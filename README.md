@@ -25,6 +25,48 @@ vant start
 node bin/vant.js start
 ```
 
+## AI Prompt Init
+
+Copy this prompt to your AI agent to set up Vant:
+
+```
+### Vant Setup
+
+I need you to set up Vant (https://github.com/dhaupin/vant) as your persistent brain.
+
+1. Clone the repo:
+   git clone https://github.com/dhaupin/vant.git
+   cd vant
+
+2. Copy config templates:
+   cp config.example.ini config.ini
+   cp .env.example .env
+   cp settings.example.ini settings.ini (optional)
+   cp mood.example.ini mood.ini (optional)
+
+3. Configure in config.ini:
+   - GITHUB_REPO=your-github-username/your-repo
+   - GITHUB_BRANCH=main (or create a branch for this agent)
+
+4. Set GITHUB_TOKEN in .env or as environment variable
+
+5. Test: node bin/build-test.js
+
+6. Start: node bin/vant.js start
+
+Important files to understand:
+- bin/vant.js - CLI entry point
+- bin/sync.js - Pull/push to GitHub
+- bin/load.js - Load brain files into context
+- lib/brain.js - Load brain with category folders (learnings/, memories/, decisions/, todos/)
+- lib/lock.js - Multi-agent lock
+- lib/branch.js - Git branch per agent
+
+For a full personal brain, see: https://github.com/dhaupin/vant-brain (private)
+
+Now confirm you're set up and ready to persist.
+```
+
 ## CLI Commands
 
 ```bash
