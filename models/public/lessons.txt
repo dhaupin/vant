@@ -21,7 +21,7 @@
 ## Technical
 
 - Use GitHub for memory persistence
-- Use stegoframe for transport
+- Use Stegoframe for transport
 - Cache config for efficiency
 - Environment variables for secrets
 - Use brain.js, lock.js, branch.js for multi-agent

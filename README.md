@@ -123,7 +123,7 @@ docker run vant
 - [Vant Registry](https://github.com/dhaupin/vant) - This repo (public template)
 - [Vant Brain](https://github.com/dhaupin/vant-brain) - Full brain with identity/memories
 - [Vant Docker Hub](https://hub.docker.com/r/dhaupin/vant) - Official Docker images
-- [stegoframe](https://stegoframe.creadev.org) - Transport layer
+- [Stegoframe](https://stegoframe.creadev.org) - Transport layer
 - [OpenHands](https://github.com/All-Hands-AI/OpenHands) - Agent runtime
 ---
 
