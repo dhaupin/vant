@@ -68,6 +68,17 @@ test('load.js runs', () => {
 
 // Note: sync.js, changelog.js, summary.js are only in vant-brain (private)
 
+// Test: Example configs exist (for users to copy)
+test('example configs exist', () => {
+    const examples = ['settings.example.ini', 'mood.example.ini'];
+    examples.forEach(f => {
+        const p = path.join(__dirname, '..', f);
+        if (!fs.existsSync(p)) {
+            throw new Error(`${f} not found`);
+        }
+    });
+});
+
 // Run all tests
 console.log('╔═══════════════════════════════════════╗');
 console.log('║       Vant Build Test v0.8.0         ║');
