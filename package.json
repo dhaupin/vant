@@ -8,16 +8,27 @@
   "repository": "https://github.com/dhaupin/vant",
   "homepage": "https://github.com/dhaupin/vant#readme",
   "preferGlobal": true,
-  "keywords": ["ai", "agent", "cli", "github", "stegoframe", "memory", "multi-agent"],
+  "keywords": [
+    "ai",
+    "agent",
+    "cli",
+    "github",
+    "stegoframe",
+    "memory",
+    "multi-agent"
+  ],
   "engines": {
     "node": ">=18"
   },
   "author": "vant Project <vant@example.com>",
   "license": "MIT",
   "dependencies": {
+    "chalk": "^4.1.2",
+    "cli-progress": "^3.12.0",
+    "express": "^5.2.1",
+    "inquirer": "^13.4.1",
     "yaml": "^2.3.0"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "node bin/build-test.js",
     "setup": "node bin/setup.js",
