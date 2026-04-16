@@ -18,6 +18,7 @@ Vant persists across sessions through GitHub-based brain transfer. Each generati
 - [Security](#security)
 - [GitHub Actions (Optional)](#github-actions-optional)
 - [Related](#related)
+- [Stegoframe Transport](STEGO.md)
 
 ---
 
