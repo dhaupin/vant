@@ -5,191 +5,197 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VANT | Persistent AI Agent</title>
     <style>
+        :root {
+            --bg: #fafafa;
+            --bg-card: #fff;
+            --text: #222;
+            --text-muted: #666;
+            --border: #e0e0e0;
+            --accent: #059669;
+            --accent-hover: #047857;
+            --link: #059669;
+        }
+        [data-theme="dark"] {
+            --bg: #0f0f12;
+            --bg-card: #18181c;
+            --text: #e8e8e8;
+            --text-muted: #888;
+            --border: #2a2a32;
+            --accent: #10b981;
+            --accent-hover: #34d399;
+            --link: #10b981;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0f;
-            color: #e0e0e0;
+            background: var(--bg);
+            color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
         }
-        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .container { max-width: 880px; margin: 0 auto; padding: 40px 20px; }
+        
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover {
+            border-color: var(--accent);
+        }
         
         /* Header */
         header {
             text-align: center;
-            padding: 60px 0;
-            border-bottom: 1px solid #1a1a2e;
+            padding: 50px 0;
+            border-bottom: 1px solid var(--border);
         }
         h1 {
-            font-size: 3.5rem;
-            font-weight: 300;
-            letter-spacing: 12px;
-            margin-bottom: 10px;
-            background: linear-gradient(90deg, #00ff88, #00ccff, #ff00aa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-size: 200% auto;
-            animation: gradient 5s ease infinite;
-        }
-        @keyframes gradient {
-            0% { background-position: 0% center; }
-            50% { background-position: 100% center; }
-            100% { background-position: 0% center; }
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: 6px;
+            margin-bottom: 8px;
+            color: var(--text);
         }
         .tagline {
-            color: #666;
-            font-size: 1.1rem;
-            letter-spacing: 3px;
+            color: var(--text-muted);
+            font-size: 1rem;
+            letter-spacing: 2px;
         }
         
         /* Hero */
         .hero {
-            padding: 60px 0;
+            padding: 50px 0;
             text-align: center;
         }
         .hero p {
-            font-size: 1.15rem;
-            color: #888;
-            max-width: 650px;
-            margin: 0 auto 30px;
-            line-height: 1.8;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 25px;
         }
         .badge {
             display: inline-block;
-            background: #0d0d15;
-            border: 1px solid #00ff88;
-            padding: 10px 24px;
-            border-radius: 24px;
-            font-size: 0.9rem;
-            color: #00ff88;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
         }
-        .badge span { color: #666; }
+        .badge span { color: var(--text); }
         
         /* Stats */
         .stats {
             display: flex;
             justify-content: center;
-            gap: 50px;
-            padding: 40px 0;
-            border-top: 1px solid #1a1a2e;
-            border-bottom: 1px solid #1a1a2e;
-            margin: 40px 0;
+            gap: 40px;
+            padding: 35px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin: 30px 0;
             flex-wrap: wrap;
         }
         .stat { text-align: center; }
         .stat-value { 
-            font-size: 2rem; 
-            background: linear-gradient(90deg, #00ff88, #00ccff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 300; 
+            font-size: 1.8rem; 
+            font-weight: 600;
+            color: var(--accent);
         }
-        .stat-label { color: #555; font-size: 0.85rem; margin-top: 5px; }
+        .stat-label { color: var(--text-muted); font-size: 0.8rem; margin-top: 4px; }
         
         /* Features */
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 25px;
-            padding: 40px 0;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px 0;
         }
         .feature {
-            background: linear-gradient(135deg, #0d0d15 0%, #12121f 100%);
-            border: 1px solid #1a1a2e;
-            padding: 30px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-        .feature:hover {
-            border-color: #00ff88;
-            transform: translateY(-3px);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 24px;
+            border-radius: 8px;
         }
         .feature h3 {
-            color: #00ff88;
-            margin-bottom: 12px;
+            color: var(--accent);
+            margin-bottom: 8px;
             font-weight: 500;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
-        .feature p { color: #666; font-size: 0.92rem; }
-        .feature .icon { font-size: 1.5rem; margin-right: 8px; }
+        .feature p { color: var(--text-muted); font-size: 0.88rem; }
         
         /* Links */
         .links {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            padding: 50px 0;
+            gap: 15px;
+            padding: 40px 0;
             flex-wrap: wrap;
         }
         .link {
-            color: #00ccff;
+            color: var(--bg);
+            background: var(--accent);
             text-decoration: none;
-            padding: 14px 32px;
-            border: 1px solid #00ccff;
+            padding: 12px 28px;
             border-radius: 6px;
-            transition: all 0.2s;
             font-weight: 500;
+            transition: all 0.2s;
         }
         .link:hover {
-            background: #00ccff;
-            color: #000;
+            background: var(--accent-hover);
         }
-        .link.primary {
-            background: linear-gradient(90deg, #00ff88, #00cc66);
-            border-color: #00ff88;
-            color: #000;
-            border: none;
-        }
-        .link.primary:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
-        }
-        .link.secondary {
-            border-color: #444;
-            color: #888;
-        }
-        .link.secondary:hover {
-            border-color: #00ccff;
-            color: #00ccff;
+        .link.outline {
             background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .link.outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
         }
         
         /* Docs */
         .docs {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
             padding: 20px 0;
+            flex-wrap: wrap;
         }
         .doc-link {
-            color: #555;
+            color: var(--text-muted);
             text-decoration: none;
-            padding: 12px 16px;
-            background: #0d0d15;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            transition: all 0.2s;
+            padding: 8px 14px;
+            font-size: 0.85rem;
         }
-        .doc-link:hover {
-            color: #00ff88;
-            background: #12121f;
-        }
+        .doc-link:hover { color: var(--accent); }
         
         /* Footer */
         footer {
             text-align: center;
-            padding: 40px 0;
-            color: #444;
-            font-size: 0.85rem;
-            border-top: 1px solid #1a1a2e;
-            margin-top: 40px;
+            padding: 30px 0;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 30px;
         }
-        footer a { color: #00ccff; text-decoration: none; }
+        footer a { color: var(--link); text-decoration: none; }
         footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
+    <button class="theme-toggle" onclick="toggleTheme()">dark</button>
     <div class="container">
         <header>
             <h1>VANT</h1>
@@ -197,8 +203,8 @@
         </header>
         
         <section class="hero">
-            <p>Open source system for AI agent memory persistence. Each agent inherits the full context from previous sessions via GitHub. Built for long-running agentic workflows.</p>
-            <span class="badge">v0.8.1 &bull; <span>Open Source</span> &bull; <span>MIT</span></span>
+            <p>Open source system for AI agent memory persistence. Each agent inherits full context from previous sessions via GitHub. Built for long-running agentic workflows.</p>
+            <span class="badge">v0.8.1 &bull; Open Source &bull; MIT</span>
         </section>
         
         <section class="stats">
@@ -215,60 +221,79 @@
                 <div class="stat-label">CLI Commands</div>
             </div>
             <div class="stat">
-                <div class="stat-value">✓</div>
-                <div class="stat-label">Docker Ready</div>
+                <div class="stat-value">900+</div>
+                <div class="stat-label">Docker Pulls</div>
             </div>
         </section>
         
         <section class="features">
             <div class="feature">
-                <h3><span class="icon">🧠</span>Generational Memory</h3>
-                <p>Brain transfer via GitHub. Each session inherits full context from previous agents. Memory persists across restarts.</p>
+                <h3>Generational Memory</h3>
+                <p>Brain transfer via GitHub. Each session inherits full context. Memory persists across restarts.</p>
             </div>
             <div class="feature">
-                <h3><span class="icon">🔐</span>Stegoframe Transport</h3>
-                <p>Steganographic encoding in PNG images. AES-256-GCM encryption. Zero metadata leakage for sensitive transfers.</p>
+                <h3>Stegoframe Transport</h3>
+                <p>Steganographic encoding in PNG images. AES-256-GCM encryption for sensitive transfers.</p>
             </div>
             <div class="feature">
-                <h3><span class="icon">🐳</span>Docker Ready</h3>
-                <p>Official Docker image. Run anywhere. Portable brain that survives container restarts and redeployments.</p>
+                <h3>Docker Ready</h3>
+                <p>Official Docker image. Run anywhere. Portable brain that survives container restarts.</p>
             </div>
             <div class="feature">
-                <h3><span class="icon">🔌</span>Plugin System</h3>
-                <p>Extensible architecture. Brain, config, mood, and custom plugins. Drop in and hook into the agent lifecycle.</p>
+                <h3>Multi-Agent Lock</h3>
+                <p>Race-condition safe locking for parallel agent workflows. File-based (Redis optional).</p>
             </div>
             <div class="feature">
-                <h3><span class="icon">⚡</span>Auto-Update</h3>
-                <p>Context-aware brain saving. Monitors token usage and auto-summarizes to memory before context window fills.</p>
+                <h3>Notifications</h3>
+                <p>Slack, Discord, and Telegram integrations. Get notified on sync, health, and errors.</p>
             </div>
             <div class="feature">
-                <h3><span class="icon">🔒</span>Multi-Agent Lock</h3>
-                <p>Race-condition safe locking for parallel agent workflows. Redis-backed distributed locks for scale.</p>
+                <h3>Extensible</h3>
+                <p>Plugin architecture. Brain, config, mood, and custom plugins. Drop in and hook in.</p>
             </div>
         </section>
         
         <section class="links">
-            <a href="https://github.com/dhaupin/vant" class="link primary">GitHub Repo</a>
-            <a href="https://github.com/dhaupin/vant-brain" class="link">Private Brain</a>
-            <a href="https://github.com/dhaupin/vant/blob/main/README.md" class="link secondary">Documentation</a>
+            <a href="https://github.com/dhaupin/vant" class="link">GitHub</a>
+            <a href="https://github.com/dhaupin/vant-brain" class="link outline">Brain</a>
+            <a href="https://hub.docker.com/r/dhaupin/vant" class="link outline">Docker</a>
         </section>
         
         <section class="docs">
-            <a href="https://github.com/dhaupin/vant/blob/main/README.md" class="doc-link">README</a>
-            <a href="https://github.com/dhaupin/vant/blob/main/CLI.md" class="doc-link">CLI Reference</a>
-            <a href="https://github.com/dhaupin/vant/blob/main/ROADMAP.md" class="doc-link">Roadmap</a>
-            <a href="https://github.com/dhaupin/vant/blob/main/STEGO.md" class="doc-link">Stego Docs</a>
-            <a href="https://github.com/dhaupin/vant/blob/main/LIBS.md" class="doc-link">Lib Reference</a>
-            <a href="https://hub.docker.com/r/dhaupin/vant" class="doc-link">Docker Hub</a>
+            <a href="https://github.com/dhaupin/vant/blob/main/README.md" class="doc-link">Docs</a>
+            <a href="https://github.com/dhaupin/vant/blob/main/CLI.md" class="doc-link">CLI</a>
+            <a href="https://github.com/dhaupin/vant/blob/main/STEGO.md" class="doc-link">Stego</a>
+            <a href="https://github.com/dhaupin/vant/blob/main/CHANGELOG.md" class="doc-link">Changelog</a>
         </section>
         
         <footer>
             <p>Open source under MIT license</p>
-            <p style="margin-top:10px;color:#333;">
+            <p style="margin-top:8px;">
                 <a href="https://github.com/dhaupin/vant">vant</a> / 
                 <a href="https://github.com/dhaupin/vant-brain">vant-brain</a>
             </p>
         </footer>
     </div>
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.querySelector('.theme-toggle');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.setAttribute('data-theme', 'light');
+                btn.textContent = 'dark';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                btn.textContent = 'light';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        // Load saved theme
+        const saved = localStorage.getItem('theme');
+        if (saved === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.querySelector('.theme-toggle').textContent = 'light';
+        }
+    </script>
 </body>
 </html>

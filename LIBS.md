@@ -219,8 +219,63 @@ autoUpdate.enable();
 
 ---
 
+## notifications.js
+
+Slack and Discord webhook notifications.
+
+```javascript
+const notifications = require('./lib/notifications');
+
+// Slack
+await notifications.slack('Deploy complete', { channel: '#deploys' });
+
+// Discord
+await notifications.discord('Brain synced', { embed: true });
+
+// Both
+await notifications.broadcast('Health check ok', { slack: '#ops', discord: true });
+
+// Events
+await notifications.event('sync', { files: 5, branch: 'main' });
+await notifications.event('health', { status: 'ok' });
+await notifications.event('error', { message: 'Failed to connect' });
+```
+
+Environment: `SLACK_WEBHOOK_URL`, `DISCORD_WEBHOOK_URL`
+
+---
+
+## telegram.js
+
+Telegram bot API wrapper.
+
+```javascript
+const telegram = require('./lib/telegram');
+
+// Send message
+await telegram.send(chatId, 'Hello from VANT!');
+
+// Register command
+telegram.onCommand('status', async (msg) => {
+    await telegram.send(msg.chat, 'VANT is running');
+});
+
+// Register message handler
+telegram.onMessage(async (msg) => {
+    console.log('Received:', msg.text);
+});
+
+// Start polling
+await telegram.startPolling();
+```
+
+Environment: `TELEGRAM_BOT_TOKEN`
+
+---
+
 ## Related
 
 - [CLI.md](./CLI.md) - Command reference
 - [STEGO.md](./STEGO.md) - Steganography docs
 - [ROADMAP.md](./ROADMAP.md) - Future features
+- [CHANGELOG.md](./CHANGELOG.md) - Version history
