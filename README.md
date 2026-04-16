@@ -68,8 +68,6 @@ Important files:
 - lib/lock.js - Multi-agent lock
 - lib/branch.js - Git branch per agent
 
-For a full personal brain, see: https://github.com/dhaupin/vant-brain (private)
-
 Now confirm you're set up and ready to persist.
 ```
 
@@ -105,6 +103,9 @@ node bin/vant.js start
 ```bash
 docker run -e GITHUB_TOKEN=your_token -e GITHUB_REPO=owner/repo dhaupin/vant
 ```
+
+### Docker Desktop
+Click "Run in Docker Desktop" in Docker Hub for one-click launch.
 
 ### With Config File
 ```bash
@@ -215,7 +216,6 @@ Without these, build fails on push but tests pass.
 ## Related
 
 - [Vant](https://github.com/dhaupin/vant) - Source code
-- [Vant Brain](https://github.com/dhaupin/vant-brain) - Full personal brain
 - [Vant Docker Hub](https://hub.docker.com/r/dhaupin/vant) - Official images
 - [Stegoframe](https://stegoframe.creadev.org) - Encrypted transport
 - [OpenHands](https://github.com/All-Hands-AI/OpenHands) - Agent runtime
