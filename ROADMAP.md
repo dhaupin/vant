@@ -1,16 +1,16 @@
 # Vant Roadmap
 
-## v0.9.0 - Stegoframe Upgrades
+## v0.9.0 - Next
 
-### Encryption [DONE]
-- [x] Add AES-256 encryption before encoding
-- [x] Support password-protected messages
-- [x] Encrypt then encode pipeline
+### Capabilities
+- [ ] Video steganography (larger payloads)
+- [ ] Audio steganography 
+- [ ] WebM/MKV support
 
-### Capacity
-- [ ] Split large payloads across multiple PNGs
-- [ ] Reassemble on decode
-- [ ] Use RGBA channels (4 bits per pixel instead of 3)
+### Testing
+- [ ] Unit tests for lib/*.js
+- [ ] Integration tests
+- [ ] Bot testing (Slack/Discord/Telegram)
 
 ---
 
@@ -28,38 +28,41 @@
 - [ ] REST API for brain CRUD
 - [ ] WebSocket for real-time updates
 
-### Agent Interface
-- [ ] `/portal/status` - current brain health
-- [ ] `/portal/sessions` - list past sessions
-- [ ] `/portal/transfer` - request memory transfer
-
 ---
 
 ## Backlog
 
 ### Core
-- [ ] Unit tests for all lib/*.js modules
-- [ ] CI/CD pipeline verification
-- [ ] Docker multi-arch builds (arm64)
+- [ ] Redis-backed distributed locks
+- [ ] Docker multi-arch push automation
+- [ ] i18n/localization
 
 ### Agent UX
-- [ ] Interactive CLI prompts (Inquirer)
-- [ ] Colored output throughout
-- [ ] Progress bars for long operations
+- [ ] Interactive setup wizard
+- [ ] TUI (terminal UI)
+- [ ] Session replay
 
 ### Integrations
-- [ ] Slack webhook notifications
-- [ ] Discord bot commands
-- [ ] Telegram integration
+- [ ] Test Slack notifications
+- [ ] Test Discord bot
+- [ ] Test Telegram bot
+- [ ] Matrix/Element support
+- [ ] WhatsApp Business API
 
 ### Monitoring
-- [ ] Datadog/StatsD metrics
-- [ ] Health check endpoint
-- [ ] Alerting on failures
+- [ ] Grafana dashboards
+- [ ] Prometheus metrics
+- [ ] Alerting rules
 
 ---
 
-## Notes
+## Released (v0.8.1)
 
-- Public vs Private split: vant (public) / vant-brain (private)
-- See vant-brain for full roadmap with private features
+- [x] RGBA steganography (4 bits/pixel)
+- [x] Multi-image encoding
+- [x] Slack/Discord webhooks
+- [x] Telegram bot
+- [x] Docker multi-arch (amd64/arm64)
+- [x] Health endpoints
+- [x] CLI prompts
+- [x] Multi-agent locking

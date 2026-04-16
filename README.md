@@ -221,6 +221,52 @@ Without these, build fails on push but tests pass.
 
 ---
 
+## Integrations
+
+### Slack/Discord Notifications
+
+Send VANT events to your team's chat:
+
+```javascript
+const notifications = require('./lib/notifications');
+
+// Slack
+await notifications.slack('Brain synced!', { channel: '#agents' });
+
+// Discord
+await notifications.discord('Deploy complete', { embed: true });
+
+// Event notifications
+await notifications.event('sync', { branch: 'main', files: 5 });
+await notifications.event('health', { status: 'ok' });
+```
+
+Environment variables:
+- `SLACK_WEBHOOK_URL` - Slack incoming webhook
+- `DISCORD_WEBHOOK_URL` - Discord incoming webhook
+
+### Telegram Bot
+
+Run a Telegram bot for VANT control:
+
+```bash
+# Set token
+export TELEGRAM_BOT_TOKEN=your_bot_token
+
+# Run bot
+vant bot
+# Or: node bin/bot.js
+```
+
+Commands:
+- `/start` - Welcome message
+- `/status` - Show VANT status
+- `/brain` - Show brain version
+- `/health` - Run health check
+- `/sync` - Trigger brain sync
+
+---
+
 ## Related
 
 - [Vant](https://github.com/dhaupin/vant) - Source code
