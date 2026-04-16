@@ -18,7 +18,7 @@ const CONFIG_FILE = 'config.ini';
 function loadConfig() {
     if (!fs.existsSync(CONFIG_FILE)) {
         console.warn('⚠ config.ini not found, using defaults');
-        return { VANT_VERSION: 'unknown', MODEL_PATH: 'models/v0.5.0' };
+        return { VANT_VERSION: 'unknown', MODEL_PATH: 'models/public' };
     }
     
     const config = {};
@@ -43,7 +43,17 @@ function loadModel(version = 'latest') {
         const dirs = fs.readdirSync(MODELS_DIR).filter(d => 
             d.startsWith('v') && fs.statSync(path.join(MODELS_DIR, d)).isDirectory()
         );
-        version = dirs.sort().pop();
+        
+        // If no versioned models, try public
+        if (dirs.length === 0) {
+            if (fs.existsSync(path.join(MODELS_DIR, 'public'))) {
+                version = 'public';
+            } else {
+                throw new Error('No models found');
+            }
+        } else {
+            version = dirs.sort().pop();
+        }
     }
 
     const modelPath = path.join(MODELS_DIR, version);

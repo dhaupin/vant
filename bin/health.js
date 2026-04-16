@@ -25,11 +25,9 @@ const CONFIG = {
     MODELS_DIR: 'models',
     STATES_DIR: 'states',
     REQUIRED_FILES: [
-        'config.ini',
-        'settings.ini', 
-        'mood.ini',
-        'README.md',
-        'REGISTRY.txt'
+        'config.example.ini',
+        '.env.example',
+        'README.md'
     ]
 };
 
@@ -81,6 +79,7 @@ function checkConfig() {
     
     CONFIG.REQUIRED_FILES.forEach(f => checkFile(f));
     
+    // Also check for optional config.ini
     if (fs.existsSync(CONFIG.CONFIG_FILE)) {
         const config = parseIni(fs.readFileSync(CONFIG.CONFIG_FILE, 'utf8'));
         
@@ -93,6 +92,8 @@ function checkConfig() {
                 log('warn', `config.${key} missing`);
             }
         });
+    } else {
+        log('info', 'config.ini not found (using config.example.ini defaults)');
     }
 }
 
@@ -101,14 +102,26 @@ function checkBrain() {
     
     checkDir(CONFIG.MODELS_DIR);
     
-    // Find latest model
+    // Check for public model (in public release)
+    if (fs.existsSync(path.join(CONFIG.MODELS_DIR, 'public'))) {
+        log('ok', 'Public model exists');
+        const publicPath = path.join(CONFIG.MODELS_DIR, 'public');
+        const files = fs.readdirSync(publicPath);
+        ['identity.txt', 'meta.json', 'lessons.txt'].forEach(f => {
+            if (files.includes(f)) {
+                log('ok', `  public/${f} exists`);
+            }
+        });
+    }
+    
+    // Find latest versioned model
     const versions = fs.readdirSync(CONFIG.MODELS_DIR)
         .filter(d => d.startsWith('v') && fs.statSync(path.join(CONFIG.MODELS_DIR, d)).isDirectory())
         .sort();
     
     if (versions.length) {
         const latest = versions[versions.length - 1];
-        log('ok', `Latest model: ${latest}`);
+        log('ok', `Latest versioned model: ${latest}`);
         
         const modelPath = path.join(CONFIG.MODELS_DIR, latest);
         const files = fs.readdirSync(modelPath);
@@ -118,47 +131,52 @@ function checkBrain() {
             if (files.includes(f)) {
                 log('ok', `  ${latest}/${f} exists`);
             } else {
-                log('fail', `  ${latest}/${f} missing`);
+                log('warn', `  ${latest}/${f} missing`);
             }
         });
     } else {
-        log('fail', 'No models found');
+        log('warn', 'No versioned models found (public only?)');
     }
 }
 
 function checkStates() {
     console.log('\n--- State Files ---');
     
-    checkDir(CONFIG.STATES_DIR);
-    checkDir(path.join(CONFIG.STATES_DIR, 'active'));
-    
-    // Check room metadata
-    const roomMeta = path.join(CONFIG.STATES_DIR, 'active', 'room-meta.json');
-    if (fs.existsSync(roomMeta)) {
-        const meta = JSON.parse(fs.readFileSync(roomMeta, 'utf8'));
-        log('ok', `Room: ${meta.room}`);
+    // States are only in vant-brain, not in public release
+    if (fs.existsSync(CONFIG.STATES_DIR)) {
+        checkDir(CONFIG.STATES_DIR);
+        checkDir(path.join(CONFIG.STATES_DIR, 'active'));
         
-        if (meta.expires_at) {
-            const expires = new Date(meta.expires_at);
-            const daysLeft = Math.ceil((expires - new Date()) / (1000 * 60 * 60 * 24));
-            if (daysLeft > 0) {
-                log('info', `Room expires in ${daysLeft} days`);
-            } else {
-                log('fail', 'Room EXPIRED!');
+        // Check room metadata
+        const roomMeta = path.join(CONFIG.STATES_DIR, 'active', 'room-meta.json');
+        if (fs.existsSync(roomMeta)) {
+            const meta = JSON.parse(fs.readFileSync(roomMeta, 'utf8'));
+            log('ok', `Room: ${meta.room}`);
+            
+            if (meta.expires_at) {
+                const expires = new Date(meta.expires_at);
+                const daysLeft = Math.ceil((expires - new Date()) / (1000 * 60 * 60 * 24));
+                if (daysLeft > 0) {
+                    log('info', `Room expires in ${daysLeft} days`);
+                } else {
+                    log('fail', 'Room EXPIRED!');
+                }
             }
+        } else {
+            log('warn', 'No room metadata - room may be expired');
+        }
+        
+        // Check rate limit
+        const rateLimit = path.join(CONFIG.STATES_DIR, 'active', 'rate-limit.json');
+        if (fs.existsSync(rateLimit)) {
+            const rl = JSON.parse(fs.readFileSync(rateLimit, 'utf8'));
+            const remaining = rl.maxPerHour - rl.requestsThisHour;
+            log('ok', `Rate limit: ${remaining} remaining this hour`);
+        } else {
+            log('warn', 'No rate limit tracking');
         }
     } else {
-        log('warn', 'No room metadata - room may be expired');
-    }
-    
-    // Check rate limit
-    const rateLimit = path.join(CONFIG.STATES_DIR, 'active', 'rate-limit.json');
-    if (fs.existsSync(rateLimit)) {
-        const rl = JSON.parse(fs.readFileSync(rateLimit, 'utf8'));
-        const remaining = rl.maxPerHour - rl.requestsThisHour;
-        log('ok', `Rate limit: ${remaining} remaining this hour`);
-    } else {
-        log('warn', 'No rate limit tracking');
+        log('info', 'states/ not in public release (vant-brain only)');
     }
 }
 
@@ -177,6 +195,7 @@ function checkGitHub() {
 function checkPlugins() {
     console.log('\n--- Plugins ---');
     
+    // Plugins are only in vant-brain, not public
     const pluginsDir = 'src/plugins';
     if (fs.existsSync(pluginsDir)) {
         const plugins = fs.readdirSync(pluginsDir).filter(f => 
@@ -184,14 +203,15 @@ function checkPlugins() {
         );
         plugins.forEach(p => log('ok', `Plugin: ${p}`));
     } else {
-        log('warn', 'No plugins directory');
+        log('info', 'src/plugins not in public release (vant-brain only)');
     }
 }
 
 function checkBin() {
     console.log('\n--- Bin Scripts ---');
     
-    const scripts = ['load.sh', 'load.js', 'run.js', 'poll-stegoframe.sh'];
+    // Check available scripts in public
+    const scripts = ['load.js', 'health.js', 'setup.js', 'vant.js'];
     scripts.forEach(s => {
         const found = fs.existsSync(path.join('bin', s));
         if (found) {
@@ -200,6 +220,9 @@ function checkBin() {
             log('warn', `bin/${s} missing`);
         }
     });
+    
+    // Note about private scripts
+    log('info', 'Note: sync.js, run.js, changelog.js are in vant-brain only');
 }
 
 function summary() {

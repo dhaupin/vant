@@ -20,50 +20,40 @@ function test(name, fn) {
     TESTS.push({ name, fn });
 }
 
-// Test: Config loads
-test('config.ini parses', () => {
-    const content = fs.readFileSync('config.ini', 'utf8');
-    if (!content.includes('VANT_VERSION=')) {
-        throw new Error('VANT_VERSION not found');
+// Test: Config example exists
+test('config.example.ini exists', () => {
+    if (!fs.existsSync('config.example.ini')) {
+        throw new Error('config.example.ini not found');
     }
 });
 
-// Test: Settings loads
-test('settings.ini parses', () => {
-    const content = fs.readFileSync('settings.ini', 'utf8');
-    if (!content.includes('HANDLE=')) {
-        throw new Error('HANDLE not found');
+// Test: Env example exists
+test('.env.example exists', () => {
+    if (!fs.existsSync('.env.example')) {
+        throw new Error('.env.example not found');
     }
 });
 
-// Test: Mood loads
-test('mood.ini parses', () => {
-    const content = fs.readFileSync('mood.ini', 'utf8');
-    if (!content.includes('MOOD=')) {
-        throw new Error('MOOD not found');
+// Test: Public model exists
+test('public model exists', () => {
+    if (!fs.existsSync('models/public')) {
+        throw new Error('models/public not found');
     }
-});
-
-// Test: Model exists
-test('latest model exists', () => {
-    const dirs = fs.readdirSync('models').filter(d => d.startsWith('v'));
-    if (!dirs.length) throw new Error('No models found');
-});
-
-// Test: Identity loads
-test('identity.txt loads', () => {
-    const dirs = fs.readdirSync('models').filter(d => d.startsWith('v'));
-    const latest = dirs.sort().pop();
-    const identity = path.join('models', latest, 'identity.txt');
+    const identity = path.join('models/public', 'identity.txt');
     if (!fs.existsSync(identity)) {
-        throw new Error('identity.txt not found');
+        throw new Error('identity.txt not found in public model');
     }
 });
 
 // Test: Run.js can start (with timeout)
 test('run.js starts without error', () => {
-    // Just check syntax by loading - use absolute path
-    require(path.join(__dirname, '..', 'run.js'));
+    // Check if run.js exists (only in vant-brain, not public)
+    const runPath = path.join(__dirname, '..', 'run.js');
+    if (fs.existsSync(runPath)) {
+        require(runPath);
+    } else {
+        console.log('  (run.js not in public release - skipped)');
+    }
 });
 
 // Test: Health check runs
@@ -71,25 +61,12 @@ test('health.js runs', () => {
     execSync('node ' + path.join(__dirname, 'health.js'), { stdio: 'pipe' });
 });
 
-// Test: Load.js runs
+// Test: Load.js runs (public model)
 test('load.js runs', () => {
-    execSync('node bin/load.js v0.5.0', { stdio: 'pipe', cwd: '..' });
+    execSync('node bin/load.js', { stdio: 'pipe' });
 });
 
-// Test: Sync.js runs
-test('sync.js runs', () => {
-    execSync('node bin/sync.js', { stdio: 'pipe', timeout: 10000, cwd: '..' });
-});
-
-// Test: Changelog.js runs
-test('changelog.js runs', () => {
-    execSync('node bin/changelog.js', { stdio: 'pipe', timeout: 10000, cwd: '..' });
-});
-
-// Test: Summary.js runs
-test('summary.js runs', () => {
-    execSync('node bin/summary.js', { stdio: 'pipe', cwd: '..' });
-});
+// Note: sync.js, changelog.js, summary.js are only in vant-brain (private)
 
 // Run all tests
 console.log('╔═══════════════════════════════════════╗');
