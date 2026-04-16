@@ -76,10 +76,19 @@ const safeFn = errors.wrap(asyncOperation, 'context');
 | Code | Description | Retryable |
 |------|-------------|-----------|
 | `CONFIG_MISSING` | Config file not found | No |
+| `CONFIG_INVALID` | Config is invalid | No |
 | `GITHUB_AUTH` | Authentication failed | No |
+| `GITHUB_NOT_FOUND` | Resource not found | No |
 | `GITHUB_RATE_LIMIT` | Hit GitHub limit | Yes |
+| `GITHUB_SYNC_FAIL` | Sync failed | Yes |
+| `BRAIN_LOAD_FAIL` | Failed to load brain | No |
+| `BRAIN_SAVE_FAIL` | Failed to save brain | No |
 | `NETWORK_TIMEOUT` | Request timed out | Yes |
+| `NETWORK_OFFLINE` | No network connection | Yes |
 | `LOCK_TIMEOUT` | Couldn't acquire lock | Yes |
+| `STEGO_*` | Stego errors (invalid PNG, etc) | No |
+| `DECRYPT_FAIL` | Decryption failed | No |
+| `UNKNOWN` | Unknown error | Depends |
 
 ---
 
