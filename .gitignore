@@ -9,6 +9,7 @@ node_modules/
 # State
 states/active/
 states/archive/
+models/private/
 
 # IDE
 .vscode/
