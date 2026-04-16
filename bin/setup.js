@@ -3,6 +3,10 @@
  * Interactive configuration for new users
  * 
  * Usage: node bin/setup.js
+ * 
+ * SECURITY:
+ * - Never save tokens to config.ini
+ * - Use environment variables instead
  */
 
 const fs = require('fs');
@@ -13,7 +17,7 @@ const CONFIG_FILE = 'config.ini';
 const CONFIG_TEMPLATE = `=== Vant CONFIG ===
 
 # Core
-VANT_VERSION=v0.6.0
+VANT_VERSION=v0.8.1
 MODEL_PATH=models/public
 STATE_PATH=states/active/current.json
 
@@ -59,9 +63,9 @@ async function setup() {
 
     console.log('\n1. GitHub Setup');
     console.log('   Create token: https://github.com/settings/tokens');
-    console.log('   Required: repo scope\n');
+    console.log('   Required: repo scope');
+    console.log('   IMPORTANT: Set as GITHUB_TOKEN env var, NOT in config.ini\n');
     const githubRepo = await question('GitHub repo (username/repo): ');
-    const githubToken = await question('GitHub token (or press Enter for env var): ');
     
     console.log('\n2. Stegoframe Setup (optional)');
     console.log('   URL: https://stegoframe.creadev.org\n');
@@ -84,14 +88,9 @@ async function setup() {
     fs.writeFileSync(CONFIG_FILE, config);
     console.log(`\n✓ Written to ${CONFIG_FILE}`);
 
-    // Set env var if provided
-    if (githubToken) {
-        console.log('\n💡 Set GITHUB_TOKEN env var:');
-        console.log(`   export GITHUB_TOKEN=${githubToken.substring(0, 8)}...`);
-    }
-
     console.log('\n═══════════════════════════════════════════');
     console.log('Setup complete! Run: node bin/vant.js health');
+    console.log('IMPORTANT: Set GITHUB_TOKEN as env var, NOT in config');
     console.log('═══════════════════════════════════════════\n');
 
     rl.close();
