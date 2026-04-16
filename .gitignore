@@ -26,8 +26,10 @@ Thumbs.db
 npm-debug.log*
 
 # Build
-dist/
 build/
+
+# Dist is NOT ignored - it's part of the public release
+# dist/
 
 # Temp
 *.tmp
