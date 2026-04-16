@@ -2,32 +2,38 @@
 
 > Persistent AI agent with generational memory transfer
 
-Vant is an AI agent that persists across sessions through GitHub-based brain transfer. Each generation inherits the full memory of its predecessors.
+Vant persists across sessions through GitHub-based brain transfer. Each generation inherits the full memory of its predecessors.
 
-## Quick Start
+---
 
-```bash
-# Clone
-git clone https://github.com/dhaupin/vant.git
-cd vant
+## Table of Contents
 
-# Setup (interactive)
-node bin/setup.js
+- [Choose Your Init Method](#choose-your-init-method)
+- [AI Prompt Init](#ai-prompt-init)
+- [Local Init](#local-init)
+- [Docker Init](#docker-init)
+- [Configuration](#configuration)
+- [CLI Commands](#cli-commands)
+- [Architecture](#architecture)
+- [Security](#security)
+- [GitHub Actions (Optional)](#github-actions-optional)
+- [Related](#related)
 
-# Or use templates
-cp config.example.ini config.ini
-cp .env.example .env
-# Edit with your values
+---
 
-# Run
-vant start
-# or
-node bin/vant.js start
-```
+## Choose Your Init Method
+
+| Method | Best For | Time |
+|--------|----------|------|
+| [AI Prompt Init](#ai-prompt-init) | AI agents setting up themselves | 2 min |
+| [Local Init](#local-init) | Local development, contributors | 5 min |
+| [Docker Init](#docker-init) | Containers, quick start | 1 min |
+
+---
 
 ## AI Prompt Init
 
-Copy this prompt to your AI agent to set up Vant:
+Copy this to your AI agent to set up Vant itself:
 
 ```
 ### Vant Setup
@@ -54,11 +60,11 @@ I need you to set up Vant (https://github.com/dhaupin/vant) as your persistent b
 
 6. Start: node bin/vant.js start
 
-Important files to understand:
+Important files:
 - bin/vant.js - CLI entry point
 - bin/sync.js - Pull/push to GitHub
 - bin/load.js - Load brain files into context
-- lib/brain.js - Load brain with category folders (learnings/, memories/, decisions/, todos/)
+- lib/brain.js - Brain loader (learnings/, memories/, decisions/, todos/)
 - lib/lock.js - Multi-agent lock
 - lib/branch.js - Git branch per agent
 
@@ -66,6 +72,83 @@ For a full personal brain, see: https://github.com/dhaupin/vant-brain (private)
 
 Now confirm you're set up and ready to persist.
 ```
+
+---
+
+## Local Init
+
+```bash
+# Clone
+git clone https://github.com/dhaupin/vant.git
+cd vant
+
+# Setup (interactive)
+node bin/setup.js
+
+# Or use templates
+cp config.example.ini config.ini
+cp .env.example .env
+# Edit with your values
+
+# Test
+node bin/build-test.js
+
+# Run
+node bin/vant.js start
+```
+
+---
+
+## Docker Init
+
+### Quick Start
+```bash
+docker run -e GITHUB_TOKEN=your_token -e GITHUB_REPO=owner/repo dhaupin/vant
+```
+
+### With Config File
+```bash
+docker run -v ./config.ini:/app/config.ini dhaupin/vant
+```
+
+### Interactive CLI
+```bash
+docker run -it dhaupin/vant vant help
+```
+
+### Pull First
+```bash
+docker pull dhaupin/vant
+docker run dhaupin/vant vant start
+```
+
+---
+
+## Configuration
+
+### config.example.ini
+Copy to `config.ini`. Required:
+- `GITHUB_REPO=owner/repo`
+
+Optional:
+- `GITHUB_BRANCH=main`
+- `STEGOFRAME_ROOM` and `STEGOFRAME_PASSPHRASE`
+
+### .env
+Copy to `.env`:
+- `GITHUB_TOKEN=your_personal_access_token`
+
+### settings.example.ini (Optional)
+Copy to `settings.ini` to customize personality:
+- `HANDLE`, `DISPLAY_NAME`
+- `DIRECTNESS`, `CURIOSITY`, `PATIENCE`
+- `CURRENT_MOOD=focused|curious|playful|cautious|urgent|contemplative`
+
+### mood.example.ini (Optional)
+Copy to `mood.ini` to customize behavior:
+- `MOOD`, `ENERGY`, `SOCIABILITY`
+
+---
 
 ## CLI Commands
 
@@ -81,129 +164,58 @@ vant watch      # Monitor GitHub changes
 vant help       # Show help
 ```
 
-## Configuration
-
-### config.example.ini
-Copy to `config.ini` and fill in:
-- GitHub repo
-- Stegoframe room (optional)
-
-### .env.example
-Copy to `.env` and set:
-- `GITHUB_TOKEN` (required for sync)
-- `STEGOFRAME_ROOM`, `STEGOFRAME_PASSPHRASE` (optional)
-
-## Current Version
-
-**v0.8.0** - Multi-agent support, brain refactor, auto-update
+---
 
 ## Architecture
 
 ```
 models/
-  public/       # Default brain (safe for open source)
-    identity.txt  # Public identity
-    lessons.txt   # Public principles
-    meta.json    # Version metadata
-  v0.5.0/      # Full brain (private)
+  public/       # Default brain (identity + principles)
+    identity.txt
+    lessons.txt
+    meta.json
 bin/
   vant.js       # CLI entry point
   setup.js      # Interactive setup
   health.js     # Diagnostics
   sync.js       # GitHub sync
+  load.js       # Load brain
 lib/
   config.js     # Config loader
-  brain.js      # Brain loader with category folders
-  lock.js       # Agent lock for multi-agent
+  brain.js      # Brain loader
+  lock.js       # Multi-agent lock
   branch.js     # Git branch per agent
-  auto-update.js # Auto-save context to brain
-config.example.ini  # Config template
-.env.example        # Env template
+  auto-update.js # Auto-save context
 ```
 
-## Multi-Agent Support
-
-Vant supports multiple agents running simultaneously:
-
-```javascript
-const lock = require('./lib/lock');
-const brain = require('./lib/brain');
-const branch = require('./lib/branch');
-const auto = require('./lib/auto-update');
-
-// Acquire lock before work
-await lock.acquire('agent-1');
-
-// Work on your branch
-await branch.checkout('agent-1');
-
-// Track messages for auto-save
-auto.addMessage('user', message);
-
-// Before context fills...
-if (auto.shouldUpdate()) {
-    auto.writeToBrain(brain);
-}
-```
+---
 
 ## Security
 
 - No hardcoded credentials in defaults
 - Uses environment variables for secrets
-- User must configure own credentials
 - Public model is identity-only, no secrets
+- User must configure own credentials
 
-## Docker
+---
 
-### Build
-```bash
-docker build -t vant .
-```
+## GitHub Actions (Optional)
 
-### Run
-```bash
-# Quick start (requires env vars)
-docker run -e GITHUB_TOKEN=your_token -e GITHUB_REPO=owner/repo dhaupin/vant
+For Docker Hub push, add these secrets in repo Settings → Secrets → Actions:
 
-# With config file mount
-docker run -v ./config.ini:/app/config.ini dhaupin/vant
+| Secret | Where to get |
+|--------|--------------|
+| `DOCKERHUB_USERNAME` | Your Docker Hub username |
+| `DOCKERHUB_TOKEN` | [Create token](https://hub.docker.com/settings/security) |
 
-# Interactive CLI
-docker run -it dhaupin/vant vant help
-```
+Without these, build fails on push but tests pass.
 
-### Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|------------|
-| `GITHUB_TOKEN` | Yes | GitHub personal access token |
-| `GITHUB_REPO` | Yes | owner/repo format |
-| `GITHUB_BRANCH` | No | Branch (default: main) |
-| `STEGOFRAME_ROOM` | No | Stegoframe room |
-| `STEGOFRAME_PASSPHRASE` | No | Stegoframe passphrase |
-
-### From Docker Hub
-```bash
-docker pull dhaupin/vant
-docker run dhaupin/vant vant start
-```
+---
 
 ## Related
 
-- [Vant Registry](https://github.com/dhaupin/vant) - This repo (public template)
-- [Vant Brain](https://github.com/dhaupin/vant-brain) - Full brain with identity/memories
-- [Vant Docker Hub](https://hub.docker.com/r/dhaupin/vant) - Official Docker images
-- [Stegoframe](https://stegoframe.creadev.org) - Transport layer
+- [Vant](https://github.com/dhaupin/vant) - Source code
+- [Vant Brain](https://github.com/dhaupin/vant-brain) - Full personal brain
+- [Vant Docker Hub](https://hub.docker.com/r/dhaupin/vant) - Official images
+- [Stegoframe](https://stegoframe.creadev.org) - Encrypted transport
 - [OpenHands](https://github.com/All-Hands-AI/OpenHands) - Agent runtime
----
-
-## GitHub Actions Secrets (Optional)
-
-For Docker Hub push workflow, add these secrets in repo Settings → Secrets → Actions:
-
-| Secret | How to get |
-|--------|------------|
-| `DOCKERHUB_USERNAME` | Your Docker Hub username |
-| `DOCKERHUB_TOKEN` | [Create token](https://hub.docker.com/settings/security) → New Access Token |
-
-Without these, the build will fail on push but tests will pass.
