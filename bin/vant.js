@@ -35,7 +35,8 @@ const COMMANDS = {
     watch: 'watch.js',
     bump: 'bump.js',
     setup: 'setup.js',
-    rate: 'rate.js'
+    rate: 'rate.js',
+    server: 'server.js'  // Health endpoint server
 };
 
 const cmd = process.argv[2];
@@ -43,7 +44,7 @@ const cmd = process.argv[2];
 if (!cmd || cmd === 'help') {
     console.log(`
 ╔═══════════════════════════════════════╗
-║         vant CLI v0.8.0              ║
+║         vant CLI v0.8.1              ║
 ╚═══════════════════════════════════════╝
 
 Usage: vant <command> [options]
@@ -59,6 +60,7 @@ Commands:
   vant summary     Session summary
   vant watch       Monitor GitHub
   vant setup       Interactive setup
+  vant server      Health endpoint server
   vant help        Show help
 `);
     process.exit(0);
