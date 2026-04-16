@@ -36,7 +36,8 @@ const COMMANDS = {
     bump: 'bump.js',
     setup: 'setup.js',
     rate: 'rate.js',
-    server: 'server.js'  // Health endpoint server
+    server: 'server.js',  // Health endpoint server
+    bot: 'bot.js'         // Telegram bot
 };
 
 const cmd = process.argv[2];
@@ -61,6 +62,7 @@ Commands:
   vant watch       Monitor GitHub
   vant setup       Interactive setup
   vant server      Health endpoint server
+  vant bot         Telegram bot
   vant help        Show help
 `);
     process.exit(0);

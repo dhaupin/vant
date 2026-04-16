@@ -1,0 +1,41 @@
+# VANT Docker Compose
+# Build and push multi-arch image
+#
+# Usage:
+#   docker-compose build
+#   docker-compose push
+
+services:
+  vant:
+    build: .
+    image: dhaupin/vant:latest
+    environment:
+      - NODE_ENV=production
+      - VANT_VERSION=0.8.1
+    # Multi-arch build (run from host with docker buildx):
+    #   docker buildx build --platform linux/amd64,linux/arm64 -t dhaupin/vant --push .
+    
+  # Health server for monitoring
+  health:
+    build: .
+    image: dhaupin/vant:health
+    command: ["node", "bin/server.js"]
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DD_API_KEY=${DD_API_KEY:-}
+      - DD_SITE=${DD_SITE:-datadoghq.com}
+
+  # Telegram bot
+  bot:
+    build: .
+    image: dhaupin/vant:bot
+    command: ["node", "bin/bot.js"]
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - GITHUB_REPO=${GITHUB_REPO:-dhaupin/vant}
+    volumes:
+      - ./models:/app/models
+    restart: unless-stopped
