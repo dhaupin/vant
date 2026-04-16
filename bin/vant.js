@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * VANT CLI - Command aliases
+ * vant CLI - Command aliases
  *
  * Usage: vant <command> [args]
  *
@@ -42,7 +42,7 @@ const cmd = process.argv[2];
 if (!cmd || cmd === 'help') {
     console.log(`
 ╔═══════════════════════════════════════╗
-║         VANT CLI v0.6.2              ║
+║         vant CLI v0.6.6              ║
 ╚═══════════════════════════════════════╝
 
 Usage: vant <command> [options]

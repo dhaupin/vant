@@ -1,4 +1,4 @@
-# VANT CLI
+# vant CLI
 
 A lightweight CLI tool for AI agent session management with GitHub-backed state.
 
@@ -19,7 +19,7 @@ vant status      # Current status
 
 ## For VANT System
 
-This is the CLI skeleton. Full system at: https://github.com/dhaupin/VANT
+This is the CLI skeleton. Full system at: https://github.com/dhaupin/vant
 
 ## License
 

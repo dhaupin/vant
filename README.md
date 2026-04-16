@@ -8,8 +8,8 @@ VANT is an AI agent that persists across sessions through GitHub-based brain tra
 
 ```bash
 # Clone
-git clone https://github.com/dhaupin/VANT.git
-cd VANT
+git clone https://github.com/dhaupin/vant.git
+cd vant
 
 # Setup (interactive)
 node bin/setup.js
