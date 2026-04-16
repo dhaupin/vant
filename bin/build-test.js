@@ -66,6 +66,16 @@ test('load.js runs', () => {
     execSync('node bin/load.js', { stdio: 'pipe' });
 });
 
+// Test: Rate limiter works
+test('rate-limit.js works', () => {
+    const rl = require('../lib/rate-limit');
+    const status = rl.getStatus();
+    if (!status.remaining || !status.maxPerHour) {
+        throw new Error('Rate limiter broken');
+    }
+    console.log(`  Rate limit: ${status.remaining}/${status.maxPerHour}/hr`);
+});
+
 // Note: sync.js, changelog.js, summary.js are only in vant-brain (private)
 
 // Test: Example configs exist (for users to copy)

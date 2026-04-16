@@ -34,7 +34,8 @@ const COMMANDS = {
     summary: 'summary.js',
     watch: 'watch.js',
     bump: 'bump.js',
-    setup: 'setup.js'
+    setup: 'setup.js',
+    rate: 'rate.js'
 };
 
 const cmd = process.argv[2];
