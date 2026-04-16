@@ -70,7 +70,7 @@ test('load.js runs', () => {
 
 // Run all tests
 console.log('╔═══════════════════════════════════════╗');
-console.log('║       Vant Build Test v0.6.0         ║');
+console.log('║       Vant Build Test v0.8.0         ║');
 console.log('╚═══════════════════════════════════════╝\n');
 
 let passed = 0;

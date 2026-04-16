@@ -40,7 +40,7 @@ CLI TOOLS:
 - vant test - Run tests
 - vant watch - Monitor changes
 
-VERSION: v0.7.0
+VERSION: v0.8.0
 STATUS: Production ready
 
 ---

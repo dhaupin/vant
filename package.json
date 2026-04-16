@@ -1,6 +1,6 @@
 {
   "name": "vant",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "vant CLI - Persistent AI agent with generational memory transfer",
   "bin": {
     "vant": "./bin/vant.js"

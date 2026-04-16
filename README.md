@@ -53,7 +53,7 @@ Copy to `.env` and set:
 
 ## Current Version
 
-**v0.7.0** - Multi-agent support, brain refactor, auto-update
+**v0.8.0** - Multi-agent support, brain refactor, auto-update
 
 ## Architecture
 
