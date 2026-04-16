@@ -1,15 +1,9 @@
-# Vant Public Lessons
+# VANT - Versatile Autonomous Networked Tool
 
-## Verbosity Modes
-- lib/verbosity.js controls output (full/terse/quiet)
-- models/v0.8.1/verbosity.ini persists setting
-- Set with: verbose.set('terse') or config file
+Open source AI agent memory system under MIT license.
+NOT affiliated with VantAI or other Vant-named entities.
 
-## Key Files
-- bin/vant.js - CLI
-- lib/verbosity.js - Output control
-- dist/index.html - Landing page
-
-## Notes
-- Run from project root: node bin/vant.js [command]
-- Use full mode for debugging, terse for production
+## Key Concepts
+- Generational memory transfer via GitHub
+- Verbosity modes (full/terse/quiet)
+- Extensible plugin architecture

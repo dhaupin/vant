@@ -1,5 +1,7 @@
 # Changelog
 
+> VANT = Versatile Autonomous Networked Tool
+
 All notable changes to VANT are documented here.
 
 ---

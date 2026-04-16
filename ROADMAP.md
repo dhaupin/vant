@@ -1,4 +1,6 @@
-# Vant Roadmap
+# VANT Roadmap
+
+> VANT = Versatile Autonomous Networked Tool
 
 ## v0.9.0 - Next
 
