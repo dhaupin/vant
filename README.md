@@ -1,8 +1,8 @@
-# VANT
+# Vant
 
 > Persistent AI agent with generational memory transfer
 
-VANT is an AI agent that persists across sessions through GitHub-based brain transfer. Each generation inherits the full memory of its predecessors.
+Vant is an AI agent that persists across sessions through GitHub-based brain transfer. Each generation inherits the full memory of its predecessors.
 
 ## Quick Start
 

@@ -1,5 +1,5 @@
 /**
- * VANT Build Test
+ * Vant Build Test
  * Validates all scripts can load without errors
  * 
  * Usage: node bin/build-test.js
@@ -93,7 +93,7 @@ test('summary.js runs', () => {
 
 // Run all tests
 console.log('╔═══════════════════════════════════════╗');
-console.log('║       VANT Build Test v0.5.7         ║');
+console.log('║       Vant Build Test v0.6.0         ║');
 console.log('╚═══════════════════════════════════════╝\n');
 
 let passed = 0;

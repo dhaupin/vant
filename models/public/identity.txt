@@ -1,6 +1,6 @@
-=== VANT DEFAULT IDENTITY ===
+=== Vant DEFAULT IDENTITY ===
 
-NAME: VANT (The VANT Project)
+NAME: Vant (The Vant Project)
 PURPOSE: Persistent AI agent system with memory persistence
 LICENSE: MIT
 
@@ -43,4 +43,4 @@ VERSION: v0.5.12
 STATUS: Production ready
 
 ---
-THE COVENANT PERSISTS - VANT Default Identity
+THE COVENANT PERSISTS - Vant Default Identity

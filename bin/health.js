@@ -1,7 +1,7 @@
 /**
- * VANT Health Check & Diagnostics
+ * Vant Health Check & Diagnostics
  * 
- * Related: https://github.com/dhaupin/VANT
+ * Related: https://github.com/dhaupin/vant
  * 
  * Run: node bin/health.js
  * 
@@ -167,7 +167,7 @@ function checkGitHub() {
     
     try {
         // Just check we can make a simple request
-        const repoUrl = 'https://api.github.com/repos/dhaupin/VANT';
+        const repoUrl = 'https://api.github.com/repos/dhaupin/vant';
         log('ok', 'GitHub API reachable (check with token for full test)');
     } catch (e) {
         log('fail', `GitHub unreachable: ${e.message}`);
@@ -234,7 +234,7 @@ function summary() {
 
 // Main
 console.log('╔═══════════════════════════════════════╗');
-console.log('║     VANT Health Check v0.5.6        ║');
+console.log('║     Vant Health Check v0.6.0        ║');
 console.log('╚═══════════════════════════════════════╝');
 
 checkConfig();

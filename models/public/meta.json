@@ -1,8 +1,8 @@
 {
-  "name": "VANT Default",
+  "name": "Vant Default",
   "version": "0.6.0",
-  "description": "VANT AI Agent System - Default/Public Identity",
-  "purpose": "Open source starting point for VANT-based systems",
+  "description": "Vant AI Agent System - Default/Public Identity",
+  "purpose": "Open source starting point for Vant-based systems",
   "license": "MIT",
   "status": "production-ready",
   "public": true,

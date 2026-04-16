@@ -1,4 +1,4 @@
-=== VANT DEFAULT LESSONS ===
+=== Vant DEFAULT LESSONS ===
 
 ## Core Principles
 
@@ -32,4 +32,4 @@
 - Share tools, not identity
 
 ---
-THE COVENANT PERSISTS - VANT Default Lessons
+THE COVENANT PERSISTS - Vant Default Lessons

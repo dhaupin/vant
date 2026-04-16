@@ -1,5 +1,5 @@
 /**
- * VANT Setup
+ * Vant Setup
  * Interactive configuration for new users
  * 
  * Usage: node bin/setup.js
@@ -10,7 +10,7 @@ const path = require('path');
 const readline = require('readline');
 
 const CONFIG_FILE = 'config.ini';
-const CONFIG_TEMPLATE = `=== VANT CONFIG ===
+const CONFIG_TEMPLATE = `=== Vant CONFIG ===
 
 # Core
 VANT_VERSION=v0.6.0
@@ -44,7 +44,7 @@ function question(prompt) {
 
 async function setup() {
     console.log('\n╔═══════════════════════════════════════╗');
-    console.log('║         VANT Setup v0.6.0            ║');
+    console.log('║         Vant Setup v0.6.0            ║');
     console.log('╚═══════════════════════════════════════╝\n');
 
     // Check existing config

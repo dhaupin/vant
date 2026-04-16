@@ -17,7 +17,7 @@ vant health      # System diagnostics
 vant status      # Current status
 ```
 
-## For VANT System
+## For Vant System
 
 This is the CLI skeleton. Full system at: https://github.com/dhaupin/vant
 

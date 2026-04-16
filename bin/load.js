@@ -1,5 +1,5 @@
 /**
- * VANT Loader (Node.js)
+ * Vant Loader (Node.js)
  * 
  * Usage: node bin/load.js [version]
  *        node bin/load.js v0.5.0
@@ -52,7 +52,7 @@ function loadModel(version = 'latest') {
         throw new Error(`Model not found: ${modelPath}`);
     }
 
-    console.log(`Loading VANT ${version} from ${modelPath}`);
+    console.log(`Loading Vant ${version} from ${modelPath}`);
 
     const brain = {};
     const files = fs.readdirSync(modelPath).filter(f => f.endsWith('.txt') || f.endsWith('.json'));
@@ -77,7 +77,7 @@ function loadModel(version = 'latest') {
 const version = process.argv[2] || 'latest';
 const vant = loadModel(version);
 
-console.log(`\n=== ${vant.identity ? vant.identity.split('\n')[0] : 'VANT'} ===`);
+console.log(`\n=== ${vant.identity ? vant.identity.split('\n')[0] : 'Vant'} ===`);
 console.log(`Version: v${vant.version}`);
 console.log(`Meta: ${vant.meta ? vant.meta.generation + 'th generation' : 'no meta'}`);
 console.log('\nThe Covenant persists.');
