@@ -92,11 +92,12 @@ test('errors.js works', () => {
 });
 
 // Test: Stego module loads
-test('stego.js loads', () => {
+test('stego.js works', () => {
     const stego = require('../lib/stego');
     if (typeof stego.encode !== 'function') throw new Error('Stego missing encode');
     if (typeof stego.decode !== 'function') throw new Error('Stego missing decode');
-    console.log('  Stego OK');
+    if (typeof stego.encrypt !== 'function') throw new Error('Stego missing encrypt');
+    console.log('  Stego OK + encryption');
 });
 
 // Test: Branch module loads
