@@ -76,6 +76,21 @@ test('rate-limit.js works', () => {
     console.log(`  Rate limit: ${status.remaining}/${status.maxPerHour}/hr`);
 });
 
+// Test: Logger can initialize
+test('logger.js works', () => {
+    const logger = require('../lib/logger');
+    logger.info('Test log', { test: true });
+    console.log('  Logger OK');
+});
+
+// Test: Errors can be created
+test('errors.js works', () => {
+    const errors = require('../lib/errors');
+    const err = new errors.VantError('Test error', { code: errors.CODES.CONFIG_MISSING });
+    if (err.code !== 'CONFIG_MISSING') throw new Error('Error code failed');
+    console.log('  Errors OK');
+});
+
 // Note: sync.js, changelog.js, summary.js are only in vant-brain (private)
 
 // Test: Example configs exist (for users to copy)
