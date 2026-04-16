@@ -3,9 +3,11 @@
 # 
 # Usage:
 #   docker build -t vant .
-#   docker run vant
+#   docker run dhaupin/vant
 #
-# For full (private) version: https://github.com/dhaupin/VANT
+# Environment:
+#   GITHUB_TOKEN - Required for sync
+#   GITHUB_REPO  - Required (owner/repo)
 
 FROM node:20-alpine
 
@@ -18,13 +20,18 @@ WORKDIR /app
 COPY bin/ ./bin/
 COPY lib/ ./lib/
 COPY models/public/ ./models/public/
+COPY config.example.ini ./
+COPY settings.example.ini ./
+COPY mood.example.ini ./
+COPY .env.example ./
+COPY README.md ./
 COPY CLI.md package.json ./
 
 # Default config
-ENV VANT_VERSION=0.6.0
+ENV VANT_VERSION=0.8.0
 ENV NODE_ENV=production
 
-# Quick start
-RUN echo "#!/bin/sh\nnode bin/vant.js health" > /entry.sh && chmod +x /entry.sh
+# Expose for any future network features
+EXPOSE 3000
 
 CMD ["node", "bin/vant.js", "health"]
