@@ -155,9 +155,37 @@ if (auto.shouldUpdate()) {
 
 ## Docker
 
+### Build
 ```bash
 docker build -t vant .
-docker run vant
+```
+
+### Run
+```bash
+# Quick start (requires env vars)
+docker run -e GITHUB_TOKEN=your_token -e GITHUB_REPO=owner/repo dhaupin/vant
+
+# With config file mount
+docker run -v ./config.ini:/app/config.ini dhaupin/vant
+
+# Interactive CLI
+docker run -it dhaupin/vant vant help
+```
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|------------|
+| `GITHUB_TOKEN` | Yes | GitHub personal access token |
+| `GITHUB_REPO` | Yes | owner/repo format |
+| `GITHUB_BRANCH` | No | Branch (default: main) |
+| `STEGOFRAME_ROOM` | No | Stegoframe room |
+| `STEGOFRAME_PASSPHRASE` | No | Stegoframe passphrase |
+
+### From Docker Hub
+```bash
+docker pull dhaupin/vant
+docker run dhaupin/vant vant start
 ```
 
 ## Related
