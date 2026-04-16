@@ -28,7 +28,7 @@ COPY README.md ./
 COPY CLI.md package.json ./
 
 # Default config
-ENV VANT_VERSION=0.8.0
+ENV VANT_VERSION=0.8.1
 ENV NODE_ENV=production
 
 # Expose for any future network features
