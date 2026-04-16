@@ -64,9 +64,15 @@ Important files:
 - bin/vant.js - CLI entry point
 - bin/sync.js - Pull/push to GitHub
 - bin/load.js - Load brain files into context
-- lib/brain.js - Brain loader (learnings/, memories/, decisions/, todos/)
-- lib/lock.js - Multi-agent lock
-- lib/branch.js - Git branch per agent
+- bin/health.js - System diagnostics
+- lib/config.js - Config loader (reads from config.ini)
+- lib/auto-update.js - Auto-save on exit
+- lib/lock.js - Multi-agent lock (optional)
+- lib/branch.js - Git branch per agent (optional)
+
+The public repo (vant) has basic brain loading (text/json).
+For full YAML brain with categories (learnings/, memories/, etc),
+use vant-brain: https://github.com/dhaupin/vant-brain
 
 Now confirm you're set up and ready to persist.
 ```
