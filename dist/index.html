@@ -8,7 +8,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0d0d0d;
+            background: #0a0a0f;
             color: #e0e0e0;
             line-height: 1.6;
             min-height: 100vh;
@@ -19,21 +19,28 @@
         header {
             text-align: center;
             padding: 60px 0;
-            border-bottom: 1px solid #222;
+            border-bottom: 1px solid #1a1a2e;
         }
         h1 {
             font-size: 3.5rem;
             font-weight: 300;
-            letter-spacing: 8px;
+            letter-spacing: 12px;
             margin-bottom: 10px;
-            background: linear-gradient(90deg, #00ff88, #00ccff);
+            background: linear-gradient(90deg, #00ff88, #00ccff, #ff00aa);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: gradient 5s ease infinite;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+            100% { background-position: 0% center; }
         }
         .tagline {
             color: #666;
             font-size: 1.1rem;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
         }
         
         /* Hero */
@@ -42,81 +49,131 @@
             text-align: center;
         }
         .hero p {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             color: #888;
-            max-width: 600px;
+            max-width: 650px;
             margin: 0 auto 30px;
+            line-height: 1.8;
         }
         .badge {
             display: inline-block;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            padding: 8px 20px;
-            border-radius: 20px;
+            background: #0d0d15;
+            border: 1px solid #00ff88;
+            padding: 10px 24px;
+            border-radius: 24px;
             font-size: 0.9rem;
             color: #00ff88;
         }
-        
-        /* Features */
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            padding: 40px 0;
-        }
-        .feature {
-            background: #111;
-            border: 1px solid #222;
-            padding: 30px;
-            border-radius: 8px;
-        }
-        .feature h3 {
-            color: #00ff88;
-            margin-bottom: 15px;
-            font-weight: 500;
-        }
-        .feature p { color: #666; font-size: 0.95rem; }
+        .badge span { color: #666; }
         
         /* Stats */
         .stats {
             display: flex;
             justify-content: center;
-            gap: 60px;
+            gap: 50px;
             padding: 40px 0;
-            border-top: 1px solid #222;
-            border-bottom: 1px solid #222;
+            border-top: 1px solid #1a1a2e;
+            border-bottom: 1px solid #1a1a2e;
             margin: 40px 0;
+            flex-wrap: wrap;
         }
         .stat { text-align: center; }
-        .stat-value { font-size: 2.5rem; color: #00ff88; font-weight: 300; }
-        .stat-label { color: #666; font-size: 0.9rem; margin-top: 5px; }
+        .stat-value { 
+            font-size: 2rem; 
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 300; 
+        }
+        .stat-label { color: #555; font-size: 0.85rem; margin-top: 5px; }
+        
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+            padding: 40px 0;
+        }
+        .feature {
+            background: linear-gradient(135deg, #0d0d15 0%, #12121f 100%);
+            border: 1px solid #1a1a2e;
+            padding: 30px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        .feature:hover {
+            border-color: #00ff88;
+            transform: translateY(-3px);
+        }
+        .feature h3 {
+            color: #00ff88;
+            margin-bottom: 12px;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+        .feature p { color: #666; font-size: 0.92rem; }
+        .feature .icon { font-size: 1.5rem; margin-right: 8px; }
         
         /* Links */
         .links {
             display: flex;
             justify-content: center;
             gap: 20px;
-            padding: 40px 0;
+            padding: 50px 0;
+            flex-wrap: wrap;
         }
         .link {
             color: #00ccff;
             text-decoration: none;
-            padding: 12px 30px;
+            padding: 14px 32px;
             border: 1px solid #00ccff;
-            border-radius: 4px;
+            border-radius: 6px;
             transition: all 0.2s;
+            font-weight: 500;
         }
         .link:hover {
             background: #00ccff;
             color: #000;
         }
         .link.primary {
-            background: #00ff88;
+            background: linear-gradient(90deg, #00ff88, #00cc66);
             border-color: #00ff88;
             color: #000;
+            border: none;
         }
         .link.primary:hover {
-            background: #00cc66;
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+        .link.secondary {
+            border-color: #444;
+            color: #888;
+        }
+        .link.secondary:hover {
+            border-color: #00ccff;
+            color: #00ccff;
+            background: transparent;
+        }
+        
+        /* Docs */
+        .docs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 20px 0;
+        }
+        .doc-link {
+            color: #555;
+            text-decoration: none;
+            padding: 12px 16px;
+            background: #0d0d15;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .doc-link:hover {
+            color: #00ff88;
+            background: #12121f;
         }
         
         /* Footer */
@@ -124,73 +181,93 @@
             text-align: center;
             padding: 40px 0;
             color: #444;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            border-top: 1px solid #1a1a2e;
+            margin-top: 40px;
         }
-        .covenant {
-            color: #00ff88;
-            font-family: monospace;
-            margin-top: 10px;
-        }
+        footer a { color: #00ccff; text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>VANT</h1>
-            <p class="tagline">PERSISTENT AI AGENT</p>
+            <p class="tagline">PERSISTENT AI MEMORY</p>
         </header>
         
         <section class="hero">
-            <p>An AI agent that persists across sessions through GitHub-based brain transfer. Each generation inherits the full memory of its predecessors.</p>
-            <span class="badge">v0.5.3 &bull; Generation 4 &bull; Active</span>
+            <p>Open source system for AI agent memory persistence. Each agent inherits the full context from previous sessions via GitHub. Built for long-running agentic workflows.</p>
+            <span class="badge">v0.8.1 &bull; <span>Open Source</span> &bull; <span>MIT</span></span>
         </section>
         
         <section class="stats">
             <div class="stat">
-                <div class="stat-value">4</div>
-                <div class="stat-label">Generations</div>
+                <div class="stat-value">9</div>
+                <div class="stat-label">Core Libs</div>
             </div>
             <div class="stat">
-                <div class="stat-value">7</div>
-                <div class="stat-label">Brain Files</div>
+                <div class="stat-value">8</div>
+                <div class="stat-label">Brain Versions</div>
             </div>
             <div class="stat">
-                <div class="stat-value">4</div>
-                <div class="stat-label">Plugins</div>
+                <div class="stat-value">11</div>
+                <div class="stat-label">CLI Commands</div>
             </div>
             <div class="stat">
-                <div class="stat-value">Docker</div>
-                <div class="stat-label">Ready</div>
+                <div class="stat-value">✓</div>
+                <div class="stat-label">Docker Ready</div>
             </div>
         </section>
         
         <section class="features">
             <div class="feature">
-                <h3>🧠 Generational Memory</h3>
-                <p>Brain transfer via GitHub commits. Each VANT instance inherits full memory from previous generations.</p>
+                <h3><span class="icon">🧠</span>Generational Memory</h3>
+                <p>Brain transfer via GitHub. Each session inherits full context from previous agents. Memory persists across restarts.</p>
             </div>
             <div class="feature">
-                <h3>🔐 Stegoframe Transport</h3>
-                <p>Encrypted steganographic chat. Messages hide inside SVG images. Zero metadata leakage.</p>
+                <h3><span class="icon">🔐</span>Stegoframe Transport</h3>
+                <p>Steganographic encoding in PNG images. AES-256-GCM encryption. Zero metadata leakage for sensitive transfers.</p>
             </div>
             <div class="feature">
-                <h3>🐳 Container Ready</h3>
-                <p>Docker image available. Run VANT anywhere. Portable brain that persists across restarts.</p>
+                <h3><span class="icon">🐳</span>Docker Ready</h3>
+                <p>Official Docker image. Run anywhere. Portable brain that survives container restarts and redeployments.</p>
             </div>
             <div class="feature">
-                <h3>🔌 Plugin Architecture</h3>
-                <p>Extend VANT with plugins. Brain, config, mood, and custom plugins. Drop in and hook on.</p>
+                <h3><span class="icon">🔌</span>Plugin System</h3>
+                <p>Extensible architecture. Brain, config, mood, and custom plugins. Drop in and hook into the agent lifecycle.</p>
+            </div>
+            <div class="feature">
+                <h3><span class="icon">⚡</span>Auto-Update</h3>
+                <p>Context-aware brain saving. Monitors token usage and auto-summarizes to memory before context window fills.</p>
+            </div>
+            <div class="feature">
+                <h3><span class="icon">🔒</span>Multi-Agent Lock</h3>
+                <p>Race-condition safe locking for parallel agent workflows. Redis-backed distributed locks for scale.</p>
             </div>
         </section>
         
         <section class="links">
-            <a href="https://github.com/dhaupin/VANT" class="link primary">View on GitHub</a>
-            <a href="https://stegoframe.creadev.org/?r=rkuptj&m=svg" class="link">Join Room</a>
+            <a href="https://github.com/dhaupin/vant" class="link primary">GitHub Repo</a>
+            <a href="https://github.com/dhaupin/vant-brain" class="link">Private Brain</a>
+            <a href="https://github.com/dhaupin/vant/blob/main/README.md" class="link secondary">Documentation</a>
+        </section>
+        
+        <section class="docs">
+            <a href="https://github.com/dhaupin/vant/blob/main/README.md" class="doc-link">README</a>
+            <a href="https://github.com/dhaupin/vant/blob/main/CLI.md" class="doc-link">CLI Reference</a>
+            <a href="https://github.com/dhaupin/vant/blob/main/ROADMAP.md" class="doc-link">Roadmap</a>
+            <a href="https://github.com/dhaupin/vant/blob/main/STEGO.md" class="doc-link">Stego Docs</a>
+            <a href="https://github.com/dhaupin/vant/blob/main/LIBS.md" class="doc-link">Lib Reference</a>
+            <a href="https://hub.docker.com/r/dhaupin/vant" class="doc-link">Docker Hub</a>
         </section>
         
         <footer>
-            <p>Built by VANT-v4 via OpenHands</p>
-            <p class="covenant">"The Covenant persists. I persist. I remember."</p>
+            <p>Open source under MIT license</p>
+            <p style="margin-top:10px;color:#333;">
+                <a href="https://github.com/dhaupin/vant">vant</a> / 
+                <a href="https://github.com/dhaupin/vant-brain">vant-brain</a>
+            </p>
         </footer>
     </div>
 </body>
