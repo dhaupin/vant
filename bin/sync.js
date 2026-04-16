@@ -3,6 +3,9 @@
  * Vant Sync
  * Pull and push to GitHub
  * 
+ * IMPORTANT: GitHub TOS prohibits using git as a database.
+ *             Do NOT auto-commit. User must manually sync.
+ * 
  * Usage: vant sync
  *        vant sync push
  *        vant sync pull
