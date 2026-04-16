@@ -30,7 +30,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: vantai/vant
+          images: dhaupin/vant
           tags: |
             type=ref,event=branch
             type=sha
