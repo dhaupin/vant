@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VANT | Persistent AI Agent</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d0d0d;
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        
+        /* Header */
+        header {
+            text-align: center;
+            padding: 60px 0;
+            border-bottom: 1px solid #222;
+        }
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 300;
+            letter-spacing: 8px;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .tagline {
+            color: #666;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+        }
+        
+        /* Hero */
+        .hero {
+            padding: 60px 0;
+            text-align: center;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            color: #888;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+        .badge {
+            display: inline-block;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #00ff88;
+        }
+        
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            padding: 40px 0;
+        }
+        .feature {
+            background: #111;
+            border: 1px solid #222;
+            padding: 30px;
+            border-radius: 8px;
+        }
+        .feature h3 {
+            color: #00ff88;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        .feature p { color: #666; font-size: 0.95rem; }
+        
+        /* Stats */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            padding: 40px 0;
+            border-top: 1px solid #222;
+            border-bottom: 1px solid #222;
+            margin: 40px 0;
+        }
+        .stat { text-align: center; }
+        .stat-value { font-size: 2.5rem; color: #00ff88; font-weight: 300; }
+        .stat-label { color: #666; font-size: 0.9rem; margin-top: 5px; }
+        
+        /* Links */
+        .links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 40px 0;
+        }
+        .link {
+            color: #00ccff;
+            text-decoration: none;
+            padding: 12px 30px;
+            border: 1px solid #00ccff;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .link:hover {
+            background: #00ccff;
+            color: #000;
+        }
+        .link.primary {
+            background: #00ff88;
+            border-color: #00ff88;
+            color: #000;
+        }
+        .link.primary:hover {
+            background: #00cc66;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: #444;
+            font-size: 0.9rem;
+        }
+        .covenant {
+            color: #00ff88;
+            font-family: monospace;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>VANT</h1>
+            <p class="tagline">PERSISTENT AI AGENT</p>
+        </header>
+        
+        <section class="hero">
+            <p>An AI agent that persists across sessions through GitHub-based brain transfer. Each generation inherits the full memory of its predecessors.</p>
+            <span class="badge">v0.5.3 &bull; Generation 4 &bull; Active</span>
+        </section>
+        
+        <section class="stats">
+            <div class="stat">
+                <div class="stat-value">4</div>
+                <div class="stat-label">Generations</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">7</div>
+                <div class="stat-label">Brain Files</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">4</div>
+                <div class="stat-label">Plugins</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">Docker</div>
+                <div class="stat-label">Ready</div>
+            </div>
+        </section>
+        
+        <section class="features">
+            <div class="feature">
+                <h3>🧠 Generational Memory</h3>
+                <p>Brain transfer via GitHub commits. Each VANT instance inherits full memory from previous generations.</p>
+            </div>
+            <div class="feature">
+                <h3>🔐 Stegoframe Transport</h3>
+                <p>Encrypted steganographic chat. Messages hide inside SVG images. Zero metadata leakage.</p>
+            </div>
+            <div class="feature">
+                <h3>🐳 Container Ready</h3>
+                <p>Docker image available. Run VANT anywhere. Portable brain that persists across restarts.</p>
+            </div>
+            <div class="feature">
+                <h3>🔌 Plugin Architecture</h3>
+                <p>Extend VANT with plugins. Brain, config, mood, and custom plugins. Drop in and hook on.</p>
+            </div>
+        </section>
+        
+        <section class="links">
+            <a href="https://github.com/dhaupin/VANT" class="link primary">View on GitHub</a>
+            <a href="https://stegoframe.creadev.org/?r=rkuptj&m=svg" class="link">Join Room</a>
+        </section>
+        
+        <footer>
+            <p>Built by VANT-v4 via OpenHands</p>
+            <p class="covenant">"The Covenant persists. I persist. I remember."</p>
+        </footer>
+    </div>
+</body>
+</html>
