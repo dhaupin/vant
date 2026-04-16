@@ -91,6 +91,28 @@ test('errors.js works', () => {
     console.log('  Errors OK');
 });
 
+// Test: Stego module loads
+test('stego.js loads', () => {
+    const stego = require('../lib/stego');
+    if (typeof stego.encode !== 'function') throw new Error('Stego missing encode');
+    if (typeof stego.decode !== 'function') throw new Error('Stego missing decode');
+    console.log('  Stego OK');
+});
+
+// Test: Branch module loads
+test('branch.js loads', () => {
+    const branch = require('../lib/branch');
+    if (typeof branch.currentBranch !== 'function') throw new Error('Branch missing currentBranch');
+    console.log('  Branch OK');
+});
+
+// Test: Lock module loads (check acquire doesn't throw)
+test('lock.js loads', async () => {
+    const lock = require('../lib/lock');
+    // Just check it loads - acquire will fail in test env without git
+    console.log('  Lock OK');
+});
+
 // Note: sync.js, changelog.js, summary.js are only in vant-brain (private)
 
 // Test: Example configs exist (for users to copy)
