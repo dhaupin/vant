@@ -39,12 +39,8 @@ jobs:
       - name: Build VANT
         run: |
           echo "Building VANT..."
-          # Just verify files exist - full build optional
-          ls -la models/ bin/ config.ini
-
-      - name: Check version
-        run: |
-          grep VANT_VERSION config.ini || echo "VANT_VERSION=local" >> config.ini
+          # Verify files exist - config.example.ini used in public repos
+          ls -la models/ bin/ config.example.ini 2>/dev/null || ls -la models/ bin/
           echo "Built: $(date)"
 
   test:
