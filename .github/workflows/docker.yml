@@ -24,7 +24,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-        continue-on-error: true
 
       - name: Extract metadata
         id: meta
@@ -42,6 +41,14 @@ jobs:
           # Verify files exist - config.example.ini used in public repos
           ls -la models/ bin/ config.example.ini 2>/dev/null || ls -la models/ bin/
           echo "Built: $(date)"
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: dhaupin/vant:latest,dhaupin/vant:${{ github.sha }}
+          labels: ${{ steps.meta.outputs.labels }}
 
   test:
     runs-on: ubuntu-latest
