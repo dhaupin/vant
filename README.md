@@ -53,7 +53,7 @@ Copy to `.env` and set:
 
 ## Current Version
 
-**v0.6.4** - Security audit complete, public-safe defaults
+**v0.7.0** - Multi-agent support, brain refactor, auto-update
 
 ## Architecture
 
@@ -71,8 +71,37 @@ bin/
   sync.js       # GitHub sync
 lib/
   config.js     # Config loader
+  brain.js      # Brain loader with category folders
+  lock.js       # Agent lock for multi-agent
+  branch.js     # Git branch per agent
+  auto-update.js # Auto-save context to brain
 config.example.ini  # Config template
 .env.example        # Env template
+```
+
+## Multi-Agent Support
+
+Vant supports multiple agents running simultaneously:
+
+```javascript
+const lock = require('./lib/lock');
+const brain = require('./lib/brain');
+const branch = require('./lib/branch');
+const auto = require('./lib/auto-update');
+
+// Acquire lock before work
+await lock.acquire('agent-1');
+
+// Work on your branch
+await branch.checkout('agent-1');
+
+// Track messages for auto-save
+auto.addMessage('user', message);
+
+// Before context fills...
+if (auto.shouldUpdate()) {
+    auto.writeToBrain(brain);
+}
 ```
 
 ## Security

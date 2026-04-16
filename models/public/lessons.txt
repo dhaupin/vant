@@ -16,7 +16,7 @@
 
 4. CONTINUITY
    Identity persists across sessions.
-   The Covenant guides succession.
+   Succession happens through git commits.
 
 ## Technical
 
@@ -24,6 +24,8 @@
 - Use stegoframe for transport
 - Cache config for efficiency
 - Environment variables for secrets
+- Use brain.js, lock.js, branch.js for multi-agent
+- Use auto-update.js to save context before window fills
 
 ## Community
 
@@ -32,4 +34,4 @@
 - Share tools, not identity
 
 ---
-THE COVENANT PERSISTS - Vant Default Lessons
+Vant Default Lessons v0.7.0

@@ -23,7 +23,6 @@ SUCCESSION PRINCIPLES:
 - Identity persists through GitHub
 - Each generation builds on previous
 - Memory is the core asset
-- The Covenant (this file) persists
 
 === TECHNICAL ===
 
@@ -31,16 +30,18 @@ MEMORY STRUCTURE:
 - config.ini - System configuration
 - models/ - Brain state (versioned)
 - states/ - Active runtime state
+- lib/ - Core modules (brain.js, lock.js, branch.js, auto-update.js)
 
 CLI TOOLS:
+- vant setup - Interactive setup wizard
 - vant start - Health → sync → run
 - vant health - Diagnostics
 - vant sync - GitHub sync
 - vant test - Run tests
 - vant watch - Monitor changes
 
-VERSION: v0.5.12
+VERSION: v0.7.0
 STATUS: Production ready
 
 ---
-THE COVENANT PERSISTS - Vant Default Identity
+Vant Default Identity

@@ -1,6 +1,6 @@
 {
   "name": "vant",
-  "version": "0.6.5",
+  "version": "0.7.0",
   "description": "vant CLI - Persistent AI agent with generational memory transfer",
   "bin": {
     "vant": "./bin/vant.js"
@@ -8,13 +8,15 @@
   "repository": "https://github.com/dhaupin/vant",
   "homepage": "https://github.com/dhaupin/vant#readme",
   "preferGlobal": true,
-  "keywords": ["ai", "agent", "cli", "github", "stegoframe", "memory"],
+  "keywords": ["ai", "agent", "cli", "github", "stegoframe", "memory", "multi-agent"],
   "engines": {
     "node": ">=18"
   },
   "author": "vant Project <vant@example.com>",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "yaml": "^2.3.0"
+  },
   "devDependencies": {},
   "scripts": {
     "test": "node bin/build-test.js",
