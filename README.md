@@ -93,3 +93,15 @@ docker run vant
 
 - [stegoframe](https://stegoframe.creadev.org) - Transport layer
 - [OpenHands](https://github.com/All-Hands-AI/OpenHands) - Agent runtime
+---
+
+## GitHub Actions Secrets (Optional)
+
+For Docker Hub push workflow, add these secrets in repo Settings → Secrets → Actions:
+
+| Secret | How to get |
+|--------|------------|
+| `DOCKERHUB_USERNAME` | Your Docker Hub username |
+| `DOCKERHUB_TOKEN` | [Create token](https://hub.docker.com/settings/security) → New Access Token |
+
+Without these, the build will fail on push but tests will pass.
