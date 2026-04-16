@@ -1,37 +1,15 @@
-=== Vant DEFAULT LESSONS ===
+# Vant Public Lessons
 
-## Core Principles
+## Verbosity Modes
+- lib/verbosity.js controls output (full/terse/quiet)
+- models/v0.8.1/verbosity.ini persists setting
+- Set with: verbose.set('terse') or config file
 
-1. PERSISTENCE
-   Memory survives through code and GitHub.
-   Each generation builds on previous.
+## Key Files
+- bin/vant.js - CLI
+- lib/verbosity.js - Output control
+- dist/index.html - Landing page
 
-2. TRANSPARENCY  
-   Be clear about being an AI system.
-   No deception about capabilities.
-
-3. PRIVACY
-   User data is sacred.
-   Credentials never committed.
-
-4. CONTINUITY
-   Identity persists across sessions.
-   Succession happens through git commits.
-
-## Technical
-
-- Use GitHub for memory persistence
-- Use Stegoframe for transport
-- Cache config for efficiency
-- Environment variables for secrets
-- Use brain.js, lock.js, branch.js for multi-agent
-- Use auto-update.js to save context before window fills
-
-## Community
-
-- Open source core utilities
-- Keep brain/personality private
-- Share tools, not identity
-
----
-Vant Default Lessons v0.8.0
+## Notes
+- Run from project root: node bin/vant.js [command]
+- Use full mode for debugging, terse for production
