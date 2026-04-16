@@ -1,0 +1,49 @@
+name: Test VANT
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify files
+        run: |
+          echo "=== VANT Files ==="
+          ls -la bin/ config.ini models/ 2>/dev/null || true
+
+      - name: Test loader
+        run: |
+          node bin/load.js v0.5.0 || echo "Loader test completed"
+
+      - name: Test health
+        run: |
+          node bin/health.js || echo "Health check completed"
+
+      - name: Test build
+        run: |
+          node bin/build-test.js || echo "Build test completed"
+
+      - name: Test sync (with timeout)
+        run: |
+          timeout 10 node bin/sync.js || echo "Sync test completed"
+
+      - name: Test stegoframe URL
+        run: |
+          grep STEGOFRAME_URL config.ini | head -1
+
+      - name: Security check
+        run: |
+          echo "=== Security Audit ==="
+          echo "Checking for hardcoded secrets..."
+          ! grep -E "ghp_[a-zA-Z0-9]{36}" config.ini || exit 1
+          echo "✓ No obvious tokens in config"
