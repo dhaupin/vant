@@ -32,6 +32,7 @@ const COMMANDS = {
     test: 'build-test.js',
     changelog: 'changelog.js',
     summary: 'summary.js',
+    update: 'update.js',
     watch: 'watch.js',
     bump: 'bump.js',
     setup: 'setup.js',
