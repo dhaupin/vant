@@ -5,6 +5,7 @@ on:
     branches: [main]
     tags:
       - 'v*'
+      - 'checkpoint-*'
   pull_request:
     branches: [main]
 
@@ -12,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # Don't run on PRs (security)
+    # Only build on PRs, push to main, or tags
     if: github.event_name != 'pull_request'
 
     steps:
@@ -34,15 +35,14 @@ jobs:
           images: dhaupin/vant
           tags: |
             type=ref,event=branch
-            type=sha
             type=raw,value=latest,enable={{is_default_branch}}
             type=semver,pattern={{version}}
+            type=match,pattern=checkpoint-(.*),group=1
 
       - name: Build VANT
         run: |
           echo "Building VANT..."
           docker build -t ${{ steps.meta.outputs.tags }} .
-          echo "Built: ${{ steps.meta.outputs.tags }}"
 
       - name: Push to Hub
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
