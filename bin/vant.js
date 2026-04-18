@@ -43,7 +43,7 @@ const cmd = process.argv[2];
 if (!cmd || cmd === 'help') {
     console.log(`
 ╔═══════════════════════════════════════╗
-║         vant CLI v0.8.0              ║
+║         vant CLI v0.8.2              ║
 ╚═══════════════════════════════════════╝
 
 Usage: vant <command> [options]

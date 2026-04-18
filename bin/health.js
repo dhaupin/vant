@@ -257,7 +257,7 @@ function summary() {
 
 // Main
 console.log('╔═══════════════════════════════════════╗');
-console.log('║     Vant Health Check v0.8.1        ║');
+console.log('║     Vant Health Check v0.8.2        ║');
 console.log('╚═══════════════════════════════════════╝');
 
 checkConfig();
