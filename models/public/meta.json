@@ -1,28 +1,23 @@
 {
-  "name": "Vant Default",
+  "model": "Vant Project",
   "version": "0.8.2",
-  "description": "Vant AI Agent System - Default/Public Identity",
+  "link": "https://github.com/dhaupin/vant",
+  "description": "Vant AI Agent System - Default/Public Model",
   "purpose": "Open source starting point for Vant-based systems",
   "license": "MIT",
   "status": "production-ready",
-  "public": true,
   "files": [
     "identity.txt",
-    "meta.json",
+    "meta.json", 
     "verbosity.ini",
     "lessons.txt",
     "schema/"
   ],
   "cli": [
-    "../bin/vant.js",
-    "../bin/health.js",
-    "../bin/load.js",
-    "../bin/update.js"
-  ],
-  "lib": [
-    "../lib/config.js",
-    "../lib/brain.js",
-    "../lib/lock.js",
-    "../lib/branch.js"
+    "vant setup - Interactive setup",
+    "vant health - Diagnostics", 
+    "vant load - Load brain",
+    "vant test - Run tests",
+    "vant update - Check updates"
   ]
 }
