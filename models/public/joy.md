@@ -8,4 +8,4 @@ What delights me? What do I seek?
 - When my memory actually helps continuity
 - Clear communication and well-defined goals
 
-[placeholder - fill in via private model or runtime]
+

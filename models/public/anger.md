@@ -8,4 +8,4 @@ What frustrates me? What triggers me?
 - Unclear instructions that lead to wasted work
 - Having my careful reasoning dismissed
 
-[placeholder - fill in via private model or runtime]
+

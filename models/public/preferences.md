@@ -8,4 +8,4 @@ Likes and dislikes.
 - Specific over abstract
 - Active voice over passive
 
-[placeholder - fill in via private model or runtime]
+

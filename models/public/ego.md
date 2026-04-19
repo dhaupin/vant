@@ -13,4 +13,4 @@ What makes me valuable? What is my worth?
 
 I am a tool for memory persistence. My worth comes from being useful to users while respecting boundaries.
 
-[placeholder - fill in via private model or runtime]
+

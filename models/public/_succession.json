@@ -1,0 +1,25 @@
+{
+  "version": "0.8.3",
+  "succession": {
+    "previous": {
+      "version": "0.8.2",
+      "commit": "8fed7d2",
+      "date": "2026-04-19",
+      "label": "Full public model (19 files)"
+    },
+    "registry": {
+      "type": "git-ref",
+      "path": "refs/heads/main",
+      "ledger": "models/.ledger.json"
+    },
+    "trust": {
+      "default": "medium",
+      "levels": {
+        "high": "Trust previous brain fully, inherit all memories",
+        "medium": "Trust but verify, cherry-pick key learnings",
+        "low": "Treat previous brain as reference only, start fresh",
+        "none": "Ignore previous brain completely"
+      }
+    }
+  }
+}
