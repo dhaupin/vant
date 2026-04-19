@@ -3,7 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VANT | VANT: Versatile Autonomous Networked Tool</title>
+    <title>Vant | Persistent AI Memory System</title>
+    <meta name="description" content="Vant: Open source system for AI agent memory persistence via GitHub. Each agent inherits full context from previous sessions. Built for long-running agentic workflows.">
+    <meta name="keywords" content="AI agent, memory persistence, agentic AI, GitHub, autonomous agents, memory transfer, brain transfer, AI continuity, persistent AI">
+    <meta name="author" content="Vant Project">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Vant | Persistent AI Memory System">
+    <meta property="og:description" content="Open source system for AI agent memory persistence. Each agent inherits full context from previous sessions via GitHub.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/dhaupin/vant">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Vant | Persistent AI Memory">
+    <meta name="twitter:description" content="Your AI should remember. Open source memory system for agents.">
+    <link rel="canonical" href="https://github.com/dhaupin/vant">
     <style>
         :root {
             --bg: #fafafa;
@@ -35,7 +47,7 @@
             transition: background 0.3s, color 0.3s;
         }
         .container { max-width: 880px; margin: 0 auto; padding: 40px 20px; }
-        
+
         /* Theme toggle */
         .theme-toggle {
             position: fixed;
@@ -48,140 +60,148 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.85rem;
-            transition: all 0.2s;
         }
-        .theme-toggle:hover {
-            border-color: var(--accent);
-        }
-        
-        /* Header */
-        header {
-            text-align: center;
-            padding: 50px 0;
-            border-bottom: 1px solid var(--border);
-        }
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 600;
-            letter-spacing: 6px;
-            margin-bottom: 8px;
-            color: var(--text);
+        .theme-toggle:hover { background: var(--border); }
+
+        header { text-align: center; margin-bottom: 30px; }
+        header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 5px;
         }
         .tagline {
             color: var(--text-muted);
-            font-size: 1rem;
-            letter-spacing: 2px;
-        }
-        
-        /* Hero */
-        .hero {
-            padding: 50px 0;
-            text-align: center;
-        }
-        .hero p {
             font-size: 1.1rem;
-            color: var(--text-muted);
-            max-width: 600px;
-            margin: 0 auto 25px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
         }
+
+        .hero {
+            text-align: center;
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+        }
+        .hero p { font-size: 1.15rem; max-width: 600px; margin: 0 auto 20px; }
         .badge {
             display: inline-block;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 8px 20px;
+            background: var(--accent);
+            color: #fff;
+            padding: 6px 14px;
             border-radius: 20px;
             font-size: 0.85rem;
-            color: var(--text-muted);
+            font-weight: 500;
         }
-        .badge span { color: var(--text); }
-        
-        /* Stats */
+
         .stats {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            padding: 35px 0;
-            border-top: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
-            margin: 30px 0;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
         }
-        .stat { text-align: center; }
-        .stat-value { 
-            font-size: 1.8rem; 
-            font-weight: 600;
+        .stat {
+            text-align: center;
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
             color: var(--accent);
         }
-        .stat-label { color: var(--text-muted); font-size: 0.8rem; margin-top: 4px; }
-        
-        /* Features */
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
-            padding: 30px 0;
+            margin-bottom: 30px;
         }
         .feature {
             background: var(--bg-card);
-            border: 1px solid var(--border);
             padding: 24px;
-            border-radius: 8px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
         }
         .feature h3 {
-            color: var(--accent);
+            font-size: 1.1rem;
             margin-bottom: 8px;
-            font-weight: 500;
-            font-size: 1rem;
+            color: var(--accent);
         }
-        .feature p { color: var(--text-muted); font-size: 0.88rem; }
-        
-        /* Links */
+        .feature p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
         .links {
             display: flex;
+            gap: 12px;
             justify-content: center;
-            gap: 15px;
-            padding: 40px 0;
-            flex-wrap: wrap;
+            margin-bottom: 20px;
         }
         .link {
-            color: var(--bg);
-            background: var(--accent);
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 8px;
             text-decoration: none;
-            padding: 12px 28px;
-            border-radius: 6px;
             font-weight: 500;
             transition: all 0.2s;
         }
-        .link:hover {
-            background: var(--accent-hover);
+        .link:not(.outline) {
+            background: var(--accent);
+            color: #fff;
         }
+        .link:not(.outline):hover { background: var(--accent-hover); }
         .link.outline {
-            background: transparent;
             border: 1px solid var(--border);
             color: var(--text);
         }
-        .link.outline:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        
-        /* Docs */
+        .link.outline:hover { border-color: var(--accent); color: var(--accent); }
+
         .docs {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            padding: 20px 0;
-            flex-wrap: wrap;
+            text-align: center;
+            margin-bottom: 30px;
         }
         .doc-link {
+            display: inline-block;
             color: var(--text-muted);
             text-decoration: none;
-            padding: 8px 14px;
-            font-size: 0.85rem;
+            padding: 8px 16px;
+            font-size: 0.9rem;
         }
         .doc-link:hover { color: var(--accent); }
-        
-        /* Footer */
+
+        /* New agent section */
+        .agent-note {
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%);
+            border: 1px solid #059669;
+            padding: 24px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        [data-theme="dark"] .agent-note {
+            background: linear-gradient(135deg, #052e16 0%, #0c4a6e 100%);
+            border-color: #10b981;
+        }
+        .agent-note h3 { margin-bottom: 10px; color: var(--accent); }
+        .agent-note code {
+            background: var(--bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
         footer {
             text-align: center;
             padding: 30px 0;
@@ -201,76 +221,84 @@
             <h1>VANT</h1>
             <p class="tagline">PERSISTENT AI MEMORY</p>
         </header>
-        
+
         <section class="hero">
             <p>Open source system for AI agent memory persistence. Each agent inherits full context from previous sessions via GitHub. Built for long-running agentic workflows.</p>
-            <span class="badge">v0.8.1 &bull; Open Source &bull; MIT</span>
+            <span class="badge">v0.8.2 &bull; Open Source &bull; MIT</span>
         </section>
-        
+
+        <div class="agent-note">
+            <h3>🤖 For AI Agents</h3>
+            <p>Clone me to get a persistent brain. Run <code>node bin/vant.js setup</code> to initialize. Your memory will persist across every session via GitHub commits.</p>
+        </div>
+
         <section class="stats">
             <div class="stat">
-                <div class="stat-value">9</div>
+                <div class="stat-value">12+</div>
                 <div class="stat-label">Core Libs</div>
             </div>
             <div class="stat">
-                <div class="stat-value">8</div>
-                <div class="stat-label">Brain Versions</div>
+                <div class="stat-value">3</div>
+                <div class="stat-label">Brain Models</div>
             </div>
             <div class="stat">
                 <div class="stat-value">11</div>
                 <div class="stat-label">CLI Commands</div>
             </div>
             <div class="stat">
-                <div class="stat-value">900+</div>
-                <div class="stat-label">Docker Pulls</div>
+                <div class="stat-value">v0.8.2</div>
+                <div class="stat-label">Release</div>
             </div>
         </section>
-        
+
         <section class="features">
             <div class="feature">
                 <h3>Generational Memory</h3>
                 <p>Brain transfer via GitHub. Each session inherits full context. Memory persists across restarts.</p>
             </div>
             <div class="feature">
-                <h3>Stegoframe Transport</h3>
-                <p>Steganographic encoding in PNG images. AES-256-GCM encryption for sensitive transfers.</p>
+                <h3>Versioned Brain</h3>
+                <p>Git commits = memory checkpoints. Branch for experiments, merge what works. Every version preserved.</p>
+            </div>
+            <div class="feature">
+                <h3>Transport Protocol</h3>
+                <p>Defined cargo manifest. Exactly what files make up "you" — identity, ego, fears, goals, lessons.</p>
+            </div>
+            <div class="feature">
+                <h3>Public & Private Models</h3>
+                <p>Public model as default base. Private model for user customizations. Ethical framework built-in.</p>
             </div>
             <div class="feature">
                 <h3>Docker Ready</h3>
-                <p>Official Docker image. Run anywhere. Portable brain that survives container restarts.</p>
+                <p>Official Docker image builds on release tags. Run anywhere. Portable brain survives container restarts.</p>
             </div>
             <div class="feature">
-                <h3>Multi-Agent Lock</h3>
-                <p>Race-condition safe locking for parallel agent workflows. File-based (Redis optional).</p>
-            </div>
-            <div class="feature">
-                <h3>Notifications</h3>
-                <p>Slack, Discord, and Telegram integrations. Get notified on sync, health, and errors.</p>
-            </div>
-            <div class="feature">
-                <h3>Extensible</h3>
-                <p>Plugin architecture. Brain, config, mood, and custom plugins. Drop in and hook in.</p>
+                <h3>Auto-Update</h3>
+                <p><code>vant update</code> checks GitHub for new releases. Stay current with latest improvements.</p>
             </div>
         </section>
-        
+
         <section class="links">
             <a href="https://github.com/dhaupin/vant" class="link">GitHub</a>
+            <a href="https://github.com/dhaupin/vant/releases/tag/v0.8.2" class="link outline">Release</a>
             <a href="https://github.com/dhaupin/vant-brain" class="link outline">Brain</a>
-            <a href="https://hub.docker.com/r/dhaupin/vant" class="link outline">Docker</a>
         </section>
-        
+
         <section class="docs">
             <a href="https://github.com/dhaupin/vant/blob/main/README.md" class="doc-link">Docs</a>
             <a href="https://github.com/dhaupin/vant/blob/main/CLI.md" class="doc-link">CLI</a>
-            <a href="https://github.com/dhaupin/vant/blob/main/STEGO.md" class="doc-link">Stego</a>
+            <a href="https://github.com/dhaupin/vant/blob/main/models/public/schema/memory-files.md" class="doc-link">Schema</a>
             <a href="https://github.com/dhaupin/vant/blob/main/CHANGELOG.md" class="doc-link">Changelog</a>
         </section>
-        
+
         <footer>
             <p>Open source under MIT license. Not affiliated with VantAI or other Vant-named entities.</p>
             <p style="margin-top:8px;">
-                <a href="https://github.com/dhaupin/vant">vant</a> / 
+                <a href="https://github.com/dhaupin/vant">vant</a> /
                 <a href="https://github.com/dhaupin/vant-brain">vant-brain</a>
+            </p>
+            <p style="margin-top:12px; font-size: 0.75rem; color: var(--text-muted);">
+                Powered by <a href="https://github.com/openhands/openhands">OpenHands</a> AI agent
             </p>
         </footer>
     </div>
