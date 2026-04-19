@@ -6,27 +6,23 @@
   "license": "MIT",
   "status": "production-ready",
   "public": true,
-  "core_files": [
-    "bin/vant.js",
-    "bin/health.js",
-    "bin/load.js",
-    "bin/setup.js",
-    "lib/config.js",
-    "lib/brain.js",
-    "lib/lock.js",
-    "lib/branch.js",
-    "lib/auto-update.js",
-    "package.json",
-    "CLI.md",
-    "README.md"
+  "files": [
+    "identity.txt",
+    "meta.json",
+    "verbosity.ini",
+    "lessons.txt",
+    "schema/"
   ],
-  "private_files": [
-    "models/v0.5.0/*",
-    "bin/sync.js",
-    "bin/changelog.js",
-    "bin/summary.js",
-    "config.ini",
-    "settings.ini",
-    "mood.ini"
+  "cli": [
+    "../bin/vant.js",
+    "../bin/health.js",
+    "../bin/load.js",
+    "../bin/update.js"
+  ],
+  "lib": [
+    "../lib/config.js",
+    "../lib/brain.js",
+    "../lib/lock.js",
+    "../lib/branch.js"
   ]
 }
