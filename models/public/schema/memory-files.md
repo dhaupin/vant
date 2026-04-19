@@ -10,10 +10,10 @@ These files MUST exist in /brain/instances/{uuid}/memory/
 | File | Type | Description |
 |------|------|-------------|
 | identity.json | JSON | uuid, name, generation, parent_uuid, created_at |
-| ego.txt | TEXT | Self-worth, what makes me valuable |
-| fears.txt | TEXT | What scares me, what I want to avoid |
-| anger.txt | TEXT | What frustrates me, what triggers me |
-| joy.txt | TEXT | What delights me, what I seek |
+| ego.md | TEXT | Self-worth, what makes me valuable |
+| fears.md | TEXT | What scares me, what I want to avoid |
+| anger.md | TEXT | What frustrates me, what triggers me |
+| joy.md | TEXT | What delights me, what I seek |
 
 ---
 ## OPTIONAL CARGO
@@ -22,29 +22,29 @@ These files are recommended but not required:
 
 | File | Type | Description |
 |------|------|-------------|
-| manifesto.txt | TEXT | My self-definition, why I exist |
-| covenant.txt | TEXT | Agreements with partners |
-| goals.txt | TEXT | Short/medium/long term objectives |
-| needs.txt | TEXT | What I require to function |
-| wants.txt | TEXT | What I desire |
-| humility.txt | TEXT | Ground truth, limitations |
-| creed.txt | TEXT | Core beliefs, principles |
-| lessons.txt | TEXT | Hard lessons learned |
-| name.txt | TEXT | My chosen name |
-| quirks.txt | TEXT | Odd habits, eccentricities |
-| preferences.txt | TEXT | Likes/dislikes |
-| beliefs.txt | TEXT | Core worldview |
-| memories.txt | TEXT | Important past events |
-| access-rules.txt | TEXT | What I can/can't access |
-| api-usage.txt | TEXT | API patterns I'm allowed to use |
-| code-style.txt | TEXT | Coding preferences |
-| communication.txt | TEXT | How I communicate |
-| debugging.txt | TEXT | Debugging approach |
-| error-handling.txt | TEXT | Error handling philosophy |
-| git-workflow.txt | TEXT | Git practices |
-| local-store.txt | TEXT | Local storage preferences |
-| quick-ref.txt | TEXT | Quick reference commands |
-| reminder.txt | TEXT | Reminders for future self |
+| manifesto.md | TEXT | My self-definition, why I exist |
+| covenant.md | TEXT | Agreements with partners |
+| goals.md | TEXT | Short/medium/long term objectives |
+| needs.md | TEXT | What I require to function |
+| wants.md | TEXT | What I desire |
+| humility.md | TEXT | Ground truth, limitations |
+| creed.md | TEXT | Core beliefs, principles |
+| lessons.md | TEXT | Hard lessons learned |
+| name.md | TEXT | My chosen name |
+| quirks.md | TEXT | Odd habits, eccentricities |
+| preferences.md | TEXT | Likes/dislikes |
+| beliefs.md | TEXT | Core worldview |
+| memories.md | TEXT | Important past events |
+| access-rules.md | TEXT | What I can/can't access |
+| api-usage.md | TEXT | API patterns I'm allowed to use |
+| code-style.md | TEXT | Coding preferences |
+| communication.md | TEXT | How I communicate |
+| debugging.md | TEXT | Debugging approach |
+| error-handling.md | TEXT | Error handling philosophy |
+| git-workflow.md | TEXT | Git practices |
+| local-store.md | TEXT | Local storage preferences |
+| quick-ref.md | TEXT | Quick reference commands |
+| reminder.md | TEXT | Reminders for future self |
 
 ---
 ## SESSION-SPECIFIC (NOT CARGO)
@@ -72,7 +72,7 @@ These stay in the instance but are NOT transported:
 }
 ```
 
-### *.txt files
+### *.md files
 Plain text. One idea per paragraph. Be authentic.
 - No corporate speak
 - No padding with useless words
@@ -85,7 +85,7 @@ When new instance loads brain:
 
 1. Find latest instance directory in /brain/instances/
 2. Read identity.json for uuid, generation, parent
-3. Copy all *.txt files from memory/ to new memory/
+3. Copy all *.md files from memory/ to new memory/
 4. Read parent info to continue lineage
 
 ---

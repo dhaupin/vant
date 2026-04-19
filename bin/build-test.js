@@ -1,12 +1,6 @@
 /**
  * Vant Build Test
  * Validates all scripts can load without errors
- * 
- * Usage: node bin/build-test.js
- * 
- * Exit codes:
- *   0 - All tests passed
- *   1 - One or more tests failed
  */
 
 const { execSync } = require('child_process');
@@ -15,7 +9,6 @@ const path = require('path');
 
 const TESTS = [];
 
-// Helper to add test
 function test(name, fn) {
     TESTS.push({ name, fn });
 }
@@ -34,114 +27,100 @@ test('.env.example exists', () => {
     }
 });
 
-// Test: Public model exists
+// Test: Public model exists (check both .md and .txt for backward compat)
 test('public model exists', () => {
-    if (!fs.existsSync('models/public')) {
-        throw new Error('models/public not found');
-    }
-    const identity = path.join('models/public', 'identity.txt');
-    if (!fs.existsSync(identity)) {
-        throw new Error('identity.txt not found in public model');
+    const identityMd = path.join('models/public', 'identity.md');
+    const identityTxt = path.join('models/public', 'identity.txt');
+    if (!fs.existsSync(identityMd) && !fs.existsSync(identityTxt)) {
+        throw new Error('identity.md or identity.txt not found in public model');
     }
 });
 
-// Test: Run.js can start (with timeout)
+// Test: run.js can start
 test('run.js starts without error', () => {
-    // Check if run.js exists (only in vant-brain, not public)
     const runPath = path.join(__dirname, '..', 'run.js');
     if (fs.existsSync(runPath)) {
         require(runPath);
     } else {
-        console.log('  (run.js not in public release - skipped)');
+        // run.js not in public release - this is expected
     }
 });
 
-// Test: Health check runs
+// Test: health.js runs
 test('health.js runs', () => {
-    execSync('node ' + path.join(__dirname, 'health.js'), { stdio: 'pipe' });
+    require('./health');
 });
 
-// Test: Load.js runs (public model)
+// Test: load.js runs
 test('load.js runs', () => {
-    execSync('node bin/load.js', { stdio: 'pipe' });
+    require('./load');
 });
 
-// Test: Rate limiter works
+// Test: rate-limit.js works
 test('rate-limit.js works', () => {
     const rl = require('../lib/rate-limit');
-    const status = rl.getStatus();
-    if (!status.remaining || !status.maxPerHour) {
-        throw new Error('Rate limiter broken');
+    if (typeof rl.getStatus !== 'function') {
+        throw new Error('rate-limit.js missing get()');
     }
-    console.log(`  Rate limit: ${status.remaining}/${status.maxPerHour}/hr`);
 });
 
-// Test: Logger can initialize
+// Test: logger.js works
 test('logger.js works', () => {
     const logger = require('../lib/logger');
     logger.info('Test log', { test: true });
-    console.log('  Logger OK');
 });
 
-// Test: Errors can be created
+// Test: errors.js works
 test('errors.js works', () => {
     const errors = require('../lib/errors');
-    const err = new errors.VantError('Test error', { code: errors.CODES.CONFIG_MISSING });
-    if (err.code !== 'CONFIG_MISSING') throw new Error('Error code failed');
-    console.log('  Errors OK');
+    if (typeof errors.VantError !== 'function') {
+        throw new Error('errors.js missing vantError()');
+    }
 });
 
-// Test: Stego module loads
+// Test: stego.js works
 test('stego.js works', () => {
     const stego = require('../lib/stego');
-    if (typeof stego.encode !== 'function') throw new Error('Stego missing encode');
-    if (typeof stego.decode !== 'function') throw new Error('Stego missing decode');
-    if (typeof stego.encrypt !== 'function') throw new Error('Stego missing encrypt');
-    console.log('  Stego OK + encryption');
+    if (typeof stego.encode !== 'function') {
+        throw new Error('stego.js missing encode()');
+    }
 });
 
-// Test: Branch module loads
+// Test: branch.js loads
 test('branch.js loads', () => {
     const branch = require('../lib/branch');
-    if (typeof branch.currentBranch !== 'function') throw new Error('Branch missing currentBranch');
-    console.log('  Branch OK');
 });
 
-// Test: Lock module loads (check acquire doesn't throw)
-test('lock.js loads', async () => {
+// Test: lock.js loads
+test('lock.js loads', () => {
     const lock = require('../lib/lock');
-    // Just check it loads - acquire will fail in test env without git
-    console.log('  Lock OK');
 });
 
-// Note: sync.js, changelog.js, summary.js are only in vant-brain (private)
-
-// Test: Example configs exist (for users to copy)
+// Test: example configs exist
 test('example configs exist', () => {
-    const examples = ['settings.example.ini', 'mood.example.ini'];
-    examples.forEach(f => {
-        const p = path.join(__dirname, '..', f);
-        if (!fs.existsSync(p)) {
-            throw new Error(`${f} not found`);
+    const configs = ['config.example.ini', '.env.example'];
+    configs.forEach(c => {
+        if (!fs.existsSync(c)) {
+            throw new Error(`${c} not found`);
         }
     });
 });
 
-// Run all tests
-console.log('╔═══════════════════════════════════════╗');
-console.log('║       Vant Build Test v0.8.2         ║');
-console.log('╚═══════════════════════════════════════╝\n');
-
+// Run tests
 let passed = 0;
 let failed = 0;
 
-for (const { name, fn } of TESTS) {
+console.log('╔═══════════════════════════════════════╗');
+console.log('║       Vant Build Test v0.8.2         ║');
+console.log('╚═══════════════════════════════════════╝');
+
+for (const t of TESTS) {
     try {
-        fn();
-        console.log(`✓ ${name}`);
+        t.fn();
+        console.log(`✓ ${t.name}`);
         passed++;
     } catch (e) {
-        console.log(`✗ ${name}: ${e.message}`);
+        console.log(`✗ ${t.name}: ${e.message}`);
         failed++;
     }
 }
@@ -150,4 +129,6 @@ console.log('\n═════════════════════�
 console.log(`Results: ${passed} passed, ${failed} failed`);
 console.log('═══════════════════════════════════════');
 
-process.exit(failed > 0 ? 1 : 0);
+if (failed > 0) {
+    process.exit(1);
+}

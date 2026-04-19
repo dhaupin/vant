@@ -7,15 +7,23 @@
   "license": "MIT",
   "status": "production-ready",
   "files": [
-    "identity.txt",
-    "meta.json", 
+    "identity.md",
+    "ego.md",
+    "fears.md",
+    "anger.md",
+    "joy.md",
+    "manifesto.md",
+    "creed.md",
+    "goals.md",
+    "preferences.md",
+    "lessons.md",
+    "meta.json",
     "verbosity.ini",
-    "lessons.txt",
     "schema/"
   ],
   "cli": [
     "vant setup - Interactive setup",
-    "vant health - Diagnostics", 
+    "vant health - Diagnostics",
     "vant load - Load brain",
     "vant test - Run tests",
     "vant update - Check updates"
