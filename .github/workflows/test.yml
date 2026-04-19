@@ -39,7 +39,7 @@ jobs:
 
       - name: Test stegoframe URL
         run: |
-          grep STEGOFRAME_URL config.ini | head -1
+          cat config.example.ini | grep STEGOFRAME_URL | head -1
 
       - name: Security check
         run: |

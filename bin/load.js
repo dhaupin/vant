@@ -58,20 +58,28 @@ function loadModel(modelPath) {
         return null;
     }
 
-    const files = fs.readdirSync(modelPath).filter(f => 
-        f.endsWith('.md') || f.endsWith('.txt') || f.endsWith('.json')
-    );
+    const files = fs.readdirSync(modelPath).filter(f => {
+        const ext = path.extname(f).toLowerCase();
+        return ['.md', '.txt', '.json', '.yaml', '.yml'].includes(ext);
+    });
 
     const model = {};
     files.forEach(file => {
         const filePath = path.join(modelPath, file);
         const content = fs.readFileSync(filePath, 'utf8');
-        const ext = path.extname(file);
+        const ext = path.extname(file).toLowerCase();
         const name = path.basename(file, ext);
         
         if (ext === '.json') {
             try {
                 model[name] = JSON.parse(content);
+            } catch (e) {
+                model[name] = content;
+            }
+        } else if (ext === '.yaml' || ext === '.yml') {
+            try {
+                const yaml = require('yaml');
+                model[name] = yaml.parse(content);
             } catch (e) {
                 model[name] = content;
             }

@@ -206,21 +206,39 @@ async function getMemory(files = null) {
         return { error: 'Brain not found' };
     }
 
-    const allFiles = fs.readdirSync(modelPath).filter(f => 
-        f.endsWith('.md') || f.endsWith('.txt') || f.endsWith('.json')
-    );
+    const allFiles = fs.readdirSync(modelPath).filter(f => {
+        const ext = path.extname(f).toLowerCase();
+        return ['.md', '.txt', '.json', '.yaml', '.yml'].includes(ext);
+    });
 
     const targetFiles = files || allFiles.map(f => path.basename(f, path.extname(f)));
     const memory = {};
 
     for (const name of targetFiles) {
-        const mdFile = path.join(modelPath, `${name}.md`);
-        const txtFile = path.join(modelPath, `${name}.txt`);
+        // Try each supported extension in order of preference
+        const extensions = ['.md', '.txt', '.yaml', '.yml', '.json'];
+        let content = null;
         
-        if (fs.existsSync(mdFile)) {
-            memory[name] = fs.readFileSync(mdFile, 'utf8');
-        } else if (fs.existsSync(txtFile)) {
-            memory[name] = fs.readFileSync(txtFile, 'utf8');
+        for (const ext of extensions) {
+            const filePath = path.join(modelPath, `${name}${ext}`);
+            if (fs.existsSync(filePath)) {
+                content = fs.readFileSync(filePath, 'utf8');
+                
+                // Parse JSON/YAML
+                if (ext === '.json') {
+                    try { content = JSON.parse(content); } catch (e) {}
+                } else if (ext === '.yaml' || ext === '.yml') {
+                    try {
+                        const yaml = require('yaml');
+                        content = yaml.parse(content);
+                    } catch (e) {}
+                }
+                break;
+            }
+        }
+        
+        if (content !== null) {
+            memory[name] = content;
         }
     }
 

@@ -126,14 +126,33 @@ class VantNode {
             return brain;
         }
         
-        const files = fs.readdirSync(modelPath).filter(f => 
-            f.endsWith('.md') || f.endsWith('.txt') || f.endsWith('.json')
-        );
+        const files = fs.readdirSync(modelPath).filter(f => {
+            const ext = path.extname(f).toLowerCase();
+            return ['.md', '.txt', '.json', '.yaml', '.yml'].includes(ext);
+        });
         
         for (const file of files) {
             const filePath = path.join(modelPath, file);
-            const name = path.basename(file, path.extname(file));
-            brain[name] = fs.readFileSync(filePath, 'utf8');
+            const ext = path.extname(file).toLowerCase();
+            const name = path.basename(file, ext);
+            let content = fs.readFileSync(filePath, 'utf8');
+            
+            if (ext === '.json') {
+                try {
+                    content = JSON.parse(content);
+                } catch (e) {
+                    // Keep as string if parse fails
+                }
+            } else if (ext === '.yaml' || ext === '.yml') {
+                try {
+                    const yaml = require('yaml');
+                    content = yaml.parse(content);
+                } catch (e) {
+                    // Keep as string if parse fails
+                }
+            }
+            
+            brain[name] = content;
         }
         
         this.log(`Loaded brain: ${files.length} files`);
