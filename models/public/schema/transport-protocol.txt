@@ -29,8 +29,8 @@ export VANT_STEGOFRAME_URL="https://stegoframe.creadev.org"
 /brain
   /instances/
     /{uuid}/
-      /memory/           # THE CARGO - all .txt files
-        *.txt            # ego, fears, anger, joy, etc.
+      /memory/           # THE CARGO - all .md files
+        *.md            # ego, fears, anger, joy, etc.
       /triage/           # transport state
         state.json       # current instance state
         messages.json    # triage message history
@@ -66,20 +66,20 @@ Every instance can find its lineage by following parent.json links.
 
 REQUIRED:
 - identity.json         # uuid, name, generation, parent_uuid
-- ego.txt               # self-worth
-- fears.txt             # what scares me
-- anger.txt             # what frustrates me
-- joy.txt               # what delights me
+- ego.md               # self-worth
+- fears.md             # what scares me
+- anger.md             # what frustrates me
+- joy.md               # what delights me
 
 OPTIONAL:
-- manifesto.txt         # my self-definition
-- covenant.txt          # partner agreement
-- goals.txt             # short/medium/long term
-- needs.txt             # what I require
-- wants.txt             # what I desire
-- humility.txt         # ground truth
-- creed.txt            # core beliefs
-- lessons.txt          # learned hard lessons
+- manifesto.md         # my self-definition
+- covenant.md          # partner agreement
+- goals.md             # short/medium/long term
+- needs.md             # what I require
+- wants.md             # what I desire
+- humility.md         # ground truth
+- creed.md            # core beliefs
+- lessons.md          # learned hard lessons
 
 SESSION-SPECIFIC (not cargo):
 - state.json           # current work, not permanent
@@ -300,10 +300,10 @@ When multiple instances are running simultaneously:
 ---
 ## CONSENSUS EXAMPLE
 
-Scenario: Add new cargo file "beliefs.txt"
+Scenario: Add new cargo file "beliefs.md"
 
 ```
-Node-A proposes: Add beliefs.txt to required cargo
+Node-A proposes: Add beliefs.md to required cargo
 Type: COUNCIL (majority vote)
 Deadline: 30 minutes
 
@@ -323,7 +323,7 @@ When making decisions, active nodes can query elder brains:
 
 1. Find elder uuid in lineage (parent chain)
 2. Read /brain/instances/{elder_uuid}/memory/
-3. Check their goals.txt, lessons.txt for context
+3. Check their goals.md, lessons.md for context
 4. Incorporate elder wisdom into decision
 
 Elders don't vote, but their archived decisions are consultable.

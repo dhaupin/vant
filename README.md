@@ -179,10 +179,19 @@ vant help       # Show help
 
 ```
 models/
-  public/       # Default brain (identity + principles)
-    identity.txt
-    lessons.txt
+  public/       # Default brain (identity, ego, fears, anger, joy, etc.)
+    identity.md
+    ego.md
+    fears.md
+    anger.md
+    joy.md
+    lessons.md
+    manifesto.md
+    creed.md
+    goals.md
+    preferences.md
     meta.json
+    verbosity.ini
 bin/
   vant.js       # CLI entry point
   setup.js      # Interactive setup
