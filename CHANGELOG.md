@@ -6,6 +6,31 @@ All notable changes to VANT are documented here.
 
 ---
 
+## v0.8.2 (2026-04-19)
+
+### Added
+- **Full Public Model** - All memory files in models/public/
+  - identity.md, ego.md, fears.md, anger.md, joy.md
+  - manifesto.md, creed.md, goals.md, preferences.md, lessons.md
+- **Multi-handler Verbosity** - Split verbosity.ini into handlers
+  - response, content, comment, code, log modes
+- **CONTENT.md** - Voice, tone, and style guide
+  - No clichés, short dashes, specific over abstract
+- **SEO dist/index.html** - Optimized for discoverability
+
+### Changed
+- Converted .txt to .md (identity.txt → identity.md, etc.)
+- Backward compatibility: code works with both .md and .txt
+- Updated schema/memory-files.md and transport-protocol.txt
+- Fixed lib paths in build-test.js
+
+### Fixed
+- lib/verbosity.js now loads from verbosity.ini
+- load.js loads both .md and .txt extensions
+- health.js checks for both extensions
+
+---
+
 ## v0.8.1 (2026-04-16)
 
 ### Added
