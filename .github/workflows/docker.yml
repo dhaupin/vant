@@ -42,7 +42,7 @@ jobs:
       - name: Build VANT
         run: |
           echo "Building VANT..."
-          docker buildx build -t ${{ steps.meta.outputs.tags }} .
+          docker build . -t ${{ steps.meta.outputs.tags }}
 
       - name: Push to Hub
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
