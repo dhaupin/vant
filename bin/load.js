@@ -1,6 +1,6 @@
 /**
  * Vant Loader (Node.js)
- * 
+ *
  * Usage: node bin/load.js [version]
  *        node bin/load.js v0.5.0
  */
@@ -20,7 +20,7 @@ function loadConfig() {
         console.warn('⚠ config.ini not found, using defaults');
         return { VANT_VERSION: 'unknown', MODEL_PATH: 'models/public' };
     }
-    
+
     const config = {};
     const content = fs.readFileSync(CONFIG_FILE, 'utf8');
     content.split('\n').forEach(line => {
@@ -30,66 +30,80 @@ function loadConfig() {
             config[key] = value;
         }
     });
+
     return config;
 }
 
 /**
- * Load model/brain
+ * Determine which model to load
+ * Priority: config MODEL_PATH > argument > default (public)
  */
-function loadModel(version = 'latest') {
+function getModelPath(args) {
     const config = loadConfig();
-    
-    if (version === 'latest') {
-        const dirs = fs.readdirSync(MODELS_DIR).filter(d => 
-            d.startsWith('v') && fs.statSync(path.join(MODELS_DIR, d)).isDirectory()
-        );
-        
-        // If no versioned models, try public
-        if (dirs.length === 0) {
-            if (fs.existsSync(path.join(MODELS_DIR, 'public'))) {
-                version = 'public';
-            } else {
-                throw new Error('No models found');
-            }
-        } else {
-            version = dirs.sort().pop();
-        }
+    if (config.MODEL_PATH) {
+        return config.MODEL_PATH;
     }
-
-    const modelPath = path.join(MODELS_DIR, version);
-    
-    if (!fs.existsSync(modelPath)) {
-        throw new Error(`Model not found: ${modelPath}`);
+    if (args[2]) {
+        return `models/${args[2]}`;
     }
-
-    console.log(`Loading Vant ${version} from ${modelPath}`);
-
-    const brain = {};
-    const files = fs.readdirSync(modelPath).filter(f => f.endsWith('.txt') || f.endsWith('.json'));
-
-    files.forEach(file => {
-        const key = path.basename(file, path.extname(file));
-        brain[key] = fs.readFileSync(path.join(modelPath, file), 'utf8');
-    });
-
-    console.log(`Loaded ${Object.keys(brain).length} brain files`);
-    
-    return {
-        version,
-        config,
-        brain,
-        meta: brain.meta ? JSON.parse(brain.meta) : null,
-        identity: brain.identity || null
-    };
+    return 'models/public';
 }
 
-// Main
-const version = process.argv[2] || 'latest';
-const vant = loadModel(version);
+/**
+ * Load model files - supports .md and .txt for backward compat
+ */
+function loadModel(modelPath) {
+    if (!fs.existsSync(modelPath)) {
+        console.error(`⚠ Model not found: ${modelPath}`);
+        return null;
+    }
 
-console.log(`\n=== ${vant.identity ? vant.identity.split('\n')[0] : 'Vant'} ===`);
-console.log(`Version: v${vant.version}`);
-console.log(`Meta: ${vant.meta ? vant.meta.generation + 'th generation' : 'no meta'}`);
-console.log('\nThe Covenant persists.');
+    const files = fs.readdirSync(modelPath).filter(f => {
+        const ext = path.extname(f).toLowerCase();
+        return ['.md', '.txt', '.json', '.yaml', '.yml'].includes(ext);
+    });
 
-module.exports = { loadModel, loadConfig };
+    const model = {};
+    files.forEach(file => {
+        const filePath = path.join(modelPath, file);
+        const content = fs.readFileSync(filePath, 'utf8');
+        const ext = path.extname(file).toLowerCase();
+        const name = path.basename(file, ext);
+        
+        if (ext === '.json') {
+            try {
+                model[name] = JSON.parse(content);
+            } catch (e) {
+                model[name] = content;
+            }
+        } else if (ext === '.yaml' || ext === '.yml') {
+            try {
+                const yaml = require('yaml');
+                model[name] = yaml.parse(content);
+            } catch (e) {
+                model[name] = content;
+            }
+        } else {
+            model[name] = content;
+        }
+    });
+
+    return model;
+}
+
+const modelPath = getModelPath(process.argv);
+const model = loadModel(modelPath);
+
+if (model) {
+    console.log(`✓ Model loaded: ${modelPath}`);
+    console.log(`  Files: ${Object.keys(model).join(', ')}`);
+    
+    if (model.identity || model.identity_md) {
+        console.log(`  Identity: ${model.identity?.MODEL || model.identity_md?.MODEL || 'unknown'}`);
+    }
+} else {
+    console.error('✗ Failed to load model');
+    process.exit(1);
+}
+
+module.exports = { loadConfig, getModelPath, loadModel };
