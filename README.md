@@ -179,25 +179,21 @@ vant help       # Show help
 
 ```
 models/
-  public/       # Default brain (identity, ego, fears, anger, joy, etc.)
-    identity.md
-    ego.md
-    fears.md
-    anger.md
-    joy.md
-    lessons.md
-    manifesto.md
-    creed.md
-    goals.md
-    preferences.md
-    meta.json
-    verbosity.ini
+  public/       # Default brain (19 files)
+    identity.md, ego.md, fears.md, anger.md, joy.md    # Core
+    manifesto.md, creed.md, goals.md, preferences.md # Values
+    lessons.md, qc.md, security.md                 # Learnings + Ops
+    audit.md, errors.md, keepers.md               # Operations
+    curiosity.md, humility.md, empathy.md, gratitude.md # Humanity
+    meta.json, verbosity.ini
 bin/
   vant.js       # CLI entry point
-  setup.js      # Interactive setup
-  health.js     # Diagnostics
-  sync.js       # GitHub sync
-  load.js       # Load brain
+  help.js       # Help command
+  node.js      # Node runner
+  mcp.js       # MCP server
+  setup.js     # Interactive setup
+  health.js    # Diagnostics
+  sync.js      # GitHub sync
 lib/
   config.js     # Config loader
   brain.js      # Brain loader

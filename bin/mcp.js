@@ -439,9 +439,10 @@ async function handleMessage(msg) {
 // Run mode
 const args = process.argv.slice(2);
 const isStdio = args.includes('--stdio');
+const isServer = args.includes('--server') || args.includes('--http');
 
-// Only start HTTP server when run directly (not imported)
-if (!module.parent && !isStdio) {
+// Only start HTTP server when run directly with --server flag
+if ((!module.parent || isServer) && !isStdio) {
     const http = require('http');
     
     const server = http.createServer(async (req, res) => {

@@ -20,9 +20,12 @@ All notable changes to VANT are documented here.
   - vant help [command] for specific help
 - **AGENTS.md** - Agent branching guide
   - How to use branches + locks for multi-agent
-- **Full Public Model** - All memory files in models/public/
-  - identity.md, ego.md, fears.md, anger.md, joy.md
-  - manifesto.md, creed.md, goals.md, preferences.md, lessons.md
+- **Full Public Model** - Complete brain with 19 files
+  - identity.md, ego.md, fears.md, anger.md, joy.md - Core
+  - manifesto.md, creed.md, goals.md, preferences.md - Values
+  - lessons.md - Historical learnings
+  - qc.md, security.md, audit.md, errors.md - Operations
+  - keepers.md, curiosity.md, humility.md, empathy.md, gratitude.md - Humanity
 - **Multi-handler Verbosity** - Split verbosity.ini into handlers
   - response, content, comment, code, log modes
 - **CONTENT.md** - Voice, tone, and style guide

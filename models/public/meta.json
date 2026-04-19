@@ -17,6 +17,15 @@
     "goals.md",
     "preferences.md",
     "lessons.md",
+    "qc.md",
+    "security.md",
+    "audit.md",
+    "errors.md",
+    "keepers.md",
+    "curiosity.md",
+    "humility.md",
+    "empathy.md",
+    "gratitude.md",
     "meta.json",
     "verbosity.ini",
     "schema/"
@@ -26,6 +35,9 @@
     "vant health - Diagnostics",
     "vant load - Load brain",
     "vant test - Run tests",
-    "vant update - Check updates"
+    "vant update - Check updates",
+    "vant help - Show help",
+    "vant node - Run as node",
+    "vant mcp - Run MCP server"
   ]
 }

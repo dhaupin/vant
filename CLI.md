@@ -14,18 +14,23 @@ node bin/vant.js <command>
 
 | Command | Description |
 |---------|-------------|
-| `vant start` | Health check, ready to sync |
-| `vant start --sync` | Health check + sync from GitHub |
-| `vant sync pull` | Pull latest from GitHub |
-| `vant sync push` | Push changes to GitHub |
+| `vant start` | Full startup (health → sync → load → run) |
+| `vant sync` | Pull/push brain from/to GitHub |
 | `vant health` | System diagnostics |
+| `vant load` | Load brain from models/public |
+| `vant run` | Start runtime (long-running agent loop) |
 | `vant test` | Run build tests |
-| `vant load [version]` | Load brain files |
-| `vant changelog` | View git history |
-| `vant summary` | Session summary |
-| `vant bump [version]` | Bump version & tag |
-| `vant watch` | Monitor GitHub for changes |
-| `vant setup` | Interactive setup |
+| `vant changelog` | View recent changes |
+| `vant summary` | Session summary - memory, state, stats |
+| `vant watch` | Monitor GitHub for changes (poll) |
+| `vant help` | Show all commands with help |
+| `vant help <cmd>` | Help for specific command |
+| `vant setup` | Interactive setup wizard |
+| `vant update` | Check for new Vant releases |
+| `vant rate` | Show GitHub API rate limit |
+| `vant bump` | Bump version and tag release |
+| `vant node` | Run as persistent node |
+| `vant mcp` | Run MCP server for AI tools |
 
 ## Examples
 
