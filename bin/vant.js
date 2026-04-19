@@ -32,9 +32,11 @@ const COMMANDS = {
     test: 'build-test.js',
     changelog: 'changelog.js',
     summary: 'summary.js',
+    update: 'update.js',
     watch: 'watch.js',
     bump: 'bump.js',
-    setup: 'setup.js'
+    setup: 'setup.js',
+    rate: 'rate.js'
 };
 
 const cmd = process.argv[2];
@@ -42,7 +44,7 @@ const cmd = process.argv[2];
 if (!cmd || cmd === 'help') {
     console.log(`
 ╔═══════════════════════════════════════╗
-║         vant CLI v0.6.6              ║
+║         vant CLI v0.8.2              ║
 ╚═══════════════════════════════════════╝
 
 Usage: vant <command> [options]

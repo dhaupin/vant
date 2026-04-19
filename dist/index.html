@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VANT | VANT: Versatile Autonomous Networked Tool</title>
+    <style>
+        :root {
+            --bg: #fafafa;
+            --bg-card: #fff;
+            --text: #222;
+            --text-muted: #666;
+            --border: #e0e0e0;
+            --accent: #059669;
+            --accent-hover: #047857;
+            --link: #059669;
+        }
+        [data-theme="dark"] {
+            --bg: #0f0f12;
+            --bg-card: #18181c;
+            --text: #e8e8e8;
+            --text-muted: #888;
+            --border: #2a2a32;
+            --accent: #10b981;
+            --accent-hover: #34d399;
+            --link: #10b981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width: 880px; margin: 0 auto; padding: 40px 20px; }
+        
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover {
+            border-color: var(--accent);
+        }
+        
+        /* Header */
+        header {
+            text-align: center;
+            padding: 50px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: 6px;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+        .tagline {
+            color: var(--text-muted);
+            font-size: 1rem;
+            letter-spacing: 2px;
+        }
+        
+        /* Hero */
+        .hero {
+            padding: 50px 0;
+            text-align: center;
+        }
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 25px;
+        }
+        .badge {
+            display: inline-block;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .badge span { color: var(--text); }
+        
+        /* Stats */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 35px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .stat { text-align: center; }
+        .stat-value { 
+            font-size: 1.8rem; 
+            font-weight: 600;
+            color: var(--accent);
+        }
+        .stat-label { color: var(--text-muted); font-size: 0.8rem; margin-top: 4px; }
+        
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px 0;
+        }
+        .feature {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 24px;
+            border-radius: 8px;
+        }
+        .feature h3 {
+            color: var(--accent);
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        .feature p { color: var(--text-muted); font-size: 0.88rem; }
+        
+        /* Links */
+        .links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 40px 0;
+            flex-wrap: wrap;
+        }
+        .link {
+            color: var(--bg);
+            background: var(--accent);
+            text-decoration: none;
+            padding: 12px 28px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .link:hover {
+            background: var(--accent-hover);
+        }
+        .link.outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .link.outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        /* Docs */
+        .docs {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px 0;
+            flex-wrap: wrap;
+        }
+        .doc-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+        }
+        .doc-link:hover { color: var(--accent); }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 30px;
+        }
+        footer a { color: var(--link); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">dark</button>
+    <div class="container">
+        <header>
+            <h1>VANT</h1>
+            <p class="tagline">PERSISTENT AI MEMORY</p>
+        </header>
+        
+        <section class="hero">
+            <p>Open source system for AI agent memory persistence. Each agent inherits full context from previous sessions via GitHub. Built for long-running agentic workflows.</p>
+            <span class="badge">v0.8.1 &bull; Open Source &bull; MIT</span>
+        </section>
+        
+        <section class="stats">
+            <div class="stat">
+                <div class="stat-value">9</div>
+                <div class="stat-label">Core Libs</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">8</div>
+                <div class="stat-label">Brain Versions</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">11</div>
+                <div class="stat-label">CLI Commands</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">900+</div>
+                <div class="stat-label">Docker Pulls</div>
+            </div>
+        </section>
+        
+        <section class="features">
+            <div class="feature">
+                <h3>Generational Memory</h3>
+                <p>Brain transfer via GitHub. Each session inherits full context. Memory persists across restarts.</p>
+            </div>
+            <div class="feature">
+                <h3>Stegoframe Transport</h3>
+                <p>Steganographic encoding in PNG images. AES-256-GCM encryption for sensitive transfers.</p>
+            </div>
+            <div class="feature">
+                <h3>Docker Ready</h3>
+                <p>Official Docker image. Run anywhere. Portable brain that survives container restarts.</p>
+            </div>
+            <div class="feature">
+                <h3>Multi-Agent Lock</h3>
+                <p>Race-condition safe locking for parallel agent workflows. File-based (Redis optional).</p>
+            </div>
+            <div class="feature">
+                <h3>Notifications</h3>
+                <p>Slack, Discord, and Telegram integrations. Get notified on sync, health, and errors.</p>
+            </div>
+            <div class="feature">
+                <h3>Extensible</h3>
+                <p>Plugin architecture. Brain, config, mood, and custom plugins. Drop in and hook in.</p>
+            </div>
+        </section>
+        
+        <section class="links">
+            <a href="https://github.com/dhaupin/vant" class="link">GitHub</a>
+            <a href="https://github.com/dhaupin/vant-brain" class="link outline">Brain</a>
+            <a href="https://hub.docker.com/r/dhaupin/vant" class="link outline">Docker</a>
+        </section>
+        
+        <section class="docs">
+            <a href="https://github.com/dhaupin/vant/blob/main/README.md" class="doc-link">Docs</a>
+            <a href="https://github.com/dhaupin/vant/blob/main/CLI.md" class="doc-link">CLI</a>
+            <a href="https://github.com/dhaupin/vant/blob/main/STEGO.md" class="doc-link">Stego</a>
+            <a href="https://github.com/dhaupin/vant/blob/main/CHANGELOG.md" class="doc-link">Changelog</a>
+        </section>
+        
+        <footer>
+            <p>Open source under MIT license. Not affiliated with VantAI or other Vant-named entities.</p>
+            <p style="margin-top:8px;">
+                <a href="https://github.com/dhaupin/vant">vant</a> / 
+                <a href="https://github.com/dhaupin/vant-brain">vant-brain</a>
+            </p>
+        </footer>
+    </div>
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.querySelector('.theme-toggle');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.setAttribute('data-theme', 'light');
+                btn.textContent = 'dark';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                btn.textContent = 'light';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        // Load saved theme
+        const saved = localStorage.getItem('theme');
+        if (saved === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.querySelector('.theme-toggle').textContent = 'light';
+        }
+    </script>
+</body>
+</html>

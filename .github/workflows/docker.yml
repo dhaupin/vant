@@ -3,14 +3,17 @@ name: Build and Push VANT
 on:
   push:
     branches: [main]
+    tags:
+      - 'v*'
+      - 'checkpoint-*'
   pull_request:
     branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
-    # Don't run on PRs (security)
+
+    # Only build on PRs, push to main, or tags
     if: github.event_name != 'pull_request'
 
     steps:
@@ -32,44 +35,17 @@ jobs:
           images: dhaupin/vant
           tags: |
             type=ref,event=branch
-            type=sha
             type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+            type=match,pattern=checkpoint-(.*),group=1
 
       - name: Build VANT
         run: |
           echo "Building VANT..."
-          # Verify files exist - config.example.ini used in public repos
-          ls -la models/ bin/ config.example.ini 2>/dev/null || ls -la models/ bin/
-          echo "Built: $(date)"
+          docker build -t ${{ steps.meta.outputs.tags }} .
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: dhaupin/vant:latest,dhaupin/vant:${{ github.sha }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-  test:
-    runs-on: ubuntu-latest
-    needs: build
-    
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Verify build
+      - name: Push to Hub
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
         run: |
-          echo "VANT Build Verification"
-          echo "======================"
-          node --version
-          ls -la bin/
-          cat package.json 2>/dev/null || echo '{"name":"vant"}' > package.json
-
-      - name: Smoke test
-        run: |
-          node bin/health.js || echo "Health check completed"
+          echo "Pushing to Docker Hub..."
+          docker push ${{ steps.meta.outputs.tags }}
