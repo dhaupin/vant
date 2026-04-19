@@ -5,17 +5,22 @@
  * Usage: vant <command> [args]
  *
  * Commands:
- *   vant start      - Full startup
- *   vant sync       - GitHub sync
- *   vant health     - Diagnostics
- *   vant load       - Load brain
- *   vant run        - Runtime
- *   vant test       - Build tests
- *   vant changelog  - View changes
- *   vant summary    - Session summary
- *   vant watch      - Monitor GitHub
- *   vant setup      - Interactive setup
- *   vant help       - Show help
+ *   vant start      - Full startup (health → sync → load → run)
+ *   vant sync       - Pull/push brain from/to GitHub
+ *   vant health     - System diagnostics and model check
+ *   vant load       - Load brain from models/public
+ *   vant run        - Start runtime (long-running agent loop)
+ *   vant test       - Run build tests
+ *   vant changelog  - View recent changes
+ *   vant summary    - Session summary - memory, state, stats
+ *   vant watch      - Monitor GitHub for changes (poll)
+ *  vant help        - Show help (this command)
+ *   vant setup      - Interactive setup wizard
+ *   vant update     - Check for new Vant releases
+ *   vant rate       - Show GitHub API rate limit
+ *   vant bump      - Bump version and tag release
+ *   vant node      - Run as persistent node
+ *   vant mcp       - Run MCP server for AI tools
  */
 
 const { spawn } = require('child_process');
@@ -36,7 +41,10 @@ const COMMANDS = {
     watch: 'watch.js',
     bump: 'bump.js',
     setup: 'setup.js',
-    rate: 'rate.js'
+    rate: 'rate.js',
+    help: 'help.js',
+    node: 'node.js',
+    mcp: 'mcp.js'
 };
 
 const cmd = process.argv[2];

@@ -9,6 +9,17 @@ All notable changes to VANT are documented here.
 ## v0.8.2 (2026-04-19)
 
 ### Added
+- **MCP Server** - Exposes Vant memory as AI tools
+  - bin/mcp.js - JSON-RPC over HTTP/stdio
+  - Tools: vant_get_memory, vant_set_memory, vant_branch, vant_lock, etc
+- **Node Runner** - Runs Vant as persistent node
+  - bin/node.js - Polls GitHub, optional MCP server
+  - Like crypto nodes: same software, own brain state
+- **Help Command** - Full CLI reference
+  - bin/help.js - Shows all commands with examples
+  - vant help [command] for specific help
+- **AGENTS.md** - Agent branching guide
+  - How to use branches + locks for multi-agent
 - **Full Public Model** - All memory files in models/public/
   - identity.md, ego.md, fears.md, anger.md, joy.md
   - manifesto.md, creed.md, goals.md, preferences.md, lessons.md
