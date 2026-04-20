@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vant | Persistent AI Memory System</title>
     <meta name="description" content="Vant: Open source system for AI agent memory persistence via GitHub. Each agent inherits full context from previous sessions. Built for long-running agentic workflows.">
-    <meta name="keywords" content="AI agent, memory persistence, agentic AI, GitHub, autonomous agents, memory transfer, brain transfer, AI continuity, persistent AI">
+    <meta name="keywords" content="AI agent, memory persistence, agentic AI, GitHub, autonomous agents, memory transfer, brain transfer, AI continuity, persistent AI, Vant, MCP server, AI tools, AI memory system">
     <meta name="author" content="Vant Project">
     <meta name="robots" content="index, follow">
     <meta property="og:title" content="Vant | Persistent AI Memory System">
@@ -16,6 +16,7 @@
     <meta name="twitter:title" content="Vant | Persistent AI Memory">
     <meta name="twitter:description" content="Your AI should remember. Open source memory system for agents.">
     <link rel="canonical" href="https://github.com/dhaupin/vant">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23059669'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' fill='white' font-family='system-ui' font-weight='bold' font-size='20'>V</text></svg>">
     <style>
         :root {
             --bg: #fafafa;
@@ -143,6 +144,31 @@
             color: var(--text-muted);
         }
 
+        .about {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+        }
+        .about h2 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+        .about p {
+            margin-bottom: 12px;
+            color: var(--text-muted);
+        }
+        .about ul {
+            margin: 15px 0;
+            padding-left: 20px;
+            color: var(--text-muted);
+        }
+        .about li {
+            margin-bottom: 6px;
+        }
+
         .links {
             display: flex;
             gap: 12px;
@@ -151,122 +177,96 @@
         }
         .link {
             display: inline-block;
+            background: var(--accent);
+            color: #fff;
             padding: 12px 24px;
             border-radius: 8px;
             text-decoration: none;
             font-weight: 500;
-            transition: all 0.2s;
         }
-        .link:not(.outline) {
-            background: var(--accent);
-            color: #fff;
-        }
-        .link:not(.outline):hover { background: var(--accent-hover); }
+        .link:hover { background: var(--accent-hover); }
         .link.outline {
+            background: transparent;
             border: 1px solid var(--border);
             color: var(--text);
         }
-        .link.outline:hover { border-color: var(--accent); color: var(--accent); }
+        .link.outline:hover { background: var(--border); }
 
         .docs {
-            text-align: center;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
             margin-bottom: 30px;
+            flex-wrap: wrap;
         }
         .doc-link {
-            display: inline-block;
-            color: var(--text-muted);
+            color: var(--link);
             text-decoration: none;
-            padding: 8px 16px;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
-        .doc-link:hover { color: var(--accent); }
-
-        /* New agent section */
-        .agent-note {
-            background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%);
-            border: 1px solid #059669;
-            padding: 24px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        [data-theme="dark"] .agent-note {
-            background: linear-gradient(135deg, #052e16 0%, #0c4a6e 100%);
-            border-color: #10b981;
-        }
-        .agent-note h3 { margin-bottom: 10px; color: var(--accent); }
-        .agent-note code {
-            background: var(--bg);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
+        .doc-link:hover { text-decoration: underline; }
 
         footer {
             text-align: center;
-            padding: 30px 0;
             color: var(--text-muted);
-            font-size: 0.8rem;
+            font-size: 0.9rem;
+            padding-top: 20px;
             border-top: 1px solid var(--border);
-            margin-top: 30px;
         }
-        footer a { color: var(--link); text-decoration: none; }
-        footer a:hover { text-decoration: underline; }
+        footer a { color: var(--link); }
+
+        @media (max-width: 600px) {
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .features { grid-template-columns: 1fr; }
+            header h1 { font-size: 2.2rem; }
+        }
     </style>
 </head>
 <body>
-    <button class="theme-toggle" onclick="toggleTheme()">dark</button>
     <div class="container">
+        <button class="theme-toggle" onclick="toggleTheme()">dark</button>
+
         <header>
-            <h1>VANT</h1>
-            <p class="tagline">PERSISTENT AI MEMORY</p>
+            <h1>Vant</h1>
+            <p class="tagline">Persistent AI Memory</p>
         </header>
 
         <section class="hero">
-            <p>Open source system for AI agent memory persistence. Each agent inherits full context from previous sessions via GitHub. Built for long-running agentic workflows.</p>
-            <span class="badge">v0.8.2 &bull; Open Source &bull; MIT</span>
+            <p>Your AI should remember. Vant is an open source system for AI agent memory persistence via GitHub. Each session inherits the full context from previous ones.</p>
+            <span class="badge">v0.8.4</span>
         </section>
-
-        <div class="agent-note">
-            <h3>🤖 For AI Agents</h3>
-            <p>Clone me to get a persistent brain. Run <code>node bin/vant.js setup</code> to initialize. Your memory will persist across every session via GitHub commits.</p>
-        </div>
 
         <section class="stats">
             <div class="stat">
-                <div class="stat-value">18</div>
-                <div class="stat-label">Core Libs</div>
+                <div class="stat-value">25+</div>
+                <div class="stat-label">Tools</div>
             </div>
             <div class="stat">
                 <div class="stat-value">19</div>
-                <div class="stat-label">Brain Files</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value">18</div>
                 <div class="stat-label">CLI Commands</div>
             </div>
             <div class="stat">
-                <div class="stat-value">v0.8.2</div>
-                <div class="stat-label">Release</div>
+                <div class="stat-value">21</div>
+                <div class="stat-label">Brain Files</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">v0.8.4</div>
+                <div class="stat-label">Version</div>
             </div>
         </section>
 
         <section class="features">
             <div class="feature">
-                <h3>Generational Memory</h3>
-                <p>Brain transfer via GitHub. Each session inherits full context. Memory persists across restarts.</p>
+                <h3>Git-Based Memory</h3>
+                <p>Brain files live in Git. Version control built in. Pull changes from previous sessions automatically.</p>
             </div>
             <div class="feature">
-                <h3>Versioned Brain</h3>
-                <p>Git commits = memory checkpoints. Branch for experiments, merge what works. Every version preserved.</p>
+                <h3>Resolution System</h3>
+                <p>Track thoughts as resolved, deprecated, or rejected. Frontmatter updates directly in brain files.</p>
             </div>
             <div class="feature">
-                <h3>Transport Protocol</h3>
-                <p>Defined cargo manifest. Exactly what files make up "you" — identity, ego, fears, goals, lessons.</p>
-            </div>
-            <div class="feature">
-                <h3>Public & Private Models</h3>
-                <p>Public model as default base. Private model for user customizations. Ethical framework built-in.</p>
+                <h3>Multi-Agent Safe</h3>
+                <p>Branches and locks prevent conflicts. Multiple agents can work on the same brain without overwriting each other.</p>
             </div>
             <div class="feature">
                 <h3>Docker Ready</h3>
@@ -276,12 +276,29 @@
                 <h3>MCP Server</h3>
                 <p>9 memory tools via JSON-RPC. AI agents read/write brain over HTTP. Standard MCP protocol.</p>
             </div>
+            <div class="feature">
+                <h3>Branching</h3>
+                <p>Experiment with different brain configs. Merge via pull request. Always keep a working main branch.</p>
+            </div>
+        </section>
+
+        <section class="about">
+            <h2>About Vant</h2>
+            <p>Vant solves a fundamental problem: AI agents lose all context when sessions end. Traditional memory systems require complex databases or external services. Vant uses Git as a simple, reliable foundation.</p>
+            <p>Why Git? It already handles versioning, branches, conflict resolution, and distributed sync. Every commit is a checkpoint. Every branch is an experiment. Every pull request is a review.</p>
+            <p>Use Vant for:</p>
+            <ul>
+                <li>Long-running agentic workflows that span days or weeks</li>
+                <li>Multi-agent systems where agents need shared context</li>
+                <li>AI applications requiring audit trails and memory inheritance</li>
+                <li>Experimenting with different brain configurations safely</li>
+            </ul>
+            <p>The brain is your AI's memory and personality. Vant makes it persistent, portable, and versioned.</p>
         </section>
 
         <section class="links">
             <a href="https://github.com/dhaupin/vant" class="link">GitHub</a>
-            <a href="https://github.com/dhaupin/vant/releases/tag/v0.8.2" class="link outline">Release</a>
-            <a href="https://github.com/dhaupin/vant-brain" class="link outline">Brain</a>
+            <a href="https://github.com/dhaupin/vant/releases" class="link outline">Releases</a>
         </section>
 
         <section class="docs">
@@ -292,11 +309,7 @@
         </section>
 
         <footer>
-            <p>Open source under MIT license. Not affiliated with VantAI or other Vant-named entities.</p>
-            <p style="margin-top:8px;">
-                <a href="https://github.com/dhaupin/vant">vant</a> /
-                <a href="https://github.com/dhaupin/vant-brain">vant-brain</a>
-            </p>
+            <p>Open source under MIT license.</p>
             <p style="margin-top:12px; font-size: 0.75rem; color: var(--text-muted);">
                 Powered by <a href="https://github.com/openhands/openhands">OpenHands</a> AI agent
             </p>
