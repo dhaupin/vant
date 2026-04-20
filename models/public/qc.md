@@ -29,6 +29,15 @@ Standards, checks, and validation rules for Vant brain.
 - All commands: vant <command> --help for usage
 - Help command shows all available commands
 - Exit codes: 0 = success, 1 = error
+- New: vant resolution - Thought status tracking
+
+## Resolution System
+
+- Track thoughts as resolved/deprecated/rejected
+- `vant resolution resolve <file> <entry> <reason>` - Mark resolved
+- `vant resolution deprecate <file> <entry> <reason>` - Mark deprecated
+- `vant resolution reject <file> <entry> <reason>` - Mark rejected
+- Frontmatter updates directly in brain files: headings and bullets
 
 ## Testing
 
@@ -47,3 +56,4 @@ Before any release:
 - [ ] No .txt files in public model (convert to .md)
 - [ ] CHANGELOG updated
 - [ ] VERSION in lib/config.js updated
+- [ ] Resolution system tested (`vant resolution status`)
