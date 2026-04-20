@@ -29,7 +29,11 @@
     "inquirer": "^13.4.1",
     "yaml": "^2.3.0"
   },
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  },
   "scripts": {
+    "lint": "eslint bin lib",
     "test": "node bin/build-test.js",
     "setup": "node bin/setup.js",
     "start": "node bin/start.js",

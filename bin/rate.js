@@ -14,7 +14,8 @@ const cmd = process.argv[2] || 'status';
 
 switch (cmd) {
     case 'status':
-    case 's':
+    case 's': {
+        
         const status = rateLimit.getStatus();
         console.log(`
 ╔═══════════════════════════════════════╗
@@ -24,6 +25,7 @@ switch (cmd) {
   Resets in: ~${status.resetIn} minutes
 `);
         break;
+    }
         
     case 'reset':
     case 'r':
