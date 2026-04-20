@@ -105,6 +105,11 @@ See: vant node --help`
         usage: 'vant onboard [files|read|search]',
         detail: 'View brain files.\nSee: vant onboard help'
     },
+    resolution: {
+        desc: 'Thought resolution system',
+        usage: 'vant resolution [status|list|resolve|deprecate|reject]',
+        detail: 'Mark thoughts resolved.\nSee: vant resolution help'
+    },
     succession: {
         desc: 'Brain succession status',
         usage: 'vant succession [status|trust|log]',

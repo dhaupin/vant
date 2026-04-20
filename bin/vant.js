@@ -47,6 +47,7 @@ const COMMANDS = {
     node: 'node.js',
     mcp: 'mcp.js',
     onboard: 'onboard.js',
+    resolution: 'resolution.js',
     succession: 'succession.js',
     bot: 'bot.js'
 };

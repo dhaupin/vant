@@ -1,0 +1,15 @@
+{
+  "resolutions": [
+    {
+      "file": "fears",
+      "entry": "fear of rejection",
+      "status": "resolved",
+      "reason": "克服了通过写作",
+      "resolved_by": "unknown",
+      "branch": "main",
+      "resolved_at": "2026-04-20T21:07:57.744Z",
+      "superseded_by": null
+    }
+  ],
+  "deltas": []
+}

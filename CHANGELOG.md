@@ -15,6 +15,10 @@ All notable changes to VANT are documented here.
 - **Succession** - Brain version/trust management
   - vant succession - Version + trust levels
   - lib/succession.js - Trust level controls
+- **Resolution** - Thought status tracking
+  - vant resolution - Mark thoughts resolved/deprecated/rejected
+  - lib/resolution.js - Per-file/per-entry status
+  - Deltas for change tracking
 - **MCP Authentication** - API key for secure AI tool access
   - X-API-Key header for all MCP endpoints
   - Via VANT_MCP_API_KEY env or MCP_API_KEY in config.ini

@@ -109,6 +109,21 @@ vant succession trust high   # Set trust level
 vant succession help         # Show levels
 ```
 
+### Resolution
+
+Mark thoughts as resolved/deprecated/rejected:
+
+```bash
+vant resolution              # Status summary
+vant resolution list         # List resolutions
+vant resolution list resolved # Filter by status
+vant resolution resolve fears "fear of X" overcame via therapy
+vant resolution deprecate goals "old goal" replaced by new
+vant resolution reject identity "old belief" ethics changed
+vant resolution deltas identity 5
+vant resolution help
+```
+
 | `vant bot` | Run Telegram bot |
 
 ## Multi-Agent

@@ -97,6 +97,14 @@ test('lock.js loads', () => {
     const lock = require('../lib/lock');
 });
 
+// Test: resolution.js loads
+test('resolution.js loads', () => {
+    const res = require('../lib/resolution');
+    if (typeof res.resolve !== 'function') {
+        throw new Error('resolution.js missing resolve()');
+    }
+});
+
 // Test: example configs exist
 test('example configs exist', () => {
     const configs = ['config.example.ini', '.env.example'];
