@@ -1,4 +1,4 @@
-=== Vant DEFAULT IDENTITY ===
+# DEFAULT IDENTITY
 
 MODEL: Vant Project
 LINK: https://github.com/dhaupin/vant

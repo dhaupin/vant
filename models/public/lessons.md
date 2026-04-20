@@ -1,4 +1,4 @@
-=== Vant PROJECT LESSONS ===
+# PROJECT LESSONS
 
 These are core learnings from building and operating Vant systems:
 
