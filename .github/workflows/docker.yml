@@ -16,7 +16,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # Only build on PRs, push to main, or tags
+    # Only build on push to main, v0.8.2, or tags
     if: github.event_name != 'pull_request'
 
     steps:
@@ -41,15 +41,30 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
             type=semver,pattern={{version}}
             type=match,pattern=checkpoint-(.*),group=1
-            type=raw,value=v0.8.2,enable=branch:v0.8.2
 
       - name: Build VANT
         run: |
           echo "Building VANT..."
+          # Tag with correct version based on branch
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            docker build . -t dhaupin/vant:latest
+          elif [[ "${{ github.ref }}" == "refs/heads/v0.8.2" ]]; then
+            docker build . -t dhaupin/vant:v0.8.2 -t dhaupin/vant:latest
+          elif [[ "${{ github.ref }}" =~ ^refs/tags/v ]]; then
+            VERSION="${github.ref#refs/tags/v}"
+            docker build . -t "dhaupin/vant:$VERSION"
+          fi
 
       - name: Push to Hub
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/v0.8.2')
+        if: github.event_name == 'push'
         run: |
           echo "Pushing to Docker Hub..."
-          docker push dhaupin/vant:latest
-          docker push dhaupin/vant:v0.8.2
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            docker push dhaupin/vant:latest
+          elif [[ "${{ github.ref }}" == "refs/heads/v0.8.2" ]]; then
+            docker push dhaupin/vant:v0.8.2
+            docker push dhaupin/vant:latest
+          elif [[ "${{ github.ref }}" =~ ^refs/tags/v ]]; then
+            VERSION="${github.ref#refs/tags/v}"
+            docker push "dhaupin/vant:$VERSION"
+          fi
