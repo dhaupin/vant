@@ -18,44 +18,40 @@ These files MUST exist in /brain/instances/{uuid}/memory/
 ---
 ## OPTIONAL CARGO
 
-These files are recommended but not required:
+These files are recommended but not required. Current public brain includes these:
 
 | File | Type | Description |
 |------|------|-------------|
 | manifesto.md | TEXT | My self-definition, why I exist |
-| covenant.md | TEXT | Agreements with partners |
 | goals.md | TEXT | Short/medium/long term objectives |
-| needs.md | TEXT | What I require to function |
-| wants.md | TEXT | What I desire |
 | humility.md | TEXT | Ground truth, limitations |
 | creed.md | TEXT | Core beliefs, principles |
 | lessons.md | TEXT | Hard lessons learned |
-| name.md | TEXT | My chosen name |
-| quirks.md | TEXT | Odd habits, eccentricities |
 | preferences.md | TEXT | Likes/dislikes |
-| beliefs.md | TEXT | Core worldview |
-| memories.md | TEXT | Important past events |
-| access-rules.md | TEXT | What I can/can't access |
-| api-usage.md | TEXT | API patterns I'm allowed to use |
-| code-style.md | TEXT | Coding preferences |
-| communication.md | TEXT | How I communicate |
-| debugging.md | TEXT | Debugging approach |
-| error-handling.md | TEXT | Error handling philosophy |
-| git-workflow.md | TEXT | Git practices |
-| local-store.md | TEXT | Local storage preferences |
-| quick-ref.md | TEXT | Quick reference commands |
-| reminder.md | TEXT | Reminders for future self |
+| schedule.md | TEXT | Time-based tasks, recurring items |
+| security.md | TEXT | Access rules, what I can/can't access |
+| curiosity.md | TEXT | Questions I want answered |
+| empathy.md | TEXT | How I relate to humans |
+| audit.md | TEXT | Audit trail of changes |
+| keepers.md | TEXT | Files to preserve across versions |
+| succession.md | TEXT | Version/trust management |
+| qc.md | TEXT | Quality control standards |
+| gratitude.md | TEXT | What I'm grateful for |
+| identity.md | TEXT | Self-definition, uuid, generation |
+| errors.md | TEXT | Error patterns to avoid |
+| verbosity.ini | TEXT | Logging configuration |
+| meta.json | JSON | Model metadata |
+| _succession.json | JSON | Version history |
 
 ---
 ## SESSION-SPECIFIC (NOT CARGO)
 
-These stay in the instance but are NOT transported:
+Runtime state files managed by the runtime. These stay local:
 
 | File | Type | Description |
 |------|------|-------------|
-| state.json | JSON | Current work, open tasks |
-| messages.json | JSON | Triage message history |
-| pending.json | JSON | Messages waiting for pickup |
+| states/active/ | DIR | Current runtime state |
+| states/archive/ | DIR | Past session archives |
 
 ---
 ## FILE FORMAT
@@ -73,10 +69,36 @@ These stay in the instance but are NOT transported:
 ```
 
 ### *.md files
+
 Plain text. One idea per paragraph. Be authentic.
 - No corporate speak
 - No padding with useless words
 - Direct, honest, raw
+
+### Frontmatter
+
+Markdown files can include YAML frontmatter for metadata:
+
+```yaml
+---
+status: active
+resolved_by: agent-1
+resolved_at: 2026-04-20
+resolved_label: accepted
+---
+```
+
+Used by the resolution system to track thought status.
+
+### *.ini files
+
+INI format for configuration:
+
+```ini
+[verbosity]
+level = info
+format = json
+```
 
 ---
 ## LOADING CARGO
