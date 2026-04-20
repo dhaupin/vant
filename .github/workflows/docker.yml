@@ -2,12 +2,15 @@ name: Build and Push VANT
 
 on:
   push:
-    branches: [main]
+    branches: [main, v0.8.2]
     tags:
       - 'v*'
       - 'checkpoint-*'
   pull_request:
     branches: [main]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   build:
@@ -41,16 +44,25 @@ jobs:
       - name: Build VANT
         run: |
           echo "Building VANT..."
-          docker build . -t dhaupin/vant:latest
-
-      - name: Push to Hub
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
-        run: |
-          echo "Pushing to Docker Hub..."
-          docker push dhaupin/vant:latest
-          # Push version tag if this is a tag push
-          if [[ "${{ github.ref }}" =~ ^refs/tags/v ]]; then
+          # Tag with latest for main branch, v0.8.2 for release branch
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            docker build . -t dhaupin/vant:latest
+          elif [[ "${{ github.ref }}" == "refs/heads/v0.8.2" ]]; then
+            docker build . -t dhaupin/vant:v0.8.2
+          elif [[ "${{ github.ref }}" =~ ^refs/tags/v ]]; then
             VERSION="${github.ref#refs/tags/v}"
             docker build . -t "dhaupin/vant:$VERSION"
+          fi
+
+      - name: Push to Hub
+        if: github.event_name == 'push'
+        run: |
+          echo "Pushing to Docker Hub..."
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            docker push dhaupin/vant:latest
+          elif [[ "${{ github.ref }}" == "refs/heads/v0.8.2" ]]; then
+            docker push dhaupin/vant:v0.8.2
+          elif [[ "${{ github.ref }}" =~ ^refs/tags/v ]]; then
+            VERSION="${github.ref#refs/tags/v}"
             docker push "dhaupin/vant:$VERSION"
           fi
