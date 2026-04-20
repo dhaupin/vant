@@ -1,0 +1,15 @@
+{
+  "resolutions": [
+    {
+      "file": "fears",
+      "entry": "Losing memory",
+      "status": "resolved",
+      "reason": "now have backup",
+      "resolved_by": "unknown",
+      "branch": "main",
+      "resolved_at": "2026-04-20T21:21:12.003Z",
+      "superseded_by": null
+    }
+  ],
+  "deltas": []
+}
