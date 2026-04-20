@@ -102,11 +102,13 @@ See: vant node --help`
     // Info
     onboard: {
         desc: 'Show onboarding summary',
-        usage: 'vant onboard'
+        usage: 'vant onboard [files|read|search]',
+        detail: 'View brain files.\nSee: vant onboard help'
     },
     succession: {
         desc: 'Brain succession status',
-        usage: 'vant succession'
+        usage: 'vant succession [status|trust|log]',
+        detail: 'Manage brain trust levels.\nSee: vant succession help'
     }
 };
 

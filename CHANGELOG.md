@@ -30,6 +30,7 @@ All notable changes to VANT are documented here.
 - vant help <cmd> now shows specific command help
 - bin/mcp.js --help exits properly (doesn't start server)
 - Node --help now shows help (was starting node instead)
+- onboard read <file> now auto-adds .md extension
 
 ---
 
