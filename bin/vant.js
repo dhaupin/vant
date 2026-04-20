@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const version = require('../lib/version');
 /**
  * vant CLI - Command aliases
  *
@@ -52,7 +53,7 @@ const cmd = process.argv[2];
 if (!cmd || cmd === 'help') {
     console.log(`
 ╔═══════════════════════════════════════╗
-║         vant CLI v0.8.3              ║
+║         vant CLI v' + version + '              ║
 ╚═══════════════════════════════════════╝
 
 Usage: vant <command> [options]

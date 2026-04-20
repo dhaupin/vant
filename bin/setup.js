@@ -1,3 +1,4 @@
+const version = require('../lib/version');
 /**
  * Vant Setup
  * Interactive configuration for new users
@@ -17,7 +18,7 @@ const CONFIG_FILE = 'config.ini';
 const CONFIG_TEMPLATE = `=== Vant CONFIG ===
 
 # Core
-VANT_VERSION=v0.8.3
+VANT_VERSION=v' + version + '
 MODEL_PATH=models/public
 STATE_PATH=states/active/current.json
 
@@ -48,7 +49,7 @@ function question(prompt) {
 
 async function setup() {
     console.log('\n╔═══════════════════════════════════════╗');
-    console.log('║         Vant Setup v0.8.3            ║');
+    console.log('║         Vant Setup v' + version + '            ║');
     console.log('╚═══════════════════════════════════════╝\n');
 
     // Check existing config

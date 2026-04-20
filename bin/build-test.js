@@ -1,3 +1,4 @@
+const version = require('../lib/version');
 /**
  * Vant Build Test
  * Validates all scripts can load without errors
@@ -111,7 +112,7 @@ let passed = 0;
 let failed = 0;
 
 console.log('╔═══════════════════════════════════════╗');
-console.log('║       Vant Build Test v0.8.3         ║');
+console.log('║       Vant Build Test v' + version + '         ║');
 console.log('╚═══════════════════════════════════════╝');
 
 for (const t of TESTS) {
