@@ -37,10 +37,41 @@ const http = require('http');
 
 // Parse CLI arguments
 const args = process.argv.slice(2);
+
+// Show help
+if (args.includes('--help') || args.includes('-h')) {
+    console.log(`
+Vant Node Runner
+
+Usage:
+  node bin/node.js                    # Start node
+  node bin/node.js --mcp              # Start with MCP server
+  node bin/node.js --mcp-port 3457    # Custom MCP port
+  node bin/node.js --poll-interval 30   # GitHub poll every 30s
+  node bin/node.js --sync              # Auto-sync on changes
+  node bin/node.js --help            # Show this help
+
+Environment:
+  VANT_GITHUB_REPO      - GitHub repo
+  VANT_GITHUB_TOKEN    - GitHub token
+  VANT_MCP_PORT        - MCP server port
+  VANT_POLL_INTERVAL   - GitHub poll interval in seconds
+
+What it does:
+  1. Loads brain from models/public
+  2. Starts MCP server (optional)
+  3. Polls GitHub for remote changes
+  4. Syncs brain state on changes
+
+HTTP Status: GET http://localhost:3456/health (if MCP enabled)
+`);
+    process.exit(0);
+}
+
 const config = {
     mcp: args.includes('--mcp'),
-    mcpPort: parseInt(args.find(a => a.startsWith('--mcp-port'))?.split(' ')[1] || '3456'),
-    pollInterval: parseInt(args.find(a => a.startsWith('--poll-interval'))?.split(' ')[1] || '60'),
+    mcpPort: parseInt(args.find(a => a.startsWith('--mcp-port='))?.split('=')[1] || '3456'),
+    pollInterval: parseInt(args.find(a => a.startsWith('--poll-interval='))?.split('=')[1] || '60'),
     sync: args.includes('--sync'),
     verbose: args.includes('--verbose') || args.includes('-v')
 };

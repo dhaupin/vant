@@ -88,8 +88,11 @@ Set VANT_MCP_API_KEY to enable auth.
 See: vant mcp --help`
     },
     node: {
-        desc: 'Run as persistent node',
-        usage: 'vant node'
+        desc: 'Run as persistent node (polls GitHub)',
+        usage: 'vant node [--mcp] [--poll-interval=60]',
+        detail: `Run Vant as persistent node.
+Set VANT_GITHUB_REPO and VANT_GITHUB_TOKEN.
+See: vant node --help`
     },
     bot: {
         desc: 'Run Telegram bot',

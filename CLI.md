@@ -30,6 +30,27 @@ node bin/vant.js <command>
 | `vant rate` | Show GitHub API rate limit |
 | `vant bump` | Bump version and tag release |
 | `vant node` | Run as persistent node |
+
+### Persistent Node
+
+Run Vant as persistent agent node:
+
+```bash
+vant node                    # Start node
+vant node --mcp              # Start with MCP server
+vant node --mcp-port=3457   # Custom MCP port
+vant node --poll-interval=30   # Poll GitHub every 30s
+vant node --help            # Show usage
+```
+
+**Environment:**
+
+```bash
+export VANT_GITHUB_REPO=dhaupin/vant
+export VANT_GITHUB_TOKEN=ghp_...
+vant node --sync
+```
+
 | `vant mcp` | Run MCP server for AI tools |
 
 ### MCP Server
