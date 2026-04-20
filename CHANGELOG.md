@@ -9,6 +9,12 @@ All notable changes to VANT are documented here.
 ## v0.8.4 (2026-04-20)
 
 ### Added
+- **Onboarding** - Knowledge base browser
+  - vant onboard - View/search brain files
+  - lib/onboard.js - Search + read brain
+- **Succession** - Brain version/trust management
+  - vant succession - Version + trust levels
+  - lib/succession.js - Trust level controls
 - **MCP Authentication** - API key for secure AI tool access
   - X-API-Key header for all MCP endpoints
   - Via VANT_MCP_API_KEY env or MCP_API_KEY in config.ini

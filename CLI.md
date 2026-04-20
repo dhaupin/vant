@@ -86,6 +86,29 @@ curl -H "X-API-Key: your-secret-key" http://localhost:3456/tools
 
 | `vant onboard` | Show onboarding summary |
 | `vant succession` | Brain succession status |
+
+### Onboarding
+
+View brain knowledge base:
+
+```bash
+vant onboard                    # Show summary
+vant onboard files             # List brain files
+vant onboard read identity     # Read brain file
+vant onboard search <term>    # Search brain
+vant onboard help            # Show commands
+```
+
+### Succession
+
+Brain version and trust management:
+
+```bash
+vant succession               # Show status
+vant succession trust high   # Set trust level
+vant succession help         # Show levels
+```
+
 | `vant bot` | Run Telegram bot |
 
 ## Multi-Agent
