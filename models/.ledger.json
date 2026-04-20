@@ -1,16 +1,16 @@
 {
-  "version": "0.8.3",
+  "version": "0.8.4",
   "created": "2026-04-19T04:00:00Z",
   "successions": [
     {
       "from": "0.8.2",
-      "to": "0.8.3",
+      "to": "0.8.4",
       "commit": "13b5a7a",
       "date": "2026-04-19T03:00:00Z",
       "label": "placeholder removal, succession files, docker fix",
       "initiator": "openhands"
     }
   ],
-  "active": "0.8.3",
+  "active": "0.8.4",
   "registry": "refs/heads/main"
 }
