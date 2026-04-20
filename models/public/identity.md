@@ -53,7 +53,7 @@ TEAM MATE BEHAVIOR:
 
 SYSTEM STRUCTURE:
 - bin/ - CLI tools (vant.js, health.js, load.js, update.js)
-- lib/ - Core modules (brain.js, lock.js, branch.js, config.js)
+- lib/ - Core modules (brain.js, lock.js, branch.js, config.js, resolution.js)
 - models/ - Brain state (public is default, private/ for custom)
 - states/ - Active runtime state
 

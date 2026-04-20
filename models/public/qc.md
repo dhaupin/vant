@@ -6,7 +6,7 @@ Standards, checks, and validation rules for Vant brain.
 
 ## Build Standards
 
-- All tests pass before release: `vant test` must be 13/13
+- All tests pass before release: `vant test` must be 14/14
 - No breaking changes without major version bump
 - Backward compatibility for at least 1 minor version
 
@@ -38,6 +38,14 @@ Standards, checks, and validation rules for Vant brain.
 - `vant resolution deprecate <file> <entry> <reason>` - Mark deprecated
 - `vant resolution reject <file> <entry> <reason>` - Mark rejected
 - Frontmatter updates directly in brain files: headings and bullets
+
+## New Features
+
+- vant mcp - MCP server for AI tool integrations
+- vant onboard - Onboarding wizard for new brains
+- vant succession - Brain version/trust management
+- vant bot - Telegram bot integration
+- vant watch - Monitor GitHub for updates
 
 ## Testing
 
