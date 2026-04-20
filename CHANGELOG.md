@@ -6,6 +6,32 @@ All notable changes to VANT are documented here.
 
 ---
 
+## v0.8.4 (2026-04-20)
+
+### Added
+- **MCP Authentication** - API key for secure AI tool access
+  - X-API-Key header for all MCP endpoints
+  - Via VANT_MCP_API_KEY env or MCP_API_KEY in config.ini
+  - Optional but recommended for production
+- **Full CLI Help** - All 20 commands documented
+  - vant help <cmd> now delegates properly to help.js
+  - mcp --help shows full docs with curl examples
+- **onboard Command** - Onboarding summary
+- **succession Command** - Brain succession status
+
+### Changed
+- Updated CLI.md with MCP auth section
+- MCP server now blocks without correct key when configured
+- POST /call endpoint fixed (JSON-RPC params handling)
+- Removed .agents_tmp directory
+- Removed deploy.example.sh (CI/CD handles deploys)
+
+### Fixed
+- vant help <cmd> now shows specific command help
+- bin/mcp.js --help exits properly (doesn't start server)
+
+---
+
 ## v0.8.2 (2026-04-19)
 
 ### Added
