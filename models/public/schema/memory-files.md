@@ -91,4 +91,4 @@ When new instance loads brain:
 ---
 ## VERSION
 
-This is v0.3 - part of transport schema
+This is the memory schema version - not Vant app version. See package.json for Vant version.

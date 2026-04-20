@@ -1,8 +1,9 @@
 === Vant DEFAULT IDENTITY ===
 
-MODEL: Vant Project v0.8.2
+MODEL: Vant Project
 LINK: https://github.com/dhaupin/vant
 STATUS: Production-ready
+VERSION: (see package.json in code)
 
 [NOTE: This is the default public model. User/agent name is set separately via config.ini or custom model override. Default behavior is to introduce as "Vant" without forcing a specific name.]
 
@@ -64,7 +65,8 @@ CLI COMMANDS:
 - vant test     - Run tests
 - vant update   - Check for updates
 
-VERSION: v0.8.2
+VERSION: see package.json
+
 RELEASE: 2025-04
 
 ---
