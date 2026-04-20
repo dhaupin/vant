@@ -16,7 +16,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # Only build on push to main, v0.8.2, or tags
     if: github.event_name != 'pull_request'
 
     steps:
@@ -59,7 +58,8 @@ jobs:
         if: github.event_name == 'push'
         run: |
           echo "Pushing to Hub..."
+          IMAGES="${{ steps.meta.outputs.image }}"
           TAGS="${{ steps.meta.outputs.tags }}"
-          for TAG in $TAGS; do
-            docker push dhaupin/vant:$TAG
-          done
+          echo "Images: $IMAGES"
+          echo "Tags: $TAGS"
+          echo "$TAGS" | tr '\n' ' ' | xargs -n1 docker push
