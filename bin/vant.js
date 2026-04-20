@@ -45,10 +45,21 @@ const COMMANDS = {
     rate: 'rate.js',
     help: 'help.js',
     node: 'node.js',
-    mcp: 'mcp.js'
+    mcp: 'mcp.js',
+    onboard: 'onboard.js',
+    succession: 'succession.js',
+    bot: 'bot.js'
 };
 
-const cmd = process.argv[2];
+const args = process.argv.slice(2);
+const cmd = args[0];
+
+// Handle: vant help <cmd>
+if (cmd === 'help' && args[1]) {
+    const { execSync } = require('child_process');
+    execSync('node bin/help.js ' + args[1], { stdio: 'inherit' });
+    process.exit(0);
+}
 
 if (!cmd || cmd === 'help') {
     console.log(`
@@ -58,18 +69,32 @@ if (!cmd || cmd === 'help') {
 
 Usage: vant <command> [options]
 
-Commands:
+Core:
   vant start        Full startup
-  vant sync        Pull from GitHub
+  vant sync        Pull/push brain
   vant health      System diagnostics
   vant load        Load brain
   vant run         Start runtime
+
+Info:
   vant test        Run build tests
   vant changelog   View changes
-  vant summary     Session summary
-  vant watch       Monitor GitHub
-  vant setup       Interactive setup
-  vant help        Show help
+  vant summary    Session summary
+  vant watch      Monitor GitHub
+  vant help       Show help
+
+Setup:
+  vant setup      Interactive setup
+  vant update    Check for updates
+  vant rate      GitHub rate limit
+  vant bump     Bump version
+
+Integrations:
+  vant mcp       MCP server
+  vant node      Persistent node
+  vant bot       Telegram bot
+  vant onboard  Onboarding
+  vant succession Succession
 `);
     process.exit(0);
 }

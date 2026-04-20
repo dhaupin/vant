@@ -31,6 +31,38 @@ node bin/vant.js <command>
 | `vant bump` | Bump version and tag release |
 | `vant node` | Run as persistent node |
 | `vant mcp` | Run MCP server for AI tools |
+
+### MCP Server
+
+Run MCP server for AI tool access:
+
+```bash
+vant mcp --server        # HTTP server on port 3456
+vant mcp --stdio       # STDIO mode
+vant mcp --help       # Show usage
+```
+
+**Authentication:**
+
+Set API key via environment or config:
+
+```bash
+export VANT_MCP_API_KEY=your-secret-key
+vant mcp --server
+```
+
+Or in `config.ini` (copy from config.example.ini):
+
+```ini
+MCP_API_KEY=your-secret-key
+```
+
+Requests need `X-API-Key` header:
+
+```bash
+curl -H "X-API-Key: your-secret-key" http://localhost:3456/tools
+```
+
 | `vant onboard` | Show onboarding summary |
 | `vant succession` | Brain succession status |
 | `vant bot` | Run Telegram bot |

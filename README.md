@@ -330,6 +330,24 @@ curl -X POST http://localhost:3456/call \
 
 **Environment:**
 - `VANT_MCP_PORT` - Server port (default: 3456)
+- `VANT_MCP_API_KEY` - API key for authentication
+
+**Authentication:**
+Set `VANT_MCP_API_KEY` or add to `config.ini`:
+
+```bash
+# As environment variable
+export VANT_MCP_API_KEY=your-secret-key
+
+# Or in config.ini (copy from config.example.ini)
+MCP_API_KEY=your-secret-key
+```
+
+Requests must include `X-API-Key` header:
+
+```bash
+curl -H "X-API-Key: your-secret-key" http://localhost:3456/tools
+```
 
 ---
 

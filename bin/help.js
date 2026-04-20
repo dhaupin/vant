@@ -77,6 +77,33 @@ const COMMANDS = {
     branch: {
         desc: 'List/switch brain branches',
         usage: 'vant branch [list|switch|create] [name]'
+    },
+    
+    // Integrations
+    mcp: {
+        desc: 'Run MCP server for AI tools (use --help for auth)',
+        usage: 'vant mcp [--server|--stdio]',
+        detail: `Run MCP server for AI tool access.
+Set VANT_MCP_API_KEY to enable auth.
+See: vant mcp --help`
+    },
+    node: {
+        desc: 'Run as persistent node',
+        usage: 'vant node'
+    },
+    bot: {
+        desc: 'Run Telegram bot',
+        usage: 'vant bot'
+    },
+    
+    // Info
+    onboard: {
+        desc: 'Show onboarding summary',
+        usage: 'vant onboard'
+    },
+    succession: {
+        desc: 'Brain succession status',
+        usage: 'vant succession'
     }
 };
 
@@ -96,6 +123,10 @@ function showHelp(command) {
         console.log('\n  Command: vant ' + command);
         console.log('  Usage:  ' + c.usage);
         console.log('  Desc:   ' + c.desc);
+        if (c.detail) {
+            console.log('');
+            console.log(c.detail);
+        }
         console.log('');
         return;
     }
@@ -134,4 +165,5 @@ const args = process.argv.slice(2);
 const cmd = args[0] || 'help';
 const target = ALIASES[cmd] || cmd;
 
-showHelp(target === 'help' && args[1] ? args[1] : null);
+// Show specific help if command is provided, otherwise show all
+showHelp(args[1] || (COMMANDS[target] ? target : null));

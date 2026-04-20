@@ -456,8 +456,48 @@ async function handleMessage(msg) {
 
 // Run mode
 const args = process.argv.slice(2);
+const isHelp = args.includes('--help') || args.includes('-h');
 const isStdio = args.includes('--stdio');
 const isServer = args.includes('--server') || args.includes('--http');
+
+// Show help and exit
+if (isHelp) {
+    console.log(`
+Vant MCP Server
+
+Usage:
+  node bin/mcp.js              # Run in background mode
+  node bin/mcp.js --server     # Start HTTP server
+  node bin/mcp.js --stdio     # Run for AI SDK stdio
+  node bin/mcp.js --help      # Show this help
+
+HTTP Endpoints:
+  GET  /tools   List available tools
+  GET  /health  Server health check
+  POST /call    Execute tool (JSON-RPC)
+
+Examples:
+  # Start server
+  node bin/mcp.js --server
+
+  # List tools
+  curl http://localhost:3456/tools
+
+  # Call tool
+  curl -X POST http://localhost:3456/call \\
+    -H "Content-Type: application/json" \\
+    -d '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"vant_health"},"id":1}'
+
+Environment:
+  VANT_MCP_PORT    Server port (default: 3456)
+  VANT_MCP_API_KEY  API key for auth (optional but recommended)
+
+Authentication:
+  If VANT_MCP_API_KEY is set, include in requests:
+  curl -H "X-API-Key: your-key" http://localhost:3456/...
+`);
+    process.exit(0);
+}
 
 // Only start HTTP server when run directly with --server flag
 if ((!module.parent || isServer) && !isStdio) {
@@ -467,12 +507,23 @@ if ((!module.parent || isServer) && !isStdio) {
         // Add CORS headers
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-API-Key');
         
         if (req.method === 'OPTIONS') {
             res.writeHead(204);
             res.end();
             return;
+        }
+        
+        // API Key auth check (if configured)
+        const expectedKey = process.env.VANT_MCP_API_KEY || (config ? config.MCP_API_KEY : null);
+        if (expectedKey) {
+            const apiKey = req.headers['x-api-key'];
+            if (apiKey !== expectedKey) {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Unauthorized - provide X-API-Key header' }));
+                return;
+            }
         }
         
         if (req.url === '/tools' && req.method === 'GET') {
