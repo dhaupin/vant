@@ -131,6 +131,23 @@ test('example configs exist', () => {
     });
 });
 
+// Test: vaf.js loads and works
+test('vaf.js works', () => {
+    const vaf = require('../lib/vaf');
+    // Check key functions exist
+    if (typeof vaf.check !== 'function') {
+        throw new Error('vaf.js missing check()');
+    }
+    if (typeof vaf.checkPathTraversal !== 'function') {
+        throw new Error('vaf.js missing checkPathTraversal()');
+    }
+    // Test blocking
+    const blocked = vaf.checkPathTraversal('../etc/passwd');
+    if (!blocked.blocked) {
+        throw new Error('Path traversal not blocked');
+    }
+});
+
 // Run tests
 let passed = 0;
 let failed = 0;

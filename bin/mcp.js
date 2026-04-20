@@ -40,6 +40,7 @@ const lock = loadModule('lock');
 const config = loadModule('config');
 const health = loadModule('health');
 const protection = require('../lib/protection');
+const vaf = require('../lib/vaf');
 
 /**
  * Tool definitions for MCP
@@ -402,6 +403,51 @@ async function checkHealth(detailed = false) {
  * Handle MCP request
  */
 async function handleRequest(request) {
+    // VAF pre-check
+    const params = request.params || {};
+    if (params.arguments) {
+        const args = params.arguments;
+        
+        // Validate memory write content
+        if (args.content) {
+            try {
+                vaf.check(args.content, {
+                    type: 'string',
+                    name: 'content',
+                    maxLength: 50000
+                });
+            } catch (e) {
+                return { error: 'Security check failed: ' + e.message };
+            }
+        }
+        
+        // Validate file names
+        if (args.file) {
+            try {
+                vaf.check(args.file, {
+                    type: 'path',
+                    name: 'file'
+                });
+            } catch (e) {
+                return { error: 'Security check failed: ' + e.message };
+            }
+        }
+        
+        // Validate branch names
+        if (args.name) {
+            try {
+                vaf.check(args.name, {
+                    type: 'string',
+                    name: 'branch',
+                    maxLength: 100,
+                    pattern: /^[a-zA-Z0-9_\-]+$/
+                });
+            } catch (e) {
+                return { error: 'Security check failed: ' + e.message };
+            }
+        }
+    }
+    
     if (protection.isCircuitOpen()) {
         return { error: 'Circuit open: too many failures. Wait and retry.' };
     }
@@ -409,7 +455,7 @@ async function handleRequest(request) {
         return { error: 'Server busy: max ' + protection.MAX_CONCURRENT + ' concurrent requests' };
     }
     protection.incrementActive();
-    const { method, params = {} } = request;
+    const { method, params: reqParams = {} } = request;
     try {
         switch (method) {
             case 'tools/list':
