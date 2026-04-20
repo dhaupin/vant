@@ -20,49 +20,36 @@ jobs:
     if: github.event_name != 'pull_request'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: dhaupin/vant
           tags: |
+            type=ref,event=branch
             type=raw,value=latest,enable={{is_default_branch}}
             type=semver,pattern={{version}}
             type=match,pattern=checkpoint-(.*),group=1
+            type=raw,value=v0.8.2,enable=branch:v0.8.2
 
       - name: Build VANT
         run: |
           echo "Building VANT..."
-          # Tag with latest for main branch, v0.8.2 for release branch
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            docker build . -t dhaupin/vant:latest
-          elif [[ "${{ github.ref }}" == "refs/heads/v0.8.2" ]]; then
-            docker build . -t dhaupin/vant:v0.8.2
-          elif [[ "${{ github.ref }}" =~ ^refs/tags/v ]]; then
-            VERSION="${github.ref#refs/tags/v}"
-            docker build . -t "dhaupin/vant:$VERSION"
-          fi
 
       - name: Push to Hub
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/v0.8.2')
         run: |
           echo "Pushing to Docker Hub..."
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            docker push dhaupin/vant:latest
-          elif [[ "${{ github.ref }}" == "refs/heads/v0.8.2" ]]; then
-            docker push dhaupin/vant:v0.8.2
-          elif [[ "${{ github.ref }}" =~ ^refs/tags/v ]]; then
-            VERSION="${github.ref#refs/tags/v}"
-            docker push "dhaupin/vant:$VERSION"
-          fi
+          docker push dhaupin/vant:latest
+          docker push dhaupin/vant:v0.8.2
