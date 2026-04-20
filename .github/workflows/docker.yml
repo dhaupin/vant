@@ -45,14 +45,15 @@ jobs:
       - name: Build VANT
         run: |
           echo "Building VANT..."
+          VERSION=$(node -p "require('./package.json').version")
           # Tag with correct version based on branch
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            docker build . -t dhaupin/vant:latest
+            docker build --build-arg VERSION=$VERSION . -t dhaupin/vant:latest
           elif [[ "${{ github.ref }}" == "refs/heads/v0.8.2" ]]; then
-            docker build . -t dhaupin/vant:v0.8.2 -t dhaupin/vant:latest
+            docker build --build-arg VERSION=$VERSION . -t dhaupin/vant:v0.8.2 -t dhaupin/vant:latest
           elif [[ "${{ github.ref }}" =~ ^refs/tags/v ]]; then
-            VERSION="${github.ref#refs/tags/v}"
-            docker build . -t "dhaupin/vant:$VERSION"
+            TAG_VERSION="${github.ref#refs/tags/v}"
+            docker build --build-arg VERSION=$TAG_VERSION . -t "dhaupin/vant:$TAG_VERSION"
           fi
 
       - name: Push to Hub

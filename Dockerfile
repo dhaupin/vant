@@ -16,6 +16,7 @@
 #   GITHUB_TOKEN - Required for sync
 #   GITHUB_REPO  - Required (owner/repo)
 
+ARG VERSION=0.8.3
 FROM node:20-alpine
 
 LABEL maintainer="VANT Project"
@@ -23,7 +24,7 @@ LABEL description="VANT AI Agent System - Open Source"
 LABEL org.opencontainers.image.title="VANT"
 LABEL org.opencontainers.image.description="Persistent AI Agent Memory System"
 LABEL org.opencontainers.image.source="https://github.com/dhaupin/vant"
-LABEL org.opencontainers.image.version="0.8.3"
+LABEL org.opencontainers.image.version="${VERSION}"
 
 WORKDIR /app
 
@@ -39,7 +40,7 @@ COPY README.md ./
 COPY CLI.md package.json ./
 
 # Default config
-ENV VANT_VERSION=0.8.3
+ENV VANT_VERSION=${VERSION}
 ENV NODE_ENV=production
 
 # Expose for health endpoint
