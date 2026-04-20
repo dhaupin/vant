@@ -1,4 +1,4 @@
-=== VANT MEMORY FILES MANIFEST ===
+# VANT MEMORY FILES MANIFEST
 
 This defines THE CARGO - the files that are transported between instances.
 
