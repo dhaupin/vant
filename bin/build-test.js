@@ -60,8 +60,24 @@ test('load.js runs', () => {
 // Test: rate-limit.js works
 test('rate-limit.js works', () => {
     const rl = require('../lib/rate-limit');
-    if (typeof rl.getStatus !== 'function') {
-        throw new Error('rate-limit.js missing get()');
+    if (typeof rl.canMakeRequest !== 'function') {
+        throw new Error('rate-limit.js missing canMakeRequest()');
+    }
+    if (typeof rl.recordRequest !== 'function') {
+        throw new Error('rate-limit.js missing recordRequest()');
+    }
+    // Functional test: verify rate limiting
+    const key = 'test-rate-limit-key';
+    rl.reset(); // Clear any existing state
+    const allowed = rl.canMakeRequest();
+    if (!allowed) {
+        throw new Error('Rate limiter blocked but should allow first request');
+    }
+    rl.recordRequest();
+    // After recording, should still be allowed
+    const allowed2 = rl.canMakeRequest();
+    if (!allowed2) {
+        throw new Error('Rate limiter blocked second request incorrectly');
     }
 });
 
@@ -113,6 +129,23 @@ test('example configs exist', () => {
             throw new Error(`${c} not found`);
         }
     });
+});
+
+// Test: vaf.js loads and works
+test('vaf.js works', () => {
+    const vaf = require('../lib/vaf');
+    // Check key functions exist
+    if (typeof vaf.check !== 'function') {
+        throw new Error('vaf.js missing check()');
+    }
+    if (typeof vaf.checkPathTraversal !== 'function') {
+        throw new Error('vaf.js missing checkPathTraversal()');
+    }
+    // Test blocking
+    const blocked = vaf.checkPathTraversal('../etc/passwd');
+    if (!blocked.blocked) {
+        throw new Error('Path traversal not blocked');
+    }
 });
 
 // Run tests

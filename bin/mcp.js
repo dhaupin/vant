@@ -39,6 +39,8 @@ const branch = loadModule('branch');
 const lock = loadModule('lock');
 const config = loadModule('config');
 const health = loadModule('health');
+const protection = require('../lib/protection');
+const vaf = require('../lib/vaf');
 
 /**
  * Tool definitions for MCP
@@ -401,42 +403,119 @@ async function checkHealth(detailed = false) {
  * Handle MCP request
  */
 async function handleRequest(request) {
-    const { method, params = {} } = request;
-    
-    switch (method) {
-        case 'tools/list':
-            return { tools: TOOLS };
-            
-        case 'tools/call':
-            const { name, arguments: args = {} } = params;
-            
-            switch (name) {
-                case 'vant_get_memory':
-                    return await getMemory(args.files);
-                case 'vant_set_memory':
-                    return await setMemory(args.file, args.content, args.branch, args.commit);
-                case 'vant_list_branches':
-                    return await listBranches();
-                case 'vant_create_branch':
-                    return await createBranch(args.name);
-                case 'vant_switch_branch':
-                    return await switchBranch(args.name);
-                case 'vant_commit':
-                    return await commitChanges(args.message, args.branch);
-                case 'vant_sync':
-                    return await syncBrain(args.direction);
-                case 'vant_lock':
-                    return await lockBrain(args.action, args.agentId);
-                case 'vant_health':
-                    return await checkHealth(args.detailed);
-                default:
-                    return { error: `Unknown tool: ${name}` };
+    // VAF pre-check
+    const params = request.params || {};
+    if (params.arguments) {
+        const args = params.arguments;
+        
+        // Validate memory write content
+        if (args.content) {
+            try {
+                vaf.check(args.content, {
+                    type: 'string',
+                    name: 'content',
+                    maxLength: 50000
+                });
+            } catch (e) {
+                return { error: 'Security check failed: ' + e.message };
             }
-            
-        default:
-            return { error: `Unknown method: ${method}` };
+        }
+        
+        // Validate file names
+        if (args.file) {
+            try {
+                vaf.check(args.file, {
+                    type: 'path',
+                    name: 'file'
+                });
+            } catch (e) {
+                return { error: 'Security check failed: ' + e.message };
+            }
+        }
+        
+        // Validate branch names
+        if (args.name) {
+            try {
+                vaf.check(args.name, {
+                    type: 'string',
+                    name: 'branch',
+                    maxLength: 100,
+                    pattern: /^[a-zA-Z0-9_\-]+$/
+                });
+            } catch (e) {
+                return { error: 'Security check failed: ' + e.message };
+            }
+        }
+    }
+    
+    if (protection.isCircuitOpen()) {
+        return { error: 'Circuit open: too many failures. Wait and retry.' };
+    }
+    if (!protection.canProceed()) {
+        return { error: 'Server busy: max ' + protection.MAX_CONCURRENT + ' concurrent requests' };
+    }
+    protection.incrementActive();
+    const { method, params: reqParams = {} } = request;
+    try {
+        switch (method) {
+            case 'tools/list':
+                return { tools: TOOLS };
+            case 'tools/call':
+                const { name, arguments: args = {} } = params;
+                if (name === 'vant_set_memory' && args.content) {
+                    protection.checkInputSize(args.content);
+                }
+                let result;
+                switch (name) {
+                    case 'vant_get_memory':
+                        result = await protection.withTimeout(getMemory(args.files));
+                        break;
+                    case 'vant_set_memory':
+                        result = await protection.withTimeout(setMemory(args.file, args.content, args.branch, args.commit));
+                        break;
+                    case 'vant_list_branches':
+                        result = await protection.withTimeout(listBranches());
+                        break;
+                    case 'vant_create_branch':
+                        result = await protection.withTimeout(createBranch(args.name));
+                        break;
+                    case 'vant_switch_branch':
+                        result = await protection.withTimeout(switchBranch(args.name));
+                        break;
+                    case 'vant_commit':
+                        result = await protection.withTimeout(commitChanges(args.message, args.branch));
+                        break;
+                    case 'vant_sync':
+                        result = await protection.withTimeout(syncBrain(args.direction), 60000);
+                        break;
+                    case 'vant_lock':
+                        result = await protection.withTimeout(lockBrain(args.action, args.agentId));
+                        break;
+                    case 'vant_health':
+                        result = await protection.withTimeout(checkHealth(args.detailed));
+                        break;
+                    case 'vant_protection':
+                        result = protection.getStatus();
+                        break;
+                    default:
+                        result = { error: 'Unknown tool: ' + name };
+                }
+                // Record failures for error results (not just exceptions)
+                if (result && result.error) {
+                    protection.recordFailure();
+                }
+                return result;
+            default:
+                return { error: 'Unknown method: ' + method };
+        }
+    } catch (e) {
+        protection.recordFailure();
+        return { error: e.message };
+    } finally {
+        protection.decrementActive();
     }
 }
+
 
 /**
  * JSON-RPC message handler
