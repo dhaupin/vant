@@ -111,7 +111,7 @@ let passed = 0;
 let failed = 0;
 
 console.log('╔═══════════════════════════════════════╗');
-console.log('║       Vant Build Test v0.8.2         ║');
+console.log('║       Vant Build Test v0.8.3         ║');
 console.log('╚═══════════════════════════════════════╝');
 
 for (const t of TESTS) {

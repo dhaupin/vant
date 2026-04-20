@@ -17,7 +17,7 @@ const CONFIG_FILE = 'config.ini';
 const CONFIG_TEMPLATE = `=== Vant CONFIG ===
 
 # Core
-VANT_VERSION=v0.8.2
+VANT_VERSION=v0.8.3
 MODEL_PATH=models/public
 STATE_PATH=states/active/current.json
 
@@ -48,7 +48,7 @@ function question(prompt) {
 
 async function setup() {
     console.log('\n╔═══════════════════════════════════════╗');
-    console.log('║         Vant Setup v0.8.2            ║');
+    console.log('║         Vant Setup v0.8.3            ║');
     console.log('╚═══════════════════════════════════════╝\n');
 
     // Check existing config
