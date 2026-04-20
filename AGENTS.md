@@ -4,6 +4,33 @@ This guide explains how agents can use Vant's branching system for safe multi-ag
 
 ---
 
+## Security: VAF (Vant Application Firewall)
+
+All inputs are validated through VAF before processing:
+
+```javascript
+const vaf = require('./lib/vaf');
+
+// Check any input
+vaf.check(input, {type: 'string', maxLength: 50000});
+vaf.check(filepath, {type: 'path'});
+
+// Path traversal protection
+vaf.checkPathTraversal('../etc/passwd');  // {blocked: true}
+
+// Content filtering  
+vaf.checkContent('<script>');  // {blocked: true}
+vaf.checkContent('rm -rf /');  // {blocked: true}
+```
+
+Blocked patterns:
+- Path traversal: `../etc/passwd`, `../../../`
+- Script injection: `<script>`, `javascript:`, `onclick=`
+- Shell commands: `rm -rf`, `|bash`, `$(...)`, backticks
+- PHP code: `<?php`
+
+---
+
 ## The Problem
 
 Multiple agents working on the same brain can cause conflicts:
