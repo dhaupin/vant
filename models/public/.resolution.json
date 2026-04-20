@@ -11,16 +11,6 @@
       "superseded_by": null
     },
     {
-      "file": "goals",
-      "entry": "become famous",
-      "status": "resolved",
-      "reason": "Decided its not important",
-      "resolved_by": "agent-1",
-      "branch": "main",
-      "resolved_at": "2026-04-20T21:14:06.009Z",
-      "superseded_by": null
-    },
-    {
       "file": "fears",
       "entry": "fear of death",
       "status": "resolved",
@@ -49,6 +39,36 @@
       "branch": "main",
       "resolved_at": "2026-04-20T21:22:46.908Z",
       "superseded_by": null
+    },
+    {
+      "file": "goals",
+      "entry": "become famous",
+      "status": "resolved",
+      "reason": "not important",
+      "resolved_by": "agent-audit",
+      "branch": "main",
+      "resolved_at": "2026-04-20T21:31:29.376Z",
+      "superseded_by": null
+    },
+    {
+      "file": "goals",
+      "entry": "old goal",
+      "status": "deprecated",
+      "reason": "superseded",
+      "resolved_by": "agent-audit",
+      "branch": "main",
+      "resolved_at": "2026-04-20T21:31:29.377Z",
+      "superseded_by": null
+    },
+    {
+      "file": "identity",
+      "entry": "old belief",
+      "status": "rejected",
+      "reason": "ethics changed",
+      "resolved_by": "agent-audit",
+      "branch": "main",
+      "resolved_at": "2026-04-20T21:31:29.379Z",
+      "superseded_by": null
     }
   ],
   "deltas": [
@@ -58,6 +78,14 @@
       "changed_by": "agent-1",
       "branch": "main",
       "changed_at": "2026-04-20T21:14:06.014Z",
+      "metadata": {}
+    },
+    {
+      "file": "goals",
+      "change": "Audited resolution system",
+      "changed_by": "agent-audit",
+      "branch": "main",
+      "changed_at": "2026-04-20T21:31:29.380Z",
       "metadata": {}
     }
   ]

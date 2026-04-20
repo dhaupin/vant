@@ -15,6 +15,11 @@ All notable changes to VANT are documented here.
 - **Succession** - Brain version/trust management
   - vant succession - Version + trust levels
   - lib/succession.js - Trust level controls
+- **Resolution** - Improved frontmatter matching
+  - Fix path resolution (PROJECT_ROOT)
+  - Auto-add .md extension  
+  - Partial match for bullets/headings
+  - Returns foundType, foundAt metadata
 - **Resolution** - Thought status tracking
   - vant resolution - Mark thoughts resolved/deprecated/rejected
   - lib/resolution.js - Per-file/per-entry status
