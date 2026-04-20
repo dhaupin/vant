@@ -273,9 +273,40 @@ Environment: `TELEGRAM_BOT_TOKEN`
 
 ---
 
+## mcp.js
+
+MCP (Model Context Protocol) server exposing VANT brain as AI tools.
+
+```javascript
+// HTTP server
+const mcp = require('./bin/mcp');
+
+// Tools available
+const { TOOLS, getMemory, checkHealth } = mcp;
+```
+
+**Run as HTTP server:**
+
+```bash
+node bin/mcp.js --server
+# Endpoints: GET /tools, GET /health, POST /call
+```
+
+**Run as AI SDK stdio:**
+
+```bash
+node bin/mcp.js --stdio
+```
+
+See [README.md](./README.md#mcp-server) for full usage.
+
+---
+
 ## Related
 
 - [CLI.md](./CLI.md) - Command reference
+- [AGENTS.md](../AGENTS.md) - Multi-agent workflows
 - [STEGO.md](./STEGO.md) - Steganography docs
 - [ROADMAP.md](./ROADMAP.md) - Future features
 - [CHANGELOG.md](./CHANGELOG.md) - Version history
+- [README.md](./README.md#mcp-server) - MCP server docs

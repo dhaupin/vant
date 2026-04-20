@@ -31,6 +31,15 @@ node bin/vant.js <command>
 | `vant bump` | Bump version and tag release |
 | `vant node` | Run as persistent node |
 | `vant mcp` | Run MCP server for AI tools |
+| `vant onboard` | Show onboarding summary |
+| `vant succession` | Brain succession status |
+| `vant bot` | Run Telegram bot |
+
+## Multi-Agent
+
+For multi-agent workflows, see [AGENTS.md](./AGENTS.md) for:
+- Branch management (`vant checkout`, `vant commit`)
+- Lock coordination to prevent race conditions
 
 ## Examples
 

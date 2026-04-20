@@ -3,7 +3,8 @@
   "version": "0.8.4",
   "description": "vant CLI - Persistent AI agent with generational memory transfer",
   "bin": {
-    "vant": "./bin/vant.js"
+    "vant": "./bin/vant.js",
+    "mcp": "./bin/mcp.js"
   },
   "repository": "https://github.com/dhaupin/vant",
   "homepage": "https://github.com/dhaupin/vant#readme",

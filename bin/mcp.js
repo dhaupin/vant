@@ -408,7 +408,7 @@ async function handleRequest(request) {
             return { tools: TOOLS };
             
         case 'tools/call':
-            const { name, arguments: args } = params;
+            const { name, arguments: args = {} } = params;
             
             switch (name) {
                 case 'vant_get_memory':
@@ -464,12 +464,37 @@ if ((!module.parent || isServer) && !isStdio) {
     const http = require('http');
     
     const server = http.createServer(async (req, res) => {
-        if (req.url === '/tools') {
+        // Add CORS headers
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        
+        if (req.method === 'OPTIONS') {
+            res.writeHead(204);
+            res.end();
+            return;
+        }
+        
+        if (req.url === '/tools' && req.method === 'GET') {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ tools: TOOLS }));
-        } else if (req.url === '/health') {
+        } else if (req.url === '/health' && req.method === 'GET') {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(await checkHealth()));
+        } else if (req.url === '/call' && req.method === 'POST') {
+            let body = '';
+            req.on('data', chunk => body += chunk);
+            req.on('end', async () => {
+                try {
+                    const request = JSON.parse(body);
+                    const response = await handleRequest(request);
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ id: request.id, result: response }));
+                } catch (e) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ id: null, error: { message: e.message } }));
+                }
+            });
         } else {
             res.writeHead(404);
             res.end();
