@@ -152,7 +152,7 @@ git push && git push --tags
 ## For Vant System
 
 Full system at: https://github.com/dhaupin/vant
-For full brain with YAML categories: https://github.com/dhaupin/vant-brain
+Vant supports text/json brain files
 
 ## License
 

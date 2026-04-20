@@ -1,26 +1,21 @@
 #!/usr/bin/env node
 /**
  * Vant Run
- * Placeholder for runtime (not in public release)
- * 
- * In vant-brain: Full runtime integration
+ * CLI-based runtime entry point
  */
 
 console.log(`
 ╔═══════════════════════════════════════╗
-║       Vant Runtime (Preview)        ║
+║       Vant Runtime                     ║
 ╚═══════════════════════════════════════╝
 
-Runtime integration is available in vant-brain.
+Run with: node bin/vant.js start
 
-For now, you can:
+Or use these commands:
 1. vant health    - Check system health
-2.vant load      - Load brain files
+2. vant load      - Load brain files
 3. vant test     - Run tests
 4. vant sync     - Sync with GitHub
-
-To enable runtime, use vant-brain:
-  https://github.com/dhaupin/vant-brain
 `);
 
 process.exit(0);

@@ -73,11 +73,8 @@ Important files:
 - lib/lock.js - Multi-agent lock (optional)
 - lib/branch.js - Git branch per agent (optional)
 
-The public repo (vant) has basic brain loading (text/json).
-For full YAML brain with categories (learnings/, memories/, etc),
-use vant-brain: https://github.com/dhaupin/vant-brain
-
-Now confirm you're set up and ready to persist.
+Vant persists via GitHub - each generation inherits full memory.
+The public repo (vant) has built-in brain loading (text/json).
 ```
 
 ---

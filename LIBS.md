@@ -190,7 +190,7 @@ See [STEGO.md](./STEGO.md) for full documentation.
 
 ## brain.js
 
-Brain file loader (vant-brain only).
+Brain file loader (Vant).
 
 ```javascript
 const brain = require('./lib/brain');
@@ -206,7 +206,7 @@ const identity = brain.getFile('identity');
 
 ## auto-update.js
 
-Auto-save on exit (vant-brain only).
+Auto-save on exit (Vant).
 
 ```javascript
 const autoUpdate = require('./lib/auto-update');

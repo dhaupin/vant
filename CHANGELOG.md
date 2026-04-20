@@ -8,7 +8,16 @@ All notable changes to VANT are documented here.
 
 ## v0.8.4 (2026-04-20)
 
+### Security: VAF (Vant Application Firewall)
+- New lib/vaf.js - Security layer:
+  - Input validation, path traversal protection
+  - Content filtering (PHP, script injection, shell)
+  - Rate limiting, file extension blocking
+- Integrated into bin/mcp.js, lib/resolution.js, lib/branch.js
+
 ### Added
+- **lib/protection.js** - Circuit breaker for MCP
+- **lib/load.js** - Model loader utilities
 - **Onboarding** - Knowledge base browser
   - vant onboard - View/search brain files
   - lib/onboard.js - Search + read brain
@@ -46,6 +55,15 @@ All notable changes to VANT are documented here.
 - bin/mcp.js --help exits properly (doesn't start server)
 - Node --help now shows help (was starting node instead)
 - onboard read <file> now auto-adds .md extension
+
+---
+
+## v0.8.3 (2026-04-19)
+
+### Fixed
+- **bin/run.js** - Updated vant-brain references → Vant
+- **README.md** - Removed vant-brain references
+- **LIBS.md/CLI.md** - Updated references
 
 ---
 
