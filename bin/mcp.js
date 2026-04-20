@@ -454,6 +454,10 @@ async function handleRequest(request) {
                     default:
                         result = { error: 'Unknown tool: ' + name };
                 }
+                // Record failures for error results (not just exceptions)
+                if (result && result.error) {
+                    protection.recordFailure();
+                }
                 return result;
             default:
                 return { error: 'Unknown method: ' + method };
