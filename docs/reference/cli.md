@@ -146,6 +146,8 @@ TELEGRAM_BOT_TOKEN=xxx vant bot
 |---------|-------------|
 | `vant setup` | Interactive setup wizard |
 | `vant update` | Check for new releases |
+| `vant test` | Run test suite |
+| `vant build-test` | Run build validation |
 
 ### Setup Details
 
@@ -171,6 +173,24 @@ Check for updates:
 ```bash
 vant update           # Check
 vant update --install # Install if available
+```
+
+#### vant test
+
+Run test suite:
+
+```bash
+vant test              # Run all tests
+vant test --coverage  # With coverage
+vant test lib/        # Specific path
+```
+
+#### vant build-test
+
+Run build validation tests:
+
+```bash
+vant build-test       # Validate all scripts load
 ```
 
 ## Help & Info
