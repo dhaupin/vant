@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const vaf = require("../lib/vaf");
 /**
  * Vant Watch
  * Monitor GitHub for changes
@@ -95,7 +96,9 @@ function main() {
     // Parse args
     for (let i = 0; i < args.length; i++) {
         if (args[i] === '--interval' && args[i + 1]) {
-            interval = parseInt(args[i + 1]);
+            const intervalArg = args[i + 1];
+            vaf.check(intervalArg, {type: "string", name: "interval", maxLength: 10});
+            interval = parseInt(intervalArg);
         } else if (args[i] === '--daemon') {
             daemon = true;
         }
