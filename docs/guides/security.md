@@ -47,7 +47,9 @@ VAF blocks the following patterns (all configurable via config.ini):
 | Pattern | Description | Example |
 |---------|-------------|---------|
 | Massive repetition | 10+ repeats of same word | `vant vant vant vant vant vant vant vant vant vant` |
-| Word stacking | 2+ repeats | `vant vant`, `foo foo`, `bar bar bar` |
+| Command stacking | 2+ repeats of commands | `vant vant`, `node node`, `docker docker` |
+
+**Note:** Blocks ONLY command/program words (vant, node, docker, npm, git, etc.), NOT normal words (bye, go, ok, hi, etc. pass through).
 
 ### 2. Command Injection
 
