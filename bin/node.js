@@ -68,6 +68,19 @@ HTTP Status: GET http://localhost:3456/health (if MCP enabled)
     process.exit(0);
 }
 
+const vaf = require("../lib/vaf");
+// Validate CLI args
+for (const arg of args) {
+    if (arg.startsWith("--mcp-port=")) {
+        const port = parseInt(arg.split("=")[1]);
+        vaf.check(port, {type: "number", name: "mcpPort", min: 1, max: 65535});
+    }
+    if (arg.startsWith("--poll-interval=")) {
+        const interval = parseInt(arg.split("=")[1]);
+        vaf.check(interval, {type: "number", name: "pollInterval", min: 5, max: 3600});
+    }
+}
+
 const config = {
     mcp: args.includes('--mcp'),
     mcpPort: parseInt(args.find(a => a.startsWith('--mcp-port='))?.split('=')[1] || '3456'),

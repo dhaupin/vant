@@ -1,3 +1,4 @@
+const vaf = require("../lib/vaf");
 const version = require('../lib/version');
 /**
  * Vant Setup
@@ -47,6 +48,17 @@ function question(prompt) {
     return new Promise(resolve => rl.question(prompt, resolve));
 }
 
+/**
+ * Validate user input - log warning but don't block
+ */
+function validateInput(value, type, name, options = {}) {
+    try {
+        vaf.check(value, { type, name, ...options });
+    } catch (e) {
+        console.log(`  ⚠️  ${name} validation warning: ${e.message}`);
+    }
+}
+
 async function setup() {
     console.log('\n╔═══════════════════════════════════════╗');
     console.log('║         Vant Setup v' + version + '            ║');
@@ -67,11 +79,14 @@ async function setup() {
     console.log('   Required: repo scope');
     console.log('   IMPORTANT: Set as GITHUB_TOKEN env var, NOT in config.ini\n');
     const githubRepo = await question('GitHub repo (username/repo): ');
+    validateInput(githubRepo, "string", "githubRepo", { maxLength: 100, pattern: /@[w-]+/[w-]+$/ });
     
     console.log('\n2. Stegoframe Setup (optional)');
     console.log('   URL: https://stegoframe.creadev.org\n');
     const roomId = await question('Room ID (or press Enter to skip): ');
+    validateInput(roomId, "string", "roomId", { maxLength: 50 });
     const passphrase = await question('Passphrase (or press Enter to skip): ');
+    validateInput(passphrase, "string", "passphrase", { maxLength: 100 });
 
     // Build config
     let config = CONFIG_TEMPLATE
