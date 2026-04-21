@@ -23,6 +23,14 @@ guides:
     path: /architecture
   - title: Nodes
     path: /nodes
+  - title: Bot
+    path: /bot
+  - title: Onboarding
+    path: /onboard
+  - title: Succession
+    path: /succession
+  - title: Resolution
+    path: /resolution
   - title: Security
     path: /security
   - title: Multi-Agent

@@ -215,4 +215,50 @@ notifications.send('title', 'message');
 notifications.list();
 ```
 
+## lib/metrics.js
+
+```javascript
+const metrics = require('./lib/metrics');
+
+metrics.increment('vant.sync.success');
+metrics.gauge('vant.memory.usage', 256);
+metrics.timing('vant.sync.duration', 1234);
+```
+
+## lib/resolution.js
+
+```javascript
+const resolution = require('./lib/resolution');
+
+resolution.getStatus('fears', 'fear of X');
+resolution.resolve('fears', 'fear of X', 'resolved', 'therapy');
+resolution.deprecate('goals', 'old goal', 'new goal');
+resolution.reject('identity', 'old belief', 'ethics changed');
+resolution.getLedger();
+```
+
+## lib/telegram.js
+
+```javascript
+const telegram = require('./lib/telegram');
+
+telegram.onCommand('status', async (msg) => {
+    await telegram.send(msg.chat, 'VANT is running');
+});
+telegram.onMessage(async (msg) => {
+    console.log('Received:', msg.text);
+});
+await telegram.startPolling();
+```
+
+## lib/update-check.js
+
+```javascript
+const updateCheck = require('./lib/update-check');
+
+const hasUpdate = await updateCheck.checkForUpdate();
+const latest = await updateCheck.getLatestVersion();
+await updateCheck.notifyIfUpdate();
+```
+
 See also: [CLI Commands](./cli.md), [Schema](./schema.md)

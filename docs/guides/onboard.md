@@ -1,0 +1,115 @@
+---
+permalink: /onboard.html
+---
+
+---
+version: 0.8.4
+title: Onboarding
+slug: /onboard
+order: 25
+---
+
+# Knowledge Base Browser
+
+Browse and search Vant's knowledge base (brain).
+
+## Concept
+
+**Onboarding** provides:
+- List brain files
+- Search knowledge
+- Read content
+- Previews
+
+## Running
+
+```bash
+# Interactive browse
+vant onboard
+
+# Query specific file
+vant onboard identity
+
+# List all files
+vant onboard --list
+
+# Search for term
+vant onboard --search therapy
+
+# Search in file
+vant onboard identity --search therapy
+
+# Show summary
+vant onboard --summary
+```
+
+## Brain Files
+
+Standard brain layout in `models/public/`:
+
+| File | What |
+|------|------|
+| `identity.md` | Core identity |
+| `lessons.md` | Learnings |
+| `goals.md` | Goals |
+| `fears.md` | Fears/concerns |
+| `knowledge.md` | Knowledge base |
+| `style.md` | Working style |
+
+## System Files
+
+Underscore-prefixed files:
+
+| File | What |
+|------|------|
+| `_schema.json` | Brain schema |
+| `_succession.json` | Version/trust |
+| `.ledger.json` | History |
+| `.resolutions/*` | Thought status |
+
+## Use Cases
+
+- **Explore** - See what's in brain
+- **Debug** - Check specific file
+- **Search** - Find memory
+- **Audit** - List all knowledge
+
+## API
+
+```javascript
+const onboard = require('./lib/onboard');
+
+// Get all brain files
+const files = onboard.getBrainFiles();
+
+// Get file content + metadata
+const info = onboard.getFileInfo('identity.md');
+
+// Full summary
+const summary = onboard.getOnboardSummary();
+
+// Search content
+const results = onboard.searchFiles('therapy');
+```
+
+## Output Example
+
+```
+=== Onboarding: Vant Brain ===
+
+Files:
+  identity.md    (core identity)
+  lessons.md   (learnings)
+  goals.md     (goals)
+  fears.md    (concerns)
+
+Search: "therapy"
+  - identity.md: 2 matches
+  - lessons.md: 5 matches
+```
+
+## See Also
+
+- [Succession](./succession.md) - Version/trust
+- [Resolution](./resolution.md) - Thought status
+- [Knowledge](./troubleshooting.md) - Knowledge base
