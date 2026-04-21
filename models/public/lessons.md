@@ -37,7 +37,8 @@ These are core learnings from building and operating Vant systems:
 - Archive originals, reference preserved - distilled versions are lossy
 - Pattern: raw input → spool → process → output (not distill)
 
-7. PROCESS SPOOLING (Validate Every Step)
+7. PROCESS SPOOLING (Validate Every Step + Small Batches)
+- Small batches preserve context, understanding, focus
 - Always verify each step before moving to next
 - Validate state after each commit
 - Pattern: batch → verify → commit → push → validate → next
