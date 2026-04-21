@@ -1,4 +1,5 @@
 const version = require('../lib/version');
+const vaf = require("../lib/vaf");
 // VAF: No user input - fixed Telegram commands
 /**
  * VANT Telegram Bot

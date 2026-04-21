@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const vaf = require("../lib/vaf");
 // VAF: No user input - from package.json
 /**
  * docs-build.js - Build docs for release
