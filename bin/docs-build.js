@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// VAF: No user input - from package.json
 /**
  * docs-build.js - Build docs for release
  * 
