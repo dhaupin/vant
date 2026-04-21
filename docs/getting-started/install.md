@@ -1,4 +1,5 @@
 ---
+version: 0.8.4
 title: Installation
 slug: /install
 order: 1

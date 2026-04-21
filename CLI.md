@@ -1,5 +1,9 @@
 # vant CLI
 
+> ⚠️ **Deprecated**: See [docs/reference/cli](../docs/reference/cli.md) for latest.
+
+---
+
 A lightweight CLI tool for AI agent session management with GitHub-backed state.
 
 ## Installation

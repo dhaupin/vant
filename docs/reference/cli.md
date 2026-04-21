@@ -1,4 +1,5 @@
 ---
+version: 0.8.4
 title: CLI Reference
 slug: /cli
 order: 3

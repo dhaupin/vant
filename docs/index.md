@@ -1,4 +1,5 @@
 ---
+version: 0.8.4
 title: Vant Docs
 slug: /
 order: 0

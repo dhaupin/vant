@@ -394,6 +394,7 @@ See [AGENTS.md](./AGENTS.md) for detailed multi-agent workflows.
 
 ## Related
 
+- [Docs](./docs) - Full documentation
 - [Vant](https://github.com/dhaupin/vant) - Source code
 - [Vant Docker Hub](https://hub.docker.com/r/dhaupin/vant) - Official images
 - [Stegoframe](https://stegoframe.creadev.org) - Encrypted transport

@@ -1,4 +1,5 @@
 ---
+version: 0.8.4
 title: Security
 slug: /security
 order: 8

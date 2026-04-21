@@ -1,4 +1,5 @@
 ---
+version: 0.8.4
 title: Brain Schema
 slug: /schema
 order: 6

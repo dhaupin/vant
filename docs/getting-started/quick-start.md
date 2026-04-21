@@ -1,4 +1,5 @@
 ---
+version: 0.8.4
 title: Quick Start
 slug: /quick-start
 order: 2

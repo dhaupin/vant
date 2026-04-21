@@ -1,4 +1,5 @@
 ---
+version: 0.8.4
 title: Module API
 slug: /api
 order: 5

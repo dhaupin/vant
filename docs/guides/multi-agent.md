@@ -1,4 +1,5 @@
 ---
+version: 0.8.4
 title: Multi-Agent
 slug: /multi-agent
 order: 9
