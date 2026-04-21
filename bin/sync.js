@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const vaf = require("../lib/vaf");
 /**
  * Vant Sync
  * Pull and push to GitHub
@@ -98,6 +99,7 @@ function pull() {
  * Push to GitHub
  */
 function push(message = 'Vant update') {
+    vaf.check(message, {type: "string", name: "message", maxLength: 200});
     const url = getRemoteUrl();
     if (!url) {
         console.log('Config not set. Run vant setup first.');
