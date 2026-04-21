@@ -77,7 +77,8 @@ AVOID:
 
 v0.8.4 (2026-04):
 - Added spooling lesson - resist context distillation
-- VAF gap filling complete for bin/*.js
+- Added process spooling - validate every step
+- VAF gap filling complete for bin/*.js (23/23)
 - 15 tests passing
 
 v0.8.2 (2025-04):
