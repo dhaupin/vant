@@ -157,6 +157,50 @@ Error: Token expired
 - Generate new token: https://github.com/settings/tokens
 - Update .env file
 
+## VAF Blocked Input
+
+VAF (Vant Application Firewall) may block legitimate input:
+
+### Blocked: Newlines
+
+```
+Error: Content blocked: /\n/
+```
+
+**Fix**:
+- Write multi-line content directly to `models/public/filename.md`
+- Don't pass newlines via MCP `setMemory`
+
+### Blocked: Path Traversal
+
+```
+Error: Path traversal detected: ../etc/passwd
+```
+
+**Fix**:
+- Use relative paths within project
+- Don't use `../` in file parameters
+
+### Blocked: Script/XSS
+
+```
+Error: Content blocked: /<script>/
+```
+
+**Fix**:
+- Don't include `<script>`, `javascript:`, `on*=` in inputs
+- For HTML content, write directly to files
+
+### Blocked: Shell Commands
+
+```
+Error: Content blocked: /; rm -rf/
+```
+
+**Fix**:
+- Don't include `;`, `|`, `&&`, `$()` in inputs
+- These are blocked to prevent injection
+
 ## Limitations
 
 | Limitation | Description |
