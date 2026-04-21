@@ -151,4 +151,63 @@ await load.files();      // Load all files
 await load.file(path);  // Load single file
 ```
 
+## lib/colors.js
+
+```javascript
+const colors = require('./lib/colors');
+
+colors.red('error');
+colors.green('success');
+colors.yellow('warning');
+colors.cyan('info');
+```
+
+## lib/progress.js
+
+```javascript
+const progress = require('./lib/progress');
+
+progress.start(total);
+progress.update(current);
+progress.complete();
+```
+
+## lib/prompts.js
+
+```javascript
+const prompts = require('./lib/prompts');
+
+prompts.get('question');
+prompts.list();
+```
+
+## lib/verbosity.js
+
+```javascript
+const verbosity = require('./lib/verbosity');
+
+verbosity.get();     // Current level
+verbosity.set('info');
+verbosity.increase();
+verbosity.decrease();
+```
+
+## lib/stego.js
+
+```javascript
+const stego = require('./lib/stego');
+
+stego.encode(message, image);
+stego.decode(image);
+```
+
+## lib/notifications.js
+
+```javascript
+const notifications = require('./lib/notifications');
+
+notifications.send('title', 'message');
+notifications.list();
+```
+
 See also: [CLI Commands](./cli.md), [Schema](./schema.md)

@@ -36,6 +36,7 @@ New to Vant? Start here:
 - [Multi-Agent](./guides/multi-agent.md) - Branch + lock
 - [MCP Server](./guides/mcp.md) - Model Context Protocol
 - [Docker](./guides/docker.md) - Container guides
+- [Plugins](./guides/plugins.md) - Extend Vant
 - [Troubleshooting](./guides/troubleshooting.md) - Common issues
 
 ---

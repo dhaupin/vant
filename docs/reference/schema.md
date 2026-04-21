@@ -68,4 +68,13 @@ Files in `models/public/`:
 | `_succession.json` | Serialized state, timestamps |
 | `schedule.md` | Task schedule, reminders |
 
+## Runtime State
+
+Files in `states/active/`:
+
+| File | Description |
+|------|-------------|
+| `current.json` | Current runtime state |
+| `rate-limit.json` | Rate limit tracking |
+
 See also: [API](./api.md), [Multi-Agent](../guides/multi-agent.md)
