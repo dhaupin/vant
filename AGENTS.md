@@ -273,9 +273,92 @@ branch.create('agent-1')
 
 ---
 
+## VANT Deep Scan
+
+**Project Overview:**
+- **Name**: VANT (Versatile Autonomous Networked Tool)
+- **Version**: 0.8.4
+- **Purpose**: Persistent AI agent memory system - each generation inherits full context from previous sessions via GitHub
+- **Repository**: https://github.com/dhaupin/vant
+- **Node**: >=18 required
+
+### Architecture
+
+```
+vant/
+├── bin/                    # CLI executables
+│   ├── vant.js            # Main CLI entry
+│   ├── mcp.js             # Model Context Protocol server
+│   ├── node.js            # Persistent node runner
+│   ├── health.js          # System diagnostics
+│   ├── sync.js            # GitHub pull/push
+│   └── load.js           # Load brain files
+├── lib/                    # Core modules (29 files)
+│   ├── config.js          # Config loader
+│   ├── brain.js         # Brain file loader
+│   ├── lock.js          # Multi-agent locking
+│   ├── branch.js        # Git branch per agent
+│   ├── stego.js        # Steganography (PNG encoding)
+│   ├── vaf.js          # Vant Application Firewall
+│   └── notifications.js # Slack/Discord webhooks
+├── src/                   # Extension points
+│   ├── loader/          # Custom loaders
+│   └── plugins/        # Plugin system
+├── models/               # Brain files
+│   └── public/        # Default brain (19 files)
+│       ├── identity.md, ego.md, fears.md, anger.md, joy.md
+│       ├── manifesto.md, creed.md, goals.md, preferences.md
+│       ├── lessons.md, qc.md, security.md
+│       ├── audit.md, errors.md, keepers.md
+│       ├── curiosity.md, humility.md, empathy.md, gratitude.md
+│       └── meta.json, verbosity.ini
+└── docs/                # Full documentation
+```
+
+### Key Dependencies
+
+- `chalk` - Terminal styling
+- `cli-progress` - Progress bars
+- `express` - HTTP server (MCP)
+- `inquirer` - Interactive prompts
+- `yaml` - YAML parsing
+
+### CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant start` | Full startup (health → sync → load → run) |
+| `vant health` | System diagnostics |
+| `vant sync` | Pull/push brain from GitHub |
+| `vant load` | Load brain from models/public |
+| `vant test` | Run build/tests |
+| `vant watch` | Monitor GitHub for changes |
+| `vant setup` | Interactive setup wizard |
+| `vant mcp` | Run MCP server |
+| `vant node` | Run as persistent node |
+
+### Integration Points
+
+1. **GitHub Sync**: Uses GITHUB_TOKEN and GITHUB_REPO config
+2. **Slack/Discord**: Via SLACK_WEBHOOK_URL, DISCORD_WEBHOOK_URL
+3. **Telegram**: Via TELEGRAM_BOT_TOKEN
+4. **MCP Server**: HTTP server on port 3456 (default)
+
+### Important Patterns
+
+- **Lock before writing**: Always acquire lock before modifying brain
+- **Branch per agent**: Each agent works on their own Git branch
+- **Commit with prefix**: Include agent ID in commit messages
+- **Auto-save**: Enable auto-update for exit persistence
+
+---
+
 ## Related Docs
 
 - `lib/branch.js` - Branch API source
 - `lib/lock.js` - Lock API source
 - `models/public/schema/memory-files.md` - Memory file schema
 - `CHANGELOG.md` - Version history
+- `LIBS.md` - Full module reference
+- `CLI.md` - Command reference
+- `README.md` - Full documentation
