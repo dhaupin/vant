@@ -181,8 +181,19 @@ await onboard.list();    // List available
 ```javascript
 const errors = require('./lib/errors');
 
-errors.get(code);
-errors.format(error);
+errors.handle(error, 'context');  // Handle error with context
+
+// Wrapping helpers
+errors.configError('message');       // Wrap config error
+errors.githubError('message', 404); // Wrap GitHub error
+errors.networkError('message');   // Wrap network error
+
+// Retry
+await errors.retry(fn, 3, 1000);   // Retry with backoff
+
+// Get error info
+errors.get(code);                 // Get error by code
+errors.format(error);             // Format error message
 ```
 
 ## lib/load.js
@@ -234,8 +245,12 @@ progress.complete();
 ```javascript
 const prompts = require('./lib/prompts');
 
-prompts.get('question');
-prompts.list();
+// Interactive prompts
+const confirmed = await prompts.confirm('Continue?');
+const name = await prompts.input('Your name');
+const password = await prompts.password('Password');
+const choice = await prompts.select('Choose:', ['a', 'b', 'c']);
+const choices = await prompts.checkbox('Select:', ['a', 'b', 'c']);
 ```
 
 ## lib/verbosity.js
@@ -243,10 +258,23 @@ prompts.list();
 ```javascript
 const verbosity = require('./lib/verbosity');
 
-verbosity.get();     // Current level
-verbosity.set('info');
-verbosity.increase();
-verbosity.decrease();
+// Get verbosity level
+verbosity.get();           // Get all levels
+verbosity.get('content');   // Get specific: log, response, content, comment, code
+verbosity.isVerbose('content'); // Check if verbose
+
+// Set verbosity
+verbosity.set('content', 'extended');
+verbosity.set({ content: 'extended', response: 'terse' });
+
+// Adjust
+verbosity.increase('log');
+verbosity.decrease('log');
+
+// Output helpers
+verbosity.log('message');        // Respects log= setting
+verbosity.response('message');    // Respects response= setting
+verbosity.content('message');     // Respects content= setting
 ```
 
 ## lib/stego.js
