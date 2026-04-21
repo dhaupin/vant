@@ -60,6 +60,10 @@ const vaf = require('./lib/vaf');
 // Validation
 vaf.validate(input);                    // Throws on invalid
 vaf.check(input, {type: 'string', maxLength: 50000}); // Check with rules
+
+// Different types
+vaf.check(input, {type: 'path'});              // File path - blocks traversal
+vaf.check(content, {type: 'string', skipDangerous: true}); // Skip content check (for memory)
 vaf.checkPathTraversal('../etc/passwd'); // Check path traversal
 vaf.checkContent('<script>');            // Check for injection
 vaf.checkFileExtension('file.exe');      // Check dangerous extensions
