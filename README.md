@@ -10,14 +10,18 @@
 
 ## Table of Contents
 
-### Getting Started
-- [Quick Start](#quick-start)
-- [Installation](#installation)
-- [Configuration](#configuration)
+### Installation
+- [Install](#install)
+  - [Choose Your Init Method](#choose-your-init-method)
+  - [AI Prompt Init](#ai-prompt-init)
+  - [Local Init](#local-init)
+  - [Docker Init](#docker-init)
 
 ### CLI Reference
 - [CLI Commands](#cli-commands)
-- [Full Reference →](CLI.md)
+
+### Configuration
+- [Configuration](#configuration)
 
 ### How It Works
 - [Architecture](#architecture)
@@ -25,13 +29,11 @@
 - [Multi-Agent](#multi-agent)
 
 ### More
-- [Docker](#docker-init)
-- [GitHub Actions](#github-actions-optional)
 - [Related](#related)
 
 ---
 
-## Choose Your Init Method
+## Install
 
 | Method | Best For | Time |
 |--------|----------|------|
