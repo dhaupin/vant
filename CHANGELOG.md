@@ -18,6 +18,11 @@ All notable changes to VANT are documented here.
   - All point to docs/ for full reference
   - Backwards compat via deprecated notices
   - Added /style, /steganography redirects
+- **Docsify Era** - Multiple iterations to fix routing
+  - 404.html SPA fallback
+  - Mobile-friendly swipe nav
+  - BasePath handling
+  - Static generator with _site/ pre-built
 
 ### Documentation
 - **AGENTS.md** - Added deep scan knowledge
@@ -25,6 +30,11 @@ All notable changes to VANT are documented here.
   - Key dependencies, CLI commands table
   - Integration points documented
   - Important patterns (lock before write, branch per agent)
+- **Docs Expansion** - Full coverage added
+  - Security, testing, audit, GitHub Pages
+  - Integration, gotchas, limits
+  - Plugins, config, states
+  - FAQs added to index, CLI, MCP
 
 ---
 
