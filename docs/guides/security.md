@@ -146,7 +146,34 @@ Home expansion: `~`, `$HOME`, `$USER`, `~/.ssh/`
 /chown\s+/          // chown
 ```
 
-### 11. Null Byte Injection
+### 11. Log Injection
+
+Newlines in logs can inject fake entries or corrupt audit trails:
+
+| Pattern | Description | Risk |
+|---------|-------------|------|
+| `\n` | Newline | Fake log entries |
+| `\r` | Carriage return | Log corruption |
+
+### 12. CRLF Injection
+
+CRLF sequences can inject HTTP headers:
+
+| Pattern | Description | Risk |
+|---------|-------------|------|
+| `\r\n` | CRLF sequence | HTTP header injection |
+| `Set-Cookie:` | Cookie injection | Session hijacking |
+
+### 13. XXE (XML External Entity)
+
+XML parsing vulnerabilities:
+
+| Pattern | Description |
+|---------|-------------|
+| `<!ENTITY` | XML entity definition |
+| `<!ELEMENT` | XML element definition |
+
+### 14. Null Byte Injection
 
 ```
 file.txt\x00.exe  -> Blocked
@@ -169,8 +196,22 @@ MAX_REQUESTS_PER_HOUR=1000
 MAX_BURST=10
 MAX_PATH_LENGTH=4096
 BLOCK_PATH_TRAVERSAL=true
-AUDIT_LOG=true
-AUDIT_FILE=.audit.log
+```
+
+## MCP Server
+
+MCP endpoints use VAF for all input validation. Important:
+
+- **File parameters** use `type: 'path'` to block path traversal
+- **String parameters** block newlines (`\n`), CRLF (`\r\n`), XSS
+- **Memory content** should be written directly to `models/public/` not via MCP
+
+```javascript
+// MCP - blocks newlines in content (secure)
+await setMemory('lessons', '# Lesson\n\n- Note here')
+
+// Direct file write - allows newlines (user intent)
+fs.writeFileSync('models/public/lessons.md', '# Lesson\n\n- Note here')
 ```
 
 ### Settings Reference
