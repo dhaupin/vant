@@ -83,7 +83,7 @@ Core configuration:
 
 ```ini
 # Core
-vant_VERSION=v0.8.4
+VANT_VERSION=v0.8.4
 MODEL_PATH=models/public
 STATE_PATH=states/active/current.json
 
@@ -104,10 +104,83 @@ MCP_PORT=3456
 
 | Section | Options |
 |---------|---------|
-| Core | vant_VERSION, MODEL_PATH, STATE_PATH |
+| Core | VANT_VERSION, MODEL_PATH, STATE_PATH |
 | GitHub | GITHUB_REPO, GITHUB_BRANCH |
 | Runtime | POLLING_INTERVAL, MAX_REQUESTS_PER_HOUR |
 | MCP Server | MCP_API_KEY, MCP_PORT |
+
+### Security Configuration (config.ini)
+
+All security settings can be configured via config.ini:
+
+```ini
+# === Security Configuration ===
+
+# VAF (Input Validation & Filtering)
+MAX_STRING_LENGTH=100000
+MAX_DEPTH=5
+MAX_ARRAY_LENGTH=1000
+
+# Rate Limiting
+MAX_REQUESTS_PER_MINUTE=60
+MAX_REQUESTS_PER_HOUR=1000
+MAX_BURST=10
+
+# Path Protection
+MAX_PATH_LENGTH=4096
+BLOCK_PATH_TRAVERSAL=true
+
+# Audit Logging
+AUDIT_LOG=true
+AUDIT_FILE=.audit.log
+
+# MCP Server Security
+MCP_REQUIRE_API_KEY=false
+MCP_TIMEOUT=30000
+MCP_MAX_INPUT_SIZE=1048576
+MCP_MAX_CONCURRENT=3
+MCP_CIRCUIT_BREAK_THRESHOLD=5
+MCP_CIRCUIT_BREAK_WINDOW=60000
+```
+
+### Security Settings Reference
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| **VAF Settings** |||
+| MAX_STRING_LENGTH | 100000 | Max input string length |
+| MAX_DEPTH | 5 | Max nested object depth |
+| MAX_ARRAY_LENGTH | 1000 | Max array items |
+| **Rate Limiting** |||
+| MAX_REQUESTS_PER_MINUTE | 60 | Requests per minute |
+| MAX_REQUESTS_PER_HOUR | 1000 | Requests per hour |
+| MAX_BURST | 10 | Burst requests |
+| **Path Protection** |||
+| MAX_PATH_LENGTH | 4096 | Max path length |
+| BLOCK_PATH_TRAVERSAL | true | Block .. in paths |
+| **Audit** |||
+| AUDIT_LOG | true | Enable logging |
+| AUDIT_FILE | .audit.log | Log file |
+| **MCP Security** |||
+| MCP_REQUIRE_API_KEY | false | Force API key |
+| MCP_TIMEOUT | 30000 | Request timeout (ms) |
+| MCP_MAX_INPUT_SIZE | 1048576 | Max input (1MB) |
+| MCP_MAX_CONCURRENT | 3 | Parallel requests |
+| MCP_CIRCUIT_BREAK_THRESHOLD | 5 | Failures before block |
+| MCP_CIRCUIT_BREAK_WINDOW | 60000 | Failure window (ms) |
+
+### Environment Variable Overrides
+
+Security settings can also be set via environment variables:
+
+```bash
+# MCP Security via environment
+export VANT_MCP_API_KEY=your-secret-key
+export VANT_MCP_REQUIRE_API_KEY=true
+export MCP_TIMEOUT=15000
+export MCP_MAX_CONCURRENT=2
+export MCP_CIRCUIT_BREAK_THRESHOLD=3
+```
 
 ## settings.ini
 

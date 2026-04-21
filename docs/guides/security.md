@@ -2,7 +2,6 @@
 permalink: /security.html
 ---
 
-
 ---
 version: 0.8.4
 title: Security
@@ -14,229 +13,309 @@ order: 8
 
 Security guide for Vant - protecting your brain, tokens, and secrets.
 
-## VAF (Vant Authorization Framework)
+## VAF (Vant Application Firewall)
 
-Vant includes VAF for input validation and sanitization.
+VAF is Vant's input validation and filtering system. It protects against:
+- Injection attacks (command, path, script)
+- DoS attacks (rate limits, input size bombs)
+- Malicious content (malware patterns, exploits)
+- Word stacking attacks (troll/flood attacks)
 
-### Features
-
-| Feature | Description |
-|---------|-------------|
-| Input validation | Validates all input before use |
-| Path traversal protection | Blocks `../` attacks |
-| Injection prevention | Blocks malicious patterns |
-| Rate limiting | Per-agent/IP request limits |
-| Content filtering | Filters dangerous content |
-| Audit logging | Logs all security events |
-
-### Input Validation
-
-All input is validated before use:
-
-- **No hardcoded credentials** - Uses environment variables
-- **Type checking** - Enforces expected types
-- **Length limits** - Prevents buffer overflow
-- **Format validation** - Regex validation
+### Quick Start
 
 ```javascript
 const vaf = require('./lib/vaf');
 
-// Validates input - throws on invalid
-vaf.check(userInput);
+// Validate any input
+vaf.check(userInput, { type: 'string', maxLength: 50000 });
 
-// Returns safe version
-const safe = vaf.sanitize(userInput);
+// Check path for traversal
+vaf.checkPathTraversal(userPath);
+
+// Check content for dangerous patterns
+vaf.checkContent(content);
 ```
 
-### Path Traversal Protection
+---
 
-VAF blocks path traversal attacks:
+## VAF Rules (Complete List)
 
-| Attack | Blocked? |
-|--------|----------|
-| `../etc/passwd` | ✓ |
-| `..%2F..%2Fetc` | ✓ |
-| `%2E%2E%2F` | ✓ |
-| `....//....//etc` | ✓ |
+VAF blocks the following patterns (all configurable via config.ini):
 
-### Content Filtering
+### 1. Word Stacking / Flood Attacks
 
-Patterns that are blocked:
+| Pattern | Description | Example |
+|---------|-------------|---------|
+| Massive repetition | 10+ repeats of same word | `vant vant vant vant vant vant vant vant vant vant` |
+| Word stacking | 2+ repeats | `vant vant`, `foo foo`, `bar bar bar` |
+
+### 2. Command Injection
+
+| Pattern | Blocked Examples |
+|---------|----------------|
+| Command substitution | `$(whoami)`, `${whoami}`, `` `whoami` `` |
+| Pipe to shell | `| bash`, `| sh` |
+| Sequential | `; rm -rf /`, `:;rm` |
+| Background | `& rm -rf &` |
+| Chain operators | `&& whoami`, `|| whoami` |
+
+### 3. Shell Metacharacters
+
+| Character | Purpose | Blocked |
+|-----------|---------|---------|
+| `&&` | AND chain | Yes |
+| `||` | OR chain | Yes |
+| `;` | Sequence | Yes |
+| `&` | Background | Yes |
+| `|` | Pipe | Yes |
+| `>` | Redirect out | Yes |
+| `<` | Redirect in | Yes |
+| `>>` | Append redirect | Yes |
+
+### 4. Environment Variables
+
+| Pattern | Blocked |
+|---------|---------|
+| `$VAR` | `$HOME`, `$PATH`, `$USER`, `$AWS_KEY` |
+| `${VAR}` | `${SECRET}`, `${AWS_ACCESS_KEY}` |
+
+### 5. Script Injection
+
+| Pattern | Description |
+|---------|-------------|
+| `<script>` | Script tags |
+| `javascript:` | JS protocol |
+| `onclick=` | Event handlers |
+| `<iframe>` | Frame injection |
+| `eval()` | Code eval |
+| `exec()` | Command exec |
+| `system()` | PHP system |
+
+### 6. Path Traversal
+
+| Pattern | Blocked |
+|---------|---------|
+| `../` | Parent traversal |
+| `..%2F` | URL encoded |
+| `%2E%2E%2F` | Double encoded |
+| `....//` | Bypass attempt |
+
+### 7. Sensitive System Paths
+
+All of these are blocked in paths:
+
+```
+/etc/   /usr/   /bin/   /sbin/  /var/   /root/
+/home/  /tmp/   /opt/   /boot/  /dev/   /sys/
+/proc/  /lib/   /snap/
+```
+
+Windows paths: `C:\`, `D:\`, `\\UNC\path`
+
+Home expansion: `~`, `$HOME`, `$USER`, `~/.ssh/`
+
+### 8. File Attack Extensions
+
+| Blocked | Reason |
+|---------|--------|
+| `.exe`, `.bat`, `.cmd` | Executables |
+| `.sh`, `.bash` | Shell scripts |
+| `.ps1` | PowerShell |
+| `.scr`, `.vbs` | Scripts |
+| `.dll`, `.so` | Libraries |
+
+### 9. PHP Code
+
+| Pattern | Description |
+|---------|-------------|
+| `<?php` | PHP open tag |
+| `<?=` | PHP short echo |
+| `system()` | Execute command |
+| `shell_exec()` | Shell execute |
+| `passthru()` | Execute passthru |
+| `proc_open()` | Process open |
+
+### 10. Dangerous Commands
 
 ```javascript
-const DANGEROUS_PATTERNS = [
-    /<\?php/i,
-    /<script/i,
-    /javascript:/i,
-    /on\w+\s*=/i,    // onclick=, onload=
-    /eval\s*\(/i,
-    /exec\s*\(/i,
-    /\$\(.*\)/,       // Command injection
-    /`.*`/,          // Backtick expansion
-    /\brm\s+-rf\b/,
-    /chmod\s+777/
-];
+/\brm\s+-rf\b/      // rm -rf
+/\bdd\s+if\b.*\bof\b/  // dd if
+/chmod\s+777/      // chmod 777
+/chown\s+/          // chown
 ```
 
-### Rate Limiting
+### 11. Null Byte Injection
 
-Rate limits per agent/IP:
-
-| Limit | Value |
-|-------|-------|
-| Per minute | 60 requests |
-| Per hour | 1,000 requests |
-| Burst | 10 requests |
-
-```javascript
-if (vaf.canMakeRequest()) {
-    // Make request
-    vaf.recordRequest();
-}
+```
+file.txt\x00.exe  -> Blocked
+test.php\x00      -> Blocked
 ```
 
-### Audit Logging
+---
+
+## Configuration
+
+All VAF settings are configurable via `config.ini`:
+
+```ini
+# VAF Configuration (config.ini)
+MAX_STRING_LENGTH=100000
+MAX_DEPTH=5
+MAX_ARRAY_LENGTH=1000
+MAX_REQUESTS_PER_MINUTE=60
+MAX_REQUESTS_PER_HOUR=1000
+MAX_BURST=10
+MAX_PATH_LENGTH=4096
+BLOCK_PATH_TRAVERSAL=true
+AUDIT_LOG=true
+AUDIT_FILE=.audit.log
+```
+
+### Settings Reference
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| MAX_STRING_LENGTH | 100000 | Max input string length |
+| MAX_DEPTH | 5 | Max nested object depth |
+| MAX_ARRAY_LENGTH | 1000 | Max array items |
+| MAX_REQUESTS_PER_MINUTE | 60 | Rate limit/min |
+| MAX_REQUESTS_PER_HOUR | 1000 | Rate limit/hour |
+| MAX_BURST | 10 | Burst requests |
+| MAX_PATH_LENGTH | 4096 | Max path length |
+| BLOCK_PATH_TRAVERSAL | true | Block .. in paths |
+| AUDIT_LOG | true | Enable audit logging |
+| AUDIT_FILE | .audit.log | Log file path |
+
+---
+
+## MCP Protection
+
+The MCP server has additional protection layers (lib/protection.js):
+
+### Settings (config.ini)
+
+```ini
+MCP_SERVER=true
+MCP_PORT=3456
+MCP_API_KEY=your-secret-key
+MCP_REQUIRE_API_KEY=false
+MCP_TIMEOUT=30000
+MCP_MAX_INPUT_SIZE=1048576
+MCP_MAX_CONCURRENT=3
+MCP_CIRCUIT_BREAK_THRESHOLD=5
+MCP_CIRCUIT_BREAK_WINDOW=60000
+```
+
+### MCP Settings Reference
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| MCP_PORT | 3456 | Server port |
+| MCP_API_KEY | - | API key for auth |
+| MCP_REQUIRE_API_KEY | false | Force auth required |
+| MCP_TIMEOUT | 30000 | Request timeout (ms) |
+| MCP_MAX_INPUT_SIZE | 1048576 | Max input (1MB) |
+| MCP_MAX_CONCURRENT | 3 | Concurrent requests |
+| MCP_CIRCUIT_BREAK_THRESHOLD | 5 | Failures before block |
+| MCP_CIRCUIT_BREAK_WINDOW | 60000 | Failure window (ms) |
+
+### Circuit Breaker
+
+The circuit breaker prevents cascade failures:
+
+1. 5 failures in 1 minute -> circuit opens
+2. All requests rejected until window clears
+3. Auto-recovery after window passes
+
+---
+
+## Rate Limiting
+
+| Limit | Default | Description |
+|-------|---------|-------------|
+| Per minute | 60 | Standard rate |
+| Per hour | 1000 | Hourly limit |
+| Burst | 10 | Rapid requests |
+
+---
+
+## Audit Logging
 
 All security events are logged:
 
 ```bash
-# View audit log
 tail -f .audit.log
 ```
 
 Events logged:
-- Blocked requests
-- Rate limit exceeded
-- Invalid input detected
-- Path traversal attempts
+- BLOCKED - Content blocked by VAF
+- RATE_LIMIT - Rate limit exceeded
+- PATH_TRAVERSAL - Path attack blocked
+- AUTH_FAILED - Invalid API key
+- CIRCUIT_OPEN - Circuit breaker open
+- TIMEOUT - Request timeout
 
-## Token Security
-
-### GitHub Tokens
-
-#### PAT (Personal Access Token)
-
-| Scope | Required | Risk |
-|-------|----------|------|
-| `repo` | Yes | High - full control |
-| `read:user` | No | Low |
-| `delete_repo` | No | Critical |
-
-**Recommendation**: Use minimal scope needed.
-
-#### Fine-Grained Tokens
-
-より安全な代替:
-
-```yaml
-- Repository: vant-brain
-- Permissions:
-  - Contents: Read/Write
-  - Pull requests: Read/Write
-```
-
-### Token Best Practices
-
-| Practice | Description |
-|----------|-------------|
-| Rotate regularly | Every 90 days |
-| Use fine-grained | Instead of PAT when possible |
-| Set expiration | Auto-expire tokens |
-| Restrict by IP | Add IP allowlist |
-| Monitor usage | Check audit logs |
-
-### Environment Variables
-
-Store secrets in environment, NOT in code:
-
-```bash
-# .env (add to .gitignore)
-GITHUB_TOKEN=ghp_xxxxxxxxxxxx
-STEGOFRAME_PASSPHRASE=secret
-MCP_API_KEY=key
-```
-
-```bash
-# .gitignore
-.env
-.env.*
-states/active/current.json
-*.pem
-*.key
-```
+---
 
 ## MCP Security
 
-When using MCP server:
+### Enable API Key (Recommended for Production)
 
-| Setting | Recommendation |
-|--------|---------------|
-| API key | Always use |
-| Network | Restrict access |
-| Tools | Review permissions |
-| Timeout | Set limits |
-
-```bash
-vant mcp --api-key $MCP_API_KEY --timeout 30000
+```ini
+# config.ini
+MCP_REQUIRE_API_KEY=true
+MCP_API_KEY=your-very-secret-key
 ```
 
-## GPG Signing
-
-Sign commits for verified authorship:
+### Making Authenticated Requests
 
 ```bash
-# Set up GPG
-gpg --full-generate-key
-
-# Configure Git
-git config --global user.signingkey $KEY_ID
-git config --global commit.gpgsign true
-
-# Sign commits
-vant sync  # Commits are signed
+curl -X POST http://localhost:3456/call \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: your-very-secret-key" \
+  -d '{"jsonrpc":"2.0","method":"tools/call","params":{...}}'
 ```
 
-## Incident Response
-
-### If Token Leaked
-
-1. **Revoke immediately**: https://github.com/settings/tokens
-2. **Regenerate new token**
-3. **Update .env**
-4. **Check audit logs** for unauthorized access
-
-### If Brain Compromised
-
-1. **Check git log**: `git log`
-2. **Revert compromised commits**
-3. **Force push** if needed: `git push --force`
-4. **Rotate tokens**
-
-### Audit Log Analysis
+### Environment Variables
 
 ```bash
-# View last 100 events
-tail -100 .audit.log
-
-# Filter blocked requests
-grep BLOCKED .audit.log
-
-# Filter rate limits
-grep RATE_LIMIT .audit.log
+export VANT_MCP_API_KEY=your-secret-key
+export VANT_MCP_REQUIRE_API_KEY=true
+export MCP_TIMEOUT=15000
 ```
+
+---
 
 ## Security Checklist
 
-Before deploying Vant:
+Before deploying to production:
 
-- [ ] Token in .env, NOT in code
-- [ ] .env in .gitignore
-- [ ] Minimal token scope
-- [ ] Token expiration set
-- [ ] MCP API key enabled
-- [ ] Rate limiting enabled
-- [ ] Audit log monitored
-- [ ] Private repository (for brain)
-- [ ] 2FA on GitHub account
+- [ ] Set MCP_REQUIRE_API_KEY=true
+- [ ] Use strong MCP_API_KEY (32+ random chars)
+- [ ] Configure rate limits for your use
+- [ ] Enable AUDIT_LOG=true
+- [ ] Monitor .audit.log regularly
+- [ ] Review circuit breaker settings
+- [ ] Test VAF blocks manually
+
+---
+
+## Test VAF Blocks
+
+```bash
+# Test word stacking
+node -e "const vaf=require('./lib/vaf');vaf.check('vant vant')"
+
+# Test path traversal  
+node -e "const vaf=require('./lib/vaf');vaf.checkPathTraversal('../etc/passwd')"
+
+# Test shell metacharacters
+node -e "const vaf=require('./lib/vaf');vaf.check('&& whoami')"
+
+# Test environment variables
+node -e "const vaf=require('./lib/vaf');vaf.check('\$HOME')"
+```
+
+---
 
 See also: [Configuration](../reference/configuration.md), [Architecture](./architecture.md), [Troubleshooting](./troubleshooting.md)
