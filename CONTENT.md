@@ -1,6 +1,6 @@
 # Vant Content Guide
 
-> ⚠️ **Moved**: See [docs/guides/style](../docs/guides/style.md) for latest.
+> ⚠️ **Deprecated**: See [docs/guides/style](../docs/guides/style.md) for latest.
 
 ---
 

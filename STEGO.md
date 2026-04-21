@@ -1,6 +1,6 @@
 # Vant Stegoframe Transport
 
-> ⚠️ **Moved**: See [docs/guides/steganography](../docs/guides/steganography.md) for latest.
+> ⚠️ **Deprecated**: See [docs/guides/steganography](../docs/guides/steganography.md) for latest.
 
 ---
 

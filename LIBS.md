@@ -1,6 +1,6 @@
 # Vant Module Reference
 
-> ⚠️ **Moved**: See [docs/reference/api](../docs/reference/api.md) for latest.
+> ⚠️ **Deprecated**: See [docs/reference/api](../docs/reference/api.md) for latest.
 
 ---
 
