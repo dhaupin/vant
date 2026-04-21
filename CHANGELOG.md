@@ -1,5 +1,9 @@
 # Changelog
 
+> ⚠️ **Migration to Jekyll docs in progress**. See [docs/](docs/) for latest guides.
+
+---
+
 > VANT = Versatile Autonomous Networked Tool
 
 All notable changes to VANT are documented here.

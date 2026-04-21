@@ -1,5 +1,7 @@
 # VANT Roadmap
 
+> ⚠️ **Migration to Jekyll docs in progress**. See [docs/guides/](docs/guides/) for latest guides.
+
 > VANT = Versatile Autonomous Networked Tool
 
 ## v0.9.0 - Next
