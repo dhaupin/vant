@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const vaf = require("../lib/vaf");
 // resolution.js - CLI for thought resolution
 
 const path = require('path');
@@ -6,6 +7,7 @@ const resolution = require('../lib/resolution');
 
 const args = process.argv.slice(2);
 const cmd = args[0];
+if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
 
 function printStatus() {
     const ledger = resolution.getLedger();

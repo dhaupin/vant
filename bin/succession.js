@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const vaf = require("../lib/vaf");
 // bin/succession.js - CLI for brain succession
 
 const path = require('path')
@@ -8,7 +9,8 @@ const { execSync } = require('child_process')
 const succession = require('../lib/succession')
 
 const args = process.argv.slice(2)
-const cmd = args[0]
+const cmd = args[0];
+if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
 
 function getGitCommit() {
   try {
