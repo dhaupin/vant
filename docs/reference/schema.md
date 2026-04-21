@@ -56,8 +56,16 @@ Files in `models/public/`:
 ## Meta
 
 | File | Description |
-|------|------------|
+|------|-------------|
 | `meta.json` | Version, stats |
 | `verbosity.ini` | Output settings |
+
+## Version & State
+
+| File | Description |
+|------|-------------|
+| `succession.md` | Version history, changelog |
+| `_succession.json` | Serialized state, timestamps |
+| `schedule.md` | Task schedule, reminders |
 
 See also: [API](./api.md), [Multi-Agent](../guides/multi-agent.md)

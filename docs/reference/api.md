@@ -56,4 +56,99 @@ vaf.validate(input);
 vaf.sanitize(input);
 ```
 
+## lib/health.js
+
+```javascript
+const health = require('./lib/health');
+
+await health.run();        // Run all checks
+const status = await health.check(); // Get status
+```
+
+## lib/logger.js
+
+```javascript
+const logger = require('./lib/logger');
+
+logger.info('message');
+logger.warn('warning');
+logger.error('error');
+```
+
+## lib/version.js
+
+```javascript
+const version = require('./lib/version');
+
+version.get();    // Get current version
+version.bump('patch'); // Bump version
+```
+
+## lib/succession.js
+
+```javascript
+const succession = require('./lib/succession');
+
+await succession.get();     // Get current version
+await succession.trust();   // Mark trusted
+await succession.diff();    // Compare to previous
+```
+
+## lib/protection.js
+
+```javascript
+const protection = require('./lib/protection');
+
+protection.enable();   // Enable circuit breaker
+protection.disable(); // Disable
+protection.trigger(); // Trigger protection
+```
+
+## lib/rate-limit.js
+
+```javascript
+const rateLimit = require('./lib/rate-limit');
+
+await rateLimit.check();    // Check remaining
+await rateLimit.wait();    // Wait if needed
+rateLimit.getResetTime();  // Get reset time
+```
+
+## lib/auto-update.js
+
+```javascript
+const autoUpdate = require('./lib/auto-update');
+
+autoUpdate.enable();    // Enable auto-save
+autoUpdate.disable();  // Disable
+autoUpdate.trigger();  // Trigger save
+```
+
+## lib/onboard.js
+
+```javascript
+const onboard = require('./lib/onboard');
+
+await onboard.query('question');
+await onboard.list();    // List available
+```
+
+## lib/errors.js
+
+```javascript
+const errors = require('./lib/errors');
+
+errors.get(code);
+errors.format(error);
+```
+
+## lib/load.js
+
+```javascript
+const load = require('./lib/load');
+
+await load.files();      // Load all files
+await load.file(path);  // Load single file
+```
+
 See also: [CLI Commands](./cli.md), [Schema](./schema.md)

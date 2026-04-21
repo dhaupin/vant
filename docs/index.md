@@ -19,21 +19,24 @@ Vant persists across sessions through GitHub-based brain transfer. Each generati
 
 New to Vant? Start here:
 
-- [Installation](./getting-started/install) - Choose your init method
-- [Quick Start](./getting-started/quick-start) - 2-minute guide
+- [Installation](./getting-started/install.md) - Choose your init method
+- [Quick Start](./getting-started/quick-start.md) - 2-minute guide
 
 ## Reference
 
-- [CLI Commands](./reference/cli) - All commands
-- [Configuration](./reference/configuration) - Config files
-- [Module API](./reference/api) - Code reference
-- [Brain Schema](./reference/schema) - Brain files
+- [CLI Commands](./reference/cli.md) - All commands
+- [Configuration](./reference/configuration.md) - Config files
+- [Module API](./reference/api.md) - Code reference
+- [Brain Schema](./reference/schema.md) - Brain files
 
 ## Guides
 
-- [Architecture](./guides/architecture) - How it works
-- [Security](./guides/security) - Best practices
-- [Multi-Agent](./guides/multi-agent) - Branch + lock
+- [Architecture](./guides/architecture.md) - How it works
+- [Security](./guides/security.md) - Best practices
+- [Multi-Agent](./guides/multi-agent.md) - Branch + lock
+- [MCP Server](./guides/mcp.md) - Model Context Protocol
+- [Docker](./guides/docker.md) - Container guides
+- [Troubleshooting](./guides/troubleshooting.md) - Common issues
 
 ---
 
