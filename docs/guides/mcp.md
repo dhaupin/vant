@@ -1,4 +1,9 @@
 ---
+permalink: /mcp.html
+---
+
+
+---
 version: 0.8.4
 title: MCP Server
 slug: /mcp

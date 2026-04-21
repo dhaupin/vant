@@ -1,4 +1,9 @@
 ---
+permalink: /testing.html
+---
+
+
+---
 version: 0.8.4
 title: Testing
 slug: /testing

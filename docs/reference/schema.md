@@ -1,4 +1,9 @@
 ---
+permalink: /schema.html
+---
+
+
+---
 version: 0.8.4
 title: Brain Schema
 slug: /schema

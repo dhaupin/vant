@@ -1,4 +1,9 @@
 ---
+permalink: /configuration.html
+---
+
+
+---
 version: 0.8.4
 title: Configuration
 slug: /configuration

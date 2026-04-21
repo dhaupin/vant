@@ -1,7 +1,7 @@
 ---
 version: 0.8.4
 title: Quick Start
-slug: /quick-start
+permalink: /quick-start.html
 order: 2
 ---
 

@@ -1,4 +1,9 @@
 ---
+permalink: /errors.html
+---
+
+
+---
 version: 0.8.4
 title: Error Codes
 slug: /errors

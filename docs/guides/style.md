@@ -1,4 +1,9 @@
 ---
+permalink: /style.html
+---
+
+
+---
 version: 0.8.4
 title: Voice & Style
 slug: /style

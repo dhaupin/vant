@@ -1,4 +1,9 @@
 ---
+permalink: /multi-agent.html
+---
+
+
+---
 version: 0.8.4
 title: Multi-Agent
 slug: /multi-agent

@@ -1,7 +1,7 @@
 ---
 version: 0.8.4
 title: Installation
-slug: /install
+permalink: /install.html
 order: 1
 ---
 

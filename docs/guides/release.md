@@ -1,4 +1,9 @@
 ---
+permalink: /release.html
+---
+
+
+---
 version: 0.8.4
 title: Release Process
 slug: /release

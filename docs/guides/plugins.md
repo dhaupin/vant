@@ -1,4 +1,9 @@
 ---
+permalink: /plugins.html
+---
+
+
+---
 version: 0.8.4
 title: Plugins
 slug: /plugins

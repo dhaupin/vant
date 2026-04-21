@@ -1,4 +1,9 @@
 ---
+permalink: /architecture.html
+---
+
+
+---
 version: 0.8.4
 title: Architecture
 slug: /architecture

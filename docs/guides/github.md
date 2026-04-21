@@ -1,4 +1,9 @@
 ---
+permalink: /github.html
+---
+
+
+---
 version: 0.8.4
 title: GitHub Integration
 slug: /github

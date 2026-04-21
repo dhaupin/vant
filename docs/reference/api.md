@@ -1,4 +1,9 @@
 ---
+permalink: /api.html
+---
+
+
+---
 version: 0.8.4
 title: Module API
 slug: /api

@@ -1,4 +1,9 @@
 ---
+permalink: /docker.html
+---
+
+
+---
 version: 0.8.4
 title: Docker
 slug: /docker

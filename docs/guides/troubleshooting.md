@@ -1,4 +1,9 @@
 ---
+permalink: /troubleshooting.html
+---
+
+
+---
 version: 0.8.4
 title: Troubleshooting
 slug: /troubleshooting
