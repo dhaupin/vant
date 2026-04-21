@@ -45,6 +45,38 @@ MAX_REQUESTS_PER_HOUR=360
 | `POLLING_INTERVAL` | No | Poll interval (ms) |
 | `MAX_REQUESTS_PER_HOUR` | No | Rate limit cap |
 
+## Additional Environment Variables
+
+### MCP Server
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VANT_MCP_PORT` | No | MCP server port (default: 3456) |
+| `VANT_MCP_API_KEY` | No | API key for MCP authentication |
+| `MCP_API_KEY` | No | Alternative MCP API key |
+
+### Notifications
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SLACK_WEBHOOK_URL` | No | Slack webhook for notifications |
+| `DISCORD_WEBHOOK_URL` | No | Discord webhook for notifications |
+| `TELEGRAM_BOT_TOKEN` | No | Telegram bot for commands |
+
+### Agent / Node
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VANT_AGENT_ID` | No | Agent identifier (multi-agent) |
+| `VANT_BRANCH` | No | Git branch to use |
+
+### Paths
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `CONFIG_PATH` | No | Path to config.ini |
+| `MODEL_PATH` | No | Path to brain files (default: models/public) |
+
 ## config.ini
 
 Core configuration:
