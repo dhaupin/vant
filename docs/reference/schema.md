@@ -82,4 +82,47 @@ Files in `states/active/`:
 | `current.json` | Current runtime state |
 | `rate-limit.json` | Rate limit tracking |
 
+## Schema / Cargo
+
+Internal schema in `models/public/schema/`:
+
+| File | Description |
+|------|-------------|
+| `memory-files.md` | Required + optional cargo definition |
+| `transport-protocol.txt` | Instance transport protocol |
+
+### Required Cargo
+
+These MUST exist in every Vant instance:
+
+| File | Description |
+|------|-------------|
+| `identity.json` | uuid, name, generation, parent_uuid |
+| `ego.md` | Self-worth, what makes me valuable |
+| `fears.md` | What scares me |
+| `anger.md` | What frustrates me |
+| `joy.md` | What delights me |
+
+### Optional Cargo
+
+Recommended files transported between instances:
+
+| File | Description |
+|------|-------------|
+| `manifesto.md` | Self-definition |
+| `goals.md` | Objectives |
+| `humility.md` | Limitations |
+| `creed.md` | Core beliefs |
+| `lessons.md` | Hard lessons |
+| `preferences.md` | Likes/dislikes |
+| `schedule.md` | Time-based tasks |
+| `security.md` | Access rules |
+| `curiosity.md` | Questions |
+| `empathy.md` | Human relations |
+| `audit.md` | Change trail |
+| `keepers.md` | Preserve across versions |
+| `succession.md` | Version management |
+| `qc.md` | Quality standards |
+| `gratitude.md` | Appreciation |
+
 See also: [API](./api.md), [Multi-Agent](../guides/multi-agent.md)
