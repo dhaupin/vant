@@ -64,7 +64,7 @@ if (cmd === 'help' && args[1]) {
     process.exit(0);
 }
 
-if (!cmd || cmd === 'help') {
+if (!cmd || cmd === 'help' || cmd === 'vant') {
     console.log(`
 ╔═══════════════════════════════════════╗
 ║         vant CLI v0.8.4              ║
