@@ -33,7 +33,7 @@ New to Vant? Start here:
 ## Guides
 
 - [Architecture](./guides/architecture.md) - How it works
-- [Security](./guides/security.md) - Best practices
+- [Security](./guides/security.md) - Tokens, VAF, secrets
 - [Multi-Agent](./guides/multi-agent.md) - Branch + lock
 - [MCP Server](./guides/mcp.md) - Model Context Protocol
 - [Docker](./guides/docker.md) - Container guides
@@ -42,6 +42,9 @@ New to Vant? Start here:
 - [GitHub](./guides/github.md) - GitHub integration
 - [Release](./guides/release.md) - Release process
 - [Style](./guides/style.md) - Voice & style
+- [Operations](./guides/operations.md) - Runbook
+- [Testing](./guides/testing.md) - QC/test guide
+- [Audit](./guides/audit.md) - Compliance
 - [Troubleshooting](./guides/troubleshooting.md) - Common issues
 
 ---
