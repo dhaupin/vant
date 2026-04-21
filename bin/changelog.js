@@ -21,6 +21,7 @@ const DEFAULT_LIMIT = 20;
 function getLog(since = null, limit = DEFAULT_LIMIT) {
     const args = ['log', `--pretty=format:%h|%s|%an|%ai`, `-n`, limit.toString()];
     if (since) {
+        vaf.check(since, {type: 'string', name: 'since', maxLength: 20});
         args.push(`${since}..HEAD`);
     }
     
