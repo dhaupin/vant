@@ -6,46 +6,28 @@ All notable changes to VANT are documented here.
 
 ---
 
-## v0.8.5 (2026-04-21)
+## v0.8.4 (2026-04-20)
 
-### Docs System
-- **Jekyll Migration** - Switch from Docsify to Jekyll
-  - docs/ folder restructured for Jekyll rendering
-  - New _config.yml, _sidebar.yml, _redirects
+### Added
+- **Docs System** - Full documentation overhaul
+  - Jekyll migration from Docsify
+  - docs/ folder with getting-started/, guides/, reference/
+  - _config.yml, _sidebar.yml, _redirects
   - Permalinks for clean URLs
-- **Docs Funnel** - Root MDs now point to docs
-  - CLI.md, LIBS.md, CONTENT.md, STEGO.md deprecated
-  - All point to docs/ for full reference
-  - Backwards compat via deprecated notices
+  - Mobile-friendly navigation
+- **Docs Funnel** - Root MDs deprecated, point to docs
+  - CLI.md, LIBS.md, CONTENT.md, STEGO.md with deprecation notices
+  - Backwards compat via links to docs/
   - Added /style, /steganography redirects
-- **Docsify Era** - Multiple iterations to fix routing
-  - 404.html SPA fallback
-  - Mobile-friendly swipe nav
-  - BasePath handling
-  - Static generator with _site/ pre-built
-
-### Documentation
 - **AGENTS.md** - Added deep scan knowledge
   - Project overview, architecture diagram
   - Key dependencies, CLI commands table
   - Integration points documented
-  - Important patterns (lock before write, branch per agent)
-- **Docs Expansion** - Full coverage added
-  - Security, testing, audit, GitHub Pages
+- **Docs Expansion** - Full coverage
+  - Security, testing, audit, GitHub Pages guides
   - Integration, gotchas, limits
   - Plugins, config, states
   - FAQs added to index, CLI, MCP
-
----
-
-### Security: VAF (Vant Application Firewall)
-- New lib/vaf.js - Security layer:
-  - Input validation, path traversal protection
-  - Content filtering (PHP, script injection, shell)
-  - Rate limiting, file extension blocking
-- Integrated into bin/mcp.js, lib/resolution.js, lib/branch.js
-
-### Added
 - **lib/protection.js** - Circuit breaker for MCP
 - **lib/load.js** - Model loader utilities
 - **Onboarding** - Knowledge base browser
