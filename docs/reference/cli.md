@@ -319,3 +319,31 @@ vant docs serve          # Local server
 ```
 
 See also: [Configuration](./configuration.md), [API](./api.md)
+
+---
+
+## FAQ
+
+### Which command do I start with?
+
+`vant start` - Full startup (health → sync → load → run)
+
+### How do I check if everything is working?
+
+`vant health` - Runs diagnostics
+
+### How do I save my brain?
+
+`vant sync` - Pulls latest + pushes changes
+
+### How do I see my rate limit?
+
+`vant rate` - Shows GitHub API remaining
+
+### How do I update Vant?
+
+`vant update` - Checks for new versions
+
+### How do I run tests?
+
+`vant test` - Runs build tests

@@ -61,3 +61,31 @@ vant mcp --websocket --port 3000
 ```
 
 See also: [CLI Reference](../reference/cli.md), [Architecture](./architecture.md)
+
+---
+
+## FAQ
+
+### What is MCP?
+
+MCP = Model Context Protocol. It's how AI tools talk to external systems.
+
+### Why use MCP with Vant?
+
+Your AI can call Vant tools directly - load brain, query memory, sync changes.
+
+### How do I start MCP?
+
+`vant mcp` - Starts the MCP server on port 3456
+
+### What tools does MCP expose?
+
+| Tool | Description |
+|------|-------------|
+| vant_load | Load brain |
+| vant_query | Query memory |
+| vant_sync | Sync with GitHub |
+
+### Do I need an API key?
+
+Yes, set `MCP_API_KEY` in .env for security
