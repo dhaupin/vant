@@ -38,9 +38,8 @@ These are core learnings from building and operating Vant systems:
 - Pattern: raw input → spool → process → output (not distill)
 
 7. PROCESS SPOOLING (Validate Every Step)
-- Lost steps #8 and #9 on previous VAF batches
-- Spool each step, verify before moving to next
-- Validate VAF state after each commit
+- Always verify each step before moving to next
+- Validate state after each commit
 - Pattern: batch → verify → commit → push → validate → next
 - Never assume - always verify
 
