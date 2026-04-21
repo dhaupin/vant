@@ -2,25 +2,32 @@
 
 > Versatile Autonomous Networked Tool - Persistent AI agent memory system
 
-Vant persists across sessions through GitHub-based brain transfer. Each generation inherits the full memory of its predecessors.
+**Vant** is an open source system for AI agent memory persistence. Each generation inherits the full context from previous sessions via GitHub. Built for long-running agentic workflows.
+
+🔗 **[vant.creadev.org](https://vant.creadev.org)** | 📦 **[GitHub](https://github.com/dhaupin/vant)**
 
 ---
 
 ## Table of Contents
 
-- [Choose Your Init Method](#choose-your-init-method)
-- [AI Prompt Init](#ai-prompt-init)
-- [Local Init](#local-init)
-- [Docker Init](#docker-init)
+### Getting Started
+- [Quick Start](#quick-start)
+- [Installation](#installation)
 - [Configuration](#configuration)
+
+### CLI Reference
 - [CLI Commands](#cli-commands)
+- [Full Reference →](CLI.md)
+
+### How It Works
 - [Architecture](#architecture)
 - [Security](#security)
-- [GitHub Actions (Optional)](#github-actions-optional)
 - [Multi-Agent](#multi-agent)
+
+### More
+- [Docker](#docker-init)
+- [GitHub Actions](#github-actions-optional)
 - [Related](#related)
-- [Stegoframe Transport](STEGO.md)
-- [Module Reference](LIBS.md)
 
 ---
 
@@ -159,17 +166,35 @@ Copy to `mood.ini` to customize behavior:
 
 ## CLI Commands
 
-```bash
-vant setup      # Interactive setup wizard
-vant start      # Full startup (health → sync → run)
-vant health     # System diagnostics
-vant sync       # Pull from GitHub
-vant load       # Load brain
-vant run        # Start runtime
-vant test       # Run build tests
-vant watch      # Monitor GitHub changes
-vant help       # Show help
-```
+| Command | Description |
+|---------|-------------|
+| **Core** | |
+| `vant start` | Full startup (health → sync → load → run) |
+| `vant health` | System diagnostics |
+| `vant sync` | Pull/push brain from GitHub |
+| `vant load` | Load brain from models/public |
+| **Development** | |
+| `vant test` | Run build/tests |
+| `vant watch` | Monitor GitHub for changes |
+| **Setup** | |
+| `vant setup` | Interactive setup wizard |
+| `vant update` | Check for new releases |
+| **Help & Info** | |
+| `vant help` | Show all commands |
+| `vant help <cmd>` | Help for specific command |
+| `vant changelog` | View recent changes |
+| `vant summary` | Session summary |
+| `vant rate` | GitHub API rate limit |
+| **Node & MCP** | |
+| `vant node` | Run as persistent node |
+| `vant node --mcp` | Node + MCP server |
+| `vant mcp` | Run MCP server |
+| **Advanced** | |
+| `vant onboard` | Browse knowledge base |
+| `vant succession` | Brain version/trust |
+| `vant resolution` | Mark thoughts resolved |
+| `vant bump` | Bump version & tag |
+
 For full command reference, see [CLI.md](CLI.md).
 
 ---
@@ -200,6 +225,8 @@ lib/
   branch.js     # Git branch per agent
   auto-update.js # Auto-save context
 ```
+
+For module reference, see [LIBS.md](LIBS.md).
 
 ---
 
