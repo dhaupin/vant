@@ -1,10 +1,10 @@
 # Vant Stegoframe Transport
 
-> Hidden messages in PNG images for covert communication
+> ⚠️ **Moved**: See [docs/guides/steganography](../docs/guides/steganography.md) for latest.
 
 ---
 
-## Overview
+> Hidden messages in PNG images for covert communication
 
 Vant can encode/decode secret messages inside PNG images using LSB (Least Significant Bit) steganography. Messages are invisible to the naked eye - the image looks normal.
 

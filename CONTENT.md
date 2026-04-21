@@ -1,8 +1,10 @@
 # Vant Content Guide
 
-This file defines the voice, tone, and style for all Vant project content.
+> ⚠️ **Moved**: See [docs/guides/style](../docs/guides/style.md) for latest.
 
 ---
+
+This file defines the voice, tone, and style for all Vant project content.
 
 ## Our Tone
 

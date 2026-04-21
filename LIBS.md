@@ -1,8 +1,10 @@
 # Vant Module Reference
 
-Core libraries in `lib/`.
+> ⚠️ **Moved**: See [docs/reference/api](../docs/reference/api.md) for latest.
 
 ---
+
+Core libraries in `lib/`.
 
 ## config.js
 
