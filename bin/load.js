@@ -1,4 +1,5 @@
 /**
+const vaf = require("../lib/vaf");
  * Vant Loader (Node.js)
  *
  * Usage: node bin/load.js [version]
@@ -39,6 +40,7 @@ function loadConfig() {
  * Priority: config MODEL_PATH > argument > default (public)
  */
 function getModelPath(args) {
+    if (args[2]) vaf.check(args[2], {type: "string", name: "version", maxLength: 20});
     const config = loadConfig();
     if (config.MODEL_PATH) {
         return config.MODEL_PATH;
