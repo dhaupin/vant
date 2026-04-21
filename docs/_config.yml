@@ -1,0 +1,18 @@
+title: Vant
+description: AI memory for agents
+theme: minima
+collections:
+  guides:
+    output: true
+  reference:
+    output: true
+  getting-started:
+    output: true
+markdown: kramdown
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true
+  collections: true
+include:
+  - _sidebar.yml
