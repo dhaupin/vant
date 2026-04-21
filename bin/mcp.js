@@ -594,11 +594,15 @@ if ((!module.parent || isServer) && !isStdio) {
             return;
         }
         
-        // API Key auth check (if configured)
-        const expectedKey = process.env.VANT_MCP_API_KEY || (config ? config.MCP_API_KEY : null);
-        if (expectedKey) {
+        // API Key auth check
+        const expectedKey = process.env.VANT_MCP_API_KEY || (config ? config.get('MCP_API_KEY') : null);
+        const requireApiKey = process.env.VANT_MCP_REQUIRE_API_KEY === 'true' || 
+                             (config ? config.get('MCP_REQUIRE_API_KEY') === 'true' : false);
+        
+        // If key is set OR required, enforce auth
+        if (expectedKey || requireApiKey) {
             const apiKey = req.headers['x-api-key'];
-            if (apiKey !== expectedKey) {
+            if (!apiKey || apiKey !== expectedKey) {
                 res.writeHead(401, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ error: 'Unauthorized - provide X-API-Key header' }));
                 return;
