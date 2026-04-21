@@ -29,7 +29,7 @@ Files in `models/public/`:
 | File | Description |
 |------|------------|
 | `manifesto.md` | Core beliefs, principles |
-| `credo.md` | Credo or oath |
+| `creed.md` | Core beliefs, principles |
 | `goals.md` | Short/long term goals |
 | `preferences.md` | Preferences, style |
 
