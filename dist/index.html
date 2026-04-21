@@ -206,6 +206,25 @@
         }
         .doc-link:hover { text-decoration: underline; }
 
+        .faq { margin-bottom: 30px; }
+        .faq h3 { text-align: center; margin-bottom: 20px; }
+        .faq details {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            padding: 12px 16px;
+        }
+        .faq summary {
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .faq p {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
         footer {
             text-align: center;
             color: var(--text-muted);
@@ -301,11 +320,39 @@
             <a href="https://github.com/dhaupin/vant/releases" class="link outline">Releases</a>
         </section>
 
+        <section class="faq">
+            <h3>Frequently Asked Questions</h3>
+            <details>
+                <summary>What is a "brain" in Vant?</summary>
+                <p>Your AI's memory. A folder of markdown files storing who you are, what you've learned, and your context. Each session loads the brain, changes are pushed to GitHub, next session inherits everything.</p>
+            </details>
+            <details>
+                <summary>Do I need GitHub?</summary>
+                <p>Yes. Vant uses GitHub as storage + version control + sync. Free account works.</p>
+            </details>
+            <details>
+                <summary>Is my brain private?</summary>
+                <p>Yes, use a private GitHub repo. Vant is just you + GitHub.</p>
+            </details>
+            <details>
+                <summary>Can multiple AI agents share one brain?</summary>
+                <p>Yes! Use branches + locks for safe multi-agent coordination.</p>
+            </details>
+            <details>
+                <summary>How is Vant different from vector databases?</summary>
+                <p>Vant stores full context (not just embeddings), uses Git versioning, and enables session inheritance.</p>
+            </details>
+            <details>
+                <summary>Does Vant cost money?</summary>
+                <p>No - it's open source. Just need a free GitHub account + your own AI API keys.</p>
+            </details>
+        </section>
+
         <section class="docs">
-            <a href="https://github.com/dhaupin/vant/blob/main/README.md" class="doc-link">Docs</a>
-            <a href="https://github.com/dhaupin/vant/blob/main/CLI.md" class="doc-link">CLI</a>
-            <a href="https://github.com/dhaupin/vant/blob/main/models/public/schema/memory-files.md" class="doc-link">Schema</a>
-            <a href="https://github.com/dhaupin/vant/blob/main/CHANGELOG.md" class="doc-link">Changelog</a>
+            <a href="https://vant.creadev.org" class="doc-link">Docs</a>
+            <a href="https://vant.creadev.org/cli" class="doc-link">CLI</a>
+            <a href="https://vant.creadev.org/schema" class="doc-link">Schema</a>
+            <a href="https://github.com/dhaupin/vant/releases" class="doc-link">Changelog</a>
         </section>
 
         <footer>
