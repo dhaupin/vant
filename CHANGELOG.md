@@ -6,7 +6,27 @@ All notable changes to VANT are documented here.
 
 ---
 
-## v0.8.4 (2026-04-20)
+## v0.8.5 (2026-04-21)
+
+### Docs System
+- **Jekyll Migration** - Switch from Docsify to Jekyll
+  - docs/ folder restructured for Jekyll rendering
+  - New _config.yml, _sidebar.yml, _redirects
+  - Permalinks for clean URLs
+- **Docs Funnel** - Root MDs now point to docs
+  - CLI.md, LIBS.md, CONTENT.md, STEGO.md deprecated
+  - All point to docs/ for full reference
+  - Backwards compat via deprecated notices
+  - Added /style, /steganography redirects
+
+### Documentation
+- **AGENTS.md** - Added deep scan knowledge
+  - Project overview, architecture diagram
+  - Key dependencies, CLI commands table
+  - Integration points documented
+  - Important patterns (lock before write, branch per agent)
+
+---
 
 ### Security: VAF (Vant Application Firewall)
 - New lib/vaf.js - Security layer:
