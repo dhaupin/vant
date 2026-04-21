@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vant Docs</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23059669'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' fill='white' font-family='system-ui' font-weight='bold' font-size='20'>V</text></svg>">
+</head>
+<body>
+  <div id="app">Loading...</div>
+  <script>
+    window.$docsify = {
+      
+      name: 'Vant',
+      repo: 'https://github.com/dhaupin/vant',
+      loadSidebar: true,
+      subMaxLevel: 3,
+      auto2top: true,
+      el: "#app",
+      relativePath: true,
+      search: {
+        maxAge: 86400000,
+        paths: 'auto',
+        placeholder: 'Search',
+        noData: 'No Results!'
+      },
+      pagination: {
+        previousText: 'Previous',
+        nextText: 'Next',
+        crossChapter: true
+      },
+      copyCode: {
+        buttonText: 'Copy',
+        errorText: 'Error',
+        successText: 'Copied'
+      }
+    };
+  </script>
+  <!-- Docsify v4 -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+  <!-- Plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-pagination/dist/docsify-pagination.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>
+  <style>
+    /* Mobile navigation fixes */
+    :root {
+      --theme-color: #059669;
+      --sidebar-width: 260px;
+    }
+    @media (max-width: 768px) {
+      .sidebar-toggle {
+        display: block !important;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 9999;
+        background: var(--theme-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 12px;
+        font-size: 18px;
+        cursor: pointer;
+      }
+      .sidebar-toggle span {
+        display: block;
+        width: 20px;
+        height: 2px;
+        background: white;
+        margin: 4px 0;
+      }
+      .sidebar {
+        width: 85% !important;
+        max-width: 300px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .sidebar-overlay {
+        display: block !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+      .sidebar-overlay.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      body.sidebar-active .sidebar {
+        transform: translateX(0);
+      }
+    }
+    @media (min-width: 769px) {
+      .sidebar-toggle { display: none; }
+      .sidebar-overlay { display: none !important; }
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var toggle = document.querySelector('.sidebar-toggle');
+      var sidebar = document.querySelector('.sidebar');
+      var overlay = document.querySelector('.sidebar-overlay') || document.createElement('div');
+      
+      if (!document.querySelector('.sidebar-overlay')) {
+        overlay.className = 'sidebar-overlay';
+        document.body.appendChild(overlay);
+      }
+      
+      function toggleSidebar() {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('open');
+        document.body.classList.toggle('sidebar-active');
+      }
+      
+      if (toggle) toggle.addEventListener('click', toggleSidebar);
+      if (overlay) overlay.addEventListener('click', toggleSidebar);
+      
+      let touchStartX = 0;
+      document.addEventListener('touchstart', function(e) {
+        touchStartX = e.touches[0].clientX;
+      });
+      document.addEventListener('touchend', function(e) {
+        let touchEndX = e.changedTouches[0].clientX;
+        let diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 50) {
+          if (diff > 0) {
+            if (!sidebar.classList.contains('open')) toggleSidebar();
+          } else {
+            if (sidebar.classList.contains('open')) toggleSidebar();
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

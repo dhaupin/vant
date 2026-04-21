@@ -1,0 +1,49 @@
+# Sidebar
+
+getting-started:
+  - title: Installation
+    path: /install
+  - title: Quick Start
+    path: /quick-start
+
+reference:
+  - title: CLI Reference
+    path: /cli
+  - title: Configuration
+    path: /configuration
+  - title: Module API
+    path: /api
+  - title: Brain Schema
+    path: /schema
+  - title: Error Codes
+    path: /errors
+
+guides:
+  - title: Architecture
+    path: /architecture
+  - title: Security
+    path: /security
+  - title: Multi-Agent
+    path: /multi-agent
+  - title: MCP Server
+    path: /mcp
+  - title: Docker
+    path: /docker
+  - title: Plugins
+    path: /plugins
+  - title: Steganography
+    path: /steganography
+  - title: GitHub
+    path: /github
+  - title: Release
+    path: /release
+  - title: Style
+    path: /style
+  - title: Operations
+    path: /operations
+  - title: Testing
+    path: /testing
+  - title: Audit
+    path: /audit
+  - title: Troubleshooting
+    path: /troubleshooting
