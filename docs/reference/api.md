@@ -57,8 +57,27 @@ branch.commit(agentId, message);
 ```javascript
 const vaf = require('./lib/vaf');
 
-vaf.validate(input);
-vaf.sanitize(input);
+// Validation
+vaf.validate(input);                    // Throws on invalid
+vaf.check(input, {type: 'string', maxLength: 50000}); // Check with rules
+vaf.checkPathTraversal('../etc/passwd'); // Check path traversal
+vaf.checkContent('<script>');            // Check for injection
+vaf.checkFileExtension('file.exe');      // Check dangerous extensions
+
+// Rate limiting
+vaf.checkRateLimit(ip);                  // Check if IP is rate limited
+vaf.isBlocked(ip);                       // Check if IP is blocked
+vaf.recordFailedAttempt(ip);             // Record failed attempt
+vaf.getStatus();                         // Get VAF status
+
+// Sanitization
+vaf.sanitize(input);                     // Remove dangerous content
+
+// Middleware
+vaf.middleware(req, res, next);          // Express middleware
+
+// Admin
+vaf.reset();                             // Reset all limits
 ```
 
 ## lib/health.js
@@ -104,9 +123,28 @@ await succession.diff();    // Compare to previous
 ```javascript
 const protection = require('./lib/protection');
 
+// Circuit breaker
 protection.enable();   // Enable circuit breaker
 protection.disable(); // Disable
-protection.trigger(); // Trigger protection
+protection.trigger();  // Trigger protection mode
+protection.getStatus(); // Get protection status
+
+// Active request tracking
+protection.incrementActive();  // Track new request
+protection.decrementActive();  // Release request
+protection.getActiveCount();   // Get active count
+protection.canProceed();       // Check if can accept more
+
+// Input size limits
+protection.getMaxInputSize();    // Get max size
+protection.checkInputSize(data); // Check size
+
+// Failure tracking
+protection.recordFailure(ip);      // Record failure
+protection.getFailureCount(ip);   // Get failure count
+protection.isCircuitOpen();       // Check if circuit open
+protection.getCircuitStatus();    // Get full status
+protection.resetCircuit();         // Reset circuit
 ```
 
 ## lib/rate-limit.js
@@ -161,10 +199,24 @@ await load.file(path);  // Load single file
 ```javascript
 const colors = require('./lib/colors');
 
-colors.red('error');
-colors.green('success');
-colors.yellow('warning');
-colors.cyan('info');
+// Primary colors
+colors.error('message');    // Red
+colors.warning('message');  // Yellow
+colors.success('message');  // Green
+colors.info('message');     // Blue
+colors.primary('message');  // Cyan
+
+// Styling
+colors.bold('message');
+colors.dim('message');
+colors.inverse('message');
+
+// Brand
+colors.vant;           // Bold cyan VANT
+colors.vantHeader;     // [VANT] header
+
+// Sections
+colors.section('title');
 ```
 
 ## lib/progress.js
