@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const vaf = require("../lib/vaf");
 /**
  * Vant Rate
  * Check rate limit status
@@ -11,6 +12,7 @@
 const rateLimit = require('../lib/rate-limit');
 
 const cmd = process.argv[2] || 'status';
+if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
 
 switch (cmd) {
     case 'status':
