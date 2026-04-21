@@ -58,6 +58,20 @@ All notable changes to VANT are documented here.
   - mcp --help shows full docs with curl examples
 - **onboard Command** - Onboarding summary
 - **succession Command** - Brain succession status
+- **API Documentation** - Full lib coverage expanded
+  - vaf.js: validation, rate limiting, sanitization, middleware
+  - protection.js: circuit breaker, active tracking, input limits
+  - colors.js: brand styling, method corrections
+  - prompts.js: all Inquirer prompt types
+  - verbosity.js: multi-handler verbosity controls
+  - errors.js: error wrapping helpers, retry
+  - stego.js: utilities, format support
+  - notifications.js: channel methods, health check
+- **CLI Commands** - Additional commands documented
+  - vant test - Run test suite with coverage
+  - vant build-test - Validate build scripts
+- **Deprecation Notices** - Backwards compatibility
+  - CHANGELOG.md, RELEASE.md, ROADMAP.md point to docs/
 
 ### Changed
 - Updated CLI.md with MCP auth section
