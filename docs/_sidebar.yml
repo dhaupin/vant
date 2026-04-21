@@ -21,6 +21,8 @@ reference:
 guides:
   - title: Architecture
     path: /architecture
+  - title: Nodes
+    path: /nodes
   - title: Security
     path: /security
   - title: Multi-Agent
