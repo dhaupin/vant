@@ -446,6 +446,19 @@ async function handleRequest(request) {
                 return { error: 'Security check failed: ' + e.message };
             }
         }
+        
+        // Validate commit message
+        if (args.message) {
+            try {
+                vaf.check(args.message, {
+                    type: 'string',
+                    name: 'message',
+                    maxLength: 100000
+                });
+            } catch (e) {
+                return { error: 'Security check failed: ' + e.message };
+            }
+        }
     }
     
     if (protection.isCircuitOpen()) {
