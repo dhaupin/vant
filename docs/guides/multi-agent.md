@@ -57,4 +57,4 @@ Merge via PR for review:
 4. Merge via PR - Human review first
 5. Set timeouts - Lock expires after 1 hour
 
-See also: [Architecture](./architecture), [Schema](../reference/schema)
+See also: [Architecture](./architecture.md), [Schema](../reference/schema.md)

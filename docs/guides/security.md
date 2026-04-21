@@ -46,4 +46,4 @@ When using MCP server:
 - Restrict network access
 - Review tool permissions
 
-See also: [Architecture](./architecture), [Configuration](../reference/configuration)
+See also: [Architecture](./architecture.md), [Configuration](../reference/configuration.md)

@@ -66,4 +66,4 @@ node bin/vant.js load
 docker run -it -v vant-brain:/app/models dhaupin/vant vant load
 ```
 
-See also: [Configuration](../reference/configuration)
+See also: [Configuration](../reference/configuration.md)

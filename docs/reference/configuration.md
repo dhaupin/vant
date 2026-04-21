@@ -42,4 +42,4 @@ Personality configuration:
 Behavior overrides:
 - `MOOD`, `ENERGY`, `SOCIABILITY`
 
-See also: [CLI Commands](./cli)
+See also: [CLI Commands](./cli.md)

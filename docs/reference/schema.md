@@ -60,4 +60,4 @@ Files in `models/public/`:
 | `meta.json` | Version, stats |
 | `verbosity.ini` | Output settings |
 
-See also: [API](./api), [Multi-Agent](../guides/multi-agent)
+See also: [API](./api.md), [Multi-Agent](../guides/multi-agent.md)

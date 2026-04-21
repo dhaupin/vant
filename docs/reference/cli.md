@@ -60,4 +60,4 @@ All Vant CLI commands.
 | `vant resolution` | Mark thoughts resolved |
 | `vant bump` | Bump version & tag |
 
-See also: [Configuration](./configuration), [API](./api)
+See also: [Configuration](./configuration.md), [API](./api.md)

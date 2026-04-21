@@ -56,4 +56,4 @@ vaf.validate(input);
 vaf.sanitize(input);
 ```
 
-See also: [CLI Commands](./cli), [Schema](./schema)
+See also: [CLI Commands](./cli.md), [Schema](./schema.md)
