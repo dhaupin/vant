@@ -1,0 +1,25 @@
+# Sidebar
+
+getting-started:
+  - title: Installation
+    path: /install
+  - title: Quick Start
+    path: /quick-start
+
+reference:
+  - title: CLI Reference
+    path: /cli
+  - title: Configuration
+    path: /configuration
+  - title: Module API
+    path: /api
+  - title: Brain Schema
+    path: /schema
+
+guides:
+  - title: Architecture
+    path: /architecture
+  - title: Security
+    path: /security
+  - title: Multi-Agent
+    path: /multi-agent
