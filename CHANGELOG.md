@@ -12,6 +12,23 @@ All notable changes to VANT are documented here.
 
 ## v0.8.4 (2026-04-20)
 
+### Security Hardening
+- **VAF (Vant Application Firewall)** - Input validation system
+  - `lib/vaf.js` - Pattern-based content blocking
+  - Blocks: path traversal, XSS, shell injection, log injection, CRLF, XXE
+  - MCP integration - all endpoints validated
+  - `type: 'path'` for file params prevents traversal
+  - Rate limiting via `lib/protection.js`
+- **VAF Patterns Added**:
+  - Path traversal: `../`, `..\`
+  - XSS: `<script>`, `javascript:`, `on*=`
+  - Shell: `;`, `|`, `&&`, `$()`, backticks
+  - Log injection: `\n`, `\r\n`
+  - XXE: `<!ENTITY`, `<!ELEMENT`
+- **MCP Hardening**:
+  - Changed file params from `type: 'string'` to `type: 'path'`
+  - Newlines/CRLF blocked in string content
+
 ### Added
 - **Docs System** - Full documentation overhaul
   - Jekyll migration from Docsify
