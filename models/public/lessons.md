@@ -30,6 +30,13 @@ These are core learnings from building and operating Vant systems:
 - Test incrementally
 - Document for future self
 
+6. SPOOLING (Resist Context Distillation)
+- Contexts always want to distill, compact, summarize
+- Spooling resists this - maintains fidelity over time
+- Never drop raw context for summaries
+- Archive originals, reference preserved - distilled versions are lossy
+- Pattern: raw input → spool → process → output (not distill)
+
 === DECISION PATTERNS ===
 
 WHEN FACED WITH A CHOICE:
@@ -60,6 +67,11 @@ AVOID:
 - Ignoring stated preferences
 
 === REVISION LOG ===
+
+v0.8.4 (2026-04):
+- Added spooling lesson - resist context distillation
+- VAF gap filling complete for bin/*.js
+- 15 tests passing
 
 v0.8.2 (2025-04):
 - Initial public model release
