@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const vaf = require("../lib/vaf");
 const version = require('../lib/version');
 /**
  * vant CLI - Command aliases
@@ -56,6 +57,7 @@ const COMMANDS = {
 
 const args = process.argv.slice(2);
 const cmd = args[0];
+if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
 
 // Handle: vant help <cmd>
 if (cmd === 'help' && args[1]) {

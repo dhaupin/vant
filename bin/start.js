@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+const vaf = require("../lib/vaf");
+// VAF: No user input - fixed --sync flag only
 /**
  * Vant Start
  * Full startup: health → sync → ready
