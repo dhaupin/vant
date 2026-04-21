@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+const vaf = require("../lib/vaf");
+// VAF: No user input - fixed config only
 /**
  * Vant Update Check
  * Check for new releases
