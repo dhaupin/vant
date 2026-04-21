@@ -11,11 +11,10 @@
 ## Table of Contents
 
 ### Installation
-- [Install](#install)
-  - [Choose Your Init Method](#choose-your-init-method)
-  - [AI Prompt Init](#ai-prompt-init)
-  - [Local Init](#local-init)
-  - [Docker Init](#docker-init)
+- [Choose Your Init Method](#choose-your-init-method)
+- [AI Prompt Init](#ai-prompt-init)
+- [Local Init](#local-init)
+- [Docker Init](#docker-init)
 
 ### CLI Reference
 - [CLI Commands](#cli-commands)
@@ -28,12 +27,14 @@
 - [Security](#security)
 - [Multi-Agent](#multi-agent)
 
+### Operations
+- [GitHub Actions](#github-actions-optional)
+- [Integrations](#integrations)
+
 ### More
 - [Related](#related)
 
 ---
-
-## Install
 
 | Method | Best For | Time |
 |--------|----------|------|
