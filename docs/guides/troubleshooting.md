@@ -99,4 +99,66 @@ vant rate          # Check rate limit
 vant update        # Check for updates
 ```
 
+## Advanced Issues
+
+### Network Timeouts
+
+```
+Error: Request timed out
+```
+
+**Fix**:
+- Increase POLLING_INTERVAL in config.ini
+- Check firewall/network
+- Use different network
+
+### Large Brain
+
+**Symptoms**: Slow loads, sync timeouts
+
+**Fix**:
+- Split brain into categories
+- Use git LFS for large files
+- Archive old lessons
+
+### Git Corruption
+
+```
+Error: fatal: unsafe repository
+```
+
+**Fix**:
+```bash
+git config --global --add safe.directory /path/to/repo
+```
+
+### Permission Denied
+
+```
+Error: Permission denied (publickey)
+```
+
+**Fix**:
+- Use HTTPS with token (recommended)
+- Or add SSH key: `git remote set-url origin git@github.com:user/repo.git`
+
+### Token Expired
+
+```
+Error: Token expired
+```
+
+**Fix**:
+- Generate new token: https://github.com/settings/tokens
+- Update .env file
+
+## Limitations
+
+| Limitation | Description |
+|-----------|-------------|
+| GitHub rate limits | 5,000/hour authenticated |
+| File size | GitHub max 100MB per file |
+| Repo size | Free tier: 1GB max |
+| Private repos | Must have GitHub account |
+
 See also: [Configuration](../reference/configuration.md), [Architecture](./architecture.md)

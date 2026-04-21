@@ -28,6 +28,7 @@ New to Vant? Start here:
 - [Configuration](./reference/configuration.md) - Config files
 - [Module API](./reference/api.md) - Code reference
 - [Brain Schema](./reference/schema.md) - Brain files
+- [Error Codes](./reference/errors.md) - Error reference
 
 ## Guides
 
@@ -37,6 +38,10 @@ New to Vant? Start here:
 - [MCP Server](./guides/mcp.md) - Model Context Protocol
 - [Docker](./guides/docker.md) - Container guides
 - [Plugins](./guides/plugins.md) - Extend Vant
+- [Steganography](./guides/steganography.md) - Hidden messages
+- [GitHub](./guides/github.md) - GitHub integration
+- [Release](./guides/release.md) - Release process
+- [Style](./guides/style.md) - Voice & style
 - [Troubleshooting](./guides/troubleshooting.md) - Common issues
 
 ---
