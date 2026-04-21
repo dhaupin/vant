@@ -29,12 +29,12 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
         with:
-          static_site_generator: "static"
+          static_site_generator: "docsify"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'docs/_site'
+          path: 'docs'
 
       - name: Deploy to GitHub Pages
         id: deployment
