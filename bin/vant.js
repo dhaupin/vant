@@ -59,9 +59,11 @@ const cmd = args[0];
 
 // Handle: vant help <cmd>
 if (cmd === 'help' && args[1]) {
-    const { execSync } = require('child_process');
-    execSync('node bin/help.js ' + args[1], { stdio: 'inherit' });
-    process.exit(0);
+    const { spawn } = require('child_process');
+    // Validate command name to prevent injection
+    const helpCmd = args[1].replace(/[^a-zA-Z0-9_-]/g, '');
+    const child = spawn('node', ['bin/help.js', helpCmd], { stdio: 'inherit' });
+    child.on('exit', (code) => process.exit(code || 0));
 }
 
 if (!cmd || cmd === 'help' || cmd === 'vant') {

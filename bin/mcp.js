@@ -203,6 +203,7 @@ const TOOLS = [
  * Read memory files from models/public
  */
 async function getMemory(files = null) {
+    vaf.check(files, {type: "string", name: "files", maxLength: 200, required: false});
     const modelPath = 'models/public';
     if (!fs.existsSync(modelPath)) {
         return { error: 'Brain not found' };
@@ -251,6 +252,8 @@ async function getMemory(files = null) {
  * Write memory file
  */
 async function setMemory(file, content, branch = null, autoCommit = false) {
+    vaf.check(file, {type: 'string', name: 'file', maxLength: 100});
+    vaf.check(content, {type: 'string', name: 'content', maxLength: 50000});
     const modelPath = 'models/public';
     
     // Determine extension - prefer .md
@@ -296,6 +299,7 @@ async function listBranches() {
  * Create branch
  */
 async function createBranch(name) {
+    vaf.check(name, {type: 'string', name: 'name', maxLength: 50});
     if (!branch || !branch.create) {
         return { error: 'Branch module not available' };
     }
@@ -311,6 +315,7 @@ async function createBranch(name) {
  * Switch branch
  */
 async function switchBranch(name) {
+    vaf.check(name, {type: 'string', name: 'name', maxLength: 50});
     if (!branch || !branch.checkout) {
         return { error: 'Branch module not available' };
     }
