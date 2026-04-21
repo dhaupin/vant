@@ -11,7 +11,6 @@
 ## Table of Contents
 
 ### Installation
-- [Choose Your Init Method](#choose-your-init-method)
 - [AI Prompt Init](#ai-prompt-init)
 - [Local Init](#local-init)
 - [Docker Init](#docker-init)
