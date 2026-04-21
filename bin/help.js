@@ -1,4 +1,5 @@
 /**
+const vaf = require("../lib/vaf");
  * Vant Help Command
  * Shows all available commands with descriptions
  */
@@ -177,3 +178,4 @@ const target = ALIASES[cmd] || cmd;
 
 // Show specific help if command is provided, otherwise show all
 showHelp(args[1] || (COMMANDS[target] ? target : null));
+    if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});

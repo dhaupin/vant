@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const vaf = require("../lib/vaf");
 /**
  * Vant Version Bump
  * Bump version and tag
@@ -40,6 +41,7 @@ function formatVersion(v) {
  * Bump version
  */
 function bump(type = DEFAULT_BUMP) {
+    vaf.check(type, {type: "string", name: "type", maxLength: 10});
     const current = getVersion();
     const v = parseVersion(current);
     

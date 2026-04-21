@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const vaf = require("../lib/vaf");
 /**
  * docs.js - Docs management
  * 
