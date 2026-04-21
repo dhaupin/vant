@@ -170,6 +170,7 @@ vant test       # Run build tests
 vant watch      # Monitor GitHub changes
 vant help       # Show help
 ```
+For full command reference, see [CLI.md](CLI.md).
 
 ---
 
@@ -203,6 +204,8 @@ lib/
 ---
 
 ## Security
+
+For VAF security, see [AGENTS.md](AGENTS.md#security).
 
 - No hardcoded credentials in defaults
 - Uses environment variables for secrets
