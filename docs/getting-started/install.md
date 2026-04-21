@@ -21,7 +21,7 @@ Choose your init method:
 
 Copy this to your AI agent to set up Vant:
 
-\`\`\`
+```
 ### Vant Setup
 
 I need you to set up Vant (https://github.com/dhaupin/vant) as your persistent brain.
@@ -43,27 +43,27 @@ I need you to set up Vant (https://github.com/dhaupin/vant) as your persistent b
 4. Set GITHUB_TOKEN in .env
 
 5. Start: node bin/vant.js start
-\`\`\`
+```
 
 ---
 
 ## Local Init
 
-\`\`\`bash
+```bash
 git clone https://github.com/dhaupin/vant.git
 cd vant
 npm install
 node bin/vant.js setup
 node bin/vant.js health
 node bin/vant.js load
-\`\`\`
+```
 
 ---
 
 ## Docker Init
 
-\`\`\`bash
+```bash
 docker run -it -v vant-brain:/app/models dhaupin/vant vant load
-\`\`\`
+```
 
 See also: [Configuration](../reference/configuration)

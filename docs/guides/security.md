@@ -34,10 +34,10 @@ User data is sanitized before:
 
 ## Configuration
 
-\`\`\`
+```
 # .env (add to .gitignore)
 GITHUB_TOKEN=ghp_xxxxxxxxxxxx
-\`\`\`
+```
 
 ## MCP Security
 

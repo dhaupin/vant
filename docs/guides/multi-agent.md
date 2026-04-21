@@ -21,16 +21,16 @@ Vant uses branches for agent isolation and locks for coordination.
 
 ### Branch Per Agent
 
-\`\`\`bash
+```bash
 git checkout -b agent-1
 # work...
 git add -A
 git commit -m "Agent 1: Updated memory"
-\`\`\`
+```
 
 ### Lock API
 
-\`\`\`javascript
+```javascript
 const lock = await lock.acquire(agentId);
 if (!lock) {
     console.log('Brain locked');
@@ -38,16 +38,16 @@ if (!lock) {
 }
 // work...
 await lock.release(agentId, token);
-\`\`\`
+```
 
 ## Merging
 
 Merge via PR for review:
-\`\`\`bash
+```bash
 # Create PR on GitHub
 # Human reviews
 # Merge to main
-\`\`\`
+```
 
 ## Best Practices
 

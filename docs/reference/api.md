@@ -9,51 +9,51 @@ order: 5
 
 ## lib/config.js
 
-\`\`\`javascript
+```javascript
 const config = require('./lib/config');
 
 config.get('github.repo');
 config.get('paths.models');
 config.set('node.pollInterval', 30);
-\`\`\`
+```
 
 ## lib/brain.js
 
-\`\`\`javascript
+```javascript
 const brain = require('./lib/brain');
 
 await brain.load();      // Load all brain files
 await brain.get(key);  // Get file content
 await brain.set(key, content); // Set file content
 await brain.save();   // Save to disk
-\`\`\`
+```
 
 ## lib/lock.js
 
-\`\`\`javascript
+```javascript
 const lock = require('./lib/lock');
 
 await lock.acquire(agentId);
 await lock.release(agentId, token);
-\`\`\`
+```
 
 ## lib/branch.js
 
-\`\`\`javascript
+```javascript
 const branch = require('./lib/branch');
 
 branch.currentBranch();
 branch.checkout(branchName);
 branch.commit(agentId, message);
-\`\`\`
+```
 
 ## lib/vaf.js
 
-\`\`\`javascript
+```javascript
 const vaf = require('./lib/vaf');
 
 vaf.validate(input);
 vaf.sanitize(input);
-\`\`\`
+```
 
 See also: [CLI Commands](./cli), [Schema](./schema)

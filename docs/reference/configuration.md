@@ -17,7 +17,7 @@ order: 4
 
 ## config.ini
 
-\`\`\`
+```
 [github]
 repo = dhaupin/vant
 branch = main
@@ -28,7 +28,7 @@ models = models/public
 [node]
 poll-interval = 30
 auto-save = true
-\`\`\`
+```
 
 ## settings.ini (Optional)
 

@@ -11,11 +11,11 @@ Get Vant running in 2 minutes.
 
 ## 1. Install
 
-\`\`\`bash
+```bash
 npm install -g vant
 # Or use directly
 node bin/vant.js start
-\`\`\`
+```
 
 ## 2. Configure
 
@@ -25,12 +25,12 @@ Copy `.env.example` to `.env`:
 
 ## 3. Run
 
-\`\`\`bash
+```bash
 vant setup      # Interactive setup
 vant health    # Verify system
 vant load      # Load brain
 vant start     # Full startup
-\`\`\`
+```
 
 ## What's Next?
 
