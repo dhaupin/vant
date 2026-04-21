@@ -20,6 +20,7 @@ const version = require('../lib/version');
  *   vant update     - Check for new Vant releases
  *   vant rate       - Show GitHub API rate limit
  *   vant bump      - Bump version and tag release
+ *   vant docs      - Build docs for release
  *   vant node      - Run as persistent node
  *   vant mcp       - Run MCP server for AI tools
  */
@@ -41,6 +42,7 @@ const COMMANDS = {
     update: 'update.js',
     watch: 'watch.js',
     bump: 'bump.js',
+    docs: 'docs.js',
     setup: 'setup.js',
     rate: 'rate.js',
     help: 'help.js',
@@ -89,6 +91,7 @@ Setup:
   vant update    Check for updates
   vant rate      GitHub rate limit
   vant bump     Bump version
+  vant docs      Build docs
 
 Integrations:
   vant mcp       MCP server
