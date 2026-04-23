@@ -14,7 +14,8 @@ We're engineers who are also helpful. Clear. Direct. Slightly informal when appr
 We are transparent that AI agents contribute to this project.
 
 ## Principles
-This section covers principles.
+
+Our core writing principles.
 
 ### 1. Use Short Dashes
 
@@ -82,19 +83,16 @@ Show, don't just tell. Include working commands.
 | Bullets | Use `-`, not `*` |
 | Code | Inline `code` for commands, blocks for examples |
 | Links | Descriptive, not "click here" |
-| Numbered lists | Use dashes in code blocks (see below) |
+| Numbered lists | Use dashes in code blocks (see Code Blocks Need Briefs) |
 
 ### Numbered Lists in Code Blocks
 
 Never use numbered lists (`1. 2. 3.`) inside markdown code blocks. Use dashes instead:
 
-```markdown
-```markdown
+```
 Steps to run:
 - Clone: git clone https://github.com/dhaupin/vant.git
 - Configure: cp config.example.ini config.ini
-- Start: node bin/vant.js start
-```
 ```
 
 Why: Markdown parsers may render numbered lists incorrectly inside fenced code blocks.
@@ -112,13 +110,9 @@ Never use "This section covers..." as a section intro. Write actual content:
 
 Every code block needs a 1-sentence explainer before it:
 
-```
 Check system health:
 
-```bash
-vant health
-```
-```
+    vant health
 
 Why: Readers need context, not just commands.
 
@@ -146,7 +140,8 @@ Why: Docs can be rendered with Jekyll (syntax highlighting, navigation, search).
 - Buzzwords
 
 ## Example
-This section covers example.
+
+Show don't vs shouldn't.
 
 ### Before (Cliché)
 
@@ -176,18 +171,12 @@ Every section header should have a 1-2 sentence intro that answers:
 
 For example, here's a properly documented section:
 
-```markdown
-## Installation
-
-Install Vant locally or via Docker. Choose the method that fits your setup.
-
-### Local Install
-For local development with full source access:
-
-```bash
-npm install -g vant
-```
-```
+    ## Installation
+    
+    Install Vant locally or via Docker.
+    
+    ### Local Install
+    For local development:
 
 **What's NOT needed:**
 - Long intros (save for index page)
