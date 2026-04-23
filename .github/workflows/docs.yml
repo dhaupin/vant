@@ -37,16 +37,15 @@ jobs:
         env:
           JEKYLL_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install Pagefind
-        run: npm install pagefind
+      - name: Download Pagefind
+        run: |
+          curl -L https://github.com/pagefind/pagefind/releases/download/v1.5.2/pagefind-v1.5.2-x86_64-unknown-linux-musl.tar.gz -o pagefind.tar.gz
+          tar -xzf pagefind.tar.gz
+          chmod +x pagefind-v1.5.2-x86_64-unknown-linux-musl/pagefind
+          echo "$(pwd)/pagefind-v1.5.2-x86_64-unknown-linux-musl" >> $GITHUB_PATH
 
       - name: Create search index
-        run: npx pagefind --site docs/_site
+        run: pagefind --site docs/_site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
