@@ -1,0 +1,497 @@
+---
+# Jekyll layout for Vant docs with sidebar navigation
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page.title | default: "Vant Docs" }}</title>
+    <meta name="description" content="{{ page.description | default: "Vant: Open source system for AI agent memory persistence" }}">
+    <link rel="canonical" href="{{ page.url | absolute_url }}">
+    <style>
+        :root {
+            --bg: #fafafa;
+            --bg-card: #ffffff;
+            --bg-sidebar: #f5f5f5;
+            --text: #222222;
+            --text-muted: #666666;
+            --text-light: #888888;
+            --border: #e0e0e0;
+            --accent: #059669;
+            --accent-hover: #047857;
+            --link: #059669;
+            --sidebar-width: 260px;
+            --header-height: 56px;
+        }
+        [data-theme="dark"] {
+            --bg: #0f0f12;
+            --bg-card: #18181c;
+            --bg-sidebar: #141418;
+            --text: #e8e8e8;
+            --text-muted: #a0a0a0;
+            --text-light: #707070;
+            --border: #2a2a32;
+            --accent: #10b981;
+            --accent-hover: #34d399;
+            --link: #10b981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        
+        a { color: var(--link); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 100;
+        }
+        
+        .header-brand {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-brand:hover { text-decoration: none; }
+        
+        .header-brand svg {
+            width: 28px;
+            height: 28px;
+        }
+        
+        .header-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        /* Theme toggle */
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .theme-toggle:hover {
+            background: var(--bg);
+            border-color: var(--text-muted);
+        }
+        
+        /* Hamburger menu button */
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            padding: 8px;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+        
+        .hamburger svg {
+            width: 24px;
+            height: 24px;
+            display: block;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 20px 0;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-light);
+            padding: 8px 20px;
+            margin-bottom: 4px;
+        }
+        
+        .sidebar-nav {
+            list-style: none;
+        }
+        
+        .sidebar-nav li {
+            margin: 0;
+        }
+        
+        .sidebar-nav a {
+            display: block;
+            padding: 8px 20px;
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            transition: background 0.15s, color 0.15s;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-nav a:hover {
+            background: var(--bg);
+            color: var(--text);
+            text-decoration: none;
+        }
+        
+        .sidebar-nav a.active {
+            color: var(--accent);
+            border-left-color: var(--accent);
+            background: var(--bg);
+            font-weight: 500;
+        }
+        
+        /* Main content */
+        .main {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            padding: 30px 40px;
+            max-width: 800px;
+        }
+        
+        .main h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+        
+        .main h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 30px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .main h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin: 24px 0 8px;
+        }
+        
+        .main p {
+            margin-bottom: 16px;
+            color: var(--text-muted);
+        }
+        
+        .main ul, .main ol {
+            margin: 0 0 16px 20px;
+            color: var(--text-muted);
+        }
+        
+        .main li {
+            margin-bottom: 6px;
+        }
+        
+        .main code {
+            background: var(--bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: 'SF Mono', Menlo, Monaco, monospace;
+        }
+        
+        .main pre {
+            background: var(--bg);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 16px 0;
+            font-size: 0.9em;
+        }
+        
+        .main pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        .main table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+        
+        .main th, .main td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .main th {
+            font-weight: 600;
+            background: var(--bg);
+        }
+        
+        .main blockquote {
+            border-left: 3px solid var(--accent);
+            padding-left: 16px;
+            margin: 16px 0;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        
+        /* Breadcrumbs */
+        .breadcrumbs {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 16px;
+        }
+        
+        .breadcrumbs a {
+            color: var(--text-muted);
+        }
+        
+        .breadcrumbs a:hover {
+            color: var(--accent);
+        }
+        
+        .breadcrumbs span {
+            color: var(--text-light);
+            margin: 0 6px;
+        }
+        
+        /* Footer */
+        .footer {
+            margin-top: 60px;
+            padding: 30px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+        
+        .footer a {
+            color: var(--link);
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 99;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main {
+                margin-left: 0;
+                padding: 20px 16px;
+            }
+            
+            .header {
+                padding: 0 12px;
+            }
+        }
+        
+        /* Sidebar overlay for mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 98;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar-overlay.open {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12h18M3 6h18M3 18h18"/>
+            </svg>
+        </button>
+        
+        <a href="/" class="header-brand">
+            <svg viewBox="0 0 32 32" fill="currentColor">
+                <rect width="32" height="32" rx="4" fill="var(--accent)"/>
+                <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" fill="white" font-family="system-ui" font-weight="bold" font-size="20">V</text>
+            </svg>
+            Vant Docs
+        </a>
+        
+        <div class="header-right">
+            <a href="https://github.com/dhaupin/vant" style="color: var(--text-muted); font-size: 0.9rem;">GitHub</a>
+            <button class="theme-toggle" onclick="toggleTheme()">dark</button>
+        </div>
+    </header>
+    
+    <!-- Sidebar overlay (mobile) -->
+    <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+    
+    <!-- Sidebar navigation -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Getting Started -->
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <ul class="sidebar-nav">
+                <li><a href="/getting-started/install.html">Installation</a></li>
+                <li><a href="/getting-started/quick-start.html">Quick Start</a></li>
+            </ul>
+        </div>
+        
+        <!-- Reference -->
+        <div class="sidebar-section">
+            <div class="sidebar-title">Reference</div>
+            <ul class="sidebar-nav">
+                <li><a href="/reference/cli.html">CLI Reference</a></li>
+                <li><a href="/reference/configuration.html">Configuration</a></li>
+                <li><a href="/reference/api.html">Module API</a></li>
+                <li><a href="/reference/schema.html">Brain Schema</a></li>
+                <li><a href="/reference/errors.html">Error Codes</a></li>
+            </ul>
+        </div>
+        
+        <!-- Guides -->
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <ul class="sidebar-nav">
+                <li><a href="/guides/architecture.html">Architecture</a></li>
+                <li><a href="/guides/nodes.html">Nodes</a></li>
+                <li><a href="/guides/bot.html">Bot</a></li>
+                <li><a href="/guides/onboarding.html">Onboarding</a></li>
+                <li><a href="/guides/succession.html">Succession</a></li>
+                <li><a href="/guides/resolution.html">Resolution</a></li>
+                <li><a href="/guides/security.html">Security</a></li>
+                <li><a href="/guides/multi-agent.html">Multi-Agent</a></li>
+                <li><a href="/guides/mcp.html">MCP Server</a></li>
+                <li><a href="/guides/docker.html">Docker</a></li>
+                <li><a href="/guides/plugins.html">Plugins</a></li>
+                <li><a href="/guides/steganography.html">Steganography</a></li>
+                <li><a href="/guides/github.html">GitHub</a></li>
+                <li><a href="/guides/release.html">Release</a></li>
+                <li><a href="/guides/style.html">Style</a></li>
+                <li><a href="/guides/operations.html">Operations</a></li>
+                <li><a href="/guides/testing.html">Testing</a></li>
+                <li><a href="/guides/audit.html">Audit</a></li>
+                <li><a href="/guides/troubleshooting.html">Troubleshooting</a></li>
+            </ul>
+        </div>
+    </aside>
+    
+    <!-- Main content -->
+    <main class="main">
+        <!-- Breadcrumbs -->
+        <nav class="breadcrumbs">
+            <a href="/">Docs</a>
+            <span>/</span>
+            <span>{{ page.collection | default: "guides" }}</span>
+            <span>/</span>
+            <span>{{ page.title }}</span>
+        </nav>
+        
+        <!-- Page content -->
+        {{ content }}
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Open source under <a href="https://github.com/dhaupin/vant/blob/main/LICENSE">MIT license</a>.</p>
+            <p style="margin-top: 8px;">
+                <a href="https://github.com/dhaupin/vant">GitHub</a> · 
+                <a href="https://github.com/dhaupin/vant/releases">Releases</a> · 
+                <a href="https://github.com/dhaupin/vant/issues">Issues</a>
+            </p>
+        </footer>
+    </main>
+    
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.querySelector('.theme-toggle');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.setAttribute('data-theme', 'light');
+                btn.textContent = 'dark';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                btn.textContent = 'light';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // Load saved theme
+        const saved = localStorage.getItem('theme');
+        if (saved === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.querySelector('.theme-toggle').textContent = 'light';
+        }
+        
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.querySelector('.sidebar-overlay').classList.toggle('open');
+        }
+        
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.querySelector('.sidebar-overlay').classList.remove('open');
+        }
+        
+        // Set active nav item based on current URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const path = window.location.pathname;
+            const links = document.querySelectorAll('.sidebar-nav a');
+            links.forEach(link => {
+                if (link.getAttribute('href') === path) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
