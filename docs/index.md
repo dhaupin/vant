@@ -40,9 +40,9 @@ Vant persists across sessions through GitHub-based brain transfer. Each generati
 
 | Document | Purpose |
 |----------|---------|
-| [Terms & Disclaimer](./legal/index.html) | Warranty, liability, responsibilities |
-| [Privacy](./legal/privacy.html) | Data collection, your control |
-| [Environment](./legal/environment.html) | GitHub API, limits |
+| [Terms & Disclaimer](/vant/legal/index.html) | Warranty, liability, responsibilities |
+| [Privacy](/vant/legal/privacy.html) | Data collection, your control |
+| [Environment](/vant/legal/environment.html) | GitHub API, limits |
 
 
 

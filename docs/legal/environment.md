@@ -350,7 +350,7 @@ Before using Vant with GitHub:
 
 ## SEE ALSO
 
-- [Terms](./index.html) - Legal disclaimer
-- [Privacy](./privacy.html) - Privacy policy
+- [Terms](/vant/index.html) - Legal disclaimer
+- [Privacy](/vant/legal/privacy.html) - Privacy policy
 - [GitHub API Docs](https://docs.github.com/en/rest) - Full API reference
 - [GitHub ToS](https://docs.github.com/en/github/site-policy) - All policies

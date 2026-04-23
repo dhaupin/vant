@@ -262,5 +262,5 @@ If you have concerns:
 ## SEE ALSO
 
 - [GitHub Privacy](https://docs.github.com/en/github/site-policy/github-privacy-statement) - GitHub's policy
-- [Terms](./index.html) - Our legal terms
+- [Terms](/vant/index.html) - Our legal terms
 - [Security](/vant/guides/security.html) - Security practices
