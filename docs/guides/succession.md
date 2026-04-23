@@ -46,6 +46,7 @@ vant succession trust none
 ```
 
 ## _succession.json
+Version tracking and brain inheritance.
 
 ```json
 {

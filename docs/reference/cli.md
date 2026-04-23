@@ -133,6 +133,8 @@ TELEGRAM_BOT_TOKEN=xxx vant bot
 #   /sync - Trigger sync
 ```
 
+Example:
+
 ## Setup & Config
 
 | Command | Description |
@@ -349,6 +351,7 @@ See also: [Configuration](/vant/reference/configuration.html), [API](/vant/refer
 ---
 
 ## FAQ
+Frequently asked questions answered.
 
 ### Which command do I start with?
 

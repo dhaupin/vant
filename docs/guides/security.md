@@ -296,6 +296,7 @@ Events logged:
 ---
 
 ## MCP Security
+Keep your brain and tokens safe.
 
 ### Enable API Key (Recommended for Production)
 

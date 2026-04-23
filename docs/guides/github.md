@@ -24,6 +24,8 @@ gh repo create vant-brain --private
 # Or via web: https://github.com/new
 ```
 
+Example:
+
 ### 2. Generate Token
 
 1. Go to: https://github.com/settings/tokens
@@ -141,6 +143,8 @@ git push origin experiment-feature
 # Create PR on GitHub for review
 # Merge to main when ready
 ```
+
+Example:
 
 See: [Multi-Agent](/vant/guides/multi-agent.html)
 

@@ -37,6 +37,7 @@ async function saveLesson(lesson) {
 ```
 
 ## MCP Server
+Connect Vant to AI models via Model Context Protocol.
 
 ```javascript
 const mcp = require('./bin/mcp');
@@ -88,6 +89,7 @@ async function check() {
 ```
 
 ## GitHub Sync
+GitHub integration and workflow.
 
 ```javascript
 const sync = require('./lib/sync');

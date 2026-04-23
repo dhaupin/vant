@@ -8,6 +8,7 @@ title: Audit & Compliance
 Logging and compliance for Vant.
 
 ## Audit Logging
+Track changes to your brain for compliance.
 
 ### Enable Audit
 

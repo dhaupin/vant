@@ -55,6 +55,7 @@ The brain lives in `models/public/` and contains personality, goals, and learned
 | `keepers.md` | Non-negotiable rules |
 
 ## Customizing Your Brain
+Brain file structure and management.
 
 ### Start Fresh
 

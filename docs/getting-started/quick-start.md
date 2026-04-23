@@ -8,6 +8,7 @@ title: Quick Start
 > Get Vant running in 2 minutes
 
 ## 1. Install
+Installation options and setup.
 
 ```bash
 npm install -g vant

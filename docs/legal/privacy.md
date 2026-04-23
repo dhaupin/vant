@@ -107,6 +107,7 @@ Tokens/config in `.env`:
 ---
 
 ## SECURITY
+Keep your brain and tokens safe.
 
 ### Local Security
 
@@ -213,6 +214,8 @@ git clone https://github.com/yourname/vant.git
 
 # Or use GitHub's export
 ```
+
+Example:
 
 ---
 

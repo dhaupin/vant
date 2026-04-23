@@ -19,6 +19,7 @@ Vant can encode/decode secret messages inside PNG images using LSB (Least Signif
 - Bypass content filters that allow images but block text
 
 ## Quick Start
+Get up and running in minutes.
 
 ```bash
 # Encode a secret message

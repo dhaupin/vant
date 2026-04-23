@@ -13,6 +13,7 @@ title: Contributing
 Be respectful. We're all here to build cool AI memory stuff together.
 
 ## Ways to Contribute
+There are several ways to contribute to Vant.
 
 ### 1. Report Bugs
 
@@ -52,6 +53,7 @@ Docs live in `docs/`. Just edit and PR!
 - Help others in discussions
 
 ## Development Setup
+Get your local development environment ready.
 
 ```bash
 # Clone

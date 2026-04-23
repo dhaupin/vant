@@ -55,6 +55,7 @@ node bin/build-test.js --load
 ```
 
 ## Manual Testing
+Test your Vant setup and agents.
 
 ### Brain Loading
 
@@ -96,6 +97,8 @@ vant start
 # Expected: Brain loads, no errors
 ```
 
+Example:
+
 ### Error Handling
 
 ```bash
@@ -103,6 +106,8 @@ vant start
 GITHUB_TOKEN=invalid vant sync
 # Expected: Error with code GITHUB_AUTH
 ```
+
+Example:
 
 ### Rate Limit
 
@@ -112,6 +117,8 @@ for i in {1..100}; do vant sync; done
 
 # Expected: RATE_LIMIT error
 ```
+
+Example:
 
 ### Brain Corruption
 
@@ -123,6 +130,8 @@ rm models/public/identity.md
 vant load
 # Expected: Error with code BRAIN_LOAD_FAIL
 ```
+
+Example:
 
 ## Test Data
 
@@ -145,7 +154,10 @@ vant health
 # Expected: Error with code CONFIG_INVALID
 ```
 
+Example:
+
 ## CI/CD Testing
+Test your Vant setup and agents.
 
 ### GitHub Actions
 

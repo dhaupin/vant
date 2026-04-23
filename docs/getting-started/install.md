@@ -17,6 +17,8 @@ Choose your init method:
 
 ## Local Init
 
+Clone the repo and run setup locally:
+
 ```bash
 git clone https://github.com/dhaupin/vant.git
 cd vant
@@ -46,6 +48,7 @@ This mode skips interactive prompts and uses env vars for full automation.
 ---
 
 ## Docker Init
+Deploy Vant in a container for consistent environments.
 
 ```bash
 docker run -it -v vant-brain:/app/models dhaupin/vant vant load

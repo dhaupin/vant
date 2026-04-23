@@ -28,6 +28,7 @@ title: Examples & Showcase
 - **Learning Assistant** - Tracks learning progress across sessions
 
 ## Use Cases
+Common scenarios where Vant excels.
 
 ### Long-Running Workflows
 
@@ -64,6 +65,7 @@ Edge device starts → Load brain from GitHub
 ```
 
 ## Code Snippets
+Working examples for common tasks.
 
 ### Basic Memory
 

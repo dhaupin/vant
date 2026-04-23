@@ -56,6 +56,7 @@ Error: GitHub API rate limit exceeded
 - Reduce sync frequency
 
 ## Brain Issues
+Brain file structure and management.
 
 ### Brain not loading
 

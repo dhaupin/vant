@@ -71,6 +71,7 @@ Reference for all Vant error codes.
 | `UNKNOWN` | Unknown error | No |
 
 ## Handling Errors
+Error codes and troubleshooting.
 
 ### Throw an Error
 

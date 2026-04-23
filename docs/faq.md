@@ -7,6 +7,7 @@ title: FAQ
 # Frequently Asked Questions
 
 ## General
+Common questions about Vant.
 
 ### What is Vant?
 
@@ -34,6 +35,7 @@ No - it's completely open source and free. You only need:
 ---
 
 ## Technical
+Technical details and implementation.
 
 ### How does brain transfer work?
 
@@ -69,6 +71,7 @@ Yes! Just `git clone` your brain repo. It's all markdown files you can edit dire
 ---
 
 ## Comparison
+How Vant compares to alternatives.
 
 ### vs Vector Databases
 
@@ -98,6 +101,7 @@ Yes! Just `git clone` your brain repo. It's all markdown files you can edit dire
 ---
 
 ## Support
+Get help when you need it.
 
 ### How do I get help?
 

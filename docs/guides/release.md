@@ -23,6 +23,7 @@ v0.8.4
 | MAJOR | 0.8.4 → 1.0.0 | Breaking changes |
 
 ## Release Checklist
+Release process and versioning.
 
 ### 1. Pre-Release
 
@@ -85,6 +86,7 @@ After pushing tags:
 5. Publish
 
 ## Docker Tags
+Deploy Vant in a container for consistent environments.
 
 ```bash
 # Build and push

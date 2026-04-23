@@ -45,6 +45,7 @@ await notifications.discord('Brain updated');
 ```
 
 ## Daily Operations
+Day-to-day management tasks.
 
 ### Health Check
 
@@ -75,6 +76,7 @@ Shows:
 - Tokens used
 
 ## Troubleshooting
+Fix common issues.
 
 ### Vant Won't Start
 
@@ -108,6 +110,8 @@ vant rate
 # Wait for reset (GitHub resets hourly)
 # Or use different token
 ```
+
+Example:
 
 ## Recovery
 
@@ -178,6 +182,7 @@ vant changelog
 ```
 
 ## Monitoring
+Tracking Vant health and activity.
 
 ### Watch Mode
 

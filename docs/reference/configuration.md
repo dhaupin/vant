@@ -39,6 +39,7 @@ MAX_REQUESTS_PER_HOUR=360
 | `MAX_REQUESTS_PER_HOUR` | No | Rate limit cap |
 
 ## Additional Environment Variables
+Configuration via environment.
 
 ### MCP Server
 
@@ -230,6 +231,8 @@ SOCIABILITY=medium
 # urgent:    Quick, action-focused
 # contemplative: Thoughtful, philosophical
 ```
+
+Example:
 
 | Setting | Options | Description |
 |--------|---------|-------------|

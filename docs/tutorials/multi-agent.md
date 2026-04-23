@@ -94,6 +94,7 @@ async function work() {
 ```
 
 ## Multi-Agent Patterns
+Coordinate multiple AI agents with Vant.
 
 ### Pattern 1: Solo Agent (Safe)
 ```javascript

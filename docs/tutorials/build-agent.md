@@ -28,6 +28,8 @@ npm install -g vant
 # Create repo
 ```
 
+Example:
+
 ## Step 2: Configure
 
 ```bash
@@ -38,6 +40,8 @@ vant setup
 # - Brain repo: yourusername/my-first-agent-brain
 # - Branch: main
 ```
+
+Example:
 
 ## Step 3: Create Agent Script
 
@@ -80,7 +84,10 @@ node agent.js
 # Output: Previous sessions: 1
 ```
 
+Example:
+
 ## How Brain Transfer Works
+Brain file structure and management.
 
 ```text
 Session 1              Session 2

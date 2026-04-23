@@ -8,6 +8,7 @@ title: MCP Server
 Model Context Protocol (MCP) server for Vant.
 
 ## Quick Start
+Get up and running in minutes.
 
 ```bash
 vant mcp              # Start server
@@ -63,6 +64,7 @@ See also: [CLI Reference](/vant/reference/cli.html), [Architecture](/vant/guides
 ---
 
 ## FAQ
+Frequently asked questions answered.
 
 ### What is MCP?
 

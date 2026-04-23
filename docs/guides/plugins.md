@@ -76,7 +76,10 @@ vant start
 # [Plugin] Loaded: echo
 ```
 
+Example:
+
 ## Examples
+Real-world use cases and patterns.
 
 ### Echo Plugin
 

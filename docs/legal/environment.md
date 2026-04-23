@@ -11,6 +11,7 @@ title: Environment & Limits
 ---
 
 ## GITHUB API USAGE
+How Vant interacts with GitHub APIs.
 
 ### What Vant Uses
 
@@ -63,6 +64,7 @@ repo
 ---
 
 ## POLLING CONSIDERATIONS
+Timing and rate limit details.
 
 ### GitHub ToS Prohibition
 
@@ -91,6 +93,7 @@ Vant defaults to:
 ---
 
 ## DATA CONSIDERATIONS
+How your data is handled.
 
 ### What Gets Synced
 
@@ -127,6 +130,7 @@ Your brain is:
 ---
 
 ## TOKEN SECURITY
+Keeping your GitHub token safe.
 
 ### Best Practices
 
@@ -174,6 +178,7 @@ Your brain is:
 ---
 
 ## SYSTEM REQUIREMENTS
+What you need to run Vant.
 
 ### Minimum
 
@@ -206,6 +211,7 @@ Vant uses:
 ---
 
 ## NETWORK CONSIDERATIONS
+Network requirements and behavior.
 
 ### Ports Used
 
@@ -237,6 +243,7 @@ export HTTPS_PROXY=http://proxy:8080
 ---
 
 ## ENVIRONMENT VARIABLES
+Configuration via environment.
 
 ### Required
 
@@ -262,6 +269,7 @@ export HTTPS_PROXY=http://proxy:8080
 ---
 
 ## ERROR HANDLING
+How errors are managed.
 
 ### Common Errors
 
@@ -283,6 +291,7 @@ export HTTPS_PROXY=http://proxy:8080
 ---
 
 ## LIMITATIONS
+Known limitations and workarounds.
 
 ### Vant Limitations
 
@@ -309,6 +318,7 @@ Future support (not implemented):
 ---
 
 ## MONITORING
+Tracking Vant health and activity.
 
 ### Local Monitoring
 

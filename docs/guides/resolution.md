@@ -57,6 +57,7 @@ vant resolution deltas identity 5
 - `models/public/.resolution.json` - Ledger
 
 ## Resolution File
+How Vant handles brain conflicts and resolution.
 
 ```json
 {

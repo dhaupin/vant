@@ -47,6 +47,8 @@ Merge via PR for review:
 # Merge to main
 ```
 
+Example:
+
 ## Best Practices
 
 1. Use locks - Even solo agents prevent race conditions

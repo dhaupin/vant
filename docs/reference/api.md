@@ -16,6 +16,7 @@ config.set('node.pollInterval', 30);
 ```
 
 ## lib/brain.js
+Brain file structure and management.
 
 ```javascript
 const brain = require('./lib/brain');
@@ -106,6 +107,7 @@ version.bump('patch'); // Bump version
 ```
 
 ## lib/succession.js
+Version tracking and brain inheritance.
 
 ```javascript
 const succession = require('./lib/succession');
@@ -165,6 +167,7 @@ autoUpdate.trigger();  // Trigger save
 ```
 
 ## lib/onboard.js
+Onboard new agents to your brain.
 
 ```javascript
 const onboard = require('./lib/onboard');
@@ -174,6 +177,7 @@ await onboard.list();    // List available
 ```
 
 ## lib/errors.js
+Error codes and troubleshooting.
 
 ```javascript
 const errors = require('./lib/errors');
@@ -303,6 +307,7 @@ metrics.timing('vant.sync.duration', 1234);
 ```
 
 ## lib/resolution.js
+How Vant handles brain conflicts and resolution.
 
 ```javascript
 const resolution = require('./lib/resolution');

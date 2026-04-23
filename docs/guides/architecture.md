@@ -17,6 +17,7 @@ User's AI → bin/vant.js → lib/brain.js → GitHub
 ```
 
 ## Components
+The core modules that make up Vant.
 
 ### bin/
 

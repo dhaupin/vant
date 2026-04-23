@@ -32,6 +32,7 @@ Vant is open source software provided without warranty. By using it, you accept 
 ---
 
 ## Key Points
+The essentials you need to know.
 
 ### You Are Responsible For
 
