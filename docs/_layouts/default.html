@@ -14,6 +14,9 @@
     <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
     
+    <!-- Pagefind UI for search -->
+    <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+    
     <style>
         :root {
             --bg: #fafafa;
@@ -107,6 +110,27 @@
         .theme-toggle:hover {
             background: var(--bg);
             border-color: var(--text-muted);
+        }
+        
+        /* Pagefind search */
+        .pagefind-ui__search-input {
+            background: var(--bg) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--text) !important;
+            font-size: 0.85rem !important;
+            padding: 6px 12px !important;
+            border-radius: 6px !important;
+            width: 180px !important;
+        }
+        .pagefind-ui__result-title {
+            color: var(--link) !important;
+        }
+        .pagefind-ui__result-excerpt {
+            color: var(--text-muted) !important;
+        }
+        .pagefind-ui__drawer {
+            background: var(--bg-card) !important;
+            border: 1px solid var(--border) !important;
         }
         
         /* Hamburger menu button */
@@ -440,6 +464,7 @@
         </a>
         
         <div class="header-right">
+            <div id="search"></div>
             <a href="https://github.com/dhaupin/vant" style="color: var(--text-muted); font-size: 0.9rem;">GitHub</a>
             <button class="theme-toggle" onclick="toggleTheme()">dark</button>
         </div>
@@ -557,6 +582,18 @@
     
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    
+    <!-- Pagefind search -->
+    <script src="/pagefind/pagefind-ui.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            new PagefindUI({ 
+                element: "#search", 
+                showSubResults: true,
+                showImages: false
+            });
+        });
+    </script>
     
     <script>
         // Theme toggle

@@ -37,6 +37,16 @@ jobs:
         env:
           JEKYLL_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Index with Pagefind
+        run: |
+          npm install -g pagefind
+          pagefind --site docs/_site
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
