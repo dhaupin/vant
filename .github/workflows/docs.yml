@@ -41,20 +41,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build site
-        run: mkdir -p docs/_site && echo "<html><body>test</body></html>" > docs/_site/index.html
+      - name: Build site (skip Jekyll for debug)
+        run: mkdir -p docs/_site && echo "test" > docs/_site/index.html
 
       - name: Install Pagefind
-        run: |
-          npm install pagefind
-          echo "Pagefind installed: $(which pagefind)"
-          echo "node_modules: $(ls node_modules/ | grep pagefind)"
+        run: npm install pagefind
 
       - name: Index with Pagefind
         run: npx pagefind --site docs/_site
