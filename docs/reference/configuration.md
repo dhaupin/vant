@@ -232,7 +232,6 @@ SOCIABILITY=medium
 # contemplative: Thoughtful, philosophical
 ```
 
-Example:
 
 | Setting | Options | Description |
 |--------|---------|-------------|

@@ -157,7 +157,6 @@ git push origin experiment-feature
 # Merge to main when ready
 ```
 
-Example:
 
 See: [Multi-Agent](/vant/guides/multi-agent.html)
 

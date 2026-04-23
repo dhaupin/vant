@@ -220,7 +220,6 @@ git clone https://github.com/yourname/vant.git
 # Or use GitHub's export
 ```
 
-Example:
 
 ---
 

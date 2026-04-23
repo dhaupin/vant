@@ -110,7 +110,6 @@ vant start
 # Expected: Brain loads, no errors
 ```
 
-Example:
 
 ### Error Handling
 Handle this error case.
@@ -121,7 +120,6 @@ GITHUB_TOKEN=invalid vant sync
 # Expected: Error with code GITHUB_AUTH
 ```
 
-Example:
 
 ### Rate Limit
 Check rate limits.
@@ -133,7 +131,6 @@ for i in {1..100}; do vant sync; done
 # Expected: RATE_LIMIT error
 ```
 
-Example:
 
 ### Brain Corruption
 Handle corrupted brain files.
@@ -147,7 +144,6 @@ vant load
 # Expected: Error with code BRAIN_LOAD_FAIL
 ```
 
-Example:
 
 ## Test Data
 Key information for the plugin.
@@ -172,7 +168,6 @@ vant health
 # Expected: Error with code CONFIG_INVALID
 ```
 
-Example:
 
 ## CI/CD Testing
 Test your Vant setup and agents.
