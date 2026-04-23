@@ -187,23 +187,13 @@ For AI agents, copy this prompt to set up Vant automatically:
 
 Set up Vant (https://github.com/dhaupin/vant) as my persistent brain.
 
-1. Clone the repo:
-   git clone https://github.com/dhaupin/vant.git
-   cd vant
-
-2. Copy config templates:
-   cp config.example.ini config.ini
-   cp .env.example .env
-
-3. Configure in config.ini:
-   - GITHUB_REPO=your-github-username/your-repo
-   - GITHUB_BRANCH=main
-
-4. Set GITHUB_TOKEN in .env
-
-5. Test: node bin/build-test.js
-
-6. Start: node bin/vant.js start
+Steps to run:
+- Clone: git clone https://github.com/dhaupin/vant.git && cd vant
+- Configure: cp config.example.ini config.ini && cp .env.example .env
+- Edit config.ini with GITHUB_REPO=your-username/your-repo
+- Add GITHUB_TOKEN to .env
+- Test: node bin/build-test.js
+- Start: node bin/vant.js start
 ```
 
 ### Environment Variables
@@ -215,11 +205,11 @@ Set up Vant (https://github.com/dhaupin/vant) as my persistent brain.
 | `GITHUB_BRANCH` | No | Branch name (default: main) |
 | `VANT_AGENT_ID` | No | Agent identifier for multi-agent |
 
-### For AI Agents (Full Prompt)
+### For AI Agents (Quick Prompt)
 
 Give this to your AI agent to self-configure:
 
-> "I need you to set up Vant (https://github.com/dhaupin/vant) as your persistent brain. Clone the repo, configure it with GITHUB_REPO and GITHUB_TOKEN, then run `vant start` to begin."
+> "Set up Vant (https://github.com/dhaupin/vant) as my persistent brain. Clone the repo, configure it with GITHUB_REPO and GITHUB_TOKEN, then run `vant start` to begin."
 
 See also: [Quick Start](/vant/getting-started/quick-start.html)
 
