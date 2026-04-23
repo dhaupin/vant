@@ -1,10 +1,22 @@
 title: Vant
 description: AI memory for agents
 markdown: kramdown
+highlighter: rouge
 
 # Build settings
 permalink: pretty
 exclude: ['README.md', 'Gemfile', 'Gemfile.lock', 'tmp']
+
+# Kramdown settings for syntax highlighting
+kramdown:
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    default_lang: plaintext
+    css_class: 'highlight'
+    span:
+      decorator: '<span class="language-{}">{}</span>'
+    block:
+      decorator: '<div class="language-{}"><pre class="line-numbers">{}</pre></div>'
 
 # Default layouts for all docs
 defaults:
