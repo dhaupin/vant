@@ -206,45 +206,54 @@ telegram.onCallback(async (query) => {
 
 ## Bot Security Best Practices
 
-1. **Keep your token secret**
-   ```bash
-   # Use environment variable
-   export TELEGRAM_BOT_TOKEN=xxx
-   
-   # Never commit to git
-   echo "TELEGRAM_BOT_TOKEN=xxx" >> .env
-   ```
+### Keep Your Token Secret
 
-2. **Limit access (optional)**
-   ```javascript
-   const ALLOWED_USERS = ['user_id_1', 'user_id_2'];
-   
-   telegram.onMessage(async (msg) => {
-       if (!ALLOWED_USERS.includes(msg.from.id)) {
-           await telegram.send(msg.chat, 'Access denied');
-           return;
-       }
-       // Process message
-   });
-   ```
+Use environment variables instead of hardcoding:
 
-3. **Rate limit commands**
-   ```javascript
-   const lastCommand = {};
-   
-   telegram.onCommand('sync', async (msg) => {
-       const userId = msg.from.id;
-       const now = Date.now();
-       
-       if (lastCommand[userId] && now - lastCommand[userId] < 60000) {
-           await telegram.send(msg.chat, 'Please wait 60 seconds between syncs');
-           return;
-       }
-       
-       lastCommand[userId] = now;
-       // Run sync
-   });
-   ```
+```bash
+# Use environment variable
+export TELEGRAM_BOT_TOKEN=xxx
+
+# Never commit to git
+echo "TELEGRAM_BOT_TOKEN=xxx" >> .env
+```
+
+### Limit Access (Optional)
+
+Restrict bot access to specific users:
+
+```javascript
+const ALLOWED_USERS = ['user_id_1', 'user_id_2'];
+
+telegram.onMessage(async (msg) => {
+    if (!ALLOWED_USERS.includes(msg.from.id)) {
+        await telegram.send(msg.chat, 'Access denied');
+        return;
+    }
+    // Process message
+});
+```
+
+### Rate Limit Commands
+
+Prevent spam with simple rate limiting:
+
+```javascript
+const lastCommand = {};
+
+telegram.onCommand('sync', async (msg) => {
+    const userId = msg.from.id;
+    const now = Date.now();
+    
+    if (lastCommand[userId] && now - lastCommand[userId] < 60000) {
+        await telegram.send(msg.chat, 'Please wait 60 seconds between syncs');
+        return;
+    }
+    
+    lastCommand[userId] = now;
+    // Run sync
+});
+```
 
 ## Deployment Options
 

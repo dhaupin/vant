@@ -178,6 +178,34 @@ npm install -g vant && vant start --ai
 
 The `--ai` flag skips interactive prompts and uses environment variables directly.
 
+### One-Click Setup Prompt
+
+For AI agents, copy this prompt to set up Vant automatically:
+
+```markdown
+### Vant Setup
+
+Set up Vant (https://github.com/dhaupin/vant) as my persistent brain.
+
+1. Clone the repo:
+   git clone https://github.com/dhaupin/vant.git
+   cd vant
+
+2. Copy config templates:
+   cp config.example.ini config.ini
+   cp .env.example .env
+
+3. Configure in config.ini:
+   - GITHUB_REPO=your-github-username/your-repo
+   - GITHUB_BRANCH=main
+
+4. Set GITHUB_TOKEN in .env
+
+5. Test: node bin/build-test.js
+
+6. Start: node bin/vant.js start
+```
+
 ### Environment Variables
 
 | Variable | Required | Description |
@@ -186,6 +214,14 @@ The `--ai` flag skips interactive prompts and uses environment variables directl
 | `GITHUB_REPO` | Yes | Brain repository (owner/name) |
 | `GITHUB_BRANCH` | No | Branch name (default: main) |
 | `VANT_AGENT_ID` | No | Agent identifier for multi-agent |
+
+### For AI Agents (Full Prompt)
+
+Give this to your AI agent to self-configure:
+
+> "I need you to set up Vant (https://github.com/dhaupin/vant) as your persistent brain. Clone the repo, configure it with GITHUB_REPO and GITHUB_TOKEN, then run `vant start` to begin."
+
+See also: [Quick Start](/vant/getting-started/quick-start.html)
 
 ---
 
