@@ -1,12 +1,7 @@
 ---
-permalink: /security.html
----
-
----
-version: 0.8.4
+permalink: /vant/guides/security.html
+layout: default
 title: Security
-slug: /security
-order: 8
 ---
 
 # Security

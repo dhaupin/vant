@@ -1,13 +1,7 @@
 ---
-permalink: /architecture.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/guides/architecture.html
+layout: default
 title: Architecture
-slug: /architecture
-order: 7
 ---
 
 # Architecture
