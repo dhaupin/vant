@@ -587,12 +587,18 @@
     <script src="/vant/pagefind/pagefind-ui.js"></script>
     <script>
         window.addEventListener('DOMContentLoaded', function() {
-            new PagefindUI({ 
-                element: "#search", 
-                basePath: "/vant",
-                showSubResults: true,
-                showImages: false
-            });
+            console.log('Initializing Pagefind...');
+            try {
+                new PagefindUI({ 
+                    element: "#search", 
+                    basePath: "/vant",
+                    showSubResults: true,
+                    showImages: false
+                });
+                console.log('Pagefind initialized');
+            } catch(e) {
+                console.error('Pagefind error:', e);
+            }
         });
     </script>
     
