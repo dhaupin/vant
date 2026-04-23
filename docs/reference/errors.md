@@ -110,4 +110,4 @@ if (error.retryable) {
 | `NETWORK_OFFLINE` | Check internet connection |
 | `LOCK_TIMEOUT` | Another agent holds the lock |
 
-See also: [Troubleshooting](./troubleshooting.md), [CLI Reference](./cli.md)
+See also: [Troubleshooting](/vant/guides/troubleshooting.html), [CLI Reference](/vant/reference/cli.html)

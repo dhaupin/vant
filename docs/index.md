@@ -76,7 +76,7 @@ Yes, use a private GitHub repo. Vant is just you + GitHub.
 
 ### Can multiple AI agents share one brain?
 
-Yes! Use the [Multi-Agent](./guides/multi-agent.md) system with branches + locks.
+Yes! Use the [Multi-Agent](/vant/guides/multi-agent.html) system with branches + locks.
 
 ### How is this different from vector databases?
 

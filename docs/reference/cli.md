@@ -344,7 +344,7 @@ vant docs build --version # Specific version
 vant docs serve          # Local server
 ```
 
-See also: [Configuration](./configuration.md), [API](./api.md)
+See also: [Configuration](/vant/reference/configuration.html), [API](/vant/reference/api.html)
 
 ---
 
