@@ -16,11 +16,17 @@
     
     <!-- Pagefind search -->
     <link href="/vant/pagefind/pagefind-component-ui.css" rel="stylesheet">
-    <script src="/vant/pagefind/pagefind-component-ui.js" type="module"></script>
-    <script type="module">
-        import { initializeModal } from '/vant/pagefind/pagefind-component-ui.js';
-        window.addEventListener('DOMContentLoaded', () => {
-            initializeModal();
+    <script src="/vant/pagefind/pagefind-component-ui.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-open on Cmd+K
+            document.addEventListener('keydown', function(e) {
+                if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                    e.preventDefault();
+                    var trigger = document.querySelector('pagefind-modal-trigger');
+                    trigger?.click();
+                }
+            });
         });
     </script>
     
