@@ -42,21 +42,11 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Build site
-        run: |
-          mkdir -p docs/_site
-          echo "<html><title>Test</title><body><h1>Test page</h1></body></html>" > docs/_site/index.html
-
       - name: Install Pagefind
         run: npm install pagefind
 
-      - name: Create index
-        run: |
-          ls docs/_site/
-          npx pagefind --site docs/_site
-
-      - name: List output
-        run: ls docs/_site/pagefind/
+      - name: Create search index
+        run: npx pagefind --site docs/_site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
