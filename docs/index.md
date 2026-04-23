@@ -63,4 +63,4 @@ Vant's version tracking - knows which brain version to load, handles rollbacks.
 
 ### Can I export my brain?
 
-Yes! Just `git clone` your brain repo. It's all markdown.
+Yes! Just `git clone` your brain repo. It's all markdown.# Vant Docs
