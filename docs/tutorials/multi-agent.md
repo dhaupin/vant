@@ -69,7 +69,7 @@ async function work() {
 
 ## Workflow
 
-```
+```text
 ┌─────────────────┐
 │  Agent A wants   │
 │     to work     │
@@ -82,7 +82,7 @@ async function work() {
          │                │
     ┌────┴────┐         │
     │         │         │
- ▼ S UCESS  │ FAILED  │       
+    ▼ SUCCESS │ FAILED  │       
     │         │         │
     ▼         ▼         │
 ┌─────────┴─────────┐  │
