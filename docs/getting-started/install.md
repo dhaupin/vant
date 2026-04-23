@@ -28,6 +28,23 @@ node bin/vant.js load
 
 ---
 
+## AI Prompt Init {#ai-prompt-init}
+
+For AI agents that need to set up themselves (auto-configuration):
+
+```bash
+# Set environment variables
+export GITHUB_TOKEN=$AI_GITHUB_TOKEN
+export GITHUB_REPO=$AI_BRAIN_REPO
+
+# Auto-install and run
+npm install -g vant && vant start --ai
+```
+
+This mode skips interactive prompts and uses env vars for full automation.
+
+---
+
 ## Docker Init
 
 ```bash
