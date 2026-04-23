@@ -110,4 +110,4 @@ Trust levels control how much context to inherit:
 | `low` | Reference only |
 | `none` | Start fresh |
 
-See also: [Architecture](./vant/architecture.md), [Succession](./vant/succession.md)
+See also: [Architecture](/vant/guides/architecture.html), [Succession](/vant/guides/succession.html)

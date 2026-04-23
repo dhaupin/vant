@@ -104,6 +104,6 @@ Search: "therapy"
 
 ## See Also
 
-- [Succession](./vant/succession.md) - Version/trust
-- [Resolution](./vant/resolution.md) - Thought status
-- [Knowledge](./vant/troubleshooting.md) - Knowledge base
+- [Succession](/vant/guides/succession.html) - Version/trust
+- [Resolution](/vant/guides/resolution.html) - Thought status
+- [Knowledge](/vant/guides/troubleshooting.html) - Knowledge base

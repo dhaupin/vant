@@ -122,6 +122,6 @@ resolution.reject('identity', 'old belief', 'ethics changed');
 
 ## See Also
 
-- [Succession](./vant/succession.md) - Brain version tracking
-- [Onboarding](./vant/troubleshooting.md) - Knowledge base browser
-- [Audit](./vant/audit.md) - Compliance tracking
+- [Succession](/vant/guides/succession.html) - Brain version tracking
+- [Onboarding](/vant/guides/troubleshooting.html) - Knowledge base browser
+- [Audit](/vant/guides/audit.html) - Compliance tracking

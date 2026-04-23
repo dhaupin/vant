@@ -47,4 +47,4 @@ User's AI → bin/vant.js → lib/brain.js → GitHub
 3. Commits to GitHub on changes (human/agent initiated)
 4. Next session syncs when ready
 
-See also: [Multi-Agent](./vant/multi-agent.md), [Security](./vant/security.md)
+See also: [Multi-Agent](/vant/guides/multi-agent.html), [Security](/vant/guides/security.html)

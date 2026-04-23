@@ -142,7 +142,7 @@ git push origin experiment-feature
 # Merge to main when ready
 ```
 
-See: [Multi-Agent](./vant/multi-agent.md)
+See: [Multi-Agent](/vant/guides/multi-agent.html)
 
 ## Troubleshooting
 

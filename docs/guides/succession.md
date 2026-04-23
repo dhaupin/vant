@@ -111,6 +111,6 @@ const files = succession.getFilesForTrust('medium');
 
 ## See Also
 
-- [MCP Server](./vant/mcp.md) - Tool integration
-- [Multi-Agent](./vant/multi-agent.md) - Multi-node coordination
-- [Resolution](./vant/resolution.md) - Mark thoughts resolved
+- [MCP Server](/vant/guides/mcp.html) - Tool integration
+- [Multi-Agent](/vant/guides/multi-agent.html) - Multi-node coordination
+- [Resolution](/vant/guides/resolution.html) - Mark thoughts resolved
