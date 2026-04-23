@@ -15,19 +15,120 @@
     <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
     
     <!-- Pagefind search -->
-    <link href="/vant/pagefind/pagefind-component-ui.css" rel="stylesheet">
-    <script src="/vant/pagefind/pagefind-ui.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize with base_path for subdirectory deployment
-            if (window.PagefindUI) {
-                new window.PagefindUI({
-                    element: "#search",
-                    base_path: "/vant/pagefind/"
-                });
+    <style>
+        .search-trigger {
+            display: flex;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .search-trigger:hover {
+            color: var(--text);
+            border-color: var(--text-muted);
+        }
+        .search-trigger svg {
+            width: 16px;
+            height: 16px;
+        }
+        .search-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 8vh 1rem;
+        }
+        .search-modal.open {
+            display: flex;
+        }
+        .search-modal-content {
+            width: 100%;
+            max-width: 600px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 2vh;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            font-family: var(--font);
+            background: transparent;
+            color: var(--text);
+            border: none;
+            border-bottom: 1px solid var(--border);
+            outline: none;
+        }
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+        .search-results {
+            padding: 0;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+        .search-result {
+            display: block;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+        .search-result:hover {
+            background: var(--bg-hover);
+            text-decoration: none;
+        }
+        .search-result-title {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+        .search-result-excerpt {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .search-empty {
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+        .search-close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0.5rem;
+        }
+        .search-close:hover {
+            color: var(--text);
+        }
+        @media (max-width: 600px) {
+            .search-modal-content {
+                margin-top: 0;
             }
-        });
-    </script>
+        }
+    </style>
     
     <style>
         :root {
@@ -456,7 +557,12 @@
         </a>
         
         <div class="header-right">
-            <div id="search" style="--pagefind-ui-primary: var(--link); --pagefind-ui-text: var(--text); --pagefind-ui-background: var(--bg-card); --pagefind-ui-border: var(--border); --pagefind-ui-border-radius: 6px; --pagefind-ui-font-size: 0.85rem; min-width: 200px;"></div>
+            <button class="search-trigger" id="searchTrigger" aria-label="Search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+            </button>
             <a href="https://github.com/dhaupin/vant" style="color: var(--text-muted); font-size: 0.9rem;">GitHub</a>
             <button class="theme-toggle" onclick="toggleTheme()">dark</button>
         </div>
@@ -692,6 +798,78 @@
             }
             return null;
         }
+    </script>
+<!-- Search Modal -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-modal-content">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search docs..." autocomplete="off">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+        <button class="search-close" id="searchClose" aria-label="Close search">×</button>
+    </div>
+    
+    <script>
+        // Search functionality using Pagefind
+        var searchTrigger = document.getElementById('searchTrigger');
+        var searchModal = document.getElementById('searchModal');
+        var searchInput = document.getElementById('searchInput');
+        var searchResults = document.getElementById('searchResults');
+        var searchClose = document.getElementById('searchClose');
+        var pagefindLoaded = false;
+
+        async function doSearch(q) {
+            if (q.length < 2) {
+                searchResults.innerHTML = '';
+                return;
+            }
+            searchResults.innerHTML = '<div class="search-empty">Loading...</div>';
+            try {
+                var pagefind = await import('/vant/pagefind/pagefind.js');
+                await pagefind.init();
+                var resp = await pagefind.search(q);
+                if (resp.results.length === 0) {
+                    searchResults.innerHTML = '<div class="search-empty">No results found for "' + q + '"</div>';
+                    return;
+                }
+                var html = '';
+                for (var i = 0; i < resp.results.length && i < 10; i++) {
+                    var r = resp.results[i];
+                    var data = await r.data();
+                    html += '<a href="/vant' + data.url + '" class="search-result">';
+                    html += '<div class="search-result-title">' + data.meta.title + '</div>';
+                    if (data.excerpt) html += '<div class="search-result-excerpt">' + data.excerpt + '</div>';
+                    html += '</a>';
+                }
+                searchResults.innerHTML = html;
+            } catch (e) {
+                searchResults.innerHTML = '<div class="search-empty">Search unavailable</div>';
+                console.error('Search error:', e);
+            }
+        }
+
+        searchTrigger.addEventListener('click', function() {
+            searchModal.classList.add('open');
+            searchInput.focus();
+        });
+        searchClose.addEventListener('click', function() {
+            searchModal.classList.remove('open');
+        });
+        searchModal.addEventListener('click', function(e) {
+            if (e.target === searchModal) searchModal.classList.remove('open');
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && searchModal.classList.contains('open')) {
+                searchModal.classList.remove('open');
+            }
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                searchModal.classList.add('open');
+                searchInput.focus();
+            }
+        });
+        searchInput.addEventListener('input', function() {
+            doSearch(this.value);
+        });
     </script>
 </body>
 </html>
