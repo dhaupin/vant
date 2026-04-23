@@ -111,6 +111,6 @@ const files = succession.getFilesForTrust('medium');
 
 ## See Also
 
-- [Nodes](./nodes.md) - Persistent node
-- [Resolution](./troubleshooting.md) - Mark thoughts resolved
+- [MCP Server](./mcp.md) - Tool integration
 - [Multi-Agent](./multi-agent.md) - Multi-node coordination
+- [Resolution](./resolution.md) - Mark thoughts resolved

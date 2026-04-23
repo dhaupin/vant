@@ -15,7 +15,7 @@ Vant persists across sessions through GitHub-based brain transfer. Each generati
 
 ## Quick Links
 
-- [Quickstart](/quickstart.html) - 5 minute setup
+- [Quickstart](/getting-started/quick-start.html) - 5 minute setup
 - [Build Your First Agent](/tutorials/build-agent.html) - 15 min tutorial
 - [Examples](/examples.html) - What others are building
 - [FAQ](/faq.html) - Common questions
