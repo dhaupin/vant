@@ -27,8 +27,8 @@ reference:
 guides:
   - title: Architecture
     path: /guides/architecture
-  - title: Bot
-    path: /guides/bot
+  - title: Operations
+    path: /guides/operations
   - title: Onboarding
     path: /guides/onboard
   - title: Succession
