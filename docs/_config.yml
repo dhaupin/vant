@@ -23,14 +23,18 @@ exclude: ['README.md']
 # Default layouts per collection
 defaults:
   - scope:
-      path: guides
+      path: docs/guides
     values:
       layout: default
   - scope:
-      path: reference
+      path: docs/reference
     values:
       layout: default
   - scope:
-      path: getting-started
+      path: docs/getting-started
+    values:
+      layout: default
+  - scope:
+      path: docs
     values:
       layout: default
