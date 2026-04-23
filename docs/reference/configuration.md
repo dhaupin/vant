@@ -46,6 +46,7 @@ MAX_REQUESTS_PER_HOUR=360
 |----------|----------|-------------|
 | `VANT_MCP_PORT` | No | MCP server port (default: 3456) |
 | `VANT_MCP_API_KEY` | No | API key for MCP authentication |
+| `VANT_AGREE_AUTO_SYNC` | No | **⚠️** Enable auto-polling: set to `"true"` to confirm (see notes) |
 | `MCP_API_KEY` | No | Alternative MCP API key |
 
 ### Notifications
@@ -250,5 +251,11 @@ See these files in the repo for full examples:
 - `config.example.ini` - Config template
 - `settings.example.ini` - Settings template
 - `mood.example.ini` - Mood template
+
+> ⚠️ **Auto-Polling Note**: `VANT_AGREE_AUTO_SYNC` enables background GitHub polling in `vant node`. This requires **both**:
+> 1. The `--enable-polling` flag when starting node
+> 2. Set `VANT_AGREE_AUTO_SYNC=true` (in `.env` or export)
+> 
+> This exists because GitHub ToS prohibits automated polling. Use `vant sync` for manual brain updates instead. See [CLI Reference](./cli.md).
 
 See also: [CLI Commands](./cli.md), [Installation](../getting-started/install.md)

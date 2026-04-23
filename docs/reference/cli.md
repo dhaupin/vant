@@ -248,13 +248,21 @@ vant rate reset  # Time until reset
 
 #### vant node
 
-Persistent node with MCP:
+**Persistent node** - runs Vant continuously with brain loaded.
 
 ```bash
-vant node              # Persistent mode
-vant node --mcp        # MCP enabled
-vant node --port 3000  # Custom port
+vant node              # Persistent mode (manual sync)
+vant node --mcp        # Node + MCP server
+vant node --mcp-port 3457  # Custom MCP port
 ```
+
+> ⚠️ **Auto-Polling Opt-In**: By default, `vant node` does NOT poll GitHub. To enable background sync:
+> 
+> - Flag: `--enable-polling` 
+> - Env var: `VANT_AGREE_AUTO_SYNC=true`
+> - Or type "AGREE" when prompted
+> 
+> This is intentional - GitHub ToS prohibits automated polling. Use `vant sync` for manual brain sync.
 
 #### vant mcp
 
