@@ -17,6 +17,9 @@
     <!-- Pagefind search -->
     <link href="/vant/pagefind/pagefind-component-ui.css" rel="stylesheet">
     <script src="/vant/pagefind/pagefind-component-ui.js"></script>
+    
+    <pagefind-searchbox></pagefind-searchbox>
+    <pagefind-modal-trigger>Search</pagefind-modal-trigger>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Auto-open on Cmd+K
@@ -457,7 +460,7 @@
         </a>
         
         <div class="header-right">
-            <pagefind-modal-trigger>Search docs (⌘K)</pagefind-modal-trigger>
+            <pagefind-searchbox></pagefind-searchbox>
             <a href="https://github.com/dhaupin/vant" style="color: var(--text-muted); font-size: 0.9rem;">GitHub</a>
             <button class="theme-toggle" onclick="toggleTheme()">dark</button>
         </div>
