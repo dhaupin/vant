@@ -142,7 +142,7 @@ git push origin experiment-feature
 # Merge to main when ready
 ```
 
-See: [Multi-Agent](./multi-agent.md)
+See: [Multi-Agent](./vant/multi-agent.md)
 
 ## Troubleshooting
 
@@ -162,4 +162,4 @@ See: [Multi-Agent](./multi-agent.md)
 | Rotate tokens | Refresh periodically |
 | Use fine-grained tokens | Restrict to brain repo only |
 
-See also: [CLI Reference](../reference/cli.md), [Troubleshooting](./troubleshooting.md)
+See also: [CLI Reference](../vant/reference/cli.md), [Troubleshooting](./vant/troubleshooting.md)

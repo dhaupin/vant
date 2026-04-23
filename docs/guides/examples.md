@@ -126,4 +126,4 @@ async function safeWork(fn) {
 }
 ```
 
-See also: [Operations](./operations.md), [API Reference](../reference/api.md)
+See also: [Operations](./vant/operations.md), [API Reference](../vant/reference/api.md)

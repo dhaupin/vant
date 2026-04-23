@@ -114,4 +114,4 @@ Check all content for:
 - [ ] Specific over abstract
 - [ ] Active voice
 
-See also: [CLI Reference](../reference/cli.md), [Documentation](../index.md)
+See also: [CLI Reference](../vant/reference/cli.md), [Documentation](../vant/index.md)

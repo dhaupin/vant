@@ -256,4 +256,4 @@ await telegram.startPolling();
 | `vant update` | Check updates |
 | `vant summary` | Session summary |
 
-See also: [Troubleshooting](./troubleshooting.md), [CLI Reference](../reference/cli.md)
+See also: [Troubleshooting](./vant/troubleshooting.md), [CLI Reference](../vant/reference/cli.md)

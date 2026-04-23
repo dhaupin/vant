@@ -58,7 +58,7 @@ vant mcp --websocket --port 3000
 }
 ```
 
-See also: [CLI Reference](../reference/cli.md), [Architecture](./architecture.md)
+See also: [CLI Reference](../vant/reference/cli.md), [Architecture](./vant/architecture.md)
 
 ---
 

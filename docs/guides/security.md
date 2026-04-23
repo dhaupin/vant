@@ -356,4 +356,4 @@ node -e "const vaf=require('./lib/vaf');vaf.check('\$HOME')"
 
 ---
 
-See also: [Configuration](../reference/configuration.md), [Architecture](./architecture.md), [Troubleshooting](./troubleshooting.md)
+See also: [Configuration](../vant/reference/configuration.md), [Architecture](./vant/architecture.md), [Troubleshooting](./vant/troubleshooting.md)

@@ -114,4 +114,4 @@ module.exports = {
 3. Document configuration options
 4. Support enable/disable
 
-See also: [Architecture](./architecture.md), [CLI Reference](../reference/cli.md)
+See also: [Architecture](./vant/architecture.md), [CLI Reference](../vant/reference/cli.md)

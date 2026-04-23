@@ -183,4 +183,4 @@ TRACE=true vant start
 vant start 2>&1 | tee vant.log
 ```
 
-See also: [CLI Reference](../reference/cli.md), [Troubleshooting](./troubleshooting.md)
+See also: [CLI Reference](../vant/reference/cli.md), [Troubleshooting](./vant/troubleshooting.md)
