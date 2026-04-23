@@ -114,4 +114,65 @@ Check all content for:
 - [ ] Specific over abstract
 - [ ] Active voice
 
-See also: [CLI Reference](../vant/reference/cli.md), [Documentation](../vant/index.md)
+## Documenting Sections
+
+Every section header should have a 1-2 sentence intro that answers:
+
+1. **What** is this section about?
+2. **Why** does the reader need to know it?
+
+### Example
+
+```markdown
+## Installation
+
+Install Vant locally or via Docker. Choose the method that fits your setup.
+
+### Local Install
+
+```bash
+npm install -g vant
+```
+
+For local development, clone the repo for access to source.
+```
+
+**What's NOT needed:**
+- Long intros (save for index page)
+- Multiple paragraphs before first step
+
+## Documenting Code Blocks
+
+Every code block needs a brief explainer (1 sentence):
+
+| ✓ Enough | ✗ Missing |
+|---------|-----------|
+| "Run diagnostics:" followed by code | Just the code |
+| "Create config:" followed by code | Just the code |
+
+### Example
+
+```markdown
+Check system health:
+
+```bash
+vant health
+```
+
+This verifies your setup before running.
+```
+
+**Keep it:**
+- Direct command with brief purpose
+- Expected output if not obvious
+
+## Common Doc Blocks
+
+| Block | Include |
+|-------|--------|
+| Tables | Headers, 1-2 sentence intro |
+| Lists | Lead-in sentence |
+| Tips/Notes | Emoji prefix (>, ⚠️) |
+| Warnings | Why it matters (1 sentence) |
+
+See also: [CLI Reference](/vant/reference/cli.html), [Documentation](/vant/index.html)
