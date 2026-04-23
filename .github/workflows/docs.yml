@@ -3,8 +3,10 @@ name: Deploy Docs
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - '.github/workflows/pages/**'
+    paths:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -18,7 +20,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.event.sender != 'github-actions[bot]'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
