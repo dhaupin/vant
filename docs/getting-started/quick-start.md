@@ -45,6 +45,6 @@ vant sync   # Push brain changes to GitHub
 
 ## What's Next?
 
-- [Build Your First Agent](/vant/tutorials/build-agent) - 15 min tutorial
-- [CLI Reference](/vant/reference/cli) - All commands
-- [Configuration](/vant/reference/configuration) - Customize Vant
+- [Build Your First Agent](/vant/tutorials/build-agent.html) - 15 min tutorial
+- [CLI Reference](/vant/reference/cli.html) - All commands
+- [Configuration](/vant/reference/configuration.html) - Customize Vant
