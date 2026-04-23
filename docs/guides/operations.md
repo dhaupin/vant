@@ -5,7 +5,44 @@ title: Operations
 ---
 # Operations Runbook
 
-What to run and when - operational commands for Vant.
+> What to run and when - operational commands for Vant.
+
+## Notifications
+
+Vant supports Slack and Discord webhooks for brain sync and alerts.
+
+### Environment
+
+```bash
+# Slack
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx
+
+# Discord
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx
+```
+
+### Send Notification
+
+```javascript
+const notifications = require('./lib/notifications');
+
+// Slack
+await notifications.slack('Brain synced!', { 
+  channel: '#alerts',
+  username: 'VANT'
+});
+
+// Discord
+await notifications.discord('Brain synced!');
+```
+
+### Auto-Notify on Sync
+
+```javascript
+// In your sync script
+await vant.sync();
+await notifications.discord('Brain updated');
+```
 
 ## Daily Operations
 
