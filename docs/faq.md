@@ -111,12 +111,12 @@ See [ROADMAP.md](https://github.com/dhaupin/blob/main/ROADMAP.md) in the repo.
 
 ### Can I contribute?
 
-Yes! See [Contributing Guide](/contributing.html) in the docs.
+Yes! See [Contributing Guide](/vant/contributing.html) in the docs.
 
 ---
 
 ## Related
 
-- [Quickstart](/quickstart.html)
+- [Quickstart](/vant/getting-started/quick-start.html)
 - [Architecture](/guides/architecture.html)
 - [Build Agent Tutorial](/tutorials/build-agent.html)
