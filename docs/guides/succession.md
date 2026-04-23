@@ -1,14 +1,8 @@
 ---
-permalink: /succession.html
----
-
----
-version: 0.8.4
+permalink: /vant/guides/succession.html
+layout: default
 title: Succession
-slug: /succession
-order: 23
 ---
-
 # Brain Succession
 
 Track brain versions and trust levels across generations.

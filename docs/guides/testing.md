@@ -1,15 +1,8 @@
 ---
-permalink: /testing.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/guides/testing.html
+layout: default
 title: Testing
-slug: /testing
-order: 19
 ---
-
 # Testing
 
 How to test Vant.

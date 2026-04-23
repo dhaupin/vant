@@ -1,15 +1,8 @@
 ---
-permalink: /style.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/guides/style.html
+layout: default
 title: Voice & Style
-slug: /style
-order: 16
 ---
-
 # Voice & Style
 
 Writing guidelines for Vant content.

@@ -1,15 +1,8 @@
 ---
-permalink: /operations.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/guides/operations.html
+layout: default
 title: Operations
-slug: /operations
-order: 18
 ---
-
 # Operations Runbook
 
 What to run and when - operational commands for Vant.

@@ -1,15 +1,8 @@
 ---
-permalink: /errors.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/reference/errors.html
+layout: default
 title: Error Codes
-slug: /errors
-order: 7
 ---
-
 # Error Codes
 
 Reference for all Vant error codes.

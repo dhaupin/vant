@@ -1,15 +1,8 @@
 ---
-permalink: /troubleshooting.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/guides/troubleshooting.html
+layout: default
 title: Troubleshooting
-slug: /troubleshooting
-order: 12
 ---
-
 # Troubleshooting
 
 Common issues and fixes.

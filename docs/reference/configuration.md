@@ -1,15 +1,8 @@
 ---
-permalink: /configuration.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/reference/configuration.html
+layout: default
 title: Configuration
-slug: /configuration
-order: 4
 ---
-
 # Configuration
 
 All configuration files for Vant.

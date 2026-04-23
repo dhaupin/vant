@@ -1,14 +1,8 @@
 ---
-permalink: /onboard.html
----
-
----
-version: 0.8.4
+permalink: /vant/guides/onboard.html
+layout: default
 title: Onboarding
-slug: /onboard
-order: 25
 ---
-
 # Knowledge Base Browser
 
 Browse and search Vant's knowledge base (brain).

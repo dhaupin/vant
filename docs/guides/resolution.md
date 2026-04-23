@@ -1,14 +1,8 @@
 ---
-permalink: /resolution.html
----
-
----
-version: 0.8.4
+permalink: /vant/guides/resolution.html
+layout: default
 title: Resolution
-slug: /resolution
-order: 24
 ---
-
 # Thought Resolution
 
 Track thought status - resolved, deprecated, or rejected.

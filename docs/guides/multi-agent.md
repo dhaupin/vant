@@ -1,15 +1,8 @@
 ---
-permalink: /multi-agent.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/guides/multi-agent.html
+layout: default
 title: Multi-Agent
-slug: /multi-agent
-order: 9
 ---
-
 # Multi-Agent
 
 ## Branch + Lock

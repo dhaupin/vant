@@ -1,15 +1,8 @@
 ---
-permalink: /plugins.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/guides/plugins.html
+layout: default
 title: Plugins
-slug: /plugins
-order: 13
 ---
-
 # Plugins
 
 Extend VANT with custom plugins.

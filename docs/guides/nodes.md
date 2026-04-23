@@ -1,14 +1,8 @@
 ---
-permalink: /nodes.html
----
-
----
-version: 0.8.4
+permalink: /vant/guides/nodes.html
+layout: default
 title: Nodes
-slug: /nodes
-order: 21
 ---
-
 # Vant Nodes
 
 Run Vant as a persistent node - like crypto nodes, but for AI agents.

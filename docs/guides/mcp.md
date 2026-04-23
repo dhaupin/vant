@@ -1,15 +1,8 @@
 ---
-permalink: /mcp.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/guides/mcp.html
+layout: default
 title: MCP Server
-slug: /mcp
-order: 10
 ---
-
 # MCP Server
 
 Model Context Protocol (MCP) server for Vant.

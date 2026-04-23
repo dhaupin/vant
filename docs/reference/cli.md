@@ -1,15 +1,8 @@
 ---
-permalink: /cli.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/reference/cli.html
+layout: default
 title: CLI Reference
-slug: /cli
-order: 3
 ---
-
 # CLI Reference
 
 All Vant CLI commands.

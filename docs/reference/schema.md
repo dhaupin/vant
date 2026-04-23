@@ -1,15 +1,8 @@
 ---
-permalink: /schema.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/reference/schema.html
+layout: default
 title: Brain Schema
-slug: /schema
-order: 6
 ---
-
 # Brain Schema
 
 Files in `models/public/`:

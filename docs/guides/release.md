@@ -1,15 +1,8 @@
 ---
-permalink: /release.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/guides/release.html
+layout: default
 title: Release Process
-slug: /release
-order: 15
 ---
-
 # Release Process
 
 How to release a new version of Vant.

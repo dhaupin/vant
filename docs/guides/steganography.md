@@ -1,15 +1,8 @@
 ---
-permalink: /steganography.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/guides/steganography.html
+layout: default
 title: Steganography
-slug: /steganography
-order: 14
 ---
-
 # Steganography
 
 Hidden messages in PNG images for covert communication.

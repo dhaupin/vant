@@ -1,15 +1,8 @@
 ---
-permalink: /github.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/guides/github.html
+layout: default
 title: GitHub Integration
-slug: /github
-order: 17
 ---
-
 # GitHub Integration
 
 Deep dive on Vant's GitHub integration.

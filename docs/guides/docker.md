@@ -1,15 +1,8 @@
 ---
-permalink: /docker.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/guides/docker.html
+layout: default
 title: Docker
-slug: /docker
-order: 11
 ---
-
 # Docker
 
 Run Vant in containers.

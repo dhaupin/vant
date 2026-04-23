@@ -1,15 +1,8 @@
 ---
-permalink: /api.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/reference/api.html
+layout: default
 title: Module API
-slug: /api
-order: 5
 ---
-
 # Module API
 
 ## lib/config.js

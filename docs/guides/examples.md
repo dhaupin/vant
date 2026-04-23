@@ -1,14 +1,8 @@
 ---
-permalink: /examples.html
----
-
----
-version: 0.8.4
+permalink: /vant/guides/examples.html
+layout: default
 title: Examples
-slug: /examples
-order: 22
 ---
-
 # Examples
 
 Working examples for Vant workflows.

@@ -1,14 +1,8 @@
 ---
-permalink: /bot.html
----
-
----
-version: 0.8.4
+permalink: /vant/guides/bot.html
+layout: default
 title: Telegram Bot
-slug: /bot
-order: 22
 ---
-
 # Telegram Bot
 
 Control Vant via Telegram - brain queries and commands.

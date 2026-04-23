@@ -1,10 +1,8 @@
 ---
-version: 0.8.4
+permalink: /vant/getting-started/quick-start.html
+layout: default
 title: Quick Start
-permalink: /quick-start.html
-order: 2
 ---
-
 # Quick Start
 
 Get Vant running in 2 minutes.

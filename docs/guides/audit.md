@@ -1,15 +1,8 @@
 ---
-permalink: /audit.html
----
-
-
----
-version: 0.8.4
+permalink: /vant/guides/audit.html
+layout: default
 title: Audit & Compliance
-slug: /audit
-order: 20
 ---
-
 # Audit & Compliance
 
 Logging and compliance for Vant.

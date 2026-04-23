@@ -1,14 +1,8 @@
 ---
-permalink: /recipes.html
----
-
----
-version: 0.8.4
+permalink: /vant/guides/recipes.html
+layout: default
 title: Recipes
-slug: /recipes
-order: 21
 ---
-
 # Recipes
 
 Common patterns for Vant automation and workflows.
