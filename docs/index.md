@@ -34,6 +34,16 @@ Vant persists across sessions through GitHub-based brain transfer. Each generati
 | **VAF Security** | Input validation and filtering |
 | **Telegram Bot** | Control Vant via chat |
 
+## Legal
+
+> **IMPORTANT**: Read before using Vant. By using this software, you agree to our terms.
+
+| Document | Purpose |
+|----------|---------|
+| [Terms & Disclaimer](./legal/index.html) | Warranty, liability, responsibilities |
+| [Privacy](./legal/privacy.html) | Data collection, your control |
+| [Environment](./legal/environment.html) | GitHub API, limits |
+
 
 
 ## About
