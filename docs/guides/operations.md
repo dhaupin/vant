@@ -175,6 +175,39 @@ tail -f .vant.log
 | Token issues | GitHub Settings |
 | Vant bugs | GitHub Issues |
 
+## Telegram Bot
+
+Control Vant via Telegram - brain queries and commands.
+
+### Running Bot
+
+```bash
+export TELEGRAM_BOT_TOKEN=your_bot_token
+vant bot
+```
+
+### Commands
+
+| Command | What |
+|--------|------|
+| `/start` | Welcome + status |
+| `/status` | Vant status |
+| `/brain` | Brain version |
+| `/health` | Health check |
+| `/sync` | Trigger sync |
+
+### Custom Commands
+
+```javascript
+const telegram = require('./lib/telegram');
+
+telegram.onCommand('status', async (msg) => {
+    await telegram.send(msg.chat, 'VANT is running');
+});
+
+await telegram.startPolling();
+```
+
 ## Common Commands
 
 | Command | Use |
