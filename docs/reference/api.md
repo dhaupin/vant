@@ -338,4 +338,4 @@ const latest = await updateCheck.getLatestVersion();
 await updateCheck.notifyIfUpdate();
 ```
 
-See also: [CLI Commands](./cli.md), [Schema](./schema.md)
+See also: [CLI Commands](/vant/reference/cli.html), [Schema](/vant/reference/schema.html)

@@ -145,4 +145,4 @@ port = 514
 - [ ] Git audit trail verified
 - [ ] Rate limits monitored
 
-See also: [Security](./vant/security.md), [Operations](./vant/operations.md)
+See also: [Security](/vant/guides/security.html), [Operations](/vant/guides/operations.html)
