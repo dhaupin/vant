@@ -103,7 +103,7 @@ Never use "This section covers..." as a section intro. Write actual content:
 
 | ✗ Placeholder | ✓ Real Content |
 |--------------|--------------|
-| "This section covers events." | "Track system events for debugging and compliance." |
+| "Track system events for debugging and compliance." | "Track system events for debugging and compliance." |
 | "This section covers setup." | "Configure Vant to sync with your GitHub repository." |
 
 ### Code Blocks Need Briefs

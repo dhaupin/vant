@@ -11,7 +11,7 @@ title: Privacy Policy
 ---
 
 ## WHAT WE COLLECT
-This section covers collect.
+Data collection.
 
 ### Information You Provide
 
@@ -48,7 +48,7 @@ When you set up GitHub sync, Vant may access:
 ---
 
 ## HOW WE USE INFORMATION
-This section covers information.
+Information sharing.
 
 ### Primary Use
 
@@ -80,7 +80,7 @@ If you configure GitHub sync:
 ---
 
 ## DATA STORAGE
-This section covers storage.
+Data storage.
 
 ### Local Only
 
@@ -150,7 +150,7 @@ We try to keep Vant secure:
 ---
 
 ## THIRD PARTIES
-This section covers third.
+Third-party services.
 
 ### GitHub
 
@@ -193,7 +193,7 @@ We may change this policy.
 ---
 
 ## YOUR RIGHTS
-This section covers rights.
+Your rights.
 
 ### To Your Data
 

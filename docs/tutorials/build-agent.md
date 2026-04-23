@@ -32,7 +32,7 @@ npm install -g vant
 Example:
 
 ## Step 2: Configure
-This section covers configure.
+Configure the agent.
 
 ```bash
 vant setup
@@ -72,14 +72,14 @@ run();
 ```
 
 ## Step 4: Run
-This section covers key information.
+Key information for the plugin.
 
 ```bash
 node agent.js
 ```
 
 ## Step 5: Run Again
-This section covers again.
+Run again.
 
 ```bash
 # Run a second time

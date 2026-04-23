@@ -54,7 +54,7 @@ export GITHUB_REPO=your-username/vant-brain
 > Minimum required: `repo` for private brain storage.
 
 ## Rate Limits
-This section covers limits.
+Understand rate limits and quotas.
 
 ### Understanding Limits
 
@@ -84,7 +84,7 @@ vant rate reset
 | Limit sync frequency | Don't sync every message |
 
 ## Sync Strategies
-This section covers strategies.
+Optimize GitHub sync strategy.
 
 ### Full Sync
 Push and pull all changes.
@@ -121,7 +121,7 @@ vant sync --push  # Push local changes
 > ⚠️ **Don't use cron or auto-sync** - GitHub Terms prohibit using GitHub as a database with automated polling. Sync intentionally when your agent has meaningful updates.
 
 ## Branching Strategy
-This section covers branching.
+Manage Git branches for brain versions.
 
 ### Default Branch
 Main production branch.

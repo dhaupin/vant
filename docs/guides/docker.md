@@ -29,7 +29,7 @@ docker run -it -v vant-brain:/app/models dhaupin/vant vant load
 | `/app/config` | Config files |
 
 ## Environment
-This section covers environment.
+Set up Docker environment variables.
 
 ```bash
 docker run -it \
@@ -40,7 +40,7 @@ docker run -it \
 ```
 
 ## Compose
-This section covers compose.
+Use Docker Compose for orchestration.
 
 ```yaml
 version: '3.8'
@@ -60,7 +60,7 @@ docker-compose up -d
 ```
 
 ## Build Local
-This section covers build.
+Build custom Docker images.
 
 ```bash
 docker build -t vant:local .

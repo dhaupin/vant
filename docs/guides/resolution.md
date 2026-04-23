@@ -25,7 +25,7 @@ Track thought status - resolved, deprecated, or rejected.
 | `rejected` | Not applicable |
 
 ## Running
-This section covers running.
+Run the resolution system.
 
 ```bash
 # Show status
@@ -82,7 +82,7 @@ How Vant handles brain conflicts and resolution.
 ```
 
 ## Ledger
-This section covers ledger.
+Track decisions on the blockchain.
 
 ```json
 {

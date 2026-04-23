@@ -347,7 +347,7 @@ Before deploying to production:
 ---
 
 ## Test VAF Blocks
-This section covers blocks.
+Security blocked inputs.
 
 ```bash
 # Test word stacking

@@ -16,7 +16,7 @@ Browse and search Vant's knowledge base (brain).
 - Previews
 
 ## Running
-This section covers running.
+Run the resolution system.
 
 ```bash
 # Interactive browse
@@ -89,7 +89,7 @@ const results = onboard.searchFiles('therapy');
 ```
 
 ## Output Example
-This section covers output.
+Parse onboarding output.
 
 ```
 === Onboarding: Vant Brain ===

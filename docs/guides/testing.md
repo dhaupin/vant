@@ -8,7 +8,7 @@ title: Testing
 How to test Vant.
 
 ## Test Command
-This section covers command.
+Run release commands.
 
 ### Basic Test
 Test this feature.
@@ -32,7 +32,7 @@ vant test --verbose
 Shows all test output.
 
 ## Test Types
-This section covers types.
+Types of tests available.
 
 ### Unit Tests
 
@@ -96,7 +96,7 @@ curl http://localhost:3456/health
 ```
 
 ## Test Patterns
-This section covers patterns.
+Common test patterns.
 
 ### Happy Path
 Normal operation test.
@@ -146,7 +146,7 @@ vant load
 Example:
 
 ## Test Data
-This section covers key information.
+Key information for the plugin.
 
 ### Test Brain
 
@@ -174,7 +174,7 @@ Example:
 Test your Vant setup and agents.
 
 ### GitHub Actions
-This section covers github.
+Fix GitHub connection issues.
 
 ```yaml
 name: Test
@@ -191,7 +191,7 @@ jobs:
 ```
 
 ## Debugging
-This section covers debugging.
+Debug test failures.
 
 ### Verbose Mode
 Show detailed output.
@@ -201,7 +201,7 @@ VERBOSE=true vant start
 ```
 
 ### Trace Mode
-This section covers trace.
+Trace test execution.
 
 ```bash
 TRACE=true vant start

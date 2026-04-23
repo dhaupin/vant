@@ -38,7 +38,8 @@ Each entry:
 | ERROR | Errors |
 
 ## Events Logged
-This section covers events.
+
+Track system events for debugging and compliance.
 
 ### Security Events
 
@@ -67,7 +68,7 @@ This section covers events.
 | `LOGIN_FAIL` | Failed login |
 
 ## Compliance
-This section covers compliance.
+Meet compliance requirements with audit logs.
 
 ### Data Retention
 
@@ -100,7 +101,7 @@ git log models/public/identity.md
 ```
 
 ## Reporting
-This section covers reporting.
+Generate reports from audit data.
 
 ### Generate Report
 Create audit reports.
@@ -121,7 +122,7 @@ Create audit reports.
 - Rate limit usage
 
 ## SIEM Integration
-This section covers integration.
+Connect to external monitoring systems.
 
 ### Export Logs
 Export audit logs for analysis.

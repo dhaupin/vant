@@ -52,7 +52,7 @@ git push origin main --tags
 - [ ] Announce (if applicable)
 
 ## Bump Command
-This section covers command.
+Run release commands.
 
 ```bash
 # Patch release (0.8.4 → 0.8.5)

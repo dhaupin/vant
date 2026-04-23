@@ -77,7 +77,7 @@ node bin/stego.js decode output.png --decrypt password
 ```
 
 ## How It Works
-This section covers works.
+Hide data in images using steganography.
 
 ### LSB Encoding
 

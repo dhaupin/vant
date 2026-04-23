@@ -59,7 +59,7 @@ DAMAGES ARE CLAIMED, INCLUDING BUT NOT LIMITED TO:
 ---
 
 ## USER RESPONSIBILITIES
-This section covers responsibilities.
+Company responsibilities.
 
 ### You Are Responsible For:
 
@@ -192,7 +192,7 @@ This includes but is not limited to:
 ---
 
 ## THIRD-PARTY SERVICES
-This section covers thirdparty.
+Third-party code.
 
 ### GitHub
 
@@ -227,7 +227,7 @@ Vant may integrate with:
 ---
 
 ## INTELLECTUAL PROPERTY
-This section covers intellectual.
+Intellectual property.
 
 ### Vant Code
 
@@ -330,7 +330,7 @@ For questions about these terms:
 ---
 
 ## SPECIFIC EXPOSURES
-This section covers specific.
+Specific terms.
 
 ### AI Agent Behavior (CRITICAL)
 

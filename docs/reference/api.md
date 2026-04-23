@@ -6,7 +6,7 @@ title: Module API
 # Module API
 
 ## lib/config.js
-This section covers libconfigjs.
+Load configuration.
 
 ```javascript
 const config = require('./lib/config');
@@ -29,7 +29,7 @@ await brain.save();   // Save to disk
 ```
 
 ## lib/lock.js
-This section covers liblockjs.
+Manage locks.
 
 ```javascript
 const lock = require('./lib/lock');
@@ -39,7 +39,7 @@ await lock.release(agentId, token);
 ```
 
 ## lib/branch.js
-This section covers libbranchjs.
+Manage branches.
 
 ```javascript
 const branch = require('./lib/branch');
@@ -50,7 +50,7 @@ branch.commit(agentId, message);
 ```
 
 ## lib/vaf.js
-This section covers libvafjs.
+Validate inputs.
 
 ```javascript
 const vaf = require('./lib/vaf');
@@ -83,7 +83,7 @@ vaf.reset();                             // Reset all limits
 ```
 
 ## lib/health.js
-This section covers libhealthjs.
+Health checks.
 
 ```javascript
 const health = require('./lib/health');
@@ -93,7 +93,7 @@ const status = await health.check(); // Get status
 ```
 
 ## lib/logger.js
-This section covers libloggerjs.
+Logging.
 
 ```javascript
 const logger = require('./lib/logger');
@@ -104,7 +104,7 @@ logger.error('error');
 ```
 
 ## lib/version.js
-This section covers libversionjs.
+Version management.
 
 ```javascript
 const version = require('./lib/version');
@@ -125,7 +125,7 @@ await succession.diff();    // Compare to previous
 ```
 
 ## lib/protection.js
-This section covers libprotectionjs.
+Protect sensitive data.
 
 ```javascript
 const protection = require('./lib/protection');
@@ -155,7 +155,7 @@ protection.resetCircuit();         // Reset circuit
 ```
 
 ## lib/rate-limit.js
-This section covers libratelimitjs.
+Rate limiting.
 
 ```javascript
 const rateLimit = require('./lib/rate-limit');
@@ -166,7 +166,7 @@ rateLimit.getResetTime();  // Get reset time
 ```
 
 ## lib/auto-update.js
-This section covers libautoupdatejs.
+Auto-save on exit.
 
 ```javascript
 const autoUpdate = require('./lib/auto-update');
@@ -208,7 +208,7 @@ errors.format(error);             // Format error message
 ```
 
 ## lib/load.js
-This section covers libloadjs.
+Load brain files.
 
 ```javascript
 const load = require('./lib/load');
@@ -218,7 +218,7 @@ await load.file(path);  // Load single file
 ```
 
 ## lib/colors.js
-This section covers libcolorsjs.
+Terminal colors.
 
 ```javascript
 const colors = require('./lib/colors');
@@ -244,7 +244,7 @@ colors.section('title');
 ```
 
 ## lib/progress.js
-This section covers libprogressjs.
+Progress bars.
 
 ```javascript
 const progress = require('./lib/progress');
@@ -255,7 +255,7 @@ progress.complete();
 ```
 
 ## lib/prompts.js
-This section covers libpromptsjs.
+Interactive prompts.
 
 ```javascript
 const prompts = require('./lib/prompts');
@@ -269,7 +269,7 @@ const choices = await prompts.checkbox('Select:', ['a', 'b', 'c']);
 ```
 
 ## lib/verbosity.js
-This section covers libverbosityjs.
+Configure verbosity.
 
 ```javascript
 const verbosity = require('./lib/verbosity');
@@ -294,7 +294,7 @@ verbosity.content('message');     // Respects content= setting
 ```
 
 ## lib/stego.js
-This section covers libstegojs.
+Steganography.
 
 ```javascript
 const stego = require('./lib/stego');
@@ -304,7 +304,7 @@ stego.decode(image);
 ```
 
 ## lib/notifications.js
-This section covers libnotificationsjs.
+Send notifications.
 
 ```javascript
 const notifications = require('./lib/notifications');
@@ -314,7 +314,7 @@ notifications.list();
 ```
 
 ## lib/metrics.js
-This section covers libmetricsjs.
+Track metrics.
 
 ```javascript
 const metrics = require('./lib/metrics');
@@ -338,7 +338,7 @@ resolution.getLedger();
 ```
 
 ## lib/telegram.js
-This section covers libtelegramjs.
+Telegram bot.
 
 ```javascript
 const telegram = require('./lib/telegram');
@@ -353,7 +353,7 @@ await telegram.startPolling();
 ```
 
 ## lib/update-check.js
-This section covers libupdatecheckjs.
+Check for updates.
 
 ```javascript
 const updateCheck = require('./lib/update-check');

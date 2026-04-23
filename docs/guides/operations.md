@@ -123,7 +123,7 @@ vant rate
 Example:
 
 ## Recovery
-This section covers recovery.
+Recover from failures.
 
 ### Full Recovery
 Recover from failures.
@@ -168,7 +168,7 @@ vant health
 ```
 
 ## Maintenance
-This section covers maintenance.
+Maintain the system.
 
 ### Manual Sync
 Manually sync brain.

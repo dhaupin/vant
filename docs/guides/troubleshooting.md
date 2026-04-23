@@ -8,7 +8,7 @@ title: Troubleshooting
 Common issues and fixes.
 
 ## Health Check Failures
-This section covers health.
+Diagnose system health issues.
 
 ### Config not found
 Configuration options.
@@ -24,7 +24,7 @@ vant setup
 ```
 
 ### GitHub connection failed
-This section covers github.
+Fix GitHub connection issues.
 
 ```
 Error: Cannot connect to GitHub
@@ -36,10 +36,10 @@ Error: Cannot connect to GitHub
 3. Check network connection
 
 ## Sync Issues
-This section covers issues.
+Debug common issues.
 
 ### Merge conflict
-This section covers merge.
+Resolve merge conflicts.
 
 ```
 Error: Merge conflict in brain
@@ -83,7 +83,7 @@ Error: Cannot load brain
 2. `vant sync --pull` to restore
 
 ## Node Issues
-This section covers issues.
+Debug common issues.
 
 ### MCP not responding
 
@@ -108,7 +108,7 @@ vant update        # Check for updates
 ```
 
 ## Advanced Issues
-This section covers advanced.
+Advanced troubleshooting.
 
 ### Network Timeouts
 Timeout configuration.
@@ -144,7 +144,7 @@ git config --global --add safe.directory /path/to/repo
 ```
 
 ### Permission Denied
-This section covers permission.
+Fix permission errors.
 
 ```
 Error: Permission denied (publickey)
@@ -155,7 +155,7 @@ Error: Permission denied (publickey)
 - Or add SSH key: `git remote set-url origin git@github.com:user/repo.git`
 
 ### Token Expired
-This section covers token.
+Fix token errors.
 
 ```
 Error: Token expired
@@ -170,7 +170,7 @@ Error: Token expired
 VAF (Vant Application Firewall) may block legitimate input:
 
 ### Blocked: Newlines
-This section covers blocked.
+Handle blocked requests.
 
 ```
 Error: Content blocked: /\n/
@@ -181,7 +181,7 @@ Error: Content blocked: /\n/
 - Don't pass newlines via MCP `setMemory`
 
 ### Blocked: Path Traversal
-This section covers blocked.
+Handle blocked requests.
 
 ```
 Error: Path traversal detected: ../etc/passwd
@@ -192,7 +192,7 @@ Error: Path traversal detected: ../etc/passwd
 - Don't use `../` in file parameters
 
 ### Blocked: Script/XSS
-This section covers blocked.
+Handle blocked requests.
 
 ```
 Error: Content blocked: /<script>/
@@ -203,7 +203,7 @@ Error: Content blocked: /<script>/
 - For HTML content, write directly to files
 
 ### Blocked: Shell Commands
-This section covers blocked.
+Handle blocked requests.
 
 ```
 Error: Content blocked: /; rm -rf/

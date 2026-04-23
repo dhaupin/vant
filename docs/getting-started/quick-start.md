@@ -36,7 +36,7 @@ vant setup
 ```
 
 ## 3. Run
-This section covers key information.
+Key information for the plugin.
 
 ```bash
 vant start     # Full startup (health → sync → load → run)
