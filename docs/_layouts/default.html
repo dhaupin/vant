@@ -16,27 +16,18 @@
     
     <!-- Pagefind search -->
     <link href="/vant/pagefind/pagefind-component-ui.css" rel="stylesheet">
-    <pagefind-searchbox></pagefind-searchbox>
-    <script src="/vant/pagefind/pagefind-component-ui.js"></script>
+    <script src="/vant/pagefind/pagefind-ui.js"></script>
     <script>
-        // Initialize basePath for subdirectory deployment
-        window.addEventListener('DOMContentLoaded', function() {
-            // Set baseUrl for subdirectory
-            if (window.pagefindUI) {
-                new window.pagefindUI({ 
-                    element: "pagefind-searchbox",
-                    baseUrl: '/vant/' 
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize with base_path for subdirectory deployment
+            if (window.PagefindUI) {
+                new window.PagefindUI({
+                    element: "#search",
+                    base_path: "/vant/pagefind/",
+                    show_images: false,
+                    excerpt_length: 20
                 });
             }
-            
-            // Auto-open on Cmd+K
-            document.addEventListener('keydown', function(e) {
-                if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-                    e.preventDefault();
-                    var trigger = document.querySelector('pagefind-modal-trigger');
-                    trigger?.click();
-                }
-            });
         });
     </script>
     
@@ -467,7 +458,7 @@
         </a>
         
         <div class="header-right">
-            <pagefind-searchbox></pagefind-searchbox>
+            <div id="search" style="--pagefind-ui-primary: var(--link); --pagefind-ui-text: var(--text); --pagefind-ui-background: var(--bg-card); --pagefind-ui-border: var(--border); --pagefind-ui-border-radius: 6px; --pagefind-ui-font-size: 0.85rem; min-width: 200px;"></div>
             <a href="https://github.com/dhaupin/vant" style="color: var(--text-muted); font-size: 0.9rem;">GitHub</a>
             <button class="theme-toggle" onclick="toggleTheme()">dark</button>
         </div>
