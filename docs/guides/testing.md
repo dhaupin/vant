@@ -8,8 +8,10 @@ title: Testing
 How to test Vant.
 
 ## Test Command
+This section covers command.
 
 ### Basic Test
+Test this feature.
 
 ```bash
 vant test
@@ -21,6 +23,7 @@ Runs all build tests:
 - Brain integrity
 
 ### Verbose Output
+Show detailed output.
 
 ```bash
 vant test --verbose
@@ -29,6 +32,7 @@ vant test --verbose
 Shows all test output.
 
 ## Test Types
+This section covers types.
 
 ### Unit Tests
 
@@ -58,6 +62,7 @@ node bin/build-test.js --load
 Test your Vant setup and agents.
 
 ### Brain Loading
+Test brain loading.
 
 ```bash
 # Load brain
@@ -68,6 +73,7 @@ vant health
 ```
 
 ### CLI Commands
+Command-line usage.
 
 ```bash
 # Test each command
@@ -79,6 +85,7 @@ vant rate
 ```
 
 ### MCP Server
+MCP server functionality.
 
 ```bash
 # Start MCP
@@ -89,8 +96,10 @@ curl http://localhost:3456/health
 ```
 
 ## Test Patterns
+This section covers patterns.
 
 ### Happy Path
+Normal operation test.
 
 ```bash
 vant start
@@ -100,6 +109,7 @@ vant start
 Example:
 
 ### Error Handling
+Handle this error case.
 
 ```bash
 # Invalid token
@@ -110,6 +120,7 @@ GITHUB_TOKEN=invalid vant sync
 Example:
 
 ### Rate Limit
+Check rate limits.
 
 ```bash
 # Exhaust rate limit
@@ -121,6 +132,7 @@ for i in {1..100}; do vant sync; done
 Example:
 
 ### Brain Corruption
+Handle corrupted brain files.
 
 ```bash
 # Delete brain file
@@ -134,6 +146,7 @@ vant load
 Example:
 
 ## Test Data
+This section covers key information.
 
 ### Test Brain
 
@@ -146,6 +159,7 @@ echo "name: Test" >> models/test/identity.md
 ```
 
 ### Test Config
+Configuration options.
 
 ```bash
 # Invalid config
@@ -160,6 +174,7 @@ Example:
 Test your Vant setup and agents.
 
 ### GitHub Actions
+This section covers github.
 
 ```yaml
 name: Test
@@ -176,20 +191,24 @@ jobs:
 ```
 
 ## Debugging
+This section covers debugging.
 
 ### Verbose Mode
+Show detailed output.
 
 ```bash
 VERBOSE=true vant start
 ```
 
 ### Trace Mode
+This section covers trace.
 
 ```bash
 TRACE=true vant start
 ```
 
 ### Log Output
+Logging configuration.
 
 ```bash
 vant start 2>&1 | tee vant.log

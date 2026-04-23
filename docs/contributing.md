@@ -31,6 +31,7 @@ Open a discussion first:
 - How it would work
 
 ### 3. Write Code
+Contribute code to the project.
 
 ```
 1. Fork the repo

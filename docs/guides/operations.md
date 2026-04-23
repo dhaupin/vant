@@ -12,6 +12,7 @@ title: Operations
 Vant supports Slack and Discord webhooks for brain sync and alerts.
 
 ### Environment
+Set up the environment.
 
 ```bash
 # Slack
@@ -22,6 +23,7 @@ DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx
 ```
 
 ### Send Notification
+Send a notification.
 
 ```javascript
 const notifications = require('./lib/notifications');
@@ -37,6 +39,7 @@ await notifications.discord('Brain synced!');
 ```
 
 ### Auto-Notify on Sync
+Automatically notify on events.
 
 ```javascript
 // In your sync script
@@ -48,6 +51,7 @@ await notifications.discord('Brain updated');
 Day-to-day management tasks.
 
 ### Health Check
+Check Vant health.
 
 ```bash
 vant health
@@ -59,12 +63,14 @@ Expected output:
 - ✓ Rate limit OK
 
 ### Check Rate Limit
+Check rate limits.
 
 ```bash
 vant rate
 ```
 
 ### Session Summary
+Get session summary.
 
 ```bash
 vant summary
@@ -79,6 +85,7 @@ Shows:
 Fix common issues.
 
 ### Vant Won't Start
+Fix when start fails.
 
 ```bash
 # 1. Check logs
@@ -92,6 +99,7 @@ cat config.ini
 ```
 
 ### Brain Won't Load
+Fix when load fails.
 
 ```bash
 # 1. Check GitHub sync
@@ -102,6 +110,7 @@ vant load
 ```
 
 ### Rate Limit Hit
+Check rate limits.
 
 ```bash
 # Check current limit
@@ -114,8 +123,10 @@ vant rate
 Example:
 
 ## Recovery
+This section covers recovery.
 
 ### Full Recovery
+Recover from failures.
 
 ```bash
 # 1. Pull latest
@@ -129,6 +140,7 @@ vant health
 ```
 
 ### Reset State
+Reset Vant state.
 
 ```bash
 # 1. Backup state
@@ -142,6 +154,7 @@ vant start
 ```
 
 ### Reinstall
+Installation options.
 
 ```bash
 # 1. Clear node_modules
@@ -155,8 +168,10 @@ vant health
 ```
 
 ## Maintenance
+This section covers maintenance.
 
 ### Manual Sync
+Manually sync brain.
 
 ```bash
 # Pull only
@@ -170,12 +185,14 @@ vant sync
 ```
 
 ### Check for Updates
+Check for updates.
 
 ```bash
 vant update
 ```
 
 ### View Changelog
+View the changelog.
 
 ```bash
 vant changelog
@@ -185,6 +202,7 @@ vant changelog
 Tracking Vant health and activity.
 
 ### Watch Mode
+Watch for changes.
 
 ```bash
 vant watch
@@ -193,6 +211,7 @@ vant watch
 Monitors GitHub for changes - useful for multi-agent.
 
 ### MCP Health
+MCP server functionality.
 
 ```bash
 # If MCP running
@@ -200,6 +219,7 @@ curl http://localhost:3456/health
 ```
 
 ### Log Monitoring
+Logging configuration.
 
 ```bash
 # View last 100 lines
@@ -222,6 +242,7 @@ tail -f .vant.log
 Control Vant via Telegram - brain queries and commands.
 
 ### Running Bot
+Run the bot in production.
 
 ```bash
 export TELEGRAM_BOT_TOKEN=your_bot_token
@@ -239,6 +260,7 @@ vant bot
 | `/sync` | Trigger sync |
 
 ### Custom Commands
+Add custom commands.
 
 ```javascript
 const telegram = require('./lib/telegram');

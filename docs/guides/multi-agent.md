@@ -18,6 +18,7 @@ Vant uses branches for agent isolation and locks for coordination.
 5. **Release lock** - Allow others
 
 ### Branch Per Agent
+Isolate agent work with branches.
 
 ```bash
 git checkout -b agent-1
@@ -27,6 +28,7 @@ git commit -m "Agent 1: Updated memory"
 ```
 
 ### Lock API
+API usage.
 
 ```javascript
 const lock = await lock.acquire(agentId);

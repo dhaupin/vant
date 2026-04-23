@@ -8,8 +8,10 @@ title: Troubleshooting
 Common issues and fixes.
 
 ## Health Check Failures
+This section covers health.
 
 ### Config not found
+Configuration options.
 
 ```
 Error: Config file not found
@@ -22,6 +24,7 @@ vant setup
 ```
 
 ### GitHub connection failed
+This section covers github.
 
 ```
 Error: Cannot connect to GitHub
@@ -33,8 +36,10 @@ Error: Cannot connect to GitHub
 3. Check network connection
 
 ## Sync Issues
+This section covers issues.
 
 ### Merge conflict
+This section covers merge.
 
 ```
 Error: Merge conflict in brain
@@ -46,6 +51,7 @@ Error: Merge conflict in brain
 3. `vant sync --push`
 
 ### Rate limit exceeded
+Check rate limits.
 
 ```
 Error: GitHub API rate limit exceeded
@@ -59,6 +65,7 @@ Error: GitHub API rate limit exceeded
 Brain file structure and management.
 
 ### Brain not loading
+Test brain loading.
 
 ```
 Error: Cannot load brain
@@ -76,6 +83,7 @@ Error: Cannot load brain
 2. `vant sync --pull` to restore
 
 ## Node Issues
+This section covers issues.
 
 ### MCP not responding
 
@@ -90,6 +98,7 @@ Error: Cannot load brain
 2. Check firewall rules
 
 ## Common Commands
+Available commands.
 
 ```bash
 vant health          # Diagnose issues
@@ -99,8 +108,10 @@ vant update        # Check for updates
 ```
 
 ## Advanced Issues
+This section covers advanced.
 
 ### Network Timeouts
+Timeout configuration.
 
 ```
 Error: Request timed out
@@ -121,6 +132,7 @@ Error: Request timed out
 - Archive old lessons
 
 ### Git Corruption
+Handle corrupted brain files.
 
 ```
 Error: fatal: unsafe repository
@@ -132,6 +144,7 @@ git config --global --add safe.directory /path/to/repo
 ```
 
 ### Permission Denied
+This section covers permission.
 
 ```
 Error: Permission denied (publickey)
@@ -142,6 +155,7 @@ Error: Permission denied (publickey)
 - Or add SSH key: `git remote set-url origin git@github.com:user/repo.git`
 
 ### Token Expired
+This section covers token.
 
 ```
 Error: Token expired
@@ -156,6 +170,7 @@ Error: Token expired
 VAF (Vant Application Firewall) may block legitimate input:
 
 ### Blocked: Newlines
+This section covers blocked.
 
 ```
 Error: Content blocked: /\n/
@@ -166,6 +181,7 @@ Error: Content blocked: /\n/
 - Don't pass newlines via MCP `setMemory`
 
 ### Blocked: Path Traversal
+This section covers blocked.
 
 ```
 Error: Path traversal detected: ../etc/passwd
@@ -176,6 +192,7 @@ Error: Path traversal detected: ../etc/passwd
 - Don't use `../` in file parameters
 
 ### Blocked: Script/XSS
+This section covers blocked.
 
 ```
 Error: Content blocked: /<script>/
@@ -186,6 +203,7 @@ Error: Content blocked: /<script>/
 - For HTML content, write directly to files
 
 ### Blocked: Shell Commands
+This section covers blocked.
 
 ```
 Error: Content blocked: /; rm -rf/

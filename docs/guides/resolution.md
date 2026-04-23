@@ -25,6 +25,7 @@ Track thought status - resolved, deprecated, or rejected.
 | `rejected` | Not applicable |
 
 ## Running
+This section covers running.
 
 ```bash
 # Show status
@@ -81,6 +82,7 @@ How Vant handles brain conflicts and resolution.
 ```
 
 ## Ledger
+This section covers ledger.
 
 ```json
 {
@@ -101,6 +103,7 @@ How Vant handles brain conflicts and resolution.
 - **Audit** - Track thinking changes
 
 ## API
+API reference and methods.
 
 ```javascript
 const resolution = require('./lib/resolution');

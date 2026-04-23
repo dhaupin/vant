@@ -58,6 +58,7 @@ The brain lives in `models/public/` and contains personality, goals, and learned
 Brain file structure and management.
 
 ### Start Fresh
+Initialize a new brain.
 
 ```bash
 # Create new brain repo
@@ -66,6 +67,7 @@ git clone my-brain models/public
 ```
 
 ### Modify Files
+Edit brain files directly.
 
 ```bash
 # Edit any brain file
@@ -77,6 +79,7 @@ git commit -m "Updated goals"
 ```
 
 ### View Current Brain
+Inspect your brain state.
 
 ```bash
 # Load and display brain

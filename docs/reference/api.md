@@ -6,6 +6,7 @@ title: Module API
 # Module API
 
 ## lib/config.js
+This section covers libconfigjs.
 
 ```javascript
 const config = require('./lib/config');
@@ -28,6 +29,7 @@ await brain.save();   // Save to disk
 ```
 
 ## lib/lock.js
+This section covers liblockjs.
 
 ```javascript
 const lock = require('./lib/lock');
@@ -37,6 +39,7 @@ await lock.release(agentId, token);
 ```
 
 ## lib/branch.js
+This section covers libbranchjs.
 
 ```javascript
 const branch = require('./lib/branch');
@@ -47,6 +50,7 @@ branch.commit(agentId, message);
 ```
 
 ## lib/vaf.js
+This section covers libvafjs.
 
 ```javascript
 const vaf = require('./lib/vaf');
@@ -79,6 +83,7 @@ vaf.reset();                             // Reset all limits
 ```
 
 ## lib/health.js
+This section covers libhealthjs.
 
 ```javascript
 const health = require('./lib/health');
@@ -88,6 +93,7 @@ const status = await health.check(); // Get status
 ```
 
 ## lib/logger.js
+This section covers libloggerjs.
 
 ```javascript
 const logger = require('./lib/logger');
@@ -98,6 +104,7 @@ logger.error('error');
 ```
 
 ## lib/version.js
+This section covers libversionjs.
 
 ```javascript
 const version = require('./lib/version');
@@ -118,6 +125,7 @@ await succession.diff();    // Compare to previous
 ```
 
 ## lib/protection.js
+This section covers libprotectionjs.
 
 ```javascript
 const protection = require('./lib/protection');
@@ -147,6 +155,7 @@ protection.resetCircuit();         // Reset circuit
 ```
 
 ## lib/rate-limit.js
+This section covers libratelimitjs.
 
 ```javascript
 const rateLimit = require('./lib/rate-limit');
@@ -157,6 +166,7 @@ rateLimit.getResetTime();  // Get reset time
 ```
 
 ## lib/auto-update.js
+This section covers libautoupdatejs.
 
 ```javascript
 const autoUpdate = require('./lib/auto-update');
@@ -198,6 +208,7 @@ errors.format(error);             // Format error message
 ```
 
 ## lib/load.js
+This section covers libloadjs.
 
 ```javascript
 const load = require('./lib/load');
@@ -207,6 +218,7 @@ await load.file(path);  // Load single file
 ```
 
 ## lib/colors.js
+This section covers libcolorsjs.
 
 ```javascript
 const colors = require('./lib/colors');
@@ -232,6 +244,7 @@ colors.section('title');
 ```
 
 ## lib/progress.js
+This section covers libprogressjs.
 
 ```javascript
 const progress = require('./lib/progress');
@@ -242,6 +255,7 @@ progress.complete();
 ```
 
 ## lib/prompts.js
+This section covers libpromptsjs.
 
 ```javascript
 const prompts = require('./lib/prompts');
@@ -255,6 +269,7 @@ const choices = await prompts.checkbox('Select:', ['a', 'b', 'c']);
 ```
 
 ## lib/verbosity.js
+This section covers libverbosityjs.
 
 ```javascript
 const verbosity = require('./lib/verbosity');
@@ -279,6 +294,7 @@ verbosity.content('message');     // Respects content= setting
 ```
 
 ## lib/stego.js
+This section covers libstegojs.
 
 ```javascript
 const stego = require('./lib/stego');
@@ -288,6 +304,7 @@ stego.decode(image);
 ```
 
 ## lib/notifications.js
+This section covers libnotificationsjs.
 
 ```javascript
 const notifications = require('./lib/notifications');
@@ -297,6 +314,7 @@ notifications.list();
 ```
 
 ## lib/metrics.js
+This section covers libmetricsjs.
 
 ```javascript
 const metrics = require('./lib/metrics');
@@ -320,6 +338,7 @@ resolution.getLedger();
 ```
 
 ## lib/telegram.js
+This section covers libtelegramjs.
 
 ```javascript
 const telegram = require('./lib/telegram');
@@ -334,6 +353,7 @@ await telegram.startPolling();
 ```
 
 ## lib/update-check.js
+This section covers libupdatecheckjs.
 
 ```javascript
 const updateCheck = require('./lib/update-check');

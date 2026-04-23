@@ -17,6 +17,7 @@ VAF is Vant's input validation and filtering system. It protects against:
 - Word stacking attacks (troll/flood attacks)
 
 ### Quick Start
+Get started in minutes.
 
 ```javascript
 const vaf = require('./lib/vaf');
@@ -133,6 +134,7 @@ Home expansion: `~`, `$HOME`, `$USER`, `~/.ssh/`
 | `proc_open()` | Process open |
 
 ### 10. Dangerous Commands
+Dangerous Commands step.
 
 ```javascript
 /\brm\s+-rf\b/      // rm -rf
@@ -169,6 +171,7 @@ XML parsing vulnerabilities:
 | `<!ELEMENT` | XML element definition |
 
 ### 14. Null Byte Injection
+Null Byte Injection step.
 
 ```
 file.txt\x00.exe  -> Blocked
@@ -231,6 +234,7 @@ fs.writeFileSync('models/public/lessons.md', '# Lesson\n\n- Note here')
 The MCP server has additional protection layers (lib/protection.js):
 
 ### Settings (config.ini)
+Configuration options.
 
 ```ini
 MCP_SERVER=true
@@ -299,6 +303,7 @@ Events logged:
 Keep your brain and tokens safe.
 
 ### Enable API Key (Recommended for Production)
+API usage.
 
 ```ini
 # config.ini
@@ -307,6 +312,7 @@ MCP_API_KEY=your-very-secret-key
 ```
 
 ### Making Authenticated Requests
+Make authenticated API calls.
 
 ```bash
 curl -X POST http://localhost:3456/call \
@@ -316,6 +322,7 @@ curl -X POST http://localhost:3456/call \
 ```
 
 ### Environment Variables
+Set up the environment.
 
 ```bash
 export VANT_MCP_API_KEY=your-secret-key
@@ -340,6 +347,7 @@ Before deploying to production:
 ---
 
 ## Test VAF Blocks
+This section covers blocks.
 
 ```bash
 # Test word stacking

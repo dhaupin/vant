@@ -38,6 +38,7 @@ No - it's completely open source and free. You only need:
 Technical details and implementation.
 
 ### How does brain transfer work?
+How memory persists across sessions.
 
 ```
 Session 1 ends:

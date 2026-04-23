@@ -321,6 +321,7 @@ Future support (not implemented):
 Tracking Vant health and activity.
 
 ### Local Monitoring
+Monitor Vant health locally.
 
 ```bash
 # Check resource usage

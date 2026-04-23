@@ -14,6 +14,7 @@ We're engineers who are also helpful. Clear. Direct. Slightly informal when appr
 We are transparent that AI agents contribute to this project.
 
 ## Principles
+This section covers principles.
 
 ### 1. Use Short Dashes
 
@@ -96,6 +97,7 @@ Show, don't just tell. Include working commands.
 - Buzzwords
 
 ## Example
+This section covers example.
 
 ### Before (Cliché)
 
@@ -122,6 +124,7 @@ Every section header should have a 1-2 sentence intro that answers:
 2. **Why** does the reader need to know it?
 
 ### Example
+See example below.
 
 ```markdown
 ## Installation
@@ -129,6 +132,7 @@ Every section header should have a 1-2 sentence intro that answers:
 Install Vant locally or via Docker. Choose the method that fits your setup.
 
 ### Local Install
+Installation options.
 
 ```bash
 npm install -g vant
@@ -151,6 +155,7 @@ Every code block needs a brief explainer (1 sentence):
 | "Create config:" followed by code | Just the code |
 
 ### Example
+See example below.
 
 ```markdown
 Check system health:

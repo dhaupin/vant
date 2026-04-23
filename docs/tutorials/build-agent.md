@@ -16,6 +16,7 @@ A CLI agent that:
 - Saves memory after each interaction
 
 ## Step 1: Setup
+Configure for your environment.
 
 ```bash
 # Install Vant
@@ -31,6 +32,7 @@ npm install -g vant
 Example:
 
 ## Step 2: Configure
+This section covers configure.
 
 ```bash
 vant setup
@@ -70,12 +72,14 @@ run();
 ```
 
 ## Step 4: Run
+This section covers key information.
 
 ```bash
 node agent.js
 ```
 
 ## Step 5: Run Again
+This section covers again.
 
 ```bash
 # Run a second time

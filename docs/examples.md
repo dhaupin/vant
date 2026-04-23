@@ -68,6 +68,7 @@ Edge device starts → Load brain from GitHub
 Working examples for common tasks.
 
 ### Basic Memory
+Simple get/set operations.
 
 ```javascript
 const brain = require('vant/lib/brain');
@@ -80,6 +81,7 @@ await brain.save();
 ```
 
 ### With Locking
+Thread-safe operations with lock.
 
 ```javascript
 const lock = require('vant/lib/lock');

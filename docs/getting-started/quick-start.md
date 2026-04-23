@@ -36,6 +36,7 @@ vant setup
 ```
 
 ## 3. Run
+This section covers key information.
 
 ```bash
 vant start     # Full startup (health → sync → load → run)

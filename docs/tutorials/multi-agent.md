@@ -28,6 +28,7 @@ main branch (production)
 ```
 
 ## Setup
+Configure for your environment.
 
 ```bash
 # Each agent gets own branch
@@ -36,6 +37,7 @@ vant checkout agent-2
 ```
 
 ## Agent Code
+This section covers agent.
 
 ```javascript
 const branch = require('./lib/branch');
@@ -68,6 +70,7 @@ async function work() {
 ```
 
 ## Workflow
+This section covers workflow.
 
 ```text
 ┌─────────────────┐
@@ -97,6 +100,7 @@ async function work() {
 Coordinate multiple AI agents with Vant.
 
 ### Pattern 1: Solo Agent (Safe)
+This section covers pattern.
 ```javascript
 // Just commit to main directly
 await branch.checkout('main');
@@ -104,6 +108,7 @@ await branch.commit('agent-1', 'Updated memory');
 ```
 
 ### Pattern 2: Branch Isolation
+This section covers pattern.
 ```javascript
 // Each agent uses own branch
 await branch.checkout('agent-1');
@@ -112,6 +117,7 @@ await branch.commit('agent-1', 'Work complete');
 ```
 
 ### Pattern 3: Merge via PR
+This section covers pattern.
 ```javascript
 // When done, merge to main via PR
 // Don't auto-merge - human reviews first

@@ -58,8 +58,10 @@ console.log(stego.decode('output.png', {
 ```
 
 ## CLI Commands
+Command-line interface.
 
 ### Encode
+Encode data into an image.
 
 ```bash
 node bin/stego.js encode "message" input.png output.png
@@ -67,6 +69,7 @@ node bin/stego.js encode "secret" in.png out.png --encrypt password
 ```
 
 ### Decode
+Decode data from an image.
 
 ```bash
 node bin/stego.js decode output.png
@@ -74,6 +77,7 @@ node bin/stego.js decode output.png --decrypt password
 ```
 
 ## How It Works
+This section covers works.
 
 ### LSB Encoding
 

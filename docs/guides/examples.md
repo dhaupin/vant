@@ -8,6 +8,7 @@ title: Examples
 Working examples for Vant workflows.
 
 ## Basic: Load and Query
+This section covers basic.
 
 ```javascript
 const vant = require('./lib/vant');
@@ -25,6 +26,7 @@ main();
 ```
 
 ## Basic: Save Memory
+This section covers basic.
 
 ```javascript
 const vant = require('./lib/vant');
@@ -49,6 +51,7 @@ mcp.run({
 ```
 
 ## With VAF Validation
+This section covers validation.
 
 ```javascript
 const vaf = require('./lib/vaf');
@@ -65,6 +68,7 @@ function validate(input) {
 ```
 
 ## With Rate Limiting
+This section covers limiting.
 
 ```javascript
 const protection = require('./lib/protection');
@@ -78,6 +82,7 @@ function limitedCall(fn) {
 ```
 
 ## Health Check
+This section covers health.
 
 ```javascript
 const health = require('./lib/health');
@@ -101,6 +106,7 @@ async function sync() {
 ```
 
 ## Branch Work
+This section covers branch.
 
 ```javascript
 const branch = require('./lib/branch');
@@ -114,6 +120,7 @@ async function work() {
 ```
 
 ## Lock Work
+This section covers key information.
 
 ```javascript
 const lock = require('./lib/lock');

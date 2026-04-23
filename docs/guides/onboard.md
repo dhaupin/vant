@@ -16,6 +16,7 @@ Browse and search Vant's knowledge base (brain).
 - Previews
 
 ## Running
+This section covers running.
 
 ```bash
 # Interactive browse
@@ -69,6 +70,7 @@ Underscore-prefixed files:
 - **Audit** - List all knowledge
 
 ## API
+API reference and methods.
 
 ```javascript
 const onboard = require('./lib/onboard');
@@ -87,6 +89,7 @@ const results = onboard.searchFiles('therapy');
 ```
 
 ## Output Example
+This section covers output.
 
 ```
 === Onboarding: Vant Brain ===

@@ -38,6 +38,7 @@ Each entry:
 | ERROR | Errors |
 
 ## Events Logged
+This section covers events.
 
 ### Security Events
 
@@ -66,6 +67,7 @@ Each entry:
 | `LOGIN_FAIL` | Failed login |
 
 ## Compliance
+This section covers compliance.
 
 ### Data Retention
 
@@ -98,8 +100,10 @@ git log models/public/identity.md
 ```
 
 ## Reporting
+This section covers reporting.
 
 ### Generate Report
+Create audit reports.
 
 ```bash
 # Last 30 days
@@ -117,8 +121,10 @@ git log models/public/identity.md
 - Rate limit usage
 
 ## SIEM Integration
+This section covers integration.
 
 ### Export Logs
+Export audit logs for analysis.
 
 ```bash
 # JSON format
@@ -129,6 +135,7 @@ git log models/public/identity.md
 ```
 
 ### Integration Example
+Example integration code.
 
 ```yaml
 # Splunk

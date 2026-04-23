@@ -28,6 +28,7 @@ src/plugins/my-plugin/
 ```
 
 ### Plugin Interface
+The plugin interface definition.
 
 ```javascript
 // src/plugins/my-plugin/index.js
@@ -56,6 +57,7 @@ module.exports = {
 ```
 
 ### config.json
+Configuration options.
 
 ```json
 {

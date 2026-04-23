@@ -15,6 +15,7 @@ Reference for all Vant error codes.
 | `VantRetryableError` | Errors that can be retried |
 
 ## Error Codes
+This section covers error.
 
 ### Configuration
 
@@ -74,6 +75,7 @@ Reference for all Vant error codes.
 Error codes and troubleshooting.
 
 ### Throw an Error
+Handle this error case.
 
 ```javascript
 const errors = require('./lib/errors');
@@ -85,6 +87,7 @@ throw new errors.VantError('Failed to sync', {
 ```
 
 ### Retry Logic
+Logging configuration.
 
 ```javascript
 const errors = require('./lib/errors');
@@ -95,6 +98,7 @@ await errors.retry(async () => {
 ```
 
 ### Check if Retryable
+Retry configuration.
 
 ```javascript
 if (error.retryable) {

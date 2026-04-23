@@ -12,6 +12,7 @@ Deep dive on Vant's GitHub integration.
 Vant uses GitHub as the brain storage and sync backend. Each brain file is a commit.
 
 ## Required Setup
+Configure for your environment.
 
 ### 1. Create Repository
 
@@ -35,6 +36,7 @@ Example:
 4. Copy token
 
 ### 3. Configure
+Configure the integration.
 
 ```bash
 export GITHUB_TOKEN=ghp_xxxxxxxxxxxx
@@ -52,6 +54,7 @@ export GITHUB_REPO=your-username/vant-brain
 > Minimum required: `repo` for private brain storage.
 
 ## Rate Limits
+This section covers limits.
 
 ### Understanding Limits
 
@@ -61,6 +64,7 @@ export GITHUB_REPO=your-username/vant-brain
 | Unauthenticated | 60 |
 
 ### Managing Limits
+Handle rate limits.
 
 ```bash
 # Check current limit
@@ -80,26 +84,31 @@ vant rate reset
 | Limit sync frequency | Don't sync every message |
 
 ## Sync Strategies
+This section covers strategies.
 
 ### Full Sync
+Push and pull all changes.
 
 ```bash
 vant sync  # Pull + push
 ```
 
 ### Pull Only
+Pull changes without pushing.
 
 ```bash
 vant sync --pull  # Get latest
 ```
 
 ### Push Only
+Push changes without pulling.
 
 ```bash
 vant sync --push  # Push local changes
 ```
 
 ## Best Practices
+Recommended approaches.
 
 ### Manual Sync
 
@@ -112,14 +121,17 @@ vant sync --push  # Push local changes
 > ⚠️ **Don't use cron or auto-sync** - GitHub Terms prohibit using GitHub as a database with automated polling. Sync intentionally when your agent has meaningful updates.
 
 ## Branching Strategy
+This section covers branching.
 
 ### Default Branch
+Main production branch.
 
 ```
 main - Production brain
 ```
 
 ### Experiment Branches
+Try changes safely.
 
 ```
 main
@@ -129,6 +141,7 @@ main
 ```
 
 ### Workflow
+Recommended workflow.
 
 ```bash
 # Create experiment branch

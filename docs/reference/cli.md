@@ -18,6 +18,7 @@ All Vant CLI commands.
 | `vant run` | Start runtime loop |
 
 ### Core Details
+This section covers core.
 
 #### vant start
 
@@ -94,6 +95,7 @@ vant run --websocket # WebSocket mode
 | `vant bot` | Run Telegram bot |
 
 ### Development Details
+This section covers development.
 
 #### vant test
 
@@ -145,6 +147,7 @@ Example:
 | `vant build-test` | Run build validation |
 
 ### Setup Details
+Initial setup.
 
 #### vant setup
 
@@ -199,6 +202,7 @@ vant build-test       # Validate all scripts load
 | `vant rate` | GitHub API rate limit |
 
 ### Help Details
+This section covers help.
 
 #### vant help
 
@@ -247,6 +251,7 @@ vant rate reset  # Time until reset
 | `vant mcp` | Run MCP server |
 
 ### Node Details
+This section covers node.
 
 #### vant node
 
@@ -286,6 +291,7 @@ vant mcp --websocket # WebSocket
 | `vant bump` | Bump version & tag |
 
 ### Advanced Details
+This section covers advanced.
 
 #### vant onboard
 
@@ -335,6 +341,7 @@ vant bump major  # Major (0.8.4 → 1.0.0)
 | `vant docs serve` | Serve docs locally |
 
 ### Docs Details
+This section covers docs.
 
 #### vant docs
 

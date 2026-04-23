@@ -33,6 +33,7 @@ Release process and versioning.
 - [ ] Update version in lib/version.js
 
 ### 2. Release
+Release step.
 
 ```bash
 # Bump version
@@ -51,6 +52,7 @@ git push origin main --tags
 - [ ] Announce (if applicable)
 
 ## Bump Command
+This section covers command.
 
 ```bash
 # Patch release (0.8.4 → 0.8.5)

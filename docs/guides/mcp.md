@@ -17,6 +17,7 @@ vant mcp --websocket # WebSocket mode
 ```
 
 ## Modes
+This section covers modes.
 
 ### STDIO Mode
 
@@ -44,6 +45,7 @@ vant mcp --websocket --port 3000
 | vant_sync | Sync with GitHub |
 
 ## Example Request
+This section covers example.
 
 ```json
 {

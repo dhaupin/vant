@@ -33,6 +33,7 @@ How much to inherit from previous brain:
 - `models/.ledger.json` - Succession history
 
 ## Running
+This section covers running.
 
 ```bash
 # Show current version
@@ -93,6 +94,7 @@ Tracks succession history:
 - **Production** - High trust for stable ops
 
 ## API
+API reference and methods.
 
 ```javascript
 const succession = require('./lib/succession');
