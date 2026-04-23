@@ -3,10 +3,13 @@
   "version": "0.8.4",
   "description": "vant CLI - Persistent AI agent with generational memory transfer",
   "bin": {
-    "vant": "./bin/vant.js",
-    "mcp": "./bin/mcp.js"
+    "vant": "bin/vant.js",
+    "mcp": "bin/mcp.js"
   },
-  "repository": "https://github.com/dhaupin/vant",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dhaupin/vant.git"
+  },
   "homepage": "https://github.com/dhaupin/vant#readme",
   "preferGlobal": true,
   "keywords": [
@@ -31,7 +34,8 @@
     "yaml": "^2.3.0"
   },
   "devDependencies": {
-    "eslint": "^8.57.0"
+    "eslint": "^8.57.0",
+    "pagefind": "^1.5.2"
   },
   "scripts": {
     "lint": "eslint bin lib",
@@ -39,5 +43,13 @@
     "setup": "node bin/setup.js",
     "start": "node bin/start.js",
     "health": "node bin/health.js"
+  },
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib"
+  },
+  "bugs": {
+    "url": "https://github.com/dhaupin/vant/issues"
   }
 }

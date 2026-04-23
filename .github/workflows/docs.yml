@@ -44,8 +44,7 @@ jobs:
 
       - name: Index with Pagefind
         run: |
-          npm install -g pagefind
-          pagefind --site docs/_site
+          npx pagefind --site docs/_site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
