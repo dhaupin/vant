@@ -16,12 +16,19 @@
     
     <!-- Pagefind search -->
     <link href="/vant/pagefind/pagefind-component-ui.css" rel="stylesheet">
-    <script src="/vant/pagefind/pagefind-component-ui.js"></script>
-    
     <pagefind-searchbox></pagefind-searchbox>
-    <pagefind-modal-trigger>Search</pagefind-modal-trigger>
+    <script src="/vant/pagefind/pagefind-component-ui.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        // Initialize basePath for subdirectory deployment
+        window.addEventListener('DOMContentLoaded', function() {
+            // Set baseUrl for subdirectory
+            if (window.pagefindUI) {
+                new window.pagefindUI({ 
+                    element: "pagefind-searchbox",
+                    baseUrl: '/vant/' 
+                });
+            }
+            
             // Auto-open on Cmd+K
             document.addEventListener('keydown', function(e) {
                 if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
