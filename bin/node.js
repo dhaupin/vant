@@ -122,6 +122,7 @@ class VantNode {
             mcpPort: options.mcpPort || 3456,
             pollInterval: options.pollInterval || 60,
             enablePolling: options.enablePolling || false,
+            enablePollingRequested: options.enablePollingRequested || false,
             verbose: options.verbose || false
         };
         
@@ -161,6 +162,7 @@ class VantNode {
         
         // Check if polling requested but not confirmed
         if (this.options.enablePollingRequested && !this.options.enablePolling) {
+            this.log('');
             this.log('⚠️  AUTO-POLLING FLAG DETECTED BUT NOT CONFIRMED');
             this.log('⚠️  GitHub ToS Warning: Automated polling of GitHub is prohibited.');
             this.log('   See: https://docs.github.com/en/github/site-policy/github-acceptable-use-policies');
@@ -175,8 +177,15 @@ class VantNode {
             await this.promptPollingConfirmation();
         }
         
+        // Check if polling is enabled (via env var + flag OR via stdin confirmation)
+        // If enablePolling is true but no stdin confirmation yet, confirm now
+        if (this.options.enablePolling && !this.confirmedPolling) {
+            this.confirmedPolling = true;  // Auto-confirm if env var was set
+        }
+        
         // Start GitHub polling only if confirmed
         if (this.options.enablePolling && this.confirmedPolling) {
+            this.log('');
             this.warn('⚠️  AUTO-POLLING ENABLED - This may violate GitHub ToS');
             this.warn('   Polling GitHub at regular intervals is not permitted.');
             this.warn('   Use vant sync for manual brain sync instead.');
