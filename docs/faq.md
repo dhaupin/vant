@@ -58,7 +58,7 @@ Vant's version tracking:
 
 ### Can multiple agents share one brain?
 
-Yes! Use the [Multi-Agent System](/tutorials/multi-agent.html) with:
+Yes! Use the [Multi-Agent System](/vant/tutorials/multi-agent.html) with:
 - Git branches per agent
 - File locks for coordination
 
@@ -118,5 +118,5 @@ Yes! See [Contributing Guide](/vant/contributing.html) in the docs.
 ## Related
 
 - [Quickstart](/vant/getting-started/quick-start.html)
-- [Architecture](/guides/architecture.html)
-- [Build Agent Tutorial](/tutorials/build-agent.html)
+- [Architecture](/vant/guides/architecture.html)
+- [Build Agent Tutorial](/vant/tutorials/build-agent.html)

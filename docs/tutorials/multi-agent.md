@@ -126,6 +126,6 @@ await branch.commit('agent-1', 'Work complete');
 
 ## Related
 
-- [Multi-Agent Guide](/guides/multi-agent.html) - Full guide
-- [Lock API](/reference/api.html) - Lock module
-- [Branch API](/reference/api.html) - Branch module
+- [Multi-Agent Guide](/vant/guides/multi-agent.html) - Full guide
+- [Lock API](/vant/reference/api.html) - Lock module
+- [Branch API](/vant/reference/api.html) - Branch module
