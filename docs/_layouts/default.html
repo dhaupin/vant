@@ -835,7 +835,9 @@
                 for (var i = 0; i < resp.results.length && i < 10; i++) {
                     var r = resp.results[i];
                     var data = await r.data();
-                    html += '<a href="/vant' + data.url + '" class="search-result">';
+                    // Use URL as-is (pagefind includes the base path)
+                    var url = data.url;
+                    html += '<a href="' + url + '" class="search-result">';
                     html += '<div class="search-result-title">' + data.meta.title + '</div>';
                     if (data.excerpt) html += '<div class="search-result-excerpt">' + data.excerpt + '</div>';
                     html += '</a>';
