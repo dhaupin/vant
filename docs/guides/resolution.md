@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/resolution.html
+permalink: /guides/resolution.html
 layout: default
 title: Resolution
 ---

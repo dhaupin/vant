@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/troubleshooting.html
+permalink: /guides/troubleshooting.html
 layout: default
 title: Troubleshooting
 ---

@@ -1,5 +1,5 @@
 ---
-permalink: /vant/reference/api.html
+permalink: /reference/api.html
 layout: default
 title: Module API
 ---

@@ -4,11 +4,11 @@ markdown: kramdown
 
 # Build settings
 permalink: pretty
-exclude: ['README.md', 'Gemfile', 'Gemfile.lock']
+exclude: ['README.md', 'Gemfile', 'Gemfile.lock', 'tmp']
 
 # Default layouts for all docs
 defaults:
   - scope:
-      type: page
+      type: pages
     values:
       layout: default

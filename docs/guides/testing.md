@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/testing.html
+permalink: /guides/testing.html
 layout: default
 title: Testing
 ---

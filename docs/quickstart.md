@@ -1,5 +1,5 @@
 ---
-permalink: /vant/quickstart.html
+permalink: /quickstart.html
 layout: default
 title: Quickstart
 ---
@@ -61,6 +61,6 @@ vant sync
 
 ## Next Steps
 
-- [Install Guide](/vant/getting-started/install.html) - Full installation details
-- [Architecture](/vant/guides/architecture.html) - How it works
-- [CLI Reference](/vant/reference/cli.html) - All commands
+- [Install Guide](/getting-started/install.html) - Full installation details
+- [Architecture](/guides/architecture.html) - How it works
+- [CLI Reference](/reference/cli.html) - All commands

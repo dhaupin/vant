@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/operations.html
+permalink: /guides/operations.html
 layout: default
 title: Operations
 ---

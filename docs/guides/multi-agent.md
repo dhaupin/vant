@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/multi-agent.html
+permalink: /guides/multi-agent.html
 layout: default
 title: Multi-Agent
 ---

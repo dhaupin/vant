@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/plugins.html
+permalink: /guides/plugins.html
 layout: default
 title: Plugins
 ---

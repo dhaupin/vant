@@ -1,5 +1,5 @@
 ---
-permalink: /vant/contributing.html
+permalink: /contributing.html
 layout: default
 title: Contributing
 ---
@@ -107,13 +107,13 @@ Contributors get added to README.md. Thanks for making Vant better!
 
 ## Questions?
 
-- Open a [GitHub Discussion](https://github.com/dhaupin/vant/discussions)
-- Ask in [Issues](https://github.com/dhaupin/vant/issues)
+- Open a [GitHub Discussion](https://github.com/dhaupin/discussions)
+- Ask in [Issues](https://github.com/dhaupin/issues)
 
 ---
 
 ## Related
 
 - [GitHub Repo](https://github.com/dhaupin/vant)
-- [Issues](https://github.com/dhaupin/vant/issues)
-- [Discussions](https://github.com/dhaupin/vant/discussions)
+- [Issues](https://github.com/dhaupin/issues)
+- [Discussions](https://github.com/dhaupin/discussions)

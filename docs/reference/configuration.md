@@ -1,5 +1,5 @@
 ---
-permalink: /vant/reference/configuration.html
+permalink: /reference/configuration.html
 layout: default
 title: Configuration
 ---

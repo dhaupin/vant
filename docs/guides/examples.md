@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/examples.html
+permalink: /guides/examples.html
 layout: default
 title: Examples
 ---

@@ -2,74 +2,74 @@
 
 getting-started:
   - title: Installation
-    path: /vant/getting-started/install
+    path: /getting-started/install
   - title: Quick Start
-    path: /vant/getting-started/quick-start
+    path: /getting-started/quick-start
   - title: Quickstart (5 min)
-    path: /vant/quickstart
+    path: /quickstart
 
 tutorials:
   - title: Build First Agent
-    path: /vant/tutorials/build-agent
+    path: /tutorials/build-agent
   - title: Multi-Agent System
-    path: /vant/tutorials/multi-agent
+    path: /tutorials/multi-agent
 
 reference:
   - title: CLI Reference
-    path: /vant/reference/cli
+    path: /reference/cli
   - title: Configuration
-    path: /vant/reference/configuration
+    path: /reference/configuration
   - title: Module API
-    path: /vant/reference/api
+    path: /reference/api
   - title: Brain Schema
-    path: /vant/reference/schema
+    path: /reference/schema
   - title: Error Codes
-    path: /vant/reference/errors
+    path: /reference/errors
 
 guides:
   - title: Architecture
-    path: /vant/guides/architecture
+    path: /guides/architecture
   - title: Nodes
-    path: /vant/guides/nodes
+    path: /guides/nodes
   - title: Bot
-    path: /vant/guides/bot
+    path: /guides/bot
   - title: Onboarding
-    path: /vant/guides/onboard
+    path: /guides/onboard
   - title: Succession
-    path: /vant/guides/succession
+    path: /guides/succession
   - title: Resolution
-    path: /vant/guides/resolution
+    path: /guides/resolution
   - title: Security
-    path: /vant/guides/security
+    path: /guides/security
   - title: Multi-Agent
-    path: /vant/guides/multi-agent
+    path: /guides/multi-agent
   - title: MCP Server
-    path: /vant/guides/mcp
+    path: /guides/mcp
   - title: Docker
-    path: /vant/guides/docker
+    path: /guides/docker
   - title: Plugins
-    path: /vant/guides/plugins
+    path: /guides/plugins
   - title: Steganography
-    path: /vant/guides/steganography
+    path: /guides/steganography
   - title: GitHub
-    path: /vant/guides/github
+    path: /guides/github
   - title: Release
-    path: /vant/guides/release
+    path: /guides/release
   - title: Style
-    path: /vant/guides/style
+    path: /guides/style
   - title: Operations
-    path: /vant/guides/operations
+    path: /guides/operations
   - title: Testing
-    path: /vant/guides/testing
+    path: /guides/testing
   - title: Audit
-    path: /vant/guides/audit
+    path: /guides/audit
   - title: Troubleshooting
-    path: /vant/guides/troubleshooting
+    path: /guides/troubleshooting
 
 community:
   - title: Examples
-    path: /vant/examples
+    path: /examples
   - title: FAQ
-    path: /vant/faq
+    path: /faq
   - title: Contributing
-    path: /vant/contributing
+    path: /contributing

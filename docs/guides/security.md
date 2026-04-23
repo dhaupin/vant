@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/security.html
+permalink: /guides/security.html
 layout: default
 title: Security
 ---

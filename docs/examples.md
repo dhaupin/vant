@@ -1,5 +1,5 @@
 ---
-permalink: /vant/examples.html
+permalink: /examples.html
 layout: default
 title: Examples & Showcase
 ---
@@ -10,7 +10,7 @@ title: Examples & Showcase
 
 ## Community Projects
 
-*(Submit yours via [GitHub Issues](https://github.com/dhaupin/vant/issues))*
+*(Submit yours via [GitHub Issues](https://github.com/dhaupin/issues))*
 
 ### AI Development Agents
 
@@ -100,6 +100,6 @@ await lock.release('agent-1', token);
 
 ## Related
 
-- [Build Agent Tutorial](/vant/tutorials/build-agent.html)
-- [Multi-Agent Tutorial](/vant/tutorials/multi-agent.html)
+- [Build Agent Tutorial](/tutorials/build-agent.html)
+- [Multi-Agent Tutorial](/tutorials/multi-agent.html)
 - [GitHub](https://github.com/dhaupin/vant) - star us!

@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/steganography.html
+permalink: /guides/steganography.html
 layout: default
 title: Steganography
 ---

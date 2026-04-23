@@ -1,5 +1,5 @@
 ---
-permalink: /vant/getting-started/install.html
+permalink: /getting-started/install.html
 layout: default
 title: Installation
 ---

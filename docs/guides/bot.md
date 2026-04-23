@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/bot.html
+permalink: /guides/bot.html
 layout: default
 title: Telegram Bot
 ---

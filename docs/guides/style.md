@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/style.html
+permalink: /guides/style.html
 layout: default
 title: Voice & Style
 ---

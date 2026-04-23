@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/succession.html
+permalink: /guides/succession.html
 layout: default
 title: Succession
 ---

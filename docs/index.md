@@ -1,5 +1,5 @@
 ---
-permalink: /vant/
+permalink: /
 layout: default
 title: Vant Docs
 ---
@@ -15,10 +15,10 @@ Vant persists across sessions through GitHub-based brain transfer. Each generati
 
 ## Quick Links
 
-- [Quickstart](/vant/quickstart.html) - 5 minute setup
-- [Build Your First Agent](/vant/tutorials/build-agent.html) - 15 min tutorial
-- [Examples](/vant/examples.html) - What others are building
-- [FAQ](/vant/faq.html) - Common questions
+- [Quickstart](/quickstart.html) - 5 minute setup
+- [Build Your First Agent](/tutorials/build-agent.html) - 15 min tutorial
+- [Examples](/examples.html) - What others are building
+- [FAQ](/faq.html) - Common questions
 
 
 

@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/github.html
+permalink: /guides/github.html
 layout: default
 title: GitHub Integration
 ---

@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/docker.html
+permalink: /guides/docker.html
 layout: default
 title: Docker
 ---

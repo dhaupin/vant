@@ -1,5 +1,5 @@
 ---
-permalink: /vant/getting-started/quick-start.html
+permalink: /getting-started/quick-start.html
 layout: default
 title: Quick Start
 ---

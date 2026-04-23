@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/audit.html
+permalink: /guides/audit.html
 layout: default
 title: Audit & Compliance
 ---

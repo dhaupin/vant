@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/architecture.html
+permalink: /guides/architecture.html
 layout: default
 title: Architecture
 ---

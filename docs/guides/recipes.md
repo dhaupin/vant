@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/recipes.html
+permalink: /guides/recipes.html
 layout: default
 title: Recipes
 ---

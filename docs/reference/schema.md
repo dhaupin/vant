@@ -1,5 +1,5 @@
 ---
-permalink: /vant/reference/schema.html
+permalink: /reference/schema.html
 layout: default
 title: Brain Schema
 ---

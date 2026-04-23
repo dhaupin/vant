@@ -1,5 +1,5 @@
 ---
-permalink: /vant/faq.html
+permalink: /faq.html
 layout: default
 title: FAQ
 ---
@@ -58,7 +58,7 @@ Vant's version tracking:
 
 ### Can multiple agents share one brain?
 
-Yes! Use the [Multi-Agent System](/vant/tutorials/multi-agent.html) with:
+Yes! Use the [Multi-Agent System](/tutorials/multi-agent.html) with:
 - Git branches per agent
 - File locks for coordination
 
@@ -101,22 +101,22 @@ Yes! Just `git clone` your brain repo. It's all markdown files you can edit dire
 
 ### How do I get help?
 
-- [GitHub Issues](https://github.com/dhaupin/vant/issues) - Bug reports
-- [Discussions](https://github.com/dhaupin/vant/discussions) - Q&A
+- [GitHub Issues](https://github.com/dhaupin/issues) - Bug reports
+- [Discussions](https://github.com/dhaupin/discussions) - Q&A
 - [Discord](https://discord.gg/vant) - Chat (if available)
 
 ### Where's the roadmap?
 
-See [ROADMAP.md](https://github.com/dhaupin/vant/blob/main/ROADMAP.md) in the repo.
+See [ROADMAP.md](https://github.com/dhaupin/blob/main/ROADMAP.md) in the repo.
 
 ### Can I contribute?
 
-Yes! See [Contributing Guide](/vant/contributing.html) in the docs.
+Yes! See [Contributing Guide](/contributing.html) in the docs.
 
 ---
 
 ## Related
 
-- [Quickstart](/vant/quickstart.html)
-- [Architecture](/vant/guides/architecture.html)
-- [Build Agent Tutorial](/vant/tutorials/build-agent.html)
+- [Quickstart](/quickstart.html)
+- [Architecture](/guides/architecture.html)
+- [Build Agent Tutorial](/tutorials/build-agent.html)

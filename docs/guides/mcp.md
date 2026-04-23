@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/mcp.html
+permalink: /guides/mcp.html
 layout: default
 title: MCP Server
 ---

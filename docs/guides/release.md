@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/release.html
+permalink: /guides/release.html
 layout: default
 title: Release Process
 ---
@@ -78,7 +78,7 @@ git push origin main --tags
 
 After pushing tags:
 
-1. Go to [Releases](https://github.com/dhaupin/vant/releases)
+1. Go to [Releases](https://github.com/dhaupin/releases)
 2. Click "Draft a new release"
 3. Select the tag
 4. Add release notes

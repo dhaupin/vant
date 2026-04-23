@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/onboard.html
+permalink: /guides/onboard.html
 layout: default
 title: Onboarding
 ---

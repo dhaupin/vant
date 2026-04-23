@@ -1,5 +1,5 @@
 ---
-permalink: /vant/reference/errors.html
+permalink: /reference/errors.html
 layout: default
 title: Error Codes
 ---

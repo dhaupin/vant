@@ -1,5 +1,5 @@
 ---
-permalink: /vant/reference/cli.html
+permalink: /reference/cli.html
 layout: default
 title: CLI Reference
 ---

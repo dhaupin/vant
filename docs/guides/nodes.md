@@ -1,5 +1,5 @@
 ---
-permalink: /vant/guides/nodes.html
+permalink: /guides/nodes.html
 layout: default
 title: Nodes
 ---
