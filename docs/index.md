@@ -20,6 +20,20 @@ Vant persists across sessions through GitHub-based brain transfer. Each generati
 - [Examples](/examples.html) - What others are building
 - [FAQ](/faq.html) - Common questions
 
+---
+
+## Key Features
+
+| Feature | Description |
+|---------|-------------|
+| **Persistent Memory** | GitHub-based brain storage with version control |
+| **Multi-Agent** | Branch + lock system for safe collaboration |
+| **MCP Server** | Model Context Protocol for AI integration |
+| **Steganography** | Hidden messages in PNG images |
+| **Slack/Discord** | Webhook notifications |
+| **VAF Security** | Input validation and filtering |
+| **Telegram Bot** | Control Vant via chat |
+
 
 
 ## About

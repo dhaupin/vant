@@ -27,8 +27,8 @@ reference:
 guides:
   - title: Architecture
     path: /guides/architecture
-  - title: Operations
-    path: /guides/operations
+  - title: Brain Structure
+    path: /guides/brain
   - title: Onboarding
     path: /guides/onboard
   - title: Succession
@@ -39,16 +39,14 @@ guides:
     path: /guides/security
   - title: MCP Server
     path: /guides/mcp
+  - title: GitHub Sync
+    path: /guides/github
   - title: Docker
     path: /guides/docker
   - title: Plugins
     path: /guides/plugins
   - title: Steganography
     path: /guides/steganography
-  - title: GitHub Sync
-    path: /guides/github
-  - title: Release
-    path: /guides/release
   - title: Operations
     path: /guides/operations
   - title: Testing
@@ -57,6 +55,8 @@ guides:
     path: /guides/audit
   - title: Troubleshooting
     path: /guides/troubleshooting
+  - title: Release
+    path: /guides/release
 
 community:
   - title: Examples
