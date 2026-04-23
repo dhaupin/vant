@@ -82,6 +82,55 @@ Show, don't just tell. Include working commands.
 | Bullets | Use `-`, not `*` |
 | Code | Inline `code` for commands, blocks for examples |
 | Links | Descriptive, not "click here" |
+| Numbered lists | Use dashes in code blocks (see below) |
+
+### Numbered Lists in Code Blocks
+
+Never use numbered lists (`1. 2. 3.`) inside markdown code blocks. Use dashes instead:
+
+```markdown
+```markdown
+Steps to run:
+- Clone: git clone https://github.com/dhaupin/vant.git
+- Configure: cp config.example.ini config.ini
+- Start: node bin/vant.js start
+```
+```
+
+Why: Markdown parsers may render numbered lists incorrectly inside fenced code blocks.
+
+### Avoid Placeholder Content
+
+Never use "This section covers..." as a section intro. Write actual content:
+
+| ✗ Placeholder | ✓ Real Content |
+|--------------|--------------|
+| "This section covers events." | "Track system events for debugging and compliance." |
+| "This section covers setup." | "Configure Vant to sync with your GitHub repository." |
+
+### Code Blocks Need Briefs
+
+Every code block needs a 1-sentence explainer before it:
+
+```
+Check system health:
+
+```bash
+vant health
+```
+```
+
+Why: Readers need context, not just commands.
+
+## Source of Truth
+
+The docs system (`/docs/`) is the source of truth for all documentation.
+
+- README.md references docs, not the other way around
+- Keep detailed content in docs
+- README provides quick reference with links to full docs
+
+Why: Docs can be rendered with Jekyll (syntax highlighting, navigation, search). README is a single file.
 
 ## Focus Areas
 
@@ -124,7 +173,8 @@ Every section header should have a 1-2 sentence intro that answers:
 2. **Why** does the reader need to know it?
 
 ### Example
-See example below.
+
+For example, here's a properly documented section:
 
 ```markdown
 ## Installation
@@ -132,44 +182,16 @@ See example below.
 Install Vant locally or via Docker. Choose the method that fits your setup.
 
 ### Local Install
-Installation options.
+For local development with full source access:
 
 ```bash
 npm install -g vant
 ```
-
-For local development, clone the repo for access to source.
 ```
 
 **What's NOT needed:**
 - Long intros (save for index page)
 - Multiple paragraphs before first step
-
-## Documenting Code Blocks
-
-Every code block needs a brief explainer (1 sentence):
-
-| ✓ Enough | ✗ Missing |
-|---------|-----------|
-| "Run diagnostics:" followed by code | Just the code |
-| "Create config:" followed by code | Just the code |
-
-### Example
-See example below.
-
-```markdown
-Check system health:
-
-```bash
-vant health
-```
-
-This verifies your setup before running.
-```
-
-**Keep it:**
-- Direct command with brief purpose
-- Expected output if not obvious
 
 ## Common Doc Blocks
 
