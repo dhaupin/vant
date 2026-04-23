@@ -118,4 +118,4 @@ Recommended files transported between instances:
 | `qc.md` | Quality standards |
 | `gratitude.md` | Appreciation |
 
-See also: [API](./api.md), [Multi-Agent](../guides/multi-agent.md)
+See also: [API](/vant/reference/api.html), [Multi-Agent](/vant/guides/multi-agent.html)

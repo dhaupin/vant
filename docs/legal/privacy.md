@@ -263,4 +263,4 @@ If you have concerns:
 
 - [GitHub Privacy](https://docs.github.com/en/github/site-policy/github-privacy-statement) - GitHub's policy
 - [Terms](./index.html) - Our legal terms
-- [Security](../guides/security.md) - Security practices
+- [Security](/vant/guides/security.html) - Security practices

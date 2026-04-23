@@ -71,7 +71,7 @@ Read these in order:
 
 - [MIT License](../LICENSE) - Code license
 - [README](../index.html) - Project overview
-- [Security](../guides/security.md) - Security practices
+- [Security](/vant/guides/security.html) - Security practices
 - [GitHub Terms](https://docs.github.com/en/github/site-policy) - Full policies
 
 ---
