@@ -323,3 +323,173 @@ For questions about these terms:
 - [Security](./security.md) - Security practices
 - [GitHub Terms](https://docs.github.com/en/github/site-policy) - Full GitHub policies
 - [GitHub Acceptable Use](https://docs.github.com/en/github/site-policy/github-acceptable-use-policies) - What you can't do
+
+---
+
+## SPECIFIC EXPOSURES
+
+### AI Agent Behavior (CRITICAL)
+
+**Vant generates outputs through AI. You acknowledge:**
+
+1. **Outputs May Be Wrong**
+   - AI can hallucinate facts
+   - AI may give incorrect instructions
+   - AI may misunderstand context
+   - You MUST verify critical outputs
+
+2. **Outputs May Be Harmful**
+   - AI may generate offensive content
+   - AI may suggest dangerous actions
+   - AI may create inappropriate text
+   - You are responsible for review
+
+3. **AI May Be Manipulated**
+   - Prompt injection attacks
+   - Jailbreak attempts
+   - Context pollution
+   - Security is your responsibility
+
+4. **No AI Safety Guarantees**
+   - We don't control AI providers
+   - We don't guarantee outputs
+   - You use AI at your own risk
+
+### Data Loss Scenarios
+
+**Your data may be lost through:**
+
+1. **Your Actions**
+   - Accidental deletion
+   - Wrong git commands
+   - Force push overwrites
+   - Repo deletion
+
+2. **GitHub Actions**
+   - Token revocation
+   - Account suspension
+   - Repository deletion
+   - Rate limiting
+
+3. **Technical Failures**
+   - Disk corruption
+   - Network failures
+   - Power loss
+   - Hardware failure
+
+4. **Vant Bugs**
+   - Sync conflicts
+   - File corruption
+   - Version issues
+
+**BACKUP YOUR DATA REGULARLY.**
+
+### Third-Party Integrations
+
+**When using Slack, Discord, Telegram, or other services:**
+
+- Each service's terms apply
+- Your data goes to those services
+- We don't control their security
+- They may access your data
+- They may change API without notice
+- You accept their policies
+
+### Open Source Risks
+
+**Vant is open source. This means:**
+
+- No warranty (explicit)
+- No support obligation
+- No security audits
+- Code reviewed by community
+- Dependencies may have vulnerabilities
+- Security is your responsibility
+
+### Future Changes
+
+**We may:**
+
+- Stop development anytime
+- Change features without notice
+- Modify API without notice
+- Add breaking changes
+- Deprecate features
+- Remove features
+- Archive the project
+
+---
+
+## JURISDICTION
+
+**These terms are governed by:**
+- United States law (where GitHub is based)
+- The state of California
+- Applicable federal law
+
+**Any disputes will be resolved in:**
+- Federal or state courts in California
+- GitHub's chosen venue
+
+**You are responsible for:**
+- Understanding your local laws
+- Complying with your jurisdiction
+- Reporting requirements
+
+---
+
+## ENTIRE AGREEMENT
+
+These terms, plus the LICENSE file, constitute the entire agreement between you and Vant.
+
+**No oral statements, representations, or warranties create any obligation.**
+
+---
+
+## WAIVER
+
+Our failure to enforce any right does not mean we waive that right.
+
+**We reserve all rights.**
+
+---
+
+## SURVIVAL
+
+If any part of these terms is found invalid, the rest remain in effect.
+
+**Severability does not affect the rest.**
+
+---
+
+## NO ASSIGNMENT
+
+**You may not assign these terms to another person or entity without our written consent.**
+
+**We may assign these terms at any time.**
+
+---
+
+## INDEPENDENT CONTRACTORS
+
+**We are independent contractors. These terms do not create a partnership, joint venture, or employment relationship.**
+
+---
+
+## HEADINGS
+
+**Headings are for convenience only. They don't affect the meaning of these terms.**
+
+---
+
+## INTERPRETATION
+
+**"Including" means "including without limitation."**
+
+**"May" means "may but not required to."**
+
+**"Must" means "required to."**
+
+**"We" means Vant contributors and maintainers.**
+
+**"You" means you, the user of Vant.**
