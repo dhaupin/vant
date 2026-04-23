@@ -97,14 +97,17 @@ vant sync --pull  # Get latest
 vant sync --push  # Push local changes
 ```
 
-### Batch Mode
+## Best Practices
+
+### Manual Sync
+
+Always sync manually when ready:
 
 ```bash
-# Don't auto-push
-AUTO_PUSH=false vant run
-# Manual push when ready
-vant sync --push
+vant sync --push  # Push local changes
 ```
+
+> ⚠️ **Don't use cron or auto-sync** - GitHub Terms prohibit using GitHub as a database with automated polling. Sync intentionally when your agent has meaningful updates.
 
 ## Branching Strategy
 
@@ -158,25 +161,5 @@ See: [Multi-Agent](./multi-agent.md)
 | Use private repo | Keep brain private |
 | Rotate tokens | Refresh periodically |
 | Use fine-grained tokens | Restrict to brain repo only |
-
-## CI/CD Integration
-
-### GitHub Actions
-
-```yaml
-name: Sync Brain
-on:
-  schedule:
-    - cron: '*/30 * * * *'
-jobs:
-  sync:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Sync brain
-        run: node bin/sync.js
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-```
 
 See also: [CLI Reference](../reference/cli.md), [Troubleshooting](./troubleshooting.md)

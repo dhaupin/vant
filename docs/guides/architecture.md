@@ -44,7 +44,7 @@ User's AI → bin/vant.js → lib/brain.js → GitHub
 
 1. `vant start` → health check → sync → load → run
 2. Brain files in `models/public/`
-3. Commits to GitHub on changes
-4. Next session polls GitHub to inherit
+3. Commits to GitHub on changes (human/agent initiated)
+4. Next session syncs when ready
 
 See also: [Multi-Agent](./multi-agent.md), [Security](./security.md)
