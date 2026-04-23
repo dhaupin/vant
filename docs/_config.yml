@@ -1,24 +1,10 @@
 title: Vant
 description: AI memory for agents
-collections:
-  guides:
-    output: true
-  reference:
-    output: true
-  getting-started:
-    output: true
 markdown: kramdown
-plugins:
-  - jekyll-relative-links
-relative_links:
-  enabled: true
-  collections: true
-include:
-  - _sidebar.yml
 
 # Build settings
 permalink: pretty
-exclude: ['README.md']
+exclude: ['README.md', 'Gemfile', 'Gemfile.lock']
 
 # Default layouts for all docs
 defaults:
