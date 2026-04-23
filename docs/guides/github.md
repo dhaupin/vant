@@ -162,4 +162,4 @@ See: [Multi-Agent](./vant/multi-agent.md)
 | Rotate tokens | Refresh periodically |
 | Use fine-grained tokens | Restrict to brain repo only |
 
-See also: [CLI Reference](../vant/reference/cli.md), [Troubleshooting](./vant/troubleshooting.md)
+See also: [CLI Reference](/vant/reference/cli.html), [Troubleshooting](/vant/guides/troubleshooting.html)

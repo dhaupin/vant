@@ -203,4 +203,4 @@ Error: Content blocked: /; rm -rf/
 | Repo size | Free tier: 1GB max |
 | Private repos | Must have GitHub account |
 
-See also: [Configuration](../vant/reference/configuration.md), [Architecture](./vant/architecture.md)
+See also: [Configuration](/vant/reference/configuration.html), [Architecture](/vant/guides/architecture.html)

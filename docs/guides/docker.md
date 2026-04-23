@@ -63,4 +63,4 @@ docker build -t vant:local .
 docker run -it vant:local vant load
 ```
 
-See also: [Installation](../vant/getting-started/install.md), [Architecture](./vant/architecture.md)
+See also: [Installation](/vant/getting-started/install.html), [Architecture](/vant/guides/architecture.html)

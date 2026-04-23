@@ -96,4 +96,4 @@ docker tag dhaupin/vant:v0.8.5 dhaupin/vant:latest
 docker push dhaupin/vant:latest
 ```
 
-See also: [CLI Reference](../vant/reference/cli.md), [Docker](./vant/docker.md)
+See also: [CLI Reference](/vant/reference/cli.html), [Docker](/vant/guides/docker.html)
