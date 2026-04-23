@@ -303,6 +303,8 @@ async function versionExample() {
 
 ### Auto-Save on Exit
 
+> ⚠️ **Warning for GitHub.com**: Auto-save triggers a sync which counts against rate limits and violates GitHub.com ToS if used for continuous polling. **Use for manual save only**, or use with self-hosted GitLab/Gitea.
+
 ```javascript
 const autoUpdate = require('./lib/auto-update');
 

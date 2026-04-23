@@ -118,7 +118,7 @@ Always sync manually when ready:
 vant sync --push  # Push local changes
 ```
 
-> ⚠️ **Don't use cron or auto-sync** - GitHub Terms prohibit using GitHub as a database with automated polling. Sync intentionally when your agent has meaningful updates.
+> ⚠️ **Don't use cron or auto-sync with GitHub.com** - GitHub.com Terms of Service prohibit automated polling. Self-hosted GitLab/Gitea is fine.
 
 ## Branching Strategy
 Manage Git branches for brain versions.

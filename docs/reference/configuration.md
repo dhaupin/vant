@@ -254,10 +254,10 @@ See these files in the repo for full examples:
 - `settings.example.ini` - Settings template
 - `mood.example.ini` - Mood template
 
-> ⚠️ **Auto-Polling Note**: `VANT_AGREE_AUTO_SYNC` enables background GitHub polling in `vant node`. This requires **both**:
+> ⚠️ **Auto-Polling Warning for GitHub.com**: `VANT_AGREE_AUTO_SYNC` enables background GitHub.com polling in `vant node`. This is intended for self-hosted GitLab/Gitea - using with GitHub.com **violates their Terms of Service**. Requires **both**:
 > 1. The `--enable-polling` flag when starting node
 > 2. Set `VANT_AGREE_AUTO_SYNC=true` (in `.env` or export)
-> 
-> This exists because GitHub ToS prohibits automated polling. Use `vant sync` for manual brain updates instead. See [CLI Reference](/vant/reference/cli.html).
+>
+> Self-hosted GitLab/Gitea is fine. Use `vant sync` for manual brain updates with GitHub.com. See [CLI Reference](/vant/reference/cli.html).
 
 See also: [CLI Commands](/vant/reference/cli.html), [Installation](/vant/getting-started/install.html)

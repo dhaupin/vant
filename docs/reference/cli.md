@@ -262,13 +262,13 @@ vant node --mcp        # Node + MCP server
 vant node --mcp-port 3457  # Custom MCP port
 ```
 
-> ⚠️ **Auto-Polling Opt-In**: By default, `vant node` does NOT poll GitHub. To enable background sync:
+> ⚠️ **Auto-Polling Opt-In (for Self-Hosted)**: By default, `vant node` does NOT poll GitHub. To enable background sync:
 > 
 > - Flag: `--enable-polling` 
 > - Env var: `VANT_AGREE_AUTO_SYNC=true`
 > - Or type "AGREE" when prompted
 > 
-> This is intentional - GitHub ToS prohibits automated polling. Use `vant sync` for manual brain sync.
+> ⚠️ **This violates GitHub.com ToS** - intended for self-hosted GitLab/Gitea only. Use `vant sync` for manual brain sync with GitHub.com.
 
 #### vant mcp
 

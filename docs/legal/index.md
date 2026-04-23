@@ -96,13 +96,15 @@ Company responsibilities.
 - [GitHub Privacy Statement](https://docs.github.com/en/github/site-policy/github-privacy-statement)
 - [GitHub API Terms](https://docs.github.com/en/github/site-policy/github-api-terms)
 
-**Prohibited Uses Include:**
+**Prohibited Uses on GitHub.com Include:**
 
 - Using GitHub as a database or CRM (violates Section B.1)
 - Automated polling at regular intervals (violates Section B.1)
 - Spamming or abusive behavior
 - Creating repositories for prohibited content
 - Violating any third-party rights
+
+> ⚠️ **Self-hosted GitLab/Gitea is not subject to these restrictions.**
 
 **See also:**
 - [GitHub Rate Limits](https://docs.github.com/en/rest/about-rest-api/rate-limits-and-concurrency)

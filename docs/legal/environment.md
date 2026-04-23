@@ -66,9 +66,9 @@ repo
 ## POLLING CONSIDERATIONS
 Timing and rate limit details.
 
-### GitHub ToS Prohibition
+### GitHub.com ToS Prohibition
 
-**Automated polling is prohibited.**
+**Automated polling of GitHub.com is prohibited.** Self-hosted GitLab/Gitea is fine.
 
 > "Using GitHub as a database or for purposes unrelated to source code management."
 > — [GitHub Acceptable Use Policies](https://docs.github.com/en/github/site-policy/github-acceptable-use-policies)
