@@ -28,7 +28,8 @@ git commit -m "Agent 1: Updated memory"
 ```
 
 ### Lock API
-API usage.
+
+Use the lock module to prevent conflicts:
 
 ```javascript
 const lock = await lock.acquire(agentId);
@@ -42,14 +43,14 @@ await lock.release(agentId, token);
 
 ## Merging
 
-Merge via PR for review:
+Merge changes via PR for human review:
+
 ```bash
 # Create PR on GitHub
 # Human reviews
 # Merge to main
 ```
 
-Example:
 
 ## Best Practices
 

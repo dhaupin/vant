@@ -36,6 +36,9 @@ vant setup
 - npm (comes with Node.js)
 
 ### Check Node Version
+
+Check your Node version:
+
 ```bash
 node --version
 # Should be v18.x.x or higher

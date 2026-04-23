@@ -12,7 +12,8 @@ title: Operations
 Vant supports Slack and Discord webhooks for brain sync and alerts.
 
 ### Environment
-Set up the environment.
+
+Configure webhook URLs:
 
 ```bash
 # Slack
@@ -23,7 +24,8 @@ DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx
 ```
 
 ### Send Notification
-Send a notification.
+
+Send a message to Slack or Discord:
 
 ```javascript
 const notifications = require('./lib/notifications');
@@ -39,7 +41,8 @@ await notifications.discord('Brain synced!');
 ```
 
 ### Auto-Notify on Sync
-Automatically notify on events.
+
+Automatically notify when brain syncs:
 
 ```javascript
 // In your sync script
@@ -48,10 +51,12 @@ await notifications.discord('Brain updated');
 ```
 
 ## Daily Operations
-Day-to-day management tasks.
+
+Run these commands day-to-day.
 
 ### Health Check
-Check Vant health.
+
+Check Vant health status:
 
 ```bash
 vant health
@@ -63,14 +68,16 @@ Expected output:
 - ✓ Rate limit OK
 
 ### Check Rate Limit
-Check rate limits.
+
+View remaining API quota:
 
 ```bash
 vant rate
 ```
 
 ### Session Summary
-Get session summary.
+
+Get session statistics:
 
 ```bash
 vant summary
@@ -82,10 +89,12 @@ Shows:
 - Tokens used
 
 ## Troubleshooting
+
 Fix common issues.
 
 ### Vant Won't Start
-Fix when start fails.
+
+Debug startup failures:
 
 ```bash
 # 1. Check logs
@@ -99,7 +108,8 @@ cat config.ini
 ```
 
 ### Brain Won't Load
-Fix when load fails.
+
+Debug load failures:
 
 ```bash
 # 1. Check GitHub sync
@@ -110,7 +120,8 @@ vant load
 ```
 
 ### Rate Limit Hit
-Check rate limits.
+
+Handle API quota exceeded:
 
 ```bash
 # Check current limit
@@ -120,13 +131,13 @@ vant rate
 # Or use different token
 ```
 
-Example:
-
 ## Recovery
-Recover from failures.
+
+Restore from failures.
 
 ### Full Recovery
-Recover from failures.
+
+Run full recovery sequence:
 
 ```bash
 # 1. Pull latest
@@ -140,7 +151,8 @@ vant health
 ```
 
 ### Reset State
-Reset Vant state.
+
+Clear state and restart:
 
 ```bash
 # 1. Backup state
@@ -154,7 +166,8 @@ vant start
 ```
 
 ### Reinstall
-Installation options.
+
+Clean reinstall of Vant:
 
 ```bash
 # 1. Clear node_modules
@@ -168,10 +181,12 @@ vant health
 ```
 
 ## Maintenance
-Maintain the system.
+
+Keep Vant running smoothly.
 
 ### Manual Sync
-Manually sync brain.
+
+Sync brain with GitHub:
 
 ```bash
 # Pull only
@@ -185,7 +200,8 @@ vant sync
 ```
 
 ### Check for Updates
-Check for updates.
+
+Check for updates:
 
 ```bash
 vant update

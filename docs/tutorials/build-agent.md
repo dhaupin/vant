@@ -16,7 +16,8 @@ A CLI agent that:
 - Saves memory after each interaction
 
 ## Step 1: Setup
-Configure for your environment.
+
+Install Vant and create a brain repo:
 
 ```bash
 # Install Vant
@@ -29,10 +30,10 @@ npm install -g vant
 # Create repo
 ```
 
-Example:
 
 ## Step 2: Configure
-Configure the agent.
+
+Run the setup wizard:
 
 ```bash
 vant setup
@@ -43,7 +44,6 @@ vant setup
 # - Branch: main
 ```
 
-Example:
 
 ## Step 3: Create Agent Script
 
@@ -72,14 +72,16 @@ run();
 ```
 
 ## Step 4: Run
-Key information for the plugin.
+
+Execute your agent:
 
 ```bash
 node agent.js
 ```
 
 ## Step 5: Run Again
-Run again.
+
+Run a second time to see memory persist:
 
 ```bash
 # Run a second time
@@ -88,7 +90,6 @@ node agent.js
 # Output: Previous sessions: 1
 ```
 
-Example:
 
 ## How Brain Transfer Works
 Brain file structure and management.

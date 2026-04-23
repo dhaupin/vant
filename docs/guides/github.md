@@ -12,7 +12,8 @@ Deep dive on Vant's GitHub integration.
 Vant uses GitHub as the brain storage and sync backend. Each brain file is a commit.
 
 ## Required Setup
-Configure for your environment.
+
+Set up GitHub for brain storage.
 
 ### 1. Create Repository
 
@@ -25,8 +26,6 @@ gh repo create vant-brain --private
 # Or via web: https://github.com/new
 ```
 
-Example:
-
 ### 2. Generate Token
 
 1. Go to: https://github.com/settings/tokens
@@ -36,7 +35,8 @@ Example:
 4. Copy token
 
 ### 3. Configure
-Configure the integration.
+
+Set environment variables:
 
 ```bash
 export GITHUB_TOKEN=ghp_xxxxxxxxxxxx

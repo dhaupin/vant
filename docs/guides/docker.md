@@ -8,7 +8,8 @@ title: Docker
 Run Vant in containers.
 
 ## Quick Start
-Get up and running in minutes.
+
+Run Vant container:
 
 ```bash
 docker run -it -v vant-brain:/app/models dhaupin/vant vant load

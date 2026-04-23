@@ -17,7 +17,7 @@ Configuration options.
 Error: Config file not found
 ```
 
-**Fix**: Run setup:
+**Fix**: Run setup wizard:
 
 ```bash
 vant setup

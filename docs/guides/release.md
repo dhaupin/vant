@@ -23,7 +23,8 @@ v0.8.4
 | MAJOR | 0.8.4 → 1.0.0 | Breaking changes |
 
 ## Release Checklist
-Release process and versioning.
+
+Steps for a successful release.
 
 ### 1. Pre-Release
 
@@ -33,7 +34,8 @@ Release process and versioning.
 - [ ] Update version in lib/version.js
 
 ### 2. Release
-Release step.
+
+Bump version and tag:
 
 ```bash
 # Bump version
@@ -52,7 +54,8 @@ git push origin main --tags
 - [ ] Announce (if applicable)
 
 ## Bump Command
-Run release commands.
+
+Use the bump command to increment versions:
 
 ```bash
 # Patch release (0.8.4 → 0.8.5)

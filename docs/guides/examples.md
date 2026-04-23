@@ -8,7 +8,8 @@ title: Examples
 Working examples for Vant workflows.
 
 ## Basic: Load and Query
-Basic plugin setup.
+
+Load brain and query memory:
 
 ```javascript
 const vant = require('./lib/vant');
@@ -26,7 +27,8 @@ main();
 ```
 
 ## Basic: Save Memory
-Basic plugin setup.
+
+Save new memory to brain:
 
 ```javascript
 const vant = require('./lib/vant');
@@ -51,7 +53,8 @@ mcp.run({
 ```
 
 ## With VAF Validation
-Validate plugin configuration.
+
+Use Vant Application Firewall to validate inputs:
 
 ```javascript
 const vaf = require('./lib/vaf');
@@ -68,7 +71,8 @@ function validate(input) {
 ```
 
 ## With Rate Limiting
-Limit request rates.
+
+Protect API calls with rate limiting:
 
 ```javascript
 const protection = require('./lib/protection');
@@ -82,7 +86,8 @@ function limitedCall(fn) {
 ```
 
 ## Health Check
-Diagnose system health issues.
+
+Run system diagnostics:
 
 ```javascript
 const health = require('./lib/health');
@@ -94,7 +99,8 @@ async function check() {
 ```
 
 ## GitHub Sync
-GitHub integration and workflow.
+
+Sync brain with GitHub:
 
 ```javascript
 const sync = require('./lib/sync');
@@ -106,7 +112,8 @@ async function sync() {
 ```
 
 ## Branch Work
-Branch selection logic.
+
+Work on a branch:
 
 ```javascript
 const branch = require('./lib/branch');
@@ -120,7 +127,8 @@ async function work() {
 ```
 
 ## Lock Work
-Key information for the plugin.
+
+Use locks to prevent conflicts:
 
 ```javascript
 const lock = require('./lib/lock');

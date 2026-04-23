@@ -8,10 +8,12 @@ title: Testing
 How to test Vant.
 
 ## Test Command
-Run release commands.
+
+Run tests to verify Vant works correctly.
 
 ### Basic Test
-Test this feature.
+
+Run all tests:
 
 ```bash
 vant test
@@ -23,7 +25,8 @@ Runs all build tests:
 - Brain integrity
 
 ### Verbose Output
-Show detailed output.
+
+See detailed test output:
 
 ```bash
 vant test --verbose
@@ -32,7 +35,8 @@ vant test --verbose
 Shows all test output.
 
 ## Test Types
-Types of tests available.
+
+Available test categories.
 
 ### Unit Tests
 

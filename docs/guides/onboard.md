@@ -16,7 +16,8 @@ Browse and search Vant's knowledge base (brain).
 - Previews
 
 ## Running
-Run the resolution system.
+
+Start the interactive browser:
 
 ```bash
 # Interactive browse

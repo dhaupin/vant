@@ -8,7 +8,8 @@ title: Quick Start
 > Get Vant running in 2 minutes
 
 ## 1. Install
-Installation options and setup.
+
+Install Vant globally:
 
 ```bash
 npm install -g vant
@@ -36,7 +37,8 @@ vant setup
 ```
 
 ## 3. Run
-Key information for the plugin.
+
+Start Vant to load your brain and begin:
 
 ```bash
 vant start     # Full startup (health → sync → load → run)
