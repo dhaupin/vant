@@ -11,6 +11,8 @@ tutorials:
     path: /tutorials/build-agent
   - title: Multi-Agent System
     path: /tutorials/multi-agent
+  - title: Telegram Bot
+    path: /tutorials/telegram-bot
 
 reference:
   - title: CLI Reference

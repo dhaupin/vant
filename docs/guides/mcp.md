@@ -5,92 +5,370 @@ title: MCP Server
 ---
 # MCP Server
 
-Model Context Protocol (MCP) server for Vant.
+Model Context Protocol (MCP) server exposes Vant's brain as tools for AI agents. Connect any AI to your persistent memory.
 
 ## Quick Start
-Get up and running in minutes.
 
 ```bash
-vant mcp              # Start server
-vant mcp --stdio     # STDIO mode
-vant mcp --websocket # WebSocket mode
+# Start the server
+node bin/mcp.js --server
+
+# Or with CLI
+vant mcp
 ```
 
-## Modes
-This section covers modes.
+The server runs on **port 3456** by default with three endpoints:
 
-### STDIO Mode
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/tools` | GET | List all available tools |
+| `/health` | GET | Server health check |
+| `/call` | POST | Execute a tool (JSON-RPC) |
 
-For local development:
+## Running Modes
 
+### HTTP Server (Default)
 ```bash
+vant mcp --server           # Default port 3456
+vant mcp --server --port 8080  # Custom port
+
+# Or directly
+node bin/mcp.js --server
+```
+
+### STDIO Mode (for AI SDK)
+```bash
+# For AI SDK integration
 vant mcp --stdio
+node bin/mcp.js --stdio
 ```
 
-### WebSocket Mode
-
-For network access:
-
+### With Configuration
 ```bash
-vant mcp --websocket --port 3000
+# Using environment variables
+VANT_MCP_PORT=3457 vant mcp --server
+
+# Or in config.ini
+MCP_SERVER=true
+MCP_PORT=3457
 ```
 
-## Tools
+## Available Tools
 
 | Tool | Description |
 |------|-------------|
-| vant_load | Load brain files |
-| vant_save | Save brain |
-| vant_query | Query knowledge |
-| vant_sync | Sync with GitHub |
+| `vant_get_memory` | Read brain files |
+| `vant_set_memory` | Write to brain |
+| `vant_list_branches` | List branches |
+| `vant_create_branch` | Create branch |
+| `vant_switch_branch` | Switch branch |
+| `vant_commit` | Commit changes |
+| `vant_sync` | Sync with GitHub |
+| `vant_lock` | Acquire/release lock |
+| `vant_health` | System health check |
 
-## Example Request
-This section covers example.
+## API Examples
+
+### List Available Tools
+```bash
+curl http://localhost:3456/tools
+```
+
+Returns:
+```json
+{
+  "tools": [
+    {
+      "name": "vant_get_memory",
+      "description": "Read current brain state from Vant...",
+      "inputSchema": { "type": "object", "properties": { ... } }
+    }
+  ]
+}
+```
+
+### Get Brain Memory
+```bash
+curl -X POST http://localhost:3456/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "vant_get_memory"
+    },
+    "id": 1
+  }'
+```
+
+**With specific files:**
+```bash
+curl -X POST http://localhost:3456/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "vant_get_memory",
+      "arguments": {
+        "files": ["identity", "goals", "lessons"]
+      }
+    },
+    "id": 1
+  }'
+```
+
+### Write to Brain
+```bash
+curl -X POST http://localhost:3456/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "vant_set_memory",
+      "arguments": {
+        "file": "lessons",
+        "content": "# Lessons Learned\n\n- Test changes before committing",
+        "commit": true
+      }
+    },
+    "id": 1
+  }'
+```
+
+### List Branches
+```bash
+curl -X POST http://localhost:3456/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "vant_list_branches"
+    },
+    "id": 1
+  }'
+```
+
+### Create Branch
+```bash
+curl -X POST http://localhost:3456/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "vant_create_branch",
+      "arguments": {
+        "name": "experiment-1"
+      }
+    },
+    "id": 1
+  }'
+```
+
+### Switch Branch
+```bash
+curl -X POST http://localhost:3456/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "vant_switch_branch",
+      "arguments": {
+        "name": "agent-1"
+      }
+    },
+    "id": 1
+  }'
+```
+
+### Commit Changes
+```bash
+curl -X POST http://localhost:3456/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "vant_commit",
+      "arguments": {
+        "message": "Updated memory with new learnings"
+      }
+    },
+    "id": 1
+  }'
+```
+
+### Sync with GitHub
+```bash
+curl -X POST http://localhost:3456/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "vant_sync",
+      "arguments": {
+        "direction": "push"
+      }
+    },
+    "id": 1
+  }'
+```
+
+### Acquire Lock (for multi-agent)
+```bash
+curl -X POST http://localhost:3456/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "vant_lock",
+      "arguments": {
+        "action": "acquire",
+        "agentId": "agent-1"
+      }
+    },
+    "id": 1
+  }'
+```
+
+### Release Lock
+```bash
+curl -X POST http://localhost:3456/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "vant_lock",
+      "arguments": {
+        "action": "release",
+        "agentId": "agent-1"
+      }
+    },
+    "id": 1
+  }'
+```
+
+### Health Check
+```bash
+curl http://localhost:3456/health
+```
+
+## Authentication
+
+### Enable API Key (Recommended)
+```bash
+# Environment variable
+export VANT_MCP_API_KEY=your-secret-key
+
+# Or in config.ini
+MCP_API_KEY=your-secret-key
+MCP_REQUIRE_API_KEY=true
+```
+
+### Authenticated Request
+```bash
+curl -H "X-API-Key: your-secret-key" \
+  http://localhost:3456/tools
+```
+
+## Integration Examples
+
+### Node.js Client
+```javascript
+async function callVantTool(name, args = {}) {
+    const response = await fetch('http://localhost:3456/call', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-API-Key': process.env.VANT_MCP_API_KEY
+        },
+        body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: { name, arguments: args },
+            id: 1
+        })
+    });
+    return response.json();
+}
+
+// Get brain
+const memory = await callVantTool('vant_get_memory', {
+    files: ['identity', 'goals']
+});
+
+// Write to brain
+await callVantTool('vant_set_memory', {
+    file: 'lessons',
+    content: '# New Lesson\n\nRemember to test first!',
+    commit: true
+});
+```
+
+### Python Client
+```python
+import requests
+
+def call_vant_tool(name, args=None):
+    response = requests.post(
+        'http://localhost:3456/call',
+        json={
+            'jsonrpc': '2.0',
+            'method': 'tools/call',
+            'params': {'name': name, 'arguments': args or {}},
+            'id': 1
+        },
+        headers={'X-API-Key': 'your-secret-key'}
+    )
+    return response.json()
+
+# Get memory
+memory = call_vant_tool('vant_get_memory')
+
+# Set memory
+call_vant_tool('vant_set_memory', {
+    'file': 'goals',
+    'content': '# Goals\n\n- Complete the project',
+    'commit': True
+})
+```
+
+## Error Handling
+
+Errors return a result object with an `error` field:
 
 ```json
 {
-  "jsonrpc": "2.0",
   "id": 1,
-  "method": "tools/call",
-  "params": {
-    "name": "vant_query",
-    "arguments": {
-      "query": "what are my goals?"
-    }
+  "result": {
+    "error": "Circuit open: too many failures. Wait and retry."
   }
 }
 ```
 
-See also: [CLI Reference](/vant/reference/cli.html), [Architecture](/vant/guides/architecture.html)
+Common errors:
+- `Security check failed` - Input validation failed (VAF)
+- `Circuit open` - Too many failures, wait and retry
+- `Server busy` - Max concurrent requests reached
+- `Unknown tool` - Tool name not found
 
----
+## Configuration Options
 
-## FAQ
-Frequently asked questions answered.
-
-### What is MCP?
-
-MCP = Model Context Protocol. It's how AI tools talk to external systems.
-
-### Why use MCP with Vant?
-
-Your AI can call Vant tools directly - load brain, query memory, sync changes.
-
-### How do I start MCP?
-
-`vant mcp` - Starts the MCP server on port 3456
-
-### What tools does MCP expose?
-
-| Tool | Description |
-|------|-------------|
-| vant_load | Load brain |
-| vant_query | Query memory |
-| vant_sync | Sync with GitHub |
-
-### Do I need an API key?
-
-Yes, set `MCP_API_KEY` in .env for security
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `MCP_PORT` | 3456 | Server port |
+| `MCP_API_KEY` | - | API key for auth |
+| `MCP_REQUIRE_API_KEY` | false | Force auth required |
+| `MCP_TIMEOUT` | 30000 | Request timeout (ms) |
+| `MCP_MAX_INPUT_SIZE` | 1048576 | Max input (1MB) |
+| `MCP_MAX_CONCURRENT` | 3 | Concurrent requests |
 
 ## Security
 
@@ -98,28 +376,10 @@ MCP uses VAF (Vant Application Firewall) for input validation:
 
 - All endpoints validated with VAF
 - File parameters use `type: 'path'` to block traversal
-- String content blocks: newlines, XSS, shell commands, XXE
+- String content blocks: newlines, XSS, shell commands
 - Rate limiting enabled
-
-```javascript
-// Example: VAF blocks these inputs via MCP
-{
-  "params": {
-    "name": "vant_save",
-    "arguments": {
-      "file": "../etc/passwd"  // BLOCKED - path traversal
-      "content": "test\nroot::" // BLOCKED - log injection
-    }
-  }
-}
-```
-
-### Allowed vs Blocked
-
-| Input | MCP | Direct File |
-|-------|-----|-------------|
-| `../etc/passwd` | BLOCKED | BLOCKED |
-| `test\nnew line` | BLOCKED | ALLOWED |
-| `<script>` | BLOCKED | ALLOWED |
+- Circuit breaker prevents cascade failures
 
 For multi-line content, write directly to `models/public/` instead of via MCP.
+
+See also: [Security Guide](/vant/guides/security.html), [Multi-Agent](/vant/guides/multi-agent.html), [CLI Reference](/vant/reference/cli.html)
