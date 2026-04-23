@@ -5,35 +5,37 @@
  * runs the same code but maintains its own brain state in GitHub.
  * 
  * Usage:
- *   node bin/node.js                    # Start node
+ *   node bin/node.js                    # Start node (manual sync)
  *   node bin/node.js --mcp              # Start with MCP server
- *   node bin/node.js --mcp-port 3457    # Custom MCP port
- *   node bin/node.js --poll-interval 30   # GitHub poll every 30s
- *   node bin/node.js --sync              # Auto-sync on changes
+ *   node bin/node.js --mcp-port 3457    # Custom MCP server port
+ *   node bin/node.js --help             # Show this help
+ * 
+ * Auto-Polling Mode (OPT-IN with WARNING):
+ *   node bin/node.js --enable-polling   # Enable background GitHub polling
+ *   node bin/node.js --enable-polling --poll-interval 30
+ * 
+ *   ⚠️  AUTO-POLLING REQUIRES TWO CONFIRMATIONS:
+ *       1. Set VANT_AGREE_AUTO_SYNC=true (env var = "checkbox")
+ *       2. Type "AGREE" when prompted (stdin = "type to confirm")
  * 
  * Environment:
- *   VANT_GITHUB_REPO    - GitHub repo (default: from config)
- *   VANT_GITHUB_TOKEN   - GitHub token
- *   VANT_MCP_PORT      - MCP server port
- *   VANT_POLL_INTERVAL - GitHub poll interval in seconds
+ *   VANT_GITHUB_REPO       - GitHub repo (default: from config)
+ *   VANT_GITHUB_TOKEN     - GitHub token
+ *   VANT_MCP_PORT         - MCP server port (default: 3456)
+ *   VANT_AGREE_AUTO_SYNC  - Required for polling: set to "true" to agree
  * 
  * What it does:
- *   1. Loads brain from models/public (or GitHub if configured)
- *   2. Starts MCP server (optional) for AI tool access
- *   3. Polls GitHub for remote changes
- *   4. Syncs brain state on changes
- *   5. Logs activity
- * 
- * Communication:
- *   - GitHub: Push/pull brain state
- *   - MCP: Direct tool calls (JSON-RPC over HTTP or stdio)
- *   - Could add: WebSocket, gRPC, etc for node-to-node
+ *   1. Loads brain from models/public
+ *   2. Starts MCP server (optional)
+ *   3. Runs loop (brain updates done manually via vant sync)
+ *   4. Optional: background GitHub polling (opt-in with warnings)
  */
 
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 const http = require('http');
+const readline = require('readline');
 
 // Parse CLI arguments
 const args = process.argv.slice(2);
@@ -44,26 +46,30 @@ if (args.includes('--help') || args.includes('-h')) {
 Vant Node Runner
 
 Usage:
-  node bin/node.js                    # Start node
+  node bin/node.js                    # Start node (manual sync)
   node bin/node.js --mcp              # Start with MCP server
-  node bin/node.js --mcp-port 3457    # Custom MCP port
-  node bin/node.js --poll-interval 30   # GitHub poll every 30s
-  node bin/node.js --sync              # Auto-sync on changes
-  node bin/node.js --help            # Show this help
+  node bin/node.js --mcp-port 3457    # Custom MCP server port
+  node bin/node.js --help             # Show this help
+
+Auto-Polling Mode (OPT-IN with WARNING):
+  node bin/node.js --enable-polling   # Enable background GitHub polling
+  node bin/node.js --enable-polling --poll-interval 30
+
+  ⚠️  AUTO-POLLING REQUIRES TWO CONFIRMATIONS:
+      1. Set VANT_AGREE_AUTO_SYNC=true (env var = "checkbox")
+      2. Type "AGREE" when prompted (stdin = "type to confirm")
 
 Environment:
   VANT_GITHUB_REPO      - GitHub repo
   VANT_GITHUB_TOKEN    - GitHub token
   VANT_MCP_PORT        - MCP server port
-  VANT_POLL_INTERVAL   - GitHub poll interval in seconds
+  VANT_AGREE_AUTO_SYNC  - Required for polling: set to "true" to agree
 
 What it does:
   1. Loads brain from models/public
   2. Starts MCP server (optional)
-  3. Polls GitHub for remote changes
-  4. Syncs brain state on changes
-
-HTTP Status: GET http://localhost:3456/health (if MCP enabled)
+  3. Runs loop (brain updates done manually via vant sync)
+  4. Optional: background GitHub polling (opt-in with warnings)
 `);
     process.exit(0);
 }
@@ -81,11 +87,19 @@ for (const arg of args) {
     }
 }
 
+// Parse polling flag
+const enablePollingArg = args.includes('--enable-polling');
+const pollInterval = parseInt(args.find(a => a.startsWith('--poll-interval='))?.split('=')[1] || '60');
+
+// Check for opt-in confirmation (MUST have BOTH)
+const agreedAutoSync = process.env.VANT_AGREE_AUTO_SYNC === 'true';
+
 const config = {
     mcp: args.includes('--mcp'),
     mcpPort: parseInt(args.find(a => a.startsWith('--mcp-port='))?.split('=')[1] || '3456'),
-    pollInterval: parseInt(args.find(a => a.startsWith('--poll-interval='))?.split('=')[1] || '60'),
-    sync: args.includes('--sync'),
+    pollInterval,
+    enablePollingRequested: enablePollingArg,  // Track if flag provided (for warning)
+    enablePolling: enablePollingArg && agreedAutoSync,  // Only enabled with BOTH
     verbose: args.includes('--verbose') || args.includes('-v')
 };
 
@@ -107,7 +121,7 @@ class VantNode {
             mcp: options.mcp || false,
             mcpPort: options.mcpPort || 3456,
             pollInterval: options.pollInterval || 60,
-            sync: options.sync || true,
+            enablePolling: options.enablePolling || false,
             verbose: options.verbose || false
         };
         
@@ -128,6 +142,7 @@ class VantNode {
         this.memory = {};
         this.pollTimer = null;
         this.mcpServer = null;
+        this.confirmedPolling = false;
     }
     
     /**
@@ -144,18 +159,62 @@ class VantNode {
             await this.startMcpServer();
         }
         
-        // Start GitHub polling
-        if (this.options.sync) {
+        // Check if polling requested but not confirmed
+        if (this.options.enablePollingRequested && !this.options.enablePolling) {
+            this.log('⚠️  AUTO-POLLING FLAG DETECTED BUT NOT CONFIRMED');
+            this.log('⚠️  GitHub ToS Warning: Automated polling of GitHub is prohibited.');
+            this.log('   See: https://docs.github.com/en/github/site-policy/github-acceptable-use-policies');
+            this.log('');
+            this.log('To enable auto-polling, you must:');
+            this.log('  1. Set environment variable: VANT_AGREE_AUTO_SYNC=true');
+            this.log('  2. Re-run with: --enable-polling');
+            this.log('');
+            this.log('Alternatively, type "AGREE" below to confirm you understand the risks.');
+            this.log("(This check exists because git clone/fetch IS allowed, but polling is not)");
+            this.log('');
+            await this.promptPollingConfirmation();
+        }
+        
+        // Start GitHub polling only if confirmed
+        if (this.options.enablePolling && this.confirmedPolling) {
+            this.warn('⚠️  AUTO-POLLING ENABLED - This may violate GitHub ToS');
+            this.warn('   Polling GitHub at regular intervals is not permitted.');
+            this.warn('   Use vant sync for manual brain sync instead.');
+            this.log('');
             this.startPolling();
         }
         
         this.state = 'running';
         this.log(`Vant Node running`);
         this.log(`  Repo: ${this.repo}`);
-        this.log(`  Poll: every ${this.options.pollInterval}s`);
+        this.log(`  Poll: ${this.options.enablePolling && this.confirmedPolling ? 'enabled (opt-in confirmed)' : 'disabled (manual only)'}`);
         this.log(`  MCP: ${this.options.mcp ? 'enabled' : 'disabled'}`);
         
         return this;
+    }
+    
+    /**
+     * Prompt for polling confirmation via stdin
+     */
+    async promptPollingConfirmation() {
+        return new Promise((resolve) => {
+            const rl = readline.createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+            
+            rl.question('Type "AGREE" to confirm auto-polling: ', (answer) => {
+                rl.close();
+                if (answer.trim().toUpperCase() === 'AGREE') {
+                    this.confirmedPolling = true;
+                    this.log('✓ Auto-polling confirmed via stdin');
+                } else {
+                    this.log('✗ Auto-polling NOT confirmed. Running in manual sync mode.');
+                    this.options.enablePolling = false;
+                }
+                resolve();
+            });
+        });
     }
     
     /**
