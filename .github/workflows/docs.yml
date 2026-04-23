@@ -51,7 +51,10 @@ jobs:
         run: mkdir -p docs/_site && echo "<html><body>test</body></html>" > docs/_site/index.html
 
       - name: Install Pagefind
-        run: npm install pagefind
+        run: |
+          npm install pagefind
+          echo "Pagefind installed: $(which pagefind)"
+          echo "node_modules: $(ls node_modules/ | grep pagefind)"
 
       - name: Index with Pagefind
         run: npx pagefind --site docs/_site
