@@ -44,11 +44,20 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build site
+        run: mkdir -p docs/_site && echo "<html><body>test</body></html>" > docs/_site/index.html
+
       - name: Install Pagefind
         run: npm install pagefind
 
       - name: Index with Pagefind
         run: npx pagefind --site docs/_site
+
+      - name: Show pagefind output
+        run: ls -la docs/_site/pagefind/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
