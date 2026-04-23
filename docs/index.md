@@ -11,6 +11,15 @@ Vant persists across sessions through GitHub-based brain transfer. Each generati
 
 🔗 [vant.creadev.org](https://vant.creadev.org) | 📦 [GitHub](https://github.com/dhaupin/vant)
 
+---
+
+## Quick Links
+
+- [Quickstart](/vant/quickstart.html) - 5 minute setup
+- [Build Your First Agent](/vant/tutorials/build-agent.html) - 15 min tutorial
+- [Examples](/vant/examples.html) - What others are building
+- [FAQ](/vant/faq.html) - Common questions
+
 
 
 ## About

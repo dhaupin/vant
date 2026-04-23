@@ -2,58 +2,74 @@
 
 getting-started:
   - title: Installation
-    path: /install
+    path: /vant/getting-started/install
   - title: Quick Start
-    path: /quick-start
+    path: /vant/getting-started/quick-start
+  - title: Quickstart (5 min)
+    path: /vant/quickstart
+
+tutorials:
+  - title: Build First Agent
+    path: /vant/tutorials/build-agent
+  - title: Multi-Agent System
+    path: /vant/tutorials/multi-agent
 
 reference:
   - title: CLI Reference
-    path: /cli
+    path: /vant/reference/cli
   - title: Configuration
-    path: /configuration
+    path: /vant/reference/configuration
   - title: Module API
-    path: /api
+    path: /vant/reference/api
   - title: Brain Schema
-    path: /schema
+    path: /vant/reference/schema
   - title: Error Codes
-    path: /errors
+    path: /vant/reference/errors
 
 guides:
   - title: Architecture
-    path: /architecture
+    path: /vant/guides/architecture
   - title: Nodes
-    path: /nodes
+    path: /vant/guides/nodes
   - title: Bot
-    path: /bot
+    path: /vant/guides/bot
   - title: Onboarding
-    path: /onboard
+    path: /vant/guides/onboard
   - title: Succession
-    path: /succession
+    path: /vant/guides/succession
   - title: Resolution
-    path: /resolution
+    path: /vant/guides/resolution
   - title: Security
-    path: /security
+    path: /vant/guides/security
   - title: Multi-Agent
-    path: /multi-agent
+    path: /vant/guides/multi-agent
   - title: MCP Server
-    path: /mcp
+    path: /vant/guides/mcp
   - title: Docker
-    path: /docker
+    path: /vant/guides/docker
   - title: Plugins
-    path: /plugins
+    path: /vant/guides/plugins
   - title: Steganography
-    path: /steganography
+    path: /vant/guides/steganography
   - title: GitHub
-    path: /github
+    path: /vant/guides/github
   - title: Release
-    path: /release
+    path: /vant/guides/release
   - title: Style
-    path: /style
+    path: /vant/guides/style
   - title: Operations
-    path: /operations
+    path: /vant/guides/operations
   - title: Testing
-    path: /testing
+    path: /vant/guides/testing
   - title: Audit
-    path: /audit
+    path: /vant/guides/audit
   - title: Troubleshooting
-    path: /troubleshooting
+    path: /vant/guides/troubleshooting
+
+community:
+  - title: Examples
+    path: /vant/examples
+  - title: FAQ
+    path: /vant/faq
+  - title: Contributing
+    path: /vant/contributing
