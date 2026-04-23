@@ -20,21 +20,9 @@ include:
 permalink: pretty
 exclude: ['README.md']
 
-# Default layouts per collection
+# Default layouts for all docs
 defaults:
   - scope:
-      path: docs/guides
-    values:
-      layout: default
-  - scope:
-      path: docs/reference
-    values:
-      layout: default
-  - scope:
-      path: docs/getting-started
-    values:
-      layout: default
-  - scope:
-      path: docs
+      type: page
     values:
       layout: default
