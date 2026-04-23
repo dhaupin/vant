@@ -1,12 +1,10 @@
 # Sidebar
 
 getting-started:
-  - title: Installation
-    path: /getting-started/install
   - title: Quick Start
     path: /getting-started/quick-start
-  - title: Quickstart (5 min)
-    path: /quickstart
+  - title: Installation
+    path: /getting-started/install
 
 tutorials:
   - title: Build First Agent
@@ -29,8 +27,6 @@ reference:
 guides:
   - title: Architecture
     path: /guides/architecture
-  - title: Nodes
-    path: /guides/nodes
   - title: Bot
     path: /guides/bot
   - title: Onboarding
@@ -41,8 +37,6 @@ guides:
     path: /guides/resolution
   - title: Security
     path: /guides/security
-  - title: Multi-Agent
-    path: /guides/multi-agent
   - title: MCP Server
     path: /guides/mcp
   - title: Docker
@@ -51,12 +45,10 @@ guides:
     path: /guides/plugins
   - title: Steganography
     path: /guides/steganography
-  - title: GitHub
+  - title: GitHub Sync
     path: /guides/github
   - title: Release
     path: /guides/release
-  - title: Style
-    path: /guides/style
   - title: Operations
     path: /guides/operations
   - title: Testing
