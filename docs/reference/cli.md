@@ -135,7 +135,6 @@ TELEGRAM_BOT_TOKEN=xxx vant bot
 #   /sync - Trigger sync
 ```
 
-Example:
 
 ## Setup & Config
 

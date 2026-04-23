@@ -15,7 +15,8 @@ Reference for all Vant error codes.
 | `VantRetryableError` | Errors that can be retried |
 
 ## Error Codes
-Error codes.
+
+Common errors and their meanings.
 
 ### Configuration
 

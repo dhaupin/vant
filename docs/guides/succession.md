@@ -33,7 +33,8 @@ How much to inherit from previous brain:
 - `models/.ledger.json` - Succession history
 
 ## Running
-Run the resolution system.
+
+Use succession commands:
 
 ```bash
 # Show current version
