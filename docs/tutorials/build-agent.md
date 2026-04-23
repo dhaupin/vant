@@ -82,20 +82,19 @@ node agent.js
 
 ## How Brain Transfer Works
 
-```
-Session 1          Session 2
-    │                 │
-    ▼                 ▼
-[Load Brain]───────→[Memory]
-    │                 │
-    ▼                 ▼
-[AI Makes ──────────→[Decisions]
-    │    Decisions]        │
-    │                 │
-    ▼                 ▼
-[Save Brain]───────→[GitHub Push]
-    │                 │
-    └─────────────────┘
+```text
+Session 1              Session 2
+    │                      │
+    ▼                      ▼
+[Load Brain]─────────→[Memory]
+    │                      │
+    ▼                      ▼
+[AI Makes Decisions]──→[Decisions]
+    │                      │
+    ▼                      ▼
+[Save Brain]─────────→[GitHub Push]
+    │                      │
+    └──────────────────────┘
        Next session inherits!
 ```
 
