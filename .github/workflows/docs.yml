@@ -46,16 +46,17 @@ jobs:
           JEKYLL_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download Pagefind
+        working-directory: docs
         run: |
           VERSION=$(curl -sL "https://api.github.com/repos/Pagefind/pagefind/releases/latest" | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
           curl -sL "https://github.com/pagefind/pagefind/releases/download/v${VERSION}/pagefind-v${VERSION}-x86_64-unknown-linux-musl.tar.gz" -o pagefind.tar.gz
           tar -xzf pagefind.tar.gz
           rm pagefind.tar.gz
           chmod +x pagefind
-          echo "$(pwd)" >> $GITHUB_PATH
 
       - name: Create search index
-        run: ./pagefind --site docs/_site
+        working-directory: docs
+        run: ./pagefind --site _site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
