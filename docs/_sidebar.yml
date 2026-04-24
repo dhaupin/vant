@@ -34,6 +34,10 @@ guides:
     path: /guides/brain
   - title: Succession
     path: /guides/succession
+  - title: Multi-Agent
+    path: /guides/multi-agent
+  - title: Style Guide
+    path: /guides/style
 
   # Getting Started
   - title: Onboarding
