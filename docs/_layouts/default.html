@@ -876,6 +876,12 @@
         searchInput.addEventListener('input', function() {
             doSearch(this.value);
         });
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                doSearch(this.value);
+            }
+        });
     </script>
 </body>
 </html>
