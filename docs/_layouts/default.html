@@ -810,23 +810,14 @@
     
     <script src="/vant/pagefind/pagefind.js"></script>
     <script>
-        // Search functionality using Pagefind (global script)
+        // Search functionality using Pagefind (matching prestruct approach)
         var searchTrigger = document.getElementById('searchTrigger');
         var searchModal = document.getElementById('searchModal');
         var searchInput = document.getElementById('searchInput');
         var searchResults = document.getElementById('searchResults');
         var searchClose = document.getElementById('searchClose');
-        var pfInstance = null;
+        var pfModule = null;
 
-        async function initPagefind() {
-            if (pfInstance) return pfInstance;
-            pfInstance = pagefind.createInstance({
-                basePath: '/vant/pagefind/'
-            });
-            await pfInstance.init();
-            return pfInstance;
-        }
-        
         async function doSearch(q) {
             if (q.length < 2) {
                 searchResults.innerHTML = '';
@@ -834,8 +825,12 @@
             }
             searchResults.innerHTML = '<div class="search-empty">Searching for "' + q + '"...</div>';
             try {
-                var pf = await initPagefind();
-                var resp = await pf.search(q);
+                // Match prestruct: import and directly init
+                if (!pfModule) {
+                    pfModule = await import('/vant/pagefind/pagefind.js');
+                    await pfModule.init();
+                }
+                var resp = await pfModule.search(q);
                 searchResults.innerHTML = '<div class="search-empty">Found ' + resp.results.length + ' results</div>';
                 if (resp.results.length === 0) {
                     searchResults.innerHTML += '<div class="search-empty">No results for "' + q + '"</div>';
