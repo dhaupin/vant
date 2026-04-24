@@ -822,24 +822,24 @@
                 searchResults.innerHTML = '';
                 return;
             }
-            searchResults.innerHTML = '<div class="search-empty">Loading...</div>';
+            searchResults.innerHTML = '<div class="search-empty">Searching for "' + q + '"...</div>';
             try {
-                // Use pagefind's createInstance API for proper initialization
                 var pagefind = await import('/vant/pagefind/pagefind.js');
                 var pf = pagefind.createInstance({
                     basePath: '/vant/pagefind/'
                 });
                 await pf.init();
+                
                 var resp = await pf.search(q);
+                searchResults.innerHTML = '<div class="search-empty">Found ' + resp.results.length + ' results</div>';
                 if (resp.results.length === 0) {
-                    searchResults.innerHTML = '<div class="search-empty">No results found for "' + q + '"</div>';
+                    searchResults.innerHTML += '<div class="search-empty">No results for "' + q + '"</div>';
                     return;
                 }
                 var html = '';
-                for (var i = 0; i < resp.results.length && i < 10; i++) {
+                for (var i = 0; i < resp.results.length && i < 5; i++) {
                     var r = resp.results[i];
                     var data = await r.data();
-                    // Use URL as-is (pagefind includes the base path)
                     var url = data.url;
                     html += '<a href="' + url + '" class="search-result">';
                     html += '<div class="search-result-title">' + data.meta.title + '</div>';
@@ -848,7 +848,7 @@
                 }
                 searchResults.innerHTML = html;
             } catch (e) {
-                searchResults.innerHTML = '<div class="search-empty">Search unavailable</div>';
+                searchResults.innerHTML = '<div class="search-empty">Error: ' + e.message + '</div>';
                 console.error('Search error:', e);
             }
         }
