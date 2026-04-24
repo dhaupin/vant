@@ -93,35 +93,38 @@ Shows:
 Fix common issues.
 
 ### Vant Won't Start
+Debug startup failures.
 
-Debug startup failures:
+Debug steps:
 
 ```bash
-# 1. Check logs
+# Check logs
 vant health
 
-# 2. Verify .env
+# Verify .env
 cat .env
 
-# 3. Verify config
+# Verify config
 cat config.ini
 ```
 
 ### Brain Won't Load
+Debug load failures.
 
-Debug load failures:
+Reload manually:
 
 ```bash
-# 1. Check GitHub sync
+# Check GitHub sync
 vant sync --pull
 
-# 2. Manual reload
+# Manual reload
 vant load
 ```
 
 ### Rate Limit Hit
+Handle API quota exceeded.
 
-Handle API quota exceeded:
+Check and wait:
 
 ```bash
 # Check current limit
@@ -136,47 +139,50 @@ vant rate
 Restore from failures.
 
 ### Full Recovery
+Run full recovery sequence.
 
-Run full recovery sequence:
+Pull, reload, verify:
 
 ```bash
-# 1. Pull latest
+# Pull latest
 vant sync --pull
 
-# 2. Reload brain
+# Reload brain
 vant load
 
-# 3. Verify
+# Verify
 vant health
 ```
 
 ### Reset State
+Clear state and restart.
 
-Clear state and restart:
+Backup, clear, restart:
 
 ```bash
-# 1. Backup state
+# Backup state
 cp states/active/current.json states/backup.json
 
-# 2. Clear state
+# Clear state
 echo '{}' > states/active/current.json
 
-# 3. Restart
+# Restart
 vant start
 ```
 
 ### Reinstall
+Clean reinstall of Vant.
 
-Clean reinstall of Vant:
+Reinstall steps:
 
 ```bash
-# 1. Clear node_modules
+# Clear node_modules
 rm -rf node_modules
 
-# 2. Install fresh
+# Install fresh
 npm install
 
-# 3. Test
+# Test
 vant health
 ```
 
@@ -208,14 +214,14 @@ vant update
 ```
 
 ### View Changelog
-View the changelog.
+View recent changes.
 
 ```bash
 vant changelog
 ```
 
 ## Monitoring
-Tracking Vant health and activity.
+Track Vant health and activity.
 
 ### Watch Mode
 Watch for changes.
