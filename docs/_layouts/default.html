@@ -824,9 +824,13 @@
             }
             searchResults.innerHTML = '<div class="search-empty">Loading...</div>';
             try {
+                // Use pagefind's createInstance API for proper initialization
                 var pagefind = await import('/vant/pagefind/pagefind.js');
-                await pagefind.init();
-                var resp = await pagefind.search(q);
+                var pf = pagefind.createInstance({
+                    basePath: '/vant/pagefind/'
+                });
+                await pf.init();
+                var resp = await pf.search(q);
                 if (resp.results.length === 0) {
                     searchResults.innerHTML = '<div class="search-empty">No results found for "' + q + '"</div>';
                     return;
