@@ -11,53 +11,61 @@ Common issues and fixes.
 Diagnose system health issues.
 
 ### Config not found
-Configuration options.
+Create config file.
+
+Error:
 
 ```
 Error: Config file not found
 ```
 
-**Fix**: Run setup wizard:
+Run setup wizard:
 
 ```bash
 vant setup
 ```
 
 ### GitHub connection failed
-Fix GitHub connection issues.
+Check GitHub credentials.
+
+Error:
 
 ```
 Error: Cannot connect to GitHub
 ```
 
-**Fix**:
-1. Check GITHUB_TOKEN in .env
-2. Verify repo exists
-3. Check network connection
+Debug steps:
+- Check GITHUB_TOKEN in .env
+- Verify repo exists
+- Check network connection
 
 ## Sync Issues
 Debug common issues.
 
 ### Merge conflict
-Resolve merge conflicts.
+Resolve version conflicts.
+
+Error:
 
 ```
 Error: Merge conflict in brain
 ```
 
-**Fix**:
-1. `vant sync --pull` to see conflicts
-2. Resolve manually in brain files
-3. `vant sync --push`
+Resolve:
+- `vant sync --pull` to see conflicts
+- Resolve manually in brain files
+- `vant sync --push`
 
 ### Rate limit exceeded
-Check rate limits.
+Handle API quota limits.
+
+Error:
 
 ```
 Error: GitHub API rate limit exceeded
 ```
 
-**Fix**:
+Wait:
 - Wait for reset (usually 1 hour)
 - Reduce sync frequency
 

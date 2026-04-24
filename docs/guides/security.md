@@ -17,7 +17,7 @@ VAF is Vant's input validation and filtering system. It protects against:
 - Word stacking attacks (troll/flood attacks)
 
 ### Quick Start
-Get started in minutes.
+Initialize VAF in your code:
 
 ```javascript
 const vaf = require('./lib/vaf');
@@ -134,7 +134,7 @@ Home expansion: `~`, `$HOME`, `$USER`, `~/.ssh/`
 | `proc_open()` | Process open |
 
 ### 10. Dangerous Commands
-Dangerous Commands step.
+Block dangerous command patterns:
 
 ```javascript
 /\brm\s+-rf\b/      // rm -rf
@@ -171,7 +171,7 @@ XML parsing vulnerabilities:
 | `<!ELEMENT` | XML element definition |
 
 ### 14. Null Byte Injection
-Null Byte Injection step.
+Block null byte injection attacks:
 
 ```
 file.txt\x00.exe  -> Blocked
@@ -182,7 +182,7 @@ test.php\x00      -> Blocked
 
 ## Configuration
 
-All VAF settings are configurable via `config.ini`:
+Configure VAF via config.ini:
 
 ```ini
 # VAF Configuration (config.ini)
@@ -234,7 +234,7 @@ fs.writeFileSync('models/public/lessons.md', '# Lesson\n\n- Note here')
 The MCP server has additional protection layers (lib/protection.js):
 
 ### Settings (config.ini)
-Configuration options.
+Configure MCP in config.ini:
 
 ```ini
 MCP_SERVER=true
