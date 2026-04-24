@@ -1,5 +1,7 @@
 # Jekyll config for Vant docs
 title: Vant
+baseurl: "/vant"
+url: "https://dhaupin.github.io"
 description: AI memory for agents
 markdown: kramdown
 highlighter: rouge
