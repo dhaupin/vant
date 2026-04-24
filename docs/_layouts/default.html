@@ -825,15 +825,12 @@
             }
             searchResults.innerHTML = '<div class="search-empty">Searching for "' + q + '"...</div>';
             try {
-                // Match prestruct: import and directly init
-                if (!pfModule) {
-                    pfModule = await import('/vant/pagefind/pagefind.js');
-                    await pfModule.init();
-                }
-                var resp = await pfModule.search(q);
-                searchResults.innerHTML = '<div class="search-empty">Found ' + resp.results.length + ' results</div>';
+                // Import fresh each time (matching prestruct pattern)
+                var pagefind = await import('/vant/pagefind/pagefind.js');
+                await pagefind.init();
+                var resp = await pagefind.search(q);
                 if (resp.results.length === 0) {
-                    searchResults.innerHTML += '<div class="search-empty">No results for "' + q + '"</div>';
+                    searchResults.innerHTML = '<div class="search-empty">No results for "' + q + '"</div>';
                     return;
                 }
                 var html = '';
