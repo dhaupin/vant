@@ -353,6 +353,128 @@ vant/
 
 ---
 
+## Docs: Jekyll + GitHub Pages
+
+The documentation at https://dhaupin.github.io/vant/ uses Jekyll with GitHub Pages and Pagefind for search.
+
+### Structure
+
+```
+docs/
+├── _config.yml          # Jekyll config (baseurl, collections)
+├── _layouts/
+│   └── default.html     # Main layout with search modal
+├── _sidebar.yml         # Navigation structure
+├── getting-started/    # Tutorial docs
+├── tutorials/           # How-to guides
+├── reference/          # API documentation
+├── guides/             # Deep dive guides
+└── legal/              # Legal pages
+```
+
+### Search: Pagefind
+
+The docs use [Pagefind](https://pagefind.app/) for static full-text search.
+
+**How it works:**
+1. GitHub Actions workflow builds Jekyll site
+2. Runs `pagefind --site _site` to generate search index
+3. Index deployed as artifact to GitHub Pages
+4. Browser loads JS module and fetches index on search
+
+**Code pattern (in default.html):**
+```javascript
+// Global script loads pagefind.js
+var pfModule = await import('/vant/pagefind/pagefind.js');
+await pfModule.init();
+var resp = await pfModule.search(query);
+```
+
+**Testing search:**
+```bash
+# Verify index deployed
+curl -sI "https://dhaupin.github.io/vant/pagefind/pagefind.js" | head -1
+# Should return: HTTP/2 200
+
+# Check entry
+curl -s "https://dhaupin.github.io/vant/pagefind/pagefind-entry.json" | jq '.languages.en.page_count'
+# Returns page count (e.g., 37)
+```
+
+### GitHub Pages Deployment
+
+**Critical: Legacy vs Actions conflict**
+
+Both Vant and prestruct repos had legacy Pages build_type conflicting with Actions workflow:
+- Legacy build ran after Actions, overriding Pagefind artifact
+- Fixed by ensuring Actions deploys first (check timestamps)
+
+**Check deployment:**
+```bash
+# See what Pages is using
+gh api repos/dhaupin/vant/pages --jq '.build_type'
+# Returns: "legacy"
+
+# Check recent runs
+gh run list --repo dhaupin/vant --workflow="Deploy Docs" --limit 1
+gh run list --repo dhaupin/vant --workflow="pages-build-deployment" --limit 1
+```
+
+**If artifacts not deploying:**
+1. Trigger workflow manually: `gh workflow run docs.yml -R owner/repo`
+2. Wait ~50s for build + deploy
+3. Check timestamps - Actions should finish before legacy
+4. If legacy wins, may need GitHub UI toggle to Actions-only
+
+### Workflow
+
+```yaml
+# .github/workflows/docs.yml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+      - uses: actions/configure-pages@v4
+      
+      - name: Build Jekyll
+        run: bundle exec jekyll build
+      
+      - name: Download Pagefind
+        run: |
+          VERSION=$(curl -sL "api.github.com/repos/Pagefind/pagefind/releases/latest" | ...)
+          curl -sL ".../pagefind-v${VERSION}-x86_64-unknown-linux-musl.tar.gz" -o pagefind.tar.gz
+          tar -xzf pagefind.tar.gz
+      
+      - name: Create search index
+        working-directory: docs
+        run: ./pagefind --site _site
+      
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'docs/_site'
+  
+  deploy:
+    needs: build
+    uses: actions/deploy-pages@v4
+```
+
+### Troubleshooting
+
+**Search returns no results:**
+1. Check Pagefind files exist: `curl -sI /vant/pagefind/pagefind-entry.json`
+2. Check page count: Should be ~37
+3. Check network tab for failed fetches
+4. Verify artifact deployed from Actions
+
+**Index 404:**
+1. Legacy build may have overridden artifact
+2. Trigger Actions workflow manually
+3. Check timestamps between runs
+
+---
+
 ## Related Docs
 
 - `lib/branch.js` - Branch API source
