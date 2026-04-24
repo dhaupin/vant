@@ -32,6 +32,8 @@ docker run -it -v vant-brain:/app/models dhaupin/vant vant load
 ## Environment
 Set up Docker environment variables.
 
+Run with GitHub configuration:
+
 ```bash
 docker run -it \
   -e GITHUB_REPO=owner/repo \
@@ -42,6 +44,8 @@ docker run -it \
 
 ## Compose
 Use Docker Compose for orchestration.
+
+Compose configuration:
 
 ```yaml
 version: '3.8'
@@ -56,12 +60,16 @@ services:
       - .env
 ```
 
+Start Docker Compose:
+
 ```bash
 docker-compose up -d
 ```
 
 ## Build Local
-Build custom Docker images.
+Build custom Docker images locally.
+
+Build and run:
 
 ```bash
 docker build -t vant:local .

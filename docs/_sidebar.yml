@@ -27,36 +27,49 @@ reference:
     path: /reference/errors
 
 guides:
+  # Core Concepts
   - title: Architecture
     path: /guides/architecture
   - title: Brain Structure
     path: /guides/brain
-  - title: Onboarding
-    path: /guides/onboard
   - title: Succession
     path: /guides/succession
-  - title: Resolution
-    path: /guides/resolution
-  - title: Security
-    path: /guides/security
+  - title: Multi-Agent
+    path: /guides/multi-agent
+  - title: Style Guide
+    path: /guides/style
+
+  # Getting Started
+  - title: Onboarding
+    path: /guides/onboard
+
+  # Usage
+  - title: Operations
+    path: /guides/operations
+  - title: Docker
+    path: /guides/docker
+  - title: Testing
+    path: /guides/testing
+  - title: Troubleshooting
+    path: /guides/troubleshooting
+
+  # Integration
   - title: MCP Server
     path: /guides/mcp
   - title: GitHub Sync
     path: /guides/github
-  - title: Docker
-    path: /guides/docker
   - title: Plugins
     path: /guides/plugins
-  - title: Steganography
-    path: /guides/steganography
-  - title: Operations
-    path: /guides/operations
-  - title: Testing
-    path: /guides/testing
+
+  # Advanced
+  - title: Security
+    path: /guides/security
+  - title: Resolution
+    path: /guides/resolution
   - title: Audit
     path: /guides/audit
-  - title: Troubleshooting
-    path: /guides/troubleshooting
+  - title: Steganography
+    path: /guides/steganography
   - title: Release
     path: /guides/release
 

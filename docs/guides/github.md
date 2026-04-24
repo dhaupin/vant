@@ -64,7 +64,9 @@ Understand rate limits and quotas.
 | Unauthenticated | 60 |
 
 ### Managing Limits
-Handle rate limits.
+View and wait for rate limits.
+
+Check current limit:
 
 ```bash
 # Check current limit

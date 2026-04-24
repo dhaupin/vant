@@ -9,6 +9,8 @@ Model Context Protocol (MCP) server exposes Vant's brain as tools for AI agents.
 
 ## Quick Start
 
+Start the server:
+
 ```bash
 # Start the server
 node bin/mcp.js --server
@@ -28,6 +30,8 @@ The server runs on **port 3456** by default with three endpoints:
 ## Running Modes
 
 ### HTTP Server (Default)
+Start the HTTP server:
+
 ```bash
 vant mcp --server           # Default port 3456
 vant mcp --server --port 8080  # Custom port
@@ -37,13 +41,16 @@ node bin/mcp.js --server
 ```
 
 ### STDIO Mode (for AI SDK)
+Run in STDIO mode for AI SDK integration:
+
 ```bash
-# For AI SDK integration
 vant mcp --stdio
 node bin/mcp.js --stdio
 ```
 
 ### With Configuration
+Set via env vars or config file:
+
 ```bash
 # Using environment variables
 VANT_MCP_PORT=3457 vant mcp --server
@@ -70,6 +77,8 @@ MCP_PORT=3457
 ## API Examples
 
 ### List Available Tools
+List available MCP tools:
+
 ```bash
 curl http://localhost:3456/tools
 ```
@@ -88,6 +97,8 @@ Returns:
 ```
 
 ### Get Brain Memory
+Read brain memory via MCP:
+
 ```bash
 curl -X POST http://localhost:3456/call \
   -H "Content-Type: application/json" \
@@ -101,7 +112,8 @@ curl -X POST http://localhost:3456/call \
   }'
 ```
 
-**With specific files:**
+Get specific brain files:
+
 ```bash
 curl -X POST http://localhost:3456/call \
   -H "Content-Type: application/json" \
@@ -119,6 +131,8 @@ curl -X POST http://localhost:3456/call \
 ```
 
 ### Write to Brain
+Write content to a brain file:
+
 ```bash
 curl -X POST http://localhost:3456/call \
   -H "Content-Type: application/json" \
@@ -138,6 +152,8 @@ curl -X POST http://localhost:3456/call \
 ```
 
 ### List Branches
+List all Git branches:
+
 ```bash
 curl -X POST http://localhost:3456/call \
   -H "Content-Type: application/json" \
@@ -152,6 +168,8 @@ curl -X POST http://localhost:3456/call \
 ```
 
 ### Create Branch
+Create a new Git branch:
+
 ```bash
 curl -X POST http://localhost:3456/call \
   -H "Content-Type: application/json" \
@@ -169,6 +187,8 @@ curl -X POST http://localhost:3456/call \
 ```
 
 ### Switch Branch
+Switch to a different branch:
+
 ```bash
 curl -X POST http://localhost:3456/call \
   -H "Content-Type: application/json" \
@@ -186,6 +206,8 @@ curl -X POST http://localhost:3456/call \
 ```
 
 ### Commit Changes
+Commit current changes with a message:
+
 ```bash
 curl -X POST http://localhost:3456/call \
   -H "Content-Type: application/json" \
@@ -203,6 +225,8 @@ curl -X POST http://localhost:3456/call \
 ```
 
 ### Sync with GitHub
+Push or pull brain from GitHub:
+
 ```bash
 curl -X POST http://localhost:3456/call \
   -H "Content-Type: application/json" \
@@ -220,6 +244,8 @@ curl -X POST http://localhost:3456/call \
 ```
 
 ### Acquire Lock (for multi-agent)
+Acquire the brain lock:
+
 ```bash
 curl -X POST http://localhost:3456/call \
   -H "Content-Type: application/json" \
@@ -238,6 +264,8 @@ curl -X POST http://localhost:3456/call \
 ```
 
 ### Release Lock
+Release the brain lock:
+
 ```bash
 curl -X POST http://localhost:3456/call \
   -H "Content-Type: application/json" \
@@ -256,6 +284,8 @@ curl -X POST http://localhost:3456/call \
 ```
 
 ### Health Check
+Check if MCP server is running:
+
 ```bash
 curl http://localhost:3456/health
 ```
@@ -263,6 +293,8 @@ curl http://localhost:3456/health
 ## Authentication
 
 ### Enable API Key (Recommended)
+Set API key via env or config:
+
 ```bash
 # Environment variable
 export VANT_MCP_API_KEY=your-secret-key

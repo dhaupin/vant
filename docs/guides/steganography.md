@@ -19,7 +19,7 @@ Vant can encode/decode secret messages inside PNG images using LSB (Least Signif
 - Bypass content filters that allow images but block text
 
 ## Quick Start
-Get up and running in minutes.
+Encode and decode messages in images.
 
 ```bash
 # Encode a secret message
@@ -36,8 +36,9 @@ console.log(stego.decode('output.png'));
 ```
 
 ## With Encryption
+Encrypt messages with a password.
 
-Messages can be encrypted with a password:
+Encode with encryption:
 
 ```bash
 # Encode with encryption
@@ -58,7 +59,7 @@ console.log(stego.decode('output.png', {
 ```
 
 ## CLI Commands
-Command-line interface.
+Use stego CLI.
 
 ### Encode
 Encode data into an image.

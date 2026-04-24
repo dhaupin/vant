@@ -77,7 +77,7 @@ vant health
 ```
 
 ### CLI Commands
-Command-line usage.
+Test CLI commands:
 
 ```bash
 # Test each command
