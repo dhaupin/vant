@@ -60,6 +60,8 @@ Brain file structure and management.
 ### Start Fresh
 Initialize a new brain.
 
+Create new brain repo:
+
 ```bash
 # Create new brain repo
 gh repo create my-brain --private
@@ -68,6 +70,8 @@ git clone my-brain models/public
 
 ### Modify Files
 Edit brain files directly.
+
+Edit and commit:
 
 ```bash
 # Edit any brain file
@@ -80,6 +84,8 @@ git commit -m "Updated goals"
 
 ### View Current Brain
 Inspect your brain state.
+
+Load and display:
 
 ```bash
 # Load and display brain
