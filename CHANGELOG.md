@@ -78,30 +78,21 @@ All notable changes to VANT are documented here.
 - **API Documentation** - Full lib coverage expanded
   - vaf.js: validation, rate limiting, sanitization, middleware
   - protection.js: circuit breaker, active tracking, input limits
-  - colors.js: brand styling, method corrections
-  - prompts.js: all Inquirer prompt types
-  - verbosity.js: multi-handler verbosity controls
-  - errors.js: error wrapping helpers, retry
-  - stego.js: utilities, format support
-  - notifications.js: channel methods, health check
-- **CLI Commands** - Additional commands documented
-  - vant test - Run test suite with coverage
-  - vant build-test - Validate build scripts
-- **Deprecation Notices** - Backwards compatibility
-  - CHANGELOG.md, RELEASE.md, ROADMAP.md point to docs/
 
-### Changed
-- Updated CLI.md with MCP auth section
-- MCP server now blocks without correct key when configured
-- POST /call endpoint fixed (JSON-RPC params handling)
-- Removed .agents_tmp directory
-- Removed deploy.example.sh (CI/CD handles deploys)
+### Added (2026-04-23)
+- **Pagefind Search** - Full-text search for Jekyll docs
+  - docs/_layouts/default.html with search modal
+  - Custom themed UI matching Vant design
+  - Keyboard shortcuts (Cmd/Ctrl+K)
+  - Pagefind v1.5.2 integrated
 
-### Fixed
-- vant help <cmd> now shows specific command help
-- bin/mcp.js --help exits properly (doesn't start server)
-- Node --help now shows help (was starting node instead)
-- onboard read <file> now auto-adds .md extension
+### Fixed (2026-04-23)
+- **Docs Search** - Pagefind deployment issue
+  - Legacy Pages build conflicting with GitHub Actions
+  - Workflow fixed with working-directory: docs
+  - Added configure-pages step for proper OIDC
+  - baseurl and url added to Jekyll _config.yml
+  - 37 pages now indexed and searchable
 
 ---
 
