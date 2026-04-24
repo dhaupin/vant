@@ -73,8 +73,8 @@
             display: block;
         }
         .theme-toggle .icon-sun, .theme-toggle .icon-moon { display: none; }
-        :not([data-theme="dark"]) .theme-toggle .icon-moon { display: block; }
         [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+        :root:not([data-theme="dark"]) .theme-toggle .icon-moon { display: block; }
 
         header { text-align: center; margin-bottom: 30px; }
         header h1 {
