@@ -353,7 +353,46 @@ vant docs build --version # Specific version
 vant docs serve          # Local server
 ```
 
-See also: [Configuration](/vant/reference/configuration.html), [API](/vant/reference/api.html)
+See also: [Configuration](/vant/reference/configuration.html), [API](/vant/reference/api.html), [Entropy-Patch](/vant/reference/entropy.html)
+
+## compress
+
+Entropy encoder for Vant brain files. Creates `.vpatch` files from markdown.
+
+### vant compress
+
+```bash
+vant compress <input> [options]
+```
+
+| Option | Alias | Description |
+|--------|------|-------------|
+| `--output` | `-o` | Output directory (default: models/latent) |
+| `--window` | `-w` | Window size (default: 8) |
+| `--threshold` | `-t` | Entropy threshold 0-1 (default: 0.85) |
+| `--adaptive` | `-a` | Enable adaptive threshold (auto μ + k×σ) |
+| `--sensitivity` | `-k` | k-factor for threshold (default: 1.5) |
+| `--stats` | `-s` | Show entropy statistics only |
+| `--decompress` | `-d` | Decompress .vpatch to original |
+
+### Examples
+
+```bash
+# Compress a file
+vant compress models/public/goals.md
+
+# View entropy stats
+vant compress models/public/goals.md --stats
+
+# Adaptive mode (self-calibrating threshold)
+vant compress models/public/goals.md --adaptive
+vant compress models/public/goals.md -a -k 2.0
+
+# Decompress
+vant compress models/latent/goals.vpatch --decompress
+```
+
+See also: [Entropy-Patch](/vant/reference/entropy.html)
 
 ---
 

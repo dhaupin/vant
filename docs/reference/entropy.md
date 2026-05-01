@@ -170,6 +170,36 @@ const stats = entropy.getEntropyStats(buffer);
 | `windowSize` | 8 | 1-1024 | Bytes per sliding window |
 | `threshold` | 0.85 | 0-1 | Entropy cutoff for spike detection |
 
+### Adaptive Mode
+
+For self-calibrating thresholds based on data entropy history:
+
+```javascript
+const { AdaptiveEntropy, createAdaptivePatch } = require('lib/entropy');
+
+// Manual usage
+const ae = new AdaptiveEntropy({ sensitivity: 1.5, windowSize: 64 });
+const patches = ae.deassemble(Buffer.from(data));
+
+// Or use convenience function
+const patch = createAdaptivePatch(data, { sensitivity: 1.5, windowSize: 64 });
+```
+
+**Algorithm:** `threshold = μ + k × σ` (rolling mean + k × standard deviation)
+
+| Option | Default | Range | Description |
+|--------|---------|-------|-------------|
+| `sensitivity` | 1.5 | 0.1-10 | k-factor for threshold (lower = more spikes) |
+| `windowSize` | 64 | 1-1024 | Bytes per sliding window |
+| `historyLimit` | 1000 | 10-10000 | Max entropy history to track |
+
+**CLI Usage:**
+```bash
+vant compress file.md --adaptive         # auto threshold
+vant compress file.md -a -k 2.0         # custom sensitivity
+vant compress file.md --stats           # view entropy stats first
+```
+
 ### Tuning
 
 - **Lower threshold** (`0.7`) = More spikes detected, better compression
