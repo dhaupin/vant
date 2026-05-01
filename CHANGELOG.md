@@ -12,6 +12,20 @@ All notable changes to VANT are documented here.
 
 ## v0.8.4 (2026-04-20)
 
+### Added
+- **Entropy-Patch Protocol** - Token-aware latent transport
+  - `lib/entropy.js` - Core module
+    - `generatePatches()` - Windowed entropy scan
+    - `generateVPatch()` - Create .vpatch files
+    - `hydratePatches()` - Lossless reconstruction
+    - `getEntropyStats()` - Entropy analysis
+  - `bin/compress.js` - CLI command
+    - `vant compress <file> --stats` - Show entropy stats
+    - `vant compress <file>` - Create .vpatch
+    - `vant compress <file> --decompress` - Extract
+  - `models/latent/` - Output directory
+  - Transforms Vant from Context Storage to Latent Transport
+
 ### Security Hardening
 - **VAF (Vant Application Firewall)** - Input validation system
   - `lib/vaf.js` - Pattern-based content blocking
