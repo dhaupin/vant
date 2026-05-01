@@ -100,6 +100,12 @@ All notable changes to VANT are documented here.
   - Keyboard shortcuts (Cmd/Ctrl+K)
   - Pagefind v1.5.2 integrated
 
+### Added (2026-05-01)
+- **AdaptiveEntropy** - Self-calibrating entropy mode
+  - `lib/entropy.js`: AdaptiveEntropy class with rolling mu + k*sigma
+  - CLI: --adaptive/-a and --sensitivity/-k flags
+  - docs/reference/entropy.md updated
+
 ### Fixed (2026-04-23)
 - **Docs Search** - Pagefind deployment issue
   - Legacy Pages build conflicting with GitHub Actions
