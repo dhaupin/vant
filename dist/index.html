@@ -381,17 +381,17 @@
             <div class="feature">
                 <h3>Entropy-Patch</h3>
                 <p>Token-aware compression. Separates high-entropy data from stable patterns. Dramatically reduces LLM prompt size.</p>
-                <a href="https://docs.creadev.org/vant/reference/entropy.html" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/reference/entropy/" class="learn-more">Learn more →</a>
             </div>
             <div class="feature">
                 <h3>AdaptiveEntropy</h3>
                 <p>Self-calibrating threshold (μ + k×σ). Auto-detects optimal compression for your data.</p>
-                <a href="https://docs.creadev.org/vant/reference/entropy.html#adaptive-mode" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/reference/entropy/#adaptive-mode" class="learn-more">Learn more →</a>
             </div>
             <div class="feature">
                 <h3>Semantic Seed</h3>
                 <p>Stable patches include anchors. Tells the LLM where to place high-entropy data in context.</p>
-                <a href="https://docs.creadev.org/vant/reference/entropy.html#semantic-seed-anchoring" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/reference/entropy/#semantic-seed-anchoring" class="learn-more">Learn more →</a>
             </div>
             <div class="feature">
                 <h3>Resolution System</h3>
@@ -411,7 +411,7 @@
             <div class="feature">
                 <h3>MCP Server</h3>
                 <p>Memory tools via JSON-RPC. AI agents read/write brain over HTTP. Standard MCP protocol.</p>
-                <a href="https://docs.creadev.org/vant/reference/mcp.html" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/guides/mcp.html" class="learn-more">Learn more →</a>
             </div>
             <div class="feature">
                 <h3>Branching</h3>
@@ -452,17 +452,17 @@
             <details>
                 <summary>What is Entropy-Patch and why should I care?</summary>
                 <p>Entropy-Patch is Vant's token-aware compression (v0.8.4). It scans your brain files and separates "stable" repetitive content from "spiky" high-entropy data. The result? Massive token savings. Instead of sending 19 markdown files to your LLM, you send one compressed .vpatch file. Includes Semantic Seeds so the AI knows where each piece of data belongs in context.</p>
-                <a href="https://docs.creadev.org/vant/reference/entropy.html" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/reference/entropy/" class="learn-more">Learn more →</a>
             </details>
             <details>
                 <summary>What is AdaptiveEntropy?</summary>
                 <p>AdaptiveEntropy automatically calibrates your compression threshold using statistical analysis (μ + k×σ). Instead of guessing the right threshold, it analyzes your data and picks optimal settings. Lower k = more aggressive compression, Higher k = preserve more. Great for long-running autonomous agents that need to "remember" correctly without hitting token limits.</p>
-                <a href="https://docs.creadev.org/vant/reference/entropy.html#adaptive-mode" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/reference/entropy/#adaptive-mode" class="learn-more">Learn more →</a>
             </details>
             <details>
                 <summary>How does generational evolution work?</summary>
                 <p>Each time your agent updates the brain, Vant tracks entropy drift between generations. Low delta = stable memory (good). High delta = context shift (warning). This helps you spot when your agent is "forgetting" or when its personality is drifting. Built for multi-session autonomy where the agent needs to evolve without losing its core identity.</p>
-                <a href="https://docs.creadev.org/vant/reference/entropy.html#generational-optimization-guide" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/reference/entropy/#generational-optimization-guide" class="learn-more">Learn more →</a>
             </details>
             <details>
                 <summary>Do I need GitHub?</summary>
@@ -492,7 +492,7 @@
             <p>Open source under MIT license.</p>
             <nav class="footer-nav">
                 <a href="https://docs.creadev.org/vant/">Docs</a>
-                <a href="https://docs.creadev.org/vant/getting-started/">Getting Started</a>
+                <a href="https://docs.creadev.org/vant/getting-started/install.html">Getting Started</a>
                 <a href="https://github.com/dhaupin/vant">GitHub</a>
             </nav>
         </footer>
