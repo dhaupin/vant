@@ -2,6 +2,7 @@
 permalink: /guides/multi-agent.html
 layout: default
 title: Multi-Agent
+nav_order: 4
 ---
 # Multi-Agent
 

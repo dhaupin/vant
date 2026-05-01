@@ -2,6 +2,7 @@
 permalink: /guides/operations.html
 layout: default
 title: Operations
+nav_order: 15
 ---
 # Operations Runbook
 

@@ -2,6 +2,7 @@
 permalink: /contributing.html
 layout: default
 title: Contributing
+nav_order: 3
 ---
 
 # Contributing to Vant

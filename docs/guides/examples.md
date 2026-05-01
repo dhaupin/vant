@@ -2,6 +2,7 @@
 permalink: /guides/examples.html
 layout: default
 title: Examples
+nav_order: 19
 ---
 # Examples
 

@@ -2,6 +2,7 @@
 permalink: /reference/api.html
 layout: default
 title: Module API
+nav_order: 3
 ---
 # Module API
 

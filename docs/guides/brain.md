@@ -2,6 +2,7 @@
 permalink: /guides/brain.html
 layout: default
 title: Brain Structure
+nav_order: 1
 ---
 # Brain Structure
 

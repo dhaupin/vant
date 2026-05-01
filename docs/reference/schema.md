@@ -2,6 +2,7 @@
 permalink: /reference/schema.html
 layout: default
 title: Brain Schema
+nav_order: 4
 ---
 # Brain Schema
 

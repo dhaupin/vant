@@ -2,6 +2,7 @@
 permalink: /guides/plugins.html
 layout: default
 title: Plugins
+nav_order: 10
 ---
 # Plugins
 
