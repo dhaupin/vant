@@ -36,3 +36,12 @@ nav_sections:
   guides: "Guides"
   community: "Community"
   legal: "Legal"
+
+# Section order (numeric - lower shows first)
+nav_order:
+  getting-started: 1
+  tutorials: 2
+  guides: 3
+  reference: 4
+  community: 5
+  legal: 6

@@ -14,6 +14,7 @@ module Jekyll
 
     def build_nav(pages, config)
       section_titles = config['nav_sections'] || {}
+      section_order = config['nav_order'] || {}
       root_docs = []
       folders = {}
 
@@ -47,10 +48,10 @@ module Jekyll
         end
       end
 
-      # Sort items in each folder
+      # Sort: items by title, folders by nav_order
       folders.each { |k, v| v['items'].sort_by! { |i| i['title'] } }
 
-      # Build result: root docs first, then folders sorted by title
+      # Build result: root docs first, then folders by nav_order
       result = []
       
       # Add root docs as "Docs" section
@@ -58,8 +59,13 @@ module Jekyll
         result << { 'title' => 'Docs', 'items' => root_docs.sort_by { |i| i['title'] } }
       end
       
-      # Add folders as sections
-      result += folders.values.sort_by { |f| f['title'] }
+      # Add folders sorted by nav_order (find folder key from title)
+      result += folders.values.sort_by do |f|
+        title = f['title']
+        # Find folder name with this title
+        folder_key = section_titles.key(title) || title.downcase
+        section_order[folder_key] || 999
+      end
       
       result
     end
