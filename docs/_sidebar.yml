@@ -25,6 +25,8 @@ reference:
     path: /reference/schema
   - title: Error Codes
     path: /reference/errors
+  - title: Entropy-Patch
+    path: /reference/entropy
 
 guides:
   # Core Concepts
