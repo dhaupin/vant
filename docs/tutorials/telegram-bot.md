@@ -2,6 +2,7 @@
 permalink: /tutorials/telegram-bot.html
 layout: default
 title: Telegram Bot Integration
+nav_order: 3
 ---
 # Tutorial: Telegram Bot with Vant
 

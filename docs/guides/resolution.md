@@ -2,6 +2,7 @@
 permalink: /guides/resolution.html
 layout: default
 title: Resolution
+nav_order: 8
 ---
 # Thought Resolution
 

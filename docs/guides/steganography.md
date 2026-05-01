@@ -2,6 +2,7 @@
 permalink: /guides/steganography.html
 layout: default
 title: Steganography
+nav_order: 11
 ---
 # Steganography
 

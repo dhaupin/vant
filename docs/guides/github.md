@@ -2,6 +2,7 @@
 permalink: /guides/github.html
 layout: default
 title: GitHub Integration
+nav_order: 12
 ---
 # GitHub Integration
 

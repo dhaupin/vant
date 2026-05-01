@@ -1,7 +1,8 @@
 ---
 permalink: /examples.html
 layout: default
-title: Examples & Showcase
+title: Examples title: Examples & Showcase Showcase
+nav_order: 1
 ---
 
 # Examples & Showcase

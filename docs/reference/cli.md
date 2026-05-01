@@ -2,6 +2,7 @@
 permalink: /reference/cli.html
 layout: default
 title: CLI Reference
+nav_order: 1
 ---
 # CLI Reference
 

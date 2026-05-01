@@ -2,6 +2,7 @@
 permalink: /guides/succession.html
 layout: default
 title: Succession
+nav_order: 3
 ---
 # Brain Succession
 

@@ -2,6 +2,7 @@
 permalink: /guides/mcp.html
 layout: default
 title: MCP Server
+nav_order: 6
 ---
 # MCP Server
 

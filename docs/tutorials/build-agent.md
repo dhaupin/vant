@@ -2,6 +2,7 @@
 permalink: /tutorials/build-agent.html
 layout: default
 title: Build Your First Agent
+nav_order: 1
 ---
 
 # Tutorial: Build Your First Persistent Agent

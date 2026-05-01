@@ -2,6 +2,7 @@
 layout: default
 title: Entropy-Patch Protocol
 nav_order: 6
+nav_order: 6
 parent: Reference
 ---
 

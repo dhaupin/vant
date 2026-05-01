@@ -640,11 +640,7 @@
     <main class="main">
         <!-- Breadcrumbs -->
         <nav class="breadcrumbs">
-            <a href="/">Docs</a>
-            <span>/</span>
-            <span>{{ page.collection | default: "guides" }}</span>
-            <span>/</span>
-            <span>{{ page.title }}</span>
+            <a href="{{ page.url }}">{{ page.title }}</a>
         </nav>
         
         <!-- Page content -->

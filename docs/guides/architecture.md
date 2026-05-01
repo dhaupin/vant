@@ -2,6 +2,7 @@
 permalink: /guides/architecture.html
 layout: default
 title: Architecture
+nav_order: 2
 ---
 
 # Architecture

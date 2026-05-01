@@ -2,6 +2,7 @@
 permalink: /reference/errors.html
 layout: default
 title: Error Codes
+nav_order: 5
 ---
 # Error Codes
 

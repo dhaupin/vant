@@ -2,6 +2,7 @@
 permalink: /guides/onboard.html
 layout: default
 title: Onboarding
+nav_order: 7
 ---
 # Knowledge Base Browser
 

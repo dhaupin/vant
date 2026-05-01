@@ -2,6 +2,7 @@
 permalink: /getting-started/install.html
 layout: default
 title: Installation
+nav_order: 1
 ---
 # Installation
 
