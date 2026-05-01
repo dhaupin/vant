@@ -52,7 +52,8 @@ const COMMANDS = {
     onboard: 'onboard.js',
     resolution: 'resolution.js',
     succession: 'succession.js',
-    bot: 'bot.js'
+    bot: 'bot.js',
+    compress: 'compress.js'
 };
 
 const args = process.argv.slice(2);
@@ -103,6 +104,7 @@ Integrations:
   vant bot       Telegram bot
   vant onboard  Onboarding
   vant succession Succession
+  vant compress  Entropy-Patch encoder
 `);
     process.exit(0);
 }
