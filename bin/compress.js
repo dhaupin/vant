@@ -37,7 +37,8 @@ Options:
   -o, --output <dir>    Output directory (default: models/latent)
   -w, --window <num>   Window size (default: 8)
   -t, --threshold <num> Entropy threshold 0-1 (default: 0.85)
-  -d, --decompress     Decompress .vpatch to original
+  -a, --adaptive     Enable adaptive threshold (auto mu + k*sigma)
+  -k, --sensitivity <num>  k-factor for threshold (default: 1.5)
   -s, --stats          Show entropy statistics only
   -h, --help           Show this help
 
@@ -57,6 +58,8 @@ let windowSize = 8;
 let threshold = 0.85;
 let decompress = false;
 let statsOnly = false;
+let adaptiveMode = false;
+let sensitivity = 1.5;
 
 for (let i = 1; i < args.length; i++) {
     const arg = args[i];
@@ -71,6 +74,10 @@ for (let i = 1; i < args.length; i++) {
         decompress = true;
     } else if (arg === '-s' || arg === '--stats') {
         statsOnly = true;
+    } else if (arg === '-a' || arg === '--adaptive') {
+        adaptiveMode = true;
+    } else if (arg === '-k' || arg === '--sensitivity') {
+        sensitivity = parseFloat(args[++i]);
     }
 }
 
@@ -106,6 +113,15 @@ Compression Potential:
             const outputPath = inputPath.replace('.vpatch', '.decompressed');
             entropy.decompress(inputPath, outputPath);
             console.log('[Entropy] Done!');
+        } else if (adaptiveMode) {
+            // Adaptive mode - self-calibrating threshold
+            const inputContent = readFileSync(inputPath);
+            const patch = entropy.createAdaptivePatch(inputContent, { windowSize, sensitivity });
+            const outPath = path.join(outputDir, path.basename(inputPath, path.extname(inputPath)) + '.vpatch');
+            require('fs').writeFileSync(outPath, JSON.stringify(patch, null, 2));
+            console.log('[Entropy] Adaptive mode:');
+            console.log('  Threshold:', patch.stats.threshold.toFixed(4));
+            console.log('  Patches:', patch.metadata.totalPatches);
         } else {
             // Compress input
             console.log('[Entropy] Compressing:', inputPath);
