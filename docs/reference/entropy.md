@@ -1,3 +1,10 @@
+---
+layout: default
+title: Entropy-Patch Protocol
+nav_order: 6
+parent: Reference
+---
+
 # Entropy-Patch Protocol
 
 > Token-aware latent transport for Vant v0.8.4+
