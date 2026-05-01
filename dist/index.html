@@ -91,6 +91,14 @@
             font-size: 0.9rem;
         }
         .header-nav a:hover { color: var(--link); }
+        .footer-nav { margin-top: 12px; }
+        .footer-nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 0.85rem;
+        }
+        .footer-nav a:hover { color: var(--link); }
         .tagline {
             color: var(--text-muted);
             font-size: 1.1rem;
@@ -296,8 +304,7 @@
             <h1>Vant</h1>
             <p class="tagline">Persistent AI Memory</p>
             <nav class="header-nav">
-                <a href="https://vant.creadev.org">Docs (CF)</a>
-                <a href="https://dhaupin.github.io/vant/">Docs (GH)</a>
+                <a href="https://dhaupin.creadev.org/vant/">Docs</a>
                 <a href="https://github.com/dhaupin/vant">GitHub</a>
             </nav>
         </header>
@@ -330,22 +337,22 @@
             <div class="feature">
                 <h3>Git-Based Memory</h3>
                 <p>Brain files live in Git. Version control built in. Pull changes from previous sessions automatically.</p>
-                <a href="https://dhaupin.github.io/vant/" class="learn-more">Learn more →</a>
+                <a href="https://dhaupin.creadev.org/vant/" class="learn-more">Learn more →</a>
             </div>
             <div class="feature">
                 <h3>Entropy-Patch</h3>
                 <p>Token-aware compression. Separates high-entropy data from stable patterns. Dramatically reduces LLM prompt size.</p>
-                <a href="https://dhaupin.github.io/vant/reference/entropy.html" class="learn-more">Entropy docs →</a>
+                <a href="https://dhaupin.creadev.org/vant/reference/entropy.html" class="learn-more">Entropy docs →</a>
             </div>
             <div class="feature">
                 <h3>AdaptiveEntropy</h3>
                 <p>Self-calibrating threshold (μ + k×σ). Auto-detects optimal compression for your data.</p>
-                <a href="https://dhaupin.github.io/vant/reference/entropy.html#adaptive-mode" class="learn-more">Adaptive mode →</a>
+                <a href="https://dhaupin.creadev.org/vant/reference/entropy.html#adaptive-mode" class="learn-more">Adaptive mode →</a>
             </div>
             <div class="feature">
                 <h3>Semantic Seed</h3>
                 <p>Stable patches include anchors. Tells the LLM where to place high-entropy data in context.</p>
-                <a href="https://dhaupin.github.io/vant/reference/entropy.html#semantic-seed-anchoring" class="learn-more">Semantic Seed →</a>
+                <a href="https://dhaupin.creadev.org/vant/reference/entropy.html#semantic-seed-anchoring" class="learn-more">Semantic Seed →</a>
             </div>
             <div class="feature">
                 <h3>Resolution System</h3>
@@ -354,7 +361,7 @@
             <div class="feature">
                 <h3>Multi-Agent Safe</h3>
                 <p>Branches and locks prevent conflicts. Multiple agents can work on the same brain without overwriting each other.</p>
-                <a href="https://dhaupin.github.io/vant/guides/multi-agent.html" class="learn-more">Multi-agent →</a>
+                <a href="https://dhaupin.creadev.org/vant/guides/multi-agent.html" class="learn-more">Multi-agent →</a>
             </div>
             <div class="feature">
                 <h3>Docker Ready</h3>
@@ -363,7 +370,7 @@
             <div class="feature">
                 <h3>MCP Server</h3>
                 <p>Memory tools via JSON-RPC. AI agents read/write brain over HTTP. Standard MCP protocol.</p>
-                <a href="https://dhaupin.github.io/vant/reference/mcp.html" class="learn-more">MCP docs →</a>
+                <a href="https://dhaupin.creadev.org/vant/reference/mcp.html" class="learn-more">MCP docs →</a>
             </div>
             <div class="feature">
                 <h3>Branching</h3>
@@ -385,7 +392,7 @@
                 <li>Token-limited agents that need semantic compression</li>
             </ul>
             <p>The brain is your AI's memory and personality. Vant makes it persistent, portable, and versioned.</p>
-            <a href="https://dhaupin.github.io/vant/" class="learn-more">Full documentation →</a>
+            <a href="https://dhaupin.creadev.org/vant/" class="learn-more">Full documentation →</a>
         </section>
 
         <section class="links">
@@ -397,69 +404,65 @@
             <h3>Frequently Asked Questions</h3>
             <details>
                 <summary>What is a "brain" in Vant?</summary>
-                <p>Your AI's memory. A folder of markdown files storing who you are, what you've learned, and your context. Each session loads the brain, changes are pushed to GitHub, next session inherits everything.</p>
-                <a href="https://dhaupin.github.io/vant/" class="learn-more">Brain docs →</a>
+                <p>Your AI's memory—a folder of markdown files that store who you are, what you've learned, goals, preferences, and context. Think of it as your AI's personality and knowledge base. Each session loads the brain from GitHub, makes changes, and pushes back. The next session inherits everything automatically. It's like human memory but versioned.</p>
+                <a href="https://dhaupin.creadev.org/vant/" class="learn-more">Learn more →</a>
             </details>
             <details>
-                <summary>What is Entropy-Patch?</summary>
-                <p>Token-aware compression (v0.8.4). Separates high-entropy data from stable patterns. Dramatically reduces LLM prompt size. Includes Semantic Seed for anchoring.</p>
-                <a href="https://dhaupin.github.io/vant/reference/entropy.html" class="learn-more">Entropy docs →</a>
+                <summary>What is Entropy-Patch and why should I care?</summary>
+                <p>Entropy-Patch is Vant's token-aware compression (v0.8.4). It scans your brain files and separates "stable" repetitive content from "spiky" high-entropy data. The result? Massive token savings. Instead of sending 19 markdown files to your LLM, you send one compressed .vpatch file. Includes Semantic Seeds so the AI knows where each piece of data belongs in context.</p>
+                <a href="https://dhaupin.creadev.org/vant/reference/entropy.html" class="learn-more">Learn more →</a>
             </details>
             <details>
                 <summary>What is AdaptiveEntropy?</summary>
-                <p>Self-calibrating threshold (μ + k×σ). Auto-detects optimal compression for your data. No manual tuning needed.</p>
-                <a href="https://dhaupin.github.io/vant/reference/entropy.html#adaptive-mode" class="learn-more">Adaptive mode →</a>
+                <p>AdaptiveEntropy automatically calibrates your compression threshold using statistical analysis (μ + k×σ). Instead of guessing the right threshold, it analyzes your data and picks optimal settings. Lower k = more aggressive compression, Higher k = preserve more. Great for long-running autonomous agents that need to "remember" correctly without hitting token limits.</p>
+                <a href="https://dhaupin.creadev.org/vant/reference/entropy.html#adaptive-mode" class="learn-more">Learn more →</a>
             </details>
             <details>
                 <summary>How does generational evolution work?</summary>
-                <p>Track entropy drift across agent generations. Low delta = stable evolution. High drift = context shift detected.</p>
-                <a href="https://dhaupin.github.io/vant/reference/entropy.html#generational-optimization-guide" class="learn-more">Generational docs →</a>
+                <p>Each time your agent updates the brain, Vant tracks entropy drift between generations. Low delta = stable memory (good). High delta = context shift (warning). This helps you spot when your agent is "forgetting" or when its personality is drifting. Built for multi-session autonomy where the agent needs to evolve without losing its core identity.</p>
+                <a href="https://dhaupin.creadev.org/vant/reference/entropy.html#generational-optimization-guide" class="learn-more">Learn more →</a>
             </details>
             <details>
                 <summary>Do I need GitHub?</summary>
-                <p>Yes. Vant uses GitHub as storage + version control + sync. Free account works.</p>
+                <p>Yes, GitHub is required. It's Vant's storage, version control, and sync mechanism—all in one. Every commit is a checkpoint. Every branch is an experiment. Every pull request is a review. Using a private repo keeps your brain private. A free GitHub account works perfectly.</p>
+                <a href="https://dhaupin.creadev.org/vant/" class="learn-more">Learn more →</a>
             </details>
             <details>
                 <summary>Is my brain private?</summary>
-                <p>Yes, use a private GitHub repo. Vant is just you + GitHub.</p>
+                <p>Yes—if you use a private GitHub repository, your brain stays completely private. Vant doesn't use any external databases or services. Your brain lives in your GitHub repo, and only you (or agents you authorize) can access it.</p>
             </details>
             <details>
                 <summary>Can multiple AI agents share one brain?</summary>
-                <p>Yes! Use branches + locks for safe multi-agent coordination.</p>
-                <a href="https://dhaupin.github.io/vant/guides/multi-agent.html" class="learn-more">Multi-agent guide →</a>
+                <p>Yes! Vant is built for multi-agent coordination. Use branches for isolation and file locks to prevent conflicts. Each agent works on their own branch, commits changes, and merges via pull request. Safe concurrent agentic workflows without overwrite fears.</p>
+                <a href="https://dhaupin.creadev.org/vant/guides/multi-agent.html" class="learn-more">Learn more →</a>
             </details>
             <details>
                 <summary>How is Vant different from vector databases?</summary>
-                <p>Vant stores full context (not just embeddings), uses Git versioning, and enables session inheritance.</p>
+                <p>Vector databases store embeddings (mathematical summaries of text). Vant stores full context—the actual markdown, personality, goals, lessons learned. This means complete session inheritance, not just semantic search. Your agent literally inherits its previous thoughts, not just "similar" ones.</p>
             </details>
             <details>
                 <summary>Does Vant cost money?</summary>
-                <p>No - it's open source. Just need a free GitHub account + your own AI API keys.</p>
+                <p>No—Vant is completely open source and free. You only need a free GitHub account and your own LLM API keys (OpenAI, Anthropic, etc.). No database fees, no hosting costs, no middleman.</p>
             </details>
         </section>
 
         <section class="links-doc">
             <h3>Documentation</h3>
-            <a href="https://dhaupin.github.io/vant/" class="doc-link">Getting Started</a>
-            <a href="https://dhaupin.github.io/vant/reference/entropy.html" class="doc-link">Entropy-Patch</a>
-            <a href="https://dhaupin.github.io/vant/reference/cli.html" class="doc-link">CLI Reference</a>
-            <a href="https://dhaupin.github.io/vant/reference/mcp.html" class="doc-link">MCP Server</a>
-            <a href="https://dhaupin.github.io/vant/schema/" class="doc-link">Brain Schema</a>
-            <a href="https://github.com/dhaupin/vant/releases" class="doc-link">Changelog</a>
-        </section>
-
-        <section class="docs">
-            <a href="https://vant.creadev.org" class="doc-link">Landing (CF)</a>
-            <a href="https://vant.creadev.org/cli" class="doc-link">CLI</a>
-            <a href="https://vant.creadev.org/schema" class="doc-link">Schema</a>
+            <a href="https://dhaupin.creadev.org/vant/" class="doc-link">Getting Started</a>
+            <a href="https://dhaupin.creadev.org/vant/reference/entropy.html" class="doc-link">Entropy-Patch</a>
+            <a href="https://dhaupin.creadev.org/vant/reference/cli.html" class="doc-link">CLI Reference</a>
+            <a href="https://dhaupin.creadev.org/vant/reference/mcp.html" class="doc-link">MCP Server</a>
+            <a href="https://dhaupin.creadev.org/vant/schema/" class="doc-link">Brain Schema</a>
             <a href="https://github.com/dhaupin/vant/releases" class="doc-link">Changelog</a>
         </section>
 
         <footer>
             <p>Open source under MIT license.</p>
-            <p style="margin-top:12px; font-size: 0.75rem; color: var(--text-muted);">
-                Powered by <a href="https://github.com/openhands/openhands">OpenHands</a> AI agent
-            </p>
+            <nav class="footer-nav">
+                <a href="https://dhaupin.creadev.org/vant/">Docs</a>
+                <a href="https://dhaupin.creadev.org/vant/getting-started/">Getting Started</a>
+                <a href="https://github.com/dhaupin/vant">GitHub</a>
+            </nav>
         </footer>
     </div>
     <script>
