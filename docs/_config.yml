@@ -27,3 +27,12 @@ defaults:
       type: pages
     values:
       layout: default
+
+# Custom section titles for navigation (folder => display title)
+nav_sections:
+  getting-started: "Getting Started"
+  tutorials: "Tutorials"
+  reference: "Reference"
+  guides: "Guides"
+  community: "Community"
+  legal: "Legal"

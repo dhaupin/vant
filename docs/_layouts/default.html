@@ -620,85 +620,20 @@
     
     <!-- Sidebar navigation -->
     <aside class="sidebar" id="sidebar">
-        <!-- Getting Started -->
-        <div class="sidebar-section">
-            <div class="sidebar-title">Getting Started</div>
-            <ul class="sidebar-nav">
-                <li><a href="/vant/getting-started/install.html">Installation</a></li>
-                
-                <li><a href="/vant/getting-started/quick-start.html">Quick Start</a></li>
-            </ul>
-        </div>
-        
-        <!-- Tutorials -->
-        <div class="sidebar-section">
-            <div class="sidebar-title">Tutorials</div>
-            <ul class="sidebar-nav">
-                <li><a href="/vant/tutorials/build-agent.html">Build First Agent</a></li>
-                <li><a href="/vant/tutorials/multi-agent.html">Multi-Agent System</a></li>
-                <li><a href="/vant/tutorials/telegram-bot.html">Telegram Bot</a></li>
-            </ul>
-        </div>
-        
-        <!-- Reference -->
-        <div class="sidebar-section">
-            <div class="sidebar-title">Reference</div>
-            <ul class="sidebar-nav">
-                <li><a href="/vant/reference/cli.html">CLI Reference</a></li>
-                <li><a href="/vant/reference/configuration.html">Configuration</a></li>
-                <li><a href="/vant/reference/api.html">Module API</a></li>
-                <li><a href="/vant/reference/schema.html">Brain Schema</a></li>
-                <li><a href="/vant/reference/errors.html">Error Codes</a></li>
-                <li><a href="/vant/reference/entropy.html">Entropy-Patch</a></li>
-            </ul>
-        </div>
-        
-        <!-- Guides -->
-        <div class="sidebar-section">
-            <div class="sidebar-title">Guides</div>
-            <ul class="sidebar-nav">
-                <li><a href="/vant/guides/architecture.html">Architecture</a></li>
-                <li><a href="/vant/guides/brain.html">Brain Structure</a></li>
-                
-                
-                <li><a href="/vant/guides/onboard.html">Onboarding</a></li>
-                <li><a href="/vant/guides/succession.html">Succession</a></li>
-                <li><a href="/vant/guides/resolution.html">Resolution</a></li>
-                <li><a href="/vant/guides/security.html">Security</a></li>
-                <li><a href="/vant/guides/multi-agent.html">Multi-Agent</a></li>
-                <li><a href="/vant/guides/mcp.html">MCP Server</a></li>
-                <li><a href="/vant/guides/docker.html">Docker</a></li>
-                <li><a href="/vant/guides/plugins.html">Plugins</a></li>
-                <li><a href="/vant/guides/steganography.html">Steganography</a></li>
-                <li><a href="/vant/guides/github.html">GitHub</a></li>
-                <li><a href="/vant/guides/release.html">Release</a></li>
-                <li><a href="/vant/guides/style.html">Style</a></li>
-                <li><a href="/vant/guides/operations.html">Operations</a></li>
-                <li><a href="/vant/guides/testing.html">Testing</a></li>
-                <li><a href="/vant/guides/audit.html">Audit</a></li>
-                <li><a href="/vant/guides/troubleshooting.html">Troubleshooting</a></li>
-            </ul>
-        </div>
-        
-        <!-- Community -->
-        <div class="sidebar-section">
-            <div class="sidebar-title">Community</div>
-            <ul class="sidebar-nav">
-                <li><a href="/vant/examples.html">Examples</a></li>
-                <li><a href="/vant/faq.html">FAQ</a></li>
-                <li><a href="/vant/contributing.html">Contributing</a></li>
-            </ul>
-        </div>
-        
-        <!-- Legal -->
-        <div class="sidebar-section">
-            <div class="sidebar-title">Legal</div>
-            <ul class="sidebar-nav">
-                <li><a href="/vant/legal/index.html">Terms & Disclaimer</a></li>
-                <li><a href="/vant/legal/privacy.html">Privacy Policy</a></li>
-                <li><a href="/vant/legal/environment.html">Environment & Limits</a></li>
-            </ul>
-        </div>
+        {% if site.nav %}
+          {% for section in site.nav %}
+            {% if section.items %}
+            <div class="sidebar-section">
+                <div class="sidebar-title">{{ section.title }}</div>
+                <ul class="sidebar-nav">
+                {% for item in section.items %}
+                    <li><a href="{{ item.url | relative_url }}">{{ item.title }}</a></li>
+                {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
     </aside>
     
     <!-- Main content -->
