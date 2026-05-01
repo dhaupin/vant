@@ -304,6 +304,46 @@ See [README.md](./README.md#mcp-server) for full usage.
 
 ---
 
+## entropy.js
+
+Entropy-Patch protocol for token-aware latent transport. Transforms Vant from "Context Storage" to "Latent Transport" by detecting high-entropy regions in binary data.
+
+```javascript
+const entropy = require('./lib/entropy');
+
+// Generate patches from binary data
+const patches = entropy.generatePatches(buffer, {
+    windowSize: 8,      // sliding window size (default)
+    threshold: 0.85,    // entropy threshold (default)
+});
+
+// Create .vpatch file
+const vpatch = await entropy.generateVPatch(inputFile, outputPath, options);
+
+// Reconstruct from patches (lossless)
+const hydrated = entropy.hydratePatches(patches);
+
+// Get entropy statistics
+const stats = entropy.getEntropyStats(buffer);
+// { overall, min, max, mean, chunkCount, byteCount }
+```
+
+**CLI:**
+
+```bash
+vant compress <file> --stats    # Show entropy stats
+vant compress <file>           # Create .vpatch
+vant compress <file> -d        # Decompress .vpatch
+```
+
+**Constants:**
+
+- `entropy.LATENT_DIR` - Default output dir (`models/latent`)
+- `entropy.DEFAULT_WINDOW_SIZE` - Default window (8)
+- `entropy.DEFAULT_THRESHOLD` - Default threshold (0.85)
+
+---
+
 ## Related
 
 - [CLI.md](./CLI.md) - Command reference

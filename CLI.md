@@ -136,6 +136,25 @@ For multi-agent workflows, see [AGENTS.md](./AGENTS.md) for:
 - Branch management (`vant checkout`, `vant commit`)
 - Lock coordination to prevent race conditions
 
+## compress
+
+Entropy-Patch encoder for token-aware latent transport.
+
+```bash
+# Show entropy statistics
+vant compress README.md --stats
+
+# Compress file to .vpatch
+vant compress README.md
+vant compress models/public/goals.md --output models/latent
+
+# Compress directory
+vant compress models/public/ --output models/latent --window 16 --threshold 0.9
+
+# Decompress .vpatch back to original
+vant compress models/latent/goals.vpatch --decompress
+```
+
 ## Examples
 
 ```bash
