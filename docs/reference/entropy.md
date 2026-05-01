@@ -239,4 +239,68 @@ All paths are validated through VAF (Vant Application Firewall):
 
 - [CLI.md](../CLI.md#compress) - compress command
 - [LIBS.md](../LIBS.md#entropyjs) - module reference
+
+---
+
+## Generational Optimization Guide
+
+Tips for tuning Entropy-Patch in production autonomous sessions.
+
+### 1. The Sensitivity Sweet Spot
+
+The `k` factor (sensitivity) controls threshold = μ + k×σ:
+
+| k Value | Behavior | Use Case |
+|--------|----------|----------|
+| 0.5-1.0 | Lower threshold, more spikes | Token-limited agents |
+| 1.5 | Default (balanced) | General use |
+| 2.0+ | Higher threshold, less pruning | Agents feel "forgetful" |
+
+**Tuning tips:**
+- Agent feels "forgetful" → increase k (pruning too much)
+- Hitting token limits → decrease k (too many spikes)
+
+### 2. Calibration Phase (Recommended)
+
+Run a quick calibration on first autonomous session:
+
+```javascript
+// Quick calibration sample (1kb)
+const sample = brainFiles.slice(0, 1024);
+const patch = createAdaptivePatch(sample, { sensitivity: 1.5 });
+console.log('Auto-calibrated k:', patch.stats.threshold);
+```
+
+Recommended: Add to `vant start` sequence for auto k-detection.
+
+### 3. Semantic Seed (Anchoring)
+
+Stable patches should include a "semantic seed"—a summary that anchors high-entropy spikes:
+
+```javascript
+// Example patch with seed
+{
+  "type": "stable",
+  "seed": "Agent goals: help user, learn context",
+  "data": "YWJjZGVm...",
+  "start": 0,
+  "end": 100
+}
+```
+
+This tells the LLM "where to place" the high-entropy data you just gave it.
+
+### 4. Generational Evolution
+
+Track entropy changes across agent generations:
+
+```javascript
+// Each update creates new commit with entropy delta
+patch.metadata.generation = 5;
+patch.metadata.parentEntropy = 0.52;
+patch.metadata.currentEntropy = 0.48;
+```
+
+Low entropy delta = stable evolution
+High entropy drift = review needed
 - [schema.md](./schema.md) - brain file schema
