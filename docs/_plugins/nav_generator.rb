@@ -37,26 +37,30 @@ module Jekyll
         title = page.data['title'] || filename.gsub('-', ' ').capitalize
         title = title.to_s
         
+        # Sort order from frontmatter (default to 999 if not set)
+        sort_order = page.data['nav_order'] || 999
+        
         if folder == '.' || folder == ''
           # Root-level doc - add to root list
-          root_docs << { 'title' => title, 'url' => page.url }
+          root_docs << { 'title' => title, 'url' => page.url, 'order' => sort_order }
         else
           # Folder name = section, file = link
           section_title = section_titles[folder] || folder.gsub('-', ' ').capitalize
           folders[folder] ||= { 'title' => section_title, 'items' => [] }
-          folders[folder]['items'] << { 'title' => title, 'url' => page.url }
+          folders[folder]['items'] << { 'title' => title, 'url' => page.url, 'order' => sort_order }
         end
       end
 
-      # Sort: items by title, folders by nav_order
-      folders.each { |k, v| v['items'].sort_by! { |i| i['title'] } }
+      # Sort: items by nav_order (then title), folders by nav_order
+      folders.each { |k, v| v['items'].sort_by! { |i| [i['order'], i['title']] } }
 
       # Build result: root docs first, then folders by nav_order
       result = []
       
-      # Add root docs as "Docs" section
+      # Add root docs as "Docs" section (sorted by nav_order)
       if root_docs.any?
-        result << { 'title' => 'Docs', 'items' => root_docs.sort_by { |i| i['title'] } }
+        root_docs.sort_by! { |i| [i['order'], i['title']] }
+        result << { 'title' => 'Docs', 'items' => root_docs }
       end
       
       # Add folders sorted by nav_order (find folder key from title)
