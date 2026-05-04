@@ -9,7 +9,7 @@ const vaf = require("../lib/vaf");
  *        vant changelog --format=short
  */
 
-const { execSync } = require('child_process');
+const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -19,14 +19,14 @@ const DEFAULT_LIMIT = 20;
  * Get git log since tag
  */
 function getLog(since = null, limit = DEFAULT_LIMIT) {
-    const args = ['log', `'--pretty=format:%H---%s---%an---%aI'`, `-n`, limit.toString()];
+    const args = ['log', `'--pretty=format:%H---%s---%an---%aI'`, `-n`, Math.min(Math.max(parseInt(limit) || DEFAULT_LIMIT, 1), 100)];
     if (since) {
         vaf.check(since, {type: 'string', name: 'since', maxLength: 20});
-        args.push(`${since}..HEAD`);
+        if (/[^a-zA-Z0-9._-]/.test(since)) throw new Error('Invalid since'); args.push(since + '..HEAD');
     }
     
     try {
-        const log = execSync('git ' + args.join(' '), { encoding: 'utf8' });
+        const log = spawnSync('git', args, { encoding: 'utf8' }).stdout;
         return log.trim().split('\n').filter(l => l);
     } catch (e) {
         return [];
