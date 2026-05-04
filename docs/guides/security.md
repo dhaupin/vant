@@ -386,6 +386,9 @@ Multiple vulnerabilities fixed in this release:
 ### V001: Command Injection Fix
 
 Before (vulnerable):
+```javascript
+const log = execSync('git ' + args.join(' '), { encoding: 'utf8' });
+```
 
 After (fixed):
 ```javascript
@@ -406,6 +409,7 @@ Key changes:
 ### V002: GitHub Token Protection
 
 Before (vulnerable):
+```javascript
 
 After (fixed):
 ```javascript
