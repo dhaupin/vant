@@ -1,5 +1,5 @@
 ---
-version: 0.8.10
+version: 0.8.49
 permalink: /reference/configuration.html
 layout: default
 title: Configuration
