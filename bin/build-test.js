@@ -1,3 +1,4 @@
+const version = require('../lib/version');
 /**
  * Vant Build Test
  * Validates all scripts can load without errors
@@ -59,8 +60,24 @@ test('load.js runs', () => {
 // Test: rate-limit.js works
 test('rate-limit.js works', () => {
     const rl = require('../lib/rate-limit');
-    if (typeof rl.getStatus !== 'function') {
-        throw new Error('rate-limit.js missing get()');
+    if (typeof rl.canMakeRequest !== 'function') {
+        throw new Error('rate-limit.js missing canMakeRequest()');
+    }
+    if (typeof rl.recordRequest !== 'function') {
+        throw new Error('rate-limit.js missing recordRequest()');
+    }
+    // Functional test: verify rate limiting
+    const key = 'test-rate-limit-key';
+    rl.reset(); // Clear any existing state
+    const allowed = rl.canMakeRequest();
+    if (!allowed) {
+        throw new Error('Rate limiter blocked but should allow first request');
+    }
+    rl.recordRequest();
+    // After recording, should still be allowed
+    const allowed2 = rl.canMakeRequest();
+    if (!allowed2) {
+        throw new Error('Rate limiter blocked second request incorrectly');
     }
 });
 
@@ -96,6 +113,14 @@ test('lock.js loads', () => {
     const lock = require('../lib/lock');
 });
 
+// Test: resolution.js loads
+test('resolution.js loads', () => {
+    const res = require('../lib/resolution');
+    if (typeof res.resolve !== 'function') {
+        throw new Error('resolution.js missing resolve()');
+    }
+});
+
 // Test: example configs exist
 test('example configs exist', () => {
     const configs = ['config.example.ini', '.env.example'];
@@ -106,12 +131,29 @@ test('example configs exist', () => {
     });
 });
 
+// Test: vaf.js loads and works
+test('vaf.js works', () => {
+    const vaf = require('../lib/vaf');
+    // Check key functions exist
+    if (typeof vaf.check !== 'function') {
+        throw new Error('vaf.js missing check()');
+    }
+    if (typeof vaf.checkPathTraversal !== 'function') {
+        throw new Error('vaf.js missing checkPathTraversal()');
+    }
+    // Test blocking
+    const blocked = vaf.checkPathTraversal('../etc/passwd');
+    if (!blocked.blocked) {
+        throw new Error('Path traversal not blocked');
+    }
+});
+
 // Run tests
 let passed = 0;
 let failed = 0;
 
 console.log('╔═══════════════════════════════════════╗');
-console.log('║       Vant Build Test v0.8.2         ║');
+console.log('║       Vant Build Test v' + version + '         ║');
 console.log('╚═══════════════════════════════════════╝');
 
 for (const t of TESTS) {

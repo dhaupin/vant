@@ -1,6 +1,6 @@
 {
   "model": "Vant Project",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "link": "https://github.com/dhaupin/vant",
   "description": "Vant AI Agent System - Default/Public Model",
   "purpose": "Open source starting point for Vant-based systems",

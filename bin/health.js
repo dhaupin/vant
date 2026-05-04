@@ -1,3 +1,7 @@
+#!/usr/bin/env node
+const vaf = require("../lib/vaf");
+// VAF: No user input - checks .env exists only
+
 /**
  * Vant Health Check
  * 

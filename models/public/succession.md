@@ -52,4 +52,4 @@ See: models/.ledger.json
 
 ## Current Version
 
-This is **v0.8.3** - container for dev new stuff.
+This is **v0.8.4** - container for dev new stuff.

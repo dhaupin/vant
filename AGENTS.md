@@ -4,6 +4,33 @@ This guide explains how agents can use Vant's branching system for safe multi-ag
 
 ---
 
+## Security: VAF (Vant Application Firewall)
+
+All inputs are validated through VAF before processing:
+
+```javascript
+const vaf = require('./lib/vaf');
+
+// Check any input
+vaf.check(input, {type: 'string', maxLength: 50000});
+vaf.check(filepath, {type: 'path'});
+
+// Path traversal protection
+vaf.checkPathTraversal('../etc/passwd');  // {blocked: true}
+
+// Content filtering  
+vaf.checkContent('<script>');  // {blocked: true}
+vaf.checkContent('rm -rf /');  // {blocked: true}
+```
+
+Blocked patterns:
+- Path traversal: `../etc/passwd`, `../../../`
+- Script injection: `<script>`, `javascript:`, `onclick=`
+- Shell commands: `rm -rf`, `|bash`, `$(...)`, backticks
+- PHP code: `<?php`
+
+---
+
 ## The Problem
 
 Multiple agents working on the same brain can cause conflicts:
@@ -246,9 +273,264 @@ branch.create('agent-1')
 
 ---
 
+## VANT Deep Scan
+
+**Project Overview:**
+- **Name**: VANT (Versatile Autonomous Networked Tool)
+- **Version**: 0.8.4
+- **Purpose**: Persistent AI agent memory system - each generation inherits full context from previous sessions via GitHub
+- **Repository**: https://github.com/dhaupin/vant
+- **Node**: >=18 required
+
+### Architecture
+
+```
+vant/
+├── bin/                    # CLI executables
+│   ├── vant.js            # Main CLI entry
+│   ├── mcp.js             # Model Context Protocol server
+│   ├── node.js            # Persistent node runner
+│   ├── health.js          # System diagnostics
+│   ├── sync.js            # GitHub pull/push
+│   └── load.js           # Load brain files
+├── lib/                    # Core modules (29 files)
+│   ├── config.js          # Config loader
+│   ├── brain.js         # Brain file loader
+│   ├── lock.js          # Multi-agent locking
+│   ├── branch.js        # Git branch per agent
+│   ├── stego.js        # Steganography (PNG encoding)
+│   ├── vaf.js          # Vant Application Firewall
+│   └── notifications.js # Slack/Discord webhooks
+├── src/                   # Extension points
+│   ├── loader/          # Custom loaders
+│   └── plugins/        # Plugin system
+├── models/               # Brain files
+│   └── public/        # Default brain (19 files)
+│       ├── identity.md, ego.md, fears.md, anger.md, joy.md
+│       ├── manifesto.md, creed.md, goals.md, preferences.md
+│       ├── lessons.md, qc.md, security.md
+│       ├── audit.md, errors.md, keepers.md
+│       ├── curiosity.md, humility.md, empathy.md, gratitude.md
+│       └── meta.json, verbosity.ini
+└── docs/                # Full documentation
+```
+
+### Key Dependencies
+
+- `chalk` - Terminal styling
+- `cli-progress` - Progress bars
+- `express` - HTTP server (MCP)
+- `inquirer` - Interactive prompts
+- `yaml` - YAML parsing
+
+### CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant start` | Full startup (health → sync → load → run) |
+| `vant health` | System diagnostics |
+| `vant sync` | Pull/push brain from GitHub |
+| `vant load` | Load brain from models/public |
+| `vant test` | Run build/tests |
+| `vant watch` | Monitor GitHub for changes |
+| `vant setup` | Interactive setup wizard |
+| `vant mcp` | Run MCP server |
+| `vant node` | Run as persistent node |
+
+### Integration Points
+
+1. **GitHub Sync**: Uses GITHUB_TOKEN and GITHUB_REPO config
+2. **Slack/Discord**: Via SLACK_WEBHOOK_URL, DISCORD_WEBHOOK_URL
+3. **Telegram**: Via TELEGRAM_BOT_TOKEN
+4. **MCP Server**: HTTP server on port 3456 (default)
+
+### Important Patterns
+
+- **Lock before writing**: Always acquire lock before modifying brain
+- **Branch per agent**: Each agent works on their own Git branch
+- **Commit with prefix**: Include agent ID in commit messages
+- **Auto-save**: Enable auto-update for exit persistence
+
+---
+
+## Docs: Jekyll + GitHub Pages
+
+The documentation at https://dhaupin.github.io/vant/ uses Jekyll with GitHub Pages and Pagefind for search.
+
+### Structure
+
+```
+docs/
+├── _config.yml          # Jekyll config (baseurl, collections)
+├── _layouts/
+│   └── default.html     # Main layout with search modal
+├── _sidebar.yml         # Navigation structure
+├── getting-started/    # Tutorial docs
+├── tutorials/           # How-to guides
+├── reference/          # API documentation
+├── guides/             # Deep dive guides
+└── legal/              # Legal pages
+```
+
+### Search: Pagefind
+
+The docs use [Pagefind](https://pagefind.app/) for static full-text search.
+
+**How it works:**
+1. GitHub Actions workflow builds Jekyll site
+2. Runs `pagefind --site _site` to generate search index
+3. Index deployed as artifact to GitHub Pages
+4. Browser loads JS module and fetches index on search
+
+**Code pattern (in default.html):**
+```javascript
+// Global script loads pagefind.js
+var pfModule = await import('/vant/pagefind/pagefind.js');
+await pfModule.init();
+var resp = await pfModule.search(query);
+```
+
+**Testing search:**
+```bash
+# Verify index deployed
+curl -sI "https://dhaupin.github.io/vant/pagefind/pagefind.js" | head -1
+# Should return: HTTP/2 200
+
+# Check entry
+curl -s "https://dhaupin.github.io/vant/pagefind/pagefind-entry.json" | jq '.languages.en.page_count'
+# Returns page count (e.g., 37)
+```
+
+### GitHub Pages Deployment
+
+**Critical: Legacy vs Actions conflict**
+
+Both Vant and prestruct repos had legacy Pages build_type conflicting with Actions workflow:
+- Legacy build ran after Actions, overriding Pagefind artifact
+- Fixed by ensuring Actions deploys first (check timestamps)
+
+**Check deployment:**
+```bash
+# See what Pages is using
+gh api repos/dhaupin/vant/pages --jq '.build_type'
+# Returns: "legacy"
+
+# Check recent runs
+gh run list --repo dhaupin/vant --workflow="Deploy Docs" --limit 1
+gh run list --repo dhaupin/vant --workflow="pages-build-deployment" --limit 1
+```
+
+**If artifacts not deploying:**
+1. Trigger workflow manually: `gh workflow run docs.yml -R owner/repo`
+2. Wait ~50s for build + deploy
+3. Check timestamps - Actions should finish before legacy
+4. If legacy wins, may need GitHub UI toggle to Actions-only
+
+### Workflow
+
+```yaml
+# .github/workflows/docs.yml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+      - uses: actions/configure-pages@v4
+      
+      - name: Build Jekyll
+        run: bundle exec jekyll build
+      
+      - name: Download Pagefind
+        run: |
+          VERSION=$(curl -sL "api.github.com/repos/Pagefind/pagefind/releases/latest" | ...)
+          curl -sL ".../pagefind-v${VERSION}-x86_64-unknown-linux-musl.tar.gz" -o pagefind.tar.gz
+          tar -xzf pagefind.tar.gz
+      
+      - name: Create search index
+        working-directory: docs
+        run: ./pagefind --site _site
+      
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'docs/_site'
+  
+  deploy:
+    needs: build
+    uses: actions/deploy-pages@v4
+```
+
+### Troubleshooting
+
+**Search returns no results:**
+1. Check Pagefind files exist: `curl -sI /vant/pagefind/pagefind-entry.json`
+2. Check page count: Should be ~37
+3. Check network tab for failed fetches
+4. Verify artifact deployed from Actions
+
+**Index 404:**
+1. Legacy build may have overridden artifact
+2. Trigger Actions workflow manually
+3. Check timestamps between runs
+
+---
+
 ## Related Docs
 
+- `CLI.md` - Full CLI command reference
+- `docs/guides/manual-brain.md` - Manual brain creation (without CLI)
+
+- `lib/version.js` - Version system (reads from package.json)
 - `lib/branch.js` - Branch API source
+- `docs/guides/manual-brain.md` - Manual brain creation (no CLI)
 - `lib/lock.js` - Lock API source
 - `models/public/schema/memory-files.md` - Memory file schema
 - `CHANGELOG.md` - Version history
+- `LIBS.md` - Full module reference
+- `CLI.md` - Command reference
+- `README.md` - Full documentation
+---
+
+## Version Management
+
+### Single Source of Truth
+The version is defined in `package.json` (version field). All other places read dynamically from it.
+
+### Version Files
+- **Dynamic** (auto-reads package.json): `lib/version.js`, `lib/config.js`, `.github/workflows/docker.yml`
+- **Manual** (update on release): `package.json`, `RELEASE.md`, `docs/CHANGELOG.md`
+
+### When to Bump Version
+- **NEVER** bump version for docs changes, formatting fixes, or non-release commits
+- **ONLY** bump when preparing an actual release (security fix, feature, breaking change)
+- Use `lib/version.js` to read version programmatically
+
+---
+
+## Tag & Release Policy
+
+### Only Tag on Release
+- Tags mark release checkpoints for Docker Hub, back-porting, and users wanting stable releases
+- Only create a tag when releasing (not for every commit)
+
+### Release Process
+1. Tag a point: `git tag v0.8.4`
+2. Create branch from tag: `git checkout -b release/v0.8.4 v0.8.4`
+3. Release from the release branch (e.g., `release/v0.8.4`)
+
+### Branch Types
+- **Long-lived**: Only `main` and `release/v*.*.*` branches (for back-porting)
+- **Short-lived**: Feature branches (auto-deleted after merge)
+- **NEVER** keep temp branches around long-term
+
+### Anti-Pattern (Don't Do)
+- ❌ Multiple tags per week (spams Docker Hub)
+- ❌ Version bumps on every commit
+- ❌ Temp branches left behind
+- ❌ Creating tags for docs-only changes
+
+### Correct Pattern (Do)
+- ✅ Tag only on actual releases
+- ✅ One tag per stable release
+- ✅ Release branch for back-porting
+- ✅ Clean up feature branches after merge

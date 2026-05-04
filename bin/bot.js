@@ -1,3 +1,6 @@
+const version = require('../lib/version');
+const vaf = require("../lib/vaf");
+// VAF: No user input - fixed Telegram commands
 /**
  * VANT Telegram Bot
  * Simple bot for brain queries and status
@@ -30,7 +33,7 @@ async function main() {
     telegram.onCommand('start', async (msg) => {
         const welcome = `👋 *Welcome to VANT*
 
-Persistent AI Memory System v0.8.2
+Persistent AI Memory System v' + version + '
 
 Commands:
 /status - System status
@@ -45,7 +48,7 @@ Powered by: https://github.com/dhaupin/vant`;
     telegram.onCommand('status', async (msg) => {
         const status = `📊 *VANT Status*
 
-• Version: v0.8.2
+• Version: v' + version + '
 • Platform: Node.js ${process.version}
 • Time: ${new Date().toISOString().slice(0, 19).replace('T', ' ')}
 • Repo: \`${config.GITHUB_REPO || 'Not configured'}\``;

@@ -1,8 +1,10 @@
 # Vant Module Reference
 
-Core libraries in `lib/`.
+> ⚠️ **Deprecated**: See [docs/reference/api](../docs/reference/api.md) for latest.
 
 ---
+
+Core libraries in `lib/`.
 
 ## config.js
 
@@ -190,7 +192,7 @@ See [STEGO.md](./STEGO.md) for full documentation.
 
 ## brain.js
 
-Brain file loader (vant-brain only).
+Brain file loader (Vant).
 
 ```javascript
 const brain = require('./lib/brain');
@@ -206,7 +208,7 @@ const identity = brain.getFile('identity');
 
 ## auto-update.js
 
-Auto-save on exit (vant-brain only).
+Auto-save on exit (Vant).
 
 ```javascript
 const autoUpdate = require('./lib/auto-update');
@@ -273,9 +275,80 @@ Environment: `TELEGRAM_BOT_TOKEN`
 
 ---
 
+## mcp.js
+
+MCP (Model Context Protocol) server exposing VANT brain as AI tools.
+
+```javascript
+// HTTP server
+const mcp = require('./bin/mcp');
+
+// Tools available
+const { TOOLS, getMemory, checkHealth } = mcp;
+```
+
+**Run as HTTP server:**
+
+```bash
+node bin/mcp.js --server
+# Endpoints: GET /tools, GET /health, POST /call
+```
+
+**Run as AI SDK stdio:**
+
+```bash
+node bin/mcp.js --stdio
+```
+
+See [README.md](./README.md#mcp-server) for full usage.
+
+---
+
+## entropy.js
+
+Entropy-Patch protocol for token-aware latent transport. Transforms Vant from "Context Storage" to "Latent Transport" by detecting high-entropy regions in binary data.
+
+```javascript
+const entropy = require('./lib/entropy');
+
+// Generate patches from binary data
+const patches = entropy.generatePatches(buffer, {
+    windowSize: 8,      // sliding window size (default)
+    threshold: 0.85,    // entropy threshold (default)
+});
+
+// Create .vpatch file
+const vpatch = await entropy.generateVPatch(inputFile, outputPath, options);
+
+// Reconstruct from patches (lossless)
+const hydrated = entropy.hydratePatches(patches);
+
+// Get entropy statistics
+const stats = entropy.getEntropyStats(buffer);
+// { overall, min, max, mean, chunkCount, byteCount }
+```
+
+**CLI:**
+
+```bash
+vant compress <file> --stats    # Show entropy stats
+vant compress <file>           # Create .vpatch
+vant compress <file> -d        # Decompress .vpatch
+```
+
+**Constants:**
+
+- `entropy.LATENT_DIR` - Default output dir (`models/latent`)
+- `entropy.DEFAULT_WINDOW_SIZE` - Default window (8)
+- `entropy.DEFAULT_THRESHOLD` - Default threshold (0.85)
+
+---
+
 ## Related
 
 - [CLI.md](./CLI.md) - Command reference
+- [AGENTS.md](../AGENTS.md) - Multi-agent workflows
 - [STEGO.md](./STEGO.md) - Steganography docs
 - [ROADMAP.md](./ROADMAP.md) - Future features
 - [CHANGELOG.md](./CHANGELOG.md) - Version history
+- [README.md](./README.md#mcp-server) - MCP server docs

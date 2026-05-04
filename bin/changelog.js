@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const vaf = require("../lib/vaf");
 /**
  * Vant Changelog
  * Generate session changelog from git history
@@ -8,7 +9,7 @@
  *        vant changelog --format=short
  */
 
-const { execSync } = require('child_process');
+const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -18,13 +19,14 @@ const DEFAULT_LIMIT = 20;
  * Get git log since tag
  */
 function getLog(since = null, limit = DEFAULT_LIMIT) {
-    const args = ['log', `--pretty=format:%h|%s|%an|%ai`, `-n`, limit.toString()];
+    const args = ['log', `'--pretty=format:%H---%s---%an---%aI'`, `-n`, Math.min(Math.max(parseInt(limit) || DEFAULT_LIMIT, 1), 100)];
     if (since) {
-        args.push(`${since}..HEAD`);
+        vaf.check(since, {type: 'string', name: 'since', maxLength: 20});
+        if (/[^a-zA-Z0-9._-]/.test(since)) throw new Error('Invalid since'); args.push(since + '..HEAD');
     }
     
     try {
-        const log = execSync(args.join(' '), { encoding: 'utf8' });
+        const log = spawnSync('git', args, { encoding: 'utf8' }).stdout;
         return log.trim().split('\n').filter(l => l);
     } catch (e) {
         return [];
@@ -35,7 +37,7 @@ function getLog(since = null, limit = DEFAULT_LIMIT) {
  * Parse log entry
  */
 function parseEntry(line) {
-    const [hash, subject, author, date] = line.split('|');
+    const [hash, subject, author, date] = line.split('---');
     return { hash, subject, author, date };
 }
 

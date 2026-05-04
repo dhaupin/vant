@@ -1,10 +1,12 @@
 #!/usr/bin/env node
+const vaf = require("../lib/vaf");
 // bin/onboard.js - CLI for knowledge base / onboarding
 
 const onboard = require('../lib/onboard')
 
 const args = process.argv.slice(2)
 const cmd = args[0]
+if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20})
 
 function printSummary() {
   const summary = onboard.getOnboardSummary()

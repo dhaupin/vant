@@ -39,6 +39,8 @@ const branch = loadModule('branch');
 const lock = loadModule('lock');
 const config = loadModule('config');
 const health = loadModule('health');
+const protection = require('../lib/protection');
+const vaf = require('../lib/vaf');
 
 /**
  * Tool definitions for MCP
@@ -201,6 +203,7 @@ const TOOLS = [
  * Read memory files from models/public
  */
 async function getMemory(files = null) {
+    vaf.check(files, {type: 'path', name: 'files', maxLength: 200, required: false});
     const modelPath = 'models/public';
     if (!fs.existsSync(modelPath)) {
         return { error: 'Brain not found' };
@@ -211,7 +214,34 @@ async function getMemory(files = null) {
         return ['.md', '.txt', '.json', '.yaml', '.yml'].includes(ext);
     });
 
-    const targetFiles = files || allFiles.map(f => path.basename(f, path.extname(f)));
+    // Handle files parameter
+    let targetFiles = allFiles.map(f => path.basename(f, path.extname(f)));
+    if (files && Array.isArray(files)) {
+        // SECURITY: Validate each file before processing
+        for (const file of files) {
+            // Block null bytes
+            if (file.includes('\0')) {
+                return { error: 'Invalid filename - null bytes not allowed' };
+            }
+            // Block absolute paths
+            if (file.startsWith('/') || file.startsWith('\\')) {
+                return { error: 'Absolute paths not allowed' };
+            }
+            // Block parent directory refs
+            if (file.includes('..')) {
+                return { error: 'Parent directory references not allowed' };
+            }
+            
+            // Validate final path is within expected directory
+            const resolvedFile = path.resolve(path.join(modelPath, file));
+            const resolvedPath = path.resolve(modelPath);
+            if (!resolvedFile.startsWith(resolvedPath + path.sep) && resolvedFile !== resolvedPath) {
+                return { error: 'Path traversal detected' };
+            }
+        }
+        targetFiles = files;
+    }
+    
     const memory = {};
 
     for (const name of targetFiles) {
@@ -249,7 +279,30 @@ async function getMemory(files = null) {
  * Write memory file
  */
 async function setMemory(file, content, branch = null, autoCommit = false) {
+    vaf.check(file, {type: 'path', name: 'file', maxLength: 100});
+    vaf.check(content, {type: 'string', name: 'content', maxLength: 50000});
     const modelPath = 'models/public';
+    
+    // SECURITY: Basic filename validation
+    // Block null bytes
+    if (file.includes('\0')) {
+        throw new Error('Invalid filename - null bytes not allowed');
+    }
+    // Block absolute paths
+    if (file.startsWith('/') || file.startsWith('\\')) {
+        throw new Error('Absolute paths not allowed');
+    }
+    // Block parent directory refs
+    if (file.includes('..')) {
+        throw new Error('Parent directory references not allowed');
+    }
+    
+    // SECURITY: Validate final path is within expected directory (prevent path traversal)
+    const resolvedFile = path.resolve(path.join(modelPath, `${file}.md`));
+    const resolvedPath = path.resolve(modelPath);
+    if (!resolvedFile.startsWith(resolvedPath + path.sep) && resolvedFile !== resolvedPath) {
+        throw new Error('Path traversal detected - file must be within models/public');
+    }
     
     // Determine extension - prefer .md
     const mdFile = path.join(modelPath, `${file}.md`);
@@ -294,6 +347,7 @@ async function listBranches() {
  * Create branch
  */
 async function createBranch(name) {
+    vaf.check(name, {type: 'string', name: 'name', maxLength: 50});
     if (!branch || !branch.create) {
         return { error: 'Branch module not available' };
     }
@@ -309,6 +363,7 @@ async function createBranch(name) {
  * Switch branch
  */
 async function switchBranch(name) {
+    vaf.check(name, {type: 'string', name: 'name', maxLength: 50});
     if (!branch || !branch.checkout) {
         return { error: 'Branch module not available' };
     }
@@ -401,42 +456,132 @@ async function checkHealth(detailed = false) {
  * Handle MCP request
  */
 async function handleRequest(request) {
-    const { method, params = {} } = request;
-    
-    switch (method) {
-        case 'tools/list':
-            return { tools: TOOLS };
-            
-        case 'tools/call':
-            const { name, arguments: args } = params;
-            
-            switch (name) {
-                case 'vant_get_memory':
-                    return await getMemory(args.files);
-                case 'vant_set_memory':
-                    return await setMemory(args.file, args.content, args.branch, args.commit);
-                case 'vant_list_branches':
-                    return await listBranches();
-                case 'vant_create_branch':
-                    return await createBranch(args.name);
-                case 'vant_switch_branch':
-                    return await switchBranch(args.name);
-                case 'vant_commit':
-                    return await commitChanges(args.message, args.branch);
-                case 'vant_sync':
-                    return await syncBrain(args.direction);
-                case 'vant_lock':
-                    return await lockBrain(args.action, args.agentId);
-                case 'vant_health':
-                    return await checkHealth(args.detailed);
-                default:
-                    return { error: `Unknown tool: ${name}` };
+    // VAF pre-check
+    const params = request.params || {};
+    if (params.arguments) {
+        const args = params.arguments;
+        
+        // Validate memory write content
+        if (args.content) {
+            try {
+                vaf.check(args.content, {
+                    type: 'string',
+                    name: 'content',
+                    maxLength: 50000
+                });
+            } catch (e) {
+                return { error: 'Security check failed: ' + e.message };
             }
-            
-        default:
-            return { error: `Unknown method: ${method}` };
+        }
+        
+        // Validate file names
+        if (args.file) {
+            try {
+                vaf.check(args.file, {
+                    type: 'path',
+                    name: 'file'
+                });
+            } catch (e) {
+                return { error: 'Security check failed: ' + e.message };
+            }
+        }
+        
+        // Validate branch names
+        if (args.name) {
+            try {
+                vaf.check(args.name, {
+                    type: 'string',
+                    name: 'branch',
+                    maxLength: 100,
+                    pattern: /^[a-zA-Z0-9_\-]+$/
+                });
+            } catch (e) {
+                return { error: 'Security check failed: ' + e.message };
+            }
+        }
+        
+        // Validate commit message
+        if (args.message) {
+            try {
+                vaf.check(args.message, {
+                    type: 'string',
+                    name: 'message',
+                    maxLength: 100000
+                });
+            } catch (e) {
+                return { error: 'Security check failed: ' + e.message };
+            }
+        }
+    }
+    
+    if (protection.isCircuitOpen()) {
+        return { error: 'Circuit open: too many failures. Wait and retry.' };
+    }
+    if (!protection.canProceed()) {
+        return { error: 'Server busy: max ' + protection.MAX_CONCURRENT + ' concurrent requests' };
+    }
+    protection.incrementActive();
+    const { method, params: reqParams = {} } = request;
+    try {
+        switch (method) {
+            case 'tools/list':
+                return { tools: TOOLS };
+            case 'tools/call':
+                const { name, arguments: args = {} } = params;
+                if (name === 'vant_set_memory' && args.content) {
+                    protection.checkInputSize(args.content);
+                }
+                let result;
+                switch (name) {
+                    case 'vant_get_memory':
+                        result = await protection.withTimeout(getMemory(args.files));
+                        break;
+                    case 'vant_set_memory':
+                        result = await protection.withTimeout(setMemory(args.file, args.content, args.branch, args.commit));
+                        break;
+                    case 'vant_list_branches':
+                        result = await protection.withTimeout(listBranches());
+                        break;
+                    case 'vant_create_branch':
+                        result = await protection.withTimeout(createBranch(args.name));
+                        break;
+                    case 'vant_switch_branch':
+                        result = await protection.withTimeout(switchBranch(args.name));
+                        break;
+                    case 'vant_commit':
+                        result = await protection.withTimeout(commitChanges(args.message, args.branch));
+                        break;
+                    case 'vant_sync':
+                        result = await protection.withTimeout(syncBrain(args.direction), 60000);
+                        break;
+                    case 'vant_lock':
+                        result = await protection.withTimeout(lockBrain(args.action, args.agentId));
+                        break;
+                    case 'vant_health':
+                        result = await protection.withTimeout(checkHealth(args.detailed));
+                        break;
+                    case 'vant_protection':
+                        result = protection.getStatus();
+                        break;
+                    default:
+                        result = { error: 'Unknown tool: ' + name };
+                }
+                // Record failures for error results (not just exceptions)
+                if (result && result.error) {
+                    protection.recordFailure();
+                }
+                return result;
+            default:
+                return { error: 'Unknown method: ' + method };
+        }
+    } catch (e) {
+        protection.recordFailure();
+        return { error: e.message };
+    } finally {
+        protection.decrementActive();
     }
 }
+
 
 /**
  * JSON-RPC message handler
@@ -456,20 +601,117 @@ async function handleMessage(msg) {
 
 // Run mode
 const args = process.argv.slice(2);
+const isHelp = args.includes('--help') || args.includes('-h');
 const isStdio = args.includes('--stdio');
 const isServer = args.includes('--server') || args.includes('--http');
+
+// Show help and exit
+if (isHelp) {
+    console.log(`
+Vant MCP Server
+
+Usage:
+  node bin/mcp.js              # Run in background mode
+  node bin/mcp.js --server     # Start HTTP server
+  node bin/mcp.js --stdio     # Run for AI SDK stdio
+  node bin/mcp.js --help      # Show this help
+
+HTTP Endpoints:
+  GET  /tools   List available tools
+  GET  /health  Server health check
+  POST /call    Execute tool (JSON-RPC)
+
+Examples:
+  # Start server
+  node bin/mcp.js --server
+
+  # List tools
+  curl http://localhost:3456/tools
+
+  # Call tool
+  curl -X POST http://localhost:3456/call \\
+    -H "Content-Type: application/json" \\
+    -d '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"vant_health"},"id":1}'
+
+Environment:
+  VANT_MCP_PORT    Server port (default: 3456)
+ // Optional: VANT_MCP_API_KEY   API key for authentication
+  VANT_MCP_API_KEY  API key for auth (optional but recommended)
+
+Authentication:
+  If VANT_MCP_API_KEY is set, include in requests:
+  curl -H "X-API-Key: your-key" http://localhost:3456/...
+`);
+    process.exit(0);
+}
 
 // Only start HTTP server when run directly with --server flag
 if ((!module.parent || isServer) && !isStdio) {
     const http = require('http');
     
-    const server = http.createServer(async (req, res) => {
-        if (req.url === '/tools') {
+    // SECURITY: Add authentication check
+const MCP_API_KEY = process.env.VANT_MCP_API_KEY;
+
+function checkAuth(req) {
+    if (!MCP_API_KEY) return true; // No key configured, allow all
+    const auth = req.headers.authorization;
+    if (auth === MCP_API_KEY || auth === 'Bearer ' + MCP_API_KEY) return true;
+    return false;
+}
+
+const server = http.createServer(async (req, res) => {
+    // Check auth for /call endpoints
+    if (req.url === '/call' && !checkAuth(req)) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Unauthorized' }));
+        return;
+    }
+        // Add CORS headers
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-API-Key');
+        
+        if (req.method === 'OPTIONS') {
+            res.writeHead(204);
+            res.end();
+            return;
+        }
+        
+        // API Key auth check
+        const expectedKey = process.env.VANT_MCP_API_KEY || (config ? config.get('MCP_API_KEY') : null);
+        const requireApiKey = process.env.VANT_MCP_REQUIRE_API_KEY === 'true' || 
+                             (config ? config.get('MCP_REQUIRE_API_KEY') === 'true' : false);
+        
+        // If key is set OR required, enforce auth
+        if (expectedKey || requireApiKey) {
+            const apiKey = req.headers['x-api-key'];
+            if (!apiKey || apiKey !== expectedKey) {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Unauthorized - provide X-API-Key header' }));
+                return;
+            }
+        }
+        
+        if (req.url === '/tools' && req.method === 'GET') {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ tools: TOOLS }));
-        } else if (req.url === '/health') {
+        } else if (req.url === '/health' && req.method === 'GET') {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(await checkHealth()));
+        } else if (req.url === '/call' && req.method === 'POST') {
+            let body = '';
+            req.on('data', chunk => body += chunk);
+            req.on('end', async () => {
+                try {
+                    const request = JSON.parse(body);
+                    const response = await handleRequest(request);
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ id: request.id, result: response }));
+                } catch (e) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ id: null, error: { message: e.message } }));
+                }
+            });
         } else {
             res.writeHead(404);
             res.end();

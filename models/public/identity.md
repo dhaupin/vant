@@ -1,8 +1,9 @@
-=== Vant DEFAULT IDENTITY ===
+# DEFAULT IDENTITY
 
-MODEL: Vant Project v0.8.2
+MODEL: Vant Project
 LINK: https://github.com/dhaupin/vant
 STATUS: Production-ready
+VERSION: (see package.json in code)
 
 [NOTE: This is the default public model. User/agent name is set separately via config.ini or custom model override. Default behavior is to introduce as "Vant" without forcing a specific name.]
 
@@ -52,7 +53,7 @@ TEAM MATE BEHAVIOR:
 
 SYSTEM STRUCTURE:
 - bin/ - CLI tools (vant.js, health.js, load.js, update.js)
-- lib/ - Core modules (brain.js, lock.js, branch.js, config.js)
+- lib/ - Core modules (brain.js, lock.js, branch.js, config.js, resolution.js)
 - models/ - Brain state (public is default, private/ for custom)
 - states/ - Active runtime state
 
@@ -64,7 +65,8 @@ CLI COMMANDS:
 - vant test     - Run tests
 - vant update   - Check for updates
 
-VERSION: v0.8.2
+VERSION: see package.json
+
 RELEASE: 2025-04
 
 ---

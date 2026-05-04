@@ -1,8 +1,127 @@
 # Changelog
 
+> ⚠️ **Migration to Jekyll docs in progress**. See [docs/](docs/) for latest guides.
+
+---
+
 > VANT = Versatile Autonomous Networked Tool
 
 All notable changes to VANT are documented here.
+
+---
+
+## v0.8.4 (2026-04-20)
+
+### Added
+- **Entropy-Patch Protocol** - Token-aware latent transport
+  - `lib/entropy.js` - Core module
+    - `generatePatches()` - Windowed entropy scan
+    - `generateVPatch()` - Create .vpatch files
+    - `hydratePatches()` - Lossless reconstruction
+    - `getEntropyStats()` - Entropy analysis
+  - `bin/compress.js` - CLI command
+    - `vant compress <file> --stats` - Show entropy stats
+    - `vant compress <file>` - Create .vpatch
+    - `vant compress <file> --decompress` - Extract
+  - `models/latent/` - Output directory
+  - Transforms Vant from Context Storage to Latent Transport
+
+### Security Hardening
+- **VAF (Vant Application Firewall)** - Input validation system
+  - `lib/vaf.js` - Pattern-based content blocking
+  - Blocks: path traversal, XSS, shell injection, log injection, CRLF, XXE
+  - MCP integration - all endpoints validated
+  - `type: 'path'` for file params prevents traversal
+  - Rate limiting via `lib/protection.js`
+- **VAF Patterns Added**:
+  - Path traversal: `../`, `..\`
+  - XSS: `<script>`, `javascript:`, `on*=`
+  - Shell: `;`, `|`, `&&`, `$()`, backticks
+  - Log injection: `\n`, `\r\n`
+  - XXE: `<!ENTITY`, `<!ELEMENT`
+- **MCP Hardening**:
+  - Changed file params from `type: 'string'` to `type: 'path'`
+  - Newlines/CRLF blocked in string content
+
+### Added
+- **Docs System** - Full documentation overhaul
+  - Jekyll migration from Docsify
+  - docs/ folder with getting-started/, guides/, reference/
+  - _config.yml, _sidebar.yml, _redirects
+  - Permalinks for clean URLs
+  - Mobile-friendly navigation
+- **Docs Funnel** - Root MDs deprecated, point to docs
+  - CLI.md, LIBS.md, CONTENT.md, STEGO.md with deprecation notices
+  - Backwards compat via links to docs/
+  - Added /style, /steganography redirects
+- **AGENTS.md** - Added deep scan knowledge
+  - Project overview, architecture diagram
+  - Key dependencies, CLI commands table
+  - Integration points documented
+- **Docs Expansion** - Full coverage
+  - Security, testing, audit, GitHub Pages guides
+  - Integration, gotchas, limits
+  - Plugins, config, states
+  - FAQs added to index, CLI, MCP
+- **lib/protection.js** - Circuit breaker for MCP
+- **lib/load.js** - Model loader utilities
+- **Onboarding** - Knowledge base browser
+  - vant onboard - View/search brain files
+  - lib/onboard.js - Search + read brain
+- **Succession** - Brain version/trust management
+  - vant succession - Version + trust levels
+  - lib/succession.js - Trust level controls
+- **Resolution** - Improved frontmatter matching
+  - Fix path resolution (PROJECT_ROOT)
+  - Auto-add .md extension  
+  - Partial match for bullets/headings
+  - Returns foundType, foundAt metadata
+- **Resolution** - Thought status tracking
+  - vant resolution - Mark thoughts resolved/deprecated/rejected
+  - lib/resolution.js - Per-file/per-entry status
+  - Deltas for change tracking
+- **MCP Authentication** - API key for secure AI tool access
+  - X-API-Key header for all MCP endpoints
+  - Via VANT_MCP_API_KEY env or MCP_API_KEY in config.ini
+  - Optional but recommended for production
+- **Full CLI Help** - All 20 commands documented
+  - vant help <cmd> now delegates properly to help.js
+  - mcp --help shows full docs with curl examples
+- **onboard Command** - Onboarding summary
+- **succession Command** - Brain succession status
+- **API Documentation** - Full lib coverage expanded
+  - vaf.js: validation, rate limiting, sanitization, middleware
+  - protection.js: circuit breaker, active tracking, input limits
+
+### Added (2026-04-23)
+- **Pagefind Search** - Full-text search for Jekyll docs
+  - docs/_layouts/default.html with search modal
+  - Custom themed UI matching Vant design
+  - Keyboard shortcuts (Cmd/Ctrl+K)
+  - Pagefind v1.5.2 integrated
+
+### Added (2026-05-01)
+- **AdaptiveEntropy** - Self-calibrating entropy mode
+  - `lib/entropy.js`: AdaptiveEntropy class with rolling mu + k*sigma
+  - CLI: --adaptive/-a and --sensitivity/-k flags
+  - docs/reference/entropy.md updated
+
+### Fixed (2026-04-23)
+- **Docs Search** - Pagefind deployment issue
+  - Legacy Pages build conflicting with GitHub Actions
+  - Workflow fixed with working-directory: docs
+  - Added configure-pages step for proper OIDC
+  - baseurl and url added to Jekyll _config.yml
+  - 37 pages now indexed and searchable
+
+---
+
+## v0.8.3 (2026-04-19)
+
+### Fixed
+- **bin/run.js** - Updated vant-brain references → Vant
+- **README.md** - Removed vant-brain references
+- **LIBS.md/CLI.md** - Updated references
 
 ---
 

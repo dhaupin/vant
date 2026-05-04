@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+const vaf = require("../lib/vaf");
+const version = require('../lib/version');
 /**
  * vant CLI - Command aliases
  *
@@ -19,6 +21,7 @@
  *   vant update     - Check for new Vant releases
  *   vant rate       - Show GitHub API rate limit
  *   vant bump      - Bump version and tag release
+ *   vant docs      - Build docs for release
  *   vant node      - Run as persistent node
  *   vant mcp       - Run MCP server for AI tools
  */
@@ -40,35 +43,68 @@ const COMMANDS = {
     update: 'update.js',
     watch: 'watch.js',
     bump: 'bump.js',
+    docs: 'docs.js',
     setup: 'setup.js',
     rate: 'rate.js',
     help: 'help.js',
     node: 'node.js',
-    mcp: 'mcp.js'
+    mcp: 'mcp.js',
+    onboard: 'onboard.js',
+    resolution: 'resolution.js',
+    succession: 'succession.js',
+    bot: 'bot.js',
+    compress: 'compress.js'
 };
 
-const cmd = process.argv[2];
+const args = process.argv.slice(2);
+const cmd = args[0];
+if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
 
-if (!cmd || cmd === 'help') {
+// Handle: vant help <cmd>
+if (cmd === 'help' && args[1]) {
+    const { spawn } = require('child_process');
+    // Validate command name to prevent injection
+    const helpCmd = args[1].replace(/[^a-zA-Z0-9_-]/g, '');
+    const child = spawn('node', ['bin/help.js', helpCmd], { stdio: 'inherit' });
+    child.on('exit', (code) => process.exit(code || 0));
+}
+
+if (!cmd || cmd === 'help' || cmd === 'vant') {
     console.log(`
 ╔═══════════════════════════════════════╗
-║         vant CLI v0.8.2              ║
+║         vant CLI v0.8.4              ║
 ╚═══════════════════════════════════════╝
 
 Usage: vant <command> [options]
 
-Commands:
+Core:
   vant start        Full startup
-  vant sync        Pull from GitHub
+  vant sync        Pull/push brain
   vant health      System diagnostics
   vant load        Load brain
   vant run         Start runtime
+
+Info:
   vant test        Run build tests
   vant changelog   View changes
-  vant summary     Session summary
-  vant watch       Monitor GitHub
-  vant setup       Interactive setup
-  vant help        Show help
+  vant summary    Session summary
+  vant watch      Monitor GitHub
+  vant help       Show help
+
+Setup:
+  vant setup      Interactive setup
+  vant update    Check for updates
+  vant rate      GitHub rate limit
+  vant bump     Bump version
+  vant docs      Build docs
+
+Integrations:
+  vant mcp       MCP server
+  vant node      Persistent node
+  vant bot       Telegram bot
+  vant onboard  Onboarding
+  vant succession Succession
+  vant compress  Entropy-Patch encoder
 `);
     process.exit(0);
 }

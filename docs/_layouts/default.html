@@ -1,0 +1,858 @@
+---
+# Jekyll layout for Vant docs with sidebar navigation
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page.title | default: "Vant Docs" }}</title>
+    <meta name="description" content="{{ page.description | default: "Vant: Open source system for AI agent memory persistence" }}">
+    <link rel="canonical" href="{{ page.url | absolute_url }}">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23059669'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' fill='white' font-family='system-ui' font-weight='bold' font-size='20'>V</text></svg>">
+    
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+    
+    <!-- Pagefind search -->
+    <style>
+        .search-trigger {
+            display: flex;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .search-trigger:hover {
+            color: var(--text);
+            border-color: var(--text-muted);
+        }
+        .search-trigger svg {
+            width: 16px;
+            height: 16px;
+        }
+        .search-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 8vh 1rem;
+        }
+        .search-modal.open {
+            display: flex;
+        }
+        .search-modal-content {
+            width: 100%;
+            max-width: 600px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 2vh;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            font-family: var(--font);
+            background: transparent;
+            color: var(--text);
+            border: none;
+            border-bottom: 1px solid var(--border);
+            outline: none;
+        }
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+        .search-results {
+            padding: 0;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+        .search-result {
+            display: block;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+        .search-result:hover {
+            background: var(--bg-hover);
+            text-decoration: none;
+        }
+        .search-result-title {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+        .search-result-excerpt {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .search-empty {
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+        .search-close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0.5rem;
+        }
+        .search-close:hover {
+            color: var(--text);
+        }
+        @media (max-width: 600px) {
+            .search-modal-content {
+                margin-top: 0;
+            }
+        }
+    </style>
+    
+    <style>
+        :root {
+            --bg: #fafafa;
+            --bg-card: #ffffff;
+            --bg-sidebar: #f5f5f5;
+            --text: #222222;
+            --text-muted: #666666;
+            --text-light: #888888;
+            --border: #e0e0e0;
+            --accent: #059669;
+            --accent-hover: #047857;
+            --link: #059669;
+            --sidebar-width: 260px;
+            --header-height: 56px;
+        }
+        [data-theme="dark"] {
+            --bg: #0f0f12;
+            --bg-card: #18181c;
+            --bg-sidebar: #141418;
+            --text: #e8e8e8;
+            --text-muted: #a0a0a0;
+            --text-light: #707070;
+            --border: #2a2a32;
+            --accent: #10b981;
+            --accent-hover: #34d399;
+            --link: #10b981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        
+        a { color: var(--link); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 100;
+        }
+        
+        .header-brand {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-brand:hover { text-decoration: none; }
+        
+        .header-brand svg {
+            width: 28px;
+            height: 28px;
+        }
+        
+        .header-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        /* Header buttons */
+        .search-trigger,
+        .theme-toggle,
+        .github-cta,
+        .hamburger {
+            background: none;
+            border: none;
+            color: var(--text);
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .search-trigger:hover,
+        .theme-toggle:hover,
+        .github-cta:hover,
+        .hamburger:hover {
+            background: var(--bg-hover);
+        }
+        
+        .search-trigger svg,
+        .theme-toggle svg,
+        .github-cta svg,
+        .hamburger svg {
+            width: 18px;
+            height: 18px;
+            display: block;
+        }
+        
+        /* Theme toggle icons */
+        .theme-toggle .icon-sun,
+        .theme-toggle .icon-moon {
+            display: none;
+        }
+        
+        body:not(.dark) .theme-toggle .icon-moon {
+            display: block;
+        }
+        
+        body.dark .theme-toggle .icon-sun {
+            display: block;
+        }
+        
+        /* GitHub CTA button */
+        .github-cta {
+            color: var(--text-muted);
+        }
+        
+        .github-cta svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* Hide header hamburger on desktop */
+        .header .hamburger {
+            display: none;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 20px 0;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-light);
+            padding: 8px 20px;
+            margin-bottom: 4px;
+        }
+        
+        .sidebar-nav {
+            list-style: none;
+        }
+        
+        .sidebar-nav li {
+            margin: 0;
+        }
+        
+        .sidebar-nav a {
+            display: block;
+            padding: 8px 20px;
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            transition: background 0.15s, color 0.15s;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-nav a:hover {
+            background: var(--bg);
+            color: var(--text);
+            text-decoration: none;
+        }
+        
+        .sidebar-nav a.active {
+            color: var(--accent);
+            border-left-color: var(--accent);
+            background: var(--bg);
+            font-weight: 500;
+        }
+        
+        /* Main content */
+        .main {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            padding: 30px 40px;
+            max-width: 800px;
+        }
+        
+        .main h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+        
+        .main h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 30px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .main h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin: 24px 0 8px;
+        }
+        
+        .main p {
+            margin-bottom: 16px;
+            color: var(--text-muted);
+        }
+        
+        .main ul, .main ol {
+            margin: 0 0 16px 20px;
+            color: var(--text-muted);
+        }
+        
+        .main li {
+            margin-bottom: 6px;
+        }
+        
+        .main code {
+            background: var(--bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: 'SF Mono', Menlo, Monaco, monospace;
+        }
+        
+        /* Inline code styling (not inside pre blocks) */
+        .main p code, .main li code, .main td code {
+            background: var(--bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: 'SF Mono', Menlo, Monaco, monospace;
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+        
+        /* Code blocks with syntax highlighting */
+        .main pre {
+            position: relative;
+            background: #1e1e1e;
+            padding: 16px;
+            padding-top: 40px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 16px 0;
+            font-size: 0.9em;
+        }
+        
+        .main pre[data-language]::before {
+            content: attr(data-language);
+            position: absolute;
+            top: 8px;
+            left: 16px;
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .main pre code {
+            background: none;
+            padding: 0;
+            font-family: 'SF Mono', Menlo, Monaco, 'Consolas', monospace;
+        }
+        
+        /* Copy button */
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 6px 10px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s, background 0.2s;
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+        
+        .main pre:hover .copy-btn {
+            opacity: 1;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        
+        .copy-btn.copied {
+            color: #10b981;
+            border-color: #10b981;
+        }
+        
+        /* Prism.js overrides for better dark theme */
+        pre[class*="language-"] {
+            background: #1e1e1e !important;
+        }
+        
+        code[class*="language-"] {
+            background: transparent !important;
+        }
+        
+        /* Line numbers */
+        .line-numbers .line-numbers-rows {
+            border-right: 1px solid #333 !important;
+        }
+        
+        .main table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+        
+        .main th, .main td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .main th {
+            font-weight: 600;
+            background: var(--bg);
+        }
+        
+        .main blockquote {
+            border-left: 3px solid var(--accent);
+            padding-left: 16px;
+            margin: 16px 0;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        
+        /* Breadcrumbs */
+        .breadcrumbs {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 16px;
+        }
+        
+        .breadcrumbs a {
+            color: var(--text-muted);
+        }
+        
+        .breadcrumbs a:hover {
+            color: var(--accent);
+        }
+        
+        .breadcrumbs span {
+            color: var(--text-light);
+            margin: 0 6px;
+        }
+        
+        /* Footer */
+        .footer {
+            margin-top: 60px;
+            padding: 30px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+        
+        .footer a {
+            color: var(--link);
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            /* Show hamburger in header on mobile */
+            .header .hamburger {
+                display: flex;
+            }
+            
+            /* Move header brand to left, hide text on very small screens */
+            .header-brand span,
+            .header-brand svg + span {
+                display: inline;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 99;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main {
+                margin-left: 0;
+                padding: 20px 16px;
+            }
+            
+            .header {
+                padding: 0 12px;
+            }
+        }
+        
+        /* Sidebar overlay for mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 98;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar-overlay.open {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <a href="/vant/" class="header-brand">
+            <svg viewBox="0 0 32 32" fill="currentColor">
+                <rect width="32" height="32" rx="4" fill="var(--accent)"/>
+                <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" fill="white" font-family="system-ui" font-weight="bold" font-size="20">V</text>
+            </svg>
+            Vant Docs
+        </a>
+        
+        <div class="header-right">
+            <button class="search-trigger" id="searchTrigger" aria-label="Search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+            </button>
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+                <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                </svg>
+                <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                </svg>
+            </button>
+            <a href="https://github.com/dhaupin/vant" class="github-cta" aria-label="GitHub">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+            </a>
+            <button class="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12h18M3 6h18M3 18h18"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+    
+    <!-- Sidebar overlay (mobile) -->
+    <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+    
+    <!-- Sidebar navigation -->
+    <aside class="sidebar" id="sidebar">
+        {% if site.nav %}
+          {% for section in site.nav %}
+            {% if section.items %}
+            <div class="sidebar-section">
+                <div class="sidebar-title">{{ section.title }}</div>
+                <ul class="sidebar-nav">
+                {% for item in section.items %}
+                    <li><a href="{{ item.url | relative_url }}">{{ item.title }}</a></li>
+                {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+    </aside>
+    
+    <!-- Main content -->
+    <main class="main">
+        <!-- Page content -->
+        {{ content }}
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Open source under <a href="https://github.com/dhaupin/vant/blob/main/LICENSE">MIT license</a>.</p>
+            <p style="margin-top: 8px;">
+                <a href="https://github.com/dhaupin/vant">GitHub</a> · 
+                <a href="https://github.com/dhaupin/vant/releases">Releases</a> · 
+                <a href="https://github.com/dhaupin/vant/issues">Issues</a>
+            </p>
+        </footer>
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    
+    <!-- Pagefind search -->
+    
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // Load saved theme
+        const saved = localStorage.getItem('theme');
+        if (saved === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else if (saved === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.querySelector('.sidebar-overlay').classList.toggle('open');
+        }
+        
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.querySelector('.sidebar-overlay').classList.remove('open');
+        }
+        
+        // Set active nav item based on current URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const path = window.location.pathname;
+            const links = document.querySelectorAll('.sidebar-nav a');
+            links.forEach(link => {
+                if (link.getAttribute('href') === path) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // Initialize syntax highlighting
+            initCodeBlocks();
+        });
+        
+        // Syntax highlighting and copy button setup
+        function initCodeBlocks() {
+            const preBlocks = document.querySelectorAll('.main pre');
+            
+            preBlocks.forEach(pre => {
+                const code = pre.querySelector('code');
+                if (!code) return;
+                
+                // Detect language from class
+                const langClass = Array.from(code.classList).find(c => c.startsWith('language-'));
+                const lang = langClass ? langClass.replace('language-', '') : detectLanguage(code.textContent);
+                
+                if (lang) {
+                    pre.setAttribute('data-language', lang);
+                    
+                    // Try to apply highlighting
+                    if (Prism.languages[lang]) {
+                        code.innerHTML = Prism.highlight(code.textContent, Prism.languages[lang], lang);
+                    }
+                }
+                
+                // Add copy button
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+                copyBtn.setAttribute('aria-label', 'Copy code');
+                copyBtn.setAttribute('title', 'Copy to clipboard');
+                pre.appendChild(copyBtn);
+                
+                copyBtn.addEventListener('click', async function() {
+                    const text = code.textContent;
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        copyBtn.classList.add('copied');
+                        copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                        setTimeout(() => {
+                            copyBtn.classList.remove('copied');
+                            copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Failed to copy:', err);
+                    }
+                });
+            });
+        }
+        
+        // Simple language detection based on content patterns
+        function detectLanguage(code) {
+            const patterns = {
+                javascript: [/\bconst\b.*=.*require/, /\bimport\b.*from\b/, /\basync\s+function\b/, /=>\s*{/],
+                bash: [/^\s*#!\/bin\/(ba)?sh/, /^\s*npm\s+/, /^\s*git\s+/, /\$\s*\w+/],
+                json: [/^\s*{[\s\S]*}\s*$/, /"[^"]+"\s*:/],
+                yaml: [/^\w+:\s*\S/m, /^\s+-\s+\w+/],
+                python: [/\bdef\b.*\(.*\)\s*:/, /\bimport\b/, /\bclass\b.*:/, /print\s*\(/],
+                dockerfile: [/FROM\s+\w+/, /RUN\s+/, /COPY\s+/],
+                markdown: [/^\s*#+\s+/m, /\*\*[^*]+\*\*/, /^\s*[-*]\s+/m],
+                html: [/<\/?[a-z]+[^>]*>/i, /<\/?[a-z]+[^>]*\/\s*>/i],
+                css: [/\{[^}]*\}/, /\.[a-z-]+\s*{/, /#[a-z-]+\s*{/]
+            };
+            
+            for (const [lang, regexes] of Object.entries(patterns)) {
+                if (regexes.some(regex => regex.test(code))) {
+                    return lang;
+                }
+            }
+            return null;
+        }
+    </script>
+<!-- Search Modal -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-modal-content">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search docs..." autocomplete="off">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+        <button class="search-close" id="searchClose" aria-label="Close search">×</button>
+    </div>
+    
+    <script src="/vant/pagefind/pagefind.js"></script>
+    <script>
+        // Search functionality using Pagefind (matching prestruct approach)
+        var searchTrigger = document.getElementById('searchTrigger');
+        var searchModal = document.getElementById('searchModal');
+        var searchInput = document.getElementById('searchInput');
+        var searchResults = document.getElementById('searchResults');
+        var searchClose = document.getElementById('searchClose');
+        var pfModule = null;
+
+        async function doSearch(q) {
+            if (q.length < 2) {
+                searchResults.innerHTML = '';
+                return;
+            }
+            searchResults.innerHTML = '<div class="search-empty">Searching for "' + q + '"...</div>';
+            try {
+                // Import fresh each time (matching prestruct pattern)
+                var pagefind = await import('/vant/pagefind/pagefind.js');
+                await pagefind.init();
+                var resp = await pagefind.search(q);
+                if (resp.results.length === 0) {
+                    searchResults.innerHTML = '<div class="search-empty">No results for "' + q + '"</div>';
+                    return;
+                }
+                var html = '';
+                for (var i = 0; i < resp.results.length && i < 5; i++) {
+                    var r = resp.results[i];
+                    var data = await r.data();
+                    var url = data.url;
+                    html += '<a href="' + url + '" class="search-result">';
+                    html += '<div class="search-result-title">' + data.meta.title + '</div>';
+                    if (data.excerpt) html += '<div class="search-result-excerpt">' + data.excerpt + '</div>';
+                    html += '</a>';
+                }
+                searchResults.innerHTML = html;
+            } catch (e) {
+                searchResults.innerHTML = '<div class="search-empty">Error: ' + e.message + '</div>';
+                console.error('Search error:', e);
+            }
+        }
+
+        searchTrigger.addEventListener('click', function() {
+            searchModal.classList.add('open');
+            searchInput.focus();
+        });
+        searchClose.addEventListener('click', function() {
+            searchModal.classList.remove('open');
+        });
+        searchModal.addEventListener('click', function(e) {
+            if (e.target === searchModal) searchModal.classList.remove('open');
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && searchModal.classList.contains('open')) {
+                searchModal.classList.remove('open');
+            }
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                searchModal.classList.add('open');
+                searchInput.focus();
+            }
+        });
+        searchInput.addEventListener('input', function() {
+            doSearch(this.value);
+        });
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                doSearch(this.value);
+            }
+        });
+    </script>
+</body>
+</html>

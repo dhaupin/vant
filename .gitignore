@@ -33,4 +33,4 @@ build/
 
 # Temp
 *.tmp
-temp/
+temp/models/latent/*.vpatch

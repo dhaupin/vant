@@ -16,6 +16,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    # Only build on push to main, v0.8.2, or tags
     if: github.event_name != 'pull_request'
 
     steps:
@@ -45,21 +46,26 @@ jobs:
         run: |
           echo "Building VANT..."
           VERSION=$(node -p "require('./package.json').version")
-          REF_NAME="${{ github.ref_name }}"
-          if [[ "$REF_NAME" == "main" ]]; then
+          # Tag with correct version based on branch
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             docker build --build-arg VERSION=$VERSION . -t dhaupin/vant:latest
-          elif [[ "$REF_NAME" == "v0.8.2" ]]; then
-            docker build --build-arg VERSION=0.8.2 . -t dhaupin/vant:v0.8.2 -t dhaupin/vant:latest
-          elif [[ "$REF_NAME" =~ ^v ]]; then
-            docker build --build-arg VERSION=$REF_NAME . -t "dhaupin/vant:$REF_NAME"
+          elif [[ "${{ github.ref }}" == "refs/heads/v0.8.2" ]]; then
+            docker build --build-arg VERSION=$VERSION . -t dhaupin/vant:v0.8.2 -t dhaupin/vant:latest
+          elif [[ "${{ github.ref }}" =~ ^refs/tags/v ]]; then
+            TAG_VERSION="${github.ref#refs/tags/v}"
+            docker build --build-arg VERSION=$TAG_VERSION . -t "dhaupin/vant:$TAG_VERSION"
           fi
 
       - name: Push to Hub
         if: github.event_name == 'push'
         run: |
-          echo "Pushing to Hub..."
-          IMAGES="${{ steps.meta.outputs.image }}"
-          TAGS="${{ steps.meta.outputs.tags }}"
-          echo "Images: $IMAGES"
-          echo "Tags: $TAGS"
-          echo "$TAGS" | tr '\n' ' ' | xargs -n1 docker push
+          echo "Pushing to Docker Hub..."
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            docker push dhaupin/vant:latest
+          elif [[ "${{ github.ref }}" == "refs/heads/v0.8.2" ]]; then
+            docker push dhaupin/vant:v0.8.2
+            docker push dhaupin/vant:latest
+          elif [[ "${{ github.ref }}" =~ ^refs/tags/v ]]; then
+            VERSION="${github.ref#refs/tags/v}"
+            docker push "dhaupin/vant:$VERSION"
+          fi

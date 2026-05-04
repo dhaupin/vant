@@ -1,49 +1,73 @@
-name: Test VANT
+name: VANT CI
 
-on: [push, pull_request]
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, develop, 'agent-*']
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    
     timeout-minutes: 5
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Install dependencies
+        run: npm install
+      - name: Run CI tests
+        run: node test/ci.js
+      - name: Run full suite
+        run: node test/runner.js
 
-      - name: Verify files
-        run: |
-          echo "=== VANT Files ==="
-          ls -la bin/ config.ini models/ 2>/dev/null || true
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install
+      - name: Load config
+        run: node -e "require('./lib/config')"
+      - name: Load auto-update
+        run: node -e "require('./lib/auto-update')"
 
-      - name: Test loader
-        run: |
-          node bin/load.js v0.5.0 || echo "Loader test completed"
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install
+      - name: Check tokens (should find none)
+        run: '! grep -rE "ghp_[a-zA-Z0-9]{36}" . --include="*.js" '
+      - name: Check npm audit
+        run: npm audit --audit-level=high
 
-      - name: Test health
-        run: |
-          node bin/health.js || echo "Health check completed"
-
-      - name: Test build
-        run: |
-          node bin/build-test.js || echo "Build test completed"
-
-      - name: Test sync (with timeout)
-        run: |
-          timeout 10 node bin/sync.js || echo "Sync test completed"
-
-      - name: Test stegoframe URL
-        run: |
-          cat config.example.ini | grep STEGOFRAME_URL | head -1
-
-      - name: Security check
-        run: |
-          echo "=== Security Audit ==="
-          echo "Checking for hardcoded secrets..."
-          ! grep -E "ghp_[a-zA-Z0-9]{36}" config.ini || exit 1
-          echo "✓ No obvious tokens in config"
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install
+      - name: Show version
+        run: node -e "console.log(require('./package.json').version)"
