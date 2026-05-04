@@ -1,0 +1,117 @@
+name: VANT CI
+
+on:
+  push:
+    branches: [main, develop, 'agent-*']
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install dependencies
+        run: npm install
+        
+      - name: Run CI tests
+        run: node test/ci.js --json
+        
+      - name: Run full test suite
+        run: node test/runner.js
+        
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Check syntax
+        run: |
+          for f in lib/*.js bin/*.js; do
+            node --check "$f" || exit 1
+          done
+          
+      - name: Check required files
+        run: |
+          ls -la bin/vant.js lib/vaf.js lib/config.js lib/lock.js lib/branch.js
+          
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Test VAF
+        run: node -e "
+          const vaf = require('./lib/vaf');
+          const tests = [
+            ['../etc/passwd', true],
+            ['<script>', true],
+            ['rm -rf /', true],
+          ];
+          let failed = 0;
+          tests.forEach(([input, shouldBlock]) => {
+            const r = vaf.checkContent(input);
+            if (r.blocked !== shouldBlock) failed++;
+          });
+          if (failed > 0) process.exit(1);
+        "
+        
+      - name: Test path traversal
+        run: node -e "
+          const vaf = require('./lib/vaf');
+          const paths = ['../etc', '..', '/etc/passwd'];
+          let failed = 0;
+          paths.forEach(p => {
+            const r = vaf.checkPathTraversal(p);
+            if (!r.blocked) failed++;
+          });
+          if (failed > 0) process.exit(1);
+        "
+        
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Test library loads
+        run: node -e "
+          const libs = ['vaf','config','lock','branch','brain','logger','errors','entropy'];
+          libs.forEach(lib => require('./lib/' + lib));
+        "
+        
+      - name: Test binaries
+        run: |
+          for bin in vant health load sync; do
+            timeout 3 node bin/$bin.js || true
+          done

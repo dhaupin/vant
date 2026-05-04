@@ -79,7 +79,7 @@ async function setup() {
     console.log('   Required: repo scope');
     console.log('   IMPORTANT: Set as GITHUB_TOKEN env var, NOT in config.ini\n');
     const githubRepo = await question('GitHub repo (username/repo): ');
-    validateInput(githubRepo, "string", "githubRepo", { maxLength: 100, pattern: /@[w-]+/[w-]+$/ });
+    validateInput(githubRepo, "string", "githubRepo", { maxLength: 100 });
     
     console.log('\n2. Stegoframe Setup (optional)');
     console.log('   URL: https://stegoframe.creadev.org\n');
