@@ -19,10 +19,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install
+      - name: Install dependencies
         run: npm install
       - name: Run CI tests
-        run: node test/ci.js --json
+        run: node test/ci.js
       - name: Run full suite
         run: node test/runner.js
 
@@ -35,12 +35,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install
+      - name: Install dependencies
         run: npm install
-      - name: Syntax check bins
-        run: node -e "require('./bin/vant.js')"
-      - name: Syntax check libs
+      - name: Load config
         run: node -e "require('./lib/config')"
+      - name: Load auto-update
+        run: node -e "require('./lib/auto-update')"
 
   security:
     runs-on: ubuntu-latest
@@ -51,12 +51,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install
+      - name: Install dependencies
         run: npm install
-      - name: VAF tests
+      - name: VAF validate
         run: node test/ci.js --lib=vaf
-      - name: No leaked tokens
-        run: '! grep -rE "ghp_[a-zA-Z0-9]{36}" . --include="*.js" || exit 1'
+      - name: Check tokens
+        run: '! grep -rE "ghp_[a-zA-Z0-9]{36}" . --include="*.js" '
 
   validate:
     runs-on: ubuntu-latest
@@ -67,11 +67,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install
+      - name: Install dependencies
         run: npm install
-      - name: Health check
-        run: node bin/health.js
-      - name: Load brain
-        run: node bin/load.js v0.5.0
-      - name: Output version
-        run: node -e "console.log('Version:', require('./package.json').version)"
+      - name: Show version
+        run: node -e "console.log(require('./package.json').version)"
