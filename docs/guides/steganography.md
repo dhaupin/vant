@@ -39,6 +39,10 @@ console.log(stego.decode('output.png'));
 ## With Encryption
 Encrypt messages with a password.
 
+**Password Requirements:**
+- Minimum 8 characters
+- Maximum 128 characters
+
 Encode with encryption:
 
 ```bash
