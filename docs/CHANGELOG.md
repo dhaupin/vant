@@ -1,4 +1,5 @@
 # CHANGELOG
+version: 0.8.59
 
 All notable changes to Vant are documented in this file.
 
