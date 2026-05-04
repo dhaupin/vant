@@ -635,6 +635,7 @@ Examples:
 
 Environment:
   VANT_MCP_PORT    Server port (default: 3456)
+ // Optional: VANT_MCP_API_KEY   API key for authentication
   VANT_MCP_API_KEY  API key for auth (optional but recommended)
 
 Authentication:
@@ -648,7 +649,23 @@ Authentication:
 if ((!module.parent || isServer) && !isStdio) {
     const http = require('http');
     
-    const server = http.createServer(async (req, res) => {
+    // SECURITY: Add authentication check
+const MCP_API_KEY = process.env.VANT_MCP_API_KEY;
+
+function checkAuth(req) {
+    if (!MCP_API_KEY) return true; // No key configured, allow all
+    const auth = req.headers.authorization;
+    if (auth === MCP_API_KEY || auth === 'Bearer ' + MCP_API_KEY) return true;
+    return false;
+}
+
+const server = http.createServer(async (req, res) => {
+    // Check auth for /call endpoints
+    if (req.url === '/call' && !checkAuth(req)) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Unauthorized' }));
+        return;
+    }
         // Add CORS headers
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');

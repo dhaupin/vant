@@ -69,7 +69,7 @@ function getRemoteUrl() {
         return null;
     }
     
-    return `https://${token}@github.com/${repo}.git`;
+    return `https://github.com/${repo}.git`;
 }
 
 /**
@@ -99,6 +99,7 @@ function pull() {
  * Push to GitHub
  */
 function push(message = 'Vant update') {
+    const token = process.env.GITHUB_TOKEN;
     vaf.check(message, {type: "string", name: "message", maxLength: 200});
     const url = getRemoteUrl();
     if (!url) {
@@ -118,7 +119,16 @@ function push(message = 'Vant update') {
         }
         
         execSync(`git commit -m "${message}"`, { stdio: 'pipe' });
-        execSync(`git push ${url} ${DEFAULT_BRANCH}`, { stdio: 'pipe' });
+        // SECURITY: Use git config token instead of URL
+if (token) {
+    const os = require('os');
+    const tmp = fs.mkdtempSync(os.tmpdir() + '/vant-');
+    fs.writeFileSync(tmp + '/git-credentials', `https://${token}:x-oauth-basic@github.com\n`);
+    execSync(`git config --local credential.helper store`);
+    execSync(`git config --local credential.useHttpPath true`);
+    execSync(`git config --local user.token ${token.replace(/./, '*')}`);
+}
+execSync(`git push ${url} ${DEFAULT_BRANCH}`, { stdio: 'pipe' });
         console.log('[Sync] Pushed successfully');
         return { success: true, changes: true };
     } catch (e) {
