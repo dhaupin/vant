@@ -214,7 +214,34 @@ async function getMemory(files = null) {
         return ['.md', '.txt', '.json', '.yaml', '.yml'].includes(ext);
     });
 
-    const targetFiles = files || allFiles.map(f => path.basename(f, path.extname(f)));
+    // Handle files parameter
+    let targetFiles = allFiles.map(f => path.basename(f, path.extname(f)));
+    if (files && Array.isArray(files)) {
+        // SECURITY: Validate each file before processing
+        for (const file of files) {
+            // Block null bytes
+            if (file.includes('\0')) {
+                return { error: 'Invalid filename - null bytes not allowed' };
+            }
+            // Block absolute paths
+            if (file.startsWith('/') || file.startsWith('\\')) {
+                return { error: 'Absolute paths not allowed' };
+            }
+            // Block parent directory refs
+            if (file.includes('..')) {
+                return { error: 'Parent directory references not allowed' };
+            }
+            
+            // Validate final path is within expected directory
+            const resolvedFile = path.resolve(path.join(modelPath, file));
+            const resolvedPath = path.resolve(modelPath);
+            if (!resolvedFile.startsWith(resolvedPath + path.sep) && resolvedFile !== resolvedPath) {
+                return { error: 'Path traversal detected' };
+            }
+        }
+        targetFiles = files;
+    }
+    
     const memory = {};
 
     for (const name of targetFiles) {
@@ -255,6 +282,27 @@ async function setMemory(file, content, branch = null, autoCommit = false) {
     vaf.check(file, {type: 'path', name: 'file', maxLength: 100});
     vaf.check(content, {type: 'string', name: 'content', maxLength: 50000});
     const modelPath = 'models/public';
+    
+    // SECURITY: Basic filename validation
+    // Block null bytes
+    if (file.includes('\0')) {
+        throw new Error('Invalid filename - null bytes not allowed');
+    }
+    // Block absolute paths
+    if (file.startsWith('/') || file.startsWith('\\')) {
+        throw new Error('Absolute paths not allowed');
+    }
+    // Block parent directory refs
+    if (file.includes('..')) {
+        throw new Error('Parent directory references not allowed');
+    }
+    
+    // SECURITY: Validate final path is within expected directory (prevent path traversal)
+    const resolvedFile = path.resolve(path.join(modelPath, `${file}.md`));
+    const resolvedPath = path.resolve(modelPath);
+    if (!resolvedFile.startsWith(resolvedPath + path.sep) && resolvedFile !== resolvedPath) {
+        throw new Error('Path traversal detected - file must be within models/public');
+    }
     
     // Determine extension - prefer .md
     const mdFile = path.join(modelPath, `${file}.md`);

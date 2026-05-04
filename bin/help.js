@@ -1,9 +1,9 @@
 /**
-const vaf = require("../lib/vaf");
  * Vant Help Command
  * Shows all available commands with descriptions
  */
 
+const vaf = require("../lib/vaf");
 const path = require('path');
 const fs = require('fs');
 

@@ -1,4 +1,5 @@
 ---
+version: 0.8.5
 permalink: /reference/schema.html
 layout: default
 title: Brain Schema

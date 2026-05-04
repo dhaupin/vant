@@ -1,4 +1,5 @@
 ---
+version: 0.8.5
 permalink: /guides/architecture.html
 layout: default
 title: Architecture
