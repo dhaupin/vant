@@ -16,7 +16,7 @@
 #   GITHUB_TOKEN - Required for sync
 #   GITHUB_REPO  - Required (owner/repo)
 
-ARG VERSION=0.8.3
+ARG VERSION=0.8.4
 FROM node:20-alpine
 
 LABEL maintainer="VANT Project"
