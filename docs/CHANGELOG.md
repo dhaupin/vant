@@ -7,7 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
-## [v0.8.58] - 2026-05-04 - Security Release
+## [v0.8.59] - 2026-05-04 - Security Release
 
 ### ⚠️ MAJOR SECURITY RELEASE
 

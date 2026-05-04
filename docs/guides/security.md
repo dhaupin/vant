@@ -1,5 +1,5 @@
 ---
-version: 0.8.58
+version: 0.8.59
 permalink: /guides/security.html
 layout: default
 title: Security
