@@ -1,11 +1,11 @@
 /**
-const vaf = require("../lib/vaf");
  * Vant Loader (Node.js)
  *
  * Usage: node bin/load.js [version]
  *        node bin/load.js v0.5.0
  */
 
+const vaf = require("../lib/vaf");
 const fs = require('fs');
 const path = require('path');
 
@@ -42,19 +42,32 @@ function loadConfig() {
 function getModelPath(args) {
     if (args[2]) vaf.check(args[2], {type: "string", name: "version", maxLength: 20});
     const config = loadConfig();
-    if (config.MODEL_PATH) {
-        return config.MODEL_PATH;
+    let modelPath = config.MODEL_PATH || 'models/public';
+    
+    // SECURITY: Validate MODEL_PATH (block path traversal)
+    if (modelPath.startsWith('/') || modelPath.includes('..')) {
+        console.error(`⚠ Invalid MODEL_PATH: ${modelPath}`);
+        modelPath = 'models/public';
     }
+    
     if (args[2]) {
         return `models/${args[2]}`;
     }
-    return 'models/public';
+    return modelPath;
 }
 
 /**
  * Load model files - supports .md and .txt for backward compat
  */
 function loadModel(modelPath) {
+    // SECURITY: Validate path is within allowed directory
+    const resolved = path.resolve(modelPath);
+    const allowed = path.resolve('models');
+    if (!resolved.startsWith(allowed + path.sep) && resolved !== allowed) {
+        console.error(`⚠ Path traversal blocked: ${modelPath}`);
+        return null;
+    }
+
     if (!fs.existsSync(modelPath)) {
         console.error(`⚠ Model not found: ${modelPath}`);
         return null;
