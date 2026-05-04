@@ -1,7 +1,7 @@
 ---
 permalink: /examples.html
 layout: default
-title: Examples title: Examples & Showcase Showcase
+title: Examples & Showcase
 nav_order: 1
 ---
 
@@ -354,7 +354,7 @@ async function customBrainExample() {
 
 ## Related
 
-- [Build Agent Tutorial](/vant/tutorials/build-agent.html)
-- [Multi-Agent Tutorial](/vant/tutorials/multi-agent.html)
-- [Telegram Bot Tutorial](/vant/tutorials/telegram-bot.html)
+- [Build Agent Tutorial](tutorials/build-agent.html)
+- [Multi-Agent Tutorial](tutorials/multi-agent.html)
+- [Telegram Bot Tutorial](tutorials/telegram-bot.html)
 - [GitHub](https://github.com/dhaupin/vant) - star us!

@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /guides/onboard.html
 layout: default
 title: Onboarding
@@ -109,6 +110,6 @@ Search: "therapy"
 
 ## See Also
 
-- [Succession](/vant/guides/succession.html) - Version/trust
-- [Resolution](/vant/guides/resolution.html) - Thought status
-- [Knowledge](/vant/guides/troubleshooting.html) - Knowledge base
+- [Succession](guides/succession.html) - Version/trust
+- [Resolution](guides/resolution.html) - Thought status
+- [Knowledge](guides/troubleshooting.html) - Knowledge base

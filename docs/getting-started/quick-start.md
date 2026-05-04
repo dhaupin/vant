@@ -1,5 +1,6 @@
 ---
-version: 0.8.49
+version: 0.8.59
+version: 0.8.59
 permalink: /getting-started/quick-start.html
 layout: default
 title: Quick Start
@@ -51,6 +52,6 @@ vant sync   # Push brain changes to GitHub
 
 ## What's Next?
 
-- [Build Your First Agent](/vant/tutorials/build-agent.html) - 15 min tutorial
-- [CLI Reference](/vant/reference/cli.html) - All commands
-- [Configuration](/vant/reference/configuration.html) - Customize Vant
+- [Build Your First Agent](tutorials/build-agent.html) - 15 min tutorial
+- [CLI Reference](reference/cli.html) - All commands
+- [Configuration](reference/configuration.html) - Customize Vant

@@ -1,5 +1,5 @@
 ---
-version: 0.8.49
+version: 0.8.59
 permalink: /guides/multi-agent.html
 layout: default
 title: Multi-Agent
@@ -62,4 +62,4 @@ Merge changes via PR for human review:
 4. Merge via PR - Human review first
 5. Set timeouts - Lock expires after 1 hour
 
-See also: [Architecture](/vant/guides/architecture.html), [Schema](/vant/reference/schema.html)
+See also: [Architecture](guides/architecture.html), [Schema](reference/schema.html)

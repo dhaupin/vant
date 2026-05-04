@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /guides/testing.html
 layout: default
 title: Testing
@@ -214,4 +215,4 @@ Logging configuration.
 vant start 2>&1 | tee vant.log
 ```
 
-See also: [CLI Reference](/vant/reference/cli.html), [Troubleshooting](/vant/guides/troubleshooting.html)
+See also: [CLI Reference](reference/cli.html), [Troubleshooting](guides/troubleshooting.html)

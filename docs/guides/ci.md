@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /guides/ci.html
 layout: default
 title: CI, Testing & Audit
@@ -329,6 +330,6 @@ cat AUDIT.md
 
 ## See Also
 
-- [Security Guide](/vant/guides/security.html)
-- [Operations](/vant/guides/operations.html)
-- [Troubleshooting](/vant/guides/troubleshooting.html)
+- [Security Guide](guides/security.html)
+- [Operations](guides/operations.html)
+- [Troubleshooting](guides/troubleshooting.html)

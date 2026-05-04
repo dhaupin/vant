@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /getting-started/install.html
 layout: default
 title: Installation
@@ -129,7 +130,7 @@ docker run -it \
 ### Docker Compose
 ```yaml
 # docker-compose.yml
-version: 0.8.49
+version: 0.8.59
 services:
   vant:
     image: dhaupin/vant
@@ -215,7 +216,7 @@ Give this to your AI agent to self-configure:
 
 > "Set up Vant (https://github.com/dhaupin/vant) as my persistent brain. Clone the repo, configure it with GITHUB_REPO and GITHUB_TOKEN, then run `vant start` to begin."
 
-See also: [Quick Start](/vant/getting-started/quick-start.html)
+See also: [Quick Start](getting-started/quick-start.html)
 
 ---
 
@@ -306,6 +307,6 @@ docker run -it dhaupin/vant vant health
 
 ## Next Steps
 
-- [Quick Start](/vant/getting-started/quick-start.html) - Run your first commands
-- [Configuration](/vant/reference/configuration.html) - Customize Vant
-- [Build First Agent](/vant/tutorials/build-agent.html) - Tutorial
+- [Quick Start](getting-started/quick-start.html) - Run your first commands
+- [Configuration](reference/configuration.html) - Customize Vant
+- [Build First Agent](tutorials/build-agent.html) - Tutorial

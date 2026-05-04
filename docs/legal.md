@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /legal.html
 layout: default
 title: Legal & Policies
@@ -15,9 +16,9 @@ title: Legal & Policies
 Vant is open source software provided without warranty. By using it, you accept all risks and responsibilities.
 
 **Quick links:**
-- [Disclaimer & Terms](/vant/legal/index.html) - Full legal disclaimer
-- [Privacy Policy](/vant/legal/privacy.html) - What we collect
-- [Environment & Limits](/vant/legal/environment.html) - GitHub, API, system
+- [Disclaimer & Terms](legal/index.html) - Full legal disclaimer
+- [Privacy Policy](legal/privacy.html) - What we collect
+- [Environment & Limits](legal/environment.html) - GitHub, API, system
 
 ---
 
@@ -25,9 +26,9 @@ Vant is open source software provided without warranty. By using it, you accept 
 
 | Document | For |
 |----------|-----|
-| [Disclaimer](/vant/legal/index.html) | Lawyers, liability |
-| [Privacy](/vant/legal/privacy.html) | Your data, GitHub |
-| [Environment](/vant/legal/environment.html) | API limits, setup |
+| [Disclaimer](legal/index.html) | Lawyers, liability |
+| [Privacy](legal/privacy.html) | Your data, GitHub |
+| [Environment](legal/environment.html) | API limits, setup |
 
 ---
 
@@ -62,17 +63,17 @@ The essentials you need to know.
 
 Read these in order:
 
-1. **[Terms](/vant/legal/index.html)** - You accept all risks
-2. **[Privacy](/vant/legal/privacy.html)** - Your data, your control
-3. **[Environment](/vant/legal/environment.html)** - GitHub limitations
+1. **[Terms](legal/index.html)** - You accept all risks
+2. **[Privacy](legal/privacy.html)** - Your data, your control
+3. **[Environment](legal/environment.html)** - GitHub limitations
 
 ---
 
 ## Quick Links
 
 - [MIT License](/LICENSE) - Code license
-- [README](/vant/index.html) - Project overview
-- [Security](/vant/guides/security.html) - Security practices
+- [README](index.html) - Project overview
+- [Security](guides/security.html) - Security practices
 - [GitHub Terms](https://docs.github.com/en/github/site-policy) - Full policies
 
 ---

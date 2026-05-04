@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /guides/plugins.html
 layout: default
 title: Plugins
@@ -119,4 +120,4 @@ module.exports = {
 3. Document configuration options
 4. Support enable/disable
 
-See also: [Architecture](/vant/guides/architecture.html), [CLI Reference](/vant/reference/cli.html)
+See also: [Architecture](guides/architecture.html), [CLI Reference](reference/cli.html)

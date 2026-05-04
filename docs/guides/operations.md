@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /guides/operations.html
 layout: default
 title: Operations
@@ -306,4 +307,4 @@ await telegram.startPolling();
 | `vant update` | Check updates |
 | `vant summary` | Session summary |
 
-See also: [Troubleshooting](/vant/guides/troubleshooting.html), [CLI Reference](/vant/reference/cli.html)
+See also: [Troubleshooting](guides/troubleshooting.html), [CLI Reference](reference/cli.html)

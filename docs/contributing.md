@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /contributing.html
 layout: default
 title: Contributing

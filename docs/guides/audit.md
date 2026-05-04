@@ -1,7 +1,8 @@
 ---
+version: 0.8.59
 permalink: /guides/audit.html
 layout: default
-title: Audit title: Audit & Compliance Compliance
+title: Audit \title: Audit title: Audit & Compliance Compliance Compliance
 nav_order: 17
 ---
 # Audit & Compliance
@@ -155,4 +156,4 @@ port = 514
 - [ ] Git audit trail verified
 - [ ] Rate limits monitored
 
-See also: [Security](/vant/guides/security.html), [Operations](/vant/guides/operations.html)
+See also: [Security](guides/security.html), [Operations](guides/operations.html)

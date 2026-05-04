@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /guides/examples.html
 layout: default
 title: Examples
@@ -144,4 +145,4 @@ async function safeWork(fn) {
 }
 ```
 
-See also: [Operations](/vant/guides/operations.html), [API Reference](/vant/reference/api.html)
+See also: [Operations](guides/operations.html), [API Reference](reference/api.html)

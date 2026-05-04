@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /guides/github.html
 layout: default
 title: GitHub Integration
@@ -161,7 +162,7 @@ git push origin experiment-feature
 ```
 
 
-See: [Multi-Agent](/vant/guides/multi-agent.html)
+See: [Multi-Agent](guides/multi-agent.html)
 
 ## Troubleshooting
 
@@ -181,4 +182,4 @@ See: [Multi-Agent](/vant/guides/multi-agent.html)
 | Rotate tokens | Refresh periodically |
 | Use fine-grained tokens | Restrict to brain repo only |
 
-See also: [CLI Reference](/vant/reference/cli.html), [Troubleshooting](/vant/guides/troubleshooting.html)
+See also: [CLI Reference](reference/cli.html), [Troubleshooting](guides/troubleshooting.html)

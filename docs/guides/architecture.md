@@ -1,5 +1,5 @@
 ---
-version: 0.8.49
+version: 0.8.59
 permalink: /guides/architecture.html
 layout: default
 title: Architecture
@@ -50,4 +50,4 @@ The core modules that make up Vant.
 3. Commits to GitHub on changes (human/agent initiated)
 4. Next session syncs when ready
 
-See also: [Multi-Agent](/vant/guides/multi-agent.html), [Security](/vant/guides/security.html)
+See also: [Multi-Agent](guides/multi-agent.html), [Security](guides/security.html)

@@ -1,5 +1,5 @@
 ---
-version: 0.8.49
+version: 0.8.59
 permalink: /reference/configuration.html
 layout: default
 title: Configuration
@@ -260,6 +260,6 @@ See these files in the repo for full examples:
 > 1. The `--enable-polling` flag when starting node
 > 2. Set `VANT_AGREE_AUTO_SYNC=true` (in `.env` or export)
 >
-> Self-hosted GitLab/Gitea is fine. Use `vant sync` for manual brain updates with GitHub.com. See [CLI Reference](/vant/reference/cli.html).
+> Self-hosted GitLab/Gitea is fine. Use `vant sync` for manual brain updates with GitHub.com. See [CLI Reference](reference/cli.html).
 
-See also: [CLI Commands](/vant/reference/cli.html), [Installation](/vant/getting-started/install.html)
+See also: [CLI Commands](reference/cli.html), [Installation](getting-started/install.html)

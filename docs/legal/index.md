@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /legal/index.html
 layout: default
 title: Legal & Disclaimer
@@ -324,8 +325,8 @@ For questions about these terms:
 ## SEE ALSO
 
 - [LICENSE](/LICENSE) - Full license text
-- [README](/vant/index.html) - Project overview
-- [Security](/vant/guides/security.html) - Security practices
+- [README](index.html) - Project overview
+- [Security](guides/security.html) - Security practices
 - [GitHub Terms](https://docs.github.com/en/github/site-policy) - Full GitHub policies
 - [GitHub Acceptable Use](https://docs.github.com/en/github/site-policy/github-acceptable-use-policies) - What you can't do
 

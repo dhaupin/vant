@@ -1,5 +1,5 @@
 ---
-version: 0.8.49
+version: 0.8.59
 permalink: /reference/schema.html
 layout: default
 title: Brain Schema
@@ -120,4 +120,4 @@ Recommended files transported between instances:
 | `qc.md` | Quality standards |
 | `gratitude.md` | Appreciation |
 
-See also: [API](/vant/reference/api.html), [Multi-Agent](/vant/guides/multi-agent.html)
+See also: [API](reference/api.html), [Multi-Agent](guides/multi-agent.html)

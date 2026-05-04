@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /legal/privacy.html
 layout: default
 title: Privacy Policy
@@ -269,5 +270,5 @@ If you have concerns:
 ## SEE ALSO
 
 - [GitHub Privacy](https://docs.github.com/en/github/site-policy/github-privacy-statement) - GitHub's policy
-- [Terms](/vant/index.html) - Our legal terms
-- [Security](/vant/guides/security.html) - Security practices
+- [Terms](index.html) - Our legal terms
+- [Security](guides/security.html) - Security practices

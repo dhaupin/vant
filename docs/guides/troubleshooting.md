@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /guides/troubleshooting.html
 layout: default
 title: Troubleshooting
@@ -231,4 +232,4 @@ Error: Content blocked: /; rm -rf/
 | Repo size | Free tier: 1GB max |
 | Private repos | Must have GitHub account |
 
-See also: [Configuration](/vant/reference/configuration.html), [Architecture](/vant/guides/architecture.html)
+See also: [Configuration](reference/configuration.html), [Architecture](guides/architecture.html)

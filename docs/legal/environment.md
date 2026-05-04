@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /legal/environment.html
 layout: default
 title: Environment & Limits
@@ -361,7 +362,7 @@ Before using Vant with GitHub:
 
 ## SEE ALSO
 
-- [Terms](/vant/index.html) - Legal disclaimer
-- [Privacy](/vant/legal/privacy.html) - Privacy policy
+- [Terms](index.html) - Legal disclaimer
+- [Privacy](legal/privacy.html) - Privacy policy
 - [GitHub API Docs](https://docs.github.com/en/rest) - Full API reference
 - [GitHub ToS](https://docs.github.com/en/github/site-policy) - All policies

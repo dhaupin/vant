@@ -1,5 +1,5 @@
 ---
-version: 0.8.49
+version: 0.8.59
 permalink: /reference/cli.html
 layout: default
 title: CLI Reference
@@ -354,7 +354,7 @@ vant docs build --version # Specific version
 vant docs serve          # Local server
 ```
 
-See also: [Configuration](/vant/reference/configuration.html), [API](/vant/reference/api.html), [Entropy-Patch](/vant/reference/entropy.html)
+See also: [Configuration](reference/configuration.html), [API](reference/api.html), [Entropy-Patch](reference/entropy.html)
 
 ## compress
 
@@ -393,7 +393,7 @@ vant compress models/public/goals.md -a -k 2.0
 vant compress models/latent/goals.vpatch --decompress
 ```
 
-See also: [Entropy-Patch](/vant/reference/entropy.html)
+See also: [Entropy-Patch](reference/entropy.html)
 
 ---
 
@@ -423,3 +423,89 @@ Frequently asked questions answered.
 ### How do I run tests?
 
 `vant test` - Runs build tests
+## Utility Commands
+
+Additional CLI commands for specific tasks.
+
+### vant audit
+
+Generate an audit report - security, health, deps:
+
+```bash
+vant audit              # Full report
+vant audit --json      # JSON output
+```
+
+### vant bot
+
+Run Telegram bot:
+
+```bash
+vant bot              # Start bot
+vant bot --test     # Test mode
+```
+
+### vant bump
+
+Bump version and create git tag:
+
+```bash
+vant bump patch      # 0.8.58 → 0.8.59
+vant bump minor     # 0.8.58 → 0.9.0
+vant bump major    # 0.8.58 → 1.0.0
+```
+
+### vant compress
+
+Compress brain to patches:
+
+```bash
+vant compress input.png "Secret message" -o output.png
+vant compress input.png "msg" -o out.png --encrypt password
+```
+
+### vant rate
+
+Show GitHub API rate limit:
+
+```bash
+vant rate           # Current remaining
+vant rate --json   # JSON output
+```
+
+### vant resolution
+
+Manage resolutions:
+
+```bash
+vant resolution --list     # List all
+vant resolution --add key "content"
+ vant resolution --rm key
+```
+
+### vant succession
+
+Show commit history:
+
+```bash
+vant succession           # Last 10 commits
+vant succession 20     # Last N commits
+```
+
+### vant summary
+
+Show brain summary:
+
+```bash
+vant summary          # Stats + info
+vant summary --json # JSON
+```
+
+### vant update
+
+Check for updates:
+
+```bash
+vant update         # Check version
+vant update --force # Force update
+```

@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /tutorials/telegram-bot.html
 layout: default
 title: Telegram Bot Integration
@@ -320,6 +321,6 @@ export TELEGRAM_TIMEOUT=30000
 
 ## Next Steps
 
-- [MCP Server](/vant/guides/mcp.html) - Expose tools via HTTP API
-- [Slack/Discord Integration](/vant/guides/operations.html) - Team notifications
-- [Multi-Agent](/vant/guides/multi-agent.html) - Coordinate multiple agents
+- [MCP Server](guides/mcp.html) - Expose tools via HTTP API
+- [Slack/Discord Integration](guides/operations.html) - Team notifications
+- [Multi-Agent](guides/multi-agent.html) - Coordinate multiple agents

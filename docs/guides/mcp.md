@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /guides/mcp.html
 layout: default
 title: MCP Server
@@ -415,4 +416,4 @@ MCP uses VAF (Vant Application Firewall) for input validation:
 
 For multi-line content, write directly to `models/public/` instead of via MCP.
 
-See also: [Security Guide](/vant/guides/security.html), [Multi-Agent](/vant/guides/multi-agent.html), [CLI Reference](/vant/reference/cli.html)
+See also: [Security Guide](guides/security.html), [Multi-Agent](guides/multi-agent.html), [CLI Reference](reference/cli.html)

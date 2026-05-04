@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /guides/resolution.html
 layout: default
 title: Resolution
@@ -127,6 +128,6 @@ resolution.reject('identity', 'old belief', 'ethics changed');
 
 ## See Also
 
-- [Succession](/vant/guides/succession.html) - Brain version tracking
-- [Onboarding](/vant/guides/troubleshooting.html) - Knowledge base browser
-- [Audit](/vant/guides/audit.html) - Compliance tracking
+- [Succession](guides/succession.html) - Brain version tracking
+- [Onboarding](guides/troubleshooting.html) - Knowledge base browser
+- [Audit](guides/audit.html) - Compliance tracking

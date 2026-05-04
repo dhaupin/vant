@@ -127,4 +127,4 @@ Uses AES-256-GCM:
 | `STEGO_004` | Decryption failed |
 | `STEGO_005` | Invalid password |
 
-See also: [CLI Reference](/vant/reference/cli.html), [Architecture](/vant/guides/architecture.html)
+See also: [CLI Reference](reference/cli.html), [Architecture](guides/architecture.html)

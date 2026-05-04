@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /guides/docker.html
 layout: default
 title: Docker
@@ -77,4 +78,4 @@ docker build -t vant:local .
 docker run -it vant:local vant load
 ```
 
-See also: [Installation](/vant/getting-started/install.html), [Architecture](/vant/guides/architecture.html)
+See also: [Installation](getting-started/install.html), [Architecture](guides/architecture.html)

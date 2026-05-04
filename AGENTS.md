@@ -478,6 +478,7 @@ jobs:
 ## Related Docs
 
 - `lib/branch.js` - Branch API source
+- `docs/guides/manual-brain.md` - Manual brain creation (no CLI)
 - `lib/lock.js` - Lock API source
 - `models/public/schema/memory-files.md` - Memory file schema
 - `CHANGELOG.md` - Version history
