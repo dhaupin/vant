@@ -129,7 +129,7 @@ docker run -it \
 ### Docker Compose
 ```yaml
 # docker-compose.yml
-version: 0.8.5
+version: 0.8.10
 services:
   vant:
     image: dhaupin/vant
