@@ -1,16 +1,19 @@
 name: VANT CI
 
 on:
+  workflow_dispatch:
   push:
     branches: [main, develop, 'agent-*']
   pull_request:
     branches: [main, develop]
   schedule:
-    - cron: '0 0 * * 0'  # Weekly
+    - cron:
+  workflow_dispatch: '0 0 * * 0'  # Weekly
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on:
+  workflow_dispatch: ubuntu-latest
     timeout-minutes: 5
     
     steps:
@@ -19,7 +22,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version:
+  workflow_dispatch: '20'
           
       - name: Install dependencies
         run: npm install
@@ -31,7 +35,8 @@ jobs:
         run: node test/runner.js
         
   lint:
-    runs-on: ubuntu-latest
+    runs-on:
+  workflow_dispatch: ubuntu-latest
     timeout-minutes: 5
     
     steps:
@@ -40,7 +45,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version:
+  workflow_dispatch: '20'
           
       - name: Check syntax
         run: |
@@ -53,7 +59,8 @@ jobs:
           ls -la bin/vant.js lib/vaf.js lib/config.js lib/lock.js lib/branch.js
           
   security:
-    runs-on: ubuntu-latest
+    runs-on:
+  workflow_dispatch: ubuntu-latest
     timeout-minutes: 5
     
     steps:
@@ -62,7 +69,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version:
+  workflow_dispatch: '20'
           
       - name: Test VAF - script injection
         run: node -e "
@@ -106,7 +114,8 @@ jobs:
         "
         
   validate:
-    runs-on: ubuntu-latest
+    runs-on:
+  workflow_dispatch: ubuntu-latest
     timeout-minutes: 5
     
     steps:
@@ -115,7 +124,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version:
+  workflow_dispatch: '20'
           
       - name: Test library loads
         run: node -e "
