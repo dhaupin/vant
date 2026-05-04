@@ -230,6 +230,40 @@ async function testSecurity(name, input, testFn, shouldBlock = true) {
 }
 
 /**
+ * Run security tests using VAF
+ */
+async function testSecurityTests() {
+  try {
+    const vafPath = path.join(ROOT, 'lib/vaf.js');
+    const vaf = require(vafPath);
+    
+    // Test script injection blocked
+    await testSecurity('script', '<script>', vaf.checkContent, true);
+    await testSecurity('img-onerror', '<img onerror=alert(1)>', vaf.checkContent, true);
+    await testSecurity('svg', '<svg onload=alert(1)>', vaf.checkContent, true);
+    await testSecurity('javascript:', 'javascript:alert(1)', vaf.checkContent, true);
+    
+    // Test command injection blocked
+    await testSecurity('shell', 'rm -rf /', vaf.checkContent, true);
+    await testSecurity('pipe', '| bash', vaf.checkContent, true);
+    await testSecurity('subshell', '$(whoami)', vaf.checkContent, true);
+    await testSecurity('backtick', '\`id\`', vaf.checkContent, true);
+    
+    // Test path traversal blocked
+    await testSecurity('path-traversal', '../etc/passwd', vaf.checkPathTraversal, true);
+    await testSecurity('absolute-path', '/etc/passwd', vaf.checkPathTraversal, true);
+    await testSecurity('double-dot', '..', vaf.checkPathTraversal, true);
+    
+    // Test allowed paths (should NOT block)
+    await testSecurity('allowed-file', 'models/public/goals.md', vaf.checkPathTraversal, false);
+    await testSecurity('allowed-dir', 'models/public', vaf.checkPathTraversal, false);
+    
+  } catch(e) {
+    warn('security:vaf', e.message);
+  }
+}
+
+/**
  * Check Node.js version is supported
  */
 function checkNodeVersion() {
