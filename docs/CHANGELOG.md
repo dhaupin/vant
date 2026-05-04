@@ -66,25 +66,31 @@ This version contains comprehensive security hardening from a deep penetration t
 - docs/guides/security.md - Full vulnerability disclosure
 - docs/CHANGELOG.md - This file
 - README.md - Security section linked
-- .github/workflows/audit.yml - Weekly audit workflow
+- docs/guides/manual-brain.md - Manual brain creation guide
+- docs/guides/release.md - Release process guide
+- All docs now have version frontmatter (0.8.4)
+- CLI.md referenced in AGENTS.md
+- lib/version.js referenced in AGENTS.md
+
+### Documentation System
+
+- Jekyll docs migrated to /docs/
+- All guides have nav_order frontmatter
+- Broken links fixed across docs
+- Version-aligned all 42 markdown files
+
+### Code Quality
+
+- JSDoc added throughout lib/ and bin/
+- Security tests added for all VAF patterns
+- MCP authentication implemented
+- Password validation for stego.js
 
 ### Thanks
 
-Security audit by OpenHands agent during deep pen test session.
+Security audit and documentation pass by OpenHands agent.
 
----
 
-## [v0.8.4] - 2026-05-04
-
-### Security
-- V006-V009: Safe JSON parsing in succession, resolution, update-check, onboard
-
----
-
-## [v0.8.4] - 2026-05-04
-
-### Security
-- V001-V005: Initial security fixes
 
 ---
 
