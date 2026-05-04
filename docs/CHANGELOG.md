@@ -1,5 +1,5 @@
 # CHANGELOG
-version: 0.8.59
+version: 0.8.4
 
 All notable changes to Vant are documented in this file.
 
@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
-## [v0.8.59] - 2026-05-04 - Security Release
+## [v0.8.4] - 2026-05-04 - Security Release
 
 ### ⚠️ MAJOR SECURITY RELEASE
 
@@ -74,14 +74,14 @@ Security audit by OpenHands agent during deep pen test session.
 
 ---
 
-## [v0.8.57] - 2026-05-04
+## [v0.8.4] - 2026-05-04
 
 ### Security
 - V006-V009: Safe JSON parsing in succession, resolution, update-check, onboard
 
 ---
 
-## [v0.8.56] - 2026-05-04
+## [v0.8.4] - 2026-05-04
 
 ### Security
 - V001-V005: Initial security fixes

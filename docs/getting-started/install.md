@@ -1,5 +1,5 @@
 ---
-version: 0.8.59
+version: 0.8.4
 permalink: /getting-started/install.html
 layout: default
 title: Installation
@@ -130,7 +130,7 @@ docker run -it \
 ### Docker Compose
 ```yaml
 # docker-compose.yml
-version: 0.8.59
+version: 0.8.4
 services:
   vant:
     image: dhaupin/vant

@@ -1,5 +1,5 @@
 ---
-version: 0.8.59
+version: 0.8.4
 permalink: /reference/api.html
 layout: default
 title: Module API

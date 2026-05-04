@@ -477,6 +477,10 @@ jobs:
 
 ## Related Docs
 
+- `CLI.md` - Full CLI command reference
+- `docs/guides/manual-brain.md` - Manual brain creation (without CLI)
+
+- `lib/version.js` - Version system (reads from package.json)
 - `lib/branch.js` - Branch API source
 - `docs/guides/manual-brain.md` - Manual brain creation (no CLI)
 - `lib/lock.js` - Lock API source
@@ -485,3 +489,48 @@ jobs:
 - `LIBS.md` - Full module reference
 - `CLI.md` - Command reference
 - `README.md` - Full documentation
+---
+
+## Version Management
+
+### Single Source of Truth
+The version is defined in `package.json` (version field). All other places read dynamically from it.
+
+### Version Files
+- **Dynamic** (auto-reads package.json): `lib/version.js`, `lib/config.js`, `.github/workflows/docker.yml`
+- **Manual** (update on release): `package.json`, `RELEASE.md`, `docs/CHANGELOG.md`
+
+### When to Bump Version
+- **NEVER** bump version for docs changes, formatting fixes, or non-release commits
+- **ONLY** bump when preparing an actual release (security fix, feature, breaking change)
+- Use `lib/version.js` to read version programmatically
+
+---
+
+## Tag & Release Policy
+
+### Only Tag on Release
+- Tags mark release checkpoints for Docker Hub, back-porting, and users wanting stable releases
+- Only create a tag when releasing (not for every commit)
+
+### Release Process
+1. Tag a point: `git tag v0.8.4`
+2. Create branch from tag: `git checkout -b release/v0.8.4 v0.8.4`
+3. Release from the release branch (e.g., `release/v0.8.4`)
+
+### Branch Types
+- **Long-lived**: Only `main` and `release/v*.*.*` branches (for back-porting)
+- **Short-lived**: Feature branches (auto-deleted after merge)
+- **NEVER** keep temp branches around long-term
+
+### Anti-Pattern (Don't Do)
+- ❌ Multiple tags per week (spams Docker Hub)
+- ❌ Version bumps on every commit
+- ❌ Temp branches left behind
+- ❌ Creating tags for docs-only changes
+
+### Correct Pattern (Do)
+- ✅ Tag only on actual releases
+- ✅ One tag per stable release
+- ✅ Release branch for back-porting
+- ✅ Clean up feature branches after merge

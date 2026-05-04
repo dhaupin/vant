@@ -1,5 +1,5 @@
 ---
-version: 0.8.59
+version: 0.8.4
 permalink: /reference/cli.html
 layout: default
 title: CLI Reference
@@ -450,9 +450,9 @@ vant bot --test     # Test mode
 Bump version and create git tag:
 
 ```bash
-vant bump patch      # 0.8.58 → 0.8.59
-vant bump minor     # 0.8.58 → 0.9.0
-vant bump major    # 0.8.58 → 1.0.0
+vant bump patch      # 0.8.4 → 0.8.4
+vant bump minor     # 0.8.4 → 0.9.0
+vant bump major    # 0.8.4 → 1.0.0
 ```
 
 ### vant compress

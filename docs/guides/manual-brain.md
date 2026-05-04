@@ -1,5 +1,5 @@
 ---
-version: 0.8.59
+version: 0.8.4
 permalink: /guides/manual-brain.html
 layout: default
 title: Manual Brain Creation Guide
@@ -56,7 +56,7 @@ models/public/
 ## Basic Info
 - **Name:** [Your Name]
 - **Role:** [assistant|user|system]
-- **Version:** 0.8.59
+- **Version:** 0.8.4
 
 ## Core Capabilities
 - [List what you can do]
@@ -248,7 +248,7 @@ models/public/
 **`meta.json`**
 ```json
 {
-  "version": "0.8.59",
+  "version": "0.8.4",
   "created": "2024-01-01",
   "last_modified": "2024-01-01",
   "brain_type": "public",

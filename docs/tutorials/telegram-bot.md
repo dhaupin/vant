@@ -1,5 +1,5 @@
 ---
-version: 0.8.59
+version: 0.8.4
 permalink: /tutorials/telegram-bot.html
 layout: default
 title: Telegram Bot Integration

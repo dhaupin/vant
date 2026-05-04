@@ -1,5 +1,5 @@
 ---
-version: 0.8.59
+version: 0.8.4
 permalink: /legal/privacy.html
 layout: default
 title: Privacy Policy

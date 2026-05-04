@@ -1,5 +1,5 @@
 ---
-version: 0.8.59
+version: 0.8.4
 permalink: /getting-started/quick-start.html
 layout: default
 title: Quick Start
