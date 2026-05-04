@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /examples.html
 layout: default
 title: Examples & Showcase

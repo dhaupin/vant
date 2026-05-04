@@ -1,4 +1,5 @@
 ---
+version: 0.8.59
 permalink: /guides/style.html
 layout: default
 title: Voice & Style
