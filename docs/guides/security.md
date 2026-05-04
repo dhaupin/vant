@@ -445,3 +445,45 @@ if (KEY === 'MODEL_PATH') {
     if (parts.includes('..')) throw new Error('Traversal blocked');
 }
 ```
+
+
+## v0.8.57 Additional Security Hardening
+
+### Additional Fixes
+
+| ID | Severity | File | Issue | Fix |
+|----|---------|------|-------|-----|
+| V006 | MEDIUM | lib/succession.js | Unsafe JSON parse | Try/catch with safe defaults |
+| V007 | MEDIUM | lib/resolution.js | Same | Same |
+| V008 | MEDIUM | lib/update-check.js | Duplicate vaf.check, unsafe JSON | Fixed |
+| V009 | MEDIUM | lib/onboard.js | Same | Safe parses |
+
+### V006-V009: Safe JSON Parsing
+
+All JSON file loading now wrapped in try/catch:
+```javascript
+// Before (vulnerable)
+return JSON.parse(fs.readFileSync(path, 'utf8'));
+
+// After (fixed)
+try {
+    return JSON.parse(fs.readFileSync(path, 'utf8'));
+} catch {
+    return { entries: [] }; // Safe default
+}
+```
+
+Prevents:
+- Service crashes from corrupted state files
+- Information disclosure in error messages
+- DoS attacks via malformed JSON
+
+### Deep Analysis Complete
+
+Additional vectors checked:
+- ✓ Dynamic code execution (none found)
+- ✓ File write path traversal (protected)
+- ✓ Model content injection (no eval)
+- ✓ Environment variable injection (VAF validated)
+- ✓ NPM dependency confusion (no dynamic requires from input)
+```
