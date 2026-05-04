@@ -53,10 +53,10 @@ jobs:
           node-version: '20'
       - name: Install dependencies
         run: npm install
-      - name: VAF validate
-        run: node test/ci.js --lib=vaf
-      - name: Check tokens
+      - name: Check tokens (should find none)
         run: '! grep -rE "ghp_[a-zA-Z0-9]{36}" . --include="*.js" '
+      - name: Check npm audit
+        run: npm audit --audit-level=high
 
   validate:
     runs-on: ubuntu-latest
