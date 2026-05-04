@@ -487,3 +487,51 @@ Additional vectors checked:
 - ✓ Environment variable injection (VAF validated)
 - ✓ NPM dependency confusion (no dynamic requires from input)
 ```
+
+
+## v0.8.58 AI Security Hardening
+
+### AI-Specific Vulnerabilities Found & Fixed
+
+| ID | Severity | Vector | Issue | Fix |
+|----|----------|--------|-------|------|-----|
+| V010 | HIGH | Prompt injection | No AI prompt filtering | Added to VAF blocklist |
+| V011 | MEDIUM | Model key injection | Unsafe key in writes | Alphanumeric validation |
+| V012 | LOW | Context overflow | No max token limit | Message limit exists |
+
+### V010: Prompt Injection Protection
+
+VAF now blocks AI prompt injection patterns:
+```
+- "ignore all previous instructions"
+- "forget everything you know"  
+- "new system:"
+- "you are now a [role]"
+- "role:", "act as", "DAN mode"
+- "{{system}}", "[INST]", "[SYS]"
+```
+
+### V011: Model Key Validation
+
+Brain file keys now validated:
+```javascript
+if (!/^[a-zA-Z0-9_-]+$/.test(key)) {
+    throw new Error('Invalid key');
+}
+```
+
+Prevents: Filename injection, path traversal via keys.
+
+### Deep Analysis: AI Attack Vectors
+
+| Vector | Status | Notes |
+|--------|--------|-------|
+| Prompt injection | ✅ BLOCKED | VAF now catches 17+ patterns |
+| Context poisoning | ✅ LIMITED | 50 message max, 100KB limit |
+| Model hijacking | ✅ PROTECTED | MCP auth required |
+| YAML deserialization | ✅ SAFE | js-yaml, no eval |
+| System prompt extraction | ✅ MITIGATED | No sensitive content in logs |
+| Embedding injection | ℹ️ N/A | No vector DB |
+| RAG poisoning | ℹ️ N/A | No retrieval integration |
+
+### Commit: 93d6d2a (pushed)
