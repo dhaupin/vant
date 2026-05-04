@@ -368,3 +368,80 @@ node -e "const vaf=require('./lib/vaf');vaf.check('\$HOME')"
 ---
 
 See also: [Configuration](/vant/reference/configuration.html), [Architecture](/vant/guides/architecture.html), [Troubleshooting](/vant/guides/troubleshooting.html)
+
+## v0.8.56 Security Updates
+
+Multiple vulnerabilities fixed in this release:
+
+### Fixed Vulnerabilities
+
+| ID | Severity | File | Issue | Fix |
+|----|---------|------|-------|-----|
+| V001 | CRITICAL | bin/changelog.js | Command injection | spawnSync with array validation |
+| V002 | HIGH | bin/sync.js | Token in URL | Git config credential helper |
+| V003 | HIGH | bin/mcp.js | Unauthenticated | API key authentication |
+| V004 | MEDIUM | lib/lock.js | DoS via lock | Rate limiting (10/min) |
+| V005 | MEDIUM | lib/config.js | Path traversal | Block ../ in MODEL_PATH |
+
+### V001: Command Injection Fix
+
+Before (vulnerable):
+```javascript
+const log = execSync('git ' + args.join(' '), { encoding: 'utf8' });
+```
+
+After (fixed):
+```javascript
+const result = spawnSync('git', args, { encoding: 'utf8' });
+const safeLimit = Math.min(Math.max(parseInt(limit) || 20, 1), 100);
+```
+
+Key changes:
+- Use `spawnSync` with array args instead of `execSync` with string
+- Validate all integer inputs
+- Block shell metacharacters in string parameters
+
+### V002: GitHub Token Protection
+
+Before (vulnerable):
+```javascript
+execSync(`git push https://${token}@github.com/${repo}.git`);
+```
+
+After (fixed):
+```javascript
+// Token stored in git config, not URL
+execSync(`git config --local credential.helper store`);
+execSync(`git push https://github.com/${repo}.git`);
+// Git uses stored credentials
+```
+
+### V003: MCP Authentication
+
+New optional environment variable:
+```bash
+export VANT_MCP_API_KEY="your-secure-api-key"
+```
+
+Without key: MCP works in backwards-compatible mode (no auth)
+With key: All `/call` requests require `Authorization: <key>`
+
+### V004: Lock Rate Limiting
+
+```javascript
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const MAX_ACQUIRES_PER_MINUTE = 10;
+const _acquireAttempts = new Map();
+```
+
+Prevents DoS via rapid lock acquisition.
+
+### V005: Path Traversal in Config
+
+```javascript
+// In lib/config.js
+if (KEY === 'MODEL_PATH') {
+    parts = value.split(/[\/\\]/);
+    if (parts.includes('..')) throw new Error('Traversal blocked');
+}
+```
