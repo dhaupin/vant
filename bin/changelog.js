@@ -19,14 +19,14 @@ const DEFAULT_LIMIT = 20;
  * Get git log since tag
  */
 function getLog(since = null, limit = DEFAULT_LIMIT) {
-    const args = ['log', `--pretty=format:%h|%s|%an|%ai`, `-n`, limit.toString()];
+    const args = ['log', `'--pretty=format:%H---%s---%an---%aI'`, `-n`, limit.toString()];
     if (since) {
         vaf.check(since, {type: 'string', name: 'since', maxLength: 20});
         args.push(`${since}..HEAD`);
     }
     
     try {
-        const log = execSync(args.join(' '), { encoding: 'utf8' });
+        const log = execSync('git ' + args.join(' '), { encoding: 'utf8' });
         return log.trim().split('\n').filter(l => l);
     } catch (e) {
         return [];
@@ -37,7 +37,7 @@ function getLog(since = null, limit = DEFAULT_LIMIT) {
  * Parse log entry
  */
 function parseEntry(line) {
-    const [hash, subject, author, date] = line.split('|');
+    const [hash, subject, author, date] = line.split('---');
     return { hash, subject, author, date };
 }
 
