@@ -1,0 +1,56 @@
+name: Vant Audit
+
+on:
+  schedule:
+    # Weekly audit: Sunday at midnight
+    - cron: '0 0 * * 0'
+  # Manual trigger
+  workflow_dispatch:
+  # Run after main CI completes
+  workflow_run:
+    workflows: ["VANT CI"]
+    types: ["completed"]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install dependencies
+        run: npm install --silent
+        
+      - name: Generate audit report
+        run: |
+          node bin/audit.js --out=AUDIT.md
+          cat AUDIT.md
+          
+      - name: Check audit runs
+        run: |
+          # Verify audit data is good
+          grep -q "Core Modules" AUDIT.md
+          grep -q "External Deps" AUDIT.md
+          grep -q "Input injection" AUDIT.md
+          echo "Audit format verified"
+          
+      - name: Upload AUDIT.md
+        uses: actions/upload-artifact@v4
+        with:
+          name: AUDIT
+          path: AUDIT.md
+          retention-days: 30
+          
+      - name: Post to GitHub (optional)
+        if: github.event_name == 'schedule'
+        run: |
+          # Could post to a repo issue or PR comment
+          echo "Audit completed at $(date)"
+          # Uncomment to create issue:
+          # gh issue create --title "Weekly Audit" --body-file AUDIT.md
