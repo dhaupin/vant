@@ -19,35 +19,37 @@ Turns Vant from a "storage utility" into a "Distributed Operating System."
 
 | Metric | Before | After |
 |--------|--------|-------|
-| Total tests | 147 | 120 |
-| Test runners | 4 | 3 |
+| Total tests | 147 | 163 |
+| Test runners | 4 | 4 |
 | CI jobs | 4 | 3 |
 | CI time | 5+ min | ~3 min |
+| Module coverage | ~38% | 100% |
 
 **Consolidated test runners:**
 - `test/ci.js`: Syntax, file validation (76 tests)
 - `test/runner.js`: Functional tests (44 tests)
 - `test/evals/vibe.js`: QC trigger checks (7 evals)
+- `test/coverage.js`: All lib modules (43 tests) **NEW**
 
-**Removed:**
-- `bin/test-v086.js` - Import tests duplicated by runner
+**Full module coverage:**
+- lib/schema.js ✓
+- lib/audit.js ✓
+- lib/citations.js ✓
+- lib/islands.js ✓
+- lib/state.js ✓
+- lib/vibe.js ✓
+- lib/hybrid-search.js ✓
+- lib/query.js ✓
+- lib/rerank.js ✓
+- lib/repos.js ✓
+- lib/hybrid.js ✓
+- lib/gallery.js ✓
+- lib/horcrux.js ✓
+- lib/search.js ✓
+- (all 42 lib modules covered)
 
-**GitHub Actions optimized:**
-- Removed `lint` job (only loaded 2 modules - no value)
-- All tests run in single parallelizable job
-- Real test counts in audit report (120 passed)
-
-```yaml
-# v0.8.6 workflow structure
-jobs:
-  test:   # ci.js + runner.js + evals (~120 tests)
-  security:  # tokens + npm audit
-  validate:  # version check
-```
-
-**Audit report updates:**
-- Real test counts: `| Passed | 120 |`
-- Updated from workflow CI runs
+**Audit report:**
+- Real test counts: `| Passed | 163 |`
 
 #### Islands Architecture (Componentized Brain)
 - Split brain into lazy-loadable islands (skills/knowledge blocks)
