@@ -10,33 +10,30 @@ highlighter: rouge
 permalink: :title
 exclude: ['README.md', 'Gemfile', 'Gemfile.lock', 'tmp', 'pagefind*']
 
-# Kramdown settings for syntax highlighting
+# Kramdown settings
 kramdown:
   syntax_highlighter: rouge
   syntax_highlighter_opts:
     default_lang: plaintext
     css_class: 'highlight'
-    span: false
-    line_numbers: null
-    line_span: null
-    entity_output: as_char
   toc_levels: [1, 2, 3, 4, 5, 6]
   auto_ids: true
   auto_id_prefix: ''
-  heading_anchors: 2
 
-# Plugins
+# Plugins (Jekyll 3+) / Gems (Jekyll 2)
+gems:
+  - jekyll-redirect-from
 plugins:
   - jekyll-redirect-from
 
-# Navigation - manually ordered (takes precedence over nav_order)
+# Navigation - manually ordered sidebar
 nav:
-  - title: Quick Links
+  - title: Getting Started
     items:
-      - title: Quickstart
-        url: /vant/getting-started/
-      - title: Omega Init
-        url: /vant/omega-init/
+      - title: Installation
+        url: /vant/getting-started/install/
+      - title: Quick Start
+        url: /vant/getting-started/quick-start/
   - title: Guides
     items:
       - title: AI Onboarding
@@ -53,7 +50,9 @@ nav:
         url: /vant/guides/airgap-propagation.html
   - title: Reference
     items:
-      - title: CLI
+      - title: CLI Reference
         url: /vant/reference/cli.html
-      - title: API
+      - title: Module API
         url: /vant/reference/api.html
+      - title: Configuration
+        url: /vant/reference/configuration.html
