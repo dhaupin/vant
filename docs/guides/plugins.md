@@ -11,13 +11,19 @@ Extend VANT with custom plugins.
 
 ## Built-in Plugins
 
-| Plugin | Description |
+| Plugin
+- Description |
 |--------|-------------|
-| brain | Brain loading and management |
-| config | Configuration management |
-| echo | Echo test plugin |
-| mood | Mood state management |
-| renderer | Output renderer |
+| brain
+- Brain loading and management |
+| config
+- Configuration management |
+| echo
+- Echo test plugin |
+| mood
+- Mood state management |
+| renderer
+- Output renderer |
 
 ## Creating a Plugin
 
@@ -104,7 +110,8 @@ Respond differently based on mood:
 ```javascript
 // src/plugins/mood/index.js
 module.exports = {
-  onMessage: (msg, { mood }) => {
+  onMessage: (msg |
+- { mood }) => {
     if (mood === 'playful') {
       return msg + ' 😄';
     }
@@ -120,4 +127,7 @@ module.exports = {
 3. Document configuration options
 4. Support enable/disable
 
-See also: [Architecture](guides/architecture), [CLI Reference](reference/cli)
+## Related
+
+- [Architecture](guides/architecture) |
+- [CLI Reference](reference/cli)

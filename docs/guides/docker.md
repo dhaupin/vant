@@ -19,17 +19,23 @@ docker run -it -v vant-brain:/app/models dhaupin/vant vant load
 
 ## Image
 
-| Tag | Description |
+| Tag
+- Description |
 |-----|-------------|
-| `latest` | Latest release |
-| `v0.8.6` | Specific version |
+| `latest`
+- Latest release |
+| `v0.8.6`
+- Specific version |
 
 ## Volumes
 
-| Volume | Purpose |
+| Volume
+- Purpose |
 |--------|---------|
-| `/app/models` | Brain storage |
-| `/app/config` | Config files |
+| `/app/models`
+- Brain storage |
+| `/app/config`
+- Config files |
 
 ## Environment
 Set up Docker environment variables.
@@ -78,4 +84,7 @@ docker build -t vant:local .
 docker run -it vant:local vant load
 ```
 
-See also: [Installation](getting-started/install), [Architecture](guides/architecture)
+## Related
+
+- [Installation](getting-started/install) - Setup guide
+- [Architecture](architecture) - System design

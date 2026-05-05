@@ -134,7 +134,8 @@ Error: Request timed out
 
 ### Large Brain
 
-**Symptoms**: Slow loads, sync timeouts
+**Symptoms**: Slow loads |
+- sync timeouts
 
 **Fix**:
 - Split brain into categories
@@ -209,8 +210,11 @@ Error: Content blocked: /<script>/
 ```
 
 **Fix**:
-- Don't include `<script>`, `javascript:`, `on*=` in inputs
-- For HTML content, write directly to files
+- Don't include `<script>` |
+- `javascript:` |
+- `on*=` in inputs
+- For HTML content |
+- write directly to files
 
 ### Blocked: Shell Commands
 Handle blocked requests.
@@ -220,16 +224,27 @@ Error: Content blocked: /; rm -rf/
 ```
 
 **Fix**:
-- Don't include `;`, `|`, `&&`, `$()` in inputs
+- Don't include `;` |
+- `|` |
+- `&&` |
+- `$()` in inputs
 - These are blocked to prevent injection
 
 ## Limitations
 
-| Limitation | Description |
+| Limitation
+- Description |
 |-----------|-------------|
-| GitHub rate limits | 5,000/hour authenticated |
-| File size | GitHub max 100MB per file |
-| Repo size | Free tier: 1GB max |
-| Private repos | Must have GitHub account |
+| GitHub rate limits
+- 5,000/hour authenticated |
+| File size
+- GitHub max 100MB per file |
+| Repo size
+- Free tier: 1GB max |
+| Private repos
+- Must have GitHub account |
 
-See also: [Configuration](reference/configuration), [Architecture](guides/architecture)
+## Related
+
+- [Configuration](reference/configuration) |
+- [Architecture](guides/architecture)

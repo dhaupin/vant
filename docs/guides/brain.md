@@ -145,8 +145,8 @@ When you wake up, check `_succession.json` for your autonomy level:
 
 ---
 
-## See Also
+## Related
 
-- [AI Onboarding](guides/ai-onboard) - Start here if new
-- [Succession](guides/succession) - Trust levels
-- [Multi-Agent](guides/multi-agent) - Branch workflow
+- [AI Onboarding](ai-onboard) - Start here if new
+- [Succession](succession) - Trust levels
+- [Multi-Agent](multi-agent) - Branch workflow

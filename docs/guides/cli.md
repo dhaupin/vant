@@ -106,7 +106,7 @@ vant setup        # Initial setup wizard
 
 ---
 
-## See Also
+## Related
 
-- [Operations](guides/operations)
-- [AI Onboarding](guides/ai-onboard)
+- [Operations](operations)
+- [AI Onboarding](ai-onboard)

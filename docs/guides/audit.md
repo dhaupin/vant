@@ -34,12 +34,17 @@ Each entry:
 
 ### Log Levels
 
-| Level | Description |
+| Level
+- Description |
 |-------|-------------|
-| INFO | Normal operations |
-| WARN | Warnings |
-| BLOCKED | Blocked requests |
-| ERROR | Errors |
+| INFO
+- Normal operations |
+| WARN
+- Warnings |
+| BLOCKED
+- Blocked requests |
+| ERROR
+- Errors |
 
 ## Events Logged
 
@@ -47,50 +52,76 @@ Track system events for debugging and compliance.
 
 ### Security Events
 
-| Event | Description |
+| Event
+- Description |
 |-------|-------------|
-| `BLOCKED` | Malicious input blocked |
-| `RATE_LIMIT` | Rate limit exceeded |
-| `INVALID_INPUT` | Invalid input detected |
-| `PATH_TRAVERSAL` | Path traversal attempt |
+| `BLOCKED`
+- Malicious input blocked |
+| `RATE_LIMIT`
+- Rate limit exceeded |
+| `INVALID_INPUT`
+- Invalid input detected |
+| `PATH_TRAVERSAL`
+- Path traversal attempt |
 
 ### Operational Events
 
-| Event | Description |
+| Event
+- Description |
 |-------|-------------|
-| `START` | Vant started |
-| `STOP` | Vant stopped |
-| `SYNC` | GitHub sync |
-| `LOAD` | Brain loaded |
+| `START`
+- Vant started |
+| `STOP`
+- Vant stopped |
+| `SYNC`
+- GitHub sync |
+| `LOAD`
+- Brain loaded |
 
 ### Authentication Events
 
-| Event | Description |
+| Event
+- Description |
 |-------|-------------|
-| `LOGIN` | Login attempt |
-| `LOGIN_SUCCESS` | Successful login |
-| `LOGIN_FAIL` | Failed login |
+| `LOGIN`
+- Login attempt |
+| `LOGIN_SUCCESS`
+- Successful login |
+| `LOGIN_FAIL`
+- Failed login |
 
 ## Compliance
 Meet compliance requirements with audit logs.
 
 ### Data Retention
 
-| Data | Retention | Location |
+| Data
+- Retention
+- Location |
 |------|-----------|----------|
-| Audit logs | 90 days | .audit.log |
-| Brain history | Indefinite | GitHub |
-| Rate limits | Reset hourly | states/active/ |
+| Audit logs
+- 90 days
+- .audit.log |
+| Brain history
+- Indefinite
+- GitHub |
+| Rate limits
+- Reset hourly
+- states/active/ |
 
 ### Access Control
 
 Role-based access:
 
-| Role | Permissions |
+| Role
+- Permissions |
 |------|-------------|
-| Admin | Full access |
-| User | Read brain |
-| Agent | Sync only |
+| Admin
+- Full access |
+| User
+- Read brain |
+| Agent
+- Sync only |
 
 ### Audit Trail
 
@@ -162,15 +193,20 @@ port = 514
 
 ## Audit Ledger (v0.8.6+)
 
-> Append-only, tamper-proof ledger for system actions
+> Append-only |
+- tamper-proof ledger for system actions
 
 ### What It Logs
 
-| Action | Description |
+| Action
+- Description |
 |--------|-------------|
-| `island:github:hydrate` | Island hydrated |
-| `stego:snapshot` | Stego image captured |
-| `sync:github:push` | Sync to provider |
+| `island:github:hydrate`
+- Island hydrated |
+| `stego:snapshot`
+- Stego image captured |
+| `sync:github:push`
+- Sync to provider |
 
 ### Usage
 
@@ -178,19 +214,25 @@ port = 514
 const audit = require('./lib/audit');
 
 // Log action
-audit.log('island:github:hydrate', { success: true });
+audit.log('island:github:hydrate' |
+- { success: true });
 
 // Log specific types
-audit.logHydrate('github', true);
-audit.logStego('snapshot', 'manifest.png');
-audit.logSync('github', 'push');
+audit.logHydrate('github' |
+- true);
+audit.logStego('snapshot' |
+- 'manifest.png');
+audit.logSync('github' |
+- 'push');
 
 // Get ledger
 const entries = audit.getLedger(10);
 
 // Health check
 const health = audit.healthCheck();
-// { healthy: true, entries: 50, issues: [] }
+// { healthy: true |
+- entries: 50 |
+- issues: [] }
 ```
 
 ### CLI
@@ -214,11 +256,15 @@ const audit = require('./lib/audit');
 const islands = require('./lib/islands');
 
 // After hydration
-audit.logHydrate(island, true);
+audit.logHydrate(island |
+- true);
 
 // After sync
 const sync = require('./lib/sync');
 // Already logs in pushAll()
 ```
 
-See also: [Security](guides/security), [Operations](guides/operations)
+## Related
+
+- [Security](guides/security) |
+- [Operations](guides/operations)

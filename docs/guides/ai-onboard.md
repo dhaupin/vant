@@ -210,9 +210,9 @@ PURPOSE: Exploring codebase
 
 ---
 
-## See Also
+## Related
 
-- [Multi-Agent](multi-agent.html) - Branch and lock system
-- [MCP](mcp.html) - Brain as tools for AI
-- [Security](security.html) - VAF input validation
-- [CLI Reference](operations.html#cli) - All commands
+- [Multi-Agent](multi-agent) - Branch and lock system
+- [MCP](mcp) - Brain as tools for AI
+- [Security](security) - VAF input validation
+- [CLI Reference](operations) - All commands

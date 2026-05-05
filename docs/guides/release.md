@@ -18,11 +18,19 @@ MAJOR.MINOR.PATCH
 v0.8.6
 ```
 
-| Type | Example | When |
+| Type
+- Example
+- When |
 |------|---------|-------|
-| PATCH | 0.8.6 → 0.8.5 | Bug fixes |
-| MINOR | 0.8.6 → 0.9.0 | New features |
-| MAJOR | 0.8.6 → 1.0.0 | Breaking changes |
+| PATCH
+- 0.8.6 → 0.8.5
+- Bug fixes |
+| MINOR
+- 0.8.6 → 0.9.0
+- New features |
+| MAJOR
+- 0.8.6 → 1.0.0
+- Breaking changes |
 
 ## Release Checklist
 
@@ -105,4 +113,7 @@ docker tag dhaupin/vant:v0.8.5 dhaupin/vant:latest
 docker push dhaupin/vant:latest
 ```
 
-See also: [CLI Reference](reference/cli), [Docker](guides/docker)
+## Related
+
+- [CLI Reference](reference/cli) |
+- [Docker](guides/docker)

@@ -48,7 +48,7 @@ npm run build
 
 ---
 
-## See Also
+## Related
 
-- [Testing](guides/testing)
-- [Release](guides/release)
+- [Testing](testing)
+- [Release](release)

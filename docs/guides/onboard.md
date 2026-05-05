@@ -48,7 +48,7 @@ Common brain files:
 
 ---
 
-## See Also
+## Related
 
-- [Brain](guides/brain)
-- [AI Onboarding](guides/ai-onboard)
+- [Brain](brain)
+- [AI Onboarding](ai-onboard)

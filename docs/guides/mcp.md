@@ -23,11 +23,19 @@ vant mcp
 
 The server runs on **port 3456** by default with three endpoints:
 
-| Endpoint | Method | Description |
+| Endpoint
+- Method
+- Description |
 |----------|--------|-------------|
-| `/tools` | GET | List all available tools |
-| `/health` | GET | Server health check |
-| `/call` | POST | Execute a tool (JSON-RPC) |
+| `/tools`
+- GET
+- List all available tools |
+| `/health`
+- GET
+- Server health check |
+| `/call`
+- POST
+- Execute a tool (JSON-RPC) |
 
 ## Running Modes
 
@@ -64,17 +72,27 @@ MCP_PORT=3457
 
 ## Available Tools
 
-| Tool | Description |
+| Tool
+- Description |
 |------|-------------|
-| `vant_get_memory` | Read brain files |
-| `vant_set_memory` | Write to brain |
-| `vant_list_branches` | List branches |
-| `vant_create_branch` | Create branch |
-| `vant_switch_branch` | Switch branch |
-| `vant_commit` | Commit changes |
-| `vant_sync` | Sync with GitHub |
-| `vant_lock` | Acquire/release lock |
-| `vant_health` | System health check |
+| `vant_get_memory`
+- Read brain files |
+| `vant_set_memory`
+- Write to brain |
+| `vant_list_branches`
+- List branches |
+| `vant_create_branch`
+- Create branch |
+| `vant_switch_branch`
+- Switch branch |
+| `vant_commit`
+- Commit changes |
+| `vant_sync`
+- Sync with GitHub |
+| `vant_lock`
+- Acquire/release lock |
+| `vant_health`
+- System health check |
 
 ## API Examples
 
@@ -92,7 +110,8 @@ Returns:
     {
       "name": "vant_get_memory",
       "description": "Read current brain state from Vant...",
-      "inputSchema": { "type": "object", "properties": { ... } }
+      "inputSchema": { "type": "object" |
+- "properties": { ... } }
     }
   ]
 }
@@ -125,7 +144,9 @@ curl -X POST http://localhost:3456/call \
     "params": {
       "name": "vant_get_memory",
       "arguments": {
-        "files": ["identity", "goals", "lessons"]
+        "files": ["identity" |
+- "goals" |
+- "lessons"]
       }
     },
     "id": 1
@@ -316,8 +337,10 @@ curl -H "X-API-Key: your-secret-key" \
 
 ### Node.js Client
 ```javascript
-async function callVantTool(name, args = {}) {
-    const response = await fetch('http://localhost:3456/call', {
+async function callVantTool(name |
+- args = {}) {
+    const response = await fetch('http://localhost:3456/call' |
+- {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -326,7 +349,8 @@ async function callVantTool(name, args = {}) {
         body: JSON.stringify({
             jsonrpc: '2.0',
             method: 'tools/call',
-            params: { name, arguments: args },
+            params: { name |
+- arguments: args },
             id: 1
         })
     });
@@ -334,12 +358,15 @@ async function callVantTool(name, args = {}) {
 }
 
 // Get brain
-const memory = await callVantTool('vant_get_memory', {
-    files: ['identity', 'goals']
+const memory = await callVantTool('vant_get_memory' |
+- {
+    files: ['identity' |
+- 'goals']
 });
 
 // Write to brain
-await callVantTool('vant_set_memory', {
+await callVantTool('vant_set_memory' |
+- {
     file: 'lessons',
     content: '# New Lesson\n\nRemember to test first!',
     commit: true
@@ -350,13 +377,15 @@ await callVantTool('vant_set_memory', {
 ```python
 import requests
 
-def call_vant_tool(name, args=None):
+def call_vant_tool(name |
+- args=None):
     response = requests.post(
         'http://localhost:3456/call',
         json={
             'jsonrpc': '2.0',
             'method': 'tools/call',
-            'params': {'name': name, 'arguments': args or {}},
+            'params': {'name': name |
+- 'arguments': args or {}},
             'id': 1
         },
         headers={'X-API-Key': 'your-secret-key'}
@@ -367,7 +396,8 @@ def call_vant_tool(name, args=None):
 memory = call_vant_tool('vant_get_memory')
 
 # Set memory
-call_vant_tool('vant_set_memory', {
+call_vant_tool('vant_set_memory' |
+- {
     'file': 'goals',
     'content': '# Goals\n\n- Complete the project',
     'commit': True
@@ -389,20 +419,35 @@ Errors return a result object with an `error` field:
 
 Common errors:
 - `Security check failed` - Input validation failed (VAF)
-- `Circuit open` - Too many failures, wait and retry
+- `Circuit open` - Too many failures |
+- wait and retry
 - `Server busy` - Max concurrent requests reached
 - `Unknown tool` - Tool name not found
 
 ## Configuration Options
 
-| Setting | Default | Description |
+| Setting
+- Default
+- Description |
 |---------|---------|-------------|
-| `MCP_PORT` | 3456 | Server port |
-| `MCP_API_KEY` | - | API key for auth |
-| `MCP_REQUIRE_API_KEY` | false | Force auth required |
-| `MCP_TIMEOUT` | 30000 | Request timeout (ms) |
-| `MCP_MAX_INPUT_SIZE` | 1048576 | Max input (1MB) |
-| `MCP_MAX_CONCURRENT` | 3 | Concurrent requests |
+| `MCP_PORT`
+- 3456
+- Server port |
+| `MCP_API_KEY`
+- -
+- API key for auth |
+| `MCP_REQUIRE_API_KEY`
+- false
+- Force auth required |
+| `MCP_TIMEOUT`
+- 30000
+- Request timeout (ms) |
+| `MCP_MAX_INPUT_SIZE`
+- 1048576
+- Max input (1MB) |
+| `MCP_MAX_CONCURRENT`
+- 3
+- Concurrent requests |
 
 ## Security
 
@@ -410,10 +455,16 @@ MCP uses VAF (Vant Application Firewall) for input validation:
 
 - All endpoints validated with VAF
 - File parameters use `type: 'path'` to block traversal
-- String content blocks: newlines, XSS, shell commands
+- String content blocks: newlines |
+- XSS |
+- shell commands
 - Rate limiting enabled
 - Circuit breaker prevents cascade failures
 
 For multi-line content, write directly to `models/public/` instead of via MCP.
 
-See also: [Security Guide](guides/security), [Multi-Agent](guides/multi-agent), [CLI Reference](reference/cli)
+## Related
+
+- [Security Guide](security) - Input validation
+- [Multi-Agent](multi-agent) - Branch workflow
+- [CLI Reference](reference/cli) - All commands

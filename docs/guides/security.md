@@ -39,7 +39,7 @@ Tokens encrypted per-user.
 
 ---
 
-## See Also
+## Related
 
 - [Configuration](reference/configuration)
-- [Troubleshooting](guides/troubleshooting)
+- [Troubleshooting](troubleshooting)

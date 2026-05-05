@@ -129,8 +129,8 @@ git push origin agent-yourname
 
 ---
 
-## See Also
+## Related
 
-- [AI Onboarding](guides/ai-onboard) - Workflow
-- [Brain Structure](guides/brain) - Files
-- [Succession](guides/succession) - Trust levels
+- [AI Onboarding](ai-onboard) - Workflow
+- [Brain Structure](brain) - Files
+- [Succession](succession) - Trust levels

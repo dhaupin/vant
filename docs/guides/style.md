@@ -11,7 +11,8 @@ Writing guidelines for Vant content.
 
 ## Our Tone
 
-We're engineers who are also helpful. Clear. Direct. Slightly informal when appropriate, serious when it matters.
+We're engineers who are also helpful. Clear. Direct. Slightly informal when appropriate |
+- serious when it matters.
 
 We are transparent that AI agents contribute to this project.
 
@@ -23,54 +24,78 @@ Our core writing principles.
 
 Always use `-` instead of `—` or `–`.
 
-| ✓ Right | ✗ Wrong |
+| ✓ Right
+- ✗ Wrong |
 |--------|----------|
-| "Git is memory - every commit is a checkpoint" | "Git is memory — every commit is a checkpoint" |
+| "Git is memory - every commit is a checkpoint"
+- "Git is memory — every commit is a checkpoint" |
 
 ### 2. Avoid AI Clichés
 
 These phrases are overused:
 
-| Avoid | Instead |
+| Avoid
+- Instead |
 |-------|---------|
-| "delve into" | "explore" |
-| "leverage" | "use" |
-| "unlock" | use specific |
-| "seamless" | remove |
-| "empower" | "let you" |
-| "journey" | remove |
-| "realm" | remove |
-| "game-changer" | remove |
-| "cutting-edge" | remove |
-| "revolutionary" | remove |
-| "we're excited to" | remove |
+| "delve into"
+- "explore" |
+| "leverage"
+- "use" |
+| "unlock"
+- use specific |
+| "seamless"
+- remove |
+| "empower"
+- "let you" |
+| "journey"
+- remove |
+| "realm"
+- remove |
+| "game-changer"
+- remove |
+| "cutting-edge"
+- remove |
+| "revolutionary"
+- remove |
+| "we're excited to"
+- remove |
 
 Just say what you mean.
 
-### 3. Be Specific, Not Abstract
+### 3. Be Specific |
+- Not Abstract
 
-| ✗ Abstract | ✓ Specific |
+| ✗ Abstract
+- ✓ Specific |
 |------------|----------|
-| "This feature empowers users to do more" | "This feature lets you transfer your brain between instances" |
-| "Vant unlocks seamless persistent intelligence" | "Vant stores your AI's memory in Git" |
+| "This feature empowers users to do more"
+- "This feature lets you transfer your brain between instances" |
+| "Vant unlocks seamless persistent intelligence"
+- "Vant stores your AI's memory in Git" |
 
-### 4. State Facts, Not Hype
+### 4. State Facts |
+- Not Hype
 
-| ✗ Hype | ✓ Fact |
+| ✗ Hype
+- ✓ Fact |
 |--------|-------|
-| "Vant is a revolutionary system that will change AI forever" | "Vant persists AI memory across sessions via Git" |
+| "Vant is a revolutionary system that will change AI forever"
+- "Vant persists AI memory across sessions via Git" |
 
 ### 5. Active Voice
 
 Use subject-verb-object. Present tense.
 
-| ✗ Passive | ✓ Active |
+| ✗ Passive
+- ✓ Active |
 |----------|---------|
-| "The brain is loaded by the CLI" | "The CLI loads the brain" |
+| "The brain is loaded by the CLI"
+- "The CLI loads the brain" |
 
 ### 6. Code Is Documentation
 
-Show, don't just tell. Include working commands.
+Show |
+- don't just tell. Include working commands.
 
 ### 7. Write for Humans and AIs
 
@@ -79,13 +104,23 @@ Show, don't just tell. Include working commands.
 
 ## Formatting
 
-| Element | Style |
+| Element
+- Style |
 |---------|-------|
-| Headers | Title case (titles), sentence case (subheads) |
-| Bullets | Use `-`, not `*` |
-| Code | Inline `code` for commands, blocks for examples |
-| Links | Descriptive, not "click here" |
-| Numbered lists | Use dashes in code blocks (see Code Blocks Need Briefs) |
+| Headers
+- Title case (titles) |
+- sentence case (subheads) |
+| Bullets
+- Use `-` |
+- not `*` |
+| Code
+- Inline `code` for commands |
+- blocks for examples |
+| Links
+- Descriptive |
+- not "click here" |
+| Numbered lists
+- Use dashes in code blocks (see Code Blocks Need Briefs) |
 
 ### Numbered Lists in Code Blocks
 
@@ -103,10 +138,13 @@ Why: Markdown parsers may render numbered lists incorrectly inside fenced code b
 
 Never use "This section covers..." as a section intro. Write actual content:
 
-| ✗ Placeholder | ✓ Real Content |
+| ✗ Placeholder
+- ✓ Real Content |
 |--------------|--------------|
-| "Track system events for debugging and compliance." | "Track system events for debugging and compliance." |
-| "This section covers setup." | "Configure Vant to sync with your GitHub repository." |
+| "Track system events for debugging and compliance."
+- "Track system events for debugging and compliance." |
+| "This section covers setup."
+- "Configure Vant to sync with your GitHub repository." |
 
 ### Code Blocks Need Briefs
 
@@ -116,7 +154,8 @@ Check system health:
 
     vant health
 
-Why: Readers need context, not just commands.
+Why: Readers need context |
+- not just commands.
 
 ### Code Block Best Practices
 
@@ -148,11 +187,14 @@ Example output:
 
 The docs system (`/docs/`) is the source of truth for all documentation.
 
-- README.md references docs, not the other way around
+- README.md references docs |
+- not the other way around
 - Keep detailed content in docs
 - README provides quick reference with links to full docs
 
-Why: Docs can be rendered with Jekyll (syntax highlighting, navigation, search). README is a single file.
+Why: Docs can be rendered with Jekyll (syntax highlighting |
+- navigation |
+- search). README is a single file.
 
 ## Focus Areas
 
@@ -197,7 +239,8 @@ Every section header should have a 1-2 sentence intro that answers:
 
 ### Example
 
-For example, here's a properly documented section:
+For example |
+- here's a properly documented section:
 
     ## Installation
     
@@ -212,11 +255,21 @@ For example, here's a properly documented section:
 
 ## Common Doc Blocks
 
-| Block | Include |
+| Block
+- Include |
 |-------|--------|
-| Tables | Headers, 1-2 sentence intro |
-| Lists | Lead-in sentence |
-| Tips/Notes | Emoji prefix (>, ⚠️) |
-| Warnings | Why it matters (1 sentence) |
+| Tables
+- Headers |
+- 1-2 sentence intro |
+| Lists
+- Lead-in sentence |
+| Tips/Notes
+- Emoji prefix (> |
+- ⚠️) |
+| Warnings
+- Why it matters (1 sentence) |
 
-See also: [CLI Reference](reference/cli), [Documentation](index)
+## Related
+
+- [CLI Reference](reference/cli) - All commands
+- [Documentation](index) - Docs index

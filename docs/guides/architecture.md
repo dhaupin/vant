@@ -23,25 +23,39 @@ The core modules that make up Vant.
 
 ### bin/
 
-| File | Purpose |
+| File
+- Purpose |
 |------|---------|
-| `vant.js` | CLI entry point |
-| `sync.js` | GitHub sync |
-| `load.js` | Brain loader |
-| `health.js` | Diagnostics |
-| `node.js` | Persistent node |
+| `vant.js`
+- CLI entry point |
+| `sync.js`
+- GitHub sync |
+| `load.js`
+- Brain loader |
+| `health.js`
+- Diagnostics |
+| `node.js`
+- Persistent node |
 
 ### lib/
 
-| File | Purpose |
+| File
+- Purpose |
 |------|---------|
-| `config.js` | Config loader |
-| `brain.js` | Brain manager |
-| `lock.js` | Multi-agent lock |
-| `branch.js` | Git branch per agent |
-| `vaf.js` | Security layer |
-| `protection.js` | Circuit breaker |
-| `auto-update.js` | Auto-save |
+| `config.js`
+- Config loader |
+| `brain.js`
+- Brain manager |
+| `lock.js`
+- Multi-agent lock |
+| `branch.js`
+- Git branch per agent |
+| `vaf.js`
+- Security layer |
+| `protection.js`
+- Circuit breaker |
+| `auto-update.js`
+- Auto-save |
 
 ## Flow
 
@@ -50,4 +64,7 @@ The core modules that make up Vant.
 3. Commits to GitHub on changes (human/agent initiated)
 4. Next session syncs when ready
 
-See also: [Multi-Agent](guides/multi-agent), [Security](guides/security)
+## Related
+
+- [Multi-Agent](guides/multi-agent) |
+- [Security](guides/security)

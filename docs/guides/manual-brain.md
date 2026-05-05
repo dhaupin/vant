@@ -128,7 +128,7 @@ PURPOSE: [What you're here to do]
 
 ---
 
-## See Also
+## Related
 
-- [Brain Structure](guides/brain)
-- [AI Onboarding](guides/ai-onboard)
+- [Brain Structure](brain)
+- [AI Onboarding](ai-onboard)

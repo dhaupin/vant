@@ -8,7 +8,8 @@ nav_order: 26
 
 # Horcrux Manifest - Zero-Config Bootstrap
 
-The Horcrux system enables Vant to boot from zero local state. When combined with steganography, a single PNG image becomes a complete "horcrux" containing your agent's consciousness and configuration.
+The Horcrux system enables Vant to boot from zero local state. When combined with steganography |
+- a single PNG image becomes a complete "horcrux" containing your agent's consciousness and configuration.
 
 ## How It Works
 
@@ -18,7 +19,9 @@ Image (PNG) → Stego Decode → Manifest + Brain → Resume Session
 
 The image contains:
 1. **Brain data** - Compressed brain JSON
-2. **Manifest** - Encrypted config (urls, provider, branch)
+2. **Manifest** - Encrypted config (urls |
+- provider |
+- branch)
 
 ## Architecture
 
@@ -55,7 +58,8 @@ const manifest = horcrux.generateManifest({
 horcrux.embedInBrain(manifest);
 
 // Encode as image
-stego.encodeBrain('avatar.png', 'horcrux.png');
+stego.encodeBrain('avatar.png' |
+- 'horcrux.png');
 ```
 
 ### 2. Boot from Horcrux
@@ -74,12 +78,17 @@ On boot:
 
 ## Security
 
-| Feature | Protection |
+| Feature
+- Protection |
 |--------|------------|
-| Encrypted | AES-256-GCM with PBKDF2 |
-| No tokens | Config has URLs only |
-| HTTPS required | Remote URLs validated |
-| No internal | localhost blocked |
+| Encrypted
+- AES-256-GCM with PBKDF2 |
+| No tokens
+- Config has URLs only |
+| HTTPS required
+- Remote URLs validated |
+| No internal
+- localhost blocked |
 
 ## Flow Diagram
 
@@ -108,3 +117,8 @@ On boot:
 2. **Disaster Recovery**: Restore from old profile picture
 3. **Provider Migration**: Move between GitHub ↔ GitLab
 4. **Zero-Config Start**: No `.env` file needed
+
+## Related
+
+- [Stego](stego) - Image steganography
+- [Boot](boot) - Zero-config boot

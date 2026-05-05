@@ -109,8 +109,8 @@ Track decisions on the blockchain.
 
 This doc has advanced API reference. See GitHub for latest.
 
-## See Also
+## Related
 
-- [Succession](guides/succession)
-- [Brain](guides/brain)
-- [Audit](guides/audit)
+- [Succession](succession)
+- [Brain](brain)
+- [Audit](audit)

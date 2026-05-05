@@ -47,11 +47,19 @@ export GITHUB_REPO=your-username/vant-brain
 
 ## Token Scopes
 
-| Scope | Required | Description |
+| Scope
+- Required
+- Description |
 |-------|----------|-------------|
-| `repo` | Yes | Full repository control |
-| `read:user` | No | Read user profile |
-| `delete_repo` | No | Delete repository |
+| `repo`
+- Yes
+- Full repository control |
+| `read:user`
+- No
+- Read user profile |
+| `delete_repo`
+- No
+- Delete repository |
 
 > Minimum required: `repo` for private brain storage.
 
@@ -60,10 +68,13 @@ Understand rate limits and quotas.
 
 ### Understanding Limits
 
-| Plan | Requests/Hour |
+| Plan
+- Requests/Hour |
 |------|---------------|
-| Authenticated | 5,000 |
-| Unauthenticated | 60 |
+| Authenticated
+- 5,000 |
+| Unauthenticated
+- 60 |
 
 ### Managing Limits
 View and wait for rate limits.
@@ -80,12 +91,18 @@ vant rate reset
 
 ### Best Practices
 
-| Practice | Description |
+| Practice
+- Description |
 |----------|-------------|
-| Batch commits | Combine multiple changes into one commit |
-| Skip auto-push | Use `AUTO_PUSH=false` for testing |
-| Cache brain | Load once, use locally |
-| Limit sync frequency | Don't sync every message |
+| Batch commits
+- Combine multiple changes into one commit |
+| Skip auto-push
+- Use `AUTO_PUSH=false` for testing |
+| Cache brain
+- Load once |
+- use locally |
+| Limit sync frequency
+- Don't sync every message |
 
 ## Sync Strategies
 Optimize GitHub sync strategy.
@@ -162,24 +179,36 @@ git push origin experiment-feature
 ```
 
 
-See: [Multi-Agent](guides/multi-agent)
 
-## Troubleshooting
-
-| Issue | Solution |
+| Issue
+- Solution |
 |-------|----------|
-| 403 Forbidden | Check token scopes |
-| 404 Not Found | Verify GITHUB_REPO |
-| Rate limit exceeded | Wait or use different token |
-| Merge conflict | Pull latest, resolve manually |
+| 403 Forbidden
+- Check token scopes |
+| 404 Not Found
+- Verify GITHUB_REPO |
+| Rate limit exceeded
+- Wait or use different token |
+| Merge conflict
+- Pull latest |
+- resolve manually |
 
 ## Security
 
-| Practice | Description |
+| Practice
+- Description |
 |----------|-------------|
-| Never commit .env | Add to .gitignore |
-| Use private repo | Keep brain private |
-| Rotate tokens | Refresh periodically |
-| Use fine-grained tokens | Restrict to brain repo only |
+| Never commit .env
+- Add to .gitignore |
+| Use private repo
+- Keep brain private |
+| Rotate tokens
+- Refresh periodically |
+| Use fine-grained tokens
+- Restrict to brain repo only |
 
-See also: [CLI Reference](reference/cli), [Troubleshooting](guides/troubleshooting)
+## Related
+
+- [Troubleshooting](troubleshooting) - Problem solving
+- [Multi-Agent](multi-agent) - Branch workflow
+- [CLI Reference](reference/cli) - All commands

@@ -101,8 +101,8 @@ vant succession trust high
 
 ---
 
-## See Also
+## Related
 
-- [AI Onboarding](guides/ai-onboard) - Workflow
-- [Brain Structure](guides/brain) - Files
-- [Multi-Agent](guides/multi-agent) - Branch workflow
+- [AI Onboarding](ai-onboard) - Workflow
+- [Brain Structure](brain) - Files
+- [Multi-Agent](multi-agent) - Branch workflow

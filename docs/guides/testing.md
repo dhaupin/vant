@@ -109,7 +109,8 @@ Normal operation test.
 
 ```bash
 vant start
-# Expected: Brain loads, no errors
+# Expected: Brain loads |
+- no errors
 ```
 
 
@@ -179,7 +180,8 @@ Fix GitHub connection issues.
 
 ```yaml
 name: Test
-on: [push, pull_request]
+on: [push |
+- pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -212,7 +214,11 @@ TRACE=true vant start
 Logging configuration.
 
 ```bash
-vant start 2>&1 | tee vant.log
+vant start 2>&1
+- tee vant.log
 ```
 
-See also: [CLI Reference](reference/cli), [Troubleshooting](guides/troubleshooting)
+## Related
+
+- [CLI Reference](reference/cli) |
+- [Troubleshooting](guides/troubleshooting)

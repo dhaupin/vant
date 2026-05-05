@@ -56,13 +56,10 @@ Vant is designed to be lightweight and efficient. This guide covers optimization
 - Use etag headers
 - Avoid redundant fetches
 
-## See Also
+## Related
 
-- [Operations](/guides/operations)
-- [Configuration](/reference/configuration)
-
-## See Also
-
-- [Architecture](guides/architecture)
-- [Testing](guides/testing)
-- [Troubleshooting](guides/troubleshooting)
+- [Operations](operations) - CLI commands
+- [Configuration](reference/configuration) - Config options
+- [Architecture](architecture) - System design
+- [Testing](testing) - Quality assurance
+- [Troubleshooting](troubleshooting) - Problem solving

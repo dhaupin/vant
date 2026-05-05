@@ -30,6 +30,6 @@ node -e "
 
 This feature uses LSB steganography for encoding hidden messages in PNG images. For advanced users only.
 
-## See Also
+## Related
 
-- [Security](guides/security)
+- [Security](security)

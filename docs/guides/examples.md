@@ -64,8 +64,18 @@ git push origin your-branch
 
 ## Errors
 
-| Error | Fix |
+| Error
+- Fix |
 |-------|-----|
-| Permission denied | Check GITHUB_TOKEN |
-| Rate limit | Wait 1 hour |
-| Lock held | Use your branch |
+| Permission denied
+- Check GITHUB_TOKEN |
+| Rate limit
+- Wait 1 hour |
+| Lock held
+- Use your branch |
+
+## Related
+
+- [CLI Reference](reference/cli) - All commands
+- [Troubleshooting](troubleshooting) - Problem solving
+- [GitHub](github) - GitHub integration
