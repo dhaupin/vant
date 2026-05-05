@@ -3,17 +3,19 @@
  * Vant Boot - Ghost in the Machine
  * 
  * Boot Vant from zero local state by fetching a stego image.
+ * Triple-redundant bootstrap: URL → local backup → .env fallback
  * 
  * Usage:
  *   node bin/boot.js --image <url>           # From URL
  *   node bin/boot.js --image <path>          # From local file
  *   node bin/boot.js --decrypt <password>   # Decrypt password
+ *   node bin/boot.js                        # Auto (try all sources)
  * 
  * The flow:
- *   1. Fetch PNG from URL or load from file
- *   2. Decode brain from stego
- *   3. Extract embedded config (no tokens!)
- *   4. Resume session with remote brain
+ *   1. Try provided URL (or use default)
+ *   2. Try local backup: models/.states/manifest.png
+ *   3. Try .env DEFAULT_BOOT_URL
+ *   4. If all fail → Amnesia Mode (clean state)
  * 
  * SECURITY:
  *   - Validates URL before fetch (HTTPS required for remote)
@@ -28,6 +30,7 @@ const { URL } = require('url');
 const args = process.argv.slice(2);
 const imageArg = args.find(a => a.startsWith('--image='))?.slice(8);
 const decrypt = args.find(a => a.startsWith('--decrypt='))?.slice(10);
+const force = args.includes('--force');
 
 // Helper: Validate URL is safe for fetching
 function validateUrl(urlString) {
@@ -197,18 +200,115 @@ Security:
 }
 
 // Main
+// Local backup path
+const LOCAL_BACKUP = path.join(__dirname, '..', 'models', '.states', 'manifest.png');
+const ENV_FILE = path.join(__dirname, '..', '.env');
+
+// Load .env fallback
+function getEnvBootUrl() {
+    if (fs.existsSync(ENV_FILE)) {
+        const env = fs.readFileSync(ENV_FILE, 'utf8');
+        const match = env.match(/DEFAULT_BOOT_URL=(.+)/);
+        if (match && match[1] && !match[1].startsWith('#')) {
+            return match[1].trim();
+        }
+    }
+    return null;
+}
+
+// Triple-redundant boot sources
+function getBootSources() {
+    const sources = [];
+    
+    // 1. Provided or default
+    if (imageArg) {
+        sources.push({ type: 'provided', source: imageArg });
+    }
+    
+    // 2. Local backup
+    if (fs.existsSync(LOCAL_BACKUP)) {
+        sources.push({ type: 'local', source: LOCAL_BACKUP });
+    }
+    
+    // 3. .env fallback
+    const envUrl = getEnvBootUrl();
+    if (envUrl) {
+        sources.push({ type: 'env', source: envUrl });
+    }
+    
+    return sources;
+}
+
+// Amnesia Mode - clean state
+function enterAmnesiaMode() {
+    console.log('\n⚠ All boot sources failed!');
+    console.log('============================================');
+    console.log('VANT AMNESIA MODE');
+    console.log('Cleaning brain and starting fresh...');
+    console.log('============================================\n');
+    
+    // Save warning state
+    const brain = require('../lib/brain');
+    brain.set('amnesia', {
+        mode: true,
+        timestamp: new Date().toISOString(),
+        reason: 'No valid boot sources found'
+    });
+    
+    return true;
+}
+
 async function main() {
     const isHelp = args.includes('--help') || args.includes('-h');
     
-    if (isHelp || !imageArg) {
+    if (isHelp && !imageArg) {
         help();
-        process.exit(isHelp ? 0 : 1);
+        process.exit(0);
+    }
+    
+    // If no image provided, try all sources
+    if (!imageArg && !force) {
+        const sources = getBootSources();
+        
+        console.log('[Boot] Auto-boot mode: trying', sources.length, 'sources');
+        
+        let lastError = null;
+        for (const src of sources) {
+            console.log('[Boot] Trying', src.type + ':', src.source);
+            try {
+                await boot(src.source, decrypt);
+                process.exit(0);
+            } catch (e) {
+                console.log('[Boot] Failed:', e.message);
+                lastError = e;
+            }
+        }
+        
+        // All sources failed
+        console.log('[Boot] All sources exhausted');
+        enterAmnesiaMode();
+        process.exit(0);
     }
     
     try {
-        await boot(imageArg, decrypt);
+        await boot(imageArg || 'auto', decrypt);
     } catch (e) {
         console.error('[Boot] Error:', e.message);
+        
+        // Try fallback
+        if (!force) {
+            const sources = getBootSources().filter(s => s.source !== imageArg);
+            for (const src of sources) {
+                console.log('[Boot] Fallback:', src.type);
+                try {
+                    await boot(src.source, decrypt);
+                    process.exit(0);
+                } catch (e2) {
+                    console.log('[Boot] Fallback failed:', e2.message);
+                }
+            }
+            enterAmnesiaMode();
+        }
         process.exit(1);
     }
 }

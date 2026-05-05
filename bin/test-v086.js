@@ -264,6 +264,16 @@ async function runTests() {
         passed++;
     } catch (e) { console.log('  ✗', e.message); failed++; }
     
+    // Vibe Evals
+    try {
+        console.log('\n[VibeEvals]');
+        const evals = require(path.join(DIR, 'test/evals/vibe'));
+        assert(typeof evals.EVALS !== 'undefined');
+        assert(evals.EVALS.length > 0);
+        console.log('  ✓');
+        passed++;
+    } catch (e) { console.log('  ✗', e.message); failed++; }
+    
     console.log('\n╔═══════════════════════════════════════╗');
     console.log('║  Results: ' + passed + '/' + (passed + failed) + ' passed             ║');
     console.log('╚═══════════════════════════════════════╝');

@@ -107,6 +107,78 @@
         "ltcEntries": 0,
         "errors": []
       }
+    },
+    {
+      "date": "2026-05-05T14:34:44.477Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
+    },
+    {
+      "date": "2026-05-05T14:34:52.112Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
+    },
+    {
+      "date": "2026-05-05T14:35:09.515Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
+    },
+    {
+      "date": "2026-05-05T14:35:23.418Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
+    },
+    {
+      "date": "2026-05-05T14:35:32.783Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
+    },
+    {
+      "date": "2026-05-05T14:35:48.648Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
     }
   ]
 }

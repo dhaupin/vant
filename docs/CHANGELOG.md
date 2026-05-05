@@ -268,6 +268,24 @@ sync.isCircuitClosed('github');
 // true/false
 ```
 
+#### Cold Boot Fallbacks
+- Triple-redundant: provided URL → local backup → .env
+- Auto-try all sources on `vant boot`
+- Amnesia Mode: clean state if all fail
+
+```bash
+vant boot           # Auto (try all)
+vant boot --image=<url>  # From URL
+```
+
+#### Vibe Evals (QC)
+- Deterministic keyword trigger tests
+- Ensures correct island fires for keywords
+
+```bash
+node test/evals/vibe.js  # Run all
+```
+
 ---
 
 ## [v0.8.6] - 2026-05-05 - Feature Release
