@@ -25,6 +25,10 @@ jobs:
         run: node test/ci.js
       - name: Run full suite
         run: node test/runner.js
+      - name: Run v0.8.6 tests
+        run: node bin/test-v086.js
+      - name: Run Vibe Evals
+        run: node test/evals/vibe.js
 
   lint:
     runs-on: ubuntu-latest
