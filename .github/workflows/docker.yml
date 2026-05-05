@@ -2,7 +2,7 @@ name: Build and Push VANT
 
 on:
   push:
-    branches: [main, release/v0.8.2]
+    branches: [main, release/v0.8.2, release/v0.8.4]
     tags:
       - 'v*'
       - 'checkpoint-*'
