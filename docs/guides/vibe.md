@@ -10,8 +10,6 @@ nav_order: 13
 
 > Dynamic mood system for AI runtime
 
-> **Related**: [Islands](islands) | [Schema](schema) | [Testing](testing)
-
 ## What Is Vibe?
 
 Vibe formalizes how "mood" influences runtime.
@@ -71,3 +69,11 @@ vibe.onTaskSuccess();
 const commitMsg = `Fixed issue #123
 ${vibe.getCommitVibe()}`;
 ```
+
+---
+
+## Related
+
+- [Islands](islands) - Componentized brain
+- [Schema](schema) - JSON validation
+- [Testing](testing) - Quality assurance

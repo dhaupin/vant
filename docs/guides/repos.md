@@ -10,8 +10,6 @@ nav_order: 15
 
 > Distributed brain - mount repos like drives
 
-> **Related**: [Islands](islands) | [Hybrid Sync](hybrid) | [Providers](providers)
-
 ## What Is Multi-Repo?
 
 Pull skills from different repos:
@@ -70,3 +68,11 @@ Use with Hybrid sync:
 const hybrid = require('./lib/hybrid');
 hybrid.setPrivacy('my-skills', 'public'); // or 'private'
 ```
+
+---
+
+## Related
+
+- [Islands](islands) - Componentized brain
+- [Hybrid Sync](hybrid) - Public/Private split
+- [Providers](providers) - Multi-git provider

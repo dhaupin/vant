@@ -10,8 +10,6 @@ nav_order: 14
 
 > Public/Private brain - split sync
 
-> **Related**: [Islands](islands) | [Multi-Repo](repos) | [Sync](sync)
-
 ## What Is Hybrid?
 
 Sync different parts to different repos:
@@ -69,3 +67,11 @@ hybrid.setPrivacy('skills', 'public');
 repos.register('internal', 'https://github.com/user/internal');
 hybrid.setPrivacy('internal', 'private');
 ```
+
+---
+
+## Related
+
+- [Islands](islands) - Componentized brain
+- [Multi-Repo](repos) - Mount external repos
+- [Sync](sync) - Multi-provider sync

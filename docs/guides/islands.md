@@ -10,8 +10,6 @@ nav_order: 12
 
 Implements Prestruct's "Islands of Interactivity" for AI memory. Each skill/knowledge block is a lazy-loadable "island."
 
-> **Related**: [Vibe Controls](vibe) | [Hybrid Sync](hybrid) | [Multi-Repo](repos)
-
 ## The Problem
 
 Vant used to load one giant `current.json` - potentially massive, containing everything.
@@ -128,3 +126,11 @@ gallery.linkToBrain();
 - `lib/state.js` - Static/Hydrated state separation
 - `lib/gallery.js` - Linked stego image chunks
 - `bin/islands-boot.js` - Islands boot CLI
+
+---
+
+## Related
+
+- [Vibe Controls](vibe) - Dynamic mood system
+- [Hybrid Sync](hybrid) - Public/Private brain split
+- [Multi-Repo](repos) - Mount external repos

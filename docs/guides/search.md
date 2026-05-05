@@ -10,8 +10,6 @@ nav_order: 16
 
 > **NEW in v0.8.6**: See [Hybrid Search](#hybrid-search) below for BM25+Vector RRF.
 
-> **Related**: [Islands](islands) | [Citations](citations) | [Audit](audit)
-
 Use your Long Term Core (LTC) as a high-level index for RAG-like consciousness. Search for relevant memories, then re-hydrate full context from git history.
 
 ## Why Semantic Search?
@@ -161,3 +159,11 @@ const result = await query.hyde('herbalism');
 
 citations.addSource(result.sources[0].commit);
 ```
+
+---
+
+## Related
+
+- [Islands](islands) - Componentized brain
+- [Audit](audit) - Activity logging
+- [Hybrid Sync](hybrid) - Public/Private split
