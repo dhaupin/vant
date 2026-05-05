@@ -166,4 +166,5 @@ citations.addSource(result.sources[0].commit);
 
 - [Islands](islands) - Componentized brain
 - [Audit](audit) - Activity logging
+- [Citations](citations) - Git-backed citations
 - [Hybrid Sync](hybrid) - Public/Private split

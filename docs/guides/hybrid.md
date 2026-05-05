@@ -74,4 +74,5 @@ hybrid.setPrivacy('internal', 'private');
 
 - [Islands](islands) - Componentized brain
 - [Multi-Repo](repos) - Mount external repos
+- [Citations](citations) - Git-backed citations
 - [Sync](sync) - Multi-provider sync

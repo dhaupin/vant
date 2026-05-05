@@ -267,4 +267,5 @@ const sync = require('./lib/sync');
 ## Related
 
 - [Security](security) - VAF validation
+- [Citations](citations) - Git-backed citations
 - [Operations](operations) - CLI commands
