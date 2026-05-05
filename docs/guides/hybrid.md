@@ -1,6 +1,14 @@
-# Vant Hybrid Sync Guide
+---
+version: 0.8.6
+title: Hybrid Sync
+nav_order: 14
+---
+
+# Vant Hybrid Sync
 
 > Public/Private brain - split sync
+
+> **Related**: [Islands](islands) | [Multi-Repo](repos) | [Sync](sync)
 
 ## What Is Hybrid?
 

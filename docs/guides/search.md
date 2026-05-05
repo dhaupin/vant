@@ -1,6 +1,14 @@
-# LTC Semantic Search + Re-hydrate
+---
+version: 0.8.6
+title: Hybrid Search
+nav_order: 16
+---
+
+# Hybrid Search
 
 > **NEW in v0.8.6**: See [Hybrid Search](#hybrid-search) below for BM25+Vector RRF.
+
+> **Related**: [Islands](islands) | [Citations](citations) | [Audit](audit)
 
 Use your Long Term Core (LTC) as a high-level index for RAG-like consciousness. Search for relevant memories, then re-hydrate full context from git history.
 

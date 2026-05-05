@@ -1,6 +1,14 @@
-# Vant Vibe Controls Guide
+---
+version: 0.8.6
+title: Vibe Controls
+nav_order: 13
+---
+
+# Vant Vibe Controls
 
 > Dynamic mood system for AI runtime
+
+> **Related**: [Islands](islands) | [Schema](schema) | [Testing](testing)
 
 ## What Is Vibe?
 

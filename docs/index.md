@@ -30,13 +30,19 @@ Click any feature to learn more:
 
 | Feature | Description | Docs |
 |--------|-------------|------|
-| **Persistent Memory** | GitHub-based brain storage with version control | [Brain Guide](guides/brain) |
+| **Persistent Memory** | GitHub-based brain storage with version control | [Brain](guides/brain) |
+| **Islands** | Componentized brain - lazy-loadable islands | [Islands](guides/islands) |
 | **Multi-Agent** | Branch + lock system for safe collaboration | [Multi-Agent](guides/multi-agent) |
 | **MCP Server** | Model Context Protocol for AI integration | [MCP](guides/mcp) |
-| **Steganography** | Hidden messages in PNG images | [Stego](guides/steganography) |
-| **Slack/Discord** | Webhook notifications | [Operations](guides/operations) |
+| **Steganography** | Hidden messages in PNG images | [Stego](guides/stego) |
+| **Hybrid Search** | BM25 + Vector with RRF re-ranking | [Search](guides/search) |
+| **Vibe Controls** | Dynamic mood system | [Vibe](guides/vibe) |
+| **Multi-Repo** | Mount external repos like drives | [Repos](guides/repos) |
+| **Hybrid Sync** | Public/Private brain split | [Hybrid](guides/hybrid) |
 | **VAF Security** | Input validation and filtering | [Security](guides/security) |
 | **Telegram Bot** | Control Vant via chat | [Bot Tutorial](tutorials/telegram-bot) |
+| **Schema** | JSON schema validation | [Schema](guides/schema) |
+| **Audit** | Compliance logging + ledger | [Audit](guides/audit) |
 
 ---
 

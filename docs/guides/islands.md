@@ -1,6 +1,14 @@
-# Vant Islands - Componentized Brain
+---
+version: 0.8.6
+title: Islands - Componentized Brain
+nav_order: 12
+---
+
+# Vant Islands
 
 Implements Prestruct's "Islands of Interactivity" for AI memory. Each skill/knowledge block is a lazy-loadable "island."
+
+> **Related**: [Vibe Controls](vibe) | [Hybrid Sync](hybrid) | [Multi-Repo](repos)
 
 ## The Problem
 

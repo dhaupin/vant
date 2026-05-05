@@ -1,6 +1,14 @@
-# Vant Multi-Repo Guide
+---
+version: 0.8.6
+title: Multi-Repo Skills
+nav_order: 15
+---
+
+# Vant Multi-Repo
 
 > Distributed brain - mount repos like drives
+
+> **Related**: [Islands](islands) | [Hybrid Sync](hybrid) | [Providers](providers)
 
 ## What Is Multi-Repo?
 
