@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/security.html
 layout: default
 title: Security
-nav_order: 5
+nav_order: 11
 ---
 # Security
 

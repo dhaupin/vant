@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/onboard.html
 layout: default
 title: Knowledge Base Browser
-nav_order: 7
+nav_order: 12
 ---
 # Knowledge Base Browser
 

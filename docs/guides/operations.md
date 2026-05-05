@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/operations.html
 layout: default
 title: Operations
-nav_order: 15
+nav_order: 10
 ---
 # Operations
 
