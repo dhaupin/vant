@@ -3,14 +3,12 @@ version: 0.8.6
 
 All notable changes to Vant are documented in this file.
 
-> ⚠️ **This is the source of truth**. The root CHANGELOG.md is deprecated.
-
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ---
 
-## [v0.8.6] - 2026-05-04 - Security Release
+## [v0.8.4] - 2026-05-04 - Security Release
 
 ### ⚠️ MAJOR SECURITY RELEASE
 
