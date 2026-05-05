@@ -112,3 +112,4 @@ Yes! Just `git clone` your brain repo. It's all markdown.
 | [Privacy](legal/privacy) | Data collection, your control |
 | [Environment](legal/environment) | GitHub API, limits |
 
+ 
