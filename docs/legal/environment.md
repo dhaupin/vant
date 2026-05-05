@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /legal/environment.html
 layout: default
 title: Environment & Limits
+nav_order: 102
 ---
 
 # Environment & Limits

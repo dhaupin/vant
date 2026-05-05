@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /
 layout: default
 title: Vant Docs
+nav_order: 0
 ---
 # Vant Documentation
 
