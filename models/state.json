@@ -1,0 +1,17 @@
+{
+  "static": {
+    "name": "Vant",
+    "version": "0.8.7",
+    "test": "static"
+  },
+  "current": {
+    "mode": "islands",
+    "hydrated": [],
+    "task": "test islands",
+    "test": "current"
+  },
+  "temp": {
+    "debug": true
+  },
+  "updated": "2026-05-05T14:02:16.066Z"
+}

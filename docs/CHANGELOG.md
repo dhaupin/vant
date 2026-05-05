@@ -8,6 +8,257 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ---
 
+## [v0.8.6] - 2026-05-05 - Islands Release
+
+### ⚠️ MAJOR ARCHITECTURE UPDATE
+
+Implements Prestruct's "Islands of Interactivity" for AI memory.
+Turns Vant from a "storage utility" into a "Distributed Operating System."
+
+#### Islands Architecture (Componentized Brain)
+- Split brain into lazy-loadable islands (skills/knowledge blocks)
+- Static islands: identity, learnings, decisions (always loaded)
+- Lazy islands: github, herbalism, vesc, linear, automation (on trigger)
+- Auto-hydrate based on prompt context
+
+```javascript
+const islands = require('./lib/islands');
+
+// Find islands matching trigger
+const found = islands.findTriggers('github pr issue');
+// ['github']
+
+// Auto-hydrate based on prompt
+const toLoad = islands.autoHydrate('fix the github pr');
+// ['identity', 'learnings', 'decisions', 'github']
+
+// Hydrate specific island
+await islands.hydrate('github');
+```
+
+#### State Separation (Static vs Hydrated)
+- Static state: Immutable facts, identity (never changes)
+- Current state: Active task (per prompt)
+- Temp state: Temporary variables (wiped on prune)
+
+```javascript
+const state = require('./lib/state');
+
+// Static: Immutable
+state.setStatic({ name: 'Vant', version: '0.8.6' });
+state.getStatic('name'); // 'Vant'
+
+// Current: Active task
+state.setCurrent({ task: 'fix bug', target: 'github' });
+
+// Temp: Wiped on prune
+state.setTemp({ cache: {} });
+state.clearTemp();
+```
+
+#### Stego Gallery (Linked Image Chunks)
+- Each island can be its own stego PNG
+- Gallery of images, lazy-loaded
+- Link to brain manifest
+
+```javascript
+const gallery = require('./lib/gallery');
+gallery.saveImage('github', pngBuffer);  // Save island
+const img = gallery.loadImage('github'); // Load
+gallery.linkToBrain(); // Link to brain
+```
+
+#### Horcrux Manifest (Encrypted Bootstrap)
+- Encrypted configuration in stego images
+- Zero-config boot from image URL
+- Provider URLs in manifest (no tokens!)
+
+```javascript
+const horcrux = require('./lib/horcrux');
+
+const manifest = horcrux.generateManifest({
+    provider: 'github',
+    primaryUrl: 'https://github.com/user/repo',
+    secondaryUrl: 'https://gitlab.com/user/repo'
+});
+
+const bootstrap = horcrux.createBootstrap(manifest, 'password');
+```
+
+#### RAID Sync + Rebase
+- Rebase stale providers when they recover
+- Provider state tracking (.providers.json)
+- marks providers as "stale" on failure, "healthy" on success
+
+```javascript
+const sync = require('./lib/sync');
+
+await sync.rebase('github'); // Catch up stale provider
+sync.markStale('github'); // Mark as stale
+sync.getProviderState('github'); // Get status
+```
+
+#### Search + Git History
+- Get current commit in search summary
+- Fetch historical files from git
+
+```javascript
+const search = require('./lib/search');
+
+search.getCurrentCommit(); // '6b0d7e5'
+search.fetchFromHistory('models/v0.5.0/learnings/1.md', 'abc123');
+```
+
+### New CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant islands` | Islands boot |
+| `vant islands --list` | List all islands |
+| `vant islands --prompt <text>` | Auto-hydrate based on prompt |
+| `vant islands --island <name>` | Hydrate specific island |
+
+### New Modules
+
+- `lib/islands.js` - Island registry + lazy hydration
+- `lib/state.js` - Static/Hydrated state separation
+- `lib/gallery.js` - Linked stego image chunks
+- `lib/horcrux.js` - Encrypted bootstrap manifest
+- `bin/islands-boot.js` - Islands CLI
+
+### New Docs
+
+- `docs/guides/islands.md` - Islands guide
+- `docs/guides/horcrux.md` - Horcrux manifest guide
+
+### Trigger Mapping
+
+| Trigger | Island |
+|---------|--------|
+| github, pr, issue, repo | github |
+| gitlab, merge | gitlab |
+| bitbucket | bitbucket |
+| herb, plant, medicine | herbalism |
+| vesc, skateboard, motor | vesc |
+| linear, project | linear |
+| cron, automation | automation |
+
+---
+
+## [v0.8.6] - 2026-05-05 - Feature Release
+
+### New Features
+
+#### Multi-Git Provider Support
+- Universal provider abstraction layer for GitHub, GitLab, Bitbucket, self-hosted
+- Auto-detect provider from git remote URL
+- Provider-specific PR/MR creation via API
+- CLI fallback when no provider token configured
+
+```javascript
+const { getProvider } = require('./lib/providers');
+const provider = getProvider(); // Auto-detect
+const pr = await provider.createPR({ source, target, title, body });
+```
+
+#### Steganographic Brain Recovery
+- Encode brain into PNG images using LSB steganography
+- AES-256-GCM encryption support
+- Multi-image chunking for large brains
+- Compression (~70% size reduction)
+
+```javascript
+const stego = require('./lib/stego');
+stego.encodeBrain('input.png', 'output.png', { encrypt: 'password' });
+const brain = stego.decodeBrain('output.png', { decrypt: 'password' });
+```
+
+#### Automated Brain Pruning
+- Stale detection (>90 days configurable)
+- Fluff removal (repetitive/tangential content)
+- Decision preservation
+- Long Term Core (LTC) generation
+- Background daemon mode
+
+```javascript
+const prune = require('./lib/prune');
+await prune.prune({ dryRun: true });
+const ltc = prune.getCore();
+```
+
+#### Ghost in the Machine (Stego-Bootstrapping)
+- Boot from zero local state via stego image
+- Fetch brain from URL or local file
+- Embedded config support (no tokens!)
+- HTTPS validation for security
+
+```bash
+vant boot --image https://raw.githubusercontent.com/user/repo/main/brain.png
+```
+
+#### Multi-Provider RAID 1
+- Push to all configured providers simultaneously
+- Pull from first available provider
+- Auto-failover on provider failure
+
+```javascript
+const sync = require('./lib/sync');
+await sync.pushAll(); // RAID push
+await sync.pullAny(); // Failover pull
+```
+
+#### LTC Semantic Search + Re-hydrate
+- Search LTC for relevant topics
+- Re-hydrate full context from git history
+- RAG-like consciousness
+
+```javascript
+const search = require('./lib/search');
+const { results, context } = await search.query('python');
+```
+
+### New CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant boot --image <url>` | Boot from stego image |
+| `vant stego snapshot` | Encode brain to image |
+| `vant stego recover` | Decode brain from image |
+| `vant stego capacity` | Check image capacity |
+| `vant prune --dry-run` | Preview changes |
+| `vant prune --list` | List prunable files |
+| `vant prune --force` | Run actual prune |
+| `vant prune --daemon` | Background daemon |
+| `vant prune --stats` | Show statistics |
+
+### New Modules
+
+- `lib/providers/index.js` - Provider abstraction (5 providers)
+- `lib/prune.js` - Pruning logic
+- `lib/sync.js` - Multi-provider RAID 1 sync
+- `lib/search.js` - LTC semantic search + re-hydrate
+- `bin/stego.js` - Stego CLI
+- `bin/prune.js` - Prune CLI
+- `bin/boot.js` - Ghost boot CLI
+
+### New Docs
+
+- `docs/guides/providers.md` - Provider guide
+- `docs/guides/stego.md` - Stego guide
+- `docs/guides/pruning.md` - Pruning guide
+- `docs/guides/boot.md` - Ghost boot guide
+- `docs/guides/sync.md` - RAID sync guide
+- `docs/guides/search.md` - Semantic search guide
+
+### Security Audits
+
+- URL validation: Block internal/localhost for boot
+- No tokens in embedded config
+- Path validation for git operations
+- Size limits for re-hydrate (50KB max)
+
+---
+
 ## [v0.8.4] - 2026-05-04 - Security Release
 
 ### ⚠️ MAJOR SECURITY RELEASE

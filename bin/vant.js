@@ -53,7 +53,15 @@ const COMMANDS = {
     resolution: 'resolution.js',
     succession: 'succession.js',
     bot: 'bot.js',
-    compress: 'compress.js'
+    compress: 'compress.js',
+    // Stego brain recovery
+    stego: 'stego.js',
+    // Automated pruning
+    prune: 'prune.js',
+    // Ghost in the Machine
+    boot: 'boot.js',
+    // NEW: Islands (componentized brain)
+    islands: 'islands-boot.js'
 };
 
 const args = process.argv.slice(2);
@@ -79,32 +87,26 @@ Usage: vant <command> [options]
 
 Core:
   vant start        Full startup
+  vant islands     Componentized brain boot
   vant sync        Pull/push brain
   vant health      System diagnostics
-  vant load        Load brain
-  vant run         Start runtime
+
+Ghost (stego bootstrap):
+  vant boot --image <url>   Zero-config boot
+  vant stego snapshot      Encode brain to image
+
+Prune (brain cleanup):
+  vant prune --dry-run   Preview changes
+  vant prune --force    Run prune
+
+Islands:
+  vant islands --list        List islands
+  vant islands --prompt    Auto-hydrate
+  vant islands --island     Hydrate one
 
 Info:
-  vant test        Run build tests
-  vant changelog   View changes
-  vant summary    Session summary
-  vant watch      Monitor GitHub
   vant help       Show help
-
-Setup:
-  vant setup      Interactive setup
-  vant update    Check for updates
-  vant rate      GitHub rate limit
-  vant bump     Bump version
-  vant docs      Build docs
-
-Integrations:
-  vant mcp       MCP server
-  vant node      Persistent node
-  vant bot       Telegram bot
-  vant onboard  Onboarding
-  vant succession Succession
-  vant compress  Entropy-Patch encoder
+  vant changelog View changes
 `);
     process.exit(0);
 }

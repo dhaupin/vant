@@ -1,0 +1,88 @@
+{
+  "version": "1.0",
+  "islands": {
+    "identity": {
+      "name": "Identity",
+      "type": "static",
+      "autoLoad": true,
+      "triggers": []
+    },
+    "learnings": {
+      "name": "Learnings",
+      "type": "static",
+      "autoLoad": true,
+      "triggers": []
+    },
+    "decisions": {
+      "name": "Decisions",
+      "type": "static",
+      "autoLoad": true,
+      "triggers": []
+    },
+    "github": {
+      "name": "GitHub",
+      "type": "lazy",
+      "autoLoad": false,
+      "triggers": [
+        "github",
+        "pr",
+        "issue",
+        "repo"
+      ]
+    },
+    "gitlab": {
+      "name": "GitLab",
+      "type": "lazy",
+      "triggers": [
+        "gitlab",
+        "merge"
+      ]
+    },
+    "bitbucket": {
+      "name": "Bitbucket",
+      "type": "lazy",
+      "triggers": [
+        "bitbucket"
+      ]
+    },
+    "herbalism": {
+      "name": "Herbalism",
+      "type": "lazy",
+      "triggers": [
+        "herb",
+        "plant",
+        "medicine"
+      ]
+    },
+    "vesc": {
+      "name": "VESC",
+      "type": "lazy",
+      "triggers": [
+        "vesc",
+        "skateboard",
+        "motor"
+      ]
+    },
+    "linear": {
+      "name": "Linear",
+      "type": "lazy",
+      "triggers": [
+        "linear",
+        "project"
+      ]
+    },
+    "automation": {
+      "name": "Automation",
+      "type": "lazy",
+      "triggers": [
+        "cron",
+        "automation",
+        "schedule"
+      ]
+    }
+  },
+  "loaded": [],
+  "hydrated": [
+    "github"
+  ]
+}

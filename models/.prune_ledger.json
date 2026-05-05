@@ -1,0 +1,16 @@
+{
+  "operations": [
+    {
+      "date": "2026-05-05T13:18:08.311Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
+    }
+  ]
+}
