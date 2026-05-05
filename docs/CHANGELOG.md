@@ -235,6 +235,39 @@ citations.formatCitation(source);
 // [Source: abc123d]
 ```
 
+#### Schema Enforcement (Validation)
+- Strict JSON Schema for brain.json, _core.json
+- Prevent corrupted states from hydrating
+- `vant validate --check` CLI
+
+```javascript
+const schema = require('./lib/schema');
+schema.isValid();
+schema.validateFile('brain.json');
+```
+
+#### Audit Ledger
+- Append-only, tamper-proof ledger
+- Logs: island hydration, stego snapshot, RAID sync
+- Hash chain: tamper-evident
+
+```javascript
+const audit = require('./lib/audit');
+audit.log('island:github:hydrate');
+audit.healthCheck();
+```
+
+#### Circuit Breakers (RAID Sync)
+- 3 failures → circuit open
+- Auto-skip failed providers
+- Auto-reset after 60s
+
+```javascript
+const sync = require('./lib/sync');
+sync.isCircuitClosed('github');
+// true/false
+```
+
 ---
 
 ## [v0.8.6] - 2026-05-05 - Feature Release
@@ -331,6 +364,8 @@ const { results, context } = await search.query('python');
 | `vant hybrid --private` | Push private only |
 | `vant search --hybrid` | Hybrid search |
 | `vant search --hyde` | HyDE query |
+| `vant validate --check` | Schema + audit + circuits |
+| `vant validate --schema` | Schema only |
 
 ### New Modules
 
@@ -338,6 +373,9 @@ const { results, context } = await search.query('python');
 - `lib/prune.js` - Pruning logic
 - `lib/sync.js` - Multi-provider RAID 1 sync
 - `lib/hybrid-search.js` - Hybrid search (BM25 + Vector)
+- `lib/schema.js` - Schema validation
+- `lib/audit.js` - Audit ledger
+- `bin/validate.js` - Validate CLI
 - `lib/query.js` - Query transformation (HyDE + Multi-Query)
 - `lib/rerank.js` - Re-ranking & compression
 - `lib/citations.js` - Git-backed citations
@@ -358,6 +396,8 @@ const { results, context } = await search.query('python');
 - `docs/guides/hybrid.md` - Hybrid sync guide
 - `docs/guides/vibe.md` - Vibe controls guide
 - `docs/guides/repos.md` - Multi-repo guide
+- `docs/guides/schema.md` - Schema validation guide
+- `docs/guides/audit.md` - Audit ledger guide
 
 ### Security Audits
 

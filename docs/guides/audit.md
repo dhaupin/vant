@@ -7,6 +7,8 @@ nav_order: 25
 ---
 # Audit & Compliance
 
+> **NEW in v0.8.6**: See [Audit Ledger](#audit-ledger-v086) below for new append-only ledger.
+
 Logging and compliance for Vant.
 
 ## Audit Logging
@@ -155,5 +157,68 @@ port = 514
 - [ ] Access controls in place
 - [ ] Git audit trail verified
 - [ ] Rate limits monitored
+
+---
+
+## Audit Ledger (v0.8.6+)
+
+> Append-only, tamper-proof ledger for system actions
+
+### What It Logs
+
+| Action | Description |
+|--------|-------------|
+| `island:github:hydrate` | Island hydrated |
+| `stego:snapshot` | Stego image captured |
+| `sync:github:push` | Sync to provider |
+
+### Usage
+
+```javascript
+const audit = require('./lib/audit');
+
+// Log action
+audit.log('island:github:hydrate', { success: true });
+
+// Log specific types
+audit.logHydrate('github', true);
+audit.logStego('snapshot', 'manifest.png');
+audit.logSync('github', 'push');
+
+// Get ledger
+const entries = audit.getLedger(10);
+
+// Health check
+const health = audit.healthCheck();
+// { healthy: true, entries: 50, issues: [] }
+```
+
+### CLI
+
+```bash
+vant validate --ledger  # Show entries
+vant validate --check  # Full check
+```
+
+### Hash Chain
+
+Each entry's hash includes the previous hash for tamper-evidence:
+- `SHA256(prevHash + action + timestamp)` → first 8 chars
+
+### Integration
+
+Used automatically in:
+
+```javascript
+const audit = require('./lib/audit');
+const islands = require('./lib/islands');
+
+// After hydration
+audit.logHydrate(island, true);
+
+// After sync
+const sync = require('./lib/sync');
+// Already logs in pushAll()
+```
 
 See also: [Security](guides/security), [Operations](guides/operations)
