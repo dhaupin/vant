@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/ai-onboard.html
 layout: default
 title: AI Agent Onboarding
+nav_order: 1
 nav_order: 7
 ---
 # AI Agent Onboarding
