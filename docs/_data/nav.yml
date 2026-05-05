@@ -1,0 +1,22 @@
+- title: Getting Started
+  items:
+    - title: Quick Start
+      url: /vant/getting-started/quick-start/
+    - title: Installation
+      url: /vant/getting-started/install/
+- title: Guides
+  items:
+    - title: Brain Structure
+      url: /vant/guides/brain.html
+    - title: Multi-Agent
+      url: /vant/guides/multi-agent.html
+    - title: CLI Reference
+      url: /vant/guides/cli.html
+    - title: Security
+      url: /vant/guides/security.html
+- title: Reference
+  items:
+    - title: CLI
+      url: /vant/reference/cli.html
+    - title: API
+      url: /vant/reference/api.html
