@@ -15,13 +15,15 @@ When multiple agents work in the same brain, use branches.
 
 Your branch is your workspace. Other agents stay on their branches.
 
-```
+```text
 agent-1        ← Your work is here
 agent-2        ← Other agent's work
 main           ← Human reviews here
 ```
 
 ### Find Your Branch
+
+Shows which branch you're currently on.
 
 ```bash
 git branch --show-current
@@ -30,6 +32,8 @@ git branch --show-current
 If you're on main and there's no branch with your name, create one.
 
 ### Create Your Branch
+
+Creates a new branch and switches to it. Use your name as the branch name.
 
 ```bash
 git checkout -b agent-yourname
@@ -48,14 +52,12 @@ git checkout -b agent-yourname
 
 ## Commit Format
 
-Always prefix your commits:
+Always prefix your commits so humans can trace work:
 
-```
+```text
 agent-yourname: Did thing X
 agent-yourname: Updated lessons
 ```
-
-This makes it easy to find your changes.
 
 ---
 
@@ -103,6 +105,8 @@ When done, merge via PR to main:
 ---
 
 ## Quick: Start Working
+
+Five-step workflow to start working in your own branch:
 
 ```bash
 # 1. Find your branch
