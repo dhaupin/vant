@@ -3,32 +3,39 @@ version: 0.8.6
 permalink: /guides/security.html
 layout: default
 title: Security
-nav_order: 5
+nav_order: 10
 ---
-
 # Security
 
-Security guide for Vant - protecting your brain, tokens, and secrets.
+Vant security model.
 
-## VAF (Vant Application Firewall)
+---
 
-VAF is Vant's input validation and filtering system. It protects against:
-- Injection attacks (command, path, script)
-- DoS attacks (rate limits, input size bombs)
-- Malicious content (malware patterns, exploits)
-- Word stacking attacks (troll/flood attacks)
+## VAF
 
-### Quick Start
-Initialize VAF in your code:
+Vant Application Firewall - input validation layer.
 
+### What It Does
 
-## VAF Config
+- **Word stacking** - Blocks repeated words
+- **Path traversal** - Blocks `../` attacks
+- **Shell metacharacters** - Blocks `;`, `|`, `&&`
+- **Environment variables** - Blocks `$VAR` attacks
 
-Configure VAF via environment:
+### Config
 
 | Env | Default | What |
 |-----|---------|------|
-| MCP_REQUIRE_API_KEY | false | Force auth |
+| MCP_REQUIRE_API_KEY | false | Force auth required |
+| VAF_MAX_LENGTH | 50000 | Max input length |
+
+---
+
+## Data
+
+- Tokens stored per-user (encrypted)
+- No Reddit credentials in logs
+- AI keys encrypted at rest
 
 ---
 
