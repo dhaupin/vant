@@ -1,5 +1,5 @@
 ---
-version: 0.8.4
+version: 0.8.6
 permalink: /reference/entropy.html
 layout: default
 title: Entropy-Patch Protocol
@@ -8,7 +8,7 @@ nav_order: 6
 
 # Entropy-Patch Protocol
 
-> Token-aware latent transport for Vant v0.8.4+
+> Token-aware latent transport for Vant v0.8.6+
 
 ## What is Entropy-Patch?
 

@@ -10,7 +10,7 @@ All notable changes to VANT are documented here.
 
 ---
 
-## v0.8.4 (2026-04-20)
+## v0.8.6 (2026-04-20)
 
 ### Added
 - **Entropy-Patch Protocol** - Token-aware latent transport

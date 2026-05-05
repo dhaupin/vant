@@ -1,5 +1,5 @@
 ---
-version: 0.8.4
+version: 0.8.6
 permalink: /guides/release.html
 layout: default
 title: Release Process
@@ -15,14 +15,14 @@ Vant uses [Semantic Versioning](https://semver.org/):
 
 ```
 MAJOR.MINOR.PATCH
-v0.8.4
+v0.8.6
 ```
 
 | Type | Example | When |
 |------|---------|-------|
-| PATCH | 0.8.4 → 0.8.5 | Bug fixes |
-| MINOR | 0.8.4 → 0.9.0 | New features |
-| MAJOR | 0.8.4 → 1.0.0 | Breaking changes |
+| PATCH | 0.8.6 → 0.8.5 | Bug fixes |
+| MINOR | 0.8.6 → 0.9.0 | New features |
+| MAJOR | 0.8.6 → 1.0.0 | Breaking changes |
 
 ## Release Checklist
 
@@ -60,13 +60,13 @@ git push origin main --tags
 Use the bump command to increment versions:
 
 ```bash
-# Patch release (0.8.4 → 0.8.5)
+# Patch release (0.8.6 → 0.8.5)
 vant bump
 
-# Minor release (0.8.4 → 0.9.0)
+# Minor release (0.8.6 → 0.9.0)
 vant bump minor
 
-# Major release (0.8.4 → 1.0.0)
+# Major release (0.8.6 → 1.0.0)
 vant bump major
 ```
 

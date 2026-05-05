@@ -72,7 +72,7 @@ if (cmd === 'help' && args[1]) {
 if (!cmd || cmd === 'help' || cmd === 'vant') {
     console.log(`
 ╔═══════════════════════════════════════╗
-║         vant CLI v0.8.4              ║
+║         vant CLI v${version}              ║
 ╚═══════════════════════════════════════╝
 
 Usage: vant <command> [options]

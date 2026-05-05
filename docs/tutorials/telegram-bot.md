@@ -1,5 +1,5 @@
 ---
-version: 0.8.4
+version: 0.8.6
 permalink: /tutorials/telegram-bot.html
 layout: default
 title: Telegram Bot Integration
@@ -86,7 +86,7 @@ Commands:
 ```
 📊 Vant Status
 
-Version: 0.8.4
+Version: 0.8.6
 Branch: main
 Last Sync: 2 hours ago
 Brain Files: 19
@@ -97,7 +97,7 @@ Lock Status: Available
 ```
 🧠 Brain Info
 
-Version: 0.8.4
+Version: 0.8.6
 Succession: trusted
 Last Updated: Today at 14:30
 Files:
@@ -198,7 +198,7 @@ telegram.onCallback(async (query) => {
             response = 'System is running normally ✅';
             break;
         case 'brain':
-            response = 'Brain version: 0.8.4 🧠';
+            response = 'Brain version: 0.8.6 🧠';
             break;
     }
     

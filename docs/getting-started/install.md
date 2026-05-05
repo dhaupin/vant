@@ -1,5 +1,5 @@
 ---
-version: 0.8.4
+version: 0.8.6
 permalink: /getting-started/install.html
 layout: default
 title: Installation
@@ -130,7 +130,7 @@ docker run -it \
 ### Docker Compose
 ```yaml
 # docker-compose.yml
-version: 0.8.4
+version: 0.8.6
 services:
   vant:
     image: dhaupin/vant
@@ -240,7 +240,7 @@ vant sync
 
 You should see output like:
 ```
-✅ Vant v0.8.4
+✅ Vant v0.8.6
 ✅ Config loaded
 ✅ GitHub connected
 ✅ Brain files present (19 files)

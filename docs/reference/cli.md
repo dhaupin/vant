@@ -1,5 +1,5 @@
 ---
-version: 0.8.4
+version: 0.8.6
 permalink: /reference/cli.html
 layout: default
 title: CLI Reference
@@ -329,9 +329,9 @@ vant resolution list     # List unresolved
 Bump version:
 
 ```bash
-vant bump         # Patch (0.8.4 → 0.8.5)
-vant bump minor  # Minor (0.8.4 → 0.9.0)
-vant bump major  # Major (0.8.4 → 1.0.0)
+vant bump         # Patch (0.8.6 → 0.8.5)
+vant bump minor  # Minor (0.8.6 → 0.9.0)
+vant bump major  # Major (0.8.6 → 1.0.0)
 ```
 
 ## Docs
@@ -450,9 +450,9 @@ vant bot --test     # Test mode
 Bump version and create git tag:
 
 ```bash
-vant bump patch      # 0.8.4 → 0.8.4
-vant bump minor     # 0.8.4 → 0.9.0
-vant bump major    # 0.8.4 → 1.0.0
+vant bump patch      # 0.8.6 → 0.8.6
+vant bump minor     # 0.8.6 → 0.9.0
+vant bump major    # 0.8.6 → 1.0.0
 ```
 
 ### vant compress

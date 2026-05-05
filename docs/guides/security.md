@@ -1,5 +1,5 @@
 ---
-version: 0.8.4
+version: 0.8.6
 permalink: /guides/security.html
 layout: default
 title: Security
@@ -369,7 +369,7 @@ node -e "const vaf=require('./lib/vaf');vaf.check('\$HOME')"
 
 See also: [Configuration](reference/configuration), [Architecture](guides/architecture), [Troubleshooting](guides/troubleshooting)
 
-## v0.8.4 Security Updates
+## v0.8.6 Security Updates
 
 Multiple vulnerabilities fixed in this release:
 
@@ -455,7 +455,7 @@ if (KEY === 'MODEL_PATH') {
 ```
 
 
-## v0.8.4 Additional Security Hardening
+## v0.8.6 Additional Security Hardening
 
 ### Additional Fixes
 
@@ -497,7 +497,7 @@ Additional vectors checked:
 ```
 
 
-## v0.8.4 AI Security Hardening
+## v0.8.6 AI Security Hardening
 
 ### AI-Specific Vulnerabilities Found & Fixed
 

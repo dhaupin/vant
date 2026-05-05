@@ -277,7 +277,7 @@ branch.create('agent-1')
 
 **Project Overview:**
 - **Name**: VANT (Versatile Autonomous Networked Tool)
-- **Version**: 0.8.4
+- **Version**: 0.8.6
 - **Purpose**: Persistent AI agent memory system - each generation inherits full context from previous sessions via GitHub
 - **Repository**: https://github.com/dhaupin/vant
 - **Node**: >=18 required
@@ -514,9 +514,9 @@ The version is defined in `package.json` (version field). All other places read 
 - Only create a tag when releasing (not for every commit)
 
 ### Release Process
-1. Tag a point: `git tag v0.8.4`
-2. Create branch from tag: `git checkout -b release/v0.8.4 v0.8.4`
-3. Release from the release branch (e.g., `release/v0.8.4`)
+1. Tag a point: `git tag v0.8.6`
+2. Create branch from tag: `git checkout -b release/v0.8.6 v0.8.6`
+3. Release from the release branch (e.g., `release/v0.8.6`)
 
 ### Branch Types
 - **Long-lived**: Only `main` and `release/v*.*.*` branches (for back-porting)

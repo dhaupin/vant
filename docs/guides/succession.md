@@ -1,5 +1,5 @@
 ---
-version: 0.8.4
+version: 0.8.6
 permalink: /guides/succession.html
 layout: default
 title: Succession
@@ -54,7 +54,7 @@ Version tracking and brain inheritance.
 
 ```json
 {
-  "version": "0.8.4",
+  "version": "0.8.6",
   "succession": {
     "trust": {
       "default": "medium",
@@ -80,11 +80,11 @@ Tracks succession history:
 
 ```json
 {
-  "version": "0.8.4",
+  "version": "0.8.6",
   "created": "2026-04-20",
   "successions": [
     { "version": "0.8.3", "date": "2026-04-19", "label": "initial" },
-    { "version": "0.8.4", "date": "2026-04-20", "label": "qc-release" }
+    { "version": "0.8.6", "date": "2026-04-20", "label": "qc-release" }
   ]
 }
 ```

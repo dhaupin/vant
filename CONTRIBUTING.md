@@ -79,7 +79,7 @@ node bin/build-test.js
 node bin/health.js
 
 # Load brain
-node bin/load.js v0.8.4
+node bin/load.js v0.8.6
 ```
 
 ---

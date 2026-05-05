@@ -1,5 +1,5 @@
 ---
-version: 0.8.4
+version: 0.8.6
 permalink: /guides/steganography.html
 layout: default
 title: Steganography

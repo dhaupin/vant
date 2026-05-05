@@ -75,7 +75,7 @@ AVOID:
 
 === REVISION LOG ===
 
-v0.8.4 (2026-04):
+v0.8.6 (2026-04):
 - Added spooling lesson - resist context distillation
 - Added process spooling - validate every step
 - VAF gap filling complete for bin/*.js (23/23)

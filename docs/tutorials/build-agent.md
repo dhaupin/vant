@@ -1,5 +1,5 @@
 ---
-version: 0.8.4
+version: 0.8.6
 permalink: /tutorials/build-agent.html
 layout: default
 title: Build Your First Agent

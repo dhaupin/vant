@@ -1,5 +1,5 @@
 ---
-version: 0.8.4
+version: 0.8.6
 permalink: /reference/configuration.html
 layout: default
 title: Configuration
@@ -80,7 +80,7 @@ Core configuration:
 
 ```ini
 # Core
-VANT_VERSION=v0.8.4
+VANT_VERSION=v0.8.6
 MODEL_PATH=models/public
 STATE_PATH=states/active/current.json
 

@@ -1,5 +1,5 @@
 ---
-version: 0.8.4
+version: 0.8.6
 permalink: /guides/docker.html
 layout: default
 title: Docker
@@ -22,7 +22,7 @@ docker run -it -v vant-brain:/app/models dhaupin/vant vant load
 | Tag | Description |
 |-----|-------------|
 | `latest` | Latest release |
-| `v0.8.4` | Specific version |
+| `v0.8.6` | Specific version |
 
 ## Volumes
 

@@ -3,7 +3,7 @@
 > Comprehensive architectural, engineering, security, and quality audit for public OSS release.
 
 **Audit Date:** 2026-05-04
-**Version:** 0.8.4
+**Version:** 0.8.6
 **Auditor:** Deep AI + Human Triangulation
 
 ---
@@ -62,7 +62,7 @@
 
 ## 3. SECURITY AUDIT
 
-### Fixes Implemented (v0.8.4)
+### Fixes Implemented (v0.8.6)
 
 | Fix | Status |
 |-----|---------|

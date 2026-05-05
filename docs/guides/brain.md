@@ -1,5 +1,5 @@
 ---
-version: 0.8.4
+version: 0.8.6
 permalink: /guides/brain.html
 layout: default
 title: Brain Structure
@@ -103,7 +103,7 @@ The `_succession.json` tracks brain versions:
 
 ```json
 {
-  "version": "0.8.4",
+  "version": "0.8.6",
   "succession": {
     "previous": {
       "version": "0.8.2",

@@ -1,5 +1,5 @@
 # CHANGELOG
-version: 0.8.4
+version: 0.8.6
 
 All notable changes to Vant are documented in this file.
 
@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ---
 
-## [v0.8.4] - 2026-05-04 - Security Release
+## [v0.8.6] - 2026-05-04 - Security Release
 
 ### ⚠️ MAJOR SECURITY RELEASE
 
@@ -68,7 +68,7 @@ This version contains comprehensive security hardening from a deep penetration t
 - README.md - Security section linked
 - docs/guides/manual-brain.md - Manual brain creation guide
 - docs/guides/release.md - Release process guide
-- All docs now have version frontmatter (0.8.4)
+- All docs now have version frontmatter (0.8.6)
 - CLI.md referenced in AGENTS.md
 - lib/version.js referenced in AGENTS.md
 
