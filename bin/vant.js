@@ -38,7 +38,7 @@ const COMMANDS = {
     load: 'load.js',
     run: 'run.js',
     test: 'build-test.js',
-    testv086: 'test-v086.js',
+    'test v086': 'test-v086.js',
     vibe: 'vibe.js',
     repos: 'repos.js',
     hybrid: 'hybrid.js',
@@ -94,7 +94,7 @@ Core:
   vant islands     Componentized brain boot
   vant sync        Pull/push brain
   vant health      System diagnostics
-  vant testv086    Run test suite
+  vant test v086  Run v0.8.6 test suite
   vant vibe        Show/set vibe
 
 Multi-Repo:

@@ -281,7 +281,7 @@ const { results, context } = await search.query('python');
 | `vant prune --force` | Run actual prune |
 | `vant prune --daemon` | Background daemon |
 | `vant prune --stats` | Show statistics |
-| `vant testv086` | Run test suite |
+| `vant test v086` | Run test suite |
 | `vant vibe` | Show/set vibe |
 | `vant repos --list` | List repos |
 | `vant repos --mount` | Mount repo |
