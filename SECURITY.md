@@ -11,44 +11,30 @@
 
 If you find a security vulnerability, please report it **privately** - do not open a public issue.
 
-### How to Report
-
 1. **Do NOT** create a public GitHub issue
-2. Email: Open a discussion with "Security" tag
-3. Or: Contact maintainer directly
+2. Open a discussion with "Security" tag
+3. Or contact maintainer directly
 
 **Response time:** Within 48 hours
 
 ## Security Features
 
-Vant includes these security measures:
+Vant includes:
 
-### Input Validation
-
-- VAF (Vant Application Firewall)
-- Path traversal protection
-- Command injection blocking
-- Script injection blocking
-
-### Rate Limiting
-
-- 60 requests/minute
-- 1000 requests/hour
-
-### Secret Handling
-
-- Prefer environment variables over config file
-- Secret masking available in config module
+- **VAF** - Input validation (path traversal, command injection, script injection)
+- **Rate Limiting** - 60 requests/min, 1000/hour
+- **Secret Handling** - Environment variables preferred
 
 ## Security Checklist
-
-If running Vant:
 
 - [ ] Set strong API keys
 - [ ] Use environment variables for secrets
 - [ ] Enable audit logging
-- [ ] Monitor .audit.log
-- [ ] Review rate limits
+- [ ] Monitor `.audit.log`
+
+---
+
+See [Security Guide](https://docs.creadev.org/vant/guides/security.html) for full technical details.
 
 ##感谢
 
