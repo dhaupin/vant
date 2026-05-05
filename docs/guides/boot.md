@@ -1,3 +1,11 @@
+---
+version: 0.8.6
+permalink: /guides/boot.html
+layout: default
+title: Ghost in the Machine
+nav_order: 25
+---
+
 # Ghost in the Machine - Stego Bootstrapping
 
 Boot Vant from zero local state by fetching a stego image. The agent becomes truly transient - no `.env` file needed if config is embedded in the image!

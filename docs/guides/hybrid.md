@@ -1,5 +1,7 @@
 ---
 version: 0.8.6
+permalink: /guides/hybrid.html
+layout: default
 title: Hybrid Sync
 nav_order: 14
 ---

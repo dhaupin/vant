@@ -1,5 +1,7 @@
 ---
 version: 0.8.6
+permalink: /guides/islands.html
+layout: default
 title: Islands - Componentized Brain
 nav_order: 12
 ---

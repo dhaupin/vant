@@ -1,3 +1,11 @@
+---
+version: 0.8.6
+permalink: /guides/horcrux.html
+layout: default
+title: Horcrux Manifest
+nav_order: 26
+---
+
 # Horcrux Manifest - Zero-Config Bootstrap
 
 The Horcrux system enables Vant to boot from zero local state. When combined with steganography, a single PNG image becomes a complete "horcrux" containing your agent's consciousness and configuration.

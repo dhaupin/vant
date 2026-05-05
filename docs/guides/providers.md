@@ -1,3 +1,11 @@
+---
+version: 0.8.6
+permalink: /guides/providers.html
+layout: default
+title: Multi-Git Provider Support
+nav_order: 18
+---
+
 # Multi-Git Provider Support
 
 Vant now supports multiple git providers through a universal abstraction layer. This enables branching, commit, and PR operations across GitHub, GitLab, Bitbucket, and self-hosted git instances.

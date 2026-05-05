@@ -1,3 +1,11 @@
+---
+version: 0.8.6
+permalink: /guides/schema.html
+layout: default
+title: Schema Validation
+nav_order: 20
+---
+
 # Vant Schema Guide
 
 > JSON Schema validation for brain integrity

@@ -1,3 +1,11 @@
+---
+version: 0.8.6
+permalink: /guides/stego.html
+layout: default
+title: Steganographic Brain Recovery
+nav_order: 24
+---
+
 # Steganographic Brain Recovery
 
 Vant can encode your entire brain (memory, learnings, decisions) into an image using LSB (Least Significant Bit) steganography. This enables:

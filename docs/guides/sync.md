@@ -1,3 +1,11 @@
+---
+version: 0.8.6
+permalink: /guides/sync.html
+layout: default
+title: Multi-Provider RAID Sync
+nav_order: 19
+---
+
 # Multi-Provider RAID 1 - Sync Manager
 
 Sync Vant brain to multiple providers simultaneously for redundancy. If one provider fails, the agent automatically fails over to the next available provider.

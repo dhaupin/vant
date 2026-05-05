@@ -1,5 +1,7 @@
 ---
 version: 0.8.6
+permalink: /guides/search.html
+layout: default
 title: Hybrid Search
 nav_order: 16
 ---

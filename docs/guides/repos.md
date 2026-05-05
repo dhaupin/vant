@@ -1,5 +1,7 @@
 ---
 version: 0.8.6
+permalink: /guides/repos.html
+layout: default
 title: Multi-Repo Skills
 nav_order: 15
 ---

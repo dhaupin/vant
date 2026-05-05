@@ -1,3 +1,11 @@
+---
+version: 0.8.6
+permalink: /guides/pruning.html
+layout: default
+title: Automated Brain Pruning
+nav_order: 23
+---
+
 # Automated Brain Pruning
 
 Vant can automatically clean up old brain files to prevent hallucination buildup and create a "Long Term Core" (LTC) with only essential memories.
