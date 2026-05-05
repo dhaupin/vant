@@ -7,7 +7,7 @@ markdown: kramdown
 highlighter: rouge
 
 # Build settings
-permalink: pretty
+permalink: :title
 exclude: ['README.md', 'Gemfile', 'Gemfile.lock', 'tmp', 'pagefind*']
 
 # Kramdown settings for syntax highlighting
