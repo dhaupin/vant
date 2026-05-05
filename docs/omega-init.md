@@ -4,13 +4,12 @@ permalink: /omega-init.html
 layout: default
 title: Omega Init
 nav_order: 1
-is_hidden: true
 ---
 # Omega Init
 
-> The one prompt to bootstrap Vant anywhere
+> The one prompt to bootstrap Vant anywhere. Single source of truth.
 
-This is the single source of truth for Vant initialization. Copy into any agent or system.
+Copy this into any agent or system.
 
 ---
 
@@ -34,32 +33,14 @@ If stego image received, decode first: vant stego decode image.png
 
 ---
 
-## From Stego
-
-If you received a stego PNG:
-
-```bash
-# Decode the config
-vant stego decode image.png
-
-# Then run Omega Init above
-```
-
----
-
-## Quick Config
-
-| Var | Required | Example |
-|-----|----------|---------|
-| GITHUB_TOKEN | ✓ | ghp_xxx |
-| GITHUB_REPO | ✓ | owner/repo |
-| GITHUB_BRANCH | - | main |
-| MCP_API_KEY | - | secret |
-
----
-
 ## Docker
 
 ```bash
 docker run -e GITHUB_TOKEN=xxx -e GITHUB_REPO=owner/repo dhaupin/vant
 ```
+
+---
+
+## See Also
+
+- [Airgap Propagation](guides/airgap-propagation) - Self-propagate across airgaps

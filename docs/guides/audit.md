@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/audit.html
 layout: default
 title: Audit & Compliance
-nav_order: 17
+nav_order: 25
 ---
 # Audit & Compliance
 
