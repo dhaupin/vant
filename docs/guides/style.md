@@ -118,6 +118,32 @@ Check system health:
 
 Why: Readers need context, not just commands.
 
+### Code Block Best Practices
+
+**Include:**
+- Brief context (what does this do?)
+- Language hint when it matters
+- Explain key parts after the block
+- Show expected output when helpful
+
+**Don't:**
+- Just dump code with no explanation
+- Assume the reader knows the context
+- Skip error handling in examples
+
+Example - Good code block documentation:
+
+Install Vant via npm:
+
+    npm install -g vant
+
+This installs Vant globally. Use `-g` for CLI access anywhere.
+
+Example output:
+
+    $ vant --version
+    0.8.6
+
 ## Source of Truth
 
 The docs system (`/docs/`) is the source of truth for all documentation.
