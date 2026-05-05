@@ -66,5 +66,5 @@ The core modules that make up Vant.
 
 ## Related
 
-- [Multi-Agent](guides/multi-agent) |
-- [Security](guides/security)
+- [Multi-Agent](multi-agent) - Branch system
+- [Security](security) - VAF validation

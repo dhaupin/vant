@@ -130,5 +130,5 @@ tail -f .vant.log
 
 ## Related
 
-- [AI Onboarding](ai-onboard)
-- [Troubleshooting](troubleshooting)
+- [AI Onboarding](ai-onboard) - Getting started
+- [Troubleshooting](troubleshooting) - Problem solving

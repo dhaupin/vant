@@ -129,5 +129,5 @@ module.exports = {
 
 ## Related
 
-- [Architecture](guides/architecture) |
-- [CLI Reference](reference/cli)
+- [Architecture](architecture) - System design
+- [CLI Reference](reference/cli) - All commands

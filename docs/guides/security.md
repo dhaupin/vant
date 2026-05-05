@@ -41,5 +41,5 @@ Tokens encrypted per-user.
 
 ## Related
 
-- [Configuration](reference/configuration)
-- [Troubleshooting](troubleshooting)
+- [Configuration](reference/configuration) - Config settings
+- [Troubleshooting](troubleshooting) - Problem solving

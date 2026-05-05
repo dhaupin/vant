@@ -50,5 +50,5 @@ npm run build
 
 ## Related
 
-- [Testing](testing)
-- [Release](release)
+- [Testing](testing) - Test guide
+- [Release](release) - Release process

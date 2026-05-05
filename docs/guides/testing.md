@@ -220,5 +220,5 @@ vant start 2>&1
 
 ## Related
 
-- [CLI Reference](reference/cli) |
-- [Troubleshooting](guides/troubleshooting)
+- [CLI Reference](reference/cli) - All commands
+- [Troubleshooting](troubleshooting) - Problem solving

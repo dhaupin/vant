@@ -50,5 +50,5 @@ Common brain files:
 
 ## Related
 
-- [Brain](brain)
-- [AI Onboarding](ai-onboard)
+- [Brain](brain) - Brain structure
+- [AI Onboarding](ai-onboard) - Getting started

@@ -32,4 +32,4 @@ This feature uses LSB steganography for encoding hidden messages in PNG images. 
 
 ## Related
 
-- [Security](security)
+- [Security](security) - Security guide

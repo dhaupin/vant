@@ -130,5 +130,5 @@ PURPOSE: [What you're here to do]
 
 ## Related
 
-- [Brain Structure](brain)
-- [AI Onboarding](ai-onboard)
+- [Brain Structure](brain) - Brain layout
+- [AI Onboarding](ai-onboard) - Getting started

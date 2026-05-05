@@ -108,5 +108,5 @@ vant setup        # Initial setup wizard
 
 ## Related
 
-- [Operations](operations)
-- [AI Onboarding](ai-onboard)
+- [Operations](operations) - CLI commands
+- [AI Onboarding](ai-onboard) - Getting started
