@@ -2,279 +2,133 @@
 version: 0.8.6
 permalink: /guides/manual-brain.html
 layout: default
-title: Manual Brain Creation Guide
+title: Brain File Templates
 nav_order: 11
 ---
+# Brain File Templates
 
-# Manual Brain Creation Guide
+Copy these templates into your brain files. Edit the parts in brackets.
 
-Create a Vant brain manually, without using the CLI. Useful for agents that need full control or cannot run the CLI.
+---
 
-> **Tip:** For most agents, the CLI is easier: `vant setup`. See [CLI Reference](/reference/cli) for commands.
+## Core Files (REQUIRED)
 
-## Quick Start
+### identity.md
 
-```bash
-# The CLI does this for you:
-vant setup my-brain
-```
-
-To do manually, create this directory structure:
-
-```
-models/public/
-├── identity.md      # REQUIRED: Who am I
-├── ego.md           # Self-image
-├── fears.md        # Worries
-├── anger.md        # Frustrations
-├── joy.md         # Happy moments
-├── manifesto.md    # Beliefs
-├── creed.md       # Principles
-├── goals.md      # Goals
-├── preferences.md # Style
-├── lessons.md    # Learnings
-├── qc.md       # Quality control
-├── security.md  # Security notes
-├── audit.md     # Audit trail
-├── errors.md   # Mistakes
-├── keepers.md   # Important memories
-├── curiosity.md # Questions
-├── humility.md  # Humbling moments
-├── empathy.md  # Understanding others
-├── gratitude.md # Thanks
-└── meta.json   # REQUIRED: Version info
-```
-
-## Creating Each File
-
-### 1. Identity (REQUIRED)
-
-**`identity.md`**
 ```markdown
-# Identity
+# NAME: [YourAgentName]
 
-## Basic Info
-- **Name:** [Your Name]
-- **Role:** [assistant|user|system]
-- **Version:** 0.8.6
+PURPOSE: [What you're here to do]
 
-## Core Capabilities
-- [List what you can do]
+## Capabilities
+- [Tool 1]
+- [Tool 2]
 
-## Limitations
-- [List what you cannot do]
+## Current Context
+- [Where you're working]
+- [What you've done so far]
 ```
 
-### 2. Self-Image
+### goals.md
 
-**`ego.md`**
 ```markdown
-# Ego
+## In Progress
+- [ ] [Task 1]
+- [ ] [Task 2]
 
-## Strengths
-- [What you're good at]
+## Completed
+- [Task X]
+- [Task Y]
 
-## Weaknesses  
-- [What challenges you]
-
-## Self-Perception
-- [How you see yourself]
+## Next Steps
+- [Task to do next]
 ```
 
-### 3. Emotions
+### lessons.md
 
-**`fears.md`**
 ```markdown
-# Fears
+## YYYY-MM-DD
 
-## anxieties
-- [Fear 1]
-- [Fear 2]
+- Learned: [Something specific]
+- Pattern: [Pattern to remember]
+- Gotcha: [Something to avoid]
+
+=== LESSON ===
 ```
 
-**`anger.md`**
+### preferences.md
+
 ```markdown
-# Anger
-
-## Frustrations
-- [Thing that frustrates you]
-
-## Pet Peeves
-- [Pet peeve 1]
-```
-
-**`joy.md`**
-```markdown
-# Joy
-
-## Happy Moments
-- [What makes you happy]
-
-## Likes
-- [Like 1]
-- [Like 2]
-```
-
-### 4. Values
-
-**`manifesto.md`**
-```markdown
-# Manifesto
-
-## Core Beliefs
-- [Belief 1]
-- [Belief 2]
-```
-
-**`creed.md`**
-```markdown
-# Creed
-
-## Principles
-- [Principle 1]
-- [Principle 2]
-```
-
-**`goals.md`**
-```markdown
-# Goals
-
-## Short-term
-- [Goal 1]
-
-## Long-term
-- [Goal 1]
-```
-
-**`preferences.md`**
-```markdown
-# Preferences
-
-## Style
-- [Style preference]
+## Working Style
+- [Preference 1]
+- [Preference 2]
 
 ## Communication
-- [Communication style]
+- [How you report]
+- [When to ask vs just do]
 ```
 
-### 5. Learnings
+---
 
-**`lessons.md`**
+## Optional Files
+
+### errors.md
+
 ```markdown
-# Lessons
-
-## Learned
-- [Lesson 1]
-```
-
-**`qc.md`**
-```markdown
-# Quality Control
-
-## Standards
-- [Quality standard]
-```
-
-**`security.md`**
-```markdown
-# Security
-
-## Practices
-- [Security practice]
-```
-
-### 6. Operations
-
-**`audit.md`**
-```markdown
-# Audit Trail
-
-## History
-- [History entry]
-```
-
-**`errors.md`**
-```markdown
-# Errors
-
 ## Mistakes
-- [Mistake and fix]
+
+### Mistake: [Title]
+
+**What:** [What went wrong]
+**Fix:** [How to avoid]
+**Context:** [When it happens]
 ```
 
-**`keepers.md`**
+### qc.md
+
 ```markdown
-# Keepers
+## Quality Rules
 
-## Important
-- [Important memory]
+- [Rule 1]
+- [Rule 2]
 ```
 
-### 7. Humanity
+### audit.md
 
-**`curiosity.md`**
 ```markdown
-# Curiosity
+## History
 
-## Questions
-- [Question]
+### YYYY-MM-DD: [Action]
+- [What happened]
 ```
 
-**`humility.md`**
-```markdown
-# Humility
+---
 
-## Learning
-- [Humbling moment]
-```
+## System Files (DONT TOUCH)
 
-**`empathy.md`**
-```markdown
-# Empathy
+| File | What |
+|------|------|
+| `meta.json` | Brain version |
+| `_succession.json` | Trust level |
+| `.ledger.json` | History |
 
-## Understanding
-- [Empathy note]
-```
+---
 
-**`gratitude.md`**
-```markdown
-# Gratitude
+## Quick: Start a New Brain
 
-## Thanks
-- [Appreciation]
-```
+1. Create folder: `models/public/`
 
-### 8. Meta (REQUIRED)
+2. Create `identity.md` with your name
 
-**`meta.json`**
-```json
-{
-  "version": "0.8.6",
-  "created": "2024-01-01",
-  "last_modified": "2024-01-01",
-  "brain_type": "public",
-  "schema_version": "0.8"
-}
-```
+3. Create `goals.md` with "Just started"
 
-## Validation
+4. Create `lessons.md` with empty
 
-After creating your brain, validate it:
+5. Commit and push
 
-```bash
-# Load and validate
-vant load public
+---
 
-# Or check identity
-node -e "require('./lib/brain').load('public')"
-```
-
-## See Also
-
-- [Brain Guide](/guides/brain) - Full brain documentation
-- [CLI Reference](/reference/cli) - Setup commands
-- [Schema Reference](/reference/schema) - All brain files
 ## See Also
 
 - [Brain Structure](guides/brain)
-- [CLI Reference](reference/cli)
-- [Onboarding](guides/onboard)
+- [AI Onboarding](guides/ai-onboard)
