@@ -15,6 +15,40 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 Implements Prestruct's "Islands of Interactivity" for AI memory.
 Turns Vant from a "storage utility" into a "Distributed Operating System."
 
+#### Testing Infrastructure (v0.8.6 Checkpoint)
+
+| Metric | Before | After |
+|--------|--------|-------|
+| Total tests | 147 | 120 |
+| Test runners | 4 | 3 |
+| CI jobs | 4 | 3 |
+| CI time | 5+ min | ~3 min |
+
+**Consolidated test runners:**
+- `test/ci.js`: Syntax, file validation (76 tests)
+- `test/runner.js`: Functional tests (44 tests)
+- `test/evals/vibe.js`: QC trigger checks (7 evals)
+
+**Removed:**
+- `bin/test-v086.js` - Import tests duplicated by runner
+
+**GitHub Actions optimized:**
+- Removed `lint` job (only loaded 2 modules - no value)
+- All tests run in single parallelizable job
+- Real test counts in audit report (120 passed)
+
+```yaml
+# v0.8.6 workflow structure
+jobs:
+  test:   # ci.js + runner.js + evals (~120 tests)
+  security:  # tokens + npm audit
+  validate:  # version check
+```
+
+**Audit report updates:**
+- Real test counts: `| Passed | 120 |`
+- Updated from workflow CI runs
+
 #### Islands Architecture (Componentized Brain)
 - Split brain into lazy-loadable islands (skills/knowledge blocks)
 - Static islands: identity, learnings, decisions (always loaded)

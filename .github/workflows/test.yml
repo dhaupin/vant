@@ -12,7 +12,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
@@ -21,34 +21,15 @@ jobs:
           node-version: '20'
       - name: Install dependencies
         run: npm install
-      - name: Run CI tests
-        run: node test/ci.js
-      - name: Run full suite
-        run: node test/runner.js
-      - name: Run v0.8.6 tests
-        run: node bin/test-v086.js
-      - name: Run Vibe Evals
-        run: node test/evals/vibe.js
-
-  lint:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Install dependencies
-        run: npm install
-      - name: Load config
-        run: node -e "require('./lib/config')"
-      - name: Load auto-update
-        run: node -e "require('./lib/auto-update')"
+      - name: Run tests
+        run: |
+          node test/ci.js
+          node test/runner.js
+          node test/evals/vibe.js
 
   security:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
@@ -57,14 +38,14 @@ jobs:
           node-version: '20'
       - name: Install dependencies
         run: npm install
-      - name: Check tokens (should find none)
+      - name: Check tokens
         run: '! grep -rE "ghp_[a-zA-Z0-9]{36}" . --include="*.js" '
       - name: Check npm audit
         run: npm audit --audit-level=high
 
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 2
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
