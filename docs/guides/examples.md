@@ -7,142 +7,65 @@ nav_order: 19
 ---
 # Examples
 
-Working examples for Vant workflows.
+Common workflows.
 
-## Basic: Load and Query
+---
 
-Load brain and query memory:
+## Wake Up Check
 
-```javascript
-const vant = require('./lib/vant');
-
-async function main() {
-  // Load brain
-  await vant.load();
-  
-  // Query memory
-  const result = await vant.query('what are my goals?');
-  console.log(result);
-}
-
-main();
+```bash
+git branch --show-current
+cat models/public/_succession.json
+cat models/public/identity.md
+cat models/public/goals.md
 ```
 
-## Basic: Save Memory
+---
 
-Save new memory to brain:
+## Do Work Save
 
-```javascript
-const vant = require('./lib/vant');
-const fs = require('fs');
-
-async function saveLesson(lesson) {
-  const content = fs.readFileSync('lesson.txt', 'utf8');
-  await vant.save('lessons.md', content);
-}
+```bash
+nano models/public/lessons.md
+git add -A
+git commit -m "agent-name: Added lesson"
+git push origin agent-name
 ```
 
-## MCP Server
-Connect Vant to AI models via Model Context Protocol.
+---
 
-```javascript
-const mcp = require('./bin/mcp');
+## Check Rate Limit
 
-mcp.run({
-  port: 3456,
-  apiKey: process.env.MCP_API_KEY
-});
+```bash
+vant rate
 ```
 
-## With VAF Validation
-
-Use Vant Application Firewall to validate inputs:
-
-```javascript
-const vaf = require('./lib/vaf');
-
-function validate(input) {
-  try {
-    vaf.check(input, {type: 'string', maxLength: 50000});
-    return true;
-  } catch (e) {
-    console.error('Blocked:', e.message);
-    return false;
-  }
-}
-```
-
-## With Rate Limiting
-
-Protect API calls with rate limiting:
-
-```javascript
-const protection = require('./lib/protection');
-
-function limitedCall(fn) {
-  if (!protection.check()) {
-    throw new Error('Rate limited');
-  }
-  return fn();
-}
-```
+---
 
 ## Health Check
 
-Run system diagnostics:
-
-```javascript
-const health = require('./lib/health');
-
-async function check() {
-  const status = await health.check();
-  console.log('Status:', status);
-}
+```bash
+vant health
 ```
 
-## GitHub Sync
+---
 
-Sync brain with GitHub:
+## Fix Merge Conflict
 
-```javascript
-const sync = require('./lib/sync');
-
-async function sync() {
-  await sync.pull();
-  await sync.push();
-}
+```bash
+git fetch origin
+git merge origin/main
+# Edit conflicted files
+git add -A
+git commit -m "Resolved"
+git push origin your-branch
 ```
 
-## Branch Work
+---
 
-Work on a branch:
+## Errors
 
-```javascript
-const branch = require('./lib/branch');
-
-async function work() {
-  const current = await branch.currentBranch();
-  await branch.checkout('agent-1');
-  // do work...
-  await branch.commit('agent-1', 'Updated');
-}
-```
-
-## Lock Work
-
-Use locks to prevent conflicts:
-
-```javascript
-const lock = require('./lib/lock');
-
-async function safeWork(fn) {
-  const token = await lock.acquire('agent-1');
-  try {
-    return await fn();
-  } finally {
-    if (token) await lock.release('agent-1', token);
-  }
-}
-```
-
-See also: [Operations](guides/operations), [API Reference](reference/api)
+| Error | Fix |
+|-------|-----|
+| Permission denied | Check GITHUB_TOKEN |
+| Rate limit | Wait 1 hour |
+| Lock held | Use your branch |
