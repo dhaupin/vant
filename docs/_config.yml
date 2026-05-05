@@ -40,12 +40,28 @@ nav:
         url: /vant/guides/ai-onboard.html
       - title: Brain
         url: /vant/guides/brain.html
+      - title: Islands
+        url: /vant/guides/islands.html
+      - title: Vibe
+        url: /vant/guides/vibe.html
       - title: Multi-Agent
         url: /vant/guides/multi-agent.html
-      - title: Security
-        url: /vant/guides/security.html
+      - title: Multi-Repo
+        url: /vant/guides/repos.html
+      - title: Hybrid Sync
+        url: /vant/guides/hybrid.html
+      - title: Hybrid Search
+        url: /vant/guides/search.html
       - title: MCP
         url: /vant/guides/mcp.html
+      - title: Security
+        url: /vant/guides/security.html
+      - title: Schema
+        url: /vant/guides/schema.html
+      - title: Audit
+        url: /vant/guides/audit.html
+      - title: Stego
+        url: /vant/guides/stego.html
       - title: Airgap
         url: /vant/guides/airgap-propagation.html
   - title: Reference
