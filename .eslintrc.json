@@ -7,6 +7,11 @@
     "no-console": "off",
     "no-empty": "off",
     "no-case-declarations": "off",
-    "no-constant-condition": "off"
+    "no-constant-condition": "off",
+    "no-useless-escape": "off",
+    "no-undef": "off",
+    "no-inner-declarations": "off",
+    "no-const-assign": "off",
+    "no-dupe-keys": "off"
   }
 }
