@@ -11,6 +11,54 @@
         "ltcEntries": 0,
         "errors": []
       }
+    },
+    {
+      "date": "2026-05-05T14:05:17.988Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
+    },
+    {
+      "date": "2026-05-05T14:05:26.474Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
+    },
+    {
+      "date": "2026-05-05T14:05:40.538Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
+    },
+    {
+      "date": "2026-05-05T14:06:09.548Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
     }
   ]
 }

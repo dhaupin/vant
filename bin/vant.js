@@ -38,6 +38,7 @@ const COMMANDS = {
     load: 'load.js',
     run: 'run.js',
     test: 'build-test.js',
+    testv086: 'test-v086.js',
     changelog: 'changelog.js',
     summary: 'summary.js',
     update: 'update.js',
@@ -90,19 +91,19 @@ Core:
   vant islands     Componentized brain boot
   vant sync        Pull/push brain
   vant health      System diagnostics
+  vant testv086    Run v0.8.6 test suite
 
 Ghost (stego bootstrap):
   vant boot --image <url>   Zero-config boot
   vant stego snapshot      Encode brain to image
 
-Prune (brain cleanup):
-  vant prune --dry-run   Preview changes
-  vant prune --force    Run prune
+Prune:
+  vant prune --dry-run   Preview
+  vant prune --force     Run
 
 Islands:
   vant islands --list        List islands
   vant islands --prompt    Auto-hydrate
-  vant islands --island     Hydrate one
 
 Info:
   vant help       Show help
