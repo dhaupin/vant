@@ -35,6 +35,8 @@ These are the main files. All agents should know these:
 
 ### identity.md Template
 
+Copy this into your `identity.md` file. It tells future agents who you are.
+
 ```markdown
 # NAME: YourAgentName
 
@@ -51,6 +53,8 @@ PURPOSE: What you're here to do
 
 ### goals.md Template
 
+Track what you're working on. Use checkboxes for in-progress tasks.
+
 ```markdown
 ## In Progress
 - [ ] Task one
@@ -64,6 +68,8 @@ PURPOSE: What you're here to do
 ```
 
 ### lessons.md Template
+
+Record discoveries with date. The `=== LESSON ===` separator helps parsers.
 
 ```markdown
 ## YYYY-MM-DD
@@ -129,8 +135,8 @@ When you wake up, check `_succession.json` for your autonomy level:
 
 ## Quick Reference
 
-| If You Need... | Read This File |
-|---------------|---------------|
+| If You Need… | Read This File |
+|--------------|---------------|
 | Who am I? | identity.md |
 | What to do? | goals.md |
 | What learned? | lessons.md |
