@@ -625,20 +625,380 @@
     
     <!-- Sidebar navigation -->
     <aside class="sidebar" id="sidebar">
-        {% assign nav = nav %}{% if nav.size == 0 %}{% assign nav = site.data.nav %}{% endif %}{% if nav %}
-          {% for section in nav %}
-            {% if section.items %}
-            <div class="sidebar-section">
-                <div class="sidebar-title">{{ section.title }}</div>
-                <ul class="sidebar-nav">
-                {% for item in section.items %}
-                    <li><a href="{{ item.url | relative_url | replace: ".html", "" }}">{{ item.title }}</a></li>
-                {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-          {% endfor %}
-        {% endif %}
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/getting-started/quick-start/">Quick Start</a></li>
+                <li><a href="/vant/getting-started/install/">Installation</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/guides/brain.html">Brain Structure</a></li>
+                <li><a href="/vant/guides/multi-agent.html">Multi-Agent</a></li>
+                <li><a href="/vant/guides/cli.html">CLI Reference</a></li>
+                <li><a href="/vant/guides/security.html">Security</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Reference</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/reference/cli.html">CLI</a></li>
+                <li><a href="/vant/reference/api.html">API</a></li>
+            </ul>
+        </div>
+    </aside>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/getting-started/quick-start/">Quick Start</a></li>
+                <li><a href="/vant/getting-started/install/">Installation</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/guides/brain.html">Brain Structure</a></li>
+                <li><a href="/vant/guides/multi-agent.html">Multi-Agent</a></li>
+                <li><a href="/vant/guides/cli.html">CLI Reference</a></li>
+                <li><a href="/vant/guides/security.html">Security</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Reference</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/reference/cli.html">CLI</a></li>
+                <li><a href="/vant/reference/api.html">API</a></li>
+            </ul>
+        </div>
+    </aside>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/getting-started/quick-start/">Quick Start</a></li>
+                <li><a href="/vant/getting-started/install/">Installation</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/guides/brain.html">Brain Structure</a></li>
+                <li><a href="/vant/guides/multi-agent.html">Multi-Agent</a></li>
+                <li><a href="/vant/guides/cli.html">CLI Reference</a></li>
+                <li><a href="/vant/guides/security.html">Security</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Reference</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/reference/cli.html">CLI</a></li>
+                <li><a href="/vant/reference/api.html">API</a></li>
+            </ul>
+        </div>
+    </aside>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/getting-started/quick-start/">Quick Start</a></li>
+                <li><a href="/vant/getting-started/install/">Installation</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/guides/brain.html">Brain Structure</a></li>
+                <li><a href="/vant/guides/multi-agent.html">Multi-Agent</a></li>
+                <li><a href="/vant/guides/cli.html">CLI Reference</a></li>
+                <li><a href="/vant/guides/security.html">Security</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Reference</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/reference/cli.html">CLI</a></li>
+                <li><a href="/vant/reference/api.html">API</a></li>
+            </ul>
+        </div>
+    </aside>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/getting-started/quick-start/">Quick Start</a></li>
+                <li><a href="/vant/getting-started/install/">Installation</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/guides/brain.html">Brain Structure</a></li>
+                <li><a href="/vant/guides/multi-agent.html">Multi-Agent</a></li>
+                <li><a href="/vant/guides/cli.html">CLI Reference</a></li>
+                <li><a href="/vant/guides/security.html">Security</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Reference</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/reference/cli.html">CLI</a></li>
+                <li><a href="/vant/reference/api.html">API</a></li>
+            </ul>
+        </div>
+    </aside>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/getting-started/quick-start/">Quick Start</a></li>
+                <li><a href="/vant/getting-started/install/">Installation</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/guides/brain.html">Brain Structure</a></li>
+                <li><a href="/vant/guides/multi-agent.html">Multi-Agent</a></li>
+                <li><a href="/vant/guides/cli.html">CLI Reference</a></li>
+                <li><a href="/vant/guides/security.html">Security</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Reference</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/reference/cli.html">CLI</a></li>
+                <li><a href="/vant/reference/api.html">API</a></li>
+            </ul>
+        </div>
+    </aside>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/getting-started/quick-start/">Quick Start</a></li>
+                <li><a href="/vant/getting-started/install/">Installation</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/guides/brain.html">Brain Structure</a></li>
+                <li><a href="/vant/guides/multi-agent.html">Multi-Agent</a></li>
+                <li><a href="/vant/guides/cli.html">CLI Reference</a></li>
+                <li><a href="/vant/guides/security.html">Security</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Reference</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/reference/cli.html">CLI</a></li>
+                <li><a href="/vant/reference/api.html">API</a></li>
+            </ul>
+        </div>
+    </aside>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/getting-started/quick-start/">Quick Start</a></li>
+                <li><a href="/vant/getting-started/install/">Installation</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/guides/brain.html">Brain Structure</a></li>
+                <li><a href="/vant/guides/multi-agent.html">Multi-Agent</a></li>
+                <li><a href="/vant/guides/cli.html">CLI Reference</a></li>
+                <li><a href="/vant/guides/security.html">Security</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Reference</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/reference/cli.html">CLI</a></li>
+                <li><a href="/vant/reference/api.html">API</a></li>
+            </ul>
+        </div>
+    </aside>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/getting-started/quick-start/">Quick Start</a></li>
+                <li><a href="/vant/getting-started/install/">Installation</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/guides/brain.html">Brain Structure</a></li>
+                <li><a href="/vant/guides/multi-agent.html">Multi-Agent</a></li>
+                <li><a href="/vant/guides/cli.html">CLI Reference</a></li>
+                <li><a href="/vant/guides/security.html">Security</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Reference</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/reference/cli.html">CLI</a></li>
+                <li><a href="/vant/reference/api.html">API</a></li>
+            </ul>
+        </div>
+    </aside>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/getting-started/quick-start/">Quick Start</a></li>
+                <li><a href="/vant/getting-started/install/">Installation</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/guides/brain.html">Brain Structure</a></li>
+                <li><a href="/vant/guides/multi-agent.html">Multi-Agent</a></li>
+                <li><a href="/vant/guides/cli.html">CLI Reference</a></li>
+                <li><a href="/vant/guides/security.html">Security</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Reference</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/reference/cli.html">CLI</a></li>
+                <li><a href="/vant/reference/api.html">API</a></li>
+            </ul>
+        </div>
+    </aside>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/getting-started/quick-start/">Quick Start</a></li>
+                <li><a href="/vant/getting-started/install/">Installation</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/guides/brain.html">Brain Structure</a></li>
+                <li><a href="/vant/guides/multi-agent.html">Multi-Agent</a></li>
+                <li><a href="/vant/guides/cli.html">CLI Reference</a></li>
+                <li><a href="/vant/guides/security.html">Security</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Reference</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/reference/cli.html">CLI</a></li>
+                <li><a href="/vant/reference/api.html">API</a></li>
+            </ul>
+        </div>
+    </aside>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/getting-started/quick-start/">Quick Start</a></li>
+                <li><a href="/vant/getting-started/install/">Installation</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/guides/brain.html">Brain Structure</a></li>
+                <li><a href="/vant/guides/multi-agent.html">Multi-Agent</a></li>
+                <li><a href="/vant/guides/cli.html">CLI Reference</a></li>
+                <li><a href="/vant/guides/security.html">Security</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Reference</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/reference/cli.html">CLI</a></li>
+                <li><a href="/vant/reference/api.html">API</a></li>
+            </ul>
+        </div>
+    </aside>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/getting-started/quick-start/">Quick Start</a></li>
+                <li><a href="/vant/getting-started/install/">Installation</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/guides/brain.html">Brain Structure</a></li>
+                <li><a href="/vant/guides/multi-agent.html">Multi-Agent</a></li>
+                <li><a href="/vant/guides/cli.html">CLI Reference</a></li>
+                <li><a href="/vant/guides/security.html">Security</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Reference</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/reference/cli.html">CLI</a></li>
+                <li><a href="/vant/reference/api.html">API</a></li>
+            </ul>
+        </div>
+    </aside>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/getting-started/quick-start/">Quick Start</a></li>
+                <li><a href="/vant/getting-started/install/">Installation</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/guides/brain.html">Brain Structure</a></li>
+                <li><a href="/vant/guides/multi-agent.html">Multi-Agent</a></li>
+                <li><a href="/vant/guides/cli.html">CLI Reference</a></li>
+                <li><a href="/vant/guides/security.html">Security</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Reference</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/reference/cli.html">CLI</a></li>
+                <li><a href="/vant/reference/api.html">API</a></li>
+            </ul>
+        </div>
+    </aside>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Getting Started</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/getting-started/quick-start/">Quick Start</a></li>
+                <li><a href="/vant/getting-started/install/">Installation</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Guides</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/guides/brain.html">Brain Structure</a></li>
+                <li><a href="/vant/guides/multi-agent.html">Multi-Agent</a></li>
+                <li><a href="/vant/guides/cli.html">CLI Reference</a></li>
+                <li><a href="/vant/guides/security.html">Security</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Reference</div>
+            <ul class="sidebar-nav">
+                <li><a href="/vant/reference/cli.html">CLI</a></li>
+                <li><a href="/vant/reference/api.html">API</a></li>
+            </ul>
+        </div>
+    </aside>
     </aside>
     
     <!-- Main content -->
