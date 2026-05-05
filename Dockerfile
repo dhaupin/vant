@@ -37,7 +37,7 @@ COPY settings.example.ini ./
 COPY mood.example.ini ./
 COPY .env.example ./
 COPY README.md ./
-COPY CLI.md package.json ./
+COPY package.json ./
 
 # Default config
 ENV VANT_VERSION=${VERSION}
