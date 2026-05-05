@@ -3,3 +3,20 @@
 - OpenHands agent identity
 - Rate limiting notes
 - Threadforge parity
+---
+nav: Add navigation sidebar in _config.yml
+omega-init: Full reboot prompt for any agent (connected/airgapped)
+---
+
+### Session 2026-05-05
+
+**Fixed:**
+- vant docs/_config.yml added nav sidebar config
+- omega-init.md expanded with:
+  - Core loop (check brain, load, init)
+  - Option A: Connected
+  - Option B: Airgapped 
+  - Env vars table
+  - Troubleshooting table
+  - Docker section
+
