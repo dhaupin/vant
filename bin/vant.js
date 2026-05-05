@@ -42,6 +42,7 @@ const COMMANDS = {
     vibe: 'vibe.js',
     repos: 'repos.js',
     hybrid: 'hybrid.js',
+    search: 'search.js',
     changelog: 'changelog.js',
     summary: 'summary.js',
     update: 'update.js',
@@ -117,6 +118,10 @@ Prune:
 Islands:
   vant islands --list        List islands
   vant islands --prompt    Auto-hydrate
+
+RAG:
+  vant search --hybrid     Hybrid search
+  vant search --hyde      HyDE query
 
 Info:
   vant help       Show help

@@ -179,6 +179,55 @@ async function runTests() {
         passed++;
     } catch (e) { console.log('  ✗', e.message); failed++; }
     
+    // HybridSearch
+    try {
+        console.log('\n[HybridSearch]');
+        const hs = require(path.join(DIR, 'lib/hybrid-search'));
+        assert(typeof hs.search === 'function');
+        assert(typeof hs.indexDocument === 'function');
+        const stats = hs.getStats();
+        assert(typeof stats === 'object');
+        console.log('  ✓');
+        passed++;
+    } catch (e) { console.log('  ✗', e.message); failed++; }
+    
+    // Query
+    try {
+        console.log('\n[Query]');
+        const query = require(path.join(DIR, 'lib/query'));
+        assert(typeof query.multiQuery === 'function');
+        assert(typeof query.hyde === 'function');
+        const vars = query.multiQuery('how to setup vesc');
+        assert(vars.length > 0);
+        console.log('  ✓');
+        passed++;
+    } catch (e) { console.log('  ✗', e.message); failed++; }
+    
+    // Rerank
+    try {
+        console.log('\n[Rerank]');
+        const rerank = require(path.join(DIR, 'lib/rerank'));
+        assert(typeof rerank.rerank === 'function');
+        assert(typeof rerank.compress === 'function');
+        const result = rerank.rerank([{ title: 'test', content: 'test content' }], 'test');
+        assert(result.length > 0);
+        console.log('  ✓');
+        passed++;
+    } catch (e) { console.log('  ✗', e.message); failed++; }
+    
+    // Citations
+    try {
+        console.log('\n[Citations]');
+        const citations = require(path.join(DIR, 'lib/citations'));
+        assert(typeof citations.addSource === 'function');
+        assert(typeof citations.formatCitation === 'function');
+        citations.clear(); // Reset
+        const src = citations.addSource('abc123def', 'test context');
+        assert(src.commit === 'abc123def');
+        console.log('  ✓');
+        passed++;
+    } catch (e) { console.log('  ✗', e.message); failed++; }
+    
     console.log('\n╔═══════════════════════════════════════╗');
     console.log('║  Results: ' + passed + '/' + (passed + failed) + ' passed             ║');
     console.log('╚═══════════════════════════════════════╝');
