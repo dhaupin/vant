@@ -16,8 +16,7 @@ kramdown:
   syntax_highlighter_opts:
     default_lang: plaintext
     css_class: 'highlight'
-    span:
-      false
+    span: false
     line_numbers: null
     line_span: null
     entity_output: as_char
@@ -29,3 +28,32 @@ kramdown:
 # Plugins
 plugins:
   - jekyll-redirect-from
+
+# Navigation - manually ordered (takes precedence over nav_order)
+nav:
+  - title: Quick Links
+    items:
+      - title: Quickstart
+        url: /vant/getting-started/
+      - title: Omega Init
+        url: /vant/omega-init/
+  - title: Guides
+    items:
+      - title: AI Onboarding
+        url: /vant/guides/ai-onboard.html
+      - title: Brain
+        url: /vant/guides/brain.html
+      - title: Multi-Agent
+        url: /vant/guides/multi-agent.html
+      - title: Security
+        url: /vant/guides/security.html
+      - title: MCP
+        url: /vant/guides/mcp.html
+      - title: Airgap
+        url: /vant/guides/airgap-propagation.html
+  - title: Reference
+    items:
+      - title: CLI
+        url: /vant/reference/cli.html
+      - title: API
+        url: /vant/reference/api.html
