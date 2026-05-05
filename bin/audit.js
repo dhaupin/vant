@@ -20,6 +20,7 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
+const version = require('../lib/version');
 const args = process.argv.slice(2);
 
 // ============================================
