@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/docker.html
+permalink: /guides/docker
 layout: default
 title: Docker
 nav_order: 16

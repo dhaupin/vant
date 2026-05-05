@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/steganography.html
+permalink: /guides/steganography
 layout: default
 title: Steganography
 nav_order: 9

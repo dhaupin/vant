@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/testing.html
+permalink: /guides/testing
 layout: default
 title: Testing
 nav_order: 19

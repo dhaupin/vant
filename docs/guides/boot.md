@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/boot.html
+permalink: /guides/boot
 layout: default
 title: Ghost in the Machine
 nav_order: 25

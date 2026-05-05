@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /reference/entropy.html
+permalink: /reference/entropy
 layout: default
 title: Entropy-Patch Protocol
 nav_order: 6

@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/plugins.html
+permalink: /guides/plugins
 layout: default
 title: Plugins
 nav_order: 22

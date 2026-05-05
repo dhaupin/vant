@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /reference/cli.html
+permalink: /reference/cli
 layout: default
 title: CLI Reference
 nav_order: 1

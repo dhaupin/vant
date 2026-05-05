@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/architecture.html
+permalink: /guides/architecture
 layout: default
 title: Architecture
 nav_order: 15

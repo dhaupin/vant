@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/brain.html
+permalink: /guides/brain
 layout: default
 title: Brain Structure
 nav_order: 2

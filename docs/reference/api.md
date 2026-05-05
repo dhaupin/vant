@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /reference/api.html
+permalink: /reference/api
 layout: default
 title: Module API
 nav_order: 3

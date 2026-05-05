@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/stego.html
+permalink: /guides/stego
 layout: default
 title: Steganographic Brain Recovery
 nav_order: 24

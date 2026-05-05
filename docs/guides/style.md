@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/style.html
+permalink: /guides/style
 layout: default
 title: Voice & Style
 nav_order: 18

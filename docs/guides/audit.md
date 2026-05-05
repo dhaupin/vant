@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/audit.html
+permalink: /guides/audit
 layout: default
 title: Audit & Compliance
 nav_order: 25

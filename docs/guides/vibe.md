@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/vibe.html
+permalink: /guides/vibe
 layout: default
 title: Vibe Controls
 nav_order: 13

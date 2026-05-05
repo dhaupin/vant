@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /getting-started/quick-start.html
+permalink: /getting-started/quick-start
 layout: default
 title: Quick Start
 nav_order: 2

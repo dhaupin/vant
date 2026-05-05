@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/horcrux.html
+permalink: /guides/horcrux
 layout: default
 title: Horcrux Manifest
 nav_order: 26

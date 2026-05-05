@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /tutorials/build-agent.html
+permalink: /tutorials/build-agent
 layout: default
 title: Build Your First Agent
 nav_order: 1

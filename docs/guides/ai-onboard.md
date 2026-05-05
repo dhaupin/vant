@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/ai-onboard.html
+permalink: /guides/ai-onboard
 layout: default
 title: AI Agent Onboarding
 nav_order: 1

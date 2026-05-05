@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/examples.html
+permalink: /guides/examples
 layout: default
 title: Examples
 nav_order: 23

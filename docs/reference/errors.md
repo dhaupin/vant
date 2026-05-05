@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /reference/errors.html
+permalink: /reference/errors
 layout: default
 title: Error Codes
 nav_order: 5

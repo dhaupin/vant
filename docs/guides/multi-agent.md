@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/multi-agent.html
+permalink: /guides/multi-agent
 layout: default
 title: Multi-Agent
 nav_order: 5

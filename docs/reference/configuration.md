@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /reference/configuration.html
+permalink: /reference/configuration
 layout: default
 title: Configuration
 nav_order: 2

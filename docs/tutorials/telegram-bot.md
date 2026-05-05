@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /tutorials/telegram-bot.html
+permalink: /tutorials/telegram-bot
 layout: default
 title: Telegram Bot Integration
 nav_order: 3

@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /tutorials/multi-agent.html
+permalink: /tutorials/multi-agent
 layout: default
 title: Multi-Agent System
 nav_order: 2

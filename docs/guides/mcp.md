@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/mcp.html
+permalink: /guides/mcp
 layout: default
 title: MCP Server
 nav_order: 6

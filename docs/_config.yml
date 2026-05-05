@@ -7,6 +7,9 @@ markdown: kramdown
 highlighter: rouge
 
 # Build settings
+# pretty = /path/ (with trailing slash)
+# :title = /path (clean, no ext or slash)
+# But individual page frontmatter overrides this
 permalink: :title
 exclude: ['README.md', 'Gemfile', 'Gemfile.lock', 'tmp', 'pagefind*']
 
@@ -31,48 +34,48 @@ nav:
   - title: Getting Started
     items:
       - title: Installation
-        url: /vant/getting-started/install/
+        url: /vant/getting-started/install
       - title: Quick Start
-        url: /vant/getting-started/quick-start/
+        url: /vant/getting-started/quick-start
   - title: Guides
     items:
       - title: AI Onboarding
-        url: /vant/guides/ai-onboard.html
+        url: /vant/guides/ai-onboard
       - title: Brain
-        url: /vant/guides/brain.html
+        url: /vant/guides/brain
       - title: Islands
-        url: /vant/guides/islands.html
+        url: /vant/guides/islands
       - title: Vibe
-        url: /vant/guides/vibe.html
+        url: /vant/guides/vibe
       - title: Multi-Agent
-        url: /vant/guides/multi-agent.html
+        url: /vant/guides/multi-agent
       - title: Multi-Repo
-        url: /vant/guides/repos.html
+        url: /vant/guides/repos
       - title: Hybrid Sync
-        url: /vant/guides/hybrid.html
+        url: /vant/guides/hybrid
       - title: Hybrid Search
-        url: /vant/guides/search.html
+        url: /vant/guides/search
       - title: MCP
-        url: /vant/guides/mcp.html
+        url: /vant/guides/mcp
       - title: Security
-        url: /vant/guides/security.html
+        url: /vant/guides/security
       - title: Schema
-        url: /vant/guides/schema.html
+        url: /vant/guides/schema
       - title: Audit
-        url: /vant/guides/audit.html
+        url: /vant/guides/audit
       - title: Stego
-        url: /vant/guides/stego.html
+        url: /vant/guides/stego
       - title: Providers
-        url: /vant/guides/providers.html
+        url: /vant/guides/providers
       - title: Sync
-        url: /vant/guides/sync.html
+        url: /vant/guides/sync
       - title: Airgap
-        url: /vant/guides/airgap-propagation.html
+        url: /vant/guides/airgap-propagation
   - title: Reference
     items:
       - title: CLI Reference
-        url: /vant/reference/cli.html
+        url: /vant/reference/cli
       - title: Module API
-        url: /vant/reference/api.html
+        url: /vant/reference/api
       - title: Configuration
-        url: /vant/reference/configuration.html
+        url: /vant/reference/configuration

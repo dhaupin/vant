@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /getting-started/install.html
+permalink: /getting-started/install
 layout: default
 title: Installation
 nav_order: 1

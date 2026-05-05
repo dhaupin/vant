@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /reference/schema.html
+permalink: /reference/schema
 layout: default
 title: Brain Schema
 nav_order: 4
