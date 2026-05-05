@@ -365,4 +365,4 @@ const latest = await updateCheck.getLatestVersion();
 await updateCheck.notifyIfUpdate();
 ```
 
-See also: [CLI Commands](reference/cli.html), [Schema](reference/schema.html)
+See also: [CLI Commands](reference/cli), [Schema](reference/schema)

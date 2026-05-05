@@ -17,31 +17,15 @@ kramdown:
     default_lang: plaintext
     css_class: 'highlight'
     span:
-      decorator: '<span class="language-{}">{}</span>'
-    block:
-      decorator: '<div class="language-{}"><pre class="line-numbers">{}</pre></div>'
+      false
+    line_numbers: null
+    line_span: null
+    entity_output: as_char
+  toc_levels: [1, 2, 3, 4, 5, 6]
+  auto_ids: true
+  auto_id_prefix: ''
+  heading_anchors: 2
 
-# Default layouts for all docs
-defaults:
-  - scope:
-      type: pages
-    values:
-      layout: default
-
-# Custom section titles for navigation (folder => display title)
-nav_sections:
-  getting-started: "Getting Started"
-  tutorials: "Tutorials"
-  reference: "Reference"
-  guides: "Guides"
-  community: "Community"
-  legal: "Legal"
-
-# Section order (numeric - lower shows first)
-nav_order:
-  getting-started: 1
-  tutorials: 2
-  guides: 3
-  reference: 4
-  community: 5
-  legal: 6
+# Plugins
+plugins:
+  - jekyll-redirect-from

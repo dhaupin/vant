@@ -156,4 +156,4 @@ port = 514
 - [ ] Git audit trail verified
 - [ ] Rate limits monitored
 
-See also: [Security](guides/security.html), [Operations](guides/operations.html)
+See also: [Security](guides/security), [Operations](guides/operations)

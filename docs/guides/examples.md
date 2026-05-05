@@ -145,4 +145,4 @@ async function safeWork(fn) {
 }
 ```
 
-See also: [Operations](guides/operations.html), [API Reference](reference/api.html)
+See also: [Operations](guides/operations), [API Reference](reference/api)

@@ -63,7 +63,7 @@ Vant's version tracking:
 
 ### Can multiple agents share one brain?
 
-Yes! Use the [Multi-Agent System](tutorials/multi-agent.html) with:
+Yes! Use the [Multi-Agent System](tutorials/multi-agent) with:
 - Git branches per agent
 - File locks for coordination
 
@@ -118,12 +118,12 @@ See [ROADMAP.md](https://github.com/dhaupin/blob/main/ROADMAP.md) in the repo.
 
 ### Can I contribute?
 
-Yes! See [Contributing Guide](contributing.html) in the docs.
+Yes! See [Contributing Guide](contributing) in the docs.
 
 ---
 
 ## Related
 
-- [Quickstart](getting-started/quick-start.html)
-- [Architecture](guides/architecture.html)
-- [Build Agent Tutorial](tutorials/build-agent.html)
+- [Quickstart](getting-started/quick-start)
+- [Architecture](guides/architecture)
+- [Build Agent Tutorial](tutorials/build-agent)

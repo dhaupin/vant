@@ -215,4 +215,4 @@ Logging configuration.
 vant start 2>&1 | tee vant.log
 ```
 
-See also: [CLI Reference](reference/cli.html), [Troubleshooting](guides/troubleshooting.html)
+See also: [CLI Reference](reference/cli), [Troubleshooting](guides/troubleshooting)

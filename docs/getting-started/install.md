@@ -216,7 +216,7 @@ Give this to your AI agent to self-configure:
 
 > "Set up Vant (https://github.com/dhaupin/vant) as my persistent brain. Clone the repo, configure it with GITHUB_REPO and GITHUB_TOKEN, then run `vant start` to begin."
 
-See also: [Quick Start](getting-started/quick-start.html)
+See also: [Quick Start](getting-started/quick-start)
 
 ---
 
@@ -307,6 +307,6 @@ docker run -it dhaupin/vant vant health
 
 ## Next Steps
 
-- [Quick Start](getting-started/quick-start.html) - Run your first commands
-- [Configuration](reference/configuration.html) - Customize Vant
-- [Build First Agent](tutorials/build-agent.html) - Tutorial
+- [Quick Start](getting-started/quick-start) - Run your first commands
+- [Configuration](reference/configuration) - Customize Vant
+- [Build First Agent](tutorials/build-agent) - Tutorial

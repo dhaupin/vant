@@ -8,7 +8,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ page.title | default: "Vant Docs" }}</title>
     <meta name="description" content="{{ page.description | default: "Vant: Open source system for AI agent memory persistence" }}">
-    <link rel="canonical" href="{{ page.url | absolute_url }}">
+    <link rel="canonical" href="{{ page.url | absolute_url | replace: ".html", "" }}">
+    <meta property="og:title" content="{{ page.title | default: "Vant Docs" }}">
+    <meta property="og:description" content="{{ page.description | default: "Vant: Open source system for AI agent memory persistence" }}">
+    <meta property="og:url" content="{{ page.url | absolute_url | replace: ".html", "" }}">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Vant Docs">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23059669'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' fill='white' font-family='system-ui' font-weight='bold' font-size='20'>V</text></svg>">
     
     <!-- Prism.js for syntax highlighting -->
@@ -627,7 +632,7 @@
                 <div class="sidebar-title">{{ section.title }}</div>
                 <ul class="sidebar-nav">
                 {% for item in section.items %}
-                    <li><a href="{{ item.url | relative_url }}">{{ item.title }}</a></li>
+                    <li><a href="{{ item.url | relative_url | replace: ".html", "" }}">{{ item.title }}</a></li>
                 {% endfor %}
                 </ul>
             </div>

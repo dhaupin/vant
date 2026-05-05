@@ -307,4 +307,4 @@ await telegram.startPolling();
 | `vant update` | Check updates |
 | `vant summary` | Session summary |
 
-See also: [Troubleshooting](guides/troubleshooting.html), [CLI Reference](reference/cli.html)
+See also: [Troubleshooting](guides/troubleshooting), [CLI Reference](reference/cli)

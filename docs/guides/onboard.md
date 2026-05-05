@@ -110,6 +110,6 @@ Search: "therapy"
 
 ## See Also
 
-- [Succession](guides/succession.html) - Version/trust
-- [Resolution](guides/resolution.html) - Thought status
-- [Knowledge](guides/troubleshooting.html) - Knowledge base
+- [Succession](guides/succession) - Version/trust
+- [Resolution](guides/resolution) - Thought status
+- [Knowledge](guides/troubleshooting) - Knowledge base

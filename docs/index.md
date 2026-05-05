@@ -16,10 +16,10 @@ Vant persists across sessions through GitHub-based brain transfer. Each generati
 
 ## Quick Links
 
-- [Quickstart](getting-started/quick-start.html) - 5 minute setup
-- [Build Your First Agent](tutorials/build-agent.html) - 15 min tutorial
-- [Examples](examples.html) - What others are building
-- [FAQ](faq.html) - Common questions
+- [Quickstart](getting-started/quick-start) - 5 minute setup
+- [Build Your First Agent](tutorials/build-agent) - 15 min tutorial
+- [Examples](examples) - What others are building
+- [FAQ](faq) - Common questions
 
 ---
 
@@ -29,13 +29,13 @@ Click any feature to learn more:
 
 | Feature | Description | Docs |
 |--------|-------------|------|
-| **Persistent Memory** | GitHub-based brain storage with version control | [Brain Guide](guides/brain.html) |
-| **Multi-Agent** | Branch + lock system for safe collaboration | [Multi-Agent](guides/multi-agent.html) |
-| **MCP Server** | Model Context Protocol for AI integration | [MCP](guides/mcp.html) |
-| **Steganography** | Hidden messages in PNG images | [Stego](guides/steganography.html) |
-| **Slack/Discord** | Webhook notifications | [Operations](guides/operations.html) |
-| **VAF Security** | Input validation and filtering | [Security](guides/security.html) |
-| **Telegram Bot** | Control Vant via chat | [Bot Tutorial](tutorials/telegram-bot.html) |
+| **Persistent Memory** | GitHub-based brain storage with version control | [Brain Guide](guides/brain) |
+| **Multi-Agent** | Branch + lock system for safe collaboration | [Multi-Agent](guides/multi-agent) |
+| **MCP Server** | Model Context Protocol for AI integration | [MCP](guides/mcp) |
+| **Steganography** | Hidden messages in PNG images | [Stego](guides/steganography) |
+| **Slack/Discord** | Webhook notifications | [Operations](guides/operations) |
+| **VAF Security** | Input validation and filtering | [Security](guides/security) |
+| **Telegram Bot** | Control Vant via chat | [Bot Tutorial](tutorials/telegram-bot) |
 
 ---
 
@@ -77,7 +77,7 @@ Yes, use a private GitHub repo. Vant is just you + GitHub.
 
 ### Can multiple AI agents share one brain?
 
-Yes! Use the [Multi-Agent](guides/multi-agent.html) system with branches + locks.
+Yes! Use the [Multi-Agent](guides/multi-agent) system with branches + locks.
 
 ### How is this different from vector databases?
 
@@ -107,7 +107,7 @@ Yes! Just `git clone` your brain repo. It's all markdown.
 
 | Document | Purpose |
 |----------|---------|
-| [Terms & Disclaimer](legal/index.html) | Warranty, liability, responsibilities |
-| [Privacy](legal/privacy.html) | Data collection, your control |
-| [Environment](legal/environment.html) | GitHub API, limits |
+| [Terms & Disclaimer](legal/index) | Warranty, liability, responsibilities |
+| [Privacy](legal/privacy) | Data collection, your control |
+| [Environment](legal/environment) | GitHub API, limits |
 

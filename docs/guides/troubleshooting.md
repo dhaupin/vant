@@ -232,4 +232,4 @@ Error: Content blocked: /; rm -rf/
 | Repo size | Free tier: 1GB max |
 | Private repos | Must have GitHub account |
 
-See also: [Configuration](reference/configuration.html), [Architecture](guides/architecture.html)
+See also: [Configuration](reference/configuration), [Architecture](guides/architecture)

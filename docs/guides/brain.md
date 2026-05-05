@@ -122,4 +122,4 @@ Trust levels control how much context to inherit:
 | `low` | Reference only |
 | `none` | Start fresh |
 
-See also: [Architecture](guides/architecture.html), [Succession](guides/succession.html)
+See also: [Architecture](guides/architecture), [Succession](guides/succession)

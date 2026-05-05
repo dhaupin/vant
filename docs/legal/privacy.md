@@ -270,5 +270,5 @@ If you have concerns:
 ## SEE ALSO
 
 - [GitHub Privacy](https://docs.github.com/en/github/site-policy/github-privacy-statement) - GitHub's policy
-- [Terms](index.html) - Our legal terms
-- [Security](guides/security.html) - Security practices
+- [Terms](index) - Our legal terms
+- [Security](guides/security) - Security practices

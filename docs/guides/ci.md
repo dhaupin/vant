@@ -330,6 +330,6 @@ cat AUDIT.md
 
 ## See Also
 
-- [Security Guide](guides/security.html)
-- [Operations](guides/operations.html)
-- [Troubleshooting](guides/troubleshooting.html)
+- [Security Guide](guides/security)
+- [Operations](guides/operations)
+- [Troubleshooting](guides/troubleshooting)

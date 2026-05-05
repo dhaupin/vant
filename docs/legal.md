@@ -16,9 +16,9 @@ title: Legal & Policies
 Vant is open source software provided without warranty. By using it, you accept all risks and responsibilities.
 
 **Quick links:**
-- [Disclaimer & Terms](legal/index.html) - Full legal disclaimer
-- [Privacy Policy](legal/privacy.html) - What we collect
-- [Environment & Limits](legal/environment.html) - GitHub, API, system
+- [Disclaimer & Terms](legal/index) - Full legal disclaimer
+- [Privacy Policy](legal/privacy) - What we collect
+- [Environment & Limits](legal/environment) - GitHub, API, system
 
 ---
 
@@ -26,9 +26,9 @@ Vant is open source software provided without warranty. By using it, you accept 
 
 | Document | For |
 |----------|-----|
-| [Disclaimer](legal/index.html) | Lawyers, liability |
-| [Privacy](legal/privacy.html) | Your data, GitHub |
-| [Environment](legal/environment.html) | API limits, setup |
+| [Disclaimer](legal/index) | Lawyers, liability |
+| [Privacy](legal/privacy) | Your data, GitHub |
+| [Environment](legal/environment) | API limits, setup |
 
 ---
 
@@ -63,17 +63,17 @@ The essentials you need to know.
 
 Read these in order:
 
-1. **[Terms](legal/index.html)** - You accept all risks
-2. **[Privacy](legal/privacy.html)** - Your data, your control
-3. **[Environment](legal/environment.html)** - GitHub limitations
+1. **[Terms](legal/index)** - You accept all risks
+2. **[Privacy](legal/privacy)** - Your data, your control
+3. **[Environment](legal/environment)** - GitHub limitations
 
 ---
 
 ## Quick Links
 
 - [MIT License](/LICENSE) - Code license
-- [README](index.html) - Project overview
-- [Security](guides/security.html) - Security practices
+- [README](index) - Project overview
+- [Security](guides/security) - Security practices
 - [GitHub Terms](https://docs.github.com/en/github/site-policy) - Full policies
 
 ---

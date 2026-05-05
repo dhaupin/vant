@@ -58,5 +58,5 @@ Vant is designed to be lightweight and efficient. This guide covers optimization
 
 ## See Also
 
-- [Operations](/guides/operations.html)
-- [Configuration](/reference/configuration.html)
+- [Operations](/guides/operations)
+- [Configuration](/reference/configuration)

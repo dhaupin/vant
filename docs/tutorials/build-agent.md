@@ -114,6 +114,6 @@ Session 1              Session 2
 
 ## Next Steps
 
-- [Multi-Agent Tutorial](tutorials/multi-agent.html) - Scale to multiple agents
-- [Succession System](guides/succession.html) - Version tracking
-- [Architecture](guides/architecture.html) - Deep dive
+- [Multi-Agent Tutorial](tutorials/multi-agent) - Scale to multiple agents
+- [Succession System](guides/succession) - Version tracking
+- [Architecture](guides/architecture) - Deep dive

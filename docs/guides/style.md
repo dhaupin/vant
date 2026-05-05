@@ -192,4 +192,4 @@ For example, here's a properly documented section:
 | Tips/Notes | Emoji prefix (>, ⚠️) |
 | Warnings | Why it matters (1 sentence) |
 
-See also: [CLI Reference](reference/cli.html), [Documentation](index.html)
+See also: [CLI Reference](reference/cli), [Documentation](index)

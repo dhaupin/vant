@@ -10,7 +10,7 @@ nav_order: 11
 
 Create a Vant brain manually, without using the CLI. Useful for agents that need full control or cannot run the CLI.
 
-> **Tip:** For most agents, the CLI is easier: `vant setup`. See [CLI Reference](/reference/cli.html) for commands.
+> **Tip:** For most agents, the CLI is easier: `vant setup`. See [CLI Reference](/reference/cli) for commands.
 
 ## Quick Start
 
@@ -270,6 +270,6 @@ node -e "require('./lib/brain').load('public')"
 
 ## See Also
 
-- [Brain Guide](/guides/brain.html) - Full brain documentation
-- [CLI Reference](/reference/cli.html) - Setup commands
-- [Schema Reference](/reference/schema.html) - All brain files
+- [Brain Guide](/guides/brain) - Full brain documentation
+- [CLI Reference](/reference/cli) - Setup commands
+- [Schema Reference](/reference/schema) - All brain files

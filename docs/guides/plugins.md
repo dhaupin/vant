@@ -120,4 +120,4 @@ module.exports = {
 3. Document configuration options
 4. Support enable/disable
 
-See also: [Architecture](guides/architecture.html), [CLI Reference](reference/cli.html)
+See also: [Architecture](guides/architecture), [CLI Reference](reference/cli)

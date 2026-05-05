@@ -162,7 +162,7 @@ git push origin experiment-feature
 ```
 
 
-See: [Multi-Agent](guides/multi-agent.html)
+See: [Multi-Agent](guides/multi-agent)
 
 ## Troubleshooting
 
@@ -182,4 +182,4 @@ See: [Multi-Agent](guides/multi-agent.html)
 | Rotate tokens | Refresh periodically |
 | Use fine-grained tokens | Restrict to brain repo only |
 
-See also: [CLI Reference](reference/cli.html), [Troubleshooting](guides/troubleshooting.html)
+See also: [CLI Reference](reference/cli), [Troubleshooting](guides/troubleshooting)

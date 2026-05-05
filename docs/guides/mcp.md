@@ -416,4 +416,4 @@ MCP uses VAF (Vant Application Firewall) for input validation:
 
 For multi-line content, write directly to `models/public/` instead of via MCP.
 
-See also: [Security Guide](guides/security.html), [Multi-Agent](guides/multi-agent.html), [CLI Reference](reference/cli.html)
+See also: [Security Guide](guides/security), [Multi-Agent](guides/multi-agent), [CLI Reference](reference/cli)

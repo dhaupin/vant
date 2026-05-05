@@ -50,4 +50,4 @@ The core modules that make up Vant.
 3. Commits to GitHub on changes (human/agent initiated)
 4. Next session syncs when ready
 
-See also: [Multi-Agent](guides/multi-agent.html), [Security](guides/security.html)
+See also: [Multi-Agent](guides/multi-agent), [Security](guides/security)
