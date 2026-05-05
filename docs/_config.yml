@@ -26,16 +26,53 @@ gems:
 plugins:
   - jekyll-redirect-from
 
-# Nav section titles (auto-generated from folders)
-nav_sections:
-  guides: Guides
-  reference: Reference
-  getting-started: Getting Started
-  tutorials: Tutorials
-
-# Override folder order
-nav_order:
-  getting-started: 1
-  guides: 2
-  tutorials: 3
-  reference: 4
+# Navigation - explicit order (manual override, reliable)
+nav:
+  - title: Getting Started
+    items:
+      - title: Installation
+        url: /vant/getting-started/install/
+      - title: Quick Start
+        url: /vant/getting-started/quick-start/
+  - title: Guides
+    items:
+      - title: AI Onboarding
+        url: /vant/guides/ai-onboard.html
+      - title: Brain
+        url: /vant/guides/brain.html
+      - title: Islands
+        url: /vant/guides/islands.html
+      - title: Vibe
+        url: /vant/guides/vibe.html
+      - title: Multi-Agent
+        url: /vant/guides/multi-agent.html
+      - title: Multi-Repo
+        url: /vant/guides/repos.html
+      - title: Hybrid Sync
+        url: /vant/guides/hybrid.html
+      - title: Hybrid Search
+        url: /vant/guides/search.html
+      - title: MCP
+        url: /vant/guides/mcp.html
+      - title: Security
+        url: /vant/guides/security.html
+      - title: Schema
+        url: /vant/guides/schema.html
+      - title: Audit
+        url: /vant/guides/audit.html
+      - title: Stego
+        url: /vant/guides/stego.html
+      - title: Providers
+        url: /vant/guides/providers.html
+      - title: Sync
+        url: /vant/guides/sync.html
+      - title: Airgap
+        url: /vant/guides/airgap-propagation.html
+  - title: Reference
+    items:
+      - title: CLI Reference
+        url: /vant/reference/cli.html
+      - title: Module API
+        url: /vant/reference/api.html
+      - title: Configuration
+        url: /vant/reference/configuration.html
