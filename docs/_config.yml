@@ -20,26 +20,22 @@ kramdown:
   auto_ids: true
   auto_id_prefix: ''
 
-# Plugins (Jekyll 3+) / Gems (Jekyll 2)
+# Plugins
 gems:
   - jekyll-redirect-from
 plugins:
   - jekyll-redirect-from
 
-# Navigation - auto-sorted from nav_order frontmatter + overrides at top
-# Order: Getting Started → Guides → Reference
-nav:
-  - title: Getting Started
-    items:
-      - title: Installation
-        url: /vant/getting-started/install/
-      - title: Quick Start
-        url: /vant/getting-started/quick-start/
-  - title: Reference
-    items:
-      - title: CLI Reference
-        url: /vant/reference/cli.html
-      - title: Module API
-        url: /vant/reference/api.html
-      - title: Configuration
-        url: /vant/reference/configuration.html
+# Nav section titles (auto-generated from folders)
+nav_sections:
+  guides: Guides
+  reference: Reference
+  getting-started: Getting Started
+  tutorials: Tutorials
+
+# Override folder order
+nav_order:
+  getting-started: 1
+  guides: 2
+  tutorials: 3
+  reference: 4
