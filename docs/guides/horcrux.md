@@ -58,8 +58,7 @@ const manifest = horcrux.generateManifest({
 horcrux.embedInBrain(manifest);
 
 // Encode as image
-stego.encodeBrain('avatar.png' |
-- 'horcrux.png');
+stego.encodeBrain('avatar.png', 'horcrux.png');
 ```
 
 ### 2. Boot from Horcrux

@@ -61,8 +61,7 @@ brain.embedConfig({
 });
 ```
 
-Then encode as stego image. On boot |
-- config is extracted automatically.
+Then encode as stego image. On boot, config is extracted automatically.
 
 ## Use Cases
 
