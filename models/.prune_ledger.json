@@ -59,6 +59,18 @@
         "ltcEntries": 0,
         "errors": []
       }
+    },
+    {
+      "date": "2026-05-05T14:09:35.510Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
     }
   ]
 }

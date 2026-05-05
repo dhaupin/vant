@@ -139,6 +139,46 @@ async function runTests() {
         passed++;
     } catch (e) { console.log('  ✗', e.message); failed++; }
     
+    // Vibe
+    try {
+        console.log('\n[Vibe]');
+        const vibe = require(path.join(DIR, 'lib/vibe'));
+        assert(typeof vibe.getMood === 'function');
+        assert(typeof vibe.setMood === 'function');
+        const available = vibe.getAvailableVibes();
+        assert(available.includes('experimental'));
+        assert(available.includes('safety_first'));
+        const commitVibe = vibe.getCommitVibe();
+        assert(commitVibe.includes('[vibe:'));
+        console.log('  ✓');
+        passed++;
+    } catch (e) { console.log('  ✗', e.message); failed++; }
+    
+    // Repos
+    try {
+        console.log('\n[Repos]');
+        const repos = require(path.join(DIR, 'lib/repos'));
+        assert(typeof repos.list === 'function');
+        assert(typeof repos.mount === 'function');
+        const list = repos.list();
+        assert(list.includes('github'));
+        assert(list.includes('herbalism'));
+        console.log('  ✓');
+        passed++;
+    } catch (e) { console.log('  ✗', e.message); failed++; }
+    
+    // Hybrid
+    try {
+        console.log('\n[Hybrid]');
+        const hybrid = require(path.join(DIR, 'lib/hybrid'));
+        assert(typeof hybrid.setPrivacy === 'function');
+        assert(typeof hybrid.getPrivacy === 'function');
+        const summary = hybrid.getSummary();
+        assert(typeof summary === 'object');
+        console.log('  ✓');
+        passed++;
+    } catch (e) { console.log('  ✗', e.message); failed++; }
+    
     console.log('\n╔═══════════════════════════════════════╗');
     console.log('║  Results: ' + passed + '/' + (passed + failed) + ' passed             ║');
     console.log('╚═══════════════════════════════════════╝');

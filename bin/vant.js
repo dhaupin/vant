@@ -39,6 +39,9 @@ const COMMANDS = {
     run: 'run.js',
     test: 'build-test.js',
     testv086: 'test-v086.js',
+    vibe: 'vibe.js',
+    repos: 'repos.js',
+    hybrid: 'hybrid.js',
     changelog: 'changelog.js',
     summary: 'summary.js',
     update: 'update.js',
@@ -91,7 +94,17 @@ Core:
   vant islands     Componentized brain boot
   vant sync        Pull/push brain
   vant health      System diagnostics
-  vant testv086    Run v0.8.6 test suite
+  vant testv086    Run test suite
+  vant vibe        Show/set vibe
+
+Multi-Repo:
+  vant repos --list       List repos
+  vant repos --mount     Mount repo
+  vant repos --pull      Pull mounted
+
+Hybrid:
+  vant hybrid --public   Push public only
+  vant hybrid --private  Push private only
 
 Ghost (stego bootstrap):
   vant boot --image <url>   Zero-config boot
