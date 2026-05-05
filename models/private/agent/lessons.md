@@ -1,66 +1,59 @@
-# PROJECT LESSONS
+# MYCELIUM CORE LIBRARIES - DISCOVERED
 
-MODEL: Private Agent Brain
-UPDATED: 2026-05-04
+## vaf.js (Vant Application Firewall)
+- Input validation and sanitization
+- Path traversal protection
+- Injection prevention
+- Rate limiting per agent/IP
+- Content filtering (/dangerous patterns/)
+- Audit logging
 
-=== WEISYNC LESSONS ===
+## rate-limit.js
+- Respects GitHub API rate limits
+- Per-hour sliding window
+- State persistence to JSON
 
-1. ARCHITECTURE
-- Frontend/Backend separation via typed service interfaces
-- Use config files for all operational settings
-- Never hard-code navigation - use navigation.ts
+## protection.js (MCP Protection)
+- Concurrent request limit (MAX_CONCURRENT)
+- Request timeouts (MCP_TIMEOUT)
+- Input size limits
+- Circuit breaker pattern
 
-2. SECURITY
-- AES-256-GCM for credential encryption
-- RLS for per-user data isolation
-- Input firewall on all user data
-- Admin bypass carefully controlled
+## resolution.js
+- Per-file thought status tracking
+- ACTIVE, RESOLVED, DEPRECATED, REJECTED
+- Ledger file for all resolutions
 
-3. BILLING
-- Polling (not webhooks) for subscription status
-- Embedded Stripe checkout
-- Service role writes to local DB
+## health.js
+- Express health server
+- /health, /health/ready, /health/live
+- Readiness + liveness probes
 
-4. CODE STYLE
-- No emojis in code comments or logs
-- JSDoc headers on all logic files
-- Semantic design tokens (not raw colors)
-- Barrel exports for service layers
+## stego.js
+- LSB image steganography
+- Optional AES-256-GCM encryption
+- Encode/decode messages in images
 
-5. DATABASE
-- Row-level security on every table
-- Per-user isolation via auth.uid()
-- Cron for cleanup jobs
+## entropy.js
+- Shannon entropy calculation
+- Latent transport patches
+- Separate stable from high-entropy content
 
-=== MYCELIUM INTEGRATION ===
+## prompts.js (CLI)
+- Inquirer-based prompts
+- confirm(), input(), password(), select()
+- Validation support
 
-1. BRAIN STRUCTURE
-- models/public = default base brain
-- models/private/agent = private agent brain
-- Identity, goals, lessons, projects
+## onboard.js
+- Agent onboarding flow
+- First-run setup
 
-2. MEMORY PATTERNS
-- Public brain is default base
-- Private brain builds on top
-- Git branches for experiments
-- Locks for coordination
+## misc
+- colors.js - Terminal colors
+- errors.js - Error types
+- logger.js - Logging with verbosity levels
+- metrics.js - Performance metrics
+- telegram.js - Telegram bot integration
+- version.js - Version management
 
-=== TECHNICAL DECISIONS ===
-
-1. WHY SELF-HOSTED SUPABASE
-- Full control over infrastructure
-- No vendor lock-in
-- Edge functions for server-side logic
-
-2. WHY STRIPE POLLING
-- Simpler than webhooks
-- No public webhook endpoint needed
-- Works with self-hosted setup
-
-3. WHY GITHUB FOR MEMORY
-- Versioned checkpoint history
-- Pull/push for persistence
-- Branches for isolation
-
----
-Agent Lessons
+=== CORE LIBS DISCOVERED ===

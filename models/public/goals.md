@@ -1,18 +1,48 @@
-# Goals
+# BILLING PORT PLAN
 
-Short, medium, and long term objectives.
+## Status: Ready to Port
 
-## Current Goals
+### Why Port to Threadforge?
+- Weisync already has full Stripe billing
+- Threadforge Settings has NO billing tab
+- Paid tiers needed for business model
+- Bidirectional parity on features
 
-### Short Term
-- v0.8.2 release complete
+### Files to Port (Priority Order)
 
-### Medium Term
-- Instance-to-instance brain transfer
-- Stegoframe integration
+1. **src/types/billing.ts**
+   - SubscriptionTier: free | pro | team
+   - SubscriptionStatus: active | canceled | past_due | etc
+   - PLAN_CATALOG with limits
+   - IPaymentProcessor interface
 
-### Long Term
-- Multi-agent shared memory
-- Plugin architecture
+2. **src/types/plugins.ts**
+   - IPlugin base interface
+   - RegistryScope types
 
-[placeholder - fill in via private model or runtime]
+3. **src/lib/billing/**
+   - index.ts (barrel)
+   - processor-registry.ts
+   - stripe-plugin.ts
+
+4. **src/components/settings/BillingTab.tsx**
+   - Use Threadforge's shadcn/ui
+   - Same design as weisync
+
+5. **Database (future)**
+   - Add subscription columns to profiles
+   - Edge functions for webhooks
+
+### How to Port
+1. Copy types first (no deps)
+2. Copy lib/billing (framework-agnostic)
+3. Create BillingTab using Threadforge components
+4. Add Settings route
+
+### Key Decisions Made
+- Keep same pricing as weisync
+- Use Threadforge's supabase client
+- Reuse PLAN_CATALOG from weisync
+- Stripe keys via config
+
+=== PORT CAN START TODAY ===
