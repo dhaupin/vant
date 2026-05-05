@@ -354,6 +354,31 @@ telegram.onMessage(async (msg) => {
 await telegram.startPolling();
 ```
 
+## lib/entropy.js
+Entropy-Patch protocol for token-aware latent transport. Transforms Vant from "Context Storage" to "Latent Transport".
+
+```javascript
+const entropy = require('./lib/entropy');
+
+// Generate patches from binary data
+const patches = entropy.generatePatches(buffer, {
+    windowSize: 8,
+    threshold: 0.85,
+});
+
+// Create .vpatch file
+const vpatch = await entropy.generateVPatch(inputFile, outputPath, options);
+
+// Reconstruct from patches (lossless)
+const hydrated = entropy.hydratePatches(patches);
+
+// Get entropy statistics
+const stats = entropy.getEntropyStats(buffer);
+// { overall, min, max, mean, chunkCount, byteCount }
+```
+
+**CLI:** `vant compress <file> --stats`, `vant compress <file>`, `vant compress <file> -d`
+
 ## lib/update-check.js
 Check for updates.
 
