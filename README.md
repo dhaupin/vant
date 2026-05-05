@@ -86,7 +86,7 @@ Vant persists via GitHub - each generation inherits full memory.
 The public repo (vant) has built-in brain loading (text/json).
 ```
 
-> 📖 Full installation guide: [https://dhaupin.github.io/vant/getting-started/install.html](https://dhaupin.github.io/vant/getting-started/install.html)
+> 📖 Full installation guide: [https://docs.creadev.org/vant/getting-started/install.html](https://docs.creadev.org/vant/getting-started/install.html)
 
 ---
 

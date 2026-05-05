@@ -355,7 +355,7 @@ vant/
 
 ## Docs: Jekyll + GitHub Pages
 
-The documentation at https://dhaupin.github.io/vant/ uses Jekyll with GitHub Pages and Pagefind for search.
+The documentation at https://docs.creadev.org/vant/ uses Jekyll with GitHub Pages and Pagefind for search.
 
 ### Structure
 
@@ -393,11 +393,11 @@ var resp = await pfModule.search(query);
 **Testing search:**
 ```bash
 # Verify index deployed
-curl -sI "https://dhaupin.github.io/vant/pagefind/pagefind.js" | head -1
+curl -sI "https://docs.creadev.org/vant/pagefind/pagefind.js" | head -1
 # Should return: HTTP/2 200
 
 # Check entry
-curl -s "https://dhaupin.github.io/vant/pagefind/pagefind-entry.json" | jq '.languages.en.page_count'
+curl -s "https://docs.creadev.org/vant/pagefind/pagefind-entry.json" | jq '.languages.en.page_count'
 # Returns page count (e.g., 37)
 ```
 
@@ -485,10 +485,10 @@ jobs:
 - `docs/guides/manual-brain.md` - Manual brain creation (no CLI)
 - `lib/lock.js` - Lock API source
 - `models/public/schema/memory-files.md` - Memory file schema
-- `CHANGELOG.md` - Version history
-- `LIBS.md` - Full module reference
-- `CLI.md` - Command reference
-- `README.md` - Full documentation
+- `docs/CHANGELOG.md` - Version history
+- `docs/reference/api.md` - Module reference
+- `docs/reference/cli.md` - Command reference
+- `docs.creadev.org/vant/` - Full documentation
 ---
 
 ## Version Management
@@ -498,7 +498,7 @@ The version is defined in `package.json` (version field). All other places read 
 
 ### Version Files
 - **Dynamic** (auto-reads package.json): `lib/version.js`, `lib/config.js`, `.github/workflows/docker.yml`
-- **Manual** (update on release): `package.json`, `RELEASE.md`, `docs/CHANGELOG.md`
+- **Manual** (update on release): `package.json`, docs frontmatter files, docker-compose.yml
 
 ### When to Bump Version
 - **NEVER** bump version for docs changes, formatting fixes, or non-release commits
