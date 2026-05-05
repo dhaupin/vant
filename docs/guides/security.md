@@ -13,29 +13,29 @@ Vant security model.
 
 ## VAF
 
-Vant Application Firewall - input validation layer.
+Vant Application Firewall - input validation.
 
-### What It Does
+### What
 
-- **Word stacking** - Blocks repeated words
-- **Path traversal** - Blocks `../` attacks
-- **Shell metacharacters** - Blocks `;`, `|`, `&&`
-- **Environment variables** - Blocks `$VAR` attacks
+| Check | Blocks |
+|-------|--------|
+| Word stacking | vant vant vant |
+| Path traversal | ../etc/passwd |
+| Shell chars | ; rm -rf |
+| Env vars | $HOME |
 
 ### Config
 
-| Env | Default | What |
-|-----|---------|------|
-| MCP_REQUIRE_API_KEY | false | Force auth required |
-| VAF_MAX_LENGTH | 50000 | Max input length |
+| Env | Default |
+|-----|---------|
+| MCP_REQUIRE_API_KEY | false |
+| VAF_MAX_LENGTH | 50000 |
 
 ---
 
 ## Data
 
-- Tokens stored per-user (encrypted)
-- No Reddit credentials in logs
-- AI keys encrypted at rest
+Tokens encrypted per-user.
 
 ---
 
