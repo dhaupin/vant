@@ -228,6 +228,42 @@ async function runTests() {
         passed++;
     } catch (e) { console.log('  ✗', e.message); failed++; }
     
+    // Schema
+    try {
+        console.log('\n[Schema]');
+        const schema = require(path.join(DIR, 'lib/schema'));
+        assert(typeof schema.validateFile === 'function');
+        assert(typeof schema.isValid === 'function');
+        const result = schema.isValid();
+        assert(typeof result === 'object');
+        console.log('  ✓');
+        passed++;
+    } catch (e) { console.log('  ✗', e.message); failed++; }
+    
+    // Audit
+    try {
+        console.log('\n[Audit]');
+        const audit = require(path.join(DIR, 'lib/audit'));
+        assert(typeof audit.log === 'function');
+        assert(typeof audit.getLedger === 'function');
+        audit.clear(); // Reset
+        const entry = audit.log('test:action');
+        assert(entry.action === 'test:action');
+        console.log('  ✓');
+        passed++;
+    } catch (e) { console.log('  ✗', e.message); failed++; }
+    
+    // Circuit Breaker
+    try {
+        console.log('\n[CircuitBreaker]');
+        const sync = require(path.join(DIR, 'lib/sync'));
+        assert(typeof sync.isCircuitClosed === 'function');
+        assert(typeof sync.recordFailure === 'function');
+        assert(typeof sync.recordSuccess === 'function');
+        console.log('  ✓');
+        passed++;
+    } catch (e) { console.log('  ✗', e.message); failed++; }
+    
     console.log('\n╔═══════════════════════════════════════╗');
     console.log('║  Results: ' + passed + '/' + (passed + failed) + ' passed             ║');
     console.log('╚═══════════════════════════════════════╝');

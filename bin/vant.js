@@ -43,6 +43,7 @@ const COMMANDS = {
     repos: 'repos.js',
     hybrid: 'hybrid.js',
     search: 'search.js',
+    validate: 'validate.js',
     changelog: 'changelog.js',
     summary: 'summary.js',
     update: 'update.js',
@@ -122,6 +123,9 @@ Islands:
 RAG:
   vant search --hybrid     Hybrid search
   vant search --hyde      HyDE query
+
+Validation:
+  vant validate --check   Schema + audit + circuits
 
 Info:
   vant help       Show help
