@@ -1,0 +1,12 @@
+{
+  "providers": {
+    "test-provider": {
+      "failures": 0,
+      "open": false
+    },
+    "test-prov": {
+      "failures": 0,
+      "open": false
+    }
+  }
+}
