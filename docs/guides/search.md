@@ -1,5 +1,7 @@
 # LTC Semantic Search + Re-hydrate
 
+> **NEW in v0.8.6**: See [Hybrid Search](#hybrid-search) below for BM25+Vector RRF.
+
 Use your Long Term Core (LTC) as a high-level index for RAG-like consciousness. Search for relevant memories, then re-hydrate full context from git history.
 
 ## Why Semantic Search?
@@ -106,3 +108,46 @@ async function answerWithContext(query) {
 - Requires LTC (run prune first)
 - Limited to pruned versions
 - 50KB max prevents context overflow
+
+---
+
+## Hybrid Search (v0.8.6+)
+
+> BM25 + Vector + RRF for full RAG capability
+
+Combines:
+- **BM25 (Sparse)**: Keyword/exact match ("VESC v3.4")
+- **Vector (Dense)**: Semantic search ("nature medicine" → "herbalism")
+- **RRF**: Reciprocal Rank Fusion for best of both
+
+### Usage
+
+```javascript
+const search = require('./lib/hybrid-search');
+
+const results = await search.search('herbalism plants');
+// { sparse: [], dense: [], fused: [], sources: [] }
+```
+
+### CLI
+
+```bash
+vant search "query"           # Default hybrid
+vant search --hybrid "q"   # Explicit hybrid
+vant search --hyde "q"      # HyDE
+vant search --stats        # Index stats
+```
+
+### Integration
+
+Use with query transformation:
+
+```javascript
+const query = require('./lib/query');
+const citations = require('./lib/citations');
+
+const result = await query.hyde('herbalism');
+// Uses HyDE: fake answer → search real
+
+citations.addSource(result.sources[0].commit);
+```

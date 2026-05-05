@@ -194,6 +194,47 @@ await hybrid.pushPublic();  // Only public repos
 await hybrid.pushPrivate(); // Only private repos
 ```
 
+#### Hybrid Search (Sparse + Dense)
+- BM25 for keywords: exact match "VESC v3.4"
+- Vector for semantic: "nature medicine" → "herbalism"
+- RRF: Reciprocal Rank Fusion combines both
+
+```javascript
+const search = require('./lib/hybrid-search');
+await search.search('herbalism plants');
+```
+
+#### Query Transformation (Multi-Query + HyDE)
+- Multi-Query: Generate 3 variations of vague prompts
+- HyDE: Write fake answer first, then search real
+
+```javascript
+const query = require('./lib/query');
+query.multiQuery('how to setup vesc');
+await query.hyde('what is herbalism');
+```
+
+#### Re-Ranking & Compression
+- Score hydrated memories against query
+- Strip fluff (headers, metadata)
+- Fit context window
+
+```javascript
+const rerank = require('./lib/rerank');
+const top = rerank.rerank(memories, query);
+```
+
+#### Git-Backed Citations
+- Force [Source: commit_hash] in answers
+- Audit-friendly receipts
+
+```javascript
+const citations = require('./lib/citations');
+citations.addSource(commitHash, context);
+citations.formatCitation(source);
+// [Source: abc123d]
+```
+
 ---
 
 ## [v0.8.6] - 2026-05-05 - Feature Release
@@ -288,12 +329,19 @@ const { results, context } = await search.query('python');
 | `vant repos --pull` | Pull mounted |
 | `vant hybrid --public` | Push public only |
 | `vant hybrid --private` | Push private only |
+| `vant search --hybrid` | Hybrid search |
+| `vant search --hyde` | HyDE query |
 
 ### New Modules
 
 - `lib/providers/index.js` - Provider abstraction (5 providers)
 - `lib/prune.js` - Pruning logic
 - `lib/sync.js` - Multi-provider RAID 1 sync
+- `lib/hybrid-search.js` - Hybrid search (BM25 + Vector)
+- `lib/query.js` - Query transformation (HyDE + Multi-Query)
+- `lib/rerank.js` - Re-ranking & compression
+- `lib/citations.js` - Git-backed citations
+- `bin/search.js` - Search CLI
 - `lib/search.js` - LTC semantic search + re-hydrate
 - `bin/stego.js` - Stego CLI
 - `bin/prune.js` - Prune CLI
@@ -306,7 +354,10 @@ const { results, context } = await search.query('python');
 - `docs/guides/pruning.md` - Pruning guide
 - `docs/guides/boot.md` - Ghost boot guide
 - `docs/guides/sync.md` - RAID sync guide
-- `docs/guides/search.md` - Semantic search guide
+- `docs/guides/search.md` - Hybrid search (BM25 + Vector) guide
+- `docs/guides/hybrid.md` - Hybrid sync guide
+- `docs/guides/vibe.md` - Vibe controls guide
+- `docs/guides/repos.md` - Multi-repo guide
 
 ### Security Audits
 
