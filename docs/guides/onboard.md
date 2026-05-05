@@ -2,7 +2,7 @@
 version: 0.8.6
 permalink: /guides/onboard.html
 layout: default
-title: Onboarding
+title: Knowledge Base Browser
 nav_order: 7
 ---
 # Knowledge Base Browser
@@ -28,88 +28,27 @@ vant onboard
 # Query specific file
 vant onboard identity
 
-# List all files
-vant onboard --list
-
-# Search for term
-vant onboard --search therapy
-
-# Search in file
-vant onboard identity --search therapy
-
-# Show summary
-vant onboard --summary
+# Search brain
+vant onboard --search "goals"
 ```
 
-## Brain Files
+---
 
-Standard brain layout in `models/public/`:
+## Files
+
+Common brain files:
 
 | File | What |
 |------|------|
-| `identity.md` | Core identity |
-| `lessons.md` | Learnings |
-| `goals.md` | Goals |
-| `fears.md` | Fears/concerns |
-| `knowledge.md` | Knowledge base |
-| `style.md` | Working style |
+| identity.md | Your identity |
+| goals.md | Goals |
+| lessons.md | Lessons learned |
+| style.md | Preferences |
+| rules.md | Rules |
 
-## System Files
-
-Underscore-prefixed files:
-
-| File | What |
-|------|------|
-| `_schema.json` | Brain schema |
-| `_succession.json` | Version/trust |
-| `.ledger.json` | History |
-| `.resolutions/*` | Thought status |
-
-## Use Cases
-
-- **Explore** - See what's in brain
-- **Debug** - Check specific file
-- **Search** - Find memory
-- **Audit** - List all knowledge
-
-## API
-API reference and methods.
-
-```javascript
-const onboard = require('./lib/onboard');
-
-// Get all brain files
-const files = onboard.getBrainFiles();
-
-// Get file content + metadata
-const info = onboard.getFileInfo('identity.md');
-
-// Full summary
-const summary = onboard.getOnboardSummary();
-
-// Search content
-const results = onboard.searchFiles('therapy');
-```
-
-## Output Example
-Parse onboarding output.
-
-```
-=== Onboarding: Vant Brain ===
-
-Files:
-  identity.md    (core identity)
-  lessons.md   (learnings)
-  goals.md     (goals)
-  fears.md    (concerns)
-
-Search: "therapy"
-  - identity.md: 2 matches
-  - lessons.md: 5 matches
-```
+---
 
 ## See Also
 
-- [Succession](guides/succession) - Version/trust
-- [Resolution](guides/resolution) - Thought status
-- [Knowledge](guides/troubleshooting) - Knowledge base
+- [Brain](guides/brain)
+- [AI Onboarding](guides/ai-onboard)

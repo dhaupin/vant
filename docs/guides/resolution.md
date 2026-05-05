@@ -104,35 +104,13 @@ Track decisions on the blockchain.
 - **Ethics** - Reject outdated beliefs
 - **Audit** - Track thinking changes
 
-## API
-API reference and methods.
 
-```javascript
-const resolution = require('./lib/resolution');
+## Advanced
 
-// Get status
-const status = resolution.getStatus();
+This doc has advanced API reference. See GitHub for latest.
 
-// Get ledger
-const ledger = resolution.getLedger();
-
-// Resolve entry
-resolution.resolve('fears', 'fear of X', 'resolved', 'therapy');
-
-// Deprecate entry
-resolution.deprecate('goals', 'old goal', 'new goal');
-
-// Reject entry
-resolution.reject('identity', 'old belief', 'ethics changed');
-```
-
-## See Also
-
-- [Succession](guides/succession) - Brain version tracking
-- [Onboarding](guides/troubleshooting) - Knowledge base browser
-- [Audit](guides/audit) - Compliance tracking
 ## See Also
 
 - [Succession](guides/succession)
-- [Brain Structure](guides/brain)
-- [Multi-Agent](guides/multi-agent)
+- [Brain](guides/brain)
+- [Audit](guides/audit)
