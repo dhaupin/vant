@@ -20,3 +20,10 @@ omega-init: Full reboot prompt for any agent (connected/airgapped)
   - Troubleshooting table
   - Docker section
 
+
+### Session 2026-05-05 - DocsQC
+
+- Version: Reverted omega-init to 0.8.6
+- Docs explained: cli.md, brain.md, multi-agent.md
+- Each code block now has a line BEFORE it explaining what it does
+
