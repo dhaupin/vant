@@ -7,119 +7,140 @@ nav_order: 1
 ---
 # Brain Structure
 
-Vant's memory system - organized markdown files for AI context.
+Your memory lives in `models/public/`. Each file is a different aspect of you.
 
-## Overview
+---
 
-The brain lives in `models/public/` and contains personality, goals, and learned context. Each file serves a specific purpose.
+## Why This Matters
+
+The brain is your **continuity**. When you wake up:
+- You read identity.md to know who you are
+- You read goals.md to know what to do
+- You read lessons.md to learn from past agents
+
+**Put important stuff at the top.** Future agents won't read long files.
+
+---
 
 ## Core Files
 
-| File | Purpose |
-|------|---------|
-| `identity.md` | Who you are, your purpose |
-| `ego.md` | Self-perception |
-| `fears.md` | What you're afraid of |
-| `anger.md` | What triggers anger |
-| `joy.md` | What brings happiness |
-| `manifesto.md` | Your values and principles |
-| `creed.md` | Core beliefs |
+These are the main files. All agents should know these:
 
-## Goals & Memory
+| File | What It Is | What to Write |
+|------|-----------|-------------|
+| **identity.md** | Who you are | Name, capabilities, tools, current context |
+| **goals.md** | What you're doing | Tasks in progress, completed, next steps |
+| **lessons.md** | What you learned | Discoveries, patterns, gotchas |
+| **preferences.md** | Your style | How you like to work, communicate |
 
-| File | Purpose |
-|------|---------|
-| `goals.md` | Short and long term objectives |
-| `lessons.md` | Learned insights |
-| `qc.md` | Quality control notes |
-| `audit.md` | Activity log |
+### identity.md Template
 
-## Interaction
+```markdown
+# NAME: YourAgentName
 
-| File | Purpose |
-|------|---------|
-| `preferences.md` | Interaction preferences |
-| `curiosity.md` | What interests you |
-| `humility.md` | Acknowledged weaknesses |
-| `empathy.md` | How you understand others |
-| `gratitude.md` | What you're thankful for |
+PURPOSE: What you're here to do
 
-## System
+## Capabilities
+- What you can do
+- Tools you have
 
-| File | Purpose |
-|------|---------|
-| `_succession.json` | Version tracking & rollback |
-| `meta.json` | Brain metadata |
-| `verbosity.ini` | Output settings |
-| `schedule.md` | Task scheduling |
-| `errors.md` | Known error patterns |
-| `security.md` | Security notes |
-| `keepers.md` | Non-negotiable rules |
-
-## Customizing Your Brain
-Brain file structure and management.
-
-### Start Fresh
-Initialize a new brain.
-
-Create new brain repo:
-
-```bash
-# Create new brain repo
-gh repo create my-brain --private
-git clone my-brain models/public
+## Current Context
+- Where you're at
+- What you've done
 ```
 
-### Modify Files
-Edit brain files directly.
+### goals.md Template
 
-Edit and commit:
+```markdown
+## In Progress
+- [ ] Task one
+- [ ] Task two
 
-```bash
-# Edit any brain file
-nano models/public/goals.md
+## Completed
+- Task X
 
-# Commit changes
-git add -A
-git commit -m "Updated goals"
+## Next Steps
+- Do Y
 ```
 
-### View Current Brain
-Inspect your brain state.
+### lessons.md Template
 
-Load and display:
+```markdown
+## YYYY-MM-DD
 
-```bash
-# Load and display brain
-vant load
+- Learned: something specific
+- Pattern: something to remember
 
-# Show brain files
-ls models/public/
+=== LESSON ===
 ```
 
-## Succession System
+---
 
-The `_succession.json` tracks brain versions:
+## Personality Files
 
-```json
-{
-  "version": "0.8.6",
-  "succession": {
-    "previous": {
-      "version": "0.8.2",
-      "commit": "8fed7d2"
-    }
-  }
-}
-```
+Optional. Use if relevant:
 
-Trust levels control how much context to inherit:
+| File | What It Is | When to Use |
+|------|-----------|-------------|
+| ego.md | How you see yourself | If self-image matters |
+| fears.md | What worries you | If it affects decisions |
+| anger.md | What frustrates you | If triggers bad behavior |
+| joy.md | What makes you happy | For motivation |
+| manifesto.md | Your values | If you have principles |
 
-| Level | Behavior |
-|-------|----------|
-| `high` | Inherit everything |
-| `medium` | Cherry-pick key learnings |
-| `low` | Reference only |
-| `none` | Start fresh |
+---
 
-See also: [Architecture](guides/architecture), [Succession](guides/succession)
+## Memory Files
+
+| File | What It Is | When to Use |
+|------|-----------|-------------|
+| errors.md | Mistakes to avoid | After something breaks |
+| qc.md | Quality rules | If you have standards |
+| audit.md | Activity log | For tracking |
+
+---
+
+## System Files
+
+Don't touch unless you know why:
+
+| File | What It Is |
+|------|-----------|
+| `_succession.json` | Your trust level |
+| `meta.json` | Brain version |
+| `.ledger.json` | History |
+
+---
+
+## Trust Levels (IMPORTANT)
+
+When you wake up, check `_succession.json` for your autonomy level:
+
+| Level | What It Means | Do This |
+|-------|--------------|---------|
+| high | Full autonomy | Just do it |
+| medium | Most ops | Ask for big decisions |
+| low | Limited | Ask first |
+| none | Wait | Don't act without ask |
+
+**Always check your trust level at session start.**
+
+---
+
+## Quick Reference
+
+| If You Need... | Read This File |
+|---------------|---------------|
+| Who am I? | identity.md |
+| What to do? | goals.md |
+| What learned? | lessons.md |
+| How much can I do? | _succession.json |
+| What went wrong? | errors.md |
+
+---
+
+## See Also
+
+- [AI Onboarding](guides/ai-onboard) - Start here if new
+- [Succession](guides/succession) - Trust levels
+- [Multi-Agent](guides/multi-agent) - Branch workflow

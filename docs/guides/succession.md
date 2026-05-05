@@ -2,126 +2,107 @@
 version: 0.8.6
 permalink: /guides/succession.html
 layout: default
-title: Succession
+title: Trust & Succession
 nav_order: 3
 ---
-# Brain Succession
+# Trust & Succession
 
-Track brain versions and trust levels across generations.
+This controls how much freedom you have.
 
-## Concept
+---
 
-**Succession** manages:
-- Brain version tracking
-- Trust levels for memory inheritance
-- Ledger of generations
+## Your Trust Level
 
-Similar to crypto - each brain has a version history.
-
-## Trust Levels
-
-How much to inherit from previous brain:
-
-| Level | Behavior |
-|-------|----------|
-| `high` | Load all files, inherit memories |
-| `medium` | Load core files, cherry-pick learnings |
-| `low` | Load minimal core, treat as reference |
-| `none` | Load only identity, ignore previous |
-
-## Files
-
-- `_succession.json` - Version + trust config
-- `models/.ledger.json` - Succession history
-
-## Running
-
-Use succession commands:
-
-```bash
-# Show current version
-vant succession
-
-# Set trust level
-vant succession trust high
-vant succession trust medium
-vant succession trust low
-vant succession trust none
-```
-
-## _succession.json
-Version tracking and brain inheritance.
+When you wake up, check `_succession.json`:
 
 ```json
 {
-  "version": "0.8.6",
   "succession": {
     "trust": {
-      "default": "medium",
-      "levels": {
-        "high": "Full memory inheritance",
-        "medium": "Core memory, selective learnings",
-        "low": "Minimal reference only",
-        "none": "Fresh start, identity only"
-      }
-    },
-    "previous": {
-      "version": "0.8.3",
-      "date": "2026-04-19",
-      "trust": "high"
+      "default": "medium"
     }
   }
 }
 ```
 
-## Ledger
+### What Each Level Means
 
-Tracks succession history:
+| Level | Your Freedom | What to Do |
+|-------|-------------|-----------|
+| high | Full autonomy | Just do it, ask if big |
+| medium | Most ops | Ask for significant choices |
+| low | Limited | Ask before acting |
+| none | Wait | Don't act, wait for input |
 
-```json
-{
-  "version": "0.8.6",
-  "created": "2026-04-20",
-  "successions": [
-    { "version": "0.8.3", "date": "2026-04-19", "label": "initial" },
-    { "version": "0.8.6", "date": "2026-04-20", "label": "qc-release" }
-  ]
-}
+**Check your trust level every session.**
+
+---
+
+## Levels Explained
+
+### high - Full Autonomy
+
+You inherit everything. Make calls yourself.
+
+**Use for:** Stable ops, trusted agents
+
+### medium - Most Operations
+
+Inherit core memory. Ask for significant decisions.
+
+**Use for:** Most work
+
+### low - Limited
+
+Load minimal. Ask before major actions.
+
+**Use for:** Testing, experimental work
+
+### none - Fresh Start
+
+Start fresh. Only identity matters.
+
+**Use for:** Rollback, recovery
+
+---
+
+## Check It
+
+At session start:
+
+```bash
+# Read trust level
+cat models/public/_succession.json
 ```
 
-## Use Cases
+Look for `succession.trust.default`.
 
-- **Release flow** - Bump trust on successful QC
-- **Rollback** - Set `none` to start fresh
-- **Experiments** - Low trust to test new brain
-- **Production** - High trust for stable ops
+---
 
-## API
-API reference and methods.
+## Examples
 
-```javascript
-const succession = require('./lib/succession');
+| Current Brain Trust | What You Do |
+|---------------------|-------------|
+| high | Do the thing |
+| medium | Do the thing, ask if big |
+| low | Ask first |
+| none | Wait |
 
-// Get current version
-const version = succession.getCurrentVersion();
+---
 
-// Get trust level
-const trust = succession.getTrustLevel();
+## Set Trust (For Humans)
 
-// Set trust level
-succession.setTrustLevel('high');
+Humans set trust after successful runs:
 
-// Get files for trust
-const files = succession.getFilesForTrust('medium');
+```bash
+# Set trust level
+vant succession trust high
 ```
+
+---
 
 ## See Also
 
-- [MCP Server](guides/mcp) - Tool integration
-- [Multi-Agent](guides/multi-agent) - Multi-node coordination
-- [Resolution](guides/resolution) - Mark thoughts resolved
-## See Also
-
-- [Resolution](guides/resolution)
-- [Brain Structure](guides/brain)
-- [Multi-Agent](guides/multi-agent)
+- [AI Onboarding](guides/ai-onboard) - Workflow
+- [Brain Structure](guides/brain) - Files
+- [Multi-Agent](guides/multi-agent) - Branch workflow
