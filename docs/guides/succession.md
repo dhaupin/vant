@@ -120,3 +120,8 @@ const files = succession.getFilesForTrust('medium');
 - [MCP Server](guides/mcp) - Tool integration
 - [Multi-Agent](guides/multi-agent) - Multi-node coordination
 - [Resolution](guides/resolution) - Mark thoughts resolved
+## See Also
+
+- [Resolution](guides/resolution)
+- [Brain Structure](guides/brain)
+- [Multi-Agent](guides/multi-agent)

@@ -131,3 +131,8 @@ resolution.reject('identity', 'old belief', 'ethics changed');
 - [Succession](guides/succession) - Brain version tracking
 - [Onboarding](guides/troubleshooting) - Knowledge base browser
 - [Audit](guides/audit) - Compliance tracking
+## See Also
+
+- [Succession](guides/succession)
+- [Brain Structure](guides/brain)
+- [Multi-Agent](guides/multi-agent)

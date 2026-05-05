@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /tutorials/multi-agent.html
 layout: default
 title: Multi-Agent System
+nav_order: 2
 ---
 
 # Tutorial: Multi-Agent Coordination

@@ -273,3 +273,8 @@ node -e "require('./lib/brain').load('public')"
 - [Brain Guide](/guides/brain) - Full brain documentation
 - [CLI Reference](/reference/cli) - Setup commands
 - [Schema Reference](/reference/schema) - All brain files
+## See Also
+
+- [Brain Structure](guides/brain)
+- [CLI Reference](reference/cli)
+- [Onboarding](guides/onboard)
