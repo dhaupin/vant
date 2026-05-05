@@ -124,12 +124,22 @@ search.fetchFromHistory('models/v0.5.0/learnings/1.md', 'abc123');
 - `lib/state.js` - Static/Hydrated state separation
 - `lib/gallery.js` - Linked stego image chunks
 - `lib/horcrux.js` - Encrypted bootstrap manifest
+- `lib/vibe.js` - Dynamic mood controls
+- `lib/repos.js` - Multi-repo skills system
+- `lib/hybrid.js` - Public/private sync
 - `bin/islands-boot.js` - Islands CLI
+- `bin/vibe.js` - Vibe CLI
+- `bin/repos.js` - Repos CLI
+- `bin/hybrid.js` - Hybrid CLI
+- `bin/test-v086.js` - Test suite
 
 ### New Docs
 
 - `docs/guides/islands.md` - Islands guide
 - `docs/guides/horcrux.md` - Horcrux manifest guide
+- `docs/guides/vibe.md` - Vibe controls guide
+- `docs/guides/repos.md` - Multi-repo guide
+- `docs/guides/hybrid.md` - Hybrid sync guide
 
 ### Trigger Mapping
 
@@ -142,6 +152,47 @@ search.fetchFromHistory('models/v0.5.0/learnings/1.md', 'abc123');
 | vesc, skateboard, motor | vesc |
 | linear, project | linear |
 | cron, automation | automation |
+
+#### Vibe Controls (Dynamic Mood)
+- Programmatic mood.ini swapping based on task outcome
+- Auto-switch to `safety_first` on error, `review` after debugging success
+- Vibe-aware git commits: `[vibe:experimental risk=high]`
+- 6 moods: experimental, safety_first, focused, learning, debugging, review
+
+```javascript
+const vibe = require('./lib/vibe');
+
+vibe.setMood('experimental');
+vibe.onTaskSuccess();  // Auto-adjust
+vibe.onTaskError();    // → safety_first
+vibe.getCommitVibe(); // '[vibe:x risk=y]'
+```
+
+#### Multi-Repo Skills (Distributed Brain)
+- Mount external repos like drives (github skills, herbalism data, vesc configs)
+- Register → mount → pull workflow
+- Different privacies per repo
+
+```javascript
+const repos = require('./lib/repos');
+
+repos.register('skills', 'https://github.com/user/skills-repo');
+await repos.mount('skills');
+await repos.pull();
+```
+
+#### Hybrid Sync (Public/Private)
+- Split brain: sensitive → private repo, logs → public repo
+- `pushPublic()` / `pushPrivate()` selective sync
+- Privacy config per repo
+
+```javascript
+const hybrid = require('./lib/hybrid');
+
+hybrid.setPrivacy('github', 'private');
+await hybrid.pushPublic();  // Only public repos
+await hybrid.pushPrivate(); // Only private repos
+```
 
 ---
 
@@ -230,6 +281,13 @@ const { results, context } = await search.query('python');
 | `vant prune --force` | Run actual prune |
 | `vant prune --daemon` | Background daemon |
 | `vant prune --stats` | Show statistics |
+| `vant testv086` | Run test suite |
+| `vant vibe` | Show/set vibe |
+| `vant repos --list` | List repos |
+| `vant repos --mount` | Mount repo |
+| `vant repos --pull` | Pull mounted |
+| `vant hybrid --public` | Push public only |
+| `vant hybrid --private` | Push private only |
 
 ### New Modules
 
