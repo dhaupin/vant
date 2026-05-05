@@ -26,6 +26,7 @@ jobs:
           node test/ci.js
           node test/runner.js
           node test/evals/vibe.js
+          node test/coverage.js
 
   security:
     runs-on: ubuntu-latest

@@ -26,7 +26,7 @@
 | CI/CD | GitHub Actions |
 | Node | 18+ (.nvmrc) |
 
-| Passed | 120 |
+| Passed | 163 |
 | Failed | 0 |
 
 ## 3. SECURITY AUDIT
