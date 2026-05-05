@@ -92,44 +92,49 @@ if (!cmd || cmd === 'help' || cmd === 'vant') {
 Usage: vant <command> [options]
 
 Core:
-  vant start        Full startup
-  vant islands     Componentized brain boot
-  vant sync        Pull/push brain
+  vant start        Full startup (health → sync → load → run)
   vant health      System diagnostics
-  vant test v086  Run v0.8.6 test suite
+  vant sync        Pull/push brain
+  vant load       Load brain
+  vant run        Long-running agent loop
+
+Development:
+  vant test         Run build tests
+  vant test v086    Run v0.8.6 test suite
+  vant validate    Schema + audit + circuits
+  vant changelog   View changes
+
+Sync:
+  vant repos       Mount external repos
+  vant hybrid     Public/Private split sync
+  vant search    RAG + hybrid search
+
+Brain:
+  vant onboard     Browse brain files
+  vant islands    Componentized brain boot
+  vant prune      Prune brain (LTC generation)
+  vant succession Trust levels
+  vant resolution Thought resolution
+
+State:
   vant vibe        Show/set vibe
+  vant watch      Poll GitHub for changes
+  vant summary    Session stats
 
-Multi-Repo:
-  vant repos --list       List repos
-  vant repos --mount     Mount repo
-  vant repos --pull      Pull mounted
+Integrations:
+  vant mcp        MCP server for AI tools
+  vant node       Persistent node
 
-Hybrid:
-  vant hybrid --public   Push public only
-  vant hybrid --private  Push private only
+Maintenance:
+  vant boot       Ghost boot (stego image)
+  vant stego      Encode/decode brain in images
+  vant bump      Bump version + tag release
+  vant update     Check for updates
+  vant rate      Show GitHub rate limit
 
-Ghost (stego bootstrap):
-  vant boot --image <url>   Zero-config boot
-  vant stego snapshot      Encode brain to image
-
-Prune:
-  vant prune --dry-run   Preview
-  vant prune --force     Run
-
-Islands:
-  vant islands --list        List islands
-  vant islands --prompt    Auto-hydrate
-
-RAG:
-  vant search --hybrid     Hybrid search
-  vant search --hyde      HyDE query
-
-Validation:
-  vant validate --check   Schema + audit + circuits
-
-Info:
-  vant help       Show help
-  vant changelog View changes
+Setup:
+  vant setup     Interactive wizard
+  vant help      Show help (this message)
 `);
     process.exit(0);
 }

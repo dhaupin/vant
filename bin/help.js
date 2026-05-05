@@ -115,6 +115,63 @@ See: vant node --help`
         desc: 'Brain succession status',
         usage: 'vant succession [status|trust|log]',
         detail: 'Manage brain trust levels.\nSee: vant succession help'
+    },
+
+    // New / Additional
+    repos: {
+        desc: 'Mount external repositories',
+        usage: 'vant repos --list|--mount|--pull',
+        detail: 'Register and mount external repos.\nSee: vant repos --help'
+    },
+    hybrid: {
+        desc: 'Hybrid sync (public/private split)',
+        usage: 'vant hybrid --public|--private',
+        detail: 'Push public or private only.\nSee: vant hybrid --help'
+    },
+    search: {
+        desc: 'Search brain with RAG',
+        usage: 'vant search [query]|--hybrid|--hyde',
+        detail: 'Search with RAG + HyDE.\nSee: vant search --help'
+    },
+    stego: {
+        desc: 'Encode/decode brain in images',
+        usage: 'vant stego encode|decode|snapshot|capacity',
+        detail: 'LSB steganography for brain transfer.\nSee: vant stego --help'
+    },
+    boot: {
+        desc: 'Ghost boot from stego image',
+        usage: 'vant boot --image <url>',
+        detail: 'Zero-config boot from image URL.\nSee: vant boot --help'
+    },
+    prune: {
+        desc: 'Prune brain to LTC',
+        usage: 'vant prune [--dry-run|--force]',
+        detail: 'Generate LTC (Less Than Context).\nSee: vant prune --help'
+    },
+    islands: {
+        desc: 'Componentized brain boot',
+        usage: 'vant islands --list|--island|--prompt',
+        detail: 'Boot brain components on trigger.\nSee: vant islands --help'
+    },
+    validate: {
+        desc: 'Validate schema + audit + circuits',
+        usage: 'vant validate --check',
+        detail: 'Full validation suite.\nSee: vant validate --help'
+    },
+    vibe: {
+        desc: 'Show/set current vibe',
+        usage: 'vant vibe [experimental|safety_first]',
+        detail: 'Track agent mood for context.\nSee: vant vibe --help'
+    },
+    compress: {
+        desc: 'Compress brain for transfer',
+        usage: 'vant compress',
+        detail: 'Compress brain to minimal form.'
+    },
+    docs: {
+        desc: 'Build docs for release',
+        usage: 'vant docs',
+        detail: 'Generate documentation.'
     }
 };
 
