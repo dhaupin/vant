@@ -1,5 +1,5 @@
 ---
-version: 0.8.7
+version: 0.8.6
 permalink: /omega-init.html
 layout: default
 title: Omega Init
