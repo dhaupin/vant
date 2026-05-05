@@ -1,139 +1,127 @@
 # VANT
 
-> Versatile Autonomous Networked Tool - Persistent AI agent memory system
+> Persistent AI memory via GitHub - each session inherits full context
 
-**Vant** persists AI agent memory across sessions via GitHub. Each generation inherits full context from previous sessions. Built for long-running agentic workflows.
-
-🔗 **[vant.creadev.org](https://vant.creadev.org)** | 📦 **[GitHub](https://github.com/dhaupin/vant)** | 📖 **[Docs](https://docs.creadev.org/vant/)**
+🔗 **[vant.creadev.org](https://vant.creadev.org)** | 📦 **[GitHub](https://github.com/dhaupin/vant)**
 
 ---
 
 ## Quick Start
 
-| Method | For | Install |
-|--------|-----|---------|
-| Docker | Quick start | `docker run -e GITHUB_TOKEN=... -e GITHUB_REPO=owner/repo dhaupin/vant` |
-| Local | Development | `git clone && cp config.example.ini config.ini && node bin/vant.js start` |
-| AI Prompt | Self-setup | [Copy prompt below](#ai-prompt-init) |
+### Docker (One Line)
+
+```bash
+docker run -e GITHUB_TOKEN=ghp_xxx -e GITHUB_REPO=owner/repo dhaupin/vant
+```
+
+Done. That's it.
+
+### What Gets Configured
+
+| Env | Required | What |
+|-----|----------|------|
+| GITHUB_TOKEN | ✓ | GitHub token (repo scope) |
+| GITHUB_REPO | ✓ | Owner/repo for brain |
+| MODEL_PATH | - | Default: models/public |
+| STATE_PATH | - | Default: states/active/current.json |
+| MCP_API_KEY | - | Only if using MCP |
+| GITHUB_BRANCH | - | Default: main |
 
 ---
 
-## AI Prompt Init
+## Running
 
-Copy this to your AI agent to set up Vant:
+### Docker
 
+```bash
+# Run once
+docker run -e GITHUB_TOKEN=... -e GITHUB_REPO=... dhaupin/vant
+
+# Persistent mode (keeps brain in sync)
+docker run -d -e GITHUB_TOKEN=... -e GITHUB_REPO=... dhaupin/vant
+
+# With MCP server
+docker run -e GITHUB_TOKEN=... -e GITHUB_REPO=... -e MCP_API_KEY=... -p 3456:3456 dhaupin/vant vant mcp
 ```
-### Vant Setup
 
-I need you to set up Vant (https://github.com/dhaupin/vant) as your persistent brain.
+### Local
 
-1. Clone the repo:
-   git clone https://github.com/dhaupin/vant.git
-   cd vant
-
-2. Copy config templates:
-   cp config.example.ini config.ini
-   cp .env.example .env
-
-3. Configure in config.ini:
-   - GITHUB_REPO=your-github-username/your-repo
-
-4. Set GITHUB_TOKEN in .env
-
-5. Run: node bin/vant.js start
+```bash
+git clone https://github.com/dhaupin/vant.git
+cd vant
+echo "GITHUB_TOKEN=ghp_xxx" > .env
+echo "GITHUB_REPO=owner/repo" >> .env
+npm start
 ```
 
 ---
 
 ## Features
 
-### Steganography
-Hide messages in images for secure transport. RGBA encoding yields 4 bits/pixel.
+### MCP Server (Optional)
+Expose brain to AI agents via HTTP. Enable with `-e MCP_API_KEY`.
 
-[Guide →](https://docs.creadev.org/vant/guides/steganography.html)
+[Guide →](docs/guides/mcp.md)
 
-### Multi-Agent
-Branch per agent + file locks for safe concurrent work.
+### Multi-Agent (Optional)
+File locks + branch isolation for concurrent agents.
 
-[Guide →](https://docs.creadev.org/vant/guides/multi-agent.html)
+[Guide →](docs/guides/multi-agent.md)
 
-### MCP Server
-Expose brain tools to AI agents via HTTP or stdio.
+### Steganography (Optional)
+Hide messages in images.
 
-[Guide →](https://docs.creadev.org/vant/guides/mcp.html)
-
-### Integrations
-Slack, Discord, and Telegram notifications.
-
-[Guide →](https://docs.creadev.org/vant/guides/operations.html)
+[Guide →](docs/guides/steganography.md)
 
 ---
 
-## CLI Commands
+## Troubleshooting
 
-| Command | Description |
-|---------|-------------|
-| `vant start` | Full startup (health → sync → load → run) |
-| `vant health` | System diagnostics |
-| `vant sync` | Pull/push brain from GitHub |
-| `vant load` | Load brain files into context |
-| `vant mcp` | Run MCP server |
-| `vant node` | Run as persistent node |
-
-[Full CLI Reference →](https://docs.creadev.org/vant/reference/cli.html)
+| Problem | Fix |
+|---------|-----|
+| Token error | Ensure `repo` scope |
+| Not syncing | Check GITHUB_REPO format |
+| MCP fails | Set MCP_API_KEY |
 
 ---
 
-## Configuration
+## Airgapped Init
 
-### Required
-- `GITHUB_REPO=owner/repo` (in config.ini)
-- `GITHUB_TOKEN=...` (in .env)
-
-### Optional
-- `GITHUB_BRANCH=main`
-- `STEGOFRAME_ROOM`, `STEGOFRAME_PASSPHRASE`
-- Settings: `HANDLE`, `DIRECTNESS`, `CURRENT_MOOD`
-
-[Config Guide →](https://docs.creadev.org/vant/guides/configuration.html)
-
----
-
-## Security
-
-Vant includes VAF (Vant Application Firewall) for input validation:
-
-- Path traversal blocking
-- Command injection blocking
-- Prompt injection filtering
-- Rate limiting
-
-[Security Guide →](https://docs.creadev.org/vant/guides/security.html)
-
----
-
-## Architecture
+Copy this to your AI agent:
 
 ```
-vant/
-├── bin/           # CLI commands
-│   ├── vant.js    # Entry point
-│   ├── mcp.js    # MCP server
-│   └── node.js   # Node runner
-├── lib/           # Core modules
-│   ├── brain.js   # Brain loader
-│   ├── lock.js   # Multi-agent lock
-│   └── branch.js # Branch management
-└── models/
-    └── public/   # Default brain (19 files)
-```
+### Vant Airgapped Setup
 
-[Architecture Guide →](https://docs.creadev.org/vant/guides/architecture.html)
+Set up Vant (https://github.com/dhaupin/vant) for persistent memory:
+
+1. Clone: git clone https://github.com/dhaupin/vant.git
+2. Create .env:
+   GITHUB_TOKEN=ghp_your_token
+   GITHUB_REPO=owner/repo
+3. Run: npm start
+
+To sync brain: vant sync
+To load brain: vant load
+```
 
 ---
 
-## Related
+## Full Options
 
-- [Docs](https://docs.creadev.org/vant/) - Full documentation
-- [Docker Hub](https://hub.docker.com/r/dhaupin/vant) - Official images
-- [Stegoframe](https://stegoframe.creadev.org) - Encrypted transport
+Edit `.env` for all options:
+
+```
+# Required
+GITHUB_TOKEN=ghp_xxx
+GITHUB_REPO=owner/repo
+
+# Optional (defaults work)
+GITHUB_BRANCH=main
+MODEL_PATH=models/public
+STATE_PATH=states/active/current.json
+POLLING_INTERVAL=10000
+MAX_REQUESTS_PER_HOUR=360
+
+# Optional features
+MCP_API_KEY=secret
+```
