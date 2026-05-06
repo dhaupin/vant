@@ -27,6 +27,7 @@ Usage:
 Options:
   --mode basic|rag|hybrid  Search mode
   -l, --limit <N>         Max results (default: 5)
+  --compact              Summaries only (skip full rehydration)
 `);
         process.exit(0);
     }
@@ -35,6 +36,7 @@ Options:
     let mode = null;
     let limit = 5;
     let query = action;
+    let compact = false;
     
     for (let i = 1; i < args.length; i++) {
         if (args[i] === '--mode' && args[i+1]) {
@@ -43,13 +45,15 @@ Options:
         } else if ((args[i] === '-l' || args[i] === '--limit') && args[i+1]) {
             limit = parseInt(args[i+1]) || 5;
             i++;
+        } else if (args[i] === '--compact') {
+            compact = true;
         }
     }
 
     // Basic mode
     if (mode === 'basic') {
         const searchLib = require(path.join(DIR, 'lib', 'search'));
-        const results = await searchLib.searchLTC(query, { limit });
+        const results = await searchLib.searchLTC(query, { limit, compact });
         console.log('\n=== Basic Search: ' + query + ' ===');
         console.log('Results:', results.length);
         for (const r of results) {
@@ -61,7 +65,7 @@ Options:
     // RAG mode
     if (mode === 'rag') {
         const searchLib = require(path.join(DIR, 'lib', 'search'));
-        const { results, context } = await searchLib.query(query, { limit });
+        const { results, context } = await searchLib.query(query, { limit, compact });
         const settings = searchLib.getSettings();
         console.log('\n=== RAG Search: ' + query + ' ===');
         console.log('Results:', results.length);

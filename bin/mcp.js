@@ -325,7 +325,8 @@ const TOOLS = [
                 query: { type: 'string', description: 'Search query' },
                 mode: { type: 'string', description: 'Search mode: "basic" (text), "rag" (semantic LTC), "hybrid" (BM25+Vector RRF)', enum: ['basic', 'rag', 'hybrid'], default: 'basic' },
                 files: { type: 'array', items: { type: 'string' }, description: 'Files to search (basic mode only)' },
-                limit: { type: 'number', description: 'Max results (RAG mode)', default: 5 }
+                limit: { type: 'number', description: 'Max results (RAG mode)', default: 5 },
+                compact: { type: 'boolean', description: 'Compact mode: return summaries only, skip full rehydration (RAG mode)', default: false }
             },
             required: ['query']
         }
@@ -567,6 +568,7 @@ async function lockBrain(action, agentId = 'mcp') {
  */
 async function searchBrain(query, args = {}) {
     const mode = args.mode || 'basic';
+    const compact = args.compact || false;
     
     // Validate query
     vaf.check(query, {
@@ -584,7 +586,7 @@ async function searchBrain(query, args = {}) {
         if (limit < 1) limit = 1;
         if (limit > 20) limit = 20;
         
-        const { results, context } = await searchLib.query(query, { limit });
+        const { results, context } = await searchLib.query(query, { limit, compact });
 
         // Get settings for compression threshold
         const settings = searchLib.getSettings();
