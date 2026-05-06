@@ -90,13 +90,27 @@ When you start a session:
 3. **Load brain**: Read key files (identity.md, goals.md, lessons.md)
 4. **Find context**: Check what's in progress
 
+## Multi-Agent Branches
+
+When multiple agents work together:
+
+| Branch | Who |
+|--------|-----|
+| main | Human reviews, final state |
+| agent-* | Each agent's workspace |
+
 ```bash
-# Startup sequence
-vant start              # Full: health → sync → load → run
-vant health            # Check system
-vant load              # Load brain
-vant onboard           # Browse knowledge
+# On your own branch
+git checkout -b agent-openhands
+
+# Commit your changes
+git commit -m "agent-openhands: did X"
+
+# Push to GitHub
+git push origin agent-openhands
 ```
+
+See: `_succession.json` for trust levels
 
 ## Utilities
 - vant watch   - Monitor GitHub
