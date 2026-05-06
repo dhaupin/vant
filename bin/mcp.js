@@ -197,6 +197,122 @@ const TOOLS = [
                 }
             }
         }
+    },
+    // === Batch 2: Extended MCP Tools ===
+    {
+        name: 'vant_get_islands',
+        description: 'List available Vant islands (lazy-loadable brain components).',
+        inputSchema: { type: 'object', properties: {} }
+    },
+    {
+        name: 'vant_load_island',
+        description: 'Load a specific island (GitHub, GitLab, Linear, Stego).',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                island: { type: 'string', enum: ['github', 'gitlab', 'linear', 'stego'] }
+            },
+            required: ['island']
+        }
+    },
+    {
+        name: 'vant_resolution_track',
+        description: 'Track thought resolution for auditability.',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                thought: { type: 'string', description: 'Current thought or decision' },
+                context: { type: 'string', description: 'Decision context' }
+            },
+            required: ['thought']
+        }
+    },
+    {
+        name: 'vant_stego_encode',
+        description: 'Encode data into PNG using LSB steganography with AES-256-GCM encryption.',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                data: { type: 'string', description: 'Data to encode' },
+                image: { type: 'string', description: 'PNG image path' },
+                password: { type: 'string', description: 'Optional encryption password' }
+            },
+            required: ['data']
+        }
+    },
+    {
+        name: 'vant_stego_decode',
+        description: 'Decode LSB steganography from PNG.',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                image: { type: 'string', description: 'PNG image path' },
+                password: { type: 'string', description: 'Optional decryption password' }
+            },
+            required: ['image']
+        }
+    },
+    {
+        name: 'vant_config_get',
+        description: 'Get Vant configuration value.',
+        inputSchema: {
+            type: 'object',
+            properties: { key: { type: 'string', description: 'Config key (dot notation)' } },
+            required: ['key']
+        }
+    },
+    {
+        name: 'vant_config_set',
+        description: 'Set Vant configuration value.',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                key: { type: 'string', description: 'Config key' },
+                value: { type: 'string', description: 'Config value' }
+            },
+            required: ['key', 'value']
+        }
+    },
+    {
+        name: 'vant_audit_log',
+        description: 'Log action to audit ledger.',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                action: { type: 'string', description: 'Action performed' },
+                context: { type: 'string', description: 'Action context' },
+                tags: { type: 'array', items: { type: 'string' } }
+            },
+            required: ['action']
+        }
+    },
+    {
+        name: 'vant_audit_list',
+        description: 'List audit log entries.',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                limit: { type: 'number' },
+                action: { type: 'string' }
+            }
+        }
+    },
+    {
+        name: 'vant_succession_info',
+        description: 'Get succession/trust configuration.',
+        inputSchema: { type: 'object', properties: {} }
+    },
+    {
+        name: 'vant_search',
+        description: 'Search brain files for content.',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                query: { type: 'string', description: 'Search query' },
+                files: { type: 'array', items: { type: 'string' } }
+            },
+            required: ['query']
+        }
     }
 ];
 
