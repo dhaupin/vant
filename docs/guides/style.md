@@ -104,6 +104,28 @@ Show |
 
 ## Formatting
 
+Every guide needs frontmatter for the docs site:
+
+```yaml
+---
+version: 0.8.6
+permalink: /guides/my-guide
+layout: default
+title: My Guide Title
+nav_order: 15
+---
+```
+
+| Field | Required | What |
+|-------|----------|------|
+| version | ✓ | Version introduced (0.8.6, 0.8.7, etc.) |
+| permalink | ✓ | URL path (/guides/name or /name) |
+| layout | ✓ | Use `default` |
+| title | ✓ | Display title |
+| nav_order | ✓ | Sort order (lower = earlier) |
+
+**Always include all 5 fields.** Guides without frontmatter won't render on docs.creadev.org.
+
 | Element
 - Style |
 |---------|-------|

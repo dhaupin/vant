@@ -1,4 +1,7 @@
 ---
+version: 0.8.6
+permalink: /guides/search-architecture
+layout: default
 title: Search Architecture
 nav_order: 15
 ---
@@ -31,6 +34,8 @@ Query "python"
 
 Same search runs repeatedly? Cache it.
 
+**Cache stores results per session. Same query = instant return from cache.**
+
 ```javascript
 // First call - slow
 const r1 = await search.hybrid('python');
@@ -46,6 +51,8 @@ const r2 = await search.hybrid('python');
 ### Layer 2: Compact Mode
 
 Don't need full file content? Just summaries.
+
+**Compact returns summaries only. Skip re-hydration for speed.**
 
 ```javascript
 // Full search + rehydrate
@@ -65,6 +72,8 @@ const { results, context } = await search.query('python', { compact: true });
 ### Layer 3: Lazy Load
 
 Heavy modules slow boot? Load on-demand.
+
+**Lazy load delays heavy module loading until first use. Fast boot.**
 
 ```javascript
 // Before: loaded at startup
@@ -102,6 +111,8 @@ The LTC (Long Term Core) index is the "map". Git history is the "archive". Searc
 
 ## API
 
+**Search module exposes all methods.**
+
 ```javascript
 const search = require('./lib/search');
 
@@ -122,6 +133,8 @@ vant search python --mode rag --compact
 // MCP
 { "name": "vant_search", "arguments": { "query": "python", "compact": true } }
 ```
+
+**MCP tool available as `vant_search`.**
 
 ## Security
 

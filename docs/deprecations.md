@@ -1,5 +1,7 @@
-# Deprecations
 ---
+version: 0.8.6
+permalink: /deprecations
+layout: default
 title: Deprecations
 nav_order: 99
 ---
