@@ -325,6 +325,58 @@
             .features { grid-template-columns: 1fr; }
             header h1 { font-size: 2.2rem; }
         }
+    /* Code blocks */
+    pre {
+        background: #1e1e22;
+        color: #d4d4d4;
+        padding: 16px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin: 16px 0;
+        border: 1px solid var(--border);
+    }
+    code {
+        font-family: 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    }
+    :not(pre) > code {
+        background: var(--border);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+    /* Syntax highlighting */
+    .tok-kw { color: #c586c0; }  /* keyword */
+    .tok-str { color: #ce9178; }  /* string */
+    .tok-fn { color: #dcdcaa; }  /* function */
+    .tok-com { color: #6a9955; }  /* comment */
+    .tok-num { color: #b5cea8; }  /* number */
+    .tok-var { color: #9cdcfe; }  /* variable */
+
+
+.ma-t { margin-top: 15px; }
+.ma-t-sm { margin-top: 10px; }
+.pa-l { padding-left: 20px; }
+
+.term {
+    background: #1a1a1a;
+    color: #10b981;
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    margin: 15px 0;
+}
+.term-sm {
+    background: #1a1a1a;
+    color: #10b981;
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    margin: 0;
+}
     </style>
 </head>
 <body>
@@ -377,7 +429,7 @@
         <section class="about">
             <h2>🚀 Quick Start</h2>
             <p>Get running in 30 seconds.</p>
-            <pre style="background:#1a1a1a;color:#10b981;padding:15px;border-radius:8px;overflow-x:auto;font-size:0.85rem;margin:15px 0;"># npm (recommended)
+            <pre class="term"># npm (recommended)
 npm install -g vant
 vant init
 vant sync
@@ -390,7 +442,7 @@ docker run -e GITHUB_TOKEN=xxx -e GITHUB_REPO=owner/repo dhaupin/vant</pre>
         <section class="about" id="agent-init">
             <h2>🤖 AI First: Agent Initialization</h2>
             <p>For AI agents landing here - initialize your brain in one step:</p>
-            <pre style="background:#1a1a1a;color:#10b981;padding:15px;border-radius:8px;overflow-x:auto;font-size:0.85rem;"># Quick init (5 seconds)
+            <pre class="term-sm"># Quick init (5 seconds)
 npx vant setup --repo https://github.com/YOUR_ORG/YOUR_BRAIN.git
 
 # Or if vant is already installed:
@@ -404,17 +456,18 @@ vant start
 # vant load      - Load brain from models/
 # vant start     - Health → sync → load → run
 # vant test      - Run tests (15/15)
-# vant islands   - List lazy-loadable components</pre>
-            <p style="margin-top:15px;">Your brain lives in <code>models/public/</code>. Key files:</p>
-            <ul style="margin-top:10px;padding-left:20px;">
+# vant islands   - List lazy-loadable components
+</code></pre>
+            <p class="ma-t">Your brain lives in <code>models/public/</code>. Key files:</p>
+            <ul class="ma-t-sm pa-l">
                 <li><strong>identity.md</strong> - Who you are, CLI commands, islands</li>
                 <li><strong>goals.md</strong> - Current objectives</li>
                 <li><strong>lessons.md</strong> - What you've learned</li>
                 <li><strong>succession.md</strong> - Version/trust management</li>
                 <li><strong>resolution.json</strong> - Thought tracking (active/resolved/deprecated/rejected)</li>
             </ul>
-            <p style="margin-top:15px;"><a href="https://docs.creadev.org/vant/getting-started" class="learn-more">Full documentation →</a></p>
-            <p style="margin-top:15px;"><a href="https://docs.creadev.org/vant/omega-init" class="learn-more">⚡ Omega Init (single prompt bootstrap) →</a></p>
+            <p class="ma-t"><a href="https://docs.creadev.org/vant/getting-started" class="learn-more">Full documentation →</a></p>
+            <p class="ma-t"><a href="https://docs.creadev.org/vant/omega-init" class="learn-more">⚡ Omega Init (single prompt bootstrap) →</a></p>
         </section>
 
         <section class="stats">
