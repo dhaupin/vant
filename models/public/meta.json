@@ -44,7 +44,11 @@
     "vant mcp - Run MCP server",
     "vant islands - Islands boot",
     "vant resolution - Thought tracking",
+    "vant stego - Steganography bootstrap",
     "vant sync - GitHub sync",
-    "vant prune - State cleanup"
+    "vant prune - State cleanup",
+    "vant succession - Trust management",
+    "vant onboard - Onboarding wizard",
+    "vant bot - Telegram bot"
   ]
 }
