@@ -214,7 +214,7 @@ search.fetchFromHistory('models/v0.5.0/learnings/1.md', 'abc123');
 - `bin/vibe.js` - Vibe CLI
 - `bin/repos.js` - Repos CLI
 - `bin/hybrid-sync.js` - Hybrid CLI
-- `bin/test-v086.js` - Test suite
+- `bin/test-core.js` - Test suite
 
 ### New Docs
 
@@ -456,7 +456,7 @@ const { results, context } = await search.query('python');
 | `vant prune --force` | Run actual prune |
 | `vant prune --daemon` | Background daemon |
 | `vant prune --stats` | Show statistics |
-| `vant test v086` | Run test suite |
+| `vant test core` | Run test suite |
 | `vant vibe` | Show/set vibe |
 | `vant repos --list` | List repos |
 | `vant repos --mount` | Mount repo |
@@ -567,7 +567,7 @@ New order:
 - Added -h/--help to all CLI scripts
 - Added short args to batches 1-3
 - Syntax bug fixes
-- bin/test-v086.js checkpoint test
+- bin/test-core.js checkpoint test
 
 ### Resolution System (v0.8.6)
 

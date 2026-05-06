@@ -38,7 +38,7 @@ const COMMANDS = {
     load: 'load.js',
     run: 'run.js',
     test: 'build-test.js',
-    'test v086': 'test-v086.js',
+    'test core': 'test-core.js',
     vibe: 'vibe.js',
     repos: 'repos.js',
     hybrid: 'hybrid.js',
@@ -100,7 +100,7 @@ Core:
 
 Development:
   vant test         Run build tests
-  vant test v086    Run v0.8.6 test suite
+  vant test core    Run core test suite
   vant validate    Schema + audit + circuits
   vant changelog   View changes
 

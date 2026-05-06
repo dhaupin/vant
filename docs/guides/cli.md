@@ -87,7 +87,7 @@ Run build tests.
 
 ```bash
 vant test             # Run all tests
-vant test v086        # Run v0.8.6 specific tests
+vant test core        Run core test suite
 ```
 
 ### changelog

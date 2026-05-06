@@ -1,5 +1,5 @@
 /**
- * Vant v0.8.6 Test Suite
+ * Vant Core Test Suite
  */
 
 const path = require('path');
@@ -22,7 +22,7 @@ function resetBrain() {
 
 async function runTests() {
     console.log('╔═══════════════════════════════════════╗');
-    console.log('║    Vant v0.8.6 Test Suite          ║');
+    console.log('║    Vant Core Test Suite             ║');
     console.log('╚═══════════════════════════════════════╝');
     
     resetBrain();
