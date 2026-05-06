@@ -124,6 +124,13 @@ State:
 Integrations:
   vant mcp        MCP server for AI tools
   vant node       Persistent node
+  vant webhook   Webhook server + send
+  vant notify    Send notifications
+  vant linear   Linear issue tracking (requires island)
+
+Config:
+  vant config get <key>   Get config value
+  vant config set <key> <value>  Set config value
 
 Maintenance:
   vant boot       Ghost boot (stego image)

@@ -10,7 +10,8 @@
  *   node bin/mcp.js -s|--stdio
  *   node bin/mcp.js -S|--server [-p|--port <port>]
  * 
- * Tools exposed:
+ * Tools exposed (20 total):
+ * Core (9):
  *   - vant_get_memory    : Read current brain state
  *   - vant_set_memory    : Write to brain (creates branch)
  *   - vant_list_branches : List brain branches
@@ -19,7 +20,19 @@
  *   - vant_commit        : Commit brain changes
  *   - vant_sync          : Sync with GitHub
  *   - vant_lock          : Acquire/release brain lock
- *   - vant_health        : Check system health
+ *   - vant_health         : System health
+ * Extended (11):
+ *   - vant_get_islands   : List islands
+ *   - vant_load_island   : Load island
+ *   - vant_resolution_track : Track decisions
+ *   - vant_stego_encode   : Encode PNG stego
+ *   - vant_stego_decode   : Decode PNG stego
+ *   - vant_config_get    : Get config
+ *   - vant_config_set   : Set config
+ *   - vant_audit_log    : Log audit
+ *   - vant_audit_list   : List audit
+ *   - vant_succession_info : Trust config
+ *   - vant_search       : Search brain
  */
 
 const fs = require('fs');
