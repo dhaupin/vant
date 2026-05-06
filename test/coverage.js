@@ -219,7 +219,7 @@ function testVibe() {
 // ============================================
 
 function testHybridSearch() {
-    const search = require(path.join(ROOT, 'lib/hybrid-search'));
+    const search = require(path.join(ROOT, 'lib/search'));
     
     test('hybrid-search loads', () => {
         assert(search);

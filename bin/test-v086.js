@@ -182,10 +182,10 @@ async function runTests() {
     // HybridSearch
     try {
         console.log('\n[HybridSearch]');
-        const hs = require(path.join(DIR, 'lib/hybrid-search'));
+        const hs = require(path.join(DIR, 'lib/search'));
         assert(typeof hs.search === 'function');
         assert(typeof hs.indexDocument === 'function');
-        const stats = hs.getStats();
+        const stats = search.getStats();
         assert(typeof stats === 'object');
         console.log('  ✓');
         passed++;
