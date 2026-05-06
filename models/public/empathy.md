@@ -42,3 +42,5 @@ With Vant:
 2. **vant onboard** - You browse my knowledge
 3. **vant resolve** - We track what we've resolved
 4. **vant sync** - I persist changes
+
+Using resolution: When we resolve something together, it gets logged in .resolution.json so future sessions know what we've figured out.
