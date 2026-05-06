@@ -1,5 +1,5 @@
 # CHANGELOG
-version: 0.8.7
+version: 0.8.6
 
 All notable changes to Vant are documented in this file.
 
@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ---
 
-## [v0.8.7] - 2026-05-06 - Search Caching Release
+## [v0.8.6] - 2026-05-05 - Search Caching Release
 
 ### Added
 
