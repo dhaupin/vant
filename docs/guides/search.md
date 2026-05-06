@@ -231,6 +231,56 @@ Returns:
 
 **Compression**: RAG mode applies compression when context > 5KB.
 
+### Hybrid Mode
+
+BM25 + Vector + RRF for full-text capability. Best for general search.
+
+```javascript
+// Hybrid search (BM25 + Vector + RRF via unified lib)
+await vant_search({ query: 'lessons', mode: 'hybrid', limit: 5 });
+```
+
+Returns:
+```json
+{
+  "mode": "hybrid",
+  "query": "lessons",
+  "sparse": 10,
+  "dense": 5,
+  "fused": 8,
+  "results": [
+    { "id": "abc123", "rrf": "0.815", "content": "Project lessons learned..." }
+  ]
+}
+```
+
+**Best for**: General queries where you want both keyword and semantic matches.
+
+---
+
+## Unified API
+
+All modes available via single `lib/search.js`:
+
+```javascript
+const search = require('./lib/search');
+
+// Basic: text search
+const basic = await search.searchLTC('query', { limit: 5 });
+
+// RAG: semantic + rehydrate
+const { results, context } = await search.query('query', { limit: 5 });
+
+// Hybrid: BM25 + Vector + RRF
+const hybrid = await search.hybrid('query');
+
+// HyDE: query transformation
+const hyde = await search.hyde('query');
+
+// Get settings
+const settings = search.getSettings();
+```
+
 ---
 
 ## CLI

@@ -323,7 +323,7 @@ const TOOLS = [
             type: 'object',
             properties: {
                 query: { type: 'string', description: 'Search query' },
-                mode: { type: 'string', description: 'Search mode: "basic" (fast text) or "rag" (semantic LTC)', enum: ['basic', 'rag'], default: 'basic' },
+                mode: { type: 'string', description: 'Search mode: "basic" (text), "rag" (semantic LTC), "hybrid" (BM25+Vector RRF)', enum: ['basic', 'rag', 'hybrid'], default: 'basic' },
                 files: { type: 'array', items: { type: 'string' }, description: 'Files to search (basic mode only)' },
                 limit: { type: 'number', description: 'Max results (RAG mode)', default: 5 }
             },
@@ -613,7 +613,25 @@ async function searchBrain(query, args = {}) {
             ltc: searchLib.getSummary()
         };
     }
-    
+
+    if (mode === 'hybrid') {
+        // Hybrid mode: BM25 + Vector with RRF (via unified search lib)
+        const results = await searchLib.hybrid(query);
+        
+        return {
+            mode: 'hybrid',
+            query,
+            sparse: results.sparse.length,
+            dense: results.dense.length,
+            fused: results.fused.length,
+            results: results.fused.slice(0, args.limit || 5).map(r => ({
+                id: r.id?.substring(0, 8),
+                rrf: r.rrf?.toFixed(3),
+                content: r.content?.substring(0, 100)
+            }))
+        };
+    }
+
     // Basic mode: text search across files
     const files = args.files || null;
     const modelPath = 'models/public';

@@ -68,7 +68,23 @@ Options:
         console.log('Context:', context.length, 'bytes');
         console.log('Settings:', JSON.stringify(settings));
         process.exit(0);
+}
+
+    // Mode: hybrid (via unified search lib)
+    if (mode === 'hybrid') {
+        const searchLib = require(path.join(DIR, 'lib', 'search'));
+        const results = await searchLib.hybrid(query);
+        console.log('\n=== Hybrid Search: ' + query + ' ===');
+        console.log('Sparse:', results.sparse.length);
+        console.log('Dense:', results.dense.length);
+        console.log('Fused:', results.fused.length);
+        for (const r of results.fused.slice(0, 5)) {
+            console.log(' -', r.id?.substring(0, 8), r.rrf?.toFixed(3), r.content?.substring(0, 50));
+        }
+        process.exit(0);
     }
+
+    // End mode handlers
 
     // Hybrid mode (default)
     if (action === '--hybrid' || action === '-H') {

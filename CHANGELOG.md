@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Basic: Fast text search across brain files
   - RAG: Semantic search via LTC, context rehydration, compression
   - Available in MCP tool schema
+- **Search: Unified API**
+  - Single `lib/search.js` for all search modes
+  - Exports: searchLTC(), query(), hybrid(), hyde(), getSettings()
+  - MCP and CLI use unified lib
+  - Available modes: basic, rag, hybrid
 - **Search: Configurable Settings**
   - `settings.ini` support for REHYDRATE_MAX_SIZE, COMPRESSION_THRESHOLD, RAG_LIMIT_MAX
   - RAG response includes current settings
