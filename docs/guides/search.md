@@ -276,6 +276,46 @@ RAG response includes current settings:
 
 ---
 
+## Security
+
+- **Path traversal**: Blocked in basic mode
+- **Null bytes**: Content rejected
+- **Absolute paths**: Blocked in files filter  
+- **Query length**: Max 500 chars via vaf
+- **RAG limit bounds**: 1-20 enforced
+
+---
+
+## Mode Comparison
+
+| Feature | Basic | RAG/LTC | Hybrid |
+|---------|-------|---------|-------|
+| Speed | ~1ms | ~5ms | ~10ms |
+| Type | Text match | Semantic | RRF |
+| Context | Current brain | Git history | Full |
+| Compression | N/A | >5KB trigger | N/A |
+| Requires LTC | No | Yes | Optional |
+| Tokens | Full file | Distilled | Full |
+
+---
+
+## Future: Islands + vpatch
+
+Combining with [Islands](islands) architecture:
+
+- **Islands**: Componentized brain (lazy-load on trigger)
+- **vpatch**: Compact diff format vs full file
+- **Benefit**: Smaller token context, faster hydration
+
+Potential workflow:
+1. Query triggers island(s) → lazy-hydrate only needed components
+2. Return compressed vpatch diffs → smaller context
+3. Result: Faster RAG with lower tokens
+
+See: [Islands](islands) for architecture.
+
+---
+
 ## Related
 
 - [Islands](islands) - Componentized brain

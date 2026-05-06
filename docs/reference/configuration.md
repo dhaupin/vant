@@ -215,6 +215,23 @@ NOTIFY_ON_NEW=true
 | `AUTO_SAVE` | true/false | Auto-save brain |
 | `AUTO_PUSH` | true/false | Auto-push to GitHub |
 
+### Search (RAG)
+
+Search/MCP tool settings:
+
+```ini
+# Search (RAG)
+REHYDRATE_MAX_SIZE=51200    # bytes, max 1MB
+COMPRESSION_THRESHOLD=5120  # bytes trigger for compression hint
+RAG_LIMIT_MAX=20             # max results from LTC search
+```
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `REHYDRATE_MAX_SIZE` | 50KB | Max context bytes (1MB max) |
+| `COMPRESSION_THRESHOLD` | 5KB | Compression hint trigger |
+| `RAG_LIMIT_MAX` | 20 | Max LTC results |
+
 ## mood.ini
 
 Current state affects responses:

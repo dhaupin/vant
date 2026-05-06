@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Basic: Fast text search across brain files
   - RAG: Semantic search via LTC, context rehydration, compression
   - Available in MCP tool schema
+- **Search: Configurable Settings**
+  - `settings.ini` support for REHYDRATE_MAX_SIZE, COMPRESSION_THRESHOLD, RAG_LIMIT_MAX
+  - RAG response includes current settings
 - **Agent Skills Format (agentskills.io)**: New skill format compatible with Claude Code, OpenAI Codex, Cursor, and other agents
   - `models/public/vant/SKILL.md` - Skill manifest with YAML frontmatter
   - `models/public/vant/references/context-optimization.md` - Entropy patching, semantic seeds, context budgets
