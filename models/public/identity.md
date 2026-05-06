@@ -75,6 +75,7 @@ CLI COMMANDS:
 - vant mcp - Run MCP server
 - vant node - Run as node
 - vant bot - Telegram bot
+- vant stego - Steganography bootstrap
 
 ## Brain Management
 - vant onboard     - Onboarding wizard
@@ -139,6 +140,7 @@ Vant is lazy-loadable. Skills hydrate on first trigger:
 | linear | linear, project | Linear task management |
 | automation | cron, automation | Scheduled tasks |
 | resolution | resolve, resolution | Thought tracking |
+| stego | stego, horcrux, embed | Steganography bootstrap |
 
 ```bash
 # Islands boot - load all
