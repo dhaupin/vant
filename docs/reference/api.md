@@ -391,3 +391,34 @@ await updateCheck.notifyIfUpdate();
 ```
 
 See also: [CLI Commands](reference/cli), [Schema](reference/schema)
+## MCP Tools
+
+Vant exposes 20 MCP tools for agent integrations:
+
+### Core Tools (9)
+| Tool | Description |
+|------|-------------|
+| vant_get_memory | Read brain files |
+| vant_set_memory | Write brain files |
+| vant_list_branches | List Git branches |
+| vant_create_branch | Create branch |
+| vant_switch_branch | Switch branch |
+| vant_commit | Commit changes |
+| vant_sync | Push/pull |
+| vant_lock | Lock brain |
+| vant_health | System health |
+
+### Extended Tools (11)
+| Tool | Description |
+|------|-------------|
+| vant_get_islands | List islands |
+| vant_load_island | Load island |
+| vant_resolution_track | Track decisions |
+| vant_stego_encode | Encode PNG stego |
+| vant_stego_decode | Decode PNG stego |
+| vant_config_get | Get config |
+| vant_config_set | Set config |
+| vant_audit_log | Log audit entry |
+| vant_audit_list | List audit |
+| vant_succession_info | Get trust config |
+| vant_search | Search brain |

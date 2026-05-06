@@ -509,3 +509,27 @@ Check for updates:
 vant update         # Check version
 vant update --force # Force update
 ```
+
+## Webhook Commands
+
+```bash
+vant webhook serve             # Start webhook server
+vant webhook register <name> <source>  # Register webhook
+vant webhook list            # List webhooks
+vant webhook send <url> <payload>   # Send webhook
+```
+
+## Notification Commands
+
+```bash
+vant notify slack "message"    # Send Slack notification
+vant notify discord "message" # Send Discord notification
+```
+
+## Linear Commands (when island loaded)
+
+```bash
+vant linear issues            # List issues
+vant linear create "title"   # Create issue
+vant linear comment <id> "body"  # Add comment
+```
