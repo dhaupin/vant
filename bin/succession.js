@@ -15,7 +15,6 @@ const { execSync } = require('child_process')
 // Load succession lib
 const succession = require('../lib/succession')
 
-const args = process.argv.slice(2)
 const cmd = args[0];
 if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
 

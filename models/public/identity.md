@@ -52,18 +52,45 @@ TEAM MATE BEHAVIOR:
 === TECHNICAL ===
 
 SYSTEM STRUCTURE:
-- bin/ - CLI tools (vant.js, health.js, load.js, update.js)
-- lib/ - Core modules (brain.js, lock.js, branch.js, config.js, resolution.js)
+- bin/ - CLI tools (start, health, sync, load, run, mcp, node, etc.)
+- lib/ - Core modules (brain, lock, branch, config, resolution, islands, etc.)
 - models/ - Brain state (public is default, private/ for custom)
+- docs/ - Documentation (guides, reference)
 - states/ - Active runtime state
 
 CLI COMMANDS:
-- vant setup      - Interactive setup
-- vant health    - Diagnostics
-- vant load     - Load brain
-- vant start    - Health → sync → run
+## Core
+- vant start    - Full startup (health → sync → load → run)
+- vant health  - System diagnostics
+- vant sync    - Pull/push brain from GitHub
+- vant load    - Load brain from models/
+- vant run     - Runtime loop
+
+## Development
 - vant test     - Run tests
-- vant update   - Check for updates
+- vant changelog - Generate changelog
+- vant summary  - Project summary
+
+## Integrations
+- vant mcp - Run MCP server
+- vant node - Run as node
+- vant bot - Telegram bot
+
+## Brain Management
+- vant onboard     - Onboarding wizard
+- vant succession - Version/trust management
+- vant resolution - Thought tracking
+
+## Utilities
+- vant watch   - Monitor GitHub
+- vant rate   - Check rate limits
+- vant bump   - Version bump
+- vant update - Check updates
+- vant setup - Interactive setup
+- vant prune - State cleanup
+- vant repos - Multi-repo management
+- vant hybrid - Hybrid sync
+- vant vibe - Dynamic mood
 
 VERSION: see package.json
 

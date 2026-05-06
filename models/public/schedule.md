@@ -16,7 +16,7 @@ Periodic tasks and maintenance cadence.
 
 ## Monthly
 
-- Brain cleanup: Remove stale branches
+- Brain cleanup: `vant prune`
 - Dependency audit: Check for updates
 - CHANGELOG review
 
@@ -48,5 +48,7 @@ Periodic tasks and maintenance cadence.
 | vant health | Daily | Monitor system |
 | vant rate | Daily | Check limits |
 | vant update | Weekly | Stay current |
-| vant sync pull | Weekly | Get latest brain |
-| vant sync push | After changes | Save brain |
+| vant sync | Weekly | Get latest brain |
+| vant prune | Monthly | Clean stale states |
+| vant islands | As needed | Lazy-load brain |
+| vant resolution | As needed | Track thoughts |
