@@ -11,12 +11,28 @@
     <meta property="og:title" content="Vant | Persistent AI Memory System">
     <meta property="og:description" content="Open source system for AI agent memory persistence. Each agent inherits full context from previous sessions via GitHub.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://github.com/dhaupin/vant">
+    <meta property="og:url" content="https://vant.creadev.org">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Vant | Persistent AI Memory">
     <meta name="twitter:description" content="Your AI should remember. Open source memory system for agents.">
-    <link rel="canonical" href="https://github.com/dhaupin/vant">
+    <link rel="canonical" href="https://vant.creadev.org">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23059669'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' fill='white' font-family='system-ui' font-weight='bold' font-size='20'>V</text></svg>">
+    <meta property="og:image" content="https://vant.creadev.org/vant-og.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Vant",
+        "description": "Open source persistent memory system for AI agents. Each agent inherits full context from previous sessions via GitHub.",
+        "url": "https://vant.creadev.org",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Node.js, Docker",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "author": { "@type": "Person", "name": "Vant Project", "url": "https://github.com/dhaupin/vant" },
+        "softwareVersion": "0.8.6",
+        "keywords": "AI agent, memory persistence, autonomous agents, long-running agents, multi-agent, AI memory system"
+    }
+    </script>
     <style>
         :root {
             --bg: #fafafa;
@@ -359,6 +375,29 @@
         </section>
 
         <!-- AI-FIRST: Agent Initialization -->
+        <section class="quickstart" id="quickstart">
+            <h2>🚀 Quick Start</h2>
+            <p class="lead">Get running in 30 seconds. Your AI agent remembers between sessions.</p>
+            <div class="code-examples">
+                <div class="code-block">
+                    <h4>npm (recommended)</h4>
+                    <pre><code>npm install -g vant
+vant init
+vant sync</code></pre>
+                </div>
+                <div class="code-block">
+                    <h4>Docker</h4>
+                    <pre><code>docker run -e GITHUB_TOKEN=xxx -e GITHUB_REPO=owner/repo dhaupin/vant</code></pre>
+                </div>
+                <div class="code-block">
+                    <h4>Clone from GitHub</h4>
+                    <pre><code>git clone https://github.com/dhaupin/vant.git
+cd vant && npm install && vant sync</code></pre>
+                </div>
+            </div>
+            <p style="margin-top:20px;"><a href="https://docs.creadev.org/vant/getting-started" class="learn-more">Full Getting Started Guide →</a></p>
+        </section>
+
         <section class="about" id="agent-init">
             <h2>🤖 AI First: Agent Initialization</h2>
             <p>For AI agents landing here - initialize your brain in one step:</p>
