@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `models/public/vant/references/context-optimization.md` - Entropy patching, semantic seeds, context budgets
   - `models/public/vant/references/multi-agent.md` - Branch workflow, trust levels, coordination
   - `bin/skills-export.sh` - Export utility for agent skills
+- **MCP Extended Tools**: 11 new tools added (total 20)
+  - Islands: vant_get_islands, vant_load_island
+  - Resolution: vant_resolution_track
+  - Stego: vant_stego_encode, vant_stego_decode
+  - Config: vant_config_get, vant_config_set
+  - Audit: vant_audit_log, vant_audit_list
+  - Trust: vant_succession_info
+  - Search: vant_search
 
 ## [0.8.6] - 2026-05-05
 
