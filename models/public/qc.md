@@ -6,7 +6,7 @@ Standards, checks, and validation rules for Vant brain.
 
 ## Build Standards
 
-- All tests pass before release: `vant test` must be 14/14
+- All tests pass before release: `vant test` must be 15/15
 - No breaking changes without major version bump
 - Backward compatibility for at least 1 minor version
 

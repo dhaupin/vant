@@ -9,7 +9,7 @@ These files MUST exist in models/public/:
 
 | File | Type | Description |
 |------|------|-------------|
-| identity.json | JSON | uuid, name, generation, parent_uuid, created_at |
+| identity.md | TEXT | Self-definition, preferences |
 | ego.md | TEXT | Self-worth, what makes me valuable |
 | fears.md | TEXT | What scares me, what I want to avoid |
 | anger.md | TEXT | What frustrates me, what triggers me |
@@ -46,10 +46,11 @@ These files are recommended but not required. Current public brain includes:
 ---
 ## ISLANDS (v0.8.6+)
 
-Lazy-loadable brain components:
+Lazy-loadable brain components (loaded on first trigger):
 
 | Island | Triggers | Description |
 |--------|----------|-------------|
+| resolution | resolve, resolution | Thought tracking (status: active, resolved, deprecated, rejected) |
 | github | github, pr, issue, repo | GitHub operations |
 | gitlab | gitlab, merge | GitLab operations |
 | linear | linear, project | Linear project management |
@@ -68,7 +69,7 @@ vant resolution deprecate goals "old goal" superseded by new approach
 vant resolution reject security "pattern" violates safety
 ```
 
-Resolution stored in: `.resolution` (JSON ledger)
+Resolution stored in: .resolution.json (JSON ledger)
 
 ---
 ## SESSION-SPECIFIC (NOT CARGO)
