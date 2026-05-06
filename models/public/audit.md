@@ -11,6 +11,8 @@ System audit trail and logging.
 - Branch create/switch/merge
 - Errors and failures
 - Health checks
+- Island activations (lazy-load)
+- Resolution changes (thought tracking)
 
 ## Log Levels
 

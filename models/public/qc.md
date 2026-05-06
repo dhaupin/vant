@@ -46,12 +46,15 @@ Standards, checks, and validation rules for Vant brain.
 - vant succession - Brain version/trust management
 - vant bot - Telegram bot integration
 - vant watch - Monitor GitHub for updates
+- vant islands - Lazy-load brain components
+- vant resolution - Thought tracking
 
 ## Testing
 
 - Run: `node bin/vant.js test`
 - Include health check: `vant health`
 - Include load check: `vant load`
+- Include islands check: `vant islands --status`
 
 ---
 
@@ -65,3 +68,4 @@ Before any release:
 - [x] CHANGELOG updated (v0.8.6 Islands Release)
 - [x] VERSION in lib/config.js updated (v0.8.6 from package.json)
 - [x] Resolution system tested (`vant resolution status` → ✓)
+- [x] Islands check passes (`vant islands --status` → ✓)

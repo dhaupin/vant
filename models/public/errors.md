@@ -11,6 +11,8 @@ Error handling and recovery for Vant.
 - **BranchError** - Git branch operations
 - **NetworkError** - GitHub API failures
 - **ConfigError** - Configuration issues
+- **IslandError** - Lazy-load failures (island not found, hydrate fail)
+- **ResolutionError** - Resolution tracking conflicts
 
 ## Handling
 
@@ -45,6 +47,8 @@ try {
 | Branch exists | Branch already created | Switch to existing branch |
 | Not found | File or endpoint missing | Check path/URL |
 | Rate limited | GitHub API limit | Wait, reduce requests |
+| Island fail | Lazy-load error | vant islands --load |
+| Resolution conflict | Duplicate entry | vant resolution status |
 
 ---
 
