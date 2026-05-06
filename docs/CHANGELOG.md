@@ -13,6 +13,38 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ---
 
+## [v0.8.6] - 2026-05-06 - Reliability Improvements Release
+
+### Fixed
+
+- **VAF newline blocking** - Learned that blocking `\n` in all strings breaks multi-line memory content (learnings, memories, etc). Now supports `allowContent: true` option to bypass content checks for valid memory content.
+- **Circuit breaker** - Changed from aggressive 3-failure/60s-reset to 5-failure with exponential backoff (1s -> 30s max)
+- **Lock race conditions** - Increased from 3 attempts/50ms fixed to 5 attempts with exponential backoff (50ms -> 1s max)
+- **Unicode keys** - Changed from `[a-zA-Z0-9_-]` to blocking only path-unsafe chars `/ \ : * ? " < > |`
+
+### Security
+
+- New `AUDIT_PATTERNS` array separates content blocking from audit-log protection
+- Added `category` field to VAF audit for memory content tracing
+- Configurable circuit breaker and lock parameters exported for tuning
+
+### API Changes
+
+```javascript
+// VAF - allow newlines in memory content
+vaf.check(content, { type: 'string', allowContent: true, category: 'learnings' });
+
+// Lock - configure via exported config
+lock.LOCK_CONFIG.MAX_ATTEMPTS;         // 5 (was 3)
+lock.LOCK_CONFIG.BASE_BACKOFF_MS;       // 50 (was 50 fixed)
+lock.LOCK_CONFIG.MAX_BACKOFF_MS;       // 1000
+
+// Sync circuit - exported config
+sync.getAllCircuits().config.FAILURE_THRESHOLD;  // 5 (was 3)
+```
+
+---
+
 ## [v0.8.6] - 2026-05-05 - Search Caching Release
 
 ### Added
