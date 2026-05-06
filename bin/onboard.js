@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 const vaf = require("../lib/vaf");
+
+// -h/--help
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log("'Usage: vant onboard [options]'");
+    process.exit(0);
+}
 // bin/onboard.js - CLI for knowledge base / onboarding
 
 const onboard = require('../lib/onboard')

@@ -1,10 +1,17 @@
 #!/usr/bin/env node
 const vaf = require("../lib/vaf");
+
+// -h/--help
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log("'Usage: vant bump [options]'");
+    process.exit(0);
+}
 /**
  * Vant Version Bump
  * Bump version and tag
  * 
- * Usage: vant bump [patch|minor|major]
+ * Usage: vant bump [-h|--help] [-p|--patch|-m|--minor|-M|--major]
  */
 
 const { execSync } = require('child_process');

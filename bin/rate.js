@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 const vaf = require("../lib/vaf");
+
+// -h/--help
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log("'Usage: vant rate [-h|--help] [-s|--status] [-r|--reset]'");
+    process.exit(0);
+}
 /**
  * Vant Rate
  * Check rate limit status

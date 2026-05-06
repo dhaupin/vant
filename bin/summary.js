@@ -1,10 +1,17 @@
 #!/usr/bin/env node
 const vaf = require("../lib/vaf");
+
+// -h/--help
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log("'Usage: vant summary [-h|--help] [-j|--json] [options]'");
+    process.exit(0);
+}
 /**
  * Vant Summary
  * Session summary using auto-update module
  * 
- * Usage: vant summary
+ * Usage: vant summary [-h|--help] [-j|--json]
  *        vant summary --json
  */
 
