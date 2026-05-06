@@ -210,6 +210,30 @@ vant resolution list    # List all
 
 ## Utilities
 
+### search
+
+Search brain (3 modes).
+
+```bash
+# Default: hybrid search
+vant search python
+
+# Basic text search
+vant search python --mode basic
+
+# Semantic RAG
+vant search python --mode rag
+
+# Hybrid (BM25+Vector+RRF)
+vant search python --mode hybrid
+
+# Compact (summaries only)
+vant search python --mode rag --compact
+
+# Limit results
+vant search python -l 3
+```
+
 ### watch
 
 Monitor GitHub for changes (poll).

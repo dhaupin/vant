@@ -1,10 +1,52 @@
 # CHANGELOG
-version: 0.8.6
+version: 0.8.7
 
 All notable changes to Vant are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
+
+---
+
+## [v0.8.7] - 2026-05-06 - Search Caching Release
+
+### Added
+
+- **Session caching** for hybrid search results (50 max, MD5-keyed)
+- **Lazy-load** of hybrid-search module (heavy, on-demand)
+- **Compact mode** in query() - summaries only, skip full rehydration
+- **Cache APIs**: clearCache(), getCacheStats()
+- **CLI --compact flag** for quick summaries
+- **MCP compact option** for vant_search tool
+
+### Search API
+
+```javascript
+// Session caching
+const r1 = await search.hybrid('python');  // First call
+const r2 = await search.hybrid('python');  // Cached!
+
+// Compact mode
+const { results, context } = await search.query('python', { compact: true });
+
+// Cache management
+search.getCacheStats();  // { size: 1, max: 50 }
+search.clearCache();
+```
+
+### CLI/MCP
+
+```bash
+# CLI
+vant search python --mode rag --compact
+
+# MCP
+{ "name": "vant_search", "arguments": { "query": "python", "mode": "rag", "compact": true } }
+```
+
+### Security
+
+Unchanged - query limits (500 char), rehydrate limits (50KB), compression threshold (5KB) still enforced.
 
 ---
 

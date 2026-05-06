@@ -93,6 +93,8 @@ MCP_PORT=3457
 - Acquire/release lock |
 | `vant_health`
 - System health check |
+| `vant_search`
+- Search brain (basic/rag/hybrid) |
 
 ## API Examples
 
@@ -402,6 +404,87 @@ call_vant_tool('vant_set_memory' |
     'content': '# Goals\n\n- Complete the project',
     'commit': True
 })
+```
+
+### Search Brain
+Search brain via MCP (3 modes):
+
+```bash
+# Basic text search
+curl -X POST http://localhost:3456/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "vant_search",
+      "arguments": {
+        "query": "python",
+        "mode": "basic"
+      }
+    },
+    "id": 1
+  }'
+```
+
+RAG mode with rehydration:
+
+```bash
+# Semantic search + rehydrate (default 5 results)
+curl -X POST http://localhost:3456/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "vant_search",
+      "arguments": {
+        "query": "authentication",
+        "mode": "rag",
+        "limit": 3
+      }
+    },
+    "id": 1
+  }'
+```
+
+Compact mode (summaries only, faster):
+
+```bash
+curl -X POST http://localhost:3456/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "vant_search",
+      "arguments": {
+        "query": "python",
+        "mode": "rag",
+        "compact": true
+      }
+    },
+    "id": 1
+  }'
+```
+
+Hybrid mode (BM25 + Vector + RRF):
+
+```bash
+curl -X POST http://localhost:3456/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "vant_search",
+      "arguments": {
+        "query": "python",
+        "mode": "hybrid"
+      }
+    },
+    "id": 1
+  }'
 ```
 
 ## Error Handling

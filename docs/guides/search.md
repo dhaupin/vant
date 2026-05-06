@@ -44,6 +44,46 @@ const { results, context } = await search.query('authentication');
 console.log(context);  // Full matching content
 ```
 
+## Query Options
+
+All query modes:
+
+```javascript
+// Full search + rehydrate (default)
+const { results, context } = await search.query('python');
+
+// Compact mode: summaries only (faster)
+const { results, context } = await search.query('python', { compact: true });
+// context: "- Learned X\n- Decided Y..."
+
+// Hybrid search with caching
+const r1 = await search.hybrid('python');   // First call
+const r2 = await search.hybrid('python');   // Cached!
+
+// Cache management
+console.log(search.getCacheStats());  // { size: 1, max: 50 }
+search.clearCache();               // Clear session cache
+
+// HyDE transform
+const hydeQuery = search.hyde(query);
+```
+
+## Session Caching
+
+Hybrid search results are cached per-session (50 max, MD5 keyed):
+
+```javascript
+// First call - actual search
+const r1 = await search.hybrid('python');
+
+// Second call - cached (instant)
+const r2 = await search.hybrid('python');
+
+// Cache stats
+search.getCacheStats();  // { size: 1, max: 50 }
+search.clearCache();  // Clear all cached
+```
+
 ## Re-hydrate
 
 Re-hydrate fetches full matching files from git history:
