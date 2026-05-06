@@ -4,10 +4,18 @@
  * Schema enforcement + audit
  */
 
+// -h/--help: show help and exit
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log('Usage: vant validate [--check]');
+    console.log('');
+    console.log('  --check   Run full validation');
+    process.exit(0);
+}
+
 const path = require('path');
 const DIR = path.join(__dirname, '..');
 
-const args = process.argv.slice(2);
 const action = args[0];
 
 async function run() {

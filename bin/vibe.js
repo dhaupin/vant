@@ -4,6 +4,16 @@
  * Show/set agent mood
  */
 
+// -h/--help: show help and exit
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log('Usage: vant vibe [experimental|safety_first]');
+    console.log('');
+    console.log('  experimental   Set experimental mode');
+    console.log('  safety_first   Set safety-first mode');
+    process.exit(0);
+}
+
 const path = require('path');
 const DIR = path.join(__dirname, '..');
 const vibe = require(path.join(DIR, 'lib', 'vibe'));

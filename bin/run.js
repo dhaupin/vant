@@ -1,6 +1,16 @@
 #!/usr/bin/env node
 const vaf = require("../lib/vaf");
 // VAF: No user input - fixed config only
+
+// -h/--help: show help and exit
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log('Usage: vant run [--prompt "task"]');
+    console.log('');
+    console.log('  --prompt   Run single task and exit');
+    process.exit(0);
+}
+
 /**
  * Vant Run
  * CLI-based runtime entry point

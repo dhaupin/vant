@@ -5,6 +5,16 @@
  *        node bin/load.js v0.5.0
  */
 
+// -h/--help: show help and exit
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log('Usage: vant load [version|latest]');
+    console.log('');
+    console.log('  version   Load specific version');
+    console.log('  latest    Force latest');
+    process.exit(0);
+}
+
 const vaf = require("../lib/vaf");
 const fs = require('fs');
 const path = require('path');

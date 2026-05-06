@@ -1,5 +1,17 @@
 #!/usr/bin/env node
 const vaf = require("../lib/vaf");
+
+// Universal -h/--help (consistent with vant help <cmd>)
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log('Usage: vant sync [pull|push|status]');
+    console.log('');
+    console.log('  pull      Pull from GitHub (default)');
+    console.log('  push      Push to GitHub');
+    console.log('  status    Show git status');
+    process.exit(0);
+}
+
 /**
  * Vant Sync
  * Pull and push to GitHub

@@ -2,6 +2,15 @@
 const vaf = require("../lib/vaf");
 // VAF: No user input - checks .env exists only
 
+// -h/--help: show help and exit
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log('Usage: vant health [--quiet]');
+    console.log('');
+    console.log('  --quiet   Minimal output');
+    process.exit(0);
+}
+
 /**
  * Vant Health Check
  * 

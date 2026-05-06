@@ -4,6 +4,16 @@
  * Public/Private sync
  */
 
+// -h/--help: show help and exit
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log('Usage: vant hybrid [--public|--private]');
+    console.log('');
+    console.log('  --public   Push public only');
+    console.log('  --private  Push private only');
+    process.exit(0);
+}
+
 const path = require('path');
 const DIR = path.join(__dirname, '..');
 const hybrid = require(path.join(DIR, 'lib', 'hybrid'));
