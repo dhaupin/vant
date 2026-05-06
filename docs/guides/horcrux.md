@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/horcrux
 layout: default
 title: Horcrux Manifest
-nav_order: 26
+nav_order: 44
 ---
 
 # Horcrux Manifest - Zero-Config Bootstrap

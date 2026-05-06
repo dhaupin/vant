@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/mcp
 layout: default
 title: MCP Server
-nav_order: 6
+nav_order: 7
 ---
 # MCP Server
 

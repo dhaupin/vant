@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/cli
 layout: default
 title: CLI Reference
-nav_order: 5
+nav_order: 7
 ---
 # CLI Reference
 

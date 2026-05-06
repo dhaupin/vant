@@ -1,6 +1,10 @@
 ---
+version: 0.8.6
+permalink: /guides/agent-skills
+layout: default
 title: Agent Skills
 description: Using Vant with Agent Skills format (Claude Code, Codex, Cursor)
+nav_order: 15
 ---
 
 # Agent Skills

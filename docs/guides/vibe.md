@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/vibe
 layout: default
 title: Vibe Controls
-nav_order: 13
+nav_order: 16
 ---
 
 # Vant Vibe Controls

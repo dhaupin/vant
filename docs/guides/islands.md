@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/islands
 layout: default
 title: Islands - Componentized Brain
-nav_order: 12
+nav_order: 4
 ---
 
 # Vant Islands

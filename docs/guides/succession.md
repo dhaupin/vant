@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/succession
 layout: default
 title: Trust & Succession
-nav_order: 3
+nav_order: 5
 ---
 # Trust & Succession
 

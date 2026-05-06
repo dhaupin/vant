@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/schema
 layout: default
 title: Schema Validation
-nav_order: 20
+nav_order: 33
 ---
 
 # Vant Schema Guide

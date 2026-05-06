@@ -1,6 +1,10 @@
 ---
+version: 0.8.6
+permalink: /guides/linear
+layout: default
 title: Linear Integration
 description: Using Linear issue tracking with Vant
+nav_order: 14
 ---
 
 # Linear Integration

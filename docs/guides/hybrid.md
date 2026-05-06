@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/hybrid
 layout: default
 title: Hybrid Sync
-nav_order: 14
+nav_order: 20
 ---
 
 # Vant Hybrid Sync

@@ -1,6 +1,10 @@
 ---
+version: 0.8.6
+permalink: /guides/webhooks
+layout: default
 title: Webhooks
 description: Inbound webhook server and event triggers for Vant automations
+nav_order: 12
 ---
 
 # Webhooks

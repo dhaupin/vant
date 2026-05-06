@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/architecture
 layout: default
 title: Architecture
-nav_order: 15
+nav_order: 6
 ---
 
 # Architecture
