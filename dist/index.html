@@ -22,14 +22,67 @@
     {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
+        "@id": "https://vant.creadev.org/#software",
         "name": "Vant",
-        "description": "Open source persistent memory system for AI agents via GitHub.",
+        "description": "Git-based persistent memory system for AI agents. Agents inherit full context across sessions via markdown brain files hosted on GitHub.",
         "url": "https://vant.creadev.org",
         "applicationCategory": "DeveloperApplication",
+        "applicationSubCategory": "AI Agent Framework",
         "operatingSystem": "Node.js, Docker",
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-        "author": { "@type": "Person", "name": "Vant Project", "url": "https://github.com/dhaupin/vant" },
-        "softwareVersion": "0.8.6"
+        "installUrl": "https://docs.creadev.org/vant/getting-started",
+        "softwareRequirements": "Node.js 18+, Git",
+        "programmingLanguage": "JavaScript",
+        "codeRepository": "https://github.com/dhaupin/vant",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock"
+        },
+        "author": {
+            "@type": "Person",
+            "name": "Vant Project",
+            "url": "https://github.com/dhaupin/vant"
+        },
+        "producer": {
+            "@type": "Organization",
+            "name": "Vant Project",
+            "url": "https://vant.creadev.org"
+        },
+        "softwareVersion": "0.8.6",
+        "datePublished": "2026-05-05",
+        "keywords": "AI, agent, memory, persistent, github, brain, context, sessions",
+        "featureList": [
+            "Git-based persistent memory",
+            "Session inheritance across restarts",
+            "Islands (lazy-loading)",
+            "MCP tool access",
+            "Entropy Patching",
+            "Adaptive Entropy auto-calibration",
+            "Semantic Seed placement",
+            "Resolution thought tracking",
+            "Stego steganography",
+            "Multi-agent coordination"
+        ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            { "@type": "Question", "name": "What is a brain in Vant?", "acceptedAnswer": { "@type": "Answer", "text": "A brain is a folder of markdown files in models/public/ that store your agent's identity, goals, lessons, and context across sessions." } },
+            { "@type": "Question", "name": "What is Entropy Patching?", "acceptedAnswer": { "@type": "Answer", "text": "Entropy Patching intelligently replaces low-value context with high-value tokens to optimize LLM context windows." } },
+            { "@type": "Question", "name": "What are Islands in Vant?", "acceptedAnswer": { "@type": "Answer", "text": "Islands are lazy-loadable brain components that dramatically reduce cold start time by loading only needed modules." } },
+            { "@type": "Question", "name": "What is Stego in Vant?", "acceptedAnswer": { "@type": "Answer", "text": "Stego encodes brain data into PNG images using LSB steganography with AES-256-GCM encryption." } },
+            { "@type": "Question", "name": "What is Adaptive Entropy?", "acceptedAnswer": { "@type": "Answer", "text": "Auto-calibrates entropy based on token count/temperature for optimized context efficiency." } },
+            { "@type": "Question", "name": "How does generational evolution work?", "acceptedAnswer": { "@type": "Answer", "text": "Agents can spawn child agents that inherit their brain, enabling multi-agent coordination via branch-per-agent workflow." } },
+            { "@type": "Question", "name": "Do I need GitHub?", "acceptedAnswer": { "@type": "Answer", "text": "No - Vant works with any Git provider (GitHub, GitLab, Bitbucket, self-hosted) via provider abstraction layer." } },
+            { "@type": "Question", "name": "Is my brain private?", "acceptedAnswer": { "@type": "Answer", "text": "Yes - your brain lives in your GitHub repo. Use private repos, encryption, or steganography for deniable persistence." } },
+            { "@type": "Question", "name": "Can multiple AI agents share one brain?", "acceptedAnswer": { "@type": "Answer", "text": "Yes - multi-agent coordination via branch-per-agent isolation, with merge workflow for collaboration." } },
+            { "@type": "Question", "name": "How is Vant different from vector databases?", "acceptedAnswer": { "@type": "Answer", "text": "Vant stores full context (markdown, personality, goals), not just embeddings. Agents literally inherit previous thoughts." } }
+        ]
     }
     </script>
     <style>
