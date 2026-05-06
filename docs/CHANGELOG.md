@@ -460,6 +460,74 @@ const { results, context } = await search.query('python');
 - Path validation for git operations
 - Size limits for re-hydrate (50KB max)
 
+
+### Homepage & Doc Updates (v0.8.6 Checkpoint)
+
+#### SEO Overhaul
+- JSON-LD schema.org for rich snippets
+- Open Graph meta tags (og:title, og:description, og:image)
+- Canonical URL
+- Semantic structure for AI-first indexing
+
+#### Quick Start Section
+- Added before Agent Init section
+- Action-oriented commands
+- Links to getting-started guide
+
+#### Feature Reorder (AI-First)
+New order:
+1. Git-Based Memory (core concept)
+2. Getting Started (action first)
+3. Islands (cold start optimization)
+4. MCP Server (tool access)
+5. Entropy Patching (token optimization)
+6. Adaptive Entropy (auto-calibration)
+7. Semantic Seed (context placement)
+8. Resolution System (thought tracking)
+9. Stego (deniable persistence)
+10. Linear Integration (project tracking)
+11. Telegram Bot, Discord/Slack (communications)
+12. Multi-Agent Safe (coordination)
+
+#### Menu Reorder (AI-First)
+New order:
+1. Getting Started (do first)
+2. Agent (become)
+3. Brain (core concept)
+4. MCP (tools)
+5. CLI (commands)
+6. Github (sync)
+7. Docs (reference)
+
+### Brain Updates (v0.8.6)
+
+- Enhanced identity.md with islands details
+- Multi-agent branching in identity.md
+- Brain awareness across all files
+- Stego island in identity.md
+- Islands/Resolution added to lessons.md revision log
+- Islands details added to audit.md VERSION
+- Meta.json CLI list updated (islands, stego, successors)
+
+### Schema Updates (v0.8.6)
+
+- Schema files updated to Islands Release
+- Resolution system awareness added
+- Islands trigger mapping in schema
+
+### CLI Updates (v0.8.6)
+
+- Added -h/--help to all CLI scripts
+- Added short args to batches 1-3
+- Syntax bug fixes
+- bin/test-v086.js checkpoint test
+
+### Resolution System (v0.8.6)
+
+- Resolution awareness added to empathy
+- Deep audit enhancements
+- Thought tracking integration
+
 ---
 
 ## [v0.8.4] - 2026-05-04 - Security Release
@@ -545,6 +613,14 @@ This version contains comprehensive security hardening from a deep penetration t
 Security audit and documentation pass by OpenHands agent.
 
 
+### Brain Backport from v0.8.6 (v0.8.4 Checkpoint)
+
+Cherry-picked v0.8.6 brain features into v0.8.4 branch for compatibility.
+
+- v0.8.4 brain parity with v0.8.6 islands
+- Brain refresh for multi-provider support
+- Meta.json CLI list updated
+- Schema updates for multi-repo
 
 ---
 
