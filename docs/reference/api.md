@@ -355,7 +355,7 @@ await telegram.startPolling();
 ```
 
 ## lib/entropy.js
-Entropy-Patch protocol for token-aware latent transport. Transforms Vant from "Context Storage" to "Latent Transport".
+Entropy Patching protocol for token-aware latent transport. Transforms Vant from "Context Storage" to "Latent Transport".
 
 ```javascript
 const entropy = require('./lib/entropy');

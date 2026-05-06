@@ -2,21 +2,21 @@
 version: 0.8.6
 permalink: /reference/entropy
 layout: default
-title: Entropy-Patch Protocol
+title: Entropy Patching Protocol
 nav_order: 6
 ---
 
-# Entropy-Patch Protocol
+# Entropy Patching Protocol
 
 > Token-aware latent transport for Vant v0.8.6+
 
-## What is Entropy-Patch?
+## What is Entropy Patching?
 
-**Entropy-Patch** is a compression protocol that separates high-entropy data (unique, random-looking content) from low-entropy data (repeated, predictable patterns). It transforms Vant from a "Context Storage" system into a "Latent Transport" system.
+**Entropy Patching** is a compression protocol that separates high-entropy data (unique, random-looking content) from low-entropy data (repeated, predictable patterns). It transforms Vant from a "Context Storage" system into a "Latent Transport" system.
 
 ### Why Does It Exist?
 
-LLMs are token-limited. Loading 19 brain files on startup is expensive. Entropy-Patch enables:
+LLMs are token-limited. Loading 19 brain files on startup is expensive. Entropy Patching enables:
 
 1. **Token reduction** - Agents load one `.vpatch` file instead of 19 `.md` files
 2. **Git-native diffs** - Tracks entropy spikes instead of line changes
@@ -244,7 +244,7 @@ All paths are validated through VAF (Vant Application Firewall):
 
 ## Generational Optimization Guide
 
-Tips for tuning Entropy-Patch in production autonomous sessions.
+Tips for tuning Entropy Patching in production autonomous sessions.
 
 ### 1. The Sensitivity Sweet Spot
 
