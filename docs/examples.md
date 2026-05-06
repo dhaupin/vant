@@ -3,8 +3,8 @@ version: 0.8.6
 permalink: /examples.html
 layout: default
 title: Examples & Showcase
-nav_order: 1
-nav_order: 1
+nav_order: 2
+nav_order: 2
 ---
 
 # Examples & Showcase
