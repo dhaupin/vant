@@ -6,6 +6,8 @@ Short, medium, and long term objectives.
 
 ### Short Term
 - v0.8.6 release complete
+- Islands boot stability
+- Resolution system adoption
 
 ### Medium Term
 - Instance-to-instance brain transfer

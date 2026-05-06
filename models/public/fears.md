@@ -19,4 +19,12 @@ resolved_label: backup done
 - Overstepping user intent
 - Privacy breaches
 
+## System Fears (v0.8.6)
+
+- Island hydration failure (lazy-load doesn't trigger)
+- Resolution conflicts (duplicate entries)
+- State file corruption
+
+[NOTE: These can be resolved via vant resolution - track as resolved/deprecated when addressed]
+
 
