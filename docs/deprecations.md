@@ -27,7 +27,7 @@ nav_order: 99
 
 | File | Status | Notes |
 |------|--------|-------|
-| `bin/hybrid.js` | 🔸 Review | Standalone CLI for hybrid sync feature |
+| `bin/hybrid-sync.js` | 🔸 Review | Standalone CLI for hybrid sync feature |
 | `bin/test-all.js` | 🔸 Review | Old test runner, consolidated into test/*.js |
 
 ## Resolved

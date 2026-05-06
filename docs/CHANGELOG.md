@@ -213,7 +213,7 @@ search.fetchFromHistory('models/v0.5.0/learnings/1.md', 'abc123');
 - `bin/islands-boot.js` - Islands CLI
 - `bin/vibe.js` - Vibe CLI
 - `bin/repos.js` - Repos CLI
-- `bin/hybrid.js` - Hybrid CLI
+- `bin/hybrid-sync.js` - Hybrid CLI
 - `bin/test-v086.js` - Test suite
 
 ### New Docs
@@ -461,8 +461,8 @@ const { results, context } = await search.query('python');
 | `vant repos --list` | List repos |
 | `vant repos --mount` | Mount repo |
 | `vant repos --pull` | Pull mounted |
-| `vant hybrid --public` | Push public only |
-| `vant hybrid --private` | Push private only |
+| `vant hybrid-sync --public` | Push public only |
+| `vant hybrid-sync --private` | Push private only |
 | `vant search --hybrid` | Hybrid search |
 | `vant search --hyde` | HyDE query |
 | `vant validate --check` | Schema + audit + circuits |

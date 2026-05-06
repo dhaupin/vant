@@ -70,9 +70,9 @@ async function runTests() {
         passed++;
     } catch (e) { console.log('  ✗', e.message); failed++; }
     
-    // Search
+    // SearchBasic
     try {
-        console.log('\n[Search]');
+        console.log('\n[SearchBasic]');
         const search = require(path.join(DIR, 'lib/search'));
         const commit = search.getCurrentCommit();
         assert(commit && commit.length >= 7);
@@ -179,21 +179,21 @@ async function runTests() {
         passed++;
     } catch (e) { console.log('  ✗', e.message); failed++; }
     
-    // HybridSearch
+    // SearchHybrid
     try {
-        console.log('\n[HybridSearch]');
-        const hs = require(path.join(DIR, 'lib/search'));
+        console.log('\n[SearchHybrid]');
+        const hs = require(path.join(DIR, 'lib/search-hybrid'));
         assert(typeof hs.search === 'function');
         assert(typeof hs.indexDocument === 'function');
-        const stats = search.getStats();
+        const stats = hs.getStats();
         assert(typeof stats === 'object');
         console.log('  ✓');
         passed++;
     } catch (e) { console.log('  ✗', e.message); failed++; }
     
-    // Query
+    // SearchHyde
     try {
-        console.log('\n[Query]');
+        console.log('\n[SearchHyde]');
         const query = require(path.join(DIR, 'lib/search-hyde'));
         assert(typeof query.multiQuery === 'function');
         assert(typeof query.hyde === 'function');

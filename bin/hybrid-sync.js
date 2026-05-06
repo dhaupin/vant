@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 /**
- * Vant Hybrid CLI
- * Public/Private sync
+ * Vant Hybrid-Sync CLI
+ * Public/Private brain sync
  * 
  * All args should have both long (--arg) and short (-a) forms.
  * 
- * Usage: vant hybrid [-h|--help] [-p|--public] [-r|--private]
+ * Usage: vant hybrid-sync [-h|--help] [-p|--public] [-r|--private]
  */
 
 // -h/--help: show help and exit
 const args = process.argv.slice(2);
 if (args[0] === '-h' || args[0] === '--help') {
-    console.log('Usage: vant hybrid [-h|--help] [-p|--public] [-r|--private]');
+    console.log('Usage: vant hybrid-sync [-h|--help] [-p|--public] [-r|--private]');
     console.log('');
     console.log('  -h, --help    Show this help');
     console.log('  -p, --public  Push public only');
