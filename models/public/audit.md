@@ -50,6 +50,19 @@ git show --stat HEAD
 
 ---
 
+## Resolution Ledger
+
+Track changes to brain files:
+
+```bash
+vant resolution status        # Show all statuses
+vant resolution deltas goals  # Show changes to goals.md
+```
+
+Resolution states: resolved, deprecated, rejected
+
+---
+
 ## Filesystem
 
 - bin/ - Executable CLI
@@ -58,3 +71,9 @@ git show --stat HEAD
 - states/ - Runtime state
 
 Always know what's in each directory before modifying.
+
+---
+
+## VERSION
+
+v0.8.6 - Islands Release
