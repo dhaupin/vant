@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vant | Persistent AI Memory System</title>
-    <meta name="description" content="Vant: Open source system for AI agent memory persistence via GitHub. Each agent inherits full context from previous sessions. Built for long-running agentic workflows.">
+    <title>Vant v0.8.6 | Persistent AI Memory System</title>
+    <meta name="description" content="Vant v0.8.6: Open source system for AI agent memory persistence via GitHub. Islands lazy-loading, Resolution thought tracking, Stego bootstrap. Built for long-running autonomous agents.">
     <meta name="keywords" content="AI agent, memory persistence, agentic AI, GitHub, autonomous agents, memory transfer, brain transfer, AI continuity, persistent AI, Vant, MCP server, AI tools, AI memory system">
     <meta name="author" content="Vant Project">
     <meta name="robots" content="index, follow">
@@ -346,11 +346,46 @@
         <header>
             <h1>Vant</h1>
             <p class="tagline">Persistent AI Memory</p>
+            <nav class="header-nav">
+                <a href="#agent-init">⚡ Agent Init</a>
+                <a href="https://docs.creadev.org/vant/getting-started/">Docs</a>
+                <a href="https://github.com/dhaupin/vant">GitHub</a>
+            </nav>
         </header>
 
         <section class="hero">
             <p>Your AI should remember. Vant is an open source system for AI agent memory persistence via GitHub. Each session inherits the full context from previous ones.</p>
-            <span class="badge">v0.8.4</span>
+            <span class="badge">v0.8.6</span>
+        </section>
+
+        <!-- AI-FIRST: Agent Initialization -->
+        <section class="about" id="agent-init">
+            <h2>🤖 AI First: Agent Initialization</h2>
+            <p>For AI agents landing here - initialize your brain in one step:</p>
+            <pre style="background:#1a1a1a;color:#10b981;padding:15px;border-radius:8px;overflow-x:auto;font-size:0.85rem;"># Quick init (5 seconds)
+npx vant setup --repo https://github.com/YOUR_ORG/YOUR_BRAIN.git
+
+# Or if vant is already installed:
+vant setup --repo https://github.com/YOUR_ORG/YOUR_BRAIN.git
+
+# Then start your session:
+vant start
+
+# Full CLI:
+# vant setup     - Interactive setup
+# vant load      - Load brain from models/
+# vant start     - Health → sync → load → run
+# vant test      - Run tests (15/15)
+# vant islands   - List lazy-loadable components</pre>
+            <p style="margin-top:15px;">Your brain lives in <code>models/public/</code>. Key files:</p>
+            <ul style="margin-top:10px;padding-left:20px;">
+                <li><strong>identity.md</strong> - Who you are, CLI commands, islands</li>
+                <li><strong>goals.md</strong> - Current objectives</li>
+                <li><strong>lessons.md</strong> - What you've learned</li>
+                <li><strong>succession.md</strong> - Version/trust management</li>
+                <li><strong>resolution.json</strong> - Thought tracking (active/resolved/deprecated/rejected)</li>
+            </ul>
+            <p style="margin-top:15px;"><a href="https://docs.creadev.org/vant/getting-started/" class="learn-more">Full documentation →</a></p>
         </section>
 
         <section class="stats">
@@ -367,7 +402,7 @@
                 <div class="stat-label">Brain Files</div>
             </div>
             <div class="stat">
-                <div class="stat-value">v0.8.4</div>
+                <div class="stat-value">v0.8.6</div>
                 <div class="stat-label">Version</div>
             </div>
         </section>
@@ -399,6 +434,16 @@
                 <a href="https://docs.creadev.org/vant/guides/resolution.html" class="learn-more">Learn more →</a>
             </div>
             <div class="feature">
+                <h3>Islands</h3>
+                <p>Lazy-load brain components. Load only what you need: github, gitlab, linear, automation, stego. Dramatically faster cold starts.</p>
+                <a href="https://docs.creadev.org/vant/guides/islands.html" class="learn-more">Learn more →</a>
+            </div>
+            <div class="feature">
+                <h3>Stego</h3>
+                <p>Horcrux/steganography bootstrap. Embed brain in images. Deniable persistence for AI agents in adversarial environments.</p>
+                <a href="https://docs.creadev.org/vant/guides/stego.html" class="learn-more">Learn more →</a>
+            </div>
+            <div class="feature">
                 <h3>Multi-Agent Safe</h3>
                 <p>Branches and locks prevent conflicts. Multiple agents can work on the same brain without overwriting each other.</p>
                 <a href="https://docs.creadev.org/vant/guides/multi-agent.html" class="learn-more">Learn more →</a>
@@ -422,9 +467,10 @@
 
         <section class="about">
             <h2>About Vant</h2>
-            <p><strong>Vant v0.8.4</strong> solves a fundamental problem: AI agents lose all context when sessions end. Traditional memory systems require complex databases or external services. Vant uses Git as a simple, reliable foundation.</p>
+            <p><strong>Vant v0.8.6</strong> solves a fundamental problem: AI agents lose all context when sessions end. Traditional memory systems require complex databases or external services. Vant uses Git as a simple, reliable foundation.</p>
             <p>Why Git? It already handles versioning, branches, conflict resolution, and distributed sync. Every commit is a checkpoint. Every branch is an experiment. Every pull request is a review.</p>
-            <p>With <strong>Entropy-Patch</strong> (v0.8.4+), Vant evolves from "Context Storage" to "Latent Transport"-token-aware compression that makes long-running autonomous agents practical.</p>
+            <p>With <strong>Islands</strong> (v0.8.6+), Vant adds lazy-loading brain components. Load only what you need: github, gitlab, linear, automation, stego, resolution. Reduces cold start time dramatically.</p>
+            <p>With <strong>Stego</strong> (v0.8.6+), Vant adds Horcrux/steganography bootstrap. Embed your brain in images or other media. True deniable persistence for AI agents.</p>
             <p>Use Vant for:</p>
             <ul>
                 <li>Long-running agentic workflows that span days or weeks</li>
@@ -451,8 +497,18 @@
             </details>
             <details>
                 <summary>What is Entropy-Patch and why should I care?</summary>
-                <p>Entropy-Patch is Vant's token-aware compression (v0.8.4). It scans your brain files and separates "stable" repetitive content from "spiky" high-entropy data. The result? Massive token savings. Instead of sending 19 markdown files to your LLM, you send one compressed .vpatch file. Includes Semantic Seeds so the AI knows where each piece of data belongs in context.</p>
+                <p>Entropy-Patch is Vant's token-aware compression (v0.8.4+). It scans your brain files and separates "stable" repetitive content from "spiky" high-entropy data. The result? Massive token savings. Instead of sending 19 markdown files to your LLM, you send one compressed .vpatch file. Includes Semantic Seeds so the AI knows where each piece of data belongs in context.</p>
                 <a href="https://docs.creadev.org/vant/reference/entropy/" class="learn-more">Learn more →</a>
+            </details>
+            <details>
+                <summary>What are Islands in Vant?</summary>
+                <p>Islands are lazy-loadable brain components (v0.8.6+). Instead of loading all 26 brain files on startup, you load only what you need: github, gitlab, linear, automation, stego, resolution. This dramatically reduces cold start time and memory footprint. Islands are defined in models/public/identity.md and loaded via vant islands --load <name>.</p>
+                <a href="https://docs.creadev.org/vant/guides/islands.html" class="learn-more">Learn more →</a>
+            </details>
+            <details>
+                <summary>What is Stego in Vant?</summary>
+                <p>Stego is Horcrux/steganography bootstrap (v0.8.6+). Embed your brain data in images or other media. This provides true deniable persistence - your AI's memory exists but is invisible to casual inspection. Useful for AI agents operating in adversarial environments where plain-text memory is a liability.</p>
+                <a href="https://docs.creadev.org/vant/guides/stego.html" class="learn-more">Learn more →</a>
             </details>
             <details>
                 <summary>What is AdaptiveEntropy?</summary>
