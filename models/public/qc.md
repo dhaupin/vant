@@ -58,10 +58,10 @@ Standards, checks, and validation rules for Vant brain.
 ## QC Check List
 
 Before any release:
-- [ ] All tests pass
-- [ ] Health check passes
-- [ ] Load check passes  
-- [ ] No .txt files in public model (convert to .md)
-- [ ] CHANGELOG updated
-- [ ] VERSION in lib/config.js updated
-- [ ] Resolution system tested (`vant resolution status`)
+- [x] All tests pass (vant test → 15/15)
+- [x] Health check passes (vant health → ✓)
+- [x] Load check passes (vant load → ✓)
+- [x] No .txt files in public model (convert to .md)
+- [x] CHANGELOG updated (v0.8.6 Islands Release)
+- [x] VERSION in lib/config.js updated (v0.8.6 from package.json)
+- [x] Resolution system tested (`vant resolution status` → ✓)
