@@ -263,3 +263,49 @@ See these files in the repo for full examples:
 > Self-hosted GitLab/Gitea is fine. Use `vant sync` for manual brain updates with GitHub.com. See [CLI Reference](reference/cli).
 
 See also: [CLI Commands](reference/cli), [Installation](getting-started/install)
+## Webhooks
+
+```bash
+VANT_WEBHOOK_PORT=3456
+VANT_WEBHOOK_SECRET=your-secret
+VANT_WEBHOOK_URL=https://your-domain.com/webhook
+```
+
+## Notifications
+
+```bash
+# Slack
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx
+
+# Discord
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx
+
+# Email
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=user@gmail.com
+SMTP_PASS=app-password
+FROM_EMAIL=Vant <noreply@vant.dev>
+
+# Pushover
+PUSHOVER_KEY=user-key
+PUSHOVER_TOKEN=app-token
+
+# Telegram
+TELEGRAM_TOKEN=bot-token
+```
+
+## Linear
+
+```bash
+LINEAR_API_KEY=your-api-key
+LINEAR_TEAM=team-id
+LINEAR_ENDPOINT=https://api.linear.app/graphql
+```
+
+## MCP Tools
+
+```bash
+MCP_PORT=3100
+MCP_HOST=localhost
+```
