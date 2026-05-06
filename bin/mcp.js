@@ -55,6 +55,7 @@ const config = loadModule('config');
 const health = loadModule('health');
 const protection = require('../lib/protection');
 const vaf = require('../lib/vaf');
+const searchLib = require('../lib/search');
 
 /**
  * Tool definitions for MCP
@@ -317,12 +318,14 @@ const TOOLS = [
     },
     {
         name: 'vant_search',
-        description: 'Search brain files for content.',
+        description: 'Search brain files. Two modes: basic (fast text search) or rag (LTC-based semantic search with context rehydration).',
         inputSchema: {
             type: 'object',
             properties: {
                 query: { type: 'string', description: 'Search query' },
-                files: { type: 'array', items: { type: 'string' } }
+                mode: { type: 'string', description: 'Search mode: "basic" (fast text) or "rag" (semantic LTC)', enum: ['basic', 'rag'], default: 'basic' },
+                files: { type: 'array', items: { type: 'string' }, description: 'Files to search (basic mode only)' },
+                limit: { type: 'number', description: 'Max results (RAG mode)', default: 5 }
             },
             required: ['query']
         }
@@ -560,6 +563,109 @@ async function lockBrain(action, agentId = 'mcp') {
 }
 
 /**
+ * Search brain files (2-mode: basic text or RAG/LTC semantic)
+ */
+async function searchBrain(query, args = {}) {
+    const mode = args.mode || 'basic';
+    
+    // Validate query
+    vaf.check(query, {
+        type: 'string',
+        name: 'query',
+        maxLength: 500
+    });
+    
+    if (mode === 'rag') {
+        // RAG mode: use LTC-based semantic search
+        let limit = args.limit || 5;
+        
+        // Validate limit inline (vaf doesn't support number type)
+        if (typeof limit !== 'number') limit = 5;
+        if (limit < 1) limit = 1;
+        if (limit > 20) limit = 20;
+        
+        const { results, context } = await searchLib.query(query, { limit });
+        
+        // Apply compression if context is large
+        let compressed = null;
+        if (context && context.length > 5000) {
+            // Compress using vpatch format
+            compressed = `[COMPRESSED:${context.length}]${context.slice(0, 5000)}...`;
+        }
+        
+        return {
+            mode: 'rag',
+            query,
+            results: results.length,
+            hits: results.map(r => ({ type: r.type, summary: r.summary })),
+            context: context || '',
+            compressed,
+            ltc: searchLib.getSummary()
+        };
+    }
+    
+    // Basic mode: text search across files
+    const files = args.files || null;
+    const modelPath = 'models/public';
+    
+    if (!fs.existsSync(modelPath)) {
+        return { error: 'Brain not found', mode: 'basic' };
+    }
+    
+    // Get files to search
+    const allFiles = fs.readdirSync(modelPath).filter(f => {
+        const ext = path.extname(f).toLowerCase();
+        return ['.md', '.txt', '.json', '.yaml', '.yml'].includes(ext);
+    });
+    
+    let targetFiles = allFiles;
+    if (files && Array.isArray(files)) {
+        targetFiles = files.filter(f => {
+            // Security: validate filenames
+            if (f.includes('\0') || f.startsWith('/') || f.startsWith('\\') || f.includes('..')) {
+                return false;
+            }
+            return allFiles.includes(f);
+        });
+    }
+    
+    const queryLower = query.toLowerCase();
+    const hits = [];
+    
+    for (const file of targetFiles) {
+        const filePath = path.join(modelPath, file);
+        try {
+            const content = fs.readFileSync(filePath, 'utf8');
+            const lines = content.split('\n');
+            
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].toLowerCase().includes(queryLower)) {
+                    hits.push({
+                        file,
+                        line: i + 1,
+                        text: lines[i].slice(0, 200)
+                    });
+                    
+                    if (hits.length >= 50) break; // Limit results
+                }
+            }
+        } catch (e) {
+            // Skip unreadable files
+        }
+        
+        if (hits.length >= 50) break;
+    }
+    
+    return {
+        mode: 'basic',
+        query,
+        filesSearched: targetFiles.length,
+        hits: hits.length,
+        results: hits
+    };
+}
+
+/**
  * Health check
  */
 async function checkHealth(detailed = false) {
@@ -692,6 +798,9 @@ async function handleRequest(request) {
                         break;
                     case 'vant_protection':
                         result = protection.getStatus();
+                        break;
+                    case 'vant_search':
+                        result = await protection.withTimeout(searchBrain(args.query, args));
                         break;
                     default:
                         result = { error: 'Unknown tool: ' + name };
@@ -863,4 +972,4 @@ const server = http.createServer(async (req, res) => {
     });
 }
 
-module.exports = { TOOLS, getMemory, setMemory, listBranches, createBranch, switchBranch, commitChanges, lockBrain, checkHealth };
+module.exports = { TOOLS, getMemory, setMemory, listBranches, createBranch, switchBranch, commitChanges, lockBrain, checkHealth, searchBrain };

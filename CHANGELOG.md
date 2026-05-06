@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Search: 2-Mode MCP Tool**
+  - `vant_search` now has 2 modes: `basic` (text) and `rag` (semantic LTC)
+  - Basic: Fast text search across brain files
+  - RAG: Semantic search via LTC, context rehydration, compression
+  - Available in MCP tool schema
 - **Agent Skills Format (agentskills.io)**: New skill format compatible with Claude Code, OpenAI Codex, Cursor, and other agents
   - `models/public/vant/SKILL.md` - Skill manifest with YAML frontmatter
   - `models/public/vant/references/context-optimization.md` - Entropy patching, semantic seeds, context budgets
@@ -20,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Config: vant_config_get, vant_config_set
   - Audit: vant_audit_log, vant_audit_list
   - Trust: vant_succession_info
-  - Search: vant_search
+  - Search: vant_search (2-mode: basic text + RAG semantic)
 
 ## [0.8.6] - 2026-05-05
 

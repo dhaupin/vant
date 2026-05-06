@@ -162,6 +162,90 @@ citations.addSource(result.sources[0].commit);
 
 ---
 
+## MCP Tool
+
+Search is available via MCP as `vant_search` with two modes:
+
+```javascript
+{
+  name: 'vant_search',
+  arguments: {
+    query: 'search term',
+    mode: 'basic' | 'rag',  // default: 'basic'
+    files: ['file.md'],       // basic mode only
+    limit: 5                // rag mode, default: 5
+  }
+}
+```
+
+### Basic Mode
+
+Fast text search. Default mode.
+
+```javascript
+// Search all files
+await vant_search({ query: 'lessons', mode: 'basic' });
+
+// Search specific files
+await vant_search({ query: 'lessons', mode: 'basic', files: ['identity.md', 'goals.md'] });
+```
+
+Returns:
+```json
+{
+  "mode": "basic",
+  "query": "lessons",
+  "filesSearched": 24,
+  "hits": 5,
+  "results": [
+    { "file": "identity.md", "line": 91, "text": "3. **Load brain**" },
+    { "file": "lessons.md", "line": 1, "text": "# PROJECT LESSONS" }
+  ]
+}
+```
+
+### RAG Mode
+
+Semantic search using LTC. Searches indexed learnings and decisions, then rehydrates full context.
+
+```javascript
+// Semantic search
+await vant_search({ query: 'python', mode: 'rag', limit: 3 });
+```
+
+Returns:
+```json
+{
+  "mode": "rag",
+  "query": "python",
+  "results": 2,
+  "hits": [
+    { "type": "learnings", "summary": "Use requests library" },
+    { "type": "decisions", "summary": "Prefer venv" }
+  ],
+  "context": "=== learnings/python.md ===\n...",
+  "compressed": "[COMPRESSED:12345]...",
+  "ltc": { "hasLTC": true, "learnings": 42, "decisions": 15 }
+}
+```
+
+**Compression**: RAG mode applies compression when context > 5KB.
+
+---
+
+## CLI
+
+```bash
+# Basic search (default)
+vant search "lessons"
+
+# RAG search
+vant search --mode rag "python"
+vant search --mode rag --limit 3 "context"
+```
+
+---
+
 ## Related
 
 - [Islands](islands) - Componentized brain
