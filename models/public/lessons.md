@@ -76,12 +76,16 @@ AVOID:
 === REVISION LOG ===
 
 v0.8.6 (2026-05-06):
-- Fixed duplicate args declaration in bin/resolution.js
+- Islands Release - lazy-loadable brain components
+- Resolution system - thought lifecycle tracking (active, resolved, deprecated, rejected)
+- Fixed duplicate args declaration in bin/resolution.js, onboard.js, succession.js
 - Renamed transport-protocol.txt to transport-protocol.md (QC compliance)
+- Updated schema files: transport-protocol.md, memory-files.md for Islands
 - 15 tests passing
 - Added spooling lesson - resist context distillation
 - Added process spooling - validate every step
 - VAF gap filling complete for bin/*.js (23/23)
+- Updated brain CLI: 6→24 commands in identity.md
 
 v0.8.2 (2025-04):
 - Initial public model release
