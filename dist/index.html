@@ -23,14 +23,13 @@
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Vant",
-        "description": "Open source persistent memory system for AI agents. Each agent inherits full context from previous sessions via GitHub.",
+        "description": "Open source persistent memory system for AI agents via GitHub.",
         "url": "https://vant.creadev.org",
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Node.js, Docker",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
         "author": { "@type": "Person", "name": "Vant Project", "url": "https://github.com/dhaupin/vant" },
-        "softwareVersion": "0.8.6",
-        "keywords": "AI agent, memory persistence, autonomous agents, long-running agents, multi-agent, AI memory system"
+        "softwareVersion": "0.8.6"
     }
     </script>
     <style>
@@ -375,27 +374,17 @@
         </section>
 
         <!-- AI-FIRST: Agent Initialization -->
-        <section class="quickstart" id="quickstart">
+        <section class="about">
             <h2>🚀 Quick Start</h2>
-            <p class="lead">Get running in 30 seconds. Your AI agent remembers between sessions.</p>
-            <div class="code-examples">
-                <div class="code-block">
-                    <h4>npm (recommended)</h4>
-                    <pre><code>npm install -g vant
+            <p>Get running in 30 seconds.</p>
+            <pre style="background:#1a1a1a;color:#10b981;padding:15px;border-radius:8px;overflow-x:auto;font-size:0.85rem;margin:15px 0;"># npm (recommended)
+npm install -g vant
 vant init
-vant sync</code></pre>
-                </div>
-                <div class="code-block">
-                    <h4>Docker</h4>
-                    <pre><code>docker run -e GITHUB_TOKEN=xxx -e GITHUB_REPO=owner/repo dhaupin/vant</code></pre>
-                </div>
-                <div class="code-block">
-                    <h4>Clone from GitHub</h4>
-                    <pre><code>git clone https://github.com/dhaupin/vant.git
-cd vant && npm install && vant sync</code></pre>
-                </div>
-            </div>
-            <p style="margin-top:20px;"><a href="https://docs.creadev.org/vant/getting-started" class="learn-more">Full Getting Started Guide →</a></p>
+vant sync
+
+# Docker
+docker run -e GITHUB_TOKEN=xxx -e GITHUB_REPO=owner/repo dhaupin/vant</pre>
+            <p><a href="https://docs.creadev.org/vant/getting-started">Full Getting Started Guide →</a></p>
         </section>
 
         <section class="about" id="agent-init">
@@ -455,7 +444,7 @@ vant start
             </div>
             <div class="feature">
                 <h3>Getting Started</h3>
-                <p>One command: <code>npx vant init</code>. Works with npm, Docker, or clone. Built for autonomous agents.</p>
+                <p>One command: <code>npx vant init</code>. Works with npm, Docker, or clone.</p>
                 <a href="https://docs.creadev.org/vant/getting-started" class="learn-more">Quick Start →</a>
             </div>
             <div class="feature">
