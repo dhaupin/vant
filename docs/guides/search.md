@@ -244,6 +244,36 @@ vant search --mode rag "python"
 vant search --mode rag --limit 3 "context"
 ```
 
+## Settings
+
+Configure search via `settings.ini`:
+
+```ini
+# Search (RAG)
+REHYDRATE_MAX_SIZE=51200    # bytes, max 1MB (default 50KB)
+COMPRESSION_THRESHOLD=5120  # bytes trigger for compression hint (default 5KB)
+RAG_LIMIT_MAX=20             # max results from LTC search (default 20)
+```
+
+| Setting | Default | Description |
+|---------|---------|------------|
+| REHYDRATE_MAX_SIZE | 50KB | Max bytes returned in RAG context |
+| COMPRESSION_THRESHOLD | 5KB | When to show compression hint |
+| RAG_LIMIT_MAX | 20 | Max results from LTC query |
+
+RAG response includes current settings:
+
+```json
+{
+  "mode": "rag",
+  "settings": {
+    "rehydrateMaxSize": 51200,
+    "compressionThreshold": 5120,
+    "ragLimitMax": 20
+  }
+}
+```
+
 ---
 
 ## Related

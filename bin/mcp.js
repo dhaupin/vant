@@ -585,12 +585,17 @@ async function searchBrain(query, args = {}) {
         if (limit > 20) limit = 20;
         
         const { results, context } = await searchLib.query(query, { limit });
+
+        // Get settings for compression threshold
+        const settings = searchLib.getSettings();
+        const compressThreshold = settings.compressionThreshold;
         
         // Apply compression if context is large
         let compressed = null;
-        if (context && context.length > 5000) {
+        if (context && context.length > compressThreshold) {
             // Compress using vpatch format
-            compressed = `[COMPRESSED:${context.length}]${context.slice(0, 5000)}...`;
+            const truncated = context.slice(0, compressThreshold);
+            compressed = `[COMPRESSED:${context.length}]${truncated}...`;
         }
         
         return {
@@ -600,6 +605,11 @@ async function searchBrain(query, args = {}) {
             hits: results.map(r => ({ type: r.type, summary: r.summary })),
             context: context || '',
             compressed,
+            settings: {
+                rehydrateMaxSize: settings.rehydrateMaxSize,
+                compressionThreshold: compressThreshold,
+                ragLimitMax: settings.ragLimitMax
+            },
             ltc: searchLib.getSummary()
         };
     }
