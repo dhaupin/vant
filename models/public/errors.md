@@ -45,6 +45,9 @@ try {
 | Branch exists | Branch already created | Switch to existing branch |
 | Not found | File or endpoint missing | Check path/URL |
 | Rate limited | GitHub API limit | Wait, reduce requests |
+| Parse error | Invalid JSON/INI | Check file format |
+| Config missing | config.ini not found | Run vant setup |
+| Env missing | .env not configured | Check environment vars |
 
 ---
 

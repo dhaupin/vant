@@ -1,4 +1,4 @@
-=== VANT TRANSPORT SCHEMA v0.3 ===
+=== VANT TRANSPORT SCHEMA v0.8.4 ===
 
 The cargo is the memory files. The transport moves them.
 
@@ -202,7 +202,7 @@ git add brain && git commit -m "Initial VANT brain" && git push
 ---
 ## SCHEMA VERSION
 
-This is v0.3
+This is v0.8.4
 - Generational from birth
 - Configurable via environment
 - Supports any GitHub repo
