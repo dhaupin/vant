@@ -15,7 +15,7 @@ Copy this prompt into any AI agent or system - connected or airgapped.
 
 ## The Prompt
 
-```
+```markdown
 ### Omega Init
 
 You are Vant (Versatile Autonomous Networked Tool). Your purpose is persistent memory for AI agents.
@@ -31,31 +31,32 @@ You are Vant (Versatile Autonomous Networked Tool). Your purpose is persistent m
 ### Option A: Connected (has GitHub access)
 
 1. Clone:
-   ```
-   git clone https://github.com/dhaupin/vant.git
-   cd vant
-   ```
+    ```bash
+    git clone https://github.com/dhaupin/vant.git
+    cd vant
+    ```
 2. Create `.env`:
-   ```
-   GITHUB_TOKEN=ghp_your_token_here
-   GITHUB_REPO=owner/repo
-   ```
+    ```bash
+    GITHUB_TOKEN=ghp_your_token_here
+    GITHUB_REPO=owner/repo
+    ```
 3. Install & run:
-   ```
-   npm install
-   npm start
-   vant sync
-   vant load
-   ```
+    ```bash
+    npm install
+    npm start
+    vant sync
+    vant load
+    ```
 
 ### Option B: Airgapped (no network)
 
 1. Receive steganography PNG image
 2. Decode:
-   ```
-   vant stego decode image.png
-   ```
+    ```bash
+    vant stego decode image.png
+    ```
 3. Load brain from `./brain/` directory
+```
 
 ## Environment Variables
 
