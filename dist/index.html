@@ -474,7 +474,7 @@
             <p class="tagline">Persistent AI Memory</p>
             <nav class="header-nav">
                 <a href="#agent-init">⚡ Agent Init</a>
-                <a href="https://docs.creadev.org/vant/getting-started">Docs</a>
+                <a href="https://docs.creadev.org/vant/guides/search-architecture">Search</a>
                 <a href="https://github.com/dhaupin/vant">GitHub</a>
             </nav>
         </header>
@@ -568,6 +568,11 @@
                 <h3>Islands</h3>
                 <p>Lazy-load brain components. Load only what you need: github, gitlab, linear, stego. Faster cold starts.</p>
                 <a href="https://docs.creadev.org/vant/guides/islands" class="learn-more">Learn more →</a>
+            </div>
+            <div class="feature">
+                <h3>Search</h3>
+                <p>3-layer speed: cache + compact + lazy. Connect memory islands fast. Scales to 10k+ memories.</p>
+                <a href="https://docs.creadev.org/vant/guides/search-architecture" class="learn-more">Learn more →</a>
             </div>
             <div class="feature">
                 <h3>MCP Server</h3>
@@ -724,6 +729,10 @@
             <details>
                 <summary>Is my brain private?</summary>
                 <p>Yes-if you use a private GitHub repository, your brain stays completely private. Vant doesn't use any external databases or services. Your brain lives in your GitHub repo, and only you (or agents you authorize) can access it.</p>
+            </details>
+            <details>
+                <summary>How does search work in Vant?</summary>
+                <p>Three layers: cache (same query = instant), compact (summaries skip rehydration), lazy-load (heavy modules load on-demand). Scales to 10k+ memories.</p>
             </details>
             <details>
                 <summary>Can multiple AI agents share one brain?</summary>
