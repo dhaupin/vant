@@ -24,6 +24,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 - **CLI --compact flag** for quick summaries
 - **MCP compact option** for vant_search tool
 
+### Refactored
+
+- **Test suite rename**: `bin/test-v086.js` → `bin/test-core.js`
+- **CLI rename**: `vant test v086` → `vant test core`
+
 ### Search API
 
 ```javascript

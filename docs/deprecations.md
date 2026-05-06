@@ -36,6 +36,8 @@ nav_order: 99
 |------|------------|---------|
 | `lib/search-hybrid.js` | Kept + lazy-load | v0.8.6 |
 | Session cache | Added to search.js | v0.8.6 |
+| `bin/test-v086.js` | Renamed to test-core.js | v0.8.6 |
+| `vant test v086` | CLI renamed to 'vant test core' | v0.8.6 |
 
 ## Related
 
