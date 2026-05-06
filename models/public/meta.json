@@ -5,7 +5,7 @@
   "description": "Vant AI Agent System - Default/Public Model",
   "purpose": "Open source starting point for Vant-based systems",
   "license": "MIT",
-  "status": "dev",
+  "status": "production",
   "files": [
     "identity.md",
     "ego.md",
@@ -41,6 +41,10 @@
     "vant update - Check updates",
     "vant help - Show help",
     "vant node - Run as node",
-    "vant mcp - Run MCP server"
+    "vant mcp - Run MCP server",
+    "vant islands - Islands boot",
+    "vant resolution - Thought tracking",
+    "vant sync - GitHub sync",
+    "vant prune - State cleanup"
   ]
 }

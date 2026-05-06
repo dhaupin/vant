@@ -5,11 +5,11 @@ Short, medium, and long term objectives.
 ## Current Goals
 
 ### Short Term
-- v0.8.2 release complete
+- v0.8.6 release complete
 
 ### Medium Term
 - Instance-to-instance brain transfer
-- Stegoframe integration
+- Horcrux steganography bootstrap
 
 ### Long Term
 - Multi-agent shared memory

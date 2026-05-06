@@ -67,7 +67,7 @@ CLI COMMANDS:
 
 VERSION: see package.json
 
-RELEASE: 2025-04
+RELEASE: 2026-05
 
 ---
 Vant Default Model
