@@ -2,25 +2,32 @@
 /**
  * Vant Hybrid CLI
  * Public/Private sync
+ * 
+ * All args should have both long (--arg) and short (-a) forms.
+ * 
+ * Usage: vant hybrid [-h|--help] [-p|--public] [-r|--private]
  */
 
 // -h/--help: show help and exit
 const args = process.argv.slice(2);
 if (args[0] === '-h' || args[0] === '--help') {
-    console.log('Usage: vant hybrid [--public|--private]');
+    console.log('Usage: vant hybrid [-h|--help] [-p|--public] [-r|--private]');
     console.log('');
-    console.log('  --public   Push public only');
-    console.log('  --private  Push private only');
+    console.log('  -h, --help    Show this help');
+    console.log('  -p, --public  Push public only');
+    console.log('  -r, --private Push private only');
     process.exit(0);
 }
+
+// Parse: support both short and long
+const argsSet = new Set(args);
+const action = (argsSet.has('-p') || argsSet.has('--public')) ? 'public' :
+              (argsSet.has('-r') || argsSet.has('--private')) ? 'private' :
+              args[0];
 
 const path = require('path');
 const DIR = path.join(__dirname, '..');
 const hybrid = require(path.join(DIR, 'lib', 'hybrid'));
-
-// Parse args
-const args = process.argv.slice(2);
-const action = args[0];
 
 async function run() {
     if (!action) {

@@ -23,7 +23,7 @@ Usage: vant search <query>
         process.exit(0);
     }
     
-    if (action === '--hybrid' || action === '-h') {
+    if (action === '--hybrid' || action === '-H') {
         const query = args.slice(1).join(' ') || process.argv[3] || '';
         if (!query) {
             console.error('Usage: vant search --hybrid <query>');

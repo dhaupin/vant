@@ -1,17 +1,6 @@
 #!/usr/bin/env node
 const vaf = require("../lib/vaf");
 
-// Universal -h/--help (consistent with vant help <cmd>)
-const args = process.argv.slice(2);
-if (args[0] === '-h' || args[0] === '--help') {
-    console.log('Usage: vant sync [pull|push|status]');
-    console.log('');
-    console.log('  pull      Pull from GitHub (default)');
-    console.log('  push      Push to GitHub');
-    console.log('  status    Show git status');
-    process.exit(0);
-}
-
 /**
  * Vant Sync
  * Pull and push to GitHub
@@ -19,10 +8,34 @@ if (args[0] === '-h' || args[0] === '--help') {
  * IMPORTANT: GitHub TOS prohibits using git as a database.
  *             Do NOT auto-commit. User must manually sync.
  * 
- * Usage: vant sync
- *        vant sync push
- *        vant sync pull
+ * All args should have both long (--arg) and short (-a) forms.
+ * 
+ * Usage: vant sync [-h|--help] [-p|-r|-s] [message]
+ *        vant sync --push [message]
+ *        vant sync --pull
+ *        vant sync --status
  */
+
+// Universal -h/--help
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log('Usage: vant sync [-h|--help] [-p|-r|-s] [message]');
+    console.log('');
+    console.log('  -h, --help    Show this help');
+    console.log('  -p, --push   Push to GitHub');
+    console.log('  -r, --pull   Pull from GitHub (default)');
+    console.log('  -s, --status Show git status');
+    console.log('');
+    console.log('  message     Optional commit message for push');
+    process.exit(0);
+}
+
+// Parse args: support both -p/--push, -r/--pull, -s/--status
+const argsSet = new Set(args);
+const action = (argsSet.has('-p') || argsSet.has('--push')) ? 'push' :
+              (argsSet.has('-r') || argsSet.has('--pull')) ? 'pull' :
+              (argsSet.has('-s') || argsSet.has('--status')) ? 'status' :
+              args[0] || 'pull';
 
 const { execSync } = require('child_process');
 const fs = require('fs');
@@ -153,18 +166,18 @@ execSync(`git push ${url} ${DEFAULT_BRANCH}`, { stdio: 'pipe' });
  * Main
  */
 function main() {
-    const args = process.argv.slice(3);
-    const action = args[0] || 'pull';
+    // Use action parsed at top-level, or default to pull
+    const message = args.slice(1).join(' ') || 'Vant update';
     
     if (action === 'push') {
-        const message = args.slice(1).join(' ') || 'Vant update';
         push(message);
     } else if (action === 'pull') {
         pull();
     } else if (action === 'status') {
         console.log(git(['status']));
     } else {
-        console.log('Usage: vant sync [pull|push|status]');
+        console.log('Usage: vant sync [-h|--help] [-p|-r|-s]');
+        process.exit(1);
     }
 }
 

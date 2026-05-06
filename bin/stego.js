@@ -1,13 +1,38 @@
 #!/usr/bin/env node
 /**
  * Vant Stego CLI
+ * Hide data in images (steganography)
+ * 
+ * All args should have both long (--arg) and short (-a) forms.
  * 
  * Usage:
- *   node bin/stego.js snapshot --output brain.png [--encrypt password]
- *   node bin/stego.js recover --input brain.png [--decrypt password]
- *   node bin/stego.js capacity --image avatar.png
- *   node bin/stego.js upload --input avatar.png [--provider github]
+ *   vant stego -h|--help
+ *   vant stego snapshot -o|--output <file> [-e|--encrypt <pass>]
+ *   vant stego recover -i|--input <file> [-d|--decrypt <pass>]
+ *   vant stego capacity -i|--input <image>
+ *   vant stego upload -i|--input <file> [-p|--provider <name>]
  */
+
+// -h/--help
+const args = process.argv.slice(2);
+if (args.includes('-h') || args.includes('--help')) {
+    console.log('Usage: vant stego <command> [-h|--help] [options]');
+    console.log('');
+    console.log('Commands:');
+    console.log('  snapshot     Hide brain in image');
+    console.log('  recover      Extract brain from image');
+    console.log('  capacity     Show image capacity');
+    console.log('  upload       Upload to provider');
+    console.log('');
+    console.log('Options:');
+    console.log('  -h, --help     Show this help');
+    console.log('  -i, --input    Input file');
+    console.log('  -o, --output   Output file');
+    console.log('  -e, --encrypt  Encryption password');
+    console.log('  -d, --decrypt  Decryption password');
+    console.log('  -p, --provider Provider (github)');
+    process.exit(0);
+}
 
 const fs = require('fs');
 const path = require('path');
@@ -18,9 +43,12 @@ const args = process.argv.slice(2);
 const command = args[0];
 
 async function snapshot(args) {
-    const output = args.find(a => a.startsWith('--output='))?.slice(9) || 'brain.png';
-    const encrypt = args.find(a => a.startsWith('--encrypt='))?.slice(10);
-    const input = args.find(a => a.startsWith('--input='))?.slice(8) || 'avatar.png';
+    const output = args.find(a => a.startsWith('--output=') || a.startsWith('-o='))?.split('=')[1] || 
+                args.find(a => a.startsWith('-o'))?.slice(2) || 'brain.png';
+    const encrypt = args.find(a => a.startsWith('--encrypt=') || a.startsWith('-e='))?.split('=')[1] ||
+                   args.find(a => a.startsWith('-e'))?.slice(2);
+    const input = args.find(a => a.startsWith('--input=') || a.startsWith('-i='))?.split('=')[1] ||
+                  args.find(a => a.startsWith('-i'))?.slice(2) || 'avatar.png';
     
     if (!fs.existsSync(input)) {
         console.error(`Input image not found: ${input}`);

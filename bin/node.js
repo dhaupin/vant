@@ -4,17 +4,21 @@
  * Runs Vant as a persistent node. Similar to crypto nodes - each instance
  * runs the same code but maintains its own brain state in GitHub.
  * 
+ * All args should have both long (--arg) and short (-a) forms.
+ * 
  * Usage:
- *   node bin/node.js                    # Start node (manual sync)
- *   node bin/node.js --mcp              # Start with MCP server
- *   node bin/node.js --mcp-port 3457    # Custom MCP server port
- *   node bin/node.js --help             # Show this help
+ *   node bin/node.js -h|--help
+ *   node bin/node.js -m|--mcp [-p|--mcp-port <port>]
+ *   node bin/node.js -P|--enable-polling [-i|--poll-interval <sec>]
  * 
- * Auto-Polling Mode (OPT-IN with WARNING):
- *   node bin/node.js --enable-polling   # Enable background GitHub polling
- *   node bin/node.js --enable-polling --poll-interval 30
+ * Options:
+ *   -h, --help          Show this help
+ *   -m, --mcp         Start with MCP server
+ *   -p, --mcp-port    MCP server port (default: 3456)
+ *   -P, --enable-polling   Enable background GitHub polling
+ *   -i, --poll-interval    Polling interval in seconds (default: 60)
  * 
- *   ⚠️  AUTO-POLLING REQUIRES TWO CONFIRMATIONS:
+ * ⚠️  AUTO-POLLING REQUIRES TWO CONFIRMATIONS:
  *       1. Set VANT_AGREE_AUTO_SYNC=true (env var = "checkbox")
  *       2. Type "AGREE" when prompted (stdin = "type to confirm")
  * 
@@ -45,31 +49,20 @@ if (args.includes('--help') || args.includes('-h')) {
     console.log(`
 Vant Node Runner
 
-Usage:
-  node bin/node.js                    # Start node (manual sync)
-  node bin/node.js --mcp              # Start with MCP server
-  node bin/node.js --mcp-port 3457    # Custom MCP server port
-  node bin/node.js --help             # Show this help
+Usage: node bin/node.js [-h|--help] [-m|--mcp] [-p|--mcp-port <port>]
+       node bin/node.js -P|--enable-polling [-i|--poll-interval <sec>]
 
-Auto-Polling Mode (OPT-IN with WARNING):
-  node bin/node.js --enable-polling   # Enable background GitHub polling
-  node bin/node.js --enable-polling --poll-interval 30
+Options:
+  -h, --help          Show this help
+  -m, --mcp         Start with MCP server
+  -p, --mcp-port    MCP server port (default: 3456)
+  -P, --enable-polling   Enable background GitHub polling
+  -i, --poll-interval    Polling interval in seconds (default: 60)
+  -v, --verbose      Verbose output
 
-  ⚠️  AUTO-POLLING REQUIRES TWO CONFIRMATIONS:
-      1. Set VANT_AGREE_AUTO_SYNC=true (env var = "checkbox")
-      2. Type "AGREE" when prompted (stdin = "type to confirm")
-
-Environment:
-  VANT_GITHUB_REPO      - GitHub repo
-  VANT_GITHUB_TOKEN    - GitHub token
-  VANT_MCP_PORT        - MCP server port
-  VANT_AGREE_AUTO_SYNC  - Required for polling: set to "true" to agree
-
-What it does:
-  1. Loads brain from models/public
-  2. Starts MCP server (optional)
-  3. Runs loop (brain updates done manually via vant sync)
-  4. Optional: background GitHub polling (opt-in with warnings)
+⚠️  AUTO-POLLING REQUIRES TWO CONFIRMATIONS:
+    1. Set VANT_AGREE_AUTO_SYNC=true (env var)
+    2. Type "AGREE" when prompted
 `);
     process.exit(0);
 }
@@ -77,29 +70,33 @@ What it does:
 const vaf = require("../lib/vaf");
 // Validate CLI args
 for (const arg of args) {
-    if (arg.startsWith("--mcp-port=")) {
-        const port = parseInt(arg.split("=")[1]);
+    if (arg.startsWith("--mcp-port=") || arg.startsWith("-p=") || arg.startsWith("-p")) {
+        const port = parseInt(arg.split("=")[1] || arg.slice(2));
         vaf.check(port, {type: "number", name: "mcpPort", min: 1, max: 65535});
     }
-    if (arg.startsWith("--poll-interval=")) {
-        const interval = parseInt(arg.split("=")[1]);
+    if (arg.startsWith("--poll-interval=") || arg.startsWith("-i=") || arg.startsWith("-i")) {
+        const interval = parseInt(arg.split("=")[1] || arg.slice(2));
         vaf.check(interval, {type: "number", name: "pollInterval", min: 5, max: 3600});
     }
 }
 
 // Parse polling flag
-const enablePollingArg = args.includes('--enable-polling');
-const pollInterval = parseInt(args.find(a => a.startsWith('--poll-interval='))?.split('=')[1] || '60');
+const enablePollingArg = args.includes('--enable-polling') || args.includes('-P');
+const pollInterval = parseInt(args.find(a => a.startsWith('--poll-interval='))?.split('=')[1] || 
+                    args.find(a => a.startsWith('-i='))?.split('=')[1] ||
+                    args.find(a => a.startsWith('-i'))?.slice(2) || '60');
 
 // Check for opt-in confirmation (MUST have BOTH)
 const agreedAutoSync = process.env.VANT_AGREE_AUTO_SYNC === 'true';
 
 const config = {
-    mcp: args.includes('--mcp'),
-    mcpPort: parseInt(args.find(a => a.startsWith('--mcp-port='))?.split('=')[1] || '3456'),
+    mcp: args.includes('--mcp') || args.includes('-m'),
+    mcpPort: parseInt(args.find(a => a.startsWith('--mcp-port='))?.split('=')[1] || 
+            args.find(a => a.startsWith('-p='))?.split('=')[1] ||
+            args.find(a => a.startsWith('-p'))?.slice(2) || '3456'),
     pollInterval,
-    enablePollingRequested: enablePollingArg,  // Track if flag provided (for warning)
-    enablePolling: enablePollingArg && agreedAutoSync,  // Only enabled with BOTH
+    enablePollingRequested: enablePollingArg,
+    enablePolling: enablePollingArg && agreedAutoSync,
     verbose: args.includes('--verbose') || args.includes('-v')
 };
 

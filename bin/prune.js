@@ -1,32 +1,48 @@
 #!/usr/bin/env node
 /**
  * Vant Prune CLI
+ * Clean up old/stale brain files
+ * 
+ * All args should have both long (--arg) and short (-a) forms.
  * 
  * Usage:
- *   node bin/prune.js              - Run once
- *   node bin/prune.js --dry-run    - Preview without changes
- *   node bin/prune.js --daemon     - Background daemon
- *   node bin/prune.js --stats       - Show prune statistics
- *   node bin/prune.js --list      - List prunable files
+ *   vant prune -h|--help
+ *   vant prune -d|--dry-run [-f|--force]
+ *   vant prune -D|--daemon
+ *   vant prune -s|--stats
+ *   vant prune -l|--list
  */
+
+// -h/--help
+const args = process.argv.slice(2);
+if (args.includes('-h') || args.includes('--help')) {
+    console.log('Usage: vant prune [-h|--help] [-d|--dry-run] [-f|--force] [-D|--daemon] [-s|--stats] [-l|--list]');
+    console.log('');
+    console.log('  -h, --help     Show this help');
+    console.log('  -d, --dry-run  Preview without changes');
+    console.log('  -f, --force   Force prune without confirmation');
+    console.log('  -D, --daemon  Run as background daemon');
+    console.log('  -s, --stats   Show prune statistics');
+    console.log('  -l, --list    List prunable files');
+    process.exit(0);
+}
 
 const fs = require('fs');
 const path = require('path');
 const prune = require('../lib/prune');
 
-const args = process.argv.slice(2);
 const command = args[0];
 
 /**
  * Run prune operation
  */
 async function runPrune(args) {
-    const dryRun = args.includes('--dry-run');
-    const force = args.includes('--force');
-    const verbose = args.includes('--verbose');
+    const dryRun = args.includes('--dry-run') || args.includes('-d');
+    const force = args.includes('--force') || args.includes('-f');
+    const verbose = args.includes('--verbose') || args.includes('-v');
     
     // Get options
-    const staleDaysOption = args.find(a => a.startsWith('--stale-days='));
+    const staleDaysOption = args.find(a => a.startsWith('--stale-days=') || a.startsWith('-D='));
     const staleDays = staleDaysOption ? parseInt(staleDaysOption.slice(12)) : null;
     
     const options = {

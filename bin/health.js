@@ -2,20 +2,28 @@
 const vaf = require("../lib/vaf");
 // VAF: No user input - checks .env exists only
 
+/**
+ * Vant Health Check
+ * Checks system state and model integrity
+ * 
+ * All args should have both long (--arg) and short (-a) forms.
+ * 
+ * Usage: vant health [-h|--help] [-q|--quiet]
+ */
+
 // -h/--help: show help and exit
 const args = process.argv.slice(2);
 if (args[0] === '-h' || args[0] === '--help') {
-    console.log('Usage: vant health [--quiet]');
+    console.log('Usage: vant health [-h|--help] [-q|--quiet]');
     console.log('');
-    console.log('  --quiet   Minimal output');
+    console.log('  -h, --help   Show this help');
+    console.log('  -q, --quiet  Minimal output');
     process.exit(0);
 }
 
-/**
- * Vant Health Check
- * 
- * Checks system state and model integrity
- */
+// Parse: support both -q/--quiet
+const argsSet = new Set(args);
+const quiet = argsSet.has('-q') || argsSet.has('--quiet');
 
 const fs = require('fs');
 const path = require('path');

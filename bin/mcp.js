@@ -3,11 +3,12 @@
  * 
  * Exposes Vant memory as MCP tools for AI agents.
  * 
- * Usage:
- *   node bin/mcp.js
+ * All args should have both long (--arg) and short (-a) forms.
  * 
- * Or run with --stdio for AI SDK integration:
- *   node bin/mcp.js --stdio
+ * Usage:
+ *   node bin/mcp.js -h|--help
+ *   node bin/mcp.js -s|--stdio
+ *   node bin/mcp.js -S|--server [-p|--port <port>]
  * 
  * Tools exposed:
  *   - vant_get_memory    : Read current brain state
@@ -602,8 +603,8 @@ async function handleMessage(msg) {
 // Run mode
 const args = process.argv.slice(2);
 const isHelp = args.includes('--help') || args.includes('-h');
-const isStdio = args.includes('--stdio');
-const isServer = args.includes('--server') || args.includes('--http');
+const isStdio = args.includes('--stdio') || args.includes('-s');
+const isServer = args.includes('--server') || args.includes('-S') || args.includes('--http');
 
 // Show help and exit
 if (isHelp) {
@@ -611,10 +612,15 @@ if (isHelp) {
 Vant MCP Server
 
 Usage:
-  node bin/mcp.js              # Run in background mode
-  node bin/mcp.js --server     # Start HTTP server
-  node bin/mcp.js --stdio     # Run for AI SDK stdio
-  node bin/mcp.js --help      # Show this help
+  node bin/mcp.js -h|--help
+  node bin/mcp.js -s|--stdio
+  node bin/mcp.js -S|--server [-p|--port <port>]
+
+Options:
+  -h, --help     Show this help
+  -s, --stdio   Run for AI SDK stdio
+  -S, --server  Start HTTP server
+  -p, --port   HTTP server port (default: 3456)
 
 HTTP Endpoints:
   GET  /tools   List available tools

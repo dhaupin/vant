@@ -1,17 +1,20 @@
 /**
  * Vant Loader (Node.js)
- *
- * Usage: node bin/load.js [version]
- *        node bin/load.js v0.5.0
+ * Load brain from models/public or custom path
+ * 
+ * All args should have both long (--arg) and short (-a) forms.
+ * 
+ * Usage: vant load [-h|--help] [-v|--version <ver>] [-l|--latest]
  */
 
 // -h/--help: show help and exit
 const args = process.argv.slice(2);
 if (args[0] === '-h' || args[0] === '--help') {
-    console.log('Usage: vant load [version|latest]');
+    console.log('Usage: vant load [-h|--help] [-v|--version <ver>] [-l|--latest]');
     console.log('');
-    console.log('  version   Load specific version');
-    console.log('  latest    Force latest');
+    console.log('  -h, --help     Show this help');
+    console.log('  -v, --version Load specific version');
+    console.log('  -l, --latest  Force latest');
     process.exit(0);
 }
 
