@@ -429,36 +429,34 @@
         <section class="about">
             <h2>🚀 Quick Start</h2>
             <p>Get running in 30 seconds.</p>
-            <pre class="term"># npm (recommended)
-npm install -g vant
-vant init
-vant sync
+            <pre class="term"><code><span class="tok-com"># npm (recommended)</span>
+<span class="tok-kw">npm</span> install -g vant
+<span class="tok-kw">vant</span> init
+<span class="tok-kw">vant</span> sync
 
-# Docker
-docker run -e GITHUB_TOKEN=xxx -e GITHUB_REPO=owner/repo dhaupin/vant</code></pre>
+<span class="tok-com"># Docker</span>
+<span class="tok-kw">docker</span> run -e <span class="tok-var">GITHUB_TOKEN</span>=xxx -e <span class="tok-var">GITHUB_REPO</span>=owner/repo dhaupin/vant</code></pre>
             <p><a href="https://docs.creadev.org/vant/getting-started">Full Getting Started Guide →</a></p>
         </section>
 
         <section class="about" id="agent-init">
             <h2>🤖 AI First: Agent Initialization</h2>
             <p>For AI agents landing here - initialize your brain in one step:</p>
-            <pre><code class="term term-sm"># Quick init (5 seconds)
-npx vant setup --repo https://github.com/YOUR_ORG/YOUR_BRAIN.git
+            <pre class="term-sm"><code><span class="tok-com"># Quick init (5 seconds)</span>
+<span class="tok-kw">npx</span> vant setup --repo <span class="tok-str">https://github.com/YOUR_ORG/YOUR_BRAIN.git</span>
 
-# Or if vant is already installed:
-vant setup --repo https://github.com/YOUR_ORG/YOUR_BRAIN.git
+<span class="tok-com"># Or if vant is already installed:</span>
+<span class="tok-kw">vant</span> setup --repo <span class="tok-str">https://github.com/YOUR_ORG/YOUR_BRAIN.git</span>
 
-# Then start your session:
-vant start
-</code></pre>
+<span class="tok-com"># Then start your session:</span>
+<span class="tok-kw">vant</span> start</code></pre>
 
-<pre><code class="term"># Full CLI:
-# vant setup     - Interactive setup
-# vant load      - Load brain from models/
-# vant start     - Health → sync → load → run
-# vant test      - Run tests (15/15)
-# vant islands   - List lazy-loadable components
-</code></pre>
+<pre class="term"><code><span class="tok-com"># Full CLI:</span>
+<span class="tok-com"># vant setup     - Interactive setup</span>
+<span class="tok-com"># vant load      - Load brain from models/</span>
+<span class="tok-com"># vant start     - Health → sync → load → run</span>
+<span class="tok-com"># vant test      - Run tests (15/15)</span>
+<span class="tok-com"># vant islands   - List lazy-loadable components</span></code></pre>
             <p class="ma-t">Your brain lives in <code>models/public/</code>. Key files:</p>
             <ul class="ma-t-sm pa-l">
                 <li><strong>identity.md</strong> - Who you are, CLI commands, islands</li>
