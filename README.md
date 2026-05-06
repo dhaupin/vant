@@ -58,20 +58,26 @@ npm start
 
 ## Features
 
-### MCP Server (Optional)
-Expose brain to AI agents via HTTP. Enable with `-e MCP_API_KEY`.
+### Agent Skills (agentskills.io)
+Export brain as skill for Claude Code, Codex, Cursor. [Guide →](docs/guides/agent-skills.md)
 
-[Guide →](docs/guides/mcp.md)
+### MCP Server (Optional)
+20 tools for AI agents (memory, branches, config, audit, search). [Guide →](docs/guides/mcp.md)
+
+### Islands (Optional)
+Lazy-loadable integrations: GitHub, GitLab, Linear, Stego. [Guide →](docs/guides/islands.md)
 
 ### Multi-Agent (Optional)
-File locks + branch isolation for concurrent agents.
+Branch-per-agent workflow + trust levels. [Guide →](docs/guides/multi-agent.md)
 
-[Guide →](docs/guides/multi-agent.md)
+### Webhooks (Optional)
+Inbound server + event triggers + filters. [Guide →](docs/guides/webhooks.md)
+
+### Notifications (Optional)
+Slack, Discord, Email, Pushover, Telegram. [Guide →](docs/guides/notifications.md)
 
 ### Steganography (Optional)
-Hide messages in images.
-
-[Guide →](docs/guides/steganography.md)
+Hide messages in PNG with AES-256-GCM. [Guide →](docs/guides/steganography.md)
 
 ---
 

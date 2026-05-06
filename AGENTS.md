@@ -126,8 +126,14 @@ These are the commands that work in Vant:
 | `node bin/vant.js sync` | Pull/push brain |
 | `node bin/vant.js health` | Check system |
 | `node bin/vant.js onboard` | Browse brain |
+| `node bin/vant.js islands list` | List islands |
+| `node bin/vant.js islands load <name>` | Load island |
+| `node bin/vant.js config get <key>` | Get config |
+| `node bin/vant.js config set <key> <value>` | Set config |
+| `node bin/webhook.js serve` | Start webhook server |
+| `node bin/vant.js linear issues` | List Linear issues |
 
-**MCP Server:** Run `node bin/mcp.js` to expose brain as tools.
+**MCP Server:** Run `node bin/mcp.js` to expose brain as 20 tools.
 
 ---
 
