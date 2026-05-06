@@ -77,3 +77,7 @@ Always know what's in each directory before modifying.
 ## VERSION
 
 v0.8.6 - Islands Release
+- Lazy-loadable brain components (GitHub, Linear, Automation islands)
+- Resolution system for thought lifecycle tracking
+- 24 CLI commands (was 6)
+- Dual JSON format: .resolution.json + .resolutions/ folder (future)
