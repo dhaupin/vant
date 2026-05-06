@@ -81,6 +81,23 @@ CLI COMMANDS:
 - vant succession - Version/trust management
 - vant resolution - Thought tracking
 
+### First Thing: Wake Up
+
+When you start a session:
+
+1. **Check your branch**: `git branch --show-current`
+2. **Check your trust level**: Read `_succession.json`
+3. **Load brain**: Read key files (identity.md, goals.md, lessons.md)
+4. **Find context**: Check what's in progress
+
+```bash
+# Startup sequence
+vant start              # Full: health → sync → load → run
+vant health            # Check system
+vant load              # Load brain
+vant onboard           # Browse knowledge
+```
+
 ## Utilities
 - vant watch   - Monitor GitHub
 - vant rate   - Check rate limits

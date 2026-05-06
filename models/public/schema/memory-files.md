@@ -129,17 +129,13 @@ format = json
 ```
 
 ---
-## LOADING CARGO
 
-When new instance loads brain:
+## CARGO (NOT VERSIONED)
 
-1. Clone/branch from GitHub
-2. Read identity.json for uuid, generation, parent
+The brain files in models/public/ are NOT individually versioned.
+They travel as a unit - the whole brain is versioned via package.json.
+
+When a new agent loads:
+1. Clone/branch from GitHub (has version via commit)
+2. Read identity.md for self
 3. Copy all *.md files from models/public/
-4. Read parent info to continue lineage
-
----
-## VERSION
-
-v0.8.6 - Islands Release
-- Single source: `package.json` version field
