@@ -29,53 +29,113 @@ gems:
 plugins:
   - jekyll-redirect-from
 
-# Navigation - explicit order (manual override, reliable)
+# Navigation - explicit order
 nav:
   - title: Getting Started
     items:
-      - title: Installation
-        url: /vant/getting-started/install
       - title: Quick Start
-        url: /vant/getting-started/quick-start
-  - title: Guides
+        url: /vant
+      - title: Examples
+        url: /vant/examples.html
+      - title: FAQ
+        url: /vant/faq.html
+  - title: Core
     items:
       - title: AI Onboarding
         url: /vant/guides/ai-onboard
-      - title: Brain
+      - title: Brain Structure
         url: /vant/guides/brain
       - title: Islands
         url: /vant/guides/islands
-      - title: Vibe
-        url: /vant/guides/vibe
+      - title: Trust & Succession
+        url: /vant/guides/succession
+      - title: Architecture
+        url: /vant/guides/architecture
+  - title: Tools
+    items:
+      - title: CLI
+        url: /vant/guides/cli
+      - title: MCP Server
+        url: /vant/guides/mcp
+      - title: Search Architecture
+        url: /vant/guides/search-architecture
+      - title: Hybrid Search
+        url: /vant/guides/search
       - title: Multi-Agent
         url: /vant/guides/multi-agent
+      - title: Airgap
+        url: /vant/guides/airgap-propagation
+  - title: Features
+    items:
+      - title: Webhooks
+        url: /vant/guides/webhooks
+      - title: Notifications
+        url: /vant/guides/notifications
+      - title: Linear Integration
+        url: /vant/guides/linear
+      - title: Agent Skills
+        url: /vant/guides/agent-skills
+      - title: Vibe Controls
+        url: /vant/guides/vibe
+  - title: Integrations
+    items:
+      - title: GitHub
+        url: /vant/guides/github
+      - title: Docker
+        url: /vant/guides/docker
+      - title: Providers
+        url: /vant/guides/providers
       - title: Multi-Repo
         url: /vant/guides/repos
       - title: Hybrid Sync
         url: /vant/guides/hybrid
-      - title: Hybrid Search
-        url: /vant/guides/search
-      - title: MCP
-        url: /vant/guides/mcp
-      - title: Security
-        url: /vant/guides/security
-      - title: Schema
-        url: /vant/guides/schema
-      - title: Audit
-        url: /vant/guides/audit
-      - title: Stego
-        url: /vant/guides/stego
-      - title: Providers
-        url: /vant/guides/providers
       - title: Sync
         url: /vant/guides/sync
-      - title: Airgap
-        url: /vant/guides/airgap-propagation
+  - title: Advanced
+    items:
+      - title: Security
+        url: /vant/guides/security
+      - title: Operations
+        url: /vant/guides/operations
+      - title: Style Guide
+        url: /vant/guides/style
+      - title: Testing
+        url: /vant/guides/testing
+      - title: Release
+        url: /vant/guides/release
+      - title: Contributing
+        url: /vant/contributing.html
+      - title: Schema
+        url: /vant/guides/schema
+      - title: Resolution
+        url: /vant/guides/resolution
+      - title: Pruning
+        url: /vant/guides/pruning
+      - title: Stego
+        url: /vant/guides/stego
+      - title: Steganography
+        url: /vant/guides/steganography
+      - title: Efficiency
+        url: /vant/guides/efficiency
+      - title: Plugins
+        url: /vant/guides/plugins
+      - title: CI
+        url: /vant/guides/ci
+      - title: Troubleshooting
+        url: /vant/guides/troubleshooting
+      - title: Audit
+        url: /vant/guides/audit
+      - title: Boot
+        url: /vant/guides/boot
+      - title: Horcrux
+        url: /vant/guides/horcrux
   - title: Reference
     items:
-      - title: CLI Reference
-        url: /vant/reference/cli
       - title: Module API
         url: /vant/reference/api
       - title: Configuration
         url: /vant/reference/configuration
+      - title: Deprecations
+        url: /vant/deprecations
+      - title: CHANGELOG
+        url: /vant/CHANGELOG
