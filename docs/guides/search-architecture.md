@@ -82,7 +82,7 @@ const search = require('./lib/search');  // ~2s load
 // After: loaded on first use (~50ms boot)
 ```
 
-The hybrid-search module loads only when you call `search.hybrid()` or `search.query()`.
+The search-hybrid module loads only when you call `search.hybrid()` or `search.query()`.
 
 ## Islands Architecture
 

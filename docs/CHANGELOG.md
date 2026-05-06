@@ -18,7 +18,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 ### Added
 
 - **Session caching** for hybrid search results (50 max, MD5-keyed)
-- **Lazy-load** of hybrid-search module (heavy, on-demand)
+- **Lazy-load** of search-hybrid module (heavy, on-demand)
 - **Compact mode** in query() - summaries only, skip full rehydration
 - **Cache APIs**: clearCache(), getCacheStats()
 - **CLI --compact flag** for quick summaries
@@ -85,8 +85,8 @@ Turns Vant from a "storage utility" into a "Distributed Operating System."
 - lib/islands.js ✓
 - lib/state.js ✓
 - lib/vibe.js ✓
-- lib/hybrid-search.js ✓
-- lib/query.js ✓
+- lib/search-hybrid.js ✓
+- lib/search-hyde.js ✓
 - lib/rerank.js ✓
 - lib/repos.js ✓
 - lib/hybrid.js ✓
@@ -283,7 +283,7 @@ await hybrid.pushPrivate(); // Only private repos
 - RRF: Reciprocal Rank Fusion combines both
 
 ```javascript
-const search = require('./lib/hybrid-search');
+const search = require('./lib/search-hybrid');
 await search.search('herbalism plants');
 ```
 
@@ -473,11 +473,11 @@ const { results, context } = await search.query('python');
 - `lib/providers/index.js` - Provider abstraction (5 providers)
 - `lib/prune.js` - Pruning logic
 - `lib/sync.js` - Multi-provider RAID 1 sync
-- `lib/hybrid-search.js` - Hybrid search (BM25 + Vector)
+- `lib/search-hybrid.js` - Hybrid search (BM25 + Vector)
 - `lib/schema.js` - Schema validation
 - `lib/audit.js` - Audit ledger
 - `bin/validate.js` - Validate CLI
-- `lib/query.js` - Query transformation (HyDE + Multi-Query)
+- `lib/search-hyde.js` - Query transformation (HyDE + Multi-Query)
 - `lib/rerank.js` - Re-ranking & compression
 - `lib/citations.js` - Git-backed citations
 - `bin/search.js` - Search CLI

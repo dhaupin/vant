@@ -34,7 +34,7 @@ nav_order: 99
 
 | File | Resolution | Version |
 |------|------------|---------|
-| `lib/hybrid-search.js` | Kept + lazy-load | v0.8.6 |
+| `lib/search-hybrid.js` | Kept + lazy-load | v0.8.6 |
 | Session cache | Added to search.js | v0.8.6 |
 
 ## Related

@@ -328,7 +328,7 @@ const TOOLS = [
                 limit: { type: 'number', description: 'Max results (RAG mode)', default: 5 },
                 compact: { type: 'boolean', description: 'Compact mode: return summaries only, skip full rehydration (RAG mode)', default: false }
             },
-            required: ['query']
+            required: ['search-hyde']
         }
     }
 ];
@@ -573,7 +573,7 @@ async function searchBrain(query, args = {}) {
     // Validate query
     vaf.check(query, {
         type: 'string',
-        name: 'query',
+        name: 'search-hyde',
         maxLength: 500
     });
     

@@ -235,7 +235,7 @@ function testHybridSearch() {
 // ============================================
 
 function testQuery() {
-    const query = require(path.join(ROOT, 'lib/query'));
+    const query = require(path.join(ROOT, 'lib/search-hyde'));
     
     test('query loads', () => {
         assert(query);

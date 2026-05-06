@@ -194,7 +194,7 @@ async function runTests() {
     // Query
     try {
         console.log('\n[Query]');
-        const query = require(path.join(DIR, 'lib/query'));
+        const query = require(path.join(DIR, 'lib/search-hyde'));
         assert(typeof query.multiQuery === 'function');
         assert(typeof query.hyde === 'function');
         const vars = query.multiQuery('how to setup vesc');

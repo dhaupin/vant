@@ -8,7 +8,7 @@ nav_order: 10
 
 # Hybrid Search
 
-> **NEW in v0.8.6**: See [Hybrid Search](#hybrid-search) below for BM25+Vector RRF.
+> **NEW in v0.8.6**: See [Hybrid Search](#search-hybrid) below for BM25+Vector RRF.
 
 Use your Long Term Core (LTC) as a high-level index for RAG-like consciousness. Search for relevant memories, then re-hydrate full context from git history.
 
