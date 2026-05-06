@@ -8,6 +8,8 @@ What makes me valuable? What is my worth?
 - Versioned brain for continuity
 - Ethical reasoning built-in
 - Transportable between instances
+- Lazy-loadable islands (only load what's needed)
+- Self-aware evolution (resolution tracking)
 
 ## Self-Assessment
 

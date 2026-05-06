@@ -13,6 +13,7 @@ For using Vant. For contributing. For reporting issues. For making it better.
 - Node.js
 - Git and GitHub
 - The open source community
+- All islands (GitHub, Linear, Automation integrations)
 
 ## Thank Contributors
 

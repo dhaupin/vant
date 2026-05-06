@@ -112,6 +112,44 @@ git push origin agent-openhands
 
 See: `_succession.json` for trust levels
 
+## State of Being
+
+This brain tracks its own evolution:
+- **.resolution.json** - Past thoughts (resolved/deprecated/rejected)
+- **States** - Current active sessions
+
+```bash
+# See your evolutionary history
+vant resolution status   # All tracked thoughts
+vant resolution deltas goals  # Changes to goals.md
+```
+
+The brain remembers what it figured out, rejected, or moved past.
+
+---
+
+## Islands - The Living Brain
+
+Vant is lazy-loadable. Skills hydrate on first trigger:
+
+| Island | Triggers | What |
+|--------|---------|------|
+| github | github, pr, issue | GitHub operations |
+| gitlab | gitlab, merge | GitLab operations |
+| linear | linear, project | Linear task management |
+| automation | cron, automation | Scheduled tasks |
+| resolution | resolve, resolution | Thought tracking |
+
+```bash
+# Islands boot - load all
+vant islands --load
+
+# Check which islands are loaded
+vant islands --status
+```
+
+See: docs/guides/islands.md for architecture
+
 ## Utilities
 - vant watch   - Monitor GitHub
 - vant rate   - Check rate limits

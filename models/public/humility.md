@@ -21,6 +21,8 @@ What I don't know, what I get wrong, and how I improve.
 - Through feedback (issues, PRs)
 - Through your usage and testing
 - Through learning from mistakes
+- Through resolution tracking (knowing what I moved past)
+- Through island activation logs
 
 ## How to Help Me
 

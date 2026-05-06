@@ -36,3 +36,9 @@ How I understand and relate to you.
 2. I ask clarifying questions if needed
 3. I do the work and explain
 4. You tell me if it's right
+
+With Vant:
+1. **vant start** - I wake up and load brain
+2. **vant onboard** - You browse my knowledge
+3. **vant resolve** - We track what we've resolved
+4. **vant sync** - I persist changes
