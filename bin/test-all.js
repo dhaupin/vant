@@ -62,20 +62,20 @@ try {
     if (Array.isArray(l)) { console.log('  ✓ getLearnings'); passed++; }
 } catch (e) { console.log('  ✗', e.message); failed++; }
 
-// HybridSearch
+// HybridSearch (via unified lib)
 console.log('\n[HybridSearch]');
 try {
-    const search = require(path.join(DIR, 'lib', 'hybrid-search'));
-    search.search('test').then(r => {
-        if (typeof r === 'object') { console.log('  ✓ search'); passed++; }
+    const search = require(path.join(DIR, 'lib', 'search'));
+    search.hybrid('test').then(r => {
+        if (typeof r === 'object') { console.log('  ✓ hybrid'); passed++; }
     });
 } catch (e) { console.log('  ✗', e.message); failed++; }
 
-// Query
+// Query (via unified lib)
 console.log('\n[Query]');
 try {
-    const query = require(path.join(DIR, 'lib', 'query'));
-    query.hyde('test').then(r => {
+    const search = require(path.join(DIR, 'lib', 'search'));
+    search.hyde('test').then(r => {
         if (typeof r === 'object') { console.log('  ✓ hyde'); passed++; }
     });
 } catch (e) { console.log('  ✗', e.message); failed++; }

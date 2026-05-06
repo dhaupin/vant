@@ -131,9 +131,9 @@ Combines:
 ### Usage
 
 ```javascript
-const search = require('./lib/hybrid-search');
+const search = require('./lib/search');
 
-const results = await search.search('herbalism plants');
+const results = await search.hybrid('herbalism plants');
 // { sparse: [], dense: [], fused: [], sources: [] }
 ```
 

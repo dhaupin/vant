@@ -92,23 +92,23 @@ Options:
     }
 
     if (action === '--stats') {
-        const hs = require(path.join(DIR, 'lib', 'hybrid-search'));
-        console.log(hs.getStats());
+        const searchLib = require(path.join(DIR, 'lib', 'search'));
+        console.log(searchLib.getStats());
         process.exit(0);
     }
 
     if (action === '--hyde') {
-        const q = require(path.join(DIR, 'lib', 'query'));
-        const result = await q.hyde(query);
+        const searchLib = require(path.join(DIR, 'lib', 'search'));
+        const result = await searchLib.hyde(query);
         console.log('\n=== HyDE: ' + query + ' ===\n');
         console.log('Fake Answer:\n' + result.fake + '\n');
         console.log('Results:', result.results.length);
         process.exit(0);
     }
 
-    // Default: hybrid search
-    const hs = require(path.join(DIR, 'lib', 'hybrid-search'));
-    const results = await hs.search(query);
+    // Default: hybrid search (via unified lib)
+    const searchLib = require(path.join(DIR, 'lib', 'search'));
+    const results = await searchLib.hybrid(query);
 
     console.log('\nResults:', results.fused.length);
     for (const r of results.fused.slice(0, 5)) {
