@@ -89,6 +89,13 @@ Check your level at session start. It determines how much you should ask before 
 
 ---
 
+## Full Docs
+
+- [CHANGELOG](docs/CHANGELOG.md) - Version history
+- [Deprecations](docs/deprecations.md) - Files planned for removal
+
+---
+
 ## Commit Message Format
 
 Prefix with your agent identifier:

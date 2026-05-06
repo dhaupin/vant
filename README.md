@@ -81,6 +81,13 @@ Hide messages in PNG with AES-256-GCM. [Guide →](docs/guides/steganography.md)
 
 ---
 
+## Full Docs
+
+- [CHANGELOG](docs/CHANGELOG.md) - Version history
+- [Deprecations](docs/deprecations.md) - Files planned for removal
+
+---
+
 ## Troubleshooting
 
 | Problem | Fix |
