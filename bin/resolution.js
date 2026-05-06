@@ -12,7 +12,6 @@ if (args[0] === '-h' || args[0] === '--help') {
 const path = require('path');
 const resolution = require('../lib/resolution');
 
-const args = process.argv.slice(2);
 const cmd = args[0];
 if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
 

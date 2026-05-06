@@ -75,11 +75,13 @@ AVOID:
 
 === REVISION LOG ===
 
-v0.8.6 (2026-04):
+v0.8.6 (2026-05-06):
+- Fixed duplicate args declaration in bin/resolution.js
+- Renamed transport-protocol.txt to transport-protocol.md (QC compliance)
+- 15 tests passing
 - Added spooling lesson - resist context distillation
 - Added process spooling - validate every step
 - VAF gap filling complete for bin/*.js (23/23)
-- 15 tests passing
 
 v0.8.2 (2025-04):
 - Initial public model release
