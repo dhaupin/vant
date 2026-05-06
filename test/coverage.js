@@ -287,7 +287,7 @@ function testRepos() {
 // ============================================
 
 function testHybrid() {
-    const hybrid = require(path.join(ROOT, 'lib/hybrid'));
+    const hybrid = require(path.join(ROOT, 'lib/hybrid-sync'));
     
     test('hybrid loads', () => {
         assert(hybrid);

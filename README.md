@@ -62,7 +62,7 @@ npm start
 Export brain as skill for Claude Code, Codex, Cursor. [Guide →](docs/guides/agent-skills.md)
 
 ### MCP Server (Optional)
-20 tools for AI agents (memory, branches, config, audit, search). [Guide →](docs/guides/mcp.md)
+21 tools for AI agents (memory, branches, config, audit, search, rerank). [Guide →](docs/guides/mcp.md)
 
 ### Islands (Optional)
 Lazy-loadable integrations: GitHub, GitLab, Linear, Stego. [Guide →](docs/guides/islands.md)

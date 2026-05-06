@@ -10,7 +10,7 @@
  *   node bin/mcp.js -s|--stdio
  *   node bin/mcp.js -S|--server [-p|--port <port>]
  * 
- * Tools exposed (20 total):
+ * Tools exposed (21 total):
  * Core (9):
  *   - vant_get_memory    : Read current brain state
  *   - vant_set_memory    : Write to brain (creates branch)
@@ -33,6 +33,7 @@
  *   - vant_audit_list   : List audit
  *   - vant_succession_info : Trust config
  *   - vant_search       : Search brain
+ *   - vant_rerank       : RAG rerank + compress
  */
 
 const fs = require('fs');
@@ -329,6 +330,19 @@ const TOOLS = [
                 compact: { type: 'boolean', description: 'Compact mode: return summaries only, skip full rehydration (RAG mode)', default: false }
             },
             required: ['search-hyde']
+        }
+    },
+    {
+        name: 'vant_rerank',
+        description: 'RAG rerank + compress memories. Rerank by keyword query, compress to token budget for LLM context.',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                query: { type: 'string', description: 'Query to rerank against' },
+                topK: { type: 'number', description: 'Top K results (default: 5)', default: 5 },
+                maxTokens: { type: 'number', description: 'Max tokens for compression (default: 2000)', default: 2000 },
+                mode: { type: 'string', description: 'Mode: rerank, compress, or pipeline', enum: ['rerank', 'compress', 'pipeline'], default: 'rerank' }
+            }
         }
     }
 ];
@@ -831,6 +845,22 @@ async function handleRequest(request) {
                         break;
                     case 'vant_search':
                         result = await protection.withTimeout(searchBrain(args.query, args));
+                        break;
+                    case 'vant_rerank':
+                        const rerankLib = require('./lib/rerank');
+                        const memories = getMemory();
+                        const query = args.query || '';
+                        const mode = args.mode || 'rerank';
+                        const topK = args.topK || 5;
+                        const maxTokens = args.maxTokens || 2000;
+                        
+                        if (mode === 'compress') {
+                            result = { compressed: rerankLib.compress(memories, maxTokens) };
+                        } else if (mode === 'pipeline') {
+                            result = rerankLib.pipeline(memories, query, { topK, maxTokens });
+                        } else {
+                            result = { reranked: rerankLib.rerank(memories, query, topK) };
+                        }
                         break;
                     default:
                         result = { error: 'Unknown tool: ' + name };

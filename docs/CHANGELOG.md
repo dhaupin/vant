@@ -15,6 +15,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ## [v0.8.6] - 2026-05-06 - Reliability Improvements Release
 
+### Added
+
+- **Rerank (RAG)** - New rerank module for keyword reranking and LLM context compression:
+  - CLI: `vant rerank <query>`, `vant rerank compress`, `vant rerank pipeline`
+  - MCP: `vant_rerank` tool (21 MCP tools total)
+  - 3 modes: rerank (keyword score), compress (token budget), pipeline (both)
+  - Docs: [docs/guides/rerank.md](guides/rerank)
+- **hybrid-sync.js** - Renamed `lib/hybrid.js` → `lib/hybrid-sync.js` for clarity
+
 ### Fixed
 
 - **VAF newline blocking** - Learned that blocking `\n` in all strings breaks multi-line memory content (learnings, memories, etc). Now supports `allowContent: true` option to bypass content checks for valid memory content.

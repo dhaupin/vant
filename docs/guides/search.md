@@ -159,14 +159,33 @@ async function answerWithContext(query) {
 
 ---
 
-## Hybrid Search (v0.8.6+)
+## Rerank (RAG)
 
-> BM25 + Vector + RRF for full RAG capability
+> Keyword reranking and compression for LLM context
 
-Combines:
-- **BM25 (Sparse)**: Keyword/exact match ("VESC v3.4")
-- **Vector (Dense)**: Semantic search ("nature medicine" → "herbalism")
-- **RRF**: Reciprocal Rank Fusion for best of both
+Rerank is separate from search - focuses on **keyword scoring** and **token optimization**:
+
+- **Rerank**: Score memories by keyword match to query
+- **Compress**: Strip markdown fluff, truncate to token budget
+- **Pipeline**: Rerank + compress in sequence
+
+See [Rerank Guide](guides/rerank) for full documentation.
+
+```bash
+vant rerank "lessons learned"          # Rerank
+vant rerank pipeline "security" -t 4000  # Rerank + compress
+```
+
+### Search vs Rerank
+
+| Feature | Search | Rerank |
+|---------|--------|--------|
+| Type | Semantic (BM25+Vector) | Keyword |
+| Use case | Find relevant memories | Prepare for LLM |
+| Input | Query | Query + memories |
+| Output | Candidates | Ranked + compressed |
+
+Use search to find candidates, rerank to optimize for LLM context.
 
 ### Usage
 

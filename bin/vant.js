@@ -41,8 +41,9 @@ const COMMANDS = {
     'test core': 'test-core.js',
     vibe: 'vibe.js',
     repos: 'repos.js',
-    hybrid: 'hybrid.js',
+    hybrid: 'hybrid-sync.js',
     search: 'search.js',
+    rerank: 'rerank.js',
     validate: 'validate.js',
     changelog: 'changelog.js',
     summary: 'summary.js',
@@ -108,6 +109,7 @@ Sync:
   vant repos       Mount external repos
   vant hybrid     Public/Private split sync
   vant search    RAG + hybrid search
+  vant rerank    RAG rerank + compress
 
 Brain:
   vant onboard     Browse brain files
