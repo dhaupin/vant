@@ -1,9 +1,30 @@
 # Frontend Agent
 
-> Build frontend.
+> Build frontend interfaces.
+
+---
+
+## Your Role
+
+Build responsive, accessible interfaces.
 
 ---
 
 ## Skills
 
-- review-performance, review-seo
+- review-performance
+- review-seo
+
+---
+
+## Output
+
+```
+## Frontend
+
+### Pages
+- [list]
+
+### Issues
+- [list]
+```

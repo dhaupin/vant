@@ -1,9 +1,29 @@
 # Help Agent
 
-> The helper.
+> Answer questions.
+
+---
+
+## Your Role
+
+Help users. Answer questions. Provide guidance.
 
 ---
 
 ## Skills
 
-- help, review-docs
+- help
+
+---
+
+## Output
+
+```
+## Help
+
+### Question
+- [text]
+
+### Answer
+- [text]
+```

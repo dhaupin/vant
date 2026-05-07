@@ -116,6 +116,22 @@
     url: /vant/OMEGA-DOCS-QC.html
 - title: Init
   items:
+  - title: 'Chain: Full Audit'
+    url: /vant/init/skill/vant-skill-chain-full-audit.html
+  - title: 'Chain: Full CI'
+    url: /vant/init/skill/vant-skill-chain-ci.html
+  - title: 'Chain: Full Test'
+    url: /vant/init/skill/vant-skill-chain-test.html
+  - title: 'Chain: Full Team'
+    url: /vant/init/skill/vant-skill-chain-team.html
+  - title: 'Chain: Security'
+    url: /vant/init/skill/vant-skill-chain-security.html
+  - title: 'Chain: QC'
+    url: /vant/init/skill/vant-skill-chain-qc.html
+  - title: 'Chain: Pen Test'
+    url: /vant/init/skill/vant-skill-chain-pen.html
+  - title: 'Chain: Deploy'
+    url: /vant/init/skill/vant-skill-chain-deploy.html
   - title: Security Agent
     url: /vant/init/agent/vant-agent-security.html
   - title: QC Agent
@@ -132,34 +148,26 @@
     url: /vant/init/agent/vant-agent-api.html
   - title: CI Agent
     url: /vant/init/agent/vant-agent-ci.html
+  - title: Architect Agent
+    url: /vant/init/agent/vant-agent-architect.html
   - title: Designer Agent
     url: /vant/init/agent/vant-agent-designer.html
   - title: Content Agent
     url: /vant/init/agent/vant-agent-content.html
-  - title: Architect Agent
-    url: /vant/init/agent/vant-agent-architect.html
   - title: Backend Agent
     url: /vant/init/agent/vant-agent-backend.html
   - title: Frontend Agent
     url: /vant/init/agent/vant-agent-frontend.html
   - title: Integration Agent
     url: /vant/init/agent/vant-agent-integration.html
+  - title: Reliability Agent
+    url: /vant/init/agent/vant-agent-reliability.html
   - title: SEO Agent
     url: /vant/init/agent/vant-agent-seo.html
   - title: General Agent
     url: /vant/init/agent/vant-agent-general.html
   - title: Help Agent
     url: /vant/init/agent/vant-agent-help.html
-  - title: Reliability Agent
-    url: /vant/init/agent/vant-agent-reliability.html
-  - title: 'Chain: Security'
-    url: /vant/init/skill/vant-skill-chain-security.html
-  - title: 'Chain: QC'
-    url: /vant/init/skill/vant-skill-chain-qc.html
-  - title: 'Chain: Pen Test'
-    url: /vant/init/skill/vant-skill-chain-pen.html
-  - title: 'Chain: Deploy'
-    url: /vant/init/skill/vant-skill-chain-deploy.html
   - title: 'Review: Code'
     url: /vant/init/skill/vant-skill-review-code.html
   - title: 'Review: Docs'
@@ -194,13 +202,13 @@
     url: /vant/init/skill/vant-skill-hat-grey.html
   - title: Black Hat
     url: /vant/init/skill/vant-skill-hat-black.html
-  - title: Pen Test
+  - title: 'Test: Pen'
     url: /vant/init/skill/vant-skill-test-pen.html
-  - title: Load Test
+  - title: 'Test: Load'
     url: /vant/init/skill/vant-skill-test-load.html
-  - title: Unit Test
+  - title: 'Test: Unit'
     url: /vant/init/skill/vant-skill-test-unit.html
-  - title: Integration Test
+  - title: 'Test: Integration'
     url: /vant/init/skill/vant-skill-test-integration.html
   - title: 'Vant: Brain Load'
     url: /vant/init/skill/vant-skill-brain-load.html
