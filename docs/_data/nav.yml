@@ -113,6 +113,8 @@
     - title: Rerank
       url: /vant/guides/rerank.html
 - title: Reference
+    - title: Code Comments
+      url: /vant/code-comments.html
   items:
     - title: CLI Reference
       url: /vant/reference/cli.html
