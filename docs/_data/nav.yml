@@ -120,6 +120,16 @@
     url: /vant/init/agent/vant-agent-docs.html
   - title: Code Review
     url: /vant/init/skill/vant-skill-review-code.html
+  - title: Help
+    url: /vant/init/skill/vant-skill-help.html
+  - title: Security Audit
+    url: /vant/init/skill/vant-skill-audit-security.html
+  - title: White Hat
+    url: /vant/init/skill/vant-skill-hat-white.html
+  - title: QC Audit
+    url: /vant/init/skill/vant-skill-audit-qc.html
+  - title: Docs Review
+    url: /vant/init/skill/vant-skill-review-docs.html
 - title: Reference
   items:
   - title: CLI Reference
