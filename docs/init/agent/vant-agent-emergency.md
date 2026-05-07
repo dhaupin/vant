@@ -127,5 +127,6 @@
 - Handle security incident
 - Handle data loss
 - Use iterate to drive to merge
+- Use grep to find things in code
 - Use help to route to correct agent
 - Use general for complex tasks

@@ -107,5 +107,7 @@
 - Find bug
 - Fix error
 - Use iterate to drive to merge
+- Use grep to find things in code
 - Use help to route to correct agent
+- Use sed to bypass (level 2)
 - Use general for complex tasks
