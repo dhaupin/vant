@@ -1,3 +1,10 @@
+---
+title: 4-Layer Framework
+layout: docs
+slug: framework
+description: VAF → Sandbox → QoS → Security at same global scope
+---
+
 # Vant 4-Layer Framework
 
 > The 4-layer operational stack at the same global scope

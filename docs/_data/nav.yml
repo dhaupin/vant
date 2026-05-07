@@ -36,6 +36,8 @@
     url: /vant/guides/succession.html
   - title: Architecture
     url: /vant/guides/architecture.html
+  - title: 4-Layer Framework
+    url: /vant/framework.html
   - title: Manual Brain
     url: /vant/guides/manual-brain.html
 - title: Integrations

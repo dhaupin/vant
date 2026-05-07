@@ -1,3 +1,10 @@
+---
+title: Sandbox Architecture Review
+layout: docs
+slug: sandbox-review
+description: Deep dive on Vant's sandboxing capabilities and gaps
+---
+
 # VANT SANDBOX ARCHITECTURE REVIEW
 
 > **Date**: 2026-05-07  
