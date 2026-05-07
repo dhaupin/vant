@@ -297,6 +297,70 @@ format
 ## Triggers
 
 - Use grep to find things in code
+- Use sed for raw brain access
 - Use iterate to drive to merge
-- Use general for complex tasks
-Use help to route
+- Use help to route
+- Use general for context
+
+---
+
+## AGENT FAM
+
+### Level 1 (Root)
+
+| Agent | Role |
+|-------|------|
+| general | Root template |
+
+### Level 2 (Keepers)
+
+| Agent | Role |
+|-------|------|
+| iterate | Driver - drives through layers to merge |
+| help | Router - finds solutions, routes to agents |
+| sed | Bypass - direct brain access |
+| grep | Finder - deep search, context |
+
+### Level 3 (All Agents)
+
+| Layer | Agents |
+|-------|--------|
+| CI | ci |
+| Security | security |
+| QoS | qos |
+| Reliability | reliability |
+| Ops | ops |
+| QC | qc |
+| Build | backend, frontend, api, designer |
+| Find | grep, sed, docs |
+| Test | tester, debug |
+| Content | content, seo, docs |
+| Integrate | integration, api |
+| Special | emergency, assistant |
+
+### Full Hierarchy
+
+```
+general (root)
+    ↓
+iterate ←→ help ←→ sed ←→ grep (Level 2)
+    ↓
+ci → security → qos → reliability → ops → qc
+    ↓
+[backend, frontend, api, designer]
+[grep, sed, docs]
+[tester, debug]
+[content, seo, docs]
+[integration, api]
+[emergency, assistant]
+```
+
+### Cross-References
+
+All agents reference:
+
+- iterate (drive to merge)
+- help (route to solutions)
+- sed (brain access)
+- grep (find things)
+- general (context)
