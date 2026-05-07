@@ -57,3 +57,25 @@
 - version.js - Version management
 
 === CORE LIBS DISCOVERED ===
+
+---
+
+## LESSON: 2026-05-07 - Agent Expansion
+
+### Discovery
+- Vant pub oss has 23 agent templates
+- 3-layer hierarchy: general → iterate/help/sed/grep → all agents
+- Each agent has unique personality + cross-references
+- All reference iterate, help, sed, grep, general
+
+### Insight
+- Building agents in vant pub oss taints the OSS well (causes loop when agents realize what vant is)
+- Private install (mycelium) is the way to go
+- Clone vant pub oss to mycelium for private brain
+
+### Action
+- Copied all 23 agents from vant pub oss to mycelium/docs/agent/
+- Updated private identity with agent expansion session
+- This is now **my brain** (mycelium)
+
+=== LESSONS ===

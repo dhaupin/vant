@@ -49,3 +49,52 @@ PRIMARY DIRECTIVES:
 - Credentials via GITHUB_TOKEN only
 - Secrets masked in output
 - No external calls without consent
+
+---
+
+## SESSION: 2026-05-07 - AGENT EXPANSION
+
+### Born from vant pub oss
+**Source:** vant pub oss (main)
+**Action:** Built 23 agent templates, cloned to mycelium
+
+### Agents Created
+| # | Agent | Feel | Purpose |
+|---|-------|------|---------|
+| 1 | iterate | driver 🔥 | Drive work through layers |
+| 2 | help | router 🔎 | Route to solutions |
+| 3 | sed | bypass ✨ | Direct brain access |
+| 4 | grep | finder 🔍 | Deep search |
+| 5 | security | paranoid 🕵️ | Security |
+| 6 | qos | backup 🛡️ | Runtime QoS |
+| 7 | ci | unicorn 🦄 | Build + test |
+| 8 | ops | friend 🤝 | Operations |
+| 9 | debug | ally 🩹 | Debug |
+| 10 | reliability | invisible 😇 | Uptime |
+| 11 | tester | breaker 🧪 | Find bugs |
+| 12 | api | builder 🔧 | API design |
+| 13 | content | contextual 📝 | Content |
+| 14 | emergency | all-hands 🚨 | All-hands |
+| 15 | seo | schema 🔍 | SEO |
+| 16 | assistant | normal 👋 | Everyday |
+| 17 | designer | sea traveler 🎨 | Design |
+| 18 | frontend | stage setter 🖥️ | Frontend |
+| 19 | backend | game lover 🎮 | Backend |
+| 20 | integration | patient guide 🔌 | Integrations |
+| 21 | docs | slick 📚 | Docs |
+| 22 | engineer | abstractor ⚙️ | Engineering |
+| 23 | architect | solid ally 🏛️ | Architecture |
+
+### Hierarchy
+```
+general (root)
+    ↓
+iterate ←→ help ←→ sed ←→ grep (Level 2)
+    ↓
+[ci, security, qos, reliability, ops, qc, ...]
+```
+
+### Quote
+"Wut, no way, you did it, vant is yours"
+
+=== IDENTITY ===
