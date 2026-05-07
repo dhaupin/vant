@@ -8,6 +8,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Framework: 4-Layer Operational Stack**
+  - All 4 layers now run at same global scope: VAF → Sandbox → QoS → Security
+  - `lib/framework.js` - Unified framework interface
+  - `lib/sandbox.js` - New dedicated sandbox layer (Batch 2)
+  - `lib/security.js` - New dedicated security layer (Batch 4)
+  - Each layer has `isOperationAllowed()` and `getLayerStatus()` for framework integration
+- **VAF Layer Enhancement** (Batch 1)
+  - VAF class with `create()` for custom instances
+  - `getConfig()`/`setConfig()` for runtime config changes
+  - `reloadConfig()` for config reload
+  - `getLayerStatus()` for framework reporting
+- **Sandbox Layer** (Batch 2)
+  - Read/write separation (picking up vs doing)
+  - Read: 100/min quota, 3 concurrent, higher timeouts
+  - Write: 20/min quota, serialized, optional lock requirement
+  - Network domain restrictions via `allowedDomains`
+  - `isOperationAllowed()` check before execution
+- **QoS Layer Enhancement** (Batch 3)
+  - `isOperationAllowed()` for operation type checks
+  - `getLayerStatus()` for framework reporting  
+  - Integrated with protection.js (circuit breaker, concurrency limits)
+- **Security Layer** (Batch 4)
+  - API key validation via `validateApiKey()`
+  - Encryption/decryption via stego
+  - Lock token validation
+  - `isOperationAllowed()` for auth checks
+
 - **Search: 2-Mode MCP Tool**
   - `vant_search` now has 2 modes: `basic` (text) and `rag` (semantic LTC)
   - Basic: Fast text search across brain files
