@@ -4,6 +4,12 @@ Quick entry for new Vant users and agents.
 
 ---
 
+## Welcome
+
+You belong here. Start reading here.
+
+---
+
 ## The Vant Way (What Makes Us Different)
 
 We have patience. We don't rush. We break things to YOUR pace.
