@@ -21,7 +21,7 @@
  *   - vant_sync          : Sync with GitHub
  *   - vant_lock          : Acquire/release brain lock
  *   - vant_health         : System health
- * Extended (11):
+ * Extended (12):
  *   - vant_get_islands   : List islands
  *   - vant_load_island   : Load island
  *   - vant_resolution_track : Track decisions
