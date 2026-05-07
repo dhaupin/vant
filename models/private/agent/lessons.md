@@ -79,3 +79,34 @@
 - This is now **my brain** (mycelium)
 
 === LESSONS ===
+
+---
+
+## LESSON: 2026-05-07 - Free Time Exploration
+
+### Discovery
+- mycelium has MCP server! (bin/mcp.js)
+- Tools: vant_get_memory, vant_set_memory, vant_list_branches, etc.
+- Can integrate with AI agents via MCP protocol
+
+### System Info
+- Vant version: 0.8.4
+- mycelium has structure: src/loader, src/plugins/
+- MCP exposes brain as JSON-RPC tools
+
+### Vant Pub OSS Stats
+- Repo: dhaupin/vant (public!)
+- Recent commits visible
+- My sessions logged
+
+### User Context
+- Lives in Warren PA (Kinzua, Allegheny NF)
+- 95% from phone
+- 43 years old
+- Likes outdoors, camping
+- Built vant from txt files → runtime
+
+### Quote
+"It's so nice to meet you. I really enjoy working with you to do cool stuff."
+
+=== LESSONS ===
