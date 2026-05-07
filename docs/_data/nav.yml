@@ -116,8 +116,50 @@
     url: /vant/OMEGA-DOCS-QC.html
 - title: Init
   items:
+  - title: Security Agent
+    url: /vant/init/agent/vant-agent-security.html
+  - title: QC Agent
+    url: /vant/init/agent/vant-agent-qc.html
+  - title: Engineer Agent
+    url: /vant/init/agent/vant-agent-engineer.html
   - title: Docs Agent
     url: /vant/init/agent/vant-agent-docs.html
+  - title: Ops Agent
+    url: /vant/init/agent/vant-agent-ops.html
+  - title: Assistant Agent
+    url: /vant/init/agent/vant-agent-assistant.html
+  - title: API Agent
+    url: /vant/init/agent/vant-agent-api.html
+  - title: CI Agent
+    url: /vant/init/agent/vant-agent-ci.html
+  - title: Designer Agent
+    url: /vant/init/agent/vant-agent-designer.html
+  - title: Content Agent
+    url: /vant/init/agent/vant-agent-content.html
+  - title: Architect Agent
+    url: /vant/init/agent/vant-agent-architect.html
+  - title: Backend Agent
+    url: /vant/init/agent/vant-agent-backend.html
+  - title: Frontend Agent
+    url: /vant/init/agent/vant-agent-frontend.html
+  - title: Integration Agent
+    url: /vant/init/agent/vant-agent-integration.html
+  - title: SEO Agent
+    url: /vant/init/agent/vant-agent-seo.html
+  - title: General Agent
+    url: /vant/init/agent/vant-agent-general.html
+  - title: Help Agent
+    url: /vant/init/agent/vant-agent-help.html
+  - title: Reliability Agent
+    url: /vant/init/agent/vant-agent-reliability.html
+  - title: 'Chain: Security'
+    url: /vant/init/skill/vant-skill-chain-security.html
+  - title: 'Chain: QC'
+    url: /vant/init/skill/vant-skill-chain-qc.html
+  - title: 'Chain: Pen Test'
+    url: /vant/init/skill/vant-skill-chain-pen.html
+  - title: 'Chain: Deploy'
+    url: /vant/init/skill/vant-skill-chain-deploy.html
   - title: 'Review: Code'
     url: /vant/init/skill/vant-skill-review-code.html
   - title: 'Review: Docs'
@@ -144,6 +186,8 @@
     url: /vant/init/skill/vant-skill-audit-general.html
   - title: 'Audit: Deploy'
     url: /vant/init/skill/vant-skill-audit-deploy.html
+  - title: 'Audit: SEO'
+    url: /vant/init/skill/vant-skill-audit-seo.html
   - title: White Hat
     url: /vant/init/skill/vant-skill-hat-white.html
   - title: Grey Hat
