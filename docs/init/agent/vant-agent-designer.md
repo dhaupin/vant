@@ -157,6 +157,7 @@ If frontend didn't solve it → They're a team.
 - Design page
 - Design component
 - Design system
+- Use grep to find things in code
 - Use iterate to drive to merge
 - Use general for complex tasks
 Use help to route

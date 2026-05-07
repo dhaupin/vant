@@ -143,6 +143,7 @@ Build and manage APIs.
 - Build API
 - Design API
 - Document API
+- Use grep to find things in code
 - Use iterate to drive to merge
 - Use general for complex tasks
 Use help to route

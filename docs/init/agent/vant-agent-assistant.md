@@ -152,6 +152,7 @@ Mid-chain:
 - Transform input/output
 - Manage state
 - Handle errors mid-chain
+- Use grep to find things in code
 - Use iterate to drive to merge
 - Use general for complex tasks
 Use help to route

@@ -130,6 +130,7 @@ Write clear, helpful content.
 - Write docs
 - Write marketing
 - Write copy
+- Use grep to find things in code
 - Use iterate to drive to merge
 - Use general for complex tasks
 Use help to route

@@ -151,6 +151,7 @@ When routers fail, you're there:
 - User needs help
 - Route to agent
 - Be fallback
+- Use grep to find things in code
 - Use iterate to drive to merge
 - Use general for complex tasks
 Use help to route
