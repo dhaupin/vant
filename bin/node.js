@@ -87,7 +87,7 @@ const pollInterval = parseInt(args.find(a => a.startsWith('--poll-interval='))?.
                     args.find(a => a.startsWith('-i'))?.slice(2) || '60');
 
 // Check for opt-in confirmation (MUST have BOTH)
-const agreedAutoSync = process.env.VANT_AGREE_AUTO_SYNC === 'true';
+const agreedAutoSync = env.agreeAutoSync() === 'true';
 
 const config = {
     mcp: args.includes('--mcp') || args.includes('-m'),
@@ -125,8 +125,8 @@ class VantNode {
         
         this.state = 'initialized';
         this.startedAt = Date.now();
-        this.githubToken = process.env.VANT_GITHUB_TOKEN || process.env.GITHUB_TOKEN;
-        this.repo = process.env.VANT_GITHUB_REPO || 'dhaupin/vant';
+        this.githubToken = env.githubToken() || process.env.GITHUB_TOKEN;
+        this.repo = env.githubRepo() || 'dhaupin/vant';
         
         this.modules = {
             brain: loadModule('brain'),

@@ -41,6 +41,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 // Load core Vant modules
+const { env } = require("../lib/env");
 const loadModule = (name) => {
     try {
         return require(`../lib/${name}`);
@@ -986,7 +987,7 @@ if ((!module.parent || isServer) && !isStdio) {
     const http = require('http');
     
     // SECURITY: Add authentication check
-const MCP_API_KEY = process.env.VANT_MCP_API_KEY;
+const MCP_API_KEY = env.mcpApiKey();
 
 function checkAuth(req) {
     if (!MCP_API_KEY) return true; // No key configured, allow all
@@ -1014,8 +1015,8 @@ const server = http.createServer(async (req, res) => {
         }
         
         // API Key auth check
-        const expectedKey = process.env.VANT_MCP_API_KEY || (config ? config.get('MCP_API_KEY') : null);
-        const requireApiKey = process.env.VANT_MCP_REQUIRE_API_KEY === 'true' || 
+        const expectedKey = env.mcpApiKey() || (config ? config.get('MCP_API_KEY') : null);
+        const requireApiKey = env.mcpRequireKey() === 'true' || 
                              (config ? config.get('MCP_REQUIRE_API_KEY') === 'true' : false);
         
         // If key is set OR required, enforce auth
@@ -1054,7 +1055,7 @@ const server = http.createServer(async (req, res) => {
         }
     });
     
-    const PORT = process.env.VANT_MCP_PORT || 3456;
+    const PORT = env.mcpPort() || 3456;
     server.listen(PORT, () => {
         console.log(`Vant MCP Server running on port ${PORT}`);
         console.log('Endpoints:');

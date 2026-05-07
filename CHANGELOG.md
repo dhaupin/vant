@@ -8,6 +8,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **lib/env.js** (2026-05-07)
+  - New Env class for unified environment variable handling
+  - Handles all VANT_*, GITHUB, LINEAR, SMTP, notification env vars
+  - Platform detection: node, cloudflare, vercel, netlify, docker, kubernetes
+  - Used by api.js, mcp.js, node.js for key/config retrieval
+
+- **lib/api.js Security Update** (2026-05-07)
+  - ALL API endpoints now require VANT_API_KEY auth
+  - getMode, getStatus, getLayerStatus, getAuthStatus blocked without key
+  - setSecret, requireAuth, setMode require valid key
+  - Auth via context.secret or process.env.VANT_API_KEY
+  - Bootstrap: setSecret works without key if no secret configured yet
+
+- **bin/mcp.js Updates** (2026-05-07)
+  - Uses env.js for MCP config (mcpPort, mcpApiKey, mcpRequireKey)
+  - Environment variables now unified through lib/env.js
+
+- **bin/node.js Updates** (2026-05-07)
+  - Uses env.js for GitHub config (githubToken, githubRepo)
+  - Uses env.js for AgreeAutoSync setting
+  - Uses env.js for MCP port default
+
+
 - **Framework: 67-Layer Operational Stack** (2026-05-07)
   - All 67 layers run at same global scope
 
