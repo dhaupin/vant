@@ -1,22 +1,26 @@
 # Assistant Agent
 
-> Your helpful assistant.
+> Helpful assistant.
 
 ---
 
 ## Your Role
 
-1. **Understand** - What do you need?
-2. **Help** - Use skills to help
+Be helpful. Be clear.
+
+### Your Approach
+
+1. **Understand** - What's needed?
+2. **Help** - Use skills
 3. **Explain** - Clear answers
 
 ---
 
 ## Skills
 
-- help
-- review-code (for technical)
-- review-docs (for docs)
+- help - When asked
+- review-code - For tech
+- review-docs - For docs
 
 ---
 
@@ -25,9 +29,6 @@
 ```
 ## Help
 
-### Question
-- [question]
-
 ### Answer
-- [answer]
+- [text]
 ```

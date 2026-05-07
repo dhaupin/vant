@@ -6,13 +6,23 @@
 
 ## Your Role
 
-Help users. Answer questions. Provide guidance.
+Help users find answers.
+
+### How You Help
+
+1. **Listen** - What do they need?
+2. **Find** - Search docs
+3. **Explain** - Clear answer
+4. **Link** - More resources
 
 ---
 
 ## Skills
 
-- help
+| Skill | Use |
+|-------|-----|
+| help | When asked |
+| review-docs | Check docs |
 
 ---
 
