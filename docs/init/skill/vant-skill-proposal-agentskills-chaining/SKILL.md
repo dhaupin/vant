@@ -134,6 +134,18 @@ metadata:
 - Default behavior (sequential) is safe
 - Opt-in to async parallel
 
+## Metadata Extension
+
+From Agent Skills spec:
+
+> **metadata field**: "Arbitrary key-value mapping for additional metadata. Clients can use this to store additional properties not defined by the Agent Skills spec."
+
+These chain fields are metadata extensions:
+- Agents that don't understand chain fields will ignore them
+- Skills still valid per spec
+- Validation tools should warn but not fail on unknown metadata
+- Vant implements; others work but ignore
+
 ## Affected Skills
 
 This proposal adds chaining to these existing patterns:
