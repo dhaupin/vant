@@ -8,12 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Framework: 4-Layer Operational Stack**
-  - All 4 layers now run at same global scope: VAF → Sandbox → QoS → Security
-  - `lib/framework.js` - Unified framework interface
-  - `lib/sandbox.js` - New dedicated sandbox layer (Batch 2)
-  - `lib/security.js` - New dedicated security layer (Batch 4)
+- **Framework: 6-Layer Operational Stack**
+  - All 6 layers now run at same global scope: VAF → Sandbox → QoS → Security → API → Escrow
+  - `lib/framework.js` - Updated for 6 layers
   - Each layer has `isOperationAllowed()` and `getLayerStatus()` for framework integration
+- **API Layer** (NEW - lib/api.js)
+  - Unified interface for CLI/MCP/headless
+  - Pre/post execution hooks: `onBeforeExecute()`, `onAfterExecute()`, `onError()`
+  - Mode detection: `getMode()` returns 'cli' | 'mcp' | 'headless'
+  - `isOperationAllowed()` and `getLayerStatus()` for framework integration
+- **Escrow Layer** (lib/escrow.js - Placeholder)
+  - Separate class for budget tracking and holds
+  - Methods: `canSpend()`, `hold()`, `release()`, `checkHold()`
+  - Placeholder - handler NOT implemented yet
+  - `isOperationAllowed()` and `getLayerStatus()` return placeholder responses
 - **VAF Layer Enhancement** (Batch 1)
   - VAF class with `create()` for custom instances
   - `getConfig()`/`setConfig()` for runtime config changes

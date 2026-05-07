@@ -12,17 +12,19 @@ description: VAF → Sandbox → QoS → Security at same global scope
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────┐
-│           GLOBAL OPERATIONAL LAYERS           │
-├─────────────────────────────────────────────┤
-│  VAF      →  Input validation firewall    │
-│  Sandbox →  Execution isolation          │
-│  QoS      →  Rate limits, circuit breakers│
-│  Security → Auth, encryption, posture     │
-└─────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────┐
+│           GLOBAL OPERATIONAL LAYERS                 │
+├───────────────────────────────────────────────────────┤
+│  VAF      →  Input validation firewall            │
+│  Sandbox →  Execution isolation                   │
+│  QoS      →  Rate limits, circuit breakers          │
+│  Security → Auth, encryption, posture             │
+│  API      →  Unified interface (CLI/MCP/headless) │
+│  Escrow   →  Budget tracking, holds (placeholder)  │
+└───────────────────────────────────────────────────────┘
 ```
 
-All 4 layers run at the **same global scope** - no nested boxes, just layered defenses.
+All 6 layers run at the **same global scope** - no nested boxes, just layered defenses.
 
 ## Layer Details
 
@@ -56,6 +58,19 @@ All 4 layers run at the **same global scope** - no nested boxes, just layered de
 - Encryption
 - Lock token validation
 - Functions: `validateApiKey()`, `encrypt()`, `validateLock()`
+
+### Layer 5: API (NEW - lib/api.js)
+- Unified interface
+- Controls HOW TO CALL (CLI/MCP/headless)
+- Pre/post execution hooks
+- Mode detection
+- Functions: `execute()`, `read()`, `write()`, `onBeforeExecute()`, `onAfterExecute()`, `onError()`
+
+### Layer 6: Escrow (NEW - lib/escrow.js - Placeholder)
+- Budget tracking and holds
+- Controls WHEN/HOW MUCH
+- Placeholder - handler NOT implemented yet
+- Functions: `canSpend()`, `hold()`, `release()`, `checkHold()`
 
 ## Unified Interface (lib/framework.js)
 
