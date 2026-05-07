@@ -114,6 +114,10 @@
     url: /vant/guides/rerank.html
   - title: Omega Docs QC
     url: /vant/OMEGA-DOCS-QC.html
+- title: Prompts
+  items:
+  - title: Docs Engineer
+    url: /vant/prompts/docs-engineer.html
 - title: Reference
   items:
   - title: CLI Reference
