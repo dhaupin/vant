@@ -26,6 +26,9 @@ Agent Skills spec relies on "agent decides which skills to load" - no explicit o
 - Test chains need unit → integration → e2e order
 - Security: scan → review → audit order
 - Deploy: test → build → deploy order
+- Current spec: "agent decides" is unpredictable
+- Without explicit order: failures are mysterious
+- Can't debug: don't know which skill ran when
 
 ## Solution
 
@@ -122,10 +125,12 @@ metadata:
 ##动机 (Why This Matters)
 
 1. **Deterministic workflows** - Same input → Same output
-2. **Debugging** - When chain fails, know where
-3. **Compose-ability** - Build complex from simple
+2. **Debugging** - When chain fails, know exactly where
+3. **Compose-ability** - Build complex from simple skills
 4. **Portability** - Works same across all agents
 5. **No agent luck** - Explicit beats implicit
+6. **Real world need** - Test, security, deploy all need order
+7. **Industry gap** - No chaining in spec is a missing feature
 
 ## Backward Compatibility
 
@@ -168,8 +173,12 @@ This proposal adds chaining to these existing patterns:
 ## Discussion
 
 - GitHub Discussion: https://github.com/agentskills/agentskills/discussions
-- Alternative: Use `scripts/` to chain (but that's for code, not skills)
-- This is metadata-level, cleaner
+- Alternative considered: Use `scripts/` to chain
+  - Rejected: That's for code, not skill ordering
+  - Cleaner: metadata-level orchestration
+- Prior art: Vant has chain-* skills working in production
+- Q: Why not just "agent decides"?
+- A: Works sometimes, fails mysteriously. Can't debug.
 
 ## See Also
 
