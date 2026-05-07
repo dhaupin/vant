@@ -136,6 +136,7 @@ These are the commands that work in Vant:
 | `node bin/vant.js islands list` | List islands |
 | `node bin/vant.js islands load <name>` | Load island |
 | `node bin/vant.js search <query>` | RAG search |
+| `node bin/vant.js search <query> -r` | RAG search + rerank |
 | `node bin/vant.js rerank <query>` | RAG rerank + compress |
 | `node bin/vant.js config get <key>` | Get config |
 | `node bin/vant.js config set <key> <value>` | Set config |

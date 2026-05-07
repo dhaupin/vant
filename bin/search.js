@@ -28,6 +28,8 @@ Options:
   --mode basic|rag|hybrid  Search mode
   -l, --limit <N>         Max results (default: 5)
   --compact              Summaries only (skip full rehydration)
+  -r, --rerank           Rerank results (keyword score + compress)
+  -t, --max-tokens <N>   Max tokens for rerank (default: 2000)
 `);
         process.exit(0);
     }
@@ -37,6 +39,8 @@ Options:
     let limit = 5;
     let query = action;
     let compact = false;
+    let rerank = false;
+    let maxTokens = 2000;
     
     for (let i = 1; i < args.length; i++) {
         if (args[i] === '--mode' && args[i+1]) {
@@ -47,6 +51,11 @@ Options:
             i++;
         } else if (args[i] === '--compact') {
             compact = true;
+        } else if (args[i] === '-r' || args[i] === '--rerank') {
+            rerank = true;
+        } else if ((args[i] === '-t' || args[i] === '--max-tokens') && args[i+1]) {
+            maxTokens = parseInt(args[i+1]) || 2000;
+            i++;
         }
     }
 
@@ -113,10 +122,33 @@ Options:
     // Default: hybrid search (via unified lib)
     const searchLib = require(path.join(DIR, 'lib', 'search'));
     const results = await searchLib.hybrid(query);
-
-    console.log('\nResults:', results.fused.length);
-    for (const r of results.fused.slice(0, 5)) {
-        console.log('  -', r.id?.substring(0, 8), r.rrf?.toFixed(3));
+    
+    // Optional: rerank results
+    if (rerank) {
+        const rerankLib = require(path.join(DIR, 'lib', 'rerank'));
+        const memories = results.fused.map(r => ({
+            id: r.id,
+            title: r.id?.substring(0, 20),
+            content: r.content || r.summary || '',
+            date: r.date || new Date().toISOString()
+        }));
+        const ranked = rerankLib.rerank(memories, query, limit);
+        const compressed = rerankLib.compress(ranked, maxTokens);
+        
+        console.log('\n[Search + Rerank] Query:', query);
+        console.log('Search Results:', results.fused.length);
+        console.log('Reranked:', ranked.length);
+        console.log('Compressed:', compressed.length, 'memories');
+        
+        for (let i = 0; i < compressed.length; i++) {
+            const r = compressed[i];
+            console.log((i+1) + '.', r.title?.substring(0, 20), '[' + (r.rerankScore || 0).toFixed(1) + ']');
+        }
+    } else {
+        console.log('\nResults:', results.fused.length);
+        for (const r of results.fused.slice(0, limit)) {
+            console.log('  -', r.id?.substring(0, 8), r.rrf?.toFixed(3));
+        }
     }
 }
 

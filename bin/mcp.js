@@ -327,7 +327,9 @@ const TOOLS = [
                 mode: { type: 'string', description: 'Search mode: "basic" (text), "rag" (semantic LTC), "hybrid" (BM25+Vector RRF)', enum: ['basic', 'rag', 'hybrid'], default: 'basic' },
                 files: { type: 'array', items: { type: 'string' }, description: 'Files to search (basic mode only)' },
                 limit: { type: 'number', description: 'Max results (RAG mode)', default: 5 },
-                compact: { type: 'boolean', description: 'Compact mode: return summaries only, skip full rehydration (RAG mode)', default: false }
+                compact: { type: 'boolean', description: 'Compact mode: return summaries only, skip full rehydration (RAG mode)', default: false },
+                rerank: { type: 'boolean', description: 'Rerank results after search (keyword score + compression)', default: false },
+                maxTokens: { type: 'number', description: 'Max tokens for rerank compression', default: 2000 }
             },
             required: ['search-hyde']
         }
@@ -633,6 +635,36 @@ async function searchBrain(query, args = {}) {
     if (mode === 'hybrid') {
         // Hybrid mode: BM25 + Vector with RRF (via unified search lib)
         const results = await searchLib.hybrid(query);
+        
+        // Optional: rerank results
+        if (args.rerank) {
+            const rerankLib = require('./lib/rerank');
+            const limit = args.limit || 5;
+            const maxTokens = args.maxTokens || 2000;
+            
+            const memories = results.fused.map(r => ({
+                id: r.id,
+                title: r.id?.substring(0, 20),
+                content: r.content || r.summary || '',
+                date: r.date || new Date().toISOString()
+            }));
+            
+            const ranked = rerankLib.rerank(memories, query, limit);
+            const compressed = rerankLib.compress(ranked, maxTokens);
+            
+            return {
+                mode: 'hybrid',
+                query,
+                searchResults: results.fused.length,
+                reranked: ranked.length,
+                compressed: compressed.length,
+                results: compressed.map(r => ({
+                    id: r.title?.substring(0, 15),
+                    score: r.rerankScore?.toFixed(1),
+                    content: r.content?.substring(0, 80)
+                }))
+            };
+        }
         
         return {
             mode: 'hybrid',

@@ -203,7 +203,26 @@ vant search "query"           # Default hybrid
 vant search --hybrid "q"   # Explicit hybrid
 vant search --hyde "q"      # HyDE
 vant search --stats        # Index stats
+vant search "q" -r         # Search + rerank
+vant search "q" -r -t 4000 # Search + rerank w/ 4000 tokens
 ```
+
+#### Rerank Integration
+
+Use `-r` or `--rerank` to pipeline search results through rerank:
+
+```bash
+# Search hybrid, then keyword rerank + compress
+vant search "lessons" -r -t 4000
+
+# Pipeline: Hybrid search → Rerank → Compress
+# Returns keyword-scored, token-compressed memories
+```
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-r, --rerank` | Rerank results | false |
+| `-t, --max-tokens` | Max tokens | 2000 |
 
 ### Integration
 
