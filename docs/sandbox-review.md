@@ -313,4 +313,75 @@ The most significant gap is **no operation-type sandboxing** (read vs write sepa
 
 ---
 
+# APPENDIX: GLOBAL STACK MAPPING
+
+> Updated with user's architectural framing
+
+## THE FOUR LAYERS AT SAME GLOBAL SCOPE:
+
+```
+┌─────────────────────────────────────────────┐
+│           GLOBAL OPERATIONAL LAYERS           │
+├─────────────────────────────────────────────┤
+│  VAF      →  Input validation firewall    │
+│  Sandbox →  Execution isolation          │
+│  QoS      →  Rate limits, circuit breakers│
+│  Security → Auth, encryption, posture     │
+└─────────────────────────────────────────────┘
+```
+
+### Current Vant Component Mapping:
+
+| Global Layer | Vant Component | What It Does |
+|--------------|---------------|-------------|
+| **VAF** | lib/vaf.js | Input validation, content filtering, path traversal protection |
+| **Sandbox** | lib/protection.js (partial) | Concurrent limits, timeouts - but MIXED with QoS |
+| **QoS** | lib/protection.js + lib/sync.js + vaf rate limiting | Rate limits, circuit breakers, prioritization |
+| **Security** | lib/stego.js + lock.js + mcp.js auth | Encryption, tokens, API keys, lock validation |
+
+### The Gap:
+
+**Sandbox is NOT a dedicated layer** - it's interleaved with QoS in protection.js:
+- VAF has clear identity as "input firewall"
+- Sandbox and QoS are mixed together
+- No dedicated "run in sandbox" abstraction
+
+### Recommendation:
+
+Add `lib/sandbox.js` as a **dedicated layer** at the same scope level as VAF:
+
+```javascript
+// lib/sandbox.js - NEW dedicated layer
+class Sandbox {
+  constructor(config) {
+    this.maxConcurrent = config.maxConcurrent || 3;
+    this.maxMemory = config.maxMemory || '100MB';
+    this.allowedDomains = config.allowedDomains || [];
+    this.quota = config.quota || { reads: '10MB/min', writes: '1MB/min' };
+  }
+  
+  async read(operation) {
+    // Read-specific sandbox config
+    return this.execute(operation, { type: 'read', allowConcurrent: 5 });
+  }
+  
+  async write(operation) {
+    // Write-specific sandbox config (require lock)
+    return this.execute(operation, { type: 'write', allowConcurrent: 1, requireLock: true });
+  }
+  
+  execute(operation, context) {
+    // Core sandbox execution
+  }
+}
+```
+
+This creates the four-layer stack the user is envisioning:
+- **VAF** → "what comes IN" (validated)
+- **Sandbox** → "where it runs" (isolated)  
+- **QoS** → "how fast/fair" (limited)
+- **Security** → "is it allowed" (authenticated)
+
+---
+
 *End of Review*
