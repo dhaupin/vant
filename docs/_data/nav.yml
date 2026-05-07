@@ -1,5 +1,7 @@
 - title: Getting Started
   items:
+    - title: Omega Init
+      url: /vant/omega-init.html
     - title: Quick Start
       url: /vant/getting-started/quick-start/
     - title: Installation
@@ -8,24 +10,12 @@
       url: /vant/examples.html
     - title: FAQ
       url: /vant/faq.html
-- title: Core
-  items:
-    - title: AI Onboarding
-      url: /vant/guides/ai-onboard.html
-    - title: Brain Structure
-      url: /vant/guides/brain.html
-    - title: Islands
-      url: /vant/guides/islands.html
-    - title: Trust & Succession
-      url: /vant/guides/succession.html
-    - title: Architecture
-      url: /vant/guides/architecture.html
 - title: Tools
   items:
-    - title: CLI
-      url: /vant/guides/cli.html
     - title: MCP Server
       url: /vant/guides/mcp.html
+    - title: CLI
+      url: /vant/guides/cli.html
     - title: Search Architecture
       url: /vant/guides/search-architecture.html
     - title: Hybrid Search
@@ -34,18 +24,18 @@
       url: /vant/guides/multi-agent.html
     - title: Airgap
       url: /vant/guides/airgap-propagation.html
-- title: Features
+- title: Core
   items:
-    - title: Webhooks
-      url: /vant/guides/webhooks.html
-    - title: Notifications
-      url: /vant/guides/notifications.html
-    - title: Linear Integration
-      url: /vant/guides/linear.html
-    - title: Agent Skills
-      url: /vant/guides/agent-skills.html
-    - title: Vibe Controls
-      url: /vant/guides/vibe.html
+    - title: Brain Structure
+      url: /vant/guides/brain.html
+    - title: Islands
+      url: /vant/guides/islands.html
+    - title: AI Onboarding
+      url: /vant/guides/ai-onboard.html
+    - title: Trust & Succession
+      url: /vant/guides/succession.html
+    - title: Architecture
+      url: /vant/guides/architecture.html
 - title: Integrations
   items:
     - title: GitHub
@@ -60,44 +50,32 @@
       url: /vant/guides/hybrid.html
     - title: Sync
       url: /vant/guides/sync.html
+- title: Features
+  items:
+    - title: Webhooks
+      url: /vant/guides/webhooks.html
+    - title: Notifications
+      url: /vant/guides/notifications.html
+    - title: Linear Integration
+      url: /vant/guides/linear.html
+    - title: Agent Skills
+      url: /vant/guides/agent-skills.html
+    - title: Vibe Controls
+      url: /vant/guides/vibe.html
 - title: Advanced
   items:
     - title: Security
       url: /vant/guides/security.html
     - title: Operations
       url: /vant/guides/operations.html
-    - title: Style Guide
-      url: /vant/guides/style.html
     - title: Testing
       url: /vant/guides/testing.html
+    - title: Style Guide
+      url: /vant/guides/style.html
     - title: Release
       url: /vant/guides/release.html
     - title: Contributing
       url: /vant/contributing.html
-    - title: Schema
-      url: /vant/guides/schema.html
-    - title: Resolution
-      url: /vant/guides/resolution.html
-    - title: Pruning
-      url: /vant/guides/pruning.html
-    - title: Stego
-      url: /vant/guides/stego.html
-    - title: Steganography
-      url: /vant/guides/steganography.html
-    - title: Efficiency
-      url: /vant/guides/efficiency.html
-    - title: Plugins
-      url: /vant/guides/plugins.html
-    - title: CI
-      url: /vant/guides/ci.html
-    - title: Troubleshooting
-      url: /vant/guides/troubleshooting.html
-    - title: Audit
-      url: /vant/guides/audit.html
-    - title: Boot
-      url: /vant/guides/boot.html
-    - title: Horcrux
-      url: /vant/guides/horcrux.html
 - title: Reference
   items:
     - title: CLI Reference
