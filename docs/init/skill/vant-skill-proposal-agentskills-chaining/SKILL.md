@@ -72,13 +72,52 @@ metadata:
 
 ### Subfolder Restriction
 
-All skills in `chain` must be in same skillset subfolders:
-- ✅ `test-unit`, `test-e2e` - same level
-- ✅ `audit/security` - nested subfolder
-- ❌ `../parent` - not allowed
-- ❌ `/absolute` - not allowed
+All skills in `chain` must be same parent or lower (no escape up):
+- ✅ `test/chain/SKILL.md` → `test/unit/SKILL.md` (same parent)
+- ✅ `test/chain/SKILL.md` → `test/e2e/smoke/SKILL.md` (lower/deeper)
+- ❌ `test/chain/SKILL.md` → `../audit/SKILL.md` (escape to parent)
+- ❌ `/absolute/path` (not allowed)
 
-This enforces hierarchy: a chain above has more power than chain below.
+This enforces hierarchy: chain at level N can only call skills at level N or deeper.
+
+### Path Resolution
+
+When chain references a skill by name:
+1. Look in same subfolder first
+2. Then look in subfolders at same level or deeper
+3. Fail if skill not found (if validate_on_load: true)
+
+### Output Format
+
+Each skill in chain should return standard output:
+
+```yaml
+output:
+  status: success | failure | critical
+  result: "...description..."
+  errors: []
+  metrics: {}
+```
+
+- `status`: outcome for chain decision
+- `result`: human-readable summary
+- `errors`: array of issues found
+- `metrics`: timing, counts, etc.
+
+### State Passing
+
+When `pass_state: true`, chain passes to next skill:
+
+```yaml
+chain_state:
+  previous_outputs: []
+  accumulated_errors: []
+  total_metrics: {}
+```
+
+- Previous skills' outputs available to next skill
+- Errors accumulate across chain
+- Metrics merge (sum/count)
 
 ### Chain Calls Chain
 

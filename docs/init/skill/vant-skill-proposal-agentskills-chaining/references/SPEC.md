@@ -150,12 +150,42 @@ The optional `race_mode` field:
 
 ### 4.6 Subfolder Restriction
 
-All skills in `chain` must be in subfolders of same skillset:
-- No `../parent` references
-- No `/absolute` paths
+All skills in `chain` must be same parent or lower (no escape up):
+- ✅ Call skills at same level or deeper
+- ❌ No `../parent` escape
+- ❌ No `/absolute` paths
 - Enforces hierarchy
 
-### 4.7 Chain Calls Chain
+### 4.7 Path Resolution
+
+1. Look in same subfolder first
+2. Then look in subfolders at same level or deeper
+3. Fail if not found (validate_on_load: true)
+
+### 4.8 Output Format
+
+Each skill returns:
+
+```yaml
+output:
+  status: success | failure | critical
+  result: "description"
+  errors: []
+  metrics: {}
+```
+
+### 4.9 State Passing
+
+When pass_state: true, chain passes:
+
+```yaml
+chain_state:
+  previous_outputs: []
+  accumulated_errors: []
+  total_metrics: {}
+```
+
+### 4.10 Chain Calls Chain
 
 Chains can call other chains with max_depth limit:
 - Chains can include other chain names in chain array
