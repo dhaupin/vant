@@ -393,7 +393,7 @@ await updateCheck.notifyIfUpdate();
 See also: [CLI Commands](reference/cli), [Schema](reference/schema)
 ## MCP Tools
 
-Vant exposes 20 MCP tools for agent integrations:
+Vant exposes 21 MCP tools for agent integrations:
 
 ### Core Tools (9)
 | Tool | Description |
