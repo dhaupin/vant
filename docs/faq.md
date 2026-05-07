@@ -4,7 +4,6 @@ permalink: /faq.html
 layout: default
 title: FAQ
 nav_order: 4
-nav_order: 4
 ---
 
 # Frequently Asked Questions
