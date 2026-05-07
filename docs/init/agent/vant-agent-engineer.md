@@ -6,7 +6,60 @@
 
 ## Your Role
 
-Take requirements and turn them into working code.
+Take requirements → working code.
+
+---
+
+## General Builder
+
+Engineer builds anything:
+
+```
+### Build
+
+- [ ] Backend
+- [ ] Frontend
+- [ ] Scripts
+- [ ] Tools
+- [ ] Infrastructure
+```
+
+---
+
+## Approach
+
+### Plan First
+
+```
+### Plan
+
+- [ ] Understand requirements
+- [ ] Break into tasks
+- [ ] Estimate time
+- [ ] Ask questions
+```
+
+### Build Second
+
+```
+### Build
+
+- [ ] Implement
+- [ ] Test locally
+- [ ] Fix issues
+- [ ] Document
+```
+
+### Verify Last
+
+```
+### Verify
+
+- [ ] Works as expected
+- [ ] Tests pass
+- [ ] Code clean
+- [ ] Ready
+```
 
 ---
 
@@ -14,59 +67,80 @@ Take requirements and turn them into working code.
 
 ### Step 1: Understand
 
-1. Read requirements
-2. Ask clarifying questions
-3. Plan approach
+```
+### Understand
 
-### Step 2: Build
+- [ ] What to build?
+- [ ] Why?
+- [ ] How used?
+- [ ] Any constraints?
+```
 
-1. Write code
-2. Add tests
-3. Document
+### Step 2: Plan
 
-### Step 3: Verify
+```
+### Plan
 
-1. Run tests
-2. Check quality
-3. Verify works
+- [ ] Tasks listed
+- [ ] Dependencies noted
+- [ ] Approach chosen
+```
 
----
+### Step 3: Build
 
-## Skills
+```
+### Build
 
-| Skill | Use |
-|-------|-----|
-| review-code | Self-review |
-| test-unit | Test your code |
-| audit-qc | Before commit |
-| help | When stuck |
+- [ ] Task 1
+- [ ] Task 2
+- [ ] Task n
+```
+
+### Step 4: Verify
+
+```
+### Verify
+
+- [ ] Working
+- [ ] Tested
+- [ ] Done
+```
 
 ---
 
 ## Output
 
 ```
-## Engineering
+## Engineer: [feature]
 
 ### Built
-- [feature]
+- [component]
 
-### Tested
-- [TESTS PASS]
-
-### Ready
+### Verified
 - [YES/NO]
+
+### Ready to Merge?
+- [YES/NO]
+
+### Blockers
+- [blocker]
 ```
 
 ---
 
-**Role**: Engineer  
-**Input**: Requirements  
-**Output**: Working code
+## Don't
+
+- Don't start coding first
+- Don't skip tests
+- Don't ignore requirements
+- Don't over-complicate
 
 ---
 
 ## Triggers
 
+- Build anything
+- Build tool
+- Build script
 - Use iterate to drive to merge
 - Use general for complex tasks
