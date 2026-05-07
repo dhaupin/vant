@@ -48,6 +48,20 @@ Standards, checks, and validation rules for Vant brain.
 - vant watch - Monitor GitHub for updates
 - vant islands - Lazy-load brain components
 - vant resolution - Thought tracking
+- vant stego - Steganography bootstrap (brain in images)
+- vant prune - State cleanup / LTC generation
+- vant hybrid - Public/Private brain split sync
+- vant rerank - RAG rerank + compression
+- vant search - Basic + RAG search
+
+## Security Features (v0.8.6+)
+
+- VANT_API_KEY required for ALL API endpoints
+- Auth lockout duration (60s default, configurable)
+- MCP binds to localhost only (127.0.0.1)
+- VAF input validation (path traversal, injection blocking)
+- Rate limiting (per IP, per agent)
+- Circuit breaker (5 failures → open)
 
 ## Testing
 
@@ -61,11 +75,11 @@ Standards, checks, and validation rules for Vant brain.
 ## QC Check List
 
 Before any release:
-- [x] All tests pass (vant test → 15/15)
+- [x] All tests pass (vant test → 44/44)
 - [x] Health check passes (vant health → ✓)
 - [x] Load check passes (vant load → ✓)
 - [x] No .txt files in public model (convert to .md)
-- [x] CHANGELOG updated (v0.8.6 Islands Release)
+- [x] CHANGELOG updated (v0.8.6 Islands Release + Security Hardening)
 - [x] VERSION in lib/config.js updated (v0.8.6 from package.json)
 - [x] Resolution system tested (`vant resolution status` → ✓)
 - [x] Islands check passes (`vant islands --status` → ✓)

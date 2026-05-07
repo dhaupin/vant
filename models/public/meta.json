@@ -8,6 +8,8 @@
   "status": "production",
   "files": [
     "identity.md",
+    "boundaries.md",
+    "start.md",
     "ego.md",
     "fears.md",
     "anger.md",
