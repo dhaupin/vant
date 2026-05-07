@@ -8,35 +8,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Framework: 12-Layer Operational Stack**
-  - All 12 layers now run at same global scope
-  - `lib/framework.js` - Updated for 12 layers
+- **Framework: 22-Layer Operational Stack**
+  - All 22 layers now run at same global scope
+  - `lib/framework.js` - Updated for 22 layers
   - Each layer has `isOperationAllowed()` and `getLayerStatus()` for framework integration
-- **Brain Layer** (NEW - lib/brain-class.js)
-  - Class wrapper for brain operations
-  - `load()`, `get()`, `write()`, `getIdentity()`
-  - `isOperationAllowed()` and `getLayerStatus()` for framework integration
-- **Resolution Layer** (NEW - lib/resolution-class.js)
-  - Class wrapper for resolution tracking
-  - `getStatus()`, `setStatus()`, `getHistory()`, `getStats()`
-  - `isOperationAllowed()` and `getLayerStatus()` for framework integration
-- **Mitigate Layer** (NEW - lib/mitigate.js - Placeholder)
-  - Error recovery, retry logic, fallback handlers
-  - `execute()`, `retry()`, `fallback()` as placeholders
-  - Placeholder - handler NOT implemented yet
-- **Sync Layer** (NEW - lib/sync-class.js)
-  - Class wrapper for multi-provider sync
-  - `pushAll()`, `pullAny()`, `rebase()`, `isRAID()`
-  - `isOperationAllowed()` and `getLayerStatus()` for framework integration
-- **Auth Layer** (NEW - lib/auth.js - Placeholder)
-  - API key validation, token management, access control
-  - `validateApiKey()`, `generateToken()`, `validateToken()` as placeholders
-  - Placeholder - handler NOT implemented yet
-- **Search Layer** (NEW - lib/search-class.js)
-  - Class wrapper for search operations
-  - `search()`, `rag()`, `hybrid()` methods
-  - `isOperationAllowed()` and `getLayerStatus()` for framework integration
-
+- **Cache Layer** (NEW - lib/cache.js)
+  - Unified cache with LRU eviction and TTL expiration
+  - `get()`, `set()`, `delete()`, `has()`, `clear()`, `prune()`
+  - `getStats()` with hits, misses, evictions
+- **Queue Layer** (NEW - lib/queue.js)
+  - Async task queue with concurrency control
+  - `add()`, `process()`, `getJobStatus()`, `clear()`
+  - Job states: pending, running, completed, failed, retry
+- **EventBus Layer** (NEW - lib/event-bus.js)
+  - Pub/sub event bus for layer-to-layer communication
+  - `on()`, `once()`, `emit()`, `off()`
+  - Wildcards, priority handlers, async handling
+- **Metrics Layer** (NEW - lib/metrics-class.js)
+  - Observability wrapper - counters, gauges, timings
+  - `increment()`, `decrement()`, `gauge()`, `timing()`
+  - System info, retention
+- **AuditLog Layer** (NEW - lib/audit-log.js)
+  - Audit logging - who did what when
+  - `log()`, `query()`, `getUserActivity()`
+  - Compliance requirement
+- **HealthCheck Layer** (NEW - lib/health-check.js)
+  - Dependency health checks, readiness probes
+  - `register()`, `check()`, `checkOne()`
+  - Timeout handling
+- **Pipeline Layer** (NEW - lib/pipeline.js)
+  - Hooks and middleware composition
+  - `use()`, `remove()`, `execute()`
+  - Pre/post execution chains
+- **ConfigFlag Layer** (NEW - lib/config-flag.js)
+  - Feature flags, runtime config
+  - `set()`, `get()`, `enable()`, `disable()`, `toggle()`
+- **RateLimit Layer** (NEW - lib/rate-limit-class.js)
+  - Per-user rate limiting, sliding window
+  - `check()`, `record()`, `remaining()`, `reset()`
+- **Session Layer** (NEW - lib/session.js)
+  - Request context, correlation IDs
+  - `create()`, `get()`, `set()`, `correlationId()`
 - **Search: 2-Mode MCP Tool**
   - `vant_search` now has 2 modes: `basic` (text) and `rag` (semantic LTC)
   - Basic: Fast text search across brain files
