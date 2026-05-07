@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Framework: 62-Layer Operational Stack** (2026-05-07)
+  - All 62 layers run at same global scope
+  - `lib/framework.js` - Updated for 62 layers
+
+- **API Infrastructure Classes** (9 new)
+  - `server.js` - HTTP server wrapper (listen/start/stop)
+  - `middleware-stack.js` - Chain middleware handlers
+  - `query-builder.js` - SQL query builder (select/insert/update/delete)
+  - `sanitize.js` - Input sanitization (stripHtml, escapeSQL, escapeHTML)
+  - `migration.js` - DB migration manager
+  - `socket-io.js` - Socket.IO wrapper with rooms
+  - `rate-limiter.js` - HTTP rate limiting (X-RateLimit headers)
+  - `ip-filter.js` - IP allow/deny list
+
+## [Unreleased]
 - **Framework: 53-Layer Operational Stack** (2026-05-07)
   - All 53 layers run at same global scope
   - `lib/framework.js` - Updated for 53 layers
