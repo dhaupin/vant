@@ -68,6 +68,7 @@ Options:
 }
 
 const vaf = require("../lib/vaf");
+const { env: vantEnv } = require("../lib/env");
 // Validate CLI args
 for (const arg of args) {
     if (arg.startsWith("--mcp-port=") || arg.startsWith("-p=") || arg.startsWith("-p")) {
