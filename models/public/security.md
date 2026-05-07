@@ -60,3 +60,6 @@ if (token) {
 - [ ] Use lock before write
 - [ ] Check rate limits
 - [ ] Validate inputs
+- [x] Auth lockout has duration (not indefinite)
+- [x] MCP binds to localhost
+- [x] API requires VANT_API_KEY
