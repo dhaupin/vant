@@ -18,6 +18,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Path Traversal Protection** (2026-05-07)
   - Config blocks .. in paths
 
+### Fixed (2026-05-07)
+- **VAF tryCatch option**
+  - Added `{tryCatch: true}` option to validateString
+  - Returns `{valid: false, reason: '...'}` instead of throwing
+  - All validation checks support this option
+- **Config prototype block**
+  - Block `__proto__`, `constructor`, `prototype` keys in get()
+  - Prevents prototype pollution attacks
+- **Protection counter**
+  - decrementActive() now prevents going below 0
+
+### Verified
+- **MCP HTTP smuggling** (2026-05-07)
+  - Not applicable - MCP uses WebSocket, not HTTP
+  - Low risk for localhost-only service
+
 ### Scanned
 - Shell injection: All exec/spawn uses are internal git operations with controlled inputs
 - Eval: None found
