@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Prevents prototype pollution attacks
 - **Protection counter**
   - decrementActive() now prevents going below 0
+- **checkCommandStacking** (FIXED BUG)
+  - Now uses DANGEROUS_PATTERNS instead of broken regex
+  - Was: always returned `{blocked: false}` (BUG)
+  - Now: properly blocks command injection
 
 ### Verified
 - **MCP HTTP smuggling** (2026-05-07)
