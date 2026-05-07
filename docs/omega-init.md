@@ -4,6 +4,7 @@ permalink: /omega-init.html
 layout: default
 title: Omega Init
 nav_order: 1
+# AI-first: 1=Omega, 2=MCP, 3=CLI, 4=Brain, 5=Islands
 ---
 # Omega Init
 

@@ -112,7 +112,6 @@ version: 0.8.6
 permalink: /guides/my-guide
 layout: default
 title: My Guide Title
-nav_order: 15
 ---
 ```
 
