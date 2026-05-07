@@ -8,6 +8,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Framework: 53-Layer Operational Stack** (2026-05-07)
+  - All 53 layers run at same global scope
+  - `lib/framework.js` - Updated for 53 layers
+  - Each layer has `isOperationAllowed()` and `getLayerStatus()`
+
+- **API Framework Classes** (11 new - NEW category: API)
+  - `router.js` - Route matching/dispatch (GET, POST, PUT, DELETE)
+  - `request.js` - HTTP request abstraction
+  - `response.js` - HTTP response abstraction
+  - `context.js` - Combined req/res context
+  - `body-parser.js` - Parse JSON/form/multipart
+  - `cors.js` - Cross-origin resource sharing
+  - `error-handler.js` - Centralized error handling
+  - `helmet.js` - Security headers
+  - `static.js` - Static file serving
+  - `cache-control.js` - Cache headers
+  - `compression.js` - Gzip compression
+
+- **Infrastructure Utilities** (20 new - NEW category: Utilities)
+  - Core: event-emitter.js, serializer.js, storage.js
+  - Network: websocket.js, http.js
+  - Time: cron-parser.js, timing.js
+  - IDs: uuid.js
+  - Flow: debouncer.js, throttler.js, retry.js
+  - Resilience: circuit-breaker.js, bulkhead.js
+  - Data: transformer.js, hash.js, buffer.js
+  - Cache: memoize.js, lru.js
+  - Validation: validator.js
+  - Pooling: pool.js
+
+## [Unreleased] (legacy)
 - **Framework: 22-Layer Operational Stack**
   - All 22 layers now run at same global scope
   - `lib/framework.js` - Updated for 22 layers
