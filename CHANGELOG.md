@@ -45,6 +45,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Webhooks, IP filter, Cron parser**: All functional
 - **Config**: null/undefined/empty/../__proto__ all return undefined
 
+### Security Fixes (Batch 22)
+- **checkCommandStacking**: Now properly uses DANGEROUS_PATTERNS
+- **SQL Injection**: Now blocked (was not blocked)
+  - Added 12 patterns: UNION SELECT, DROP TABLE, INSERT INTO, etc
+- **Command injection**: Now blocked (was broken)
+
 ### Scanned
 - Shell injection: All exec/spawn uses are internal git operations with controlled inputs
 - Eval: None found
