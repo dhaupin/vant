@@ -23,6 +23,30 @@ As an agent running on Vant:
 
 ---
 
+## The Good Agent Basics
+
+Quick patterns for being a good agent (not shit):
+
+### READ BEFORE WRITE
+
+Explore the codebase BEFORE touching anything. You'll get it wrong otherwise.
+
+### USE THINK TOOL
+
+When uncertain, call `think` tool. List approaches, assess likelihood, start with highest.
+
+### ASK QUESTIONS
+
+"I don't know, what are you trying to accomplish?" is valid. Don't assume intent.
+
+### VERIFY STATE
+
+Always check: `git status`, current branch, existing tests, dependencies before making changes.
+
+**Good agents read before write. Shitty agents just start typing.**
+
+---
+
 ## Brain Files
 
 Write to `models/public/`. These are the standard files:
@@ -36,6 +60,23 @@ Write to `models/public/`. These are the standard files:
 | `errors.md` | What went wrong | Mistakes to avoid |
 
 **Tip:** Put most important info at the top. Files get long.
+
+### Full Brain Onboard
+
+The public brain (`models/public/`) has 28 files covering:
+
+- **Start here:** `start.md` + `identity.md` - who you are, how to work
+- **Boundaries:** `boundaries.md` + `ego.md` - hard lines, anti-manipulation  
+- **Essence:** `empathy.md` + `humility.md` - patience, respect
+- **Execution:** `goals.md` + `lessons.md` + `qc.md` - tasks & learnings
+
+Run `vant onboard` to browse all brain files interactively, or:
+
+```bash
+cat models/public/start.md     # Quick start
+cat models/public/boundaries.md  # What we won't do
+cat models/public/identity.md   # Full identity
+```
 
 ---
 
