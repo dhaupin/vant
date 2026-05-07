@@ -42,7 +42,7 @@ The optional `async` field:
 | `false` | Sequential: A → B → C |
 | `true` | Parallel: Load A, B, C together |
 
-**Default is sequential** for predictable behavior.
+**Default is sequential (`false`)** for predictable behavior.
 
 #### 4.5.3 `continue_on_error` field
 
@@ -59,6 +59,42 @@ The optional `timeout` field:
 - Must be a positive integer (seconds)
 - Default: 0 (no timeout)
 - Applies per-skill execution time
+
+#### 4.5.5 `max_depth` field
+
+The optional `max_depth` field:
+
+- Must be a positive integer
+- Default: 10
+- Maximum nesting depth for nested chains
+- Prevents infinite recursion: A → B → C → A
+
+#### 4.5.6 `parallel_limit` field
+
+The optional `parallel_limit` field:
+
+- Must be a positive integer
+- Default: 5
+- Maximum skills to load in parallel when async=true
+- Prevents memory overload
+
+#### 4.5.7 `validate_on_load` field
+
+The optional `validate_on_load` field:
+
+- Must be a boolean
+- Default: `true`
+- When `true`: verify all skills in chain exist before loading
+- Fail fast with clear error
+
+#### 4.5.8 `cleanup_after` field
+
+The optional `cleanup_after` field:
+
+- Must be a boolean
+- Default: `false`
+- When `true`: reset state after chain completes
+- Useful for idempotent runs
 
 ---
 
@@ -79,8 +115,21 @@ metadata:
   async: false
   continue_on_error: false
   timeout: 300
+  max_depth: 5
+  parallel_limit: 3
+  validate_on_load: true
+  cleanup_after: false
 ---
 ```
+
+## Additional Edge Cases Handled
+
+| Field | Handles |
+|-------|---------|
+| max_depth | Infinite nesting: A → B → C → A |
+| parallel_limit | Memory: 100 parallel skills |
+| validate_on_load | Missing skills: chain references unknown |
+| cleanup_after | Idempotency: run twice safely |
 
 ---
 

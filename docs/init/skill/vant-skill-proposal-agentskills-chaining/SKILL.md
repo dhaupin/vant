@@ -48,9 +48,13 @@ metadata:
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
 | `chain` | array | Yes | - | Ordered list of skill names to load |
-| `async` | boolean | No | `true` | Load sequentially (false) or parallel (true) |
+| `async` | boolean | No | `false` | Sequential (false) or parallel (true) |
 | `continue_on_error` | boolean | No | `true` | Continue if skill fails |
 | `timeout` | integer | No | 0 | Max time per skill (0=unlimited) |
+| `max_depth` | integer | No | 10 | Max nesting depth for nested chains |
+| `parallel_limit` | integer | No | 5 | Max parallel skills when async=true |
+| `validate_on_load` | boolean | No | `true` | Verify referenced skills exist |
+| `cleanup_after` | boolean | No | `false` | Reset state after chain completes |
 
 ### Async Flag Explanation
 
@@ -59,7 +63,7 @@ metadata:
 | `false` (default) | Sequential: A → B → C | Dependent skills, ordered workflows |
 | `true` | Parallel: Load all at once | Independent skills, maximum speed |
 
-**Default is sequential** because:
+**Default is sequential (`false`)** because:
 1. Most workflows need order (test before deploy)
 2. Less surprising behavior
 3. Explicit beats implicit
