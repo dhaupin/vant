@@ -3,9 +3,9 @@
     - title: Omega Init
       url: /vant/omega-init.html
     - title: Quick Start
-      url: /vant/getting-started/quick-start/
+      url: /vant/getting-started/quick-start.html
     - title: Installation
-      url: /vant/getting-started/install/
+      url: /vant/getting-started/install.html
     - title: Examples
       url: /vant/examples.html
     - title: FAQ
@@ -36,6 +36,8 @@
       url: /vant/guides/succession.html
     - title: Architecture
       url: /vant/guides/architecture.html
+    - title: Manual Brain
+      url: /vant/guides/manual-brain.html
 - title: Integrations
   items:
     - title: GitHub
@@ -76,6 +78,40 @@
       url: /vant/guides/release.html
     - title: Contributing
       url: /vant/contributing.html
+    - title: Schema
+      url: /vant/guides/schema.html
+    - title: Resolution
+      url: /vant/guides/resolution.html
+    - title: Pruning
+      url: /vant/guides/pruning.html
+    - title: Stego
+      url: /vant/guides/stego.html
+    - title: Steganography
+      url: /vant/guides/steganography.html
+    - title: Efficiency
+      url: /vant/guides/efficiency.html
+    - title: Plugins
+      url: /vant/guides/plugins.html
+    - title: CI
+      url: /vant/guides/ci.html
+    - title: Troubleshooting
+      url: /vant/guides/troubleshooting.html
+    - title: Audit
+      url: /vant/guides/audit.html
+    - title: Boot
+      url: /vant/guides/boot.html
+    - title: Horcrux
+      url: /vant/guides/horcrux.html
+    - title: Citations
+      url: /vant/guides/citations.html
+    - title: Entropy
+      url: /vant/guides/entropy.html
+    - title: Errors
+      url: /vant/guides/errors.html
+    - title: Onboard
+      url: /vant/guides/onboard.html
+    - title: Rerank
+      url: /vant/guides/rerank.html
 - title: Reference
   items:
     - title: CLI Reference
@@ -88,3 +124,5 @@
       url: /vant/deprecations.html
     - title: CHANGELOG
       url: /vant/CHANGELOG.html
+    - title: Legal & Policies
+      url: /vant/legal.html
