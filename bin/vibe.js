@@ -19,8 +19,8 @@ const DIR = path.join(__dirname, '..');
 const vibe = require(path.join(DIR, 'lib', 'vibe'));
 
 // Parse args
-const args = process.argv.slice(2);
-const action = args[0];
+const vibeArgs = process.argv.slice(2);
+const action = vibeArgs[0];
 
 if (!action) {
     // Show current vibe

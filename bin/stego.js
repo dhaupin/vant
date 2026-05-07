@@ -39,8 +39,8 @@ const path = require('path');
 const stego = require('../lib/stego');
 const brain = require('../lib/brain');
 
-const args = process.argv.slice(2);
-const command = args[0];
+const stegoArgs = process.argv.slice(2);
+const command = stegoArgs[0];
 
 async function snapshot(args) {
     const output = args.find(a => a.startsWith('--output=') || a.startsWith('-o='))?.split('=')[1] || 
