@@ -8,6 +8,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Integration Documentation** (2026-05-07)
+  - VAF integrated with API and Framework (input validation layer)
+  - QoS integrated (rate limiting, circuit breaker)
+  - Debouncer/Throttler available in Framework
+  - Hooks: onBeforeExecute, onAfterExecute, onError
+  
+- **Full Execution Stack** (2026-05-07)
+  - 1. API.execute() called
+  - 2. authenticate() - rate limit auth failures (max 5)
+  - 3. onBeforeExecute() hooks
+  - 4. Framework layers:
+    - a. VAF.isOperationAllowed() - input validation
+    - b. Security.isOperationAllowed()  
+    - c. QoS.isOperationAllowed() - rate limit + circuit
+    - d. Sandbox.execute() - isolation
+  - 5. onAfterExecute() hooks
+  - 6. Return result
+
+- **Rate Limiting & Circuit Breaker** (2026-05-07)
+  - QoS: maxConcurrent (default 3)
+  - QoS: circuitThreshold (default 5 failures)
+  - QoS: circuitWindow (default 60s)
+  - QoS: canProceed(), isCircuitOpen(), resetCircuit()
+
+- **Auth Rate Limiting** (2026-05-07)
+  - Max auth failures: 5 (configurable)
+  - After 5 failures: auth locked until reset
+
+
+### Added
 - **lib/env.js** (2026-05-07)
   - New Env class for unified environment variable handling
   - Handles all VANT_*, GITHUB, LINEAR, SMTP, notification env vars
