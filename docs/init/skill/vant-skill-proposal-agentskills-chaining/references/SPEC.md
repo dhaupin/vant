@@ -96,6 +96,71 @@ The optional `cleanup_after` field:
 - When `true`: reset state after chain completes
 - Useful for idempotent runs
 
+#### 4.5.9 `early_exit_on` field
+
+The optional `early_exit_on` field:
+
+- Must be a string: `none`, `failure`, `success`, or `critical`
+- Default: `none` (run all skills)
+- When `failure`: stop at first skill failure
+- When `success`: stop at first skill success
+- When `critical`: stop on critical failure only
+
+#### 4.5.10 `continue_on_success` field
+
+The optional `continue_on_success` field:
+
+- Must be a boolean
+- Default: `false`
+- When `true`: skip next skill if previous failed
+
+#### 4.5.11 `pass_state` field
+
+The optional `pass_state` field:
+
+- Must be a boolean
+- Default: `true`
+- When `true`: pass skill outputs to next skill
+- When `false`: each skill runs in isolation
+
+#### 4.5.12 `retry_count` field
+
+The optional `retry_count` field:
+
+- Must be a positive integer
+- Default: 1
+- Run entire chain N times
+
+#### 4.5.13 `retry_until` field
+
+The optional `retry_until` field:
+
+- Must be a string: `none`, `stable`, or `success`
+- Default: `none`
+- When `stable`: repeat until output unchanged
+- When `success`: repeat until all pass
+
+#### 4.5.14 `race_mode` field
+
+The optional `race_mode` field:
+
+- Must be a boolean
+- Default: `false`
+- When `true`: first skill to complete wins (requires async=true)
+
+### 4.6 Subfolder Restriction
+
+All skills in `chain` must be in subfolders of same skillset:
+- No `../parent` references
+- No `/absolute` paths
+- Enforces hierarchy
+
+### 4.7 Chain Calls Chain
+
+Chains can call other chains with max_depth limit:
+- Chains can include other chain names in chain array
+- max_depth prevents infinite recursion
+
 ---
 
 ## Full Example
@@ -103,7 +168,7 @@ The optional `cleanup_after` field:
 ```yaml
 ---
 name: full-test-chain
-description: Complete test suite chain
+description: Complete test suite with all options
 metadata:
   chain:
     - test-smoke
@@ -119,6 +184,12 @@ metadata:
   parallel_limit: 3
   validate_on_load: true
   cleanup_after: false
+  early_exit_on: failure
+  continue_on_success: true
+  pass_state: true
+  retry_count: 1
+  retry_until: none
+  race_mode: false
 ---
 ```
 

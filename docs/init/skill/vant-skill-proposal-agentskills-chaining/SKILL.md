@@ -59,6 +59,33 @@ metadata:
 | `validate_on_load` | boolean | No | `true` | Verify referenced skills exist |
 | `cleanup_after` | boolean | No | `false` | Reset state after chain completes |
 
+### Execution Fields
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `early_exit_on` | string | No | `none` | Exit on: `none` `failure` `success` `critical` |
+| `continue_on_success` | boolean | No | `false` | Continue only if previous skill passed |
+| `pass_state` | boolean | No | `true` | Pass outputs to next skill in chain |
+| `retry_count` | integer | No | 1 | Run entire chain N times |
+| `retry_until` | string | No | `none` | Repeat until: `none` `stable` `success` |
+| `race_mode` | boolean | No | `false` | First skill to complete wins (parallel only) |
+
+### Subfolder Restriction
+
+All skills in `chain` must be in same skillset subfolders:
+- ✅ `test-unit`, `test-e2e` - same level
+- ✅ `audit/security` - nested subfolder
+- ❌ `../parent` - not allowed
+- ❌ `/absolute` - not allowed
+
+This enforces hierarchy: a chain above has more power than chain below.
+
+### Chain Calls Chain
+
+Chains can call other chains (with max_depth limit):
+- ✅ `chain: [chain-test, chain-security]`
+- With depth limit to prevent infinite recursion
+
 ### Async Flag Explanation
 
 | `async` | Behavior | Use Case |
@@ -85,6 +112,63 @@ metadata:
 |-----------|----------|
 | 0 (default) | No limit |
 | positive integer | Seconds per skill |
+
+### early_exit_on
+
+| `early_exit_on` | Behavior |
+|---------------|----------|
+| `none` (default) | Run all skills |
+| `failure` | Stop on first failure |
+| `success` | Stop on first success |
+| `critical` | Stop on critical failure only |
+
+**Use case**: Stop test chain immediately if smoke test fails.
+
+### continue_on_success
+
+| `continue_on_success` | Behavior |
+|---------------------|----------|
+| `false` (default) | Run all skills regardless |
+| `true` | Skip if previous skill failed |
+
+**Use case**: Only run e2e if unit tests passed.
+
+### pass_state
+
+| `pass_state` | Behavior |
+|-------------|----------|
+| `true` (default) | Pass outputs to next skill |
+| `false` | Each skill starts fresh |
+
+**Use case**: test-e2e gets errors from test-unit.
+
+### retry_count
+
+| `retry_count` | Behavior |
+|--------------|----------|
+| 1 (default) | Run chain once |
+| N | Run entire chain N times |
+
+**Use case**: Run stability test 3 times.
+
+### retry_until
+
+| `retry_until` | Behavior |
+|-------------|----------|
+| `none` (default) | Run once (or retry_count times) |
+| `stable` | Repeat until output unchanged |
+| `success` | Repeat until all pass |
+
+**Use case**: Retry deploy until success.
+
+### race_mode
+
+| `race_mode` | Behavior |
+|------------|----------|
+| `false` (default) | Run all in order |
+| `true` | First to complete wins (async only) |
+
+**Use case**: Run against 3 mirrors, use first response.
 
 ## Example: Test Chain
 

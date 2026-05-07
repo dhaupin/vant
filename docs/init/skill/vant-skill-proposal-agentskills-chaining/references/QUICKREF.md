@@ -25,6 +25,12 @@ metadata:
 | parallel_limit | integer | 5 | No |
 | validate_on_load | boolean | true | No |
 | cleanup_after | boolean | false | No |
+| early_exit_on | string | none | No |
+| continue_on_success | boolean | false | No |
+| pass_state | boolean | true | No |
+| retry_count | integer | 1 | No |
+| retry_until | string | none | No |
+| race_mode | boolean | false | No |
 
 ## Sequential (default, async: false)
 
@@ -41,18 +47,25 @@ Load all together
 max 5 at once (parallel_limit)
 ```
 
-## Why Default Sequential?
+## Execution Control
 
-1. Most skills need order
-2. Less surprising
-3. Debug easier
-4. Explicit > implicit
+| Field | What |
+|-------|------|
+| early_exit_on: failure | Stop on first fail |
+| continue_on_success: true | Skip if prev failed |
+| pass_state: true | Pass outputs to next |
+| retry_count: 3 | Run 3 times |
+| retry_until: stable | Repeat until unchanged |
+| race_mode: true | First wins |
 
-## Edge Cases
+## Subfolder Restriction
 
-| Field | Handles |
-|-------|---------|
-| max_depth | A → B → C → A (infinite) |
-| parallel_limit | 100 parallel skills (memory) |
-| validate_on_load | Missing skill in chain |
-| cleanup_after | Run twice safely |
+- ✅ Same subfolder: `test-unit`, `test-e2e`
+- ❌ No `../parent`
+- ❌ No `/absolute`
+
+## Chain Calls Chain
+
+```
+chain: [chain-test, chain-security]
+```
