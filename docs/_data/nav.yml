@@ -112,6 +112,8 @@
       url: /vant/guides/onboard.html
     - title: Rerank
       url: /vant/guides/rerank.html
+    - title: Omega Docs QC
+      url: /vant/OMEGA-DOCS-QC.html
 - title: Reference
   items:
     - title: CLI Reference
@@ -128,6 +130,3 @@
       url: /vant/CHANGELOG.html
     - title: Legal & Policies
       url: /vant/legal.html
-
-- title: Omega Docs QC
-  url: /vant/OMEGA-DOCS-QC.html
