@@ -1068,7 +1068,8 @@ const server = http.createServer(async (req, res) => {
     });
     
     const PORT = env.mcpPort() || 3456;
-    server.listen(PORT, () => {
+    const BIND_ADDRESS = env.mcpBindAddress();
+    server.listen(PORT, BIND_ADDRESS, () => {
         console.log(`Vant MCP Server running on port ${PORT}`);
         console.log('Endpoints:');
         console.log('  GET /tools  - List available tools');

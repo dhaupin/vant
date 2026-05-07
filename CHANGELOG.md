@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+- **MCP Bind Address Restriction** (2026-05-07)
+  - Default to 127.0.0.1 (localhost only)
+  - Configurable via MCP_BIND_ADDRESS env var
+  - Added env.mcpBindAddress() method
+  - lib/server.js defaults to localhost
+
+### Fixed
+- **Path Traversal Protection** (2026-05-07)
+  - Config blocks .. in paths
+
+### Scanned
+- Shell injection: All exec/spawn uses are internal git operations with controlled inputs
+- Eval: None found
+- SQL/NoSQL injection: Not applicable (no DB)
+- Hardcoded secrets: None found
+- XSS: Handled by VAF (maxStringLength)
+
 ### Added
 - **Auth Lockout Duration** (2026-05-07)
   - Configurable lockout: lockoutDuration (default: 60000ms = 1min)
