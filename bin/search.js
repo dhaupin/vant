@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Vant Search CLI - Hybrid + Basic + RAG
+ * Vant Search CLI - Hybrid + Basic + RAG + Rerank
  */
 
 const path = require('path');
@@ -23,12 +23,13 @@ Usage:
   vant search --hybrid <query>     # BM25+Vector RRF
   vant search --hyde <query>       # HyDE transform
   vant search --stats             # Index stats
+  vant search <query> -r          # All modes support --rerank
 
 Options:
   --mode basic|rag|hybrid  Search mode
   -l, --limit <N>         Max results (default: 5)
   --compact              Summaries only (skip full rehydration)
-  -r, --rerank           Rerank results (keyword score + compress)
+  -r, --rerank           Rerank results after search
   -t, --max-tokens <N>   Max tokens for rerank (default: 2000)
 `);
         process.exit(0);
@@ -59,14 +60,42 @@ Options:
         }
     }
 
+    // Helper: apply rerank to results
+    function applyRerank(memories, q, lim, tok) {
+        const rerankLib = require(path.join(DIR, 'lib', 'rerank'));
+        const ranked = rerankLib.rerank(memories, q, lim);
+        const compressed = rerankLib.compress(ranked, tok);
+        return compressed;
+    }
+
     // Basic mode
     if (mode === 'basic') {
         const searchLib = require(path.join(DIR, 'lib', 'search'));
         const results = await searchLib.searchLTC(query, { limit, compact });
-        console.log('\n=== Basic Search: ' + query + ' ===');
-        console.log('Results:', results.length);
-        for (const r of results) {
-            console.log(' -', r.type, r.summary?.substring(0, 60));
+        
+        if (rerank && results.length > 0) {
+            const memories = results.map(r => ({
+                id: r.type || r.file || 'unknown',
+                title: r.type?.substring(0, 20),
+                content: r.content || r.summary || '',
+                date: r.date || new Date().toISOString()
+            }));
+            const compressed = applyRerank(memories, query, limit, maxTokens);
+            
+            console.log('\n[Basic + Rerank] Query:', query);
+            console.log('Search Results:', results.length);
+            console.log('Reranked:', compressed.length, 'memories');
+            
+            for (let i = 0; i < compressed.length; i++) {
+                const r = compressed[i];
+                console.log((i+1) + '.', r.title?.substring(0, 20), '[' + (r.rerankScore || 0).toFixed(1) + ']');
+            }
+        } else {
+            console.log('\n=== Basic Search: ' + query + ' ===');
+            console.log('Results:', results.length);
+            for (const r of results) {
+                console.log(' -', r.type, r.summary?.substring(0, 60));
+            }
         }
         process.exit(0);
     }
@@ -76,40 +105,83 @@ Options:
         const searchLib = require(path.join(DIR, 'lib', 'search'));
         const { results, context } = await searchLib.query(query, { limit, compact });
         const settings = searchLib.getSettings();
-        console.log('\n=== RAG Search: ' + query + ' ===');
-        console.log('Results:', results.length);
-        console.log('Context:', context.length, 'bytes');
-        console.log('Settings:', JSON.stringify(settings));
-        process.exit(0);
-}
-
-    // Mode: hybrid (via unified search lib)
-    if (mode === 'hybrid') {
-        const searchLib = require(path.join(DIR, 'lib', 'search'));
-        const results = await searchLib.hybrid(query);
-        console.log('\n=== Hybrid Search: ' + query + ' ===');
-        console.log('Sparse:', results.sparse.length);
-        console.log('Dense:', results.dense.length);
-        console.log('Fused:', results.fused.length);
-        for (const r of results.fused.slice(0, 5)) {
-            console.log(' -', r.id?.substring(0, 8), r.rrf?.toFixed(3), r.content?.substring(0, 50));
+        
+        if (rerank && results.length > 0) {
+            const memories = results.map(r => ({
+                id: r.type || 'unknown',
+                title: r.type?.substring(0, 20),
+                content: r.content || r.summary || '',
+                date: r.date || new Date().toISOString()
+            }));
+            const compressed = applyRerank(memories, query, limit, maxTokens);
+            
+            console.log('\n[RAG + Rerank] Query:', query);
+            console.log('Search Results:', results.length);
+            console.log('Reranked:', compressed.length, 'memories');
+            console.log('Context:', context.length, 'bytes');
+            
+            for (let i = 0; i < compressed.length; i++) {
+                const r = compressed[i];
+                console.log((i+1) + '.', r.title?.substring(0, 20), '[' + (r.rerankScore || 0).toFixed(1) + ']');
+            }
+        } else {
+            console.log('\n=== RAG Search: ' + query + ' ===');
+            console.log('Results:', results.length);
+            console.log('Context:', context.length, 'bytes');
+            console.log('Settings:', JSON.stringify(settings));
         }
         process.exit(0);
     }
 
-    // End mode handlers
-
-    // Hybrid mode (default)
-    if (action === '--hybrid' || action === '-H') {
-        query = args.slice(1).join(' ') || query;
+    // Hybrid mode (explicit)
+    if (mode === 'hybrid') {
+        const searchLib = require(path.join(DIR, 'lib', 'search'));
+        const results = await searchLib.hybrid(query);
+        
+        if (rerank && results.fused.length > 0) {
+            const memories = results.fused.map(r => ({
+                id: r.id,
+                title: r.id?.substring(0, 20),
+                content: r.content || r.summary || '',
+                date: r.date || new Date().toISOString()
+            }));
+            const compressed = applyRerank(memories, query, limit, maxTokens);
+            
+            console.log('\n[Hybrid + Rerank] Query:', query);
+            console.log('Search Results:', results.fused.length);
+            console.log('Reranked:', compressed.length, 'memories');
+            
+            for (let i = 0; i < compressed.length; i++) {
+                const r = compressed[i];
+                console.log((i+1) + '.', r.title?.substring(0, 20), '[' + (r.rerankScore || 0).toFixed(1) + ']');
+            }
+        } else {
+            console.log('\n=== Hybrid Search: ' + query + ' ===');
+            console.log('Sparse:', results.sparse.length);
+            console.log('Dense:', results.dense.length);
+            console.log('Fused:', results.fused.length);
+            for (const r of results.fused.slice(0, 5)) {
+                console.log(' -', r.id?.substring(0, 8), r.rrf?.toFixed(3), r.content?.substring(0, 50));
+            }
+        }
+        process.exit(0);
     }
 
+    // Hybrid mode (default via --hybrid flag)
+    if (action === '--hybrid' || action === '-H') {
+        // Filter out flags from args, keep only the query words
+        const queryArgs = args.slice(1).filter(a => !a.startsWith('-'));
+        query = queryArgs.join(' ') || query;
+    }
+
+    // Stats
     if (action === '--stats') {
         const searchLib = require(path.join(DIR, 'lib', 'search'));
         console.log(searchLib.getStats());
         process.exit(0);
     }
 
+    // HyDE
     if (action === '--hyde') {
         const searchLib = require(path.join(DIR, 'lib', 'search'));
         const result = await searchLib.hyde(query);
@@ -119,35 +191,32 @@ Options:
         process.exit(0);
     }
 
-    // Default: hybrid search (via unified lib)
+    // Default: hybrid search with optional rerank
     const searchLib = require(path.join(DIR, 'lib', 'search'));
     const results = await searchLib.hybrid(query);
     
-    // Optional: rerank results
-    if (rerank) {
-        const rerankLib = require(path.join(DIR, 'lib', 'rerank'));
+    if (rerank && results.fused.length > 0) {
         const memories = results.fused.map(r => ({
             id: r.id,
             title: r.id?.substring(0, 20),
             content: r.content || r.summary || '',
             date: r.date || new Date().toISOString()
         }));
-        const ranked = rerankLib.rerank(memories, query, limit);
-        const compressed = rerankLib.compress(ranked, maxTokens);
+        const compressed = applyRerank(memories, query, limit, maxTokens);
         
-        console.log('\n[Search + Rerank] Query:', query);
+        console.log('\n[Hybrid + Rerank] Query:', query);
         console.log('Search Results:', results.fused.length);
-        console.log('Reranked:', ranked.length);
-        console.log('Compressed:', compressed.length, 'memories');
+        console.log('Reranked:', compressed.length, 'memories');
         
         for (let i = 0; i < compressed.length; i++) {
             const r = compressed[i];
             console.log((i+1) + '.', r.title?.substring(0, 20), '[' + (r.rerankScore || 0).toFixed(1) + ']');
         }
     } else {
-        console.log('\nResults:', results.fused.length);
+        console.log('\n=== Hybrid Search: ' + query + ' ===');
+        console.log('Fused:', results.fused.length);
         for (const r of results.fused.slice(0, limit)) {
-            console.log('  -', r.id?.substring(0, 8), r.rrf?.toFixed(3));
+            console.log(' -', r.id?.substring(0, 8), r.rrf?.toFixed(3));
         }
     }
 }

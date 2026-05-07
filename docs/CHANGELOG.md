@@ -19,7 +19,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 - **Rerank (RAG)** - New rerank module for keyword reranking and LLM context compression:
   - CLI: `vant rerank <query>`, `vant rerank compress`, `vant rerank pipeline`
-  - Search `-r/--rerank`: Pipeline search results through rerank
+  - Search `-r/--rerank`: Pipeline all search modes through rerank (default, basic, rag, hybrid)
   - MCP: `vant_rerank` tool + search rerank option (21 MCP tools total)
   - 3 modes: rerank (keyword score), compress (token budget), pipeline (both)
   - Docs: [docs/guides/rerank.md](guides/rerank)

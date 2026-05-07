@@ -224,6 +224,8 @@ vant search "lessons" -r -t 4000
 | `-r, --rerank` | Rerank results | false |
 | `-t, --max-tokens` | Max tokens | 2000 |
 
+> **All 3 search modes support `--rerank`:** Default (hybrid), `--mode basic`, `--mode rag`, `--mode hybrid`
+
 ### Integration
 
 Use with query transformation:
