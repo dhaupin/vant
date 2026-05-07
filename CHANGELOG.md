@@ -66,6 +66,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Progress**: Progress, Resolution, Onboard, Gallery all functional
 - **Security**: All vectors still blocked (verified)
 
+### Batch 35 Fixes
+- **bin/node.js**: Fixed missing env require, added path resolution
+- **lib/env.js**: Added missing module exports (githubRepo, agreeAutoSync)
+- **bin/webhook.js**: Renamed to webhook.sh (was bash with .js extension)
+
 ### Scanned
 - Shell injection: All exec/spawn uses are internal git operations with controlled inputs
 - Eval: None found

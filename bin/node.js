@@ -40,6 +40,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 const http = require('http');
 const readline = require('readline');
+const env = require(path.join(__dirname, '../lib/env'));
 
 // Parse CLI arguments
 const args = process.argv.slice(2);
