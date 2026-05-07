@@ -131,3 +131,10 @@ export const theme = {
 - Build page
 - Apply theme
 - Accessibility audit
+
+---
+
+## Triggers
+
+- Use iterate to drive to merge
+- Use general for complex tasks

@@ -13,3 +13,10 @@ For docs, load:
 **Role**: Docs Agent  
 **Input**: Documentation needs  
 **Output**: Updated docs
+
+---
+
+## Triggers
+
+- Use iterate to drive to merge
+- Use general for complex tasks

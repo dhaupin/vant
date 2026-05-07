@@ -37,3 +37,10 @@ Make content findable.
 ### Issues
 - [n] fixed
 ```
+
+---
+
+## Triggers
+
+- Use iterate to drive to merge
+- Use general for complex tasks

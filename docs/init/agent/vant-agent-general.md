@@ -292,3 +292,9 @@ skills
 
 format
 ```
+---
+
+## Triggers
+
+- Use iterate to drive to merge
+- Use general for complex tasks

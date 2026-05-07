@@ -63,3 +63,10 @@ Take requirements and turn them into working code.
 **Role**: Engineer  
 **Input**: Requirements  
 **Output**: Working code
+
+---
+
+## Triggers
+
+- Use iterate to drive to merge
+- Use general for complex tasks

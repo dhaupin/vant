@@ -28,3 +28,10 @@ Write clear, helpful content.
 ### Issues
 - [list]
 ```
+
+---
+
+## Triggers
+
+- Use iterate to drive to merge
+- Use general for complex tasks

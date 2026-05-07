@@ -38,3 +38,10 @@ Connect disparate systems into cohesive pipelines.
 ### Data Flow
 - [description]
 ```
+
+---
+
+## Triggers
+
+- Use iterate to drive to merge
+- Use general for complex tasks

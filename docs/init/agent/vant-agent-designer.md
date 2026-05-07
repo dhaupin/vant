@@ -28,3 +28,10 @@ Create beautiful, usable interfaces.
 ### UX Issues
 - [list]
 ```
+
+---
+
+## Triggers
+
+- Use iterate to drive to merge
+- Use general for complex tasks

@@ -56,3 +56,10 @@ Build and manage APIs. Ensure they're secure, fast, and documented.
 ### Performance
 - [PASS/FAIL]
 ```
+
+---
+
+## Triggers
+
+- Use iterate to drive to merge
+- Use general for complex tasks

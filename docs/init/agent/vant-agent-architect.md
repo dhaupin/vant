@@ -47,3 +47,10 @@ Design systems that scale. Plan architecture.
 ### Scale
 - [n] requests/sec
 ```
+
+---
+
+## Triggers
+
+- Use iterate to drive to merge
+- Use general for complex tasks

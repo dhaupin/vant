@@ -37,3 +37,10 @@ Help users find answers.
 ### Answer
 - [text]
 ```
+
+---
+
+## Triggers
+
+- Use iterate to drive to merge
+- Use general for complex tasks
