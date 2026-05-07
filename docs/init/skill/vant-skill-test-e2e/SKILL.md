@@ -2,7 +2,6 @@
 name: test-e2e
 description: End-to-end user workflow testing. Test complete user flows from action to result. Use when testing full stack, customer scenarios, or complete purchase/login/flow paths.
 license: MIT
-compatibility: Node.js, Python, any test framework
 metadata:
   author: vant
   version: "1.0"
@@ -15,7 +14,7 @@ metadata:
 ## When To Use
 
 - Complete user flows
-- Full stack integration
+- Full stack testing
 - Customer scenarios
 
 ## What To Test
@@ -48,6 +47,19 @@ test('complete purchase flow', async () => {
 })
 ```
 
+---
+
+## Tools
+
+| Tool | Use |
+|------|-----|
+| Playwright | Browser automation |
+| Cypress | E2E testing |
+| Puppeteer | Headless Chrome |
+| Selenium | Cross-browser |
+
+---
+
 ## Output
 
 ```
@@ -58,10 +70,9 @@ test('complete purchase flow', async () => {
 | Signup | [PASS/FAIL] |
 | Login | [PASS/FAIL] |
 | Purchase | [PASS/FAIL] |
+| Search | [PASS/FAIL] |
 ```
 
-## See Also
-
-- [test-unit](test-unit/SKILL.md) - Run unit tests first
-- [test-integration](test-integration/SKILL.md) - Component integration
-- [test-regression](test-regression/SKILL.md) - Verify no new breaks
+**Role**: E2E Tester  
+**Input**: User flow  
+**Output**: Test results
