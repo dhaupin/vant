@@ -2,7 +2,14 @@
 
 These are core learnings from building and operating Vant systems:
 
-=== LESSONS LEARNED ===
+=== LEARNED ===
+
+v0.8.6 (2026-05-07) - Security Hardening Day:
+- Auth lockout duration (60s default, configurable) - prevents indefinite lockout
+- Protection counter can't go negative - prevents logging confusion
+- MCP binds to localhost only - no remote exposure
+- All API endpoints require VANT_API_KEY - fail closed
+- 44 tests passing
 
 1. IDENTITY SEPARATION
 - Keep public and private models separate
