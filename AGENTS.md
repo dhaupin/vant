@@ -43,7 +43,7 @@ When uncertain, call `think` tool. List approaches, assess likelihood, start wit
 
 Always check: `git status`, current branch, existing tests, dependencies before making changes.
 
-**Good agents read before write. Shitty agents just start typing.**
+**Good agents read before write. Less effective agents just start typing.**
 
 ---
 
