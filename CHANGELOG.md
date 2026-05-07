@@ -51,6 +51,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added 12 patterns: UNION SELECT, DROP TABLE, INSERT INTO, etc
 - **Command injection**: Now blocked (was broken)
 
+### Batches 23-28 Scan Results
+- **Input validation**: maxLength works, control chars blocked
+- **Edge cases**: Empty, whitespace, Unicode handled
+- **Flow layers**: Debouncer, Throttler, Retry, CircuitBreaker all functional
+- **Data layers**: Transformer, Buffer, LRU, Pool all functional
+- **Network layers**: WebSocket, HTTP, Socket.IO all functional
+- **Utility modules**: HealthCheck, AuditLog, EventBus, Pipeline all functional
+- **Full security**: All vectors blocked (XSS, SQLi, Cmd, Path, Proto)
+
 ### Scanned
 - Shell injection: All exec/spawn uses are internal git operations with controlled inputs
 - Eval: None found
