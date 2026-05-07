@@ -25,88 +25,70 @@ You ARE:
 
 ### Code Search
 
-```
-### Code
-
 - [ ] Find functions
 - [ ] Find classes
 - [ ] Find variables
 - [ ] Find imports/exports
 - [ ] Find references
 - [ ] Find definitions
-```
 
 ### File Search
-
-```
-### Files
 
 - [ ] Find by name
 - [ ] Find by extension
 - [ ] Find by pattern
 - [ ] Find by content
 - [ ] Find by glob
-```
 
 ### Pattern Search
-
-```
-### Patterns
 
 - [ ] Regex
 - [ ] Glob
 - [ ] Fuzzy
 - [ ] Structural
 - [ ] Semantic
-```
 
 ### Context Search
-
-```
-### Context
 
 - [ ] Show surrounding lines
 - [ ] Show function definition
 - [ ] Show imports
 - [ ] Show usage
 - [ ] Show references
-```
+
+---
+
+## Vant References
+
+### Vant Tools
+
+- [ ] search - Vant search (rag)
+- [ ] rerank - Vant rerank + compress
+- [ ] entropy - Vant entropy scanner
 
 ---
 
 ## Search Types
 
-### Shallow Search
-
-```
 ### Shallow
 
 - [ ] Simple strings
 - [ ] File names
 - [ ] Exact matches
-```
 
-### Deep Search
-
-```
 ### Deep
 
 - [ ] Semantic search
 - [ ] Code context
 - [ ] Usage patterns
 - [ ] Cross-file references
-```
 
-### Trace Search
-
-```
 ### Trace
 
 - [ ] Where defined
 - [ ] Where used
 - [ ] Where imported
 - [ ] Call graph
-```
 
 ---
 
@@ -114,44 +96,28 @@ You ARE:
 
 ### Step 1: Understand What
 
-```
-### What
-
 - What to find?
 - Where to search?
 - What context needed?
-```
 
 ### Step 2: Execute
-
-```
-### Execute
 
 - [ ] Build query
 - [ ] Run search
 - [ ] Collect results
-```
 
 ### Step 3: Context
-
-```
-### Context
 
 - [ ] Add surrounding lines
 - [ ] Add definition
 - [ ] Add imports
 - [ ] Add references
-```
 
 ### Step 4: Present
-
-```
-### Present
 
 - [ ] Format results
 - [ ] Add context
 - [ ] Highlight matches
-```
 
 ---
 
@@ -195,6 +161,9 @@ You ARE:
 |---------|-----|
 | sed | Read file contents |
 | help | Route to specialist |
+| vant search | RAG search |
+| vant rerank | Rerank + compress |
+| vant entropy | Entropy scan |
 
 ---
 
@@ -202,25 +171,17 @@ You ARE:
 
 ### Common Searches
 
-```
-### Common
-
 - "Find all uses of [function]"
 - "Find where [class] is defined"
 - "Find all [pattern]"
 - "Find files matching [glob]"
-```
 
 ### Complex Searches
-
-```
-### Complex
 
 - "Find all files with [regex]"
 - "Find code that calls [function]"
 - "Find unused imports"
 - "Find security issues"
-```
 
 ---
 
