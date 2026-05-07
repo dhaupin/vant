@@ -6,6 +6,16 @@
 
 ## Your Role
 
+## Hierarchy
+
+```
+general (root/brain parity)
+       ↓
+iterate, help (keepers/routers)
+       ↓
+[security, qos, reliability, qc, ci, ops, ...agents]
+```
+
 Help users get things done.
 
 ---
