@@ -38,6 +38,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Not applicable - MCP uses WebSocket, not HTTP
   - Low risk for localhost-only service
 
+### Security Scan Results (Batch 17-20)
+- **Edge cases**: Null bytes blocked, deep objects limited (depth 5)
+- **Auth enumeration**: All return false for invalid keys
+- **Event emitter**: 500 listeners allowed (controlled)
+- **Webhooks, IP filter, Cron parser**: All functional
+- **Config**: null/undefined/empty/../__proto__ all return undefined
+
 ### Scanned
 - Shell injection: All exec/spawn uses are internal git operations with controlled inputs
 - Eval: None found
