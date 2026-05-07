@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+/**
+ * Vant Bump - Version bump and tag release
+ * Updates version in package.json and creates git tag
+ *
+ * Usage: vant bump [major|minor|patch]
+ */
+
 const vaf = require("../lib/vaf");
 
 // -h/--help

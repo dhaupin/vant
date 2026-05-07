@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+/**
+ * Vant Succession - Trust level management
+ * Controls agent autonomy via trust levels
+ *
+ * Usage: vant succession [get|set <level>]
+ */
+
 const vaf = require("../lib/vaf");
 
 // -h/--help

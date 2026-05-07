@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+/**
+ * Vant Resolution - Thought resolution tracking
+ * Tracks resolved/rejected thoughts
+ *
+ * Usage: vant resolution [status|history|set <entry>]
+ */
+
 const vaf = require("../lib/vaf");
 
 // -h/--help

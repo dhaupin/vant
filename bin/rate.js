@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+/**
+ * Vant rate - rate module
+ *
+ * Usage: vant rate
+ */
 const vaf = require("../lib/vaf");
 
 // -h/--help

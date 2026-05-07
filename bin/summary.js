@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+/**
+ * Vant summary - summary module
+ *
+ * Usage: vant summary
+ */
 const vaf = require("../lib/vaf");
 
 // -h/--help

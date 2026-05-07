@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+/**
+ * Vant update - update module
+ *
+ * Usage: vant update
+ */
 const vaf = require("../lib/vaf");
 
 // -h/--help

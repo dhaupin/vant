@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+/**
+ * Vant onboard - onboard module
+ *
+ * Usage: vant onboard
+ */
 const vaf = require("../lib/vaf");
 
 // -h/--help

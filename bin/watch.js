@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+/**
+ * Vant watch - watch module
+ *
+ * Usage: vant watch
+ */
 const vaf = require("../lib/vaf");
 
 // -h/--help
