@@ -118,18 +118,60 @@
   items:
   - title: Docs Agent
     url: /vant/init/agent/vant-agent-docs.html
-  - title: Code Review
+  - title: 'Review: Code'
     url: /vant/init/skill/vant-skill-review-code.html
-  - title: Help
-    url: /vant/init/skill/vant-skill-help.html
-  - title: Security Audit
+  - title: 'Review: Docs'
+    url: /vant/init/skill/vant-skill-review-docs.html
+  - title: 'Review: SEO'
+    url: /vant/init/skill/vant-skill-review-seo.html
+  - title: 'Review: Performance'
+    url: /vant/init/skill/vant-skill-review-performance.html
+  - title: 'Review: Efficiency'
+    url: /vant/init/skill/vant-skill-review-efficiency.html
+  - title: 'Audit: Security'
     url: /vant/init/skill/vant-skill-audit-security.html
+  - title: 'Audit: QC'
+    url: /vant/init/skill/vant-skill-audit-qc.html
+  - title: 'Audit: Ops'
+    url: /vant/init/skill/vant-skill-audit-ops.html
+  - title: 'Audit: CI'
+    url: /vant/init/skill/vant-skill-audit-ci.html
+  - title: 'Audit: QoS'
+    url: /vant/init/skill/vant-skill-audit-qos.html
+  - title: 'Audit: Reliability'
+    url: /vant/init/skill/vant-skill-audit-reliability.html
+  - title: 'Audit: General'
+    url: /vant/init/skill/vant-skill-audit-general.html
+  - title: 'Audit: Deploy'
+    url: /vant/init/skill/vant-skill-audit-deploy.html
   - title: White Hat
     url: /vant/init/skill/vant-skill-hat-white.html
-  - title: QC Audit
-    url: /vant/init/skill/vant-skill-audit-qc.html
-  - title: Docs Review
-    url: /vant/init/skill/vant-skill-review-docs.html
+  - title: Grey Hat
+    url: /vant/init/skill/vant-skill-hat-grey.html
+  - title: Black Hat
+    url: /vant/init/skill/vant-skill-hat-black.html
+  - title: Pen Test
+    url: /vant/init/skill/vant-skill-test-pen.html
+  - title: Load Test
+    url: /vant/init/skill/vant-skill-test-load.html
+  - title: Unit Test
+    url: /vant/init/skill/vant-skill-test-unit.html
+  - title: Integration Test
+    url: /vant/init/skill/vant-skill-test-integration.html
+  - title: 'Vant: Brain Load'
+    url: /vant/init/skill/vant-skill-brain-load.html
+  - title: 'Vant: Brain Save'
+    url: /vant/init/skill/vant-skill-brain-save.html
+  - title: 'Vant: Sync'
+    url: /vant/init/skill/vant-skill-sync.html
+  - title: 'Vant: Island'
+    url: /vant/init/skill/vant-skill-island.html
+  - title: 'Vant: Linear'
+    url: /vant/init/skill/vant-skill-linear.html
+  - title: 'Vant: GitHub'
+    url: /vant/init/skill/vant-skill-github.html
+  - title: Help
+    url: /vant/init/skill/vant-skill-help.html
 - title: Reference
   items:
   - title: CLI Reference
