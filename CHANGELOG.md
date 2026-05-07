@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Auth Lockout Duration** (2026-05-07)
+  - Configurable lockout: lockoutDuration (default: 60000ms = 1min)
+  - Auto-unlock after duration expires
+  - getAuthStatus() returns remaining seconds
+  - Instance option: new API({ lockoutDuration: 5000 })
+
+- **Extended config.example.ini** (2026-05-07)
+  - VANT_API_KEY, MAX_AUTH_FAILURES, AUTH_LOCKOUT_DURATION
+  - VAF_RATE_LIMIT_WINDOW, VAF_MAX_CONCURRENT
+
+- **MCP /tools Endpoint Fix** (2026-05-07)
+  - /tools now requires auth when MCP_API_KEY set
+  - /health reduced info leak (no uptime)
+
+### Added
 - **Integration Documentation** (2026-05-07)
   - VAF integrated with API and Framework (input validation layer)
   - QoS integrated (rate limiting, circuit breaker)

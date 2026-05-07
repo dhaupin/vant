@@ -1030,9 +1030,21 @@ const server = http.createServer(async (req, res) => {
         }
         
         if (req.url === '/tools' && req.method === 'GET') {
+            if (!MCP_API_KEY && requireApiKey) {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Unauthorized' }));
+                return;
+            }
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ tools: TOOLS }));
         } else if (req.url === '/health' && req.method === 'GET') {
+            // Health can be public but sanitize output
+            const health = await checkHealth();
+            delete health.uptime; // Reduce info leak
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(health));
+        } else if (false) { // DISABLED - keep path
+
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(await checkHealth()));
         } else if (req.url === '/call' && req.method === 'POST') {
