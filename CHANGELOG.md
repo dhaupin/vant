@@ -30,14 +30,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added: framework interface (getLayerStatus, isOperationAllowed)
 
 - **Deleted Unused HTTP Modules** (2026-05-09)
-  - DELETE: body-parser.js (orphaned)
-  - DELETE: cors.js (orphaned)
-  - DELETE: helmet.js (orphaned)
-  - DELETE: middleware-stack.js (orphaned)
-  - DELETE: session.js (orphaned)
-  - DELETE: session_store.js (orphaned)
-  - DELETE: websocket.js (orphaned)
-  - DELETE: socket-io.js (orphaned)
+  - MERGED: body-parser, cors, helmet, middleware-stack, session, session_store → server.js
+  - integrated: BodyParser, CORS, Helmet, MiddlewareStack, Session, SessionStore
+
+- **Unified QoS + Throttler + Debouncer** (2026-05-09)
+  - MERGED: throttler.js, debouncer.js → qos.js
+  - Added: Throttler, Debouncer classes
+  - Added: QoS.throttle(), QoS.debounce()
+
+- **JobWorker in Cron** (2026-05-09)
+  - MERGED: job_worker.js → cron.js
+  - Added: JobWorker class
 
 ### Added
 - **Vant Class + Agent Runtime** (2026-05-09)
