@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Vant Class + Agent Runtime** (2026-05-09)
+  - lib/runtime.js → lib/vant.js: Renamed main module
+  - NEW: Vant class - ultimate agent with full system access
+  - lazy-loads all core systems: brain, search, islands, config, memoize, lock, audit, compression
+  - NEW: vector-store.js, cron.js, conversation.js modules added
+  - OS features merged: encrypt shortcuts, QoS, stego, agents, ipc
+  - getLayerStatus() + isOperationAllowed() - standard interface
+  - framework.js, agents.js updated to use vant.js
+
+### Changed
+- **Runtime renamed to Vant** (2026-05-09)
+  - runtime.js → vant.js
+  - framework.js updated
+  - agents.js updated
+
+### Added
+- **Core Modules for Vant Class** (2026-05-09)
+  - lib/vector-store.js: Local embedding-based semantic memory
+  - lib/cron.js: Task scheduling with setInterval
+  - lib/conversation.js: Shared context between agents
+  - Used by new Vant class runtime
+
 ## [0.8.6] - 2026-05-08
 ### Changed
 - **Search Consolidation** (2026-05-08)
