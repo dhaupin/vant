@@ -10,6 +10,19 @@ nav_order: 1
 
 ## Unreleased
 
+### New: Msg Class
+
+- Added `lib/msg.js` (498 lines) - Unified agent-to-agent messaging
+- Merge: conversation.js + ipc.js → Msg class
+- Features:
+  - Conversation API (create, post, reply, participants)
+  - Channel API (IPC-style send/subscribe/publish)
+  - Encryption layers: plain, encrypt, stego, encrypt+stego
+  - Auto-detect + explicit reveal options
+  - Security: VAF, QoS (500/min), Escrow, Event
+- Updated: vant.js, framework.js to use msg
+- Deleted: lib/conversation.js, lib/ipc.js (no backwards compat)
+
 ### New: Network Layer
 
 - Added `lib/network.js` (274 lines) - Network connectivity, retries, timeouts, latency

@@ -10,6 +10,13 @@ nav_order: 99
 
 ## v0.8.6 - Current (2026-05-08)
 
+### Deleted (No Replacements - BREAKING)
+
+| File | Notes |
+|------|-------|
+| `lib/conversation.js` | Use `lib/msg.js` - unified Msg class |
+| `lib/ipc.js` | Use `lib/msg.js` - Channel API |
+
 ### All Resolved ✓
 
 | File | Resolution | Status |
