@@ -43,6 +43,7 @@ const { spawn } = require('child_process');
 // Load core Vant modules
 const { env } = require('../lib/config');
 const api = require('../lib/api');  // Unified API with hooks + auth
+const network = require('../lib/network');  // Network layer
 
 // Security chain
 const vaf = require('../lib/vaf');

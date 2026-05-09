@@ -8,6 +8,19 @@ nav_order: 1
 
 > Vant release history.
 
+## Unreleased
+
+### New: Network Layer
+
+- Added `lib/network.js` (274 lines) - Network connectivity, retries, timeouts, latency
+- Features: isOnline, checkOnline, getLatency, retry, withTimeout, fetch, fetchJson
+- Integrated into: framework, vant, server, api, mcp, node, telegram
+- Consolidated from: lib/utils.js (deleted)
+
+### Refactor
+
+- Deleted unused lib/utils.js (~180 lines, fully consolidated)
+
 ## v0.8.6 - 2026-05-08
 
 ### Agent OS
