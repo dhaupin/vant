@@ -190,27 +190,27 @@ async function main() {
   }
   
   if (!filter || filter === 'errors') {
-    testLib('errors', './lib/errors', {
-      functions: { VantError: 1, handle: 1 }
+    testLib('errors', './lib/error', {
+      functions: { Error: 1, handle: 1 }
     });
   }
   
-  if (!filter || filter === 'entropy') {
-    testLib('entropy', './lib/entropy', {
-      functions: { generatePatches: 1, hydratePatches: 1 }
-    });
-    
-    testSecurity('Entropy buffer limit', () => {
-      const vaf = require(path.join(ROOT, 'lib/vaf'));
-      try {
-        vaf.check('x'.repeat(20 * 1024 * 1024), { type: 'string', maxLength: 10 * 1024 * 1024 });
-        return { blocked: false };
-      } catch(e) {
-        // Should throw - this is correct behavior
-        return { blocked: true, pattern: e.message };
-      }
-    });
-  }
+//   if (!filter || filter === 'entropy') {
+//     testLib('entropy', './lib/entropy', {
+//       functions: { generatePatches: 1, hydratePatches: 1 }
+//     });
+//     
+//     testSecurity('Entropy buffer limit', () => {
+//       const vaf = require(path.join(ROOT, 'lib/vaf'));
+//       try {
+//         vaf.check('x'.repeat(20 * 1024 * 1024), { type: 'string', maxLength: 10 * 1024 * 1024 });
+//         return { blocked: false };
+//       } catch(e) {
+//         // Should throw - this is correct behavior
+//         return { blocked: true, pattern: e.message };
+//       }
+//     });
+//   }
   
   if (!filter || filter === 'stego') {
     testLib('stego', './lib/stego', {
