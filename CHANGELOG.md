@@ -29,6 +29,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added: Queue + Job classes
   - Added: framework interface (getLayerStatus, isOperationAllowed)
 
+- **Deleted Unused HTTP Modules** (2026-05-09)
+  - DELETE: body-parser.js (orphaned)
+  - DELETE: cors.js (orphaned)
+  - DELETE: helmet.js (orphaned)
+  - DELETE: middleware-stack.js (orphaned)
+  - DELETE: session.js (orphaned)
+  - DELETE: session_store.js (orphaned)
+  - DELETE: websocket.js (orphaned)
+  - DELETE: socket-io.js (orphaned)
+
 ### Added
 - **Vant Class + Agent Runtime** (2026-05-09)
   - lib/runtime.js → lib/vant.js: Renamed main module
