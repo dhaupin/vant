@@ -184,8 +184,8 @@ async function main() {
   }
   
   if (!filter || filter === 'logger') {
-    testLib('logger', './lib/logger', {
-      functions: { info: 1, warn: 1, error: 1 }
+    testLib('logger', './lib/audit', {
+      functions: { info: 1, warn: 1, error: 1, debug: 1 }
     });
   }
   

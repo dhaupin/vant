@@ -77,7 +77,7 @@ test('qos.js works', () => {
 
 // Test: logger.js works
 test('logger.js works', () => {
-    const logger = require('../lib/logger');
+    const logger = require('../lib/audit');
     logger.info('Test log', { test: true });
 });
 

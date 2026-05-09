@@ -80,7 +80,7 @@ const branch = loadModule('branch');
 const lock = loadModule('lock');
 const config = loadModule('config');
 const health = loadModule('health');
-const protection = require('../lib/protection');
+const protection = require('../lib/qos');
 // vaf already loaded above
 const searchLib = require('../lib/search');
 
