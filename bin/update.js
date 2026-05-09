@@ -20,5 +20,5 @@ if (args[0] === '-h' || args[0] === '--help') {
  * Usage: vant update [-h|--help]
  */
 
-const update = require('../lib/update-check');
+const update = require('../lib/update');
 update.check().catch(console.error);

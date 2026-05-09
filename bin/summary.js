@@ -20,7 +20,7 @@ if (args[0] === '-h' || args[0] === '--help') {
  *        vant summary --json
  */
 
-const autoUpdate = require('../lib/auto-update');
+const autoUpdate = require('../lib/update');
 const fs = require('fs');
 const path = require('path');
 

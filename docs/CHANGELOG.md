@@ -21,6 +21,16 @@ nav_order: 1
 
 - Deleted unused lib/utils.js (~180 lines, fully consolidated)
 
+### New: Update class
+
+- Unified lib/update.js (consolidating auto-update + update-check)
+- Features: checkForUpdate, getLatestRelease, context auto-update, token tracking
+- Integrated into: framework, vant, bin/summary, bin/update
+
+### Webhooks
+
+- Added vaf, qos, network protections to webhooks
+
 ## v0.8.6 - 2026-05-08
 
 ### Agent OS
