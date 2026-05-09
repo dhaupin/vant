@@ -179,7 +179,7 @@ async function main() {
   
   if (!filter || filter === 'brain') {
     testLib('brain', './lib/brain', {
-      functions: { load: 1, write: 1 }
+      functions: { get: 1, write: 1 }
     });
   }
   
