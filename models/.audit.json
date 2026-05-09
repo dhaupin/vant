@@ -28,6 +28,16 @@
       },
       "data": {},
       "hash": "41faa15210f00bda"
+    },
+    {
+      "timestamp": "2026-05-09T09:29:12.784Z",
+      "action": {
+        "type": "learn",
+        "key": "boot",
+        "agent": "agent_moy56ts8tl6my"
+      },
+      "data": {},
+      "hash": "c6114523e8045ed6"
     }
   ]
 }
