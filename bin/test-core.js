@@ -170,7 +170,7 @@ async function runTests() {
     // Hybrid
     try {
         console.log('\n[Hybrid]');
-        const hybrid = require(path.join(DIR, 'lib/hybrid'));
+        const hybrid = require(path.join(DIR, 'sync'));
         assert(typeof hybrid.setPrivacy === 'function');
         assert(typeof hybrid.getPrivacy === 'function');
         const summary = hybrid.getSummary();
