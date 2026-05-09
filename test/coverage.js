@@ -323,7 +323,7 @@ function testGallery() {
 // ============================================
 
 function testHorcrux() {
-    const horcrux = require(path.join(ROOT, 'lib/horcrux'));
+    const horcrux = require(path.join(ROOT, 'lib/stego'));
     
     test('horcrux loads', () => {
         assert(horcrux);
