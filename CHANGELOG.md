@@ -54,6 +54,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - MERGED: hybrid-sync.js → sync.js
   - Added: hybrid_getPrivacyConfig, hybrid_setPrivacy, hybrid_getPublicRepos, hybrid_getPrivateRepos
 
+- **ErrorHandler in Errors** (2026-05-09)
+  - MERGED: error-handler.js → errors.js
+  - Added: errors.ErrorHandler class
+
 ### Added
 - **Vant Class + Agent Runtime** (2026-05-09)
   - lib/runtime.js → lib/vant.js: Renamed main module
