@@ -14,6 +14,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - All consolidate into single cache module
   - No backward compatibility - v0.8.6 is breaking
 
+- **Deleted Unused Search/Query Modules** (2026-05-09)
+  - DELETE: rerank.js (in search.js already)
+  - DELETE: search-hyde.js (in search.js)
+  - DELETE: search-hybrid.js (in search.js)
+  - DELETE: query-builder.js (unused)
+  - DELETE: rate-limit.js (qos has it)
+  - DELETE: pipeline.js (unused)
+
+- **Unified Event Module** (2026-05-09)
+  - NEW: lib/event.js (Event + PubSub + Queue + Job)
+  - MERGED: event-bus.js, queue.js, job_worker.js, throttler.js, debouncer.js
+  - Renamed class: Event (was EventBus)
+  - Added: Queue + Job classes
+  - Added: framework interface (getLayerStatus, isOperationAllowed)
+
 ### Added
 - **Vant Class + Agent Runtime** (2026-05-09)
   - lib/runtime.js → lib/vant.js: Renamed main module
