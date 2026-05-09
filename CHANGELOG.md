@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking Changes (v0.8.6)
+- **Consolidated Cache Module** (2026-05-09)
+  - REMOVED: memoize.js, compression.js, pool.js, cache.js, cache-control.js
+  - NEW: unified lib/cache.js (LRU cache + compression + buffer pool)
+  - All consolidate into single cache module
+  - No backward compatibility - v0.8.6 is breaking
+
 ### Added
 - **Vant Class + Agent Runtime** (2026-05-09)
   - lib/runtime.js → lib/vant.js: Renamed main module
