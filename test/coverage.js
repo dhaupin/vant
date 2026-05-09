@@ -219,7 +219,7 @@ function testVibe() {
 // ============================================
 
 function testHybridSearch() {
-    const search = require(path.join(ROOT, 'lib/search-hybrid'));
+    const search = require(path.join(ROOT, 'lib/search'));
     
     test('hybrid-search loads', () => {
         assert(search);
@@ -235,7 +235,7 @@ function testHybridSearch() {
 // ============================================
 
 function testQuery() {
-    const query = require(path.join(ROOT, 'lib/search-hyde'));
+    const query = require(path.join(ROOT, 'lib/search'));
     
     test('query loads', () => {
         assert(query);
@@ -251,7 +251,7 @@ function testQuery() {
 // ============================================
 
 function testRerank() {
-    const rerank = require(path.join(ROOT, 'lib/rerank'));
+    const rerank = require(path.join(ROOT, 'lib/search'));
     
     test('rerank loads', () => {
         assert(rerank);
