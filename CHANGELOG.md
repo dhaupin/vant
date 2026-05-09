@@ -46,6 +46,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - DELETE: audit-log.js, metrics.js, storage.js, buffer.js, entropy.js, serializer.js, load.js, horcrux.js, env.js
   - 9 deprecated wrappers removed
 
+- **Sanitize + IPFilter in VAF** (2026-05-09)
+  - MERGED: sanitize.js + ip-filter.js → vaf.js
+  - Added: VAF.Sanitize, VAF.IPFilter classes
+
+- **Hybrid-Sync in Sync** (2026-05-09)
+  - MERGED: hybrid-sync.js → sync.js
+  - Added: hybrid_getPrivacyConfig, hybrid_setPrivacy, hybrid_getPublicRepos, hybrid_getPrivateRepos
+
 ### Added
 - **Vant Class + Agent Runtime** (2026-05-09)
   - lib/runtime.js → lib/vant.js: Renamed main module
