@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.8.6] - 2026-05-08
 ### Changed
+- **Search Consolidation** (2026-05-08)
+  - lib/search.js: Unified search + rerank + hybrid + hyde
+  - lib/rerank.js, lib/search-hybrid.js, lib/search-hyde.js: Deleted
+  - Consumers updated: bin/mcp.js, bin/search.js, bin/rerank.js
+  - New exports: rerank, compress, pipeline, stripFluff
 - **Config+Env Merge** (2026-05-08)
   - lib/config.js: Now exports all VANT_* envvars
   - lib/env.js: Deleted - all exports moved to config
@@ -41,6 +46,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - All crypto operations now use Encrypt
 
 ### Changed
+- **Search Consolidation** (2026-05-08)
+  - lib/search.js: Unified search + rerank + hybrid + hyde
+  - lib/rerank.js, lib/search-hybrid.js, lib/search-hyde.js: Deleted
+  - Consumers updated: bin/mcp.js, bin/search.js, bin/rerank.js
+  - New exports: rerank, compress, pipeline, stripFluff
 - **HTTP Server Consolidation**
   - server.js: Merged Request, Response, Router, Static inner classes
 

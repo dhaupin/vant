@@ -19,4 +19,7 @@ nav_order: 99
 | `lib/audit-log.js` | ✅ Resolved | Merged into audit |
 | `lib/metrics.js` | ✅ Resolved | Merged into audit |
 | `lib/horcrux.js` | ✅ Resolved | Merged into stego |
-
+| `lib/rerank.js` | ✅ Resolved | Merged into search |
+| `lib/search-hybrid.js` | ✅ Resolved | Merged into search |
+| `lib/search-hyde.js` | ✅ Resolved | Merged into search |
+| `lib/serializer.js` | ✅ Resolved | Merged into compression |
