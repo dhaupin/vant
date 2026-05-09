@@ -57,27 +57,21 @@ test('load.js runs', () => {
     require('./load');
 });
 
-// Test: rate-limit.js works
-test('rate-limit.js works', () => {
-    const rl = require('../lib/rate-limit');
-    if (typeof rl.canMakeRequest !== 'function') {
-        throw new Error('rate-limit.js missing canMakeRequest()');
+// Test: qos.js works (consolidated rate-limit + circuit-breaker + bulkhead)
+test('qos.js works', () => {
+    const { QoS } = require('../lib/qos');
+    const qos = new QoS();
+    if (typeof qos.check !== 'function') {
+        throw new Error('qos.js missing check()');
     }
-    if (typeof rl.recordRequest !== 'function') {
-        throw new Error('rate-limit.js missing recordRequest()');
+    if (typeof qos.getLayerStatus !== 'function') {
+        throw new Error('qos.js missing getLayerStatus()');
     }
-    // Functional test: verify rate limiting
-    const key = 'test-rate-limit-key';
-    rl.reset(); // Clear any existing state
-    const allowed = rl.canMakeRequest();
+    const key = 'test-key-' + Date.now();
+    qos.reset(key);
+    const allowed = qos.check(key, 'read');
     if (!allowed) {
-        throw new Error('Rate limiter blocked but should allow first request');
-    }
-    rl.recordRequest();
-    // After recording, should still be allowed
-    const allowed2 = rl.canMakeRequest();
-    if (!allowed2) {
-        throw new Error('Rate limiter blocked second request incorrectly');
+        throw new Error('QoS check blocked first request');
     }
 });
 

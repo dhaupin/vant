@@ -18,6 +18,7 @@ All Vant CLI commands.
 | `vant sync` | Pull/push brain from GitHub |
 | `vant load` | Load brain from models/public |
 | `vant run` | Start runtime loop |
+| `vant vibe` | Get/set runtime mood (experimental, focused, safety_first, etc) |
 
 ### Core Details
 Core CLI commands.
@@ -289,6 +290,7 @@ vant mcp --websocket # WebSocket
 | `vant onboard` | Browse knowledge base |
 | `vant succession` | Brain version/trust |
 | `vant resolution` | Mark thoughts resolved |
+| `vant lock` | Brain write lock (acquire/release/status) |
 | `vant bump` | Bump version & tag |
 
 ### Advanced Details
@@ -323,6 +325,40 @@ vant resolution          # Interactive
 vant resolution resolve # Mark resolved
 vant resolution list     # List unresolved
 ```
+
+#### vant lock
+
+Brain write lock for multi-agent safety. Prevents race conditions when multiple agents try to write to brain simultaneously.
+
+```bash
+vant lock acquire   # Acquire lock for writes
+vant lock release   # Release lock
+vant lock status   # Show lock status
+vant lock force    # Force release (admin)
+```
+
+**Using in code:**
+
+```javascript
+const brain = require('./lib/brain');
+
+// Simple: acquire lock, do work, release
+const token = await brain.acquireBrainLock();
+if (token) {
+    brain.write('learnings', 'new-lesson', '# My lesson content');
+    await brain.releaseBrainLock(token);
+}
+
+// Safer: withLock helper handles release
+await brain.withLock(async () => {
+    brain.write('learnings', 'new-lesson', '# Content');
+});
+```
+
+**Lock behavior:**
+- Auto-expires after 1 hour if not released
+- Uses exponential backoff for contention
+- Token required for secure release
 
 #### vant bump
 
@@ -532,4 +568,189 @@ vant notify discord "message" # Send Discord notification
 vant linear issues            # List issues
 vant linear create "title"   # Create issue
 vant linear comment <id> "body"  # Add comment
+```
+
+## Development Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant search` | Search brain files (basic/rag/hybrid) |
+| `vant rerank` | Rerank search results |
+| `vant prune` | Clean up old/stale brain files |
+
+### vant prune
+
+Clean up old or stale brain files:
+
+```bash
+vant prune -h, --help           # Show help
+vant prune -d, --dry-run       # Preview without changes
+vant prune -f, --force        # Force prune without confirmation
+vant prune -D, --daemon      # Run as background daemon
+vant prune -s, --stats       # Show prune statistics
+vant prune -l, --list        # List prunable files
+```
+
+### vant search
+
+Search brain files:
+
+```bash
+vant search <query>          # Basic search
+vant search --rag <query>    # RAG search (semantic)
+vant search --hybrid <query> # Hybrid search (BM25 + vector + RRF)
+vant search --rerank         # Rerank results
+```
+
+### vant rerank
+
+Rerank search results:
+
+```bash
+vant rerank <results.json>    # Rerank results file
+vant rerank --query "query"  # Query for reranking
+```
+
+## Infrastructure Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant repos` | Manage multiple brain repositories |
+| `vant islands-boot` | Initialize islands |
+| `vant validate` | Validate brain files |
+
+### vant repos
+
+Manage multiple repositories:
+
+```bash
+vant repos list               # List configured repos
+vant repos add <name> <url>  # Add new repository
+vant repos remove <name>    # Remove repository
+vant repos sync <name>      # Sync specific repo
+```
+
+### vant islands-boot
+
+Initialize islands:
+
+```bash
+vant islands-boot            # Initialize all islands
+vant islands-boot <island>   # Initialize specific island
+```
+
+### vant validate
+
+Validate brain files:
+
+```bash
+vant validate                # Validate all files
+vant validate --schema      # Schema validation
+vant validate --integrity  # Check file integrity
+```
+
+## Testing Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant test-all` | Run all tests |
+| `vant test-core` | Run core tests |
+
+### vant test-all
+
+Run all tests:
+
+```bash
+vant test-all                # Run all tests
+vant test-all --verbose     # Verbose output
+```
+
+### vant test-core
+
+Run core Vant tests:
+
+```bash
+vant test-core              # Run core tests
+vant test-core --coverage   # With coverage
+```
+
+## Stego Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant stego` | Encode/decode data in images |
+
+### vant stego
+
+Steganography - encode/decode data in images:
+
+```bash
+vant stego encode <input.txt> <image.png>  # Encode text in image
+vant stego decode <stego.png>              # Decode from image
+vant stego --RGBA                         # Use RGBA encoding (4x capacity)
+vant stego --multi                        # Split across multiple images
+```
+
+## Sync Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant hybrid-sync` | Public/private brain sync |
+
+### vant hybrid-sync
+
+Hybrid sync between public and private brains:
+
+```bash
+vant hybrid-sync -h, --help         # Show help
+vant hybrid-sync -p, --public    # Sync public brain only
+vant hybrid-sync -r, --private   # Sync private brain only
+```
+
+## Docs Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant docs` | Build docs |
+| `vant docs-build` | Build docs (detailed) |
+
+### vant docs-build
+
+Build documentation:
+
+```bash
+vant docs-build                # Build docs
+vant docs-build --version 0.9.0 # Specific version
+```
+
+## Boot Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant boot` | System bootstrap |
+
+### vant boot
+
+Bootstrap Vant system:
+
+```bash
+vant boot                  # Full bootstrap
+vant boot --init           # Initialize from scratch
+vant boot --verify         # Verify installation
+```
+
+## Main Entry
+
+| Command | Description |
+|---------|-------------|
+| `vant` | Main entry point |
+
+### vant
+
+Main Vant CLI entry:
+
+```bash
+vant                      # Show version
+vant -h, --help           # Show help
+vant --version            # Show version
 ```

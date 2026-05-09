@@ -7,6 +7,159 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Encrypt Class** (2026-05-09)
+  - New lib/encrypt.js: Consolidated crypto handlers pool
+  - All crypto operations now use Encrypt
+  - Added generateId, generateToken, encrypt/decrypt, hash/verify, hmac
+- **Security Self-Tests** (2026-05-09)
+  - security.runSelfTests() - Test Encrypt, Auth, VAF, Lock
+  - security.checkBrainHealth() - Scan brain for injection patterns
+  - security.verifyVafSanity() - Verify VAF module loaded
+
+### Changed
+- **Crypto Consolidation** (2026-05-09)
+  - auth.js: Uses Encrypt for token generation
+  - lock.js: Uses Encrypt for token generation  
+  - server.js: Uses Encrypt for request IDs
+  - sandbox.js: Uses Encrypt for IDs
+  - search.js: Uses Encrypt for cache keys
+  - search-hybrid.js: Uses Encrypt for hashing
+  - audit.js: Uses Encrypt for logging hashes
+  - vaf.js: Uses Encrypt for IP hashing
+  - hash.js: Now wrapper to Encrypt (md5, sha256, consistent)
+
+### Added
+- **QoS Class** (2026-05-08)
+  - New lib/qos.js: Unified QoS (rate-limit + circuit-breaker + bulkhead)
+  - lib/server.js: Security chain now uses QoS (was rate-limit)
+  - bin/mcp.js: Security chain now uses QoS
+  - lib/escrow.js: Uses QoS CircuitBreaker (was separate file)
+  - lib/framework.js: Updated to use QoS
+  - bin/rate.js: Now uses QoS
+- **CLI Server Command** (2026-05-08)
+  - New bin/server.js CLI command
+  - vant server --help shows all options
+  - vant CLI shows server command
+- **Security Hardening** (2026-05-08)
+  - Added security headers (CSP, HSTS, X-Frame-Options, etc)
+  - Added request ID for tracking
+  - Added rate limit headers
+  - Added request body limit (1MB)
+  - Added request timeout (30s)
+  - Added RateLimiter cleanup for memory management
+- **Server Documentation** (2026-05-08)
+  - New docs/guides/server.md
+  - New docs/guides/setup.md
+- **Breaking Changes** (2026-05-08)
+  - Removed lib/rate-limit.js (merged to lib/qos.js)
+  - Removed lib/rate-limiter.js (merged to lib/qos.js)
+  - Removed lib/circuit-breaker.js (merged to lib/qos.js)
+  - Removed lib/bulkhead.js (merged to lib/qos.js)
+  - bin/build-test.js: Updated to test qos.js instead of rate-limit.js
+- **Security Chain** (2026-05-09)
+  - lib/server.js: VAF + rate-limit + auth + escrow in security chain
+  - Security chain: VAF → Rate-Limit → Auth → Escrow → Handler
+  - VANT_SERVER_AUTH_REQUIRED for enforcing API key
+  - lib/auth.js: API key validation + lockout after 5 failures
+  - bin/mcp.js: VAF + rate-limit integrated
+- **Remote Server + TLS** (2026-05-09)
+  - New lib/server.js with HTTP/HTTPS support
+  - TLS certificate loading from filesystem
+  - HTTP fallback for development (VANT_SERVER_INSECURE=1)
+  - Configurable bind address + port
+  - Caddy integration documented for auto-TLS
+  - New env functions: serverPort(), serverBind(), serverCert(), serverKey()
+- **Unified MCP + Headless API** (2026-05-09)
+  - bin/mcp.js now uses lib/api.js for consistent execution
+  - Pre/post execution hooks via api.onBeforeExecute/onAfterExecute
+  - Unified authentication with lockout (5 failures = 60s lockout)
+  - MCP mode detection propagated to framework
+  - Debug hooks with VANT_DEBUG=1 env var
+- **Brain File Locking** (2026-05-08)
+  - lib/brain.js now integrates with lib/lock.js
+  - New functions: acquireBrainLock(), releaseBrainLock(), getLockStatus(), withLock()
+  - Prevents race conditions in multi-agent brain writes
+  - Token-based release validation
+  - CLI: `vant lock acquire | release | status | force`
+- **Error Handler Integration** (2026-05-08)
+  - lib/error-handler.js now uses lib/errors.js codes
+  - Consistent error response format
+  - VantError.code and retryable exposed in HTTP responses
+- **Class Wrapper Consolidation** (2026-05-08)
+  - Merged all *-class.js wrappers into core lib modules
+  - Now matches app architecture (one file per concern)
+  - Added framework hooks (getLayerStatus, isOperationAllowed, getStatus) to each module
+  - Files merged:
+    - brain-class.js → brain.js
+    - metrics-class.js → metrics.js (added in-memory tracking)
+    - rate-limit-class.js → rate-limit.js (added per-user limiting)
+    - resolution-class.js → resolution.js
+    - search-class.js → search.js
+    - sync-class.js → sync.js
+
+### Added (2026-05-07)
+- **Vibe Controls** - Full brain state control system
+  - vibe.pause() / vibe.resume() - Pause/resume brain writes
+  - vibe.snapshot() - Save brain snapshot
+  - vibe.restore(snapshotId) - Restore from snapshot
+  - vibe.lock() / vibe.unlock() - Full brain lock
+  - vibe.freeze() - Freeze brain state
+  - CLI: `vant vibe [pause|resume|snapshot|restore|lock|unlock|freeze]`
+
+- **Multi-Repo Support** - Multiple brain repositories
+  - Support for GitHub, GitLab, Bitbucket, file://
+  - Hybrid sync across providers
+  - Provider priority configuration
+  - CLI: `vant sync --provider github|gitlab|bitbucket`
+
+- **Hybrid Search** - Combined BM25 + Vector + RRF
+  - search.hybrid() - Multi-algorithm search
+  - Session caching
+  - Lazy-load heavy search modules
+  - Cache management APIs
+
+- **Escrow Layer** - Authentication middleware
+  - api.js authentication layer integration
+  - VANT_API_KEY required for all endpoints
+  - Bootstrap: setSecret without key if no secret set
+  - Context-based auth support
+
+- **Linear Integration** - Issue tracking sync
+  - Linear API connection
+  - Issue sync with brain files
+  - Automatic issue creation from brain
+
+- **Webhook Automation** - Generic webhook triggers
+  - Event-based webhooks (sync, commit, errors)
+  - Slack/Discord notifications
+  - Custom webhook URLs
+
+- **19 Agent Types** (2026-05-07)
+  - Full Architect, Full Engineer, Full Docs agents
+  - Full Integration, Full Backend, Full Frontend agents
+  - Full Designer, Full Assistant, Full SEO, Full Content agents
+  - Full API, Full Tester, Full Reliability agents
+  - Full Debug, Full Ops, Full CI, Full QoS agents
+  - Full security agent
+  - Full Emergency agent
+  - Each with full capability expansion
+
+- **sed + grep Tools (Level 2)**
+  - Full sed capabilities for line editing
+  - Full grep for pattern matching
+  - Integrated into all agent triggers
+
+- **Help System (Level 2)**
+  - Hierarchical help command
+  - All agents linked to help router
+  - Full command reference
+
+- **Iterate + QC Overhaul**
+  - Full iterate agent improvements
+  - Full QC overhaul with new checks
+  - sed + grep integration
+
 ### Security
 - **MCP Bind Address Restriction** (2026-05-07)
   - Default to 127.0.0.1 (localhost only)

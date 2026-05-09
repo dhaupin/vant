@@ -21,21 +21,275 @@ node bin/mcp.js --server
 vant mcp
 ```
 
-The server runs on **port 3456** by default with three endpoints:
+The server runs on **port 3456** by default:
 
-| Endpoint
-- Method
-- Description |
+| Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/tools`
-- GET
-- List all available tools |
-| `/health`
-- GET
-- Server health check |
-| `/call`
-- POST
-- Execute a tool (JSON-RPC) |
+| `/tools` | GET | List all available tools |
+| `/call` | POST | Execute a tool |
+| `/health` | GET | Server health check |
+
+### Port Configuration
+
+**Default: 3456** — Works out of the box. Change via environment:
+
+```bash
+# Via environment variable (recommended)
+export VANT_MCP_PORT=4000
+vant mcp --server
+
+# Via CLI flag
+vant mcp --server --port 4000
+```
+
+The server uses `VANT_MCP_PORT` from environment, falls back to 3456 if unset.
+
+---
+
+## Remote Access
+
+By default, MCP binds to `127.0.0.1` (localhost only) for security. To expose to network:
+
+```bash
+# Bind to all interfaces (REMOTE - but UNENCRYPTED!)
+export MCP_BIND_ADDRESS=0.0.0.0
+vant mcp --server
+```
+
+### TLS / HTTPS
+
+For production remote access, use TLS certificates:
+
+```bash
+# With Let's Encrypt or Cloudflare certificates
+export VANT_SERVER_CERT=/path/to/cert.pem
+export VANT_SERVER_KEY=/path/to/key.pem
+vant mcp --server
+```
+
+Or use **Caddy** for automatic HTTPS:
+
+```bash
+# Caddyfile (place next to Caddyfile in project root)
+mcp.yourdomain.com:3456 {
+    reverse_proxy localhost:3456
+}
+```
+
+Then run Caddy:
+```bash
+caddy run
+```
+
+Caddy automatically provisions free TLS certificates!
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MCP_PORT` | 3456 | Server port |
+| `MCP_BIND_ADDRESS` | 127.0.0.1 | Bind address |
+| `VANT_SERVER_CERT` | - | TLS certificate path |
+| `VANT_SERVER_KEY` | - | TLS key path |
+| `VANT_SERVER_INSECURE` | false | Allow HTTP (dev only) |
+
+---
+
+## Security Chain
+
+MCP uses a security chain for all requests:
+
+1. **VAF** - Input validation, path traversal protection
+2. **Rate-Limit** - Per-IP request limiting
+3. **Auth** - API key validation (optional)
+4. **Escrow** - Budget checks for writes
+
+```bash
+# Require API key
+VANT_SERVER_AUTH_REQUIRED=1 vant mcp --server
+```
+
+### Failed Attempts
+
+After 5 failed auth attempts, access is locked for 60 seconds.
+
+---
+
+## Unified API
+
+MCP uses the **unified lib/api.js** for consistent execution:
+
+- **Hooks**: Pre/post execution hooks for logging
+- **Auth**: Unified authentication with lockout after 5 failures
+- **Mode**: MCP mode detection for framework
+
+```javascript
+// Debug MCP hooks (optional)
+VANT_DEBUG=1 vant mcp --server
+```
+
+### Authentication
+
+Uses unified API with lockout:
+- 5 failed attempts triggers 60-second lockout
+- Set `VANT_API_KEY` in environment
+- Pass key via JSON-RPC params:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "vant_get_memory",
+    "apiKey": "your-key"
+  }
+}
+```
+
+---
+
+## REST API Reference
+
+### Base URL
+
+```
+http://localhost:3456
+```
+
+### Authentication
+
+Pass API key in header:
+
+```bash
+curl -H "Authorization: Bearer $VANT_API_KEY" http://localhost:3456/tools
+```
+
+### List Tools (`GET /tools`)
+
+```bash
+curl http://localhost:3456/tools
+```
+
+Response:
+```json
+{
+  "tools": [
+    {
+      "name": "vant_get_memory",
+      "description": "Read brain memory",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "file": { "type": "string", "description": "Brain file name" }
+        }
+      }
+    }
+  ]
+}
+```
+
+### Execute Tool (`POST /call`)
+
+Execute any tool via JSON-RPC:
+
+```bash
+curl -X POST http://localhost:3456/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "vant_get_memory",
+      "arguments": { "file": "identity.md" }
+    },
+    "id": 1
+  }'
+```
+
+Response:
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "content": "# NAME: MyAgent\n\nPURPOSE: ..."
+  }
+}
+```
+
+### Health Check (`GET /health`)
+
+```bash
+curl http://localhost:3456/health
+```
+
+---
+
+## Tool Reference
+
+### Core Tools (9)
+
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `vant_get_memory` | Read brain file | `file` (string) |
+| `vant_set_memory` | Write brain file | `file`, `content` |
+| `vant_list_branches` | List branches | - |
+| `vant_create_branch` | Create branch | `name` |
+| `vant_switch_branch` | Switch branch | `name` |
+| `vant_commit` | Commit changes | `message` |
+| `vant_sync` | Push/pull | - |
+| `vant_lock` | Lock brain | `token` |
+| `vant_health` | Health check | - |
+
+### Extended Tools (11)
+
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `vant_get_islands` | List islands | - |
+| `vant_load_island` | Load island | `name` |
+| `vant_resolution_track` | Track decision | `id`, `outcome` |
+| `vant_stego_encode` | Encode stego | `text`, `image` |
+| `vant_stego_decode` | Decode stego | `image` |
+| `vant_config_get` | Get config | `key` |
+| `vant_config_set` | Set config | `key`, `value` |
+| `vant_audit_log` | Log audit | `action`, `details` |
+| `vant_audit_list` | List audit | `filters` |
+| `vant_succession_info` | Trust config | - |
+| `vant_search` | Search brain | `query`, `mode` |
+
+---
+
+## Error Codes
+
+| Code | HTTP Status | Retryable | Description |
+|------|-------------|-----------|-------------|
+| `UNKNOWN` | 500 | true | Unknown error |
+| `CONFIG_MISSING` | 500 | false | Missing config |
+| `CONFIG_INVALID` | 400 | false | Invalid config |
+| `GITHUB_AUTH` | 401 | false | Auth failed |
+| `GITHUB_NOT_FOUND` | 404 | false | Not found |
+| `GITHUB_RATE_LIMIT` | 429 | true | Rate limited |
+| `GITHUB_SYNC_FAIL` | 500 | true | Sync failed |
+| `BRAIN_LOAD_FAIL` | 500 | true | Load failed |
+| `BRAIN_SAVE_FAIL` | 500 | true | Save failed |
+| `NETWORK_TIMEOUT` | 504 | true | Timeout |
+| `NETWORK_OFFLINE` | 503 | true | Offline |
+| `LOCK_TIMEOUT` | 409 | false | Lock conflict |
+| `LOCK_FAILED` | 409 | false | Lock error |
+| `STEGO_ENCODE_FAIL` | 500 | false | Encode failed |
+| `STEGO_DECODE_FAIL` | 500 | false | Decode failed |
+
+Error response format:
+```json
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "code": "BRAIN_LOAD_FAIL",
+    "message": "Failed to load brain"
+  },
+  "id": 1
+}
+```
 
 ## Running Modes
 
@@ -95,6 +349,26 @@ MCP_PORT=3457
 - System health check |
 | `vant_search`
 - Search brain (basic/rag/hybrid) |
+| `vant_get_islands`
+- List brain islands |
+| `vant_load_island`
+- Load specific island |
+| `vant_resolution_track`
+- Track thought resolutions |
+| `vant_stego_encode`
+- Encode data in image |
+| `vant_stego_decode`
+- Decode stego image |
+| `vant_config_get`
+- Get config value |
+| `vant_config_set`
+- Set config value |
+| `vant_audit_log`
+- Write audit log |
+| `vant_audit_list`
+- List audit entries |
+| `vant_succession_info`
+- Get succession state |
 
 ## API Examples
 

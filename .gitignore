@@ -34,3 +34,7 @@ build/
 # Temp
 *.tmp
 temp/models/latent/*.vpatch
+
+# Lock files (brain + agent)
+.brain-lock-token
+.agent-locks/

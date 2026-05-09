@@ -72,8 +72,14 @@ const COMMANDS = {
     
     // Advanced
     lock: {
-        desc: 'Acquire/release brain lock',
-        usage: 'vant lock [acquire|release]'
+        desc: 'Brain write lock (multi-agent safety)',
+        usage: 'vant lock [acquire|release|status|force]',
+        detail: `Brain lock for multi-agent writes.
+  acquire - Acquire lock (returns token)
+  release - Release lock (using token)
+  status   - Show lock status
+  force    - Force release (admin)
+See: vant lock --help`
     },
     branch: {
         desc: 'List/switch brain branches',
@@ -81,6 +87,22 @@ const COMMANDS = {
     },
     
     // Integrations
+    server: {
+        desc: 'HTTP/HTTPS server with security chain',
+        usage: 'vant server [--port <port>] [--host <host>] [--cert <path>] [--key <path>]',
+        detail: `Run Vant HTTP/HTTPS server.
+
+Options:
+  -p, --port <port>    Server port (default: 3456)
+  -h, --host <host>    Bind address (default: 127.0.0.1)
+  -c, --cert <path>    TLS certificate path
+  -k, --key <path>    TLS key path
+  -i, --insecure      Allow HTTP (dev only)
+  -a, --auth          Require API key
+
+Set VANT_API_KEY to require authentication.
+See: vant server --help`,
+    },
     mcp: {
         desc: 'Run MCP server for AI tools (use --help for auth)',
         usage: 'vant mcp [--server|--stdio]',

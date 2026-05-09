@@ -2,50 +2,49 @@
 /**
  * Vant rate - rate module
  *
- * Usage: vant rate
+ * Usage: vant rate [-h|--help] [-s|--status] [reset <clientId>]
  */
 const vaf = require("../lib/vaf");
+const { QoS } = require('../lib/qos');
 
 // -h/--help
 const args = process.argv.slice(2);
 if (args[0] === '-h' || args[0] === '--help') {
-    console.log("'Usage: vant rate [-h|--help] [-s|--status] [-r|--reset]'");
+    console.log("Usage: vant rate [-h|--help] [-s|--status] [reset <clientId>]");
     process.exit(0);
 }
-/**
- * Vant Rate
- * Check rate limit status
- * 
- * Usage: vant rate
- *        vant rate status
- *        vant rate reset
- */
 
-const rateLimit = require('../lib/rate-limit');
+const qos = new QoS();
 
-const cmd = process.argv[2] || 'status';
-if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
+const cmd = args[0] || 'status';
+vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
 
 switch (cmd) {
     case 'status':
     case 's': {
-        
-        const status = rateLimit.getStatus();
+        const status = qos.getRateLimiterStatus();
         console.log(`
 ╔═══════════════════════════════════════╗
 ║         Rate Limit Status            ║
-╚═══════════════════════════════════════╝
-  Remaining: ${status.remaining}/${status.maxPerHour} per hour
-  Resets in: ~${status.resetIn} minutes
+╚═══════════════════════════════════════
+  Enabled: ${status.enabled}
+  Max/Min: ${status.config.maxPerMinute}
+  Clients: ${status.state.uniqueClients}
 `);
         break;
     }
-        
+    
     case 'reset':
     case 'r':
-        rateLimit.reset();
+        if (args[1]) {
+            qos.resetRateLimiter(args[1]);
+            console.log('Rate limit reset for: ' + args[1]);
+        } else {
+            console.log('Usage: vant rate reset <clientId>');
+            process.exit(1);
+        }
         break;
         
     default:
-        console.log('Usage: vant rate [status|reset]');
+        console.log('Usage: vant rate [status|reset <clientId>]');
 }

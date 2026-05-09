@@ -41,7 +41,32 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 // Load core Vant modules
-const { env } = require("../lib/env");
+const { env } = require('../lib/env');
+const api = require('../lib/api');  // Unified API with hooks + auth
+
+// Security chain
+const vaf = require('../lib/vaf');
+const { QoS } = require('../lib/qos');
+const qos = new QoS();  // QoS instance for rate limiting + concurrency
+const { Escrow } = require('../lib/escrow');
+const { Auth } = require('../lib/auth');
+
+// Set MCP mode for unified API (internal, no auth required)
+api.setMode('mcp', { internal: true });
+
+// Register hooks for MCP operations
+api.onBeforeExecute((ctx) => {
+    if (process.env.VANT_DEBUG === '1') {
+        console.log('[MCP] Before execute:', ctx.type, ctx.operation?.name || 'unknown');
+    }
+});
+
+api.onAfterExecute((ctx) => {
+    if (process.env.VANT_DEBUG === '1') {
+        console.log('[MCP] After execute:', ctx.type, 'success:', !!ctx.result);
+    }
+});
+
 const loadModule = (name) => {
     try {
         return require(`../lib/${name}`);
@@ -827,6 +852,17 @@ async function handleRequest(request) {
         }
     }
     
+    // Use unified API for authentication (with lockout)
+    const MCP_API_KEY = env.mcpApiKey();
+    if (MCP_API_KEY) {
+        // For JSON-RPC, pass key in params or use internal context
+        const apiKey = reqParams.apiKey;
+        const auth = api.authenticate(apiKey);
+        if (!auth.allowed) {
+            return { error: 'Unauthorized: ' + auth.reason };
+        }
+    }
+    
     if (protection.isCircuitOpen()) {
         return { error: 'Circuit open: too many failures. Wait and retry.' };
     }
@@ -997,6 +1033,24 @@ function checkAuth(req) {
 }
 
 const server = http.createServer(async (req, res) => {
+    // Get client IP for rate limiting
+    const clientIp = req.ip || req.socket?.remoteAddress || req.connection?.remoteAddress || 'unknown';
+    
+    // VAF + QoS security chain
+    try {
+        vaf.check(req.url);  // throws on bad input
+        if (vaf.isBlocked(clientIp)) {
+            res.writeHead(429, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Rate limited - too many requests' }));
+            return;
+        }
+        await qos.check(clientIp, 'read');
+    } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: e.message }));
+        return;
+    }
+    
     // Check auth for /call endpoints
     if (req.url === '/call' && !checkAuth(req)) {
         res.writeHead(401, { 'Content-Type': 'application/json' });

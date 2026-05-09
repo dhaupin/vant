@@ -31,14 +31,56 @@ const path = require('path');
 
 const BIN_DIR = __dirname;
 
+// CLI commands
 const COMMANDS = {
+    // Core
     start: 'start.js',
     sync: 'sync.js',
     health: 'health.js',
     load: 'load.js',
     run: 'run.js',
     test: 'build-test.js',
-    'test core': 'test-core.js',
+    
+    // Server
+    server: 'server.js',
+    
+    // Changelog & docs
+    changelog: 'changelog.js',
+    docs: 'docs.js',
+    
+    // Utilities
+    summary: 'summary.js',
+    update: 'update.js',
+    watch: 'watch.js',
+    bump: 'bump.js',
+    
+    // Help & info
+    help: 'help.js',
+    
+    // Server modes
+    node: 'node.js',
+    mcp: 'mcp.js',
+    
+    // Onboarding
+    onboard: 'onboard.js',
+    
+    // Settings
+    setup: 'setup.js',
+    rate: 'rate.js',
+    
+    // Branching
+    resolution: 'resolution.js',
+    succession: 'succession.js',
+    
+    // Advanced
+    bot: 'bot.js',
+    compress: 'compress.js',
+    
+    // Brain
+    stego: 'stego.js',
+    
+    // Automation
+    prune: 'prune.js',
     vibe: 'vibe.js',
     repos: 'repos.js',
     hybrid: 'hybrid-sync.js',
@@ -68,7 +110,9 @@ const COMMANDS = {
     // Ghost in the Machine
     boot: 'boot.js',
     // NEW: Islands (componentized brain)
-    islands: 'islands-boot.js'
+    islands: 'islands-boot.js',
+    // Brain lock management
+    lock: 'lock.js'
 };
 
 const args = process.argv.slice(2);
@@ -117,6 +161,7 @@ Brain:
   vant prune      Prune brain (LTC generation)
   vant succession Trust levels
   vant resolution Thought resolution
+  vant lock       Brain write lock (acquire/release/status)
 
 State:
   vant vibe        Show/set vibe
@@ -127,6 +172,7 @@ Integrations:
   vant mcp        MCP server for AI tools
   vant node       Persistent node
   vant webhook   Webhook server + send
+  vant server     HTTP/HTTPS server with security chain
   vant notify    Send notifications
   vant linear   Linear issue tracking (requires island)
 
