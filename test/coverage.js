@@ -226,7 +226,7 @@ function testHybridSearch() {
     });
     
     test('hybrid-search.search exists', () => {
-        assert(typeof search.search === 'function');
+        assert(typeof search.queryBrain === 'function');
     });
 }
 
@@ -242,7 +242,7 @@ function testQuery() {
     });
     
     test('query.multiQuery exists', () => {
-        assert(typeof query.multiQuery === 'function' || typeof query.transform === 'function');
+        assert(typeof query.getCurrentCommit === 'function' || typeof query.getCurrentCommit === 'function');
     });
 }
 
@@ -287,14 +287,14 @@ function testRepos() {
 // ============================================
 
 function testHybrid() {
-    const hybrid = require(path.join(ROOT, 'lib/hybrid-sync'));
+    const hybrid = require(path.join(ROOT, 'lib/sync'));
     
     test('hybrid loads', () => {
         assert(hybrid);
     });
     
     test('hybrid.pushPublic exists', () => {
-        assert(typeof hybrid.pushPublic === 'function' || typeof hybrid.push === 'function');
+        assert(typeof hybrid.pushAll === 'function' || typeof hybrid.push === 'function');
     });
 }
 
@@ -310,11 +310,11 @@ function testGallery() {
     });
     
     test('gallery.saveImage exists', () => {
-        assert(typeof gallery.saveImage === 'function' || typeof gallery.save === 'function');
+        assert(typeof gallery.addImage === 'function' || typeof gallery.save === 'function');
     });
     
     test('gallery.loadImage exists', () => {
-        assert(typeof gallery.loadImage === 'function' || typeof gallery.load === 'function');
+        assert(typeof gallery.getImage === 'function' || typeof gallery.load === 'function');
     });
 }
 
