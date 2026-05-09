@@ -303,7 +303,7 @@ function testHybrid() {
 // ============================================
 
 function testGallery() {
-    const gallery = require(path.join(ROOT, 'lib/gallery'));
+    const gallery = require(path.join(ROOT, 'lib/stego'));
     
     test('gallery loads', () => {
         assert(gallery);
