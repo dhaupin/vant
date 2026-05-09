@@ -20,11 +20,37 @@ nav_order: 99
 | `lib/lru.js` | ✅ Resolved | Deleted - already in lib/cache.js |
 | Search inner classes | ✅ Resolved | Search.Hybrid, Search.Hyde, Search.Rerank added to search.js |
 
+### Batch 1 - Class Refactor (f1fd28e)
+
+| File | Resolution | Notes |
+|------|------------|---------|
+| `lib/brain-class.js` | ✅ Resolved | Merged into lib/brain.js |
+| `lib/search-class.js` | ✅ Resolved | Merged into lib/search.js |
+| `lib/sync-class.js` | ✅ Resolved | Merged into lib/sync.js |
+| `lib/resolution-class.js` | ✅ Resolved | Merged into lib/resolution.js |
+| `lib/metrics-class.js` | ✅ Resolved | Merged into lib/metrics.js |
+| `lib/circuit-breaker.js` | ✅ Resolved | Two implementations - sync has file-based, qos has class |
+| `lib/bulkhead.js` | ✅ Resolved | Merged into lib/qos.js (Bulkhead class) |
+| `lib/rate-limit-class.js` | ✅ Resolved | Rate limiter now in lib/qos.js |
+| `lib/rate-limit.js` | ✅ Resolved | Rate limiter now in lib/qos.js |
+| `lib/rate-limiter.js` | ✅ Resolved | Rate limiter now in lib/qos.js |
+
+### Batch 2 - HTTP Server (9f63c37)
+
+| File | Resolution | Notes |
+|------|------------|---------|
+| `lib/request.js` | ✅ Resolved | Merged into lib/server.js |
+| `lib/response.js` | ✅ Resolved | Merged into lib/server.js |
+| `lib/router.js` | ✅ Resolved | Merged into lib/server.js |
+| `lib/static.js` | ✅ Resolved | Merged into lib/server.js |
+
 ### v0.8.6 Notes
 
 - Search system refactored: rerank.js kept but may integrate later
 - Hybrid.js kept as separate feature (different from search-hybrid)
 - Test CLI renamed for clarity
+- Rate limiting consolidated into QoS class
+- All -class.js files merged into base implementations
 
 ## Planned for v0.8.7
 
@@ -38,6 +64,17 @@ nav_order: 99
 |------|--------|-------|
 | `bin/hybrid-sync.js` | 🔸 Review | Standalone CLI - consolidate? |
 | `bin/test-all.js` | 🔸 Review | Old test runner - consolidate into test/*.js? |
+
+
+
+### Batch 3 - Server Consolidation (current session)
+
+| File | Resolution | Notes |
+|------|------------|---------|
+| `lib/http.js` | ✅ Resolved | Merged HTTP class into Server module |
+| `bin/test-all.js` | ✅ Resolved | Deleted - redundant test runner |
+| `lib/queue.js` | 🔸 Deferred | Async job queue - deferred to merge to Data layer later |
+
 
 ### Status Legend
 
