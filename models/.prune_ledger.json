@@ -251,6 +251,54 @@
         "ltcEntries": 0,
         "errors": []
       }
+    },
+    {
+      "date": "2026-05-09T12:40:26.634Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
+    },
+    {
+      "date": "2026-05-09T12:41:26.481Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
+    },
+    {
+      "date": "2026-05-09T12:41:56.257Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
+    },
+    {
+      "date": "2026-05-09T12:42:50.407Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
     }
   ]
 }

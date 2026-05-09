@@ -1,5 +1,5 @@
 ---
-version: 0.8.7
+version: 0.8.11
 permalink: /
 layout: default
 title: Vant Docs

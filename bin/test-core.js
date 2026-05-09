@@ -132,7 +132,7 @@ async function runTests() {
     // Gallery
     try {
         console.log('\n[Gallery]');
-        const gallery = require(path.join(DIR, 'lib/gallery'));
+        const gallery = require(path.join(DIR, 'lib/stego'));
         const index = gallery.getIndex();
         assert(index.version === '1.0');
         console.log('  ✓');
@@ -170,7 +170,7 @@ async function runTests() {
     // Hybrid
     try {
         console.log('\n[Hybrid]');
-        const hybrid = require(path.join(DIR, 'lib/hybrid-sync'));
+        const hybrid = require(path.join(DIR, 'lib/hybrid'));
         assert(typeof hybrid.setPrivacy === 'function');
         assert(typeof hybrid.getPrivacy === 'function');
         const summary = hybrid.getSummary();

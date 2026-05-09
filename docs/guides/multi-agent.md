@@ -1,5 +1,5 @@
 ---
-version: 0.8.7
+version: 0.8.11
 permalink: /guides/multi-agent
 layout: default
 title: Multi-Agent
