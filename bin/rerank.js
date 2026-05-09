@@ -8,8 +8,8 @@
  * Usage:
  *   vant rerank -h|--help
  *   vant rerank <query> [-k|--top-k <n>] [-t|--max-tokens <n>]
- *   vant rerank compress <file> [-t|--max-tokens <n>]
- *   vant rerank pipeline <query> [-k|--top-k <n>] [-t|--max-tokens <n>]
+ *   vant rerank.compress <file> [-t|--max-tokens <n>]
+ *   vant rerank.pipeline <query> [-k|--top-k <n>] [-t|--max-tokens <n>]
  *   vant rerank -s|--stats
  */
 
@@ -20,8 +20,8 @@ const DIR = path.join(__dirname, '..');
 const args = process.argv.slice(2);
 if (args.includes('-h') || args.includes('--help')) {
     console.log('Usage: vant rerank [-h|--help] <query> [options]');
-    console.log('       vant rerank compress <file> [options]');
-    console.log('       vant rerank pipeline <query> [options]');
+    console.log('       vant rerank.compress <file> [options]');
+    console.log('       vant rerank.pipeline <query> [options]');
     console.log('       vant rerank -s|--stats');
     console.log('');
     console.log('RAG-powered memory reranking and compression.');
@@ -41,8 +41,8 @@ if (args.includes('-h') || args.includes('--help')) {
     console.log('Examples:');
     console.log('  vant rerank "lessons learned"');
     console.log('  vant rerank "security fixes" -k 10');
-    console.log('  vant rerank pipeline "memory" -t 4000');
-    console.log('  vant rerank compress lessons.md -t 1000');
+    console.log('  vant rerank.pipeline "memory" -t 4000');
+    console.log('  vant rerank.compress lessons.md -t 1000');
     process.exit(0);
 }
 
@@ -64,7 +64,7 @@ const topK = parseInt(getOption('-k', '--top-k', '5'));
 const maxTokens = parseInt(getOption('-t', '--max-tokens', '2000'));
 
 // Load modules
-const rerank = require(path.join(DIR, 'lib', 'rerank'));
+const rerank = require(path.join(DIR, 'lib', 'search'));
 
 /**
  * Get memories from brain files

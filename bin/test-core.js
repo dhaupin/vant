@@ -182,7 +182,7 @@ async function runTests() {
     // SearchHybrid
     try {
         console.log('\n[SearchHybrid]');
-        const hs = require(path.join(DIR, 'lib/search-hybrid'));
+        const hs = require(path.join(DIR, 'lib/search'));
         assert(typeof hs.search === 'function');
         assert(typeof hs.indexDocument === 'function');
         const stats = hs.getStats();
@@ -194,7 +194,7 @@ async function runTests() {
     // SearchHyde
     try {
         console.log('\n[SearchHyde]');
-        const query = require(path.join(DIR, 'lib/search-hyde'));
+        const query = require(path.join(DIR, 'lib/search'));
         assert(typeof query.multiQuery === 'function');
         assert(typeof query.hyde === 'function');
         const vars = query.multiQuery('how to setup vesc');
@@ -206,7 +206,7 @@ async function runTests() {
     // Rerank
     try {
         console.log('\n[Rerank]');
-        const rerank = require(path.join(DIR, 'lib/rerank'));
+        const rerank = require(path.join(DIR, 'lib/search'));
         assert(typeof rerank.rerank === 'function');
         assert(typeof rerank.compress === 'function');
         const result = rerank.rerank([{ title: 'test', content: 'test content' }], 'test');

@@ -62,7 +62,7 @@ Options:
 
     // Helper: apply rerank to results
     function applyRerank(memories, q, lim, tok) {
-        const rerankLib = require(path.join(DIR, 'lib', 'rerank'));
+        const rerankLib = require(path.join(DIR, 'lib', 'search'));
         const ranked = rerankLib.rerank(memories, q, lim);
         const compressed = rerankLib.compress(ranked, tok);
         return compressed;

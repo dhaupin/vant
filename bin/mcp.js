@@ -664,7 +664,7 @@ async function searchBrain(query, args = {}) {
         
         // Optional: rerank results
         if (args.rerank) {
-            const rerankLib = require('./lib/rerank');
+            const rerankLib = require('./lib/search');
             const limit = args.limit || 5;
             const maxTokens = args.maxTokens || 2000;
             
@@ -916,7 +916,7 @@ async function handleRequest(request) {
                         result = await protection.withTimeout(searchBrain(args.query, args));
                         break;
                     case 'vant_rerank':
-                        const rerankLib = require('./lib/rerank');
+                        const rerankLib = require('./lib/search');
                         const memories = getMemory();
                         const query = args.query || '';
                         const mode = args.mode || 'rerank';
