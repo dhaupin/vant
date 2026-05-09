@@ -81,7 +81,7 @@ const lock = loadModule('lock');
 const config = loadModule('config');
 const health = loadModule('health');
 const protection = require('../lib/protection');
-const vaf = require('../lib/vaf');
+// vaf already loaded above
 const searchLib = require('../lib/search');
 
 /**
