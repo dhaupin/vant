@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- wildcard folder vant-skill-audit-* renamed to vant-skill-audit-meta
+- lib/lru.js deleted (already in lib/cache.js)
+- lib/search.js: Added Search.Hybrid, Search.Hyde, Search.Rerank inner classes
+- Backward compatible exports maintained
 
 ### Added
 - **Encrypt Class** (2026-05-09)
