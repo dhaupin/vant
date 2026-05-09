@@ -81,11 +81,11 @@ test('logger.js works', () => {
     logger.info('Test log', { test: true });
 });
 
-// Test: errors.js works
-test('errors.js works', () => {
-    const errors = require('../lib/errors');
-    if (typeof errors.VantError !== 'function') {
-        throw new Error('errors.js missing vantError()');
+// Test: error.js works
+test('error.js works', () => {
+    const errors = require('../lib/error');
+    if (typeof errors.Error !== 'function') {
+        throw new Error('error.js missing vantError()');
     }
 });
 
