@@ -41,7 +41,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 // Load core Vant modules
-const { env } = require('../lib/env');
+const { env } = require('../lib/config');
 const api = require('../lib/api');  // Unified API with hooks + auth
 
 // Security chain
@@ -56,13 +56,13 @@ api.setMode('mcp', { internal: true });
 
 // Register hooks for MCP operations
 api.onBeforeExecute((ctx) => {
-    if (process.env.VANT_DEBUG === '1') {
+    if (process.config.VANT_DEBUG === '1') {
         console.log('[MCP] Before execute:', ctx.type, ctx.operation?.name || 'unknown');
     }
 });
 
 api.onAfterExecute((ctx) => {
-    if (process.env.VANT_DEBUG === '1') {
+    if (process.config.VANT_DEBUG === '1') {
         console.log('[MCP] After execute:', ctx.type, 'success:', !!ctx.result);
     }
 });
@@ -853,7 +853,7 @@ async function handleRequest(request) {
     }
     
     // Use unified API for authentication (with lockout)
-    const MCP_API_KEY = env.mcpApiKey();
+    const MCP_API_KEY = config.mcpApiKey();
     if (MCP_API_KEY) {
         // For JSON-RPC, pass key in params or use internal context
         const apiKey = reqParams.apiKey;
@@ -1023,7 +1023,7 @@ if ((!module.parent || isServer) && !isStdio) {
     const http = require('http');
     
     // SECURITY: Add authentication check
-const MCP_API_KEY = env.mcpApiKey();
+const MCP_API_KEY = config.mcpApiKey();
 
 function checkAuth(req) {
     if (!MCP_API_KEY) return true; // No key configured, allow all
@@ -1069,8 +1069,8 @@ const server = http.createServer(async (req, res) => {
         }
         
         // API Key auth check
-        const expectedKey = env.mcpApiKey() || (config ? config.get('MCP_API_KEY') : null);
-        const requireApiKey = env.mcpRequireKey() === 'true' || 
+        const expectedKey = config.mcpApiKey() || (config ? config.get('MCP_API_KEY') : null);
+        const requireApiKey = config.mcpRequireKey() === 'true' || 
                              (config ? config.get('MCP_REQUIRE_API_KEY') === 'true' : false);
         
         // If key is set OR required, enforce auth
@@ -1121,8 +1121,8 @@ const server = http.createServer(async (req, res) => {
         }
     });
     
-    const PORT = env.mcpPort() || 3456;
-    const BIND_ADDRESS = env.mcpBindAddress();
+    const PORT = config.mcpPort() || 3456;
+    const BIND_ADDRESS = config.mcpBindAddress();
     server.listen(PORT, BIND_ADDRESS, () => {
         console.log(`Vant MCP Server running on port ${PORT}`);
         console.log('Endpoints:');
