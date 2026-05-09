@@ -42,6 +42,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - MERGED: job_worker.js → cron.js
   - Added: JobWorker class
 
+- **Delete Deprecated Wrappers** (2026-05-09)
+  - DELETE: audit-log.js, metrics.js, storage.js, buffer.js, entropy.js, serializer.js, load.js, horcrux.js, env.js
+  - 9 deprecated wrappers removed
+
 ### Added
 - **Vant Class + Agent Runtime** (2026-05-09)
   - lib/runtime.js → lib/vant.js: Renamed main module
