@@ -67,15 +67,6 @@ nav_order: 99
 
 
 
-### Batch 3 - Server Consolidation (current session)
-
-| File | Resolution | Notes |
-|------|------------|---------|
-| `lib/http.js` | ✅ Resolved | Merged HTTP class into Server module |
-| `bin/test-all.js` | ✅ Resolved | Deleted - redundant test runner |
-| `lib/queue.js` | 🔸 Deferred | Async job queue - deferred to merge to Data layer later |
-
-
 ### Status Legend
 
 - 🔸 Consider = may remove in future
