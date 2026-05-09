@@ -27,7 +27,7 @@ const action = (argsSet.has('-p') || argsSet.has('--public')) ? 'public' :
 
 const path = require('path');
 const DIR = path.join(__dirname, '..');
-const hybrid = require(path.join(DIR, 'lib', 'hybrid-sync'));
+const hybrid = require('./sync');
 
 async function run() {
     if (!action) {
