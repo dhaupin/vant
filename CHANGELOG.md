@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - security.verifyVafSanity() - Verify VAF module loaded
 
 ### Changed
+- **HTTP Server Consolidation** (2026-05-09)
+  - server.js: Merged Request, Response, Router, Static inner classes
+  - Removed lib/request.js, lib/response.js, lib/router.js, lib/static.js
+  - Server.Request, Server.Response, Server.Router, Server.Static now available
+  - Server.route(), Server.static() methods added
+  - Backward compatible exports maintained
+  - bin/server.js updated to use new Server class
 - **Crypto Consolidation** (2026-05-09)
   - auth.js: Uses Encrypt for token generation
   - lock.js: Uses Encrypt for token generation  
@@ -443,6 +450,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Unicode keys** - Changed from `[a-zA-Z0-9_-]` to blocking only path-unsafe chars `/ \ : * ? " < > |`
 
 ### Changed
+- **HTTP Server Consolidation** (2026-05-09)
+  - server.js: Merged Request, Response, Router, Static inner classes
+  - Removed lib/request.js, lib/response.js, lib/router.js, lib/static.js
+  - Server.Request, Server.Response, Server.Router, Server.Static now available
+  - Server.route(), Server.static() methods added
+  - Backward compatible exports maintained
+  - bin/server.js updated to use new Server class
 - **CLI Code Block**: Now uses `<pre class="term"><code>`
 
 ### Security
@@ -814,6 +828,13 @@ Cherry-picked v0.8.6 brain features into v0.8.4 branch for compatibility.
 - **Multi-handler Verbosity** - Split verbosity.ini into handlers
 
 ### Changed
+- **HTTP Server Consolidation** (2026-05-09)
+  - server.js: Merged Request, Response, Router, Static inner classes
+  - Removed lib/request.js, lib/response.js, lib/router.js, lib/static.js
+  - Server.Request, Server.Response, Server.Router, Server.Static now available
+  - Server.route(), Server.static() methods added
+  - Backward compatible exports maintained
+  - bin/server.js updated to use new Server class
 - Converted .txt to .md (identity.txt → identity.md, etc.)
 - Backward compatibility: code works with both .md and .txt
 - Updated schema/memory-files.md and transport-protocol.txt
@@ -849,6 +870,13 @@ Cherry-picked v0.8.6 brain features into v0.8.4 branch for compatibility.
   - Added docker-compose.yml
 
 ### Changed
+- **HTTP Server Consolidation** (2026-05-09)
+  - server.js: Merged Request, Response, Router, Static inner classes
+  - Removed lib/request.js, lib/response.js, lib/router.js, lib/static.js
+  - Server.Request, Server.Response, Server.Router, Server.Static now available
+  - Server.route(), Server.static() methods added
+  - Backward compatible exports maintained
+  - bin/server.js updated to use new Server class
 - Updated dist stats: 14 libs, 6 brain versions, 16 CLI commands
 - Added bot to CLI commands
 
@@ -870,6 +898,13 @@ Cherry-picked v0.8.6 brain features into v0.8.4 branch for compatibility.
   - Encrypt/decrypt with AES-256-GCM
 
 ### Changed
+- **HTTP Server Consolidation** (2026-05-09)
+  - server.js: Merged Request, Response, Router, Static inner classes
+  - Removed lib/request.js, lib/response.js, lib/router.js, lib/static.js
+  - Server.Request, Server.Response, Server.Router, Server.Static now available
+  - Server.route(), Server.static() methods added
+  - Backward compatible exports maintained
+  - bin/server.js updated to use new Server class
 - Initial public release
 - MIT License
 

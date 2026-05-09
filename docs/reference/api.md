@@ -646,7 +646,7 @@ store.destroy(id);
 
 ## API & HTTP
 
-### lib/router.js
+### lib/router.js (DEPRECATED)
 
 HTTP route matching and dispatch.
 
@@ -658,7 +658,36 @@ router.post(path, handler);
 router.route(method, path);
 ```
 
-### lib/request.js
+### lib/server.js - Inner Classes
+
+HTTP classes now consolidated into Server.
+
+```javascript
+const { Server, Request, Response, Router, Static } = require('./lib/server');
+
+// Request
+const req = new Request();
+req.url('/test').method('POST').body({ data: 1 });
+
+// Response
+const res = new Response();
+res.status(201).send({ ok: true });
+
+// Router
+const router = new Router();
+router.get('/api/:id', async (p) => ({ id: p.id }));
+
+// Server.Static
+const staticHandler = new Static({ root: 'public' });
+
+// Server with route/static convenience
+const server = new Server();
+server.route('/api/:id', async (ctx) => ({ id: ctx.id }), 'get');
+server.static('public', { index: 'index.html' });
+```
+
+Deprecated separate exports now available via Server inner classes.
+### lib/request.js (DEPRECATED)
 
 HTTP request abstraction.
 
@@ -672,7 +701,7 @@ req.query;     // Query string
 req.body;      // Parsed body
 ```
 
-### lib/response.js
+### lib/response.js (DEPRECATED)
 
 HTTP response builder.
 
