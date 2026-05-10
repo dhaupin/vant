@@ -38,6 +38,7 @@ vant start
 |----------|------------|
 | `VANT_API_KEY` | Server API key |
 | `VANT_MCP_API_KEY` | MCP API key |
+| `VANT_TOKEN_SECRET` | Secret for signing auth tokens (required for multi-instance) |
 
 ### Optional - AI
 

@@ -33,6 +33,44 @@ Vant Application Firewall - input validation.
 
 ---
 
+## Encryption
+
+Vant uses AES-256-GCM for message encryption.
+
+### Algorithm
+
+| Method | Algorithm | Auth |
+|--------|-----------|------|
+| `Encrypt.encrypt/decrypt` | AES-256-GCM | Yes (authTag) |
+| `Encrypt.aesGcmEncrypt/decrypt` | AES-256-GCM | Yes |
+| `Encrypt.encode/decode` | AES-256-GCM | Yes |
+| `Encrypt.hmac` | HMAC-SHA256 | - |
+
+### Token Signing
+
+| Method | Algorithm |
+|--------|-----------|
+| `Encrypt.signToken` | HMAC-SHA256 |
+| `Encrypt.verifyToken` | HMAC-SHA256 |
+
+### RSA
+
+| Method | Algorithm | Min Key Size |
+|--------|-----------|--------------|
+| `Encrypt.rsaKeyPair` | RSA | 2048 bits |
+| `Encrypt.rsaEncrypt/decrypt` | OAEP-SHA256 | 2048 bits |
+| `Encrypt.rsaSign/Verify` | RSA-SHA256 | 2048 bits |
+
+### Environment Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `VANT_TOKEN_SECRET` | Secret for signing auth tokens |
+| `VANT_API_KEY` | Server authentication |
+| `VANT_MSG_ENCRYPTED` | Enable message encryption (default: true) |
+
+---
+
 ## Data
 
 Tokens encrypted per-user.
