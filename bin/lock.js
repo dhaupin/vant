@@ -21,7 +21,6 @@ function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.c
 function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
 const lock = require('../lib/lock');
-const brain = require('../lib/storage').get('brain');
 
 const LOCK_TOKEN_FILE = path.join(__dirname, '..', '.lock-brain-token');
 
@@ -66,14 +65,14 @@ async function main() {
     switch (action) {
         case 'acquire':
         case 'acq':
-            const token = await brain.acquireBrainLock();
+            const token = await lock.acquire('brain');
             if (token) {
                 saveToken(token);
                 console.log('✓ Lock acquired');
                 console.log('Token:', token);
             } else {
                 console.log('✗ Could not acquire lock');
-                const status = brain.getLockStatus();
+                const status = lock.status();
                 if (status) {
                     console.log(`Held by: ${status.agentId} (${status.age}ms old)`);
                 }
@@ -83,18 +82,18 @@ async function main() {
         case 'release':
         case 'rel':
             const inputToken = args[1] || loadToken();
-            const result = await brain.releaseBrainLock(inputToken);
-            if (result.success) {
+            const result = await lock.release('brain', inputToken);
+            if (result) {
                 clearToken();
                 console.log('✓ Lock released');
             } else {
-                console.log('✗ Release failed:', result.message);
+                console.log('✗ Release failed');
             }
             break;
             
         case 'status':
         case 'stat':
-            const status = brain.getLockStatus();
+            const status = lock.status();
             if (status) {
                 console.log('Lock Status:');
                 console.log('  Agent:', status.agentId);
