@@ -8,6 +8,22 @@ nav_order: 1
 
 > Vant release history.
 
+## v0.8.7
+
+### Refactor: File Persistence + Legacy Cleanup
+
+- **Circuit Breakers**: Add file persistence for all circuit breakers (survive restarts)
+  - sync.js: `.circuit.json`
+  - network.js: `.network-circuit.json`
+  - escrow.js: `.escrow-circuit.json`
+  - vaf.js: `.vaf-blocked-circuit.json`
+  - auth.js: `.auth-lockout-circuit.json`
+
+- **Remove Legacy Resolution External Files**
+  - Resolution now scans brain files for in-file `status:` metadata
+  - Deleted `.resolution.json` ledger file
+  - In-file resolution is now single source of truth
+
 ## v0.8.6
 
 ### Refactor: Encrypt Security Update

@@ -28,6 +28,7 @@ nav_order: 99
 | `lib/encrypt.js` | Deprecated legacy methods - see below |
 | `lib/sandbox.js` | Refactored - delegates to qos/lock/network |
 | `lib/network.js` | Added domain whitelist functions |
+| `lib/resolution.js` | Removed external JSON - scans brain files only |
 
 ### Deprecated (Still Works - Will Remove)
 
@@ -37,6 +38,12 @@ nav_order: 99
 | `Encrypt.encode()` | `Encrypt.aesGcmEncrypt()` |
 | `Encrypt.decode()` | `Encrypt.aesGcmDecrypt()` |
 | `Encrypt.pbkdf2Sync()` | Node.js `crypto.pbkdf2Sync()` |
+
+### Removed Files
+
+| File | Reason |
+|------|--------|
+| `models/public/.resolution.json` | Replaced by in-file resolution metadata |
 
 ### New in v0.8.6
 
