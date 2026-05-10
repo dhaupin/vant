@@ -37,7 +37,7 @@ if (args.includes('-h') || args.includes('--help')) {
 const fs = require('fs');
 const path = require('path');
 const stego = require('../lib/stego');
-const brain = require('../lib/brain');
+const brain = require('../lib/storage').get('brain');
 
 const stegoArgs = process.argv.slice(2);
 const command = stegoArgs[0];

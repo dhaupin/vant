@@ -177,9 +177,9 @@ async function main() {
     });
   }
   
-  if (!filter || filter === 'brain') {
-    testLib('brain', './lib/brain', {
-      functions: { get: 1, write: 1 }
+  if (!filter || filter === 'storage') {
+    testLib('storage', './lib/storage', {
+      functions: { get: 1 }
     });
   }
   
