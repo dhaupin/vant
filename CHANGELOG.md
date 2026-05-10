@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Feature - Git Provider Parity (v0.8.7)
+### Feature - Git Provider Parity (v0.8.6)
 - **Multi-Provider Support** (2026-05-10)
   - ADDED: GitLabProvider with full API (issues, MRs, pipelines)
   - ADDED: BitbucketProvider with full API (PRs, repo details)
