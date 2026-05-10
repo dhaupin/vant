@@ -18,7 +18,7 @@ const listArg = args.includes('--list');
 const helpArg = args.includes('--help') || args.includes('-h');
 
 const islands = require('../lib/islands');
-const state = require('../lib/state');
+const state = require("../lib/storage").get("state");
 const brain = require('../lib/storage').get('brain');
 const gallery = require('../lib/stego');
 
@@ -31,7 +31,7 @@ async function bootBoot(prompt) {
     
     // 1. Load static state
     console.log('\n[Islands] Loading static state...');
-    state.setCurrent({
+    state.set("current", {
         mode: 'islands',
         prompt: prompt,
         hydrated: []
@@ -49,15 +49,10 @@ async function bootBoot(prompt) {
     
     // 4. Show state summary
     console.log('\n[Islands] State:');
-    console.log('  - Static:', state.getSummary());
+    console.log('  - Static:', state.get("current"));
     console.log('  - Available:', islands.getAvailable().length);
     console.log('  - Hydrated:', islands.getHydrated().length);
     
-    // 5. Check gallery
-    const galleryImages = gallery.getAllImages();
-    if (galleryImages.length > 0) {
-        console.log('[Islands] Gallery:', galleryImages.length, 'images');
-    }
     
     console.log('\n[Islands] === Componentized Brain Ready ===');
     console.log('[Islands] Mode: Islands (lazy load)');
