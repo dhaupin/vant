@@ -10,6 +10,22 @@ nav_order: 1
 
 ## Unreleased
 
+### Refactor: Stego → Encrypt (v0.8.6)
+
+- Modified `lib/stego.js` - Remove duplicate encrypt/decrypt code
+- Now uses Encrypt class: `Encrypt.aesGcmEncrypt/Decrypt`
+- Simplified `createBootstrap/parseBootstrap` functions
+- Removed HORCRUX constants (unused)
+- Removed buffer mode (for image carriers only, not messages)
+
+### Refactor: Msg Cleanup
+
+- Modified `lib/msg.js` - Remove stego mode
+- `lib/msg.js` now uses only Encrypt for messages
+- Added config settings: `msg.encrypted`, `msg.autoEncrypt`
+- Added `decrypt(messageContent)` and `revealAuto(messageContent)`
+- Removed: `stego` option, `reveal()` method, `isStego()` helper
+
 ### New: Msg Class
 
 - Added `lib/msg.js` (498 lines) - Unified agent-to-agent messaging
@@ -17,9 +33,10 @@ nav_order: 1
 - Features:
   - Conversation API (create, post, reply, participants)
   - Channel API (IPC-style send/subscribe/publish)
-  - Encryption layers: plain, encrypt, stego, encrypt+stego
+  - Encryption: plain, encrypt (AES-256-GCM)
   - Auto-detect + explicit reveal options
   - Security: VAF, QoS (500/min), Escrow, Event
+- Config: `msg.encrypted`, `msg.autoEncrypt` (default: true)
 - Updated: vant.js, framework.js to use msg
 - Deleted: lib/conversation.js, lib/ipc.js (no backwards compat)
 

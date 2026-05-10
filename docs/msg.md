@@ -66,14 +66,11 @@ const messages = msg.messages(conv.id);
 // Plain (default)
 msg.post(convId, 'Hello');
 
-// Encrypted
+// Encrypted (AES-256-GCM)
 msg.post(convId, 'Secret', { encrypt: true });
 
-// Stego (hidden in data)
-msg.post(convId, 'Hidden', { stego: true });
-
-// Encrypt + Stego (paranoid)
-msg.post(convId, 'Super secret', { encrypt: true, stego: true });
+// Force plain (skip auto-detect)
+msg.post(convId, 'Secret', { encrypt: true, forcePlain: true });
 
 // Auto-detect and reveal
 msg.revealAuto(messageContent);
@@ -85,12 +82,24 @@ msg.revealAuto(messageContent);
 // Explicit decrypt
 const result = msg.decrypt(messageContent);
 
-// Explicit reveal (stego)
-const result = msg.reveal(messageContent);
-
-// Auto-detect + reveal
+// Auto-detect decrypt
 const result = msg.revealAuto(messageContent);
 ```
+
+## Configuration
+
+Encryption is enabled by default. Configure via:
+
+```javascript
+const config = require('./lib/config');
+config.get('msg.encrypted');   // true
+config.get('msg.autoEncrypt'); // true
+```
+
+| Setting | Env Variable | Default | Description |
+|---------|-------------|---------|-------------|
+| `msg.encrypted` | `VANT_MSG_ENCRYPTED` | `true` | Enable message encryption |
+| `msg.autoEncrypt` | `VANT_MSG_AUTO_ENCRYPT` | `true` | Auto-detect encrypted |
 
 ## Options
 
@@ -98,11 +107,9 @@ const result = msg.revealAuto(messageContent);
 |--------|------|---------|-------------|
 | `id` | string | auto | Conversation ID |
 | `maxMessages` | number | 100 | Max messages to keep |
-| `encryption` | boolean | false | Enable encryption |
 | `author` | string | 'anonymous' | Message author |
 | `metadata` | object | {} | Custom metadata |
 | `encrypt` | boolean | false | Encrypt this message |
-| `stego` | boolean | false | Stego this message |
 | `forcePlain` | boolean | false | Force plain text |
 
 ## Security

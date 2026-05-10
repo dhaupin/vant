@@ -10,6 +10,13 @@ nav_order: 99
 
 ## v0.8.6 - Current (2026-05-08)
 
+### Changed
+
+| File | Notes |
+|------|-------|
+| `lib/stego.js` | Removed stego mode for messages - use only Encrypt |
+| `lib/msg.js` | Removed stego options - use config for encryption |
+
 ### Deleted (No Replacements - BREAKING)
 
 | File | Notes |
