@@ -8,7 +8,34 @@ nav_order: 1
 
 > Vant release history.
 
-## Unreleased
+## v0.8.6
+
+### Refactor: Encrypt Security Update
+
+- **CTR → GCM**: `encrypt/decrypt` now uses AES-256-GCM
+  - New format: `salt:iv:authTag:encrypted` (previously was `salt:iv:encrypted`)
+  - Authenticated encryption - detects tampering
+- **Remove md5**: Use `sha256()` for cache keys
+- **Add RSA**: Full asymmetric crypto
+  - `rsaKeyPair(bits)` → `{ publicKey, privateKey }`
+  - `rsaEncrypt/Decrypt` → OAEP-SHA256
+  - `rsaSign/Verify` → SHA256
+
+### Deprecations
+
+| Method | Use Instead |
+|--------|-------------|
+| `Encrypt.encrypt/decrypt` | `Encrypt.aesGcmEncrypt/aesGcmDecrypt` |
+| `Encrypt.encode/decode` | `Encrypt.aesGcmEncrypt/aesGcmDecrypt` |
+| `Encrypt.pbkdf2Sync` | `crypto.pbkdf2Sync()` |
+
+### Fix: aesGcmEncrypt/Decrypt
+
+- Returns hex string (was Buffer)
+- Now consistent with other Encrypt methods
+
+
+## v0.8.6
 
 ### Refactor: Stego → Encrypt (v0.8.6)
 
