@@ -10,6 +10,15 @@
  */
 
 const fs = require('fs');
+
+// Lazy-load sandbox
+let _sandbox = null;
+function _getSandbox() {
+    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    return _sandbox;
+}
+function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
+function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
 const lock = require('../lib/lock');
 const brain = require('../lib/storage').get('brain');
@@ -23,6 +32,8 @@ const action = args[0];
  * Save token to file for cross-process persistence
  */
 function saveToken(token) {
+    _checkWrite();
+
     if (token) {
         fs.writeFileSync(LOCK_TOKEN_FILE, token);
     }
@@ -32,6 +43,8 @@ function saveToken(token) {
  * Load token from file
  */
 function loadToken() {
+    _checkRead();
+
     if (fs.existsSync(LOCK_TOKEN_FILE)) {
         return fs.readFileSync(LOCK_TOKEN_FILE, 'utf8').trim();
     }
@@ -42,6 +55,8 @@ function loadToken() {
  * Clear token file
  */
 function clearToken() {
+    _checkWrite();
+
     if (fs.existsSync(LOCK_TOKEN_FILE)) {
         fs.unlinkSync(LOCK_TOKEN_FILE);
     }
