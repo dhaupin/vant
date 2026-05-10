@@ -102,7 +102,7 @@ function checkEnv() {
 
 function checkDirs() {
     console.log('\n📁 Directories:');
-    const dirs = ['models', 'models/public', 'lib', 'bin', 'states'];
+    const dirs = ['models', 'models/public', 'lib', 'bin'];
     dirs.forEach(d => {
         if (fs.existsSync(d)) {
             console.log(`  ✓ ${d}/`);
@@ -110,6 +110,13 @@ function checkDirs() {
             console.log(`  ✗ ${d}/ missing`);
         }
     });
+
+    // State now in brain
+    if (fs.existsSync('models/public/.state.json')) {
+        console.log('  ✓ models/public/.state.json');
+    } else {
+        // May not exist yet (first run)
+    }
 }
 
 function run() {

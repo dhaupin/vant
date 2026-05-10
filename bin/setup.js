@@ -30,7 +30,8 @@ const CONFIG_TEMPLATE = `=== Vant CONFIG ===
 # Core
 VANT_VERSION=v' + version + '
 MODEL_PATH=models/public
-STATE_PATH=states/active/current.json
+# State now stored in brain
+# STATE_PATH is deprecated
 
 # Transport (stegoframe)
 STEGOFRAME_URL=https://stegoframe.creadev.org

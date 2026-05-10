@@ -32,7 +32,6 @@ function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.
 const path = require('path');
 
 const MODELS_DIR = 'models';
-const STATES_DIR = 'states';
 const CONFIG_FILE = 'config.ini';
 
 /**
