@@ -40,9 +40,9 @@ build/
 *.tmp
 temp/models/latent/*.vpatch
 
-# Lock files (brain + agent)
+# Lock files (brain + storage)
 .brain-lock-token
-.agent-locks/
+.locks/
 
 # Circuit breakers (runtime state)
 .circuit*.json

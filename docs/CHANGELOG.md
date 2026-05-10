@@ -13,11 +13,9 @@ nav_order: 1
 ### Refactor: File Persistence + Legacy Cleanup
 
 - **Circuit Breakers**: Add file persistence for all circuit breakers (survive restarts)
-  - sync.js: `.circuit.json`
-  - network.js: `.network-circuit.json`
-  - escrow.js: `.escrow-circuit.json`
-  - vaf.js: `.vaf-blocked-circuit.json`
-  - auth.js: `.auth-lockout-circuit.json`
+  - Naming: `.circuit-<name>.json` format
+  - `.circuit-sync.json`, `.circuit-network.json`, `.circuit-escrow.json`, `.circuit-vaf.json`, `.circuit-auth.json`
+  - Gitignore: `.circuit*.json` ignores all
 
 - **Remove Legacy Resolution External Files**
   - Resolution now scans brain files for in-file `status:` metadata

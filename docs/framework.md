@@ -51,6 +51,36 @@ All 6 layers run at the **same global scope** - no nested boxes, just layered de
 - Timeouts
 - Functions: `withTimeout()`, `canProceed()`, `isCircuitOpen()`
 
+#### Circuit Breakers
+
+Vant uses file-based circuit breakers that persist across restarts:
+
+| File | Purpose | Module |
+|------|---------|--------|
+| `.circuit-sync.json` | Sync operation state | `lib/sync.js` |
+| `.circuit-network.json` | Network connectivity | `lib/network.js` |
+| `.circuit-escrow.json` | Budget/escrow state | `lib/escrow.js` |
+| `.circuit-vaf.json` | VAF blocked IPs | `lib/vaf.js` |
+| `.circuit-auth.json` | Auth lockouts | `lib/auth.js` |
+
+**Naming Convention**: `.circuit-<name>.json`
+
+All circuit files are ignored via `.circuit*.json` in `.gitignore`.
+
+#### Lock System
+
+Vant uses file-based locks for multi-agent coordination:
+
+| Pattern | Purpose | Module |
+|---------|---------|--------|
+| `.lock-brain.json` | Brain acquisition lock | `lib/lock.js` |
+| `.lock-<id>.json` | Storage locks | `lib/storage.js` |
+| `.brain-lock-token` | Legacy brain token (unused) | - |
+
+**Naming Convention**: `.lock-<name>.json`
+
+Locks directory `.locks/` is ignored in `.gitignore`.
+
 ### Layer 4: Security (lib/security.js)
 - Security posture
 - Controls IS IT ALLOWED
