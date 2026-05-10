@@ -25,6 +25,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - REMOVED: direct lock usage (delegates to lock module)
   - Role: Agent/Node execution isolation "keeper"
 
+- **Sandbox Keeper Features** (2026-05-10)
+  - ADDED: budget delegation to escrow (getBudgetStatus, recordSpend)
+  - ADDED: capability flags (canRead, canWrite, canNetwork, canSpawn, canCommit, etc.)
+  - ADDED: operation scopes (read, write, network, spawn)
+  - ADDED: getCapabilities(), setCapabilities(), can(cap)
+  - ADDED: getScopes(), setScopes(), hasScope(scope)
+  - ADDED: getOperationHistory(), getErrors()
+  - ADDED: isolate() for untrusted sub-sandbox
+  - Full keeper integration: agents now have proper guards/lanes
+
 ### Breaking Changes (v0.8.6)
 - **Consolidated Cache Module** (2026-05-09)
   - REMOVED: memoize.js, compression.js, pool.js, cache.js, cache-control.js
