@@ -46,7 +46,7 @@ async function runTests() {
     // State
     try {
         console.log('\n[State]');
-        const state = require(path.join(DIR, 'lib/state'));
+        const state = require(path.join(DIR, 'lib/storage')).get('state');
         state.setStatic({ t: 'v' });
         assert(state.getStatic('t') === 'v');
         state.setCurrent({ task: 'test' });
@@ -157,7 +157,7 @@ async function runTests() {
     // Repos
     try {
         console.log('\n[Repos]');
-        const repos = require(path.join(DIR, 'lib/repos'));
+        const repos = require(path.join(DIR, 'lib/storage')).get('repos');
         assert(typeof repos.list === 'function');
         assert(typeof repos.mount === 'function');
         const list = repos.list();

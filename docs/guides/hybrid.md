@@ -56,7 +56,7 @@ vant hybrid-sync --set github private
 ## With Multi-Repo
 
 ```javascript
-const repos = require('./lib/repos');
+const repos = require('./lib/storage').get('repos');
 const hybrid = require('./lib/hybrid');
 
 // Mount skills (public)

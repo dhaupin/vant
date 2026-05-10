@@ -26,7 +26,7 @@ Pull skills from different repos:
 ## Usage
 
 ```javascript
-const repos = require('./lib/repos');
+const repos = require('./lib/storage').get('repos');
 
 // Register external repo
 repos.register('my-skills', 'https://github.com/user/skills-repo', {

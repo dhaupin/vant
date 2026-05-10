@@ -54,7 +54,7 @@ vant islands --island github
 
 ```javascript
 const islands = require('./lib/islands');
-const state = require('./lib/state');
+const state = require('./lib/storage').get('state');
 
 // Find islands that match a trigger
 const found = islands.findTriggers('github issue');
@@ -71,7 +71,7 @@ await islands.hydrate('github');
 ## State Separation
 
 ```javascript
-const state = require('./lib/state');
+const state = require('./lib/storage').get('state');
 
 // Static: Immutable (identity, facts)
 state.setStatic({ name: 'Vant', version: '0.8.6' });

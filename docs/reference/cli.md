@@ -340,7 +340,7 @@ vant lock force    # Force release (admin)
 **Using in code:**
 
 ```javascript
-const brain = require('./lib/brain');
+const brain = require('./lib/storage').get('brain');
 
 // Simple: acquire lock, do work, release
 const token = await brain.acquireBrainLock();
