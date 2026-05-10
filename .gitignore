@@ -39,6 +39,7 @@ temp/models/latent/*.vpatch
 .brain-lock-token
 .agent-locks/
 
-# Resolution
-*.resolution.json
-.resolutions/
+# Circuit breakers (runtime state)
+*.circuit.json
+*locked-circuit.json
+*lockout-circuit.json
