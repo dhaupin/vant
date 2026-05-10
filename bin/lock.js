@@ -23,7 +23,7 @@ const path = require('path');
 const lock = require('../lib/lock');
 const brain = require('../lib/storage').get('brain');
 
-const LOCK_TOKEN_FILE = path.join(__dirname, '..', '.brain-lock-token');
+const LOCK_TOKEN_FILE = path.join(__dirname, '..', '.lock-brain-token');
 
 const args = process.argv.slice(2);
 const action = args[0];

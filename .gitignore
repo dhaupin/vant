@@ -6,10 +6,9 @@ node_modules/
 .env.local
 .env.*.local
 
-# State
-states/active/
-states/archive/
-models/private/
+# State (in brain - removed states/ directory)
+models/public/.state.json
+models/public/repos/
 
 # IDE
 .vscode/
@@ -41,7 +40,7 @@ build/
 temp/models/latent/*.vpatch
 
 # Lock files (brain + storage)
-.brain-lock-token
+.lock-brain-token
 .locks/
 
 # Circuit breakers (runtime state)

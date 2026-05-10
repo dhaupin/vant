@@ -16,6 +16,7 @@ nav_order: 1
   - Naming: `.circuit-<name>.json` format
   - `.circuit-sync.json`, `.circuit-network.json`, `.circuit-escrow.json`, `.circuit-vaf.json`, `.circuit-auth.json`
   - Gitignore: `.circuit*.json` ignores all
+  - Removed `states/active/` directory (legacy)
 
 - **Remove Legacy Resolution External Files**
   - Resolution now scans brain files for in-file `status:` metadata
