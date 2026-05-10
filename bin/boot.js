@@ -116,7 +116,7 @@ async function boot(imageInput, decryptPassword) {
     
     // Load stego module
     const stego = require('../lib/stego');
-    const brain = require('../lib/brain');
+    const brain = require('../lib/storage').get('brain');
     
     // Decode brain from image
     console.log('[Boot] Decoding brain from image...');
@@ -248,7 +248,7 @@ function enterAmnesiaMode() {
     console.log('============================================\n');
     
     // Save warning state
-    const brain = require('../lib/brain');
+    const brain = require('../lib/storage').get('brain');
     brain.set('amnesia', {
         mode: true,
         timestamp: new Date().toISOString(),

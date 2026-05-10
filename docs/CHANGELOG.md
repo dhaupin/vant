@@ -45,6 +45,29 @@ nav_order: 1
 - Returns hex string (was Buffer)
 - Now consistent with other Encrypt methods
 
+### Refactor: Storage Module (v0.8.6 Breaking)
+
+- **Remove old modules**: `brain.js`, `vector-store.js`, `state.js`, `repos.js` deleted
+- **New Storage class**: `lib/storage/index.js` - unified storage abstraction
+  - `Storage.get('brain')` → BrainStorage instance
+  - `Storage.get('vector')` → VectorStorage instance
+  - `Storage.get('state')` → StateStorage instance
+  - `Storage.get('config')` → ConfigStorage instance
+  - `Storage.get('lock')` → LockStorage instance
+  - `Storage.get('islands')` → IslandStorage instance
+  - `Storage.get('repos')` → ReposStorage instance
+- **Connectors**: `lib/storage/connectors/` - pluggable storage backends
+  - `FileStorage` (default) - filesystem-based
+  - `PineconeConnector` - vector database
+- **Breaking**: All consumers updated to use `Storage.get('brain')` instead of `require('./brain')`
+- **API**:
+  ```js
+  const Storage = require('./storage');
+  const brain = Storage.get('brain');
+  await brain.write('file.md', content);
+  const data = await brain.read('file.md');
+  ```
+
 
 ## v0.8.6
 

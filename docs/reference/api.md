@@ -207,7 +207,7 @@ Direct brain access.
 Get brain file.
 
 ```javascript
-const brain = require('./lib/brain');
+const brain = require('./lib/storage').get('brain');
 
 const data = await brain.get('identity');
 // { key, content, date }
