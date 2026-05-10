@@ -87,8 +87,10 @@ function loadModel(modelPath) {
     }
 
     const files = fs.readdirSync(modelPath).filter(f => {
+        const filePath = path.join(modelPath, f);
         const ext = path.extname(f).toLowerCase();
-        return ['.md', '.txt', '.json', '.yaml', '.yml'].includes(ext);
+        const isFile = fs.statSync(filePath).isFile();
+        return isFile && ['.md', '.txt', '.json', '.yaml', '.yml'].includes(ext);
     });
 
     const model = {};
