@@ -71,7 +71,7 @@ Options:
     // Basic mode
     if (mode === 'basic') {
         const searchLib = require(path.join(DIR, 'lib', 'search'));
-        const results = await searchLib.searchLTC(query, { limit, compact });
+        const results = await searchLib.getLTC(query, { limit, compact });
         
         if (rerank && results.length > 0) {
             const memories = results.map(r => ({
