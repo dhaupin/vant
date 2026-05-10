@@ -12,7 +12,7 @@
 const fs = require('fs');
 const path = require('path');
 const lock = require('../lib/lock');
-const brain = require('../lib/brain');
+const brain = require('../lib/storage').get('brain');
 
 const LOCK_TOKEN_FILE = path.join(__dirname, '..', '.brain-lock-token');
 

@@ -167,7 +167,7 @@ function testIslands() {
 // ============================================
 
 function testState() {
-    const state = require(path.join(ROOT, 'lib/state'));
+    const state = require(path.join(ROOT, 'lib/storage')).get('state');
     
     test('state loads', () => {
         assert(state);
@@ -267,7 +267,7 @@ function testRerank() {
 // ============================================
 
 function testRepos() {
-    const repos = require(path.join(ROOT, 'lib/repos'));
+    const repos = require(path.join(ROOT, 'lib/storage')).get('repos');
     
     test('repos loads', () => {
         assert(repos);

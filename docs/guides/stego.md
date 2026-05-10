@@ -60,7 +60,7 @@ Shows maximum embeddable bytes.
 
 ```javascript
 const stego = require('./lib/stego');
-const brain = require('./lib/brain');
+const brain = require('./lib/storage').get('brain');
 
 // Encode brain into image
 stego.encodeBrain('input.png' |

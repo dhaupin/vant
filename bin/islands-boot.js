@@ -19,7 +19,7 @@ const helpArg = args.includes('--help') || args.includes('-h');
 
 const islands = require('../lib/islands');
 const state = require('../lib/state');
-const brain = require('../lib/brain');
+const brain = require('../lib/storage').get('brain');
 const gallery = require('../lib/stego');
 
 /**

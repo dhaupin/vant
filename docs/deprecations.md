@@ -8,7 +8,16 @@ nav_order: 99
 
 > Track deprecated, orphaned, and planned-for-removal files.
 
-## v0.8.6 - Current (2026-05-08)
+## v0.8.6 - Current (2026-05-09)
+
+### REMOVED (v0.8.6 Breaking)
+
+| File | Replacement |
+|------|------------|
+| `lib/brain.js` | Use `Storage.get('brain')` from `lib/storage` |
+| `lib/vector-store.js` | Use `Storage.get('vector')` from `lib/storage` |
+| `lib/state.js` | Use `Storage.get('state')` from `lib/storage` |
+| `lib/repos.js` | Use `Storage.get('repos')` from `lib/storage` |
 
 ### Changed
 

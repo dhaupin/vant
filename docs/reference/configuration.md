@@ -40,6 +40,44 @@ MAX_REQUESTS_PER_HOUR=360
 | `POLLING_INTERVAL` | No | Poll interval (ms) |
 | `MAX_REQUESTS_PER_HOUR` | No | Rate limit cap |
 
+## GitLab
+
+```bash
+GITLAB_TOKEN=your_gitlab_token
+GITLAB_REPO=owner/repo
+GITLAB_URL=https://gitlab.com
+```
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GITLAB_TOKEN` | Yes | GitLab Personal Access Token |
+| `GITLAB_REPO` | Yes | Project path (owner/repo) |
+| `GITLAB_URL` | No | GitLab instance URL |
+
+## Bitbucket
+
+```bash
+BITBUCKET_TOKEN=your_bitbucket_token
+BITBUCKET_WORKSPACE=your_workspace
+BITBUCKET_REPO=your_repo
+```
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `BITBUCKET_TOKEN` | Yes | Bitbucket Access Token |
+| `BITBUCKET_WORKSPACE` | Yes | Workspace name |
+| `BITBUCKET_REPO` | Yes | Repository slug |
+
+## Self-Hosted Git
+
+```bash
+GIT_TOKEN=your_git_token
+```
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GIT_TOKEN` | No | Git token/SSH key |
+
 ## Additional Environment Variables
 Configuration via environment.
 

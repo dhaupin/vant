@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Feature - Git Provider Parity (v0.8.6)
+- **Multi-Provider Support** (2026-05-10)
+  - ADDED: GitLabProvider with full API (issues, MRs, pipelines)
+  - ADDED: BitbucketProvider with full API (PRs, repo details)
+  - ADDED: SelfHostedProvider with git CLI operations
+  - ADDED: Unified getProvider() factory in lib/remotes.js
+  - All providers share common API: issues, comments, PRs, repo, branches, status
+  - Provider-specific features: GitHub Actions, GitLab Pipelines, Bitbucket Issues
+
 ### Breaking Changes (v0.8.6)
 - **Consolidated Cache Module** (2026-05-09)
   - REMOVED: memoize.js, compression.js, pool.js, cache.js, cache-control.js

@@ -73,7 +73,7 @@ Working examples for common tasks.
 ### Basic Memory Operations
 
 ```javascript
-const brain = require('./lib/brain');
+const brain = require('./lib/storage').get('brain');
 
 async function basicExample() {
   // Load brain from GitHub
@@ -96,7 +96,7 @@ async function basicExample() {
 ### Persistent Agent Loop
 
 ```javascript
-const brain = require('./lib/brain');
+const brain = require('./lib/storage').get('brain');
 const config = require('./lib/config');
 
 async function agentLoop() {
@@ -157,7 +157,7 @@ async function safeWrite(agentId, content) {
 ### Reading Specific Files
 
 ```javascript
-const brain = require('./lib/brain');
+const brain = require('./lib/storage').get('brain');
 
 async function queryBrain() {
   // Get specific files
@@ -181,7 +181,7 @@ async function queryBrain() {
 ### Appending to Lessons
 
 ```javascript
-const brain = require('./lib/brain');
+const brain = require('./lib/storage').get('brain');
 
 async function addLesson(lesson) {
   const timestamp = new Date().toISOString();
@@ -330,7 +330,7 @@ function setupAutoSave() {
 ### Custom Brain Files
 
 ```javascript
-const brain = require('./lib/brain');
+const brain = require('./lib/storage').get('brain');
 const fs = require('fs');
 
 async function customBrainExample() {
