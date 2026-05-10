@@ -44,6 +44,7 @@ const { spawn } = require('child_process');
 const { env } = require('../lib/config');
 const api = require('../lib/api');  // Unified API with hooks + auth
 const network = require('../lib/network');  // Network layer
+const sandbox = require('../lib/sandbox');  // Execution isolation layer
 
 // Security chain
 const vaf = require('../lib/vaf');
@@ -372,6 +373,14 @@ const TOOLS = [
                 maxTokens: { type: 'number', description: 'Max tokens for compression (default: 2000)', default: 2000 },
                 mode: { type: 'string', description: 'Mode: rerank, compress, or pipeline', enum: ['rerank', 'compress', 'pipeline'], default: 'rerank' }
             }
+        }
+    },
+    {
+        name: 'vant_sandbox_status',
+        description: 'Get sandbox execution layer status. Returns active operations, read/write counts, and layer configuration.',
+        inputSchema: {
+            type: 'object',
+            properties: {}
         }
     }
 ];
@@ -931,6 +940,9 @@ async function handleRequest(request) {
                         } else {
                             result = { reranked: rerankLib.rerank(memories, query, topK) };
                         }
+                        break;
+                    case 'vant_sandbox_status':
+                        result = sandbox.getLayerStatus();
                         break;
                     default:
                         result = { error: 'Unknown tool: ' + name };

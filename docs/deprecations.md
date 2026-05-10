@@ -8,7 +8,7 @@ nav_order: 99
 
 > Track deprecated, orphaned, and planned-for-removal files.
 
-## v0.8.6 - Current (2026-05-09)
+## v0.8.6 - Current (2026-05-10)
 
 ### REMOVED (v0.8.6 Breaking)
 
@@ -26,6 +26,8 @@ nav_order: 99
 | `lib/stego.js` | Removed stego mode for messages - use only Encrypt |
 | `lib/msg.js` | Removed stego options - use config for encryption |
 | `lib/encrypt.js` | Deprecated legacy methods - see below |
+| `lib/sandbox.js` | Refactored - delegates to qos/lock/network |
+| `lib/network.js` | Added domain whitelist functions |
 
 ### Deprecated (Still Works - Will Remove)
 

@@ -16,6 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - All providers share common API: issues, comments, PRs, repo, branches, status
   - Provider-specific features: GitHub Actions, GitLab Pipelines, Bitbucket Issues
 
+- **Sandbox Refactor - Execution Keeper** (2026-05-10)
+  - REFACTORED: sandbox.js - now delegates to qos, lock, network
+  - ADDED: domain whitelist to network.js (isDomainAllowed, setAllowedDomains)
+  - ADDED: network.fetch() domain checks
+  - WIRED: sandbox into framework.js, vant.js, api.js (fully integrated)
+  - REMOVED: duplicate quota/concurrency in sandbox (uses qos.RateLimiter)
+  - REMOVED: direct lock usage (delegates to lock module)
+  - Role: Agent/Node execution isolation "keeper"
+
 ### Breaking Changes (v0.8.6)
 - **Consolidated Cache Module** (2026-05-09)
   - REMOVED: memoize.js, compression.js, pool.js, cache.js, cache-control.js
