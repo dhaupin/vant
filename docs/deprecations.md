@@ -16,6 +16,16 @@ nav_order: 99
 |------|-------|
 | `lib/stego.js` | Removed stego mode for messages - use only Encrypt |
 | `lib/msg.js` | Removed stego options - use config for encryption |
+| `lib/encrypt.js` | Deprecated legacy methods - see below |
+
+### Deprecated (Still Works - Will Remove)
+
+| Method | Use Instead |
+|--------|-------------|
+| `Encrypt.md5()` | `Encrypt.sha256()` |
+| `Encrypt.encode()` | `Encrypt.encrypt()` or `Encrypt.aesGcmEncrypt()` |
+| `Encrypt.decode()` | `Encrypt.decrypt()` or `Encrypt.aesGcmDecrypt()` |
+| `Encrypt.pbkdf2Sync()` | Node.js `crypto.pbkdf2Sync()` |
 
 ### Deleted (No Replacements - BREAKING)
 
