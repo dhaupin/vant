@@ -45,6 +45,4 @@ temp/models/latent/*.vpatch
 .agent-locks/
 
 # Circuit breakers (runtime state)
-*.circuit.json
-*locked-circuit.json
-*lockout-circuit.json
+.circuit*.json
