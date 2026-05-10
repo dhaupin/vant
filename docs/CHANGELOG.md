@@ -8,7 +8,7 @@ nav_order: 1
 
 > Vant release history.
 
-## v0.8.7
+## v0.8.6 (Unreleased)
 
 ### Refactor: File Persistence + Legacy Cleanup
 
