@@ -22,15 +22,9 @@ models/private/
 Thumbs.db
 
 # Runtime state (generated at runtime)
-models/*.json
+models/.*.json
 models/backup/
 temp/
-
-# Keep these tracked files
-!models/brain.json
-!models/islands.json
-!models/state.json
-!models/vectors.json
 
 # Logs
 *.log
