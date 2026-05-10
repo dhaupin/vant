@@ -35,6 +35,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - ADDED: isolate() for untrusted sub-sandbox
   - Full keeper integration: agents now have proper guards/lanes
 
+- **Runtime Gate Integration** (2026-05-10)
+  - ADDED: capability gate to network.fetch() (checks canNetwork)
+  - ADDED: capability gate to agents.spawn() (checks canSpawn)
+  - ADDED: capability gate to msg.post() (checks canWrite)
+  - ADDED: CircuitBreaker from qos (trips on failures)
+  - All runtime operations now protected by sandbox
+  - Full gate map: network → agents → msg → sandbox
+
 ### Breaking Changes (v0.8.6)
 - **Consolidated Cache Module** (2026-05-09)
   - REMOVED: memoize.js, compression.js, pool.js, cache.js, cache-control.js
