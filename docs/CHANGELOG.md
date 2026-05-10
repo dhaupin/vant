@@ -20,6 +20,17 @@ nav_order: 1
   - `rsaKeyPair(bits)` → `{ publicKey, privateKey }`
   - `rsaEncrypt/Decrypt` → OAEP-SHA256
   - `rsaSign/Verify` → SHA256
+- **Add Signed Tokens**: JWT-like token system
+  - `Encrypt.signToken(payload, secret, expiresIn)`
+  - `Encrypt.verifyToken(token, secret)`
+  - Used by Auth for proper token validation
+
+### Refactor: Auth Token System
+
+- `generateToken()` now returns signed JWT-like tokens
+- `validateToken()` verifies signature + expiry
+- Tokens include: userId, role, iat, exp
+- Configurable via `VANT_TOKEN_SECRET` env
 
 ### Deprecations
 

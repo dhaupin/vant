@@ -27,6 +27,14 @@ nav_order: 99
 | `Encrypt.decode()` | `Encrypt.aesGcmDecrypt()` |
 | `Encrypt.pbkdf2Sync()` | Node.js `crypto.pbkdf2Sync()` |
 
+### New in v0.8.6
+
+| Feature | Usage |
+|---------|--------|
+| **Signed Tokens** | `Encrypt.signToken(payload, secret, expiresIn)` / `Encrypt.verifyToken(token, secret)` |
+| **RSA** | `Encrypt.rsaKeyPair()`, `rsaEncrypt()`, `rsaDecrypt()`, `rsaSign()`, `rsaVerify()` |
+| **Auth Tokens** | `auth.generateToken(userId, { role, expiresIn })` / `auth.validateToken(token)` |
+
 ### Deleted (No Replacements - BREAKING)
 
 | File | Notes |
