@@ -22,9 +22,9 @@ nav_order: 99
 
 | Method | Use Instead |
 |--------|-------------|
-| `Encrypt.md5()` | `Encrypt.sha256()` |
-| `Encrypt.encode()` | `Encrypt.encrypt()` or `Encrypt.aesGcmEncrypt()` |
-| `Encrypt.decode()` | `Encrypt.decrypt()` or `Encrypt.aesGcmDecrypt()` |
+| `Encrypt.encrypt/decrypt` | `Encrypt.aesGcmEncrypt/aesGcmDecrypt` |
+| `Encrypt.encode()` | `Encrypt.aesGcmEncrypt()` |
+| `Encrypt.decode()` | `Encrypt.aesGcmDecrypt()` |
 | `Encrypt.pbkdf2Sync()` | Node.js `crypto.pbkdf2Sync()` |
 
 ### Deleted (No Replacements - BREAKING)
