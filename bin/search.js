@@ -140,8 +140,8 @@ Options:
         
         if (rerank && results.fused.length > 0) {
             const memories = results.fused.map(r => ({
-                id: r.id,
-                title: r.id?.substring(0, 20),
+                id: r.title || r.id,
+                title: r.title || r.id,
                 content: r.content || r.summary || '',
                 date: r.date || new Date().toISOString()
             }));
@@ -185,9 +185,10 @@ Options:
     if (action === '--hyde') {
         const searchLib = require(path.join(DIR, 'lib', 'search'));
         const result = await searchLib.hyde(query);
+        const hydeDoc = result.hyde[0];
         console.log('\n=== HyDE: ' + query + ' ===\n');
-        console.log('Fake Answer:\n' + result.fake + '\n');
-        console.log('Results:', result.results.length);
+        console.log('Hypothetical Answer:\n' + hydeDoc.content + '\n');
+        console.log('Encrypted:', hydeDoc.encrypted ? 'yes' : 'no');
         process.exit(0);
     }
 
