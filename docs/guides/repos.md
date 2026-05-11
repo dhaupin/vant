@@ -10,20 +10,46 @@ nav_order: 19
 
 > Distributed brain - mount repos like drives
 
+```
+┌─────────────────────────────────────────────────────┐
+│           Multi-Repo Architecture                  │
+│                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
+│  │ GitHub   │  │Herbalism │  │  VESC   │        │
+│  │  Repo   │  │  Repo    │  │  Repo   │        │
+│  └──────────┘  └──────────┘  └──────────┘        │
+│       │              │              │                │
+│       └──────────────┼──────────────┘                │
+│                    ▼                             │
+│              Brain Mount                          │
+└─────────────────────────────────────────────────────┘
+```
+
 ## What Is Multi-Repo?
 
 Pull skills from different repos:
 - GitHub Automation skills
 - Herbalism/Foraging data
 - VESC configs
+- Team knowledge bases
+
+### Why
+
+- **Modular skills** - Each repo is a skill domain
+- **Team sharing** - Share repo with team
+- **Updates** - Pull latest without redeploy
 
 ## Default Repos
 
-- `github` - GitHub skills
-- `herbalism` - Herbalism data  
-- `vesc` - VESC configs
+| Repo | What | Trigger |
+|------|------|---------|
+| github | GitHub API skills | github, pr, issue |
+| herbalism | Plant/herb data | herb, plant |
+| vesc | Electric skate configs | vesc, motor |
 
 ## Usage
+
+### Register Repo
 
 ```javascript
 const repos = require('./lib/storage').get('repos');
@@ -33,46 +59,49 @@ repos.register('my-skills', 'https://github.com/user/skills-repo', {
     type: 'skills',
     domain: 'github'
 });
+```
 
+### Mount
+
+```javascript
 // Mount for use
 await repos.mount('my-skills');
-
-// Pull updates
-await repos.pull();
 
 // Check if mounted
 repos.has('my-skills'); // true
 ```
 
+### Use Skills
+
+```javascript
+// Auto-load when triggered
+const result = await vant.think('Create a GitHub PR');
+// → loads github repo automatically
+```
+
+### Pull Updates
+
+```javascript
+// Pull latest
+await repos.pull('my-skills');
+
+// Pull all
+await repos.pull();
+```
+
 ## CLI
 
 ```bash
-vant repos --list           # List repos
-vant repos --mount github  # Mount
-vant repos --pull          # Pull all mounted
-vant repos --register myskills https://github.com/user/repo
+# List repos
+vant repos --list
+
+# Add repo
+vant repos add my-skills https://github.com/user/skills-repo
+
+# Remove repo
+vant repos remove my-skills
+
+# Pull updates
+vant repos pull
 ```
 
-## Workflow
-
-1. **Register** skill repo
-2. **Mount** when needed
-3. **Pull** updates on demand
-4. Use mounted files in tasks
-
-## Privacy
-
-Use with Hybrid sync:
-
-```javascript
-const hybrid = require('./lib/hybrid');
-hybrid.setPrivacy('my-skills', 'public'); // or 'private'
-```
-
----
-
-## Related
-
-- [Islands](islands) - Componentized brain
-- [Hybrid Sync](hybrid) - Public/Private split
-- [Providers](providers) - Multi-git provider

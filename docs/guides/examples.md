@@ -7,75 +7,75 @@ nav_order: 23
 ---
 # Examples
 
-Common workflows.
+Common workflows and one-liners.
 
----
+```
+┌─────────────────────────────────────────────────────┐
+│           Common Vant Workflows                    │
+│                                                      │
+│  ┌─────────────────────────────────────────────┐   │
+│  │  WAKE UP → DO WORK → SAVE → SYNC → EXIT    │   │
+│  └─────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────┘
+```
 
 ## Wake Up Check
 
 ```bash
+# Check state
 git branch --show-current
+
+# Read brain
 cat models/public/_succession.json
 cat models/public/identity.md
 cat models/public/goals.md
 ```
 
----
-
 ## Do Work Save
 
 ```bash
+# Edit brain
 nano models/public/lessons.md
+
+# Commit
 git add -A
-git commit -m "agent-name: Added lesson"
+git commit -m "agent: Added lesson"
 git push origin agent-name
 ```
-
----
 
 ## Check Rate Limit
 
 ```bash
-vant rate
-```
+# GitHub rate limit
+ vant rate
 
----
+# Output:
+# Remaining: 4995
+# Reset: 3600 seconds
+```
 
 ## Health Check
 
 ```bash
+# Full check
 vant health
+
+# Output:
+# ✓ GitHub connection
+# ✓ Brain integrity
+# ✓ Lock status
 ```
 
----
-
-## Fix Merge Conflict
+## Quick Stats
 
 ```bash
-git fetch origin
-git merge origin/main
-# Edit conflicted files
-git add -A
-git commit -m "Resolved"
-git push origin your-branch
-```
+# Brain stats
+wc -l models/public/*.md
+
+# Git status
+git log --oneline -5
+
+# Branch
+git branch -a
 
 ---
-
-## Errors
-
-| Error
-- Fix |
-|-------|-----|
-| Permission denied
-- Check GITHUB_TOKEN |
-| Rate limit
-- Wait 1 hour |
-| Lock held
-- Use your branch |
-
-## Related
-
-- [CLI Reference](reference/cli) - All commands
-- [Troubleshooting](troubleshooting) - Problem solving
-- [GitHub](github) - GitHub integration

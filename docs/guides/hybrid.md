@@ -10,13 +10,35 @@ nav_order: 20
 
 > Public/Private brain - split sync
 
+```
+┌─────────────────────────────────────────────────────┐
+│           Hybrid Sync Architecture                  │
+│                                                      │
+│  ┌─────────────────────────────────────────────┐   │
+│  │              Brain                          │   │
+│  │                                             │   │
+│  │  Public (logs)  ────────▶ Public repo      │   │
+│  │       │                                    │   │
+│  │  Private (keys) ──────▶ Private repo      │   │
+│  └─────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────┘
+```
+
 ## What Is Hybrid?
 
 Sync different parts to different repos:
 - Sensitive state → private repo
 - Public logs/summaries → public repo
 
+## Why
+
+- **Privacy** - Keep secrets separate
+- **Sharing** - Publish without expose
+- **Compliance** - Data region requirements
+
 ## Usage
+
+### Configure Privacy
 
 ```javascript
 const hybrid = require('./lib/hybrid');
@@ -24,13 +46,21 @@ const hybrid = require('./lib/hybrid');
 // Set repo privacy
 hybrid.setPrivacy('github', 'private');
 hybrid.setPrivacy('logs', 'public');
+hybrid.setPrivacy('identity', 'private');
+```
 
+### Push
+
+```javascript
 // Push to specific
 await hybrid.pushPublic();   // Only public repos
 await hybrid.pushPrivate();  // Only private repos
-await hybrid.pushAll();     // Both
+await hybrid.pushAll();      // Both
+```
 
-// Get summary
+### Get Summary
+
+```javascript
 hybrid.getSummary();
 // { defaultPrivacy: 'private', publicRepos: [], privateRepos: [] }
 ```
@@ -46,33 +76,11 @@ vant hybrid-sync --set github private
 
 ## Use Cases
 
-| Data | Privacy |
+| Data | Privacy | Why |
+|------|---------|------|
+| identity | private | PII |
+| learnings | private | IP |
+| decisions | private | Strategy |
+| logs | public | Sharing |
+| summaries | public | Team sync |
 |------|----------|
-| Identity | private |
-| Learnings | private |
-| Error logs | public |
-| Weekly summaries | public |
-
-## With Multi-Repo
-
-```javascript
-const repos = require('./lib/storage').get('repos');
-const hybrid = require('./lib/hybrid');
-
-// Mount skills (public)
-repos.register('skills', 'https://github.com/user/skills');
-hybrid.setPrivacy('skills', 'public');
-
-// Mount sensitive (private)
-repos.register('internal', 'https://github.com/user/internal');
-hybrid.setPrivacy('internal', 'private');
-```
-
----
-
-## Related
-
-- [Islands](islands) - Componentized brain
-- [Multi-Repo](repos) - Mount external repos
-- [Citations](citations) - Git-backed citations
-- [Sync](sync) - Multi-provider sync
