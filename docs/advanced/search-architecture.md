@@ -77,7 +77,7 @@ Heavy modules slow boot? Load on-demand.
 
 ```javascript
 // Before: loaded at startup
-const search = require('./lib/search');  // ~2s load
+const search = require('vant').search;  // ~2s load
 
 // After: loaded on first use (~50ms boot)
 ```
@@ -114,7 +114,7 @@ The LTC (Long Term Core) index is the "map". Git history is the "archive". Searc
 **Search module exposes all methods.**
 
 ```javascript
-const search = require('./lib/search');
+const search = require('vant').search;
 
 // Cache management
 search.getCacheStats();    // { size: N, max: 50 }

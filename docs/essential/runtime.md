@@ -13,7 +13,7 @@ nav_order: 3
 ## Quick Start
 
 ```javascript
-const vant = require('./lib/vant');
+const vant = require('vant');
 
 // Initialize
 await vant.init({ name: 'MyAgent' });
