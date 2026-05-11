@@ -4,7 +4,6 @@ permalink: /agents.md/agents
 layout: default
 title: Agents
 nav_order: 31
-2
 ---
 
 # Agents

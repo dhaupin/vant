@@ -4,7 +4,6 @@ permalink: /server.md/server
 layout: default
 title: Server Guide
 nav_order: 72
-51
 ---
 # Server Guide
 

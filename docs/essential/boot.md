@@ -4,7 +4,6 @@ permalink: /essential/boot
 layout: default
 title: Ghost in the Machine
 nav_order: 8
-7
 ---
 
 # Ghost in the Machine - Stego Bootstrapping

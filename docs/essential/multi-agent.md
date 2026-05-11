@@ -4,7 +4,6 @@ permalink: /essential/multi-agent
 layout: default
 title: Multi-Agent
 nav_order: 12
-7
 ---
 # Multi-Agent
 

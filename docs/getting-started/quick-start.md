@@ -4,8 +4,6 @@ permalink: /getting-started/quick-start
 layout: default
 title: Quick Start
 nav_order: 11
-
-0.5
 ---
 # Quick Start
 

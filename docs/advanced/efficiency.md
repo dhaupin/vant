@@ -4,7 +4,6 @@ permalink: /efficiency.md/efficiency
 layout: default
 title: Efficiency
 nav_order: 62
-17
 ---
 
 # Efficiency & Performance

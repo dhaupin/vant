@@ -4,7 +4,6 @@ permalink: /docker.md/docker
 layout: default
 title: Docker
 nav_order: 32
-16
 ---
 # Docker
 

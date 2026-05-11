@@ -4,7 +4,6 @@ permalink: /storage.md/storage
 layout: default
 title: Storage Layer
 nav_order: 48
-55
 ---
 
 # Storage Layer

@@ -5,7 +5,6 @@ layout: default
 title: Agent Skills
 nav_order: 30
 description: Using Vant with Agent Skills format (Claude Code, Codex, Cursor)
-9
 ---
 
 # Agent Skills

@@ -4,7 +4,6 @@ permalink: /essential/onboard
 layout: default
 title: Knowledge Base Browser
 nav_order: 13
-34
 ---
 # Knowledge Base Browser
 

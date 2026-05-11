@@ -4,7 +4,6 @@ permalink: /hybrid.md/hybrid
 layout: default
 title: Hybrid Sync
 nav_order: 34
-25
 ---
 
 # Vant Hybrid Sync

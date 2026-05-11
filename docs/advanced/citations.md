@@ -4,7 +4,6 @@ permalink: /citations.md/citations
 layout: default
 title: Citations
 nav_order: 61
-12
 ---
 # Citations
 

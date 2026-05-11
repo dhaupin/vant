@@ -4,7 +4,6 @@ permalink: /essential/architecture
 layout: default
 title: System Architecture
 nav_order: 6
-5
 ---
 
 # Architecture

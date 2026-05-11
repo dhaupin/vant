@@ -4,7 +4,6 @@ permalink: /github.md/github
 layout: default
 title: GitHub Integration
 nav_order: 33
-23
 ---
 # GitHub Integration
 

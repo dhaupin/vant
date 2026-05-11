@@ -4,8 +4,6 @@ permalink: /getting-started/install
 layout: default
 title: Installation
 nav_order: 12
-
-0.6
 ---
 # Installation
 

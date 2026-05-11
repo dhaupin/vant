@@ -4,7 +4,6 @@ permalink: /frontend.md/frontend
 layout: default
 title: Frontend Integration
 nav_order: 64
-22
 ---
 # Frontend Integration
 

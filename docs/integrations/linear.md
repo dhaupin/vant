@@ -5,7 +5,6 @@ layout: default
 title: Linear Integration
 nav_order: 35
 description: Using Linear issue tracking with Vant
-28
 ---
 
 # Linear Integration

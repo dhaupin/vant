@@ -4,7 +4,6 @@ permalink: /rerank.md/rerank
 layout: default
 title: Rerank (RAG)
 nav_order: 98
-43
 ---
 
 > RAG-powered memory reranking and compression for LLM context.

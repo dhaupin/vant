@@ -5,7 +5,6 @@ layout: default
 title: Notifications
 nav_order: 45
 description: Configuring notification channels - Slack, Discord, Email, Pushover, Telegram
-33
 ---
 
 # Notifications

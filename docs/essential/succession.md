@@ -4,7 +4,6 @@ permalink: /essential/succession
 layout: default
 title: Trust & Succession
 nav_order: 5
-8
 ---
 # Trust & Succession
 

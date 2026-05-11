@@ -4,7 +4,6 @@ permalink: /essential/islands
 layout: default
 title: Islands - Lazy-loading
 nav_order: 4
-4
 ---
 
 # Vant Islands

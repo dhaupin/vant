@@ -4,7 +4,6 @@ permalink: /pruning.md/pruning
 layout: default
 title: Automated Brain Pruning
 nav_order: 67
-38
 ---
 
 # Automated Brain Pruning

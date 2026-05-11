@@ -4,7 +4,6 @@ permalink: /horcrux.md/horcrux
 layout: default
 title: Horcrux Manifest
 nav_order: 65
-24
 ---
 
 # Horcrux Manifest - Zero-Config Bootstrap

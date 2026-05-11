@@ -4,7 +4,6 @@ permalink: /getting-started/setup
 layout: default
 title: Setup Guide
 nav_order: 13
-52
 ---
 # Setup Guide
 

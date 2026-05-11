@@ -4,7 +4,6 @@ permalink: /ci.md/ci
 layout: default
 title: CI
 nav_order: 41
-11
 ---
 # CI
 

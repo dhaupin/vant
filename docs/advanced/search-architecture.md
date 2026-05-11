@@ -4,7 +4,6 @@ permalink: /search-architecture.md/search-architecture
 layout: default
 title: Search Architecture
 nav_order: 70
-8
 ---
 
 > **v0.8.6+**: How search connects your memory islands.

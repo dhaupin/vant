@@ -4,7 +4,6 @@ permalink: /essential/branch
 layout: default
 title: Branch
 nav_order: 10
-9
 ---
 
 # Branch

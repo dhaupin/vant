@@ -4,7 +4,6 @@ permalink: /providers.md/providers
 layout: default
 title: Multi-Git Provider Support
 nav_order: 37
-37
 ---
 
 # Multi-Git Provider Support

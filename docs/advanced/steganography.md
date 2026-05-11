@@ -4,7 +4,6 @@ permalink: /steganography.md/steganography
 layout: default
 title: Steganography
 nav_order: 73
-53
 ---
 # Steganography
 

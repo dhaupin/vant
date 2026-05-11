@@ -4,7 +4,6 @@ permalink: /mcp.md/mcp
 layout: default
 title: MCP Server
 nav_order: 36
-30
 ---
 # MCP Server
 

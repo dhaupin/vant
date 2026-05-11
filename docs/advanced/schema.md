@@ -4,7 +4,6 @@ permalink: /schema.md/schema
 layout: default
 title: Schema Validation
 nav_order: 69
-47
 ---
 
 # Vant Schema Guide

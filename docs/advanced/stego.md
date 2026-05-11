@@ -4,7 +4,6 @@ permalink: /stego.md/stego
 layout: default
 title: Steganographic Brain Recovery
 nav_order: 74
-54
 ---
 
 # Steganographic Brain Recovery

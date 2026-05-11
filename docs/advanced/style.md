@@ -4,7 +4,6 @@ permalink: /style.md/style
 layout: default
 title: Voice & Style
 nav_order: 75
-56
 ---
 # Voice & Style
 

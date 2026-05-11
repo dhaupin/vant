@@ -4,7 +4,6 @@ permalink: /essential/ai-onboard
 layout: default
 title: AI Agent Onboarding
 nav_order: 7
-6
 ---
 # AI Agent Onboarding
 

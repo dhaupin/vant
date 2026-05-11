@@ -4,7 +4,6 @@ permalink: /resolution.md/resolution
 layout: default
 title: Resolution
 nav_order: 89
-44
 ---
 # Thought Resolution
 

@@ -4,7 +4,6 @@ permalink: /essential/manual-brain
 layout: default
 title: Brain File Templates
 nav_order: 9
-29
 ---
 # Brain File Templates
 

@@ -4,7 +4,6 @@ permalink: /events.md/events
 layout: default
 title: Events
 nav_order: 43
-19
 ---
 
 # Events
