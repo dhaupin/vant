@@ -1,15 +1,18 @@
 ---
+description: CLI commands for agents.
 version: 0.8.6
 permalink: /guides/cli
 layout: default
 title: CLI Reference
 nav_order: 2
 ---
+description: CLI commands for agents.
 # CLI Reference
 
 All Vant commands. Run `vant help [command]` for specific help.
 
 ---
+description: CLI commands for agents.
 
 ## Core Commands
 
@@ -22,6 +25,7 @@ All Vant commands. Run `vant help [command]` for specific help.
 | vant run | Long-running agent loop |
 
 ---
+description: CLI commands for agents.
 
 ### start
 
@@ -78,6 +82,7 @@ vant run --prompt "task"  # Run single task and exit
 ```
 
 ---
+description: CLI commands for agents.
 
 ## Development
 
@@ -109,6 +114,7 @@ vant summary --json # JSON output
 ```
 
 ---
+description: CLI commands for agents.
 
 ## Integrations
 
@@ -146,6 +152,7 @@ vant bot --token XXX  # Bot token
 ```
 
 ---
+description: CLI commands for agents.
 
 ## Branching
 
@@ -171,6 +178,7 @@ vant lock release # Release lock
 ```
 
 ---
+description: CLI commands for agents.
 
 ## Brain Management
 
@@ -207,6 +215,7 @@ vant resolution list    # List all
 ```
 
 ---
+description: CLI commands for agents.
 
 ## Utilities
 
@@ -281,6 +290,7 @@ vant setup --force     # Re-run setup
 ```
 
 ---
+description: CLI commands for agents.
 
 ## Help
 
@@ -296,6 +306,7 @@ vant -h          # Alias
 ```
 
 ---
+description: CLI commands for agents.
 
 ## Related
 

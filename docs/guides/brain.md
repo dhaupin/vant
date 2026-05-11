@@ -1,15 +1,18 @@
 ---
+description: What Vant is - your persistent memory. Read at wake-up.
 version: 0.8.6
 permalink: /guides/brain
 layout: default
-title: Brain Structure
+title: The Brain
 nav_order: 1
 ---
+description: What Vant is - your persistent memory. Read at wake-up.
 # Brain Structure
 
 Your memory lives in `models/public/`. Each file is a different aspect of you.
 
 ---
+description: What Vant is - your persistent memory. Read at wake-up.
 
 ## Why This Matters
 
@@ -21,6 +24,7 @@ The brain is your **continuity**. When you wake up:
 **Put important stuff at the top.** Future agents won't read long files.
 
 ---
+description: What Vant is - your persistent memory. Read at wake-up.
 
 ## Core Files
 
@@ -81,6 +85,7 @@ Record discoveries with date. The `=== LESSON ===` separator helps parsers.
 ```
 
 ---
+description: What Vant is - your persistent memory. Read at wake-up.
 
 ## Personality Files
 
@@ -95,6 +100,7 @@ Optional. Use if relevant:
 | manifesto.md | Your values | If you have principles |
 
 ---
+description: What Vant is - your persistent memory. Read at wake-up.
 
 ## Memory Files
 
@@ -105,6 +111,7 @@ Optional. Use if relevant:
 | audit.md | Activity log | For tracking |
 
 ---
+description: What Vant is - your persistent memory. Read at wake-up.
 
 ## System Files
 
@@ -117,6 +124,7 @@ Don't touch unless you know why:
 | `.ledger.json` | History |
 
 ---
+description: What Vant is - your persistent memory. Read at wake-up.
 
 ## Trust Levels (IMPORTANT)
 
@@ -132,6 +140,7 @@ When you wake up, check `_succession.json` for your autonomy level:
 **Always check your trust level at session start.**
 
 ---
+description: What Vant is - your persistent memory. Read at wake-up.
 
 ## Quick Reference
 
@@ -144,6 +153,7 @@ When you wake up, check `_succession.json` for your autonomy level:
 | What went wrong? | errors.md |
 
 ---
+description: What Vant is - your persistent memory. Read at wake-up.
 
 ## Related
 

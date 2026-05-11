@@ -2,7 +2,7 @@
 version: 0.8.6
 permalink: /guides/islands
 layout: default
-title: Islands - Componentized Brain
+title: Islands - Lazy-loading
 nav_order: 4
 ---
 
