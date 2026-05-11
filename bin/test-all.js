@@ -105,7 +105,7 @@ function testMcp(name, url, check) {
     test('search rag', 'search github --mode rag', out => out.includes('Context'));
     test('search hybrid', 'search github', out => out.includes('Fused'));
     test('search hyde', 'search --hyde github', out => out.includes('HyDE'));
-    test('search --stats', 'search --stats', out => out.includes('Stats'));
+    test('search --stats', 'search --stats', out => out.includes('corpus'));
     
     // Brain management
     console.log('Testing brain management...');
