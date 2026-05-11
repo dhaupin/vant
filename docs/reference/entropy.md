@@ -128,7 +128,7 @@ vant compress <file.vpatch> --decompress
 ### generatePatches()
 
 ```javascript
-const entropy = require('./lib/entropy');
+const entropy = require('vant').entropy;
 
 const patches = entropy.generatePatches(buffer, {
     windowSize: 8,     // sliding window (default: 8)

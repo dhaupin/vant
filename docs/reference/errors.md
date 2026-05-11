@@ -81,7 +81,7 @@ Error codes and troubleshooting.
 Handle this error case.
 
 ```javascript
-const errors = require('./lib/errors');
+const errors = require('vant').errors;
 
 throw new errors.VantError('Failed to sync', {
     code: 'GITHUB_SYNC_FAIL',
@@ -93,7 +93,7 @@ throw new errors.VantError('Failed to sync', {
 Logging configuration.
 
 ```javascript
-const errors = require('./lib/errors');
+const errors = require('vant').errors;
 
 await errors.retry(async () => {
     await syncBrain();
