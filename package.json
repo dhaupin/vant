@@ -31,7 +31,6 @@
     "express": "^5.2.1",
     "yaml": "^2.8.4"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "node bin/build-test.js",
     "setup": "node bin/setup.js",
