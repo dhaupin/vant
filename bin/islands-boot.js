@@ -10,10 +10,19 @@
  *   node bin/islands-boot.js --prompt "fix github pr"
  *   node bin/islands-boot.js --island github
  */
-
 const args = process.argv.slice(2);
-const promptArg = args.find(a => a.startsWith('--prompt='))?.slice(9);
-const islandArg = args.find(a => a.startsWith('--island='))?.slice(9);
+
+// Simple arg parser supporting both --key=value and --key value formats
+function getArg(key) {
+    const idx = args.indexOf('--' + key);
+    if (idx >= 0 && args[idx + 1]) return args[idx + 1];
+    const match = args.find(a => a.startsWith('--' + key + '='));
+    if (match) return match.split('=')[1];
+    return undefined;
+}
+
+const promptArg = getArg('prompt');
+const islandArg = getArg('island');
 const listArg = args.includes('--list');
 const helpArg = args.includes('--help') || args.includes('-h');
 
@@ -121,7 +130,8 @@ async function main() {
     if (listArg) { listIslands(); return; }
     if (islandArg) {
         console.log('[Islands] Hydrating:', islandArg);
-        await islands.hydrate(islandArg);
+        const result = await islands.hydrate(islandArg);
+        console.log('[Islands] Files:', result?.join(', ') || 'none');
         return;
     }
     
