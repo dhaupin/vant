@@ -16,7 +16,7 @@ nav_order: 87
 
 ### Why Does It Exist?
 
-LLMs are token-limited. Loading 19 brain files on startup is expensive. Entropy Patching enables:
+LLMs are token-limited. Loading 60+ brain files on startup is expensive. Entropy Patching enables:
 
 1. **Token reduction** - Agents load one `.vpatch` file instead of 19 `.md` files
 2. **Git-native diffs** - Tracks entropy spikes instead of line changes
