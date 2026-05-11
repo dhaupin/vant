@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /tutorials/webhooks
 layout: default
 title: Webhooks
-nav_order: 6
+nav_order: 3
 ---
 
 # Tutorial: Webhook Automation

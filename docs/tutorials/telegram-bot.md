@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /tutorials/telegram-bot
 layout: default
 title: Telegram Bot Integration
-nav_order: 3
+nav_order: 6
 ---
 # Tutorial: Telegram Bot with Vant
 
