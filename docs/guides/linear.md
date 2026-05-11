@@ -1,5 +1,5 @@
 ---
-version: 0.8.6
+version: 0.8.11
 permalink: /guides/linear
 layout: default
 title: Linear Integration
@@ -11,58 +11,145 @@ nav_order: 14
 
 Vant integrates with Linear for issue tracking via GraphQL API.
 
+```
+┌─────────────────────────────────────────┐
+│         Linear Issue Flow                │
+│                                          │
+│  Vant ──▶ Create issue ──▶ Linear       │
+│           │                             │
+│           ▼                             │
+│      Sync to brain                      │
+│           │                             │
+│           ▼                             │
+│      Link issue in comments           │
+└─────────────────────────────────────────┘
+```
+
+## Why
+
+Track agent work in Linear:
+- Agent creates issues for tasks
+- Updates status as it works
+- Links to brain learnings
+- Full audit trail
+
 ## Configuration
 
+Get API key:
+1. Go to Linear Settings → API
+2. Create API key
+3. Set environment:
+
 ```bash
-LINEAR_API_KEY=your-api-key
+LINEAR_API_KEY=lin_api_xxx
 LINEAR_TEAM=your-team-id
 ```
 
 ## Usage
 
+### Create Issue
+
 ```javascript
 const linear = require('./lib/linear');
 
-// List issues
+const issue = await linear.createIssue('Fix authentication bug', {
+    description: 'User cannot login with OAuth',
+    priority: 1,
+    teamId: process.env.LINEAR_TEAM
+});
+
+console.log(issue.id);    // "SYS-123"
+console.log(issue.url);   // "https://linear.app/team/SYS-123"
+```
+
+### List Issues
+
+```javascript
+// Get open issues
 const issues = await linear.listIssues({
     state: { name: { ne: 'Done' } }
 });
 
-// Create issue
-const issue = await linear.createIssue('Fix bug', {
-    description: 'Details here',
-    priority: 1
+// Filter by label
+const bugs = await linear.listIssues({
+    labels: { name: { eq: 'bug' } }
+});
+```
+
+### Update Issue
+
+```javascript
+// Update status
+await linear.updateIssue('SYS-123', {
+    state: 'In Progress'
 });
 
 // Add comment
-await linear.addComment('issue-id', 'Working on it!');
+await linear.addComment('SYS-123', 'Working on this!');
 
-// Update issue
-await linear.updateIssue('issue-id', {
-    state: 'Done'
+// Assign
+await linear.updateIssue('SYS-123', {
+    assigneId: 'user_id'
 });
 ```
 
-## MCP Tool
+### Close Issue
 
-When Linear island is loaded:
-
+```javascript
+await linear.updateIssue('SYS-123', {
+    state: 'Done',
+    resolution: 'Fixed in PR #45'
+});
 ```
-vant_get_islands    # Check loaded
-vant_load_island  # "linear"
+
+## Vant Integration
+
+### Auto-Create Issues
+
+```javascript
+vant.onGoalCreated(async (goal) => {
+    const issue = await linear.createIssue(goal.title, {
+        description: Goal: `${goal.description}`,
+        priority: goal.priority
+    });
+    
+    await vant.learn('goals/' + issue.id, goal.description);
+});
+```
+
+### Sync to Brain
+
+```javascript
+// When issue closes, learn from it
+linear.onIssueClosed(async (issue) => {
+    await vant.learn('decisions/' + issue.id, issue.resolution);
+});
 ```
 
 ## GraphQL
 
-All operations use Linear's GraphQL API:
+Linear uses GraphQL. Key queries:
 
-- `issues` - Query issues
-- `issueCreate` - Create issue
-- `commentCreate` - Add comment
-- `issueUpdate` - Update status
-- `labels` - List labels
+```javascript
+// Issues query
+const issues = await linear.query('query { issues { nodes { id title state { name } priority } } }');
 
-## See Also
+// Create mutation
+const result = await linear.query('mutation { issueCreate(input: { title: "New issue" teamId: "team_id" }) { success issue { id } } }');
+```
 
-- [MCP Reference](/reference/api)
-- [Islands Guide](/guides/islands)
+## MCP Tools
+
+When Linear island loaded:
+- vant_linear_create_issue
+- vant_linear_list_issues
+- vant_linear_update_issue
+- vant_linear_add_comment
+
+---
+
+## Related
+
+- [Islands](islands) - Load on-demand
+- [MCP](mcp) - MCP server
+- [GitHub](providers) - GitHub integration

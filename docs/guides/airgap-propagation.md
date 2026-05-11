@@ -9,34 +9,91 @@ nav_order: 9
 
 Self-propagate Vant across airgapped environments using steganography.
 
----
+```
+┌─────────────────────────────────────────────────────┐
+│          Airgap Propagation Flow                     │
+│                                                      │
+│  [Air-gapped] ◀── PNG image ───▶ [GitHub]          │
+│       │                                        │    │
+│       │                                        │    │
+│  Decode ◀─── Steganography ─── Encode           │    │
+│                                              │    │
+│  No network needed!                             │    │
+└─────────────────────────────────────────────────────┘
+```
 
-## Concept
+## Why
 
-Vant can spread across airgapped systems:
+For air-gapped environments:
+- No internet access
+- Transfer via USB/image
+- Zero network footprint
+
+## How It Works
 
 1. **Carrier agent** has GitHub access → encodes config into image
 2. **Target agent** (airgapped) receives image → decodes → runs
-
-No network between agents needed.
-
----
+3. **Target** encodes response back → sends to carrier
 
 ## Encode (Carrier)
 
+Encode config into image:
+
 ```bash
-# Encode .env config into PNG
-vant stego encode --input config.png --output propagated.png --brain GITHUB_TOKEN=xxx,GITHUB_REPO=owner/repo
+# Encode into PNG
+vant stego encode --input config.png --output propagated.png --data "GITHUB_TOKEN=xxx,GITHUB_REPO=owner/brain"
+
+# Verify encoded
+vant stego decode propagated.png
 ```
 
+## Transfer
+
+Transfer via:
+- USB drive
+- Email attachment
+- Image hosting (upload/download)
+
 ## Decode (Target)
+
+On air-gapped system:
 
 ```bash
 # Decode from received image
 vant stego decode propagated.png
+# Output: GITHUB_TOKEN=xxx,GITHUB_REPO=owner/brain
+
+# Use config
+export GITHUB_TOKEN=xxx
+vant start
+```
+
+## Use Cases
+
+### Secure Transport
+
+Transfer tokens without network:
+
+```
+Developer machine ─▶ USB ─▶ Air-gapped server
+     │                           │
+ Encode ──▶ PNG file ──▶ Decode ──▶ Export env
+```
+
+### Cross-Environment Sync
+
+```
+Production (air-gapped) ─▶ USB ──▶ Staging
+      │                        │
+ Encode ◀─── Reply ◀── Decode
 ```
 
 ---
+
+## Related
+
+- [Stego](stego) - PNG steganography
+- [Security](security) - VAF + sandbox
 
 ## Omega Init Prompt
 
