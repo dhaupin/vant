@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-chain-deploy.md
 layout: default
 title: Skill Chain deploy
-nav_order: 86
+nav_order: 110
 ---
 
 # Deploy Chain

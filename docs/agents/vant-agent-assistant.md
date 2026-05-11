@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-assistant.md
 layout: default
 title: Agent Assistant
-nav_order: 62
+nav_order: 92
 ---
 
 # Assistant Agent

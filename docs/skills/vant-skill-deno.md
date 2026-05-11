@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-deno.md
 layout: default
 title: Skill Deno
-nav_order: 95
+nav_order: 119
 ---
 
 # Deno

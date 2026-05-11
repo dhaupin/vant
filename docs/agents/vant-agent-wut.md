@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-wut.md
 layout: default
 title: Agent Wut
-nav_order: 85
+nav_order: 115
 ---
 
 # Wut Agent

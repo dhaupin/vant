@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-profiler.md
 layout: default
 title: Skill Profiler
-nav_order: 114
+nav_order: 138
 ---
 
 # Profiler

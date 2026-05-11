@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-debugger.md
 layout: default
 title: Skill Debugger
-nav_order: 94
+nav_order: 118
 ---
 
 # Debugger

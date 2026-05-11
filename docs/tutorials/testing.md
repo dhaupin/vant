@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /tutorials/testing
 layout: default
 title: Testing
-nav_order: 9
+nav_order: 31
 ---
 
 # Tutorial: Testing & Debugging

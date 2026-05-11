@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-graphql.md
 layout: default
 title: Skill Graphql
-nav_order: 101
+nav_order: 125
 ---
 
 # GraphQL

@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-npm.md
 layout: default
 title: Skill Npm
-nav_order: 112
+nav_order: 136
 ---
 
 # NPM

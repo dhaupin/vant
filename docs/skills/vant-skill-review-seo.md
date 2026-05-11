@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-review-seo.md
 layout: default
 title: Skill Review seo
-nav_order: 123
+nav_order: 147
 ---
 
 # SEO Review

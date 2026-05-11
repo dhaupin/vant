@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-chain-ci.md
 layout: default
 title: Skill Chain ci
-nav_order: 85
+nav_order: 109
 ---
 
 # Full CI Chain

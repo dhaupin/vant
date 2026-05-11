@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-docs.md
 layout: default
 title: Agent Docs
-nav_order: 68
+nav_order: 98
 ---
 
 # Docs Agent

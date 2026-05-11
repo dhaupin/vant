@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-chain-full-audit.md
 layout: default
 title: Skill Chain full audit
-nav_order: 87
+nav_order: 111
 ---
 
 # Full Audit Chain

@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-linear.md
 layout: default
 title: Skill Linear
-nav_order: 109
+nav_order: 133
 ---
 
 # Linear

@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-qc.md
 layout: default
 title: Agent Qc
-nav_order: 78
+nav_order: 108
 ---
 
 # QC Agent

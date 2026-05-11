@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-designer.md
 layout: default
 title: Agent Designer
-nav_order: 67
+nav_order: 97
 ---
 
 # Designer Agent

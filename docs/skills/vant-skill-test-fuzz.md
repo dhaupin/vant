@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-test-fuzz.md
 layout: default
 title: Skill Test fuzz
-nav_order: 132
+nav_order: 156
 ---
 
 # Test Fuzz

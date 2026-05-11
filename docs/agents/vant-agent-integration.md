@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-integration.md
 layout: default
 title: Agent Integration
-nav_order: 75
+nav_order: 105
 ---
 
 # Integration Agent

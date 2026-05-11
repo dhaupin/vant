@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-tailwind.md
 layout: default
 title: Skill Tailwind
-nav_order: 128
+nav_order: 152
 ---
 
 # Tailwind

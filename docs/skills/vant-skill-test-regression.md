@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-test-regression.md
 layout: default
 title: Skill Test regression
-nav_order: 136
+nav_order: 160
 ---
 
 # Test Regression

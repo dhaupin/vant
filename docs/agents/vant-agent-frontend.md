@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-frontend.md
 layout: default
 title: Agent Frontend
-nav_order: 71
+nav_order: 101
 ---
 
 # Frontend Agent

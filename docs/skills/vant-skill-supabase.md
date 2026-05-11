@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-supabase.md
 layout: default
 title: Skill Supabase
-nav_order: 126
+nav_order: 150
 ---
 
 # Supabase

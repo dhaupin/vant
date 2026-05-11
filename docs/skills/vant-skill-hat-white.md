@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-hat-white.md
 layout: default
 title: Skill Hat white
-nav_order: 104
+nav_order: 128
 ---
 
 # White Hat

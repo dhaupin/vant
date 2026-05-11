@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-brain-load.md
 layout: default
 title: Skill Brain load
-nav_order: 82
+nav_order: 106
 ---
 
 # Brain Load

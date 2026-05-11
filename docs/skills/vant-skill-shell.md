@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-shell.md
 layout: default
 title: Skill Shell
-nav_order: 124
+nav_order: 148
 ---
 
 # Shell

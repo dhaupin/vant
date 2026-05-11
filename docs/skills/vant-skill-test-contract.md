@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-test-contract.md
 layout: default
 title: Skill Test contract
-nav_order: 130
+nav_order: 154
 ---
 
 # Test Contract

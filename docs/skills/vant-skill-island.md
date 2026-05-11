@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-island.md
 layout: default
 title: Skill Island
-nav_order: 106
+nav_order: 130
 ---
 
 # Island

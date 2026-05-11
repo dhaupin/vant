@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-regex.md
 layout: default
 title: Skill Regex
-nav_order: 118
+nav_order: 142
 ---
 
 # Regex

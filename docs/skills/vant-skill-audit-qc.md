@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-audit-qc.md
 layout: default
 title: Skill Audit qc
-nav_order: 76
+nav_order: 100
 ---
 
 # Quality Control

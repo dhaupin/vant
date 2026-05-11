@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /tutorials/automation
 layout: default
 title: Automation
-nav_order: 8
+nav_order: 20
 ---
 
 # Tutorial: Automation Setup

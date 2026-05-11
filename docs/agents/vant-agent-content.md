@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-content.md
 layout: default
 title: Agent Content
-nav_order: 65
+nav_order: 95
 ---
 
 # Content Agent

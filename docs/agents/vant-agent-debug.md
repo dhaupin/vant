@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-debug.md
 layout: default
 title: Agent Debug
-nav_order: 66
+nav_order: 96
 ---
 
 # Debug Agent

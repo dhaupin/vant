@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-ci.md
 layout: default
 title: Agent Ci
-nav_order: 64
+nav_order: 94
 ---
 
 # CI Agent

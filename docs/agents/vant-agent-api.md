@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-api.md
 layout: default
 title: Agent Api
-nav_order: 60
+nav_order: 90
 ---
 
 # API Agent

@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-browser.md
 layout: default
 title: Skill Browser
-nav_order: 84
+nav_order: 108
 ---
 
 # Browser Automation

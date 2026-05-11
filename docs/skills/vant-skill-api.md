@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-api.md
 layout: default
 title: Skill Api
-nav_order: 71
+nav_order: 95
 ---
 
 # API

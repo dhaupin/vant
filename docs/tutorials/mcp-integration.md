@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /tutorials/mcp-integration
 layout: default
 title: MCP Integration
-nav_order: 4
+nav_order: 24
 ---
 
 # Tutorial: Connect Any AI to Vant via MCP

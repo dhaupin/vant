@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-chain-qc.md
 layout: default
 title: Skill Chain qc
-nav_order: 89
+nav_order: 113
 ---
 
 # QC Chain

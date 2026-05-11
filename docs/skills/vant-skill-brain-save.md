@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-brain-save.md
 layout: default
 title: Skill Brain save
-nav_order: 83
+nav_order: 107
 ---
 
 # Brain Save

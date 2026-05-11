@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-seo.md
 layout: default
 title: Agent Seo
-nav_order: 83
+nav_order: 113
 ---
 
 # SEO Agent

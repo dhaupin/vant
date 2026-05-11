@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-redis.md
 layout: default
 title: Skill Redis
-nav_order: 117
+nav_order: 141
 ---
 
 # Redis

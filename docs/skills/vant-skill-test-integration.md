@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-test-integration.md
 layout: default
 title: Skill Test integration
-nav_order: 133
+nav_order: 157
 ---
 
 # Integration Test

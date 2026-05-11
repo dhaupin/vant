@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-tester.md
 layout: default
 title: Agent Tester
-nav_order: 84
+nav_order: 114
 ---
 
 # Tester Agent

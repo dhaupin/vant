@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-grep.md
 layout: default
 title: Agent Grep
-nav_order: 73
+nav_order: 103
 ---
 
 # Grep Agent

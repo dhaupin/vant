@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-python.md
 layout: default
 title: Skill Python
-nav_order: 115
+nav_order: 139
 ---
 
 # Python

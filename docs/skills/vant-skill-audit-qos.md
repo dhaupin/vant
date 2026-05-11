@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-audit-qos.md
 layout: default
 title: Skill Audit qos
-nav_order: 77
+nav_order: 101
 ---
 
 # Quality of Service

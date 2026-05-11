@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-reliability.md
 layout: default
 title: Agent Reliability
-nav_order: 80
+nav_order: 110
 ---
 
 # Reliability Agent

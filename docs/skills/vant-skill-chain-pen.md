@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-chain-pen.md
 layout: default
 title: Skill Chain pen
-nav_order: 88
+nav_order: 112
 ---
 
 # Pen Test Chain

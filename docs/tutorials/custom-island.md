@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /tutorials/custom-island
 layout: default
 title: Custom Islands
-nav_order: 7
+nav_order: 22
 ---
 
 # Tutorial: Create Custom Islands

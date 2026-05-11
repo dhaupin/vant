@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-general.md
 layout: default
 title: Agent General
-nav_order: 72
+nav_order: 102
 ---
 
 # General Agent

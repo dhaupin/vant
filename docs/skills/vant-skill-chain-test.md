@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-chain-test.md
 layout: default
 title: Skill Chain test
-nav_order: 92
+nav_order: 116
 ---
 
 # Full Test Chain

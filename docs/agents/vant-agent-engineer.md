@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-engineer.md
 layout: default
 title: Agent Engineer
-nav_order: 70
+nav_order: 100
 ---
 
 # Engineer Agent

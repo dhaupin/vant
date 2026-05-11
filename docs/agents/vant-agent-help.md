@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /agents/vant-agent-help.md
 layout: default
 title: Agent Help
-nav_order: 74
+nav_order: 104
 ---
 
 # Help Agent

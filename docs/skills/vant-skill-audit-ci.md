@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-audit-ci.md
 layout: default
 title: Skill Audit ci
-nav_order: 72
+nav_order: 96
 ---
 
 # CI Audit

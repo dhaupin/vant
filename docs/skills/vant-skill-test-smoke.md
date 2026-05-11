@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-test-smoke.md
 layout: default
 title: Skill Test smoke
-nav_order: 137
+nav_order: 161
 ---
 
 # Test Smoke

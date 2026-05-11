@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /skills/vant-skill-sql.md
 layout: default
 title: Skill Sql
-nav_order: 125
+nav_order: 149
 ---
 
 # SQL

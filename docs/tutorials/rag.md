@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /tutorials/rag
 layout: default
 title: RAG with Vant
-nav_order: 5
+nav_order: 28
 ---
 
 # Tutorial: Build RAG with Your Brain
