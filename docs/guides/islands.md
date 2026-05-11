@@ -134,3 +134,30 @@ gallery.linkToBrain();
 - [Vibe Controls](vibe) - Dynamic mood system
 - [Hybrid Sync](hybrid) - Public/Private brain split
 - [Multi-Repo](repos) - Mount external repos
+
+---
+
+## Custom Islands
+
+Create your own island:
+
+```javascript
+const islands = require('./lib/islands');
+
+islands.define({
+    name: 'myskills',
+    triggers: ['python', 'docker', 'kubernetes'],
+    load: async () => {
+        return await brain.get('skills', 'myskills');
+    }
+});
+```
+
+Then use:
+
+```javascript
+const result = await vant.think('How do I use Docker?');
+// → auto-loads python island when "Docker" detected
+```
+
+See [Tutorial: Custom Islands](/tutorials/custom-island) for full guide.
