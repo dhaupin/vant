@@ -1,3 +1,10 @@
+---
+version: 0.8.11
+permalink: /guides/setup
+layout: default
+title: Setup Guide
+nav_order: 45
+---
 # Setup Guide
 
 > AI-first guide for setting up Vant environment
