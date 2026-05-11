@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /guides/storage
+permalink: /storage.md/storage
 layout: default
 title: Storage Layer
 nav_order: 48

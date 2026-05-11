@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /guides/branch
+permalink: /essential/branch
 layout: default
 title: Branch
 nav_order: 10

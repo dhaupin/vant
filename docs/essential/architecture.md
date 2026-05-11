@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /guides/architecture
+permalink: /essential/architecture
 layout: default
 title: System Architecture
 nav_order: 6

@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /guides/vaf
+permalink: /vaf.md/vaf
 layout: default
 title: VAF
 nav_order: 54

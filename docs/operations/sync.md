@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/sync
+permalink: /sync.md/sync
 layout: default
 title: Multi-Provider RAID Sync
 nav_order: 49

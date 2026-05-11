@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /guides/security
+permalink: /security.md/security
 layout: default
 title: Security
 nav_order: 53

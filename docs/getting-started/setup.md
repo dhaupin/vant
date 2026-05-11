@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /guides/setup
+permalink: /getting-started/setup
 layout: default
 title: Setup Guide
 nav_order: 13

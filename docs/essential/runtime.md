@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /guides/runtime
+permalink: /essential/runtime
 layout: default
 title: Programmatic API
 nav_order: 3

@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /guides/escrow
+permalink: /escrow.md/escrow
 layout: default
 title: Escrow
 nav_order: 51

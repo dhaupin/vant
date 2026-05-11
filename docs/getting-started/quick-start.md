@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /guides/quick-start
+permalink: /getting-started/quick-start
 layout: default
 title: Quick Start
 nav_order: 11

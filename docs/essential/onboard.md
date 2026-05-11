@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/onboard
+permalink: /essential/onboard
 layout: default
 title: Knowledge Base Browser
 nav_order: 13

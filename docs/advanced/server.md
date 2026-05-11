@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /guides/server
+permalink: /server.md/server
 layout: default
 title: Server Guide
 nav_order: 72

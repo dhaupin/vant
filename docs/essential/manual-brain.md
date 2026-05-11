@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/manual-brain
+permalink: /essential/manual-brain
 layout: default
 title: Brain File Templates
 nav_order: 9

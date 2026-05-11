@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/citations
+permalink: /citations.md/citations
 layout: default
 title: Citations
 nav_order: 61

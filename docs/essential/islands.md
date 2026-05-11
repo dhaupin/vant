@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/islands
+permalink: /essential/islands
 layout: default
 title: Islands - Lazy-loading
 nav_order: 4

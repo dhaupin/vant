@@ -1,7 +1,7 @@
 ---
 description: What Vant is - your persistent memory. Read at wake-up.
 version: 0.8.6
-permalink: /guides/brain
+permalink: /essential/brain
 layout: default
 title: The Brain
 nav_order: 1

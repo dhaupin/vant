@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /guides/install
+permalink: /getting-started/install
 layout: default
 title: Installation
 nav_order: 12

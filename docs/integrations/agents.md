@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /guides/agents
+permalink: /agents.md/agents
 layout: default
 title: Agents
 nav_order: 31

@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /guides/qos
+permalink: /qos.md/qos
 layout: default
 title: QoS
 nav_order: 47

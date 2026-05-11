@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /guides/release
+permalink: /release.md/release
 layout: default
 title: Release Process
 nav_order: 68
