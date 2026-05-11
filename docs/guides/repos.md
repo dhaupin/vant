@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/repos
 layout: default
 title: Multi-Repo Skills
-nav_order: 19
+nav_order: 51
 ---
 
 # Vant Multi-Repo

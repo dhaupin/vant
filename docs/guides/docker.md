@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/docker
 layout: default
 title: Docker
-nav_order: 18
+nav_order: 40
 ---
 # Docker
 

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/efficiency
 layout: default
 title: Efficiency
-nav_order: 39
+nav_order: 33
 ---
 
 # Efficiency & Performance

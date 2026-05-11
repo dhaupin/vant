@@ -4,7 +4,7 @@ permalink: /guides/linear
 layout: default
 title: Linear Integration
 description: Using Linear issue tracking with Vant
-nav_order: 14
+nav_order: 22
 ---
 
 # Linear Integration

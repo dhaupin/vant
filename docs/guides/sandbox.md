@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /guides/sandbox
 layout: default
 title: Sandbox
-nav_order: 22
+nav_order: 12
 ---
 
 # Sandbox
