@@ -227,7 +227,7 @@ curl http://localhost:3456/health
 
 ## Tool Reference
 
-### Core Tools (9)
+### MCP Tools
 
 | Tool | Description | Parameters |
 |------|-------------|------------|
@@ -241,7 +241,7 @@ curl http://localhost:3456/health
 | `vant_lock` | Lock brain | `token` |
 | `vant_health` | Health check | - |
 
-### Extended Tools (11)
+### Extended Tools (12)
 
 | Tool | Description | Parameters |
 |------|-------------|------------|
@@ -256,6 +256,7 @@ curl http://localhost:3456/health
 | `vant_audit_list` | List audit | `filters` |
 | `vant_succession_info` | Trust config | - |
 | `vant_search` | Search brain | `query`, `mode` |
+| `vant_rerank` | Rerank results | `query`, `topK` |
 
 ---
 
