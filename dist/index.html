@@ -209,6 +209,26 @@
             text-transform: uppercase;
         }
 
+        .hero-buttons {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .button.primary {
+            background: #059669;
+            color: white;
+        }
+        .button:hover {
+            opacity: 0.9;
+        }
+
         .hero {
             text-align: center;
             background: var(--bg-card);
@@ -480,11 +500,19 @@
                 <a href="https://github.com/dhaupin/vant">GitHub</a>
             </nav>
         </header>
-
-        <main>
         <section class="hero">
-            <p>Your AI should remember. Vant is an open source system for AI agent memory persistence via GitHub. Each session inherits the full context from previous ones.</p>
+            <h1>Vant</h1>
+            <p>Your AI should remember. Open source system for AI agent memory persistence via GitHub.</p>
+            <div class="hero-buttons">
+                <a href="https://docs.creadev.org/vant/getting-started" class="button primary">Get Started →</a>
+                <a href="https://docs.creadev.org/vant/reference/cli" class="button">CLI Reference</a>
+                <a href="https://docs.creadev.org/vant/integrations/mcp" class="button">MCP Tools</a>
+            </div>
+            <pre class="term"><code><span class="tok-com"># Quick install</span>
+<span class="tok-kw">npm</span> install -g vant
+<span class="tok-kw">npx</span> vant setup --repo https://github.com/YOUR_ORG/YOUR_BRAIN.git</span></code></pre>
             <span class="badge">v0.8.6</span>
+        </section>
         </section>
 
         <!-- AI-FIRST: Agent Initialization -->
@@ -698,6 +726,10 @@
         </section>
 
         <section class="links">
+            <a href="https://docs.creadev.org/vant/getting-started" class="link">Docs</a>
+            <a href="https://docs.creadev.org/vant/essential/islands" class="link">Islands</a>
+            <a href="https://docs.creadev.org/vant/integrations/mcp" class="link">MCP</a>
+            <a href="https://docs.creadev.org/vant/tutorials/webhooks" class="link">Webhooks</a>
             <a href="https://github.com/dhaupin/vant" class="link">GitHub</a>
             <a href="https://github.com/dhaupin/vant/releases" class="link outline">Releases</a>
         </section>
