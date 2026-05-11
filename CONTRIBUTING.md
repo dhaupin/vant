@@ -75,7 +75,7 @@ Types: `fix`, `feat`, `docs`, `chore`, `refactor`, `test`
 
 ## Style Guide
 
-See [Voice & Style Guide](https://docs.creadev.org/vant/guides/style.html) for:
+See [Voice & Style Guide](https://docs.creadev.org/vant/advanced/style.html) for:
 - Writing style
 - Code formatting
 - Naming conventions

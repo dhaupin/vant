@@ -4,7 +4,7 @@
 
 ## Latest Guides
 
-See [docs.creadev.org/vant/guides](/guides/) for detailed guides.
+See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 
 ---
 
