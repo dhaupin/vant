@@ -8,7 +8,7 @@ nav_order: 3
 
 # Runtime API
 
-> Programmatic Vant usage - quick intro. For full API, see [API Reference](/reference/api-runtime).
+> Programmatic Vant usage - quick intro. For full API, see [API Reference](/api/api-runtime).
 
 ## Quick Start
 
@@ -41,7 +41,7 @@ await vant.commit('Did work');
 
 ## Full Reference
 
-See [API Reference](/reference/api-runtime) for complete documentation:
+See [API Reference](/api/api-runtime) for complete documentation:
 
 - All methods with examples
 - Error handling

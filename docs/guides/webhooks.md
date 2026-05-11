@@ -132,5 +132,5 @@ webhooks.register({
 
 ## See Also
 
-- [CLI Reference](/reference/cli)
+- [CLI Reference](/api/cli)
 - [Automation](/guides/automation)

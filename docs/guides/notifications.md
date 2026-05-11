@@ -138,5 +138,5 @@ await notifications.email('admin@example.com', 'Daily Summary', summary);
 
 ## See Also
 
-- [CLI Reference](/reference/cli)
-- [Configuration](/reference/configuration)
+- [CLI Reference](/api/cli)
+- [Configuration](/api/configuration)
