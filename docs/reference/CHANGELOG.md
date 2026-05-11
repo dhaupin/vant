@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /changelog
 layout: default
 title: Changelog
-nav_order: 1
+nav_order: 90
 ---
 
 > Vant release history.

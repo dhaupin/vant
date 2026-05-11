@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /legal.html
 layout: default
 title: Legal & Policies
-nav_order: 100
+nav_order: 93
 ---
 
 # Legal & Policies

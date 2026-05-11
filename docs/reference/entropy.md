@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/entropy
 layout: default
 title: Entropy Patching Protocol
-nav_order: 84
+nav_order: 87
 ---
 
 # Entropy Patching Protocol

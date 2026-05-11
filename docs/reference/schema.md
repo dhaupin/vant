@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /reference/schema
 layout: default
 title: Brain Schema
-nav_order: 89
+nav_order: 85
 ---
 # Brain Schema
 

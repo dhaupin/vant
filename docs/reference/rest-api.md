@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/rest-api
 layout: default
 title: REST API Reference
-nav_order: 88
+nav_order: 82
 ---
 # REST API Reference
 

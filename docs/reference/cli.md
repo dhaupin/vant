@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /reference/cli
 layout: default
 title: CLI Reference
-nav_order: 82
+nav_order: 80
 ---
 # CLI Reference
 

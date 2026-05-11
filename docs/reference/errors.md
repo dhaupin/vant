@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/errors
 layout: default
 title: Error Codes
-nav_order: 85
+nav_order: 86
 ---
 # Error Codes
 

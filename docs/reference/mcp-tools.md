@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /reference/mcp-tools
 layout: default
 title: MCP Tools Reference
-nav_order: 86
+nav_order: 88
 ---
 
 # MCP Tools Reference

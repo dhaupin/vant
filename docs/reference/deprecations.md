@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /deprecations
 layout: default
 title: Deprecations
-nav_order: 99
+nav_order: 92
 ---
 
 > Track deprecated, orphaned, and planned-for-removal files.
