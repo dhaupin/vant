@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /guides/architecture
 layout: default
 title: System Architecture
-nav_order: 2
+nav_order: 6
 5
 ---
 

@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /guides/branch
 layout: default
 title: Branch
-nav_order: 5
+nav_order: 10
 9
 ---
 

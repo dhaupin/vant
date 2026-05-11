@@ -1,8 +1,8 @@
 ---
 title: Msg
+nav_order: 15
 permalink: /msg
 layout: default
-nav_order: 15
 ---
 
 # Msg (v0.8.6)

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/islands
 layout: default
 title: Islands - Lazy-loading
-nav_order: 8
+nav_order: 4
 4
 ---
 

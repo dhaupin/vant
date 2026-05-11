@@ -1,5 +1,6 @@
 ---
 title: 4-Layer Framework
+nav_order: 14
 layout: docs
 slug: framework
 description: VAF → Sandbox → QoS → Security at same global scope

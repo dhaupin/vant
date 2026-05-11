@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /guides/quick-start
 layout: default
 title: Quick Start
-nav_order: 13
+nav_order: 11
 
 0.5
 ---

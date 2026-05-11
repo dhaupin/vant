@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /guides/config
 layout: default
 title: Configuration
-nav_order: 7
+nav_order: 11
 14
 ---
 

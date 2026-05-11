@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /faq.html
 layout: default
 title: FAQ
-nav_order: 11
+nav_order: 15
 ---
 
 # Frequently Asked Questions
