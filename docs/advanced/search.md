@@ -431,7 +431,7 @@ RAG response includes current settings:
 
 ## Future: Islands + vpatch
 
-Combining with [Islands](islands) architecture:
+Combining with [Islands](essential/islands.md) architecture:
 
 - **Islands**: Componentized brain (lazy-load on trigger)
 - **vpatch**: Compact diff format vs full file
@@ -442,13 +442,13 @@ Potential workflow:
 2. Return compressed vpatch diffs → smaller context
 3. Result: Faster RAG with lower tokens
 
-See: [Islands](islands) for architecture.
+See: [Islands](essential/islands.md) for architecture.
 
 ---
 
 ## Related
 
-- [Islands](islands) - Componentized brain
-- [Audit](audit) - Activity logging
+- [Islands](essential/islands.md) - Componentized brain
+- [Audit](advanced/audit.md) - Activity logging
 - [Citations]/advanced/citations - Git-backed citations
 - [Hybrid Sync](hybrid) - Public/Private split

@@ -125,5 +125,5 @@ Yes! See [Contributing Guide](contributing) in the docs.
 ## Related
 
 - [Quickstart](getting-started/quick-start)
-- [Architecture](essential/architecture)
+- [Architecture](essential/architecture.md)
 - [Build Agent Tutorial](tutorials/build-agent)

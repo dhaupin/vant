@@ -134,7 +134,7 @@ const manifest = islands.getManifest();
 const data = islands.get('github');
 ```
 
-See [Islands](islands) for details.
+See [Islands](essential/islands.md) for details.
 
 ## Vector Store
 
@@ -182,6 +182,6 @@ const storage = new Storage({
 ## See Also
 
 - [Brain](brain) - Brain file structure
-- [Islands](islands) - Lazy brain components
+- [Islands](essential/islands.md) - Lazy brain components
 - [Search](search) - Hybrid search
 - [Providers](providers) - GitHub, GitLab, etc
