@@ -71,12 +71,12 @@ Options:
     // Basic mode
     if (mode === 'basic') {
         const searchLib = require(path.join(DIR, 'lib', 'search'));
-        const results = await searchLib.getLTC(query, { limit, compact });
+        const { results, context } = await searchLib.query(query, { limit: parseInt(limit) });
         
         if (rerank && results.length > 0) {
             const memories = results.map(r => ({
-                id: r.type || r.file || 'unknown',
-                title: r.type?.substring(0, 20),
+                id: r.id || r.title || 'unknown',
+                title: r.title || r.id || 'unknown',
                 content: r.content || r.summary || '',
                 date: r.date || new Date().toISOString()
             }));
@@ -94,7 +94,7 @@ Options:
             console.log('\n=== Basic Search: ' + query + ' ===');
             console.log('Results:', results.length);
             for (const r of results) {
-                console.log(' -', r.type, r.summary?.substring(0, 60));
+                console.log(' -', r.title, r.summary?.substring(0, 60));
             }
         }
         process.exit(0);
@@ -128,6 +128,12 @@ Options:
             console.log('\n=== RAG Search: ' + query + ' ===');
             console.log('Results:', results.length);
             console.log('Context:', context.length, 'bytes');
+            
+            for (let i = 0; i < results.length; i++) {
+                const r = results[i];
+                console.log((i+1) + '.', r.title?.substring(0, 25));
+            }
+            
             console.log('Settings:', JSON.stringify(settings));
         }
         process.exit(0);
