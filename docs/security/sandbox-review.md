@@ -1,5 +1,6 @@
 ---
 title: Sandbox Architecture Review
+nav_order: 55
 layout: docs
 slug: sandbox-review
 description: Deep dive on Vant's sandboxing capabilities and gaps
