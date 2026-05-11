@@ -167,7 +167,8 @@ Options:
             console.log('Dense:', results.dense.length);
             console.log('Fused:', results.fused.length);
             for (const r of results.fused.slice(0, 5)) {
-                console.log(' -', r.id?.substring(0, 8), r.rrf?.toFixed(3), r.content?.substring(0, 50));
+                const title = r.title || r.id;
+                console.log(' -', title?.substring(0, 10), r.bm25Score?.toFixed(3));
             }
         }
         process.exit(0);
@@ -189,6 +190,9 @@ Options:
 
     // HyDE
     if (action === '--hyde') {
+        // Extract query from remaining args (filter out other flags)
+        const queryArgs = args.slice(1).filter(a => !a.startsWith('-'));
+        query = queryArgs.join(' ') || query;
         const searchLib = require(path.join(DIR, 'lib', 'search'));
         const result = await searchLib.hyde(query);
         const hydeDoc = result.hyde[0];
@@ -205,7 +209,7 @@ Options:
     if (rerank && results.fused.length > 0) {
         const memories = results.fused.map(r => ({
             id: r.id,
-            title: r.id?.substring(0, 20),
+            title: r.title || r.id,
             content: r.content || r.summary || '',
             date: r.date || new Date().toISOString()
         }));
@@ -223,7 +227,8 @@ Options:
         console.log('\n=== Hybrid Search: ' + query + ' ===');
         console.log('Fused:', results.fused.length);
         for (const r of results.fused.slice(0, limit)) {
-            console.log(' -', r.id?.substring(0, 8), r.rrf?.toFixed(3));
+            const title = r.title || r.id;
+            console.log(' -', title?.substring(0, 10), r.bm25Score?.toFixed(3));
         }
     }
 }
