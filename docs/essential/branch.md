@@ -81,5 +81,5 @@ const branches = await provider.listBranches();
 
 ## See Also
 
-- [Multi-Agent](multi-agent) - Multi-agent workflow
-- [Providers](providers) - GitHub, GitLab, etc
+- - Multi-agent workflow
+- - GitHub, GitLab, etc

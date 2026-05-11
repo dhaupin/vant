@@ -94,5 +94,5 @@ vant boot --image=https://raw.githubusercontent.com/user/repo/main/brain.png
 
 ## Related
 
-- [Stego](stego) - Image encoding
-- [GitHub](github) - GitHub integration
+- - Image encoding
+- - GitHub integration

@@ -157,7 +157,7 @@ description: What Vant is - your persistent memory. Read at wake-up.
 
 ## Related
 
-- [AI Onboarding](ai-onboard) - Start here if new
-- [Succession](succession) - Trust levels
-- [Multi-Agent](multi-agent) - Branch workflow
-- [Citations](citations) - Git-backed citations
+- - Start here if new
+- - Trust levels
+- - Branch workflow
+- - Git-backed citations

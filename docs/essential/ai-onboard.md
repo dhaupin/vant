@@ -211,7 +211,7 @@ PURPOSE: Exploring codebase
 
 ## Related
 
-- [Multi-Agent](multi-agent) - Branch and lock system
-- [MCP](mcp) - Brain as tools for AI
-- [Security](security) - VAF input validation
-- [CLI Reference](operations) - All commands
+- - Branch and lock system
+- - Brain as tools for AI
+- - VAF input validation
+- - All commands

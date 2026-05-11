@@ -52,6 +52,6 @@ See [API Reference](/api/api-runtime) for complete documentation:
 
 ## Related
 
-- [CLI](cli) - Command-line interface
-- [MCP](mcp) - MCP server tools
-- [Islands](islands) - Lazy-loading
+- - Command-line interface
+- - MCP server tools
+- - Lazy-loading

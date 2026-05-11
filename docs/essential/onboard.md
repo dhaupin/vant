@@ -183,6 +183,6 @@ cat models/public/identity.md
 
 ## Related
 
-- [Brain](brain) - Brain structure
-- [AI Onboarding](ai-onboard) - Getting started
-- [Search](search) - Hybrid search
+- - Brain structure
+- - Getting started
+- - Hybrid search

@@ -138,7 +138,7 @@ Request → VAF (filter) → Sandbox (capabilities) → Escrow (budget) → Exec
          [block]        [permission]        [budget]      [run]
 ```
 
-See [Security](security) for details.
+See for details.
 
 ## State Management
 
@@ -153,6 +153,6 @@ See [Security](security) for details.
 
 ## Related
 
-- [Multi-Agent](multi-agent) - Branch + lock
-- [Security](security) - VAF + sandbox
-- [Runtime](runtime) - Programmatic API
+- - Branch + lock
+- - VAF + sandbox
+- - Programmatic API

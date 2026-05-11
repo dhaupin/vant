@@ -130,6 +130,6 @@ git push origin agent-yourname
 
 ## Related
 
-- [AI Onboarding](ai-onboard) - Workflow
-- [Brain Structure](brain) - Files
-- [Succession](succession) - Trust levels
+- - Workflow
+- - Files
+- - Trust levels

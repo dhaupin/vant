@@ -131,9 +131,9 @@ gallery.linkToBrain();
 
 ## Related
 
-- [Vibe Controls](vibe) - Dynamic mood system
-- [Hybrid Sync](hybrid) - Public/Private brain split
-- [Multi-Repo](repos) - Mount external repos
+- - Dynamic mood system
+- - Public/Private brain split
+- - Mount external repos
 
 ---
 
