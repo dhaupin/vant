@@ -42,41 +42,41 @@ nav:
   - title: Core
     items:
       - title: AI Onboarding
-        url: /vant/guides/ai-onboard
+        url: /vant/essential/ai-onboard
       - title: Brain Structure
-        url: /vant/guides/brain
+        url: /vant/essential/brain
       - title: Islands
-        url: /vant/guides/islands
+        url: /vant/essential/islands
       - title: Trust & Succession
-        url: /vant/guides/succession
+        url: /vant/essential/succession
       - title: Architecture
         url: /vant/essential/architecture
   - title: Tools
     items:
       - title: CLI
-        url: /vant/guides/cli
+        url: /vant/reference/cli
       - title: MCP Server
-        url: /vant/guides/mcp
+        url: /vant/reference/mcp-tools
       - title: Search Architecture
-        url: /vant/guides/search-architecture
+        url: /vant/advanced/search-architecture
       - title: Hybrid Search
-        url: /vant/guides/search
+        url: /vant/advanced/search
       - title: Multi-Agent
-        url: /vant/guides/multi-agent
+        url: /vant/tutorials/multi-agent
       - title: Airgap
-        url: /vant/guides/airgap-propagation
+        url: /vant/security/airgap-propagation
   - title: Features
     items:
       - title: Webhooks
-        url: /vant/guides/webhooks
+        url: /vant/tutorials/webhooks
       - title: Notifications
-        url: /vant/guides/notifications
+        url: /vant/operations/notifications
       - title: Linear Integration
-        url: /vant/guides/linear
+        url: /vant/integrations/linear
       - title: Agent Skills
-        url: /vant/guides/agent-skills
+        url: /vant/integrations/agent-skills
       - title: Vibe Controls
-        url: /vant/guides/vibe
+        url: /vant/advanced/vibe
   - title: Integrations
     items:
       - title: GitHub
