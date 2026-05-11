@@ -138,7 +138,7 @@ const { context, scores } = await search.hybrid('question', {
 });
 ```
 
-See [Search](/guides/search) for details.
+See [Search](/advanced/search) for details.
 
 ## Cache Results
 
@@ -189,6 +189,6 @@ User: What do I know about量子计算?
 
 ## See Also
 
-- [Search](/guides/search)
-- [Runtime](/guides/runtime)
-- [MCP](/guides/mcp)
+- [Search](/advanced/search)
+- [Runtime](/essential/runtime)
+- [MCP](/integrations/mcp)

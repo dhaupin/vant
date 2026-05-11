@@ -110,4 +110,4 @@ npm run test:coverage
 
 ## More
 
-See [CI](/guides/ci) for CI setup.
+See [CI](/operations/ci) for CI setup.

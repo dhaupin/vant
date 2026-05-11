@@ -131,6 +131,6 @@ vant branch create agent-b
 
 ## See Also
 
-- [Getting Started](/guides/getting-started)
-- [MCP Integration](/guides/mcp)
-- [Multi-Agent Guide](/guides/multi-agent)
+- [Getting Started](getting-started)
+- [MCP Integration](mcp)
+- [Multi-Agent Guide](multi-agent)

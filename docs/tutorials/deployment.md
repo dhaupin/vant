@@ -127,4 +127,4 @@ docker run -m 2g vant
 
 ## More
 
-See [Server](/guides/server) and [Docker](/guides/docker).
+See [Server](/advanced/server) and [Docker](/integrations/docker).

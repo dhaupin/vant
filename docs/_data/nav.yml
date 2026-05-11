@@ -25,7 +25,6 @@
     url: /vant/essential/multi-agent
   - title: Onboard
     url: /vant/essential/onboard
-  - title: Framework
     url: /vant/essential/framework
   - title: Msg
     url: /vant/essential/msg
@@ -171,7 +170,6 @@
     url: /vant/advanced/vibe
   - title: Server
     url: /vant/advanced/server
-  - title: Framework
     url: /vant/advanced/framework
   - title: Frontend
     url: /vant/advanced/frontend

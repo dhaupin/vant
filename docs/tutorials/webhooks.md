@@ -188,6 +188,6 @@ cron.cron('0 0 * * *', async () => {
 
 ## See Also
 
-- [CLI](/guides/cli)
-- [Sync](/guides/sync)
-- [Search](/guides/search)
+- [CLI](/essential/cli)
+- [Sync](/operations/sync)
+- [Search](/advanced/search)
