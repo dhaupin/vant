@@ -4,7 +4,7 @@ permalink: /guides/notifications
 layout: default
 title: Notifications
 description: Configuring notification channels - Slack, Discord, Email, Pushover, Telegram
-nav_order: 13
+33
 ---
 
 # Notifications

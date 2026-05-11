@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /tutorials/multi-repo
 layout: default
 title: Multi-Repo
-nav_order: 13
+nav_order: 26
 ---
 
 # Tutorial: Multi-Repo Setup

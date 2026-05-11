@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /guides/qos
 layout: default
 title: QoS
-nav_order: 24
+39
 ---
 
 # QoS

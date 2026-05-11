@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /guides/multi-agent
 layout: default
 title: Multi-Agent
-nav_order: 7
+7
 ---
 # Multi-Agent
 

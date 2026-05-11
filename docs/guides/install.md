@@ -4,7 +4,7 @@ permalink: /guides/install
 layout: default
 title: Installation
 
-nav_order: 0.6
+0.6
 ---
 # Installation
 

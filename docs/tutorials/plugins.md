@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /tutorials/plugins
 layout: default
 title: Plugins
-nav_order: 11
+nav_order: 27
 ---
 
 # Tutorial: Build Plugins

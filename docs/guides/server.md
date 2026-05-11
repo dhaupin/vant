@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /guides/server
 layout: default
 title: Server Guide
-nav_order: 41
+51
 ---
 # Server Guide
 

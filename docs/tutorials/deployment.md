@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /tutorials/deployment
 layout: default
 title: Deployment
-nav_order: 10
+nav_order: 23
 ---
 
 # Tutorial: Deploy Vant

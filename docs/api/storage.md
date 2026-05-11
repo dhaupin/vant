@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/storage
 layout: default
 title: Storage
-nav_order: 99
+nav_order: 89
 ---
 # Storage (v0.8.6)
 

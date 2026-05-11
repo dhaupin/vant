@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/citations
 layout: default
 title: Citations
-nav_order: 12
+12
 ---
 # Citations
 

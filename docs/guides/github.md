@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/github
 layout: default
 title: GitHub Integration
-nav_order: 20
+23
 ---
 # GitHub Integration
 

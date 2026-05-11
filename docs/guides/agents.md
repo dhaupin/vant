@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /guides/agents
 layout: default
 title: Agents
-nav_order: 34
+2
 ---
 
 # Agents

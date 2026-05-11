@@ -4,7 +4,7 @@ permalink: /guides/quick-start
 layout: default
 title: Quick Start
 
-nav_order: 0.5
+0.5
 ---
 # Quick Start
 

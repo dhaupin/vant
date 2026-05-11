@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/search-architecture
 layout: default
 title: Search Architecture
-nav_order: 8
+8
 ---
 
 > **v0.8.6+**: How search connects your memory islands.

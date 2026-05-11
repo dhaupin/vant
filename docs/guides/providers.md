@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/providers
 layout: default
 title: Multi-Git Provider Support
-nav_order: 19
+37
 ---
 
 # Multi-Git Provider Support

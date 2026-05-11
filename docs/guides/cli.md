@@ -4,7 +4,7 @@ version: 0.8.6
 permalink: /guides/cli
 layout: default
 title: CLI Reference
-nav_order: 2
+2
 ---
 description: CLI commands for agents.
 # CLI Reference

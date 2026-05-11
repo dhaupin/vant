@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /guides/cron
 layout: default
 title: Cron
-nav_order: 32
+15
 ---
 
 # Cron

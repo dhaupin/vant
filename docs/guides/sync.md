@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/sync
 layout: default
 title: Multi-Provider RAID Sync
-nav_order: 21
+58
 ---
 
 # Multi-Provider RAID 1 - Sync Manager

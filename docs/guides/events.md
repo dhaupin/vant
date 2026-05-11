@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /guides/events
 layout: default
 title: Events
-nav_order: 25
+19
 ---
 
 # Events

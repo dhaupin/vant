@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/rerank
 layout: default
 title: Rerank (RAG)
-nav_order: 45
+43
 ---
 
 > RAG-powered memory reranking and compression for LLM context.

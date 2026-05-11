@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/pruning
 layout: default
 title: Automated Brain Pruning
-nav_order: 36
+38
 ---
 
 # Automated Brain Pruning

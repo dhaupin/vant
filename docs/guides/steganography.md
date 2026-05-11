@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/steganography
 layout: default
 title: Steganography
-nav_order: 38
+53
 ---
 # Steganography
 

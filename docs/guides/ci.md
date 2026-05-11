@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/ci
 layout: default
 title: CI
-nav_order: 29
+11
 ---
 # CI
 

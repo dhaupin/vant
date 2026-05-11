@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /tutorials/security
 layout: default
 title: Security Best Practices
-nav_order: 12
+nav_order: 29
 ---
 
 # Tutorial: Security Best Practices

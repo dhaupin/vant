@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /guides/boot
 layout: default
 title: Ghost in the Machine
-nav_order: 42
+7
 ---
 
 # Ghost in the Machine - Stego Bootstrapping
