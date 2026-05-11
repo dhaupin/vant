@@ -2,7 +2,7 @@
 
 > Persistent AI memory via GitHub - v0.8.6 - each session inherits full context
 
-🔗 **[vant.creadev.org](https://vant.creadev.org)** | 📦 **[GitHub](https://github.com/dhaupin/vant)**
+🔗 **[Lander](https://vant.creadev.org)** | 📄 **[Docs](https://docs.creadev.org/vant)** | 📦 **[GitHub](https://github.com/dhaupin/vant)**
 
 ---
 

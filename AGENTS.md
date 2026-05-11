@@ -132,6 +132,7 @@ Check your level at session start. It determines how much you should ask before 
 
 ## Full Docs
 
+- [docs.creadev.org/vant](https://docs.creadev.org/vant) - Full documentation
 - [CHANGELOG](docs/CHANGELOG.md) - Version history
 - [Deprecations](docs/deprecations.md) - Files planned for removal
 
