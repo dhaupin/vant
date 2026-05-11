@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/examples
 layout: default
 title: Examples
+nav_order: 98
 20
 ---
 # Examples

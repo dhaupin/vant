@@ -3,6 +3,7 @@ version: 0.8.11
 permalink: /guides/linear
 layout: default
 title: Linear Integration
+nav_order: 15
 description: Using Linear issue tracking with Vant
 28
 ---
@@ -136,6 +137,7 @@ const issues = await linear.query('query { issues { nodes { id title state { nam
 
 // Create mutation
 const result = await linear.query('mutation { issueCreate(input: { title: "New issue" teamId: "team_id" }) { success issue { id } } }');
+nav_order: 15
 ```
 
 ## MCP Tools

@@ -3,6 +3,7 @@ version: 0.8.11
 permalink: /guides/telegram
 layout: default
 title: Telegram Bot
+nav_order: 16
 59
 ---
 

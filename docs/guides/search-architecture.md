@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/search-architecture
 layout: default
 title: Search Architecture
+nav_order: 98
 8
 ---
 

@@ -3,6 +3,7 @@ version: 0.8.11
 permalink: /guides/storage
 layout: default
 title: Storage Layer
+nav_order: 20
 55
 ---
 

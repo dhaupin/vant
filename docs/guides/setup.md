@@ -3,6 +3,7 @@ version: 0.8.11
 permalink: /guides/setup
 layout: default
 title: Setup Guide
+nav_order: 98
 52
 ---
 # Setup Guide

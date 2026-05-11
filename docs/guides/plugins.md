@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/plugins
 layout: default
 title: Plugins
+nav_order: 98
 36
 ---
 # Plugins

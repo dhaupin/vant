@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/agent-skills
 layout: default
 title: Agent Skills
+nav_order: 9
 description: Using Vant with Agent Skills format (Claude Code, Codex, Cursor)
 9
 ---

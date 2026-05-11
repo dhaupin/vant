@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/search
 layout: default
 title: Hybrid Search
+nav_order: 98
 49
 ---
 

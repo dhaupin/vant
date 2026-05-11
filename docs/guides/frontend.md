@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/frontend
 layout: default
 title: Frontend Integration
+nav_order: 98
 22
 ---
 # Frontend Integration

@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/manual-brain
 layout: default
 title: Brain File Templates
+nav_order: 29
 29
 ---
 # Brain File Templates

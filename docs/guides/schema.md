@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/schema
 layout: default
 title: Schema Validation
+nav_order: 98
 47
 ---
 

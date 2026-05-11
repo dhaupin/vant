@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/troubleshooting
 layout: default
 title: Troubleshooting
+nav_order: 98
 61
 ---
 # Troubleshooting

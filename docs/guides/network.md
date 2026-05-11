@@ -3,6 +3,7 @@ version: 0.8.11
 permalink: /guides/network
 layout: default
 title: Network
+nav_order: 25
 32
 ---
 

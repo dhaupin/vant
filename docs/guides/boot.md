@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/boot
 layout: default
 title: Ghost in the Machine
+nav_order: 98
 7
 ---
 

@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/resolution
 layout: default
 title: Resolution
+nav_order: 98
 44
 ---
 # Thought Resolution

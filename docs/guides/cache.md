@@ -3,6 +3,7 @@ version: 0.8.11
 permalink: /guides/cache
 layout: default
 title: Cache
+nav_order: 21
 10
 ---
 

@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/testing
 layout: default
 title: Testing
+nav_order: 98
 60
 ---
 # Testing

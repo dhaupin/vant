@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/release
 layout: default
 title: Release Process
+nav_order: 98
 41
 ---
 # Release Process

@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/providers
 layout: default
 title: Multi-Git Provider Support
+nav_order: 19
 37
 ---
 
@@ -97,6 +98,7 @@ if (provider.isConfigured()) {
     source: 'agents/my-agent',
     target: 'main',
     title: 'My PR Title',
+nav_order: 19
     body: 'Description'
   });
 }
@@ -119,6 +121,7 @@ const pr = await branch.createPR({
   source: 'agents/my-agent',
   target: 'main',
   title: 'Feature PR'
+nav_order: 19
 });
 ```
 

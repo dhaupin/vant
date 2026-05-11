@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/hybrid
 layout: default
 title: Hybrid Sync
+nav_order: 35
 25
 ---
 

@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/notifications
 layout: default
 title: Notifications
+nav_order: 98
 description: Configuring notification channels - Slack, Discord, Email, Pushover, Telegram
 33
 ---

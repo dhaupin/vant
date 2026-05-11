@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/webhooks
 layout: default
 title: Webhooks
+nav_order: 24
 description: Inbound webhook server and event triggers for Vant automations
 64
 ---

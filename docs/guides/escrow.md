@@ -3,6 +3,7 @@ version: 0.8.11
 permalink: /guides/escrow
 layout: default
 title: Escrow
+nav_order: 13
 18
 ---
 

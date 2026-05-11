@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /guides/style
 layout: default
 title: Voice & Style
+nav_order: 98
 56
 ---
 # Voice & Style
@@ -112,6 +113,7 @@ version: 0.8.6
 permalink: /guides/my-guide
 layout: default
 title: My Guide Title
+nav_order: 98
 ---
 ```
 
