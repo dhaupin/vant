@@ -146,4 +146,4 @@ Tools available:
 
 - [Getting Started](https://docs.creadev.org/vant/getting-started)
 - [CLI Reference](https://docs.creadev.org/vant/reference/cli)
-- [MCP Integration](https://docs.creadev.org/vant/guides/mcp)
+- [MCP Integration](https://docs.creadev.org/vant/integrations/mcp)
