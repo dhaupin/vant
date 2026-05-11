@@ -232,7 +232,7 @@ const { allowed, remaining } = escrow.checkQuota('api');
 Escrow integrates with sandbox:
 
 ```javascript
-const sandbox = require('./lib/sandbox');
+const sandbox = require('vant').sandbox;
 
 const s = sandbox.create({
     agentId: 'agent-1',

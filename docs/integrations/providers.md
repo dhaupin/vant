@@ -107,7 +107,7 @@ if (provider.isConfigured()) {
 The `lib/branch.js` module now automatically uses providers:
 
 ```javascript
-const branch = require('./lib/branch');
+const branch = require('vant').branch;
 
 const status = await branch.status();
 console.log(status.provider); // 'github' |

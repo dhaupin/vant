@@ -21,7 +21,7 @@ Manage git branches programmatically:
 ## Get Current Branch
 
 ```javascript
-const branch = require('./lib/branch');
+const branch = require('vant').branch;
 
 const current = await branch.currentBranch();
 console.log(current); // "main" or "agent-name"

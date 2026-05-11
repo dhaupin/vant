@@ -80,7 +80,7 @@ await mcp.call('vant_rerank', {
 ## Programmatic Usage
 
 ```javascript
-const rerank = require('./lib/rerank');
+const rerank = require('vant').rerank;
 
 // Get memories from brain
 const memories = [

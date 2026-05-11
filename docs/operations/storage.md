@@ -26,7 +26,7 @@ The storage layer handles all brain read/write operations:
 Import storage:
 
 ```javascript
-const Storage = require('./lib/storage');
+const Storage = require('vant').storage;
 const brain = Storage.get('brain');
 ```
 

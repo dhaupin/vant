@@ -211,7 +211,7 @@ port = 514
 ### Usage
 
 ```javascript
-const audit = require('./lib/audit');
+const audit = require('vant').audit;
 
 // Log action
 audit.log('island:github:hydrate' |
@@ -252,7 +252,7 @@ Each entry's hash includes the previous hash for tamper-evidence:
 Used automatically in:
 
 ```javascript
-const audit = require('./lib/audit');
+const audit = require('vant').audit;
 const islands = require('./lib/islands');
 
 // After hydration

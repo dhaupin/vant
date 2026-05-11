@@ -53,7 +53,7 @@ vant boot --image=./brain.png --decrypt=secret123
 Save non-sensitive config in brain:
 
 ```javascript
-const brain = require('./lib/storage').get('brain');
+const brain = require('vant').storage.get('brain');
 
 brain.embedConfig({
     GITHUB_REPO: 'owner/repo',

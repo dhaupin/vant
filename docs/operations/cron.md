@@ -23,7 +23,7 @@ Run tasks on schedule:
 Simple interval:
 
 ```javascript
-const cron = require('./lib/cron');
+const cron = require('vant').cron;
 
 cron.every('1h', () => {
     console.log('Hourly task');
