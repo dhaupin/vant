@@ -38,22 +38,37 @@ Vant comes with built-in islands:
 
 ## Create Custom Island
 
-### Step 1: Define Island
+### Step 1: Extend Islands
 
-Create a new brain category as an island:
+Add new islands by editing `DEFAULT_ISLANDS` in `lib/islands.js`:
 
 ```javascript
-const islands = require('./lib/islands');
+const DEFAULT_ISLANDS = {
+    // ... existing islands ...
+    herbalism: { 
+        name: 'Herbalism', 
+        type: 'lazy', 
+        triggers: ['herb', 'plant', 'medicine'] 
+    },
+    // Add more...
+};
+```
 
-// Define new island
-islands.define({
-    name: 'herbalism',
-    triggers: ['herb', 'plant', 'medicine'],
-    load: async () => {
-        // Load from brain
-        return await brain.get('skills', 'herbalism');
-    }
-});
+**Runtime API**
+
+```javascript
+const vant = require('vant');
+
+// Get available islands
+const available = vant.islands.getAvailable();
+// ['identity', 'learnings', 'decisions', 'github', 'gitlab', ...]
+
+// Find triggers in prompt
+const triggers = vant.islands.findTriggers('What herbs help with sleep?');
+// ['herb', 'plant']
+
+// Auto-hydrate from prompt
+await vant.islands.autoHydrate('I need to work with GitHub PRs');
 ```
 
 ### Step 2: Add Content
@@ -75,39 +90,42 @@ Add content to your brain:
 
 ### Step 3: Trigger Usage
 
-Now when you use triggers:
-
 ```javascript
-// Think about herbs - island auto-loads
-const result = await vant.think('What herbs help with sleep?');
+const vant = require('vant');
 
-// Island auto-hydrates
-console.log(result.islands);
+// Think about herbs - auto-hydrates island
+const result = await vant.islands.autoHydrate('What herbs help with sleep?');
+
+// Check hydrated islands
+console.log(vant.islands.getHydrated());
 // [{ name: 'herbalism', loaded: true }]
 ```
 
 ## Programmatic Load
 
-Manual island loading:
-
 ```javascript
-// Load specific island
-const data = await islands.load('github');
+// Load specific island (get data)
+const data = await vant.islands.load('github');
 
-// Load all
-const all = await islands.loadAll();
+// Load + track as hydrated
+await vant.islands.hydrate('github');
+
+// Get all available islands
+const all = vant.islands.getAvailable();
 ```
 
 ## Island Manifest
 
-Save island configuration:
+Save island configuration to `islands.json`:
 
 ```javascript
-// Save to manifest
-islands.saveManifest({
+const vant = require('vant');
+
+vant.islands.saveManifest({
     version: '1.0',
     islands: {
         herbalism: {
+            name: 'Herbalism',
             triggers: ['herb', 'plant'],
             autoLoad: false
         }
@@ -117,16 +135,17 @@ islands.saveManifest({
 
 ## Multi-Trigger Islands
 
-One island, multiple triggers:
+Add more triggers in `DEFAULT_ISLANDS`:
 
 ```javascript
-islands.define({
-    name: 'database',
-    triggers: ['sql', 'postgres', 'mysql', 'database', 'db'],
-    load: async () => {
-        return await brain.get('skills', 'database');
-    }
-});
+const DEFAULT_ISLANDS = {
+    // ... existing islands ...
+    database: { 
+        name: 'Database', 
+        type: 'lazy', 
+        triggers: ['sql', 'postgres', 'mysql', 'database', 'db'] 
+    },
+};
 ```
 
 ## Use Cases
