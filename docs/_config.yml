@@ -50,7 +50,7 @@ nav:
       - title: Trust & Succession
         url: /vant/guides/succession
       - title: Architecture
-        url: /vant/guides/architecture
+        url: /vant/essential/architecture
   - title: Tools
     items:
       - title: CLI

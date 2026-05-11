@@ -112,5 +112,5 @@ This doc has advanced API reference. See GitHub for latest.
 ## Related
 
 - [Succession](succession) - Trust levels
-- [Brain](brain) - Brain structure
+- [Brain]/essential/brain - Brain structure
 - [Audit](audit) - Activity logging

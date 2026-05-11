@@ -78,5 +78,5 @@ const receipt = citations.generateReceipts(results);
 - [Audit](audit) - Activity logging
 - [Hybrid Search](hybrid) - RRF search with citations
 - [Search](search) - Search with source tracking
-- [Brain](brain) - Where citations stored
-- [Sync](sync) - Git-backed sync
+- [Brain]/essential/brain - Where citations stored
+- [Sync]/operations/sync - Git-backed sync

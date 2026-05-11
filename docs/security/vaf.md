@@ -77,5 +77,5 @@ brain.write('category', 'file', content);
 
 ## See Also
 
-- [Security](security) - Security overview
-- [Sandbox](sandbox) - Execution isolation
+- [Security]/tutorials/security - Security overview
+- [Sandbox]/security/sandbox - Execution isolation

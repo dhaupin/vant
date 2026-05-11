@@ -250,12 +250,12 @@ if (result.error) {
 }
 ```
 
-See [Sandbox](sandbox) for details.
+See [Sandbox]/security/sandbox for details.
 
 ---
 
 ## See Also
 
-- [Sandbox](sandbox) - Execution isolation
-- [QoS](qos) - Rate limiting and circuit breaking
-- [Security](security) - VAF and encryption
+- [Sandbox]/security/sandbox - Execution isolation
+- [QoS]/operations/qos - Rate limiting and circuit breaking
+- [Security]/tutorials/security - VAF and encryption

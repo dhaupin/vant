@@ -150,6 +150,6 @@ When Linear island loaded:
 
 ## Related
 
-- [Islands](islands) - Load on-demand
-- [MCP](mcp) - MCP server
+- [Islands]/essential/islands - Load on-demand
+- [MCP]/reference/mcp-tools - MCP server
 - [GitHub](providers) - GitHub integration

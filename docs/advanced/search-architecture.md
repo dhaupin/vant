@@ -147,6 +147,6 @@ Unchanged limits:
 ## Related
 
 - [Hybrid Search](hybrid) - BM25 + Vector + RRF
-- [Brain](brain) - Memory islands
+- [Brain]/essential/brain - Memory islands
 - [CLI](cli) - Search command
 - [MCP](mcp) - Search tool

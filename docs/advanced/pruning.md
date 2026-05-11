@@ -176,4 +176,4 @@ All prune operations recorded in `models/.prune_ledger.json`:
 ## Related
 
 - [Search](search) - Search LTC
-- [Brain](brain) - Brain structure
+- [Brain]/essential/brain - Brain structure

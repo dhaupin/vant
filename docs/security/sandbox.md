@@ -150,7 +150,7 @@ await s.write(() => doWork());
 console.log(s.getBudget()); // 9999
 ```
 
-Budget tracking uses the escrow system. See [Security](security) for details.
+Budget tracking uses the escrow system. See [Security]/tutorials/security for details.
 
 ## Multi-Agent
 
@@ -246,6 +246,6 @@ const s = sandbox.create({
 
 ## See Also
 
-- [Security](security) - VAF and encryption
-- [Runtime](runtime) - Programmatic API
-- [Multi-Agent](multi-agent) - Branch and lock system
+- [Security]/tutorials/security - VAF and encryption
+- [Runtime]/essential/runtime - Programmatic API
+- [Multi-Agent]/tutorials/multi-agent - Branch and lock system
