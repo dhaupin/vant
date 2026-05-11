@@ -6,6 +6,15 @@ const path = require('path');
 const assert = require('assert');
 const fs = require('fs');
 
+// Lazy-load sandbox
+let _sandbox = null;
+function _getSandbox() {
+    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    return _sandbox;
+}
+function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
+function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
+
 const DIR = path.join(__dirname, '..');
 const MODELS_DIR = path.join(DIR, 'models');
 

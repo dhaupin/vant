@@ -20,10 +20,18 @@ if (args[0] === '-h' || args[0] === '--help') {
 
 const vaf = require("../lib/vaf");
 const fs = require('fs');
+
+// Lazy-load sandbox
+let _sandbox = null;
+function _getSandbox() {
+    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    return _sandbox;
+}
+function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
+function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
 
 const MODELS_DIR = 'models';
-const STATES_DIR = 'states';
 const CONFIG_FILE = 'config.ini';
 
 /**
@@ -87,8 +95,10 @@ function loadModel(modelPath) {
     }
 
     const files = fs.readdirSync(modelPath).filter(f => {
+        const filePath = path.join(modelPath, f);
         const ext = path.extname(f).toLowerCase();
-        return ['.md', '.txt', '.json', '.yaml', '.yml'].includes(ext);
+        const isFile = fs.statSync(filePath).isFile();
+        return isFile && ['.md', '.txt', '.json', '.yaml', '.yml'].includes(ext);
     });
 
     const model = {};

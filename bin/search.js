@@ -71,12 +71,12 @@ Options:
     // Basic mode
     if (mode === 'basic') {
         const searchLib = require(path.join(DIR, 'lib', 'search'));
-        const results = await searchLib.searchLTC(query, { limit, compact });
+        const { results, context } = await searchLib.query(query, { limit: parseInt(limit) });
         
         if (rerank && results.length > 0) {
             const memories = results.map(r => ({
-                id: r.type || r.file || 'unknown',
-                title: r.type?.substring(0, 20),
+                id: r.id || r.title || 'unknown',
+                title: r.title || r.id || 'unknown',
                 content: r.content || r.summary || '',
                 date: r.date || new Date().toISOString()
             }));
@@ -94,7 +94,7 @@ Options:
             console.log('\n=== Basic Search: ' + query + ' ===');
             console.log('Results:', results.length);
             for (const r of results) {
-                console.log(' -', r.type, r.summary?.substring(0, 60));
+                console.log(' -', r.title, r.summary?.substring(0, 60));
             }
         }
         process.exit(0);
@@ -128,6 +128,12 @@ Options:
             console.log('\n=== RAG Search: ' + query + ' ===');
             console.log('Results:', results.length);
             console.log('Context:', context.length, 'bytes');
+            
+            for (let i = 0; i < results.length; i++) {
+                const r = results[i];
+                console.log((i+1) + '.', r.title?.substring(0, 25));
+            }
+            
             console.log('Settings:', JSON.stringify(settings));
         }
         process.exit(0);
@@ -140,8 +146,8 @@ Options:
         
         if (rerank && results.fused.length > 0) {
             const memories = results.fused.map(r => ({
-                id: r.id,
-                title: r.id?.substring(0, 20),
+                id: r.title || r.id,
+                title: r.title || r.id,
                 content: r.content || r.summary || '',
                 date: r.date || new Date().toISOString()
             }));
@@ -161,7 +167,8 @@ Options:
             console.log('Dense:', results.dense.length);
             console.log('Fused:', results.fused.length);
             for (const r of results.fused.slice(0, 5)) {
-                console.log(' -', r.id?.substring(0, 8), r.rrf?.toFixed(3), r.content?.substring(0, 50));
+                const title = r.title || r.id;
+                console.log(' -', title?.substring(0, 10), r.bm25Score?.toFixed(3));
             }
         }
         process.exit(0);
@@ -183,11 +190,15 @@ Options:
 
     // HyDE
     if (action === '--hyde') {
+        // Extract query from remaining args (filter out other flags)
+        const queryArgs = args.slice(1).filter(a => !a.startsWith('-'));
+        query = queryArgs.join(' ') || query;
         const searchLib = require(path.join(DIR, 'lib', 'search'));
         const result = await searchLib.hyde(query);
+        const hydeDoc = result.hyde[0];
         console.log('\n=== HyDE: ' + query + ' ===\n');
-        console.log('Fake Answer:\n' + result.fake + '\n');
-        console.log('Results:', result.results.length);
+        console.log('Hypothetical Answer:\n' + hydeDoc.content + '\n');
+        console.log('Encrypted:', hydeDoc.encrypted ? 'yes' : 'no');
         process.exit(0);
     }
 
@@ -198,7 +209,7 @@ Options:
     if (rerank && results.fused.length > 0) {
         const memories = results.fused.map(r => ({
             id: r.id,
-            title: r.id?.substring(0, 20),
+            title: r.title || r.id,
             content: r.content || r.summary || '',
             date: r.date || new Date().toISOString()
         }));
@@ -216,7 +227,8 @@ Options:
         console.log('\n=== Hybrid Search: ' + query + ' ===');
         console.log('Fused:', results.fused.length);
         for (const r of results.fused.slice(0, limit)) {
-            console.log(' -', r.id?.substring(0, 8), r.rrf?.toFixed(3));
+            const title = r.title || r.id;
+            console.log(' -', title?.substring(0, 10), r.bm25Score?.toFixed(3));
         }
     }
 }

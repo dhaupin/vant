@@ -23,6 +23,15 @@ if (args[0] === '-h' || args[0] === '--help') {
 
 const { execSync } = require('child_process');
 const fs = require('fs');
+
+// Lazy-load sandbox
+let _sandbox = null;
+function _getSandbox() {
+    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    return _sandbox;
+}
+function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
+function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
 
 const PACKAGE_JSON = 'package.json';
@@ -99,7 +108,7 @@ function tag(version) {
 /**
  * Main
  */
-function main() {
+function main() { _checkRead(); 
     const args = process.argv.slice(3);
     const bumpType = args[0] || DEFAULT_BUMP;
     

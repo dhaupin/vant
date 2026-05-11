@@ -18,6 +18,8 @@ const vaf = require("../lib/vaf");
 
 const telegram = require('../lib/telegram');
 const logger = require('../lib/audit');
+// Use logger methods for logging
+const { error, info, warn, debug } = logger;
 const config = require('../lib/config');
 
 const BOT_COMMANDS = [
@@ -86,17 +88,17 @@ _Use /sync to update_`;
         await telegram.api('setMyCommands', {
             commands: BOT_COMMANDS
         });
-        audit.info('[Bot] Commands registered');
+        logger.info('[Bot] Commands registered');
     } catch (e) {
-        audit.warn('[Bot] Could not register commands:', e.message);
+        logger.warn('[Bot] Could not register commands:', e.message);
     }
     
     // Start polling
-    audit.info('[Bot] Starting Telegram bot...');
+    logger.info('[Bot] Starting Telegram bot...');
     await telegram.startPolling();
 }
 
 main().catch(err => {
-    audit.error('Bot failed:', err.message);
+    logger.error('Bot failed:', err.message);
     process.exit(1);
 });

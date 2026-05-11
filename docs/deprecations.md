@@ -8,7 +8,7 @@ nav_order: 99
 
 > Track deprecated, orphaned, and planned-for-removal files.
 
-## v0.8.6 - Current (2026-05-09)
+## v0.8.6 - Current (2026-05-10)
 
 ### REMOVED (v0.8.6 Breaking)
 
@@ -26,6 +26,9 @@ nav_order: 99
 | `lib/stego.js` | Removed stego mode for messages - use only Encrypt |
 | `lib/msg.js` | Removed stego options - use config for encryption |
 | `lib/encrypt.js` | Deprecated legacy methods - see below |
+| `lib/sandbox.js` | Refactored - delegates to qos/lock/network |
+| `lib/network.js` | Added domain whitelist functions |
+| `lib/resolution.js` | Removed external JSON - scans brain files only |
 
 ### Deprecated (Still Works - Will Remove)
 
@@ -35,6 +38,12 @@ nav_order: 99
 | `Encrypt.encode()` | `Encrypt.aesGcmEncrypt()` |
 | `Encrypt.decode()` | `Encrypt.aesGcmDecrypt()` |
 | `Encrypt.pbkdf2Sync()` | Node.js `crypto.pbkdf2Sync()` |
+
+### Removed Files
+
+| File | Reason |
+|------|--------|
+| `models/public/.resolution.json` | Replaced by in-file resolution metadata |
 
 ### New in v0.8.6
 

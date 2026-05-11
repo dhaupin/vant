@@ -30,10 +30,10 @@ const action = args.find(a => a === '-l' || a === '--list') ? 'list' :
 
 const path = require('path');
 const DIR = path.join(__dirname, '..');
-const repos = require(path.join(DIR, 'lib', 'repos'));
+const Storage = require(path.join(DIR, 'lib', 'storage')); const repos = Storage.get('repos');
 
 async function run() {
-    if (!action || action === '--list' || action === '-l') {
+    if (!action || action === 'list' || action === '-l') {
         console.log(`
 ╔═══════════════════════════════════════╗
 ║         Vant Repos                  ║

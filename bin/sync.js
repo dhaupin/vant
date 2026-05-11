@@ -39,6 +39,15 @@ const action = (argsSet.has('-p') || argsSet.has('--push')) ? 'push' :
 
 const { execSync } = require('child_process');
 const fs = require('fs');
+
+// Lazy-load sandbox
+let _sandbox = null;
+function _getSandbox() {
+    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    return _sandbox;
+}
+function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
+function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
 
 const CONFIG_PATH = process.env.CONFIG_PATH || 'config.ini';
@@ -165,7 +174,7 @@ execSync(`git push ${url} ${DEFAULT_BRANCH}`, { stdio: 'pipe' });
 /**
  * Main
  */
-function main() {
+function main() { _checkRead(); 
     // Use action parsed at top-level, or default to pull
     const message = args.slice(1).join(' ') || 'Vant update';
     

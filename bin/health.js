@@ -26,6 +26,15 @@ const argsSet = new Set(args);
 const quiet = argsSet.has('-q') || argsSet.has('--quiet');
 
 const fs = require('fs');
+
+// Lazy-load sandbox
+let _sandbox = null;
+function _getSandbox() {
+    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    return _sandbox;
+}
+function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
+function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
 
 // Check if file exists - tries .md first, falls back to .txt
@@ -93,7 +102,7 @@ function checkEnv() {
 
 function checkDirs() {
     console.log('\n📁 Directories:');
-    const dirs = ['models', 'models/public', 'lib', 'bin', 'states'];
+    const dirs = ['models', 'models/public', 'lib', 'bin'];
     dirs.forEach(d => {
         if (fs.existsSync(d)) {
             console.log(`  ✓ ${d}/`);
@@ -101,6 +110,13 @@ function checkDirs() {
             console.log(`  ✗ ${d}/ missing`);
         }
     });
+
+    // State now in brain
+    if (fs.existsSync('models/public/.state.json')) {
+        console.log('  ✓ models/public/.state.json');
+    } else {
+        // May not exist yet (first run)
+    }
 }
 
 function run() {

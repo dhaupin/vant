@@ -44,6 +44,7 @@ const { spawn } = require('child_process');
 const { env } = require('../lib/config');
 const api = require('../lib/api');  // Unified API with hooks + auth
 const network = require('../lib/network');  // Network layer
+const sandbox = require('../lib/sandbox');  // Execution isolation layer
 
 // Security chain
 const vaf = require('../lib/vaf');
@@ -77,6 +78,9 @@ const loadModule = (name) => {
 };
 
 const brain = loadModule('brain');
+// Use storage.js for brain (goes through sandbox capability gates)
+const storage = require('../lib/storage');
+const brainStorage = storage.get('brain');
 const branch = loadModule('branch');
 const lock = loadModule('lock');
 const config = loadModule('config');
@@ -373,6 +377,14 @@ const TOOLS = [
                 mode: { type: 'string', description: 'Mode: rerank, compress, or pipeline', enum: ['rerank', 'compress', 'pipeline'], default: 'rerank' }
             }
         }
+    },
+    {
+        name: 'vant_sandbox_status',
+        description: 'Get sandbox execution layer status. Returns active operations, read/write counts, and layer configuration.',
+        inputSchema: {
+            type: 'object',
+            properties: {}
+        }
     }
 ];
 
@@ -385,11 +397,9 @@ async function getMemory(files = null) {
     if (!fs.existsSync(modelPath)) {
         return { error: 'Brain not found' };
     }
-
-    const allFiles = fs.readdirSync(modelPath).filter(f => {
-        const ext = path.extname(f).toLowerCase();
-        return ['.md', '.txt', '.json', '.yaml', '.yml'].includes(ext);
-    });
+    
+    // Use brainStorage.list() (goes through sandbox canRead)
+    const allFiles = brainStorage.list('public') || [];
 
     // Handle files parameter
     let targetFiles = allFiles.map(f => path.basename(f, path.extname(f)));
@@ -427,18 +437,13 @@ async function getMemory(files = null) {
         let content = null;
         
         for (const ext of extensions) {
-            const filePath = path.join(modelPath, `${name}${ext}`);
-            if (fs.existsSync(filePath)) {
-                content = fs.readFileSync(filePath, 'utf8');
-                
-                // Parse JSON/YAML
+            // Use brainStorage.get() (goes through sandbox canRead)
+            const result = brainStorage.get('public', name + ext);
+            if (result && !result.error) {
+                content = result;
+                // Parse JSON if needed
                 if (ext === '.json') {
                     try { content = JSON.parse(content); } catch (e) {}
-                } else if (ext === '.yaml' || ext === '.yml') {
-                    try {
-                        const yaml = require('yaml');
-                        content = yaml.parse(content);
-                    } catch (e) {}
                 }
                 break;
             }
@@ -474,38 +479,16 @@ async function setMemory(file, content, branch = null, autoCommit = false) {
         throw new Error('Parent directory references not allowed');
     }
     
-    // SECURITY: Validate final path is within expected directory (prevent path traversal)
-    const resolvedFile = path.resolve(path.join(modelPath, `${file}.md`));
-    const resolvedPath = path.resolve(modelPath);
-    if (!resolvedFile.startsWith(resolvedPath + path.sep) && resolvedFile !== resolvedPath) {
-        throw new Error('Path traversal detected - file must be within models/public');
+    // Use brainStorage.write() (goes through sandbox canWrite gate)
+    const result = brainStorage.write('public', file + '.md', content);
+    
+    if (!result || result.error) {
+        return { error: result.error || 'Failed to write' };
     }
     
-    // Determine extension - prefer .md
-    const mdFile = path.join(modelPath, `${file}.md`);
-    const targetFile = fs.existsSync(mdFile) ? mdFile : path.join(modelPath, `${file}.md`);
-    
-    fs.writeFileSync(targetFile, content, 'utf8');
-    
-    let result = { file: targetFile, written: true };
-    
-    if (autoCommit && branch) {
-        try {
-            if (branch.checkout) {
-                await branch.checkout(branch);
-            }
-            if (branch.commit) {
-                await branch.commit('mcp', `Update ${file}`);
-            }
-            result.committed = true;
-        } catch (e) {
-            result.commitError = e.message;
-        }
-    }
-    
-    return result;
+    return { success: true, file: file + '.md' };
 }
-
+    
 /**
  * List branches
  */
@@ -931,6 +914,9 @@ async function handleRequest(request) {
                         } else {
                             result = { reranked: rerankLib.rerank(memories, query, topK) };
                         }
+                        break;
+                    case 'vant_sandbox_status':
+                        result = sandbox.getLayerStatus();
                         break;
                     default:
                         result = { error: 'Unknown tool: ' + name };

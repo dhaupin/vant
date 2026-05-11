@@ -16,6 +16,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - All providers share common API: issues, comments, PRs, repo, branches, status
   - Provider-specific features: GitHub Actions, GitLab Pipelines, Bitbucket Issues
 
+- **Sandbox Refactor - Execution Keeper** (2026-05-10)
+  - REFACTORED: sandbox.js - now delegates to qos, lock, network
+  - ADDED: domain whitelist to network.js (isDomainAllowed, setAllowedDomains)
+  - ADDED: network.fetch() domain checks
+  - WIRED: sandbox into framework.js, vant.js, api.js (fully integrated)
+  - REMOVED: duplicate quota/concurrency in sandbox (uses qos.RateLimiter)
+  - REMOVED: direct lock usage (delegates to lock module)
+  - Role: Agent/Node execution isolation "keeper"
+
+- **Sandbox Keeper Features** (2026-05-10)
+  - ADDED: budget delegation to escrow (getBudgetStatus, recordSpend)
+  - ADDED: capability flags (canRead, canWrite, canNetwork, canSpawn, canCommit, etc.)
+  - ADDED: operation scopes (read, write, network, spawn)
+  - ADDED: getCapabilities(), setCapabilities(), can(cap)
+  - ADDED: getScopes(), setScopes(), hasScope(scope)
+  - ADDED: getOperationHistory(), getErrors()
+  - ADDED: isolate() for untrusted sub-sandbox
+  - Full keeper integration: agents now have proper guards/lanes
+
+- **Runtime Gate Integration** (2026-05-10)
+  - ADDED: capability gate to network.fetch() (checks canNetwork)
+  - ADDED: capability gate to agents.spawn() (checks canSpawn)
+  - ADDED: capability gate to msg.post() (checks canWrite)
+  - ADDED: CircuitBreaker from qos (trips on failures)
+  - All runtime operations now protected by sandbox
+  - Full gate map: network → agents → msg → sandbox
+
 ### Breaking Changes (v0.8.6)
 - **Consolidated Cache Module** (2026-05-09)
   - REMOVED: memoize.js, compression.js, pool.js, cache.js, cache-control.js

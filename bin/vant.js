@@ -112,7 +112,9 @@ const COMMANDS = {
     // NEW: Islands (componentized brain)
     islands: 'islands-boot.js',
     // Brain lock management
-    lock: 'lock.js'
+    lock: 'lock.js',
+    // Config get/set
+    config: 'config.js'
 };
 
 const args = process.argv.slice(2);

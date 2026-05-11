@@ -10,15 +10,24 @@
  *   node bin/islands-boot.js --prompt "fix github pr"
  *   node bin/islands-boot.js --island github
  */
-
 const args = process.argv.slice(2);
-const promptArg = args.find(a => a.startsWith('--prompt='))?.slice(9);
-const islandArg = args.find(a => a.startsWith('--island='))?.slice(9);
+
+// Simple arg parser supporting both --key=value and --key value formats
+function getArg(key) {
+    const idx = args.indexOf('--' + key);
+    if (idx >= 0 && args[idx + 1]) return args[idx + 1];
+    const match = args.find(a => a.startsWith('--' + key + '='));
+    if (match) return match.split('=')[1];
+    return undefined;
+}
+
+const promptArg = getArg('prompt');
+const islandArg = getArg('island');
 const listArg = args.includes('--list');
 const helpArg = args.includes('--help') || args.includes('-h');
 
 const islands = require('../lib/islands');
-const state = require('../lib/state');
+const state = require("../lib/storage").get("state");
 const brain = require('../lib/storage').get('brain');
 const gallery = require('../lib/stego');
 
@@ -31,7 +40,7 @@ async function bootBoot(prompt) {
     
     // 1. Load static state
     console.log('\n[Islands] Loading static state...');
-    state.setCurrent({
+    state.set("current", {
         mode: 'islands',
         prompt: prompt,
         hydrated: []
@@ -44,20 +53,15 @@ async function bootBoot(prompt) {
     // 3. Hydrate each island
     for (const name of toHydrate) {
         const result = islands.hydrate(name);
-        console.log('[Islands] ' + name + ':', result.success ? 'hydrated' : 'failed');
+        console.log('[Islands] ' + name + ':', result ? 'hydrated' : 'failed');
     }
     
     // 4. Show state summary
     console.log('\n[Islands] State:');
-    console.log('  - Static:', state.getSummary());
+    console.log('  - Static:', state.get("current"));
     console.log('  - Available:', islands.getAvailable().length);
     console.log('  - Hydrated:', islands.getHydrated().length);
     
-    // 5. Check gallery
-    const galleryImages = gallery.getAllImages();
-    if (galleryImages.length > 0) {
-        console.log('[Islands] Gallery:', galleryImages.length, 'images');
-    }
     
     console.log('\n[Islands] === Componentized Brain Ready ===');
     console.log('[Islands] Mode: Islands (lazy load)');
@@ -126,7 +130,8 @@ async function main() {
     if (listArg) { listIslands(); return; }
     if (islandArg) {
         console.log('[Islands] Hydrating:', islandArg);
-        await islands.hydrate(islandArg);
+        const result = await islands.hydrate(islandArg);
+        console.log('[Islands] Files:', result?.join(', ') || 'none');
         return;
     }
     
