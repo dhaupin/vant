@@ -44,9 +44,9 @@ function getSessionSummary() {
  */
 function formatMarkdown(summary) {
     let md = '# Vant Session Summary\n\n';
-    md += `**Messages:** ${summary.messageCount}\n`;
-    md += `**Tokens (est):** ${summary.tokens}\n`;
-    md += `**Decisions:** ${summary.decisions}\n\n`;
+    md += `**Messages:** ${summary.messages || 0}\n`;
+    md += `**Tokens (est):** ${summary.tokens || 0}\n`;
+    md += `**Decisions:** ${summary.decisions || 0}\n\n`;
     
     if (summary.filesModified && summary.filesModified.length) {
         md += '## Files Modified\n\n';
