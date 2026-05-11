@@ -11,7 +11,7 @@
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>https://docs.creadev.org/vant/guides/hybrid</loc>
+        <loc>https://docs.creadev.org/vant/integrations/hybrid</loc>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
@@ -21,22 +21,22 @@
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://docs.creadev.org/vant/guides/mcp</loc>
+        <loc>https://docs.creadev.org/vant/integrations/mcp</loc>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://docs.creadev.org/vant/guides/schema</loc>
+        <loc>https://docs.creadev.org/vant/integrations/schema</loc>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://docs.creadev.org/vant/guides/audit</loc>
+        <loc>https://docs.creadev.org/vant/integrations/audit</loc>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://docs.creadev.org/vant/guides/github</loc>
+        <loc>https://docs.creadev.org/vant/integrations/github</loc>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
