@@ -5,6 +5,7 @@ permalink: /guides/brain
 layout: default
 title: The Brain
 nav_order: 1
+nav_order: 1
 ---
 description: What Vant is - your persistent memory. Read at wake-up.
 # Brain Structure
