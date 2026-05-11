@@ -243,7 +243,7 @@ You should see output like:
 ✅ Vant v0.8.6
 ✅ Config loaded
 ✅ GitHub connected
-✅ Brain files present (19 files)
+✅ Brain files present (62 files)
 ```
 
 ---

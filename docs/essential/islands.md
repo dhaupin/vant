@@ -17,24 +17,27 @@ Vant used to load one giant `current.json` - potentially massive, containing eve
 ## The Solution
 
 **Componentized Brain** - Split into islands:
-- **Static Islands**: Identity, learnings, decisions (always loaded)
-- **Lazy Islands**: GitHub, Herbalism, VESC, etc (on trigger)
+- **Static Islands** (3): Identity, Learnings, Decisions (always loaded)
+- **Lazy Islands** (7): GitHub, GitLab, Bitbucket, Linear, Herbalism, VESC, Automation
 
 ## Architecture
 
 ```
-Brain = Static Islands + Hydrated Islands + Gallery
+Brain = Static Islands + Lazy Islands
 
-Static (always):
+Static (always, 3):
   - identity   (who I am)
   - learnings  (knowledge)
   - decisions  (reasoning)
 
-Lazy (on trigger):
-  - github     → trigger: "github", "pr", "issue"
-  - herbalism → trigger: "herb", "plant"  
+Lazy (on trigger, 7):
+  - github     → trigger: "github", "pr", "issue", "repo"
+  - gitlab     → trigger: "gitlab", "mr"
+  - bitbucket → trigger: "bitbucket"
+  - linear    → trigger: "linear", "project", "issue"
+  - herbalism → trigger: "herb", "plant"
   - vesc       → trigger: "vesc", "motor"
-  - linear     → trigger: "linear", "project"
+  - automation → trigger: "automation", "webhook"
 ```
 
 ## CLI Usage
