@@ -53,7 +53,7 @@ async function bootBoot(prompt) {
     // 3. Hydrate each island
     for (const name of toHydrate) {
         const result = islands.hydrate(name);
-        console.log('[Islands] ' + name + ':', result.success ? 'hydrated' : 'failed');
+        console.log('[Islands] ' + name + ':', result ? 'hydrated' : 'failed');
     }
     
     // 4. Show state summary
