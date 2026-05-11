@@ -77,7 +77,7 @@ export BITBUCKET_REPO=repo
 
 ```javascript
 const { getProvider |
-- detectProvider } = require('./lib/providers');
+- detectProvider } = require('vant').providers;
 
 // Auto-detect provider
 const provider = getProvider();

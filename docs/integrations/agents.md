@@ -24,7 +24,7 @@ Manage multiple agents:
 Import agents:
 
 ```javascript
-const agents = require('./lib/agents');
+const agents = require('vant').agents;
 ```
 
 ## Create Agent

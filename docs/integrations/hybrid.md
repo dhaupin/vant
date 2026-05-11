@@ -41,7 +41,7 @@ Sync different parts to different repos:
 ### Configure Privacy
 
 ```javascript
-const hybrid = require('./lib/hybrid');
+const hybrid = require('vant').hybrid;
 
 // Set repo privacy
 hybrid.setPrivacy('github', 'private');

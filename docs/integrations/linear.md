@@ -50,7 +50,7 @@ LINEAR_TEAM=your-team-id
 ### Create Issue
 
 ```javascript
-const linear = require('./lib/linear');
+const linear = require('vant').linear;
 
 const issue = await linear.createIssue('Fix authentication bug', {
     description: 'User cannot login with OAuth',
