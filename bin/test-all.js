@@ -11,13 +11,15 @@ const LIB = path.resolve('./lib');
 function test(name, cmd, check) {
     try {
         if (typeof check === 'function') {
-            const r = check();
+            // Pass output to check function
+            const out = execSync('node ./bin/vant.js ' + cmd, { encoding: 'utf8', timeout: 10000 });
+            const r = check(out);
             r ? results.passed.push(name) : results.failed.push({ name, error: 'check' });
             return;
         }
         const out = execSync('node ./bin/vant.js ' + cmd, { encoding: 'utf8', timeout: 10000 });
-        if (check && !check(out)) {
-            results.failed.push({ name, error: 'check' });
+        if (!out.includes('Vant')) {  // Simple check
+            results.failed.push({ name, error: 'output' });
             return;
         }
         results.passed.push(name);
