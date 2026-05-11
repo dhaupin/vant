@@ -2,7 +2,6 @@
   items:
   - title: The Brain
     url: /vant/essential/brain
-  - title: CLI
     url: /vant/essential/cli
   - title: Runtime
     url: /vant/essential/runtime
@@ -58,13 +57,10 @@
     url: /vant/tutorials/multi-agent
   - title: Multi-Repo
     url: /vant/tutorials/multi-repo
-  - title: Plugins
     url: /vant/tutorials/plugins
-  - title: Testing
     url: /vant/tutorials/testing
   - title: Telegram Bot
     url: /vant/tutorials/telegram-bot
-  - title: Webhooks
     url: /vant/tutorials/webhooks
   - title: Automation
     url: /vant/tutorials/automation
@@ -110,7 +106,6 @@
     url: /vant/operations/sync
   - title: Workflows
     url: /vant/operations/operations
-  - title: Webhooks
     url: /vant/operations/webhooks
   - title: Notifications
     url: /vant/operations/notifications
@@ -154,9 +149,7 @@
     url: /vant/advanced/errors
   - title: Entropy
     url: /vant/advanced/entropy
-  - title: Plugins
     url: /vant/advanced/plugins
-  - title: Testing
     url: /vant/advanced/testing
   - title: Troubleshooting
     url: /vant/advanced/troubleshooting
@@ -184,13 +177,11 @@
     url: /vant/advanced/frontend
 - title: Reference
   items:
-  - title: CLI
     url: /vant/reference/cli
   - title: API
     url: /vant/reference/api
   - title: REST API
     url: /vant/reference/rest-api
-  - title: Configuration
     url: /vant/reference/configuration
   - title: Storage
     url: /vant/reference/storage
