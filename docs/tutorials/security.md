@@ -55,7 +55,7 @@ ufw allow 3456/tcp  # Vant only
 ### Enable Sandbox
 
 ```javascript
-const sandbox = require('./lib/sandbox');
+const sandbox = require('vant').sandbox;
 
 const s = sandbox.create({
     canRead: true,

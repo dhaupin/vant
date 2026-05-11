@@ -73,7 +73,7 @@ vant lock release --force
 
 ```javascript
 const assert = require('assert');
-const vant = require('./lib/vant');
+const vant = require('vant');
 
 describe('Vant', () => {
     it('should init', async () => {

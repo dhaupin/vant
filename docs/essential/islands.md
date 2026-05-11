@@ -56,8 +56,8 @@ vant islands --island github
 ## API Usage
 
 ```javascript
-const islands = require('./lib/islands');
-const state = require('./lib/storage').get('state');
+const islands = require('vant').islands;
+const state = require('vant').storage.get('state');
 
 // Find islands that match a trigger
 const found = islands.findTriggers('github issue');
@@ -74,7 +74,7 @@ await islands.hydrate('github');
 ## State Separation
 
 ```javascript
-const state = require('./lib/storage').get('state');
+const state = require('vant').storage.get('state');
 
 // Static: Immutable (identity, facts)
 state.setStatic({ name: 'Vant', version: '0.8.6' });
@@ -91,7 +91,7 @@ state.setTemp({ cache: {}, debug: {} });
 Each island can be its own stego PNG:
 
 ```javascript
-const gallery = require('./lib/gallery');
+const gallery = require('vant').gallery;
 
 // Save island as image
 gallery.saveImage('github', pngBuffer);
@@ -145,7 +145,7 @@ gallery.linkToBrain();
 Create your own island:
 
 ```javascript
-const islands = require('./lib/islands');
+const islands = require('vant').islands;
 
 islands.define({
     name: 'myskills',

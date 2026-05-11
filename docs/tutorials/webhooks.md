@@ -35,7 +35,7 @@ Webhook handlers that trigger Vant actions:
 ### Handler
 
 ```javascript
-constvant = require('./lib/vant');
+constvant = require('vant');
 
 app.post('/webhook', async (req, res) => {
     const { action, branch } = req.body;
@@ -55,7 +55,7 @@ app.post('/webhook', async (req, res) => {
 Use cron:
 
 ```javascript
-const cron = require('./lib/cron');
+const cron = require('vant').cron;
 
 // Daily prune at midnight
 cron.cron('0 0 * * *', async () => {

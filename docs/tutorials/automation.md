@@ -46,8 +46,8 @@ Vant uses cron for scheduling:
 ### Schedule Sync
 
 ```javascript
-const cron = require('./lib/cron');
-const vant = require('./lib/vant');
+const cron = require('vant').cron;
+const vant = require('vant');
 
 // Sync brain every hour
 cron.cron('0 * * * *', async () => {

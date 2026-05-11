@@ -48,7 +48,7 @@ Context + User Query
 ## Step 1: Query Brain
 
 ```javascript
-const search = require('./lib/search');
+const search = require('vant').search;
 
 async function queryBrain(question) {
     // Search brain
@@ -106,8 +106,8 @@ async function askWithRAG(question) {
 ## Step 4: Put It Together
 
 ```javascript
-const vant = require('./lib/vant');
-const search = require('./lib/search');
+const vant = require('vant');
+const search = require('vant').search;
 
 async function ragAgent(question) {
     // Initialize

@@ -42,8 +42,8 @@ vant checkout agent-2
 Build a working agent using Vant.
 
 ```javascript
-const branch = require('./lib/branch');
-const lock = require('./lib/lock');
+const branch = require('vant').branch;
+const lock = require('vant').lock;
 
 const AGENT_ID = 'agent-1';
 

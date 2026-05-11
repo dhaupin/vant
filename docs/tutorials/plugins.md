@@ -61,7 +61,7 @@ module.exports = {
 ### Register
 
 ```javascript
-const vant = require('./lib/vant');
+const vant = require('vant');
 const plugin = require('./plugins/my-plugin');
 
 vant.use(plugin);
