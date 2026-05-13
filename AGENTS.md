@@ -58,6 +58,28 @@ Loading goes through: sandbox → vaf → qos → escrow
 - `brain.getBrainPath()` → 'models/private' (runtime)
 - `brain.getPublicPath()` → 'models/public' (OS template)
 
+## Islands (Brain Modules)
+
+Islands are brain modules loaded by trigger - routing based on source:
+
+```javascript
+const islands = require('./lib/islands');
+
+// Static: from brain corpus
+const identity = await islands.load('identity');
+// → { type: 'corpus', source: 'public'|'private', content: '...' }
+
+// Lazy: from storage (dynamic data)
+const github = await islands.load('github');
+// → storage data (if exists)
+```
+
+### Island Types
+| Type | Source | Examples |
+|------|--------|-----------|
+| 'static' | corpus | identity, learnings, decisions |
+| 'lazy' | storage | github, gitlab, linear |
+
 ---
 
 ## Good Agent Patterns
