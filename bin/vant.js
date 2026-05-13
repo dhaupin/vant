@@ -10,7 +10,7 @@ const version = require('../lib/version');
  *   vant start      - Full startup (health → sync → load → run)
  *   vant sync       - Pull/push brain from/to GitHub
  *   vant health     - System diagnostics and model check
- *   vant load       - Load brain from models/public
+ *   vant load       - Load brain from models/private
  *   vant run        - Start runtime (long-running agent loop)
  *   vant test       - Run build tests
  *   vant changelog  - View recent changes

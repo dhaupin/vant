@@ -22,7 +22,7 @@ const COMMANDS = {
         usage: 'vant health'
     },
     load: {
-        desc: 'Load brain from models/public or custom path',
+        desc: 'Load brain from models/private or custom path',
         usage: 'vant load [version]'
     },
     run: {

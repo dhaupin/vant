@@ -29,7 +29,7 @@ const CONFIG_TEMPLATE = `=== Vant CONFIG ===
 
 # Core
 VANT_VERSION=v' + version + '
-MODEL_PATH=models/public
+MODEL_PATH=models/private
 # State now stored in brain
 # STATE_PATH is deprecated
 

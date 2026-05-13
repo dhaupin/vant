@@ -29,7 +29,7 @@
  *   VANT_AGREE_AUTO_SYNC  - Required for polling: set to "true" to agree
  * 
  * What it does:
- *   1. Loads brain from models/public
+ *   1. Loads brain from models/private
  *   2. Starts MCP server (optional)
  *   3. Runs loop (brain updates done manually via vant sync)
  *   4. Optional: background GitHub polling (opt-in with warnings)
@@ -161,7 +161,7 @@ class VantNode {
     async init() {
         this.log('Initializing Vant Node...');
         
-        // Load brain from local models/public
+        // Load brain from local models/private
         this.memory = this.loadBrain();
         
         // Start MCP server if enabled
