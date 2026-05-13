@@ -78,9 +78,8 @@ const loadModule = (name) => {
 };
 
 const brain = loadModule('brain');
-// Use storage.js for brain (goes through sandbox capability gates)
-const storage = require('../lib/storage');
-const brainStorage = storage.get('brain');
+// Use brain router for storage (goes through sandbox + middleware chain)
+const brainStorage = brain.getBrainStorage();
 const branch = loadModule('branch');
 const lock = loadModule('lock');
 const config = loadModule('config');
