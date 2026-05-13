@@ -49,9 +49,10 @@ Vant uses cron for scheduling:
 const cron = require('vant').cron;
 const vant = require('vant');
 
-// Sync brain every hour
+// Sync brain every hour (via network module)
+const { sync } = require('vant/lib/network');
 cron.cron('0 * * * *', async () => {
-    await vant.sync.push();
+    await sync({ direction: 'push' });
     console.log('Brain synced');
 });
 ```

@@ -18,14 +18,15 @@ const vant = require('vant');
 // Initialize
 await vant.init({ name: 'MyAgent' });
 
-// Think
+// Think - query brain for context
 const result = await vant.think('What should I do?');
 
-// Learn
+// Learn - store new information
 await vant.learn('key', 'value');
 
-// Commit
-await vant.commit('Did work');
+// Commit - save to brain via git (use branch module)
+// const { commit } = require('vant/lib/branch');
+// await commit('MyAgent', 'Did work');
 ```
 
 ## Core Functions
@@ -33,11 +34,17 @@ await vant.commit('Did work');
 | Function | What |
 |----------|------|
 | `vant.init()` | Initialize agent |
-| `vant.think()` | Process with brain |
-| `vant.learn()` | Save to brain |
-| `vant.get()` | Read from brain |
-| `vant.commit()` | Save changes |
-| `vant.sync()` | Push to GitHub |
+| `vant.think()` | Query brain for context |
+| `vant.learn()` | Store to brain (memory) |
+| `vant.remember()` | Store persistent (never expire) |
+| `vant.act()` | Execute with lock |
+| `vant.getState()` | Get agent state |
+| `vant.search()` | Search brain |
+| `vant.islands()` | Lazy-load integrations |
+| `vant.lock()` | Acquire/release lock |
+| `vant.audit()` | Log operations |
+
+> **Note**: Git operations (commit, sync) via `require('vant/lib/branch')`
 
 ## Full Reference
 

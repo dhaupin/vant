@@ -89,14 +89,15 @@ models/
 ### New Session
 
 ```javascript
-// 1. Sync from GitHub
-await vant.sync.pull();
+// 1. Sync from GitHub (via network module)
+const { sync } = require('vant/lib/network');
+await sync({ direction: 'pull' });
 
 // 2. Load brain
-await vant.load();
+// await vant.load(); // automatic in init()
 
 // 3. Read identity
-const identity = await vant.get('identity');
+const identity = await vant.brain().get('identity');
 
 // 4. Think with context
 const result = await vant.think('What should I do?');
@@ -104,11 +105,13 @@ const result = await vant.think('What should I do?');
 // 5. Learn new things
 await vant.learn('key', 'content');
 
-// 6. Commit
-await vant.commit('message');
+// 6. Commit (via branch module)
+const { commit } = require('vant/lib/branch');
+await commit('MyAgent', 'Did work');
 
-// 7. Push to GitHub
-await vant.sync.push();
+// 7. Push to GitHub (via network/sync)
+const { sync } = require('vant/lib/network');
+await sync({ direction: 'push' });
 ```
 
 ### MCP Flow

@@ -35,14 +35,15 @@ Webhook handlers that trigger Vant actions:
 ### Handler
 
 ```javascript
-constvant = require('vant');
+const vant = require('vant');
 
 app.post('/webhook', async (req, res) => {
     const { action, branch } = req.body;
     
     if (action === 'push') {
-        // Sync brain on push
-        await vant.sync.pull();
+        // Sync brain on push (via network module)
+        const { sync } = require('vant/lib/network');
+        await sync({ direction: 'pull' });
         console.log('Synced brain');
     }
     
@@ -63,9 +64,10 @@ cron.cron('0 0 * * *', async () => {
     console.log('Pruned brain');
 });
 
-// Hourly sync
+// Hourly sync (via network)
+const { sync } = require('vant/lib/network');
 cron.cron('0 * * * *', async () => {
-    await vant.sync.push();
+    await sync({ direction: 'push' });
     console.log('Synced to GitHub');
 });
 ```
@@ -75,6 +77,10 @@ cron.cron('0 * * * *', async () => {
 ### Trigger Agent Action
 
 ```javascript
+const vant = require('vant');
+const { sync } = require('vant/lib/network');
+const { commit } = require('vant/lib/branch');
+
 app.post('/webhook/trigger', async (req, res) => {
     const { action, params } = req.body;
     
@@ -86,7 +92,10 @@ app.post('/webhook/trigger', async (req, res) => {
             const results = await vant.think(params.query);
             return res.json(results);
         case 'commit':
-            await vant.sync.commit(params.message);
+            await commit('MyAgent', params.message);
+            break;
+        case 'sync':
+            await sync({ direction: 'push' });
             break;
     }
     
@@ -159,8 +168,9 @@ app.post('/webhook/trigger', (req, res) => {
 
 ```javascript
 // On every push, pull latest brain
+const { sync } = require('vant/lib/network');
 app.post('/webhook/github', async (req, res) => {
-    await vant.sync.pull();
+    await sync({ direction: 'pull' });
     console.log('Updated brain from GitHub');
 });
 ```
