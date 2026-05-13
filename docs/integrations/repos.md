@@ -104,3 +104,12 @@ vant repos remove my-skills
 # Pull updates
 vant repos pull
 ```
+
+## Related
+
+- [Agent Skills](integrations/agent-skills) - Manage skills
+- [MCP](reference/mcp-tools) - MCP server
+
+## Next
+
+- [Linear Integration](integrations/linear) - Issue tracking

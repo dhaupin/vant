@@ -305,7 +305,7 @@ docker run -it dhaupin/vant vant health
 
 ---
 
-## Next Steps
+## Related
 
 - [Quick Start](getting-started/quick-start) - Run your first commands
 - [Configuration](reference/configuration) - Customize Vant

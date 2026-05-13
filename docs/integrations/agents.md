@@ -87,8 +87,12 @@ Agent states:
 
 ---
 
-## See Also
+## Related
 
 - [Runtime](essential/runtime) - Runtime API
 - [Multi-Agent](essential/multi-agent) - Multi-agent workflows
 - [Lock](essential/lock) - Coordination
+
+## Next
+
+- [GitHub Integration](integrations/github) - GitHub workflows
