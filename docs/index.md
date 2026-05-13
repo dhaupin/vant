@@ -45,15 +45,15 @@ Vant persists through GitHub-based brain transfer. Agents inherit full context f
 | **Storage Layer** | Brain storage abstraction | [Storage](operations/storage) |
 | **Sandbox** | Execution isolation + capabilities | [Sandbox](security/sandbox) |
 | **QoS** | Rate limiting, bulkhead, circuit breaker | [QoS](operations/qos) |
-| **Events** | Event system + pub/sub + jobs | [Events](advanced/event.md) |
+| **Events** | Event system + pub/sub + jobs | [Events](operations/events) |
 | **Escrow** | Budget tracking + approvals | [Escrow](security/escrow) |
 | **Steganography** | Hidden messages in PNG images | [Stego](advanced/stego) |
-| **Hybrid Search** | BM25 + Vector with RRF re-ranking | [Search](advanced/search.md) |
+| **Hybrid Search** | BM25 + Vector with RRF re-ranking | [Search](advanced/search) |
 | **Vibe Controls** | Dynamic mood system | [Vibe](advanced/vibe) |
 | **Network** | HTTP with retry + circuit breaker | [Network](operations/network) |
 | **VAF** | Input validation firewall | [VAF](security/vaf) |
 | **Multi-Repo** | Mount external repos like drives | [Repos](integrations/repos) |
-| **Hybrid Sync** | Public/Private brain split | [Hybrid](advanced/search.md) |
+| **Hybrid Sync** | Public/Private brain split | [Hybrid](integrations/hybrid) |
 | **Telegram Bot** | Control Vant via chat | [Telegram](tutorials/telegram-bot) |
 | **Cron** | Scheduled jobs | [Cron](operations/cron.md) |
 | **Schema** | JSON schema validation | [Schema](reference/schema) |
@@ -129,8 +129,7 @@ Yes! Just `git clone` your brain repo. It's all markdown.
 
 | Document | Purpose |
 |----------|---------|
-| [Terms & Disclaimer](legal/index) | Warranty, liability, responsibilities |
-| [Privacy](legal/privacy) | Data collection, your control |
-| [Environment](legal/environment) | GitHub API, limits |
+| [Terms & Disclaimer](reference/legal) | Warranty, liability, responsibilities |
+| [Privacy](security/privacy) | Data collection, your control |
+| [Environment](security/environment) | GitHub API, limits |
 
- 
