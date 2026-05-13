@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /getting-started/install
 layout: default
 title: Installation
-nav_order: 1
+nav_order: 12
 ---
 # Installation
 
@@ -243,7 +243,7 @@ You should see output like:
 ✅ Vant v0.8.6
 ✅ Config loaded
 ✅ GitHub connected
-✅ Brain files present (19 files)
+✅ Brain files present (62 files)
 ```
 
 ---

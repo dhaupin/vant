@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /reference/schema
 layout: default
 title: Brain Schema
-nav_order: 4
+nav_order: 85
 ---
 # Brain Schema
 
@@ -120,4 +120,4 @@ Recommended files transported between instances:
 | `qc.md` | Quality standards |
 | `gratitude.md` | Appreciation |
 
-See also: [API](reference/api), [Multi-Agent](guides/multi-agent)
+See also: [API]/reference/cli, [Multi-Agent](essential/multi-agent)

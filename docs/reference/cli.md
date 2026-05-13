@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /reference/cli
 layout: default
 title: CLI Reference
-nav_order: 1
+nav_order: 80
 ---
 # CLI Reference
 
@@ -340,7 +340,7 @@ vant lock force    # Force release (admin)
 **Using in code:**
 
 ```javascript
-const brain = require('./lib/storage').get('brain');
+const brain = require('vant').brain;
 
 // Simple: acquire lock, do work, release
 const token = await brain.acquireBrainLock();
@@ -390,7 +390,7 @@ vant docs build --version # Specific version
 vant docs serve          # Local server
 ```
 
-See also: [Configuration](reference/configuration), [API](reference/api), [Entropy Patching](reference/entropy)
+See also: [Configuration](reference/configuration), [API]/reference/cli, [Entropy Patching]/reference/entropy
 
 ## compress
 
@@ -429,7 +429,7 @@ vant compress models/public/goals.md -a -k 2.0
 vant compress models/latent/goals.vpatch --decompress
 ```
 
-See also: [Entropy Patching](reference/entropy)
+See also: [Entropy Patching]/reference/entropy
 
 ---
 

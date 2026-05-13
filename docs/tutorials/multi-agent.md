@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /tutorials/multi-agent
 layout: default
 title: Multi-Agent System
-nav_order: 2
+nav_order: 25
 ---
 
 # Tutorial: Multi-Agent Coordination
@@ -42,8 +42,8 @@ vant checkout agent-2
 Build a working agent using Vant.
 
 ```javascript
-const branch = require('./lib/branch');
-const lock = require('./lib/lock');
+const branch = require('vant').branch;
+const lock = require('vant').lock;
 
 const AGENT_ID = 'agent-1';
 
@@ -135,6 +135,6 @@ Coordination patterns for multi-agent.
 
 ## Related
 
-- [Multi-Agent Guide](guides/multi-agent) - Full guide
-- [Lock API](reference/api) - Lock module
-- [Branch API](reference/api) - Branch module
+- [Multi-Agent Guide]/tutorials/multi-agent - Full guide
+- [Lock API]/reference/cli - Lock module
+- [Branch API]/reference/cli - Branch module

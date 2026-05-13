@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/rest-api
 layout: default
 title: REST API Reference
-nav_order: 14
+nav_order: 82
 ---
 # REST API Reference
 
@@ -305,4 +305,4 @@ io.on('error', (error) => {
 
 ---
 
-See also: [MCP Guide](guides/mcp), [CLI Reference](reference/cli)
+See also: [MCP Guide](integrations/mcp), [CLI Reference](reference/cli)

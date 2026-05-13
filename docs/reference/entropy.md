@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/entropy
 layout: default
 title: Entropy Patching Protocol
-nav_order: 6
+nav_order: 87
 ---
 
 # Entropy Patching Protocol
@@ -16,7 +16,7 @@ nav_order: 6
 
 ### Why Does It Exist?
 
-LLMs are token-limited. Loading 19 brain files on startup is expensive. Entropy Patching enables:
+LLMs are token-limited. Loading 60+ brain files on startup is expensive. Entropy Patching enables:
 
 1. **Token reduction** - Agents load one `.vpatch` file instead of 19 `.md` files
 2. **Git-native diffs** - Tracks entropy spikes instead of line changes
@@ -128,7 +128,7 @@ vant compress <file.vpatch> --decompress
 ### generatePatches()
 
 ```javascript
-const entropy = require('./lib/entropy');
+const entropy = require('vant').entropy;
 
 const patches = entropy.generatePatches(buffer, {
     windowSize: 8,     // sliding window (default: 8)

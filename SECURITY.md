@@ -34,7 +34,7 @@ Vant includes:
 
 ---
 
-See [Security Guide](https://docs.creadev.org/vant/guides/security.html) for full technical details.
+See [Security Guide](https://docs.creadev.org/vant/security/security.html) for full technical details.
 
 ##感谢
 

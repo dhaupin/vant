@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /reference/api
 layout: default
 title: API Reference
-nav_order: 2
+nav_order: 81
 ---
 
 > Vant Agent OS API Reference.
@@ -17,7 +17,7 @@ Initialize and manage the agent.
 Initialize the agent.
 
 ```javascript
-const runtime = require('./lib/runtime');
+const runtime = require('vant').runtime;
 
 const state = await runtime.init({
     name: 'Vant',      // Agent name
@@ -110,7 +110,7 @@ Multi-agent runtime.
 Spawn a new agent.
 
 ```javascript
-const agents = require('./lib/agents');
+const agents = require('vant').agents;
 
 const agent = await agents.spawn({
     name: 'Helper',
@@ -175,7 +175,7 @@ Inter-agent messaging.
 Send message to channel.
 
 ```javascript
-const ipc = require('./lib/ipc');
+const ipc = require('vant').ipc;
 
 ipc.send('alerts', { text: 'Hello' });
 ```
@@ -207,7 +207,7 @@ Direct brain access.
 Get brain file.
 
 ```javascript
-const brain = require('./lib/storage').get('brain');
+const brain = require('vant').brain;
 
 const data = await brain.get('identity');
 // { key, content, date }
@@ -257,7 +257,7 @@ Query brain memories.
 Query brain for context.
 
 ```javascript
-const search = require('./lib/search');
+const search = require('vant').search;
 
 const result = await search.queryBrain('query', {
     topK: 10,
@@ -283,7 +283,7 @@ Intent detection and lazy-loading.
 Find islands matching prompt.
 
 ```javascript
-const islands = require('./lib/islands');
+const islands = require('vant').islands;
 
 const triggers = islands.findTriggers('create a github pr');
 // ['github', 'linear']
@@ -315,7 +315,7 @@ Get configuration.
 Get config value.
 
 ```javascript
-const config = require('./lib/config');
+const config = require('vant').config;
 
 const port = config.get('server.port');
 // 3100
@@ -338,7 +338,7 @@ Acquire/release locks.
 Acquire lock.
 
 ```javascript
-const lock = require('./lib/lock');
+const lock = require('vant').lock;
 
 lock.acquire('agent_123', 10000);
 ```
@@ -360,7 +360,7 @@ Logging and metrics.
 Log entry.
 
 ```javascript
-const audit = require('./lib/audit');
+const audit = require('vant').audit;
 
 audit.log({ type: 'act', key: 'value' });
 ```
@@ -382,7 +382,7 @@ Error handling.
 Handle error.
 
 ```javascript
-const errors = require('./lib/errors');
+const errors = require('vant').errors;
 
 errors.handle(new Error('msg'));
 ```

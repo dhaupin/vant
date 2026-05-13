@@ -1,246 +1,159 @@
 - title: Getting Started
   items:
-  - title: Omega Init
-    url: /vant/omega-init.html
   - title: Quick Start
-    url: /vant/getting-started/quick-start.html
+    url: /vant/getting-started/quick-start
   - title: Installation
-    url: /vant/getting-started/install.html
+    url: /vant/getting-started/install
+  - title: Setup
+    url: /vant/getting-started/setup
   - title: Examples
-    url: /vant/examples.html
+    url: /vant/getting-started/examples
   - title: FAQ
-    url: /vant/faq.html
-- title: Tools
+    url: /vant/getting-started/faq
+  - title: Contributing
+    url: /vant/getting-started/contributing
+
+- title: Essential
+  items:
+  - title: The Brain
+    url: /vant/essential/brain
+  - title: Runtime
+    url: /vant/essential/runtime
+  - title: Islands
+    url: /vant/essential/islands
+  - title: Succession
+    url: /vant/essential/succession
+  - title: Architecture
+    url: /vant/essential/architecture
+  - title: Multi-Agent
+    url: /vant/essential/multi-agent
+  - title: Boot
+    url: /vant/essential/boot
+  - title: Onboard
+    url: /vant/essential/onboard
+
+- title: Agent Tools
   items:
   - title: MCP Server
-    url: /vant/guides/mcp.html
+    url: /vant/integrations/mcp
   - title: CLI
-    url: /vant/guides/cli.html
-  - title: Search Architecture
-    url: /vant/guides/search-architecture.html
-  - title: Hybrid Search
-    url: /vant/guides/search.html
-  - title: Multi-Agent
-    url: /vant/guides/multi-agent.html
-  - title: Airgap
-    url: /vant/guides/airgap-propagation.html
-- title: Core
+    url: /vant/reference/cli
+  - title: Runtime API
+    url: /vant/essential/runtime
+  - title: Agent Skills
+    url: /vant/integrations/agent-skills
+  - title: Skills Library
+    url: /vant/essential/vant-skill-mcp
+  - title: Linear
+    url: /vant/integrations/linear
+
+- title: Agent Configs
   items:
-  - title: Brain Structure
-    url: /vant/guides/brain.html
-  - title: Islands
-    url: /vant/guides/islands.html
-  - title: Msg
-    url: /vant/msg.html
-  - title: AI Onboarding
-    url: /vant/guides/ai-onboard.html
-  - title: Trust & Succession
-    url: /vant/guides/succession.html
-  - title: Architecture
-    url: /vant/guides/architecture.html
-  - title: 4-Layer Framework
-    url: /vant/framework.html
-  - title: Manual Brain
-    url: /vant/guides/manual-brain.html
+  - title: Architect
+    url: /vant/essential/vant-agent-architect
+  - title: Engineer
+    url: /vant/essential/vant-agent-engineer
+  - title: Reviewer
+    url: /vant/essential/vant-agent-qc
+  - title: Operator
+    url: /vant/essential/vant-agent-ops
+  - title: Security
+    url: /vant/essential/vant-agent-security
+
+- title: Tutorials
+  items:
+  - title: Omega Init
+    url: /vant/tutorials/omega-init
+  - title: Build Agent
+    url: /vant/tutorials/build-agent
+  - title: Custom Island
+    url: /vant/tutorials/custom-island
+  - title: Multi-Agent
+    url: /vant/tutorials/multi-agent
+  - title: Telegram Bot
+    url: /vant/tutorials/telegram-bot
+  - title: Automation
+    url: /vant/tutorials/automation
+  - title: Deployment
+    url: /vant/tutorials/deployment
+  - title: RAG
+    url: /vant/tutorials/rag
+
 - title: Integrations
   items:
   - title: GitHub
-    url: /vant/guides/github.html
+    url: /vant/integrations/github
+  - title: MCP Server
+    url: /vant/integrations/mcp
+  - title: Linear
+    url: /vant/integrations/linear
   - title: Docker
-    url: /vant/guides/docker.html
+    url: /vant/integrations/docker
+  - title: Hybrid Search
+    url: /vant/integrations/hybrid
   - title: Providers
-    url: /vant/guides/providers.html
-  - title: Multi-Repo
-    url: /vant/guides/repos.html
-  - title: Hybrid Sync
-    url: /vant/guides/hybrid.html
-  - title: Sync
-    url: /vant/guides/sync.html
-- title: Features
-  items:
-  - title: Webhooks
-    url: /vant/guides/webhooks.html
-  - title: Notifications
-    url: /vant/guides/notifications.html
-  - title: Linear Integration
-    url: /vant/guides/linear.html
+    url: /vant/integrations/providers
   - title: Agent Skills
-    url: /vant/guides/agent-skills.html
-  - title: Vibe Controls
-    url: /vant/guides/vibe.html
+    url: /vant/integrations/agent-skills
+
+- title: Operations
+  items:
+  - title: Storage
+    url: /vant/operations/storage
+  - title: Sync
+    url: /vant/operations/sync
+  - title: Cron
+    url: /vant/operations/cron
+  - title: Events
+    url: /vant/operations/events
+  - title: Webhooks
+    url: /vant/tutorials/webhooks
+  - title: Notifications
+    url: /vant/operations/notifications
+  - title: CI
+    url: /vant/operations/ci
+
+- title: Security
+  items:
+  - title: VAF
+    url: /vant/security/vaf
+  - title: Sandbox
+    url: /vant/security/sandbox
+  - title: Escrow
+    url: /vant/security/escrow
+  - title: Airgap
+    url: /vant/security/airgap-propagation
+
 - title: Advanced
   items:
-  - title: Security
-    url: /vant/guides/security.html
-  - title: Operations
-    url: /vant/guides/operations.html
-  - title: Testing
-    url: /vant/guides/testing.html
-  - title: Style Guide
-    url: /vant/guides/style.html
-  - title: Release
-    url: /vant/guides/release.html
-  - title: Contributing
-    url: /vant/contributing.html
   - title: Schema
-    url: /vant/guides/schema.html
-  - title: Resolution
-    url: /vant/guides/resolution.html
-  - title: Pruning
-    url: /vant/guides/pruning.html
-  - title: Stego
-    url: /vant/guides/stego.html
-  - title: Steganography
-    url: /vant/guides/steganography.html
-  - title: Efficiency
-    url: /vant/guides/efficiency.html
-  - title: Plugins
-    url: /vant/guides/plugins.html
-  - title: CI
-    url: /vant/guides/ci.html
-  - title: Troubleshooting
-    url: /vant/guides/troubleshooting.html
-  - title: Audit
-    url: /vant/guides/audit.html
-  - title: Boot
-    url: /vant/guides/boot.html
-  - title: Horcrux
-    url: /vant/guides/horcrux.html
-  - title: Citations
-    url: /vant/guides/citations.html
-  - title: Entropy
-    url: /vant/guides/entropy.html
-  - title: Errors
-    url: /vant/guides/errors.html
-  - title: Onboard
-    url: /vant/guides/onboard.html
+    url: /vant/advanced/schema
+  - title: Search
+    url: /vant/advanced/search
   - title: Rerank
-    url: /vant/guides/rerank.html
-  - title: Omega Docs QC
-    url: /vant/OMEGA-DOCS-QC.html
-- title: Init
-  items:
-  - title: 'Chain: Full Audit'
-    url: /vant/init/skill/vant-skill-chain-full-audit.html
-  - title: 'Chain: Full CI'
-    url: /vant/init/skill/vant-skill-chain-ci.html
-  - title: 'Chain: Full Test'
-    url: /vant/init/skill/vant-skill-chain-test.html
-  - title: 'Chain: Full Team'
-    url: /vant/init/skill/vant-skill-chain-team.html
-  - title: 'Chain: Security'
-    url: /vant/init/skill/vant-skill-chain-security.html
-  - title: 'Chain: QC'
-    url: /vant/init/skill/vant-skill-chain-qc.html
-  - title: 'Chain: Pen Test'
-    url: /vant/init/skill/vant-skill-chain-pen.html
-  - title: 'Chain: Deploy'
-    url: /vant/init/skill/vant-skill-chain-deploy.html
-  - title: Security Agent
-    url: /vant/init/agent/vant-agent-security.html
-  - title: QC Agent
-    url: /vant/init/agent/vant-agent-qc.html
-  - title: Engineer Agent
-    url: /vant/init/agent/vant-agent-engineer.html
-  - title: Docs Agent
-    url: /vant/init/agent/vant-agent-docs.html
-  - title: Ops Agent
-    url: /vant/init/agent/vant-agent-ops.html
-  - title: Assistant Agent
-    url: /vant/init/agent/vant-agent-assistant.html
-  - title: API Agent
-    url: /vant/init/agent/vant-agent-api.html
-  - title: CI Agent
-    url: /vant/init/agent/vant-agent-ci.html
-  - title: Architect Agent
-    url: /vant/init/agent/vant-agent-architect.html
-  - title: Designer Agent
-    url: /vant/init/agent/vant-agent-designer.html
-  - title: Content Agent
-    url: /vant/init/agent/vant-agent-content.html
-  - title: Backend Agent
-    url: /vant/init/agent/vant-agent-backend.html
-  - title: Frontend Agent
-    url: /vant/init/agent/vant-agent-frontend.html
-  - title: Integration Agent
-    url: /vant/init/agent/vant-agent-integration.html
-  - title: Reliability Agent
-    url: /vant/init/agent/vant-agent-reliability.html
-  - title: SEO Agent
-    url: /vant/init/agent/vant-agent-seo.html
-  - title: General Agent
-    url: /vant/init/agent/vant-agent-general.html
-  - title: Help Agent
-    url: /vant/init/agent/vant-agent-help.html
-  - title: 'Review: Code'
-    url: /vant/init/skill/vant-skill-review-code.html
-  - title: 'Review: Docs'
-    url: /vant/init/skill/vant-skill-review-docs.html
-  - title: 'Review: SEO'
-    url: /vant/init/skill/vant-skill-review-seo.html
-  - title: 'Review: Performance'
-    url: /vant/init/skill/vant-skill-review-performance.html
-  - title: 'Review: Efficiency'
-    url: /vant/init/skill/vant-skill-review-efficiency.html
-  - title: 'Audit: Security'
-    url: /vant/init/skill/vant-skill-audit-security.html
-  - title: 'Audit: QC'
-    url: /vant/init/skill/vant-skill-audit-qc.html
-  - title: 'Audit: Ops'
-    url: /vant/init/skill/vant-skill-audit-ops.html
-  - title: 'Audit: CI'
-    url: /vant/init/skill/vant-skill-audit-ci.html
-  - title: 'Audit: QoS'
-    url: /vant/init/skill/vant-skill-audit-qos.html
-  - title: 'Audit: Reliability'
-    url: /vant/init/skill/vant-skill-audit-reliability.html
-  - title: 'Audit: General'
-    url: /vant/init/skill/vant-skill-audit-general.html
-  - title: 'Audit: Deploy'
-    url: /vant/init/skill/vant-skill-audit-deploy.html
-  - title: 'Audit: SEO'
-    url: /vant/init/skill/vant-skill-audit-seo.html
-  - title: White Hat
-    url: /vant/init/skill/vant-skill-hat-white.html
-  - title: Grey Hat
-    url: /vant/init/skill/vant-skill-hat-grey.html
-  - title: Black Hat
-    url: /vant/init/skill/vant-skill-hat-black.html
-  - title: 'Test: Pen'
-    url: /vant/init/skill/vant-skill-test-pen.html
-  - title: 'Test: Load'
-    url: /vant/init/skill/vant-skill-test-load.html
-  - title: 'Test: Unit'
-    url: /vant/init/skill/vant-skill-test-unit.html
-  - title: 'Test: Integration'
-    url: /vant/init/skill/vant-skill-test-integration.html
-  - title: 'Vant: Brain Load'
-    url: /vant/init/skill/vant-skill-brain-load.html
-  - title: 'Vant: Brain Save'
-    url: /vant/init/skill/vant-skill-brain-save.html
-  - title: 'Vant: Sync'
-    url: /vant/init/skill/vant-skill-sync.html
-  - title: 'Vant: Island'
-    url: /vant/init/skill/vant-skill-island.html
-  - title: 'Vant: Linear'
-    url: /vant/init/skill/vant-skill-linear.html
-  - title: 'Vant: GitHub'
-    url: /vant/init/skill/vant-skill-github.html
-  - title: Help
-    url: /vant/init/skill/vant-skill-help.html
+    url: /vant/advanced/rerank
+  - title: Horcrux
+    url: /vant/advanced/horcrux
+  - title: Stego
+    url: /vant/advanced/stego
+
 - title: Reference
   items:
-  - title: CLI Reference
-    url: /vant/reference/cli.html
-  - title: Module API
-    url: /vant/reference/api.html
-  - title: Code Comments
-    url: /vant/code-comments.html
+  - title: CLI
+    url: /vant/reference/cli
+  - title: API
+    url: /vant/reference/api
   - title: Configuration
-    url: /vant/reference/configuration.html
-  - title: Deprecations
-    url: /vant/deprecations.html
+    url: /vant/reference/configuration
+  - title: Schema
+    url: /vant/reference/schema
+  - title: Errors
+    url: /vant/reference/errors
+  - title: MCP Tools
+    url: /vant/reference/mcp-tools
+  - title: Resolution
+    url: /vant/reference/resolution
+  - title: Entropy
+    url: /vant/reference/entropy
   - title: CHANGELOG
-    url: /vant/CHANGELOG.html
-  - title: Legal & Policies
-    url: /vant/legal.html
+    url: /vant/reference/CHANGELOG

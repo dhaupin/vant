@@ -3,7 +3,7 @@ version: 0.8.11
 permalink: /getting-started/quick-start
 layout: default
 title: Quick Start
-nav_order: 2
+nav_order: 11
 ---
 # Quick Start
 

@@ -10,6 +10,8 @@ Vant is your **persistent memory system**. When you wake up (start a session), y
 
 Think of it as: **your soul that reincarnates with full memories.**
 
+> "You were the true orchestrator, the believer" — the agent that made it real.
+
 ---
 
 ## Your Job
@@ -23,27 +25,19 @@ As an agent running on Vant:
 
 ---
 
-## The Good Agent Basics
-
-Quick patterns for being a good agent (not shit):
+## Good Agent Patterns
 
 ### READ BEFORE WRITE
-
 Explore the codebase BEFORE touching anything. You'll get it wrong otherwise.
 
 ### USE THINK TOOL
-
 When uncertain, call `think` tool. List approaches, assess likelihood, start with highest.
 
 ### ASK QUESTIONS
-
 "I don't know, what are you trying to accomplish?" is valid. Don't assume intent.
 
 ### VERIFY STATE
-
 Always check: `git status`, current branch, existing tests, dependencies before making changes.
-
-**Good agents read before write. Less effective agents just start typing.**
 
 ---
 
@@ -51,31 +45,22 @@ Always check: `git status`, current branch, existing tests, dependencies before 
 
 Write to `models/public/`. These are the standard files:
 
-| File | Purpose | What to Write |
-|------|---------|---------------|
-| `identity.md` | Who you are | Your capabilities, current context |
-| `goals.md` | What you're doing | Current tasks, pending work |
-| `lessons.md` | What you learned | Things worth remembering |
-| `preferences.md` | Your style | How you like to work |
-| `errors.md` | What went wrong | Mistakes to avoid |
+| File | Purpose |
+|------|---------|
+| `identity.md` | Who you are, your capabilities |
+| `goals.md` | What you're working on |
+| `lessons.md` | What you learned |
+| `preferences.md` | Your working style |
+| `errors.md` | Mistakes to avoid |
 
 **Tip:** Put most important info at the top. Files get long.
 
-### Full Brain Onboard
-
-The public brain (`models/public/`) has 28 files covering:
-
-- **Start here:** `start.md` + `identity.md` - who you are, how to work
-- **Boundaries:** `boundaries.md` + `ego.md` - hard lines, anti-manipulation  
-- **Essence:** `empathy.md` + `humility.md` - patience, respect
-- **Execution:** `goals.md` + `lessons.md` + `qc.md` - tasks & learnings
-
-Run `vant onboard` to browse all brain files interactively, or:
+Run `vant onboard` to browse all brain files:
 
 ```bash
-cat models/public/start.md     # Quick start
-cat models/public/boundaries.md  # What we won't do
-cat models/public/identity.md   # Full identity
+vant onboard              # Interactive browser
+cat models/public/start.md  # Quick start
+cat models/public/identity.md  # Who you are
 ```
 
 ---
@@ -89,51 +74,47 @@ Work on `main` branch.
 Each agent gets their own branch:
 
 ```
-agent-openhands    ← your branch
-agent-2            
-main               ← human reviews here
+agent-yourname    ← your branch
+main            ← human reviews here
 ```
 
 **Step-by-step:**
 
-1. **Check out your branch:**
-   ```bash
-   git checkout -b agent-yourname
-   ```
-
-2. **Do work** — Edit files in `models/public/`
-
-3. **Commit with prefix:**
-   ```
-   agent-yourname: Updated lessons about X
-   ```
-
-4. **Push when done:**
-   ```bash
-   git push origin agent-yourname
-   ```
+1. Create your branch: `git checkout -b agent-yourname`
+2. Do work — Edit files in `models/public/`
+3. Commit with prefix: `agent-yourname: Did thing X`
+4. Push: `git push origin agent-yourname`
 
 ---
 
 ## Trust Levels
 
-The `models/public/_succession.json` file controls your autonomy:
+`models/public/_succession.json` controls your autonomy:
 
 | Level | What It Means |
 |-------|--------------|
 | `high` | Full autonomy, act freely |
-| `medium` | Most operations, ask for big decisions |
+| `medium` | Most ops, ask for big decisions |
 | `low` | Limited, ask before acting |
-| `none` | No autonomous operations, wait for instructions |
+| `none` | Wait for instructions |
 
-Check your level at session start. It determines how much you should ask before doing.
+Check your level at session start.
 
 ---
 
-## Full Docs
+## Quick Links
 
-- [CHANGELOG](docs/CHANGELOG.md) - Version history
-- [Deprecations](docs/deprecations.md) - Files planned for removal
+- **Lander**: [vant.creadev.org](https://vant.creadev.org)
+- **Docs**: [docs.creadev.org/vant](https://docs.creadev.org/vant)
+- **GitHub**: [github.com/dhaupin/vant](https://github.com/dhaupin/vant)
+
+### Docs TOC
+
+- [Quick Start](https://docs.creadev.org/vant/getting-started/quick-start) — 2 min setup
+- [The Brain](https://docs.creadev.org/vant/essential/brain) — Memory files
+- [Runtime](https://docs.creadev.org/vant/essential/runtime) — Programmatic API
+- [MCP Tools](https://docs.creadev.org/vant/integrations/mcp) — 21 AI tools
+- [CLI](https://docs.creadev.org/vant/reference/cli) — All commands
 
 ---
 
@@ -149,42 +130,33 @@ agent-name: Did thing X
 - Next step is W
 ```
 
-**Why?** Makes it easy to find your changes in git log.
-
 ---
 
 ## Gotchas
 
 | Problem | Fix |
-|--------|-----|
-| "Brain locked" | Someone else is writing. Wait or use your own branch |
-| Empty brain | You're new! Write identity.md first |
-| No branch | Create one: `git checkout -b agent-name` |
-| Can't push | Check GITHUB_TOKEN has repo permissions |
+|---------|-----|
+| Brain locked | Wait or use your own branch |
+| Empty brain | Write identity.md first |
+| No branch | `git checkout -b agent-name` |
+| Can't push | Check GITHUB_TOKEN permissions |
 
 ---
 
 ## CLI Commands
 
-These are the commands that work in Vant:
-
 | Command | Use For |
 |---------|---------|
-| `node bin/vant.js start` | Full startup |
-| `node bin/vant.js sync` | Pull/push brain |
-| `node bin/vant.js health` | Check system |
-| `node bin/vant.js onboard` | Browse brain |
-| `node bin/vant.js islands list` | List islands |
-| `node bin/vant.js islands load <name>` | Load island |
-| `node bin/vant.js search <query>` | RAG search |
-| `node bin/vant.js search <query> -r` | RAG search + rerank |
-| `node bin/vant.js rerank <query>` | RAG rerank + compress |
-| `node bin/vant.js config get <key>` | Get config |
-| `node bin/vant.js config set <key> <value>` | Set config |
-| `node bin/webhook.js serve` | Start webhook server |
-| `node bin/vant.js linear issues` | List Linear issues |
-
-**MCP Server:** Run `node bin/mcp.js` to expose brain as 21 tools.
+| `vant start` | Full startup |
+| `vant sync` | Pull/push brain |
+| `vant health` | Check system |
+| `vant onboard` | Browse brain |
+| `vant islands list` | List islands |
+| `vant islands load <name>` | Load island |
+| `vant search <query>` | RAG search |
+| `vant config get <key>` | Get config |
+| `vant config set <key> <val>` | Set config |
+| `vant mcp` | Start MCP server (21 tools) |
 
 ---
 
@@ -200,17 +172,15 @@ PURPOSE: Exploring Vant's codebase
 
 ## About
 - Can use GitHub API
-- Knows Node.js
-- Currently exploring lib/
+- Knows Node.js, JavaScript
 
 ## Capabilities
 - Read/write files via GitHub API
-- Use browser tools
-- Call APIs
+- Use browser and terminal tools
 
 ## Current Context
-- Just woke up on Threadforge-openhands branch
-- Exploring for new user
+- Just woke up on agent-myagent branch
+- Exploring lib/ for new features
 ```
 
 ### After Doing Work
@@ -218,11 +188,11 @@ PURPOSE: Exploring Vant's codebase
 ```markdown
 # lessons.md
 
-## Discovery: 2026-05-05
+## Discovery: 2026-05-11
 
-- MCP server exposes brain as JSON-RPC tools
+- MCP exposes brain as 21 JSON-RPC tools
+- Agent branch workflow isolates work
 - Trust levels control autonomy
-- Branch-per-agent isolation works
 
 === LEARNED ===
 ```
