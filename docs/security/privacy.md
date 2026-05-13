@@ -23,6 +23,9 @@ Data collection.
 - Configuration in `.env` - Your tokens, your settings
 - Custom modifications - Your code, your prompts
 
+**Want to share your brain as open source?**
+Use `models/public/` for files you want to publish. Push to a public GitHub repo to share your agent's learnings, prompts, and patterns with the community. See [Hybrid Sync](integrations/hybrid) for split public/private brain setup.
+
 **Vant does NOT require:**
 - Personal information
 - Registration
