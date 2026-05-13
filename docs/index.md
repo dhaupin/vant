@@ -17,7 +17,7 @@ Vant persists across sessions through GitHub-based brain transfer. Each generati
 
 ## Quick Links
 
-- [Quickstart](/guides/quick-start) - 5 minute setup
+- [Quickstart](getting-started/quick-start) - 5 minute setup
 - [Build Your First Agent](tutorials/build-agent) - 15 min tutorial
 - [Examples](examples) - What others are building
 - [FAQ](faq) - Common questions
@@ -31,25 +31,25 @@ Click any feature to learn more:
 | Feature | Description | Docs |
 |--------|-------------|------|
 | **Persistent Memory** | GitHub-based brain storage with version control | [Brain](essential/brain.md) |
-| **Storage Layer** | Brain storage abstraction | [Storage](guides/storage) |
+| **Storage Layer** | Brain storage abstraction | [Storage](operations/storage) |
 | **Islands** | Componentized brain - lazy-loadable islands | [Islands](essential/islands.md) |
-| **Runtime API** | Programmatic agent API | [Runtime](guides/runtime) |
-| **Sandbox** | Execution isolation + capabilities | [Sandbox](guides/sandbox) |
-| **Multi-Agent** | Branch + lock system for safe collaboration | [Multi-Agent](guides/multi-agent) |
-| **MCP Server** | Model Context Protocol for AI integration | [MCP](guides/mcp) |
-| **QoS** | Rate limiting, bulkhead, circuit breaker | [QoS](guides/qos) |
+| **Runtime API** | Programmatic agent API | [Runtime](essential/runtime) |
+| **Sandbox** | Execution isolation + capabilities | [Sandbox](security/sandbox) |
+| **Multi-Agent** | Branch + lock system for safe collaboration | [Multi-Agent](essential/multi-agent) |
+| **MCP Server** | Model Context Protocol for AI integration | [MCP](integrations/mcp) |
+| **QoS** | Rate limiting, bulkhead, circuit breaker | [QoS](operations/qos) |
 | **Events** | Event system + pub/sub + jobs | [Events](advanced/event.md) |
-| **Escrow** | Budget tracking + approvals | [Escrow](guides/escrow) |
-| **Steganography** | Hidden messages in PNG images | [Stego](guides/stego) |
-| **Hybrid Search** | BM25 + Vector with RRF re-ranking | [Search](guides/search) |
-| **Vibe Controls** | Dynamic mood system | [Vibe](guides/vibe) |
-| **Network** | HTTP with retry + circuit breaker | [Network](guides/network) |
-| **VAF** | Input validation firewall | [VAF](guides/vaf) |
-| **Multi-Repo** | Mount external repos like drives | [Repos](guides/repos) |
+| **Escrow** | Budget tracking + approvals | [Escrow](security/escrow) |
+| **Steganography** | Hidden messages in PNG images | [Stego](advanced/stego) |
+| **Hybrid Search** | BM25 + Vector with RRF re-ranking | [Search](advanced/search.md) |
+| **Vibe Controls** | Dynamic mood system | [Vibe](advanced/vibe) |
+| **Network** | HTTP with retry + circuit breaker | [Network](operations/network) |
+| **VAF** | Input validation firewall | [VAF](security/vaf) |
+| **Multi-Repo** | Mount external repos like drives | [Repos](integrations/repos) |
 | **Hybrid Sync** | Public/Private brain split | [Hybrid](advanced/search.md) |
-| **Telegram Bot** | Control Vant via chat | [Telegram](guides/telegram) |
+| **Telegram Bot** | Control Vant via chat | [Telegram](tutorials/telegram-bot) |
 | **Cron** | Scheduled jobs | [Cron](operations/cron.md) |
-| **Schema** | JSON schema validation | [Schema](guides/schema) |
+| **Schema** | JSON schema validation | [Schema](reference/schema) |
 | **Audit** | Compliance logging + ledger | [Audit](advanced/audit.md) |
 
 ---
@@ -92,7 +92,7 @@ Yes, use a private GitHub repo. Vant is just you + GitHub.
 
 ### Can multiple AI agents share one brain?
 
-Yes! Use the [Multi-Agent](guides/multi-agent) system with branches + locks.
+Yes! Use the [Multi-Agent](essential/multi-agent) system with branches + locks.
 
 ### How is this different from vector databases?
 

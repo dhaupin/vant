@@ -300,4 +300,4 @@ export default function App() {
 
 ---
 
-See also: [REST API](reference/rest-api), [MCP Guide](guides/mcp), [Schema](reference/schema)
+See also: [REST API](reference/rest-api), [MCP Guide](integrations/mcp), [Schema](reference/schema)

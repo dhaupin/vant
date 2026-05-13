@@ -305,4 +305,4 @@ io.on('error', (error) => {
 
 ---
 
-See also: [MCP Guide](guides/mcp), [CLI Reference](reference/cli)
+See also: [MCP Guide](integrations/mcp), [CLI Reference](reference/cli)

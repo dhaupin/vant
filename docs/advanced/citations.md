@@ -35,7 +35,7 @@ Vant can track what sources informed agent answers. Each citation links to a Git
 ```
 📋 Citations:
 - a1b2c3d: brain/identity.md
-- e5f6g7h: docs/guides/audit.md
+- e5f6g7h: docs/advanced/audit.md
 ```
 
 ---

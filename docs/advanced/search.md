@@ -169,7 +169,7 @@ Rerank is separate from search - focuses on **keyword scoring** and **token opti
 - **Compress**: Strip markdown fluff, truncate to token budget
 - **Pipeline**: Rerank + compress in sequence
 
-See [Rerank Guide](guides/rerank) for full documentation.
+See [Rerank Guide](advanced/rerank) for full documentation.
 
 ```bash
 vant rerank "lessons learned"          # Rerank
