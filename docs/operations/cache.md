@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /cache.md/cache
+permalink: /operations/cache
 layout: default
 title: Cache
 nav_order: 40

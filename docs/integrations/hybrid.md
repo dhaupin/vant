@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /hybrid.md/hybrid
+permalink: /integrations/hybrid
 layout: default
 title: Hybrid Sync
 nav_order: 34

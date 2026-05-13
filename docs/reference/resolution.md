@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /resolution.md/resolution
+permalink: /reference/resolution
 layout: default
 title: Resolution
 nav_order: 89

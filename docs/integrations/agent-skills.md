@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /agent-skills.md/agent-skills
+permalink: /integrations/agent-skills
 layout: default
 title: Agent Skills
 nav_order: 30

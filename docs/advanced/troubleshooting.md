@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /troubleshooting.md/troubleshooting
+permalink: /advanced/troubleshooting
 layout: default
 title: Troubleshooting
 nav_order: 77

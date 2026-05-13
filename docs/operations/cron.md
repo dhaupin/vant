@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /cron.md/cron
+permalink: /operations/cron
 layout: default
 title: Cron
 nav_order: 42

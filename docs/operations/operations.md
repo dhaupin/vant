@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /operations.md/operations
+permalink: /operations/operations
 layout: default
 title: Operations
 nav_order: 46

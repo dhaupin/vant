@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /pruning.md/pruning
+permalink: /advanced/pruning
 layout: default
 title: Automated Brain Pruning
 nav_order: 67

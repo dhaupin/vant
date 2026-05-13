@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /audit.md/audit
+permalink: /advanced/audit
 layout: default
 title: Audit & Compliance
 nav_order: 60

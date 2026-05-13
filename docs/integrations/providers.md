@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /providers.md/providers
+permalink: /integrations/providers
 layout: default
 title: Multi-Git Provider Support
 nav_order: 37

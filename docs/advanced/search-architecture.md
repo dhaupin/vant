@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /search-architecture.md/search-architecture
+permalink: /advanced/search-architecture
 layout: default
 title: Search Architecture
 nav_order: 70

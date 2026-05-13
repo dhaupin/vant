@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /style.md/style
+permalink: /advanced/style
 layout: default
 title: Voice & Style
 nav_order: 75

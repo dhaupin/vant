@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /docker.md/docker
+permalink: /integrations/docker
 layout: default
 title: Docker
 nav_order: 32

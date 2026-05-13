@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /vibe.md/vibe
+permalink: /advanced/vibe
 layout: default
 title: Vibe Controls
 nav_order: 78
@@ -185,6 +185,6 @@ vibe.configure({
 
 ## Related
 
-- [Islands](essential/islands.md) - Componentized brain
+- [Islands](essential/islands) - Componentized brain
 - [Schema](reference/schema) - JSON validation
 - [Testing](tutorials/testing) - Quality assurance

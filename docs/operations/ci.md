@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /ci.md/ci
+permalink: /operations/ci
 layout: default
 title: CI
 nav_order: 41

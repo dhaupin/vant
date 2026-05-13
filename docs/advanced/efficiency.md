@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /efficiency.md/efficiency
+permalink: /advanced/efficiency
 layout: default
 title: Efficiency
 nav_order: 62

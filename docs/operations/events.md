@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /events.md/events
+permalink: /operations/events
 layout: default
 title: Events
 nav_order: 43

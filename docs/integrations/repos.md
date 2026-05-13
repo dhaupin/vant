@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /repos.md/repos
+permalink: /integrations/repos
 layout: default
 title: Multi-Repo Skills
 nav_order: 38

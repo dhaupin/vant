@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /rerank.md/rerank
+permalink: /advanced/rerank
 layout: default
 title: Rerank (RAG)
 nav_order: 98

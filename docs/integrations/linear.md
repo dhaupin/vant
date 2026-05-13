@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /linear.md/linear
+permalink: /integrations/linear
 layout: default
 title: Linear Integration
 nav_order: 35

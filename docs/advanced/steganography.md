@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /steganography.md/steganography
+permalink: /advanced/steganography
 layout: default
 title: Steganography
 nav_order: 73

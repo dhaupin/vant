@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /notifications.md/notifications
+permalink: /operations/notifications
 layout: default
 title: Notifications
 nav_order: 45

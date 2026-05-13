@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /sandbox.md/sandbox
+permalink: /security/sandbox
 layout: default
 title: Sandbox
 nav_order: 52

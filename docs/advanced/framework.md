@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /framework.md/framework
+permalink: /advanced/framework
 layout: default
 title: Framework
 nav_order: 63

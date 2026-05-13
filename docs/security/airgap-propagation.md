@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /airgap-propagation.md/airgap-propagation
+permalink: /security/airgap-propagation
 layout: default
 title: Airgap Propagation
 nav_order: 50

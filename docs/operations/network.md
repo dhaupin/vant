@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /network.md/network
+permalink: /operations/network
 layout: default
 title: Network
 nav_order: 44

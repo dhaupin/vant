@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /schema.md/schema
+permalink: /advanced/schema
 layout: default
 title: Schema Validation
 nav_order: 69

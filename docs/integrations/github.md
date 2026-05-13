@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /github.md/github
+permalink: /integrations/github
 layout: default
 title: GitHub Integration
 nav_order: 33

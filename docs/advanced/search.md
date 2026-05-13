@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /search.md/search
+permalink: /advanced/search
 layout: default
 title: Hybrid Search
 nav_order: 71
@@ -431,7 +431,7 @@ RAG response includes current settings:
 
 ## Future: Islands + vpatch
 
-Combining with [Islands](essential/islands.md) architecture:
+Combining with [Islands](essential/islands) architecture:
 
 - **Islands**: Componentized brain (lazy-load on trigger)
 - **vpatch**: Compact diff format vs full file
@@ -442,13 +442,13 @@ Potential workflow:
 2. Return compressed vpatch diffs → smaller context
 3. Result: Faster RAG with lower tokens
 
-See: [Islands](essential/islands.md) for architecture.
+See: [Islands](essential/islands) for architecture.
 
 ---
 
 ## Related
 
-- [Islands](essential/islands.md) - Componentized brain
-- [Audit](advanced/audit.md) - Activity logging
+- [Islands](essential/islands) - Componentized brain
+- [Audit](advanced/audit) - Activity logging
 - [Citations]/advanced/citations - Git-backed citations
 - [Hybrid Sync](integrations/hybrid) - Public/Private split

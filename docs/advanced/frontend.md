@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /frontend.md/frontend
+permalink: /advanced/frontend
 layout: default
 title: Frontend Integration
 nav_order: 64

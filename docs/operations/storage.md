@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /storage.md/storage
+permalink: /operations/storage
 layout: default
 title: Storage Layer
 nav_order: 48
@@ -134,7 +134,7 @@ const manifest = islands.getManifest();
 const data = islands.get('github');
 ```
 
-See [Islands](essential/islands.md) for details.
+See [Islands](essential/islands) for details.
 
 ## Vector Store
 
@@ -182,6 +182,6 @@ const storage = new Storage({
 ## See Also
 
 - [Brain](essential/brain) - Brain file structure
-- [Islands](essential/islands.md) - Lazy brain components
+- [Islands](essential/islands) - Lazy brain components
 - [Search](advanced/search) - Hybrid search
 - [Providers](integrations/providers) - GitHub, GitLab, etc
