@@ -165,4 +165,4 @@ If no provider token is configured |
 ## Related
 
 - [GitHub](integrations/github) - GitHub provider
-- [Sync]/operations/sync - Sync operations
+- [Sync](operations/sync) - Sync operations

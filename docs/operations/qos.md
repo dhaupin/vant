@@ -285,12 +285,12 @@ const s = sandbox.create({
 });
 ```
 
-See [Sandbox]/security/sandbox for details.
+See [Sandbox](security/sandbox) for details.
 
 ---
 
 ## See Also
 
-- [Sandbox]/security/sandbox - Execution isolation
+- [Sandbox](security/sandbox) - Execution isolation
 - [Security](security) - VAF and encryption
 - [Network](server) - HTTP server with QoS

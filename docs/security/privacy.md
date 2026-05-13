@@ -272,4 +272,4 @@ If you have concerns:
 
 - [GitHub Privacy](https://docs.github.com/en/github/site-policy/github-privacy-statement) - GitHub's policy
 - [Terms](reference/index) - Our legal terms
-- [Security]/tutorials/security - Security practices
+- [Security](security/security) - Security practices

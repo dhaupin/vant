@@ -450,5 +450,5 @@ See: [Islands](essential/islands) for architecture.
 
 - [Islands](essential/islands) - Componentized brain
 - [Audit](advanced/audit) - Activity logging
-- [Citations]/advanced/citations - Git-backed citations
+- [Citations](advanced/citations) - Git-backed citations
 - [Hybrid Sync](integrations/hybrid) - Public/Private split

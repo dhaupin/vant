@@ -89,6 +89,6 @@ Agent states:
 
 ## See Also
 
-- [Runtime]/essential/runtime - Runtime API
-- [Multi-Agent]/tutorials/multi-agent - Multi-agent workflows
-- [Lock]/tutorials/multi-agent - Coordination
+- [Runtime](essential/runtime) - Runtime API
+- [Multi-Agent](essential/multi-agent) - Multi-agent workflows
+- [Lock](essential/lock) - Coordination

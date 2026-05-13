@@ -58,7 +58,7 @@ Vant is designed to be lightweight and efficient. This guide covers optimization
 
 ## Related
 
-- [Operations]/operations/operations - CLI commands
+- [Operations](operations/operations) - CLI commands
 - [Configuration](reference/configuration) - Config options
 - [Architecture](essential/architecture) - System design
 - [Testing](tutorials/testing) - Quality assurance

@@ -162,6 +162,6 @@ See [Security](security) for details.
 
 ## See Also
 
-- [Sandbox]/security/sandbox - Execution isolation
+- [Sandbox](security/sandbox) - Execution isolation
 - [Server](server) - HTTP server
 - [Security](security) - VAF and encryption

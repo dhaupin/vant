@@ -17,8 +17,8 @@ nav_order: 93
 Vant is open source software provided without warranty. By using it, you accept all risks and responsibilities.
 
 **Quick links:**
-- [Disclaimer & Terms]/security/environment - Full legal disclaimer
-- [Privacy Policy]/security/privacy - What we collect
+- [Disclaimer & Terms](security/environment) - Full legal disclaimer
+- [Privacy Policy](security/privacy) - What we collect
 - [Environment & Limits](legal/environment) - GitHub, API, system
 
 ---
@@ -27,8 +27,8 @@ Vant is open source software provided without warranty. By using it, you accept 
 
 | Document | For |
 |----------|-----|
-| [Disclaimer]/security/environment | Lawyers, liability |
-| [Privacy]/security/privacy | Your data, GitHub |
+| [Disclaimer](security/environment) | Lawyers, liability |
+| [Privacy](security/privacy) | Your data, GitHub |
 | [Environment](legal/environment) | API limits, setup |
 
 ---
@@ -64,8 +64,8 @@ The essentials you need to know.
 
 Read these in order:
 
-1. **[Terms]/security/environment** - You accept all risks
-2. **[Privacy]/security/privacy** - Your data, your control
+1. **[Terms](security/environment)** - You accept all risks
+2. **[Privacy](security/privacy)** - Your data, your control
 3. **[Environment](legal/environment)** - GitHub limitations
 
 ---

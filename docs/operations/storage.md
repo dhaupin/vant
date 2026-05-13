@@ -160,7 +160,7 @@ const content = brain.get('learnings', 'lesson-1');
 // If !canRead, throws "Read permission required"
 ```
 
-See [Sandbox]/security/sandbox for details.
+See [Sandbox](security/sandbox) for details.
 
 ---
 

@@ -390,7 +390,7 @@ vant docs build --version # Specific version
 vant docs serve          # Local server
 ```
 
-See also: [Configuration](reference/configuration), [API]/reference/cli, [Entropy Patching]/reference/entropy
+See also: [Configuration](reference/configuration), [API](reference/cli), [Entropy Patching](reference/entropy)
 
 ## compress
 
@@ -429,7 +429,7 @@ vant compress models/public/goals.md -a -k 2.0
 vant compress models/latent/goals.vpatch --decompress
 ```
 
-See also: [Entropy Patching]/reference/entropy
+See also: [Entropy Patching](reference/entropy)
 
 ---
 

@@ -115,5 +115,5 @@ Session 1              Session 2
 ## Next Steps
 
 - [Multi-Agent Tutorial](tutorials/multi-agent) - Scale to multiple agents
-- [Succession System]/essential/succession - Version tracking
+- [Succession System](essential/succession) - Version tracking
 - [Architecture](essential/architecture.md) - Deep dive

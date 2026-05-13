@@ -823,6 +823,6 @@ For multi-line content, write directly to `models/public/` instead of via MCP.
 
 ## Related
 
-- [Security Guide]/tutorials/security - Input validation
-- [Multi-Agent]/tutorials/multi-agent - Branch workflow
+- [Security Guide](security/security) - Input validation
+- [Multi-Agent](essential/multi-agent) - Branch workflow
 - [CLI Reference](reference/cli) - All commands

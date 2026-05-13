@@ -81,7 +81,7 @@ Tokens encrypted per-user.
 ## Related
 
 - [VAF](security/vaf) - Input validation firewall
-- [Sandbox]/security/sandbox - Execution isolation
+- [Sandbox](security/sandbox) - Execution isolation
 - [Escrow](security/escrow) - Budget tracking
 
 - [Configuration](reference/configuration) - Config settings

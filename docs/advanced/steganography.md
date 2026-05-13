@@ -101,5 +101,5 @@ console.log('Max bytes:', maxBytes);
 
 ## Related
 
-- [Security]/tutorials/security - Security guide
+- [Security](security/security) - Security guide
 - [Horcrux](advanced/horcrux) - Distributed backup

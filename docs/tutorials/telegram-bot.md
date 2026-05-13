@@ -323,4 +323,4 @@ export TELEGRAM_TIMEOUT=30000
 
 - [MCP Server](integrations/mcp) - Expose tools via HTTP API
 - [Slack/Discord Integration](operations/events) - Team notifications
-- [Multi-Agent]/tutorials/multi-agent - Coordinate multiple agents
+- [Multi-Agent](essential/multi-agent) - Coordinate multiple agents

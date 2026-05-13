@@ -193,6 +193,6 @@ curl http://localhost:3456/health
 ## Related
 
 - [Deployment Tutorial](/tutorials/deployment)
-- [Server]/advanced/server - HTTP server
-- [Security]/tutorials/security - VAF + sandbox
+- [Server](advanced/server) - HTTP server
+- [Security](security/security) - VAF + sandbox
 ```

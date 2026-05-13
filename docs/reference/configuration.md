@@ -317,7 +317,7 @@ See these files in the repo for full examples:
 >
 > Self-hosted GitLab/Gitea is fine. Use `vant sync` for manual brain updates with GitHub.com. See [CLI Reference](reference/cli).
 
-See also: [CLI Commands](reference/cli), [Installation]/getting-started/install
+See also: [CLI Commands](reference/cli), [Installation](getting-started/install)
 ## Webhooks
 
 ```bash
