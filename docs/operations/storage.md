@@ -183,5 +183,5 @@ const storage = new Storage({
 
 - [Brain](brain) - Brain file structure
 - [Islands](essential/islands.md) - Lazy brain components
-- [Search](search) - Hybrid search
+- [Search](advanced/search) - Hybrid search
 - [Providers](providers) - GitHub, GitLab, etc

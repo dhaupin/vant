@@ -62,4 +62,4 @@ Vant is designed to be lightweight and efficient. This guide covers optimization
 - [Configuration](reference/configuration) - Config options
 - [Architecture](architecture) - System design
 - [Testing](testing) - Quality assurance
-- [Troubleshooting](troubleshooting) - Problem solving
+- [Troubleshooting](advanced/troubleshooting) - Problem solving

@@ -209,6 +209,6 @@ git push origin experiment-feature
 
 ## Related
 
-- [Troubleshooting](troubleshooting) - Problem solving
+- [Troubleshooting](advanced/troubleshooting) - Problem solving
 - [Multi-Agent]/tutorials/multi-agent - Branch workflow
 - [CLI Reference](reference/cli) - All commands
