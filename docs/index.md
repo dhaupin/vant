@@ -20,15 +20,15 @@ Vant persists through GitHub-based brain transfer. Agents inherit full context f
 - [Quickstart](getting-started/quick-start) - 5 minute setup
 - [Build Agent](tutorials/build-agent) - 15 min tutorial
 - [MCP Server](integrations/mcp) - Connect to any LLM
-- [Skills Library](skills/vant-skill-mcp) - 72 reusable tools
+- [Skills Library](essential/vant-skill-mcp) - 72 reusable tools
 
 ## Agent Templates
 
-- [Architect](agents/vant-agent-architect) - System design agent
-- [Engineer](agents/vant-agent-engineer) - Implementation agent
-- [Reviewer](agents/vant-agent-qc) - Code review agent
-- [Operator](agents/vant-agent-ops) - DevOps automation
-- [Security](agents/vant-agent-security) - Security audit
+- [Architect](essential/vant-agent-architect) - System design agent
+- [Engineer](essential/vant-agent-engineer) - Implementation agent
+- [Reviewer](essential/vant-agent-qc) - Code review agent
+- [Operator](essential/vant-agent-ops) - DevOps automation
+- [Security](essential/vant-agent-security) - Security audit
 
 ---
 
@@ -41,7 +41,7 @@ Vant persists through GitHub-based brain transfer. Agents inherit full context f
 | **Persistent Memory** | GitHub-based brain with version control | [Brain](essential/brain) |
 | **Islands** | Componentized brain - lazy-load on-demand | [Islands](essential/islands) |
 | **Multi-Agent** | Branch + lock for safe agent collaboration | [Multi-Agent](essential/multi-agent) |
-| **Skills Library** | 72 reusable agent tools | [Skills](skills/vant-skill-mcp) |
+| **Skills Library** | 72 reusable agent tools | [Skills](essential/vant-skill-mcp) |
 | **Storage Layer** | Brain storage abstraction | [Storage](operations/storage) |
 | **Sandbox** | Execution isolation + capabilities | [Sandbox](security/sandbox) |
 | **QoS** | Rate limiting, bulkhead, circuit breaker | [QoS](operations/qos) |
