@@ -69,7 +69,7 @@ async function runTests() {
     // Horcrux
     try {
         console.log('\n[Horcrux]');
-        const horcrux = require(path.join(DIR, 'lib/horcrux'));
+        const horcrux = require(path.join(DIR, 'lib/stego'));
         const m = horcrux.generateManifest({ provider: 'github' });
         assert(m.type === 'vant-horcrux');
         const bs = horcrux.createBootstrap(m, 'pass');
@@ -128,7 +128,7 @@ async function runTests() {
     // Providers
     try {
         console.log('\n[Providers]');
-        const { getAllProviders, getProvider } = require(path.join(DIR, 'lib/providers'));
+        const { getAllProviders, getProvider } = require(path.join(DIR, 'lib/remote'));
         const all = getAllProviders();
         assert(all.github);
         assert(all.gitlab);
