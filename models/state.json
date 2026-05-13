@@ -14,14 +14,12 @@
   "temp": {
     "debug": true
   },
-  "updated": "2026-05-13T20:36:05.307Z",
+  "updated": "2026-05-13T20:39:56.152Z",
   "neurons": {
     "synapses": {},
     "attention": {
-      "A0": 1,
-      "A1": 1,
-      "identity": 0.4,
-      "A2": 1
+      "Claude": 1,
+      "identity": 0.2
     }
   }
 }
