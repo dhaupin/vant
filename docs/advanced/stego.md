@@ -130,5 +130,5 @@ const brainData = stego.decodeBrainChunked(outputs);
 
 ## Related
 
-- [Steganography](steganography) - Detailed encoding
-- [Boot](boot) - Zero-config boot
+- [Steganography](advanced/steganography) - Detailed encoding
+- [Boot](essential/boot) - Zero-config boot

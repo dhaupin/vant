@@ -65,4 +65,4 @@ cache.clear();
 ## Related
 
 - [Storage]/operations/storage - Persistent storage
-- [Efficiency]/operations/efficiency - Performance tips
+- [Efficiency](advanced/efficiency) - Performance tips

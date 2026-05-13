@@ -152,4 +152,4 @@ When Linear island loaded:
 
 - [Islands]/essential/islands - Load on-demand
 - [MCP]/reference/mcp-tools - MCP server
-- [GitHub](providers) - GitHub integration
+- [GitHub](integrations/github) - GitHub integration

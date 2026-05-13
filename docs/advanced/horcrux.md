@@ -119,5 +119,5 @@ On boot:
 
 ## Related
 
-- [Stego](stego) - Image steganography
-- [Boot](boot) - Zero-config boot
+- [Stego](advanced/stego) - Image steganography
+- [Boot](essential/boot) - Zero-config boot

@@ -87,4 +87,4 @@ if (!result.valid) {
 ## Related
 
 - [Configuration](reference/configuration) - Config validation
-- [Vibe Controls](vibe) - Dynamic settings
+- [Vibe Controls](advanced/vibe) - Dynamic settings
