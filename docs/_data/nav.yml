@@ -47,6 +47,19 @@
   - title: Linear
     url: /vant/integrations/linear
 
+- title: Agent Configs
+  items:
+  - title: Architect
+    url: /vant/agents/vant-agent-architect
+  - title: Engineer
+    url: /vant/agents/vant-agent-engineer
+  - title: Reviewer
+    url: /vant/agents/vant-agent-qc
+  - title: Operator
+    url: /vant/agents/vant-agent-ops
+  - title: Security
+    url: /vant/agents/vant-agent-security
+
 - title: Tutorials
   items:
   - title: Omega Init

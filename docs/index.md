@@ -20,7 +20,15 @@ Vant persists through GitHub-based brain transfer. Agents inherit full context f
 - [Quickstart](getting-started/quick-start) - 5 minute setup
 - [Build Agent](tutorials/build-agent) - 15 min tutorial
 - [MCP Server](integrations/mcp) - Connect to any LLM
-- [Skills Library](skills/vant-skill-mcp) - Reusable agent tools
+- [Skills Library](skills/vant-skill-mcp) - 72 reusable tools
+
+## Agent Templates
+
+- [Architect](agents/vant-agent-architect) - System design agent
+- [Engineer](agents/vant-agent-engineer) - Implementation agent
+- [Reviewer](agents/vant-agent-qc) - Code review agent
+- [Operator](agents/vant-agent-ops) - DevOps automation
+- [Security](agents/vant-agent-security) - Security audit
 
 ---
 
