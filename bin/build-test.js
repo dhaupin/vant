@@ -37,10 +37,12 @@ test('.env.example exists', () => {
     }
 });
 
-// Test: Public model exists for fresh installs
+// Test: Public model exists for fresh installs (template)
+const config = require('./lib/config');
+const publicDir = config.publicPath();
+const identityMd = path.join(publicDir, 'identity.md');
+const identityTxt = path.join(publicDir, 'identity.txt');
 test('public model exists', () => {
-    const identityMd = path.join('models/public', 'identity.md');
-    const identityTxt = path.join('models/public', 'identity.txt');
     if (!fs.existsSync(identityMd) && !fs.existsSync(identityTxt)) {
         throw new Error('identity.md or identity.txt not found in public model');
     }
