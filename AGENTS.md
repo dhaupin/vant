@@ -25,6 +25,41 @@ As an agent running on Vant:
 
 ---
 
+## Brain Router Interface
+
+All brain loading goes through `lib/brain.js` - the single source of truth.
+
+```javascript
+const brain = require('./lib/brain');
+
+// Mode switch: dual | public | private | remote
+brain.setMode('dual');  // default: private overrides public
+
+// Load single brain (async)
+const item = await brain.loadBrain('identity');
+console.log(item.source);  // 'public' | 'private' | 'remote'
+
+// Load all brains (sync)
+const corpus = brain.loadCorpus();
+console.log(corpus.length);  // 62 files
+
+// Sources returned:
+// corpus[0].source === 'public' | 'private'
+```
+
+### Middleware Chain
+Loading goes through: sandbox → vaf → qos → escrow
+- sandbox: capability gates (canRead, canWrite)
+- vaf: input validation
+- qos: rate limiting
+- escrow: operation approval
+
+### Paths
+- `brain.getBrainPath()` → 'models/private' (runtime)
+- `brain.getPublicPath()` → 'models/public' (OS template)
+
+---
+
 ## Good Agent Patterns
 
 ### READ BEFORE WRITE
