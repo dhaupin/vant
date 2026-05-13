@@ -79,7 +79,7 @@
   - title: Events
     url: /vant/operations/events
   - title: Webhooks
-    url: /vant/operations/webhooks
+    url: /vant/tutorials/webhooks
   - title: Notifications
     url: /vant/operations/notifications
   - title: CI
@@ -104,8 +104,6 @@
     url: /vant/advanced/search
   - title: Rerank
     url: /vant/advanced/rerank
-  - title: Entropy
-    url: /vant/advanced/entropy
   - title: Horcrux
     url: /vant/advanced/horcrux
   - title: Stego
@@ -127,5 +125,7 @@
     url: /vant/reference/mcp-tools
   - title: Resolution
     url: /vant/reference/resolution
+  - title: Entropy
+    url: /vant/reference/entropy
   - title: CHANGELOG
     url: /vant/reference/CHANGELOG
