@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Feature - Multi-Agent Orchestration (v0.8.7)
+- **MCP Agent Tools** (2026-05-13)
+  - ADDED: agent_spawn - Spawn new agent (max 4: you + 3 others)
+  - ADDED: agent_list - List active agents with IDs and states
+  - ADDED: agent_kill - Kill agent by ID
+  - MCP server now exposes /rpc endpoint with brain_* prefixed tools
+
+- **Agent Quota** (2026-05-13)
+  - ADDED: MAX_AGENTS = 4 limit enforced in spawn()
+  - Returns error when quota reached
+
+- **Orchestrator** (2026-05-13)
+  - ADDED: agents.delegate(id, task) - Assign job to specific agent
+  - ADDED: msg.send(channel, message) - Broadcast to channel
+  - ADDED: Full vant↔brain↔agent↔msg loop wired
+
+- **Agent-Brain Wiring** (2026-05-13)
+  - agents.spawn() → brain.attend(name) tracks attention
+  - agents.spawn(parent) → brain.fireSynapse(parent→child)
+  - msg.post() → brain.attend(conversation)
+
 ### Feature - Git Provider Parity (v0.8.6)
 - **Multi-Provider Support** (2026-05-10)
   - ADDED: GitLabProvider with full API (issues, MRs, pipelines)

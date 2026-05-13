@@ -176,7 +176,55 @@ Check your level at session start.
 - [The Brain](https://docs.creadev.org/vant/essential/brain) — Memory files
 - [Runtime](https://docs.creadev.org/vant/essential/runtime) — Programmatic API
 - [MCP Tools](https://docs.creadev.org/vant/integrations/mcp) — 21 AI tools
+- [Multi-Agent Crew](https://docs.creadev.org/vant/essential/agents) — 4 agents max
 - [CLI](https://docs.creadev.org/vant/reference/cli) — All commands
+
+---
+
+## Multi-Agent Crew (v0.8.7)
+
+Up to 4 agents can work together (you + 3 coworkers).
+
+### Join via MCP
+
+External agents connect via MCP JSON-RPC:
+
+```javascript
+const response = await fetch('http://localhost:3457/rpc', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'brain_agent_spawn',  // brain_ prefix required
+        params: { name: 'Claude', role: 'Assistant' },
+        id: 1
+    })
+});
+// → { result: { id: 'agent_xxx', name: 'Claude' } }
+```
+
+### Available Tools
+
+| Tool | Description |
+|------|-------------|
+| `brain_agent_spawn` | Spawn new agent (max 4) |
+| `brain_agent_list` | List all agents |
+| `brain_agent_kill` | Kill agent by ID |
+
+### Orchestrator
+
+Main agent spawns coworkers:
+
+```javascript
+const agents = vant.agents();
+const a = await agents.spawn({ name: 'Claude', role: 'Asst' });
+await agents.delegate(a.id, 'Write haiku');
+agents.list();
+```
+
+### Channels
+
+Broadcast via msg.send('channel', message).
 
 ---
 
