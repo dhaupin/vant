@@ -451,4 +451,4 @@ See: [Islands](essential/islands.md) for architecture.
 - [Islands](essential/islands.md) - Componentized brain
 - [Audit](advanced/audit.md) - Activity logging
 - [Citations]/advanced/citations - Git-backed citations
-- [Hybrid Sync](hybrid) - Public/Private split
+- [Hybrid Sync](integrations/hybrid) - Public/Private split
