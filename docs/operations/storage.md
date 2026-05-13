@@ -118,7 +118,7 @@ const github = new connectors.github({
 });
 ```
 
-See [Providers](providers) for all connectors.
+See [Providers](integrations/providers) for all connectors.
 
 ## Islands
 
@@ -181,7 +181,7 @@ const storage = new Storage({
 
 ## See Also
 
-- [Brain](brain) - Brain file structure
+- [Brain](essential/brain) - Brain file structure
 - [Islands](essential/islands.md) - Lazy brain components
 - [Search](advanced/search) - Hybrid search
-- [Providers](providers) - GitHub, GitLab, etc
+- [Providers](integrations/providers) - GitHub, GitLab, etc

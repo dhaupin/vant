@@ -186,5 +186,5 @@ vibe.configure({
 ## Related
 
 - [Islands](essential/islands.md) - Componentized brain
-- [Schema](schema) - JSON validation
-- [Testing](testing) - Quality assurance
+- [Schema](reference/schema) - JSON validation
+- [Testing](tutorials/testing) - Quality assurance
