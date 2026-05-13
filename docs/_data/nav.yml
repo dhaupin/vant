@@ -32,6 +32,21 @@
   - title: Onboard
     url: /vant/essential/onboard
 
+- title: Agent Tools
+  items:
+  - title: MCP Server
+    url: /vant/integrations/mcp
+  - title: CLI
+    url: /vant/reference/cli
+  - title: Runtime API
+    url: /vant/essential/runtime
+  - title: Agent Skills
+    url: /vant/integrations/agent-skills
+  - title: Skills Library
+    url: /vant/skills/vant-skill-mcp
+  - title: Linear
+    url: /vant/integrations/linear
+
 - title: Tutorials
   items:
   - title: Omega Init
