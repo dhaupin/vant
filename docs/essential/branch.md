@@ -79,7 +79,7 @@ const branches = await provider.listBranches();
 
 ---
 
-## See Also
+## Related
 
 - [Multi-Agent](essential/multi-agent) - Multi-agent workflow
 - [GitHub Integration](integrations/github) - GitHub, GitLab, etc
