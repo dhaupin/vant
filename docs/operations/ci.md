@@ -192,4 +192,4 @@ npx eslint path/to/file.js
 ## Related
 
 - [Testing](tutorials/testing) - Test guide
-- [Release]/operations/release - Release process
+- [Release](advanced/release) - Release process
