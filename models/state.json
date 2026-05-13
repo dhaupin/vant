@@ -14,10 +14,11 @@
   "temp": {
     "debug": true
   },
-  "updated": "2026-05-13T20:57:01.419Z",
+  "updated": "2026-05-13T21:39:43.277Z",
   "neurons": {
     "synapses": {},
     "attention": {
+      "test_agent": 1,
       "identity": 0.2
     }
   }
