@@ -183,6 +183,10 @@ cat models/public/identity.md
 
 ## Related
 
-- - Brain structure
-- - Getting started
-- - Hybrid search
+- [Brain](essential/brain) - Brain structure
+- [Getting Started](getting-started) - Getting started guide
+- [Hybrid Search](integrations/hybrid) - Hybrid search
+
+## Next
+
+- [Islands](essential/islands) - Lazy-loading integrations

@@ -130,5 +130,9 @@ PURPOSE: [What you're here to do]
 
 ## Related
 
-- - Brain layout
-- - Getting started
+- [Brain](essential/brain) - Brain layout
+- [Getting Started](getting-started) - Getting started
+
+## Next
+
+- [Onboard](essential/onboard) - Onboarding

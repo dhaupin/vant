@@ -134,9 +134,13 @@ gallery.linkToBrain();
 
 ## Related
 
-- - Dynamic mood system
-- - Public/Private brain split
-- - Mount external repos
+- [Vibe](advanced/vibe) - Dynamic mood system
+- [Brain](essential/brain) - Public/Private brain split
+- [External Repos](integrations/repos) - Mount external repos
+
+## Next
+
+- [Runtime](essential/runtime) - Runtime API
 
 ---
 
@@ -163,4 +167,4 @@ const result = await vant.think('How do I use Docker?');
 // → auto-loads python island when "Docker" detected
 ```
 
-See [Tutorial: Custom Islands](/tutorials/custom-island) for full guide.
+See [Tutorial: Custom Islands](tutorials/custom-island) for full guide.

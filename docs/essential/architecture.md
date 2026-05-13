@@ -156,6 +156,12 @@ See for details.
 
 ## Related
 
-- - Branch + lock
-- - VAF + sandbox
-- - Programmatic API
+- [Branch](essential/branch) - Git branch isolation
+- [Lock](essential/lock) - Distributed coordination
+- [VAF](security/vaf) - Input filtering
+- [Sandbox](security/sandbox) - Security sandbox
+
+## Next
+
+- [Runtime](essential/runtime) - Runtime API
+- [Boot](essential/boot) - Startup sequence

@@ -8,7 +8,7 @@ nav_order: 3
 
 # Runtime API
 
-> Programmatic Vant usage - quick intro. For full API, see [API Reference](/api/api-runtime).
+> Programmatic Vant usage - quick intro. For full API, see [API Reference](reference/api-runtime).
 
 ## Quick Start
 
@@ -59,6 +59,11 @@ See [API Reference](/api/api-runtime) for complete documentation:
 
 ## Related
 
-- - Command-line interface
-- - MCP server tools
-- - Lazy-loading
+- [CLI Reference](reference/cli) - Command-line interface
+- [MCP Server](integrations/mcp) - MCP server tools
+- [Islands](essential/islands) - Lazy-loading integrations
+
+## Next
+
+- [Boot](essential/boot) - Startup sequence
+- [Onboard](essential/onboard) - Brain onboarding

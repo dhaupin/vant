@@ -211,7 +211,7 @@ PURPOSE: Exploring codebase
 
 ## Related
 
-- - Branch and lock system
-- - Brain as tools for AI
-- - VAF input validation
-- - All commands
+- [Branch](essential/branch) - Branch and lock system
+- [Runtime](essential/runtime) - Brain as tools for AI
+- [VAF](security/vaf) - VAF input validation
+- [CLI Reference](reference/cli) - All commands

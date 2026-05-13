@@ -130,6 +130,11 @@ git push origin agent-yourname
 
 ## Related
 
-- - Workflow
-- - Files
-- - Trust levels
+- [Succession](essential/succession) - Workflow
+- [Brain](essential/brain) - Files
+- [Succession](essential/succession) - Trust levels
+
+## Next
+
+- [Branch](essential/branch) - Git branch isolation
+- [Lock](essential/lock) - Coordination
