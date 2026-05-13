@@ -236,14 +236,15 @@ class VantNode {
     }
     
     /**
-     * Load brain from models/public
+     * Load brain from user's template (MODEL_PATH) or fallback
      */
     loadBrain() {
-        const modelPath = 'models/public';
+        // Load user's brain template (MODEL_PATH), fallback to private for agent
+        const modelPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || 'models/private';
         const brain = {};
         
         if (!fs.existsSync(modelPath)) {
-            this.warn('Brain not found at models/public');
+            this.warn('Brain not found at ' + modelPath);
             return brain;
         }
         
@@ -281,10 +282,11 @@ class VantNode {
     }
     
     /**
-     * Save brain to models/public
+     * Save brain to agent's private path ( MODEL_PATH for user overrides)
      */
     saveBrain(memory) {
-        const modelPath = 'models/public';
+        // Agent's private path - keeps their brain separate from user
+        const modelPath = process.env.MODEL_PATH || process.env.VANT_STORAGE_PATH || 'models/private';
         
         for (const [name, content] of Object.entries(memory)) {
             const filePath = path.join(modelPath, `${name}.md`);

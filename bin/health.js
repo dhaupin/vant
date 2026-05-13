@@ -55,16 +55,18 @@ function checkModel() {
     ];
     
     const required = ['identity.md', 'identity.txt'];
-    const found = checks.some(pair => pair.some(f => fs.existsSync(path.join('models/public', f))));
+    // Check user's brain (determined by MODEL_PATH or config)
+    const brainPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || process.env.VANT_STORAGE_PATH || 'models/private';
+    const found = checks.some(pair => pair.some(f => fs.existsSync(path.join(brainPath, f))));
     
     if (found) {
-        console.log('  ✓ Public model exists');
+        console.log('  ✓ Brain exists at ' + brainPath);
         
         // Try to read identity
-        const identityPath = fs.existsSync('models/public/identity.md') 
-            ? 'models/public/identity.md' 
-            : fs.existsSync('models/public/identity.txt') 
-                ? 'models/public/identity.txt' 
+        const identityPath = fs.existsSync(brainPath + '/identity.md') 
+            ? brainPath + '/identity.md' 
+            : fs.existsSync(brainPath + '/identity.txt') 
+                ? brainPath + '/identity.txt' 
                 : null;
         
         if (identityPath) {
@@ -102,7 +104,9 @@ function checkEnv() {
 
 function checkDirs() {
     console.log('\n📁 Directories:');
-    const dirs = ['models', 'models/public', 'lib', 'bin'];
+    // Check base dirs + user's brain (MODEL_PATH or default private)
+    const brainPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || 'models/private';
+    const dirs = ['models', 'models/private', 'lib', 'bin', brainPath];
     dirs.forEach(d => {
         if (fs.existsSync(d)) {
             console.log(`  ✓ ${d}/`);
@@ -111,9 +115,9 @@ function checkDirs() {
         }
     });
 
-    // State now in brain
-    if (fs.existsSync('models/public/.state.json')) {
-        console.log('  ✓ models/public/.state.json');
+    // State now in brain path
+    if (fs.existsSync(brainPath + '/.state.json')) {
+        console.log('  ✓ ' + brainPath + '/.state.json');
     } else {
         // May not exist yet (first run)
     }

@@ -1,6 +1,6 @@
 /**
  * Vant Loader (Node.js)
- * Load brain from models/public or custom path
+ * Load brain (default: models/private - agent's brain)
  * 
  * All args should have both long (--arg) and short (-a) forms.
  * 
@@ -40,7 +40,7 @@ const CONFIG_FILE = 'config.ini';
 function loadConfig() {
     if (!fs.existsSync(CONFIG_FILE)) {
         console.warn('⚠ config.ini not found, using defaults');
-        return { VANT_VERSION: 'unknown', MODEL_PATH: 'models/public' };
+        return { VANT_VERSION: 'unknown', MODEL_PATH: 'models/private' };
     }
 
     const config = {};
@@ -58,17 +58,18 @@ function loadConfig() {
 
 /**
  * Determine which model to load
- * Priority: config MODEL_PATH > argument > default (public)
+ * Priority: config MODEL_PATH > argument > default (private - agent's brain)
  */
 function getModelPath(args) {
     if (args[2]) vaf.check(args[2], {type: "string", name: "version", maxLength: 20});
     const config = loadConfig();
-    let modelPath = config.MODEL_PATH || 'models/public';
+    // Default to private (agent's brain) to keep separate from user's public brain
+    let modelPath = config.MODEL_PATH || 'models/private';
     
     // SECURITY: Validate MODEL_PATH (block path traversal)
     if (modelPath.startsWith('/') || modelPath.includes('..')) {
         console.error(`⚠ Invalid MODEL_PATH: ${modelPath}`);
-        modelPath = 'models/public';
+        modelPath = 'models/private';
     }
     
     if (args[2]) {

@@ -389,11 +389,13 @@ const TOOLS = [
 ];
 
 /**
- * Read memory files from models/public
+ * Read memory files from user's brain
+ * Uses MODEL_PATH (or defaults to private for agent)
  */
 async function getMemory(files = null) {
     vaf.check(files, {type: 'path', name: 'files', maxLength: 200, required: false});
-    const modelPath = 'models/public';
+    // User's brain template path (MODEL_PATH), fallback to agent's private brain
+    const modelPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || 'models/private';
     if (!fs.existsSync(modelPath)) {
         return { error: 'Brain not found' };
     }
@@ -463,7 +465,8 @@ async function getMemory(files = null) {
 async function setMemory(file, content, branch = null, autoCommit = false) {
     vaf.check(file, {type: 'path', name: 'file', maxLength: 100});
     vaf.check(content, {type: 'string', name: 'content', maxLength: 50000});
-    const modelPath = 'models/public';
+    // Agent's private path - keeps agent brain separate from user's
+    const modelPath = process.env.MODEL_PATH || process.env.VANT_STORAGE_PATH || 'models/private';
     
     // SECURITY: Basic filename validation
     // Block null bytes
@@ -692,7 +695,8 @@ async function searchBrain(query, args = {}) {
 
     // Basic mode: text search across files
     const files = args.files || null;
-    const modelPath = 'models/public';
+    // Use MODEL_PATH to search user's brain
+    const modelPath = process.env.MODEL_PATH || 'models/private';
     
     if (!fs.existsSync(modelPath)) {
         return { error: 'Brain not found', mode: 'basic' };
@@ -755,7 +759,8 @@ async function searchBrain(query, args = {}) {
  * Health check
  */
 async function checkHealth(detailed = false) {
-    const modelPath = 'models/public';
+    // Use MODEL_PATH (user's brain template) for health check
+    const modelPath = process.env.MODEL_PATH || 'models/private';
     const configPath = 'config.ini';
     
     const status = {

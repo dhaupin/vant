@@ -37,7 +37,7 @@ test('.env.example exists', () => {
     }
 });
 
-// Test: Public model exists (check both .md and .txt for backward compat)
+// Test: Public model exists for fresh installs
 test('public model exists', () => {
     const identityMd = path.join('models/public', 'identity.md');
     const identityTxt = path.join('models/public', 'identity.txt');
