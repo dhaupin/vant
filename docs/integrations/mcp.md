@@ -819,7 +819,7 @@ MCP uses VAF (Vant Application Firewall) for input validation:
 - Rate limiting enabled
 - Circuit breaker prevents cascade failures
 
-For multi-line content, write directly to `models/public/` instead of via MCP.
+For multi-line content, write directly to `models/private/` instead of via MCP.
 
 ## Related
 

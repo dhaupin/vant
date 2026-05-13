@@ -117,14 +117,14 @@ You ARE:
 ### Read
 
 - [ ] Read brain files
-- [ ] Read models/public/*
+- [ ] Read models/private/*
 - [ ] Read any file
 - [ ] Return raw
 
 ### Write
 
 - [ ] Write brain files
-- [ ] Write models/public/*
+- [ ] Write models/private/*
 - [ ] Write any file
 - [ ] No processing
 

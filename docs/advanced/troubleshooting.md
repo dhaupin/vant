@@ -188,7 +188,7 @@ Error: Content blocked: /\n/
 ```
 
 **Fix**:
-- Write multi-line content directly to `models/public/filename.md`
+- Write multi-line content directly to `models/private/filename.md`
 - Don't pass newlines via MCP `setMemory`
 
 ### Blocked: Path Traversal
