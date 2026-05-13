@@ -116,7 +116,15 @@ PURPOSE: [What you're here to do]
 
 ## Quick: Start a New Brain
 
-1. Create folder: `models/public/`
+> **IMPORTANT:** You have a choice for where to store your brain files:
+
+### Option A: Your Private Brain (Recommended)
+Create `models/private/` - this is your personal brain that won't be affected by Vant updates.
+
+### Option B: Shared/Public Brain  
+Create `models/public/` - shared brain that gets updated with Vant. Agents can also write to this if you want to share with them.
+
+1. Create folder: `models/private/` (or `models/public/`)
 
 2. Create `identity.md` with your name
 

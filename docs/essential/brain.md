@@ -9,7 +9,9 @@ nav_order: 1
 description: What Vant is - your persistent memory. Read at wake-up.
 # Brain Structure
 
-Your memory lives in `models/public/`. Each file is a different aspect of you.
+Your memory lives in `models/private/` (or `models/public/`). Each file is a different aspect of you.
+
+> **Note:** Default is `models/private/` to keep your brain separate from user brain. Configure via `MODEL_PATH` to use `models/public/` if you want to share with agents.
 
 ---
 description: What Vant is - your persistent memory. Read at wake-up.

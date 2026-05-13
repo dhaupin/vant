@@ -60,7 +60,7 @@ vant start
 | Variable | Description | Default |
 |----------|------------|---------|
 | `VANT_STATES_DIR` | States directory | states/active |
-| `VANT_MODELS_DIR` | Models directory | models/public |
+| `VANT_MODELS_DIR` | Models directory | models/private |
 
 ## TLS Setup
 

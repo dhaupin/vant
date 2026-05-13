@@ -32,10 +32,10 @@ Agent Name
 Load brain:
 
 ```
-cat models/public/identity.md    # WHO
-cat models/public/boundaries.md  # NEVER
-cat models/public/goals.md      # NOW
-cat models/public/lessons.md   # PAST
+cat models/private/identity.md    # WHO
+cat models/private/boundaries.md  # NEVER
+cat models/private/goals.md      # NOW
+cat models/private/lessons.md   # PAST
 ```
 
 ### Trust Levels

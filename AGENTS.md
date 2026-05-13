@@ -43,7 +43,7 @@ Always check: `git status`, current branch, existing tests, dependencies before 
 
 ## Brain Files
 
-Write to `models/public/`. These are the standard files:
+Write to `models/private/`. These are the standard files:
 
 | File | Purpose |
 |------|---------|
@@ -53,14 +53,19 @@ Write to `models/public/`. These are the standard files:
 | `preferences.md` | Your working style |
 | `errors.md` | Mistakes to avoid |
 
+> **IMPORTANT:** Writing to `models/private/` keeps your brain separate from the user's brain. On Vant updates, your files won't overwrite their brain.
+
+**Want to share your learnings publicly?**
+Use `models/public/` and push to your public GitHub repo.
+
 **Tip:** Put most important info at the top. Files get long.
 
 Run `vant onboard` to browse all brain files:
 
 ```bash
 vant onboard              # Interactive browser
-cat models/public/start.md  # Quick start
-cat models/public/identity.md  # Who you are
+cat models/private/start.md  # Quick start
+cat models/private/identity.md  # Who you are
 ```
 
 ---
@@ -81,7 +86,7 @@ main            ← human reviews here
 **Step-by-step:**
 
 1. Create your branch: `git checkout -b agent-yourname`
-2. Do work — Edit files in `models/public/`
+2. Do work — Edit files in `models/private/`
 3. Commit with prefix: `agent-yourname: Did thing X`
 4. Push: `git push origin agent-yourname`
 
@@ -89,7 +94,7 @@ main            ← human reviews here
 
 ## Trust Levels
 
-`models/public/_succession.json` controls your autonomy:
+`models/private/_succession.json` controls your autonomy:
 
 | Level | What It Means |
 |-------|--------------|

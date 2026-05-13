@@ -67,11 +67,11 @@ This enables lightweight "what changed" queries without full hydration.
 Compress Vant's brain files for faster loading:
 
 ```bash
-# Compress all brain files
-vant compress models/public/ --output models/latent
+# Compress all brain files (use $MODEL_PATH or models/private/)
+vant compress ${MODEL_PATH:-models/private}/ --output models/latent
 
 # Now agents can load:
-# - models/latent/*.vpatch  (instead of models/public/*.md)
+# - models/latent/*.vpatch  (instead of models/private/*.md)
 ```
 
 ### Use Case 2: Generational Evolution
@@ -89,8 +89,8 @@ git commit -m "Updated chapter 4"
 Ask lightweight questions without full hydration:
 
 ```bash
-# Get stats on any file
-vant compress models/public/goals.md --stats
+# Get stats on any file (use $MODEL_PATH or models/private/)
+vant compress ${MODEL_PATH:-models/private}/goals.md --stats
 ```
 
 ## CLI Commands

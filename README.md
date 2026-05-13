@@ -43,7 +43,7 @@ npm start
 | `GITHUB_TOKEN` | ✓ | - |
 | `GITHUB_REPO` | ✓ | - |
 | `GITHUB_BRANCH` | - | `main` |
-| `MODEL_PATH` | - | `models/public` |
+| `MODEL_PATH` | - | `models/private` |
 | `MCP_API_KEY` | - | - |
 
 ---
@@ -53,7 +53,7 @@ npm start
 | Feature | What It Does |
 |---------|--------------|
 | **Brain** | Files in GitHub - each session reads context |
-| **Memory** | `models/public/` - identity, goals, lessons... |
+| **Memory** | `models/private/` - identity, goals, lessons... |
 | **Sync** | Push/pull brain state via GitHub API |
 | **MCP Server** | 21 tools for AI agents (optional) |
 | **Islands** | Lazy-loadable integrations |

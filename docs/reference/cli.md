@@ -16,7 +16,7 @@ All Vant CLI commands.
 | `vant start` | Full startup (health → sync → load → run) |
 | `vant health` | System diagnostics |
 | `vant sync` | Pull/push brain from GitHub |
-| `vant load` | Load brain from models/public |
+| `vant load` | Load brain (default: `$MODEL_PATH` or models/private)
 | `vant run` | Start runtime loop |
 | `vant vibe` | Get/set runtime mood (experimental, focused, safety_first, etc) |
 
@@ -66,7 +66,7 @@ vant sync --force     # Force push
 
 #### vant load
 
-Load brain from `models/public/`:
+Load brain from your brain folder (default: `$MODEL_PATH` or `models/private/`):
 - Load all .md files
 - Parse _succession.json
 - Update memory
@@ -415,15 +415,15 @@ vant compress <input> [options]
 ### Examples
 
 ```bash
-# Compress a file
-vant compress models/public/goals.md
+# Compress a file (use $MODEL_PATH or models/private/)
+vant compress ${MODEL_PATH:-models/private}/goals.md
 
 # View entropy stats
-vant compress models/public/goals.md --stats
+vant compress ${MODEL_PATH:-models/private}/goals.md --stats
 
 # Adaptive mode (self-calibrating threshold)
-vant compress models/public/goals.md --adaptive
-vant compress models/public/goals.md -a -k 2.0
+vant compress ${MODEL_PATH:-models/private}/goals.md --adaptive
+vant compress ${MODEL_PATH:-models/private}/goals.md -a -k 2.0
 
 # Decompress
 vant compress models/latent/goals.vpatch --decompress

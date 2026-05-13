@@ -110,7 +110,7 @@ Configuration via environment.
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `CONFIG_PATH` | No | Path to config.ini |
-| `MODEL_PATH` | No | Path to brain files (default: models/public) |
+| `MODEL_PATH` | No | Path to brain files (default: models/private) |
 
 ## config.ini
 
@@ -119,7 +119,7 @@ Core configuration:
 ```ini
 # Core
 VANT_VERSION=v0.8.6
-MODEL_PATH=models/public
+MODEL_PATH=models/private
 STATE_PATH=states/active/current.json
 
 # GitHub (set via environment variable)
