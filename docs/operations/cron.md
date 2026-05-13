@@ -67,7 +67,7 @@ console.log(cron.jobs());
 
 ---
 
-## See Also
+## Related
 
 - [Events](operations/events) - Event system
 - [Multi-Agent](multi-agent) - Agent system

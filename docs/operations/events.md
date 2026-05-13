@@ -285,7 +285,7 @@ sandbox.on('blocked', (info) => {
 
 ---
 
-## See Also
+## Related
 
 - [Runtime](essential/runtime) - Programmatic API
 - [Sandbox](security/sandbox) - Execution isolation

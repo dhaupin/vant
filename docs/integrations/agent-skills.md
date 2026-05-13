@@ -128,7 +128,7 @@ vant branch create agent-b
 | low | Limited |
 | none | Wait for instructions |
 
-## See Also
+## Related
 
 - [Getting Started](getting-started/quick-start)
 - [MCP Integration](reference/mcp-tools)

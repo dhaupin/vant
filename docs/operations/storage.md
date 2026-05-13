@@ -179,7 +179,7 @@ const storage = new Storage({
 
 ---
 
-## See Also
+## Related
 
 - [Brain](essential/brain) - Brain file structure
 - [Islands](essential/islands) - Lazy brain components

@@ -96,7 +96,7 @@ See [API](runtime) for programmatic API.
 
 ---
 
-## See Also
+## Related
 
 - [Runtime](runtime) - Runtime API
 - [Server](server) - HTTP server

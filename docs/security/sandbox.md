@@ -244,7 +244,7 @@ const s = sandbox.create({
 
 ---
 
-## See Also
+## Related
 
 - [Security](security/security) - VAF and encryption
 - [Runtime](essential/runtime) - Programmatic API

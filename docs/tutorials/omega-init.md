@@ -92,7 +92,7 @@ After initialization:
 docker run -e GITHUB_TOKEN=xxx -e GITHUB_REPO=owner/repo dhaupin/vant
 ```
 
-## See Also
+## Related
 
 - [AI Onboarding](essential/ai-onboard) - Full agent guide
 - [Airgap Propagation](security/airgap-propagation) - Self-propagate across airgaps

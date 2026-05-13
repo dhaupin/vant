@@ -289,7 +289,7 @@ See [Sandbox](security/sandbox) for details.
 
 ---
 
-## See Also
+## Related
 
 - [Sandbox](security/sandbox) - Execution isolation
 - [Security](security) - VAF and encryption

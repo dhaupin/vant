@@ -136,7 +136,7 @@ const summary = {
 await notifications.email('admin@example.com', 'Daily Summary', summary);
 ```
 
-## See Also
+## Related
 
 - [CLI Reference](reference/cli)
 - [Configuration](reference/configuration)

@@ -254,7 +254,7 @@ See [Sandbox](security/sandbox) for details.
 
 ---
 
-## See Also
+## Related
 
 - [Sandbox](security/sandbox) - Execution isolation
 - [QoS](operations/qos) - Rate limiting and circuit breaking

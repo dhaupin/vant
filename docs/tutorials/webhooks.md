@@ -196,7 +196,7 @@ cron.cron('0 0 * * *', async () => {
 
 ---
 
-## See Also
+## Related
 
 - [CLI](essential/cli)
 - [Sync](operations/sync)

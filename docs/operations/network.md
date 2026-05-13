@@ -160,7 +160,7 @@ See [Security](security) for details.
 
 ---
 
-## See Also
+## Related
 
 - [Sandbox](security/sandbox) - Execution isolation
 - [Server](server) - HTTP server
