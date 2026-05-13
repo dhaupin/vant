@@ -38,7 +38,7 @@ test('.env.example exists', () => {
 });
 
 // Test: Public model exists for fresh installs (template)
-const config = require('./lib/config');
+const config = require('../lib/config');
 const publicDir = config.publicPath();
 const identityMd = path.join(publicDir, 'identity.md');
 const identityTxt = path.join(publicDir, 'identity.txt');
