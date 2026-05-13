@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-chain-qc.md
+permalink: /essential/vant-skill-chain-qc.md
 layout: default
 title: Skill Chain qc
 nav_order: 113

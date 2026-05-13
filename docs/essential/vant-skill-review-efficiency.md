@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-review-efficiency.md
+permalink: /essential/vant-skill-review-efficiency.md
 layout: default
 title: Skill Review efficiency
 nav_order: 145

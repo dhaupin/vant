@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-kubernetes.md
+permalink: /essential/vant-skill-kubernetes.md
 layout: default
 title: Skill Kubernetes
 nav_order: 132

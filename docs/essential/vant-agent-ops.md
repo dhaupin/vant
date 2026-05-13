@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /agents/vant-agent-ops.md
+permalink: /essential/vant-agent-ops.md
 layout: default
 title: Agent Ops
 nav_order: 107

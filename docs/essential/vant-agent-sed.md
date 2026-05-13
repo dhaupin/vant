@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /agents/vant-agent-sed.md
+permalink: /essential/vant-agent-sed.md
 layout: default
 title: Agent Sed
 nav_order: 112

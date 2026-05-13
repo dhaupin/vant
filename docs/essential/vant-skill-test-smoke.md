@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-test-smoke.md
+permalink: /essential/vant-skill-test-smoke.md
 layout: default
 title: Skill Test smoke
 nav_order: 161

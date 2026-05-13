@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-docker.md
+permalink: /essential/vant-skill-docker.md
 layout: default
 title: Skill Docker
 nav_order: 120

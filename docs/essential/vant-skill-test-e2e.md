@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-test-e2e.md
+permalink: /essential/vant-skill-test-e2e.md
 layout: default
 title: Skill Test e2e
 nav_order: 155

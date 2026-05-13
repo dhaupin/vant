@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /agents/vant-agent-tester.md
+permalink: /essential/vant-agent-tester.md
 layout: default
 title: Agent Tester
 nav_order: 114

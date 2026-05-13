@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-chain-team.md
+permalink: /essential/vant-skill-chain-team.md
 layout: default
 title: Skill Chain team
 nav_order: 115

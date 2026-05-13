@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-typescript.md
+permalink: /essential/vant-skill-typescript.md
 layout: default
 title: Skill Typescript
 nav_order: 164

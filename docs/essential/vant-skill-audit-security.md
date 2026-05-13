@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-audit-security.md
+permalink: /essential/vant-skill-audit-security.md
 layout: default
 title: Skill Audit security
 nav_order: 103

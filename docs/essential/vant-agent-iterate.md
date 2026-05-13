@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /agents/vant-agent-iterate.md
+permalink: /essential/vant-agent-iterate.md
 layout: default
 title: Agent Iterate
 nav_order: 106

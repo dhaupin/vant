@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-api.md
+permalink: /essential/vant-skill-api.md
 layout: default
 title: Skill Api
 nav_order: 95

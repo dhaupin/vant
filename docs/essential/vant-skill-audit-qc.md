@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-audit-qc.md
+permalink: /essential/vant-skill-audit-qc.md
 layout: default
 title: Skill Audit qc
 nav_order: 100

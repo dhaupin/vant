@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /agents/vant-agent-security.md
+permalink: /essential/vant-agent-security.md
 layout: default
 title: Agent Security
 nav_order: 111

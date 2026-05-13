@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-debugger.md
+permalink: /essential/vant-skill-debugger.md
 layout: default
 title: Skill Debugger
 nav_order: 118

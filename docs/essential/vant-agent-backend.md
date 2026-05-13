@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /agents/vant-agent-backend.md
+permalink: /essential/vant-agent-backend.md
 layout: default
 title: Agent Backend
 nav_order: 93

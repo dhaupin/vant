@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-environment.md
+permalink: /essential/vant-skill-environment.md
 layout: default
 title: Skill Environment
 nav_order: 122

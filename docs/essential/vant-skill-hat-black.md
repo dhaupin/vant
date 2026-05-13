@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-hat-black.md
+permalink: /essential/vant-skill-hat-black.md
 layout: default
 title: Skill Hat black
 nav_order: 126

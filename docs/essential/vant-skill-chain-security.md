@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-chain-security.md
+permalink: /essential/vant-skill-chain-security.md
 layout: default
 title: Skill Chain security
 nav_order: 114

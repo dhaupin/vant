@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-audit-seo.md
+permalink: /essential/vant-skill-audit-seo.md
 layout: default
 title: Skill Audit seo
 nav_order: 104

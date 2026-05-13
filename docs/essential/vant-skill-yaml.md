@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-yaml.md
+permalink: /essential/vant-skill-yaml.md
 layout: default
 title: Skill Yaml
 nav_order: 166

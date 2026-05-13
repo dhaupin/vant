@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /agents/vant-agent-qc.md
+permalink: /essential/vant-agent-qc.md
 layout: default
 title: Agent Qc
 nav_order: 108

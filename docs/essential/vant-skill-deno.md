@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-deno.md
+permalink: /essential/vant-skill-deno.md
 layout: default
 title: Skill Deno
 nav_order: 119

@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /agents/vant-agent-architect.md
+permalink: /essential/vant-agent-architect.md
 layout: default
 title: Agent Architect
 nav_order: 91

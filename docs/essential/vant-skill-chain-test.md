@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-chain-test.md
+permalink: /essential/vant-skill-chain-test.md
 layout: default
 title: Skill Chain test
 nav_order: 116

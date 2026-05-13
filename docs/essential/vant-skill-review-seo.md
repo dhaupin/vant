@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-review-seo.md
+permalink: /essential/vant-skill-review-seo.md
 layout: default
 title: Skill Review seo
 nav_order: 147

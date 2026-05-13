@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-json.md
+permalink: /essential/vant-skill-json.md
 layout: default
 title: Skill Json
 nav_order: 131

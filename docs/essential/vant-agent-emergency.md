@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /agents/vant-agent-emergency.md
+permalink: /essential/vant-agent-emergency.md
 layout: default
 title: Agent Emergency
 nav_order: 99

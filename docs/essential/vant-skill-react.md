@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-react.md
+permalink: /essential/vant-skill-react.md
 layout: default
 title: Skill React
 nav_order: 140

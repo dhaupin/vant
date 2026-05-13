@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /agents/vant-agent-grep.md
+permalink: /essential/vant-agent-grep.md
 layout: default
 title: Agent Grep
 nav_order: 103

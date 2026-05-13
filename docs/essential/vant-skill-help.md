@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /skills/vant-skill-help.md
+permalink: /essential/vant-skill-help.md
 layout: default
 title: Skill Help
 nav_order: 129
