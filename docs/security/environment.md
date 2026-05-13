@@ -363,7 +363,7 @@ Before using Vant with GitHub:
 
 ## SEE ALSO
 
-- [Terms](index) - Legal disclaimer
-- [Privacy](legal/privacy) - Privacy policy
+- [Terms](reference/index) - Legal disclaimer
+- [Privacy](security/privacy) - Privacy policy
 - [GitHub API Docs](https://docs.github.com/en/rest) - Full API reference
 - [GitHub ToS](https://docs.github.com/en/github/site-policy) - All policies

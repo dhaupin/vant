@@ -116,4 +116,4 @@ docker push dhaupin/vant:latest
 ## Related
 
 - [CLI Reference](reference/cli) - All commands
-- [Docker](docker) - Container build
+- [Docker](integrations/docker) - Container build

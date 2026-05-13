@@ -102,4 +102,4 @@ console.log('Max bytes:', maxBytes);
 ## Related
 
 - [Security]/tutorials/security - Security guide
-- [Horcrux](horcrux) - Distributed backup
+- [Horcrux](advanced/horcrux) - Distributed backup
