@@ -219,7 +219,7 @@ Network requirements and behavior.
 
 | Port | Service |
 |------|---------|
-| 3456 | MCP server (default) |
+| 3100 | MCP server (default) |
 | 3457 | MCP alt port |
 | 443 | HTTPS (GitHub) |
 

@@ -16,7 +16,7 @@ Complete REST API documentation for Vant headless integration.
 | Env Variable | Description | Default |
 |-------------|-------------|---------|
 | `VANT_API_KEY` | API authentication | - |
-| `VANT_MCP_PORT` | HTTP server port | 3456 |
+| `VANT_MCP_PORT` | HTTP server port | 3100 |
 | `VANT_MODE` | Mode: cli, mcp, headless | headless |
 | `GITHUB_TOKEN` | GitHub auth token | - |
 | `GITHUB_REPO` | Repository owner/repo | - |
