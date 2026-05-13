@@ -89,7 +89,7 @@
     url: /vant/integrations/linear
   - title: Docker
     url: /vant/integrations/docker
-  - title: Hybrid Search
+  - title: Hybrid Sync
     url: /vant/integrations/hybrid
   - title: Providers
     url: /vant/integrations/providers
