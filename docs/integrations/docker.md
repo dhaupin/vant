@@ -19,7 +19,8 @@ Run Vant in containers.
 │  │  /app/models  ← brain volume        │   │
 │  │  /app/config ← config volume       │   │
 │  │                                     │   │
-│  │  Port 3456 ← MCP/server          │   │
+│  │  Port 3100 ← MCP              │   │
+│  │  Port 3456 ← API/Server        │   │
 │  └─────────────────────────────────────┘   │
 │                   │                        │
 │                   ▼                        │

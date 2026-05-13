@@ -31,7 +31,7 @@ WORKDIR /app
 COPY . .
 RUN npm install
 
-EXPOSE 3456
+EXPOSE 3100 3456
 
 CMD ["node", "bin/vant.js", "serve"]
 ```

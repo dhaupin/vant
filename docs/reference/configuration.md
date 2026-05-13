@@ -85,7 +85,7 @@ Configuration via environment.
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `VANT_MCP_PORT` | No | MCP server port (default: 3456) |
+| `VANT_MCP_PORT` | No | MCP server port (default: 3100) |
 | `VANT_MCP_API_KEY` | No | API key for MCP authentication |
 | `VANT_AGREE_AUTO_SYNC` | No | **⚠️** Enable auto-polling: set to `"true"` to confirm (see notes) |
 | `MCP_API_KEY` | No | Alternative MCP API key |
@@ -132,7 +132,7 @@ MAX_REQUESTS_PER_HOUR=360
 
 # MCP Server (optional)
 MCP_API_KEY=your-secret-api-key
-MCP_PORT=3456
+MCP_PORT=3100
 ```
 
 ### Sections

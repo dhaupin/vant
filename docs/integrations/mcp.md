@@ -21,7 +21,7 @@ node bin/mcp.js --server
 vant mcp
 ```
 
-The server runs on **port 3456** by default:
+The MCP server runs on port **3100** by default:
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
@@ -31,7 +31,7 @@ The server runs on **port 3456** by default:
 
 ### Port Configuration
 
-**Default: 3456** — Works out of the box. Change via environment:
+**Default: 3100** — Works out of the box. Change via environment:
 
 ```bash
 # Via environment variable (recommended)
@@ -42,7 +42,7 @@ vant mcp --server
 vant mcp --server --port 4000
 ```
 
-The server uses `VANT_MCP_PORT` from environment, falls back to 3456 if unset.
+The server uses `VANT_MCP_PORT` from environment, falls back to 3100 if unset.
 
 ---
 
@@ -71,8 +71,8 @@ Or use **Caddy** for automatic HTTPS:
 
 ```bash
 # Caddyfile (place next to Caddyfile in project root)
-mcp.yourdomain.com:3456 {
-    reverse_proxy localhost:3456
+mcp.yourdomain.com:3100 {
+    reverse_proxy localhost:3100
 }
 ```
 
@@ -87,7 +87,7 @@ Caddy automatically provisions free TLS certificates!
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `MCP_PORT` | 3456 | Server port |
+| `MCP_PORT` | 3100 | Server port |
 | `MCP_BIND_ADDRESS` | 127.0.0.1 | Bind address |
 | `VANT_SERVER_CERT` | - | TLS certificate path |
 | `VANT_SERVER_KEY` | - | TLS key path |
@@ -153,7 +153,7 @@ Uses unified API with lockout:
 ### Base URL
 
 ```
-http://localhost:3456
+http://localhost:3100
 ```
 
 ### Authentication
@@ -161,13 +161,13 @@ http://localhost:3456
 Pass API key in header:
 
 ```bash
-curl -H "Authorization: Bearer $VANT_API_KEY" http://localhost:3456/tools
+curl -H "Authorization: Bearer $VANT_API_KEY" http://localhost:3100/tools
 ```
 
 ### List Tools (`GET /tools`)
 
 ```bash
-curl http://localhost:3456/tools
+curl http://localhost:3100/tools
 ```
 
 Response:
@@ -193,7 +193,7 @@ Response:
 Execute any tool via JSON-RPC:
 
 ```bash
-curl -X POST http://localhost:3456/call \
+curl -X POST http://localhost:3100/call \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -220,7 +220,7 @@ Response:
 ### Health Check (`GET /health`)
 
 ```bash
-curl http://localhost:3456/health
+curl http://localhost:3100/health
 ```
 
 ---
@@ -298,7 +298,7 @@ Error response format:
 Start the HTTP server:
 
 ```bash
-vant mcp --server           # Default port 3456
+vant mcp --server           # Default port 3100
 vant mcp --server --port 8080  # Custom port
 
 # Or directly
@@ -377,7 +377,7 @@ MCP_PORT=3457
 List available MCP tools:
 
 ```bash
-curl http://localhost:3456/tools
+curl http://localhost:3100/tools
 ```
 
 Returns:
@@ -398,7 +398,7 @@ Returns:
 Read brain memory via MCP:
 
 ```bash
-curl -X POST http://localhost:3456/call \
+curl -X POST http://localhost:3100/call \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -413,7 +413,7 @@ curl -X POST http://localhost:3456/call \
 Get specific brain files:
 
 ```bash
-curl -X POST http://localhost:3456/call \
+curl -X POST http://localhost:3100/call \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -434,7 +434,7 @@ curl -X POST http://localhost:3456/call \
 Write content to a brain file:
 
 ```bash
-curl -X POST http://localhost:3456/call \
+curl -X POST http://localhost:3100/call \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -455,7 +455,7 @@ curl -X POST http://localhost:3456/call \
 List all Git branches:
 
 ```bash
-curl -X POST http://localhost:3456/call \
+curl -X POST http://localhost:3100/call \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -471,7 +471,7 @@ curl -X POST http://localhost:3456/call \
 Create a new Git branch:
 
 ```bash
-curl -X POST http://localhost:3456/call \
+curl -X POST http://localhost:3100/call \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -490,7 +490,7 @@ curl -X POST http://localhost:3456/call \
 Switch to a different branch:
 
 ```bash
-curl -X POST http://localhost:3456/call \
+curl -X POST http://localhost:3100/call \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -509,7 +509,7 @@ curl -X POST http://localhost:3456/call \
 Commit current changes with a message:
 
 ```bash
-curl -X POST http://localhost:3456/call \
+curl -X POST http://localhost:3100/call \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -528,7 +528,7 @@ curl -X POST http://localhost:3456/call \
 Push or pull brain from GitHub:
 
 ```bash
-curl -X POST http://localhost:3456/call \
+curl -X POST http://localhost:3100/call \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -547,7 +547,7 @@ curl -X POST http://localhost:3456/call \
 Acquire the brain lock:
 
 ```bash
-curl -X POST http://localhost:3456/call \
+curl -X POST http://localhost:3100/call \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -567,7 +567,7 @@ curl -X POST http://localhost:3456/call \
 Release the brain lock:
 
 ```bash
-curl -X POST http://localhost:3456/call \
+curl -X POST http://localhost:3100/call \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -587,7 +587,7 @@ curl -X POST http://localhost:3456/call \
 Check if MCP server is running:
 
 ```bash
-curl http://localhost:3456/health
+curl http://localhost:3100/health
 ```
 
 ## Authentication
@@ -607,7 +607,7 @@ MCP_REQUIRE_API_KEY=true
 ### Authenticated Request
 ```bash
 curl -H "X-API-Key: your-secret-key" \
-  http://localhost:3456/tools
+  http://localhost:3100/tools
 ```
 
 ## Integration Examples
@@ -616,7 +616,7 @@ curl -H "X-API-Key: your-secret-key" \
 ```javascript
 async function callVantTool(name |
 - args = {}) {
-    const response = await fetch('http://localhost:3456/call' |
+    const response = await fetch('http://localhost:3100/call' |
 - {
         method: 'POST',
         headers: {
@@ -657,7 +657,7 @@ import requests
 def call_vant_tool(name |
 - args=None):
     response = requests.post(
-        'http://localhost:3456/call',
+        'http://localhost:3100/call',
         json={
             'jsonrpc': '2.0',
             'method': 'tools/call',
@@ -686,7 +686,7 @@ Search brain via MCP (3 modes):
 
 ```bash
 # Basic text search
-curl -X POST http://localhost:3456/call \
+curl -X POST http://localhost:3100/call \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -706,7 +706,7 @@ RAG mode with rehydration:
 
 ```bash
 # Semantic search + rehydrate (default 5 results)
-curl -X POST http://localhost:3456/call \
+curl -X POST http://localhost:3100/call \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -726,7 +726,7 @@ curl -X POST http://localhost:3456/call \
 Compact mode (summaries only, faster):
 
 ```bash
-curl -X POST http://localhost:3456/call \
+curl -X POST http://localhost:3100/call \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -746,7 +746,7 @@ curl -X POST http://localhost:3456/call \
 Hybrid mode (BM25 + Vector + RRF):
 
 ```bash
-curl -X POST http://localhost:3456/call \
+curl -X POST http://localhost:3100/call \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -789,7 +789,7 @@ Common errors:
 - Description |
 |---------|---------|-------------|
 | `MCP_PORT`
-- 3456
+- 3100
 - Server port |
 | `MCP_API_KEY`
 - -
