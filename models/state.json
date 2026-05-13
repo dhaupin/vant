@@ -14,15 +14,10 @@
   "temp": {
     "debug": true
   },
-  "updated": "2026-05-13T20:08:27.846Z",
+  "updated": "2026-05-13T20:12:49.451Z",
   "neurons": {
-    "synapses": {
-      "alpha": {
-        "beta": 1
-      }
-    },
+    "synapses": {},
     "attention": {
-      "alpha": 0.8,
       "identity": 0.2
     }
   }
