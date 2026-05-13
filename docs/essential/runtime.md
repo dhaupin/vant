@@ -48,7 +48,7 @@ await vant.learn('key', 'value');
 
 ## Full Reference
 
-See [API Reference](/api/api-runtime) for complete documentation:
+See [API Reference](reference/api-runtime) for complete documentation:
 
 - All methods with examples
 - Error handling

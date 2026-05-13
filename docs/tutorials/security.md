@@ -84,4 +84,4 @@ vaf.configure({
 
 ## More
 
-See [Security](/security/security) and [VAF](/security/vaf).
+See [Security](security/security) and [VAF](security/vaf).

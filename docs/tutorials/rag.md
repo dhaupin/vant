@@ -190,5 +190,5 @@ User: What do I know about量子计算?
 ## See Also
 
 - [Search](/advanced/search)
-- [Runtime](/essential/runtime)
-- [MCP](/integrations/mcp)
+- [Runtime](essential/runtime)
+- [MCP](integrations/mcp)

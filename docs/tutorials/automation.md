@@ -116,4 +116,4 @@ queue.process('sync', async (job) => {
 
 ## More
 
-See [Cron](/operations/cron) and [Events](/operations/events) for details.
+See [Cron](operations/cron) and [Events](operations/events) for details.

@@ -105,4 +105,4 @@ vant add vant-my-plugin
 
 ## More
 
-See [Islands](/essential/islands) and [Runtime](/essential/runtime).
+See [Islands](essential/islands) and [Runtime](essential/runtime).

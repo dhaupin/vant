@@ -195,6 +195,6 @@ const result = await vant.think('Contact acme about invoice');
 
 ## See Also
 
-- [Islands Guide](/essential/islands)
-- [Runtime API](/essential/runtime)
+- [Islands Guide](essential/islands)
+- [Runtime API](essential/runtime)
 - [Search](/advanced/search)
