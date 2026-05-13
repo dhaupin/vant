@@ -8,7 +8,7 @@ nav_order: 88
 
 # MCP Tools Reference
 
-Complete reference for all 22 MCP tools.
+Complete reference for all 31 MCP tools.
 
 ## Core Tools (9)
 

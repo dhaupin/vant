@@ -26,7 +26,7 @@ nav_order: 135
 
 ```bash
 node bin/mcp.js
-# Exposes 22 tools
+# Exposes 31 tools
 ```
 
 ### 2. Tools Exposed

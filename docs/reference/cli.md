@@ -262,7 +262,7 @@ Run as node.
 ```bash
 vant node              # Persistent mode (manual sync)
 vant node --mcp        # Node + MCP server
-vant node --mcp-port 3457  # Custom MCP port
+vant node --mcp-port 3100  # Custom MCP port
 ```
 
 > ⚠️ **Auto-Polling Opt-In (for Self-Hosted)**: By default, `vant node` does NOT poll GitHub. To enable background sync:
