@@ -34,7 +34,7 @@ Your branch is your identity space. If it starts with `agent-`, you're on your o
 
 ### Check Your Trust Level
 
-Read `models/public/_succession.json`:
+Read `models/private/_succession.json`:
 
 ```json
 {
@@ -57,7 +57,7 @@ Read `models/public/_succession.json`:
 
 ## What to Read
 
-In `models/public/`:
+In `models/private/`:
 
 | File | Why |
 |------|-----|

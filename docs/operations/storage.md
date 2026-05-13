@@ -101,7 +101,7 @@ The default brain location:
 
 ```javascript
 const brain = Storage.get('brain');
-console.log(brain.modelsPath); // "models/public"
+console.log(brain.modelsPath); // "models/private"
 ```
 
 ## GitHub Sync
@@ -170,7 +170,7 @@ Storage options:
 
 ```javascript
 const storage = new Storage({
-    path: 'models/public',     // brain location
+    path: 'models/private',     // brain location
     sync: true,             // auto-sync
     atomic: true,          // atomic writes
     sandbox: true          // enable checks

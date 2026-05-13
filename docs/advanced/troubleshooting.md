@@ -82,7 +82,7 @@ Error: Cannot load brain
 ```
 
 **Fix**:
-1. Check models/public/ exists
+1. Check models/private/ exists
 2. Verify brain files are valid markdown
 3. Run `vant health`
 

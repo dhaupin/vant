@@ -19,7 +19,7 @@ Data collection.
 
 **You control what you share:**
 
-- Brain files in `models/public/` - You decide what goes here
+- Brain files in `models/private/` - You decide what goes here
 - Configuration in `.env` - Your tokens, your settings
 - Custom modifications - Your code, your prompts
 

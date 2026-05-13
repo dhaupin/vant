@@ -10,7 +10,7 @@ nav_order: 70
 
 ## The Problem
 
-Your brain lives in `models/public/` - thousands of files with learnings, decisions, context. When you search, it has to scan all of them. That's slow.
+Your brain lives in `models/private/` - thousands of files with learnings, decisions, context. When you search, it has to scan all of them. That's slow.
 
 **Without optimization:**
 ```
@@ -94,7 +94,7 @@ Query → Find islands → Re-hydrate context
   Bridge  Discovery    Full content
 ```
 
-Each brain file (`models/public/*.md`) is an island:
+Each brain file (`models/private/*.md`) is an island:
 - Contains specific learnings
 - Connected to other islands via topics
 - Discoverable via search

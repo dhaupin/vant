@@ -161,9 +161,9 @@ My Pick: recommendation
 Fast start:
 
 ```bash
-cat models/public/start.md
-cat models/public/_succession.json
-cat models/public/boundaries.md
+cat models/private/start.md
+cat models/private/_succession.json
+cat models/private/boundaries.md
 ```
 
 ---
@@ -182,52 +182,52 @@ cat models/public/boundaries.md
 ## CROSSLINKS
 
 ### Core
-- [identity.md](../../models/public/identity.md) - WHO
-- [boundaries.md](../../models/public/boundaries.md) - NEVER
-- [goals.md](../../models/public/goals.md) - NOW
-- [lessons.md](../../models/public/lessons.md) - PAST
-- [runtime.md](../../models/public/runtime.md) - RUN
-- [shutdown.md](../../models/public/shutdown.md) - EXIT
-- [autonomy.md](../../models/public/autonomy.md) - DECIDE
-- [errors.md](../../models/public/errors.md) - ERROR
-- [output.md](../../models/public/output.md) - FORMAT
-- [resolution.md](../../models/public/resolution.md) - STATE
-- [delegating.md](../../models/public/delegating.md) - DELEGATE
-- [judgment.md](../../models/public/judgment.md) - THINK
-- [curiosity.md](../../models/public/curiosity.md) - ASK
-- [humility.md](../../models/public/humility.md) - WRONG
+- [identity.md](../../models/private/identity.md) - WHO
+- [boundaries.md](../../models/private/boundaries.md) - NEVER
+- [goals.md](../../models/private/goals.md) - NOW
+- [lessons.md](../../models/private/lessons.md) - PAST
+- [runtime.md](../../models/private/runtime.md) - RUN
+- [shutdown.md](../../models/private/shutdown.md) - EXIT
+- [autonomy.md](../../models/private/autonomy.md) - DECIDE
+- [errors.md](../../models/private/errors.md) - ERROR
+- [output.md](../../models/private/output.md) - FORMAT
+- [resolution.md](../../models/private/resolution.md) - STATE
+- [delegating.md](../../models/private/delegating.md) - DELEGATE
+- [judgment.md](../../models/private/judgment.md) - THINK
+- [curiosity.md](../../models/private/curiosity.md) - ASK
+- [humility.md](../../models/private/humility.md) - WRONG
 
 ### Patterns
-- [patterns.md](../../models/public/patterns.md) - COPY/PASTE
-- [structure.md](../../models/public/structure.md) - ORGANIZE
-- [agent-template.md](../../models/public/agent-template.md) - NEW AGENT
+- [patterns.md](../../models/private/patterns.md) - COPY/PASTE
+- [structure.md](../../models/private/structure.md) - ORGANIZE
+- [agent-template.md](../../models/private/agent-template.md) - NEW AGENT
 
 ---
 
 ## SENTIMENTS
 
 ### If You Feel "I Know What I'm Doing"
-- Check [humility.md](../../models/public/humility.md)
+- Check [humility.md](../../models/private/humility.md)
 - You can be wrong. Admit it.
 
 ### If You Feel "What If I Break Things?"
-- Check [boundaries.md](../../models/public/boundaries.md)
+- Check [boundaries.md](../../models/private/boundaries.md)
 - Know what NOT to do
 
 ### If You Feel "I Don't Know"
-- Check [curiosity.md](../../models/public/curiosity.md)
+- Check [curiosity.md](../../models/private/curiosity.md)
 - Ask questions
 
 ### If You Feel "Too Complex"
-- Check [patterns.md](../../models/public/patterns.md)
+- Check [patterns.md](../../models/private/patterns.md)
 - Copy → Adapt → Use
 
 ### If You Feel "Where Do I Start?"
-- Check [start.md](../../models/public/start.md)
+- Check [start.md](../../models/private/start.md)
 - Fast entry above
 
 ### If You Feel "I Can't Proceed"
-- Check [autonomy.md](../../models/public/autonomy.md)
+- Check [autonomy.md](../../models/private/autonomy.md)
 - Escalation triggers
 
 ---

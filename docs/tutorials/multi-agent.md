@@ -59,9 +59,9 @@ async function work() {
   await branch.checkout(AGENT_ID);
 
   // 3. Do work on your brain...
-  const lessons = await readFile('models/public/lessons.md');
+  const lessons = await readFile('models/private/lessons.md');
   lessons += `\n- Agent ${AGENT_ID}: learned something`;
-  await writeFile('models/public/lessons.md', lessons);
+  await writeFile('models/private/lessons.md', lessons);
 
   // 4. Commit changes
   await branch.commit(AGENT_ID, 'Updated lessons');

@@ -149,7 +149,7 @@ See for details.
 |-------|-------|---------|
 | Agent ID | memory | Current agent |
 | Session | vant.js | Runtime context |
-| Brain | models/public/ | Persistent |
+| Brain | models/private/ | Persistent |
 | Lock | git ref | Coordination |
 
 ---

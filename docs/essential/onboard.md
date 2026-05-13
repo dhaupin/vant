@@ -176,7 +176,7 @@ vant onboard decisions
 
 ```bash
 # One-liner
-cat models/public/identity.md
+cat models/private/identity.md
 ```
 
 ---

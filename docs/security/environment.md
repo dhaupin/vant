@@ -100,7 +100,7 @@ How your data is handled.
 ### What Gets Synced
 
 **Your brain files:**
-- Memory files (`models/public/*.md`)
+- Memory files (`models/private/*.md`)
 - Configuration (non-secret)
 - Settings
 
@@ -334,7 +334,7 @@ htop
 ps aux | grep node
 
 # Check disk usage
-du -sh models/public/
+du -sh models/private/
 ```
 
 ### GitHub Monitoring
