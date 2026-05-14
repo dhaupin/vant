@@ -1,25 +1,8 @@
 {
-  "static": {
-    "name": "Vant",
-    "version": "0.8.6",
-    "test": "static",
-    "t": "v"
-  },
-  "current": {
-    "mode": "islands",
-    "hydrated": [],
-    "task": "test",
-    "test": "current"
-  },
-  "temp": {
-    "debug": true
-  },
-  "updated": "2026-05-13T21:43:59.002Z",
   "neurons": {
-    "synapses": {},
-    "attention": {
-      "Agent_iydm": 1,
-      "identity": 0.2
+    "neurons": {
+      "asyncTest": true
     }
-  }
+  },
+  "updated": "2026-05-14T05:12:26.153Z"
 }
