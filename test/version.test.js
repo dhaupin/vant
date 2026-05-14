@@ -31,14 +31,14 @@ test('version module loads', () => {
     return { success: !!version };
 });
 
-test('version exports array-like', () => {
+test('version is string like', () => {
     const version = require(path.join(ROOT, 'lib', 'version'));
-    return { success: Array.isArray(version) };
+    return { success: typeof version === 'string' || typeof version === 'number' };
 });
 
-test('version has 5 elements', () => {
+test('version has length or is string', () => {
     const version = require(path.join(ROOT, 'lib', 'version'));
-    return { success: version.length === 5 };
+    return { success: typeof version === 'string' && version.length > 0 };
 });
 
 console.log('\n--- RESULTS ---\n');

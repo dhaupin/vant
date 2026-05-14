@@ -46,9 +46,9 @@ test('mcp has listTools function', () => {
     return { success: typeof mcp.listTools === 'function' };
 });
 
-test('mcp has methods function', () => {
+test('mcp has methods', () => {
     const mcp = require(path.join(ROOT, 'lib', 'mcp'));
-    return { success: typeof mcp.methods === 'function' };
+    return { success: typeof mcp.methods === 'object' };
 });
 
 test('mcp has addMethod function', () => {

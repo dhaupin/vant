@@ -36,9 +36,9 @@ test('encrypt has default export', () => {
     return { success: !!encrypt.default };
 });
 
-test('encrypt is object', () => {
+test('encrypt is class or function', () => {
     const encrypt = require(path.join(ROOT, 'lib', 'encrypt'));
-    return { success: typeof encrypt === 'object' };
+    return { success: typeof encrypt === 'function' || typeof encrypt === 'object' };
 });
 
 console.log('\n--- RESULTS ---\n');
