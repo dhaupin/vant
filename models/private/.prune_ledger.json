@@ -251,6 +251,30 @@
         "ltcEntries": 0,
         "errors": []
       }
+    },
+    {
+      "date": "2026-05-14T07:44:52.689Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
+    },
+    {
+      "date": "2026-05-14T07:45:18.184Z",
+      "dryRun": true,
+      "stats": {
+        "filesScanned": 0,
+        "staleRemoved": 0,
+        "fluffRemoved": 0,
+        "kept": 0,
+        "ltcEntries": 0,
+        "errors": []
+      }
     }
   ]
 }
