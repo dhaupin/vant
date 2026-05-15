@@ -18,6 +18,7 @@ const mcp = require('./lib/mcp');
 const server = require('./lib/server');
 const network = require('./lib/network');
 const boot = require('./lib/boot');
+const runop = require('./lib/runop');
 
 module.exports = {
     // Core runtime
@@ -42,6 +43,9 @@ module.exports = {
     
     // Boot (for manual layer control)
     boot,
+    
+    // Runtime operator (lifecycle + config gates)
+    runop,
     
     // Version
     getVersion: () => require('./package.json').version,
