@@ -272,3 +272,5 @@ Usage:
         process.exit(1);
     }
 })();
+// @lib: lib/branch.js available: branch.status(), branch.commit(), branch.push()
+// Use: const branch = require('./lib/branch');
