@@ -19,11 +19,27 @@ const REPO_ROOT = path.join(__dirname, '..');
 const islands = require(path.join(REPO_ROOT, 'lib', 'islands'));
 const brain = require(path.join(REPO_ROOT, 'lib', 'brain'));
 
+// Islands manifest file path
+const ISLANDS_FILE = path.join(REPO_ROOT, 'models', 'islands.json');
+
 /**
- * Get islands manifest
+ * Load islands manifest from file (islands.getManifest uses internal, we need file)
  */
 function getManifest() {
     return islands.getManifest();
+}
+
+/**
+ * Save islands manifest to file (workaround - islands.saveManifest may not exist)
+ */
+function saveManifest(m) {
+    // Try the module's saveManifest first
+    if (islands.saveManifest) {
+        saveManifest(m);
+    } else {
+        // Fallback: save directly to file
+        fs.writeFileSync(ISLANDS_FILE, JSON.stringify(m, null, 2));
+    }
 }
 
 /**
@@ -48,7 +64,7 @@ function createIsland(name, options = {}) {
         triggers: triggers.map(t => t.toLowerCase())
     };
     
-    islands.saveManifest(m);
+    saveManifest(m);
     console.log(`[create] Created island: ${name}`);
     console.log(`[create] Type: ${type}, Triggers: ${triggers.join(', ') || 'none'}`);
     
@@ -78,7 +94,7 @@ function updateTriggers(name, triggers) {
     }
     
     m.islands[name].triggers = triggers.map(t => t.toLowerCase());
-    islands.saveManifest(m);
+    saveManifest(m);
     
     console.log(`[update] Updated triggers for ${name}: ${triggers.join(', ')}`);
     return m.islands[name];
@@ -100,7 +116,7 @@ function addTrigger(name, trigger) {
         m.islands[name].triggers.push(t);
     }
     
-    islands.saveManifest(m);
+    saveManifest(m);
     console.log(`[add] Added trigger '${t}' to ${name}`);
     return m.islands[name];
 }
