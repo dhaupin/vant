@@ -139,6 +139,12 @@
       "triggers": [
         "chain"
       ]
+    },
+    "boot-test2": {
+      "name": "Boot-test2",
+      "type": "static",
+      "source": "corpus",
+      "triggers": []
     }
   },
   "loaded": [],
