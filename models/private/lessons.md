@@ -77,3 +77,64 @@
 - Agent max is 4 (hard limit in code)
 
 === LEARNED ===
+
+## 2026-05-15 - Awareness Branch Runtime Buildout
+
+### What We Completed
+
+1. **Sudo MCP Tools** (10 tools)
+   - vant_sudo_createTask, getTask, can, grant, revoke
+   - vant_sudo_escalate, listTasks, suggest, getScopes, getLayerStatus
+   - Wired to agent delegation via context
+
+2. **Shell Fixes**
+   - Added taskId context (setTaskId, getTaskId)
+   - Dynamic whitelist via config + setAllowedCommands
+   - Consistent getLayerStatus with capabilities/scopes/chain
+   - Added deno, bun to defaults
+
+3. **Tmp.js Refactor**
+   - Added TmpSpace class for extensibility
+   - Unified interface: put(space, name, content), get(space, name), list(space)
+   - Added sudo checks to security chain
+   - Task context for delegation
+   - Backward compat: dropbox*, myStuff*, yourStuff* still work
+
+4. **Boot Sequence** (lib/boot.js)
+   - init() for clean startup with all layers
+   - Ordered: sudo → sandbox → qos → escrow → lock → audit → brain → islands
+   - getLayerStatus() for all layers
+   - Syncs task context to shell/tmp
+
+5. **Agent Context**
+   - getCurrentAgentId/setCurrentAgentId in agents.js
+   - Syncs to shell.setTaskId and tmp.setTaskId
+
+### New MCP Tools Added
+- 10 sudo tools
+- 4 boot tools (init, status, layers, reset)
+- 3 unified tmp tools (put, get, list)
+- Total: 142 MCP tools now
+
+### Usage
+
+```javascript
+// Boot runtime
+const boot = require('./lib/boot');
+await boot.init({ taskId: 'agent_123', scopes: ['read', 'write'] });
+
+// Check layers
+boot.getLayerStatus();
+
+// Use unified tmp
+const tmp = require('./lib/tmp');
+await tmp.put('dropbox', 'test.txt', 'hello');
+await tmp.put('myStuff', 'data.json', JSON.stringify(data));
+
+// Shell with task
+const shell = require('./lib/shell');
+shell.setTaskId('agent_123');
+await shell.exec('git status');
+```
+
+=== LEARNED ===
