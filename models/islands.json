@@ -157,6 +157,14 @@
       "type": "static",
       "source": "corpus",
       "triggers": []
+    },
+    "test-new": {
+      "name": "Test-new",
+      "type": "static",
+      "source": "corpus",
+      "triggers": [
+        "test"
+      ]
     }
   },
   "loaded": [],
