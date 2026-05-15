@@ -98,6 +98,15 @@
         "mine",
         "custom"
       ]
+    },
+    "runtime-test": {
+      "name": "Runtime-test",
+      "type": "static",
+      "source": "corpus",
+      "triggers": [
+        "test",
+        "runtime"
+      ]
     }
   },
   "loaded": [],
