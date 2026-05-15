@@ -138,3 +138,42 @@ await shell.exec('git status');
 ```
 
 === LEARNED ===
+
+## 2026-05-15 - Full Runtime Orchestration
+
+### What We Did
+
+1. **vant.js v0.8.9** - Full runtime with state machine
+   - State: stopped → starting → running → stopping → stopped
+   - Wired boot.init() into init() for security layers
+   - Added startFull() - boot→event→msg→mcp chain
+   - Added shutdown() - graceful cleanup
+
+2. **brain.js audit fix**
+   - audit called directly but not imported
+   - Fixed all calls to use lazy getAudit()
+
+3. **index.js wired**
+   - Now exports: startFull, shutdown, getStatus
+   - start: vant.startFull
+   - shutdown: vant.shutdown
+
+### Usage
+
+```javascript
+// Full runtime
+const vant = require('./lib/vant');
+await vant.startFull();
+
+// Or via index
+const vant = require('./index');
+await vant.start();
+
+// Shutdown
+await vant.shutdown();
+
+// Get status
+vant.getStatus();
+```
+
+=== LEARNED ===
