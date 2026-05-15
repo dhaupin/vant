@@ -145,6 +145,18 @@
       "type": "static",
       "source": "corpus",
       "triggers": []
+    },
+    "bulk1": {
+      "name": "Bulk1",
+      "type": "static",
+      "source": "corpus",
+      "triggers": []
+    },
+    "bulk2": {
+      "name": "Bulk2",
+      "type": "static",
+      "source": "corpus",
+      "triggers": []
     }
   },
   "loaded": [],
