@@ -17,6 +17,7 @@ const stream = require('./lib/stream');
 const mcp = require('./lib/mcp');
 const server = require('./lib/server');
 const network = require('./lib/network');
+const boot = require('./lib/boot');
 
 module.exports = {
     // Core runtime
@@ -39,12 +40,22 @@ module.exports = {
     // MCP (new!)
     mcp,
     
+    // Boot (for manual layer control)
+    boot,
+    
     // Version
     getVersion: () => require('./package.json').version,
     
-    // Start everything
-    start: async (options) => {
-        await vant.init(options);
-        return { vant, brain, agents, mcp };
-    }
+    // Start everything (full runtime)
+    start: vant.startFull,
+    
+    // Shutdown gracefully
+    shutdown: vant.shutdown,
+    
+    // Get status
+    getStatus: vant.getStatus,
+    
+    // Individual starts
+    startMCP: (port) => mcp.start({ port }),
+    startBoot: (opts) => boot.init(opts)
 };
