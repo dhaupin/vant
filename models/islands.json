@@ -107,6 +107,38 @@
         "test",
         "runtime"
       ]
+    },
+    "mcp-test": {
+      "name": "Mcp-test",
+      "type": "static",
+      "source": "corpus",
+      "triggers": [
+        "test"
+      ]
+    },
+    "flow-test": {
+      "name": "Flow-test",
+      "type": "static",
+      "source": "corpus",
+      "triggers": [
+        "flow"
+      ]
+    },
+    "api-test": {
+      "name": "Api-test",
+      "type": "static",
+      "source": "corpus",
+      "triggers": [
+        "api"
+      ]
+    },
+    "chain-test": {
+      "name": "Chain-test",
+      "type": "static",
+      "source": "corpus",
+      "triggers": [
+        "chain"
+      ]
     }
   },
   "loaded": [],
