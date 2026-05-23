@@ -1,31 +1,35 @@
-# Legal Framework & License Agreement
+# License Agreement & Legal Framework
 
 > **⚖️ This document provides legally binding terms for using, forking, and building upon Vant.**
 
-> **Last Updated: 2026-05-23** | **Version: 1.0** | **[Vant v0.8.6+](https://github.com/dhaupin/vant)**
+> **Last Updated: 2026-05-23** | **Version: 1.1** | **[Vant v0.8.6+](https://github.com/dhaupin/vant)**
 
 ---
 
 ## PART 1: CORE LEGAL FRAMEWORK
 
-### §1. License Grant
+### §1. License Grant (Fair-Code / Source-Available Model)
 
-The Versatile Autonomous Networked Tool ("Vant") is provided under the **MIT License** (see LICENSE file), with **additional protective terms** in this document that supplement or supersede where noted.
+The Versatile Autonomous Networked Tool ("Vant") is provided under a **Fair-Code / Source-Available license model.**
+
+**This is NOT a pure MIT License** — Vant includes supplemental terms (especially §8, §15) that restrict commercial exploitation. These terms are explicit and disclosed.
 
 **Grant:** Permission is granted, free of charge, to use, copy, modify, merge, distribute, sublicense, and/or sell copies of Vant, subject to the following conditions:
 
-1. **Attribution** - Modified or unmodified versions must retain this LEGAL.md and cite Vant as originating work
+1. **Attribution** - Modified or unmodified versions must retain LEGAL.md and cite Vant as originating work
 2. **No Vant Branding** - Derivatives may NOT use "Vant" name in product/project names without written permission
-3. **No Commercial Service** - Vant may NOT be used to provide commercial SAAS/platform services to third parties
+3. **No Commercial Service** - Vant may NOT be used to provide commercial SAAS/platform services to third parties (see §15)
 
 ---
 
 ### §2. Copyright & Ownership
 
-**© 2024-2026 The Contributors.** Vant is an open-source project with copyright held collectively by contributors.
+**© 2024-2026 dhaupin** and **The Contributors.** 
 
-- Original author/maintainer: **David H** (dhaupin)
-- Contributor license: **CLA-C** (Contributor License Agreement - Copyright) - By submitting PRs, contributors agree to license contributions under MIT + this document
+Vant is an open-source project with copyright held by the maintainer and contributors collectively.
+
+- **Maintainer:** **dhaupin** (Derek H / David H on GitHub)
+- **Contributor License:** **CLA-C** (Contributor License Agreement - Copyright) — By submitting PRs, contributors agree to license contributions under this document's terms
 
 **No IP Transfer Required:** Contributors retain copyright to their contributions. License is non-exclusive, worldwide, royalty-free.
 
@@ -66,18 +70,20 @@ If any party brings a patent infringement claim against Vant, Contributors may d
 
 ## PART 2: TRADEMARK & BRANDING
 
-### §6. Trademark Protection
+### §6. Trademark & Naming Convention
 
-**"Vant"®** and associated logos are **registered trademarks** of the Vant project.
+**"Vant"** is used as a descriptive **acronym** for this project's technical profile: **V**ersatile **A**utonomous **N**etworked **T**ool.
 
-**Use Restrictions:**
-- ✅ MAY use "Vant-compatible" to describe compatibility
-- ✅ MAY use "Built with Vant" withattribution  
-- ❌ CANNOT use "Vant" as your project/product name
-- ❌ CANNOT use Vant logos without permission
-- ❌ CANNOT claim "Vant-certified" or "Vant-official"
+**™ Status:** This document establishes **common-law trademark** protection through consistent use in the open-source community. We have NOT filed a formal USPTO registration.
 
-**Violations:** Unauthorized use constitutes trademark infringement and is prohibited.
+**Nomenclature Rationale:**
+The term "Vant" was chosen as a purely technical acronym describing the framework's architectural characteristics:
+- **V**ersatile — adaptable to many use cases
+- **A**utonomous — operates with self-directed agency  
+- **N**etworked — connects across systems and contexts
+- **T**ool — developer tooling for AI agent construction
+
+This naming is a descriptive technical designation, NOT a commercial brand attempt, and is explicitly **separate** from any registered corporate trademarks in enterprise compliance, biotech, or UI frameworks.
 
 ---
 
