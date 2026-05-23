@@ -19,6 +19,7 @@ const server = require('./lib/server');
 const network = require('./lib/network');
 const boot = require('./lib/boot');
 const runop = require('./lib/runop');
+const format = require('./lib/format');
 
 module.exports = {
     // Core runtime
@@ -32,6 +33,9 @@ module.exports = {
     sandbox,
     qos,
     escrow,
+    
+    // Utilities
+    format,
     
     // Communication
     stream,
