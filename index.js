@@ -20,6 +20,7 @@ const network = require('./lib/network');
 const boot = require('./lib/boot');
 const runop = require('./lib/runop');
 const format = require('./lib/format');
+const legal = require('./lib/legal');  // Emergency red button
 
 module.exports = {
     // Core runtime
@@ -36,6 +37,7 @@ module.exports = {
     
     // Utilities
     format,
+    legal,  // Emergency red button
     
     // Communication
     stream,
