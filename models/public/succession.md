@@ -52,4 +52,9 @@ See: models/.ledger.json
 
 ## Current Version
 
-This is **v0.8.4** - container for dev new stuff.
+This is **v0.8.6** - Islands Release (Distributed OS Architecture)
+
+Features:
+- Lazy-loadable islands
+- Resolution thought tracking
+- Multi-agent branching

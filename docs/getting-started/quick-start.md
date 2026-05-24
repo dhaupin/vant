@@ -1,8 +1,9 @@
 ---
-permalink: /getting-started/quick-start.html
+version: 0.8.11
+permalink: /getting-started/quick-start
 layout: default
 title: Quick Start
-nav_order: 2
+nav_order: 11
 ---
 # Quick Start
 
@@ -50,6 +51,6 @@ vant sync   # Push brain changes to GitHub
 
 ## What's Next?
 
-- [Build Your First Agent](/vant/tutorials/build-agent.html) - 15 min tutorial
-- [CLI Reference](/vant/reference/cli.html) - All commands
-- [Configuration](/vant/reference/configuration.html) - Customize Vant
+- [Build Your First Agent](tutorials/build-agent) - 15 min tutorial
+- [CLI Reference](reference/cli) - All commands
+- [Configuration](reference/configuration) - Customize Vant

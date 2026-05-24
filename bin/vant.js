@@ -10,7 +10,7 @@ const version = require('../lib/version');
  *   vant start      - Full startup (health → sync → load → run)
  *   vant sync       - Pull/push brain from/to GitHub
  *   vant health     - System diagnostics and model check
- *   vant load       - Load brain from models/public
+ *   vant load       - Load brain from models/private
  *   vant run        - Start runtime (long-running agent loop)
  *   vant test       - Run build tests
  *   vant changelog  - View recent changes
@@ -31,13 +31,62 @@ const path = require('path');
 
 const BIN_DIR = __dirname;
 
+// CLI commands
 const COMMANDS = {
+    // Core
     start: 'start.js',
     sync: 'sync.js',
     health: 'health.js',
     load: 'load.js',
     run: 'run.js',
     test: 'build-test.js',
+    
+    // Server
+    server: 'server.js',
+    
+    // Changelog & docs
+    changelog: 'changelog.js',
+    docs: 'docs.js',
+    
+    // Utilities
+    summary: 'summary.js',
+    update: 'update.js',
+    watch: 'watch.js',
+    bump: 'bump.js',
+    
+    // Help & info
+    help: 'help.js',
+    
+    // Server modes
+    node: 'node.js',
+    mcp: 'mcp.js',
+    
+    // Onboarding
+    onboard: 'onboard.js',
+    
+    // Settings
+    setup: 'setup.js',
+    rate: 'rate.js',
+    
+    // Branching
+    resolution: 'resolution.js',
+    succession: 'succession.js',
+    
+    // Advanced
+    bot: 'bot.js',
+    compress: 'compress.js',
+    
+    // Brain
+    stego: 'stego.js',
+    
+    // Automation
+    prune: 'prune.js',
+    vibe: 'vibe.js',
+    repos: 'repos.js',
+    hybrid: 'hybrid-sync.js',
+    search: 'search.js',
+    rerank: 'rerank.js',
+    validate: 'validate.js',
     changelog: 'changelog.js',
     summary: 'summary.js',
     update: 'update.js',
@@ -53,7 +102,19 @@ const COMMANDS = {
     resolution: 'resolution.js',
     succession: 'succession.js',
     bot: 'bot.js',
-    compress: 'compress.js'
+    compress: 'compress.js',
+    // Stego brain recovery
+    stego: 'stego.js',
+    // Automated pruning
+    prune: 'prune.js',
+    // Ghost in the Machine
+    boot: 'boot.js',
+    // NEW: Islands (componentized brain)
+    islands: 'islands-boot.js',
+    // Brain lock management
+    lock: 'lock.js',
+    // Config get/set
+    config: 'config.js'
 };
 
 const args = process.argv.slice(2);
@@ -72,39 +133,65 @@ if (cmd === 'help' && args[1]) {
 if (!cmd || cmd === 'help' || cmd === 'vant') {
     console.log(`
 ╔═══════════════════════════════════════╗
-║         vant CLI v0.8.4              ║
+║         vant CLI v${version}              ║
 ╚═══════════════════════════════════════╝
 
 Usage: vant <command> [options]
 
 Core:
-  vant start        Full startup
-  vant sync        Pull/push brain
+  vant start        Full startup (health → sync → load → run)
   vant health      System diagnostics
-  vant load        Load brain
-  vant run         Start runtime
+  vant sync        Pull/push brain
+  vant load       Load brain
+  vant run        Long-running agent loop
 
-Info:
-  vant test        Run build tests
+Development:
+  vant test         Run build tests
+  vant test core    Run core test suite
+  vant validate    Schema + audit + circuits
   vant changelog   View changes
-  vant summary    Session summary
-  vant watch      Monitor GitHub
-  vant help       Show help
 
-Setup:
-  vant setup      Interactive setup
-  vant update    Check for updates
-  vant rate      GitHub rate limit
-  vant bump     Bump version
-  vant docs      Build docs
+Sync:
+  vant repos       Mount external repos
+  vant hybrid     Public/Private split sync
+  vant search    RAG + hybrid search
+  vant rerank    RAG rerank + compress
+
+Brain:
+  vant onboard     Browse brain files
+  vant islands    Componentized brain boot
+  vant prune      Prune brain (LTC generation)
+  vant succession Trust levels
+  vant resolution Thought resolution
+  vant lock       Brain write lock (acquire/release/status)
+
+State:
+  vant vibe        Show/set vibe
+  vant watch      Poll GitHub for changes
+  vant summary    Session stats
 
 Integrations:
-  vant mcp       MCP server
-  vant node      Persistent node
-  vant bot       Telegram bot
-  vant onboard  Onboarding
-  vant succession Succession
-  vant compress  Entropy-Patch encoder
+  vant mcp        MCP server for AI tools
+  vant node       Persistent node
+  vant webhook   Webhook server + send
+  vant server     HTTP/HTTPS server with security chain
+  vant notify    Send notifications
+  vant linear   Linear issue tracking (requires island)
+
+Config:
+  vant config get <key>   Get config value
+  vant config set <key> <value>  Set config value
+
+Maintenance:
+  vant boot       Ghost boot (stego image)
+  vant stego      Encode/decode brain in images
+  vant bump      Bump version + tag release
+  vant update     Check for updates
+  vant rate      Show GitHub rate limit
+
+Setup:
+  vant setup     Interactive wizard
+  vant help      Show help (this message)
 `);
     process.exit(0);
 }

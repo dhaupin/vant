@@ -7,41 +7,135 @@ markdown: kramdown
 highlighter: rouge
 
 # Build settings
-permalink: pretty
+# pretty = /path/ (with trailing slash)
+# :title = /path (clean, no ext or slash)
+# But individual page frontmatter overrides this
+permalink: :title
 exclude: ['README.md', 'Gemfile', 'Gemfile.lock', 'tmp', 'pagefind*']
 
-# Kramdown settings for syntax highlighting
+# Kramdown settings
 kramdown:
   syntax_highlighter: rouge
   syntax_highlighter_opts:
     default_lang: plaintext
     css_class: 'highlight'
-    span:
-      decorator: '<span class="language-{}">{}</span>'
-    block:
-      decorator: '<div class="language-{}"><pre class="line-numbers">{}</pre></div>'
+  toc_levels: [1, 2, 3, 4, 5, 6]
+  auto_ids: true
+  auto_id_prefix: ''
 
-# Default layouts for all docs
-defaults:
-  - scope:
-      type: pages
-    values:
-      layout: default
+# Plugins
+gems:
+  - jekyll-redirect-from
+plugins:
+  - jekyll-redirect-from
 
-# Custom section titles for navigation (folder => display title)
-nav_sections:
-  getting-started: "Getting Started"
-  tutorials: "Tutorials"
-  reference: "Reference"
-  guides: "Guides"
-  community: "Community"
-  legal: "Legal"
-
-# Section order (numeric - lower shows first)
-nav_order:
-  getting-started: 1
-  tutorials: 2
-  guides: 3
-  reference: 4
-  community: 5
-  legal: 6
+# Navigation - explicit order
+nav:
+  - title: Getting Started
+    items:
+      - title: Quick Start
+        url: /vant
+      - title: Examples
+        url: /vant/examples.html
+      - title: FAQ
+        url: /vant/faq.html
+  - title: Core
+    items:
+      - title: AI Onboarding
+        url: /vant/essential/ai-onboard
+      - title: Brain Structure
+        url: /vant/essential/brain
+      - title: Islands
+        url: /vant/essential/islands
+      - title: Trust & Succession
+        url: /vant/essential/succession
+      - title: Architecture
+        url: /vant/essential/architecture
+  - title: Tools
+    items:
+      - title: CLI
+        url: /vant/reference/cli
+      - title: MCP Server
+        url: /vant/reference/mcp-tools
+      - title: Search Architecture
+        url: /vant/advanced/search-architecture
+      - title: Hybrid Search
+        url: /vant/advanced/search
+      - title: Multi-Agent
+        url: /vant/tutorials/multi-agent
+      - title: Airgap
+        url: /vant/security/airgap-propagation
+  - title: Features
+    items:
+      - title: Webhooks
+        url: /vant/tutorials/webhooks
+      - title: Notifications
+        url: /vant/operations/notifications
+      - title: Linear Integration
+        url: /vant/integrations/linear
+      - title: Agent Skills
+        url: /vant/integrations/agent-skills
+      - title: Vibe Controls
+        url: /vant/advanced/vibe
+  - title: Integrations
+    items:
+      - title: GitHub
+        url: /vant/integrations/github
+      - title: Docker
+        url: /vant/integrations/docker
+      - title: Providers
+        url: /vant/integrations/providers
+      - title: Multi-Repo
+        url: /vant/integrations/repos
+      - title: Hybrid Sync
+        url: /vant/integrations/hybrid
+      - title: Sync
+        url: /vant/operations/sync
+  - title: Advanced
+    items:
+      - title: Security
+        url: /vant/tutorials/security
+      - title: Operations
+        url: /vant/operations/operations
+      - title: Style Guide
+        url: /vant/advanced/style
+      - title: Testing
+        url: /vant/tutorials/testing
+      - title: Release
+        url: /vant/advanced/release
+      - title: Contributing
+        url: /vant/contributing.html
+      - title: Schema
+        url: /vant/advanced/schema
+      - title: Resolution
+        url: /vant/reference/resolution
+      - title: Pruning
+        url: /vant/advanced/pruning
+      - title: Stego
+        url: /vant/advanced/stego
+      - title: Steganography
+        url: /vant/advanced/steganography
+      - title: Efficiency
+        url: /vant/advanced/efficiency
+      - title: Plugins
+        url: /vant/tutorials/plugins
+      - title: CI
+        url: /vant/advanced/citations
+      - title: Troubleshooting
+        url: /vant/advanced/troubleshooting
+      - title: Audit
+        url: /vant/advanced/audit
+      - title: Boot
+        url: /vant/essential/boot
+      - title: Horcrux
+        url: /vant/advanced/horcrux
+  - title: Reference
+    items:
+      - title: Module API
+        url: /vant/reference/api
+      - title: Configuration
+        url: /vant/reference/configuration
+      - title: Deprecations
+        url: /vant/deprecations
+      - title: CHANGELOG
+        url: /vant/CHANGELOG

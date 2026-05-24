@@ -3,20 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vant | Persistent AI Memory System</title>
-    <meta name="description" content="Vant: Open source system for AI agent memory persistence via GitHub. Each agent inherits full context from previous sessions. Built for long-running agentic workflows.">
-    <meta name="keywords" content="AI agent, memory persistence, agentic AI, GitHub, autonomous agents, memory transfer, brain transfer, AI continuity, persistent AI, Vant, MCP server, AI tools, AI memory system">
+    <title>Vant v0.8.6 | Persistent AI Memory System</title>
+    <meta name="description" content="Vant v0.8.6: Open source system for AI agent memory persistence via GitHub. 31 MCP tools, search rerank across all modes, RAG compression, Islands lazy-loading, Agent Skills, Webhooks, 5 notification channels, Resolution thought tracking, Stego bootstrap. Built for long-running autonomous agents.">
+    <meta name="keywords" content="AI agent, memory persistence, RAG retrieval augmented generation, rerank, keyword reranking, LLM context compression, autonomous agents, long-running agents, multi-agent, AI memory system, persistent memory, context injection, agentic AI, GitHub, memory transfer, brain transfer, AI continuity, persistent AI, Vant, MCP server, 31 MCP tools, AI tools, islands architecture, lazy loading, agent skills, webhooks, slack notifications, discord notifications, linear integration, steganography">
     <meta name="author" content="Vant Project">
     <meta name="robots" content="index, follow">
     <meta property="og:title" content="Vant | Persistent AI Memory System">
     <meta property="og:description" content="Open source system for AI agent memory persistence. Each agent inherits full context from previous sessions via GitHub.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://github.com/dhaupin/vant">
+    <meta property="og:url" content="https://vant.creadev.org">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Vant | Persistent AI Memory">
     <meta name="twitter:description" content="Your AI should remember. Open source memory system for agents.">
-    <link rel="canonical" href="https://github.com/dhaupin/vant">
+    <link rel="canonical" href="https://vant.creadev.org">
+    <link rel="preconnect" href="https://docs.creadev.org">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23059669'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' fill='white' font-family='system-ui' font-weight='bold' font-size='20'>V</text></svg>">
+    <meta property="og:image" content="https://vant.creadev.org/vant-og.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "@id": "https://vant.creadev.org/#software",
+        "name": "Vant",
+        "description": "Git-based persistent memory system for AI agents. Agents inherit full context across sessions via markdown brain files hosted on GitHub.",
+        "url": "https://vant.creadev.org",
+        "applicationCategory": "DeveloperApplication",
+        "applicationSubCategory": "AI Agent Framework",
+        "operatingSystem": "Node.js, Docker",
+        "installUrl": "https://docs.creadev.org/vant/getting-started",
+        "softwareRequirements": "Node.js 18+, Git",
+        "programmingLanguage": "JavaScript",
+        "codeRepository": "https://github.com/dhaupin/vant",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock"
+        },
+        "author": {
+            "@type": "Person",
+            "name": "Vant Project",
+            "url": "https://github.com/dhaupin/vant"
+        },
+        "producer": {
+            "@type": "Organization",
+            "name": "Vant Project",
+            "url": "https://vant.creadev.org"
+        },
+        "softwareVersion": "0.8.6",
+        "datePublished": "2026-05-05",
+        "keywords": "AI, agent, memory, persistent, github, brain, context, sessions",
+        "featureList": [
+            "Git-based persistent memory",
+            "Session inheritance across restarts",
+            "31 MCP tools for AI agents",
+            "Islands (lazy-loading: GitHub, GitLab, Linear, Stego)",
+            "Agent Skills format (agentskills.io)",
+            "Webhook server + filters",
+            "5 notification channels (Slack, Discord, Email, Pushover, Telegram)",
+            "Linear issue tracking integration",
+            "Resolution thought tracking",
+            "Config management",
+            "Audit ledger",
+            "Trust levels + succession",
+            "Multi-agent coordination",
+            "Stego steganography",
+            "RAG + hybrid search"
+        ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            { "@type": "Question", "name": "What is a brain in Vant?", "acceptedAnswer": { "@type": "Answer", "text": "A brain is a folder of markdown files in models/public/ that store your agent's identity, goals, lessons, and context across sessions." } },
+            { "@type": "Question", "name": "What is Entropy Patching?", "acceptedAnswer": { "@type": "Answer", "text": "Entropy Patching intelligently replaces low-value context with high-value tokens to optimize LLM context windows." } },
+            { "@type": "Question", "name": "What are Islands in Vant?", "acceptedAnswer": { "@type": "Answer", "text": "Islands are lazy-loadable brain components that dramatically reduce cold start time by loading only needed modules." } },
+            { "@type": "Question", "name": "What is Stego in Vant?", "acceptedAnswer": { "@type": "Answer", "text": "Stego encodes brain data into PNG images using LSB steganography with AES-256-GCM encryption." } },
+            { "@type": "Question", "name": "What is Adaptive Entropy?", "acceptedAnswer": { "@type": "Answer", "text": "Auto-calibrates entropy based on token count/temperature for optimized context efficiency." } },
+            { "@type": "Question", "name": "How does generational evolution work?", "acceptedAnswer": { "@type": "Answer", "text": "Agents can spawn child agents that inherit their brain, enabling multi-agent coordination via branch-per-agent workflow." } },
+            { "@type": "Question", "name": "Do I need GitHub?", "acceptedAnswer": { "@type": "Answer", "text": "No - Vant works with any Git provider (GitHub, GitLab, Bitbucket, self-hosted) via provider abstraction layer." } },
+            { "@type": "Question", "name": "Is my brain private?", "acceptedAnswer": { "@type": "Answer", "text": "Yes - your brain lives in your GitHub repo. Use private repos, encryption, or steganography for deniable persistence." } },
+            { "@type": "Question", "name": "Can multiple AI agents share one brain?", "acceptedAnswer": { "@type": "Answer", "text": "Yes - multi-agent coordination via branch-per-agent isolation, with merge workflow for collaboration." } },
+            { "@type": "Question", "name": "How is Vant different from vector databases?", "acceptedAnswer": { "@type": "Answer", "text": "Vant stores full context (markdown, personality, goals), not just embeddings. Agents literally inherit previous thoughts." } }
+        ]
+    }
+    </script>
     <style>
         :root {
             --bg: #fafafa;
@@ -133,6 +207,26 @@
             font-size: 1.1rem;
             letter-spacing: 0.15em;
             text-transform: uppercase;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .button.primary {
+            background: #059669;
+            color: white;
+        }
+        .button:hover {
+            opacity: 0.9;
         }
 
         .hero {
@@ -310,6 +404,58 @@
             .features { grid-template-columns: 1fr; }
             header h1 { font-size: 2.2rem; }
         }
+    /* Code blocks */
+    pre {
+        background: #1e1e22;
+        color: #d4d4d4;
+        padding: 16px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin: 16px 0;
+        border: 1px solid var(--border);
+    }
+    code {
+        font-family: 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    }
+    :not(pre) > code {
+        background: var(--border);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+    /* Syntax highlighting */
+    .tok-kw { color: #c586c0; }  /* keyword */
+    .tok-str { color: #ce9178; }  /* string */
+    .tok-fn { color: #dcdcaa; }  /* function */
+    .tok-com { color: #6a9955; }  /* comment */
+    .tok-num { color: #b5cea8; }  /* number */
+    .tok-var { color: #9cdcfe; }  /* variable */
+
+
+.ma-t { margin-top: 15px; }
+.ma-t-sm { margin-top: 10px; }
+.pa-l { padding-left: 20px; }
+
+.term {
+    background: #1a1a1a;
+    color: #10b981;
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    margin: 15px 0;
+}
+.term-sm {
+    background: #1a1a1a;
+    color: #10b981;
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    margin: 0;
+}
     </style>
 </head>
 <body>
@@ -325,13 +471,13 @@
             </svg>
         </button>
         <div class="dropdown" id="menuDropdown">
+            <a href="https://docs.creadev.org/vant/getting-started">Getting Started</a>
+            <a href="https://docs.creadev.org/vant/essential/multi-agent">Agent</a>
+            <a href="https://docs.creadev.org/vant/reference/schema">Brain</a>
+            <a href="https://docs.creadev.org/vant/integrations/mcp">MCP</a>
+            <a href="https://docs.creadev.org/vant/reference/cli">CLI</a>
+            <a href="https://docs.creadev.org/vant/integrations/">GitHub</a>
             <a href="https://docs.creadev.org/vant/">Docs</a>
-            <a href="https://docs.creadev.org/vant/getting-started/install.html">Install</a>
-            <a href="https://docs.creadev.org/vant/guides/multi-agent.html">Agent</a>
-            <a href="https://docs.creadev.org/vant/reference/schema.html">Brain</a>
-            <a href="https://docs.creadev.org/vant/reference/cli.html">CLI</a>
-            <a href="https://docs.creadev.org/vant/guides/mcp.html">MCP</a>
-            <a href="https://docs.creadev.org/vant/guides/github.html">Github</a>
         </div>
         <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
             <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -346,28 +492,100 @@
         <header>
             <h1>Vant</h1>
             <p class="tagline">Persistent AI Memory</p>
+            <nav class="header-nav">
+                <a href="#agent-init">⚡ Agent Init</a>
+                <a href="https://docs.creadev.org/vant/getting-started">Docs</a>
+                <a href="https://docs.creadev.org/vant/advanced/search">Search</a>
+                <a href="https://docs.creadev.org/vant/advanced/rerank">Rerank (RAG)</a>
+                <a href="https://github.com/dhaupin/vant">GitHub</a>
+            </nav>
         </header>
-
         <section class="hero">
-            <p>Your AI should remember. Vant is an open source system for AI agent memory persistence via GitHub. Each session inherits the full context from previous ones.</p>
-            <span class="badge">v0.8.4</span>
+            <h1>Vant</h1>
+            <p>Your AI should remember. Open source system for AI agent memory persistence via GitHub.</p>
+            <div class="hero-buttons">
+                <a href="https://docs.creadev.org/vant/getting-started" class="button primary">Get Started →</a>
+                <a href="https://docs.creadev.org/vant/reference/cli" class="button">CLI Reference</a>
+                <a href="https://docs.creadev.org/vant/integrations/mcp" class="button">MCP Tools</a>
+            </div>
+            <pre class="term"><code><span class="tok-com"># Quick install</span>
+<span class="tok-kw">npm</span> install -g vant
+<span class="tok-kw">npx</span> vant setup --repo https://github.com/YOUR_ORG/YOUR_BRAIN.git</span></code></pre>
+            <span class="badge">v0.8.6</span>
+        </section>
+        </section>
+
+        <!-- AI-FIRST: Agent Initialization -->
+        <section class="about">
+            <h2>🚀 Quick Start</h2>
+            <p>Get running in 30 seconds.</p>
+            <pre class="term"><code><span class="tok-com"># npm (recommended)</span>
+<span class="tok-kw">npm</span> install -g vant
+<span class="tok-kw">vant</span> init
+<span class="tok-kw">vant</span> sync
+
+<span class="tok-com"># Docker</span>
+<span class="tok-kw">docker</span> run -e <span class="tok-var">GITHUB_TOKEN</span>=xxx -e <span class="tok-var">GITHUB_REPO</span>=owner/repo dhaupin/vant</code></pre>
+            <p><a href="https://docs.creadev.org/vant/getting-started" class="learn-more">Full Getting Started Guide →</a></p>
+        </section>
+
+        <section class="about" id="agent-init">
+            <h2>🤖 AI First: Agent Initialization</h2>
+            <p>For AI agents landing here - initialize your brain in one step:</p>
+            <pre class="term-sm"><code><span class="tok-com"># Quick init (5 seconds)</span>
+<span class="tok-kw">npx</span> vant setup --repo <span class="tok-str">https://github.com/YOUR_ORG/YOUR_BRAIN.git</span>
+
+<span class="tok-com"># Or if vant is already installed:</span>
+<span class="tok-kw">vant</span> setup --repo <span class="tok-str">https://github.com/YOUR_ORG/YOUR_BRAIN.git</span>
+
+<span class="tok-com"># Then start your session:</span>
+<span class="tok-kw">vant</span> start</code></pre>
+
+<pre class="term"><code><span class="tok-com"># Full CLI:</span>
+<span class="tok-com"># vant setup     - Interactive setup</span>
+<span class="tok-com"># vant load      - Load brain from models/</span>
+<span class="tok-com"># vant start     - Health → sync → load → run</span>
+<span class="tok-com"># vant test      - Run tests (15/15)</span>
+<span class="tok-com"># vant islands   - List lazy-loadable components</span></code></pre>
+            <p class="ma-t">Your brain lives in <code>models/public/</code>. Key files:</p>
+            <ul class="ma-t-sm pa-l">
+                <li><strong>identity.md</strong> - Who you are, CLI commands, islands</li>
+                <li><strong>goals.md</strong> - Current objectives</li>
+                <li><strong>lessons.md</strong> - What you've learned</li>
+                <li><strong>succession.md</strong> - Version/trust management</li>
+                <li><strong>resolution.json</strong> - Thought tracking (active/resolved/deprecated/rejected)</li>
+            </ul>
+            <p class="ma-t"><a href="https://docs.creadev.org/vant/getting-started" class="learn-more">Full documentation →</a></p>
+            <p class="ma-t"><a href="https://docs.creadev.org/vant/tutorials/omega-init" class="learn-more">⚡ Omega Init (single prompt bootstrap) →</a></p>
         </section>
 
         <section class="stats">
             <div class="stat">
-                <div class="stat-value">25+</div>
-                <div class="stat-label">Tools</div>
+                <div class="stat-value">31</div>
+                <div class="stat-label">MCP Tools</div>
             </div>
             <div class="stat">
-                <div class="stat-value">19</div>
+                <div class="stat-value">58</div>
                 <div class="stat-label">CLI Commands</div>
             </div>
             <div class="stat">
-                <div class="stat-value">21</div>
+                <div class="stat-value">68</div>
                 <div class="stat-label">Brain Files</div>
             </div>
             <div class="stat">
-                <div class="stat-value">v0.8.4</div>
+                <div class="stat-value">43</div>
+                <div class="stat-label">Lib Modules</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">41</div>
+                <div class="stat-label">Bin Files</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">115</div>
+                <div class="stat-label">Doc Pages</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">v0.8.6</div>
                 <div class="stat-label">Version</div>
             </div>
         </section>
@@ -376,55 +594,125 @@
             <div class="feature">
                 <h3>Git-Based Memory</h3>
                 <p>Brain files live in Git. Version control built in. Pull changes from previous sessions automatically.</p>
-                <a href="https://docs.creadev.org/vant/guides/github.html" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/integrations/" class="learn-more">Learn more →</a>
             </div>
             <div class="feature">
-                <h3>Entropy-Patch</h3>
+                <h3>Getting Started</h3>
+                <p>One command: <code>npx vant init</code>. Works with npm, Docker, or clone.</p>
+                <a href="https://docs.creadev.org/vant/getting-started" class="learn-more">Quick Start →</a>
+            </div>
+            <div class="feature">
+                <h3>Agent Skills</h3>
+                <p>Export brain as skill for Claude Code, Codex, Cursor. agentskills.io compatible format.</p>
+                <a href="https://docs.creadev.org/vant/integrations/agent-skills" class="learn-more">Learn more →</a>
+            </div>
+            <div class="feature">
+                <h3>Islands</h3>
+                <p>Lazy-load brain components. Load only what you need: github, gitlab, linear, stego. Faster cold starts.</p>
+                <a href="https://docs.creadev.org/vant/essential/islands" class="learn-more">Learn more →</a>
+            </div>
+            <div class="feature">
+                <h3>Search</h3>
+                <p>3-layer speed: cache + compact + lazy. Connect memory islands fast. Scales to 10k+ memories.</p>
+                <a href="https://docs.creadev.org/vant/advanced/search" class="learn-more">Learn more →</a>
+            </div>
+            <div class="feature">
+                <h3>Rerank (RAG)</h3>
+                <p>Keyword reranking and compression for LLM context. Prepare memories for prompts with token budget control.</p>
+                <a href="https://docs.creadev.org/vant/advanced/rerank" class="learn-more">Learn more →</a>
+            </div>
+            <div class="feature">
+                <h3>MCP Server</h3>
+                <p>31 MCP tools via JSON-RPC. AI agents read/write brain, branches, config, audit, search. Standard MCP protocol.</p>
+                <a href="https://docs.creadev.org/vant/integrations/mcp" class="learn-more">Learn more →</a>
+            </div>
+            <div class="feature">
+                <h3>Webhooks</h3>
+                <p>Inbound webhook server. Event filters, JMESPath matching, signature verification. Trigger automations.</p>
+                <a href="https://docs.creadev.org/vant/tutorials/webhooks" class="learn-more">Learn more →</a>
+            </div>
+            <div class="feature">
+                <h3>Notifications</h3>
+                <p>5 channels: Slack, Discord, Email, Pushover, Telegram. Broadcast to all or select channels.</p>
+                <a href="https://docs.creadev.org/vant/operations/notifications" class="learn-more">Learn more →</a>
+            </div>
+            <div class="feature">
+                <h3>Linear Integration</h3>
+                <p>GraphQL API for issue tracking. Create issues, add comments, manage labels.</p>
+                <a href="https://docs.creadev.org/vant/integrations/linear" class="learn-more">Learn more →</a>
+            </div>
+            <div class="feature">
+                <h3>Entropy Patching</h3>
                 <p>Token-aware compression. Separates high-entropy data from stable patterns. Dramatically reduces LLM prompt size.</p>
-                <a href="https://docs.creadev.org/vant/reference/entropy/" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/reference/entropy" class="learn-more">Learn more →</a>
             </div>
             <div class="feature">
-                <h3>AdaptiveEntropy</h3>
+                <h3>Adaptive Entropy</h3>
                 <p>Self-calibrating threshold (μ + k×σ). Auto-detects optimal compression for your data.</p>
-                <a href="https://docs.creadev.org/vant/reference/entropy/#adaptive-mode" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/reference/entropy#adaptive" class="learn-more">Learn more →</a>
             </div>
             <div class="feature">
                 <h3>Semantic Seed</h3>
                 <p>Stable patches include anchors. Tells the LLM where to place high-entropy data in context.</p>
-                <a href="https://docs.creadev.org/vant/reference/entropy/#semantic-seed-anchoring" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/reference/entropy#semantic-seed" class="learn-more">Learn more →</a>
             </div>
             <div class="feature">
                 <h3>Resolution System</h3>
                 <p>Track thoughts as resolved, deprecated, or rejected. Frontmatter updates directly in brain files.</p>
-                <a href="https://docs.creadev.org/vant/guides/resolution.html" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/reference/resolution" class="learn-more">Learn more →</a>
+            </div>
+            <div class="feature">
+                <h3>Stego</h3>
+                <p>Horcrux/steganography bootstrap. Embed brain in images. Deniable persistence for AI agents in adversarial environments.</p>
+            </div>
+            <div class="feature">
+                <h3>Telegram Bot</h3>
+                <p>Run Vant in Telegram. Commands, inline queries, voice messages. Mobile-first AI agent.</p>
+                <a href="https://docs.creadev.org/vant/tutorials/telegram-bot" class="learn-more">Learn more →</a>
+            </div>
+            <div class="feature">
+                <h3>Discord/Slack</h3>
+                <p>Run Vant in Discord or Slack. Slash commands, webhooks, rich embeds. Team AI agent.</p>
+                <a href="https://docs.creadev.org/vant/integrations/mcp" class="learn-more">Learn more →</a>
             </div>
             <div class="feature">
                 <h3>Multi-Agent Safe</h3>
                 <p>Branches and locks prevent conflicts. Multiple agents can work on the same brain without overwriting each other.</p>
-                <a href="https://docs.creadev.org/vant/guides/multi-agent.html" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/essential/multi-agent" class="learn-more">Learn more →</a>
+            </div>
+            <div class="feature">
+                <h3>Multi-Git Providers</h3>
+                <p>GitHub, GitLab, Bitbucket, self-hosted. Universal abstraction layer for branching/PRs across providers.</p>
+                <a href="https://docs.creadev.org/vant/integrations/providers" class="learn-more">Learn more →</a>
+            </div>
+            <div class="feature">
+                <h3>Nodes Integration</h3>
+                <p>Connect to any HTTP API. Heroku, Railway, Render, custom. Structured data retrieval.</p>
+                <a href="https://docs.creadev.org/vant/integrations/providers" class="learn-more">Learn more →</a>
+            </div>
+            <div class="feature">
+                <h3>Automation Ready</h3>
+                <p>Webhook triggers, scheduled tasks, CI/CD. GitHub Actions, GitLab CI, Bitbucket Pipelines.</p>
+                <a href="https://docs.creadev.org/vant/operations/ci" class="learn-more">Learn more →</a>
             </div>
             <div class="feature">
                 <h3>Docker Ready</h3>
                 <p>Official Docker image builds on release tags. Run anywhere. Portable brain survives container restarts.</p>
-                <a href="https://docs.creadev.org/vant/guides/docker.html" class="learn-more">Learn more →</a>
-            </div>
-            <div class="feature">
-                <h3>MCP Server</h3>
-                <p>Memory tools via JSON-RPC. AI agents read/write brain over HTTP. Standard MCP protocol.</p>
-                <a href="https://docs.creadev.org/vant/guides/mcp.html" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/integrations/docker" class="learn-more">Learn more →</a>
             </div>
             <div class="feature">
                 <h3>Branching</h3>
                 <p>Experiment with different brain configs. Merge via pull request. Always keep a working main branch.</p>
-                <a href="https://docs.creadev.org/vant/guides/succession.html" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/essential/succession" class="learn-more">Learn more →</a>
             </div>
         </section>
 
         <section class="about">
             <h2>About Vant</h2>
-            <p><strong>Vant v0.8.4</strong> solves a fundamental problem: AI agents lose all context when sessions end. Traditional memory systems require complex databases or external services. Vant uses Git as a simple, reliable foundation.</p>
+            <p><strong>Vant v0.8.6</strong> solves a fundamental problem: AI agents lose all context when sessions end. Traditional memory systems require complex databases or external services. Vant uses Git as a simple, reliable foundation.</p>
             <p>Why Git? It already handles versioning, branches, conflict resolution, and distributed sync. Every commit is a checkpoint. Every branch is an experiment. Every pull request is a review.</p>
-            <p>With <strong>Entropy-Patch</strong> (v0.8.4+), Vant evolves from "Context Storage" to "Latent Transport"-token-aware compression that makes long-running autonomous agents practical.</p>
+            <p>With <strong>Islands</strong> (v0.8.6+), Vant adds lazy-loading brain components. Load only what you need: github, gitlab, linear, automation, stego, resolution. Reduces cold start time dramatically.</p>
+            <p>With <strong>Stego</strong> (v0.8.6+), Vant adds Horcrux/steganography bootstrap. Embed your brain in images or other media. True deniable persistence for AI agents.</p>
             <p>Use Vant for:</p>
             <ul>
                 <li>Long-running agentic workflows that span days or weeks</li>
@@ -438,6 +726,10 @@
         </section>
 
         <section class="links">
+            <a href="https://docs.creadev.org/vant/getting-started" class="link">Docs</a>
+            <a href="https://docs.creadev.org/vant/essential/islands" class="link">Islands</a>
+            <a href="https://docs.creadev.org/vant/integrations/mcp" class="link">MCP</a>
+            <a href="https://docs.creadev.org/vant/tutorials/webhooks" class="link">Webhooks</a>
             <a href="https://github.com/dhaupin/vant" class="link">GitHub</a>
             <a href="https://github.com/dhaupin/vant/releases" class="link outline">Releases</a>
         </section>
@@ -450,23 +742,33 @@
                 <a href="https://docs.creadev.org/vant/" class="learn-more">Learn more →</a>
             </details>
             <details>
-                <summary>What is Entropy-Patch and why should I care?</summary>
-                <p>Entropy-Patch is Vant's token-aware compression (v0.8.4). It scans your brain files and separates "stable" repetitive content from "spiky" high-entropy data. The result? Massive token savings. Instead of sending 19 markdown files to your LLM, you send one compressed .vpatch file. Includes Semantic Seeds so the AI knows where each piece of data belongs in context.</p>
-                <a href="https://docs.creadev.org/vant/reference/entropy/" class="learn-more">Learn more →</a>
+                <summary>What is Entropy Patching and why should I care?</summary>
+                <p>Entropy Patching is Vant's token-aware compression (v0.8.4+). It scans your brain files and separates "stable" repetitive content from "spiky" high-entropy data. The result? Massive token savings. Instead of sending 68 markdown files to your LLM, you send one compressed .vpatch file. Includes Semantic Seeds so the AI knows where each piece of data belongs in context.</p>
+                <a href="https://docs.creadev.org/vant/reference/entropy" class="learn-more">Learn more →</a>
             </details>
             <details>
-                <summary>What is AdaptiveEntropy?</summary>
-                <p>AdaptiveEntropy automatically calibrates your compression threshold using statistical analysis (μ + k×σ). Instead of guessing the right threshold, it analyzes your data and picks optimal settings. Lower k = more aggressive compression, Higher k = preserve more. Great for long-running autonomous agents that need to "remember" correctly without hitting token limits.</p>
-                <a href="https://docs.creadev.org/vant/reference/entropy/#adaptive-mode" class="learn-more">Learn more →</a>
+                <summary>What are Islands in Vant?</summary>
+                <p>Islands are lazy-loadable brain components (v0.8.6+). Instead of loading all 68 brain files on startup, you load only what you need: github, gitlab, linear, automation, stego, resolution. This dramatically reduces cold start time and memory footprint. Islands are defined in models/public/identity.md and loaded via vant islands --load <name>.</p>
+                <a href="https://docs.creadev.org/vant/essential/islands" class="learn-more">Learn more →</a>
+            </details>
+            <details>
+                <summary>What is Stego in Vant?</summary>
+                <p>Stego is Horcrux/steganography bootstrap (v0.8.6+). Embed your brain data in images or other media. This provides true deniable persistence - your AI's memory exists but is invisible to casual inspection. Useful for AI agents operating in adversarial environments where plain-text memory is a liability.</p>
+                <a href="https://docs.creadev.org/vant/advanced/stego" class="learn-more">Learn more →</a>
+            </details>
+            <details>
+                <summary>What is Adaptive Entropy?</summary>
+                <p>Adaptive Entropy automatically calibrates your compression threshold using statistical analysis (μ + k×σ). Instead of guessing the right threshold, it analyzes your data and picks optimal settings. Lower k = more aggressive compression, Higher k = preserve more. Great for long-running autonomous agents that need to "remember" correctly without hitting token limits.</p>
+                <a href="https://docs.creadev.org/vant/reference/entropy#adaptive" class="learn-more">Learn more →</a>
             </details>
             <details>
                 <summary>How does generational evolution work?</summary>
                 <p>Each time your agent updates the brain, Vant tracks entropy drift between generations. Low delta = stable memory (good). High delta = context shift (warning). This helps you spot when your agent is "forgetting" or when its personality is drifting. Built for multi-session autonomy where the agent needs to evolve without losing its core identity.</p>
-                <a href="https://docs.creadev.org/vant/reference/entropy/#generational-optimization-guide" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/reference/entropy#generational" class="learn-more">Learn more →</a>
             </details>
             <details>
                 <summary>Do I need GitHub?</summary>
-                <p>Yes, GitHub is required. It's Vant's storage, version control, and sync mechanism-all in one. Every commit is a checkpoint. Every branch is an experiment. Every pull request is a review. Using a private repo keeps your brain private. A free GitHub account works perfectly.</p>
+<p>No - Vant works with any Git provider: GitHub, GitLab, Bitbucket, or self-hosted. Use what you already have. A free GitHub account works perfectly.</p>
                 <a href="https://docs.creadev.org/vant/" class="learn-more">Learn more →</a>
             </details>
             <details>
@@ -474,9 +776,18 @@
                 <p>Yes-if you use a private GitHub repository, your brain stays completely private. Vant doesn't use any external databases or services. Your brain lives in your GitHub repo, and only you (or agents you authorize) can access it.</p>
             </details>
             <details>
+                <summary>How does search work in Vant?</summary>
+                <p>Three layers: cache (same query = instant), compact (summaries skip rehydration), lazy-load (heavy modules load on-demand). Scales to 10k+ memories.</p>
+            </details>
+            <details>
+                <summary>What is RAG reranking in Vant?</summary>
+                <p>RAG rerank (v0.8.6+) keyword-scores memories against your query and compresses them to fit token budgets. It's different from search: search finds semantic matches, rerank prepares them for LLM context. Use rerank to optimize memories before sending to your AI - it strips markdown fluff and truncates to your token budget.</p>
+                <a href="https://docs.creadev.org/vant/advanced/rerank" class="learn-more">Learn more →</a>
+            </details>
+            <details>
                 <summary>Can multiple AI agents share one brain?</summary>
                 <p>Yes! Vant is built for multi-agent coordination. Use branches for isolation and file locks to prevent conflicts. Each agent works on their own branch, commits changes, and merges via pull request. Safe concurrent agentic workflows without overwrite fears.</p>
-                <a href="https://docs.creadev.org/vant/guides/multi-agent.html" class="learn-more">Learn more →</a>
+                <a href="https://docs.creadev.org/vant/essential/multi-agent" class="learn-more">Learn more →</a>
             </details>
             <details>
                 <summary>How is Vant different from vector databases?</summary>
@@ -492,10 +803,11 @@
             <p>Open source under MIT license.</p>
             <nav class="footer-nav">
                 <a href="https://docs.creadev.org/vant/">Docs</a>
-                <a href="https://docs.creadev.org/vant/getting-started/install.html">Getting Started</a>
+                <a href="https://docs.creadev.org/vant/getting-started">Getting Started</a>
                 <a href="https://github.com/dhaupin/vant">GitHub</a>
             </nav>
         </footer>
+        </main>
     </div>
     <script>
         function toggleTheme() {
@@ -529,5 +841,16 @@
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
+    <!-- Cloudflare Web Analytics -->
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "9f9ce72fca16440ca015253e02bf66ef"}'></script>
+
+    <!-- Cloudflare Zaraz Analytics -->
+    <script>
+    window.ctz = window.ctz || [];
+    window.ctz.push(["setAccount", "9f9ce72fca16440ca015253e02bf66ef"]);
+    </script>
+    <script src='https://static.cloudflareinsights.com/zaraz.js'></script>
+
+</main>
 </body>
 </html>

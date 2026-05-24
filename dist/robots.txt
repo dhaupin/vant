@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /models/
+Disallow: /lib/
+Disallow: /bin/
+Disallow: /.git/
+
+Sitemap: https://vant.creadev.org/sitemap.xml

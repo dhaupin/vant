@@ -1,5 +1,17 @@
 #!/usr/bin/env node
+/**
+ * Vant watch - watch module
+ *
+ * Usage: vant watch
+ */
 const vaf = require("../lib/vaf");
+
+// -h/--help
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log("'Usage: vant watch [options]'");
+    process.exit(0);
+}
 /**
  * Vant Watch
  * Monitor GitHub for changes
@@ -11,6 +23,15 @@ const vaf = require("../lib/vaf");
 
 const { execSync } = require('child_process');
 const fs = require('fs');
+
+// Lazy-load sandbox
+let _sandbox = null;
+function _getSandbox() {
+    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    return _sandbox;
+}
+function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
+function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
 
 let logger;
@@ -88,7 +109,7 @@ function notify(message) {
 /**
  * Main
  */
-function main() {
+function main() { _checkRead(); 
     const args = process.argv.slice(3);
     let interval = DEFAULT_INTERVAL;
     let daemon = false;

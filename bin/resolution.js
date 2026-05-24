@@ -1,11 +1,24 @@
 #!/usr/bin/env node
+/**
+ * Vant Resolution - Thought resolution tracking
+ * Tracks resolved/rejected thoughts
+ *
+ * Usage: vant resolution [status|history|set <entry>]
+ */
+
 const vaf = require("../lib/vaf");
+
+// -h/--help
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log("'Usage: vant resolution [options]'");
+    process.exit(0);
+}
 // resolution.js - CLI for thought resolution
 
 const path = require('path');
 const resolution = require('../lib/resolution');
 
-const args = process.argv.slice(2);
 const cmd = args[0];
 if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
 

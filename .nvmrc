@@ -1,0 +1,4 @@
+# Node.js version for Vant
+# Use with nvm: nvm use
+# Or in CI: nvm install && nvm use
+20

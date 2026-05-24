@@ -1,14 +1,26 @@
 #!/usr/bin/env node
+/**
+ * Vant summary - summary module
+ *
+ * Usage: vant summary
+ */
 const vaf = require("../lib/vaf");
+
+// -h/--help
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log("'Usage: vant summary [-h|--help] [-j|--json] [options]'");
+    process.exit(0);
+}
 /**
  * Vant Summary
  * Session summary using auto-update module
  * 
- * Usage: vant summary
+ * Usage: vant summary [-h|--help] [-j|--json]
  *        vant summary --json
  */
 
-const autoUpdate = require('../lib/auto-update');
+const autoUpdate = require('../lib/update');
 const fs = require('fs');
 const path = require('path');
 
@@ -32,9 +44,9 @@ function getSessionSummary() {
  */
 function formatMarkdown(summary) {
     let md = '# Vant Session Summary\n\n';
-    md += `**Messages:** ${summary.messageCount}\n`;
-    md += `**Tokens (est):** ${summary.tokens}\n`;
-    md += `**Decisions:** ${summary.decisions}\n\n`;
+    md += `**Messages:** ${summary.messages || 0}\n`;
+    md += `**Tokens (est):** ${summary.tokens || 0}\n`;
+    md += `**Decisions:** ${summary.decisions || 0}\n\n`;
     
     if (summary.filesModified && summary.filesModified.length) {
         md += '## Files Modified\n\n';

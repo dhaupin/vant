@@ -1,8 +1,9 @@
 ---
-permalink: /tutorials/telegram-bot.html
+version: 0.8.6
+permalink: /tutorials/telegram-bot
 layout: default
 title: Telegram Bot Integration
-nav_order: 3
+nav_order: 30
 ---
 # Tutorial: Telegram Bot with Vant
 
@@ -85,7 +86,7 @@ Commands:
 ```
 📊 Vant Status
 
-Version: 0.8.4
+Version: 0.8.6
 Branch: main
 Last Sync: 2 hours ago
 Brain Files: 19
@@ -96,7 +97,7 @@ Lock Status: Available
 ```
 🧠 Brain Info
 
-Version: 0.8.4
+Version: 0.8.6
 Succession: trusted
 Last Updated: Today at 14:30
 Files:
@@ -157,7 +158,7 @@ telegram.onMessage(async (msg) => {
     console.log('Received:', msg.text);
     
     if (msg.text.toLowerCase().includes('goals')) {
-        const goals = require('./models/public/goals.md');
+        const goals = require('./models/private/goals.md');
         await telegram.send(msg.chat, goals);
     }
 });
@@ -197,7 +198,7 @@ telegram.onCallback(async (query) => {
             response = 'System is running normally ✅';
             break;
         case 'brain':
-            response = 'Brain version: 0.8.4 🧠';
+            response = 'Brain version: 0.8.6 🧠';
             break;
     }
     
@@ -320,6 +321,6 @@ export TELEGRAM_TIMEOUT=30000
 
 ## Next Steps
 
-- [MCP Server](/vant/guides/mcp.html) - Expose tools via HTTP API
-- [Slack/Discord Integration](/vant/guides/operations.html) - Team notifications
-- [Multi-Agent](/vant/guides/multi-agent.html) - Coordinate multiple agents
+- [MCP Server](integrations/mcp) - Expose tools via HTTP API
+- [Slack/Discord Integration](operations/events) - Team notifications
+- [Multi-Agent](essential/multi-agent) - Coordinate multiple agents

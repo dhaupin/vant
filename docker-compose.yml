@@ -11,7 +11,7 @@ services:
     image: dhaupin/vant:latest
     environment:
       - NODE_ENV=production
-      - VANT_VERSION=0.8.1
+      - VANT_VERSION=0.8.6
     # Multi-arch build (run from host with docker buildx):
     #   docker buildx build --platform linux/amd64,linux/arm64 -t dhaupin/vant --push .
     

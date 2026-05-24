@@ -1,8 +1,9 @@
 ---
-permalink: /reference/errors.html
+version: 0.8.6
+permalink: /reference/errors
 layout: default
 title: Error Codes
-nav_order: 5
+nav_order: 86
 ---
 # Error Codes
 
@@ -80,7 +81,7 @@ Error codes and troubleshooting.
 Handle this error case.
 
 ```javascript
-const errors = require('./lib/errors');
+const errors = require('vant').errors;
 
 throw new errors.VantError('Failed to sync', {
     code: 'GITHUB_SYNC_FAIL',
@@ -92,7 +93,7 @@ throw new errors.VantError('Failed to sync', {
 Logging configuration.
 
 ```javascript
-const errors = require('./lib/errors');
+const errors = require('vant').errors;
 
 await errors.retry(async () => {
     await syncBrain();
@@ -117,4 +118,4 @@ if (error.retryable) {
 | `NETWORK_OFFLINE` | Check internet connection |
 | `LOCK_TIMEOUT` | Another agent holds the lock |
 
-See also: [Troubleshooting](/vant/guides/troubleshooting.html), [CLI Reference](/vant/reference/cli.html)
+See also: [Troubleshooting](operations/troubleshooting), [CLI Reference](reference/cli)

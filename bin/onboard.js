@@ -1,15 +1,29 @@
 #!/usr/bin/env node
+/**
+ * Vant onboard - onboard module
+ *
+ * Usage: vant onboard
+ */
 const vaf = require("../lib/vaf");
+
+// -h/--help
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log("'Usage: vant onboard [options]'");
+    process.exit(0);
+}
 // bin/onboard.js - CLI for knowledge base / onboarding
 
 const onboard = require('../lib/onboard')
 
-const args = process.argv.slice(2)
 const cmd = args[0]
 if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20})
 
-function printSummary() {
-  const summary = onboard.getOnboardSummary()
+// Main IIFE
+(async () => {
+
+async function printSummary() {
+  const summary = await onboard.getOnboardSummary()
   
   console.log('=== Vant Onboarding ===\n')
   console.log(`Version: ${summary.version}`)
@@ -38,7 +52,7 @@ function printSummary() {
 if (cmd === 'summary' || cmd === 'list' || !cmd) {
   printSummary()
 } else if (cmd === 'files') {
-  const files = onboard.getBrainFiles()
+  const files = await onboard.getBrainFiles()
   console.log('Brain files:')
   files.forEach(f => console.log(`  ${f}`))
 } else if (cmd === 'read') {
@@ -85,3 +99,5 @@ Commands:
   console.log('Unknown command. Use: vant onboard help')
   process.exit(1)
 }
+
+})()

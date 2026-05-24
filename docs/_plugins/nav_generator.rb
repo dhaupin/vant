@@ -42,12 +42,12 @@ module Jekyll
         
         if folder == '.' || folder == ''
           # Root-level doc - add to root list
-          root_docs << { 'title' => title, 'url' => page.url, 'order' => sort_order }
+          root_docs << { 'title' => title, 'url' => page.url.gsub('.html', ''), 'order' => sort_order }
         else
           # Folder name = section, file = link
           section_title = section_titles[folder] || folder.gsub('-', ' ').capitalize
           folders[folder] ||= { 'title' => section_title, 'items' => [] }
-          folders[folder]['items'] << { 'title' => title, 'url' => page.url, 'order' => sort_order }
+          folders[folder]['items'] << { 'title' => title, 'url' => page.url.gsub('.html', ''), 'order' => sort_order }
         end
       end
 

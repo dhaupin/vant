@@ -4,17 +4,21 @@
  * Runs Vant as a persistent node. Similar to crypto nodes - each instance
  * runs the same code but maintains its own brain state in GitHub.
  * 
+ * All args should have both long (--arg) and short (-a) forms.
+ * 
  * Usage:
- *   node bin/node.js                    # Start node (manual sync)
- *   node bin/node.js --mcp              # Start with MCP server
- *   node bin/node.js --mcp-port 3457    # Custom MCP server port
- *   node bin/node.js --help             # Show this help
+ *   node bin/node.js -h|--help
+ *   node bin/node.js -m|--mcp [-p|--mcp-port <port>]
+ *   node bin/node.js -P|--enable-polling [-i|--poll-interval <sec>]
  * 
- * Auto-Polling Mode (OPT-IN with WARNING):
- *   node bin/node.js --enable-polling   # Enable background GitHub polling
- *   node bin/node.js --enable-polling --poll-interval 30
+ * Options:
+ *   -h, --help          Show this help
+ *   -m, --mcp         Start with MCP server
+ *   -p, --mcp-port    MCP server port (default: 3456)
+ *   -P, --enable-polling   Enable background GitHub polling
+ *   -i, --poll-interval    Polling interval in seconds (default: 60)
  * 
- *   ⚠️  AUTO-POLLING REQUIRES TWO CONFIRMATIONS:
+ * ⚠️  AUTO-POLLING REQUIRES TWO CONFIRMATIONS:
  *       1. Set VANT_AGREE_AUTO_SYNC=true (env var = "checkbox")
  *       2. Type "AGREE" when prompted (stdin = "type to confirm")
  * 
@@ -25,17 +29,28 @@
  *   VANT_AGREE_AUTO_SYNC  - Required for polling: set to "true" to agree
  * 
  * What it does:
- *   1. Loads brain from models/public
+ *   1. Loads brain from models/private
  *   2. Starts MCP server (optional)
  *   3. Runs loop (brain updates done manually via vant sync)
  *   4. Optional: background GitHub polling (opt-in with warnings)
  */
 
 const fs = require('fs');
+
+// Lazy-load sandbox
+let _sandbox = null;
+function _getSandbox() {
+    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    return _sandbox;
+}
+function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
+function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
 const { spawn } = require('child_process');
 const http = require('http');
 const readline = require('readline');
+const env = require(path.join(__dirname, '../lib/config'));
+const network = require(path.join(__dirname, '../lib/network'));
 
 // Parse CLI arguments
 const args = process.argv.slice(2);
@@ -45,61 +60,55 @@ if (args.includes('--help') || args.includes('-h')) {
     console.log(`
 Vant Node Runner
 
-Usage:
-  node bin/node.js                    # Start node (manual sync)
-  node bin/node.js --mcp              # Start with MCP server
-  node bin/node.js --mcp-port 3457    # Custom MCP server port
-  node bin/node.js --help             # Show this help
+Usage: node bin/node.js [-h|--help] [-m|--mcp] [-p|--mcp-port <port>]
+       node bin/node.js -P|--enable-polling [-i|--poll-interval <sec>]
 
-Auto-Polling Mode (OPT-IN with WARNING):
-  node bin/node.js --enable-polling   # Enable background GitHub polling
-  node bin/node.js --enable-polling --poll-interval 30
+Options:
+  -h, --help          Show this help
+  -m, --mcp         Start with MCP server
+  -p, --mcp-port    MCP server port (default: 3456)
+  -P, --enable-polling   Enable background GitHub polling
+  -i, --poll-interval    Polling interval in seconds (default: 60)
+  -v, --verbose      Verbose output
 
-  ⚠️  AUTO-POLLING REQUIRES TWO CONFIRMATIONS:
-      1. Set VANT_AGREE_AUTO_SYNC=true (env var = "checkbox")
-      2. Type "AGREE" when prompted (stdin = "type to confirm")
-
-Environment:
-  VANT_GITHUB_REPO      - GitHub repo
-  VANT_GITHUB_TOKEN    - GitHub token
-  VANT_MCP_PORT        - MCP server port
-  VANT_AGREE_AUTO_SYNC  - Required for polling: set to "true" to agree
-
-What it does:
-  1. Loads brain from models/public
-  2. Starts MCP server (optional)
-  3. Runs loop (brain updates done manually via vant sync)
-  4. Optional: background GitHub polling (opt-in with warnings)
+⚠️  AUTO-POLLING REQUIRES TWO CONFIRMATIONS:
+    1. Set VANT_AGREE_AUTO_SYNC=true (env var)
+    2. Type "AGREE" when prompted
 `);
     process.exit(0);
 }
 
 const vaf = require("../lib/vaf");
+const { env: vantEnv } = require("../lib/config");
 // Validate CLI args
 for (const arg of args) {
-    if (arg.startsWith("--mcp-port=")) {
-        const port = parseInt(arg.split("=")[1]);
+    if (arg.startsWith("--mcp-port=") || arg.startsWith("-p=") || arg.startsWith("-p")) {
+        const port = parseInt(arg.split("=")[1] || arg.slice(2));
         vaf.check(port, {type: "number", name: "mcpPort", min: 1, max: 65535});
     }
-    if (arg.startsWith("--poll-interval=")) {
-        const interval = parseInt(arg.split("=")[1]);
+    if (arg.startsWith("--poll-interval=") || arg.startsWith("-i=") || arg.startsWith("-i")) {
+        const interval = parseInt(arg.split("=")[1] || arg.slice(2));
         vaf.check(interval, {type: "number", name: "pollInterval", min: 5, max: 3600});
     }
 }
 
 // Parse polling flag
-const enablePollingArg = args.includes('--enable-polling');
-const pollInterval = parseInt(args.find(a => a.startsWith('--poll-interval='))?.split('=')[1] || '60');
+const enablePollingArg = args.includes('--enable-polling') || args.includes('-P');
+const pollInterval = parseInt(args.find(a => a.startsWith('--poll-interval='))?.split('=')[1] || 
+                    args.find(a => a.startsWith('-i='))?.split('=')[1] ||
+                    args.find(a => a.startsWith('-i'))?.slice(2) || '60');
 
 // Check for opt-in confirmation (MUST have BOTH)
-const agreedAutoSync = process.env.VANT_AGREE_AUTO_SYNC === 'true';
+const agreedAutoSync = env.agreeAutoSync() === 'true';
 
 const config = {
-    mcp: args.includes('--mcp'),
-    mcpPort: parseInt(args.find(a => a.startsWith('--mcp-port='))?.split('=')[1] || '3456'),
+    mcp: args.includes('--mcp') || args.includes('-m'),
+    mcpPort: parseInt(args.find(a => a.startsWith('--mcp-port='))?.split('=')[1] || 
+            args.find(a => a.startsWith('-p='))?.split('=')[1] ||
+            args.find(a => a.startsWith('-p'))?.slice(2) || '3456'),
     pollInterval,
-    enablePollingRequested: enablePollingArg,  // Track if flag provided (for warning)
-    enablePolling: enablePollingArg && agreedAutoSync,  // Only enabled with BOTH
+    enablePollingRequested: enablePollingArg,
+    enablePolling: enablePollingArg && agreedAutoSync,
     verbose: args.includes('--verbose') || args.includes('-v')
 };
 
@@ -128,8 +137,8 @@ class VantNode {
         
         this.state = 'initialized';
         this.startedAt = Date.now();
-        this.githubToken = process.env.VANT_GITHUB_TOKEN || process.env.GITHUB_TOKEN;
-        this.repo = process.env.VANT_GITHUB_REPO || 'dhaupin/vant';
+        this.githubToken = env.githubToken() || process.env.GITHUB_TOKEN;
+        this.repo = env.githubRepo() || 'dhaupin/vant';
         
         this.modules = {
             brain: loadModule('brain'),
@@ -152,7 +161,7 @@ class VantNode {
     async init() {
         this.log('Initializing Vant Node...');
         
-        // Load brain from local models/public
+        // Load brain from local models/private
         this.memory = this.loadBrain();
         
         // Start MCP server if enabled
@@ -227,14 +236,15 @@ class VantNode {
     }
     
     /**
-     * Load brain from models/public
+     * Load brain from user's template (MODEL_PATH) or fallback
      */
     loadBrain() {
-        const modelPath = 'models/public';
+        // Load user's brain template (MODEL_PATH), fallback to private for agent
+        const modelPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || 'models/private';
         const brain = {};
         
         if (!fs.existsSync(modelPath)) {
-            this.warn('Brain not found at models/public');
+            this.warn('Brain not found at ' + modelPath);
             return brain;
         }
         
@@ -272,10 +282,11 @@ class VantNode {
     }
     
     /**
-     * Save brain to models/public
+     * Save brain to agent's private path ( MODEL_PATH for user overrides)
      */
     saveBrain(memory) {
-        const modelPath = 'models/public';
+        // Agent's private path - keeps their brain separate from user
+        const modelPath = process.env.MODEL_PATH || process.env.VANT_STORAGE_PATH || 'models/private';
         
         for (const [name, content] of Object.entries(memory)) {
             const filePath = path.join(modelPath, `${name}.md`);

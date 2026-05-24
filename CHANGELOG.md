@@ -1,241 +1,187 @@
 # Changelog
 
-> ⚠️ **Migration to Jekyll docs in progress**. See [docs/](docs/) for latest guides.
+All notable changes to Vant will be documented in this file.
 
----
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> VANT = Versatile Autonomous Networked Tool
+## [Unreleased]
 
-All notable changes to VANT are documented here.
+### Feature - Multi-Agent Orchestration (v0.8.7)
+- **MCP Agent Tools** (2026-05-13)
+  - ADDED: agent_spawn - Spawn new agent (max 4: you + 3 others)
+  - ADDED: agent_list - List active agents with IDs and states
+  - ADDED: agent_kill - Kill agent by ID
+  - MCP server now exposes /rpc endpoint with brain_* prefixed tools
 
----
+- **Agent Quota** (2026-05-13)
+  - ADDED: MAX_AGENTS = 4 limit enforced in spawn()
+  - Returns error when quota reached
 
-## v0.8.4 (2026-04-20)
+- **Orchestrator** (2026-05-13)
+  - ADDED: agents.delegate(id, task) - Assign job to specific agent
+  - ADDED: msg.send(channel, message) - Broadcast to channel
+  - ADDED: Full vant↔brain↔agent↔msg loop wired
+
+- **Agent-Brain Wiring** (2026-05-13)
+  - agents.spawn() → brain.attend(name) tracks attention
+  - agents.spawn(parent) → brain.fireSynapse(parent→child)
+  - msg.post() → brain.attend(conversation)
+
+### Feature - Git Provider Parity (v0.8.6)
+- **Multi-Provider Support** (2026-05-10)
+  - ADDED: GitLabProvider with full API (issues, MRs, pipelines)
+  - ADDED: BitbucketProvider with full API (PRs, repo details)
+  - ADDED: SelfHostedProvider with git CLI operations
+  - ADDED: Unified getProvider() factory in lib/remotes.js
+  - All providers share common API: issues, comments, PRs, repo, branches, status
+  - Provider-specific features: GitHub Actions, GitLab Pipelines, Bitbucket Issues
+
+- **Sandbox Refactor - Execution Keeper** (2026-05-10)
+  - REFACTORED: sandbox.js - now delegates to qos, lock, network
+  - ADDED: domain whitelist to network.js (isDomainAllowed, setAllowedDomains)
+  - ADDED: network.fetch() domain checks
+  - WIRED: sandbox into framework.js, vant.js, api.js (fully integrated)
+  - REMOVED: duplicate quota/concurrency in sandbox (uses qos.RateLimiter)
+  - REMOVED: direct lock usage (delegates to lock module)
+  - Role: Agent/Node execution isolation "keeper"
+
+- **Sandbox Keeper Features** (2026-05-10)
+  - ADDED: budget delegation to escrow (getBudgetStatus, recordSpend)
+  - ADDED: capability flags (canRead, canWrite, canNetwork, canSpawn, canCommit, etc.)
+  - ADDED: operation scopes (read, write, network, spawn)
+  - ADDED: getCapabilities(), setCapabilities(), can(cap)
+  - ADDED: getScopes(), setScopes(), hasScope(scope)
+  - ADDED: getOperationHistory(), getErrors()
+  - ADDED: isolate() for untrusted sub-sandbox
+  - Full keeper integration: agents now have proper guards/lanes
+
+- **Runtime Gate Integration** (2026-05-10)
+  - ADDED: capability gate to network.fetch() (checks canNetwork)
+  - ADDED: capability gate to agents.spawn() (checks canSpawn)
+  - ADDED: capability gate to msg.post() (checks canWrite)
+  - ADDED: CircuitBreaker from qos (trips on failures)
+  - All runtime operations now protected by sandbox
+  - Full gate map: network → agents → msg → sandbox
+
+### Breaking Changes (v0.8.6)
+- **Consolidated Cache Module** (2026-05-09)
+  - REMOVED: memoize.js, compression.js, pool.js, cache.js, cache-control.js
+  - NEW: unified lib/cache.js (LRU cache + compression + buffer pool)
+  - All consolidate into single cache module
+  - No backward compatibility - v0.8.6 is breaking
+
+- **Deleted Unused Search/Query Modules** (2026-05-09)
+  - DELETE: rerank.js (in search.js already)
+  - DELETE: search-hyde.js (in search.js)
+  - DELETE: search-hybrid.js (in search.js)
+  - DELETE: query-builder.js (unused)
+  - DELETE: rate-limit.js (qos has it)
+  - DELETE: pipeline.js (unused)
+
+- **Unified Event Module** (2026-05-09)
+  - NEW: lib/event.js (Event + PubSub + Queue + Job)
+  - MERGED: event-bus.js, queue.js, job_worker.js, throttler.js, debouncer.js
+  - Renamed class: Event (was EventBus)
+  - Added: Queue + Job classes
+  - Added: framework interface (getLayerStatus, isOperationAllowed)
+
+- **Deleted Unused HTTP Modules** (2026-05-09)
+  - MERGED: body-parser, cors, helmet, middleware-stack, session, session_store → server.js
+  - integrated: BodyParser, CORS, Helmet, MiddlewareStack, Session, SessionStore
+
+- **Unified QoS + Throttler + Debouncer** (2026-05-09)
+  - MERGED: throttler.js, debouncer.js → qos.js
+  - Added: Throttler, Debouncer classes
+  - Added: QoS.throttle(), QoS.debounce()
+
+- **JobWorker in Cron** (2026-05-09)
+  - MERGED: job_worker.js → cron.js
+  - Added: JobWorker class
+
+- **Delete Deprecated Wrappers** (2026-05-09)
+  - DELETE: audit-log.js, metrics.js, storage.js, buffer.js, entropy.js, serializer.js, load.js, horcrux.js, env.js
+  - 9 deprecated wrappers removed
+
+- **Sanitize + IPFilter in VAF** (2026-05-09)
+  - MERGED: sanitize.js + ip-filter.js → vaf.js
+  - Added: VAF.Sanitize, VAF.IPFilter classes
+
+- **Hybrid-Sync in Sync** (2026-05-09)
+  - MERGED: hybrid-sync.js → sync.js
+  - Added: hybrid_getPrivacyConfig, hybrid_setPrivacy, hybrid_getPublicRepos, hybrid_getPrivateRepos
+
+- **ErrorHandler in Errors** (2026-05-09)
+  - MERGED: error-handler.js → errors.js
+  - Added: errors.ErrorHandler class
 
 ### Added
-- **Entropy-Patch Protocol** - Token-aware latent transport
-  - `lib/entropy.js` - Core module
-    - `generatePatches()` - Windowed entropy scan
-    - `generateVPatch()` - Create .vpatch files
-    - `hydratePatches()` - Lossless reconstruction
-    - `getEntropyStats()` - Entropy analysis
-  - `bin/compress.js` - CLI command
-    - `vant compress <file> --stats` - Show entropy stats
-    - `vant compress <file>` - Create .vpatch
-    - `vant compress <file> --decompress` - Extract
-  - `models/latent/` - Output directory
-  - Transforms Vant from Context Storage to Latent Transport
+- **Vant Class + Agent Runtime** (2026-05-09)
+  - lib/runtime.js → lib/vant.js: Renamed main module
+  - NEW: Vant class - ultimate agent with full system access
+  - lazy-loads all core systems: brain, search, islands, config, memoize, lock, audit, compression
+  - NEW: vector-store.js, cron.js, conversation.js modules added
+  - OS features merged: encrypt shortcuts, QoS, stego, agents, ipc
+  - getLayerStatus() + isOperationAllowed() - standard interface
+  - framework.js, agents.js updated to use vant.js
 
-### Security Hardening
-- **VAF (Vant Application Firewall)** - Input validation system
-  - `lib/vaf.js` - Pattern-based content blocking
-  - Blocks: path traversal, XSS, shell injection, log injection, CRLF, XXE
-  - MCP integration - all endpoints validated
-  - `type: 'path'` for file params prevents traversal
-  - Rate limiting via `lib/protection.js`
-- **VAF Patterns Added**:
-  - Path traversal: `../`, `..\`
-  - XSS: `<script>`, `javascript:`, `on*=`
-  - Shell: `;`, `|`, `&&`, `$()`, backticks
-  - Log injection: `\n`, `\r\n`
-  - XXE: `<!ENTITY`, `<!ELEMENT`
-- **MCP Hardening**:
-  - Changed file params from `type: 'string'` to `type: 'path'`
-  - Newlines/CRLF blocked in string content
+### Changed
+- **Runtime renamed to Vant** (2026-05-09)
+  - runtime.js → vant.js
+  - framework.js updated
+  - agents.js updated
 
 ### Added
-- **Docs System** - Full documentation overhaul
-  - Jekyll migration from Docsify
-  - docs/ folder with getting-started/, guides/, reference/
-  - _config.yml, _sidebar.yml, _redirects
-  - Permalinks for clean URLs
-  - Mobile-friendly navigation
-- **Docs Funnel** - Root MDs deprecated, point to docs
-  - CLI.md, LIBS.md, CONTENT.md, STEGO.md with deprecation notices
-  - Backwards compat via links to docs/
-  - Added /style, /steganography redirects
-- **AGENTS.md** - Added deep scan knowledge
-  - Project overview, architecture diagram
-  - Key dependencies, CLI commands table
-  - Integration points documented
-- **Docs Expansion** - Full coverage
-  - Security, testing, audit, GitHub Pages guides
-  - Integration, gotchas, limits
-  - Plugins, config, states
-  - FAQs added to index, CLI, MCP
-- **lib/protection.js** - Circuit breaker for MCP
-- **lib/load.js** - Model loader utilities
-- **Onboarding** - Knowledge base browser
-  - vant onboard - View/search brain files
-  - lib/onboard.js - Search + read brain
-- **Succession** - Brain version/trust management
-  - vant succession - Version + trust levels
-  - lib/succession.js - Trust level controls
-- **Resolution** - Improved frontmatter matching
-  - Fix path resolution (PROJECT_ROOT)
-  - Auto-add .md extension  
-  - Partial match for bullets/headings
-  - Returns foundType, foundAt metadata
-- **Resolution** - Thought status tracking
-  - vant resolution - Mark thoughts resolved/deprecated/rejected
-  - lib/resolution.js - Per-file/per-entry status
-  - Deltas for change tracking
-- **MCP Authentication** - API key for secure AI tool access
-  - X-API-Key header for all MCP endpoints
-  - Via VANT_MCP_API_KEY env or MCP_API_KEY in config.ini
-  - Optional but recommended for production
-- **Full CLI Help** - All 20 commands documented
-  - vant help <cmd> now delegates properly to help.js
-  - mcp --help shows full docs with curl examples
-- **onboard Command** - Onboarding summary
-- **succession Command** - Brain succession status
-- **API Documentation** - Full lib coverage expanded
-  - vaf.js: validation, rate limiting, sanitization, middleware
-  - protection.js: circuit breaker, active tracking, input limits
+- **Core Modules for Vant Class** (2026-05-09)
+  - lib/vector-store.js: Local embedding-based semantic memory
+  - lib/cron.js: Task scheduling with setInterval
+  - lib/conversation.js: Shared context between agents
+  - Used by new Vant class runtime
 
-### Added (2026-04-23)
-- **Pagefind Search** - Full-text search for Jekyll docs
-  - docs/_layouts/default.html with search modal
-  - Custom themed UI matching Vant design
-  - Keyboard shortcuts (Cmd/Ctrl+K)
-  - Pagefind v1.5.2 integrated
+## [0.8.6] - 2026-05-08
+### Changed
+- **Search Consolidation** (2026-05-08)
+  - lib/search.js: Unified search + rerank + hybrid + hyde
+  - lib/rerank.js, lib/search-hybrid.js, lib/search-hyde.js: Deleted
+  - Consumers updated: bin/mcp.js, bin/search.js, bin/rerank.js
+  - New exports: rerank, compress, pipeline, stripFluff
+- **Config+Env Merge** (2026-05-08)
+  - lib/config.js: Now exports all VANT_* envvars
+  - lib/env.js: Deleted - all exports moved to config
+  - Consumers updated: server.js, auth.js, api.js, bin/node.js, bin/mcp.js
 
-### Added (2026-05-01)
-- **AdaptiveEntropy** - Self-calibrating entropy mode
-  - `lib/entropy.js`: AdaptiveEntropy class with rolling mu + k*sigma
-  - CLI: --adaptive/-a and --sensitivity/-k flags
-  - docs/reference/entropy.md updated
+- **Pool Consolidation** (2026-05-08)
+  - lib/pool.js: Unified class for buffer + storage + resources
+  - lib/buffer.js, lib/storage.js: Deleted - merged into pool
+  - framework.js updated: require pool instead of buffer/storage
 
-### Fixed (2026-04-23)
-- **Docs Search** - Pagefind deployment issue
-  - Legacy Pages build conflicting with GitHub Actions
-  - Workflow fixed with working-directory: docs
-  - Added configure-pages step for proper OIDC
-  - baseurl and url added to Jekyll _config.yml
-  - 37 pages now indexed and searchable
+- **Audit Unification** (2026-05-08)
+  - lib/audit.js: Unified audit + metrics + user tracking
+  - lib/audit-log.js, lib/metrics.js: Deleted - merged into audit
 
----
-
-## v0.8.3 (2026-04-19)
+### Deleted
+- lib/env.js
+- lib/buffer.js
+- lib/storage.js
+- lib/audit-log.js
+- lib/metrics.js
 
 ### Fixed
-- **bin/run.js** - Updated vant-brain references → Vant
-- **README.md** - Removed vant-brain references
-- **LIBS.md/CLI.md** - Updated references
+- framework.js: _configFlag not defined
+- test/coverage.js: horcrux require → stego
 
----
-
-## v0.8.2 (2026-04-19)
-
+## [0.8.5] - 2026-05-07
 ### Added
-- **MCP Server** - Exposes Vant memory as AI tools
-  - bin/mcp.js - JSON-RPC over HTTP/stdio
-  - Tools: vant_get_memory, vant_set_memory, vant_branch, vant_lock, etc
-- **Node Runner** - Runs Vant as persistent node
-  - bin/node.js - Polls GitHub, optional MCP server
-  - Like crypto nodes: same software, own brain state
-- **Help Command** - Full CLI reference
-  - bin/help.js - Shows all commands with examples
-  - vant help [command] for specific help
-- **AGENTS.md** - Agent branching guide
-  - How to use branches + locks for multi-agent
-- **Full Public Model** - Complete brain with 19 files
-  - identity.md, ego.md, fears.md, anger.md, joy.md - Core
-  - manifesto.md, creed.md, goals.md, preferences.md - Values
-  - lessons.md - Historical learnings
-  - qc.md, security.md, audit.md, errors.md - Operations
-  - keepers.md, curiosity.md, humility.md, empathy.md, gratitude.md - Humanity
-- **Multi-handler Verbosity** - Split verbosity.ini into handlers
-  - response, content, comment, code, log modes
-- **CONTENT.md** - Voice, tone, and style guide
-  - No clichés, short dashes, specific over abstract
-- **SEO dist/index.html** - Optimized for discoverability
+- **Encrypt Class**
+  - New lib/encrypt.js: Consolidated crypto handlers pool
+  - All crypto operations now use Encrypt
 
 ### Changed
-- Converted .txt to .md (identity.txt → identity.md, etc.)
-- Backward compatibility: code works with both .md and .txt
-- Updated schema/memory-files.md and transport-protocol.txt
-- Fixed lib paths in build-test.js
+- **Search Consolidation** (2026-05-08)
+  - lib/search.js: Unified search + rerank + hybrid + hyde
+  - lib/rerank.js, lib/search-hybrid.js, lib/search-hyde.js: Deleted
+  - Consumers updated: bin/mcp.js, bin/search.js, bin/rerank.js
+  - New exports: rerank, compress, pipeline, stripFluff
+- **HTTP Server Consolidation**
+  - server.js: Merged Request, Response, Router, Static inner classes
 
-### Fixed
-- lib/verbosity.js now loads from verbosity.ini
-- load.js loads both .md and .txt extensions
-- health.js checks for both extensions
-
----
-
-## v0.8.1 (2026-04-16)
-
-### Added
-- **RGBA Steganography** - 4 bits/pixel capacity using alpha channel
-  - `lib/stego.encodeRGBA(buffer, imageData)`
-  - `lib/stego.decodeRGBA(imageData)`
-- **Multi-Image Encoding** - Split large messages across multiple PNGs
-  - `lib/stego.encodeMulti(buffer, imageDatas)`
-  - `lib/stego.decodeMulti(imageDatas)`
-- **Slack/Discord Notifications** - Webhook integrations
-  - `lib/notifications.slack(message, options)`
-  - `lib/notifications.discord(message, options)`
-  - `lib/notifications.broadcast(message, targets)`
-  - `lib/notifications.event(eventType, data)`
-- **Telegram Bot** - Bot wrapper and CLI
-  - `lib/telegram.js` - Bot API wrapper
-  - `bin/bot.js` - Bot CLI (`vant bot`)
-  - Commands: /start, /status, /brain, /health, /sync
-- **Docker Multi-Arch** - amd64 and arm64 support
-  - Updated Dockerfile with buildx instructions
-  - Added docker-compose.yml
-
-### Changed
-- Updated dist stats: 14 libs, 6 brain versions, 16 CLI commands
-- Added `bot` to CLI commands
-
----
-
-## v0.8.0 (2026-04-16)
-
-### Added
-- **Health Endpoints** - HTTP health checks
-  - `lib/health.js` - Health check utilities
-  - `bin/server.js` - Health server (`vant server`)
-- **CLI Prompts** - Interactive prompts
-  - `lib/prompts.js` - Inquirer-based prompts
-- **Progress Bars** - CLI progress display
-  - Uses `cli-progress` for sync/load operations
-- **Datadog Metrics** - Metrics integration
-  - `lib/metrics.js` - Datadog metrics
-- **Stegoframe Support** - Encrypted image transport
-  - Encrypt/decrypt with AES-256-GCM
-
-### Changed
-- Initial public release
-- MIT License
-
----
-
-## v0.7.0 (2026-04-15)
-
-### Added
-- **Multi-Agent Locking** - Race-condition safety
-  - `lib/lock.js` - File-based locking
-- **Branch Management** - Per-session branches
-  - `lib/branch.js` - Git branch utilities
-
----
-
-## v0.5.0 - v0.6.0 (2026-04-14)
-
-### Added
-- Core CLI (vant start, sync, health, load, run, test)
-- Brain loader (learnings/, memories/, decisions/, todos/)
-- Logger, config, errors utilities
-- GitHub sync
-
----
-
-### Future (Unreleased)
-
-- Unit tests for lib/*.js
-- Redis-backed distributed locks
-- i18n/localization
-- Web dashboard

@@ -1,8 +1,9 @@
 ---
-permalink: /reference/cli.html
+version: 0.8.11
+permalink: /reference/cli
 layout: default
 title: CLI Reference
-nav_order: 1
+nav_order: 80
 ---
 # CLI Reference
 
@@ -15,8 +16,9 @@ All Vant CLI commands.
 | `vant start` | Full startup (health → sync → load → run) |
 | `vant health` | System diagnostics |
 | `vant sync` | Pull/push brain from GitHub |
-| `vant load` | Load brain from models/public |
+| `vant load` | Load brain (default: `$MODEL_PATH` or models/private)
 | `vant run` | Start runtime loop |
+| `vant vibe` | Get/set runtime mood (experimental, focused, safety_first, etc) |
 
 ### Core Details
 Core CLI commands.
@@ -64,7 +66,7 @@ vant sync --force     # Force push
 
 #### vant load
 
-Load brain from `models/public/`:
+Load brain from your brain folder (default: `$MODEL_PATH` or `models/private/`):
 - Load all .md files
 - Parse _succession.json
 - Update memory
@@ -260,7 +262,7 @@ Run as node.
 ```bash
 vant node              # Persistent mode (manual sync)
 vant node --mcp        # Node + MCP server
-vant node --mcp-port 3457  # Custom MCP port
+vant node --mcp-port 3100  # Custom MCP port
 ```
 
 > ⚠️ **Auto-Polling Opt-In (for Self-Hosted)**: By default, `vant node` does NOT poll GitHub. To enable background sync:
@@ -288,6 +290,7 @@ vant mcp --websocket # WebSocket
 | `vant onboard` | Browse knowledge base |
 | `vant succession` | Brain version/trust |
 | `vant resolution` | Mark thoughts resolved |
+| `vant lock` | Brain write lock (acquire/release/status) |
 | `vant bump` | Bump version & tag |
 
 ### Advanced Details
@@ -323,14 +326,48 @@ vant resolution resolve # Mark resolved
 vant resolution list     # List unresolved
 ```
 
+#### vant lock
+
+Brain write lock for multi-agent safety. Prevents race conditions when multiple agents try to write to brain simultaneously.
+
+```bash
+vant lock acquire   # Acquire lock for writes
+vant lock release   # Release lock
+vant lock status   # Show lock status
+vant lock force    # Force release (admin)
+```
+
+**Using in code:**
+
+```javascript
+const brain = require('vant').brain;
+
+// Simple: acquire lock, do work, release
+const token = await brain.acquireBrainLock();
+if (token) {
+    brain.write('learnings', 'new-lesson', '# My lesson content');
+    await brain.releaseBrainLock(token);
+}
+
+// Safer: withLock helper handles release
+await brain.withLock(async () => {
+    brain.write('learnings', 'new-lesson', '# Content');
+});
+```
+
+**Lock behavior:**
+- Auto-expires after 1 hour if not released
+- Uses exponential backoff for contention
+- Token required for secure release
+
 #### vant bump
 
 Bump version:
 
 ```bash
-vant bump         # Patch (0.8.4 → 0.8.5)
-vant bump minor  # Minor (0.8.4 → 0.9.0)
-vant bump major  # Major (0.8.4 → 1.0.0)
+vant bump         # Patch (0.8.6 → 0.8.5)
+vant bump minor  # Minor (0.8.6 → 0.9.0)
+vant bump major  # Major (0.8.6 → 1.0.0)
 ```
 
 ## Docs
@@ -353,7 +390,7 @@ vant docs build --version # Specific version
 vant docs serve          # Local server
 ```
 
-See also: [Configuration](/vant/reference/configuration.html), [API](/vant/reference/api.html), [Entropy-Patch](/vant/reference/entropy.html)
+See also: [Configuration](reference/configuration), [API](reference/cli), [Entropy Patching](reference/entropy)
 
 ## compress
 
@@ -378,21 +415,21 @@ vant compress <input> [options]
 ### Examples
 
 ```bash
-# Compress a file
-vant compress models/public/goals.md
+# Compress a file (use $MODEL_PATH or models/private/)
+vant compress ${MODEL_PATH:-models/private}/goals.md
 
 # View entropy stats
-vant compress models/public/goals.md --stats
+vant compress ${MODEL_PATH:-models/private}/goals.md --stats
 
 # Adaptive mode (self-calibrating threshold)
-vant compress models/public/goals.md --adaptive
-vant compress models/public/goals.md -a -k 2.0
+vant compress ${MODEL_PATH:-models/private}/goals.md --adaptive
+vant compress ${MODEL_PATH:-models/private}/goals.md -a -k 2.0
 
 # Decompress
 vant compress models/latent/goals.vpatch --decompress
 ```
 
-See also: [Entropy-Patch](/vant/reference/entropy.html)
+See also: [Entropy Patching](reference/entropy)
 
 ---
 
@@ -422,3 +459,298 @@ Frequently asked questions answered.
 ### How do I run tests?
 
 `vant test` - Runs build tests
+## Utility Commands
+
+Additional CLI commands for specific tasks.
+
+### vant audit
+
+Generate an audit report - security, health, deps:
+
+```bash
+vant audit              # Full report
+vant audit --json      # JSON output
+```
+
+### vant bot
+
+Run Telegram bot:
+
+```bash
+vant bot              # Start bot
+vant bot --test     # Test mode
+```
+
+### vant bump
+
+Bump version and create git tag:
+
+```bash
+vant bump patch      # 0.8.6 → 0.8.6
+vant bump minor     # 0.8.6 → 0.9.0
+vant bump major    # 0.8.6 → 1.0.0
+```
+
+### vant compress
+
+Compress brain to patches:
+
+```bash
+vant compress input.png "Secret message" -o output.png
+vant compress input.png "msg" -o out.png --encrypt password
+```
+
+### vant rate
+
+Show GitHub API rate limit:
+
+```bash
+vant rate           # Current remaining
+vant rate --json   # JSON output
+```
+
+### vant resolution
+
+Manage resolutions:
+
+```bash
+vant resolution --list     # List all
+vant resolution --add key "content"
+ vant resolution --rm key
+```
+
+### vant succession
+
+Show commit history:
+
+```bash
+vant succession           # Last 10 commits
+vant succession 20     # Last N commits
+```
+
+### vant summary
+
+Show brain summary:
+
+```bash
+vant summary          # Stats + info
+vant summary --json # JSON
+```
+
+### vant update
+
+Check for updates:
+
+```bash
+vant update         # Check version
+vant update --force # Force update
+```
+
+## Webhook Commands
+
+```bash
+vant webhook serve             # Start webhook server
+vant webhook register <name> <source>  # Register webhook
+vant webhook list            # List webhooks
+vant webhook send <url> <payload>   # Send webhook
+```
+
+## Notification Commands
+
+```bash
+vant notify slack "message"    # Send Slack notification
+vant notify discord "message" # Send Discord notification
+```
+
+## Linear Commands (when island loaded)
+
+```bash
+vant linear issues            # List issues
+vant linear create "title"   # Create issue
+vant linear comment <id> "body"  # Add comment
+```
+
+## Development Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant search` | Search brain files (basic/rag/hybrid) |
+| `vant rerank` | Rerank search results |
+| `vant prune` | Clean up old/stale brain files |
+
+### vant prune
+
+Clean up old or stale brain files:
+
+```bash
+vant prune -h, --help           # Show help
+vant prune -d, --dry-run       # Preview without changes
+vant prune -f, --force        # Force prune without confirmation
+vant prune -D, --daemon      # Run as background daemon
+vant prune -s, --stats       # Show prune statistics
+vant prune -l, --list        # List prunable files
+```
+
+### vant search
+
+Search brain files:
+
+```bash
+vant search <query>          # Basic search
+vant search --rag <query>    # RAG search (semantic)
+vant search --hybrid <query> # Hybrid search (BM25 + vector + RRF)
+vant search --rerank         # Rerank results
+```
+
+### vant rerank
+
+Rerank search results:
+
+```bash
+vant rerank <results.json>    # Rerank results file
+vant rerank --query "query"  # Query for reranking
+```
+
+## Infrastructure Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant repos` | Manage multiple brain repositories |
+| `vant islands-boot` | Initialize islands |
+| `vant validate` | Validate brain files |
+
+### vant repos
+
+Manage multiple repositories:
+
+```bash
+vant repos list               # List configured repos
+vant repos add <name> <url>  # Add new repository
+vant repos remove <name>    # Remove repository
+vant repos sync <name>      # Sync specific repo
+```
+
+### vant islands-boot
+
+Initialize islands:
+
+```bash
+vant islands-boot            # Initialize all islands
+vant islands-boot <island>   # Initialize specific island
+```
+
+### vant validate
+
+Validate brain files:
+
+```bash
+vant validate                # Validate all files
+vant validate --schema      # Schema validation
+vant validate --integrity  # Check file integrity
+```
+
+## Testing Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant test-all` | Run all tests |
+| `vant test-core` | Run core tests |
+
+### vant test-all
+
+Run all tests:
+
+```bash
+vant test-all                # Run all tests
+vant test-all --verbose     # Verbose output
+```
+
+### vant test-core
+
+Run core Vant tests:
+
+```bash
+vant test-core              # Run core tests
+vant test-core --coverage   # With coverage
+```
+
+## Stego Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant stego` | Encode/decode data in images |
+
+### vant stego
+
+Steganography - encode/decode data in images:
+
+```bash
+vant stego encode <input.txt> <image.png>  # Encode text in image
+vant stego decode <stego.png>              # Decode from image
+vant stego --RGBA                         # Use RGBA encoding (4x capacity)
+vant stego --multi                        # Split across multiple images
+```
+
+## Sync Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant hybrid-sync` | Public/private brain sync |
+
+### vant hybrid-sync
+
+Hybrid sync between public and private brains:
+
+```bash
+vant hybrid-sync -h, --help         # Show help
+vant hybrid-sync -p, --public    # Sync public brain only
+vant hybrid-sync -r, --private   # Sync private brain only
+```
+
+## Docs Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant docs` | Build docs |
+| `vant docs-build` | Build docs (detailed) |
+
+### vant docs-build
+
+Build documentation:
+
+```bash
+vant docs-build                # Build docs
+vant docs-build --version 0.9.0 # Specific version
+```
+
+## Boot Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant boot` | System bootstrap |
+
+### vant boot
+
+Bootstrap Vant system:
+
+```bash
+vant boot                  # Full bootstrap
+vant boot --init           # Initialize from scratch
+vant boot --verify         # Verify installation
+```
+
+## Main Entry
+
+| Command | Description |
+|---------|-------------|
+| `vant` | Main entry point |
+
+### vant
+
+Main Vant CLI entry:
+
+```bash
+vant                      # Show version
+vant -h, --help           # Show help
+vant --version            # Show version
+```

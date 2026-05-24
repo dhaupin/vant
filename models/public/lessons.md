@@ -2,7 +2,14 @@
 
 These are core learnings from building and operating Vant systems:
 
-=== LESSONS LEARNED ===
+=== LEARNED ===
+
+v0.8.6 (2026-05-07) - Security Hardening Day:
+- Auth lockout duration (60s default, configurable) - prevents indefinite lockout
+- Protection counter can't go negative - prevents logging confusion
+- MCP binds to localhost only - no remote exposure
+- All API endpoints require VANT_API_KEY - fail closed
+- 44 tests passing
 
 1. IDENTITY SEPARATION
 - Keep public and private models separate
@@ -75,11 +82,17 @@ AVOID:
 
 === REVISION LOG ===
 
-v0.8.4 (2026-04):
+v0.8.6 (2026-05-06):
+- Islands Release - lazy-loadable brain components
+- Resolution system - thought lifecycle tracking (active, resolved, deprecated, rejected)
+- Fixed duplicate args declaration in bin/resolution.js, onboard.js, succession.js
+- Renamed transport-protocol.txt to transport-protocol.md (QC compliance)
+- Updated schema files: transport-protocol.md, memory-files.md for Islands
+- 15 tests passing
 - Added spooling lesson - resist context distillation
 - Added process spooling - validate every step
 - VAF gap filling complete for bin/*.js (23/23)
-- 15 tests passing
+- Updated brain CLI: 6→24 commands in identity.md
 
 v0.8.2 (2025-04):
 - Initial public model release

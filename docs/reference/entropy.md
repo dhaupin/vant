@@ -1,22 +1,22 @@
 ---
+version: 0.8.6
+permalink: /reference/entropy
 layout: default
-title: Entropy-Patch Protocol
-nav_order: 6
-nav_order: 6
-parent: Reference
+title: Entropy Patching Protocol
+nav_order: 87
 ---
 
-# Entropy-Patch Protocol
+# Entropy Patching Protocol
 
-> Token-aware latent transport for Vant v0.8.4+
+> Token-aware latent transport for Vant v0.8.6+
 
-## What is Entropy-Patch?
+## What is Entropy Patching?
 
-**Entropy-Patch** is a compression protocol that separates high-entropy data (unique, random-looking content) from low-entropy data (repeated, predictable patterns). It transforms Vant from a "Context Storage" system into a "Latent Transport" system.
+**Entropy Patching** is a compression protocol that separates high-entropy data (unique, random-looking content) from low-entropy data (repeated, predictable patterns). It transforms Vant from a "Context Storage" system into a "Latent Transport" system.
 
 ### Why Does It Exist?
 
-LLMs are token-limited. Loading 19 brain files on startup is expensive. Entropy-Patch enables:
+LLMs are token-limited. Loading 60+ brain files on startup is expensive. Entropy Patching enables:
 
 1. **Token reduction** - Agents load one `.vpatch` file instead of 19 `.md` files
 2. **Git-native diffs** - Tracks entropy spikes instead of line changes
@@ -67,11 +67,11 @@ This enables lightweight "what changed" queries without full hydration.
 Compress Vant's brain files for faster loading:
 
 ```bash
-# Compress all brain files
-vant compress models/public/ --output models/latent
+# Compress all brain files (use $MODEL_PATH or models/private/)
+vant compress ${MODEL_PATH:-models/private}/ --output models/latent
 
 # Now agents can load:
-# - models/latent/*.vpatch  (instead of models/public/*.md)
+# - models/latent/*.vpatch  (instead of models/private/*.md)
 ```
 
 ### Use Case 2: Generational Evolution
@@ -89,8 +89,8 @@ git commit -m "Updated chapter 4"
 Ask lightweight questions without full hydration:
 
 ```bash
-# Get stats on any file
-vant compress models/public/goals.md --stats
+# Get stats on any file (use $MODEL_PATH or models/private/)
+vant compress ${MODEL_PATH:-models/private}/goals.md --stats
 ```
 
 ## CLI Commands
@@ -128,7 +128,7 @@ vant compress <file.vpatch> --decompress
 ### generatePatches()
 
 ```javascript
-const entropy = require('./lib/entropy');
+const entropy = require('vant').entropy;
 
 const patches = entropy.generatePatches(buffer, {
     windowSize: 8,     // sliding window (default: 8)
@@ -244,7 +244,7 @@ All paths are validated through VAF (Vant Application Firewall):
 
 ## Generational Optimization Guide
 
-Tips for tuning Entropy-Patch in production autonomous sessions.
+Tips for tuning Entropy Patching in production autonomous sessions.
 
 ### 1. The Sensitivity Sweet Spot
 

@@ -23,6 +23,8 @@ Security principles and practices for Vant.
 - config.ini with secrets
 - states/ - Runtime state
 - .agent-locks/ - Lock files
+- .resolution.json - Thought tracking (may contain sensitive)
+- Island state files (lazy-loaded brains)
 
 ## Usage
 
@@ -58,3 +60,6 @@ if (token) {
 - [ ] Use lock before write
 - [ ] Check rate limits
 - [ ] Validate inputs
+- [x] Auth lockout has duration (not indefinite)
+- [x] MCP binds to localhost
+- [x] API requires VANT_API_KEY

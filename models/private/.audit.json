@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "entries": [
+    {
+      "timestamp": "2026-05-13T19:21:15.900Z",
+      "action": "test:action",
+      "data": {},
+      "hash": "8d73d50c67815bfb"
+    },
+    {
+      "timestamp": "2026-05-14T08:13:55.748Z",
+      "action": {
+        "type": "act",
+        "operation": "anonymous",
+        "duration": 2,
+        "agent": null
+      },
+      "data": {},
+      "hash": "aec92a740464be39"
+    }
+  ]
+}

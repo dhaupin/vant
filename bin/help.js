@@ -1,9 +1,9 @@
 /**
-const vaf = require("../lib/vaf");
  * Vant Help Command
  * Shows all available commands with descriptions
  */
 
+const vaf = require("../lib/vaf");
 const path = require('path');
 const fs = require('fs');
 
@@ -22,7 +22,7 @@ const COMMANDS = {
         usage: 'vant health'
     },
     load: {
-        desc: 'Load brain from models/public or custom path',
+        desc: 'Load brain from models/private or custom path',
         usage: 'vant load [version]'
     },
     run: {
@@ -72,8 +72,14 @@ const COMMANDS = {
     
     // Advanced
     lock: {
-        desc: 'Acquire/release brain lock',
-        usage: 'vant lock [acquire|release]'
+        desc: 'Brain write lock (multi-agent safety)',
+        usage: 'vant lock [acquire|release|status|force]',
+        detail: `Brain lock for multi-agent writes.
+  acquire - Acquire lock (returns token)
+  release - Release lock (using token)
+  status   - Show lock status
+  force    - Force release (admin)
+See: vant lock --help`
     },
     branch: {
         desc: 'List/switch brain branches',
@@ -81,6 +87,22 @@ const COMMANDS = {
     },
     
     // Integrations
+    server: {
+        desc: 'HTTP/HTTPS server with security chain',
+        usage: 'vant server [--port <port>] [--host <host>] [--cert <path>] [--key <path>]',
+        detail: `Run Vant HTTP/HTTPS server.
+
+Options:
+  -p, --port <port>    Server port (default: 3456)
+  -h, --host <host>    Bind address (default: 127.0.0.1)
+  -c, --cert <path>    TLS certificate path
+  -k, --key <path>    TLS key path
+  -i, --insecure      Allow HTTP (dev only)
+  -a, --auth          Require API key
+
+Set VANT_API_KEY to require authentication.
+See: vant server --help`,
+    },
     mcp: {
         desc: 'Run MCP server for AI tools (use --help for auth)',
         usage: 'vant mcp [--server|--stdio]',
@@ -115,6 +137,63 @@ See: vant node --help`
         desc: 'Brain succession status',
         usage: 'vant succession [status|trust|log]',
         detail: 'Manage brain trust levels.\nSee: vant succession help'
+    },
+
+    // New / Additional
+    repos: {
+        desc: 'Mount external repositories',
+        usage: 'vant repos --list|--mount|--pull',
+        detail: 'Register and mount external repos.\nSee: vant repos --help'
+    },
+    hybrid: {
+        desc: 'Hybrid sync (public/private split)',
+        usage: 'vant hybrid --public|--private',
+        detail: 'Push public or private only.\nSee: vant hybrid --help'
+    },
+    search: {
+        desc: 'Search brain with RAG',
+        usage: 'vant search [query]|--hybrid|--hyde',
+        detail: 'Search with RAG + HyDE.\nSee: vant search --help'
+    },
+    stego: {
+        desc: 'Encode/decode brain in images',
+        usage: 'vant stego encode|decode|snapshot|capacity',
+        detail: 'LSB steganography for brain transfer.\nSee: vant stego --help'
+    },
+    boot: {
+        desc: 'Ghost boot from stego image',
+        usage: 'vant boot --image <url>',
+        detail: 'Zero-config boot from image URL.\nSee: vant boot --help'
+    },
+    prune: {
+        desc: 'Prune brain to LTC',
+        usage: 'vant prune [--dry-run|--force]',
+        detail: 'Generate LTC (Less Than Context).\nSee: vant prune --help'
+    },
+    islands: {
+        desc: 'Componentized brain boot',
+        usage: 'vant islands --list|--island|--prompt',
+        detail: 'Boot brain components on trigger.\nSee: vant islands --help'
+    },
+    validate: {
+        desc: 'Validate schema + audit + circuits',
+        usage: 'vant validate --check',
+        detail: 'Full validation suite.\nSee: vant validate --help'
+    },
+    vibe: {
+        desc: 'Show/set current vibe',
+        usage: 'vant vibe [experimental|safety_first]',
+        detail: 'Track agent mood for context.\nSee: vant vibe --help'
+    },
+    compress: {
+        desc: 'Compress brain for transfer',
+        usage: 'vant compress',
+        detail: 'Compress brain to minimal form.'
+    },
+    docs: {
+        desc: 'Build docs for release',
+        usage: 'vant docs',
+        detail: 'Generate documentation.'
     }
 };
 

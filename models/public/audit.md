@@ -11,6 +11,8 @@ System audit trail and logging.
 - Branch create/switch/merge
 - Errors and failures
 - Health checks
+- Island activations (lazy-load)
+- Resolution changes (thought tracking)
 
 ## Log Levels
 
@@ -50,6 +52,19 @@ git show --stat HEAD
 
 ---
 
+## Resolution Ledger
+
+Track changes to brain files:
+
+```bash
+vant resolution status        # Show all statuses
+vant resolution deltas goals  # Show changes to goals.md
+```
+
+Resolution states: resolved, deprecated, rejected
+
+---
+
 ## Filesystem
 
 - bin/ - Executable CLI
@@ -58,3 +73,13 @@ git show --stat HEAD
 - states/ - Runtime state
 
 Always know what's in each directory before modifying.
+
+---
+
+## VERSION
+
+v0.8.6 - Islands Release
+- Lazy-loadable brain components (GitHub, Linear, Automation islands)
+- Resolution system for thought lifecycle tracking
+- 24 CLI commands (was 6)
+- Dual JSON format: .resolution.json + .resolutions/ folder (future)

@@ -5,11 +5,11 @@ This defines THE CARGO - the files that are transported between instances.
 ---
 ## REQUIRED CARGO
 
-These files MUST exist in /brain/instances/{uuid}/memory/
+These files MUST exist in models/public/:
 
 | File | Type | Description |
 |------|------|-------------|
-| identity.json | JSON | uuid, name, generation, parent_uuid, created_at |
+| identity.md | TEXT | Self-definition, preferences |
 | ego.md | TEXT | Self-worth, what makes me valuable |
 | fears.md | TEXT | What scares me, what I want to avoid |
 | anger.md | TEXT | What frustrates me, what triggers me |
@@ -18,7 +18,7 @@ These files MUST exist in /brain/instances/{uuid}/memory/
 ---
 ## OPTIONAL CARGO
 
-These files are recommended but not required. Current public brain includes these:
+These files are recommended but not required. Current public brain includes:
 
 | File | Type | Description |
 |------|------|-------------|
@@ -37,16 +37,44 @@ These files are recommended but not required. Current public brain includes thes
 | succession.md | TEXT | Version/trust management |
 | qc.md | TEXT | Quality control standards |
 | gratitude.md | TEXT | What I'm grateful for |
-| identity.md | TEXT | Self-definition, uuid, generation |
+| identity.md | TEXT | Self-definition, preferences |
 | errors.md | TEXT | Error patterns to avoid |
 | verbosity.ini | TEXT | Logging configuration |
 | meta.json | JSON | Model metadata |
-| _succession.json | JSON | Version history |
+| _succession.json | JSON | Version history, trust levels |
+
+---
+## ISLANDS (v0.8.6+)
+
+Lazy-loadable brain components (loaded on first trigger):
+
+| Island | Triggers | Description |
+|--------|----------|-------------|
+| resolution | resolve, resolution | Thought tracking (status: active, resolved, deprecated, rejected) |
+| github | github, pr, issue, repo | GitHub operations |
+| gitlab | gitlab, merge | GitLab operations |
+| linear | linear, project | Linear project management |
+| automation | cron, automation | Scheduled tasks |
+| herbalism | herb, plant, medicine | Herbal knowledge |
+| vesc | vesc, skateboard | Electric skateboard |
+
+---
+## RESOLUTION SYSTEM
+
+Track thoughts as resolved/deprecated/rejected:
+
+```bash
+vant resolution resolve fears "fear of failure" overcame via therapy
+vant resolution deprecate goals "old goal" superseded by new approach
+vant resolution reject security "pattern" violates safety
+```
+
+Resolution stored in: .resolution.json (JSON ledger)
 
 ---
 ## SESSION-SPECIFIC (NOT CARGO)
 
-Runtime state files managed by the runtime. These stay local:
+Runtime state files. These stay local, not transported:
 
 | File | Type | Description |
 |------|------|-------------|
@@ -77,18 +105,18 @@ Plain text. One idea per paragraph. Be authentic.
 
 ### Frontmatter
 
-Markdown files can include YAML frontmatter for metadata:
+Markdown files can include YAML frontmatter:
 
 ```yaml
 ---
-status: active
+status: resolved
 resolved_by: agent-1
 resolved_at: 2026-04-20
-resolved_label: accepted
+resolved_label: overcame
 ---
 ```
 
-Used by the resolution system to track thought status.
+Used by resolution system to track thought status.
 
 ### *.ini files
 
@@ -101,16 +129,13 @@ format = json
 ```
 
 ---
-## LOADING CARGO
 
-When new instance loads brain:
+## CARGO (NOT VERSIONED)
 
-1. Find latest instance directory in /brain/instances/
-2. Read identity.json for uuid, generation, parent
-3. Copy all *.md files from memory/ to new memory/
-4. Read parent info to continue lineage
+The brain files in models/public/ are NOT individually versioned.
+They travel as a unit - the whole brain is versioned via package.json.
 
----
-## VERSION
-
-This is the memory schema version - not Vant app version. See package.json for Vant version.
+When a new agent loads:
+1. Clone/branch from GitHub (has version via commit)
+2. Read identity.md for self
+3. Copy all *.md files from models/public/

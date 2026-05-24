@@ -6,10 +6,9 @@ node_modules/
 .env.local
 .env.*.local
 
-# State
-states/active/
-states/archive/
-models/private/
+# State (in brain - removed states/ directory)
+models/public/.state.json
+models/public/repos/
 
 # IDE
 .vscode/
@@ -20,6 +19,11 @@ models/private/
 # OS
 .DS_Store
 Thumbs.db
+
+# Runtime state (generated at runtime)
+models/.*.json
+models/backup/
+temp/
 
 # Logs
 *.log
@@ -34,3 +38,10 @@ build/
 # Temp
 *.tmp
 temp/models/latent/*.vpatch
+
+# Lock files (brain + storage)
+.lock-brain-token
+.locks/
+
+# Circuit breakers (runtime state)
+.circuit*.json

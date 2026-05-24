@@ -4,11 +4,37 @@ const vaf = require("../lib/vaf");
 
 /**
  * Vant Health Check
- * 
  * Checks system state and model integrity
+ * 
+ * All args should have both long (--arg) and short (-a) forms.
+ * 
+ * Usage: vant health [-h|--help] [-q|--quiet]
  */
 
+// -h/--help: show help and exit
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log('Usage: vant health [-h|--help] [-q|--quiet]');
+    console.log('');
+    console.log('  -h, --help   Show this help');
+    console.log('  -q, --quiet  Minimal output');
+    process.exit(0);
+}
+
+// Parse: support both -q/--quiet
+const argsSet = new Set(args);
+const quiet = argsSet.has('-q') || argsSet.has('--quiet');
+
 const fs = require('fs');
+
+// Lazy-load sandbox
+let _sandbox = null;
+function _getSandbox() {
+    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    return _sandbox;
+}
+function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
+function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
 
 // Check if file exists - tries .md first, falls back to .txt
@@ -29,16 +55,18 @@ function checkModel() {
     ];
     
     const required = ['identity.md', 'identity.txt'];
-    const found = checks.some(pair => pair.some(f => fs.existsSync(path.join('models/public', f))));
+    // Check user's brain (determined by MODEL_PATH or config)
+    const brainPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || process.env.VANT_STORAGE_PATH || 'models/private';
+    const found = checks.some(pair => pair.some(f => fs.existsSync(path.join(brainPath, f))));
     
     if (found) {
-        console.log('  ✓ Public model exists');
+        console.log('  ✓ Brain exists at ' + brainPath);
         
         // Try to read identity
-        const identityPath = fs.existsSync('models/public/identity.md') 
-            ? 'models/public/identity.md' 
-            : fs.existsSync('models/public/identity.txt') 
-                ? 'models/public/identity.txt' 
+        const identityPath = fs.existsSync(brainPath + '/identity.md') 
+            ? brainPath + '/identity.md' 
+            : fs.existsSync(brainPath + '/identity.txt') 
+                ? brainPath + '/identity.txt' 
                 : null;
         
         if (identityPath) {
@@ -76,7 +104,9 @@ function checkEnv() {
 
 function checkDirs() {
     console.log('\n📁 Directories:');
-    const dirs = ['models', 'models/public', 'lib', 'bin', 'states'];
+    // Check base dirs + user's brain (MODEL_PATH or default private)
+    const brainPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || 'models/private';
+    const dirs = ['models', 'models/private', 'lib', 'bin', brainPath];
     dirs.forEach(d => {
         if (fs.existsSync(d)) {
             console.log(`  ✓ ${d}/`);
@@ -84,6 +114,13 @@ function checkDirs() {
             console.log(`  ✗ ${d}/ missing`);
         }
     });
+
+    // State now in brain path
+    if (fs.existsSync(brainPath + '/.state.json')) {
+        console.log('  ✓ ' + brainPath + '/.state.json');
+    } else {
+        // May not exist yet (first run)
+    }
 }
 
 function run() {

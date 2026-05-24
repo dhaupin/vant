@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "sources": [
+    {
+      "id": 1,
+      "commit": "abc123def",
+      "context": "test context",
+      "timestamp": "2026-05-07T00:19:51.530Z"
+    }
+  ]
+}

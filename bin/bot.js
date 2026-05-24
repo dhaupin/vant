@@ -17,7 +17,9 @@ const vaf = require("../lib/vaf");
  */
 
 const telegram = require('../lib/telegram');
-const logger = require('../lib/logger');
+const logger = require('../lib/audit');
+// Use logger methods for logging
+const { error, info, warn, debug } = logger;
 const config = require('../lib/config');
 
 const BOT_COMMANDS = [

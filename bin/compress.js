@@ -18,7 +18,7 @@
  *   --stats, -s      Show entropy statistics only
  */
 
-const entropy = require('../lib/entropy');
+const entropy = require('../lib/encrypt');
 const vaf = require('../lib/vaf');
 const { readFileSync, statSync, mkdirSync, readdirSync } = require('fs');
 const path = require('path');

@@ -1,14 +1,37 @@
 #!/usr/bin/env node
+/**
+ * Vant Bump - Version bump and tag release
+ * Updates version in package.json and creates git tag
+ *
+ * Usage: vant bump [major|minor|patch]
+ */
+
 const vaf = require("../lib/vaf");
+
+// -h/--help
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log("'Usage: vant bump [options]'");
+    process.exit(0);
+}
 /**
  * Vant Version Bump
  * Bump version and tag
  * 
- * Usage: vant bump [patch|minor|major]
+ * Usage: vant bump [-h|--help] [-p|--patch|-m|--minor|-M|--major]
  */
 
 const { execSync } = require('child_process');
 const fs = require('fs');
+
+// Lazy-load sandbox
+let _sandbox = null;
+function _getSandbox() {
+    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    return _sandbox;
+}
+function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
+function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
 
 const PACKAGE_JSON = 'package.json';
@@ -85,7 +108,7 @@ function tag(version) {
 /**
  * Main
  */
-function main() {
+function main() { _checkRead(); 
     const args = process.argv.slice(3);
     const bumpType = args[0] || DEFAULT_BUMP;
     

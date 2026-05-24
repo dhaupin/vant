@@ -1,0 +1,43 @@
+{
+  "version": "1.0",
+  "entries": [
+    {
+      "id": 1,
+      "timestamp": "2026-05-07T00:19:51.532Z",
+      "action": "test:action",
+      "meta": {},
+      "hash": "28df9132"
+    },
+    {
+      "timestamp": "2026-05-09T09:14:03.480Z",
+      "action": {
+        "type": "learn",
+        "key": "test_lesson",
+        "agent": "agent_moy4nc5natz52"
+      },
+      "data": {},
+      "hash": "ba08ff343e16c650"
+    },
+    {
+      "timestamp": "2026-05-09T09:14:03.482Z",
+      "action": {
+        "type": "act",
+        "operation": "anonymous",
+        "duration": 1,
+        "agent": "agent_moy4nc5natz52"
+      },
+      "data": {},
+      "hash": "41faa15210f00bda"
+    },
+    {
+      "timestamp": "2026-05-09T09:29:12.784Z",
+      "action": {
+        "type": "learn",
+        "key": "boot",
+        "agent": "agent_moy56ts8tl6my"
+      },
+      "data": {},
+      "hash": "c6114523e8045ed6"
+    }
+  ]
+}

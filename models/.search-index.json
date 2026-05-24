@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "documents": [
+    {
+      "id": "test-1",
+      "content": "herbal medicine plants",
+      "path": "test.md",
+      "commit": "abc123"
+    },
+    {
+      "id": "test-2",
+      "content": "electric skateboard VESC",
+      "path": "vesc.md",
+      "commit": "def456"
+    }
+  ]
+}

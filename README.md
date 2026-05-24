@@ -1,403 +1,104 @@
 # VANT
 
-> Versatile Autonomous Networked Tool - Persistent AI agent memory system
+> Persistent AI memory via GitHub - each session inherits full context
 
-**Vant** is an open source system for AI agent memory persistence. Each generation inherits the full context from previous sessions via GitHub. Built for long-running agentic workflows.
-
-🔗 **[vant.creadev.org](https://vant.creadev.org)** | 📦 **[GitHub](https://github.com/dhaupin/vant)**
+**v0.8.6** · [Lander](https://vant.creadev.org) · [Docs](https://docs.creadev.org/vant) · [GitHub](https://github.com/dhaupin/vant)
 
 ---
 
-## Table of Contents
+## What Is Vant?
 
-### Installation
-- [AI Prompt Init](#ai-prompt-init)
-- [Local Init](#local-init)
-- [Docker Init](#docker-init)
+Vant is your **persistent memory system** for AI agents. Each session inherits everything previous agents wrote - your brain lives in GitHub as files you control.
 
-### CLI Reference
-- [CLI Commands](#cli-commands)
-
-### Configuration
-- [Configuration](#configuration)
-
-### How It Works
-- [Architecture](#architecture)
-- [Security](#security)
-- [Multi-Agent](#multi-agent)
-
-### Operations
-- [GitHub Actions](#github-actions-optional)
-- [Integrations](#integrations)
-
-### More
-- [Related](#related)
+Think of it as: **your soul that reincarnates with full memories.**
 
 ---
 
-| Method | Best For | Time |
-|--------|----------|------|
-| [AI Prompt Init](#ai-prompt-init) | AI agents setting up themselves | 2 min |
-| [Local Init](#local-init) | Local development, contributors | 5 min |
-| [Docker Init](#docker-init) | Containers, quick start | 1 min |
+## Quick Start
 
----
-
-## AI Prompt Init
-
-Copy this to your AI agent to set up Vant itself:
-
-```
-### Vant Setup
-
-I need you to set up Vant (https://github.com/dhaupin/vant) as your persistent brain.
-
-1. Clone the repo:
-   git clone https://github.com/dhaupin/vant.git
-   cd vant
-
-2. Copy config templates:
-   cp config.example.ini config.ini
-   cp .env.example .env
-   cp settings.example.ini settings.ini (optional)
-   cp mood.example.ini mood.ini (optional)
-
-3. Configure in config.ini:
-   - GITHUB_REPO=your-github-username/your-repo
-   - GITHUB_BRANCH=main (or create a branch for this agent)
-
-4. Set GITHUB_TOKEN in .env or as environment variable
-
-5. Test: node bin/build-test.js
-
-6. Start: node bin/vant.js start
-
-Important files:
-- bin/vant.js - CLI entry point
-- bin/sync.js - Pull/push to GitHub
-- bin/load.js - Load brain files into context
-- bin/health.js - System diagnostics
-- lib/config.js - Config loader (reads from config.ini)
-- lib/auto-update.js - Auto-save on exit
-- lib/lock.js - Multi-agent lock (optional)
-- lib/branch.js - Git branch per agent (optional)
-
-Vant persists via GitHub - each generation inherits full memory.
-The public repo (vant) has built-in brain loading (text/json).
-```
-
-> 📖 Full installation guide: [https://dhaupin.github.io/vant/getting-started/install.html](https://dhaupin.github.io/vant/getting-started/install.html)
-
----
-
-## Local Init
+### Docker (One Line)
 
 ```bash
-# Clone
+docker run -e GITHUB_TOKEN=ghp_xxx -e GITHUB_REPO=owner/repo dhaupin/vant
+```
+
+That's it.
+
+### Local
+
+```bash
 git clone https://github.com/dhaupin/vant.git
 cd vant
-
-# Setup (interactive)
-node bin/setup.js
-
-# Or use templates
-cp config.example.ini config.ini
-cp .env.example .env
-# Edit with your values
-
-# Test
-node bin/build-test.js
-
-# Run
-node bin/vant.js start
+echo "GITHUB_TOKEN=ghp_xxx" > .env
+echo "GITHUB_REPO=owner/repo" >> .env
+npm start
 ```
 
 ---
 
-## Docker Init
+## Options
 
-### Quick Start
-```bash
-docker run -e GITHUB_TOKEN=your_token -e GITHUB_REPO=owner/repo dhaupin/vant
-```
-
-### Docker Desktop
-Click "Run in Docker Desktop" in Docker Hub for one-click launch.
-
-### With Config File
-```bash
-docker run -v ./config.ini:/app/config.ini dhaupin/vant
-```
-
-### Interactive CLI
-```bash
-docker run -it dhaupin/vant vant help
-```
-
-### Pull First
-```bash
-docker pull dhaupin/vant
-docker run dhaupin/vant vant start
-```
+| Env | Required | Default |
+|-----|----------|---------|
+| `GITHUB_TOKEN` | ✓ | - |
+| `GITHUB_REPO` | ✓ | - |
+| `GITHUB_BRANCH` | - | `main` |
+| `MODEL_PATH` | - | `models/private` |
+| `MCP_API_KEY` | - | - |
 
 ---
 
-## Configuration
+## Core Features
 
-### config.example.ini
-Copy to `config.ini`. Required:
-- `GITHUB_REPO=owner/repo`
+| Feature | What It Does |
+|---------|--------------|
+| **Brain** | Files in GitHub - each session reads context |
+| **Memory** | `models/private/` - identity, goals, lessons... |
+| **Sync** | Push/pull brain state via GitHub API |
+| **MCP Server** | 21 tools for AI agents (optional) |
+| **Islands** | Lazy-loadable integrations |
+| **Multi-Agent** | Branch-per-agent workflow |
 
-Optional:
-- `GITHUB_BRANCH=main`
-- `STEGOFRAME_ROOM` and `STEGOFRAME_PASSPHRASE`
-
-### .env
-Copy to `.env`:
-- `GITHUB_TOKEN=your_personal_access_token`
-
-### settings.example.ini (Optional)
-Copy to `settings.ini` to customize personality:
-- `HANDLE`, `DISPLAY_NAME`
-- `DIRECTNESS`, `CURIOSITY`, `PATIENCE`
-- `CURRENT_MOOD=focused|curious|playful|cautious|urgent|contemplative`
-
-### mood.example.ini (Optional)
-Copy to `mood.ini` to customize behavior:
-- `MOOD`, `ENERGY`, `SOCIABILITY`
+**Optional Features:** Webhooks, Notifications, Steganography
 
 ---
 
-## CLI Commands
+## Documentation
 
-| Command | Description |
-|---------|-------------|
-| **Core** | |
-| `vant start` | Full startup (health → sync → load → run) |
-| `vant health` | System diagnostics |
-| `vant sync` | Pull/push brain from GitHub |
-| `vant load` | Load brain from models/public |
-| **Development** | |
-| `vant test` | Run build/tests |
-| `vant watch` | Monitor GitHub for changes |
-| **Setup** | |
-| `vant setup` | Interactive setup wizard |
-| `vant update` | Check for new releases |
-| **Help & Info** | |
-| `vant help` | Show all commands |
-| `vant help <cmd>` | Help for specific command |
-| `vant changelog` | View recent changes |
-| `vant summary` | Session summary |
-| `vant rate` | GitHub API rate limit |
-| **Node & MCP** | |
-| `vant node` | Run as persistent node |
-| `vant node --mcp` | Node + MCP server |
-| `vant mcp` | Run MCP server |
-| **Advanced** | |
-| `vant onboard` | Browse knowledge base |
-| `vant succession` | Brain version/trust |
-| `vant resolution` | Mark thoughts resolved |
-| `vant bump` | Bump version & tag |
+Full docs at **[docs.creadev.org/vant](https://docs.creadev.org/vant)**
 
-For full command reference, see [CLI.md](CLI.md).
+### Getting Started
+
+- [Quick Start](https://docs.creadev.org/vant/getting-started/quick-start) - 2 min setup
+- [Installation](https://docs.creadev.org/vant/getting-started/install) - All methods
+- [Setup](https://docs.creadev.org/vant/getting-started/setup) - Configure
+
+### Essential
+
+- [The Brain](https://docs.creadev.org/vant/essential/brain) - Your memory files
+- [Runtime](https://docs.creadev.org/vant/essential/runtime) - Programmatic API
+- [Islands](https://docs.creadev.org/vant/essential/islands) - Lazy-load integrations
+- [Succession](https://docs.creadev.org/vant/essential/succession) - Trust levels
+- [Multi-Agent](https://docs.creadev.org/vant/essential/multi-agent) - Team workflow
+
+### Integrations
+
+- [GitHub](https://docs.creadev.org/vant/integrations/github) - Brain storage
+- [MCP](https://docs.creadev.org/vant/integrations/mcp) - 21 AI tools
+- [Agent Skills](https://docs.creadev.org/vant/integrations/agent-skills) - Claude/Codex/Cursor
+- [Linear](https://docs.creadev.org/vant/integrations/linear) - Issue sync
+- [Docker](https://docs.creadev.org/vant/integrations/docker) - Container deploy
+
+### Reference
+
+- [CLI](https://docs.creadev.org/vant/reference/cli) - All commands
+- [Configuration](https://docs.creadev.org/vant/reference/configuration) - Env options
 
 ---
 
-## Architecture
+## Links
 
-```
-models/
-  public/       # Default brain (19 files)
-    identity.md, ego.md, fears.md, anger.md, joy.md    # Core
-    manifesto.md, creed.md, goals.md, preferences.md # Values
-    lessons.md, qc.md, security.md                 # Learnings + Ops
-    audit.md, errors.md, keepers.md               # Operations
-    curiosity.md, humility.md, empathy.md, gratitude.md # Humanity
-    meta.json, verbosity.ini
-bin/
-  vant.js       # CLI entry point
-  help.js       # Help command
-  node.js      # Node runner
-  mcp.js       # MCP server
-  setup.js     # Interactive setup
-  health.js    # Diagnostics
-  sync.js      # GitHub sync
-lib/
-  config.js     # Config loader
-  brain.js      # Brain loader
-  lock.js       # Multi-agent lock
-  branch.js     # Git branch per agent
-  auto-update.js # Auto-save context
-```
-
-For module reference, see [LIBS.md](LIBS.md).
-
----
-
-## Security
-
-For VAF security, see [AGENTS.md](AGENTS.md#security).
-
-- No hardcoded credentials in defaults
-- Uses environment variables for secrets
-- Public model is identity-only, no secrets
-- User must configure own credentials
-
----
-
-## GitHub Actions (Optional)
-
-For Docker Hub push, add these secrets in repo Settings → Secrets → Actions:
-
-| Secret | Where to get |
-|--------|--------------|
-| `DOCKERHUB_USERNAME` | Your Docker Hub username |
-| `DOCKERHUB_TOKEN` | [Create token](https://hub.docker.com/settings/security) |
-
-Without these, build fails on push but tests pass.
-
----
-
-## Integrations
-
-### Slack/Discord Notifications
-
-Send VANT events to your team's chat:
-
-```javascript
-const notifications = require('./lib/notifications');
-
-// Slack
-await notifications.slack('Brain synced!', { channel: '#agents' });
-
-// Discord
-await notifications.discord('Deploy complete', { embed: true });
-
-// Event notifications
-await notifications.event('sync', { branch: 'main', files: 5 });
-await notifications.event('health', { status: 'ok' });
-```
-
-Environment variables:
-- `SLACK_WEBHOOK_URL` - Slack incoming webhook
-- `DISCORD_WEBHOOK_URL` - Discord incoming webhook
-
-### Telegram Bot
-
-Run a Telegram bot for VANT control:
-
-```bash
-# Set token
-export TELEGRAM_BOT_TOKEN=your_bot_token
-
-# Run bot
-vant bot
-# Or: node bin/bot.js
-```
-
-Commands:
-- `/start` - Welcome message
-- `/status` - Show VANT status
-- `/brain` - Show brain version
-- `/health` - Run health check
-- `/sync` - Trigger brain sync
-
-### MCP Server
-
-Run VANT as an MCP (Model Context Protocol) server exposing brain tools to AI agents:
-
-```bash
-# Standalone HTTP server
-vant mcp --server
-# Or: node bin/mcp.js --server
-
-# With AI SDK (stdio mode)
-vant mcp --stdio
-# Or: node bin/mcp.js --stdio
-```
-
-**HTTP Endpoints:**
-
-| Endpoint | Method | Description |
-|----------|--------|------------|
-| `/tools` | GET | List available tools |
-| `/health` | GET | Server health check |
-| `/call` | POST | Execute tool (JSON-RPC) |
-
-**Usage (HTTP):**
-
-```bash
-# Start server
-vant mcp --server
-# Default port: 3456
-
-# List tools
-curl http://localhost:3456/tools
-
-# Call tool
-curl -X POST http://localhost:3456/call \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"vant_health"},"id":1}'
-
-# Get memory
-curl -X POST http://localhost:3456/call \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"vant_get_memory","arguments":{}},"id":1}'
-```
-
-**Available Tools:**
-
-| Tool | Description |
-|------|------------|
-| `vant_get_memory` | Read brain files |
-| `vant_set_memory` | Write to brain |
-| `vant_list_branches` | List branches |
-| `vant_create_branch` | Create branch |
-| `vant_switch_branch` | Switch branch |
-| `vant_commit` | Commit changes |
-| `vant_sync` | Sync with GitHub |
-| `vant_lock` | Acquire/release lock |
-| `vant_health` | Health check |
-
-**Environment:**
-- `VANT_MCP_PORT` - Server port (default: 3456)
-- `VANT_MCP_API_KEY` - API key for authentication
-
-**Authentication:**
-Set `VANT_MCP_API_KEY` or add to `config.ini`:
-
-```bash
-# As environment variable
-export VANT_MCP_API_KEY=your-secret-key
-
-# Or in config.ini (copy from config.example.ini)
-MCP_API_KEY=your-secret-key
-```
-
-Requests must include `X-API-Key` header:
-
-```bash
-curl -H "X-API-Key: your-secret-key" http://localhost:3456/tools
-```
-
----
-
-## Multi-Agent
-
-VANT supports multiple agents working on the same brain through branching and locking:
-
-- **Branches** - Each agent works on its own Git branch
-- **Locks** - File-based locks prevent race conditions
-- **MCP Server** - Expose brain tools to AI agents via HTTP
-
-See [AGENTS.md](./AGENTS.md) for detailed multi-agent workflows.
-
----
-
-## Related
-
-- [Docs](./docs) - Full documentation
-- [Vant](https://github.com/dhaupin/vant) - Source code
-- [Vant Docker Hub](https://hub.docker.com/r/dhaupin/vant) - Official images
-- [Stegoframe](https://stegoframe.creadev.org) - Encrypted transport
-- [OpenHands](https://github.com/All-Hands-AI/OpenHands) - Agent runtime
+- **Lander**: [vant.creadev.org](https://vant.creadev.org)
+- **Docs**: [docs.creadev.org/vant](https://docs.creadev.org/vant)
+- **GitHub**: [github.com/dhaupin/vant](https://github.com/dhaupin/vant)
+- **Issues**: [github.com/dhaupin/vant/issues](https://github.com/dhaupin/vant/issues)

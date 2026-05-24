@@ -1,5 +1,19 @@
 #!/usr/bin/env node
+/**
+ * Vant Succession - Trust level management
+ * Controls agent autonomy via trust levels
+ *
+ * Usage: vant succession [get|set <level>]
+ */
+
 const vaf = require("../lib/vaf");
+
+// -h/--help
+const args = process.argv.slice(2);
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log("'Usage: vant succession [options]'");
+    process.exit(0);
+}
 // bin/succession.js - CLI for brain succession
 
 const path = require('path')
@@ -8,7 +22,6 @@ const { execSync } = require('child_process')
 // Load succession lib
 const succession = require('../lib/succession')
 
-const args = process.argv.slice(2)
 const cmd = args[0];
 if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
 

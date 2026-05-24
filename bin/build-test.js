@@ -6,6 +6,15 @@ const version = require('../lib/version');
 
 const { execSync } = require('child_process');
 const fs = require('fs');
+
+// Lazy-load sandbox
+let _sandbox = null;
+function _getSandbox() {
+    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    return _sandbox;
+}
+function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
+function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
 
 const TESTS = [];
@@ -28,10 +37,12 @@ test('.env.example exists', () => {
     }
 });
 
-// Test: Public model exists (check both .md and .txt for backward compat)
+// Test: Public model exists for fresh installs (template)
+const config = require('../lib/config');
+const publicDir = config.publicPath();
+const identityMd = path.join(publicDir, 'identity.md');
+const identityTxt = path.join(publicDir, 'identity.txt');
 test('public model exists', () => {
-    const identityMd = path.join('models/public', 'identity.md');
-    const identityTxt = path.join('models/public', 'identity.txt');
     if (!fs.existsSync(identityMd) && !fs.existsSync(identityTxt)) {
         throw new Error('identity.md or identity.txt not found in public model');
     }
@@ -57,41 +68,35 @@ test('load.js runs', () => {
     require('./load');
 });
 
-// Test: rate-limit.js works
-test('rate-limit.js works', () => {
-    const rl = require('../lib/rate-limit');
-    if (typeof rl.canMakeRequest !== 'function') {
-        throw new Error('rate-limit.js missing canMakeRequest()');
+// Test: qos.js works (consolidated rate-limit + circuit-breaker + bulkhead)
+test('qos.js works', () => {
+    const { QoS } = require('../lib/qos');
+    const qos = new QoS();
+    if (typeof qos.check !== 'function') {
+        throw new Error('qos.js missing check()');
     }
-    if (typeof rl.recordRequest !== 'function') {
-        throw new Error('rate-limit.js missing recordRequest()');
+    if (typeof qos.getLayerStatus !== 'function') {
+        throw new Error('qos.js missing getLayerStatus()');
     }
-    // Functional test: verify rate limiting
-    const key = 'test-rate-limit-key';
-    rl.reset(); // Clear any existing state
-    const allowed = rl.canMakeRequest();
+    const key = 'test-key-' + Date.now();
+    qos.reset(key);
+    const allowed = qos.check(key, 'read');
     if (!allowed) {
-        throw new Error('Rate limiter blocked but should allow first request');
-    }
-    rl.recordRequest();
-    // After recording, should still be allowed
-    const allowed2 = rl.canMakeRequest();
-    if (!allowed2) {
-        throw new Error('Rate limiter blocked second request incorrectly');
+        throw new Error('QoS check blocked first request');
     }
 });
 
 // Test: logger.js works
 test('logger.js works', () => {
-    const logger = require('../lib/logger');
+    const logger = require('../lib/audit');
     logger.info('Test log', { test: true });
 });
 
-// Test: errors.js works
-test('errors.js works', () => {
-    const errors = require('../lib/errors');
-    if (typeof errors.VantError !== 'function') {
-        throw new Error('errors.js missing vantError()');
+// Test: error.js works
+test('error.js works', () => {
+    const errors = require('../lib/error');
+    if (typeof errors.Error !== 'function') {
+        throw new Error('error.js missing vantError()');
     }
 });
 

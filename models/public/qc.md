@@ -6,7 +6,7 @@ Standards, checks, and validation rules for Vant brain.
 
 ## Build Standards
 
-- All tests pass before release: `vant test` must be 14/14
+- All tests pass before release: `vant test` must be 15/15
 - No breaking changes without major version bump
 - Backward compatibility for at least 1 minor version
 
@@ -46,22 +46,40 @@ Standards, checks, and validation rules for Vant brain.
 - vant succession - Brain version/trust management
 - vant bot - Telegram bot integration
 - vant watch - Monitor GitHub for updates
+- vant islands - Lazy-load brain components
+- vant resolution - Thought tracking
+- vant stego - Steganography bootstrap (brain in images)
+- vant prune - State cleanup / LTC generation
+- vant hybrid - Public/Private brain split sync
+- vant rerank - RAG rerank + compression
+- vant search - Basic + RAG search
+
+## Security Features (v0.8.6+)
+
+- VANT_API_KEY required for ALL API endpoints
+- Auth lockout duration (60s default, configurable)
+- MCP binds to localhost only (127.0.0.1)
+- VAF input validation (path traversal, injection blocking)
+- Rate limiting (per IP, per agent)
+- Circuit breaker (5 failures → open)
 
 ## Testing
 
 - Run: `node bin/vant.js test`
 - Include health check: `vant health`
 - Include load check: `vant load`
+- Include islands check: `vant islands --status`
 
 ---
 
 ## QC Check List
 
 Before any release:
-- [ ] All tests pass
-- [ ] Health check passes
-- [ ] Load check passes  
-- [ ] No .txt files in public model (convert to .md)
-- [ ] CHANGELOG updated
-- [ ] VERSION in lib/config.js updated
-- [ ] Resolution system tested (`vant resolution status`)
+- [x] All tests pass (vant test → 44/44)
+- [x] Health check passes (vant health → ✓)
+- [x] Load check passes (vant load → ✓)
+- [x] No .txt files in public model (convert to .md)
+- [x] CHANGELOG updated (v0.8.6 Islands Release + Security Hardening)
+- [x] VERSION in lib/config.js updated (v0.8.6 from package.json)
+- [x] Resolution system tested (`vant resolution status` → ✓)
+- [x] Islands check passes (`vant islands --status` → ✓)

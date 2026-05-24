@@ -12,6 +12,15 @@ const version = require('../lib/version');
  */
 
 const fs = require('fs');
+
+// Lazy-load sandbox
+let _sandbox = null;
+function _getSandbox() {
+    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    return _sandbox;
+}
+function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
+function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
 const readline = require('readline');
 
@@ -20,8 +29,9 @@ const CONFIG_TEMPLATE = `=== Vant CONFIG ===
 
 # Core
 VANT_VERSION=v' + version + '
-MODEL_PATH=models/public
-STATE_PATH=states/active/current.json
+MODEL_PATH=models/private
+# State now stored in brain
+# STATE_PATH is deprecated
 
 # Transport (stegoframe)
 STEGOFRAME_URL=https://stegoframe.creadev.org
@@ -79,7 +89,7 @@ async function setup() {
     console.log('   Required: repo scope');
     console.log('   IMPORTANT: Set as GITHUB_TOKEN env var, NOT in config.ini\n');
     const githubRepo = await question('GitHub repo (username/repo): ');
-    validateInput(githubRepo, "string", "githubRepo", { maxLength: 100, pattern: /@[w-]+/[w-]+$/ });
+    validateInput(githubRepo, "string", "githubRepo", { maxLength: 100 });
     
     console.log('\n2. Stegoframe Setup (optional)');
     console.log('   URL: https://stegoframe.creadev.org\n');

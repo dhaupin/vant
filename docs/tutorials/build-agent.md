@@ -1,8 +1,9 @@
 ---
-permalink: /tutorials/build-agent.html
+version: 0.8.6
+permalink: /tutorials/build-agent
 layout: default
 title: Build Your First Agent
-nav_order: 1
+nav_order: 21
 ---
 
 # Tutorial: Build Your First Persistent Agent
@@ -113,6 +114,6 @@ Session 1              Session 2
 
 ## Next Steps
 
-- [Multi-Agent Tutorial](/vant/tutorials/multi-agent.html) - Scale to multiple agents
-- [Succession System](/vant/guides/succession.html) - Version tracking
-- [Architecture](/vant/guides/architecture.html) - Deep dive
+- [Multi-Agent Tutorial](tutorials/multi-agent) - Scale to multiple agents
+- [Succession System](essential/succession) - Version tracking
+- [Architecture](essential/architecture.md) - Deep dive

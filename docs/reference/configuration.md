@@ -1,8 +1,9 @@
 ---
-permalink: /reference/configuration.html
+version: 0.8.11
+permalink: /reference/configuration
 layout: default
 title: Configuration
-nav_order: 2
+nav_order: 83
 ---
 # Configuration
 
@@ -39,6 +40,44 @@ MAX_REQUESTS_PER_HOUR=360
 | `POLLING_INTERVAL` | No | Poll interval (ms) |
 | `MAX_REQUESTS_PER_HOUR` | No | Rate limit cap |
 
+## GitLab
+
+```bash
+GITLAB_TOKEN=your_gitlab_token
+GITLAB_REPO=owner/repo
+GITLAB_URL=https://gitlab.com
+```
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GITLAB_TOKEN` | Yes | GitLab Personal Access Token |
+| `GITLAB_REPO` | Yes | Project path (owner/repo) |
+| `GITLAB_URL` | No | GitLab instance URL |
+
+## Bitbucket
+
+```bash
+BITBUCKET_TOKEN=your_bitbucket_token
+BITBUCKET_WORKSPACE=your_workspace
+BITBUCKET_REPO=your_repo
+```
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `BITBUCKET_TOKEN` | Yes | Bitbucket Access Token |
+| `BITBUCKET_WORKSPACE` | Yes | Workspace name |
+| `BITBUCKET_REPO` | Yes | Repository slug |
+
+## Self-Hosted Git
+
+```bash
+GIT_TOKEN=your_git_token
+```
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GIT_TOKEN` | No | Git token/SSH key |
+
 ## Additional Environment Variables
 Configuration via environment.
 
@@ -46,7 +85,7 @@ Configuration via environment.
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `VANT_MCP_PORT` | No | MCP server port (default: 3456) |
+| `VANT_MCP_PORT` | No | MCP server port (default: 3100) |
 | `VANT_MCP_API_KEY` | No | API key for MCP authentication |
 | `VANT_AGREE_AUTO_SYNC` | No | **⚠️** Enable auto-polling: set to `"true"` to confirm (see notes) |
 | `MCP_API_KEY` | No | Alternative MCP API key |
@@ -71,7 +110,7 @@ Configuration via environment.
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `CONFIG_PATH` | No | Path to config.ini |
-| `MODEL_PATH` | No | Path to brain files (default: models/public) |
+| `MODEL_PATH` | No | Path to brain files (default: models/private) |
 
 ## config.ini
 
@@ -79,8 +118,8 @@ Core configuration:
 
 ```ini
 # Core
-VANT_VERSION=v0.8.4
-MODEL_PATH=models/public
+VANT_VERSION=v0.8.6
+MODEL_PATH=models/private
 STATE_PATH=states/active/current.json
 
 # GitHub (set via environment variable)
@@ -93,7 +132,7 @@ MAX_REQUESTS_PER_HOUR=360
 
 # MCP Server (optional)
 MCP_API_KEY=your-secret-api-key
-MCP_PORT=3456
+MCP_PORT=3100
 ```
 
 ### Sections
@@ -214,6 +253,23 @@ NOTIFY_ON_NEW=true
 | `AUTO_SAVE` | true/false | Auto-save brain |
 | `AUTO_PUSH` | true/false | Auto-push to GitHub |
 
+### Search (RAG)
+
+Search/MCP tool settings:
+
+```ini
+# Search (RAG)
+REHYDRATE_MAX_SIZE=51200    # bytes, max 1MB
+COMPRESSION_THRESHOLD=5120  # bytes trigger for compression hint
+RAG_LIMIT_MAX=20             # max results from LTC search
+```
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `REHYDRATE_MAX_SIZE` | 50KB | Max context bytes (1MB max) |
+| `COMPRESSION_THRESHOLD` | 5KB | Compression hint trigger |
+| `RAG_LIMIT_MAX` | 20 | Max LTC results |
+
 ## mood.ini
 
 Current state affects responses:
@@ -259,6 +315,52 @@ See these files in the repo for full examples:
 > 1. The `--enable-polling` flag when starting node
 > 2. Set `VANT_AGREE_AUTO_SYNC=true` (in `.env` or export)
 >
-> Self-hosted GitLab/Gitea is fine. Use `vant sync` for manual brain updates with GitHub.com. See [CLI Reference](/vant/reference/cli.html).
+> Self-hosted GitLab/Gitea is fine. Use `vant sync` for manual brain updates with GitHub.com. See [CLI Reference](reference/cli).
 
-See also: [CLI Commands](/vant/reference/cli.html), [Installation](/vant/getting-started/install.html)
+See also: [CLI Commands](reference/cli), [Installation](getting-started/install)
+## Webhooks
+
+```bash
+VANT_WEBHOOK_PORT=3456
+VANT_WEBHOOK_SECRET=your-secret
+VANT_WEBHOOK_URL=https://your-domain.com/webhook
+```
+
+## Notifications
+
+```bash
+# Slack
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx
+
+# Discord
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx
+
+# Email
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=user@gmail.com
+SMTP_PASS=app-password
+FROM_EMAIL=Vant <noreply@vant.dev>
+
+# Pushover
+PUSHOVER_KEY=user-key
+PUSHOVER_TOKEN=app-token
+
+# Telegram
+TELEGRAM_TOKEN=bot-token
+```
+
+## Linear
+
+```bash
+LINEAR_API_KEY=your-api-key
+LINEAR_TEAM=team-id
+LINEAR_ENDPOINT=https://api.linear.app/graphql
+```
+
+## MCP Tools
+
+```bash
+MCP_PORT=3100
+MCP_HOST=localhost
+```

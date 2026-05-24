@@ -1,7 +1,9 @@
 ---
-permalink: /tutorials/multi-agent.html
+version: 0.8.6
+permalink: /tutorials/multi-agent
 layout: default
 title: Multi-Agent System
+nav_order: 25
 ---
 
 # Tutorial: Multi-Agent Coordination
@@ -40,8 +42,8 @@ vant checkout agent-2
 Build a working agent using Vant.
 
 ```javascript
-const branch = require('./lib/branch');
-const lock = require('./lib/lock');
+const branch = require('vant').branch;
+const lock = require('vant').lock;
 
 const AGENT_ID = 'agent-1';
 
@@ -57,9 +59,9 @@ async function work() {
   await branch.checkout(AGENT_ID);
 
   // 3. Do work on your brain...
-  const lessons = await readFile('models/public/lessons.md');
+  const lessons = await readFile('models/private/lessons.md');
   lessons += `\n- Agent ${AGENT_ID}: learned something`;
-  await writeFile('models/public/lessons.md', lessons);
+  await writeFile('models/private/lessons.md', lessons);
 
   // 4. Commit changes
   await branch.commit(AGENT_ID, 'Updated lessons');
@@ -133,6 +135,6 @@ Coordination patterns for multi-agent.
 
 ## Related
 
-- [Multi-Agent Guide](/vant/guides/multi-agent.html) - Full guide
-- [Lock API](/vant/reference/api.html) - Lock module
-- [Branch API](/vant/reference/api.html) - Branch module
+- [Multi-Agent Guide](essential/multi-agent) - Full guide
+- [Lock API](reference/cli) - Lock module
+- [Branch API](reference/cli) - Branch module
