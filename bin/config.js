@@ -9,6 +9,7 @@
  */
 
 const config = require('../lib/config');
+const theme = require('../lib/theme');
 
 const args = process.argv.slice(2);
 const action = args[0];
@@ -32,7 +33,7 @@ async function main() {
                 process.exit(1);
             }
             config.set(key, value);
-            console.log(`✓ Set ${key}=${value}`);
+            console.log(theme.status.ok('Set ' + key + ' '+ value));
             break;
 
         case 'list':
