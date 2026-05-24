@@ -2,6 +2,7 @@
  * Vant MCP Server
  *
  * CLI entry point - delegates to lib/mcp.js
+ * Format: supports yaml/json input (via format.js)
  *
  * Usage:
  *   node bin/mcp.js -h|--help
@@ -10,6 +11,7 @@
  */
 
 const mcp = require('../lib/mcp');
+const format = require('../lib/format');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -48,13 +50,17 @@ Environment:
 }
 
 if (mode === 'stdio') {
-    // STDIO mode - read JSON from stdin, write to stdout
+    // STDIO mode - read JSON/YAML from stdin, write to stdout
     let buffer = '';
     process.stdin.setEncoding('utf8');
     process.stdin.on('data', chunk => buffer += chunk);
     process.stdin.on('end', async () => {
         try {
-            const { method, params = {}, id } = JSON.parse(buffer);
+            // Use format.js for flexible parsing (yaml/json)
+            const parsed = format.parse(buffer, { validate: false });
+            const request = parsed.data || JSON.parse(buffer);  // Fallback
+            const { method, params = {}, id } = request;
+            
             const tools = mcp.methods;
             const toolName = method.replace(/^vant_/, '').replace(/^brain_/, '');
             const handler = tools.get(toolName);

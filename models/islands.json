@@ -4,38 +4,43 @@
     "identity": {
       "name": "Identity",
       "type": "static",
-      "autoLoad": true,
+      "source": "corpus",
       "triggers": []
     },
     "learnings": {
       "name": "Learnings",
       "type": "static",
-      "autoLoad": true,
+      "source": "corpus",
       "triggers": []
     },
     "decisions": {
       "name": "Decisions",
       "type": "static",
-      "autoLoad": true,
+      "source": "corpus",
       "triggers": []
     },
     "github": {
       "name": "GitHub",
       "type": "lazy",
-      "autoLoad": false,
+      "source": "storage",
       "triggers": [
         "github",
         "pr",
         "issue",
-        "repo"
+        "push",
+        "repo",
+        "commit",
+        "branch"
       ]
     },
     "gitlab": {
       "name": "GitLab",
       "type": "lazy",
+      "source": "storage",
       "triggers": [
         "gitlab",
-        "merge"
+        "merge",
+        "mr"
       ]
     },
     "bitbucket": {
@@ -45,13 +50,14 @@
         "bitbucket"
       ]
     },
-    "herbalism": {
-      "name": "Herbalism",
+    "linear": {
+      "name": "Linear",
       "type": "lazy",
       "triggers": [
-        "herb",
-        "plant",
-        "medicine"
+        "linear",
+        "project",
+        "issue",
+        "tracker"
       ]
     },
     "vesc": {
@@ -59,16 +65,18 @@
       "type": "lazy",
       "triggers": [
         "vesc",
-        "skateboard",
-        "motor"
+        "electric skateboard",
+        "brushless"
       ]
     },
-    "linear": {
-      "name": "Linear",
+    "herbalism": {
+      "name": "Herbalism",
       "type": "lazy",
       "triggers": [
-        "linear",
-        "project"
+        "herbal",
+        "herbalism",
+        "plant remedies",
+        "medicine"
       ]
     },
     "automation": {
@@ -76,13 +84,89 @@
       "type": "lazy",
       "triggers": [
         "cron",
+        "schedule",
         "automation",
-        "schedule"
+        "workflow",
+        "webhook"
+      ]
+    },
+    "my-island": {
+      "name": "My-island",
+      "type": "static",
+      "source": "corpus",
+      "triggers": [
+        "mine",
+        "custom"
+      ]
+    },
+    "runtime-test": {
+      "name": "Runtime-test",
+      "type": "static",
+      "source": "corpus",
+      "triggers": [
+        "test",
+        "runtime"
+      ]
+    },
+    "mcp-test": {
+      "name": "Mcp-test",
+      "type": "static",
+      "source": "corpus",
+      "triggers": [
+        "test"
+      ]
+    },
+    "flow-test": {
+      "name": "Flow-test",
+      "type": "static",
+      "source": "corpus",
+      "triggers": [
+        "flow"
+      ]
+    },
+    "api-test": {
+      "name": "Api-test",
+      "type": "static",
+      "source": "corpus",
+      "triggers": [
+        "api"
+      ]
+    },
+    "chain-test": {
+      "name": "Chain-test",
+      "type": "static",
+      "source": "corpus",
+      "triggers": [
+        "chain"
+      ]
+    },
+    "boot-test2": {
+      "name": "Boot-test2",
+      "type": "static",
+      "source": "corpus",
+      "triggers": []
+    },
+    "bulk1": {
+      "name": "Bulk1",
+      "type": "static",
+      "source": "corpus",
+      "triggers": []
+    },
+    "bulk2": {
+      "name": "Bulk2",
+      "type": "static",
+      "source": "corpus",
+      "triggers": []
+    },
+    "test-new": {
+      "name": "Test-new",
+      "type": "static",
+      "source": "corpus",
+      "triggers": [
+        "test"
       ]
     }
   },
   "loaded": [],
-  "hydrated": [
-    "github"
-  ]
+  "hydrated": []
 }

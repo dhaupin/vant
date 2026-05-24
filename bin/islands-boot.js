@@ -99,20 +99,23 @@ Boot Vant as a componentized brain with lazy-loaded islands.
 Usage:
   node bin/islands-boot.js [--prompt <text>] [--island <name>] [--list]
 
-Options:
+Commands:
   --prompt=<text>    Prompt context for auto-hydration
   --island=<name>    Hydrate specific island
   --list            List all islands
-  --help            Show help
+  --create=<name>   Create new island (NEW!)
+  --delete=<name>  Delete island (NEW!)
+  --enable=<name>  Enable island (NEW!)
+  --disable=<name> Disable island (NEW!)
 
 Examples:
-  # Auto-hydrate based on prompt
-  node bin/islands-boot.js --prompt "fix github pr"
+  # Create new island
+  node bin/islands-boot.js --create my-island --triggers "test"
 
-  # Hydrate just GitHub island
-  node bin/islands-boot.js --island github
+  # Delete island  
+  node bin/islands-boot.js --delete old-island
 
-  # List all islands
+  # List islands
   node bin/islands-boot.js --list
 
 Architecture:
@@ -128,6 +131,43 @@ Architecture:
 async function main() {
     if (helpArg) { help(); return; }
     if (listArg) { listIslands(); return; }
+    
+    // New: create island
+    if (process.argv.includes('--create')) {
+        const idx = process.argv.indexOf('--create') + 1;
+        const name = process.argv[idx];
+        const result = islands.createIsland(name, { type: 'static', triggers: [] });
+        console.log('[Islands] Created:', result.name || result.error);
+        return;
+    }
+    
+    // New: delete island  
+    if (process.argv.includes('--delete')) {
+        const idx = process.argv.indexOf('--delete') + 1;
+        const name = process.argv[idx];
+        const result = islands.deleteIsland(name);
+        console.log('[Islands] Deleted:', result.deleted || result.error);
+        return;
+    }
+    
+    // New: enable island
+    if (process.argv.includes('--enable')) {
+        const idx = process.argv.indexOf('--enable') + 1;
+        const name = process.argv[idx];
+        const result = islands.enableIsland(name);
+        console.log('[Islands] Enabled:', result.enabled || result.error);
+        return;
+    }
+    
+    // New: disable island
+    if (process.argv.includes('--disable')) {
+        const idx = process.argv.indexOf('--disable') + 1;
+        const name = process.argv[idx];
+        const result = islands.disableIsland(name);
+        console.log('[Islands] Disabled:', result.enabled === false || result.error);
+        return;
+    }
+    
     if (islandArg) {
         console.log('[Islands] Hydrating:', islandArg);
         const result = await islands.hydrate(islandArg);

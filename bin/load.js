@@ -5,6 +5,8 @@
  * All args should have both long (--arg) and short (-a) forms.
  * 
  * Usage: vant load [-h|--help] [-v|--version <ver>] [-l|--latest]
+ * 
+ * Config: Supports .ini, .yaml, .json, .md (via format.js)
  */
 
 // -h/--help: show help and exit
@@ -19,6 +21,7 @@ if (args[0] === '-h' || args[0] === '--help') {
 }
 
 const vaf = require("../lib/vaf");
+const format = require("../lib/format");
 const fs = require('fs');
 
 // Lazy-load sandbox
@@ -32,37 +35,39 @@ function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.
 const path = require('path');
 
 const MODELS_DIR = 'models';
-const CONFIG_FILE = 'config.ini';
 
 /**
- * Load configuration
+ * Load configuration (format.js - supports ini/yaml/json/md)
  */
-function loadConfig() {
-    if (!fs.existsSync(CONFIG_FILE)) {
-        console.warn('⚠ config.ini not found, using defaults');
-        return { VANT_VERSION: 'unknown', MODEL_PATH: 'models/private' };
-    }
-
-    const config = {};
-    const content = fs.readFileSync(CONFIG_FILE, 'utf8');
-    content.split('\n').forEach(line => {
-        line = line.trim();
-        if (line && !line.startsWith('#') && line.includes('=')) {
-            const [key, value] = line.split('=').map(s => s.trim());
-            config[key] = value;
+async function loadConfig() {
+    // Try multiple config filenames with format.js auto-detect
+    const configFiles = ['config.yaml', 'config.yml', 'config.json', 'config.ini'];
+    
+    for (const configFile of configFiles) {
+        if (fs.existsSync(configFile)) {
+            try {
+                const result = await format.loadFile(configFile);
+                if (result.data) {
+                    console.log(`✅ Loaded config: ${configFile}`);
+                    return result.data;
+                }
+            } catch (e) {
+                // Continue to next format
+            }
         }
-    });
-
-    return config;
+    }
+    
+    console.warn('⚠ No config file found, using defaults');
+    return { VANT_VERSION: 'unknown', MODEL_PATH: 'models/private' };
 }
 
 /**
- * Determine which model to load
+ * Determine which model to load (async - loads config)
  * Priority: config MODEL_PATH > argument > default (private - agent's brain)
  */
-function getModelPath(args) {
+async function getModelPath(args) {
     if (args[2]) vaf.check(args[2], {type: "string", name: "version", maxLength: 20});
-    const config = loadConfig();
+    const config = await loadConfig();  // async
     // Default to private (agent's brain) to keep separate from user's public brain
     let modelPath = config.MODEL_PATH || 'models/private';
     
@@ -130,19 +135,22 @@ function loadModel(modelPath) {
     return model;
 }
 
-const modelPath = getModelPath(process.argv);
-const model = loadModel(modelPath);
+// Main execution (async)
+(async () => {
+    const modelPath = await getModelPath(process.argv);
+    const model = loadModel(modelPath);
 
-if (model) {
-    console.log(`✓ Model loaded: ${modelPath}`);
-    console.log(`  Files: ${Object.keys(model).join(', ')}`);
-    
-    if (model.identity || model.identity_md) {
-        console.log(`  Identity: ${model.identity?.MODEL || model.identity_md?.MODEL || 'unknown'}`);
+    if (model) {
+        console.log(`✅ Model loaded: ${modelPath}`);
+        console.log(`  Files: ${Object.keys(model).join(', ')}`);
+        
+        if (model.identity || model.identity_md) {
+            console.log(`  Identity: ${model.identity?.MODEL || model.identity_md?.MODEL || 'unknown'}`);
+        }
+    } else {
+        console.error('❌ Failed to load model');
+        process.exit(1);
     }
-} else {
-    console.error('✗ Failed to load model');
-    process.exit(1);
-}
+})();
 
 module.exports = { loadConfig, getModelPath, loadModel };
