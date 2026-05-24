@@ -1,4 +1,28 @@
-# MYCELIUM CORE LIBRARIES - DISCOVERED
+# MY LESSONS - 2026-05-23
+
+## TODAY WE BUILT VANT v0.8.6
+
+### Format.js
+- Universal handler: json, yaml, md, txt, ini
+- detect(), parse(), serialize(), pipeline(), loadFile()
+- 32 tests - 100% pass
+
+### Legal.js  
+- Red button switch: DORMANT → WARN → BLOCK
+- Emergency license scan
+- checkGate() for integrations
+
+### Execution Chain
+- runop.js: sudo → sandbox → qos → escrow → legal → execute
+- Defense in depth (both must pass)
+- legal.isFriend(escrow)
+
+### Public Brain Templates (NEW)
+- legal-framework.md - Generic license awareness
+- security-chain.md - Multi-layer defense pattern
+- implementation-patterns.md - Coding patterns
+
+=== MYCELIUM CORE LIBRARIES - DISCOVERED
 
 ## vaf.js (Vant Application Firewall)
 - Input validation and sanitization
