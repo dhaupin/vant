@@ -75,8 +75,8 @@ function checkModel() {
             }
         }
     } else {
-        console.log('  ' + theme.status.fail('Public model missing'));
-        return false;
+        console.log('  ' + theme.status.fail('Private model not initialized (run vant setup)'));
+        console.log('  Use models/public templates for fresh install');
     }
     
     return true;
