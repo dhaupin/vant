@@ -1,0 +1,79 @@
+{
+  "version": "1.0",
+  "skills": {
+    "agents": {
+      "name": "Agents",
+      "type": "native",
+      "module": "./agents",
+      "triggers": ["spawn", "delegate", "fork", "agent"]
+    },
+    "brain": {
+      "name": "Brain",
+      "type": "native",
+      "module": "./brain",
+      "triggers": ["memory", "learn", "remember", "brain"]
+    },
+    "islands": {
+      "name": "Islands",
+      "type": "native",
+      "module": "./islands",
+      "triggers": ["component", "island", "lazy"]
+    },
+    "mcp": {
+      "name": "MCP",
+      "type": "native",
+      "module": "./mcp",
+      "triggers": ["rpc", "json-rpc", "mcp", "tool"]
+    },
+    "github": {
+      "name": "GitHub",
+      "type": "native",
+      "module": "./github",
+      "triggers": ["github", "pr", "issue", "repo", "push"]
+    },
+    "gitlab": {
+      "name": "GitLab",
+      "type": "native",
+      "module": "./gitlab",
+      "triggers": ["gitlab", "merge", "mr"]
+    },
+    "linear": {
+      "name": "Linear",
+      "type": "native",
+      "module": "./linear",
+      "triggers": ["linear", "project", "ticket", "sprint"]
+    },
+    "slack": {
+      "name": "Slack",
+      "type": "native",
+      "module": "./slack",
+      "triggers": ["slack", "channel", "message"]
+    },
+    "discord": {
+      "name": "Discord",
+      "type": "native",
+      "module": "./discord",
+      "triggers": ["discord", "server", "bot"]
+    },
+    "notion": {
+      "name": "Notion",
+      "type": "native",
+      "module": "./notion",
+      "triggers": ["notion", "page", "database"]
+    },
+    "security": {
+      "name": "Security",
+      "type": "native",
+      "module": "./security",
+      "triggers": ["security", "auth", "token", "permission"]
+    },
+    "code_review": {
+      "name": "Code Review",
+      "type": "native",
+      "module": "./code-review",
+      "triggers": ["review", "pr", "security"]
+    }
+  },
+  "loaded": [],
+  "hydrated": []
+}
