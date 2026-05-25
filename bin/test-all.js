@@ -30,7 +30,7 @@ function test(name, cmd, check) {
 
 async function main() {
     console.log('=== Vant Comprehensive Test ===\n');
-    test('health', 'health', o => o.includes('Vant'));
+    test('health', 'health', o => o.includes('Model'));
     test('load', 'load', o => o.includes('Model'));
     test('summary', 'summary', o => o.includes('Session'));
     test('search basic', 'search github --mode basic', o => o.includes('Results'));

@@ -22,7 +22,10 @@ Thumbs.db
 
 # Runtime state (generated at runtime)
 models/.*.json
+models/private/
+models/private/**
 models/backup/
+storage/
 temp/
 
 # Logs
