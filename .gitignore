@@ -48,3 +48,4 @@ temp/models/latent/*.vpatch
 
 # Circuit breakers (runtime state)
 .circuit*.json
+models/latent/*.vpatch
