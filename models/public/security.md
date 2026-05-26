@@ -23,7 +23,7 @@ Security principles and practices.
 - config.ini with secrets
 - states/ - Runtime state
 - .agent-locks/ - Lock files
-- .resolution.json - Thought tracking (may contain sensitive)
+- Thought tracking (may contain sensitive)
 - Island state files (lazy-loaded brains)
 
 ## Usage
@@ -61,5 +61,5 @@ if (token) {
 - [ ] Check rate limits
 - [ ] Validate inputs
 - [x] Auth lockout has duration (not indefinite)
-- [x] MCP binds to localhost
-- [x] API requires API_KEY
+- [x] Internal tools bind to localhost
+- [x] API requires auth

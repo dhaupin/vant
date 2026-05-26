@@ -13,7 +13,7 @@ For using. For contributing. For reporting issues. For making it better.
 - Node.js
 - Git and GitHub
 - The open source community
-- All islands (GitHub, Linear, Automation integrations)
+- Integrations (GitHub, Linear, Automation)
 
 ## Thank Contributors
 

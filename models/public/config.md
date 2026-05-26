@@ -38,6 +38,6 @@ config set auto_commit false
 
 ---
 
-## Islands Config
+## Component Config
 
-Per-island config in `islands/*/config.json`.
+Per-component config in `config/`.

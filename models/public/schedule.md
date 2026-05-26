@@ -50,5 +50,5 @@ Periodic tasks and maintenance cadence.
 | agent update | Weekly | Stay current |
 | agent sync | Weekly | Get latest brain |
 | agent prune | Monthly | Clean stale states |
-| agent islands | As needed | Lazy-load brain |
+| agent components | As needed | Lazy-load brain |
 | agent resolution | As needed | Track thoughts |

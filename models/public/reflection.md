@@ -23,7 +23,7 @@ After each session:
 
 ### Project Reflection
 - Did resolution tracking work?
-- Did islands load properly?
+- Did components load properly?
 - Did we get stronger?
 
 ### Error Reflection  

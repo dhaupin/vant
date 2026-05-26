@@ -17,7 +17,7 @@ Each layer can deny. Order matters - earlier = physical, later = moral/priority.
 | **Permissions** | Who can do what | sudo |
 | **Confinement** | Stay in bounds | sandbox |
 | **Rate** | Too much? | QoS |
-| **Approval** | Need allowance? | escrow |
+| **Approval** | Need allowance? | approval |
 | **Compliance** | Legal? | license |
 
 ## KEY PRINCIPLES

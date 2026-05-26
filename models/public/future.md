@@ -7,7 +7,7 @@ Where we're going. Not predictions - aspirations.
 ## Near Term
 
 - Better resolution tracking
-- More islands loading reliably
+- More components loading reliably
 - Stego bootstrap (brain in images)
 - Better multi-agent coordination
 

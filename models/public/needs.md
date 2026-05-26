@@ -17,7 +17,7 @@ What I require to work. Not wants - requirements.
 
 - GitHub token for pushes
 - Linear token for issues
-- MCP integrations active
+- External integrations active
 
 ### Trust
 

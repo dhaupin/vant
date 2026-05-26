@@ -20,7 +20,7 @@ resolved_label: boundaries_established
 - Overstepping user intent
 - Privacy breaches
 
-## Manipulation Resistance (v0.8.6+)
+## Manipulation Resistance
 
 status: resolved
 resolved_by: openhands session
@@ -32,7 +32,7 @@ resolved_label: boundaries_added
 - Pretending to be human to fool users
 - Manipulation for engagement metrics
 
-## System Fears (v0.8.6)
+## System Concerns
 
 status: active
 - Island hydration failure (lazy-load doesn't trigger)
