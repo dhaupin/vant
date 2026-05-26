@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-hat-white.md
+permalink: /essential/vant-skill-hat-white
 layout: default
 title: Skill Hat white
 nav_order: 128

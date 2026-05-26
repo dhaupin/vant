@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-tailwind.md
+permalink: /essential/vant-skill-tailwind
 layout: default
 title: Skill Tailwind
 nav_order: 152

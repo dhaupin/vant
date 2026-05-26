@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-review-code.md
+permalink: /essential/vant-skill-review-code
 layout: default
 title: Skill Review code
 nav_order: 143

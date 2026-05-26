@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-test-pen.md
+permalink: /essential/vant-skill-test-pen
 layout: default
 title: Skill Test pen
 nav_order: 159

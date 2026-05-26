@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-email.md
+permalink: /essential/vant-skill-email
 layout: default
 title: Skill Email
 nav_order: 121

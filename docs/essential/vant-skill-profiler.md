@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-profiler.md
+permalink: /essential/vant-skill-profiler
 layout: default
 title: Skill Profiler
 nav_order: 138

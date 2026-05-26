@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-browser.md
+permalink: /essential/vant-skill-browser
 layout: default
 title: Skill Browser
 nav_order: 108

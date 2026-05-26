@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-test-unit.md
+permalink: /essential/vant-skill-test-unit
 layout: default
 title: Skill Test unit
 nav_order: 163

@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /examples.html
+permalink: /examples
 layout: default
 title: Examples & Showcase
 nav_order: 14
@@ -140,9 +140,9 @@ async function safeWrite(agentId, content) {
     await branch.checkout(agentId);
     
     // 3. Do work
-    const lessons = readFile('models/private/lessons.md');
+    const lessons = readFile('models/private/lessons');
     lessons += `\n${content}`;
-    writeFile('models/private/lessons.md', lessons);
+    writeFile('models/private/lessons', lessons);
     
     // 4. Commit
     await branch.commit(agentId, `Agent ${agentId}: ${content}`);

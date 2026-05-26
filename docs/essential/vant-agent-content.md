@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-agent-content.md
+permalink: /essential/vant-agent-content
 layout: default
 title: Agent Content
 nav_order: 95

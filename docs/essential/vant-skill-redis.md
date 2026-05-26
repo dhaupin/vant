@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-redis.md
+permalink: /essential/vant-skill-redis
 layout: default
 title: Skill Redis
 nav_order: 141

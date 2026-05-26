@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-test-integration.md
+permalink: /essential/vant-skill-test-integration
 layout: default
 title: Skill Test integration
 nav_order: 157

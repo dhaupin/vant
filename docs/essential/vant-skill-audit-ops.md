@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-audit-ops.md
+permalink: /essential/vant-skill-audit-ops
 layout: default
 title: Skill Audit ops
 nav_order: 99

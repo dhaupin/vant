@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-test-chaos.md
+permalink: /essential/vant-skill-test-chaos
 layout: default
 title: Skill Test chaos
 nav_order: 153

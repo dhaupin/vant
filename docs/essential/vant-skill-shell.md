@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-shell.md
+permalink: /essential/vant-skill-shell
 layout: default
 title: Skill Shell
 nav_order: 148

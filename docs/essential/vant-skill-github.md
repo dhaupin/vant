@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-github.md
+permalink: /essential/vant-skill-github
 layout: default
 title: Skill Github
 nav_order: 124

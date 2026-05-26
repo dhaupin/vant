@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-agent-wut.md
+permalink: /essential/vant-agent-wut
 layout: default
 title: Agent Wut
 nav_order: 115

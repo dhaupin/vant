@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-sync.md
+permalink: /essential/vant-skill-sync
 layout: default
 title: Skill Sync
 nav_order: 151

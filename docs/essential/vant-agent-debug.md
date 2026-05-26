@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-agent-debug.md
+permalink: /essential/vant-agent-debug
 layout: default
 title: Agent Debug
 nav_order: 96

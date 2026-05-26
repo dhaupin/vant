@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-review-performance.md
+permalink: /essential/vant-skill-review-performance
 layout: default
 title: Skill Review performance
 nav_order: 146

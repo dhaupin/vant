@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-agent-general.md
+permalink: /essential/vant-agent-general
 layout: default
 title: Agent General
 nav_order: 102

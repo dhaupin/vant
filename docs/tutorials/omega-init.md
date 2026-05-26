@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /omega-init.html
+permalink: /omega-init
 layout: default
 title: Omega Init
 nav_order: 1

@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-agent-docs.md
+permalink: /essential/vant-agent-docs
 layout: default
 title: Agent Docs
 nav_order: 98

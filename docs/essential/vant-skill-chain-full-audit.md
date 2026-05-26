@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-chain-full-audit.md
+permalink: /essential/vant-skill-chain-full-audit
 layout: default
 title: Skill Chain full audit
 nav_order: 111

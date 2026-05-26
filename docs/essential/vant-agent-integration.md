@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-agent-integration.md
+permalink: /essential/vant-agent-integration
 layout: default
 title: Agent Integration
 nav_order: 105

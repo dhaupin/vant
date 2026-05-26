@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-agent-seo.md
+permalink: /essential/vant-agent-seo
 layout: default
 title: Agent Seo
 nav_order: 113

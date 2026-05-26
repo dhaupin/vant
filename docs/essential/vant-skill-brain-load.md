@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-brain-load.md
+permalink: /essential/vant-skill-brain-load
 layout: default
 title: Skill Brain load
 nav_order: 106

@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-test-contract.md
+permalink: /essential/vant-skill-test-contract
 layout: default
 title: Skill Test contract
 nav_order: 154

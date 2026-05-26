@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-agent-assistant.md
+permalink: /essential/vant-agent-assistant
 layout: default
 title: Agent Assistant
 nav_order: 92

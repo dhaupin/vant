@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-chain-pen.md
+permalink: /essential/vant-skill-chain-pen
 layout: default
 title: Skill Chain pen
 nav_order: 112

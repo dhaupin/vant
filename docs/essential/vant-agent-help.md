@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-agent-help.md
+permalink: /essential/vant-agent-help
 layout: default
 title: Agent Help
 nav_order: 104

@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-python.md
+permalink: /essential/vant-skill-python
 layout: default
 title: Skill Python
 nav_order: 139

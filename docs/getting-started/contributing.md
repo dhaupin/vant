@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /contributing.html
+permalink: /contributing
 layout: default
 title: Contributing
 nav_order: 16
@@ -106,7 +106,7 @@ docs: Update CLI reference
 
 ## Recognition
 
-Contributors get added to README.md. Thanks for making Vant better!
+Contributors get added to README. Thanks for making Vant better!
 
 ---
 
