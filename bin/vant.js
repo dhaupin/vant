@@ -7,29 +7,65 @@ const version = require('../lib/version');
  * Usage: vant <command> [args]
  *
  * Commands:
- *   vant start      - Full startup (health → sync → load → run)
- *   vant sync       - Pull/push brain from/to GitHub
- *   vant health     - System diagnostics and model check
- *   vant load       - Load brain from models/private
- *   vant run        - Start runtime (long-running agent loop)
- *   vant test       - Run build tests
- *   vant changelog  - View recent changes
- *   vant summary    - Session summary - memory, state, stats
- *   vant watch      - Monitor GitHub for changes (poll)
+ *   vant start        - Full startup (health → sync → load → run)
+ *   vant start --distributed - Start as distributed agent node
+ *   vant sync         - Pull/push brain from/to GitHub
+ *   vant health       - System diagnostics and model check
+ *   vant load         - Load brain from models/private
+ *   vant run          - Start runtime (long-running agent loop)
+ *   vant test        - Run build tests
+ *   vant changelog   - View recent changes
+ *   vant summary     - Session summary - memory, state, stats
+ *   vant watch       - Monitor GitHub for changes (poll)
  *  vant help        - Show help (this command)
- *   vant setup      - Interactive setup wizard
- *   vant update     - Check for new Vant releases
- *   vant rate       - Show GitHub API rate limit
- *   vant bump      - Bump version and tag release
- *   vant docs      - Build docs for release
- *   vant node      - Run as persistent node
- *   vant mcp       - Run MCP server for AI tools
+ *   vant setup       - Interactive setup wizard
+ *   vant update      - Check for new Vant releases
+ *   vant rate        - Show GitHub API rate limit
+ *   vant bump       - Bump version and tag release
+ *   vant docs       - Build docs for release
+ *   vant node       - Run as persistent node
+ *   vant mcp        - Run MCP server for AI tools
  */
 
 const { spawn } = require('child_process');
 const path = require('path');
 
 const BIN_DIR = __dirname;
+
+// DISTRIBUTED: Start as distributed agent node
+async function distributed(args) {
+    console.log(`╔═══════════════════════════════════════╗`);
+    console.log(`║    Vant Distributed Agent Node        ║`);
+    console.log(`╚═══════════════════════════════════════╝`);
+    
+    const vant = require('../lib/vant');
+    
+    // Initialize as distributed
+    console.log('\n→ Initializing OS...');
+    vant.runop({ distributed: true, layers: { registry: true, consensus: true } });
+    
+    // Register this node
+    const registry = vant.registry();
+    const nodeId = 'agent_' + Math.random().toString(36).slice(2, 8);
+    registry.register({ name: nodeId, host: 'localhost', port: 3100, status: 'alive' });
+    console.log('✓ Registered:', nodeId);
+    
+    // Check peers (if any)
+    const peers = registry.discover();
+    console.log('✓ Discovered peers:', peers.length);
+    
+    // Ready for consensus
+    const c = vant.consensus();
+    const stats = c.getStats();
+    console.log('✓ Consensus:', stats.total, 'votes');
+    
+    console.log(`\n🤖 Distributed Agent Ready!\n`);
+    console.log('  Registry:', nodeId);
+    console.log('  Peers:   ', peers.length);
+    console.log('  Consensus:', stats.total, 'votes\n');
+    
+    return { nodeId, peers, status: 'ready' };
+}
 
 // CLI commands
 const COMMANDS = {
@@ -40,6 +76,9 @@ const COMMANDS = {
     load: 'load.js',
     run: 'run.js',
     test: 'build-test.js',
+    
+    // Distributed (NEW!)
+    distributed: null,  // Special handler
     
     // Server
     server: 'server.js',
@@ -198,8 +237,20 @@ Setup:
 
 const script = COMMANDS[cmd];
 if (!script) {
-    console.error('Unknown command:', cmd);
-    process.exit(1);
+    if (cmd === 'distributed') {
+        // Special handler
+        distributed(process.argv.slice(3)).then(r => {
+            console.log(r);
+            process.exit(0);
+        }).catch(e => {
+            console.error(e);
+            process.exit(1);
+        });
+    } else {
+        console.error('Unknown command:', cmd);
+        process.exit(1);
+    }
+    return;
 }
 
 const scriptPath = path.join(BIN_DIR, script);
