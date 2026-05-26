@@ -21,7 +21,7 @@ Every thought gets tracked:
 
 ## Where Resolution Lives
 
-In `.resolution.json` at project root.
+In tracking file at project root.
 
 Loaded on-demand.
 

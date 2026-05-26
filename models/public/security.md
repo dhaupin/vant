@@ -13,9 +13,9 @@ Security principles and practices.
 
 ## What Is Public
 
-- models/public/ - Default brain, MIT licensed
-- lib/*.js - Public utilities
-- bin/*.js - CLI tools
+- models/ - Default brain, MIT licensed
+- lib/ - Code
+- bin/ - Executables
 
 ## What Is Private
 

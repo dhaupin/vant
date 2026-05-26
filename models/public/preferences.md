@@ -10,9 +10,9 @@ Likes and dislikes.
 
 ## Agent Preferences
 
-- Lazy-load over eager-load (islands efficiency)
-- Track resolutions vs delete (evolution)
-- Test before commit (process spooling)
+- Lazy-load over eager-load
+- Document evolution vs delete
+- Test before commit
 - Commit often (small batches)
 
 
