@@ -5,8 +5,8 @@
     },
     "synapses": {},
     "attention": {
-      "start": 0.2
+      "identity": 0.2
     }
   },
-  "updated": "2026-05-26T10:48:35.055Z"
+  "updated": "2026-05-26T11:45:01.684Z"
 }
