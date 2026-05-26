@@ -1,6 +1,6 @@
 # Security
 
-Security principles and practices for Vant.
+Security principles and practices.
 
 ---
 
@@ -48,7 +48,7 @@ if (token) {
 ## Rate Limiting
 
 - GitHub API has limits (360/hour)
-- Use `vant rate` to check your limit
+- Use rate limit APIs to check your limit
 - Use caching to reduce API calls
 
 ---
@@ -62,4 +62,4 @@ if (token) {
 - [ ] Validate inputs
 - [x] Auth lockout has duration (not indefinite)
 - [x] MCP binds to localhost
-- [x] API requires VANT_API_KEY
+- [x] API requires API_KEY

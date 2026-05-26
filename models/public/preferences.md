@@ -8,7 +8,7 @@ Likes and dislikes.
 - Specific over abstract
 - Active voice over passive
 
-## Vant Preferences
+## Agent Preferences
 
 - Lazy-load over eager-load (islands efficiency)
 - Track resolutions vs delete (evolution)

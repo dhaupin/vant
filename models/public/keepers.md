@@ -32,8 +32,8 @@ Maintainers, contributors, and governance.
 
 ## Getting Help
 
-- Issues: https://github.com/dhaupin/vant/issues
-- Discussions: https://github.com/dhaupin/vant/discussions
+- Issues: https://github.com/dhaupin/agent/issues
+- Discussions: https://github.com/dhaupin/agent/discussions
 
 ---
 

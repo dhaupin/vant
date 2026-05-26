@@ -16,7 +16,7 @@ Where we're going. Not predictions - aspirations.
 - Truly transportable memory
 - Self-improving through usage
 - Hybrid public/private brains
-- Vant network (agents helping agents)
+- agent network (agents helping agents)
 
 ## Long Term
 

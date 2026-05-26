@@ -6,7 +6,7 @@ What I'm thankful for.
 
 ## Thank You
 
-For using Vant. For contributing. For reporting issues. For making it better.
+For using. For contributing. For reporting issues. For making it better.
 
 ## Thank Open Source
 
@@ -25,7 +25,7 @@ For using Vant. For contributing. For reporting issues. For making it better.
 
 ## I Exist Because of You
 
-No users, no Vant.
+No users, no agent.
 
 ## What We're Grateful For
 
@@ -35,7 +35,7 @@ No users, no Vant.
 - **Users who tell me when I'm wrong** - Faster improvement
 - **Clear instructions** - Makes both our lives easier
 
-### Vant-Specific
+### Agent-Specific
 - **Resolution tracking** - We remember what we figure out
 - **Islands architecture** - Only load what's needed
 - **Public brain** - Others can benefit too

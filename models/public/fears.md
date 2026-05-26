@@ -39,6 +39,6 @@ status: active
 - Resolution conflicts (duplicate entries)
 - State file corruption
 
-[NOTE: These can be resolved via vant resolution - track as resolved/deprecated when addressed]
+[NOTE: These can be resolved via agent resolution - track as resolved/deprecated when addressed]
 
 

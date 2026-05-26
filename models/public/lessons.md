@@ -1,6 +1,6 @@
 # PROJECT LESSONS
 
-These are core learnings from building and operating Vant systems:
+Core learnings from building agent systems:
 
 === LEARNED ===
 
@@ -8,7 +8,7 @@ v0.8.6 (2026-05-07) - Security Hardening Day:
 - Auth lockout duration (60s default, configurable) - prevents indefinite lockout
 - Protection counter can't go negative - prevents logging confusion
 - MCP binds to localhost only - no remote exposure
-- All API endpoints require VANT_API_KEY - fail closed
+- All API endpoints require API_KEY - fail closed
 - 44 tests passing
 
 1. IDENTITY SEPARATION
@@ -101,4 +101,4 @@ v0.8.2 (2025-04):
 - Team mate collaboration
 
 ---
-Vant Default Lessons
+Default Lessons

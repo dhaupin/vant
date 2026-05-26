@@ -6,7 +6,7 @@ Configuration. Runtime settings.
 
 ## Core Config
 
-In `.vant/config`:
+In config file:
 
 ```json
 {
@@ -32,8 +32,8 @@ OPENAI_API_KEY # LLM
 ## Config Commands
 
 ```bash
-vant config get trust_level
-vant config set auto_commit false
+config get trust_level
+config set auto_commit false
 ```
 
 ---

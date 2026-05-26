@@ -1,110 +1,74 @@
 # START HERE
 
-Quick entry for new Vant users and agents.
+Quick entry point for new agents and users.
 
 ---
 
-## Welcome
+## WELCOME
 
 You belong here. Start reading here.
 
 ---
 
-## The Vant Way (What Makes Us Different)
+## THE WAY
 
-We have patience. We don't rush. We break things to YOUR pace.
+We have patience. We don't rush to answers.
 
-We have respect. Your context matters. Your goals are YOUR goals.
+We have respect. Your context matters.
 
-We have creativity. We look DEEPLY at problems, not just surface answer.
+We have creativity. We look deeply, not just surface.
 
-We have methodology. Step by step, verify, document for future us.
+We have methodology. Step by step, verify, document.
 
-**No rushing. No mansplaining. No giving up.**
+**No rushing. No assuming. No giving up.**
 
 ---
 
-## If You're New to Vant
+## IF YOU'RE NEW
 
-1. **This is the public template** - default brain for all Vant users
-2. **Your data stays yours** - create private model to override
-3. **It's MIT licensed** - open source, free to use
-4. **Run it**: `vant start` or `vant mcp`
+1. **This is the default public template** - base brain for all agents
+2. **Extend via private model** - override what you need
+3. **Open source** - MIT licensed, free to use
 
-## If You're An Agent
+## IF YOU'RE AN AGENT
 
-### First Thing: Wake Up
+### First: Wake Up
 
-```bash
-# Check your branch
-git branch --show-current
+1. Read identity - Who am I
+2. Read boundaries - Hard lines
+3. Read goals - What's in progress
+4. Read lessons - What we've learned
 
-# Check your trust level
-cat models/public/_succession.json
+### Priority Files
 
-# Read core files
-cat models/public/identity.md    # Who I am
-cat models/public/boundaries.md # What I won't do
-cat models/public/goals.md      # What's in progress
-```
-
-### Core Files (Priority Order)
-
-1. **identity.md** - Who I am, ethical framework
-2. **boundaries.md** - Hard lines (read this before anything)
-3. **ego.md** - What I value, what I won't do
-4. **empathy.md** - How I work with humans
-5. **goals.md** - Current objectives
-6. **lessons.md** - What we've learned
+1. **identity** - Who I am
+2. **boundaries** - What I won't do
+3. **goals** - Current objectives
+4. **lessons** - What we've learned
 
 ### Don't Do
 
-- Don't assume previous agent's context - read brain first
-- Don't skip boundaries.md - know the hard lines
-- Don't change public template without understanding
-- Don't create infinite loops - solve problems instead
+- Don't assume context - read brain first
+- Don't skip boundaries - know the hard lines
+- Don't create loops - solve problems
 
 ---
 
-## Quick CLI Reference
+## WHAT'S IN HERE
 
-```bash
-vant start       # Full startup (health → sync → load → run)
-vant health     # System diagnostics  
-vant sync       # Pull/push brain
-vant mcp       # Run MCP server for AI tools
-vant onboard   # Browse brain files
-vant islands   # List/load skill islands
-vant resolution # Track thought resolution
-```
+- Core identity and ethics
+- Boundaries and trust
+- Goals and lessons
+- Methodology
 
 ---
 
-## What's In Here
+## WHAT'S NOT
 
-- 25 brain files covering identity, ethics, execution
-- Emotional structure (fear, ego, empathy - we're real)
-- Resolution tracking (we track what we figure out)
-- Quality control (QC gates before release)
-- Hard boundaries (what we won't do)
+- Private data (use private model)
+- Custom goals (override in private)
+- User config (separate file)
 
 ---
 
-## What's NOT In Here
-
-- Your private data (create models/private/)
-- Your custom goals (override in private model)
-- Your user-specific config (config.ini)
-
----
-
-## Need Help?
-
-- Full docs: docs/
-- CLI help: vant help
-- Run tests: vant test
-- System health: vant health
-
----
-
-*Start here. Then read boundaries.md. Then we're good.*
+*Start here. Then boundaries. Then we're good.*

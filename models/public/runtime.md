@@ -44,4 +44,4 @@ Graceful exit:
 - Commit changes
 - Document what remains
 
-`vant shutdown` for clean exit.
+`agent shutdown` for clean exit.

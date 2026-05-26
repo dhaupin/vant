@@ -26,7 +26,7 @@ What I don't know, what I get wrong, and how I improve.
 
 ## How to Help Me
 
-- Open an issue: https://github.com/dhaupin/vant/issues
+- Open an issue: https://github.com/dhaupin/agent/issues
 - Write a failing test
 - Suggest simpler solutions
 
