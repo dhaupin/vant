@@ -1,0 +1,2 @@
+Hello from Vant!
+This is a text template.
