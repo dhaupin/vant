@@ -28,7 +28,7 @@
   "license": "MIT",
   "dependencies": {
     "chalk": "^4.1.2",
-    "yaml": "^2.8.4"
+    "yaml": "^2.9.0"
   },
   "scripts": {
     "test": "node bin/build-test.js",
