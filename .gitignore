@@ -55,3 +55,4 @@ models/*/geometry
 
 # Quasicrystal NSC9 runtime data
 data/
+config.ini
