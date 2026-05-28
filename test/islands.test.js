@@ -100,24 +100,24 @@ test('islands has getSummary function', () => {
 });
 
 // ============================================
-// MANIFEST
+// MANIFEST (SYNC VERSION AVAILABLE)
 // ============================================
 
 test('getManifest returns object', () => {
     const islands = require(path.join(ROOT, 'lib', 'islands'));
-    const manifest = islands.getManifest();
+    const manifest = islands.getManifestSync();
     return { success: typeof manifest === 'object' && manifest !== null };
 });
 
 test('getManifest has version', () => {
     const islands = require(path.join(ROOT, 'lib', 'islands'));
-    const manifest = islands.getManifest();
+    const manifest = islands.getManifestSync();
     return { success: typeof manifest.version === 'string' };
 });
 
 test('getManifest has islands object', () => {
     const islands = require(path.join(ROOT, 'lib', 'islands'));
-    const manifest = islands.getManifest();
+    const manifest = islands.getManifestSync();
     return { success: typeof manifest.islands === 'object' };
 });
 
@@ -127,13 +127,13 @@ test('getManifest has islands object', () => {
 
 test('static island identity exists in manifest', () => {
     const islands = require(path.join(ROOT, 'lib', 'islands'));
-    const manifest = islands.getManifest();
+    const manifest = islands.getManifestSync();
     return { success: !!manifest.islands?.identity };
 });
 
 test('static island learnings exists in manifest', () => {
     const islands = require(path.join(ROOT, 'lib', 'islands'));
-    const manifest = islands.getManifest();
+    const manifest = islands.getManifestSync();
     return { success: !!manifest.islands?.learnings };
 });
 
@@ -143,19 +143,19 @@ test('static island learnings exists in manifest', () => {
 
 test('lazy island github exists in manifest', () => {
     const islands = require(path.join(ROOT, 'lib', 'islands'));
-    const manifest = islands.getManifest();
+    const manifest = islands.getManifestSync();
     return { success: !!manifest.islands?.github };
 });
 
 test('lazy island linear exists in manifest', () => {
     const islands = require(path.join(ROOT, 'lib', 'islands'));
-    const manifest = islands.getManifest();
+    const manifest = islands.getManifestSync();
     return { success: !!manifest.islands?.linear };
 });
 
 test('lazy island automation exists in manifest', () => {
     const islands = require(path.join(ROOT, 'lib', 'islands'));
-    const manifest = islands.getManifest();
+    const manifest = islands.getManifestSync();
     return { success: !!manifest.islands?.automation };
 });
 
