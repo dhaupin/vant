@@ -50,5 +50,5 @@ temp/models/latent/*.vpatch
 .circuit*.json
 models/latent/*.vpatch
 
-# Quasicrystal storage (generated at runtime)
-data/quasicrystal/
+# Geometry storage in brain (runtime-generated)
+models/*/geometry
