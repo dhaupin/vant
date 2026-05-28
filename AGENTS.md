@@ -305,4 +305,25 @@ PURPOSE: Exploring Vant's codebase
 - Trust levels control autonomy
 
 === LEARNED ===
+
+## Discovery: 2026-05-28 - Bug Sprint
+
+### Fixed Bugs
+- Islands getManifest() is async but called sync - added getManifestSync()
+- theme.js missing chalk dependency - added graceful fallback with chaining
+
+### Found Security Gaps (unfixed)
+- storage.js: Symlink escape prevention NOT activated on read()
+- storage.js: __proto__ file writes allowed (security risk)
+- vaf.js: check() doesn't auto-call checkPathTraversal()
+- vaf.js: {{constructor}} template injection passes through
+
+### Test Coverage Status
+- Islands: 23 passed ✅
+- MCP: 6 passed ✅
+- Brain: 42 passed ✅
+- Runner: 37 passed ✅
+- Storage: 15 passed ✅
+
+=== LEARNED ===
 ```
