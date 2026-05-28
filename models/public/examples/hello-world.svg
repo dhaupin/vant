@@ -1,0 +1,7 @@
+<svg xmlns:brn="urn:vant" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200">
+  <rect width="400" height="200" fill="#111"/>
+  <text x="200" y="100" text-anchor="middle" fill="#0f0" font-family="monospace" font-size="32">
+    HELLO WORLD
+  </text>
+<metadata><brn:secret>QlJOOkVOQzphOGJhMjJmYzI3MDQ3OWJjZGI5MDIzNWViYjY4YjVmODphY2QyNmNiM2QxYjgzMmZkNTgzMjc1ODY4NjQ2NTQ4MDo4Njg4NmE2ZTg3M2Y4OWE5YTJiOTJmYjE1ZjgxNDI0NzozYzNiMTBkNmU3MTBhYzg5NzlkM2Q2ODc0ZGVhMDM1MTIxZGFhMGY4ZTJmOTVjMjM4ZWU2OWMxNWUzZjdlMGY5Mzk4ODIzNjRkZjc0YTY4ZGU3M2M=</brn:secret></metadata>
+</svg>
