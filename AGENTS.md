@@ -312,11 +312,11 @@ PURPOSE: Exploring Vant's codebase
 - Islands getManifest() is async but called sync - added getManifestSync()
 - theme.js missing chalk dependency - added graceful fallback with chaining
 
-### Found Security Gaps (unfixed)
-- storage.js: Symlink escape prevention NOT activated on read()
-- storage.js: __proto__ file writes allowed (security risk)
-- vaf.js: check() doesn't auto-call checkPathTraversal()
-- vaf.js: {{constructor}} template injection passes through
+### Found Security Gaps (CLOSED)
+- storage.js: Symlink escape - NOW BLOCKED
+- storage.js: __proto__ file writes - NOW BLOCKED
+- vaf.js: checkPathTraversal not wired - NOW WIRED
+- vaf.js: {{constructor}} injection - NOW BLOCKED
 
 ### Test Coverage Status
 - Islands: 23 passed ✅
