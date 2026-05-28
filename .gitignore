@@ -52,3 +52,6 @@ models/latent/*.vpatch
 
 # Geometry storage in brain (runtime-generated)
 models/*/geometry
+
+# Quasicrystal NSC9 runtime data
+data/
