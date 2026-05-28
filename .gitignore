@@ -49,3 +49,6 @@ temp/models/latent/*.vpatch
 # Circuit breakers (runtime state)
 .circuit*.json
 models/latent/*.vpatch
+
+# Quasicrystal storage (generated at runtime)
+data/quasicrystal/
