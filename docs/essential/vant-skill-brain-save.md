@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-brain-save.md
+permalink: /essential/vant-skill-brain-save
 layout: default
 title: Skill Brain save
 nav_order: 107

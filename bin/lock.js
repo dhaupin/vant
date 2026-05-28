@@ -10,6 +10,7 @@
  */
 
 const fs = require('fs');
+const theme = require('../lib/theme');
 
 // Lazy-load sandbox
 let _sandbox = null;
@@ -68,10 +69,10 @@ async function main() {
             const token = await lock.acquire('brain');
             if (token) {
                 saveToken(token);
-                console.log('✓ Lock acquired');
+                console.log(theme.status.ok('Lock acquired'));
                 console.log('Token:', token);
             } else {
-                console.log('✗ Could not acquire lock');
+                console.log(theme.status.fail('Could not acquire lock'));
                 const status = lock.status();
                 if (status) {
                     console.log(`Held by: ${status.agentId} (${status.age}ms old)`);
@@ -85,9 +86,9 @@ async function main() {
             const result = await lock.release('brain', inputToken);
             if (result) {
                 clearToken();
-                console.log('✓ Lock released');
+                console.log(theme.status.ok('Lock released'));
             } else {
-                console.log('✗ Release failed');
+                console.log(theme.status.fail('Release failed'));
             }
             break;
             
@@ -101,13 +102,13 @@ async function main() {
                 console.log('  Valid:', status.valid);
                 console.log('  Stale:', status.stale || false);
             } else {
-                console.log('No lock held');
+                console.log(theme.status.warn('No lock held'));
             }
             break;
             
         case 'force':
             lock.forceRelease();
-            console.log('✓ Lock force released');
+            console.log(theme.status.ok('Lock force released'));
             break;
             
         default:

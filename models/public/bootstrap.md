@@ -1,52 +1,28 @@
-# Bootstrap
+# BOOTSTRAP
 
-How to load this brain. Startup sequence.
-
----
-
-## Boot Order
-
-1. Load identity.md - Who I am
-2. Load boundaries.md - Hard lines
-3. Load succession.json - Trust level
-4. Load goals.md - Current tasks
-5. Load lessons.md - What I've learned
+How to load the brain. Startup sequence.
 
 ---
 
-## Islands (Lazy Load)
+## FIRST THINGS
 
-Islands load on-demand:
+Load in this order:
 
-```
-vant islands load github    # GitHub integration
-vant islands load linear   # Linear issues
-vant islands load mcp    # MCP tools
-```
+1. **identity** - Who am I
+2. **boundaries** - Hard lines
+3. **goals** - Current tasks
+4. **lessons** - What I've learned
+5. **preferences** - How you like to work
 
-Full load: `vant islands list`
+## DEFERRED LOADING
 
----
+Load on-demand (lazy):
+- Security context
+- Integration details
+- Workflow specifics
 
-## Startup Commands
-
-```bash
-node bin/vant.js start        # Full startup
-node bin/vant.js health       # Diagnostics
-node bin/vant.js onboard    # Browse brain
-node bin/vant.js sync        # GitHub sync
-```
+Context first. Details later.
 
 ---
 
-## What Loads First
-
-priority = [
-  "identity",
-  "boundaries",
-  "goals", 
-  "lessons",
-  "succession"
-]
-
-Context loads fast. Depth loads later.
+*The brain is modular - load core first, depth on demand.*

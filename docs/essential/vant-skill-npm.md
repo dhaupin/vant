@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-npm.md
+permalink: /essential/vant-skill-npm
 layout: default
 title: Skill Npm
 nav_order: 136

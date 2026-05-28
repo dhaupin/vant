@@ -5,6 +5,7 @@
 const path = require('path');
 const assert = require('assert');
 const fs = require('fs');
+const theme = require('../lib/theme');
 
 // Lazy-load sandbox
 let _sandbox = null;

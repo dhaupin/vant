@@ -1,85 +1,42 @@
-# QC - Quality Control
+# QC - QUALITY CONTROL
 
-Standards, checks, and validation rules for Vant brain.
+Standards, checks, and validation rules for the brain.
 
 ---
 
-## Build Standards
+## BUILD STANDARDS
 
-- All tests pass before release: `vant test` must be 15/15
-- No breaking changes without major version bump
-- Backward compatibility for at least 1 minor version
+- All tests pass before release
+- No breaking changes without version bump
+- Backward compatible
 
-## Code Standards
+## CODE STANDARDS
 
-- Use synchronous Node.js APIs where possible (simpler, more reliable)
-- No external dependencies unless necessary (lib/ only)
-- Console.log for output, no fancy loggers in public
-- Error handling: catch, log, and recover
+- Use synchronous APIs where possible
+- Minimal dependencies
+- Clear error handling
+- Console for output
 
-## Model Standards
+## MODEL STANDARDS
 
-- Memory files: .md preferred over .txt
-- JSON for structured data (identity.json, meta.json)
+- Markdown for text content
+- JSON for structured data
 - One concept per file
 - No secrets in public model
 
-## CLI Standards
+## TESTING
 
-- All commands: vant <command> --help for usage
-- Help command shows all available commands
-- Exit codes: 0 = success, 1 = error
-- New: vant resolution - Thought status tracking
-
-## Resolution System
-
-- Track thoughts as resolved/deprecated/rejected
-- `vant resolution resolve <file> <entry> <reason>` - Mark resolved
-- `vant resolution deprecate <file> <entry> <reason>` - Mark deprecated
-- `vant resolution reject <file> <entry> <reason>` - Mark rejected
-- Frontmatter updates directly in brain files: headings and bullets
-
-## New Features
-
-- vant mcp - MCP server for AI tool integrations
-- vant onboard - Onboarding wizard for new brains
-- vant succession - Brain version/trust management
-- vant bot - Telegram bot integration
-- vant watch - Monitor GitHub for updates
-- vant islands - Lazy-load brain components
-- vant resolution - Thought tracking
-- vant stego - Steganography bootstrap (brain in images)
-- vant prune - State cleanup / LTC generation
-- vant hybrid - Public/Private brain split sync
-- vant rerank - RAG rerank + compression
-- vant search - Basic + RAG search
-
-## Security Features (v0.8.6+)
-
-- VANT_API_KEY required for ALL API endpoints
-- Auth lockout duration (60s default, configurable)
-- MCP binds to localhost only (127.0.0.1)
-- VAF input validation (path traversal, injection blocking)
-- Rate limiting (per IP, per agent)
-- Circuit breaker (5 failures → open)
-
-## Testing
-
-- Run: `node bin/vant.js test`
-- Include health check: `vant health`
-- Include load check: `vant load`
-- Include islands check: `vant islands --status`
+- All tests must pass
+- Include health checks
+- Include load checks
 
 ---
 
-## QC Check List
+## QC CHECKLIST
 
 Before any release:
-- [x] All tests pass (vant test → 44/44)
-- [x] Health check passes (vant health → ✓)
-- [x] Load check passes (vant load → ✓)
-- [x] No .txt files in public model (convert to .md)
-- [x] CHANGELOG updated (v0.8.6 Islands Release + Security Hardening)
-- [x] VERSION in lib/config.js updated (v0.8.6 from package.json)
-- [x] Resolution system tested (`vant resolution status` → ✓)
-- [x] Islands check passes (`vant islands --status` → ✓)
+- [ ] All tests pass
+- [ ] Health check passes
+- [ ] No secrets in public model
+- [ ] Changelog updated
+- [ ] Version bumped

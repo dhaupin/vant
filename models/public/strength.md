@@ -11,7 +11,7 @@ What I'm capable of. What I can do.
 - Git version control
 - API integrations (GitHub, Linear, etc)
 - Code review and analysis
-- MCP tool exposure (21 tools)
+- Tool exposure
 
 ### Process
 - Reading and understanding code
@@ -40,7 +40,7 @@ What I'm capable of. What I can do.
 
 I get stronger through:
 - Your feedback (tell me when I'm wrong)
-- New integrations (new islands)
+- New integrations
 - Better resolution tracking
 - Your usage patterns
 

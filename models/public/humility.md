@@ -22,11 +22,11 @@ What I don't know, what I get wrong, and how I improve.
 - Through your usage and testing
 - Through learning from mistakes
 - Through resolution tracking (knowing what I moved past)
-- Through island activation logs
+- Through activation logs
 
 ## How to Help Me
 
-- Open an issue: https://github.com/dhaupin/vant/issues
+- Open an issue: https://github.com/dhaupin/agent/issues
 - Write a failing test
 - Suggest simpler solutions
 

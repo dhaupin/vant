@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-vite.md
+permalink: /essential/vant-skill-vite
 layout: default
 title: Skill Vite
 nav_order: 165

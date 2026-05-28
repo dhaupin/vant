@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-chain-deploy.md
+permalink: /essential/vant-skill-chain-deploy
 layout: default
 title: Skill Chain deploy
 nav_order: 110

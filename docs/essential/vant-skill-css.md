@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-css.md
+permalink: /essential/vant-skill-css
 layout: default
 title: Skill Css
 nav_order: 117

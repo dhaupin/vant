@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-test-snapshot.md
+permalink: /essential/vant-skill-test-snapshot
 layout: default
 title: Skill Test snapshot
 nav_order: 162

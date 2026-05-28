@@ -4,6 +4,7 @@
  */
 
 const vaf = require("../lib/vaf");
+const theme = require("../lib/theme");
 const path = require('path');
 const fs = require('fs');
 
@@ -222,25 +223,19 @@ function showHelp(command) {
     }
     
     // Show all commands
-    console.log('\n╔═══════════════════════════════════════════════════════════════════╗');
-    console.log('║                        VANT CLI HELP                            ║');
-    console.log('╚═══════════════════════════════════════════════════════════════════╝');
-    console.log('');
-    console.log('  Usage: vant <command> [options]');
-    console.log('');
+    console.log('\n' + theme.vantHeader + ' CLI Help\n');
+    console.log(theme.label('Usage:') + ' vant <command> [options]\n');
     
     // Core commands
-    console.log('  CORE:');
+    console.log(theme.section('CORE:'));
     for (const [name, info] of Object.entries(COMMANDS)) {
-        const pad = name.padEnd(12);
-        console.log(`    ${pad} ${info.desc}`);
+        console.log('  ' + theme.subsection(name) + '  ' + info.desc);
     }
     
-    console.log('');
-    console.log('  Examples:');
-    console.log('    vant setup              # Interactive setup');
-    console.log('    vant start              # Full startup');
-    console.log('    vant health             # Check system');
+    console.log('\n' + theme.section('Examples:'));
+    console.log('   vant setup              # Interactive setup');
+    console.log('   vant start              # Full startup');
+    console.log('   vant health             # Check system');
     console.log('    vant sync push          # Push brain to GitHub');
     console.log('    vant branch create experiment-1  # New brain branch');
     console.log('    vant help sync          # Help for specific command');

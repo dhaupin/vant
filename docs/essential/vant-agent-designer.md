@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-agent-designer.md
+permalink: /essential/vant-agent-designer
 layout: default
 title: Agent Designer
 nav_order: 97

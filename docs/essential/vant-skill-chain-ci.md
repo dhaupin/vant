@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-chain-ci.md
+permalink: /essential/vant-skill-chain-ci
 layout: default
 title: Skill Chain ci
 nav_order: 109

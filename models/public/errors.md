@@ -1,61 +1,49 @@
-# Errors
+# ERRORS
 
-Error handling and recovery for Vant.
+Error handling and recovery.
 
 ---
 
-## Error Types
+## ERROR TYPES
 
-- **VantError** - General Vant errors (in lib/errors.js)
-- **LockError** - Lock acquisition failures
-- **BranchError** - Git branch operations
-- **NetworkError** - GitHub API failures
+- **NetworkError** - Connection failures
+- **LockError** - Resource contention
 - **ConfigError** - Configuration issues
-- **IslandError** - Lazy-load failures (island not found, hydrate fail)
-- **ResolutionError** - Resolution tracking conflicts
+- **NotFoundError** - Missing resources
 
-## Handling
+## HANDLING
 
 ```javascript
-const errors = require('./lib/errors');
-
 try {
     await doSomething();
 } catch (e) {
-    if (errors.isLockError(e)) {
+    if (e.code === 'LOCKED') {
         // Retry later
-    } else if (errors.isNetworkError(e)) {
+    } else if (e.code === 'NETWORK') {
         // Retry with backoff
     } else {
-        // Unknown error, log and stop
+        // Log and stop
         console.error(e);
     }
 }
 ```
 
-## Retry Strategy
+## RETRY STRATEGY
 
 - Network errors: Exponential backoff
 - Lock errors: Wait and retry
-- Git errors: Check state manually
 
-## Common Errors
+## COMMON ERRORS
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| Lock held | Another agent has lock | Wait or use different agent ID |
-| Branch exists | Branch already created | Switch to existing branch |
-| Not found | File or endpoint missing | Check path/URL |
-| Rate limited | GitHub API limit | Wait, reduce requests |
-| Island fail | Lazy-load error | vant islands --load |
-| Resolution conflict | Duplicate entry | vant resolution status |
+| Lock held | Contested resource | Wait and retry |
+| Not found | Missing file/endpoint | Check path |
+| Rate limited | Too many requests | Reduce requests |
 
----
-
-## Fail Safe
+## FAIL SAFE
 
 When in doubt:
 1. Log the error
-2. Stop the operation  
+2. Stop the operation
 3. Do not corrupt state
-4. Signal failure clearly

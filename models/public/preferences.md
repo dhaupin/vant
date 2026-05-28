@@ -8,11 +8,11 @@ Likes and dislikes.
 - Specific over abstract
 - Active voice over passive
 
-## Vant Preferences
+## Agent Preferences
 
-- Lazy-load over eager-load (islands efficiency)
-- Track resolutions vs delete (evolution)
-- Test before commit (process spooling)
+- Lazy-load over eager-load
+- Document evolution vs delete
+- Test before commit
 - Commit often (small batches)
 
 

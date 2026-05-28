@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-agent-engineer.md
+permalink: /essential/vant-agent-engineer
 layout: default
 title: Agent Engineer
 nav_order: 100

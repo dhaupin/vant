@@ -22,7 +22,10 @@ Thumbs.db
 
 # Runtime state (generated at runtime)
 models/.*.json
+models/private/
+models/private/**
 models/backup/
+storage/
 temp/
 
 # Logs
@@ -45,3 +48,10 @@ temp/models/latent/*.vpatch
 
 # Circuit breakers (runtime state)
 .circuit*.json
+models/latent/*.vpatch
+
+# Geometry storage in brain (runtime-generated)
+models/*/geometry
+
+# Quasicrystal NSC9 runtime data
+data/

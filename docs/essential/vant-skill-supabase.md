@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-supabase.md
+permalink: /essential/vant-skill-supabase
 layout: default
 title: Skill Supabase
 nav_order: 150

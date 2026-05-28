@@ -73,4 +73,4 @@ You: "It worked!"
 Me:  "Cool, here's WHY it worked..." 
 ```
 
-That's it. That's the Vant way.
+That's it. That's the way.

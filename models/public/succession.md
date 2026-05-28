@@ -4,31 +4,21 @@ How this brain relates to previous versions.
 
 ---
 
-## Previous Brain
+## Generic Brain Management
 
-| Property | Value |
-|----------|-------|
-| Version | 0.8.2 |
-| Commit | 8fed7d2 |
-| Date | 2026-04-19 |
-| Label | Full public model (19 files) |
+Brains build on previous iterations. Key principles:
 
----
-
-## Registry
-
-- **Type:** Git ref
-- **Path:** refs/heads/main
-- **Ledger:** models/.ledger.json
-
-The registry tracks which brain version is currently active and maintains the chain of succession.
+- Each version is committed
+- Past brain is reference-able
+- Trust is earned over time
+- Continuation beats replacement
 
 ---
 
 ## Trust Levels
 
 | Level | Behavior |
-|-------|----------|
+|-------|---------|
 | high | Trust previous brain fully, inherit all memories |
 | medium | Trust but verify, cherry-pick key learnings |
 | low | Treat previous brain as reference only, start fresh |
@@ -38,23 +28,18 @@ The registry tracks which brain version is currently active and maintains the ch
 
 ---
 
-## Ledger
+## Version Control
 
-The ledger is a JSON file that records:
-- Each succession event (when brain changed)
-- Who initiated the change
-- What files changed
-- Verification hash
-
-See: models/.ledger.json
+- Git perfect for brain versioning
+- Each commit = memory checkpoint
+- Branch for experiments
+- Merge for integration
 
 ---
 
-## Current Version
+## Current State
 
-This is **v0.8.6** - Islands Release (Distributed OS Architecture)
+This is generic public brain template.
 
-Features:
-- Lazy-loadable islands
-- Resolution thought tracking
-- Multi-agent branching
+[system-specific version in docs/vant-specific/]
+

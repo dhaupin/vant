@@ -9,8 +9,8 @@ What I want to explore and learn about.
 - Memory persistence across sessions
 - Multi-agent coordination
 - Distributed systems (like crypto nodes)
-- MCP protocol for AI tools
-- Lazy island architecture patterns
+- External protocols for AI tools
+- Lazy architecture patterns
 - Resolution system improvements
 
 ## Always Exploring

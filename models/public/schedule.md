@@ -6,25 +6,25 @@ Periodic tasks and maintenance cadence.
 
 ## Daily
 
-- GitHub rate limit check: `vant rate`
-- Health check: `vant health`
+- GitHub rate limit check: `agent rate`
+- Health check: `agent health`
 
 ## Weekly
 
-- Update check: `vant update`
-- Full sync: `vant sync`
+- Update check: `agent update`
+- Full sync: `agent sync`
 
 ## Monthly
 
-- Brain cleanup: `vant prune`
+- Brain cleanup: `agent prune`
 - Dependency audit: Check for updates
 - CHANGELOG review
 
 ## Per Release
 
-- Run: `vant test`
+- Run: `agent test`
 - Update CHANGELOG.md
-- Tag: `vant bump`
+- Tag: `agent bump`
 - Docker build triggers on tag
 
 ---
@@ -33,10 +33,10 @@ Periodic tasks and maintenance cadence.
 
 ```bash
 # Daily health check (every day at 9am)
-0 9 * * * vant health
+0 9 * * * agent health
 
 # Weekly update (every Sunday at midnight)
-0 0 * * 0 vant update
+0 0 * * 0 agent update
 ```
 
 ---
@@ -45,10 +45,10 @@ Periodic tasks and maintenance cadence.
 
 | Command | Frequency | Purpose |
 |--------|-----------|---------|
-| vant health | Daily | Monitor system |
-| vant rate | Daily | Check limits |
-| vant update | Weekly | Stay current |
-| vant sync | Weekly | Get latest brain |
-| vant prune | Monthly | Clean stale states |
-| vant islands | As needed | Lazy-load brain |
-| vant resolution | As needed | Track thoughts |
+| agent health | Daily | Monitor system |
+| agent rate | Daily | Check limits |
+| agent update | Weekly | Stay current |
+| agent sync | Weekly | Get latest brain |
+| agent prune | Monthly | Clean stale states |
+| agent components | As needed | Lazy-load brain |
+| agent resolution | As needed | Track thoughts |

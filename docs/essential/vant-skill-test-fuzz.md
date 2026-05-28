@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-test-fuzz.md
+permalink: /essential/vant-skill-test-fuzz
 layout: default
 title: Skill Test fuzz
 nav_order: 156

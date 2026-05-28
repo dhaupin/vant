@@ -1,6 +1,6 @@
 # Security
 
-Security principles and practices for Vant.
+Security principles and practices.
 
 ---
 
@@ -13,9 +13,9 @@ Security principles and practices for Vant.
 
 ## What Is Public
 
-- models/public/ - Default brain, MIT licensed
-- lib/*.js - Public utilities
-- bin/*.js - CLI tools
+- models/ - Default brain, MIT licensed
+- lib/ - Code
+- bin/ - Executables
 
 ## What Is Private
 
@@ -23,7 +23,7 @@ Security principles and practices for Vant.
 - config.ini with secrets
 - states/ - Runtime state
 - .agent-locks/ - Lock files
-- .resolution.json - Thought tracking (may contain sensitive)
+- Thought tracking (may contain sensitive)
 - Island state files (lazy-loaded brains)
 
 ## Usage
@@ -48,7 +48,7 @@ if (token) {
 ## Rate Limiting
 
 - GitHub API has limits (360/hour)
-- Use `vant rate` to check your limit
+- Use rate limit APIs to check your limit
 - Use caching to reduce API calls
 
 ---
@@ -61,5 +61,5 @@ if (token) {
 - [ ] Check rate limits
 - [ ] Validate inputs
 - [x] Auth lockout has duration (not indefinite)
-- [x] MCP binds to localhost
-- [x] API requires VANT_API_KEY
+- [x] Internal tools bind to localhost
+- [x] API requires auth

@@ -1,0 +1,18 @@
+{
+  "barcode": "1-31814-04200-8",
+  "_key": "200_13_26",
+  "fingerprint": "-0.526,0.851,0.000",
+  "position": [
+    -0.5257311121191336,
+    0.85065080835204,
+    0
+  ],
+  "theta": 1.999,
+  "phi": 0.132,
+  "depth": 0.026,
+  "data": {
+    "type": "test",
+    "content": "Hello from quasicrystal!"
+  },
+  "_stored": 1779803675738
+}

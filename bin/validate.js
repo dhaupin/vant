@@ -51,7 +51,8 @@ async function run() {
             console.log('  ✓ Ledger sound (' + auditHealth.entries + ' entries)');
         } else {
             console.log('  ✗ Issues:');
-            for (const issue of auditHealth.issues) {
+            const issues = auditHealth.issues || [];
+            for (const issue of issues) {
                 console.log('    ' + issue);
             }
         }

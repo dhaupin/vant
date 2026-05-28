@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-aws.md
+permalink: /essential/vant-skill-aws
 layout: default
 title: Skill Aws
 nav_order: 105

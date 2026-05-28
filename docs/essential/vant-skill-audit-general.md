@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-audit-general.md
+permalink: /essential/vant-skill-audit-general
 layout: default
 title: Skill Audit general
 nav_order: 98

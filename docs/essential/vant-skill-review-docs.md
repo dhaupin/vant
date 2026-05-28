@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-review-docs.md
+permalink: /essential/vant-skill-review-docs
 layout: default
 title: Skill Review docs
 nav_order: 144

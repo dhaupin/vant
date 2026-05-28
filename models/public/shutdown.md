@@ -15,7 +15,7 @@ Graceful exit. Save state.
 
 ## What Gets Saved
 
-- `.resolution.json` - thoughts
+- Tracking file - thoughts
 - Git commits - changes
 - `_succession.json` - trust
 

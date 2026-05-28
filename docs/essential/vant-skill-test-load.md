@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-test-load.md
+permalink: /essential/vant-skill-test-load
 layout: default
 title: Skill Test load
 nav_order: 158

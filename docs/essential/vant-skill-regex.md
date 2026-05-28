@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-regex.md
+permalink: /essential/vant-skill-regex
 layout: default
 title: Skill Regex
 nav_order: 142

@@ -29,113 +29,25 @@ gems:
 plugins:
   - jekyll-redirect-from
 
-# Navigation - explicit order
-nav:
-  - title: Getting Started
-    items:
-      - title: Quick Start
-        url: /vant
-      - title: Examples
-        url: /vant/examples.html
-      - title: FAQ
-        url: /vant/faq.html
-  - title: Core
-    items:
-      - title: AI Onboarding
-        url: /vant/essential/ai-onboard
-      - title: Brain Structure
-        url: /vant/essential/brain
-      - title: Islands
-        url: /vant/essential/islands
-      - title: Trust & Succession
-        url: /vant/essential/succession
-      - title: Architecture
-        url: /vant/essential/architecture
-  - title: Tools
-    items:
-      - title: CLI
-        url: /vant/reference/cli
-      - title: MCP Server
-        url: /vant/reference/mcp-tools
-      - title: Search Architecture
-        url: /vant/advanced/search-architecture
-      - title: Hybrid Search
-        url: /vant/advanced/search
-      - title: Multi-Agent
-        url: /vant/tutorials/multi-agent
-      - title: Airgap
-        url: /vant/security/airgap-propagation
-  - title: Features
-    items:
-      - title: Webhooks
-        url: /vant/tutorials/webhooks
-      - title: Notifications
-        url: /vant/operations/notifications
-      - title: Linear Integration
-        url: /vant/integrations/linear
-      - title: Agent Skills
-        url: /vant/integrations/agent-skills
-      - title: Vibe Controls
-        url: /vant/advanced/vibe
-  - title: Integrations
-    items:
-      - title: GitHub
-        url: /vant/integrations/github
-      - title: Docker
-        url: /vant/integrations/docker
-      - title: Providers
-        url: /vant/integrations/providers
-      - title: Multi-Repo
-        url: /vant/integrations/repos
-      - title: Hybrid Sync
-        url: /vant/integrations/hybrid
-      - title: Sync
-        url: /vant/operations/sync
-  - title: Advanced
-    items:
-      - title: Security
-        url: /vant/tutorials/security
-      - title: Operations
-        url: /vant/operations/operations
-      - title: Style Guide
-        url: /vant/advanced/style
-      - title: Testing
-        url: /vant/tutorials/testing
-      - title: Release
-        url: /vant/advanced/release
-      - title: Contributing
-        url: /vant/contributing.html
-      - title: Schema
-        url: /vant/advanced/schema
-      - title: Resolution
-        url: /vant/reference/resolution
-      - title: Pruning
-        url: /vant/advanced/pruning
-      - title: Stego
-        url: /vant/advanced/stego
-      - title: Steganography
-        url: /vant/advanced/steganography
-      - title: Efficiency
-        url: /vant/advanced/efficiency
-      - title: Plugins
-        url: /vant/tutorials/plugins
-      - title: CI
-        url: /vant/advanced/citations
-      - title: Troubleshooting
-        url: /vant/advanced/troubleshooting
-      - title: Audit
-        url: /vant/advanced/audit
-      - title: Boot
-        url: /vant/essential/boot
-      - title: Horcrux
-        url: /vant/advanced/horcrux
-  - title: Reference
-    items:
-      - title: Module API
-        url: /vant/reference/api
-      - title: Configuration
-        url: /vant/reference/configuration
-      - title: Deprecations
-        url: /vant/deprecations
-      - title: CHANGELOG
-        url: /vant/CHANGELOG
+# Auto-generate nav from folder structure (no manual nav)
+# Section order in nav (lower = higher)
+nav_order:
+  getting-started: 10
+  essential: 20
+  reference: 30
+  integrations: 40
+  operations: 50
+  tutorials: 60
+  advanced: 70
+  security: 80
+
+# Section display names (override folder name)
+nav_sections:
+  getting-started: Getting Started
+  essential: Core Concepts
+  reference: Reference
+  integrations: Integrations
+  operations: Operations
+  tutorials: Tutorials
+  advanced: Advanced
+  security: Security

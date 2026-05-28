@@ -1,12 +1,10 @@
 #!/usr/bin/env node
 const vaf = require("../lib/vaf");
-// VAF: No user input - checks .env exists only
+const theme = require("../lib/theme");
 
 /**
  * Vant Health Check
  * Checks system state and model integrity
- * 
- * All args should have both long (--arg) and short (-a) forms.
  * 
  * Usage: vant health [-h|--help] [-q|--quiet]
  */
@@ -45,7 +43,7 @@ function fileExists(file) {
 }
 
 function checkModel() {
-    console.log('\n📦 Model:');
+    console.log('\n' + theme.label('📦 Model:'));
     
     // Try .md first, then .txt for backward compat
     const checks = [
@@ -60,7 +58,7 @@ function checkModel() {
     const found = checks.some(pair => pair.some(f => fs.existsSync(path.join(brainPath, f))));
     
     if (found) {
-        console.log('  ✓ Brain exists at ' + brainPath);
+        console.log('  ' + theme.status.ok('Brain exists at ' + brainPath));
         
         // Try to read identity
         const identityPath = fs.existsSync(brainPath + '/identity.md') 
@@ -73,60 +71,56 @@ function checkModel() {
             const content = fs.readFileSync(identityPath, 'utf8');
             const modelMatch = content.match(/MODEL:\s*(.+)/);
             if (modelMatch) {
-                console.log(`  → ${modelMatch[1]}`);
+                console.log('  → ' + theme.value(modelMatch[1]));
             }
         }
     } else {
-        console.log('  ✗ Public model missing');
-        return false;
+        console.log('  ' + theme.status.fail('Private model not initialized (run vant setup)'));
+        console.log('  Use models/public templates for fresh install');
     }
     
     return true;
 }
 
 function checkConfig() {
-    console.log('\n⚙️  Config:');
+    console.log('\n' + theme.label('⚙️  Config:'));
     if (fs.existsSync('config.ini')) {
-        console.log('  ✓ config.ini exists');
+        console.log('  ' + theme.status.ok('config.ini exists'));
     } else {
-        console.log('  ⚠ config.ini not found (run vant setup)');
+        console.log('  ' + theme.status.warn('config.ini not found (run vant setup)'));
     }
 }
 
 function checkEnv() {
-    console.log('\n🔐 Environment:');
+    console.log('\n' + theme.label('🔐 Environment:'));
     if (fs.existsSync('.env')) {
-        console.log('  ✓ .env exists');
+        console.log('  ' + theme.status.ok('.env exists'));
     } else {
-        console.log('  ⚠ .env not found');
+        console.log('  ' + theme.status.warn('.env not found'));
     }
 }
 
 function checkDirs() {
-    console.log('\n📁 Directories:');
+    console.log('\n' + theme.label('📁 Directories:'));
     // Check base dirs + user's brain (MODEL_PATH or default private)
     const brainPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || 'models/private';
     const dirs = ['models', 'models/private', 'lib', 'bin', brainPath];
     dirs.forEach(d => {
         if (fs.existsSync(d)) {
-            console.log(`  ✓ ${d}/`);
+            console.log('  ' + theme.status.ok(d + '/'));
         } else {
-            console.log(`  ✗ ${d}/ missing`);
+            console.log('  ' + theme.status.fail(d + '/ missing'));
         }
     });
 
     // State now in brain path
     if (fs.existsSync(brainPath + '/.state.json')) {
-        console.log('  ✓ ' + brainPath + '/.state.json');
-    } else {
-        // May not exist yet (first run)
+        console.log('  ' + theme.status.ok(brainPath + '/.state.json'));
     }
 }
 
 function run() {
-    console.log('╔═══════════════════════════════════════╗');
-    console.log('║         Vant Health Check            ║');
-    console.log('╚═══════════════════════════════════════╝');
+    console.log('\n' + theme.vantHeader + ' Health Check\n');
     
     checkModel();
     checkConfig();

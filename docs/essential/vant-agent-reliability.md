@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-agent-reliability.md
+permalink: /essential/vant-agent-reliability
 layout: default
 title: Agent Reliability
 nav_order: 110

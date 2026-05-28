@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-graphql.md
+permalink: /essential/vant-skill-graphql
 layout: default
 title: Skill Graphql
 nav_order: 125

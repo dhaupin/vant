@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-linear.md
+permalink: /essential/vant-skill-linear
 layout: default
 title: Skill Linear
 nav_order: 133

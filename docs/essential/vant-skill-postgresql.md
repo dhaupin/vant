@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-postgresql.md
+permalink: /essential/vant-skill-postgresql
 layout: default
 title: Skill Postgresql
 nav_order: 137

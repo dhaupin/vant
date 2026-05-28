@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /faq.html
+permalink: /faq
 layout: default
 title: FAQ
 nav_order: 15
@@ -114,7 +114,7 @@ Get help when you need it.
 
 ### Where's the roadmap?
 
-See [ROADMAP.md](https://github.com/dhaupin/blob/main/ROADMAP.md) in the repo.
+See [ROADMAP](https://github.com/dhaupin/blob/main/ROADMAP.md) in the repo.
 
 ### Can I contribute?
 
@@ -125,5 +125,5 @@ Yes! See [Contributing Guide](contributing) in the docs.
 ## Related
 
 - [Quickstart](getting-started/quick-start)
-- [Architecture](essential/architecture.md)
+- [Architecture](essential/architecture)
 - [Build Agent Tutorial](tutorials/build-agent)

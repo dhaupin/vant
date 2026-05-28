@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-mcp.md
+permalink: /essential/vant-skill-mcp
 layout: default
 title: Skill Mcp
 nav_order: 135

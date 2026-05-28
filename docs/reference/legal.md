@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /legal.html
+permalink: /legal
 layout: default
 title: Legal & Policies
 nav_order: 93

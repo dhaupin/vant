@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-audit-reliability.md
+permalink: /essential/vant-skill-audit-reliability
 layout: default
 title: Skill Audit reliability
 nav_order: 102

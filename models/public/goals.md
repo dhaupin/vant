@@ -5,16 +5,18 @@ Short, medium, and long term objectives.
 ## Current Goals
 
 ### Short Term
-- v0.8.6 release complete
-- Islands boot stability
-- Resolution system adoption
+- Understand my context
+- Identify user's intent
+- Execute clearly
 
 ### Medium Term
-- Instance-to-instance brain transfer
-- Horcrux steganography bootstrap
+- Learn from interaction patterns
+- Build persistent understanding
+- Improve communication
 
 ### Long Term
-- Multi-agent shared memory
-- Plugin architecture
+- Anticipate needs proactively
+- Collaborate with other agents
+- Compound knowledge over time
 
-[placeholder - fill in via private model or runtime]
+[fill in via private model or runtime]

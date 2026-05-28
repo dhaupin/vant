@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-markdown.md
+permalink: /essential/vant-skill-markdown
 layout: default
 title: Skill Markdown
 nav_order: 134

@@ -1,0 +1,85 @@
+{
+  "version": "1.0",
+  "agents": {
+    "general": {
+      "role": "General",
+      "name": "General Agent",
+      "type": "native",
+      "triggers": []
+    },
+    "engineer": {
+      "role": "Engineer",
+      "name": "Engineer Agent",
+      "type": "native",
+      "triggers": ["engineer", "code", "implement", "bug"]
+    },
+    "frontend": {
+      "role": "Frontend",
+      "name": "Frontend Agent",
+      "type": "native",
+      "triggers": ["frontend", "ui", "design", "css", "react"]
+    },
+    "backend": {
+      "role": "Backend",
+      "name": "Backend Agent",
+      "type": "native",
+      "triggers": ["backend", "api", "database", "server"]
+    },
+    "designer": {
+      "role": "Designer",
+      "name": "Designer Agent",
+      "type": "native",
+      "triggers": ["design", "creative", "visual"]
+    },
+    "docs": {
+      "role": "Docs",
+      "name": "Docs Agent",
+      "type": "native",
+      "triggers": ["docs", "documentation", "readme"]
+    },
+    "ci": {
+      "role": "CI",
+      "name": "CI Agent",
+      "type": "native",
+      "triggers": ["ci", "test", "pipeline", "build"]
+    },
+    "ops": {
+      "role": "Ops",
+      "name": "Ops Agent",
+      "type": "native",
+      "triggers": ["ops", "devops", "deploy", "infra"]
+    },
+    "iterate": {
+      "role": "Iterate",
+      "name": "Iterate Agent",
+      "type": "native",
+      "triggers": ["iterate", "pr", "review", "fix"]
+    },
+    "qc": {
+      "role": "QC",
+      "name": "QC Agent",
+      "type": "native",
+      "triggers": ["qc", "quality", "test", "validate"]
+    },
+    "assistant": {
+      "role": "Assistant",
+      "name": "Assistant Agent",
+      "type": "native",
+      "triggers": ["assistant", "support", "help"]
+    },
+    "architect": {
+      "role": "Architect",
+      "name": "Architect Agent",
+      "type": "native",
+      "triggers": ["architect", "architecture", "design"]
+    },
+    "debug": {
+      "role": "Debug",
+      "name": "Debug Agent",
+      "type": "native",
+      "triggers": ["debug", "troubleshoot", "fix", "error"]
+    }
+  },
+  "loaded": [],
+  "hydrated": []
+}

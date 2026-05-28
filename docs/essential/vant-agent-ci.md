@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-agent-ci.md
+permalink: /essential/vant-agent-ci
 layout: default
 title: Agent Ci
 nav_order: 94

@@ -31,7 +31,7 @@ agent-2          <- other agent
 
 - GitHub API
 - Linear issues
-- MCP tools
+- External integrations
 - Git operations
 
 ---

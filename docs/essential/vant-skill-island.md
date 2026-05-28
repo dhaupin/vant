@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-island.md
+permalink: /essential/vant-skill-island
 layout: default
 title: Skill Island
 nav_order: 130

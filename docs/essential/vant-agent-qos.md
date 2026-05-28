@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-agent-qos.md
+permalink: /essential/vant-agent-qos
 layout: default
 title: Agent Qos
 nav_order: 109

@@ -21,7 +21,7 @@ Every thought gets tracked:
 
 ## Where Resolution Lives
 
-In `.resolution.json` at project root.
+In tracking file at project root.
 
 Loaded on-demand.
 
@@ -30,9 +30,9 @@ Loaded on-demand.
 ## Using Resolution
 
 ```bash
-vant resolution --add "X is true because Y"
-vant resolution query "X"
-vant resolution --list
+resolution --add "X is true because Y"
+resolution query "X"
+resolution --list
 ```
 
 ---

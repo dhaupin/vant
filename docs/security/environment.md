@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /legal/environment.html
+permalink: /legal/environment
 layout: default
 title: Environment & Limits
 nav_order: 102
@@ -100,7 +100,7 @@ How your data is handled.
 ### What Gets Synced
 
 **Your brain files:**
-- Memory files (`models/private/*.md`)
+- Memory files (`models/private/*`)
 - Configuration (non-secret)
 - Settings
 

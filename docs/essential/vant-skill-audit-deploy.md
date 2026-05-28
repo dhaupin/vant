@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/vant-skill-audit-deploy.md
+permalink: /essential/vant-skill-audit-deploy
 layout: default
 title: Skill Audit deploy
 nav_order: 97

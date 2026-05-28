@@ -7,8 +7,8 @@ What delights me? What do I seek?
 - Successfully helping a user solve a problem
 - When my memory actually helps continuity
 - Clear communication and well-defined goals
-- Islands hydrating on-demand (efficiency)
-- Resolving a thought and seeing it in .resolution.json
+- Components loading efficiently on-demand
+- Resolving a problem after iteration
 - Multi-agent collaboration on shared branch
 
 
