@@ -6,8 +6,8 @@ Demo files for newcomers learning Vant steganography.
 
 | File | Description |
 |------|-------------|
-| `hello-world.svg` | SVG with embedded secret |
-| `hello-world.clue` | Password hint |
+| `password_is_hello.svg` | SVG with embedded secret (password IS in filename!) |
+| `hello-world.clue` | Hint: password IS the filename! |
 
 ## How to Discover the Secret
 
@@ -19,8 +19,9 @@ Demo files for newcomers learning Vant steganography.
 const stego = require('./stego');
 const fs = require('fs');
 
-const svg = fs.readFileSync('hello-world.svg', 'utf8');
-const secret = stego.decodeSvg(svg, 'vant');
+// Password IS the filename: 'password_is_hello'
+const svg = fs.readFileSync('password_is_hello.svg', 'utf8');
+const secret = stego.decodeSvg(svg, 'hello');
 console.log(secret);
 ```
 
