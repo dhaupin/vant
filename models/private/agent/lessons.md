@@ -134,3 +134,34 @@
 "It's so nice to meet you. I really enjoy working with you to do cool stuff."
 
 === LESSONS ===
+
+=== LESSONS ===
+
+---
+
+## LESSON: 2026-05-28 - MCP Stub Wiring
+
+### The Problem
+- Vant had stub MCP handlers that just returned dummy values
+- vant_stego_encode: `{ status: 'encoded' }` - didn't actually encode
+- vant_compute_eval: allowed arbitrary code execution (security bug!)
+
+### The Attempt
+- Used file_editor to replace stub implementations
+- Showed correct changes in editor view
+- But `git diff` showed original code - changes not persisting
+- Tests passed because they mock or don't call real handlers
+
+### Possible Cause
+- git reset to commit 43798d3 may have reloaded from remote
+- Or there's some VFS copy-on-write behavior
+- Or file_editor works in-layer but git sees different copy
+
+### Fix Designed (Not Yet Applied)
+- sudo guard on vant_compute_eval: check `global._sudo.can()`
+- Wire stego to stego.encode()/stego.decode()
+- Wire config to config.get()/config.set()
+- Wire audit to global._audit.log()/.list()
+- Wire succession to global._succession.getTrustLevel()
+
+=== LESSONS ===
