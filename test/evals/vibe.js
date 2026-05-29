@@ -17,15 +17,13 @@ const APP_DIR = process.cwd();
 const args = process.argv;
 const verbose = args.includes('--verbose');
 
-// Expected triggers
+// Only test public islands (not private brain islands)
+// Private islands like vesc, herbalism, automation exist in mycelium but not public OSS
 const EVALS = [
     { keyword: 'github', expected: 'github', prompts: ['create a PR', 'check issue', 'push to repo'] },
     { keyword: 'gitlab', expected: 'gitlab', prompts: ['merge request', 'gitlab repo'] },
     { keyword: 'bitbucket', expected: 'bitbucket', prompts: ['bitbucket PR'] },
-    { keyword: 'vesc', expected: 'vesc', prompts: ['VESC v3', 'electric skateboard', 'brushless motor'] },
     { keyword: 'linear', expected: 'linear', prompts: ['linear issue', 'project tracking'] },
-    { keyword: 'herbalism', expected: 'herbalism', prompts: ['herbal medicine', 'plant remedies'] },
-    { keyword: 'automation', expected: 'automation', prompts: ['cron job', 'schedule task', 'automation workflow'] },
 ];
 
 function getIslands() {
