@@ -153,12 +153,6 @@ test('lazy island linear exists in manifest', () => {
     return { success: !!manifest.islands?.linear };
 });
 
-test('lazy island automation exists in manifest', () => {
-    const islands = require(path.join(ROOT, 'lib', 'islands'));
-    const manifest = islands.getManifestSync();
-    return { success: !!manifest.islands?.automation };
-});
-
 // ============================================
 // TRIGGERS
 // ============================================
@@ -179,12 +173,6 @@ test('findTriggers detects linear triggers', () => {
     const islands = require(path.join(ROOT, 'lib', 'islands'));
     const triggers = islands.findTriggers('update linear issue');
     return { success: triggers.includes('linear') };
-});
-
-test('findTriggers detects automation triggers', () => {
-    const islands = require(path.join(ROOT, 'lib', 'islands'));
-    const triggers = islands.findTriggers('schedule a cron job');
-    return { success: triggers.includes('automation') };
 });
 
 test('findTriggers returns empty for unrelated query', () => {

@@ -120,7 +120,7 @@ Examples:
 
 Architecture:
   - Static: identity, learnings, decisions (always loaded)
-  - Lazy: github, herbalism, vesc, etc (on trigger)
+  - Lazy: github, linear, etc (on trigger)
   - Gallery: individual PNGs per island
 `);
 }

@@ -172,7 +172,6 @@ async function runTests() {
         assert(typeof repos.mount === 'function');
         const list = repos.list();
         assert(list.includes('github'));
-        assert(list.includes('herbalism'));
         console.log('  ✓');
         passed++;
     } catch (e) { console.log('  ✗', e.message); failed++; }
@@ -207,7 +206,7 @@ async function runTests() {
         const query = require(path.join(DIR, 'lib/search'));
         assert(typeof query.multiQuery === 'function');
         assert(typeof query.hyde === 'function');
-        const vars = query.multiQuery('how to setup vesc');
+        const vars = query.multiQuery('github');
         assert(vars.length > 0);
         console.log('  ✓');
         passed++;
