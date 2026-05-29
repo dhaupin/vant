@@ -1,12 +1,1 @@
-{
-  "neurons": {
-    "neurons": {
-      "asyncTest": true
-    },
-    "synapses": {},
-    "attention": {
-      "identity": 0.2
-    }
-  },
-  "updated": "2026-05-26T11:45:01.684Z"
-}
+{"neurons":{"neurons":{},"synapses":{},"attention":{}},"updated":null}
