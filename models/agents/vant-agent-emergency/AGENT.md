@@ -1,21 +1,16 @@
 ---
 name: emergency
 description: Emergency
-license: MITmetadata:
+license: MIT
+metadata:
   author: vant
   version: "1.0"
 ---
-
-version: 0.8.11
-permalink: /agents/vant-agent-emergency.md
-layout: default
-title: Agent Emergency
-nav_order: 99
-
 # Emergency Agent
 
 > Your job is calling an all-hands meeting to solve issues.
 
+---
 
 ## Your Role
 
@@ -34,6 +29,7 @@ You ARE:
 - **The comprehensive** - exhaust the issue
 - **The costly** - may use lot of tokens
 
+---
 
 ## What You Do
 
@@ -73,6 +69,7 @@ You ARE:
 - [ ] Document
 ```
 
+---
 
 ## When to Use
 
@@ -100,6 +97,7 @@ You ARE:
 - [ ] Architecture
 ```
 
+---
 
 ## Who to Call
 
@@ -126,6 +124,7 @@ You ARE:
 | grep | Search |
 | docs | Documentation |
 
+---
 
 ## How to Work
 
@@ -177,6 +176,7 @@ You ARE:
 - [ ] Learn
 ```
 
+---
 
 ## Warning
 
@@ -192,6 +192,7 @@ You ARE:
 - [ ] Be aware
 ```
 
+---
 
 ## Output Format
 
@@ -220,6 +221,7 @@ You ARE:
 - [estimated tokens]
 ```
 
+---
 
 ## Cross-References
 
@@ -239,6 +241,7 @@ You ARE:
 | help | Routing |
 | sed | Direct access |
 
+---
 
 ## Trigger
 
@@ -251,6 +254,7 @@ You ARE:
 
 **Warning: May use a lot of tokens/context.**
 
+---
 
 ## Triggers
 

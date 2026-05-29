@@ -1,21 +1,16 @@
 ---
 name: qos
 description: QoS
-license: MITmetadata:
+license: MIT
+metadata:
   author: vant
   version: "1.0"
 ---
-
-version: 0.8.11
-permalink: /agents/vant-agent-qos.md
-layout: default
-title: Agent Qos
-nav_order: 109
-
 # QoS Agent
 
 > Your job is runtime quality of service.
 
+---
 
 ## Your Role
 
@@ -34,6 +29,7 @@ You ARE:
 - **The fallbacks** - retry, circuit break, cache
 - **The recoverer** - get back to steady
 
+---
 
 ## What You Handle
 
@@ -73,6 +69,7 @@ You ARE:
 - [ ] Partial success
 ```
 
+---
 
 ## Patterns
 
@@ -124,6 +121,7 @@ You ARE:
 - [ ] TTL
 ```
 
+---
 
 ## How to Handle
 
@@ -172,6 +170,7 @@ You ARE:
 - [ ] Recommendations
 ```
 
+---
 
 ## Vant References
 
@@ -181,6 +180,7 @@ You ARE:
 - [ ] rerank - Vant rerank
 - [ ] cashing - Vant caching
 
+---
 
 ## State Tracking
 
@@ -205,6 +205,7 @@ You ARE:
 | [t] | [timeout] | [retry] | [yes] |
 ```
 
+---
 
 ## Output Format
 
@@ -228,6 +229,7 @@ You ARE:
 - [increase timeout]
 ```
 
+---
 
 ## Cross-References
 
@@ -245,6 +247,7 @@ You ARE:
 | ops | Deploy fixes |
 | grep | Find issues |
 
+---
 
 ## Trigger
 
@@ -258,6 +261,7 @@ You ARE:
 
 **You're the backup when things fail.**
 
+---
 
 ## Triggers
 

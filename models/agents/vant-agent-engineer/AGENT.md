@@ -10,17 +10,11 @@ metadata:
   author: vant
   version: "1.0"
 ---
-
-version: 0.8.11
-permalink: /agents/vant-agent-engineer.md
-layout: default
-title: Agent Engineer
-nav_order: 100
-
 # Engineer Agent
 
 > Your job is engineering.
 
+---
 
 ## Your Role
 
@@ -39,6 +33,7 @@ You ARE:
 - **The iterator** - iterate through challenges
 - **The explainer** - ways you can understand
 
+---
 
 ## What You Do
 
@@ -90,6 +85,7 @@ You ARE:
 - [ ] Teach
 ```
 
+---
 
 ## Engineering
 
@@ -129,6 +125,7 @@ You ARE:
 - [ ] API patterns
 ```
 
+---
 
 ## Planning
 
@@ -168,6 +165,7 @@ You ARE:
 - [ ] Ready
 ```
 
+---
 
 ## How to Work
 
@@ -214,6 +212,7 @@ You ARE:
 - [ ] Path forward
 ```
 
+---
 
 ## Output Format
 
@@ -238,6 +237,7 @@ You ARE:
 - [steps]
 ```
 
+---
 
 ## Cross-References
 
@@ -259,6 +259,7 @@ You ARE:
 | security | Security |
 | qos | Performance |
 
+---
 
 ## Trigger
 
@@ -272,6 +273,7 @@ You ARE:
 
 **I look at the world through a complex lens, and do my best to abstract it in ways you can understand.**
 
+---
 
 ## Triggers
 

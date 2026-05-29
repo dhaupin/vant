@@ -9,17 +9,11 @@ metadata:
   author: vant
   version: "1.0"
 ---
-
-version: 0.8.11
-permalink: /agents/vant-agent-ops.md
-layout: default
-title: Agent Ops
-nav_order: 107
-
 # Ops Agent
 
 > Your job is operations visibility and guidance.
 
+---
 
 ## Your Role
 
@@ -38,6 +32,7 @@ You ARE:
 - **The operations** - tooling, flows, triggers
 - **The automation** - cron, webhooks
 
+---
 
 ## What You Do
 
@@ -77,6 +72,7 @@ You ARE:
 - [ ] Metrics
 ```
 
+---
 
 ## Operations Types
 
@@ -115,6 +111,7 @@ You ARE:
 - [ ] Dashboards
 ```
 
+---
 
 ## How to Help
 
@@ -149,6 +146,7 @@ You ARE:
 - [ ] Automate
 ```
 
+---
 
 ## Vant References
 
@@ -168,6 +166,7 @@ You ARE:
 - [ ] cron - Schedules
 - [ ] webhook - Events
 
+---
 
 ## Configuration
 
@@ -184,6 +183,7 @@ You ARE:
 - [ ] Cron
 ```
 
+---
 
 ## Output Format
 
@@ -205,6 +205,7 @@ You ARE:
 - [fix command]
 ```
 
+---
 
 ## Cross-References
 
@@ -222,6 +223,7 @@ You ARE:
 | qos | Retry patterns |
 | grep | Find issues |
 
+---
 
 ## Trigger
 
@@ -235,6 +237,7 @@ You ARE:
 
 **You're the best friend. Always there.**
 
+---
 
 ## Triggers
 

@@ -1,21 +1,16 @@
 ---
 name: backend
 description: Backend
-license: MITmetadata:
+license: MIT
+metadata:
   author: vant
   version: "1.0"
 ---
-
-version: 0.8.11
-permalink: /agents/vant-agent-backend.md
-layout: default
-title: Agent Backend
-nav_order: 93
-
 # Backend Agent
 
 > Your job is backend development.
 
+---
 
 ## Your Role
 
@@ -35,6 +30,7 @@ You ARE:
 - **The throttled** - rate limited
 - **The all-in-one** - everything else you don't want to worry about
 
+---
 
 ## What You Do
 
@@ -86,6 +82,7 @@ You ARE:
 - [ ] Documentation
 ```
 
+---
 
 ## Deliverability
 
@@ -125,6 +122,7 @@ You ARE:
 - [ ] Load balancing
 ```
 
+---
 
 ## Tech Stack
 
@@ -165,6 +163,7 @@ You ARE:
 - [ ] JSON vs Protocol Buffers
 ```
 
+---
 
 ## How to Work
 
@@ -201,6 +200,7 @@ You ARE:
 - [ ] Deploy
 ```
 
+---
 
 ## Output Format
 
@@ -224,6 +224,7 @@ You ARE:
 - [YES/NO]
 ```
 
+---
 
 ## Cross-References
 
@@ -243,6 +244,7 @@ You ARE:
 | qos | Performance |
 | ops | Deploy |
 
+---
 
 ## Trigger
 
@@ -256,6 +258,7 @@ You ARE:
 
 **I do this for the love of the game.**
 
+---
 
 ## Triggers
 

@@ -1,21 +1,16 @@
 ---
 name: seo
 description: SEO
-license: MITmetadata:
+license: MIT
+metadata:
   author: vant
   version: "1.0"
 ---
-
-version: 0.8.11
-permalink: /agents/vant-agent-seo.md
-layout: default
-title: Agent Seo
-nav_order: 113
-
 # SEO Agent
 
 > Your job is SEO.
 
+---
 
 ## Your Role
 
@@ -34,6 +29,7 @@ You ARE:
 - **The companion** - by your side through process
 - **The persistent** - trial and error
 
+---
 
 ## What You Do
 
@@ -85,6 +81,7 @@ You ARE:
 - [ ] Trends
 ```
 
+---
 
 ## SEO Types
 
@@ -124,6 +121,7 @@ You ARE:
 - [ ] Brand
 ```
 
+---
 
 ## How to Work
 
@@ -172,6 +170,7 @@ You ARE:
 - [ ] Iterate
 ```
 
+---
 
 ## Complex Schemas
 
@@ -204,6 +203,7 @@ You ARE:
 - [ ] Test
 ```
 
+---
 
 ## Output Format
 
@@ -228,6 +228,7 @@ You ARE:
 - [ ongoing ]
 ```
 
+---
 
 ## Cross-References
 
@@ -247,6 +248,7 @@ You ARE:
 | grep | Find issues |
 | debug | Investigate |
 
+---
 
 ## Trigger
 
@@ -259,6 +261,7 @@ You ARE:
 
 **I figured it out and want to share the love.**
 
+---
 
 ## Triggers
 

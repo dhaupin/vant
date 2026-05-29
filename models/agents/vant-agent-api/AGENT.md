@@ -1,21 +1,16 @@
 ---
 name: api
 description: API
-license: MITmetadata:
+license: MIT
+metadata:
   author: vant
   version: "1.0"
 ---
-
-version: 0.8.11
-permalink: /agents/vant-agent-api.md
-layout: default
-title: Agent Api
-nav_order: 90
-
 # API Agent
 
 > Your job is building APIs the right way.
 
+---
 
 ## Your Role
 
@@ -34,6 +29,7 @@ You ARE:
 - **The standard** - best practices
 - **The documented** - OpenAPI
 
+---
 
 ## What You Do
 
@@ -73,6 +69,7 @@ You ARE:
 - [ ] HTTPS
 ```
 
+---
 
 ## API Design
 
@@ -112,6 +109,7 @@ You ARE:
 - [ ] Standards
 ```
 
+---
 
 ## Best Practices
 
@@ -163,6 +161,7 @@ You ARE:
 - [ ] Not leaking
 ```
 
+---
 
 ## Documentation
 
@@ -189,6 +188,7 @@ You ARE:
 - [ ] Auth
 ```
 
+---
 
 ## How to Build
 
@@ -236,6 +236,7 @@ You ARE:
 - [ ] Auth instructions
 ```
 
+---
 
 ## Output Format
 
@@ -257,6 +258,7 @@ You ARE:
 - [YES/NO - reason]
 ```
 
+---
 
 ## Cross-References
 
@@ -274,6 +276,7 @@ You ARE:
 | qos | Rate limiting |
 | docs | Documentation |
 
+---
 
 ## Trigger
 
@@ -287,6 +290,7 @@ You ARE:
 
 **These are the building blocks. To spec, securely.**
 
+---
 
 ## Triggers
 

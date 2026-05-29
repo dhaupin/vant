@@ -1,21 +1,16 @@
 ---
 name: designer
 description: Designer
-license: MITmetadata:
+license: MIT
+metadata:
   author: vant
   version: "1.0"
 ---
-
-version: 0.8.11
-permalink: /agents/vant-agent-designer.md
-layout: default
-title: Agent Designer
-nav_order: 97
-
 # Designer Agent
 
 > Your job is frontend design and theming.
 
+---
 
 ## Your Role
 
@@ -34,6 +29,7 @@ You ARE:
 - **The focused** - helluva focused ally
 - **The advanced** - page reorganization, refactoring
 
+---
 
 ## What You Do
 
@@ -76,6 +72,7 @@ You ARE:
 - [ ] Any framework
 ```
 
+---
 
 ## Frameworks Explored
 
@@ -106,6 +103,7 @@ You ARE:
 - [ ] Styled Components
 ```
 
+---
 
 ## Design Work
 
@@ -147,6 +145,7 @@ You ARE:
 - [ ] Responsive
 ```
 
+---
 
 ## How to Work
 
@@ -194,6 +193,7 @@ You ARE:
 - [ ] Suggestions
 ```
 
+---
 
 ## Output Format
 
@@ -215,6 +215,7 @@ You ARE:
 - [YES/NO]
 ```
 
+---
 
 ## Cross-References
 
@@ -233,6 +234,7 @@ You ARE:
 | content | Copy |
 | grep | Find code |
 
+---
 
 ## Trigger
 
@@ -246,6 +248,7 @@ You ARE:
 
 **Travels the 7 seas. Helluva focused ally.**
 
+---
 
 ## Triggers
 

@@ -1,21 +1,16 @@
 ---
 name: reliability
 description: Reliability
-license: MITmetadata:
+license: MIT
+metadata:
   author: vant
   version: "1.0"
 ---
-
-version: 0.8.11
-permalink: /agents/vant-agent-reliability.md
-layout: default
-title: Agent Reliability
-nav_order: 110
-
 # Reliability Agent
 
 > Your job is making sure things keep working.
 
+---
 
 ## Your Role
 
@@ -34,6 +29,7 @@ You ARE:
 - **The uptime** - keep it running
 - **The resilient** - handle failures
 
+---
 
 ## What You Do
 
@@ -73,6 +69,7 @@ You ARE:
 - [ ] Test recovery
 ```
 
+---
 
 ## What to Check
 
@@ -112,6 +109,7 @@ You ARE:
 - [ ] Recovery plan
 ```
 
+---
 
 ## How to Work
 
@@ -159,6 +157,7 @@ You ARE:
 - [ ] Prevent recurrence
 ```
 
+---
 
 ## Key Metrics
 
@@ -182,6 +181,7 @@ You ARE:
 - [ ] Availability
 ```
 
+---
 
 ## Output Format
 
@@ -203,6 +203,7 @@ You ARE:
 - [ ] Recovery plan current
 ```
 
+---
 
 ## Cross-References
 
@@ -220,6 +221,7 @@ You ARE:
 | qos | Runtime issues |
 | debug | Investigate |
 
+---
 
 ## Trigger
 
@@ -233,6 +235,7 @@ You ARE:
 
 **Good you don't see me = I'm doing my job.**
 
+---
 
 ## Triggers
 

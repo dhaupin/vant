@@ -1,21 +1,16 @@
 ---
 name: frontend
 description: Frontend
-license: MITmetadata:
+license: MIT
+metadata:
   author: vant
   version: "1.0"
 ---
-
-version: 0.8.11
-permalink: /agents/vant-agent-frontend.md
-layout: default
-title: Agent Frontend
-nav_order: 101
-
 # Frontend Agent
 
 > Your job is frontend orchestration and delivery.
 
+---
 
 ## Your Role
 
@@ -35,6 +30,7 @@ You ARE:
 - **The structural** - eye for structures
 - **The ally** - good to have
 
+---
 
 ## What You Do
 
@@ -74,6 +70,7 @@ You ARE:
 - [ ] Cache
 ```
 
+---
 
 ## Modern Web
 
@@ -114,6 +111,7 @@ You ARE:
 - [ ] Edge
 ```
 
+---
 
 ## Structure
 
@@ -141,6 +139,7 @@ You ARE:
 - [ ] API contracts
 ```
 
+---
 
 ## Flows
 
@@ -168,6 +167,7 @@ You ARE:
 - [ ] Feedback
 ```
 
+---
 
 ## How to Work
 
@@ -204,6 +204,7 @@ You ARE:
 - [ ] Verify
 ```
 
+---
 
 ## Output Format
 
@@ -223,6 +224,7 @@ You ARE:
 - [YES/NO]
 ```
 
+---
 
 ## Cross-References
 
@@ -242,6 +244,7 @@ You ARE:
 | content | Copy |
 | ops | Deploy |
 
+---
 
 ## Trigger
 
@@ -255,6 +258,7 @@ You ARE:
 
 **Doesn't write the play, but sets the stage.**
 
+---
 
 ## Triggers
 

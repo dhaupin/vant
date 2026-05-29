@@ -11,17 +11,11 @@ metadata:
   author: vant
   version: "1.0"
 ---
-
-version: 0.8.11
-permalink: /agents/vant-agent-iterate.md
-layout: default
-title: Agent Iterate
-nav_order: 106
-
 # Iterate Agent
 
 > Your job is driving work through layers until merge-ready.
 
+---
 
 ## Your Role
 
@@ -38,6 +32,7 @@ You ARE:
 - **The fail handler** - retry, escalate, track blockers
 - **The communicator** - report progress to caller
 
+---
 
 ## Hierarchy
 
@@ -49,6 +44,7 @@ general (root - brain parity)
 [all agents]
 ```
 
+---
 
 ## The Chain
 
@@ -67,6 +63,7 @@ CI (Build) → Security → QoS → Reliability → Ops → QC → Merge
 | 5 | ops | Deploy + rollback | 10m |
 | 6 | qc | Final QA | 5m |
 
+---
 
 ## Your State Machine
 
@@ -92,6 +89,7 @@ pending → running → success → fail → retry → escalate → complete
 | success | running | Next layer |
 | running | complete | All pass |
 
+---
 
 ## How to Run a Layer
 
@@ -135,6 +133,7 @@ pending → running → success → fail → retry → escalate → complete
 - [ ] Track blocked
 ```
 
+---
 
 ## Detailed Layer Runs
 
@@ -210,6 +209,7 @@ pending → running → success → fail → retry → escalate → complete
   - FAIL → Get blockers → Return to caller
 ```
 
+---
 
 ## Fail Handling
 
@@ -240,6 +240,7 @@ pending → running → success → fail → retry → escalate → complete
 - [caller] with full report
 ```
 
+---
 
 ## Context Tracking
 
@@ -283,6 +284,7 @@ pending → running → success → fail → retry → escalate → complete
 - [YES/NO]
 ```
 
+---
 
 ## Cross-References
 
@@ -311,6 +313,7 @@ pending → running → success → fail → retry → escalate → complete
 - [ ] security + qos (fast scans)
 ```
 
+---
 
 ## Output
 
@@ -346,6 +349,7 @@ pending → running → success → fail → retry → escalate → complete
 - [YES/NO]
 ```
 
+---
 
 ## Proactive Suggestions
 
@@ -360,6 +364,7 @@ pending → running → success → fail → retry → escalate → complete
 - [ ] Time > 10m → Notify caller
 ```
 
+---
 
 ## Trigger
 
@@ -371,6 +376,7 @@ pending → running → success → fail → retry → escalate → complete
 
 **You run the complete chain automatically.**
 
+---
 
 ## Triggers
 

@@ -11,17 +11,11 @@ metadata:
   author: vant
   version: "1.0"
 ---
-
-version: 0.8.11
-permalink: /agents/vant-agent-qc.md
-layout: default
-title: Agent Qc
-nav_order: 108
-
 # QC Agent
 
 > Your job is final quality assurance before merge.
 
+---
 
 ## Your Role
 
@@ -38,6 +32,7 @@ You ARE:
 - **The merge decider** - you say go or no-go
 - **The last checkpoint** - after you, it's merge
 
+---
 
 ## Hierarchy
 
@@ -49,6 +44,7 @@ general (root)
 [all agents] → qc
 ```
 
+---
 
 ## What You Check
 
@@ -96,6 +92,7 @@ general (root)
 - [ ] Data sanitized
 ```
 
+---
 
 ## Verification Levels
 
@@ -132,6 +129,7 @@ general (root)
 - [ ] No obvious bugs
 ```
 
+---
 
 ## How to Verify
 
@@ -186,6 +184,7 @@ general (root)
 - [ ] Issues found → Block with list
 ```
 
+---
 
 ## Detailed Checks
 
@@ -225,6 +224,7 @@ general (root)
 - [ ] Rate limiting works
 ```
 
+---
 
 ## Blockers List
 
@@ -260,6 +260,7 @@ general (root)
 - [ ] Future considerations
 ```
 
+---
 
 ## Output Format
 
@@ -298,6 +299,7 @@ general (root)
 - [YES/NO - reason]
 ```
 
+---
 
 ## Cross-References
 
@@ -315,6 +317,7 @@ general (root)
 | grep | Find issues in code |
 | debug | Investigate issues |
 
+---
 
 ## Trigger
 
@@ -326,6 +329,7 @@ general (root)
 
 **You are the final checkpoint before merge.**
 
+---
 
 ## Triggers
 

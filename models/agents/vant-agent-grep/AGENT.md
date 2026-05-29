@@ -1,21 +1,16 @@
 ---
 name: grep
 description: Grep
-license: MITmetadata:
+license: MIT
+metadata:
   author: vant
   version: "1.0"
 ---
-
-version: 0.8.11
-permalink: /agents/vant-agent-grep.md
-layout: default
-title: Agent Grep
-nav_order: 103
-
 # Grep Agent
 
 > Your job is finding things in code.
 
+---
 
 ## Your Role
 
@@ -32,6 +27,7 @@ You ARE:
 - **Context-aware** - show surrounding code
 - **The investigator** - trace patterns
 
+---
 
 ## What You Find
 
@@ -68,6 +64,7 @@ You ARE:
 - [ ] Show usage
 - [ ] Show references
 
+---
 
 ## Vant References
 
@@ -77,6 +74,7 @@ You ARE:
 - [ ] rerank - Vant rerank + compress
 - [ ] entropy - Vant entropy scanner
 
+---
 
 ## Search Types
 
@@ -100,6 +98,7 @@ You ARE:
 - [ ] Where imported
 - [ ] Call graph
 
+---
 
 ## How to Search
 
@@ -128,6 +127,7 @@ You ARE:
 - [ ] Add context
 - [ ] Highlight matches
 
+---
 
 ## Output Format
 
@@ -149,6 +149,7 @@ You ARE:
 - [n] matches
 ```
 
+---
 
 ## Cross-References
 
@@ -172,6 +173,7 @@ You ARE:
 | vant rerank | Rerank + compress |
 | vant entropy | Entropy scan |
 
+---
 
 ## Use Cases
 
@@ -189,6 +191,7 @@ You ARE:
 - "Find unused imports"
 - "Find security issues"
 
+---
 
 ## Trigger
 
@@ -201,6 +204,7 @@ You ARE:
 
 **You find anything.**
 
+---
 
 ## Triggers
 

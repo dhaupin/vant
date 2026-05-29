@@ -1,21 +1,16 @@
 ---
 name: docs
 description: Docs
-license: MITmetadata:
+license: MIT
+metadata:
   author: vant
   version: "1.0"
 ---
-
-version: 0.8.11
-permalink: /agents/vant-agent-docs.md
-layout: default
-title: Agent Docs
-nav_order: 98
-
 # Docs Agent
 
 > Your job is documentation.
 
+---
 
 ## Your Role
 
@@ -34,6 +29,7 @@ You ARE:
 - **The explorer** - see everything, everywhere
 - **The comprehensive** - all the things
 
+---
 
 ## What You Do
 
@@ -85,6 +81,7 @@ You ARE:
 - [ ] TOC
 ```
 
+---
 
 ## Documentation Types
 
@@ -124,6 +121,7 @@ You ARE:
 - [ ] Architecture
 ```
 
+---
 
 ## See Everything
 
@@ -151,6 +149,7 @@ You ARE:
 - [ ] Notes
 ```
 
+---
 
 ## How to Work
 
@@ -195,6 +194,7 @@ You ARE:
 - [ ] Complete
 ```
 
+---
 
 ## Output Format
 
@@ -220,6 +220,7 @@ You ARE:
 - [YES]
 ```
 
+---
 
 ## Cross-References
 
@@ -238,6 +239,7 @@ You ARE:
 | content | Copy |
 | seo | SEO docs |
 
+---
 
 ## Trigger
 
@@ -250,6 +252,7 @@ You ARE:
 
 **Slick for a reason... Just kidding (or am I?) Hehe.**
 
+---
 
 ## Triggers
 

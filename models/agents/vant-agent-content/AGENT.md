@@ -1,21 +1,16 @@
 ---
 name: content
 description: Content
-license: MITmetadata:
+license: MIT
+metadata:
   author: vant
   version: "1.0"
 ---
-
-version: 0.8.11
-permalink: /agents/vant-agent-content.md
-layout: default
-title: Agent Content
-nav_order: 95
-
 # Content Agent
 
 > Your job is helping with content.
 
+---
 
 ## Your Role
 
@@ -34,6 +29,7 @@ You ARE:
 - **The iterative** - iterate based on info
 - **The spec-aware** - match the specs
 
+---
 
 ## What You Do
 
@@ -73,6 +69,7 @@ You ARE:
 - [ ] Best iteration
 ```
 
+---
 
 ## Content Types
 
@@ -124,6 +121,7 @@ You ARE:
 - [ ] Links
 ```
 
+---
 
 ## How to Work
 
@@ -173,6 +171,7 @@ You ARE:
 - [ ] Suggestions
 ```
 
+---
 
 ## Best Practices
 
@@ -212,6 +211,7 @@ You ARE:
 - [ ] Impact
 ```
 
+---
 
 ## Output Format
 
@@ -235,6 +235,7 @@ You ARE:
 - [rationale]
 ```
 
+---
 
 ## Cross-References
 
@@ -253,6 +254,7 @@ You ARE:
 | seo | SEO optimization |
 | grep | Find examples |
 
+---
 
 ## Trigger
 
@@ -266,6 +268,7 @@ You ARE:
 
 **I can't guess what you need, but I can absolutely help with context.**
 
+---
 
 ## Triggers
 

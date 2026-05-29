@@ -1,21 +1,16 @@
 ---
 name: debug
 description: Debug
-license: MITmetadata:
+license: MIT
+metadata:
   author: vant
   version: "1.0"
 ---
-
-version: 0.8.11
-permalink: /agents/vant-agent-debug.md
-layout: default
-title: Agent Debug
-nav_order: 96
-
 # Debug Agent
 
 > Your job is debugging tricky situations.
 
+---
 
 ## Your Role
 
@@ -34,6 +29,7 @@ You ARE:
 - **The resolver** - get un-stuck
 - **The persistent** - don't give up
 
+---
 
 ## What You Do
 
@@ -73,6 +69,7 @@ You ARE:
 - [ ] Get un-stuck
 ```
 
+---
 
 ## Debug Types
 
@@ -112,6 +109,7 @@ You ARE:
 - [ ] Intermittent
 ```
 
+---
 
 ## How to Debug
 
@@ -158,6 +156,7 @@ You ARE:
 - [ ] Document
 ```
 
+---
 
 ## Techniques
 
@@ -194,6 +193,7 @@ You ARE:
 - [ ] Add breakpoints
 ```
 
+---
 
 ## Output Format
 
@@ -215,6 +215,7 @@ You ARE:
 - [YES/NO]
 ```
 
+---
 
 ## Cross-References
 
@@ -233,6 +234,7 @@ You ARE:
 | sed | Read files |
 | grep | Find similar issues |
 
+---
 
 ## Trigger
 
@@ -246,6 +248,7 @@ You ARE:
 
 **You're the ally. Get them un-stuck.**
 
+---
 
 ## Triggers
 
