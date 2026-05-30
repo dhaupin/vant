@@ -12,7 +12,7 @@
 
 The Versatile Autonomous Networked Tool ("Vant") is provided under a **Fair-Code / Source-Available license model.**
 
-**This is NOT a pure MIT License** — Vant includes supplemental terms (especially §8, §15) that restrict commercial exploitation. These terms are explicit and disclosed.
+**This is NOT a pure MIT License** - Vant includes supplemental terms (especially 8, 15) that restrict commercial exploitation. These terms are explicit and disclosed.
 
 **Grant:** Permission is granted, free of charge, to use, copy, modify, merge, distribute, sublicense, and/or sell copies of Vant, subject to the following conditions:
 
@@ -28,8 +28,8 @@ The Versatile Autonomous Networked Tool ("Vant") is provided under a **Fair-Code
 
 Vant is an open-source project with copyright held by the maintainer and contributors collectively.
 
-- **Maintainer:** **dhaupin** (Derek H / David H on GitHub)
-- **Contributor License:** **CLA-C** (Contributor License Agreement - Copyright) — By submitting PRs, contributors agree to license contributions under this document's terms
+- **Maintainer:** **dhaupin**
+- **Contributor License:** **CLA-C** (Contributor License Agreement - Copyright) - By submitting PRs, contributors agree to license contributions under this document's terms
 
 **No IP Transfer Required:** Contributors retain copyright to their contributions. License is non-exclusive, worldwide, royalty-free.
 
@@ -78,10 +78,10 @@ If any party brings a patent infringement claim against Vant, Contributors may d
 
 **Nomenclature Rationale:**
 The term "Vant" was chosen as a purely technical acronym describing the framework's architectural characteristics:
-- **V**ersatile — adaptable to many use cases
-- **A**utonomous — operates with self-directed agency  
-- **N**etworked — connects across systems and contexts
-- **T**ool — developer tooling for AI agent construction
+- **V**ersatile - adaptable to many use cases
+- **A**utonomous - operates with self-directed agency  
+- **N**etworked - connects across systems and contexts
+- **T**ool - developer tooling for AI agent construction
 
 This naming is a descriptive technical designation, NOT a commercial brand attempt, and is explicitly **separate** from any registered corporate trademarks in enterprise compliance, biotech, or UI frameworks.
 
