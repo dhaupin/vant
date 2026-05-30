@@ -5,7 +5,168 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.8.6] - 2026-05-30
+
+### Feature - AI-First Runtime Interoperability (v0.8.6)
+
+- **Event Wiring** (2026-05-30)
+  - ADDED: Events emitted by core vant.js operations
+    - agent:initialized - on vant.init() complete
+    - think:complete - on vant.think() with insights count
+    - learn:saved - on vant.learn() with key/category
+    - module:discovered - when registry builds with module count
+    - act:executing/completed/failed/blocked - operation lifecycle
+  - Event system available via lib/event.js
+
+- **Auto-Islands** (2026-05-30)
+  - ADDED: Auto-hydrate islands in vant.init()
+    - Detects agent identity + role
+    - Calls islands.findTriggers() for context
+    - Auto-hydrates relevant islands
+
+- **Security Chain** (2026-05-30)
+  - ADDED: Full security chain in vant.act()
+    - VAF validation (input schema checking)
+    - QoS rate limiting (1000 ops/min per type)
+    - Escrow quota check (budget enforcement)
+    - Lock serialization (concurrent safety)
+  - Previously only had lock + audit
+
+- **Discovery Registry** (2026-05-30)
+  - ADDED: vant.buildRegistry() - auto-scan lib/*.js
+  - ADDED: vant.discover({ capability: 'security' }) - filter by capability
+  - ADDED: vant.findByCapability('memory') - list by type
+  - Maps 63 modules across 10 capabilities:
+    - memory, search, agency, security, compute
+    - network, events, scheduling, observability, config
+  - Auto-emits module:discovered event
+
+- **System Dashboard** (2026-05-30)
+  - EXTENDED: system.status() now returns:
+    - boot: layer initialization state
+    - events: listener count, uptime
+    - discovery: modules, capabilities, byCapability
+    - services: compute, embed, storage... (unchanged)
+  - ADDED: getLayerStatus(), isOperationAllowed() framework interface
+
+- **User Extensibility** (2026-05-30)
+  - 3 ways to extend without touching core:
+    1. Add .js file to lib/ (auto-discovered)
+    2. Add connector to lib/connectors/ (auto-loaded)
+    3. Subscribe to event system (no file needed)
+  - Hook into: agent:initialized, think:complete, learn:saved, act:*, module:*
+
+- **Batch 2: Memory Trio Interoperability** (2026-05-30)
+  - ADDED: storage.js events
+    - storage:saved - when file written with category/key/size
+    - storage:loaded - when file read with path
+    - storage:deleted - when file removed
+    - storage:miss - when get() returns null
+    - storage:checked - when has() returns true
+    - storage:error - on sandbox denials
+  - ADDED: search.js events
+    - results:found - when query returns hits
+    - search:empty - when LTC missing
+    - pipeline:executed - when rerank+compress completes
+  - ADDED: cache.js events
+    - cache:set/onRemove/hit/miss/expired/evicted/cleared
+    - cache:flushing/flushed - DUALITY bridge events
+
+- **Batch 3: Config Centralization** (2026-05-30)
+  - ADDED: config:changed event
+    - Emits on setFlag() when value actually changes
+    - Includes oldValue and newValue for observers
+
+- **Batch 4: Boot System Visibility** (2026-05-30)
+  - ADDED: boot events
+    - boot:starting - on init() start with taskId/scopes
+    - layer:loaded - each layer init with order/count
+    - boot:complete - full stack ready with layers/uptime
+  - FIXED: escrow require path ('./lib/escrow' → './escrow')
+  - ADDED: boot.getBootState() - state exposed to system.js
+  - ADDED: boot → system.status().boot now shows full layers
+
+- **Batch 5: Duality Bridge** (2026-05-30)
+  - ADDED: cache.flush() - returns entries for persistence
+    - Clears memory cache, returns [{key, value, timestamp}]
+    - Emits cache:flushed with entry list
+    - Enables temp ↔ persist tiering
+  - Storage listeners can subscribe and persist flushed data
+
+- **Batch 6: Heartbeat Systems** (2026-05-30)
+  - ADDED: cron.js events
+    - task:scheduled/running/completed/failed
+    - job:started/completed/failed (JobWorker)
+  - ADDED: metrics.js events
+    - metric:milestone - every 100 increments
+    - metric:spike - gauge changes >50%
+  - ADDED: islands.js events
+    - island:hydrated/dehydrated/hydrate:failed
+  
+- **Batch 7: Coordination Systems** (2026-05-30)
+  - ADDED: consensus.js events
+    - vote:cast/quorum/consensus
+  - ADDED: network.js events
+    - network:checking/online/offline
+    - network:blocked (capability/domain)
+    - network:cache:hit/miss
+    - network:request:start/success/error/timeout
+  - FIXED: network.js checkOnline() URL parsing bug
+
+- **Batch 8: API & Integration** (2026-05-30)
+  - ADDED: api.js events
+    - api:executing/executed/auth:failed/error
+  - ADDED: sync.js events
+    - sync:push:starting/complete/failed
+    - sync:pull:starting/success/failed
+  - ADDED: audit.js events
+    - audit:info/warn/error
+    
+- **Batch 9: Compute & Embed** (2026-05-30)
+  - ADDED: compute.js events
+    - compute:invoking/invoked
+    - compute:eval:starting/complete
+    - compute:run:starting/complete
+  - ADDED: embed.js events
+    - embed:generating/generated
+    - embed:batch:starting/complete
+
+- **Batch 10: Infrastructure** (2026-05-30)
+  - ADDED: theme.js events
+    - theme:apply
+  - ADDED: escrow.js events
+    - escrow:budget:check
+    - escrow:spend:recorded
+    - escrow:execute:before/check/after
+  - ADDED: branch.js events
+    - branch:checked-out
+    - branch:committed
+  - ADDED: lock.js events
+    - lock:acquired
+    - lock:released
+
+- **Batch 11: Core Systems** (2026-05-30)
+  - ADDED: brain.js events - brain:cache:hit, brain:loading, brain:loaded
+  - ADDED: auth.js events - auth:validated, auth:failed
+  - ADDED: mcp.js events - mcp:request/response/error
+  - ADDED: lineage.js events - lineage:recorded
+  - ADDED: error.js events - error:retry/attempt/exhausted
+  - ADDED: vaf.js events - vaf:blocked
+  - ADDED: stego.js events - stego:encoded, stego:decoded
+  - ADDED: agents.js events - agent:spawned, agent:delegating, agent:delegated
+
+- **Batch 12: Utilities** (2026-05-30)
+  - ADDED: format.js events - format:parsed
+  - ADDED: update.js events - update:check
+  - ADDED: canvas.js events - canvas:painted
+
+- **Batch 13: Security + Infrastructure** (2026-05-30)
+  - ADDED: encrypt.js events - encrypt:encrypted, encrypt:decrypted
+  - ADDED: shell.js events - shell:exec
+  - ADDED: security.js events (header)
+  - ADDED: qos.js events - qos:rate-limit
+  - ADDED: stream.js events - stream:enqueued, stream:polled, stream:completed
+  - ADDED: sudo.js events - sudo:escalation
 
 ### Feature - Multi-Agent Orchestration (v0.8.7)
 - **MCP Agent Tools** (2026-05-13)

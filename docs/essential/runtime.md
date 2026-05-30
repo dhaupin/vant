@@ -46,6 +46,71 @@ await vant.learn('key', 'value');
 
 > **Note**: Git operations (commit, sync) via `require('vant/lib/branch')`
 
+## v0.8.7+ New Features
+
+### Event System (AI-first)
+
+Vant emits events during operations — subscribe for reactive behavior:
+
+```js
+const event = require('./lib/event');
+
+// Subscribe
+event.on('agent:initialized', (agent) => { /* agent started */ });
+event.on('think:complete', (result) => { /* thought completed */ });
+event.on('learn:saved', (data) => { /* new learning */ });
+
+// Trigger: vant.init() → 'agent:initialized'
+// Trigger: vant.think() → 'think:complete'
+// Trigger: vant.learn() → 'learn:saved'
+```
+
+| Event | When | Data |
+|-------|------|------|
+| `agent:initialized` | vant.init() complete | `{ id, name, role }` |
+| `think:complete` | vant.think() done | `{ query, insights, memories }` |
+| `learn:saved` | vant.learn() done | `{ key, category }` |
+| `module:discovered` | registry built | `{ count, capabilities }` |
+| `act:*` | operation lifecycle | `{ opKey, duration }` |
+
+### Discovery Registry
+
+New in v0.8.7 — auto-discover modules:
+
+```js
+// Scan all lib/*.js files
+const reg = vant.buildRegistry();
+// → { modules: Map(63), byCapability: Map(10) }
+
+// Filter by capability
+const memMods = vant.discover({ capability: 'memory' });
+const secMods = vant.discover({ capability: 'security' });
+
+// Find modules with capability
+const memNames = vant.findByCapability('memory'); 
+// → ['brain', 'islands', 'storage']
+```
+
+### User Extensibility
+
+3 ways to extend without touching core:
+
+| Way | How |
+|-----|-----|
+| Add to `lib/` | Drop `.js` → auto-discovered |
+| Add to `lib/connectors/` | Drop language connector → auto-loaded |
+| Event subscriptions | Subscribe/emit anytime — no file needed |
+
+```js
+// Example: Listen to agent lifecycle
+const event = require('./lib/event');
+
+event.on('agent:initialized', async (agent) => {
+    // Custom setup when agent starts
+    await doMySetup(agent.id);
+});
+```
+
 ## Full Reference
 
 See [API Reference](reference/api-runtime) for complete documentation:
