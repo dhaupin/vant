@@ -118,4 +118,4 @@ if (error.retryable) {
 | `NETWORK_OFFLINE` | Check internet connection |
 | `LOCK_TIMEOUT` | Another agent holds the lock |
 
-See also: [Troubleshooting](operations/troubleshooting), [CLI Reference](reference/cli)
+See also: [Troubleshooting](advanced/troubleshooting), [CLI Reference](reference/cli)

@@ -9,11 +9,11 @@ nav_order: 8
 
 Run and manage Vant in production:
 
-- [CI/CD](ci) - Continuous integration
+- [CI/CD](operations/ci) - Continuous integration
 - [Cron](operations/cron) - Scheduled tasks
 - [Events](operations/events) - Event handling
 - [Notifications](operations/notifications) - Alerting
 - [Storage](operations/storage) - Data persistence
 - [Sync](operations/sync) - Git sync
-- [Cache](cache) - Caching
-- [Network](network) - Networking
+- [Cache](operations/cache) - Caching
+- [Network](operations/network) - Networking

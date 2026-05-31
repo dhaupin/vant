@@ -9,6 +9,6 @@ nav_order: 10
 
 Step-by-step guides:
 
-- [Omega Init](omega-init) - Initialize agent from scratch
-- [Telegram Bot](telegram-bot) - Build Telegram agent
-- [Webhooks](webhooks) - Webhook automation
+- [Omega Init](tutorials/omega-init) - Initialize agent from scratch
+- [Telegram Bot](tutorials/telegram-bot) - Build Telegram agent
+- [Webhooks](tutorials/webhooks) - Webhook automation

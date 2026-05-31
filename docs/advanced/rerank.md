@@ -135,6 +135,6 @@ Search can hook into rerank via `--rerank` flag (future).
 ## Related
 
 - [Search](advanced/search)
-- [Hybrid Search](advanced/search-architecture.md)
+- [Hybrid Search](advanced/search-architecture)
 - [Entropy](reference/entropy)
 - [CLI Reference](reference/cli)

@@ -116,4 +116,4 @@ Session 1              Session 2
 
 - [Multi-Agent Tutorial](tutorials/multi-agent) - Scale to multiple agents
 - [Succession System](essential/succession) - Version tracking
-- [Architecture](essential/architecture.md) - Deep dive
+- [Architecture](essential/architecture) - Deep dive

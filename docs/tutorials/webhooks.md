@@ -198,6 +198,6 @@ cron.cron('0 0 * * *', async () => {
 
 ## Related
 
-- [CLI](essential/cli)
+- [CLI](reference/cli)
 - [Sync](operations/sync)
-- [Search](/advanced/search)
+- [Search](advanced/search)

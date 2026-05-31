@@ -139,7 +139,7 @@ Create `models/public/` - shared brain that gets updated with Vant. Agents can a
 ## Related
 
 - [Brain](essential/brain) - Brain layout
-- [Getting Started](getting-started) - Getting started
+- [Getting Started/getting-started/index) - Getting started
 
 ## Next
 

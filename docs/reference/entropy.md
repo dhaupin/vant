@@ -303,4 +303,4 @@ patch.metadata.currentEntropy = 0.48;
 
 Low entropy delta = stable evolution
 High entropy drift = review needed
-- [schema.md](./schema.md) - brain file schema
+- [schema.md](reference/schema) - brain file schema
