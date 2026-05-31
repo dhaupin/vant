@@ -1,10 +1,10 @@
 ---
 title: Extensibility
 description: How to extend Vant with custom agents and skills
-nav_order: 4
+nav_order: 5
 ---
 
-# Brains & Extensibility
+# Extensibility
 
 Vant's brain system follows a **public/private pattern** - defaults live in `models/public/`, your customizations go in `models/private/`.
 
