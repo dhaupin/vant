@@ -1,10 +1,13 @@
 ---
+
 version: 0.8.6
 permalink: /advanced/steganography
 layout: default
 title: Steganography
+
 nav_order: 73
 ---
+
 # Steganography
 
 Hidden messages in PNG images for covert communication.
@@ -98,6 +101,7 @@ console.log('Max bytes:', maxBytes);
 - Large messages increase file size slightly
 
 ---
+
 
 ## Related
 

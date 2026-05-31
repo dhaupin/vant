@@ -4,7 +4,6 @@ permalink: /security/escrow
 layout: default
 title: Escrow
 nav_order: 51
-18
 ---
 
 # Escrow
@@ -226,32 +225,23 @@ const { allowed, remaining } = escrow.checkQuota('api');
 ```
 
 ---
-
 ## Integration
-
 Escrow integrates with sandbox:
-
 ```javascript
 const sandbox = require('vant').sandbox;
-
 const s = sandbox.create({
     agentId: 'agent-1',
     budget: 10000
 });
 ```
-
 When sandbox runs operations:
-
 ```javascript
 const result = s.write(() => doWork());
-
 if (result.error) {
     console.log(result.code); // "BUDGET_EXCEEDED" | "APPROVAL_REQUIRED"
 }
 ```
-
 See [Sandbox](security/sandbox) for details.
-
 ---
 
 ## Related

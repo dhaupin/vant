@@ -1,10 +1,13 @@
 ---
+
 version: 0.8.6
 permalink: /advanced/search-architecture
 layout: default
 title: Search Architecture
+
 nav_order: 70
 ---
+
 
 > **v0.8.6+**: How search connects your memory islands.
 

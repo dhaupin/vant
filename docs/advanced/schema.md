@@ -1,10 +1,13 @@
 ---
+
 version: 0.8.6
 permalink: /advanced/schema
 layout: default
 title: Schema Validation
+
 nav_order: 69
 ---
+
 
 # Vant Schema Guide
 

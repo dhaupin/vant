@@ -1,10 +1,13 @@
 ---
+
 version: 0.8.6
 permalink: /advanced/search
 layout: default
 title: Hybrid Search
+
 nav_order: 71
 ---
+
 
 # Hybrid Search
 
@@ -159,6 +162,7 @@ async function answerWithContext(query) {
 
 ---
 
+
 ## Rerank (RAG)
 
 > Keyword reranking and compression for LLM context
@@ -241,6 +245,7 @@ citations.addSource(result.sources[0].commit);
 ```
 
 ---
+
 
 ## MCP Tool
 
@@ -338,6 +343,7 @@ Returns:
 
 ---
 
+
 ## Unified API
 
 All modes available via single `lib/search.js`:
@@ -362,6 +368,7 @@ const settings = search.getSettings();
 ```
 
 ---
+
 
 ## CLI
 
@@ -406,6 +413,7 @@ RAG response includes current settings:
 
 ---
 
+
 ## Security
 
 - **Path traversal**: Blocked in basic mode
@@ -415,6 +423,7 @@ RAG response includes current settings:
 - **RAG limit bounds**: 1-20 enforced
 
 ---
+
 
 ## Mode Comparison
 
@@ -428,6 +437,7 @@ RAG response includes current settings:
 | Tokens | Full file | Distilled | Full |
 
 ---
+
 
 ## Future: Islands + vpatch
 
@@ -445,6 +455,7 @@ Potential workflow:
 See: [Islands](essential/islands) for architecture.
 
 ---
+
 
 ## Related
 

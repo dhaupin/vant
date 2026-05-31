@@ -4,6 +4,7 @@ permalink: /advanced/frontend
 layout: default
 title: Frontend Integration
 nav_order: 64
+
 ---
 # Frontend Integration
 

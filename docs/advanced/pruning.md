@@ -1,10 +1,13 @@
 ---
+
 version: 0.8.6
 permalink: /advanced/pruning
 layout: default
 title: Automated Brain Pruning
+
 nav_order: 67
 ---
+
 
 # Automated Brain Pruning
 

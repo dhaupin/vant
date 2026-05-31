@@ -1,10 +1,13 @@
 ---
+
 version: 0.8.11
 permalink: /advanced/framework
 layout: default
 title: Framework
+
 nav_order: 63
 ---
+
 
 # Framework
 
@@ -81,6 +84,7 @@ framework.use('read', async (ctx, next) => {
 
 ---
 
+
 ## API
 
 Framework provides unified API:
@@ -95,6 +99,7 @@ const result = await api.execute('read', () => brain.get('key'));
 See [API](essential/runtime) for programmatic API.
 
 ---
+
 
 ## Related
 

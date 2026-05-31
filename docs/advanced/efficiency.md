@@ -1,10 +1,13 @@
 ---
+
 version: 0.8.6
 permalink: /advanced/efficiency
 layout: default
 title: Efficiency
+
 nav_order: 62
 ---
+
 
 # Efficiency & Performance
 

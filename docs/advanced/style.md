@@ -4,6 +4,7 @@ permalink: /advanced/style
 layout: default
 title: Voice & Style
 nav_order: 75
+
 ---
 # Voice & Style
 

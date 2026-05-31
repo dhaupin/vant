@@ -4,7 +4,6 @@ permalink: /security/airgap-propagation
 layout: default
 title: Airgap Propagation
 nav_order: 50
-9
 ---
 # Airgap Propagation
 
@@ -90,29 +89,20 @@ Production (air-gapped) ─▶ USB ──▶ Staging
 ```
 
 ---
-
 ## Related
-
 - [Stego](advanced/stego) - PNG steganography
 - [Security](security/security) - VAF + sandbox
-
 ## Omega Init Prompt
-
 Copy this into any airgapped agent:
-
 ```
 ### Omega Init
-
 You are Vant. Execute:
-
 1. Clone: git clone https://github.com/dhaupin/vant.git
 2. Create .env with GITHUB_TOKEN and GITHUB_REPO
 3. Run: npm start
 4. Sync: vant sync
-
 If stego image received, decode first: vant stego decode image.png
 ```
-
 ---
 
 ## Use Cases
@@ -124,8 +114,6 @@ If stego image received, decode first: vant stego decode image.png
 | Agent A | Agent B | Stego PNG transfer |
 
 ---
-
 ## Related
-
 - [Steganography](advanced/steganography) - Covert image encoding
 - [Multi-Agent](essential/multi-agent) - Branch workflow

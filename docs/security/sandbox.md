@@ -4,7 +4,6 @@ permalink: /security/sandbox
 layout: default
 title: Sandbox
 nav_order: 52
-46
 ---
 
 # Sandbox
@@ -243,9 +242,7 @@ const s = sandbox.create({
 ```
 
 ---
-
 ## Related
-
 - [Security](security/security) - VAF and encryption
 - [Runtime](essential/runtime) - Programmatic API
 - [Multi-Agent](essential/multi-agent) - Branch and lock system

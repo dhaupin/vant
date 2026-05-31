@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /legal/environment
+permalink: /security/environment
 layout: default
 title: Environment & Limits
 nav_order: 102
@@ -11,14 +11,10 @@ nav_order: 102
 > GitHub API usage, rate limits, environmental considerations. Updated: April 2025.
 
 ---
-
 ## GITHUB API USAGE
 How Vant interacts with GitHub APIs.
-
 ### What Vant Uses
-
 When configured with GitHub sync, Vant interacts with:
-
 | API | Purpose | Method |
 |-----|---------|--------|
 | Repositories | Brain storage | GET, POST, PUT |
@@ -26,43 +22,32 @@ When configured with GitHub sync, Vant interacts with:
 | Commits | Version history | GET, POST |
 | Branches | Isolation | GET, POST |
 | Git Data | Sync operations | GET, POST |
-
 ### Not Used
-
 Vant does NOT use:
 - Issues (for storage)
 - Pull requests (as data)
 - Wiki (as storage)
 - Releases (for storage)
 - Projects (as database)
-
 ### Rate Limits
-
 **GitHub API has rate limits:**
-
 | Plan | Requests/Hour | Burst |
 |------|--------------|-------|
 | Unauthenticated | 60 | 60 |
 | Authenticated | 5,000 | 5,000 |
 | GitHub Actions | 1,000 | 1,000 |
-
 **Source:** [GitHub Rate Limits](https://docs.github.com/en/rest/about-rest-api/rate-limits-and-concurrency)
-
 ### Token Scopes
-
 **Recommended minimal scopes:**
-
 ```
 repo
   - repo:status    (check)
   - repo_deployment (read)
 ```
-
 **Avoid:**
 - `admin:org`
 - `delete_repo`
 - `write:discussion`
-
 ---
 
 ## POLLING CONSIDERATIONS
@@ -93,42 +78,31 @@ Vant defaults to:
 - **Two confirmations** — Env var OR stdin
 
 ---
-
 ## DATA CONSIDERATIONS
 How your data is handled.
-
 ### What Gets Synced
-
 **Your brain files:**
 - Memory files (`models/private/*`)
 - Configuration (non-secret)
 - Settings
-
 **NOT synced:**
 - `.env` files (gitignored)
 - Tokens
 - Local state
 - Cache files
-
 ### Repository Size
-
 **GitHub soft limit:** 1GB per repo
 **GitHub hard limit:** 2GB per repo
-
 **Best practices:**
 - Keep brain files concise
 - Don't commit binaries
 - Use `.gitignore`
-
 See: [GitHub Large Files](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github)
-
 ### Privacy
-
 Your brain is:
 - Stored on YOUR GitHub account
 - Visible to who you share with
 - Public or private - YOUR choice
-
 ---
 
 ## TOKEN SECURITY
@@ -178,30 +152,23 @@ Keeping your GitHub token safe.
    - Restart node
 
 ---
-
 ## SYSTEM REQUIREMENTS
 What you need to run Vant.
-
 ### Minimum
-
 | Resource | Requirement |
 |----------|-------------|
 | Node.js | 18+ |
 | RAM | 512MB |
 | Disk | 100MB |
 | Git | 2.x |
-
 ### Recommended
-
 | Resource | Requirement |
 |----------|-------------|
 | Node.js | 20+ |
 | RAM | 1GB |
 | Disk | 500MB |
 | Git | 2.x |
-
 ### Dependencies
-
 Vant uses:
 - `express` - HTTP server
 - `chalk` - Terminal colors
@@ -209,7 +176,6 @@ Vant uses:
 - `inquirer` - Interactive prompts
 - `yaml` - YAML parsing
 - And ~30 other packages
-
 ---
 
 ## NETWORK CONSIDERATIONS
@@ -243,31 +209,23 @@ export HTTPS_PROXY=http://proxy:8080
 ```
 
 ---
-
 ## ENVIRONMENT VARIABLES
 Configuration via environment.
-
 ### Required
-
 | Variable | Purpose |
 |----------|---------|
 | None | Works standalone |
-
 ### Optional
-
 | Variable | Purpose |
 |----------|---------|
 | `VANT_GITHUB_TOKEN` | GitHub sync |
 | `VANT_GITHUB_REPO` | Repository |
 | `VANT_MCP_PORT` | MCP port |
 | `VANT_AGREE_AUTO_SYNC` | Opt-in polling |
-
 ### Security
-
 - Store in `.env` (gitignored)
 - Never in code
 - Never in logs
-
 ---
 
 ## ERROR HANDLING
@@ -291,32 +249,24 @@ How errors are managed.
 4. **Conflict**: Pull rebase or merge manually
 
 ---
-
 ## LIMITATIONS
 Known limitations and workarounds.
-
 ### Vant Limitations
-
 - Single brain per instance
 - No built-in encryption
 - Git-based sync only
 - No multi-user auth
-
 ### GitHub Limitations
-
 - Not a database
 - Not for real-time apps
 - Rate limited
 - Can revoke access
-
 ### Alternative Backends
-
 Future support (not implemented):
 - GitLab
 - Gitea
 - Self-hosted Git
 - File system only
-
 ---
 
 ## MONITORING
@@ -344,11 +294,8 @@ du -sh models/private/
 - **Usage**: Settings → Repositories
 
 ---
-
 ## COMPLIANCE CHECKLIST
-
 Before using Vant with GitHub:
-
 - [ ] Read GitHub Terms
 - [ ] Understood API rate limits
 - [ ] Token created with minimal scopes
@@ -358,7 +305,6 @@ Before using Vant with GitHub:
 - [ ] Understand manual sync
 - [ ] No automated polling
 - [ ] Privacy implications understood
-
 ---
 
 ## SEE ALSO

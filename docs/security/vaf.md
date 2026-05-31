@@ -4,7 +4,6 @@ permalink: /security/vaf
 layout: default
 title: VAF
 nav_order: 54
-62
 ---
 
 # VAF
@@ -63,16 +62,12 @@ vaf.configure({
 ```
 
 ---
-
 ## Integration
-
 VAF runs on all inputs:
-
 ```javascript
 // All storage operations go through VAF
 brain.write('category', 'file', content);
 ```
-
 ---
 
 ## Related

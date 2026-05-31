@@ -1,10 +1,13 @@
 ---
+
 version: 0.8.6
 permalink: /advanced/vibe
 layout: default
 title: Vibe Controls
+
 nav_order: 78
 ---
+
 
 # Vant Vibe Controls
 
@@ -182,6 +185,7 @@ vibe.configure({
 ```
 
 ---
+
 
 ## Related
 

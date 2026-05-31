@@ -1,10 +1,13 @@
 ---
+
 version: 0.8.6
 permalink: /advanced/stego
 layout: default
 title: Steganographic Brain Recovery
+
 nav_order: 74
 ---
+
 
 # Steganographic Brain Recovery
 

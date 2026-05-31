@@ -1,6 +1,6 @@
 ---
 version: 0.8.11
-permalink: /essential/agents
+permalink: /integrations/agents
 layout: default
 title: Agents
 nav_order: 31

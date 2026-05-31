@@ -4,34 +4,26 @@ permalink: /security/security
 layout: default
 title: Security
 nav_order: 53
-50
 ---
 # Security
 
 Vant security guide.
 
 ---
-
 ## VAF
-
 Vant Application Firewall - input validation.
-
 ### What
-
 | Check | Blocks |
 |-------|--------|
 | Word stacking | vant vant vant |
 | Path traversal | ../etc/passwd |
 | Shell chars | ; rm -rf |
 | Env vars | $HOME |
-
 ### Config
-
 | Env | Default |
 |-----|---------|
 | MCP_REQUIRE_API_KEY | false |
 | VAF_MAX_LENGTH | 50000 |
-
 ---
 
 ## Encryption
@@ -71,11 +63,8 @@ Vant uses AES-256-GCM for message encryption.
 | `VANT_MSG_ENCRYPTED` | Enable message encryption (default: true) |
 
 ---
-
 ## Data
-
 Tokens encrypted per-user.
-
 ---
 
 ## Related

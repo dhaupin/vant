@@ -1,10 +1,13 @@
 ---
+
 version: 0.8.6
 permalink: /advanced/rerank
 layout: default
 title: Rerank (RAG)
+
 nav_order: 98
 ---
+
 
 > RAG-powered memory reranking and compression for LLM context.
 
