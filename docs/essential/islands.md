@@ -18,7 +18,27 @@ Vant used to load one giant `current.json` - potentially massive, containing eve
 
 **Componentized Brain** - Split into islands:
 - **Static Islands** (3): Identity, Learnings, Decisions (always loaded)
-- **Lazy Islands** (7): GitHub, GitLab, Bitbucket, Linear, Herbalism, VESC, Automation
+- **Lazy Islands**: Trigger-based loading (github, gitlab, linear, etc.)
+
+## Functions
+
+| Function | What |
+|----------|------|
+| `load(name)` | Load lazy island by name |
+| `save(name, data)` | Save island data |
+| `hydrate(name)` | Force hydrate specific island |
+| `dehydrate(name)` | Unload island from memory |
+| `autoHydrate(prompt)` | Auto-load based on prompt |
+| `getAvailable()` | List all available islands |
+| `getHydrated()` | List currently loaded |
+| `getManifest()` | Get island metadata |
+| `createIsland(opts)` | Create new island |
+| `updateTriggers(name, triggers)` | Update island triggers |
+| `deleteIsland(name)` | Remove island |
+| `enableIsland(name)` | Enable disabled island |
+| `disableIsland(name)` | Disable island (won't load) |
+| `bulkCreate(islands[])` | Create multiple islands |
+| `bulkDelete(names[])` | Delete multiple islands |
 
 ## Architecture
 

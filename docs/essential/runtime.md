@@ -43,8 +43,31 @@ await vant.learn('key', 'value');
 | `vant.islands()` | Lazy-load integrations |
 | `vant.lock()` | Acquire/release lock |
 | `vant.audit()` | Log operations |
+| `vant.shutdown()` | Graceful shutdown |
 
 > **Note**: Git operations (commit, sync) via `require('vant/lib/branch')`
+
+## Submodules
+
+Access via `vant.<submodule>()`:
+
+| Submodule | What | Key Methods |
+|----------|------|------------|
+| `vant.brain` | Persistent memory | load(), save(), search() |
+| `vant.storage` | Storage layer | put(), get(), del() |
+| `vant.islands` | Lazy-loaded modules | load(), list(), hydrate() |
+| `vant.agents` | Agent management | spawn(), list(), kill() |
+| `vant.msg` | Agent messaging | send(), broadcast(), receive() |
+| `vant.citations` | Git-backed grounding | cite(), link(), verify() |
+| `vant.mcp` | MCP server | start(), stop(), handlers() |
+| `vant.embed` | Vector embeddings | embed(), similarity() |
+| `vant.compute` | Code execution | execute(), sandbox() |
+| `vant.nodeRegistry` | Peer discovery | discover(), list(), announce() |
+| `vant.system` | OS status | cpu(), mem(), disk() |
+| `vant.metrics` | Performance stats | gauge(), counter(), histogram() |
+| `vant.lock` | Distributed lock | acquire(), release() |
+| `vant.cache` | Memoization | memoize(), clear() |
+| `vant.config` | Configuration | get(), set(), load() |
 
 ## v0.8.7+ New Features
 
