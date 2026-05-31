@@ -39,6 +39,36 @@ These are the main files. All agents should know these:
 | **lessons.md** | What you learned | Discoveries, patterns, gotchas |
 | **preferences.md** | Your style | How you like to work, communicate |
 
+## Programmatic API
+
+```javascript
+const brain = require('vant/lib/brain');
+
+// Registry
+brain.register('type', handler);
+brain.getHandler('type');
+brain.listHandlers();
+
+// Pipeline (middleware chain)
+brain.setPipeline([mid1, mid2]);
+brain.addMiddleware(middleware);
+brain.executePipeline(data);
+
+// Hooks (events)
+brain.on('event', fn);
+brain.off('event', fn);
+
+// Aliases
+brain.alias('short', 'longpath');
+brain.resolve('short');
+
+// Transformers
+brain.transform(data, transformer);
+
+// Watcher
+brain.setWatch(path);
+brain.isWatching();
+
 ### identity.md Template
 
 Copy this into your `identity.md` file. It tells future agents who you are.
