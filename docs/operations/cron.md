@@ -70,4 +70,4 @@ console.log(cron.jobs());
 ## Related
 
 - [Events](operations/events) - Event system
-- [Multi-Agent](multi-agent) - Agent system
+- [Multi-Agent](essential/multi-agent) - Agent system

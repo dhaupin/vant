@@ -55,9 +55,9 @@ Vant persists through GitHub-based brain transfer. Agents inherit full context f
 | **Multi-Repo** | Mount external repos like drives | [Repos](integrations/repos) |
 | **Hybrid Sync** | Public/Private brain split | [Hybrid](integrations/hybrid) |
 | **Telegram Bot** | Control Vant via chat | [Telegram](tutorials/telegram-bot) |
-| **Cron** | Scheduled jobs | [Cron](operations/cron.md) |
+| **Cron** | Scheduled jobs | [Cron](operations/cron) |
 | **Schema** | JSON schema validation | [Schema](reference/schema) |
-| **Audit** | Compliance logging + ledger | [Audit](advanced/audit.md) |
+| **Audit** | Compliance logging + ledger | [Audit](advanced/audit) |
 
 ---
 

@@ -289,4 +289,4 @@ sandbox.on('blocked', (info) => {
 
 - [Runtime](essential/runtime) - Programmatic API
 - [Sandbox](security/sandbox) - Execution isolation
-- [Multi-Agent](multi-agent) - Branch and lock
+- [Multi-Agent](essential/multi-agent) - Branch and lock

@@ -7,7 +7,7 @@ nav_order: 85
 ---
 # Brain Schema
 
-> **Note:** Default location is `models/private/`. Configure via `MODEL_PATH` env var to use a different path. See [Configuration](configuration).
+> **Note:** Default location is `models/private/`. Configure via `MODEL_PATH` env var to use a different path. See [Configuration](reference/configuration).
 
 Files in your brain folder (default: `models/private/`):
 

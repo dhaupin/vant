@@ -137,4 +137,4 @@ git push origin agent-yourname
 ## Next
 
 - [Branch](essential/branch) - Git branch isolation
-- [Lock](essential/lock) - Coordination
+- [Lock](essential/multi-agent) - Coordination

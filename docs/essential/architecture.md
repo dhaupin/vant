@@ -157,7 +157,7 @@ See for details.
 ## Related
 
 - [Branch](essential/branch) - Git branch isolation
-- [Lock](essential/lock) - Distributed coordination
+- [Lock](essential/multi-agent) - Distributed coordination
 - [VAF](security/vaf) - Input filtering
 - [Sandbox](security/sandbox) - Security sandbox
 

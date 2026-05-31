@@ -118,7 +118,7 @@ See [ROADMAP](https://github.com/dhaupin/blob/main/ROADMAP.md) in the repo.
 
 ### Can I contribute?
 
-Yes! See [Contributing Guide](contributing) in the docs.
+Yes! See [Contributing Guide](getting-started/contributing) in the docs.
 
 ---
 

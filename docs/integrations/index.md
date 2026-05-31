@@ -9,9 +9,9 @@ nav_order: 6
 
 Connect Vant with external tools and services:
 
-- [MCP](mcp) - Model Context Protocol
-- [Agent Skills](agent-skills) - Skill-based AI
-- [GitHub](github) - GitHub API
-- [Linear](linear) - Linear issue tracking
-- [Docker](docker) - Container integration
-- [Providers](providers) - LLM providers
+- [MCP](integrations/mcp) - Model Context Protocol
+- [Agent Skills](integrations/agent-skills) - Skill-based AI
+- [GitHub](integrations/github) - GitHub API
+- [Linear](integrations/linear) - Linear issue tracking
+- [Docker](integrations/docker) - Container integration
+- [Providers](integrations/providers) - LLM providers

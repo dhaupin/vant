@@ -1,6 +1,7 @@
 ---
 title: Brains & Extensibility
 description: How to extend Vant with custom agents and skills
+nav_order: 4
 ---
 
 # Brains & Extensibility
@@ -125,6 +126,6 @@ This lets you:
 
 ## Related
 
-- [brain.md](./brain.md) - Brain system internals
-- [islands.md](./islands.md) - Lazy-loading brain modules
-- [multi-agent.md](./multi-agent.md) - Multi-agent coordination
+- [brain.md](essential/brain) - Brain system internals
+- [islands.md](essential/islands) - Lazy-loading brain modules
+- [multi-agent.md](essential/multi-agent) - Multi-agent coordination

@@ -159,7 +159,7 @@ description: What Vant is - your persistent memory. Read at wake-up.
 
 ## Related
 
-- [Getting Started](/vant/getting-started) - Start here if new
-- [Succession](/vant/essential/succession) - Trust levels
-- [Branch](/vant/essential/branch) - Branch workflow
-- [Citations](/vant/advanced/citations) - Git-backed citations
+- [Getting Started](../getting-started) - Start here if new
+- [Succession](essential/succession) - Trust levels
+- [Branch](essential/branch) - Branch workflow
+- [Citations](../advanced/citations) - Git-backed citations

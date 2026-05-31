@@ -156,12 +156,12 @@ const result = await network.fetch('https://evil.com');
 // Blocked by domain whitelist
 ```
 
-See [Security](security) for details.
+See [Security](security/security) for details.
 
 ---
 
 ## Related
 
 - [Sandbox](security/sandbox) - Execution isolation
-- [Server](server) - HTTP server
-- [Security](security) - VAF and encryption
+- [Server](advanced/server) - HTTP server
+- [Security](security/security) - VAF and encryption

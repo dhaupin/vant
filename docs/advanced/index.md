@@ -9,6 +9,6 @@ nav_order: 7
 
 Deep dives:
 
-- [Rerank](rerank) - Semantic reranking
-- [Search](search) - Search architecture
-- [Stego](stego) - Steganography
+- [Rerank](advanced/rerank) - Semantic reranking
+- [Search](advanced/search) - Search architecture
+- [Stego](advanced/stego) - Steganography
