@@ -20,7 +20,7 @@ Vant persists through GitHub-based brain transfer. Agents inherit full context f
 - [Quickstart](getting-started/quick-start) - 5 minute setup
 - [Build Agent](tutorials/build-agent) - 15 min tutorial
 - [MCP Server](integrations/mcp) - Connect to any LLM
-- [Brains](essential/brains) - Agents & skills library
+- [Brains](essential/extensibility) - Agents & skills library
 
 ## Agent Templates
 
@@ -41,7 +41,7 @@ Vant persists through GitHub-based brain transfer. Agents inherit full context f
 | **Persistent Memory** | GitHub-based brain with version control | [Brain](essential/brain) |
 | **Islands** | Componentized brain - lazy-load on-demand | [Islands](essential/islands) |
 | **Multi-Agent** | Branch + lock for safe agent collaboration | [Multi-Agent](essential/multi-agent) |
-| **Skills Library** | 70 reusable agent tools | [Brains](essential/brains) |
+| **Skills Library** | 70 reusable agent tools | [Brains](essential/extensibility) |
 | **Storage Layer** | Brain storage abstraction | [Storage](operations/storage) |
 | **Sandbox** | Execution isolation + capabilities | [Sandbox](security/sandbox) |
 | **QoS** | Rate limiting, bulkhead, circuit breaker | [QoS](operations/qos) |

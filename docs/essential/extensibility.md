@@ -1,5 +1,5 @@
 ---
-title: Brains & Extensibility
+title: Extensibility
 description: How to extend Vant with custom agents and skills
 nav_order: 4
 ---
