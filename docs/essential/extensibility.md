@@ -1,7 +1,7 @@
 ---
 title: Extensibility
 description: How to extend Vant with custom agents and skills
-nav_order: 6
+nav_order: 5
 ---
 
 # Extensibility
