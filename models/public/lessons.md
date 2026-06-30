@@ -87,3 +87,10 @@ Core learnings from building agent systems.
 ---
 
 Default Lessons
+=== NEW June 2026 ===
+
+**Storage vs Filesystem Pattern**
+- Storage class emits events (storage:saved, storage:loaded, storage:deleted) - enables reactive inter-op
+- Direct fs used across 30+ lib files - NO events = isolated changes
+- Key insight: External connectors (github, gitlab, etc) can subscribe to storage events!
+- Brain.js mixes both - direct fs AND storage() calls - inconsistent
