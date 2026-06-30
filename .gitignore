@@ -24,6 +24,7 @@ Thumbs.db
 models/.*.json
 models/private/
 models/private/**
+.agent_tmp/
 models/backup/
 storage/
 temp/
