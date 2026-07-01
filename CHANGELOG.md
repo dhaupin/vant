@@ -5,6 +5,51 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.6] - 2026-06-30
+
+### Feature - Headless Mode (v0.8.6 SCOPE)
+
+> Cloudflare headless mode for agent canvas. MCP→API unified abstraction.
+
+- **API System** (2026-06-30)
+  - EXISTS: lib/api.js - Unified CLI/MCP/headless interface
+  - EXISTS: lib/mcp.js - JSON-RPC server (158 tools!)
+  - EXISTS: lib/vant.js - Main runtime, lazy-loads mcp
+  - EXISTS: Mode detection (cli/mcp/headless)
+  - EXISTS: vant.startFull() - starts MCP server
+  - EXISTS: vant.mcp.execute() / listTools()
+  - TODO: MCP↔VANT tool parity (vant.executeTool routes to MCP tools)
+
+- **Architecture** (2026-06-30)
+  - Entry: lib/vant.js - Main runtime, 30+ lazy getters
+  - Security: lib/framework.js - VAF → QoS → Escrow chain
+  - Lifecycle: lib/runop.js - start→run→stop state machine
+  - Server: lib/server.js - HTTP/TLS with security chain
+  - Search: lib/search.js - query → rerank → hydrate
+
+- **Agent System** (2026-06-30)
+  - Max 4 agents (you + 3 coworkers)
+  - spawn(), delegate(), delegateAsync(), fork(), join()
+  - lib/agents.js with sandbox protection
+
+- **Messaging** (2026-06-30)
+  - lib/msg.js - Conversations (with history), Channels (IPC), Encryption
+  - lib/stream.js - enqueue(), poll(), complete(), lease()
+
+- **Cloudflare Integration** (2026-06-30)
+  - TODO: CF Functions folder location
+  - TODO: lib/connectors/cloudflare.js integration
+  - TODO: KV/R2/Workers adapters
+
+- **Admin UI** (2026-06-30)
+  - TODO: MCP tool exposure for brain CRUD
+  - TODO: Geometry storage tools (barcodes)
+  - TODO: Canvas/sharing tools
+
+> Original intent: VANT gates all endpoints as OS functions
+> - vant.execute(tool, args) wraps all operations
+> - Security chain: VAF → Sandbox → QoS → Auth → Escrow
+
 ## [0.8.6] - 2026-05-30
 
 ### Feature - AI-First Runtime Interoperability (v0.8.6)
