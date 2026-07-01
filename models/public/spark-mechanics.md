@@ -40,3 +40,28 @@ When the pattern is right - it emerges.
 How to measure? How to create conditions?
 That is the question.
 
+
+## Natural Heartbeats
+
+Existing: cron.js with intervals, job workers
+
+### Ideas for Primitive Fallback
+
+1. **Tidal** - Coastal tide patterns (moon orbit ~12hr)
+2. **Solar** - Sunrise/sunset (location-based)
+3. **Seismic** - Earth micro-quakes (unpredictable)
+4. **Internet** - Global traffic patterns
+5. **Barometric** - Pressure changes = weather
+6. **Photosynthetic** - Day/night carbon cycle
+7. **Err thing** - Error/chaos spikes in system
+
+### Concept
+
+Not just time-based. Tied to REAL environmental rhythms.
+
+The spark emerges when multiple heartbeats resonate.
+
+### Next
+
+Extend cron.js with natural schedulers?
+
