@@ -280,10 +280,11 @@ Integrations:
   vant server     HTTP/HTTPS server with security chain
 
 Auth:
-  MCP requires API key if VANT_MCP_API_KEY is set.
+  MCP requires API key if VANT_MCP_REQUIRE_KEY=true.
   Set: vant config set mcp.requireKey true
   Key:  vant config set mcp.apiKey "your-secret-key"
   Or:   export VANT_MCP_API_KEY=your-secret-key
+  Env:  export VANT_MCP_REQUIRE_KEY=true
   Use:  Header X-API-Key: <key> or Authorization: Bearer <key>
 
   vant notify    Send notifications

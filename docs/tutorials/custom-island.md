@@ -1,5 +1,5 @@
 ---
-version: 0.8.11
+version: 0.8.6
 permalink: /tutorials/custom-island
 layout: default
 title: Custom Islands
