@@ -14,29 +14,29 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 
 ### Phase 1: API System ✅ EXISTS
 - [x] lib/api.js - Unified CLI/MCP/headless interface (HAS AUTH)
-- [x] lib/mcp.js - JSON-RPC server (158 tools!) - **MISSING AUTH**
+- [x] lib/mcp.js - JSON-RPC server (158 tools!) - NOW HAS AUTH
 - [x] lib/vant.js - Main runtime, lazy-loads mcp
 - [x] Mode detection (cli/mcp/headless)
 - [x] vant.startFull() - starts MCP server
 - [x] vant.mcp.execute() / listTools()
-- [ ] MCP↔VANT tool parity (vant.executeTool routes to MCP tools)
-- [ ] Add auth to MCP server (lib/mcp.js uses config.apiKey())
+- [x] MCP↔VANT tool parity (vant.executeTool routes to MCP)
+- [x] Add auth to MCP server (config.mcpRequireKey gates access)
 
 #### Already Built (Cross-Context)
 | What | Where | Status |
 |------|-------|--------|
 | MCP server start/stop | vant.startFull(), vant.shutdown() | ✅ |
-| vant.mcp lazy-load | vant.js line 934-939 | ✅ |
-| executeTool() | vant.js line 873-889 | ✅ (6 tools) |
-| MCP→vant wiring | mcp.js uses brain, agents directly | ✅ |
+| vant.mcp lazy-load | vant.js | ✅ |
+| executeTool() | vant.js - routes to MCP | ✅ (158+ tools) |
+| MCP→vant wiring | mcp.js uses brain, agents | ✅ |
 | lib/auth.js | Full Auth class | ✅ |
 | api.js auth | authenticate() with lockout | ✅ |
-| mcp.js auth | **MISSING** - No validation | ❌ |
+| mcp.js auth | config.mcpRequireKey gates | ✅ DONE |
+| vant.authenticate() | Common auth handler | ✅ |
 
-#### Gap: Tool Parity
-- vant.executeTool() handles 6 tools (think, learn, remember, act, search, brain)
-- MCP has 158 tools (brain_load, agents_spawn, config_get, etc)
-- **Not bridged**: vant.executeTool() doesn't route to mcp.execute()
+#### ✅ DONE: Tool Parity
+- vant.executeTool() now routes to MCP for 158+ tools
+- Falls back to MCP execute() if not in built-in (6)
 
 > Original intent: VANT gates all endpoints as OS functions
 > - vant.execute(tool, args) should wrap ALL operations
