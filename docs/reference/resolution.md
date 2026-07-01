@@ -52,7 +52,34 @@ vant resolution reject identity "old belief" ethics changed
 
 # Show deltas
 vant resolution deltas identity 5
+
+# Mark with TTL (auto-expiry)
+vant resolution resolve fears "fear of X" --ttl 86400000
+vant resolution deprecate goals "old goal" --ttl 604800000
+vant resolution reject identity "old belief" --ttl 2592000000
+
+# Check if still active (returns ACTIVE or RESOLVED/DEPRECATED/REJECTED)
+vant resolution is-active fears "fear of X"
+
+# Clean up expired resolutions
+vant resolution evict
 ```
+
+## TTL (Time-To-Live)
+
+Resolutions can have optional TTL for automatic expiry:
+
+```bash
+--ttl 86400000      # 24 hours
+--ttl 604800000     # 1 week
+--ttl 2592000000    # 30 days
+```
+
+**Behavior:**
+- Expired resolutions are treated as `ACTIVE` (like they never happened)
+- Use `vant resolution evict` to permanently remove expired resolutions
+- Without TTL, resolutions persist forever
+- `is-active` checks both status AND TTL expiry
 
 ## Files
 

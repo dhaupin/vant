@@ -40,27 +40,42 @@ const result = await runtime.think('who am I', {
 
 **Returns:** `{ query, triggers, insights, memories, tokens, agent }`
 
-### learn(key, content)
+### learn(key, content, options?)
 
-Store new information to brain.
+Store new information to brain with optional TTL.
 
 ```javascript
+// Store with default TTL (24 hours)
 await runtime.learn('key', 'Content to remember');
+
+// Store with custom TTL (1 hour)
+await runtime.learn('key', 'Content', { ttl: 3600000 });
 ```
 
-**Returns:** `{ success, key }`
+**Options:**
+- `ttl` - Time-to-live in milliseconds (default: 24h, min: 1min, max: 100years)
 
-### remember(key, content?)
+**Returns:** `{ success, key, expiresAt }`
 
-Remember across sessions.
+### remember(key, content?, options?)
+
+Remember across sessions with optional TTL.
 
 ```javascript
-// Store
+// Store with default TTL (100 years)
 await runtime.remember('key', 'content');
 
-// Recall
+// Store with custom TTL (1 day)
+await runtime.remember('key', 'content', { ttl: 86400000 });
+
+// Recall (auto-fallback to brain if cache expired)
 const content = await runtime.remember('key');
 ```
+
+**Options:**
+- `ttl` - Time-to-live in milliseconds (default: 100years, min: 1min, max: 100years)
+
+**Returns:** `{ success, key, content, expiresAt }` or `null` if not found
 
 ### act(operation, options)
 
