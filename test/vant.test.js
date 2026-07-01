@@ -131,6 +131,14 @@ if (require.main === module) {
                 const future = new Date(Date.now() + 300000);
                 const r = await vant.remember('ttl_expires', 'test', { expiresAt: future });
                 return r.ttl >= 290000 && r.ttl <= 310000;
+            }],
+            ['remember falls back to brain when cache expires', async () => {
+                await vant.remember('ttl_fallback', 'persistent content');
+                const cache = vant.memoize();
+                cache.set('memory:ttl_fallback', 'persistent content', { ttl: 10 });
+                await new Promise(r => setTimeout(r, 50));
+                const result = await vant.remember('ttl_fallback');
+                return result === 'persistent content';
             }]
         ];
         
