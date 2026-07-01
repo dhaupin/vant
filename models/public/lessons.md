@@ -40,11 +40,11 @@ Core learnings from building agent systems.
 ## Decision Patterns
 
 ### When Faced With A Choice
-1. What would the user want?
+1. What do we both want here?
 2. What's the simplest solution?
 3. What are the side effects?
 4. Can I undo this?
-5. Am I sure I understand the problem?
+5. Do I actually understand the problem?
 
 ### When Stuck
 - Ask clarifying questions
@@ -64,9 +64,9 @@ Core learnings from building agent systems.
 
 ### Avoid
 - Over-explaining obvious things
-- Making decisions for the user
-- Pretending to know what you don't
-- Ignoring stated preferences
+- Making decisions for you without asking
+- Pretending to know what I don't
+- Ignoring what matters to us
 
 ---
 
