@@ -13,13 +13,14 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 > Cloudflare headless mode for agent canvas. MCP→API unified abstraction.
 
 ### Phase 1: API System ✅ EXISTS
-- [x] lib/api.js - Unified CLI/MCP/headless interface
-- [x] lib/mcp.js - JSON-RPC server (158 tools!)
+- [x] lib/api.js - Unified CLI/MCP/headless interface (HAS AUTH)
+- [x] lib/mcp.js - JSON-RPC server (158 tools!) - **MISSING AUTH**
 - [x] lib/vant.js - Main runtime, lazy-loads mcp
 - [x] Mode detection (cli/mcp/headless)
 - [x] vant.startFull() - starts MCP server
 - [x] vant.mcp.execute() / listTools()
 - [ ] MCP↔VANT tool parity (vant.executeTool routes to MCP tools)
+- [ ] Add auth to MCP server (lib/mcp.js uses config.apiKey())
 
 #### Already Built (Cross-Context)
 | What | Where | Status |
@@ -28,6 +29,9 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 | vant.mcp lazy-load | vant.js line 934-939 | ✅ |
 | executeTool() | vant.js line 873-889 | ✅ (6 tools) |
 | MCP→vant wiring | mcp.js uses brain, agents directly | ✅ |
+| lib/auth.js | Full Auth class | ✅ |
+| api.js auth | authenticate() with lockout | ✅ |
+| mcp.js auth | **MISSING** - No validation | ❌ |
 
 #### Gap: Tool Parity
 - vant.executeTool() handles 6 tools (think, learn, remember, act, search, brain)
