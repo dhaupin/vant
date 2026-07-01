@@ -1,5 +1,5 @@
 ---
-version: 0.8.11
+version: 0.8.6
 permalink: /advanced/server
 layout: default
 title: Server Guide

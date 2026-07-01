@@ -1,5 +1,5 @@
 ---
-version: 0.8.11
+version: 0.8.6
 permalink: /reference/mcp-tools
 layout: default
 title: MCP Tools Reference

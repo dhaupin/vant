@@ -1,5 +1,5 @@
 ---
-version: 0.8.7
+version: 0.8.6
 permalink: /reference/canvas
 layout: default
 title: Canvas API

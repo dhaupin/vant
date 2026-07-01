@@ -1,5 +1,5 @@
 ---
-version: 0.8.11
+version: 0.8.6
 permalink: /operations/storage
 layout: default
 title: Storage Layer

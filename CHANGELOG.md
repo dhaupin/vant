@@ -5,33 +5,6 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.8.7] - 2026-07-01
-
-### Feature - TTL (Time-To-Live) Memory System
-
-> Expirable memories with brain fallback and resolution expiry
-
-- **Memory TTL** (2026-07-01)
-  - ADDED: `vant.learn(key, content, { ttl })` - store with custom TTL (default: 24h)
-  - ADDED: `vant.remember(key, content, { ttl })` - store/recall with TTL (default: 100 years)
-  - ADDED: Config defaults: `learn.ttl`, `memory.ttl` in config.ini
-  - ADDED: TTL bounds: min=1 minute, max=100 years (auto-clamped)
-  - ADDED: expiresAt support: `{ expiresAt: new Date() }` converts to TTL
-  - FIXED: Cache TTL expiry now falls back to brain (memories persist!)
-  - ADDED: `lib/memoize.js` - TTL-based cache with expiry events
-
-- **Resolution TTL** (2026-07-01)
-  - ADDED: `resolution.resolve(file, entry, reason, { ttl })` - resolve with expiry
-  - ADDED: `resolution.deprecate(file, entry, reason, { ttl })` - deprecate with expiry
-  - ADDED: `resolution.reject(file, entry, reason, { ttl })` - reject with expiry
-  - ADDED: `resolution.isActive(file, entry)` - checks TTL expiry
-  - ADDED: `resolution.evictExpired()` - removes expired resolutions, emits event
-
-- **CLI Support** (2026-07-01)
-  - ADDED: `vant learn <key> <content> [--ttl milliseconds]`
-  - ADDED: `vant remember <key> [content] [--ttl milliseconds]`
-  - Note: --ttl flag parses correctly (not included in content)
-
 ## [0.8.6] - 2026-06-30
 
 ### Feature - Headless Mode (v0.8.6 SCOPE)
@@ -48,6 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - ADDED: MCP↔VANT tool parity (vant.executeTool routes to MCP)
   - ADDED: Auth handler for MCP (config.mcpRequireKey gates access)
   - ADDED: vant.authenticate() - common auth for headless
+
+- **Auth & Pipeline Fixes** (2026-06-30)
+  - FIXED: mcpRequireKey now checks config flags before env var
+  - FIXED: QoS and Escrow now registered with brain pipeline
+  - FIXED: Added execute() to Escrow class for pipeline integration
+  - FIXED: Added execute() to QoS module for pipeline integration
+  - FIXED: CLI help shows correct VANT_MCP_REQUIRE_KEY env var
 
 - **Architecture** (2026-06-30)
   - Entry: lib/vant.js - Main runtime, 30+ lazy getters

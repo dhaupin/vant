@@ -1,5 +1,5 @@
 ---
-version: 0.8.11
+version: 0.8.6
 permalink: /tutorials/automation
 layout: default
 title: Automation

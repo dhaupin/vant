@@ -1,5 +1,5 @@
 ---
-version: 0.8.11
+version: 0.8.6
 permalink: /getting-started/setup
 layout: default
 title: Setup Guide
