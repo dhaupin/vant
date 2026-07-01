@@ -63,6 +63,33 @@ npm start
 
 ---
 
+## Headless Mode
+
+Use Vant as a library with REST API (no MCP required):
+
+```javascript
+const vant = require('./lib/vant');
+
+// Start headless server
+const result = await vant.startHeadless({ port: 3000, debug: true });
+// Returns: { started: true, mode: 'headless', endpoints: { health, tools, brain } }
+
+// Or programmatic API (no server)
+await vant.init({ taskId: 'my-task' });
+await vant.learn('key', 'content');
+const content = await vant.remember('key');
+```
+
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `VANT_MODE` | Force mode: `cli`, `mcp`, or `headless` |
+| `VANT_MCP_PORT` | MCP server port |
+| `MCP_REQUIRE_KEY` | Require API key for MCP access |
+
+---
+
 ## Documentation
 
 Full docs at **[docs.creadev.org/vant](https://docs.creadev.org/vant)**

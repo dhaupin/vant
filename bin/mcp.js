@@ -56,6 +56,24 @@ Authentication:
 
   Or environment:
     export VANT_MCP_API_KEY=your-secret-key
+    export VANT_MCP_REQUIRE_KEY=true
+
+TTL (Time-To-Live):
+  Use --ttl flag with learn/remember to auto-expire:
+    vant learn key "content" --ttl 60000
+  Result includes { ttl, expiresAt } fields
+
+Resolution:
+  Track thought resolutions:
+    vant resolution status
+    vant resolution resolve <entry>
+    vant resolution reject <entry>
+
+Headless Mode:
+  Use Vant as library without MCP:
+    const vant = require('./lib/vant');
+    await vant.startHeadless({ port: 3000 });
+  Or: process.env.VANT_MODE=headless
 `);
     process.exit(0);
 }

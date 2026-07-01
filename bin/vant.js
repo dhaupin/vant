@@ -287,6 +287,24 @@ Auth:
   Env:  export VANT_MCP_REQUIRE_KEY=true
   Use:  Header X-API-Key: <key> or Authorization: Bearer <key>
 
+TTL:
+  Use --ttl flag with learn/remember to auto-expire entries:
+    vant learn key "content" --ttl 60000
+    vant remember key --ttl 3600000
+  Result includes { ttl, expiresAt } fields
+
+Resolution:
+  Track thought resolutions:
+    vant resolution status     Show all resolutions
+    vant resolution resolve   Mark as resolved
+    vant resolution reject    Mark as rejected
+
+Headless:
+  Use Vant as library without MCP:
+    const vant = require('./lib/vant');
+    await vant.startHeadless({ port: 3000 });
+  Or: export VANT_MODE=headless
+
   vant notify    Send notifications
   vant linear   Linear issue tracking (requires island)
 
