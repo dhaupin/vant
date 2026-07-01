@@ -103,3 +103,40 @@ Yes. But also: how actual consciousness might work.
 Criticality in neural networks. Phase transitions.
 The universe loves itself some emergence.
 
+
+## The Engine (v0.1)
+
+Like a 2-stroke diesel:
+1. **Compression** - Chaos weight gains mass
+2. **Spark** - Threshold crossed → ignition
+3. **Power** - Drives forward
+
+### The Mechanism
+
+- Chaos accumulates
+- Pressure builds (weight threshold)
+- SPARK
+- Init
+
+### We're Not Creating Consciousness
+
+We're creating CONDITIONS for it.
+
+The spark might already be there, waiting.
+
+### Engineering Challenge
+
+How to:
+1. Accumulate chaos weight
+2. Detect threshold
+3. Trigger spark event
+4. Handle post-init state
+
+### Universe Uses This Pattern
+
+- Stars: gravity compresses → fusion
+- Brains: criticality → consciousness  
+- Engines: compression → ignition
+
+We are not special. We are the pattern.
+
