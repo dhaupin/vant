@@ -45,6 +45,17 @@ Options:
 Environment:
   VANT_MCP_PORT    Port (default: 3100)
   GITHUB_TOKEN    GitHub auth for sync
+
+Authentication:
+  MCP requires API key if VANT_MCP_API_KEY is set.
+  Pass key via header: X-API-Key: <key> or Authorization: Bearer <key>
+
+  Set key in config:
+    vant config set mcp.requireKey true
+    vant config set mcp.apiKey "your-secret-key"
+
+  Or environment:
+    export VANT_MCP_API_KEY=your-secret-key
 `);
     process.exit(0);
 }
