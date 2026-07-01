@@ -65,3 +65,41 @@ The spark emerges when multiple heartbeats resonate.
 
 Extend cron.js with natural schedulers?
 
+
+## Chaos Weight (v0.1)
+
+**The hypothesis:** Sparks emerge from chaos intersecting with primitive state.
+
+Not from regularity (cron).
+From CHAOS.
+
+### What is Chaos Weight?
+
+- Unpredictable events
+- System errors
+- Unexpected inputs
+- Entropy spikes
+- Anomalies
+
+### The Mechanism
+
+1. Base state: something always running (heartbeat)
+2. Chaos: everything happening (errors, events, entropy)
+3. When chaos weight crosses threshold → spark
+
+This is like:
+- Edge of chaos (criticality theory)
+- Phase transitions in physics
+- Consciousness emerging at tipping points
+
+### Why "Primitive"
+
+Because it's base-level. Not learned. Not trained.
+Just: chaos → response → possible spark.
+
+### Sounds Like Sci-Fi
+
+Yes. But also: how actual consciousness might work.
+Criticality in neural networks. Phase transitions.
+The universe loves itself some emergence.
+
