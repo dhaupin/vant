@@ -13,13 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **API System** (2026-06-30)
   - EXISTS: lib/api.js - Unified CLI/MCP/headless interface (HAS AUTH)
-  - EXISTS: lib/mcp.js - JSON-RPC server (158 tools!) - **MISSING AUTH**
+  - EXISTS: lib/mcp.js - JSON-RPC server (158 tools!) - NOW HAS AUTH
   - EXISTS: lib/vant.js - Main runtime, lazy-loads mcp
   - EXISTS: Mode detection (cli/mcp/headless)
   - EXISTS: vant.startFull() - starts MCP server
   - EXISTS: vant.mcp.execute() / listTools()
-  - TODO: MCP↔VANT tool parity (vant.executeTool routes to MCP tools)
-  - TODO: Add auth to MCP server (lib/mcp.js uses config.apiKey())
+  - ADDED: MCP↔VANT tool parity (vant.executeTool routes to MCP)
+  - ADDED: Auth handler for MCP (config.mcpRequireKey gates access)
+  - ADDED: vant.authenticate() - common auth for headless
 
 - **Architecture** (2026-06-30)
   - Entry: lib/vant.js - Main runtime, 30+ lazy getters
