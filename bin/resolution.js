@@ -84,19 +84,38 @@ if (cmd === 'status' || !cmd) {
         printDeltas(file, limit);
     }
 } else if (cmd === 'resolve' || cmd === 'deprecate' || cmd === 'reject') {
-    const file = args[1];
-    const entry = args[2];
-    const reason = args.slice(3).join(' ') || 'No reason provided';
+    // Parse args: file, entry, reason, --ttl
+    let file = null;
+    let entry = null;
+    let reason = '';
+    let ttl = null;
+    
+    const rawArgs = args.slice(1);
+    const finalArgs = [];
+    
+    for (let i = 0; i < rawArgs.length; i++) {
+        if (rawArgs[i] === '--ttl' && rawArgs[i + 1]) {
+            ttl = parseInt(rawArgs[i + 1], 10);
+            i++; // skip TTL value
+        } else {
+            finalArgs.push(rawArgs[i]);
+        }
+    }
+    
+    file = finalArgs[0];
+    entry = finalArgs[1];
+    reason = finalArgs.slice(2).join(' ') || 'No reason provided';
     
     if (!file || !entry) {
-        console.log('Usage: vant resolution ' + cmd + ' <file> <entry> <reason>');
-        console.log('Example: vant resolution resolve fears "fear of failure" overcame通過 therapy');
+        console.log('Usage: vant resolution ' + cmd + ' <file> <entry> <reason> [--ttl ms]');
+        console.log('Example: vant resolution resolve fears "fear of failure" --ttl 86400000');
         process.exit(1);
     }
     
     const options = {
         resolved_by: process.env.VANT_AGENT_ID || 'unknown',
-        branch: process.env.VANT_BRANCH || 'main'
+        branch: process.env.VANT_BRANCH || 'main',
+        ttl
     };
     
     let result;
@@ -120,22 +139,35 @@ if (cmd === 'status' || !cmd) {
     }
     const active = resolution.isActive(file, entry);
     console.log(file + ':' + entry + ' is ' + (active ? 'ACTIVE' : 'RESOLVED/DEPRECATED/REJECTED'));
-} else if (cmd === 'help') {
+} else if (cmd === 'evict') {
+    const vant = require('../lib/vant');
+    vant.init({ debug: false }).then(async () => {
+        const evicted = resolution.evictExpired();
+        console.log('Evicted ' + evicted + ' expired resolutions.');
+    }).catch(e => {
+        console.error('Error:', e.message);
+        process.exit(1);
+    });
+} else if (cmd === 'help' || !cmd) {
     console.log(`
 Vant Thought Resolution
 
 Mark thoughts as resolved, deprecated, or rejected.
-Tracks changes with deltas.
+Tracks changes with deltas. Supports TTL for auto-expiry.
 
 Commands:
   vant resolution status                Show resolution summary
   vant resolution list [status] [file]  List resolutions
   vant resolution deltas <file> [N]      Show file deltas
-  vant resolution resolve <f> <e> <r>  Mark as resolved
-  vant resolution deprecate <f> <e> <r> Mark as deprecated
-  vant resolution reject <f> <e> <r>  Mark as rejected
+  vant resolution resolve <f> <e> <r> [--ttl ms]  Mark as resolved
+  vant resolution deprecate <f> <e> <r> [--ttl ms] Mark as deprecated
+  vant resolution reject <f> <e> <r> [--ttl ms]  Mark as rejected
   vant resolution is-active <f> <e>   Check if still active
-  vant resolution help                Show this help
+  vant resolution evict              Remove expired resolutions
+  vant resolution help              Show this help
+
+TTL: Use --ttl to set expiry (e.g., --ttl 86400000 = 24 hours)
+     Expired resolutions are treated as ACTIVE again
 
 Status Values:
   resolved   - Solved, case closed
