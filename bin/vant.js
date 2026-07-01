@@ -169,6 +169,66 @@ if (cmd === 'help' && args[1]) {
     child.on('exit', (code) => process.exit(code || 0));
 }
 
+// Handle learn/remember commands directly
+if (cmd === 'learn' || cmd === 'remember') {
+    const vant = require('../lib/vant');
+    
+    // Parse args: extract --ttl first, rest is key + content
+    let key = null;
+    let content = '';
+    let ttl = null;
+    
+    const rawArgs = args.slice(1);
+    const finalArgs = [];
+    
+    for (let i = 0; i < rawArgs.length; i++) {
+        if (rawArgs[i] === '--ttl' && rawArgs[i + 1]) {
+            ttl = parseInt(rawArgs[i + 1], 10);
+            i++; // skip TTL value
+        } else {
+            finalArgs.push(rawArgs[i]);
+        }
+    }
+    
+    key = finalArgs[0] || null;
+    content = finalArgs.slice(1).join(' ');
+    
+    if (!key) {
+        console.error(`Usage: vant ${cmd} <key> [content] [--ttl milliseconds]`);
+        console.error(`Example: vant learn mykey "some content" --ttl 3600000`);
+        process.exit(1);
+    }
+    
+    (async () => {
+        try {
+            await vant.init({ debug: false });
+            
+            if (cmd === 'learn') {
+                const options = ttl ? { ttl } : {};
+                const result = await vant.learn(key, content || '', options);
+                console.log(`✅ Learned: ${key}`, result.ttl ? `(TTL: ${result.ttl}ms)` : '');
+            } else {
+                // remember
+                if (content) {
+                    // Store
+                    const options = ttl ? { ttl } : {};
+                    const result = await vant.remember(key, content, options);
+                    console.log(`✅ Remembered: ${key}`, result.ttl ? `(TTL: ${result.ttl}ms)` : '');
+                } else {
+                    // Recall
+                    const result = await vant.remember(key);
+                    console.log(result || '(not found)');
+                }
+            }
+            process.exit(0);
+        } catch (e) {
+            console.error('Error:', e.message);
+            process.exit(1);
+        }
+    })();
+    return;
+}
+
 if (!cmd || cmd === 'help' || cmd === 'vant') {
     console.log(`
 ╔═══════════════════════════════════════╗
@@ -183,6 +243,10 @@ Core:
   vant sync        Pull/push brain
   vant load       Load brain
   vant run        Long-running agent loop
+
+Memory:
+  vant learn <key> <content> [--ttl ms]  Store learning
+  vant remember <key> [content] [--ttl ms]  Store/recall memory
 
 Development:
   vant test         Run build tests
