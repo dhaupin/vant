@@ -8,7 +8,53 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 
 ---
 
-## v0.9.0 - Next
+## v0.8.6 - Headless (SCOPE)
+
+> Cloudflare headless mode for agent canvas. MCP→API unified abstraction.
+
+### Phase 1: API System ✅ EXISTS
+- [x] lib/api.js - Unified CLI/MCP/headless interface
+- [x] lib/mcp.js - JSON-RPC server (158 tools!)
+- [x] lib/vant.js - Main runtime, lazy-loads mcp
+- [x] Mode detection (cli/mcp/headless)
+- [x] vant.startFull() - starts MCP server
+- [x] vant.mcp.execute() / listTools()
+- [ ] MCP↔VANT tool parity (vant.executeTool routes to MCP tools)
+
+#### Already Built (Cross-Context)
+| What | Where | Status |
+|------|-------|--------|
+| MCP server start/stop | vant.startFull(), vant.shutdown() | ✅ |
+| vant.mcp lazy-load | vant.js line 934-939 | ✅ |
+| executeTool() | vant.js line 873-889 | ✅ (6 tools) |
+| MCP→vant wiring | mcp.js uses brain, agents directly | ✅ |
+
+#### Gap: Tool Parity
+- vant.executeTool() handles 6 tools (think, learn, remember, act, search, brain)
+- MCP has 158 tools (brain_load, agents_spawn, config_get, etc)
+- **Not bridged**: vant.executeTool() doesn't route to mcp.execute()
+
+> Original intent: VANT gates all endpoints as OS functions
+> - vant.execute(tool, args) should wrap ALL operations
+> - Security chain: VAF → Sandbox → QoS → Auth → Escrow
+
+### Phase 2: Cloudflare Integration
+- [ ] CF Functions folder location (functions/ or functions/dist?)
+- [ ] lib/connectors/cloudflare.js integration
+- [ ] KV/R2/Workers adapters
+- [ ] Headless mode for CF Pages
+
+> CF Functions can be anywhere in project (Cloudflare flexibility)
+
+### Phase 3: Admin UI
+- [ ] MCP tool exposure for brain CRUD
+- [ ] Geometry storage tools (barcodes)
+- [ ] Canvas/sharing tools
+- [ ] System dashboard endpoints
+
+---
+
+## v0.9.0 - Futures
 
 ### Capabilities
 - [ ] Video steganography (larger payloads)
@@ -40,6 +86,11 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 ## Released
 
 ### v0.8.x Series
+
+#### v0.8.5 - Cloudflare (2026-06-30)
+- [x] Cloudflare connector (KV, R2, Workers)
+- [x] R2 JSON API (S3-compatible)
+- [x] Worker URL support
 
 #### v0.8.4 - Security Release (2026-05-04)
 - [x] 12 security vulnerabilities fixed (V001-V012)
