@@ -85,6 +85,19 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 
 > **Admin UI Location**
 > - Place in `/admin/` (TBD - don't create yet)
+>
+> **Admin Bridge Architecture**
+> - Frontend: Vite + React (runs on CF Pages)
+> - Bridge: Thin server-side functions (CF Pages Functions)
+> - Backend: Reuse existing /lib (mcp.js, api.js, encrypt.js, cache.js)
+> - Auth: encrypt.signToken() + brain-stored profiles
+>
+> **Why this works:**
+> - mcp.js already has 158 tools = the API
+> - server.js has HTTP server + security chain = reuse patterns
+> - cache.js for brain state caching
+> - event.js for real-time (PubSub)
+> - No new backend needed - just CF Pages Functions!
 
 > Leverages existing /lib Legos:
 > - auth.js: API keys, tokens, lockout
