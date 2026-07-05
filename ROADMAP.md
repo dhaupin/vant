@@ -67,6 +67,25 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 - [ ] Connect to MCP server (158+ tools)
 - [ ] Deploy (Vercel or CF Pages)
 
+> **shadcn/ui Analysis**
+> - Copy/paste components (you own the code)
+> - Built on Radix UI + Tailwind CSS
+> - Works with Vite, Next.js, Remix
+> - Pros: Full control, lightweight, accessible, no lock-in
+> - Cons: Manual updates, Tailwind required, basic primitives only
+> - Security: You own code, no external APIs, Radix handles ARIA
+> - Hurdles: Need to wire MCP data layer yourself, no native state management
+>
+> **Custom Components Analysis (Alternative)**
+> - Build own components with Tailwind + Radix primitives directly
+> - Pros: Full control, no fighting framework, brain-native components
+> - Cons: More upfront work, need to handle ARIA/accessibility yourself
+> - Reality: Styling buttons/tables isn't hard; brain viz is custom anyway
+> - We can create: `<BrainGraph>`, `<IslandCard>`, `<AgentTimeline>`, `<SyncStatus>`
+
+> **Admin UI Location**
+> - Place in `/admin/` (TBD - don't create yet)
+
 > Leverages existing /lib Legos:
 > - auth.js: API keys, tokens, lockout
 > - encrypt.js: HMAC signing, AES-256-GCM
