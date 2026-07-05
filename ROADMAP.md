@@ -42,19 +42,37 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 > - vant.execute(tool, args) should wrap ALL operations
 > - Security chain: VAF → Sandbox → QoS → Auth → Escrow
 
-### Phase 2: Cloudflare Integration
-- [ ] CF Functions folder location (functions/ or functions/dist?)
-- [ ] lib/connectors/cloudflare.js integration
-- [ ] KV/R2/Workers adapters
-- [ ] Headless mode for CF Pages
+### Phase 2: Cloudflare Integration ✅ IN PROGRESS
+- [x] CF Functions folder: `/srv/cloudflare/` (self-contained)
+- [x] sync.js - Brain sync endpoint (handshake, push, pull)
+- [x] kv.js - Direct KV operations
+- [x] index.js - Root handler & health check
+- [x] wrangler.toml - CF config
+- [x] Cloudflare config in lib/config.js (cfPagesUrl, cfAccountId, etc.)
+- [x] Connector uses config module (lib/connectors/cloudflare.js)
+- [ ] Deploy /srv/cloudflare/ to CF Pages
+- [ ] Set CF_PAGES_URL in config
+- [ ] Test end-to-end sync
 
-> CF Functions can be anywhere in project (Cloudflare flexibility)
+> Structure: `/srv/[platform]/` for serverless functions
 
-### Phase 3: Admin UI
-- [ ] MCP tool exposure for brain CRUD
-- [ ] Geometry storage tools (barcodes)
-- [ ] Canvas/sharing tools
-- [ ] System dashboard endpoints
+### Phase 3: Admin UI (v0.9.0)
+- [ ] Select UI framework: **shadcn/ui** (React + Tailwind + Radix)
+- [ ] No-DB Auth: Use existing `Encrypt.signToken()` + brain-stored profiles
+- [ ] Admin views:
+  - Brain Explorer - navigate/edit brain files
+  - Islands Manager - enable/disable/trigger islands
+  - Agent Timeline - see agent activity
+  - Sync Status - monitor cross-device sync
+- [ ] Connect to MCP server (158+ tools)
+- [ ] Deploy (Vercel or CF Pages)
+
+> Leverages existing /lib Legos:
+> - auth.js: API keys, tokens, lockout
+> - encrypt.js: HMAC signing, AES-256-GCM
+> - event.js: Real-time via PubSub
+> - network.js: HTTP calls to MCP
+> - qos.js: Rate limiting
 
 ---
 
@@ -68,6 +86,11 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 ### Testing
 - [ ] Unit tests for lib/*.js
 - [ ] Integration tests
+
+### Vercel Integration
+- [ ] Create `/srv/vercel/` folder structure
+- [ ] API routes for sync, kv
+- [ ] Connect to Vant connector
 
 ---
 
