@@ -168,7 +168,7 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 > - Share Console: Control who has what brain segments
 > - QR Key Exchange: Generate QR codes for offline keys
 >
-> **Islands with RLS (Row-Level Security)**
+> **Islands with RLS (Row-Level Security)** - DO THIS
 > - Multi-tenant brain isolation via island policies
 > - Policy fields: readableBy, writableBy, filter, mask
 > - User scope: islands per-user (myTasks, myNotes)
