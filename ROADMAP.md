@@ -86,6 +86,25 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 > **Admin UI Location**
 > - Place in `/admin/` (TBD - don't create yet)
 >
+> **Brain 3D Visualization (Geometry Module)**
+> - Use lib/geometry/ for NSC9 barcode-based addressing
+> - Icosahedral coordinate system (20 faces, 30 edges, 12 vertices)
+> - Penrose P3 tilings (infinite aperiodic surface)
+> - Self-authenticating: position computed from barcode, no lookup table
+> - Visualize brain as navigable 3D space!
+>
+> **Duality Module**
+> - Bridges brain files ↔ geometry storage
+> - `duality.remember(category, key, content)` → stores with NSC9 barcode
+> - `duality.recall(brainPath)` → retrieves from geometry or brain
+> - Auto-learn from agent events
+>
+> **Enterprise Use Case**
+> - NSC9 barcodes for inventory/tracking
+> - Factory routing: QC → Router → Materials
+> - Traceable, searchable, visualizable
+> - Giant brain = giant searchable space
+>
 > **Admin Bridge Architecture**
 > - Frontend: Vite + React (runs on CF Pages)
 > - Bridge: **Thin HTTP wrapper** (CF Pages Functions) - just:
