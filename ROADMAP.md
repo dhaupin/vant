@@ -168,9 +168,12 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 > - Share Console: Control who has what brain segments
 > - QR Key Exchange: Generate QR codes for offline keys
 >
-> **Islands with RLS (Row-Level Security)** - DO THIS
-> - Multi-tenant brain isolation via island policies
+> **habitat.js (RLS for Islands)** - DO THIS (v0.9.0)
+> - Multi-tenant brain isolation via habitat boundaries
+> - New module: lib/habitat.js (extends organism/habitat analogy)
+> - Wraps islands.js: load(name, userContext), save(name, data, userContext)
 > - Policy fields: readableBy, writableBy, filter, mask
+> - User context from token: encrypt.signToken({ userId, role, team, scopes })
 > - User scope: islands per-user (myTasks, myNotes)
 > - Team scope: islands per-team (team:engineering)
 > - Public scope: shared islands (docs, guides)
