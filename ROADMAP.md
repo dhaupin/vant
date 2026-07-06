@@ -69,6 +69,11 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 - [ ] Unit tests for lib/*.js
 - [ ] Integration tests
 
+### Vercel Integration
+- [ ] Create `/srv/vercel/` folder structure
+- [ ] API routes for sync, kv
+- [ ] Connect to Vant connector
+
 ---
 
 ## v1.0.0 - Agent Portal
