@@ -251,12 +251,24 @@ fix: Wire sandbox.initRLS into vant boot
 
 ---
 
-### Remaining Overlap (known)
+### Remaining Overlap (RESOLVED ✅)
 
-- rls.js has createSandboxCaps()
-- sandbox.js has generateCaps()
+- ~~rls.js has createSandboxCaps()~~
+- ~~sandbox.js has generateCaps()~~
 
-Both do the same. Kept both - sandbox is primary (carrier pattern), rls.js fallback for direct RLS calls. Could consolidate later.
+Now: rls.createSandboxCaps() delegates to sandbox.generateCaps() - single source of truth.
+
+---
+
+## Commit: 9c90ed5
+
+```
+refactor: Consolidate cap generation - sandbox is single source
+
+- rls.createSandboxCaps now delegates to sandbox.generateCaps
+- sandbox is the carrier (called everywhere) - single source of truth
+- Removes duplication, prevents confusion/exploitation/code debt
+```
 
 ---
 
