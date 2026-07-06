@@ -126,13 +126,13 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 > - skills.js: Skill routing (mirrors islands pattern)
 >
 > **Multi-Agent Distributed System (Hive/Mesh)**
-> - Agents across many node installations
-> - Delegation: agent.delegate() - assign tasks to other agents
-> - Streams: stream.js - work queue with leases (prevent flooding)
-> - Messaging: msg.js - agent-to-agent communication
-> - Consensus: consensus.js - agent voting (51% = truth)
-> - Sync: sync.js - cross-device brain sync
-> - Node registry: track agents across installations
+> - **node-registry.js**: Peer discovery for distributed agents
+> - **lock.js**: Distributed locks with token-based ownership
+> - **stream.js**: Work queue with leases (prevent flooding)
+> - **msg.js**: Agent-to-agent communication
+> - **consensus.js**: Agent voting (51% = truth)
+> - **sync.js**: Cross-device brain sync
+> - **cron.js**: Task scheduling + background job processing
 >
 > **Admin UI: Agent Management Views**
 > - Agent Timeline: See agent activity
