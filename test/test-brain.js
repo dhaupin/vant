@@ -1,94 +1,140 @@
+#!/usr/bin/env node
 /**
- * Brain Tests
- * Core runtime - memory, search, identity
+ * Brain Module Unit Tests
+ * Real tests for brain.js memory/search
+ *
+ * Run: node test/test-brain.js
  */
 
-const brain = require('./lib/brain');
+const path = require('path');
 
-console.log('=== Brain Tests ===\n');
+const ROOT = path.resolve(__dirname, '..');
+const brain = require('../lib/brain');
 
-let passed = 0;
-let failed = 0;
+// Test results
+const results = {
+    passed: 0,
+    failed: 0,
+    skipped: 0,
+    tests: []
+};
 
 function test(name, fn) {
     try {
-        fn();
-        console.log(`✓ ${name}`);
-        passed++;
+        const result = fn();
+        if (result === true || (result && result.success)) {
+            results.passed++;
+            results.tests.push({ name, status: 'passed' });
+            console.log(`  ✓ ${name}`);
+        } else {
+            results.failed++;
+            results.tests.push({ name, status: 'failed', error: result.error || 'assertion failed' });
+            console.log(`  ✗ ${name}: ${result.error || 'assertion failed'}`);
+        }
     } catch (e) {
-        console.log(`✗ ${name}: ${e.message}`);
-        failed++;
+        results.failed++;
+        results.tests.push({ name, status: 'failed', error: e.message });
+        console.log(`  ✗ ${name}: ${e.message}`);
     }
 }
 
-function assert(condition, msg) {
-    if (!condition) throw new Error(msg || 'Assertion failed');
+async function asyncTest(name, fn) {
+    try {
+        const result = await fn();
+        if (result === true || (result && result.success)) {
+            results.passed++;
+            results.tests.push({ name, status: 'passed' });
+            console.log(`  ✓ ${name}`);
+        } else {
+            results.failed++;
+            results.tests.push({ name, status: 'failed', error: result.error || 'assertion failed' });
+            console.log(`  ✗ ${name}: ${result.error || 'assertion failed'}`);
+        }
+    } catch (e) {
+        results.failed++;
+        results.tests.push({ name, status: 'failed', error: e.message });
+        console.log(`  ✗ ${name}: ${e.message}`);
+    }
 }
 
+function skip(name, reason) {
+    results.skipped++;
+    results.tests.push({ name, status: 'skipped', reason });
+    console.log(`  ⊘ ${name}: ${reason}`);
+}
+
+// ============================================
+// TESTS
+// ============================================
+
+console.log('\n=== Brain Tests ===\n');
+
 // Test 1: Core exports
-test('Brain: has loadBrain', () => {
-    assert(typeof brain.loadBrain === 'function', 'Should have loadBrain');
+test('has loadBrain', () => {
+    return typeof brain.loadBrain === 'function';
 });
 
-test('Brain: has loadCorpus', () => {
-    assert(typeof brain.loadCorpus === 'function', 'Should have loadCorpus');
+test('has loadCorpus', () => {
+    return typeof brain.loadCorpus === 'function';
 });
 
-test('Brain: has getMode', () => {
-    assert(typeof brain.getMode === 'function', 'Should have getMode');
+test('has getMode', () => {
+    return typeof brain.getMode === 'function';
 });
 
-test('Brain: has setMode', () => {
-    assert(typeof brain.setMode === 'function', 'Should have setMode');
+test('has setMode', () => {
+    return typeof brain.setMode === 'function';
 });
 
-test('Brain: has getBrainPath', () => {
-    assert(typeof brain.getBrainPath === 'function', 'Should have getBrainPath');
+test('has getBrainPath', () => {
+    return typeof brain.getBrainPath === 'function';
 });
 
-test('Brain: has getPublicPath', () => {
-    assert(typeof brain.getPublicPath === 'function', 'Should have getPublicPath');
+test('has getPublicPath', () => {
+    return typeof brain.getPublicPath === 'function';
 });
 
 // Test 2: Mode
-test('Brain: setMode dual', () => {
+test('setMode dual', () => {
     brain.setMode('dual');
-    assert(brain.getMode() === 'dual', 'Mode should be dual');
+    return brain.getMode() === 'dual';
 });
 
-test('Brain: setMode private', () => {
+test('setMode private', () => {
     brain.setMode('private');
-    assert(brain.getMode() === 'private', 'Mode should be private');
+    return brain.getMode() === 'private';
 });
 
-test('Brain: setMode public', () => {
+test('setMode public', () => {
     brain.setMode('public');
-    assert(brain.getMode() === 'public', 'Mode should be public');
+    return brain.getMode() === 'public';
 });
 
 // Test 3: Paths
-test('Brain: getBrainPath returns string', () => {
-    const path = brain.getBrainPath();
-    assert(typeof path === 'string', 'Should return string');
-    assert(path.length > 0, 'Should not be empty');
+test('getBrainPath returns string', () => {
+    const p = brain.getBrainPath();
+    return typeof p === 'string' && p.length > 0;
 });
 
-test('Brain: getPublicPath returns string', () => {
-    const path = brain.getPublicPath();
-    assert(typeof path === 'string', 'Should return string');
-    assert(path.length > 0, 'Should not be empty');
+test('getPublicPath returns string', () => {
+    const p = brain.getPublicPath();
+    return typeof p === 'string' && p.length > 0;
 });
 
-// Test 4: Load corpus
-test('Brain: loadCorpus returns promise', async () => {
+// Test 4: Load corpus (async)
+asyncTest('loadCorpus returns array', async () => {
     const corpus = await brain.loadCorpus();
-    assert(Array.isArray(corpus), 'Should return array');
+    return Array.isArray(corpus);
 });
 
-console.log(`\n=== Results: ${passed} passed, ${failed} failed ===`);
+// ============================================
+// RESULTS
+// ============================================
 
-if (failed > 0) {
+console.log(`\n=== Results: ${results.passed} passed, ${results.failed} failed, ${results.skipped} skipped ===\n`);
+
+if (results.failed > 0) {
     process.exit(1);
 }
 
-console.log('All brain tests passed! 🎉');
+console.log('All brain tests passed! 🎉\n');

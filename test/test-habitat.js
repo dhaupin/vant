@@ -1,125 +1,153 @@
+#!/usr/bin/env node
 /**
- * Habitat Tests
- * Core runtime - workspaces, roles, policies, entropy
+ * Habitat Module Unit Tests
+ * Real tests for habitat.js workspace/role management
+ *
+ * Run: node test/test-habitat.js
  */
 
-const Habitat = require('./lib/habitat');
+const path = require('path');
 
-console.log('=== Habitat Tests ===\n');
+const ROOT = path.resolve(__dirname, '..');
+const Habitat = require('../lib/habitat');
 
-let passed = 0;
-let failed = 0;
+// Test results
+const results = {
+    passed: 0,
+    failed: 0,
+    skipped: 0,
+    tests: []
+};
 
 function test(name, fn) {
     try {
-        fn();
-        console.log(`✓ ${name}`);
-        passed++;
+        const result = fn();
+        if (result === true || (result && result.success)) {
+            results.passed++;
+            results.tests.push({ name, status: 'passed' });
+            console.log(`  ✓ ${name}`);
+        } else {
+            results.failed++;
+            results.tests.push({ name, status: 'failed', error: result.error || 'assertion failed' });
+            console.log(`  ✗ ${name}: ${result.error || 'assertion failed'}`);
+        }
     } catch (e) {
-        console.log(`✗ ${name}: ${e.message}`);
-        failed++;
+        results.failed++;
+        results.tests.push({ name, status: 'failed', error: e.message });
+        console.log(`  ✗ ${name}: ${e.message}`);
     }
 }
 
-function assert(condition, msg) {
-    if (!condition) throw new Error(msg || 'Assertion failed');
+function skip(name, reason) {
+    results.skipped++;
+    results.tests.push({ name, status: 'skipped', reason });
+    console.log(`  ⊘ ${name}: ${reason}`);
 }
 
+// ============================================
+// TESTS
+// ============================================
+
+console.log('\n=== Habitat Tests ===\n');
+
 // Test 1: Basic creation
-test('Habitat: create instance', () => {
+test('create instance', () => {
     const habitat = new Habitat();
-    assert(habitat !== undefined, 'Should create');
+    return habitat !== undefined;
 });
 
-test('Habitat: default workspace name', () => {
+test('default workspace name', () => {
     const habitat = new Habitat();
-    assert(habitat.defaultWorkspace === 'default', 'Default workspace should be default');
+    return habitat.defaultWorkspace === 'default';
 });
 
 // Test 2: Workspaces
-test('Habitat: createWorkspace', () => {
+test('createWorkspace', () => {
     const habitat = new Habitat();
     habitat.createWorkspace('team-alpha', { description: 'Alpha team' });
     const ws = habitat.workspaces['team-alpha'];
-    assert(ws !== undefined, 'Should create workspace');
-    assert(ws.id === 'team-alpha', 'Should have id');
+    return ws !== undefined && ws.id === 'team-alpha';
 });
 
-test('Habitat: listWorkspaces', () => {
+test('listWorkspaces', () => {
     const habitat = new Habitat();
     habitat.createWorkspace('team-beta');
     habitat.createWorkspace('team-gamma');
     const list = habitat.listWorkspaces();
-    assert(list.length >= 2, 'Should list workspaces');
+    return list.length >= 2;
 });
 
 // Test 3: Roles
-test('Habitat: addRole', () => {
+test('addRole', () => {
     const habitat = new Habitat();
     habitat.createWorkspace('team-alpha');
     habitat.addRole('team-alpha', 'editor', 'alice');
     const roles = habitat.getUserRoles('team-alpha', 'alice');
-    assert(roles.includes('editor'), 'Should have editor role');
+    return roles.includes('editor');
 });
 
-test('Habitat: hasRole', () => {
+test('hasRole', () => {
     const habitat = new Habitat();
     habitat.createWorkspace('team-alpha');
     habitat.addRole('team-alpha', 'admin', 'bob');
-    assert(habitat.hasRole('team-alpha', 'bob', 'admin') === true, 'Should have admin role');
-    assert(habitat.hasRole('team-alpha', 'bob', 'editor') === false, 'Should not have editor role');
+    return habitat.hasRole('team-alpha', 'bob', 'admin') === true &&
+           habitat.hasRole('team-alpha', 'bob', 'editor') === false;
 });
 
-test('Habitat: removeRole', () => {
+test('removeRole', () => {
     const habitat = new Habitat();
     habitat.createWorkspace('team-alpha');
     habitat.addRole('team-alpha', 'viewer', 'charlie');
     habitat.removeRole('team-alpha', 'viewer', 'charlie');
-    assert(habitat.hasRole('team-alpha', 'charlie', 'viewer') === false, 'Role should be removed');
+    return habitat.hasRole('team-alpha', 'charlie', 'viewer') === false;
 });
 
 // Test 4: Policies
-test('Habitat: setPolicy', () => {
+test('setPolicy', () => {
     const habitat = new Habitat();
     habitat.setPolicy('my-island', { read: ['editor'], write: ['admin'] });
     const bounds = habitat.getBoundaries();
-    assert(bounds['my-island'] !== undefined, 'Policy should be set');
+    return bounds['my-island'] !== undefined;
 });
 
 // Test 5: Current workspace
-test('Habitat: setWorkspace', () => {
+test('setWorkspace', () => {
     const habitat = new Habitat();
     habitat.createWorkspace('team-alpha');
     habitat.setWorkspace('team-alpha');
-    assert(habitat.getCurrentWorkspace() === 'team-alpha', 'Current workspace should be set');
+    return habitat.getCurrentWorkspace() === 'team-alpha';
 });
 
 // Test 6: Status
-test('Habitat: status', () => {
+test('status', () => {
     const habitat = new Habitat();
     habitat.createWorkspace('team-alpha');
     const status = habitat.status();
-    assert(status !== undefined, 'Should return status');
+    return status !== undefined;
 });
 
 // Test 7: Geometric map
-test('Habitat: getGeometricMap', () => {
+test('getGeometricMap', () => {
     const habitat = new Habitat();
     const map = habitat.getGeometricMap();
-    assert(map !== undefined, 'Should return geometric map');
+    return map !== undefined;
 });
 
 // Test 8: Boundaries
-test('Habitat: getBoundaries', () => {
+test('getBoundaries', () => {
     const habitat = new Habitat();
     const bounds = habitat.getBoundaries();
-    assert(bounds !== undefined, 'Should return boundaries');
+    return bounds !== undefined;
 });
 
-console.log(`\n=== Results: ${passed} passed, ${failed} failed ===`);
+// ============================================
+// RESULTS
+// ============================================
 
-if (failed > 0) {
+console.log(`\n=== Results: ${results.passed} passed, ${results.failed} failed, ${results.skipped} skipped ===\n`);
+
+if (results.failed > 0) {
     process.exit(1);
 }
 
-console.log('All habitat tests passed! 🎉');
+console.log('All habitat tests passed! 🎉\n');

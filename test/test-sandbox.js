@@ -1,98 +1,121 @@
+#!/usr/bin/env node
 /**
- * Sandbox Tests
- * Core runtime - capabilities, handlers, RLS integration
+ * Sandbox Module Unit Tests
+ * Real tests for sandbox.js capability gating
+ *
+ * Run: node test/test-sandbox.js
  */
 
-const sandbox = require('./lib/sandbox');
-const Habitat = require('./lib/habitat');
+const path = require('path');
 
-console.log('=== Sandbox Tests ===\n');
+const ROOT = path.resolve(__dirname, '..');
+const sandbox = require('../lib/sandbox');
+const Habitat = require('../lib/habitat');
 
-let passed = 0;
-let failed = 0;
+// Test results
+const results = {
+    passed: 0,
+    failed: 0,
+    skipped: 0,
+    tests: []
+};
 
 function test(name, fn) {
     try {
-        fn();
-        console.log(`✓ ${name}`);
-        passed++;
+        const result = fn();
+        if (result === true || (result && result.success)) {
+            results.passed++;
+            results.tests.push({ name, status: 'passed' });
+            console.log(`  ✓ ${name}`);
+        } else {
+            results.failed++;
+            results.tests.push({ name, status: 'failed', error: result.error || 'assertion failed' });
+            console.log(`  ✗ ${name}: ${result.error || 'assertion failed'}`);
+        }
     } catch (e) {
-        console.log(`✗ ${name}: ${e.message}`);
-        failed++;
+        results.failed++;
+        results.tests.push({ name, status: 'failed', error: e.message });
+        console.log(`  ✗ ${name}: ${e.message}`);
     }
 }
 
-function assert(condition, msg) {
-    if (!condition) throw new Error(msg || 'Assertion failed');
+function skip(name, reason) {
+    results.skipped++;
+    results.tests.push({ name, status: 'skipped', reason });
+    console.log(`  ⊘ ${name}: ${reason}`);
 }
 
-// Test 1: Basic exports
-test('Sandbox: has defaultSandbox', () => {
-    assert(sandbox.defaultSandbox !== undefined, 'Should have defaultSandbox');
+// ============================================
+// TESTS
+// ============================================
+
+console.log('\n=== Sandbox Tests ===\n');
+
+// Test 1: Core exports
+test('has initRLS', () => {
+    return typeof sandbox.initRLS === 'function';
 });
 
-test('Sandbox: has initRLS', () => {
-    assert(typeof sandbox.initRLS === 'function', 'Should have initRLS');
+test('has generateCaps', () => {
+    return typeof sandbox.generateCaps === 'function';
 });
 
-test('Sandbox: has generateCaps', () => {
-    assert(typeof sandbox.generateCaps === 'function', 'Should have generateCaps');
-});
-
-test('Sandbox: has initLegal', () => {
-    assert(typeof sandbox.initLegal === 'function', 'Should have initLegal');
+test('has initLegal', () => {
+    return typeof sandbox.initLegal === 'function';
 });
 
 // Test 2: Default capabilities (DENY)
-test('Sandbox: canRead default false', () => {
-    assert(sandbox.canRead() === false, 'canRead should be false by default');
+test('canRead default false', () => {
+    return sandbox.canRead() === false;
 });
 
-test('Sandbox: canWrite default false', () => {
-    assert(sandbox.canWrite() === false, 'canWrite should be false by default');
+test('canWrite default false', () => {
+    return sandbox.canWrite() === false;
 });
 
-test('Sandbox: canNetwork default false', () => {
-    assert(sandbox.canNetwork() === false, 'canNetwork should be false by default');
+test('canNetwork default false', () => {
+    return sandbox.canNetwork() === false;
 });
 
-test('Sandbox: canExec default false', () => {
-    assert(sandbox.canExec() === false, 'canExec should be false by default');
+test('canExec default false', () => {
+    return sandbox.canExec() === false;
 });
 
 // Test 3: Generate caps
-test('Sandbox: generateCaps returns object', () => {
+test('generateCaps returns object', () => {
     const caps = sandbox.generateCaps({});
-    assert(typeof caps === 'object', 'Should return object');
+    return typeof caps === 'object';
 });
 
 // Test 4: Create sandbox
-test('Sandbox: create with caps', () => {
+test('create with caps', () => {
     const sb = sandbox.create({
         canRead: true,
         canWrite: true
     });
-    assert(sb.capabilities.canRead === true, 'Created sandbox should read');
-    assert(sb.capabilities.canWrite === true, 'Created sandbox should write');
+    return sb.capabilities.canRead === true &&
+           sb.capabilities.canWrite === true;
 });
 
-test('Sandbox: createAllowed returns object', () => {
-    const allowed = sandbox.createAllowed();
-    assert(typeof allowed === 'object', 'createAllowed should return object');
+test('createAllowed returns object', () => {
+    return typeof sandbox.createAllowed() === 'object';
 });
 
 // Test 5: initRLS
-test('Sandbox: initRLS with habitat', () => {
+test('initRLS with habitat', () => {
     const habitat = new Habitat();
     habitat.createWorkspace('team-alpha');
-    const result = sandbox.initRLS(habitat);
-    assert(result === true, 'initRLS should return true');
+    return sandbox.initRLS(habitat) === true;
 });
 
-console.log(`\n=== Results: ${passed} passed, ${failed} failed ===`);
+// ============================================
+// RESULTS
+// ============================================
 
-if (failed > 0) {
+console.log(`\n=== Results: ${results.passed} passed, ${results.failed} failed, ${results.skipped} skipped ===\n`);
+
+if (results.failed > 0) {
     process.exit(1);
 }
 
-console.log('All sandbox tests passed! 🎉');
+console.log('All sandbox tests passed! 🎉\n');

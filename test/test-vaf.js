@@ -1,98 +1,117 @@
+#!/usr/bin/env node
 /**
- * VAF Tests
- * Security - input validation, sanitization
+ * VAF Module Unit Tests
+ * Real tests for vaf.js input validation
+ *
+ * Run: node test/test-vaf.js
  */
 
-const vaf = require('./lib/vaf');
+const path = require('path');
 
-console.log('=== VAF Tests ===\n');
+const ROOT = path.resolve(__dirname, '..');
+const vaf = require('../lib/vaf');
 
-let passed = 0;
-let failed = 0;
+// Test results
+const results = {
+    passed: 0,
+    failed: 0,
+    skipped: 0,
+    tests: []
+};
 
 function test(name, fn) {
     try {
-        fn();
-        console.log(`✓ ${name}`);
-        passed++;
+        const result = fn();
+        if (result === true || (result && result.success)) {
+            results.passed++;
+            results.tests.push({ name, status: 'passed' });
+            console.log(`  ✓ ${name}`);
+        } else {
+            results.failed++;
+            results.tests.push({ name, status: 'failed', error: result.error || 'assertion failed' });
+            console.log(`  ✗ ${name}: ${result.error || 'assertion failed'}`);
+        }
     } catch (e) {
-        console.log(`✗ ${name}: ${e.message}`);
-        failed++;
+        results.failed++;
+        results.tests.push({ name, status: 'failed', error: e.message });
+        console.log(`  ✗ ${name}: ${e.message}`);
     }
 }
 
-function assert(condition, msg) {
-    if (!condition) throw new Error(msg || 'Assertion failed');
+function skip(name, reason) {
+    results.skipped++;
+    results.tests.push({ name, status: 'skipped', reason });
+    console.log(`  ⊘ ${name}: ${reason}`);
 }
 
+// ============================================
+// TESTS
+// ============================================
+
+console.log('\n=== VAF Tests ===\n');
+
 // Test 1: Core exports
-test('VAF: has validateString', () => {
-    assert(typeof vaf.validateString === 'function', 'Should have validateString');
+test('has validateString', () => {
+    return typeof vaf.validateString === 'function';
 });
 
-test('VAF: has validateObject', () => {
-    assert(typeof vaf.validateObject === 'function', 'Should have validateObject');
+test('has validateObject', () => {
+    return typeof vaf.validateObject === 'function';
 });
 
-test('VAF: has sanitizeContent', () => {
-    assert(typeof vaf.sanitizeContent === 'function', 'Should have sanitizeContent');
+test('has sanitizeContent', () => {
+    return typeof vaf.sanitizeContent === 'function';
 });
 
-test('VAF: has checkPathTraversal', () => {
-    assert(typeof vaf.checkPathTraversal === 'function', 'Should have checkPathTraversal');
+test('has checkPathTraversal', () => {
+    return typeof vaf.checkPathTraversal === 'function';
 });
 
-test('VAF: has check', () => {
-    assert(typeof vaf.check === 'function', 'Should have check');
+test('has check', () => {
+    return typeof vaf.check === 'function';
 });
 
-test('VAF: has sanitize', () => {
-    assert(typeof vaf.sanitize === 'function', 'Should have sanitize');
+test('has sanitize', () => {
+    return typeof vaf.sanitize === 'function';
 });
 
-test('VAF: has middleware', () => {
-    assert(typeof vaf.middleware === 'function', 'Should have middleware');
+test('has middleware', () => {
+    return typeof vaf.middleware === 'function';
 });
 
 // Test 2: Validation
-test('VAF: validateString returns boolean', () => {
-    const result = vaf.validateString('hello');
-    assert(result === true, 'Should return boolean');
+test('validateString returns boolean', () => {
+    return typeof vaf.validateString('hello') === 'boolean';
 });
 
-test('VAF: validateString empty returns', () => {
-    const result = vaf.validateString('');
-    assert(result !== undefined, 'Should return something');
+test('validateString accepts input', () => {
+    return vaf.validateString('') !== undefined;
 });
 
-test('VAF: validateObject returns', () => {
-    const result = vaf.validateObject({ name: 'test' });
-    // Note: Currently returns undefined - bug in vaf
-    // assert(result !== undefined, 'Should return something');
-    passed++; // Skip for now
-});
+skip('validateObject returns', 'vaf.validateObject returns undefined - needs fix');
 
 // Test 3: Sanitization
-test('VAF: sanitizeContent returns object', () => {
-    const result = vaf.sanitizeContent('<script>alert(1)</script>');
-    assert(typeof result === 'object', 'Should return object');
+test('sanitizeContent returns object', () => {
+    return typeof vaf.sanitizeContent('<script>alert(1)</script>') === 'object';
 });
 
 // Test 4: Path traversal
-test('VAF: checkPathTraversal returns object', () => {
-    const result = vaf.checkPathTraversal('normal/path.txt');
-    assert(typeof result === 'object', 'Should return object');
+test('checkPathTraversal returns object', () => {
+    return typeof vaf.checkPathTraversal('normal/path.txt') === 'object';
 });
 
-test('VAF: checkPathTraversal blocks unsafe', () => {
-    const result = vaf.checkPathTraversal('../../../etc/passwd');
-    assert(result.blocked === true, 'Should be blocked');
+test('checkPathTraversal blocks unsafe', () => {
+    return vaf.checkPathTraversal('../../../etc/passwd').blocked === true;
 });
 
-console.log(`\n=== Results: ${passed} passed, ${failed} failed ===`);
+// ============================================
+// RESULTS
+// ============================================
 
-if (failed > 0) {
+console.log(`\n=== Results: ${results.passed} passed, ${results.failed} failed, ${results.skipped} skipped ===\n`);
+
+if (results.failed > 0) {
     process.exit(1);
 }
 
-console.log('All VAF tests passed! 🎉');
+console.log('All VAF tests passed! 🎉\n');

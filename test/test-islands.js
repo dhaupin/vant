@@ -1,97 +1,122 @@
+#!/usr/bin/env node
 /**
- * Islands Tests
- * Core runtime - corpus, lazy loading
+ * Islands Module Unit Tests
+ * Real tests for islands.js corpus/lazy loading
+ *
+ * Run: node test/test-islands.js
  */
 
-const islands = require('./lib/islands');
+const path = require('path');
 
-console.log('=== Islands Tests ===\n');
+const ROOT = path.resolve(__dirname, '..');
+const islands = require('../lib/islands');
 
-let passed = 0;
-let failed = 0;
+// Test results
+const results = {
+    passed: 0,
+    failed: 0,
+    skipped: 0,
+    tests: []
+};
 
 function test(name, fn) {
     try {
-        fn();
-        console.log(`✓ ${name}`);
-        passed++;
+        const result = fn();
+        if (result === true || (result && result.success)) {
+            results.passed++;
+            results.tests.push({ name, status: 'passed' });
+            console.log(`  ✓ ${name}`);
+        } else {
+            results.failed++;
+            results.tests.push({ name, status: 'failed', error: result.error || 'assertion failed' });
+            console.log(`  ✗ ${name}: ${result.error || 'assertion failed'}`);
+        }
     } catch (e) {
-        console.log(`✗ ${name}: ${e.message}`);
-        failed++;
+        results.failed++;
+        results.tests.push({ name, status: 'failed', error: e.message });
+        console.log(`  ✗ ${name}: ${e.message}`);
     }
 }
 
-function assert(condition, msg) {
-    if (!condition) throw new Error(msg || 'Assertion failed');
+function skip(name, reason) {
+    results.skipped++;
+    results.tests.push({ name, status: 'skipped', reason });
+    console.log(`  ⊘ ${name}: ${reason}`);
 }
 
+// ============================================
+// TESTS
+// ============================================
+
+console.log('\n=== Islands Tests ===\n');
+
 // Test 1: Core exports
-test('Islands: has load', () => {
-    assert(typeof islands.load === 'function', 'Should have load');
+test('has load', () => {
+    return typeof islands.load === 'function';
 });
 
-test('Islands: has save', () => {
-    assert(typeof islands.save === 'function', 'Should have save');
+test('has save', () => {
+    return typeof islands.save === 'function';
 });
 
-test('Islands: has hydrate', () => {
-    assert(typeof islands.hydrate === 'function', 'Should have hydrate');
+test('has hydrate', () => {
+    return typeof islands.hydrate === 'function';
 });
 
-test('Islands: has dehydrate', () => {
-    assert(typeof islands.dehydrate === 'function', 'Should have dehydrate');
+test('has dehydrate', () => {
+    return typeof islands.dehydrate === 'function';
 });
 
-test('Islands: has getHydrated', () => {
-    assert(typeof islands.getHydrated === 'function', 'Should have getHydrated');
+test('has getHydrated', () => {
+    return typeof islands.getHydrated === 'function';
 });
 
-test('Islands: has getAvailable', () => {
-    assert(typeof islands.getAvailable === 'function', 'Should have getAvailable');
+test('has getAvailable', () => {
+    return typeof islands.getAvailable === 'function';
 });
 
-test('Islands: has getManifest', () => {
-    assert(typeof islands.getManifest === 'function', 'Should have getManifest');
+test('has getManifest', () => {
+    return typeof islands.getManifest === 'function';
 });
 
-test('Islands: has getManifestSync', () => {
-    assert(typeof islands.getManifestSync === 'function', 'Should have getManifestSync');
+test('has getManifestSync', () => {
+    return typeof islands.getManifestSync === 'function';
 });
 
 // Test 2: Get hydrated
-test('Islands: getHydrated returns array', () => {
-    const hydrated = islands.getHydrated();
-    assert(Array.isArray(hydrated), 'Should return array');
+test('getHydrated returns array', () => {
+    return Array.isArray(islands.getHydrated());
 });
 
 // Test 3: Get available
-test('Islands: getAvailable returns array', () => {
-    const available = islands.getAvailable();
-    assert(Array.isArray(available), 'Should return array');
+test('getAvailable returns array', () => {
+    return Array.isArray(islands.getAvailable());
 });
 
 // Test 4: Get manifest sync
-test('Islands: getManifestSync returns object', () => {
-    const manifest = islands.getManifestSync();
-    assert(typeof manifest === 'object', 'Should return object');
+test('getManifestSync returns object', () => {
+    return typeof islands.getManifestSync() === 'object';
 });
 
 // Test 5: Islands class
-test('Islands: Islands class instantiates', () => {
+test('Islands class instantiates', () => {
     const i = new islands.Islands();
-    assert(i !== undefined, 'Should create');
+    return i !== undefined;
 });
 
-test('Islands: Islands.getStatus', () => {
+test('Islands.getStatus', () => {
     const i = new islands.Islands();
-    const status = i.getStatus();
-    assert(typeof status === 'object', 'Should return status');
+    return typeof i.getStatus() === 'object';
 });
 
-console.log(`\n=== Results: ${passed} passed, ${failed} failed ===`);
+// ============================================
+// RESULTS
+// ============================================
 
-if (failed > 0) {
+console.log(`\n=== Results: ${results.passed} passed, ${results.failed} failed, ${results.skipped} skipped ===\n`);
+
+if (results.failed > 0) {
     process.exit(1);
 }
 
-console.log('All islands tests passed! 🎉');
+console.log('All islands tests passed! 🎉\n');

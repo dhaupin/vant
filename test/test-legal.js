@@ -1,90 +1,117 @@
+#!/usr/bin/env node
 /**
- * Legal Tests
- * Security - compliance gate
+ * Legal Module Unit Tests
+ * Real tests for legal.js compliance gate
+ *
+ * Run: node test/test-legal.js
  */
 
-const legal = require('./lib/legal');
+const path = require('path');
 
-console.log('=== Legal Tests ===\n');
+const ROOT = path.resolve(__dirname, '..');
+const legal = require('../lib/legal');
 
-let passed = 0;
-let failed = 0;
+// Test results
+const results = {
+    passed: 0,
+    failed: 0,
+    skipped: 0,
+    tests: []
+};
 
 function test(name, fn) {
     try {
-        fn();
-        console.log(`✓ ${name}`);
-        passed++;
+        const result = fn();
+        if (result === true || (result && result.success)) {
+            results.passed++;
+            results.tests.push({ name, status: 'passed' });
+            console.log(`  ✓ ${name}`);
+        } else {
+            results.failed++;
+            results.tests.push({ name, status: 'failed', error: result.error || 'assertion failed' });
+            console.log(`  ✗ ${name}: ${result.error || 'assertion failed'}`);
+        }
     } catch (e) {
-        console.log(`✗ ${name}: ${e.message}`);
-        failed++;
+        results.failed++;
+        results.tests.push({ name, status: 'failed', error: e.message });
+        console.log(`  ✗ ${name}: ${e.message}`);
     }
 }
 
-function assert(condition, msg) {
-    if (!condition) throw new Error(msg || 'Assertion failed');
+function skip(name, reason) {
+    results.skipped++;
+    results.tests.push({ name, status: 'skipped', reason });
+    console.log(`  ⊘ ${name}: ${reason}`);
 }
 
+// ============================================
+// TESTS
+// ============================================
+
+console.log('\n=== Legal Tests ===\n');
+
 // Test 1: Core exports
-test('Legal: has checkGate', () => {
-    assert(typeof legal.checkGate === 'function', 'Should have checkGate');
+test('has checkGate', () => {
+    return typeof legal.checkGate === 'function';
 });
 
-test('Legal: has activate', () => {
-    assert(typeof legal.activate === 'function', 'Should have activate');
+test('has activate', () => {
+    return typeof legal.activate === 'function';
 });
 
-test('Legal: has deactivate', () => {
-    assert(typeof legal.deactivate === 'function', 'Should have deactivate');
+test('has deactivate', () => {
+    return typeof legal.deactivate === 'function';
 });
 
-test('Legal: has getStatus', () => {
-    assert(typeof legal.getStatus === 'function', 'Should have getStatus');
+test('has getStatus', () => {
+    return typeof legal.getStatus === 'function';
 });
 
-test('Legal: has notice', () => {
-    assert(typeof legal.notice === 'function', 'Should have notice');
+test('has notice', () => {
+    return typeof legal.notice === 'function';
 });
 
-test('Legal: has canUse', () => {
-    assert(typeof legal.canUse === 'function', 'Should have canUse');
+test('has canUse', () => {
+    return typeof legal.canUse === 'function';
 });
 
 // Test 2: Status
-test('Legal: getStatus returns object', () => {
-    const status = legal.getStatus();
-    assert(typeof status === 'object', 'Should return object');
+test('getStatus returns object', () => {
+    return typeof legal.getStatus() === 'object';
 });
 
 // Test 3: Activate
-test('Legal: activate warn', () => {
+test('activate warn', () => {
     const result = legal.activate('warn');
-    assert(result.activated === true, 'Should activate');
+    return result.activated === true;
 });
 
 // Test 4: Check gate
-test('Legal: checkGate returns', () => {
-    const result = legal.checkGate('test', {});
-    assert(result !== undefined, 'Should return something');
+test('checkGate returns', () => {
+    return legal.checkGate('test', {}) !== undefined;
 });
 
-// Test 5: Notice (logs to console, returns undefined)
-test('Legal: notice logs', () => {
-    // notice logs but returns undefined - that's expected
+// Test 5: Notice (logs, returns undefined - expected)
+test('notice logs', () => {
+    // notice logs to console but returns undefined
     const result = legal.notice('info', 'test message');
-    assert(result === undefined, 'Returns undefined (logs instead)');
+    return result === undefined;
 });
 
 // Test 6: Deactivate
-test('Legal: deactivate', () => {
+test('deactivate', () => {
     const result = legal.deactivate();
-    assert(result.deactivated === true, 'Should deactivate');
+    return result.deactivated === true;
 });
 
-console.log(`\n=== Results: ${passed} passed, ${failed} failed ===`);
+// ============================================
+// RESULTS
+// ============================================
 
-if (failed > 0) {
+console.log(`\n=== Results: ${results.passed} passed, ${results.failed} failed, ${results.skipped} skipped ===\n`);
+
+if (results.failed > 0) {
     process.exit(1);
 }
 
-console.log('All legal tests passed! 🎉');
+console.log('All legal tests passed! 🎉\n');
