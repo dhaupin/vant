@@ -124,12 +124,48 @@ Collision-free addressing for multi-tenant!
 
 ---
 
-## Next
+## 2026-07-05: Tonight's Plan - DONE! ✅
 
-- [ ] Map geometry → workspaces (spatial addressing)
-- [ ] Integrate lineage with workspace tracking
-- [ ] Wire habitat into vant.js boot
-- [ ] Test RLS in sandbox
+### Completed
+
+1. ✅ **Map geometry → workspaces (spatial addressing)**
+   - Added `workspaceAddress()` and `workspaceMap()` to geometry/index.js
+   - Integrated into `habitat.createWorkspace()` - auto-assigns geometric address
+   - Addresses collision-free via quasicrystal projection
+
+2. ✅ **Integrate lineage with workspace tracking**
+   - `lineage.record()` now auto-captures workspace from habitat
+   - Added `traceForWorkspace()` for filtering by workspace
+   - Stats now include workspace breakdown
+
+3. ✅ **Wire habitat into vant.js boot**
+   - Added habitat + nature init in vant.js init()
+   - Creates global __vant_habitat and __vant_nature
+   - Exports getHabitat() and getNature() getters
+   - Restores flywheel from brain, feeds cosmic entropy
+
+4. ✅ **Test RLS in sandbox**
+   - Created test-rls.js - all tests pass
+   - Fixed escrow.js beforeExecute to async
+   - Added initRLS to sandbox exports
+
+---
+
+## Commit: 99a58bf
+
+```
+feat: Geometry→workspaces, lineage workspace tracking, habitat boot, RLS tests
+
+- Add workspaceAddress(), workspaceMap() to geometry (spatial addressing)
+- Integrate geometry into habitat.createWorkspace()
+- Add workspace tracking to lineage.record()
+- Add traceForWorkspace() for multi-tenant filtering
+- Wire habitat + nature into vant.js init
+- Export habitat/nature getters
+- Add initRLS to sandbox exports
+- Fix escrow beforeExecute async
+- Add RLS integration test
+```
 
 ---
 
