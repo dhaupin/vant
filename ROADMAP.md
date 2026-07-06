@@ -105,6 +105,26 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 > - Traceable, searchable, visualizable
 > - Giant brain = giant searchable space
 >
+> **Canvas Module (Creative Output)**
+> - Paint geometry to shareable art
+> - Built-in palettes: ocean, sunset, forest, neon, mono, gold
+> - Integrates: geometry + theme + sync + consensus
+>
+> **Enterprise Features**
+> - webhooks.js: Inbound webhook receiver + triggers
+> - lineage.js: Object ancestry tracking
+> - consensus.js: Agent voting (51% = truth, no blockchain!)
+> - resolution.js: Track deprecated/resolved/rejected thoughts
+>
+> **Connectors (already built)**
+> - GitHub, GitLab, Bitbucket, Gitea, Cloudflare
+> - Python, Julia, Rust, Go, Ruby, PHP, Node (compute.js)
+>
+> **System Features**
+> - system.js: Status dashboard (all services)
+> - compute.js: Polyglot FFI (call Python, Julia, Rust, etc.)
+> - skills.js: Skill routing (mirrors islands pattern)
+>
 > **Admin Bridge Architecture**
 > - Frontend: Vite + React (runs on CF Pages)
 > - Bridge: **Thin HTTP wrapper** (CF Pages Functions) - just:
