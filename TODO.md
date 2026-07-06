@@ -240,4 +240,24 @@ feat: Connect nature to encrypt entropy, sandbox as RLS carrier
 
 ---
 
+## Commit: 6a353d3
+
+```
+fix: Wire sandbox.initRLS into vant boot
+
+- Complete the loop: vant.js now calls sandbox.initRLS(habitat)
+- Sandbox now holds RLS reference, ready to generate caps
+```
+
+---
+
+### Remaining Overlap (known)
+
+- rls.js has createSandboxCaps()
+- sandbox.js has generateCaps()
+
+Both do the same. Kept both - sandbox is primary (carrier pattern), rls.js fallback for direct RLS calls. Could consolidate later.
+
+---
+
 *Last updated: 2026-07-06*
