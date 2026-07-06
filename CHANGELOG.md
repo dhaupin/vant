@@ -5,55 +5,6 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.0] - TBD
-
-### Feature - Habitat Module (RLS for Islands)
-
-> Multi-tenant brain isolation via habitat boundaries. The organism (sandbox) operates within a habitat (boundaries).
-
-**Design (2026-07-05):**
-- **Problem**: Islands need resource-level access control beyond sandbox capabilities
-- **Solution**: New `habitat.js` module - extends organism/habitat analogy
-- **Scope**: Resource-level (which islands) + field-level (masking)
-
-**Architecture:**
-```
-┌─────────────────────────────────────────────┐
-│  lib/habitat.js (NEW MODULE)              │
-│  - canAccess(island, user, mode)          │
-│  - filter(island, data, user)             │
-│  - mask(island, data, user)               │
-│  - Default policies: readableBy, writableBy │
-└─────────────────────────────────────────────┘
-                     ↑
-                     │ wraps
-                     ↓
-┌─────────────────────────────────────────────┐
-│  lib/islands.js                            │
-│  - load(name, userContext?) → passes user  │
-│  - save(name, data, userContext?)         │
-└─────────────────────────────────────────────┘
-```
-
-**Concepts:**
-- `sandbox` = organism abilities (what you CAN do globally)
-- `habitat` = resource boundaries (what's AVAILABLE to you)
-- Duality pattern: data (islands) ↔ policy (habitat)
-
-**User Context:**
-- From token: `encrypt.signToken({ userId, role, team, scopes })`
-- Passed through MCP → islands.load(name, userContext)
-
-**RLS Policy Fields:**
-- `readableBy`: ['user:123', 'team:engineering', 'role:admin']
-- `writableBy`: ['user:123', 'role:admin']
-- `filter`: Function to filter rows based on user
-- `mask`: Field-level masking (partial reveal)
-
-**Placement:** New file `lib/habitat.js` wrapping `lib/islands.js`
-
----
-
 ## [0.8.6] - 2026-06-30
 
 ### Feature - Headless Mode (v0.8.6 SCOPE)
