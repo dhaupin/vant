@@ -120,6 +120,20 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 > - GitHub, GitLab, Bitbucket, Gitea, Cloudflare
 > - Python, Julia, Rust, Go, Ruby, PHP, Node (compute.js)
 >
+> **Airgapped/Covert Transport**
+> - **stego.js**: LSB steganography in PNG images
+> - Encodes messages in pixel data (invisible to eye)
+> - Optional AES-256-GCM encryption
+> - Prefix "BRN:" marks as Vant data
+> - Perfect for airgapped transport!
+>
+> **Secure Sharing & Audit**
+> - Share brain via steganography (encode in image)
+> - Track what's shared airgapped (audit trail)
+> - "Shared with who?" - visibility into covert channels
+> - Optional: Revoke shared brain segments
+> - QR code generation for offline key exchange
+>
 > **System Features**
 > - system.js: Status dashboard (all services)
 > - compute.js: Polyglot FFI (call Python, Julia, Rust, etc.)
@@ -140,6 +154,12 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 > - Stream Monitor: Monitor work queues
 > - Hive Status: See all connected nodes/agents
 > - Consensus Dashboard: Vote tracking
+>
+> **Admin UI: Sharing & Transport Views**
+> - Stego Panel: Encode/decode brain in images
+> - Airgap Audit: Track what's been shared covertly
+> - Share Console: Control who has what brain segments
+> - QR Key Exchange: Generate QR codes for offline keys
 >
 > **Admin Bridge Architecture**
 > - Frontend: Vite + React (runs on CF Pages)
