@@ -151,15 +151,31 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 > **Admin UI: Agent Management Views**
 > - Agent Timeline: See agent activity
 > - Delegation Console: Assign tasks to agents
-> - Stream Monitor: Monitor work queues
+> - Stream Monitor: Monitor work queues (enqueue/poll/complete)
 > - Hive Status: See all connected nodes/agents
 > - Consensus Dashboard: Vote tracking
+>
+> **Admin UI: Islands & Brain Views**
+> - Island Manager: Create/edit/delete islands
+> - Island Triggers: Configure auto-hydration
+> - Brain Explorer: Browse brain files
+> - Island RLS: Set policies per island (readableBy, writableBy, filter, mask)
+> - Semantic Search: Query brain using embeddings
 >
 > **Admin UI: Sharing & Transport Views**
 > - Stego Panel: Encode/decode brain in images
 > - Airgap Audit: Track what's been shared covertly
 > - Share Console: Control who has what brain segments
 > - QR Key Exchange: Generate QR codes for offline keys
+>
+> **Islands with RLS (Row-Level Security)**
+> - Multi-tenant brain isolation via island policies
+> - Policy fields: readableBy, writableBy, filter, mask
+> - User scope: islands per-user (myTasks, myNotes)
+> - Team scope: islands per-team (team:engineering)
+> - Public scope: shared islands (docs, guides)
+> - Field-level masking (partial reveal for sensitive data)
+> - Audit trail: track who accessed what
 >
 > **Admin Bridge Architecture**
 > - Frontend: Vite + React (runs on CF Pages)
