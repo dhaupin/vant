@@ -32,6 +32,20 @@
 
 ---
 
+## Random Tasks (from audit)
+
+- [x] Wire legal.js into security pipeline
+- [x] Clarify vaf.js role in security pipeline
+- [ ] Create headless REST API for habitat
+- [ ] Add escrow async tests
+- [ ] Check other module overlaps (escrow, lineage, brain, islands)
+- [ ] Verify export consistency across modules
+- [ ] Complete security pipeline wiring
+- [ ] Check for circular dependencies
+- [ ] Fill test coverage gaps
+
+---
+
 ## 2026-07-06: New Plan
 
 ### Goals
@@ -42,11 +56,20 @@
 4. **Add escrow async tests** (critical path)
 5. **Fix auth ↔ habitat context** (or document single source)
 
-### Security Pipeline (to implement)
+### Security Pipeline (IMPLEMENTED ✅)
 
 ```
-Request → sandbox (caps) → rls (workspace) → vaf (validate) → escrow (budget) → legal (compliance)
+Request → sandbox.execute()
+            │
+            ├── 1. VAF (sanitize input)
+            ├── 2. RLS (workspace/role caps via generateCaps)
+            ├── 3. Escrow (budget check)
+            └── 4. Legal (compliance check - if activated)
 ```
+
+**Wired in vant.js boot:**
+- `sandbox.initRLS(habitat)` - RLS carrier
+- `sandbox.initLegal('warn')` - Legal gate (dormant by default)
 
 ---
 
@@ -54,6 +77,7 @@ Request → sandbox (caps) → rls (workspace) → vaf (validate) → escrow (bu
 
 ### vant (headless)
 
+- 27b69ea - feat: Wire security pipeline - VAF → RLS → Escrow → Legal
 - 9c90ed5 - refactor: Consolidate cap generation
 - 6a353d3 - fix: Wire sandbox.initRLS into vant boot
 - e299004 - feat: Connect nature to encrypt entropy, sandbox as RLS carrier
