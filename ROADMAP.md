@@ -88,16 +88,27 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 >
 > **Admin Bridge Architecture**
 > - Frontend: Vite + React (runs on CF Pages)
-> - Bridge: Thin server-side functions (CF Pages Functions)
-> - Backend: Reuse existing /lib (mcp.js, api.js, encrypt.js, cache.js)
-> - Auth: encrypt.signToken() + brain-stored profiles
+> - Bridge: **Thin HTTP wrapper** (CF Pages Functions) - just:
+>   - Auth middleware (verify token)
+>   - MCP proxy (forward to mcp.js tools)
+>   - Optional cache layer
+> - Backend: **Reuse existing /lib** - no new code!
+>
+> **The "Thin Wrapper" Pattern:**
+> ```
+> /srv/admin/api.js          ← HTTP endpoints
+>   → verifyToken()          ← encrypt.verifyToken()
+>   → mcp.execute(tool,args) ← call 158 MCP tools
+>   → cache.get/set          ← optional brain state cache
+> ```
 >
 > **Why this works:**
 > - mcp.js already has 158 tools = the API
-> - server.js has HTTP server + security chain = reuse patterns
+> - server.js has HTTP patterns to copy
 > - cache.js for brain state caching
 > - event.js for real-time (PubSub)
-> - No new backend needed - just CF Pages Functions!
+> - encrypt.js for No-DB auth
+> - **No new backend needed** - just thin wrappers!
 
 > Leverages existing /lib Legos:
 > - auth.js: API keys, tokens, lockout
