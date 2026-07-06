@@ -169,4 +169,75 @@ feat: Geometry→workspaces, lineage workspace tracking, habitat boot, RLS tests
 
 ---
 
-*Last updated: 2026-07-05*
+## Next Session
+
+- [ ] Document security pipeline (sandbox → escrow → rls → legal)
+- [ ] Connect nature spark to cosmic entropy from encrypt
+- [ ] Fix overlaps: auth↔habitat, sandbox↔rls
+- [ ] Headless UX: expose habitat via REST API
+
+---
+
+## 2026-07-06: Security Pipeline + Nature Entropy + Overlap Fixes
+
+### Goals - DONE ✅
+
+1. ✅ **Document security pipeline** (sandbox → escrow → rls → legal)
+   - Map each layer's responsibility
+   - Document data flow
+
+2. ✅ **Connect nature spark to encrypt entropy**
+   - Added feedCosmicEntropy() to habitat
+   - Gets entropy from encrypt.getCosmicEntropy()
+   - Wired into vant.js boot
+
+3. ✅ **Fix overlaps: auth↔habitat, sandbox↔rls**
+   - sandbox is now the carrier (called everywhere)
+   - Added generateCaps() to sandbox
+   - sandbox holds _rls and _habitat references
+
+---
+
+### Security Pipeline Architecture
+
+```
+Request → sandbox (capabilities) → escrow (budget/quota) → rls (workspace/role) → legal (compliance)
+         ↓                           ↓                           ↓                        ↓
+    canRead/Write/Exec        canSpend/quota check       workspace isolation      policy check
+    caps from RLS             circuit breaker           role validation           audit trail
+```
+
+**Current flow:**
+1. sandbox.js - creates execution context, checks caps
+2. escrow.js - rate limiting, budget, circuit breaker (async)
+3. rls.js - workspace/role validation (NEW)
+4. legal.js - compliance, audit (NEW)
+
+**Overlap issue:**
+- sandbox creates caps but rls also creates caps
+- auth creates context but habitat also has context
+- Duplication = drift risk
+
+**Fix approach:**
+- Use sandbox as the carrier since it's called everywhere
+- sandbox.initRLS(habitat) → sandbox holds RLS reference
+- Remove rls.js duplicate cap creation
+- Keep rls for workspace boundary checks only
+
+---
+
+## Commit: e299004
+
+```
+feat: Connect nature to encrypt entropy, sandbox as RLS carrier
+
+- Add feedCosmicEntropy() to habitat - gets entropy from encrypt module
+- Add Nature instance creation in vant.js boot
+- Add generateCaps() to sandbox - RLS cap generation via carrier pattern
+- Sandbox now holds _rls and _habitat references
+- Remove duplicate cap creation in rls (sandbox is carrier)
+```
+
+---
+
+*Last updated: 2026-07-06*
