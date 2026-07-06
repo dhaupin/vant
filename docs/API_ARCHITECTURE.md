@@ -100,28 +100,44 @@ GET    /api/v1/health        → Health check
 WS     /api/v1/stream        → WebSocket stream
 ```
 
-## Delegation Pattern
+## Current Implementation Pattern
+
+Vant already uses a consistent pattern - each subsystem is accessed via a function:
 
 ```javascript
-// lib/vant.js - source of truth
-const vant = {
-  brain: {
-    load: async (name) => { /* ... */ },
-    list: async () => { /* ... */ },
-    // ...
-  },
-  search: async (query, options) => { /* ... */ },
-  // ...
-};
+// lib/vant.js exports functions that return subsystem objects
+vant.brain()      → { load, list, save, ... }
+vant.islands()   → { list, get, create, ... }
+vant.search()    → { semantic, hybrid, ... }
+vant.storage()   → { read, write, list, ... }
+vant.config()    → { get, set, ... }
+vant.audit()     → { log, list, ... }
 
-// lib/mcp.js - delegates to vant
-mcp.register('brain_load', async (params) => {
-  return vant.brain.load(params.name);
+// Usage
+const brain = vant.brain();
+await brain.load('identity');
+
+const islands = vant.islands();
+await islands.list();
+```
+
+### Delegation Goal
+
+```javascript
+// lib/mcp.js - CURRENT: direct import
+const brain = require('./brain');
+_methods.set('brain_load', {
+  handler: async ({ name }) => {
+    return brain.loadBrain(name);  // direct
+  }
 });
 
-// lib/api.js - delegates to vant
-app.get('/api/v1/brain/:name', async (req, res) => {
-  const result = await vant.brain.load(req.params.name);
-  res.json(result);
+// lib/mcp.js - TARGET: delegate to vant
+_methods.set('brain_load', {
+  handler: async ({ name }) => {
+    return vant.brain('loadBrain', { name });  // via vant
+  }
 });
 ```
+
+**Status**: MCP currently uses direct imports. The architecture supports the delegation pattern - refactoring is an optimization to reduce code duplication.
