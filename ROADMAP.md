@@ -60,6 +60,13 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 
 ## v0.9.0 - Futures
 
+### nature.js - Hit-and-Miss Spark Mechanism
+- From mycelium (personal brain): hit-and-miss engine pattern
+- Self-regulating: only fires when flywheel momentum drops to threshold
+- Organic rhythm: pulses when needed, not constant
+- Flywheel: keeps momentum between cycles
+- "Nature doesn't rush. But everything gets done."
+
 ### Capabilities
 - [ ] Video steganography (larger payloads)
 - [ ] Audio steganography
