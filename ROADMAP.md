@@ -125,6 +125,22 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 > - compute.js: Polyglot FFI (call Python, Julia, Rust, etc.)
 > - skills.js: Skill routing (mirrors islands pattern)
 >
+> **Multi-Agent Distributed System (Hive/Mesh)**
+> - Agents across many node installations
+> - Delegation: agent.delegate() - assign tasks to other agents
+> - Streams: stream.js - work queue with leases (prevent flooding)
+> - Messaging: msg.js - agent-to-agent communication
+> - Consensus: consensus.js - agent voting (51% = truth)
+> - Sync: sync.js - cross-device brain sync
+> - Node registry: track agents across installations
+>
+> **Admin UI: Agent Management Views**
+> - Agent Timeline: See agent activity
+> - Delegation Console: Assign tasks to agents
+> - Stream Monitor: Monitor work queues
+> - Hive Status: See all connected nodes/agents
+> - Consensus Dashboard: Vote tracking
+>
 > **Admin Bridge Architecture**
 > - Frontend: Vite + React (runs on CF Pages)
 > - Bridge: **Thin HTTP wrapper** (CF Pages Functions) - just:
