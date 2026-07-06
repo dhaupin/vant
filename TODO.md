@@ -37,12 +37,12 @@
 - [x] Wire legal.js into security pipeline
 - [x] Clarify vaf.js role in security pipeline
 - [ ] Create headless REST API for habitat
-- [ ] Add escrow async tests
-- [ ] Check other module overlaps (escrow, lineage, brain, islands)
-- [ ] Verify export consistency across modules
-- [ ] Complete security pipeline wiring
-- [ ] Check for circular dependencies
-- [ ] Fill test coverage gaps
+- [x] Add escrow async tests
+- [x] Check other module overlaps (escrow, lineage, brain, islands)
+- [x] Verify export consistency across modules
+- [x] Complete security pipeline wiring
+- [x] Check for circular dependencies
+- [x] Fill test coverage gaps (added escrow tests)
 
 ---
 
@@ -77,6 +77,7 @@ Request → sandbox.execute()
 
 ### vant (headless)
 
+- ed5218e - test: Add escrow async tests
 - 27b69ea - feat: Wire security pipeline - VAF → RLS → Escrow → Legal
 - 9c90ed5 - refactor: Consolidate cap generation
 - 6a353d3 - fix: Wire sandbox.initRLS into vant boot
