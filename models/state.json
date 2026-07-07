@@ -1,15 +1,10 @@
 {
   "neurons": {
     "neurons": {},
-    "synapses": {
-      "identity": {
-        "start": 1
-      }
-    },
+    "synapses": {},
     "attention": {
-      "identity": 0.2,
-      "start": 0.2
+      "identity": 0.2
     }
   },
-  "updated": "2026-07-07T05:30:56.804Z"
+  "updated": "2026-07-07T05:31:57.490Z"
 }
