@@ -61,6 +61,9 @@ module.exports = {
     
     // Shutdown gracefully
     shutdown: vant.shutdown,
+    sleep: vant.sleep,
+    wake: vant.wake,
+    dream: vant.dream,
     
     // Get status
     getStatus: vant.getStatus,

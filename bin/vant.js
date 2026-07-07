@@ -98,7 +98,11 @@ const COMMANDS = {
     
     // Server modes
     node: 'node.js',
-    mcp: 'mcp.js',
+
+    // Trifecta modes (via vant.startFull)
+    mcp: null,  // handled inline
+    api: null,  // handled inline
+    all: null,  // handled inline
     
     // Onboarding
     onboard: 'onboard.js',
@@ -335,6 +339,19 @@ if (!script) {
             process.exit(0);
         }).catch(e => {
             console.error(e);
+            process.exit(1);
+        });
+    } else if (cmd === 'mcp' || cmd === 'api' || cmd === 'all') {
+        // Trifecta mode handler
+        const mode = cmd;
+        const vant = require('../lib/vant');
+        vant.startFull({ mode, debug: true }).then(r => {
+            console.log(`✓ Started in ${mode} mode`);
+            console.log('  Ports:', r.ports);
+            console.log('  Status:', r.status);
+            console.log('\n🛑 Press Ctrl+C to stop\n');
+        }).catch(e => {
+            console.error('Failed to start:', e.message);
             process.exit(1);
         });
     } else {

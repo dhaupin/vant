@@ -1,0 +1,606 @@
+openapi: 3.1.0
+info:
+  title: Vant API
+  description: |
+    Vant is a persistent memory system for AI agents. 
+    
+    ## Spec Alignment
+    - Embeddings endpoint is OpenAI-compatible (`/v1/embeddings`)
+    - All endpoints gated behind JWT/API key auth
+    - QoS enforced via rate limiting
+    
+    ## Authentication
+    Bearer token in Authorization header:
+    ```
+    Authorization: Bearer <token>
+    ```
+  version: 0.8.7
+  contact:
+    name: Vant Team
+    url: https://vant.creadev.org
+
+servers:
+  - url: https://api.vant.creadev.org
+    description: Production
+  - url: http://localhost:3457
+    description: Local development
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Common
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: integer
+
+    BrainFile:
+      type: object
+      properties:
+        name:
+          type: string
+        content:
+          type: string
+        source:
+          type: string
+          enum: [public, private, remote]
+        updated:
+          type: string
+          format: date-time
+
+    BrainList:
+      type: object
+      properties:
+        brains:
+          type: array
+          items:
+            $ref: '#/components/schemas/BrainFile'
+
+    Island:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [static, lazy]
+        triggers:
+          type: array
+          items:
+            type: string
+        enabled:
+          type: boolean
+
+    SearchResult:
+      type: object
+      properties:
+        query:
+          type: string
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              score:
+                type: number
+              content:
+                type: string
+
+    EmbeddingRequest:
+      type: object
+      properties:
+        input:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+        model:
+          type: string
+          default: vant-embed-001
+
+    EmbeddingResponse:
+      type: object
+      properties:
+        object:
+          type: string
+          default: list
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              object:
+                type: string
+                default: embedding
+              embedding:
+                type: array
+                items:
+                  type: number
+              index:
+                type: integer
+        model:
+          type: string
+        usage:
+          type: object
+          properties:
+            prompt_tokens:
+              type: integer
+            total_tokens:
+              type: integer
+
+    ConfigValue:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        layers:
+          type: object
+
+tags:
+  - name: Brain
+    description: Brain file operations
+  - name: Islands
+    description: Island (brain module) operations
+  - name: Search
+    description: Search and RAG operations
+  - name: Embeddings
+    description: OpenAI-compatible embeddings
+  - name: Config
+    description: Configuration management
+  - name: Stream
+    description: Stream operations
+  - name: System
+    description: System operations
+
+paths:
+  # ============================================
+  # EMBEDDINGS (OpenAI-compatible)
+  # ============================================
+  /v1/embeddings:
+    post:
+      tags:
+        - Embeddings
+      summary: Create embeddings
+      description: |
+        OpenAI-compatible endpoint for creating embeddings.
+        Model: `vant-embed-001`
+      operationId: createEmbeddings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmbeddingRequest'
+      responses:
+        '200':
+          description: Embeddings created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmbeddingResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ============================================
+  # BRAIN
+  # ============================================
+  /api/v1/brain:
+    get:
+      tags:
+        - Brain
+      summary: List all brains
+      operationId: listBrains
+      responses:
+        '200':
+          description: List of brains
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrainList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Brain
+      summary: Create/update brain file
+      operationId: saveBrain
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                content:
+                  type: string
+                source:
+                  type: string
+                  enum: [public, private]
+      responses:
+        '200':
+          description: Brain saved
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/brain/{name}:
+    get:
+      tags:
+        - Brain
+      summary: Get brain file
+      operationId: getBrain
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Brain file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrainFile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not found
+
+    delete:
+      tags:
+        - Brain
+      summary: Delete brain file
+      operationId: deleteBrain
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Brain deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ============================================
+  # ISLANDS
+  # ============================================
+  /api/v1/islands:
+    get:
+      tags:
+        - Islands
+      summary: List all islands
+      operationId: listIslands
+      responses:
+        '200':
+          description: List of islands
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  islands:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Island'
+
+    post:
+      tags:
+        - Islands
+      summary: Create island
+      operationId: createIsland
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Island'
+      responses:
+        '200':
+          description: Island created
+
+  /api/v1/islands/{name}:
+    get:
+      tags:
+        - Islands
+      summary: Get island
+      operationId: getIsland
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Island details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Island'
+
+    delete:
+      tags:
+        - Islands
+      summary: Delete island
+      operationId: deleteIsland
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Island deleted
+
+  # ============================================
+  # SEARCH
+  # ============================================
+  /api/v1/search:
+    post:
+      tags:
+        - Search
+      summary: Search brains
+      operationId: searchBrains
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                limit:
+                  type: integer
+                  default: 10
+                type:
+                  type: string
+                  enum: [semantic, hybrid, keyword]
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResult'
+
+  # ============================================
+  # CONFIG
+  # ============================================
+  /api/v1/config/{key}:
+    get:
+      tags:
+        - Config
+      summary: Get config value
+      operationId: getConfig
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Config value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigValue'
+
+    post:
+      tags:
+        - Config
+      summary: Set config value
+      operationId: setConfig
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+      responses:
+        '200':
+          description: Config set
+
+  # ============================================
+  # STREAM
+  # ============================================
+  /api/v1/stream:
+    get:
+      tags:
+        - Stream
+      summary: List streams
+      operationId: listStreams
+      responses:
+        '200':
+          description: List of streams
+
+    post:
+      tags:
+        - Stream
+      summary: Create stream
+      operationId: createStream
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+
+  /api/v1/stream/{name}:
+    get:
+      tags:
+        - Stream
+      summary: Get stream info
+      operationId: getStream
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stream info
+
+    delete:
+      tags:
+        - Stream
+      summary: Delete stream
+      operationId: deleteStream
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stream deleted
+
+  /api/v1/stream/{name}/enqueue:
+    post:
+      tags:
+        - Stream
+      summary: Enqueue message
+      operationId: enqueueStream
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payload:
+                  type: object
+      responses:
+        '200':
+          description: Message enqueued
+
+  # ============================================
+  # SYSTEM
+  # ============================================
+  /api/v1/health:
+    get:
+      tags:
+        - System
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+  /api/v1/status:
+    get:
+      tags:
+        - System
+      summary: Get Vant status
+      operationId: getStatus
+      responses:
+        '200':
+          description: System status
+
+  # ============================================
+  # MCP (passthrough)
+  # ============================================
+  /api/v1/mcp:
+    post:
+      tags:
+        - System
+      summary: Direct MCP call
+      description: Forward to MCP server
+      operationId: mcpCall
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                method:
+                  type: string
+                params:
+                  type: object
+      responses:
+        '200':
+          description: MCP response
+        '400':
+          description: Bad request
+
+components:
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
