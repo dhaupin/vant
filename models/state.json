@@ -3,13 +3,13 @@
     "neurons": {},
     "synapses": {
       "identity": {
-        "rest-test": 1
+        "test-save": 1
       }
     },
     "attention": {
       "identity": 0.2,
-      "rest-test": 0.2
+      "test-save": 0.2
     }
   },
-  "updated": "2026-07-07T05:53:43.703Z"
+  "updated": "2026-07-07T06:01:16.419Z"
 }
