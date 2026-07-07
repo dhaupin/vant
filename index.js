@@ -7,6 +7,7 @@
 // Core
 const vant = require('./lib/vant');
 const brain = require('./lib/brain');
+const search = require('./lib/search');
 const api = require('./lib/api');
 const agents = require('./lib/agents');
 const islands = require('./lib/islands');
@@ -26,6 +27,7 @@ module.exports = {
     // Core runtime
     vant,
     brain,
+    search,
     api,
     agents,
     islands,
