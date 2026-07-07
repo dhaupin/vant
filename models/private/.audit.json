@@ -1,0 +1,162 @@
+{
+  "version": "1.0",
+  "entries": [
+    {
+      "timestamp": "2026-07-07T04:26:51.672Z",
+      "action": "test:action",
+      "data": {},
+      "hash": "b7b5b0f609184880"
+    },
+    {
+      "timestamp": "2026-07-07T04:55:49.560Z",
+      "action": {
+        "component": "fatal",
+        "op": "uncaughtException",
+        "error": "Unexpected token '.'",
+        "origin": "uncaughtException",
+        "time": 1783400149560
+      },
+      "data": {},
+      "hash": "396622c11c592d81"
+    },
+    {
+      "timestamp": "2026-07-07T04:57:26.069Z",
+      "action": {
+        "component": "fatal",
+        "op": "uncaughtException",
+        "error": "Unexpected identifier 'serve'",
+        "origin": "uncaughtException",
+        "time": 1783400246069
+      },
+      "data": {},
+      "hash": "b8e5cb28fc9f9d53"
+    },
+    {
+      "timestamp": "2026-07-07T04:57:52.444Z",
+      "action": {
+        "component": "fatal",
+        "op": "uncaughtException",
+        "error": "Cannot read properties of undefined (reading 'queryBrain')",
+        "origin": "uncaughtException",
+        "time": 1783400272444
+      },
+      "data": {},
+      "hash": "79522bdf95fb1d0a"
+    },
+    {
+      "timestamp": "2026-07-07T04:57:52.447Z",
+      "action": {
+        "component": "fatal",
+        "op": "unhandledRejection",
+        "reason": "Error: Escrow: Budget exceeded",
+        "time": 1783400272447
+      },
+      "data": {},
+      "hash": "01c961a6b0c566f4"
+    },
+    {
+      "timestamp": "2026-07-07T05:04:39.141Z",
+      "action": {
+        "component": "fatal",
+        "op": "uncaughtException",
+        "error": "vant.startFull is not a function",
+        "origin": "uncaughtException",
+        "time": 1783400679141
+      },
+      "data": {},
+      "hash": "b60de6403f36eb00"
+    },
+    {
+      "timestamp": "2026-07-07T05:10:35.892Z",
+      "action": {
+        "component": "fatal",
+        "op": "uncaughtException",
+        "error": "listen EADDRINUSE: address already in use :::4004",
+        "origin": "uncaughtException",
+        "time": 1783401035892
+      },
+      "data": {},
+      "hash": "44f4d6c0aa52c990"
+    },
+    {
+      "timestamp": "2026-07-07T06:02:32.935Z",
+      "action": {
+        "type": "act",
+        "operation": "default",
+        "duration": 0,
+        "agent": "agent_mra8p2318453c9a60c9741f21f6c314ef464adc2fb1a6445e564485e"
+      },
+      "data": {},
+      "hash": "ab6e1c9e76856b71"
+    },
+    {
+      "timestamp": "2026-07-07T06:02:32.937Z",
+      "action": {
+        "component": "fatal",
+        "op": "unhandledRejection",
+        "reason": "Error: Write permission required",
+        "time": 1783404152936
+      },
+      "data": {},
+      "hash": "36e7c9e1c3b70f35"
+    },
+    {
+      "timestamp": "2026-07-07T07:33:44.773Z",
+      "action": {
+        "component": "fatal",
+        "op": "unhandledRejection",
+        "reason": "VantError: Network permission required",
+        "time": 1783409624772
+      },
+      "data": {},
+      "hash": "874c86001e81f6b5"
+    },
+    {
+      "timestamp": "2026-07-07T07:34:13.821Z",
+      "action": {
+        "component": "fatal",
+        "op": "uncaughtException",
+        "error": "vant.startFull is not a function",
+        "origin": "uncaughtException",
+        "time": 1783409653821
+      },
+      "data": {},
+      "hash": "cfc5ed188d77850f"
+    },
+    {
+      "timestamp": "2026-07-07T07:35:51.846Z",
+      "action": {
+        "component": "fatal",
+        "op": "unhandledRejection",
+        "reason": "TypeError: vant.init is not a function",
+        "time": 1783409751846
+      },
+      "data": {},
+      "hash": "b83ec192d6853aec"
+    },
+    {
+      "timestamp": "2026-07-07T08:12:27.369Z",
+      "action": {
+        "component": "fatal",
+        "op": "uncaughtException",
+        "error": "vant.startHeadless is not a function",
+        "origin": "uncaughtException",
+        "time": 1783411947369
+      },
+      "data": {},
+      "hash": "f6779f1f41d4502d"
+    },
+    {
+      "timestamp": "2026-07-07T08:12:44.629Z",
+      "action": {
+        "component": "fatal",
+        "op": "uncaughtException",
+        "error": "write EPIPE",
+        "origin": "uncaughtException",
+        "time": 1783411964628
+      },
+      "data": {},
+      "hash": "b5b4dac2d21741db"
+    }
+  ]
+}
