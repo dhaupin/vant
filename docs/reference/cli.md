@@ -19,6 +19,36 @@ All Vant CLI commands.
 | `vant load` | Load brain (default: `$MODEL_PATH` or models/private)
 | `vant run` | Start runtime loop |
 | `vant vibe` | Get/set runtime mood (experimental, focused, safety_first, etc) |
+| `vant help` | Show help |
+| `vant setup` | Initial setup |
+
+### vant setup
+
+Initial Vant setup:
+
+```bash
+vant setup              # Interactive setup
+vant setup --force     # Overwrite existing config
+```
+
+### vant help
+
+Show help:
+
+```bash
+vant help              # Show all commands
+vant help <command>   # Show command help
+```
+
+### vant vibe
+
+Get/set runtime mood:
+
+```bash
+vant vibe              # Show current vibe
+vant vibe focused     # Set vibe to focused
+vant vibe experimental # Set vibe to experimental
+```
 
 ### Core Details
 Core CLI commands.
@@ -544,6 +574,219 @@ Check for updates:
 ```bash
 vant update         # Check version
 vant update --force # Force update
+```
+
+## Storage Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant storage` | Storage operations |
+| `vant stream` | Stream operations |
+| `vant cache` | Cache management |
+| `vant tmp` | Temp file management |
+
+### vant storage
+
+Storage operations:
+
+```bash
+vant storage              # Show storage status
+vant storage --stats    # Storage statistics
+vant storage --clear    # Clear storage
+```
+
+### vant stream
+
+Stream operations:
+
+```bash
+vant stream              # Show streams
+vant stream --list      # List active streams
+vant stream --close id  # Close stream
+```
+
+### vant cache
+
+Cache management:
+
+```bash
+vant cache               # Show cache
+vant cache --clear     # Clear all cache
+vant cache --compress  # Compress cache
+```
+
+### vant tmp
+
+Temp file management:
+
+```bash
+vant tmp                 # Show temp files
+vant tmp --clear       # Clear temp files
+vant tmp --list        # List temp files
+```
+
+## Network Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant server` | HTTP/HTTPS server |
+| `vant network` | Network operations |
+| `vant node` | Persistent node |
+| `vant nodes` | Peer discovery |
+| `vant remote` | Remote operations |
+
+### vant server
+
+HTTP/HTTPS server:
+
+```bash
+vant server              # Start server
+vant server --port 8080 # Custom port
+vant server --secure    # HTTPS mode
+```
+
+### vant network
+
+Network operations:
+
+```bash
+vant network             # Show network status
+vant network --connect  # Connect to peers
+vant network --disconnect # Disconnect
+```
+
+### vant node
+
+Persistent node:
+
+```bash
+vant node                # Start node
+vant node --name mynode # Named node
+vant node --port 3100  # Custom port
+```
+
+### vant nodes
+
+Peer discovery:
+
+```bash
+vant nodes               # List peers
+vant nodes --online    # Online only
+vant nodes --all      # All peers
+```
+
+### vant remote
+
+Remote operations:
+
+```bash
+vant remote             # Show remotes
+vant remote add name url # Add remote
+vant remote remove name # Remove remote
+```
+
+## Messaging Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant msg` | Messaging system |
+| `vant event` | Event handling |
+
+### vant msg
+
+Messaging system:
+
+```bash
+vant msg                  # Show messages
+vant msg send user msg  # Send message
+vant msg --read         # Read messages
+```
+
+### vant event
+
+Event handling:
+
+```bash
+vant event               # Show events
+vant event --emit name  # Emit event
+vant event --listen     # Listen for events
+```
+
+## Security Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant encrypt` | Encryption utilities |
+| `vant sudo` | Privilege management |
+| `vant security` | Security utilities |
+
+### vant encrypt
+
+Encryption utilities:
+
+```bash
+vant encrypt --encrypt file.txt      # Encrypt file
+vant encrypt --decrypt file.enc      # Decrypt file
+vant encrypt --keygen               # Generate key
+```
+
+### vant sudo
+
+Privilege management:
+
+```bash
+vant sudo --elevate                 # Elevate privileges
+vant sudo --status                  # Check status
+vant sudo --revoke                  # Revoke privileges
+```
+
+## DevOps Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant metrics` | Metrics dashboard |
+| `vant system` | System diagnostics |
+| `vant health` | Health check |
+| `vant cron` | Cron scheduler |
+
+### vant metrics
+
+Metrics dashboard:
+
+```bash
+vant metrics               # Show metrics
+vant metrics --json      # JSON output
+vant metrics --reset     # Reset counters
+```
+
+### vant system
+
+System diagnostics:
+
+```bash
+vant system               # System info
+vant system --verbose    # Detailed output
+vant system --check      # Run checks
+```
+
+### vant health
+
+Health check:
+
+```bash
+vant health              # Full check
+vant health --quiet     # Minimal output
+vant health --json      # JSON output
+```
+
+### vant cron
+
+Cron scheduler:
+
+```bash
+vant cron                # List jobs
+vant cron add "*/5 *" cmd # Add job
+vant cron remove id     # Remove job
 ```
 
 ## Webhook Commands

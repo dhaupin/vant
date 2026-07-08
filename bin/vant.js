@@ -375,12 +375,14 @@ Integrations:
 
 Utilities:
   vant canvas     Visualization tools
+  vant compress   Compression tools
   vant compute   Multi-language runner
   vant embed     Embedding/vector ops
   vant format    Format detection
   vant metrics   Metrics dashboard
   vant rls       Row-level security
   vant system    System diagnostics
+  vant bot       Bot utilities
 
 System Utilities:
   vant auth       Authentication
@@ -388,7 +390,7 @@ System Utilities:
   vant consensus  Consensus mechanisms
   vant framework  Framework utilities
   vant habitat    Environment management
- vant legal       Legal/compliance
+  vant legal       Legal/compliance
   vant qos        Quality of Service
   vant rules      Rule management
   vant runop      Run operations
@@ -398,6 +400,8 @@ System Utilities:
   vant stream     Stream operations
   vant sudo      Privilege management
   vant telegram   Telegram bot
+  vant docs       Docs management
+  vant islands-boot Island initialization
   vant tmp        Temp file management
   vant vaf        Validation framework
 
