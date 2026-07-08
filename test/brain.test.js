@@ -362,7 +362,7 @@ test('brain has get function', () => {
 
 test('brain get returns module', () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const mod = brain.get('storage');
+    const mod = brain.get('storage', 'config', { userCtx: { userId: 'test', roles: ['admin'] } });
     return { success: !!mod || mod === null };
 });
 
