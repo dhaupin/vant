@@ -172,7 +172,15 @@ const COMMANDS = {
     // Additional utilities
     audit: 'audit.js',
     branch: 'branch-manager.js',
-    repos: 'repos.js'
+    repos: 'repos.js',
+    
+    // Ecosystem management
+    skills: 'skills.js',
+    cache: 'cache.js',
+    cron: 'cron.js',
+    connector: 'connector.js',
+    lineage: 'lineage.js',
+    remote: 'remote.js'
 };
 
 const args = process.argv.slice(2);
@@ -268,6 +276,14 @@ Additional:
   vant audit     Security audit
   vant branch    Branch management
   vant repos     External repo management
+
+Ecosystem:
+  vant skills    Skill management
+  vant cache    Cache/compression
+  vant cron     Cron job scheduler
+  vant connector External services
+  vant lineage  Trace/audit trail
+  vant remote   Remote operations
 
 Memory:
   vant learn <key> <content> [--ttl ms]  Store learning
