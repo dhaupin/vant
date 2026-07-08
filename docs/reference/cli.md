@@ -177,6 +177,50 @@ TELEGRAM_BOT_TOKEN=xxx vant bot
 | `vant update` | Check for new releases |
 | `vant test` | Run test suite |
 | `vant build-test` | Run build validation |
+| `vant api` | API server |
+| `vant auth` | Authentication |
+| `vant config` | Configuration |
+| `vant connector` | External services |
+
+### vant api
+
+API server:
+
+```bash
+vant api                 # Start API server
+vant api --port 3456  # Custom port
+vant api --secure     # HTTPS mode
+```
+
+### vant auth
+
+Authentication:
+
+```bash
+vant auth               # Show auth status
+vant auth --login     # Login
+vant auth --logout    # Logout
+```
+
+### vant config
+
+Configuration management:
+
+```bash
+vant config              # Show config
+vant config get key   # Get value
+vant config set key   # Set value
+```
+
+### vant connector
+
+External services connector:
+
+```bash
+vant connector           # List connectors
+vant connector add name # Add connector
+vant connector remove   # Remove connector
+```
 
 ### Setup Details
 Initial setup.
@@ -489,9 +533,90 @@ Frequently asked questions answered.
 ### How do I run tests?
 
 `vant test` - Runs build tests
+
 ## Utility Commands
 
 Additional CLI commands for specific tasks.
+
+### vant canvas
+
+Visualization tools:
+
+```bash
+vant canvas             # Show canvas
+vant canvas render     # Render visualization
+vant canvas export     # Export canvas
+```
+
+### vant compute
+
+Multi-language runner:
+
+```bash
+vant compute            # Show compute status
+vant compute run lang  # Run code
+vant compute eval     # Evaluate expression
+```
+
+### vant format
+
+Format detection and conversion:
+
+```bash
+vant format             # Detect format
+vant format convert    # Convert format
+vant format validate  # Validate format
+```
+
+### vant geometry
+
+Geometry utilities:
+
+```bash
+vant geometry           # Show tools
+vant geometry calc    # Calculate
+vant geometry render  # Render shape
+```
+
+### vant nature
+
+Nature/entropy utilities:
+
+```bash
+vant nature            # Show entropy tools
+vant nature analyze   # Analyze
+vant nature generate  # Generate
+```
+
+### vant rls
+
+Row-level security:
+
+```bash
+vant rls               # Show RLS status
+vant rls enable       # Enable RLS
+vant rls disable      # Disable RLS
+```
+
+### vant rules
+
+Rule management:
+
+```bash
+vant rules             # List rules
+vant rules add        # Add rule
+vant rules remove     # Remove rule
+```
+
+### vant shell
+
+Shell operations:
+
+```bash
+vant shell             # Open shell
+vant shell --cmd     # Run command
+vant shell --script  # Run script
+```
 
 ### vant audit
 
@@ -528,6 +653,78 @@ Compress brain to patches:
 ```bash
 vant compress input.png "Secret message" -o output.png
 vant compress input.png "msg" -o out.png --encrypt password
+```
+
+### vant changelog
+
+View changes:
+
+```bash
+vant changelog           # View changelog
+vant changelog --since  # Since version
+vant changelog --json   # JSON output
+```
+
+### vant citations
+
+Citation management:
+
+```bash
+vant citations           # List citations
+vant citations add     # Add citation
+vant citations format  # Format citations
+```
+
+### vant clean
+
+Unified cleanup:
+
+```bash
+vant clean              # Show cleanup options
+vant clean --dry-run   # Preview changes
+vant clean --force     # Execute cleanup
+vant clean --auto     # Auto-cleanup
+vant clean --setup-cron # Setup cron job
+```
+
+### vant error
+
+Error handling:
+
+```bash
+vant error              # Show errors
+vant error --list      # List errors
+vant error --clear    # Clear errors
+```
+
+### vant schema
+
+Schema validation:
+
+```bash
+vant schema             # Validate schema
+vant schema --check   # Check schema
+vant schema --fix     # Fix schema issues
+```
+
+### vant telegram
+
+Telegram bot:
+
+```bash
+vant telegram           # Start Telegram bot
+vant telegram --token  # Set token
+vant telegram --chat   # Set chat
+```
+
+### vant watch
+
+Poll GitHub for changes:
+
+```bash
+vant watch             # Watch for changes
+vant watch --interval # Set interval
+vant watch --quiet    # Quiet mode
 ```
 
 ### vant rate
@@ -789,6 +986,164 @@ vant cron add "*/5 *" cmd # Add job
 vant cron remove id     # Remove job
 ```
 
+## Agent Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant agents` | Multi-agent management |
+| `vant load` | Load brain |
+| `vant onboard` | Browse brain files |
+| `vant islands` | Island component boot |
+| `vant mcp` | MCP server |
+| `vant succession` | Trust levels |
+
+### vant agents
+
+Multi-agent management:
+
+```bash
+vant agents               # List agents
+vant agents spawn name  # Spawn agent
+vant agents kill id    # Kill agent
+```
+
+### vant load
+
+Load brain:
+
+```bash
+vant load                # Load brain
+vant load --path path   # Custom path
+vant load --repl       # Interactive mode
+```
+
+### vant onboard
+
+Browse brain files:
+
+```bash
+vant onboard             # Interactive browser
+vant onboard --path     # Browse path
+```
+
+### vant islands
+
+Island component boot:
+
+```bash
+vant islands             # Show islands
+vant islands boot       # Boot islands
+vant islands load name  # Load island
+```
+
+### vant mcp
+
+MCP server for AI tools:
+
+```bash
+vant mcp                 # Start MCP server
+vant mcp --port 3457   # Custom port
+vant mcp --key secret  # Require API key
+```
+
+## Brain Commands
+
+| Command | Description |
+|---------|-------------|
+| `vant brain` | Brain operations |
+| `vant horcrux` | Backup/restore |
+| `vant stego` | Stego recovery |
+| `vant lock` | Write locking |
+| `vant lineage` | Trace/audit |
+
+### vant brain
+
+Brain operations:
+
+```bash
+vant brain               # Show brain status
+vant brain --stats     # Brain statistics
+vant brain --path      # Brain path
+```
+
+### vant horcrux
+
+Backup/restore brain to images:
+
+```bash
+vant horcrux backup     # Create backup
+vant horcrux restore   # Restore backup
+vant horcrux list      # List backups
+```
+
+### vant stego
+
+Stego brain recovery:
+
+```bash
+vant stego              # Scan for stego
+vant stego --extract   # Extract data
+vant stego --verify    # Verify integrity
+```
+
+### vant lock
+
+Brain write lock:
+
+```bash
+vant lock acquire      # Acquire lock
+vant lock release     # Release lock
+vant lock status      # Show lock status
+```
+
+### vant lineage
+
+Trace/audit trail:
+
+```bash
+vant lineage            # Show lineage
+vant lineage --graph   # Graph view
+vant lineage --json   # JSON output
+```
+
+## Skills & Plugins
+
+| Command | Description |
+|---------|-------------|
+| `vant skills` | Skill management |
+| `vant embed` | Embedding operations |
+| `vant theme` | Theme management |
+
+### vant skills
+
+Skill management:
+
+```bash
+vant skills             # List skills
+vant skills add url   # Add skill
+vant skills remove    # Remove skill
+```
+
+### vant embed
+
+Embedding/vector operations:
+
+```bash
+vant embed             # Show embed status
+vant embed --query    # Query vectors
+vant embed --index   # Build index
+```
+
+### vant theme
+
+Theme management:
+
+```bash
+vant theme             # Show theme
+vant theme set name   # Set theme
+vant theme list      # List themes
+```
+
 ## Webhook Commands
 
 ```bash
@@ -1048,7 +1403,21 @@ vant stego --multi                        # Split across multiple images
 
 | Command | Description |
 |---------|-------------|
+| `vant sync` | GitHub brain sync |
 | `vant hybrid-sync` | Public/private brain sync |
+| `vant watch` | Poll GitHub for changes |
+| `vant config` | Configuration management |
+| `vant branch` | Branch management |
+
+### vant sync
+
+GitHub brain sync:
+
+```bash
+vant sync               # Full sync
+vant sync --push     # Push only
+vant sync --pull     # Pull only
+```
 
 ### vant hybrid-sync
 
