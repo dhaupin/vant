@@ -211,7 +211,14 @@ const COMMANDS = {
     sudo: 'sudo.js',
     telegram: 'telegram.js',
     tmp: 'tmp.js',
-    vaf: 'vaf.js'
+    vaf: 'vaf.js',
+    
+    // Core modules
+    agents: 'agents.js',
+    api: 'api.js',
+    error: 'error.js',
+    escrow: 'escrow.js',
+    nature: 'nature.js'
 };
 
 const args = process.argv.slice(2);
@@ -391,6 +398,13 @@ System Utilities:
   vant telegram   Telegram bot
   vant tmp        Temp file management
   vant vaf        Validation framework
+
+Core:
+  vant agents     Agent management
+  vant api        API utilities
+  vant error      Error handling
+  vant escrow     Escrow operations
+  vant nature     Nature module
 
 Brain:
   vant brain mode <mode>  Set brain mode (dual/public/private/remote)
