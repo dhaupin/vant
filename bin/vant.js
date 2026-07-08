@@ -167,7 +167,12 @@ const COMMANDS = {
     // Brain & Geometry
     brain: 'brain.js',
     geometry: 'geometry.js',
-    duality: 'geometry.js'
+    duality: 'geometry.js',
+    
+    // Additional utilities
+    audit: 'audit.js',
+    branch: 'branch-manager.js',
+    repos: 'repos.js'
 };
 
 const args = process.argv.slice(2);
@@ -258,6 +263,11 @@ Core:
   vant load       Load brain
   vant run        Long-running agent loop
   vant version     Show version (-v, --version)
+
+Additional:
+  vant audit     Security audit
+  vant branch    Branch management
+  vant repos     External repo management
 
 Memory:
   vant learn <key> <content> [--ttl ms]  Store learning
