@@ -53,7 +53,7 @@ vant vibe experimental # Set vibe to experimental
 ### Core Details
 Core CLI commands.
 
-#### vant start
+### vant start
 
 Full startup sequence:
 1. `health` - Run diagnostics
@@ -67,7 +67,7 @@ vant start --no-sync # Skip sync
 vant start --local  # Skip GitHub
 ```
 
-#### vant health
+### vant health
 
 Run system diagnostics:
 - Check config files
@@ -80,7 +80,7 @@ vant health          # Full check
 vant health --quiet # Minimal output
 ```
 
-#### vant sync
+### vant sync
 
 Sync brain with GitHub:
 - Pull remote changes
@@ -94,7 +94,7 @@ vant sync --push      # Push only
 vant sync --force     # Force push
 ```
 
-#### vant load
+### vant load
 
 Load brain from your brain folder (default: `$MODEL_PATH` or `models/private/`):
 - Load all .md files
@@ -106,7 +106,7 @@ vant load            # Load all
 vant load identity  # Reload identity only
 ```
 
-#### vant run
+### vant run
 
 Start runtime loop:
 - Wait for input
@@ -130,7 +130,7 @@ vant run --websocket # WebSocket mode
 ### Development Details
 Development commands.
 
-#### vant test
+### vant test
 
 Build and test:
 - Lint code
@@ -143,7 +143,7 @@ vant test --lint   # Lint only
 vant test --build  # Build only
 ```
 
-#### vant watch
+### vant watch
 
 File watcher for changes:
 - Watch bin/, lib/
@@ -154,7 +154,7 @@ vant watch             # Watch + reload
 vant watch --no-reload # Watch only
 ```
 
-#### vant bot
+### vant bot
 
 Telegram bot for brain queries:
 
@@ -225,7 +225,7 @@ vant connector remove   # Remove connector
 ### Setup Details
 Initial setup.
 
-#### vant setup
+### vant setup
 
 Interactive setup:
 - Create config.ini
@@ -237,7 +237,7 @@ vant setup          # Interactive
 vant setup --force # Overwrite existing
 ```
 
-#### vant update
+### vant update
 
 Check for updates:
 - Compare local to remote
@@ -249,7 +249,7 @@ vant update           # Check
 vant update --install # Install if available
 ```
 
-#### vant test
+### vant test
 
 Run test suite:
 
@@ -259,7 +259,7 @@ vant test --coverage  # With coverage
 vant test lib/        # Specific path
 ```
 
-#### vant build-test
+### vant build-test
 
 Run build validation tests:
 
@@ -280,7 +280,7 @@ vant build-test       # Validate all scripts load
 ### Help Details
 Help commands.
 
-#### vant help
+### vant help
 
 Show help:
 
@@ -290,7 +290,7 @@ vant help start    # Start command
 vant help --json  # JSON output
 ```
 
-#### vant changelog
+### vant changelog
 
 View recent commits:
 
@@ -300,7 +300,7 @@ vant changelog --full    # Full history
 vant changelog v0.8.0   # Since version
 ```
 
-#### vant summary
+### vant summary
 
 Session statistics:
 
@@ -309,7 +309,7 @@ vant summary       # This session
 vant summary all  # All time
 ```
 
-#### vant rate
+### vant rate
 
 GitHub API rate status:
 
@@ -329,7 +329,7 @@ vant rate reset  # Time until reset
 ### Node Details
 Run as node.
 
-#### vant node
+### vant node
 
 **Persistent node** - runs Vant continuously with brain loaded.
 
@@ -347,7 +347,7 @@ vant node --mcp-port 3100  # Custom MCP port
 > 
 > ⚠️ **This violates GitHub.com ToS** - intended for self-hosted GitLab/Gitea only. Use `vant sync` for manual brain sync with GitHub.com.
 
-#### vant mcp
+### vant mcp
 
 Standalone MCP server:
 
@@ -370,7 +370,7 @@ vant mcp --websocket # WebSocket
 ### Advanced Details
 Advanced commands.
 
-#### vant onboard
+### vant onboard
 
 Browse knowledge base:
 
@@ -380,7 +380,7 @@ vant onboard identity # Query identity
 vant onboard --list   # List files
 ```
 
-#### vant succession
+### vant succession
 
 Brain version tracking:
 
@@ -390,7 +390,7 @@ vant succession trust # Mark trusted
 vant succession diff # vs previous
 ```
 
-#### vant resolution
+### vant resolution
 
 Mark thoughts resolved:
 
@@ -400,7 +400,7 @@ vant resolution resolve # Mark resolved
 vant resolution list     # List unresolved
 ```
 
-#### vant lock
+### vant lock
 
 Brain write lock for multi-agent safety. Prevents race conditions when multiple agents try to write to brain simultaneously.
 
@@ -434,7 +434,7 @@ await brain.withLock(async () => {
 - Uses exponential backoff for contention
 - Token required for secure release
 
-#### vant bump
+### vant bump
 
 Bump version:
 
@@ -454,7 +454,7 @@ vant bump major  # Major (0.8.6 → 1.0.0)
 ### Docs Details
 Docs commands.
 
-#### vant docs
+### vant docs
 
 Build documentation:
 
@@ -1408,6 +1408,7 @@ vant stego --multi                        # Split across multiple images
 | `vant watch` | Poll GitHub for changes |
 | `vant config` | Configuration management |
 | `vant branch` | Branch management |
+| `vant branch-manager` | Advanced branch ops |
 
 ### vant sync
 
@@ -1429,12 +1430,44 @@ vant hybrid-sync -p, --public    # Sync public brain only
 vant hybrid-sync -r, --private   # Sync private brain only
 ```
 
+### vant branch
+
+Branch management:
+
+```bash
+vant branch              # List branches
+vant branch create     # Create branch
+vant branch delete     # Delete branch
+vant branch switch     # Switch branch
+```
+
+### vant branch-manager
+
+Advanced branch operations:
+
+```bash
+vant branch-manager           # Show status
+vant branch-manager merge   # Merge branches
+vant branch-manager rebase  # Rebase branch
+vant branch-manager compare # Compare branches
+```
+
 ## Docs Commands
 
 | Command | Description |
 |---------|-------------|
 | `vant docs` | Build docs |
 | `vant docs-build` | Build docs (detailed) |
+
+### vant docs
+
+Build docs (shortcut):
+
+```bash
+vant docs                # Build docs
+vant docs --serve       # Serve locally
+vant docs --version    # Show version
+```
 
 ### vant docs-build
 
@@ -1476,3 +1509,16 @@ vant                      # Show version
 vant -h, --help           # Show help
 vant --version            # Show version
 ```
+
+## Internal Commands
+
+These commands are for internal development use.
+
+| Command | Description |
+|---------|-------------|
+| `vant agent-spawner` | Agent spawning utility |
+| `vant cli-standard` | CLI standards checker |
+| `vant format-test` | Format testing |
+| `vant brain-horcrux` | Brain backup utility |
+
+See also: `vant horcrux` for user-facing brain backup
