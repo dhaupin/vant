@@ -180,7 +180,13 @@ const COMMANDS = {
     cron: 'cron.js',
     connector: 'connector.js',
     lineage: 'lineage.js',
-    remote: 'remote.js'
+    remote: 'remote.js',
+    
+    // System operations
+    msg: 'msg.js',
+    nodes: 'nodes.js',
+    storage: 'storage.js',
+    encrypt: 'encrypt.js'
 };
 
 const args = process.argv.slice(2);
@@ -284,6 +290,12 @@ Ecosystem:
   vant connector External services
   vant lineage  Trace/audit trail
   vant remote   Remote operations
+
+System:
+  vant msg      Messaging system
+  vant nodes    Peer discovery
+  vant storage  Storage operations
+  vant encrypt  Encryption utilities
 
 Memory:
   vant learn <key> <content> [--ttl ms]  Store learning
