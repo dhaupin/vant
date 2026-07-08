@@ -186,7 +186,13 @@ const COMMANDS = {
     msg: 'msg.js',
     nodes: 'nodes.js',
     storage: 'storage.js',
-    encrypt: 'encrypt.js'
+    encrypt: 'encrypt.js',
+    
+    // Additional system
+    schema: 'schema.js',
+    event: 'event.js',
+    network: 'network.js',
+    theme: 'theme.js'
 };
 
 const args = process.argv.slice(2);
@@ -296,6 +302,10 @@ System:
   vant nodes    Peer discovery
   vant storage  Storage operations
   vant encrypt  Encryption utilities
+  vant schema   Schema validation
+  vant event    Event handling
+  vant network  Network operations
+  vant theme    Theme management
 
 Memory:
   vant learn <key> <content> [--ttl ms]  Store learning
