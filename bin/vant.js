@@ -192,7 +192,26 @@ const COMMANDS = {
     schema: 'schema.js',
     event: 'event.js',
     network: 'network.js',
-    theme: 'theme.js'
+    theme: 'theme.js',
+    
+    // System utilities
+    auth: 'auth.js',
+    citations: 'citations.js',
+    consensus: 'consensus.js',
+    framework: 'framework.js',
+    habitat: 'habitat.js',
+    legal: 'legal.js',
+    qos: 'qos.js',
+    rules: 'rules.js',
+    runop: 'runop.js',
+    sandbox: 'sandbox.js',
+    security: 'security.js',
+    shell: 'shell.js',
+    stream: 'stream.js',
+    sudo: 'sudo.js',
+    telegram: 'telegram.js',
+    tmp: 'tmp.js',
+    vaf: 'vaf.js'
 };
 
 const args = process.argv.slice(2);
@@ -353,6 +372,25 @@ Utilities:
   vant metrics   Metrics dashboard
   vant rls       Row-level security
   vant system    System diagnostics
+
+System Utilities:
+  vant auth       Authentication
+  vant citations  Citation management
+  vant consensus  Consensus mechanisms
+  vant framework  Framework utilities
+  vant habitat    Environment management
+ vant legal       Legal/compliance
+  vant qos        Quality of Service
+  vant rules      Rule management
+  vant runop      Run operations
+  vant sandbox    Sandbox management
+  vant security   Security utilities
+  vant shell      Shell operations
+  vant stream     Stream operations
+  vant sudo      Privilege management
+  vant telegram   Telegram bot
+  vant tmp        Temp file management
+  vant vaf        Validation framework
 
 Brain:
   vant brain mode <mode>  Set brain mode (dual/public/private/remote)
