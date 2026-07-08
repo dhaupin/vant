@@ -75,9 +75,9 @@ const COMMANDS = {
     health: 'health.js',
     load: 'load.js',
     run: 'run.js',
-    test: 'build-test.js',
+    test: 'test-core.js',
     
-    // Distributed (NEW!)
+    // Distributed
     distributed: null,  // Special handler
     
     // Server
@@ -130,34 +130,44 @@ const COMMANDS = {
     search: 'search.js',
     rerank: 'rerank.js',
     validate: 'validate.js',
-    changelog: 'changelog.js',
-    summary: 'summary.js',
-    update: 'update.js',
-    watch: 'watch.js',
-    bump: 'bump.js',
-    docs: 'docs.js',
-    setup: 'setup.js',
-    rate: 'rate.js',
-    help: 'help.js',
-    node: 'node.js',
-    mcp: 'mcp.js',
-    onboard: 'onboard.js',
-    resolution: 'resolution.js',
-    succession: 'succession.js',
-    bot: 'bot.js',
-    compress: 'compress.js',
-    // Stego brain recovery
-    stego: 'stego.js',
-    // Automated pruning
-    prune: 'prune.js',
+    
     // Ghost in the Machine
     boot: 'boot.js',
-    // NEW: Islands (componentized brain)
-    islands: 'islands-boot.js',
+    
+    // Islands (componentized brain)
+    islands: 'islands.js',
+    
     // Brain lock management
     lock: 'lock.js',
+    
     // Config get/set
-    config: 'config.js'
+    config: 'config.js',
+    
+    // Brain horcrux (backup/restore)
+    horcrux: 'brain-horcrux.js',
+    
+    // Agent spawning
+    spawn: 'agent-spawner.js',
+    
+    // Audit & Metrics
+    audit: 'audit.js',
+    
+    // Branch management
+    branch: 'branch-manager.js',
+    
+    // System utilities
+    canvas: 'canvas.js',
+    compute: 'compute.js',
+    embed: 'embed.js',
+    format: 'format.js',
+    metrics: 'metrics.js',
+    rls: 'rls.js',
+    system: 'system.js',
+    
+    // Brain & Geometry
+    brain: 'brain.js',
+    geometry: 'geometry.js',
+    duality: 'geometry.js'
 };
 
 const args = process.argv.slice(2);
@@ -247,22 +257,24 @@ Core:
   vant sync        Pull/push brain
   vant load       Load brain
   vant run        Long-running agent loop
+  vant version     Show version (-v, --version)
 
 Memory:
   vant learn <key> <content> [--ttl ms]  Store learning
   vant remember <key> [content] [--ttl ms]  Store/recall memory
 
 Development:
-  vant test         Run build tests
+  vant test         Run smoke tests
   vant test core    Run core test suite
+  vant test full    Run all tests (500+)
   vant validate    Schema + audit + circuits
   vant changelog   View changes
 
 Sync:
   vant repos       Mount external repos
   vant hybrid     Public/Private split sync
-  vant search    RAG + hybrid search
-  vant rerank    RAG rerank + compress
+  vant search    Search (basic|rag|hybrid|hyde + rerank)
+  vant rerank    Rerank (query|compress|pipeline)
 
 Brain:
   vant onboard     Browse brain files
@@ -271,6 +283,8 @@ Brain:
   vant succession Trust levels
   vant resolution Thought resolution
   vant lock       Brain write lock (acquire/release/status)
+  vant horcrux    Backup/restore brain to images
+  vant stego      Stego brain recovery
 
 State:
   vant vibe        Show/set vibe
@@ -282,6 +296,20 @@ Integrations:
   vant node       Persistent node
   vant webhook   Webhook server + send
   vant server     HTTP/HTTPS server with security chain
+
+Utilities:
+  vant canvas     Visualization tools
+  vant compute   Multi-language runner
+  vant embed     Embedding/vector ops
+  vant format    Format detection
+  vant metrics   Metrics dashboard
+  vant rls       Row-level security
+  vant system    System diagnostics
+
+Brain:
+  vant brain mode <mode>  Set brain mode (dual/public/private/remote)
+  vant geometry          Brain-Quasicrystal duality bridge
+  vant duality          Alias for geometry
 
 Auth:
   MCP requires API key if VANT_MCP_REQUIRE_KEY=true.
@@ -305,7 +333,7 @@ Resolution:
 
 Headless:
   Use Vant as library without MCP:
-    const vant = require('./lib/vant');
+    const vant = require('../lib/vant');
     await vant.startHeadless({ port: 3000 });
   Or: export VANT_MODE=headless
 
@@ -332,6 +360,12 @@ Setup:
 
 const script = COMMANDS[cmd];
 if (!script) {
+    // Built-in commands
+    if (cmd === 'version' || cmd === '--version' || cmd === '-v') {
+        const vant = require('../lib/vant');
+        console.log('vant CLI v' + vant.version);
+        process.exit(0);
+    }
     if (cmd === 'distributed') {
         // Special handler
         distributed(process.argv.slice(3)).then(r => {

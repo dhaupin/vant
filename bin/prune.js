@@ -48,7 +48,9 @@ async function runPrune(args) {
     const options = {
         dryRun: dryRun || !force,
         staleDays,
-        removeFluff: true
+        removeFluff: true,
+        // CLI user - in production this would come from auth
+        userCtx: { role: 'admin', id: 'cli-user' }
     };
     
     if (dryRun) {

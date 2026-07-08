@@ -71,7 +71,7 @@ Resolution:
 
 Headless Mode:
   Use Vant as library without MCP:
-    const vant = require('./lib/vant');
+    const vant = require('../lib/vant');
     await vant.startHeadless({ port: 3000 });
   Or: process.env.VANT_MODE=headless
 `);

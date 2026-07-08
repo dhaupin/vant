@@ -1,5 +1,5 @@
 ---
-version: 0.8.6
+version: 0.8.9
 permalink: /reference/cli
 layout: default
 title: CLI Reference

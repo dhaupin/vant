@@ -3,7 +3,11 @@
     "t": "v"
   },
   "current": {
-    "task": "test"
+    "task": "test",
+    "current": {
+      "mode": "islands",
+      "hydrated": []
+    }
   },
   "temp": {}
 }

@@ -249,20 +249,20 @@ function getBootSources() {
 }
 
 // Amnesia Mode - clean state
-function enterAmnesiaMode() {
+async function enterAmnesiaMode() {
     console.log('\n⚠ All boot sources failed!');
     console.log('============================================');
     console.log('VANT AMNESIA MODE');
     console.log('Cleaning brain and starting fresh...');
     console.log('============================================\n');
     
-    // Save warning state
-    const brain = require('../lib/storage').get('brain');
-    brain.set('amnesia', {
+    // Save warning state - use vant.remember instead
+    const vant = require('../lib/vant');
+    await vant.remember('amnesia', JSON.stringify({
         mode: true,
         timestamp: new Date().toISOString(),
         reason: 'No valid boot sources found'
-    });
+    }));
     
     return true;
 }
