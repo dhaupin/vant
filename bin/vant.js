@@ -151,6 +151,7 @@ const COMMANDS = {
     
     // Audit & Metrics
     audit: 'audit.js',
+    clean: 'clean.js',
     
     // Branch management
     branch: 'branch-manager.js',
@@ -312,6 +313,7 @@ Core:
 
 Additional:
   vant audit     Security audit
+  vant clean     Unified cleanup (logs, tmp, cache, prune)
   vant branch    Branch management
   vant repos     External repo management
 

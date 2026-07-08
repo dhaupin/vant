@@ -618,6 +618,16 @@ vant rerank --query "query"  # Query for reranking
 | `vant repos` | Manage multiple brain repositories |
 | `vant islands-boot` | Initialize islands |
 | `vant validate` | Validate brain files |
+| `vant qos` | QoS rate limiting |
+| `vant sandbox` | Capability sandbox |
+| `vant security` | Security utilities |
+| `vant vaf` | Input validation |
+| `vant habitat` | Runtime environment |
+| `vant legal` | Compliance tools |
+| `vant consensus` | Consensus mechanisms |
+| `vant framework` | Agent framework |
+| `vant runop` | Run operator |
+| `vant escrow` | Escrow service | |
 
 ### vant repos
 
@@ -647,6 +657,106 @@ Validate brain files:
 vant validate                # Validate all files
 vant validate --schema      # Schema validation
 vant validate --integrity  # Check file integrity
+```
+
+### vant qos
+
+QoS (Quality of Service) rate limiting:
+
+```bash
+vant qos                  # Show QoS status
+vant qos --stats         # View rate limit stats
+vant qos --reset         # Reset counters
+```
+
+### vant sandbox
+
+Capability sandbox for security:
+
+```bash
+vant sandbox             # Show sandbox status
+vant sandbox --allow    # Enable capabilities
+vant sandbox --deny    # Restrict capabilities
+```
+
+### vant security
+
+Security utilities:
+
+```bash
+vant security            # Run security audit
+vant security --scan    # Scan for vulnerabilities
+vant security --fix     # Auto-fix issues
+```
+
+### vant vaf
+
+Validation-Authorization-Framework (input validation):
+
+```bash
+vant vaf                 # Show VAF status
+vant vaf --validate     # Validate inputs
+vant vaf --rules        # List validation rules
+```
+
+### vant habitat
+
+Runtime environment management:
+
+```bash
+vant habitat             # Show environment info
+vant habitat --init     # Initialize environment
+vant habitat --status   # Check runtime status
+```
+
+### vant legal
+
+Compliance and legal tools:
+
+```bash
+vant legal               # Compliance check
+vant legal --audit      # Audit compliance
+vant legal --report     # Generate report
+```
+
+### vant consensus
+
+Consensus mechanisms for multi-agent:
+
+```bash
+vant consensus           # Show consensus status
+vant consensus --vote   # Submit vote
+vant consensus --tally # Tally results
+```
+
+### vant framework
+
+Agent framework utilities:
+
+```bash
+vant framework           # Framework info
+vant framework --list   # List available frameworks
+vant framework --init  # Initialize framework
+```
+
+### vant runop
+
+Run operator for task execution:
+
+```bash
+vant runop               # Show operators
+vant runop --execute    # Execute operation
+vant runop --status    # Check status
+```
+
+### vant escrow
+
+Escrow service for operations:
+
+```bash
+vant escrow              # Escrow status
+vant escrow --hold      # Hold operation
+vant escrow --release  # Release held operation
 ```
 
 ## Testing Commands
