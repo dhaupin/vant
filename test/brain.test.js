@@ -88,7 +88,7 @@ test('brain module loads', () => {
 
 test('brain has loadBrain function', () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
-    return { success: typeof brain.loadBrain === 'function' };
+    return { success: typeof brain.load === 'function' };
 });
 
 test('brain has loadCorpus function', () => {
