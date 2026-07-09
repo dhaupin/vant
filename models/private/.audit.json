@@ -391,6 +391,16 @@
       },
       "data": {},
       "hash": "91d4ada258a05a71"
+    },
+    {
+      "timestamp": "2026-07-09T01:18:10.465Z",
+      "action": {
+        "type": "learn",
+        "key": "ttl_test_learn",
+        "agent": "agent_mrctib6j80b5748670c5c3bb326b7224e17f0cf9e76adb6458218981"
+      },
+      "data": {},
+      "hash": "2a77fb23436501a4"
     }
   ]
 }
