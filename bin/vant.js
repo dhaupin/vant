@@ -271,18 +271,27 @@ if (cmd === 'learn' || cmd === 'remember') {
             
             if (cmd === 'learn') {
                 const options = ttl ? { ttl } : {};
-                const result = await vant.learn(key, content || '', options);
+                const result = await vant.withSecurity(
+                    () => vant.learn(key, content || '', options),
+                    { type: 'write', key, args: { key, content: content || '' } }
+                );
                 console.log(`✅ Learned: ${key}`, result.ttl ? `(TTL: ${result.ttl}ms)` : '');
             } else {
                 // remember
                 if (content) {
                     // Store
                     const options = ttl ? { ttl } : {};
-                    const result = await vant.remember(key, content, options);
+                    const result = await vant.withSecurity(
+                        () => vant.remember(key, content, options),
+                        { type: 'write', key, args: { key, content } }
+                    );
                     console.log(`✅ Remembered: ${key}`, result.ttl ? `(TTL: ${result.ttl}ms)` : '');
                 } else {
                     // Recall
-                    const result = await vant.remember(key);
+                    const result = await vant.withSecurity(
+                        () => vant.remember(key),
+                        { type: 'read', key, args: { key } }
+                    );
                     console.log(result || '(not found)');
                 }
             }
