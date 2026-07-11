@@ -533,6 +533,160 @@
       },
       "data": {},
       "hash": "4d1d5de9837c2c82"
+    },
+    {
+      "timestamp": "2026-07-11T05:48:51.273Z",
+      "action": "test-action",
+      "data": {
+        "detail": "testing audit"
+      },
+      "hash": "4c02faad65db5439"
+    },
+    {
+      "timestamp": "2026-07-11T06:23:08.290Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "help_human",
+        "context": {
+          "requiresConsent": true,
+          "consentGiven": true,
+          "benefitScore": 0.8,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783750988290,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "consent": {
+            "passed": true,
+            "note": "Consent given"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.8,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "c15f69a4b2391f8b"
+    },
+    {
+      "timestamp": "2026-07-11T06:23:35.925Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "help",
+        "context": {
+          "requiresConsent": true,
+          "consentGiven": true,
+          "benefitScore": 0.9,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783751015925,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "consent": {
+            "passed": true,
+            "note": "Consent given"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.9,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "e743ed3286ef11e7"
+    },
+    {
+      "timestamp": "2026-07-11T06:27:12.039Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "share_knowledge",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.9,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783751232039,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.9,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "a696a6df1a3d3fa6"
+    },
+    {
+      "timestamp": "2026-07-11T06:27:12.040Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "harm_human",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": -0.5,
+          "harmPotential": 0.9
+        },
+        "timestamp": 1783751232040,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": false,
+            "score": -0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": false,
+            "potential": 0.9,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": false,
+        "reason": "Harm potential too high"
+      },
+      "hash": "cb0e4f631df55953"
+    },
+    {
+      "timestamp": "2026-07-11T06:27:12.043Z",
+      "action": "test",
+      "data": {
+        "action": "full_system_test"
+      },
+      "hash": "09e734cc53e6605c"
     }
   ]
 }
