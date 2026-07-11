@@ -13896,6 +13896,28 @@
       },
       "data": {},
       "hash": "a25981a515301193"
+    },
+    {
+      "timestamp": "2026-07-11T10:05:05.742Z",
+      "action": {
+        "component": "fatal",
+        "op": "unhandledRejection",
+        "reason": "ReferenceError: sanitized is not defined",
+        "time": 1783764305740
+      },
+      "data": {},
+      "hash": "3f7502dd5bd09a34"
+    },
+    {
+      "timestamp": "2026-07-11T10:05:19.522Z",
+      "action": {
+        "component": "fatal",
+        "op": "unhandledRejection",
+        "reason": "ReferenceError: sanitized is not defined",
+        "time": 1783764319519
+      },
+      "data": {},
+      "hash": "dbdc56445c4f5595"
     }
   ]
 }
