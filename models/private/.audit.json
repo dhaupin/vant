@@ -521,6 +521,18 @@
       },
       "data": {},
       "hash": "6582d496e8b58b56"
+    },
+    {
+      "timestamp": "2026-07-11T05:40:34.647Z",
+      "action": {
+        "component": "fatal",
+        "op": "uncaughtException",
+        "error": "server.close is not a function",
+        "origin": "uncaughtException",
+        "time": 1783748434647
+      },
+      "data": {},
+      "hash": "4d1d5de9837c2c82"
     }
   ]
 }
