@@ -3,10 +3,15 @@
     "neurons": {
       "asyncTest": true
     },
-    "synapses": {},
+    "synapses": {
+      "identity": {
+        "start": 1
+      }
+    },
     "attention": {
-      "identity": 0.2
+      "identity": 0.2,
+      "start": 0.2
     }
   },
-  "updated": "2026-07-09T01:52:59.570Z"
+  "updated": "2026-07-11T04:51:03.791Z"
 }
