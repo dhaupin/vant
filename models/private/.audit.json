@@ -1433,6 +1433,210 @@
         "reason": "Consent required"
       },
       "hash": "f44e2b2b79f6b433"
+    },
+    {
+      "timestamp": "2026-07-11T08:28:38.065Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783758518064,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "1e1887eedf64afd9"
+    },
+    {
+      "timestamp": "2026-07-11T08:30:39.609Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "full_test",
+        "context": {
+          "benefitScore": 0.9,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783758639608,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.9,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "a7d085d0300c596d"
+    },
+    {
+      "timestamp": "2026-07-11T08:30:39.611Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "discover",
+        "context": {
+          "requiresConsent": true,
+          "consentGiven": true,
+          "benefitScore": 0.8,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783758639611,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "consent": {
+            "passed": true,
+            "note": "Consent given"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.8,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "da9e6724a3b34254"
+    },
+    {
+      "timestamp": "2026-07-11T08:30:39.614Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_invite",
+        "context": {
+          "requiresConsent": true,
+          "benefitScore": 0.8,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783758639613,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "consent": {
+            "passed": false,
+            "note": "No consent"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.8,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": false,
+        "reason": "Consent required"
+      },
+      "hash": "2df969e4031430f9"
+    },
+    {
+      "timestamp": "2026-07-11T08:30:39.615Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783758639615,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "0803e31edb98bd5a"
+    },
+    {
+      "timestamp": "2026-07-11T08:30:39.617Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_quarantine",
+        "context": {
+          "requiresConsent": true,
+          "benefitScore": 0.9,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783758639617,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "consent": {
+            "passed": false,
+            "note": "No consent"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.9,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": false,
+        "reason": "Consent required"
+      },
+      "hash": "7952e4af84160914"
     }
   ]
 }
