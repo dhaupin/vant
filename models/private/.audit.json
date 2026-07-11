@@ -13918,6 +13918,1896 @@
       },
       "data": {},
       "hash": "dbdc56445c4f5595"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.790Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395788,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "27b6a4d3e67b9d8e"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.795Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395793,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "449b5b128bf5808c"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.799Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395798,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "7f2836fc8a0fc689"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.804Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395802,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "766a41bf080c1c86"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.808Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395806,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "c41dcc465ae2e654"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.812Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395811,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "5cb75c52f4acbd57"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.817Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395816,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "1d74fe6ad7f008ea"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.822Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395820,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "ff88a93f57be3534"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.826Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395824,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "8cd98dc60fc244c2"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.830Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395828,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "7c9ff66036f14373"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.834Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395832,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "0c0f06ddf0361853"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.839Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395836,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "ed060f5b8c993b88"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.843Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395841,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "8bbae6aac6975ae1"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.847Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395845,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "8580e4f56d2fbcc8"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.850Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395849,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "ed9fcb336949c09a"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.854Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395853,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "7a0ebbf82be82fd5"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.858Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395857,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "1f31577501c87afd"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.863Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395861,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "d3620951c99104f0"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.867Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395865,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "b3e34a4f299e7592"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.871Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395869,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "52ae121e58dbf798"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.875Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395873,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "5063995ad8488a4b"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.879Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395877,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "931c0d48e0eaa5ab"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.883Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395881,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "3d3277473974bc4b"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.888Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395886,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "40364a8f814e65b5"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.892Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395890,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "313af3b6f6498e0f"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.896Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395895,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "1de6e709069f624f"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.900Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395899,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "3f2bde8839b2f695"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.904Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395903,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "2bf1220597182f43"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.909Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395907,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "49e507683ecb07bc"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.913Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783764395911,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "8368e391b6fb76c7"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.917Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g0",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395915,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "fff37d89166ce5c9"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.921Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g1",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395919,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "4259dc67992c9cad"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.924Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g2",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395923,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "2950032e5e5c19f8"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.928Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g3",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395926,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "2b9a71531cee61ec"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.932Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g4",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395930,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "2bae191dc501995c"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.935Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g5",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395934,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "71d4fddd4937db1b"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.938Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g6",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395937,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "9511470214c57e8e"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.942Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g7",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395940,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "b3493579857ad1c2"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.945Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g8",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395944,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "f43e361c91d355ab"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.949Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g9",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395948,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "a23d0654424eb5ab"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.953Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g10",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395951,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "7ff51c20cac52bed"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.956Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g11",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395955,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "7eb074f23fedf8ba"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.960Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g12",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395958,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "471fa428718db93b"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.963Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g13",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395961,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "acad5497ba350b44"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.967Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g14",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395966,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "2b2c2b12362df2f6"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.971Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g15",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395969,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "df8145473ecdb324"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.974Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g16",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395972,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "b9e2f16ae4974058"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.977Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g17",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395976,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "8df80d6d0f17954f"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.981Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g18",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395979,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "ad41d17087f19800"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.985Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g19",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395983,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "a608223f3317277d"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.988Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g20",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395987,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "0c7b3d84e3ab038e"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.992Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g21",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395990,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "78532a8ca431a577"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.995Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g22",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395994,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "239468c4e65b08a4"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:35.999Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g23",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764395997,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "e6585094afb52735"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:36.003Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g24",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764396001,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "53f5d375de0cb2e1"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:36.007Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g25",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764396005,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "68e9604ce8358d35"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:36.010Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g26",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764396009,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "2d9aaa8b684a1c24"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:36.014Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g27",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764396012,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "de94b755c0e2a8ae"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:36.017Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g28",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764396016,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "5cd861c4321bbb05"
+    },
+    {
+      "timestamp": "2026-07-11T10:06:36.021Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "g29",
+        "context": {
+          "benefitScore": 0.5,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783764396020,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.5,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "1da711f9000c9454"
     }
   ]
 }
