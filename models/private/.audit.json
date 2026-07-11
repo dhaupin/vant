@@ -2653,6 +2653,106 @@
         "reason": ""
       },
       "hash": "a664c39bd477ffbe"
+    },
+    {
+      "timestamp": "2026-07-11T08:52:00.200Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "test",
+        "context": {
+          "benefitScore": 0.8,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783759920199,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.8,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "cc75e49bb7c13054"
+    },
+    {
+      "timestamp": "2026-07-11T08:52:00.202Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "discover",
+        "context": {
+          "requiresConsent": true,
+          "consentGiven": true,
+          "benefitScore": 0.8,
+          "harmPotential": 0.1
+        },
+        "timestamp": 1783759920202,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "consent": {
+            "passed": true,
+            "note": "Consent given"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.8,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.1,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "18dd7fe4e7a3bf6d"
+    },
+    {
+      "timestamp": "2026-07-11T08:52:00.204Z",
+      "action": "governance:decide",
+      "data": {
+        "action": "forum_publish",
+        "context": {
+          "requiresConsent": false,
+          "benefitScore": 0.7,
+          "harmPotential": 0.2
+        },
+        "timestamp": 1783759920204,
+        "checks": {
+          "transparency": {
+            "passed": true,
+            "note": "All actions are logged"
+          },
+          "benefit": {
+            "passed": true,
+            "score": 0.7,
+            "note": "Benefit score check"
+          },
+          "nonHarm": {
+            "passed": true,
+            "potential": 0.2,
+            "note": "Harm potential check"
+          }
+        },
+        "allowed": true,
+        "reason": ""
+      },
+      "hash": "2155a8abc95cb95c"
     }
   ]
 }
