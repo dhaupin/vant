@@ -4,6 +4,72 @@ What I learned this session
 
 ---
 
+## 2026-07-13: Port & CLI Fixes
+
+### Fixes Applied
+
+1. **server.start() → server.listen()**
+   - lib/vant.js line 1056: was calling `server.start()` but server module exports `listen`
+   - Fixed to use `server.listen({ port, debug })`
+   - Headless REST API now works on port 3000
+
+2. **CLI port not passed to lib/mcp.js**
+   - bin/mcp.js: parsed `-p` flag but didn't pass port to `mcp.start()`
+   - lib/mcp.js: `start()` function didn't accept port parameter
+   - Fixed both: CLI now passes `{ port }` and lib/mcp.js accepts `options.port`
+
+3. **CLI help said wrong default port**
+   - bin/mcp.js help said "default: 3100" but actual default is 3457
+   - Fixed help text to say "default: 3457"
+
+### Verified Working
+- MCP server: 160 tools on port 3457 (or custom port)
+- Headless REST: /health, /tools, /brain on port 3000
+- Both servers can run simultaneously
+
+### Port Summary
+| Service | Default Port |
+|---------|--------------|
+| Headless REST | 3000 |
+| MCP Server | 3457 |
+
+---
+
+## 2026-07-13: REST API Fixes
+
+### Bug: API server using wrong Server API
+
+1. **Server.route() instead of server.get/post()**
+   - lib/api.js was calling `server.get()` and `server.post()` directly
+   - Server class uses `server.route(pattern, handler, method)`
+   - Fixed all 13 route definitions in startREST() and startMCP()
+
+2. **Missing res.json() method**
+   - lib/server.js Server.Response didn't have json() method
+   - Added: `json(obj)` method that sets Content-Type and stringifies
+
+3. **Missing req.body and req.params**
+   - Server wasn't passing body/params to route handlers
+   - Added body parsing and param extraction in route handler call
+   - Router.match() now extracts :param values
+
+4. **REST endpoints now working**
+   - GET /health, /brain, /brain/ls, /brain/:name
+   - POST /brain/:name (save brain)
+   - Streams: /streams, /streams/:id, etc.
+   - MCP: /mcp/tools, /mcp/exec
+
+### Architecture: MCP ↔ API ↔ Vant.js
+
+| Component | Role |
+|-----------|------|
+| vant.js | Core runtime, brain, security chain |
+| mcp.js | MCP protocol server (160 tools) |
+| api.js | REST wrapper around MCP |
+| server.js | HTTP server with routing |
+
+---
+
 ## 2026-07-07: Flow/Usability Fixes
 
 ### Fixes Applied

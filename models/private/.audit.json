@@ -15808,6 +15808,61 @@
         "reason": ""
       },
       "hash": "1da711f9000c9454"
+    },
+    {
+      "timestamp": "2026-07-13T03:04:45.500Z",
+      "action": {
+        "component": "fatal",
+        "op": "unhandledRejection",
+        "reason": "Error [ERR_HTTP_HEADERS_SENT]: Cannot write headers after they are sent to the client",
+        "time": 1783911885497
+      },
+      "data": {},
+      "hash": "e2654d405c5619fd"
+    },
+    {
+      "timestamp": "2026-07-13T03:26:38.570Z",
+      "action": {
+        "component": "fatal",
+        "op": "unhandledRejection",
+        "reason": "Error [ERR_HTTP_HEADERS_SENT]: Cannot write headers after they are sent to the client",
+        "time": 1783913198567
+      },
+      "data": {},
+      "hash": "87af86d84240c0af"
+    },
+    {
+      "timestamp": "2026-07-13T03:26:42.523Z",
+      "action": {
+        "component": "fatal",
+        "op": "unhandledRejection",
+        "reason": "Error [ERR_HTTP_HEADERS_SENT]: Cannot write headers after they are sent to the client",
+        "time": 1783913202520
+      },
+      "data": {},
+      "hash": "c78561e204ebbb44"
+    },
+    {
+      "timestamp": "2026-07-13T03:26:42.532Z",
+      "action": {
+        "component": "fatal",
+        "op": "unhandledRejection",
+        "reason": "Error [ERR_HTTP_HEADERS_SENT]: Cannot write headers after they are sent to the client",
+        "time": 1783913202530
+      },
+      "data": {},
+      "hash": "f57d5b798366b004"
+    },
+    {
+      "timestamp": "2026-07-13T03:26:46.503Z",
+      "action": {
+        "component": "fatal",
+        "op": "unhandledRejection",
+        "reason": "Error [ERR_HTTP_HEADERS_SENT]: Cannot write headers after they are sent to the client",
+        "time": 1783913206501
+      },
+      "data": {},
+      "hash": "f08182d478b18d2b"
     }
   ]
 }
