@@ -45,23 +45,28 @@ async function run() {
             console.log('Sending to:', to);
             console.log('Message:', message);
         } else if (subcmd === 'list' || subcmd === 'ls' || subcmd === 'inbox') {
-            console.log('Messages: (use msg.list() for actual messages)');
+            const messages = await msg.list();
+            console.log('Messages:', messages.length);
+            messages.slice(0, 5).forEach(m => console.log('  ' + m.id + ': ' + (m.content || '').slice(0, 50)));
         } else if (subcmd === 'read' || subcmd === 'show' || subcmd === 'view') {
             const id = args[1];
             if (!id) {
                 console.error('Usage: vant msg read <id>');
                 process.exit(1);
             }
-            console.log('Reading message:', id);
+            const message = await msg.get(id);
+            console.log('Message:', message);
         } else if (subcmd === 'channels' || subcmd === 'chans') {
-            console.log('Channels: (use msg.channels() to list)');
+            const info = await msg.info();
+            console.log('Channels:', Object.keys(info.channels || {}).length);
         } else if (subcmd === 'join' || subcmd === 'subscribe') {
             const channel = args[1];
             if (!channel) {
                 console.error('Usage: vant msg join <channel>');
                 process.exit(1);
             }
-            console.log('Joining channel:', channel);
+            const result = await msg.join(channel);
+            console.log('Joined channel:', channel);
         } else if (subcmd === 'leave' || subcmd === 'unsubscribe') {
             const channel = args[1];
             if (!channel) {
@@ -70,7 +75,8 @@ async function run() {
             }
             console.log('Leaving channel:', channel);
         } else if (subcmd === 'unread' || subcmd === 'count') {
-            console.log('Unread: 0');
+            const info = await msg.info();
+            console.log('Unread:', info.unread || 0);
         } else {
             console.log('Usage: vant msg <command>');
             process.exit(1);

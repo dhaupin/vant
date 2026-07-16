@@ -63,13 +63,20 @@ async function run() {
             }
             console.log('Deleting:', key);
         } else if (subcmd === 'keys' || subcmd === 'list') {
-            console.log('Storage keys: (use Storage.keys() to list)');
+            const keys = await storage.list();
+            console.log('Storage keys:', keys.length);
+            keys.slice(0, 10).forEach(k => console.log('  ' + k));
         } else if (subcmd === 'stats' || subcmd === 'info') {
+            const keys = await storage.list();
             console.log('Storage stats:');
             console.log('  Backend: brain');
-            console.log('  (use Storage.stats() for actual stats)');
+            console.log('  Keys:', keys.length);
         } else if (subcmd === 'clear' || subcmd === 'reset' || subcmd === 'wipe') {
-            console.log('Clearing storage...');
+            const keys = await storage.list();
+            for (const key of keys) {
+                await storage.delete(key);
+            }
+            console.log('Storage cleared');
         } else {
             console.log('Usage: vant storage <command>');
             process.exit(1);

@@ -20,7 +20,7 @@ const teams = require('../lib/teams');
 const args = process.argv.slice(2);
 const cmd = args[0];
 
-function main() {
+async function main() {
     switch (cmd) {
         case 'create':
             // vant teams create <name> [--plan <plan>]
@@ -134,9 +134,9 @@ function main() {
                     process.exit(1);
                 }
                 
-                const role = teams.createRole(roleName, { team: roleTeamId, permissions: perms });
+                const role = await teams.createRole(roleName, { team: roleTeamId, permissions: perms });
                 console.log('Role created:', role.name, '(' + role.id + ')');
-                console.log('  Permissions:', role.permissions || role.permissions);
+                console.log('  Permissions:', role.permissions);
             } else {
                 console.log('Usage: vant teams role create <team-id> <name> [--perms <perms>]');
             }
@@ -204,4 +204,4 @@ function main() {
     }
 }
 
-main();
+main().catch(console.error);
