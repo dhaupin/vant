@@ -175,6 +175,7 @@ const COMMANDS = {
     branch: 'branch-manager.js',
     repos: 'repos.js',
     teams: 'teams.js',
+    governance: 'governance.js',
     
     // Ecosystem management
     skills: 'skills.js',
@@ -327,6 +328,7 @@ Additional:
   vant branch    Branch management
   vant repos     External repo management
   vant teams     Organization/Team management
+  vant governance Governance decisions
 
 Ecosystem:
   vant skills    Skill management
