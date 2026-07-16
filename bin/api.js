@@ -25,26 +25,40 @@ Usage:
     process.exit(0);
 }
 
-function run() {
+async function run() {
     const api = require('../lib/api');
     
     if (subcmd === 'status' || subcmd === 'stat' || subcmd === 'info') {
-        console.log('API status: (use api.status() to get)');
+        const status = await api.getStatus();
+        console.log('API Status:');
+        console.log('  Running:', status.running || false);
+        console.log('  Port:', status.port || 'N/A');
+        console.log('  Mode:', status.mode || 'N/A');
     } else if (subcmd === 'routes' || subcmd === 'list' || subcmd === 'ls') {
-        console.log('API routes: (use api.routes() to list)');
+        // MCP methods as "routes"
+        const mcp = require('../lib/mcp');
+        const tools = mcp.listTools();
+        console.log('API Routes (MCP tools):', tools.length);
+        tools.slice(0, 10).forEach(t => console.log('  ' + t.name));
+        if (tools.length > 10) console.log('  ... and', tools.length - 10, 'more');
     } else if (subcmd === 'call' || subcmd === 'request' || subcmd === 'get') {
         const endpoint = args[1];
         if (!endpoint) {
             console.error('Usage: vant api call <endpoint>');
             process.exit(1);
         }
-        console.log('Calling endpoint:', endpoint);
+        const mcp = require('../lib/mcp');
+        const result = await mcp.call(endpoint, {});
+        console.log('Result:', JSON.stringify(result, null, 2));
     } else if (subcmd === 'docs' || subcmd === 'documentation') {
-        console.log('API docs: (use api.docs() to get)');
+        const mcp = require('../lib/mcp');
+        const tools = mcp.listTools();
+        console.log('API Docs:');
+        console.log('  Total MCP tools:', tools.length);
     } else {
         console.log('Usage: vant api <command>');
         process.exit(1);
     }
 }
 
-run();
+run().catch(console.error);

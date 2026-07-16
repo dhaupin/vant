@@ -25,31 +25,40 @@ Usage:
     process.exit(0);
 }
 
-function run() {
+async function run() {
     const escrow = require('../lib/escrow');
     
     if (subcmd === 'status' || subcmd === 'stat' || subcmd === 'info') {
-        console.log('Escrow status: (use escrow.status() to get)');
+        const status = await escrow.getStatus();
+        console.log('Escrow Status:');
+        console.log('  Held items:', status.held || 0);
+        console.log('  Budget used:', status.used || 0);
+        console.log('  Budget total:', status.budget || 0);
     } else if (subcmd === 'hold' || subcmd === 'lock' || subcmd === 'create') {
         const id = args[1];
         if (!id) {
             console.error('Usage: vant escrow hold <id>');
             process.exit(1);
         }
-        console.log('Putting in escrow:', id);
+        const result = await escrow.hold(id);
+        console.log('Held:', id);
+        console.log('  Result:', result.held ? 'SUCCESS' : 'FAILED');
     } else if (subcmd === 'release' || subcmd === 'unlock' || subcmd === 'unhold') {
         const id = args[1];
         if (!id) {
             console.error('Usage: vant escrow release <id>');
             process.exit(1);
         }
-        console.log('Releasing from escrow:', id);
+        const result = await escrow.release(id);
+        console.log('Released:', id);
+        console.log('  Result:', result.released ? 'SUCCESS' : 'FAILED');
     } else if (subcmd === 'list' || subcmd === 'ls' || subcmd === 'all') {
-        console.log('Escrow items: (use escrow.list() to list)');
+        const status = await escrow.getStatus();
+        console.log('Escrow items:', status.items || []);
     } else {
         console.log('Usage: vant escrow <command>');
         process.exit(1);
     }
 }
 
-run();
+run().catch(console.error);

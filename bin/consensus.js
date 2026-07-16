@@ -27,19 +27,24 @@ Usage:
     process.exit(0);
 }
 
-function run() {
+async function run() {
     const consensus = require('../lib/consensus');
     
     if (subcmd === 'status' || subcmd === 'stat' || subcmd === 'info') {
+        const stats = await consensus.getStats();
         console.log('Consensus status:');
-        console.log('  (use consensus.status() for actual status)');
+        console.log('  Proposals:', stats.proposals || 0);
+        console.log('  Votes:', stats.votes || 0);
+        console.log('  Resolved:', stats.resolved || 0);
     } else if (subcmd === 'propose' || subcmd === 'proposal') {
         const data = args.slice(1).join(' ');
         if (!data) {
             console.error('Usage: vant consensus propose <data>');
             process.exit(1);
         }
-        console.log('Proposing:', data);
+        const result = await consensus.create(data);
+        console.log('Proposed:', data);
+        console.log('  ID:', result.id);
     } else if (subcmd === 'vote') {
         const id = args[1];
         const vote = args[2];
@@ -47,15 +52,19 @@ function run() {
             console.error('Usage: vant consensus vote <id> <yay|nay>');
             process.exit(1);
         }
-        console.log('Voting', vote, 'on proposal:', id);
+        const result = await consensus.vote(id, vote);
+        console.log('Voted', vote, 'on proposal:', id);
+        console.log('  Result:', result.voted ? 'SUCCESS' : 'FAILED');
     } else if (subcmd === 'leaders' || subcmd === 'delegate') {
-        console.log('Current leaders: (use consensus.leaders() for list)');
+        const list = await consensus.list();
+        console.log('Current leaders:', list.length);
     } else if (subcmd === 'history' || subcmd === 'log') {
-        console.log('Consensus history: (use consensus.history() for list)');
+        const list = await consensus.list();
+        console.log('Consensus history:', list.length, 'proposals');
     } else {
         console.log('Usage: vant consensus <command>');
         process.exit(1);
     }
 }
 
-run();
+run().catch(console.error);
