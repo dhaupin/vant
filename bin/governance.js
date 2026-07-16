@@ -14,7 +14,7 @@ const governance = require('../lib/governance');
 const args = process.argv.slice(2);
 const cmd = args[0];
 
-function main() {
+async function main() {
     switch (cmd) {
         case 'decide':
             // vant governance decide <topic> <proposal>
@@ -26,10 +26,11 @@ function main() {
                 process.exit(1);
             }
             
-            const decision = governance.decide(topic, proposal);
+            const decision = await governance.decide(topic, { benefitScore: 10, consentGiven: true, proposal });
             console.log('Decision:', decision.allowed ? 'APPROVED' : 'DENIED');
             console.log('  Topic:', topic);
             console.log('  Proposal:', proposal);
+            if (decision.reason) console.log('  Reason:', decision.reason);
             break;
             
         case 'status':
@@ -75,4 +76,4 @@ function main() {
     }
 }
 
-main();
+main().catch(console.error);
