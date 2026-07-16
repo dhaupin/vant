@@ -174,6 +174,7 @@ const COMMANDS = {
     audit: 'audit.js',
     branch: 'branch-manager.js',
     repos: 'repos.js',
+    teams: 'teams.js',
     
     // Ecosystem management
     skills: 'skills.js',
@@ -325,6 +326,7 @@ Additional:
   vant clean     Unified cleanup (logs, tmp, cache, prune)
   vant branch    Branch management
   vant repos     External repo management
+  vant teams     Organization/Team management
 
 Ecosystem:
   vant skills    Skill management
