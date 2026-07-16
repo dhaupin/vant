@@ -88,7 +88,7 @@ test('brain module loads', () => {
 
 test('brain has loadBrain function', () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
-    return { success: typeof brain.loadBrain === 'function' };
+    return { success: typeof brain.load === 'function' };
 });
 
 test('brain has loadCorpus function', () => {
@@ -362,7 +362,7 @@ test('brain has get function', () => {
 
 test('brain get returns module', () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const mod = brain.get('storage');
+    const mod = brain.get('storage', 'config', { userCtx: { userId: 'test', roles: ['admin'] } });
     return { success: !!mod || mod === null };
 });
 

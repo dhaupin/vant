@@ -19,14 +19,14 @@ let mcp = null;
 
 async function loadModules() {
     try {
-        mcp = require('./lib/mcp');
+        mcp = require('../lib/mcp');
         console.log('[agent] Using MCP module');
     } catch (e) {
         console.log('[agent] MCP not available, using direct');
     }
     
     try {
-        agents = require('./lib/agents');
+        agents = require('../lib/agents');
         console.log('[agent] Using agents module');
     } catch (e) {
         console.error('[agent] No agent module:', e.message);

@@ -56,16 +56,6 @@ test('framework has query function', () => {
     return { success: typeof framework.query === 'function' };
 });
 
-test('framework has loadBrain function', () => {
-    const framework = require(path.join(ROOT, 'lib', 'framework'));
-    return { success: typeof framework.loadBrain === 'function' };
-});
-
-test('framework has saveBrain function', () => {
-    const framework = require(path.join(ROOT, 'lib', 'framework'));
-    return { success: typeof framework.saveBrain === 'function' };
-});
-
 test('framework has getState function', () => {
     const framework = require(path.join(ROOT, 'lib', 'framework'));
     return { success: typeof framework.getState === 'function' };

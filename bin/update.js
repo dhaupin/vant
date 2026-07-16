@@ -21,4 +21,4 @@ if (args[0] === '-h' || args[0] === '--help') {
  */
 
 const update = require('../lib/update');
-update.check().catch(console.error);
+update.checkForUpdate().catch(console.error);

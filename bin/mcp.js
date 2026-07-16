@@ -40,10 +40,10 @@ Options:
   -h, --help     Show this help
   -s, --stdio   Run in stdio mode (for AI agents)
   -S, --server  Run as HTTP server (default)
-  -p, --port    Port for server mode (default: 3100)
+  -p, --port    Port for server mode (default: 3457)
 
 Environment:
-  VANT_MCP_PORT    Port (default: 3100)
+  VANT_MCP_PORT    Port (default: 3457)
   GITHUB_TOKEN    GitHub auth for sync
 
 Authentication:
@@ -71,7 +71,7 @@ Resolution:
 
 Headless Mode:
   Use Vant as library without MCP:
-    const vant = require('./lib/vant');
+    const vant = require('../lib/vant');
     await vant.startHeadless({ port: 3000 });
   Or: process.env.VANT_MODE=headless
 `);
@@ -106,8 +106,9 @@ if (mode === 'stdio') {
         }
     });
 } else {
-    // Server mode
-    mcp.start().then(({ port }) => {
+    // Server mode - pass port to mcp.start()
+    const options = port ? { port } : {};
+    mcp.start(options).then(({ port }) => {
         console.log(`[MCP] Server running on port ${port}`);
         console.log(`[MCP] Tools: ${mcp.listTools().length} available`);
     }).catch(err => {

@@ -11,8 +11,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const brain = require('./lib/brain');
-const stego = require('./lib/stego');
+const brain = require('../lib/brain');
+const stego = require('../lib/stego');
 
 const CORPUS_DIR = brain.getBrainPath();
 const PUBLIC_DIR = brain.getPublicPath();

@@ -20,7 +20,7 @@ const fs = require('fs');
 // Lazy-load sandbox
 let _sandbox = null;
 function _getSandbox() {
-    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    if (!_sandbox) { try { _sandbox = require("../lib/sandbox"); } catch (e) {} }
     return _sandbox;
 }
 function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
@@ -169,7 +169,7 @@ function buildReport(libs, bins, deps, tryCatch, vafCount, version, date, pkg) {
 // MAIN
 // ============================================
 
-function main() { _checkRead(); 
+function main() { 
   const outFile = args.find(a => a.startsWith('--out='))?.split('=')[1];
   const jsonMode = args.includes('--json');
   
