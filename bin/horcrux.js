@@ -78,7 +78,7 @@ async function run() {
         console.log('Restored:', result.restored.join(', '));
         
     } else if (subcmd === 'create') {
-        const outputPath = args[1] || path.join(__dirname, '..', 'models', 'horcrux', `brain-${Date.now()}.svg`);
+        const outputPath = args[1] || path.join(__dirname, '..', 'models', 'public', 'boot', `brain-${Date.now()}.svg`);
         const password = args[2]; // Must be provided or via secret.js
         
         if (!password) {
@@ -91,7 +91,7 @@ async function run() {
         console.log('Creating horcrux:', outputPath);
         
         const transform = require('../lib/transform');
-        const result = await transform.toHorcruxFile(outputPath, { password });
+        const result = await transform.toHorcrux(outputPath, { password });
         
         console.log('\n✅ Created!');
         console.log('Path:', result.path);
