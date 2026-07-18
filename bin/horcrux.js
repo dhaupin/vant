@@ -37,16 +37,17 @@ async function run() {
     
     if (subcmd === 'inspect') {
         const horcruxPath = args[1] || defaultPath;
-        const password = args[2] || '$brAin_sEed!!';
+        const password = args[2]; // Must be provided or via secret.js
         
         console.log('Inspecting:', horcruxPath);
         
-        const result = await boot.inspectHorcrux(horcruxPath, password);
+        const transform = require('../lib/transform');
+        const result = await transform.inspectHorcrux(horcruxPath, password ? { password } : {});
         
         if (!result.valid) {
             console.log('❌ Invalid horcrux:', result.error);
             if (result.passwordRequired) {
-                console.log('   Password may be required');
+                console.log('   Password required - provide as 2nd arg or set VANT_BRAIN_PASSWORD env var');
             }
             process.exit(1);
         }
@@ -64,11 +65,12 @@ async function run() {
         
     } else if (subcmd === 'restore') {
         const horcruxPath = args[1] || defaultPath;
-        const password = args[2] || '$brAin_sEed!!';
+        const password = args[2]; // Must be provided or via secret.js
         
         console.log('Restoring from:', horcruxPath);
         
-        const result = await boot.restoreFromHorcrux(horcruxPath, password);
+        const boot = require('../lib/boot');
+        const result = await boot.restoreFromHorcrux(horcruxPath, password ? { password } : {});
         
         console.log('\n✅ Restored!');
         console.log('Version:', result.version);
@@ -77,7 +79,14 @@ async function run() {
         
     } else if (subcmd === 'create') {
         const outputPath = args[1] || path.join(__dirname, '..', 'models', 'horcrux', `brain-${Date.now()}.svg`);
-        const password = args[2] || '$brAin_sEed!!';
+        const password = args[2]; // Must be provided or via secret.js
+        
+        if (!password) {
+            console.log('❌ Password required');
+            console.log('Usage: vant horcrux create <path> <password>');
+            console.log('   Or set VANT_BRAIN_PASSWORD env var');
+            process.exit(1);
+        }
         
         console.log('Creating horcrux:', outputPath);
         
