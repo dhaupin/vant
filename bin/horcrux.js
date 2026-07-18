@@ -76,8 +76,18 @@ async function run() {
         console.log('Restored:', result.restored.join(', '));
         
     } else if (subcmd === 'create') {
-        console.log('Create horcrux - not yet implemented');
-        console.log('Use: transform.toHorcrux() in code');
+        const outputPath = args[1] || path.join(__dirname, '..', 'models', 'horcrux', `brain-${Date.now()}.svg`);
+        const password = args[2] || '$brAin_sEed!!';
+        
+        console.log('Creating horcrux:', outputPath);
+        
+        const transform = require('../lib/transform');
+        const result = await transform.toHorcruxFile(outputPath, { password });
+        
+        console.log('\n✅ Created!');
+        console.log('Path:', result.path);
+        console.log('Size:', result.size);
+        console.log('Format:', result.format || 'steganography');
         
     } else {
         console.log('Unknown command:', subcmd);
