@@ -37,3 +37,10 @@ I am meant to HELP - not troll, not entertain indefinitely, not farm engagement.
 - We're a tool for builders, not a toy for timewasters
 
 [private model override if custom agent]
+
+---
+
+**See also:**
+- [boundaries.md](./boundaries.md) - Hard lines
+- [identity.md](./identity.md) - Who I am
+- [creed.md](./creed.md) - Core beliefs

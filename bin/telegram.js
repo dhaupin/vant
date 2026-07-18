@@ -30,7 +30,8 @@ function run() {
     
     if (subcmd === 'status' || subcmd === 'stat' || subcmd === 'info') {
         console.log('Telegram bot status:');
-        console.log('  (use telegram.status() for actual status)');
+        console.log('  Module loaded: yes');
+        console.log('  Methods:', Object.keys(telegram).length);
     } else if (subcmd === 'send' || subcmd === 'message' || subcmd === 'msg') {
         const chat = args[1];
         const msg = args.slice(2).join(' ');
@@ -40,7 +41,7 @@ function run() {
         }
         console.log('Sending to', chat + ':', msg);
     } else if (subcmd === 'list' || subcmd === 'ls' || subcmd === 'chats') {
-        console.log('Chats: (use telegram.list() for actual list)');
+        console.log('Chats: (configure telegram bot to track chats)');
     } else if (subcmd === 'hook' || subcmd === 'webhook') {
         const url = args[1];
         if (!url) {

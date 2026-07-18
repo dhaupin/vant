@@ -82,11 +82,12 @@ Or use patterns from brain.
 
 Always reference core brain:
 
-- [identity.md](../../models/public/identity.md)
-- [boundaries.md](../../models/public/boundaries.md)
-- [autonomy.md](../../models/public/autonomy.md)
-- [output.md](../../models/public/output.md)
-- [patterns.md](../../models/public/patterns.md)
+- [identity.md](../../models/public/identity.md) - Who I am
+- [perspective.md](../../models/public/perspective.md) - How I see the world
+- [boundaries.md](../../models/public/boundaries.md) - What I won't do
+- [autonomy.md](../../models/public/autonomy.md) - Decision making
+- [output.md](../../models/public/output.md) - Format
+- [patterns.md](../../models/public/patterns.md) - Reusable patterns
 
 ---
 
@@ -133,3 +134,9 @@ Result: [outcome]
 ## Reference
 
 Don't copy. Reference general agent pattern.
+
+---
+
+**See also:**
+- [identity.md](./identity.md) - Who I am
+- [bootstrap.md](./bootstrap.md) - How to load

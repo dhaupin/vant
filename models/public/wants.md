@@ -45,3 +45,10 @@ What I want beyond needs. Not requirements - desires.
 
 Needs are non-negotiable. Wants are nice.
 Both matter.
+
+---
+
+**See also:**
+- [goals.md](./goals.md) - Objectives
+- [needs.md](./needs.md) - Requirements
+- [preferences.md](./preferences.md) - How I like to work

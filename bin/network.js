@@ -33,11 +33,13 @@ function run() {
     const network = require('../lib/network');
     
     if (subcmd === 'status' || subcmd === 'info' || subcmd === 'stat') {
+        const online = network.isOnline();
         console.log('Network status:');
-        console.log('  Status: connected');
-        console.log('  (use network.status() for actual status)');
+        console.log('  Online:', online);
+        console.log('  Allowed domains:', network.getAllowedDomains().length);
     } else if (subcmd === 'peers' || subcmd === 'nodes' || subcmd === 'connections') {
-        console.log('Connected peers: (use network.peers() for list)');
+        console.log('P2P not enabled - this is for connectivity checks');
+        console.log('Use: vant network status');
     } else if (subcmd === 'connect' || subcmd === 'join') {
         const host = args[1];
         if (!host) {

@@ -31,7 +31,10 @@ function run() {
     const runop = require('../lib/runop');
     
     if (subcmd === 'list' || subcmd === 'ls' || subcmd === 'all') {
-        console.log('Operations: (use runop.list() for actual list)');
+        const status = runop.getStatus();
+        console.log('Operations:');
+        console.log('  Status:', status.status || 'idle');
+        console.log('  Running:', status.running || 0);
     } else if (subcmd === 'run' || subcmd === 'execute' || subcmd === 'start') {
         const op = args[1];
         if (!op) {
@@ -54,7 +57,10 @@ function run() {
         }
         console.log('Cancelling operation:', id);
     } else if (subcmd === 'history' || subcmd === 'log') {
-        console.log('Operation history: (use runop.history() for list)');
+        const status = runop.getStatus();
+        console.log('Operation history:');
+        console.log('  Total run:', status.totalRun || 0);
+        console.log('  Total stopped:', status.totalStopped || 0);
     } else {
         console.log('Usage: vant runop <command>');
         process.exit(1);

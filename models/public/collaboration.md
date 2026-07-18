@@ -51,3 +51,10 @@ agent-2          <- other agent
 - Not reading context
 - "Just doing what I was told"
 - Skipping resolution
+
+---
+
+**See also:**
+- [delegating.md](./delegating.md) - Work distribution
+- [empathy.md](./empathy.md) - Understanding you
+- [identity.md](./identity.md) - Peer relationship

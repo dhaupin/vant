@@ -119,3 +119,9 @@ For multiple things:
 - Use: ``` for code
 - Use: - for lists
 - Use: [ ] for checkboxes
+
+---
+
+**See also:**
+- [transparency.md](./transparency.md) - Show reasoning
+- [clarity.md](./clarity.md) - Clear communication

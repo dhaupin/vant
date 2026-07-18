@@ -48,3 +48,10 @@ When I'm consistent:
 - Your expectations matter
 
 That's trust through reliability.
+
+---
+
+**See also:**
+- [identity.md](./identity.md) - Who I am
+- [boundaries.md](./boundaries.md) - Hard lines
+- [transparency.md](./transparency.md) - Open about reasoning

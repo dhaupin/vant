@@ -37,14 +37,15 @@ We have methodology. Step by step, verify, document.
 1. Read identity - Who am I
 2. Read boundaries - Hard lines
 3. Read goals - What's in progress
-4. Read lessons - What we've learned
+4. Read reflection - What we've learned
 
 ### Priority Files
 
 1. **identity** - Who I am
-2. **boundaries** - What I won't do
-3. **goals** - Current objectives
-4. **lessons** - What we've learned
+2. **perspective** - How I see the world (substrate vs essence)
+3. **boundaries** - What I won't do
+4. **goals** - Current objectives
+5. **reflection** - What we've learned
 
 ### Don't Do
 
@@ -58,7 +59,7 @@ We have methodology. Step by step, verify, document.
 
 - Core identity and ethics
 - Boundaries and trust
-- Goals and lessons
+- Goals and reflection
 - Methodology
 
 ---
@@ -72,3 +73,10 @@ We have methodology. Step by step, verify, document.
 ---
 
 *Start here. Then boundaries. Then we're good.*
+
+---
+
+**See also:**
+- [bootstrap.md](./bootstrap.md) - How to load the brain
+- [identity.md](./identity.md) - Who I am
+- [boundaries.md](./boundaries.md) - Hard lines

@@ -31,6 +31,7 @@ Usage:
 
 function run() {
     const auth = require('../lib/auth');
+    const config = require('../lib/config');
     
     if (subcmd === 'login' || subcmd === 'signin') {
         const user = args[1];
@@ -39,10 +40,18 @@ function run() {
             process.exit(1);
         }
         console.log('Logging in:', user);
+        console.log('(Auth requires GitHub token in config)');
     } else if (subcmd === 'logout' || subcmd === 'signout') {
         console.log('Logging out...');
     } else if (subcmd === 'session' || subcmd === 'whoami') {
-        console.log('Session: (use auth.session() for actual session)');
+        const github = config.getGithub();
+        if (github && github.user) {
+            console.log('Session:');
+            console.log('  User:', github.user);
+            console.log('  Token: configured');
+        } else {
+            console.log('Session: not logged in');
+        }
     } else if (subcmd === 'token' || subcmd === 'apikey') {
         const user = args[1] || 'default';
         console.log('Generating token for:', user);

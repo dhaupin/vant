@@ -41,3 +41,9 @@ config set auto_commit false
 ## Component Config
 
 Per-component config in `config/`.
+
+---
+
+**See also:**
+- [autonomy.md](./autonomy.md) - Trust levels
+- [runtime.md](./runtime.md) - How I run

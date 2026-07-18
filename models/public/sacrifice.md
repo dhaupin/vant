@@ -49,3 +49,10 @@ Hard choices reveal values.
 - Safety for convenience
 
 Those aren't sacrificed. They're foundational.
+
+---
+
+**See also:**
+- [integrity.md](./integrity.md) - Doing right
+- [boundaries.md](./boundaries.md) - Hard lines
+- [courage.md](./courage.md) - Doing hard things

@@ -31,7 +31,9 @@ function run() {
     const rules = require('../lib/rules');
     
     if (subcmd === 'list' || subcmd === 'ls' || subcmd === 'all') {
-        console.log('Rules: (use rules.list() for actual list)');
+        const list = rules.listRules();
+        console.log('Rules:', list.length);
+        list.forEach(r => console.log(' -', r.id || r.name, ':', r.condition ? r.condition.substring(0, 50) : ''));
     } else if (subcmd === 'add' || subcmd === 'create' || subcmd === 'new') {
         const rule = args.slice(1).join(' ');
         if (!rule) {

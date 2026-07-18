@@ -31,12 +31,18 @@ function run() {
     const framework = require('../lib/framework');
     
     if (subcmd === 'info' || subcmd === 'status') {
+        const status = framework.getStatus();
         console.log('Vant Framework');
-        console.log('  (use framework.info() for actual info)');
+        console.log('  Version:', status.version || 'unknown');
+        console.log('  Runtime:', status.runtime || 'N/A');
+        console.log('  Brain:', status.brain || 'N/A');
+        console.log('  Islands:', status.islands || 0);
     } else if (subcmd === 'version' || subcmd === 'ver') {
-        console.log('Framework version: (use framework.version() to get)');
+        const status = framework.getStatus();
+        console.log(status.version || '0.8.6');
     } else if (subcmd === 'plugins' || subcmd === 'list' || subcmd === 'ls') {
-        console.log('Loaded plugins: (use framework.plugins() to list)');
+        const status = framework.getStatus();
+        console.log('Loaded plugins:', status.plugins || []);
     } else if (subcmd === 'load' || subcmd === 'add') {
         const plugin = args[1];
         if (!plugin) {

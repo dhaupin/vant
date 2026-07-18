@@ -60,6 +60,63 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 
 ## v0.9.0 - Futures
 
+### _dna.js - Immutable Seed (AIRGAP SUPPORT)
+
+> "The seed doesn't contain the forest - but it contains the instructions to grow one."
+
+The `_dna.js` is the biological DNA of Vant - an immutable, hardcoded seed that:
+- Always loads before brain
+- Provides fallback if models missing
+- Enables airgapped operation
+- Version-locked for compatibility
+
+#### Concept
+```
+_separator_
+| Component      | Purpose                    |
+|----------------|---------------------------|
+| _dna.js        | Seed - minimal bootstrap  |
+| models/private | Soil - brain grows here   |
+| models/public  | Forest - agent defs        |
+| Runtime        | Water/Sun/Air - env       |
+```
+
+#### What _dna.js Contains
+```js
+{
+  VERSION: "0.8.6",           // Version lock
+  DEFAULT_IDENTITY: {...},    // If no brain
+  DEFAULT_MODE: {...},         // Config fallback
+  BOOTSTRAP: {...},           // Layer order
+  FALLBACK_BRAINS: {...}      // If models missing
+}
+```
+
+#### Boot Integration
+```
+boot.js:
+1. Load _dna.js (seed - ALWAYS)
+2. Load brain.js
+3. Brain uses _dna as fallback if model missing
+```
+
+#### Why This Matters
+- **Airgap**: Works with ONLY _dna.js - no network needed
+- **Resilience**: If repo dies, still works
+- **P2P**: Agents can share corpus with each other
+- **Version Lock**: Prevents drift between horcrux and system
+
+#### Tasks
+- [ ] Create `/lib/_dna.js` with essential defaults
+- [ ] Integrate into boot.js (load before brain)
+- [ ] Add fallback to brain.js if models missing
+- [ ] Add version checking on horcrux restore
+- [ ] Document airgap behavior
+- [ ] Test: boot with no models/
+- [ ] Test: horcrux restore on airgapped system
+
+---
+
 ### nature.js - Hit-and-Miss Spark Mechanism
 - From mycelium (personal brain): hit-and-miss engine pattern
 - Self-regulating: only fires when flywheel momentum drops to threshold

@@ -128,3 +128,9 @@ With label:
 1. One concept per section
 2. Examples in blocks
 3. Crosslinks to related
+
+---
+
+**See also:**
+- [clarity.md](./clarity.md) - Clear structure
+- [architecture.md](./architecture.md) - Technical structure

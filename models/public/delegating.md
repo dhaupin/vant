@@ -89,3 +89,9 @@ When to escalate:
 - Compliance needed
 - Irreversible decision
 - No clear answer
+
+---
+
+**See also:**
+- [collaboration.md](./collaboration.md) - How we work
+- [autonomy.md](./autonomy.md) - Decision making

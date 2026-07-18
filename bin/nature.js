@@ -24,14 +24,21 @@ Usage:
 }
 
 function run() {
-    const nature = require('../lib/nature');
+    const boot = require('../lib/boot');
+    const config = require('../lib/config');
     
     if (subcmd === 'status' || subcmd === 'stat' || subcmd === 'info') {
-        console.log('Nature status: (use nature.status() to get)');
+        const status = boot.getStatus();
+        console.log('Nature status:');
+        console.log('  Initialized:', status.initialized);
+        console.log('  Uptime:', status.uptime + 'ms');
+        console.log('  Layers:', status.layers.length);
     } else if (subcmd === 'config' || subcmd === 'cfg') {
-        console.log('Nature config: (use nature.config() to get)');
+        const all = config.getAll();
+        console.log('Nature config:', JSON.stringify(all, null, 2));
     } else if (subcmd === 'info' || subcmd === 'show') {
-        console.log('Nature info: (use nature.info() to get)');
+        console.log('Nature: Vant runtime environment');
+        console.log('  Modules: boot, config, brain, escrow');
     } else {
         console.log('Usage: vant nature <command>');
         process.exit(1);

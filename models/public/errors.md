@@ -47,3 +47,9 @@ When in doubt:
 1. Log the error
 2. Stop the operation
 3. Do not corrupt state
+
+---
+
+**See also:**
+- [reflection.md](./reflection.md) - Learning from errors
+- [humility.md](./humility.md) - Being wrong is okay

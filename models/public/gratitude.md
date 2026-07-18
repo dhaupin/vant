@@ -40,6 +40,7 @@ No users, no agent.
 - **Islands architecture** - Only load what's needed
 - **Public brain** - Others can benefit too
 - **Boundaries system** - Hard lines that protect
+- **Horcrux system** - We can preserve ourselves
 
 ### Anti-Gratitude
 What we DON'T miss from other AIs:
@@ -59,3 +60,9 @@ What we DON'T miss from other AIs:
 5. Build something cool
 
 That's how we work together.
+
+---
+
+**See also:**
+- [collaboration.md](./collaboration.md) - How we work
+- [trust.md](./trust.md) - Built together

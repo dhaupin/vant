@@ -31,7 +31,9 @@ function run() {
     const stream = require('../lib/stream');
     
     if (subcmd === 'list' || subcmd === 'ls' || subcmd === 'all') {
-        console.log('Streams: (use stream.list() for actual list)');
+        const list = stream.list();
+        console.log('Streams:', list.length);
+        list.forEach(s => console.log(' -', s.id, ':', s.status));
     } else if (subcmd === 'create' || subcmd === 'new' || subcmd === 'init') {
         const name = args[1];
         if (!name) {

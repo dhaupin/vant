@@ -27,11 +27,28 @@ Usage:
     process.exit(0);
 }
 
-function run() {
+async function run() {
     const agents = require('../lib/agents');
     
     if (subcmd === 'list' || subcmd === 'ls' || subcmd === 'all') {
-        console.log('Agents: (use agents.list() for actual list)');
+        const list = await agents.list();
+        console.log('Active Agents:');
+        if (!list || list.length === 0) {
+            console.log('  (none)');
+        } else {
+            list.forEach(a => console.log(`  ${a.id}: ${a.name} (${a.state})`));
+        }
+    } else if (subcmd === 'status') {
+        const status = agents.getStatus();
+        console.log(JSON.stringify(status, null, 2));
+    } else if (subcmd === 'info' || subcmd === 'get') {
+        const id = args[1];
+        if (!id) {
+            console.error('Usage: vant agents info <id>');
+            process.exit(1);
+        }
+        const agent = agents.get(id);
+        console.log(agent ? JSON.stringify(agent, null, 2) : `Agent ${id} not found`);
     } else if (subcmd === 'spawn' || subcmd === 'create' || subcmd === 'new') {
         const name = args[1];
         if (!name) {
@@ -61,4 +78,7 @@ function run() {
     }
 }
 
-run();
+run().catch(e => {
+    console.error('Error:', e.message);
+    process.exit(1);
+});

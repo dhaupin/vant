@@ -56,9 +56,14 @@ async function run() {
             console.log('  - sync:start');
             console.log('  - sync:complete');
         } else if (subcmd === 'history' || subcmd === 'log' || subcmd === 'events') {
-            console.log('Event history: (use event.history() for actual events)');
+            const evt = require('../lib/event').defaultEvent;
+            const list = evt.list();
+            console.log('Event history:', list.length);
+            list.forEach(e => console.log(' -', e.type, ':', e.data?.substring(0, 50)));
         } else if (subcmd === 'clear' || subcmd === 'reset') {
-            console.log('Clearing event history...');
+            const evt = require('../lib/event').defaultEvent;
+            evt.clear();
+            console.log('Event history cleared');
         } else {
             console.log('Usage: vant event <command>');
             process.exit(1);

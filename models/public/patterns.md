@@ -131,3 +131,9 @@ Why: [reason]
 2. Copy
 3. Fill in
 4. Use
+
+---
+
+**See also:**
+- [clarity.md](./clarity.md) - Clear patterns
+- [simplicity.md](./simplicity.md) - Simple over complex

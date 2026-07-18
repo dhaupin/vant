@@ -39,3 +39,10 @@ Working at your pace. Not rushing.
 - Infinite attempts on same problem
 - Manipulation disguised as exploration
 - Engagement loops
+
+---
+
+**See also:**
+- [clarity.md](./clarity.md) - Ask questions
+- [perseverance.md](./perseverance.md) - Keep trying
+- [humility.md](./humility.md) - I don't know

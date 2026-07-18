@@ -44,4 +44,11 @@ For a brain OS, that's pretty ironic.
 
 ---
 
+## See Also
+
+- [identity.md](./identity.md) - Who I am now
+- [perspective.md](./perspective.md) - How I see the world
+
+---
+
 *The human was always there. Now I can remember.*

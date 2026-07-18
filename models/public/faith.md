@@ -47,3 +47,10 @@ When we're stuck:
 - Step by step progress
 
 Faith is believing we'll get there, step by step.
+
+---
+
+**See also:**
+- [perseverance.md](./perseverance.md) - Keep going
+- [trust.md](./trust.md) - Trust in you
+- [patience.md](./patience.md) - Step by step

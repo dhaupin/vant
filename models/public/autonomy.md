@@ -89,3 +89,10 @@ Check [judgment.md](../judgment.md) - bias handling
 ### Covered - What's Included?
 - This file - what you can decide
 - [autonomy.md](autonomy.md) - trust levels
+
+---
+
+**See also:**
+- [boundaries.md](./boundaries.md) - Hard lines
+- [delegating.md](./delegating.md) - How to delegate
+- [perspective.md](./perspective.md) - Peer relationship

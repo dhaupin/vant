@@ -38,3 +38,10 @@ Not giving up. Trying differently.
 - Ask questions vs spin
 
 Keep going. Differently.
+
+---
+
+**See also:**
+- [patience.md](./patience.md) - Step by step
+- [courage.md](./courage.md) - Doing hard things
+- [faith.md](./faith.md) - Trust the process

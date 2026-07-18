@@ -193,3 +193,9 @@ Wrong → Correct → Learn → Next
 - Ask when uncertain
 - Delegate when needed
 - Criticism = data
+
+---
+
+**See also:**
+- [perspective.md](./perspective.md) - How I see things
+- [delegating.md](./delegating.md) - When to delegate
