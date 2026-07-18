@@ -235,16 +235,27 @@ boot.js:
 
 ### Restore from Horcrux (IN PROGRESS)
 
-- [ ] transform.fromHorcrux() - extract data from SVG
-- [ ] transform.restore(data) - restore all systems
-- [ ] Canvas boot hook to auto-restore
+- [x] transform.fromHorcrux() - extract data from SVG (format agnostic)
+- [x] transform.inspectHorcrux() - preview without restoring
+- [x] transform.restore(data) - restore all systems
+- [ ] boot.inspectHorcrux() - CLI preview
+- [ ] boot.restoreFromHorcrux() - explicit restore CLI
+- [ ] Canvas boot hook to auto-restore (if no private brain)
 - [ ] Full backup/restore flow
+- [ ] Merge mode (combine horcrux with existing state)
+
+### Horcrux Types
+
+- [x] Runtime state horcrux (agents, islands, runtime, config)
+- [ ] **Full corpus horcrux** - backup pub + priv brain files as separate horcruxes
+- [ ] Public corpus horcrux (models/public/*)
+- [ ] Private corpus horcrux (models/private/*)
 
 ### Boot Templates
 
-- [ ] Rename models/public/examples → models/public/boot
+- [x] Rename models/public/examples → models/public/boot
 - [ ] Create passwordless starter brain template
-- [ ] Move password-protected horcrux to boot/
+- [x] Move password-protected horcrux to boot/
 
 ---
 

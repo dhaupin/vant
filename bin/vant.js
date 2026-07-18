@@ -144,7 +144,7 @@ const COMMANDS = {
     config: 'config.js',
     
     // Brain horcrux (backup/restore)
-    horcrux: 'brain-horcrux.js',
+    horcrux: 'horcrux.js',
     
     // Agent spawning
     spawn: 'agent-spawner.js',
