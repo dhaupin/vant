@@ -37,19 +37,19 @@ EXAMPLES:
 
 const ROOT = path.resolve(__dirname, '..');
 
-// Lazy-load learn module
-let learn = null;
-let learnInstance = null;
+// Lazy-load memory module (the learning system)
+let memory = null;
+let memoryInstance = null;
 function getLearn() {
-    if (!learn) {
+    if (!memory) {
         try { 
-            learn = require('../lib/learn');
-            if (learn.LearningSystem) {
-                learnInstance = new learn.LearningSystem();
+            memory = require('../lib/memory');
+            if (memory.MemorySystem) {
+                memoryInstance = new memory.MemorySystem();
             }
         } catch(e) {}
     }
-    return learnInstance;
+    return memoryInstance;
 }
 
 async function main() {
