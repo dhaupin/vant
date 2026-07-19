@@ -256,9 +256,10 @@ async function enterAmnesiaMode() {
     console.log('Cleaning brain and starting fresh...');
     console.log('============================================\n');
     
-    // Save warning state - use vant.remember instead
+    // Save warning state - use memory.state instead
     const vant = require('../lib/vant');
-    await vant.remember('amnesia', JSON.stringify({
+    const memory = require('../lib/memory');
+    await memory.state('amnesia', JSON.stringify({
         mode: true,
         timestamp: new Date().toISOString(),
         reason: 'No valid boot sources found'

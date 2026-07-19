@@ -271,10 +271,12 @@ if (cmd === 'learn' || cmd === 'remember') {
         try {
             await vant.init({ debug: false });
             
+            const memory = require('../lib/memory');
+            
             if (cmd === 'learn') {
                 const options = ttl ? { ttl } : {};
                 const result = await vant.withSecurity(
-                    () => vant.learn(key, content || '', options),
+                    () => memory.learn(key, content || '', options),
                     { type: 'write', key, args: { key, content: content || '' } }
                 );
                 console.log(`✅ Learned: ${key}`, result.ttl ? `(TTL: ${result.ttl}ms)` : '');
@@ -284,14 +286,14 @@ if (cmd === 'learn' || cmd === 'remember') {
                     // Store
                     const options = ttl ? { ttl } : {};
                     const result = await vant.withSecurity(
-                        () => vant.remember(key, content, options),
+                        () => memory.state(key, content, options),
                         { type: 'write', key, args: { key, content } }
                     );
                     console.log(`✅ Remembered: ${key}`, result.ttl ? `(TTL: ${result.ttl}ms)` : '');
                 } else {
                     // Recall
                     const result = await vant.withSecurity(
-                        () => vant.remember(key),
+                        () => memory.recall(key),
                         { type: 'read', key, args: { key } }
                     );
                     console.log(result || '(not found)');

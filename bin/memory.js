@@ -1,42 +1,37 @@
 #!/usr/bin/env node
 /**
- * Vant Memory - Memory operations
+ * Vant Memory - CLI operations
  * 
  * Usage:
- *   vant memory add <topic> <content>   # Add learning
-  vant memory set <key> <value>      # Set memory
- *   vant memory get <key>              # Get memory
-  vant memory query <topic>          # Query learning
- *   vant memory list                  # List memories
- *   vant memory clear                 # Clear memories
+ *   vant memory state <key> <value>   # Store state
+ *   vant memory recall <key>          # Get state
+ *   vant memory learn <key> <content> # Learn document
+ *   vant memory query <key>           # Query document
+ *   vant memory list                  # Show stats
+ *   vant memory clear                 # Clear all
  */
 
 const path = require('path');
-
 const args = process.argv.slice(2);
 const action = args[0];
 
 // Show help
 if (args.includes('--help') || args.includes('-h') || !action) {
     console.log(`
-Vant Memory - Unified memory & learning system
+Vant Memory - Unified memory CLI
 
 USAGE:
-  vant memory add <topic> <content>   # Add learning
-  vant memory set <key> <value>      # Set memory
-  vant memory get <key>              # Get memory
-  vant memory query <topic>          # Query learning
-  vant memory list                  # List memories
+  vant memory state <key> <value>   # Store state (key-value)
+  vant memory recall <key>          # Get state
+  vant memory learn <key> <content> # Learn document
+  vant memory query <key>           # Query document
+  vant memory list                  # Show stats
   vant memory clear                 # Clear all
-  vant memory delete <key>            # Delete key
-  vant memory forget <topic>        # Remove learning
-  vant memory stats                 # Show stats
 
 EXAMPLES:
-  vant memory set session-id abc123
-  vant memory get session-id
+  vant memory state session-id abc123
+  vant memory recall session-id
   vant memory list
-  vant memory delete session-id
 `);
     process.exit(0);
 }
@@ -44,121 +39,82 @@ EXAMPLES:
 const ROOT = path.resolve(__dirname, '..');
 
 // Lazy-load memory module
-let memory = null;
-let memoryInstance = null;
+let _memory = null;
 function getMemory() {
-    if (!memory) {
-        try { 
-            memory = require('../lib/memory');
-            if (memory.MemorySystem) {
-                memoryInstance = new memory.MemorySystem();
-            }
-        } catch(e) {}
+    if (!_memory) {
+        try {
+            _memory = require('../lib/memory');
+        } catch(e) {
+            console.error('Failed to load memory:', e.message);
+        }
     }
-    return memoryInstance;
+    return _memory;
 }
 
 async function main() {
-    const mod = getMemory();
+    const mem = getMemory();
+    if (!mem) {
+        console.error('Memory module not available');
+        process.exit(1);
+    }
     
     switch (action) {
-        // Add learning (alias for set)
-        case 'add':
+        // Store state (key-value)
+        case 'state':
         case 'set':
             const key = args[1];
             const value = args.slice(2).join(' ');
             if (!key) {
-                console.error('Usage: vant memory add <topic> <content>');
+                console.error('Usage: vant memory state <key> <value>');
                 process.exit(1);
             }
-            console.log('Adding:', key);
-            if (mod && mod.remember) {
-                const result = await mod.remember(key, value);
-                console.log('Added:', key, '(total:', result.total + ')');
-            } else {
-                console.log('Memory module not available');
-            }
+            await mem.state(key, value);
+            console.log('Stored:', key);
             break;
             
-        // Get memory (alias for query)
+        // Recall state
+        case 'recall':
         case 'get':
-        case 'query':
-            const getKey = args[1];
-            if (!getKey) {
-                console.error('Usage: vant memory get <key>');
+            const recallKey = args[1];
+            if (!recallKey) {
+                console.error('Usage: vant memory recall <key>');
                 process.exit(1);
             }
-            console.log('Getting:', getKey);
-            if (mod && mod.find) {
-                const results = await mod.find(getKey);
-                if (results && results.length) {
-                    results.forEach(r => console.log(r.data || r));
-                } else {
-                    console.log('Not found');
-                }
+            const val = await mem.recall(recallKey);
+            console.log(val || '(not found)');
+            break;
+            
+        // Learn document
+        case 'learn':
+            const learnKey = args[1];
+            const content = args.slice(2).join(' ');
+            if (!learnKey) {
+                console.error('Usage: vant memory learn <key> <content>');
+                process.exit(1);
             }
+            await mem.learn(learnKey, content);
+            console.log('Learned:', learnKey);
+            break;
+            
+        // Query document
+        case 'query':
+            const queryKey = args[1];
+            if (!queryKey) {
+                console.error('Usage: vant memory query <key>');
+                process.exit(1);
+            }
+            const doc = await mem.query(queryKey);
+            console.log(doc || '(not found)');
             break;
             
         case 'list':
-        case 'ls':
-            console.log('Memories:');
-            if (mod && mod.experiences) {
-                const exps = mod.experiences || [];
-                if (exps.length) {
-                    exps.forEach(e => console.log(' -', e.type));
-                } else {
-                    console.log(' (No memories)');
-                }
-            } else {
-                console.log(' (No memories)');
-            }
-            break;
-            
-        case 'delete':
-        case 'del':
-            const delKey = args[1];
-            if (!delKey) {
-                console.error('Usage: vant memory delete <key>');
-                process.exit(1);
-            }
-            console.log('Deleting:', delKey);
-            if (mod && mod.patterns && mod.patterns.delete) {
-                mod.patterns.delete(delKey);
-                console.log('Deleted');
-            }
+        case 'stats':
+            console.log(JSON.stringify(mem.getStats(), null, 2));
             break;
             
         case 'clear':
-            console.log('Clearing all memories...');
-            if (mod) {
-                mod.experiences = [];
-                mod.patterns = new Map();
-            }
+            mem.clear();
             console.log('Cleared');
-            break;
-            
-        case 'stats':
-            console.log('Memory Stats:');
-            if (mod) {
-                console.log('Total memories:', mod.experiences ? mod.experiences.length : 0);
-                console.log('Max capacity:', mod.maxExperiences || 1000);
-            } else {
-                console.log('Memory module not available');
-            }
-            break;
-            
-        // Forget learning (alias for delete)
-        case 'forget':
-            const forgetKey = args[1];
-            if (!forgetKey) {
-                console.error('Usage: vant memory forget <topic>');
-                process.exit(1);
-            }
-            console.log('Forgetting:', forgetKey);
-            if (mod && mod.patterns && mod.patterns.delete) {
-                mod.patterns.delete(forgetKey);
-                console.log('Forgotten');
-            }
             break;
             
         default:
