@@ -34,6 +34,18 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 - [ ] Brain sync/merge conflicts
 - [ ] Entry point: Which brain loads first
 
+#### Category Brain (FLAT + CATEGORIES)
+- [ ] Organize brain files by category: identity/, goals/, lessons/, etc.
+- [ ] Use BrainStorage with category/key addressing
+- [ ] Maintain backward compatibility with flat brain
+- [ ] Migration path from flat to category
+
+#### Geometry Brain (SEMANTIC ADDRESSING)
+- [ ] Content-addressable storage using semantic embeddings
+- [ ] Neural-style addressing: hash(embedding) = address
+- [ ] Support similarity search within brain
+- [ ] Integrate with existing brain.js attention system
+
 ### Phase 1: API System ✅ EXISTS
 - [x] lib/api.js - Unified CLI/MCP/headless interface (HAS AUTH)
 - [x] lib/mcp.js - JSON-RPC server (158 tools!) - NOW HAS AUTH
@@ -136,6 +148,20 @@ boot.js:
 - [ ] Document airgap behavior
 - [ ] Test: boot with no models/
 - [ ] Test: horcrux restore on airgapped system
+
+#### Minimal Brain Files (_dna Compliant)
+For agent-first operation, define core required files:
+- [ ] `identity.md` - Who am I (name, purpose, capabilities)
+- [ ] `goals.md` - What I'm working on (current sprint, backlog)
+- [ ] `lessons.md` - What I learned (discoveries, patterns, bugs)
+- [ ] `errors.md` - Mistakes to avoid (past errors, recovery)
+- [ ] `preferences.md` - How I work (communication, style)
+
+Optional extended brain:
+- [ ] `boundaries.md` - What I can't/shouldn't do
+- [ ] `autonomy.md` - Decision-making limits
+- [ ] `context.md` - Current environment/state
+- [ ] `relationships.md` - Other agents I've met
 
 ---
 
