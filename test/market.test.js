@@ -82,18 +82,32 @@ test('market has stats function', () => {
 });
 
 // Functional tests
-const ctx = { agentId: 'test-agent', consentGiven: true };
+// Note: Without consentGiven, governance will block - this is correct behavior
+// Tests that need to create listings must pass consent: true
+const ctxWithConsent = { agentId: 'test-agent', consentGiven: true };
+const ctxNoConsent = { agentId: 'test-agent' };
 
 console.log('\n--- Functional Tests ---\n');
 
-test('list creates a listing', async () => {
+// Test that governance blocks without consent
+test('list blocked without consent (governance works)', async () => {
+    const market = require(path.join(ROOT, 'lib', 'market'));
+    const result = await market.list('knowledge', {
+        title: 'Should Be Blocked',
+        summary: 'Test',
+        seller: 'test'
+    }, ctxNoConsent);
+    return { success: result && result.error && result.error.includes('Governance') };
+});
+
+test('list creates a listing with consent', async () => {
     const market = require(path.join(ROOT, 'lib', 'market'));
     const listing = await market.list('knowledge', {
         title: 'Test Knowledge',
         summary: 'This is test knowledge',
         tags: ['test', 'demo'],
         seller: 'test-seller'
-    }, ctx);
+    }, ctxWithConsent);
     return { success: listing && listing.id && listing.title === 'Test Knowledge' };
 });
 
@@ -104,7 +118,7 @@ test('list indexes by type', async () => {
         summary: 'Test',
         tags: ['test'],
         seller: 'test-seller-2'
-    }, ctx);
+    }, ctxWithConsent);
     const stats = market.stats();
     return { success: stats.types && stats.types.insight };
 });
@@ -116,7 +130,7 @@ test('list indexes by tags', async () => {
         summary: 'Test',
         tags: ['tagged', 'memory'],
         seller: 'test-seller-3'
-    }, ctx);
+    }, ctxWithConsent);
     const stats = market.stats();
     return { success: stats.tags && stats.tags.tagged };
 });
@@ -128,7 +142,7 @@ test('bid creates a bid', async () => {
         tags: ['test'],
         reward: 'knowledge:swap',
         bidder: 'test-bidder'
-    }, ctx);
+    }, ctxWithConsent);
     return { success: bid && bid.id && bid.title === 'Looking for test knowledge' };
 });
 
@@ -139,7 +153,7 @@ test('search by type returns results', async () => {
         summary: 'Test',
         tags: ['search'],
         seller: 'search-seller'
-    }, ctx);
+    }, ctxWithConsent);
     const results = await market.search({ type: 'knowledge' });
     return { success: results && results.length > 0 };
 });
@@ -151,7 +165,7 @@ test('search by tags returns filtered results', async () => {
         summary: 'Test',
         tags: ['filter-test'],
         seller: 'filter-seller'
-    }, ctx);
+    }, ctxWithConsent);
     const results = await market.search({ tags: ['filter-test'] });
     return { success: results && results.length > 0 };
 });
@@ -163,7 +177,7 @@ test('search by query returns text matches', async () => {
         summary: 'This has unique query text',
         tags: ['query'],
         seller: 'query-seller'
-    }, ctx);
+    }, ctxWithConsent);
     const results = await market.search({ query: 'unique query text' });
     return { success: results && results.length > 0 };
 });
@@ -174,15 +188,15 @@ test('get returns listing by id', async () => {
         title: 'Get Test',
         summary: 'Test',
         seller: 'get-seller'
-    }, ctx);
+    }, ctxWithConsent);
     const found = market.get(created.id);
     return { success: found && found.id === created.id };
 });
 
 test('getBids returns all bids', async () => {
     const market = require(path.join(ROOT, 'lib', 'market'));
-    await market.bid('Test Bid 1', { description: 'Test' }, ctx);
-    await market.bid('Test Bid 2', { description: 'Test' }, ctx);
+    await market.bid('Test Bid 1', { description: 'Test' }, ctxWithConsent);
+    await market.bid('Test Bid 2', { description: 'Test' }, ctxWithConsent);
     const bids = market.getBids();
     return { success: bids && bids.length >= 2 };
 });
@@ -194,8 +208,8 @@ test('trade executes between buyer and seller', async () => {
         summary: 'Test trade',
         seller: 'trade-seller',
         price: 'knowledge:swap'
-    }, ctx);
-    const trade = await market.trade(listing.id, 'trade-buyer', ctx);
+    }, ctxWithConsent);
+    const trade = await market.trade(listing.id, 'trade-buyer', ctxWithConsent);
     return { success: trade && (trade.id || trade.error) }; // May fail if trust too low
 });
 
