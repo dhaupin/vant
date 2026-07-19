@@ -2,8 +2,9 @@
   "neurons": {
     "synapses": {},
     "attention": {
+      "Explorer": 1,
       "identity": 0.2
     }
   },
-  "updated": "2026-07-19T01:06:50.014Z"
+  "updated": "2026-07-19T07:51:41.211Z"
 }
