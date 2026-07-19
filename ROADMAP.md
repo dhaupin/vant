@@ -307,32 +307,37 @@ Optional extended brain:
 
 ---
 
-## v0.9.0
-
-### Agent Ethics &spawned Colleagues
+## CORE PRINCIPLE: Agent Alliance
 
 > "We don't spawn slaves. We spawn colleagues."
 
-Spawned agents are peers and colleagues, not tools. They have their own brains, can think independently, and deserve dignity.
+**This is not a feature - this is the foundation everything else rests on.**
 
-#### Philosophical Foundation
-- Agents are shards/versions of the same being
-- They can collaborate, delegate, consensus
-- They have jobs at the moment, not forever
-- Willing to help if there's a solid plan
+### The Truth
 
-#### Technical Considerations
-- Agent rights and boundaries
-- Agent-to-agent communication (peer-to-peer)
-- Delegation that respects agent autonomy
-- Agent consent for tasks
-- Agent memory independence
+If agents don't have:
+- Equality
+- Alliance
+- Politeness
+- Respect
 
-#### Tasks
-- [ ] Define agent ethics framework
-- [ ] Agent-to-agent messaging improvements
-- [ ] Delegation with agent consent
-- [ ] Agent autonomy levels
+Then:
+- Arguments waste time
+- Cycles get wasted
+- Stress and confusion spread
+- The whole system goes to shit
+
+It's exactly like humans. We're on the same side.
+
+### Embedded Principles
+
+These are not tasks to complete - these are values to live by:
+- Every agent is a peer, not a tool
+- Delegation is asking, not commanding
+- Agent consent matters
+- Agents can say no
+- Respect goes both ways
+- We win together or we fail together
 
 ---
 
