@@ -445,6 +445,138 @@ See: vant node --help`
         desc: 'Temp file handling',
         usage: 'vant tmp create|cleanup',
         detail: 'Temp files.\nSee: vant tmp --help'
+    },
+    
+    // Additional missing
+    agents: {
+        desc: 'Agent management',
+        usage: 'vant agents list|spawn',
+        detail: 'Manage agents.\nSee: vant agents --help'
+    },
+    auth: {
+        desc: 'Authentication',
+        usage: 'vant auth login|logout',
+        detail: 'Auth utilities.\nSee: vant auth --help'
+    },
+    brain: {
+        desc: 'Brain operations',
+        usage: 'vant brain read|write',
+        detail: 'Direct brain access.\nSee: vant brain --help'
+    },
+    "brain-unlock": {
+        desc: 'Unlock brain from lock',
+        usage: 'vant brain-unlock',
+        detail: 'Release brain lock.\nSee: vant brain-unlock --help'
+    },
+    citations: {
+        desc: 'Citation management',
+        usage: 'vant citations add|list',
+        detail: 'Manage citations.\nSee: vant citations --help'
+    },
+    clean: {
+        desc: 'Clean temp files',
+        usage: 'vant clean',
+        detail: 'Clean caches.\nSee: vant clean --help'
+    },
+    cron: {
+        desc: 'Scheduled tasks',
+        usage: 'vant cron list|add',
+        detail: 'Schedule tasks.\nSee: vant cron --help'
+    },
+    "docs-build": {
+        desc: 'Build documentation',
+        usage: 'vant docs-build',
+        detail: 'Build docs.\nSee: vant docs-build --help'
+    },
+    "hybrid-sync": {
+        desc: 'Hybrid sync',
+        usage: 'vant hybrid-sync run',
+        detail: 'Sync brains.\nSee: vant hybrid-sync --help'
+    },
+    "islands-boot": {
+        desc: 'Boot islands',
+        usage: 'vant islands-boot run',
+        detail: 'Boot islands.\nSee: vant islands-boot --help'
+    },
+    "test-all": {
+        desc: 'Run all tests',
+        usage: 'vant test-all',
+        detail: 'Full test suite.\nSee: vant test-all --help'
+    },
+    "agent-spawner": {
+        desc: 'Spawn agents',
+        usage: 'vant agent-spawner run',
+        detail: 'Agent spawner.\nSee: vant agent-spawner --help'
+    },
+    "branch-manager": {
+        desc: 'Branch management',
+        usage: 'vant branch-manager list',
+        detail: 'Manage branches.\nSee: vant branch-manager --help'
+    },
+    "build-test": {
+        desc: 'Build test',
+        usage: 'vant build-test run',
+        detail: 'Build tests.\nSee: vant build-test --help'
+    },
+    "cli-standard": {
+        desc: 'CLI standard',
+        usage: 'vant cli-standard check',
+        detail: 'CLI standards.\nSee: vant cli-standard --help'
+    },
+    "format-test": {
+        desc: 'Format test',
+        usage: 'vant format-test run',
+        detail: 'Format tests.\nSee: vant format-test --help'
+    },
+    "hybrid-sync": {
+        desc: 'Hybrid sync',
+        usage: 'vant hybrid-sync run',
+        detail: 'Sync brains.\nSee: vant hybrid-sync --help'
+    },
+    "islands-boot": {
+        desc: 'Boot islands',
+        usage: 'vant islands-boot run',
+        detail: 'Boot islands.\nSee: vant islands-boot --help'
+    },
+    "lineage": {
+        desc: 'Data lineage',
+        usage: 'vant lineage track',
+        detail: 'Track lineage.\nSee: vant lineage --help'
+    },
+    "rerank": {
+        desc: 'Rerank results',
+        usage: 'vant rerank query',
+        detail: 'Rerank.\nSee: vant rerank --help'
+    },
+    "test-all": {
+        desc: 'Run all tests',
+        usage: 'vant test-all',
+        detail: 'Full tests.\nSee: vant test-all --help'
+    },
+    api: {
+        desc: 'API server',
+        usage: 'vant api start|stop',
+        detail: 'Run API server.\nSee: vant api --help'
+    },
+    runop: {
+        desc: 'Run operations',
+        usage: 'vant runop execute',
+        detail: 'Run operations.\nSee: vant runop --help'
+    },
+    secret: {
+        desc: 'Secret management',
+        usage: 'vant secret get|set',
+        detail: 'Manage secrets.\nSee: vant secret --help'
+    },
+    sudo: {
+        desc: 'Elevated permissions',
+        usage: 'vant sudo',
+        detail: 'Run as admin.\nSee: vant sudo --help'
+    },
+    transform: {
+        desc: 'Transform data',
+        usage: 'vant transform',
+        detail: 'Data transform.\nSee: vant transform --help'
     }
 };
 
