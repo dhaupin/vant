@@ -57,3 +57,7 @@ models/*/geometry
 # Quasicrystal NSC9 runtime data
 data/
 config.ini
+
+# My private brain (scribe)
+models/private/scribe/
+
