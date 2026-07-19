@@ -38,24 +38,21 @@ async function main() {
             break;
         }
             
-        case 'horcrux': {
+        case 'horcrux': 
+        case 'full-horcrux': {
             const svgPath = args[1] || './hypha-brain.svg';
-            const password = args[2] || 'brain';
+            const password = args[2];
+            if (!password) {
+                console.log('❌ Password required');
+                console.log('Usage: vant transform horcrux <path> <password>');
+                console.log('   Or set VANT_BRAIN_PASSWORD env var');
+                process.exit(1);
+            }
             console.log('=== CREATING HORCRUX ===');
             console.log('SVG:', svgPath);
             console.log('Password:', password);
-            const result = await transform.embedToSvg(svgPath, password);
-            console.log('Result:', result);
-            break;
-        }
-            
-        case 'full-horcrux': {
-            const svgPath = args[1] || './hypha-brain.svg';
-            const password = args[2] || 'brain';
-            console.log('=== CREATING FULL HORCRUX ===');
-            console.log('SVG:', svgPath);
-            console.log('Password:', password);
-            const result = await transform.embedToSvgFull(svgPath, password);
+            // toHorcrux handles full gather + embed by default
+            const result = await transform.toHorcrux(svgPath, { password });
             console.log('Result:', result);
             break;
         }
