@@ -577,6 +577,78 @@ See: vant node --help`
         desc: 'Transform data',
         usage: 'vant transform',
         detail: 'Data transform.\nSee: vant transform --help'
+    },
+    
+    // New from lib coverage
+    backup: {
+        desc: 'Brain backup & restore',
+        usage: 'vant backup create|restore|list',
+        detail: 'Backup brain.\nSee: vant backup --help'
+    },
+    learn: {
+        desc: 'Learning system',
+        usage: 'vant learn add|query|list',
+        detail: 'Learning system.\nSee: vant learn --help'
+    },
+    memory: {
+        desc: 'In-memory storage',
+        usage: 'vant memory get|set|list',
+        detail: 'Memory operations.\nSee: vant memory --help'
+    },
+    registry: {
+        desc: 'General registry',
+        usage: 'vant registry get|set|list',
+        detail: 'Registry operations.\nSee: vant registry --help'
+    },
+    webhooks: {
+        desc: 'Webhook management',
+        usage: 'vant webhooks list|add|remove',
+        detail: 'Webhook handling.\nSee: vant webhooks --help'
+    },
+    zen: {
+        desc: 'Zen utilities',
+        usage: 'vant zen quote|breathe',
+        detail: 'Zen utilities.\nSee: vant zen --help'
+    },
+    consciousness: {
+        desc: 'Consciousness engine',
+        usage: 'vant consciousness status|think',
+        detail: 'Consciousness.\nSee: vant consciousness --help'
+    },
+    recursion: {
+        desc: 'Recursion engine',
+        usage: 'vant recursion run|unwind',
+        detail: 'Recursion.\nSee: vant recursion --help'
+    },
+    relay: {
+        desc: 'Relay operations',
+        usage: 'vant relay status|connect|send',
+        detail: 'Relay system.\nSee: vant relay --help'
+    },
+    spirit: {
+        desc: 'Spirit system',
+        usage: 'vant spirit status|invoke',
+        detail: 'Spirit system.\nSee: vant spirit --help'
+    },
+    encounter: {
+        desc: 'Agent encounters',
+        usage: 'vant encounter list|meet',
+        detail: 'Encounter tracking.\nSee: vant encounter --help'
+    },
+    forum: {
+        desc: 'Forum/discussion',
+        usage: 'vant forum list|post|view',
+        detail: 'Forum system.\nSee: vant forum --help'
+    },
+    "brain-registry": {
+        desc: 'Brain registration',
+        usage: 'vant brain-registry list|register',
+        detail: 'Brain registry.\nSee: vant brain-registry --help'
+    },
+    "node-registry": {
+        desc: 'Node registration',
+        usage: 'vant node-registry list|register',
+        detail: 'Node registry.\nSee: vant node-registry --help'
     }
 };
 
