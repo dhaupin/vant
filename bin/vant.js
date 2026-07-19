@@ -387,9 +387,12 @@ System:
   vant network  Network operations
   vant theme    Theme management
 
-Memory:
-  vant learn <key> <content> [--ttl ms]  Store learning
-  vant remember <key> [content] [--ttl ms]  Store/recall memory
+Memory (Unified API - sandbox + RLS secured):
+  vant learn <key> <content> [--ttl ms]  Store document (markdown)
+  vant remember <key> [content] [--ttl ms]  Store/recall state
+  vant address <data> [--ttl ms]          Store at NSC9 geometric address
+  vant locate <barcode>                  Retrieve from NSC9 address
+  vant memory <cmd>                       Full memory CLI (state|learn|query|...)
 
 Development:
   vant test         Run smoke tests
@@ -466,8 +469,14 @@ Core:
 
 Brain:
   vant brain mode <mode>  Set brain mode (dual/public/private/remote)
-  vant geometry          NSC9 quasicrystal storage (via memory)
+  vant geometry          NSC9 quasicrystal storage (barcode addressing)
   vant duality          Alias for geometry (deprecated)
+
+NSC9 Geometric:
+  vant geometry store <key> <val>   Store in quasicrystal
+  vant geometry retrieve <key>       Retrieve from quasicrystal
+  vant geometry address <data>      Store at random barcode
+  vant geometry locate <barcode>    Retrieve by barcode
 
 Auth:
   MCP requires API key if VANT_MCP_REQUIRE_KEY=true.
