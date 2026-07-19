@@ -12,6 +12,13 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 
 > Cloudflare headless mode for agent canvas. MCP→API unified abstraction.
 
+### Config Documentation
+- [ ] Update config.example.ini with all new config.js settings
+  - VANT_BRAIN_PASSWORD_TIMEOUT
+  - server.insecure, server.authRequired
+  - storage.path
+  - And other missing env vars from lib/config.js
+
 ### Phase 1: API System ✅ EXISTS
 - [x] lib/api.js - Unified CLI/MCP/headless interface (HAS AUTH)
 - [x] lib/mcp.js - JSON-RPC server (158 tools!) - NOW HAS AUTH
