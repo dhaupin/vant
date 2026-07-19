@@ -1,3 +1,6 @@
+# Brain (private - per user/agent)
+models/private/
+
 # Dependencies
 node_modules/
 
