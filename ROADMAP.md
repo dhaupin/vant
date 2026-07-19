@@ -335,7 +335,9 @@ Optional extended brain:
   - QoS: Rate limiting
   - Escrow: Budget checks
   - Governance: Ethics
-- [ ] Add MCP tools for market operations
+- [x] Add MCP tools (DONE): market_list, market_bid, market_search, market_trade, market_stats
+- [x] Wire to boot (DONE): layer 10
+- [x] Wire to islands (DONE): runtime source type
 
 ---
 
@@ -363,9 +365,12 @@ Optional extended brain:
   - Sandbox: Capability checks
   - QoS: Rate limiting
   - Governance: Ethics
+- [x] Add MCP tools (DONE): trust_getScore, trust_record, trust_leaderboard, trust_can
+- [x] Wire to boot (DONE): layer 9
+- [x] Wire to islands (DONE): runtime source type
 - [ ] Integrate with agents.js
 - [ ] Integrate with teams.js
-- [ ] Integrate with market.js
+- [x] Integrate with market.js (DONE: market uses trust for trade reputation)
 
 ---
 
