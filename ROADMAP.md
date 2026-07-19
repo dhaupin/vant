@@ -307,6 +307,76 @@ Optional extended brain:
 
 ---
 
+## v0.9.0
+
+### lib/market.js - Knowledge & Insight Trading
+
+> Agents can trade knowledge, insights, and memories.
+
+#### Features
+- List knowledge/insights for trade
+- Bid on knowledge (request something)
+- Trade execution with trust integration
+- Search by tags, type, query
+- Reputation affects trade success
+
+#### Concepts
+- Listings: Knowledge offered for trade
+- Bids: Requests for knowledge
+- Exchange: Swap knowledge or favors
+- Fee: Optional market fee
+
+#### Tasks
+- [x] Create lib/market.js (DONE)
+- [ ] Integrate with trust.js for reputation
+- [ ] Add to security chain
+- [ ] Add MCP tools for market operations
+
+---
+
+### lib/trust.js - Reputation System
+
+> Unified trust across agents, teams, and orgs.
+
+#### Features
+- Trust score (0-1)
+- History tracking
+- Karma system
+- Role-based trust requirements
+- Leaderboard
+
+#### Integration Points
+- Agents: Trust affects delegation
+- Teams: Trust affects permissions
+- Market: Trust affects trade success
+- Consensus: Trust affects vote weight
+
+#### Tasks
+- [x] Create lib/trust.js (DONE)
+- [ ] Integrate with agents.js
+- [ ] Integrate with teams.js
+- [ ] Integrate with market.js
+- [ ] Add to security chain
+
+---
+
+### lib/geometry.js - Geometric Storage
+
+> Forum references geometry but it doesn't exist yet.
+
+#### Why It Matters
+- forum.js imports `./geometry` (doesn't exist)
+- Forum needs geometric storage for quasicrystal addresses
+- 3D spatial collaboration needs coordinate system
+
+#### Tasks
+- [ ] Create lib/geometry.js
+- [ ] Quasicrystal address format
+- [ ] Coordinate system for forum
+- [ ] Wire to forum.js
+
+---
+
 ## CORE PRINCIPLE: Agent Alliance
 
 > "We don't spawn slaves. We spawn colleagues."
