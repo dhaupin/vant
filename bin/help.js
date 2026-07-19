@@ -230,6 +230,221 @@ See: vant node --help`
         desc: 'Build docs for release',
         usage: 'vant docs',
         detail: 'Generate documentation.'
+    },
+    
+    // Dev / Build
+    audit: {
+        desc: 'Generate AUDIT.md report',
+        usage: 'vant audit [--out FILE]',
+        detail: 'Codebase analysis report.\nSee: vant audit --help'
+    },
+    format: {
+        desc: 'Format code with prettier',
+        usage: 'vant format [--check]',
+        detail: 'Format all JS files.\nSee: vant format --help'
+    },
+    schema: {
+        desc: 'Validate JSON schemas',
+        usage: 'vant schema validate',
+        detail: 'Validate schema files.\nSee: vant schema --help'
+    },
+    
+    // Storage / Data
+    cache: {
+        desc: 'Cache operations',
+        usage: 'vant cache get|set|clear',
+        detail: 'In-memory cache.\nSee: vant cache --help'
+    },
+    storage: {
+        desc: 'Persistent storage',
+        usage: 'vant storage get|set|list',
+        detail: 'File-based storage.\nSee: vant storage --help'
+    },
+    sandbox: {
+        desc: 'Sandbox permissions',
+        usage: 'vant sandbox allow|deny|status',
+        detail: 'Manage sandbox capabilities.\nSee: vant sandbox --help'
+    },
+    
+    // Security
+    security: {
+        desc: 'Security utilities',
+        usage: 'vant security scan|check',
+        detail: 'Security scanning.\nSee: vant security --help'
+    },
+    encrypt: {
+        desc: 'Encrypt/decrypt files',
+        usage: 'vant encrypt <file>',
+        detail: 'AES-256 encryption.\nSee: vant encrypt --help'
+    },
+    
+    // System
+    system: {
+        desc: 'System info and utils',
+        usage: 'vant system info',
+        detail: 'System diagnostics.\nSee: vant system --help'
+    },
+    vaf: {
+        desc: 'Validate input (vaf)',
+        usage: 'vant vaf check|validate',
+        detail: 'Input validation.\nSee: vant vaf --help'
+    },
+    error: {
+        desc: 'Error handling utilities',
+        usage: 'vant error handle|parse',
+        detail: 'Error utilities.\nSee: vant error --help'
+    },
+    event: {
+        desc: 'Event emitter system',
+        usage: 'vant event emit|listen',
+        detail: 'Event system.\nSee: vant event --help'
+    },
+    
+    // Network
+    network: {
+        desc: 'Network utilities',
+        usage: 'vant network status',
+        detail: 'Network diagnostics.\nSee: vant network --help'
+    },
+    connector: {
+        desc: 'External service connectors',
+        usage: 'vant connector list|add',
+        detail: 'Connect to services.\nSee: vant connector --help'
+    },
+    
+    // Data / Analytics
+    metrics: {
+        desc: 'Metrics collection',
+        usage: 'vant metrics get|set',
+        detail: 'Metrics tracking.\nSee: vant metrics --help'
+    },
+    qos: {
+        desc: 'Quality of service',
+        usage: 'vant qos status|limits',
+        detail: 'Rate limiting & QoS.\nSee: vant qos --help'
+    },
+    lineage: {
+        desc: 'Data lineage tracking',
+        usage: 'vant lineage track',
+        detail: 'Track data origins.\nSee: vant lineage --help'
+    },
+    stream: {
+        desc: 'Stream processing',
+        usage: 'vant stream process',
+        detail: 'Stream utilities.\nSee: vant stream --help'
+    },
+    
+    // External
+    telegram: {
+        desc: 'Telegram bot',
+        usage: 'vant telegram start',
+        detail: 'Run Telegram bot.\nSee: vant telegram --help'
+    },
+    skills: {
+        desc: 'Skill management',
+        usage: 'vant skills list|add',
+        detail: 'Manage skills.\nSee: vant skills --help'
+    },
+    
+    // Integrations
+    embed: {
+        desc: 'Embed brain in images',
+        usage: 'vant embed encode|decode',
+        detail: 'Steganography embed.\nSee: vant embed --help'
+    },
+    rerank: {
+        desc: 'Rerank search results',
+        usage: 'vant rerank query',
+        detail: 'Rerank with models.\nSee: vant rerank --help'
+    },
+    
+    // Brain / Memory
+    brain: {
+        desc: 'Brain file operations',
+        usage: 'vant brain read|write|list',
+        detail: 'Direct brain access.\nSee: vant brain --help'
+    },
+    framework: {
+        desc: 'Framework utilities',
+        usage: 'vant framework build|serve',
+        detail: 'Framework helpers.\nSee: vant framework --help'
+    },
+    compute: {
+        desc: 'Compute engine',
+        usage: 'vant compute run',
+        detail: 'Run computations.\nSee: vant compute --help'
+    },
+    canvas: {
+        desc: 'Canvas rendering',
+        usage: 'vant canvas render',
+        detail: 'Canvas operations.\nSee: vant canvas --help'
+    },
+    
+    // Advanced
+    geometry: {
+        desc: 'Geometry calculations',
+        usage: 'vant geometry calc',
+        detail: 'Math utilities.\nSee: vant geometry --help'
+    },
+    nature: {
+        desc: 'Nature simulation',
+        usage: 'vant nature simulate',
+        detail: 'Nature algorithms.\nSee: vant nature --help'
+    },
+    habitat: {
+        desc: 'Habitat simulation',
+        usage: 'vant habitat run',
+        detail: 'Habitat engine.\nSee: vant habitat --help'
+    },
+    theme: {
+        desc: 'Theme utilities',
+        usage: 'vant theme get|set',
+        detail: 'Theme management.\nSee: vant theme --help'
+    },
+    shell: {
+        desc: 'Shell commands',
+        usage: 'vant shell exec',
+        detail: 'Execute shell.\nSee: vant shell --help'
+    },
+    legal: {
+        desc: 'Legal/compliance utils',
+        usage: 'vant legal check',
+        detail: 'Compliance tools.\nSee: vant legal --help'
+    },
+    horcrux: {
+        desc: 'Split brain into shards',
+        usage: 'vant horcrux split|join',
+        detail: 'Shard brain.\nSee: vant horcrux --help'
+    },
+    msg: {
+        desc: 'Message handling',
+        usage: 'vant msg send|receive',
+        detail: 'Messaging system.\nSee: vant msg --help'
+    },
+    nodes: {
+        desc: 'Node management',
+        usage: 'vant nodes list|add',
+        detail: 'Node operations.\nSee: vant nodes --help'
+    },
+    remote: {
+        desc: 'Remote operations',
+        usage: 'vant remote connect',
+        detail: 'Remote access.\nSee: vant remote --help'
+    },
+    rules: {
+        desc: 'Rule engine',
+        usage: 'vant rules evaluate',
+        detail: 'Rule system.\nSee: vant rules --help'
+    },
+    rls: {
+        desc: 'Row-level security',
+        usage: 'vant rls check',
+        detail: 'RLS utilities.\nSee: vant rls --help'
+    },
+    tmp: {
+        desc: 'Temp file handling',
+        usage: 'vant tmp create|cleanup',
+        detail: 'Temp files.\nSee: vant tmp --help'
     }
 };
 

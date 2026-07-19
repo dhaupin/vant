@@ -32,6 +32,23 @@ const ROOT = path.resolve(__dirname, '..');
 const version = require('../lib/version');
 const args = process.argv.slice(2);
 
+// Show help
+if (args.includes('--help') || args.includes('-h')) {
+    console.log(`
+Vant Audit Generator
+
+USAGE:
+  vant audit              # Generate to stdout
+  vant audit --out FILE   # Write to file
+  vant audit --json       # JSON output
+
+EXAMPLES:
+  vant audit --out AUDIT.md
+  vant audit --json > audit.json
+`);
+    process.exit(0);
+}
+
 // ============================================
 // AUDIT DATA GATHERING (NO BLOCKING CALLS)
 // ============================================
