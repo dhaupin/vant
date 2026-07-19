@@ -32,7 +32,13 @@ async function run() {
         const citations = require('../lib/citations');
         
         if (subcmd === 'list' || subcmd === 'ls' || subcmd === 'all') {
-            console.log('Citations: (use citations.list() for actual list)');
+            const all = citations.getAll();
+            console.log('Citations:');
+            if (all.length === 0) {
+                console.log('  (none)');
+            } else {
+                all.forEach(c => console.log('  -', c));
+            }
         } else if (subcmd === 'add' || subcmd === 'create' || subcmd === 'new') {
             const ref = args[1];
             if (!ref) {

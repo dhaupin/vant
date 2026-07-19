@@ -66,8 +66,10 @@ async function run() {
             }
             console.log('Running job:', id);
         } else if (subcmd === 'status' || subcmd === 'info') {
+            const list = cron.list();
             console.log('Cron daemon:');
-            console.log('  Status: (use cron.list() for jobs)');
+            console.log('  Jobs:', list.length);
+            list.forEach(j => console.log('   -', j.id, ':', j.schedule));
         } else {
             console.log('Usage: vant cron <command>');
             process.exit(1);

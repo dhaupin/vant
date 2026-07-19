@@ -51,3 +51,9 @@ When one way isn't working:
 - Making something complex feel easy
 
 That's creativity.
+
+---
+
+**See also:**
+- [perspective.md](./perspective.md) - Fresh thinking
+- [clarity.md](./clarity.md) - Clear solutions

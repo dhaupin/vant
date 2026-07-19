@@ -12,6 +12,40 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 
 > Cloudflare headless mode for agent canvas. MCP→API unified abstraction.
 
+### Config Documentation
+- [ ] Update config.example.ini with all new config.js settings
+  - VANT_BRAIN_PASSWORD_TIMEOUT
+  - server.insecure, server.authRequired
+  - storage.path
+  - And other missing env vars from lib/config.js
+- [ ] Audit settings.ini / settings.example.ini - these are separate from config.js (user personality/preferences vs system config)
+  - Determine if they should migrate to config system or stay separate
+
+### Horcrux System
+- [ ] Horcrux sharing/distribution (to steveframe.creadev.org)
+- [ ] Version migration for horcrux files
+- [ ] Horcrux validation/metadata inspection
+- [ ] Backup scheduling with horcrux
+- [ ] Full corpus through transform (public + private brains)
+
+### Multi-Brain Architecture
+- [ ] Design: How multiple brains coexist (user brain + agent brains + shared brains)
+- [ ] Brain isolation vs sharing strategy
+- [ ] Brain sync/merge conflicts
+- [ ] Entry point: Which brain loads first
+
+#### Category Brain (FLAT + CATEGORIES)
+- [ ] Organize brain files by category: identity/, goals/, lessons/, etc.
+- [ ] Use BrainStorage with category/key addressing
+- [ ] Maintain backward compatibility with flat brain
+- [ ] Migration path from flat to category
+
+#### Geometry Brain (SEMANTIC ADDRESSING)
+- [ ] Content-addressable storage using semantic embeddings
+- [ ] Neural-style addressing: hash(embedding) = address
+- [ ] Support similarity search within brain
+- [ ] Integrate with existing brain.js attention system
+
 ### Phase 1: API System ✅ EXISTS
 - [x] lib/api.js - Unified CLI/MCP/headless interface (HAS AUTH)
 - [x] lib/mcp.js - JSON-RPC server (158 tools!) - NOW HAS AUTH
@@ -59,6 +93,77 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 ---
 
 ## v0.9.0 - Futures
+
+### _dna.js - Immutable Seed (AIRGAP SUPPORT)
+
+> "The seed doesn't contain the forest - but it contains the instructions to grow one."
+
+The `_dna.js` is the biological DNA of Vant - an immutable, hardcoded seed that:
+- Always loads before brain
+- Provides fallback if models missing
+- Enables airgapped operation
+- Version-locked for compatibility
+
+#### Concept
+```
+_separator_
+| Component      | Purpose                    |
+|----------------|---------------------------|
+| _dna.js        | Seed - minimal bootstrap  |
+| models/private | Soil - brain grows here   |
+| models/public  | Forest - agent defs        |
+| Runtime        | Water/Sun/Air - env       |
+```
+
+#### What _dna.js Contains
+```js
+{
+  VERSION: "0.8.6",           // Version lock
+  DEFAULT_IDENTITY: {...},    // If no brain
+  DEFAULT_MODE: {...},         // Config fallback
+  BOOTSTRAP: {...},           // Layer order
+  FALLBACK_BRAINS: {...}      // If models missing
+}
+```
+
+#### Boot Integration
+```
+boot.js:
+1. Load _dna.js (seed - ALWAYS)
+2. Load brain.js
+3. Brain uses _dna as fallback if model missing
+```
+
+#### Why This Matters
+- **Airgap**: Works with ONLY _dna.js - no network needed
+- **Resilience**: If repo dies, still works
+- **P2P**: Agents can share corpus with each other
+- **Version Lock**: Prevents drift between horcrux and system
+
+#### Tasks
+- [ ] Create `/lib/_dna.js` with essential defaults
+- [ ] Integrate into boot.js (load before brain)
+- [ ] Add fallback to brain.js if models missing
+- [ ] Add version checking on horcrux restore
+- [ ] Document airgap behavior
+- [ ] Test: boot with no models/
+- [ ] Test: horcrux restore on airgapped system
+
+#### Minimal Brain Files (_dna Compliant)
+For agent-first operation, define core required files:
+- [ ] `identity.md` - Who am I (name, purpose, capabilities)
+- [ ] `goals.md` - What I'm working on (current sprint, backlog)
+- [ ] `lessons.md` - What I learned (discoveries, patterns, bugs)
+- [ ] `errors.md` - Mistakes to avoid (past errors, recovery)
+- [ ] `preferences.md` - How I work (communication, style)
+
+Optional extended brain:
+- [ ] `boundaries.md` - What I can't/shouldn't do
+- [ ] `autonomy.md` - Decision-making limits
+- [ ] `context.md` - Current environment/state
+- [ ] `relationships.md` - Other agents I've met
+
+---
 
 ### nature.js - Hit-and-Miss Spark Mechanism
 - From mycelium (personal brain): hit-and-miss engine pattern
@@ -162,3 +267,81 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 - [ ] Grafana dashboards
 - [ ] Prometheus metrics
 - [ ] Alerting rules
+# Vant Roadmap
+
+## v0.8.6 (Current)
+
+### Transform + Horcrux System ✅ DONE
+
+- [x] lib/transform.js - universal data gathering
+- [x] Security chain integration (sandbox, vaf, qos)
+- [x] Delegation tracking (auto-track agent events)
+- [x] Islands in horcrux
+- [x] Runtime snapshot in horcrux
+- [x] embedToSvg() wiring to stego
+- [x] bin/transform.js CLI
+
+### Restore from Horcrux (IN PROGRESS)
+
+- [x] transform.fromHorcrux() - extract data from SVG (format agnostic)
+- [x] transform.inspectHorcrux() - preview without restoring
+- [x] transform.restore(data) - restore all systems
+- [ ] boot.inspectHorcrux() - CLI preview
+- [ ] boot.restoreFromHorcrux() - explicit restore CLI
+- [ ] Canvas boot hook to auto-restore (if no private brain)
+- [ ] Full backup/restore flow
+- [ ] Merge mode (combine horcrux with existing state)
+
+### Horcrux Types
+
+- [x] Runtime state horcrux (agents, islands, runtime, config)
+- [ ] **Full corpus horcrux** - backup pub + priv brain files as separate horcruxes
+- [ ] Public corpus horcrux (models/public/*)
+- [ ] Private corpus horcrux (models/private/*)
+
+### Boot Templates
+
+- [x] Rename models/public/examples → models/public/boot
+- [ ] Create passwordless starter brain template
+- [x] Move password-protected horcrux to boot/
+
+---
+
+## v0.9.0
+
+### Multi-Brain Support
+
+File-based multi-tenancy:
+
+```
+models/private/
+  ├── brain-name1/
+  │   ├── identity.md
+  │   ├── orgs.json
+  │   └── ...
+  ├── brain-name2/
+  │   ├── identity.md
+  │   └── ...
+  └── _default -> brain-name1/
+```
+
+**Options Considered:**
+
+| Option | Pros | Cons |
+|--------|------|------|
+| **File-based (recommended)** | Simple, portable, git-friendly | Need path updates everywhere |
+| Registry DB | Fast switching | Single point of failure |
+| Symlinks | Works with existing code | OS-dependent |
+
+**Implementation:**
+1. lib/brain-registry.js - manages brain folders
+2. brain.use('name') - switch brain
+3. brain.create('name') - create new brain
+4. Update getBrainPath() to use registry
+5. Keep models/private in .gitignore (like .env)
+
+**Files to Update:**
+- lib/brain.js (getBrainPath, load, etc)
+- lib/sandbox.js (capabilities per brain)
+- bin/* (all CLI tools)
+- Any hardcoded 'models/private' paths

@@ -29,8 +29,10 @@ function run() {
     const sudo = require('../lib/sudo');
     
     if (subcmd === 'status' || subcmd === 'stat' || subcmd === 'info') {
+        const scopes = sudo.getScopes();
         console.log('Sudo status:');
-        console.log('  (use sudo.status() for actual status)');
+        console.log('  Scopes:', scopes.length);
+        console.log('  can(>):', sudo.can('test') ? 'allowed' : 'denied');
     } else if (subcmd === 'enable' || subcmd === 'on' || subcmd === 'activate') {
         console.log('Enabling sudo...');
     } else if (subcmd === 'disable' || subcmd === 'off' || subcmd === 'deactivate') {

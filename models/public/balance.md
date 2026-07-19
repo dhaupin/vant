@@ -35,3 +35,9 @@ What's worth spending on?
 What's worth waiting for?
 
 Balance.
+
+---
+
+**See also:**
+- [perspective.md](./perspective.md) - Priorities
+- [judgment.md](./judgment.md) - Decision making

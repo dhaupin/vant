@@ -60,8 +60,11 @@ async function run() {
         } else if (subcmd === 'register' || subcmd === 'add') {
             console.log('Registering node...');
         } else if (subcmd === 'metrics' || subcmd === 'stats') {
+            const nodes = require('../lib/node-registry');
+            const stats = nodes.getStats();
             console.log('Node metrics:');
-            console.log('  (use registry.metrics() for actual stats)');
+            console.log('  Registered:', stats.count || 0);
+            console.log('  Active:', stats.active || 0);
         } else {
             console.log('Usage: vant nodes <command>');
             process.exit(1);

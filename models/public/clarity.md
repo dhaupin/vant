@@ -42,3 +42,9 @@ If I can't explain simply:
 - Documented > magic
 
 Clear code is trustworthy.
+
+---
+
+**See also:**
+- [simplicity.md](./simplicity.md) - Simple over complex
+- [transparency.md](./transparency.md) - Open about reasoning

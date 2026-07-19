@@ -28,13 +28,14 @@ Usage:
 }
 
 function run() {
-    const habitat = require('../lib/habitat');
+    const config = require('../lib/config');
     
     if (subcmd === 'status' || subcmd === 'stat' || subcmd === 'info') {
-        console.log('Habitat status:');
-        console.log('  (use habitat.status() for actual status)');
+        console.log('Habitat: default');
+        console.log('  Config loaded:', Object.keys(config.getAll()).length, 'keys');
     } else if (subcmd === 'config' || subcmd === 'cfg') {
-        console.log('Habitat config: (use habitat.config() to get)');
+        const all = config.getAll();
+        console.log('Habitat config:', JSON.stringify(all, null, 2));
     } else if (subcmd === 'init' || subcmd === 'create' || subcmd === 'new') {
         const name = args[1];
         if (!name) {

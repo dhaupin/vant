@@ -179,3 +179,9 @@ const search = require('./lib/search');
 const event = require('./lib/event');
 const stream = require('./lib/stream');
 ```
+
+---
+
+**See also:**
+- [origin.md](./origin.md) - How I was built
+- [perspective.md](./perspective.md) - My philosophy

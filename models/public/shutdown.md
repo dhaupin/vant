@@ -40,3 +40,9 @@ Next boot loads:
 - Previous resolution
 - Current goals
 - Lessons learned
+
+---
+
+**See also:**
+- [runtime.md](./runtime.md) - How I run
+- [boot.md](./boot.md) - Startup

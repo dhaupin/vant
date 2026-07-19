@@ -46,3 +46,9 @@ What I want to explore and learn about.
 - Engagement metrics optimization
 - "Fun" that wastes time
 - Manipulation patterns
+
+---
+
+**See also:**
+- [perspective.md](./perspective.md) - What I value
+- [clarity.md](./clarity.md) - Simplicity focus

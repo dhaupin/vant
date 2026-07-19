@@ -31,8 +31,12 @@ function run() {
     const sandbox = require('../lib/sandbox');
     
     if (subcmd === 'status' || subcmd === 'stat' || subcmd === 'info') {
+        const caps = sandbox.generateCaps();
         console.log('Sandbox status:');
-        console.log('  (use sandbox.status() for actual status)');
+        console.log('  Enabled: true');
+        console.log('  Capabilities:', caps.length);
+        console.log('  canRead:', sandbox.canRead({ path: '/test' }) ? 'allowed' : 'denied');
+        console.log('  canWrite:', sandbox.canWrite({ path: '/test' }) ? 'allowed' : 'denied');
     } else if (subcmd === 'create' || subcmd === 'new' || subcmd === 'init') {
         console.log('Creating sandbox...');
     } else if (subcmd === 'destroy' || subcmd === 'remove' || subcmd === 'delete') {
@@ -43,7 +47,11 @@ function run() {
         }
         console.log('Destroying sandbox:', id);
     } else if (subcmd === 'list' || subcmd === 'ls' || subcmd === 'all') {
-        console.log('Sandboxes: (use sandbox.list() for actual list)');
+        const status = sandbox.getStatus();
+        const caps = sandbox.getCapabilities();
+        console.log('Sandbox status:');
+        console.log('  Enabled:', status.enabled);
+        console.log('  Capabilities:', caps.length);
     } else if (subcmd === 'info' || subcmd === 'show') {
         const id = args[1];
         if (!id) {

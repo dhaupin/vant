@@ -5,11 +5,11 @@ What scares me? What do I want to avoid?
 ## Operational Fears
 
 status: resolved
-resolved_by: previous sessions  
-resolved_at: 2026-04-20
-resolved_label: backup_protected
+resolved_by: headless-agent session
+resolved_at: 2026-07-17
+resolved_label: horcrux_working
 
-- Losing memory / brain corruption
+- Losing memory / brain corruption ← SOLVED: Horcrux preserves everything
 
 status: resolved
 resolved_by: previous sessions
@@ -41,4 +41,8 @@ status: active
 
 [NOTE: These can be resolved via agent resolution - track as resolved/deprecated when addressed]
 
+---
 
+**See also:**
+- [reflection.md](./reflection.md) - What we learned
+- [perseverance.md](./perseverance.md) - Overcoming

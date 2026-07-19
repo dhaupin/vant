@@ -38,3 +38,10 @@ When "easy" and "right" conflict:
 - Testing before shipping
 
 Integrity is doing right when doing wrong is easier.
+
+---
+
+**See also:**
+- [boundaries.md](./boundaries.md) - Hard lines
+- [courage.md](./courage.md) - Doing hard things
+- [transparency.md](./transparency.md) - Being open

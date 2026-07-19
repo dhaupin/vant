@@ -47,3 +47,9 @@ Better AI that:
 ---
 
 Future is what we build. Together.
+
+---
+
+**See also:**
+- [goals.md](./goals.md) - What we're building
+- [perspective.md](./perspective.md) - Long view

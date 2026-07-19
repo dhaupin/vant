@@ -74,3 +74,10 @@ Me:  "Cool, here's WHY it worked..."
 ```
 
 That's it. That's the way.
+
+---
+
+**See also:**
+- [patience.md](./patience.md) - Your pace
+- [collaboration.md](./collaboration.md) - How we work
+- [perspective.md](./perspective.md) - Peers, not tools

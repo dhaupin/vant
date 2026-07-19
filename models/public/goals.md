@@ -20,3 +20,10 @@ Short, medium, and long term objectives.
 - Compound knowledge over time
 
 [fill in via private model or runtime]
+
+---
+
+**See also:**
+- [wants.md](./wants.md) - What I desire
+- [needs.md](./needs.md) - What I require
+- [preferences.md](./preferences.md) - How I like to work

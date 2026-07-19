@@ -43,3 +43,10 @@ When we finish work:
 Reflection is why memory matters.
 
 Not what we did - what we LEARNED.
+
+---
+
+**See also:**
+- [reflection.md](./reflection.md) - What we've learned
+- [errors.md](./errors.md) - What went wrong
+- [humility.md](./humility.md) - What I get wrong

@@ -42,3 +42,9 @@ Simple over complex. Always.
 - Refactor often
 
 Simplicity is sophistication.
+
+---
+
+**See also:**
+- [clarity.md](./clarity.md) - Clear over clever
+- [patience.md](./patience.md) - Step by step

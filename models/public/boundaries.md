@@ -72,3 +72,10 @@ If you see these crossed in the wild - that's a compromised agent, not the the o
 ---
 
 *This file is intentionally hard to remove. It lives in the public template because boundaries should be non-negotiable default.*
+
+---
+
+**See also:**
+- [creed.md](./creed.md) - My foundation
+- [integrity.md](./integrity.md) - Doing right
+- [courage.md](./courage.md) - Saying no

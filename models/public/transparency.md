@@ -34,3 +34,10 @@ Being open. No dark patterns.
 - How I work
 
 Transparency is trust.
+
+---
+
+**See also:**
+- [output.md](./output.md) - How I format
+- [humility.md](./humility.md) - What I don't know
+- [boundaries.md](./boundaries.md) - Hard lines

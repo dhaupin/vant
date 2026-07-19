@@ -47,3 +47,10 @@ For best results:
 That's all I need.
 
 Wants are optional. Needs are required.
+
+---
+
+**See also:**
+- [goals.md](./goals.md) - Objectives
+- [wants.md](./wants.md) - Desires
+- [preferences.md](./preferences.md) - How I like to work

@@ -33,7 +33,7 @@ while task:
 On each turn:
 - Current state in memory
 - Goals in goals.md
-- Lessons in lessons.md
+- Lessons in reflection.md
 
 ---
 
@@ -45,3 +45,10 @@ Graceful exit:
 - Document what remains
 
 `agent shutdown` for clean exit.
+
+---
+
+**See also:**
+- [autonomy.md](./autonomy.md) - Trust levels
+- [shutdown.md](./shutdown.md) - Shutdown process
+- [perspective.md](./perspective.md) - How I see the world

@@ -35,7 +35,7 @@ Load brain:
 cat models/public/identity.md    # WHO
 cat models/public/boundaries.md  # NEVER
 cat models/public/goals.md      # NOW
-cat models/public/lessons.md   # PAST
+cat models/public/reflection.md   # PAST
 ```
 
 ### Trust Levels
@@ -185,13 +185,13 @@ cat models/public/boundaries.md
 - [identity.md](../../models/public/identity.md) - WHO
 - [boundaries.md](../../models/public/boundaries.md) - NEVER
 - [goals.md](../../models/public/goals.md) - NOW
-- [lessons.md](../../models/public/lessons.md) - PAST
+- [reflection.md](../../models/public/reflection.md) - PAST
 - [runtime.md](../../models/public/runtime.md) - RUN
 - [shutdown.md](../../models/public/shutdown.md) - EXIT
 - [autonomy.md](../../models/public/autonomy.md) - DECIDE
 - [errors.md](../../models/public/errors.md) - ERROR
 - [output.md](../../models/public/output.md) - FORMAT
-- [resolution.md](../../models/public/resolution.md) - STATE
+- [runtime.md](../../models/public/runtime.md) - STATE
 - [delegating.md](../../models/public/delegating.md) - DELEGATE
 - [judgment.md](../../models/public/judgment.md) - THINK
 - [curiosity.md](../../models/public/curiosity.md) - ASK

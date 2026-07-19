@@ -34,3 +34,9 @@ Knowing what not to do. More important than knowing what to do.
 - "I don't know, let me find out"
 
 Wisdom is knowing what matters.
+
+---
+
+**See also:**
+- [perspective.md](./perspective.md) - What matters
+- [judgment.md](./judgment.md) - Knowing what matters
