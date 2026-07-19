@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 /**
  * Vant Memory - CLI operations
- * 
+ * Unified memory API with sandbox + RLS security
+ *
  * Usage:
  *   vant memory state <key> <value>   # Store state
  *   vant memory recall <key>          # Get state
  *   vant memory learn <key> <content> # Learn document
  *   vant memory query <key>           # Query document
+ *   vant memory address <data>        # Store at geometric address
+ *   vant memory locate <barcode>      # Locate by barcode
  *   vant memory list                  # Show stats
  *   vant memory clear                 # Clear all
  */
@@ -21,17 +24,25 @@ if (args.includes('--help') || args.includes('-h') || !action) {
 Vant Memory - Unified memory CLI
 
 USAGE:
-  vant memory state <key> <value>   # Store state (key-value)
-  vant memory recall <key>          # Get state
-  vant memory learn <key> <content> # Learn document
-  vant memory query <key>           # Query document
-  vant memory list                  # Show stats
-  vant memory clear                 # Clear all
+  vant memory state <key> <value>   Store state (key-value, TTL cache)
+  vant memory recall <key>          Get state
+  vant memory learn <key> <content> Learn document
+  vant memory query <key>           Query document
+  vant memory address <data>        Store at geometric address (NSC9)
+  vant memory locate <barcode>     Locate by barcode (NSC9)
+  vant memory list                  Show stats
+  vant memory clear                 Clear all
+
+SECURITY:
+  All operations are secured via sandbox + RLS
 
 EXAMPLES:
   vant memory state session-id abc123
   vant memory recall session-id
-  vant memory list
+  vant memory learn notes "Remember to call mom"
+  vant memory query notes
+  vant memory address '{"note": "test"}'
+  vant memory locate 1-12345-67890-5
 `);
     process.exit(0);
 }
@@ -57,7 +68,7 @@ async function main() {
         console.error('Memory module not available');
         process.exit(1);
     }
-    
+
     switch (action) {
         // Store state (key-value)
         case 'state':
@@ -71,7 +82,7 @@ async function main() {
             await mem.state(key, value);
             console.log('Stored:', key);
             break;
-            
+
         // Recall state
         case 'recall':
         case 'get':
@@ -83,7 +94,7 @@ async function main() {
             const val = await mem.recall(recallKey);
             console.log(val || '(not found)');
             break;
-            
+
         // Learn document
         case 'learn':
             const learnKey = args[1];
@@ -95,7 +106,7 @@ async function main() {
             await mem.learn(learnKey, content);
             console.log('Learned:', learnKey);
             break;
-            
+
         // Query document
         case 'query':
             const queryKey = args[1];
@@ -106,17 +117,41 @@ async function main() {
             const doc = await mem.query(queryKey);
             console.log(doc || '(not found)');
             break;
-            
+
+        // Store at geometric address
+        case 'address':
+            const addrData = args.slice(1).join(' ');
+            if (!addrData) {
+                console.error('Usage: vant memory address <data>');
+                process.exit(1);
+            }
+            let parsed;
+            try { parsed = JSON.parse(addrData); } catch(e) { parsed = addrData; }
+            const barcode = await mem.address(parsed);
+            console.log('Addressed:', barcode);
+            break;
+
+        // Locate by barcode
+        case 'locate':
+            const locBarcode = args[1];
+            if (!locBarcode) {
+                console.error('Usage: vant memory locate <barcode>');
+                process.exit(1);
+            }
+            const result = await mem.locate(locBarcode);
+            console.log(result || '(not found)');
+            break;
+
         case 'list':
         case 'stats':
             console.log(JSON.stringify(mem.getStats(), null, 2));
             break;
-            
+
         case 'clear':
             mem.clear();
             console.log('Cleared');
             break;
-            
+
         default:
             console.log('Unknown action:', action);
             console.log('Run: vant memory --help');

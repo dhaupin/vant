@@ -382,9 +382,15 @@ See: vant node --help`
     
     // Advanced
     geometry: {
-        desc: 'Geometry calculations',
-        usage: 'vant geometry calc',
-        detail: 'Math utilities.\nSee: vant geometry --help'
+        desc: 'NSC9 Quasicrystal geometric storage',
+        usage: 'vant geometry store <key> <value>',
+        detail: `NSC9 Quasicrystal storage.
+  store <key> <val>   Store in NSC9 (via memory)
+  retrieve <key>       Retrieve from NSC9
+  barcode <content>    Generate barcode
+  address <data>       Store at geometric address
+  locate <barcode>     Locate by barcode
+See: vant geometry --help`,
     },
     nature: {
         desc: 'Nature simulation',
@@ -587,8 +593,15 @@ See: vant node --help`
     },
     memory: {
         desc: 'Memory & learning system',
-        usage: 'vant memory add|set|get|query|list|forget|delete|clear',
-        detail: 'Unified memory and learning.\nSee: vant memory --help'
+        usage: 'vant memory state|learn|address|list|clear',
+        detail: `Unified memory API (sandbox + RLS secured).
+  state <key> <val>   Key-value state (TTL cache)
+  recall <key>        Get state
+  learn <key> <val>   Document storage
+  query <key>        Query document
+  address <data>      Store at geometric address
+  locate <barcode>   Retrieve by barcode
+See: vant memory --help`\nSee: vant memory --help'
     },
     registry: {
         desc: 'General registry',
