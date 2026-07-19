@@ -309,6 +309,85 @@ Optional extended brain:
 
 ## v0.9.0
 
+### Node Architecture (UNIFIED)
+
+> Everything is a node. Unified node system across the OS.
+
+#### Concept
+```
+lib/node.js (base class)
+├── id, type, name, metadata
+├── parent, children[] (graph/tree)
+├── schema (JSON-LD style validation)
+├── validate()
+├── toJSON()
+└── fromJSON()
+
+Node Types (extend base):
+├── BrainNode extends Node
+├── AgentNode extends Node
+├── TeamNode extends Node
+├── OrgNode extends Node
+├── CanvasNode extends Node
+└── ... (runtime extensible)
+```
+
+#### Why
+- Current state: Fragmented node-like concepts everywhere (teams.js, lineage.js, agents.js, brain-registry.js)
+- Each has own ID generation, parent/child tracking, metadata
+- Need unified base for: FAIR principles, graph traversal, canvas paintbrush per node type
+
+#### Tasks
+- [ ] Create lib/node.js with base Node class
+- [ ] Define node schema (id, type, metadata, parent, children, created, modified)
+- [ ] Extend BrainNode from Node
+- [ ] Extend AgentNode from Node  
+- [ ] Extend TeamNode/OrgNode from Node (from teams.js)
+- [ ] Canvas paintbrush per node type (each node can render itself)
+- [ ] Graph traversal methods (ancestors, descendants, paths)
+
+---
+
+### Registry Consolidation
+
+> One registry that exists, agnostic to config/storage/state.
+
+#### Concept
+```
+lib/registry.js (universal)
+├── register(node)           // Register any node type
+├── get(id)                 // Get by ID
+├── find(filters)           // Query by type, parent, metadata
+├── list(type)              // List by type
+├── validate(schema)        // Validate node schema
+└── type definitions        // Runtime-extensible types
+
+Storage backends (configurable):
+├── brain     // Files in models/private/
+├── memory    // In-memory runtime
+├── config    // Settings/config
+└── custom    // Per-runtime adapters
+```
+
+#### Current State (Fragmented)
+| Registry | Purpose |
+|----------|---------|
+| lib/registry.js | Agent address book |
+| lib/node-registry.js | Peer discovery |
+| lib/brain-registry.js | Brain folders |
+| lib/teams.js | Org/dept/team hierarchy |
+
+#### Tasks
+- [ ] Create universal registry in lib/registry.js
+- [ ] Migrate agent registry → universal
+- [ ] Migrate node-registry → universal
+- [ ] Integrate brain-registry with universal
+- [ ] Add storage backend abstraction
+- [ ] Runtime-extensible type definitions
+- [ ] Add node.js base class integration
+
+---
+
 ### Multi-Brain Support
 
 File-based multi-tenancy:
