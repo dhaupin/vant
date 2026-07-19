@@ -42,7 +42,7 @@ Examples:
 
 async function run() {
     try {
-        const duality = require('../lib/geometry/duality');
+        const memory = require('../lib/memory');
         
         if (subcmd === 'duality' || subcmd === 'status') {
             console.log('=== Brain-Geometry Duality ===');
@@ -55,7 +55,7 @@ async function run() {
                 console.error('Usage: vant geometry remember <key> <value>');
                 process.exit(1);
             }
-            await duality.remember(key, 'default', value);
+            await memory.learn('geometry:' + key, value);
             console.log('Stored in duality:', key);
         } else if (subcmd === 'recall' || subcmd === 'get') {
             const key = args[1];
@@ -63,7 +63,7 @@ async function run() {
                 console.error('Usage: vant geometry recall <key>');
                 process.exit(1);
             }
-            const result = await duality.recall(key);
+            const result = await memory.query(key);
             console.log(result);
         } else if (subcmd === 'barcode') {
             const content = args.slice(1).join(' ');
