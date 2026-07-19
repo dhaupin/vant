@@ -91,7 +91,11 @@ async function run() {
         console.log('Creating horcrux:', outputPath);
         
         const transform = require('../lib/transform');
-        const result = await transform.toHorcrux(outputPath, { password });
+        // Gather full corpus (public + private brains, storage, config)
+        const result = await transform.toHorcrux(outputPath, { 
+            password,
+            full: true  // Include corpus, brainStorage, privateBrains
+        });
         
         console.log('\n✅ Created!');
         console.log('Path:', result.path);
