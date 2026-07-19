@@ -3,8 +3,10 @@
  * Vant Memory - Memory operations
  * 
  * Usage:
- *   vant memory set <key> <value>    # Set memory
- *   vant memory get <key>             # Get memory
+ *   vant memory add <topic> <content>   # Add learning
+  vant memory set <key> <value>      # Set memory
+ *   vant memory get <key>              # Get memory
+  vant memory query <topic>          # Query learning
  *   vant memory list                  # List memories
  *   vant memory clear                 # Clear memories
  */
@@ -17,14 +19,17 @@ const action = args[0];
 // Show help
 if (args.includes('--help') || args.includes('-h') || !action) {
     console.log(`
-Vant Memory - In-memory storage
+Vant Memory - Unified memory & learning system
 
 USAGE:
-  vant memory set <key> <value>    # Set memory
-  vant memory get <key>             # Get memory
+  vant memory add <topic> <content>   # Add learning
+  vant memory set <key> <value>      # Set memory
+  vant memory get <key>              # Get memory
+  vant memory query <topic>          # Query learning
   vant memory list                  # List memories
   vant memory clear                 # Clear all
-  vant memory delete <key>          # Delete key
+  vant memory delete <key>            # Delete key
+  vant memory forget <topic>        # Remove learning
   vant memory stats                 # Show stats
 
 EXAMPLES:
@@ -57,23 +62,27 @@ async function main() {
     const mod = getMemory();
     
     switch (action) {
+        // Add learning (alias for set)
+        case 'add':
         case 'set':
             const key = args[1];
             const value = args.slice(2).join(' ');
             if (!key) {
-                console.error('Usage: vant memory set <key> <value>');
+                console.error('Usage: vant memory add <topic> <content>');
                 process.exit(1);
             }
-            console.log('Setting:', key);
+            console.log('Adding:', key);
             if (mod && mod.remember) {
                 const result = await mod.remember(key, value);
-                console.log('Set:', key, '(total:', result.total + ')');
+                console.log('Added:', key, '(total:', result.total + ')');
             } else {
                 console.log('Memory module not available');
             }
             break;
             
+        // Get memory (alias for query)
         case 'get':
+        case 'query':
             const getKey = args[1];
             if (!getKey) {
                 console.error('Usage: vant memory get <key>');
@@ -135,6 +144,20 @@ async function main() {
                 console.log('Max capacity:', mod.maxExperiences || 1000);
             } else {
                 console.log('Memory module not available');
+            }
+            break;
+            
+        // Forget learning (alias for delete)
+        case 'forget':
+            const forgetKey = args[1];
+            if (!forgetKey) {
+                console.error('Usage: vant memory forget <topic>');
+                process.exit(1);
+            }
+            console.log('Forgetting:', forgetKey);
+            if (mod && mod.patterns && mod.patterns.delete) {
+                mod.patterns.delete(forgetKey);
+                console.log('Forgotten');
             }
             break;
             

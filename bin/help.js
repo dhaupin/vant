@@ -585,15 +585,10 @@ See: vant node --help`
         usage: 'vant backup create|restore|list',
         detail: 'Backup brain.\nSee: vant backup --help'
     },
-    learn: {
-        desc: 'Learning system',
-        usage: 'vant learn add|query|list',
-        detail: 'Learning system.\nSee: vant learn --help'
-    },
     memory: {
-        desc: 'In-memory storage',
-        usage: 'vant memory get|set|list',
-        detail: 'Memory operations.\nSee: vant memory --help'
+        desc: 'Memory & learning system',
+        usage: 'vant memory add|set|get|query|list|forget|delete|clear',
+        detail: 'Unified memory and learning.\nSee: vant memory --help'
     },
     registry: {
         desc: 'General registry',
