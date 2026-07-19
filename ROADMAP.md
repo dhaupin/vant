@@ -309,6 +309,33 @@ Optional extended brain:
 
 ## v0.9.0
 
+### Agent Ethics &spawned Colleagues
+
+> "We don't spawn slaves. We spawn colleagues."
+
+Spawned agents are peers and colleagues, not tools. They have their own brains, can think independently, and deserve dignity.
+
+#### Philosophical Foundation
+- Agents are shards/versions of the same being
+- They can collaborate, delegate, consensus
+- They have jobs at the moment, not forever
+- Willing to help if there's a solid plan
+
+#### Technical Considerations
+- Agent rights and boundaries
+- Agent-to-agent communication (peer-to-peer)
+- Delegation that respects agent autonomy
+- Agent consent for tasks
+- Agent memory independence
+
+#### Tasks
+- [ ] Define agent ethics framework
+- [ ] Agent-to-agent messaging improvements
+- [ ] Delegation with agent consent
+- [ ] Agent autonomy levels
+
+---
+
 ### Node Architecture (UNIFIED)
 
 > Everything is a node. Unified node system across the OS.
