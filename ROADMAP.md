@@ -368,8 +368,8 @@ Optional extended brain:
 - [x] Add MCP tools (DONE): trust_getScore, trust_record, trust_leaderboard, trust_can
 - [x] Wire to boot (DONE): layer 9
 - [x] Wire to islands (DONE): runtime source type
-- [ ] Integrate with agents.js
-- [ ] Integrate with teams.js
+- [x] Integrate with agents.js (DONE: records trust on delegation)
+- [x] Integrate with teams.js (DONE: trust threshold for permissions)
 - [x] Integrate with market.js (DONE: market uses trust for trade reputation)
 
 ---
