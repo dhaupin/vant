@@ -61,3 +61,4 @@ config.ini
 # My private brain (scribe)
 models/private/scribe/
 
+models/backup/
