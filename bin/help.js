@@ -141,6 +141,41 @@ See: vant node --help`
     },
 
     // New / Additional
+    trust: {
+        desc: 'Trust & reputation system',
+        usage: 'vant trust score|record|leaderboard|can|required',
+        detail: 'Manage trust scores and permissions.\nSee: vant trust --help'
+    },
+    market: {
+        desc: 'Knowledge trading market',
+        usage: 'vant market list|bid|search|trade|stats',
+        detail: 'Trade knowledge with escrow.\nSee: vant market --help'
+    },
+    config: {
+        desc: 'Get/set configuration',
+        usage: 'vant config get|set|list <key> [value]',
+        detail: 'Manage vant configuration.'
+    },
+    teams: {
+        desc: 'Team permissions & roles',
+        usage: 'vant teams list|add|remove|perm',
+        detail: 'Manage team permissions.\nSee: vant teams --help'
+    },
+    consensus: {
+        desc: 'Voting & decision system',
+        usage: 'vant consensus vote|propose|results',
+        detail: 'Distributed decision making.\nSee: vant consensus --help'
+    },
+    escrow: {
+        desc: 'Escrow quota management',
+        usage: 'vant escrow status|hold|release',
+        detail: 'Manage operation quotas.\nSee: vant escrow --help'
+    },
+    governance: {
+        desc: 'System governance rules',
+        usage: 'vant governance check|set',
+        detail: 'Governance & consent.\nSee: vant governance --help'
+    },
     repos: {
         desc: 'Mount external repositories',
         usage: 'vant repos --list|--mount|--pull',
@@ -247,9 +282,10 @@ function showHelp(command) {
 
 // Get command from args
 const args = process.argv.slice(2);
-const cmd = args[0] || 'help';
+const cmd = args[0] || '';
 const target = ALIASES[cmd] || cmd;
 
 // Show specific help if command is provided, otherwise show all
-showHelp(args[1] || (COMMANDS[target] ? target : null));
+// Empty cmd or 'help' shows all commands
+showHelp(args[0] && args[0] !== 'help' && COMMANDS[target] ? target : null);
     if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
