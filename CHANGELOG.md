@@ -5,6 +5,54 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - Future
+
+### Architecture - Areas to Address
+
+> Architectural improvements identified for future versions.
+
+#### Config Consolidation
+- Current state: Fragmented config across multiple files
+  - `lib/config.js` - Runtime config (env vars)
+  - `settings.ini` - User personality/preferences
+  - `settings.example.ini` - User settings template
+  - `config.example.ini` - System config template
+  - `models/private/_config.json` - Brain registry (new)
+- Issue: No single source of truth for configuration
+- Task: Unify into layered config system
+  - Layer 1: Runtime defaults (lib/config.js)
+  - Layer 2: System config (settings.ini)
+  - Layer 3: User preferences (settings.ini)
+  - Layer 4: Runtime overrides (env vars)
+- Benefit: Easier to understand, configure, migrate
+
+#### Boot Flow Modularization
+- Current state: lib/boot.js loads layers sequentially
+  - sudo → sandbox → qos → escrow → lock → audit → brain → islands
+- Issue: Rigid order, hard to customize, hard to add new layers
+- Task: Make boot more modular
+  - Configurable boot order via config
+  - Plugin hooks for boot stages
+  - Conditional layer loading
+  - Clear dependency chain
+- Benefit: More flexible, easier to extend, better debugging
+
+#### Plugin/Extension System
+- Current state: No formal plugin system
+- Vision: Runtime-extensible Vant
+  - Plugins register via standard interface
+  - Plugin can add: handlers, islands, tools, routes
+  - Plugin lifecycle: init → register → start → stop
+  - Plugin discovery: file-based or registry
+- Tasks:
+  - Define plugin interface (register, config, lifecycle)
+  - Plugin loader in lib/boot.js
+  - Plugin registry (which plugins active)
+  - Sandboxed plugin execution
+- Benefit: Ecosystem of shareable extensions
+
+---
+
 ## [0.8.6] - 2026-06-30
 
 ### Feature - Headless Mode (v0.8.6 SCOPE)
