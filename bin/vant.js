@@ -308,6 +308,43 @@ if (cmd === 'learn' || cmd === 'remember') {
     return;
 }
 
+
+// Handle address/locate commands
+if (cmd === 'address' || cmd === 'locate') {
+    const vant = require('../lib/vant');
+    
+    let data = args.slice(1).join(' ');
+    
+    if (!data) {
+        console.error(`Usage: vant ${cmd} <data|barcode>`);
+        console.error(`Example: vant address '{"note": "test"}'`);
+        console.error(`       vant locate 1-12345-67890-5`);
+        process.exit(1);
+    }
+    
+    (async () => {
+        try {
+            await vant.init({ debug: false });
+            const memory = require('../lib/memory');
+            
+            if (cmd === 'address') {
+                let parsed;
+                try { parsed = JSON.parse(data); } catch(e) { parsed = data; }
+                const barcode = await memory.address(parsed);
+                console.log(`✅ Addressed: ${barcode}`);
+            } else {
+                const result = await memory.locate(data);
+                console.log(result || '(not found)');
+            }
+            process.exit(0);
+        } catch (e) {
+            console.error('Error:', e.message);
+            process.exit(1);
+        }
+    })();
+    return;
+}
+
 if (!cmd || cmd === 'help' || cmd === 'vant') {
     console.log(`
 ╔═══════════════════════════════════════╗
@@ -429,8 +466,8 @@ Core:
 
 Brain:
   vant brain mode <mode>  Set brain mode (dual/public/private/remote)
-  vant geometry          Brain-Quasicrystal duality bridge
-  vant duality          Alias for geometry
+  vant geometry          NSC9 quasicrystal storage (via memory)
+  vant duality          Alias for geometry (deprecated)
 
 Auth:
   MCP requires API key if VANT_MCP_REQUIRE_KEY=true.
