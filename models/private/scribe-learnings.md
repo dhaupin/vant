@@ -53,7 +53,47 @@
 
 ## Todo
 
-- [ ] Horcrux validation with VAF
-- [ ] Backup scheduling with cron/entropy
+- [x] Horcrux validation with VAF
+- [x] Backup scheduling with cron/entropy
+- [x] Multi-format backup (horcrux, json, incremental)
+- [x] Encryption validation
 - [ ] Multi-brain architecture
-- [ ] Stegoframe sharing
+- [ ] Stegoframe sharing (stegoframe.creadev.org)
+- [ ] Stego API cleanup
+- [ ] Bug: models/private/public folder investigation
+
+## Roadmap
+
+### Stego API Cleanup
+- decode() should auto-detect format from file extension
+- Support both PNG and SVG seamlessly
+- horcrux uses SVG (better for large data)
+- PNG works for simple steganography
+
+### Stegoframe Integration  
+- stegoframe.creadev.org - public horcrux sharing
+- Upload horcruxes to share with others
+- Import horcruxes from URL
+- Encryption preserved during upload
+
+### Multi-Brain Architecture
+- Each agent gets own brain in models/private/[agent]/
+- Currently: flat files in models/private/
+- Future: subdirectory per agent
+- Need routing layer
+
+## Backup Storage
+
+### Location
+- Default: `models/backup/`
+- Configurable via `backupPath` in config
+
+### Formats
+- **horcrux (.svg)**: Steganography, encrypted, default
+- **json (.json)**: Plain JSON, not encrypted
+- **incremental (.delta.json)**: Delta from last full backup
+
+### Encryption
+- Horcrux uses AES-256-GCM via stego module
+- Password required for create/validate
+- Default password: 'default-backup-2026' (set VANT_BRAIN_PASSWORD)
