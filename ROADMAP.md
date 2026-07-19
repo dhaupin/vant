@@ -18,6 +18,21 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
   - server.insecure, server.authRequired
   - storage.path
   - And other missing env vars from lib/config.js
+- [ ] Audit settings.ini / settings.example.ini - these are separate from config.js (user personality/preferences vs system config)
+  - Determine if they should migrate to config system or stay separate
+
+### Horcrux System
+- [ ] Horcrux sharing/distribution (to steveframe.creadev.org)
+- [ ] Version migration for horcrux files
+- [ ] Horcrux validation/metadata inspection
+- [ ] Backup scheduling with horcrux
+- [ ] Full corpus through transform (public + private brains)
+
+### Multi-Brain Architecture
+- [ ] Design: How multiple brains coexist (user brain + agent brains + shared brains)
+- [ ] Brain isolation vs sharing strategy
+- [ ] Brain sync/merge conflicts
+- [ ] Entry point: Which brain loads first
 
 ### Phase 1: API System ✅ EXISTS
 - [x] lib/api.js - Unified CLI/MCP/headless interface (HAS AUTH)
