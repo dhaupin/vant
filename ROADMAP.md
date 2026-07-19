@@ -328,8 +328,13 @@ Optional extended brain:
 
 #### Tasks
 - [x] Create lib/market.js (DONE)
-- [ ] Integrate with trust.js for reputation
-- [ ] Add to security chain
+- [x] Integrate with trust.js for reputation (DONE)
+- [x] Add to security chain (DONE)
+  - VAF: Input validation
+  - Sandbox: Capability checks
+  - QoS: Rate limiting
+  - Escrow: Budget checks
+  - Governance: Ethics
 - [ ] Add MCP tools for market operations
 
 ---
@@ -353,10 +358,14 @@ Optional extended brain:
 
 #### Tasks
 - [x] Create lib/trust.js (DONE)
+- [x] Add to security chain (DONE)
+  - VAF: Input validation
+  - Sandbox: Capability checks
+  - QoS: Rate limiting
+  - Governance: Ethics
 - [ ] Integrate with agents.js
 - [ ] Integrate with teams.js
 - [ ] Integrate with market.js
-- [ ] Add to security chain
 
 ---
 
