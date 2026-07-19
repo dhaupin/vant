@@ -59,6 +59,15 @@ async function main() {
             console.log('✨ Spirit manifested ✨');
             break;
             
+        case 'list':
+        case 'ls':
+            console.log('Spirit States:');
+            console.log('  - Dormant');
+            console.log('  - Awakened');
+            console.log('  - Manifested');
+            console.log('  - Transcendent');
+            break;
+            
         default:
             console.log('Unknown action:', action);
             console.log('Run: vant spirit --help');

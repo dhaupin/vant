@@ -39,11 +39,17 @@ const ROOT = path.resolve(__dirname, '..');
 
 // Lazy-load learn module
 let learn = null;
+let learnInstance = null;
 function getLearn() {
     if (!learn) {
-        try { learn = require('../lib/learn'); } catch(e) {}
+        try { 
+            learn = require('../lib/learn');
+            if (learn.LearningSystem) {
+                learnInstance = new learn.LearningSystem();
+            }
+        } catch(e) {}
     }
-    return learn;
+    return learnInstance;
 }
 
 async function main() {
@@ -58,10 +64,12 @@ async function main() {
                 process.exit(1);
             }
             console.log('Adding learning:', topic);
-            if (mod && mod.add) {
-                await mod.add(topic, content);
+            if (mod && mod.remember) {
+                const result = await mod.remember(topic, { content });
+                console.log('Added:', topic, '(total:', result.total + ')');
+            } else {
+                console.log('Learning module not available');
             }
-            console.log('Added:', topic, '=', content.substring(0, 50));
             break;
             
         case 'query':
@@ -72,27 +80,37 @@ async function main() {
                 process.exit(1);
             }
             console.log('Querying:', queryTopic);
-            if (mod && mod.get) {
-                const result = await mod.get(queryTopic);
-                console.log(result);
+            if (mod && mod.find) {
+                const results = await mod.find(queryTopic);
+                if (results && results.length) {
+                    results.forEach(r => console.log(' -', r.type, ':', JSON.stringify(r.data).substring(0, 50)));
+                } else {
+                    console.log('Not found');
+                }
             }
             break;
             
         case 'list':
             console.log('Learnings:');
-            if (mod && mod.list) {
-                const list = await mod.list();
-                list.forEach(l => console.log(' -', l.topic, '=', l.content.substring(0, 30)));
+            if (mod && mod.remember && mod.experiences) {
+                const exps = mod.experiences || [];
+                if (exps.length) {
+                    exps.forEach(e => console.log(' -', e.type));
+                } else {
+                    console.log(' (No learnings)');
+                }
             }
             break;
             
         case 'stats':
             console.log('Learning Stats:');
-            if (mod && mod.stats) {
-                const stats = await mod.stats();
+            if (mod && mod.getStats) {
+                const stats = await mod.getStats();
                 console.log(JSON.stringify(stats, null, 2));
+            } else if (mod && mod.experiences) {
+                console.log('Total experiences:', mod.experiences.length);
             } else {
-                console.log('Total learnings: 0');
+                console.log('Learning system active');
             }
             break;
             
@@ -103,8 +121,9 @@ async function main() {
                 process.exit(1);
             }
             console.log('Removing:', forgetTopic);
-            if (mod && mod.remove) {
-                await mod.remove(forgetTopic);
+            if (mod && mod.patterns && mod.patterns.delete) {
+                mod.patterns.delete(forgetTopic);
+                console.log('Removed');
             }
             break;
             

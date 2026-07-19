@@ -49,6 +49,15 @@ function main() {
             console.log('  Active: No');
             break;
             
+        case 'list':
+        case 'ls':
+            console.log('Recursion Levels:');
+            console.log('  0. Base case');
+            console.log('  1. Level 1');
+            console.log('  2. Level 2');
+            console.log('  n. Level n');
+            break;
+            
         default:
             console.log('Unknown action:', action);
             console.log('Run: vant recursion --help');

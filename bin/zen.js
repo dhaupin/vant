@@ -20,11 +20,13 @@ USAGE:
   vant zen quote              # Show zen quote
   vant zen breathe [seconds]  # Breathing exercise
   vant zen clear              # Clear mind
+  vant zen list               # List all quotes
 
 EXAMPLES:
   vant zen quote
   vant zen breathe 4
   vant zen clear
+  vant zen list
 `);
     process.exit(0);
 }
@@ -64,6 +66,12 @@ function main() {
         case 'c':
             console.log('\nClearing mind...');
             console.log('🧘\n');
+            break;
+            
+        case 'list':
+        case 'ls':
+            console.log('Zen quotes:');
+            quotes.forEach((q, i) => console.log(' ' + (i+1) + '.', q.substring(0, 50) + '...'));
             break;
             
         default:

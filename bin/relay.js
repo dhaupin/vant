@@ -63,6 +63,12 @@ function main() {
             console.log('Sent');
             break;
             
+        case 'list':
+        case 'ls':
+            console.log('Relays:');
+            console.log('  (No relays configured)');
+            break;
+            
         default:
             console.log('Unknown action:', action);
             console.log('Run: vant relay --help');

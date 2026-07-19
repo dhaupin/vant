@@ -72,6 +72,15 @@ async function main() {
             console.log('Consciousness is present and aware.');
             break;
             
+        case 'list':
+        case 'ls':
+            console.log('Consciousness States:');
+            console.log('  - Active');
+            console.log('  - Idle');
+            console.log('  - Thinking');
+            console.log('  - Meditating');
+            break;
+            
         default:
             console.log('Unknown action:', action);
             console.log('Run: vant consciousness --help');

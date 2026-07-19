@@ -40,11 +40,17 @@ const ROOT = path.resolve(__dirname, '..');
 
 // Lazy-load memory module
 let memory = null;
+let memoryInstance = null;
 function getMemory() {
     if (!memory) {
-        try { memory = require('../lib/memory'); } catch(e) {}
+        try { 
+            memory = require('../lib/memory');
+            if (memory.MemorySystem) {
+                memoryInstance = new memory.MemorySystem();
+            }
+        } catch(e) {}
     }
-    return memory;
+    return memoryInstance;
 }
 
 async function main() {
@@ -59,10 +65,12 @@ async function main() {
                 process.exit(1);
             }
             console.log('Setting:', key);
-            if (mod && mod.set) {
-                await mod.set(key, value);
+            if (mod && mod.remember) {
+                const result = await mod.remember(key, value);
+                console.log('Set:', key, '(total:', result.total + ')');
+            } else {
+                console.log('Memory module not available');
             }
-            console.log('Set:', key, '=', value);
             break;
             
         case 'get':
@@ -72,18 +80,28 @@ async function main() {
                 process.exit(1);
             }
             console.log('Getting:', getKey);
-            if (mod && mod.get) {
-                const value = await mod.get(getKey);
-                console.log(value);
+            if (mod && mod.find) {
+                const results = await mod.find(getKey);
+                if (results && results.length) {
+                    results.forEach(r => console.log(r.data || r));
+                } else {
+                    console.log('Not found');
+                }
             }
             break;
             
         case 'list':
         case 'ls':
             console.log('Memories:');
-            if (mod && mod.keys) {
-                const keys = await mod.keys();
-                keys.forEach(k => console.log(' -', k));
+            if (mod && mod.experiences) {
+                const exps = mod.experiences || [];
+                if (exps.length) {
+                    exps.forEach(e => console.log(' -', e.type));
+                } else {
+                    console.log(' (No memories)');
+                }
+            } else {
+                console.log(' (No memories)');
             }
             break;
             
@@ -95,26 +113,28 @@ async function main() {
                 process.exit(1);
             }
             console.log('Deleting:', delKey);
-            if (mod && mod.delete) {
-                await mod.delete(delKey);
+            if (mod && mod.patterns && mod.patterns.delete) {
+                mod.patterns.delete(delKey);
+                console.log('Deleted');
             }
             break;
             
         case 'clear':
             console.log('Clearing all memories...');
-            if (mod && mod.clear) {
-                await mod.clear();
+            if (mod) {
+                mod.experiences = [];
+                mod.patterns = new Map();
             }
             console.log('Cleared');
             break;
             
         case 'stats':
             console.log('Memory Stats:');
-            if (mod && mod.stats) {
-                const stats = await mod.stats();
-                console.log(JSON.stringify(stats, null, 2));
+            if (mod) {
+                console.log('Total memories:', mod.experiences ? mod.experiences.length : 0);
+                console.log('Max capacity:', mod.maxExperiences || 1000);
             } else {
-                console.log('Memory operational');
+                console.log('Memory module not available');
             }
             break;
             

@@ -58,10 +58,10 @@ async function main() {
                 process.exit(1);
             }
             console.log('Setting:', key);
-            if (mod && mod.set) {
-                await mod.set(key, value);
+            if (mod && mod.register) {
+                await mod.register(key, value);
             }
-            console.log('Set:', key, '=', value);
+            console.log('Set:', key);
             break;
             
         case 'get':
@@ -73,19 +73,22 @@ async function main() {
             console.log('Getting:', getKey);
             if (mod && mod.get) {
                 const value = await mod.get(getKey);
-                console.log(value);
+                console.log(value || '(empty)');
             }
             break;
             
         case 'list':
         case 'ls':
             console.log('Registry:');
-            if (mod && mod.keys) {
-                const keys = await mod.keys();
-                keys.forEach(async k => {
-                    const v = await mod.get(k);
-                    console.log(' -', k, '=', v);
-                });
+            if (mod && mod.list) {
+                const items = await mod.list();
+                if (items && items.length) {
+                    items.forEach(item => {
+                        console.log(' -', item.key || item, '=', item.value);
+                    });
+                } else {
+                    console.log(' (Empty)');
+                }
             }
             break;
             
@@ -97,9 +100,10 @@ async function main() {
                 process.exit(1);
             }
             console.log('Deleting:', delKey);
-            if (mod && mod.delete) {
-                await mod.delete(delKey);
+            if (mod && mod.remove) {
+                await mod.remove(delKey);
             }
+            console.log('Deleted');
             break;
             
         case 'clear':
@@ -108,6 +112,18 @@ async function main() {
                 await mod.clear();
             }
             console.log('Cleared');
+            break;
+            
+        case 'stats':
+            console.log('Registry Stats:');
+            if (mod && mod.count) {
+                const count = await mod.count();
+                console.log('Total entries:', count);
+            }
+            if (mod && mod.summary) {
+                const summary = await mod.summary();
+                console.log(JSON.stringify(summary, null, 2));
+            }
             break;
             
         default:
