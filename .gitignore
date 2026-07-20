@@ -65,3 +65,4 @@ config.ini
 models/private/scribe/
 
 models/backup/
+models/state.json
