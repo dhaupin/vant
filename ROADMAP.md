@@ -82,9 +82,25 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 - [x] lib/brain.js - multi-brain state (currentBrain, brainMode, brainDirs, switchBrain)
 - [x] models/public/vant/ - default public brain
 - [x] models/private/ - gitignored, local brains only
-- [ ] brain.load() - load multiple brains into layer stack
-- [ ] brain.merge() - merge across brains in layer
-- [ ] CLI brain management
+- [x] brain.load() - load single brain (string) or multiple (array)
+- [x] brain.getStack() - get current stack, supports {wait:true} for async
+- [x] brain.pushBrain() - push brain to stack
+- [x] brain.removeBrain() - remove brain from stack
+- [x] brain.switchBrain() - switch current brain
+- [x] brain.currentBrain() - get current brain
+- [x] CLI brain management (vant brain list/stack/push/pop/switch/load/merge)
+- [x] MCP tools exposed (brain_stack, brain_load, brain_push, brain_remove, brain_switch, brain_current, brain_geo_*)
+
+**Per-Brain Geometry (NSC9 Address Space):**
+- [x] Each brain has own geometry at models/private/{brain}/geometry/
+- [x] NSC9 barcode format: 9-{brain-hash}-{key-hash}-{checksum}
+- [x] Collision-free across brains
+- [x] geoLoad(), geoStore(), geoList(), geoBrains() functions
+- [x] MCP: brain_geo_list, brain_geo_store, brain_geo_load, brain_geo_brains
+
+**Persistence:**
+- [x] Stack saves to models/state.json
+- [x] getStack({wait:true}) loads from state on restart
 
 #### Category Brain (FLAT + CATEGORIES)
 - [ ] Organize brain files by category: identity/, goals/, lessons/, etc.
@@ -141,6 +157,36 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 - [ ] Geometry storage tools (barcodes)
 - [ ] Canvas/sharing tools
 - [ ] System dashboard endpoints
+
+---
+
+### lib/ Refactoring Plan (Multi-Brain Integration)
+
+Each lib module will be updated to support multi-brain stack. Methodical approach: complete one module fully before moving to next.
+
+**Priority Order:**
+1. **memory.js** - Core storage, already has geometry
+2. **dream.js** - Context/session awareness
+3. **islands.js** - Load from stack
+4. **habitat.js** - Environment detection
+5. **nature.js** - Natural systems
+6. **boot.js** - Startup orchestration
+7. **bin/** - CLI tools
+
+**Refactoring Pattern for Each Module:**
+1. Add stack awareness (use brain.getStack())
+2. Support per-brain data paths (models/private/{brain}/...)
+3. Update MCP tools if needed
+4. Test integration
+5. Document changes
+
+**Current Status:**
+- [ ] memory.js - PENDING
+- [ ] dream.js - PENDING
+- [ ] islands.js - PENDING
+- [ ] habitat.js - PENDING
+- [ ] nature.js - PENDING
+- [ ] boot.js - PENDING
 
 ---
 
@@ -356,6 +402,36 @@ Optional extended brain:
 - [x] Rename models/public/examples → models/public/boot
 - [ ] Create passwordless starter brain template
 - [x] Move password-protected horcrux to boot/
+
+---
+
+### lib/ Refactoring Plan (Multi-Brain Integration)
+
+Each lib module will be updated to support multi-brain stack. Methodical approach: complete one module fully before moving to next.
+
+**Priority Order:**
+1. **memory.js** - Core storage, already has geometry
+2. **dream.js** - Context/session awareness
+3. **islands.js** - Load from stack
+4. **habitat.js** - Environment detection
+5. **nature.js** - Natural systems
+6. **boot.js** - Startup orchestration
+7. **bin/** - CLI tools
+
+**Refactoring Pattern for Each Module:**
+1. Add stack awareness (use brain.getStack())
+2. Support per-brain data paths (models/private/{brain}/...)
+3. Update MCP tools if needed
+4. Test integration
+5. Document changes
+
+**Current Status:**
+- [ ] memory.js - PENDING
+- [ ] dream.js - PENDING
+- [ ] islands.js - PENDING
+- [ ] habitat.js - PENDING
+- [ ] nature.js - PENDING
+- [ ] boot.js - PENDING
 
 ---
 

@@ -66,3 +66,4 @@ models/private/scribe/
 
 models/backup/
 models/state.json
+models/public/vant/.audit.json
