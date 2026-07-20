@@ -125,6 +125,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - TODO: Unified index across brain types (private/public/gov)
   - TODO: Efficient recall and assimilation system
 
+- **Config System Consolidation** (Roadmap)
+  - DONE: Per-brain JSON config with global fallback (v0.8.7)
+  - TODO: Additional config utilities per brain
+
 > Original intent: VANT gates all endpoints as OS functions
 > - vant.execute(tool, args) wraps all operations
 > - Security chain: VAF → Sandbox → QoS → Auth → Escrow
