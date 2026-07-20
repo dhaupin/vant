@@ -2,7 +2,7 @@
   "neurons": {
     "synapses": {},
     "attention": {
-      "identity": 0.2
+      "test/final2": 0.2
     }
   },
   "stack": [
@@ -44,5 +44,5 @@
       "timestamp": 1784519025370
     }
   ],
-  "updated": "2026-07-20T05:19:52.375Z"
+  "updated": "2026-07-20T05:40:06.972Z"
 }
