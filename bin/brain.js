@@ -81,15 +81,39 @@ async function runMultiBrain() {
                 console.log('    -', v.brain, ':', v.content?.slice(0, 50) + '...');
             }
         }
+    } else if (subcmd === 'geo' || subcmd === 'geometry') {
+        const geoCmd = args[1] || 'list';
+        
+        if (geoCmd === 'list') {
+            const dirs = brain.geoList();
+            console.log('\nGeometry storage:');
+            for (const d of dirs) {
+                console.log('  ', d);
+            }
+        } else if (geoCmd === 'load' && args[2]) {
+            const result = await brain.geoLoad(args[2]);
+            console.log('\nLoaded:', JSON.stringify(result, null, 2));
+        } else if (geoCmd === 'store' && args[2] && args[3]) {
+            const result = await brain.geoStore(args[2], JSON.parse(args[3]));
+            console.log('\nStored:', result);
+        } else if (geoCmd === 'search' && args[2]) {
+            // Search by key prefix
+            const dirs = brain.geoList();
+            console.log('\nSearching for:', args[2]);
+            // Would need to implement search
+            console.log('(search not implemented)');
+        } else {
+            console.log('Geo commands: list, load <barcode>, store <key> <json>, search <key>');
+        }
     } else {
         console.log('Unknown subcommand or missing args');
-        console.log('Multi-brain commands: list, stack, push, pop, switch, load, merge');
+        console.log('Multi-brain commands: list, stack, push, pop, switch, load, merge, geo');
     }
 }
 
 function run() {
     // Check for multi-brain commands
-const multiBrainCmds = ['list', 'ls', 'stack', 'push', 'pop', 'switch', 'load', 'merge'];
+const multiBrainCmds = ['list', 'ls', 'stack', 'push', 'pop', 'switch', 'load', 'merge', 'geo', 'geometry'];
 if (multiBrainCmds.includes(subcmd)) {
     runMultiBrain().catch(e => {
         console.error('Error:', e.message);
