@@ -183,8 +183,9 @@ Each lib module will be updated to support multi-brain stack. Methodical approac
 **Current Status:**
 - [x] memory.js - DONE (constructor, _getBrainName, brain option in learn/query/state/recall)
 - [x] islands.js - DONE (_getStackPaths, load from stack, options.brain)
-- [ ] habitat.js - EXISTS
-- [ ] boot.js - EXISTS
+- [x] habitat.js - EXISTS (uses Memory which has brain support)
+- [x] boot.js - EXISTS (loads brain module, already works)
+- bin/brain.js - Works (uses brain.getStack())
 - [ ] dream.js - TODO (doesn't exist yet)
 - [ ] nature.js - EXISTS
 
@@ -428,8 +429,9 @@ Each lib module will be updated to support multi-brain stack. Methodical approac
 **Current Status:**
 - [x] memory.js - DONE (constructor, _getBrainName, brain option in learn/query/state/recall)
 - [x] islands.js - DONE (_getStackPaths, load from stack, options.brain)
-- [ ] habitat.js - EXISTS
-- [ ] boot.js - EXISTS
+- [x] habitat.js - EXISTS (uses Memory which has brain support)
+- [x] boot.js - EXISTS (loads brain module, already works)
+- bin/brain.js - Works (uses brain.getStack())
 - [ ] dream.js - TODO (doesn't exist yet)
 - [ ] nature.js - EXISTS
 
