@@ -64,7 +64,7 @@ async function runMultiBrain() {
         const result = brain.pushBrain(args[1], args[2] || 'private');
         console.log('\nPushed to stack:', result);
     } else if (subcmd === 'pop' && args[1]) {
-        const result = brain.popBrain(args[1]);
+        const result = brain.removeBrain(args[1]);
         console.log('\nPopped from stack:', result);
     } else if (subcmd === 'switch' && args[1]) {
         const result = brain.switchBrain(args[1], args[2] || 'private');
