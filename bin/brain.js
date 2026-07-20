@@ -35,8 +35,67 @@ Modes:
     process.exit(0);
 }
 
+// Multi-brain commands
+async function runMultiBrain() {
+    const brain = require('../lib/brain');
+    
+    if (subcmd === 'list' || subcmd === 'ls') {
+        const dirs = brain.brainDirs();
+        console.log('\nBrains:');
+        if (dirs.private) {
+            console.log('  Private:');
+            for (const b of dirs.private) {
+                console.log('    -', b);
+            }
+        }
+        if (dirs.public) {
+            console.log('  Public:');
+            for (const b of dirs.public) {
+                console.log('    -', b);
+            }
+        }
+    } else if (subcmd === 'stack') {
+        const stack = brain.getStack();
+        console.log('\nCurrent stack:');
+        for (const b of stack) {
+            console.log('  -', b);
+        }
+    } else if (subcmd === 'push' && args[1]) {
+        const result = brain.pushBrain(args[1], args[2] || 'private');
+        console.log('\nPushed to stack:', result);
+    } else if (subcmd === 'pop' && args[1]) {
+        const result = brain.popBrain(args[1]);
+        console.log('\nPopped from stack:', result);
+    } else if (subcmd === 'switch' && args[1]) {
+        const result = brain.switchBrain(args[1], args[2] || 'private');
+        console.log('\nSwitched to:', result);
+    } else if (subcmd === 'load' && args[1]) {
+        const result = await brain.loadMultiple([args[1]], { type: args[2] || 'private' });
+        console.log('\nLoaded:', result);
+    } else if (subcmd === 'merge' && args[1]) {
+        const result = await brain.merge([args[1]]);
+        console.log('\nMerged:');
+        for (const [key, values] of Object.entries(result.results)) {
+            console.log('  ', key + ':');
+            for (const v of values) {
+                console.log('    -', v.brain, ':', v.content?.slice(0, 50) + '...');
+            }
+        }
+    } else {
+        console.log('Unknown subcommand or missing args');
+        console.log('Multi-brain commands: list, stack, push, pop, switch, load, merge');
+    }
+}
+
 function run() {
-    if (subcmd === 'mode' && !args[1]) {
+    // Check for multi-brain commands
+const multiBrainCmds = ['list', 'ls', 'stack', 'push', 'pop', 'switch', 'load', 'merge'];
+if (multiBrainCmds.includes(subcmd)) {
+    runMultiBrain().catch(e => {
+        console.error('Error:', e.message);
+        process.exit(1);
+    });
+} else if (subcmd === 'mode' && !args[1]) {
         // Show current mode
         const mode = brain.getMode();
         console.log('Current mode:', mode);

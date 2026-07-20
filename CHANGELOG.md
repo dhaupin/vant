@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - Future
 
+### Evolution - Temporal Learning System
+- Session tracking: changes, insights per session
+- Auto-start/end sessions
+- Brain load tracking → attention boosting
+- Memory integration: sessions persist for semantic search
+- Islands integration: lazy-load evolution data
+- MCP tools: brain_evolution_start, brain_evolution_end, brain_evolution_insight, brain_evolution_history, brain_evolution_status
+- Dream integration: evolution insights consolidate to learnings
+
+### Multi-Brain Architecture v0.9.0
+- Stack-based multi-brain loading (pushBrain, popBrain, getStack)
+- Brain switching (currentBrain, switchBrain)
+- Brain modes: silo, shared, governance
+- Brain types: public, private
+- State persistence: stack saves to models/state.json
+
 ### Architecture - Areas to Address
 
 > Architectural improvements identified for future versions.
