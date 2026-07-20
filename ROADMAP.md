@@ -30,14 +30,30 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 
 ### Multi-Brain Architecture (v0.9.0)
 
-**Hierarchy:**
+**Layers Model:**
 ```
-instance (habitat.js - workspaces, roles, RLS, boundaries)
-    └── brain (lib/brain.js extended)
-        ├── [brain-name1]/  (persona, storage, org, agent)
-        ├── [brain-name2]/
-        └── ...
+┌─────────────────────────────────────┐
+│  Public Layer (models/public/)      │  ← In repo, collaborative
+│  ├── vant/                         │
+│  ├── [brain-name]/                 │
+│  └── ...                           │
+├─────────────────────────────────────┤
+│  Private Layer (models/private/)    │  ← Local only, gitignored
+│  ├── my-brain/                     │
+│  ├── my-research/                  │
+│  └── ...                           │
+└─────────────────────────────────────┘
 ```
+
+**Running Modes:**
+| Mode | Public | Private | Example |
+|------|--------|---------|---------|
+| Public only | ✓ | ✗ | Default vant |
+| Private only | ✗ | ✓ | All local |
+| Both layered | ✓ | ✓ | vant + my-brain |
+| Multi-public | ✓+ | ✗ | vant + other-brain |
+| Multi-private | ✗ | ✓+ | my-brain + my-research |
+| Full stack | ✓+ | ✓+ | vant + my-brain + my-research |
 
 **Brain Types:**
 | Type | Description |
@@ -57,18 +73,18 @@ instance (habitat.js - workspaces, roles, RLS, boundaries)
 **Switching Mechanisms:**
 | Trigger | Description |
 |---------|-------------|
-| `brain.switch('name')` | Manual explicit switch |
+| `brain.switchBrain('name', 'public'|'private')` | Explicit switch |
 | `VANT_BRAIN=name` | Environment variable |
+| `brain.currentBrain('name')` | Programmatic switch |
 | `brain.auto()` | Context-based auto-switch |
-| `nature.on('spark')` | Entropy-based trigger |
-| `cron` | Scheduled switching |
 
 **Implementation:**
-- [x] lib/transform.js - memory gather (foundation)
-- [ ] lib/brain.js - add list(), switch(), current(), mode()
-- [ ] lib/brain-registry.js - handle persona paths
-- [ ] lib/mcp.js - brain selection tools
-- [ ] bin/vant.js - CLI brain management
+- [x] lib/brain.js - multi-brain state (currentBrain, brainMode, brainDirs, switchBrain)
+- [x] models/public/vant/ - default public brain
+- [x] models/private/ - gitignored, local brains only
+- [ ] brain.load() - load multiple brains into layer stack
+- [ ] brain.merge() - merge across brains in layer
+- [ ] CLI brain management
 
 #### Category Brain (FLAT + CATEGORIES)
 - [ ] Organize brain files by category: identity/, goals/, lessons/, etc.
