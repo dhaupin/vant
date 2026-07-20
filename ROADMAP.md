@@ -181,7 +181,7 @@ Each lib module will be updated to support multi-brain stack. Methodical approac
 5. Document changes
 
 **Current Status:**
-- [ ] memory.js - PENDING
+- [x] memory.js - IN PROGRESS (constructor + _getBrainName added)
 - [ ] dream.js - PENDING
 - [ ] islands.js - PENDING
 - [ ] habitat.js - PENDING
@@ -426,7 +426,7 @@ Each lib module will be updated to support multi-brain stack. Methodical approac
 5. Document changes
 
 **Current Status:**
-- [ ] memory.js - PENDING
+- [x] memory.js - IN PROGRESS (constructor + _getBrainName added)
 - [ ] dream.js - PENDING
 - [ ] islands.js - PENDING
 - [ ] habitat.js - PENDING
