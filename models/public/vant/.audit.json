@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "entries": [
+    {
+      "timestamp": "2026-07-20T04:53:05.895Z",
+      "action": {
+        "component": "fatal",
+        "op": "unhandledRejection",
+        "reason": "TypeError: mcp.brain_stack is not a function",
+        "time": 1784523185895
+      },
+      "data": {},
+      "hash": "6ee6f6228ed215f1"
+    },
+    {
+      "timestamp": "2026-07-20T04:53:21.855Z",
+      "action": {
+        "component": "fatal",
+        "op": "unhandledRejection",
+        "reason": "TypeError: mcp.getMethod is not a function",
+        "time": 1784523201855
+      },
+      "data": {},
+      "hash": "0d8ecf425039ad0e"
+    }
+  ]
+}
