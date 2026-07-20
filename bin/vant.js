@@ -168,7 +168,6 @@ const COMMANDS = {
     // Brain & Geometry
     brain: 'brain.js',
     geometry: 'geometry.js',
-    duality: 'geometry.js',
     
     // Additional utilities
     audit: 'audit.js',
@@ -470,7 +469,6 @@ Core:
 Brain:
   vant brain mode <mode>  Set brain mode (dual/public/private/remote)
   vant geometry          NSC9 quasicrystal storage (barcode addressing)
-  vant duality          Alias for geometry (deprecated)
 
 NSC9 Geometric:
   vant geometry store <key> <val>   Store in quasicrystal

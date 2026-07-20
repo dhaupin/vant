@@ -47,6 +47,45 @@ await vant.learn('key', 'value');
 
 > **Note**: Git operations (commit, sync) via `require('vant/lib/branch')`
 
+## Memory API (NSC9)
+
+Vant includes a unified memory system with geometric addressing:
+
+```javascript
+const api = require('vant/lib/api');
+
+// State (key-value with TTL)
+await api.memoryState('key', 'value', { ttl: 60000 });
+const value = await api.memoryRecall('key');
+
+// Documents (markdown)
+await api.memoryLearn('doc-key', '# Title
+
+Content', { ttl: 3600000 });
+const doc = await api.memoryQuery('doc-key');
+
+// NSC9 Geometric Addressing
+const barcode = await api.memoryAddress({ test: 'data' });
+const data = await api.memoryLocate(barcode);
+
+// Stats & Clear
+const stats = api.memoryStats();
+await api.memoryClear();
+```
+
+| Method | Description |
+|--------|-------------|
+| `memoryState(key, value, opts)` | Store key-value with optional TTL |
+| `memoryRecall(key)` | Retrieve value by key |
+| `memoryLearn(key, content, opts)` | Store markdown document |
+| `memoryQuery(key)` | Retrieve document by key |
+| `memoryAddress(data)` | Generate NSC9 barcode for data |
+| `memoryLocate(barcode)` | Retrieve data from barcode |
+| `memoryStats()` | Get memory statistics |
+| `memoryClear()` | Clear all memory |
+
+> Also available via MCP: `vant_memory_state`, `vant_memory_recall`, etc.
+
 ## Submodules
 
 Access via `vant.<submodule>()`:
