@@ -119,6 +119,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - TODO: Geometry storage tools (barcodes)
   - TODO: Canvas/sharing tools
 
+- **Index Engine** (Roadmap)
+  - TODO: High-performance index for geometry/semantic/flat storage
+  - TODO: Nature-inspired indexing (math constants, golden ratio patterns)
+  - TODO: Unified index across brain types (private/public/gov)
+  - TODO: Efficient recall and assimilation system
+
 > Original intent: VANT gates all endpoints as OS functions
 > - vant.execute(tool, args) wraps all operations
 > - Security chain: VAF → Sandbox → QoS → Auth → Escrow
