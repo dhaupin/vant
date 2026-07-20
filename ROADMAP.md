@@ -28,11 +28,47 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 - [ ] Backup scheduling with horcrux
 - [ ] Full corpus through transform (public + private brains)
 
-### Multi-Brain Architecture
-- [ ] Design: How multiple brains coexist (user brain + agent brains + shared brains)
-- [ ] Brain isolation vs sharing strategy
-- [ ] Brain sync/merge conflicts
-- [ ] Entry point: Which brain loads first
+### Multi-Brain Architecture (v0.9.0)
+
+**Hierarchy:**
+```
+instance (habitat.js - workspaces, roles, RLS, boundaries)
+    └── brain (lib/brain.js extended)
+        ├── [brain-name1]/  (persona, storage, org, agent)
+        ├── [brain-name2]/
+        └── ...
+```
+
+**Brain Types:**
+| Type | Description |
+|------|-------------|
+| `persona` | Identity, goals, personality |
+| `storage` | Just data/memory |
+| `org` | Organization data |
+| `agent` | Per-agent state |
+
+**Isolation Modes (per brain):**
+| Mode | Description |
+|------|-------------|
+| `silo` | Private, max isolation, .gitignored |
+| `shared` | Public/collaborative, in repo |
+| `governance` | Rules-based, consensus-driven |
+
+**Switching Mechanisms:**
+| Trigger | Description |
+|---------|-------------|
+| `brain.switch('name')` | Manual explicit switch |
+| `VANT_BRAIN=name` | Environment variable |
+| `brain.auto()` | Context-based auto-switch |
+| `nature.on('spark')` | Entropy-based trigger |
+| `cron` | Scheduled switching |
+
+**Implementation:**
+- [x] lib/transform.js - memory gather (foundation)
+- [ ] lib/brain.js - add list(), switch(), current(), mode()
+- [ ] lib/brain-registry.js - handle persona paths
+- [ ] lib/mcp.js - brain selection tools
+- [ ] bin/vant.js - CLI brain management
 
 #### Category Brain (FLAT + CATEGORIES)
 - [ ] Organize brain files by category: identity/, goals/, lessons/, etc.
