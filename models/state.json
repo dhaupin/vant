@@ -2,7 +2,7 @@
   "neurons": {
     "synapses": {},
     "attention": {
-      "test/final2": 0.2
+      "test/mem": 0.2
     }
   },
   "stack": [
@@ -44,5 +44,5 @@
       "timestamp": 1784519025370
     }
   ],
-  "updated": "2026-07-20T05:40:06.972Z"
+  "updated": "2026-07-20T06:55:02.216Z"
 }
