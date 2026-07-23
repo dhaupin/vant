@@ -2,6 +2,8 @@
   "neurons": {
     "synapses": {},
     "attention": {
+      "Nova-Lead": 1,
+      "Nova-Researcher": 1,
       "identity": 0.2
     }
   },
@@ -9,5 +11,5 @@
     "vant",
     "nova"
   ],
-  "updated": "2026-07-23T01:52:34.531Z"
+  "updated": "2026-07-23T02:13:57.538Z"
 }
