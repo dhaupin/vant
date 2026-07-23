@@ -191,6 +191,69 @@ Each lib module will be updated to support multi-brain stack. Methodical approac
 
 ---
 
+## v0.9.0 - Multibrain Security Chain
+
+> Each lib/ module gets per-brain state isolation. No cross-brain contention.
+
+### lib/ Multibrain Integration
+
+**Scope**: Security chain modules that need brain-isolated state
+
+| Module | Status | Brain-Specific State |
+|--------|--------|---------------------|
+| **lock.js** | TODO | Lock files, token cache, rate limits |
+| **network.js** | TODO | Online status, latency, circuit breaker, domains |
+| **escrow.js** | TODO | Budgets, approvals, holds |
+| **qos.js** | TODO | Rate limits, circuit state, timeouts |
+
+**Integration Pattern:**
+```js
+// 1. Add brain resolution
+function _resolveBrain(brain) {
+    if (brain) return brain;
+    try {
+        const brainMod = require('./brain');
+        return brainMod.currentBrain ? brainMod.currentBrain() : null;
+    } catch (e) { return null; }
+}
+
+// 2. Brain-scoped state
+const _brainLocks = new Map();
+
+function getBrainLock(brain) {
+    const resolvedBrain = _resolveBrain(brain);
+    const brainKey = resolvedBrain || 'default';
+    if (!_brainLocks.has(brainKey)) {
+        _brainLocks.set(brainKey, { 
+            brain: resolvedBrain,
+            lockFile: `.lock-${brainKey}.json`,
+            tokenCache: new Map(),
+            rateLimits: new Map()
+        });
+    }
+    return _brainLocks.get(brainKey);
+}
+
+// 3. Wire core functions to use brain context
+async function acquire(agentId, timeout) {
+    const brainLock = getBrainLock(); // Auto-detect brain
+    const lockPath = path.join(LOCK_DIR, brainLock.lockFile);
+    // ... rest of acquire logic
+}
+```
+
+**Current Status:**
+- [ ] lock.js - TODO
+- [ ] network.js - TODO
+- [ ] escrow.js - TODO
+- [ ] qos.js - TODO
+
+**Progress:**
+- 2026-07-22: Reverted stub work, verified clean state at 37b0549
+- 2026-07-22: Planning lock.js as first fully-wired module
+
+---
+
 ## v0.9.0 - Futures
 
 ### _dna.js - Immutable Seed (AIRGAP SUPPORT)
