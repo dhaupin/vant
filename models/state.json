@@ -2,47 +2,12 @@
   "neurons": {
     "synapses": {},
     "attention": {
-      "test/mem": 0.2
+      "identity": 0.2
     }
   },
   "stack": [
-    "local",
-    "vant"
+    "vant",
+    "nova"
   ],
-  "lastSession": {
-    "id": "auto-1784519025369",
-    "startTime": 1784519025369,
-    "brains": [
-      "local",
-      "vant"
-    ],
-    "changes": [
-      {
-        "type": "load",
-        "data": {
-          "name": "identity",
-          "source": "private",
-          "brain": "local"
-        },
-        "timestamp": 1784519025370
-      }
-    ],
-    "insights": [
-      {
-        "insight": "Test integration",
-        "metadata": {},
-        "timestamp": 1784519025370
-      }
-    ],
-    "endTime": 1784519025370,
-    "duration": 1
-  },
-  "recentInsights": [
-    {
-      "insight": "Test integration",
-      "metadata": {},
-      "timestamp": 1784519025370
-    }
-  ],
-  "updated": "2026-07-20T06:55:02.216Z"
+  "updated": "2026-07-23T01:15:36.774Z"
 }
