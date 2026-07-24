@@ -1,11 +1,14 @@
 {
   "neurons": {
     "neurons": {
-      "asyncTest": true
-    }
+      "currentBrain": "vant"
+    },
+    "mode": "dual"
   },
   "stack": [
-    "vant"
+    "vant",
+    "nova"
   ],
-  "updated": "2026-07-24T02:18:58.448Z"
+  "mode": "dual",
+  "updated": "2026-07-24T05:46:44.718Z"
 }
