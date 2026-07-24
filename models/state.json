@@ -1,12 +1,11 @@
 {
-  "neurons": {},
-  "stack": [
-    "nova",
-    "vant"
-  ],
-  "mode": "dual",
-  "updated": "2026-07-24T09:14:44.487Z"
-}      "identity": 2
+  "neurons": {
+    "synapses": {
+      "exploration": {
+        "fundamentals": 2
+      },
+      "fundamentals": {
+        "identity": 2
       },
       "identity": {
         "realizations": 2
@@ -19,7 +18,7 @@
       "exploration": 0.4,
       "fundamentals": 0.6000000000000001,
       "identity": 0.8,
-      "realizations": 0.8
+      "realizations": 0.4
     }
   },
   "stack": [
@@ -27,5 +26,6 @@
     "vant"
   ],
   "mode": "dual",
-  "updated": "2026-07-24T09:14:44.487Z"
+  "updated": "2026-07-24T09:19:32.646Z"
+}9:19:32.646Z"
 }
