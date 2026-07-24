@@ -2,16 +2,17 @@
   "neurons": {
     "synapses": {
       "exploration": {
-        "fundamentals": 11
+        "fundamentals": 10
       },
       "fundamentals": {
-        "identity": 11
+        "identity": 9
       },
       "identity": {
-        "realizations": 10
+        "realizations": 8,
+        "exploration": 1
       },
       "realizations": {
-        "exploration": 10
+        "exploration": 8
       }
     },
     "attention": {
@@ -26,5 +27,5 @@
     "vant"
   ],
   "mode": "dual",
-  "updated": "2026-07-24T09:26:38.794Z"
-}
+  "updated": "2026-07-24T09:26:58.398Z"
+}}
