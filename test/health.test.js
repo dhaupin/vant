@@ -46,6 +46,18 @@ test('health has runChecks function', () => {
     return { success: typeof health.runChecks === 'function' };
 });
 
+// Stack tests
+test('health has getStackHealthStatus function', () => {
+    const health = require(path.join(ROOT, 'lib', 'health'));
+    return { success: typeof health.getStackHealthStatus === 'function' };
+});
+
+test('getStackHealthStatus returns object with source stack', () => {
+    const health = require(path.join(ROOT, 'lib', 'health'));
+    const result = health.getStackHealthStatus();
+    return { success: result && result.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

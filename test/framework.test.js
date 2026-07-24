@@ -96,6 +96,29 @@ test('framework has isOperationAllowed function', () => {
     return { success: typeof framework.isOperationAllowed === 'function' };
 });
 
+// Multibrain tests
+test('framework has getBrainFrameworkConfig function', () => {
+    const framework = require(path.join(ROOT, 'lib', 'framework'));
+    return { success: typeof framework.getBrainFrameworkConfig === 'function' };
+});
+
+test('framework has setBrainFrameworkConfig function', () => {
+    const framework = require(path.join(ROOT, 'lib', 'framework'));
+    return { success: typeof framework.setBrainFrameworkConfig === 'function' };
+});
+
+// Stack tests
+test('framework has getStackFrameworkConfigs function', () => {
+    const framework = require(path.join(ROOT, 'lib', 'framework'));
+    return { success: typeof framework.getStackFrameworkConfigs === 'function' };
+});
+
+test('getStackFrameworkConfigs returns object with source stack', () => {
+    const framework = require(path.join(ROOT, 'lib', 'framework'));
+    const result = framework.getStackFrameworkConfigs();
+    return { success: result && result.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

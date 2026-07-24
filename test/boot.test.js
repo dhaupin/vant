@@ -61,6 +61,29 @@ test('boot has main function', () => {
     return { success: typeof boot.main === 'function' };
 });
 
+// Multibrain tests
+test('boot has getBrainBootConfig function', () => {
+    const boot = require(path.join(ROOT, 'lib', 'boot'));
+    return { success: typeof boot.getBrainBootConfig === 'function' };
+});
+
+test('boot has setBrainBootConfig function', () => {
+    const boot = require(path.join(ROOT, 'lib', 'boot'));
+    return { success: typeof boot.setBrainBootConfig === 'function' };
+});
+
+// Stack tests
+test('boot has getStackBootConfigs function', () => {
+    const boot = require(path.join(ROOT, 'lib', 'boot'));
+    return { success: typeof boot.getStackBootConfigs === 'function' };
+});
+
+test('getStackBootConfigs returns object with source stack', () => {
+    const boot = require(path.join(ROOT, 'lib', 'boot'));
+    const result = boot.getStackBootConfigs();
+    return { success: result && result.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

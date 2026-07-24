@@ -86,6 +86,32 @@ test('escrow has isOperationAllowed function', () => {
 });
 
 // ============================================
+// MULTIBRAIN TESTS
+// ============================================
+
+test('escrow has getBrainEscrowStatus function', () => {
+    const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    return { success: typeof escrow.getBrainEscrowStatus === 'function' };
+});
+
+test('escrow has setBrainQuota function', () => {
+    const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    return { success: typeof escrow.setBrainQuota === 'function' };
+});
+
+// Stack tests
+test('escrow has getStackEscrowStatus function', () => {
+    const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    return { success: typeof escrow.getStackEscrowStatus === 'function' };
+});
+
+test('getStackEscrowStatus returns object with source stack', () => {
+    const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    const result = escrow.getStackEscrowStatus();
+    return { success: result && result.source === 'stack' };
+});
+
+// ============================================
 // SUMMARY
 // ============================================
 

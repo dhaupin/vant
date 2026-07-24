@@ -111,6 +111,39 @@ test('stream has emit function', () => {
     return { success: typeof stream.emit === 'function' };
 });
 
+// ============================================
+// MULTIBRAIN STACK TESTS
+// ============================================
+
+console.log('\n📚 STACK SUPPORT TESTS\n');
+
+test('stream has listStack function', () => {
+    const stream = require(path.join(ROOT, 'lib', 'stream'));
+    return { success: typeof stream.listStack === 'function' };
+});
+
+test('stream has getStackStreamInfo function', () => {
+    const stream = require(path.join(ROOT, 'lib', 'stream'));
+    return { success: typeof stream.getStackStreamInfo === 'function' };
+});
+
+test('stream has getStackStats function', () => {
+    const stream = require(path.join(ROOT, 'lib', 'stream'));
+    return { success: typeof stream.getStackStats === 'function' };
+});
+
+test('listStack returns array', () => {
+    const stream = require(path.join(ROOT, 'lib', 'stream'));
+    const streams = stream.listStack();
+    return { success: Array.isArray(streams) };
+});
+
+test('getStackStats returns object with source stack', () => {
+    const stream = require(path.join(ROOT, 'lib', 'stream'));
+    const stats = stream.getStackStats();
+    return { success: stats && stats.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

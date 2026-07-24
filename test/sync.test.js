@@ -96,6 +96,34 @@ test('sync has isOperationAllowed function', () => {
     return { success: typeof sync.isOperationAllowed === 'function' };
 });
 
+// ============================================
+// MULTIBRAIN STACK TESTS
+// ============================================
+
+console.log('\n📚 STACK SUPPORT TESTS\n');
+
+test('sync has getStackSyncStatus function', () => {
+    const sync = require(path.join(ROOT, 'lib', 'sync'));
+    return { success: typeof sync.getStackSyncStatus === 'function' };
+});
+
+test('sync has getStackPrivacy function', () => {
+    const sync = require(path.join(ROOT, 'lib', 'sync'));
+    return { success: typeof sync.getStackPrivacy === 'function' };
+});
+
+test('getStackSyncStatus returns object with source stack', () => {
+    const sync = require(path.join(ROOT, 'lib', 'sync'));
+    const status = sync.getStackSyncStatus();
+    return { success: status && status.source === 'stack' };
+});
+
+test('getStackPrivacy returns object with source stack', () => {
+    const sync = require(path.join(ROOT, 'lib', 'sync'));
+    const privacy = sync.getStackPrivacy();
+    return { success: privacy && privacy.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

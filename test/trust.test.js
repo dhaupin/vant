@@ -156,6 +156,18 @@ test('reset clears trust for entity', () => {
     return { success: score === 0.5 }; // Back to default
 });
 
+// Stack tests
+test('trust has getStackTrustStats function', () => {
+    const trust = require(path.join(ROOT, 'lib', 'trust'));
+    return { success: typeof trust.getStackTrustStats === 'function' };
+});
+
+test('getStackTrustStats returns object with source stack', () => {
+    const trust = require(path.join(ROOT, 'lib', 'trust'));
+    const stats = trust.getStackTrustStats();
+    return { success: stats && stats.source === 'stack' };
+});
+
 // Print summary
 console.log('\n' + '='.repeat(50));
 console.log(`RESULTS: ${results.passed} passed, ${results.failed} failed, ${results.skipped} skipped`);

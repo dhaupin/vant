@@ -76,6 +76,18 @@ test('error has onError function', () => {
     return { success: typeof err.onError === 'function' };
 });
 
+// Stack tests
+test('error has getStackErrorStats function', () => {
+    const err = require(path.join(ROOT, 'lib', 'error'));
+    return { success: typeof err.getStackErrorStats === 'function' };
+});
+
+test('getStackErrorStats returns object with source stack', () => {
+    const err = require(path.join(ROOT, 'lib', 'error'));
+    const stats = err.getStackErrorStats();
+    return { success: stats && stats.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

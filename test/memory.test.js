@@ -5,6 +5,7 @@
  */
 
 const path = require('path');
+const ROOT = path.resolve(__dirname, '..');
 
 const results = { passed: 0, failed: 0, tests: [] };
 const _asyncTests = [];
@@ -125,6 +126,34 @@ asyncTest('api.memoryRecall works', async () => {
     const v = await api.memoryRecall('api-recall');
     assert(v === 'api-recall-val');
     return true;
+});
+
+// ============================================
+// MULTIBRAIN STACK TESTS
+// ============================================
+
+console.log('\n📚 STACK SUPPORT TESTS\n');
+
+test('memory has getStackStats function', () => {
+    const memory = require(path.join(ROOT, 'lib', 'memory'));
+    return { success: typeof memory.getStackStats === 'function' };
+});
+
+test('memory has findStack function', () => {
+    const memory = require(path.join(ROOT, 'lib', 'memory'));
+    return { success: typeof memory.findStack === 'function' };
+});
+
+test('getStackStats returns object with source stack', () => {
+    const memory = require(path.join(ROOT, 'lib', 'memory'));
+    const stats = memory.getStackStats();
+    return { success: stats && stats.source === 'stack' };
+});
+
+test('findStack returns array', () => {
+    const memory = require(path.join(ROOT, 'lib', 'memory'));
+    const results = memory.findStack('test');
+    return { success: Array.isArray(results) };
 });
 
 (async () => {

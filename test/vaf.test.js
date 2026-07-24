@@ -67,6 +67,29 @@ test('vaf has isOperationAllowed function', () => {
 
 // ============================================
 // SUMMARY
+// Multibrain tests
+test('vaf has getBrainVafConfig function', () => {
+    const vaf = require(path.join(ROOT, 'lib', 'vaf'));
+    return { success: typeof vaf.getBrainVafConfig === 'function' };
+});
+
+test('vaf has setBrainVafConfig function', () => {
+    const vaf = require(path.join(ROOT, 'lib', 'vaf'));
+    return { success: typeof vaf.setBrainVafConfig === 'function' };
+});
+
+// Stack tests
+test('vaf has getStackVafConfigs function', () => {
+    const vaf = require(path.join(ROOT, 'lib', 'vaf'));
+    return { success: typeof vaf.getStackVafConfigs === 'function' };
+});
+
+test('getStackVafConfigs returns object with source stack', () => {
+    const vaf = require(path.join(ROOT, 'lib', 'vaf'));
+    const result = vaf.getStackVafConfigs();
+    return { success: result && result.source === 'stack' };
+});
+
 // ============================================
 
 console.log('\n--- RESULTS ---\n');

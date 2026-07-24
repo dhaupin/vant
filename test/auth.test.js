@@ -101,6 +101,18 @@ test('recordFailedAttempt triggers lockout after max attempts', () => {
     return { success: result.locked === true && result.until > Date.now() };
 });
 
+// Stack tests
+test('auth has getStackAuthStatus function', () => {
+    const auth = require(path.join(ROOT, 'lib', 'auth'));
+    return { success: typeof auth.getStackAuthStatus === 'function' };
+});
+
+test('getStackAuthStatus returns object with source stack', () => {
+    const auth = require(path.join(ROOT, 'lib', 'auth'));
+    const result = auth.getStackAuthStatus();
+    return { success: result && result.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

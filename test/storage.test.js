@@ -146,6 +146,50 @@ test('isOperationAllowed returns object', () => {
 });
 
 // ============================================
+// MULTIBRAIN STACK TESTS
+// ============================================
+
+console.log('\n📚 STACK SUPPORT TESTS\n');
+
+test('storage has listStack function', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof Storage.listStack === 'function' };
+});
+
+test('storage has readStack function', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof Storage.readStack === 'function' };
+});
+
+test('storage has existsStack function', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof Storage.existsStack === 'function' };
+});
+
+test('storage has getStackStats function', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof Storage.getStackStats === 'function' };
+});
+
+test('listStack returns array', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const files = Storage.listStack();
+    return { success: Array.isArray(files) };
+});
+
+test('existsStack returns object', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const result = Storage.existsStack('nonexistent');
+    return { success: typeof result === 'object' };
+});
+
+test('getStackStats returns object with source stack', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const stats = Storage.getStackStats();
+    return { success: stats && stats.source === 'stack' };
+});
+
+// ============================================
 // SUMMARY
 // ============================================
 

@@ -1,15 +1,11 @@
 {
   "neurons": {
-    "synapses": {},
-    "attention": {
-      "Nova-Lead": 1,
-      "Nova-Researcher": 1,
-      "identity": 0.2
+    "neurons": {
+      "asyncTest": true
     }
   },
   "stack": [
-    "vant",
-    "nova"
+    "vant"
   ],
-  "updated": "2026-07-23T02:13:57.538Z"
+  "updated": "2026-07-24T02:18:58.448Z"
 }

@@ -162,6 +162,34 @@ test('config getLayerStatus is callable', () => {
 });
 
 // ============================================
+// MULTIBRAIN STACK TESTS
+// ============================================
+
+console.log('\n📚 STACK SUPPORT TESTS\n');
+
+test('config has getStackConfig function', () => {
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    return { success: typeof config.getStackConfig === 'function' };
+});
+
+test('config has getStackFlag function', () => {
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    return { success: typeof config.getStackFlag === 'function' };
+});
+
+test('getStackConfig returns object with source stack', () => {
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    const conf = config.getStackConfig();
+    return { success: conf && conf.source === 'stack' };
+});
+
+test('getStackFlag returns object with source stack', () => {
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    const flag = config.getStackFlag('test');
+    return { success: flag && flag.source === 'stack' };
+});
+
+// ============================================
 // SUMMARY
 // ============================================
 

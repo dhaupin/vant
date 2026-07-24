@@ -86,6 +86,18 @@ test('cron has isOperationAllowed function', () => {
     return { success: typeof cron.isOperationAllowed === 'function' };
 });
 
+// Stack tests
+test('cron has getStackCronJobs function', () => {
+    const cron = require(path.join(ROOT, 'lib', 'cron'));
+    return { success: typeof cron.getStackCronJobs === 'function' };
+});
+
+test('getStackCronJobs returns object with source stack', () => {
+    const cron = require(path.join(ROOT, 'lib', 'cron'));
+    const jobs = cron.getStackCronJobs();
+    return { success: jobs && jobs.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

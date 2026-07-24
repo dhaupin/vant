@@ -86,6 +86,37 @@ test('cache has isOperationAllowed function', () => {
 });
 
 // ============================================
+// MULTIBRAIN TESTS
+// ============================================
+
+test('cache has getBrainCache function', () => {
+    const cache = require(path.join(ROOT, 'lib', 'cache'));
+    return { success: typeof cache.getBrainCache === 'function' };
+});
+
+test('cache has setBrainCache function', () => {
+    const cache = require(path.join(ROOT, 'lib', 'cache'));
+    return { success: typeof cache.setBrainCache === 'function' };
+});
+
+test('cache has clearBrainCache function', () => {
+    const cache = require(path.join(ROOT, 'lib', 'cache'));
+    return { success: typeof cache.clearBrainCache === 'function' };
+});
+
+// Stack tests
+test('cache has getStackCacheStats function', () => {
+    const cache = require(path.join(ROOT, 'lib', 'cache'));
+    return { success: typeof cache.getStackCacheStats === 'function' };
+});
+
+test('getStackCacheStats returns object with source stack', () => {
+    const cache = require(path.join(ROOT, 'lib', 'cache'));
+    const result = cache.getStackCacheStats();
+    return { success: result && result.source === 'stack' };
+});
+
+// ============================================
 // SUMMARY
 // ============================================
 

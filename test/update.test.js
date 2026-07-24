@@ -116,6 +116,34 @@ test('update has isOperationAllowed function', () => {
     return { success: typeof update.isOperationAllowed === 'function' };
 });
 
+// ============================================
+// MULTIBRAIN STACK TESTS
+// ============================================
+
+console.log('\n📚 STACK SUPPORT TESTS\n');
+
+test('update has getStackUpdateStatus function', () => {
+    const update = require(path.join(ROOT, 'lib', 'update'));
+    return { success: typeof update.getStackUpdateStatus === 'function' };
+});
+
+test('update has getStackVersions function', () => {
+    const update = require(path.join(ROOT, 'lib', 'update'));
+    return { success: typeof update.getStackVersions === 'function' };
+});
+
+test('getStackUpdateStatus returns object with source stack', () => {
+    const update = require(path.join(ROOT, 'lib', 'update'));
+    const status = update.getStackUpdateStatus();
+    return { success: status && status.source === 'stack' };
+});
+
+test('getStackVersions returns object with source stack', () => {
+    const update = require(path.join(ROOT, 'lib', 'update'));
+    const versions = update.getStackVersions();
+    return { success: versions && versions.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

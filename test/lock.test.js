@@ -61,6 +61,34 @@ test('lock has getAgentId function', () => {
 });
 
 // ============================================
+// MULTIBRAIN STACK TESTS
+// ============================================
+
+console.log('\n📚 STACK SUPPORT TESTS\n');
+
+test('lock has getStackLockStatus function', () => {
+    const lock = require(path.join(ROOT, 'lib', 'lock'));
+    return { success: typeof lock.getStackLockStatus === 'function' };
+});
+
+test('lock has listStackLocks function', () => {
+    const lock = require(path.join(ROOT, 'lib', 'lock'));
+    return { success: typeof lock.listStackLocks === 'function' };
+});
+
+test('getStackLockStatus returns object with source stack', () => {
+    const lock = require(path.join(ROOT, 'lib', 'lock'));
+    const status = lock.getStackLockStatus();
+    return { success: status && status.source === 'stack' };
+});
+
+test('listStackLocks returns array', () => {
+    const lock = require(path.join(ROOT, 'lib', 'lock'));
+    const locks = lock.listStackLocks();
+    return { success: Array.isArray(locks) };
+});
+
+// ============================================
 // SUMMARY
 // ============================================
 

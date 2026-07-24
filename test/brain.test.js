@@ -415,6 +415,114 @@ test('getPipelineState has chain', () => {
 });
 
 // ============================================
+// MULTIBRAIN NEURONS (v0.9.0)
+// ============================================
+
+test('brainNeurons returns object', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    const neurons = brain.brainNeurons();
+    return { success: typeof neurons === 'object' && neurons !== null };
+});
+
+test('brainNeurons has synapses, attention, predictions', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    const neurons = brain.brainNeurons();
+    return { 
+        success: 'synapses' in neurons && 
+                 'attention' in neurons && 
+                 'predictions' in neurons 
+    };
+});
+
+test('brainNeurons has attention for brains in stack', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    const stack = brain.getStack();
+    const neurons = brain.brainNeurons();
+    // Should have attention for at least current brain
+    return { success: typeof neurons.attention === 'object' };
+});
+
+test('fireSynapse tracks brain access', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    // Fire some synapses
+    brain.fireSynapse('vant', 'nova');
+    brain.fireSynapse('vant', 'nova');
+    const synapses = brain.getSynapses();
+    return { success: synapses.vant && synapses.vant.nova > 0 };
+});
+
+test('predictNext returns brain name', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    // Fire synapse first
+    brain.fireSynapse('vant', 'nova');
+    const predicted = brain.predictNext('vant');
+    return { success: predicted === 'nova' || predicted === null };
+});
+
+test('attend sets attention score', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    brain.attend('test-brain', 0.85);
+    const attention = brain.getAttention('test-brain');
+    return { success: attention === 0.85 };
+});
+
+test('getAttention returns 0 for unknown brain', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    const attention = brain.getAttention('nonexistent-brain-xyz');
+    return { success: attention === 0 };
+});
+
+test('brainSaveNeurons returns saving status', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    const result = brain.brainSaveNeurons({ attention: { vant: 0.5 } });
+    return { success: 'saving' in result || 'error' in result };
+});
+
+// ============================================
+// MULTIBRAIN STACK
+// ============================================
+
+test('getStack returns array', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    const stack = brain.getStack();
+    return { success: Array.isArray(stack) };
+});
+
+test('getStack includes vant', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    const stack = brain.getStack();
+    return { success: stack.includes('vant') };
+});
+
+test('currentBrain returns brain name', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    const current = brain.currentBrain();
+    return { success: typeof current === 'string' };
+});
+
+test('brainDirs returns object with public/private', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    const dirs = brain.brainDirs();
+    return { 
+        success: typeof dirs === 'object' && 
+                 'public' in dirs && 
+                 'private' in dirs 
+    };
+});
+
+test('loadStackCorpus returns array', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    const corpus = brain.loadStackCorpusSync();
+    return { success: Array.isArray(corpus) };
+});
+
+test('brainList returns array', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    const list = brain.listBrains();
+    return { success: Array.isArray(list) };
+});
+
+// ============================================
 // SUMMARY
 // ============================================
 

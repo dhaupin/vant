@@ -66,6 +66,29 @@ test('remote has GiteaProvider', () => {
     return { success: !!remote.GiteaProvider };
 });
 
+// Multibrain tests
+test('remote has getBrainRemoteConfig function', () => {
+    const remote = require(path.join(ROOT, 'lib', 'remote'));
+    return { success: typeof remote.getBrainRemoteConfig === 'function' };
+});
+
+test('remote has setBrainRemoteConfig function', () => {
+    const remote = require(path.join(ROOT, 'lib', 'remote'));
+    return { success: typeof remote.setBrainRemoteConfig === 'function' };
+});
+
+// Stack tests
+test('remote has getStackRemoteConfigs function', () => {
+    const remote = require(path.join(ROOT, 'lib', 'remote'));
+    return { success: typeof remote.getStackRemoteConfigs === 'function' };
+});
+
+test('getStackRemoteConfigs returns object with source stack', () => {
+    const remote = require(path.join(ROOT, 'lib', 'remote'));
+    const result = remote.getStackRemoteConfigs();
+    return { success: result && result.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

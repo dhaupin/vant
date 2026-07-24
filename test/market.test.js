@@ -223,6 +223,19 @@ test('stats returns market statistics', async () => {
     };
 });
 
+// Stack tests
+test('market has getStackMarketStats function', () => {
+    const market = require(path.join(ROOT, 'lib', 'market'));
+    return { success: typeof market.getStackMarketStats === 'function' };
+});
+
+test('getStackMarketStats returns object with source stack', () => {
+    const market = require(path.join(ROOT, 'lib', 'market'));
+    const result = market.getStackMarketStats();
+    return { success: result && result.source === 'stack' };
+});
+
+
 // Print summary
 (async () => {
     if (asyncTests.length > 0) {

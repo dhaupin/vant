@@ -86,6 +86,39 @@ test('msg has isOperationAllowed function', () => {
     return { success: typeof msg.isOperationAllowed === 'function' };
 });
 
+// ============================================
+// MULTIBRAIN STACK TESTS
+// ============================================
+
+console.log('\n📚 STACK SUPPORT TESTS\n');
+
+test('msg has listStack function', () => {
+    const msg = require(path.join(ROOT, 'lib', 'msg'));
+    return { success: typeof msg.listStack === 'function' };
+});
+
+test('msg has getStackStats function', () => {
+    const msg = require(path.join(ROOT, 'lib', 'msg'));
+    return { success: typeof msg.getStackStats === 'function' };
+});
+
+test('msg has getStackMessages function', () => {
+    const msg = require(path.join(ROOT, 'lib', 'msg'));
+    return { success: typeof msg.getStackMessages === 'function' };
+});
+
+test('listStack returns array', () => {
+    const msg = require(path.join(ROOT, 'lib', 'msg'));
+    const convos = msg.listStack();
+    return { success: Array.isArray(convos) };
+});
+
+test('getStackStats returns object with source stack', () => {
+    const msg = require(path.join(ROOT, 'lib', 'msg'));
+    const stats = msg.getStackStats();
+    return { success: stats && stats.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

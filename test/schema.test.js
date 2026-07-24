@@ -66,6 +66,18 @@ test('schema has LTC_SCHEMA', () => {
     return { success: typeof schema.LTC_SCHEMA === 'object' };
 });
 
+// Stack tests
+test('schema has getStackSchemas function', () => {
+    const schema = require(path.join(ROOT, 'lib', 'schema'));
+    return { success: typeof schema.getStackSchemas === 'function' };
+});
+
+test('getStackSchemas returns object with source stack', () => {
+    const schema = require(path.join(ROOT, 'lib', 'schema'));
+    const result = schema.getStackSchemas();
+    return { success: result && result.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

@@ -61,6 +61,18 @@ test('onboard has search function', () => {
     return { success: typeof onboard.search === 'function' };
 });
 
+// Stack tests
+test('onboard has getStackOnboardStatus function', () => {
+    const onboard = require(path.join(ROOT, 'lib', 'onboard'));
+    return { success: typeof onboard.getStackOnboardStatus === 'function' };
+});
+
+test('getStackOnboardStatus returns object with source stack', () => {
+    const onboard = require(path.join(ROOT, 'lib', 'onboard'));
+    const result = onboard.getStackOnboardStatus();
+    return { success: result && result.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);
