@@ -14,7 +14,7 @@
     "attention": {
       "fundamentals": 0.4,
       "identity": 0.6000000000000001,
-      "realizations": 0.6000000000000001
+      "realizations": 0.8
     }
   },
   "stack": [
@@ -22,5 +22,6 @@
     "vant"
   ],
   "mode": "dual",
-  "updated": "2026-07-24T08:26:14.626Z"
+  "updated": "2026-07-24T08:34:00.557Z"
+}8:34:00.557Z"
 }
