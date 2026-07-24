@@ -5,7 +5,7 @@
         "identity": 2
       },
       "identity": {
-        "realizations": 1
+        "realizations": 2
       },
       "realizations": {
         "fundamentals": 1
@@ -14,7 +14,7 @@
     "attention": {
       "fundamentals": 0.4,
       "identity": 0.6000000000000001,
-      "realizations": 0.2
+      "realizations": 0.6000000000000001
     }
   },
   "stack": [
@@ -22,6 +22,5 @@
     "vant"
   ],
   "mode": "dual",
-  "updated": "2026-07-24T07:59:09.220Z"
-}7:59:09.220Z"
+  "updated": "2026-07-24T08:26:14.626Z"
 }
