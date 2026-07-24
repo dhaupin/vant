@@ -1,16 +1,20 @@
 {
   "neurons": {
     "synapses": {
+      "fundamentals": {
+        "identity": 2
+      },
       "identity": {
-        "realizations": 2
+        "realizations": 1
       },
       "realizations": {
-        "identity": 1
+        "fundamentals": 1
       }
     },
     "attention": {
-      "identity": 0.4,
-      "realizations": 0.6000000000000001
+      "fundamentals": 0.4,
+      "identity": 0.6000000000000001,
+      "realizations": 0.2
     }
   },
   "stack": [
@@ -18,6 +22,6 @@
     "vant"
   ],
   "mode": "dual",
-  "updated": "2026-07-24T07:56:25.346Z"
-}7:56:25.346Z"
+  "updated": "2026-07-24T07:59:09.220Z"
+}7:59:09.220Z"
 }
