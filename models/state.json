@@ -1,13 +1,22 @@
 {
   "neurons": {
-    "neurons": {
-      "currentBrain": "vant"
+    "synapses": {
+      "identity": {
+        "realizations": 2
+      },
+      "realizations": {
+        "identity": 2
+      }
+    },
+    "attention": {
+      "identity": 0.6000000000000001,
+      "realizations": 0.6000000000000001
     }
   },
   "stack": [
-    "vant",
-    "nova"
+    "nova",
+    "vant"
   ],
   "mode": "dual",
-  "updated": "2026-07-24T06:10:18.081Z"
+  "updated": "2026-07-24T07:12:28.185Z"
 }
