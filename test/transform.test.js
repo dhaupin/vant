@@ -10,9 +10,7 @@ describe('transform', () => {
         it('should gather all components by default', async () => {
             const data = await transform.gather();
             
-            // Should have all keys
-            assert(data.timestamp, 'should have timestamp');
-            assert(data.version, 'should have version');
+            // Should have all keys (timestamp/version moved to wrapper level in toHorcrux)
             assert(data.agents, 'should have agents');
             assert(data.islands, 'should have islands');
             assert(data.runtime, 'should have runtime');
@@ -50,6 +48,9 @@ describe('transform', () => {
             const data = JSON.parse(json);
             assert(data.timestamp, 'should have timestamp');
             assert(data.version, 'should have version');
+            assert(data.type === 'vant-horcrux', 'should have vant-horcrux type');
+            assert(data.payload, 'should have payload');
+            assert(data.payload.agents, 'payload should have agents');
         });
     });
     
