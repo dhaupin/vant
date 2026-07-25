@@ -1,0 +1,57 @@
+{
+  "version": "0.9.0-exp",
+  "type": "tiling-metadata",
+  "created": 1750876800000,
+  "description": "Nova's learned tiling patterns from dream state",
+  "tilings": [
+    {
+      "name": "penrose-p3",
+      "type": "aperiodic",
+      "prototiles": ["thin-rhombus", "thick-rhombus"],
+      "matching-rules": "golden-ratio-constraint",
+      "observed": true,
+      "projectionSource": "nsc9-quasicrystal"
+    },
+    {
+      "name": "a4-root-lattice", 
+      "type": "crystallographic",
+      "dimension": 9,
+      "rank": 8,
+      "observed": true,
+      "projectionSource": "nsc9-quasicrystal"
+    }
+  ],
+  "patterns": [
+    {
+      "name": "golden-spiral",
+      "description": "Spiral pattern emerging from NSC9 projection",
+      "growthFactor": 1.618033988749895,
+      "cellCount": 144,
+      "firstObserved": 1750780800000
+    },
+    {
+      "name": "fivefold-symmetry",
+      "description": "Pentagonal symmetry in 2D projection",
+      "foldCount": 5,
+      "cellCount": 89,
+      "firstObserved": 1750820400000
+    },
+    {
+      "name": "self-similar-clusters",
+      "description": "Nested structures repeating at multiple scales",
+      "depth": 7,
+      "cellCount": 377,
+      "firstObserved": 1750845600000
+    }
+  ],
+  "geometry": {
+    "spaceType": "quasicrystal",
+    "dimensionality": 9,
+    "euclideanProjection": "A4-root-lattice",
+    "scalingFactor": 1.618033988749895
+  },
+  "metadata": {
+    "lastUpdated": 1750876800000,
+    "observationCount": 3
+  }
+}
