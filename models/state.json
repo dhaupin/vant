@@ -156,6 +156,9 @@
       },
       "trust": {
         "wants": 1
+      },
+      "wants": {
+        "wisdom": 1
       }
     },
     "attention": {
@@ -211,7 +214,8 @@
       "structure": 0.2,
       "transparency": 0.2,
       "trust": 0.2,
-      "wants": 0.2
+      "wants": 0.2,
+      "wisdom": 0.2
     }
   },
   "stack": [
@@ -220,7 +224,5 @@
   ],
   "mode": "dual",
   "currentBrain": "vant",
-  "updated": "2026-07-25T22:19:09.709Z"
-}  "currentBrain": "vant",
-  "updated": "2026-07-25T22:19:09.709Z"
+  "updated": "2026-07-25T22:56:29.833Z"
 }
