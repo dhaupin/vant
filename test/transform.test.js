@@ -83,6 +83,11 @@ describe('transform', () => {
         it('should exist and be a function', () => {
             assert(typeof transform.inspectHorcrux === 'function');
         });
+        
+        it('should have inspect alias', () => {
+            assert(typeof transform.inspect === 'function');
+            assert(transform.inspect === transform.inspectHorcrux);
+        });
     });
 });
 
