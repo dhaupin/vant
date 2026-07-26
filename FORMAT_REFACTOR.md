@@ -487,6 +487,56 @@ Corpus reads from: `basePath/filename.md`
 
 ---
 
+## Geometry, Memory, Semantic - Are They Usable?
+
+### Current State - MULTIPLE SEPARATE SYSTEMS!
+
+| System | What | Format | Exposed? |
+|--------|------|--------|-----------|
+| **Corpus** | Brain files | .md only | YES - loadCorpus |
+| **Storage** | User data | .md only | YES - brain.write |
+| **Geometry** | JSON storage | .json | YES - geoLoad/geoStore |
+| **Memory** | Semantic/doc memory | separate | YES - memory.learn() |
+| **Islands** | Plugin data | .json | YES - islands.js |
+
+### Files NOT Loaded by Brain
+
+These JSON files exist but are IGNORED by loadCorpus:
+
+```
+models/private/nova/geometry/
+├── coordinates.json      ← IGNORED (but geoLoad can read)
+├── tilings.json         ← IGNORED (but geoLoad can read)
+
+models/public/vant/
+├── _succession.json     ← IGNORED
+├── .audit.json         ← IGNORED  
+├── insights.json        ← IGNORED
+├── islands.json        ← IGNORED (but islands.js loads)
+├── meta.json           ← IGNORED
+├── knowledge-links.json ← IGNORED
+
+models/state.json        ← IGNORED
+```
+
+### Are They Usable?
+
+| System | Usable? | How |
+|--------|----------|-----|
+| Geometry | YES | `brain.geoLoad(barcode)` via MCP |
+| Memory | YES | `memory.learn(key, content)` directly |
+| Islands | YES | `islands.load(name)` directly |
+| JSON files | **NO** | Not loaded by brain corpus! |
+
+### Problem
+
+- loadCorpus only reads .md files
+- JSON/YAML files in models/ are completely ignored
+- They exist but can't be accessed via brain API
+- Each system (geometry, memory, islands) is separate
+
+---
+
 ## Fragmentation Analysis
 
 ### Current Problems
