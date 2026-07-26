@@ -95,31 +95,35 @@ When both `foo.md` and `foo.json` exist:
 
 ### 2. API Changes
 
-**Current**:
+**Current (messy)**:
 ```javascript
 brain.loadCorpus()           // Returns { identity: { content, source } }
+brain.load('identity')       // Loads specific brain file
 brain.get(category, key)     // Returns raw content
 ```
 
-**New**:
+**New (simplified)**:
 ```javascript
-brain.loadCorpus()           
-// Returns { 
-//   identity: { content, source, format, parsed },
-//   geometry: { content, source, format, parsed }
-// }
+brain.read('identity')       // Returns { data, format, source }
+brain.read('identity', { raw: true })  // Returns raw string
 
-brain.get(category, key, { parse: true })  // Returns parsed object
-brain.get(category, key, { parse: false }) // Returns raw content
-brain.get(category, key)                    // Returns both: { raw, parsed }
+brain.get('notes', 'data')  // Storage read - returns { data, format }
+brain.get('notes', 'data', { raw: true })  // Raw string
+
+brain.loadCorpus()          // Loads all brains (stays, cached)
 ```
+
+**Defaults**:
+- Parsed object returned by default
+- Raw string only with `{ raw: true }`
 
 ### 3. Backwards Compatibility
 
-- `brain['foo']` returns same shape (content + source)
-- Add `parsed` field with format.js result
-- Add `format` field with detected type
-- Storage continues to work (uses full filenames)
+**NOT REQUIRED** - 0.8.6 is breaking release
+
+- Clean implementation
+- May rename/remove old methods
+- No aliases needed
 
 ### 4. Storage Integration
 
@@ -142,8 +146,10 @@ brain.get(category, key)                    // Returns both: { raw, parsed }
 - [ ] Import format.js DEFAULT_EXTENSIONS in brain.js
 - [ ] Replace `.md` hardcoding with extension list
 - [ ] Add `getBrainName(file)` helper that strips any extension
-- [ ] Store `{ content, source, format, parsed }` instead of `{ content, source }`
+- [ ] Add `brain.read(name)` method - unified corpus read
+- [ ] Return `{ data, format, source }` instead of `{ content, source }`
 - [ ] Exclude `/boot` directories from corpus loading
+- [ ] Remove/rename old `load()` method if redundant
 
 ### Phase 3: Unified File Operations
 
@@ -196,12 +202,87 @@ brain.get(category, key)                    // Returns both: { raw, parsed }
 
 ---
 
+## Q3: Parsed + Raw Return Value
+
+**Question**: Returns both at same time? Is that necessary?
+
+**Answer**: No, simplified design - return parsed by default, raw only if explicitly requested:
+
+```javascript
+// Default: returns parsed object
+const data = brain.get('notes', 'data')
+// Returns: { data: {...}, format: 'json' }
+
+// Explicit raw: 
+const raw = brain.get('notes', 'data', { raw: true })
+// Returns: '{ "key": "value" }' (string)
+
+// Explicit parsed:
+const parsed = brain.get('notes', 'data', { parsed: true })
+// Returns: { key: 'value' } (object)
+```
+
+**Default**: Parsed object (most common use case)
+**Opt-in**: Raw string (debugging, manual handling)
+
+---
+
+## Q3.1: brain.get vs brain.load vs brain.loadCorpus
+
+**Current Confusion** - Three methods that seem redundant:
+
+| Method | Source | Purpose |
+|--------|--------|---------|
+| `loadCorpus()` | models/ | Loads ALL brain files into memory |
+| `load(name)` | models/ | Loads specific brain file by name |
+| `get(category, key)` | storage/ | Reads from storage with RLS |
+
+**Proposed Cleanup** - Unify into consistent API:
+
+```javascript
+// Unified brain.read() - reads from corpus
+brain.read('identity')              // Load by name
+brain.read('identity', { format: 'md' })  // Explicit format
+
+// Unified brain.get() - reads from storage  
+brain.get('notes', 'data')          // category, key
+brain.get('notes', 'data', { raw: true }) // raw string
+
+// brain.loadCorpus() - stays as is (loads all)
+const allBrains = brain.loadCorpus()
+```
+
+**Decision**: Consolidate to 2 primary methods:
+- `brain.read(name)` - corpus read (replaces load, loadCorpus)
+- `brain.get(category, key)` - storage read (stays, add format support)
+
+---
+
+## Q5: Storage Location Confirmed
+
+- BrainStorage uses `MODELS_PATH` = `models/private/` by default
+- So storage writes to same location as corpus: `models/private/`
+- Just uses different folder structure: `storage/brain/` subfolder
+
+---
+
+## Breaking Changes (0.8.6)
+
+**Note**: Backwards compatibility NOT required. 0.8.6 is already a breaking release.
+
+- No aliases needed for old methods
+- Clean implementation from scratch
+- May rename/remove duplicate methods
+
+---
+
 ## Open Questions
 
 1. **Geometry loading**: Should geometry/ JSON files be in corpus or separate?
 2. **Remote brains**: How does this work with remote brain storage?
 3. **Caching**: Should parsed objects be cached separately?
 4. **Migration**: How to migrate existing .md to .json if desired?
+5. **Method names**: `brain.read()` vs `brain.load()` - which for corpus?
 
 ---
 
