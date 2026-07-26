@@ -779,7 +779,18 @@ functionNameSync(); // alias
 ```
 
 **Apply to:**
-- loadCorpus / loadCorpusSync → loadCorpus({sync}) ✅ DONE
-- loadStackCorpus / loadStackCorpusSync → loadStackCorpus({sync}) ✅ DONE
+- loadCorpus / loadCorpusSync → loadCorpus({sync}) ✅ DONE (v0.8.6: no backwards compat)
+- loadStackCorpus / loadStackCorpusSync → loadStackCorpus({sync}) ✅ DONE (v0.8.6: no backwards compat)
 - readDirAsync / readDirSync → readDir({sync}) ✅ DONE
 - Other pairs in codebase (find and consolidate)
+
+### Format System Enforcement (TODO)
+
+**Problem:** Many functions still hardcode `.md` extension instead of using format system.
+
+**Spots to fix:**
+- `_writeToBrain()` - line ~1502, hardcodes `.md`
+- `_readFromBrain()` - line ~1517, hardcodes `.md`
+- MCP `brain_save` - hardcodes `.md`
+
+**Fix:** Add format option to these functions, use format.getExtension() or similar.
