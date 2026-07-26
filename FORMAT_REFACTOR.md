@@ -133,6 +133,37 @@ brain.loadCorpus()          // Loads all brains (stays, cached)
 
 ---
 
+## ✅ PLAN OVERVIEW (Current State)
+
+### Goal
+Unify brain file handling with extension support (Option C: Hybrid)
+
+### Key Decisions
+
+1. **Extensions**: Support all formats (.md, .json, .yaml, .yml, .txt, .ini)
+2. **API**: brain.read() / brain.write() - replace load entirely
+3. **brain.load**: Remove completely (no backwards compat)
+4. **brain.get**: Remove (unused dead code)
+5. **Unification**: Option C - Hybrid approach
+
+### Files to Change
+- lib/format.js - Foundation
+- lib/brain.js - Main changes
+- lib/storage.js - Optional format support
+- lib/transform.js - Use DEFAULT_EXTENSIONS
+
+### Call Sites to Update (brain.load → brain.read)
+- lib/mcp.js (1)
+- lib/transform.js (1)
+- lib/stream.js (1)
+- lib/onboard.js (2)
+- lib/api.js (1)
+- lib/vant.js (1)
+- lib/memory.js (5)
+- lib/search.js (1)
+
+---
+
 ## Implementation Phases
 
 ### Phase 1: Format.js Integration (Foundation)
