@@ -733,3 +733,53 @@ models/private/
 - lib/sandbox.js (capabilities per brain)
 - bin/* (all CLI tools)
 - Any hardcoded 'models/private' paths
+
+---
+
+### Unified Sync/Async Functions (Template)
+
+**Problem:** Many functions exist as duplicate `funcName()` and `funcNameSync()` - code duplication and confusion.
+
+**Solution:** Single function with `opts.sync` option, defaulting to async:
+
+```javascript
+/**
+ * Unified function - does X
+ * @param {object} opts - Options: { sync: boolean }
+ * @returns {Promise<any>|any} Result (Promise if async, direct if sync)
+ */
+function functionName(opts = {}) {
+    const isSync = opts.sync === true;
+    
+    if (isSync) {
+        // SYNC MODE
+        return doWork();
+    } else {
+        // ASYNC MODE (default)
+        return (async () => {
+            return doWork();
+        })();
+    }
+}
+
+// Backwards compatibility - keep old names as aliases
+const functionNameSync = (opts) => functionName({ ...opts, sync: true });
+```
+
+**Usage:**
+```javascript
+// Async (default)
+functionName().then(result => console.log(result));
+
+// Sync
+const result = functionName({ sync: true });
+
+// Old API still works
+functionNameSync(); // alias
+```
+
+**Apply to:**
+- loadCorpus / loadCorpusSync → loadCorpus({sync}) ✅ DONE
+- loadStackCorpus / loadStackCorpusSync → loadStackCorpus({sync}) ✅ DONE
+- readDirAsync / readDirSync → readDir({sync}) ✅ DONE
+- Other pairs in codebase (find and consolidate)
