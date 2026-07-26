@@ -263,6 +263,34 @@ brain.storage('notes', 'data')     // New cleaner name?
 
 ---
 
+## brain.read vs brain.load Clarification
+
+**Question**: Is brain.read a replacement or wrapper?
+
+**Answer**: brain.read is PROPOSED as a NEW unified method:
+- `brain.load()` keeps working (alias for backwards)
+- `brain.read()` becomes the NEW primary API
+- More consistent with `brain.write()`
+
+**What happens to existing brain.load users?**:
+- MCP uses `brain.load(name)` at line 1645
+- These will continue to work (keep load as alias)
+- Eventually can deprecate with warning
+
+**Proposed**:
+```javascript
+// New unified API (proposed)
+brain.read('identity')           // Primary method
+brain.write('identity', content) // Primary method
+
+// Keep for compatibility
+brain.load('identity')          // Alias to brain.read()
+```
+
+**Rationale**: `read`/`write` is more intuitive than `load`/`write`
+
+---
+
 ## Q5: Storage Location + Structure
 
 **Current Structure**:
@@ -314,7 +342,134 @@ The line between corpus and storage is blurry - they use same basePath!
 2. **Remote brains**: How does this work with remote brain storage?
 3. **Caching**: Should parsed objects be cached separately?
 4. **Migration**: How to migrate existing .md to .json if desired?
-5. **Method names**: `brain.read()` vs `brain.load()` - which for corpus?
+5. **brain.read vs brain.load**: Should we replace or add?
+6. **Unused brain.get**: Remove entirely or repurpose?
+7. **Legacy methods**: Any other unused/old methods to remove?
+
+---
+
+## Brain.js Method Inventory
+
+### Core Methods (Exported)
+```
+// Loading (Corpus)
+load                    - Load specific brain by name
+loadCorpus              - Load ALL brains into memory
+loadCorpusSync          - Sync version
+loadStackCorpus         - Load from all brains in stack
+loadStackCorpusSync     - Sync version
+hasBrain               - Check if brain exists
+brainFiles             - List brain files
+
+// Mode
+getMode, setMode       - Get/set brain mode
+getRemoteURL, setRemoteURL
+
+// Version & Identity
+getVersion, getIdentity
+
+// Storage (user data)
+getBrainStorage        - Get storage instance
+write                  - Write to storage
+append                 - Append to storage
+get                    - Read from storage (UNUSED!)
+
+// Modules & Handlers
+getModule, getHandler
+
+// Pipeline
+getPipeline, setPipeline, addMiddleware, removeMiddleware
+
+// Hooks
+on, off, emit
+
+// Aliases
+alias, resolve, listAliases
+
+// Cache
+setCache, invalidateCache, getCacheStats
+
+// Watch
+setWatch, isWatching
+
+// Metrics
+getMetrics, resetMetrics
+
+// Neurons (ML-like)
+fireSynapse, predictNext, getSynapses
+attend, getAttention, attendBySemantic
+metabolize, dream, onFail, preload, forget
+
+// State
+getNeuronState, saveNeuronState, restoreNeuronState
+
+// Evolution
+startEvolutionSession, endEvolutionSession, getEvolutionSession
+recordChange, recordInsight
+getEvolutionChanges, getEvolutionInsights, getEvolutionHistory
+
+// Paths
+getBrainPath, getPublicPath, currentBrain, brainMode
+brainDirs, switchBrain, loadStack, getStack
+pushBrain, removeBrain, merge, writeTo
+geoLoad, geoStore, geoList, geoBrains, resolveBrainPath
+
+// Multi-brain
+brainList, listBrains, brainCurrent, brainNeurons, brainSaveNeurons
+
+// Special
+backupToImage, restoreFromImage, listBackups
+myStuff, updateMyStuff, myDropFile, myGetFile
+yourStuff, stashYourStuff, clearYourStuff
+```
+
+---
+
+## Storage.js Method Inventory
+
+### Storage Classes
+```
+FileStorage           - General file storage
+  read, write, delete, has, list, get, set
+
+BrainStorage          - Brain-specific storage (SAME LOCATION AS CORPUS!)
+  get, write, append
+
+VectorStorage        - Vector embeddings storage
+
+StateStorage         - State management
+  get, getCurrent, getStatic, getTemp, getSummary
+
+ConfigStorage        - Config management
+  get, getAll
+
+LockStorage          - File locking
+
+SchemaStorage        - Schema storage
+
+IslandStorage        - Islands data
+  getManifest, get
+
+ReposStorage        - Repo storage
+  getMounted
+```
+
+### Storage Exports
+```
+get(type)             - Factory: get('file'), get('brain'), etc.
+read, write, delete, has, exists, list - Shortcuts to FileStorage
+```
+
+---
+
+## Key Discovery: Storage Uses Same Location as Corpus!
+
+BrainStorage writes to: `basePath/category/key` = `models/private/notes/my-note.md`
+Corpus reads from: `basePath/filename.md`
+
+**They use the same folder!** The difference is:
+- Corpus = root level files (identity.md, goals.md)
+- Storage = subfolder files (notes/my-note.md)
 
 ---
 
