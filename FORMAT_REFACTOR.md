@@ -265,29 +265,43 @@ brain.storage('notes', 'data')     // New cleaner name?
 
 ## brain.read vs brain.load Clarification
 
-**Question**: Is brain.read a replacement or wrapper?
+**Decision**: Replace brain.load entirely - NO backwards compat needed!
 
-**Answer**: brain.read is PROPOSED as a NEW unified method:
-- `brain.load()` keeps working (alias for backwards)
-- `brain.read()` becomes the NEW primary API
-- More consistent with `brain.write()`
+### All brain.load Usages Found (16 places)
 
-**What happens to existing brain.load users?**:
-- MCP uses `brain.load(name)` at line 1645
-- These will continue to work (keep load as alias)
-- Eventually can deprecate with warning
+| File | Line | Usage |
+|------|------|-------|
+| lib/mcp.js | 1645 | `brain.load(name)` |
+| lib/transform.js | 575 | `brain.load(fileName)` |
+| lib/stream.js | 359 | `brain.load(streamName)` |
+| lib/onboard.js | 83, 160 | `brain.load(id)` |
+| lib/api.js | 416 | `brain.load(name)` |
+| lib/vant.js | 592 | `brain.load('memory/' + key)` |
+| lib/memory.js | 131, 370, 372, 443, 445 | `brain.load(...)` |
+| lib/search.js | 282 | `brain.load('start')` |
+| lib/brain.js | 1319 | Error message |
+| lib/sandbox.js | 236 | Config option |
+| lib/agents.js | 368 | Config option |
 
-**Proposed**:
+### Implementation Plan
+
+1. Add new `brain.read()` method
+2. Update all 8 call sites to use `brain.read()`
+3. Remove `brain.load()` entirely
+
 ```javascript
-// New unified API (proposed)
-brain.read('identity')           // Primary method
-brain.write('identity', content) // Primary method
+// New unified API
+brain.read('identity')           // NEW primary
+brain.write('identity', content)
 
-// Keep for compatibility
-brain.load('identity')          // Alias to brain.read()
+// REMOVED (no alias):
+// brain.load('identity')       // DELETE THIS
 ```
 
-**Rationale**: `read`/`write` is more intuitive than `load`/`write`
+**Rationale**: 
+- `read`/`write` is more consistent
+- 0.8.6 is breaking anyway
+- Cleaner API surface
 
 ---
 
