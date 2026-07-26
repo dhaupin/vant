@@ -740,36 +740,30 @@ models/private/
 
 **Problem:** Many functions exist as duplicate `funcName()` and `funcNameSync()` - code duplication and confusion.
 
-**Solution:** Single function with `opts.sync` option, defaulting to async:
+**Solution:** Use lib/do.js for unified async/sync handling:
 
 ```javascript
-/**
- * Unified function - does X
- * @param {object} opts - Options: { sync: boolean }
- * @returns {Promise<any>|any} Result (Promise if async, direct if sync)
- */
+const { do } = require('./do');
+
 function functionName(opts = {}) {
-    const isSync = opts.sync === true;
-    
-    // Unified work function - handles both sync and async
-    const work = () => {
-        // Core logic - uses isSync flag for any branching
-        const data = isSync ? doWorkSync() : doWorkAsync();
-        return process(data);
-    };
-    
-    if (isSync) {
-        return work();
-    } else {
-        return (async () => work())();
-    }
+    return do((isSync) => {
+        // Core logic using isSync flag
+        return isSync ? doWorkSync() : doWorkAsync();
+    }, opts);
 }
 ```
 
 **Key points:**
-- Single `work()` function contains core logic
-- Uses `isSync` flag for any conditional branching
-- Minimal duplication - only the return wrapper differs
+- lib/do.js handles the sync/async wrapping
+- Core logic in one place
+- Consistent pattern across codebase
+- Agents can discover: `grep -r "require.*do" lib/`
+
+**Why lib/do.js:**
+- Forces consistent pattern
+- Defaults to async (fixes bugs)
+- Single point to update
+- Shared vocabulary: "wrap it in a do"
 
 **Usage:**
 ```javascript
