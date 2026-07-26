@@ -487,6 +487,47 @@ Corpus reads from: `basePath/filename.md`
 
 ---
 
+## Question: Should We UNIFY These Systems?
+
+**Scope Question**: Is unification part of this refactor or separate?
+
+### Current State
+
+We found 5 SEPARATE systems that should perhaps be ONE:
+
+| System | Format | Access Method |
+|--------|--------|---------------|
+| Corpus | .md | brain.loadCorpus() |
+| Storage | .md | brain.write() |
+| Geometry | .json | brain.geoLoad/geoStore |
+| Memory | separate | memory.learn() |
+| Islands | .json | islands.load() |
+
+### Options
+
+**Option A**: Unify into ONE system
+- brain.read() loads ALL formats from ALL locations
+- No separate geoLoad, memory.learn, islands.load
+- Single API surface
+
+**Option B**: Keep separate, just add extension support
+- loadCorpus reads all extensions (.md, .json, .yaml)
+- Keep geoLoad, memory, islands as specialized APIs
+- Less invasive
+
+**Option C**: Hybrid
+- Load corpus includes all brain files (md, json, yaml)
+- Keep geometry/memory/islands as specialized (different use case)
+
+### Recommendation
+
+**Option C - Hybrid** seems best:
+- Extend loadCorpus to read all formats (the original goal)
+- Keep geometry/memory/islands as special systems (they have unique APIs)
+- But make them accessible via unified brain.read() too
+
+---
+
 ## Geometry, Memory, Semantic - Are They Usable?
 
 ### Current State - MULTIPLE SEPARATE SYSTEMS!
