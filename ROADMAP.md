@@ -751,20 +751,25 @@ models/private/
 function functionName(opts = {}) {
     const isSync = opts.sync === true;
     
+    // Unified work function - handles both sync and async
+    const work = () => {
+        // Core logic - uses isSync flag for any branching
+        const data = isSync ? doWorkSync() : doWorkAsync();
+        return process(data);
+    };
+    
     if (isSync) {
-        // SYNC MODE
-        return doWork();
+        return work();
     } else {
-        // ASYNC MODE (default)
-        return (async () => {
-            return doWork();
-        })();
+        return (async () => work())();
     }
 }
-
-// Backwards compatibility - keep old names as aliases
-const functionNameSync = (opts) => functionName({ ...opts, sync: true });
 ```
+
+**Key points:**
+- Single `work()` function contains core logic
+- Uses `isSync` flag for any conditional branching
+- Minimal duplication - only the return wrapper differs
 
 **Usage:**
 ```javascript
