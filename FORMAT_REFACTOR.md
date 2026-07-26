@@ -229,40 +229,72 @@ const parsed = brain.get('notes', 'data', { parsed: true })
 
 ## Q3.1: brain.get vs brain.load vs brain.loadCorpus
 
-**Current Confusion** - Three methods that seem redundant:
+**CORRECTION** - Checked the codebase:
 
-| Method | Source | Purpose |
-|--------|--------|---------|
-| `loadCorpus()` | models/ | Loads ALL brain files into memory |
-| `load(name)` | models/ | Loads specific brain file by name |
-| `get(category, key)` | storage/ | Reads from storage with RLS |
+| Method | Exists? | Used? | Purpose |
+|--------|----------|-------|---------|
+| `load(name)` | YES | YES (MCP) | Load specific brain file by name |
+| `loadCorpus()` | YES | YES | Load ALL brain files into memory |
+| `get(category, key)` | YES | **NO** | Storage read (exists but unused!) |
+| `read()` | **NO** | N/A | Does not exist |
 
-**Proposed Cleanup** - Unify into consistent API:
+**Discovery**: `brain.get()` EXISTS but is NOT USED anywhere in MCP! It's dead code.
 
+**Question**: Should we:
+1. Keep `brain.load()` and `brain.loadCorpus()` as-is?
+2. Add `brain.read()` as alias/cleaner API?
+3. Remove unused `brain.get()` or repurpose it?
+
+**Proposed Cleanup**:
 ```javascript
-// Unified brain.read() - reads from corpus
+// Unified brain.read() - reads from corpus (new, cleaner API)
 brain.read('identity')              // Load by name
-brain.read('identity', { format: 'md' })  // Explicit format
+brain.read('identity', { raw: true }) // Raw string
 
-// Unified brain.get() - reads from storage  
-brain.get('notes', 'data')          // category, key
-brain.get('notes', 'data', { raw: true }) // raw string
+// Keep for compatibility
+brain.load('identity')              // Same as above (alias)
 
-// brain.loadCorpus() - stays as is (loads all)
-const allBrains = brain.loadCorpus()
+// Storage access - GET or NEW method?
+brain.storage('notes', 'data')     // New cleaner name?
+// OR repurpose brain.get() which is unused
 ```
 
-**Decision**: Consolidate to 2 primary methods:
-- `brain.read(name)` - corpus read (replaces load, loadCorpus)
-- `brain.get(category, key)` - storage read (stays, add format support)
+**Decision needed**: What to do with unused `brain.get()`?
 
 ---
 
-## Q5: Storage Location Confirmed
+## Q5: Storage Location + Structure
 
-- BrainStorage uses `MODELS_PATH` = `models/private/` by default
-- So storage writes to same location as corpus: `models/private/`
-- Just uses different folder structure: `storage/brain/` subfolder
+**Current Structure**:
+```
+models/private/nova/
+├── identity.md           ← CORPUS (brain files)
+├── geometry/             ← CORPUS (special folder)
+│   ├── coordinates.json
+│   └── tilings.json
+```
+
+**Storage** - Uses BrainStorage which writes to:
+- `basePath/category/key` - e.g., `models/private/notes/my-note.md`
+- Category = subfolder, Key = filename
+
+**Key Insight**:
+- Corpus = brain files (identity, goals, lessons)
+- Storage = user data (notes, stash, dropbox)
+- Both use same basePath but different access patterns
+- MCP uses `brain.write('', key + '.md', content)` for storage
+
+---
+
+## Storage vs Corpus Clarification
+
+| Layer | What | Location | Extension |
+|-------|------|----------|-----------|
+| **Corpus** | Brain files (identity, goals) | models/*/ | .md only (currently) |
+| **Storage** | User data (notes, stash) | models/*/category/ | .md (currently) |
+| **Geometry** | Special data | models/*/geometry/ | .json (not loaded) |
+
+The line between corpus and storage is blurry - they use same basePath!
 
 ---
 
@@ -283,6 +315,49 @@ const allBrains = brain.loadCorpus()
 3. **Caching**: Should parsed objects be cached separately?
 4. **Migration**: How to migrate existing .md to .json if desired?
 5. **Method names**: `brain.read()` vs `brain.load()` - which for corpus?
+
+---
+
+## Fragmentation Analysis
+
+### Current Problems
+
+1. **Too many similar methods**:
+   - `brain.load()` - load one brain file
+   - `brain.loadCorpus()` - load all brain files  
+   - `brain.get()` - exists but unused (dead code)
+   - `brain.write()` - storage write
+   - All use different patterns
+
+2. **Extension handling scattered**:
+   - Corpus hardcoded: `.md` only
+   - Storage: manual `.md` append (line 177 in MCP)
+   - Geometry: completely separate, not loaded
+
+3. **Unclear boundary**:
+   - Corpus vs Storage vs Geometry
+   - All use same basePath
+   - No unified API
+
+### Proposed Unification
+
+**Single entry point**: `brain.read()` and `brain.write()`
+
+```javascript
+// Unified file operations
+brain.read('identity')              // Corpus: models/private/nova/identity.md
+brain.read('notes/my-note')        // Storage: models/private/nova/notes/my-note.md
+brain.read('geometry/coordinates') // Special: models/private/nova/geometry/coordinates.json
+
+brain.write('identity', content)         // Corpus write
+brain.write('notes/my-note', content)   // Storage write  
+brain.write('geometry/coords', data)    // JSON write
+```
+
+**Auto-detect**:
+- If path has `/` → treat as storage (category/key)
+- If path matches geometry pattern → load as JSON
+- Otherwise → corpus
 
 ---
 
