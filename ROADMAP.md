@@ -21,6 +21,20 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 - [ ] Audit settings.ini / settings.example.ini - these are separate from config.js (user personality/preferences vs system config)
   - Determine if they should migrate to config system or stay separate
 
+### ESLint Security & Quality Audit (HIGH PRIORITY)
+- [ ] Enable strict ESLint rules (already in .eslintrc.json)
+  - no-unused-vars: warn (406 vars found)
+  - no-shadow-restricted-names: error (1 found)
+  - no-redeclare: error (2 found)
+  - no-unreachable: error (1 found)
+  - no-prototype-builtins: error (1 found)
+  - no-dupe-class-members: error (2 found)
+  - no-control-regex: error (2 found)
+- [ ] Fix all 9 error-level issues (security/bugs)
+- [ ] Review all 406 unused vars - many are likely dead code that can be removed
+- [ ] Run `npm run lint` to see current state
+- [ ] This audit helps secure and clean up the codebase significantly
+
 ### Horcrux System
 - [ ] Horcrux sharing/distribution (to steveframe.creadev.org)
 - [ ] Version migration for horcrux files
