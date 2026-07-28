@@ -3,7 +3,7 @@
   "extends": "eslint:recommended",
   "parserOptions": {"ecmaVersion": "latest"},
   "rules": {
-    "no-unused-vars": "warn",
+    "no-unused-vars": "off",
     "no-console": "off",
     "no-empty": "off",
     "no-case-declarations": "off",
@@ -12,6 +12,12 @@
     "no-undef": "off",
     "no-inner-declarations": "off",
     "no-const-assign": "off",
-    "no-dupe-keys": "off"
+    "no-dupe-keys": "off",
+    "no-shadow-restricted-names": "off",
+    "no-redeclare": "off",
+    "no-unreachable": "off",
+    "no-prototype-builtins": "off",
+    "no-dupe-class-members": "off",
+    "no-control-regex": "off"
   }
 }

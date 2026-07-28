@@ -249,7 +249,11 @@ test('secret has info function', () => {
     return { success: typeof secret.info === 'function' };
 });
 
-// Note: secret.info() has a bug - skip for now
+test('secret info returns info for valid type', () => {
+    const secret = require(path.join(ROOT, 'lib', 'secret'));
+    const result = secret.info('brain');
+    return { success: result && typeof result.type === 'string' };
+});
 
 // ============================================
 // RESULTS
