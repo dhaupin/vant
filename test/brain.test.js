@@ -178,11 +178,10 @@ test('getPipelineState returns object', () => {
 // BRAIN LOADING
 // ============================================
 
-skip('loadCorpus returns array', 'Async loadCorpus has bug - use {sync:true}');
 asyncTest('loadCorpus returns array', async () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
-    // Use sync mode as workaround for async bug
-    const corpus = brain.loadCorpus({sync:true});
+    // Async loadCorpus now properly awaits readDir promise
+    const corpus = await brain.loadCorpus();
     return { success: Array.isArray(corpus) || corpus?.length > 0 };
 });
 
@@ -512,7 +511,6 @@ test('brainDirs returns object with public/private', () => {
     };
 });
 
-skip('loadStackCorpus returns array', 'loadStackCorpusSync not implemented - use loadStackCorpus({sync:true})');
 test('loadStackCorpus returns array', () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     const corpus = brain.loadStackCorpus({sync:true});
