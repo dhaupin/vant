@@ -1,0 +1,17 @@
+{
+  "brain": {
+    "readableBy": ["public"],
+    "writableBy": ["admin", "editor"],
+    "container": "default"
+  },
+  "island": {
+    "readableBy": ["public"],
+    "writableBy": ["admin"],
+    "container": "default"
+  },
+  "private": {
+    "readableBy": ["owner"],
+    "writableBy": ["owner"],
+    "container": "nova"
+  }
+}

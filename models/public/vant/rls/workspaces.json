@@ -1,0 +1,14 @@
+{
+  "default": {
+    "name": "Default Workspace",
+    "owner": "system",
+    "roles": ["admin", "editor", "viewer"],
+    "members": []
+  },
+  "nova": {
+    "name": "Nova Brain",
+    "owner": "nova",
+    "roles": ["admin", "editor", "viewer"],
+    "members": ["nova"]
+  }
+}
