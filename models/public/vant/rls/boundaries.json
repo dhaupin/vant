@@ -13,5 +13,17 @@
     "readableBy": ["owner"],
     "writableBy": ["owner"],
     "container": "nova"
+  },
+  "_dream:*": {
+    "readableBy": ["public"],
+    "writableBy": ["role:dream", "role:admin", "role:editor"],
+    "container": "default",
+    "description": "Dream consolidation - allows dream role, admin, editor to write insights"
+  },
+  "_dream:nova": {
+    "readableBy": ["public"],
+    "writableBy": ["role:dream", "role:admin", "role:editor", "brain:nova"],
+    "container": "nova",
+    "description": "Nova brain dream operations - role + brain based"
   }
 }
