@@ -23,12 +23,10 @@ models/public/repos/
 .DS_Store
 Thumbs.db
 
-# Runtime state (generated at runtime)
-models/.*.json
-models/private/
+# Runtime state (dotfiles - generated at runtime)
+models/**/.*
 models/private/**
 .agent_tmp/
-models/backup/
 storage/
 temp/
 
@@ -64,7 +62,5 @@ config.ini
 # My private brain (scribe)
 models/private/scribe/
 
-models/backup/
-models/state.json
-models/public/vant/.audit.json
+# Backup files
 *.bak
