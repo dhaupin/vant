@@ -217,16 +217,17 @@
       "wants": 0.2,
       "wisdom": 0.2
     },
-    "mode": "private",
+    "mode": "dual",
     "neurons": {
       "asyncTest": true
     }
   },
   "stack": [
+    "nova",
     "vant",
-    "nova"
+    "axolotl"
   ],
   "mode": "dual",
-  "currentBrain": "vant",
-  "updated": "2026-07-28T21:45:40.306Z"
+  "currentBrain": "nova",
+  "updated": "2026-08-03T10:26:52.270Z"
 }
