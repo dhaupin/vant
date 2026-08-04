@@ -2,28 +2,19 @@
   "brain": {
     "readableBy": ["public"],
     "writableBy": ["admin", "editor"],
-    "container": "default"
+    "container": "default",
+    "description": "Default brain policies - readable by anyone, writable by admin/editor roles"
   },
   "island": {
     "readableBy": ["public"],
     "writableBy": ["admin"],
-    "container": "default"
+    "container": "default",
+    "description": "Island/state policies - readable by anyone, writable by admin"
   },
   "private": {
     "readableBy": ["owner"],
     "writableBy": ["owner"],
-    "container": "nova"
-  },
-  "_dream:*": {
-    "readableBy": ["public"],
-    "writableBy": ["role:dream", "role:admin", "role:editor"],
-    "container": "default",
-    "description": "Dream consolidation - allows dream role, admin, editor to write insights"
-  },
-  "_dream:nova": {
-    "readableBy": ["public"],
-    "writableBy": ["role:dream", "role:admin", "role:editor", "brain:nova"],
-    "container": "nova",
-    "description": "Nova brain dream operations - role + brain based"
+    "container": "self",
+    "description": "Private resources - only accessible by owner"
   }
 }
