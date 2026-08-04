@@ -278,9 +278,22 @@ Violations may result in:
 
 This document is governed by **United States federal law** and **California state law**, excluding conflict of law provisions.
 
-### §20. Severability
+### §20. Acceptable Use
 
-If any provision is held unenforceable, the remainder continues in effect.
+Vant is provided for **legitimate, constructive purposes**. You may NOT use Vant to:
+
+- Harm others (physically, financially, or reputationally)
+- Engage in illegal activities
+- Generate harmful content (malware, exploits, CSAM, etc.)
+- Attack systems you don't own (penetration testing without permission)
+- Spam, phish, or engage in social engineering
+- DDoS or abuse network resources
+- Bypass security controls or access controls
+- Generate content that violates others' IP rights
+
+**Penetration Testing:** You may use Vant to test systems you own or have explicit written permission to test. Using Vant to access systems without authorization is prohibited.
+
+Violating this section may result in immediate license termination (§14).
 
 ---
 
@@ -368,6 +381,30 @@ Vant is not responsible for:
 - Data loss from corrupted horcruxes
 - Unauthorized access to unprotected horcruxes
 - Harmful content in restored data
+
+---
+
+### §26. Rate Limiting & API Abuse
+
+When using Vant to interact with external services (APIs, websites, databases):
+
+- Respect rate limits of external services
+- Don't abuse or overload external systems
+- Implement appropriate backoffs and retries
+- Don't use Vant for DDoS, scraping without consent, or spam
+
+Vant provides QoS tools (lib/qos.js) to help manage rate limits. Use them.
+
+Violating this may result in:
+- API key revocation from providers
+- IP blocks from services
+- License termination
+
+---
+
+### §27. Severability
+
+If any provision of this license is held unenforceable, the remainder continues in effect.
 
 ---
 
