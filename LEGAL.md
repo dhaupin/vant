@@ -284,6 +284,93 @@ If any provision is held unenforceable, the remainder continues in effect.
 
 ---
 
+### §21. External AI Model Providers
+
+Vant connects to external AI providers (OpenAI, Anthropic, MiniMax, Google, Azure, AWS, and other LLM services). Users must:
+
+- Comply with those providers' Terms of Service
+- Handle their own API keys securely (Vant provides tools but users own keys)
+- Understand those providers' data handling policies
+- No guarantee Vant will work with any specific provider (APIs change)
+
+Vant is not responsible for:
+- Provider outages or API changes
+- Data sent to external providers
+- Costs accrued through external APIs
+
+---
+
+### §22. AI-Generated Content
+
+Vant may generate code, text, images, or other content. Vant makes no claims to IP ownership of generated content. Users are solely responsible for:
+
+- Verifying generated content is safe, legal, and appropriate
+- Complying with applicable licenses for generated code
+- Any liability arising from generated content
+- Reviewing generated content before use in production
+
+---
+
+### §23. Autonomous Behavior
+
+Vant is designed to operate autonomously, executing tasks without continuous human oversight. Users are responsible for:
+
+- Supervising Vant's actions, especially in production
+- Ensuring Vant doesn't perform harmful, illegal, or unintended acts
+- Setting appropriate boundaries and restrictions
+- Any consequences of autonomous decisions made by Vant
+
+**Warning:** Autonomous agents can make unexpected decisions. Always review actions before committing to production systems.
+
+---
+
+### §24. Data Security & Brain Storage
+
+Vant stores data in "brain" files (models/private/, models/public/). Users must understand:
+
+**Risks:**
+- Brain files may contain sensitive data (API keys, credentials, secrets)
+- If brain is compromised, attacker gains access to stored data
+- Backup/horcrux files contain snapshots of brain data
+- No encryption by default on brain files
+
+**Recommendations:**
+- Never store actual API keys or credentials in brain files
+- Use Vant's secret management (lib/secret.js) for sensitive data
+- Keep models/private/ gitignored and private
+- Encrypt horcruxes before sharing
+- Regularly audit brain contents for sensitive data
+
+Vant is not responsible for:
+- Data breaches caused by storing secrets in brain
+- Loss of sensitive data through backups
+- Compromised brain files
+
+---
+
+### §25. Horcrux & Backup Security
+
+Vant's horcrux/backup system (lib/transform.js) creates snapshots of brain data. Users must understand:
+
+**Risks:**
+- Horcrux files contain full or partial brain data
+- Unencrypted horcruxes expose all included data
+- Restoring from horcrux overwrites current state
+- Malicious horcruxes could contain harmful data
+
+**Best Practices:**
+- Always password-protect horcruxes when sharing
+- Verify horcrux integrity before restoring
+- Store horcruxes securely (encrypted)
+- Limit what data is included in horcruxes
+
+Vant is not responsible for:
+- Data loss from corrupted horcruxes
+- Unauthorized access to unprotected horcruxes
+- Harmful content in restored data
+
+---
+
 ## QUICK REFERENCE
 
 | Action | Allowed? |
