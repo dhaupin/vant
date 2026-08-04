@@ -21,6 +21,109 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 - [ ] Audit settings.ini / settings.example.ini - these are separate from config.js (user personality/preferences vs system config)
   - Determine if they should migrate to config system or stay separate
 
+### Vibe/Mood System (Risk Management)
+> Refactor legacy vibe.js to support multi-brain stacks with risk management
+
+**Current State:**
+- lib/vibe.js defines 6 vibes with riskTolerance, creativity, caution
+- Stored at models/private/mood.ini (INI is legacy)
+- Not wired into any runtime decisions
+
+**Design Goals:**
+- Per-brain mood (each brain has its own mood)
+- Multi-brain stack support (composite or stack winner)
+- Stored in brain file (mood.md) not INI
+- Actually influences runtime decisions
+
+**Reference: regarded (Trading Risk System)**
+- See: https://github.com/dhaupin/regarded/tree/staging
+- Companion project with similar risk concepts (guards, rules, psychology)
+- Vant can use similar abstractions but for agent behavior, not trading
+
+**Risk Abstractions (from regarded, adapted for Vant):**
+
+| regarded (Trading) | Vant (Agent) |
+|-------------------|--------------|
+| maxPositions | maxConcurrentTasks |
+| maxDailyLoss | maxErrorsPerSession |
+| stopLossPercent | autoPauseAfterFailures |
+| circuitBreaker | cooldownAfterFailures |
+| fearGreed (0-100) | vibe (experimental ↔ safety_first) |
+| volatilityGuard | complexityGuard (don't overcomplicate) |
+| PsychologyGuard | VibeGuard (mood affects decisions) |
+| RulesEngine | VibeRules (conditional mood shifts) |
+
+**Vibe/Guard System Architecture:**
+```javascript
+// lib/vibe.js - Core vibe system
+{
+  vibes: {
+    experimental:  { riskTolerance: 'high',  creativity: 'high',  caution: 'low'  },
+    safety_first: { riskTolerance: 'low',   creativity: 'medium', caution: 'high' },
+    focused:      { riskTolerance: 'medium', creativity: 'medium', caution: 'medium' },
+    learning:     { riskTolerance: 'high',  creativity: 'high',  caution: 'medium' },
+    debugging:    { riskTolerance: 'low',   creativity: 'low',   caution: 'high' },
+    review:       { riskTolerance: 'low',   creativity: 'low',   caution: 'high' }
+  }
+}
+
+// lib/guard.js - Agent risk guards (adapted from regarded)
+// Like trading guards but for agent behavior
+{
+  maxConcurrentTasks: 5,
+  maxErrorsPerSession: 10,
+  autoPauseAfterFailures: 3,
+  circuitBreakerThreshold: 5,
+  cooldownPeriodMs: 60000,
+  complexityLimit: 'medium', // Don't overcomplicate
+  requireConfirmation: ['high_risk'], // Confirm certain actions
+  maxDelegationDepth: 3
+}
+
+// lib/psy.js - Psychology (adapted from regarded)
+// How mood affects decisions
+{
+  fearGreed: 50, // 0-100, derived from vibe
+  decisionWeight: {
+    creativity: 0.3,
+    caution: 0.4,
+    riskTolerance: 0.3
+  },
+  // If vibe = experimental: high creativity, low caution → riskier decisions
+  // If vibe = safety_first: low creativity, high caution → conservative
+}
+
+// lib/rules.js - Conditional mood shifts
+// Auto-adjust vibe based on context
+{
+  conditions: [
+    { if: 'errors > 5', then: 'safety_first' },
+    { if: 'task.type === "creative"', then: 'experimental' },
+    { if: 'context === "debugging"', then: 'debugging' }
+  ]
+}
+```
+
+**Potential Integration Points:**
+- Commit message formatting (already has getCommitVibe())
+- Delegation: risk tolerance affects task approval
+- Autonomy: caution level affects decision thresholds
+- Task complexity: vibe affects how much the agent tries to do at once
+- Error handling: safety_first after failures
+
+**Research:**
+- See: https://github.com/dhaupin/regarded/tree/staging (risk system ideas)
+
+**Tasks:**
+- [ ] Redesign vibe.js for multi-brain support
+- [ ] Migrate from INI to brain file (mood.md)
+- [ ] Create lib/guard.js (agent risk guards, adapted from regarded)
+- [ ] Create lib/psy.js (psychology/vibe integration)
+- [ ] Create lib/rules.js (conditional mood shifts)
+- [ ] Define what riskTolerance actually affects in delegation/task execution
+- [ ] Wire into runtime (agents.js, delegation, autonomy)
+- [ ] Test with brain stacks
+
 ### ESLint Security & Quality Audit (HIGH PRIORITY)
 - [ ] Enable strict ESLint rules (already in .eslintrc.json)
   - no-unused-vars: warn (406 vars found)
