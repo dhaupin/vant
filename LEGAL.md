@@ -96,6 +96,10 @@ Vant is **INDEPENDENT** from all commercial entities. Specifically:
 | **Vanta Inc.** | Not affiliated, completely independent |
 | **VantAI / Roivant** | Not affiliated, completely independent |
 | **Vant by Youzan** | Not affiliated, completely independent |
+| **Amazon Nova Act** | Not affiliated, completely independent |
+
+**Nova Brain Naming:**
+The "nova" brain (agent/identity) in Vant is named for its role as a new/supernova source of intelligence for the agent system. It is a descriptive technical designation, explicitly separate from Amazon's "Nova Act" (browser-based AI agents) or any other "Nova" products. Using Vant's nova brain does not imply affiliation with Amazon or any other entity.
 
 Using Vant does not imply endorsement by any entity.
 
