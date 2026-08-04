@@ -100,18 +100,79 @@ cron.schedule('prompt-cache-warm', async () => {
 | DeepSeek | Auto (sequence match) | Deterministic ordering only |
 | OpenAI | Auto (sequence match) | Deterministic ordering only |
 
+### Context Engine Design Details
+
+**1. Context Sources (leveraging existing systems):**
+- Brain files: identity.md, lessons.md, preferences.md, etc.
+- transform.gather(): Can leverage existing gather methods (agents, islands, runtime, config, corpus, neurons, brainStorage)
+- MCP tool schemas
+- Chat history
+- Dynamic: git diffs, shell logs
+
+**2. Multi-Brain Context:**
+- Each brain in stack has own context
+- Stack merged in order (first brain = highest priority)
+- Cache state tracked per-brain
+- When brain changes → new cache context
+
+**3. Model Detection:**
+- TBD: How to detect model capabilities
+- Options: Per-request parameter, global config, or provider detection
+- Need to research model spec (MiniMax, Claude, DeepSeek, OpenAI)
+- May need separate config for model capabilities
+
+**4. Cache Invalidation:**
+- Time-based: 5-min TTL (per model spec)
+- Brain changes: Watch for brain file modifications
+- Manual: context_refresh MCP tool
+- Events: Emit invalidation on brain changes
+
+**5. Cache Persistence:**
+- Use memory.state() with long TTL (1 hour+)
+- Key format: `context:cache:{brain}:{layer}`
+- Restore on startup for warm cache
+
+**6. cache_control Injection:**
+- Inject for ALL models (doesn't hurt non-cache models)
+- Models that ignore it: no harm
+- Models that use it: benefit
+
+**7. Security:**
+- VAF validation on all context inputs
+- QoS rate limiting on context builds
+- Sanitize sensitive data before caching
+- Sandbox capability checks
+
+**8. Testing:**
+- TBD: How to verify cache hits
+- Options: API response headers, token counting, mock testing
+- Need test harness for context.js
+
+**9. No Backward Compatibility Needed:**
+- Net-new module
+- No legacy wrappers or aliases needed
+
 **Tasks:**
 - [ ] Create lib/context.js - Context engine
   - [ ] Context assembly from brain files
+  - [ ] Leverage transform.gather() for sources
   - [ ] Deterministic sorting (stable sort)
   - [ ] Cache breakpoint injection
   - [ ] Per-brain cache state tracking
+  - [ ] Persistence via memory.state()
+- [ ] Research model detection spec (MiniMax, Claude, DeepSeek, OpenAI)
+- [ ] Add invalidation triggers (time, brain changes, manual)
+- [ ] Add security (VAF, QoS, sanitization)
 - [ ] Add heartbeat to lib/cron.js
   - [ ] `vant up --keep-cached` flag triggers heartbeat
   - [ ] 4-min interval ping
   - [ ] Optional nature integration (multifunctional)
 - [ ] Expose MCP tools for context inspection/modification
-- [ ] Test with MiniMax/Claude to verify cache hits
+  - [ ] context_get - inspect current context
+  - [ ] context_set - modify context rules
+  - [ ] context_refresh - force cache invalidation
+  - [ ] context_layers - list layers and status
+- [ ] Create test harness for context.js
 
 ### Vibe/Mood System (Risk Management)
 > Refactor legacy vibe.js to support multi-brain stacks with risk management
