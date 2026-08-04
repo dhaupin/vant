@@ -16,6 +16,7 @@ models/public/repos/
 # Runtime state files (explicit)
 models/.resolution.json
 models/.providers.json
+models/state.json
 models/**/.*.json
 models/**/.*.ini
 
