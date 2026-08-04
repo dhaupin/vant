@@ -41,9 +41,17 @@ Vant is an open-source project with copyright held by the maintainer and contrib
 
 Specifically:
 - **NO FITNESS FOR A PARTICULAR PURPOSE** - Vant may not be suitable for any specific use case
-- **NO SECURITY GUARANTEES** - Despite sandbox boundaries, no guarantee security vulnerabilities don't exist  
+- **NO SECURITY GUARANTEES** - Despite sandbox boundaries, no guarantee security vulnerabilities don't exist
 - **NO AVAILABILITY** - No SLA for uptime, updates, or support
 - **NO MALWARE SCANNING** - Vant doesn't scan loaded content for malware
+- **EXPERIMENTAL FEATURES** - Vant moves fast. Some features are experimental, beta, or unstable.
+  - Backward compatibility is NOT guaranteed for experimental features
+  - Features may change, break, or be removed without notice
+  - Stable releases are noted in CHANGELOG; everything else is potentially unstable
+- **THIRD-PARTY DEPENDENCIES** - Vant depends on npm packages and external services.
+  - Vulnerabilities in dependencies are outside Vant's control
+  - Users are responsible for auditing their dependency tree
+  - Vant is not liable for vulnerabilities in third-party code
 
 ---
 
@@ -405,6 +413,29 @@ Violating this may result in:
 ### §27. Severability
 
 If any provision of this license is held unenforceable, the remainder continues in effect.
+
+---
+
+### §28. Data Retention & Management
+
+Vant does NOT enforce global data retention policies. Retention is controlled by:
+
+- **Per-feature settings**: Each feature manages its own TTL
+  - Memory/state: Default 7 days (configurable per-entry)
+  - Backups: Configurable rotation (daily/weekly)
+  - Nature flywheel: Up to 100 years (if configured)
+- **User control**: Users set their own retention via config
+- **Manual cleanup**: Users can delete brain files, memories, or state anytime
+
+Vant does not:
+- Automatically delete brain content
+- Enforce data expiration beyond feature-specific TTLs
+- Retain data longer than configured
+
+Users are responsible for:
+- Setting appropriate retention policies for their use case
+- Managing their own brain/backup cleanup
+- Complying with any data regulations (GDPR, etc.)
 
 ---
 
