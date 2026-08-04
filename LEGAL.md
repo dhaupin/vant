@@ -47,7 +47,7 @@ Specifically:
 - **EXPERIMENTAL FEATURES** - Vant moves fast. Some features are experimental, beta, or unstable.
   - Backward compatibility is NOT guaranteed for experimental features
   - Features may change, break, or be removed without notice
-  - Stable releases are noted in CHANGELOG; everything else is potentially unstable
+  - Check git history for current state of features
 - **THIRD-PARTY DEPENDENCIES** - Vant depends on npm packages and external services.
   - Vulnerabilities in dependencies are outside Vant's control
   - Users are responsible for auditing their dependency tree
