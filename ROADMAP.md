@@ -21,6 +21,50 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 - [ ] Audit settings.ini / settings.example.ini - these are separate from config.js (user personality/preferences vs system config)
   - Determine if they should migrate to config system or stay separate
 
+### Prompt Caching (MiniMax/Claude/DeepSeek)
+> Optimize token costs with deterministic prompt structure and cache breakpoints
+
+**Reference:** Gemini conversation on prompt caching (see gist: 6b9d33ae054b6aa60a033fae36fd06e4)
+
+**Core Principles:**
+1. **Strict Top-Down Structure**: Static → Dynamic. Any change at top invalidates everything below.
+2. **Cache Control Blocks**: Use `cache_control: {type: "ephemeral"}`. Max 4 breakpoints per request.
+3. **Byte-Level Consistency**: Same order every time. Watch whitespace/trailing newlines.
+4. **TTL**: 5 min expiry. Group requests within 4 min or use heartbeat to keep warm.
+
+**Vant Context Layers:**
+| Layer | Content | Cache Strategy |
+|-------|---------|----------------|
+| Static | identity.md, lessons.md, preferences.md | Always FIRST, cache_control |
+| Tools | MCP tool schemas | Sorted alphabetically, cache_control |
+| History | Chat history (early messages) | Middle, cache_control |
+| Dynamic | git diffs, shell logs, active tasks | BOTTOM, NO caching |
+
+**Implementation Targets:**
+1. `lib/brain.js` - Context aggregator, enforce deterministic file ordering
+2. `lib/vant.js` / `lib/headless.js` - 5-min heartbeat daemon (`vant up --keep-cached`)
+3. `lib/mcp.js` / providers - cache_control injection for compatible models
+
+**Model Compatibility:**
+| Model | Cache Type | Implementation |
+|-------|------------|----------------|
+| MiniMax | Explicit cache_control | Add cache_control blocks |
+| Claude (Anthropic) | Explicit cache_control | Same as MiniMax |
+| DeepSeek | Auto (sequence match) | Deterministic ordering only |
+| OpenAI | Auto (sequence match) | Deterministic ordering only |
+
+**Tasks:**
+- [ ] Create lib/cache.js - Prompt cache orchestrator
+  - [ ] Deterministic array sorting (stable sort on file/tool order)
+  - [ ] Cache breakpoint injection
+  - [ ] Per-brain cache state tracking
+- [ ] Modify lib/brain.js - Use cache orchestrator for context assembly
+- [ ] Add heartbeat daemon to lib/vant.js
+  - [ ] `vant up --keep-cached` flag
+  - [ ] 4-min lightweight ping to keep cache warm
+- [ ] Add cache_control injection to lib/mcp.js (when model supports it)
+- [ ] Test with MiniMax/Claude to verify cache hits
+
 ### Vibe/Mood System (Risk Management)
 > Refactor legacy vibe.js to support multi-brain stacks with risk management
 
