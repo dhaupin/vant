@@ -116,10 +116,20 @@ cron.schedule('prompt-cache-warm', async () => {
 - When brain changes → new cache context
 
 **3. Model Detection:**
-- TBD: How to detect model capabilities
-- Options: Per-request parameter, global config, or provider detection
-- Need to research model spec (MiniMax, Claude, DeepSeek, OpenAI)
-- May need separate config for model capabilities
+- Use model registry with capability flags
+- LiteLLM has `supports_prompt_caching(model)` we can reference
+- Per-model config: { supportsCache: bool, cacheTTL: number, endpoint: string }
+- Default: assume no cache support, opt-in per model
+
+**Supported Models (reference):**
+| Model | Cache Support | TTL | Notes |
+|-------|--------------|-----|-------|
+| Claude 4.5 | Yes | 1 hour | Max 4 breakpoints |
+| Claude 3.5 | Yes | 5 min | |
+| MiniMax | Yes (Anthropic API) | 5 min | |
+| Amazon Bedrock Nova | Yes | 5 min | |
+| DeepSeek | Auto | - | Sequence match |
+| OpenAI | Auto | - | Sequence match |
 
 **4. Cache Invalidation:**
 - Time-based: 5-min TTL (per model spec)
@@ -143,10 +153,22 @@ cron.schedule('prompt-cache-warm', async () => {
 - Sanitize sensitive data before caching
 - Sandbox capability checks
 
-**8. Testing:**
-- TBD: How to verify cache hits
-- Options: API response headers, token counting, mock testing
-- Need test harness for context.js
+**8. Testing - How to Verify Cache Hits:**
+- API response includes `usage` object:
+```javascript
+{
+  usage: {
+    input_tokens: 1000,              // total input
+    cache_creation_input_tokens: 500, // tokens written to cache
+    cache_read_input_tokens: 400      // tokens read from cache
+  }
+}
+// Cache write: cache_creation_input_tokens > 0
+// Cache hit: cache_read_input_tokens > 0
+```
+- Track: cache hit rate = cache_read / total_input
+- Test by: First call (cold), Second call (warm) - compare token counts
+- Mock testing: simulate cache_control injection, verify ordering
 
 **9. No Backward Compatibility Needed:**
 - Net-new module
