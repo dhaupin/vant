@@ -21,6 +21,298 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 - [ ] Audit settings.ini / settings.example.ini - these are separate from config.js (user personality/preferences vs system config)
   - Determine if they should migrate to config system or stay separate
 
+### Prompt Caching / Context Engine (lib/context.js)
+> Optimize token costs with deterministic prompt structure and cache breakpoints
+
+**Reference:** Gemini conversation on prompt caching (see gist: 6b9d33ae054b6aa60a033fae36fd06e4)
+
+**Why lib/context.js:**
+- "Prompt" is too specific - could evolve to other context types
+- Caching is tightly coupled to context assembly - keep together
+- Future-proof naming
+
+**Core Principles:**
+1. **Strict Top-Down Structure**: Static → Dynamic. Any change at top invalidates everything below.
+2. **Cache Control Blocks**: Use `cache_control: {type: "ephemeral"}`. Max 4 breakpoints per request.
+3. **Byte-Level Consistency**: Same order every time. Watch whitespace/trailing newlines.
+4. **TTL**: 5 min expiry. Group requests within 4 min or use heartbeat to keep warm.
+
+**Vant Context Layers:**
+| Layer | Content | Cache Strategy |
+|-------|---------|----------------|
+| Static | identity.md, lessons.md, preferences.md | Always FIRST, cache_control |
+| Tools | MCP tool schemas | Sorted alphabetically, cache_control |
+| History | Chat history (early messages) | Middle, cache_control |
+| Dynamic | git diffs, shell logs, active tasks | BOTTOM, NO caching |
+
+**Architecture:**
+```javascript
+// lib/context.js
+{
+  // Context assembly - builds prompt from brain files
+  build(options) { },
+  
+  // Deterministic ordering - ensures same order every time
+  sortFiles(files) { },  // alphabetical, stable
+  sortTools(tools) { }, // alphabetical by name
+  
+  // Cache management
+  addCheckpoint(block, afterIndex) { },  // inject cache_control
+  getBrainCacheState(brain) { },        // per-brain tracking
+  invalidate(brain) { },                // force cold start
+  
+  // Heartbeat integration
+  ping() { },  // lightweight warm-up call
+  
+  // MCP exposure
+  getContext() { },  // inspect current context
+  setContext() { },  // modify context rules
+}
+```
+
+**Heartbeat (cron + nature):**
+- cron schedules every 4 minutes
+- Triggers `context.ping()` to keep cache warm
+- Can also trigger nature's flywheel (multifunctional!)
+```javascript
+cron.schedule('prompt-cache-warm', async () => {
+  await context.ping();      // Keep cache warm
+  nature.accumulate({       // Spin nature's flywheel
+    source: 'heartbeat', 
+    amount: 1 
+  });
+});
+```
+
+**MCP Tools:**
+| Tool | Description |
+|------|-------------|
+| context_get | Inspect current context state |
+| context_set | Modify context assembly rules |
+| context_refresh | Force cache invalidation |
+| context_layers | List context layers and cache status |
+
+**Model Compatibility:**
+| Model | Cache Type | Implementation |
+|-------|------------|----------------|
+| MiniMax | Explicit cache_control | Add cache_control blocks |
+| Claude (Anthropic) | Explicit cache_control | Same as MiniMax |
+| DeepSeek | Auto (sequence match) | Deterministic ordering only |
+| OpenAI | Auto (sequence match) | Deterministic ordering only |
+
+### Context Engine Design Details
+
+**1. Context Sources (leveraging existing systems):**
+- Brain files: identity.md, lessons.md, preferences.md, etc.
+- transform.gather(): Can leverage existing gather methods (agents, islands, runtime, config, corpus, neurons, brainStorage)
+- MCP tool schemas
+- Chat history
+- Dynamic: git diffs, shell logs
+
+**2. Multi-Brain Context:**
+- Each brain in stack has own context
+- Stack merged in order (first brain = highest priority)
+- Cache state tracked per-brain
+- When brain changes → new cache context
+
+**3. Model Detection:**
+- Use model registry with capability flags
+- LiteLLM has `supports_prompt_caching(model)` we can reference
+- Per-model config: { supportsCache: bool, cacheTTL: number, endpoint: string }
+- Default: assume no cache support, opt-in per model
+
+**Supported Models (reference):**
+| Model | Cache Support | TTL | Notes |
+|-------|--------------|-----|-------|
+| Claude 4.5 | Yes | 1 hour | Max 4 breakpoints |
+| Claude 3.5 | Yes | 5 min | |
+| MiniMax | Yes (Anthropic API) | 5 min | |
+| Amazon Bedrock Nova | Yes | 5 min | |
+| DeepSeek | Auto | - | Sequence match |
+| OpenAI | Auto | - | Sequence match |
+
+**4. Cache Invalidation:**
+- Time-based: 5-min TTL (per model spec)
+- Brain changes: Watch for brain file modifications
+- Manual: context_refresh MCP tool
+- Events: Emit invalidation on brain changes
+
+**5. Cache Persistence:**
+- Use memory.state() with long TTL (1 hour+)
+- Key format: `context:cache:{brain}:{layer}`
+- Restore on startup for warm cache
+
+**6. cache_control Injection:**
+- Inject for ALL models (doesn't hurt non-cache models)
+- Models that ignore it: no harm
+- Models that use it: benefit
+
+**7. Security:**
+- VAF validation on all context inputs
+- QoS rate limiting on context builds
+- Sanitize sensitive data before caching
+- Sandbox capability checks
+
+**8. Testing - How to Verify Cache Hits:**
+- API response includes `usage` object:
+```javascript
+{
+  usage: {
+    input_tokens: 1000,              // total input
+    cache_creation_input_tokens: 500, // tokens written to cache
+    cache_read_input_tokens: 400      // tokens read from cache
+  }
+}
+// Cache write: cache_creation_input_tokens > 0
+// Cache hit: cache_read_input_tokens > 0
+```
+- Track: cache hit rate = cache_read / total_input
+- Test by: First call (cold), Second call (warm) - compare token counts
+- Mock testing: simulate cache_control injection, verify ordering
+
+**9. No Backward Compatibility Needed:**
+- Net-new module
+- No legacy wrappers or aliases needed
+
+**Tasks:**
+- [ ] Create lib/context.js - Context engine
+  - [ ] Context assembly from brain files
+  - [ ] Leverage transform.gather() for sources
+  - [ ] Deterministic sorting (stable sort)
+  - [ ] Cache breakpoint injection
+  - [ ] Per-brain cache state tracking
+  - [ ] Persistence via memory.state()
+- [ ] Research model detection spec (MiniMax, Claude, DeepSeek, OpenAI)
+- [ ] Add invalidation triggers (time, brain changes, manual)
+- [ ] Add security (VAF, QoS, sanitization)
+- [ ] Add heartbeat to lib/cron.js
+  - [ ] `vant up --keep-cached` flag triggers heartbeat
+  - [ ] 4-min interval ping
+  - [ ] Optional nature integration (multifunctional)
+- [ ] Expose MCP tools for context inspection/modification
+  - [ ] context_get - inspect current context
+  - [ ] context_set - modify context rules
+  - [ ] context_refresh - force cache invalidation
+  - [ ] context_layers - list layers and status
+- [ ] Create test harness for context.js
+
+### Vibe/Mood System (Risk Management)
+> Refactor legacy vibe.js to support multi-brain stacks with risk management
+
+**Current State:**
+- lib/vibe.js defines 6 vibes with riskTolerance, creativity, caution
+- Stored at models/private/mood.ini (INI is legacy)
+- Not wired into any runtime decisions
+
+**Design Goals:**
+- Per-brain mood (each brain has its own mood)
+- Multi-brain stack support (composite or stack winner)
+- Stored in brain file (mood.md) not INI
+- Actually influences runtime decisions
+
+**Reference: regarded (Trading Risk System)**
+- See: https://github.com/dhaupin/regarded/tree/staging
+- Companion project with similar risk concepts (guards, rules, psychology)
+- Vant can use similar abstractions but for agent behavior, not trading
+
+**Risk Abstractions (from regarded, adapted for Vant):**
+
+| regarded (Trading) | Vant (Agent) |
+|-------------------|--------------|
+| maxPositions | maxConcurrentTasks |
+| maxDailyLoss | maxErrorsPerSession |
+| stopLossPercent | autoPauseAfterFailures |
+| circuitBreaker | cooldownAfterFailures |
+| fearGreed (0-100) | vibe (experimental ↔ safety_first) |
+| volatilityGuard | complexityGuard (don't overcomplicate) |
+| PsychologyGuard | VibeGuard (mood affects decisions) |
+| RulesEngine | VibeRules (conditional mood shifts) |
+
+**Vibe/Guard System Architecture:**
+```javascript
+// lib/vibe.js - Core vibe system
+{
+  vibes: {
+    experimental:  { riskTolerance: 'high',  creativity: 'high',  caution: 'low'  },
+    safety_first: { riskTolerance: 'low',   creativity: 'medium', caution: 'high' },
+    focused:      { riskTolerance: 'medium', creativity: 'medium', caution: 'medium' },
+    learning:     { riskTolerance: 'high',  creativity: 'high',  caution: 'medium' },
+    debugging:    { riskTolerance: 'low',   creativity: 'low',   caution: 'high' },
+    review:       { riskTolerance: 'low',   creativity: 'low',   caution: 'high' }
+  }
+}
+
+// lib/guard.js - Agent risk guards (adapted from regarded)
+// Like trading guards but for agent behavior
+{
+  maxConcurrentTasks: 5,
+  maxErrorsPerSession: 10,
+  autoPauseAfterFailures: 3,
+  circuitBreakerThreshold: 5,
+  cooldownPeriodMs: 60000,
+  complexityLimit: 'medium', // Don't overcomplicate
+  requireConfirmation: ['high_risk'], // Confirm certain actions
+  maxDelegationDepth: 3
+}
+
+// lib/psy.js - Psychology (adapted from regarded)
+// How mood affects decisions
+{
+  fearGreed: 50, // 0-100, derived from vibe
+  decisionWeight: {
+    creativity: 0.3,
+    caution: 0.4,
+    riskTolerance: 0.3
+  },
+  // If vibe = experimental: high creativity, low caution → riskier decisions
+  // If vibe = safety_first: low creativity, high caution → conservative
+}
+
+// lib/rules.js - Conditional mood shifts
+// Auto-adjust vibe based on context
+{
+  conditions: [
+    { if: 'errors > 5', then: 'safety_first' },
+    { if: 'task.type === "creative"', then: 'experimental' },
+    { if: 'context === "debugging"', then: 'debugging' }
+  ]
+}
+```
+
+**Potential Integration Points:**
+- Commit message formatting (already has getCommitVibe())
+- Delegation: risk tolerance affects task approval
+- Autonomy: caution level affects decision thresholds
+- Task complexity: vibe affects how much the agent tries to do at once
+- Error handling: safety_first after failures
+
+**Research:**
+- See: https://github.com/dhaupin/regarded/tree/staging (risk system ideas)
+
+**Tasks:**
+- [ ] Redesign vibe.js for multi-brain support
+- [ ] Migrate from INI to brain file (mood.md)
+- [ ] Create lib/guard.js (agent risk guards, adapted from regarded)
+- [ ] Create lib/psy.js (psychology/vibe integration)
+- [ ] Create lib/rules.js (conditional mood shifts)
+- [ ] Define what riskTolerance actually affects in delegation/task execution
+- [ ] Wire into runtime (agents.js, delegation, autonomy)
+- [ ] Test with brain stacks
+
+### ESLint Security & Quality Audit (HIGH PRIORITY)
+- [ ] Enable strict ESLint rules (already in .eslintrc.json)
+  - no-unused-vars: warn (406 vars found)
+  - no-shadow-restricted-names: error (1 found)
+  - no-redeclare: error (2 found)
+  - no-unreachable: error (1 found)
+  - no-prototype-builtins: error (1 found)
+  - no-dupe-class-members: error (2 found)
+  - no-control-regex: error (2 found)
+- [ ] Fix all 9 error-level issues (security/bugs)
+- [ ] Review all 406 unused vars - many are likely dead code that can be removed
+- [ ] Run `npm run lint` to see current state
+- [ ] This audit helps secure and clean up the codebase significantly
+
 ### Horcrux System
 - [ ] Horcrux sharing/distribution (to steveframe.creadev.org)
 - [ ] Version migration for horcrux files
@@ -733,3 +1025,69 @@ models/private/
 - lib/sandbox.js (capabilities per brain)
 - bin/* (all CLI tools)
 - Any hardcoded 'models/private' paths
+
+---
+
+### Unified Sync/Async Functions (Template)
+
+**Problem:** Many functions exist as duplicate `funcName()` and `funcNameSync()` - code duplication and confusion.
+
+**Solution:** Single function with `opts.sync` option, defaulting to async:
+
+```javascript
+/**
+ * Unified function - does X
+ * @param {object} opts - Options: { sync: boolean }
+ * @returns {Promise<any>|any} Result (Promise if async, direct if sync)
+ */
+function functionName(opts = {}) {
+    const isSync = opts.sync === true;
+    
+    // Unified work function - handles both sync and async
+    const work = () => {
+        // Core logic - uses isSync flag for any branching
+        const data = isSync ? doWorkSync() : doWorkAsync();
+        return process(data);
+    };
+    
+    if (isSync) {
+        return work();
+    } else {
+        return (async () => work())();
+    }
+}
+```
+
+**Key points:**
+- Single `work()` function contains core logic
+- Uses `isSync` flag for any conditional branching
+- Minimal duplication - only the return wrapper differs
+
+**Usage:**
+```javascript
+// Async (default)
+functionName().then(result => console.log(result));
+
+// Sync
+const result = functionName({ sync: true });
+
+// Old API still works
+functionNameSync(); // alias
+```
+
+**Apply to:**
+- loadCorpus / loadCorpusSync → loadCorpus({sync}) ✅ DONE (v0.8.6: no backwards compat)
+- loadStackCorpus / loadStackCorpusSync → loadStackCorpus({sync}) ✅ DONE (v0.8.6: no backwards compat)
+- readDirAsync / readDirSync → readDir({sync}) ✅ DONE
+- Other pairs in codebase (find and consolidate)
+
+### Format System Enforcement (TODO)
+
+**Problem:** Many functions still hardcode `.md` extension instead of using format system.
+
+**Spots to fix:**
+- `_writeToBrain()` - line ~1502, hardcodes `.md`
+- `_readFromBrain()` - line ~1517, hardcodes `.md`
+- MCP `brain_save` - hardcodes `.md`
+
+**Fix:** Add format option to these functions, use format.getExtension() or similar.

@@ -70,7 +70,7 @@ async function runMultiBrain() {
         const result = brain.switchBrain(args[1], args[2] || 'private');
         console.log('\nSwitched to:', result);
     } else if (subcmd === 'load' && args[1]) {
-        const result = await brain.loadMultiple([args[1]], { type: args[2] || 'private' });
+        const result = await brain.load(args[1], { type: args[2] || 'private' });
         console.log('\nLoaded:', result);
     } else if (subcmd === 'merge' && args[1]) {
         const result = await brain.merge([args[1]]);

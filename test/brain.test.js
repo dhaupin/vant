@@ -180,6 +180,7 @@ test('getPipelineState returns object', () => {
 
 asyncTest('loadCorpus returns array', async () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
+    // Async loadCorpus now properly awaits readDir promise
     const corpus = await brain.loadCorpus();
     return { success: Array.isArray(corpus) || corpus?.length > 0 };
 });
@@ -512,7 +513,7 @@ test('brainDirs returns object with public/private', () => {
 
 test('loadStackCorpus returns array', () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const corpus = brain.loadStackCorpusSync();
+    const corpus = brain.loadStackCorpus({sync:true});
     return { success: Array.isArray(corpus) };
 });
 
@@ -520,6 +521,146 @@ test('brainList returns array', () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     const list = brain.listBrains();
     return { success: Array.isArray(list) };
+});
+
+// ============================================
+// MULTI-FORMAT BRAIN TESTS (v0.8.6)
+// ============================================
+
+test('brain.read function exists', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    return { success: typeof brain.read === 'function' };
+});
+
+test('brain.loadFile function exists', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    return { success: typeof brain.loadFile === 'function' };
+});
+
+test('brain.saveFile function exists', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    return { success: typeof brain.saveFile === 'function' };
+});
+
+asyncTest('brain.read returns object or null', async () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    const result = await brain.read('identity', { type: 'public' });
+    // Should return { data, content, format, source } or null
+    return { 
+        success: result === null || 
+                 (typeof result === 'object' && 'content' in result) 
+    };
+});
+
+asyncTest('brain.read handles non-existent brain', async () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    const result = await brain.read('nonexistent-brain-xyz', { type: 'public' });
+    return { success: result === null };
+});
+
+asyncTest('brain.loadFile works with valid path', async () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    // Try to load from a valid brain file - use relative path to pass security check
+    const testPath = 'models/public/vant/identity.md';
+    if (!fs.existsSync(testPath)) {
+        skip('test brain file not found', 'fixture missing');
+        return;
+    }
+    const result = await brain.loadFile(testPath);
+    // Result has { data, format, error } structure
+    return result && result.data ? true : { error: result?.error || 'no data' };
+});
+
+asyncTest('brain.saveFile creates file', async () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    // Use relative path to pass security check
+    const testPath = '.agent_tmp/test-brain-file.md';
+    const testDir = path.dirname(testPath);
+    if (!fs.existsSync(testDir)) {
+        fs.mkdirSync(testDir, { recursive: true });
+    }
+    const result = await brain.saveFile(testPath, { content: '# Test' }, { format: 'md' });
+    // Clean up
+    if (fs.existsSync(testPath)) {
+        fs.unlinkSync(testPath);
+    }
+    // Result has { success: true } or { error: '...' }
+    return result && result.success === true ? true : { error: result?.error || 'save failed' };
+});
+
+// ============================================
+// FORMAT MODULE TESTS
+// ============================================
+
+test('format.listFiles function exists', () => {
+    const format = require(path.join(ROOT, 'lib', 'format'));
+    return { success: typeof format.listFiles === 'function' };
+});
+
+test('format.getBrainName function exists', () => {
+    const format = require(path.join(ROOT, 'lib', 'format'));
+    return { success: typeof format.getBrainName === 'function' };
+});
+
+test('format.listFiles returns array', () => {
+    const format = require(path.join(ROOT, 'lib', 'format'));
+    const result = format.listFiles(MODELS_PUBLIC);
+    return { success: Array.isArray(result) };
+});
+
+test('format.listFiles filters by extension', () => {
+    const format = require(path.join(ROOT, 'lib', 'format'));
+    const result = format.listFiles(MODELS_PUBLIC, ['.md']);
+    // Should only include .md files
+    const allMd = result.every(f => f.endsWith('.md'));
+    return { success: allMd || result.length === 0 };
+});
+
+test('format.getBrainName strips extensions', () => {
+    const format = require(path.join(ROOT, 'lib', 'format'));
+    
+    const tests = [
+        { input: 'identity.md', expected: 'identity' },
+        { input: 'notes.json', expected: 'notes' },
+        { input: 'data.yaml', expected: 'data' },
+        { input: 'readme', expected: 'readme' }, // no ext
+    ];
+    
+    let passed = true;
+    for (const { input, expected } of tests) {
+        const result = format.getBrainName(input);
+        if (result !== expected) {
+            passed = false;
+            break;
+        }
+    }
+    return { success: passed };
+});
+
+test('format.DEFAULT_EXTENSIONS includes expected formats', () => {
+    const format = require(path.join(ROOT, 'lib', 'format'));
+    const exts = format.DEFAULT_EXTENSIONS;
+    return { 
+        success: exts.includes('.md') && 
+                 exts.includes('.json') &&
+                 exts.includes('.yaml') 
+    };
+});
+
+// SECURITY TESTS
+test('format.listFiles prevents path traversal', () => {
+    const format = require(path.join(ROOT, 'lib', 'format'));
+    // Try to escape with ..
+    const result = format.listFiles('/etc/../' + MODELS_PUBLIC);
+    // Should return empty or safe results, not /etc/passwd
+    const hasEtc = result.some(f => f.startsWith('/etc'));
+    return { success: !hasEtc };
+});
+
+test('format.listFiles handles invalid path', () => {
+    const format = require(path.join(ROOT, 'lib', 'format'));
+    const result = format.listFiles('/nonexistent/path/xyz');
+    return { success: Array.isArray(result) && result.length === 0 };
 });
 
 // ============================================

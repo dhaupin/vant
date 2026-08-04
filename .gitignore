@@ -13,6 +13,13 @@ node_modules/
 models/public/.state.json
 models/public/repos/
 
+# Runtime state files (explicit)
+models/.resolution.json
+models/.providers.json
+models/state.json
+models/**/.*.json
+models/**/.*.ini
+
 # IDE
 .vscode/
 .idea/
@@ -23,12 +30,9 @@ models/public/repos/
 .DS_Store
 Thumbs.db
 
-# Runtime state (generated at runtime)
-models/.*.json
-models/private/
+# Runtime state (dotfiles - generated at runtime)
 models/private/**
 .agent_tmp/
-models/backup/
 storage/
 temp/
 
@@ -53,6 +57,7 @@ temp/models/latent/*.vpatch
 # Circuit breakers (runtime state)
 .circuit*.json
 models/latent/*.vpatch
+models/latent/.*
 
 # Geometry storage in brain (runtime-generated)
 models/*/geometry
@@ -61,9 +66,5 @@ models/*/geometry
 data/
 config.ini
 
-# My private brain (scribe)
-models/private/scribe/
-
-models/backup/
-models/state.json
-models/public/vant/.audit.json
+# Backup files
+*.bak

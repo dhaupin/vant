@@ -86,8 +86,8 @@ test('qos.js works', () => {
     }
 });
 
-// Test: logger.js works
-test('logger.js works', () => {
+// Test: audit.js works (audit is Vant's logger)
+test('audit.js works', () => {
     const logger = require('../lib/audit');
     logger.info('Test log', { test: true });
 });

@@ -35,7 +35,13 @@
     "test": "node bin/build-test.js",
     "setup": "node bin/setup.js",
     "start": "node bin/start.js",
-    "health": "node bin/health.js"
+    "health": "node bin/health.js",
+    "lint": "eslint lib/ test/",
+    "lint:fix": "eslint lib/ test/ --fix",
+    "check": "node --check lib/*.js test/*.js"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1"
   },
   "main": "index.js",
   "directories": {

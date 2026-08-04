@@ -35,13 +35,24 @@ const brain = require('./lib/brain');
 // Mode switch: dual | public | private | remote
 brain.setMode('dual');  // default: private overrides public
 
+// NEW (v0.8.6): Unified read - reads any brain file by name
+// Supports all extensions: .md, .json, .yaml, .yml, .txt, .ini
+const item = await brain.read('identity');  // or 'identity.json', 'notes.yaml'
+console.log(item.format);   // 'md' | 'json' | 'yaml' | 'txt'
+console.log(item.source);   // 'public' | 'private'
+console.log(item.content);  // raw content
+console.log(item.data);     // parsed data
+
 // Load single brain (async)
-const item = await brain.loadBrain('identity');
-console.log(item.source);  // 'public' | 'private' | 'remote'
+const item2 = await brain.loadBrain('identity');
+console.log(item2.source);  // 'public' | 'private' | 'remote'
 
 // Load all brains (sync)
 const corpus = brain.loadCorpus();
 console.log(corpus.length);  // 62 files
+
+// NEW (v0.8.6): Corpus now includes format field
+// corpus[0].format === 'md' | 'json' | 'yaml' | 'txt'
 
 // Sources returned:
 // corpus[0].source === 'public' | 'private'
@@ -57,6 +68,33 @@ Loading goes through: sandbox → vaf → qos → escrow
 ### Paths
 - `brain.getBrainPath()` → 'models/private' (runtime)
 - `brain.getPublicPath()` → 'models/public' (OS template)
+
+### Format Support (v0.8.6)
+Brain files now support multiple formats:
+
+```javascript
+const format = require('./lib/format');
+
+// Supported extensions
+format.DEFAULT_EXTENSIONS; // ['.yaml', '.yml', '.json', '.md', '.txt', '.ini']
+
+// List files with specific extensions
+const files = format.listFiles('./models/private', format.DEFAULT_EXTENSIONS, { 
+    recursive: true,      // include subdirectories
+    excludeDirs: ['boot']  // exclude boot directories
+});
+// ['models/private/nova/identity.md', 'models/private/nova/geometry/coordinates.json']
+
+// Get brain name from file path (strips extension)
+format.getBrainName('models/private/nova/notes.json');  // 'notes'
+
+// Load file with auto-detection
+const data = await format.loadFile('./data/config.json');
+// { data: {...}, format: 'json', content: '...' }
+
+// Save with auto-serialization
+await format.saveFile('./data/config.json', { key: 'value' }, { format: 'json' });
+```
 
 ## Islands (Brain Modules)
 
