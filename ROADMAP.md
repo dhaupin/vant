@@ -21,10 +21,15 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 - [ ] Audit settings.ini / settings.example.ini - these are separate from config.js (user personality/preferences vs system config)
   - Determine if they should migrate to config system or stay separate
 
-### Prompt Caching (MiniMax/Claude/DeepSeek)
+### Prompt Caching / Context Engine (lib/context.js)
 > Optimize token costs with deterministic prompt structure and cache breakpoints
 
 **Reference:** Gemini conversation on prompt caching (see gist: 6b9d33ae054b6aa60a033fae36fd06e4)
+
+**Why lib/context.js:**
+- "Prompt" is too specific - could evolve to other context types
+- Caching is tightly coupled to context assembly - keep together
+- Future-proof naming
 
 **Core Principles:**
 1. **Strict Top-Down Structure**: Static → Dynamic. Any change at top invalidates everything below.
@@ -40,10 +45,52 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 | History | Chat history (early messages) | Middle, cache_control |
 | Dynamic | git diffs, shell logs, active tasks | BOTTOM, NO caching |
 
-**Implementation Targets:**
-1. `lib/brain.js` - Context aggregator, enforce deterministic file ordering
-2. `lib/vant.js` / `lib/headless.js` - 5-min heartbeat daemon (`vant up --keep-cached`)
-3. `lib/mcp.js` / providers - cache_control injection for compatible models
+**Architecture:**
+```javascript
+// lib/context.js
+{
+  // Context assembly - builds prompt from brain files
+  build(options) { },
+  
+  // Deterministic ordering - ensures same order every time
+  sortFiles(files) { },  // alphabetical, stable
+  sortTools(tools) { }, // alphabetical by name
+  
+  // Cache management
+  addCheckpoint(block, afterIndex) { },  // inject cache_control
+  getBrainCacheState(brain) { },        // per-brain tracking
+  invalidate(brain) { },                // force cold start
+  
+  // Heartbeat integration
+  ping() { },  // lightweight warm-up call
+  
+  // MCP exposure
+  getContext() { },  // inspect current context
+  setContext() { },  // modify context rules
+}
+```
+
+**Heartbeat (cron + nature):**
+- cron schedules every 4 minutes
+- Triggers `context.ping()` to keep cache warm
+- Can also trigger nature's flywheel (multifunctional!)
+```javascript
+cron.schedule('prompt-cache-warm', async () => {
+  await context.ping();      // Keep cache warm
+  nature.accumulate({       // Spin nature's flywheel
+    source: 'heartbeat', 
+    amount: 1 
+  });
+});
+```
+
+**MCP Tools:**
+| Tool | Description |
+|------|-------------|
+| context_get | Inspect current context state |
+| context_set | Modify context assembly rules |
+| context_refresh | Force cache invalidation |
+| context_layers | List context layers and cache status |
 
 **Model Compatibility:**
 | Model | Cache Type | Implementation |
@@ -54,15 +101,16 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 | OpenAI | Auto (sequence match) | Deterministic ordering only |
 
 **Tasks:**
-- [ ] Create lib/cache.js - Prompt cache orchestrator
-  - [ ] Deterministic array sorting (stable sort on file/tool order)
+- [ ] Create lib/context.js - Context engine
+  - [ ] Context assembly from brain files
+  - [ ] Deterministic sorting (stable sort)
   - [ ] Cache breakpoint injection
   - [ ] Per-brain cache state tracking
-- [ ] Modify lib/brain.js - Use cache orchestrator for context assembly
-- [ ] Add heartbeat daemon to lib/vant.js
-  - [ ] `vant up --keep-cached` flag
-  - [ ] 4-min lightweight ping to keep cache warm
-- [ ] Add cache_control injection to lib/mcp.js (when model supports it)
+- [ ] Add heartbeat to lib/cron.js
+  - [ ] `vant up --keep-cached` flag triggers heartbeat
+  - [ ] 4-min interval ping
+  - [ ] Optional nature integration (multifunctional)
+- [ ] Expose MCP tools for context inspection/modification
 - [ ] Test with MiniMax/Claude to verify cache hits
 
 ### Vibe/Mood System (Risk Management)
