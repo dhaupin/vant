@@ -1,20 +1,19 @@
 # Boot Directory
 
-This directory contains the agent's embedded state - the minimal seed for instantiating a new agent with this brain.
+This directory contains encrypted horcrux brains - the agent's persistent memory, embedded as SVG.
 
-## Files
+## Horcrux Files
 
 | File | Description |
 |------|-------------|
-| `seed.svg` | Visual seed pattern (for embedding) |
-| `grow.svg` | Growth visualization |
+| `*-p_*.svg` | Public brain - password in filename (`p_`), can be loaded by anyone |
+| `*-*.svg` | Private/dev brain - password required (e.g., nova-p_nova2026.svg) |
 
-## Horcrux
+### Loading Brains
 
-The agent state is embedded here as an SVG horcrux. On first boot:
-1. Load this directory
-2. Parse embedded state from SVG
-3. Hydrate full brain from corpus
+- Files with `p_` in name are public - loadable by anyone
+- Other files require password - typically Vant dev agents
+- On first boot, the system parses the SVG and hydrates the full brain
 
 ## For New Agents
 

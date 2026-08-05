@@ -22,6 +22,7 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
   - Determine if they should migrate to config system or stay separate
 
 ### Prompt Caching / Context Engine (lib/context.js)
+> See also: [Parallel Brain Stacking](#parallel-brain-stacking) - graph mode integrates with context assembly
 > Optimize token costs with deterministic prompt structure and cache breakpoints
 
 **Reference:** Gemini conversation on prompt caching (see gist: 6b9d33ae054b6aa60a033fae36fd06e4)
@@ -298,6 +299,66 @@ cron.schedule('prompt-cache-warm', async () => {
 - [ ] Define what riskTolerance actually affects in delegation/task execution
 - [ ] Wire into runtime (agents.js, delegation, autonomy)
 - [ ] Test with brain stacks
+
+### Parallel Brain Stacking
+> Use multiple brains simultaneously - separate or together
+
+**Current State:**
+- Series stacking: brains load in order, fallback to lower brains
+- brains.switchBrain() switches active brain manually
+- Each brain is isolated
+
+**Design Goals:**
+- Parallel mode: multiple brains loaded, no automatic fallback
+- Explicit brain selection per operation
+- Combined/merged reads: query multiple brains at once
+- Broadcast writes: write to specific brains
+- Brain aliases: short names for frequently used brains
+
+**Use Cases:**
+- Use nova (engineering) + axolotl (creative) together
+- Query across all brains: "what are my current goals?"
+- Context mixing: engineering focus + creative flavor
+- Selective override: vant defaults + nova specifics
+
+**API Concepts:**
+
+```javascript
+// Parallel mode - all brains loaded, no fallback
+vant.brain.setMode('parallel');  // vs 'series' (default)
+
+// Explicit read from specific brain
+await vant.brain.read('goals', { brain: 'nova' });
+
+// Merged read - returns results from multiple brains
+const results = await vant.brain.read('goals', { merge: true });
+// { nova: {...}, axolotl: {...}, vant: {...} }
+
+// Broadcast write - write to multiple brains
+await vant.brain.write('goals.md', content, { brains: ['nova', 'axolotl'] });
+
+// Brain aliases
+vant.brain.alias('n', 'nova');
+vant.brain.alias('a', 'axolotl');
+await vant.brain.read('goals', { brain: 'n' });
+```
+
+**Future: Graph Mode (See also: lib/context.js)**
+> Brains as nodes with relationships/delegation
+
+Beyond series + parallel, graph mode could support:
+- Topic routing: "this topic → brain X"
+- Delegation chains: brain A delegates to B for specific topics
+- Dynamic priority based on context
+
+**Tasks:**
+- [ ] Add brain.setMode(mode) - 'series' vs 'parallel'
+- [ ] Add brain.read(options) with merge option
+- [ ] Add brain.write(content, options) with brains array
+- [ ] Add brain.alias(name, brainName) for shortcuts
+- [ ] Test with nova + axolotl stack
+- [ ] Document in AGENTS.md
+- [ ] **Graph mode (future)** - See lib/context.js proposal for integration
 
 ### ESLint Security & Quality Audit (HIGH PRIORITY)
 - [ ] Enable strict ESLint rules (already in .eslintrc.json)
