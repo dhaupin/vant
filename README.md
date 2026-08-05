@@ -1,6 +1,6 @@
 # VANT
 
-> Persistent AI memory via GitHub - each session inherits full context
+> **V**ersatile **A**utonomous **N**etworked **T**ool — Persistent AI memory via GitHub
 
 **v0.8.6** · [Lander](https://vant.creadev.org) · [Docs](https://docs.creadev.org/vant) · [GitHub](https://github.com/dhaupin/vant)
 
@@ -58,6 +58,8 @@ npm start
 | **MCP Server** | 21 tools for AI agents (optional) |
 | **Islands** | Lazy-loadable integrations |
 | **Multi-Agent** | Branch-per-agent workflow |
+| **Horcrux** | SVG steganography - embed encrypted brain in image |
+| **Multi-Brain** | Multiple brains (nova, axolotl, custom) - series or parallel |
 
 **Optional Features:** Webhooks, Notifications, Steganography
 
