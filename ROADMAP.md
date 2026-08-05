@@ -22,6 +22,7 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
   - Determine if they should migrate to config system or stay separate
 
 ### Prompt Caching / Context Engine (lib/context.js)
+> See also: [Parallel Brain Stacking](#parallel-brain-stacking) - graph mode integrates with context assembly
 > Optimize token costs with deterministic prompt structure and cache breakpoints
 
 **Reference:** Gemini conversation on prompt caching (see gist: 6b9d33ae054b6aa60a033fae36fd06e4)
@@ -342,6 +343,14 @@ vant.brain.alias('a', 'axolotl');
 await vant.brain.read('goals', { brain: 'n' });
 ```
 
+**Future: Graph Mode (See also: lib/context.js)**
+> Brains as nodes with relationships/delegation
+
+Beyond series + parallel, graph mode could support:
+- Topic routing: "this topic → brain X"
+- Delegation chains: brain A delegates to B for specific topics
+- Dynamic priority based on context
+
 **Tasks:**
 - [ ] Add brain.setMode(mode) - 'series' vs 'parallel'
 - [ ] Add brain.read(options) with merge option
@@ -349,6 +358,7 @@ await vant.brain.read('goals', { brain: 'n' });
 - [ ] Add brain.alias(name, brainName) for shortcuts
 - [ ] Test with nova + axolotl stack
 - [ ] Document in AGENTS.md
+- [ ] **Graph mode (future)** - See lib/context.js proposal for integration
 
 ### ESLint Security & Quality Audit (HIGH PRIORITY)
 - [ ] Enable strict ESLint rules (already in .eslintrc.json)
