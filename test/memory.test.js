@@ -158,6 +158,7 @@ test('findStack returns array', () => {
 
 (async () => {
     await _runAsyncTests();
-    console.log(`\nPassed:  ${results.passed} Passed:  ${results.failed} failed`);
+    console.log(`\nPassed:  ${results.passed}`);
+    console.log(`Failed:  ${results.failed}`);
     process.exit(results.failed > 0 ? 1 : 0);
 })();
