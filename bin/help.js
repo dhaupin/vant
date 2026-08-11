@@ -601,7 +601,7 @@ See: vant geometry --help`,
   query <key>        Query document
   address <data>      Store at geometric address
   locate <barcode>   Retrieve by barcode
-See: vant memory --help`\nSee: vant memory --help'
+See: vant memory --help`
     },
     registry: {
         desc: 'General registry',
