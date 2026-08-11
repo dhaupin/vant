@@ -170,7 +170,7 @@ test('getStackTrustStats returns object with source stack', () => {
 
 // Print summary
 console.log('\n' + '='.repeat(50));
-console.log(`RESULTS: ${results.passed} passed, ${results.failed} failed, ${results.skipped} skipped`);
+console.log(`Passed:  ${results.passed} Passed:  ${results.failed} Failed:  ${results.skipped} skipped`);
 console.log('='.repeat(50));
 
 process.exit(results.failed > 0 ? 1 : 0);

@@ -92,30 +92,30 @@ test('system uses brain path', () => {
     return { success: !!brainPath };
 });
 
-// Test 9: system has getStackSystemStatus
-test('system has getStackSystemStatus function', () => {
+// Test 9: system has status function
+test('system has status function', () => {
     const system = require(path.join(ROOT, 'lib', 'system'));
-    return { success: typeof system.getStackSystemStatus === 'function' };
+    return { success: typeof system.status === 'function' };
 });
 
-// Test 10: system has getStackHealth function
-test('system has getStackHealth function', () => {
+// Test 10: system has healthy function
+test('system has healthy function', () => {
     const system = require(path.join(ROOT, 'lib', 'system'));
-    return { success: typeof system.getStackHealth === 'function' };
+    return { success: typeof system.healthy === 'function' };
 });
 
-// Test 11: getStackSystemStatus returns object with source stack
-test('getStackSystemStatus returns object with source stack', () => {
+// Test 11: system status returns object with services
+test('system status returns object with services', () => {
     const system = require(path.join(ROOT, 'lib', 'system'));
-    const status = system.getStackSystemStatus();
-    return { success: status && status.source === 'stack' };
+    const status = system.status();
+    return { success: status && typeof status.services === 'object' };
 });
 
-// Test 12: getStackHealth returns object with source stack
-test('getStackHealth returns object with source stack', () => {
+// Test 12: system healthy returns boolean
+test('system healthy returns boolean', () => {
     const system = require(path.join(ROOT, 'lib', 'system'));
-    const health = system.getStackHealth();
-    return { success: health && health.source === 'stack' };
+    const health = system.healthy();
+    return { success: typeof health === 'boolean' };
 });
 
 // ============================================

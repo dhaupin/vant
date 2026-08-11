@@ -56,54 +56,21 @@ test('update has getLatestRelease function', () => {
     return { success: typeof update.getLatestRelease === 'function' };
 });
 
-test('update has addMessage function', () => {
+test('update has getLayerStatus function', () => {
     const update = require(path.join(ROOT, 'lib', 'update'));
-    return { success: typeof update.addMessage === 'function' };
+    return { success: typeof update.getLayerStatus === 'function' };
 });
 
-test('update has getContextTokens function', () => {
+test('update getStatus returns current version', () => {
     const update = require(path.join(ROOT, 'lib', 'update'));
-    return { success: typeof update.getContextTokens === 'function' };
+    const status = update.getStatus();
+    return { success: status && status.currentVersion === update.CURRENT_VERSION };
 });
 
-test('update has shouldUpdate function', () => {
+test('update getLayerStatus returns update layer', () => {
     const update = require(path.join(ROOT, 'lib', 'update'));
-    return { success: typeof update.shouldUpdate === 'function' };
-});
-
-test('update has generateSummary function', () => {
-    const update = require(path.join(ROOT, 'lib', 'update'));
-    return { success: typeof update.generateSummary === 'function' };
-});
-
-test('update has writeToBrain function', () => {
-    const update = require(path.join(ROOT, 'lib', 'update'));
-    return { success: typeof update.writeToBrain === 'function' };
-});
-
-test('update has pushToGitHub function', () => {
-    const update = require(path.join(ROOT, 'lib', 'update'));
-    return { success: typeof update.pushToGitHub === 'function' };
-});
-
-test('update has stats function', () => {
-    const update = require(path.join(ROOT, 'lib', 'update'));
-    return { success: typeof update.stats === 'function' };
-});
-
-test('update has reset function', () => {
-    const update = require(path.join(ROOT, 'lib', 'update'));
-    return { success: typeof update.reset === 'function' };
-});
-
-test('update has saveOnExit function', () => {
-    const update = require(path.join(ROOT, 'lib', 'update'));
-    return { success: typeof update.saveOnExit === 'function' };
-});
-
-test('update has getSessionSummary function', () => {
-    const update = require(path.join(ROOT, 'lib', 'update'));
-    return { success: typeof update.getSessionSummary === 'function' };
+    const layer = update.getLayerStatus();
+    return { success: layer && layer.type === 'update' };
 });
 
 test('update has getStatus function', () => {
