@@ -42,8 +42,7 @@ const TEST_MODES = {
 
 // Tests that need external test runners (mocha/jest) - skip in standalone mode
 const SKIP_TESTS = [
-    'cloudflare.test.js',        // needs mocha describe()
-    'cloudflare-adapter.test.js' // needs mocha describe()
+    // No skipped tests - all converted to standard format
 ];
 
 function getFullSuite() {
