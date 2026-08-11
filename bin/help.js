@@ -584,6 +584,19 @@ See: vant geometry --help`,
         usage: 'vant transform',
         detail: 'Data transform.\nSee: vant transform --help'
     },
+    context: {
+        desc: 'Prompt caching & context engine',
+        usage: 'vant context build|inspect|refresh|layers|heartbeat|cache',
+        detail: `Prompt caching for token optimization.
+  build              Build context from brain files
+  inspect            Inspect context state
+  refresh            Force refresh
+  layers             List context layers
+  heartbeat start   Start heartbeat (4 min interval)
+  heartbeat stop    Stop heartbeat
+  cache <model>     Get cache control for model
+See: vant context --help`
+    },
     
     // New from lib coverage
     backup: {
