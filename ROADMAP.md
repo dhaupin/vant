@@ -1177,23 +1177,38 @@ Unified security pipeline (`lib/pipeline.js`) that runs handlers:
 - ✅ `lib/pipeline.js` - NEW (v0.9.0-axolotl)
 - ✅ `lib/embed.js` - uses pipeline.run()
 - ✅ `lib/search.js` - uses pipeline.run()
+- ✅ `lib/api.js` - DONE (Batch 1)
+- ✅ `lib/mcp.js` - DONE (Batch 1)
+- ⏳ `lib/storage.js` - SKIPPED (sync interface, pipeline is async - has own inline security)
+- ⏳ `lib/islands.js` - SKIPPED (complex nested code - risky refactor)
+
+### Future: Sync/Async Handler
+**Problem:** Some modules (storage.js, islands.js) have sync interfaces but pipeline.run() is async.
+**Solution:** Create `lib/do.js` - wrapper that handles sync/async uniformly:
+```javascript
+const do = require('./do');
+// Works with both sync and async handlers
+do.pipeline(() => readFileSync(...), { mode: 'public' });
+do.pipeline(async () => await readFile(...), { mode: 'public' });
+```
+Until then, modules with own inline security can be skipped.
 
 ### Modules That Need Pipeline (CLEAN SWEEP):
 
 #### HIGH PRIORITY - Entry Points:
-| Module | Current Security | Action |
+| Module | Current Security | Status |
 |--------|-----------------|--------|
-| `lib/api.js` | vaf, sandbox, qos | Update to use pipeline.run() |
-| `lib/mcp.js` | vaf, qos | Update to use pipeline.run() |
-| `lib/storage.js` | sandbox, vaf | Update to use pipeline.run() |
-| `lib/islands.js` | vaf, sandbox | Update to use pipeline.run() |
+| `lib/api.js` | vaf, sandbox, qos | ✅ Done |
+| `lib/mcp.js` | vaf, qos | ✅ Done |
+| `lib/storage.js` | sandbox, vaf | ⏳ Skipped - sync interface |
+| `lib/islands.js` | vaf, sandbox | ⏳ Skipped - complex code |
 
 #### MEDIUM PRIORITY - Core Operations:
-| Module | Current Security | Action |
+| Module | Current Security | Status |
 |--------|-----------------|--------|
-| `lib/msg.js` | vaf, qos, sandbox | Update to use pipeline.run() |
-| `lib/agents.js` | sandbox, vaf | Update to use pipeline.run() |
-| `lib/context.js` | vaf | Update to use pipeline.run() |
+| `lib/msg.js` | vaf, qos, sandbox | ⏳ Skipped - sync interface |
+| `lib/agents.js` | sandbox, vaf | ✅ Done (Batch 3) |
+| `lib/context.js` | vaf | ✅ Done (Batch 3) |
 
 #### LOWER PRIORITY - Supporting:
 | Module | Current Security | Action |
