@@ -1152,3 +1152,107 @@ functionNameSync(); // alias
 - MCP `brain_save` - hardcodes `.md`
 
 **Fix:** Add format option to these functions, use format.getExtension() or similar.
+
+---
+
+## Pipeline System Cleanup (v0.9.0-axolotl)
+
+**Status:** IN PROGRESS
+
+### What is Pipeline?
+Unified security pipeline (`lib/pipeline.js`) that runs handlers:
+- `sandbox` - capability checks (canRead, canWrite, canRemote)
+- `vaf` - input validation (string, path, file, etc)
+- `qos` - rate limiting (requests per minute/second)
+- `escrow` - operation approval
+
+### Modes:
+- `PUBLIC` - read-only operations (sandbox(read) → vaf → qos → escrow(read))
+- `PRIVATE` - read/write operations (sandbox(write) → vaf → qos → escrow)
+- `REMOTE` - remote operations
+- `DUAL` - public + private combined
+- `STACK` - all brains in stack (iterates)
+
+### Modules Updated:
+- ✅ `lib/pipeline.js` - NEW (v0.9.0-axolotl)
+- ✅ `lib/embed.js` - uses pipeline.run()
+- ✅ `lib/search.js` - uses pipeline.run()
+
+### Modules That Need Pipeline (CLEAN SWEEP):
+
+#### HIGH PRIORITY - Entry Points:
+| Module | Current Security | Action |
+|--------|-----------------|--------|
+| `lib/api.js` | vaf, sandbox, qos | Update to use pipeline.run() |
+| `lib/mcp.js` | vaf, qos | Update to use pipeline.run() |
+| `lib/storage.js` | sandbox, vaf | Update to use pipeline.run() |
+| `lib/islands.js` | vaf, sandbox | Update to use pipeline.run() |
+
+#### MEDIUM PRIORITY - Core Operations:
+| Module | Current Security | Action |
+|--------|-----------------|--------|
+| `lib/msg.js` | vaf, qos, sandbox | Update to use pipeline.run() |
+| `lib/agents.js` | sandbox, vaf | Update to use pipeline.run() |
+| `lib/context.js` | vaf | Update to use pipeline.run() |
+
+#### LOWER PRIORITY - Supporting:
+| Module | Current Security | Action |
+|--------|-----------------|--------|
+| `lib/backup.js` | sandbox, vaf | Update to use pipeline.run() |
+| `lib/config.js` | vaf | Update to use pipeline.run() |
+| `lib/cron.js` | sandbox, qos | Update to use pipeline.run() |
+| `lib/network.js` | vaf, qos | Update to use pipeline.run() |
+| `lib/cache.js` | sandbox | Update to use pipeline.run() |
+| `lib/security.js` | vaf, sandbox | Update to use pipeline.run() |
+| `lib/audit.js` | sandbox, vaf | Update to use pipeline.run() |
+| `lib/auth.js` | vaf, sandbox | Update to use pipeline.run() |
+| `lib/format.js` | vaf | Update to use pipeline.run() |
+| `lib/health.js` | vaf | Update to use pipeline.run() |
+| `lib/lineage.js` | vaf, sandbox | Update to use pipeline.run() |
+| `lib/registry.js` | vaf, sandbox | Update to use pipeline.run() |
+| `lib/remote.js` | vaf, sandbox | Update to use pipeline.run() |
+| `lib/stream.js` | vaf, sandbox | Update to use pipeline.run() |
+| `lib/webhooks.js` | vaf | Update to use pipeline.run() |
+| `lib/sync.js` | sandbox, vaf | Update to use pipeline.run() |
+| `lib/lock.js` | sandbox | Update to use pipeline.run() |
+| `lib/rls.js` | sandbox | Update to use pipeline.run() |
+
+#### Notes:
+- `lib/escrow.js`, `lib/qos.js`, `lib/sandbox.js`, `lib/vaf.js` are HANDLERS - don't need pipeline
+- `lib/brain.js` has its own `executePipeline()` - keep separate or consolidate later
+- After updating all modules, remove duplicate security code from each module
+
+### Pattern to Replace:
+```javascript
+// OLD - each module re-implements:
+const sandbox = require('./sandbox');
+const vaf = require('./vaf');
+const qos = require('./qos');
+
+function doSomething(input) {
+    // Sandbox check
+    if (!sandbox.can('canRead')) throw new Error('Denied');
+    
+    // VAF validation
+    vaf.check(input, { type: 'string', maxLength: 1000 });
+    
+    // QoS rate limit
+    const limiter = new qos.RateLimiter({ maxPerMinute: 60 });
+    if (!limiter.check()) throw new Error('Rate limited');
+    
+    // ... do work
+}
+
+// NEW - use unified pipeline:
+const pipeline = require('./pipeline');
+
+async function doSomething(input) {
+    return await pipeline.run(
+        { input, operation: 'module:action' },
+        async () => {
+            // ... do work
+        },
+        { mode: pipeline.PRIVATE }  // or PUBLIC
+    );
+}
+```
