@@ -1211,26 +1211,26 @@ Until then, modules with own inline security can be skipped.
 | `lib/context.js` | vaf | ✅ Done (Batch 3) |
 
 #### LOWER PRIORITY - Supporting:
-| Module | Current Security | Action |
+| Module | Current Security | Status |
 |--------|-----------------|--------|
-| `lib/backup.js` | sandbox, vaf | Update to use pipeline.run() |
-| `lib/config.js` | vaf | Update to use pipeline.run() |
-| `lib/cron.js` | sandbox, qos | Update to use pipeline.run() |
-| `lib/network.js` | vaf, qos | Update to use pipeline.run() |
-| `lib/cache.js` | sandbox | Update to use pipeline.run() |
-| `lib/security.js` | vaf, sandbox | Update to use pipeline.run() |
-| `lib/audit.js` | sandbox, vaf | Update to use pipeline.run() |
-| `lib/auth.js` | vaf, sandbox | Update to use pipeline.run() |
-| `lib/format.js` | vaf | Update to use pipeline.run() |
-| `lib/health.js` | vaf | Update to use pipeline.run() |
-| `lib/lineage.js` | vaf, sandbox | Update to use pipeline.run() |
-| `lib/registry.js` | vaf, sandbox | Update to use pipeline.run() |
-| `lib/remote.js` | vaf, sandbox | Update to use pipeline.run() |
-| `lib/stream.js` | vaf, sandbox | Update to use pipeline.run() |
-| `lib/webhooks.js` | vaf | Update to use pipeline.run() |
-| `lib/sync.js` | sandbox, vaf | Update to use pipeline.run() |
-| `lib/lock.js` | sandbox | Update to use pipeline.run() |
-| `lib/rls.js` | sandbox | Update to use pipeline.run() |
+| `lib/backup.js` | vaf | ⏳ Skipped - minimal security |
+| `lib/config.js` | sandbox | ⏳ Skipped - sync |
+| `lib/cron.js` | vaf, qos | ⏳ Skipped - sync |
+| `lib/network.js` | sandbox, qos | ⏳ Skipped - complex nested |
+| `lib/cache.js` | sandbox | ⏳ Skipped - sync |
+| `lib/security.js` | vaf, sandbox | ⏳ Skipped - framework |
+| `lib/audit.js` | sandbox | ⏳ Skipped - sync |
+| `lib/auth.js` | vaf, sandbox | Todo |
+| `lib/format.js` | vaf | Todo |
+| `lib/health.js` | vaf | Todo |
+| `lib/lineage.js` | vaf, sandbox | Todo |
+| `lib/registry.js` | vaf, sandbox | Todo |
+| `lib/remote.js` | vaf, sandbox | Todo |
+| `lib/stream.js` | vaf, sandbox | Todo |
+| `lib/webhooks.js` | vaf | Todo |
+| `lib/sync.js` | sandbox, vaf | Todo |
+| `lib/lock.js` | sandbox | Todo |
+| `lib/rls.js` | sandbox | Todo |
 
 #### Notes:
 - `lib/escrow.js`, `lib/qos.js`, `lib/sandbox.js`, `lib/vaf.js` are HANDLERS - don't need pipeline
