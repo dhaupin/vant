@@ -50,14 +50,15 @@ test('has getCanvasPath function', () => { return typeof canvas.getCanvasPath ==
 console.log('\n=== Embed Module Tests ===\n');
 const embed = require('../lib/embed');
 
-test('has register function', () => { return typeof embed.register === 'function'; });
-test('has setEmbedder function', () => { return typeof embed.setEmbedder === 'function'; });
-test('has getEmbedder function', () => { return typeof embed.getEmbedder === 'function'; });
-test('has listEmbedders function', () => { return typeof embed.listEmbedders === 'function'; });
-test('has embed function', () => { return typeof embed.embed === 'function'; });
-test('has embedBatch function', () => { return typeof embed.embedBatch === 'function'; });
+test('has generate function', () => { return typeof embed.generate === 'function'; });
+test('has generateBatch function', () => { return typeof embed.generateBatch === 'function'; });
+test('has setProvider function', () => { return typeof embed.setProvider === 'function'; });
+test('has getProvider function', () => { return typeof embed.getProvider === 'function'; });
+test('has listProviders function', () => { return typeof embed.listProviders === 'function'; });
 test('has cosineSimilarity function', () => { return typeof embed.cosineSimilarity === 'function'; });
 test('has EMBED_DIM constant', () => { return typeof embed.EMBED_DIM === 'number'; });
+test('has generateStack function', () => { return typeof embed.generateStack === 'function'; });
+test('has generateBatchStack function', () => { return typeof embed.generateBatchStack === 'function'; });
 
 // ============================================
 // THEME
