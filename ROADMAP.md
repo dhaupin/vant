@@ -1182,16 +1182,174 @@ Unified security pipeline (`lib/pipeline.js`) that runs handlers:
 - ⏳ `lib/storage.js` - SKIPPED (sync interface, pipeline is async - has own inline security)
 - ⏳ `lib/islands.js` - SKIPPED (complex nested code - risky refactor)
 
-### Future: Sync/Async Handler
-**Problem:** Some modules (storage.js, islands.js) have sync interfaces but pipeline.run() is async.
-**Solution:** Create `lib/do.js` - wrapper that handles sync/async uniformly:
+### do.js - The Entry Abstraction Layer
+
+**Vision:** do.js is the "front door" for module code to access infrastructure. It's a means for all parties (core modules, agents, third-party contributors) to stay on a consistent path and accomplish goals without reinventing the wheel.
+
+#### What do.js IS:
+- **Function Handler** - not middleware, not framework, just a handler
+- **Universal** - works across all modules consistently  
+- **Entry Abstraction** - from monolithic to granular
+- **Extensibility Layer** - hooks, adapters, plugins can plug in
+
+#### What do.js IS NOT:
+- Replacement for pipeline.js (security implementation)
+- Replacement for error.js (error definitions)
+- Replacement for event.js (event system)
+- Middleware itself - it's a CONVENIENCE LAYER on top
+
+#### The Problem Being Solved:
+
+Currently every module reinvents wheels:
 ```javascript
-const do = require('./do');
-// Works with both sync and async handlers
-do.pipeline(() => readFileSync(...), { mode: 'public' });
-do.pipeline(async () => await readFile(...), { mode: 'public' });
+// Style 1: manual everything
+function getX() {
+    vaf.check(input);
+    if (!sandbox.can()) throw E();
+    return result;
+}
+
+// Style 2: try/catch fallback
+function getY() {
+    try { pipeline.run(...) } 
+    catch { directCall(); }
+}
+
+// Style 3: pipeline only
+function getZ() {
+    return pipeline.run(...);
+}
 ```
-Until then, modules with own inline security can be skipped.
+
+do.js standardizes to ONE style:
+```javascript
+const getX = () => do.public('mod:op', ctx, fn);
+const getY = () => do.fallback(fn1, fn2);
+const getZ = () => do('mod:op', ctx, mode, fn);
+```
+
+#### do.js API Contract:
+
+```javascript
+// Core execution
+do(op, ctx, mode, fn)        // Execute fn through pipeline
+do.public(op, fn)           // PUBLIC shorthand
+do.private(op, fn)          // PRIVATE shorthand  
+do.dual(op, fn)             // DUAL shorthand
+
+// Fallback chaining
+do.fallback(fn1, fn2, fn3)  // Try each until one works
+
+// Sync/async handling
+do.sync(fn)                 // Wrap sync function
+do.async(fn)               // Wrap async function
+
+// Discovery (future)
+do.list()                   // What operations exist?
+do.manifest({...})          // Define operation schemas
+```
+
+#### Hooks System (Future):
+
+```javascript
+// Before/After hooks - structured, not ad-hoc
+do.hook('before:read', (ctx) => { log(ctx); });
+do.hook('after:read', (ctx, result) => { metrics.increment('read'); });
+do.hook('error:read', (err, ctx) => { notify(err); });
+
+// Operation-specific hooks
+do.hook('brain:loaded', (brain) => { cache.set(brain); });
+```
+
+#### Adapters/Connectors (Future):
+
+```javascript
+// Register adapters - they just plug in
+do.adapter('storage', s3Adapter);
+do.adapter('embed', openaiAdapter);
+
+// do() picks the right adapter automatically
+do.embed('text', { adapter: 'openai' });
+do.embed('text', { adapter: 'local' });
+```
+
+This makes "adapters, connectors, embedders" (and future storage handlers) just... adapters registered with do.js!
+
+#### Architecture Position:
+
+```
+┌─────────────────────────────────────────┐
+│         Third-Party Extensions          │
+│   - Custom storage backends            │
+│   - Custom embedding providers         │
+│   - Custom hooks                       │
+└─────────────────┬───────────────────────┘
+                  │ plug into
+                  ▼
+┌─────────────────────────────────────────┐
+│              do.js                       │
+│   - Registry of adapters               │
+│   - Hook system                        │
+│   - Metrics/tracking                   │
+│   - Operation discovery                │
+└─────────────────┬───────────────────────┘
+                  │ orchestrates
+                  ▼
+┌─────────────────────────────────────────┐
+│         Core Infrastructure             │
+│   pipeline.js, error.js, event.js     │
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│           APPLICATION CODE              │
+│   brain.js, skills.js, branch.js...   │
+│   "I just wanna DO things"             │
+└─────────────────────────────────────────┘
+```
+
+#### do.js Goals:
+
+| Goal | What It Means |
+|------|---------------|
+| **Consistency** | One way to call everything |
+| **Discoverability** | `do.list()` - what can I call? |
+| **Extensibility** | Hooks, adapters, plugins |
+| **Telemetry** | Built-in metrics/tracing |
+| **Resilience** | Circuit breaker, fallbacks |
+| **Contribution** | Easy to contribute - just register with do.js |
+
+#### Why This Matters for Agents:
+
+Agents aren't held up by "research/crafting" - time spent figuring out how to do things. They just... `do.()` and it works.
+
+Third-party contributors have a clear extension point without modifying core.
+
+#### Implementation Phases:
+
+**Phase 1: Core (MVP)**
+- Create lib/do.js with basic shorthand
+- Add mode constants (PUBLIC, PRIVATE, DUAL)
+- Add fallback system
+- Test with one module
+
+**Phase 2: Extensibility**  
+- Add hooks system
+- Add adapter registry
+- Add metrics/tracking
+
+**Phase 3: Discovery**
+- Add do.list() operation registry
+- Add do.manifest() schema definitions
+- Add documentation generation
+
+#### Pipeline Module Status After do.js:
+
+Once do.js exists, skipped modules can be revisited:
+- Sync modules: do.sync() handles the wrap
+- Complex modules: do() provides consistent interface
+- Modules with own pipeline: can migrate to do() or keep manual
+
+**This is the entry abstraction layer - from monolithic to granular.**
 
 ### Modules That Need Pipeline (CLEAN SWEEP):
 
