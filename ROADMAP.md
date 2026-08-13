@@ -1200,6 +1200,7 @@ Until then, modules with own inline security can be skipped.
 |--------|-----------------|--------|
 | `lib/api.js` | vaf, sandbox, qos | ✅ Done |
 | `lib/mcp.js` | vaf, qos | ✅ Done |
+| `lib/onboard.js` | vaf, sandbox | ✅ Done (Batch 6) |
 | `lib/storage.js` | sandbox, vaf | ⏳ Skipped - sync interface |
 | `lib/islands.js` | vaf, sandbox | ⏳ Skipped - complex code |
 
