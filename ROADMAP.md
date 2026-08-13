@@ -1213,6 +1213,7 @@ Until then, modules with own inline security can be skipped.
 #### LOWER PRIORITY - Supporting:
 | Module | Current Security | Status |
 |--------|-----------------|--------|
+| `lib/skills.js` | vaf | ✅ Done (Batch 5) |
 | `lib/backup.js` | vaf | ⏳ Skipped - minimal security |
 | `lib/config.js` | sandbox | ⏳ Skipped - sync interface |
 | `lib/cron.js` | vaf, qos | ⏳ Skipped - sync interface |
@@ -1220,17 +1221,17 @@ Until then, modules with own inline security can be skipped.
 | `lib/cache.js` | sandbox | ⏳ Skipped - sync interface |
 | `lib/security.js` | vaf, sandbox | ⏳ Skipped - framework module |
 | `lib/audit.js` | sandbox | ⏳ Skipped - sync interface |
-| `lib/auth.js` | vaf, sandbox | Todo |
+| `lib/auth.js` | vaf, sandbox | ⏳ Skipped - sync interface |
 | `lib/format.js` | vaf | ✅ Done (Batch 4) |
 | `lib/health.js` | vaf | ✅ Done (Batch 4) |
 | `lib/lineage.js` | vaf, sandbox | ⏳ Skipped - sync interface |
-| `lib/registry.js` | vaf, sandbox | Todo |
-| `lib/remote.js` | vaf, sandbox | Todo |
+| `lib/registry.js` | vaf, sandbox | ⏳ Skipped - sync interface |
+| `lib/remote.js` | vaf, sandbox | ⏳ Skipped - minimal security |
 | `lib/stream.js` | vaf, sandbox, qos, escrow | ✅ Has own pipeline (manual) |
 | `lib/webhooks.js` | vaf | ✅ Done (Batch 4) |
-| `lib/sync.js` | sandbox, vaf | Todo |
-| `lib/lock.js` | sandbox | Todo |
-| `lib/rls.js` | sandbox | Todo |
+| `lib/sync.js` | sandbox, vaf | ⏳ Skipped - complex nested code |
+| `lib/lock.js` | sandbox | ⏳ Skipped - sync interface |
+| `lib/rls.js` | sandbox | ⏳ Skipped - sync interface |
 
 #### Notes:
 - `lib/escrow.js`, `lib/qos.js`, `lib/sandbox.js`, `lib/vaf.js` are HANDLERS - don't need pipeline
