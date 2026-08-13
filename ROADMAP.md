@@ -1214,20 +1214,20 @@ Until then, modules with own inline security can be skipped.
 | Module | Current Security | Status |
 |--------|-----------------|--------|
 | `lib/backup.js` | vaf | ⏳ Skipped - minimal security |
-| `lib/config.js` | sandbox | ⏳ Skipped - sync |
-| `lib/cron.js` | vaf, qos | ⏳ Skipped - sync |
-| `lib/network.js` | sandbox, qos | ⏳ Skipped - complex nested |
-| `lib/cache.js` | sandbox | ⏳ Skipped - sync |
-| `lib/security.js` | vaf, sandbox | ⏳ Skipped - framework |
-| `lib/audit.js` | sandbox | ⏳ Skipped - sync |
+| `lib/config.js` | sandbox | ⏳ Skipped - sync interface |
+| `lib/cron.js` | vaf, qos | ⏳ Skipped - sync interface |
+| `lib/network.js` | sandbox, qos | ⏳ Skipped - complex nested code |
+| `lib/cache.js` | sandbox | ⏳ Skipped - sync interface |
+| `lib/security.js` | vaf, sandbox | ⏳ Skipped - framework module |
+| `lib/audit.js` | sandbox | ⏳ Skipped - sync interface |
 | `lib/auth.js` | vaf, sandbox | Todo |
-| `lib/format.js` | vaf | Todo |
-| `lib/health.js` | vaf | Todo |
-| `lib/lineage.js` | vaf, sandbox | Todo |
+| `lib/format.js` | vaf | ✅ Done (Batch 4) |
+| `lib/health.js` | vaf | ✅ Done (Batch 4) |
+| `lib/lineage.js` | vaf, sandbox | ⏳ Skipped - sync interface |
 | `lib/registry.js` | vaf, sandbox | Todo |
 | `lib/remote.js` | vaf, sandbox | Todo |
-| `lib/stream.js` | vaf, sandbox | Todo |
-| `lib/webhooks.js` | vaf | Todo |
+| `lib/stream.js` | vaf, sandbox, qos, escrow | ✅ Has own pipeline (manual) |
+| `lib/webhooks.js` | vaf | ✅ Done (Batch 4) |
 | `lib/sync.js` | sandbox, vaf | Todo |
 | `lib/lock.js` | sandbox | Todo |
 | `lib/rls.js` | sandbox | Todo |
