@@ -1234,6 +1234,23 @@ Until then, modules with own inline security can be skipped.
 | `lib/lock.js` | sandbox | ⏳ Skipped - sync interface |
 | `lib/rls.js` | sandbox | ⏳ Skipped - sync interface |
 
+#### OTHER MODULES - Not in Original List:
+| Module | Current Security | Status |
+|--------|-----------------|--------|
+| `lib/shell.js` | vaf, sandbox, qos, escrow, lock | ⏳ Skipped - complex security chain |
+| `lib/branch.js` | vaf | ⏳ Skipped - complex nested code |
+| `lib/embed.js` | vaf, sandbox | ⏳ Skipped - has internal _pipelineRun |
+| `lib/search.js` | vaf, sandbox | ⏳ Skipped - has internal _pipelineRun |
+| `lib/transform.js` | vaf, sandbox, qos, escrow | ⏳ Skipped - complex security chain |
+| `lib/teams.js` | vaf | ⏳ Skipped - complex code |
+| `lib/market.js` | vaf, qos | ⏳ Skipped - minimal security |
+| `lib/telegram.js` | vaf | ⏳ Skipped - external service |
+| `lib/prune.js` | vaf, sandbox | ⏳ Skipped - complex file ops |
+| `lib/consensus.js` | vaf | ⏳ Skipped - P2P logic |
+| `lib/backup.js` | vaf | ⏳ Skipped - minimal security |
+| `lib/update.js` | vaf, sandbox | ⏳ Skipped - complex code |
+| `lib/secret.js` | vaf | ⏳ Skipped - sensitive ops |
+
 #### Notes:
 - `lib/escrow.js`, `lib/qos.js`, `lib/sandbox.js`, `lib/vaf.js` are HANDLERS - don't need pipeline
 - `lib/brain.js` has its own `executePipeline()` - keep separate or consolidate later
