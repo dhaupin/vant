@@ -73,7 +73,7 @@ function run() {
         }
         const fs = require('fs');
         const content = fs.readFileSync(file, 'utf8');
-        const result = format.pipeline(content);
+        const result = format.prepare(content);
         console.log(JSON.stringify(result, null, 2));
     } else {
         console.log('Available: detect, parse, serialize, detect-path, pipeline');

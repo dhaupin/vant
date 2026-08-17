@@ -185,23 +185,23 @@ test('format.serialize - TXT output uses intent', () => {
 
 // ==================== PIPELINE TESTS ====================
 
-test('format.pipeline - auto detect yaml', () => {
+test('format.prepare - auto detect yaml', () => {
     const format = require('../lib/format');
-    const result = format.pipeline('intent: test\ngoal: done');
+    const result = format.prepare('intent: test\ngoal: done');
     assertEq(result.data.intent, 'test', 'Should auto-detect and parse');
     assertEq(result.format, 'yaml', 'Should detect format');
 });
 
-test('format.pipeline - explicit json format', () => {
+test('format.prepare - explicit json format', () => {
     const format = require('../lib/format');
-    const result = format.pipeline('{"a":1}', { format: 'json' });
+    const result = format.prepare('{"a":1}', { format: 'json' });
     assertEq(result.data.a, 1, 'Should use explicit format');
 });
 
-test('format.pipeline - string input passes through', () => {
+test('format.prepare - string input passes through', () => {
     const format = require('../lib/format');
     // Note: pipeline expects string input, not objects
-    const result = format.pipeline('intent: test\ngoal: done');
+    const result = format.prepare('intent: test\ngoal: done');
     assertEq(result.data.intent, 'test', 'Should handle string input');
 });
 
