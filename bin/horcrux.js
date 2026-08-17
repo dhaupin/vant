@@ -57,11 +57,19 @@ async function run() {
         console.log('Version:', result.version);
         console.log('Created:', new Date(result.timestamp));
         console.log('\n--- Contents Preview ---');
+        console.log('Brains:', result.preview.brainCount);
         console.log('Agents:', result.preview.agentCount);
         console.log('Islands:', result.preview.islandCount);
         console.log('Corpus:', result.preview.corpusCount);
         console.log('Config:', result.preview.hasConfig ? 'Yes' : 'No');
         console.log('Runtime:', result.preview.hasRuntime ? 'Yes' : 'No');
+        console.log('Teams/Orgs:', result.preview.hasTeams ? `${result.preview.orgCount} orgs, ${result.preview.teams2Count} teams` : 'No');
+        if (result.teamsError) {
+            console.log('⚠️ Teams error:', result.teamsError);
+        }
+        if (result.hasBothFormats) {
+            console.log('⚠️ Warning: Both brainStorage and privateBrains present (duplicate)');
+        }
         
     } else if (subcmd === 'restore') {
         const horcruxPath = args[1] || defaultPath;
