@@ -9,7 +9,7 @@
  *   vant rerank -h|--help
  *   vant rerank <query> [-k|--top-k <n>] [-t|--max-tokens <n>]
  *   vant rerank.compress <file> [-t|--max-tokens <n>]
- *   vant rerank.pipeline <query> [-k|--top-k <n>] [-t|--max-tokens <n>]
+ *   vant rerank.refine <query> [-k|--top-k <n>] [-t|--max-tokens <n>]
  *   vant rerank -s|--stats
  */
 
@@ -21,7 +21,7 @@ const args = process.argv.slice(2);
 if (args.includes('-h') || args.includes('--help')) {
     console.log('Usage: vant rerank [-h|--help] <query> [options]');
     console.log('       vant rerank.compress <file> [options]');
-    console.log('       vant rerank.pipeline <query> [options]');
+    console.log('       vant rerank.refine <query> [options]');
     console.log('       vant rerank -s|--stats');
     console.log('');
     console.log('RAG-powered memory reranking and compression.');
@@ -29,7 +29,7 @@ if (args.includes('-h') || args.includes('--help')) {
     console.log('Commands:');
     console.log('  <query>        Rerank memories against query (default)');
     console.log('  compress      Compress memories using token budget');
-    console.log('  pipeline      Run rerank + compress in sequence');
+    console.log('  refine        Rerank + compress (refine memories)');
     console.log('');
     console.log('Options:');
     console.log('  -h, --help         Show this help');
@@ -41,7 +41,7 @@ if (args.includes('-h') || args.includes('--help')) {
     console.log('Examples:');
     console.log('  vant rerank "lessons learned"');
     console.log('  vant rerank "security fixes" -k 10');
-    console.log('  vant rerank.pipeline "memory" -t 4000');
+    console.log('  vant rerank.refine "memory" -t 4000');
     console.log('  vant rerank.compress lessons.md -t 1000');
     process.exit(0);
 }
@@ -151,19 +151,19 @@ async function runRerank(query) {
 }
 
 /**
- * Run pipeline (rerank + compress)
+ * Refine memories (rerank + compress)
  */
-async function runPipeline(query) {
+async function refine(query) {
     const memories = getMemories();
     
     if (memories.length === 0) {
-        console.log('[Pipeline] No memories found');
+        console.log('[Refine] No memories found');
         return;
     }
     
-    const result = rerank.pipeline(memories, query, { topK, maxTokens });
+    const result = rerank.refine(memories, query, { topK, maxTokens });
     
-    console.log('\n[Pipeline] Results for: ' + query);
+    console.log('\n[Refine] Results for: ' + query);
     console.log('─'.repeat(40));
     console.log('Input: ' + result.stats.input + ' memories');
     console.log('Output: ' + result.stats.output + ' memories');
@@ -212,8 +212,8 @@ async function main() {
         return;
     }
     
-    if (command === 'pipeline') {
-        await runPipeline(args.slice(1)[0] || '');
+    if (command === 'refine') {
+        await refine(args.slice(1)[0] || '');
         return;
     }
     
