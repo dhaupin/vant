@@ -70,7 +70,8 @@ const rerank = require(path.join(DIR, 'lib', 'search'));
  * Get memories from brain files
  */
 function getMemories() {
-    const modelsPath = path.join(DIR, 'models', 'public');
+    // Look in current brain (models/public/vant by default in dual mode)
+    const modelsPath = path.join(DIR, 'models', 'public', 'vant');
     const memories = [];
     
     // Look for common memory files
