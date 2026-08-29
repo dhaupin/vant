@@ -66,9 +66,15 @@ test('vant has getStatus function', () => {
     return { success: typeof vant.getStatus === 'function' };
 });
 
-test('vant has Runtime class', () => {
+test('Runtime legacy alias class removed (T14b — nuclear breaking)', () => {
+    // v0.9.0-axolotl T14b: `vant.Runtime` was a legacy class wrapper
+    // exposing init/think/getStatus. Removed. Call the top-level
+    // init/think/getStatus functions directly.
     const vant = require(path.join(ROOT, 'lib', 'vant'));
-    return { success: !!vant.Runtime };
+    return {
+        success: vant.Runtime === undefined,
+        error: vant.Runtime !== undefined ? 'vant.Runtime still exported' : null
+    };
 });
 
 test('vant has storage module', () => {
