@@ -66,10 +66,14 @@ models/*/geometry
 data/
 config.ini
 
-# Brain horcrux snapshots (reproducible via bin/snapshot.js, may contain
-# encrypted secrets; would balloon the repo). The script is the canonical
-# artifact. The boot/ dir is otherwise empty so this is safe to ignore fully.
-models/public/boot/
+# Brain horcrux snapshots created by bin/snapshot.js. The convention lives
+# in models/public/vant/boot/ where existing public-template horcruxes
+# (nova, scribe, etc.) are tracked. New private snapshots of the live
+# runtime brain should NOT be tracked because they may contain private
+# brain content. The script is the canonical artifact.
+models/public/vant/boot/axolotl-p_*.svg
+models/public/vant/boot/axolotl-p_*.svg.manifest.json
+models/public/vant/boot/axolotl-p_*.svg.sha256
 
 
 # Backup files

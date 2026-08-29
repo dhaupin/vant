@@ -7,20 +7,34 @@
  *   The user wants a snapshot of the agent at the moment of the
  *   axolotl-branch cleanup work. The stego-SVG horcrux is the canonical
  *   format: the full brain state is encrypted with a password and
- *   embedded in an SVG using steganography. boot.js auto-discovers
- *   `models/public/boot/hypha-brain-horcrux.svg` at boot and restores
- *   from it. This script produces that exact file.
+ *   embedded in an SVG using steganography.
+ *
+ * Convention (per models/public/vant/boot/README.md):
+ *   Files in models/public/vant/boot/ named `<agent>-p_<password>.svg`
+ *   are public brain horcruxes. The `p_` token signals "password-in-name",
+ *   and the literal text after `p_` IS the decryption password. So the
+ *   filename is self-describing: agent identity + decryption key in one.
+ *   Example: nova-p_nova2026.svg is the nova brain encrypted with "nova2026".
+ *
+ *   The default snapshot path follows this convention. Pass --agent and/or
+ *   --password to override.
  *
  * Usage:
- *   node bin/snapshot.js                       # uses VANT_BRAIN_PASSWORD env
- *                                              # or prompts via secret.js
+ *   node bin/snapshot.js                       # default: axolotl-p_axolotl2026.svg
+ *                                              # password from env or secret.js
+ *   node bin/snapshot.js --agent nova          # nova-p_<pw>.svg
  *   node bin/snapshot.js --output <path>       # custom output path
- *   node bin/snapshot.js --password <pw>       # explicit (don't use in CI)
+ *   node bin/snapshot.js --password <pw>       # explicit (don't echo)
  *   node bin/snapshot.js --no-verify           # skip round-trip check
  *
- * The .svg output is gitignored (it's reproducible, possibly contains
- * secrets, and would balloon the repo). The script is the canonical
- * artifact; running it reproduces the snapshot.
+ * Side-effects (next to the .svg):
+ *   - <file>.manifest.json — timestamp, git context, format, size
+ *   - <file>.sha256 — integrity hash
+ *
+ * The .svg is gitignored (the existing nova-p_nova2026.svg is tracked
+ * because it's part of the public brain template; new private snapshots
+ * of live state should not be tracked because they may contain private
+ * brain content).
  */
 
 const path = require('path');
@@ -28,25 +42,43 @@ const fs = require('fs');
 const crypto = require('crypto');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
-const DEFAULT_OUTPUT = path.join(REPO_ROOT, 'models', 'public', 'boot', 'hypha-brain-horcrux.svg');
+const BOOT_DIR = path.join(REPO_ROOT, 'models', 'public', 'vant', 'boot');
+const DEFAULT_AGENT = 'axolotl';
+const DEFAULT_PASSWORD = 'axolotl2026';
+const DEFAULT_OUTPUT = path.join(BOOT_DIR, `${DEFAULT_AGENT}-p_${DEFAULT_PASSWORD}.svg`);
 
 function parseArgs(argv) {
-    const args = { output: null, password: null, verify: true };
+    const args = {
+        output: null,
+        password: null,
+        agent: DEFAULT_AGENT,
+        verify: true
+    };
     for (let i = 2; i < argv.length; i++) {
         if (argv[i] === '--output' || argv[i] === '-o') args.output = argv[++i];
         else if (argv[i] === '--password' || argv[i] === '-p') args.password = argv[++i];
+        else if (argv[i] === '--agent' || argv[i] === '-a') args.agent = argv[++i];
         else if (argv[i] === '--no-verify') args.verify = false;
         else if (argv[i] === '-h' || argv[i] === '--help') {
-            console.log(fs.readFileSync(__filename, 'utf8').split('\n').slice(0, 25).join('\n'));
+            console.log(fs.readFileSync(__filename, 'utf8').split('\n').slice(0, 30).join('\n'));
             process.exit(0);
         }
     }
     return args;
 }
 
+function deriveOutput(args) {
+    if (args.output) return path.resolve(args.output);
+    // Convention: <agent>-p_<password>.svg in models/public/vant/boot/
+    const password = args.password || DEFAULT_PASSWORD;
+    return path.join(BOOT_DIR, `${args.agent}-p_${password}.svg`);
+}
+
 async function getPassword(args) {
     if (args.password) return args.password;
     if (process.env.VANT_BRAIN_PASSWORD) return process.env.VANT_BRAIN_PASSWORD;
+    // Default to the convention password for the agent
+    if (args.agent === DEFAULT_AGENT) return DEFAULT_PASSWORD;
     try {
         const secret = require(path.join(REPO_ROOT, 'lib', 'secret'));
         return await secret.get('brain');
@@ -73,7 +105,7 @@ function getGitContext() {
 
 async function run() {
     const args = parseArgs(process.argv);
-    const output = args.output ? path.resolve(args.output) : DEFAULT_OUTPUT;
+    const output = deriveOutput(args);
     const password = await getPassword(args);
     const git = getGitContext();
 
@@ -81,10 +113,11 @@ async function run() {
     fs.mkdirSync(path.dirname(output), { recursive: true });
 
     console.log('=== Vant Brain Snapshot ===');
-    console.log('Output:', output);
-    console.log('Branch:', git.branch);
-    console.log('Commit:', git.commit);
-    console.log('Dirty: ', git.dirty);
+    console.log('Agent:  ', args.agent);
+    console.log('Output: ', output);
+    console.log('Branch: ', git.branch);
+    console.log('Commit: ', git.commit);
+    console.log('Dirty:  ', git.dirty);
 
     // Create the horcrux (full payload: agents, teams, islands, brainStorage, etc.)
     const transform = require(path.join(REPO_ROOT, 'lib', 'transform'));

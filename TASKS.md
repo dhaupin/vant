@@ -22,8 +22,9 @@
 
 - **Test suite: 1480/1480 passing** — 0 failures across 75 test files.
 - **First axolotl horcrux snapshot taken** at 2026-08-29T08:41:57Z.
-  1.1 MB stego-SVG at `models/public/boot/hypha-brain-horcrux.svg`,
-  validated 0 errors. Reproducible via `node bin/snapshot.js`.
+  1.1 MB stego-SVG at
+  `models/public/vant/boot/axolotl-p_axolotl2026.svg`, validated
+  0 errors. Reproducible via `node bin/snapshot.js`.
 - **Two new tools added this session** (both committed, versioned):
   - `bin/sweep.sh` — persistent test health gate (replaces /tmp/sweep.sh)
   - `bin/snapshot.js` — verifiable brain horcrux snapshot
@@ -283,18 +284,28 @@
 
 ### T21 — Brain horcrux tooling + first axolotl snapshot
 - `bin/snapshot.js` — produces a verifiable stego-SVG horcrux of the
-  current vant brain state and writes it to the canonical
-  `models/public/boot/hypha-brain-horcrux.svg` path that `lib/boot.js`
-  auto-discovers at boot. Round-trip-verifies by reading it back and
-  calling `validateHorcruxData`. Side-effects:
-  - `hypha-brain-horcrux.svg` (the encrypted brain, 1.1 MB at
-    axolotl 83d0a3c)
-  - `hypha-brain-horcrux.svg.manifest.json` (timestamp + git context)
-  - `hypha-brain-horcrux.svg.sha256` (sha256 for integrity checks)
-- `models/public/boot/` added to `.gitignore` — the snapshot is
-  reproducible from the script and may contain encrypted secrets, so
-  the script is the canonical artifact (committed, versioned) while
-  the actual SVG is gitignored.
+  current vant brain state. Defaults to the convention path and
+  password per `models/public/vant/boot/README.md`:
+  `<agent>-p_<password>.svg`. The `p_` token signals "password-in-name"
+  and the literal text after it IS the decryption key. So
+  `axolotl-p_axolotl2026.svg` is the axolotl brain encrypted with
+  `axolotl2026`. Round-trip-verifies by reading it back and calling
+  `validateHorcruxData`. Side-effects (next to the .svg):
+  - `.manifest.json` — timestamp, git context, format, size
+  - `.sha256` — integrity hash
+- **Correction from initial T21 commit (13e1688):** the first version
+  wrote to `models/public/boot/hypha-brain-horcrux.svg` based on a
+  stale path constant in `lib/boot.js:218`. The user pointed out
+  that path is an old prototype; the real convention (per the
+  README in `models/public/vant/boot/`) is
+  `models/public/vant/boot/<agent>-p_<password>.svg` with the password
+  embedded in the filename. Re-snapped at the right path on the same
+  branch; old wrong-path artifact deleted. Lesson captured in
+  `models/private/vant/lessons.md` (read-the-README, not the lib path).
+- `.gitignore`: `models/public/vant/boot/axolotl-p_*.svg` (and sidecars)
+  ignored. Existing tracked public-template horcruxes (nova, scribe,
+  hypha) remain tracked. The new private snapshot is reproducible
+  from the script.
 - First snapshot taken at 2026-08-29T08:41:57Z on commit `83d0a3c`
   (post-T20 cleanup). 63 corpus brains, 1 org, 32 depts, 32 teams,
   10 islands. Validated 0 errors.
@@ -311,7 +322,7 @@
 |---|---|---|
 | `bin/sweep.sh` | Test health gate (full + --quick modes) | ✅ in repo, versioned |
 | `bin/snapshot.js` | Brain horcrux snapshot (verifiable stego-SVG) | ✅ in repo, versioned |
-| Output: `models/public/boot/hypha-brain-horcrux.svg` | First snapshot of axolotl state | ⚠️ gitignored, reproducible |
+| Output: `models/public/vant/boot/axolotl-p_axolotl2026.svg` | First snapshot of axolotl state | ⚠️ gitignored, reproducible |
 | Output: `...svg.manifest.json` | Snapshot metadata (timestamp, git, format) | ⚠️ gitignored |
 | Output: `...svg.sha256` | Integrity hash for the SVG | ⚠️ gitignored |
 
