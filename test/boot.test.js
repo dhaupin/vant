@@ -4,6 +4,7 @@
  */
 
 const path = require('path');
+const fs = require('fs');
 const ROOT = path.resolve(__dirname, '..');
 
 const results = { passed: 0, failed: 0, skipped: 0, tests: [] };
@@ -82,6 +83,23 @@ test('getStackBootConfigs returns object with source stack', () => {
     const boot = require(path.join(ROOT, 'lib', 'boot'));
     const result = boot.getStackBootConfigs();
     return { success: result && result.source === 'stack' };
+});
+
+// Boot layer uniqueness (regression: brain used to be pushed twice)
+test('boot layer list has no duplicate layer names', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'lib', 'boot.js'), 'utf8');
+    const pushes = [...src.matchAll(/layers\.push\(['"]([\w-]+)['"]\)/g)].map(m => m[1]);
+    const counts = {};
+    for (const name of pushes) counts[name] = (counts[name] || 0) + 1;
+    const dups = Object.entries(counts).filter(([, n]) => n > 1);
+    return { success: dups.length === 0, error: dups.length ? `duplicates: ${JSON.stringify(dups)}` : null };
+});
+
+test('boot layer list includes brain exactly once', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'lib', 'boot.js'), 'utf8');
+    const pushes = [...src.matchAll(/layers\.push\(['"]([\w-]+)['"]\)/g)].map(m => m[1]);
+    const brainCount = pushes.filter(n => n === 'brain').length;
+    return { success: brainCount === 1, error: `brain pushed ${brainCount} times` };
 });
 
 console.log('\n--- RESULTS ---\n');
