@@ -7,6 +7,7 @@
  */
 
 const path = require('path');
+const fs = require('fs');
 const ROOT = path.resolve(__dirname, '..');
 
 const results = { passed: 0, failed: 0, skipped: 0, tests: [] };
@@ -27,6 +28,53 @@ function test(name, fn) {
         results.failed++;
         results.tests.push({ name, status: 'failed', error: e.message });
         console.log(`  ✗ ${name}: ${e.message}`);
+    }
+}
+
+// v0.9.0-axolotl: async test support. Mirrors storage.test.js pattern.
+const _asyncTests = [];
+function asyncTest(name, fn) {
+    _asyncTests.push({ name, fn });
+}
+
+async function _runAsyncTests() {
+    for (const t of _asyncTests) {
+        try {
+            const result = await t.fn();
+            if (result === true || (result && result.success)) {
+                results.passed++;
+                results.tests.push({ name: t.name, status: 'passed' });
+                console.log(`  ✓ ${t.name}`);
+            } else {
+                results.failed++;
+                results.tests.push({ name: t.name, status: 'failed', error: result?.error || 'assertion failed' });
+                console.log(`  ✗ ${t.name}: ${result?.error || 'assertion failed'}`);
+            }
+        } catch (e) {
+            results.failed++;
+            results.tests.push({ name: t.name, status: 'failed', error: e.message });
+            console.log(`  ✗ ${t.name}: ${e.message}`);
+        }
+    }
+}
+
+async function _printResults() {
+    await _runAsyncTests();
+    console.log('\n--- RESULTS ---\n');
+    console.log(`  Passed:  ${results.passed}`);
+    console.log(`  Failed:  ${results.failed}`);
+    console.log(`  Skipped: ${results.skipped}`);
+    console.log(`  Total:   ${results.passed + results.failed + results.skipped}`);
+
+    if (results.failed > 0) {
+        console.log('\nFailed tests:');
+        results.tests.filter(t => t.status === 'failed').forEach(t => {
+            console.log(`  - ${t.name}: ${t.error}`);
+        });
+        process.exit(1);
+    } else {
+        console.log('\n✓ All tests passed!\n');
+        process.exit(0);
     }
 }
 
@@ -169,23 +217,69 @@ test('listStackIntersections returns array', () => {
     return { success: Array.isArray(intersections) };
 });
 
+// ==================== v0.9.0-axolotl T6 ====================
+
+test('forum has unpublish method', () => {
+    const forum = require(path.join(ROOT, 'lib', 'forum'));
+    return { success: typeof forum.unpublish === 'function' };
+});
+
+test('forum source has sandbox check in unpublish', () => {
+    // Verify the T6 sandbox check is wired up
+    const src = fs.readFileSync(path.join(ROOT, 'lib', 'forum.js'), 'utf8');
+    const hasUnpublish = src.includes('async unpublish(');
+    const hasSandboxCheck = /async unpublish\([^)]*\)\s*\{[\s\S]{0,500}sandbox\.canWrite/.test(src);
+    return {
+        success: hasUnpublish && hasSandboxCheck,
+        error: !hasUnpublish ? 'no unpublish method' : !hasSandboxCheck ? 'no sandbox.canWrite in unpublish' : null
+    };
+});
+
+asyncTest('forum unpublish blocks when sandbox denies write', async () => {
+    const forumPath = path.join(ROOT, 'lib', 'forum.js');
+    const sandboxPath = path.join(ROOT, 'lib', 'sandbox.js');
+    const originalSandbox = require.cache[sandboxPath];
+    delete require.cache[sandboxPath];
+    require.cache[sandboxPath] = {
+        id: sandboxPath, filename: sandboxPath, loaded: true,
+        exports: { canWrite: () => false, canRead: () => false }
+    };
+    delete require.cache[forumPath];
+    const forum = require(forumPath);
+    const result = await forum.unpublish('PUB-NONEXISTENT');
+    // Restore
+    delete require.cache[forumPath];
+    delete require.cache[sandboxPath];
+    if (originalSandbox) require.cache[sandboxPath] = originalSandbox;
+    return {
+        success: result && result.unpublished === false && result.reason === 'sandbox_write_denied',
+        error: result ? `got: ${JSON.stringify(result)}` : 'no result'
+    };
+});
+
+asyncTest('forum unpublish returns not_found for missing barcode', async () => {
+    const forumPath = path.join(ROOT, 'lib', 'forum.js');
+    const sandboxPath = path.join(ROOT, 'lib', 'sandbox.js');
+    const originalSandbox = require.cache[sandboxPath];
+    delete require.cache[sandboxPath];
+    require.cache[sandboxPath] = {
+        id: sandboxPath, filename: sandboxPath, loaded: true,
+        exports: { canWrite: () => true, canRead: () => true }
+    };
+    delete require.cache[forumPath];
+    const forum = require(forumPath);
+    const result = await forum.unpublish('PUB-DOES-NOT-EXIST');
+    delete require.cache[forumPath];
+    delete require.cache[sandboxPath];
+    if (originalSandbox) require.cache[sandboxPath] = originalSandbox;
+    return {
+        success: result && result.unpublished === false && result.reason === 'not_found',
+        error: result ? `got: ${JSON.stringify(result)}` : 'no result'
+    };
+});
+
 // ============================================
 // SUMMARY
 // ============================================
 
-console.log('\n--- RESULTS ---\n');
-console.log(`  Passed:  ${results.passed}`);
-console.log(`  Failed:  ${results.failed}`);
-console.log(`  Skipped: ${results.skipped}`);
-console.log(`  Total:   ${results.passed + results.failed + results.skipped}`);
-
-if (results.failed > 0) {
-    console.log('\nFailed tests:');
-    results.tests.filter(t => t.status === 'failed').forEach(t => {
-        console.log(`  - ${t.name}: ${t.error}`);
-    });
-    process.exit(1);
-} else {
-    console.log('\n✓ All tests passed!\n');
-    process.exit(0);
-}
+_printResults();
