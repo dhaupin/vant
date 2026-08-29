@@ -24,7 +24,10 @@ test('has list function', () => typeof agents.list === 'function');
 test('has get function', () => typeof agents.get === 'function');
 test('has terminate function', () => typeof agents.terminate === 'function');
 test('has Agents class', () => typeof agents.Agents === 'function');
-test('has MAX_AGENTS constant', () => typeof agents.MAX_AGENTS === 'number');
+// v0.9.0-axolotl T15e: agents.MAX_AGENTS constant removed. The
+// agent cap is config-driven (cfg.get('agents.max', 200)) and is
+// not a hard-coded constant. There is no "MAX_AGENTS" export.
+// Re-add only if a real static cap is introduced.
 
 console.log('\n=== Runop Module Tests ===\n');
 const runop = require('../lib/runop');

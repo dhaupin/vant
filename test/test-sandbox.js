@@ -64,21 +64,53 @@ test('has initLegal', () => {
     return typeof sandbox.initLegal === 'function';
 });
 
-// Test 2: Default capabilities (DENY)
-test('canRead default false', () => {
-    return sandbox.canRead() === false;
+// Test 2: Default capabilities
+// v0.9.0-axolotl: the default sandbox is now allow-by-default for
+// canRead/canWrite/canExec (agents need to do work in the trusted
+// runtime). canNetwork is still false by default (network is the
+// explicit, gated capability). Use `sandbox.create({ canRead: false,
+// canWrite: false, canExec: false })` for a restricted sandbox.
+test('canRead default true', () => {
+    return sandbox.canRead() === true;
 });
 
-test('canWrite default false', () => {
-    return sandbox.canWrite() === false;
+test('canWrite default true', () => {
+    return sandbox.canWrite() === true;
 });
 
 test('canNetwork default false', () => {
     return sandbox.canNetwork() === false;
 });
 
-test('canExec default false', () => {
-    return sandbox.canExec() === false;
+test('canExec default true', () => {
+    return sandbox.canExec() === true;
+});
+
+test('restricted sandbox canRead false', () => {
+    // Demonstrates the explicit-deny path: callers who want a
+    // deny-by-default sandbox must opt in via `sandbox.create()`
+    // with `capabilities: { canRead: false }` and `scopes: []`.
+    const restricted = sandbox.create({
+        capabilities: { canRead: false, canWrite: false, canExec: false },
+        scopes: []
+    });
+    return restricted.can('canRead') === false;
+});
+
+test('restricted sandbox canWrite false', () => {
+    const restricted = sandbox.create({
+        capabilities: { canRead: false, canWrite: false, canExec: false },
+        scopes: []
+    });
+    return restricted.can('canWrite') === false;
+});
+
+test('restricted sandbox canExec false', () => {
+    const restricted = sandbox.create({
+        capabilities: { canRead: false, canWrite: false, canExec: false },
+        scopes: []
+    });
+    return restricted.can('canExec') === false;
 });
 
 // Test 3: Generate caps

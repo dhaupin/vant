@@ -93,19 +93,24 @@ test('version has string elements', () => { return typeof version[0] === 'string
 // ============================================
 // CACHE
 // ============================================
+// v0.9.0-axolotl T15a: cache module no longer exports a singleton.
+// Tests now assert against the Cache class and a fresh instance.
+// ============================================
 console.log('\n=== Cache Module Tests ===\n');
-const cache = require('../lib/cache');
+const { Cache } = require('../lib/cache');
+const cache = new Cache();
 
 test('has configure function', () => { return typeof cache.configure === 'function'; });
 test('has set function', () => { return typeof cache.set === 'function'; });
 test('has get function', () => { return typeof cache.get === 'function'; });
 test('has remove function', () => { return typeof cache.remove === 'function'; });
 test('has clear function', () => { return typeof cache.clear === 'function'; });
-test('has has function', () => { return typeof cache.has === 'function'; });
+test('has has function', () => { return cache.has && typeof cache.has === 'function'; });
 test('has size function', () => { return typeof cache.size === 'function'; });
 test('has compress function', () => { return typeof cache.compress === 'function'; });
 test('has decompress function', () => { return typeof cache.decompress === 'function'; });
 test('has createPool function', () => { return typeof cache.createPool === 'function'; });
+test('exports Cache class', () => { return typeof Cache === 'function'; });
 
 // ============================================
 // NETWORK
