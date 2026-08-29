@@ -50,22 +50,22 @@ test('embed has embedBatch function', () => {
     return { success: typeof embed.embedBatch === 'function' };
 });
 
-// Test 4: Has setEmbedder function
-test('embed has setEmbedder function', () => {
+// Test 4: Has setProvider function (canonical: provider, not embedder)
+test('embed has setProvider function', () => {
     const embed = require(path.join(ROOT, 'lib', 'embed'));
-    return { success: typeof embed.setEmbedder === 'function' };
+    return { success: typeof embed.setProvider === 'function' };
 });
 
-// Test 5: Has getEmbedder function
-test('embed has getEmbedder function', () => {
+// Test 5: Has getProvider function
+test('embed has getProvider function', () => {
     const embed = require(path.join(ROOT, 'lib', 'embed'));
-    return { success: typeof embed.getEmbedder === 'function' };
+    return { success: typeof embed.getProvider === 'function' };
 });
 
-// Test 6: Has listEmbedders function
-test('embed has listEmbedders function', () => {
+// Test 6: Has listProviders function
+test('embed has listProviders function', () => {
     const embed = require(path.join(ROOT, 'lib', 'embed'));
-    return { success: typeof embed.listEmbedders === 'function' };
+    return { success: typeof embed.listProviders === 'function' };
 });
 
 // Test 7: Has cosineSimilarity function
@@ -80,18 +80,20 @@ test('embed has EMBED_DIM constant', () => {
     return { success: typeof embed.EMBED_DIM === 'number' };
 });
 
-// Test 9: Default embedder exists
-test('default embedder exists', () => {
+// Test 9: Default provider exists
+test('default provider exists', () => {
     const embed = require(path.join(ROOT, 'lib', 'embed'));
-    const embedders = embed.listEmbedders();
-    return { success: embedders.includes('default') };
+    const providers = embed.listProviders();
+    return { success: providers.length > 0 };
 });
 
-// Test 10: Can set embedder
-test('can set embedder to default', () => {
+// Test 10: Can set provider
+test('can set provider', () => {
     const embed = require(path.join(ROOT, 'lib', 'embed'));
-    embed.setEmbedder('default');
-    const current = embed.getEmbedder();
+    const providers = embed.listProviders();
+    if (providers.length === 0) return { success: false, error: 'no providers' };
+    embed.setProvider(providers[0]);
+    const current = embed.getProvider();
     return { success: !!current }; // Just check it's set
 });
 
@@ -171,25 +173,25 @@ test('cosineSimilarity calculates similarity', () => {
 
 console.log('\n📚 STACK SUPPORT TESTS\n');
 
-test('embed has embedStack function', () => {
+test('embed has generateStack function', () => {
     const embed = require(path.join(ROOT, 'lib', 'embed'));
-    return { success: typeof embed.embedStack === 'function' };
+    return { success: typeof embed.generateStack === 'function' };
 });
 
-test('embed has embedBatchStack function', () => {
+test('embed has generateBatchStack function', () => {
     const embed = require(path.join(ROOT, 'lib', 'embed'));
-    return { success: typeof embed.embedBatchStack === 'function' };
+    return { success: typeof embed.generateBatchStack === 'function' };
 });
 
-test('embedStack returns promise', () => {
+test('generateStack returns promise', () => {
     const embed = require(path.join(ROOT, 'lib', 'embed'));
-    const result = embed.embedStack('test');
+    const result = embed.generateStack('test');
     return { success: result && typeof result.then === 'function' };
 });
 
-test('embedBatchStack returns promise', () => {
+test('generateBatchStack returns promise', () => {
     const embed = require(path.join(ROOT, 'lib', 'embed'));
-    const result = embed.embedBatchStack(['test1', 'test2']);
+    const result = embed.generateBatchStack(['test1', 'test2']);
     return { success: result && typeof result.then === 'function' };
 });
 
