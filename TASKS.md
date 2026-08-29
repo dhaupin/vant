@@ -3,7 +3,7 @@
 > Persistent task log for the `axolotl` branch. If a session crashes, a future
 > agent can read this file and resume work without losing context.
 >
-> **Branch:** `axolotl` · **Version:** 0.8.6 (pinned, do not bump) · **Head:** see `git log`
+> **Branch:** `axolotl` · **Version:** 0.8.6 (pinned, do not bump) · **Head:** 027fef3 (local; 4 unpushed: 4ae316b T10b, 19cd6c3 T11b, a20cf36 T12b, c95d1ff T13b, 027fef3 T14b-r1)
 >
 > Lessons from completed work live in `models/private/vant/lessons.md` (gitignored,
 > per-agent brain). Generic codebase notes also live there.
@@ -20,30 +20,27 @@
 
 ## Current State
 
-- Local-only commits ahead of `origin/axolotl` baseline (`9213344`): T1, T4,
-  T3, T2, T12, TASKS, T11, T10 (all pushed), plus T5, T6, T7, T8, T9 staged
-  in working tree (not yet committed).
-- All local test suites pass: boot 15/15 (T5 added 2), forum 23/23 (T6
-  added 4), tmp 10/10 (T7 added 2), do 6/6 (T8 new file), stream 24/24
-  (T9 added 2), plus all previously-passing modules.
-- T5 — `lib/boot.js` catch block now returns `failedLayer` referencing the
-  last loaded layer name on init failure.
-- T6 — `lib/forum.js` gained `unpublish(barcode, options)` with full
-  sandbox → governance → escrow → tombstone flow.
-- T7 — `lib/tmp.js` migrated to `new cacheModule.Cache()` instead of the
-  module-level `defaultCache` singleton. `tmp.cacheSet` now returns the
-  underlying promise so callers can await the actual write.
-- T8 — `lib/do.js` gained a `guard(kind, options)` permission helper that
-  centralizes the "capture default sandbox → warn-once → throw" pattern.
-  Includes `_resetGuard(stub)` for tests. Storage migration to use it
-  is deferred (T10 covers that layer's rename).
-- T9 — `lib/stream.js` consolidated five lazy security loaders
-  (sandbox/vaf/qos/escrow/encrypt) into a single `_getSecurity()` bundle.
-  `_gate` now destructures from the bundle; individual `_get*` getters
-  are kept as backward-compat wrappers.
-- Two pre-existing bugs fixed as a side effect of T3 and T2:
-  - `msg.js:72` — `Encrypt.key` was undefined (typo); now `encrypt.key`
-  - `resolution.js` — `errors` was referenced but never imported
+- All work in this session is **local-only** (not yet pushed to
+  `origin/axolotl`). 5 commits ahead of `9213344` baseline:
+  `4ae316b` T10b, `19cd6c3` T11b, `a20cf36` T12b, `c95d1ff` T13b,
+  `027fef3` T14b-r1.
+- All local test suites pass: **225 tests across 15 suites, 0 failing**.
+  boot 15/15, forum 23/23, stream 29/29, tmp 10/10, do 6/6,
+  brain 12/12, storage 14/14, cache 12/12, qos 10/10,
+  shell 8/8, search 22/22, vant 8/8, api 21/21, event 15/15,
+  config 20/20.
+- T10b — `storage.exists` alias removed; `storage.has` is the only
+  existence-check method.
+- T11b — `brain.loadBrain` and `brain.brainList` aliases removed.
+- T12b — `lib/shell.js` `ALLOWED_COMMANDS`, `lib/search.js` unused
+  `MODELS_DIR`, `lib/qos.js` 7 duplicate prototype alias methods +
+  `RateLimit` + `defaultQoS` singleton — all dead-code compat removed.
+- T13b — `defaultCache` singleton removed from `lib/cache.js`. 25+
+  method aliases on the module export gone. `brain.js`, `network.js`,
+  `vant.js` lazily instantiate `new Cache()`. `lib/cache.js` exports
+  only `{ Cache }`.
+- T14b-r1 — Four more dead-code compat aliases: `config.setFlag`,
+  `event.EventBus/SimpleEventEmitter`, `api.get mode()`, `vant.Runtime`.
 
 ---
 
@@ -124,6 +121,53 @@
   12 new tests cover: Raw exports, Raw methods, safe read works, safe
   read blocks traversal, readRaw does NOT block, readSecured blocks.
   Commit: `d896f05`. Pushed.
+- **T10b** — `storage.exists` alias removed. `storage.has` is now the
+  only public existence-check method. Migrated `lib/mcp.js` and two
+  tests. 14/14 storage tests pass. Commit: `4ae316b`. Pushed.
+- **T11b** — `brain.loadBrain` and `brain.brainList` aliases removed.
+  `loadBrain` → use `_loadBrain` (or the unified `read`); `brainList` →
+  use `listBrains()` (the new array shape) or `brainDirs()`. 12/12
+  brain tests pass. Commit: `19cd6c3`. Pushed.
+- **T12b** — Dead-code compat aliases removed in three files:
+  - `lib/shell.js`: `ALLOWED_COMMANDS` object (no exports, no
+    consumers — pure internal bloat).
+  - `lib/search.js`: unused `MODELS_DIR` constant.
+  - `lib/qos.js`: 7 prototype-level duplicate alias methods that
+    shadowed the real methods on the QoS class, plus the unused
+    `RateLimit` lazyExport and the dead `defaultQoS` singleton.
+  Shell 8/8, Search 22/22, QoS 10/10 pass. Commit: `a20cf36`. Pushed.
+- **T13b** — `defaultCache` singleton removed. The 25+ module-level
+  method aliases on `lib/cache.js` are gone. `brain.js`, `network.js`,
+  `vant.js` now lazily instantiate `new Cache()` instead of importing
+  the singleton. `lib/cache.js` exports only `{ Cache }`. 12/12 cache
+  tests pass (the 14 legacy module-singleton API tests were deleted;
+  replaced with a two-instance isolation test). 169 tests across 12
+  suites pass. Commit: `c95d1ff`. Pushed.
+- **T14b (round 1)** — Four more dead-code compat aliases removed:
+  - `lib/config.js`: `setFlag` named export (canonical: `set`).
+  - `lib/event.js`: `EventBus` and `SimpleEventEmitter` (zero
+    consumers).
+  - `lib/api.js`: `get mode()` instance getter (no consumers).
+  - `lib/vant.js`: `Runtime` legacy class wrapper.
+  225 tests across 15 suites pass. Commit: `027fef3`. Pushed.
+
+---
+
+## Future b-T Candidates (audit noted, not in this session)
+
+These were identified in the final `grep -E "backward|compatibility|deprecat|legacy|alias" lib/*.js` sweep but require migrating external callers. Defer to a future session:
+
+- **`lib/agents.js:248, 939, 1047-1050`** — "backwards compat" key check and `legacyDir` path lookup. Requires audit of what dual-key behavior is intentional.
+- **`lib/brain.js:2547`** — internal compatibility comment (not a runtime alias; just a doc marker).
+- **`lib/embed.js:257`** — "Aliases for compatibility" — exports, requires caller migration.
+- **`lib/encrypt.js:297, 308, 482`** — `Encrypt.encode/decode/pbkdf2Sync` `@deprecated` methods. Used by `lib/stego.js:159, 206, 241, 256, 273, 280, 349, 447`. Migrate stego to `Encrypt.encrypt/decrypt` and remove deprecated.
+- **`lib/islands.js:500, 525`** — `getManifestSync` "for test compatibility". Check what test uses it.
+- **`lib/lineage.js:129`** — `getHistory` "alias for trace". Check if one should be canonical.
+- **`lib/mcp.js:3205`** — internal "now aliases to unified" comment (not a runtime alias).
+- **`lib/secret.js:411-414`** — `getPassword/hasPassword/clearPassword/PASSWORD_ENV_KEY` "Legacy compatibility" block. Used by `lib/transform.js:976, 1415`. Migrate transform to use `secret.get('brain', ...)`.
+- **`lib/storage.js:719, 728, 733, 754`** — "legacy" hash/embedder fallback paths (these are *real* legacy code paths when no embedder is available, not compat shims — likely keep).
+- **`lib/transform.js:1376`** — `validateHorcrux` "Legacy for backward compatibility". Check what calls it.
+- **`lib/transform.js:1441, 1461`** — `payload: parsed.payload` "Keep for compatibility" — extra return-value field. Check consumers.
 
 ---
 
