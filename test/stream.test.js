@@ -4,6 +4,7 @@
  */
 
 const path = require('path');
+const fs = require('fs');
 const ROOT = path.resolve(__dirname, '..');
 
 const results = { passed: 0, failed: 0, skipped: 0, tests: [] };
@@ -142,6 +143,68 @@ test('getStackStats returns object with source stack', () => {
     const stream = require(path.join(ROOT, 'lib', 'stream'));
     const stats = stream.getStackStats();
     return { success: stats && stats.source === 'stack' };
+});
+
+// ==================== v0.9.0-axolotl T9 ====================
+
+test('stream has _getSecurity bundle helper (T9)', () => {
+    // Read the source; _getSecurity should exist and return all 5 modules
+    const src = fs.readFileSync(path.join(ROOT, 'lib', 'stream.js'), 'utf8');
+    const hasGetSecurity = src.includes('function _getSecurity()');
+    const returnsFive = /function _getSecurity\(\)\s*\{[\s\S]{0,500}encrypt/.test(src);
+    return {
+        success: hasGetSecurity && returnsFive,
+        error: !hasGetSecurity ? 'no _getSecurity' : !returnsFive ? 'missing encrypt in bundle' : null
+    };
+});
+
+test('stream _gate uses _getSecurity bundle (T9)', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'lib', 'stream.js'), 'utf8');
+    // Find _gate body — match up to the next standalone "function" or end of file
+    const gateStart = src.indexOf('async function _gate(');
+    if (gateStart === -1) return { success: false, error: 'no _gate found' };
+    // Take a chunk from _gate to the next standalone function decl
+    const chunk = src.slice(gateStart, gateStart + 800);
+    const usesGetSecurity = chunk.includes('_getSecurity()');
+    const oldGetterCount = (chunk.match(/_getSandbox\(\)|_getVaf\(\)|_getQoS\(\)|_getEscrow\(\)/g) || []).length;
+    return {
+        success: usesGetSecurity && oldGetterCount === 0,
+        error: !usesGetSecurity ? '_gate does not use _getSecurity()' : oldGetterCount > 0 ? `_gate still uses ${oldGetterCount} old getters` : null
+    };
+});
+
+// ==================== v0.9.0-axolotl T9b ====================
+// Nuclear breaking: 5 individual _get* getters removed. 0.8.6 → 1.0.0 is a
+// fresh foundation; no backward-compat wrappers.
+
+test('stream has no _getSandbox getter (T9b)', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'lib', 'stream.js'), 'utf8');
+    const hasOldGetter = /function\s+_getSandbox\s*\(/.test(src);
+    return { success: !hasOldGetter, error: hasOldGetter ? '_getSandbox still defined' : null };
+});
+
+test('stream has no _getVaf getter (T9b)', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'lib', 'stream.js'), 'utf8');
+    const hasOldGetter = /function\s+_getVaf\s*\(/.test(src);
+    return { success: !hasOldGetter, error: hasOldGetter ? '_getVaf still defined' : null };
+});
+
+test('stream has no _getQoS getter (T9b)', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'lib', 'stream.js'), 'utf8');
+    const hasOldGetter = /function\s+_getQoS\s*\(/.test(src);
+    return { success: !hasOldGetter, error: hasOldGetter ? '_getQoS still defined' : null };
+});
+
+test('stream has no _getEscrow getter (T9b)', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'lib', 'stream.js'), 'utf8');
+    const hasOldGetter = /function\s+_getEscrow\s*\(/.test(src);
+    return { success: !hasOldGetter, error: hasOldGetter ? '_getEscrow still defined' : null };
+});
+
+test('stream has no _getEncrypt getter (T9b)', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'lib', 'stream.js'), 'utf8');
+    const hasOldGetter = /function\s+_getEncrypt\s*\(/.test(src);
+    return { success: !hasOldGetter, error: hasOldGetter ? '_getEncrypt still defined' : null };
 });
 
 console.log('\n--- RESULTS ---\n');
