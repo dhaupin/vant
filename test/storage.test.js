@@ -190,6 +190,76 @@ test('getStackStats returns object with source stack', () => {
 });
 
 // ============================================
+// v0.9.0-axolotl PIPELINE-BACKED VARIANTS
+// ============================================
+asyncTest('storage: readSecured returns content for existing file', async () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const s = Storage.get('file', { basePath: path.join(ROOT, 'models', 'public', 'vant') });
+    const content = await s.readSecured('identity.md');
+    return { success: typeof content === 'string' && content.length > 0 };
+});
+
+asyncTest('storage: readSecured returns null for missing file', async () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const s = Storage.get('file', { basePath: path.join(ROOT, 'models', 'public', 'vant') });
+    const content = await s.readSecured('does-not-exist-' + Date.now() + '.md');
+    return { success: content === null };
+});
+
+asyncTest('storage: writeSecured writes and readSecured reads back', async () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const tmpBase = path.join(ROOT, 'models', 'private', 'vant', '.test-tmp');
+    require('fs').mkdirSync(tmpBase, { recursive: true });
+    const s = Storage.get('file', { basePath: tmpBase });
+    const f = 'pipeline-test-' + Date.now() + '.md';
+    try {
+        const wrote = await s.writeSecured(f, 'hello pipeline');
+        if (!wrote) return { success: false, error: 'writeSecured returned falsy' };
+        const back = await s.readSecured(f);
+        return { success: back === 'hello pipeline' };
+    } finally {
+        try { s.deleteSecured(f); } catch (e) {}
+        try { require('fs').rmdirSync(tmpBase); } catch (e) {}
+    }
+});
+
+asyncTest('storage: deleteSecured removes a file', async () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const tmpBase = path.join(ROOT, 'models', 'private', 'vant', '.test-tmp');
+    require('fs').mkdirSync(tmpBase, { recursive: true });
+    const s = Storage.get('file', { basePath: tmpBase });
+    const f = 'pipeline-delete-' + Date.now() + '.md';
+    try {
+        await s.writeSecured(f, 'tmp');
+        const removed = await s.deleteSecured(f);
+        const still = await s.readSecured(f);
+        return { success: removed === true && still === null };
+    } finally {
+        try { s.delete(f); } catch (e) {}
+        try { require('fs').rmdirSync(tmpBase); } catch (e) {}
+    }
+});
+
+asyncTest('storage: listSecured returns array', async () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const s = Storage.get('file', { basePath: path.join(ROOT, 'models', 'public', 'vant') });
+    const result = await s.listSecured('*.md');
+    return { success: Array.isArray(result) };
+});
+
+asyncTest('storage: Secured variants throw on path traversal', async () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const s = Storage.get('file', { basePath: path.join(ROOT, 'models', 'public', 'vant') });
+    let blocked = false;
+    try {
+        await s.readSecured('../../../etc/passwd');
+    } catch (e) {
+        blocked = e.message.includes('blocked') || e.message.includes('Path');
+    }
+    return { success: blocked, error: blocked ? null : 'expected path-traversal block' };
+});
+
+// ============================================
 // SUMMARY
 // ============================================
 
