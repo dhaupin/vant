@@ -259,6 +259,94 @@ asyncTest('storage: Secured variants throw on path traversal', async () => {
     return { success: blocked, error: blocked ? null : 'expected path-traversal block' };
 });
 
+// ==================== v0.9.0-axolotl SAFE-BY-DEFAULT ====================
+
+test('storage module exports readRaw', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof Storage.readRaw === 'function' };
+});
+
+test('storage module exports writeRaw', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof Storage.writeRaw === 'function' };
+});
+
+test('storage module exports deleteRaw', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof Storage.deleteRaw === 'function' };
+});
+
+test('storage module exports listRaw', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof Storage.listRaw === 'function' };
+});
+
+test('FileStorage has readRaw method', () => {
+    const { FileStorage } = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof FileStorage.prototype.readRaw === 'function' };
+});
+
+test('FileStorage has writeRaw method', () => {
+    const { FileStorage } = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof FileStorage.prototype.writeRaw === 'function' };
+});
+
+test('FileStorage has deleteRaw method', () => {
+    const { FileStorage } = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof FileStorage.prototype.deleteRaw === 'function' };
+});
+
+test('FileStorage has listRaw method', () => {
+    const { FileStorage } = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof FileStorage.prototype.listRaw === 'function' };
+});
+
+test('safe read still works (VAF check, not blocked)', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const s = Storage.get('file', { basePath: path.join(ROOT, 'models', 'public', 'vant') });
+    const content = s.read('identity.md');
+    return { success: typeof content === 'string' && content.length > 0 };
+});
+
+test('safe read blocks path traversal', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const s = Storage.get('file', { basePath: path.join(ROOT, 'models', 'public', 'vant') });
+    let blocked = false;
+    try {
+        s.read('../../../etc/passwd');
+    } catch (e) {
+        blocked = e.message.includes('blocked') || e.message.includes('Path');
+    }
+    return { success: blocked, error: blocked ? null : 'expected path-traversal block' };
+});
+
+test('readRaw does NOT block path traversal (explicit unsafe)', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const s = Storage.get('file', { basePath: path.join(ROOT, 'models', 'public', 'vant') });
+    // readRaw should not throw on traversal; it either returns the content
+    // or null. The point is it does not do the vaf check.
+    let threw = false;
+    let result = null;
+    try {
+        result = s.readRaw('../../../etc/passwd');
+    } catch (e) {
+        threw = true;
+    }
+    return { success: !threw, error: threw ? 'readRaw should not throw on traversal' : null };
+});
+
+asyncTest('readSecured throws on path traversal', async () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const s = Storage.get('file', { basePath: path.join(ROOT, 'models', 'public', 'vant') });
+    let blocked = false;
+    try {
+        await s.readSecured('../../../etc/passwd');
+    } catch (e) {
+        blocked = true;
+    }
+    return { success: blocked, error: blocked ? null : 'readSecured should block traversal' };
+});
+
 // ============================================
 // SUMMARY
 // ============================================
