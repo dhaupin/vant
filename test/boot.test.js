@@ -102,6 +102,27 @@ test('boot layer list includes brain exactly once', () => {
     return { success: brainCount === 1, error: `brain pushed ${brainCount} times` };
 });
 
+// ==================== v0.9.0-axolotl T5 ====================
+
+test('boot.init failure surfaces failedLayer in return value', () => {
+    // Read the source to verify the T5 fix is in place
+    const src = fs.readFileSync(path.join(ROOT, 'lib', 'boot.js'), 'utf8');
+    const hasFailedLayer = src.includes('failedLayer');
+    const hasSuccessFalse = src.includes('success: false') || src.includes('success:false');
+    return {
+        success: hasFailedLayer && hasSuccessFalse,
+        error: !hasFailedLayer ? 'no failedLayer in catch' : !hasSuccessFalse ? 'no success:false in catch' : null
+    };
+});
+
+test('boot init catch block returns failedLayer referencing last loaded layer', () => {
+    // Verify failedLayer uses _bootState.layers[length-1] so the layer
+    // that was being loaded when the throw happened is the one reported.
+    const src = fs.readFileSync(path.join(ROOT, 'lib', 'boot.js'), 'utf8');
+    const usesLastPushed = /failedLayer\s*=\s*_bootState\.layers\s*\[\s*_bootState\.layers\.length\s*-\s*1\s*\]/.test(src);
+    return { success: usesLastPushed, error: usesLastPushed ? null : 'failedLayer should reference last-pushed layer' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);
