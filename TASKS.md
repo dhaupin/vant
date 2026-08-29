@@ -21,7 +21,13 @@
 ## Current State
 
 - **Test suite: 1480/1480 passing** — 0 failures across 75 test files.
-- Net **-28 lines** of code removed in this commit (T18–T20 + config key fix).
+- **First axolotl horcrux snapshot taken** at 2026-08-29T08:41:57Z.
+  1.1 MB stego-SVG at `models/public/boot/hypha-brain-horcrux.svg`,
+  validated 0 errors. Reproducible via `node bin/snapshot.js`.
+- **Two new tools added this session** (both committed, versioned):
+  - `bin/sweep.sh` — persistent test health gate (replaces /tmp/sweep.sh)
+  - `bin/snapshot.js` — verifiable brain horcrux snapshot
+- Net **-28 lines** of code removed in T18–T20 + config key fix.
 - All 3 remaining "Future b-T Candidates" resolved:
   - **T18** `lib/islands.js` `getManifestSync` removed (test-only public
     API; 0 lib callers). 7 callsites migrated to `asyncTest` + `await
@@ -275,6 +281,40 @@
   Test comment in `test/test-modules.js` updated to match.
 - 1480/1480 pass.
 
+### T21 — Brain horcrux tooling + first axolotl snapshot
+- `bin/snapshot.js` — produces a verifiable stego-SVG horcrux of the
+  current vant brain state and writes it to the canonical
+  `models/public/boot/hypha-brain-horcrux.svg` path that `lib/boot.js`
+  auto-discovers at boot. Round-trip-verifies by reading it back and
+  calling `validateHorcruxData`. Side-effects:
+  - `hypha-brain-horcrux.svg` (the encrypted brain, 1.1 MB at
+    axolotl 83d0a3c)
+  - `hypha-brain-horcrux.svg.manifest.json` (timestamp + git context)
+  - `hypha-brain-horcrux.svg.sha256` (sha256 for integrity checks)
+- `models/public/boot/` added to `.gitignore` — the snapshot is
+  reproducible from the script and may contain encrypted secrets, so
+  the script is the canonical artifact (committed, versioned) while
+  the actual SVG is gitignored.
+- First snapshot taken at 2026-08-29T08:41:57Z on commit `83d0a3c`
+  (post-T20 cleanup). 63 corpus brains, 1 org, 32 depts, 32 teams,
+  10 islands. Validated 0 errors.
+- `bin/sweep.sh` was also added earlier in this session as the
+  persistent test health gate (replaces the previous /tmp/sweep.sh
+  that got wiped on session cleanup). Auto-detects repo root,
+  supports `--quick` mode for fast iteration during refactors.
+
+---
+
+## Tools added this session
+
+| Tool | Purpose | Persistent? |
+|---|---|---|
+| `bin/sweep.sh` | Test health gate (full + --quick modes) | ✅ in repo, versioned |
+| `bin/snapshot.js` | Brain horcrux snapshot (verifiable stego-SVG) | ✅ in repo, versioned |
+| Output: `models/public/boot/hypha-brain-horcrux.svg` | First snapshot of axolotl state | ⚠️ gitignored, reproducible |
+| Output: `...svg.manifest.json` | Snapshot metadata (timestamp, git, format) | ⚠️ gitignored |
+| Output: `...svg.sha256` | Integrity hash for the SVG | ⚠️ gitignored |
+
 ---
 
 ## Future b-T Candidates (audit noted, not in this session)
@@ -297,12 +337,17 @@ These were identified in the final `grep -E "backward|compatibility|deprecat|leg
 
 ## Deferred
 
-### Horcrux — Snapshot axolotl brain copy for future agents
-- **Status:** deferred per user.
-- **When:** after the cleanup work (T10–T12) is stable.
-- **What:** copy `models/private/vant/` to `models/private/axolotl/` so future
-  agents waking up on the axolotl branch have a clean brain to read. (Today
-  axolotl only has its own scratch lessons; vant is the active brain.)
+### ~~Horcrux — Snapshot axolotl brain copy for future agents~~ — DONE (T21)
+- Resolved in T21 via `bin/snapshot.js`. The stego-SVG horcrux at
+  `models/public/boot/hypha-brain-horcrux.svg` is now the canonical
+  "agent at this moment" snapshot, and `lib/boot.js` auto-discovers
+  it on boot. The script is the versioned artifact; the SVG is
+  gitignored. First snapshot taken 2026-08-29T08:41:57Z on
+  commit `83d0a3c`.
+- The "mechanical copy" path (private/vant → private/axolotl) was
+  not chosen because it would clobber the live axolotl brain and
+  is not a true restoreable format. The stego-SVG is the right
+  primitive.
 
 ---
 

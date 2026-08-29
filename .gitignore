@@ -66,5 +66,11 @@ models/*/geometry
 data/
 config.ini
 
+# Brain horcrux snapshots (reproducible via bin/snapshot.js, may contain
+# encrypted secrets; would balloon the repo). The script is the canonical
+# artifact. The boot/ dir is otherwise empty so this is safe to ignore fully.
+models/public/boot/
+
+
 # Backup files
 *.bak
