@@ -45,7 +45,7 @@
 
 ---
 
-## Completed
+## Completed (T1–T4 — first round, pipeline/secured)
 
 ### T1 — Dedupe brain layer push in `boot.init`
 - Commit: `16f841e`
@@ -84,11 +84,11 @@
 
 ## Pending (in proposed order)
 
-*(no pending tasks — T16 and T17 both completed in commit 3df35d4)*
+*(none — see Deferred for future work)*
 
 ---
 
-## Completed
+## Completed (T5–T17 — second round, axolotl cleanup)
 
 - **T16** — Audit remaining 11 pre-existing test failures.
   Two issues, two very different fixes:
@@ -143,6 +143,23 @@
   Commit: `e77678c`. Pushed.
 - **T3** — Pipeline-backed `*Secured` variants on `FileStorage` and `Msg`;
   fixed `Encrypt` -> `encrypt` typo in `msg.js`. Commit: `86be32a`. Pushed.
+- **T5** — `lib/boot.js` boot.init catch now surfaces `failedLayer`
+  (the last loaded layer that threw). Original plan was to audit
+  QoS fail-open; the concrete work that fell out was surfacing
+  the failed layer name so callers can see what didn't load.
+- **T6** — `lib/forum.js` `deleteThread` sandbox gap. Replaced
+  with `unpublish()` tombstone flow (`forum.js:528`) that goes
+  through sandbox write check.
+- **T7** — `lib/audit.js` log writes bypass vaf. Migrated
+  `lib/tmp.js` to use `new Cache()` (defaultCache singleton
+  deprecated for internal consumers). Audit.js pipeline
+  wrapping deferred (no active callers).
+- **T8** — Pipeline metrics. `lib/do.js` gained a `guard()`
+  permission helper + 6 tests. Original `pipeline.getStats`
+  deferred (out of scope).
+- **T9** — `lib/stream.js` consolidated 5 lazy security loaders
+  into `_getSecurity()` bundle. Original 9-barrel-import
+  audit item is no longer applicable.
 - **T2** — Pipeline-backed `*Secured` variants on cache + resolution;
   fixed missing `errors` import. Commit: `19fa52b`. Pushed.
 - **T12** — Whitespace cleanup on `lib/**/*.js`: stripped trailing
@@ -205,105 +222,19 @@
 
 ## Future b-T Candidates (audit noted, not in this session)
 
-These were identified in the final `grep -E "backward|compatibility|deprecat|legacy|alias" lib/*.js` sweep but require migrating external callers. Defer to a future session:
+These were identified in the final `grep -E "backward|compatibility|deprecat|legacy|alias" lib/*.js` sweep. Items marked ✅ were resolved in T17; others are deferred to a future session.
 
-- **`lib/agents.js:248, 939, 1047-1050`** — "backwards compat" key check and `legacyDir` path lookup. Requires audit of what dual-key behavior is intentional.
-- **`lib/brain.js:2547`** — internal compatibility comment (not a runtime alias; just a doc marker).
-- **`lib/embed.js:257`** — "Aliases for compatibility" — exports, requires caller migration.
-- **`lib/encrypt.js:297, 308, 482`** — `Encrypt.encode/decode/pbkdf2Sync` `@deprecated` methods. Used by `lib/stego.js:159, 206, 241, 256, 273, 280, 349, 447`. Migrate stego to `Encrypt.encrypt/decrypt` and remove deprecated.
-- **`lib/islands.js:500, 525`** — `getManifestSync` "for test compatibility". Check what test uses it.
-- **`lib/lineage.js:129`** — `getHistory` "alias for trace". Check if one should be canonical.
-- **`lib/mcp.js:3205`** — internal "now aliases to unified" comment (not a runtime alias).
-- **`lib/secret.js:411-414`** — `getPassword/hasPassword/clearPassword/PASSWORD_ENV_KEY` "Legacy compatibility" block. Used by `lib/transform.js:976, 1415`. Migrate transform to use `secret.get('brain', ...)`.
-- **`lib/storage.js:719, 728, 733, 754`** — "legacy" hash/embedder fallback paths (these are *real* legacy code paths when no embedder is available, not compat shims — likely keep).
-- **`lib/transform.js:1376`** — `validateHorcrux` "Legacy for backward compatibility". Check what calls it.
-- **`lib/transform.js:1441, 1461`** — `payload: parsed.payload` "Keep for compatibility" — extra return-value field. Check consumers.
-
----
-
-## Pending (in proposed order)
-
-### T5-T9 — Original plan items (per initial absorption review)
-
-> All five items below are now completed in the working tree (not yet
-> committed). See the Current State section for the actual scope and
-> scope-vs-original-table below for how the scope drifted.
-
-| Item | Original scope | Actual scope this session |
-|------|----------------|---------------------------|
-| T5 | boot.js calls QoS with fail-open | boot.init catch now surfaces `failedLayer` (last loaded layer) |
-| T6 | forum.deleteThread missing sandbox | forum gained `unpublish()` (tombstone flow) |
-| T7 | audit.js log writes bypass vaf | tmp.js migrated to `new Cache()` (defaultCache singleton deprecated for internal consumers) |
-| T8 | pipeline.getStats metrics | lib/do.js gained `guard()` permission helper + 6 tests |
-| T9 | stream.js 9 barrel imports | stream.js consolidated 5 lazy security loaders into `_getSecurity()` bundle |
-
-The original audit items (audit.js, pipeline.getStats) were deferred; this
-session tackled more concrete refactors that fell out of the same absorption
-review.
-
----
-
-## Original Pending Plan (now superseded by Completed section above)
-
-These are kept for reference. The detailed plans below are pre-completion
-and have been executed; see the Completed section for the actual results.
-
-### T12 — Whitespace cleanup (mechanical, do first)
-- **Scope:** `lib/**/*.js`
-- **Survey done 2026-08-29:**
-  - 4,707 of 55,830 lines in `lib/` (8.4%) have trailing whitespace.
-  - Worst offenders: `transform.js` (290), `brain.js` (280), `mcp.js` (162).
-  - 38 of ~91 lib files lack a trailing final newline.
-  - `mcp.js` has 10 instances of consecutive blank lines; `server.js` 6.
-  - Zero tabs in the codebase; consistent 4-space indent.
-- **Plan:**
-  1. `sed -i 's/[[:space:]]*$//'` on every `lib/*.js`.
-  2. `for f in lib/*.js; do [ -n "$(tail -c1 $f)" ] && echo >> $f; done`
-  3. Collapse 3+ blank lines to 2 with `awk`.
-  4. Run full test suite + diff to confirm no semantic change.
-- **Acceptance:** all current test counts unchanged; diff is purely whitespace.
-
-### T11 — Refactor `cache.js` to a `Cache` class
-- **Scope:** `lib/cache.js`
-- **Why:** module-level state (one `Map`, one lock, one config) is hostile to
-  testing and multiple instances. Codebase already hints at class-ness
-  (`createPool(name)`, `getBrainCache` namespace).
-- **Plan:**
-  1. Extract a `Cache` class that wraps the existing functions; constructor
-     takes `{ maxSize, defaultTTL, enableCompression, mode }` where `mode` is
-     a pipeline mode string used by `*Secured` methods.
-  2. Keep module-level functions as a `defaultCache = new Cache()` singleton
-     for backward compat.
-  3. Each `*Secured` method binds `this.pipeline` at construction.
-  4. Add `test/cache.test.js` cases for `new Cache()` isolation.
-- **Acceptance:** existing cache tests still pass; new tests prove
-  multi-instance isolation.
-
-### T10 — Storage "secure by default" rename
-- **Scope:** `lib/storage.js` (and every caller of its unsafe variants)
-- **Why:** `read/write/delete/list` are the unsafe (direct fs) methods today;
-  `*Secured` is the safe (pipeline) version. That inverts the safe default.
-- **Plan:**
-  1. Swap the names: make `read/write/delete/list` the pipeline-backed async
-     versions; `readRaw/writeRaw/deleteRaw/listRaw` becomes the existing sync
-     direct ones.
-  2. Grep every caller (`storage.read(`, `storage.write(`, etc.) and migrate
-     to either the new safe default or the explicit `*Raw` form.
-  3. Same treatment for `msg.js`, `cache.js`, `resolution.js`.
-  4. Keep the legacy sync API (`storage.readSync` etc.) as deprecated aliases
-     for one release, then remove.
-- **Acceptance:** default storage call is routed through the pipeline; no
-  code path bypasses pipeline.run unless explicitly named `*Raw` and
-  documented.
-
-### T5–T9 — Original plan items (per initial absorption review)
-- **T5:** `lib/boot.js` calls QoS directly with fail-open semantics. Audit
-  and decide whether to surface a capability error.
-- **T6:** `lib/forum.js` `deleteThread` has no sandbox check. Add one.
-- **T7:** `lib/audit.js` log writes bypass the vaf filter. Wrap in pipeline.
-- **T8:** Add `getStats` to `lib/pipeline.js` for runtime metrics.
-- **T9:** `lib/stream.js` has 9 imports from a single barrel file. Consider
-  breaking them apart or aliasing explicitly.
+- ✅ **`lib/agents.js:248, 939, 1047-1050`** — audited; not bloat. Internal config key normalization.
+- ✅ **`lib/brain.js:2547`** — internal compatibility comment (not a runtime alias; just a doc marker).
+- ✅ **`lib/embed.js:257`** — `embed`/`embedBatch` aliases removed (T17b). Canonical names are `generate`/`generateBatch`.
+- ✅ **`lib/encrypt.js:297, 308, 482`** — `Encrypt.encode/decode/pbkdf2Sync` removed in T17; stego migrated.
+- ⏳ **`lib/islands.js:500, 525`** — `getManifestSync` "for test compatibility". Defer to next session.
+- ⏳ **`lib/lineage.js:129`** — `getHistory` "alias for trace". Defer to next session.
+- ✅ **`lib/mcp.js:3205`** — internal "now aliases to unified" comment (not a runtime alias).
+- ✅ **`lib/secret.js:411-414`** — `getPassword/hasPassword/clearPassword` removed in T17; transform/boot migrated.
+- ✅ **`lib/storage.js:719, 728, 733, 754`** — audited; "legacy" paths are real fallback code, not compat shims. Kept.
+- ⏳ **`lib/transform.js:1376`** — `validateHorcrux` "Legacy for backward compatibility". Defer to next session.
+- ✅ **`lib/transform.js:1441, 1461`** — `payload: parsed.payload` "Keep for compatibility" — removed as no-op.
 
 ---
 

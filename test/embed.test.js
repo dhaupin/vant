@@ -38,16 +38,16 @@ test('embed module loads', () => {
     return { success: !!embed };
 });
 
-// Test 2: Has embed function
-test('embed has embed function', () => {
+// Test 2: Has generate function (canonical name)
+test('embed has generate function', () => {
     const embed = require(path.join(ROOT, 'lib', 'embed'));
-    return { success: typeof embed.embed === 'function' };
+    return { success: typeof embed.generate === 'function' };
 });
 
-// Test 3: Has embedBatch function
-test('embed has embedBatch function', () => {
+// Test 3: Has generateBatch function (canonical name)
+test('embed has generateBatch function', () => {
     const embed = require(path.join(ROOT, 'lib', 'embed'));
-    return { success: typeof embed.embedBatch === 'function' };
+    return { success: typeof embed.generateBatch === 'function' };
 });
 
 // Test 4: Has setProvider function (canonical: provider, not embedder)
@@ -113,7 +113,7 @@ test('embed accepts brain option', () => {
     // (actual embedding may fail due to no embedder, but options should be accepted)
     try {
         // This will likely fail but we're testing options are accepted
-        embed.embed('test text', { brain: currentBrain });
+        embed.generate('test text', { brain: currentBrain });
         return { success: true };
     } catch (e) {
         // Any error other than "brain option not accepted" is ok
@@ -128,7 +128,7 @@ test('embedBatch accepts brain option', () => {
     const currentBrain = brain.currentBrain();
     
     try {
-        embed.embedBatch(['test1', 'test2'], { brain: currentBrain });
+        embed.generateBatch(['test1', 'test2'], { brain: currentBrain });
         return { success: true };
     } catch (e) {
         return { success: true };
