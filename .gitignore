@@ -70,6 +70,11 @@ config.ini
 # horcrux snapshots) are PUBLIC by design. The p_ convention embeds
 # the password in the filename — the file IS the public artifact.
 # See models/public/vant/boot/README.md. Do NOT gitignore them.
+#
+# Sidecar files (.manifest.json, .sha256) for snapshots are reproducible
+# side-products of bin/snapshot.js — ignore them, keep only the .svg.
+models/public/vant/boot/*-p_*.svg.manifest.json
+models/public/vant/boot/*-p_*.svg.sha256
 # Existing tracked public-template horcruxes (nova, scribe, hypha)
 # stay tracked; new snapshots from bin/snapshot.js get tracked too.
 
