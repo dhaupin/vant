@@ -34,90 +34,23 @@ console.log('\n💨 CACHE MODULE TESTS\n');
 // ============================================
 // LOAD
 // ============================================
-
-test('cache module loads', () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
-    return { success: !!cache };
-});
-
-test('cache has get function', () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
-    return { success: typeof cache.get === 'function' };
-});
-
-test('cache has set function', () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
-    return { success: typeof cache.set === 'function' };
-});
-
-test('cache has has function', () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
-    return { success: typeof cache.has === 'function' };
-});
-
-test('cache has remove function', () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
-    return { success: typeof cache.remove === 'function' };
-});
-
-test('cache has clear function', () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
-    return { success: typeof cache.clear === 'function' };
-});
-
-test('cache has getStats function', () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
-    return { success: typeof cache.stats === 'function' };
-});
-
-test('cache has compress function', () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
-    return { success: typeof cache.compress === 'function' };
-});
-
-test('cache has decompress function', () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
-    return { success: typeof cache.decompress === 'function' };
-});
-
-test('cache has getLayerStatus function', () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
-    return { success: typeof cache.getLayerStatus === 'function' };
-});
-
-test('cache has isOperationAllowed function', () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
-    return { success: typeof cache.isOperationAllowed === 'function' };
-});
-
-// ============================================
-// MULTIBRAIN TESTS
+// v0.9.0-axolotl T13b: legacy module-singleton API tests removed.
+// The singleton + 25+ proxy exports are gone; canonical usage is
+// `const { Cache } = require('./cache'); new Cache()`. See the
+// "v0.9.0-axolotl CACHE CLASS" block below for the new tests.
 // ============================================
 
-test('cache has getBrainCache function', () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
-    return { success: typeof cache.getBrainCache === 'function' };
-});
-
-test('cache has setBrainCache function', () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
-    return { success: typeof cache.setBrainCache === 'function' };
-});
-
-test('cache has clearBrainCache function', () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
-    return { success: typeof cache.clearBrainCache === 'function' };
-});
-
-// Stack tests
-test('cache has getStackCacheStats function', () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
-    return { success: typeof cache.getStackCacheStats === 'function' };
+// Stack tests (T13b — instances, not module singleton)
+test('Cache instance has getStackCacheStats function', () => {
+    const { Cache } = require(path.join(ROOT, 'lib', 'cache'));
+    const c = new Cache();
+    return { success: typeof c.getStackCacheStats === 'function' };
 });
 
 test('getStackCacheStats returns object with source stack', () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
-    const result = cache.getStackCacheStats();
+    const { Cache } = require(path.join(ROOT, 'lib', 'cache'));
+    const c = new Cache();
+    const result = c.getStackCacheStats();
     return { success: result && result.source === 'stack' };
 });
 
@@ -201,16 +134,19 @@ test('instance has its own buffer pool', () => {
     return { success: bufA !== null && bufB !== null && bufA !== bufB };
 });
 
-asyncTest('module-level singleton still works alongside instances', async () => {
-    const cache = require(path.join(ROOT, 'lib', 'cache'));
+// v0.9.0-axolotl T13b: the module-level `defaultCache` singleton is gone.
+// Two instances are now fully isolated (proves there's no shared state).
+asyncTest('two Cache instances are fully isolated (no module singleton)', async () => {
     const { Cache } = require(path.join(ROOT, 'lib', 'cache'));
-    const c = new Cache();
-    await cache.set('singleton-key', 'singleton');
-    await c.set('instance-key', 'instance');
+    const a = new Cache();
+    const b = new Cache();
+    await a.set('iso-key', 'in-a');
+    await b.set('iso-key', 'in-b');
     return {
-        success: cache.get('singleton-key') === 'singleton'
-            && c.get('instance-key') === 'instance'
-            && c.get('singleton-key') === undefined
+        success: a.get('iso-key') === 'in-a'
+            && b.get('iso-key') === 'in-b'
+            && a.get('isolation-foo') === undefined
+            && b.get('isolation-foo') === undefined
     };
 });
 
