@@ -316,15 +316,103 @@
 
 ---
 
+### T22 — Drop gitignore on `models/public/vant/boot/`
+- The T21 snapshot at `models/public/vant/boot/axolotl-p_axolotl2026.svg`
+  was correctly produced but the new ignore pattern blocked it from
+  being visible. Per the convention in `models/public/vant/boot/README.md`,
+  the horcrux is intentionally PUBLIC (other agents must be able to
+  discover and restore it).
+- **Fix:** removed the `models/public/vant/boot/axolotl-p_*.svg` ignore
+  pattern. Added a NOTE comment in `.gitignore` explaining that
+  `models/public/*` is a public-template directory by design. The
+  `bin/snapshot.js` output is now visible as untracked. `git
+  check-ignore` confirms it is no longer ignored.
+
+### T23 — Multibrain-aware `bin/horcrux.js`
+- The old `horcrux.js` had a hardcoded `models/public/boot/hypha-brain-horcrux.svg`
+  default and only supported an explicit `--password` flag. The
+  filename convention `<agent>-p_<password>.svg` is self-describing,
+  so the tool should pick it up automatically.
+- **Fix:**
+  - Module-scope `require('path')`/`require('fs')` (no per-call cost).
+  - Added `readBrainStack(REPO_ROOT)` and `findDefaultHorcrux(REPO_ROOT)`.
+    Stack is read from `models/state.json` (`brain.getStack()`); for
+    each stack entry, scan `models/public/<brain>/boot/` for the
+    first `*-p_*.svg`. Current brain wins.
+  - `inspect <name>` (no args) now finds the default horcrux
+    automatically.
+  - `restore <name> [password]` accepts a positional password; if
+    omitted, `transform.fromHorcrux` parses the filename via
+    `secret.parseFilenamePassword` and decrypts with that key.
+  - Help text rewritten to show multibrain awareness + `p_`
+    convention.
+- Lesson: when a tool has a convention, the tool should embrace
+  the convention end-to-end rather than forcing flags. Captured in
+  `models/private/vant/lessons.md`.
+
+### T24 — `lib/transform.js:inspectHorcrux` self-decrypts
+- `inspectHorcrux(path, options)` previously required an explicit
+  `options.password`. `fromHorcrux` already had the
+  `parseFilenamePassword` fallback; `inspectHorcrux` did not.
+  This is the kind of "no-shim, no-fork" asymmetry the axolotl
+  policy rejects.
+- **Fix:** added the same `secret.parseFilenamePassword(horcruxPath)`
+  call inside `inspectHorcrux` when no `options.password` is given.
+  `bin/horcrux.js inspect` (no args) now round-trips against the
+  filename's `p_` token. 1480/1480 tests pass post-fix.
+
+### T25 — `lib/boot.js:_tryHorcruxRestore` is multibrain-aware
+- The old `_tryHorcruxRestore` was hardcoded to look at
+  `models/public/boot/hypha-brain-horcrux.svg`. After T22 the file
+  no longer exists (the convention lives under
+  `models/public/<brain>/boot/<agent>-p_<password>.svg`). A fresh
+  boot with an empty `models/private/` would never restore.
+- **Fix:** rewrote `_tryHorcruxRestore` to:
+  1. Read the brain stack via `brain.getStack()`.
+  2. For each stack entry, look for `<brain>/boot/<agent>-p_*.svg`
+     (i.e. the per-brain boot directory).
+  3. Try each candidate in stack order, decrypt with the `p_` token
+     via `transform.fromHorcrux`.
+  4. First successful restore wins; record `restored`, `source`,
+     `brain`, `agent`, `file`, and a full `attempts` list.
+- The function is internal (not on `module.exports`) — it is called
+  from `init()` when `_checkPrivateBrain()` returns false. Its
+  result is now also visible via `boot.getBootState()`.
+- Side fix: `getBootState()` now exposes `horcruxRestored`,
+  `horcruxSource`, and `horcruxAttempts` (it was missing these
+  fields, breaking downstream visibility).
+
+### T26 — End-to-end smoke test of the rewritten boot path
+- Wrote `test/_horcrux_boot_smoke.js` to validate T25 end-to-end:
+  moves `models/private/{vant,axolotl}` aside, calls `boot.init()`,
+  asserts the restore happened from
+  `models/public/vant/boot/axolotl-p_axolotl2026.svg`, then puts
+  the stashed dirs back.
+- Result: `horcruxRestored=true`, source correctly identified,
+  all 10 boot layers loaded, and the round-tripped
+  `models/private/axolotl/identity.md` was byte-identical to the
+  stashed original (md5 verified).
+- The smoke test was a one-shot and was removed before commit; it
+  served its purpose. The pattern is now: a fresh agent that
+  clones the repo, runs `node bin/vant.js start`, and has no
+  `models/private/` will auto-restore the `p_`-encrypted
+  horcrux it finds in the public boot dir.
+- Test sweep post-T26: 1479/1480 passing; the one failure
+  (`vant.test.js: remember falls back to brain when cache expires`)
+  is pre-existing on the axolotl branch HEAD (reproduces on a clean
+  stash of my changes) and unrelated to the horcrux work.
+
+---
+
 ## Tools added this session
 
 | Tool | Purpose | Persistent? |
 |---|---|---|
 | `bin/sweep.sh` | Test health gate (full + --quick modes) | ✅ in repo, versioned |
 | `bin/snapshot.js` | Brain horcrux snapshot (verifiable stego-SVG) | ✅ in repo, versioned |
-| Output: `models/public/vant/boot/axolotl-p_axolotl2026.svg` | First snapshot of axolotl state | ⚠️ gitignored, reproducible |
-| Output: `...svg.manifest.json` | Snapshot metadata (timestamp, git, format) | ⚠️ gitignored |
-| Output: `...svg.sha256` | Integrity hash for the SVG | ⚠️ gitignored |
+| Output: `models/public/vant/boot/axolotl-p_axolotl2026.svg` | First snapshot of axolotl state (T21) | ⚠️ untracked, reproducible via `bin/snapshot.js` |
+| Output: `...svg.manifest.json` | Snapshot metadata (timestamp, git, format) | ⚠️ untracked, reproducible |
+| Output: `...svg.sha256` | Integrity hash for the SVG | ⚠️ untracked, reproducible |
 
 ---
 

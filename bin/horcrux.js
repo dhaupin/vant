@@ -14,40 +14,116 @@ const boot = require('../lib/boot');
 const args = process.argv.slice(2);
 const subcmd = args[0] || 'help';
 
+const path = require('path');
+const fs = require('fs');
+
 if (subcmd === '-h' || subcmd === '--help') {
     console.log(`
 Vant Horcrux CLI - Brain backup/restore
 
+Multibrain-aware: if no path is given, scans the brain stack
+(from models/state.json) and uses the first <agent>-p_*.svg
+found in models/public/<brain>/boot/.
+
+Filename convention (per models/public/vant/boot/README.md):
+  <agent>-p_<password>.svg  → the literal text after p_ is the
+                              decryption key. So
+  axolotl-p_axolotl2026.svg  → password is 'axolotl2026'.
+
 Usage:
-  vant horcrux inspect [path] [password]   Preview horcrux contents
-  vant horcrux restore [path] [password]   Restore from horcrux
-  vant horcrux create [path]               Create horcrux from current state
+  vant horcrux inspect [path]            Preview horcrux contents
+  vant horcrux restore [path] [password] Restore from horcrux
+  vant horcrux create [path] [password]  Create horcrux from current state
+
+Password resolution (in order):
+  1. Positional arg
+  2. VANT_BRAIN_PASSWORD env var
+  3. p_<password> in the filename (the convention)
+  4. lib/secret.js (interactive prompt)
 
 Examples:
-  vant horcrux inspect                                        # Inspect default boot/horcrux
-  vant horcrux inspect models/public/boot/hypha-brain-horcrux.svg password
-  vant horcrux restore models/public/boot/hypha-brain-horcrux.svg password
+  vant horcrux inspect
+  vant horcrux inspect models/public/vant/boot/axolotl-p_axolotl2026.svg
+  vant horcrux restore models/public/vant/boot/axolotl-p_axolotl2026.svg
+  vant horcrux create models/public/vant/boot/axolotl-p_axolotl2026.svg axolotl2026
 `);
     process.exit(0);
 }
 
+/**
+ * Read the brain stack from models/state.json. Falls back to
+ * a single-element stack with 'vant' (the canonical default).
+ */
+function readBrainStack(repoRoot) {
+    try {
+        const statePath = path.join(repoRoot, 'models', 'state.json');
+        if (!fs.existsSync(statePath)) return ['vant'];
+        const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+        if (Array.isArray(state.stack) && state.stack.length > 0) return state.stack;
+        if (state.currentBrain) return [state.currentBrain];
+        return ['vant'];
+    } catch (e) {
+        return ['vant'];
+    }
+}
+
+/**
+ * Find the default horcrux by scanning the brain stack in order.
+ * Multibrain-aware: tries models/public/<stack-entry>/boot/*.svg
+ * for any file containing the p_ password-in-name token.
+ * Returns the first match (current brain wins) or null.
+ */
+function findDefaultHorcrux(repoRoot) {
+    const stack = readBrainStack(repoRoot);
+    for (const brain of stack) {
+        const bootDir = path.join(repoRoot, 'models', 'public', brain, 'boot');
+        if (!fs.existsSync(bootDir)) continue;
+        try {
+            const entries = fs.readdirSync(bootDir);
+            for (const f of entries) {
+                if (f.endsWith('.svg') && f.includes('p_')) {
+                    return path.join(bootDir, f);
+                }
+            }
+        } catch (e) { /* skip unreadable */ }
+    }
+    return null;
+}
+
 async function run() {
     const path = require('path');
-    const defaultPath = path.join(__dirname, '..', 'models', 'public', 'boot', 'hypha-brain-horcrux.svg');
-    
+    const fs = require('fs');
+    const REPO_ROOT = path.resolve(__dirname, '..');
+    const defaultPath = findDefaultHorcrux(REPO_ROOT);
+
+    // The defaultPath helper handles multibrain scanning below. Keeping
+    // the variable so the inspect/restore branches stay readable.    
     if (subcmd === 'inspect') {
         const horcruxPath = args[1] || defaultPath;
-        const password = args[2]; // Must be provided or via secret.js
-        
+        const positionalPw = args[2];
+
+        if (!horcruxPath) {
+            console.error('❌ No horcrux found.');
+            console.error('   Searched models/public/<stack>/boot/ for <agent>-p_*.svg');
+            console.error('   Pass a path explicitly: vant horcrux inspect <path>');
+            process.exit(1);
+        }
+
         console.log('Inspecting:', horcruxPath);
-        
+
         const transform = require('../lib/transform');
-        const result = await transform.inspectHorcrux(horcruxPath, password ? { password } : {});
-        
+        // Pass empty options when no positional pw: transform.inspectHorcrux
+        // falls through to p_<pw> filename, env, then secret.js.
+        const opts = positionalPw ? { password: positionalPw } : {};
+        const result = await transform.inspectHorcrux(horcruxPath, opts);
+
         if (!result.valid) {
-            console.log('❌ Invalid horcrux:', result.error);
+            console.log('\n❌ Invalid horcrux:', result.error);
             if (result.passwordRequired) {
-                console.log('   Password required - provide as 2nd arg or set VANT_BRAIN_PASSWORD env var');
+                console.log('   Password required — supply one of:');
+                console.log('     • positional arg:    vant horcrux inspect <path> <password>');
+                console.log('     • env var:            VANT_BRAIN_PASSWORD=...');
+                console.log('     • p_<password> in the filename (the convention)');
             }
             process.exit(1);
         }
@@ -73,14 +149,20 @@ async function run() {
         
     } else if (subcmd === 'restore') {
         const horcruxPath = args[1] || defaultPath;
-        const password = args[2]; // Must be provided or via secret.js
-        
+        const positionalPw = args[2];
+
+        if (!horcruxPath) {
+            console.error('❌ No horcrux found to restore from.');
+            console.error('   Searched models/public/<stack>/boot/ for <agent>-p_*.svg');
+            console.error('   Pass a path explicitly: vant horcrux restore <path>');
+            process.exit(1);
+        }
+
         console.log('Restoring from:', horcruxPath);
-        
+
         const boot = require('../lib/boot');
-        const result = await boot.restoreFromHorcrux(horcruxPath, password ? { password } : {});
-        
-        console.log('\n✅ Restored!');
+        const opts = positionalPw ? { password: positionalPw } : {};
+        const result = await boot.restoreFromHorcrux(horcruxPath, opts);
         console.log('Version:', result.version);
         console.log('Timestamp:', new Date(result.timestamp));
         console.log('Restored:', result.restored.join(', '));
