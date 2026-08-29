@@ -20,28 +20,31 @@
 
 ## Current State
 
-- All work in this session is **pushed to `origin/axolotl`** as of
-  the most recent commit. 8 commits ahead of `9213344` baseline:
-  `4ae316b` T10b, `19cd6c3` T11b, `a20cf36` T12b, `c95d1ff` T13b,
-  `027fef3` T14b-r1, `81ddedc` T15, `f2de61a` T16, `3df35d4` T16+T17.
-- **Test suite: 1489/1489 passing** — 0 failures. T15 fixed
-  24 fails; T16 fixed the remaining 11 (9 embed + 4 escrow)
-  plus one real bug in `lib/escrow.js setBudget()`. T17
-  removed 5 more deprecated aliases with 12 callsite
-  migrations. Branch is fully green.
-- All 5 b-T commits + T15 fix pushed.
-- T10b — `storage.exists` alias removed; `storage.has` is the only
-  existence-check method.
-- T11b — `brain.loadBrain` and `brain.brainList` aliases removed.
-- T12b — `lib/shell.js` `ALLOWED_COMMANDS`, `lib/search.js` unused
-  `MODELS_DIR`, `lib/qos.js` 7 duplicate prototype alias methods +
-  `RateLimit` + `defaultQoS` singleton — all dead-code compat removed.
-- T13b — `defaultCache` singleton removed from `lib/cache.js`. 25+
-  method aliases on the module export gone. `brain.js`, `network.js`,
-  `vant.js` lazily instantiate `new Cache()`. `lib/cache.js` exports
-  only `{ Cache }`.
-- T14b-r1 — Four more dead-code compat aliases: `config.setFlag`,
-  `event.EventBus/SimpleEventEmitter`, `api.get mode()`, `vant.Runtime`.
+- **Test suite: 1480/1480 passing** — 0 failures across 75 test files.
+- Net **-28 lines** of code removed in this commit (T18–T20 + config key fix).
+- All 3 remaining "Future b-T Candidates" resolved:
+  - **T18** `lib/islands.js` `getManifestSync` removed (test-only public
+    API; 0 lib callers). 7 callsites migrated to `asyncTest` + `await
+    getManifest()`; 2 callsites in `test/test-islands.js` removed.
+  - **T19** `lib/lineage.js` `getHistory` removed (orphan alias; 0
+    callers anywhere — not even in tests).
+  - **T20** `lib/transform.js` `validateHorcrux` removed (1-line passthrough
+    wrapper to `validateHorcruxData`). 2 production callers in
+    `lib/backup.js` migrated to `validateHorcruxData`. 1 internal caller
+    in `transform.js` (`restore()`) also migrated. `validateHorcruxData`
+    is now properly exported (it was previously only available via the
+    wrapper).
+- **Bonus (caught in shim audit):** `lib/agents.js` `_getMaxAgents()` was
+  looking for `agents.max` (the canonical key the user expected) with a
+  fallback to `agents.maxAgents` (the actual key in `lib/config.js`
+  defaults). Since the canonical key was the unused one, the fallback was
+  effectively load-bearing. Collapsed to single `agents.maxAgents` lookup
+  matching the default config. Test comment in `test/test-modules.js` updated.
+- T17b (`3aa520b`) — `embed.embed`/`embedBatch` aliases removed; canonical
+  `generate`/`generateBatch`/`generateStack`/`generateBatchStack`.
+- T17 (`3df35d4`) — 5 aliases removed across `lib/encrypt.js`,
+  `lib/secret.js`, `lib/embed.js`, `lib/transform.js`. 12 callsite
+  migrations.
 
 ---
 
@@ -218,6 +221,60 @@
   - `lib/vant.js`: `Runtime` legacy class wrapper.
   225 tests across 15 suites pass. Commit: `027fef3`. Pushed.
 
+### T17 — Six more compat aliases removed
+- `lib/encrypt.js`: `Encrypt.encode/decode/pbkdf2Sync` named exports.
+  Internal stego callers migrated to the new lowercase methods.
+- `lib/secret.js`: `getPassword/hasPassword/clearPassword` named exports.
+  transform/boot migrated.
+- `lib/embed.js`: `embed`/`embedBatch` named exports (T17b follow-up
+  resolved the alias in the same module too).
+- `lib/transform.js`: `payload: parsed.payload` no-op.
+- 9 escrow tests + 4 stego test callsite migrations. 1489/1489 pass.
+  Commit: `3df35d4`. Pushed.
+
+### T17b — `embed.embed`/`embedBatch` aliases removed (canonical naming)
+- `lib/embed.js` was still exposing the old short names as aliases even
+  after T17 promoted `generate`/`generateBatch`. Both removed. Canonical
+  names are now `generate`/`generateBatch`/`generateStack`/`generateBatchStack`.
+- 4 callsites in `test/embed.test.js` migrated; 2 test cases renamed.
+  1489/1489 pass. Commit: `3aa520b`. Pushed.
+
+### T18 — `islands.getManifestSync` removed (test-only public API)
+- `lib/islands.js` exposed a sync wrapper for "test compatibility" but
+  it had zero callers in `lib/`. Tests were the only consumers.
+- Wrapper + export removed. 7 callsites in `test/islands.test.js`
+  converted to `asyncTest` + `await getManifest()`. 2 callsites in
+  `test/test-islands.js` (existence + returns-object) deleted.
+- Internal `_getManifestSync()` retained for lib internals that need it.
+- 1480/1480 pass.
+
+### T19 — `lineage.getHistory` removed (orphan alias)
+- `lib/lineage.js:129` exposed `getHistory(id) { return trace(id); }` as
+  a 1-line alias. Zero callers anywhere — not in `lib/`, not in `test/`,
+  not in `bin/`. Pure dead code.
+- Function + export entry removed.
+
+### T20 — `transform.validateHorcrux` removed (compat wrapper)
+- `lib/transform.js:1376` was a 1-line passthrough to
+  `validateHorcruxData`, labeled "Legacy for backward compatibility"
+  but had 2 active production callers (`lib/backup.js:230, 311`) and 1
+  internal caller (`transform.js:restore()`).
+- Wrapper + export removed. 3 callers migrated to `validateHorcruxData`.
+- `validateHorcruxData` is now properly exported (it was previously
+  internal-only and only reachable via the wrapper).
+- **Bonus fix found by manual smoke:** the `lib/backup.js` migration
+  needed `validateHorcruxData` to actually be on `module.exports` —
+  it wasn't. Exported it. End-to-end pipeline
+  `toHorcrux` → `validateHorcruxData` → `validateHorcruxFile` →
+  `restore` now works without the wrapper.
+- `lib/agents.js` `_getMaxAgents()` was looking for `agents.max` (the
+  canonical key the user expected) with a fallback to `agents.maxAgents`
+  (the actual key in `lib/config.js` defaults). Since the canonical key
+  was the unused one, the fallback was effectively load-bearing.
+  Collapsed to single `agents.maxAgents` lookup matching the default.
+  Test comment in `test/test-modules.js` updated to match.
+- 1480/1480 pass.
+
 ---
 
 ## Future b-T Candidates (audit noted, not in this session)
@@ -228,12 +285,12 @@ These were identified in the final `grep -E "backward|compatibility|deprecat|leg
 - ✅ **`lib/brain.js:2547`** — internal compatibility comment (not a runtime alias; just a doc marker).
 - ✅ **`lib/embed.js:257`** — `embed`/`embedBatch` aliases removed (T17b). Canonical names are `generate`/`generateBatch`.
 - ✅ **`lib/encrypt.js:297, 308, 482`** — `Encrypt.encode/decode/pbkdf2Sync` removed in T17; stego migrated.
-- ⏳ **`lib/islands.js:500, 525`** — `getManifestSync` "for test compatibility". Defer to next session.
-- ⏳ **`lib/lineage.js:129`** — `getHistory` "alias for trace". Defer to next session.
+- ✅ **`lib/islands.js:500, 525`** — `getManifestSync` "for test compatibility" removed in T18. Internal `_getManifestSync()` retained for lib internals.
+- ✅ **`lib/lineage.js:129`** — `getHistory` "alias for trace" removed in T19. Zero callers anywhere.
 - ✅ **`lib/mcp.js:3205`** — internal "now aliases to unified" comment (not a runtime alias).
 - ✅ **`lib/secret.js:411-414`** — `getPassword/hasPassword/clearPassword` removed in T17; transform/boot migrated.
 - ✅ **`lib/storage.js:719, 728, 733, 754`** — audited; "legacy" paths are real fallback code, not compat shims. Kept.
-- ⏳ **`lib/transform.js:1376`** — `validateHorcrux` "Legacy for backward compatibility". Defer to next session.
+- ✅ **`lib/transform.js:1376`** — `validateHorcrux` "Legacy for backward compatibility" removed in T20. Callers migrated to `validateHorcruxData` (now properly exported).
 - ✅ **`lib/transform.js:1441, 1461`** — `payload: parsed.payload` "Keep for compatibility" — removed as no-op.
 
 ---
