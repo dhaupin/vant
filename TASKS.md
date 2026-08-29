@@ -20,15 +20,14 @@
 
 ## Current State
 
-- All work in this session is **local-only** (not yet pushed to
-  `origin/axolotl`). 5 commits ahead of `9213344` baseline:
+- All work in this session is **pushed to `origin/axolotl`** as of
+  the most recent commit. 6 commits ahead of `9213344` baseline:
   `4ae316b` T10b, `19cd6c3` T11b, `a20cf36` T12b, `c95d1ff` T13b,
-  `027fef3` T14b-r1.
-- All local test suites pass: **225 tests across 15 suites, 0 failing**.
-  boot 15/15, forum 23/23, stream 29/29, tmp 10/10, do 6/6,
-  brain 12/12, storage 14/14, cache 12/12, qos 10/10,
-  shell 8/8, search 22/22, vant 8/8, api 21/21, event 15/15,
-  config 20/20.
+  `027fef3` T14b-r1, `81ddedc` T15.
+- **Test suite: 1478/1489 passing** (+27 since pre-T15). 11
+  pre-existing failures in 2 files: `test/embed.test.js` (9),
+  `test/test-escrow.js` (4). All other 108 test files pass.
+- All 5 b-T commits + T15 fix pushed.
 - T10b — `storage.exists` alias removed; `storage.has` is the only
   existence-check method.
 - T11b — `brain.loadBrain` and `brain.brainList` aliases removed.
@@ -82,6 +81,27 @@
 ---
 
 ## Pending (in proposed order)
+
+### T16 — Audit remaining 11 pre-existing test failures
+- **Scope:** `test/embed.test.js` (9 fails) + `test/test-escrow.js` (4 fails)
+- **Why:** these predate the axolotl b-T round and T15, but are
+  the only failing tests left on the branch. Cleaning them up
+  brings the suite to 0 failures.
+- **Plan (proposed):**
+  1. `test/embed.test.js` — either implement the embedding
+     abstraction in `lib/embed.js` (setEmbedder / getEmbedder /
+     listEmbedders / embedStack / embedBatchStack), or remove
+     the tests. User picked (a) — re-evaluate.
+  2. `test-escrow.js` — investigate the 4 failing assertions
+     (canSpend allowed, recordSpend, agent isolation, quota check)
+     and either fix the tests or the `lib/escrow.js` surface.
+- **Acceptance:** 1489/1489 tests passing.
+
+### T17 (deferred) — Future b-T candidates
+- `lib/transform.js` keep-for-compat extras
+- `lib/encrypt.js` final consolidation
+- `lib/secret.js` (TBD)
+- `lib/embed.js` (if not done in T16)
 
 ---
 
