@@ -1,0 +1,11 @@
+{
+  "created": "2026-08-29T09:18:49.689Z",
+  "format": "steganography",
+  "size": 1147735,
+  "git": {
+    "commit": "614793f3cf150b8c4c163f90bca5f247643f4085",
+    "branch": "axolotl",
+    "dirty": true
+  },
+  "passwordSet": true
+}
