@@ -63,6 +63,65 @@
 
 ## Pending (in proposed order)
 
+---
+
+## Completed
+
+- **T1** — `lib/boot.js` dedupe brain-layer push in `boot.init`.
+  Commit: `16f841e`. Pushed.
+- **T4** — Second private brain `axolotl` + coexistence tests.
+  Commit: `e77678c`. Pushed.
+- **T3** — Pipeline-backed `*Secured` variants on `FileStorage` and `Msg`;
+  fixed `Encrypt` -> `encrypt` typo in `msg.js`. Commit: `86be32a`. Pushed.
+- **T2** — Pipeline-backed `*Secured` variants on cache + resolution;
+  fixed missing `errors` import. Commit: `19fa52b`. Pushed.
+- **T12** — Whitespace cleanup on `lib/**/*.js`: stripped trailing
+  whitespace from 4,707 lines, added final newlines to 38 files,
+  collapsed 3+ blank lines to 2 in 4 files. Verified `git diff -w` shows
+  only 6 deletions (the blank-line collapses). All test counts unchanged
+  (37/37 runner, 173 module tests). Commit: `72eda6b`. Pushed.
+- **TASKS.md** — Created at repo root for crash resilience. Commit:
+  `72eda6b` (included T12). Pushed.
+- **T11** — Extracted `Cache` class from `lib/cache.js`. Module-level
+  state (one Map, one lock, one config, pools, brain caches) is now
+  per-instance. Module keeps a `defaultCache = new Cache()` singleton
+  for backward compat. Class is exposed as a named export.
+  Side-effect: surfaced and fixed a pre-existing `cache.compress` bug
+  that did `Buffer.from(JSON.stringify(str))` for strings (adding
+  quotes). 10 new tests for class behavior + isolation. Commit: `d1672e4`.
+  Pushed.
+- **T10** — Storage safe-by-default. Three tiers now:
+  1. `storage.read/write/delete/list` = SAFE BY DEFAULT (inline capability
+     + VAF, sync, backward-compatible with default sandbox via
+     `_captureDefaultSandbox` reference-comparison).
+  2. `storage.readRaw/writeRaw/deleteRaw/listRaw` = explicit unsafe
+     bypass for callers that have already validated inputs.
+  3. `storage.readSecured/writeSecured/...` (existing) = async full
+     pipeline (sandbox + vaf + qos + escrow).
+  12 new tests cover: Raw exports, Raw methods, safe read works, safe
+  read blocks traversal, readRaw does NOT block, readSecured blocks.
+  Commit: `d896f05`. Pushed.
+
+---
+
+## Pending (in proposed order)
+
+### T5-T9 — Original plan items (per initial absorption review)
+- **T5:** `lib/boot.js` calls QoS directly with fail-open semantics. Audit
+  and decide whether to surface a capability error.
+- **T6:** `lib/forum.js` `deleteThread` has no sandbox check. Add one.
+- **T7:** `lib/audit.js` log writes bypass the vaf filter. Wrap in pipeline.
+- **T8:** Add `getStats` to `lib/pipeline.js` for runtime metrics.
+- **T9:** `lib/stream.js` has 9 imports from a single barrel file. Consider
+  breaking them apart or aliasing explicitly.
+
+---
+
+## Original Pending Plan (now superseded by Completed section above)
+
+These are kept for reference. The detailed plans below are pre-completion
+and have been executed; see the Completed section for the actual results.
+
 ### T12 — Whitespace cleanup (mechanical, do first)
 - **Scope:** `lib/**/*.js`
 - **Survey done 2026-08-29:**
