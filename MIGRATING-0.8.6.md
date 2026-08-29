@@ -223,12 +223,76 @@ re-defined `mode` on the object, that no longer works.
 - CLI commands and flags
 - Config keys
 
+## T17 additions (also nuclear breaking)
+
+### 9. `Encrypt.encode()` / `Encrypt.decode()` → `Encrypt.encrypt()` / `Encrypt.decrypt()`
+
+**Before**:
+
+```js
+const { Encrypt } = require('vant');
+const enc = Encrypt.encode(message, password);
+const dec = Encrypt.decode(enc, password);
+```
+
+**After**:
+
+```js
+const { Encrypt } = require('vant');
+const enc = Encrypt.encrypt(message, password, { algorithm: 'aes-256-gcm' });
+const dec = Encrypt.decrypt(enc, password, { algorithm: 'aes-256-gcm' });
+```
+
+The deprecated `encode`/`decode` aliases for `encrypt`/`decrypt`
+with ALGORITHM='aes-256-gcm' are gone.
+
+### 10. `Encrypt.pbkdf2Sync()` → `crypto.pbkdf2Sync()` (Node built-in)
+
+**Before**:
+
+```js
+const { Encrypt } = require('vant');
+const key = Encrypt.pbkdf2Sync(password, salt, 100000, 32, 'sha256');
+```
+
+**After**:
+
+```js
+const crypto = require('crypto');
+const key = crypto.pbkdf2Sync(password, salt, 100000, 32, 'sha256');
+```
+
+`Encrypt.pbkdf2Sync` was a 1-line passthrough to `crypto.pbkdf2Sync`
+with zero callers. Use the Node built-in directly.
+
+### 11. `secret.getPassword()` / `hasPassword()` / `clearPassword()` → `get` / `has` / `clear` with `'brain'` type
+
+**Before**:
+
+```js
+const secret = require('vant').secret;
+const pwd = await secret.getPassword();
+const exists = await secret.hasPassword();
+await secret.clearPassword();
+```
+
+**After**:
+
+```js
+const secret = require('vant').secret;
+const pwd = await secret.get('brain');
+const exists = await secret.has('brain');
+await secret.clear('brain');
+```
+
+The legacy "password" aliases were hardcoded to the `'brain'`
+secret type. Use the generic `get(type, options)` API with
+the explicit type.
+
 ## What if I'm stuck?
 
-Run the test suite — the failures are informative. The b-T round
-caused 35 pre-existing test failures across 7 files; T15 fixed 24
-of them. The remaining 11 (embed: 9, test-escrow: 4) are pre-existing
-and unrelated to the bloat removal.
+Run the test suite — the failures are informative. The branch is
+**100% green** as of T16: 1489/1489 passing, 0 failures.
 
 If a removal broke your code and you need help migrating, the
-diff is in commits 4ae316b → 9a2583b on the `axolotl` branch.
+diff is in commits `4ae316b` → `3df35d4` on the `axolotl` branch.
