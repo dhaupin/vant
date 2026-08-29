@@ -62,8 +62,8 @@ test('has write method', () => {
     return typeof storage.write === 'function';
 });
 
-test('has exists method', () => {
-    return typeof storage.exists === 'function';
+test('has no exists method (T10b)', () => {
+    return storage.exists === undefined;
 });
 
 test('has delete method', () => {
@@ -104,8 +104,13 @@ test('storage.write is function', () => {
     return typeof storage.write === 'function';
 });
 
-test('storage.exists is function', () => {
-    return typeof storage.exists === 'function';
+test('storage.exists is removed (T10b — nuclear breaking)', () => {
+    // v0.9.0-axolotl T10b: removed the `exists` alias for `has`. Callers
+    // should use `storage.has(path)`. No compat shim in this branch.
+    return {
+        success: storage.exists === undefined,
+        error: storage.exists !== undefined ? 'storage.exists still exported' : null
+    };
 });
 
 // ============================================
