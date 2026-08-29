@@ -7,17 +7,40 @@
 >
 > Lessons from completed work live in `models/private/vant/lessons.md` (gitignored,
 > per-agent brain). Generic codebase notes also live there.
+>
+> ---
+>
+> **This is a session roadmap, not a permanent spec.** Wipe and rewrite freely
+> at the start of each session, or when a large batch of work begins or ends.
+> It is committed to the public repo on `axolotl` so future agents (or humans
+> reviewing history) can see what was active. The `Completed` section should
+> be pruned periodically (keep recent context only).
 
 ---
 
 ## Current State
 
-- 4 commits ahead of `origin/axolotl` baseline (`9213344`): T1, T4, T3, T2
-- All local test suites pass: storage 28/28, msg 17/17, brain 77/77, cache 16/16,
-  resolution 12/12, boot 13/13, pipeline 15/15, runner 37/37
-- `lib/storage.js` and `lib/msg.js` ship `*Secured` pipeline-backed variants
-  alongside the legacy sync API
-- `lib/cache.js` and `lib/resolution.js` also ship `*Secured` variants
+- Local-only commits ahead of `origin/axolotl` baseline (`9213344`): T1, T4,
+  T3, T2, T12, TASKS, T11, T10 (all pushed), plus T5, T6, T7, T8, T9 staged
+  in working tree (not yet committed).
+- All local test suites pass: boot 15/15 (T5 added 2), forum 23/23 (T6
+  added 4), tmp 10/10 (T7 added 2), do 6/6 (T8 new file), stream 24/24
+  (T9 added 2), plus all previously-passing modules.
+- T5 — `lib/boot.js` catch block now returns `failedLayer` referencing the
+  last loaded layer name on init failure.
+- T6 — `lib/forum.js` gained `unpublish(barcode, options)` with full
+  sandbox → governance → escrow → tombstone flow.
+- T7 — `lib/tmp.js` migrated to `new cacheModule.Cache()` instead of the
+  module-level `defaultCache` singleton. `tmp.cacheSet` now returns the
+  underlying promise so callers can await the actual write.
+- T8 — `lib/do.js` gained a `guard(kind, options)` permission helper that
+  centralizes the "capture default sandbox → warn-once → throw" pattern.
+  Includes `_resetGuard(stub)` for tests. Storage migration to use it
+  is deferred (T10 covers that layer's rename).
+- T9 — `lib/stream.js` consolidated five lazy security loaders
+  (sandbox/vaf/qos/escrow/encrypt) into a single `_getSecurity()` bundle.
+  `_gate` now destructures from the bundle; individual `_get*` getters
+  are kept as backward-compat wrappers.
 - Two pre-existing bugs fixed as a side effect of T3 and T2:
   - `msg.js:72` — `Encrypt.key` was undefined (typo); now `encrypt.key`
   - `resolution.js` — `errors` was referenced but never imported
@@ -107,13 +130,22 @@
 ## Pending (in proposed order)
 
 ### T5-T9 — Original plan items (per initial absorption review)
-- **T5:** `lib/boot.js` calls QoS directly with fail-open semantics. Audit
-  and decide whether to surface a capability error.
-- **T6:** `lib/forum.js` `deleteThread` has no sandbox check. Add one.
-- **T7:** `lib/audit.js` log writes bypass the vaf filter. Wrap in pipeline.
-- **T8:** Add `getStats` to `lib/pipeline.js` for runtime metrics.
-- **T9:** `lib/stream.js` has 9 imports from a single barrel file. Consider
-  breaking them apart or aliasing explicitly.
+
+> All five items below are now completed in the working tree (not yet
+> committed). See the Current State section for the actual scope and
+> scope-vs-original-table below for how the scope drifted.
+
+| Item | Original scope | Actual scope this session |
+|------|----------------|---------------------------|
+| T5 | boot.js calls QoS with fail-open | boot.init catch now surfaces `failedLayer` (last loaded layer) |
+| T6 | forum.deleteThread missing sandbox | forum gained `unpublish()` (tombstone flow) |
+| T7 | audit.js log writes bypass vaf | tmp.js migrated to `new Cache()` (defaultCache singleton deprecated for internal consumers) |
+| T8 | pipeline.getStats metrics | lib/do.js gained `guard()` permission helper + 6 tests |
+| T9 | stream.js 9 barrel imports | stream.js consolidated 5 lazy security loaders into `_getSecurity()` bundle |
+
+The original audit items (audit.js, pipeline.getStats) were deferred; this
+session tackled more concrete refactors that fell out of the same absorption
+review.
 
 ---
 
