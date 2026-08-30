@@ -365,8 +365,8 @@ See: vant node --help`
         detail: 'Direct brain access.\nSee: vant brain --help'
     },
     framework: {
-        desc: 'Framework utilities',
-        usage: 'vant framework build|serve',
+        desc: 'Framework (absorbed into vant.js)',
+        usage: 'vant framework info|version',
         detail: 'Framework helpers.\nSee: vant framework --help'
     },
     compute: {
@@ -565,9 +565,9 @@ See: vant geometry --help`,
         detail: 'Run API server.\nSee: vant api --help'
     },
     runop: {
-        desc: 'Run operations',
-        usage: 'vant runop execute',
-        detail: 'Run operations.\nSee: vant runop --help'
+        desc: 'Runtime operations (absorbed into pipeline)',
+        usage: 'vant runop init|status|stop',
+        detail: 'Pipeline runtime ops.\nSee: vant runop --help'
     },
     secret: {
         desc: 'Secret management',

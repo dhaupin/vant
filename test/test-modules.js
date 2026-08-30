@@ -30,11 +30,11 @@ test('has Agents class', () => typeof agents.Agents === 'function');
 // Re-add only if a real static cap is introduced.
 
 console.log('\n=== Runop Module Tests ===\n');
-const runop = require('../lib/runop');
-test('has init function', () => typeof runop.init === 'function');
-test('has run function', () => typeof runop.run === 'function');
-test('has stop function', () => typeof runop.stop === 'function');
-test('has getStatus function', () => typeof runop.getStatus === 'function');
+const pipeline = require('../lib/pipeline');
+test('has init function', () => typeof pipeline.initLayers === 'function');
+test('has run function', () => typeof pipeline.run === 'function');
+test('has stop function', () => typeof pipeline.stop === 'function');
+test('has getStatus function', () => typeof pipeline.getStatus === 'function');
 
 console.log('\n=== Vibe Module Tests ===\n');
 const vibe = require('../lib/vibe');

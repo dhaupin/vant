@@ -19,7 +19,7 @@ const mcp = require('./lib/mcp');
 const server = require('./lib/server');
 const network = require('./lib/network');
 const boot = require('./lib/boot');
-const runop = require('./lib/runop');
+const pipeline = require('./lib/pipeline');
 const format = require('./lib/format');
 const legal = require('./lib/legal');  // Emergency red button
 const memory = require('./lib/memory');  // Memory system
@@ -59,7 +59,7 @@ module.exports = {
     boot,
     
     // Runtime operator (lifecycle + config gates)
-    runop,
+    pipeline,
     
     // Version
     getVersion: () => require('./package.json').version,

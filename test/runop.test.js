@@ -34,31 +34,31 @@ console.log('\n⚙️ RUNOP MODULE TESTS\n');
 
 // Test 1: Module loads
 test('runop module loads', () => {
-    const runop = require(path.join(ROOT, 'lib', 'runop'));
+    const runop = require(path.join(ROOT, 'lib', 'pipeline'));
     return { success: !!runop };
 });
 
 // Test 2: Has run function
 test('runop has run function', () => {
-    const runop = require(path.join(ROOT, 'lib', 'runop'));
+    const runop = require(path.join(ROOT, 'lib', 'pipeline'));
     return { success: typeof runop.run === 'function' };
 });
 
 // Test 3: Has init function
 test('runop has init function', () => {
-    const runop = require(path.join(ROOT, 'lib', 'runop'));
+    const runop = require(path.join(ROOT, 'lib', 'pipeline'));
     return { success: typeof runop.init === 'function' };
 });
 
 // Test 4: Has stop function
 test('runop has stop function', () => {
-    const runop = require(path.join(ROOT, 'lib', 'runop'));
+    const runop = require(path.join(ROOT, 'lib', 'pipeline'));
     return { success: typeof runop.stop === 'function' };
 });
 
 // Test 5: Has getStatus function
 test('runop has getStatus function', () => {
-    const runop = require(path.join(ROOT, 'lib', 'runop'));
+    const runop = require(path.join(ROOT, 'lib', 'pipeline'));
     return { success: typeof runop.getStatus === 'function' };
 });
 
@@ -70,7 +70,7 @@ console.log('\n🧠 MULTIBRAIN TESTS\n');
 
 // Test 6: runop integrates with brain module
 test('runop integrates with brain module', () => {
-    const runop = require(path.join(ROOT, 'lib', 'runop'));
+    const runop = require(path.join(ROOT, 'lib', 'pipeline'));
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     
     const currentBrain = brain.currentBrain();
