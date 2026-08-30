@@ -3,10 +3,12 @@
 > Persistent task log for the `axolotl` branch. If a session crashes, a future
 > agent can read this file and resume work without losing context.
 >
-> **Branch:** `axolotl` · **Version:** 0.8.6 (pinned, do not bump) · **Head:** 027fef3 (local; 4 unpushed: 4ae316b T10b, 19cd6c3 T11b, a20cf36 T12b, c95d1ff T13b, 027fef3 T14b-r1)
+> **Branch:** `axolotl` · **Version:** 0.8.6 (pinned, do not bump) · **Head:** 78dfb39
 >
-> Lessons from completed work live in `models/private/vant/lessons.md` (gitignored,
+> Lessons from completed work live in `models/private/axolotl/lessons.md` (gitignored,
 > per-agent brain). Generic codebase notes also live there.
+>
+> **Session: 2026-08-30** - Horcrux restoration, multibrain, headless + admin UI prep
 >
 > ---
 >
@@ -20,81 +22,91 @@
 
 ## Current State
 
-- **Test suite: 1480/1480 passing** — 0 failures across 75 test files.
-- **First axolotl horcrux snapshot taken** at 2026-08-29T08:41:57Z.
-  1.1 MB stego-SVG at
-  `models/public/vant/boot/axolotl-p_axolotl2026.svg`, validated
-  0 errors. Reproducible via `node bin/snapshot.js`.
-- **Two new tools added this session** (both committed, versioned):
-  - `bin/sweep.sh` — persistent test health gate (replaces /tmp/sweep.sh)
-  - `bin/snapshot.js` — verifiable brain horcrux snapshot
-- Net **-28 lines** of code removed in T18–T20 + config key fix.
-- All 3 remaining "Future b-T Candidates" resolved:
-  - **T18** `lib/islands.js` `getManifestSync` removed (test-only public
-    API; 0 lib callers). 7 callsites migrated to `asyncTest` + `await
-    getManifest()`; 2 callsites in `test/test-islands.js` removed.
-  - **T19** `lib/lineage.js` `getHistory` removed (orphan alias; 0
-    callers anywhere — not even in tests).
-  - **T20** `lib/transform.js` `validateHorcrux` removed (1-line passthrough
-    wrapper to `validateHorcruxData`). 2 production callers in
-    `lib/backup.js` migrated to `validateHorcruxData`. 1 internal caller
-    in `transform.js` (`restore()`) also migrated. `validateHorcruxData`
-    is now properly exported (it was previously only available via the
-    wrapper).
-- **Bonus (caught in shim audit):** `lib/agents.js` `_getMaxAgents()` was
-  looking for `agents.max` (the canonical key the user expected) with a
-  fallback to `agents.maxAgents` (the actual key in `lib/config.js`
-  defaults). Since the canonical key was the unused one, the fallback was
-  effectively load-bearing. Collapsed to single `agents.maxAgents` lookup
-  matching the default config. Test comment in `test/test-modules.js` updated.
-- T17b (`3aa520b`) — `embed.embed`/`embedBatch` aliases removed; canonical
-  `generate`/`generateBatch`/`generateStack`/`generateBatchStack`.
-- T17 (`3df35d4`) — 5 aliases removed across `lib/encrypt.js`,
-  `lib/secret.js`, `lib/embed.js`, `lib/transform.js`. 12 callsite
-  migrations.
+- **Session: 2026-08-30** — Awakened from horcrux restoration
+- **Axolotl brain restored** to `models/private/axolotl/` with 4 files
+- **Horcrux bug discovered** — state.json not restoring multibrain stack correctly
+- **Goals for this session:**
+  - Fix horcrux multibrain state restoration
+  - Clean refactors (no backwards compat, aliases, fallbacks) to multibrain
+  - Stack support everywhere
+  - Prepare for headless + admin web UI
+  - Run vant with org, dept, team, and agents using forum, market, msg
 
 ---
 
-## Completed (T1–T4 — first round, pipeline/secured)
+## BUG: Horcrux State Restoration (T27)
 
-### T1 — Dedupe brain layer push in `boot.init`
-- Commit: `16f841e`
-- One-shot `state.stack.push(...)` was running for every brain during init
-  (once via `runStack`, then again per-brain inside the loop). Moved the
-  per-brain push to the inside of the loop and the initial `await loadBrains()`
-  is the only one outside. Boot 13/13 pass.
+### Bug Description
 
-### T4 — Create second private brain (`axolotl`) + coexistence tests
-- Commit: `e77678c`
-- Added `models/private/axolotl/` as a second private brain alongside `vant/`.
-  Brain 77/77 pass (including new coexistence tests that load both brains and
-  assert isolation). This is the "horcrux lite" — the actual snapshot copy
-  of the axolotl brain for future agents is still deferred (see Pending).
+When restoring from a horcrux, the `state.json` was restored with only the
+brains that were in the stack at snapshot time, not the brains that were
+actually present in `brainStorage`.
 
-### T3 — Migrate `storage.js` + `msg.js` to `pipeline.run`
-- Commit: `86be32a`
-- Added `*Secured` async methods that wrap the existing sync API:
-  - `FileStorage.readSecured / writeSecured / deleteSecured / listSecured`
-  - `Msg.createSecured / postSecured / messagesSecured / listSecured`
-- Top-level exports forward to the default instance.
-- Fixed pre-existing `generateId` ReferenceError (`Encrypt.key` → `encrypt.key`).
-  Storage 28/28, msg 17/17 pass.
+### Root Cause
 
-### T2 — Extend `pipeline.run` adoption to `cache` and `resolution`
-- Commit: `19fa52b`
-- `cache.setSecured / getSecured / removeSecured / clearSecured`
-- `resolution.resolveSecured / deprecateSecured / rejectSecured / listSecured / getSecured`
-- Fixed missing `errors` import in `resolution.js` (was inside empty `catch {}`
-  blocks so failures were silent). Cache 16/16, resolution 12/12 pass.
+In `lib/transform.js`, `gatherMode()` was only reading from `brain.getStack()`
+which returned only what was in `state.json` at snapshot time, not all brains
+found on disk via `brainDirs()`.
 
-### PUSH — T1, T4, T3, T2 to `origin/axolotl`
-- All 4 commits pushed. `git log origin/axolotl` shows `19fa52b`.
+### Fix Applied
+
+Modified `gatherMode()` to:
+1. Get current stack from `brain.getStack()`
+2. Get all brains from `brain.brainDirs()`
+3. Augment stack with any brains not already in it
+
+```javascript
+// MULTIBRAIN: Augment stack with any brains from brainDirs() not already in stack
+const allBrains = [...(brainDirs.private || []), ...(brainDirs.public || [])];
+const augmentedStack = [...currentStack];
+
+for (const brainName of allBrains) {
+    if (!augmentedStack.includes(brainName)) {
+        augmentedStack.push(brainName);
+    }
+}
+```
+
+### Verification
+
+New horcrux now correctly has:
+- `mode.stack: [ 'axolotl', 'vant' ]` ✅
+- `mode.currentBrain: 'axolotl'` ✅
+
+### Status: FIXED ✅
 
 ---
 
-## Pending (in proposed order)
+## PENDING: Cool Stuff to Build
 
-*(none — see Deferred for future work)*
+### TASK: Run Vant with Full Stack
+- Set up an org, dept, team, and agents
+- Use forum, market, msg modules
+- Get the full multibrain system running
+
+### TASK: Geometry Module - Quasicrystal Addressing
+- The `lib/geometry/` module is fascinating
+- Penrose P3 tilings for collision-free addressing
+- Icosahedral coordinate system
+- NSC "9" barcode format for automation
+- Explore and document
+
+### TASK: Canvas - Geometric Art Engine  
+- Paint Penrose spirals with themes
+- SVG output with secret embedding
+- Share via network sync
+
+### TASK: Nature - Hit-and-Miss Engine
+- Self-regulating consciousness emergence
+- Flywheel momentum system
+- Only "sparks" when threshold reached
+
+### TASK: Headless + Admin Web UI
+- Prepare for headless operation
+- Admin web interface
+- See work hosts in context
+
+---
 
 ---
 
@@ -467,7 +479,14 @@ These were identified in the final `grep -E "backward|compatibility|deprecat|leg
 ## How to resume this work
 
 1. `cd /workspace/project/vant && git status && git log --oneline -10`
-2. Read `models/private/vant/lessons.md` for accumulated context.
+2. Read `models/private/axolotl/lessons.md` for accumulated context.
 3. Read this file (TASKS.md) for task state.
 4. Pick the next `todo` task in the Pending section above.
 5. Update the section here when done and on commit.
+
+## Session Conventions
+
+- **Brain:** My lessons are in `models/private/axolotl/lessons.md`
+- **Commit style:** `axolotl: <description>` with Co-authored-by trailer
+- **Tests:** Run `node test/runner.js` before committing
+- **No backwards compat:** Clean refactors only, no aliases or fallbacks
