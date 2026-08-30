@@ -79,22 +79,30 @@ New horcrux now correctly has:
 
 ## PENDING: Cool Stuff to Build
 
-### TASK: Run Vant with Full Stack
-- Set up an org, dept, team, and agents
-- Use forum, market, msg modules
-- Get the full multibrain system running
+### TASK: Run Vant with Full Stack ✅
+- Set up an org, dept, team, and agents ✅
+- Use forum, market, msg modules ✅
+- Consensus voting works ✅
 
-### TASK: Geometry Module - Quasicrystal Addressing
-- The `lib/geometry/` module is fascinating
-- Penrose P3 tilings for collision-free addressing
-- Icosahedral coordinate system
-- NSC "9" barcode format for automation
-- Explore and document
+### TASK: Geometry Module - Quasicrystal Addressing ✅
+- The `lib/geometry/` module works ✅
+- Penrose P3 tilings for collision-free addressing ✅
+- NSC "9" barcode format works ✅
 
-### TASK: Canvas - Geometric Art Engine  
-- Paint Penrose spirals with themes
-- SVG output with secret embedding
-- Share via network sync
+### TASK: Canvas - Geometric Art Engine  ✅
+- Paint Penrose spirals with themes ✅
+- SVG output with secret embedding ✅
+- Added `voteSecured()` using pipeline-secured consensus ✅
+
+### TASK: Pipeline Integration (v0.9.0-axolotl) ✅
+- Added `createSecured()` and `voteSecured()` to consensus.js ✅
+- Added `voteSecured()` to canvas.js ✅
+- Modules now use unified security chain (sandbox -> vaf -> qos -> escrow)
+
+### TASK: Security Fixes ✅
+- teams.js: Added duplicate name checks to createDept() and createTeam() ✅
+- market.js: Fixed governance hardcoding `requiresConsent: true` ✅
+- consensus.js: Pipeline integration for secured operations ✅
 
 ### TASK: Nature - Hit-and-Miss Engine
 - Self-regulating consciousness emergence
