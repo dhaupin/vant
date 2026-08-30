@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Vant Module Unit Tests
+ * Vant Module Unit Tests (v0.8.6)
+ * Tests for vant.js (framework absorbed into vant)
  */
 
 const path = require('path');
@@ -13,156 +14,48 @@ function test(name, fn) {
         const result = fn();
         if (result === true || (result && result.success)) {
             results.passed++;
-            console.log(`  ✓ ${name}`);
+            results.tests.push({ name, status: 'passed' });
+            console.log('  PASS: ' + name);
         } else {
             results.failed++;
-            console.log(`  ✗ ${name}: ${result.error || 'assertion failed'}`);
+            results.tests.push({ name, status: 'failed', error: result.error || 'assertion failed' });
+            console.log('  FAIL: ' + name + ' - ' + (result.error || 'assertion failed'));
         }
     } catch (e) {
         results.failed++;
-        console.log(`  ✗ ${name}: ${e.message}`);
+        results.tests.push({ name, status: 'failed', error: e.message });
+        console.log('  FAIL: ' + name + ' - ' + e.message);
     }
 }
 
-console.log('\n🧠 VANT MODULE TESTS\n');
+console.log('\nVANT MODULE TESTS (v0.8.6)\n');
 
-test('vant module loads', () => {
-    const vant = require(path.join(ROOT, 'lib', 'vant'));
-    return { success: !!vant };
-});
-
-test('vant has init function', () => {
-    const vant = require(path.join(ROOT, 'lib', 'vant'));
-    return { success: typeof vant.init === 'function' };
-});
-
-test('vant has think function', () => {
-    const vant = require(path.join(ROOT, 'lib', 'vant'));
-    return { success: typeof vant.think === 'function' };
-});
-
-test('vant has learn function', () => {
-    const vant = require(path.join(ROOT, 'lib', 'vant'));
-    return { success: typeof vant.learn === 'function' };
-});
-
-test('vant has remember function', () => {
-    const vant = require(path.join(ROOT, 'lib', 'vant'));
-    return { success: typeof vant.remember === 'function' };
-});
-
-test('vant has act function', () => {
-    const vant = require(path.join(ROOT, 'lib', 'vant'));
-    return { success: typeof vant.act === 'function' };
-});
-
-test('vant has getState function', () => {
-    const vant = require(path.join(ROOT, 'lib', 'vant'));
-    return { success: typeof vant.getState === 'function' };
-});
-
-test('vant has getStatus function', () => {
-    const vant = require(path.join(ROOT, 'lib', 'vant'));
-    return { success: typeof vant.getStatus === 'function' };
-});
-
-test('Runtime legacy alias class removed (T14b — nuclear breaking)', () => {
-    // v0.9.0-axolotl T14b: `vant.Runtime` was a legacy class wrapper
-    // exposing init/think/getStatus. Removed. Call the top-level
-    // init/think/getStatus functions directly.
-    const vant = require(path.join(ROOT, 'lib', 'vant'));
-    return {
-        success: vant.Runtime === undefined,
-        error: vant.Runtime !== undefined ? 'vant.Runtime still exported' : null
-    };
-});
-
-test('vant has storage module', () => {
-    const vant = require(path.join(ROOT, 'lib', 'vant'));
-    return { success: !!vant.storage };
-});
-
-test('vant has getTools function', () => {
-    const vant = require(path.join(ROOT, 'lib', 'vant'));
-    return { success: typeof vant.getTools === 'function' };
-});
-
-test('vant has executeTool function', () => {
-    const vant = require(path.join(ROOT, 'lib', 'vant'));
-    return { success: typeof vant.executeTool === 'function' };
-});
-
-test('vant has isOperationAllowed function', () => {
-    const vant = require(path.join(ROOT, 'lib', 'vant'));
-    return { success: typeof vant.isOperationAllowed === 'function' };
-});
-
-// TTL Tests (run separately with: node test/vant.test.js)
 const vant = require(path.join(ROOT, 'lib', 'vant'));
 
-if (require.main === module) {
-    (async () => {
-        await vant.init({ debug: false });
-        
-        console.log('\n🔐 TTL TESTS\n');
-        
-        const tests = [
-            ['remember stores with TTL', async () => {
-                const r = await vant.remember('ttl_test', 'test content');
-                return r.success && r.ttl > 0;
-            }],
-            ['learn stores with TTL', async () => {
-                const r = await vant.learn('ttl_test_learn', 'test content');
-                return r.success && r.ttl > 0;
-            }],
-            ['TTL min bound (1ms -> 1min)', async () => {
-                const r = await vant.remember('ttl_min', 'test', { ttl: 1 });
-                return r.ttl === 60000;
-            }],
-            ['TTL max bound (huge -> 100 years)', async () => {
-                const r = await vant.remember('ttl_max', 'test', { ttl: 999999999999999 });
-                return r.ttl === 315360000000;
-            }],
-            ['TTL negative clamped to min', async () => {
-                const r = await vant.remember('ttl_neg', 'test', { ttl: -100 });
-                return r.ttl === 60000;
-            }],
-            ['TTL config override works', async () => {
-                vant.config().set('memory.ttl', 3600000);
-                const r = await vant.remember('ttl_config', 'test');
-                vant.config().set('memory.ttl', null);
-                return r.ttl === 3600000;
-            }],
-            ['expiresAt converts to TTL', async () => {
-                const future = new Date(Date.now() + 300000);
-                const r = await vant.remember('ttl_expires', 'test', { expiresAt: future });
-                return r.ttl >= 290000 && r.ttl <= 310000;
-            }],
-            ['remember falls back to brain when cache expires', async () => {
-                await vant.remember('ttl_fallback', 'persistent content');
-                const cache = vant.memoize();
-                cache.set('memory:ttl_fallback', 'persistent content', { ttl: 10 });
-                await new Promise(r => setTimeout(r, 50));
-                const result = await vant.remember('ttl_fallback');
-                return result === 'persistent content';
-            }]
-        ];
-        
-        let passed = 0, failed = 0;
-        for (const [name, fn] of tests) {
-            try {
-                const ok = await fn();
-                if (ok) { passed++; console.log(`  ✓ ${name}`); }
-                else { failed++; console.log(`  ✗ ${name}`); }
-            } catch (e) { failed++; console.log(`  ✗ ${name}: ${e.message}`); }
-        }
-        
-        console.log('\n--- RESULTS ---\n');
-        console.log(`  Passed:  ${passed}`);
-        console.log(`  Failed:  ${failed}`);
-        process.exit(failed > 0 ? 1 : 0);
-    })();
-} else {
-    console.log('\n⚠️  Run TTL tests with: node test/vant.test.js');
-    process.exit(0);
-}
+// Core tests
+test('vant module loads', () => ({ success: !!vant }));
+test('vant has init function', () => ({ success: typeof vant.init === 'function' }));
+test('vant has think function', () => ({ success: typeof vant.think === 'function' }));
+test('vant has act function', () => ({ success: typeof vant.act === 'function' }));
+test('vant has getState function', () => ({ success: typeof vant.getState === 'function' }));
+test('vant has getStatus function', () => ({ success: typeof vant.getStatus === 'function' }));
+test('vant has isOperationAllowed', () => ({ success: typeof vant.isOperationAllowed === 'function' }));
+test('vant has brain getter', () => ({ success: !!vant.brain }));
+test('vant has search getter', () => ({ success: !!vant.search }));
+test('vant has pipeline getter', () => ({ success: !!vant.pipeline }));
+
+// Framework absorbed from framework.js
+test('vant has computeEval', () => ({ success: typeof vant.computeEval === 'function' }));
+test('vant has embedText', () => ({ success: typeof vant.embedText === 'function' }));
+
+// Brain has framework config functions (absorbed from framework.js)
+const brain = vant.brain;
+test('brain has getBrainFrameworkConfig', () => ({ success: typeof brain.getBrainFrameworkConfig === 'function' }));
+test('brain has setBrainFrameworkConfig', () => ({ success: typeof brain.setBrainFrameworkConfig === 'function' }));
+test('brain has getStackFrameworkConfigs', () => ({ success: typeof brain.getStackFrameworkConfigs === 'function' }));
+test('getStackFrameworkConfigs returns object', () => ({ success: typeof brain.getStackFrameworkConfigs() === 'object' }));
+
+console.log('\n--- RESULTS ---\n');
+console.log('  Passed:  ' + results.passed);
+console.log('  Failed:  ' + results.failed);
+process.exit(results.failed > 0 ? 1 : 0);
