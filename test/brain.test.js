@@ -501,6 +501,78 @@ test('currentBrain returns brain name', () => {
     return { success: typeof current === 'string' };
 });
 
+// Axolotl coexistence: a second private brain sitting alongside vant
+test('axolotl brain directory exists', () => {
+    const axolotlDir = path.join(MODELS_PRIVATE, 'axolotl');
+    return { success: fs.existsSync(axolotlDir) };
+});
+
+test('axolotl brain has identity.md', () => {
+    const id = path.join(MODELS_PRIVATE, 'axolotl', 'identity.md');
+    return { success: fs.existsSync(id) };
+});
+
+test('axolotl brain has goals.md, lessons.md, preferences.md', () => {
+    const dir = path.join(MODELS_PRIVATE, 'axolotl');
+    for (const f of ['goals.md', 'lessons.md', 'preferences.md']) {
+        if (!fs.existsSync(path.join(dir, f))) {
+            return { success: false, error: `missing ${f}` };
+        }
+    }
+    return { success: true };
+});
+
+test('pushBrain(axolotl) succeeds and places axolotl at top of stack', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    try {
+        brain.pushBrain('axolotl');
+        const after = brain.getStack();
+        if (after[0] !== 'axolotl') {
+            return { success: false, error: `top is ${after[0]}, not axolotl` };
+        }
+        if (!after.includes('axolotl')) {
+            return { success: false, error: 'axolotl not in stack' };
+        }
+        return { success: true };
+    } finally {
+        try { brain.removeBrain('axolotl'); } catch (e) {}
+    }
+});
+
+test('brain.brainMode accepts silo/shared/governance and rejects bogus', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    const before = brain.brainMode();
+    try {
+        for (const m of ['silo', 'shared', 'governance']) {
+            brain.brainMode(m);
+            if (brain.brainMode() !== m) return { success: false, error: `${m} not set` };
+        }
+        try {
+            brain.brainMode('bogus');
+            return { success: false, error: 'expected throw for invalid mode' };
+        } catch (e) {
+            // expected
+        }
+        return { success: true };
+    } finally {
+        brain.brainMode(before);
+    }
+});
+
+test('switchBrain(axolotl) moves axolotl to top and updates currentBrain', () => {
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    const before = brain.currentBrain();
+    try {
+        const result = brain.switchBrain('axolotl');
+        if (result.brain !== 'axolotl') return { success: false, error: 'switchBrain did not return axolotl' };
+        if (brain.currentBrain() !== 'axolotl') return { success: false, error: 'currentBrain not axolotl' };
+        if (brain.getStack()[0] !== 'axolotl') return { success: false, error: 'stack top not axolotl' };
+        return { success: true };
+    } finally {
+        brain.switchBrain(before);
+    }
+});
+
 test('brainDirs returns object with public/private', () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     const dirs = brain.brainDirs();

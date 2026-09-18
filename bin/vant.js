@@ -42,7 +42,7 @@ async function distributed(args) {
     
     // Initialize as distributed
     console.log('\n→ Initializing OS...');
-    vant.runop({ distributed: true, layers: { registry: true, consensus: true } });
+    vant.init({ distributed: true, layers: { registry: true, consensus: true } });
     
     // Register this node
     const registry = vant.registry();

@@ -107,72 +107,85 @@ function loadImage(filePath) {
     return buffer;
 }
 
-// Boot Vant from image
+// Boot Vant from horcrux using transform.js pipeline
 async function boot(imageInput, decryptPassword) {
     // Validate input
     const validation = validateUrl(imageInput);
-    let imageBuffer;
+    let imagePath = validation.isLocal ? validation.path : null;
     
-    if (validation.isLocal) {
-        imageBuffer = loadImage(validation.path);
-    } else {
+    // Load transform module
+    const transform = require('../lib/transform');
+    
+    // If URL, download to temp file first
+    if (!validation.isLocal) {
         // Security: explicit HTTPS check
         if (!validation.url.startsWith('https://') && !validation.url.includes('localhost')) {
             throw new Error('HTTPS required for remote URLs (except localhost)');
         }
-        imageBuffer = await fetchImage(validation.url);
+        
+        console.log('[Boot] Downloading horcrux from:', validation.url);
+        const imageBuffer = await fetchImage(validation.url);
+        
+        // Save to temp file for transform.fromHorcrux
+        const os = require('os');
+        const tmpPath = path.join(os.tmpdir(), 'vant-horcrux-' + Date.now() + '.svg');
+        fs.writeFileSync(tmpPath, imageBuffer);
+        imagePath = tmpPath;
+        console.log('[Boot] Saved to temp:', imagePath);
     }
     
-    // Load stego module
-    const stego = require('../lib/stego');
-    const brain = require('../lib/storage').get('brain');
-    
-    // Decode brain from image
-    console.log('[Boot] Decoding brain from image...');
-    let brainData;
+    // Use transform.js pipeline (proper way)
+    console.log('[Boot] Extracting horcrux using transform.js...');
+    let horcruxData;
     
     try {
-        brainData = stego.decodeBrain(imageBuffer, { 
-            decrypt: decryptPassword || null 
+        horcruxData = await transform.fromHorcrux(imagePath, { 
+            password: decryptPassword 
         });
     } catch (e) {
-        if (e.message.includes('encrypted')) {
-            throw new Error('Image is encrypted. Provide --decrypt <password>');
+        if (e.message.includes('Password required') || e.message.includes('Invalid password')) {
+            throw new Error('Horcrux is encrypted. Provide --decrypt <password>');
         }
-        if (e.message.includes('No brain data')) {
-            throw new Error('No brain data found in image. Is this a stego image?');
+        if (e.message.includes('not found') || e.message.includes('Invalid')) {
+            throw new Error('Invalid horcrux file. Is this a Vant horcrux?');
         }
         throw e;
     }
     
-    console.log('[Boot] Brain decoded successfully');
+    console.log('[Boot] Horcrux extracted successfully');
     
-    // Load brain state
-    brain.fromJSON(brainData);
-    console.log('[Boot] Brain loaded');
-    
-    // Extract embedded config (if any)
-    const embeddedConfig = brain.extractEmbeddedConfig();
-    if (embeddedConfig) {
-        console.log('[Boot] Found embedded config:');
-        console.log('  - GITHUB_REPO:', embeddedConfig.GITHUB_REPO || '(not set)');
-        console.log('  - GITHUB_BRANCH:', embeddedConfig.GITHUB_BRANCH || 'main');
-        console.log('  - MODEL_PATH:', embeddedConfig.MODEL_PATH || '(default)');
+    // Full restore using transform.restore()
+    console.log('[Boot] Restoring systems...');
+    let restoreResult;
+    try {
+        restoreResult = await transform.restore(horcruxData);
+    } catch (e) {
+        console.warn('[Boot] Partial restore:', e.message);
+        restoreResult = { restored: [], errors: [e.message] };
     }
     
-    // Show what we recovered
-    const json = brain.toJSON();
-    console.log('\n[Boot] Recovered brain:');
-    console.log('  - Version:', json.version);
-    console.log('  - Timestamp:', json.timestamp);
-    console.log('  - Learnings:', Object.keys(json.learnings || {}).length, 'files');
-    console.log('  - Memories:', Object.keys(json.memories || {}).length, 'files');
-    console.log('  - Decisions:', Object.keys(json.decisions || {}).length, 'files');
+    // Show what was restored
+    console.log('\n[Boot] Restored systems:');
+    for (const item of restoreResult.restored || []) {
+        console.log('  -', item);
+    }
+    if (restoreResult.errors && restoreResult.errors.length > 0) {
+        console.log('[Boot] Restore warnings:', restoreResult.errors.length);
+    }
+    
+    // Show horcrux metadata
+    console.log('\n[Boot] Horcrux info:');
+    console.log('  - Version:', horcruxData.version);
+    console.log('  - Timestamp:', horcruxData.timestamp);
+    if (horcruxData.mode) {
+        console.log('  - Mode:', horcruxData.mode.mode);
+        console.log('  - Stack:', horcruxData.mode.stack?.join(' → '));
+    }
     
     console.log('\n[Boot] Ghost in the Machine: ✓');
     console.log('[Boot] Next: vant sync to sync with remote, or vant run to start');
     
-    return { success: true, embeddedConfig };
+    return { success: true, restored: restoreResult.restored, data: horcruxData };
 }
 
 // Help
