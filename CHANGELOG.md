@@ -5,6 +5,75 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.6] - 2026-08-29 - Axolotl "Nuclear Breaking" Refactor
+
+> Branch `axolotl` — multibrain + dead-code bloat removal. Pinned at
+> 0.8.6 (no version bump). 5 b-T commits (4ae316b → 9a2583b) + T15 fix
+> (81ddedc). **No backward-compat shims, no test-only public APIs, no
+> stubs.** Breaking changes are packed in now.
+
+### Refactor - Multi-Brain (T1–T4)
+
+- `pipeline.run` now caches module resolution and supports `async`
+  execution with an options bag.
+- "Secured" variants of the brain surface are exported for callers that
+  need the locked-down VAF → QoS → Escrow chain.
+- A second private brain ("axolotl") is loaded alongside the public
+  template so multibrain callers can switch contexts.
+
+### Refactor - Dead-Code Bloat Removal (T10b–T14b-r1, 5 commits)
+
+The b-T round removed 30+ aliases, singletons, and legacy exports that
+accumulated during the v0.7.x → v0.8.x transition. Each removal is a
+hard break — callers must migrate to the canonical name.
+
+| Removed | Use instead |
+|---------|-------------|
+| `lib/storage.js` `exists` | `has` |
+| `lib/brain.js` `loadBrain`, `brainList` | `loadCorpus()` + per-name `read()` |
+| `lib/shell.js`, `lib/search.js`, `lib/qos.js` dead-code compat exports | direct API only |
+| `lib/cache.js` `defaultCache` singleton | `new Cache()` — consumers own their instance |
+| `lib/config.js` `setFlag` | `set` |
+| `lib/event.js` `EventBus`, `SimpleEventEmitter` | `EventEmitter` |
+| `lib/api.js` `get mode()` | read-only property, no getter |
+| `lib/vant.js` `Runtime` legacy class | top-level lazy getters |
+| `lib/compute.js` `eval` | `evaluate` |
+
+### Test - Stale Test Fixes (T15, 1 commit)
+
+T15 swept all 110 test files and fixed 24 of the 35 pre-existing
+failures that the b-T round exposed. The remaining 11 failures
+(embed: 9, test-escrow: 4) predate the axolotl work and are
+deferred.
+
+| Test file | Before | After | Net |
+|-----------|--------|-------|-----|
+| `test-integrations.js` | 10 fail | 0 fail | -10 |
+| `test-vant.js` | 7 fail | 0 fail | -7 |
+| `test-sandbox.js` | 3 fail | 0 fail (+4 new) | -3 |
+| `test-compute.js` | 1 fail | 0 fail | -1 |
+| `test-modules.js` | 1 fail | 0 fail | -1 |
+| `test-trifecta.js` | broken import | deleted | -1 file |
+| **Total** | **35 fail** | **11 fail** | **-24** |
+
+Net test count: 1451 → 1478 passing (+27).
+
+### Migration
+
+See `MIGRATING-0.8.6.md` for the cookbook (per-removed-API recipe
+with before/after snippets).
+
+### Known Issues
+
+- `test/embed.test.js` (9 fails): asserts an embedding abstraction
+  (setEmbedder/getEmbedder/listEmbedders/embedStack/embedBatchStack)
+  that was never implemented in `lib/embed.js`. Pre-existing.
+- `test/test-escrow.js` (4 fails): canSpend/recordSpend/agent
+  isolation/quota check. Likely related to the v0.7.x budget
+  subsystem changes. Pre-existing.
+
+Both files are deferred — not in the b-T scope.
+
 ## [Unreleased] - Future
 
 ### Evolution - Temporal Learning System

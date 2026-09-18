@@ -26,11 +26,10 @@ const opts = process.argv.slice(3);
         switch (cmd) {
             case 'list': {
                 const list = islands.getAvailable();
-                const m = islands.getManifest();
+                const m = await islands.getManifest();
                 console.log(`[islands] ${list.length} islands:`);
-                for (const name of list) {
-                    const def = m.islands[name];
-                    console.log(`  - ${name} (${def?.type}) triggers=[${def?.triggers?.join(', ') || 'none'}]`);
+                for (const island of list) {
+                    console.log(`  - ${island.key} (${island.type}) triggers=[${island.triggers?.join(', ') || 'none'}]`);
                 }
                 break;
             }

@@ -184,7 +184,8 @@ Options:
     // Stats
     if (action === '--stats') {
         const searchLib = require(path.join(DIR, 'lib', 'search'));
-        console.log(searchLib.getStats());
+        const stats = await searchLib.getStats();
+        console.log(JSON.stringify(stats, null, 2));
         process.exit(0);
     }
 

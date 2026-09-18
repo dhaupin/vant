@@ -91,11 +91,12 @@ if (mode === 'stdio') {
             const { method, params = {}, id } = request;
             
             const tools = mcp.methods;
-            const toolName = method.replace(/^vant_/, '').replace(/^brain_/, '');
-            const handler = tools.get(toolName);
+            // Method names in tools map have prefixes (brain_, context_, etc.)
+            // Don't strip prefixes - use method name as-is
+            const handler = tools.get(method);
             
             if (!handler) {
-                console.log(JSON.stringify({ jsonrpc: '2.0', error: { code: -32601, message: 'Method not found' }, id }));
+                console.log(JSON.stringify({ jsonrpc: '2.0', error: { code: -32601, message: 'Method not found: ' + method }, id }));
                 return;
             }
             

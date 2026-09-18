@@ -8,6 +8,43 @@ nav_order: 90
 
 > Vant release history.
 
+## v0.8.6 (Unreleased) - Axolotl "Nuclear Breaking" Refactor
+
+> Branch `axolotl` — multibrain + dead-code bloat removal. Pinned at
+> 0.8.6. 5 b-T commits (4ae316b → 9a2583b) + T15 fix (81ddedc).
+> No backward-compat shims. No test-only public APIs. No stubs.
+
+### Refactor: Multi-Brain (T1–T4)
+
+- `pipeline.run` now caches module resolution and supports `async`
+  execution with an options bag.
+- "Secured" variants of the brain surface are exported for callers
+  that need the locked-down VAF → QoS → Escrow chain.
+- A second private brain ("axolotl") is loaded alongside the public
+  template so multibrain callers can switch contexts.
+
+### Refactor: Dead-Code Bloat Removal (T10b–T14b-r1)
+
+30+ aliases, singletons, and legacy exports removed. Each is a
+hard break — see `MIGRATING-0.8.6.md`.
+
+| Removed | Use instead |
+|---------|-------------|
+| `lib/storage.js` `exists` | `has` |
+| `lib/brain.js` `loadBrain`, `brainList` | `loadCorpus()` + `read()` |
+| `lib/shell.js`, `lib/search.js`, `lib/qos.js` dead-code compat | direct API only |
+| `lib/cache.js` `defaultCache` singleton | `new Cache()` |
+| `lib/config.js` `setFlag` | `set` |
+| `lib/event.js` `EventBus`, `SimpleEventEmitter` | `EventEmitter` |
+| `lib/api.js` `get mode()` | read-only property |
+| `lib/vant.js` `Runtime` legacy class | top-level lazy getters |
+| `lib/compute.js` `eval` | `evaluate` |
+
+### Test: T15 — Stale Test Fixes
+
+Swept all 110 test files. Fixed 24 of 35 pre-existing failures.
+Remaining 11 (embed: 9, test-escrow: 4) deferred.
+
 ## v0.8.6 (Unreleased)
 
 ### Refactor: File Persistence + Legacy Cleanup

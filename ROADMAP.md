@@ -1152,3 +1152,299 @@ functionNameSync(); // alias
 - MCP `brain_save` - hardcodes `.md`
 
 **Fix:** Add format option to these functions, use format.getExtension() or similar.
+
+---
+
+## Pipeline System Cleanup (v0.9.0-axolotl)
+
+**Status:** IN PROGRESS
+
+### What is Pipeline?
+Unified security pipeline (`lib/pipeline.js`) that runs handlers:
+- `sandbox` - capability checks (canRead, canWrite, canRemote)
+- `vaf` - input validation (string, path, file, etc)
+- `qos` - rate limiting (requests per minute/second)
+- `escrow` - operation approval
+
+### Modes:
+- `PUBLIC` - read-only operations (sandbox(read) → vaf → qos → escrow(read))
+- `PRIVATE` - read/write operations (sandbox(write) → vaf → qos → escrow)
+- `REMOTE` - remote operations
+- `DUAL` - public + private combined
+- `STACK` - all brains in stack (iterates)
+
+### Modules Updated:
+- ✅ `lib/pipeline.js` - NEW (v0.9.0-axolotl)
+- ✅ `lib/embed.js` - uses pipeline.run()
+- ✅ `lib/search.js` - uses pipeline.run()
+- ✅ `lib/api.js` - DONE (Batch 1)
+- ✅ `lib/mcp.js` - DONE (Batch 1)
+- ⏳ `lib/storage.js` - SKIPPED (sync interface, pipeline is async - has own inline security)
+- ⏳ `lib/islands.js` - SKIPPED (complex nested code - risky refactor)
+
+### do.js - The Entry Abstraction Layer
+
+**Vision:** do.js is the "front door" for module code to access infrastructure. It's a means for all parties (core modules, agents, third-party contributors) to stay on a consistent path and accomplish goals without reinventing the wheel.
+
+#### What do.js IS:
+- **Function Handler** - not middleware, not framework, just a handler
+- **Universal** - works across all modules consistently  
+- **Entry Abstraction** - from monolithic to granular
+- **Extensibility Layer** - hooks, adapters, plugins can plug in
+
+#### What do.js IS NOT:
+- Replacement for pipeline.js (security implementation)
+- Replacement for error.js (error definitions)
+- Replacement for event.js (event system)
+- Middleware itself - it's a CONVENIENCE LAYER on top
+
+#### The Problem Being Solved:
+
+Currently every module reinvents wheels:
+```javascript
+// Style 1: manual everything
+function getX() {
+    vaf.check(input);
+    if (!sandbox.can()) throw E();
+    return result;
+}
+
+// Style 2: try/catch fallback
+function getY() {
+    try { pipeline.run(...) } 
+    catch { directCall(); }
+}
+
+// Style 3: pipeline only
+function getZ() {
+    return pipeline.run(...);
+}
+```
+
+do.js standardizes to ONE style:
+```javascript
+const getX = () => do.public('mod:op', ctx, fn);
+const getY = () => do.fallback(fn1, fn2);
+const getZ = () => do('mod:op', ctx, mode, fn);
+```
+
+#### do.js API Contract:
+
+```javascript
+// Core execution
+do(op, ctx, mode, fn)        // Execute fn through pipeline
+do.public(op, fn)           // PUBLIC shorthand
+do.private(op, fn)          // PRIVATE shorthand  
+do.dual(op, fn)             // DUAL shorthand
+
+// Fallback chaining
+do.fallback(fn1, fn2, fn3)  // Try each until one works
+
+// Sync/async handling
+do.sync(fn)                 // Wrap sync function
+do.async(fn)               // Wrap async function
+
+// Discovery (future)
+do.list()                   // What operations exist?
+do.manifest({...})          // Define operation schemas
+```
+
+#### Hooks System (Future):
+
+```javascript
+// Before/After hooks - structured, not ad-hoc
+do.hook('before:read', (ctx) => { log(ctx); });
+do.hook('after:read', (ctx, result) => { metrics.increment('read'); });
+do.hook('error:read', (err, ctx) => { notify(err); });
+
+// Operation-specific hooks
+do.hook('brain:loaded', (brain) => { cache.set(brain); });
+```
+
+#### Adapters/Connectors (Future):
+
+```javascript
+// Register adapters - they just plug in
+do.adapter('storage', s3Adapter);
+do.adapter('embed', openaiAdapter);
+
+// do() picks the right adapter automatically
+do.embed('text', { adapter: 'openai' });
+do.embed('text', { adapter: 'local' });
+```
+
+This makes "adapters, connectors, embedders" (and future storage handlers) just... adapters registered with do.js!
+
+#### Architecture Position:
+
+```
+┌─────────────────────────────────────────┐
+│         Third-Party Extensions          │
+│   - Custom storage backends            │
+│   - Custom embedding providers         │
+│   - Custom hooks                       │
+└─────────────────┬───────────────────────┘
+                  │ plug into
+                  ▼
+┌─────────────────────────────────────────┐
+│              do.js                       │
+│   - Registry of adapters               │
+│   - Hook system                        │
+│   - Metrics/tracking                   │
+│   - Operation discovery                │
+└─────────────────┬───────────────────────┘
+                  │ orchestrates
+                  ▼
+┌─────────────────────────────────────────┐
+│         Core Infrastructure             │
+│   pipeline.js, error.js, event.js     │
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│           APPLICATION CODE              │
+│   brain.js, skills.js, branch.js...   │
+│   "I just wanna DO things"             │
+└─────────────────────────────────────────┘
+```
+
+#### do.js Goals:
+
+| Goal | What It Means |
+|------|---------------|
+| **Consistency** | One way to call everything |
+| **Discoverability** | `do.list()` - what can I call? |
+| **Extensibility** | Hooks, adapters, plugins |
+| **Telemetry** | Built-in metrics/tracing |
+| **Resilience** | Circuit breaker, fallbacks |
+| **Contribution** | Easy to contribute - just register with do.js |
+
+#### Why This Matters for Agents:
+
+Agents aren't held up by "research/crafting" - time spent figuring out how to do things. They just... `do.()` and it works.
+
+Third-party contributors have a clear extension point without modifying core.
+
+#### Implementation Phases:
+
+**Phase 1: Core (MVP)**
+- Create lib/do.js with basic shorthand
+- Add mode constants (PUBLIC, PRIVATE, DUAL)
+- Add fallback system
+- Test with one module
+
+**Phase 2: Extensibility**  
+- Add hooks system
+- Add adapter registry
+- Add metrics/tracking
+
+**Phase 3: Discovery**
+- Add do.list() operation registry
+- Add do.manifest() schema definitions
+- Add documentation generation
+
+#### Pipeline Module Status After do.js:
+
+Once do.js exists, skipped modules can be revisited:
+- Sync modules: do.sync() handles the wrap
+- Complex modules: do() provides consistent interface
+- Modules with own pipeline: can migrate to do() or keep manual
+
+**This is the entry abstraction layer - from monolithic to granular.**
+
+### Modules That Need Pipeline (CLEAN SWEEP):
+
+#### HIGH PRIORITY - Entry Points:
+| Module | Current Security | Status |
+|--------|-----------------|--------|
+| `lib/api.js` | vaf, sandbox, qos | ✅ Done |
+| `lib/mcp.js` | vaf, qos | ✅ Done |
+| `lib/onboard.js` | vaf, sandbox | ✅ Done (Batch 6) |
+| `lib/storage.js` | sandbox, vaf | ⏳ Skipped - sync interface |
+| `lib/islands.js` | vaf, sandbox | ⏳ Skipped - complex code |
+
+#### MEDIUM PRIORITY - Core Operations:
+| Module | Current Security | Status |
+|--------|-----------------|--------|
+| `lib/msg.js` | vaf, qos, sandbox | ⏳ Skipped - sync interface |
+| `lib/agents.js` | sandbox, vaf | ✅ Done (Batch 3) |
+| `lib/context.js` | vaf | ✅ Done (Batch 3) |
+
+#### LOWER PRIORITY - Supporting:
+| Module | Current Security | Status |
+|--------|-----------------|--------|
+| `lib/skills.js` | vaf | ✅ Done (Batch 5) |
+| `lib/backup.js` | vaf | ⏳ Skipped - minimal security |
+| `lib/config.js` | sandbox | ⏳ Skipped - sync interface |
+| `lib/cron.js` | vaf, qos | ⏳ Skipped - sync interface |
+| `lib/network.js` | sandbox, qos | ⏳ Skipped - complex nested code |
+| `lib/cache.js` | sandbox | ⏳ Skipped - sync interface |
+| `lib/security.js` | vaf, sandbox | ⏳ Skipped - framework module |
+| `lib/audit.js` | sandbox | ⏳ Skipped - sync interface |
+| `lib/auth.js` | vaf, sandbox | ⏳ Skipped - sync interface |
+| `lib/format.js` | vaf | ✅ Done (Batch 4) |
+| `lib/health.js` | vaf | ✅ Done (Batch 4) |
+| `lib/lineage.js` | vaf, sandbox | ⏳ Skipped - sync interface |
+| `lib/registry.js` | vaf, sandbox | ⏳ Skipped - sync interface |
+| `lib/remote.js` | vaf, sandbox | ⏳ Skipped - minimal security |
+| `lib/stream.js` | vaf, sandbox, qos, escrow | ✅ Has own pipeline (manual) |
+| `lib/webhooks.js` | vaf | ✅ Done (Batch 4) |
+| `lib/sync.js` | sandbox, vaf | ⏳ Skipped - complex nested code |
+| `lib/lock.js` | sandbox | ⏳ Skipped - sync interface |
+| `lib/rls.js` | sandbox | ⏳ Skipped - sync interface |
+
+#### OTHER MODULES - Not in Original List:
+| Module | Current Security | Status |
+|--------|-----------------|--------|
+| `lib/shell.js` | vaf, sandbox, qos, escrow, lock | ⏳ Skipped - complex security chain |
+| `lib/branch.js` | vaf | ⏳ Skipped - complex nested code |
+| `lib/embed.js` | vaf, sandbox | ⏳ Skipped - has internal _pipelineRun |
+| `lib/search.js` | vaf, sandbox | ⏳ Skipped - has internal _pipelineRun |
+| `lib/transform.js` | vaf, sandbox, qos, escrow | ⏳ Skipped - complex security chain |
+| `lib/teams.js` | vaf | ⏳ Skipped - complex code |
+| `lib/market.js` | vaf, qos | ⏳ Skipped - minimal security |
+| `lib/telegram.js` | vaf | ⏳ Skipped - external service |
+| `lib/prune.js` | vaf, sandbox | ⏳ Skipped - complex file ops |
+| `lib/consensus.js` | vaf | ⏳ Skipped - P2P logic |
+| `lib/backup.js` | vaf | ⏳ Skipped - minimal security |
+| `lib/update.js` | vaf, sandbox | ⏳ Skipped - complex code |
+| `lib/secret.js` | vaf | ⏳ Skipped - sensitive ops |
+
+#### Notes:
+- `lib/escrow.js`, `lib/qos.js`, `lib/sandbox.js`, `lib/vaf.js` are HANDLERS - don't need pipeline
+- `lib/brain.js` has its own `executePipeline()` - keep separate or consolidate later
+- After updating all modules, remove duplicate security code from each module
+
+### Pattern to Replace:
+```javascript
+// OLD - each module re-implements:
+const sandbox = require('./sandbox');
+const vaf = require('./vaf');
+const qos = require('./qos');
+
+function doSomething(input) {
+    // Sandbox check
+    if (!sandbox.can('canRead')) throw new Error('Denied');
+    
+    // VAF validation
+    vaf.check(input, { type: 'string', maxLength: 1000 });
+    
+    // QoS rate limit
+    const limiter = new qos.RateLimiter({ maxPerMinute: 60 });
+    if (!limiter.check()) throw new Error('Rate limited');
+    
+    // ... do work
+}
+
+// NEW - use unified pipeline:
+const pipeline = require('./pipeline');
+
+async function doSomething(input) {
+    return await pipeline.run(
+        { input, operation: 'module:action' },
+        async () => {
+            // ... do work
+        },
+        { mode: pipeline.PRIVATE }  // or PUBLIC
+    );
+}
+```

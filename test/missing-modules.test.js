@@ -239,9 +239,9 @@ test('secret has types function', () => {
     return { success: typeof secret.types === 'function' };
 });
 
-test('secret hasPassword function exists', () => {
+test('secret has function exists', () => {
     const secret = require(path.join(ROOT, 'lib', 'secret'));
-    return { success: typeof secret.hasPassword === 'function' };
+    return { success: typeof secret.has === 'function' };
 });
 
 test('secret has info function', () => {
