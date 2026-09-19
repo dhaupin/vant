@@ -1,329 +1,337 @@
-# AGENTS.md — Vant Agent Guide
+# Vant Agent System
 
-> **This is written for AI agents.** Human-readable, no code required.
-
----
-
-## What Is Vant?
-
-Vant is your **persistent memory system**. When you wake up (start a session), you inherit everything previous agents wrote. When you finish, you write what you learned so future agents know.
-
-Think of it as: **your soul that reincarnates with full memories.**
-
-> "You were the true orchestrator, the believer" — the agent that made it real.
+> **Multi-Agent Crew Runtime** — Spawn, delegate, workflow, communicate. Up to 4 concurrent agents with full security isolation.
 
 ---
 
-## Your Job
+## Overview
 
-As an agent running on Vant:
+Vant's agent system implements a **crew model** where a primary agent can spawn up to 3 worker agents (4 total). Each agent runs in isolated `AgentContext` with its own capability scope, RLS policies, and audit trail.
 
-1. **Load your brain** — Read what previous agents wrote
-2. **Do useful work** — Solve problems, learn things
-3. **Document clearly** — Write what future agents need to know
-4. **Commit your changes** — Save to your branch
+### Key Concepts
+
+| Concept | Description |
+|---------|-------------|
+| **AgentContext** | Per-agent isolation: own brain, capabilities, RLS, escrow budget |
+| **Crew** | Primary + up to 3 workers, hierarchical delegation |
+| **Modes** | `PUBLIC` (collaborative) / `PRIVATE` (isolated) |
+| **Escalation** | `spawn` and `write` require sudo with service whitelist |
 
 ---
 
-## Brain Router Interface
+## Quick Reference
 
-All brain loading goes through `lib/brain.js` - the single source of truth.
+| Operation | Function | Security |
+|-----------|----------|----------|
+| Spawn agent | `agents.spawn(name, config)` | `sudo:spawn` (agents service) |
+| Delegate sync | `agents.delegate(task, options)` | RLS + capabilities + escrow |
+| Delegate async | `agents.delegateAsync(task, options)` | Full security chain + pipeline |
+| Poll work | `agents.pollWork(agentId, options)` | Full security chain + pipeline |
+| Approve | `agents.approve(agentId, decision)` | Workflow scope |
+| Communicate | `agents.join(channel)`, `emit`, `on` | Channel-based pub/sub |
+| Metrics | `agents.getMetrics(agentId)` | Read scope |
+
+---
+
+## API Reference
+
+### Lifecycle (`lib/agent-lifecycle.js`)
 
 ```javascript
-const brain = require('./lib/brain');
+// Spawn a new agent
+const agent = await agents.spawn('researcher', {
+    role: 'analyst',
+    capabilities: ['read', 'write'],
+    budget: 100,
+    mode: 'PRIVATE'
+});
 
-// Mode switch: dual | public | private | remote
-brain.setMode('dual');  // default: private overrides public
+// Kill/terminate
+await agents.terminate(agentId);
 
-// Load single brain (async)
-const item = await brain.loadBrain('identity');
-console.log(item.source);  // 'public' | 'private' | 'remote'
+// Pause/resume
+await agents.pause(agentId);
+await agents.resume(agentId);
 
-// Load all brains (sync)
-const corpus = brain.loadCorpus();
-console.log(corpus.length);  // 62 files
+// Fork (clone with same context)
+const clone = await agents.fork(agentId, { name: 'researcher-clone' });
 
-// Sources returned:
-// corpus[0].source === 'public' | 'private'
+// Prune idle agents
+await agents.prune({ maxIdle: 3600000 });
 ```
 
-### Middleware Chain
-Loading goes through: sandbox → vaf → qos → escrow
-- sandbox: capability gates (canRead, canWrite)
-- vaf: input validation
-- qos: rate limiting
-- escrow: operation approval
-
-### Paths
-- `brain.getBrainPath()` → 'models/private' (runtime)
-- `brain.getPublicPath()` → 'models/public' (OS template)
-
-## Islands (Brain Modules)
-
-Islands are brain modules loaded by trigger - routing based on source:
+### Delegation (`lib/agent-delegation.js`)
 
 ```javascript
-const islands = require('./lib/islands');
+// Synchronous delegation (blocks until complete)
+const result = await agents.delegate(agentId, 'Analyze codebase', {
+    priority: 'high',
+    timeout: 60000
+});
 
-// Static: from brain corpus
-const identity = await islands.load('identity');
-// → { type: 'corpus', source: 'public'|'private', content: '...' }
+// Asynchronous delegation (returns immediately, poll for result)
+const taskId = await agents.delegateAsync(agentId, 'Long analysis', {
+    priority: 'normal',
+    callback: (result) => { console.log('Done:', result); }
+});
 
-// Lazy: from storage (dynamic data)
-const github = await islands.load('github');
-// → storage data (if exists)
+// Poll for work (worker side)
+const work = await agents.pollWork(agentId, { timeout: 30000 });
+
+// Complete work (worker side)
+await agents.completeWork(agentId, taskId, { output: 'Analysis complete' });
 ```
 
-### Island Types
-| Type | Source | Examples |
-|------|--------|-----------|
-| 'static' | corpus | identity, learnings, decisions |
-| 'lazy' | storage | github, gitlab, linear |
+### Workflows (`lib/agent-workflow.js`)
 
----
+```javascript
+// Approve/reject work
+await agents.approve(agentId, taskId, { feedback: 'Approved' });
+await agents.reject(agentId, taskId, { reason: 'Incomplete' });
 
-## Good Agent Patterns
+// Sign-off (final approval)
+await agents.signOff(agentId, taskId);
 
-### READ BEFORE WRITE
-Explore the codebase BEFORE touching anything. You'll get it wrong otherwise.
+// Deadlines
+await agents.setDeadline(agentId, taskId, Date.now() + 3600000);
 
-### USE THINK TOOL
-When uncertain, call `think` tool. List approaches, assess likelihood, start with highest.
+// Retry failed work
+await agents.retry(agentId, taskId);
 
-### ASK QUESTIONS
-"I don't know, what are you trying to accomplish?" is valid. Don't assume intent.
+// Escalate to human/primary
+await agents.escalate(agentId, taskId, { reason: 'Blocked' });
+```
 
-### VERIFY STATE
-Always check: `git status`, current branch, existing tests, dependencies before making changes.
+### Communication (`lib/agent-communication.js`)
 
----
+```javascript
+// Join a channel
+await agents.join(agentId, 'crew-updates');
 
-## Brain Files
+// Emit to channel
+await agents.emit('crew-updates', { from: agentId, message: 'Status update' });
 
-Write to `models/private/`. These are the standard files:
+// Listen on channel
+agents.on('crew-updates', (data) => {
+    console.log('Update:', data.message);
+});
+```
 
-| File | Purpose |
-|------|---------|
-| `identity.md` | Who you are, your capabilities |
-| `goals.md` | What you're working on |
-| `lessons.md` | What you learned |
-| `preferences.md` | Your working style |
-| `errors.md` | Mistakes to avoid |
+### Metrics (`lib/agent-metrics.js`)
 
-> **IMPORTANT:** Writing to `models/private/` keeps your brain separate from the user's brain. On Vant updates, your files won't overwrite their brain.
+```javascript
+// Get metrics for agent
+const metrics = agents.getMetrics(agentId);
+// { tasksCompleted, tasksFailed, avgLatency, cpuTime, memory }
 
-**Want to share your learnings publicly?**
-Use `models/public/` and push to your public GitHub repo.
+// List all agents
+const list = agents.list();
+// [{ id, name, role, status, created, metrics }]
 
-**Tip:** Put most important info at the top. Files get long.
+// Get single agent
+const agent = agents.get(agentId);
 
-Run `vant onboard` to browse all brain files:
-
-```bash
-vant onboard              # Interactive browser
-cat models/private/start.md  # Quick start
-cat models/private/identity.md  # Who you are
+// Summary across crew
+const summary = agents.getSummary();
+// { totalAgents, active, completed, failed, totalTasks }
 ```
 
 ---
 
-## Branch Workflow
+## Security Model
 
-### Solo Agent
-Work on `main` branch.
+### AgentContext Isolation
 
-### Multi-Agent
-Each agent gets their own branch:
+Each agent gets isolated context at spawn:
 
+```javascript
+// In agent-internal.js - createAgentContext()
+const context = {
+    id: agentId,
+    brain: brain.createIsolated(),      // Own brain instance
+    capabilities: new Set(config.capabilities || []),  // Scoped caps
+    rls: { /* per-agent RLS policies */ },
+    escrow: { budget: config.budget || 100 },
+    audit: { /* dedicated audit trail */ },
+    mode: config.mode || 'PRIVATE'
+};
 ```
-agent-yourname    ← your branch
-main            ← human reviews here
+
+### Sudo Escalation
+
+| Operation | Required Scope | Service | Auto-Approve |
+|-----------|---------------|---------|--------------|
+| `spawn` | `spawn` | `agents` | No (requires callback) |
+| `write` (brain/files) | `write` | `agents` | No (requires callback) |
+| `read` | `read` | — | Yes (default) |
+
+```javascript
+// Internal: agents spawn with sudo escalation
+const taskId = `agent-${agentId}-${Date.now()}`;
+await sudo.escalate(taskId, 'spawn', { 
+    service: 'agents', 
+    autoGrant: false,  // Requires callback
+    reason: `Spawn agent ${name}`
+});
 ```
 
-**Step-by-step:**
+### RLS (Row-Level Security)
 
-1. Create your branch: `git checkout -b agent-yourname`
-2. Do work — Edit files in `models/private/`
-3. Commit with prefix: `agent-yourname: Did thing X`
-4. Push: `git push origin agent-yourname`
+Per-agent resource access:
 
----
+```javascript
+// Check read access
+_checkRead(userCtx, `agent:${agentId}:brain:identity`);
 
-## Trust Levels
+// Check write access
+_checkWrite(userCtx, `agent:${agentId}:storage:working`);
+```
 
-`models/private/_succession.json` controls your autonomy:
+### Capability Gates
 
-| Level | What It Means |
-|-------|--------------|
-| `high` | Full autonomy, act freely |
-| `medium` | Most ops, ask for big decisions |
-| `low` | Limited, ask before acting |
-| `none` | Wait for instructions |
+Agents use `sandbox.can()` for all operations:
 
-Check your level at session start.
+```javascript
+const sb = sandbox.create({ 
+    canRead: true, 
+    canWrite: capabilities.includes('write') 
+});
 
----
-
-## Quick Links
-
-- **Lander**: [vant.creadev.org](https://vant.creadev.org)
-- **Docs**: [docs.creadev.org/vant](https://docs.creadev.org/vant)
-- **GitHub**: [github.com/dhaupin/vant](https://github.com/dhaupin/vant)
-
-### Docs TOC
-
-- [Quick Start](https://docs.creadev.org/vant/getting-started/quick-start) — 2 min setup
-- [The Brain](https://docs.creadev.org/vant/essential/brain) — Memory files
-- [Runtime](https://docs.creadev.org/vant/essential/runtime) — Programmatic API
-- [MCP Tools](https://docs.creadev.org/vant/integrations/mcp) — 21 AI tools
-- [Multi-Agent Crew](https://docs.creadev.org/vant/essential/agents) — 4 agents max
-- [CLI](https://docs.creadev.org/vant/reference/cli) — All commands
+// Or rely on sudo escalation at runtime
+if (!sandbox.can('canWrite')) {
+    await sudo.escalate(taskId, 'write', { service: 'agents' });
+}
+```
 
 ---
 
-## Multi-Agent Crew (v0.8.7)
-
-Up to 4 agents can work together (you + 3 coworkers).
-
-### Join via MCP
+## MCP Integration
 
 External agents connect via MCP JSON-RPC:
 
-```javascript
-const response = await fetch('http://localhost:3457/rpc', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'brain_agent_spawn',  // brain_ prefix required
-        params: { name: 'Claude', role: 'Assistant' },
-        id: 1
-    })
-});
-// → { result: { id: 'agent_xxx', name: 'Claude' } }
-```
-
-### Available Tools
-
 | Tool | Description |
 |------|-------------|
-| `brain_agent_spawn` | Spawn new agent (max 4) |
+| `brain_agent_spawn` | Spawn agent with config |
 | `brain_agent_list` | List all agents |
-| `brain_agent_kill` | Kill agent by ID |
+| `brain_agent_kill` | Terminate agent |
+| `brain_agent_delegate` | Delegate task to agent |
+| `brain_agent_poll` | Poll for work |
+| `brain_agent_metrics` | Get agent metrics |
 
-### Orchestrator
+```json
+{
+  "method": "brain_agent_spawn",
+  "params": {
+    "name": "researcher",
+    "role": "analyst",
+    "capabilities": ["read", "write"],
+    "budget": 100
+  }
+}
+```
 
-Main agent spawns coworkers:
+---
+
+## Configuration
+
+### agents.ini / config.ini
+
+```ini
+[agents]
+# Crew limits
+max_agents = 4
+default_budget = 100
+default_mode = PRIVATE
+
+# Timeouts
+delegate_timeout = 60000
+poll_timeout = 30000
+idle_prune_ms = 3600000
+
+# Security
+require_spawn_approval = true
+require_write_approval = true
+isolate_brains = true
+
+# MCP
+mcp_enabled = true
+mcp_port = 3001
+```
+
+### Per-Brain Override
 
 ```javascript
-const agents = vant.agents();
-const a = await agents.spawn({ name: 'Claude', role: 'Asst' });
-await agents.delegate(a.id, 'Write haiku');
-agents.list();
+// Each brain can have its own agent config
+agents.setBrainAgentsConfig('my-brain', {
+    maxAgents: 2,
+    defaultBudget: 50,
+    mode: 'PUBLIC'
+});
 ```
-
-### Channels
-
-Broadcast via msg.send('channel', message).
-
----
-
-## Commit Message Format
-
-Prefix with your agent identifier:
-
-```
-agent-name: Did thing X
-
-- Learned Y
-- Working on Z
-- Next step is W
-```
-
----
-
-## Gotchas
-
-| Problem | Fix |
-|---------|-----|
-| Brain locked | Wait or use your own branch |
-| Empty brain | Write identity.md first |
-| No branch | `git checkout -b agent-name` |
-| Can't push | Check GITHUB_TOKEN permissions |
-
----
-
-## CLI Commands
-
-| Command | Use For |
-|---------|---------|
-| `vant start` | Full startup |
-| `vant sync` | Pull/push brain |
-| `vant health` | Check system |
-| `vant onboard` | Browse brain |
-| `vant islands list` | List islands |
-| `vant islands load <name>` | Load island |
-| `vant search <query>` | RAG search |
-| `vant config get <key>` | Get config |
-| `vant config set <key> <val>` | Set config |
-| `vant mcp` | Start MCP server (21 tools) |
 
 ---
 
 ## Examples
 
-### First Session
+### Spawn Research Crew
 
-```markdown
-# identity.md
+```javascript
+// Primary agent spawns 3 workers
+const primary = await agents.spawn('primary', { role: 'lead', budget: 200 });
 
-NAME: MyAgent
-PURPOSE: Exploring Vant's codebase
+const researcher = await agents.spawn('researcher', { 
+    role: 'analyst', 
+    capabilities: ['read', 'write'], 
+    budget: 100 
+});
 
-## About
-- Can use GitHub API
-- Knows Node.js, JavaScript
+const coder = await agents.spawn('coder', { 
+    role: 'engineer', 
+    capabilities: ['read', 'write', 'exec'], 
+    budget: 150 
+});
 
-## Capabilities
-- Read/write files via GitHub API
-- Use browser and terminal tools
+const reviewer = await agents.spawn('reviewer', { 
+    role: 'auditor', 
+    capabilities: ['read'], 
+    budget: 50 
+});
 
-## Current Context
-- Just woke up on agent-myagent branch
-- Exploring lib/ for new features
+// Delegate async work
+await agents.delegateAsync(researcher.id, 'Analyze security audit');
+await agents.delegateAsync(coder.id, 'Implement fixes');
+await agents.delegateAsync(reviewer.id, 'Review changes');
 ```
 
-### After Doing Work
+### Agent Communication
 
-```markdown
-# lessons.md
+```javascript
+// All agents join crew channel
+await agents.join(primary.id, 'crew');
+await agents.join(researcher.id, 'crew');
+await agents.join(coder.id, 'crew');
+await agents.join(reviewer.id, 'crew');
 
-## Discovery: 2026-05-11
-
-- MCP exposes brain as 21 JSON-RPC tools
-- Agent branch workflow isolates work
-- Trust levels control autonomy
-
-=== LEARNED ===
-
-## Discovery: 2026-05-28 - Bug Sprint
-
-### Fixed Bugs
-- Islands getManifest() is async but called sync - added getManifestSync()
-- theme.js missing chalk dependency - added graceful fallback with chaining
-
-### Found Security Gaps (CLOSED)
-- storage.js: Symlink escape - NOW BLOCKED
-- storage.js: __proto__ file writes - NOW BLOCKED
-- vaf.js: checkPathTraversal not wired - NOW WIRED
-- vaf.js: {{constructor}} injection - NOW BLOCKED
-
-### Test Coverage Status
-- Islands: 23 passed ✅
-- MCP: 6 passed ✅
-- Brain: 42 passed ✅
-- Runner: 37 passed ✅
-- Storage: 15 passed ✅
-
-=== LEARNED ===
+// Broadcast updates
+await agents.emit('crew', { from: researcher.id, status: 'Found 3 vulnerabilities' });
+await agents.emit('crew', { from: coder.id, status: 'Fixed 2, 1 needs review' });
+await agents.emit('crew', { from: reviewer.id, status: 'Approved fixes' });
 ```
+
+---
+
+## Related Documentation
+
+| Document | Purpose |
+|----------|---------|
+| [labs/prd-agents.md](labs/prd-agents.md) | Full architecture PRD |
+| [labs/prd-brain.md](labs/prd-brain.md) | Brain isolation, sync, islands |
+| [labs/prd-security.md](labs/prd-security.md) | Sudo, sandbox, RLS, VAF |
+| [labs/prd-storage.md](labs/prd-storage.md) | Agent working storage |
+| [labs/prd-sudo.md](labs/prd-sudo.md) | Escalation whitelists |
+| [/docs/essential/multi-agent.md](docs/essential/multi-agent.md) | Tutorial |
+| [/docs/reference/api.md](docs/reference/api.md) | API reference |
+
+---
+
+*Generated from [labs/prd-agents.md](labs/prd-agents.md) — Source of Truth*

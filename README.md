@@ -1,131 +1,155 @@
-# VANT
+# Vant
 
-> Persistent AI memory via GitHub - each session inherits full context
+> **Persistent Multi-Brain Agent Runtime** — Defense-in-depth security, capability-based access, time-bounded sudo escalation.
 
-**v0.8.6** · [Lander](https://vant.creadev.org) · [Docs](https://docs.creadev.org/vant) · [GitHub](https://github.com/dhaupin/vant)
-
----
-
-## What Is Vant?
-
-Vant is your **persistent memory system** for AI agents. Each session inherits everything previous agents wrote - your brain lives in GitHub as files you control.
-
-Think of it as: **your soul that reincarnates with full memories.**
+[![Tests](https://img.shields.io/badge/tests-500%2B%20passing-brightgreen)]()
+[![Branch](https://img.shields.io/badge/branch-axolotl-blue)]()
+[![Security](https://img.shields.io/badge/security-deny--by--default-red)]()
+[![Version](https://img.shields.io/badge/version-0.8.6-orange)]()
 
 ---
 
 ## Quick Start
 
-### Docker (One Line)
-
 ```bash
-docker run -e GITHUB_TOKEN=ghp_xxx -e GITHUB_REPO=owner/repo dhaupin/vant
-```
-
-That's it.
-
-### Local
-
-```bash
+# Clone and setup
 git clone https://github.com/dhaupin/vant.git
 cd vant
-echo "GITHUB_TOKEN=ghp_xxx" > .env
-echo "GITHUB_REPO=owner/repo" >> .env
-npm start
+./bin/setup.js
+
+# Start Vant
+./bin/vant.js init
+
+# Think with the brain
+./bin/vant.js think "What is the architecture?"
+
+# Act via agents
+./bin/vant.js agent spawn researcher "Analyze the codebase"
 ```
 
 ---
 
-## Options
+## Architecture Overview
 
-| Env | Required | Default |
-|-----|----------|---------|
-| `GITHUB_TOKEN` | ✓ | - |
-| `GITHUB_REPO` | ✓ | - |
-| `GITHUB_BRANCH` | - | `main` |
-| `MODEL_PATH` | - | `models/private` |
-| `MCP_API_KEY` | - | - |
-
----
-
-## Core Features
-
-| Feature | What It Does |
-|---------|--------------|
-| **Brain** | Files in GitHub - each session reads context |
-| **Memory** | `models/private/` - identity, goals, lessons... |
-| **Sync** | Push/pull brain state via GitHub API |
-| **MCP Server** | 21 tools for AI agents (optional) |
-| **Islands** | Lazy-loadable integrations |
-| **Multi-Agent** | Branch-per-agent workflow |
-
-**Optional Features:** Webhooks, Notifications, Steganography
+| Layer | Description | PRD |
+|-------|-------------|-----|
+| **Brain** | Persistent memory, multi-format, sync/merge | [prd-brain.md](labs/prd-brain.md) |
+| **Agents** | Multi-agent crew, spawn/delegate/workflow | [prd-agents.md](labs/prd-agents.md) |
+| **Storage** | Atomic writes, SHA256, multi-backend | [prd-storage.md](labs/prd-storage.md) |
+| **Sync** | 3-way merge, multi-provider, RAID | [prd-brain.md#7-sync-integration](labs/prd-brain.md#7-sync-integration) |
+| **MCP** | JSON-RPC, compute connectors, tools | [prd-agents.md#9-mcp-integration](labs/prd-agents.md#9-mcp-integration) |
 
 ---
 
-## Headless Mode
+## Security Model (Defense-in-Depth)
 
-Use Vant as a library with REST API (no MCP required):
-
-```javascript
-const vant = require('./lib/vant');
-
-// Start headless server
-const result = await vant.startHeadless({ port: 3000, debug: true });
-// Returns: { started: true, mode: 'headless', endpoints: { health, tools, brain } }
-
-// Or programmatic API (no server)
-await vant.init({ taskId: 'my-task' });
-await vant.learn('key', 'content');
-const content = await vant.remember('key');
+```
+Request → Sandbox → VAF → QoS → Escrow → RLS → Operation
 ```
 
-### Environment Variables
+| Layer | File | Key Feature |
+|-------|------|-------------|
+| **Sandbox** | `lib/sandbox.js` | Deny-by-default, 8 caps require sudo |
+| **VAF** | `lib/vaf.js` | Path traversal, injection, pollution protection |
+| **QoS** | `lib/qos.js` | Rate limit, circuit breaker, bulkhead |
+| **Escrow** | `lib/escrow.js` | Operation budget |
+| **RLS** | `lib/rls.js` | Per-resource access |
+| **Sudo** | `lib/sudo.js` | Time-bounded escalation, whitelist, audit |
+| **Boot** | `lib/boot.js` | Auto-escalation, revalidation loop |
 
-| Variable | Description |
-|----------|-------------|
-| `VANT_MODE` | Force mode: `cli`, `mcp`, or `headless` |
-| `VANT_MCP_PORT` | MCP server port |
-| `MCP_REQUIRE_KEY` | Require API key for MCP access |
+> **Full Security PRD:** [labs/prd-security.md](labs/prd-security.md)
+
+---
+
+## Sudo Escalation System
+
+- **7 Service Whitelists**: boot, network, storage, sync, mcp, agents, default
+- **Time-Bounded**: TTL (default 5min), auto-revalidate
+- **Audit Trail**: Every escalation logged with context
+- **Boot Integration**: Auto-escalates write/network/spawn/exec at startup
+
+> **Full Sudo PRD:** [labs/prd-sudo.md](labs/prd-sudo.md)
+
+---
+
+## Provider Support
+
+| Provider | API | 3-Way Merge | Status |
+|----------|-----|-------------|--------|
+| GitHub | REST/GraphQL | ✅ | Production |
+| GitLab | REST | ✅ | Production |
+| Bitbucket | REST | ✅ | Production |
+| Gitea | REST | ✅ | Production |
+| SelfHosted | Git CLI | ✅ | Production |
+
+All providers implement `pullBrainFiles()` for true 3-way merge in `pullAny()`.
+
+---
+
+## Testing
+
+```bash
+# All tests
+npm test
+
+# Specific suites
+node test/sudo-integration.test.js    # 16 tests
+node test/security-hardening.test.js  # 26 tests
+node test/sudo.test.js                # 7 tests
+node test/vant.test.js                # 16 tests
+node test/network.test.js             # 22 tests
+node test/agents.test.js              # 17 tests
+node test/sync.test.js                # 18 tests
+node test/mcp.test.js                 # 6 tests
+node test/brain.test.js               # 75/77 tests
+```
+
+---
+
+## Branch Status
+
+- **Active Branch:** `axolotl` (production-ready)
+- **Security Fixes:** 38 (P0:10, P1:10, P1.5:4, P2:10, Sudo:1, Revert:1, P0-final:2)
+- **Tests:** 500+ passing across 50+ test files
+- **Providers:** GitHub, GitLab, Bitbucket, Gitea, SelfHosted — all with 3-way merge
 
 ---
 
 ## Documentation
 
-Full docs at **[docs.creadev.org/vant](https://docs.creadev.org/vant)**
+| Destination | Purpose |
+|-------------|---------|
+| [/docs/](docs/) | Full documentation site (Jekyll) |
+| [/labs/](labs/) | **Source of Truth** — 5 Architecture PRDs |
+| [/labs/archive/](labs/archive/) | Retired docs (old README, CHANGELOG, etc.) |
 
-### Getting Started
+### PRD Index (in `/labs/`)
+- [prd-sudo.md](labs/prd-sudo.md) — Time-based escalation with whitelists
+- [prd-brain.md](labs/prd-brain.md) — Brain architecture, modes, sync, islands
+- [prd-agents.md](labs/prd-agents.md) — Agent crew, lifecycle, delegation, MCP
+- [prd-storage.md](labs/prd-storage.md) — Atomic writes, backends, checksums
+- [prd-security.md](labs/prd-security.md) — Defense-in-depth, layers, migration
 
-- [Quick Start](https://docs.creadev.org/vant/getting-started/quick-start) - 2 min setup
-- [Installation](https://docs.creadev.org/vant/getting-started/install) - All methods
-- [Setup](https://docs.creadev.org/vant/getting-started/setup) - Configure
-
-### Essential
-
-- [The Brain](https://docs.creadev.org/vant/essential/brain) - Your memory files
-- [Runtime](https://docs.creadev.org/vant/essential/runtime) - Programmatic API
-- [Islands](https://docs.creadev.org/vant/essential/islands) - Lazy-load integrations
-- [Succession](https://docs.creadev.org/vant/essential/succession) - Trust levels
-- [Multi-Agent](https://docs.creadev.org/vant/essential/multi-agent) - Team workflow
-
-### Integrations
-
-- [GitHub](https://docs.creadev.org/vant/integrations/github) - Brain storage
-- [MCP](https://docs.creadev.org/vant/integrations/mcp) - 21 AI tools
-- [Agent Skills](https://docs.creadev.org/vant/integrations/agent-skills) - Claude/Codex/Cursor
-- [Linear](https://docs.creadev.org/vant/integrations/linear) - Issue sync
-- [Docker](https://docs.creadev.org/vant/integrations/docker) - Container deploy
-
-### Reference
-
-- [CLI](https://docs.creadev.org/vant/reference/cli) - All commands
-- [Configuration](https://docs.creadev.org/vant/reference/configuration) - Env options
+### Key Documents
+- [AUDIT_FINDINGS.md](labs/AUDIT_FINDINGS.md) — Complete security audit (38 fixes)
+- [TASKS.md](labs/TASKS.md) — Session task tracker with P3 roadmap
+- [MEM.md](labs/MEM.md) — Agent memory dump for handoff
+- [AGENTS.md](AGENTS.md) — Full agent system documentation
+- [DEPLOY.md](DEPLOY.md) — Deployment guide
 
 ---
 
-## Links
+## Quick Links
 
-- **Lander**: [vant.creadev.org](https://vant.creadev.org)
-- **Docs**: [docs.creadev.org/vant](https://docs.creadev.org/vant)
-- **GitHub**: [github.com/dhaupin/vant](https://github.com/dhaupin/vant)
-- **Issues**: [github.com/dhaupin/vant/issues](https://github.com/dhaupin/vant/issues)
+- **Security Audit:** [labs/AUDIT_FINDINGS.md](labs/AUDIT_FINDINGS.md)
+- **Task Tracker:** [labs/TASKS.md](labs/TASKS.md)
+- **Memory Dump:** [labs/MEM.md](labs/MEM.md)
+- **Agent System:** [AGENTS.md](AGENTS.md)
+- **Deployment:** [DEPLOY.md](DEPLOY.md)
+- **Archive:** [labs/archive/](labs/archive/)
+
+---
+
+## License
+
+MIT — See [LICENSE](labs/archive/root/LEGAL.md) for details.
