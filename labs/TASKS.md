@@ -6,6 +6,35 @@
 
 ---
 
+## Session Summary (2026-09-20 — Cohesion Pass: fs→storage + Timer Registry)
+
+**Objective:** Execute the recommended order from the cohesion audit: kill lying stubs (1), unify security chain (2), fs→storage migrations (3), cosmetic sweeps (4), timer lifecycle (C-1)
+**Result:** ALL green — 1,147 module tests + CI 408/408 (exit 0), one commit per item, pushed per item
+
+### Implemented This Session
+
+| # | Item | Files |
+|---|------|-------|
+| CO-1 | **sync.pullAny actually pulls** — was returning `success: true` without pulling a single brain file; now symmetric with pushAll (recursion guard, circuit breaker, escrow budget, provider-state, real `provider.pull()`) | `lib/sync.js` |
+| CO-2 | **islands.status()** — distinguishes unknown island vs wired-but-never-populated vs loaded (the 3 cases `load()`'s null blurred); surfaced as MCP `vant_island_status` | `lib/islands.js`, `lib/mcp.js` |
+| CO-3 | **Shared gate (lib/gate.js) — closed real security hole** — trust/market/memory clones compared `sandbox.can` *method references* for stub detection, but `can()` is a prototype method shared by all instances → gates allowed everything even after explicit configuration (verified: `trust.record` succeeded under `canWrite: false`). All three now use `gate.requireCapability`, which checks `_explicitlyConfigured` | `lib/gate.js`, `lib/trust.js`, `lib/market.js`, `lib/memory.js`, `test/security-hardening.test.js` |
+| CO-4 | **fs→storage: citations.js** — pattern-setter; its old capability checks were doubly broken (threw inside their own try{}, never denied) | `lib/citations.js` |
+| CO-5 | **Error/version cosmetics** — 11 raw `throw new Error` → VantError with codes; 18 hand-typed display versions → `require('./version')`. Horcrux `'0.8.6'` deliberately untouched (format contract) | `lib/context.js`, `lib/do.js`, `lib/mcp.js`, +14 modules |
+| CO-6 | **fs→storage: lock.js** — raw storage variants (locks must operate during races) + atomicWrite replaces the manual temp dance + brain-name validation on interpolated paths | `lib/lock.js` |
+| CO-7 | **fs→storage: resolution.js** — ledger + brain-file edits through fileStore; dead `_removed_saveLedger`/`_ensureResolutionsDir`/`getResolutionPath` removed | `lib/resolution.js` |
+| CO-8 | **fs→storage: prune.js** — ledger/LTC/scan reads+deletes/listPrunable through fileStore + shared gate; dir enumeration + mtime age stay on fs (pattern-glob/metadata limitations, paths anchored) | `lib/prune.js` |
+| CO-9 | **fs→storage: canvas.js — closed live traversal hole** — artwork names were interpolated into raw `fs.writeFileSync` paths unguarded; storage's VAF check now blocks `save('../../evil')`. Removed stray console.log in embed() | `lib/canvas.js` |
+| CO-10 | **fs→storage: teams.js** — the orgs/depts/teams/roles/assignments JSON store through FileStorage; config-driven `teams.store` path preserved | `lib/teams.js` |
+| CO-11 | **Boot timer lifecycle registry (audit C-1)** — `registerTimer`/`unregisterTimer`/`stopAllTimers`/`getTimers`; `reset()` stops all. All 8 bare `setInterval` sites migrated (`brain.metabolize`, `context.heartbeat`, `cron.<id>`, `stream.leaseSweep`, `sudo.revalidate`, `encounter.<id>`, `watch.<n>`, `zen.<n>`); per-instance names for classes; boot-unavailable fallback = bare setInterval (lazy-require guard) | `lib/boot.js` + 8 modules |
+
+### Lessons
+
+- **storage VAF is the traversal gate — route name interpolation through it.** `vaf.checkPathTraversal` normalizes paths first, so prefix strings that end in `..`-adjacent chars can absorb traversal; validate *names* before interpolation (lock brain-name, canvas artwork-name).
+- **str_replace fails silently past ~line 2200 on huge files** (transform.js). Validated node-script replacement (exact-match, throw on mismatch) is the reliable fallback.
+- **Prototype methods can't prove stub-ness.** Capture-compare tricks (`sandbox.can === captured`) are always-true; the instance's `_explicitlyConfigured` flag is the real signal.
+
+---
+
 ## Session Summary (2026-09-20 — Sudo Wiring + P3)
 
 **Objective:** Wire real sudo escalation per prd-sudo.md, close handoff gaps (phantom test files), start P3 quality work  
