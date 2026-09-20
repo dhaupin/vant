@@ -81,3 +81,4 @@ models/public/vant/boot/*-p_*.svg.sha256
 
 # Backup files
 *.bak
+settings.ini
