@@ -501,21 +501,40 @@ test('currentBrain returns brain name', () => {
     return { success: typeof current === 'string' };
 });
 
-// Axolotl coexistence: a second private brain sitting alongside vant
+// Axolotl coexistence: a second private brain sitting alongside vant.
+// models/private/ is gitignored (per-user runtime state), so these tests
+// self-seed the fixture: create-if-missing, never clobber existing content.
+const AXOLOTL_DIR = path.join(MODELS_PRIVATE, 'axolotl');
+
+function _seedAxolotlBrain() {
+    fs.mkdirSync(AXOLOTL_DIR, { recursive: true });
+    const seeds = {
+        'identity.md': '# Identity\n\nNAME: axolotl\nPURPOSE: Second brain coexisting with vant\n',
+        'goals.md': '# Goals\n\n- Coexist with the vant brain\n',
+        'lessons.md': '# Lessons\n',
+        'preferences.md': '# Preferences\n'
+    };
+    for (const [file, content] of Object.entries(seeds)) {
+        const p = path.join(AXOLOTL_DIR, file);
+        if (!fs.existsSync(p)) fs.writeFileSync(p, content);
+    }
+}
+
 test('axolotl brain directory exists', () => {
-    const axolotlDir = path.join(MODELS_PRIVATE, 'axolotl');
-    return { success: fs.existsSync(axolotlDir) };
+    _seedAxolotlBrain();
+    return { success: fs.existsSync(AXOLOTL_DIR) };
 });
 
 test('axolotl brain has identity.md', () => {
-    const id = path.join(MODELS_PRIVATE, 'axolotl', 'identity.md');
+    _seedAxolotlBrain();
+    const id = path.join(AXOLOTL_DIR, 'identity.md');
     return { success: fs.existsSync(id) };
 });
 
 test('axolotl brain has goals.md, lessons.md, preferences.md', () => {
-    const dir = path.join(MODELS_PRIVATE, 'axolotl');
+    _seedAxolotlBrain();
     for (const f of ['goals.md', 'lessons.md', 'preferences.md']) {
-        if (!fs.existsSync(path.join(dir, f))) {
+        if (!fs.existsSync(path.join(AXOLOTL_DIR, f))) {
             return { success: false, error: `missing ${f}` };
         }
     }

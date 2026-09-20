@@ -37,9 +37,9 @@ const brain = require(path.join(ROOT, 'lib', 'brain'));
 test('pipeline module loads', () => ({ success: !!pipeline }));
 test('pipeline has run function', () => ({ success: typeof pipeline.run === 'function' }));
 test('pipeline has initLayers function', () => ({ success: typeof pipeline.initLayers === 'function' }));
-test('pipeline has stop function', () => ({ success: typeof pipeline.stop === 'function' }));
+test('pipeline has runtimeStop function', () => ({ success: typeof pipeline.runtimeStop === 'function' }));
 test('pipeline has getStatus function', () => ({ success: typeof pipeline.getStatus === 'function' }));
-test('pipeline has start function', () => ({ success: typeof pipeline.start === 'function' }));
+test('pipeline has runtimeStatus function', () => ({ success: typeof pipeline.runtimeStatus === 'function' }));
 
 // Brain integration
 test('brain.currentBrain returns string', () => ({ success: typeof brain.currentBrain() === 'string' }));

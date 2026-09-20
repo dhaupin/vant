@@ -1,8 +1,50 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-09-19  
-**Session:** Security audit + fixes on axolotl branch
+**Last Updated:** 2026-09-20  
+**Session:** Consistency pass — repo absorption, test baseline, corruption/pipeline fixes
+
+---
+
+## Session Summary (2026-09-20 — Consistency Pass)
+
+**Objective:** Absorb the repo, establish a real test baseline, fix gaps/errors to a consistent usable state  
+**Result:** ALL test files green — 1,096 module tests + runner 37 + coverage 41 + CI 406/406 (exit 0)
+
+### Fixed This Session
+
+| # | Fix | Files |
+|---|-----|-------|
+| C-1 | **Pipeline export shadowing** — `run: runtimeRun` and `getStatus: getRuntimeStatus` shadowed the middleware executor in module.exports, so every `pipeline.run()` call returned `{error: 'Not running'}` (silently breaking storage `*Secured` variants and `brain.loadFile/saveFile`) | `lib/pipeline.js` (renamed to `runtimeRun`/`runtimeStop`/`runtimeStatus`) |
+| C-2 | **Code corruption: stray `gatherState, restoreState,` pairs** injected mid-expression (38 in trust.js — incl. inside `Math.max()` making scores NaN; 28 in governance.js; 1 in market.js exports). Kept the legit horcrux export (transform.js calls `market.gatherState` / `governance.restoreState`) | `lib/trust.js`, `lib/governance.js`, `lib/market.js` |
+| C-3 | **Safe-by-default capability gates** — memory ECAP, trust record, market list were hard-denied under the untouched default sandbox stub (deny-by-default hardening broke flows that never got the escalation path). Added stub-vs-configured detection (allow + one-time warning under default stub; strict enforcement once sandbox is explicitly configured via options/setScopes/setCapabilities) — mirrors storage.js `_checkWriteSafe` | `lib/memory.js`, `lib/trust.js`, `lib/market.js`, `lib/sandbox.js` (`_explicitlyConfigured`), `lib/pipeline.js` (sandbox handler) |
+| C-4 | **embed pipeline mode** — `embed.generate` ran at PRIVATE (canWrite) but embedding is compute/read; moved to PUBLIC. This also unblocked memory.find/embed tests after C-1 made pipeline real again | `lib/embed.js` |
+| C-5 | **QoS missing `reset()`/`resetRateLimiter()`** — `npm test` smoke + `bin/rate.js reset` crashed | `lib/qos.js` |
+| C-6 | **Axolotl brain tests** — `models/private/` is gitignored by design, so tests asserting a committed axolotl brain can never pass on a fresh clone. Made them self-seeding (create-if-missing, never clobber) | `test/brain.test.js` |
+| C-7 | **CI runner killed by required binaries** — syntax check did `require()` on `bin/*.js`; executing `bin/backup.js` called `process.exit(0)` and silently killed the whole runner mid-run. Now compile-only via `vm.Script` (shebang-stripped, CJS-wrapped). Also fixed JSON mode (stdout was stubbed before printing the JSON) and SIGKILL watchdog for servers that ignore SIGTERM (mcp.js, watch.js) | `test/ci.js` |
+| C-8 | **brain-unlock stale default** — default horcrux path pointed at deleted `hypha-brain.svg`; now points at the existing axolotl horcrux | `bin/brain-unlock.js` |
+| C-9 | **pipeline.test.js** — updated assertions from removed shadowed aliases (`start`/`stop`) to `runtimeStop`/`runtimeStatus` | `test/pipeline.test.js` |
+| C-10 | **bump.js bare-invocation footgun** — `node bin/bump.js` with no args silently bumped the version and created a git tag. Fired during this session's CI run (bumped repo to 0.8.12 + tags v0.8.7-9, reverted). Now requires explicit `<major|minor|patch>` plus `--yes` to apply | `bin/bump.js` |
+
+### Known Pre-existing Quirks (not blocking, worth noting)
+
+- `test/brain.test.js` self-seeds `models/private/axolotl/` — runtime artifact, gitignored, by design
+- Storage default-stub warning fires once per process ("Sandbox not configured...") — expected until boot configures capabilities
+- `bin/sync.js` push writes credentials to a temp helper then pushes `${DEFAULT_BRANCH}` (main) — needs axolotl branch awareness someday
+- `labs/TASKS.md` previously listed test files (`security-hardening.test.js`, `sudo-integration.test.js`, `sudo.test.js`) that don't exist in `test/` — handoff doc referenced tests never committed
+- **LESSON:** never `require()` or spawn CLI binaries from a test runner without arg-guard auditing — `bin/bump.js` mutated the repo when CI's binary smoke test ran it (fixed in C-7 + C-10)
+
+### How to Verify (fresh clone)
+
+```bash
+npm install
+# Full module test suite (all test/*.test.js)
+for f in test/*.test.js; do node "$f" || echo "FAIL: $f"; done
+# CI runner (syntax + smoke + security)
+node test/ci.js
+# Smoke + coverage
+npm test && node test/coverage.js
+```
 
 ---
 

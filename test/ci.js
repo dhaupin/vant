@@ -184,6 +184,7 @@ async function testBin(name, options = {}) {
     
     const proc = spawn('node', [binPath], {
       timeout: CONFIG.testTimeout,
+      killSignal: 'SIGKILL',
       stdio: 'pipe'
     });
     
@@ -191,7 +192,15 @@ async function testBin(name, options = {}) {
     proc.stdout.on('data', d => out += d);
     proc.stderr.on('data', d => err += d);
     
+    // Watchdog: spawn's timeout only sends SIGTERM; servers that ignore it
+    // (mcp.js, watch.js) would hang the runner forever. SIGKILL guarantees close.
+    const killer = setTimeout(() => {
+      try { proc.kill('SIGKILL'); } catch (e) {}
+    }, CONFIG.testTimeout + 1000);
+    killer.unref();
+    
     proc.on('close', code => {
+      clearTimeout(killer);
       if (code === 0 || out.trim()) {
         pass(fullName);
       } else {
@@ -295,6 +304,7 @@ function checkRequiredFiles() {
  * Check syntax of all JS files
  */
 function checkSyntax() {
+  const vm = require('vm');
   const dirs = ['lib', 'bin'];
   
   dirs.forEach(dir => {
@@ -306,12 +316,17 @@ function checkSyntax() {
       .forEach(file => {
         const fullPath = path.join(dirPath, file);
         try {
-          require(fullPath);
+          // COMPILE only - do NOT require. Requiring CLI binaries executes
+          // them (side effects, process.exit kills this runner).
+          // Wrap like Node's CJS loader (strip shebang, wrap module scope) so
+          // legal top-level `return` and `#!` lines compile.
+          let src = fs.readFileSync(fullPath, 'utf8');
+          if (src.startsWith('#!')) src = '//' + src.slice(2);
+          new vm.Script('(function (exports, require, module, __filename, __dirname) {' +
+            src + '\n});', { filename: fullPath });
           pass(`syntax:${dir}/${file}`);
         } catch(e) {
-          if (e.message.includes('require') === false) {
-            fail(`syntax:${dir}/${file}`, e.message);
-          }
+          fail(`syntax:${dir}/${file}`, e.message);
         }
       });
   });
@@ -367,12 +382,6 @@ async function main() {
   log('');
   log('='.repeat(40));
   const elapsed = ((Date.now() - state.startTime) / 1000).toFixed(1);
-  
-  if (options.json) {
-    // In JSON mode, suppress all stdout except the final JSON output
-    // Use stderr for debugging if needed
-    Object.assign(process.stdout, { write: () => {} });
-  }
   
   if (options.json) {
     console.log(JSON.stringify({
