@@ -203,3 +203,56 @@ node test/security-hardening.test.js # 26/26
 - **Production-ready** with defense-in-depth security
 - **Labs docs** in `/labs` for future reference
 - **Ready for P3** when next session begins
+
+---
+
+## Historical: Horcrux Multibrain Restoration (2026-08-30 Session)
+
+### Bug Fixed: Horcrux State Restoration (T27)
+
+**Root Cause:** `lib/transform.js:gatherMode()` only read from `brain.getStack()` (snapshot-time brains), not all brains on disk via `brainDirs()`.
+
+**Fix:** Augmented stack with any brains from `brainDirs()` not already in stack.
+
+**Verification:** New horcrux correctly has `mode.stack: ['axolotl', 'vant']`, `mode.currentBrain: 'axolotl'`.
+
+### Tooling Added (Persistent)
+
+| Tool | Purpose |
+|------|---------|
+| `bin/sweep.sh` | Test health gate (full + `--quick` modes) |
+| `bin/snapshot.js` | Verifiable stego-SVG brain horcrux |
+| `models/public/vant/boot/axolotl-p_axolotl2026.svg` | First axolotl snapshot (reproducible via script) |
+
+### Completed Legacy Cleanup (b-T Candidates — All Resolved)
+
+All items from final `grep -E "backward|compatibility|deprecat|legacy|alias" lib/*.js` sweep resolved in T17/T17b/T18-T20:
+
+- `lib/embed.js`: `embed`/`embedBatch` aliases → canonical `generate`/`generateBatch`
+- `lib/encrypt.js`: `Encrypt.encode/decode/pbkdf2Sync` removed; stego migrated
+- `lib/islands.js`: `getManifestSync` (test-only) removed; internal `_getManifestSync()` retained
+- `lib/lineage.js`: `getHistory` orphan alias removed (zero callers)
+- `lib/secret.js`: `getPassword/hasPassword/clearPassword` → `get/has/clear('brain')`
+- `lib/transform.js`: `validateHorcrux` wrapper removed; callers → `validateHorcruxData` (now exported)
+- `lib/transform.js`: `payload: parsed.payload` no-op removed
+
+---
+
+## Conventions (Active)
+
+- **Version:** Pinned at **0.8.6** on axolotl branch — no version bumps
+- **Commits:** Prefix `axolotl:` with imperative subject + `Co-authored-by` trailer
+- **Tests:** Run `node test/runner.js` + specific test file before committing
+- **Brain:** Lessons → `models/private/vant/lessons.md` (date-marked, most important at top)
+- **Pipeline:** New write/read/delete ops default to `pipeline.run` unless bypass justified
+- **No Backwards Compat:** Clean refactors only — no aliases, fallbacks, or shims
+
+---
+
+## Session Resume Procedure
+
+1. `cd /workspace/project/vant && git status && git log --oneline -10`
+2. Read `models/private/vant/lessons.md` for accumulated context
+3. Read this file (labs/TASKS.md) for task state
+4. Pick next `todo` in P3 section
+5. Update this file on completion and commit
