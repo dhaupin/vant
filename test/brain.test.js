@@ -544,6 +544,10 @@ test('axolotl brain has goals.md, lessons.md, preferences.md', () => {
 test('pushBrain(axolotl) succeeds and places axolotl at top of stack', () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     try {
+        // Self-contained precondition: pushBrain() is a no-op for brains already
+        // in the stack, and the stack may be seeded from models/state.json.
+        // Remove first so this test controls its own starting position.
+        brain.removeBrain('axolotl');
         brain.pushBrain('axolotl');
         const after = brain.getStack();
         if (after[0] !== 'axolotl') {
