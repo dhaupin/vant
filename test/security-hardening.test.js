@@ -227,6 +227,40 @@ test('trust exports contain no stray gatherState injections in _defaults', () =>
     return { success: !defaultsBlock.includes('gatherState') && !defaultsBlock.includes('restoreState') };
 });
 
+// ==================== Shared gate (lib/gate.js) enforcement ====================
+// Regression: the old per-module gates compared captured sandbox.can method
+// references, but can() is a PROTOTYPE method shared by all instances - so the
+// "untouched stub" check was always true and gates allowed everything even
+// after explicit configuration. The shared gate uses _explicitlyConfigured.
+
+asyncTest('gate: untouched default sandbox stub allows (safe-by-default)', async () => {
+    const sandboxMod = require(path.join(ROOT, 'lib', 'sandbox'));
+    const gate = require(path.join(ROOT, 'lib', 'gate'));
+    // Fresh-process semantics: clear any explicit config from earlier tests
+    delete sandboxMod.defaultSandbox._explicitlyConfigured;
+    const c = gate.checkCapability('canWrite', { scope: 'hardening-test' });
+    return { success: c.allowed === true };
+});
+
+asyncTest('gate: explicitly configured deny blocks trust.record (hole closed)', async () => {
+    const sandboxMod = require(path.join(ROOT, 'lib', 'sandbox'));
+    const trust = require(path.join(ROOT, 'lib', 'trust'));
+    sandboxMod.defaultSandbox.setCapabilities({ canWrite: false });
+    const r = trust.record('gate-deny-entity', 'help', { positive: true });
+    const denied = r && r.error === 'Capability denied';
+    const scoreUnchanged = trust.getScore('gate-deny-entity') === 0.5; // default
+    return { success: denied && scoreUnchanged };
+});
+
+asyncTest('gate: explicitly configured deny throws for memory writes', async () => {
+    const sandboxMod = require(path.join(ROOT, 'lib', 'sandbox'));
+    const MemoryMod = require(path.join(ROOT, 'lib', 'memory'));
+    sandboxMod.defaultSandbox.setCapabilities({ canWrite: false });
+    let err = null;
+    try { await MemoryMod.memory.remember('hardening-probe', { x: 1 }); } catch (e) { err = e; }
+    return { success: !!err && err.code === 'CAPABILITY_NOT_ALLOWED' };
+});
+
 // ==================== RUN ====================
 
 (async () => {
