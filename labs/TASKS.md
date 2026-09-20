@@ -2,7 +2,32 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-20  
-**Session:** Consistency pass — repo absorption, test baseline, corruption/pipeline fixes
+**Session:** Sudo wiring + phantom test suites + P3 quality pass
+
+---
+
+## Session Summary (2026-09-20 — Sudo Wiring + P3)
+
+**Objective:** Wire real sudo escalation per prd-sudo.md, close handoff gaps (phantom test files), start P3 quality work  
+**Result:** ALL green — 1,144 module tests (incl. 2 new suites: sudo-integration 21, security-hardening 19) + runner 37 + coverage 41 + CI 406/406 (exit 0)
+
+### Implemented This Session
+
+| # | Item | Files |
+|---|------|-------|
+| S-1 | **Sudo whitelist + TTL + revalidation** (prd-sudo.md §3-5 was documented as "implemented" but had never been committed). `ESCALATION_WHITELIST` per-service policies (boot/network/storage/mcp/agents/trust/default), TTL-capped grants (exact expiry — grants live ONLY in the TTL map, never as static scopes), revalidation loop (extends revalidatable services, revokes others), boot-time loop start, audit events (`sudo:escalation_requested/granted/denied/revalidated`) | `lib/sudo.js`, `lib/boot.js` |
+| S-2 | **can(cap) → sudo.can(taskId, scope) delegation** (the PRD's core arrow). Sandbox consults sudo when the task exists; standalone sandboxes keep static-capability fallback. Storage `*Secured` methods escalate via the service path before operating | `lib/sandbox.js`, `lib/storage.js`, `lib/sudo.js` |
+| S-3 | **P0-7 actually closed** — `ConfigStorage._load()` and `config.getConfig()` still used `require()` on user-writable `.js` configs (RCE despite audit claiming fixed). Both now evaluate in a bare `vm` context: no require/process/fs, 1s timeout; benign data configs load, hostile ones fail closed to defaults | `lib/storage.js`, `lib/config.js` |
+| S-4 | **P1-15 actually implemented** — `vaf.checkPathTraversal` did NOT decode anything: `%2e%2e%2f`, `..%2f`, double-encoded `..%252f`, NFKC-normalized `‥`, and overlong UTF-8 (`%c0%ae`) all sailed through. Now: iterative decode-until-stable (max 5), checks raw AND decoded variants, malformed percent-encoding fails closed. Legit paths (incl. Unicode filenames) still pass | `lib/vaf.js` |
+| S-5 | **Trust `_checkRateLimit` restored** — collateral damage from the corruption cleanup (the stray-pair edit sat inside `_defaults` next to that function; removal swallowed it). Every `trust.record()` call threw. Also caught: `trust.test.js`/`market.test.js` summary lines were broken (`Passed: 12 Passed: 8 Failed: 0`) — they MASKED these 8 failures in the previous session's "all green" | `lib/trust.js`, `test/trust.test.js`, `test/market.test.js` |
+| S-6 | **Phantom test suites committed** — `test/sudo-integration.test.js` (21 checks: whitelist governance, TTL semantics, revalidation loop, sandbox delegation, storage escalation, audit events) and `test/security-hardening.test.js` (19 checks: P0-6/7/8/9, P1-11/15/16 verified as REAL behavior, plus corruption-class regression guards) | `test/sudo-integration.test.js`, `test/security-hardening.test.js` |
+| S-7 | **P3 magic numbers → tunable config** — `sudo.REVALIDATE_INTERVAL_MS` and QoS `RateLimiter` defaults now read `VANT_*` env vars with the existing defaults (follows the codebase's established `VANT_ESCROW_*` convention) | `lib/sudo.js`, `lib/qos.js` |
+| S-8 | **P3 dead-export sweep** — automated cross-reference scan complete; ~150 zero-consumer exports across ~35 files cataloged in `labs/DEAD_EXPORTS.md` with false-positive caveats and a safe removal process. Deliberately NOT mass-deleted (see that doc's reasoning re: the c7009da corruption incident) | `labs/DEAD_EXPORTS.md` |
+
+### Lessons
+
+- **Test summary lines can lie.** A broken formatter (`Passed: X Passed: Y`) masked 8 real failures; grepping for `✗` (not just the summary) is the reliable check.
+- **Claim-vs-reality:** audit docs marked P0-7 and P1-15 "fixed"; neither was. The new security-hardening suite now pins the real behavior.
 
 ---
 

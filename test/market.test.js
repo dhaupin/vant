@@ -243,7 +243,7 @@ test('getStackMarketStats returns object with source stack', () => {
     }
     
     console.log('\n' + '='.repeat(50));
-    console.log(`Passed:  ${results.passed} Passed:  ${results.failed} Failed:  ${results.skipped} skipped`);
+    console.log(`Passed: ${results.passed}  Failed: ${results.failed}  Skipped: ${results.skipped}`);
     console.log('='.repeat(50));
     
     process.exit(results.failed > 0 ? 1 : 0);
