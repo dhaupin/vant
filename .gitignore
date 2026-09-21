@@ -50,6 +50,9 @@ build/
 *.tmp
 temp/models/latent/*.vpatch
 
+# Migration test fixture scratch (test/migrations.test.js)
+.migration-fixture/
+
 # Lock files (brain + storage)
 .lock-brain-token
 .locks/

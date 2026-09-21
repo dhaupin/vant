@@ -855,7 +855,7 @@ node test/brain.test.js
 - [ ] **WAL/Journal**: Write-ahead log for crash recovery
 - [ ] **Replication**: Multi-node sync via Raft/CRDT
 - [ ] **Metrics**: Prometheus exporter for storage ops
-- [ ] **Migration tool**: Schema versioning for brain format changes
+- [x] **Migration tool**: Schema/layout versioning for brain format changes — DONE (axolotl): `lib/migrations.js` + `vant migrate` CLI. Content-based detection (never trusts the marker alone), ordered idempotent steps (orgchart brain-scope, tmp-space re-anchor, dropfile relocation), dryRun, `models/private/.layout-version.json` marker written only after success, all moves through FileStorage (security chain). Tests: `test/migrations.test.js` 8/8 incl. real fixture layouts.
 - [ ] **Backup/Restore**: Point-in-time snapshots
 
 ---

@@ -146,6 +146,9 @@ const COMMANDS = {
     // Brain horcrux (backup/restore)
     horcrux: 'horcrux.js',
     
+    // Brain layout migrations (prd-storage.md)
+    migrate: 'migrate.js',
+    
     // Agent spawning
     spawn: 'agent-spawner.js',
     
@@ -415,6 +418,7 @@ Brain:
   vant lock       Brain write lock (acquire/release/status)
   vant horcrux    Backup/restore brain to images
   vant stego      Stego brain recovery
+  vant migrate    Brain layout versioning (status/dry-run/apply)
 
 State:
   vant vibe        Show/set vibe

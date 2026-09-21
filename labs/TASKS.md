@@ -2,7 +2,49 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-21  
-**Session:** fs→storage **wave F-2 (security files) COMPLETE + partial-cache security fix** (pushed)
+**Session:** brain **layout migration tool** (prd-storage checklist) COMPLETE + test-fix (pushed)
+
+---
+
+## Session (2026-09-21 — brain layout migration tool + the `require`+top-level-await test trap)
+
+**Context:** "Run keeps failing" → the in-flight slice (brain layout migration tool per
+prd-storage.md checklist) was uncommitted with `test/migrations.test.js` failing 3/8.
+Root cause of the "failing run" was NOT the migration code — the tool itself worked
+(manual repros passed). Two real issues:
+
+1. **Node refuses top-level `await` alongside `require()`** in the fixture probe
+   scripts: `ReferenceError: Cannot determine intended module format because both
+   require() and top-level await are present`. The three fixture tests crashed the
+   child before any assertion. Fix: wrap probe bodies in async IIFEs (CJS-safe),
+   plus `catch → process.exit(1)` so future child failures surface properly.
+2. **Self-contradictory assertion:** the apply test demanded the legacy `state/` dir
+   still exist AND be empty after migration — but the migration correctly drains and
+   `rmdir`s it. Fixed the check to "gone OR empty" and tightened it to also verify
+   both moved dropfiles with intact content.
+
+| Commit | What |
+|--------|------|
+| `3a38f04` | (prior wave, context) PRD hygiene record | — |
+
+**This session's slice:**
+
+| Files | What |
+|-------|------|
+| `lib/migrations.js` (new) | Layout registry: content-based detection (marker never trusted alone), ordered idempotent steps — `orgchart.brain-scope` (.agent_tmp → models/private/<brain>/orgchart/), `tmpspace.models-anchor` (./storage → models/tmp-space/), `dropfiles.tmp-space` (state/ dropfiles → tmp-space/myStuff), `marker.write` last (models/private/.layout-version.json, written only after success). dryRun support; all moves through FileStorage (sandbox→vaf→qos→escrow chain); crash-recovery path re-derives from fs evidence and re-writes the marker. |
+| `bin/migrate.js` (new) | `vant migrate --status / --dry-run / apply`. Registered in bin/vant.js COMMANDS + help. Refusals print to stdout (CI smoke gotcha from the 1b wave). |
+| `test/migrations.test.js` (new) | 8 checks: registry shape, real-tree idempotence, fixture detection/dryRun-no-mutation, apply round-trip (escrow + dropfiles + content verification), no-clobber (existing dropfile wins), CLI status + dry-run. |
+| `labs/prd-storage.md` | Migration-tool checklist item → [x] with implementation notes. |
+| `.gitignore` | `.migration-fixture/` scratch excluded. |
+
+**Bonus context recovered:** the marker on the real tree showed `dropfiles.tmp-space`
+applied at 18:26 — an earlier real-tree test run had migrated buffy's `state/`
+dropfiles to `models/tmp-space/myStuff`. That is the migration WORKING, not data loss;
+files verified present in the new location.
+
+**Verification:** migrations 8/8; storage/brain/security-hardening/sudo-integration
+suites PASS; runner 37/37; `vant migrate --status` reports v2 up-to-date on the real
+tree. (Full-loop + CI re-run queued before push.)
 
 ---
 

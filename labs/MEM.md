@@ -15,10 +15,10 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — clean state. PRD hygiene wave done: security checklist 5/5,
-storage encryption+compression live, sudo audit log + rate limiting live.
-Remaining PRD backlogs are bigger efforts (WAL, replication, templates, WebUI).
-See TASKS.md top block.)
+(nothing in flight — migration tool slice fixed, committed, pushed. Trap for the
+next agent: node -e probes mixing require() with top-level await crash with
+"Cannot determine intended module format" — wrap in async IIFE. See TASKS.md
+top block.)
 
 ---
 
