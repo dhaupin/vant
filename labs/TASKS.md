@@ -15,9 +15,12 @@
 | M-0 | **MEM.md convention settled** — it's a tmp-style scratch dump space (dump in-flight state freely, NO commit ceremony, nothing precious; durable state lives HERE in TASKS.md). Earlier template/history interpretations both superseded. | done |
 | S-1 | **succession.js fs→storage** (`a3c0322`) — `_succession.json` config + `.ledger.json` through FileStorage; fixes module-load path freeze (PUBLIC_DIR/LEDGER_PATH captured once → `getStackTrustLevels`/`getStackLedgers` pushed-brain had NO effect, stack reads returned the original brain every time). | done |
 | S-2 | **audit.js fs→storage** (`82c9429`) — ledger through FileStorage keyed by current brain path (follows pushBrain); rotate() archive clamped into contained `models/audit-rotate/` (legacy archiveDir param was never passed by any caller and accepted uncontained paths). Verified: no `storage:*` event listeners exist → no audit↔storage re-entrancy. | done |
-| S-3 | Buffy priv-brain lessons + push. | pending |
+| S-3 | Buffy priv-brain lessons + push. | done |
+| I-1 | **islands.js fs→storage** (`d089146`) — manifest + static-island brain files + status/populated checks through FileStorage; manifest save via store (format.saveFile silently fell back to raw fs when the secured read was denied). FIXED load() contract bug: static islands returned the format.parse wrapper object as `content`; consumers expect the raw text string per the islands.load() contract. createIsland() validates island names before path use. Zero raw fs sites remain. | done |
+| T-1 | **tmp.js fs→storage** (`aae610d`) — put/get/delete/clear through FileStorage on top of the existing full security chain. FIXED _getPath(): getBrainStorage() has no `.path` → every space silently wrote to `./storage` outside models; spaces now anchor at `<models>/tmp-space/<space>` (myStuff flattened to match brain.js slice-2). clear() deletes per-entry through the store (flat namespace) instead of recursive rmSync. | done |
+| K-1 | **skills.js fs→storage** (`ee1dc79`) — manifest + loadProto/loadFolder reads through FileStorage. FIXED unvalidated name interpolation into vant-skill-{name} paths; safe-charset validation (islands pattern). Enumeration stays on fs (pattern-glob limitation). | done |
 
-**Next after this session:** islands.js (6 sites), tmp.js (9), skills.js (9), stego/backup/sync/server, transform.js (46, biggest blast radius), `bin/sync.js` axolotl-branch awareness, dead-export removal per DEAD_EXPORTS.md.
+**Next after this session:** stego/backup/sync/server (small sets), transform.js (46, biggest blast radius — node-script fallback), `bin/sync.js` axolotl-branch awareness, dead-export removal per DEAD_EXPORTS.md.
 
 ---
 
@@ -25,7 +28,7 @@
 
 **Context:** Continuing the cohesion pass on `axolotl`. Slices 1-3 + citations/lock/resolution/prune/canvas/teams + timer registry were already committed (see prior summaries). This session finished brain.js and closed the mcp.js dir-scan gap.
 
-**Result:** ALL green — full module suite clean + CI 408/408 (exit 0), one commit per slice, pushed.
+**Result:** ALL green — full module suite clean + CI 408/408 (exit 0), one commit per item, pushed.
 
 ### Implemented This Session
 

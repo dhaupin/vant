@@ -30,22 +30,29 @@ is precious. Think `/tmp`: scratch state, not history.
 # CURRENT DUMP
 
 **When:** 2026-09-21, during fs→storage cohesion pass (axolotl)
-**Branch:** axolotl @ ~203caa6 (succession + audit migrated)
+**Branch:** axolotl @ ~ee1dc79 (succession, audit, islands, tmp, skills migrated)
 
 ## In-flight
 
-- fs→storage queue: islands.js (6 sites) → tmp.js (9) → skills.js (9) →
-  stego/backup/sync/server → transform.js (46, biggest blast radius)
+- fs→storage queue: stego/backup/sync/server (small sets) → transform.js
+  (46 sites, biggest blast radius — use node-script fallback there)
 - bin/sync.js axolotl-branch awareness still open
 - dead-export removal per DEAD_EXPORTS.md still open
 
 ## Leads / rough notes
 
 - storage `read()` → null on missing, `has()` → bool, write = atomic+mkdirs
-- stores keyed by resolved brain path when following pushBrain (succession/audit
-  pattern); path constants captured at module load = multibrain bug
+- "brain storage" objects (getBrainStorage()) have {basePath, version} — NO
+  `.path`. Two .path bugs found+fixed so far (brain.js listBackups, tmp.js
+  spaces → silent ./storage). grep for `.path ||` and `?.path` to be sure none left
+- format.saveFile silently falls back to raw fs when secured read is denied —
+  prefer store.write with format.serialize
+- format.parse returns {data, format, chain, error} — NO .content field; check
+  consumers expecting strings (islands load() bug fixed off this)
 - no `storage:*` event listeners exist yet → routing audit-ish modules through
   storage is re-entrancy-safe today (recheck if listeners get added)
+- name-becomes-path-segment sites need safe-charset validation (islands/_
+  skills pattern); name-interpolation bugs are likely still hiding elsewhere
 - `models/private/undefined` 0-byte artifact deleted; hunt the writer if returns
 - str_replace unreliable on lib/brain.js (even < line 2200) and can PARTIALLY
   apply multi-edits — grep-verify every removal, use node-script fallback there
