@@ -388,10 +388,10 @@ node test/boot.test.js
 
 - [x] Persistent escalation audit log to disk — DONE (axolotl `f3a40e1`): JSONL at models/private/sudo/escalations.jsonl via FileStorage, capped, survives reset; getEscalationAuditLog()
 - [x] Per-escalation rate limiting — DONE (axolotl `f3a40e1`): task+scope+service capped 20/60s (env-tunable); revoke() also clears TTL grants now
-- [ ] Escalation templates for common workflows
+- [x] Escalation templates for common workflows — DONE (axolotl): defineTemplate/getTemplate/listTemplates/deleteTemplate/applyTemplate in lib/sudo.js; pinned service+scope+ttl (clamped to policy), persisted at models/private/sudo/templates.json via FileStorage; apply routes through escalate() so whitelist/rate-limit/audit still govern; CLI `vant sudo template def|list|show|rm|apply`
 - [ ] Web UI for escalation management
 - [ ] Integration with external auth (OAuth, LDAP)
-- [ ] Escalation policies as code (version controlled)
+- [x] Escalation policies as code (version controlled) — DONE (axolotl): loadPolicies()/resetPolicies()/getPoliciesStatus() in lib/sudo.js; optional JSON at models/private/sudo/policies.json (VANT_SUDO_POLICIES_PATH); TIGHTEN-ONLY invariants (no scope adds, no auto-approve adds, no callback removals, no TTL raises, no revalidate-off, no unknown services/fields), whole-file refusal with zero partial application; wired into boot; CLI `vant sudo policies load|status|reset`
 - [ ] Automated revalidation with service health checks
 - [ ] Metrics: escalation frequency, denial rates, TTL usage
 
