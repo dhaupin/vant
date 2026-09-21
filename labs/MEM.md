@@ -29,26 +29,22 @@ is precious. Think `/tmp`: scratch state, not history.
 
 # CURRENT DUMP
 
-**When:** 2026-09-21, fs→storage wave F-1 (axolotl)
-**Branch:** axolotl @ 1c6f145 — wave F-1 pushed; docs commit in flight
+**When:** 2026-09-21, sync branch-guard + dead exports (axolotl)
+**Branch:** axolotl @ local; CI 410/410; push pending
 
 ## In-flight
 
-- **BIG FIND: transform restore() called UNDEFINED helpers** — R-3's batch
-  edit landed _safeBrainName/_modelsRel/_getStore() call sites without
-  definitions → legacy privateBrains horcrux restores silently swallowed
-  ReferenceErrors per file (0 files restored, no visible failure). Defined
-  + verified (c7412a4). LESSON: after node-script batch edits, grep the
-  function name across lib/ to confirm a definition exists somewhere.
-- Wave F-1 done: vibe (mood.ini), schema (brain.json/_core.json), context
-  (_gatherStatic), search dead helpers — all through FileStorage, per-commit
-- Census after wave: lib/ remaining fs = storage/brain/transform layer
-  itself, enumerated metadata (readdir withFileTypes), binary artifacts
-  (stego/backup), codebase introspection (legal/compute/vant/.git) — all
-  documented exceptions per prd-storage #7
-- Next: this was the last easy meat. Remaining low-pri queue: bin/sync.js
-  axolotl-branch awareness, dead-export removal (DEAD_EXPORTS.md), test
-  gaps (concurrent agents / malicious restore / sync recursion)
+- **bin/sync.js branch guard SHIPPED (ee33cb3)** — push/pull now target the
+  CURRENT branch; main/master protected (pull = destructive reset --hard →
+  needs explicit --branch opt-in; push refused unless ON that branch). The
+  'could push to main by accident' risk is closed.
+- Dead exports: 3 rounds done (metrics, lock, sync-hybrid, consensus
+  internals) — progress log in DEAD_EXPORTS.md. canvas.unwrap was a FALSE
+  POSITIVE (11 refs) — always grep before cutting.
+- fs→storage lib/ side effectively COMPLETE (see TASKS.md F-1 block) —
+  remaining sites are documented exceptions.
+- Remaining low-pri: rest of dead-export long tail, test gaps (concurrent
+  agents / malicious restore / sync recursion)
 
 ## Leads / rough notes
 

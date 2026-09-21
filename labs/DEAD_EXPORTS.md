@@ -92,3 +92,22 @@ watch.js: EntropicRecovery, entropyPool, createSpring, checkSystemHealth
    accessors and may be part of the intended stack API surface.
 4. `error.js`'s flagged helpers (`retryWithBackoff`, typed errors) look like
    intended public API — confirm intent before removing.
+
+## Progress log (2026-09-21, Buffy)
+
+- **Round 1** — metrics.js (timeFn/timeFnAsync), lock.js (listBrainLocks/
+  _getToken/_clearToken/getBackoff exports; internals retained). Verified
+  zero external callers via grep across lib/bin/test before removal.
+- **Round 2** — sync.js hybrid privacy setters (savePrivacyConfig/setPrivacy/
+  getPublicRepos/getPrivateRepos exports; getPrivacyConfig/getPrivacy retained
+  — used internally by getStackPrivacy).
+- **Round 3** — consensus.js _-middleware/internals (_validate, _checkRate,
+  _checkCapability, _grant/revokeCapability, _signVote, _verifyVote,
+  _hashTally, _encryptBallot, _decryptBallot, _auditLog, _audit). hasVoted/
+  peerVerify kept (documented API surface).
+- **Kept intentionally:** canvas.unwrap (11 real references — false positive),
+  entire getStack* family (convention API), error.js helpers (public API),
+  legal.js getLegalText (used by bin/docs), CI 410/410 after each round.
+- **Remaining:** the long tail in the findings list above (vibe, search,
+  stream, sudo, network, recursion, event, msg, realm, registry, ...) — same
+  method applies. Low value, zero risk reduction; do opportunistically.
