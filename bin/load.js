@@ -107,6 +107,11 @@ function loadModel(modelPath) {
         return null;
     }
 
+    // (fs→storage migration) brain-file reads go through FileStorage so the
+    // sandbox + vaf security chain gates every read. Enumeration stays on fs
+    // (documented readdir-withFileTypes exception); content reads are routed.
+    const store = new (require('../lib/storage').FileStorage)({ basePath: allowed });
+
     const files = fs.readdirSync(modelPath).filter(f => {
         const filePath = path.join(modelPath, f);
         const ext = path.extname(f).toLowerCase();
@@ -117,7 +122,8 @@ function loadModel(modelPath) {
     const model = {};
     files.forEach(file => {
         const filePath = path.join(modelPath, file);
-        const content = fs.readFileSync(filePath, 'utf8');
+        const content = store.read(path.relative(allowed, path.resolve(filePath)), 'utf8');
+        if (content === null) return;
         const ext = path.extname(file).toLowerCase();
         const name = path.basename(file, ext);
         
