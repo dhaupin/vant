@@ -37,14 +37,18 @@ Root cause of the "failing run" was NOT the migration code — the tool itself w
 | `labs/prd-storage.md` | Migration-tool checklist item → [x] with implementation notes. |
 | `.gitignore` | `.migration-fixture/` scratch excluded. |
 
-**Bonus context recovered:** the marker on the real tree showed `dropfiles.tmp-space`
-applied at 18:26 — an earlier real-tree test run had migrated buffy's `state/`
-dropfiles to `models/tmp-space/myStuff`. That is the migration WORKING, not data loss;
-files verified present in the new location.
+**CORRECTION (found during the snapshots slice):** the earlier note claiming the
+18:26 real-tree `dropfiles.tmp-space` move was "the migration working" was WRONG —
+it was a **mis-classification bug**: `models/private/<brain>/state/<key>.json.md`
+is the LIVE StateStorage layout (brain tests/boots re-create it constantly), not
+legacy dropfiles. Fixed the detector: only non-`.json.md` arbitrary-named files
+are treated as legacy drop content; live state files never move, and the dir is
+only removed when truly drained. The 4 real-tree files were already re-created by
+the runtime; the stale copies moved to tmp-space were preserved as
+`*.moved-bak` (never delete data) and the live ones verified in place.
 
-**Verification:** migrations 8/8; storage/brain/security-hardening/sudo-integration
-suites PASS; runner 37/37; `vant migrate --status` reports v2 up-to-date on the real
-tree. (Full-loop + CI re-run queued before push.)
+**Verification:** migrations 8/8; snapshots 9/9; full module loop ALL GREEN;
+runner 37/37; CI 414/414; `vant migrate --status` stable across repeated loop runs.
 
 ---
 

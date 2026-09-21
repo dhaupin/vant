@@ -53,6 +53,13 @@ temp/models/latent/*.vpatch
 # Migration test fixture scratch (test/migrations.test.js)
 .migration-fixture/
 
+# Snapshot test scratch + runtime point-in-time snapshots
+.snapshot-scratch/
+models/.snapshots/
+
+# Runtime tmp-space data (myStuff dropbox etc. — per-runtime, not template)
+models/tmp-space/
+
 # Lock files (brain + storage)
 .lock-brain-token
 .locks/
