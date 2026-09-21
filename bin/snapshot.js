@@ -41,6 +41,16 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
+// (1b) Capability gate — snapshot writes land in models/ + sidecar files
+function _checkWrite() {
+    try {
+        const sandbox = require('../lib/sandbox');
+        if (sandbox && !sandbox.canWrite()) throw new Error('Write capability required for snapshot output');
+    } catch (e) {
+        if (/capability/i.test(e.message)) throw e;
+    }
+}
+
 const REPO_ROOT = path.resolve(__dirname, '..');
 const BOOT_DIR = path.join(REPO_ROOT, 'models', 'public', 'vant', 'boot');
 const DEFAULT_AGENT = 'axolotl';
@@ -125,6 +135,7 @@ function getGitContext() {
 }
 
 async function run() {
+    _checkWrite();
     const args = parseArgs(process.argv);
     const output = deriveOutput(args);
     const password = await getPassword(args);

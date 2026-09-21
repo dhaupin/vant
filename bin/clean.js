@@ -20,6 +20,16 @@ const path = require('path');
 
 const config = require('../lib/config');
 
+// (1b) Capability gates — CLI writes route through the same sandbox check
+// as lib/ (sandbox.canX() is sudo-aware since the canX→can unification).
+function _getSandbox() {
+    try { return require('../lib/sandbox'); } catch (e) { return null; }
+}
+function _checkWrite() {
+    const sandbox = _getSandbox();
+    if (sandbox && !sandbox.canWrite()) throw new Error('Write capability required for clean operations');
+}
+
 // Handle cron setup commands early
 if (args.includes('--setup-cron') || args.includes('--install')) {
     const cron = require('../lib/cron');
@@ -328,6 +338,9 @@ async function runPrune() {
 // Main
 async function run() {
     const target = targets[0] || 'all';
+    
+    // (1b) destructive ops require write capability (dry-run stays ungated)
+    if (!flags.dryRun) _checkWrite();
     
     console.log('╔══════════════════════════════════════════╗');
     console.log('║         Vant Clean                      ║');

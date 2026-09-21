@@ -8,6 +8,16 @@
 
 const vaf = require("../lib/vaf");
 
+// (1b) Capability gate — the 'log' subcommand rewrites the succession ledger
+function _checkWrite() {
+    try {
+        const sandbox = require('../lib/sandbox');
+        if (sandbox && !sandbox.canWrite()) throw new Error('Write capability required for succession log');
+    } catch (e) {
+        if (/capability/i.test(e.message)) throw e;
+    }
+}
+
 // -h/--help
 const args = process.argv.slice(2);
 if (args[0] === '-h' || args[0] === '--help') {
@@ -90,6 +100,7 @@ if (cmd === 'status' || !cmd) {
 } else if (cmd === 'log') {
   const to = args[1] || 'new'
   const label = args.slice(2).join(' ') || `Update to ${to}`
+  _checkWrite()
   const commit = getGitCommit()
   const config = require('../models/public/_succession.json')
   config.succession.previous = config.succession.previous || {}

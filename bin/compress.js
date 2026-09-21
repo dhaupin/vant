@@ -23,6 +23,16 @@ const vaf = require('../lib/vaf');
 const { readFileSync, statSync, mkdirSync, readdirSync } = require('fs');
 const path = require('path');
 
+// (1b) Capability gate — vpatch writes land in models/latent
+function _checkWrite() {
+    try {
+        const sandbox = require('../lib/sandbox');
+        if (sandbox && !sandbox.canWrite()) throw new Error('Write capability required for compress output');
+    } catch (e) {
+        if (/capability/i.test(e.message)) throw e;
+    }
+}
+
 const args = process.argv.slice(2);
 
 if (!args[0] || args[0] === '--help' || args[0] === '-h') {
@@ -115,6 +125,7 @@ Compression Potential:
             console.log('[Entropy] Done!');
         } else if (adaptiveMode) {
             // Adaptive mode - self-calibrating threshold
+            _checkWrite();
             const inputContent = readFileSync(inputPath);
             const patch = entropy.createAdaptivePatch(inputContent, { windowSize, sensitivity });
             const outPath = path.join(outputDir, path.basename(inputPath, path.extname(inputPath)) + '.vpatch');

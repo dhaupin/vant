@@ -136,6 +136,8 @@ function main() { _checkRead();
 
     // Only update if different
     if (newVersion !== current) {
+        // (1b) write path gates on write capability (main() already checked read)
+        _checkWrite();
         updatePackageJson(newVersion);
 
         const tagged = tag(newVersion);
