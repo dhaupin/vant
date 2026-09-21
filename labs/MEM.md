@@ -29,44 +29,37 @@ is precious. Think `/tmp`: scratch state, not history.
 
 # CURRENT DUMP
 
-**When:** 2026-09-21, during fs→storage cohesion pass (axolotl)
-**Branch:** axolotl @ ~abee55b (R-1..R-4 done; remaining R-5 bins, R-6 name sweep)
+**When:** 2026-09-21, horcrux polish + org/teams flow QC (axolotl)
+**Branch:** axolotl @ 81d7daa local (R-1..R-4 done; push to origin hit 403 freebuff-web[bot] — RETRY, repo reconnect or app perms on user side)
 
 ## In-flight
 
-- R-3 SECURITY FIND: horcrux-controlled brain names relocated containment
-  base (slash/dotdot in name → path.join escapes → validateSafePath passes
-  relative to escaped base). Fixed via _safeBrainName charset guards in
-  transform.js. Pattern now exists in: islands, skills, transform
-- R-4: BrainStorage._getFilePath used to SILENTLY STRIP traversal
-  ('../../evil' → 'evil') — dead containment check. Now rejects loudly.
-- readRaw/writeRaw factory shortcuts: RAW BY DESIGN, contract documented;
-  P1-17 "removed entirely" labs claim corrected in TASKS.md
-- Next: R-5 bin/* sweep, R-6 cross-cutting name→path validation sweep,
-  bin/sync.js axolotl-branch awareness, dead-export removal
-- Test-suite gap: typeof-only checks miss ReferenceError bugs (decodeFromBuffer,
-  hybrid_getPrivacyConfig both found this way) — behavior tests needed
+- Org/teams flow QC done → `labs/prd-org-teams.md` (findings F-1..F-8,
+  decisions D-1..D-5, tasks O-1..O-6). Awaiting dhaupin decisions before O-1.
+- QC repro pattern kept in /tmp/qc_org2.js (boot-emulated scopes:
+  sudo.createTask + sandbox.setScopes + capabilities.canWrite/canSpawn=true)
+- Key finds: boot() defaults scopes:['read'] → every teams write E_SANDBOX;
+  FK split — creates store NAMEs (org:'QCOrg') but listings filter IDs →
+  listDepts(orgId)=0; deleteOrg orphans children; spawn() brain:null;
+  assign() type-garbage accepted; createRole async among sync siblings
+- Next: retry push, then O-1..O-6 after decisions (or R-5 bins sweep if user
+  wants to stay on fs→storage)
 
 ## Leads / rough notes
 
 - **Buffy horcrux exported 2026-09-21**: `models/public/vant/boot/buffy-p_buffy2026.svg`
-  (password `buffy2026`, 801KB, validateHorcruxData VALID — brains .locks/
-  axolotl/buffy/vant, buffy carries identity.md + learnings.md). Note:
-  bin/snapshot.js is STALE — its --output path.resolve() trips vaf's /home/
-  sensitive-prefix rule on absolute paths; `bin/horcrux.js create` (relative
-  path) is the working tool
+  (password `buffy2026`, 801KB, VALID — 4 brains, buffy = identity + learnings).
+  bin/snapshot.js STALE (absolute-path vaf trip); use `bin/horcrux.js create`
+- Wrong-pw UX fixed 81d7daa: validateHorcruxFile dataStr.includes crash →
+  clean invalid-password error; p_<pw> filename convention verified end-to-end
+- sandbox: teams/agents = deny-by-default even unconfigured; storage =
+  allow-with-warning; `_explicitlyConfigured` flag exists but unused by teams
 - storage `read()` → null on missing, `has()` → bool, write = atomic+mkdirs
-- "brain storage" objects (getBrainStorage()) have {basePath, version} — NO
-  `.path`. Two .path bugs found+fixed so far (brain.js listBackups, tmp.js
-  spaces → silent ./storage). grep for `.path ||` and `?.path` to be sure none left
-- format.saveFile silently falls back to raw fs when secured read is denied —
-  prefer store.write with format.serialize
-- format.parse returns {data, format, chain, error} — NO .content field; check
-  consumers expecting strings (islands load() bug fixed off this)
-- no `storage:*` event listeners exist yet → routing audit-ish modules through
-  storage is re-entrancy-safe today (recheck if listeners get added)
-- name-becomes-path-segment sites need safe-charset validation (islands/_
-  skills pattern); name-interpolation bugs are likely still hiding elsewhere
+- "brain storage" objects have {basePath, version} — NO `.path` (2 bugs found)
+- format.saveFile silently falls back to raw fs when secured read denied
+- format.parse returns {data, format, chain, error} — NO .content field
+- no `storage:*` event listeners exist yet → audit↔storage re-entrancy safe today
+- name-becomes-path-segment sites need safe-charset validation
 - `models/private/undefined` 0-byte artifact deleted; hunt the writer if returns
-- str_replace unreliable on lib/brain.js (even < line 2200) and can PARTIALLY
-  apply multi-edits — grep-verify every removal, use node-script fallback there
+- str_replace unreliable on lib/brain.js — grep-verify every removal, prefer
+  exact-match-or-throw node-script fallback on giant files

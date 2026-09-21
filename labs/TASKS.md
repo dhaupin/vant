@@ -2,13 +2,28 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-21  
-**Session:** fs→storage — succession/audit modules + MEM.md restore (IN PROGRESS)
+**Session:** horcrux polish + org/teams flow QC + PRD (IN PROGRESS)
+
+---
+
+## Session (2026-09-21 — Horcrux polish + Org/Teams flow QC)
+
+**Context:** Buffy horcrux verified last session (`81d7daa` also fixed the wrong-password UX: validateHorcruxFile crashed on `dataStr.includes` when decrypt produced empty payload — now a clean invalid-password error; p_<pw> filename convention re-verified end-to-end). Then ran the user's QC flow: **set up org → dept → team → role → spawn → assign end-to-end**. It passes mechanically but surfaced contract breaks → full findings + decisions in `labs/prd-org-teams.md`.
+
+| # | Item | State |
+|---|------|-------|
+| H-1 | **Horcrux wrong-password UX** (`81d7daa`) — friendly error instead of `"[object Object]" is not valid JSON` / ReferenceError. | done |
+| Q-1 | **Org flow QC executed** — full e2e with boot-emulated operator scopes: createOrg/getOrg/updateOrg/createDept/createTeam/createRole/spawn/assign/getRoleChain/hasPermission all green; **FAIL listDepts(orgId) → 0** (F-4 name-vs-ID FK split); deleteOrg orphaned live dept (F-5); spawn returned brain:null (F-6); assign accepted an object and logged `[object Object]` (F-7). | done |
+| Q-2 | **prd-org-teams.md written** — findings F-1..F-8, decisions D-1..D-5 for dhaupin (FK convention, default posture, operator grant UX, error contract, delete semantics), tasks O-1..O-6. | done |
+| O-1..O-6 | FK fix / referential integrity / error contract / spawn+assign hardening / operator grant path / real test suite — per PRD §5. | pending (needs D-1..D-5 decisions) |
+
+**Also:** push to origin hit 403 `freebuff-web[bot]` permission denied mid-session (81d7daa landed locally, push pending retry).
 
 ---
 
 ## Session (2026-09-21 — Succession/Audit migration + memory maintenance)
 
-**Context:** Continuing the fs→storage cohesion pass. Brain.js (slices 1-5) + mcp.js are done; next per the audit are the small JSON-store modules, then islands/tmp/skills, transform.js last. `labs/MEM.md` restored this session (was a stale 2026-09-19 crash dump).
+**Context:** Continuing the fs→storage cohesion pass (superseded by newer sessions above). Brain.js (slices 1-5) + mcp.js are done; next per the audit are the small JSON-store modules, then islands/tmp/skills, transform.js last. `labs/MEM.md` restored this session (was a stale 2026-09-19 crash dump).
 
 | # | Item | State |
 |---|------|-------|
