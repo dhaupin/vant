@@ -2,7 +2,23 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-21  
-**Session:** brain **layout migration tool** (prd-storage checklist) COMPLETE + test-fix (pushed)
+**Session:** sudo **templates + policies-as-code** (prd-sudo) COMPLETE (pushed `d003191`)
+
+---
+
+## Session (2026-09-21 — sudo escalation templates + policies-as-code)
+
+The in-flight working-tree slice landed and verified. prd-sudo checklist now: templates [x],
+policies-as-code [x]. Remaining open: Web UI, external auth (OAuth/LDAP), health-check
+revalidation, metrics.
+
+| Commit | What |
+|--------|------|
+| `d003191` | **Templates** — defineTemplate/getTemplate/listTemplates/deleteTemplate/applyTemplate in lib/sudo.js. Pinned service+scope+ttl (ttl clamped to CURRENT policy at define; escalate() re-clamps at apply), persisted at models/private/sudo/templates.json via FileStorage, name charset-gated (TEMPLATE_NAME_RE). applyTemplate routes through escalate() so whitelist/rate-limit/audit still govern every grant — templates are sugar, never a bypass. **Policies-as-code** — loadPolicies()/resetPolicies()/getPoliciesStatus(); optional JSON at models/private/sudo/policies.json (VANT_SUDO_POLICIES_PATH); TIGHTEN-ONLY invariants: no scope adds, no autoApprove adds, no requiresCallback removals, no maxTTL raises, no revalidate-off where forced on, no unknown services/fields/arrays — whole-file refusal, zero partial application. Wired into boot.init (refusal logs loudly, never blocks boot). CLI: `vant sudo template def|list|show|rm|apply`, `vant sudo policies load|status|reset`, `vant sudo audit [n]`. Tests: test/sudo-policies.test.js 17/17.
+
+**Gotchas:** (1) test suite leaves NO policies.json behind — a leftover file would tighten every future boot silently; tests clean both files + resetPolicies() on exit. (2) The axolotl horcrux SVG (models/public/vant/boot/axolotl-p_axolotl2026.svg) gets mutated by test runs that touch boot/horcrux state — leave unstaged, restore via checkout if needed.
+
+**Verification:** sudo-policies 17/17; full module loop 0 fails; CI 414/414; runner 37/37; boot.init smoke with policies wiring OK.
 
 ---
 

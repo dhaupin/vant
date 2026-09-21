@@ -15,11 +15,10 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — migration tool + point-in-time snapshots landed and pushed.
-StateStorage state-dir misclassification fixed (see TASKS.md). Trap for the
-next agent: node -e probes mixing require() with top-level await crash with
-"Cannot determine intended module format" — wrap in async IIFE. See TASKS.md
-top block.)
+(nothing in flight — sudo escalation templates + policies-as-code landed and pushed
+`d003191`; prd-sudo now only has Web UI / external auth / health-check revalidation /
+metrics open. See TASKS.md top block. Standing gotcha: the axolotl horcrux SVG gets
+mutated by test runs — leave unstaged.)
 
 ---
 
