@@ -2,7 +2,24 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-21  
-**Session:** org/teams BUILD + **R-5/R-6 + cleanups** (IN PROGRESS — build+R done, docs/push pending)
+**Session:** org/teams BUILD + R-track + **fs→storage wave F-1** (IN PROGRESS — wave 1 done, pushed)
+
+---
+
+## Session (2026-09-21 — fs→storage wave F-1: small modules + census refresh)
+
+**Context:** Pivoted back to fs→storage per dhaupin (R-track done). Fresh census across lib/ classified every remaining raw fs site. **BONUS SECURITY FIND:** transform restore()'s legacy privateBrains path called `_safeBrainName`/`_modelsRel`/`_getStore()` — **defined nowhere** (R-3's batch edit landed call sites, not definitions) → every legacy-horcrux brain restore silently failed with swallowed ReferenceErrors. Fixed + verified round-trip.
+
+| # | Item | State |
+|---|------|-------|
+| FIX | (`c7412a4`) **transform restore helper defs** — defined once (islands pattern); legacy privateBrains restore now writes brain files through the models store (verified: 0 files + swallowed error → 1 file written) | done |
+| V-1 | (`2266e42`) **vibe.js** — mood.ini through brain-scoped FileStorage; read contract null→default. vibe 11/11 | done |
+| V-2 | (`1571b85`) **schema.js** — brain.json/_core.json through FileStorage; fileName charset-gated (was straight path.join). schema 10/10 | done |
+| V-3 | (`0a71939`) **context.js** — _gatherStatic reads through models-root store; secondary-brain names gated. Enumeration stays fs (PRD #7) | done |
+| V-4 | (`1c6f145`) **search.js** — dead `_stat`/`_readDir` helpers removed (zero callers). search 22/22 | done |
+| AUD | **Classified as staying on fs (PRD #7):** legal.js (LEGAL.md/LICENSE repo-root docs), compute.js (codebase connector enumeration), vant.js (lib dir discovery), search getCurrentCommit (.git internals), mcp autoWire + contained vant_storage_* (by design), agents/tmp/backup enumeration+binary (documented exceptions), brain/storage/transform remainder (the layer itself + horcrux artifacts) | done |
+
+**Remaining genuinely-migratable fs sites:** near zero in lib/ — the models-data I/O is now routed through the storage layer chain. What's left is enumerated metadata (readdir withFileTypes), binary artifacts (stego/backup images), the storage layer itself, and codebase-introspection reads — all documented exceptions.
 
 ---
 

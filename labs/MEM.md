@@ -29,20 +29,26 @@ is precious. Think `/tmp`: scratch state, not history.
 
 # CURRENT DUMP
 
-**When:** 2026-09-21, R-track complete (axolotl)
-**Branch:** axolotl @ c00a8c8 — R-5/R-6 + cleanups landed; docs+push in flight
+**When:** 2026-09-21, fs→storage wave F-1 (axolotl)
+**Branch:** axolotl @ 1c6f145 — wave F-1 pushed; docs commit in flight
 
 ## In-flight
 
-- **R-roadmap COMPLETE** (R-1..R-6). R-5: snapshot.js RESURRECTED (repo-
-  relative output; vaf sensitive-prefix was the "stale" culprit) + found the
-  inspectHorcrux shadow-`let data` bug (inspect CLI crashed on EVERY file).
-  R-6: name→path gates on bin/load, branch-manager, horcrux stack scan,
-  node.js saveBrain (likely undefined-artifact writer), agents listProtos.
-  C: transform dead block gone, escrow store brain-scoped
-- Remaining (low-pri): bin/sync.js axolotl-branch awareness, dead-export
-  removal, test gaps (concurrent agents / malicious restore / sync recursion)
-- QC repro patterns in /tmp/qc_*.js
+- **BIG FIND: transform restore() called UNDEFINED helpers** — R-3's batch
+  edit landed _safeBrainName/_modelsRel/_getStore() call sites without
+  definitions → legacy privateBrains horcrux restores silently swallowed
+  ReferenceErrors per file (0 files restored, no visible failure). Defined
+  + verified (c7412a4). LESSON: after node-script batch edits, grep the
+  function name across lib/ to confirm a definition exists somewhere.
+- Wave F-1 done: vibe (mood.ini), schema (brain.json/_core.json), context
+  (_gatherStatic), search dead helpers — all through FileStorage, per-commit
+- Census after wave: lib/ remaining fs = storage/brain/transform layer
+  itself, enumerated metadata (readdir withFileTypes), binary artifacts
+  (stego/backup), codebase introspection (legal/compute/vant/.git) — all
+  documented exceptions per prd-storage #7
+- Next: this was the last easy meat. Remaining low-pri queue: bin/sync.js
+  axolotl-branch awareness, dead-export removal (DEAD_EXPORTS.md), test
+  gaps (concurrent agents / malicious restore / sync recursion)
 
 ## Leads / rough notes
 
