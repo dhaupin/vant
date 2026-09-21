@@ -15,10 +15,10 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — clean state. Wave F-3 bin/ migrations complete: clean.js
-cache deletion, load.js model reads, health.js brain reads — all through
-FileStorage with the security chain. bin/ census done, rest documented
-stay-on-fs. See TASKS.md top block.)
+(nothing in flight — clean state. Test-gap trio + timer-registry coverage landed;
+reincarnation drill PASSED cold-clone→horcrux→4-brains→CI 410/410. One hazard
+queued for product decision: SelfHostedProvider.isConfigured() hardcoded true
+means sync.pushAll() runs real git ops in CWD — see TASKS.md top block.)
 
 ---
 

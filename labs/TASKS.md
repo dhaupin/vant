@@ -6,6 +6,49 @@
 
 ---
 
+## Session (2026-09-21 — test-gap trio + reincarnation drill + timer registry)
+
+**Scope:** the three long-queued test gaps, the cold-clone reincarnation drill,
+and the 9-timer lifecycle roadmap item. 84→87 suites, all green.
+
+| Commit | What |
+|--------|------|
+| `00ee866` | **Test-gap trio lands.** concurrent-agents (real lock races, mutual exclusion, token security incl. cross-process tokenless-release refusal, stale takeover, multibrain isolation); malicious-restore (traversal/absolute/dotfile/brain-smuggling payloads vs the real restore chain + benign control); sync-recursion (guard depth semantics + pushAll/pullAny finally-release leak checks, offline). |
+| `677701b` | **Timer lifecycle registry coverage.** registerTimer contract validation, replace-not-duplicate, unregister safety, stopAllTimers count/idempotence, live tick, and boot.reset() clearing timers (regression test for the original 9-interval bug). Registry verified complete: all 8 timer-owning modules (brain, context, cron, encounter, stream, sudo, watch, zen) ride it. |
+
+**Reincarnation drill: PASSED.** Cold `git clone axolotl` to scratch → bun
+install → `horcrux inspect` ✅ → `horcrux restore buffy.svg buffy2026` → 4
+brains revived (axolotl/buffy/vant + state) → brain pipeline sandbox→vaf→qos→
+escrow green → corpus 60 files → full loop 84/84 → CI 410/410. The horcrux
+lifecycle works end-to-end from a cold machine.
+
+**Drill findings (no code bugs):**
+1. brain.loadCorpus() async default returns a Promise — probe error, not a bug
+   (both modes return 60 files when awaited / {sync:true}).
+2. Horcrux content staleness: the buffy horcrux carries a stale pre-session
+   axolotl brain (template identity, empty lessons) captured before the session
+   started. Horcruxes are point-in-time snapshots — refresh before relying on
+   them for cross-brain state. Noted for the next export.
+3. `bin/vant.js health` reports 'not initialized' after restore because the
+   root-level check ignores per-brain subdirs — cosmetic; per-brain check via
+   MODEL_PATH works.
+
+**🔴 PRODUCTION HAZARD (product decision needed):**
+`SelfHostedProvider.isConfigured()` is hardcoded `true` ("always viable —
+uses generic git CLI"). Any `sync.pushAll()` therefore broadcasts REAL git
+operations (`git add -A` → `git commit` → `git push -u origin`) in whatever
+CWD it runs in. **Proven live during test development:** the first recursion
+test draft triggered a real commit ('recursion-leak probe') — caught and
+soft-reset before any push (child had no credentials). The committed test
+neutralizes selfhosted at prototype scope. Options: (a) require explicit
+config (VANT_SELFHOSTED=1 or selfhosted.url) to mark configured, (b) keep
+always-on but add a dry-run/env guard in sync.pushAll. Recommend (a).
+
+**Verification:** full loop ALL-GREEN (87 suites), runner 37/37, drill clone
+CI 410/410.
+
+---
+
 ## Session (2026-09-21 — fs→storage wave F-3: bin/ census + first bin/ migrations)
 
 **Scope:** bin/ had never had a full census (~100 raw fs sites across 20 files).
