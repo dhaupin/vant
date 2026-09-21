@@ -166,8 +166,16 @@ async function cleanLogs() {
     const now = Date.now();
     const maxAgeMs = maxAge * 24 * 60 * 60 * 1000;
     
-    // Clean vant.log
-    const logFile = 'vant.log';
+    // NOTE (fs→storage census): cleanLogs targets vant.log/vant.log.old at
+    // the repo root — process logs, not models-data. Stay-on-fs by design
+    // (prd-storage.md): no security chain applies to the app's own logs.
+    // 
+    // NOTE: cleanTmp targets OS-level dirs (.agent_tmp, tmp, /tmp) — outside
+    // the storage tree, so stay-on-fs per prd-storage.md. lib/tmp.js's
+    // store-backed spaces (models/tmp-space/*) are the storage-managed tmp:
+    // use `vant clean` + lib/tmp clear() for those. The bare '/tmp' sweep is
+    // aggressive (shared OS dir) and is a candidate for removal — flagged,
+    // not changed, to keep this commit migration-only.
     if (fs.existsSync(logFile)) {
         const stats = fs.statSync(logFile);
         
@@ -271,13 +279,25 @@ async function cleanCache() {
         '.vector-index.json'
     ];
     
+    // (fs→storage migration) models/ cache files are models-data: delete
+    // through FileStorage so the sandbox + vaf security chain gates every
+    // unlink. Other cache locations stay raw by design.
+    let store = null;
+    function _cacheStore() {
+        if (!store) {
+            const Storage = require('../lib/storage');
+            store = new Storage.FileStorage({ basePath: path.resolve('models') });
+        }
+        return store;
+    }
+    
     for (const cacheFile of cacheFiles) {
-        const cachePath = path.join('models', cacheFile);
-        if (fs.existsSync(cachePath)) {
-            dry(`Removing cache: ${cachePath}`);
-            if (!flags.dryRun) {
-                fs.unlinkSync(cachePath);
-                cleaned++;
+        dry(`Removing cache: models/${cacheFile}`);
+        if (!flags.dryRun) {
+            try {
+                if (_cacheStore().delete(cacheFile)) cleaned++;
+            } catch (e) {
+                if (flags.verbose) log(`Cache delete blocked for ${cacheFile}: ${e.message}`);
             }
         }
     }
