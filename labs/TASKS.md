@@ -2,22 +2,27 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-21  
-**Session:** horcrux polish + org/teams flow QC + PRD (IN PROGRESS)
+**Session:** horcrux polish + org/teams flow QC + PRD + **BUILD O-1..O-8** (IN PROGRESS — build done, docs/push pending)
 
 ---
 
-## Session (2026-09-21 — Horcrux polish + Org/Teams flow QC)
+## Session (2026-09-21 — Org/Teams BUILD: O-1..O-8 all landed)
 
-**Context:** Buffy horcrux verified last session (`81d7daa` also fixed the wrong-password UX: validateHorcruxFile crashed on `dataStr.includes` when decrypt produced empty payload — now a clean invalid-password error; p_<pw> filename convention re-verified end-to-end). Then ran the user's QC flow: **set up org → dept → team → role → spawn → assign end-to-end**. It passes mechanically but surfaced contract breaks → full findings + decisions in `labs/prd-org-teams.md`.
+**Context:** dhaupin greenlit the build ("run it all", PRD recommendations adopted for D-1..D-5). The full orgchart stack is now real: IDs internally, name-or-ID everywhere, brain-scoped stores, operator grant CLI, cascade+dryRun, REAL horcrux restore. **The reincarnation test passes**: org → dept → team → role → spawn → assign → gather → wipe → restore → everything back incl. brain bindings.
 
 | # | Item | State |
 |---|------|-------|
-| H-1 | **Horcrux wrong-password UX** (`81d7daa`) — friendly error instead of `"[object Object]" is not valid JSON` / ReferenceError. | done |
-| Q-1 | **Org flow QC executed** — full e2e with boot-emulated operator scopes: createOrg/getOrg/updateOrg/createDept/createTeam/createRole/spawn/assign/getRoleChain/hasPermission all green; **FAIL listDepts(orgId) → 0** (F-4 name-vs-ID FK split); deleteOrg orphaned live dept (F-5); spawn returned brain:null (F-6); assign accepted an object and logged `[object Object]` (F-7). | done |
-| Q-2 | **prd-org-teams.md written** — findings F-1..F-8, decisions D-1..D-5 for dhaupin (FK convention, default posture, operator grant UX, error contract, delete semantics), tasks O-1..O-6. | done |
-| O-1..O-6 | FK fix / referential integrity / error contract / spawn+assign hardening / operator grant path / real test suite — per PRD §5. | pending (needs D-1..D-5 decisions) |
+| O-1+O-3+O-4 | (`7a1c01f`) **Resolver + FK IDs + contract** — `_resolve{Org,Dept,Team,Role}Ref` (exact-ID, then unique case-insensitive name; context-scoped role resolution within a team); creates+assign+listings route through it, IDs stored internally (cascade code started working the moment FKs were consistent); assign rejects non-string agentId [E_INVALID_AGENT]; spawn binds current brain (was always null); createRole sync + validated + dup-checked; error contract: throw for misuse, {error,code} for policy denials | done |
+| O-2 | (`7a1c01f`) **Integrity** — delete{Org,Dept} return `{cascaded:{depts|teams:[ids]}}` + emit counts; dryRun option on all three deletes; zero orphans verified after deletes | done |
+| O-5 | (`7a1c01f` + `fb65b00` fix) **Operator grant path** — `bin/org.js`: `grant` (scopes + canWrite/canSpawn caps + sudo task), `status`, `config --set-operator-scopes` (persisted default), `demo` (full flow, uses boot().init — NOT boot() which is islands/prompt). F-1's two-layer trap documented: boot scopes alone do NOT flip DEFAULT_CAPABILITIES | done |
+| O-7 | (`fb65b00`) **Stores brain-scoped** — teams → `models/private/<brain>/orgchart/teams.json`, agents registry → `orgchart/agents.json`, resolved PER CALL (pushBrain moves them); safe-charset brain-name guard; config override preserved; legacy `.agent_tmp` only when brain module unusable. SPLIT registry store from models-root store: loadProto/loadFolder were probing models/-relative paths against the `.agent_tmp` basePath — brain-scoped proto loading silently broken, now reads through a models-root store with correct relpaths | done |
+| O-8 | (`9066275` + `7a1c01f`) **Horcrux single-source** — transform gatherTeams/gatherAgents2 both delegate to module `gatherState()` (no more store-file fs read / dual formats); restore consumes `teams.restoreState()` (accepts Map-entries AND legacy array format) and `agents.restoreState()` (REAL restore — was `push('agents')` label-only; gatherState now carries full records incl. brain; empty array = wipe); agents.js duplicate export deduped | done |
+| O-6 | (`9066275`) **test/orgflow.test.js** — 18 e2e tests, promise-aware harness (async restore/delete — a sync harness lies): full flow, negative paths, dryRun/cascade, listings by name+ID, brain binding, reincarnation round-trip. 18/18 exit 0 | done |
+| V-1 | Full module loop all exit-0 (earlier "FAIL" lines were grep false-positives on test NAMES containing 'error'); `test/runner.js` 37/37; horcrux validate + p_<pw> re-verified after transform changes | done |
 
-**Also:** push to origin hit 403 `freebuff-web[bot]` permission denied mid-session (81d7daa landed locally, push pending retry).
+**Reincarnation verified end-to-end** (`/tmp/qc_reincarnate.js`): BUILD ok → GATHER (teams2 orgs=1, agents=1) → WIPE (maps cleared + stores deleted) → RESTORE (orgs=1 depts=1 teams=1 roles=1 assigns=1, agents=1) → VERIFY (org roundtrip by ID, listDepts by name, getAgentBrain='vant', agent record back, store persisted) → REINCARNATION-PASS.
+
+**Open follow-ups:** transform.js legacy `if (false)` block (dead store-file write path) can be deleted next cleanup; escrow.js still defaults its store to `.agent_tmp/escrow.json` (same O-7 treatment would apply); bin/org.js demo hardcodes 'vant' brain docs; R-5 bin sweep + R-6 name-validation sweep still queued.
 
 ---
 

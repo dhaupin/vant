@@ -29,21 +29,24 @@ is precious. Think `/tmp`: scratch state, not history.
 
 # CURRENT DUMP
 
-**When:** 2026-09-21, horcrux polish + org/teams flow QC (axolotl)
-**Branch:** axolotl @ 81d7daa local (R-1..R-4 done; push to origin hit 403 freebuff-web[bot] — RETRY, repo reconnect or app perms on user side)
+**When:** 2026-09-21, org/teams BUILD complete (axolotl)
+**Branch:** axolotl @ 0927d6d — O-1..O-8 all landed + committed; push pending this session
 
 ## In-flight
 
-- Org/teams flow QC done → `labs/prd-org-teams.md` (findings F-1..F-8,
-  decisions D-1..D-5, tasks O-1..O-6). Awaiting dhaupin decisions before O-1.
-- QC repro pattern kept in /tmp/qc_org2.js (boot-emulated scopes:
-  sudo.createTask + sandbox.setScopes + capabilities.canWrite/canSpawn=true)
-- Key finds: boot() defaults scopes:['read'] → every teams write E_SANDBOX;
-  FK split — creates store NAMEs (org:'QCOrg') but listings filter IDs →
-  listDepts(orgId)=0; deleteOrg orphans children; spawn() brain:null;
-  assign() type-garbage accepted; createRole async among sync siblings
-- Next: retry push, then O-1..O-6 after decisions (or R-5 bins sweep if user
-  wants to stay on fs→storage)
+- BUILD DONE: orgchart stack real — resolver (name-or-ID), FK IDs, grant CLI
+  (bin/org.js), brain-scoped stores (models/private/<brain>/orgchart/),
+  cascade+dryRun, REAL horcrux restore. test/orgflow.test.js 18/18.
+  REINCARNATION-PASS: org→dept→team→role→spawn→assign→gather→wipe→restore→
+  everything back incl. brain bindings. Details: labs/TASKS.md top session
+- Next up (queue): R-5 bin/* sweep, R-6 name→path validation sweep,
+  transform.js legacy if(false) block deletion, escrow.js .agent_tmp default
+  (same O-7 treatment), bin/org.js demo brain-docs hardcode, boot README
+  org-grant section, agents2 restore lives under realm/market block in
+  transform restore() (works, but placement is odd — tidy someday)
+- QC repro patterns in /tmp/qc_*.js (boot-emulated scopes:
+  sudo.createTask + sandbox.setScopes + capabilities.canWrite/canSpawn=true;
+  reincarnation: /tmp/qc_reincarnate.js)
 
 ## Leads / rough notes
 
@@ -52,8 +55,8 @@ is precious. Think `/tmp`: scratch state, not history.
   bin/snapshot.js STALE (absolute-path vaf trip); use `bin/horcrux.js create`
 - Wrong-pw UX fixed 81d7daa: validateHorcruxFile dataStr.includes crash →
   clean invalid-password error; p_<pw> filename convention verified end-to-end
-- sandbox: teams/agents = deny-by-default even unconfigured; storage =
-  allow-with-warning; `_explicitlyConfigured` flag exists but unused by teams
+- sandbox: teams/agents deny-by-default; grant via bin/org.js (scopes + caps
+  + sudo task — BOTH layers needed; boot scopes alone don't flip caps)
 - storage `read()` → null on missing, `has()` → bool, write = atomic+mkdirs
 - "brain storage" objects have {basePath, version} — NO `.path` (2 bugs found)
 - format.saveFile silently falls back to raw fs when secured read denied
