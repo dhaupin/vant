@@ -36,7 +36,13 @@ Migration pattern (validated across 13 modules so far): FileStorage on the model
 | R-5 | **bin/* fs consumers** | CLI layer reads models via lib APIs mostly; sweep for direct models-tree fs access and route through libs (health, summary, clean touch models paths). Low priority — bins run trusted-local. | medium |
 | R-6 | **Cross-cutting: name→path validation sweep** | grep for template-literal/concatenated path segments across lib (`vant-skill-`-style bugs are likely still hiding). Apply the `_safeSkillName` pattern everywhere an external name becomes a path segment. Also hunt the `models/private/undefined` writer if the artifact ever reappears. | medium |
 
-Also still open (from earlier sessions): `bin/sync.js` axolotl-branch awareness (pushes `${DEFAULT_BRANCH}` = main), dead-export removal per DEAD_EXPORTS.md, tests for concurrent agents / malicious backup restore / sync recursion leaks.
+Also still open (from earlier sessions): `bin/sync.js` axolotl-branch awareness (pushes `${DEFAULT_BRANCH}` = main), dead-export removal per DEAD_EXPORTS.md, tests for concurrent agents / malicious backup restore / sync recursion leaks, and **bin/snapshot.js is stale** — its path.resolve()'d --output trips vaf's sensitive-prefix rule on absolute paths ("Path traversal blocked"); `bin/horcrux.js create` with a relative path is the working export tool (Buffy horcrux created+verified via it, see MEM.md).
+
+### Agent Horcruxes
+
+| Agent | File | Password | Created | Verified |
+|-------|------|----------|---------|----------|
+| Buffy | `models/public/vant/boot/buffy-p_buffy2026.svg` | `buffy2026` | 2026-09-21 (`bin/horcrux.js create`) | ✅ inspect + fromHorcrux + validateHorcruxData VALID (4 brains, buffy = identity.md + learnings.md) |
 
 ---
 

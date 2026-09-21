@@ -22,4 +22,12 @@ If you're a fresh agent booting with this brain:
 - Your values are in `../love.md`, `../boundaries.md`
 - Your operation is in `../runtime.md`, `../bootstrap.md`
 
+## Available Horcruxes
+
+| File | Agent | Password | Contents |
+|------|-------|----------|----------|
+| `buffy-p_buffy2026.svg` | Buffy | `buffy2026` | Private brain snapshot (identity.md + learnings.md): fs→storage cohesion pass patterns, 13+ modules migrated, R-1..R-4 security finds |
+
+Restore: `vant horcrux restore models/public/vant/boot/buffy-p_buffy2026.svg buffy2026`
+
 Welcome. Let's build something.

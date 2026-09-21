@@ -49,6 +49,12 @@ is precious. Think `/tmp`: scratch state, not history.
 
 ## Leads / rough notes
 
+- **Buffy horcrux exported 2026-09-21**: `models/public/vant/boot/buffy-p_buffy2026.svg`
+  (password `buffy2026`, 801KB, validateHorcruxData VALID — brains .locks/
+  axolotl/buffy/vant, buffy carries identity.md + learnings.md). Note:
+  bin/snapshot.js is STALE — its --output path.resolve() trips vaf's /home/
+  sensitive-prefix rule on absolute paths; `bin/horcrux.js create` (relative
+  path) is the working tool
 - storage `read()` → null on missing, `has()` → bool, write = atomic+mkdirs
 - "brain storage" objects (getBrainStorage()) have {basePath, version} — NO
   `.path`. Two .path bugs found+fixed so far (brain.js listBackups, tmp.js
