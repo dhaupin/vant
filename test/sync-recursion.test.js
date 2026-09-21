@@ -52,16 +52,16 @@ for (const k of TOKEN_VARS) { savedEnv[k] = process.env[k]; delete process.env[k
 const guard = require(path.join(ROOT, 'lib', 'recursion'));
 const sync = require(path.join(ROOT, 'lib', 'sync'));
 
-// TEST-SCOPE neutralization: SelfHostedProvider.isConfigured() is hardcoded
-// true ("always viable — uses generic git CLI"), meaning sync.pushAll()
-// broadcasts REAL git operations (add -A, commit, push) in whatever repo it
-// runs in. For these offline tests we flip the prototype to unconfigured so
-// pushAll/pullAny take their true early-return path. Production behavior is
-// untouched; the always-configured hazard is recorded in labs.
-// (Getting the class from a live instance: requiring selfhosted.js directly
-// can return a partial export mid-cycle — the F-2 cache-poison pattern.)
-const remote = require(path.join(ROOT, 'lib', 'remote'));
-const selfhostedProto = Object.getPrototypeOf(remote.getAllProviders().selfhosted);
+// OFFLINE isolation note: these tests run BEFORE the selfhosted opt-in fix
+// relied on prototype patching. Now the production mechanism itself keeps
+// the provider dormant (isConfigured() requires explicit VANT_SELFHOSTED /
+// VANT_SELFHOSTED_REMOTE / constructor url) — the env scrub above is what
+// keeps the suite offline. The prototype patch below is kept only as a
+// belt-and-suspenders guarantee for CI environments where someone has set
+// the opt-in vars.
+const selfhostedProto = Object.getPrototypeOf(
+    require(path.join(ROOT, 'lib', 'remote')).getAllProviders().selfhosted
+);
 const realIsConfigured = selfhostedProto.isConfigured;
 selfhostedProto.isConfigured = function () { return false; };
 
