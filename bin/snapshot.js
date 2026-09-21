@@ -135,8 +135,10 @@ function getGitContext() {
 }
 
 async function run() {
-    _checkWrite();
     const args = parseArgs(process.argv);
+    // (1b) capability gate AFTER arg parse so --help/usage stays available
+    // and smoke runs see output; refusal still precedes ANY file write.
+    _checkWrite();
     const output = deriveOutput(args);
     const password = await getPassword(args);
     const git = getGitContext();
@@ -222,6 +224,12 @@ async function run() {
 }
 
 run().catch(e => {
+    // Refusal reasons (capability gates) print to stdout so smoke/usage
+    // output is visible; unexpected errors keep the ❌ stderr treatment.
+    if (/capability/i.test(e.message)) {
+        console.log('❌ Snapshot refused:', e.message);
+        process.exit(1);
+    }
     console.error('\n❌ Snapshot failed:', e.message);
     if (process.env.DEBUG) console.error(e.stack);
     process.exit(1);

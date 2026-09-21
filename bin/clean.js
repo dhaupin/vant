@@ -339,12 +339,14 @@ async function runPrune() {
 async function run() {
     const target = targets[0] || 'all';
     
-    // (1b) destructive ops require write capability (dry-run stays ungated)
-    if (!flags.dryRun) _checkWrite();
-    
     console.log('╔══════════════════════════════════════════╗');
     console.log('║         Vant Clean                      ║');
     console.log('╚══════════════════════════════════════════╝');
+    
+    // (1b) destructive ops require write capability — checked AFTER the
+    // banner so smoke/usage output is visible; refusal still precedes any
+    // deletion. Dry-run stays ungated.
+    if (!flags.dryRun) _checkWrite();
     
     if (flags.dryRun) {
         console.log('[DRY-RUN MODE - No changes will be made]\n');
