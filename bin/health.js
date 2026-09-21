@@ -35,6 +35,15 @@ function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.c
 function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
 
+// (fs→storage migration) brain-file existence/reads go through FileStorage so
+// the sandbox + vaf security chain gates every access. config.ini/.env checks
+// and dir listings stay on fs (app-config + enumeration classes,
+// prd-storage.md).
+function _brainStore(brainPath) {
+    const Storage = require('../lib/storage');
+    return new Storage.FileStorage({ basePath: path.resolve(brainPath) });
+}
+
 // Check if file exists - tries .md first, falls back to .txt
 function fileExists(file) {
     if (fs.existsSync(file)) return true;
@@ -55,20 +64,21 @@ function checkModel() {
     const required = ['identity.md', 'identity.txt'];
     // Check user's brain (determined by MODEL_PATH or config)
     const brainPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || process.env.VANT_STORAGE_PATH || 'models/private';
-    const found = checks.some(pair => pair.some(f => fs.existsSync(path.join(brainPath, f))));
+    const brainFs = _brainStore(brainPath);
+    const found = checks.some(pair => pair.some(f => brainFs.has(f)));
     
     if (found) {
         console.log('  ' + theme.status.ok('Brain exists at ' + brainPath));
         
         // Try to read identity
-        const identityPath = fs.existsSync(brainPath + '/identity.md') 
-            ? brainPath + '/identity.md' 
-            : fs.existsSync(brainPath + '/identity.txt') 
-                ? brainPath + '/identity.txt' 
+        const identityRel = brainFs.has('identity.md') 
+            ? 'identity.md' 
+            : brainFs.has('identity.txt') 
+                ? 'identity.txt' 
                 : null;
         
-        if (identityPath) {
-            const content = fs.readFileSync(identityPath, 'utf8');
+        if (identityRel) {
+            const content = brainFs.read(identityRel, 'utf8');
             const modelMatch = content.match(/MODEL:\s*(.+)/);
             if (modelMatch) {
                 console.log('  → ' + theme.value(modelMatch[1]));
@@ -114,7 +124,7 @@ function checkDirs() {
     });
 
     // State now in brain path
-    if (fs.existsSync(brainPath + '/.state.json')) {
+    if (_brainStore(brainPath).has('.state.json')) {
         console.log('  ' + theme.status.ok(brainPath + '/.state.json'));
     }
 }
