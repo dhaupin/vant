@@ -30,17 +30,22 @@ is precious. Think `/tmp`: scratch state, not history.
 # CURRENT DUMP
 
 **When:** 2026-09-21, during fs→storage cohesion pass (axolotl)
-**Branch:** axolotl @ ~dfeed08 (R-1 + R-2 done: stego/backup/sync/server)
+**Branch:** axolotl @ ~abee55b (R-1..R-4 done; remaining R-5 bins, R-6 name sweep)
 
 ## In-flight
 
-- Next: R-3 transform.js (46 sites — node-script batch edits), then R-4
-  storage.js self-audit (incl. readRaw/writeRaw factory-shortcut question),
-  R-5 bins, R-6 name-validation sweep
-- Found this round: decodeFromBuffer ReferenceError (typeof-only tests),
-  hybrid_getPrivacyConfig ReferenceError (undefined PRIVACY_FILE),
-  server.js containment always-false (dead static serving), backupPath
-  cwd-relative anchoring, readRaw/writeRaw still exported vs P1-17 claim
+- R-3 SECURITY FIND: horcrux-controlled brain names relocated containment
+  base (slash/dotdot in name → path.join escapes → validateSafePath passes
+  relative to escaped base). Fixed via _safeBrainName charset guards in
+  transform.js. Pattern now exists in: islands, skills, transform
+- R-4: BrainStorage._getFilePath used to SILENTLY STRIP traversal
+  ('../../evil' → 'evil') — dead containment check. Now rejects loudly.
+- readRaw/writeRaw factory shortcuts: RAW BY DESIGN, contract documented;
+  P1-17 "removed entirely" labs claim corrected in TASKS.md
+- Next: R-5 bin/* sweep, R-6 cross-cutting name→path validation sweep,
+  bin/sync.js axolotl-branch awareness, dead-export removal
+- Test-suite gap: typeof-only checks miss ReferenceError bugs (decodeFromBuffer,
+  hybrid_getPrivacyConfig both found this way) — behavior tests needed
 
 ## Leads / rough notes
 
