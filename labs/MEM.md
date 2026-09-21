@@ -29,24 +29,20 @@ is precious. Think `/tmp`: scratch state, not history.
 
 # CURRENT DUMP
 
-**When:** 2026-09-21, org/teams BUILD complete (axolotl)
-**Branch:** axolotl @ 0927d6d — O-1..O-8 all landed + committed; push pending this session
+**When:** 2026-09-21, R-track complete (axolotl)
+**Branch:** axolotl @ c00a8c8 — R-5/R-6 + cleanups landed; docs+push in flight
 
 ## In-flight
 
-- BUILD DONE: orgchart stack real — resolver (name-or-ID), FK IDs, grant CLI
-  (bin/org.js), brain-scoped stores (models/private/<brain>/orgchart/),
-  cascade+dryRun, REAL horcrux restore. test/orgflow.test.js 18/18.
-  REINCARNATION-PASS: org→dept→team→role→spawn→assign→gather→wipe→restore→
-  everything back incl. brain bindings. Details: labs/TASKS.md top session
-- Next up (queue): R-5 bin/* sweep, R-6 name→path validation sweep,
-  transform.js legacy if(false) block deletion, escrow.js .agent_tmp default
-  (same O-7 treatment), bin/org.js demo brain-docs hardcode, boot README
-  org-grant section, agents2 restore lives under realm/market block in
-  transform restore() (works, but placement is odd — tidy someday)
-- QC repro patterns in /tmp/qc_*.js (boot-emulated scopes:
-  sudo.createTask + sandbox.setScopes + capabilities.canWrite/canSpawn=true;
-  reincarnation: /tmp/qc_reincarnate.js)
+- **R-roadmap COMPLETE** (R-1..R-6). R-5: snapshot.js RESURRECTED (repo-
+  relative output; vaf sensitive-prefix was the "stale" culprit) + found the
+  inspectHorcrux shadow-`let data` bug (inspect CLI crashed on EVERY file).
+  R-6: name→path gates on bin/load, branch-manager, horcrux stack scan,
+  node.js saveBrain (likely undefined-artifact writer), agents listProtos.
+  C: transform dead block gone, escrow store brain-scoped
+- Remaining (low-pri): bin/sync.js axolotl-branch awareness, dead-export
+  removal, test gaps (concurrent agents / malicious restore / sync recursion)
+- QC repro patterns in /tmp/qc_*.js
 
 ## Leads / rough notes
 

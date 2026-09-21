@@ -2,7 +2,23 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-21  
-**Session:** horcrux polish + org/teams flow QC + PRD + **BUILD O-1..O-8** (IN PROGRESS — build done, docs/push pending)
+**Session:** org/teams BUILD + **R-5/R-6 + cleanups** (IN PROGRESS — build+R done, docs/push pending)
+
+---
+
+## Session (2026-09-21 — R-5/R-6 + cleanups: the R-track is DONE)
+
+**Context:** Completed the remaining R-roadmap. **BONUS FIND:** bin/snapshot.js was resurrectable and inspectHorcrux had a shadow-var bug that crashed the horcrux inspect CLI on EVERY file — found while testing the resurrection.
+
+| # | Item | State |
+|---|------|-------|
+| R-5 | (`4db2c29`) **snapshot.js un-staled** — deriveOutput kept repo-RELATIVE (vaf blocks absolute /home/... as sensitive prefix; the "snapshot is dead" claim was just this). --output clamped inside repo + vaf-checked; agent/password filenames charset-validated. Round-trip verified: snapshot create → horcrux inspect VALID. **BONUS: lib/transform.js inspectHorcrux had a shadowed inner `let data`** — outer stayed undefined after successful parse → data.timestamp TypeError on every inspect; fixed, buffy horcrux + fresh snapshot both inspect clean. Also audited bin/health/summary/clean/audit/boot/backup/load/lock/watch: remaining fs uses are codebase-metadata (readdir lib/bin, package.json) or pid/lock tokens — NOT models data; no migration needed per PRD #7 | done |
+| R-6 | (`22dfbe5`) **name→path sweep** — bin/load.js model arg (vaf.check alone allowed `sub/dir`; charset-gate now), bin/branch-manager brain-from-git-status, bin/horcrux brain-stack from state.json (malicious state.json could have redirected boot scans), bin/node.js saveBrain file names (probable writer of the models/private/undefined artifact), lib/agents listProtos/listFolders brainName entries. Confirmed already-clean: skills loadProto/loadFolder, canvas, islands, brain (_validBrainSegment), tmp | done |
+| C-1 | (`c00a8c8`) **transform dead block removed** (1KB if(false) + orphaned catch fragment; node-script removal + syntax check) | done |
+| C-2 | (`c00a8c8`) **escrow store brain-scoped** — models/private/<brain>/orgchart/escrow.json default (pushBrain-aware, config override kept); probe budget persisted to models store; .agent_tmp NOT recreated; probe budgets scrubbed | done |
+| V-2 | Full module loop exit-0 after each commit; runner 37/37; orgflow 18/18 | done |
+
+**Remaining from the old audit queue (lower priority):** bin/sync.js axolotl-branch awareness (pushes DEFAULT_BRANCH=main), dead-export removal per DEAD_EXPORTS.md, test gaps (concurrent agents, malicious backup restore, sync recursion).
 
 ---
 
