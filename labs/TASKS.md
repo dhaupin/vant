@@ -2,7 +2,37 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-21  
-**Session:** org/teams BUILD + R-track + **fs→storage wave F-1** (IN PROGRESS — wave 1 done, pushed)
+**Session:** fs→storage **wave F-2 (security files) COMPLETE + partial-cache security fix** (pushed)
+
+---
+
+## Session (2026-09-21 — fs→storage wave F-2: security-file persistence + the partial-cache hole)
+
+**Scope:** every remaining security/state file in lib/ routed through FileStorage
+(vaf path-check + capability gate + containment + atomic write). One commit per
+module, full loop + runner green after each.
+
+| Commit | What |
+|--------|------|
+| `9c0cd0b` | **auth.js** — lockout persistence (`.circuit-auth.json`) via FileStorage; lib/auth.js now 0 raw fs. Verified: recordFailedAttempt round-trip persists through the store. |
+| `29190a0` | **vaf.js** — blocked-IPs (`.circuit-vaf.json`) + audit append (`.audit.log`, read-modify-write) via FileStorage (lazy require to dodge the storage↔vaf cycle); 0 raw fs calls. Verified: block→persist→isBlocked round-trip, audit line written. |
+| `00b7d43` | **qos.js** — CircuitBreaker full-mode `_load/_save` route through FileStorage when basePath is the models tree. **Bonus bug:** `audit` was never imported — every rate-limit block / circuit-open trip threw a swallowed ReferenceError. Lazy audit shim added; full-mode trip→persist→reopen verified. |
+| `6c645bb` | **escrow.js** — budget persistence (brain-scoped orgchart store) via FileStorage; 0 raw fs. Verified: setBudget → fresh-module reload. |
+| `bb86477` | **transform.js** — section-2 brainStorage restore (multibrain brains-object + legacy files-array) writes through `_getStore()`; (R-6) payload brain names charset-gated. Verified: probe restore writes `identity.md` + `notes/probe.md` through the store with auto-mkdir. |
+| `5b3ca91` | **SECURITY FIX — partial-cache hole.** The gate→sandbox→vaf→storage→gate require cycle let `gate._getSandboxMod` and `storage._getVaf` cache PARTIAL modules mid-init: vaf path checks were silently skipped on EVERY storage.write/read, and gate trusted the unconfigured stub. 3 security-hardening tests failing since `29190a0`. Both caches now verify the member they rely on before caching and retry until the module finishes init. |
+
+**Verification:** full test loop 0 failures, runner 37/37, security-hardening all green.
+Traversal probe (`../../escape` write) now throws `VAF_PATH_BLOCKED`; configured-deny is enforced.
+
+**Remaining fs census (documented stay-on-fs per prd-storage.md):** storage.js layer
+itself, brain.js internals, readdir-style enumeration (pattern-glob limitation),
+binary artifacts (stego/backup SVG+PNG), codebase introspection (legal/compute/
+vant/.git), contained+sudo-gated `vant_storage_*` MCP tools, server TLS certs +
+static file serving, transform horcrux SVG I/O (path-gated at CLI). Nothing
+models-data-shaped bypasses the store.
+
+**Next candidates:** test-gap trio (concurrent agents, malicious backup restore,
+sync recursion); DEAD_EXPORTS.md long tail; fresh-clone reincarnation drill.
 
 ---
 
