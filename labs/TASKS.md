@@ -2,9 +2,26 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-21  
-**Session:** Brain slices 4+5 + MCP dir-scan storage migration — DONE
+**Session:** fs→storage — succession/audit modules + MEM.md restore (IN PROGRESS)
 
 ---
+
+## Session (2026-09-21 — Succession/Audit migration + memory maintenance)
+
+**Context:** Continuing the fs→storage cohesion pass. Brain.js (slices 1-5) + mcp.js are done; next per the audit are the small JSON-store modules, then islands/tmp/skills, transform.js last. `labs/MEM.md` restored this session (was a stale 2026-09-19 crash dump).
+
+| # | Item | State |
+|---|------|-------|
+| M-0 | **MEM.md restored** — compressed current-state crash handoff (restore procedure, migration status, security posture, conventions, quirks); full history delegated to AUDIT_FINDINGS.md/TASKS.md. Deleted `models/private/undefined` artifact (0-byte file from a pre-validation unvalidated brain-name write — if it reappears, hunt the writer). | done |
+| S-1 | **succession.js fs→storage** — `_succession.json` config + `.ledger.json` through FileStorage; fixes module-load path freeze (PUBLIC_DIR/LEDGER_PATH captured once → `getStackTrustLevels`/`getStackLedgers` pushed-brain had NO effect, stack reads returned the original brain every time). | in progress |
+| S-2 | **audit.js fs→storage** — ledger + archive through FileStorage; lazy-require the store (audit events fire during storage ops — re-entrancy risk). | pending |
+| S-3 | Buffy priv-brain lessons + push. | pending |
+
+**Next after this session:** islands.js (6 sites), tmp.js (9), skills.js (9), stego/backup/sync/server, transform.js (46, biggest blast radius), `bin/sync.js` axolotl-branch awareness, dead-export removal per DEAD_EXPORTS.md.
+
+---
+
+## Session Summary (2026-09-21 — fs→storage: brain.js slices 4-5 + mcp.js)
 
 ## Session Summary (2026-09-21 — fs→storage: brain.js slices 4-5 + mcp.js)
 
