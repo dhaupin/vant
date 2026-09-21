@@ -149,6 +149,9 @@ const COMMANDS = {
     // Brain layout migrations (prd-storage.md)
     migrate: 'migrate.js',
     
+    // Storage WAL crash recovery (prd-storage.md)
+    wal: 'wal.js',
+    
     // Agent spawning
     spawn: 'agent-spawner.js',
     
@@ -419,6 +422,7 @@ Brain:
   vant horcrux    Backup/restore brain to images
   vant stego      Stego brain recovery
   vant migrate    Brain layout versioning (status/dry-run/apply)
+  vant wal        Storage crash-recovery journal (status/drill/reset)
 
 State:
   vant vibe        Show/set vibe
