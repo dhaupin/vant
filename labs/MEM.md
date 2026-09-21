@@ -15,9 +15,10 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — clean state. Wave F-2 security-files complete: auth, vaf, qos,
-escrow, transform restore paths all through FileStorage; the gate/storage
-partial-cache security hole is closed. See TASKS.md top block.)
+(nothing in flight — clean state. Wave F-3 bin/ migrations complete: clean.js
+cache deletion, load.js model reads, health.js brain reads — all through
+FileStorage with the security chain. bin/ census done, rest documented
+stay-on-fs. See TASKS.md top block.)
 
 ---
 
