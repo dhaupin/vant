@@ -15,10 +15,9 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — clean state. Test-gap trio + timer-registry coverage landed;
-reincarnation drill PASSED cold-clone→horcrux→4-brains→CI 410/410. One hazard
-queued for product decision: SelfHostedProvider.isConfigured() hardcoded true
-means sync.pushAll() runs real git ops in CWD — see TASKS.md top block.)
+(nothing in flight — clean state. Selfhosted provider fixed (opt-in, 5/5 QC);
+brains refreshed (axolotl stubs real now); horcrux re-exported + round-trip
+6/6. Next: labs PRDs — see TASKS.md top block.)
 
 ---
 

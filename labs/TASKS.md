@@ -6,6 +6,15 @@
 
 ---
 
+## Session (2026-09-21 — selfhosted fix + brain/horcrux cleanup)
+
+| Commit | What |
+|--------|------|
+| `944ab84` | **SECURITY — selfhosted provider opt-in.** `isConfigured()` was hardcoded `true`; now dormant by default, configured via constructor `{url\|remoteUrl}`, `VANT_SELFHOSTED_REMOTE`, or `VANT_SELFHOSTED=1`. sync-recursion test now leans on production dormancy (prototype patch = CI belt-and-suspenders). QC 5/5 incl. sync early-return with zero providers. |
+| `5bf90bf` | **Horcrux + brain cleanup.** axolotl brain stubs fleshed out with real refactor state (were template stubs from the first snapshot — the drill's staleness finding); buffy identity refreshed to post-F3 state; fresh export via `horcrux create`; round-trip QC 6/6 into a scratch runtime. |
+
+---
+
 ## Session (2026-09-21 — test-gap trio + reincarnation drill + timer registry)
 
 **Scope:** the three long-queued test gaps, the cold-clone reincarnation drill,
