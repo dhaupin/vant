@@ -15,9 +15,10 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — clean state. Selfhosted provider fixed (opt-in, 5/5 QC);
-brains refreshed (axolotl stubs real now); horcrux re-exported + round-trip
-6/6. Next: labs PRDs — see TASKS.md top block.)
+(nothing in flight — clean state. PRD hygiene wave done: security checklist 5/5,
+storage encryption+compression live, sudo audit log + rate limiting live.
+Remaining PRD backlogs are bigger efforts (WAL, replication, templates, WebUI).
+See TASKS.md top block.)
 
 ---
 

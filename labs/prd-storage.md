@@ -850,8 +850,8 @@ node test/brain.test.js
 ## 12. Future Enhancements (P3+)
 
 - [ ] **Remote connectors**: S3, GCS, Azure Blob backends for FileStorage
-- [ ] **Encryption at rest**: Optional AES-256 via `encrypt.js` integration
-- [ ] **Compression**: Transparent gzip for large blobs
+- [x] **Encryption at rest**: Optional AES-256 via `encrypt.js` integration — DONE (axolotl `e91111b`): FileStorage `encrypt: true` + `encryptKey`/`VANT_STORAGE_KEY`, `vant-enc:v1:` prefix, mixed stores OK
+- [x] **Compression**: Transparent gzip for large blobs — DONE (axolotl `d4990d8`): `compressAbove`/`VANT_STORAGE_COMPRESS_ABOVE`, `vant-gz:v1:` prefix, compress→encrypt order
 - [ ] **WAL/Journal**: Write-ahead log for crash recovery
 - [ ] **Replication**: Multi-node sync via Raft/CRDT
 - [ ] **Metrics**: Prometheus exporter for storage ops

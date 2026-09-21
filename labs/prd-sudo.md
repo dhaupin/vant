@@ -386,8 +386,8 @@ node test/boot.test.js
 
 ## 12. Future Enhancements (P3+)
 
-- [ ] Persistent escalation audit log to disk
-- [ ] Per-escalation rate limiting
+- [x] Persistent escalation audit log to disk — DONE (axolotl `f3a40e1`): JSONL at models/private/sudo/escalations.jsonl via FileStorage, capped, survives reset; getEscalationAuditLog()
+- [x] Per-escalation rate limiting — DONE (axolotl `f3a40e1`): task+scope+service capped 20/60s (env-tunable); revoke() also clears TTL grants now
 - [ ] Escalation templates for common workflows
 - [ ] Web UI for escalation management
 - [ ] Integration with external auth (OAuth, LDAP)

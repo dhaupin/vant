@@ -505,11 +505,11 @@ await storage.write('brain', 'name', data);  // Handles escalation internally
 ```
 
 ### Migration Checklist
-- [ ] Audit all `sandbox.canX()` calls → migrate to `sandbox.can('capability')`
-- [ ] Add `service` parameter to operations needing escalation
-- [ ] Update tests to configure sandbox or mock sudo
-- [ ] Verify CLI scripts use `_checkWrite()` pattern with sudo
-- [ ] Update documentation/examples
+- [x] Audit all `sandbox.canX()` calls → migrate to `sandbox.can('capability')` — DONE (axolotl `8dcff83`): module-level canX() now route through can(cap), all 56 call sites inherit sudo verdicts
+- [x] Add `service` parameter to operations needing escalation — DONE (axolotl `fc2b314`): both MCP escalate handlers tagged; storage.js + vant_storage_* were already tagged
+- [x] Update tests to configure sandbox or mock sudo — DONE (axolotl `3dca7a2` + existing suites): orgflow/security-hardening already use setScopes+setCapabilities; CLI gates verified both postures
+- [x] Verify CLI scripts use `_checkWrite()` pattern with sudo — DONE (axolotl `3dca7a2`): clean/snapshot/compress/succession/bump gates wired; 12 dead-helper CLIs noted for cleanup
+- [x] Update documentation/examples — DONE (axolotl `73778c1`): docs/essential/sudo.md (policy table, grant UX, audit events)
 
 ---
 

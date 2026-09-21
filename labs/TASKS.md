@@ -6,6 +6,32 @@
 
 ---
 
+## Session (2026-09-21 — PRD hygiene wave: security checklist + storage enhancements + sudo persistence)
+
+All six queued PRD items, one commit per slice, full loop + CI green each.
+
+| Commit | What |
+|--------|------|
+| `fc2b314` | **1a — service-tag MCP escalations.** sudo_escalate (legacy level-as-scope mapped 1=read, 2+=write) + vant_sudo_escalate now `service: 'mcp'` (3-min TTL, whitelist applies). Verified granted events carry service=mcp with mcp maxTTL. Caller audit: storage + vant_storage_* were already tagged. |
+| `3dca7a2` | **1b — CLI write gates.** clean.js run() (dry-run ungated), snapshot.js run(), compress.js adaptive-write, succession.js log, bump.js updatePackageJson now _checkWrite(). Audit finding: 12 CLIs define _checkRead/_checkWrite but never call them (dead helpers); 5 write-performing CLIs had NO checks. Grant path stays `vant org grant` (per-process, D-3). |
+| `73778c1` | **1c — docs/essential/sudo.md.** Threat model, can(cap)→sudo delegation, service policy table, vant org grant UX, CLI write gates, audit event catalog. |
+| `e91111b` | **2 — encryption at rest.** FileStorage opt-in AES-256-GCM via encrypt.js (`encrypt: true` + `encryptKey` or `VANT_STORAGE_KEY`/`VANT_STORAGE_ENCRYPT=1`); `vant-enc:v1:` prefix; mixed plaintext/encrypted stores read fine; no-key/wrong-key reads refused. QC 6/6. |
+| `d4990d8` | **2b — transparent gzip.** `compressAbove` bytes threshold (`VANT_STORAGE_COMPRESS_ABOVE`); `vant-gz:v1:` prefix; pipeline serialize→compress→encrypt (ciphertext never compressed); prefix-detected decode reverses per step — any vintage mix reads correctly. 8200→99 bytes demo. |
+| `f3a40e1` | **3+3b — sudo audit log + rate limit.** Escalation decisions append to models/private/sudo/escalations.jsonl via FileStorage (capped, survives reset, getEscalationAuditLog()). Rate limit: task+scope+service 20/60s env-tunable; over-budget denied + audited. **Companion bug:** revoke() now also clears TTL grants — an auto-approved escalation previously survived revoke until expiry. |
+
+**PRD checkbox status:** prd-security migration checklist 5/5 done; prd-storage
+encryption+compression done (WAL/replication/metrics/migration/point-in-time
+still open, larger efforts); prd-sudo audit+rate-limit done (templates/WebUI/
+ext-auth/policies-as-code/metrics remain). prd-org-teams D-1..D-5 all landed in
+the O-wave.
+
+**Gotchas:** CI smoke runs bare CLIs — capability refusals must print to stdout
+(not just stderr) or the smoke harness counts them failed. encrypt.js
+Encrypt.encrypt/decrypt is salt:iv:authTag:ciphertext base64-ish text — safe
+to embed after a text prefix marker.
+
+---
+
 ## Session (2026-09-21 — selfhosted fix + brain/horcrux cleanup)
 
 | Commit | What |
