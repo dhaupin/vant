@@ -20,7 +20,22 @@
 | T-1 | **tmp.js fs→storage** (`aae610d`) — put/get/delete/clear through FileStorage on top of the existing full security chain. FIXED _getPath(): getBrainStorage() has no `.path` → every space silently wrote to `./storage` outside models; spaces now anchor at `<models>/tmp-space/<space>` (myStuff flattened to match brain.js slice-2). clear() deletes per-entry through the store (flat namespace) instead of recursive rmSync. | done |
 | K-1 | **skills.js fs→storage** (`ee1dc79`) — manifest + loadProto/loadFolder reads through FileStorage. FIXED unvalidated name interpolation into vant-skill-{name} paths; safe-charset validation (islands pattern). Enumeration stays on fs (pattern-glob limitation). | done |
 
-**Next after this session:** stego/backup/sync/server (small sets), transform.js (46, biggest blast radius — node-script fallback), `bin/sync.js` axolotl-branch awareness, dead-export removal per DEAD_EXPORTS.md.
+**Next after this session:** see the R-1..R-6 roadmap below.
+
+### fs→storage Refactor Roadmap (R-1..R-6)
+
+Migration pattern (validated across 13 modules so far): FileStorage on the models root, `path.relative` for store-relative paths, `read()`→null / `has()`→bool / write=atomic+mkdirs contracts, safe-charset validation for any name that becomes a path segment, per-call path resolution for anything that must follow `pushBrain()`, enumeration stays on fs (pattern-glob limitation). Verify each with the full test loop + `node test/ci.js` (408/408), one commit per module.
+
+| # | Task | Details | Est. size |
+|---|------|---------|-----------|
+| R-1 | **stego.js** (9 sites) | SVG/stego file I/O — check if it reads/writes brain files (then store) or caller-supplied artifact paths (then contain+validate like canvas). Watch binary vs utf8. | small |
+| R-2 | **backup.js + sync.js + server.js** (9+8+8) | backup: archive images + checksums (likely stays mostly fs for artifact dirs — contain + validate instead of FileStorage if paths live outside models); sync: provider state + git config reads; server: static/config file serving. Decide store vs contained-fs per path family, document the choice. | medium |
+| R-3 | **transform.js** (46 sites) | Horcrux gather/restore — the big one. Reads whole brains, writes stego payloads. Batch ALL edits into one exact-match-or-throw node script (str_replace fails on big files). Restore path already has traversal validation (P0-8) — keep it, route reads/writes through the store. | large |
+| R-4 | **storage.js self-audit** (56 sites) | storage.js IS the layer — its internal fs calls are the implementation. Audit only: (a) ensure every method that takes caller paths runs the containment/VAF chain, (b) no path can bypass atomicWrite on write, (c) document which methods are raw-by-design vs secured. No migration, just verification + doc comments. | medium |
+| R-5 | **bin/* fs consumers** | CLI layer reads models via lib APIs mostly; sweep for direct models-tree fs access and route through libs (health, summary, clean touch models paths). Low priority — bins run trusted-local. | medium |
+| R-6 | **Cross-cutting: name→path validation sweep** | grep for template-literal/concatenated path segments across lib (`vant-skill-`-style bugs are likely still hiding). Apply the `_safeSkillName` pattern everywhere an external name becomes a path segment. Also hunt the `models/private/undefined` writer if the artifact ever reappears. | medium |
+
+Also still open (from earlier sessions): `bin/sync.js` axolotl-branch awareness (pushes `${DEFAULT_BRANCH}` = main), dead-export removal per DEAD_EXPORTS.md, tests for concurrent agents / malicious backup restore / sync recursion leaks.
 
 ---
 

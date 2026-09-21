@@ -82,6 +82,32 @@ The Vant Storage layer provides a **unified multi-backend storage abstraction** 
 - **`lib/sudo.js`** — Capability escalation for write operations
 - **`lib/sandbox.js`** — Deny-by-default capability gating
 
+### fs→storage Migration Standard (v0.9.0-axolotl)
+
+All modules MUST route brain/models file I/O through FileStorage, not raw fs.
+The validated pattern (apply to any module still touching fs — see the
+R-1..R-6 roadmap in `labs/TASKS.md` for the remaining queue):
+
+1. **One shared store per module**, `new Storage.FileStorage({ basePath:
+   <models root> })`, lazily constructed (storage.js requires brain.js at its
+   own module load — never construct stores at module-load time).
+2. **Store-relative paths** via `path.relative(modelsRoot, absPath)`.
+3. **Contracts:** `read()` → string|null (null = missing), `has()` → bool,
+   `write()` = atomic + parent mkdirs + containment + VAF, `delete()` → bool.
+4. **Per-call path resolution** for anything under the CURRENT brain
+   (`getBrainPath()`/`getPublicPath()` resolve per call; a store keyed/frozen
+   at module load breaks `pushBrain()` — see succession.js fix).
+5. **Safe-charset validation** for ANY external name that becomes a path
+   segment (`/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/` + no `..` — islands/skills
+   pattern).
+6. **Enumeration stays on fs** (readdir/stat) — storage.list is
+   pattern-glob only; keep paths anchored to models roots, never caller input.
+7. **Binary/contained exceptions:** artifact dirs outside models (backups,
+   stego payloads) use contained+validated fs, not FileStorage — document the
+   choice at the call site.
+8. **Verify:** full `test/*.test.js` loop + `node test/ci.js` per commit, one
+   module per commit, `axolotl:` prefix.
+
 ---
 
 ## 3. Storage Types
