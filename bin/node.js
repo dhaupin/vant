@@ -289,6 +289,12 @@ class VantNode {
         const modelPath = process.env.MODEL_PATH || process.env.VANT_STORAGE_PATH || 'models/private';
         
         for (const [name, content] of Object.entries(memory)) {
+            // (R-6/O-9) name becomes a path segment — validate (the
+            // models/private/undefined artifact likely came from a path like this)
+            if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(String(name))) {
+                this.warn(`Skipping brain file with invalid name: ${String(name).slice(0, 40)}`);
+                continue;
+            }
             const filePath = path.join(modelPath, `${name}.md`);
             fs.writeFileSync(filePath, content, 'utf8');
         }

@@ -135,8 +135,11 @@ function autoCommit(options = {}) {
     
     if (brains.length > 0) {
         const firstBrain = brains[0];
-        const brainPath = path.join(PRIVATE_BRAINS, firstBrain + '.md');
-        if (fs.existsSync(brainPath)) {
+        // (R-6/O-9) brain name from git status becomes a path segment — validate
+        const brainPath = /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(firstBrain)
+            ? path.join(PRIVATE_BRAINS, firstBrain + '.md')
+            : null;
+        if (brainPath && fs.existsSync(brainPath)) {
             const content = fs.readFileSync(brainPath, 'utf8');
             const firstLine = content.split('\n').find(l => l.trim() && !l.startsWith('#'));
             if (firstLine && firstLine.length < 50) {

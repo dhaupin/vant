@@ -55,12 +55,17 @@ Examples:
  * a single-element stack with 'vant' (the canonical default).
  */
 function readBrainStack(repoRoot) {
+    // (R-6/O-9) stack entries become path segments (models/public/<brain>/boot)
+    const safe = (n) => typeof n === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(n) && !n.includes('..');
     try {
         const statePath = path.join(repoRoot, 'models', 'state.json');
         if (!fs.existsSync(statePath)) return ['vant'];
         const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
-        if (Array.isArray(state.stack) && state.stack.length > 0) return state.stack;
-        if (state.currentBrain) return [state.currentBrain];
+        if (Array.isArray(state.stack) && state.stack.length > 0) {
+            const valid = state.stack.filter(safe);
+            return valid.length > 0 ? valid : ['vant'];
+        }
+        if (safe(state.currentBrain)) return [state.currentBrain];
         return ['vant'];
     } catch (e) {
         return ['vant'];

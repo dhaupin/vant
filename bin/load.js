@@ -78,7 +78,14 @@ async function getModelPath(args) {
     }
     
     if (args[2]) {
-        return `models/${args[2]}`;
+        // (R-6/O-9) arg becomes a path segment — charset-validate it
+        // (vaf.check alone allows 'sub/dir'; segment must be a single name)
+        const name = args[2];
+        if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(name) || name.includes('..')) {
+            console.error(`\u26a0 Invalid model name: ${name}`);
+            return 'models/private';
+        }
+        return `models/${name}`;
     }
     return modelPath;
 }
