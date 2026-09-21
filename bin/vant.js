@@ -152,6 +152,9 @@ const COMMANDS = {
     // Storage WAL crash recovery (prd-storage.md)
     wal: 'wal.js',
     
+    // Storage mirror replication (prd-storage.md)
+    mirror: 'mirror.js',
+    
     // Agent spawning
     spawn: 'agent-spawner.js',
     
@@ -423,6 +426,7 @@ Brain:
   vant stego      Stego brain recovery
   vant migrate    Brain layout versioning (status/dry-run/apply)
   vant wal        Storage crash-recovery journal (status/drill/reset)
+  vant mirror     Storage replication (status/verify/resync)
 
 State:
   vant vibe        Show/set vibe
