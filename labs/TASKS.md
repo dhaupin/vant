@@ -12,6 +12,7 @@
 |--------|------|
 | `944ab84` | **SECURITY — selfhosted provider opt-in.** `isConfigured()` was hardcoded `true`; now dormant by default, configured via constructor `{url\|remoteUrl}`, `VANT_SELFHOSTED_REMOTE`, or `VANT_SELFHOSTED=1`. sync-recursion test now leans on production dormancy (prototype patch = CI belt-and-suspenders). QC 5/5 incl. sync early-return with zero providers. |
 | `5bf90bf` | **Horcrux + brain cleanup.** axolotl brain stubs fleshed out with real refactor state (were template stubs from the first snapshot — the drill's staleness finding); buffy identity refreshed to post-F3 state; fresh export via `horcrux create`; round-trip QC 6/6 into a scratch runtime. |
+| `8dcff83` | **SECURITY — canX() → can(cap) unification** (prd-security.md checklist item 1). Module-level canRead/canWrite/canNetwork/canExec/canSpawn now route through `defaultSandbox.can(cap)`, so all 56 canX() call sites in lib/+bin/ inherit sudo-aware verdicts without touching 30 files. Verified both routes MATCH in allow/deny/mixed states; CI 410/410. Remaining checklist items: `service` param on escalation ops, tests config/mock sudo, CLI `_checkWrite()` pattern audit, docs. |
 
 ---
 
