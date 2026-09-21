@@ -68,10 +68,31 @@ function parseArgs(argv) {
 }
 
 function deriveOutput(args) {
-    if (args.output) return path.resolve(args.output);
+    // Keep paths REPO-RELATIVE (O-9 fix): vaf.checkPathTraversal blocks
+    // absolute paths under /home/... as sensitive system paths, which made
+    // every snapshot output "Path traversal blocked" (see TASKS.md R-5).
+    // Validate the RELATIVE path; toHorcrux/atomicWrite resolve from cwd.
+    const safeName = (s, label) => {
+        const str = String(s || '');
+        if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(str)) {
+            throw new Error(`${label} contains invalid characters: ${str.slice(0, 40)}`);
+        }
+        return str;
+    };
+    if (args.output) {
+        const rel = path.relative(REPO_ROOT, path.resolve(args.output));
+        if (rel.startsWith('..') || path.isAbsolute(rel)) {
+            throw new Error('--output must stay inside the repo (got: ' + args.output + ')');
+        }
+        const vaf = require(path.join(REPO_ROOT, 'lib', 'vaf'));
+        const check = vaf.checkPathTraversal(rel);
+        if (check.blocked) throw new Error('Output path blocked: ' + check.reason);
+        return rel;
+    }
     // Convention: <agent>-p_<password>.svg in models/public/vant/boot/
-    const password = args.password || DEFAULT_PASSWORD;
-    return path.join(BOOT_DIR, `${args.agent}-p_${password}.svg`);
+    const agent = safeName(args.agent, 'agent name');
+    const password = safeName(args.password || DEFAULT_PASSWORD, 'password');
+    return path.join('models', 'public', 'vant', 'boot', `${agent}-p_${password}.svg`);
 }
 
 async function getPassword(args) {
