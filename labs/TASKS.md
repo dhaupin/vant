@@ -2,22 +2,28 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-21  
-**Session:** Brain slices 4+5 + MCP dir-scan storage migration (IN PROGRESS)
+**Session:** Brain slices 4+5 + MCP dir-scan storage migration — DONE
 
 ---
 
-## Session Resume — fs→storage: brain.js slices 4-5 + mcp.js (2026-09-21)
+## Session Summary (2026-09-21 — fs→storage: brain.js slices 4-5 + mcp.js)
 
-**Context:** Continuing the cohesion pass on `axolotl`. Slices 1-3 + citations/lock/resolution/prune/canvas/teams + timer registry already committed (see prior summaries). This session finishes brain.js and closes the mcp.js dir-scan gap.
+**Context:** Continuing the cohesion pass on `axolotl`. Slices 1-3 + citations/lock/resolution/prune/canvas/teams + timer registry were already committed (see prior summaries). This session finished brain.js and closed the mcp.js dir-scan gap.
 
-**Plan (each slice verified: module tests + `node test/ci.js`, then a separate `axolotl:` commit):**
+**Result:** ALL green — full module suite clean + CI 408/408 (exit 0), one commit per slice, pushed.
 
-| # | Item | State |
+### Implemented This Session
+
+| # | Item | Files |
 |---|------|-------|
-| B4 | **Brain slice 4 — brain discovery/enumeration + brain-tree reads** (~lines 1854-3323): `read`, `_loadBrain`, `hasBrain`, `readDir`, `loadStackCorpus`, `myStuff`, `updateMyStuff` (key validated), sandbox `read`/`exists` brain handlers, `switchBrain`/`getPublicPath`/`resolveBrainPath` existence probes → brain FileStore via `_bfs*` helpers + `_brainRel()`. Circular bootstrap window: `_bfs*` fall back to anchored fs on fixed models paths (storage.js requires brain.js at its module load — cannot construct FileStorage there). Dead closure in `loadStackCorpus` removed; `listBackups` bug fixed (old code joined `getBrainStorage()` which has no `.path` → silently pointed at `./backups`; now `.basePath`). Enumeration stays on fs (pattern-glob limitation, prune.js precedent). | WIP in `lib/brain.js` — verify + commit |
-| B5 | **Brain slice 5 — remaining brain-file I/O**: `endEvolutionSession` state write (fs.promises.writeFile → `_bfsWrite`), dropbox `listFiles`/`clearDropbox` (fs statSync/rmSync, anchored), audit the leftover `require('fs')` at 3195 (listBackups). | pending |
-| MCP | **mcp.js dir scans via storage**: `brain_discover` agents/skills + `brain_share` agent scans → `_mcpStore.listRaw` (contract verified: returns [] on missing dir, full paths). Then verify the raw `vant_storage_*` tools migration is complete (P1-17 removed readRaw/writeRaw; check delete/list paths). | WIP in `lib/mcp.js` — verify + commit |
-| FIN | Update this file with results + push origin/axolotl. | pending |
+| B4 | **Brain slice 4 — brain discovery/enumeration + brain-tree reads** (~lines 1854-3323): `read`, `_loadBrain`, `hasBrain`, `readDir`, `loadStackCorpus`, `myStuff`, `updateMyStuff` (key validated), sandbox `read`/`exists` brain handlers, `switchBrain`/`getPublicPath`/`resolveBrainPath` existence probes → brain FileStore via `_bfs*` helpers + `_brainRel()`. Circular bootstrap window: `_bfs*` fall back to anchored fs on fixed models paths (storage.js requires brain.js at its module load — cannot construct FileStorage there). Dead closure in `loadStackCorpus` removed (undefined dirPath ref, never called); `listBackups` bug fixed (old code joined `getBrainStorage()` which has no `.path` → silently pointed at `./backups`; now `.basePath`). Enumeration stays on fs (pattern-glob limitation, prune.js precedent). | `lib/brain.js` |
+| B5 | **Brain slice 5 — remaining brain-file write/delete**: `endEvolutionSession` state write → `_bfsWrite` (atomic, contained) instead of raw `fs.promises.writeFile`; `clearDropbox` deletes per-entry through the tmp-space store instead of recursive `rmSync`; listBackups shadowed fs require dropped. Leftover readdir/statSync sites are enumeration/metadata only — documented as staying on fs. | `lib/brain.js` |
+| MCP | **mcp.js dir scans via storage**: `brain_discover` agents/skills + `brain_share` agent scans → `_mcpStore.listRaw` over models-root-relative globs (containment applies; listRaw returns [] on missing dirs so redundant existsSync guards removed). Raw-tools audit: `vant_storage_listRecursive/rm/cp/mkdir` stay on fs **by design** — contained via `_containedModelPath` + sudo write-gated (b882428); readRaw/writeRaw were removed in P1-17. Raw-tools migration confirmed complete. | `lib/mcp.js` |
+
+### Lessons
+
+- **str_replace fails on this big file even before the documented ~line-2200 mark** (brain.js line ~2118, a one-line 1-occurrence edit failed repeatedly while appearing byte-identical). The validated node-script fallback (`scripts/_fix_*.js`, exact-match-or-throw) is now the default for brain.js edits — also batch all of a file's edits into ONE script run (a multi-edit call partially applied: the first replacement landed, the rest were skipped, leaving `_statePath` deleted while still referenced; grep caught it before any damage).
+- **storage bootstrap window is real**: storage.js requires brain.js during its own module load, so brain.js cannot construct FileStorage at module-load time — `_bfs*` anchored-fs fallbacks on fixed models paths are the workaround, with a one-time warn.
 
 **Working-tree notes:** untracked `private/` (agent priv brain, stays local) and `scripts/_fix_*.js` (one-off migration helpers — do NOT commit).
 
