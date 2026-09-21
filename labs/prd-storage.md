@@ -856,7 +856,7 @@ node test/brain.test.js
 - [ ] **Replication**: Multi-node sync via Raft/CRDT
 - [ ] **Metrics**: Prometheus exporter for storage ops
 - [x] **Migration tool**: Schema/layout versioning for brain format changes — DONE (axolotl): `lib/migrations.js` + `vant migrate` CLI. Content-based detection (never trusts the marker alone), ordered idempotent steps (orgchart brain-scope, tmp-space re-anchor, dropfile relocation), dryRun, `models/private/.layout-version.json` marker written only after success, all moves through FileStorage (security chain). Tests: `test/migrations.test.js` 8/8 incl. real fixture layouts.
-- [ ] **Backup/Restore**: Point-in-time snapshots
+- [x] **Backup/Restore**: Point-in-time snapshots — DONE (axolotl): FileStorage `snapshot(label)` / `listSnapshots()` / `restoreSnapshot(id)` / `deleteSnapshot(id)`. Tree copies live in `<basePath>/.snapshots/<id>/data` + manifest; every file moves through the secured read/write chain (hand-edited manifests with traversal paths are refused up front); `.snapshots/` excluded from capture and restore-removal; count capped via `maxSnapshots`/`VANT_STORAGE_MAX_SNAPSHOTS` (default 20, oldest pruned); encrypted stores round-trip through the codec. CLI: `vant storage snapshot|snapshots|restore|unsnapshot` against the models root. Tests: `test/snapshots.test.js` 9/9.
 
 ---
 
