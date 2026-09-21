@@ -1,8 +1,25 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-09-20  
-**Session:** Sudo wiring + phantom test suites + P3 quality pass
+**Last Updated:** 2026-09-21  
+**Session:** Brain slices 4+5 + MCP dir-scan storage migration (IN PROGRESS)
+
+---
+
+## Session Resume — fs→storage: brain.js slices 4-5 + mcp.js (2026-09-21)
+
+**Context:** Continuing the cohesion pass on `axolotl`. Slices 1-3 + citations/lock/resolution/prune/canvas/teams + timer registry already committed (see prior summaries). This session finishes brain.js and closes the mcp.js dir-scan gap.
+
+**Plan (each slice verified: module tests + `node test/ci.js`, then a separate `axolotl:` commit):**
+
+| # | Item | State |
+|---|------|-------|
+| B4 | **Brain slice 4 — brain discovery/enumeration + brain-tree reads** (~lines 1854-3323): `read`, `_loadBrain`, `hasBrain`, `readDir`, `loadStackCorpus`, `myStuff`, `updateMyStuff` (key validated), sandbox `read`/`exists` brain handlers, `switchBrain`/`getPublicPath`/`resolveBrainPath` existence probes → brain FileStore via `_bfs*` helpers + `_brainRel()`. Circular bootstrap window: `_bfs*` fall back to anchored fs on fixed models paths (storage.js requires brain.js at its module load — cannot construct FileStorage there). Dead closure in `loadStackCorpus` removed; `listBackups` bug fixed (old code joined `getBrainStorage()` which has no `.path` → silently pointed at `./backups`; now `.basePath`). Enumeration stays on fs (pattern-glob limitation, prune.js precedent). | WIP in `lib/brain.js` — verify + commit |
+| B5 | **Brain slice 5 — remaining brain-file I/O**: `endEvolutionSession` state write (fs.promises.writeFile → `_bfsWrite`), dropbox `listFiles`/`clearDropbox` (fs statSync/rmSync, anchored), audit the leftover `require('fs')` at 3195 (listBackups). | pending |
+| MCP | **mcp.js dir scans via storage**: `brain_discover` agents/skills + `brain_share` agent scans → `_mcpStore.listRaw` (contract verified: returns [] on missing dir, full paths). Then verify the raw `vant_storage_*` tools migration is complete (P1-17 removed readRaw/writeRaw; check delete/list paths). | WIP in `lib/mcp.js` — verify + commit |
+| FIN | Update this file with results + push origin/axolotl. | pending |
+
+**Working-tree notes:** untracked `private/` (agent priv brain, stays local) and `scripts/_fix_*.js` (one-off migration helpers — do NOT commit).
 
 ---
 
