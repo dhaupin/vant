@@ -1,38 +1,51 @@
-# Vant Axolotl — Crash Memory Dump
+# MEM.md — scratch dump (tmp-style)
 
-> TEMPLATE — fill this in during a crash/handoff, wipe it after the next agent
-> resumes and records state in `labs/TASKS.md`. Keep it SHORT. History lives in
-> `labs/TASKS.md` + `labs/AUDIT_FINDINGS.md`, not here.
+This file is a **catch-all dump space**. Dump whatever you're in the middle of
+so a crash/reset loses nothing — no commits needed, no ceremony, nothing here
+is precious. Think `/tmp`: scratch state, not history.
 
-**DATE:**
-**AGENT:**
-**BRANCH:** axolotl
-**LAST GOOD COMMIT:** `9e09086` — "labs docs updated - brain slices 4/5 + mcp scan results recorded" (verified: full module suite + CI 408/408)
-**UNVERIFIED COMMITS:** `a3c0322` (succession.js through storage — suite green at commit time, awaiting the user's "verified" call); audit.js storage migration in progress (uncommitted)
+## What belongs here
 
----
+- Half-finished edits and what you were about to try next
+- Working hypotheses, pending greps, "check this later" leads
+- Current branch/HEAD at dump time (rough, not a release note)
+- Any in-flight state that a `git status` won't show
 
-## WHAT HAPPENED (why this dump exists)
+## What does NOT belong here
 
--
+- Durable lessons (those go in `labs/TASKS.md` or the agent priv brain)
+- Anything already committed (git remembers; don't duplicate)
+- Templates, procedure docs, polished summaries
 
-## STATE ON DISK (uncommitted work, untracked files, artifacts)
+## Rules
 
--
-
-## NEXT STEPS (exact resume point, in order)
-
-1.
-
-## GOTCHAS (anything that will bite the next agent)
-
--
+- Dump freely, overwrite freely — it's scratch
+- NO commit ceremony; update it in place whenever context is worth keeping
+- When resuming: scan this file first, then `labs/TASKS.md` for durable state
+- It's fine for this file to be stale — never block on cleaning it up
 
 ---
+---
 
-## How to fill this file (delete when done)
+# CURRENT DUMP
 
-- Be concrete: commit hashes, file paths, command lines. No narrative.
-- If it's already recorded in `labs/TASKS.md`, reference it — don't duplicate.
-- After resume: move completed items into `labs/TASKS.md`, then wipe this file
-  back to template and update LAST GOOD COMMIT.
+**When:** 2026-09-21, during fs→storage cohesion pass (axolotl)
+**Branch:** axolotl @ ~203caa6 (succession + audit migrated)
+
+## In-flight
+
+- fs→storage queue: islands.js (6 sites) → tmp.js (9) → skills.js (9) →
+  stego/backup/sync/server → transform.js (46, biggest blast radius)
+- bin/sync.js axolotl-branch awareness still open
+- dead-export removal per DEAD_EXPORTS.md still open
+
+## Leads / rough notes
+
+- storage `read()` → null on missing, `has()` → bool, write = atomic+mkdirs
+- stores keyed by resolved brain path when following pushBrain (succession/audit
+  pattern); path constants captured at module load = multibrain bug
+- no `storage:*` event listeners exist yet → routing audit-ish modules through
+  storage is re-entrancy-safe today (recheck if listeners get added)
+- `models/private/undefined` 0-byte artifact deleted; hunt the writer if returns
+- str_replace unreliable on lib/brain.js (even < line 2200) and can PARTIALLY
+  apply multi-edits — grep-verify every removal, use node-script fallback there

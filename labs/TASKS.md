@@ -12,7 +12,7 @@
 
 | # | Item | State |
 |---|------|-------|
-| M-0 | **MEM.md is now a blank crash-dump TEMPLATE** (user clarification: "restore" meant wipe-for-next-dump, not rewrite history). LAST GOOD COMMIT marker: `9e09086`; newer commits stay "unverified" until the user confirms. First attempt (93c428d) rewrote history instead — superseded by bae0e3b. Also deleted `models/private/undefined` artifact (0-byte file from a pre-validation unvalidated brain-name write — if it reappears, hunt the writer). | done |
+| M-0 | **MEM.md convention settled** — it's a tmp-style scratch dump space (dump in-flight state freely, NO commit ceremony, nothing precious; durable state lives HERE in TASKS.md). Earlier template/history interpretations both superseded. | done |
 | S-1 | **succession.js fs→storage** (`a3c0322`) — `_succession.json` config + `.ledger.json` through FileStorage; fixes module-load path freeze (PUBLIC_DIR/LEDGER_PATH captured once → `getStackTrustLevels`/`getStackLedgers` pushed-brain had NO effect, stack reads returned the original brain every time). | done |
 | S-2 | **audit.js fs→storage** (`82c9429`) — ledger through FileStorage keyed by current brain path (follows pushBrain); rotate() archive clamped into contained `models/audit-rotate/` (legacy archiveDir param was never passed by any caller and accepted uncontained paths). Verified: no `storage:*` event listeners exist → no audit↔storage re-entrancy. | done |
 | S-3 | Buffy priv-brain lessons + push. | pending |
