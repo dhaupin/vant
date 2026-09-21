@@ -15,7 +15,8 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — migration tool slice fixed, committed, pushed. Trap for the
+(nothing in flight — migration tool + point-in-time snapshots landed and pushed.
+StateStorage state-dir misclassification fixed (see TASKS.md). Trap for the
 next agent: node -e probes mixing require() with top-level await crash with
 "Cannot determine intended module format" — wrap in async IIFE. See TASKS.md
 top block.)
