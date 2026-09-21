@@ -12,16 +12,14 @@
 
 | # | Item | State |
 |---|------|-------|
-| M-0 | **MEM.md restored** — compressed current-state crash handoff (restore procedure, migration status, security posture, conventions, quirks); full history delegated to AUDIT_FINDINGS.md/TASKS.md. Deleted `models/private/undefined` artifact (0-byte file from a pre-validation unvalidated brain-name write — if it reappears, hunt the writer). | done |
-| S-1 | **succession.js fs→storage** — `_succession.json` config + `.ledger.json` through FileStorage; fixes module-load path freeze (PUBLIC_DIR/LEDGER_PATH captured once → `getStackTrustLevels`/`getStackLedgers` pushed-brain had NO effect, stack reads returned the original brain every time). | in progress |
-| S-2 | **audit.js fs→storage** — ledger + archive through FileStorage; lazy-require the store (audit events fire during storage ops — re-entrancy risk). | pending |
+| M-0 | **MEM.md is now a blank crash-dump TEMPLATE** (user clarification: "restore" meant wipe-for-next-dump, not rewrite history). LAST GOOD COMMIT marker: `9e09086`; newer commits stay "unverified" until the user confirms. First attempt (93c428d) rewrote history instead — superseded by bae0e3b. Also deleted `models/private/undefined` artifact (0-byte file from a pre-validation unvalidated brain-name write — if it reappears, hunt the writer). | done |
+| S-1 | **succession.js fs→storage** (`a3c0322`) — `_succession.json` config + `.ledger.json` through FileStorage; fixes module-load path freeze (PUBLIC_DIR/LEDGER_PATH captured once → `getStackTrustLevels`/`getStackLedgers` pushed-brain had NO effect, stack reads returned the original brain every time). | done |
+| S-2 | **audit.js fs→storage** (`82c9429`) — ledger through FileStorage keyed by current brain path (follows pushBrain); rotate() archive clamped into contained `models/audit-rotate/` (legacy archiveDir param was never passed by any caller and accepted uncontained paths). Verified: no `storage:*` event listeners exist → no audit↔storage re-entrancy. | done |
 | S-3 | Buffy priv-brain lessons + push. | pending |
 
 **Next after this session:** islands.js (6 sites), tmp.js (9), skills.js (9), stego/backup/sync/server, transform.js (46, biggest blast radius), `bin/sync.js` axolotl-branch awareness, dead-export removal per DEAD_EXPORTS.md.
 
 ---
-
-## Session Summary (2026-09-21 — fs→storage: brain.js slices 4-5 + mcp.js)
 
 ## Session Summary (2026-09-21 — fs→storage: brain.js slices 4-5 + mcp.js)
 
