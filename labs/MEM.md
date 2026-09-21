@@ -30,16 +30,17 @@ is precious. Think `/tmp`: scratch state, not history.
 # CURRENT DUMP
 
 **When:** 2026-09-21, during fs→storage cohesion pass (axolotl)
-**Branch:** axolotl @ ~ee1dc79 (succession, audit, islands, tmp, skills migrated)
+**Branch:** axolotl @ ~dfeed08 (R-1 + R-2 done: stego/backup/sync/server)
 
 ## In-flight
 
-- fs→storage roadmap now formalized as R-1..R-6 in labs/TASKS.md (stego →
-  backup/sync/server → transform.js → storage.js self-audit → bins →
-  name-validation sweep)
-- migration standard written into labs/prd-storage.md (8-point pattern)
-- bin/sync.js axolotl-branch awareness still open
-- dead-export removal per DEAD_EXPORTS.md still open
+- Next: R-3 transform.js (46 sites — node-script batch edits), then R-4
+  storage.js self-audit (incl. readRaw/writeRaw factory-shortcut question),
+  R-5 bins, R-6 name-validation sweep
+- Found this round: decodeFromBuffer ReferenceError (typeof-only tests),
+  hybrid_getPrivacyConfig ReferenceError (undefined PRIVACY_FILE),
+  server.js containment always-false (dead static serving), backupPath
+  cwd-relative anchoring, readRaw/writeRaw still exported vs P1-17 claim
 
 ## Leads / rough notes
 
