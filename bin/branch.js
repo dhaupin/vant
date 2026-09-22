@@ -33,6 +33,14 @@ EXAMPLES:
 
 const { execSync } = require('child_process');
 
+/** Git ref-name hygiene: refs are interpolated into shell strings below, so
+ * restrict to characters git itself allows in branch names. Blocks injection
+ * (`name; rm -rf /`) and option-like values (`--all`, `-D something`). */
+function isValidRefName(name) {
+    return typeof name === 'string' && /^[A-Za-z0-9][A-Za-z0-9._\/-]{0,100}$/.test(name)
+        && !name.startsWith('-') && !name.includes('..');
+}
+
 function main() {
     try {
         switch (action) {
@@ -53,6 +61,10 @@ function main() {
                     console.error('Usage: vant branch create <name>');
                     process.exit(1);
                 }
+                if (!isValidRefName(createName)) {
+                    console.error('Invalid branch name: ' + createName);
+                    process.exit(1);
+                }
                 console.log('Creating branch:', createName);
                 try {
                     execSync(`git checkout -b ${createName}`, { encoding: 'utf8' });
@@ -69,6 +81,10 @@ function main() {
                     console.error('Usage: vant branch switch <name>');
                     process.exit(1);
                 }
+                if (!isValidRefName(switchName)) {
+                    console.error('Invalid branch name: ' + switchName);
+                    process.exit(1);
+                }
                 console.log('Switching to branch:', switchName);
                 try {
                     execSync(`git checkout ${switchName}`, { encoding: 'utf8' });
@@ -83,6 +99,10 @@ function main() {
                 const deleteName = args[1];
                 if (!deleteName) {
                     console.error('Usage: vant branch delete <name>');
+                    process.exit(1);
+                }
+                if (!isValidRefName(deleteName)) {
+                    console.error('Invalid branch name: ' + deleteName);
                     process.exit(1);
                 }
                 console.log('Deleting branch:', deleteName);
