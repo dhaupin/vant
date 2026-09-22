@@ -102,7 +102,6 @@ async function run() {
     }],
 
     ['reset() zeroes the gauge', () => {
-        const g0 = metrics.snapshot().gauges.find(x => x.name === 'vant_sudo_grants_active');
         metrics.setGauge('vant_sudo_grants_active', 5, { layer: 'sudo' });
         sudo.reset();
         return gauge() === 0 || { success: false, error: `gauge after reset ${gauge()}` };

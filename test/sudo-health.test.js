@@ -105,7 +105,7 @@ async function run() {
         sudo.registerHealthCheck('storage', async () => true);
         await sudo.escalate(null, 'write', { service: 'storage', ttl: 30 });
         let revalidated = 0;
-        const h = (ev) => { revalidated++; };
+        const h = () => { revalidated++; };
         onEvent('sudo:escalation_revalidated', h);
         sudo.startRevalidationLoop(40);
         await sleep(150);

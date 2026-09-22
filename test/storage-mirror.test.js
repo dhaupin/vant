@@ -96,7 +96,7 @@ test('mirrors never nest-replicate (_isMirror)', () => {
     cleanup();
     const prim = mk(), mir = mk(), grandchild = mk();
     try {
-        const store = new FileStorage({ basePath: prim, mirror: mir });
+        new FileStorage({ basePath: prim, mirror: mir });
         const m = new FileStorage({ basePath: mir, _isMirror: true, mirror: grandchild });
         m.write('nested.txt', 'x');
         if (fs.existsSync(path.join(grandchild, 'nested.txt'))) {
