@@ -11,7 +11,6 @@
  */
 
 const cf = require('../lib/connectors/cloudflare');
-const adapters = require('../lib/adapters/cloudflare');
 const events = require('../lib/event');
 
 const results = { passed: 0, failed: 0 };
@@ -53,23 +52,27 @@ function makeFakeClient() {
 }
 
 const UNCONFIGURED = {
-    accountId: undefined, apiToken: undefined, pagesUrl: undefined,
-    kvNamespace: undefined, r2Bucket: undefined, workerUrl: undefined, workerName: undefined,
+    accountId: undefined, r2Bucket: undefined,
     r2AccessKeyId: undefined, r2SecretAccessKey: undefined,
     r2Jurisdiction: undefined, r2Endpoint: undefined
 };
 
 console.log('\n☁️  CLOUDFLARE R2 → S3 CLIENT DELEGATION TESTS\n');
 
-test('modules load; adapter r2() interface has get/put/list/delete', () => {
-    const iface = adapters.r2();
-    for (const m of ['get', 'put', 'list', 'delete']) {
-        if (typeof iface[m] !== 'function') return { success: false, error: 'adapter r2().' + m + ' missing' };
+test('modules load; R2-only surface + museum pieces gone', () => {
+    for (const m of ['r2Get', 'r2Put', 'r2List', 'r2Delete']) {
+        if (typeof cf[m] !== 'function') return { success: false, error: 'connector ' + m + ' missing' };
     }
-    if (typeof cf.r2Delete !== 'function') return { success: false, error: 'connector r2Delete missing' };
     if (typeof cf._setR2TestClient !== 'function' || typeof cf._r2Client !== 'function') {
         return { success: false, error: 'DI hooks not exported' };
     }
+    // strip regression pins: the Pages/KV/Workers halves must stay gone
+    for (const gone of ['callPages', 'handshake', 'push', 'pull', 'kvGet', 'kvPut', 'kvDelete', 'workerCall', 'connect', 'disconnect']) {
+        if (typeof cf[gone] === 'function') return { success: false, error: 'museum piece still exported: ' + gone };
+    }
+    let adapterExists = false;
+    try { require.resolve('../lib/adapters/cloudflare'); adapterExists = true; } catch (e) { /* gone */ }
+    if (adapterExists) return { success: false, error: 'adapters/cloudflare.js still exists' };
     return true;
 });
 
@@ -176,14 +179,20 @@ test('_r2Client(): builds a real r2 client from config; DI overrides it', () => 
     return true;
 });
 
-test('getStatus reports hasR2Keys; KV/Pages paths untouched (control API intact)', () => {
+test('getStatus reports hasR2Keys; control-API usage + secrets are gone', () => {
     cf._setR2TestClient(null);
-    cf.configure({ ...UNCONFIGURED, r2Bucket: 'b', r2AccessKeyId: 'k', r2SecretAccessKey: 's', accountId: 'a', apiToken: 't', kvNamespace: 'n' });
+    cf.configure({ ...UNCONFIGURED, r2Bucket: 'b', r2AccessKeyId: 'k', r2SecretAccessKey: 's', accountId: 'a' });
     const st = cf.getStatus();
     if (st.config.hasR2Keys !== true) return { success: false, error: 'hasR2Keys missing: ' + JSON.stringify(st.config) };
+    if (st.connected !== true) return { success: false, error: 'connected flag should mirror r2 readiness' };
     const src = require('fs').readFileSync(require('path').resolve(__dirname, '..', 'lib', 'connectors', 'cloudflare.js'), 'utf8');
-    if (!src.includes('storage/kv/namespaces/')) return { success: false, error: 'KV control-API path was removed?!' };
-    if (!src.includes('client/v4/accounts')) return { success: false, error: 'control API usage removed entirely?!' };
+    // strip pins: no control-API endpoints or dead CF_* env reads remain
+    if (src.includes('api.cloudflare.com')) return { success: false, error: 'control-API endpoint still referenced' };
+    if (src.includes('CF_PAGES_URL') || src.includes('CF_KV_NAMESPACE') || src.includes('CF_WORKER_URL')) return { success: false, error: 'dead CF_* env read remains' };
+    if (src.includes('CF_API_TOKEN')) return { success: false, error: 'control token still read' };
+    // redaction still in force
+    const cfg = cf.getConfig();
+    if (cfg.r2SecretAccessKey !== '***set***') return { success: false, error: 'secret redaction lost' };
     return true;
 });
 
