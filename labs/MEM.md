@@ -15,32 +15,33 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — `lib/primitives.js` landed (`daa0f51`): the zero-Vant-
-requires home for shared primitives (atomicWriteFile, sleep), contract
-enforced by test/primitives.test.js. error.js keeps delegating compat
-re-exports. Gated-vs-ungated documented: primitives UNGATED by design;
-stego/backup STAY on gated storage.atomicWrite — do not "upgrade" them.
-NEXT SLICE queued: error.js has 3 latent ReferenceErrors, live-repro'd —
-handle() uses bare `vaf`/`logger`, retry() bare `audit`, circuitBreaker()
-bare `errors` (breaker can never open); plus CODES defines NETWORK_TIMEOUT
-and SUDO_DENIED twice. Zero external callers = fail-safe legacy surface, but
-fix is small (wire lazy getters, module-local ref, dedupe). Then P3 #32
-agents split. Gotchas: wal journal file is `wal.log` (constants at top of
-wal.js); structural walk tests must special-case the helper's own fd write
-(now in primitives.js, not error.js); brain.loadCorpus() returns the warm
-cache — invalidate before diffing; brain files must be written via the
-RESOLVED brain path (models/private/<brain>/, multibrain layout); corpus ids
-are extensionless; standalone test suites run via `node test/x.test.js` and
-are NOT auto-discovered — ci.js is smoke+syntax, runner/coverage don't scan
-test/ (register nothing, follow suite pattern); stub network.fetch (not
-global fetch) when testing provider HTTP — network owns its http/https
-transport, global-fetch stubs are inert; sandbox final exports DO expose
-top-level can() (deny-by-default) though early exports don't — module load
-order decides gate liveness. Standing: axolotl horcrux SVG mutates on test
-runs — leave unstaged; glob/code_search blind to lib/+test/, use git
-ls-files/git grep; node --check multi-arg only checks file 1; str_replace
-flaky on storage.js AND mcp.js/brain.js — use the exact-match node-script
-splice; check `git log -- <path>` before creating files.)
+(nothing in flight — error.js latent-bug batch landed (`50e9bae`):
+handle()/retry()/circuitBreaker() had bare `vaf`/`logger`/`audit`/`errors`
+references — every shape test passed, first real call threw ReferenceError;
+now wired to lazy getters/module-locals. CODES NETWORK_TIMEOUT + SUDO_DENIED
+deduped; pin test refuses duplicate CODES keys. Gotchas: error.test.js
+harness is sync-only — async checks go through the appended serialized
+`atest()` chain or Promises get misjudged; circular-dependency WARN lines
+(vaf↔storage↔sandbox) during error tests are pre-existing + harmless.
+`lib/primitives.js` is the zero-Vant-requires home for shared primitives
+(atomicWriteFile, sleep) — contract enforced by test; stego/backup STAY on
+gated storage.atomicWrite. Remaining audit items: agents module split
+(P3 #32), error-handling standardization (#33), brain-load circuit breaker
+(#34). wal journal file is `wal.log` (constants at top of wal.js);
+structural walk tests must special-case the helper's own fd write (in
+primitives.js); brain.loadCorpus() returns the warm cache — invalidate
+before diffing; brain files must be written via the RESOLVED brain path
+(models/private/<brain>/, multibrain layout); corpus ids are extensionless;
+standalone test suites run via `node test/x.test.js` and are NOT
+auto-discovered — ci.js is smoke+syntax, runner/coverage don't scan test/
+(register nothing, follow suite pattern); stub network.fetch (not global
+fetch) when testing provider HTTP; sandbox final exports DO expose top-level
+can() (deny-by-default) though early exports don't — module load order
+decides gate liveness. Standing: axolotl horcrux SVG mutates on test runs —
+leave unstaged; glob/code_search blind to lib/+test/, use git ls-files/git
+grep; node --check multi-arg only checks file 1; str_replace flaky on
+storage.js AND mcp.js/brain.js — use the exact-match node-script splice;
+check `git log -- <path>` before creating files.)
 
 ---
 

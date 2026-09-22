@@ -2,7 +2,49 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: lib/primitives.js (P2 #27 follow-up) — zero-dep home for atomicWriteFile + sleep; error.js latent-bug hunt done, fixes queued
+**Session:** Wave: error.js latent-bug batch (`50e9bae`) — 3 ReferenceErrors wired + CODES deduped, tests-first, CI 424/0/0
+
+---
+
+## Session (2026-09-22 — error.js latent-bug batch)
+
+The queued follow-up to the primitives census. Shipped as `50e9bae`, tests
+first (behavioral additions to `test/error.test.js`, 19/19 total).
+
+**Root pattern:** three error.js functions referenced bare identifiers that
+never existed in module scope. Every shape test (`typeof fn === 'function'`)
+passed while the first real call threw ReferenceError — the exact trap the
+vaf C1 ledger find came from:
+
+| Fn | Bare ref | Effect |
+|----|----------|--------|
+| `handle()` | `vaf`, `logger` (real getters: `_getVaf`/`_getLogger`) | threw on EVERY call |
+| `retry()` | `audit` (retry-path warn line) | only non-retryable errors ever worked; the retry path was itself the crash |
+| `circuitBreaker()` | `errors.*` (open-state throw) | breaker could never actually OPEN |
+
+Fixes: wired to the lazy getters (console fallbacks intact — audit/vaf stays
+optional), module-local `VantError`/`CODES` in the breaker. Zero external
+callers existed, which is why nothing ever noticed — these are the fail-safe
+legacy API surfaces the audit ledger keeps flagging.
+
+**CODES dedupe:** `NETWORK_TIMEOUT` and `SUDO_DENIED` were each defined
+twice (identical values; JS silently keeps the last key). Deduped with
+comments; structural pin in error.test.js parses the CODES block and refuses
+any duplicate key going forward.
+
+**Gotchas:** (1) error.test.js's original harness is SYNC-only — async
+checks must go through the appended serialized `atest()` chain or Promises
+get misjudged as failures (hit this mid-slice; first run showed 4 phantom
+async failures). (2) The async tests surface the known circular-dependency
+WARN lines (vaf↔storage↔sandbox) — pre-existing, harmless, out of scope
+here.
+
+**Evidence:** CI 424/0/0; full module loop ALL GREEN; runner 37/37;
+error 19/19; primitives 8/8; atomic-writes 13/13.
+
+**Remaining audit items:** P3 #32 agents module split (the big one), #33
+error-handling standardization, #34 brain-load circuit breaker, #35
+integration tests for P0/P1 fixes.
 
 ---
 
