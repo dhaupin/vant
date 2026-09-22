@@ -60,6 +60,18 @@ source 'private' can mean 'current brain root' which IS public when
 currentBrainType=public (pre-existing semantics, don't assert source in
 new tests, assert content). Docs: README/AGENTS/setup/cli/docker all
 have upgrade paths now.
+LEGACY MODEL CLARIFIED (`30c1817`): main = ONE brain, TWO scopes — public
+flat in models/public, private flat in models/private (+ category dirs
+state/, canvas/). --brain-name names BOTH scopes (public/<name>/ +
+private/<name>/ = same brain two visibilities = correct axolotl mapping).
+Migration reordered to run AFTER v2 steps: dropfiles.tmp-space was
+hijacking imported state/*.json stores into tmp-space (detect scans
+private/<b>/state/ for non-.json.md files) — import-last avoids it and
+v2 steps still see the true legacy layout. Detection now stack-only
+(missing or exactly ['vant']) — dir-based evidence masks in both
+directions (legacy category dirs contain .md; multibrain runtime dirs
+don't). Fresh-process reads verified for both scopes (private via
+current brain, public via fallback). 20/20 migration suites.
 Wave trail: #35 integration suite (`ca56f87`, + delegateAsync
 stream-gate-swallow fix); #34 brain-load breaker (`5290471` —
 BRAIN_CIRCUIT_OPEN, half-open probe, _metrics.errors revived,
