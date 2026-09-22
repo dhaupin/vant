@@ -15,12 +15,14 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — QC wave landed: WAL replay escape + dead fsync fixed `5a28829`, sudo NaN
-guards + branch injection `ce246ea`, npm-check no-op `bdf2025`, lint `7039827`. Findings ledger
-+ open gaps (branch-manager git() refactor, dead exports, security-chain consolidation) in
-labs/QC_WAVE.md. Standing gotchas: axolotl horcrux SVG mutates on test runs — leave unstaged;
-glob/code_search are blind to lib/+test/ here, use git ls-files/git grep; node --check multi-arg
-only checks the first file.)
+(nothing in flight — remote connectors LANDED: `lib/remote-s3.js` S3-API client +
+`RemoteStorage` store + `vant s3` CLI; prd-storage checklist ALL closed. Name-collision
+lesson twice-paid: check `git log -- <path>` before creating any file — lib/remote.js
+and bin/remote.js both already existed. Next wave: B-2 security-chain consolidation,
+branch-manager args-array refactor, audit criticals verification ledger. Standing:
+axolotl horcrux SVG mutates on test runs — leave unstaged; glob/code_search blind to
+lib/+test/, use git ls-files/git grep; node --check multi-arg only checks file 1;
+str_replace flaky on storage.js — use the exact-match node-script splice.)
 
 ---
 

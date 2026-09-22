@@ -2,7 +2,49 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** QC wave COMPLETE — WAL replay escape + dead fsync, sudo NaN guards, branch injection, npm-check no-op; all suites green (see labs/QC_WAVE.md)
+**Session:** Remote connectors LANDED (prd-storage last open item) — own S3-API client + RemoteStorage + `vant s3` CLI; one clobber-regression caught by the loop and fixed (see below)
+
+---
+
+## Session (2026-09-22 — remote connectors: S3/R2/MinIO/B2 via ONE own implementation)
+
+The last open prd-storage checklist item. Three slices, committed per slice, full
+loop + CI green after each (R1's original commit was verified slice-local only —
+see the regression note).
+
+| Commit | Slice | What |
+|--------|-------|------|
+| `d22379b` | R1 | **Own S3-API client** — SigV4 signer over global `fetch` (zero deps, Node ≥18), provider presets: s3 (`{bucket}.s3.{region}.amazonaws.com`), r2 (account-scoped host + path-style), minio (localhost:9000), b2 (`{region}.backblazeb2.com`); UNSIGNED-PAYLOAD signing; traversal-gated key charset BEFORE any URL interpolation; credential-safety in all error paths; `headBucket`/`test()` probes. Tests 9/9 OFFLINE incl. SigV4 known-answer (canonical request rebuilt independently from the AWS spec). |
+| `703f39e` | fix | **R1 clobbered lib/remote.js** — the git-providers registry (sync/branch/mcp/system/vant consumers) — caught by the full loop (sync-recursion suite crash), NOT by CI smokes. Registry restored, S3 client relocated to `lib/remote-s3.js`. Distinct concepts, distinct homes — the names were a trap. |
+| `b3d7f73` | R2 | **RemoteStorage store** — `getStorage('remote', {provider,bucket,region,prefix,endpoint,keys} | env VANT_REMOTE_*)`; shared B-2 gate + vaf + key hardening on EVERY path incl. raw bypass (absolute/backslash/`..` refused pre-network); recursive-by-default `list()` (shallow parity opt-in — FileStorage's one-level list is a readdir limitation, not a network contract); prefix round-trip mapping; `pushFrom`/`pullTo` (dryRun); per-store metrics at `remote://` pseudo basePath; DI client injection for offline tests; lazy config refusal. Tests 13/13 offline. |
+| `4597044` | R3 | **`vant s3` CLI** — status (secret-free) / test (connectivity probe) / ls / push / pull with --dry-run; refuses before any transfer when unconfigured; pre-existing `vant remote` SSH CLI untouched. Tests 6/6 offline smoke + router wiring. |
+
+**Config contract:** `VANT_REMOTE_PROVIDER|BUCKET|REGION|KEY|SECRET|PREFIX|ENDPOINT`.
+GCS/Azure deliberately out of scope (non-S3 APIs; revisit only with a real demand).
+
+**Gotchas (new + reinforced):**
+1. **NEVER trust a fresh-looking filename** — check `git log -- <path>` before creating
+   anything. Both clobber-regressions (lib/remote.js, bin/remote.js) were names that
+   LOOKED free but belonged to commits outside the recent log window. `glob` being
+   blind to lib/bin here makes this worse — use `git ls-files | grep`.
+2. Slice-local test suites catch slice bugs; ONLY the full module loop catches
+   blast radius. Run the loop before EVERY commit that touches a shared lib.
+3. SigV4 known-answer testing works: build the canonical request by hand from the
+   AWS spec in the test (header lines carry their own trailing \n INSIDE the block,
+   join('\n') separates the five SECTIONS) — signature mismatches then localize
+   instantly.
+4. str_replace silently refuses edits on storage.js (2000+ lines) — the exact-match-
+   or-throw node-script splice is now the default for that file; scripts are one-off,
+   always `rm`'d after success.
+5. Async test summaries lie unless tests are serialized into one promise chain —
+   the gating test flips the SHARED default sandbox, so concurrency = flaky cross-test
+   poisoning.
+6. `vant remote` (SSH host CLI, ecosystem wave `5e33280`) vs `vant s3` (object
+   storage connectors) — document the split in any future docs pass.
+
+**prd-storage checklist: ALL items closed.** Remaining wave: B-2 security-chain
+consolidation, branch-manager args-array refactor (tests first), audit criticals
+verification ledger.
 
 ---
 
