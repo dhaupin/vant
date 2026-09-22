@@ -2,7 +2,23 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** S3 client relocated into connectors family (`connectors.s3()`); cloudflare r2* ops delegated to it — connector was DOA (broken sibling requires) since creation, now actually functional
+**Session:** Cloudflare stripped to R2-only — Pages-sync/KV/Workers/adapter/srv halves removed (museum pieces, −1,274 lines); getConfig redaction
+
+---
+
+## Session (2026-09-22 — cloudflare museum strip + secret redaction)
+
+Follow-up to the r2 delegation, after the "what does this even provide" inventory:
+
+| Commit | What |
+|--------|------|
+| `f81366f` | **getConfig() redaction** — spread raw `apiToken` (always) + `r2SecretAccessKey` (since delegation); now `***set***`/undefined markers. Dormant module, hygiene only. |
+| `be0b3f2` | **Museum strip** (dhaupin: "strip the museum pieces"). Context: future web-UI hosting goes on CF Pages/Vercel as frontend deploys — never needed the Node→Pages-Functions sync RELAY. Removed: connector's sync/KV/Workers/connect surface, `lib/adapters/cloudflare.js` (transport multiplexer existed only for those), its shape-test, `srv/cloudflare/` Pages Functions (the never-deployed server half), `lib/config.js` cf* plumbing (zero consumers). Kept: **R2 facade over connectors/s3** (get/put/list/delete + cf:r2:* events + management surface + `_setR2TestClient` DI). Strip-regression pins in `cloudflare-r2.test.js` (museum exports must stay gone, control-API endpoints/CF_* env reads must not return). |
+
+**Cloudflare story is now:** R2 object storage via S3 client, full stop. Web-UI hosting
+decision (CF Pages vs Vercel) is orthogonal — it deploys frontend files, doesn't touch
+the connector. Suites: cloudflare-r2 9/9, cloudflare 10/10 (shape tests survived the
+strip untouched — they only ever pinned the kept management surface).
 
 ---
 
