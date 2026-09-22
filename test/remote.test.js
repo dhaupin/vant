@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Remote-connectors client tests (prd-storage — Slice R1)
+ * S3 connector tests (prd-storage — Slice R1)
  *
- * lib/remote.js: own S3-API client (SigV4 + fetch) for AWS S3, Cloudflare R2,
+ * lib/connectors/s3.js: own S3-API client (SigV4 + fetch) for AWS S3, Cloudflare R2,
  * MinIO, Backblaze B2. OFFLINE test suite: endpoint/key resolution, SigV4
  * known-answer verification (canonical request rebuilt from the AWS spec,
  * independently of lib code), credential-safety, and networkless refusal
@@ -10,7 +10,7 @@
  * is asserted only for synchronous pre-fetch behavior.
  */
 
-const mod = require('../lib/remote-s3');
+const mod = require('../lib/connectors/s3');
 
 const results = { passed: 0, failed: 0 };
 const failures = [];

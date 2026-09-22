@@ -15,14 +15,15 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — remote connectors LANDED: `lib/remote-s3.js` S3-API client +
-`RemoteStorage` store + `vant s3` CLI; prd-storage checklist ALL closed. Name-collision
-lesson twice-paid: check `git log -- <path>` before creating any file — lib/remote.js
-and bin/remote.js both already existed. Next wave: B-2 security-chain consolidation,
-branch-manager args-array refactor, audit criticals verification ledger. Standing:
-axolotl horcrux SVG mutates on test runs — leave unstaged; glob/code_search blind to
-lib/+test/, use git ls-files/git grep; node --check multi-arg only checks file 1;
-str_replace flaky on storage.js — use the exact-match node-script splice.)
+(nothing in flight — remote connectors LANDED: `lib/connectors/s3.js` S3-API client
+(registered as `connectors.s3(config)`, consumed by RemoteStorage) + `vant s3` CLI;
+prd-storage checklist ALL closed. Name-collision lesson twice-paid: check
+`git log -- <path>` before creating any file — lib/remote.js and bin/remote.js both
+already existed. Next wave: B-2 security-chain consolidation, branch-manager
+args-array refactor, audit criticals verification ledger. Standing: axolotl horcrux
+SVG mutates on test runs — leave unstaged; glob/code_search blind to lib/+test/,
+use git ls-files/git grep; node --check multi-arg only checks file 1; str_replace
+flaky on storage.js — use the exact-match node-script splice.)
 
 ---
 
