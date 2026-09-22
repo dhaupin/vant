@@ -58,13 +58,33 @@ const C = { accessKeyId: 'AKIDEXAMPLE', secretAccessKey: 'wJalrXUtnFEMI/K7MDENG+
 
 console.log('\n🌐 REMOTE CONNECTORS — S3-API CLIENT TESTS\n');
 
-test('module shape: createClient/PROVIDERS/_sign/_safeKey exported', () => {
+test('module shape: createClient/PROVIDERS/_sign/_safeKey/_parseListXml exported', () => {
     if (typeof mod.createClient !== 'function') return { success: false, error: 'createClient missing' };
     if (typeof mod._sign !== 'function') return { success: false, error: '_sign missing' };
     if (typeof mod._safeKey !== 'function') return { success: false, error: '_safeKey missing' };
+    if (typeof mod._parseListXml !== 'function') return { success: false, error: '_parseListXml missing' };
     for (const p of ['s3', 'r2', 'minio', 'b2']) {
         if (!mod.PROVIDERS[p]) return { success: false, error: 'provider preset missing: ' + p };
     }
+    return true;
+});
+
+test('_parseListXml: keys + Size/ETag extraction, prefix-marker skip, CommonPrefix', () => {
+    const xml = '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<ListBucketResult>' +
+        '<IsTruncated>false</IsTruncated>' +
+        '<Contents><Key>a/one.txt</Key><Size>123</Size><ETag>"abc"</ETag></Contents>' +
+        '<Contents><Key>a/b/two.txt</Key><Size>4</Size><ETag>&quot;def&quot;</ETag></Contents>' +
+        '<CommonPrefixes><Prefix>a/b/</Prefix></CommonPrefixes>' +
+        '</ListBucketResult>';
+    const items = mod._parseListXml(xml, 'a/');
+    const one = items.find(i => i.key === 'a/one.txt');
+    if (!one || one.size !== 123 || !one.etag) return { success: false, error: 'Contents parse wrong: ' + JSON.stringify(items) };
+    const two = items.find(i => i.key === 'a/b/two.txt');
+    if (!two || two.size !== 4) return { success: false, error: 'second Contents parse wrong' };
+    if (items.some(i => i.key === 'a/')) return { success: false, error: 'prefix marker not skipped' };
+    const empty = mod._parseListXml('<ListBucketResult></ListBucketResult>', '');
+    if (empty.length !== 0) return { success: false, error: 'empty parse wrong' };
     return true;
 });
 
