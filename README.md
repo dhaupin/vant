@@ -81,7 +81,7 @@ Prefer to control it yourself, or want a different brain name?
 ```bash
 vant migrate --status             # see what would be imported
 vant migrate --dry-run            # preview the moves, touch nothing
-vant migrate --brain-name mybrain # import under a chosen name
+vant migrate --brain-name mybrain # name for BOTH scopes (public+private)
 vant migrate                      # import (default name: vant)
 ```
 
@@ -95,6 +95,10 @@ Notes:
   second run is always a no-op.
 - `vant start --no-migrate` skips the auto-import if you want to migrate
   manually later.
+- One name covers both scopes: your old public brain becomes
+  `models/public/<name>/` and your old private brain becomes
+  `models/private/<name>/` — same brain, same name, two visibility
+  scopes, exactly like before but per-brain.
 - After migrating, your brain files live in
   `models/public/<brain>/` (and `models/private/<brain>/` once you write
   private state). The old flat files are moved, not copied.

@@ -377,6 +377,78 @@ define('legacy-main: apply nests brain under models/{public,private}/vant, synth
     }
 });
 
+define('legacy-main: private-brain content imports under the same chosen name (both scopes)', async () => {
+    const dir = makeLegacyMainFixture();
+    try {
+        // main's model: ONE user, TWO scopes — public brain flat in
+        // models/public, private brain flat in models/private (with
+        // category subdirs like state/, canvas/). Both must land under the
+        // SAME chosen name, categories nested, state store NOT hijacked by
+        // the dropfiles step (which is why this import runs LAST).
+        fs.mkdirSync(path.join(dir, 'models', 'private'), { recursive: true });
+        fs.writeFileSync(path.join(dir, 'models', 'private', 'journal.md'), '# private journal');
+        fs.mkdirSync(path.join(dir, 'models', 'private', 'state'), { recursive: true });
+        fs.writeFileSync(path.join(dir, 'models', 'private', 'state', 'session.json'), '{"k":1}');
+        fs.writeFileSync(path.join(dir, 'models', 'public', 'lessons2.md'), 'x');
+        fs.writeFileSync(path.join(dir, 'models', 'public', 'goals2.md'), 'x');
+
+        const probe = spawnSync(process.execPath, ['-e', `
+            (async () => {
+            process.chdir(${JSON.stringify(dir)});
+            const m = require(${JSON.stringify(path.join(dir, 'lib', 'migrations.js'))});
+            await m.migrate({ brainName: 'mybrain' });
+            const f = require('fs');
+            console.log('PRIV-JOURNAL:' + f.readFileSync('models/private/mybrain/journal.md', 'utf8').includes('private journal'));
+            console.log('PRIV-STATE:' + f.readFileSync('models/private/mybrain/state/session.json', 'utf8'));
+            console.log('PUB-ID:' + f.readFileSync('models/public/mybrain/identity.md', 'utf8').includes('legacy user'));
+            const st = JSON.parse(f.readFileSync('models/state.json', 'utf8'));
+            console.log('STACK:' + JSON.stringify(st.stack));
+            })().catch(e => { console.error('PROBE-ERR:', e.message); process.exit(1); });
+        `], { encoding: 'utf8', timeout: 60000, cwd: dir });
+        const out = probe.stdout || '';
+        return { success: out.includes('PRIV-JOURNAL:true') && out.includes('PRIV-STATE:{"k":1}') &&
+                        out.includes('PUB-ID:true') && out.includes('STACK:["mybrain"]'),
+                 error: `out=${out.slice(0, 300)} err=${(probe.stderr || '').split('\n').filter(l => !l.includes('circular') && !l.includes('trace-warnings')).join('|').slice(0, 400)}` };
+    } finally {
+        cleanupFixture(dir);
+    }
+});
+
+define('legacy-main: fresh-process reads span both scopes after import', async () => {
+    const dir = makeLegacyMainFixture();
+    try {
+        fs.mkdirSync(path.join(dir, 'models', 'private'), { recursive: true });
+        fs.writeFileSync(path.join(dir, 'models', 'private', 'journal.md'), '# private journal');
+        fs.writeFileSync(path.join(dir, 'models', 'public', 'lessons2.md'), 'x');
+        fs.writeFileSync(path.join(dir, 'models', 'public', 'goals2.md'), 'x');
+        // migrate in proc 1
+        spawnSync(process.execPath, ['-e', `
+            (async () => {
+            process.chdir(${JSON.stringify(dir)});
+            const m = require(${JSON.stringify(path.join(dir, 'lib', 'migrations.js'))});
+            await m.migrate({ brainName: 'mybrain' });
+            })().catch(e => { console.error(e.message); process.exit(1); });
+        `], { encoding: 'utf8', timeout: 60000, cwd: dir });
+        // fresh proc 2: plain reads find both scopes (private current brain + public fallback)
+        const probe = spawnSync(process.execPath, ['-e', `
+            (async () => {
+            process.chdir(${JSON.stringify(dir)});
+            const brain = require(${JSON.stringify(path.join(dir, 'lib', 'brain.js'))});
+            brain.setMode('dual');
+            const j = await brain.read('journal');
+            console.log('READ-PRIV:' + (j && /private journal/.test(j.content || '')));
+            const id = await brain.read('identity');
+            console.log('READ-PUB:' + (id && /legacy user/.test(id.content || '')));
+            })().catch(e => { console.error('READ-ERR:', e.message); process.exit(1); });
+        `], { encoding: 'utf8', timeout: 60000, cwd: dir });
+        const out = probe.stdout || '';
+        return { success: out.includes('READ-PRIV:true') && out.includes('READ-PUB:true'),
+                 error: `out=${out.slice(0, 250)} err=${(probe.stderr || '').split('\n').filter(l => !l.includes('circular') && !l.includes('trace-warnings')).join('|').slice(0, 400)}` };
+    } finally {
+        cleanupFixture(dir);
+    }
+});
+
 define('legacy-main: --brain-name flag names the imported brain', async () => {
     const dir = makeLegacyMainFixture();
     try {
