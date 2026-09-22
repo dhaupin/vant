@@ -2,7 +2,57 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: agents module split (P3 #32) — monolith → core/work/protos/multibrain + shared internal, facade contract pinned, CI 424/0/0
+**Session:** Wave: brain-load circuit breaker (P3 #34) — threshold + half-open probe + live error telemetry, tests-first, CI 424/0/0
+
+---
+
+## Session (2026-09-22 — brain-load circuit breaker, P3 #34)
+
+Shipped as `5290471`, tests first (`test/brain-circuit.test.js`, 10 checks).
+
+**The gap:** load() mostly returns null gracefully, but three real paths
+THROW — (1) pipeline-CRITICAL handler crash (sandbox/vaf/qos/escrow;
+executePipeline re-throws critical failures), (2) storage-layer error on the
+options.brain direct-read path, (3) recursion-guard trip. A wedged storage
+layer hammered every load forever, and `_metrics.errors` was
+**reset-but-never-incremented** — dead telemetry since the metrics block
+landed (found while wiring; the audit's "add circuit breaker for brain loads"
+was the visible symptom).
+
+**Contract:** consecutive-thrown-failure counting → threshold
+(`VANT_BRAIN_CIRCUIT_THRESHOLD`, default 5) → short-circuit with coded
+retryable `BRAIN_CIRCUIT_OPEN` VantError. HALF-OPEN probe after
+`VANT_BRAIN_CIRCUIT_RESET_MS` (default 30s): exactly one load through
+(`probing` flag prevents concurrent probe storms) — success closes, failure
+re-opens. Null misses (brain-not-found, the dominant normal case) NEVER feed
+the breaker; success-through closes it. Events `brain:load:circuit:open` /
+`:halfOpen`. DI: `_setLoadCircuitThreshold` / `_setLoadCircuitResetMs`.
+
+**BONUS: `_clearHandlerOverride()`** — register() had no undo: poisoning a
+pipeline handler from the public API was PERMANENT (getHandler prefers the
+_handlers Map over _defaults). Now droppable back to the default factory.
+
+**Design notes:** OPEN blocks even good loads until the window elapses —
+that's the point (fast-fail beats queuing on a wedge). Recovery is
+success-through-probe, matching qos.CircuitBreaker; resetMs=0 disables
+probing (stay open until resetLoadCircuit()). The half-open state is
+transient: it exists only between the window check and the probe's
+success/failure record.
+
+**Test-writing gotchas:** (1) `addMiddleware(mode, name, pos)` — first arg is
+the MODE, not a handler name; to poison a pipeline stage you
+`brain.register('sandbox', boom)` (register() takes the handler). (2) The
+suite's tmp VANT_MODEL_PATH does nothing — _brainModelsRoot is
+`__dirname/../models` resolved at load; sandboxing tests via env vars doesn't
+work for brain paths. (3) There's no brain.reset() — the handler-override
+undo needed the new `_clearHandlerOverride` DI.
+
+**Evidence:** CI 424/0/0; full module loop ALL GREEN; runner 37/37;
+brain-circuit 10/10; brain suite 77/77 (no regressions from the load()
+wiring).
+
+**Remaining audit items:** P3 #33 error-handling standardization, #35
+integration tests for P0/P1 fixes. P0/P1/P2 + #32/#34 all closed.
 
 ---
 

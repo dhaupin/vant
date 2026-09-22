@@ -15,38 +15,41 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — agents module split landed (`3fe53bf`, P3 #32):
-lib/agents.js now a thin facade over lib/agents/{core,work,protos,multibrain,
-internal}.js; export surface pinned identical via pre-split snapshot; ZERO
-consumer changes. Bonus fixes in the move: bare `audit.error` in emit()
-(4th bare-identifier bug) + _initCache() was dead code (proto-cache
-invalidation listeners never registered — now real in protos.js). P2 #26
-_messages multiplexing moved verbatim, de-multiplex flagged for later.
-Test gotchas: deny-by-default sandbox → suites must setScopes+setCapabilities
-before calling spawn/fork (orgflow pattern); ASYNC FUNCTIONS RESOLVE error
-objects, they don't reject — assert resolved values; bare-identifier pins
-must strip comments first. Remaining audit items: P3 #33 error-handling
-standardization, #34 brain-load circuit breaker, #35 integration tests for
-P0/P1 fixes. error.test.js harness is sync-only — async checks go through
-the appended serialized atest() chain; circular-dependency WARN lines
-(vaf↔storage↔sandbox) during tests are pre-existing + harmless.
-`lib/primitives.js` is the zero-Vant-requires home for shared primitives
-(atomicWriteFile, sleep) — contract enforced by test; stego/backup STAY on
-gated storage.atomicWrite. wal journal file is `wal.log` (constants at top
-of wal.js); structural walk tests must special-case the helper's own fd
-write (in primitives.js); brain.loadCorpus() returns the warm cache —
-invalidate before diffing; brain files must be written via the RESOLVED
-brain path (models/private/<brain>/, multibrain layout); corpus ids are
-extensionless; standalone test suites run via `node test/x.test.js` and are
-NOT auto-discovered — ci.js is smoke+syntax, runner/coverage don't scan
-test/ (register nothing, follow suite pattern); stub network.fetch (not
+(nothing in flight — brain-load circuit breaker landed (`5290471`, P3 #34):
+consecutive-failure breaker in brain.js over the 3 real load() throw paths
+(pipeline-critical crash / options.brain storage error / recursion guard);
+coded retryable BRAIN_CIRCUIT_OPEN short-circuit; HALF-OPEN probe after
+VANT_BRAIN_CIRCUIT_RESET_MS (default 30s, probing flag stops probe storms);
+null misses NEVER feed it; bonus: _metrics.errors was dead telemetry — now
+alive; bonus: _clearHandlerOverride() because register() had no undo.
+Test gotchas: brain.addMiddleware(mode, name, pos) — first arg is the MODE;
+poison a stage via brain.register('sandbox', boom); VANT_MODEL_PATH does
+NOT redirect brain paths (_brainModelsRoot is __dirname-relative at load);
+no brain.reset() exists. NEXT: labs handoff for #34 was interrupted —
+TASKS.md block written but uncommitted, MEM refreshed, then the last audit
+items are P3 #33 error-handling standardization and #35 integration tests
+for P0/P1 fixes (recommend #35 next — pins the closed criticals
+cross-module). Test gotchas: deny-by-default sandbox → suites must
+setScopes+setCapabilities before spawn/fork (orgflow pattern); ASYNC
+FUNCTIONS RESOLVE error objects, they don't reject — assert resolved
+values; bare-identifier pins must strip comments first; error.test.js
+harness is sync-only — async checks go through the serialized atest()
+chain; circular-dependency WARN lines (vaf↔storage↔sandbox) are
+pre-existing + harmless. `lib/primitives.js` is the zero-Vant-requires home
+for shared primitives (atomicWriteFile, sleep) — stego/backup STAY on gated
+storage.atomicWrite. wal journal file is `wal.log`; structural walk tests
+must special-case the helper's own fd write (primitives.js);
+brain.loadCorpus() returns the warm cache — invalidate before diffing;
+brain files must be written via the RESOLVED brain path
+(models/private/<brain>/); corpus ids are extensionless; standalone suites
+run via `node test/x.test.js` and are NOT auto-discovered — ci.js is
+smoke+syntax, runner/coverage don't scan test/; stub network.fetch (not
 global fetch) when testing provider HTTP; sandbox final exports DO expose
-top-level can() (deny-by-default) though early exports don't — module load
-order decides gate liveness. Standing: axolotl horcrux SVG mutates on test
-runs — leave unstaged; glob/code_search blind to lib/+test/, use git
-ls-files/git grep; node --check multi-arg only checks file 1; str_replace
-flaky on storage.js AND mcp.js/brain.js — use the exact-match node-script
-splice; check `git log -- <path>` before creating files.)
+top-level can() though early exports don't. Standing: axolotl horcrux SVG
+mutates on test runs — leave unstaged; glob/code_search blind to lib/+test/,
+use git ls-files/git grep; node --check multi-arg only checks file 1;
+str_replace flaky on storage.js AND mcp.js/brain.js — use the exact-match
+node-script splice; check `git log -- <path>` before creating files.)
 
 ---
 
