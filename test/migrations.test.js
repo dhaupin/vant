@@ -10,7 +10,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const { spawnSync } = require('child_process');
+const { spawnSync, spawn } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 
 const results = { passed: 0, failed: 0, tests: [] };
@@ -399,6 +399,124 @@ define('legacy-main: --brain-name flag names the imported brain', async () => {
         const errClean = (probe.stderr || '').split('\n').filter(l => !l.includes('circular') && !l.includes('trace-warnings')).join('|').slice(0, 500);
         return { success: out.includes('NOVA-NESTED:true') && out.includes('NOVA-STACK:["nova"]'),
                  error: `out=${out.slice(0, 700)} err=${errClean}` };
+    } finally {
+        cleanupFixture(dir);
+    }
+});
+
+// ---------- 6. alert surfaces (CLI banner + MCP tool) ----------
+
+define('CLI: start auto-migrate shows friendly legacy banner on a main-style tree', async () => {
+    const dir = makeLegacyMainFixture();
+    try {
+        // start.js needs the full bin/runtime; copy what it spawns
+        fs.copyFileSync(path.join(ROOT, 'bin', 'start.js'), path.join(dir, 'bin', 'start.js'));
+        fs.copyFileSync(path.join(ROOT, 'bin', 'health.js'), path.join(dir, 'bin', 'health.js'));
+        fs.writeFileSync(path.join(dir, 'models', 'public', 'lessons2.md'), 'x');
+        fs.writeFileSync(path.join(dir, 'models', 'public', 'goals2.md'), 'x');
+        const probe = spawnSync(process.execPath, ['-e', `
+            const { spawn } = require('child_process');
+            const p = spawn(process.execPath, ['bin/start.js'], { stdio: ['ignore','pipe','inherit'] });
+            let out = '';
+            p.stdout.on('data', d => out += d);
+            p.on('close', () => console.log('BANNER:' + /BRAIN MIGRATED/.test(out)));
+        `], { encoding: 'utf8', timeout: 120000, cwd: dir });
+        const out = (probe.stdout || '').match(/BANNER:(\w+)/);
+        return { success: !!out && out[1] === 'true',
+                 error: `out=${(probe.stdout || '').slice(0, 200)} err=${(probe.stderr || '').split('\n').filter(l => !l.includes('circular') && !l.includes('trace-warnings')).join('|').slice(0, 300)}` };
+    } finally {
+        cleanupFixture(dir);
+    }
+});
+
+define('CLI: second start shows no banner (idempotent, no re-alert)', async () => {
+    const dir = makeLegacyMainFixture();
+    try {
+        fs.copyFileSync(path.join(ROOT, 'bin', 'start.js'), path.join(dir, 'bin', 'start.js'));
+        fs.copyFileSync(path.join(ROOT, 'bin', 'health.js'), path.join(dir, 'bin', 'health.js'));
+        fs.writeFileSync(path.join(dir, 'models', 'public', 'lessons2.md'), 'x');
+        fs.writeFileSync(path.join(dir, 'models', 'public', 'goals2.md'), 'x');
+        const run = () => new Promise(resolve => {
+            const p = spawn(process.execPath, ['bin/start.js'], { stdio: ['ignore', 'pipe', 'ignore'] });
+            let out = '';
+            p.stdout.on('data', d => out += d);
+            p.on('close', () => resolve(out));
+        });
+        await run(); // migrates
+        const second = await run(); // no-op
+        return { success: !/BRAIN MIGRATED/.test(second) && /Brain layout OK/.test(second),
+                 error: `second-run-out=${second.slice(0, 200)}` };
+    } finally {
+        cleanupFixture(dir);
+    }
+});
+
+define('MCP: brain_migration_status reports legacy + guidance on a legacy tree', async () => {
+    const dir = makeLegacyMainFixture();
+    try {
+        const probe = spawnSync(process.execPath, ['-e', `
+            (async () => {
+            process.chdir(${JSON.stringify(dir)});
+            const mcp = require(${JSON.stringify(path.join(dir, 'lib', 'mcp.js'))});
+            const r = await mcp.execute('brain_migration_status', {});
+            console.log('LEGACY:' + r.legacy);
+            console.log('GUIDANCE-HAS-MIGRATE:' + /vant migrate/.test(r.guidance || ''));
+            console.log('GUIDANCE-HAS-NAME:' + /--brain-name/.test(r.guidance || ''));
+            })().catch(e => { console.error('PROBE-ERR:', e.message); process.exit(1); });
+        `], { encoding: 'utf8', timeout: 60000, cwd: dir });
+        const out = probe.stdout || '';
+        return { success: out.includes('LEGACY:true') && out.includes('GUIDANCE-HAS-MIGRATE:true') && out.includes('GUIDANCE-HAS-NAME:true'),
+                 error: `out=${out.slice(0, 250)} err=${(probe.stderr || '').split('\n').filter(l => !l.includes('circular') && !l.includes('trace-warnings')).join('|').slice(0, 400)}` };
+    } finally {
+        cleanupFixture(dir);
+    }
+});
+
+define('MCP: brain_migration_status reports up-to-date on migrated tree', async () => {
+    const dir = makeLegacyMainFixture();
+    try {
+        const probe = spawnSync(process.execPath, ['-e', `
+            (async () => {
+            process.chdir(${JSON.stringify(dir)});
+            const migrations = require(${JSON.stringify(path.join(dir, 'lib', 'migrations.js'))});
+            await migrations.migrate();
+            const mcp = require(${JSON.stringify(path.join(dir, 'lib', 'mcp.js'))});
+            const r = await mcp.execute('brain_migration_status', {});
+            console.log('LEGACY:' + r.legacy);
+            console.log('UPTODATE:' + r.upToDate);
+            })().catch(e => { console.error('PROBE-ERR:', e.message); process.exit(1); });
+        `], { encoding: 'utf8', timeout: 60000, cwd: dir });
+        const out = probe.stdout || '';
+        return { success: out.includes('LEGACY:false') && out.includes('UPTODATE:true'),
+                 error: `out=${out.slice(0, 250)} err=${(probe.stderr || '').split('\n').filter(l => !l.includes('circular') && !l.includes('trace-warnings')).join('|').slice(0, 400)}` };
+    } finally {
+        cleanupFixture(dir);
+    }
+});
+
+define('read(): dual-mode public fallback finds migrated content (default type path)', async () => {
+    const dir = makeLegacyMainFixture();
+    try {
+        const probe = spawnSync(process.execPath, ['-e', `
+            (async () => {
+            process.chdir(${JSON.stringify(dir)});
+            const migrations = require(${JSON.stringify(path.join(dir, 'lib', 'migrations.js'))});
+            await migrations.migrate();
+            const brain = require(${JSON.stringify(path.join(dir, 'lib', 'brain.js'))});
+            brain.setMode('dual');
+            // Plain read() must find the migrated content: either via the
+            // current-brain root (which resolves to the public brain on a
+            // legacy tree — brain type detection) or via the dual-mode
+            // public fallback. Either way the USER sees their old brain.
+            const id = await brain.read('identity');
+            console.log('FALLBACK:' + (id && /legacy user/.test(id.content || '')));
+            const pub = await brain.read('identity', { type: 'public' });
+            console.log('EXPLICIT-PUBLIC:' + (pub && /legacy user/.test(pub.content || '')));
+            })().catch(e => { console.error('PROBE-ERR:', e.message); process.exit(1); });
+        `], { encoding: 'utf8', timeout: 60000, cwd: dir });
+        const out = probe.stdout || '';
+        return { success: out.includes('FALLBACK:true') && out.includes('EXPLICIT-PUBLIC:true'),
+                 error: `out=${out.slice(0, 250)} err=${(probe.stderr || '').split('\n').filter(l => !l.includes('circular') && !l.includes('trace-warnings')).join('|').slice(0, 400)}` };
     } finally {
         cleanupFixture(dir);
     }

@@ -53,15 +53,51 @@ npm start
 | Feature | What It Does |
 |---------|--------------|
 | **Brain** | Files in GitHub - each session reads context |
-| **Memory** | `models/private/` - identity, goals, lessons... |
+| **Memory** | `models/private/<brain>/` - identity, goals, lessons... |
 | **Sync** | Push/pull brain state via GitHub API |
-| **MCP Server** | 21 tools for AI agents (optional) |
+| **MCP Server** | AI agent tools (optional) |
 | **Islands** | Lazy-loadable integrations |
 | **Multi-Agent** | Branch-per-agent workflow |
 | **Horcrux** | SVG steganography - embed encrypted brain in image |
 | **Multi-Brain** | Multiple brains (nova, axolotl, custom) - series or parallel |
 
 **Optional Features:** Webhooks, Notifications, Steganography
+
+---
+
+## Upgrading from an older Vant (single-brain layout)
+
+Older versions stored the brain **flat** — all files directly in
+`models/public/` with no per-brain folders and no brain stack. Vant ≥0.9
+(axolotl) uses a **multi-brain layout**: `models/public/<brain>/`,
+`models/private/<brain>/`, and a brain stack in `models/state.json`.
+
+**If you're upgrading, your brain migrates automatically:** `vant start`
+detects the old layout on first run, imports it (default brain name
+`vant`), and prints a confirmation banner. Nothing is lost.
+
+Prefer to control it yourself, or want a different brain name?
+
+```bash
+vant migrate --status             # see what would be imported
+vant migrate --dry-run            # preview the moves, touch nothing
+vant migrate --brain-name mybrain # import under a chosen name
+vant migrate                      # import (default name: vant)
+```
+
+AI agents on the MCP channel can check too: the `brain_migration_status`
+tool reports whether a legacy layout is pending, with guidance.
+
+Notes:
+
+- Detection is **content-based** (looks at your actual files), so it's safe
+  to run any time — it never fires on an already-multi-brain tree, and a
+  second run is always a no-op.
+- `vant start --no-migrate` skips the auto-import if you want to migrate
+  manually later.
+- After migrating, your brain files live in
+  `models/public/<brain>/` (and `models/private/<brain>/` once you write
+  private state). The old flat files are moved, not copied.
 
 ---
 

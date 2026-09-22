@@ -70,15 +70,39 @@ function main() {
         return;
     }
 
-    // Brain layout migration (idempotent; no-op when layout is current)
+    // Brain layout migration (idempotent; no-op when layout is current).
+    // stdio pipe (not inherit) so we can detect whether the import actually
+    // moved anything and give legacy users a clear, friendly alert.
     console.log('[Start] Checking brain layout...');
     const mig = spawn('node', [path.join(BIN_DIR, 'migrate.js')], {
-        stdio: 'inherit'
+        stdio: ['ignore', 'pipe', 'inherit']
     });
+
+    let migOut = '';
+    mig.stdout.on('data', d => { migOut += d; process.stdout.write(d); });
 
     mig.on('close', (code) => {
         if (code === 0) {
             console.log('[Start] Brain layout OK.');
+            // Legacy import happened? Tell the user what changed, warmly.
+            const m = migOut.match(/legacy\.multibrain-import[^{]*\{[^}]*\}/);
+            if (m) {
+                let imported = null, brainName = 'vant';
+                try {
+                    const parsed = JSON.parse(m[0].slice(m[0].indexOf('{')));
+                    imported = parsed.imported;
+                    brainName = parsed.brain || brainName;
+                } catch (e) { /* cosmetic only */ }
+                console.log('');
+                console.log('╔═══════════════════════════════════════════════════╗');
+                console.log('║  🧠 BRAIN MIGRATED to the multi-brain layout      ║');
+                console.log('╚═══════════════════════════════════════════════════╝');
+                console.log(`  Your old-style brain was imported${imported != null ? ` (${imported} files)` : ''} as brain "${brainName}".`);
+                console.log(`  Files now live in models/public/${brainName}/ and models/private/${brainName}/.`);
+                console.log('  Nothing was lost — verify with: vant migrate --status');
+                console.log(`  Prefer a different name? vant migrate --brain-name <name>`);
+                console.log('');
+            }
         } else {
             // Migrate exits 1 on real failures; layout problems should be
             // visible, not fatal — health check reports the state next.

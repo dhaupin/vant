@@ -18,7 +18,11 @@ const args = process.argv.slice(2);
 const migrations = require('../lib/migrations');
 
 async function main() {
-    if (args.includes('-h') || args.includes('--help') || args.length === 0) {
+    // No args = RUN migrations (the common path — and what `vant start`
+    // invokes). Help only on explicit -h/--help; a bare `vant migrate`
+    // printing usage instead of migrating was an auto-run trap: start's
+    // invocation silently did nothing while exiting 0.
+    if (args.includes('-h') || args.includes('--help')) {
         console.log(`
 Vant Migrate — brain layout versioning
 

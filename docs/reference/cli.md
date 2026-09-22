@@ -56,15 +56,17 @@ Core CLI commands.
 ### vant start
 
 Full startup sequence:
-1. `health` - Run diagnostics
-2. `sync` - Pull/push brain from GitHub
-3. `load` - Load brain files
-4. `run` - Start runtime loop
+1. `migrate` - Brain layout migrations (no-op when current; `--no-migrate` skips)
+2. `health` - Run diagnostics
+3. `sync` - Pull/push brain from GitHub
+4. `load` - Load brain files
+5. `run` - Start runtime loop
 
 ```bash
-vant start           # Full startup
-vant start --no-sync # Skip sync
-vant start --local  # Skip GitHub
+vant start              # Full startup (auto-migrates legacy brain layouts)
+vant start --no-sync    # Skip sync
+vant start --local      # Skip GitHub
+vant start --no-migrate # Skip brain layout migration
 ```
 
 ### vant health
@@ -1075,6 +1077,28 @@ vant horcrux backup     # Create backup
 vant horcrux restore   # Restore backup
 vant horcrux list      # List backups
 ```
+
+### vant migrate
+
+Brain **layout** migrations (distinct from package version). Vant ≥0.9
+stores brains in per-brain directories (`models/public/<brain>/`,
+`models/private/<brain>/`) with an active stack in `models/state.json`;
+`vant migrate` imports older flat layouts (files directly in
+`models/public/`) into the multi-brain structure:
+
+```bash
+vant migrate --status              # Layout version + pending migrations
+vant migrate --dry-run             # Preview what would move (no changes)
+vant migrate                      # Apply pending migrations in order
+vant migrate --brain-name mybrain  # Name the imported brain (default: vant)
+```
+
+Notes:
+
+- `vant start` runs this automatically before health; `--no-migrate` skips it
+- Detection is content-based (your actual files), never just the version marker — safe to run any time
+- Every step is idempotent; a second run is always a no-op
+- MCP clients: `brain_migration_status` tool reports the same status + guidance
 
 ### vant stego
 
