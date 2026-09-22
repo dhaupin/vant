@@ -2,7 +2,46 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: provider-op timeouts (P2 #25) — GitProvider base timeout layer + sync wall-clock caps, tests-first, CI 422/0/0
+**Session:** Wave: provider HTTP → network layer (P2 #25 follow-up) — SSRF walls + circuit breaker + `system` bypass contract, tests-first, CI 422/0/0
+
+---
+
+## Session (2026-09-22 — provider HTTP through network.js)
+
+Follow-up from the P2 #25 handoff: connectors rode `_requestJson` timeouts
+but still called the bare global fetch — no SSRF walls, no circuit breaker,
+no events. Shipped as `31f6f69`, tests first
+(`test/provider-network.test.js`, 10 checks).
+
+**Decisive discovery:** network.fetch's sandbox gate is LIVE, not dead —
+sandbox's final exports include top-level `can()` (`canNetwork()` false by
+default). Verified live in a bare require: provider calls routed naively
+would ALL deny. That's exactly why providers historically bypassed the
+network layer.
+
+**Fix:**
+- `network.fetch` gains documented `system: true` — system-initiated ops
+  bypass the per-call sandbox gate; their authorization lives at the entry
+  point (explicit config, escrow, recursion guard, circuits, wall-clock
+  caps). Agents/user fetches stay gated. Structural pin test guards the
+  contract through the prd-security canX()/can() migration.
+- `GitProvider._requestJson` routes through network.fetch (`system: true`,
+  `cache: false` — network cache is not auth-keyed; a cached authed response
+  could cross tokens). Blockers → coded `NETWORK_BLOCKED` (non-retryable);
+  `HTTP <status>` rejections → `NETWORK_HTTP_ERROR` (retryable 5xx/429);
+  wall-clock race keeps `NETWORK_TIMEOUT` on hung transports.
+- network.js bugfix pinned via loopback: non-2xx rejections said
+  `` HTTP \${res.statusCode} `` LITERALLY (escaped dollar — status never
+  interpolated).
+- `_checkNetwork` fail-open documented inline in sync.js (no flip — would
+  brick configured installs; fail-closed tracked for sandbox network-scope
+  grant path).
+- provider-timeouts suite re-targeted: network.fetch owns its http/https
+  transport, so global-fetch stubs were INERT (would have hit real DNS).
+
+**Evidence:** CI 422/0/0; 10 suites green (sync, sync-pull,
+sync-recursion, remote, remote-storage, network, connector, remote-cli,
+provider-timeouts, provider-network); `npm run check` clean.
 
 ---
 

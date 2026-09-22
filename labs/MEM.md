@@ -15,27 +15,29 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — P2 #25 provider-op timeouts shipped (`bf11f78`): all 5
-git connectors were on BARE global fetch()/execSync (no timeout, no abort,
-no circuit breaker) — now GitProvider._requestJson (AbortController → coded
-retryable NETWORK_TIMEOUT) + _gitOpts (VANT_GIT_TIMEOUT_MS, default 60s) +
-sync._capOp wall-clock caps everywhere (VANT_SYNC_OP_TIMEOUT_MS, default
-120s). Remaining audit P-items: atomic writes everywhere (P2 #27), agents
-module split (P3 #32). NEXT STEP queued: route connectors through network.js
-fetch() for circuit breaker/cache/SSRF-walls (response-shape differs: string
-vs Response — github's PR flow asserts on it; also NOTE _checkNetwork()
-fail-opens: sandbox canNetwork denial is swallowed by `catch {}` in sync.js —
-class of safe-by-default bug, fix alongside). Gotchas: brain.loadCorpus()
+(nothing in flight — provider HTTP now routes through network.js
+(`31f6f69`, P2 #25 follow-up): GitProvider._requestJson → network.fetch with
+`system: true` (sandbox canNetwork gate is LIVE + false-by-default — bare
+routing would brick sync; structural pin test guards the bypass through the
+canX()/can() migration), `cache: false` (not auth-keyed), SSRF blockers →
+NETWORK_BLOCKED, HTTP n → NETWORK_HTTP_ERROR. Loopback-pinned fix: network.js
+non-2xx said `HTTP ${res.statusCode}` literally (escaped $). _checkNetwork
+fail-open documented, no flip. Remaining audit P-items: atomic writes
+everywhere (P2 #27), agents module split (P3 #32). Gotchas: brain.loadCorpus()
 returns the warm cache — invalidate before diffing; brain files must be
 written via the RESOLVED brain path (models/private/<brain>/, multibrain
 layout); corpus ids are extensionless; standalone test suites run via
 `node test/x.test.js` and are NOT auto-discovered — ci.js is smoke+syntax,
-runner/coverage don't scan test/ (register nothing, follow suite pattern).
-Standing: axolotl horcrux SVG mutates on test runs — leave unstaged;
-glob/code_search blind to lib/+test/, use git ls-files/git grep; node --check
-multi-arg only checks file 1; str_replace flaky on storage.js AND
-mcp.js/brain.js — use the exact-match node-script splice; check
-`git log -- <path>` before creating files.)
+runner/coverage don't scan test/ (register nothing, follow suite pattern);
+stub network.fetch (not global fetch) when testing provider HTTP — network
+owns its http/https transport, global-fetch stubs are inert; sandbox final
+exports DO expose top-level can() (deny-by-default) though early exports
+don't — module load order decides gate liveness. Standing: axolotl horcrux
+SVG mutates on test runs — leave unstaged; glob/code_search blind to
+lib/+test/, use git ls-files/git grep; node --check multi-arg only checks
+file 1; str_replace flaky on storage.js AND mcp.js/brain.js — use the
+exact-match node-script splice; check `git log -- <path>` before creating
+files.)
 
 ---
 
