@@ -15,33 +15,38 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — error.js latent-bug batch landed (`50e9bae`):
-handle()/retry()/circuitBreaker() had bare `vaf`/`logger`/`audit`/`errors`
-references — every shape test passed, first real call threw ReferenceError;
-now wired to lazy getters/module-locals. CODES NETWORK_TIMEOUT + SUDO_DENIED
-deduped; pin test refuses duplicate CODES keys. Gotchas: error.test.js
-harness is sync-only — async checks go through the appended serialized
-`atest()` chain or Promises get misjudged; circular-dependency WARN lines
-(vaf↔storage↔sandbox) during error tests are pre-existing + harmless.
+(nothing in flight — agents module split landed (`3fe53bf`, P3 #32):
+lib/agents.js now a thin facade over lib/agents/{core,work,protos,multibrain,
+internal}.js; export surface pinned identical via pre-split snapshot; ZERO
+consumer changes. Bonus fixes in the move: bare `audit.error` in emit()
+(4th bare-identifier bug) + _initCache() was dead code (proto-cache
+invalidation listeners never registered — now real in protos.js). P2 #26
+_messages multiplexing moved verbatim, de-multiplex flagged for later.
+Test gotchas: deny-by-default sandbox → suites must setScopes+setCapabilities
+before calling spawn/fork (orgflow pattern); ASYNC FUNCTIONS RESOLVE error
+objects, they don't reject — assert resolved values; bare-identifier pins
+must strip comments first. Remaining audit items: P3 #33 error-handling
+standardization, #34 brain-load circuit breaker, #35 integration tests for
+P0/P1 fixes. error.test.js harness is sync-only — async checks go through
+the appended serialized atest() chain; circular-dependency WARN lines
+(vaf↔storage↔sandbox) during tests are pre-existing + harmless.
 `lib/primitives.js` is the zero-Vant-requires home for shared primitives
 (atomicWriteFile, sleep) — contract enforced by test; stego/backup STAY on
-gated storage.atomicWrite. Remaining audit items: agents module split
-(P3 #32), error-handling standardization (#33), brain-load circuit breaker
-(#34). wal journal file is `wal.log` (constants at top of wal.js);
-structural walk tests must special-case the helper's own fd write (in
-primitives.js); brain.loadCorpus() returns the warm cache — invalidate
-before diffing; brain files must be written via the RESOLVED brain path
-(models/private/<brain>/, multibrain layout); corpus ids are extensionless;
-standalone test suites run via `node test/x.test.js` and are NOT
-auto-discovered — ci.js is smoke+syntax, runner/coverage don't scan test/
-(register nothing, follow suite pattern); stub network.fetch (not global
-fetch) when testing provider HTTP; sandbox final exports DO expose top-level
-can() (deny-by-default) though early exports don't — module load order
-decides gate liveness. Standing: axolotl horcrux SVG mutates on test runs —
-leave unstaged; glob/code_search blind to lib/+test/, use git ls-files/git
-grep; node --check multi-arg only checks file 1; str_replace flaky on
-storage.js AND mcp.js/brain.js — use the exact-match node-script splice;
-check `git log -- <path>` before creating files.)
+gated storage.atomicWrite. wal journal file is `wal.log` (constants at top
+of wal.js); structural walk tests must special-case the helper's own fd
+write (in primitives.js); brain.loadCorpus() returns the warm cache —
+invalidate before diffing; brain files must be written via the RESOLVED
+brain path (models/private/<brain>/, multibrain layout); corpus ids are
+extensionless; standalone test suites run via `node test/x.test.js` and are
+NOT auto-discovered — ci.js is smoke+syntax, runner/coverage don't scan
+test/ (register nothing, follow suite pattern); stub network.fetch (not
+global fetch) when testing provider HTTP; sandbox final exports DO expose
+top-level can() (deny-by-default) though early exports don't — module load
+order decides gate liveness. Standing: axolotl horcrux SVG mutates on test
+runs — leave unstaged; glob/code_search blind to lib/+test/, use git
+ls-files/git grep; node --check multi-arg only checks file 1; str_replace
+flaky on storage.js AND mcp.js/brain.js — use the exact-match node-script
+splice; check `git log -- <path>` before creating files.)
 
 ---
 

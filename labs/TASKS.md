@@ -2,7 +2,72 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: error.js latent-bug batch (`50e9bae`) — 3 ReferenceErrors wired + CODES deduped, tests-first, CI 424/0/0
+**Session:** Wave: agents module split (P3 #32) — monolith → core/work/protos/multibrain + shared internal, facade contract pinned, CI 424/0/0
+
+---
+
+## Session (2026-09-22 — agents module split, P3 #32)
+
+The big one from the audit queue. Shipped as `3fe53bf`, tests first
+(`test/agents-split.test.js`, 22 checks).
+
+**Structure:** 1156-line monolith → five files. lib/agents.js stays as the
+ONE public door (thin facade re-export) so all 9 require points (brain, mcp,
+system, vant, prune, transform, teams flow, bin/agent-spawner, bin/agents,
+bin/org) work UNCHANGED — node resolves `lib/agents/` dir + `lib/agents.js`
+file without conflict.
+
+| File | Lines | Owns |
+|------|-------|------|
+| lib/agents/core.js | 333 | agent lifecycle: spawn (quota/rate/sandbox/sudo gates), pause/resume, terminate+kill, prune, list/get, metrics, fork, join, emit/on, Agents class |
+| lib/agents/work.js | 341 | work items: delegate (guard+pipeline+team perms), delegateAsync/pollWork/completeWork, approve/reject/signOff, setDeadline/retry/escalate/setPriority |
+| lib/agents/protos.js | 249 | loadProto/listProtos/loadFolder/listFolders/loadChain/startMCP + proto cache |
+| lib/agents/multibrain.js | 47 | per-brain agents config + stack traversal |
+| lib/agents/internal.js | 261 | ONE shared registry Map + _messages + persistence + all underscore helpers |
+
+Facade pins: export surface identical to a pre-split snapshot (names AND
+presence), no moved function bodies remain, gatherState/restoreState stay in
+the facade (span registry + persistence domains).
+
+**BONUS FIX (bare-identifier bug class #4):** emit()'s listener-error catch
+called bare `audit.error(...)` — never defined — so a throwing listener
+crashed the whole emit loop. Now console.warn. Found because the new suite
+pins comment-stripped bare-ref patterns across all submodules.
+
+**BONUS: _initCache() was dead code** — defined brain afterSave/brainChanged
+cache-invalidation listeners but had ZERO callers, so the documented proto
+cache invalidation NEVER HAPPENED. protos.js now registers the listeners at
+load time (try/catch-guarded) — the intent is finally real. Pre-split suite
+couldn't catch this: it was typeof-only.
+
+**P2 #26 preserved deliberately:** the _messages Map multiplexing (work items
++ event listeners + conversation buffers) moved VERBATIM with the fail-safe
+contract documented in work.js. De-multiplexing would have turned a pure move
+into a behavior change — flagged for a future work-item ownership slice.
+Also documented there: delegateAsync returns the STREAM workId while
+setDeadline/retry/escalate/setPriority look up _messages — stream.complete()
+is the real updater.
+
+**Test-writing gotchas (MEM-worthy):**
+1. Deny-by-default sandbox means spawn/fork refuse without a grant — suite
+   must `setScopes + setCapabilities` up front (orgflow pattern). The
+   pre-split suites never hit this because they never CALLED spawn.
+2. `async function` early-returns RESOLVE with the error object, they don't
+   reject: `resume(idle-agent)` resolves `{error:'Agent not paused'}`. Tests
+   must assert resolved values, not use rejection handlers. Cost me 3 debug
+   rounds before the instrumentation proved it.
+3. Bare-identifier structural pins must strip comments first — doc comments
+   legitimately mention the bug class by name.
+4. Dead test scaffolding: don't leave `require('lib/agents/core')` unused in
+   a test (confuses the next debugger).
+
+**Evidence:** CI 424/0/0; full module loop ALL GREEN; runner 37/37;
+agents-split 22/22; pre-split suites still green (agents 17, orgflow 18,
+concurrent-agents 6) — zero consumer changes needed.
+
+**Remaining audit items:** P3 #33 error-handling standardization, #34
+brain-load circuit breaker, #35 integration tests for P0/P1 fixes. The P0/P1
+queues are fully closed.
 
 ---
 
