@@ -15,14 +15,13 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — QC sweep 2 shipped clean at `b05a7a7`: lib-side git
-injection closed across branch.js + all 4 connectors via _gitExec/_gitRef
-argv-array guards, branch.js audit-not-required crash fixed, commit()
-message check relaxed to allowContent (argv-array made metachars inert),
-test/git-injection.test.js 7/7 pins it all, labs/QC_WAVE.md rewritten as
-the PR #91 go/no-go ledger with verdict GO. All suites / runner 37-37 /
-CI 421-0-3 green. Remaining non-blocking: DEAD_EXPORTS pass, cohesion B-2
-consolidation, PRD roadmap items. Next up: user decides on merging #91.)
+(nothing in flight — docs/CI consistency pass shipped at `1c72809`:
+standalone suites now in GitHub Actions discovery, CHANGELOG entries for
+migration + QC fixes, mcp-tools.md gained brain_migration_status and
+stale tool-counts replaced with auto-wire phrasing everywhere, cli.md
+documents failed-verify retry + existing-wins + health warning, .gitignore
+covers legacy-main fixture + .drill-* scratch. All suites / runner 37-37 /
+CI 421-0-3 green. Branch is PR #91-ready; user decides on merge.)
 
 ---
 

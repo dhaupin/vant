@@ -2,7 +2,39 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: QC sweep 2 (labs/QC_WAVE.md re-sweep) — lib-side git injection closed in 5 files, branch audit crash fixed, GO verdict recorded for PR #91
+**Session:** Wave: docs/CI consistency pass — standalone suites in CI discovery, CHANGELOG entries, tool-count drift fixed, migrate behavior documented
+
+---
+
+## Session (2026-09-22 — docs/CI consistency pass, `1c72809`)
+
+Continuation of the QC sweep: verify claims vs behavior across docs and
+wire the new suites into discovery.
+
+- **CI gap:** test/ci.js + runner were in GitHub Actions, but standalone
+  suites (git-injection.test.js, migrations.test.js, etc.) were NOT —
+  local-only discovery. Added a loop step to .github/workflows/test.yml
+  (`for f in test/*.test.js`) + timeout 3→5 min.
+- **CHANGELOG:** Unreleased section now records the brain layout
+  migration (merge-safety) and the QC-wave security/robustness fixes.
+- **Tool-count drift:** mcp-tools.md claimed "31 tools", AGENTS.md/README
+  "21 tools" — reality: 272 exposed via tools/list (auto-wire grows it).
+  Replaced hard-coded counts with auto-wire phrasing; mcp-tools.md gained
+  a brain_migration_status reference entry + return type (was only in
+  cli.md/setup.md).
+- **cli.md vant migrate:** documented failed-verify retry semantics
+  (marker withheld, exit 1, next run retries, start shows ⚠),
+  existing-wins imports (skippedExisting), health OLD-STYLE warning.
+- **Fixture residue:** none committed; .gitignore now covers
+  .migration-fixture-legacy-main/ and .drill-* (only .migration-fixture/
+  was covered).
+- **CLI drills (verified before docs edits):** --status/--dry-run/
+  --brain-name all exit 0 on the live tree; migrate --brain-name
+  end-to-end + start banner behaviors already pinned by the 28-suite
+  migration battery.
+
+**Verification:** all suites pass, runner 37/37, CI 421/0/3, docs suite
+green after doc edits.
 
 ---
 
