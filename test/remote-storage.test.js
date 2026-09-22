@@ -2,8 +2,8 @@
 /**
  * RemoteStorage tests (prd-storage — Slice R2)
  *
- * lib/storage.js RemoteStorage: FileStorage-shaped store over lib/remote's
- * S3-API client. OFFLINE suite — every test injects a fake client via the
+ * lib/storage.js RemoteStorage: FileStorage-shaped store over
+ * lib/remote-s3's S3-API client. OFFLINE suite — every test injects a fake client via the
  * constructor DI point (options.client); no network anywhere. Covers:
  * config resolution + pseudo basePath + secret hygiene, prefix round-trip
  * mapping, lazy-not-configured refusal, full CRUD contract vs FileStorage

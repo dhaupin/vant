@@ -10,7 +10,7 @@
  * is asserted only for synchronous pre-fetch behavior.
  */
 
-const mod = require('../lib/remote');
+const mod = require('../lib/remote-s3');
 
 const results = { passed: 0, failed: 0 };
 const failures = [];
