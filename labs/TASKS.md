@@ -2,7 +2,59 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: provider HTTP → network layer (P2 #25 follow-up) — SSRF walls + circuit breaker + `system` bypass contract, tests-first, CI 422/0/0
+**Session:** Wave: atomic writes everywhere (P2 #27) — fs-only helper + last 9 raw writes migrated, tests-first, CI 422/0/0
+
+---
+
+## Session (2026-09-22 — atomic writes everywhere, P2 #27)
+
+Shipped as `faedaf8`, tests first (`test/atomic-writes.test.js`, 13 checks).
+
+**Design:** shared `atomicWriteFile()` helper in **lib/error.js** — deliberate
+home choice: error.js has ZERO Vant-module requires at load time (event/audit
+are lazy), so ANY module inside the brain↔storage↔gate require cycle can use
+it without adding a cycle edge. Contract: hidden same-dir temp file
+(`.name.UUID.tmp`) + writeFileSync-to-fd + fsync + rename; a crash leaves at
+worst a harmless hidden temp (swept by `vant clean cache`), never a truncated
+final file. storage.js re-exports it (`atomicWriteFile`) as the one door for
+outside-the-layer writers. storage.atomicWrite (capability-gated variant)
+unchanged.
+
+**Census → migration (all raw final-path writes in lib/ now gone):**
+
+| Site | Hazard fixed |
+|--------|-------------|
+| brain.js `_bfsWrite` bootstrap fallback | truncated brain file in the storage↔brain cycle window |
+| qos.js CircuitBreaker._save non-models fallback | torn snapshot loads as null → silent breaker reset |
+| security/gates.js `_save` | torn trust/block DB resets every breaker on next load |
+| transform.js horcrux create() svg + json | partial horcrux that inspect/restore fail on (reincarnation-drill artifact!) |
+| wal.js blob spill + compact() truncate | torn blob fails replay digest; torn truncate resurrects stale intents |
+| format.js saveFile fallback | the pipeline-routed path was crash-safe; the raw escape was not |
+| geometry/fragmenter.js ×2 + quasicrystal.js | provider records |
+
+**Structural pins:** suite walks lib/ and refuses ANY bare `fs.writeFileSync`
+outside storage.js (tempPath line) + error.js (the helper's own fd write), and
+ANY `fs.promises.writeFile` anywhere — future raw-write regressions fail CI.
+
+**Scope notes:** bin/+srv/ were already clean (git grep verified). FileStorage
+unlinked() truncate path stays as-is (documented pre-existing behavior). WAL
+blob write being atomic makes replay digest-checks stricter than before, not
+weaker. geometry helpers keep the `await` on the now-sync helper (same-call
+await, harmless) so call sites stay unchanged.
+
+**Gotchas:** (1) wal journal is `wal.log` not `journal.jsonl` — constants
+WAL_DIR/LOG_FILE at the top of wal.js. (2) error.js is now THE home for
+fs-only shared primitives that must be cycle-safe; audit/logger stay lazy
+requires. (3) structural walk tests must special-case the helper's own file
+or the fix fails its own pin.
+
+**Evidence:** CI 422/0/0; full module loop ALL GREEN; runner 37/37; module
+suites for every touched file green (brain, qos, wal, transform, security,
+islands, storage-metrics, sync, remote, connector, mcp).
+
+**Remaining audit items:** P3 #32 agents module split (8hr est), P3 #33
+error-handling standardization, P3 #34 brain-load circuit breaker, P3 #35
+integration tests for P0/P1 fixes.
 
 ---
 
