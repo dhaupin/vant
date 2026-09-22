@@ -11,6 +11,7 @@
  *   vant sudo policies <load|status|reset>
  *   vant sudo audit [n]           # Recent escalation audit entries
  *   vant sudo metrics             # Sudo metrics (grants, escalations, latency)
+ *   vant sudo health              # Registered service health checks + live run
  */
 
 const args = process.argv.slice(2);
@@ -45,11 +46,37 @@ Policies as code (prd-sudo.md):
 
 Audit:
   vant sudo audit [n]              Last n escalation audit entries (default 20)
+
+Health checks (prd-sudo.md):
+  vant sudo health                 Run registered service health probes
 `);
     process.exit(0);
 }
 
 function run() {
+    if (subcmd === 'health') {
+        const checks = sudo.getHealthChecks();
+        const names = Object.keys(checks);
+        if (names.length === 0) {
+            console.log('No service health checks registered.');
+            console.log('(Services register via sudo.registerHealthCheck(service, check))');
+            process.exit(0);
+        }
+        console.log('Service health checks (' + names.length + ' registered):');
+        sudo.runHealthChecks().then((results) => {
+            for (const r of results) {
+                const mark = r.healthy ? '✓' : '✗';
+                const desc = checks[r.service] && checks[r.service].description ? ' — ' + checks[r.service].description : '';
+                console.log('  ' + mark + ' ' + r.service + desc + (r.detail ? ' (' + r.detail + ')' : ''));
+            }
+            process.exit(results.every(r => r.healthy) ? 0 : 1);
+        }).catch((e) => {
+            console.error('Health run failed:', e.message);
+            process.exit(1);
+        });
+        return;
+    }
+
     if (subcmd === 'metrics') {
     const m = sudo.getSudoMetrics();
     console.log('Sudo metrics (in-process):');
