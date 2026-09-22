@@ -1,36 +1,83 @@
-# QC Wave — axolotl (2026-09-22)
+# QC Wave — axolotl (2026-09-22, sweep 2)
 
-Scope: code shipped in the metrics/WAL/mirror/health-check wave + repo-wide
-automated sweeps (syntax, lint, exploit patterns, router wiring, PRD gaps).
-Prior findings live in AUDIT_FINDINGS.md (2026-09-18) and COHESION_AUDIT.md
-(2026-09-20); nothing re-triaged there unless it resurfaced.
+Scope: full re-sweep of the branch after the migration adversarial QC wave
+(`403800f`), judged as a PR #91 go/no-go. Covers migration + broader
+functionality: syntax, lint, injection patterns, router wiring, every test
+suite, runner, CI, and a real-tree migration drill. Prior findings live in
+AUDIT_FINDINGS.md (2026-09-18, verification ledger complete) and
+COHESION_AUDIT.md (2026-09-20).
 
-## Fixed this wave
+## Verdict
+
+**GO for PR #91 from the QC side.** All suites green, CI 421/0/3, the
+migration flow survives a real origin/main tree drill, and the one new
+critical found by this sweep (lib-side git injection) is fixed and pinned.
+
+## Fixed this sweep
 
 | Commit | Finding | Severity | Detail |
 |--------|---------|----------|--------|
-| `5a28829` | **WAL replay path escape** | 🔴 critical | `replay()` fed `rec.file` straight from journal JSON into `path.resolve` — a crafted `wal.log` line (`{"op":"write","file":"../../.ssh/authorized_keys"}`) applied writes OUTSIDE the store basePath on next open. Now re-validated through `_resolveRel()`; also `rec.blob` must be bare sha256 hex (was an arbitrary-file-read-as-payload primitive). |
-| `5a28829` | **WAL fsync was dead code** | 🟠 high | `fdForAppend()` opened+fsynced+closed a fd, returned the stale fd, then `_append` fsynced the CLOSED fd → EBADF swallowed every time. The journal was never durably flushed (the entire point of a WAL). `_append` now write+fsync+closes one fd properly. |
-| `ce246ea` | **sudo env tunables → NaN** | 🟠 high | `parseInt(env \|\| 'default')` yields NaN on garbage values: `VANT_SUDO_HEALTH_TIMEOUT=abc` made the health-check timeout fire at 0ms (every probe "times out" → revalidatable grants wrongly revoked); NaN revalidate interval would tight-loop; NaN audit/rate caps silently disabled guards. All 5 knobs now fall back to defaults via `_envInt()`. |
-| `ce246ea` | **bin/branch.js shell interpolation** | 🟡 medium | Branch names interpolated into `execSync` strings unvalidated (locally-trusted input, but injection + option-args like `--all` gave confusing behavior). Ref-name charset validation added to create/switch/delete. |
-| `7039827` | lint warnings in wave code | 🟢 low | Unused `fs` import in sudo.js + 3 unused test vars. 0 errors / 0 warnings on all wave files. |
-| `bdf2025` | **`npm run check` checked only 1 file** | 🟠 high (tooling) | `node --check f1 f2 ...` silently validates only f1 (probed: valid + broken file pair exits 0). Every check run since the script was added was a no-op. Now a real loop over lib/bin/test (261 files). |
+| this wave | **Git CLI injection still live in lib/ (5 files)** | 🔴 critical | QC_WAVE v1 flagged this class fixed in `bin/branch-manager.js` (R-6/O-9), but the same `execSync(\`git commit -m "${message}"\`)` pattern survived in `lib/branch.js` and ALL FOUR git connectors (github/gitlab/bitbucket/selfhosted) — checkout/push/pull interpolated branch names, commit messages (brain-file content!), and file lists straight into shell strings. Fixed: argv-array-only `execFileSync` everywhere — new `_gitExec(args)` + `_gitRef(name)` guards on the GitProvider base (remote.js), `git()` helper in branch.js converted, connectors route through the base helpers. `--upload-pack`/`;`/backtick/`$()`/`..`/leading-dash refs are REJECTED; legit refs (agent-1, feature/x, v1.0.2) pass. Pinned by `test/git-injection.test.js` (7 suites: static scans + real-repo drills proving a hostile message lands as TEXT and no marker file appears). |
+| this wave | **`audit is not defined` in lib/branch.js** | 🟠 high | `audit.info()` called in ~10 places, `audit` never required — every CLI-path commit()/checkout()/merge() did its git work then crashed (same live-bug class as vaf 1, missed there). Fixed: `const audit = require('./audit')`. Found BY the new injection drill (probe kept crashing post-commit). |
+| this wave | **commit() vaf check rejected legitimate messages** | 🟡 medium | Commit messages are arbitrary text stored in git history — with git() now argv-array, metacharacters are inert. Strict DANGEROUS_PATTERNS check (blocks `;`, backticks, pipes) rejected real brain quotes. Message check is now `allowContent:true` (text, not command); agentId stays strict (path segment). |
+| this wave | **`errors` unused import in lib/migrations.js** | 🟢 low | Wave-file lint standard: 0 warnings on wave files. Removed. |
 
-## Checked and clean
+## Migration flow (PR #91 merge-safety) — QC'd in wave 2, re-verified this sweep
 
-- **Syntax sweep**: all `git ls-files lib/bin/test` files `node --check` clean.
-- **Full test loop**: every `test/*.test.js` suite re-run after fixes — 0 failures (2 halves, 15s/suite timeout). `npm test` 15/15.
-- **mcp.js RCE (old audit Critical #1)**: `vant_call` is safe-by-construction (registered-tools only, comment at :2671); `compute_eval` requires sudo `compute:eval` + language whitelist; shell tools gated on sudo `exec`; autoWire's dynamic require uses a hardcoded array, not user input. No RCE found.
-- **Mirror replication**: fan-out goes through the mirror's own validated `write()`/`delete()` (no raw paths); internal dirs (`.wal`, `.snapshots`) excluded; CLI mirrors are explicit operator flags.
-- **`bin/wal.js`**: `--status` is side-effect-free (does NOT construct a FileStorage → no implicit replay); destructive `--reset` gated behind `--yes`.
-- **CLI router**: all 92 command→file targets exist (0 dead routes).
-- **Metric naming**: all `vant_*` series follow `vant_<layer>_<thing>_<unit>` consistently.
-- **Version literals**: remaining `0.8.6` strings are CLI banners/fixture data only (same category COHESION_AUDIT B-5 already triaged as acceptable).
+From `403800f` (see TASKS.md 2026-09-22 session block): marker-gated
+verify (failed imports retryable, exit 1, ⚠ not 🎉), default-stack rewrite
+in apply(), existing-wins import (`skippedExisting`), lstat walker +
+per-file try/catch (symlink refusal can't abort), alert surfaces
+(health checkMigration, migrate --status loud notice, banner requires
+imported>0). 28/28 suites.
 
-## Gaps noted (not fixed — decisions needed)
+This sweep re-ran: migration suites 28/28 ✓, `migrate --status` on the
+live axolotl tree: v3/v3 up-to-date ✓ (no false positive on multibrain).
 
-1. **`bin/branch-manager.js`** builds all git invocations via shell-parsed strings (`git(\`checkout -b ${branchName}\`)`, `commit -m "${message}"`). A full refactor to `execFileSync`/args-array is warranted but touches an untested 279-line file — schedule as its own slice with tests first.
-2. **AUDIT_FINDINGS.md module criticals** (brain/islands/sandbox/agents/sync/backup/remote) were fixed in earlier waves per their docs but lack per-item verification notes; a verification-only pass (repro each finding, confirm closed) would turn those docs into a trustworthy ledger.
-3. **DEAD_EXPORTS.md ~150 exports** still pending a careful removal pass (process documented there; keep per-file review discipline — see c7009da corruption incident).
-4. **COHESION_AUDIT B-2**: 7 divergent security-chain implementations still consolidated nowhere (biggest structural lift; pairs with sudo PRD work).
-5. **Open PRD items**: prd-sudo → Web UI, external auth; prd-storage → remote connectors (S3/GCS/Azure).
+## Checked and clean (this sweep)
+
+- **Syntax**: all git-tracked lib/bin/test JS `node --check` clean.
+- **Full test loop**: every `test/*.test.js` suite passes by EXIT CODE
+  (grep-on-tail heuristics false-fail on multi-line result blocks — exit
+  codes are the only unambiguous judge).
+- **Runner**: 37/37. **CI**: 421 passed, 0 failed, 0 warnings, 3 skipped
+  (ENV_DENIALS + SECURITY_REFUSALS by design).
+- **CLI router**: 92 command→file routes, 0 dead.
+- **Lint (wave files)**: 0 errors; only pre-existing interface-stub
+  unused-param warnings remain in connectors (throw-only stubs).
+- **AUDIT_FINDINGS.md ledger**: all 23 criticals verified closed earlier
+  on this branch (see that file's 2026-09-22 ledger; vaf 1 was the live
+  fix). Nothing resurfaced.
+- **Migration alert surfaces**: health, migrate --status, start banner,
+  MCP brain_migration_status — all live and silent-when-happy.
+
+## Gap ledger (v1 list → current status)
+
+1. **`bin/branch-manager.js` shell interpolation** → ✅ CLOSED (was
+   already argv-array + validated; has its own suite). The lib/ copies of
+   the pattern were the real residue — fixed this sweep.
+2. **AUDIT_FINDINGS verification pass** → ✅ DONE (ledger in that file).
+3. **DEAD_EXPORTS ~150 exports** → 🟡 open, unchanged. Process documented
+   there; deliberate per-file review discipline (c7009da incident). No
+   functional risk; not a merge blocker.
+4. **COHESION_AUDIT B-2 (7 divergent security chains)** → 🟡 open,
+   unchanged. Structural lift, pairs with sudo PRD. Not a merge blocker.
+5. **PRD open items** (sudo Web UI/external auth; storage remote
+   connectors) → 🟡 open, roadmap work. Not a merge blocker.
+
+## Remaining known-acceptables
+
+- `lib/connectors/gitea.js` + `detectRepoFromRemote()` helpers use
+  execSync with CONSTANT strings only (no interpolation) — safe.
+- selfhosted `detectProvider()` same (constant `'git remote get-url origin'`).
+- 3 skipped CI bins are by-design skips (see CI testBin judge docs).
+
+## Merge-readiness summary (PR #91)
+
+- Tests: all suites ✓ (incl. 28/28 migration, 7/7 git-injection)
+- CI: 421/0/3 ✓ · Runner: 37/37 ✓
+- Real-tree migration drill: 168 files imported, verified, zero residue,
+  fresh-process reads OK, idempotent second start ✓
+- Docs: README/AGENTS/setup/cli/docker upgrade paths shipped in `d5a63c6` ✓
+- Security: lib-side git injection closed + pinned; audit crash fixed;
+  AUDIT_FINDINGS ledger complete ✓
