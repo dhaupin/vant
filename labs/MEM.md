@@ -15,21 +15,32 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — P3 #35 integration regression suite landed (`ca56f87`):
-test/integration-criticals.test.js pins all 23 closed criticals END-TO-END
-through real entry points (mcp.execute, brain.load, delegateAsync,
-createIsland, toHorcrux, saveProviderState, storage facade). AUDIT ACTION
-PLAN NOW FULLY CLOSED (P0/P1/P2/P3 all done or annotated). BONUS fix riding
-that commit: delegateAsync swallowed stream-gate denials — returned phantom
-{status:'queued', workId:undefined} under sandbox deny; now propagates
-E_GATE_DENIED + reverts agent state. Probe-methodology notes: mcp.execute
-resolves coded-error OBJECTS for input refusals but THROWS for gate
-refusals — handle both shapes; sync userCtx guard rejects FALSY only (typed
-ctx is RLS, opt-in); vm-jail probe asserts typeof require === 'undefined'
-(not a throw — jail swallows to defaults); toHorcrux paths must be
-repo-relative (vaf clamps /tmp as traversal BEFORE password check); child
-proc (node -e) is the harness for load-time crash regressions.
-Earlier in the wave: #34 brain-load breaker (`5290471` — BRAIN_CIRCUIT_OPEN,
+(nothing in flight — COLD-CLONE REINCARNATION DRILL PASSED: fresh axolotl
+clone + bun install validated the whole wave end-to-end — inspectHorcrux
+valid on the real boot horcrux, restore() rebuilt 18 state items across
+6 private + 6 public files with 0 errors, dual corpus 63 items async/sync
+consistent, new loadCircuit surface live (CLOSED/0/th5/30s), primitives
+write ok, full module loop 107/107, runner 37/37. CI 423/1 — the 1 is
+`smoke:server`, PRE-EXISTING env artifact not wave regression: server.js
+exits 1 in BOTH envs (bind denied in this sandbox); testBin's "any stdout
+= pass" rule only passes in dev because a leftover .circuit-auth.json
+prints an INFO line. FOLLOW-UP CANDIDATE: make testBin exit-code-based.
+Gotcha added to the pile: brain.loadCorpus() is ASYNC by default (returns
+a Promise) — await it or pass {sync:true}, else corpus probe prints a
+Promise and looks like a regression.
+Wave trail: #35 integration suite (`ca56f87`, + delegateAsync
+stream-gate-swallow fix); #34 brain-load breaker (`5290471` —
+BRAIN_CIRCUIT_OPEN, half-open probe, _metrics.errors revived,
+_clearHandlerOverride DI); #32 agents split (`3fe53bf`); primitives
+(`daa0f51`); #27 atomic writes (`faedaf8`). Probe-methodology notes:
+mcp.execute resolves coded-error OBJECTS for input refusals but THROWS for
+gate refusals — handle both shapes; sync userCtx guard rejects FALSY only
+(typed ctx is RLS, opt-in); vm-jail probe asserts typeof require ===
+'undefined' (not a throw — jail swallows to defaults); toHorcrux paths must
+be repo-relative (vaf clamps /tmp as traversal BEFORE password check);
+child proc (node -e) is the harness for load-time crash regressions.
+Earlier in the wave: #34 brain-load breaker (`5290471` —
+BRAIN_CIRCUIT_OPEN,
 half-open probe, _metrics.errors revived, _clearHandlerOverride DI);
 #32 agents split (`3fe53bf`); primitives (`daa0f51`); #27 atomic writes
 (`faedaf8`). Test gotchas: brain.addMiddleware(mode, name, pos) — first arg

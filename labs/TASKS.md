@@ -2,7 +2,46 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: cross-module integration regression suite (P3 #35) — 23 closed criticals pinned end-to-end + delegateAsync gate-swallow fix, CI 424/0/0
+**Session:** Wave: cold-clone reincarnation drill — full wave validated end-to-end from a fresh clone, 107 module suites green, drill verdict PASS
+
+---
+
+## Session (2026-09-22 — cold-clone reincarnation drill)
+
+The refactor wave (atomic writes #27, primitives.js, error.js bug batch,
+agents split #32, brain breaker #34, integration suite #35) had only ever
+been validated in the dev workspace. This drill validated it from a FRESH
+clone, the way a new contributor (or a disaster recovery) would arrive.
+
+**Method:** cloned `axolotl` to `/tmp/vant-drill`, `bun install`, then:
+
+1. **Horcrux inspect + restore** — `transform.inspectHorcrux()` on the real
+   axolotl boot horcrux: valid, both formats detected. Full `restore()` of
+   the gathered data: 18 state items restored (mode, stack, state,
+   currentBrain, brainStorage, neurons, configStorage, islandState,
+   teams, trust, islands, runtime, consensus, escrow, msg, realm, market,
+   boot), 0 errors, validation clean across 6+6 private/public files.
+2. **Brain pipeline** — dual-mode corpus: 63 items (json/md/txt,
+   private+public), async/sync paths consistent, `read('identity')` →
+   md/private 2672 chars. New breaker surface live: CLOSED/0 failures,
+   threshold 5, resetMs 30s. `primitives.atomicWriteFile` writes + reads
+   clean in the clone.
+3. **Tests** — `test/ci.js`: 423/1. The 1: `smoke:server` — root-caused as
+   a CI-heuristic artifact, NOT a wave regression: `bin/server.js` exits 1
+   in BOTH environments here ("Network permission required" — the sandbox
+   denies the bind). `testBin` passes when there is ANY stdout, and the
+   main repo only has stdout because a leftover `.circuit-auth.json` emits
+   an INFO line. Fresh clone → empty stdout → heuristic fail. The module
+   itself fails identically pre-wave.
+4. **Full module loop** — 107/107 suites green, runner 37/37.
+
+**Verdict: PASS.** The wave survives a cold clone end-to-end. One CI
+robustness note left for follow-up: `testBin`'s "any stdout = pass" rule
+is fragile — a server that legitimately fails *silently* passes, and an
+environment-dependent INFO line flips the same binary between pass/fail.
+Candidate fix: exit-code-only judging, or explicit expected-output pins.
+
+Scratch cleaned (`/tmp/vant-drill` removed).
 
 ---
 
