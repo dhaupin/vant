@@ -15,10 +15,11 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — sudo escalation templates + policies-as-code landed and pushed
-`d003191`; prd-sudo now only has Web UI / external auth / health-check revalidation /
-metrics open. See TASKS.md top block. Standing gotcha: the axolotl horcrux SVG gets
-mutated by test runs — leave unstaged.)
+(nothing in flight — metrics/WAL/mirror/health-check wave landed and pushed through `bc36095`;
+prd-sudo open items now only Web UI + external auth, prd-storage open only remote connectors
+(S3/GCS/Azure). See TASKS.md top block for the 6-commit table. Standing gotchas: axolotl
+horcrux SVG mutates on test runs — leave unstaged; glob/code_search are blind to lib/+test/
+here, use git ls-files/git grep.)
 
 ---
 

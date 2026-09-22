@@ -1,8 +1,47 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-09-21  
-**Session:** sudo **templates + policies-as-code** (prd-sudo) COMPLETE (pushed `d003191`)
+**Last Updated:** 2026-09-22  
+**Session:** storage+sudo **metrics / WAL / mirror / health-check** wave COMPLETE (pushed through `bc36095`)
+
+---
+
+## Session (2026-09-22 — shared metrics registry + WAL + mirror + sudo metrics + health-check revalidation)
+
+The full 6-slice wave (prd-storage metrics/WAL/replication + prd-sudo metrics/health-check)
+landed, verified per slice, committed per slice:
+
+| Commit | Slice | What |
+|--------|-------|------|
+| `59325b8` | A | **lib/metrics.js** — shared in-process registry: counters/gauges/histograms keyed by name+sorted labels, Prometheus text exposition (`vant metrics --prom`), never-throws contract; system.js migrated onto it |
+| `3fc1d3d` | B | **Storage op metrics** — op/outcome counters + duration histograms in lib/storage.js; CLI storage section. Tests: storage-metrics 8/8 |
+| `5d22fae` | C | **WAL crash recovery** — lib/wal.js JSONL journal, replay/verify/truncate, FileStorage recovery on open; CLI `vant wal`. Tests: wal.test.js incl. crash fixtures |
+| `4794d49` | D | **Mirror replication** — primary→mirror push-on-write + `replicate()`; CLI `vant mirror`. Tests: storage-mirror 10/10 |
+| `45a594b` | E | **Sudo metrics** — escalations_total (requested/granted/denied+reason), revalidations_total, grants_active gauge, escalation_duration_ms histogram; getSudoMetrics(); CLI `vant sudo metrics` + `vant metrics` sudo section; instrumentation never throws into sudo paths. Tests: sudo-metrics 7/7 |
+| `bc36095` | F | **Health-check gated revalidation (prd-sudo §12)** — registerHealthCheck()/runHealthChecks(); revalidation loop extends expired revalidate:true grants only when the service probe passes, otherwise revokes with `reason: 'health_check_failed'`; no probe = plain TTL (backward compatible); 1s probe timeout (VANT_SUDO_HEALTH_TIMEOUT) + in-flight guard (never resurrect a grant revoked mid-probe); CLI `vant sudo health`. Tests: sudo-health 11/11 |
+
+**Verification:** per-slice suites green (sudo 7, sudo-integration 21, sudo-policies 17, sudo-metrics 7,
+sudo-health 11, metrics 11, storage-metrics 8, wal 14, storage-mirror 10, health 6, boot 15);
+full module loop over ALL test/*.test.js: 0 failures (two halves, 15s per-suite timeout).
+
+**Gotchas:**
+1. **Discovery tools blind here:** glob/code_search return nothing for lib/ + test/ on this
+   workspace — use `git ls-files` / `git grep` for code discovery in this repo.
+2. **Multi-replacement edits into structural regions can misapply** — the first attempt at the
+   revalidation-loop edit duplicated a branch and nested the helper inside the loop body. Always
+   re-read the edited region (not just `node --check`) after a multi-patch into an existing
+   control-flow block; repair by replacing the whole function.
+3. **sudo.reset() before asserting:** `sudo.reset(); return sudo.can(...) === false` evaluates the
+   assertion against the RESET state (no grants). Capture `getGrants()`/`can()` into locals BEFORE
+   reset, then assert on the locals.
+4. **Health-timeout test timing:** revocation happens AT the 1s timeout expiry — the test must
+   wait PAST it (1400ms), not before it, and the hanging probe resolves later than the wait.
+5. CI (`test/ci.js`) auto-enumerates lib/*.js + bin/*.js (load/syntax probes); the *.test.js
+   suites are run by the module-loop convention, not by CI.
+6. Standing: the axolotl horcrux SVG gets mutated by test runs — leave unstaged.
+
+**prd checklist now:** prd-sudo open items = Web UI, external auth (OAuth/LDAP) only;
+prd-storage open items = remote connectors (S3/GCS/Azure) only.
 
 ---
 

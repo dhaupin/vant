@@ -392,8 +392,8 @@ node test/boot.test.js
 - [ ] Web UI for escalation management
 - [ ] Integration with external auth (OAuth, LDAP)
 - [x] Escalation policies as code (version controlled) — DONE (axolotl): loadPolicies()/resetPolicies()/getPoliciesStatus() in lib/sudo.js; optional JSON at models/private/sudo/policies.json (VANT_SUDO_POLICIES_PATH); TIGHTEN-ONLY invariants (no scope adds, no auto-approve adds, no callback removals, no TTL raises, no revalidate-off, no unknown services/fields), whole-file refusal with zero partial application; wired into boot; CLI `vant sudo policies load|status|reset`
-- [ ] Automated revalidation with service health checks
-- [ ] Metrics: escalation frequency, denial rates, TTL usage
+- [ ] Automated revalidation with service health checks — DONE (axolotl `bc36095`): registerHealthCheck/unregisterHealthCheck/getHealthChecks/runHealthChecks in lib/sudo.js; services register async probes that the revalidation loop consults when a revalidate:true grant expires — healthy extends, failing/throwing/timing-out revokes with sudo:escalation_expired reason 'health_check_failed'; no probe = plain TTL revalidation (backward compatible). 1s hard probe timeout (VANT_SUDO_HEALTH_TIMEOUT) + in-flight guard so a grant revoked mid-probe is never resurrected. CLI `vant sudo health`. Tests: test/sudo-health.test.js 11/11.
+- [x] Metrics: escalation frequency, denial rates, TTL usage — DONE (axolotl `45a594b`): escalations instrumented into shared registry lib/metrics.js — vant_sudo_escalations_total (requested/granted/denied + reason, per service), vant_sudo_revalidations_total (extended/expired), vant_sudo_grants_active gauge, vant_sudo_escalation_duration_ms histogram; getSudoMetrics() aggregation (grants by task/service); CLI `vant sudo metrics` + sudo section in `vant metrics`. Best-effort: instrumentation never throws into sudo paths. Tests: test/sudo-metrics.test.js 7/7.
 
 ---
 
