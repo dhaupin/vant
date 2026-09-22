@@ -15,15 +15,14 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — migration adversarial QC wave 2 shipped clean at
-`403800f`: marker-gated verify (failed imports retryable instead of
-marker-locked), default-stack rewrite in apply(), existing-wins import
-with skippedExisting, lstat walker + per-file try/catch (symlink refusal
-can't abort), health + --status + banner-gated alert surfaces, 28/28
-suites / CI 421-0-3 / real origin/main drill 168 files verified+clean.
-PR #91 is now QC-solid from the migration side; next up is whatever the
-user wants before merge — candidates: labs/QC_WAVE.md final sweep,
-README/docs touch-up if needed, or merge-decision discussion.)
+(nothing in flight — QC sweep 2 shipped clean at `b05a7a7`: lib-side git
+injection closed across branch.js + all 4 connectors via _gitExec/_gitRef
+argv-array guards, branch.js audit-not-required crash fixed, commit()
+message check relaxed to allowContent (argv-array made metachars inert),
+test/git-injection.test.js 7/7 pins it all, labs/QC_WAVE.md rewritten as
+the PR #91 go/no-go ledger with verdict GO. All suites / runner 37-37 /
+CI 421-0-3 green. Remaining non-blocking: DEAD_EXPORTS pass, cohesion B-2
+consolidation, PRD roadmap items. Next up: user decides on merging #91.)
 
 ---
 

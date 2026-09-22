@@ -2,7 +2,48 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: migration adversarial QC wave 2 — marker-gated verify, stack rewrite, no-clobber import, symlink safety, health/--status alert surfaces
+**Session:** Wave: QC sweep 2 (labs/QC_WAVE.md re-sweep) — lib-side git injection closed in 5 files, branch audit crash fixed, GO verdict recorded for PR #91
+
+---
+
+## Session (2026-09-22 — QC sweep 2, `b05a7a7`)
+
+User asked for another sweep of labs/QC_WAVE.md — migration AND broader
+functionality, judged as PR #91 readiness. The sweep's big find:
+
+**lib-side git injection (critical):** QC_WAVE v1 celebrated the
+bin/branch-manager.js fix, but the SAME pattern survived in lib/ —
+lib/branch.js git() helper (`execSync(\`git ${args.join(' ')}\`)`) and ALL
+FOUR connectors (github/gitlab/bitbucket/selfhosted): checkout/push/pull
+interpolated branch names, commit() interpolated messages straight from
+brain-file content into shell strings. Fixed via argv-array execFileSync
+everywhere: new `_gitExec(args)` + `_gitRef(name)` (charset + option-dash
++ `..` rejection) on the GitProvider base in remote.js; connectors route
+through them; branch.js git() converted. Pinned by
+test/git-injection.test.js — 7 suites: static no-interpolation scans
+(comment-stripped!), _gitRef hostile-value rejection (--upload-pack, ;,
+backtick, $(), .., leading dash) with legit refs passing, real-repo drills
+proving a hostile commit message lands as TEXT and no marker file
+appears, end-to-end branch.commit() drill.
+
+**Two more live bugs found BY the new drill:**
+1. branch.js called audit.info() ~10x without requiring audit → every
+   CLI-path commit/checkout/merge crashed AFTER doing its git work (same
+   class as vaf 1). Fixed: `const audit = require('./audit')`.
+2. commit()'s strict vaf content check rejected legitimate messages
+   containing ';'/backticks — with git() argv-array these are inert text.
+   Message check now allowContent:true; agentId stays strict (path seg).
+
+**Also:** errors unused import removed from migrations.js (wave-file lint
+standard). labs/QC_WAVE.md rewritten as the go/no-go ledger: v1 gap list
+statuses updated (branch-manager ✅, AUDIT_FINDINGS ✅, DEAD_EXPORTS/B-2/
+PRD items 🟡 non-blocking), migration QC summary carried forward, verdict
+GO for PR #91.
+
+**Verification:** syntax sweep clean; ALL test/*.test.js pass by exit
+code (incl. new git-injection 7/7); runner 37/37; CI 421/0/3; router 92
+routes 0 dead; branch/remote/connector/provider suites green after the
+git() conversion.
 
 ---
 
