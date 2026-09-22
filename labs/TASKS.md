@@ -2,7 +2,24 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** storage+sudo **metrics / WAL / mirror / health-check** wave COMPLETE (pushed through `bc36095`)
+**Session:** QC wave COMPLETE — WAL replay escape + dead fsync, sudo NaN guards, branch injection, npm-check no-op; all suites green (see labs/QC_WAVE.md)
+
+---
+
+## Session (2026-09-22 — QC wave: security/consistency/gap analysis over the last-2-days code)
+
+Audit-style pass over the wave code + repo-wide sweeps. **Fixed:** WAL replay path
+escape (journal JSON fed to path.resolve unvalidated — crafted wal.log wrote outside
+the store; now re-contained + blob names must be sha256 hex) AND the WAL fsync that
+never actually fsynced (fsync on a closed fd, EBADF swallowed) — `5a28829`. Sudo env
+tunables NaN'd on garbage values (health timeout fired at 0ms → grants wrongly
+revoked; revalidate interval would tight-loop) + bin/branch.js ref-name validation —
+`ce246ea`. `npm run check` was a silent no-op (node --check multi-arg validates only
+the first file — probed and confirmed) — `bdf2025`. Lint warnings zeroed — `7039827`.
+**Clean:** syntax sweep all files, full test loop 0 failures, mcp RCE false positive
+(sudo-gated + safe vant_call), router 92/92 routes exist, metric naming consistent.
+Findings ledger + not-fixed gaps (branch-manager git() refactor, dead exports,
+security-chain consolidation) in **labs/QC_WAVE.md**.
 
 ---
 

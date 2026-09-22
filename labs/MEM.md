@@ -15,11 +15,12 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — metrics/WAL/mirror/health-check wave landed and pushed through `bc36095`;
-prd-sudo open items now only Web UI + external auth, prd-storage open only remote connectors
-(S3/GCS/Azure). See TASKS.md top block for the 6-commit table. Standing gotchas: axolotl
-horcrux SVG mutates on test runs — leave unstaged; glob/code_search are blind to lib/+test/
-here, use git ls-files/git grep.)
+(nothing in flight — QC wave landed: WAL replay escape + dead fsync fixed `5a28829`, sudo NaN
+guards + branch injection `ce246ea`, npm-check no-op `bdf2025`, lint `7039827`. Findings ledger
++ open gaps (branch-manager git() refactor, dead exports, security-chain consolidation) in
+labs/QC_WAVE.md. Standing gotchas: axolotl horcrux SVG mutates on test runs — leave unstaged;
+glob/code_search are blind to lib/+test/ here, use git ls-files/git grep; node --check multi-arg
+only checks the first file.)
 
 ---
 
