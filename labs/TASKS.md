@@ -2,7 +2,51 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: CI smoke judge overhaul (exit semantics + skip status) → wave retrospective → PR axolotl → main
+**Session:** Wave: legacy brain import migration (layout v3) — merge-safety for PR #91, old-style user brains auto-import on start
+
+---
+
+## Session (2026-09-22 — legacy.multibrain-import, layout v3, `3bbacf9`)
+
+The merge blocker caught before it shipped: main-style users have a FLAT
+brain (all content in models/public root, no models/private dirs, no stack
+in state.json). The axolotl loader reads state.stack[0] and probes
+models/{private,public}/<name>/ — a main user's brain would be silently
+invisible post-merge.
+
+**Vehicle: lib/migrations.js** (the user's instinct — right call). Added
+step `legacy.multibrain-import`, LAYOUT_VERSION 2→3:
+
+- **Detect:** ALL of (no private brain dirs) + (≥3 flat public .md or ≥1
+  flat private .md) + (state.json lacks `stack`). Conservative — never
+  fires on multibrain trees (pinned by a no-false-positive suite).
+- **Plan/apply:** every flat models/{public,private} entry nests under the
+  named brain (dirs recurse; one plan shared by both passes — re-planning
+  mid-migration sees the destination dir as a new root entry and recurses
+  into <name>/<name>/, the subtlest bug of the slice); skip roots
+  sudo/, tmp-space/, state.json, marker. Brain name via --brain-name or
+  default 'vant', segment-validated (migration must never be a traversal
+  vector).
+- **State synth:** stack=[name], currentBrain=name, neurons preserved.
+- **Stale-module resync (the second subtle bug):** brain.js loads as a
+  side effect of storage's circular require the FIRST time apply()
+  constructs a FileStorage — i.e. BEFORE the stack exists — so its
+  in-memory _brainStack is the 'vant' default and a later switchBrain
+  would persist ['nova','vant']. Fix: loadStack([name]) resync BEFORE
+  switchBrain inside the verify.
+- **Self-verify:** corpus.length > 0 through the real loader, reported in
+  the step result (verified:true). Fresh-process read pinned by suite.
+- **UX:** `vant migrate --brain-name <name>`; `vant start` auto-runs
+  migrations before health (idempotent no-op when current; --no-migrate
+  opts out). Auto-run is the difference between "users' brains just work"
+  and "users must read a changelog".
+
+**Verification:** tests first (5 new legacy-main suites), 13/13; full
+module loop 107/107; CI 421/0/3; runner 37/37; end-to-end CLI drill on a
+fixture (migrate --brain-name mybrain → nested, verified, marker v3).
+
+**PR #91 picks this up automatically** — the merge is now safe for
+old-style brains without a PR v2.
 
 ---
 

@@ -33,6 +33,19 @@ testBin per-bin pins, AGENTS.md loadCorpus doc drift), metrics table.
 wave body; repo praxis is periodic axolotl→main sync PRs #84/#87/#89;
 note: axolotl has intentionally divergent history — no merge-base with
 main, so keep PRs as whole-branch syncs).
+④ MERGE-SAFETY MIGRATION (`3bbacf9`, layout v3): main users have FLAT
+brains (models/public root, no stack) — invisible to the axolotl loader
+post-merge. New migrations step legacy.multibrain-import nests the flat
+brain under --brain-name (default vant), synthesizes state.stack, self-
+verifies via corpus; vant start auto-runs migrations (--no-migrate opts
+out). Lands in PR #91 automatically. Two subtle bugs worth remembering:
+(a) re-calling plan() mid-apply sees the destination dir as a new root
+entry → recurses <name>/<name>/ — share ONE plan across passes; (b) brain
+module loads (stale, pre-stack 'vant' default) as a side effect of
+storage's circular require during the FIRST FileStorage construction —
+resync via loadStack([name]) BEFORE switchBrain or the stale default
+gets persisted into the migrated stack. Testing gotcha: suite error
+strings with embedded newlines truncate under grep — use sed ranges.
 Wave trail: #35 integration suite (`ca56f87`, + delegateAsync
 stream-gate-swallow fix); #34 brain-load breaker (`5290471` —
 BRAIN_CIRCUIT_OPEN, half-open probe, _metrics.errors revived,
