@@ -2,7 +2,40 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: cold-clone reincarnation drill — full wave validated end-to-end from a fresh clone, 107 module suites green, drill verdict PASS
+**Session:** Wave: CI smoke judge overhaul (exit semantics + skip status) → wave retrospective → PR axolotl → main
+
+---
+
+## Session (2026-09-22 — CI testBin overhaul, `1d7245c`)
+
+Follow-up from the cold-clone drill: `testBin`'s "any stdout = pass" rule
+was environment-fragile. Replaced with exit-semantics judging:
+
+- **Pass:** exit 0; exit 1 with stdout (usage-screen CLI convention);
+  alive-at-watchdog for known servers (mcp/watch/server)
+- **Fail:** self-exited nonzero with no stdout (real breakage); any
+  non-server bin that hangs past the watchdog
+- **Skip (new, exit-code neutral):** environment denials (bind refused in
+  capability-poor sandboxes) and sandbox-gate refusals (deny-by-default
+  doing its job — `clean`/`snapshot` refuse their no-arg write ops). Skip
+  messages quote the actual refusal line via `detailLine()` (stderr noise
+  like circular-dep warnings no longer drowns it)
+- **stdin: 'ignore'** so interactive CLIs (setup.js) get immediate EOF
+  instead of hanging the watchdog
+- **Fixed `--bin=X` silently running nothing** (outer guard swallowed the
+  filter — now it actually filters)
+
+Also exposed by the strict judge (all pre-existing): ~21 CLI bins print
+usage to stdout and exit 1 on bare invocation (now recognized);
+`setup.js` is interactive (fixed via stdin); `snapshot.js` deliberately
+prints capability refusals to stdout (documented in its source, now
+covered by the refusal skip). No bin behavior was changed — only judged.
+
+**Verification:** this env 421/0/3 skipped; spot checks (`--bin` groups,
+mcp alive-pass, setup EOF-pass, clean/snapshot refusal-skips); full module
+loop 107/107; runner 37/37. Cold-clone CI implication: the drill's
+`smoke:server` "failure" now classifies as a skip — CI is deterministic
+across machines.
 
 ---
 
