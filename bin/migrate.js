@@ -23,9 +23,10 @@ async function main() {
 Vant Migrate — brain layout versioning
 
 Usage:
-  vant migrate --status     Show layout version + pending migrations
-  vant migrate --dry-run    Preview what would move (no changes)
-  vant migrate              Apply pending migrations in order
+  vant migrate --status             Show layout version + pending migrations
+  vant migrate --dry-run            Preview what would move (no changes)
+  vant migrate                      Apply pending migrations in order
+  vant migrate --brain-name <name>  Name the imported brain (legacy import; default: vant)
 
 Layout target: v${migrations.LAYOUT_VERSION}
 `);
@@ -50,7 +51,13 @@ Layout target: v${migrations.LAYOUT_VERSION}
     }
 
     const dryRun = args.includes('--dry-run') || args.includes('-d');
-    const result = await migrations.migrate({ dryRun });
+
+    // --brain-name <name>: names the brain for the legacy.multibrain-import
+    // step (pre-multibrain single-public-brain layouts). Validated downstream
+    // by migrations._validBrainName; invalid names fall back to 'vant'.
+    const nameIdx = args.indexOf('--brain-name');
+    const brainName = nameIdx !== -1 && args[nameIdx + 1] ? args[nameIdx + 1] : undefined;
+    const result = await migrations.migrate({ dryRun, brainName });
 
     if (result.applied.length === 0) {
         console.log('✓ Nothing to migrate — layout is up to date.');

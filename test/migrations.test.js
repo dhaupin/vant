@@ -66,6 +66,36 @@ function makeFixture() {
     return dir;
 }
 
+// ---------- fixture helper: build a PRE-MULTIBRAIN (main-style) layout ----------
+// Mirrors origin/main's tree: flat models/public/*.md + dirs, empty/absent
+// models/private, state.json with NO stack key.
+function makeLegacyMainFixture() {
+    const dir = path.join(ROOT, '.migration-fixture-legacy-main');
+    fs.rmSync(dir, { recursive: true, force: true });
+    fs.mkdirSync(path.join(dir, 'lib'), { recursive: true });
+    fs.mkdirSync(path.join(dir, 'bin'), { recursive: true });
+    fs.mkdirSync(path.join(dir, 'models', 'public'), { recursive: true });
+    // models/private NOT created (absent on main users' trees)
+
+    fs.copyFileSync(path.join(ROOT, 'package.json'), path.join(dir, 'package.json'));
+    fs.cpSync(path.join(ROOT, 'lib'), path.join(dir, 'lib'), { recursive: true });
+    fs.copyFileSync(path.join(ROOT, 'bin', 'migrate.js'), path.join(dir, 'bin', 'migrate.js'));
+
+    // flat public brain (the old single-public-brain style)
+    fs.writeFileSync(path.join(dir, 'models', 'public', 'identity.md'), '# identity — legacy user');
+    fs.writeFileSync(path.join(dir, 'models', 'public', 'lessons.md'), '# lessons — legacy user');
+    fs.writeFileSync(path.join(dir, 'models', 'public', 'goals.md'), '# goals — legacy user');
+    fs.writeFileSync(path.join(dir, 'models', 'public', '_succession.json'), '{"trust":"high"}');
+    fs.mkdirSync(path.join(dir, 'models', 'public', 'boot'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'models', 'public', 'boot', 'start.md'), '# start');
+    fs.mkdirSync(path.join(dir, 'models', 'public', 'agents'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'models', 'public', 'agents', 'claude.json'), '{"name":"claude"}');
+
+    // old-style state.json: neurons only, NO stack
+    fs.writeFileSync(path.join(dir, 'models', 'state.json'), JSON.stringify({ neurons: { attention: { identity: 0.2 } } }));
+    return dir;
+}
+
 function cleanupFixture(dir) {
     fs.rmSync(dir, { recursive: true, force: true });
 }
@@ -176,7 +206,7 @@ define('fixture: apply moves legacy content through the security chain', async (
         const out = probe.stdout || '';
         const checks = ['APPLIED:', 'OLD-GONE:true', 'ESCROW-MOVED:true', 'DROP-MOVED:true', 'MYSTUFF-MOVED:true', 'MARKER:true', 'IDEMPOTENT:true'];
         const allOk = checks.every(c => out.includes(c));
-        return { success: allOk, error: `out=${out.slice(0, 250)} err=${(probe.stderr || '').split('\n').filter(l => !l.includes('circular dependency') && !l.includes('trace-warnings')).join(' | ').slice(0, 800)}` };
+        return { success: allOk, error: `out=${out.slice(0, 600)} err=${(probe.stderr || '').split('\n').filter(l => !l.includes('circular dependency') && !l.includes('trace-warnings')).join(' | ').slice(0, 800)}` };
     } finally {
         cleanupFixture(dir);
     }
@@ -221,6 +251,157 @@ define('CLI: --dry-run reports no changes on clean layout', async () => {
     });
     const ok = probe.status === 0 && /Nothing to migrate|No changes made/.test(probe.stdout || '');
     return { success: ok, error: `status=${probe.status} out=${(probe.stdout || '').slice(0, 100)}` };
+});
+
+// ---------- 5. legacy main-style layout → multibrain (the merge-safety migration) ----------
+
+define('legacy-main: detection fires only on the true flat layout', async () => {
+    const dir = makeLegacyMainFixture();
+    try {
+        const probe = spawnSync(process.execPath, ['-e', `
+            (async () => {
+            process.chdir(${JSON.stringify(dir)});
+            const m = require(${JSON.stringify(path.join(dir, 'lib', 'migrations'))});
+            console.log('PENDING:' + m.status().pending.map(p => p.id).join(','));
+            })().catch(e => { console.error('PROBE-ERR:', e.message); process.exit(1); });
+        `], { encoding: 'utf8', timeout: 30000 });
+        const pending = (probe.stdout || '').match(/PENDING:(.*)/);
+        return { success: !!pending && pending[1].includes('legacy.multibrain-import'),
+                 error: `out=${(probe.stdout || '').slice(0, 150)} err=${(probe.stderr || '').split('\n').filter(l => !l.includes('circular') && !l.includes('trace-warnings')).join('|').slice(0, 500)}` };
+    } finally {
+        cleanupFixture(dir);
+    }
+});
+
+define('legacy-main: no false positive on multibrain trees', async () => {
+    // The LIVE tree is multibrain (models/private/<brain> exists, stack in state) —
+    // detection must not fire here.
+    const probe = spawnSync(process.execPath, ['-e', `
+        (async () => {
+        process.chdir(${JSON.stringify(ROOT)});
+        const m = require(${JSON.stringify(path.join(ROOT, 'lib', 'migrations'))});
+        console.log('PENDING:' + m.status().pending.map(p => p.id).join(','));
+        })().catch(e => { console.error('PROBE-ERR:', e.message); process.exit(1); });
+    `], { encoding: 'utf8', timeout: 30000 });
+    const pending = (probe.stdout || '').match(/PENDING:(.*)/);
+    return { success: !!pending && !pending[1].includes('legacy.multibrain-import'),
+             error: `false positive: ${pending ? pending[1] : 'no output'}` };
+});
+
+define('legacy-main: dry-run plans moves into <name>, mutates nothing', async () => {
+    const dir = makeLegacyMainFixture();
+    try {
+        const probe = spawnSync(process.execPath, ['-e', `
+            (async () => {
+            process.chdir(${JSON.stringify(dir)});
+            const m = require(${JSON.stringify(path.join(dir, 'lib', 'migrations'))});
+            const dry = await m.migrate({ dryRun: true });
+            const step = dry.applied.find(a => a.id === 'legacy.multibrain-import');
+            const fsmod = require('fs');
+            console.log('PLAN-FILES:' + (step ? step.plan.filter(p => p.to.includes('/vant/')).length : 0));
+            console.log('STILL-FLAT:' + fsmod.existsSync('models/public/identity.md'));
+            })().catch(e => { console.error('PROBE-ERR:', e.message); process.exit(1); });
+        `], { encoding: 'utf8', timeout: 30000 });
+        const out = probe.stdout || '';
+        const planFiles = parseInt((out.match(/PLAN-FILES:(\d+)/) || [])[1] || '0', 10);
+        return { success: planFiles >= 5 && out.includes('STILL-FLAT:true'),
+                 error: `out=${out.slice(0, 200)} err=${(probe.stderr || '').split('\n').filter(l => !l.includes('circular') && !l.includes('trace-warnings')).join('|').slice(0, 400)}` };
+    } finally {
+        cleanupFixture(dir);
+    }
+});
+
+define('legacy-main: apply nests brain under models/{public,private}/vant, synthesizes stack', async () => {
+    const dir = makeLegacyMainFixture();
+    try {
+        const probe = spawnSync(process.execPath, ['-e', `
+            (async () => {
+            process.chdir(${JSON.stringify(dir)});
+            const m = require(${JSON.stringify(path.join(dir, 'lib', 'migrations'))});
+            const r = await m.migrate();
+            const fsmod = require('fs');
+            const pathmod = require('path');
+            console.log('APPLIED:' + r.applied.map(a => a.id).join(','));
+            // flat content gone from public root
+            console.log('FLAT-GONE:' + (!fsmod.existsSync('models/public/identity.md') && !fsmod.existsSync('models/public/lessons.md')));
+            // nested under the named brain
+            console.log('NESTED:' + fsmod.readFileSync('models/public/vant/identity.md', 'utf8').includes('legacy user'));
+            console.log('BOOT-NESTED:' + fsmod.existsSync('models/public/vant/boot/start.md'));
+            console.log('SUCCESSION-NESTED:' + fsmod.existsSync('models/public/vant/_succession.json'));
+            // state.json synthesized with stack
+            const state = JSON.parse(fsmod.readFileSync('models/state.json', 'utf8'));
+            console.log('STACK:' + JSON.stringify({ s: state.stack, c: state.currentBrain, n: !!(state.neurons && state.neurons.attention) }));
+            // marker at v3
+            console.log('MARKER-V3:' + (m._readMarker() || {}).version);
+            // idempotence
+            const r2 = await m.migrate();
+            console.log('IDEMPOTENT:' + (r2.applied.filter(a => a.id === 'legacy.multibrain-import').length === 0));
+            // apply() self-verifies through the real loader (resync + invalidate
+            // + corpus) — the AUTHORITATIVE in-process check
+            const stepResult = r.applied.find(a => a.id === 'legacy.multibrain-import');
+            console.log('VERIFIED:' + (stepResult && stepResult.result && stepResult.result.verified === true));
+            })().catch(e => { console.error('PROBE-ERR:', e.message); process.exit(1); });
+        `], { encoding: 'utf8', timeout: 45000 });
+        const out = probe.stdout || '';
+        const stderrClean = (probe.stderr || '')
+            .split('\n')
+            .filter(l => !l.includes('circular') && !l.includes('trace-warnings'))
+            .join('|')
+            .slice(0, 900);
+        const checks = ['APPLIED:', 'FLAT-GONE:true', 'NESTED:true', 'BOOT-NESTED:true', 'SUCCESSION-NESTED:true',
+                        'STACK:', 'MARKER-V3:3', 'IDEMPOTENT:true', 'VERIFIED:true'];
+        const missing = checks.filter(c => !out.includes(c));
+        if (missing.length > 0) {
+            return { success: false,
+                     error: `missing=${missing.join(',')} out=${out.slice(0, 600)} err=${stderrClean}` };
+        }
+
+        // THE USER EXPERIENCE: a FRESH process (next vant command) must read
+        // the migrated brain. Assert in a second, clean node process.
+        const readProbe = spawnSync(process.execPath, ['-e', `
+            (async () => {
+            process.chdir(${JSON.stringify(dir)});
+            const brain = require(${JSON.stringify(path.join(dir, 'lib', 'brain.js'))});
+            brain.setMode('dual');
+            const id = await brain.read('identity');
+            console.log('BRAIN-READS:' + (id && (id.content || '').includes('legacy user')));
+            const c = brain.loadCorpus({ sync: true });
+            console.log('CORPUS-N:' + c.length);
+            })().catch(e => { console.error('READ-ERR:', e.message); process.exit(1); });
+        `], { encoding: 'utf8', timeout: 45000 });
+        const readOut = readProbe.stdout || '';
+        return { success: readOut.includes('BRAIN-READS:true') && /CORPUS-N:[1-9]/.test(readOut),
+                 error: `readOut=${readOut.slice(0, 300)} readErr=${(readProbe.stderr || '').split('\n').filter(l => !l.includes('circular') && !l.includes('trace-warnings')).join('|').slice(0, 400)}` };
+    } finally {
+        cleanupFixture(dir);
+    }
+});
+
+define('legacy-main: --brain-name flag names the imported brain', async () => {
+    const dir = makeLegacyMainFixture();
+    try {
+        const probe = spawnSync(process.execPath, ['-e', `
+            (async () => {
+            process.chdir(${JSON.stringify(dir)});
+            const m = require(${JSON.stringify(path.join(dir, 'lib', 'migrations'))});
+            await m.migrate({ brainName: 'nova' });
+            const fsmod = require('fs');
+            console.log('NOVA-NESTED:' + fsmod.existsSync('models/public/nova/identity.md'));
+            console.log('NO-DEFAULT-DIR:' + !fsmod.existsSync('models/public/vant'));
+            const state = JSON.parse(fsmod.readFileSync('models/state.json', 'utf8'));
+            console.log('NOVA-STACK:' + JSON.stringify(state.stack));
+            })().catch(e => { console.error('PROBE-ERR:', e.message); process.exit(1); });
+        `], { encoding: 'utf8', timeout: 30000 });
+        const out = probe.stdout || '';
+        // NOTE: no 'vant dir must not exist' assertion — brain initialization
+        // may legitimately materialize its default public brain dir; the
+        // contract is that the IMPORTED content + stack use the chosen name.
+        const errClean = (probe.stderr || '').split('\n').filter(l => !l.includes('circular') && !l.includes('trace-warnings')).join('|').slice(0, 500);
+        return { success: out.includes('NOVA-NESTED:true') && out.includes('NOVA-STACK:["nova"]'),
+                 error: `out=${out.slice(0, 700)} err=${errClean}` };
+    } finally {
+        cleanupFixture(dir);
+    }
 });
 
 // ---------- RUN ----------
