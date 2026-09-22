@@ -2,7 +2,57 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: atomic writes everywhere (P2 #27) — fs-only helper + last 9 raw writes migrated, tests-first, CI 422/0/0
+**Session:** Wave: lib/primitives.js (P2 #27 follow-up) — zero-dep home for atomicWriteFile + sleep; error.js latent-bug hunt done, fixes queued
+
+---
+
+## Session (2026-09-22 — lib/primitives.js home + error.js census)
+
+Follow-up to `faedaf8` after dhaupin challenged the error.js placement of
+atomicWriteFile ("seems very weird"). Shipped as `daa0f51`, tests first
+(`test/primitives.test.js`, 8 checks).
+
+**Naming decision (discussed):** `lib/primitives.js`, NOT `lib/utils.js`.
+Hard enforced contract in the file + test: node builtins ONLY, zero `./`
+requires ever — the one module anything inside the brain↔storage↔gate cycle
+or a bootstrap window may require at LOAD time without partial-module risk
+(the 5b3ca91 bug class). "utils" would be the first junk-drawer module in an
+88-flat-module layout that has deliberately avoided one — rejected.
+
+**Moved:** atomicWriteFile (error.js keeps a delegating compat re-export;
+same for sleep, a timing primitive with zero callers). All 12 call sites
+repointed — they were inline lazy `require('./error')` so the swap was
+mechanical. Structural pins in atomic-writes.test.js retargeted
+(error.js → primitives.js as the one legitimate direct write outside the
+storage layer).
+
+**Gated-vs-ungated is now a documented distinction, not an accident:**
+primitives are UNGATED (the sandbox capability gate is unusable mid-cycle —
+that's the point). stego.js/backup.js deliberately STAY on the GATED
+storage.atomicWrite — they're sandbox-relevant artifact writers with no
+cycle constraint, and migrating them onto the primitive would silently drop
+`_checkWrite()` enforcement. Header + test pin this so a future "cleanup"
+can't do it.
+
+**BONUS FIND while inventorying error.js — 3 latent ReferenceErrors +
+CODES dupes (live-repro'd, same class as the vaf C1 ledger find):**
+- `handle()` references bare `vaf` and `logger` — never defined (the
+  getters are `_getLogger`/`_getVaf`) → throws on FIRST call. Zero callers
+  outside error.js, fail-safe legacy surface.
+- `retry()` references bare `audit` → throws on the first RETRYABLE
+  failure (only the non-retryable path works).
+- `circuitBreaker()` references bare `errors` when throwing the OPEN-state
+  VantError → the breaker can never actually open.
+- `CODES` defines `NETWORK_TIMEOUT` and `SUDO_DENIED` TWICE (~lines 110/131,
+  115/160) — JS keeps the last silently.
+
+**NEXT SLICE (queued):** error.js fixes, tests first — wire the lazy getters
+(`_getVaf()`/`_getLogger()` + lazy audit shim), fix `errors` → module-local
+reference in circuitBreaker, dedupe CODES. Then P3 #32 agents split remains
+the big one.
+
+**Evidence:** CI 424/0/0; full module loop ALL GREEN; runner 37/37;
+primitives 8/8, atomic-writes 13/13, error 12/12.
 
 ---
 
