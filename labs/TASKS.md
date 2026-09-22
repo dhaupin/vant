@@ -2,7 +2,48 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: mcp P1 #14 schema validation at dispatch + sync P2 #23/#24 pullAny/rebase real implementations — both tests-first, CI 422/0/0
+**Session:** Wave: provider-op timeouts (P2 #25) — GitProvider base timeout layer + sync wall-clock caps, tests-first, CI 422/0/0
+
+---
+
+## Session (2026-09-22 — P2 #25 provider-op timeouts)
+
+Audit P2 #25: "Add timeouts to all provider operations (sync.js, remote.js)".
+Shipped as `bf11f78`, tests first (`test/provider-timeouts.test.js`, 14
+offline checks).
+
+**Real finding (re-scoped the slice):** the connectors were the actual hole.
+All 5 git providers' `_request()` called the BARE GLOBAL fetch() — no timeout,
+no abort, no circuit breaker, no sandbox canNetwork gate — while network.js
+sat right there with all four. Git CLI ops were bare execSync with no kill
+timeout. A dead endpoint or hung SSH remote froze pushAll/pullAny/rebase
+forever (the hung-commit repro test hung the whole suite pre-fix — that was
+the demonstration).
+
+**Fix, two layers:**
+- GitProvider base (lib/remote.js): `_requestJson()` — AbortController +
+  timer; abort → coded NETWORK_TIMEOUT VantError, retryable:true; non-2xx →
+  NETWORK_HTTP_ERROR (retryable on 5xx/429). `_gitOpts()` — execSync timeout
+  (default 60s, `VANT_GIT_TIMEOUT_MS`). All 5 connectors (github/gitlab/
+  bitbucket/gitea/selfhosted) ride the base; structural test pins that no
+  provider file ever calls bare fetch() again.
+- sync.js `_capOp()`: wall-clock cap around EVERY provider op in
+  pushAll/pullAny/rebase/status — including ops that never touch HTTP
+  (overridden methods, stuck git children). `VANT_SYNC_OP_TIMEOUT_MS`
+  (default 120s), per-call `opTimeoutMs`. Hangs now land as coded per-provider
+  results instead of a frozen broadcast.
+
+**Deliberate scope calls:** (1) timeout layer ≠ network layer — connectors
+still don't get circuit breaker/cache/SSRF-walls; routing them through
+network.fetch() is the NEXT step (response-shape differs: string vs Response,
+github's PR flow asserts on it). (2) Module-level detectRepoFromRemote()
+sites stay bare execSync — boot-time local probes, not remote ops. (3) Error
+messages changed from "GitHub API error: ..." to "Provider API error: ..." —
+no test pinned the old text.
+
+**Evidence:** CI 422/0/0; sync/sync-pull/sync-recursion/remote/
+remote-storage/network/connector/remote-cli suites green; `npm run check`
+clean across lib/bin/test.
 
 ---
 

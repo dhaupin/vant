@@ -15,18 +15,27 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — mcp P1 #14 schema validation at dispatch (`20eda2e`) and
-sync P2 #23/#24 pullAny apply-diff + rebase conflict-handling (`a1200c3`)
-shipped tests-first, CI 422/0/0. Remaining audit P-items: agents module split
-(P3 #32), mcp timeouts on provider ops (P2 #25), atomic writes everywhere
-(P2 #27). New gotchas: brain.loadCorpus() returns the warm cache — invalidate
-before diffing; brain files must be written via the RESOLVED brain path
-(models/private/<brain>/, multibrain layout) or the corpus can't see them;
-corpus ids are extensionless. Standing: axolotl horcrux SVG mutates on test
-runs — leave unstaged; glob/code_search blind to lib/+test/, use git
-ls-files/git grep; node --check multi-arg only checks file 1; str_replace
-flaky on storage.js AND mcp.js/brain.js — use the exact-match node-script
-splice; check `git log -- <path>` before creating files.)
+(nothing in flight — P2 #25 provider-op timeouts shipped (`bf11f78`): all 5
+git connectors were on BARE global fetch()/execSync (no timeout, no abort,
+no circuit breaker) — now GitProvider._requestJson (AbortController → coded
+retryable NETWORK_TIMEOUT) + _gitOpts (VANT_GIT_TIMEOUT_MS, default 60s) +
+sync._capOp wall-clock caps everywhere (VANT_SYNC_OP_TIMEOUT_MS, default
+120s). Remaining audit P-items: atomic writes everywhere (P2 #27), agents
+module split (P3 #32). NEXT STEP queued: route connectors through network.js
+fetch() for circuit breaker/cache/SSRF-walls (response-shape differs: string
+vs Response — github's PR flow asserts on it; also NOTE _checkNetwork()
+fail-opens: sandbox canNetwork denial is swallowed by `catch {}` in sync.js —
+class of safe-by-default bug, fix alongside). Gotchas: brain.loadCorpus()
+returns the warm cache — invalidate before diffing; brain files must be
+written via the RESOLVED brain path (models/private/<brain>/, multibrain
+layout); corpus ids are extensionless; standalone test suites run via
+`node test/x.test.js` and are NOT auto-discovered — ci.js is smoke+syntax,
+runner/coverage don't scan test/ (register nothing, follow suite pattern).
+Standing: axolotl horcrux SVG mutates on test runs — leave unstaged;
+glob/code_search blind to lib/+test/, use git ls-files/git grep; node --check
+multi-arg only checks file 1; str_replace flaky on storage.js AND
+mcp.js/brain.js — use the exact-match node-script splice; check
+`git log -- <path>` before creating files.)
 
 ---
 
