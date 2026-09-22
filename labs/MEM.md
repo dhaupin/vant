@@ -15,19 +15,24 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — COLD-CLONE REINCARNATION DRILL PASSED: fresh axolotl
-clone + bun install validated the whole wave end-to-end — inspectHorcrux
-valid on the real boot horcrux, restore() rebuilt 18 state items across
-6 private + 6 public files with 0 errors, dual corpus 63 items async/sync
-consistent, new loadCircuit surface live (CLOSED/0/th5/30s), primitives
-write ok, full module loop 107/107, runner 37/37. CI 423/1 — the 1 is
-`smoke:server`, PRE-EXISTING env artifact not wave regression: server.js
-exits 1 in BOTH envs (bind denied in this sandbox); testBin's "any stdout
-= pass" rule only passes in dev because a leftover .circuit-auth.json
-prints an INFO line. FOLLOW-UP CANDIDATE: make testBin exit-code-based.
-Gotcha added to the pile: brain.loadCorpus() is ASYNC by default (returns
-a Promise) — await it or pass {sync:true}, else corpus probe prints a
-Promise and looks like a regression.
+(nothing in flight — WRAP TRIO SHIPPED: ① CI testBin overhaul (`1d7245c`):
+exit-semantics judging replaces any-stdout=pass; SERVER_BINS alive-at-
+watchdog=pass; skip status (exit-neutral) for ENV_DENIALS (network bind
+denied) + SECURITY_REFUSALS (capability required — deny-by-default
+working; clean/snapshot refuse no-arg write ops by design); usage-screen
+convention (exit 1 + stdout = pass); stdin 'ignore' so interactive CLIs
+(setup.js readline) get EOF instead of watchdog hang; --bin=X filter now
+actually filters (outer guard swallowed it). This env: 421/0/3 skipped.
+Judge order: error→watchdog(server?)→exit0→ENV_DENIAL→SECURITY_REFUSAL→
+usage-screen(stdout+no Error/failed in stderr)→fail. detailLine() extracts
+the matching refusal line so stderr noise doesn't drown it. ② Wave retro
+(`feac7a0`): labs/WAVE_RETROSPECTIVE.md — commit map for the whole arc,
+8 durable lessons, honest residuals (P3 #31, full #33, broader #35,
+testBin per-bin pins, AGENTS.md loadCorpus doc drift), metrics table.
+③ PR OPENED: https://github.com/dhaupin/vant/pull/91 (axolotl→main, full
+wave body; repo praxis is periodic axolotl→main sync PRs #84/#87/#89;
+note: axolotl has intentionally divergent history — no merge-base with
+main, so keep PRs as whole-branch syncs).
 Wave trail: #35 integration suite (`ca56f87`, + delegateAsync
 stream-gate-swallow fix); #34 brain-load breaker (`5290471` —
 BRAIN_CIRCUIT_OPEN, half-open probe, _metrics.errors revived,
