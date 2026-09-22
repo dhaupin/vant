@@ -2,7 +2,22 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Remote connectors LANDED (prd-storage last open item) — own S3-API client + RemoteStorage + `vant s3` CLI; one clobber-regression caught by the loop and fixed (see below)
+**Session:** S3 client relocated into connectors family (`connectors.s3()`); cloudflare r2* ops delegated to it — connector was DOA (broken sibling requires) since creation, now actually functional
+
+---
+
+## Session (2026-09-22 — connectors-family consolidation: s3 relocation + cloudflare r2 delegation)
+
+Follow-ups to the remote-connectors wave, per dhaupin review. Two commits:
+
+| Commit | What |
+|--------|------|
+| `38790a0` | **Option B — S3 client relocated** to `lib/connectors/s3.js` (git-provider precedent: peers + index registration as `connectors.s3(config)`); RemoteStorage consumes it; name verified against git log before the move. |
+| `9fd4a51` | **Option C — cloudflare r2\* delegation.** `connectors/cloudflare.js` r2Get/r2Put/r2List now ride the S3 client against R2's NATIVE S3 endpoint: SigV4 with R2 access keys (`CF_R2_ACCESS_KEY_ID`/`CF_R2_SECRET_ACCESS_KEY`, optional `CF_R2_JURISDICTION`/`CF_R2_ENDPOINT`), gains `r2Delete` (control API had none), size/etag list parsing (`_parseListXml` shared with s3 client), put content-type support; adapter `r2()` interface gains delete wrapper. **BONUS DOA FIND:** the connector AND adapter had `require('./error')`/`'./event')`/`'./network')` — siblings that don't exist in their directories — so EVERY code path, including the "not configured" refusals, threw MODULE_NOT_FOUND since creation. Nothing noticed because nothing consumed them. Fixed to `../` requires; pinned by the new suite. Tests: `cloudflare-r2` 9/9 offline (DI fake client + event listeners), `remote` 10/10 (added `_parseListXml` known-answer). |
+
+**R2 auth contract change (safe — no consumers existed):** object ops no longer use
+`CF_API_TOKEN` (control plane); they need R2 S3 access keys. Control-plane ops
+(KV/Pages/Workers) untouched. `_setR2TestClient()` DI hook exported for offline tests.
 
 ---
 
