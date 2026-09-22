@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Provider-op timeout tests (audit P2 #25)
+ * Provider-op timeout tests (audit P2 #25 + follow-up)
  *
  * Audit P2 #25: "Add timeouts to all provider operations (sync.js, remote.js)".
  * Pre-fix reality: every git connector's _request() called the GLOBAL fetch()
@@ -9,22 +9,27 @@
  * sync.pushAll()/pullAny()/rebase() forever.
  *
  * Fix contract (all testable OFFLINE — no real network anywhere):
- *   - GitProvider._requestJson(): AbortController + timer; throws coded
- *     NETWORK_TIMEOUT VantError (retryable) on expiry; resolves parsed JSON.
+ *   - GitProvider._requestJson(): routes through network.fetch (SSRF walls,
+ *     circuit breaker, events; `system: true` bypass contract, cache off)
+ *     with a wall-clock race; throws coded retryable NETWORK_TIMEOUT on
+ *     expiry; maps 'HTTP <status>' rejections to coded NETWORK_HTTP_ERROR.
+ *     (Stub target is lib/network's fetch — network.fetch owns its own
+ *     http/https transport, so stubbing the global fetch is inert.)
  *   - GitProvider._gitOpts(): returns execSync options with a numeric
  *     `timeout` (default 60s, env VANT_GIT_TIMEOUT_MS) + stdio:'pipe'.
  *   - sync._capOp(): wall-clock cap around ANY provider op (even ones that
  *     never touch HTTP); rejects with coded NETWORK_TIMEOUT VantError.
  *
- * Offline technique: the suite stubs globalThis.fetch with a never-resolving
- * promise (and a controllable resolution for happy paths), and sync's provider
- * DI (_setTestProvider) for the pushAll wall-clock test. No sockets opened.
+ * Offline technique: network.fetch stubbed with a never-resolving promise
+ * (and controllable resolutions for happy paths); sync's provider DI
+ * (_setTestProvider) for the pushAll wall-clock test. No sockets opened.
  */
 
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 
 const errors = require(path.join(ROOT, 'lib', 'error'));
+const network = require(path.join(ROOT, 'lib', 'network'));
 const { GitProvider } = require(path.join(ROOT, 'lib', 'remote'));
 const sync = require(path.join(ROOT, 'lib', 'sync'));
 
@@ -59,27 +64,23 @@ test('base: _requestJson + _gitOpts exist on GitProvider prototype', () => {
     return true;
 });
 
-test('base: _requestJson resolves parsed JSON from a real response', async () => {
-    const realFetch = globalThis.fetch;
-    globalThis.fetch = async (url, opts) => new globalThis.Response(JSON.stringify({ ok: 1 }), { status: 200 });
+test('base: _requestJson resolves parsed JSON from network.fetch string', async () => {
+    const real = network.fetch;
+    network.fetch = async () => JSON.stringify({ ok: 1 });
     try {
         const p = new GitProvider({});
         const data = await p._requestJson('https://api.example.test/x', { headers: { Authorization: 'Bearer t' } });
         if (data.ok !== 1) return { success: false, error: 'bad payload: ' + JSON.stringify(data) };
         return true;
     } finally {
-        globalThis.fetch = realFetch;
+        network.fetch = real;
     }
 });
 
-test('base: _requestJson aborts a hung fetch and throws coded NETWORK_TIMEOUT', async () => {
-    const realFetch = globalThis.fetch;
-    let sawSignal = false;
-    let sawAbort = false;
-    globalThis.fetch = (url, opts) => new Promise((_, reject) => {
-        sawSignal = !!(opts && opts.signal);
-        opts.signal.addEventListener('abort', () => { sawAbort = true; reject(new Error('aborted')); });
-    });
+test('base: _requestJson times out a hung network.fetch with coded NETWORK_TIMEOUT', async () => {
+    const real = network.fetch;
+    let sawTimeoutOpt = null;
+    network.fetch = (url, opts) => new Promise(() => { sawTimeoutOpt = opts && opts.timeout; });
     try {
         const p = new GitProvider({});
         const t0 = Date.now();
@@ -90,18 +91,17 @@ test('base: _requestJson aborts a hung fetch and throws coded NETWORK_TIMEOUT', 
         if (!err) return { success: false, error: 'no throw on hung fetch' };
         if (err.code !== 'NETWORK_TIMEOUT') return { success: false, error: 'wrong code: ' + err.code };
         if (err.retryable !== true) return { success: false, error: 'timeout not marked retryable' };
-        if (!sawSignal) return { success: false, error: 'no AbortSignal passed to fetch' };
-        if (!sawAbort) return { success: false, error: 'signal never aborted' };
+        if (sawTimeoutOpt !== 40) return { success: false, error: 'timeout not forwarded to network layer: ' + sawTimeoutOpt };
         if (dt > 3000) return { success: false, error: 'timeout fired too late: ' + dt + 'ms' };
         return true;
     } finally {
-        globalThis.fetch = realFetch;
+        network.fetch = real;
     }
 });
 
 test('base: _requestJson throws coded error on HTTP error status', async () => {
-    const realFetch = globalThis.fetch;
-    globalThis.fetch = async () => new globalThis.Response('nope', { status: 403 });
+    const real = network.fetch;
+    network.fetch = async () => { throw new Error('HTTP 403 for https://api.example.test/denied'); };
     try {
         const p = new GitProvider({});
         let err = null;
@@ -112,7 +112,7 @@ test('base: _requestJson throws coded error on HTTP error status', async () => {
         if (!/403/.test(err.message)) return { success: false, error: 'status not in message: ' + err.message };
         return true;
     } finally {
-        globalThis.fetch = realFetch;
+        network.fetch = real;
     }
 });
 
@@ -153,11 +153,11 @@ test('connectors: no provider _request bypasses the timeout layer', () => {
 
 test('connectors: github _request returns parsed data with auth headers', async () => {
     const { GitHubProvider } = require(path.join(ROOT, 'lib', 'connectors', 'github'));
-    const realFetch = globalThis.fetch;
+    const real = network.fetch;
     let gotAuth = null;
-    globalThis.fetch = async (url, opts) => {
+    network.fetch = async (url, opts) => {
         gotAuth = opts && opts.headers && opts.headers.Authorization;
-        return new globalThis.Response(JSON.stringify({ default_branch: 'main' }), { status: 200 });
+        return JSON.stringify({ default_branch: 'main' });
     };
     try {
         const p = new GitHubProvider({ token: 'tok', repo: 'o/r' });
@@ -166,21 +166,21 @@ test('connectors: github _request returns parsed data with auth headers', async 
         if (gotAuth !== 'Bearer tok') return { success: false, error: 'missing auth header: ' + gotAuth };
         return true;
     } finally {
-        globalThis.fetch = realFetch;
+        network.fetch = real;
     }
 });
 
 test('connectors: gitea _request parses JSON from text bodies', async () => {
     const { GiteaProvider } = require(path.join(ROOT, 'lib', 'connectors', 'gitea'));
-    const realFetch = globalThis.fetch;
-    globalThis.fetch = async () => new globalThis.Response(JSON.stringify({ default_branch: 'master' }), { status: 200 });
+    const real = network.fetch;
+    network.fetch = async () => JSON.stringify({ default_branch: 'master' });
     try {
         const p = new GiteaProvider({ token: 'tok', repo: 'o/r', url: 'https://gitea.example.test' });
         const data = await p._request('/repos/o/r');
         if (data.default_branch !== 'master') return { success: false, error: 'bad payload' };
         return true;
     } finally {
-        globalThis.fetch = realFetch;
+        network.fetch = real;
     }
 });
 
@@ -211,8 +211,8 @@ test('sync: _capOp rejects hung op with coded NETWORK_TIMEOUT', async () => {
 });
 
 test('sync: _capOp caps op from test provider inside pushAll', async () => {
-    const realFetch = globalThis.fetch;
-    globalThis.fetch = async () => { throw new Error('no network in tests'); };
+    const real = network.fetch;
+    network.fetch = async () => { throw new Error('no network in tests'); };
     const fake = {
         getType: () => 'fakegit',
         isConfigured: () => true,
@@ -229,14 +229,13 @@ test('sync: _capOp caps op from test provider inside pushAll', async () => {
         return true;
     } finally {
         sync._clearTestProviders();
-        globalThis.fetch = realFetch;
+        network.fetch = real;
     }
 });
 
 // ---------- network.withTimeout sanity (borrowed infra stays healthy) ----------
 
 test('network: withTimeout still exported and rejects on deadline', async () => {
-    const network = require(path.join(ROOT, 'lib', 'network'));
     if (typeof network.withTimeout !== 'function') return { success: false, error: 'withTimeout missing' };
     let err = null;
     try { await network.withTimeout(new Promise(() => {}), 30); }
