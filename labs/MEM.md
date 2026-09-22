@@ -46,6 +46,20 @@ storage's circular require during the FIRST FileStorage construction —
 resync via loadStack([name]) BEFORE switchBrain or the stale default
 gets persisted into the migrated stack. Testing gotcha: suite error
 strings with embedded newlines truncate under grep — use sed ranges.
+QC FOLLOW-UP (`d5a63c6`): synthetic fixtures lied — QC vs a REAL
+`git archive origin/main models/` tree caught 3 more bugs: (1) no-args
+migrate.js printed help+exit0 so start's auto-run was a silent no-op;
+(2) detection masking ×2 — brain boot creates private/<b>/orgchart/ on
+legacy trees pre-migration AND health auto-persists default ['vant']
+stack; detect now keys on .md-content brain dirs + treats default-only
+stack as still-legacy; (3) nested empty dir shells need walk-verify +
+rmSync -rf. Alert surfaces: start banner (only when import ran), MCP
+brain_migration_status. Loader: restored main's dual-mode read()
+private→public fallback when type unpinned — read() labeling quirk:
+source 'private' can mean 'current brain root' which IS public when
+currentBrainType=public (pre-existing semantics, don't assert source in
+new tests, assert content). Docs: README/AGENTS/setup/cli/docker all
+have upgrade paths now.
 Wave trail: #35 integration suite (`ca56f87`, + delegateAsync
 stream-gate-swallow fix); #34 brain-load breaker (`5290471` —
 BRAIN_CIRCUIT_OPEN, half-open probe, _metrics.errors revived,

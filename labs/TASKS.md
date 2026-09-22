@@ -2,7 +2,47 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: legacy brain import migration (layout v3) — merge-safety for PR #91, old-style user brains auto-import on start
+**Session:** Wave: migration QC vs real main tree — 3 masking bugs fixed, alert surfaces (start banner + MCP tool), docs, loader public-fallback restored
+
+---
+
+## Session (2026-09-22 — migration QC + alerts + docs, `d5a63c6`)
+
+User asked: did you TEST it? — and demanded warn/alert surfaces + docs.
+QC against a REAL `git archive origin/main models/` tree (not a synthetic
+fixture) caught THREE bugs the synthetic tests missed:
+
+1. **No-args migrate = help+exit0** — vant start's auto-run silently did
+   nothing. No-args now runs; help is -h/--help only.
+2. **Detection masking (two vectors):** brain boot creates
+   models/private/<brain>/orgchart/ on legacy trees pre-migration → "any
+   private brain dir" check blocked detection forever. Brain dirs now
+   count only with .md content inside. AND: health/first-load auto-
+   persists a default ['vant'] stack onto legacy trees → stack check
+   relaxed: default-only stack no longer masks (flat public content is
+   the real legacy signature).
+3. **Empty dir shells:** nested dirs survived rmdirSync (ENOTEMPTY) →
+   import now verifies all files walked out and rmSync -rf's the husk.
+
+**Alert surfaces:** vant start prints a BRAIN MIGRATED banner (files
+count, brain name, new locations, verify/rename hints) ONLY when the
+import ran — idempotent starts stay silent. MCP `brain_migration_status`
+tool: layout version + pending legacy + actionable guidance.
+
+**Loader compat find:** main's _loadBrain fell back private→public in
+dual mode; axolotl read() lost that. Migrated users' brains live in
+public — plain read() would miss them. Restored the fallback when no
+type is pinned (pinned reads unchanged). Verified against the real tree.
+
+**Docs:** README upgrade section, AGENTS.md brain-layout contract,
+docs/getting-started/setup.md upgrade guide, docs/reference/cli.md (vant
+migrate reference + start sequence), docs/integrations/docker.md volume
+upgrade notes.
+
+**Verification:** 18/18 migration suites (5 new: banner-once, MCP legacy,
+MCP up-to-date, read fallback, explicit-public); real-main-tree drill:
+start imports 169 files, zero residue, fresh-process reads OK, second
+start clean no-op; full loop 107/107; CI 421/0/3; runner 37/37.
 
 ---
 
