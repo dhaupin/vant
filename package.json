@@ -38,7 +38,7 @@
     "health": "node bin/health.js",
     "lint": "eslint lib/ test/",
     "lint:fix": "eslint lib/ test/ --fix",
-    "check": "node --check lib/*.js test/*.js"
+    "check": "for f in lib/*.js bin/*.js test/*.js; do node --check \"$f\" || exit 1; done && echo 'syntax OK'"
   },
   "devDependencies": {
     "eslint": "^8.57.1"
