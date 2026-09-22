@@ -115,8 +115,8 @@ test('helper contract: is exported from storage.js as the one-door re-export', (
     const storage = require(path.join(ROOT, 'lib', 'storage.js'));
     if (typeof storage.atomicWriteFile !== 'function') return { success: false, error: 'storage.atomicWriteFile missing' };
     if (typeof storage.atomicWrite !== 'function') return { success: false, error: 'storage.atomicWrite missing' };
-    // same implementation, one door
-    if (storage.atomicWriteFile !== require(path.join(ROOT, 'lib', 'error.js')).atomicWriteFile) {
+    // same implementation, one door — home is now lib/primitives.js
+    if (storage.atomicWriteFile !== require(path.join(ROOT, 'lib', 'primitives.js')).atomicWriteFile) {
         return { success: false, error: 're-export is not the shared helper' };
     }
     return true;
@@ -138,12 +138,12 @@ test('structural: lib has no bare fs.writeFileSync outside storage.js temp-path 
             const src = fs.readFileSync(full, 'utf8');
             const rel = path.relative(ROOT, full).replace(/\\/g, '/');
             if (/fs\.writeFileSync\s*\(/.test(src)) {
-            if (rel === 'lib/storage.js' || rel === 'lib/error.js') {
+            if (rel === 'lib/storage.js' || rel === 'lib/primitives.js') {
                 // lib/storage.js: only the temp-path line inside atomicWrite is legal.
-                // lib/error.js: the helper ITSELF (temp-fd write + truncate) is the
-                // one legitimate direct write in the codebase.
+                // lib/primitives.js: the helper ITSELF (temp-fd write) is the one
+                // legitimate direct write outside the storage layer.
                 const hits = src.split('\n').filter(l => /fs\.writeFileSync\s*\(/.test(l));
-                if (rel === 'lib/error.js') {
+                if (rel === 'lib/primitives.js') {
                     if (hits.length !== 1 || !/writeFileSync\s*\(fd/.test(hits[0])) {
                         offenders.push(`${rel}: expected exactly the helper's fd temp write`);
                     }
