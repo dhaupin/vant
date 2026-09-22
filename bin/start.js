@@ -85,6 +85,8 @@ function main() {
         if (code === 0) {
             console.log('[Start] Brain layout OK.');
             // Legacy import happened? Tell the user what changed, warmly.
+            // Requires a NON-ZERO file count — a 0-file import is a no-op,
+            // not a migration worth banner space.
             const m = migOut.match(/legacy\.multibrain-import[^{]*\{[^}]*\}/);
             if (m) {
                 let imported = null, brainName = 'vant';
@@ -93,14 +95,22 @@ function main() {
                     imported = parsed.imported;
                     brainName = parsed.brain || brainName;
                 } catch (e) { /* cosmetic only */ }
+                if (imported > 0) {
+                    console.log('');
+                    console.log('╔═══════════════════════════════════════════════════╗');
+                    console.log('║  🧠 BRAIN MIGRATED to the multi-brain layout      ║');
+                    console.log('╚═══════════════════════════════════════════════════╝');
+                    console.log(`  Your old-style brain was imported${imported != null ? ` (${imported} files)` : ''} as brain "${brainName}".`);
+                    console.log(`  Files now live in models/public/${brainName}/ and models/private/${brainName}/.`);
+                    console.log('  Nothing was lost — verify with: vant migrate --status');
+                    console.log(`  Prefer a different name? vant migrate --brain-name <name>`);
+                    console.log('');
+                }
+            } else if (/could not verify/.test(migOut)) {
                 console.log('');
-                console.log('╔═══════════════════════════════════════════════════╗');
-                console.log('║  🧠 BRAIN MIGRATED to the multi-brain layout      ║');
-                console.log('╚═══════════════════════════════════════════════════╝');
-                console.log(`  Your old-style brain was imported${imported != null ? ` (${imported} files)` : ''} as brain "${brainName}".`);
-                console.log(`  Files now live in models/public/${brainName}/ and models/private/${brainName}/.`);
-                console.log('  Nothing was lost — verify with: vant migrate --status');
-                console.log(`  Prefer a different name? vant migrate --brain-name <name>`);
+                console.log('⚠  Brain layout migration ran but could NOT verify your brain is readable.');
+                console.log('   Your files were moved but the layout was not marked migrated.');
+                console.log('   Inspect models/{public,private}/ and re-run `vant migrate`.');
                 console.log('');
             }
         } else {

@@ -129,6 +129,22 @@ function checkDirs() {
     }
 }
 
+function checkMigration() {
+    // Cheap, silent-when-happy alert surface: a legacy (pre-multibrain)
+    // tree is reported here on every `vant health` until it's migrated.
+    try {
+        const migrations = require('../lib/migrations');
+        const s = migrations.status();
+        const legacy = s.pending.find(p => p.id === 'legacy.multibrain-import');
+        if (legacy) {
+            console.log('\n' + theme.label('🧠 Brain layout:'));
+            console.log('  ' + theme.status.warn('OLD-STYLE BRAIN detected (pre-multi-brain layout)'));
+            console.log('  Your brain is not visible to the current loader until migrated.');
+            console.log('  Run: ' + theme.value('vant migrate') + '   (name it: vant migrate --brain-name <name>)');
+        }
+    } catch (e) { /* never fail health over the notice */ }
+}
+
 function run() {
     console.log('\n' + theme.vantHeader + ' Health Check\n');
     
@@ -136,6 +152,7 @@ function run() {
     checkConfig();
     checkEnv();
     checkDirs();
+    checkMigration();
     
     console.log('\n');
 }

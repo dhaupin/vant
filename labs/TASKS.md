@@ -2,7 +2,48 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: migration QC vs real main tree — 3 masking bugs fixed, alert surfaces (start banner + MCP tool), docs, loader public-fallback restored
+**Session:** Wave: migration adversarial QC wave 2 — marker-gated verify, stack rewrite, no-clobber import, symlink safety, health/--status alert surfaces
+
+---
+
+## Session (2026-09-22 — migration adversarial QC wave 2, pre-merge gate)
+
+User: 100% solid before accepting PR #91. Adversarial edge audit found 5
+real gaps (all now fixed + pinned):
+
+1. **Marker-over-verify (data hazard, worst find):** migrate() wrote the
+   v3 marker even when the import step self-reported verified:false → a
+   failed migration was marked done and every retry was a silent no-op
+   with the brain still invisible. Now: verified:false withholds the
+   marker, migrate() returns {ok:false, failedVerify:true}, `vant
+   migrate` exits 1 with recovery copy, start shows a ⚠ (not a 🎉).
+2. **Default-stack rewrite:** detect() treats auto-persisted ['vant'] as
+   still-legacy, but apply() only filled MISSING stacks → `--brain-name
+   mybrain` left stack ['vant'] pointing at a nonexistent brain. apply()
+   now REWRITES default-only stacks (neurons preserved).
+3. **Collision overwrite:** import clobbered same-named live brain files
+   (dropfiles step had existing-wins; import didn't). Now existing-wins
+   both passes, reported as skippedExisting in the step result.
+4. **Symlink/abort hardening:** walker now lstat + skips symlinks (never
+   deletes through a link out of models/); per-file try/catch so ONE
+   refused file can't abort the whole import (real drill caught the
+   storage chain refusing with 'Security: Symlink attack detected').
+   Post-write delete hiccups still count as imported (dest has it).
+5. **Alert surfaces round 2:** health.js checkMigration() (silent when
+   happy); migrate --status prints loud OLD-STYLE BRAIN notice; start
+   banner now requires imported>0 (0-file existing-wins no-ops are quiet).
+
+**Also:** case-insensitive dest-dir compare ('Vant/' on macOS ≡ 'vant/');
+uncommitted plan() self-nest fix from last session now pinned by test.
+
+**Verification:** migrations 28/28 (8 new adversarial suites incl.
+verify-gate via Module._load sabotage, symlink canary, no-clobber,
+stack-rewrite, 0-file banner). All test/*.test.js suites pass by exit
+code (grep-on-tail heuristic was fooled by multi-line result blocks —
+use exit codes). Runner 37/37. CI 421/0/3. REAL-tree drill: git archive
+origin/main models/ → status shows legacy+notice → migrate imports 168,
+verified:true, exit 0 → zero flat residue → fresh-process read OK,
+corpus 60 → second start quiet → live axolotl tree up-to-date.
 
 ---
 

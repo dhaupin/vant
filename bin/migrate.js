@@ -50,6 +50,16 @@ Layout target: v${migrations.LAYOUT_VERSION}
                 console.log(`    - ${p.id}: ${p.description}`);
                 for (const e of p.evidence) console.log(`        evidence: ${e}`);
             }
+            // Loud legacy notice: --status is the user-facing diagnostic and
+            // should TELL them what to do, not just list a step id.
+            const legacy = status.pending.find(p => p.id === 'legacy.multibrain-import');
+            if (legacy) {
+                console.log('');
+                console.log('  ⚠  OLD-STYLE BRAIN DETECTED (pre-multi-brain layout).');
+                console.log('     Run `vant migrate` to import it — your brain is not');
+                console.log('     visible to the current loader until migrated.');
+                console.log('     Name it: `vant migrate --brain-name <name>` (default: vant).');
+            }
         }
         process.exit(0);
     }
@@ -83,6 +93,16 @@ Layout target: v${migrations.LAYOUT_VERSION}
     console.log('Applying migrations:\n');
     for (const a of result.applied) {
         console.log(`  ✓ ${a.id} ${JSON.stringify(a.result || {})}`);
+    }
+    if (result.failedVerify) {
+        // Migration RAN but could not verify the brain is readable — treat
+        // as failure so users (and start's banner logic) don't celebrate a
+        // broken import. Marker was withheld; next run retries.
+        console.log('\n❌ Migration ran but could not verify the imported brain is readable.');
+        console.log('   Your brain content was moved; the layout was NOT marked migrated.');
+        console.log('   Inspect models/{public,private}/<name>/ and re-run `vant migrate`.');
+        if (process.env.DEBUG) console.error(JSON.stringify(result, null, 2));
+        process.exit(1);
     }
     console.log(`\n✓ Layout at v${migrations.LAYOUT_VERSION}. Run \`vant migrate --status\` to verify.`);
     process.exit(0);
