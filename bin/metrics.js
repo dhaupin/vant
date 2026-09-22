@@ -157,6 +157,22 @@ function run() {
         }
     }
     showStorage();
+
+    // Sudo section — feature-detected
+    try {
+        const sudo = require('../lib/sudo');
+        if (sudo && typeof sudo.getSudoMetrics === 'function') {
+            const sm = sudo.getSudoMetrics();
+            console.log('\nSudo: grants active=' + sm.grantsActive +
+                (Object.keys(sm.byService).length ? ' byService={' + Object.entries(sm.byService).map(([k, v]) => k + '=' + v).join(',') + '}' : ''));
+            const esc = sm.registry.counters.filter(c => c.name === 'vant_sudo_escalations_total' || c.name === 'vant_sudo_revalidations_total');
+            for (const c of esc) {
+                const lbl = Object.keys(c.labels || {}).sort().map(k => c.labels[k]).join('/');
+                console.log('  ' + c.name.replace('vant_sudo_', '') + '[' + lbl + '] = ' + c.value);
+            }
+        }
+    } catch (e) { /* sudo section optional */ }
+
     console.log('\nPrometheus export: vant metrics --prom');
 }
 

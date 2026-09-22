@@ -10,6 +10,7 @@
  *   vant sudo template <def|list|show|rm|apply> ...
  *   vant sudo policies <load|status|reset>
  *   vant sudo audit [n]           # Recent escalation audit entries
+ *   vant sudo metrics             # Sudo metrics (grants, escalations, latency)
  */
 
 const args = process.argv.slice(2);
@@ -19,6 +20,8 @@ const sudo = require('../lib/sudo');
 if (subcmd === '-h' || subcmd === '--help') {
     console.log(`
 Vant Sudo CLI - Privilege management
+
+  vant sudo metrics               Grants active, escalation counters, latency
 
 Usage:
   vant sudo status                 Show sudo status
@@ -47,7 +50,24 @@ Audit:
 }
 
 function run() {
-    if (subcmd === 'status' || subcmd === 'stat' || subcmd === 'info') {
+    if (subcmd === 'metrics') {
+    const m = sudo.getSudoMetrics();
+    console.log('Sudo metrics (in-process):');
+    console.log('  grants active: ' + m.grantsActive);
+    for (const [svc, n] of Object.entries(m.byService)) console.log('    ' + svc + ': ' + n);
+    const find = (name) => m.registry.counters.find(c => c.name === name);
+    const req = find('vant_sudo_escalations_total');
+    if (req) console.log('  escalations: requested=' + req.value + ' (see vant metrics for full breakdown)');
+    for (const c of m.registry.counters.filter(c => c.name === 'vant_sudo_escalations_total' || c.name === 'vant_sudo_revalidations_total')) {
+        const lbl = Object.keys(c.labels || {}).sort().map(k => c.labels[k]).join('/');
+        console.log('    ' + c.name.replace('vant_sudo_', '') + '[' + lbl + '] = ' + c.value);
+    }
+    const h = m.registry.histograms.find(h => h.name === 'vant_sudo_escalation_duration_ms');
+    if (h) console.log('  escalation latency: count=' + h.count + ' avgMs=' + (h.count ? (h.sum / h.count).toFixed(2) : '0'));
+    process.exit(0);
+}
+
+if (subcmd === 'status' || subcmd === 'stat' || subcmd === 'info') {
         const scopes = sudo.getScopes();
         console.log('Sudo status:');
         console.log('  Scopes:', scopes.length);
