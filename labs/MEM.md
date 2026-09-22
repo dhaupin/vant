@@ -15,13 +15,14 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — cloudflare stripped to R2-only: Pages-sync/KV/Workers/adapter/
-srv halves removed (`be0b3f2`, museum pieces, never worked + never consumed);
-R2 facade over connectors/s3 remains. Web-UI hosting (CF Pages vs Vercel) is
-orthogonal — frontend deploys don't touch the connector. Next wave: B-2
-security-chain consolidation, branch-manager args-array refactor, audit
-criticals verification ledger. Standing: axolotl horcrux SVG mutates on test runs
-— leave unstaged; glob/code_search blind to lib/+test/, use git ls-files/git grep;
+(nothing in flight — audit criticals ledger complete: 22/23 closed, vaf C1
+live-repro'd + fixed (audit.info → vaf's audit(); regression pin in
+test/vaf.test.js), test-sandbox stale permissive assertions updated to the
+deny-by-default contract. CI 422/0/0. Ledger lives at top of
+labs/AUDIT_FINDINGS.md with file:line evidence. Next wave candidates: sync
+pullAny/rebase real impls, mcp schema validation enforcement, agents split.
+Standing: axolotl horcrux SVG mutates on test runs — leave unstaged;
+glob/code_search blind to lib/+test/, use git ls-files/git grep;
 node --check multi-arg only checks file 1; str_replace flaky on storage.js — use
 the exact-match node-script splice; check `git log -- <path>` before creating files.)
 

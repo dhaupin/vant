@@ -2,7 +2,48 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Cloudflare connector REMOVED entirely — R2 rides the s3 client (provider 'r2'); museum strip completed in two steps
+**Session:** Audit criticals verification ledger — all 23 criticals repro'd; 22 confirmed closed, 1 live bug (vaf C1) found + fixed
+
+---
+
+## Session (2026-09-22 — audit criticals verification ledger)
+
+Third item of the wave (after B-2 `b99065d` and branch-manager `718558b`).
+Bookkeeping pass turned adversarial: every critical was re-derived from source
+and, where cheap, live-repro'd — not just trusted from prior commit messages.
+
+**Result: 22/23 confirmed closed, 1 live bug found and fixed.**
+
+| Module | Count | Outcome |
+|--------|-------|---------|
+| brain | 9 | all closed (C8/C9 mitigated-by-design: cache-warm preload + graceful remote null) |
+| islands | 4 | all closed |
+| mcp | 5 | all closed (contained storage tools, sudo-gated shell/eval, SSRF blocklist) |
+| storage | 4 | all closed (P1-16 rename-replaces-symlink has a regression pin) |
+| sandbox | 5 | 4 closed + 1 latent (`canBrain` static defaults, zero callers) |
+| vaf | 5 | **C1 LIVE** — fixed; other 4 closed |
+| agents | 4 | closed (C1 residual: work-item fns are fail-safe legacy API, zero callers) |
+| sync/backup/remote/transform | 6 | all closed |
+
+**The vaf C1 find:** `_loadBlockedIPs()` called `audit.info(...)` but vaf's own
+`audit` is a plain function — a valid `.circuit-vaf.json` present at require
+time threw `audit.info is not a function` and killed the ENTIRE module load.
+Happy path (no blocklist file) masked it; the base test suite never planted the
+file. Fix: the three calls now use vaf's `audit()` (coded events,
+`IP_BLOCKLIST_*`); regression test plants the file and requires vaf in a fresh
+child process (`test/vaf.test.js`).
+
+**Bonus fix — stale sandbox assertions:** `test/test-sandbox.js` still asserted
+the OLD permissive contract (canWrite/canExec default true; top-level capability
+passthrough). Updated to pin the deny-by-default contract; 14/14 green.
+
+**Evidence:** CI loop **422 passed / 0 failed / 0 warnings**; module suites
+listed in the ledger header of `labs/AUDIT_FINDINGS.md`. Full per-item table
+with file:line evidence written into AUDIT_FINDINGS.md (top of file).
+
+**Next candidates:** sec-chain leftovers (QC_WAVE), sync pullAny/rebase real
+implementations (audit P2 #23/#24), mcp tool schema validation enforcement
+(P1 #14), agents module split (P3 #32).
 
 ---
 

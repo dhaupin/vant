@@ -70,20 +70,24 @@ test('has initLegal', () => {
 // runtime). canNetwork is still false by default (network is the
 // explicit, gated capability). Use `sandbox.create({ canRead: false,
 // canWrite: false, canExec: false })` for a restricted sandbox.
+// v0.9.0-axolotl (audit sandbox C1): DEFAULT_CAPABILITIES is DENY by default
+// for all dangerous capabilities. canRead stays true (read-only consumption),
+// while canWrite/canExec/canNetwork/canSpawn require explicit opt-in via
+// `sandbox.create({ capabilities: { canWrite: true, ... } })`.
 test('canRead default true', () => {
     return sandbox.canRead() === true;
 });
 
-test('canWrite default true', () => {
-    return sandbox.canWrite() === true;
+test('canWrite default false (deny by default)', () => {
+    return sandbox.canWrite() === false;
 });
 
 test('canNetwork default false', () => {
     return sandbox.canNetwork() === false;
 });
 
-test('canExec default true', () => {
-    return sandbox.canExec() === true;
+test('canExec default false (deny by default)', () => {
+    return sandbox.canExec() === false;
 });
 
 test('restricted sandbox canRead false', () => {
@@ -119,11 +123,15 @@ test('generateCaps returns object', () => {
     return typeof caps === 'object';
 });
 
-// Test 4: Create sandbox
+// Test 4: Create sandbox with explicit capability opt-in
+// (capabilities are nested under `capabilities`, not top-level —
+// top-level passthrough was the old permissive signature)
 test('create with caps', () => {
     const sb = sandbox.create({
-        canRead: true,
-        canWrite: true
+        capabilities: {
+            canRead: true,
+            canWrite: true
+        }
     });
     return sb.capabilities.canRead === true &&
            sb.capabilities.canWrite === true;

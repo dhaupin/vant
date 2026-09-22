@@ -7,6 +7,70 @@
 
 ---
 
+## ✅ VERIFICATION LEDGER (2026-09-22, agent Buffy)
+
+All 23 criticals repro-checked against current `axolotl`. **22 confirmed closed**
+(hardened in earlier waves), **1 live bug found and fixed in this pass**
+(vaf C1 — see below). Evidence: `node test/ci.js` → **422 passed, 0 failed,
+0 warnings**; security suites: security 20, security-chain 9, security-hardening 22,
+vaf 12, sandbox 22, test-sandbox 14, storage 40, malicious-restore 7, brain 77,
+islands 14, mcp 6, agents 17+6, sync 18+6, backup 8, transform 5, remote 10,
+remote-storage 13, pipeline 9, sudo 7 — all green.
+
+| # | Issue | Status | Evidence |
+|---|-------|--------|----------|
+| **brain 1** | TOCTOU in `_loadBrain` | ✅ CLOSED | reads through brain FileStore (`_bfsRead`); no access→read window |
+| **brain 2** | Double security chain | ✅ CLOSED | B-2: `_runBrainSecurityChain` delegates to `pipeline.runChain` (brain.js:347) |
+| **brain 3** | `canRead` hardcoded for writes | ✅ CLOSED | `runChain` selects `canWrite`/`canRead` by operation (pipeline.js:589) |
+| **brain 4** | Path traversal in dropbox ops | ✅ CLOSED | `_validBrainSegment` gate + writes through tmp-space store (brain.js:3224-3254) |
+| **brain 5** | Format transformer corrupts content | ✅ CLOSED | format layer off in load path; corpus keeps raw content + `format` field |
+| **brain 6** | `_saveState` not awaited | ✅ CLOSED | awaited before return; queued-promise chain (`_saveStatePromise`) |
+| **brain 7** | `loadCorpusSync` swallows errors | ✅ CLOSED | function removed; `loadCorpus({sync:true})` is the sync path |
+| **brain 8** | Fire-and-forget init | ✅ MITIGATED | preload is cache-warming only; `loadCorpus({sync:true})` guarantees sync reads |
+| **brain 9** | Remote mode incomplete | ✅ MITIGATED | returns null gracefully, warns on fetch failure; corpus falls back public/private |
+| **islands 1** | `save()` calls undefined `getBrain()` | ✅ CLOSED | save goes through island storage → sandbox canWrite (islands.js:292) |
+| **islands 2** | `hydrate()` missing await | ✅ CLOSED | `await load(name)` (islands.js:333) |
+| **islands 3** | `autoHydrate()` missing await | ✅ CLOSED | `await hydrate(name)` in loop (islands.js:402) |
+| **islands 4** | Traversal in `createIsland` | ✅ CLOSED | `vafSafeName` throws before path build (islands.js:455) |
+| **mcp 1** | `vant_call` arbitrary require RCE | ✅ CLOSED | dispatches registered `_methods` only; auto-wire is a hardcoded allowlist, not auto-invoked |
+| **mcp 2** | Storage tools raw paths | ✅ CLOSED | `_containedModelPath` to models root; rm/cp/mkdir sudo-escalate (v0.9.0-axolotl note in mcp.js) |
+| **mcp 3** | `compute_eval` no auth | ✅ CLOSED | throws `SANDBOX_EXEC_DENIED` without sudo escalation (mcp.js:1008+) |
+| **mcp 4** | Shell tools injection | ✅ CLOSED | explicit `sudo.can(taskId,'exec')` at MCP layer; lib/shell adds its own chain |
+| **mcp 5** | SSRF via network tools | ✅ CLOSED | network.js blocklist: 127/8, 169.254/16 (metadata), ::1, private ranges |
+| **storage 1** | Symlink escape in `atomicWrite` | ✅ CLOSED | rename REPLACES dest symlinks (never follows); regression test P1-16 pins it |
+| **storage 2** | `readRaw`/`writeRaw` bypass | ✅ BY DESIGN | documented explicit bypass; tests assert the unsafe contract; safe `read`/`write` enforce cap+vaf+symlink checks |
+| **storage 3** | ConfigStorage require RCE | ✅ CLOSED | bare `vm` context, no require/process/fs, 1s timeout ("closes P0-7") |
+| **storage 4** | Prototype pollution | ✅ CLOSED | `vaf.sanitizeObject` strips `__proto__`/`constructor`/`prototype` recursively; wired via `_sanitizeObject` |
+| **sandbox 1** | Permissive DEFAULT_CAPABILITIES | ✅ CLOSED | DENY by default: canWrite/canExec/canNetwork/canSpawn/canCommit all false (sandbox.js:261) |
+| **sandbox 2** | Stubs overridden by permissive exports | ✅ CLOSED | early exports also deny (`canRead:()=>false` etc.) |
+| **sandbox 3** | RLS optional | ✅ BY DESIGN | deny-by-default base; RLS is opt-in caps refinement (`generateCaps`) |
+| **sandbox 4** | Legal dormant by default | ✅ BY DESIGN | dormant gate over deny-by-default base; `initLegal(level)` activates |
+| **sandbox 5** | `canBrain` uses global constants | 🔶 LATENT | static defaults used consistently; **zero callers** repo-wide (grep); class method mirrors module fn |
+| **vaf 1** | `audit.info()` crash on load | 🔧 **FIXED TODAY** | live-repro'd: valid `.circuit-vaf.json` → `audit.info is not a function` killed module load. Happy path (no file) masked it. Replaced 3 calls with vaf's own `audit()`; regression test added |
+| **vaf 2** | `Sanitize.CONTROL_PATTERN` ReferenceError | ✅ CLOSED | class resolves module-level `vaf` self-ref at property-access time (vaf.js:1291) |
+| **vaf 3** | `checkPathTraversal` no base resolution | ✅ CLOSED | P1-15: iterative URL-decode + NFKC + fail-closed malformed encoding; pairs with `validateSafePath` for containment |
+| **vaf 4** | `sanitizeObject` array bypass | ✅ CLOSED | recursion covers arrays (Array → entries) + proto-key strip |
+| **vaf 5** | `check()` object no value validation | ✅ BY DESIGN | keys validated, depth/array caps enforced; leaf values are data (post-pollution-strip) |
+| **agents 1** | Wrong Map (`_messages`) in work fns | ✅ CLOSED | crash path gone; delegateAsync → `stream` (gated enqueue). setDeadline/retry/escalate/setPriority return clean `{error:'Work not found'}` — legacy API, non-functional but fail-safe; zero callers outside module |
+| **agents 2** | `delegateAsync` zero security | ✅ CLOSED | routes through `stream.enqueue` → sandbox→vaf→qos gate (stream.js:106+) |
+| **agents 3** | `pollWork` no execution/chain | ✅ CLOSED | `stream.poll` behind same gate; returns coded error object |
+| **agents 4** | `join()` wrong Map | ✅ CLOSED | `_messages` doubles as conversation store; join/send/listen consistent on it (keyed by conv id) |
+| **sync 1** | `saveProviderState` userCtx crash | ✅ CLOSED | EINVAL guard (sync.js:122) + `SYSTEM_USER_CTX` at all call sites |
+| **sync 2** | `audit` undefined | ✅ CLOSED | `const audit = require('./audit')` (sync.js:45) |
+| **sync 3** | Guard leak on error | ✅ CLOSED | `finally { guard.release('sync:push'/'sync:pull') }` (sync.js:304, 404) |
+| **transform 4** | Restore path traversal | ✅ CLOSED | validateHorcruxData blocks suspicious paths + `validateSafePath(fullPath, brainPath)` on all 3 write sites; malicious-restore suite pins it |
+| **backup 5** | Undefined password to encryption | ✅ CLOSED | transform.js:1186 throws `Password required` before encrypt; restore throws on undecryptable |
+| **remote 6** | `errors` not imported | ✅ CLOSED | `require('./error')` line 1; base methods throw coded VantError |
+
+**Verdict:** the P0/P1 wave is complete. The one live bug found (vaf C1) was a
+latent loader crash, not an injection vector — and it's now fixed with a
+regression pin. Remaining 🔶/design notes are documented residuals, none
+exploitable as described in the original audit.
+
+*Original audit content below, unmodified.*
+
+---
+
 ## Executive Summary
 
 **Total Findings: 187 issues across 8 modules**
