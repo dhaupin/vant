@@ -15,16 +15,18 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — audit criticals ledger complete: 22/23 closed, vaf C1
-live-repro'd + fixed (audit.info → vaf's audit(); regression pin in
-test/vaf.test.js), test-sandbox stale permissive assertions updated to the
-deny-by-default contract. CI 422/0/0. Ledger lives at top of
-labs/AUDIT_FINDINGS.md with file:line evidence. Next wave candidates: sync
-pullAny/rebase real impls, mcp schema validation enforcement, agents split.
-Standing: axolotl horcrux SVG mutates on test runs — leave unstaged;
-glob/code_search blind to lib/+test/, use git ls-files/git grep;
-node --check multi-arg only checks file 1; str_replace flaky on storage.js — use
-the exact-match node-script splice; check `git log -- <path>` before creating files.)
+(nothing in flight — mcp P1 #14 schema validation at dispatch (`20eda2e`) and
+sync P2 #23/#24 pullAny apply-diff + rebase conflict-handling (`a1200c3`)
+shipped tests-first, CI 422/0/0. Remaining audit P-items: agents module split
+(P3 #32), mcp timeouts on provider ops (P2 #25), atomic writes everywhere
+(P2 #27). New gotchas: brain.loadCorpus() returns the warm cache — invalidate
+before diffing; brain files must be written via the RESOLVED brain path
+(models/private/<brain>/, multibrain layout) or the corpus can't see them;
+corpus ids are extensionless. Standing: axolotl horcrux SVG mutates on test
+runs — leave unstaged; glob/code_search blind to lib/+test/, use git
+ls-files/git grep; node --check multi-arg only checks file 1; str_replace
+flaky on storage.js AND mcp.js/brain.js — use the exact-match node-script
+splice; check `git log -- <path>` before creating files.)
 
 ---
 

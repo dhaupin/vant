@@ -2,7 +2,42 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Audit criticals verification ledger — all 23 criticals repro'd; 22 confirmed closed, 1 live bug (vaf C1) found + fixed
+**Session:** Wave: mcp P1 #14 schema validation at dispatch + sync P2 #23/#24 pullAny/rebase real implementations — both tests-first, CI 422/0/0
+
+---
+
+## Session (2026-09-22 — mcp schema validation + sync pull/rebase)
+
+Next-wave candidates from the audit ledger, two shipped slices:
+
+**mcp P1 #14 — `20eda2e`.** 269 tools declared `inputSchema`; zero validated at
+dispatch. `_validateToolInput` now runs at every door: `execute`/`call` return
+`{error:'MCP_INPUT_INVALID', problems[]}`; the HTTP JSON-RPC path throws coded
+`MCP_INPUT_INVALID` BEFORE the security chain. Contract: fail-closed on declared
+constraints (required/type/enum/minItems), permissive on undeclared keys so bare
+`{type:'object'}` schemas keep passing. Repo-wide meta-test pins that every
+registered schema is well-formed. `test/mcp-schema.test.js` 13 checks.
+
+**sync P2 #23/#24 — `a1200c3`.** pullAny now reports a real corpus apply diff
+(added/updated/unchanged/total) via before/after snapshots, invalidates the
+corpus cache, supports dryRun. rebase classifies pull conflicts (→ needsManual,
+push never attempted), scans the corpus for unresolved git conflict markers and
+BLOCKS the push when any brain file carries one, and pushes only clean trees.
+Provider not-found/not-configured → structured errors. Added
+`brain.invalidateCorpusCache()` + test-only provider DI
+(`_setTestProvider`/`_clearTestProviders`, s3 `_setR2TestClient` pattern).
+`test/sync-pull.test.js` 15 checks.
+
+**Gotchas hit (MEM-worthy):** (1) `brain.loadCorpus()` returns the warm cache
+verbatim — snapshot code must `invalidateCorpusCache()` first or diffs lie.
+(2) Brain files must be written via the RESOLVED brain path
+(`models/private/<brain>/...`, multibrain layout) — hardcoding `models/private`
+lands files where the corpus can't see them. (3) Corpus ids are extensionless.
+(4) Test provider fakes must be registered before the async chain drains or
+clear/re-register inside the test.
+
+**Evidence:** CI 422/0/0; mcp/mcp-schema/vant/agents/sync/remote/brain suites
+green.
 
 ---
 
