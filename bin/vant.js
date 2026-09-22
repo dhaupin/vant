@@ -155,6 +155,9 @@ const COMMANDS = {
     // Storage mirror replication (prd-storage.md)
     mirror: 'mirror.js',
     
+    // Remote storage connectors — S3/R2/MinIO/B2 (prd-storage.md)
+    s3: 's3.js',
+    
     // Agent spawning
     spawn: 'agent-spawner.js',
     
@@ -426,6 +429,7 @@ Brain:
   vant stego      Stego brain recovery
   vant migrate    Brain layout versioning (status/dry-run/apply)
   vant wal        Storage crash-recovery journal (status/drill/reset)
+  vant s3         Remote storage connectors — S3/R2/MinIO/B2 (status/test/ls/push/pull)
   vant mirror     Storage replication (status/verify/resync)
 
 State:
