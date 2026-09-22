@@ -2,7 +2,64 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: brain-load circuit breaker (P3 #34) — threshold + half-open probe + live error telemetry, tests-first, CI 424/0/0
+**Session:** Wave: cross-module integration regression suite (P3 #35) — 23 closed criticals pinned end-to-end + delegateAsync gate-swallow fix, CI 424/0/0
+
+---
+
+## Session (2026-09-22 — integration regression suite, P3 #35)
+
+The final audit-queue item. Shipped as `ca56f87`, tests first
+(`test/integration-criticals.test.js`, 21 checks). With this, the ENTIRE
+audit action plan (P0 1-10, P1 11-20, P2 21-30 minus documented residuals,
+P3 31-35) is closed or ledger-annotated.
+
+**What it is:** the closed criticals were pinned mostly module-local. This
+suite walks them END-TO-END through real entry points — mcp.execute,
+brain.load, agents delegateAsync, islands.createIsland, transform.toHorcrux,
+sync.saveProviderState, the storage facade — so a refactor that breaks a
+wire (export shape, gate order, error contract) fails here even when every
+module-local suite still passes. This is exactly the harness that would have
+caught the error.js ReferenceErrors and the dead _metrics.errors years ago:
+behavioral, cross-module, no mocking of the module under test.
+
+**BONUS REAL BUG (found by the suite, pre-existing in the monolith):**
+`agents.work.delegateAsync` IGNORED stream.enqueue's gate result. The
+sandbox→vaf→qos gate returns `{error:'sandbox_denied', capability:'canWrite'}`
+on refusal; delegateAsync didn't check it and returned
+`{status:'queued', workId:undefined}` anyway — denied work silently vanished
+while the caller believed it was queued (the agent also stuck in 'delegated'
+state). Now propagates `{agentId, error, capability, code:'E_GATE_DENIED'}`
+and reverts agent.state to idle. Found by probing delegateAsync under
+`canWrite:false` — the phantom-'queued' shape was the giveaway. NOT a split
+regression (verified identical in the 4124da3 monolith).
+
+**Probe-methodology notes (repeat for future cross-module pins):**
+- mcp.execute resolves coded-error OBJECTS for input-validation refusals
+  (MCP_INPUT_INVALID) and throws VantErrors for gate refusals — tests must
+  handle both shapes.
+- sync.saveProviderState's userCtx guard rejects FALSY ctx (EINVAL);
+  truthy-but-wrong-typed ctx is RLS territory (sandbox 3 BY DESIGN, opt-in).
+- vm-jail probe: `module.exports = { leaked: typeof require }` → 'undefined'
+  (never 'function'); assert on typeof, not on throw — the jail swallows into
+  defaults by design.
+- transform.toHorcrux output paths must be repo-relative (vaf clamps
+  absolute /tmp paths as traversal BEFORE the password check).
+- Child-process (execFileSync node -e) is the right harness for load-time
+  crash regressions (vaf 1) — the crash predates any test-side hook.
+
+**Audit action-plan status: ALL P0/P1/P2/P3 items closed or annotated.**
+What remains in the ledger are the 🔶 LATENT / BY DESIGN residuals
+(sandbox 5 canBrain zero-caller, sandbox 3/4 opt-in layers, storage 2 raw
+bypass, brain 8/9 mitigations) — all documented with rationale.
+
+**Evidence:** CI 424/0/0; full module loop ALL GREEN; runner 37/37;
+integration-criticals 21/21; agents-split 22/22 (delegateAsync fix
+compatible); agents 17/17.
+
+**Next candidates (post-audit):** P2 #26 work-item Map de-multiplexing
+(flagged during the split), fresh-clone reincarnation drill rerun after the
+refactor wave, horcrux refresh (point-in-time snapshots are stale),
+DEAD_EXPORTS.md long tail.
 
 ---
 

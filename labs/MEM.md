@@ -15,41 +15,43 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — brain-load circuit breaker landed (`5290471`, P3 #34):
-consecutive-failure breaker in brain.js over the 3 real load() throw paths
-(pipeline-critical crash / options.brain storage error / recursion guard);
-coded retryable BRAIN_CIRCUIT_OPEN short-circuit; HALF-OPEN probe after
-VANT_BRAIN_CIRCUIT_RESET_MS (default 30s, probing flag stops probe storms);
-null misses NEVER feed it; bonus: _metrics.errors was dead telemetry — now
-alive; bonus: _clearHandlerOverride() because register() had no undo.
-Test gotchas: brain.addMiddleware(mode, name, pos) — first arg is the MODE;
-poison a stage via brain.register('sandbox', boom); VANT_MODEL_PATH does
-NOT redirect brain paths (_brainModelsRoot is __dirname-relative at load);
-no brain.reset() exists. NEXT: labs handoff for #34 was interrupted —
-TASKS.md block written but uncommitted, MEM refreshed, then the last audit
-items are P3 #33 error-handling standardization and #35 integration tests
-for P0/P1 fixes (recommend #35 next — pins the closed criticals
-cross-module). Test gotchas: deny-by-default sandbox → suites must
-setScopes+setCapabilities before spawn/fork (orgflow pattern); ASYNC
-FUNCTIONS RESOLVE error objects, they don't reject — assert resolved
-values; bare-identifier pins must strip comments first; error.test.js
-harness is sync-only — async checks go through the serialized atest()
-chain; circular-dependency WARN lines (vaf↔storage↔sandbox) are
-pre-existing + harmless. `lib/primitives.js` is the zero-Vant-requires home
-for shared primitives (atomicWriteFile, sleep) — stego/backup STAY on gated
-storage.atomicWrite. wal journal file is `wal.log`; structural walk tests
-must special-case the helper's own fd write (primitives.js);
-brain.loadCorpus() returns the warm cache — invalidate before diffing;
-brain files must be written via the RESOLVED brain path
-(models/private/<brain>/); corpus ids are extensionless; standalone suites
-run via `node test/x.test.js` and are NOT auto-discovered — ci.js is
-smoke+syntax, runner/coverage don't scan test/; stub network.fetch (not
-global fetch) when testing provider HTTP; sandbox final exports DO expose
-top-level can() though early exports don't. Standing: axolotl horcrux SVG
-mutates on test runs — leave unstaged; glob/code_search blind to lib/+test/,
-use git ls-files/git grep; node --check multi-arg only checks file 1;
-str_replace flaky on storage.js AND mcp.js/brain.js — use the exact-match
-node-script splice; check `git log -- <path>` before creating files.)
+(nothing in flight — P3 #35 integration regression suite landed (`ca56f87`):
+test/integration-criticals.test.js pins all 23 closed criticals END-TO-END
+through real entry points (mcp.execute, brain.load, delegateAsync,
+createIsland, toHorcrux, saveProviderState, storage facade). AUDIT ACTION
+PLAN NOW FULLY CLOSED (P0/P1/P2/P3 all done or annotated). BONUS fix riding
+that commit: delegateAsync swallowed stream-gate denials — returned phantom
+{status:'queued', workId:undefined} under sandbox deny; now propagates
+E_GATE_DENIED + reverts agent state. Probe-methodology notes: mcp.execute
+resolves coded-error OBJECTS for input refusals but THROWS for gate
+refusals — handle both shapes; sync userCtx guard rejects FALSY only (typed
+ctx is RLS, opt-in); vm-jail probe asserts typeof require === 'undefined'
+(not a throw — jail swallows to defaults); toHorcrux paths must be
+repo-relative (vaf clamps /tmp as traversal BEFORE password check); child
+proc (node -e) is the harness for load-time crash regressions.
+Earlier in the wave: #34 brain-load breaker (`5290471` — BRAIN_CIRCUIT_OPEN,
+half-open probe, _metrics.errors revived, _clearHandlerOverride DI);
+#32 agents split (`3fe53bf`); primitives (`daa0f51`); #27 atomic writes
+(`faedaf8`). Test gotchas: brain.addMiddleware(mode, name, pos) — first arg
+is the MODE, poison via brain.register('sandbox', boom); VANT_MODEL_PATH
+does NOT redirect brain paths (root is __dirname-relative at load); no
+brain.reset(); deny-by-default sandbox → suites must setScopes+
+setCapabilities first; ASYNC FUNCTIONS RESOLVE error objects — assert
+resolved values; bare-identifier pins strip comments first; error.test.js
+harness is sync-only (async via atest() chain); circular-dep WARN lines are
+pre-existing. `lib/primitives.js` = zero-Vant-requires home (atomicWrite
+File, sleep); stego/backup STAY on gated storage.atomicWrite. wal journal
+file is `wal.log`; structural walk tests special-case the helper's own fd
+write (primitives.js); brain.loadCorpus() returns warm cache — invalidate
+before diffing; brain files written via RESOLVED brain path
+(models/private/<brain>/); corpus ids extensionless; standalone suites via
+`node test/x.test.js` NOT auto-discovered; stub network.fetch (not global
+fetch) for provider HTTP; sandbox top-level can() vs defaultSandbox.can()
+both live. Standing: axolotl horcrux SVG mutates on test runs — leave
+unstaged; glob/code_search blind to lib/+test/, use git ls-files/git grep;
+node --check multi-arg only checks file 1; str_replace flaky on storage.js
+AND mcp.js/brain.js — use the exact-match node-script splice; check
+`git log -- <path>` before creating files.)
 
 ---
 
