@@ -2,7 +2,28 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Cloudflare stripped to R2-only — Pages-sync/KV/Workers/adapter/srv halves removed (museum pieces, −1,274 lines); getConfig redaction
+**Session:** Cloudflare connector REMOVED entirely — R2 rides the s3 client (provider 'r2'); museum strip completed in two steps
+
+---
+
+## Session (2026-09-22 — cloudflare: strip → delete)
+
+The full arc, in three commits after the r2 delegation:
+
+| Commit | What |
+|--------|------|
+| `f81366f` | getConfig() secret redaction (apiToken always, r2Secret after delegation). |
+| `be0b3f2` | Museum strip: Pages-sync/KV/Workers/adapter/srv halves removed (−1,274 lines); connector reduced to an R2 facade. |
+| `ead471e` | **Final step (dhaupin: "do we need the connector at all? R2 uses s3 patterns")**: NO — the facade was a redundant second front door. Connector + both suites + orphaned config.cloudflare block deleted (zero consumers verified first). −418 more lines. |
+
+**Final state:** R2 is first-class through ONE door — `connectors.s3({provider:'r2'})`,
+`getStorage('remote',{provider:'r2'})` / `VANT_REMOTE_PROVIDER=r2` + `vant s3`. The
+connectors index documents that R2 needs no separate connector. Full loop 0 failures,
+CI 422/422, R2 paths smoke-verified through both the client and the store.
+
+**Session-wide net:** cloudflare footprint went from ~2,900 lines (connector + adapter
++ srv functions + tests, most of it never-functional) to zero dedicated lines — with
+greater R2 capability than it ever had (real SigV4, delete op, list metadata).
 
 ---
 
