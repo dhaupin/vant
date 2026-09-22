@@ -1098,6 +1098,9 @@ Notes:
 - `vant start` runs this automatically before health; `--no-migrate` skips it
 - Detection is content-based (your actual files), never just the version marker — safe to run any time
 - Every step is idempotent; a second run is always a no-op
+- Failed imports are retryable: if the migration can't verify your brain is readable afterward, the layout marker is NOT written, `vant migrate` exits 1, and the next run retries (start shows a ⚠ instead of the success banner)
+- Existing brain files are never clobbered: if a live file already exists at the destination, the flat copy is skipped (`skippedExisting` in the result)
+- `vant health` shows an OLD-STYLE BRAIN warning on legacy trees until migrated
 - MCP clients: `brain_migration_status` tool reports the same status + guidance
 
 ### vant stego

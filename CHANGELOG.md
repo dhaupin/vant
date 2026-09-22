@@ -76,6 +76,31 @@ Both files are deferred — not in the b-T scope.
 
 ## [Unreleased] - Future
 
+### Added - Brain Layout Migration (merge-safety, axolotl)
+- `vant migrate` (lib/migrations.js, layout v3): imports pre-multibrain
+  (old single-brain) layouts into `models/{public,private}/<name>/` and
+  synthesizes the brain stack — old-style user brains stay readable after
+  the axolotl merge. `vant start` auto-runs it; `--no-migrate` opts out.
+- `--brain-name <name>` names BOTH imported scopes (default `vant`);
+  hostile/invalid names fall back to the default (never a path).
+- Detection is content-based and conservative; idempotent; failed imports
+  withhold the v3 marker so the next start retries (exit 1 + warning).
+- Alert surfaces: start banner (real imports only), `vant health`,
+  `vant migrate --status`, MCP `brain_migration_status`.
+
+### Fixed - Security & Robustness (axolotl QC waves)
+- Git CLI injection closed across `lib/branch.js` and all four git
+  connectors (github/gitlab/bitbucket/selfhosted): git ops are now
+  argv-array only (no shell); hostile refs rejected via `_gitRef`.
+  Pinned by `test/git-injection.test.js`.
+- `lib/branch.js` crashed with `audit is not defined` on every CLI-path
+  commit/checkout/merge (audit was called, never required).
+- Commit messages are arbitrary text again: strict content patterns no
+  longer reject quotes/backticks (argv-array made them inert).
+- Migration import is existing-wins (never clobbers live multibrain
+  files), skips symlinks, and one refused file can't abort an import.
+- Brain circuit breaker (BRAIN_CIRCUIT_OPEN) on repeated load failures.
+
 ### Evolution - Temporal Learning System
 - Session tracking: changes, insights per session
 - Auto-start/end sessions

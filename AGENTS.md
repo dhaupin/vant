@@ -230,7 +230,7 @@ Check your level at session start.
 - [Quick Start](https://docs.creadev.org/vant/getting-started/quick-start) — 2 min setup
 - [The Brain](https://docs.creadev.org/vant/essential/brain) — Memory files
 - [Runtime](https://docs.creadev.org/vant/essential/runtime) — Programmatic API
-- [MCP Tools](https://docs.creadev.org/vant/integrations/mcp) — 21 AI tools
+- [MCP Tools](https://docs.creadev.org/vant/integrations/mcp) — AI tools (auto-wired registry)
 - [Multi-Agent Crew](https://docs.creadev.org/vant/essential/agents) — 4 agents max
 - [CLI](https://docs.creadev.org/vant/reference/cli) — All commands
 
@@ -321,7 +321,7 @@ agent-name: Did thing X
 | `vant search <query>` | RAG search |
 | `vant config get <key>` | Get config |
 | `vant config set <key> <val>` | Set config |
-| `vant mcp` | Start MCP server (21 tools) |
+| `vant mcp` | Start MCP server (auto-wired tools) |
 
 ---
 
@@ -355,7 +355,7 @@ PURPOSE: Exploring Vant's codebase
 
 ## Discovery: 2026-05-11
 
-- MCP exposes brain as 21 JSON-RPC tools
+- MCP exposes brain as auto-wired JSON-RPC tools
 - Agent branch workflow isolates work
 - Trust levels control autonomy
 

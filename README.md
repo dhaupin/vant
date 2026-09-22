@@ -153,7 +153,7 @@ Full docs at **[docs.creadev.org/vant](https://docs.creadev.org/vant)**
 ### Integrations
 
 - [GitHub](https://docs.creadev.org/vant/integrations/github) - Brain storage
-- [MCP](https://docs.creadev.org/vant/integrations/mcp) - 21 AI tools
+- [MCP](https://docs.creadev.org/vant/integrations/mcp) - AI tools for agents
 - [Agent Skills](https://docs.creadev.org/vant/integrations/agent-skills) - Claude/Codex/Cursor
 - [Linear](https://docs.creadev.org/vant/integrations/linear) - Issue sync
 - [Docker](https://docs.creadev.org/vant/integrations/docker) - Container deploy

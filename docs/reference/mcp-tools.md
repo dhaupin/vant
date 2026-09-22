@@ -8,7 +8,9 @@ nav_order: 88
 
 # MCP Tools Reference
 
-Complete reference for all 31 MCP tools.
+Reference for the core MCP tools. The live registry is larger and grows
+automatically (core libs are auto-wired): a running server exposes the
+full, current list via `tools/list` or `curl http://localhost:3100/tools`.
 
 ## Core Tools (9)
 
@@ -360,3 +362,33 @@ vant_rerank(query="authentication", topK=5)
 | vant_sync | { success } |
 | vant_lock | { token } |
 | vant_health | { status, version } |
+| brain_migration_status | { markerVersion, targetVersion, upToDate, legacy, guidance } |
+
+---
+
+### brain_migration_status
+
+Check brain layout version + pending migrations. Reports `legacy: true`
+with actionable guidance when a pre-multi-brain (old single-brain)
+layout is detected — `vant start` auto-imports it; this tool lets MCP
+clients surface the same status.
+
+**Params:** None
+
+**Example:**
+```
+brain_migration_status()
+```
+
+**Returns (legacy tree):**
+```json
+{
+  "markerVersion": null,
+  "targetVersion": 3,
+  "upToDate": false,
+  "legacy": true,
+  "guidance": "Run `vant migrate` (name it: vant migrate --brain-name <name>; default: vant)."
+}
+```
+
+---

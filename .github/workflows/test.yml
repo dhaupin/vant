@@ -12,7 +12,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
@@ -27,6 +27,8 @@ jobs:
           node test/runner.js
           node test/evals/vibe.js
           node test/coverage.js
+      - name: Run standalone suites
+        run: for f in test/*.test.js; do node "$f" || exit 1; done
 
   security:
     runs-on: ubuntu-latest
