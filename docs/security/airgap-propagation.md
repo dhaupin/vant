@@ -90,7 +90,7 @@ Production (air-gapped) ─▶ USB ──▶ Staging
 
 ---
 ## Related
-- [Stego](advanced/stego) - PNG steganography
+- [Stego](../memory/stego) - PNG steganography
 - [Security](security/security) - VAF + sandbox
 ## Omega Init Prompt
 Copy this into any airgapped agent:
@@ -115,5 +115,5 @@ If stego image received, decode first: vant stego decode image.png
 
 ---
 ## Related
-- [Steganography](advanced/steganography) - Covert image encoding
+- [Steganography](../memory/stego) - Covert image encoding
 - [Multi-Agent](../../multi-agent/agents) - Branch workflow

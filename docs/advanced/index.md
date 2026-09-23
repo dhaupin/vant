@@ -11,4 +11,4 @@ Deep dives:
 
 - [Rerank](advanced/rerank) - Semantic reranking
 - [Search](advanced/search) - Search architecture
-- [Stego](advanced/stego) - Steganography
+- [Stego](../memory/stego) - Steganography
