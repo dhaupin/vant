@@ -126,4 +126,4 @@ Yes! See [Contributing Guide](getting-started/contributing) in the docs.
 
 - [Quickstart](getting-started/quick-start)
 - [Architecture](essential/architecture)
-- [Build Agent Tutorial](tutorials/build-agent)
+- [Build Agent Tutorial](../../getting-started/agent-onboarding)

@@ -26,7 +26,7 @@ Vant ≥0.9 stores brains in per-brain directories
 (`models/public/<brain>/`, `models/private/<brain>/`) plus a brain stack in
 `models/state.json`. If your install predates this (files sitting flat in
 `models/public/`), **`vant start` migrates you automatically** on first run
-and shows a confirmation banner — your brain name defaults to `vant`.
+and shows a confirmation banner, your brain name defaults to `vant`.
 
 Manual control:
 
@@ -37,7 +37,7 @@ vant migrate --brain-name mybrain  # choose the imported brain's name
 vant migrate                       # apply (default name: vant)
 ```
 
-Detection is content-based and idempotent — safe to run any time, no-op on
+Detection is content-based and idempotent, safe to run any time, no-op on
 already-multi-brain trees. `vant start --no-migrate` skips the auto-import.
 MCP clients can check via the `brain_migration_status` tool.
 

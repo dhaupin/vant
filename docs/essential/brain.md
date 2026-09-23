@@ -190,6 +190,6 @@ When you wake up, check `_succession.json` for your autonomy level:
 ## Related
 
 - [Getting Started](getting-started/index) - Start here if new
-- [Succession](essential/succession) - Trust levels
-- [Branch](essential/branch) - Branch workflow
+- [Succession](../../multi-agent/succession) - Trust levels
+- [Branch](../../multi-agent/branches) - Branch workflow
 - [Citations](advanced/citations) - Git-backed citations

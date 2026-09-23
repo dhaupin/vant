@@ -73,5 +73,5 @@ Tokens encrypted per-user.
 - [Sandbox](security/sandbox) - Execution isolation
 - [Escrow](security/escrow) - Budget tracking
 
-- [Configuration](reference/configuration) - Config settings
+- [Configuration](../../reference/config) - Config settings
 - [Tutorial: Security](tutorials/security) - Practical security setup

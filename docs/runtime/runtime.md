@@ -112,7 +112,7 @@ Access via `vant.<submodule>()`:
 
 ### Event System (AI-first)
 
-Vant emits events during operations — subscribe for reactive behavior:
+Vant emits events during operations, subscribe for reactive behavior:
 
 ```js
 const event = require('./lib/event');
@@ -137,7 +137,7 @@ event.on('learn:saved', (data) => { /* new learning */ });
 
 ### Discovery Registry
 
-New in v0.8.7 — auto-discover modules:
+New in v0.8.7, auto-discover modules:
 
 ```js
 // Scan all lib/*.js files
@@ -161,7 +161,7 @@ const memNames = vant.findByCapability('memory');
 |-----|-----|
 | Add to `lib/` | Drop `.js` → auto-discovered |
 | Add to `lib/connectors/` | Drop language connector → auto-loaded |
-| Event subscriptions | Subscribe/emit anytime — no file needed |
+| Event subscriptions | Subscribe/emit anytime, no file needed |
 
 ```js
 // Example: Listen to agent lifecycle
@@ -187,7 +187,7 @@ See [API Reference](reference/api-runtime) for complete documentation:
 ## Related
 
 - [CLI Reference](reference/cli) - Command-line interface
-- [MCP Server](integrations/mcp) - MCP server tools
+- [MCP Server](../../runtime/mcp) - MCP server tools
 - [Islands](essential/islands) - Lazy-loading integrations
 
 ## Next

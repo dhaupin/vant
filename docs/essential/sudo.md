@@ -12,7 +12,7 @@ Vant is deny-by-default. Dangerous capabilities (write, network, exec, spawn)
 are refused until a **time-bounded, audited escalation** grants them.
 Sandbox capability checks (`sandbox.can('canWrite')`, or the equivalent
 `canWrite()` helpers) consult sudo when a task exists, so grants apply
-everywhere consistently — lib and CLI alike.
+everywhere consistently, lib and CLI alike.
 
 ## The model
 
@@ -24,8 +24,8 @@ sandbox.can(cap) ──task exists in sudo?──► sudo.can(taskId, scope)   (
 
 - **Static capabilities** are the floor (deny-by-default).
 - **Escalations** are TTL grants recorded per task, per scope, with the
-  requesting service attached. They expire exactly at `expiresAt` — no
-  grace window — and can be revalidated only if the service policy allows.
+  requesting service attached. They expire exactly at `expiresAt`, no
+  grace window, and can be revalidated only if the service policy allows.
 
 ## Service-tagged escalation
 
@@ -36,11 +36,11 @@ callback is required.
 | Service | Allowed scopes | Max TTL | Auto-approve | Callback required |
 |---------|----------------|---------|--------------|-------------------|
 | `boot`    | write, network, spawn, exec | 5 min | write, network | exec, spawn |
-| `network` | network                     | 10 min | network        | — |
-| `storage` | write                       | 5 min | write          | — |
+| `network` | network                     | 10 min | network        |, |
+| `storage` | write                       | 5 min | write          |, |
 | `mcp`     | read, write, network, exec  | 3 min | read           | write, network, exec |
-| `agents`  | spawn, write                | 5 min | —              | spawn, write |
-| `trust`   | write                       | 5 min | write          | — |
+| `agents`  | spawn, write                | 5 min |,              | spawn, write |
+| `trust`   | write                       | 5 min | write          |, |
 
 Untagged requests fall to the `default` policy: no scopes, 1 minute max.
 **Always pass `service`.** Example from the storage layer:
@@ -64,7 +64,7 @@ vant org config --set-operator-scopes read,write  # persist defaults
 ```
 
 The grant lives for the process only. Persisted defaults are applied by
-`vant org grant`, never silently at boot — boot still grants `['read']` only.
+`vant org grant`, never silently at boot, boot still grants `['read']` only.
 
 ## CLI write gates
 
@@ -78,10 +78,10 @@ Inside a granted process tree they run normally; ungranted, they refuse with
 
 Escalations emit events on the shared bus:
 
-- `sudo:escalation_requested` — every ask (granted or not)
-- `sudo:escalation_granted` — `{ taskId, scope, service, ttl, auto, expiresAt }`
-- `sudo:escalation_denied` — `{ reason: not_in_whitelist | callback_denied | ... }`
-- `sudo:escalation_revalidated` — TTL extensions with revalidation count
+- `sudo:escalation_requested`, every ask (granted or not)
+- `sudo:escalation_granted`, `{ taskId, scope, service, ttl, auto, expiresAt }`
+- `sudo:escalation_denied`, `{ reason: not_in_whitelist | callback_denied | ... }`
+- `sudo:escalation_revalidated`, TTL extensions with revalidation count
 
 See [Audit](/advanced/audit) for event capture, and the sudo PRD
 (`labs/prd-sudo.md`) for the full policy design.

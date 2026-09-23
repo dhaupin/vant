@@ -60,7 +60,7 @@ curl -s -X POST http://127.0.0.1:3457/call -H "Content-Type: application/json" -
 
 ### Port Configuration
 
-**Default: 3457** — Works out of the box. Change via environment:
+**Default: 3457**, Works out of the box. Change via environment:
 
 ```bash
 # Via environment variable (recommended)
@@ -853,5 +853,5 @@ For multi-line content, write directly to `models/private/` instead of via MCP.
 ## Related
 
 - [Security Guide](security/security) - Input validation
-- [Multi-Agent](essential/multi-agent) - Branch workflow
+- [Multi-Agent](../../multi-agent/agents) - Branch workflow
 - [CLI Reference](reference/cli) - All commands

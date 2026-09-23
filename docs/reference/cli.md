@@ -466,7 +466,7 @@ vant docs build --version # Specific version
 vant docs serve          # Local server
 ```
 
-See also: [Configuration](reference/configuration), [API](reference/cli), [Entropy Patching](reference/entropy)
+See also: [Configuration](../../reference/config), [API](reference/cli), [Entropy Patching](reference/entropy)
 
 ## compress
 
@@ -1096,7 +1096,7 @@ vant migrate --brain-name mybrain  # Name the imported brain (default: vant)
 Notes:
 
 - `vant start` runs this automatically before health; `--no-migrate` skips it
-- Detection is content-based (your actual files), never just the version marker — safe to run any time
+- Detection is content-based (your actual files), never just the version marker, safe to run any time
 - Every step is idempotent; a second run is always a no-op
 - Failed imports are retryable: if the migration can't verify your brain is readable afterward, the layout marker is NOT written, `vant migrate` exits 1, and the next run retries (start shows a ⚠ instead of the success banner)
 - Existing brain files are never clobbered: if a live file already exists at the destination, the flat copy is skipped (`skippedExisting` in the result)

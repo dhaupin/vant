@@ -91,7 +91,7 @@ docker run -v vant-brain:/app/models dhaupin/vant vant start
 
 If your volume predates the multi-brain layout (brain files flat in
 `models/public/`), the first `vant start` on Vant ≥0.9 imports it
-automatically — default brain name `vant`, confirmation banner on the CLI.
+automatically, default brain name `vant`, confirmation banner on the CLI.
 Skip with `--no-migrate`, or run manually:
 
 ```bash
@@ -211,6 +211,6 @@ curl http://localhost:3456/health
 ## Related
 
 - [Deployment Tutorial](tutorials/deployment)
-- [Server](advanced/server) - HTTP server
+- [Server](../../runtime/server) - HTTP server
 - [Security](security/security) - VAF + sandbox
 ```

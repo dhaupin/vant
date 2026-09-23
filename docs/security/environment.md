@@ -58,7 +58,7 @@ Timing and rate limit details.
 **Automated polling of GitHub.com is prohibited.** Self-hosted GitLab/Gitea is fine.
 
 > "Using GitHub as a database or for purposes unrelated to source code management."
-> — [GitHub Acceptable Use Policies](https://docs.github.com/en/github/site-policy/github-acceptable-use-policies)
+>, [GitHub Acceptable Use Policies](https://docs.github.com/en/github/site-policy/github-acceptable-use-policies)
 
 ### What This Means
 
@@ -72,10 +72,10 @@ Timing and rate limit details.
 ### Vant's Approach
 
 Vant defaults to:
-- **Manual sync** — Run `vant sync` when you want
-- **No polling** — Must explicitly opt-in
-- **Opt-in warnings** — Clear GitHub ToS warnings
-- **Two confirmations** — Env var OR stdin
+- **Manual sync**, Run `vant sync` when you want
+- **No polling**, Must explicitly opt-in
+- **Opt-in warnings**, Clear GitHub ToS warnings
+- **Two confirmations**, Env var OR stdin
 
 ---
 ## DATA CONSIDERATIONS

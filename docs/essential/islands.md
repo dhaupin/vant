@@ -155,12 +155,12 @@ gallery.linkToBrain();
 ## Related
 
 - [Vibe](advanced/vibe) - Dynamic mood system
-- [Brain](essential/brain) - Public/Private brain split
+- [Brain](../../memory/brain) - Public/Private brain split
 - [External Repos](integrations/repos) - Mount external repos
 
 ## Next
 
-- [Runtime](essential/runtime) - Runtime API
+- [Runtime](../../runtime/runtime) - Runtime API
 
 ---
 

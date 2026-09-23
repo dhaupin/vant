@@ -4,7 +4,7 @@
 
 ## Overview
 
-This spec defines the "NSC-9" barcode format for marking virtual/automation entities in the global EPCIS/UPC system. NSC (Number System Character) digits 6-9 are reserved by GS1 for future use — we propose using "9" to signify automation/virtual systems.
+This spec defines the "NSC-9" barcode format for marking virtual/automation entities in the global EPCIS/UPC system. NSC (Number System Character) digits 6-9 are reserved by GS1 for future use. We propose using "9" to signify automation/virtual systems.
 
 ## Rationale
 
@@ -102,7 +102,7 @@ function generateAutomationBarcode(content) {
 
 - NSC-9 barcodes **look like** invalid UPCs to standard scanners
 - Physical product scanners will reject/not recognizethem
-- This is INTENTIONAL — marks as automation-only
+- This is INTENTIONAL, marks as automation-only
 - Can still be scanned as raw numeric strings
 
 ## Future Considerations

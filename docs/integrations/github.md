@@ -210,5 +210,5 @@ git push origin experiment-feature
 ## Related
 
 - [Troubleshooting](advanced/troubleshooting) - Problem solving
-- [Multi-Agent](essential/multi-agent) - Branch workflow
+- [Multi-Agent](../../multi-agent/agents) - Branch workflow
 - [CLI Reference](reference/cli) - All commands

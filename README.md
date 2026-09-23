@@ -99,7 +99,7 @@ const content = await vant.remember('key');
 
 ## Upgrading from an older Vant (single-brain layout)
 
-Older versions stored the brain **flat** — all files directly in
+Older versions stored the brain **flat**, all files directly in
 `models/public/` with no per-brain folders and no brain stack. Vant ≥0.9
 (axolotl) uses a **multi-brain layout**: `models/public/<brain>/`,
 `models/private/<brain>/`, and a brain stack in `models/state.json`.
@@ -123,13 +123,13 @@ tool reports whether a legacy layout is pending, with guidance.
 Notes:
 
 - Detection is **content-based** (looks at your actual files), so it's safe
-  to run any time — it never fires on an already-multi-brain tree, and a
+  to run any time, it never fires on an already-multi-brain tree, and a
   second run is always a no-op.
 - `vant start --no-migrate` skips the auto-import if you want to migrate
   manually later.
 - One name covers both scopes: your old public brain becomes
   `models/public/<name>/` and your old private brain becomes
-  `models/private/<name>/` — same brain, same name, two visibility
+  `models/private/<name>/`, same brain, same name, two visibility
   scopes, exactly like before but per-brain.
 - After migrating, your brain files live in
   `models/public/<brain>/` (and `models/private/<brain>/` once you write

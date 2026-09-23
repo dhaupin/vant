@@ -181,7 +181,7 @@ const storage = new Storage({
 
 ## Related
 
-- [Brain](essential/brain) - Brain file structure
+- [Brain](../../memory/brain) - Brain file structure
 - [Islands](essential/islands) - Lazy brain components
 - [Search](advanced/search) - Hybrid search
 - [Providers](integrations/providers) - GitHub, GitLab, etc

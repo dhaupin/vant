@@ -12,10 +12,10 @@ Complete API and CLI reference.
 
 ## Runtime APIs
 
-- [Runtime](essential/runtime) - Main runtime
-- [Brain](essential/brain) - Memory system
+- [Runtime](../../runtime/runtime) - Main runtime
+- [Brain](../../memory/brain) - Memory system
 - [Islands](essential/islands) - Brain modules
-- [Succession](essential/succession) - Agent handoff
+- [Succession](../../multi-agent/succession) - Agent handoff
 
 ## Module APIs
 
@@ -43,7 +43,7 @@ Complete API and CLI reference.
 
 ## Config
 
-- [Configuration](reference/configuration) - Settings
+- [Configuration](../../reference/config) - Settings
 - [Schema](reference/schema) - Data schema
 - [Errors](reference/errors) - Error codes
 

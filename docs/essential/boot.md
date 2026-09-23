@@ -96,7 +96,7 @@ vant boot --image=https://raw.githubusercontent.com/user/repo/main/brain.png
 
 - [Steganography](advanced/steganography) - Image encoding
 - [GitHub Integration](integrations/github) - GitHub integration
-- [Runtime](essential/runtime) - Runtime API
+- [Runtime](../../runtime/runtime) - Runtime API
 
 ## Next
 

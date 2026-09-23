@@ -139,4 +139,4 @@ await notifications.email('admin@example.com', 'Daily Summary', summary);
 ## Related
 
 - [CLI Reference](reference/cli)
-- [Configuration](reference/configuration)
+- [Configuration](../../reference/config)

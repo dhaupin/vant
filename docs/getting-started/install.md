@@ -308,5 +308,5 @@ docker run -it dhaupin/vant vant health
 ## Related
 
 - [Quick Start](getting-started/quick-start) - Run your first commands
-- [Configuration](reference/configuration) - Customize Vant
-- [Build First Agent](tutorials/build-agent) - Tutorial
+- [Configuration](../../reference/config) - Customize Vant
+- [Build First Agent](../../getting-started/agent-onboarding) - Tutorial

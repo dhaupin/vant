@@ -275,7 +275,7 @@ Recommended: Add to `vant start` sequence for auto k-detection.
 
 ### 3. Semantic Seed (Anchoring)
 
-Stable patches should include a "semantic seed"—a summary that anchors high-entropy spikes:
+Stable patches should include a "semantic seed",a summary that anchors high-entropy spikes:
 
 ```javascript
 // Example patch with seed

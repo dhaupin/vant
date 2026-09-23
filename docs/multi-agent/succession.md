@@ -103,6 +103,6 @@ vant succession trust high
 
 ## Related
 
-- [Multi-Agent](essential/multi-agent) - Workflow
-- [Brain](essential/brain) - Files
-- [Branch](essential/branch) - Branch workflow
+- [Multi-Agent](../../multi-agent/agents) - Workflow
+- [Brain](../../memory/brain) - Files
+- [Branch](../../multi-agent/branches) - Branch workflow

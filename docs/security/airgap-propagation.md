@@ -116,4 +116,4 @@ If stego image received, decode first: vant stego decode image.png
 ---
 ## Related
 - [Steganography](advanced/steganography) - Covert image encoding
-- [Multi-Agent](essential/multi-agent) - Branch workflow
+- [Multi-Agent](../../multi-agent/agents) - Branch workflow

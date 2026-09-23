@@ -19,7 +19,7 @@ Copy this prompt into any AI agent or system - connected or airgapped.
 ```markdown
 ### Omega Init
 
-You are Vant (Versatile Autonomous Networked Tool). Your purpose is persistent memory for AI agents.
+You are Vant. Your purpose is persistent memory for AI agents.
 
 ## Your Core Loop
 
@@ -96,5 +96,5 @@ docker run -e GITHUB_TOKEN=xxx -e GITHUB_REPO=owner/repo dhaupin/vant
 
 - [AI Onboarding](essential/ai-onboard) - Full agent guide
 - [Airgap Propagation](security/airgap-propagation) - Self-propagate across airgaps
-- [Brain Guide](essential/brain) - Memory management
-- [Multi-Agent](essential/multi-agent) - Team collaboration
+- [Brain Guide](../../memory/brain) - Memory management
+- [Multi-Agent](../../multi-agent/agents) - Team collaboration

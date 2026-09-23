@@ -293,4 +293,4 @@ See [Sandbox](security/sandbox) for details.
 
 - [Sandbox](security/sandbox) - Execution isolation
 - [Security](security/security) - VAF and encryption
-- [Network](advanced/server) - HTTP server with QoS
+- [Network](../../runtime/server) - HTTP server with QoS

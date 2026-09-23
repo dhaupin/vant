@@ -126,6 +126,6 @@ This lets you:
 
 ## Related
 
-- [brain.md](essential/brain) - Brain system internals
+- [brain.md](../../memory/brain) - Brain system internals
 - [islands.md](essential/islands) - Lazy-loading brain modules
-- [multi-agent.md](essential/multi-agent) - Multi-agent coordination
+- [multi-agent.md](../../multi-agent/agents) - Multi-agent coordination

@@ -247,5 +247,5 @@ Error: Content blocked: /; rm -rf/
 
 ## Related
 
-- [Configuration](reference/configuration) - Config settings
+- [Configuration](../../reference/config) - Config settings
 - [Architecture](essential/architecture) - System design

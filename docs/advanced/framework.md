@@ -96,13 +96,13 @@ const api = require('./lib/api');
 const result = await api.execute('read', () => brain.get('key'));
 ```
 
-See [API](essential/runtime) for programmatic API.
+See [API](../../runtime/runtime) for programmatic API.
 
 ---
 
 
 ## Related
 
-- [Runtime](essential/runtime) - Runtime API
-- [Server](advanced/server) - HTTP server
-- [MCP](integrations/mcp) - MCP server
+- [Runtime](../../runtime/runtime) - Runtime API
+- [Server](../../runtime/server) - HTTP server
+- [MCP](../../runtime/mcp) - MCP server

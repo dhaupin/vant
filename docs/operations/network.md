@@ -163,5 +163,5 @@ See [Security](security/security) for details.
 ## Related
 
 - [Sandbox](security/sandbox) - Execution isolation
-- [Server](advanced/server) - HTTP server
+- [Server](../../runtime/server) - HTTP server
 - [Security](security/security) - VAF and encryption

@@ -156,12 +156,12 @@ See for details.
 
 ## Related
 
-- [Branch](essential/branch) - Git branch isolation
-- [Lock](essential/multi-agent) - Distributed coordination
+- [Branch](../../multi-agent/branches) - Git branch isolation
+- [Lock](../../multi-agent/agents) - Distributed coordination
 - [VAF](security/vaf) - Input filtering
 - [Sandbox](security/sandbox) - Security sandbox
 
 ## Next
 
-- [Runtime](essential/runtime) - Runtime API
+- [Runtime](../../runtime/runtime) - Runtime API
 - [Boot](essential/boot) - Startup sequence

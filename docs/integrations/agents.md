@@ -89,9 +89,9 @@ Agent states:
 
 ## Related
 
-- [Runtime](essential/runtime) - Runtime API
-- [Multi-Agent](essential/multi-agent) - Multi-agent workflows
-- [Lock](essential/multi-agent) - Coordination
+- [Runtime](../../runtime/runtime) - Runtime API
+- [Multi-Agent](../../multi-agent/agents) - Multi-agent workflows
+- [Lock](../../multi-agent/agents) - Coordination
 
 ## Next
 

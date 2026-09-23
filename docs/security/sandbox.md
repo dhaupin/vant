@@ -244,5 +244,5 @@ const s = sandbox.create({
 ---
 ## Related
 - [Security](security/security) - VAF and encryption
-- [Runtime](essential/runtime) - Programmatic API
-- [Multi-Agent](essential/multi-agent) - Branch and lock system
+- [Runtime](../../runtime/runtime) - Programmatic API
+- [Multi-Agent](../../multi-agent/agents) - Branch and lock system

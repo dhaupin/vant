@@ -183,7 +183,7 @@ cat models/private/identity.md
 
 ## Related
 
-- [Brain](essential/brain) - Brain structure
+- [Brain](../../memory/brain) - Brain structure
 - [Getting Started/getting-started/index) - Getting started guide
 - [Hybrid Search](integrations/hybrid) - Hybrid search
 

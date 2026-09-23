@@ -29,7 +29,7 @@ Always use `-` instead of `—` or `–`.
 - ✗ Wrong |
 |--------|----------|
 | "Git is memory - every commit is a checkpoint"
-- "Git is memory — every commit is a checkpoint" |
+- "Git is memory, every commit is a checkpoint" |
 
 ### 2. Avoid AI Clichés
 

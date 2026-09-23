@@ -135,6 +135,6 @@ Coordination patterns for multi-agent.
 
 ## Related
 
-- [Multi-Agent Guide](essential/multi-agent) - Full guide
+- [Multi-Agent Guide](../../multi-agent/agents) - Full guide
 - [Lock API](reference/cli) - Lock module
 - [Branch API](reference/cli) - Branch module

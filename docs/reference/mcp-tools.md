@@ -370,7 +370,7 @@ vant_rerank(query="authentication", topK=5)
 
 Check brain layout version + pending migrations. Reports `legacy: true`
 with actionable guidance when a pre-multi-brain (old single-brain)
-layout is detected — `vant start` auto-imports it; this tool lets MCP
+layout is detected, `vant start` auto-imports it; this tool lets MCP
 clients surface the same status.
 
 **Params:** None

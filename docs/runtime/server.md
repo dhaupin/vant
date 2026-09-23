@@ -200,7 +200,7 @@ const qos = new QoS({
 
 ## Related
 
-- [Runtime](essential/runtime) - Programmatic API
+- [Runtime](../../runtime/runtime) - Programmatic API
 - [Docker](integrations/docker) - Docker deployment
 
 ## Next

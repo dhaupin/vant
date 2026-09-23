@@ -7,7 +7,7 @@ nav_order: 85
 ---
 # Brain Schema
 
-> **Note:** Default location is `models/private/`. Configure via `MODEL_PATH` env var to use a different path. See [Configuration](reference/configuration).
+> **Note:** Default location is `models/private/`. Configure via `MODEL_PATH` env var to use a different path. See [Configuration](../../reference/config).
 
 Files in your brain folder (default: `models/private/`):
 
@@ -122,4 +122,4 @@ Recommended files transported between instances:
 | `qc.md` | Quality standards |
 | `gratitude.md` | Appreciation |
 
-See also: [API](reference/cli), [Multi-Agent](essential/multi-agent)
+See also: [API](reference/cli), [Multi-Agent](../../multi-agent/agents)

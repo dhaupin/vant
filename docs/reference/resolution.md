@@ -138,6 +138,6 @@ This doc has advanced API reference. See GitHub for latest.
 
 ## Related
 
-- [Succession](essential/succession) - Trust levels
-- [Brain](essential/brain) - Brain structure
+- [Succession](../../multi-agent/succession) - Trust levels
+- [Brain](../../memory/brain) - Brain structure
 - [Audit](advanced/audit) - Activity logging
