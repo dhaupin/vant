@@ -80,7 +80,10 @@ define('loser can acquire after winner releases', async () => {
     const lockPath = path.join(ROOT, 'models', 'locks', 'brain.lock');
     try { require('fs').unlinkSync(lockPath); } catch (e) {}
 
-    const tokenA = await lock.acquire('agent-A', 1000);
+    // Long TTLs (30s) so no test's retry backoff can outlive a held lock and
+    // hit stale takeover mid-assertion (the timing trap that produced false
+    // "lock was gone" failures).
+    const tokenA = await lock.acquire('agent-A', 30000);
     if (!tokenA) return { success: false, error: 'A could not acquire empty lock' };
 
     const tokenB = await lock.acquire('agent-B', 300); // short timeout, expect fail
@@ -106,7 +109,7 @@ define('release with wrong token is refused (lock survives)', async () => {
     const lockPath = path.join(ROOT, 'models', 'locks', 'brain.lock');
     try { require('fs').unlinkSync(lockPath); } catch (e) {}
 
-    const tokenA = await lock.acquire('agent-A', 1000);
+    const tokenA = await lock.acquire('agent-A', 30000);
     if (!tokenA) return { success: false, error: 'acquire failed' };
 
     const evil = await lock.release('agent-B', 'forged-token-123');
@@ -130,7 +133,11 @@ define('release without token from a FOREIGN process is refused', async () => {
     const lockPath = path.join(ROOT, 'models', 'locks', 'brain.lock');
     try { require('fs').unlinkSync(lockPath); } catch (e) {}
 
-    const tokenA = await lock.acquire('agent-A', 1000);
+    // 30s TTL: must outlive the child spawn AND agent-B's retry backoff.
+    // A 1s TTL lapses while B is still backing off, and B's stale takeover
+    // then succeeds - indistinguishable from a broken lock, but it is just
+    // the lock expiring mid-retry (the child refusal itself is correct).
+    const tokenA = await lock.acquire('agent-A', 30000);
     if (!tokenA) return { success: false, error: 'acquire failed' };
 
     // In-process tokenless release is allowed (owner convenience: the

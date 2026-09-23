@@ -20,8 +20,86 @@ const vaf = require("../lib/vaf");
 
 const { spawn } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 
 const BIN_DIR = __dirname;
+
+/**
+ * First-run brain seed.
+ *
+ * A brand-new project gets an empty models/ tree, which makes `vant start`
+ * a silent no-op: the agent wakes with no identity, no goals, nothing to
+ * read (smoke-tested: a fresh dir produced only orgchart/escrow.json).
+ * Seed a minimal starter brain (private side) when there is nothing to
+ * load. Idempotent: never touches a brain that already has any .md file.
+ *
+ * Resolved against process.cwd() - the brain runtime (lib/brain.js) reads
+ * CWD-relative models/ paths, so seeding must match that root.
+ */
+function seedStarterBrain() {
+    // Brain name: first entry of the layout stack, else 'vant'
+    let brainName = 'vant';
+    const statePath = path.join('models', 'state.json');
+    try {
+        const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+        if (Array.isArray(state.stack) && state.stack.length &&
+            /^[A-Za-z0-9_-]+$/.test(state.stack[0])) {
+            brainName = state.stack[0];
+        }
+    } catch (e) { /* no state yet - default name */ }
+
+    const brainDir = path.join('models', 'private', brainName);
+    try {
+        if (fs.existsSync(brainDir)) {
+            const existing = fs.readdirSync(brainDir, { recursive: true })
+                .filter(f => String(f).endsWith('.md'));
+            if (existing.length > 0) return; // already has a brain
+        }
+    } catch (e) { /* unreadable dir: leave it alone */ }
+
+    try {
+        fs.mkdirSync(brainDir, { recursive: true });
+        fs.writeFileSync(path.join(brainDir, 'identity.md'),
+`# identity.md
+
+NAME: Vant
+ROLE: Persistent Memory Agent
+
+## About
+- Fresh brain, seeded by "vant start".
+- Replace this file with your own identity as you learn.
+`);
+        fs.writeFileSync(path.join(brainDir, 'goals.md'),
+`# goals.md
+
+## Current
+- (empty) Write what you are working on here.
+`);
+        fs.writeFileSync(path.join(brainDir, 'start.md'),
+`# start.md
+
+Quick start for agents waking here:
+
+1. Read identity.md, goals.md, lessons.md in this directory.
+2. Work on whatever goals.md points at.
+3. Keep what matters: "vant learn <key> <insight>" writes a lesson.
+4. Search your own memory: "vant search <query>".
+
+Full guide: https://docs.creadev.org/vant/getting-started/agent-onboarding
+`);
+        fs.writeFileSync(path.join(brainDir, 'lessons.md'),
+`# lessons.md
+
+## Learned
+- (empty) Lessons land here via "vant learn <key> <content>".
+`);
+        console.log(`[Start] Seeded starter brain: models/private/${brainName}/ (start, identity, goals, lessons).`);
+        console.log('        Edit them freely - they are yours.');
+    } catch (e) {
+        // Seeding is a convenience, never a hard failure.
+        console.log(`[Start] Starter brain seed skipped: ${e.message}`);
+    }
+}
 
 /**
  * Main
@@ -36,6 +114,9 @@ function main() {
 ║         Vant Starting             ║
 ╚═══════════════════════════════════════╝
 `);
+
+    // Seed a starter brain for brand-new projects (no-op when a brain exists).
+    if (doMigrate) seedStarterBrain();
 
     const runHealth = () => {
         // Run health check

@@ -232,7 +232,26 @@ const COMMANDS = {
     api: 'api.js',
     error: 'error.js',
     escrow: 'escrow.js',
-    nature: 'nature.js'
+    nature: 'nature.js',
+
+    // Advertised in help but previously unrouted (pass 16 gap sweep).
+    // All 16 have real bin/*.js CLIs; help promised them, the map didn't.
+    trust: 'trust.js',
+    market: 'market.js',
+    secret: 'secret.js',
+    transform: 'transform.js',
+    context: 'context.js',
+    backup: 'backup.js',
+    memory: 'memory.js',
+    registry: 'registry.js',
+    webhooks: 'webhooks.js',
+    zen: 'zen.js',
+    consciousness: 'consciousness.js',
+    recursion: 'recursion.js',
+    relay: 'relay.js',
+    spirit: 'spirit.js',
+    encounter: 'encounter.js',
+    forum: 'forum.js'
 };
 
 const args = process.argv.slice(2);
@@ -578,8 +597,12 @@ if (!script) {
 
 const scriptPath = path.join(BIN_DIR, script);
 const child = spawn('node', [scriptPath, ...process.argv.slice(3)], {
-    stdio: 'inherit',
-    cwd: path.dirname(__dirname)
+    stdio: 'inherit'
+    // cwd: intentionally NOT overridden. Subcommands must run in the user's
+    // working directory - the brain runtime resolves models/ relative to cwd
+    // (lib/brain.js getBrainPath). The previous cwd=package-root meant every
+    // spawned subcommand (start/health/sync/migrate...) read and wrote the
+    // install directory instead of the user's project.
 });
 
 child.on('exit', (code) => process.exit(code || 0));

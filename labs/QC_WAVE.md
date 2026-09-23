@@ -545,5 +545,72 @@ Vant system (lib/memory.js geoStore).
 - If the three.js CDN is a concern, vendor three.module.js into dist/
   later (~1.2MB) - importmap makes that a one-line change.
 - Swap the V brand tile + vant-og.png when logo/design prose land.
-- `vant memory` dispatcher gap still open (help advertises, code does
-  not route).
+- `vant memory` dispatcher gap: CLOSED pass 17 (16 unregistered CLIs
+  wired into bin/vant.js dispatcher).
+
+## Pass 17 - code-side QC: fresh-project smoke found 5 real bugs
+
+Scope: the repo worked in-repo but broke in any other directory.
+Smoke-tested the documented first-session flow (start, learn, search)
+in scratch dirs. Every fix verified by rerunning that flow cold.
+
+1. **16 advertised commands never routed** - dispatcher map in
+   bin/vant.js lacked entries for trust, market, secret, transform,
+   context, backup, restore, snapshot, horcrux, citations, embed,
+   canvas, memory, stream, replay, agents-split (each bin file real,
+   argv-safe, exit-0). Wired all 16. cli.md was already correct; only
+   the dispatcher was broken.
+2. **ECAP write denial on fresh installs** - boot.init setScopes()
+   flipped the sandbox into enforce mode but never linked it to the
+   boot sudo task, so can('canWrite') fell through to deny-by-default.
+   Fix: boot links defaultSandbox.agentId to the task; sandbox.can()
+   returns the UNION of sudo verdict and static capability floor
+   (widening-only semantics both directions); setScopes gained
+   { merge: true } so boot widens and never narrows host grants; boot
+   skips the identity link entirely when the host already configured
+   the sandbox (that hijack was swallowing explicit deny flips -
+   integration-criticals agents 2 caught it).
+3. **vant search dead in fresh projects** - getLTC() required
+   start.md, which no seeder created; and _brainModelsRoot was
+   package-anchored (../ escapes blocked by containment in any install).
+   Fixes: CWD-anchored root; start.md now seeded; getLTC falls back
+   to corpus head; getBrainPath self-corrects to private when only the
+   private brain exists (no state.json yet).
+4. **vant start seeded nothing** - a fresh project got an empty
+   models/ tree. bin/start.js now seeds start/identity/goals/lessons
+   (idempotent, skips any brain that already has .md files). Also
+   fixed: dispatcher spawned subcommands with cwd=package-root, so
+   every subcommand read the install dir instead of the user's
+   project (now inherits user cwd; comments document why).
+5. **bin/search.js lied about modes** - --mode hybrid printed
+   results.sparse/.dense (fields that never exist; lib is BM25), and
+   basic/rag destructured a `results` key that the empty-corpus early
+   return omitted. queryBrain now always returns both keys; CLI
+   prints the real shape; --mode hybrid labels output honestly.
+
+Plus: circular-dependency warnings silenced (root-fixed storage.js
+lazy MODELS_PATH; brain.js warning channel filters only the cycle
+class and reprints everything else), habitat.js RLS _matches()
+normalizes sparse userCtx (CLI {} contexts no longer throw into the
+pipeline's 'rls check unavailable' path), pipeline RLS check skips
+when no user subject is present, gatherState/restoreState spray from
+OpenHands c7009da purged from habitat/registry/relay/rules (35+30+16+6
+junk pairs; legit export pairs kept; syntax-checked all lib files).
+
+### Test-harness timing trap (concurrent-agents)
+
+'foreign tokenless release refused' used a 1s lock TTL; agent-B's
+tokenless acquire retries (50..800ms backoff) outlived the TTL and
+the stale takeover made it look like the child broke the lock. The
+child refusal itself was always correct. Fixed the test: 30s TTLs on
+all held locks so no retry loop can outlive them. Library behavior
+confirmed correct under the fixed timing (3x green).
+
+### Verification
+
+- Full test sweep: 109 suites, 0 failures (was 3 suites failing).
+- Fresh-project flow: vant start seeds brain, vant learn writes,
+  vant search returns corpus hits, no ECAP, no scary warnings.
+- Known noise left as-is: '[storage] Sandbox not configured' prints
+  once per process (dispatcher + child = 2 lines) by design; the
+  gate warns every 60s so misconfig is never silent.
