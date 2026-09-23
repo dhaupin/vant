@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/qos
 layout: default
 title: QoS
-nav_order: 58
+nav_order: 59
 ---
 
 # QoS

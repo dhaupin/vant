@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /multi-agent/coordination
 layout: default
 title: Multi-Agent System
-nav_order: 49
+nav_order: 50
 ---
 
 # Tutorial: Multi-Agent Coordination
@@ -21,7 +21,7 @@ When multiple agents access the same brain:
 
 Vant uses **Git branches** for isolation + **file locks** for coordination.
 
-```
+```text
 main branch (production)
     │
     ├── agent-1/          # Agent 1's brain

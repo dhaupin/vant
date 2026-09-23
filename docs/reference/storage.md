@@ -32,7 +32,7 @@ Storage provides a unified interface for all persistence in Vant:
 
 ## Architecture
 
-```
+```text
 Storage (abstract base)
 ├── FileStorage      (local file I/O)
 ├── BrainStorage    (brain/memory files)  

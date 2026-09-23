@@ -134,7 +134,7 @@ function getUser(name) {
 
 - [ ] Header comment on every file
 - [ ] @param on every function
-- [ ] @returns on every function  
+- [ ] @returns on every function
 - [ ] SECURITY section if handling credentials
 - [ ] No stale TODO/FIXME
 - [ ] No AI clichés

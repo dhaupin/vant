@@ -10,7 +10,7 @@ nav_order: 87
 
 > Public/Private brain - split sync
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │           Hybrid Sync Architecture                  │
 │                                                      │

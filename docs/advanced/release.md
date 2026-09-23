@@ -14,7 +14,7 @@ How to release a new version of Vant.
 
 Vant uses [Semantic Versioning](https://semver.org/):
 
-```
+```text
 MAJOR.MINOR.PATCH
 v0.8.6
 ```

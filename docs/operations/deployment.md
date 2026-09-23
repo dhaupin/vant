@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/deployment
 layout: default
 title: Deployment
-nav_order: 63
+nav_order: 64
 ---
 
 # Tutorial: Deploy Vant

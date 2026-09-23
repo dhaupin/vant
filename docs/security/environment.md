@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /security/environment
 layout: default
 title: Environment & Limits
-nav_order: 69
+nav_order: 70
 ---
 
 # Environment & Limits
@@ -39,7 +39,7 @@ Vant does NOT use:
 **Source:** [GitHub Rate Limits](https://docs.github.com/en/rest/about-rest-api/rate-limits-and-concurrency)
 ### Token Scopes
 **Recommended minimal scopes:**
-```
+```text
 repo
   - repo:status    (check)
   - repo_deployment (read)

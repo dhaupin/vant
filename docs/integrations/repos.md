@@ -10,7 +10,7 @@ nav_order: 89
 
 > Distributed brain - mount repos like drives
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │           Multi-Repo Architecture                  │
 │                                                      │

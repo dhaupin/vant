@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /essential/islands
 layout: default
 title: Islands - Lazy-loading
-nav_order: 35
+nav_order: 36
 ---
 
 # Vant Islands
@@ -42,7 +42,7 @@ Vant used to load one giant `current.json` - potentially massive, containing eve
 
 ## Architecture
 
-```
+```text
 Brain = Static Islands + Lazy Islands
 
 Static (always, 3):

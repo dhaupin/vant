@@ -73,6 +73,8 @@
 
 - title: Essential
   items:
+  - title: Overview
+    url: /vant/essential/
   - title: Islands
     url: /vant/essential/islands
   - title: Architecture
@@ -154,6 +156,8 @@
     url: /vant/security/best-practices
   - title: Privacy
     url: /vant/security/privacy
+  - title: Encryption
+    url: /vant/security/encryption
 
 - title: Advanced
   items:

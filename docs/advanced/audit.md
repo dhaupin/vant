@@ -28,7 +28,7 @@ cat .audit.log
 
 Each entry:
 
-```
+```text
 [TIMESTAMP] [LEVEL] [EVENT] [DETAILS]
 2024-01-15T10:30:00Z INFO BLOCKED Path traversal ../etc
 ```

@@ -11,7 +11,7 @@ description: Using Linear issue tracking with Vant
 
 Vant integrates with Linear for issue tracking via GraphQL API.
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │         Linear Issue Flow                │
 │                                          │

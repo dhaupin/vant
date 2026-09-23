@@ -17,7 +17,7 @@ nav_order: 107
 
 Vibe formalizes how "mood" influences runtime. The agent programmatically rewrites its own `mood.ini`.
 
-```
+```text
 ┌──────────────────────────────────────────┐
 │     Vibe Controls Agent Behavior        │
 │                                          │

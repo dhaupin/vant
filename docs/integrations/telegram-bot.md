@@ -54,7 +54,7 @@ TELEGRAM_BOT_TOKEN=xxx vant bot
 ```
 
 You should see:
-```
+```text
 🤖 Telegram bot started!
 Commands:
   /start   - Welcome message
@@ -69,7 +69,7 @@ Commands:
 Open Telegram and search for your bot's username. Try these commands:
 
 ### /start
-```
+```text
 🤖 Welcome to Vant Bot!
 
 I help you manage your AI brain from Telegram.
@@ -83,7 +83,7 @@ Commands:
 ```
 
 ### /status
-```
+```text
 📊 Vant Status
 
 Version: 0.8.6
@@ -94,7 +94,7 @@ Lock Status: Available
 ```
 
 ### /brain
-```
+```text
 🧠 Brain Info
 
 Version: 0.8.6
@@ -109,7 +109,7 @@ Files:
 ```
 
 ### /health
-```
+```text
 ✅ Health Check Passed
 
 ✓ Config loaded
@@ -119,7 +119,7 @@ Files:
 ```
 
 ### /sync
-```
+```text
 🔄 Syncing with GitHub...
 
 Pulling changes... ✓

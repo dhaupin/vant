@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /multi-agent/succession
 layout: default
 title: Trust & Succession
-nav_order: 47
+nav_order: 48
 ---
 # Trust & Succession
 

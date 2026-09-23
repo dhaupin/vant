@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/sync
 layout: default
 title: Multi-Provider RAID Sync
-nav_order: 52
+nav_order: 53
 ---
 
 # Multi-Provider RAID 1 - Sync Manager
@@ -21,7 +21,7 @@ Sync Vant brain to multiple providers simultaneously for redundancy. If one prov
 
 ## How It Works
 
-```
+```text
        ┌──────────┐
        │   Brain  │
        └────┬─────┘

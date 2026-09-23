@@ -15,7 +15,7 @@ Vant supports the [Agent Skills](https://agentskills.io) specification, making i
 
 Vant exports a skill in the Agent Skills format:
 
-```
+```bash
 vant/
 ├── SKILL.md                    # Required: YAML frontmatter + instructions
 ├── references/

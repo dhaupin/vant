@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/events
 layout: default
 title: Events
-nav_order: 56
+nav_order: 57
 ---
 
 # Events

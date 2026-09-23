@@ -42,7 +42,7 @@ Technical details and implementation.
 ### How does brain transfer work?
 How memory persists across sessions.
 
-```
+```text
 Session 1 ends:
   1. Save brain files
   2. Commit to GitHub

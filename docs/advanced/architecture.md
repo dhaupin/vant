@@ -11,7 +11,7 @@ description: How the Vant API surface is organized - vant.js as source of truth.
 
 ## Overview
 
-```
+```text
 lib/vant.js  ← SOURCE OF TRUTH (common calls)
     │
     ├── Brain: { load, save, list, search, corpus, state }
@@ -93,7 +93,7 @@ These live only in `lib/api.js`:
 
 ## REST API Design (OpenAPI)
 
-```
+```text
 POST   /api/v1/embeddings     → OpenAI-compatible
 GET    /api/v1/brain/:name   → Load brain file
 POST   /api/v1/brain/:name   → Save brain file

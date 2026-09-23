@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/storage
 layout: default
 title: Storage Layer
-nav_order: 51
+nav_order: 52
 ---
 
 # Storage Layer

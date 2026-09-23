@@ -119,7 +119,7 @@ const files = prune.listPrunable({ staleDays: 90 });
 ### Fluff Detection
 
 - Content < 50 characters
-- Less than 10 words  
+- Less than 10 words
 - Same word > 30% repetition
 - Test patterns (AI-generated fluff)
 

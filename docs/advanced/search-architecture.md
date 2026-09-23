@@ -16,7 +16,7 @@ nav_order: 91
 Your brain lives in `models/private/` - thousands of files with learnings, decisions, context. When you search, it has to scan all of them. That's slow.
 
 **Without optimization:**
-```
+```text
 Query "python"
 → Scan 1000s files
 → Parse each for relevance
@@ -91,7 +91,7 @@ The search-hybrid module loads only when you call `search.hybrid()` or `search.q
 
 **Concept**: Your memories are **islands of context**. Search connects them.
 
-```
+```text
 Query → Find islands → Re-hydrate context
     ↓        ↓              ↓
   Bridge  Discovery    Full content

@@ -198,7 +198,7 @@ async function search(query, mode = 'hybrid') {
 | Enterprise | 6000 |
 
 Rate limit headers:
-```
+```text
 X-RateLimit-Limit: 60
 X-RateLimit-Remaining: 45
 X-RateLimit-Reset: 1640000000

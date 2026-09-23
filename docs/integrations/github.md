@@ -147,14 +147,14 @@ Manage Git branches for brain versions.
 ### Default Branch
 Main production branch.
 
-```
+```text
 main - Production brain
 ```
 
 ### Experiment Branches
 Try changes safely.
 
-```
+```text
 main
 ├── agent-1-experiment/
 ├── personality-test/

@@ -16,7 +16,7 @@ description: Brain files - markdown memory the agent reads at wake and writes at
 Since the multi-brain layout, each brain is a named directory in both
 scopes:
 
-```
+```text
 models/
   public/<brain>/      shared template files, syncable to a repo
   private/<brain>/     agent-local state, kept out of the public brain

@@ -41,7 +41,7 @@ Using NSC "9" provides:
 
 ### Basic Format
 
-```
+```text
 NSC-9: 9-FACILITY-SEQUENCE-CHECK
         │ └─ Check digit (0-9)
         └─ Internal sequence (0-99999)
@@ -57,7 +57,7 @@ NSC-9: 9-FACILITY-SEQUENCE-CHECK
 
 When storing in quasicrystal:
 
-```
+```text
 data/{first2}/{FACILITY_SEQUENCE_CHECK}.json
 ```
 

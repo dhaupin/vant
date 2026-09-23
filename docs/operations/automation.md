@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/automation
 layout: default
 title: Automation
-nav_order: 53
+nav_order: 54
 ---
 
 # Tutorial: Automation Setup

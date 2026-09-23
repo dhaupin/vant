@@ -149,7 +149,7 @@ nav_order: 75
 
 Never use numbered lists (`1. 2. 3.`) inside markdown code blocks. Use dashes instead:
 
-```
+```text
 Steps to run:
 - Clone: git clone https://github.com/dhaupin/vant.git
 - Configure: cp config.example.ini config.ini
@@ -266,9 +266,9 @@ For example |
 - here's a properly documented section:
 
     ## Installation
-    
+
     Install Vant locally or via Docker.
-    
+
     ### Local Install
     For local development:
 

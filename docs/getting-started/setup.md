@@ -72,16 +72,16 @@ MCP clients can check via the `brain_migration_status` tool.
 
 | Variable | Description | Default |
 |----------|------------|---------|
-| `OPENAI_API_KEY` | OpenAI API key | - |
+| `OPENAI_API_KEY` | OpenAI API key (embeddings, rerank) | - |
 | `ANTHROPIC_API_KEY` | Anthropic API key | - |
-| `MODEL` | Model to use | gpt-4o |
 
 ### Optional - Storage
 
 | Variable | Description | Default |
 |----------|------------|---------|
-| `VANT_STATES_DIR` | States directory | states/active |
-| `VANT_MODELS_DIR` | Models directory | models/private |
+| `MODEL_PATH` | Primary brain path | models/private |
+| `VANT_BRAIN_PATH` | Brain path override (checked after `MODEL_PATH`) | - |
+| `VANT_MCP_PORT` | MCP server port | 3457 |
 
 ## TLS Setup
 
@@ -112,18 +112,19 @@ vant server --cert /etc/letsencrypt/live/yourdomain.com/fullchain.pem \
 
 ## Docker Setup
 
+Match the real image env contract (see the repo `Dockerfile`):
+
 ```dockerfile
-FROM node:20
+FROM node:20-alpine
 
 WORKDIR /app
-COPY package.json .
-RUN npm install
+COPY package.json ./
+RUN npm install --omit=dev
 
 COPY . .
 
 ENV GITHUB_TOKEN=your_token
-ENV VANT_SERVER_PORT=3456
-VANT_MCP_PORT=3100
+ENV GITHUB_REPO=your-username/your-brain-repo
 
 EXPOSE 3456
 
@@ -151,4 +152,5 @@ Check server is running: `vant health`
 
 ### "TLS certificate error"
 
-Use `--insecure` for development or set up TLS certificates.
+Set up TLS certificates (see [TLS Setup](#tls-setup) above); the dev server
+also accepts `VANT_SERVER_INSECURE=1` for plain HTTP.

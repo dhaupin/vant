@@ -181,7 +181,7 @@ Uses unified API with lockout:
 
 ### Base URL
 
-```
+```text
 http://localhost:3457
 ```
 

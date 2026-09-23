@@ -3,7 +3,7 @@ version: 0.9.0-axolotl
 permalink: /essential/sudo
 layout: default
 title: Sudo & Escalation
-nav_order: 43
+nav_order: 44
 ---
 
 # Sudo & Escalation
@@ -16,7 +16,7 @@ everywhere consistently, lib and CLI alike.
 
 ## The model
 
-```
+```text
 sandbox.can(cap) ──task exists in sudo?──► sudo.can(taskId, scope)   (TTL verdict)
         │                                        │
         └─ no task ──► static capabilities map   └─ expires automatically

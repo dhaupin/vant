@@ -3,75 +3,47 @@ version: 0.8.6
 permalink: /security/
 layout: default
 title: Security
-nav_order: 65
+nav_order: 66
+description: The Vant security chain - VAF input validation, sandbox capabilities, escrow budgets, encryption, and safe operation guides.
 ---
+
 # Security
 
-Vant security guide.
+> Four layers run on every operation: validate the input, gate the
+> capability, track the budget, encrypt the wire.
 
----
-## VAF
-Vant Application Firewall - input validation.
-### What
-| Check | Blocks |
-|-------|--------|
-| Word stacking | vant vant vant |
-| Path traversal | ../etc/passwd |
-| Shell chars | ; rm -rf |
-| Env vars | $HOME |
-### Config
-| Env | Default |
-|-----|---------|
-| MCP_REQUIRE_API_KEY | false |
-| VAF_MAX_LENGTH | 50000 |
----
+| Page | Job |
+|------|-----|
+| [VAF](/vant/security/vaf) | Input validation firewall (types, lengths, traversal, shell chars) |
+| [Sandbox](/vant/security/sandbox) | Capability gating: what an agent process may do |
+| [Escrow](/vant/security/escrow) | Operation budgets and spend tracking |
+| [Encryption](/vant/security/encryption) | AES-256-GCM, HMAC tokens, RSA primitives |
+| [Environment & Limits](/vant/security/environment) | Env vars, quotas, and hard ceilings |
+| [Airgap Propagation](/vant/security/airgap-propagation) | Moving brains across air gaps via images |
+| [Best Practices](/vant/security/best-practices) | Safe setup guide for agent workflows |
+| [Privacy](/vant/security/privacy) | What Vant stores, sends, and never sends |
 
-## Encryption
+## The chain in one example
 
-Vant uses AES-256-GCM for message encryption.
+```bash
+vant secret set github <value>   # secrets never print to stdout
+vant sandbox status              # check what this process may do
+vant sudo --status               # check elevation state
+```
 
-### Algorithm
+Write paths validate input (VAF), check capabilities (sandbox), and honor
+budgets (escrow) before touching disk. The same chain guards the MCP
+surface and the headless server.
 
-| Method | Algorithm | Auth |
-|--------|-----------|------|
-| `Encrypt.encrypt/decrypt` | AES-256-GCM | Yes (authTag) |
-| `Encrypt.aesGcmEncrypt/decrypt` | AES-256-GCM | Yes |
-| `Encrypt.encode/decode` | AES-256-GCM | Yes |
-| `Encrypt.hmac` | HMAC-SHA256 | - |
+## Where to start
 
-### Token Signing
-
-| Method | Algorithm |
-|--------|-----------|
-| `Encrypt.signToken` | HMAC-SHA256 |
-| `Encrypt.verifyToken` | HMAC-SHA256 |
-
-### RSA
-
-| Method | Algorithm | Min Key Size |
-|--------|-----------|--------------|
-| `Encrypt.rsaKeyPair` | RSA | 2048 bits |
-| `Encrypt.rsaEncrypt/decrypt` | OAEP-SHA256 | 2048 bits |
-| `Encrypt.rsaSign/Verify` | RSA-SHA256 | 2048 bits |
-
-### Environment Variables
-
-| Variable | Purpose |
-|----------|---------|
-| `VANT_TOKEN_SECRET` | Secret for signing auth tokens |
-| `VANT_API_KEY` | Server authentication |
-| `VANT_MSG_ENCRYPTED` | Enable message encryption (default: true) |
-
----
-## Data
-Tokens encrypted per-user.
----
+Hardening a self-hosted or multi-agent deployment: [Best
+Practices](/vant/security/best-practices) first, then [Environment &
+Limits](/vant/security/environment) for the env vars that tune each layer.
+Understanding a specific refusal or block: find the layer above and read
+its page.
 
 ## Related
 
-- [VAF](/vant/security/vaf) - Input validation firewall
-- [Sandbox](/vant/security/sandbox) - Execution isolation
-- [Escrow](/vant/security/escrow) - Budget tracking
-
-- [Configuration](/vant/reference/config) - Config settings
-- [Tutorial: Security](/vant/security/best-practices) - Practical security setup
+- [Configuration](/vant/reference/config) - Config keys including MCP auth
+- [CLI Reference](/vant/reference/cli) - `secret`, `sandbox`, `sudo`, `encrypt`

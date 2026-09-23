@@ -27,7 +27,7 @@ VANT_API_KEY=yourkey vant server
 
 The server implements a layered security chain:
 
-```
+```text
 Incoming Request
        ↓
     [VAF] ← Input validation

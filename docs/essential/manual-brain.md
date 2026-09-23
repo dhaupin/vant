@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /essential/manual-brain
 layout: default
 title: Brain File Templates
-nav_order: 42
+nav_order: 43
 ---
 # Brain File Templates
 
@@ -121,7 +121,7 @@ PURPOSE: [What you're here to do]
 ### Option A: Your Private Brain (Recommended)
 Create `models/private/` - this is your personal brain that won't be affected by Vant updates.
 
-### Option B: Shared/Public Brain  
+### Option B: Shared/Public Brain
 Create `models/public/` - shared brain that gets updated with Vant. Agents can also write to this if you want to share with them.
 
 1. Create folder: `models/private/` (or `models/public/`)

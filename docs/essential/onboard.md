@@ -3,13 +3,13 @@ version: 0.8.6
 permalink: /essential/onboard
 layout: default
 title: Knowledge Base Browser
-nav_order: 38
+nav_order: 39
 ---
 # Knowledge Base Browser
 
 Browse and search your Vant brain.
 
-```
+```text
 ┌─────────────────────────────────────────────┐
 │          Vant Onboard CLI                     │
 │                                              │

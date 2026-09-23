@@ -3,13 +3,13 @@ version: 0.8.6
 permalink: /operations/ci
 layout: default
 title: CI
-nav_order: 61
+nav_order: 62
 ---
 # CI
 
 Continuous integration for Vant.
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │              CI Pipeline                         │
 │                                                  │

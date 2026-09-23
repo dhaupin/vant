@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /security/escrow
 layout: default
 title: Escrow
-nav_order: 68
+nav_order: 69
 ---
 
 # Escrow

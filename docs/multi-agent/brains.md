@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /multi-agent/brains
 layout: default
 title: Multi-brain
-nav_order: 45
+nav_order: 46
 description: Named brains with a stack - several memory contexts in one install, switched by name.
 ---
 
@@ -14,7 +14,7 @@ description: Named brains with a stack - several memory contexts in one install,
 Since the multibrain layout, every brain lives in a per-brain directory in
 both scopes, and `models/state.json` holds the active stack:
 
-```
+```text
 models/
   public/vant/
   public/nova/

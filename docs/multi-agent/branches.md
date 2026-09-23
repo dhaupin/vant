@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /multi-agent/branches
 layout: default
 title: Branches
-nav_order: 46
+nav_order: 47
 ---
 
 # Branch

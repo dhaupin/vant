@@ -27,7 +27,7 @@ With RAG:
 
 ## Architecture
 
-```
+```text
 User Query
     │
     ▼
@@ -163,7 +163,7 @@ async function cachedQuery(question) {
 
 ### Support Bot
 
-```
+```text
 User: How do I reset password?
 → Query brain for password reset docs
 → Return step-by-step guide
@@ -171,7 +171,7 @@ User: How do I reset password?
 
 ### Code Assistant
 
-```
+```text
 User: How do I connect to PostgreSQL?
 → Query brain for database learnings
 → Return relevant code snippets
@@ -179,7 +179,7 @@ User: How do I connect to PostgreSQL?
 
 ### Research Assistant
 
-```
+```text
 User: What do I know about量子计算?
 → Query brain for quantum computing
 → Return all relevant notes

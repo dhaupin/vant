@@ -18,7 +18,7 @@ Create config file.
 
 Error:
 
-```
+```text
 Error: Config file not found
 ```
 
@@ -33,7 +33,7 @@ Check GitHub credentials.
 
 Error:
 
-```
+```text
 Error: Cannot connect to GitHub
 ```
 
@@ -50,7 +50,7 @@ Resolve version conflicts.
 
 Error:
 
-```
+```text
 Error: Merge conflict in brain
 ```
 
@@ -64,7 +64,7 @@ Handle API quota limits.
 
 Error:
 
-```
+```text
 Error: GitHub API rate limit exceeded
 ```
 
@@ -78,7 +78,7 @@ Brain file structure and management.
 ### Brain not loading
 Test brain loading.
 
-```
+```text
 Error: Cannot load brain
 ```
 
@@ -124,7 +124,7 @@ Advanced troubleshooting.
 ### Network Timeouts
 Timeout configuration.
 
-```
+```text
 Error: Request timed out
 ```
 
@@ -146,7 +146,7 @@ Error: Request timed out
 ### Git Corruption
 Handle corrupted brain files.
 
-```
+```text
 Error: fatal: unsafe repository
 ```
 
@@ -158,7 +158,7 @@ git config --global --add safe.directory /path/to/repo
 ### Permission Denied
 Fix permission errors.
 
-```
+```text
 Error: Permission denied (publickey)
 ```
 
@@ -169,7 +169,7 @@ Error: Permission denied (publickey)
 ### Token Expired
 Fix token errors.
 
-```
+```text
 Error: Token expired
 ```
 
@@ -184,7 +184,7 @@ VAF (Vant Application Firewall) may block legitimate input:
 ### Blocked: Newlines
 Handle blocked requests.
 
-```
+```text
 Error: Content blocked: /\n/
 ```
 
@@ -195,7 +195,7 @@ Error: Content blocked: /\n/
 ### Blocked: Path Traversal
 Handle blocked requests.
 
-```
+```text
 Error: Path traversal detected: ../etc/passwd
 ```
 
@@ -206,7 +206,7 @@ Error: Path traversal detected: ../etc/passwd
 ### Blocked: Script/XSS
 Handle blocked requests.
 
-```
+```text
 Error: Content blocked: /<script>/
 ```
 
@@ -220,7 +220,7 @@ Error: Content blocked: /<script>/
 ### Blocked: Shell Commands
 Handle blocked requests.
 
-```
+```text
 Error: Content blocked: /; rm -rf/
 ```
 

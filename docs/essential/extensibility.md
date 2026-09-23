@@ -4,7 +4,7 @@ permalink: /essential/extensibility
 layout: default
 title: Extensibility
 description: How to extend Vant with custom agents and skills
-nav_order: 39
+nav_order: 40
 ---
 
 # Extensibility

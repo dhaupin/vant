@@ -10,7 +10,7 @@ nav_order: 118
 
 ## v0.8.6 (Unreleased) - Axolotl "Nuclear Breaking" Refactor
 
-> Branch `axolotl` — multibrain + dead-code bloat removal. Pinned at
+> Branch `axolotl` - multibrain + dead-code bloat removal. Pinned at
 > 0.8.6. 5 b-T commits (4ae316b → 9a2583b) + T15 fix (81ddedc).
 > No backward-compat shims. No test-only public APIs. No stubs.
 
@@ -26,7 +26,7 @@ nav_order: 118
 ### Refactor: Dead-Code Bloat Removal (T10b–T14b-r1)
 
 30+ aliases, singletons, and legacy exports removed. Each is a
-hard break — see `MIGRATING-0.8.6.md`.
+hard break; see `MIGRATING-0.8.6.md`.
 
 | Removed | Use instead |
 |---------|-------------|
@@ -40,7 +40,7 @@ hard break — see `MIGRATING-0.8.6.md`.
 | `lib/vant.js` `Runtime` legacy class | top-level lazy getters |
 | `lib/compute.js` `eval` | `evaluate` |
 
-### Test: T15 — Stale Test Fixes
+### Test: T15 - Stale Test Fixes
 
 Swept all 110 test files. Fixed 24 of 35 pre-existing failures.
 Remaining 11 (embed: 9, test-escrow: 4) deferred.

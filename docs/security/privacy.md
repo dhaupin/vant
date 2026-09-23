@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /security/privacy
 layout: default
 title: Privacy Policy
-nav_order: 72
+nav_order: 73
 ---
 
 # Privacy Policy

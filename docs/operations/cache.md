@@ -3,14 +3,14 @@ version: 0.8.6
 permalink: /operations/cache
 layout: default
 title: Cache
-nav_order: 64
+nav_order: 65
 ---
 
 # Cache
 
 In-memory cache layer for fast recall.
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │              Cache Layer                            │
 │                                                      │

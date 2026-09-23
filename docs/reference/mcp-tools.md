@@ -25,7 +25,7 @@ Read from brain.
 | filename | string | File name |
 
 **Example:**
-```
+```bash
 vant_get_memory(category="learnings", filename="python")
 ```
 
@@ -43,7 +43,7 @@ Write to brain.
 | content | string | Content to write |
 
 **Example:**
-```
+```bash
 vant_set_memory(category="lessons", filename="new", content="# New")
 ```
 
@@ -56,7 +56,7 @@ List brain branches.
 **Params:** None
 
 **Example:**
-```
+```bash
 vant_list_branches
 ```
 
@@ -72,7 +72,7 @@ Create branch.
 | name | string | Branch name |
 
 **Example:**
-```
+```bash
 vant_create_branch(name="agent-1")
 ```
 
@@ -88,7 +88,7 @@ Switch branch.
 | name | string | Branch name |
 
 **Example:**
-```
+```bash
 vant_switch_branch(name="agent-1")
 ```
 
@@ -104,7 +104,7 @@ Commit changes.
 | message | string | Commit message |
 
 **Example:**
-```
+```bash
 vant_commit(message="Updated learnings")
 ```
 
@@ -120,7 +120,7 @@ Sync with GitHub.
 | direction | string | "push" or "pull" |
 
 **Example:**
-```
+```bash
 vant_sync(direction="push")
 ```
 
@@ -136,7 +136,7 @@ Acquire/release brain lock.
 | action | string | "acquire" or "release" |
 
 **Example:**
-```
+```bash
 vant_lock(action="acquire")
 ```
 
@@ -149,7 +149,7 @@ System health check.
 **Params:** None
 
 **Example:**
-```
+```bash
 vant_health
 ```
 
@@ -164,7 +164,7 @@ List islands.
 **Params:** None
 
 **Example:**
-```
+```bash
 vant_get_islands
 ```
 
@@ -180,7 +180,7 @@ Load island.
 | name | string | Island name |
 
 **Example:**
-```
+```bash
 vant_load_island(name="github")
 ```
 
@@ -197,7 +197,7 @@ Track decision.
 | reason | string | Reasoning |
 
 **Example:**
-```
+```bash
 vant_resolution_track(decision="Use uv", reason="Faster than pip")
 ```
 
@@ -215,7 +215,7 @@ Encode PNG steganography.
 | output | string | Output PNG path |
 
 **Example:**
-```
+```bash
 vant_stego_encode(message="secret", input="in.png", output="out.png")
 ```
 
@@ -231,7 +231,7 @@ Decode PNG steganography.
 | input | string | PNG path |
 
 **Example:**
-```
+```bash
 vant_stego_decode(input="out.png")
 ```
 
@@ -247,7 +247,7 @@ Get config.
 | key | string | Config key |
 
 **Example:**
-```
+```bash
 vant_config_get(key="vant.repo")
 ```
 
@@ -264,7 +264,7 @@ Set config.
 | value | string | Config value |
 
 **Example:**
-```
+```bash
 vant_config_set(key="agent.name", value="MyAgent")
 ```
 
@@ -281,7 +281,7 @@ Log audit entry.
 | data | string | Event data |
 
 **Example:**
-```
+```bash
 vant_audit_log(type="learn", data="New learning")
 ```
 
@@ -297,7 +297,7 @@ List audit log.
 | limit | number | Max entries |
 
 **Example:**
-```
+```bash
 vant_audit_list(limit=10)
 ```
 
@@ -310,7 +310,7 @@ Trust configuration.
 **Params:** None
 
 **Example:**
-```
+```bash
 vant_succession_info
 ```
 
@@ -326,7 +326,7 @@ Search brain.
 | query | string | Search query |
 
 **Example:**
-```
+```bash
 vant_search(query="python")
 ```
 
@@ -343,7 +343,7 @@ RAG rerank + compress.
 | topK | number | Results count |
 
 **Example:**
-```
+```bash
 vant_rerank(query="authentication", topK=5)
 ```
 
@@ -376,7 +376,7 @@ clients surface the same status.
 **Params:** None
 
 **Example:**
-```
+```text
 brain_migration_status()
 ```
 

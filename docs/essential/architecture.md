@@ -3,14 +3,14 @@ version: 0.8.6
 permalink: /essential/architecture
 layout: default
 title: System Architecture
-nav_order: 36
+nav_order: 37
 ---
 
 # Architecture
 
 How Vant is designed - persistent memory system using Git.
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Vant Architecture                          │
 │                                                                   │
@@ -36,7 +36,7 @@ Vant uses **Git for persistence** + ** Islands for lazy-loading** + **Branches f
 
 ### Data Flow
 
-```
+```text
 Start → Sync from GitHub → Load brain → Think/Learn → Commit → Push to GitHub
   │           │              │         │          │         │
   ▼           ▼              ▼         ▼          ▼         ▼
@@ -73,7 +73,7 @@ Start → Sync from GitHub → Load brain → Think/Learn → Commit → Push to
 
 ### Models Structure
 
-```
+```text
 models/
 ├── public/           # Brain (syncs to GitHub)
 │   ├── identity.md   # Who you are
@@ -116,7 +116,7 @@ await sync({ direction: 'push' });
 
 ### MCP Flow
 
-```
+```text
 HTTP Request (MCP)
     │
     ▼
@@ -135,7 +135,7 @@ Response
 
 ## Security Layers
 
-```
+```text
 Request → VAF (filter) → Sandbox (capabilities) → Escrow (budget) → Execute
             │               │                    │              │
          [block]        [permission]        [budget]      [run]

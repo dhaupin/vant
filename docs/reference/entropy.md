@@ -28,14 +28,14 @@ LLMs are token-limited. Loading 60+ brain files on startup is expensive. Entropy
 
 The algorithm scans data with a sliding window (default 8 bytes), calculating Shannon entropy for each position:
 
-```
+```text
 Input: "aaaaaaaaXYaabcdefg..."
          ↓ entropy scan
 Output: [stable][spike][stable][spike]...
 ```
 
 **Shannon Entropy Formula:**
-```
+```text
 H = -Σ P(x) log₂ P(x)  (normalized 0-1)
 ```
 
@@ -53,7 +53,7 @@ H = -Σ P(x) log₂ P(x)  (normalized 0-1)
 
 The seed is a semantic summary - not the data itself, but a summary:
 
-```
+```text
 "spikes:0.92,0.88,0.91"  →  3 high-entropy regions
 "stable:AAAA...BBBB"    →  all low-entropy
 ```

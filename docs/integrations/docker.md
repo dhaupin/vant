@@ -9,7 +9,7 @@ nav_order: 84
 
 Run Vant in containers.
 
-```
+```text
 ┌─────────────────────────────────────────────┐
 │          Vant Docker Setup                    │
 │                                            │
@@ -213,4 +213,4 @@ curl http://localhost:3456/health
 - [Deployment Tutorial](/vant/operations/deployment)
 - [Server](/vant/runtime/server) - HTTP server
 - [Security](/vant/security/) - VAF + sandbox
-```
+```text

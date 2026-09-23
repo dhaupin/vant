@@ -14,7 +14,7 @@ The Horcrux system enables Vant to boot from zero local state. When combined wit
 
 ## How It Works
 
-```
+```text
 Image (PNG) → Stego Decode → Manifest + Brain → Resume Session
 ```
 
@@ -92,7 +92,7 @@ On boot:
 
 ## Flow Diagram
 
-```
+```text
 ┌─────────────────┐     ┌─────────────────┐
 │  Horcrux Image   │────▶│   Decode Stego  │
 │  (any location)  │     │                │

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /multi-agent/
 layout: default
 title: Multi-agent
-nav_order: 44
+nav_order: 45
 description: Multi-brain contexts, branch-per-agent crews, succession and trust levels.
 ---
 

@@ -35,7 +35,7 @@ Open a discussion first:
 ### 3. Write Code
 Contribute code to the project.
 
-```
+```text
 1. Fork the repo
 2. Create a branch: git checkout -b feature/your-feature
 3. Make changes
@@ -92,7 +92,7 @@ Types:
 - `test`: Adding tests
 
 Examples:
-```
+```yaml
 feat: Add multi-agent lock timeout
 fix: Handle missing brain repo gracefully
 docs: Update CLI reference

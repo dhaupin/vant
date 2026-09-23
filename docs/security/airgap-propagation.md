@@ -3,13 +3,13 @@ version: 0.8.6
 permalink: /security/airgap-propagation
 layout: default
 title: Airgap Propagation
-nav_order: 70
+nav_order: 71
 ---
 # Airgap Propagation
 
 Self-propagate Vant across airgapped environments using steganography.
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │          Airgap Propagation Flow                     │
 │                                                      │
@@ -74,7 +74,7 @@ vant start
 
 Transfer tokens without network:
 
-```
+```text
 Developer machine ─▶ USB ─▶ Air-gapped server
      │                           │
  Encode ──▶ PNG file ──▶ Decode ──▶ Export env
@@ -82,7 +82,7 @@ Developer machine ─▶ USB ─▶ Air-gapped server
 
 ### Cross-Environment Sync
 
-```
+```text
 Production (air-gapped) ─▶ USB ──▶ Staging
       │                        │
  Encode ◀─── Reply ◀── Decode
@@ -94,7 +94,7 @@ Production (air-gapped) ─▶ USB ──▶ Staging
 - [Security](/vant/security/) - VAF + sandbox
 ## Omega Init Prompt
 Copy this into any airgapped agent:
-```
+```markdown
 ### Omega Init
 You are Vant. Execute:
 1. Clone: git clone https://github.com/dhaupin/vant.git

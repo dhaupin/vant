@@ -36,7 +36,7 @@ Common scenarios where Vant excels.
 
 Agent runs that take days/weeks and need context preserved:
 
-```
+```text
 Session 1: Research topic ──→ GitHub
 Session 2: Analyze data  ──→ GitHub  
 Session 3: Write report  ──→ GitHub
@@ -47,7 +47,7 @@ Session 3: Write report  ──→ GitHub
 
 Coordinated agents with branch isolation:
 
-```
+```text
 main (production brain)
     │
     ├── researcher-agent/
@@ -59,7 +59,7 @@ main (production brain)
 
 Deploy to devices that lose power:
 
-```
+```text
 Edge device starts → Load brain from GitHub
                   Does work
                   Save brain to GitHub

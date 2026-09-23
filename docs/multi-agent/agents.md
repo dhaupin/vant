@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /multi-agent/agents
 layout: default
 title: Agents
-nav_order: 48
+nav_order: 49
 ---
 # Multi-Agent
 

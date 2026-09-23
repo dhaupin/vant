@@ -165,3 +165,54 @@ verification.
   in a later cosmetic pass if the PRD's 81 target is picked up.
 - scripts/_fix_docs_links.js is one-shot (idempotent but not needed
   again); check-docs-links.js is the keeper.
+
+---
+
+# QC polish pass (2026-09-23, sweep 4)
+
+Scope: another full docs pass for QC, formatting, accuracy, examples, and
+polish, on top of sweep 3. Recovered from a crash mid-wave: the work was
+sitting as a large uncommitted diff (79 files) plus two new pages and the
+new style linter. This session verified it, fixed one accuracy bug it
+contained, and committed it.
+
+## What landed
+
+- **77 docs pages edited across every section + AGENTS.md:** formatting,
+  stale-claim fixes, example fixes, voice polish. AGENTS.md MCP Tools
+  link retargeted runtime/mcp -> reference/mcp-tools.
+- **New pages:** docs/essential/index.md (section overview, nav_order 35)
+  and docs/security/encryption.md (lib/encrypt reference, nav_order 74;
+  security band now contiguous 66-74).
+- **nav.yml:** essential Overview + security Encryption entries added.
+- **Durable tooling:** scripts/check-docs-style.js (fence language tags,
+  heading-level skips, trailing whitespace, tabs in prose; exit 1 on
+  findings). Joins check-docs-links.js as the two pre-commit docs gates.
+
+## QC found + fixed during verification
+
+- **encryption.md fabrication:** `Encrypt.encode/decode` table row does
+  not exist (live-probed lib/encrypt exports). Removed.
+- **encryption.md overstated at-rest claim:** "tokens are encrypted per
+  user" replaced with the real contract: signToken is HS256 over base64
+  payloads, signed not encrypted.
+- **Accuracy spot-checks that PASSED:** rsaEncrypt/Decrypt = OAEP-SHA256,
+  rsaSign/Verify exist, aesGcmEncrypt/Decrypt = AES-256-GCM with authTag,
+  RSA min key 2048.
+
+## Verification (sweep 4)
+
+- Style lint PASS (119 files), links PASS (119 files), docs suite 6/6.
+- nav_order: zero duplicates repo-wide; security band contiguous.
+- Battery: ci 421/0/3, runner 37/37, all 108 standalone suites exit-0,
+  coverage 41/0.
+
+## Notes for future passes
+
+- Scratch residue (scripts/_fix_*, _qc_*, _renumber_docs,
+  _audit_probe, private/buffy) left untracked per convention; the _fix_*
+  scripts are one-shots and safe to delete whenever.
+- Run check-docs-style.js + check-docs-links.js before any docs commit.
+- Remaining PRD follow-ups unchanged from sweep 3: operations/ 15 pages
+  vs 8-slot target (fold operations.md + cache.md later), reference/cli
+  nav_order 111 vs PRD 81 (cosmetic).

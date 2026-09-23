@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /essential/plugins
 layout: default
 title: Plugins
-nav_order: 41
+nav_order: 42
 ---
 
 # Tutorial: Build Plugins
@@ -21,7 +21,7 @@ Plugins extend Vant with:
 
 ### Structure
 
-```
+```text
 plugins/
 └── my-plugin/
     ├── index.js

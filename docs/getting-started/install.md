@@ -82,7 +82,7 @@ node bin/vant.js health
 ```
 
 ### What's Included
-```
+```bash
 vant/
 ├── bin/          # CLI executables
 ├── lib/          # Core modules
@@ -239,7 +239,7 @@ vant sync
 ```
 
 You should see output like:
-```
+```text
 ✅ Vant v0.8.6
 ✅ Config loaded
 ✅ GitHub connected

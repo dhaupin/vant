@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /essential/custom-island
 layout: default
 title: Custom Islands
-nav_order: 40
+nav_order: 41
 ---
 
 # Tutorial: Create Custom Islands
