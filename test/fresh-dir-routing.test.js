@@ -178,6 +178,76 @@ test('test-all --help: usage without running checks', () => {
     return true;
 });
 
+// (pass 22) cwd-anchor + containment contract: the brain runtime is
+// cwd-anchored BY DESIGN (dispatcher comment: subcommands run in the user's
+// project so models/ resolves there), so a routed command MAY create the
+// models tree in the caller's cwd. What must NEVER happen again: the escrow
+// store's two-anchor bug (cwd-anchored store path joined against the install
+// root) producing escape-shaped paths — which the hardened FileStorage.write
+// containment check now rejects, crashing every foreign-cwd invocation.
+// Pin: routed command succeeds from a foreign dir, no 'Path escape' error,
+// and the store lands INSIDE the caller's designed models tree.
+test('escrow store: foreign-cwd writes contained + land in designed location', () => {
+    const cwd = fs.mkdtempSync(path.join(sandbox, 'cwd-escrow-'));
+    try {
+        let out = '';
+        let code = 0;
+        try {
+            const r = execFileSync('node', [path.join(sandbox, 'bin', 'vant.js'), 'rate'], {
+                cwd,
+                encoding: 'utf8',
+                timeout: 60000,
+                env: { ...process.env, VANT_FRESH_DIR_TEST: '1' }
+            });
+            out = r || '';
+        } catch (e) {
+            out = (e.stdout || '') + (e.stderr || '');
+            code = e.status === undefined ? -1 : e.status;
+        }
+        if (/Path escape detected|SECURITY_PATH_ESCAPE/.test(out)) {
+            throw new Error('containment rejected a DESIGNED store write (two-anchor bug is back)');
+        }
+        if (/Cannot find module|MODULE_NOT_FOUND/.test(out)) {
+            throw new Error('module resolution broke outside repo cwd');
+        }
+        // The designed store location (caller-cwd-anchored, brain-scoped).
+        const designed = path.join(cwd, 'models', 'private', 'vant', 'orgchart', 'escrow.json');
+        if (!fs.existsSync(designed)) {
+            throw new Error('escrow store not written to the designed cwd-anchored location');
+        }
+        return true;
+    } finally {
+        try { fs.rmSync(cwd, { recursive: true, force: true }); } catch (e) { /* ignore */ }
+    }
+});
+
+// (pass 22) Containment unit: FileStorage.write must refuse to place files
+// outside its basePath, whatever path.join does with hostile relative paths.
+test('storage.write: containment pre-check rejects escape-shaped paths', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-contain-'));
+    try {
+        const Storage = require(path.join(ROOT, 'lib', 'storage'));
+        const store = new Storage.FileStorage({ basePath: dir, wal: false });
+        for (const hostile of ['../escape.txt', 'a/../../escape2.txt', 'nested/ok.txt']) {
+            if (hostile.includes('..')) {
+                let threw = false;
+                try { store.write(hostile, 'x'); } catch (e) { threw = /escape|blocked/i.test(e.message); }
+                if (!threw) return { error: `write accepted escape path: ${hostile}` };
+                if (fs.existsSync(path.join(dir, '..', 'escape.txt')) || fs.existsSync(path.join(dir, '..', 'escape2.txt'))) {
+                    return { error: `escape file materialized: ${hostile}` };
+                }
+            } else {
+                // Normal nested write must still work.
+                store.write(hostile, 'ok');
+                if (!fs.existsSync(path.join(dir, hostile))) return { error: `normal write broken: ${hostile}` };
+            }
+        }
+        return true;
+    } finally {
+        try { fs.rmSync(dir, { recursive: true, force: true }); } catch (e) { /* ignore */ }
+    }
+});
+
 // ==================== RUNNER ====================
 
 function main() {

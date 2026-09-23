@@ -209,15 +209,27 @@ vant succession set <level>
 vant vibe                        # Show current vibe
 vant vibe experimental           # or safety_first
 
-vant snapshot                    # Default output: <agent>-p_<pw>.svg
-vant snapshot --agent nova       # Snapshot a specific brain
+vant snapshot                    # Default output: <brain>/boot/<agent>-p_<pw>.svg
+vant snapshot --agent nova       # Snapshot under a specific agent name
+vant snapshot --brain nova       # Snapshot into a specific brain's boot dir
 vant snapshot --password <pw>    # Explicit password
 vant snapshot --output <path>    # Custom output path (inside the repo)
 vant snapshot --no-verify        # Skip the round-trip verification
+                                 # (REFUSED when overwriting an existing
+                                 #  horcrux — see below)
+
+# Backup safety: if the target already exists (i.e. it IS some brain's live
+# boot horcrux), snapshot writes to a sibling tmp file, round-trip validates
+# it, and only then replaces the original — same contract as
+# `vant horcrux refresh`. A failed or corrupt encode never destroys the only
+# backup. Brand-new targets write directly. The default output follows the
+# current brain (models/public/<brain>/boot/<agent>-p_<pw>.svg), not a
+# hardcoded brain name.
 
 # Note: snapshot self-grants write on a fresh default sandbox (the CLI is
 # trusted); a host that has explicitly locked the sandbox down must grant
-# canWrite first. Sidecars (.manifest.json, .sha256) are gitignored.
+# canWrite first. Sidecars (.manifest.json, .sha256) are gitignored. All
+# paths resolve against the repo root regardless of invocation cwd.
 
 vant error list
 vant error code <code>

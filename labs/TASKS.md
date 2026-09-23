@@ -1898,3 +1898,82 @@ horcrux overlap (bin/snapshot.js also wraps toHorcrux — refresh semantics
 could be shared), docs sync for `vant horcrux refresh` (cli.md + memory/
 horcrux.md), and bin/docs-build.js's require("./lib/sandbox") fix landed in
 pass 20 — worth one grep in docs for other stale paths.
+
+---
+
+## Session (2026-09-23 — pass 22: snapshot backup-safety, escrow store
+## containment, DEAD_EXPORTS triage)
+
+**#2 snapshot/horcrux overlap — resolved by adopting refresh semantics:**
+bin/snapshot.js (routed `vant snapshot`) is the second writer of stego-SVG
+horcruxes, with manifest+sha256 sidecars. Two real defects fixed:
+
+1. **Blind overwrite of the only backup.** Its default target IS the live
+   boot horcrux, and toHorcrux (despite P2 #27 atomicity) replaces the old
+   file with no content check — a corrupt-but-successful encode silently
+   destroyed the backup. Now: if the target exists, write to a sibling
+   `.snapshot-tmp.svg`, round-trip validate (fromHorcrux +
+   validateHorcruxData), THEN rename over the target — horcrux refresh's
+   exact contract. Failure at any stage leaves the original untouched, tmp
+   cleaned (success, validation-fail, and top-level-catch paths).
+   `--no-verify` on an existing target is now REFUSED (blind replace is the
+   destruction mode being removed); new targets may skip verification.
+   Manifest moved to post-validation so it never describes a discarded
+   backup.
+2. **cwd fragility.** Relative sidecar writes + toHorcrux's atomicWriteFile
+   resolved against the caller's cwd; default output was also hardcoded to
+   models/public/vant/boot (coincidental brain match). Now: --output (or
+   nothing) resolves user-relative first, then the run chdirs to REPO_ROOT
+   so every subsequent path is repo-anchored; default target follows the
+   CURRENT brain (brain.getCurrentBrain() → state.json stack head →
+   'vant') via the new --brain flag chain.
+
+Live-verified: bare snapshot (tmp→validate→replace, valid inspect
+afterward), --no-verify refusal, foreign-cwd dispatch (lands in repo,
+caller dir untouched).
+
+**BONUS root-cause while testing: escrow store escape via two-anchor bug.**
+Every routed dispatcher command from a foreign cwd materialized
+models/private/vant/orgchart/escrow.json in the CALLER's dir. Root cause:
+lib/escrow.js built its store path cwd-anchored ('models/private/<brain>/
+orgchart/escrow.json') but handed FileStorage basePath=INSTALL ROOT —
+path.resolve() anchored at cwd, path.relative() then produced an escape-
+shaped '../../tmp/...' rel, and path.join(base, rel) collapsed it right
+back outside the store. Containment never ran on write (read-only via
+_checkSymlink), so the write landed silently. Fixes:
+- escrow.js: teams.js-style anchor (basePath = resolved store DIR, file =
+  basename) — containment holds by construction. teams.js was already
+  correct; one consistent anchor per store is the rule.
+- storage.js: (a) write() and delete() now call _checkContainment BEFORE
+  any WAL intent/dir creation/unlink; (b) _checkContainment replaced the
+  startsWith prefix check ("/repo-evil" passes "/repo") with
+  path.relative + '..' detection.
+Note: the caller-cwd models/ tree itself is BY DESIGN (dispatcher comment:
+brain runtime resolves models/ relative to cwd so brains live in the
+user's project) — the bug was the escape-shaped path, not the anchor.
+
+**Guard tests (fresh-dir-routing 10/10):** foreign-cwd 'rate' dispatch must
+contain its store write in the DESIGNED location without a
+SECURITY_PATH_ESCAPE crash (this is the regression that would have fired
+with the hardening alone); FileStorage.write must refuse escape-shaped
+paths while normal nested writes still work.
+
+**#1 DEAD_EXPORTS long tail — triaged, closed as documented-debt:**
+Rounds 1-3 (2026-09-21) removed the valuable items (metrics, lock,
+consensus internals, sync privacy). The remaining tail is getStack*
+convention accessors, error.js typed-error public API, dynamic consumers'
+surface, and _-internals whose deletion buys nothing (no bundle shrink,
+no attack surface — see header). Marked opportunistically-done rather
+than churning ~30 files against the corruption-incident lesson (c7009da).
+
+**Evidence:** fresh-dir-routing 10/10; escrow 15/15, teams ✓, storage 40,
+boot 15/15, concurrent 6/6; live snapshot round-trips; full sweep below
+before commit.
+
+**Next candidates:** bin/audit.js + bin/backup.js still do raw fs ops
+outside FileStorage (same prd-storage census as clean.js); snapshot's
+--no-verify UX could offer --output - to stdout; dispatcher could pass an
+explicit anchor env (VANT_REPO_ROOT) so libs stop inferring it from cwd;
+snapshot + horcrux refresh could share a lib/horcrux-safe.js helper (the
+tmp→validate→rename flow is now duplicated in two CLIs).
+
