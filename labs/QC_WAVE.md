@@ -383,3 +383,59 @@ Scope: new check classes beyond rounds 6-8: repo paths referenced in
 - Style PASS (119), links PASS (119), docs suite 6/6, nav_order all
   unique. Zero pipe residue, 0 missing repo paths, remaining syntax
   flags all whitelisted idioms.
+
+---
+
+# Lander rebuild + pass 10 (2026-09-23)
+
+Scope: dist/ lander rewrite (frame, schema, content, rigging, single
+file, no framework) plus docs polish half still queued. Every claim on
+the page re-verified against the codebase before shipping.
+
+## Claims verified + corrected
+
+- **vant memory <cmd> is a phantom command:** bin/help.js advertises
+  `vant memory <cmd>` and bin/memory.js exists, but the vant.js
+  dispatcher has no memory route - live probe prints "Unknown command:
+  memory". The old lander's Work block used `vant memory learn`.
+  Replaced with the verified surface: `vant learn <key> <content>` and
+  `vant search <query>` (both dispatch-verified; learn/remember are
+  handled inline, address/locate too). NOTE for a future code pass:
+  either wire memory.js into the dispatcher or drop it from help.
+- **Stats band corrected with real counts:** 120 CLI commands -> 93
+  (parsed COMMANDS map in bin/vant.js), 125 lib modules -> 89
+  (ls lib/*.js). Doc pages 119, test files 108 - verified. Version
+  stat relabeled "MIT licensed" so it survives version bumps.
+- All 14 unique docs link targets resolve against real permalinks.
+
+## Lander structure (dist/index.html, single file)
+
+- Frame: skip link, nav, hero with dual-path onboarding (For humans /
+  For agents cards, each with a copyable terminal block and one CTA),
+  wake-work-sleep numbered loop, three memory systems, git-is-the-
+  feature, stats band, runtime grid, soul section, synced FAQ,
+  footer. One h1, semantic sections throughout.
+- Schema: SoftwareApplication refreshed (+license field), new HowTo
+  (4-step setup with step URLs), FAQPage kept in sync with the 9
+  visible details blocks (count-verified in CI-style probe).
+- Rigging: copy buttons on all 5 terminal blocks (clipboard API +
+  execCommand fallback, prompt ($) stripped from copied text), theme
+  applied pre-paint in head (no flash), prefers-reduced-motion
+  honored, :focus-visible styles, aria-labels on icon-only buttons.
+- No logo yet: brand mark is an inline "V" tile, easy to swap for a
+  real SVG mark later. OG image URL kept pointing at vant-og.png
+  (placeholder until design prose exists).
+
+## Verification (lander)
+
+- Structural probe: 13/13 PASS (tag balance, one h1, no em dash, no
+  emoji, 3 JSON-LD blocks parse, FAQ schema visible sync 9=9, 24
+  links all trusted hosts, 5 copy buttons all resolve).
+- All claims command-verified against bin/ + lib/ on 2026-09-23.
+
+## Notes for future passes
+
+- Docs polish half of pass 10 still queued (see round 9 notes).
+- `vant memory` dispatcher gap: help advertises it, code does not
+  route it. Fix code or help before advertising it anywhere else.
+- Swap the V brand tile + vant-og.png when logo and design prose land.
