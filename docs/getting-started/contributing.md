@@ -49,6 +49,33 @@ Contribute code to the project.
 
 Docs live in `docs/`. Just edit and PR!
 
+Two lint gates run over every docs change, so run them before you push:
+
+```bash
+# Voice/format gate: fence language tags, heading order, em dashes,
+# emoji in prose, pipe-table shape, trailing whitespace
+npm run lint:docs
+```
+
+Both scripts live in `scripts/` and pass silently when clean:
+
+```bash
+# Style gate only
+node scripts/check-docs-style.js
+
+# Link gate only: every internal link must resolve to a real page
+node scripts/check-docs-links.js
+```
+
+Content rules in short:
+
+- Plain hyphen in prose, never em or en dashes
+- No emoji or decorative glyphs outside code fences and inline code
+- Every opening code fence gets a language tag
+- Pipe tables: every row starts and ends with `|`
+- Version-specific claims (ports, paths, APIs) get checked against `lib/`
+  and `bin/` before you commit
+
 ### 5. Share
 
 - Star the repo

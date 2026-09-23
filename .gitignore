@@ -67,6 +67,12 @@ models/tmp-space/
 # Agent capability-probe scratch (sandbox gate tests, never tracked)
 /private/
 
+# scripts/ scratch (one-shot repair/probe scripts) - see scripts/.gitignore
+# for the convention: underscore/tmp- prefixed tools stay untracked.
+scripts/_*
+scripts/tmp-*
+scripts/*.local.js
+
 # Lock files (brain + storage)
 .lock-brain-token
 .locks/
