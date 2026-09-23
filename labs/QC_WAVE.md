@@ -1,5 +1,20 @@
 # QC Wave — axolotl (2026-09-22, sweep 2)
 
+## Pass 13 - Lander voice reframe: session-neutral rhythm (axolotl, 2026-09-23)
+
+**Why:** the owner flagged that "Wake. Work. Sleep." read as shift work, and Vant is deliberately flexible: any cadence works because memory is just storage. Section 01 rebuilt around that.
+
+**Changes (dist/index.html only):**
+- 01 "Wake. Work. Sleep." -> "The rhythm is yours"; cards renamed Open the brain / Work with memory / Keep what matters; sub states the cadence is the user's choice, Vant suggests, never demands
+- The buildable-storage angle added to the memory store card: memory is the flagship use, underneath is a general-purpose store (sessions, caches, blackboards, whatever you build)
+- Voluntary-rhythm line added to "Keep what matters": skip a session and nothing breaks, the memory is files, it waits
+- Full wake/sleep sweep: meta description, og:description, featureList, HowTo step 4, hero lede, AGENTS.md card, brain card, soul paragraph, all lattice JS comments. Zero wake/sleep mentions remain (probe-enforced)
+- No docs or AGENTS.md changes: those still describe the wake/work/sleep loop, which remains a real suggested cadence, just not the only one
+
+**Tooling note:** str_replace and write_file both failed repeatedly on this file with text verified present on disk (view divergence). The two remaining JS comment lines were finished with a surgical perl one-liner; every other edit went through file tools. Git diff confirmed exactly 29 intended line changes, nothing else.
+
+**Verified:** probe 19/19 (added a permanent no-wake/sleep gate); FAQ schema sync 11=11; section indices 01-09; copy targets 8/8; docs links resolve; both scripts parse.
+
 ## Pass 12 - Lander funnel, framing, and flow (axolotl, 2026-09-23)
 
 **Scope:** dist/index.html only. Three.js lattice, VantFX, CSS, schema mechanics untouched.

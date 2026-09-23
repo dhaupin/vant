@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vant | Agent Memory That Lives in Your Repo</title>
-    <meta name="description" content="Vant gives AI agents persistent memory: markdown brain files in your own repository. Read at wake, written at sleep, inherited every session. Any agent, any LLM, over MCP or plain files.">
+    <meta name="description" content="Vant gives AI agents persistent memory: markdown brain files in your own repository. Read at session start, written at session end, inherited every session. Any agent, any LLM, over MCP or plain files.">
     <meta name="author" content="Vant Project">
     <meta name="robots" content="index, follow">
     <meta property="og:title" content="Vant | Agent Memory That Lives in Your Repo">
-    <meta property="og:description" content="Persistent memory for AI agents as plain files in your repo. Agents read the brain at wake, write lessons at sleep, and inherit everything.">
+    <meta property="og:description" content="Persistent memory for AI agents as plain files in your repo. Agents read the brain when they start, write lessons before they finish, and inherit everything.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://vant.creadev.org">
     <meta name="twitter:card" content="summary_large_image">
@@ -42,7 +42,7 @@
         "datePublished": "2026-05-05",
         "keywords": "AI, agent, memory, persistent, github, git, brain, mcp, sessions, multibrain",
         "featureList": [
-            "Brain files: markdown memory read at wake, written at sleep",
+            "Brain files: markdown memory read at session start, written at session end",
             "Memory store: key-value state and documents with TTL",
             "Brain search: semantic retrieval with pluggable embed providers and rerank",
             "Citations: git-backed receipts for agent claims",
@@ -70,7 +70,7 @@
             { "@type": "HowToStep", "position": 1, "name": "Install", "text": "Install the CLI globally with npm: npm install -g vant", "url": "https://docs.creadev.org/vant/getting-started/install" },
             { "@type": "HowToStep", "position": 2, "name": "Start", "text": "Run vant start. It checks the brain layout, imports an older single-brain layout if found, and runs health checks.", "url": "https://docs.creadev.org/vant/getting-started/quick-start" },
             { "@type": "HowToStep", "position": 3, "name": "Connect an agent", "text": "Run vant mcp to serve the brain as MCP tools on 127.0.0.1:3457, then point any MCP client at it.", "url": "https://docs.creadev.org/vant/runtime/mcp" },
-            { "@type": "HowToStep", "position": 4, "name": "Let it inherit", "text": "The agent reads the brain at wake, writes lessons at sleep, and commits. The next session starts with everything.", "url": "https://docs.creadev.org/vant/getting-started/agent-onboarding" }
+            { "@type": "HowToStep", "position": 4, "name": "Let it inherit", "text": "The agent reads the brain when it starts, writes lessons before it finishes, and commits. The next session starts with everything.", "url": "https://docs.creadev.org/vant/getting-started/agent-onboarding" }
         ]
     }
     </script>
@@ -295,7 +295,7 @@
             <h1>Every session starts over. <em>Except yours.</em></h1>
             <p class="lede">
                 Vant gives any AI agent a brain: <strong>markdown memory files in your own repository</strong>.
-                Read at wake, written at sleep, inherited every session after. Git history becomes the memory
+                Read when a session opens, written before it closes, inherited every time after. Git history becomes the memory
                 lineage. No database, no lock-in, readable with <strong>cat</strong>. Humans and agents both
                 live here, and both are first-class: whether you are the one typing the commands or the one
                 executing them, welcome.
@@ -312,7 +312,7 @@
                 </div>
                 <div class="cta-card">
                     <h2>For agents</h2>
-                    <p>One command serves the brain as MCP tools. The repo AGENTS.md is your wake script.</p>
+                    <p>One command serves the brain as MCP tools. The repo AGENTS.md tells your agent exactly what to do.</p>
                     <pre class="term"><code id="c-mcp"><span class="prompt">$</span> <span class="cmd">vant</span> mcp
 <span class="cmt"># MCP server on 127.0.0.1:3457</span></code><button class="copy-btn" type="button" data-copy="c-mcp" aria-label="Copy MCP command">Copy</button></pre>
                     <p style="margin: 13px 0 0;"><a class="btn outline" href="https://docs.creadev.org/vant/getting-started/agent-onboarding">Agent onboarding</a></p>
@@ -328,26 +328,26 @@
     <main id="main">
         <section>
             <div class="container">
-                <div class="sec-head fx-reveal"><span class="sec-idx">01</span><h2>Wake. Work. Sleep.</h2></div>
-                <p class="sub fx-reveal">The whole loop is three moves. It runs the same whether a human types it or an agent executes it unattended.</p>
+                <div class="sec-head fx-reveal"><span class="sec-idx">01</span><h2>The rhythm is yours</h2></div>
+                <p class="sub fx-reveal">Three moves, at whatever pace suits: every session, once a week, or only when something is worth keeping. Vant suggests a cadence, it never demands one.</p>
                 <div class="loop">
                     <div class="card fx-reveal">
-                        <h3>Wake</h3>
-                        <p>The agent checks the brain layout, then reads identity, goals, lessons, and errors. It starts knowing things.</p>
-                        <pre class="term"><code id="c-wake"><span class="prompt">$</span> <span class="cmd">vant</span> migrate --status
-<span class="prompt">$</span> <span class="cmd">vant</span> start</code><button class="copy-btn" type="button" data-copy="c-wake" aria-label="Copy wake commands">Copy</button></pre>
+                        <h3>Open the brain</h3>
+                        <p>A session begins by reading what earlier sessions left behind: identity, goals, lessons, errors. Whoever starts next arrives already knowing things.</p>
+                        <pre class="term"><code id="c-open"><span class="prompt">$</span> <span class="cmd">vant</span> migrate --status
+<span class="prompt">$</span> <span class="cmd">vant</span> start</code><button class="copy-btn" type="button" data-copy="c-open" aria-label="Copy session start commands">Copy</button></pre>
                     </div>
                     <div class="card fx-reveal fx-d1">
-                        <h3>Work</h3>
+                        <h3>Work with memory</h3>
                         <p>Learn facts as they happen. Search the corpus when context is missing instead of guessing.</p>
-                        <pre class="term"><code id="c-work"><span class="prompt">$</span> <span class="cmd">vant</span> learn deploy-gotcha <span class="cmt">"Freeze deploys during migration."</span>
-<span class="prompt">$</span> <span class="cmd">vant</span> search <span class="cmt">"migration rollback steps"</span></code><button class="copy-btn" type="button" data-copy="c-work" aria-label="Copy work commands">Copy</button></pre>
+                        <pre class="term"><code id="c-during"><span class="prompt">$</span> <span class="cmd">vant</span> learn deploy-gotcha <span class="cmt">"Freeze deploys during migration."</span>
+<span class="prompt">$</span> <span class="cmd">vant</span> search <span class="cmt">"migration rollback steps"</span></code><button class="copy-btn" type="button" data-copy="c-during" aria-label="Copy memory commands">Copy</button></pre>
                     </div>
                     <div class="card fx-reveal fx-d2">
-                        <h3>Sleep</h3>
-                        <p>Write the lesson, commit, push. Plain files in your repo, so the next session starts with everything.</p>
-                        <pre class="term"><code id="c-sleep"><span class="prompt">$</span> <span class="cmd">git</span> add models/ &amp;&amp; <span class="cmd">git</span> commit -m <span class="cmt">"agent: session learnings"</span>
-<span class="prompt">$</span> <span class="cmd">git</span> push</code><button class="copy-btn" type="button" data-copy="c-sleep" aria-label="Copy sleep commands">Copy</button></pre>
+                        <h3>Keep what matters</h3>
+                        <p>Write lessons back, commit, push. Plain files in your repo, so the next session starts with everything. Skip a session and nothing breaks: the memory is files, it waits.</p>
+                        <pre class="term"><code id="c-keep"><span class="prompt">$</span> <span class="cmd">git</span> add models/ &amp;&amp; <span class="cmd">git</span> commit -m <span class="cmt">"agent: session learnings"</span>
+<span class="prompt">$</span> <span class="cmd">git</span> push</code><button class="copy-btn" type="button" data-copy="c-keep" aria-label="Copy keep commands">Copy</button></pre>
                     </div>
                 </div>
             </div>
@@ -372,7 +372,7 @@
                     </div>
                     <div class="card fx-reveal fx-d2">
                         <h3>Write the first lesson</h3>
-                        <p>From here the loop runs itself: learn during the session, commit at sleep, inherit at the next wake.</p>
+                        <p>From here it just repeats: learn during the session, commit what is worth keeping, and the next session starts knowing it.</p>
                         <pre class="term"><code id="c-fm3"><span class="prompt">$</span> <span class="cmd">vant</span> learn first-lesson <span class="cmt">"Vant works."</span>
 <span class="prompt">$</span> git add models/ &amp;&amp; git commit -m <span class="cmt">"first lesson"</span></code><button class="copy-btn" type="button" data-copy="c-fm3" aria-label="Copy first lesson commands">Copy</button></pre>
                     </div>
@@ -387,7 +387,7 @@
                 <div class="grid-3">
                     <div class="card fx-reveal">
                         <h3>The contract is a file</h3>
-                        <p>AGENTS.md in the repo root is the whole protocol: who the agent is, what to read at wake, what to write at sleep. Copy it into any project and point your agent at it.</p>
+                        <p>AGENTS.md in the repo root is the whole protocol: who the agent is, what to read when it starts, what to write before it stops. Copy it into any project and point your agent at it.</p>
                         <code class="path">AGENTS.md</code><br>
                         <a href="https://docs.creadev.org/vant/getting-started/agent-onboarding" class="learn-more">Agent onboarding →</a>
                     </div>
@@ -412,13 +412,13 @@
                 <div class="grid-3">
                     <div class="card fx-reveal">
                         <h3>The brain</h3>
-                        <p>Markdown memory files: identity, goals, lessons, errors, preferences. Read at wake, written at sleep, inherited by every session after.</p>
+                        <p>Markdown memory files: identity, goals, lessons, errors, preferences. Read when a session starts, written before it ends, inherited by every session after.</p>
                         <code class="path">models/&lt;scope&gt;/&lt;brain&gt;/lessons.md</code><br>
                         <a href="https://docs.creadev.org/vant/memory/brain" class="learn-more">The brain →</a>
                     </div>
                     <div class="card fx-reveal fx-d1">
                         <h3>The memory store</h3>
-                        <p>Key-value state and documents with TTL, written during the session. Sandbox-gated, atomic, per-brain scoped.</p>
+                        <p>Key-value state and documents with TTL, written during the session. Sandbox-gated, atomic, per-brain scoped. Memory is the flagship use: underneath is a general-purpose store, so sessions, caches, blackboards, or whatever else you build all fit.</p>
                         <code class="path">vant learn &lt;key&gt; &lt;content&gt;</code><br>
                         <a href="https://docs.creadev.org/vant/memory/memory-store" class="learn-more">Memory store →</a>
                     </div>
@@ -456,7 +456,7 @@
         <section>
             <div class="container">
                 <div class="sec-head fx-reveal"><span class="sec-idx">06</span><h2>Built on itself</h2></div>
-                <p class="sub fx-reveal">Vant develops Vant. Coding agents wake on this repo, work, and sleep their learnings into the brain. The project history is the demo.</p>
+                <p class="sub fx-reveal">Vant develops Vant. Coding agents open sessions on this repo, work, and close out their learnings into the brain. The project history is the demo.</p>
                 <div class="grid-3">
                     <div class="card fx-reveal">
                         <h3>Agents wrote the docs</h3>
@@ -528,7 +528,7 @@
         <section class="soul">
             <div class="container">
                 <blockquote class="fx-reveal">A <span class="fx-word">soul</span> that reincarnates with <span class="fx-word">full memories</span>.</blockquote>
-                <p class="fx-reveal fx-d1">That is the metaphor. On disk it is concrete: markdown files in models/, loaded at wake, written at sleep, committed and pushed. The next session inherits all of it, and git history keeps every generation auditable.</p>
+                <p class="fx-reveal fx-d1">That is the metaphor. On disk it is concrete: markdown files in models/, loaded when a session opens, written before it closes, committed and pushed. The next session inherits all of it, and git history keeps every generation auditable.</p>
             </div>
         </section>
 
@@ -730,7 +730,7 @@
         // ============================== Memory Lattice ==============================
         // The hero visual: Vant's memory as a living graph. Nodes are memories,
         // lines are citations, amber pulses are lessons landing in the brain.
-        // Pointer-draggable, breathes on a wake/work/sleep cadence. Gracefully
+        // Pointer-draggable, breathes on a session cadence. Gracefully
         // static (gradient only) if WebGL or the module CDN is unavailable.
         import * as THREE from 'three';
 
@@ -765,7 +765,7 @@
                 const positions = new Float32Array(N * 3);
                 const seeds = [];
                 for (let i = 0; i < N; i++) {
-                    // clusters: 3 lobes = wake/work/sleep
+                    // clusters: 3 lobes = session open / work / close
                     const lobe = i % 3;
                     const cx = [ -4.6, 0.4, 4.9 ][lobe];
                     const cy = [ 1.6, -1.2, 1.2 ][lobe];
@@ -873,11 +873,11 @@
                 retint();
                 document.addEventListener('vantfx:theme', retint);
 
-                // ---- wake/work/sleep breathing ----
+                // ---- session breathing ----
                 const clock = new THREE.Clock();
                 function frame() {
                     const t = clock.getElapsedTime();
-                    // cadence: 12s cycle - wake swell, work shimmer, sleep settle
+                    // cadence: 12s cycle - open swell, work shimmer, close settle
                     const cycle = (t % 12) / 12;
                     const breathe = 1 + Math.sin(t * 0.9) * 0.03 + (cycle < 0.25 ? (0.25 - cycle) * 0.24 : 0);
                     group.scale.setScalar(breathe);
