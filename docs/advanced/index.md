@@ -1,8 +1,9 @@
 ---
+version: 0.8.6
 permalink: /advanced/
 layout: default
 title: Advanced
-nav_order: 7
+nav_order: 90
 ---
 
 # Advanced Topics

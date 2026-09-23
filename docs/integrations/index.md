@@ -1,8 +1,9 @@
 ---
+version: 0.8.6
 permalink: /integrations/
 layout: default
 title: Integrations
-nav_order: 6
+nav_order: 70
 ---
 
 # Integrations

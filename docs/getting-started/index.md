@@ -1,8 +1,9 @@
 ---
+version: 0.8.6
 permalink: /getting-started/
 layout: default
 title: Getting Started
-nav_order: 1
+nav_order: 10
 ---
 
 # Getting Started with Vant

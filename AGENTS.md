@@ -228,10 +228,11 @@ Check your level at session start.
 ### Docs TOC
 
 - [Quick Start](https://docs.creadev.org/vant/getting-started/quick-start) — 2 min setup
-- [The Brain](https://docs.creadev.org/vant/essential/brain) — Memory files
-- [Runtime](https://docs.creadev.org/vant/essential/runtime) — Programmatic API
-- [MCP Tools](https://docs.creadev.org/vant/integrations/mcp) — AI tools (auto-wired registry)
-- [Multi-Agent Crew](https://docs.creadev.org/vant/essential/agents) — 4 agents max
+- [Agent Onboarding](https://docs.creadev.org/vant/getting-started/agent-onboarding) — the wake/work/sleep loop
+- [The Brain](https://docs.creadev.org/vant/memory/brain) — Memory files
+- [Runtime](https://docs.creadev.org/vant/runtime/runtime) — Programmatic API
+- [MCP Tools](https://docs.creadev.org/vant/runtime/mcp) — AI tools (auto-wired registry)
+- [Multi-Agent Crew](https://docs.creadev.org/vant/multi-agent/agents) — 4 agents max
 - [CLI](https://docs.creadev.org/vant/reference/cli) — All commands
 
 ---

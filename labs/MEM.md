@@ -15,10 +15,12 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — version-consistency audit shipped: all hardcoded
-runtime version fields (brain/transform/backup/compute/encounter/rules/
-docs/embed) now read lib/version.js; config.example.ini v0.8.4→v0.8.6.
-Full battery green. Branch is PR #91-ready; user decides on merge.)
+(nothing in flight — docs+lander restructure shipped per labs/prd-brand.md
++ labs/prd-content.md: memory-first IA, new memory/ + runtime/ +
+multi-agent/ sections, agent-onboarding page, nav.yml rewrite, lander
+rewrite with verified commands only, 81 links migrated, frontmatter lint
+clean across 120 pages. Full battery green. Branch is PR #91-ready; user
+decides on merge.)
 
 ---
 

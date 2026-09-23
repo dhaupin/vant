@@ -1,8 +1,9 @@
 ---
+version: 0.8.6
 permalink: /operations/
 layout: default
 title: Operations
-nav_order: 8
+nav_order: 50
 ---
 
 # Operations

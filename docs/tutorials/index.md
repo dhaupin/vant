@@ -1,8 +1,9 @@
 ---
+version: 0.8.6
 permalink: /tutorials/
 layout: default
 title: Tutorials
-nav_order: 10
+nav_order: 18
 ---
 
 # Tutorials

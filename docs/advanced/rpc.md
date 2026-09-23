@@ -1,3 +1,12 @@
+---
+version: 0.8.6
+permalink: /advanced/rpc
+layout: default
+title: RPC
+nav_order: 94
+description: Unified RPC protocol standards for Vant agent messaging.
+---
+
 # Vant RPC Protocol Standards
 
 Unified protocol specifications for Vant agent messaging across surfaces.

@@ -1,8 +1,73 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-09-22  
-**Session:** Wave: version-consistency audit — all hardcoded runtime version fields switched to lib/version.js, stale v0.8.4 in config.example.ini fixed
+**Last Updated:** 2026-09-23  
+**Session:** Wave: docs+lander restructure — brand/content PRDs, memory-first IA, new memory/ section, agent onboarding, lander rewrite, nav.yml, link migration
+
+---
+
+## Session (2026-09-23 — docs + lander restructure, 5 commits)
+
+User rulings (locked in labs/prd-brand.md): memory-first positioning,
+agentic runtime second; backronym kept LEGALLY ONLY, removed from all
+public surfaces; audience = humans + agents + agents-running-agents.
+Voice: no em dashes, no emoji, no cliche AI rhetoric, every command in
+a tagged fence with an explainer. Two PRDs written first (prd-brand,
+prd-content) then S1-S12 executed across 5 commits:
+
+**New IA** (docs/): / memory/ (NEW, center of gravity: index, brain,
+memory-store, search, citations, horcrux, horcrux-bootstrap, stego,
+geometry, prune) > runtime/ (runtime, mcp, server + index) >
+multi-agent/ (brains NEW, branches, succession, agents + index) >
+getting-started (+ agent-onboarding NEW, the agent-executable
+wake/work/sleep loop with MCP equivalents) > operations/security/
+integrations/reference/advanced. nav_order bands stepped by 10.
+
+**Key moves (git mv, history preserved):** succession/branch/multi-agent
+-> multi-agent/, runtime -> runtime/, mcp -> runtime/, server ->
+runtime/, configuration -> reference/config.md, API_ARCHITECTURE/
+NSC9-SPEC/RPC -> advanced/ with new frontmatter, MCP_THEME_RFC ->
+labs/rfc-mcp-theme.md. Deleted: advanced/stego.md (corrupted pipe-table
+artifacts, real CLI content merged into memory/stego.md after verifying
+bin/stego.js snapshot/recover/capacity), essential/ai-onboard.md
+(superseded by agent-onboarding). Renamed: advanced/horcrux.md ->
+memory/horcrux-bootstrap.md (it documents BOOTSTRAP, not toHorcrux).
+
+**Stale claims fixed:** 32x MCP port 3100 -> 3457 (matches bin/mcp.js +
+lib/config.js); phantom "vant init" and "setup --repo" removed from
+lander (verified neither exists; setup is interactive); 31-tools stat
+replaced with honest counts (120 CLI bins, 125 lib modules, 120 doc
+pages, 110 test files); FAQ backronym + /faq permalink.
+
+**New artifacts:** canonical MCP connect snippet in runtime/mcp.md
+(mcpServers JSON config + curl tools/list + tools/call on 3457);
+_data/nav.yml fully rewritten to the new IA (65 -> matching URLs,
+Memory section leads); AGENTS.md docs links retargeted; frontmatter
+linter pass: all 120 pages have version/permalink/layout/title/
+nav_order, ZERO duplicate permalinks.
+
+**Lander (dist/index.html, -856/+455 lines):** hero "Agent memory that
+lives in your repo" + soul metaphor once with disk mechanics; sections:
+three memory systems, git-is-the-feature, agent loop (wake/work/sleep
++ MCP connect with real JSON-RPC), runtime underneath, trimmed FAQ.
+Only verified commands advertised. Both JSON-LD blocks + OG/featureList
+rewritten. Gates: 0 em dashes, 0 emoji, 0 banned phrases, 0 backronym.
+
+**Mechanical passes:** 81 internal links rewritten via one-off script
+(removed); 39 em dashes converted (CHANGELOG historical entries and
+style.md's own example restored after; NSC9 spec comma-splice re-split
+into sentences).
+
+**Verification:** docs suite 6/6 after every wave; frontmatter lint 120
+pages / 0 problems / 0 dup permalinks; full battery ci 421/0/3, runner
+37/37, ALL standalone suites exit-0. Committed in 5 waves (63f03b9,
+dc62fda, 6193c05, 28a1d20, 1b02d8b + final). PRD non-goals honored: no
+code changes, no new CI, lander stays single-file.
+
+**Known follow-ups:** docs/tutorials/* still exists pending the fold
+(prd-content section 3); reference/cli.md completeness sweep against
+bin/ help not yet done; operations/ and security/ pages kept their
+deep nav_orders (functional, just not re-banded). None block PR #91.
 
 ---
 
