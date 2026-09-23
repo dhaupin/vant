@@ -216,18 +216,24 @@ test('format.prepare - string input passes through', () => {
 const REPO_ROOT = path.resolve(__dirname, '..');
 if (process.cwd() !== REPO_ROOT) process.chdir(REPO_ROOT);
 
+// Pass 20 fresh-dir fix: these two previously read repo-content files
+// (models/public/vant/islands.json, docker-compose.yml) — repo-relative, so
+// they false-failed wherever the repo tree was partial (npm installs, sandbox
+// copies without models/). They now load the suite's own setup() fixtures,
+// which exist in every environment and still prove loadFile parses
+// JSON/YAML through storage.read().
 test('format.loadFile - json file', async () => {
     const format = require('../lib/format');
-    const result = await format.loadFile('models/public/vant/islands.json');
+    const result = await format.loadFile('.agent_tmp/format-test/test.json');
     assert(result.data, 'Should load JSON');
-    assertEq(result.data.version, '1.0', 'Should parse version');
+    assertEq(result.data.intent, 'Test json', 'Should parse intent');
 });
 
 test('format.loadFile - yaml file', async () => {
     const format = require('../lib/format');
-    const result = await format.loadFile('docker-compose.yml');
+    const result = await format.loadFile('.agent_tmp/format-test/test.yaml');
     assert(result.data, 'Should load YAML');
-    assert(result.data.services, 'Should parse services');
+    assertEq(result.data.format, 'yaml', 'Should parse format key');
 });
 
 test('format.loadFile - ini example', async () => {

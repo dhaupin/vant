@@ -182,9 +182,6 @@ const COMMANDS = {
     geometry: 'geometry.js',
     
     // Additional utilities
-    audit: 'audit.js',
-    branch: 'branch-manager.js',
-    repos: 'repos.js',
     teams: 'teams.js',
     governance: 'governance.js',
     
@@ -228,8 +225,12 @@ const COMMANDS = {
     vaf: 'vaf.js',
     
     // Core modules
+    // NOTE: api.js is intentionally NOT routed here. `api` stays with the
+    // trifecta inline handler below (startFull mode 'api') — a later
+    // `api: 'api.js'` key in this object literal used to shadow it silently
+    // (duplicate-key footgun). bin/api.js remains reachable for utilities
+    // (status/routes/call/docs) via its documented direct invocation.
     agents: 'agents.js',
-    api: 'api.js',
     error: 'error.js',
     escrow: 'escrow.js',
     nature: 'nature.js',
@@ -263,7 +264,17 @@ const COMMANDS = {
     'docs-build': 'docs-build.js',
     'build-test': 'build-test.js',
     'format-test': 'format-test.js',
-    'test-all': 'test-all.js'
+    'test-all': 'test-all.js',
+
+    // Git-branch utility (repo-code branches; distinct from `vant branch`,
+    // which manages the BRAIN's git-backed branching). Was unroutable for
+    // months because `branch` shadows it in this table.
+    'git-branch': 'branch.js'
+
+    // Unrouted on purpose:
+    //   mcp.js        — standalone server entry (npm bin "mcp"); `vant mcp`
+    //                   is the inline trifecta handler.
+    //   cli-standard.js — doc-only template for new CLIs, not a command.
 };
 
 const args = process.argv.slice(2);
@@ -272,11 +283,16 @@ if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
 
 // Handle: vant help <cmd>
 if (cmd === 'help' && args[1]) {
-    const { spawn } = require('child_process');
     // Validate command name to prevent injection
     const helpCmd = args[1].replace(/[^a-zA-Z0-9_-]/g, '');
-    const child = spawn('node', ['bin/help.js', helpCmd], { stdio: 'inherit' });
+    // (pass 20) Path must be __dirname-anchored: a cwd-relative 'bin/help.js'
+    // broke `vant help <cmd>` from any directory other than the install root
+    // (MODULE_NOT_FOUND). And without the return below, the parent fell
+    // through to its own banner + process.exit(0), racing/losing the child's
+    // specific help output.
+    const child = spawn('node', [path.join(BIN_DIR, 'help.js'), helpCmd], { stdio: 'inherit' });
     child.on('exit', (code) => process.exit(code || 0));
+    return;
 }
 
 // Handle learn/remember commands directly
@@ -440,6 +456,7 @@ Development:
   vant test         Run smoke tests
   vant test core    Run core test suite
   vant test full    Run all tests (500+)
+  vant test-all     17-check self-test (health/search/islands/lib exports)
   vant validate    Schema + audit + circuits
   vant changelog   View changes
 
@@ -471,10 +488,11 @@ State:
 Integrations:
   vant mcp        MCP server for AI tools
   vant node       Persistent node
-  vant webhook   Webhook server + send
+  vant webhooks   Webhook management (list/add/remove/test)
   vant server     HTTP/HTTPS server with security chain
 
 Utilities:
+  vant spawn      Spawn/manage agents (agent-spawner)
   vant canvas     Visualization tools
   vant compress   Compression tools
   vant compute   Multi-language runner
@@ -549,8 +567,8 @@ Headless:
     await vant.startHeadless({ port: 3000 });
   Or: export VANT_MODE=headless
 
-  vant notify    Send notifications
-  vant linear   Linear issue tracking (requires island)
+  (vant notify / vant linear were removed: no backing CLI exists.
+  Notifications and Linear live on the islands/lib API, not the shell.)
 
 Config:
   vant config get <key>   Get config value
@@ -606,6 +624,16 @@ if (!script) {
             process.exit(1);
         });
     } else if (cmd === 'mcp' || cmd === 'api' || cmd === 'all') {
+        // (pass 20) `vant api <subcmd>` = the utility CLI (bin/api.js:
+        // status/routes/call/docs); bare `vant api` = trifecta API-server
+        // mode. Previously the utility CLI was unreachable — the inline
+        // handler swallowed its subcommands too.
+        if (cmd === 'api' && args[1]) {
+            const sub = args[1].replace(/[^a-zA-Z0-9_-]/g, '');
+            const child = spawn('node', [path.join(BIN_DIR, 'api.js'), sub, ...args.slice(2)], { stdio: 'inherit' });
+            child.on('exit', (code) => process.exit(code || 0));
+            return;
+        }
         // Trifecta mode handler
         const mode = cmd;
         const vant = require('../lib/vant');

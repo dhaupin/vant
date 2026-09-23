@@ -1781,3 +1781,53 @@ All items from final `grep -E "backward|compatibility|deprecat|legacy|alias" lib
 3. Read this file (labs/TASKS.md) for task state
 4. Pick next `todo` in P3 section
 5. Update this file on completion and commit
+---
+
+## Session (2026-09-23 — pass 20: dispatcher audit + fresh-dir routing guard)
+
+**Deep dispatcher audit (bin/vant.js COMMANDS vs bin/ vs help):**
+- Removed two duplicate keys that silently shadowed earlier routes:
+  `audit`, `branch`, `repos` (later keys had won; now single entries).
+- `api` was BOTH routed (`api: 'api.js'`) and inline-handled as a trifecta
+  server mode — the duplicate route key shadowed the inline handler. Now:
+  bare `vant api` = server; `vant api <sub>` = bin/api.js utilities
+  (status/routes/call/docs). Duplicate-key footgun documented at the table.
+- `git-branch` (bin/branch.js, repo-code branches) was unroutable for months
+  (`branch` shadows it). Routed as `vant git-branch`.
+- Help: added missing entries (test-all, git-branch, spawn, webhook),
+  corrected `api` entry, removed phantom `notify`/`linear` from banner.
+- mcp.js + cli-standard.js confirmed unrouted-on-purpose (standalone entry /
+  doc template); noted in the COMMANDS comment block.
+
+**Fresh-dir regression guard (test/fresh-dir-routing.test.js, 8 checks):**
+Copies bin+lib+package.json into a tmp sandbox (no models/), runs routed
+commands from a DIFFERENT cwd. Guards: test-all 17/17, build-test template
+checks, format-test 32/32, help, unknown-command suggestion+exit 1, hybrid
+banner, test-all --help. scripts/probe-fresh.js is the interactive variant.
+
+**Bugs found & fixed this pass:**
+1. bin/vant.js `vant help <cmd>` spawned `bin/help.js` cwd-relative →
+   MODULE_NOT_FOUND outside repo root; also missing `return` raced the
+   child's output vs the parent banner. Now __dirname-anchored + return.
+2. bin/help.js duplicated console.log on one line (session-crash artifact).
+3. test-core: installs without test/ crashed with raw ENOENT on readdirSync
+   → graceful "No test files found" guidance, exit 1.
+4. test-all: `test` check never passed where `vant test` exits 1 gracefully;
+   test() harness now supports allowNonZero for graceful-failure checks.
+5. format-test loadFile checks read repo-content files (models/…,
+   docker-compose.yml) → false-failed in partial trees; now load the
+   suite's own setup() fixtures (`.agent_tmp/format-test/*`), env-independent.
+6. SYSTEMIC (9 files): bin/{load,sync,watch,setup,health,node,docs-build,
+   lock,boot}.js lazy-loaded sandbox via `require("./lib/sandbox")` —
+   cwd-dependent; outside repo root the catch swallowed MODULE_NOT_FOUND and
+   the sandbox layer silently no-opped. All now `../lib/sandbox`
+   (__dirname-relative). Verified: health OK, sandbox tests OK.
+
+**Evidence:** fresh-dir guard 8/8; full suite 109/109; format-test 32/32
+(in-repo AND fresh-cwd); test-all 17/17 both ways.
+
+**Next candidates (unchanged + new):** P2 #26 work-item Map de-multiplexing,
+fresh-clone reincarnation drill rerun, horcrux refresh, DEAD_EXPORTS long
+tail, testBin "any stdout = pass" fragility, and a sweep for other
+lazy-require paths in bin/ using cwd-relative `./lib` (fixed the sandbox
+class this pass; grep for `require("\./` to find stragglers).

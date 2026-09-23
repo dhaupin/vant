@@ -36,6 +36,11 @@ const COMMANDS = {
         desc: 'Run build tests',
         usage: 'vant test'
     },
+    'test-all': {
+        desc: '17-check CLI self-test (health/search/islands/lib exports)',
+        usage: 'vant test-all',
+        detail: 'Runs from any directory; exit 1 on any failure.\nSee: vant test-all --help'
+    },
     changelog: {
         desc: 'View recent changes',
         usage: 'vant changelog'
@@ -582,6 +587,27 @@ See: vant s3 --help`
         usage: 'vant format-test run',
         detail: 'Format tests.\nSee: vant format-test --help'
     },
+    'git-branch': {
+        desc: 'Git branch utilities for the repo (list/create/switch/delete)',
+        usage: 'vant git-branch [list|create|switch|delete] [name]',
+        detail: 'Plain git-branch ops on the working repo.\nBrain branching is `vant branch` (status/auto/commit/push/pr/diff).\nSee: vant git-branch --help'
+    },
+    spawn: {
+        desc: 'Spawn/manage agents (agent spawner)',
+        usage: 'vant spawn spawn|list|delegate|kill|mcp',
+        detail: `Multi-agent management via MCP or direct library.
+  spawn --name <n> --role <r>   Spawn an agent (max 4)
+  list                          List all agents
+  delegate <id> <task>          Delegate a task
+  kill <id>                     Kill an agent
+  mcp                           Start MCP server
+See: vant spawn --help`
+    },
+    webhook: {
+        desc: 'Webhook management (routed to webhooks CLI)',
+        usage: 'vant webhook list|add|remove|test',
+        detail: 'Alias of `vant webhooks`.\nSee: vant webhooks --help'
+    },
     "lineage": {
         desc: 'Data lineage',
         usage: 'vant lineage track',
@@ -593,9 +619,9 @@ See: vant s3 --help`
         detail: 'Rerank.\nSee: vant rerank --help'
     },
     api: {
-        desc: 'API server',
-        usage: 'vant api start|stop',
-        detail: 'Run API server.\nSee: vant api --help'
+        desc: 'Trifecta API server mode',
+        usage: 'vant api',
+        detail: 'Starts the API server via vant.startFull (trifecta mode).\nStatus/routes: `node bin/api.js status|routes|call|docs` — the\nutility CLI is not routed as `vant api` to avoid shadowing the\nserver mode.\nSee: vant all --help'
     },
     runop: {
         desc: 'Runtime operations (absorbed into pipeline)',
@@ -744,8 +770,8 @@ function showHelp(command) {
     console.log('   vant setup              # Interactive setup');
     console.log('   vant start              # Full startup');
     console.log('   vant health             # Check system');
-    console.log('    vant sync push          # Push brain to GitHub');
-    console.log('    vant branch create experiment-1  # New brain branch');
+    console.log('   vant sync push          # Push brain to GitHub');
+    console.log('   vant git-branch create feature-1  # Repo branch (brain branching is: vant branch)');
     console.log('    vant help sync          # Help for specific command');
     console.log('');
     console.log('  Docs:  https://github.com/dhaupin/vant#readme');

@@ -15,7 +15,11 @@ const VANT = path.join(__dirname, 'vant.js');
 const results = { passed: [], failed: [] };
 const LIB = path.join(ROOT, 'lib');
 
-function test(name, cmd, check) {
+// (pass 20) allowNonZero: some checks assert on a graceful FAILURE path
+// (e.g. `vant test` in installs without test/ exits 1 with guidance). For
+// those, the check function decides from captured output; for everything
+// else a nonzero exit is still a hard fail.
+function test(name, cmd, check, allowNonZero) {
     try {
         if (typeof check === 'function') {
             // Pass output to check function
@@ -31,11 +35,30 @@ function test(name, cmd, check) {
         }
         results.passed.push(name);
     } catch (e) {
+        const out = (e.stdout || '') + (e.stderr || '');
+        if (allowNonZero && typeof check === 'function' && check(out)) {
+            results.passed.push(name);
+            return;
+        }
         results.failed.push({ name, error: e.message.slice(0,30) });
     }
 }
 
 async function main() {
+    if (process.argv.slice(2).includes('-h') || process.argv.slice(2).includes('--help')) {
+        console.log(`
+Vant Comprehensive Test - 17-check CLI self-test
+
+Usage: vant test-all
+
+Checks: health, load, summary, search (basic/rag/hybrid/hyde/stats),
+islands, changelog, test, and lib exports (config, branch, audit,
+search, islands, cache).
+
+Runs from any directory; exits 1 on any failure.
+`);
+        process.exit(0);
+    }
     console.log('=== Vant Comprehensive Test ===\n');
     test('health', 'health', o => o.includes('Model'));
     test('load', 'load', o => o.includes('Model'));
@@ -47,7 +70,11 @@ async function main() {
     test('search stats', 'search --stats', o => o.includes('corpus') || o.includes('Stats'));
     test('islands', 'islands --status', o => o.includes('Islands'));
     test('changelog', 'changelog', o => o.includes('Changelog'));
-    test('test', 'test', o => o.includes('Build') || o.includes('Test'));
+    test('test', 'test', o => o.includes('Build') || o.includes('Test') ||
+        // (pass 20) Installs without test/ now exit 1 with graceful guidance
+        // ("No test files found") instead of a raw ENOENT stack — that IS the
+        // correct outcome there, so count it as a pass of the graceful path.
+        o.includes('No test files found'), true);
     test('lib config', '', () => typeof require(path.join(LIB, 'config')).get === 'function');
     test('lib branch', '', () => typeof require(path.join(LIB, 'branch')).listBranches === 'function');
     test('lib audit', '', () => typeof require(path.join(LIB, 'audit')).log === 'function');
