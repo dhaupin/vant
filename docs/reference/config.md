@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /reference/configuration
+permalink: /reference/config
 layout: default
 title: Configuration
-nav_order: 83
+nav_order: 82
 ---
 # Configuration
 

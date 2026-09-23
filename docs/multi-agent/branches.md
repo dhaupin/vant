@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /essential/branch
+permalink: /multi-agent/branches
 layout: default
-title: Branch
-nav_order: 10
+title: Branches
+nav_order: 42
 ---
 
 # Branch

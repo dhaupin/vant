@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /advanced/server
+permalink: /runtime/server
 layout: default
-title: Server Guide
-nav_order: 72
+title: Server
+nav_order: 34
 
 ---
 # Server Guide

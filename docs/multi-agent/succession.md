@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /essential/succession
+permalink: /multi-agent/succession
 layout: default
 title: Trust & Succession
-nav_order: 5
+nav_order: 43
 ---
 # Trust & Succession
 

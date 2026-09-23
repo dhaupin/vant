@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /essential/multi-agent
+permalink: /multi-agent/agents
 layout: default
-title: Multi-Agent
-nav_order: 12
+title: Agents
+nav_order: 44
 ---
 # Multi-Agent
 

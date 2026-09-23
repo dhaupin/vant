@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /essential/runtime
+permalink: /runtime/runtime
 layout: default
-title: Programmatic API
-nav_order: 3
+title: Runtime
+nav_order: 31
 ---
 
 # Runtime API

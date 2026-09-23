@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /security/security
+permalink: /security/
 layout: default
 title: Security
-nav_order: 53
+nav_order: 60
 ---
 # Security
 
