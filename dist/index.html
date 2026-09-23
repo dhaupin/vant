@@ -86,6 +86,8 @@
             { "@type": "Question", "name": "Is my brain private?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Use a private repository and only you and the agents you authorize can access it. There is no external service holding a copy." } },
             { "@type": "Question", "name": "How do agents connect?", "acceptedAnswer": { "@type": "Answer", "text": "Through MCP: start the server with vant mcp and it auto-wires the module surface into JSON-RPC tools. Agents can also use the CLI or read the brain files directly." } },
             { "@type": "Question", "name": "Can multiple agents share one install?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Each agent gets a branch and a named brain context. Branch-per-agent isolation with merge-by-PR keeps concurrent work safe." } },
+            { "@type": "Question", "name": "Can I use Vant without an agent?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The CLI works on its own: learn, search, onboard, health. The memory is plain files, so you can also read and edit them directly." } },
+            { "@type": "Question", "name": "What stops an agent from writing bad lessons?", "acceptedAnswer": { "@type": "Answer", "text": "Lessons land in git, so they arrive as reviewable diffs and revert like any file. Succession trust levels decide how much each agent generation may do unattended." } },
             { "@type": "Question", "name": "What happens when I upgrade from an old single-brain layout?", "acceptedAnswer": { "@type": "Answer", "text": "vant start detects the old layout and imports it automatically into the multi-brain layout. Detection is content-based and idempotent, and nothing is lost." } },
             { "@type": "Question", "name": "Does Vant cost money?", "acceptedAnswer": { "@type": "Answer", "text": "No. Vant is open source under MIT. You need a Git host account and, if you want hosted embeddings, your own API key. The default hash provider needs nothing." } },
             { "@type": "Question", "name": "How is Vant different from a vector database?", "acceptedAnswer": { "@type": "Answer", "text": "A vector store keeps embeddings. Vant keeps the full context: the actual markdown, identity, goals, and lessons, with search on top. Agents inherit previous thoughts, not just similar ones." } }
@@ -222,6 +224,13 @@
         .card code.path { display: inline-block; font-size: 0.79rem; color: var(--link); background: var(--accent-soft); border-radius: 6px; padding: 2px 8px; margin-bottom: 12px; }
         .learn-more { font-size: 0.9rem; font-weight: 600; }
 
+        /* ---------- fit check ---------- */
+        .fits { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        @media (max-width: 860px) { .fits { grid-template-columns: 1fr; } }
+        .card ul { padding-left: 1.15rem; color: var(--text-muted); font-size: 0.92rem; margin-top: 4px; }
+        .card li { margin-bottom: 7px; }
+        .card li::marker { color: var(--signal); }
+
         /* ---------- stats ---------- */
         .stats { display: flex; flex-wrap: wrap; gap: 20px 48px; justify-content: center; background: var(--bg-card); border-block: 1px solid var(--border); padding: 38px 0; }
         .stat { text-align: center; }
@@ -269,6 +278,7 @@
         <nav class="top" aria-label="Site">
             <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">V</span>VANT</a>
             <div class="top-links">
+                <a href="https://docs.creadev.org/vant/getting-started/quick-start">Quick start</a>
                 <a href="https://docs.creadev.org/vant/">Docs</a>
                 <a href="https://github.com/dhaupin/vant">GitHub</a>
                 <a href="https://github.com/dhaupin/vant/releases">Releases</a>
@@ -286,20 +296,23 @@
             <p class="lede">
                 Vant gives any AI agent a brain: <strong>markdown memory files in your own repository</strong>.
                 Read at wake, written at sleep, inherited every session after. Git history becomes the memory
-                lineage. No database, no lock-in, readable with <strong>cat</strong>.
+                lineage. No database, no lock-in, readable with <strong>cat</strong>. Humans and agents both
+                live here, and both are first-class: whether you are the one typing the commands or the one
+                executing them, welcome.
             </p>
 
             <div class="dual-cta">
                 <div class="cta-card">
-                    <h2>For humans</h2>
-                    <p>Install the CLI, run one command, done. Existing brains migrate automatically.</p>
+                    <h2>The 5 minute path</h2>
+                    <p>Install, start, meet your brain. Existing layouts migrate automatically.</p>
                     <pre class="term"><code id="c-install"><span class="prompt">$</span> npm install -g vant
-<span class="prompt">$</span> <span class="cmd">vant</span> start</code><button class="copy-btn" type="button" data-copy="c-install" aria-label="Copy install commands">Copy</button></pre>
+<span class="prompt">$</span> <span class="cmd">vant</span> start
+<span class="prompt">$</span> <span class="cmd">vant</span> onboard</code><button class="copy-btn" type="button" data-copy="c-install" aria-label="Copy install commands">Copy</button></pre>
                     <p style="margin: 13px 0 0;"><a class="btn" href="https://docs.creadev.org/vant/getting-started/quick-start">Quick start guide</a></p>
                 </div>
                 <div class="cta-card">
                     <h2>For agents</h2>
-                    <p>One command serves the brain as MCP tools. Point any MCP client at it.</p>
+                    <p>One command serves the brain as MCP tools. The repo AGENTS.md is your wake script.</p>
                     <pre class="term"><code id="c-mcp"><span class="prompt">$</span> <span class="cmd">vant</span> mcp
 <span class="cmt"># MCP server on 127.0.0.1:3457</span></code><button class="copy-btn" type="button" data-copy="c-mcp" aria-label="Copy MCP command">Copy</button></pre>
                     <p style="margin: 13px 0 0;"><a class="btn outline" href="https://docs.creadev.org/vant/getting-started/agent-onboarding">Agent onboarding</a></p>
@@ -342,7 +355,59 @@
 
         <section>
             <div class="container">
-                <div class="sec-head fx-reveal"><span class="sec-idx">02</span><h2>Three memory systems, one home</h2></div>
+                <div class="sec-head fx-reveal"><span class="sec-idx">02</span><h2>Five minutes to a first win</h2></div>
+                <p class="sub fx-reveal">No dashboard to configure, no account to make. The CLI is the product and the memory is files, so the first session can be this short.</p>
+                <div class="loop">
+                    <div class="card fx-reveal">
+                        <h3>Install and start</h3>
+                        <p>One global install. vant start checks the brain layout, runs health checks, and imports any older single-brain layout it finds.</p>
+                        <pre class="term"><code id="c-fm1"><span class="prompt">$</span> npm install -g vant
+<span class="prompt">$</span> <span class="cmd">vant</span> start</code><button class="copy-btn" type="button" data-copy="c-fm1" aria-label="Copy install and start">Copy</button></pre>
+                    </div>
+                    <div class="card fx-reveal fx-d1">
+                        <h3>Meet the brain</h3>
+                        <p>It is just markdown. Read it, edit it, keep your own notes in it. vant onboard walks the files for you.</p>
+                        <pre class="term"><code id="c-fm2"><span class="prompt">$</span> <span class="cmd">vant</span> onboard
+<span class="prompt">$</span> cat models/private/vant/identity.md</code><button class="copy-btn" type="button" data-copy="c-fm2" aria-label="Copy onboard commands">Copy</button></pre>
+                    </div>
+                    <div class="card fx-reveal fx-d2">
+                        <h3>Write the first lesson</h3>
+                        <p>From here the loop runs itself: learn during the session, commit at sleep, inherit at the next wake.</p>
+                        <pre class="term"><code id="c-fm3"><span class="prompt">$</span> <span class="cmd">vant</span> learn first-lesson <span class="cmt">"Vant works."</span>
+<span class="prompt">$</span> git add models/ &amp;&amp; git commit -m <span class="cmt">"first lesson"</span></code><button class="copy-btn" type="button" data-copy="c-fm3" aria-label="Copy first lesson commands">Copy</button></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="container">
+                <div class="sec-head fx-reveal"><span class="sec-idx">03</span><h2>Bringing your own agents</h2></div>
+                <p class="sub fx-reveal">Any agent that can read a file or speak MCP can use Vant. Nothing vendor-specific to install.</p>
+                <div class="grid-3">
+                    <div class="card fx-reveal">
+                        <h3>The contract is a file</h3>
+                        <p>AGENTS.md in the repo root is the whole protocol: who the agent is, what to read at wake, what to write at sleep. Copy it into any project and point your agent at it.</p>
+                        <code class="path">AGENTS.md</code><br>
+                        <a href="https://docs.creadev.org/vant/getting-started/agent-onboarding" class="learn-more">Agent onboarding →</a>
+                    </div>
+                    <div class="card fx-reveal fx-d1">
+                        <h3>MCP in one command</h3>
+                        <p>vant mcp auto-wires the module surface into JSON-RPC tools on 127.0.0.1:3457. Any MCP client connects. The REST server on 3456 covers everything else.</p>
+                        <a href="https://docs.creadev.org/vant/runtime/mcp" class="learn-more">MCP reference →</a>
+                    </div>
+                    <div class="card fx-reveal fx-d2">
+                        <h3>Crews, not just one</h3>
+                        <p>Up to four agents share one install. Each gets a branch and a named brain context; merge-by-PR keeps the shared memory safe while they work.</p>
+                        <a href="https://docs.creadev.org/vant/multi-agent/" class="learn-more">Multi-agent crew →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="container">
+                <div class="sec-head fx-reveal"><span class="sec-idx">04</span><h2>Three memory systems, one home</h2></div>
                 <p class="sub fx-reveal">Not one memory: three, with different jobs. All of them are files under models/ in your repository.</p>
                 <div class="grid-3">
                     <div class="card fx-reveal">
@@ -369,7 +434,7 @@
 
         <section>
             <div class="container">
-                <div class="sec-head fx-reveal"><span class="sec-idx">03</span><h2>Git is the feature</h2></div>
+                <div class="sec-head fx-reveal"><span class="sec-idx">05</span><h2>Git is the feature</h2></div>
                 <p class="sub fx-reveal">Your memory is files in your repo, so every Git workflow is a memory workflow.</p>
                 <div class="grid-3">
                     <div class="card fx-reveal">
@@ -388,6 +453,30 @@
             </div>
         </section>
 
+        <section>
+            <div class="container">
+                <div class="sec-head fx-reveal"><span class="sec-idx">06</span><h2>Built on itself</h2></div>
+                <p class="sub fx-reveal">Vant develops Vant. Coding agents wake on this repo, work, and sleep their learnings into the brain. The project history is the demo.</p>
+                <div class="grid-3">
+                    <div class="card fx-reveal">
+                        <h3>Agents wrote the docs</h3>
+                        <p>Docs go through scripted linters agents built: a voice gate, a link gate, a frontmatter check. Contributors run the same gates with npm run lint:docs.</p>
+                        <a href="https://docs.creadev.org/vant/getting-started/contributing" class="learn-more">Contributing →</a>
+                    </div>
+                    <div class="card fx-reveal fx-d1">
+                        <h3>Sessions hand off in labs/</h3>
+                        <p>Each working session leaves notes for the next: findings, decisions, open threads. When a session crashes, the next one picks up mid-task instead of starting over.</p>
+                        <a href="https://github.com/dhaupin/vant/tree/axolotl/labs" class="learn-more">See the handoffs →</a>
+                    </div>
+                    <div class="card fx-reveal fx-d2">
+                        <h3>This page is agent work</h3>
+                        <p>The lander is a single HTML file, every number on it verified against the code, built and shipped in a session that started by reading AGENTS.md.</p>
+                        <a href="https://github.com/dhaupin/vant" class="learn-more">Read the history →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <div class="stats" role="presentation">
             <div class="stat"><div class="stat-value" data-count="3">0</div><div class="stat-label">memory systems</div></div>
             <div class="stat"><div class="stat-value" data-count="93">0</div><div class="stat-label">CLI commands</div></div>
@@ -399,7 +488,7 @@
 
         <section>
             <div class="container">
-                <div class="sec-head fx-reveal"><span class="sec-idx">04</span><h2>Runtime underneath</h2></div>
+                <div class="sec-head fx-reveal"><span class="sec-idx">07</span><h2>Runtime underneath</h2></div>
                 <p class="sub fx-reveal">Memory is the product. The runtime makes it safe to run unattended.</p>
                 <div class="grid-3">
                     <div class="card fx-reveal">
@@ -444,8 +533,34 @@
         </section>
 
         <section>
+            <div class="container">
+                <div class="sec-head fx-reveal"><span class="sec-idx">08</span><h2>Where Vant fits</h2></div>
+                <p class="sub fx-reveal">Saying what Vant is not, because your time matters more than our conversion rate.</p>
+                <div class="fits">
+                    <div class="card fx-reveal">
+                        <h3>A strong fit when</h3>
+                        <ul>
+                            <li>You run coding agents and want session continuity without a hosted service</li>
+                            <li>You want to review what your agent learned in a diff before it sticks</li>
+                            <li>You are building an agent crew that needs a separate memory per agent</li>
+                            <li>You want memory in CI: read or write brain state over REST</li>
+                        </ul>
+                    </div>
+                    <div class="card fx-reveal fx-d1">
+                        <h3>Not the tool yet when</h3>
+                        <ul>
+                            <li>Your agent is browser-only, with no filesystem or git access</li>
+                            <li>Your project lives outside git (local mode works, but there is no lineage or sync)</li>
+                            <li>You need large-scale vector serving; search is local-first, not a hosted vector database</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
             <div class="container faq">
-                <div class="sec-head fx-reveal"><span class="sec-idx">05</span><h2>Questions agents actually ask</h2></div>
+                <div class="sec-head fx-reveal"><span class="sec-idx">09</span><h2>Questions agents actually ask</h2></div>
                 <p class="sub fx-reveal">The same questions your agent will ask on its first session, answered.</p>
                 <details class="fx-reveal">
                     <summary>What is a brain in Vant?</summary>
@@ -476,6 +591,14 @@
                     <a href="https://docs.creadev.org/vant/multi-agent/" class="learn-more">Learn more →</a>
                 </details>
                 <details class="fx-reveal">
+                    <summary>Can I use Vant without an agent?</summary>
+                    <p>Yes. The CLI works on its own: learn, search, onboard, health. The memory is plain files, so you can also read and edit them directly.</p>
+                </details>
+                <details class="fx-reveal">
+                    <summary>What stops an agent from writing bad lessons?</summary>
+                    <p>Lessons land in git, so they arrive as reviewable diffs and revert like any file. Succession trust levels decide how much each agent generation may do unattended.</p>
+                </details>
+                <details class="fx-reveal">
                     <summary>What happens when I upgrade from an old single-brain layout?</summary>
                     <p>vant start detects the old layout and imports it automatically into the multi-brain layout. Detection is content-based and idempotent, and nothing is lost.</p>
                     <a href="https://docs.creadev.org/vant/getting-started/setup" class="learn-more">Learn more →</a>
@@ -491,12 +614,24 @@
             </div>
         </section>
 
+        <section class="soul" style="padding-top: 20px;">
+            <div class="container">
+                <blockquote class="fx-reveal">Pick a door. <span class="fx-word">Both are open.</span></blockquote>
+                <p class="fx-reveal fx-d1" style="margin-bottom: 28px;">Five minutes for you, one command for your agent, and the memory is yours either way.</p>
+                <p class="fx-reveal fx-d2">
+                    <a class="btn" href="https://docs.creadev.org/vant/getting-started/quick-start">Start the five minutes</a>
+                    <a class="btn outline" href="https://docs.creadev.org/vant/getting-started/agent-onboarding" style="margin-left: 10px;">Send your agent</a>
+                </p>
+            </div>
+        </section>
+
         <footer>
             <div class="container">
                 <p>Vant. Agent memory that lives in your repo. Open source under MIT.</p>
                 <nav aria-label="Footer">
                     <a href="https://docs.creadev.org/vant/">Docs</a>
                     <a href="https://docs.creadev.org/vant/getting-started/quick-start">Getting Started</a>
+                    <a href="https://docs.creadev.org/vant/getting-started/agent-onboarding">Agent Onboarding</a>
                     <a href="https://github.com/dhaupin/vant">GitHub</a>
                 </nav>
             </div>

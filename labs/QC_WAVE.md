@@ -1,5 +1,25 @@
 # QC Wave — axolotl (2026-09-22, sweep 2)
 
+## Pass 12 - Lander funnel, framing, and flow (axolotl, 2026-09-23)
+
+**Scope:** dist/index.html only. Three.js lattice, VantFX, CSS, schema mechanics untouched.
+**Goal:** the page is now a guided path for two audiences, not a feature tour. Audience framing: humans and agents are both friends and welcome.
+
+**Funnel changes (new section order):**
+- 01 Wake.Work.Sleep., hero lede states the welcome explicitly: humans and agents are first-class here
+- Hero card renamed "For humans" -> "The 5 minute path", now includes `vant onboard` (verified routed, dispatcher line 108; AGENTS.md advertises it too)
+- 02 Five minutes to a first win (NEW: install/start, meet the brain, first lesson)
+- 03 Bringing your own agents (NEW: AGENTS.md as the contract, MCP one-command, crews)
+- 04 Three memory systems (was 02)
+- 05 Git is the feature (was 03)
+- 06 Built on itself (NEW dogfooding proof: agent docs linters, labs/ handoffs, this lander itself; facts verified: labs/ exists with handoffs, brain has 165 public md files, commit history is agent-driven)
+- 07 Runtime underneath (was 04)
+- 08 Where Vant fits (NEW honest fit check: strong fit vs not-yet; anti-boilerplate trust move)
+- 09 FAQ, grew 9 -> 11: "Can I use Vant without an agent?" and "What stops an agent from writing bad lessons?" (schema synced 11=11)
+- Closing soul block is now a two-door CTA ("Pick a door. Both are open.") into quick-start / agent-onboarding; footer nav gained Agent Onboarding
+
+**Verified:** structural probe 17/18 (one artifact: bare docs.creadev.org hub link can't be mapped locally, link is fine); FAQ schema sync 11=11; section indices 01-09 sequential; copy targets 8/8; docs links 16/16 real permalinks; scripts parse; no em dash, no emoji.
+
 > **2026-09-23 update (sweep 3):** docs production pass (T1-T4) landed on
 > top of this QC. Full handoff at the bottom of this file
 > ("Docs production pass"). Verdict below is unchanged and re-verified:
