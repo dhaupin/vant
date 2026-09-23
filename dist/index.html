@@ -96,7 +96,7 @@
     </script>
 
     <script type="importmap">
-    { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    { "imports": { "three": "./vendor/three.module.js" } }
     </script>
 
     <style>
@@ -139,6 +139,7 @@
             background: var(--bg);
             color: var(--text);
             line-height: 1.65;
+            overflow-x: clip;
         }
         .mono { font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace; }
         .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
@@ -156,8 +157,26 @@
         .top-links { display: flex; align-items: center; gap: 22px; font-size: 0.92rem; }
         .top-links a { color: var(--text-muted); }
         .top-links a:hover { color: var(--ink); text-decoration: none; }
-        .theme-btn { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); cursor: pointer; padding: 6px 10px; font-size: 0.85rem; }
+        .theme-btn { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); cursor: pointer; padding: 7px 8px; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; }
         .theme-btn:hover { color: var(--ink); border-color: var(--text-muted); }
+        .theme-btn svg { display: block; }
+        .theme-btn .ico-sun { display: none; }
+        [data-theme="dark"] .theme-btn .ico-sun { display: block; }
+        [data-theme="dark"] .theme-btn .ico-moon { display: none; }
+        .menu-btn { display: none; background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--ink); cursor: pointer; padding: 7px 8px; }
+        .menu-btn svg { display: block; }
+        .menu-btn .ico-close { display: none; }
+        .menu-btn[aria-expanded="true"] .ico-menu { display: none; }
+        .menu-btn[aria-expanded="true"] .ico-close { display: block; }
+        .mobile-menu { display: none; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); padding: 6px; margin-bottom: 6px; }
+        .mobile-menu a { display: block; padding: 10px 14px; color: var(--text); border-radius: 8px; font-weight: 600; }
+        .mobile-menu a:hover { background: var(--accent-soft); text-decoration: none; }
+        .mobile-menu.open { display: block; }
+        @media (min-width: 781px) { .mobile-menu { display: none !important; } }
+        @media (max-width: 780px) {
+            .top-links a { display: none; }
+            .menu-btn { display: inline-flex; align-items: center; justify-content: center; }
+        }
 
         /* ---------- hero ---------- */
         .hero { position: relative; padding: 54px 0 0; }
@@ -180,7 +199,7 @@
         h1 em { font-style: normal; color: var(--accent); }
         .hero p.lede { font-size: 1.16rem; color: var(--text-muted); max-width: 44rem; margin-bottom: 30px; }
         .hero p.lede strong { color: var(--text); }
-        .dual-cta { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 47rem; margin-bottom: 26px; }
+        .dual-cta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; max-width: 47rem; margin-bottom: 26px; }
         @media (max-width: 780px) { .dual-cta { grid-template-columns: 1fr; } }
         .cta-card { background: color-mix(in srgb, var(--bg-card) 88%, transparent); border: 1px solid var(--border); border-radius: 14px; padding: 18px; backdrop-filter: blur(6px); }
         .cta-card h2 { font-size: 0.98rem; margin-bottom: 2px; color: var(--ink); }
@@ -207,7 +226,7 @@
         section h2 { font-size: clamp(1.55rem, 3vw, 2.1rem); letter-spacing: -0.015em; color: var(--ink); }
         p.sub { color: var(--text-muted); margin-bottom: 30px; max-width: 44rem; }
 
-        .loop { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+        .loop { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
         @media (max-width: 860px) { .loop { grid-template-columns: 1fr; } }
         .loop .card h3::before {
             counter-increment: loop; content: counter(loop, decimal-leading-zero);
@@ -216,16 +235,16 @@
         }
         .loop { counter-reset: loop; }
 
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
         @media (max-width: 860px) { .grid-3 { grid-template-columns: 1fr; } }
         .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 22px; }
         .card h3 { font-size: 1.04rem; margin-bottom: 8px; color: var(--ink); }
         .card p { font-size: 0.92rem; color: var(--text-muted); margin-bottom: 12px; }
-        .card code.path { display: inline-block; font-size: 0.79rem; color: var(--link); background: var(--accent-soft); border-radius: 6px; padding: 2px 8px; margin-bottom: 12px; }
+        .card code.path { display: inline-block; font-size: 0.79rem; color: var(--link); background: var(--accent-soft); border-radius: 6px; padding: 2px 8px; margin-bottom: 12px; max-width: 100%; overflow-wrap: anywhere; }
         .learn-more { font-size: 0.9rem; font-weight: 600; }
 
         /* ---------- fit check ---------- */
-        .fits { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .fits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
         @media (max-width: 860px) { .fits { grid-template-columns: 1fr; } }
         .card ul { padding-left: 1.15rem; color: var(--text-muted); font-size: 0.92rem; margin-top: 4px; }
         .card li { margin-bottom: 7px; }
@@ -282,9 +301,24 @@
                 <a href="https://docs.creadev.org/vant/">Docs</a>
                 <a href="https://github.com/dhaupin/vant">GitHub</a>
                 <a href="https://github.com/dhaupin/vant/releases">Releases</a>
-                <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle color theme">Theme</button>
+                <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle color theme" title="Toggle theme">
+                    <svg class="ico-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg class="ico-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                </button>
+                <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
+                    <svg class="ico-menu" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                    <svg class="ico-close" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
             </div>
         </nav>
+    </div>
+    <div class="container">
+        <div class="mobile-menu" id="mobileMenu">
+            <a href="https://docs.creadev.org/vant/getting-started/quick-start">Quick start</a>
+            <a href="https://docs.creadev.org/vant/">Docs</a>
+            <a href="https://github.com/dhaupin/vant">GitHub</a>
+            <a href="https://github.com/dhaupin/vant/releases">Releases</a>
+        </div>
     </div>
 
     <header class="hero">
@@ -648,6 +682,20 @@
             try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
             if (reduced) document.documentElement.style.setProperty('--fx', '0.35');
 
+            // ---- mobile menu ----
+            function nav() {
+                var btn = document.getElementById('menuBtn'), menu = document.getElementById('mobileMenu');
+                if (!btn || !menu) return;
+                function setOpen(open) {
+                    menu.classList.toggle('open', open);
+                    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                    btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+                }
+                btn.addEventListener('click', function () { setOpen(!menu.classList.contains('open')); });
+                menu.addEventListener('click', function (e) { if (e.target.closest('a')) setOpen(false); });
+                document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
+            }
+
             // ---- theme ----
             function theme() {
                 var btn = document.getElementById('themeBtn');
@@ -723,18 +771,19 @@
                 els.forEach(function (el) { io.observe(el); });
             }
 
-            return { theme: theme, copy: copy, reveal: reveal, counters: counters, reduced: reduced };
+            return { theme: theme, nav: nav, copy: copy, reveal: reveal, counters: counters, reduced: reduced };
         })();
 
-        VantFX.theme(); VantFX.copy(); VantFX.reveal(); VantFX.counters();
+        VantFX.theme(); VantFX.nav(); VantFX.copy(); VantFX.reveal(); VantFX.counters();
     </script>
 
     <script type="module">
         // ============================== Memory Lattice ==============================
         // The hero visual: Vant's memory as a living graph. Nodes are memories,
         // lines are citations, amber pulses are lessons landing in the brain.
-        // Pointer-draggable, breathes on a session cadence. Gracefully
-        // static (gradient only) if WebGL or the module CDN is unavailable.
+        // Pointer-draggable, breathes on a session cadence. three.js is
+        // vendored at vendor/three.module.js (no CDN dependency). Gracefully
+        // static (gradient only) if WebGL is unavailable.
         import * as THREE from 'three';
 
         const host = document.getElementById('lattice');
@@ -859,6 +908,8 @@
                     renderer.setSize(w, h, false);
                     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                     camera.aspect = w / h;
+                    // portrait viewports: pull back so the full lattice stays in frame
+                    camera.position.z = camera.aspect < 0.9 ? 17.5 : 13;
                     camera.updateProjectionMatrix();
                 }
                 size();
