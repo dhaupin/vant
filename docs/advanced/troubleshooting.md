@@ -135,8 +135,7 @@ Error: Request timed out
 
 ### Large Brain
 
-**Symptoms**: Slow loads |
-- sync timeouts
+**Symptoms**: Slow loads, sync timeouts
 
 **Fix**:
 - Split brain into categories

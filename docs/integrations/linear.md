@@ -109,7 +109,7 @@ await linear.updateIssue('SYS-123', {
 ```javascript
 vant.onGoalCreated(async (goal) => {
     const issue = await linear.createIssue(goal.title, {
-        description: Goal: `${goal.description}`,
+        description: `Goal: ${goal.description}`,
         priority: goal.priority
     });
     

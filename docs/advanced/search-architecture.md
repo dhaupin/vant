@@ -128,16 +128,16 @@ search.searchLTC('python');     // Text search (fast)
 search.query('python');        // RAG: search + rehydrate
 search.hybrid('python');      // BM25 + Vector + RRF
 search.query('python', { compact: true });  // Summaries only
-
-// CLI
-vant search python -l 3
-vant search python --mode rag --compact
-
-// MCP
-{ "name": "vant_search", "arguments": { "query": "python", "compact": true } }
 ```
 
-**MCP tool available as `vant_search`.**
+```bash
+# CLI
+vant search python -l 3
+vant search python --mode rag --compact
+```
+
+**MCP tool available as `vant_search`** - call it with
+`{ "query": "python", "compact": true }`.
 
 ## Security
 

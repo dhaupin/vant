@@ -14,25 +14,38 @@ nav_order: 63
 
 ### Enable Debug
 
-```bash
-# Enable debug output
-VANT_DEBUG=1 vant start
+Debug logging is always enabled in the trifecta server modes:
 
-# With full tracing
-VANT_DEBUG=full vant start
+```bash
+# MCP server with debug output
+vant mcp
+
+# Same for the REST API or both
+vant api
+vant all
+```
+
+For a standalone MCP server process:
+
+```bash
+# HTTP server mode on a chosen port
+node bin/mcp.js --server --port 3457
+
+# Or stdio mode for a single AI client
+node bin/mcp.js --stdio
 ```
 
 ### Debug Commands
 
 ```bash
-# Health check
-vant health --verbose
+# Health check (quiet output with -q)
+vant health
 
-# Test connection
-vant health --network
+# Sync status
+vant sync --status
 
-# Check sync
-vant sync --debug
+# Pull manually
+vant sync --pull
 ```
 
 ## Common Issues
@@ -43,15 +56,15 @@ vant sync --debug
 # Check brain files
 ls -la models/public/
 
-# Check GitHub connection
-vant health --network
+# Check system health
+vant health
 ```
 
 ### Sync Fails
 
 ```bash
 # Pull manually
-vant sync pull --force
+vant sync --pull
 
 # Check token
 echo $GITHUB_TOKEN | head -c 5
@@ -63,8 +76,8 @@ echo $GITHUB_TOKEN | head -c 5
 # Check lock status
 vant lock status
 
-# Force release (dangerous)
-vant lock release --force
+# Force release (admin)
+vant lock force
 ```
 
 ## Write Tests

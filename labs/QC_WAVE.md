@@ -304,3 +304,82 @@ code before editing.
   files do not exist yet - requiring them throws; flagged in storage.md
   as planned. Either land the connectors or drop the factory rows in a
   future code pass.
+
+---
+
+# Docs QC round 9 (2026-09-23)
+
+Scope: new check classes beyond rounds 6-8: repo paths referenced in
+  docs vs disk, node --check on every fenced javascript block, VANT_*
+  env vars in docs vs lib/config.js, plus accuracy sampling of APIs the
+  touched examples rely on. All findings verified against code first.
+
+## Found + fixed
+
+- **Hidden pipe-table residue (26 sites, 9 files):** rounds 6-8 fixed
+  residue in prose and tables, but the same `|` + newline + `- ` burst
+  pattern survived INSIDE code fences where the prose-only linter cannot
+  see. In fences the original text had commas: the explosion turned
+  `", "` into the residue. Decoded by hand and restored real commas in
+  mcp.md (Node/Python MCP clients, curl JSON), sync.md (results object,
+  console.log calls), schema.md (isValid/validateFile return shapes),
+  providers.md (destructure + provider list), boot.md,
+  horcrux-bootstrap.md, audit.md, troubleshooting.md, pruning.md. Zero
+  `|`-newline-`- ` residue remains anywhere in docs.
+- **linear.md:** broken example `description: Goal: \`${goal...}\`` (a
+  label inside an object literal) -> proper template literal.
+- **search-architecture.md:** API fence mixed JS + CLI + raw JSON;
+  split into javascript and bash fences, JSON folded into prose.
+- **Phantom env vars purged:** `VANT_DEBUG` is read by zero code
+  (debug is hard-enabled in the vant mcp/api/all trifecta modes;
+  standalone server is bin/mcp.js --server). Removed from testing.md,
+  deployment.md, docker.md, mcp.md. `MCP_REQUIRE_API_KEY` and
+  `VANT_SYSTEM_PROMPT` also read by nothing - removed. deployment.md
+  used `VANT_PORT` again (fixed to VANT_SERVER_PORT/VANT_MCP_PORT).
+- **config.md phantom config.ini block:** the "MCP Security" ini block
+  and settings table (MCP_TIMEOUT, MCP_MAX_CONCURRENT,
+  MCP_CIRCUIT_BREAK_*, MCP_MAX_INPUT_SIZE, MCP_REQUIRE_API_KEY) are
+  read by no code - removed; MCP knobs documented as the real VANT_MCP_
+  env vars (port/bind/apiKey/requireKey from lib/config.js). The VAF
+  keys (MAX_STRING_LENGTH etc.) were verified real in lib/vaf.js and
+  kept. AUDIT_FILE stays .audit.log (vaf.js) - distinct from the
+  .audit.json ledger in audit.md, both real.
+- **README.md:** `MCP_REQUIRE_KEY` -> `VANT_MCP_REQUIRE_KEY`.
+- **rest-api.md:** `async function callTool(name, arguments)` -
+  `arguments` is a reserved binding in strict mode, real syntax error
+  -> renamed to `args`.
+- **providers.md:** `require('vant').providers` and
+  `require('vant').branch` are phantom module surface; the real paths
+  are lib/remote (getProvider/detectProvider, all provider methods
+  verified) and lib/branch (status/createPR verified). Also fixed a
+  duplicate `const provider` in one scope.
+
+## Verified accurate (no change)
+
+- Every lib/*.js and bin/*.js path referenced in docs exists on disk
+  (0 missing after rounds 6-8 cleanup).
+- VANT_TOKEN_SECRET, VANT_BRANCH, VANT_MSG_ENCRYPTED, VANT_WEBHOOK_*,
+  VANT_AGENT_ID, VANT_GITHUB_*, VANT_MCP_PORT/BIND/API_KEY/REQUIRE_KEY,
+  VANT_API_KEY all real in lib/config.js, lib/auth.js, lib/webhooks.js.
+- The 11 fences flagged by node --check were triaged: 6 real bugs
+  (fixed above), 5 accepted snippet idioms (top-level await in usage
+  examples, object fragments, `{ ... }` placeholders) - left as-is.
+- vant mcp/api/all trifecta modes exist and hard-enable debug;
+  bin/mcp.js --server/--stdio/--port real; lock status/force real;
+  sync --status/--pull/--push/--branch real; health has -q only.
+
+## Tooling notes
+
+- scripts/_repair_pipe_residue.js (one-shot, untracked) proved a
+  blanket join is unsafe - it restored the join in fences but commas
+  inside code need human eyes. Deleted after hand-fixing; do NOT
+  automate this join blindly. The tmp path/syntax checker
+  (scripts/tmp-qc-paths-syntax.js) is workspace-local for now; worth
+  promoting with a whitelist for accepted idioms if fence QC becomes a
+  recurring need.
+
+## Verification (round 9)
+
+- Style PASS (119), links PASS (119), docs suite 6/6, nav_order all
+  unique. Zero pipe residue, 0 missing repo paths, remaining syntax
+  flags all whitelisted idioms.

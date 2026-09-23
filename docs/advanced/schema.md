@@ -25,17 +25,11 @@ const schema = require('./lib/schema');
 
 // Validate all
 const result = schema.isValid();
-// { valid: true |
-- results: [] |
-- summary: { checked: 2 |
-- passed: 2 |
-- failed: 0 } }
+// { valid: true, results: [], summary: { checked: 2, passed: 2, failed: 0 } }
 
 // Validate specific file
 const brainResult = schema.validateFile('brain.json');
-// { valid: true |
-- errors: [] |
-- file: 'brain.json' }
+// { valid: true, errors: [], file: 'brain.json' }
 
 // Get schema
 const brainSchema = schema.getSchema('brain');

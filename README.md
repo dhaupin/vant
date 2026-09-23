@@ -95,7 +95,7 @@ const content = await vant.remember('key');
 |----------|-------------|
 | `VANT_MODE` | Force mode: `cli`, `mcp`, or `headless` |
 | `VANT_MCP_PORT` | MCP server port |
-| `MCP_REQUIRE_KEY` | Require API key for MCP access |
+| `VANT_MCP_REQUIRE_KEY` | Require API key for MCP access (`true`/`false`) |
 
 ## Upgrading from an older Vant (single-brain layout)
 

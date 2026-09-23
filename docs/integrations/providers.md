@@ -61,14 +61,10 @@ export BITBUCKET_REPO=repo
 ## Usage in Code
 
 ```javascript
-const { getProvider |
-- detectProvider } = require('vant').providers;
+const { getProvider } = require('./lib/remote');
 
-// Auto-detect provider
+// Auto-detect provider (or pass a type: getProvider('github'))
 const provider = getProvider();
-
-// Or specify explicitly
-const provider = getProvider('github');
 
 // Check if configured
 if (provider.isConfigured()) {
@@ -92,13 +88,10 @@ if (provider.isConfigured()) {
 The `lib/branch.js` module now automatically uses providers:
 
 ```javascript
-const branch = require('vant').branch;
+const branch = require('./lib/branch');
 
 const status = await branch.status();
-console.log(status.provider); // 'github' |
-- 'gitlab' |
-- 'bitbucket' |
-- 'cli'
+console.log(status.provider); // 'github', 'gitlab', 'bitbucket', or 'cli'
 
 const pr = await branch.createPR({
   source: 'agents/my-agent',

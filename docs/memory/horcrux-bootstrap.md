@@ -9,8 +9,7 @@ description: Zero-config boot from a horcrux image - manifest and brain in one P
 
 # Horcrux Bootstrap
 
-The Horcrux system enables Vant to boot from zero local state. When combined with steganography |
-- a single PNG image becomes a complete "horcrux" containing your agent's consciousness and configuration.
+The Horcrux system enables Vant to boot from zero local state. When combined with steganography, a single PNG image becomes a complete "horcrux" containing your agent's consciousness and configuration.
 
 ## How It Works
 

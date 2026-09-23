@@ -117,8 +117,7 @@ are no-ops.
 | GITHUB_REPO | Yes | Brain repository |
 | VANT_SERVER_PORT | No | REST/health port (default: 3456) |
 | VANT_MCP_PORT | No | MCP port (default: 3457) |
-| VANT_DEBUG | No | Debug mode (0/1) |
-| VANT_MCP_REQUIRE_KEY | No | Require API key for MCP |
+| VANT_MCP_REQUIRE_KEY | No | Require API key for MCP (true/false) |
 
 ## Dockerfile
 

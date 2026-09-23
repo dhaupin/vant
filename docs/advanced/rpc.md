@@ -415,7 +415,7 @@ Wrapper for Claude Messages API:
 {
   model: "claude-3-opus-20240229",
   messages: [
-    { role: "system", content: VANT_SYSTEM_PROMPT },
+    { role: "system", content: SYSTEM_PROMPT },
     { role: "user", chain: [...] }
   ],
   tools: [...],

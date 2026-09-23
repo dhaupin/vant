@@ -15,8 +15,7 @@ Boot Vant from zero local state by fetching a stego image. The agent becomes tru
 1. **Fetch**: Load PNG from URL or local file
 2. **Decode**: Extract brain from steganographic data
 3. **Extract**: Get embedded config (no tokens!)
-4. **Resume**: Load brain state |
-- continue session
+4. **Resume**: Load brain state, continue session
 
 ## CLI Usage
 

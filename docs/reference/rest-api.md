@@ -241,7 +241,7 @@ call_tool("vant_set_memory", {"file": "lessons.md", "content": "..."})
 const fetch = require('node-fetch');
 const VANT_URL = 'http://localhost:3456';
 
-async function callTool(name, arguments) {
+async function callTool(name, args) {
   const res = await fetch(`${VANT_URL}/call`, {
     method: 'POST',
     headers: {
@@ -251,7 +251,7 @@ async function callTool(name, arguments) {
     body: JSON.stringify({
       jsonrpc: '2.0',
       method: 'tools/call',
-      params: { name, arguments },
+      params: { name, args },
       id: 1
     })
   });

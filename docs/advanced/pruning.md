@@ -84,8 +84,7 @@ Change threshold (default: 90 days).
 node bin/prune.js --dry-run --no-fluff
 ```
 
-Only remove stale |
-- skip fluff detection.
+Only remove stale entries - skip fluff detection.
 
 ## Usage in Code
 
@@ -133,8 +132,7 @@ const files = prune.listPrunable({ staleDays: 90 });
 
 ## Long Term Core (LTC)
 
-After pruning |
-- `_core.json` is created:
+After pruning, `_core.json` is created:
 
 ```json
 {
@@ -162,8 +160,7 @@ All prune operations recorded in `models/.prune_ledger.json`:
     {
       "date": "2025-05-05T12:00:00Z",
       "dryRun": false,
-      "stats": { "filesScanned": 20 |
-- ... }
+      "stats": { "filesScanned": 20, "filesPruned": 12 }
     }
   ]
 }

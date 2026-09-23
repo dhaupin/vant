@@ -152,9 +152,9 @@ MCP uses the **unified lib/api.js** for consistent execution:
 - **Auth**: Unified authentication with lockout after 5 failures
 - **Mode**: MCP mode detection for framework
 
-```javascript
-// Debug MCP hooks (optional)
-VANT_DEBUG=1 vant mcp --server
+```bash
+# Run the MCP server with debug output (always on in this mode)
+vant mcp
 ```
 
 ### Authentication
@@ -395,8 +395,7 @@ Returns:
     {
       "name": "vant_get_memory",
       "description": "Read current brain state from Vant...",
-      "inputSchema": { "type": "object" |
-- "properties": { ... } }
+      "inputSchema": { "type": "object", "properties": { ... } }
     }
   ]
 }
@@ -429,9 +428,7 @@ curl -X POST http://localhost:3457/call \
     "params": {
       "name": "vant_get_memory",
       "arguments": {
-        "files": ["identity" |
-- "goals" |
-- "lessons"]
+        "files": ["identity", "goals", "lessons"]
       }
     },
     "id": 1
@@ -622,10 +619,8 @@ curl -H "X-API-Key: your-secret-key" \
 
 ### Node.js Client
 ```javascript
-async function callVantTool(name |
-- args = {}) {
-    const response = await fetch('http://localhost:3457/call' |
-- {
+async function callVantTool(name, args = {}) {
+    const response = await fetch('http://localhost:3457/call', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -634,8 +629,7 @@ async function callVantTool(name |
         body: JSON.stringify({
             jsonrpc: '2.0',
             method: 'tools/call',
-            params: { name |
-- arguments: args },
+            params: { name, arguments: args },
             id: 1
         })
     });
@@ -643,15 +637,12 @@ async function callVantTool(name |
 }
 
 // Get brain
-const memory = await callVantTool('vant_get_memory' |
-- {
-    files: ['identity' |
-- 'goals']
+const memory = await callVantTool('vant_get_memory', {
+    files: ['identity', 'goals']
 });
 
 // Write to brain
-await callVantTool('vant_set_memory' |
-- {
+await callVantTool('vant_set_memory', {
     file: 'lessons',
     content: '# New Lesson\n\nRemember to test first!',
     commit: true
@@ -662,15 +653,13 @@ await callVantTool('vant_set_memory' |
 ```python
 import requests
 
-def call_vant_tool(name |
-- args=None):
+def call_vant_tool(name, args=None):
     response = requests.post(
         'http://localhost:3457/call',
         json={
             'jsonrpc': '2.0',
             'method': 'tools/call',
-            'params': {'name': name |
-- 'arguments': args or {}},
+            'params': {'name': name, 'arguments': args or {}},
             'id': 1
         },
         headers={'X-API-Key': 'your-secret-key'}
@@ -681,8 +670,7 @@ def call_vant_tool(name |
 memory = call_vant_tool('vant_get_memory')
 
 # Set memory
-call_vant_tool('vant_set_memory' |
-- {
+call_vant_tool('vant_set_memory', {
     'file': 'goals',
     'content': '# Goals\n\n- Complete the project',
     'commit': True

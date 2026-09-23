@@ -86,9 +86,10 @@ Configuration via environment.
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `VANT_MCP_PORT` | No | MCP server port (default: 3457) |
+| `VANT_MCP_BIND` | No | MCP bind address (default: 127.0.0.1) |
 | `VANT_MCP_API_KEY` | No | API key for MCP authentication |
+| `VANT_MCP_REQUIRE_KEY` | No | Force API key auth (`true`/`false`) |
 | `VANT_AGREE_AUTO_SYNC` | No | Enable auto-polling: set to `"true"` to confirm (see notes) |
-| `MCP_API_KEY` | No | Alternative MCP API key |
 
 ### Notifications
 
@@ -168,15 +169,10 @@ BLOCK_PATH_TRAVERSAL=true
 # Audit Logging
 AUDIT_LOG=true
 AUDIT_FILE=.audit.log
-
-# MCP Server Security
-MCP_REQUIRE_API_KEY=false
-MCP_TIMEOUT=30000
-MCP_MAX_INPUT_SIZE=1048576
-MCP_MAX_CONCURRENT=3
-MCP_CIRCUIT_BREAK_THRESHOLD=5
-MCP_CIRCUIT_BREAK_WINDOW=60000
 ```
+
+MCP server settings (port, API key, require-key) are configured through
+the `VANT_MCP_*` environment variables - see below.
 
 ### Security Settings Reference
 
@@ -196,13 +192,6 @@ MCP_CIRCUIT_BREAK_WINDOW=60000
 | **Audit** |||
 | AUDIT_LOG | true | Enable logging |
 | AUDIT_FILE | .audit.log | Log file |
-| **MCP Security** |||
-| MCP_REQUIRE_API_KEY | false | Force API key |
-| MCP_TIMEOUT | 30000 | Request timeout (ms) |
-| MCP_MAX_INPUT_SIZE | 1048576 | Max input (1MB) |
-| MCP_MAX_CONCURRENT | 3 | Parallel requests |
-| MCP_CIRCUIT_BREAK_THRESHOLD | 5 | Failures before block |
-| MCP_CIRCUIT_BREAK_WINDOW | 60000 | Failure window (ms) |
 
 ### Environment Variable Overrides
 
@@ -211,10 +200,7 @@ Security settings can also be set via environment variables:
 ```bash
 # MCP Security via environment
 export VANT_MCP_API_KEY=your-secret-key
-export VANT_MCP_REQUIRE_API_KEY=true
-export MCP_TIMEOUT=15000
-export MCP_MAX_CONCURRENT=2
-export MCP_CIRCUIT_BREAK_THRESHOLD=3
+export VANT_MCP_REQUIRE_KEY=true
 ```
 
 ## settings.ini

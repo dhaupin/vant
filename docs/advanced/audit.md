@@ -166,8 +166,7 @@ port = 514
 
 ## Audit Ledger (v0.8.6+)
 
-> Append-only |
-- tamper-proof ledger for system actions
+> Append-only, tamper-proof ledger for system actions
 
 ### What It Logs
 

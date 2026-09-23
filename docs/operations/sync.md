@@ -8,8 +8,7 @@ nav_order: 53
 
 # Multi-Provider RAID 1 - Sync Manager
 
-Sync Vant brain to multiple providers simultaneously for redundancy. If one provider fails |
-- the agent automatically fails over to the next available provider.
+Sync Vant brain to multiple providers simultaneously for redundancy. If one provider fails, the agent automatically fails over to the next available provider.
 
 ## Why RAID?
 
@@ -42,10 +41,8 @@ Sync Vant brain to multiple providers simultaneously for redundancy. If one prov
 const sync = require('./lib/sync');
 
 // Check RAID status
-console.log('RAID:' |
-- sync.isRAID() ? 'ACTIVE' : 'inactive');
-console.log('Providers:' |
-- sync.getProviderCount());
+console.log('RAID:', sync.isRAID() ? 'ACTIVE' : 'inactive');
+console.log('Providers:', sync.getProviderCount());
 
 // Push to ALL providers
 const result = await sync.pushAll({ 
@@ -79,8 +76,7 @@ export BITBUCKET_TOKEN=xxx
 
 ## Provider Priority
 
-On pull |
-- providers are tried in order:
+On pull, providers are tried in order:
 
 1. First configured provider
 2. Second configured provider
@@ -96,16 +92,13 @@ const brain = await sync.pullAny({ preference: 'gitlab' });
 
 ```javascript
 {
-    success: true |
--  // At least one succeeded
+    success: true,  // At least one succeeded
     results: {
         github: { success: true },
-        gitlab: { success: false |
-- error: 'rate limited' }
+        gitlab: { success: false, error: 'rate limited' }
     },
     errors: [
-        { provider: 'gitlab' |
-- error: 'rate limited' }
+        { provider: 'gitlab', error: 'rate limited' }
     ]
 }
 ```
