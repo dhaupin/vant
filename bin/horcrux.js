@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 /**
  * Vant Horcrux CLI
- * Horcrux management - inspect, restore, create
+ * Horcrux management - inspect, restore, create, refresh
  * 
  * Usage:
  *   vant horcrux inspect [path] [password]  # Preview horcrux
- *   vant horcrux restore [path] [password] # Restore from horcrux
- *   vant horcrux create [path]             # Create horcrux from current state
+ *   vant horcrux restore [path] [password]  # Restore from horcrux
+ *   vant horcrux create [path] [password]   # Create horcrux from current state
+ *   vant horcrux refresh [password]         # Regenerate boot horcrux in place
  */
 
 const boot = require('../lib/boot');
@@ -34,6 +35,10 @@ Usage:
   vant horcrux inspect [path]            Preview horcrux contents
   vant horcrux restore [path] [password] Restore from horcrux
   vant horcrux create [path] [password]  Create horcrux from current state
+  vant horcrux refresh [password]        Regenerate the boot horcrux in place
+                                         (fresh brain snapshot, same path —
+                                         without this, point-in-time boot
+                                         backups go stale forever)
 
 Password resolution (in order):
   1. Positional arg
@@ -46,6 +51,7 @@ Examples:
   vant horcrux inspect models/public/vant/boot/axolotl-p_axolotl2026.svg
   vant horcrux restore models/public/vant/boot/axolotl-p_axolotl2026.svg
   vant horcrux create models/public/vant/boot/axolotl-p_axolotl2026.svg axolotl2026
+  vant horcrux refresh
 `);
     process.exit(0);
 }
@@ -178,9 +184,20 @@ async function run() {
         console.log('Restored:', result.restored.join(', '));
         
     } else if (subcmd === 'create') {
-        const outputPath = args[1] || path.join(__dirname, '..', 'models', 'public', 'boot', `brain-${Date.now()}.svg`);
-        const password = args[2]; // Must be provided or via secret.js
-        
+        // (pass 21) Default lands in the CURRENT BRAIN's boot dir with the
+        // p_<password> naming convention, so boot-time discovery can find it.
+        // The old default (models/public/boot/brain-<ts>.svg) was outside
+        // every brain's boot/ dir — undetectable by _discoverBootHorcruxes().
+        const currentBrain = (() => {
+            try {
+                const brainMod = require('../lib/brain');
+                const name = brainMod.getCurrentBrain ? brainMod.getCurrentBrain() : null;
+                if (typeof name === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(name)) return name;
+            } catch (e) { /* fall through */ }
+            const stack = readBrainStack(REPO_ROOT);
+            return stack[0] || 'vant';
+        })();
+        const outputPath = args[1] || path.join(REPO_ROOT, 'models', 'public', currentBrain, 'boot', `${currentBrain}-p_${password}.svg`);
         if (!password) {
             console.log('❌ Password required');
             console.log('Usage: vant horcrux create <path> <password>');
@@ -199,6 +216,70 @@ async function run() {
         console.log('Size:', result.size);
         console.log('Format:', result.format || 'steganography');
         
+    } else if (subcmd === 'refresh') {
+        // (pass 21) Boot horcruxes are point-in-time snapshots that ONLY ever
+        // get restored, never regenerated — the backup drifts further from the
+        // live brain every session. refresh regenerates the discovered boot
+        // horcrux in place: fresh gather, same path, same password (from the
+        // filename convention / env / arg), written to a temp file first and
+        // renamed only after a successful encode, so a failed gather can never
+        // destroy the only backup.
+        const positionalPw = args[1];
+        const target = defaultPath;
+        if (!target) {
+            console.error('❌ No boot horcrux to refresh.');
+            console.error('   Searched models/public/<stack>/boot/ for <agent>-p_*.svg');
+            console.error('   Create one first: vant horcrux create models/public/<brain>/boot/<agent>-p_<pw>.svg <pw>');
+            process.exit(1);
+        }
+
+        // Resolve password by the SAME chain as restore: arg → env → filename.
+        let password = positionalPw || process.env.VANT_BRAIN_PASSWORD || null;
+        if (!password) {
+            const m = path.basename(target).match(/-p_([^.]+)\.svg$/);
+            if (m) password = m[1];
+        }
+        if (!password) {
+            console.error('❌ Password required (refresh must re-encrypt with the same key):');
+            console.error('     • positional arg: vant horcrux refresh <password>');
+            console.error('     • env var:        VANT_BRAIN_PASSWORD=...');
+            console.error('     • p_<password> in the target filename (the convention)');
+            process.exit(1);
+        }
+
+        const transform = require('../lib/transform');
+        // (pass 21) vaf.checkPathTraversal blocks ABSOLUTE paths (toHorcrux
+        // runs it on its input), so derive a REPO-RELATIVE tmp path for the
+        // encode, then join back to absolute for the rename + stat.
+        const relTarget = path.relative(REPO_ROOT, target);
+        const relTmp = relTarget.replace(/\.svg$/, '') + '.refresh-tmp.svg';
+        const absTmp = path.join(REPO_ROOT, relTmp);
+        console.log('Refreshing boot horcrux:', target);
+        console.log('  (fresh gather → temp file → atomic replace)');
+
+        try {
+            await transform.toHorcrux(relTmp, { password });
+            const stat = fs.statSync(absTmp);
+            if (!stat.size || stat.size < 64) {
+                throw new Error('encoded output suspiciously small (' + stat.size + ' bytes)');
+            }
+            // Round-trip sanity: the fresh horcrux must decrypt before we
+            // replace the old one. (Same absolute/relative treatment.)
+            const check = await transform.validateHorcruxFile(relTmp, { password });
+            if (!check || check.valid === false) {
+                throw new Error('post-encode validation failed: ' + (check && check.error || 'unknown'));
+            }
+            fs.renameSync(absTmp, target);
+            console.log('\n✅ Refreshed!');
+            console.log('Path:', target);
+            console.log('Size:', stat.size);
+            console.log('Timestamp:', new Date(Date.now()).toISOString());
+        } catch (e) {
+            // Never leave the tmp orphan, never touch the original on failure.
+            try { fs.rmSync(absTmp, { force: true }); } catch (e2) {}
+            console.error('\n❌ Refresh failed (original left untouched):', e.message);
+            process.exit(1);
+        }
     } else {
         console.log('Unknown command:', subcmd);
         console.log('Run "vant horcrux --help" for usage');

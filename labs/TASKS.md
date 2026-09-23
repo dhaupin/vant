@@ -1831,3 +1831,70 @@ fresh-clone reincarnation drill rerun, horcrux refresh, DEAD_EXPORTS long
 tail, testBin "any stdout = pass" fragility, and a sweep for other
 lazy-require paths in bin/ using cwd-relative `./lib` (fixed the sandbox
 class this pass; grep for `require("\./` to find stragglers).
+
+---
+
+## Session (2026-09-23 — pass 21: P2 #26 de-mux, testBin, horcrux refresh, drill)
+
+All five backlog candidates from pass 20 shipped.
+
+**#5 cwd-relative lazy-require sweep (the sandbox bug class, finished):**
+bin/{stego,bump}.js had the same broken `require("./lib/sandbox")` — fixed
+to `../lib/sandbox`. Deleted bin/webhook.sh entirely: referenced nowhere,
+a stale shell duplicate of webhooks.js, and it interpolated user args
+straight into `node -e` JS strings (shell injection). Wired the `webhook`
+alias route the banner always claimed (dispatcher had no route; webhooks.js
+usage-on-unknown makes the alias safe). cli.md documents the alias.
+
+**#1 P2 #26 de-multiplexed (work-item Map ownership):**
+lib/agents/internal.js gains `_workItems`; work.js bookkeeping
+(setDeadline/retry/escalate/setPriority) now reads/writes it via
+_findWorkItem() — _workItems first, then legacy _messages for bare keys
+ONLY (namespaced 'conv:*'/'event:*' keys are core.js domains and are
+skipped). The first version of the fallback was too promiscuous and the
+NEW test caught it: setPriority('event:foo') would have set .priority ON a
+listener array and returned 9. Regression pin added in agents-split.test.js
+(dedicated-Map roundtrip + listener-array immunity + legacy contract).
+Sign-off (approve/reject) is unaffected — it goes through stream.complete().
+agents-split 23/23, agents 17/17, orgflow 6/6, concurrent 6/6.
+
+**#4 testBin judged on exit semantics (both harnesses):**
+- test/ci.js: added BIN_BUDGETS (test-all: 30s — it runs 17 sub-checks;
+  the 5s smoke watchdog was killing a healthy binary → the drill's
+  "423/1" class). Main repo now 422/0/0.
+- test/runner.js: replaced "kill at timeout, pass on ANY stdout" with
+  wait-for-close + exit-code judging; Syntax/ReferenceError still fails;
+  watchdog kill passes only for known servers (BIN_SERVERS); spawn errors
+  fail cleanly. Runner 37/37.
+
+**#3 horcrux refresh (stale point-in-time backups):**
+`vant horcrux refresh` regenerates the discovered boot horcrux in place:
+password resolved by the same chain as restore (arg → env → p_<pw>
+filename), fresh gather written to a repo-relative .refresh-tmp.svg (vaf
+blocks absolute paths — found live), validated by round-trip
+(validateHorcruxFile) BEFORE rename, original untouched on any failure.
+Also fixed `create`'s default output path: models/public/boot/brain-<ts>.svg
+was outside every brain's boot/ dir — invisible to boot-time discovery.
+Now defaults to models/public/<currentBrain>/boot/<brain>-p_<pw>.svg.
+Live-verified: refresh bumped the axolotl boot horcrux 20:31 → 20:36 and
+inspect confirms fresh timestamp + valid decrypt.
+
+**#2 fresh-clone reincarnation drill (rerun after all of the above):**
+Cloned axolotl to /tmp, bun install, then: horcrux inspect valid
+(steganography) + fromHorcrux 25-key restore; brain.read('identity')
+1714 chars; fresh-dir guard 8/8 in the clone; ci.js 422/0/0 once the
+uncommitted harness fix was copied in (clone ships pass-20 code — the one
+failure was exactly the BIN_BUDGETS gap, re-confirming #4's value). Note:
+the clone's committed models/private tree means brain.read('identity')
+resolves private there vs public in the dev workspace — by-design dual-mode
+override, same content. Scratch cleaned.
+
+**Evidence:** full suite 109/109; agents-split 23/23; runner 37/37;
+test-all 17/17; fresh-dir 8/8 (main + clone); ci 422/0/0 (main + fixed
+clone); horcrux refresh live round-trip.
+
+**Next candidates:** DEAD_EXPORTS.md long tail (untouched), snapshot vs
+horcrux overlap (bin/snapshot.js also wraps toHorcrux — refresh semantics
+could be shared), docs sync for `vant horcrux refresh` (cli.md + memory/
+horcrux.md), and bin/docs-build.js's require("./lib/sandbox") fix landed in
+pass 20 — worth one grep in docs for other stale paths.

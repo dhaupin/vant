@@ -213,10 +213,10 @@ test('work: delegateAsync + pollWork roundtrip via stream queue', () => {
 
 test('work: setPriority + setDeadline + escalate bookkeeping on work items', () => {
     const agents = require(path.join(ROOT, 'lib', 'agents.js'));
-    // The bookkeeping fns look up work in the SHARED _messages Map (documented
-    // P2 #26 quirk, moved verbatim) — only items previously STORED there are
-    // visible. Pin the fail-safe contract: unknown work ids error cleanly, and
-    // a stored item roundtrips its bookkeeping fields.
+    // Legacy contract pin: unknown work ids error cleanly, and an item stored
+    // in the LEGACY _messages Map still roundtrips its bookkeeping fields via
+    // the two-tier lookup in work.js (_workItems first, _messages fallback).
+    // The dedicated _workItems path is pinned by the de-multiplexing test below.
     const internal = require(path.join(ROOT, 'lib', 'agents', 'internal.js'));
     const pr = agents.setPriority('no-such-work', 9);
     if (!pr.error) return { success: false, error: 'unknown work should error' };
@@ -241,6 +241,39 @@ test('work: approve/signOff/reject flow', () => {
             return true;
         })
     );
+});
+
+test('work: P2 #26 de-multiplexed — bookkeeping uses _workItems, cannot touch listeners/convs', () => {
+    const agents = require(path.join(ROOT, 'lib', 'agents.js'));
+    const internal = require(path.join(ROOT, 'lib', 'agents', 'internal.js'));
+
+    // Bookkeeping on a _workItems item works...
+    internal._workItems.set('wi-1', { agentId: 'x', task: {} });
+    const pr = agents.setPriority('wi-1', 7);
+    if (pr.priority !== 7) return { success: false, error: `priority: ${JSON.stringify(pr)}` };
+    if (agents.setDeadline('wi-1', 60000).deadline === undefined) return { success: false, error: 'deadline' };
+
+    // ...and a colliding work id CANNOT reach _messages domains anymore.
+    // (Pre-fix this mutated the listener array itself: setPriority('event:foo')
+    // set .priority on an ARRAY and returned 7 instead of erroring.)
+    const listeners = [];
+    internal._messages.set('event:foo', listeners);
+    const prEv = agents.setPriority('event:foo', 9);
+    if (!prEv.error) return { success: false, error: `setPriority reached a listener array: ${JSON.stringify(prEv)}` };
+    if (internal._messages.get('event:foo') !== listeners || listeners.length !== 0) {
+        return { success: false, error: 'listener array was touched' };
+    }
+
+    // Legacy contract preserved: items still stored in _messages roundtrip.
+    internal._messages.set('legacy-wi', { agentId: 'y', task: {} });
+    const pr2 = agents.setPriority('legacy-wi', 3);
+    if (pr2.priority !== 3) return { success: false, error: `legacy lookup: ${JSON.stringify(pr2)}` };
+
+    // Hygiene
+    internal._workItems.delete('wi-1');
+    internal._messages.delete('event:foo');
+    internal._messages.delete('legacy-wi');
+    return true;
 });
 
 // ---------- 4. Behavior: protos (protos.js through facade) ----------

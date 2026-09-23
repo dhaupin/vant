@@ -182,6 +182,14 @@ async function testLib(name, options = {}) {
 // "hung" and fails.
 const SERVER_BINS = new Set(['mcp', 'watch', 'server']);
 
+// (pass 21) Per-binary budgets. Bins that legitimately need longer than the
+// smoke timeout get their own allowance so the watchdog doesn't kill a
+// healthy-but-slow check. test-all runs 17 sub-checks (10s timeout each via
+// execSync) and needs ~25s on slow machines; everything else keeps the 5s
+// smoke budget.
+const BIN_BUDGETS = { 'test-all': 30000 };
+const binBudget = name => BIN_BUDGETS[name] || CONFIG.testTimeout;
+
 // Error signatures that mean "this environment refuses to run the binary",
 // not "the binary is broken". Matched case-insensitively against combined
 // output when a binary exits nonzero on its own.
@@ -247,12 +255,13 @@ async function testBin(name, options = {}) {
   }
 
   const result = await new Promise(resolve => {
+    const budget = binBudget(name);
     // stdin: 'ignore' -> reads from the child see immediate EOF. Interactive
     // CLIs (setup.js) block on readline waiting for input, and a piped stdin
     // never delivers EOF, so they'd hang the watchdog. 'ignore' is /dev/null
     // without an extra fd to clean up.
     const proc = spawn('node', [binPath], {
-      timeout: CONFIG.testTimeout,
+      timeout: budget,
       killSignal: 'SIGKILL',
       stdio: ['ignore', 'pipe', 'pipe']
     });
@@ -265,7 +274,7 @@ async function testBin(name, options = {}) {
     const killer = setTimeout(() => {
       watchdog = true;
       try { proc.kill('SIGKILL'); } catch (e) {}
-    }, CONFIG.testTimeout + 1000);
+    }, budget + 1000);
     killer.unref();
 
     proc.on('close', (code, signal) => {
@@ -291,7 +300,7 @@ async function testBin(name, options = {}) {
     if (SERVER_BINS.has(name)) {
       pass(fullName);
     } else {
-      fail(fullName, `hung past ${CONFIG.testTimeout}ms watchdog (not a known server)`);
+      fail(fullName, `hung past ${binBudget(name)}ms watchdog (not a known server)`);
     }
     return;
   }

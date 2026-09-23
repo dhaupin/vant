@@ -21,30 +21,49 @@ without the password.
 From the CLI, embedding the current brain into an image:
 
 ```bash
-vant horcrux split
+vant horcrux create <path> <password>
 ```
 
 The command gathers brain state, encrypts it, and embeds the payload into
 the carrier image. Output lands as a file you can copy, commit, or attach.
+Without a path it defaults to
+`models/public/<currentBrain>/boot/<brain>-p_<password>.svg` — the naming
+convention boot-time discovery scans for.
+
+## Refresh (keep it current)
+
+A horcrux is a point-in-time snapshot; the live brain drifts from it every
+session. Regenerate the discovered boot horcrux IN PLACE with fresh state:
+
+```bash
+vant horcrux refresh
+```
+
+The password resolves the same way as restore (arg → `VANT_BRAIN_PASSWORD`
+env → `p_<password>` in the filename). The fresh snapshot is written to a
+temp file and round-trip validated before it replaces the original, so a
+failed refresh never destroys your only backup. Run this after meaningful
+brain changes if you rely on horcrux restore for disaster recovery.
 
 ## Restore
 
 On a fresh install:
 
 ```bash
-vant horcrux join
+vant horcrux restore [path] [password]
 ```
 
-Prompts for the password, extracts the payload, and restores the brain
-state. Validation runs before anything is written; a corrupt or wrong-
-password carrier refuses cleanly.
+Without a path it scans the brain stack's boot dirs for `<agent>-p_*.svg`.
+Prompts for the password if not given, extracts the payload, and restores
+the brain state. Validation runs before anything is written; a corrupt or
+wrong-password carrier refuses cleanly.
 
 ## Inspect
 
 Check a carrier without extracting:
 
 ```bash
-vant transform inspect-horcrux <file>
+vant horcrux inspect [path] [password]
 ```
 
 Reports whether the file holds a valid horcrux payload and which formats it

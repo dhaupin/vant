@@ -284,9 +284,10 @@ vant backup create
 vant backup restore <file>
 vant backup list
 
-vant horcrux backup
-vant horcrux restore
-vant horcrux list
+vant horcrux inspect [path] [password]
+vant horcrux restore [path] [password]
+vant horcrux create [path] [password]
+vant horcrux refresh [password]      # regenerate boot horcrux in place
 
 vant transform gather
 vant transform to-horcrux
@@ -459,6 +460,7 @@ with its own `--help`.
 | `vant recursion` | Recursion engine |
 | `vant registry` | General registry |
 | `vant webhooks` | Webhook management |
+| `vant webhook` | Alias of `vant webhooks` |
 | `vant zen` | Zen utilities |
 | `vant brain-registry` | Brain registration |
 | `vant node-registry` | Node registration |

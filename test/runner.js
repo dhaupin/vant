@@ -71,6 +71,10 @@ function testLib(name, modPath, tests = {}) {
 // BINARY TESTS
 // ============================================
 
+// Known long-running servers: a watchdog kill is their PASS condition, not
+// a hang (they serve until terminated).
+const BIN_SERVERS = new Set(['mcp']);
+
 function testBin(name, binPath, args = [], timeout = 3000) {
   return new Promise((resolve) => {
     console.log(`\n🔧 Testing: ${name}`);
@@ -86,25 +90,59 @@ function testBin(name, binPath, args = [], timeout = 3000) {
     proc.stdout.on('data', (d) => { output += d; });
     proc.stderr.on('data', (d) => { error += d; });
     
-    setTimeout(() => {
-      proc.kill();
-      
-      if (error.toString().includes('SyntaxError') || error.toString().includes('ReferenceError')) {
-        fail(`${name} syntax`, error.toString().substring(0, 100));
-        resolve();
+    // (pass 21) Judged on EXIT SEMANTICS, never on stdout. The old rule
+    // killed the process at the timeout and passed on ANY output — so a
+    // binary that crashed loudly after printing its banner passed, while the
+    // same binary flipped pass/fail across machines on environment-dependent
+    // INFO lines. Now: wait for close; Syntax/ReferenceError still fails;
+    // exit 0 passes; self-exited nonzero fails with the captured stderr;
+    // a watchdog kill passes ONLY for known servers.
+    let done = false;
+    const finish = (verdict, detail) => {
+      if (done) return;
+      done = true;
+      if (verdict === 'syntax') {
+        fail(`${name} syntax`, (error || '').toString().substring(0, 100));
+      } else if (verdict === 'ok') {
+        pass(detail || `${name} exits 0`);
+      } else if (verdict === 'server') {
+        pass(`${name} serves (killed at watchdog, expected for servers)`);
+      } else if (verdict === 'hung') {
+        fail(`${name} hung`, `no exit within ${timeout}ms watchdog`);
+      } else {
+        fail(`${name} exit ${detail || '?'}`, (error || output).toString().trim().slice(0, 100) || 'nonzero exit');
+      }
+      resolve();
+    };
+    
+    proc.on('close', (code, signal) => {
+      if ((error || '').toString().includes('SyntaxError') || (error || '').toString().includes('ReferenceError')) {
+        finish('syntax');
         return;
       }
-      
-      // Check expected output patterns
-      if (args.length === 0) {
-        // Basic run - should not crash
-        pass(`${name} runs without crash`);
-      } else {
-        pass(`${name} args: ${args.join(' ')}`);
+      if (signal || code === null || code === undefined) {
+        // Killed (our watchdog) — servers legitimately never exit.
+        finish(BIN_SERVERS.has(name) ? 'server' : 'hung');
+        return;
       }
-      
+      if (code === 0) {
+        finish('ok');
+      } else {
+        finish('exit', code);
+      }
+    });
+    
+    proc.on('error', (e) => {
+      done = true;
+      fail(`${name} spawn`, e.message);
       resolve();
+    });
+    
+    // Watchdog: a CLI that hasn't exited in `timeout` ms is hung.
+    const killer = setTimeout(() => {
+      try { proc.kill(); } catch (e) {}
     }, timeout);
+    killer.unref();
   });
 }
 

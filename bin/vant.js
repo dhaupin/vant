@@ -246,6 +246,10 @@ const COMMANDS = {
     memory: 'memory.js',
     registry: 'registry.js',
     webhooks: 'webhooks.js',
+    // Singular alias — help/banner advertised `vant webhook` for months but
+    // no route existed (bare command hit unknown-command). webhooks.js shows
+    // usage on a bare/unknown subcommand, so the alias is safe.
+    webhook: 'webhooks.js',
     zen: 'zen.js',
     consciousness: 'consciousness.js',
     recursion: 'recursion.js',
