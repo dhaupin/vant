@@ -15,13 +15,11 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — docs/CI consistency pass shipped at `1c72809`:
-standalone suites now in GitHub Actions discovery, CHANGELOG entries for
-migration + QC fixes, mcp-tools.md gained brain_migration_status and
-stale tool-counts replaced with auto-wire phrasing everywhere, cli.md
-documents failed-verify retry + existing-wins + health warning, .gitignore
-covers legacy-main fixture + .drill-* scratch. All suites / runner 37-37 /
-CI 421-0-3 green. Branch is PR #91-ready; user decides on merge.)
+(nothing in flight — CI minutes-efficiency + all-green shipped: audit.yml
+deleted, test.yml consolidated to 1 job with concurrency cancel-in-progress
++ npm ci + cache, js-yaml lockfile 4.3.2 (audit clean), brain-circuit
+recovery tests deadline-based + resetMs-0 pinned. Flake-proof 5×, full
+battery green. Branch is PR #91-ready; user decides on merge.)
 
 ---
 

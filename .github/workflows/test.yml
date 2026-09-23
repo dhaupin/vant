@@ -1,5 +1,8 @@
 name: VANT CI
 
+# Minutes-efficient CI: ONE job does everything (tests + security + validate).
+# Concurrency cancels in-flight runs when a newer push lands on the same
+# branch/PR so stale runs don't burn Actions minutes.
 on:
   workflow_dispatch:
   push:
@@ -7,55 +10,40 @@ on:
   pull_request:
     branches: [main, develop]
   schedule:
-    - cron: '0 0 * * 0'  # Weekly
+    - cron: '0 0 * * 0'  # Weekly (default branch only, single job = cheap)
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
+  ci:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: npm
+
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Security checks (tokens + npm audit)
+        run: |
+          ! grep -rE "ghp_[a-zA-Z0-9]{36}" . --include="*.js"
+          npm audit --audit-level=high
+
       - name: Run tests
         run: |
+          node -e "console.log('vant', require('./package.json').version)"
           node test/ci.js
           node test/runner.js
           node test/evals/vibe.js
           node test/coverage.js
+
       - name: Run standalone suites
         run: for f in test/*.test.js; do node "$f" || exit 1; done
-
-  security:
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Install dependencies
-        run: npm install
-      - name: Check tokens
-        run: '! grep -rE "ghp_[a-zA-Z0-9]{36}" . --include="*.js" '
-      - name: Check npm audit
-        run: npm audit --audit-level=high
-
-  validate:
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Install dependencies
-        run: npm install
-      - name: Show version
-        run: node -e "console.log(require('./package.json').version)"

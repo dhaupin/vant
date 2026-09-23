@@ -2,7 +2,57 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: docs/CI consistency pass — standalone suites in CI discovery, CHANGELOG entries, tool-count drift fixed, migrate behavior documented
+**Session:** Wave: CI minutes-efficiency + green — audit workflow deleted, test.yml consolidated to 1 job with concurrency cancel, js-yaml advisory closed, brain-circuit flake fixed
+
+---
+
+## Session (2026-09-22 — CI efficiency + all-green, pre-merge #91)
+
+User's constraints: free-tier Actions minutes shared with other projects in
+the account; stale runs from rapid fix-fire pushes were burning minutes.
+Directives: delete the audit workflow, consolidate test.yml to 1 job, fix
+both CI reds (js-yaml advisory + brain-circuit flake).
+
+- **audit.yml DELETED** (whole workflow, 56 lines) — was a dedicated
+  audit-probe job; the audit itself is closed (ledger in labs/AUDIT_FINDINGS.md).
+  audit.md at root was already gone (no residue).
+- **test.yml consolidated 3 jobs → 1 job `ci`** (test + security + validate
+  all ran their own checkout + setup-node + npm install = 3x the minutes per
+  push). One job now: token grep + `npm audit --audit-level=high` + all test
+  entrypoints + the standalone-suite loop, `npm ci` (lockfile-exact, faster
+  + reproducible vs `npm install`), `cache: npm` on setup-node, timeout 5+3+2
+  → 8. **concurrency block: group `${{ github.workflow }}-${{ github.ref }}`,
+  `cancel-in-progress: true`** — a newer push to the same branch/PR cancels
+  the in-flight stale run. YAML validated by parsing with js-yaml.
+- **docker.yml / docs.yml checked, left alone:** both main/release-scoped
+  only (docs.yml already has concurrency). Zero minutes on axolotl.
+- **js-yaml high advisory:** package.json js-yaml ^4.1.1 unaffected; the
+  advisory was the eslint dev-dep's transitive 4.3.1 — lockfile bumped to
+  4.3.2 by `npm audit fix` (crash-session had it staged uncommitted).
+  Verified: `npm audit --audit-level=high` → found 0 vulnerabilities.
+- **brain-circuit flake (test 3 + 4, recovery):** fixed `setTimeout(60)`
+  sleeps raced the injected 30ms half-open window; test 4's post-probe
+  short-circuit assertion was a genuine race — past the fresh 30ms window,
+  the "next call" became another REAL poisoned probe ('still wedged')
+  instead of the coded error. Fixes: (1) `waitFor()` deadline-poll helper
+  (5ms interval, 2s deadline, rejects with label on timeout) — retries the
+  coded `BRAIN_CIRCUIT_OPEN` short-circuit until the window truly elapses
+  (safe: the short-circuit path never feeds the breaker); (2) test 4 sets
+  `_setLoadCircuitResetMs(0)` before the post-probe assertion — resetMs 0
+  disables probing in the lib, so the next call MUST short-circuit at any
+  CI speed. **Subtle trap (cost one failed run):** in the re-open test the
+  waitFor predicate must RESOLVE with the real probe error ('still wedged')
+  — it IS the expected outcome — and retry only on BRAIN_CIRCUIT_OPEN; the
+  generic `RETRY_ON_CIRCUIT` rejection-handler form rejects on the expected
+  error and skips the assertion chain entirely.
+
+**Verification:** brain-circuit 10/10 × 5 consecutive runs (flake-proof);
+npm audit clean; YAML parse OK (1 job, cancel-in-progress true, 6 steps);
+ci.js 421/0/3; runner 37/37; vibe 4/4; coverage 41/0; ALL standalone
+suites pass by exit code. Scratch residue from crash sessions (scripts/_*.js,
+private/buffy) left untracked, excluded from the commit.
+
+**This was the last pre-merge QC item — branch is GO for PR #91.**
 
 ---
 

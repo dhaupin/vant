@@ -50,6 +50,32 @@ function test(name, fn) {
     });
 }
 
+// Deadline-based wait for flake-free timing assertions (CI boxes jitter).
+// fn returns null to mean "not ready — retry", any other value to resolve.
+// Throws with the label when the deadline passes, so a broken precondition
+// fails fast with context instead of hanging.
+function waitFor(fn, { label = 'condition', intervalMs = 5, deadlineMs = 2000 } = {}) {
+    const start = Date.now();
+    return new Promise((resolve, reject) => {
+        const tick = () => {
+            Promise.resolve().then(fn).then(v => {
+                if (v !== null && v !== undefined) return resolve(v);
+                if (Date.now() - start >= deadlineMs) {
+                    return reject(new Error(`waitFor deadline exceeded: ${label}`));
+                }
+                setTimeout(tick, intervalMs);
+            }).catch(reject);
+        };
+        tick();
+    });
+}
+
+// While a breaker is OPEN pre-window, load() short-circuits with the coded
+// error — that path never feeds the breaker or changes state, so it is safe
+// to retry until the reset window elapses and a real probe passes through.
+const RETRY_ON_CIRCUIT = e =>
+    (e && e.code === 'BRAIN_CIRCUIT_OPEN') ? null : Promise.reject(e);
+
 console.log('\n🔌 BRAIN-LOAD CIRCUIT BREAKER TESTS (P3 #34)\n');
 
 // ---------- setup ----------
@@ -179,15 +205,21 @@ test('recovery: half-open probe after reset window; success closes the breaker',
                 return { success: false, error: 'breaker did not open after 2 failures' };
             }
             // Heal the pipeline; the NEXT load after the reset window is the
-            // half-open probe — its success closes the breaker.
+            // half-open probe — its success closes the breaker. Deadline-based
+            // (no fixed sleep): retry the coded short-circuit until the window
+            // has actually elapsed, then the real probe passes through.
             brain._clearHandlerOverride('sandbox');
-            return new Promise(r => setTimeout(r, 60)).then(() => brain.load('identity')).then(res => {
-                const st = brain.getLoadCircuitStatus();
-                if (st.state !== 'CLOSED') return { success: false, error: `after probe success state=${st.state}` };
-                if (!res || !res.content) return { success: false, error: 'probe load returned nothing' };
-                return true;
-            }, e => ({ success: false, error: `probe load threw: ${e.message}` }));
+            return waitFor(
+                () => brain.load('identity').then(res => res, RETRY_ON_CIRCUIT),
+                { label: 'half-open probe to pass through' }
+            );
         })
+        .then(res => {
+            const st = brain.getLoadCircuitStatus();
+            if (st.state !== 'CLOSED') return { success: false, error: `after probe success state=${st.state}` };
+            if (!res || !res.content) return { success: false, error: 'probe load returned nothing' };
+            return true;
+        }, e => ({ success: false, error: `probe load threw: ${e.message}` }))
         .finally(() => {
             brain.resetLoadCircuit();
             brain._setLoadCircuitResetMs(null);
@@ -204,14 +236,28 @@ test('recovery: half-open probe FAILURE re-opens the breaker', () => {
     return brain.load('identity-probe-reopen').catch(() => {})
         .then(() => {
             if (brain.getLoadCircuitStatus().state !== 'OPEN') return { success: false, error: 'did not open' };
-            // Wait past the window; the probe is still poisoned → must re-open
-            return new Promise(r => setTimeout(r, 60)).then(() => brain.load('identity-probe-reopen').catch(e => e));
+            // Deadline-based (no fixed sleep): retry ONLY the coded
+            // short-circuit until the reset window has actually elapsed and
+            // the (poisoned) probe really executes. A real probe failure
+            // ('still wedged') resolves waitFor with that error — it IS the
+            // expected result, not a waitFor failure.
+            return waitFor(
+                () => brain.load('identity-probe-reopen').then(
+                    v => v,
+                    e => (e && e.code === 'BRAIN_CIRCUIT_OPEN') ? null : e
+                ),
+                { label: 'poisoned half-open probe to execute' }
+            );
         })
         .then(firstProbe => {
             if (!firstProbe || firstProbe.message !== 'still wedged') return { success: false, error: `probe did not execute: ${firstProbe && firstProbe.message}` };
             const st = brain.getLoadCircuitStatus();
             if (st.state !== 'OPEN') return { success: false, error: `failed probe left ${st.state}` };
-            // and the NEXT call short-circuits again (probing flag consumed)
+            // and the NEXT call short-circuits again (probing flag consumed).
+            // Freeze the half-open window first: resetMs 0 disables probing,
+            // so the next call MUST short-circuit even if CI jitter burns the
+            // fresh 30ms window before we get here.
+            brain._setLoadCircuitResetMs(0);
             return brain.load('identity-probe-reopen').catch(e => e);
         })
         .then(secondCall => {
