@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/qos
 layout: default
 title: QoS
-nav_order: 47
+nav_order: 58
 ---
 
 # QoS
@@ -285,12 +285,12 @@ const s = sandbox.create({
 });
 ```
 
-See [Sandbox](security/sandbox) for details.
+See [Sandbox](/vant/security/sandbox) for details.
 
 ---
 
 ## Related
 
-- [Sandbox](security/sandbox) - Execution isolation
-- [Security](security/security) - VAF and encryption
-- [Network](../../runtime/server) - HTTP server with QoS
+- [Sandbox](/vant/security/sandbox) - Execution isolation
+- [Security](/vant/security/) - VAF and encryption
+- [Network](/vant/runtime/server) - HTTP server with QoS

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/automation
 layout: default
 title: Automation
-nav_order: 56
+nav_order: 53
 ---
 
 # Tutorial: Automation Setup
@@ -116,4 +116,4 @@ queue.process('sync', async (job) => {
 
 ## More
 
-See [Cron](operations/cron) and [Events](operations/events) for details.
+See [Cron](/vant/operations/cron) and [Events](/vant/operations/events) for details.

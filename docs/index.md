@@ -49,7 +49,7 @@ vant start
 ```
 
 `vant start` also imports an old single-brain layout automatically if it
-detects one. See [the migration guide](getting-started/setup).
+detects one. See [the migration guide](/vant/getting-started/setup).
 
 ### For agents: connect over MCP
 
@@ -61,7 +61,7 @@ vant mcp
 
 The server listens on `127.0.0.1:3457` by default. Point any MCP client at
 it and the brain surface arrives as tools: read, write, search, migrate
-status. Full client setup in [MCP](runtime/mcp).
+status. Full client setup in [MCP](/vant/runtime/mcp).
 
 Agents inheriting a repo with an existing brain need one command before
 anything else:
@@ -88,25 +88,25 @@ Memory is the product; the runtime makes it safe to use unattended. A
 security chain gates every brain operation (sandbox capabilities, input
 validation, rate limiting, escrow approval). A write-ahead journal and
 atomic writes survive crashes. Metrics and health endpoints expose what the
-system is doing. Start at [Runtime](runtime/runtime).
+system is doing. Start at [Runtime](/vant/runtime/runtime).
 
 ## Multi-brain and multi-agent
 
 One Vant install holds several named brains with a stack you switch
 between. Agents get their own branches and work in isolation. Trust levels
 and a succession ledger control how much state each generation inherits.
-See [Multi-brain](multi-agent/brains) and [Succession](multi-agent/succession).
+See [Multi-brain](/vant/multi-agent/brains) and [Succession](/vant/multi-agent/succession).
 
 ## Sections
 
 | Section | Contents |
 |---------|----------|
-| [Getting started](getting-started/quick-start) | Install, configure, first run, agent onboarding |
-| [Memory](memory/brain) | The brain, memory store, search, citations, horcrux, geometry |
-| [Runtime](runtime/runtime) | Programmatic API, MCP, headless server |
-| [Multi-agent](multi-agent/brains) | Brains, branches, succession, crews |
-| [Operations](operations/storage) | Storage, journal, events, cache, CI |
-| [Security](security/sandbox) | Sandbox, gates, escrow, sudo |
-| [Integrations](integrations/github) | GitHub, agent skills, Linear, Docker, S3 |
-| [Reference](reference/cli) | CLI commands, configuration, changelog |
-| [Advanced](advanced/search-architecture) | Search internals, API architecture, NSC9 spec |
+| [Getting started](/vant/getting-started/quick-start) | Install, configure, first run, agent onboarding |
+| [Memory](/vant/memory/brain) | The brain, memory store, search, citations, horcrux, geometry |
+| [Runtime](/vant/runtime/runtime) | Programmatic API, MCP, headless server |
+| [Multi-agent](/vant/multi-agent/brains) | Brains, branches, succession, crews |
+| [Operations](/vant/operations/storage) | Storage, journal, events, cache, CI |
+| [Security](/vant/security/sandbox) | Sandbox, gates, escrow, sudo |
+| [Integrations](/vant/integrations/github) | GitHub, agent skills, Linear, Docker, S3 |
+| [Reference](/vant/reference/cli) | CLI commands, configuration, changelog |
+| [Advanced](/vant/advanced/search-architecture) | Search internals, API architecture, NSC9 spec |

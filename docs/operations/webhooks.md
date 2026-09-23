@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/webhooks
 layout: default
 title: Webhooks
-nav_order: 57
+nav_order: 54
 ---
 
 # Tutorial: Webhook Automation
@@ -198,6 +198,6 @@ cron.cron('0 0 * * *', async () => {
 
 ## Related
 
-- [CLI](reference/cli)
-- [Sync](operations/sync)
-- [Search](advanced/search)
+- [CLI](/vant/reference/cli)
+- [Sync](/vant/operations/sync)
+- [Search](/vant/advanced/search)

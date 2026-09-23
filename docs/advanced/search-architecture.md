@@ -5,7 +5,7 @@ permalink: /advanced/search-architecture
 layout: default
 title: Search Architecture
 
-nav_order: 70
+nav_order: 91
 ---
 
 
@@ -149,7 +149,7 @@ Unchanged limits:
 
 ## Related
 
-- [Hybrid Search](integrations/hybrid) - BM25 + Vector + RRF
-- [Brain](../../memory/brain) - Memory islands
-- [CLI](reference/cli) - Search command
-- [MCP](../../runtime/mcp) - Search tool
+- [Hybrid Search](/vant/integrations/hybrid) - BM25 + Vector + RRF
+- [Brain](/vant/memory/brain) - Memory islands
+- [CLI](/vant/reference/cli) - Search command
+- [MCP](/vant/runtime/mcp) - Search tool

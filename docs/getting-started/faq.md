@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /getting-started/faq
 layout: default
 title: FAQ
-nav_order: 15
+nav_order: 17
 ---
 
 # Frequently Asked Questions
@@ -63,7 +63,7 @@ Vant's version tracking:
 
 ### Can multiple agents share one brain?
 
-Yes! Use the [Multi-Agent System](../../multi-agent/coordination) with:
+Yes! Use the [Multi-Agent System](/vant/multi-agent/coordination) with:
 - Git branches per agent
 - File locks for coordination
 
@@ -118,12 +118,12 @@ See [ROADMAP](https://github.com/dhaupin/blob/main/ROADMAP.md) in the repo.
 
 ### Can I contribute?
 
-Yes! See [Contributing Guide](getting-started/contributing) in the docs.
+Yes! See [Contributing Guide](/vant/getting-started/contributing) in the docs.
 
 ---
 
 ## Related
 
-- [Quickstart](getting-started/quick-start)
-- [Architecture](essential/architecture)
-- [Build Agent Tutorial](../../getting-started/agent-onboarding)
+- [Quickstart](/vant/getting-started/quick-start)
+- [Architecture](/vant/essential/architecture)
+- [Build Agent Tutorial](/vant/getting-started/agent-onboarding)

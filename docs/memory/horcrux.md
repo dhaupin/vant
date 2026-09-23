@@ -69,4 +69,4 @@ const restored = await transform.restore('brain.svg', 'passphrase');
 - Moving a brain between machines without git access.
 - Handing a brain to a successor agent as a single artifact.
 
-The underlying hide-in-plain-sight mechanism is [stego](stego).
+The underlying hide-in-plain-sight mechanism is [stego](/vant/memory/stego).

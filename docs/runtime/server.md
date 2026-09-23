@@ -200,9 +200,9 @@ const qos = new QoS({
 
 ## Related
 
-- [Runtime](../../runtime/runtime) - Programmatic API
-- [Docker](integrations/docker) - Docker deployment
+- [Runtime](/vant/runtime/runtime) - Programmatic API
+- [Docker](/vant/integrations/docker) - Docker deployment
 
 ## Next
 
-- [Security](security/security) - Security best practices
+- [Security](/vant/security/) - Security best practices

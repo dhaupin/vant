@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /integrations/docker
 layout: default
 title: Docker
-nav_order: 32
+nav_order: 84
 ---
 # Docker
 
@@ -210,7 +210,7 @@ curl http://localhost:3456/health
 
 ## Related
 
-- [Deployment Tutorial](../../operations/deployment)
-- [Server](../../runtime/server) - HTTP server
-- [Security](security/security) - VAF + sandbox
+- [Deployment Tutorial](/vant/operations/deployment)
+- [Server](/vant/runtime/server) - HTTP server
+- [Security](/vant/security/) - VAF + sandbox
 ```

@@ -68,6 +68,8 @@
     url: /vant/multi-agent/succession
   - title: Agents
     url: /vant/multi-agent/agents
+  - title: Coordination
+    url: /vant/multi-agent/coordination
 
 - title: Essential
   items:
@@ -90,6 +92,8 @@
 
 - title: Integrations
   items:
+  - title: Telegram Bot
+    url: /vant/integrations/telegram-bot
   - title: GitHub
     url: /vant/integrations/github
   - title: Agent Skills
@@ -125,6 +129,12 @@
     url: /vant/operations/testing
   - title: Deployment
     url: /vant/operations/deployment
+  - title: QoS
+    url: /vant/operations/qos
+  - title: Network
+    url: /vant/operations/network
+  - title: Cache
+    url: /vant/operations/cache
 
 - title: Security
   items:
@@ -144,16 +154,6 @@
     url: /vant/security/best-practices
   - title: Privacy
     url: /vant/security/privacy
-
-- title: Integrations Extras
-  items:
-  - title: Telegram Bot
-    url: /vant/integrations/telegram-bot
-
-- title: Multi-Agent Tutorials
-  items:
-  - title: Coordination
-    url: /vant/multi-agent/coordination
 
 - title: Advanced
   items:

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/entropy
 layout: default
 title: Entropy Patching Protocol
-nav_order: 87
+nav_order: 125
 ---
 
 # Entropy Patching Protocol
@@ -237,8 +237,7 @@ All paths are validated through VAF (Vant Application Firewall):
 
 ## Related
 
-- [CLI.md](../CLI.md#compress) - compress command
-- [LIBS.md](../LIBS.md#entropyjs) - module reference
+- [CLI Reference](/vant/reference/cli) - compress command
 
 ---
 
@@ -303,4 +302,4 @@ patch.metadata.currentEntropy = 0.48;
 
 Low entropy delta = stable evolution
 High entropy drift = review needed
-- [schema.md](reference/schema) - brain file schema
+- [schema.md](/vant/reference/schema) - brain file schema

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /security/environment
 layout: default
 title: Environment & Limits
-nav_order: 102
+nav_order: 69
 ---
 
 # Environment & Limits
@@ -309,7 +309,7 @@ Before using Vant with GitHub:
 
 ## SEE ALSO
 
-- [Terms](reference/index) - Legal disclaimer
-- [Privacy](security/privacy) - Privacy policy
+- [Terms](/vant/reference/legal) - Legal disclaimer
+- [Privacy](/vant/security/privacy) - Privacy policy
 - [GitHub API Docs](https://docs.github.com/en/rest) - Full API reference
 - [GitHub ToS](https://docs.github.com/en/github/site-policy) - All policies

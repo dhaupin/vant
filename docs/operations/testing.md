@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/testing
 layout: default
 title: Testing
-nav_order: 59
+nav_order: 62
 ---
 
 # Tutorial: Testing & Debugging
@@ -110,4 +110,4 @@ npm run test:coverage
 
 ## More
 
-See [CI](operations/ci) for CI setup.
+See [CI](/vant/operations/ci) for CI setup.

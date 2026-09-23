@@ -5,7 +5,7 @@ permalink: /advanced/pruning
 layout: default
 title: Automated Brain Pruning
 
-nav_order: 67
+nav_order: 105
 ---
 
 
@@ -178,5 +178,5 @@ All prune operations recorded in `models/.prune_ledger.json`:
 
 ## Related
 
-- [Search](advanced/search) - Search LTC
-- [Brain](../../memory/brain) - Brain structure
+- [Search](/vant/advanced/search) - Search LTC
+- [Brain](/vant/memory/brain) - Brain structure

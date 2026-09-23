@@ -5,7 +5,7 @@ permalink: /advanced/vibe
 layout: default
 title: Vibe Controls
 
-nav_order: 78
+nav_order: 107
 ---
 
 
@@ -189,6 +189,6 @@ vibe.configure({
 
 ## Related
 
-- [Islands](essential/islands) - Componentized brain
-- [Schema](reference/schema) - JSON validation
-- [Testing](../../operations/testing) - Quality assurance
+- [Islands](/vant/essential/islands) - Componentized brain
+- [Schema](/vant/reference/schema) - JSON validation
+- [Testing](/vant/operations/testing) - Quality assurance

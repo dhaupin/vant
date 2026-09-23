@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /reference/index
+permalink: /reference/
 layout: default
 title: Reference Index
-nav_order: 95
+nav_order: 110
 ---
 
 # Reference
@@ -12,43 +12,43 @@ Complete API and CLI reference.
 
 ## Runtime APIs
 
-- [Runtime](../../runtime/runtime) - Main runtime
-- [Brain](../../memory/brain) - Memory system
-- [Islands](essential/islands) - Brain modules
-- [Succession](../../multi-agent/succession) - Agent handoff
+- [Runtime](/vant/runtime/runtime) - Main runtime
+- [Brain](/vant/memory/brain) - Memory system
+- [Islands](/vant/essential/islands) - Brain modules
+- [Succession](/vant/multi-agent/succession) - Agent handoff
 
 ## Module APIs
 
-- [MCP](reference/mcp-tools) - MCP tools
-- [API](reference/api) - Vant API
-- [REST API](reference/rest-api) - REST endpoints
+- [MCP](/vant/reference/mcp-tools) - MCP tools
+- [API](/vant/reference/api) - Vant API
+- [REST API](/vant/reference/rest-api) - REST endpoints
 
 ## New APIs (v0.8.7+)
 
-- [Embed](reference/embed) - Vector embeddings
-- [Compute](reference/compute) - Code execution
-- [Stream](reference/stream) - Async queues
-- [Sudo](reference/sudo) - Permissions
-- [Node Registry](reference/node-registry) - Peer discovery
-- [Tmp](reference/tmp) - Temp storage
+- [Embed](/vant/reference/embed) - Vector embeddings
+- [Compute](/vant/reference/compute) - Code execution
+- [Stream](/vant/reference/stream) - Async queues
+- [Sudo](/vant/reference/sudo) - Permissions
+- [Node Registry](/vant/reference/node-registry) - Peer discovery
+- [Tmp](/vant/reference/tmp) - Temp storage
 
 ## Utilities
 
-- [CLI](reference/cli) - Command line
-- [Storage](reference/storage) - Storage API
-- [Canvas](reference/canvas) - Art generation
-- [Consensus](reference/consensus) - Voting
-- [Runop](reference/runop) - Runtime ops
-- [Theme](reference/theme) - Styling
+- [CLI](/vant/reference/cli) - Command line
+- [Storage](/vant/reference/storage) - Storage API
+- [Canvas](/vant/reference/canvas) - Art generation
+- [Consensus](/vant/reference/consensus) - Voting
+- [Runop](/vant/reference/runop) - Runtime ops
+- [Theme](/vant/reference/theme) - Styling
 
 ## Config
 
-- [Configuration](../../reference/config) - Settings
-- [Schema](reference/schema) - Data schema
-- [Errors](reference/errors) - Error codes
+- [Configuration](/vant/reference/config) - Settings
+- [Schema](/vant/reference/schema) - Data schema
+- [Errors](/vant/reference/errors) - Error codes
 
 ## Meta
 
-- [Changelog](reference/CHANGELOG) - Release notes
-- [Deprecations](reference/deprecations) - Deprecated
-- [Legal](reference/legal) - Disclaimer
+- [Changelog](/vant/reference/CHANGELOG) - Release notes
+- [Deprecations](/vant/reference/deprecations) - Deprecated
+- [Legal](/vant/reference/legal) - Disclaimer

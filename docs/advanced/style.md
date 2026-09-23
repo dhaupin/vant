@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /advanced/style
 layout: default
 title: Voice & Style
-nav_order: 75
+nav_order: 98
 
 ---
 # Voice & Style
@@ -294,5 +294,5 @@ For example |
 
 ## Related
 
-- [CLI Reference](reference/cli) - All commands
-- [Documentation](index) - Docs index
+- [CLI Reference](/vant/reference/cli) - All commands
+- [Documentation](/vant/advanced/) - Docs index

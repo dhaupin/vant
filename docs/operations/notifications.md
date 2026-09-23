@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/notifications
 layout: default
 title: Notifications
-nav_order: 45
+nav_order: 57
 description: Configuring notification channels - Slack, Discord, Email, Pushover, Telegram
 ---
 
@@ -138,5 +138,5 @@ await notifications.email('admin@example.com', 'Daily Summary', summary);
 
 ## Related
 
-- [CLI Reference](reference/cli)
-- [Configuration](../../reference/config)
+- [CLI Reference](/vant/reference/cli)
+- [Configuration](/vant/reference/config)

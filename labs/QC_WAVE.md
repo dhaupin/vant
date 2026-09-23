@@ -1,5 +1,11 @@
 # QC Wave — axolotl (2026-09-22, sweep 2)
 
+> **2026-09-23 update (sweep 3):** docs production pass (T1-T4) landed on
+> top of this QC. Full handoff at the bottom of this file
+> ("Docs production pass"). Verdict below is unchanged and re-verified:
+> full battery re-run green after the docs edits (421/0/3 smoke, runner
+> 37/37, vibe 4/4, all standalone suites, build-test 15/15).
+
 Scope: full re-sweep of the branch after the migration adversarial QC wave
 (`403800f`), judged as a PR #91 go/no-go. Covers migration + broader
 functionality: syntax, lint, injection patterns, router wiring, every test
@@ -81,3 +87,81 @@ live axolotl tree: v3/v3 up-to-date ✓ (no false positive on multibrain).
 - Docs: README/AGENTS/setup/cli/docker upgrade paths shipped in `d5a63c6` ✓
 - Security: lib-side git injection closed + pinned; audit crash fixed;
   AUDIT_FINDINGS ledger complete ✓
+
+---
+
+# Docs production pass (2026-09-23, sweep 3)
+
+Scope: T1-T4 of the docs IA plan (labs/prd-content.md). Tutorials fold,
+CLI reference rebuild, nav_order re-banding, full link + frontmatter
+verification.
+
+## What landed
+
+- **T2, reference/cli.md rebuilt from bin/** (~1550 → ~520 lines, one
+  entry per command): removed duplicate sections that contradicted each
+  other (sync/test/rate/bump/changelog/update/watch/succession/load
+  appeared twice with different flags); removed fabricated flags
+  (`update --install/--force`, `wal --verify/--replay/--truncate`,
+  `load identity`, `succession trust/diff`, `rate` as a GitHub API
+  check — it is the QoS limiter); added commands the old page missed
+  (learn/remember/address/locate, geometry, org, trust, brain mode,
+  error, compute). Every signature verified against bin/ usage headers
+  and the vant.js dispatcher.
+- **T3, nav_order re-banded to the PRD decade model:** essential/
+  46-54 → 35-43 (essential sits between runtime and multi-agent in the
+  nav), multi-agent/ 40-45 → 44-49 (forced move: freed the 40s),
+  operations/ 55-69 → 50-64 (PRD's 50s band; 15 pages, no dupes),
+  security/ 70-77 → 65-72 (PRD's 60s band). Unique-value dedupe pass:
+  zero duplicate nav_order integers across all 117 files.
+- **nav.yml cleanup:** dissolved orphan sections from the tutorials fold
+  (Integrations Extras, Multi-Agent Tutorials) folded into their owning
+  sections; Operations list completed (qos/network/cache were missing);
+  4 dead nav URLs fixed by modernizing legacy permalinks to match paths
+  (examples, contributing, deprecations, CHANGELOG — no inbound links,
+  PRD stub rule satisfied by deletion of risk, not stub pages).
+- **horcrux-legacy.md → horcrux-bootstrap.md** (git mv): the page
+  documents bootstrap, is nav'd and linked as horcrux-bootstrap. File
+  name now matches content and links.
+- **ci.md rewritten to match the real pipeline** (this branch's CI work):
+  single-job test.yml with concurrency cancel-in-progress, npm cache,
+  8-minute timeout, weekly schedule; docs.yml (Pages) and docker.yml
+  documented; removed fictional lint.yml/deploy.yml/codecov/80%
+  coverage/pre-commit script claims. Local commands now match package.json.
+- **Link normalization (333 links):** docs predated the /vant/ basepath;
+  most inter-doc links were leaf-relative (../../reference/config) and
+  resolved ABOVE the site root from section pages, or assumed a
+  never-implemented docs-root-absolute rewrite. All resolvable links
+  rewritten to /vant/<permalink> site-absolute form using each target's
+  real frontmatter permalink. All dead targets replaced with live ones
+  (security/security → /vant/security/, essential/ai-onboard →
+  agent-onboarding, entropy's ../CLI.md#compress → /vant/reference/cli).
+- **Durable tooling:** scripts/check-docs-links.js (validates /vant/
+  links against real permalinks, abs links against disk, rel links
+  resolve; skips fences/inline code; exit 1 on break) — the one-shot
+  fixer (scripts/_fix_docs_links.js) is retained for reference.
+
+## Verification (sweep 3)
+
+- Frontmatter lint: 117/117 docs files carry version/permalink/layout/
+  title/nav_order; permalinks match paths (index pages root or trailing
+  slash).
+- Link checker: DOCS LINKS: PASS (117 files) — /vant/ links all match
+  real permalinks; relative links all resolve.
+- Nav: 79 URLs, 0 dead; nav_order unique across all files.
+- Battery after all edits: test/ci.js 421/0/3, runner 37/37,
+  vibe evals 4/4, coverage 41/41, all test/*.test.js suites pass,
+  build-test 15/15, npm test 15/15.
+
+## Notes for future passes
+
+- operations/ has 15 pages against the PRD's 8-slot target list; banding
+  stayed inside 50-64 without page folds. A later pass could fold
+  operations/operations.md (day-2 CLI rehash) and cache.md into neighbors
+  to hit the PRD shape exactly.
+- /guides/ still referenced once from ROADMAP.md (outside docs/, left).
+- reference/cli.md says nav_order 111 by earlier convention; it sits
+  within the reference band (110-135) and is unique — fine to renumber
+  in a later cosmetic pass if the PRD's 81 target is picked up.
+- scripts/_fix_docs_links.js is one-shot (idempotent but not needed
+  again); check-docs-links.js is the keeper.

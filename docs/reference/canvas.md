@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/canvas
 layout: default
 title: Canvas API
-nav_order: 87
+nav_order: 120
 ---
 
 # Canvas API

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /integrations/providers
 layout: default
 title: Multi-Git Provider Support
-nav_order: 37
+nav_order: 86
 ---
 
 # Multi-Git Provider Support
@@ -164,5 +164,5 @@ If no provider token is configured |
 
 ## Related
 
-- [GitHub](integrations/github) - GitHub provider
-- [Sync](operations/sync) - Sync operations
+- [GitHub](/vant/integrations/github) - GitHub provider
+- [Sync](/vant/operations/sync) - Sync operations

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/cron
 layout: default
 title: Cron
-nav_order: 42
+nav_order: 55
 ---
 
 # Cron
@@ -69,5 +69,5 @@ console.log(cron.jobs());
 
 ## Related
 
-- [Events](operations/events) - Event system
-- [Multi-Agent](../../multi-agent/agents) - Agent system
+- [Events](/vant/operations/events) - Event system
+- [Multi-Agent](/vant/multi-agent/agents) - Agent system

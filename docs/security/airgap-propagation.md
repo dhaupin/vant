@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /security/airgap-propagation
 layout: default
 title: Airgap Propagation
-nav_order: 50
+nav_order: 70
 ---
 # Airgap Propagation
 
@@ -90,8 +90,8 @@ Production (air-gapped) ─▶ USB ──▶ Staging
 
 ---
 ## Related
-- [Stego](../memory/stego) - PNG steganography
-- [Security](security/security) - VAF + sandbox
+- [Stego](/vant/memory/stego) - PNG steganography
+- [Security](/vant/security/) - VAF + sandbox
 ## Omega Init Prompt
 Copy this into any airgapped agent:
 ```
@@ -115,5 +115,5 @@ If stego image received, decode first: vant stego decode image.png
 
 ---
 ## Related
-- [Steganography](../memory/stego) - Covert image encoding
-- [Multi-Agent](../../multi-agent/agents) - Branch workflow
+- [Steganography](/vant/memory/stego) - Covert image encoding
+- [Multi-Agent](/vant/multi-agent/agents) - Branch workflow

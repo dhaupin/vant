@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/consensus
 layout: default
 title: Consensus API
-nav_order: 88
+nav_order: 123
 ---
 
 # Consensus API

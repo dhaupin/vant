@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /essential/manual-brain
 layout: default
 title: Brain File Templates
-nav_order: 9
+nav_order: 42
 ---
 # Brain File Templates
 
@@ -138,9 +138,9 @@ Create `models/public/` - shared brain that gets updated with Vant. Agents can a
 
 ## Related
 
-- [Brain](../../memory/brain) - Brain layout
+- [Brain](/vant/memory/brain) - Brain layout
 - [Getting Started/getting-started/index) - Getting started
 
 ## Next
 
-- [Onboard](essential/onboard) - Onboarding
+- [Onboard](/vant/essential/onboard) - Onboarding

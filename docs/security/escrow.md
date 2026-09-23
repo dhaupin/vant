@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /security/escrow
 layout: default
 title: Escrow
-nav_order: 51
+nav_order: 68
 ---
 
 # Escrow
@@ -241,11 +241,11 @@ if (result.error) {
     console.log(result.code); // "BUDGET_EXCEEDED" | "APPROVAL_REQUIRED"
 }
 ```
-See [Sandbox](security/sandbox) for details.
+See [Sandbox](/vant/security/sandbox) for details.
 ---
 
 ## Related
 
-- [Sandbox](security/sandbox) - Execution isolation
-- [QoS](operations/qos) - Rate limiting and circuit breaking
-- [Security](security/security) - VAF and encryption
+- [Sandbox](/vant/security/sandbox) - Execution isolation
+- [QoS](/vant/operations/qos) - Rate limiting and circuit breaking
+- [Security](/vant/security/) - VAF and encryption

@@ -12,8 +12,8 @@ Welcome! Here's how to get up and running:
 
 ## Quick Links
 
-- [Quick Start](getting-started/quick-start) - 5 minute setup
-- [Install](getting-started/install) - npm installation
-- [Setup](getting-started/setup) - Configuration
-- [Examples](getting-started/examples) - Usage examples
-- [FAQ](getting-started/faq) - Common questions
+- [Quick Start](/vant/getting-started/quick-start) - 5 minute setup
+- [Install](/vant/getting-started/install) - npm installation
+- [Setup](/vant/getting-started/setup) - Configuration
+- [Examples](/vant/getting-started/examples) - Usage examples
+- [FAQ](/vant/getting-started/faq) - Common questions

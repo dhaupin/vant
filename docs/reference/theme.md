@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/theme
 layout: default
 title: Theme API
-nav_order: 90
+nav_order: 134
 ---
 
 # Theme API

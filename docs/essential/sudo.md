@@ -3,7 +3,7 @@ version: 0.9.0-axolotl
 permalink: /essential/sudo
 layout: default
 title: Sudo & Escalation
-nav_order: 9
+nav_order: 43
 ---
 
 # Sudo & Escalation
@@ -83,5 +83,5 @@ Escalations emit events on the shared bus:
 - `sudo:escalation_denied`, `{ reason: not_in_whitelist | callback_denied | ... }`
 - `sudo:escalation_revalidated`, TTL extensions with revalidation count
 
-See [Audit](/advanced/audit) for event capture, and the sudo PRD
+See [Audit](/vant/advanced/audit) for event capture, and the sudo PRD
 (`labs/prd-sudo.md`) for the full policy design.

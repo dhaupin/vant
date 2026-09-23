@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /advanced/release
 layout: default
 title: Release Process
-nav_order: 68
+nav_order: 106
 
 ---
 # Release Process
@@ -116,5 +116,5 @@ docker push dhaupin/vant:latest
 
 ## Related
 
-- [CLI Reference](reference/cli) - All commands
-- [Docker](integrations/docker) - Container build
+- [CLI Reference](/vant/reference/cli) - All commands
+- [Docker](/vant/integrations/docker) - Container build

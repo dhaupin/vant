@@ -10,6 +10,6 @@ nav_order: 90
 
 Deep dives:
 
-- [Rerank](advanced/rerank) - Semantic reranking
-- [Search](advanced/search) - Search architecture
-- [Stego](../memory/stego) - Steganography
+- [Rerank](/vant/advanced/rerank) - Semantic reranking
+- [Search](/vant/advanced/search) - Search architecture
+- [Stego](/vant/memory/stego) - Steganography

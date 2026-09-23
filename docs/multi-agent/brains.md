@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /multi-agent/brains
 layout: default
 title: Multi-brain
-nav_order: 41
+nav_order: 45
 description: Named brains with a stack - several memory contexts in one install, switched by name.
 ---
 
@@ -57,9 +57,9 @@ vant migrate --brain-name nova
 ```
 
 Names are segment-validated. Migration is content-detected and idempotent;
-the [migration guide](../getting-started/setup) has the full contract.
+the [migration guide](/vant/getting-started/setup) has the full contract.
 
 ## Agents per brain
 
 Agent rosters and configs scope per brain, with stack traversal for shared
-config. The agent crew workflow is in [Agents](agents).
+config. The agent crew workflow is in [Agents](/vant/multi-agent/agents).

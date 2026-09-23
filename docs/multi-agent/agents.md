@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /multi-agent/agents
 layout: default
 title: Agents
-nav_order: 44
+nav_order: 48
 ---
 # Multi-Agent
 
@@ -130,11 +130,11 @@ git push origin agent-yourname
 
 ## Related
 
-- [Succession](../../multi-agent/succession) - Workflow
-- [Brain](../../memory/brain) - Files
-- [Succession](../../multi-agent/succession) - Trust levels
+- [Succession](/vant/multi-agent/succession) - Workflow
+- [Brain](/vant/memory/brain) - Files
+- [Succession](/vant/multi-agent/succession) - Trust levels
 
 ## Next
 
-- [Branch](../../multi-agent/branches) - Git branch isolation
-- [Lock](../../multi-agent/agents) - Coordination
+- [Branch](/vant/multi-agent/branches) - Git branch isolation
+- [Lock](/vant/multi-agent/agents) - Coordination

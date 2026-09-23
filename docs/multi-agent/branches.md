@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /multi-agent/branches
 layout: default
 title: Branches
-nav_order: 42
+nav_order: 46
 ---
 
 # Branch
@@ -81,5 +81,5 @@ const branches = await provider.listBranches();
 
 ## Related
 
-- [Multi-Agent](../../multi-agent/agents) - Multi-agent workflow
-- [GitHub Integration](integrations/github) - GitHub, GitLab, etc
+- [Multi-Agent](/vant/multi-agent/agents) - Multi-agent workflow
+- [GitHub Integration](/vant/integrations/github) - GitHub, GitLab, etc

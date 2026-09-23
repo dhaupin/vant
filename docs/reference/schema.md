@@ -3,11 +3,11 @@ version: 0.8.6
 permalink: /reference/schema
 layout: default
 title: Brain Schema
-nav_order: 85
+nav_order: 130
 ---
 # Brain Schema
 
-> **Note:** Default location is `models/private/`. Configure via `MODEL_PATH` env var to use a different path. See [Configuration](../../reference/config).
+> **Note:** Default location is `models/private/`. Configure via `MODEL_PATH` env var to use a different path. See [Configuration](/vant/reference/config).
 
 Files in your brain folder (default: `models/private/`):
 
@@ -122,4 +122,4 @@ Recommended files transported between instances:
 | `qc.md` | Quality standards |
 | `gratitude.md` | Appreciation |
 
-See also: [API](reference/cli), [Multi-Agent](../../multi-agent/agents)
+See also: [API](/vant/reference/cli), [Multi-Agent](/vant/multi-agent/agents)

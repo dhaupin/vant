@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /essential/plugins
 layout: default
 title: Plugins
-nav_order: 18
+nav_order: 41
 ---
 
 # Tutorial: Build Plugins
@@ -105,4 +105,4 @@ vant add vant-my-plugin
 
 ## More
 
-See [Islands](essential/islands) and [Runtime](../../runtime/runtime).
+See [Islands](/vant/essential/islands) and [Runtime](/vant/runtime/runtime).

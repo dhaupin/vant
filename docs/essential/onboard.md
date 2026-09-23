@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /essential/onboard
 layout: default
 title: Knowledge Base Browser
-nav_order: 13
+nav_order: 38
 ---
 # Knowledge Base Browser
 
@@ -183,10 +183,10 @@ cat models/private/identity.md
 
 ## Related
 
-- [Brain](../../memory/brain) - Brain structure
+- [Brain](/vant/memory/brain) - Brain structure
 - [Getting Started/getting-started/index) - Getting started guide
-- [Hybrid Search](integrations/hybrid) - Hybrid search
+- [Hybrid Search](/vant/integrations/hybrid) - Hybrid search
 
 ## Next
 
-- [Islands](essential/islands) - Lazy-loading integrations
+- [Islands](/vant/essential/islands) - Lazy-loading integrations

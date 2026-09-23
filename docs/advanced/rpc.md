@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /advanced/rpc
 layout: default
 title: RPC
-nav_order: 94
+nav_order: 95
 description: Unified RPC protocol standards for Vant agent messaging.
 ---
 

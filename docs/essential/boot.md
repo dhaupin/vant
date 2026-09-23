@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /essential/boot
 layout: default
 title: Ghost in the Machine
-nav_order: 8
+nav_order: 37
 ---
 
 # Ghost in the Machine - Stego Bootstrapping
@@ -94,10 +94,10 @@ vant boot --image=https://raw.githubusercontent.com/user/repo/main/brain.png
 
 ## Related
 
-- [Steganography](../memory/stego) - Image encoding
-- [GitHub Integration](integrations/github) - GitHub integration
-- [Runtime](../../runtime/runtime) - Runtime API
+- [Steganography](/vant/memory/stego) - Image encoding
+- [GitHub Integration](/vant/integrations/github) - GitHub integration
+- [Runtime](/vant/runtime/runtime) - Runtime API
 
 ## Next
 
-- [Onboard](essential/onboard) - Brain onboarding
+- [Onboard](/vant/essential/onboard) - Brain onboarding

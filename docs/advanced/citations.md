@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /advanced/citations
 layout: default
 title: Citations
-nav_order: 61
+nav_order: 102
 
 ---
 # Citations
@@ -76,8 +76,8 @@ const receipt = citations.generateReceipts(results);
 
 ## Related
 
-- [Audit](advanced/audit) - Activity logging
-- [Hybrid Search](advanced/search) - RRF search with citations
-- [Search](advanced/search) - Search with source tracking
-- [Brain](../../memory/brain) - Where citations stored
-- [Sync](operations/sync) - Git-backed sync
+- [Audit](/vant/advanced/audit) - Activity logging
+- [Hybrid Search](/vant/advanced/search) - RRF search with citations
+- [Search](/vant/advanced/search) - Search with source tracking
+- [Brain](/vant/memory/brain) - Where citations stored
+- [Sync](/vant/operations/sync) - Git-backed sync

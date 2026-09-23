@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /code-comments
+permalink: /reference/code-comments
 layout: default
 title: Code Comments
-nav_order: 91
+nav_order: 121
 ---
 # Code Comments
 

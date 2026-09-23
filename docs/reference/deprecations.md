@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /deprecations
+permalink: /reference/deprecations
 layout: default
 title: Deprecations
-nav_order: 92
+nav_order: 117
 ---
 
 > Track deprecated, orphaned, and planned-for-removal files.

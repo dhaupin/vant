@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /memory/geometry
 layout: default
 title: Geometry
-nav_order: 26
+nav_order: 27
 description: Quasicrystal addressing for memory - collision-free spatial keys. Experimental.
 ---
 
@@ -62,5 +62,5 @@ Reads it back.
 ## Spec
 
 The projection math, address space, and collision properties are specified
-in [NSC9-SPEC](../advanced/nsc9-spec). Treat the spec as the source of
+in [NSC9-SPEC](/vant/advanced/nsc9-spec). Treat the spec as the source of
 truth for the format; this page only covers use.

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /integrations/github
 layout: default
 title: GitHub Integration
-nav_order: 33
+nav_order: 81
 ---
 # GitHub Integration
 
@@ -209,6 +209,6 @@ git push origin experiment-feature
 
 ## Related
 
-- [Troubleshooting](advanced/troubleshooting) - Problem solving
-- [Multi-Agent](../../multi-agent/agents) - Branch workflow
-- [CLI Reference](reference/cli) - All commands
+- [Troubleshooting](/vant/advanced/troubleshooting) - Problem solving
+- [Multi-Agent](/vant/multi-agent/agents) - Branch workflow
+- [CLI Reference](/vant/reference/cli) - All commands

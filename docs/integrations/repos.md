@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /integrations/repos
 layout: default
 title: Multi-Repo Skills
-nav_order: 38
+nav_order: 89
 ---
 
 # Vant Multi-Repo
@@ -107,9 +107,9 @@ vant repos pull
 
 ## Related
 
-- [Agent Skills](integrations/agent-skills) - Manage skills
-- [MCP](reference/mcp-tools) - MCP server
+- [Agent Skills](/vant/integrations/agent-skills) - Manage skills
+- [MCP](/vant/reference/mcp-tools) - MCP server
 
 ## Next
 
-- [Linear Integration](integrations/linear) - Issue tracking
+- [Linear Integration](/vant/integrations/linear) - Issue tracking

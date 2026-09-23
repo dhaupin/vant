@@ -25,7 +25,7 @@ models/
 
 The default brain name is `vant`. The stack can hold several named brains;
 switching changes what the loader reads. Layout details and the stack
-contract live in [Multi-brain](../multi-agent/brains).
+contract live in [Multi-brain](/vant/multi-agent/brains).
 
 ## Core files
 
@@ -99,4 +99,4 @@ await memory.learn('lessons', 'Use exit codes, not tail text, to judge test suit
 
 A pre-multi-brain install keeps files flat in `models/public/`. `vant start`
 detects and imports it automatically on first run. The manual path and its
-safety guarantees are in the [migration guide](../getting-started/setup).
+safety guarantees are in the [migration guide](/vant/getting-started/setup).

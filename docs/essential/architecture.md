@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /essential/architecture
 layout: default
 title: System Architecture
-nav_order: 6
+nav_order: 36
 ---
 
 # Architecture
@@ -156,12 +156,12 @@ See for details.
 
 ## Related
 
-- [Branch](../../multi-agent/branches) - Git branch isolation
-- [Lock](../../multi-agent/agents) - Distributed coordination
-- [VAF](security/vaf) - Input filtering
-- [Sandbox](security/sandbox) - Security sandbox
+- [Branch](/vant/multi-agent/branches) - Git branch isolation
+- [Lock](/vant/multi-agent/agents) - Distributed coordination
+- [VAF](/vant/security/vaf) - Input filtering
+- [Sandbox](/vant/security/sandbox) - Security sandbox
 
 ## Next
 
-- [Runtime](../../runtime/runtime) - Runtime API
-- [Boot](essential/boot) - Startup sequence
+- [Runtime](/vant/runtime/runtime) - Runtime API
+- [Boot](/vant/essential/boot) - Startup sequence

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /memory/prune
 layout: default
 title: Pruning
-nav_order: 27
+nav_order: 29
 description: Keep the brain corpus lean - prune stale files, fluff, and superseded memory before sync.
 ---
 

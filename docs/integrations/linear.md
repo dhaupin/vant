@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /integrations/linear
 layout: default
 title: Linear Integration
-nav_order: 35
+nav_order: 83
 description: Using Linear issue tracking with Vant
 ---
 
@@ -150,6 +150,6 @@ When Linear island loaded:
 
 ## Related
 
-- [Islands](essential/islands) - Load on-demand
-- [MCP](reference/mcp-tools) - MCP server
-- [GitHub](integrations/github) - GitHub integration
+- [Islands](/vant/essential/islands) - Load on-demand
+- [MCP](/vant/reference/mcp-tools) - MCP server
+- [GitHub](/vant/integrations/github) - GitHub integration

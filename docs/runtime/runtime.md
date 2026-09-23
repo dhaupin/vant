@@ -3,12 +3,12 @@ version: 0.8.6
 permalink: /runtime/runtime
 layout: default
 title: Runtime
-nav_order: 31
+nav_order: 32
 ---
 
 # Runtime API
 
-> Programmatic Vant usage - quick intro. For full API, see [API Reference](reference/api-runtime).
+> Programmatic Vant usage - quick intro. For full API, see [API Reference](/vant/reference/api-runtime).
 
 ## Quick Start
 
@@ -175,7 +175,7 @@ event.on('agent:initialized', async (agent) => {
 
 ## Full Reference
 
-See [API Reference](reference/api-runtime) for complete documentation:
+See [API Reference](/vant/reference/api-runtime) for complete documentation:
 
 - All methods with examples
 - Error handling
@@ -186,11 +186,11 @@ See [API Reference](reference/api-runtime) for complete documentation:
 
 ## Related
 
-- [CLI Reference](reference/cli) - Command-line interface
-- [MCP Server](../../runtime/mcp) - MCP server tools
-- [Islands](essential/islands) - Lazy-loading integrations
+- [CLI Reference](/vant/reference/cli) - Command-line interface
+- [MCP Server](/vant/runtime/mcp) - MCP server tools
+- [Islands](/vant/essential/islands) - Lazy-loading integrations
 
 ## Next
 
-- [Boot](essential/boot) - Startup sequence
-- [Onboard](essential/onboard) - Brain onboarding
+- [Boot](/vant/essential/boot) - Startup sequence
+- [Onboard](/vant/essential/onboard) - Brain onboarding

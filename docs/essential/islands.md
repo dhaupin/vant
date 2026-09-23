@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /essential/islands
 layout: default
 title: Islands - Lazy-loading
-nav_order: 4
+nav_order: 35
 ---
 
 # Vant Islands
@@ -154,13 +154,13 @@ gallery.linkToBrain();
 
 ## Related
 
-- [Vibe](advanced/vibe) - Dynamic mood system
-- [Brain](../../memory/brain) - Public/Private brain split
-- [External Repos](integrations/repos) - Mount external repos
+- [Vibe](/vant/advanced/vibe) - Dynamic mood system
+- [Brain](/vant/memory/brain) - Public/Private brain split
+- [External Repos](/vant/integrations/repos) - Mount external repos
 
 ## Next
 
-- [Runtime](../../runtime/runtime) - Runtime API
+- [Runtime](/vant/runtime/runtime) - Runtime API
 
 ---
 
@@ -187,4 +187,4 @@ const result = await vant.think('How do I use Docker?');
 // → auto-loads python island when "Docker" detected
 ```
 
-See [Tutorial: Custom Islands](../../essential/custom-island) for full guide.
+See [Tutorial: Custom Islands](/vant/essential/custom-island) for full guide.

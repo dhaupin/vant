@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /changelog
+permalink: /reference/CHANGELOG
 layout: default
 title: Changelog
-nav_order: 90
+nav_order: 118
 ---
 
 > Vant release history.

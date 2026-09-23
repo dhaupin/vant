@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /security/vaf
 layout: default
 title: VAF
-nav_order: 54
+nav_order: 67
 ---
 
 # VAF
@@ -72,5 +72,5 @@ brain.write('category', 'file', content);
 
 ## Related
 
-- [Security](security/security) - Security overview
-- [Sandbox](security/sandbox) - Execution isolation
+- [Security](/vant/security/) - Security overview
+- [Sandbox](/vant/security/sandbox) - Execution isolation

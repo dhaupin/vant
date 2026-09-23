@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /multi-agent/coordination
 layout: default
 title: Multi-Agent System
-nav_order: 45
+nav_order: 49
 ---
 
 # Tutorial: Multi-Agent Coordination
@@ -135,6 +135,6 @@ Coordination patterns for multi-agent.
 
 ## Related
 
-- [Multi-Agent Guide](../../multi-agent/agents) - Full guide
-- [Lock API](reference/cli) - Lock module
-- [Branch API](reference/cli) - Branch module
+- [Multi-Agent Guide](/vant/multi-agent/agents) - Full guide
+- [Lock API](/vant/reference/cli) - Lock module
+- [Branch API](/vant/reference/cli) - Branch module

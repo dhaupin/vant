@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /examples
+permalink: /getting-started/examples
 layout: default
 title: Examples & Showcase
-nav_order: 14
+nav_order: 16
 ---
 
 # Examples & Showcase
@@ -355,7 +355,7 @@ async function customBrainExample() {
 
 ## Related
 
-- [Build Agent Tutorial](../../getting-started/agent-onboarding)
-- [Multi-Agent Tutorial](../../multi-agent/coordination)
-- [Telegram Bot Tutorial](../../integrations/telegram-bot)
+- [Build Agent Tutorial](/vant/getting-started/agent-onboarding)
+- [Multi-Agent Tutorial](/vant/multi-agent/coordination)
+- [Telegram Bot Tutorial](/vant/integrations/telegram-bot)
 - [GitHub](https://github.com/dhaupin/vant) - star us!

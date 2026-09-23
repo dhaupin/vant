@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/sync
 layout: default
 title: Multi-Provider RAID Sync
-nav_order: 49
+nav_order: 52
 ---
 
 # Multi-Provider RAID 1 - Sync Manager
@@ -127,6 +127,6 @@ const brain = await sync.pullAny({ preference: 'gitlab' });
 
 ## Related
 
-- [Hybrid Sync](integrations/hybrid) - Public/Private split
-- [Citations](advanced/citations) - Git-backed source tracking
-- [Multi-Repo](integrations/repos) - External repos
+- [Hybrid Sync](/vant/integrations/hybrid) - Public/Private split
+- [Citations](/vant/advanced/citations) - Git-backed source tracking
+- [Multi-Repo](/vant/integrations/repos) - External repos

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/deployment
 layout: default
 title: Deployment
-nav_order: 58
+nav_order: 63
 ---
 
 # Tutorial: Deploy Vant
@@ -127,4 +127,4 @@ docker run -m 2g vant
 
 ## More
 
-See [Server](../../runtime/server) and [Docker](integrations/docker).
+See [Server](/vant/runtime/server) and [Docker](/vant/integrations/docker).

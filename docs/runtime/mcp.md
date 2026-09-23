@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /runtime/mcp
 layout: default
 title: MCP Server
-nav_order: 32
+nav_order: 33
 ---
 # MCP Server
 
@@ -852,6 +852,6 @@ For multi-line content, write directly to `models/private/` instead of via MCP.
 
 ## Related
 
-- [Security Guide](security/security) - Input validation
-- [Multi-Agent](../../multi-agent/agents) - Branch workflow
-- [CLI Reference](reference/cli) - All commands
+- [Security Guide](/vant/security/) - Input validation
+- [Multi-Agent](/vant/multi-agent/agents) - Branch workflow
+- [CLI Reference](/vant/reference/cli) - All commands

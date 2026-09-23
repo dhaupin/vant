@@ -5,7 +5,7 @@ permalink: /advanced/rerank
 layout: default
 title: Rerank (RAG)
 
-nav_order: 98
+nav_order: 92
 ---
 
 
@@ -137,7 +137,7 @@ Search can hook into rerank via `--rerank` flag (future).
 
 ## Related
 
-- [Search](advanced/search)
-- [Hybrid Search](advanced/search-architecture)
-- [Entropy](reference/entropy)
-- [CLI Reference](reference/cli)
+- [Search](/vant/advanced/search)
+- [Hybrid Search](/vant/advanced/search-architecture)
+- [Entropy](/vant/reference/entropy)
+- [CLI Reference](/vant/reference/cli)

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /memory/rag
 layout: default
 title: RAG with Vant
-nav_order: 30
+nav_order: 28
 ---
 
 # Tutorial: Build RAG with Your Brain
@@ -138,7 +138,7 @@ const { context, scores } = await search.hybrid('question', {
 });
 ```
 
-See [Search](advanced/search) for details.
+See [Search](/vant/advanced/search) for details.
 
 ## Cache Results
 
@@ -189,6 +189,6 @@ User: What do I know about量子计算?
 
 ## Related
 
-- [Search](advanced/search)
-- [Runtime](../../runtime/runtime)
-- [MCP](../../runtime/mcp)
+- [Search](/vant/advanced/search)
+- [Runtime](/vant/runtime/runtime)
+- [MCP](/vant/runtime/mcp)

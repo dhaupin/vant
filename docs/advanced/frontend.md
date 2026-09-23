@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /advanced/frontend
 layout: default
 title: Frontend Integration
-nav_order: 64
+nav_order: 104
 
 ---
 # Frontend Integration
@@ -301,4 +301,4 @@ export default function App() {
 
 ---
 
-See also: [REST API](reference/rest-api), [MCP Guide](../../runtime/mcp), [Schema](reference/schema)
+See also: [REST API](/vant/reference/rest-api), [MCP Guide](/vant/runtime/mcp), [Schema](/vant/reference/schema)

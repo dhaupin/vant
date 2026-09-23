@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /multi-agent/succession
 layout: default
 title: Trust & Succession
-nav_order: 43
+nav_order: 47
 ---
 # Trust & Succession
 
@@ -103,6 +103,6 @@ vant succession trust high
 
 ## Related
 
-- [Multi-Agent](../../multi-agent/agents) - Workflow
-- [Brain](../../memory/brain) - Files
-- [Branch](../../multi-agent/branches) - Branch workflow
+- [Multi-Agent](/vant/multi-agent/agents) - Workflow
+- [Brain](/vant/memory/brain) - Files
+- [Branch](/vant/multi-agent/branches) - Branch workflow

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /advanced/troubleshooting
 layout: default
 title: Troubleshooting
-nav_order: 77
+nav_order: 99
 
 ---
 # Troubleshooting
@@ -247,5 +247,5 @@ Error: Content blocked: /; rm -rf/
 
 ## Related
 
-- [Configuration](../../reference/config) - Config settings
-- [Architecture](essential/architecture) - System design
+- [Configuration](/vant/reference/config) - Config settings
+- [Architecture](/vant/essential/architecture) - System design

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/storage
 layout: default
 title: Storage Layer
-nav_order: 48
+nav_order: 51
 ---
 
 # Storage Layer
@@ -118,7 +118,7 @@ const github = new connectors.github({
 });
 ```
 
-See [Providers](integrations/providers) for all connectors.
+See [Providers](/vant/integrations/providers) for all connectors.
 
 ## Islands
 
@@ -134,7 +134,7 @@ const manifest = islands.getManifest();
 const data = islands.get('github');
 ```
 
-See [Islands](essential/islands) for details.
+See [Islands](/vant/essential/islands) for details.
 
 ## Vector Store
 
@@ -160,7 +160,7 @@ const content = brain.get('learnings', 'lesson-1');
 // If !canRead, throws "Read permission required"
 ```
 
-See [Sandbox](security/sandbox) for details.
+See [Sandbox](/vant/security/sandbox) for details.
 
 ---
 
@@ -181,7 +181,7 @@ const storage = new Storage({
 
 ## Related
 
-- [Brain](../../memory/brain) - Brain file structure
-- [Islands](essential/islands) - Lazy brain components
-- [Search](advanced/search) - Hybrid search
-- [Providers](integrations/providers) - GitHub, GitLab, etc
+- [Brain](/vant/memory/brain) - Brain file structure
+- [Islands](/vant/essential/islands) - Lazy brain components
+- [Search](/vant/advanced/search) - Hybrid search
+- [Providers](/vant/integrations/providers) - GitHub, GitLab, etc

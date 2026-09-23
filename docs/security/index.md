@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /security/
 layout: default
 title: Security
-nav_order: 60
+nav_order: 65
 ---
 # Security
 
@@ -69,9 +69,9 @@ Tokens encrypted per-user.
 
 ## Related
 
-- [VAF](security/vaf) - Input validation firewall
-- [Sandbox](security/sandbox) - Execution isolation
-- [Escrow](security/escrow) - Budget tracking
+- [VAF](/vant/security/vaf) - Input validation firewall
+- [Sandbox](/vant/security/sandbox) - Execution isolation
+- [Escrow](/vant/security/escrow) - Budget tracking
 
-- [Configuration](../../reference/config) - Config settings
-- [Tutorial: Security](../../security/best-practices) - Practical security setup
+- [Configuration](/vant/reference/config) - Config settings
+- [Tutorial: Security](/vant/security/best-practices) - Practical security setup

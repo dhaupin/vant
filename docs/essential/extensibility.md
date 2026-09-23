@@ -4,7 +4,7 @@ permalink: /essential/extensibility
 layout: default
 title: Extensibility
 description: How to extend Vant with custom agents and skills
-nav_order: 16
+nav_order: 39
 ---
 
 # Extensibility
@@ -129,6 +129,6 @@ This lets you:
 
 ## Related
 
-- [brain.md](../../memory/brain) - Brain system internals
-- [islands.md](essential/islands) - Lazy-loading brain modules
-- [multi-agent.md](../../multi-agent/agents) - Multi-agent coordination
+- [brain.md](/vant/memory/brain) - Brain system internals
+- [islands.md](/vant/essential/islands) - Lazy-loading brain modules
+- [multi-agent.md](/vant/multi-agent/agents) - Multi-agent coordination

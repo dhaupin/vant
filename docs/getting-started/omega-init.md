@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /getting-started/omega-init
 layout: default
 title: Omega Init
-nav_order: 16
+nav_order: 15
 # AI-first: 1=Omega, 2=MCP, 3=CLI, 4=Brain, 5=Islands
 ---
 # Omega Init
@@ -94,7 +94,7 @@ docker run -e GITHUB_TOKEN=xxx -e GITHUB_REPO=owner/repo dhaupin/vant
 
 ## Related
 
-- [AI Onboarding](essential/ai-onboard) - Full agent guide
-- [Airgap Propagation](security/airgap-propagation) - Self-propagate across airgaps
-- [Brain Guide](../../memory/brain) - Memory management
-- [Multi-Agent](../../multi-agent/agents) - Team collaboration
+- [Agent Onboarding](/vant/getting-started/agent-onboarding) - Full agent guide
+- [Airgap Propagation](/vant/security/airgap-propagation) - Self-propagate across airgaps
+- [Brain Guide](/vant/memory/brain) - Memory management
+- [Multi-Agent](/vant/multi-agent/agents) - Team collaboration

@@ -5,7 +5,7 @@ permalink: /advanced/schema
 layout: default
 title: Schema Validation
 
-nav_order: 69
+nav_order: 96
 ---
 
 
@@ -89,5 +89,5 @@ if (!result.valid) {
 
 ## Related
 
-- [Configuration](../../reference/config) - Config validation
-- [Vibe Controls](advanced/vibe) - Dynamic settings
+- [Configuration](/vant/reference/config) - Config validation
+- [Vibe Controls](/vant/advanced/vibe) - Dynamic settings

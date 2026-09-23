@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /advanced/nsc9-spec
 layout: default
 title: NSC9 Spec
-nav_order: 93
+nav_order: 94
 description: NSC-9 automation-reserved barcode specification. Draft.
 ---
 

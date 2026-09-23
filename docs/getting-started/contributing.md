@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /contributing
+permalink: /getting-started/contributing
 layout: default
 title: Contributing
-nav_order: 16
+nav_order: 18
 ---
 
 # Contributing to Vant

@@ -80,9 +80,9 @@ citations.addSource('lessons.md#sync-race');
 citations.getCommitFooter();
 ```
 
-Details and the verification flow are in [Citations](citations).
+Details and the verification flow are in [Citations](/vant/memory/citations).
 
 ## Internals
 
 The architecture, LTC freshness, and the settlement model behind the search
-index are documented in [Search Architecture](../advanced/search-architecture).
+index are documented in [Search Architecture](/vant/advanced/search-architecture).

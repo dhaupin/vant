@@ -3,13 +3,13 @@ version: 0.8.6
 permalink: /memory/stego
 layout: default
 title: Stego
-nav_order: 28
+nav_order: 26
 description: The steganography mechanism - hide data, and whole brains, in images. Behind horcrux and standalone recovery.
 ---
 
 # Stego
 
-> Hide data in images. The mechanism underneath [horcrux](horcrux), also
+> Hide data in images. The mechanism underneath [horcrux](/vant/memory/horcrux), also
 > usable on its own for brain snapshots and recovery.
 
 Vant can encode an entire brain (memory, learnings, decisions) into an
@@ -72,7 +72,7 @@ const brainData = stego.decodeBrainChunked(outputs);
 
 The same module carries the SVG variant that horcrux uses
 (`encodeSvg` / `decodeSvg`) plus the manifest functions behind
-[hocrux bootstrap](horcrux-bootstrap).
+[hocrux bootstrap](/vant/memory/horcrux-bootstrap).
 
 ## Capacity
 
@@ -93,6 +93,6 @@ The same module carries the SVG variant that horcrux uses
 
 ## Related
 
-- [Horcrux](horcrux) - encrypted brain-in-image packaging
-- [Horcrux bootstrap](horcrux-bootstrap) - zero-config boot from an image
-- [Boot](../essential/boot) - the startup sequence
+- [Horcrux](/vant/memory/horcrux) - encrypted brain-in-image packaging
+- [Horcrux bootstrap](/vant/memory/horcrux-bootstrap) - zero-config boot from an image
+- [Boot](/vant/essential/boot) - the startup sequence

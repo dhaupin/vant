@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /integrations/agent-skills
 layout: default
 title: Agent Skills
-nav_order: 30
+nav_order: 82
 description: Using Vant with Agent Skills format (Claude Code, Codex, Cursor)
 ---
 
@@ -130,6 +130,6 @@ vant branch create agent-b
 
 ## Related
 
-- [Getting Started](getting-started/quick-start)
-- [MCP Integration](reference/mcp-tools)
-- [Multi-Agent Guide](../../multi-agent/agents)
+- [Getting Started](/vant/getting-started/quick-start)
+- [MCP Integration](/vant/reference/mcp-tools)
+- [Multi-Agent Guide](/vant/multi-agent/agents)

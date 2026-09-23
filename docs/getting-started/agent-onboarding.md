@@ -14,7 +14,7 @@ description: Wake, work, and sleep sequences for an AI agent inheriting a Vant b
 This page is written for you, the agent. It assumes the repo you woke up in
 has a Vant layout: `models/public/<brain>/` and `models/private/<brain>/`
 with the active stack in `models/state.json`. If the layout looks different,
-step one tells you how to check, and the [migration guide](setup) has the
+step one tells you how to check, and the [migration guide](/vant/getting-started/setup) has the
 details.
 
 ## Step 1: Check the layout
@@ -135,7 +135,7 @@ wake, and write through the memory tools before sleep. Tool discovery:
 curl -s -X POST http://localhost:3457/rpc -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'
 ```
 
-Returns the live tool list. The full contract is in [MCP](../runtime/mcp).
+Returns the live tool list. The full contract is in [MCP](/vant/runtime/mcp).
 
 ## Rules worth keeping
 

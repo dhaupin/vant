@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /advanced/architecture
 layout: default
 title: API Architecture
-nav_order: 92
+nav_order: 93
 description: How the Vant API surface is organized - vant.js as source of truth.
 ---
 

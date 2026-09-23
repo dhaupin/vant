@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /memory/horcrux-bootstrap
 layout: default
 title: Horcrux Bootstrap
-nav_order: 29
+nav_order: 30
 description: Zero-config boot from a horcrux image - manifest and brain in one PNG.
 ---
 
@@ -120,5 +120,5 @@ On boot:
 
 ## Related
 
-- [Stego](stego) - Image steganography
-- [Boot](essential/boot) - Zero-config boot
+- [Stego](/vant/memory/stego) - Image steganography
+- [Boot](/vant/essential/boot) - Zero-config boot

@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /legal
+permalink: /reference/legal
 layout: default
 title: Legal & Policies
-nav_order: 93
+nav_order: 126
 ---
 
 # Legal & Policies
@@ -17,9 +17,9 @@ nav_order: 93
 Vant is open source software provided without warranty. By using it, you accept all risks and responsibilities.
 
 **Quick links:**
-- [Disclaimer & Terms](security/environment) - Full legal disclaimer
-- [Privacy Policy](security/privacy) - What we collect
-- [Environment & Limits](security/environment) - GitHub, API, system
+- [Disclaimer & Terms](/vant/security/environment) - Full legal disclaimer
+- [Privacy Policy](/vant/security/privacy) - What we collect
+- [Environment & Limits](/vant/security/environment) - GitHub, API, system
 
 ---
 
@@ -27,10 +27,10 @@ Vant is open source software provided without warranty. By using it, you accept 
 
 | Document | For |
 |----------|-----|
-| [Disclaimer](security/environment) | Lawyers, liability |
-| [Privacy](security/privacy) | Your data, GitHub |
-| [Privacy](security/privacy) | Your data + control |
-| [Environment](security/environment) | API limits, setup |
+| [Disclaimer](/vant/security/environment) | Lawyers, liability |
+| [Privacy](/vant/security/privacy) | Your data, GitHub |
+| [Privacy](/vant/security/privacy) | Your data + control |
+| [Environment](/vant/security/environment) | API limits, setup |
 
 ---
 
@@ -65,17 +65,17 @@ The essentials you need to know.
 
 Read these in order:
 
-1. **[Terms](security/environment)** - You accept all risks
-2. **[Privacy](security/privacy)** - Your data, your control
-3. **[Environment](security/environment)** - GitHub limitations
+1. **[Terms](/vant/security/environment)** - You accept all risks
+2. **[Privacy](/vant/security/privacy)** - Your data, your control
+3. **[Environment](/vant/security/environment)** - GitHub limitations
 
 ---
 
 ## Quick Links
 
-- [MIT License](/LICENSE) - Code license
-- [README](index) - Project overview
-- [Security](security/security) - Security practices
+- [MIT License](https://github.com/dhaupin/vant/blob/main/LICENSE) - Code license
+- [README](/vant/reference/) - Project overview
+- [Security](/vant/security/) - Security practices
 - [GitHub Terms](https://docs.github.com/en/github/site-policy) - Full policies
 
 ---

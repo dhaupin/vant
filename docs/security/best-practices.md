@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /security/best-practices
 layout: default
 title: Security Best Practices
-nav_order: 66
+nav_order: 71
 ---
 
 # Tutorial: Security Best Practices
@@ -84,4 +84,4 @@ vaf.configure({
 
 ## More
 
-See [Security](security/security) and [VAF](security/vaf).
+See [Security](/vant/security/) and [VAF](/vant/security/vaf).

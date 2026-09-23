@@ -84,7 +84,7 @@ await address('The quasicrystal spreads keys without collisions.');
 const hit = await locate('the barcode you got back');
 ```
 
-The addressing scheme itself is documented in [Geometry](geometry).
+The addressing scheme itself is documented in [Geometry](/vant/memory/geometry).
 
 ## Gating
 

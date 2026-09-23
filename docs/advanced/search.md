@@ -5,7 +5,7 @@ permalink: /advanced/search
 layout: default
 title: Hybrid Search
 
-nav_order: 71
+nav_order: 97
 ---
 
 
@@ -173,7 +173,7 @@ Rerank is separate from search - focuses on **keyword scoring** and **token opti
 - **Compress**: Strip markdown fluff, truncate to token budget
 - **Pipeline**: Rerank + compress in sequence
 
-See [Rerank Guide](advanced/rerank) for full documentation.
+See [Rerank Guide](/vant/advanced/rerank) for full documentation.
 
 ```bash
 vant rerank "lessons learned"          # Rerank
@@ -441,7 +441,7 @@ RAG response includes current settings:
 
 ## Future: Islands + vpatch
 
-Combining with [Islands](essential/islands) architecture:
+Combining with [Islands](/vant/essential/islands) architecture:
 
 - **Islands**: Componentized brain (lazy-load on trigger)
 - **vpatch**: Compact diff format vs full file
@@ -452,14 +452,14 @@ Potential workflow:
 2. Return compressed vpatch diffs → smaller context
 3. Result: Faster RAG with lower tokens
 
-See: [Islands](essential/islands) for architecture.
+See: [Islands](/vant/essential/islands) for architecture.
 
 ---
 
 
 ## Related
 
-- [Islands](essential/islands) - Componentized brain
-- [Audit](advanced/audit) - Activity logging
-- [Citations](advanced/citations) - Git-backed citations
-- [Hybrid Sync](integrations/hybrid) - Public/Private split
+- [Islands](/vant/essential/islands) - Componentized brain
+- [Audit](/vant/advanced/audit) - Activity logging
+- [Citations](/vant/advanced/citations) - Git-backed citations
+- [Hybrid Sync](/vant/integrations/hybrid) - Public/Private split

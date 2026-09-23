@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /advanced/audit
 layout: default
 title: Audit & Compliance
-nav_order: 60
+nav_order: 101
 
 ---
 # Audit & Compliance
@@ -267,6 +267,6 @@ const sync = require('./lib/sync');
 
 ## Related
 
-- [Security](security/vaf) - VAF validation
-- [Citations](advanced/citations) - Git-backed citations
-- [Operations](operations/operations) - CLI commands
+- [Security](/vant/security/vaf) - VAF validation
+- [Citations](/vant/advanced/citations) - Git-backed citations
+- [Operations](/vant/operations/operations) - CLI commands
