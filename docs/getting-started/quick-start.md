@@ -51,6 +51,7 @@ vant sync   # Push brain changes to GitHub
 
 ## What's Next?
 
-- [Build Your First Agent](tutorials/build-agent) - 15 min tutorial
-- [CLI Reference](reference/cli) - All commands
-- [Configuration](reference/configuration) - Customize Vant
+- [Agent Onboarding](agent-onboarding) - the wake, work, sleep loop for agents
+- [The Brain](../memory/brain) - what the memory files are and where they live
+- [MCP Server](../runtime/mcp) - connect any MCP client
+- [CLI Reference](../reference/cli) - all commands

@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /faq
+permalink: /getting-started/faq
 layout: default
 title: FAQ
 nav_order: 15
@@ -13,7 +13,7 @@ Common questions about Vant.
 
 ### What is Vant?
 
-Vant (Versatile Autonomous Networked Tool) is an open source system for AI agent memory persistence. It uses GitHub as storage so agents can remember everything between sessions.
+Vant is persistent memory for AI agents, stored as plain files in your GitHub repo. Agents read the memory when a session starts and write what they learned before it ends. A runtime underneath keeps the memory operations safe, and an MCP server exposes the whole surface as tools.
 
 ### Do I need GitHub?
 
