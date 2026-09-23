@@ -1,0 +1,3 @@
+# Untracked: agent scratch space. Only intentional tools get committed.
+*
+!.gitignore

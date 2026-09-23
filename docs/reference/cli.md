@@ -172,7 +172,7 @@ vant run -p "task"          # Run one task and exit
 vant run --mcp              # MCP mode
 
 vant node --mcp             # Node plus MCP server
-vant node --mcp-port 3100   # Custom MCP port
+vant node --mcp-port 4000   # Custom MCP port
 
 vant agents list
 vant agents spawn <name>
@@ -302,8 +302,6 @@ vant brain mode dual            # dual | public | private | remote
 | `vant remote` | Remote add/remove/list |
 | `vant msg` | Messaging system |
 | `vant event` | Event handling |
-| `vant notify` | Send notifications (Slack, Discord) |
-| `vant linear` | Linear issue tracking (requires island) |
 | `vant telegram` | Telegram bot |
 
 ```bash
@@ -316,13 +314,6 @@ vant msg --read
 
 vant event --emit <name>
 vant event --listen
-
-vant notify slack "message"
-vant notify discord "message"
-
-vant linear issues
-vant linear create "title"
-vant linear comment <id> "body"
 
 vant telegram
 ```
@@ -494,22 +485,24 @@ These commands support development and CI. Most users will not need them.
 
 | Command | Description |
 |---------|-------------|
-| `vant test` | Run smoke tests (`test`, `test core`, `test full`) |
-| `vant test-all` | Full test suite |
-| `vant test-core` | Core tests only |
-| `vant build-test` | Build verification |
-| `vant agent-spawner` | Agent spawning utility |
-| `vant cli-standard` | CLI standards checker |
-| `vant format-test` | Format testing |
+| `vant test` | Test runner (`smoke`, `core`, `full` modes) |
+| `vant spawn` | Agent spawning utility |
 
 ```bash
-vant test          # Smoke tests
-vant test core     # Core test suite
+vant test          # Smoke tests (default)
+vant test core     # Brain, storage, core modules
 vant test full     # All tests (500+)
 
-vant test-all
-vant test-core
-vant build-test
+vant spawn --help  # Agent spawner usage
+```
+
+Some dev tools are invoked with node directly rather than through the
+`vant` dispatcher:
+
+```bash
+node bin/build-test.js   # Build verification
+node bin/sweep.sh        # Test health gate (or: node bin/sweep.sh --quick)
+node test/runner.js      # Raw test runner
 ```
 
 ## See also

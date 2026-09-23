@@ -64,6 +64,9 @@ models/tmp-space/
 # QC drill scratch (real-tree migration drills)
 .drill-*/
 
+# Agent capability-probe scratch (sandbox gate tests, never tracked)
+/private/
+
 # Lock files (brain + storage)
 .lock-brain-token
 .locks/

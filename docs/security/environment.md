@@ -185,8 +185,8 @@ Network requirements and behavior.
 
 | Port | Service |
 |------|---------|
-| 3100 | MCP server (default) |
-| 3457 | MCP alt port |
+| 3457 | MCP server (default) |
+| 3456 | HTTP server (default) |
 | 443 | HTTPS (GitHub) |
 
 ### Firewall Rules

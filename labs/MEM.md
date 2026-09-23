@@ -15,12 +15,10 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — docs+lander restructure shipped per labs/prd-brand.md
-+ labs/prd-content.md: memory-first IA, new memory/ + runtime/ +
-multi-agent/ sections, agent-onboarding page, nav.yml rewrite, lander
-rewrite with verified commands only, 81 links migrated, frontmatter lint
-clean across 120 pages. Full battery green. Branch is PR #91-ready; user
-decides on merge.)
+(nothing in flight — docs round 6 shipped: phantom CLI commands purged,
+MCP port split fixed in bin/mcp.js + 9 docs, stale versions repaired,
+legacy brain paths modernized, scripts/ scratch ignored. Linters green,
+full battery 108/108. See labs/TASKS.md top block.)
 
 ---
 

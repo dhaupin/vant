@@ -19,7 +19,7 @@ Run Vant in containers.
 │  │  /app/models  ← brain volume        │   │
 │  │  /app/config ← config volume       │   │
 │  │                                     │   │
-│  │  Port 3100 ← MCP              │   │
+│  │  Port 3457 ← MCP              │   │
 │  │  Port 3456 ← API/Server        │   │
 │  └─────────────────────────────────────┘   │
 │                   │                        │
@@ -55,7 +55,7 @@ docker run -d -p 3456:3456 \
   -e GITHUB_REPO=owner/repo \
   -e GITHUB_TOKEN=xxx \
   -v vant-brain:/app/models \
-  dhaupin/vant vant serve
+  dhaupin/vant vant server
 ```
 
 ## Image Tags
@@ -68,7 +68,7 @@ docker run -d -p 3456:3456 \
 
 ```bash
 # Pull specific version
-docker pull dhaupin/vant:v0.8.11
+docker pull dhaupin/vant:v0.8.6
 ```
 
 ## Volumes
@@ -203,7 +203,7 @@ spec:
 curl http://localhost:3456/health
 
 # Response
-{"status": "ok", "version": "0.8.11", "uptime": 3600}
+{"status": "ok", "version": "0.8.6", "uptime": 3600}
 ```
 
 ---

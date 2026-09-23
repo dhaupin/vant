@@ -158,7 +158,7 @@ telegram.onMessage(async (msg) => {
     console.log('Received:', msg.text);
     
     if (msg.text.toLowerCase().includes('goals')) {
-        const goals = require('./models/private/goals.md');
+        const goals = await brain.read('goals');
         await telegram.send(msg.chat, goals);
     }
 });

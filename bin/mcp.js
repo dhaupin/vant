@@ -19,7 +19,7 @@ const path = require('path');
 // Parse args
 const args = process.argv.slice(2);
 let mode = 'server';
-let port = parseInt(process.env.VANT_MCP_PORT || '3100');
+let port = parseInt(process.env.VANT_MCP_PORT || '3457');
 let help = false;
 
 for (let i = 0; i < args.length; i++) {

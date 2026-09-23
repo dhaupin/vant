@@ -34,8 +34,8 @@ Configure for your environment.
 
 ```bash
 # Each agent gets own branch
-vant checkout agent-1
-vant checkout agent-2
+vant branch create agent-1
+vant branch create agent-2
 ```
 
 ## Agent Code
@@ -59,9 +59,10 @@ async function work() {
   await branch.checkout(AGENT_ID);
 
   // 3. Do work on your brain...
-  const lessons = await readFile('models/private/lessons.md');
+  const lessonsPath = `models/private/${AGENT_ID}/lessons.md`;
+  const lessons = await readFile(lessonsPath);
   lessons += `\n- Agent ${AGENT_ID}: learned something`;
-  await writeFile('models/private/lessons.md', lessons);
+  await writeFile(lessonsPath, lessons);
 
   // 4. Commit changes
   await branch.commit(AGENT_ID, 'Updated lessons');

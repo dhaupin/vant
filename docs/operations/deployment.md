@@ -31,7 +31,7 @@ WORKDIR /app
 COPY . .
 RUN npm install
 
-EXPOSE 3100 3456
+EXPOSE 3457 3456
 
 CMD ["node", "bin/vant.js", "serve"]
 ```
@@ -91,7 +91,7 @@ Response:
 ```json
 {
   "status": "ok",
-  "version": "0.8.11",
+  "version": "0.8.6",
   "uptime": 3600
 }
 ```
@@ -106,9 +106,9 @@ Multiple instances:
 
 ```bash
 # Each instance gets unique agent ID
-VANT_AGENT_ID=agent-1 vant serve
-VANT_AGENT_ID=agent-2 vant serve
-VANT_AGENT_ID=agent-3 vant serve
+VANT_AGENT_ID=agent-1 vant server
+VANT_AGENT_ID=agent-2 vant server
+VANT_AGENT_ID=agent-3 vant server
 ```
 
 ### Vertical

@@ -10,7 +10,7 @@ nav_order: 113
 
 Reference for the core MCP tools. The live registry is larger and grows
 automatically (core libs are auto-wired): a running server exposes the
-full, current list via `tools/list` or `curl http://localhost:3100/tools`.
+full, current list via `tools/list` or `curl http://localhost:3457/tools`.
 
 ## Core Tools (9)
 

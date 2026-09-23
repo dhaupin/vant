@@ -333,7 +333,7 @@ Get config value.
 const config = require('vant').config;
 
 const port = config.get('server.port');
-// 3100
+// 3457
 ```
 
 ### githubToken()

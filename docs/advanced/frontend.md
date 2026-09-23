@@ -231,7 +231,7 @@ EOF
 // .cursor/rules/vant.memory.md
 # Vant Integration
 
-Read/write to persistent memory via MCP on port 3100.
+Read/write to persistent memory via MCP on port 3457.
 ```
 
 ---

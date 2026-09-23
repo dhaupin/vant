@@ -6,6 +6,62 @@
 
 ---
 
+## Session (2026-09-23 — docs accuracy/format/consistency pass)
+
+Round 6 on docs. Plan: S0 script hygiene, P1 accuracy, P2 format,
+P3 consistency, P4 verify, P5 handoff. All done, battery green.
+
+**S0:** Purged 26 untracked one-off `_fix_*.js`/`_qc_*.js` scratch
+scripts from scripts/ (fixes already applied in earlier rounds). Added
+`scripts/.gitignore` (`*` + `!.gitignore`) so scratch never lands in
+`git status` again; the two committed checkers stay tracked.
+
+**P1 accuracy (docs vs bin/ dispatcher, verified per command):**
+- reference/cli.md Internal section: removed phantom `vant test-all`,
+  `vant test-core`, `vant build-test`, `vant cli-standard`,
+  `vant format-test`, `vant agent-spawner` (none in COMMANDS dispatch;
+  real names are `vant test smoke|core|full` and `vant spawn`). Kept
+  bin/-direct invocations for build-test/sweep/runner with a note.
+- reference/cli.md: dropped `vant notify` row + examples (no backing
+  bin/lib) and `vant linear` row + examples (linear is a lazy island,
+  not a CLI; integrations/linear.md already shows the real JS API).
+- integrations/docker.md + operations/deployment.md: `vant serve` ->
+  `vant server` (only bin/server.js exists).
+- essential/plugins.md: replaced invented CLI (`vant use`,
+  `vant plugins`, `vant add`) with the real registration flow
+  (`vant.use(plugin)` exists in lib/vant.js; `vant islands list` is
+  the real lister).
+- integrations/agent-skills.md: dropped phantom `vant init` row.
+- multi-agent/coordination.md: `vant checkout` -> `vant branch create`
+  (no checkout dispatcher; branch-manager has create).
+
+**P3 consistency:**
+- MCP port split resolved at the CODE side: bin/mcp.js hardcoded 3100
+  while lib/mcp.js + lib/config.js default 3457 (and runtime/mcp.md
+  already documented 3457). Fixed bin/mcp.js to 3457, then swept the
+  nine docs files still saying 3100 (rest-api, api, config, cli,
+  mcp-tools, docker, deployment, security/environment, frontend).
+  Note: previous round's TASKS entry claimed 3100->3457 was done;
+  it had only covered the lander + runtime/mcp.md. Zero 3100 refs now.
+- docker/deployment example versions 0.8.11 -> 0.8.6 (pinned reality).
+- advanced/release.md: repaired broken pipe table, fixed inverted
+  patch example (0.8.6 -> 0.8.5 became -> 0.8.7), aligned docker tag
+  examples, fixed releases URL (dhaupin/releases -> dhaupin/vant/releases).
+- runtime/runtime.md: removed forward-dated "v0.8.7+ New Features" and
+  "New in v0.8.7" claims (0.8.7 is unreleased; features are current).
+- Legacy flat brain paths swept: models/private/<file>.md ->
+  models/private/vant/<file>.md in essential/onboard.md,
+  advanced/audit.md; telegram-bot.md now uses brain.read('goals')
+  instead of require()ing markdown; coordination.md example writes to
+  the agent's own brain dir.
+
+**P4 verify:** check-docs-links PASS (119), check-docs-style PASS
+(119), test/docs.test.js 6/6, test-core core 6/6, full suite 108/108.
+
+**P5 handoff:** this block, buffy learnings, MEM.md reset.
+
+---
+
 ## Session (2026-09-23 — docs + lander restructure, 5 commits)
 
 User rulings (locked in labs/prd-brand.md): memory-first positioning,

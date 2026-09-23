@@ -133,7 +133,7 @@ All changes tracked via Git:
 git log
 
 # View specific file
-git log models/private/identity.md
+git log models/private/vant/identity.md
 ```
 
 ## Reporting

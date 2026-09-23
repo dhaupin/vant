@@ -108,7 +108,7 @@ Access via `vant.<submodule>()`:
 | `vant.cache` | Memoization | memoize(), clear() |
 | `vant.config` | Configuration | get(), set(), load() |
 
-## v0.8.7+ New Features
+## Event System and Discovery
 
 ### Event System (AI-first)
 
@@ -137,7 +137,7 @@ event.on('learn:saved', (data) => { /* new learning */ });
 
 ### Discovery Registry
 
-New in v0.8.7, auto-discover modules:
+Auto-discover modules at runtime:
 
 ```js
 // Scan all lib/*.js files

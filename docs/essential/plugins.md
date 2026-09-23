@@ -69,12 +69,11 @@ vant.use(plugin);
 
 ## Use Plugin
 
-```bash
-# Load plugin
-vant use ./plugins/my-plugin
+`vant.use(plugin)` wires the plugin's tools and islands into the runtime
+at init. List registered islands at runtime:
 
-# List plugins
-vant plugins
+```bash
+vant islands list
 ```
 
 ---
@@ -87,10 +86,10 @@ Publish to npm:
 npm publish
 ```
 
-Install:
+Install in a project, then register it as above:
 
 ```bash
-vant add vant-my-plugin
+npm install vant-my-plugin
 ```
 
 ---

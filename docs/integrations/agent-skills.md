@@ -65,8 +65,7 @@ Activate this skill when:
 
 | Command | Description |
 |---------|-------------|
-| `vant init` | Initialize brain |
-| `vant start` | Start session (load + sync + run) |
+| `vant start` | Full startup (health, sync, load, run) |
 | `vant sync` | Sync brain with GitHub |
 | `vant islands list` | Show available islands |
 | `vant config set` | Set configuration |
