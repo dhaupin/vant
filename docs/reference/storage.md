@@ -204,16 +204,16 @@ const vector = Storage.get('vector', { connector: 'pinecone', apiKey: 'xxx' });
 
 | Connector | Status |
 |-----------|--------|
-| pinecone | TODO |
-| qdrant | TODO |
-| weaviate | TODO |
 | local (default) | Built-in |
+| pinecone | Available (`lib/connectors/pinecone.js`) |
+| qdrant | Planned, factory registered |
+| weaviate | Planned, factory registered |
 
 ---
 
 ## GitHub ToS Protection
 
-⚠️ **Important**: Vant is designed to work with GitHub. Some storage operations may violate GitHub Terms of Service if used as a database with auto-sync.
+**Important**: Vant is designed to work with GitHub. Some storage operations may violate GitHub Terms of Service if used as a database with auto-sync.
 
 ### Guidelines
 
@@ -240,14 +240,14 @@ See [GitHub Terms of Service](https://docs.github.com/en/github/site-policy/gith
 
 ## Migration from v0.8.4
 
-⚠️ This is a clean-slate refactor. No backward compatibility provided.
+**Warning**: This is a clean-slate refactor. No backward compatibility provided.
 
 ### Files Deleted
 
-- `lib/brain.js` → Use `Storage.get('brain')`
-- `lib/vector-store.js` → Use `Storage.get('vector')`
-- `lib/repos.js` → Use `Storage.get('repos')` (or providers)
-- `lib/state.js` → Use `Storage.get('state')`
+- `lib/brain.js` -> Use `Storage.get('brain')`
+- `lib/vector-store.js` -> Use `Storage.get('vector')`
+- `lib/repos.js` -> Use `Storage.get('repos')` (or providers)
+- `lib/state.js` -> Use `Storage.get('state')`
 
 ### Migration Example
 

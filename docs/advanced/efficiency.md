@@ -23,7 +23,7 @@ Vant is designed to be lightweight and efficient. This guide covers optimization
 
 - Use concise prompts
 - Avoid repetition
-- Leverage brain files for context
+- Use brain files for context
 
 ### Context Window
 

@@ -124,7 +124,7 @@ const pipeline = rerank.pipeline(memories, 'security', {
 
 ### Pipeline
 
-Runs rerank → compress in sequence, returns stats.
+Runs rerank -> compress in sequence, returns stats.
 
 ## Integration
 

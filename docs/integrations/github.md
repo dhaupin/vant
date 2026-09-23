@@ -33,7 +33,7 @@ gh repo create vant-brain --private
 1. Go to: https://github.com/settings/tokens
 2. Click "Generate new token (classic)"
 3. Select scopes:
-   - `repo` (full control) ✓
+   - `repo` (full control): required
 4. Copy token
 
 ### 3. Configure
@@ -47,19 +47,11 @@ export GITHUB_REPO=your-username/vant-brain
 
 ## Token Scopes
 
-| Scope
-- Required
-- Description |
+| Scope | Required | Description |
 |-------|----------|-------------|
-| `repo`
-- Yes
-- Full repository control |
-| `read:user`
-- No
-- Read user profile |
-| `delete_repo`
-- No
-- Delete repository |
+| `repo` | Yes | Full repository control |
+| `read:user` | No | Read user profile |
+| `delete_repo` | No | Delete repository |
 
 > Minimum required: `repo` for private brain storage.
 
@@ -68,13 +60,10 @@ Understand rate limits and quotas.
 
 ### Understanding Limits
 
-| Plan
-- Requests/Hour |
+| Plan Requests/Hour |
 |------|---------------|
-| Authenticated
-- 5,000 |
-| Unauthenticated
-- 60 |
+| Authenticated 5,000 |
+| Unauthenticated 60 |
 
 ### Managing Limits
 View and wait for rate limits.
@@ -91,18 +80,12 @@ vant rate reset
 
 ### Best Practices
 
-| Practice
-- Description |
+| Practice Description |
 |----------|-------------|
-| Batch commits
-- Combine multiple changes into one commit |
-| Skip auto-push
-- Use `AUTO_PUSH=false` for testing |
-| Cache brain
-- Load once |
-- use locally |
-| Limit sync frequency
-- Don't sync every message |
+| Batch commits | Combine multiple changes into one commit |
+| Skip auto-push | Use `AUTO_PUSH=false` for testing |
+| Cache brain | Load once, use locally |
+| Limit sync frequency | Don't sync every message |
 
 ## Sync Strategies
 Optimize GitHub sync strategy.
@@ -139,7 +122,7 @@ Always sync manually when ready:
 vant sync --push  # Push local changes
 ```
 
-> ⚠️ **Don't use cron or auto-sync with GitHub.com** - GitHub.com Terms of Service prohibit automated polling. Self-hosted GitLab/Gitea is fine.
+> **Do not use cron or auto-sync with GitHub.com**: GitHub.com Terms of Service prohibit automated polling. Self-hosted GitLab/Gitea is fine.
 
 ## Branching Strategy
 Manage Git branches for brain versions.
@@ -180,32 +163,21 @@ git push origin experiment-feature
 
 
 
-| Issue
-- Solution |
+| Issue Solution |
 |-------|----------|
-| 403 Forbidden
-- Check token scopes |
-| 404 Not Found
-- Verify GITHUB_REPO |
-| Rate limit exceeded
-- Wait or use different token |
-| Merge conflict
-- Pull latest |
-- resolve manually |
+| 403 Forbidden Check token scopes |
+| 404 Not Found | Verify GITHUB_REPO |
+| Rate limit exceeded | Wait or use different token |
+| Merge conflict | Pull latest, resolve manually |
 
 ## Security
 
-| Practice
-- Description |
+| Practice Description |
 |----------|-------------|
-| Never commit .env
-- Add to .gitignore |
-| Use private repo
-- Keep brain private |
-| Rotate tokens
-- Refresh periodically |
-| Use fine-grained tokens
-- Restrict to brain repo only |
+| Never commit .env Add to .gitignore |
+| Use private repo Keep brain private |
+| Rotate tokens Refresh periodically |
+| Use fine-grained tokens Restrict to brain repo only |
 
 ## Related
 

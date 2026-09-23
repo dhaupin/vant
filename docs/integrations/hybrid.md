@@ -27,8 +27,8 @@ nav_order: 87
 ## What Is Hybrid?
 
 Sync different parts to different repos:
-- Sensitive state → private repo
-- Public logs/summaries → public repo
+- Sensitive state -> private repo
+- Public logs/summaries -> public repo
 
 ## Why
 

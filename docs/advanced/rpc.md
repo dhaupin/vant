@@ -16,7 +16,7 @@ Unified protocol specifications for Vant agent messaging across surfaces.
 ## Table of Contents
 
 1. [MCP Theme Protocol](#mcp-theme-protocol) - JSON-RPC presentation hints
-2. [Skill Chain Protocol](#skill-chain-protocol) - Agent↔Skill communication
+2. [Skill Chain Protocol](#skill-chain-protocol) - Agent<->Skill communication
 3. [Agent Chain Protocol](#agent-chain-protocol) - Multi-agent delegation
 4. [Extension Guide](#extension-guide) - How to add new protocols
 
@@ -24,7 +24,7 @@ Unified protocol specifications for Vant agent messaging across surfaces.
 
 ## MCP Theme Protocol
 
-**Status**: ✅ Implemented v0.8.6
+**Status**: Implemented v0.8.6
 **Surface**: JSON-RPC (MCP/REST)
 
 ### Overview
@@ -59,10 +59,10 @@ MCP protocol is pure data (JSON). Clients rendering responses lack context on ho
 
 | Status | Icon | Color | Usage |
 |--------|------|-------|-------|
-| success | ✓ | #22C55E | Operation completed |
-| error | ✗ | #EF4444 | Operation failed |
-| warning | ⚠ | #EAB308 | Partial success / needs attention |
-| loading | ◌ | #3B82F6 | Async in progress |
+| success | `✓` | #22C55E | Operation completed |
+| error | `✗` | #EF4444 | Operation failed |
+| warning | `⚠` | #EAB308 | Partial success / needs attention |
+| loading | `◌` | #3B82F6 | Async in progress |
 | info | ℹ | #6B7280 | Informational |
 
 #### Formats
@@ -206,7 +206,7 @@ Clients MUST:
 
 Clients MAY:
 - Interpret colors for terminal/web styling
-- Parse format: markdown→HTML, html→direct render
+- Parse format: markdown->HTML, html->direct render
 - Sort by priority for list displays
 
 ### Backward Compatibility
@@ -220,8 +220,8 @@ Clients MAY:
 
 ## Skill Chain Protocol
 
-**Status**: 📋 Planned
-**Surface**: HTTP ↔ agentskills.io
+**Status**: Planned
+**Surface**: HTTP <-> agentskills.io
 
 ### Overview
 
@@ -307,7 +307,7 @@ Skills may live locally or at remote endpoints. Need unified invocation format.
 
 ## Agent Chain Protocol
 
-**Status**: 📋 Planned
+**Status**: Planned
 **Surface**: Internal / Anthropic Messages API
 
 ### Overview
@@ -356,12 +356,12 @@ Vant supports multiple agents. Need standard message format for:
 
 | Type | Direction | Description |
 |------|----------|------------|
-| spawn | Controller→Agent | Create new agent |
-| delegate | Agent→Agent | Assign task |
-| broadcast | Any→All | Channel message |
-| query | Agent→Brain | RAG lookup |
-| terminate | Controller→Agent | Shutdown agent |
-| status | Any→Controller | Health/check |
+| spawn | Controller->Agent | Create new agent |
+| delegate | Agent->Agent | Assign task |
+| broadcast | Any->All | Channel message |
+| query | Agent->Brain | RAG lookup |
+| terminate | Controller->Agent | Shutdown agent |
+| status | Any->Controller | Health/check |
 
 #### Example: Spawn
 
@@ -471,9 +471,9 @@ Each protocol SHOULD have:
 
 | Date | Protocol | Status |
 |------|---------|--------|
-| 2026-05 | MCP Theme | ✅ Implemented |
-| 2026-05 | Agent Chain | 📋 Draft |
-| 2026-05 | Skill Chain | 📋 Draft |
+| 2026-05 | MCP Theme | Implemented |
+| 2026-05 | Agent Chain | Draft |
+| 2026-05 | Skill Chain | Draft |
 
 ---
 

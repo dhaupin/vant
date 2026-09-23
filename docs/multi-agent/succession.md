@@ -72,7 +72,7 @@ At session start:
 
 ```bash
 # Read trust level
-cat models/private/_succession.json
+cat models/public/vant/_succession.json
 ```
 
 Look for `succession.trust.default`.

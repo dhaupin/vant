@@ -30,7 +30,7 @@ GS1 (Global Standards One) manages the global UPC/EAN system. Their reserved Num
 | 6 | Reserved | Future use |
 | 7 | Reserved | Future use |
 | 8 | Reserved | Future use |
-| **9** | Reserved | **Automation/Virtual** ← PROPOSED |
+| **9** | Reserved | **Automation/Virtual** <- PROPOSED |
 
 Using NSC "9" provides:
 - Zero collision risk (never assigned to physical products)

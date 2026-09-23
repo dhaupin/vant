@@ -216,3 +216,91 @@ contained, and committed it.
 - Remaining PRD follow-ups unchanged from sweep 3: operations/ 15 pages
   vs 8-slot target (fold operations.md + cache.md later), reference/cli
   nav_order 111 vs PRD 81 (cosmetic).
+
+---
+
+# Docs QC round 8 (2026-09-23)
+
+Scope: another full docs pass (recovered from repeated session
+interrupts): mechanical voice/fence sweep, consistency greps (ports,
+versions, brain paths), accuracy of sampled commands against bin/ and
+lib/, frontmatter and link validation. All findings verified against
+code before editing.
+
+## Found + fixed
+
+- **audit.md (7 repairs):** three event tables and the RBAC table had
+  mangled two-column shape (pipe-table accident from an earlier wave);
+  Reporting section ran phantom `./bin/report.js --days/--start/--end`
+  (real tool is `vant audit` with --out/--json, per bin/audit.js +
+  bin/vant.js dispatch); SIEM block used nonexistent --format flags;
+  ledger example code was exploded with `|- { ... }` residue and used a
+  wrong require pattern (`require('vant').audit`); getLedger()/
+  healthCheck() shapes corrected to the real API ({ status, entries },
+  no args); hash-chain claim corrected (SHA256 over the full serialized
+  entry, first 16 hex chars - not prevHash+action+timestamp); ledger
+  action names matched to lib/audit.js (island:hydrate, stego:snapshot,
+  raid:sync); retention table pointed at `.audit.log` and a phantom
+  `states/active/` path - real ledger file is `.audit.json` under the
+  current brain path, rate limits are in-memory counters.
+- **docker.md (rewritten):** file had an unbalanced fence (23 fences,
+  the Related section's closing fence) which swallowed the rest of the
+  page; MCP quick start used `-p 3456:3456` for the MCP server (MCP is
+  3457, `vant mcp` - 3456 is the REST/health server); env table used
+  `VANT_PORT` and `MCP_REQUIRE_API_KEY`, neither of which exists (real:
+  VANT_SERVER_PORT, VANT_MCP_PORT, VANT_MCP_REQUIRE_KEY per lib/config.js);
+  Dockerfile CMD called nonexistent `serve` subcommand (real: `server`);
+  health payload corrected to lib/server.js's `{ status, uptime }` (no
+  version field); EXPOSE and compose/K8s port lists now cover both
+  ports; port map table added at top.
+- **succession.md:** `cat models/private/_succession.json` is a pre-0.9
+  path; file lives at `models/public/vant/_succession.json` (verified on
+  disk and in lib/succession.js).
+- **troubleshooting.md:** same flat-path fix for the multi-line write tip
+  (`models/private/filename.md` -> `models/private/vant/filename.md`).
+- **storage.md:** connector table rows said TODO; replaced with real
+  status (local built-in, pinecone has lib/connectors/pinecone.js,
+  qdrant/weaviate are factory-registered in lib/connectors/index.js but
+  have no connector files yet - planned).
+- **efficiency.md:** voice fix ("Leverage" -> "Use").
+
+## Verified accurate (no change)
+
+- Port duality: 3456 REST (VANT_SERVER_PORT) vs 3457 MCP
+  (VANT_MCP_PORT) is consistent across frontend.md, environment.md,
+  rest-api.md, deployment.md after round 6; grep hits on 3456 are the
+  REST server, not MCP.
+- Version strings: 0.8.6 dominates (164 hits) matching package version;
+  0.9.0 hits are forward-looking migration references, fine.
+- nav_order: zero duplicates repo-wide; index permalinks all
+  section-rooted.
+- Arrows/glyphs flagged by grep all live inside code fences (linter-
+  exempt) or inline code spans (rpc.md icon tables, search.md pipelines,
+  vibe.md diagrams) - intentional data values, not prose decoration.
+- `vant validate --ledger|--check` real (bin/validate.js).
+
+## Tooling
+
+- check-docs-style.js gained the voice gate (em/en dash, emoji/glyph
+  with inline-code exemption) and pipe-table shape rules this round.
+- check-docs-links.js keeper restored after an accidental overwrite by
+  a throwaway frontmatter/link script (which validated LINKS: PASS and
+  frontmatter completeness before being discarded).
+
+## Verification (round 8)
+
+- Style lint PASS (119 files), links PASS (119 files), docs suite 6/6.
+- All fixes cross-checked against lib/audit.js, bin/audit.js,
+  bin/vant.js dispatch table, lib/config.js, lib/server.js,
+  lib/connectors/, lib/succession.js before editing.
+
+## Notes for future passes
+
+- operations/ fold + reference/cli nav_order cosmetic items still open
+  (unchanged).
+- docs/advanced/nsc9-spec.md draft spec uses box-drawing arrows in
+  fenced diagrams; fine as-is.
+- lib/connectors/index.js registers qdrant/weaviate factories whose
+  files do not exist yet - requiring them throws; flagged in storage.md
+  as planned. Either land the connectors or drop the factory rows in a
+  future code pass.

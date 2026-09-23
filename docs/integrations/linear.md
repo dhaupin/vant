@@ -36,7 +36,7 @@ Track agent work in Linear:
 ## Configuration
 
 Get API key:
-1. Go to Linear Settings → API
+1. Go to Linear Settings -> API
 2. Create API key
 3. Set environment:
 

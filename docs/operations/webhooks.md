@@ -13,9 +13,9 @@ nav_order: 55
 ## What You'll Build
 
 Webhook handlers that trigger Vant actions:
-- GitHub webhooks → sync brain
-- Scheduled webhooks → brain prune
-- Custom webhooks → agent actions
+- GitHub webhooks -> sync brain
+- Scheduled webhooks -> brain prune
+- Custom webhooks -> agent actions
 
 ## Why Webhooks?
 
@@ -27,7 +27,7 @@ Webhook handlers that trigger Vant actions:
 
 ### Setup
 
-1. Go to GitHub repo → Settings → Webhooks
+1. Go to GitHub repo -> Settings -> Webhooks
 2. Add webhook:
    - Payload URL: `https://your-domain.com/webhook`
    - Events: Push
@@ -164,7 +164,7 @@ app.post('/webhook/trigger', (req, res) => {
 
 ## Use Cases
 
-### GitHub Push → Sync
+### GitHub Push -> Sync
 
 ```javascript
 // On every push, pull latest brain
@@ -175,7 +175,7 @@ app.post('/webhook/github', async (req, res) => {
 });
 ```
 
-### Linear Issue → Learn
+### Linear Issue -> Learn
 
 ```javascript
 // On issue created, learn from it
@@ -185,7 +185,7 @@ app.post('/webhook/linear', async (req, res) => {
 });
 ```
 
-### Cron → Prune
+### Cron -> Prune
 
 ```javascript
 // Daily brain cleanup

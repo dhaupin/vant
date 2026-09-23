@@ -33,20 +33,12 @@ vant boot --image=./brain.png --decrypt=secret123
 
 ## Security
 
-| Check
-- Description |
+| Check Description |
 |-------|-------------|
-| HTTPS
-- Required for remote URLs |
-| No internal
-- Blocks localhost |
-- 127.x |
-- 10.x |
-- 192.168.x |
-| No tokens
-- Config must be set separately |
-| Path traversal
-- Blocked in local paths |
+| HTTPS | Required for remote URLs |
+| No internal | Blocks localhost, 127.x, 10.x, 192.168.x |
+| No tokens | Config must be set separately |
+| Path traversal | Blocked in local paths |
 
 ## Embedded Config
 

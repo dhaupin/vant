@@ -14,8 +14,7 @@ Sync Vant brain to multiple providers simultaneously for redundancy. If one prov
 ## Why RAID?
 
 - **Resilience**: No single point of failure
-- **Throttle resistance**: If GitHub throttles |
-- use GitLab
+- **Throttle resistance**: If GitHub throttles, use GitLab
 - **Geographic distribution**: Sync to global + self-hosted
 - **Peace of mind**: Your agent is always backed up
 

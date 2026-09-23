@@ -87,7 +87,7 @@ Configuration via environment.
 |----------|----------|-------------|
 | `VANT_MCP_PORT` | No | MCP server port (default: 3457) |
 | `VANT_MCP_API_KEY` | No | API key for MCP authentication |
-| `VANT_AGREE_AUTO_SYNC` | No | **⚠️** Enable auto-polling: set to `"true"` to confirm (see notes) |
+| `VANT_AGREE_AUTO_SYNC` | No | Enable auto-polling: set to `"true"` to confirm (see notes) |
 | `MCP_API_KEY` | No | Alternative MCP API key |
 
 ### Notifications
@@ -311,7 +311,7 @@ See these files in the repo for full examples:
 - `settings.example.ini` - Settings template
 - `mood.example.ini` - Mood template
 
-> ⚠️ **Auto-Polling Warning for GitHub.com**: `VANT_AGREE_AUTO_SYNC` enables background GitHub.com polling in `vant node`. This is intended for self-hosted GitLab/Gitea - using with GitHub.com **violates their Terms of Service**. Requires **both**:
+> **Auto-Polling Warning for GitHub.com**: `VANT_AGREE_AUTO_SYNC` enables background GitHub.com polling in `vant node`. This is intended for self-hosted GitLab/Gitea - using with GitHub.com **violates their Terms of Service**. Requires **both**:
 > 1. The `--enable-polling` flag when starting node
 > 2. Set `VANT_AGREE_AUTO_SYNC=true` (in `.env` or export)
 >

@@ -18,7 +18,7 @@ Vant's brain system follows a **public/private pattern** - defaults live in `mod
 | `models/public/` | Vant's default brain files |
 | `models/private/` | Your customizations (overrides public) |
 
-When loading, Vant checks **private first** → falls back to **public**.
+When loading, Vant checks **private first** -> falls back to **public**.
 
 ## Agents
 
@@ -114,7 +114,7 @@ Use them to build multi-step workflows.
 
 When you create `models/private/agents/my-agent/`, it takes precedence over `models/public/agents/vant-agent-*`.
 
-Same for skills: `models/private/skills/my-skill/` → `models/public/skills/vant-skill-*`
+Same for skills: `models/private/skills/my-skill/` -> `models/public/skills/vant-skill-*`
 
 This lets you:
 - Extend Vant without forking
@@ -125,7 +125,7 @@ This lets you:
 
 1. **Copy, don't modify** - Start from public copies
 2. **Keep private changes** - Store in your private brain
-3. **Use descriptive names** - `vant-agent-fork` → `my-custom-agent`
+3. **Use descriptive names** - `vant-agent-fork` -> `my-custom-agent`
 
 ## Related
 

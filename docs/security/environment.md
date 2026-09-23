@@ -136,11 +136,11 @@ Keeping your GitHub token safe.
 **If exposed:**
 
 1. **Immediate**: Revoke token
-   - GitHub → Settings → Developer → Tokens
-   - Or: Settings → Tokens (classic)
+   - GitHub -> Settings -> Developer -> Tokens
+   - Or: Settings -> Tokens (classic)
 
 2. **Check Audit Log**
-   - GitHub → Settings → Audit log
+   - GitHub -> Settings -> Audit log
    - Look for suspicious activity
 
 3. **Generate New**
@@ -289,9 +289,9 @@ du -sh models/private/
 
 ### GitHub Monitoring
 
-- **Tokens**: Settings → Developer → Tokens
-- **Audit Log**: Settings → Audit log
-- **Usage**: Settings → Repositories
+- **Tokens**: Settings -> Developer -> Tokens
+- **Audit Log**: Settings -> Audit log
+- **Usage**: Settings -> Repositories
 
 ---
 ## COMPLIANCE CHECKLIST

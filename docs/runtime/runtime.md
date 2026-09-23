@@ -159,8 +159,8 @@ const memNames = vant.findByCapability('memory');
 
 | Way | How |
 |-----|-----|
-| Add to `lib/` | Drop `.js` → auto-discovered |
-| Add to `lib/connectors/` | Drop language connector → auto-loaded |
+| Add to `lib/` | Drop `.js` -> auto-discovered |
+| Add to `lib/connectors/` | Drop language connector -> auto-loaded |
 | Event subscriptions | Subscribe/emit anytime, no file needed |
 
 ```js

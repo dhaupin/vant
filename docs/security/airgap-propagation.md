@@ -31,9 +31,9 @@ For air-gapped environments:
 
 ## How It Works
 
-1. **Carrier agent** has GitHub access → encodes config into image
-2. **Target agent** (airgapped) receives image → decodes → runs
-3. **Target** encodes response back → sends to carrier
+1. **Carrier agent** has GitHub access -> encodes config into image
+2. **Target agent** (airgapped) receives image -> decodes -> runs
+3. **Target** encodes response back -> sends to carrier
 
 ## Encode (Carrier)
 

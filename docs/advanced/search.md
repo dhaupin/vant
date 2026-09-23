@@ -448,8 +448,8 @@ Combining with [Islands](/vant/essential/islands) architecture:
 - **Benefit**: Smaller token context, faster hydration
 
 Potential workflow:
-1. Query triggers island(s) → lazy-hydrate only needed components
-2. Return compressed vpatch diffs → smaller context
+1. Query triggers island(s) -> lazy-hydrate only needed components
+2. Return compressed vpatch diffs -> smaller context
 3. Result: Faster RAG with lower tokens
 
 See: [Islands](/vant/essential/islands) for architecture.

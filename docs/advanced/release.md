@@ -21,9 +21,9 @@ v0.8.6
 
 | Type | Example | When |
 |------|---------|------|
-| PATCH | 0.8.6 → 0.8.7 | Bug fixes |
-| MINOR | 0.8.6 → 0.9.0 | New features |
-| MAJOR | 0.8.6 → 1.0.0 | Breaking changes |
+| PATCH | 0.8.6 -> 0.8.7 | Bug fixes |
+| MINOR | 0.8.6 -> 0.9.0 | New features |
+| MAJOR | 0.8.6 -> 1.0.0 | Breaking changes |
 
 ## Release Checklist
 

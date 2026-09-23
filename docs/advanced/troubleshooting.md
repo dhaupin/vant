@@ -189,7 +189,7 @@ Error: Content blocked: /\n/
 ```
 
 **Fix**:
-- Write multi-line content directly to `models/private/filename.md`
+- Write multi-line content directly to `models/private/vant/filename.md`
 - Don't pass newlines via MCP `setMemory`
 
 ### Blocked: Path Traversal
@@ -211,11 +211,8 @@ Error: Content blocked: /<script>/
 ```
 
 **Fix**:
-- Don't include `<script>` |
-- `javascript:` |
-- `on*=` in inputs
-- For HTML content |
-- write directly to files
+- Don't include `<script>`, `javascript:`, or `on*=` in inputs
+- For HTML content, write directly to files
 
 ### Blocked: Shell Commands
 Handle blocked requests.
@@ -225,25 +222,17 @@ Error: Content blocked: /; rm -rf/
 ```
 
 **Fix**:
-- Don't include `;` |
-- `|` |
-- `&&` |
-- `$()` in inputs
+- Don't include `;`, `|`, `&&`, or `$()` in inputs
 - These are blocked to prevent injection
 
 ## Limitations
 
-| Limitation
-- Description |
+| Limitation Description |
 |-----------|-------------|
-| GitHub rate limits
-- 5,000/hour authenticated |
-| File size
-- GitHub max 100MB per file |
-| Repo size
-- Free tier: 1GB max |
-| Private repos
-- Must have GitHub account |
+| GitHub rate limits 5,000/hour authenticated |
+| File size GitHub max 100MB per file |
+| Repo size Free tier: 1GB max |
+| Private repos Must have GitHub account |
 
 ## Related
 

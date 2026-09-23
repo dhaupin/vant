@@ -356,49 +356,28 @@ MCP_PORT=3457
 
 ## Available Tools
 
-| Tool
-- Description |
+| Tool | Description |
 |------|-------------|
-| `vant_get_memory`
-- Read brain files |
-| `vant_set_memory`
-- Write to brain |
-| `vant_list_branches`
-- List branches |
-| `vant_create_branch`
-- Create branch |
-| `vant_switch_branch`
-- Switch branch |
-| `vant_commit`
-- Commit changes |
-| `vant_sync`
-- Sync with GitHub |
-| `vant_lock`
-- Acquire/release lock |
-| `vant_health`
-- System health check |
-| `vant_search`
-- Search brain (basic/rag/hybrid) |
-| `vant_get_islands`
-- List brain islands |
-| `vant_load_island`
-- Load specific island |
-| `vant_resolution_track`
-- Track thought resolutions |
-| `vant_stego_encode`
-- Encode data in image |
-| `vant_stego_decode`
-- Decode stego image |
-| `vant_config_get`
-- Get config value |
-| `vant_config_set`
-- Set config value |
-| `vant_audit_log`
-- Write audit log |
-| `vant_audit_list`
-- List audit entries |
-| `vant_succession_info`
-- Get succession state |
+| `vant_get_memory` | Read brain files |
+| `vant_set_memory` | Write to brain |
+| `vant_list_branches` | List branches |
+| `vant_create_branch` | Create branch |
+| `vant_switch_branch` | Switch branch |
+| `vant_commit` | Commit changes |
+| `vant_sync` | Sync with GitHub |
+| `vant_lock` | Acquire/release lock |
+| `vant_health` | System health check |
+| `vant_search` | Search brain (basic/rag/hybrid) |
+| `vant_get_islands` | List brain islands |
+| `vant_load_island` | Load specific island |
+| `vant_resolution_track` Track thought resolutions |
+| `vant_stego_encode` Encode data in image |
+| `vant_stego_decode` Decode stego image |
+| `vant_config_get` Get config value |
+| `vant_config_set` Set config value |
+| `vant_audit_log` Write audit log |
+| `vant_audit_list` List audit entries |
+| `vant_succession_info` Get succession state |
 
 ## API Examples
 
@@ -806,35 +785,20 @@ Errors return a result object with an `error` field:
 
 Common errors:
 - `Security check failed` - Input validation failed (VAF)
-- `Circuit open` - Too many failures |
-- wait and retry
+- `Circuit open` - Too many failures, wait and retry
 - `Server busy` - Max concurrent requests reached
 - `Unknown tool` - Tool name not found
 
 ## Configuration Options
 
-| Setting
-- Default
-- Description |
+| Setting | Default | Description |
 |---------|---------|-------------|
-| `MCP_PORT`
-- 3457
-- Server port |
-| `MCP_API_KEY`
-- -
-- API key for auth |
-| `MCP_REQUIRE_API_KEY`
-- false
-- Force auth required |
-| `MCP_TIMEOUT`
-- 30000
-- Request timeout (ms) |
-| `MCP_MAX_INPUT_SIZE`
-- 1048576
-- Max input (1MB) |
-| `MCP_MAX_CONCURRENT`
-- 3
-- Concurrent requests |
+| `MCP_PORT` | 3457 | Server port |
+| `MCP_API_KEY` | - | API key for auth |
+| `MCP_REQUIRE_API_KEY` | false | Force auth required |
+| `MCP_TIMEOUT` | 30000 | Request timeout (ms) |
+| `MCP_MAX_INPUT_SIZE` | 1048576 | Max input (1MB) |
+| `MCP_MAX_CONCURRENT` | 3 | Concurrent requests |
 
 ## Security
 
@@ -842,9 +806,7 @@ MCP uses VAF (Vant Application Firewall) for input validation:
 
 - All endpoints validated with VAF
 - File parameters use `type: 'path'` to block traversal
-- String content blocks: newlines |
-- XSS |
-- shell commands
+- String content blocks: newlines, XSS, shell commands
 - Rate limiting enabled
 - Circuit breaker prevents cascade failures
 

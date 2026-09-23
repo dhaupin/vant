@@ -256,8 +256,8 @@ The `k` factor (sensitivity) controls threshold = μ + k×σ:
 | 2.0+ | Higher threshold, less pruning | Agents feel "forgetful" |
 
 **Tuning tips:**
-- Agent feels "forgetful" → increase k (pruning too much)
-- Hitting token limits → decrease k (too many spikes)
+- Agent feels "forgetful" -> increase k (pruning too much)
+- Hitting token limits -> decrease k (too many spikes)
 
 ### 2. Calibration Phase (Recommended)
 

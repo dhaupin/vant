@@ -20,9 +20,7 @@ Image (PNG) → Stego Decode → Manifest + Brain → Resume Session
 
 The image contains:
 1. **Brain data** - Compressed brain JSON
-2. **Manifest** - Encrypted config (urls |
-- provider |
-- branch)
+2. **Manifest** - Encrypted config (urls, provider, branch)
 
 ## Architecture
 
@@ -70,7 +68,7 @@ vant boot --image=https://example.com/horcrux.png
 ```
 
 On boot:
-1. Decode stego → brain
+1. Decode stego -> brain
 2. Extract manifest
 3. Configure providers from manifest (URLs only!)
 4. Set tokens separately as environment
@@ -78,17 +76,12 @@ On boot:
 
 ## Security
 
-| Feature
-- Protection |
+| Feature Protection |
 |--------|------------|
-| Encrypted
-- AES-256-GCM with PBKDF2 |
-| No tokens
-- Config has URLs only |
-| HTTPS required
-- Remote URLs validated |
-| No internal
-- localhost blocked |
+| Encrypted AES-256-GCM with PBKDF2 |
+| No tokens Config has URLs only |
+| HTTPS required Remote URLs validated |
+| No internal localhost blocked |
 
 ## Flow Diagram
 
@@ -115,7 +108,7 @@ On boot:
 
 1. **Transient Deployment**: Deploy anywhere with just an image URL
 2. **Disaster Recovery**: Restore from old profile picture
-3. **Provider Migration**: Move between GitHub ↔ GitLab
+3. **Provider Migration**: Move between GitHub <-> GitLab
 4. **Zero-Config Start**: No `.env` file needed
 
 ## Related

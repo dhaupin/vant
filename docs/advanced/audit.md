@@ -35,17 +35,12 @@ Each entry:
 
 ### Log Levels
 
-| Level
-- Description |
+| Level | Description |
 |-------|-------------|
-| INFO
-- Normal operations |
-| WARN
-- Warnings |
-| BLOCKED
-- Blocked requests |
-| ERROR
-- Errors |
+| INFO | Normal operations |
+| WARN | Warnings |
+| BLOCKED | Blocked requests |
+| ERROR | Errors |
 
 ## Events Logged
 
@@ -53,76 +48,50 @@ Track system events for debugging and compliance.
 
 ### Security Events
 
-| Event
-- Description |
+| Event Description |
 |-------|-------------|
-| `BLOCKED`
-- Malicious input blocked |
-| `RATE_LIMIT`
-- Rate limit exceeded |
-| `INVALID_INPUT`
-- Invalid input detected |
-| `PATH_TRAVERSAL`
-- Path traversal attempt |
+| `BLOCKED` Malicious input blocked |
+| `RATE_LIMIT` Rate limit exceeded |
+| `INVALID_INPUT` Invalid input detected |
+| `PATH_TRAVERSAL` Path traversal attempt |
 
 ### Operational Events
 
-| Event
-- Description |
+| Event | Description |
 |-------|-------------|
-| `START`
-- Vant started |
-| `STOP`
-- Vant stopped |
-| `SYNC`
-- GitHub sync |
-| `LOAD`
-- Brain loaded |
+| `START` | Vant started |
+| `STOP` | Vant stopped |
+| `SYNC` | GitHub sync |
+| `LOAD` | Brain loaded |
 
 ### Authentication Events
 
-| Event
-- Description |
+| Event | Description |
 |-------|-------------|
-| `LOGIN`
-- Login attempt |
-| `LOGIN_SUCCESS`
-- Successful login |
-| `LOGIN_FAIL`
-- Failed login |
+| `LOGIN` | Login attempt |
+| `LOGIN_SUCCESS` | Successful login |
+| `LOGIN_FAIL` | Failed login |
 
 ## Compliance
 Meet compliance requirements with audit logs.
 
 ### Data Retention
 
-| Data
-- Retention
-- Location |
+| Data | Retention | Location |
 |------|-----------|----------|
-| Audit logs
-- 90 days
-- .audit.log |
-| Brain history
-- Indefinite
-- GitHub |
-| Rate limits
-- Reset hourly
-- states/active/ |
+| Audit logs | 90 days | `.audit.json` in the current brain path |
+| Brain history | Indefinite | GitHub |
+| Rate limits | Reset hourly | In-memory counters |
 
 ### Access Control
 
 Role-based access:
 
-| Role
-- Permissions |
+| Role | Permissions |
 |------|-------------|
-| Admin
-- Full access |
-| User
-- Read brain |
-| Agent
-- Sync only |
+| Admin | Full access |
+| User | Read brain |
+| Agent | Sync only |
 
 ### Audit Trail
 
@@ -143,11 +112,14 @@ Generate reports from audit data.
 Create audit reports.
 
 ```bash
-# Last 30 days
-./bin/report.js --days 30
+# Generate markdown report to stdout
+vant audit
 
-# Date range
-./bin/report.js --start 2024-01-01 --end 2024-01-31
+# Write to a file
+vant audit --out AUDIT.md
+
+# JSON output for tooling
+vant audit --json
 ```
 
 ### Report Contents
@@ -165,10 +137,10 @@ Export audit logs for analysis.
 
 ```bash
 # JSON format
-./bin/audit.js --format json
+vant audit --json
 
-# Syslog format
-./bin/audit.js --format syslog
+# Markdown format
+vant audit
 ```
 
 ### Integration Example
@@ -199,70 +171,58 @@ port = 514
 
 ### What It Logs
 
-| Action
-- Description |
+| Action | Description |
 |--------|-------------|
-| `island:github:hydrate`
-- Island hydrated |
-| `stego:snapshot`
-- Stego image captured |
-| `sync:github:push`
-- Sync to provider |
+| `island:hydrate` | Island hydrated |
+| `stego:snapshot` | Stego image captured |
+| `raid:sync` | Sync to provider |
 
 ### Usage
 
 ```javascript
-const audit = require('vant').audit;
+const vant = require('./lib/vant');
+const audit = vant.audit;
 
 // Log action
-audit.log('island:github:hydrate' |
-- { success: true });
+audit.log('island:hydrate', { island: 'github' });
 
 // Log specific types
-audit.logHydrate('github' |
-- true);
-audit.logStego('snapshot' |
-- 'manifest.png');
-audit.logSync('github' |
-- 'push');
+audit.logHydrate('github');
+audit.logStego('manifest.png');
+audit.logSync('github');
 
 // Get ledger
-const entries = audit.getLedger(10);
+const entries = audit.getLedger();
 
 // Health check
 const health = audit.healthCheck();
-// { healthy: true |
-- entries: 50 |
-- issues: [] }
+// { status: 'ok', entries: 50 }
 ```
 
 ### CLI
 
 ```bash
 vant validate --ledger  # Show entries
-vant validate --check  # Full check
+vant validate --check   # Full check
 ```
 
 ### Hash Chain
 
-Each entry's hash includes the previous hash for tamper-evidence:
-- `SHA256(prevHash + action + timestamp)` → first 8 chars
+Each entry's hash covers the full serialized entry (timestamp, action, data):
+- `SHA256(JSON.stringify(entry))` -> first 16 hex chars
 
 ### Integration
 
 Used automatically in:
 
 ```javascript
-const audit = require('vant').audit;
-const islands = require('./lib/islands');
+const vant = require('./lib/vant');
+const audit = vant.audit;
 
 // After hydration
-audit.logHydrate(island |
-- true);
+audit.logHydrate('github');
 
-// After sync
-const sync = require('./lib/sync');
-// Already logs in pushAll()
+// After sync: lib/sync already logs in pushAll()
 ```
 
 ## Related
