@@ -439,3 +439,59 @@ the page re-verified against the codebase before shipping.
 - `vant memory` dispatcher gap: help advertises it, code does not
   route it. Fix code or help before advertising it anywhere else.
 - Swap the V brand tile + vant-og.png when logo and design prose land.
+
+---
+
+# Lander overhaul: three.js memory lattice (2026-09-23)
+
+Scope: full visual overhaul of dist/index.html. Nothing cliche, no
+framework. VantFX animation frame is written in-file, three.js wired
+via importmap for the hero, all verified facts from pass 10 kept.
+
+## Design concept
+
+The hero is the product: a living **memory lattice**. 150 memory nodes
+in three lobes (wake/work/sleep), citation edges between neighbors, a
+wireframe brain core, and amber signal pulses that travel from nodes
+into the core - lessons landing in the brain. It breathes on a 12s
+cycle, follows the cursor with parallax, and is pointer-draggable.
+Geometry is not just decoration: NSC9 quasicrystal addressing is a real
+Vant system (lib/memory.js geoStore).
+
+## VantFX (in-file frame, no dependencies)
+
+- reveal: IntersectionObserver scroll reveals with fx-d1..d5 stagger
+- counters: stat values count up once on visibility (eased cubic)
+- copy: clipboard buttons with execCommand fallback
+- theme: toggle dispatches vantfx:theme; the lattice re-tints live
+- reduced motion: matchMedia gates every animation; lattice renders
+  one static frame; CSS honors prefers-reduced-motion
+
+## Lattice implementation notes
+
+- three@0.160.0 via importmap (module CDN unpkg); module script
+  syntax-checked with node --check; CDN verified reachable (200)
+- WebGL failure or CDN block: host is hidden and the CSS radial veil
+  reads as the hero background - page is fully usable without it
+- visibilitychange pauses the RAF loop (battery respect); pixel ratio
+  capped at 2; low-power GPU hint
+- pointer capture drag + idle parallax; both feed eased rotation
+- copy: headline is now "Every session starts over. Except yours."
+  with the soul line as a pull-quote section; numbered 01-05 section
+  indices in the signal amber; all pass-10 verified facts unchanged
+
+## Verification (lander v2)
+
+- Structural probe 17/17 PASS (tags, h1, voice, 3 JSON-LD parse, FAQ
+  sync 9=9, 24 links trusted hosts incl. unpkg, 5 copy targets, 5
+  counters, both inline scripts parse, module script parses)
+- All 14 docs link targets resolve against real permalinks
+- Command claims unchanged from pass 10 (vant learn/search verified)
+
+## Notes for future passes
+
+- If the three.js CDN is a concern, vendor three.module.js into dist/
+  later (~1.2MB) - importmap makes that a one-line change.
+- Swap the V brand tile + vant-og.png when logo/design prose land.
+- `vant memory` dispatcher gap still open (help advertises, code does
+  not route).

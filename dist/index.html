@@ -35,17 +35,8 @@
         "softwareRequirements": "Node.js 18+, Git",
         "programmingLanguage": "JavaScript",
         "codeRepository": "https://github.com/dhaupin/vant",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "availability": "https://schema.org/InStock"
-        },
-        "author": {
-            "@type": "Person",
-            "name": "Vant Project",
-            "url": "https://github.com/dhaupin/vant"
-        },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock" },
+        "author": { "@type": "Person", "name": "Vant Project", "url": "https://github.com/dhaupin/vant" },
         "license": "https://opensource.org/licenses/MIT",
         "softwareVersion": "0.8.6",
         "datePublished": "2026-05-05",
@@ -102,36 +93,42 @@
     }
     </script>
 
+    <script type="importmap">
+    { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    </script>
+
     <style>
         :root {
-            --bg: #fafafa;
+            --bg: #f7f6f3;
             --bg-card: #ffffff;
             --bg-term: #16181d;
-            --text: #1d2129;
+            --ink: #16181d;
+            --text: #23262d;
             --text-muted: #5c6470;
-            --border: #e2e5ea;
-            --accent: #059669;
-            --accent-hover: #047857;
-            --accent-soft: #e7f6f0;
-            --link: #047857;
+            --border: #e3e0d8;
+            --accent: #0b8a5c;
+            --accent-bright: #10b981;
+            --accent-soft: #e5f3ec;
+            --link: #0b7a52;
+            --signal: #e8a33d;
             --term-text: #d6dbe3;
             --term-dim: #7d8590;
             --term-green: #56d364;
             --term-amber: #e3b341;
+            --fx: 1;
         }
         [data-theme="dark"] {
-            --bg: #0e1013;
-            --bg-card: #16191e;
-            --bg-term: #0a0c0f;
-            --text: #e6e9ee;
-            --text-muted: #98a1ad;
-            --border: #262b33;
-            --accent: #34d399;
-            --accent-hover: #6ee7b7;
-            --accent-soft: #14261f;
+            --bg: #0b0d10;
+            --bg-card: #12151a;
+            --bg-term: #06070a;
+            --ink: #eef1f6;
+            --text: #dfe4ec;
+            --text-muted: #929cab;
+            --border: #232830;
+            --accent: #2dd4a0;
+            --accent-bright: #5eead4;
+            --accent-soft: #12241d;
             --link: #34d399;
-            --term-text: #d6dbe3;
-            --term-dim: #6b7482;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
@@ -140,128 +137,107 @@
             background: var(--bg);
             color: var(--text);
             line-height: 1.65;
-            transition: background 0.3s, color 0.3s;
         }
-        .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+        .mono { font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace; }
+        .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
         a { color: var(--link); text-decoration: none; }
         a:hover { text-decoration: underline; }
-        .skip-link {
-            position: absolute; left: -9999px; top: 0;
-            background: var(--accent); color: #fff; padding: 8px 16px; border-radius: 0 0 8px 0; z-index: 100;
-        }
+        .skip-link { position: absolute; left: -9999px; top: 0; background: var(--accent); color: #fff; padding: 8px 16px; z-index: 200; }
         .skip-link:focus { left: 0; }
         :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 
-        nav.top {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 18px 0;
-        }
-        .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.15rem; color: var(--text); letter-spacing: 0.04em; }
+        /* ---------- top nav ---------- */
+        nav.top { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; position: relative; z-index: 20; }
+        .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.12rem; color: var(--ink); letter-spacing: 0.22em; }
         .brand:hover { text-decoration: none; }
-        .brand-mark {
-            width: 30px; height: 30px; border-radius: 8px; flex: none;
-            background: var(--accent); color: #fff;
-            display: inline-flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 1.05rem;
-        }
-        .top-links { display: flex; align-items: center; gap: 20px; font-size: 0.95rem; }
+        .brand-mark { width: 30px; height: 30px; border-radius: 8px; flex: none; background: var(--accent); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.05rem; letter-spacing: 0; }
+        .top-links { display: flex; align-items: center; gap: 22px; font-size: 0.92rem; }
         .top-links a { color: var(--text-muted); }
-        .top-links a:hover { color: var(--text); text-decoration: none; }
-        .theme-btn {
-            background: none; border: 1px solid var(--border); border-radius: 8px;
-            color: var(--text-muted); cursor: pointer; padding: 6px 10px; font-size: 0.85rem;
-        }
-        .theme-btn:hover { color: var(--text); border-color: var(--text-muted); }
+        .top-links a:hover { color: var(--ink); text-decoration: none; }
+        .theme-btn { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); cursor: pointer; padding: 6px 10px; font-size: 0.85rem; }
+        .theme-btn:hover { color: var(--ink); border-color: var(--text-muted); }
 
-        header.hero { padding: 72px 0 56px; }
+        /* ---------- hero ---------- */
+        .hero { position: relative; padding: 54px 0 0; }
+        #lattice { position: absolute; inset: 0; z-index: 0; opacity: calc(0.9 * var(--fx)); }
+        #lattice canvas { display: block; }
+        .hero-veil {
+            position: absolute; inset: 0; z-index: 1; pointer-events: none;
+            background: radial-gradient(120% 90% at 18% 20%, var(--bg) 32%, transparent 72%);
+        }
+        .hero .container { position: relative; z-index: 2; }
         .kicker {
-            display: inline-block; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.08em;
-            text-transform: uppercase; color: var(--accent);
-            background: var(--accent-soft); border-radius: 999px; padding: 4px 14px; margin-bottom: 20px;
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--accent); border: 1px solid var(--border); border-radius: 999px;
+            padding: 5px 14px; margin-bottom: 22px; background: color-mix(in srgb, var(--bg-card) 72%, transparent);
         }
-        h1 { font-size: clamp(2.1rem, 5vw, 3.3rem); line-height: 1.12; letter-spacing: -0.02em; margin-bottom: 18px; }
-        .hero p.lede { font-size: 1.2rem; color: var(--text-muted); max-width: 46rem; margin-bottom: 32px; }
+        .kicker .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--signal); animation: pulse 2.4s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+        h1 { font-size: clamp(2.3rem, 5.6vw, 3.9rem); line-height: 1.06; letter-spacing: -0.025em; color: var(--ink); margin-bottom: 20px; max-width: 21ch; }
+        h1 em { font-style: normal; color: var(--accent); }
+        .hero p.lede { font-size: 1.16rem; color: var(--text-muted); max-width: 44rem; margin-bottom: 30px; }
         .hero p.lede strong { color: var(--text); }
-
-        .dual-cta { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 46rem; }
-        @media (max-width: 760px) { .dual-cta { grid-template-columns: 1fr; } }
-        .cta-card {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 20px;
-        }
-        .cta-card h2 { font-size: 1rem; margin-bottom: 4px; }
-        .cta-card p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 14px; }
-        .btn {
-            display: inline-block; background: var(--accent); color: #fff; font-weight: 600;
-            padding: 10px 18px; border-radius: 10px; border: none; font-size: 0.95rem; cursor: pointer;
-        }
-        .btn:hover { background: var(--accent-hover); text-decoration: none; }
+        .dual-cta { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 47rem; margin-bottom: 26px; }
+        @media (max-width: 780px) { .dual-cta { grid-template-columns: 1fr; } }
+        .cta-card { background: color-mix(in srgb, var(--bg-card) 88%, transparent); border: 1px solid var(--border); border-radius: 14px; padding: 18px; backdrop-filter: blur(6px); }
+        .cta-card h2 { font-size: 0.98rem; margin-bottom: 2px; color: var(--ink); }
+        .cta-card p { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 12px; }
+        .btn { display: inline-block; background: var(--accent); color: #fff; font-weight: 600; padding: 10px 18px; border-radius: 10px; border: none; font-size: 0.93rem; cursor: pointer; }
+        .btn:hover { text-decoration: none; filter: brightness(1.06); }
         .btn.outline { background: transparent; color: var(--link); border: 1px solid var(--border); }
         .btn.outline:hover { border-color: var(--link); }
+        .drag-hint { font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+        .drag-hint svg { flex: none; opacity: 0.7; }
 
-        pre.term {
-            position: relative; background: var(--bg-term); color: var(--term-text);
-            border-radius: 10px; padding: 14px 16px; overflow-x: auto;
-            font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 0.86rem; line-height: 1.55;
-        }
+        pre.term { position: relative; background: var(--bg-term); color: var(--term-text); border-radius: 10px; padding: 13px 15px; overflow-x: auto; font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; }
         pre.term .prompt { color: var(--term-green); user-select: none; }
         pre.term .cmd { color: var(--term-amber); }
         pre.term .cmt { color: var(--term-dim); }
-        .copy-btn {
-            position: absolute; top: 8px; right: 8px;
-            background: rgba(255,255,255,0.08); color: var(--term-text);
-            border: 1px solid rgba(255,255,255,0.15); border-radius: 6px;
-            font-size: 0.72rem; padding: 3px 9px; cursor: pointer; opacity: 0;
-            transition: opacity 0.15s;
-        }
+        .copy-btn { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.08); color: var(--term-text); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; font-size: 0.72rem; padding: 3px 9px; cursor: pointer; opacity: 0; transition: opacity 0.15s; }
         pre.term:hover .copy-btn, .copy-btn:focus-visible { opacity: 1; }
         .copy-btn:hover { background: rgba(255,255,255,0.16); }
 
-        section { padding: 48px 0; }
-        section h2 { font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -0.01em; margin-bottom: 8px; }
-        section > .container > p.sub { color: var(--text-muted); margin-bottom: 28px; max-width: 44rem; }
+        /* ---------- sections ---------- */
+        section { padding: 64px 0; }
+        .sec-head { display: flex; align-items: baseline; gap: 18px; margin-bottom: 10px; }
+        .sec-idx { font-family: ui-monospace, Menlo, monospace; font-size: 0.8rem; color: var(--signal); font-weight: 600; letter-spacing: 0.08em; }
+        section h2 { font-size: clamp(1.55rem, 3vw, 2.1rem); letter-spacing: -0.015em; color: var(--ink); }
+        p.sub { color: var(--text-muted); margin-bottom: 30px; max-width: 44rem; }
 
-        .loop { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; counter-reset: loop; }
+        .loop { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
         @media (max-width: 860px) { .loop { grid-template-columns: 1fr; } }
         .loop .card h3::before {
-            counter-increment: loop; content: counter(loop);
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 26px; height: 26px; border-radius: 50%;
-            background: var(--accent-soft); color: var(--accent);
-            font-size: 0.85rem; margin-right: 10px;
+            counter-increment: loop; content: counter(loop, decimal-leading-zero);
+            font-family: ui-monospace, Menlo, monospace; font-size: 0.8rem; color: var(--signal);
+            display: block; margin-bottom: 6px; letter-spacing: 0.1em;
         }
+        .loop { counter-reset: loop; }
 
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
         @media (max-width: 860px) { .grid-3 { grid-template-columns: 1fr; } }
-        .card {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 22px;
-        }
-        .card h3 { font-size: 1.05rem; margin-bottom: 8px; }
-        .card p { font-size: 0.93rem; color: var(--text-muted); margin-bottom: 12px; }
-        .card code.path {
-            display: inline-block; font-size: 0.8rem; color: var(--link);
-            background: var(--accent-soft); border-radius: 6px; padding: 2px 8px; margin-bottom: 12px;
-        }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 22px; }
+        .card h3 { font-size: 1.04rem; margin-bottom: 8px; color: var(--ink); }
+        .card p { font-size: 0.92rem; color: var(--text-muted); margin-bottom: 12px; }
+        .card code.path { display: inline-block; font-size: 0.79rem; color: var(--link); background: var(--accent-soft); border-radius: 6px; padding: 2px 8px; margin-bottom: 12px; }
         .learn-more { font-size: 0.9rem; font-weight: 600; }
 
-        .stats {
-            display: flex; flex-wrap: wrap; gap: 16px 40px; justify-content: center;
-            background: var(--bg-card); border-block: 1px solid var(--border); padding: 34px 0;
-        }
+        /* ---------- stats ---------- */
+        .stats { display: flex; flex-wrap: wrap; gap: 20px 48px; justify-content: center; background: var(--bg-card); border-block: 1px solid var(--border); padding: 38px 0; }
         .stat { text-align: center; }
-        .stat-value { font-size: 1.7rem; font-weight: 800; color: var(--accent); letter-spacing: -0.01em; }
-        .stat-label { font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+        .stat-value { font-size: 1.85rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+        .stat-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.09em; }
 
+        /* ---------- soul / quote ---------- */
         .soul { text-align: center; }
-        .soul h2 { max-width: 46rem; margin-inline: auto; }
-        .soul p { max-width: 46rem; margin-inline: auto; color: var(--text-muted); }
+        .soul blockquote { font-size: clamp(1.4rem, 3vw, 2rem); letter-spacing: -0.015em; color: var(--ink); max-width: 44rem; margin: 0 auto 18px; line-height: 1.3; }
+        .soul blockquote .fx-word { color: var(--accent); }
+        .soul p { max-width: 44rem; margin-inline: auto; color: var(--text-muted); }
 
+        /* ---------- faq ---------- */
         .faq { max-width: 760px; }
         .faq details { border-bottom: 1px solid var(--border); padding: 6px 0; }
-        .faq summary {
-            cursor: pointer; font-weight: 600; padding: 10px 0; list-style: none;
-            display: flex; justify-content: space-between; align-items: center;
-        }
+        .faq summary { cursor: pointer; font-weight: 600; padding: 11px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; color: var(--ink); }
         .faq summary::-webkit-details-marker { display: none; }
         .faq summary::after { content: '+'; color: var(--accent); font-size: 1.3rem; font-weight: 400; }
         .faq details[open] summary::after { content: '-'; }
@@ -271,9 +247,18 @@
         footer .container { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
         footer nav { display: flex; gap: 18px; }
 
+        /* ---------- VantFX: scroll reveal ---------- */
+        .fx-reveal { opacity: calc(var(--fx) * 0); transform: translateY(18px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+        .fx-reveal.fx-in { opacity: calc(var(--fx) * 1); transform: none; }
+        .fx-reveal.fx-d1 { transition-delay: 0.08s; } .fx-reveal.fx-d2 { transition-delay: 0.16s; }
+        .fx-reveal.fx-d3 { transition-delay: 0.24s; } .fx-reveal.fx-d4 { transition-delay: 0.32s; }
+        .fx-reveal.fx-d5 { transition-delay: 0.4s; }
+
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
-            * { transition: none !important; }
+            * { transition: none !important; animation: none !important; }
+            .fx-reveal { opacity: 1; transform: none; }
+            #lattice { opacity: 0.35; }
         }
     </style>
 </head>
@@ -290,14 +275,18 @@
                 <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle color theme" onclick="toggleTheme()">Theme</button>
             </div>
         </nav>
+    </div>
 
-        <header class="hero">
-            <span class="kicker">Persistent memory for AI agents</span>
-            <h1>Your agent forgets everything.<br>It doesn't have to.</h1>
+    <header class="hero">
+        <div id="lattice" aria-hidden="true"></div>
+        <div class="hero-veil"></div>
+        <div class="container">
+            <span class="kicker"><span class="dot" aria-hidden="true"></span>Persistent memory for AI agents</span>
+            <h1>Every session starts over. <em>Except yours.</em></h1>
             <p class="lede">
                 Vant gives any AI agent a brain: <strong>markdown memory files in your own repository</strong>.
-                The agent reads them at wake, writes what it learned at sleep, and the next session inherits all of it.
-                Git history becomes the memory lineage. No database, no lock-in, readable with <strong>cat</strong>.
+                Read at wake, written at sleep, inherited every session after. Git history becomes the memory
+                lineage. No database, no lock-in, readable with <strong>cat</strong>.
             </p>
 
             <div class="dual-cta">
@@ -306,38 +295,42 @@
                     <p>Install the CLI, run one command, done. Existing brains migrate automatically.</p>
                     <pre class="term"><code id="c-install"><span class="prompt">$</span> npm install -g vant
 <span class="prompt">$</span> <span class="cmd">vant</span> start</code><button class="copy-btn" type="button" data-copy="c-install" aria-label="Copy install commands">Copy</button></pre>
-                    <p style="margin: 14px 0 0;"><a class="btn" href="https://docs.creadev.org/vant/getting-started/quick-start">Quick start guide</a></p>
+                    <p style="margin: 13px 0 0;"><a class="btn" href="https://docs.creadev.org/vant/getting-started/quick-start">Quick start guide</a></p>
                 </div>
                 <div class="cta-card">
                     <h2>For agents</h2>
                     <p>One command serves the brain as MCP tools. Point any MCP client at it.</p>
                     <pre class="term"><code id="c-mcp"><span class="prompt">$</span> <span class="cmd">vant</span> mcp
 <span class="cmt"># MCP server on 127.0.0.1:3457</span></code><button class="copy-btn" type="button" data-copy="c-mcp" aria-label="Copy MCP command">Copy</button></pre>
-                    <p style="margin: 14px 0 0;"><a class="btn outline" href="https://docs.creadev.org/vant/getting-started/agent-onboarding">Agent onboarding</a></p>
+                    <p style="margin: 13px 0 0;"><a class="btn outline" href="https://docs.creadev.org/vant/getting-started/agent-onboarding">Agent onboarding</a></p>
                 </div>
             </div>
-        </header>
-    </div>
+            <p class="drag-hint">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 3 4 7l4 4M4 7h16M16 21l4-4-4-4M20 17H4"/></svg>
+                The lattice is your agent's memory graph. Drag it. Every pulse is a lesson landing in the brain.
+            </p>
+        </div>
+    </header>
 
     <main id="main">
         <section>
             <div class="container">
-                <h2>Wake. Work. Sleep.</h2>
-                <p class="sub">The whole loop is three moves. It runs the same whether a human types it or an agent executes it unattended.</p>
+                <div class="sec-head fx-reveal"><span class="sec-idx">01</span><h2>Wake. Work. Sleep.</h2></div>
+                <p class="sub fx-reveal">The whole loop is three moves. It runs the same whether a human types it or an agent executes it unattended.</p>
                 <div class="loop">
-                    <div class="card">
+                    <div class="card fx-reveal">
                         <h3>Wake</h3>
                         <p>The agent checks the brain layout, then reads identity, goals, lessons, and errors. It starts knowing things.</p>
                         <pre class="term"><code id="c-wake"><span class="prompt">$</span> <span class="cmd">vant</span> migrate --status
 <span class="prompt">$</span> <span class="cmd">vant</span> start</code><button class="copy-btn" type="button" data-copy="c-wake" aria-label="Copy wake commands">Copy</button></pre>
                     </div>
-                    <div class="card">
+                    <div class="card fx-reveal fx-d1">
                         <h3>Work</h3>
                         <p>Learn facts as they happen. Search the corpus when context is missing instead of guessing.</p>
                         <pre class="term"><code id="c-work"><span class="prompt">$</span> <span class="cmd">vant</span> learn deploy-gotcha <span class="cmt">"Freeze deploys during migration."</span>
 <span class="prompt">$</span> <span class="cmd">vant</span> search <span class="cmt">"migration rollback steps"</span></code><button class="copy-btn" type="button" data-copy="c-work" aria-label="Copy work commands">Copy</button></pre>
                     </div>
-                    <div class="card">
+                    <div class="card fx-reveal fx-d2">
                         <h3>Sleep</h3>
                         <p>Write the lesson, commit, push. Plain files in your repo, so the next session starts with everything.</p>
                         <pre class="term"><code id="c-sleep"><span class="prompt">$</span> <span class="cmd">git</span> add models/ &amp;&amp; <span class="cmd">git</span> commit -m <span class="cmt">"agent: session learnings"</span>
@@ -349,22 +342,22 @@
 
         <section>
             <div class="container">
-                <h2>Three memory systems, one home</h2>
-                <p class="sub">Not one memory: three, with different jobs. All of them are files under models/ in your repository.</p>
+                <div class="sec-head fx-reveal"><span class="sec-idx">02</span><h2>Three memory systems, one home</h2></div>
+                <p class="sub fx-reveal">Not one memory: three, with different jobs. All of them are files under models/ in your repository.</p>
                 <div class="grid-3">
-                    <div class="card">
+                    <div class="card fx-reveal">
                         <h3>The brain</h3>
                         <p>Markdown memory files: identity, goals, lessons, errors, preferences. Read at wake, written at sleep, inherited by every session after.</p>
                         <code class="path">models/&lt;scope&gt;/&lt;brain&gt;/lessons.md</code><br>
                         <a href="https://docs.creadev.org/vant/memory/brain" class="learn-more">The brain →</a>
                     </div>
-                    <div class="card">
+                    <div class="card fx-reveal fx-d1">
                         <h3>The memory store</h3>
                         <p>Key-value state and documents with TTL, written during the session. Sandbox-gated, atomic, per-brain scoped.</p>
                         <code class="path">vant learn &lt;key&gt; &lt;content&gt;</code><br>
                         <a href="https://docs.creadev.org/vant/memory/memory-store" class="learn-more">Memory store →</a>
                     </div>
-                    <div class="card">
+                    <div class="card fx-reveal fx-d2">
                         <h3>Brain search</h3>
                         <p>Semantic retrieval over the whole corpus. Pluggable embed providers, rerank for large corpora, git-backed citations for grounded answers.</p>
                         <code class="path">vant search "&lt;query&gt;"</code><br>
@@ -376,18 +369,18 @@
 
         <section>
             <div class="container">
-                <h2>Git is the feature</h2>
-                <p class="sub">Your memory is files in your repo, so every Git workflow is a memory workflow.</p>
+                <div class="sec-head fx-reveal"><span class="sec-idx">03</span><h2>Git is the feature</h2></div>
+                <p class="sub fx-reveal">Your memory is files in your repo, so every Git workflow is a memory workflow.</p>
                 <div class="grid-3">
-                    <div class="card">
+                    <div class="card fx-reveal">
                         <h3>Ownership</h3>
                         <p>Your repo, your history, your backup story. Stop using Vant and the memory survives as files. Exportable forever.</p>
                     </div>
-                    <div class="card">
+                    <div class="card fx-reveal fx-d1">
                         <h3>Review</h3>
                         <p>What your agent learned shows up in diffs. Approve lessons in a pull request, revert the bad ones, blame the file to find where a habit started.</p>
                     </div>
-                    <div class="card">
+                    <div class="card fx-reveal fx-d2">
                         <h3>Branches</h3>
                         <p>One branch per agent. Each works in isolation and merges what is worth keeping. Experiments are branches, not forks of your data.</p>
                     </div>
@@ -396,45 +389,45 @@
         </section>
 
         <div class="stats" role="presentation">
-            <div class="stat"><div class="stat-value">3</div><div class="stat-label">memory systems</div></div>
-            <div class="stat"><div class="stat-value">93</div><div class="stat-label">CLI commands</div></div>
-            <div class="stat"><div class="stat-value">89</div><div class="stat-label">lib modules</div></div>
-            <div class="stat"><div class="stat-value">119</div><div class="stat-label">doc pages</div></div>
-            <div class="stat"><div class="stat-value">108</div><div class="stat-label">test files</div></div>
+            <div class="stat"><div class="stat-value" data-count="3">0</div><div class="stat-label">memory systems</div></div>
+            <div class="stat"><div class="stat-value" data-count="93">0</div><div class="stat-label">CLI commands</div></div>
+            <div class="stat"><div class="stat-value" data-count="89">0</div><div class="stat-label">lib modules</div></div>
+            <div class="stat"><div class="stat-value" data-count="119">0</div><div class="stat-label">doc pages</div></div>
+            <div class="stat"><div class="stat-value" data-count="108">0</div><div class="stat-label">test files</div></div>
             <div class="stat"><div class="stat-value">v0.8.6</div><div class="stat-label">MIT licensed</div></div>
         </div>
 
         <section>
             <div class="container">
-                <h2>Runtime underneath</h2>
-                <p class="sub">Memory is the product. The runtime makes it safe to run unattended.</p>
+                <div class="sec-head fx-reveal"><span class="sec-idx">04</span><h2>Runtime underneath</h2></div>
+                <p class="sub fx-reveal">Memory is the product. The runtime makes it safe to run unattended.</p>
                 <div class="grid-3">
-                    <div class="card">
+                    <div class="card fx-reveal">
                         <h3>Security chain</h3>
                         <p>Sandbox capabilities, input validation, rate limiting, escrow approval. Every brain operation passes the chain; denials are coded, not silent.</p>
                         <a href="https://docs.creadev.org/vant/security/" class="learn-more">Security →</a>
                     </div>
-                    <div class="card">
+                    <div class="card fx-reveal fx-d1">
                         <h3>Crash safety</h3>
                         <p>A write-ahead journal and atomic writes. A crash mid-write leaves a recoverable journal, never torn memory.</p>
                         <a href="https://docs.creadev.org/vant/operations/storage" class="learn-more">Storage →</a>
                     </div>
-                    <div class="card">
+                    <div class="card fx-reveal fx-d2">
                         <h3>Multi-brain and crews</h3>
                         <p>Named brain contexts with a stack. Branch-per-agent workflows. Trust levels decide how much each generation inherits.</p>
                         <a href="https://docs.creadev.org/vant/multi-agent/" class="learn-more">Multi-agent →</a>
                     </div>
-                    <div class="card">
+                    <div class="card fx-reveal">
                         <h3>Horcrux</h3>
                         <p>A whole brain embedded in an image, encrypted. Cold backups, machine-to-machine transfer, restore anywhere.</p>
                         <a href="https://docs.creadev.org/vant/memory/horcrux" class="learn-more">Horcrux →</a>
                     </div>
-                    <div class="card">
+                    <div class="card fx-reveal fx-d1">
                         <h3>Any Git provider</h3>
                         <p>GitHub, GitLab, Bitbucket, self-hosted. Sync, rebase, and conflict detection work the same everywhere.</p>
                         <a href="https://docs.creadev.org/vant/integrations/" class="learn-more">Integrations →</a>
                     </div>
-                    <div class="card">
+                    <div class="card fx-reveal fx-d2">
                         <h3>Headless and Docker</h3>
                         <p>REST mode for CI and containers. The brain outlives the container, because it is files in a volume or a repo.</p>
                         <a href="https://docs.creadev.org/vant/runtime/server" class="learn-more">Server →</a>
@@ -445,53 +438,53 @@
 
         <section class="soul">
             <div class="container">
-                <h2>Think of it as a soul that reincarnates with full memories</h2>
-                <p>That is the metaphor. On disk it is concrete: markdown files in models/, loaded at wake, written at sleep, committed and pushed. The next session inherits all of it, and git history keeps every generation auditable.</p>
+                <blockquote class="fx-reveal">A <span class="fx-word">soul</span> that reincarnates with <span class="fx-word">full memories</span>.</blockquote>
+                <p class="fx-reveal fx-d1">That is the metaphor. On disk it is concrete: markdown files in models/, loaded at wake, written at sleep, committed and pushed. The next session inherits all of it, and git history keeps every generation auditable.</p>
             </div>
         </section>
 
         <section>
             <div class="container faq">
-                <h2>Questions agents actually ask</h2>
-                <p class="sub">The same questions your agent will ask on its first session, answered.</p>
-                <details>
+                <div class="sec-head fx-reveal"><span class="sec-idx">05</span><h2>Questions agents actually ask</h2></div>
+                <p class="sub fx-reveal">The same questions your agent will ask on its first session, answered.</p>
+                <details class="fx-reveal">
                     <summary>What is a brain in Vant?</summary>
                     <p>A set of markdown files in models/ that store identity, goals, lessons, errors, and preferences. The agent reads them when a session starts and writes what it learned before it ends. The next session inherits everything.</p>
                     <a href="https://docs.creadev.org/vant/memory/brain" class="learn-more">Learn more →</a>
                 </details>
-                <details>
+                <details class="fx-reveal">
                     <summary>Where does the memory live?</summary>
                     <p>In your own repository, as plain files. Vant never puts your memory in someone else's database. If you stop using Vant, the memory is still there, readable with cat.</p>
                 </details>
-                <details>
+                <details class="fx-reveal">
                     <summary>Do I need GitHub?</summary>
                     <p>A Git host is needed for sync, and any provider works: GitHub, GitLab, Bitbucket, or self-hosted. Without sync, Vant still runs fully on local files.</p>
                     <a href="https://docs.creadev.org/vant/integrations/" class="learn-more">Learn more →</a>
                 </details>
-                <details>
+                <details class="fx-reveal">
                     <summary>Is my brain private?</summary>
                     <p>Yes. Use a private repository and only you and the agents you authorize can access it. There is no external service holding a copy.</p>
                 </details>
-                <details>
+                <details class="fx-reveal">
                     <summary>How do agents connect?</summary>
                     <p>Through MCP: start the server with vant mcp and it auto-wires the module surface into JSON-RPC tools. Agents can also use the CLI or read the brain files directly.</p>
                     <a href="https://docs.creadev.org/vant/runtime/mcp" class="learn-more">Learn more →</a>
                 </details>
-                <details>
+                <details class="fx-reveal">
                     <summary>Can multiple agents share one install?</summary>
                     <p>Yes. Each agent gets a branch and a named brain context. Branch-per-agent isolation with merge-by-PR keeps concurrent work safe.</p>
                     <a href="https://docs.creadev.org/vant/multi-agent/" class="learn-more">Learn more →</a>
                 </details>
-                <details>
+                <details class="fx-reveal">
                     <summary>What happens when I upgrade from an old single-brain layout?</summary>
                     <p>vant start detects the old layout and imports it automatically into the multi-brain layout. Detection is content-based and idempotent, and nothing is lost.</p>
                     <a href="https://docs.creadev.org/vant/getting-started/setup" class="learn-more">Learn more →</a>
                 </details>
-                <details>
+                <details class="fx-reveal">
                     <summary>Does Vant cost money?</summary>
                     <p>No. Vant is open source under MIT. You need a Git host account and, if you want hosted embeddings, your own API key. The default hash provider needs nothing.</p>
                 </details>
-                <details>
+                <details class="fx-reveal">
                     <summary>How is Vant different from a vector database?</summary>
                     <p>A vector store keeps embeddings. Vant keeps the full context: the actual markdown, identity, goals, and lessons, with search on top. Agents inherit previous thoughts, not just similar ones.</p>
                 </details>
@@ -511,31 +504,293 @@
     </main>
 
     <script>
-        // Theme: applied before paint (inline below), toggled here.
-        function toggleTheme() {
-            const html = document.documentElement;
-            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', next);
-            try { localStorage.setItem('theme', next); } catch (e) {}
-        }
-        try { if (localStorage.getItem('theme') === 'dark') { /* applied in head, no flash */ } } catch (e) {}
+        // ============================== VantFX ==============================
+        // Single-file animation frame for the lander. No dependencies.
+        // Modules: theme, copy, reveal (scroll), counters, lattice (three.js).
+        var VantFX = (function () {
+            'use strict';
+            var reduced = false;
+            try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+            if (reduced) document.documentElement.style.setProperty('--fx', '0.35');
 
-        // Copy buttons on terminal blocks
-        document.querySelectorAll('.copy-btn').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var code = document.getElementById(btn.getAttribute('data-copy'));
-                if (!code) return;
-                var text = code.innerText.replace(/^\$\s/gm, '');
-                function done() { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy'; }, 1500); }
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(text).then(done);
-                } else {
-                    var ta = document.createElement('textarea');
-                    ta.value = text; document.body.appendChild(ta); ta.select();
-                    document.execCommand('copy'); document.body.removeChild(ta); done();
+            // ---- theme ----
+            function theme() {
+                var btn = document.getElementById('themeBtn');
+                if (btn) btn.addEventListener('click', function () {
+                    var html = document.documentElement;
+                    var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                    html.setAttribute('data-theme', next);
+                    try { localStorage.setItem('theme', next); } catch (e) {}
+                    document.dispatchEvent(new CustomEvent('vantfx:theme'));
+                });
+            }
+
+            // ---- copy buttons ----
+            function copy() {
+                document.querySelectorAll('.copy-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var code = document.getElementById(btn.getAttribute('data-copy'));
+                        if (!code) return;
+                        var text = code.innerText.replace(/^\$\s/gm, '');
+                        function done() { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy'; }, 1500); }
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            navigator.clipboard.writeText(text).then(done);
+                        } else {
+                            var ta = document.createElement('textarea');
+                            ta.value = text; document.body.appendChild(ta); ta.select();
+                            document.execCommand('copy'); document.body.removeChild(ta); done();
+                        }
+                    });
+                });
+            }
+
+            // ---- scroll reveal (staggered via fx-d1..d5) ----
+            function reveal() {
+                var els = document.querySelectorAll('.fx-reveal');
+                if (reduced || !('IntersectionObserver' in window)) {
+                    els.forEach(function (el) { el.classList.add('fx-in'); });
+                    return;
                 }
-            });
-        });
+                var io = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (en) {
+                        if (en.isIntersecting) { en.target.classList.add('fx-in'); io.unobserve(en.target); }
+                    });
+                }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+                els.forEach(function (el) { io.observe(el); });
+            }
+
+            // ---- stat counters (count up once when visible) ----
+            function counters() {
+                var els = document.querySelectorAll('[data-count]');
+                if (reduced || !('IntersectionObserver' in window)) {
+                    els.forEach(function (el) { el.textContent = el.getAttribute('data-count'); });
+                    return;
+                }
+                var io = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (en) {
+                        if (!en.isIntersecting) return;
+                        io.unobserve(en.target);
+                        var el = en.target, target = parseInt(el.getAttribute('data-count'), 10);
+                        var t0 = null, dur = 1100;
+                        function tick(t) {
+                            if (!t0) t0 = t;
+                            var p = Math.min((t - t0) / dur, 1);
+                            var eased = 1 - Math.pow(1 - p, 3);
+                            el.textContent = Math.round(target * eased);
+                            if (p < 1) requestAnimationFrame(tick);
+                        }
+                        requestAnimationFrame(tick);
+                    });
+                }, { threshold: 0.4 });
+                els.forEach(function (el) { io.observe(el); });
+            }
+
+            return { theme: theme, copy: copy, reveal: reveal, counters: counters, reduced: reduced };
+        })();
+
+        VantFX.theme(); VantFX.copy(); VantFX.reveal(); VantFX.counters();
+    </script>
+
+    <script type="module">
+        // ============================== Memory Lattice ==============================
+        // The hero visual: Vant's memory as a living graph. Nodes are memories,
+        // lines are citations, amber pulses are lessons landing in the brain.
+        // Pointer-draggable, breathes on a wake/work/sleep cadence. Gracefully
+        // static (gradient only) if WebGL or the module CDN is unavailable.
+        import * as THREE from 'three';
+
+        const host = document.getElementById('lattice');
+        if (host) {
+            try {
+                let renderer;
+                try {
+                    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' });
+                } catch (e) { throw new Error('nogl'); }
+
+                const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+                camera.position.set(0, 0, 13);
+
+                // palette follows the page theme
+                const palette = {
+                    node: 0x2dd4a0, edge: 0x3a4552, signal: 0xe8a33d,
+                    core: 0x2dd4a0, fog: 0x0b0d10
+                };
+                function themeHex() {
+                    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+                    return dark
+                        ? { node: 0x2dd4a0, edge: 0x39424e, signal: 0xe8a33d, core: 0x2dd4a0 }
+                        : { node: 0x0b8a5c, edge: 0xc9c4b8, signal: 0xd98d2b, core: 0x0b8a5c };
+                }
+                let colors = themeHex();
+
+                // ---- memory nodes: a constellation around a brain core ----
+                const N = 150;
+                const positions = new Float32Array(N * 3);
+                const seeds = [];
+                for (let i = 0; i < N; i++) {
+                    // clusters: 3 lobes = wake/work/sleep
+                    const lobe = i % 3;
+                    const cx = [ -4.6, 0.4, 4.9 ][lobe];
+                    const cy = [ 1.6, -1.2, 1.2 ][lobe];
+                    const r = 2.6 + Math.random() * 2.4;
+                    const th = Math.random() * Math.PI * 2;
+                    const ph = Math.acos(2 * Math.random() - 1);
+                    const x = cx + r * Math.sin(ph) * Math.cos(th);
+                    const y = cy + r * Math.cos(ph) * 0.62;
+                    const z = (Math.random() - 0.5) * 4.4;
+                    positions.set([x, y, z], i * 3);
+                    seeds.push({ x, y, z, lobe, phase: Math.random() * Math.PI * 2, speed: 0.3 + Math.random() * 0.7 });
+                }
+                const nodeGeo = new THREE.BufferGeometry();
+                nodeGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                const nodeMat = new THREE.PointsMaterial({
+                    color: colors.node, size: 0.075, transparent: true, opacity: 0.85,
+                    sizeAttenuation: true, depthWrite: false
+                });
+                const nodes = new THREE.Points(nodeGeo, nodeMat);
+                scene.add(nodes);
+
+                // ---- citation edges: connect neighbors within a lobe ----
+                const edgePts = [];
+                const MAXD2 = 3.1 * 3.1;
+                for (let i = 0; i < N; i++) {
+                    for (let j = i + 1; j < N; j++) {
+                        if (seeds[i].lobe !== seeds[j].lobe) continue;
+                        const dx = positions[i*3]-positions[j*3], dy = positions[i*3+1]-positions[j*3+1], dz = positions[i*3+2]-positions[j*3+2];
+                        if (dx*dx + dy*dy + dz*dz < MAXD2) edgePts.push(positions[i*3],positions[i*3+1],positions[i*3+2],positions[j*3],positions[j*3+1],positions[j*3+2]);
+                    }
+                }
+                const edgeGeo = new THREE.BufferGeometry();
+                edgeGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(edgePts), 3));
+                const edgeMat = new THREE.LineBasicMaterial({ color: colors.edge, transparent: true, opacity: 0.34 });
+                const edges = new THREE.LineSegments(edgeGeo, edgeMat);
+                scene.add(edges);
+
+                // ---- brain core ----
+                const coreGeo = new THREE.IcosahedronGeometry(1.15, 2);
+                const coreMat = new THREE.MeshBasicMaterial({ color: colors.core, wireframe: true, transparent: true, opacity: 0.5 });
+                const core = new THREE.Mesh(coreGeo, coreMat);
+                scene.add(core);
+                const haloMat = new THREE.MeshBasicMaterial({ color: colors.core, transparent: true, opacity: 0.05 });
+                const halo = new THREE.Mesh(new THREE.IcosahedronGeometry(1.5, 2), haloMat);
+                scene.add(halo);
+
+                // ---- signal pulses: lessons traveling to the brain ----
+                const P = 26;
+                const pGeo = new THREE.BufferGeometry();
+                pGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(P * 3), 3));
+                const pMat = new THREE.PointsMaterial({ color: colors.signal, size: 0.14, transparent: true, opacity: 0.95, sizeAttenuation: true, depthWrite: false });
+                const pulses = new THREE.Points(pGeo, pMat);
+                scene.add(pulses);
+                const pulseState = [];
+                for (let i = 0; i < P; i++) {
+                    pulseState.push({ from: seeds[Math.floor(Math.random()*N)], t: Math.random(), speed: 0.08 + Math.random() * 0.2 });
+                }
+                function lerp3(a, b, t, out) {
+                    out[0] = a.x + (b.x - a.x) * t;
+                    out[1] = a.y + (b.y - a.y) * t;
+                    out[2] = a.z + (b.z - a.z) * t;
+                }
+
+                // ---- drag + parallax ----
+                let targetRX = 0, targetRY = 0, curRX = 0, curRY = 0, dragging = false, lastX = 0, lastY = 0;
+                const group = new THREE.Group();
+                group.add(nodes); group.add(edges); group.add(core); group.add(halo); group.add(pulses);
+                scene.add(group);
+
+                host.addEventListener('pointerdown', (e) => { dragging = true; lastX = e.clientX; lastY = e.clientY; host.setPointerCapture(e.pointerId); });
+                host.addEventListener('pointermove', (e) => {
+                    if (dragging) {
+                        targetRY += (e.clientX - lastX) * 0.004;
+                        targetRX += (e.clientY - lastY) * 0.003;
+                        lastX = e.clientX; lastY = e.clientY;
+                    } else {
+                        // idle parallax follows the cursor
+                        const r = host.getBoundingClientRect();
+                        targetRY = ((e.clientX - r.left) / r.width - 0.5) * 0.5;
+                        targetRX = ((e.clientY - r.top) / r.height - 0.5) * 0.3;
+                    }
+                });
+                ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => host.addEventListener(ev, () => { dragging = false; }));
+
+                // ---- sizing ----
+                function size() {
+                    const w = host.clientWidth || 1, h = host.clientHeight || 1;
+                    renderer.setSize(w, h, false);
+                    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                    camera.aspect = w / h;
+                    camera.updateProjectionMatrix();
+                }
+                size();
+                window.addEventListener('resize', size);
+
+                // ---- theme sync ----
+                function retint() {
+                    colors = themeHex();
+                    nodeMat.color.setHex(colors.node);
+                    edgeMat.color.setHex(colors.edge);
+                    coreMat.color.setHex(colors.core);
+                    haloMat.color.setHex(colors.core);
+                    pMat.color.setHex(colors.signal);
+                }
+                retint();
+                document.addEventListener('vantfx:theme', retint);
+
+                // ---- wake/work/sleep breathing ----
+                const clock = new THREE.Clock();
+                function frame() {
+                    const t = clock.getElapsedTime();
+                    // cadence: 12s cycle - wake swell, work shimmer, sleep settle
+                    const cycle = (t % 12) / 12;
+                    const breathe = 1 + Math.sin(t * 0.9) * 0.03 + (cycle < 0.25 ? (0.25 - cycle) * 0.24 : 0);
+                    group.scale.setScalar(breathe);
+                    core.rotation.y = t * 0.18; core.rotation.x = Math.sin(t * 0.31) * 0.22;
+                    halo.rotation.y = -t * 0.12;
+                    haloMat.opacity = 0.04 + Math.abs(Math.sin(t * 0.9)) * 0.05;
+
+                    // gentle per-node drift
+                    const pos = nodeGeo.attributes.position.array;
+                    for (let i = 0; i < N; i++) {
+                        const s = seeds[i];
+                        pos[i*3]   = s.x + Math.sin(t * s.speed + s.phase) * 0.16;
+                        pos[i*3+1] = s.y + Math.cos(t * s.speed * 0.8 + s.phase) * 0.13;
+                    }
+                    nodeGeo.attributes.position.needsUpdate = true;
+
+                    // pulses toward the core
+                    const pp = pGeo.attributes.position.array;
+                    const out = [0, 0, 0];
+                    for (let i = 0; i < P; i++) {
+                        const p = pulseState[i];
+                        p.t += p.speed * 0.016;
+                        if (p.t >= 1) { p.t = 0; p.from = seeds[Math.floor(Math.random()*N)]; }
+                        lerp3(p.from, { x: 0, y: 0, z: 0 }, p.t < 0.85 ? p.t / 0.85 : 1, out);
+                        pp[i*3] = out[0]; pp[i*3+1] = out[1]; pp[i*3+2] = out[2];
+                    }
+                    pGeo.attributes.position.needsUpdate = true;
+                    pMat.opacity = 0.9 - Math.sin(t * 2.1) * 0.25;
+
+                    // camera drifts with drag/parallax (eased)
+                    curRX += (targetRX - curRX) * 0.06;
+                    curRY += (targetRY - curRY) * 0.06;
+                    group.rotation.x = curRX; group.rotation.y = curRY;
+
+                    renderer.render(scene, camera);
+                    if (!reduced) requestAnimationFrame(frame);
+                }
+                frame();
+
+                // pause when the tab is hidden (battery respect)
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden && !reduced) requestAnimationFrame(frame);
+                });
+            } catch (err) {
+                // no WebGL or CDN blocked: the CSS gradient veil already reads fine. Stay quiet.
+                host.style.display = 'none';
+            }
+        }
     </script>
 </body>
 </html>
