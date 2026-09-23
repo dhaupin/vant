@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /tutorials/automation
+permalink: /operations/automation
 layout: default
 title: Automation
-nav_order: 20
+nav_order: 56
 ---
 
 # Tutorial: Automation Setup

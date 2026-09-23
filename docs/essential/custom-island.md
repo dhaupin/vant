@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /tutorials/custom-island
+permalink: /essential/custom-island
 layout: default
 title: Custom Islands
-nav_order: 22
+nav_order: 17
 ---
 
 # Tutorial: Create Custom Islands

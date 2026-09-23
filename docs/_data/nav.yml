@@ -13,6 +13,8 @@
     url: /vant/getting-started/agent-onboarding
   - title: Examples
     url: /vant/getting-started/examples
+  - title: Omega Init
+    url: /vant/getting-started/omega-init
   - title: FAQ
     url: /vant/getting-started/faq
   - title: Contributing
@@ -38,6 +40,8 @@
     url: /vant/memory/stego
   - title: Geometry
     url: /vant/memory/geometry
+  - title: RAG Tutorial
+    url: /vant/memory/rag
   - title: Pruning
     url: /vant/memory/prune
 
@@ -77,6 +81,10 @@
     url: /vant/essential/onboard
   - title: Extensibility
     url: /vant/essential/extensibility
+  - title: Custom Island
+    url: /vant/essential/custom-island
+  - title: Plugins
+    url: /vant/essential/plugins
   - title: Manual Brain
     url: /vant/essential/manual-brain
 
@@ -101,6 +109,10 @@
     url: /vant/operations/storage
   - title: Sync
     url: /vant/operations/sync
+  - title: Automation
+    url: /vant/operations/automation
+  - title: Webhooks
+    url: /vant/operations/webhooks
   - title: Cron
     url: /vant/operations/cron
   - title: Events
@@ -109,6 +121,10 @@
     url: /vant/operations/notifications
   - title: CI
     url: /vant/operations/ci
+  - title: Testing
+    url: /vant/operations/testing
+  - title: Deployment
+    url: /vant/operations/deployment
 
 - title: Security
   items:
@@ -124,8 +140,20 @@
     url: /vant/security/environment
   - title: Airgap
     url: /vant/security/airgap-propagation
+  - title: Best Practices
+    url: /vant/security/best-practices
   - title: Privacy
     url: /vant/security/privacy
+
+- title: Integrations Extras
+  items:
+  - title: Telegram Bot
+    url: /vant/integrations/telegram-bot
+
+- title: Multi-Agent Tutorials
+  items:
+  - title: Coordination
+    url: /vant/multi-agent/coordination
 
 - title: Advanced
   items:

@@ -63,7 +63,7 @@ Vant's version tracking:
 
 ### Can multiple agents share one brain?
 
-Yes! Use the [Multi-Agent System](tutorials/multi-agent) with:
+Yes! Use the [Multi-Agent System](../../multi-agent/coordination) with:
 - Git branches per agent
 - File locks for coordination
 

@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /tutorials/multi-agent
+permalink: /multi-agent/coordination
 layout: default
 title: Multi-Agent System
-nav_order: 25
+nav_order: 45
 ---
 
 # Tutorial: Multi-Agent Coordination

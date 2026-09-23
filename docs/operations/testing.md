@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /tutorials/testing
+permalink: /operations/testing
 layout: default
 title: Testing
-nav_order: 31
+nav_order: 59
 ---
 
 # Tutorial: Testing & Debugging

@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /tutorials/rag
+permalink: /memory/rag
 layout: default
 title: RAG with Vant
-nav_order: 28
+nav_order: 30
 ---
 
 # Tutorial: Build RAG with Your Brain

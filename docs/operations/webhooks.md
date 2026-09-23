@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /tutorials/webhooks
+permalink: /operations/webhooks
 layout: default
 title: Webhooks
-nav_order: 32
+nav_order: 57
 ---
 
 # Tutorial: Webhook Automation

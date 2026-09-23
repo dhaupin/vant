@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /omega-init
+permalink: /getting-started/omega-init
 layout: default
 title: Omega Init
-nav_order: 1
+nav_order: 16
 # AI-first: 1=Omega, 2=MCP, 3=CLI, 4=Brain, 5=Islands
 ---
 # Omega Init

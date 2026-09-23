@@ -356,6 +356,6 @@ async function customBrainExample() {
 ## Related
 
 - [Build Agent Tutorial](../../getting-started/agent-onboarding)
-- [Multi-Agent Tutorial](tutorials/multi-agent)
-- [Telegram Bot Tutorial](tutorials/telegram-bot)
+- [Multi-Agent Tutorial](../../multi-agent/coordination)
+- [Telegram Bot Tutorial](../../integrations/telegram-bot)
 - [GitHub](https://github.com/dhaupin/vant) - star us!

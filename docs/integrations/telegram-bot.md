@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /tutorials/telegram-bot
+permalink: /integrations/telegram-bot
 layout: default
 title: Telegram Bot Integration
-nav_order: 30
+nav_order: 76
 ---
 # Tutorial: Telegram Bot with Vant
 

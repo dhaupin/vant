@@ -210,7 +210,7 @@ curl http://localhost:3456/health
 
 ## Related
 
-- [Deployment Tutorial](tutorials/deployment)
+- [Deployment Tutorial](../../operations/deployment)
 - [Server](../../runtime/server) - HTTP server
 - [Security](security/security) - VAF + sandbox
 ```

@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /tutorials/deployment
+permalink: /operations/deployment
 layout: default
 title: Deployment
-nav_order: 23
+nav_order: 58
 ---
 
 # Tutorial: Deploy Vant

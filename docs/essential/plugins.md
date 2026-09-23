@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /tutorials/plugins
+permalink: /essential/plugins
 layout: default
 title: Plugins
-nav_order: 27
+nav_order: 18
 ---
 
 # Tutorial: Build Plugins

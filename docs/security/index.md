@@ -74,4 +74,4 @@ Tokens encrypted per-user.
 - [Escrow](security/escrow) - Budget tracking
 
 - [Configuration](../../reference/config) - Config settings
-- [Tutorial: Security](tutorials/security) - Practical security setup
+- [Tutorial: Security](../../security/best-practices) - Practical security setup

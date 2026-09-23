@@ -187,4 +187,4 @@ const result = await vant.think('How do I use Docker?');
 // → auto-loads python island when "Docker" detected
 ```
 
-See [Tutorial: Custom Islands](tutorials/custom-island) for full guide.
+See [Tutorial: Custom Islands](../../essential/custom-island) for full guide.

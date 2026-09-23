@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /tutorials/security
+permalink: /security/best-practices
 layout: default
 title: Security Best Practices
-nav_order: 29
+nav_order: 66
 ---
 
 # Tutorial: Security Best Practices
