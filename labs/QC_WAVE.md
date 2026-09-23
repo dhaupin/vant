@@ -1,5 +1,22 @@
 # QC Wave — axolotl (2026-09-22, sweep 2)
 
+## Pass 15 - dist QC, live interlinks, OG image (axolotl, 2026-09-23)
+
+**Preview staleness diagnosed:** the user's preview URL hash (290798ae) is a Cloudflare Pages build from an earlier push; the last two commits predate it. No repo defect - fresh deploys mint fresh hashes. Dist itself verified clean on disk.
+
+**Live interlink sweep caught 10/19 docs URLs 404ing on the live site.** Root cause: the live docs site builds from main, which does not have the docs restructure yet. All 10 targets exist in the axolotl tree with correct permalink frontmatter (agent-onboarding, contributing, runtime/mcp, runtime/server, memory/brain, memory/memory-store, memory/search, memory/horcrux, security/, multi-agent/). **Merge-order note: lander and docs restructure must land in the same merge to main**, otherwise the lander ships dead links.
+
+**Real bug fixed: og:image pointed at a nonexistent vant-og.png.** Generated a 1200x630 dependency-free PNG (dark ink, accent V mark, bitmap VANT wordmark, amber dot) via a one-shot pure-JS PNG encoder (RGBA8, filter 0, zlib IDAT, manual CRC32). One-shot removed after use; output committed. Probe gained an og:image existence gate.
+
+**Also verified:** robots.txt (sitemaps + disallow list sane), sitemap.xml (single canonical URL), no trailing whitespace, no TODO/lorem/localhost strays. Probe 32/32.
+
+## Pass 14 - lander mobile pass (axolotl, 2026-09-23)
+
+- three.js vendored at dist/vendor/three.module.js (r160, 1.27MB), importmap local - page fully self-contained, no CDN
+- hamburger menu under 781px (aria-expanded/controls wired, Escape + link-tap close), sun/moon icon toggle
+- overflow: body overflow-x clip, minmax(0,1fr) on all 4 grids, code.path overflow-wrap, lattice camera pulls back in portrait (13 -> 17.5) so clusters fit frame
+- Tooling note: str_replace view-divergence hit again on dist/index.html (3rd time); surgical perl one-liner used for one camera line, all else via file tools
+
 ## Pass 13 - Lander voice reframe: session-neutral rhythm (axolotl, 2026-09-23)
 
 **Why:** the owner flagged that "Wake. Work. Sleep." read as shift work, and Vant is deliberately flexible: any cadence works because memory is just storage. Section 01 rebuilt around that.
