@@ -1,14 +1,17 @@
 #!/usr/bin/env node
 /**
  * Vant Audit Generator
- * 
- * Generates dynamic AUDIT.md report from codebase analysis
- * 
+ *
+ * Generates dynamic AUDIT.md report from codebase analysis.
+ * Report logic lives in lib/audit-report.js (pass 24) — this CLI keeps
+ * only arg parsing, repo containment, and output modes.
+ * (lib/audit.js itself is the shared audit/logger — do not repurpose it.)
+ *
  * USAGE:
- *   node bin/audit.js              # Generate to stdout
- *   node bin/audit.js --out AUDIT.md  # Write to file
- *   node bin/audit.js --json       # JSON output
- * 
+ *   vant audit                  # Generate to stdout
+ *   vant audit --out AUDIT.md   # Write to file (--out FILE or --out=FILE)
+ *   vant audit --json           # JSON output
+ *
  * INTEGRATION:
  *   - GitHub Actions: After build job
  *   - Scheduled: Weekly/monthly workflow
@@ -16,6 +19,7 @@
  */
 
 const fs = require('fs');
+const path = require('path');
 
 // Lazy-load sandbox
 let _sandbox = null;
@@ -25,11 +29,10 @@ function _getSandbox() {
 }
 function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
 function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
-const path = require('path');
-const { execSync } = require('child_process');
 
-const ROOT = path.resolve(__dirname, '..');
-const version = require('../lib/version');
+// (pass 24) Install root via VANT_REPO_ROOT anchor (dispatcher sets it for
+// routed commands; direct invocation falls back to this install tree).
+const ROOT = require('../lib/anchor').getRepoRoot();
 const args = process.argv.slice(2);
 
 // Show help
@@ -49,189 +52,44 @@ EXAMPLES:
     process.exit(0);
 }
 
-// ============================================
-// AUDIT DATA GATHERING (NO BLOCKING CALLS)
-// ============================================
+function main() {
+    _getSandbox();
+    if (_sandbox) _checkRead();
 
-function getLibs() {
-  return fs.readdirSync(path.join(ROOT, 'lib'))
-    .filter(f => f.endsWith('.js'))
-    .map(f => f.replace('.js', ''));
-}
+    // (pass 24) Report generation lives in lib/audit-report.js — importable
+    // and unit-testable; the CLI is thin: args, containment, output.
+    // (lib/audit.js is the shared logger; the report generator must not
+    // live there — first extraction attempt clobbered it.)
+    const { generateAuditReport } = require('../lib/audit-report');
+    const { report } = generateAuditReport({ root: ROOT });
 
-function getBins() {
-  return fs.readdirSync(path.join(ROOT, 'bin'))
-    .filter(f => f.endsWith('.js'))
-    .map(f => f.replace('.js', ''));
-}
+    // (pass 23 census) Accept both --out FILE and --out=FILE; validate the
+    // path (repo containment + vaf) before the on-purpose raw fs write.
+    const eqForm = args.find(a => a.startsWith('--out='))?.split('=')[1];
+    const spForm = (() => { const i = args.indexOf('--out'); return i !== -1 ? args[i + 1] : undefined; })();
+    const outFile = eqForm || spForm;
+    const jsonMode = args.includes('--json');
 
-function getDeps() {
-  const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
-  return Object.keys(pkg.dependencies || {});
-}
-
-function countTryCatch(dir) {
-  let count = 0;
-  const dirPath = path.join(ROOT, dir);
-  if (!fs.existsSync(dirPath)) return 0;
-  const files = fs.readdirSync(dirPath).filter(f => f.endsWith('.js'));
-  for (const file of files) {
-    const content = fs.readFileSync(path.join(dirPath, file), 'utf8');
-    count += (content.match(/try\s*\{/g) || []).length;
-  }
-  return count;
-}
-
-function getVafPatterns() {
-  try {
-    const vaf = require(path.join(ROOT, 'lib/vaf.js'));
-    if (vaf.PATTERNS) return Object.keys(vaf.PATTERNS).length;
-    return 40; // Default known count
-  } catch(e) {
-    return 0;
-  }
-}
-
-// ============================================
-// AUDIT REPORT GENERATION (STRING BUILDER)
-// ============================================
-
-function getTestCounts() {
-  // Get test counts by parsing existing test outputs
-  // CI tests: ~76 checkmarks, Runner: 44 tests, Evals: 7, Coverage: 43
-  // Total: 120 + 43 = 163 tests
-  return { passed: 163, failed: 0, warnings: 0 };
-}
-
-function buildReport(libs, bins, deps, tryCatch, vafCount, version, date, pkg) {
-  const tests = getTestCounts();
-  
-  // Repository URL (handle git+ prefix)
-  let repoUrl = 'https://github.com/dhaupin/vant';
-  if (pkg.repository) {
-    let repo = '';
-    if (typeof pkg.repository === 'string') {
-      repo = pkg.repository;
-    } else if (pkg.repository.url) {
-      repo = pkg.repository.url;
+    if (outFile) {
+        _checkWrite();
+        const rel = path.relative(ROOT, path.resolve(ROOT, outFile));
+        if (rel.startsWith('..') || path.isAbsolute(rel)) {
+            console.error('Error: --out must stay inside the repo (got: ' + outFile + ')');
+            process.exit(1);
+        }
+        const vaf = require('../lib/vaf');
+        const check = vaf.checkPathTraversal(rel);
+        if (check.blocked) {
+            console.error('Error: --out path blocked: ' + check.reason);
+            process.exit(1);
+        }
+        fs.writeFileSync(path.join(ROOT, rel), report);
+        console.error('Audit written to: ' + rel);
+    } else if (jsonMode) {
+        console.log(JSON.stringify({ generated: new Date().toISOString(), report: report }, null, 2));
+    } else {
+        console.log(report);
     }
-    // Clean up git+ prefix
-    repo = repo.replace(/^git\+/, '');
-    // Extract owner/repo
-    const match = repo.match(/github\.com[/:]([^/]+[/][^.]+)/);
-    if (match) {
-      repoUrl = 'https://github.com/' + match[1];
-    }
-  }
-  
-  let report = '# VANT CODE AUDIT REPORT\n\n';
-  report += '> Auto-generated audit from latest build. [View CI](' + repoUrl + '/actions) | [Run locally](' + repoUrl + '/blob/main/test/ci.js)\n\n';
-  report += '**Audit Date:** ' + date + '\n';
-  report += '**Version:** ' + version + '\n';
-  report += '**Auditor:** Vant CI Automated + Third-Party Scanners\n\n';
-  report += '---\n\n';
-  report += '## 1. ARCHITECTURAL AUDIT\n\n';
-  report += '### Module Design\n\n';
-  report += '| Metric | Value | Assessment |\n';
-  report += '|--------|-------|-------------|\n';
-  report += '| Core Modules | ' + libs.length + ' | Good separation |\n';
-  report += '| Executables | ' + bins.length + ' | Comprehensive CLI |\n';
-  report += '| External Deps | ' + deps.length + ' | Minimal coupling |\n\n';
-  report += '## 2. ENGINEERING AUDIT\n\n';
-  report += '| Area | Status |\n';
-  report += '|------|--------|\n';
-  report += '| Test CI | Present |\n';
-  report += '| CI/CD | GitHub Actions |\n';
-  report += '| Node | 18+ (.nvmrc) |\n\n';
-  report += '| Passed | ' + tests.passed + ' |\n';
-  report += '| Failed | ' + tests.failed + ' |\n\n';
-  report += '## 3. SECURITY AUDIT\n\n';
-  report += '| Vector | Protection |\n';
-  report += '|--------|-------------|\n';
-  report += '| Input injection | VAF (' + vafCount + '+ patterns) |\n';
-  report += '| Path traversal | VAF |\n';
-  report += '| Command injection | VAF |\n';
-  report += '| DoS | Rate limiting |\n\n';
-  report += '## 4. QUALITY CONTROL\n\n';
-  report += '| Metric | Value |\n';
-  report += '|--------|-------|\n';
-  report += '| try/catch blocks | ' + tryCatch + ' |\n\n';
-  report += '## 5. EXTERNAL AUDITS\n\n';
-  report += '### Third-Party Security Services (Free)\n\n';
-  report += '| Service | Purpose |\n';
-  report += '|--------|---------|\n';
-  report += '| GitHub Dependabot | Dependency alerts |\n';
-  report += '| GitHub Code Scanning | SAST analysis |\n';
-  report += '| npm audit | Dependency vulnerabilities |\n';
-  report += '| OSV Scanner | Vulnerability database |\n';
-  report += '| Semgrep | Static analysis |\n';
-  report += '| Trivy | Complete scanner |\n\n';
-  report += '### Running External Audits\n\n';
-  report += '```bash\n';
-  report += '# npm audit\n';
-  report += 'npm audit\n\n';
-  report += '# OSV Scanner\n';
-  report += 'npx osv-scanner .\n\n';
-  report += '# Semgrep\n';
-  report += 'npx @semgrep/semgrep --config=auto .\n';
-  report += '```\n\n';
-  
-  // Repository link (use pre-computed repoUrl)
-  report += '*Generated by Vant CI* - [View source](' + repoUrl + ') - ' + date + '\n';
-  
-  return report;
-}
-
-// ============================================
-// MAIN
-// ============================================
-
-function main() { 
-  // (pass 23 census) help advertises `--out FILE` but the parser only
-  // accepted `--out=FILE` — the space form silently fell through to stdout.
-  // Accept both.
-  const eqForm = args.find(a => a.startsWith('--out='))?.split('=')[1];
-  const spForm = (() => { const i = args.indexOf('--out'); return i !== -1 ? args[i + 1] : undefined; })();
-  const outFile = eqForm || spForm;
-  const jsonMode = args.includes('--json');
-  
-  // Gather data
-  const libs = getLibs();
-  const bins = getBins();
-  const deps = getDeps();
-  const tryCatch = countTryCatch('lib');
-  const vafCount = getVafPatterns();
-  const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
-  const version = pkg.version;
-  const date = new Date().toISOString().split('T')[0];
-  
-  // Build report (pass pkg for repo URL)
-  const report = buildReport(libs, bins, deps, tryCatch, vafCount, version, date, pkg);
-  
-  if (outFile) {
-    // (pass 23 census) --out used to skip path validation entirely. The
-    // write itself stays a raw fs op ON PURPOSE (root-anchored report
-    // artifact, not models-data — same prd-storage class as the audit's own
-    // reads), but the path now goes through the same vaf check the rest of
-    // the security chain uses.
-    const rel = path.relative(ROOT, path.resolve(ROOT, outFile));
-    if (rel.startsWith('..') || path.isAbsolute(rel)) {
-      console.error('Error: --out must stay inside the repo (got: ' + outFile + ')');
-      process.exit(1);
-    }
-    const vaf = require('../lib/vaf');
-    const check = vaf.checkPathTraversal(rel);
-    if (check.blocked) {
-      console.error('Error: --out path blocked: ' + check.reason);
-      process.exit(1);
-    }
-    fs.writeFileSync(path.join(ROOT, rel), report);
-    console.error('Audit written to: ' + rel);
-  } else if (jsonMode) {
-    console.log(JSON.stringify({ generated: new Date().toISOString(), report: report }, null, 2));
-  } else {
-    console.log(report);
-  }
 }
 
 main();

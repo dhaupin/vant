@@ -35,7 +35,9 @@ EXAMPLES:
     process.exit(0);
 }
 
-const ROOT = path.resolve(__dirname, '..');
+// (pass 24) Install root via VANT_REPO_ROOT anchor (dispatcher sets it for
+// routed commands; direct invocation falls back to this install tree).
+const ROOT = require('../lib/anchor').getRepoRoot();
 
 // Lazy-load backup module
 let backup = null;
@@ -76,10 +78,16 @@ async function main() {
                 console.error('Usage: vant backup restore <file>');
                 process.exit(1);
             }
-            console.log('Restoring from:', backupFile);
-            if (mod.restore) {
-                await mod.restore(backupFile);
+            // (pass 24) lib/backup.restore was never exported — this used to
+            // print 'Restoring from: X' and exit 0 doing nothing. Fail loudly
+            // if the module can't restore; report AFTER success, and let
+            // main().catch surface validation/decoding failures.
+            if (!mod.restore) {
+                console.error('Error: backup module does not support restore');
+                process.exit(1);
             }
+            await mod.restore(backupFile);
+            console.log('Restored from:', backupFile);
             break;
             
         case 'list':

@@ -29,7 +29,7 @@ async function main() {
     }
     
     if (args.includes('--clear') || args.includes('-c')) {
-        secret.clear('brain');
+        await secret.clear('brain');
         console.log('Brain password cleared');
         return;
     }
@@ -93,7 +93,7 @@ Uses lib/secret for password management:
         
         if (result.error) {
             console.error('Decryption failed:', result.error);
-            secret.clear('brain');
+            await secret.clear('brain');
             process.exit(1);
         }
         
@@ -105,7 +105,7 @@ Uses lib/secret for password management:
         
     } catch (e) {
         console.error('Error:', e.message);
-        secret.clear('brain');
+        await secret.clear('brain');
         process.exit(1);
     }
 }

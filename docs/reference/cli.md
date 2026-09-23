@@ -293,7 +293,8 @@ vant s3 push [--dry-run]    # Push local brain to remote
 vant s3 pull [--dry-run]    # Pull remote brain to local
 
 vant backup create
-vant backup restore <file>
+vant backup restore <file>   # validates the file first — wrong password /
+                             # corrupt file fails before anything is restored
 vant backup list
 vant backup schedule         # not implemented — prints a cron recipe
 
