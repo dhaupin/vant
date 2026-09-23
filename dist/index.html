@@ -211,7 +211,8 @@
         .drag-hint { font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
         .drag-hint svg { flex: none; opacity: 0.7; }
 
-        pre.term { position: relative; background: var(--bg-term); color: var(--term-text); border-radius: 10px; padding: 13px 15px; overflow-x: auto; font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; }
+        pre.term { position: relative; background: var(--bg-term); color: var(--term-text); border-radius: 10px; padding: 13px 15px; overflow-x: auto; font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; max-width: 100%; }
+        img, svg, canvas, video { max-width: 100%; }
         pre.term .prompt { color: var(--term-green); user-select: none; }
         pre.term .cmd { color: var(--term-amber); }
         pre.term .cmt { color: var(--term-dim); }
@@ -251,7 +252,8 @@
         .card li::marker { color: var(--signal); }
 
         /* ---------- stats ---------- */
-        .stats { display: flex; flex-wrap: wrap; gap: 20px 48px; justify-content: center; background: var(--bg-card); border-block: 1px solid var(--border); padding: 38px 0; }
+        .stats { background: var(--bg-card); border-block: 1px solid var(--border); padding: 38px 0; }
+        .stat-row { display: flex; flex-wrap: wrap; gap: 20px 48px; justify-content: center; }
         .stat { text-align: center; }
         .stat-value { font-size: 1.85rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
         .stat-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.09em; }
@@ -512,12 +514,14 @@
         </section>
 
         <div class="stats" role="presentation">
+            <div class="container stat-row">
             <div class="stat"><div class="stat-value" data-count="3">3</div><div class="stat-label">memory systems</div></div>
             <div class="stat"><div class="stat-value" data-count="93">93</div><div class="stat-label">CLI commands</div></div>
             <div class="stat"><div class="stat-value" data-count="89">89</div><div class="stat-label">lib modules</div></div>
             <div class="stat"><div class="stat-value" data-count="119">119</div><div class="stat-label">doc pages</div></div>
             <div class="stat"><div class="stat-value" data-count="108">108</div><div class="stat-label">test files</div></div>
             <div class="stat"><div class="stat-value">v0.8.6</div><div class="stat-label">MIT licensed</div></div>
+            </div>
         </div>
 
         <section>
@@ -905,7 +909,7 @@
                 // ---- sizing ----
                 function size() {
                     const w = host.clientWidth || 1, h = host.clientHeight || 1;
-                    renderer.setSize(w, h, false);
+                    renderer.setSize(w, h); // updateStyle defaults true: canvas CSS size tracks container, no hi-dpi overflow
                     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                     camera.aspect = w / h;
                     // portrait viewports: pull back so the full lattice stays in frame
