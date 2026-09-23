@@ -1708,6 +1708,20 @@ node test/security-hardening.test.js # 26/26
 
 ## Handoff Notes
 
+### Pass 19 - Bin Cold-Sweep + Fix (2026-09-23)
+
+Scope: smoke every routed bin command cold (fresh dir + repo root), fix what broke, align help/docs with reality.
+
+Fixed (10 real bugs): bin/test-all.js (spawned node ./bin/vant.js cwd-relative -> MODULE_NOT_FOUND in fresh dirs; now __dirname-absolute + cwd: ROOT; also stale lib cache assertion - exports { Cache } since T13b), bin/build-test.js (cwd-relative file checks false-failed; sandbox lazy-require was "./lib/sandbox" - broken, silently never loaded), bin/format-test.js (cwd-relative loadFile checks + asserted models/islands.json which never existed; real: models/public/vant/islands.json; now chdirs to repo root, 32/32 from any dir), bin/org.js (config.setFlag is in-memory only - crashed the advertised --set-operator-scopes path AND never persisted; now persists in the current brain config.json via saveBrainConfig, reads via brain-scoped config.get(key, null, { brain })), bin/snapshot.js (hard-refused every plain invocation though advertised everywhere; now self-grants on a FRESH sandbox per lib/sandbox.js own allow-with-warning contract, still refuses explicitly-locked-down sandboxes), bin/agent-spawner.js (agents.list() is async - sync call crashed; usage text said "vant agent ..." but the route is "vant spawn ..."), bin/tmp.js (every op threw EPERM - TmpSpace is sudo-secured and the bare CLI task was never registered; now boots vant-cli task + wires global._lock), lib/tmp.js + lib/shell.js (lock API misuse: acquire() returns a token, code called it as a release function -> "release is not a function" after write landed), bin/vant.js (unknown-command now suggests the closest real command via edit distance and exits 1 consistently), test/test-metrics.js + test/test-vant.js (asserted ghost exports: pre-59325b8 metric names and vant.framework absorbed in v0.9.6 - failed forever with zero signal; aligned to shipped API).
+
+Verified working cold: test-all 17/17, format-test 32/32, build-test (cwd-stable), org grant/config/status round-trip, brain-registry, node-registry, brain-unlock, islands-boot, docs-build, tmp list/create/clean/stats, spawn list, secret, rate, migrate --status, snapshot full stego round-trip, hybrid banner + --set, distributed and all special handlers.
+
+Sweep: bash bin/sweep.sh -> P=1783 F=0. Docs style + link checks PASS.
+
+Help/docs alignment: bin/help.js branch detail self-ref (branch-manager was never routed), hybrid flags corrected to [-p|--public] [-r|--private]; bin/cli-standard.js marked as reference template (not routable, by design); docs/reference/cli.md + docs/integrations/hybrid.md updated (hybrid route name, tmp subcommands, test-all/build-test/format-test as routed commands, snapshot capability note, stale branch-manager row removed).
+
+Key lesson (full version in models/private/axolotl/lessons.md): cold-smoke from a fresh dir, not just repo root - the dispatcher intentionally runs children in the caller cwd, so anything resolving from cwd is cwd-fragile by construction.
+
 - **Branch:** `axolotl` (pushed to origin)
 - **All fixes committed and pushed**
 - **All core tests passing** (500+ tests)

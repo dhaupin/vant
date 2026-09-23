@@ -39,7 +39,7 @@ vant health
 | Command | Description |
 |---------|-------------|
 | `vant sync` | Pull/push brain from/to GitHub |
-| `vant hybrid-sync` | Public/private brain split sync |
+| `vant hybrid` | Public/private brain split sync (runs hybrid-sync) |
 | `vant watch` | Poll GitHub for changes |
 | `vant repos` | Mount and sync external repositories |
 | `vant load` | Load brain files (.md, .json, .yaml, .ini, .txt) |
@@ -53,6 +53,9 @@ vant health
 vant sync               # Pull, then push
 vant sync push          # Push only
 vant sync pull          # Pull only
+
+vant hybrid --public    # Push public brain only
+vant hybrid --private   # Push private brain only
 
 vant load               # Load brain from models/private
 vant load --version 3   # Load a specific brain version
@@ -188,7 +191,7 @@ vant mcp --server --port 3457
 vant org grant                                  # Grant operator scopes
 vant org grant --scopes read,write,spawn
 vant org status
-vant org config --set-operator-scopes read,write,spawn
+vant org config --set-operator-scopes read,write,spawn   # Persist in brain config
 vant org demo                                   # Run the demo org flow
 
 vant trust score <entity>
@@ -209,6 +212,12 @@ vant vibe experimental           # or safety_first
 vant snapshot                    # Default output: <agent>-p_<pw>.svg
 vant snapshot --agent nova       # Snapshot a specific brain
 vant snapshot --password <pw>    # Explicit password
+vant snapshot --output <path>    # Custom output path (inside the repo)
+vant snapshot --no-verify        # Skip the round-trip verification
+
+# Note: snapshot self-grants write on a fresh default sandbox (the CLI is
+# trusted); a host that has explicitly locked the sandbox down must grant
+# canWrite first. Sidecars (.manifest.json, .sha256) are gitignored.
 
 vant error list
 vant error code <code>
@@ -253,7 +262,10 @@ Clients authenticate with `X-API-Key: <key>` or
 ```bash
 vant storage                # Show storage status
 vant cache --clear          # Clear cache
-vant tmp --list             # List temp files
+vant tmp list               # List temp files (workspace space)
+vant tmp create "text"      # Create a temp file
+vant tmp clean              # Clear the workspace temp space
+vant tmp stats              # File count + task context
 
 vant wal --status <basePath>  # Journal state (records, pending intents)
 vant wal --drill <basePath>   # Reopen, replay, verify, report
@@ -456,8 +468,7 @@ with its own `--help`.
 | `vant runop` | Run operator |
 | `vant skills` | Skill management |
 | `vant theme` | Theme management |
-| `vant branch` | Branch management |
-| `vant branch-manager` | Advanced branch operations |
+| `vant branch` | Branch management (runs branch-manager) |
 | `vant canvas` | Brain data visualization |
 
 ```bash
@@ -493,14 +504,19 @@ vant test          # Smoke tests (default)
 vant test core     # Brain, storage, core modules
 vant test full     # All tests (500+)
 
+test-all           # 17 self-checks across health/search/islands/lib exports
+test-all           # (cwd-independent: runs from any directory)
+
+vant spawn list    # List spawned agents
 vant spawn --help  # Agent spawner usage
+vant build-test    # Build verification (cwd-independent)
+vant format-test   # format.js test suite (cwd-independent)
 ```
 
 Some dev tools are invoked with node directly rather than through the
 `vant` dispatcher:
 
 ```bash
-node bin/build-test.js   # Build verification
 node bin/sweep.sh        # Test health gate (or: node bin/sweep.sh --quick)
 node test/runner.js      # Raw test runner
 ```

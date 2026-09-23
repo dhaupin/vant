@@ -1,6 +1,11 @@
 /**
  * Vant CLI Argument Standard
- * 
+ *
+ * Reference doc only — NOT a routed command. `vant cli-standard` prints
+ * "Unknown command" by design: this file is a copy-paste template for new
+ * CLIs (see the Template block below), exports nothing routable, and has no
+ * dispatcher entry. Read it when adding a command; run nothing from it.
+ *
  * ## Template for new CLI commands:
  * 
  * ```javascript

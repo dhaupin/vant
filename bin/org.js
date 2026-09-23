@@ -34,13 +34,21 @@ async function main() {
     const args = process.argv.slice(2);
     const cmd = args[0] || 'grant';
 
+    // Operator scopes persist in the CURRENT brain's config.json (see 'config'
+    // below); reads must go through the brain-scoped get() or they only see
+    // the global config and report null.
+    function getOperatorScopes() {
+        const brain = require('../lib/brain').getCurrentBrain();
+        return config.get('orgchart.operatorScopes', null, { brain });
+    }
+
     if (cmd === 'status' || cmd === '--status') {
         const ds = sandbox.defaultSandbox;
         console.log('Org operator status:');
         console.log('  scopes:', JSON.stringify(ds.scopes));
         console.log('  canWrite:', sandbox.canWrite(), ' canSpawn:', sandbox.canSpawn());
         console.log('  explicitlyConfigured:', !!ds._explicitlyConfigured);
-        console.log('  config orgchart.operatorScopes:', JSON.stringify(config.get('orgchart.operatorScopes', null)));
+        console.log('  config orgchart.operatorScopes:', JSON.stringify(getOperatorScopes()));
         return;
     }
 
@@ -53,8 +61,21 @@ async function main() {
         }
         const scopes = parseList(args[i + 1]);
         if (!scopes.length) { console.error('No scopes given'); process.exit(1); }
-        config.setFlag('orgchart.operatorScopes', scopes);
+        // Persist in the brain's config.json (survives across processes;
+        // config.setFlag is an in-memory runtime map and never persisted,
+        // so the old setFlag call silently lost the value on next boot).
+        // Read back through config.get('orgchart.operatorScopes') - the
+        // same key 'grant' and 'status' consult.
+        const brain = require('../lib/brain').getCurrentBrain();
+        const existing = config.loadBrainConfig(brain) || {};
+        const merged = { ...existing, orgchart: { ...(existing.orgchart || {}), operatorScopes: scopes } };
+        const saved = config.saveBrainConfig(brain, merged);
+        if (!saved) {
+            console.error('Could not persist orgchart.operatorScopes (brain config write failed).');
+            process.exit(1);
+        }
         console.log('Saved orgchart.operatorScopes =', JSON.stringify(scopes));
+        console.log('  (persisted in brain config for: ' + brain + ')');
         return;
     }
 
@@ -87,7 +108,7 @@ async function main() {
         const si = args.indexOf('--scopes');
         const ci = args.indexOf('--capabilities');
         const scopes = si !== -1 ? parseList(args[si + 1])
-            : (config.get('orgchart.operatorScopes', null) || OPERATOR_DEFAULT);
+            : (getOperatorScopes() || OPERATOR_DEFAULT);
         const caps = ci !== -1 ? parseList(args[ci + 1]) : CAP_DEFAULT;
 
         // Create a sudo task so scope-level verdicts apply (mirrors boot())

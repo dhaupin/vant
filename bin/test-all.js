@@ -1,23 +1,30 @@
 #!/usr/bin/env node
 /**
  * Vant Comprehensive Test Suite
+ *
+ * CWD-INDEPENDENT (pass 18 bin sweep): everything resolves from this
+ * script's location, so `vant test-all` works from any directory.
+ * Previously it spawned `node ./bin/vant.js` relative to the caller's
+ * cwd, which crashed with MODULE_NOT_FOUND in fresh installs.
  */
 const { execSync } = require('child_process');
 const path = require('path');
 
+const ROOT = path.resolve(__dirname, '..');
+const VANT = path.join(__dirname, 'vant.js');
 const results = { passed: [], failed: [] };
-const LIB = path.resolve('./lib');
+const LIB = path.join(ROOT, 'lib');
 
 function test(name, cmd, check) {
     try {
         if (typeof check === 'function') {
             // Pass output to check function
-            const out = execSync('node ./bin/vant.js ' + cmd, { encoding: 'utf8', timeout: 10000 });
+            const out = execSync('node "' + VANT + '" ' + cmd, { encoding: 'utf8', timeout: 10000, cwd: ROOT });
             const r = check(out);
             r ? results.passed.push(name) : results.failed.push({ name, error: 'check' });
             return;
         }
-        const out = execSync('node ./bin/vant.js ' + cmd, { encoding: 'utf8', timeout: 10000 });
+        const out = execSync('node "' + VANT + '" ' + cmd, { encoding: 'utf8', timeout: 10000, cwd: ROOT });
         if (!out.includes('Vant')) {  // Simple check
             results.failed.push({ name, error: 'output' });
             return;
@@ -46,7 +53,7 @@ async function main() {
     test('lib audit', '', () => typeof require(path.join(LIB, 'audit')).log === 'function');
     test('lib search', '', () => typeof require(path.join(LIB, 'search')).queryBrain === 'function');
     test('lib islands', '', () => typeof require(path.join(LIB, 'islands')).getStatus === 'function');
-    test('lib cache', '', () => typeof require(path.join(LIB, 'cache')).get === 'function');
+    test('lib cache', '', () => typeof require(path.join(LIB, 'cache')).Cache === 'function');
     console.log('\n=== Results ===');
     console.log('Passed: ' + results.passed.length + '/' + (results.passed.length + results.failed.length));
     for (const t of results.passed) console.log('  ✓ ' + t);

@@ -159,8 +159,10 @@ test('has connector export', () => {
     return typeof vant.connector === 'function';
 });
 
-test('has framework export', () => {
-    return typeof vant.framework === 'function';
+test('has pipeline export (framework absorbed)', () => {
+    // v0.9.6 absorbed framework.js into vant core (commit 02f0d29, BREAKING,
+    // no aliases). This assertion checked the ghost export and always failed.
+    return typeof vant.startFull === 'function' || typeof vant.getStatus === 'function';
 });
 
 test('has habitat function', () => {

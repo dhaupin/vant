@@ -42,10 +42,27 @@ const fs = require('fs');
 const crypto = require('crypto');
 
 // (1b) Capability gate — snapshot writes land in models/ + sidecar files
+//
+// Pass 18 bin sweep fix: this used to hard-refuse whenever canWrite() was
+// false, which is every plain `vant snapshot` invocation (default sandbox
+// ships canWrite:false). The command was advertised in help + docs but
+// literally never worked standalone. Per lib/sandbox.js's own semantics, a
+// FRESH default sandbox (not explicitly configured) is allow-with-warning —
+// only an explicitly locked-down sandbox enforces denial. So: self-grant
+// write on a fresh sandbox (same trust level as `vant org grant`, a direct
+// user CLI invocation), and still refuse when a host has deliberately
+// locked the sandbox down.
 function _checkWrite() {
     try {
         const sandbox = require('../lib/sandbox');
-        if (sandbox && !sandbox.canWrite()) throw new Error('Write capability required for snapshot output');
+        if (sandbox.canWrite()) return;
+        const ds = sandbox.defaultSandbox;
+        if (ds && ds._explicitlyConfigured) {
+            throw new Error('Write capability required for snapshot output (sandbox explicitly locked down; ask the host to grant canWrite)');
+        }
+        // Fresh sandbox: self-grant for this user-invoked write, with notice
+        ds.setCapabilities({ canRead: true, canWrite: true });
+        console.log('[snapshot] granted write capability for this process (fresh sandbox)');
     } catch (e) {
         if (/capability/i.test(e.message)) throw e;
     }

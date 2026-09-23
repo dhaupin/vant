@@ -251,7 +251,19 @@ const COMMANDS = {
     relay: 'relay.js',
     spirit: 'spirit.js',
     encounter: 'encounter.js',
-    forum: 'forum.js'
+    forum: 'forum.js',
+
+    // Bin CLIs that existed but were never routed (pass 18 bin sweep)
+    org: 'org.js',
+    snapshot: 'snapshot.js',
+    'brain-registry': 'brain-registry.js',
+    'brain-unlock': 'brain-unlock.js',
+    'node-registry': 'node-registry.js',
+    'islands-boot': 'islands-boot.js',
+    'docs-build': 'docs-build.js',
+    'build-test': 'build-test.js',
+    'format-test': 'format-test.js',
+    'test-all': 'test-all.js'
 };
 
 const args = process.argv.slice(2);
@@ -558,6 +570,24 @@ Setup:
     process.exit(0);
 }
 
+// Levenshtein distance for the unknown-command suggestion (small n, plain DP
+// is fine; no dep needed).
+function _editDistance(a, b) {
+    const m = a.length, n = b.length;
+    const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            dp[i][j] = Math.min(
+                dp[i - 1][j] + 1,
+                dp[i][j - 1] + 1,
+                dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+            );
+        }
+    }
+    return dp[m][n];
+}
+
 const script = COMMANDS[cmd];
 if (!script) {
     // Built-in commands
@@ -590,6 +620,18 @@ if (!script) {
         });
     } else {
         console.error('Unknown command:', cmd);
+        // Suggest the closest real command (edit distance over routed names
+        // + built-ins). Catches typos like `vant helth` → health.
+        const candidates = Object.keys(COMMANDS)
+            .filter(k => k !== cmd)
+            .map(k => ({ k, d: _editDistance(cmd, k) }))
+            .filter(x => x.d <= Math.max(2, Math.floor(cmd.length / 3)))
+            .sort((a, b) => a.d - b.d)
+            .slice(0, 3);
+        if (candidates.length) {
+            console.error('Did you mean: ' + candidates.map(x => x.k).join(', ') + '?');
+        }
+        console.error('Run `vant help` to see all commands.');
         process.exit(1);
     }
     return;

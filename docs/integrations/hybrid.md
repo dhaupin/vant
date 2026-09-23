@@ -68,10 +68,10 @@ hybrid.getSummary();
 ## CLI
 
 ```bash
-vant hybrid-sync                # Summary
-vant hybrid-sync --public     # Push to public
-vant hybrid-sync --private    # Push to private
-vant hybrid-sync --set github private
+vant hybrid                     # Summary
+vant hybrid --public            # Push to public
+vant hybrid --private           # Push to private
+vant hybrid --set github private  # Set a repo's privacy
 ```
 
 ## Use Cases

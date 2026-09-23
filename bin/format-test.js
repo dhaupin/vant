@@ -207,9 +207,18 @@ test('format.prepare - string input passes through', () => {
 
 // ==================== FILE LOAD TESTS ====================
 
+// Pass 19 bin sweep: lib/format.loadFile routes through storage.read(),
+// which resolves paths against process.cwd() and blocks absolute ones. Anchor
+// the suite at the repo root (derived from this script, not the caller's cwd)
+// and use repo-relative paths, so `vant format-test` gives the same verdict
+// from any directory. 'models/islands.json' never existed anywhere; the real
+// file is models/public/vant/islands.json.
+const REPO_ROOT = path.resolve(__dirname, '..');
+if (process.cwd() !== REPO_ROOT) process.chdir(REPO_ROOT);
+
 test('format.loadFile - json file', async () => {
     const format = require('../lib/format');
-    const result = await format.loadFile('models/islands.json');
+    const result = await format.loadFile('models/public/vant/islands.json');
     assert(result.data, 'Should load JSON');
     assertEq(result.data.version, '1.0', 'Should parse version');
 });
