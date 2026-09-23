@@ -671,7 +671,16 @@ if (!script) {
 
 const scriptPath = path.join(BIN_DIR, script);
 const child = spawn('node', [scriptPath, ...process.argv.slice(3)], {
-    stdio: 'inherit'
+    stdio: 'inherit',
+    env: {
+        ...process.env,
+        // (pass 23) Tell routed subcommands where the INSTALL tree lives.
+        // cwd stays the user's project (see below); libs that need the
+        // install tree (horcrux targets, templates, boot dirs) resolve it
+        // via lib/anchor.js getRepoRoot() instead of guessing from cwd or
+        // __dirname. Brain CONTENT paths stay cwd-anchored BY DESIGN.
+        VANT_REPO_ROOT: path.resolve(__dirname, '..')
+    }
     // cwd: intentionally NOT overridden. Subcommands must run in the user's
     // working directory - the brain runtime resolves models/ relative to cwd
     // (lib/brain.js getBrainPath). The previous cwd=package-root meant every

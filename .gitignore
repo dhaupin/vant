@@ -57,6 +57,8 @@ temp/models/latent/*.vpatch
 # Snapshot test scratch + runtime point-in-time snapshots
 .snapshot-scratch/
 models/.snapshots/
+# (pass 23) safe-write horcrux tmp files (snapshot/refresh encode targets)
+*.tmp.svg
 
 # Runtime tmp-space data (myStuff dropbox etc. — per-runtime, not template)
 models/tmp-space/

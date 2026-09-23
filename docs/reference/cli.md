@@ -295,6 +295,7 @@ vant s3 pull [--dry-run]    # Pull remote brain to local
 vant backup create
 vant backup restore <file>
 vant backup list
+vant backup schedule         # not implemented — prints a cron recipe
 
 vant horcrux inspect [path] [password]
 vant horcrux restore [path] [password]
@@ -382,7 +383,7 @@ vant sudo --revoke
 vant sudo metrics
 
 vant audit --json
-vant audit --out AUDIT.md
+vant audit --out AUDIT.md      # --out FILE or --out=FILE; inside the repo
 ```
 
 ## Operations

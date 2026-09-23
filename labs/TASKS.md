@@ -1977,3 +1977,68 @@ explicit anchor env (VANT_REPO_ROOT) so libs stop inferring it from cwd;
 snapshot + horcrux refresh could share a lib/horcrux-safe.js helper (the
 tmp→validate→rename flow is now duplicated in two CLIs).
 
+---
+
+## Session (2026-09-23 — pass 23: lib/horcrux-safe, anchor env, census)
+
+**Shared safe-write helper (lib/horcrux-safe.js):** the tmp→validate→rename
+flow extracted from the two CLIs into safeWriteHorcrux(relTarget, {encode,
+decode, validate, label, log, ...}). Existing targets: encode to
+<name>.tmp.svg → sanity stat → decode → validate → rename. New targets:
+direct write + round-trip (a fresh backup that cannot decrypt is worthless
+— failure throws loudly, file left for inspection). Failure at ANY stage:
+original untouched, tmp removed, error wrapped 'original left untouched'.
+Returns {usedTmp, replaced, absTarget, size, result, data} — snapshot's
+manifest now records the true final size (tmp stat, not encode string
+length) and replacedExisting flag.
+
+**Integration bug found by the foreign-cwd test:** toHorcrux/fromHorcrux
+resolve relative paths against process.cwd() while the helper anchored at
+repo root — dispatcher-routed refresh from a foreign cwd encoded the tmp
+into the CALLER'S tree while stat/cleanup looked at the repo's (silent
+0-byte 'suspiciously small' failure, tmp orphan). Fix: helper chdirs to
+repo root for the encode window, restores after (success/failure paths).
+Snapshot's own pass-22 chdir kept as defense for its sidecar writes.
+
+**VANT_REPO_ROOT anchor (lib/anchor.js + dispatcher):** dispatcher exports
+VANT_REPO_ROOT=<install root> into every routed subcommand's env; new
+lib/anchor.getRepoRoot() resolves env first, install tree second. Libs
+needing the INSTALL tree stop guessing from cwd/__dirname. Brain CONTENT
+paths stay cwd-anchored BY DESIGN (user's project owns models/) — anchor
+and brain root are now explicitly different questions.
+
+**horcrux discovery tmp-skip:** lib/boot.js _discoverBootHorcruxes and
+bin/horcrux.js findDefaultHorcrux skip *.tmp.svg — a crashed safe-write
+run must not leave a decode candidate pointing at a partial file. *.tmp.svg
+gitignored.
+
+**Raw-fs census (bin/audit.js, bin/backup.js):**
+- backup.js: zero raw writes (reads only, ROOT-anchored) — clean. BUT
+  `backup schedule` was a silent stub (printed 'Scheduling...', did
+  nothing, exit 0). Now says 'not implemented' + prints a working cron
+  recipe, exits 1 (visible failure beats invisible lie). Help text marks it.
+- audit.js: --out write is legit (root-anchored report artifact, not
+  models-data — raw fs stays ON PURPOSE) but the path skipped validation
+  entirely. Now: repo-containment + vaf.checkPathTraversal before write.
+- BONUS third find: help advertises `--out FILE` but the parser only
+  accepted `--out=FILE` — the space form silently dumped to stdout. Both
+  forms accepted now; cli.md notes it.
+
+**Guard tests (fresh-dir-routing 10 → 15):** four horcrux-safe scenarios
+via child `node -e` with fake encoders (new-target, happy-replace,
+decode-fail, validate-fail — each asserts original-untouched/tmp-cleaned)
++ anchor env-resolution unit. Harness is sync; async helper tests run in
+subprocesses printing JSON verdicts.
+
+**Evidence:** fresh-dir 15/15; live snapshot + refresh round-trips (repo
+cwd AND foreign dispatcher cwd); refresh failure path exercised (wrong
+password → original untouched); audit --out both forms + escape refusal;
+backup schedule honest failure. Full sweep before commit.
+
+**Next candidates:** VANT_REPO_ROOT adoption sweep (storage/horcrux call
+sites still infer install root from __dirname where cwd differs matters);
+bin/audit.js report generation itself could move to a lib module (CLI is
+216 lines of gather+format); `vant backup restore` never validates the
+backup file before lib/backup.restore runs.
+
+

@@ -80,19 +80,16 @@ function _checkWrite() {
 const DEFAULT_AGENT = 'axolotl';
 const DEFAULT_PASSWORD = 'axolotl2026';
 
-// (pass 22) Shared backup-safety: if the target ALREADY EXISTS (i.e. it is
-// some brain's live boot horcrux), write the fresh encode to a sibling tmp
-// file, round-trip validate it, and only then rename over the target. This is
-// the same contract as `vant horcrux refresh` — a failed or corrupt encode can
-// never destroy the only backup. Brand-new targets write directly (nothing to
-// protect). Returns { usedTmp, tmpPath } for the summary line.
+// (pass 23) The tmp→validate→rename backup-safety flow now lives in
+// lib/horcrux-safe.js (shared with `vant horcrux refresh`). snapshot keeps
+// only the plan-shaped summary for its output (usedTmp + absTarget for the
+// sha sidecar, which hashes whatever file is the backup at the end).
 function safeWritePlan(outputRel) {
     const absTarget = fromRoot(outputRel);
-    // absTarget always set — the sha sidecar hashes whatever file is the
-    // backup at the end, tmp or direct.
-    if (!fs.existsSync(absTarget)) return { usedTmp: false, tmpPath: null, absTarget };
-    const relTmp = outputRel.replace(/\.svg$/, '') + '.snapshot-tmp.svg';
-    return { usedTmp: true, tmpPath: relTmp, absTmp: fromRoot(relTmp), absTarget };
+    return {
+        usedTmp: fs.existsSync(absTarget),
+        absTarget
+    };
 }
 
 function parseArgs(argv) {
@@ -183,8 +180,9 @@ function _currentBrainName() {
 }
 
 // (pass 22) Overwrite plan for the in-flight snapshot. Module-scope so the
-// top-level catch can clean the tmp file up on any failure path.
-let plan = { usedTmp: false, tmpPath: null };
+// summary/sidecar code knows which file ended up as the backup. (pass 23:
+// cleanup lives inside lib/horcrux-safe.js; no tmp files escape to here.)
+let plan = { usedTmp: false, absTarget: null };
 
 function getGitContext() {
     try {
@@ -204,20 +202,19 @@ async function run() {
     // and smoke runs see output; refusal still precedes ANY file write.
     _checkWrite();
     const output = deriveOutput(args);
-    // (pass 22) Anchor the rest of the run at the repo root. deriveOutput
-    // already normalized a user's relative --output against THEIR cwd; from
-    // here on, every repo-relative path (encode target, sidecars) must
-    // resolve from REPO_ROOT regardless of where the command was invoked —
-    // toHorcrux's atomicWriteFile and our writeFileSync calls all use
-    // cwd-relative resolution under the hood.
+    // (pass 22/23) Anchor the rest of the run at the repo root. deriveOutput
+    // already normalized a user's relative --output against THEIR cwd. The
+    // safe-write helper chdirs for the encode window; the sidecar writes
+    // below go through fromRoot(). The chdir here covers anything else that
+    // might resolve relative paths (defensive, kept from pass 22).
     if (process.cwd() !== REPO_ROOT) process.chdir(REPO_ROOT);
     const password = await getPassword(args);
     const git = getGitContext();
     // (pass 22) Backup-safety plan: overwrite an existing horcrux via the
-    // tmp→validate→rename flow; new targets write directly. Assigned to the
-    // module-scope `plan` so the top-level catch cleans up on any failure.
+    // tmp→validate→rename flow (inside lib/horcrux-safe.js since pass 23);
+    // new targets write directly. Assigned to the module-scope `plan` so the
+    // summary/sidecar code knows which file is the backup.
     plan = safeWritePlan(output);
-    const writeTarget = plan.usedTmp ? plan.tmpPath : output;
 
     // Make sure the target directory exists (resolved from REPO_ROOT, not cwd)
     fs.mkdirSync(path.dirname(fromRoot(output)), { recursive: true });
@@ -232,11 +229,27 @@ async function run() {
 
     // Create the horcrux (full payload: agents, teams, islands, brainStorage, etc.)
     const transform = require(path.join(REPO_ROOT, 'lib', 'transform'));
+    const { safeWriteHorcrux } = require(path.join(REPO_ROOT, 'lib', 'horcrux-safe'));
     console.log('\n1. Creating stego-SVG horcrux...');
-    const result = await transform.toHorcrux(writeTarget, { password });
-    console.log('   Path:  ', result.path);
-    console.log('   Size:  ', result.size, 'bytes');
-    console.log('   Format:', result.format);
+    // (pass 23) Shared safe-write flow: existing targets go through
+    // tmp → validate → rename; new targets write directly. The helper
+    // returns the decoded+validated payload so the contents summary
+    // doesn't re-read the file.
+    const outcome = await safeWriteHorcrux(output, {
+        label: 'snapshot',
+        log: (m) => console.log(m),
+        password,
+        encode: (rel, o) => transform.toHorcrux(rel, { password: o.password }),
+        decode: (rel, o) => transform.fromHorcrux(rel, { password: o.password }),
+        validate: (data) => transform.validateHorcruxData(data)
+    });
+    const result = outcome.result;
+    const data = outcome.data;
+    console.log('   Path:  ', outcome.absTarget);
+    console.log('   Size:  ', (outcome.size || result.size), 'bytes');
+    console.log('   Format:', result.format || 'steganography');
+    console.log('   Version: ', data.version);
+    console.log('   Type:    ', data.type);
 
     // Write a sidecar manifest (NOT encrypted, but gitignored). (pass 22)
     // Written AFTER verification so it never describes a backup that failed
@@ -250,24 +263,25 @@ async function run() {
         const manifest = {
             created: new Date().toISOString(),
             format: result.format,
-            size: result.size,
+            // (pass 23) true final size — the stat of the tmp file, not the
+            // encode result's string length (they differ for stego).
+            size: outcome.size || result.size,
             git,
-            passwordSet: !!password
+            passwordSet: !!password,
+            replacedExisting: outcome.replaced
         };
         fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
         console.log('   Manifest:', manifestPath);
     };
 
     if (!args.verify) {
-        // (pass 22) --no-verify on an EXISTING backup is refused: without the
-        // round-trip check we cannot prove the fresh encode decrypts, so
-        // overwriting the only backup blind is exactly the destruction mode
-        // this pass removes. New targets may skip verification freely.
+        // (pass 22/23) --no-verify on an EXISTING backup is impossible now:
+        // the shared helper validates+replaces before returning, so reaching
+        // this point means either a new target (skip freely) or an existing
+        // one that ALREADY validated and was replaced. Keep the guard for
+        // intent clarity; it is unreachable by construction.
         if (plan.usedTmp) {
             console.error('\n❌ --no-verify is not allowed when overwriting an existing horcrux');
-            console.error('   (a blind replace could destroy the only backup). Run with');
-            console.error('   verification, or write to a new path instead.');
-            try { fs.rmSync(plan.absTmp, { force: true }); } catch (e) {}
             process.exit(1);
         }
         writeManifest();
@@ -275,32 +289,7 @@ async function run() {
         return;
     }
 
-    // Verify: read it back and check the round-trip — against the file that
-    // will become the backup (tmp when replacing, target when new).
-    console.log('\n2. Verifying round-trip...');
-    const verifyPath = plan.usedTmp ? plan.tmpPath : output;
-    const data = await transform.fromHorcrux(verifyPath, { password });
-    console.log('   Version: ', data.version);
-    console.log('   Type:    ', data.type);
-
-    const validation = transform.validateHorcruxData(data);
-    if (!validation.valid) {
-        console.error('\n❌ Validation FAILED:');
-        for (const err of validation.errors) console.error('   -', err);
-        try { fs.rmSync(plan.absTmp, { force: true }); } catch (e) {}
-        process.exit(1);
-    }
-    console.log('   Validation: OK (', validation.errors.length, 'errors)');
-
-    // (pass 22) Only NOW is it safe to replace the old backup: the fresh
-    // encode gathered, encoded, round-trip decrypted, and structurally
-    // validated. Manifest follows the replace so it always describes what
-    // actually landed. Mirrors horcrux refresh's contract exactly.
-    if (plan.usedTmp) {
-        fs.renameSync(plan.absTmp, plan.absTarget);
-        console.log('   Replaced existing backup:', plan.absTarget);
-    }
-    writeManifest();
+    console.log('   Validation: OK (round-trip, inside safe-write helper)');
 
     // Smoke-restore into a sandbox path so we don't clobber the live brain.
     // Use lib/transform.restore with merge:true so it doesn't destroy state.

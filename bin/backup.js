@@ -6,6 +6,7 @@
  *   vant backup create          # Create backup
  *   vant backup restore <file>  # Restore from backup
  *   vant backup list           # List backups
+ *   vant backup schedule       # NOT IMPLEMENTED (prints a cron recipe)
  */
 
 const path = require('path');
@@ -92,10 +93,16 @@ async function main() {
             }
             break;
             
-        case 'schedule':
+        case 'schedule': {
+            // (pass 23 census) this was a silent stub — printed 'Scheduling'
+            // and did nothing. There is no scheduler plumbing for full brain
+            // backups yet; say so instead of pretending.
             const interval = args[1] || 'daily';
-            console.log('Scheduling backups:', interval);
-            break;
+            console.log(`Backup scheduling (${interval}) is not implemented yet.`);
+            console.log('Until then, drive it from cron:');
+            console.log(`  0 3 * * * cd ${ROOT} && node bin/vant.js backup create >> vant-backup.log 2>&1`);
+            process.exit(1);
+        }
             
         default:
             console.log('Unknown action:', action);

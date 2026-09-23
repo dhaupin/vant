@@ -92,6 +92,8 @@ function findDefaultHorcrux(repoRoot) {
         try {
             const entries = fs.readdirSync(bootDir);
             for (const f of entries) {
+                // (pass 23) skip safe-write tmp files (crashed runs)
+                if (f.endsWith('.tmp.svg')) continue;
                 if (f.endsWith('.svg') && f.includes('p_')) {
                     return path.join(bootDir, f);
                 }
@@ -248,38 +250,31 @@ async function run() {
         }
 
         const transform = require('../lib/transform');
+        // (pass 23) Shared safe-write flow via lib/horcrux-safe.js:
+        // tmp → round-trip validate → rename. Also cwd-safe: the helper
+        // resolves every path against VANT_REPO_ROOT/install root, so a
+        // refresh invoked through the dispatcher from a foreign cwd no
+        // longer depends on process.cwd() being the repo (the pass-21
+        // version was cwd-fragile).
         // (pass 21) vaf.checkPathTraversal blocks ABSOLUTE paths (toHorcrux
-        // runs it on its input), so derive a REPO-RELATIVE tmp path for the
-        // encode, then join back to absolute for the rename + stat.
-        const relTarget = path.relative(REPO_ROOT, target);
-        const relTmp = relTarget.replace(/\.svg$/, '') + '.refresh-tmp.svg';
-        const absTmp = path.join(REPO_ROOT, relTmp);
+        // runs it on its input), so encode/decode always receive
+        // REPO-RELATIVE tmp paths from the helper.
+        const { safeWriteHorcrux } = require('../lib/horcrux-safe');
         console.log('Refreshing boot horcrux:', target);
-        console.log('  (fresh gather → temp file → atomic replace)');
 
-        try {
-            await transform.toHorcrux(relTmp, { password });
-            const stat = fs.statSync(absTmp);
-            if (!stat.size || stat.size < 64) {
-                throw new Error('encoded output suspiciously small (' + stat.size + ' bytes)');
-            }
-            // Round-trip sanity: the fresh horcrux must decrypt before we
-            // replace the old one. (Same absolute/relative treatment.)
-            const check = await transform.validateHorcruxFile(relTmp, { password });
-            if (!check || check.valid === false) {
-                throw new Error('post-encode validation failed: ' + (check && check.error || 'unknown'));
-            }
-            fs.renameSync(absTmp, target);
-            console.log('\n✅ Refreshed!');
-            console.log('Path:', target);
-            console.log('Size:', stat.size);
-            console.log('Timestamp:', new Date(Date.now()).toISOString());
-        } catch (e) {
-            // Never leave the tmp orphan, never touch the original on failure.
-            try { fs.rmSync(absTmp, { force: true }); } catch (e2) {}
-            console.error('\n❌ Refresh failed (original left untouched):', e.message);
-            process.exit(1);
-        }
+        await safeWriteHorcrux(path.relative(REPO_ROOT, target), {
+            label: 'horcrux',
+            log: (m) => console.log(m.replace(/^   /, '  ')),
+            password,
+            encode: (rel, o) => transform.toHorcrux(rel, { password: o.password }),
+            decode: (rel, o) => transform.validateHorcruxFile(rel, { password: o.password }),
+            validate: (check) => (check && check.valid !== false)
+                ? true
+                : { valid: false, errors: [check && check.error || 'unknown'] }
+        });
+        console.log('\n✅ Refreshed!');
+        console.log('Path:', target);
+        console.log('Timestamp:', new Date(Date.now()).toISOString());
     } else {
         console.log('Unknown command:', subcmd);
         console.log('Run "vant horcrux --help" for usage');

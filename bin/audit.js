@@ -187,7 +187,12 @@ function buildReport(libs, bins, deps, tryCatch, vafCount, version, date, pkg) {
 // ============================================
 
 function main() { 
-  const outFile = args.find(a => a.startsWith('--out='))?.split('=')[1];
+  // (pass 23 census) help advertises `--out FILE` but the parser only
+  // accepted `--out=FILE` — the space form silently fell through to stdout.
+  // Accept both.
+  const eqForm = args.find(a => a.startsWith('--out='))?.split('=')[1];
+  const spForm = (() => { const i = args.indexOf('--out'); return i !== -1 ? args[i + 1] : undefined; })();
+  const outFile = eqForm || spForm;
   const jsonMode = args.includes('--json');
   
   // Gather data
@@ -204,8 +209,24 @@ function main() {
   const report = buildReport(libs, bins, deps, tryCatch, vafCount, version, date, pkg);
   
   if (outFile) {
-    fs.writeFileSync(path.join(ROOT, outFile), report);
-    console.error('Audit written to: ' + outFile);
+    // (pass 23 census) --out used to skip path validation entirely. The
+    // write itself stays a raw fs op ON PURPOSE (root-anchored report
+    // artifact, not models-data — same prd-storage class as the audit's own
+    // reads), but the path now goes through the same vaf check the rest of
+    // the security chain uses.
+    const rel = path.relative(ROOT, path.resolve(ROOT, outFile));
+    if (rel.startsWith('..') || path.isAbsolute(rel)) {
+      console.error('Error: --out must stay inside the repo (got: ' + outFile + ')');
+      process.exit(1);
+    }
+    const vaf = require('../lib/vaf');
+    const check = vaf.checkPathTraversal(rel);
+    if (check.blocked) {
+      console.error('Error: --out path blocked: ' + check.reason);
+      process.exit(1);
+    }
+    fs.writeFileSync(path.join(ROOT, rel), report);
+    console.error('Audit written to: ' + rel);
   } else if (jsonMode) {
     console.log(JSON.stringify({ generated: new Date().toISOString(), report: report }, null, 2));
   } else {

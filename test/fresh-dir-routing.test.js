@@ -248,6 +248,101 @@ test('storage.write: containment pre-check rejects escape-shaped paths', () => {
     }
 });
 
+// (pass 23) lib/horcrux-safe unit paths with a FAKE encoder/decoder — no
+// real horcrux work, so this is fast and hermetic. The helper is async; the
+// harness here is sync, so each scenario runs in a child `node -e` that
+// prints a JSON verdict. Covers: new target direct write + round-trip,
+// existing target tmp→validate→rename, decode failure (original untouched,
+// tmp cleaned), validation failure (same).
+const HSAFE_SCENARIO = `
+const fs = require('fs');
+const path = require('path');
+const dir = process.env.HSAFE_DIR;
+const scenario = process.argv[1];
+const { safeWriteHorcrux } = require(process.env.HSAFE_LIB);
+(async () => {
+    const enc = (content) => async (rel) => { fs.writeFileSync(path.join(dir, rel), content); return { size: content.length, format: 'steganography' }; };
+    const dec = (val) => async () => val;
+    if (scenario === 'new-target') {
+        const out = await safeWriteHorcrux('backups/h.svg', {
+            encode: enc('<svg>NEW</svg>'), decode: dec({ ok: true })
+        });
+        console.log(JSON.stringify({
+            ok: out.usedTmp === false && out.replaced === false && out.data && out.data.ok === true
+                && fs.readFileSync(path.join(dir, 'backups/h.svg'), 'utf8') === '<svg>NEW</svg>'
+        }));
+    } else if (scenario === 'happy-replace') {
+        const out = await safeWriteHorcrux('backups/h.svg', {
+            encode: enc('<svg>FRESH</svg>'), decode: dec({ ok: true })
+        });
+        console.log(JSON.stringify({
+            ok: out.usedTmp === true && out.replaced === true
+                && fs.readFileSync(path.join(dir, 'backups/h.svg'), 'utf8') === '<svg>FRESH</svg>'
+                && !fs.existsSync(path.join(dir, 'backups/h.tmp.svg'))
+        }));
+    } else if (scenario === 'decode-fail' || scenario === 'validate-fail') {
+        try {
+            await safeWriteHorcrux('backups/h.svg', scenario === 'decode-fail'
+                ? { encode: enc('<svg>BAD</svg>'), decode: async () => { throw new Error('decrypt failed'); } }
+                : { encode: enc('<svg>BAD2</svg>'), decode: dec({}), validate: () => ({ valid: false, errors: ['structure wrong'] }) });
+            console.log(JSON.stringify({ ok: false, why: 'should have thrown' }));
+        } catch (e) {
+            const expect = scenario === 'decode-fail' ? /original left untouched/ : /post-encode validation failed/;
+            console.log(JSON.stringify({
+                ok: expect.test(e.message)
+                    && fs.readFileSync(path.join(dir, 'backups/h.svg'), 'utf8') === '<svg>FRESH</svg>'
+                    && !fs.existsSync(path.join(dir, 'backups/h.tmp.svg'))
+            }));
+        }
+    }
+})().catch(e => console.log(JSON.stringify({ ok: false, why: e.message })));
+`;
+
+function runHsafeScenario(scenario, seedOriginal) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-hsafe-'));
+    try {
+        fs.mkdirSync(path.join(dir, 'backups'), { recursive: true });
+        if (seedOriginal) fs.writeFileSync(path.join(dir, 'backups', 'h.svg'), '<svg>FRESH</svg>');
+        const r = execFileSync('node', ['-e', HSAFE_SCENARIO, scenario], {
+            encoding: 'utf8',
+            timeout: 30000,
+            env: {
+                ...process.env,
+                HSAFE_DIR: dir,
+                HSAFE_LIB: path.join(ROOT, 'lib', 'horcrux-safe.js'),
+                VANT_REPO_ROOT: dir
+            }
+        });
+        const verdict = JSON.parse(r.trim().split('\n').pop());
+        if (!verdict.ok) return { error: verdict.why || `scenario ${scenario} failed` };
+        return true;
+    } finally {
+        try { fs.rmSync(dir, { recursive: true, force: true }); } catch (e) { /* ignore */ }
+    }
+}
+
+test('horcrux-safe: new target writes directly + round-trips', () => runHsafeScenario('new-target', false));
+
+test('horcrux-safe: existing target tmp→validate→rename', () => runHsafeScenario('happy-replace', true));
+
+test('horcrux-safe: decode failure leaves original + cleans tmp', () => runHsafeScenario('decode-fail', true));
+
+test('horcrux-safe: validation failure leaves original + cleans tmp', () => runHsafeScenario('validate-fail', true));
+
+test('anchor: VANT_REPO_ROOT env wins over install tree', () => {
+    const anchor = require(path.join(ROOT, 'lib', 'anchor'));
+    const prevRoot = process.env.VANT_REPO_ROOT;
+    try {
+        process.env.VANT_REPO_ROOT = '/tmp/vant-anchor-probe';
+        if (anchor.getRepoRoot() !== '/tmp/vant-anchor-probe') return { error: 'env not honored' };
+        delete process.env.VANT_REPO_ROOT;
+        if (anchor.getRepoRoot() !== path.resolve(ROOT)) return { error: 'install-tree fallback broken: ' + anchor.getRepoRoot() };
+        return true;
+    } finally {
+        if (prevRoot === undefined) delete process.env.VANT_REPO_ROOT; else process.env.VANT_REPO_ROOT = prevRoot;
+    }
+});
+
 // ==================== RUNNER ====================
 
 function main() {
