@@ -15,11 +15,10 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — CI minutes-efficiency + all-green shipped: audit.yml
-deleted, test.yml consolidated to 1 job with concurrency cancel-in-progress
-+ npm ci + cache, js-yaml lockfile 4.3.2 (audit clean), brain-circuit
-recovery tests deadline-based + resetMs-0 pinned. Flake-proof 5×, full
-battery green. Branch is PR #91-ready; user decides on merge.)
+(nothing in flight — version-consistency audit shipped: all hardcoded
+runtime version fields (brain/transform/backup/compute/encounter/rules/
+docs/embed) now read lib/version.js; config.example.ini v0.8.4→v0.8.6.
+Full battery green. Branch is PR #91-ready; user decides on merge.)
 
 ---
 

@@ -2,7 +2,50 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-22  
-**Session:** Wave: CI minutes-efficiency + green — audit workflow deleted, test.yml consolidated to 1 job with concurrency cancel, js-yaml advisory closed, brain-circuit flake fixed
+**Session:** Wave: version-consistency audit — all hardcoded runtime version fields switched to lib/version.js, stale v0.8.4 in config.example.ini fixed
+
+---
+
+## Session (2026-09-22 — version-consistency audit, 0.8.6)
+
+User asked: are version numbers consistent across the codebase? We're on
+0.8.6. Repo-wide sweep for `v?0.x.y` in js/json/md/yml/ini/html (filtering
+IPs like 127.0.0.1, changelog history, and change-annotation headers).
+
+**Real drift found + fixed:**
+- `config.example.ini` `VANT_VERSION=v0.8.4` → v0.8.6 (stale since 0.8.5 —
+  bump.js only touches package.json, and lib/version.js's "MANUAL" list is
+  prose, which is exactly how this spot drifted)
+- `lib/embed.js` getStatus reported `'0.9.0-axolotl'` (dev tag) while every
+  peer getStatus reports the package version
+- `lib/encounter.js` + `lib/rules.js` (RULES_VERSION) + `lib/docs.js`
+  OpenAPI info + `lib/compute.js` getInfo + `lib/backup.js` (2 horcrux tags)
+  + `lib/transform.js` (3 horcrux tags) still said 0.8.6/0.8.7 — consistent
+  TODAY but guaranteed drift at the next bump
+- `lib/brain.js` getVersion() was a hardcoded literal → now delegates to
+  require('./version') (spliced via the node-script method; str_replace
+  silently refuses 2000+ line files, as the labs notes predicted)
+
+**Contract now:** everything runtime-reporting reads `lib/version.js`
+(lazy `require` inline at use sites — zero cycle risk, version.js only
+requires package.json + lazy event). Horcrux/backup artifact `version`
+fields switched too: they're informational tags (restore code never
+compares them; transform's gather fallback now also dynamic).
+
+**Deliberately NOT changed (audit verdicts):** module headers like
+`v0.9.0-axolotl` (change annotations, accurate on this branch);
+`0.9.0-exp` geometry experimental tag; `lib/prune.js` 'v0.5.0' (a models/
+DIRECTORY name fallback, not a version report); CHANGELOG [0.8.6] header;
+dist/index.html `v0.8.4+` (feature-availability note, correct);
+docs fixtures 0.8.11 / historical changelog pages; bin/models/brain.json
+identity.version (test fixture, matches package).
+
+**Verification:** all 8 touched files `node --check` clean; residual sweep
+`grep -rE "version: '?\"?v?0\\.8\\.[0-9]"` over lib/ + bin/ → ZERO matches;
+brain.getVersion / embed.getStatus / rules live-probe → "0.8.6"; full
+battery: ci 421/0/3, runner 37/37, ALL standalone suites exit-0, vibe 4/4,
+coverage 41/0. transform/malicious-restore '0.8.6' literals are test INPUT
+fixtures, not output pins — unaffected by the dynamic switch.
 
 ---
 
