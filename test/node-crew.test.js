@@ -78,6 +78,36 @@ sandbox.defaultSandbox.setCapabilities({
     test('stego encodeSvg/decodeSvg round-trip (message, carrier, password)',
         decoded && decoded.message === soul);
 
+    // 7. (pass 31, stress A3) market scarcity: parallel trades on the last
+    // unit — exactly ONE winner (atomic reserve + default supply 1).
+    {
+        const l = await market.list('knowledge',
+            { title: 'crew-pin-scarce-' + Date.now().toString(36), description: 'pin', price: 1, tags: [] },
+            { agentId: 'agent-pin-master', consentGiven: true });
+        const scarceId = l && !l.error ? (l.id || (l.listing && l.listing.id)) : null;
+        if (!scarceId) {
+            test('market scarce-trade race pinned', false, 'listing failed: ' + JSON.stringify(l && l.error));
+        } else {
+            const [r1, r2] = await Promise.all([
+                market.trade(scarceId, 'buyer-pin-1', { agentId: 'buyer-pin-1', consentGiven: true }),
+                market.trade(scarceId, 'buyer-pin-2', { agentId: 'buyer-pin-2', consentGiven: true })
+            ]);
+            const winners = [r1, r2].filter((r) => r && !r.error).length;
+            test('market scarce-trade race: exactly one winner (default supply 1)', winners === 1,
+                JSON.stringify({ w: winners, e1: r1.error, e2: r2.error }));
+        }
+    }
+
+    // 8. (pass 31, stress B1) secret.get never prompts on non-TTY stdin —
+    // fails structured instead of hanging CI/cron.
+    {
+        const secret = require(path.join(ROOT, 'lib', 'secret'));
+        let code = null;
+        try { await secret.get('brain'); } catch (e) { code = e.code || null; }
+        test('secret.get fails structured on non-interactive stdin (E_SECRET_NON_INTERACTIVE)',
+            code === 'E_SECRET_NON_INTERACTIVE', 'got: ' + code);
+    }
+
     console.log(`\n=== Results: ${results.passed} passed, ${results.failed} failed ===\n`);
     process.exit(results.failed > 0 ? 1 : 0);
 })().catch((e) => {

@@ -2289,3 +2289,41 @@ test-all 17/17, syntax OK.
 **Evidence:** node-crew demo 9/9 ×2 (idempotent), node-crew pins 7/7,
 sync 18/18, sync-pull 15/15, git-injection 7/7, no-legacy-bloat 11/11,
 brain-storage-strict 14/14, syntax + eslint bin/ 0 errors.
+
+## Session (2026-09-24 — pass 31: v1.0.0 stability hunt, stress harness 0 fires)
+
+**Method shift (goal: release to main / v1.0.0):** the crew now hunts its
+own bugs. labs/node-crew/stress.js = adversarial protocol probes across
+concurrency (parallel races), env matrix (fresh dirs, missing password,
+strict sandbox), hostile inputs (traversal, prototype pollution). Exit 0
+by design — humans triage, suites pin.
+
+**Fires found + FIXED this pass:**
+- A3 🔥 market double-sell: parallel trades both succeeded on a scarce
+  listing (no supply concept; escrow hold = Map.set, no atomicity; trades
+  interleaved at await points). Fix: listing.supply (default 1, Infinity
+  opt-out) + atomic pre-await reserve with rollback on every late
+  rejection. Verified: race now yields exactly one winner.
+- B1 🔥 stdin hang: secret.get() fell back to readline prompt under
+  CI/cron (no TTY) — horcrux extract hung forever. Fix: non-interactive
+  stdin fails structured E_SECRET_NON_INTERACTIVE naming the env var.
+- B4a ⚠️ anomaly: agents _loadAgents classified read DENIAL as corruption
+  and reset the roster to empty (next save = data wipe). Fix: read errors
+  throw E_AGENT_STORE_READ; only parse failures reset.
+
+**Held green under stress (9 probes):** vote blitz one-per-agent, double-
+vote audit trail, msg storm QoS degradation, trust score bounds, wrong-
+password rejection, fresh-dir cleanliness, strict-sandbox fail-closed,
+prototype-pollution containment, traversal containment.
+
+**labs/STABILITY.md (new):** v1.0.0 tracker — per-area status, fire log,
+known non-blockers (escrow hold-without-debit, in-memory protocol state,
+bin/ warnings, no full-suite runner), draft release gate (7 criteria).
+
+**Baseline:** zero red suites across 25+ sampled (core 13 + release-gate
+suites + build-test 15/15 + test-all 17/17). node-crew pins now 9/9
+(includes the two new regression pins). Demo genesis still 9/9.
+
+**Next toward v1.0.0 (per STABILITY.md gate):** full-suite sweep runner,
+escrow debit-on-trade, second consecutive 0-fire stress run, legacy
+migrate round-trip check.
