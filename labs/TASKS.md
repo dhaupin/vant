@@ -2327,3 +2327,30 @@ suites + build-test 15/15 + test-all 17/17). node-crew pins now 9/9
 **Next toward v1.0.0 (per STABILITY.md gate):** full-suite sweep runner,
 escrow debit-on-trade, second consecutive 0-fire stress run, legacy
 migrate round-trip check.
+
+## Session (2026-09-24 — pass 32: full-suite sweep 115/115, release gate ALL GREEN)
+
+**test/run-all.js (new, npm run sweep):** every test/*.test.js suite in
+its own process, 120s timeout each, categorized summary, --only/--skip/
+--json/--list. Exit 1 on failures, 2 on timeouts. The "nothing hides"
+runner: build-test + test-all covered ~32 of 115.
+
+**Historic result:** first full sweep 114/115 → the one failure was
+error.test.js still asserting the `err.Error` legacy alias removed in
+pass 26 (stale test currency, not a product bug). Updated to assert the
+real contract (VantError present, alias absent — matches the
+no-legacy-bloat pin). Second sweep: **115/115 green, 0 timeouts, ~136s.**
+
+**Release gate #5 verified live:** legacy flat tree (3 public .md +
+private .md, no stack) → `migrate --status` detects with evidence →
+migrate imports into models/{public,private}/vant/ with verified:true →
+marker v3 → idempotent (--status up to date). migrations.test.js 28/28.
+
+**STABILITY.md updated:** all 7 release-gate criteria ALL GREEN.
+Remaining pre-release work is mechanical: version bump 0.8.6 → 1.0.0
+(package.json + MANUAL surfaces per lib/version.js), CHANGELOG entry,
+owner go decision.
+
+**Evidence:** sweep 115/115 ×2, stress 0 fires ×2 (gate #2),
+node-crew pins 9/9, demo 9/9, migrations 28/28, error.test 19/19,
+syntax OK, eslint 0 errors.

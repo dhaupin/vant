@@ -33,6 +33,7 @@
   },
   "scripts": {
     "test": "node bin/build-test.js",
+    "sweep": "node test/run-all.js",
     "setup": "node bin/setup.js",
     "start": "node bin/start.js",
     "health": "node bin/health.js",

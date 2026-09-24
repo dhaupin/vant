@@ -31,9 +31,14 @@ test('error module loads', () => {
     return { success: !!err };
 });
 
-test('error has Error class', () => {
+test('error has VantError class (Error alias removed pass 26)', () => {
     const err = require(path.join(ROOT, 'lib', 'error'));
-    return { success: !!err.Error };
+    // (pass 32 sweep) updated for the no-legacy-code policy: the old
+    // `err.Error` compat alias was removed in pass 26 and its absence is
+    // pinned by test/no-legacy-bloat.test.js. Assert the real contract.
+    if (!err.VantError) return 'VantError missing';
+    if (err.Error !== undefined) return 'legacy Error alias resurrected';
+    return true;
 });
 
 test('error has CODES object', () => {
