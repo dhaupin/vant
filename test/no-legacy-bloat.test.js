@@ -110,8 +110,10 @@ test('backup.js: no legacy backup() alias', () => {
 
 test('orgchart stores: brain-scoped default only, no .agent_tmp fallback (pass 28)', () => {
     for (const rel of ['teams.js', 'escrow.js', 'agents/internal.js']) {
-        const src = readLib(rel);
-        if (/agent_tmp/.test(src)) return rel + ' still references .agent_tmp';
+        // Strip // comments first: docs of the REMOVAL may name the old path;
+        // only live code/strings count as a regression.
+        const code = readLib(rel).replace(/\/\/.*$/gm, '');
+        if (/agent_tmp/.test(code)) return rel + ' still references .agent_tmp in code';
     }
     return null;
 });
