@@ -2383,3 +2383,25 @@ excluded), stress 0 fires, demo 9/9.
 handler (nobody imports it — either wire it as THE operation registry for
 MCP/crew or fold it into pipeline), vibe.js into runtime/commit flow,
 webhook transport for node-crew v0.2.
+
+## Session (2026-09-24 — pass 34: do.js removed — superseded, honored, deleted)
+
+**Owner question:** do.js had a greater purpose with pre-gen agents — a
+function proxy/handler/harness for consistent async/sync implementation.
+Useful or remove?
+
+**Forensic verdict (remove):**
+- 0 importers anywhere (lib/bin/MCP/docs/dynamic requires) — only its own
+  test file. Never routed in vant.js.
+- Its consistency purpose was superseded by successors the codebase
+  actually adopted: pipeline.run (23 modules — mode selection + security
+  chain), gate.js (8 modules — capability checks with
+  _explicitlyConfigured awareness), and brain.register (the LIVE DI
+  registry — boot wires qos/escrow/trust/market through it).
+- The async/sync harness problem dissolved with codebase-wide async/await
+  standardization; _executeFn wrapped what the language now does natively.
+- do.guard's only consumer (storage) migrated to gate.js in B-2; the
+  comment claiming "Storage now uses do.guard()" was a stale lie.
+- Fallback chains, adapters registry, hooks registry: 0 consumers each.
+- Deleted lib/do.js + test/do.test.js. Zero remaining refs; sweep 111/111
+  green (113 minus the two do.js suites).
