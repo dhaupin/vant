@@ -27,7 +27,7 @@ vant horcrux create <path> <password>
 The command gathers brain state, encrypts it, and embeds the payload into
 the carrier image. Output lands as a file you can copy, commit, or attach.
 Without a path it defaults to
-`models/public/<currentBrain>/boot/<brain>-p_<password>.svg` — the naming
+`models/public/<currentBrain>/boot/<brain>-p_<password>.svg`, the naming
 convention boot-time discovery scans for.
 
 ## Refresh (keep it current)
@@ -39,8 +39,8 @@ session. Regenerate the discovered boot horcrux IN PLACE with fresh state:
 vant horcrux refresh
 ```
 
-The password resolves the same way as restore (arg → `VANT_BRAIN_PASSWORD`
-env → `p_<password>` in the filename). The fresh snapshot is written to a
+The password resolves the same way as restore (arg, then `VANT_BRAIN_PASSWORD`
+env, then `p_<password>` in the filename). The fresh snapshot is written to a
 temp file and round-trip validated before it replaces the original, so a
 failed refresh never destroys your only backup; after the swap the final
 file is re-verified and the previous bytes restored if verification fails.

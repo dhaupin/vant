@@ -2508,3 +2508,58 @@ migrations fix, swept, committed.
 Verification: state-persistence 8/8 ×3, registry 6/6, migrations 28/28,
 crew-bus 13/13, msg 17/17, trust 20/20, node-crew 9/9; sweep 116/116 ×1;
 eslint 0 errors.
+
+---
+
+## Pass 38 (2026-09-24) — Wave 3: consensus + market ledger persistence
+
+Crash-resumed session (frozen agent mid-reasoning); finished the Wave 3
+diff review, fixed the suite, found 3 real lib bugs via the pins.
+
+**consensus.js:** hydrate on load + write-through at lock points
+(create/vote) and tally status transitions (passed/open/rejected/expired).
+list()/resolve() hydrate too (cold-process safe). Seams added to match
+trust/registry/market: _resetHydration, _stateFile, clearState. Latent
+gap fixed: tally() reads `ledger.useTrustWeight !== false` (default ON)
+but _createInternal never stored the option — create now honors an
+explicit `useTrustWeight` option; integer minQuorum semantics need it
+(trust-weighted, a fresh voter scores 0.5 and misses minQuorum 1).
+
+**market.js:** hydrate on load + write-through at settle points
+(list/bid/trade-commit/cancelTrade/restoreState). Serialization deltas:
+supply Infinity ⇄ null on disk (scarcity opt-out must not silently cap
+at 1); _reserved NEVER persists (phantom-reservation reset). Restored
+listings rebuild the search index (byType/byTags/byAgent).
+_stateFile/_persistNow/_resetHydration seams.
+
+**Three lib bugs the pin caught (all fixed):**
+1. Consent hardcodes — market list/bid/trade hardcoded
+   `consentGiven: false` (trade ignored context entirely), so governance's
+   consent gate could never pass. Context passthrough wired.
+2. canTrade undeclared — trade() asks the gate for `canTrade`, but
+   Sandbox's DEFAULT_CAPABILITIES never had it: an explicitly-configured
+   sandbox always denied (undefined !== true) and no caller could grant
+   it. Declared deny-by-default like its siblings.
+3. Barter-price NaN — `_checkBudget(listing.price || 1)` passed
+   'favor:review' into escrow's numeric `available >= amount`: NaN, so
+   every barter trade denied 'Insufficient budget'. Non-numeric prices
+   skip the escrow check (barter has no cost to debit); numeric
+   credit-mode amounts flow through unchanged.
+
+**test/ledger-persistence.test.js (new suite, 5 pins):** consensus
+create+vote survives a real process death (tally + hash verify), resolve
+→ passed on disk, market list+bid+trade round-trip (supply consumed,
+_reserved=0, index rebuilt), Infinity-supply round-trip, kind marker on
+both files. Harness fixes vs the frozen draft: child scripts get their
+contract via env var (the draft's `node -e code LISTING_ID` argv form is
+self-injection — node parses it as a SECOND eval script), consensus
+children register the voting peer + create with useTrustWeight:false,
+market children grant caps + consent.
+
+**Also:** docs/memory/horcrux.md style regressions (em dash, arrow)
+swept — check-docs-style back to PASS (118).
+
+Verification: ledger-persistence 5/5; FULL SWEEP 117/117 (serial;
+parallel x4 showed shared-state interference between the persistence
+suites — run-all is serial, noted for future suite authors), eslint 0
+errors, syntax OK, docs-style PASS.

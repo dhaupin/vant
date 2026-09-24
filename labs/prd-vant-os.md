@@ -94,14 +94,26 @@ sandbox-gated outbound, 13/13 pinned.
 
 ### Where
 
-```
+``` 
 models/private/<brain>/state/
-  node-registry.json     # peer table (host/port/status/lastSeen)
-  trust.json             # trust scores
-  msg-<channel>.jsonl    # append-only channel logs
-  consensus-<topic>.json # topic record incl. votes (written at lock points)
-  market.json            # listings + escrow reservations (commit points)
+  node-registry.json       # peer table (host/port/status/lastSeen)  [Wave 1 ✓]
+  trust.json               # scores/karma/roleTrust/history tail       [Wave 2 ✓]
+  msg-conversations.json   # conversation snapshots (channels are      [Wave 2 ✓]
+                           # no-history IPC — never persisted)
+  consensus.json           # topic ledgers incl. votes (lock points)   [Wave 3 ✓]
+  market.json              # listings/bids/trades (commit points)      [Wave 3 ✓]
 ```
+
+All files carry `{ kind: 'vant-protocol-state', module: <name> }` — the
+live-format marker lib/migrations' legacy-dropfile detector skips (a
+content-based detector without a live allowlist eats new state formats
+as "legacy"; that near-miss was caught live in pass 37).
+
+**Implementation note (Wave 2):** the rules above live in ONE shared
+module, `lib/state-store.js` (hydrate/persist/clear) — every protocol
+module rides it; no module-local copies. state-store resolves the brain
+per call (VANT_BRAIN env override > currentBrain, matching
+getBrainPath semantics).
 
 ### Rules (per module)
 
@@ -129,11 +141,11 @@ models/private/<brain>/state/
 
 | Module | Persisted | Cadence |
 |---|---|---|
-| node-registry | full peer table | on register/heartbeat/status-change |
-| trust | scores + history tail | on score change |
-| msg | channel messages | append-only JSONL |
-| consensus | topic + votes + status | inside `_lockTopic` commit point |
-| market | listings + supply/reservations | at trade commit points (after `_unreserve` rollback logic settles) |
+| node-registry | full peer table | on register/heartbeat/unregister | ✅ Wave 1 |
+| trust | scores + karma + roleTrust + history tail (bounded 100) | on record/setRequired/reset/import | ✅ Wave 2 |
+| msg | conversation snapshots (bounded arrays, participants; Sets↔Arrays) | on create/post/reply/participants/delete | ✅ Wave 2 |
+| consensus | topic ledgers + votes + status | at lock points (create/vote/resolve/tally transitions) | ✅ Wave 3 |
+| market | listings + bids + trades (supply serialized; _reserved reset on hydrate) | at commit points (list/bid/trade settle/cancel) | ✅ Wave 3 |
 
 Escrow stays in-memory this PRD (known non-blocker, holds don't debit).
 
@@ -151,21 +163,47 @@ Escrow stays in-memory this PRD (known non-blocker, holds don't debit).
 - Read wal.js; decide use-vs-pattern for msg JSONL.
 - Sweep green + new pins.
 
-### Wave 2 — memory & scores (pass ~37)
-- **trust.json** (write-through on score change).
-- **msg JSONL** per channel (append; channel list recovered by scan or
-  an index file if wal.js doesn't fit).
-- transform.js: swap relay gather/restore seam → crew-bus status/peers.
-- Sweep green + new pins.
+### Wave 2 — memory & scores (pass ~37) ✅
+- **trust.json** (write-through on score change). ✅
+- msg: **conversation snapshots**, not channel JSONL — the PRD's
+  channel-JSONL sketch was corrected on implementation: channels are
+  no-history IPC by design; the conversation (bounded message arrays +
+  participants) is msg's history unit. wal.js verdict: follow its
+  append pattern, never the class (replay semantics misbehave on
+  appends). ✅
+- **lib/state-store.js** extracted: the ONE implementation of the arch-A
+  rules (registry refactored onto it). ✅
+- transform.js: relay gather/restore seam → crew-bus status/secret-free
+  peer topology (restore NEVER fabricates secrets). ✅
+- Migration safety: kind-marker on all state files; legacy-dropfile
+  detector skips them (near-miss: migrate() relocated a real trust.json
+  before the fix). ✅
+- Sweep 116/116 + pins. ✅
 
-### Wave 3 — ledgers (pass ~38)
-- **consensus-<topic>.json** inside `_lockTopic` commit points (create/
-  vote/tally-state transitions).
-- **market.json** at trade commit points (listings, supply, active
-  reservations) — careful to persist *after* the atomic
-  reserve/rollback dance settles so a crash can't resurrect a
-  phantom reservation.
-- Sweep green + new pins.
+### Wave 3 — ledgers (pass ~38) ✅
+- **consensus.json** at lock points: create/vote/resolve + status
+  transitions (expired/passed/rejected). One snapshot file per brain
+  (topic count is bounded by maxLedgers=100; per-topic files are
+  overkill at that scale). Hydrate on load. `list()`/`resolve()`
+  hydrate too (cold-process safe). ✅
+- **market.json** at settle points: list/bid/trade-commit/cancelTrade.
+  Serialization deltas: `supply: Infinity` ↔ `supply: null` (scarcity
+  opt-out must round-trip); `_reserved` (in-flight reserve accounting)
+  never persists — hydrate resets it to 0 so a crash can't resurrect a
+  phantom reservation. ✅
+- **Consent passthrough (bug found by the pin):** market list/bid/trade
+  hardcoded `consentGiven: false` (trade ignored context entirely), so
+  the governance consent gate could never pass. Context now flows.
+- **canTrade capability (bug found by the pin):** market.trade() asks
+  the gate for `canTrade` but Sandbox never declared it — an explicitly
+  configured sandbox always denied and no caller could grant it.
+  Declared in DEFAULT_CAPABILITIES (deny-by-default).
+- **Barter-price budget check (bug found by the pin):** `_checkBudget`
+  passed string prices ('favor:review') into escrow's numeric
+  `available >= amount` comparison → NaN → every barter trade denied
+  'Insufficient budget'. Non-numeric prices skip the escrow check
+  (no cost to debit); numeric credit-mode amounts unchanged. ✅
+- Sweep green + new pins. ✅
 
 ### Wave 4 — relay removal + OS wiring (pass ~39)
 - **Delete relay.js**; move transform's relay seam to crew-bus
