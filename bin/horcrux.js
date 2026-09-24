@@ -161,8 +161,9 @@ async function run() {
         if (result.teamsError) {
             console.log('⚠️ Teams error:', result.teamsError);
         }
-        if (result.hasBothFormats) {
-            console.log('⚠️ Warning: Both brainStorage and privateBrains present (duplicate)');
+        if (result.legacyBrainData) {
+            console.log('⚠️ Legacy brain data detected. Convert before restoring:');
+            console.log('   const { converted } = require("vant/lib/transform").migrateLegacyBrainStorage(data);');
         }
         
     } else if (subcmd === 'restore') {

@@ -118,6 +118,32 @@ test('orgchart stores: brain-scoped default only, no .agent_tmp fallback (pass 2
     return null;
 });
 
+test('transform.js: no legacy privateBrains producer/writer (pass 29)', () => {
+    const src = readLib('transform.js');
+    // Strip // comments first: reject messages and removal docs may name the
+    // legacy format; only live code counts as a regression.
+    const code = src.replace(/\/\/.*$/gm, '');
+    if (/gatherPrivateBrains/.test(code)) return 'legacy gatherPrivateBrains producer is back';
+    if (/results\.restored\.push\('privateBrains'\)/.test(code)) return 'legacy privateBrains restore writer is back';
+    if (/options\.privateBrains/.test(code)) return 'legacy gather option is back';
+    return null;
+});
+
+test('transform.js: strict restore rejects legacy shapes via bridge (pass 29)', () => {
+    const transform = require(path.join(ROOT, 'lib', 'transform'));
+    if (typeof transform.migrateLegacyBrainStorage !== 'function') return 'migrateLegacyBrainStorage bridge missing';
+    // Sync-checkable pieces here; the async E_LEGACY_FORMAT rejection is
+    // pinned by test/brain-storage-strict.test.js (async harness).
+    const { converted } = transform.migrateLegacyBrainStorage({
+        privateBrains: { loaded: true, brains: [{ name: 'b', files: [{ name: 'i', content: 'x' }] }] }
+    });
+    if (!converted.brainStorage || !converted.brainStorage.brains.b ||
+        converted.privateBrains !== undefined) return 'bridge conversion broken';
+    const src = readLib('transform.js').replace(/\/\/.*$/gm, '');
+    if (!/E_LEGACY_FORMAT/.test(src)) return 'restore no longer rejects legacy shapes (E_LEGACY_FORMAT gone)';
+    return null;
+});
+
 test('smoke: error.js still exports VantError + CODES', () => {
     const errors = require(path.join(ROOT, 'lib', 'error.js'));
     if (typeof errors.VantError !== 'function') return 'VantError missing';

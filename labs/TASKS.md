@@ -2192,3 +2192,45 @@ test-all 17/17, syntax OK.
 **Remaining .agent_tmp refs (out of scope here):** security/gates.js GATE_DB
 (separate store, own migration decision), bin/format-test temp artifacts,
 bin/clean.js cleanup list.
+
+## Session (2026-09-24 — pass 29: horcrux brainStorage strict single format, migrate-or-reject)
+
+**Tier 3 #3 (owner: restore accepts the new format ONLY; old horcruxes go
+through a migrate bridge, same pattern as teams pass 27):**
+- transform.restore() brainStorage section: the gather() brains-object shape
+  ({ brains: { <name>: { type, files } } }) is the only accepted input.
+  Both legacy shapes REJECTED with E_LEGACY_FORMAT naming the bridge, before
+  any writes: brainStorage.files flat array (pre-multibrain single brain)
+  and data.privateBrains per-brain list. Rejections validate-and-throw
+  upfront — a rejected payload leaves disk untouched.
+- transform.migrateLegacyBrainStorage(data, { brainName }) added as the
+  bridge: pure converter (flat files -> private/<brainName|'vant'>,
+  privateBrains list -> private/<name> with .name remapped to <name>.md),
+  merges both shapes with a warning, strips the legacy key into
+  _migratedPrivateBrains, and rejects unsafe brain/file names via the same
+  _safeBrainName gate as the new path. Docs + errors follow the
+  migrate-or-reject contract.
+- Legacy privateBrains SURFACE removed entirely (no dual parsing, no bloat
+  fallback): dead gatherPrivateBrains() producer + disabled-by-default
+  gather option + export deleted (brainStorage covers it since 0.8.6).
+- validateHorcruxData now recognizes legacy privateBrains payloads as
+  content so restore's specific migration error surfaces instead of a
+  generic validation failure.
+- inspectHorcrux: preview reports hasLegacyPrivateBrains + legacyBrainData
+  migration hint; legacy brains no longer double-count in brainCount/
+  agentCount. Dead hasBothFormats (always-false dup warning) removed;
+  bin/horcrux.js inspect now prints the migrate hint instead.
+- New test/brain-storage-strict.test.js (14): legacy rejections + disk-
+  safety canaries, malformed-entries rejections, bridge conversion/purity/
+  unsafe-name/merge, round-trip (migrated payload restores for real),
+  benign control, inspect hint. no-legacy-bloat guard extended with two
+  pass-29 pins.
+
+**Note (pre-existing, not this pass):** bin/transform.js full-restore calls
+transform.restoreFull/fromSvg — neither is exported by lib/transform.js.
+Dead CLI surface; candidate for next bloat sweep.
+
+**Evidence:** brain-storage-strict 14/14, no-legacy-bloat 11/11,
+malicious-restore 7/7, transform 5, backup 8, teams 22, agents 17,
+escrow 15, orgflow 24, snapshots 9, fresh-dir 16, build-test 15/15,
+test-all 17/17, syntax OK.
