@@ -2138,3 +2138,33 @@ test-all 17/17. Docs grep clean.
    .agent_tmp only via explicit config override.
 3. transform.restore() legacy privateBrains path → require new format, use
    `vant migrate` as the bridge.
+
+## Session (2026-09-24 — pass 27: teams restoreState migrate-or-reject + E2E hermeticity)
+
+**Tier 3 #1 (owner: migrate or reject, no dual parsing):**
+- teams.restoreState now accepts ONLY gatherState()'s Map-entries format
+  ([key, entity] pairs, key === entity.id / agentId). Legacy store-file
+  arrays → thrown Error code E_LEGACY_FORMAT pointing at the new bridge.
+  Validation runs BEFORE the maps are cleared — a rejected payload leaves
+  live state untouched (pinned).
+- teams.migrateLegacyState(legacy) added + exported: pure converter,
+  legacy/entries → entries; wrong-keyed or id-less entries throw.
+- transform.restore needs no change: its try/catch already funnels the
+  rejection into results.errors.
+
+**orgflow.test.js harness truth-fix (found while verifying):**
+- Store pollution: the suite wrote real entities into
+  models/private/<brain>/orgchart/teams.json, so re-runs tripped their own
+  duplicate checks (and the checked-in tree carried test residue — purged).
+  Now hermetic: config.set('teams.store', <tmpdir>) BEFORE lib/teams loads
+  (runtime flag, top get() precedence), tempdir removed on exit.
+- Coverage race: the fire-and-collect harness raced async bodies against
+  each other and against later sections' load-time setup, and process.exit
+  swallowed pending microtasks — 4/22 verdicts silently vanished run-to-run
+  (incl. the dryRun test, which had NEVER actually passed; it raced the
+  real delete). Rewrote to a sequential queue (bodies awaited in file
+  order); soul-test setup + cleanup moved into queued steps. 24/24 stable
+  across runs, real store stays clean.
+
+**Evidence:** teams 22, orgflow 24/24 ×2, agents 17, transform 5,
+backup-create-safety 3, fresh-dir 16, no-legacy-bloat 8, syntax OK.

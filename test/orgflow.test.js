@@ -15,17 +15,21 @@ const results = { passed: 0, failed: 0, tests: [] };
 const PASS = name => { results.passed++; results.tests.push({ name, status: 'passed' }); console.log(`  ✓ ${name}`); };
 const FAIL = (name, why) => { results.failed++; results.tests.push({ name, status: 'failed', error: why }); console.log(`  ✗ ${name}: ${why}`); };
 
+// (pass 27) SEQUENTIAL runner: test bodies are registered at load and then
+// awaited ONE AT A TIME, in file order. The old fire-and-collect harness
+// raced async bodies against each other AND against later sections' sync
+// setup — process.exit also swallowed pending verdicts (4/22 tests went
+// unreported on some runs). Sequential execution is the honest semantics
+// for a stateful E2E flow: each step sees the previous step's settled state.
+const queue = [];
 function test(name, fn) {
-    // (O-6) supports sync + promise-returning test bodies — deleteOrg/restoreState
-    // are async, so a promise-aware harness is required or results lie.
-    let result;
-    try { result = fn(); } catch (e) { FAIL(name, e.message); return; }
-    if (result && typeof result.then === 'function') {
-        result.then(r => {
-            const ok = r === true || (r && r.success);
-            ok ? PASS(name) : FAIL(name, (r && r.error) || (r && JSON.stringify(r).slice(0, 120)) || 'assertion failed');
-        }).catch(e => FAIL(name, e.message));
-    } else {
+    queue.push({ name, fn });
+}
+
+async function run() {
+    for (const { name, fn } of queue) {
+        let result;
+        try { result = await fn(); } catch (e) { FAIL(name, e.message); continue; }
         const ok = result === true || (result && result.success);
         ok ? PASS(name) : FAIL(name, (result && result.error) || (result && JSON.stringify(result).slice(0, 120)) || 'assertion failed');
     }
@@ -34,6 +38,18 @@ function test(name, fn) {
 // ==================== SETUP: operator grant ====================
 
 console.log('\n🏛️  ORG FLOW E2E TESTS\n');
+
+// (pass 27) HERMETICITY: redirect the teams store to a temp dir BEFORE
+// lib/teams is required — the suite creates real entities and previously
+// polluted models/private/<brain>/orgchart/teams.json, so re-runs tripped
+// their own duplicate-name checks. config.set is a runtime flag with top
+// get() precedence; the process exits before it needs clearing.
+const os = require('os');
+const fs = require('fs');
+const TMP_STORE_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-orgflow-'));
+process.on('exit', () => { try { fs.rmSync(TMP_STORE_DIR, { recursive: true, force: true }); } catch (e) { /* best effort */ } });
+const config = require(path.join(ROOT, 'lib', 'config'));
+config.set('teams.store', path.join(TMP_STORE_DIR, 'teams.json'));
 
 const sandbox = require(path.join(ROOT, 'lib', 'sandbox'));
 const sudo = require(path.join(ROOT, 'lib', 'sudo'));
@@ -146,14 +162,16 @@ console.log('💥 cascade + dryRun\n');
 
 test('dryRun reports cascade without deleting', () => {
     return teams.deleteOrg(org.id, { dryRun: true }).then(dry => {
-        return { success: dry.dryRun === true && dry.cascade.orgs.length === 1 && dry.cascade.depts.length === 1 && dry.cascade.teams.length === 1 && teams.getOrg(org.id) !== undefined };
+        const ok = dry.dryRun === true && dry.cascade.orgs.length === 1 && dry.cascade.depts.length === 1 && dry.cascade.teams.length === 1 && teams.getOrg(org.id) !== undefined;
+        return ok ? { success: true } : { success: false, dry, orgExists: teams.getOrg(org.id) !== undefined };
     });
 });
 
 test('deleteOrg cascades and reports children (F-5)', () => {
     return teams.deleteOrg(org.id).then(r => {
         const orphans = teams.listDepts().filter(d => d.name === 'SoulDept').length;
-        return { success: r.deleted === true && Array.isArray(r.cascaded.depts) && r.cascaded.depts.length === 1 && orphans === 0 };
+        const ok = r.deleted === true && Array.isArray(r.cascaded.depts) && r.cascaded.depts.length === 1 && orphans === 0;
+        return ok ? { success: true } : { success: false, r, orphans };
     });
 });
 
@@ -162,15 +180,20 @@ test('deleteOrg cascades and reports children (F-5)', () => {
 console.log('🧬 horcrux gather/restore (reincarnation)\n');
 
 const transform = require(path.join(ROOT, 'lib', 'transform'));
-const fs = require('fs');
 
-// Rebuild a fresh hierarchy for the soul test
-const org2 = teams.createOrg('SoulTestOrg', {});
-const dept2 = teams.createDept('SoulTestDept', { org: 'SoulTestOrg' });
-const team2 = teams.createTeam('SoulTestTeam', { dept: 'SoulTestDept' });
-const role2 = teams.createRole('soul-tester', { team: 'SoulTestTeam' });
-const agent2 = agents.spawn({ name: 'SoulTester' });
-teams.assign(agent2.id, { org: 'SoulTestOrg', team: 'SoulTestTeam', role: 'soul-tester' });
+// Rebuild a fresh hierarchy for the soul test (pass 27: SETUP runs as a
+// queued step, not at load — load-time side effects raced section 5's
+// pending deletes under the old harness).
+let org2, dept2, team2, role2, agent2;
+test('setup: soul-test entities', () => {
+    org2 = teams.createOrg('SoulTestOrg', {});
+    dept2 = teams.createDept('SoulTestDept', { org: 'SoulTestOrg' });
+    team2 = teams.createTeam('SoulTestTeam', { dept: 'SoulTestDept' });
+    role2 = teams.createRole('soul-tester', { team: 'SoulTestTeam' });
+    agent2 = agents.spawn({ name: 'SoulTester' });
+    const a = teams.assign(agent2.id, { org: 'SoulTestOrg', team: 'SoulTestTeam', role: 'soul-tester' });
+    return { success: !!org2.id && !!dept2.id && !!team2.id && !!role2.id && !!agent2.id && !a.error };
+});
 
 test('gather via teams.gatherState includes orgchart', () => {
     const g = teams.gatherState();
@@ -205,24 +228,46 @@ test('FULL reincarnation: teams restore round-trips IDs + names', () => {
     return { success: r.orgs >= 1 && !!orgBack && orgBack.name === 'SoulTestOrg' && byName.length === 1 && brainBack === agent2.brain };
 });
 
-test('teams.restoreState accepts legacy array format too (O-8 compat)', () => {
+test('teams.restoreState REJECTS legacy array format (pass 27: migrate-or-reject)', () => {
+    // (pass 27) Dual parsing removed per no-legacy-code policy. The legacy
+    // store-file shape must be converted via teams.migrateLegacyState() first.
     const legacy = {
         orgs: [{ id: 'org_legacy1', name: 'LegacyOrg', desc: '', metadata: {}, created: 1 }],
         depts: [], teams: [], roles: [],
         assignments: [{ agentId: 'agent_legacy1', org: 'org_legacy1', brain: 'vant', assigned: 1 }]
     };
-    const r = teams.restoreState(legacy);
+    let rejected = false;
+    let stateUntouched = true;
+    try {
+        teams.restoreState(legacy);
+    } catch (e) {
+        rejected = e.code === 'E_LEGACY_FORMAT' && /migrateLegacyState/.test(e.message);
+    }
+    // Validate-before-clear: the rejection must NOT have wiped live state.
+    // getOrg is exact-ID (D-1) — check the org created earlier this run.
+    stateUntouched = !!teams.getOrg(org2.id);
+    if (!rejected) return { error: 'legacy format was not rejected' };
+    if (!stateUntouched) return { error: 'rejected payload still wiped live state' };
+
+    // The bridge: convert → restore succeeds (restoreState is SYNC).
+    const { converted, counts } = teams.migrateLegacyState(legacy);
+    if (counts.orgs !== 1 || counts.assignments !== 1) return { error: 'bridge miscounted: ' + JSON.stringify(counts) };
+    const r = teams.restoreState(converted);
     const ok = r.orgs === 1 && r.assignments === 1 && !!teams.getOrg('org_legacy1');
-    // cleanup legacy
+    // cleanup converted entity (deleteOrg is the async one)
     return teams.deleteOrg('org_legacy1').then(() => ({ success: ok }));
 });
 
-// Cleanup soul-test entities
-teams.deleteOrg(org2.id).then(() => {});
-try { agents.kill(agent2.id); } catch (e) { try { agents.terminate(agent2.id); } catch (e2) {} }
+// Cleanup soul-test entities (queued step, not load-time)
+test('cleanup: soul-test entities', () => {
+    try { agents.kill(agent2.id); } catch (e) { try { agents.terminate(agent2.id); } catch (e2) {} }
+    return teams.deleteOrg(org2.id).then(() => ({ success: true }));
+});
 
 // ==================== RESULTS ====================
 
-console.log(`\n--- RESULTS ---\n\n  Passed:  ${results.passed}\n  Failed:  ${results.failed}\n`);
-
-process.exit(results.failed > 0 ? 1 : 0);
+// (pass 27) Sequential run, then summarize + exit.
+run().then(() => {
+    console.log(`\n--- RESULTS ---\n\n  Passed:  ${results.passed}\n  Failed:  ${results.failed}\n`);
+    process.exit(results.failed > 0 ? 1 : 0);
+});
