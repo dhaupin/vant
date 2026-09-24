@@ -180,3 +180,47 @@ money pin: register → kill → brand-new process hydrates both peers.
 Corruption, denial, brain-scoping, and interop all pinned. Regressions:
 crew-bus 13/13, consensus 8/8, node-crew 9/9. Full sweep 115/115, 0
 timeouts. eslint 0 errors. Version lock respected: 0.8.6.
+
+## Pass 37 — Wave 2: trust + msg remember; the state-store; a migration near-miss
+
+**lib/state-store.js — the ONE implementation of arch-A rules.** Registry
+(pass 36), trust, and msg all now ride it: brain-scoped FileStorage,
+per-call resolution, E_STATE_READ on denial, warn+fresh on corruption.
+Module-local copies of those rules deleted (node-registry refactored
+onto it; behavior pinned unchanged).
+
+**trust.json** — scores/karma/roleTrust/history hydrate on module load,
+write-through on record/setRequired/reset/import. History bounded at
+100 entries on disk. Consensus's tally() is trust-weighted, so this was
+integrity-critical persistence.
+
+**msg-conversations.json** — conversations (bounded message arrays +
+participants; Sets serialized/restored) hydrate on load, write-through
+on create/post/reply/addParticipant/removeParticipant/delete.
+**Channels are NOT persisted** — PRD delta: they are no-history IPC by
+design; the conversation is msg's history unit. (PRD's "channel JSONL"
+sketch corrected; wal.js verdict stands: follow its pattern, never the
+class.)
+
+**transform seam** — gather's relay section replaced by crewBus (status +
+secret-free peer topology); restore notes topology, NEVER fabricates
+secrets (placeholder secret = 401 time-bomb). Legacy data.relay restore
+line stays until Wave 4 deletes relay.js (migrate-or-reject bridge).
+
+**Migration near-miss caught (real production bug):** the legacy-dropfile
+migration step treats ANY non-.json.md file in <brain>/state/ as legacy
+drop content — arch-A state files matched, and migrate() had actually
+relocated a leftover trust.json here (zombie-process era leftovers).
+Fixed both directions: state files now carry a `kind:
+'vant-protocol-state'` marker; the detector skips marked files (one
+bounded read per candidate). Pin added via live migration suite
+(28/28). Lesson: content-based detection needs a live-format
+allowlist, or new state formats get eaten as "legacy".
+
+**Verification:** state-persistence 8/8 ×3 (trust+msg cross-process
+round-trips, denial, corruption, ephemeral channels, seam swap +
+secret-leak check), registry-persistence 6/6, migrations 28/28,
+crew-bus 13/13, msg 17/17, trust 20/20, node-crew 9/9. Full sweep
+116/116, 0 timeouts. eslint 0 errors. Also killed a zombie wal.test.js
+process (2 days at 81% CPU) that was cross-contaminating state dirs
+during sweeps. Version lock: 0.8.6.

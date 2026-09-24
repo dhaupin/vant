@@ -2480,3 +2480,31 @@ JSON.stringify drops undefined — `|| null` before asserting absence.
 **Verification:** registry-persistence 6/6 (incl. real process-death
 round-trip), crew-bus 13/13, consensus 8/8, node-crew 9/9. Sweep
 115/115 ×1 (after +1 suite), eslint 0 errors.
+
+---
+
+## Pass 37 (2026-09-24) — Wave 2: state-store + trust + msg persistence
+
+Crash-resumed session: Wave 2 was ~90% done pre-crash; finished the
+migrations fix, swept, committed.
+
+- lib/state-store.js: shared arch-A store (hydrate/persist/clear,
+  E_STATE_READ rule, kind marker). node-registry refactored onto it.
+- trust: write-through on record/setRequired/reset/import; hydrate on
+  load; history bounded 100 on disk.
+- msg: conversations snapshot (Sets↔Arrays); channels stay ephemeral.
+  PRD corrected: conversation = history unit, not channel JSONL.
+- transform: relay gather seam → crewBus (secret-free topology);
+  restore notes topology, never fabricates secrets.
+- migrations: dropfile detector now skips kind-marked protocol state
+  (caught migrate() relocating a real trust.json — near-miss fixed with
+  pin).
+- Test-harness notes: msg.post checks sandbox.can('canWrite') STRICTLY
+  (untouched stub = false) unlike FileStorage's allow-with-warning —
+  test children must setCapabilities (org.js pattern). transform.gather
+  children need an async IIFE (no top-level await in node -e CJS).
+- Killed zombie wal.test.js (2d, 81% CPU) that was contaminating sweeps.
+
+Verification: state-persistence 8/8 ×3, registry 6/6, migrations 28/28,
+crew-bus 13/13, msg 17/17, trust 20/20, node-crew 9/9; sweep 116/116 ×1;
+eslint 0 errors.

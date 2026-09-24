@@ -152,7 +152,7 @@ console.log(JSON.stringify({ total: onDisk.nodes.length, gone: !onDisk.nodes.som
         const r = await run(CHILD_READ);
         const data = JSON.parse(r.out);
         assert(data.n === 0, 'corrupt file should hydrate zero peers, got ' + data.n);
-        assert(r.err.includes('State file unreadable'), 'should warn loudly: ' + r.err);
+        assert(r.err.includes('State file corrupted'), 'should warn loudly: ' + r.err);
     });
 
     await test('read DENIAL throws E_STATE_READ — never resets', async () => {
