@@ -2563,3 +2563,56 @@ Verification: ledger-persistence 5/5; FULL SWEEP 117/117 (serial;
 parallel x4 showed shared-state interference between the persistence
 suites — run-all is serial, noted for future suite authors), eslint 0
 errors, syntax OK, docs-style PASS.
+
+---
+
+## Pass 39 (2026-09-24) — Wave 4: relay removed, crew demo v0.2, PRD complete
+
+**relay.js — deleted (owner decision pass 36: crew-bus is the resident).**
+Removal map first: the ONLY live code consumer was transform's restore
+branch; everything else was routing (bin/vant.js COMMANDS), help (help.js
+card), docs (cli.md row), and its own suite. Deleted: lib/relay.js,
+bin/relay.js, test/relay.test.js. Stripped: transform restore branch
+(legacy data.relay payloads in old horcrux/backup files are ignored —
+gather never produced them since pass 37), vant.js route, help.js card,
+cli.md row, spirit.js header comment (now names crew-bus).
+
+**no-legacy-bloat pin added:** relay stays deleted — no lib/relay.js, no
+bin/relay.js, no transform require, no COMMANDS route, no help card
+(live-code scan strips // comments so the removal docs don't false-positive).
+no-legacy 12/12.
+
+**Dead-export sweep:** zero live requires of relay anywhere; relay's
+brain-config exports (getBrainRelayConfig/setBrainRelayConfig/
+getStackRelayConfigs) had no external consumers; crew-bus already exposes
+the full transport surface (send/broadcast/nodes/status/stop).
+
+**STABILITY.md:** non-blocker "protocol state in-memory only" CLOSED —
+node-registry/trust/msg/consensus/market all persist via lib/state-store.js
+(Waves 1-3).
+
+**labs/node-crew/demo-v02.js — crew demo v0.2, the PRD's definition of
+done:** TWO REAL node processes. Master boots crew-bus + registry, creates
+a consensus topic, votes, and sends a signed genesis envelope; the peer
+verifies the HMAC, dispatches, casts its own vote in its own process
+against its own registry view; a cold third process tallies the restarted
+state (2 votes, ratify, passed). 4/4 phases, ×3 consecutive runs; v0.1
+demo still 9/9 (protocol actors in-process remain valid).
+
+Two integration lessons the demo surfaced (no code changes needed, both
+existing behaviors correct):
+1. network.setAllowedDomains takes HOSTNAMES ('127.0.0.1'), not origin
+   URLs — an 'http://127.0.0.1:PORT' entry never matches (isDomainAllowed
+   compares hostname only) and every send fails "domain not allowed".
+2. A peer process boot-hydrates consensus BEFORE the master's create lands
+   in another process — it must _resetHydration() + list() to re-hydrate
+   from disk before voting. This is the documented multi-process contract:
+   hydrate-on-first-touch, write-through; late arrivals re-hydrate.
+
+**PRD closed:** labs/prd-vant-os.md marked COMPLETE (v1.1) — all success
+criteria checked with evidence.
+
+**Verification:** demo-v02 4/4 ×3, demo v0.1 9/9, no-legacy 12/12,
+transform 5/5, state-persistence 8/8, crew-bus 13/13, node-crew 9/9;
+FULL SWEEP 116/116 (relay suite gone), syntax OK, eslint 0 errors,
+docs style + links PASS.

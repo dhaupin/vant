@@ -49,7 +49,7 @@ Sweep history:
 | Item | Risk | Notes |
 |------|------|-------|
 | Escrow holds don't debit budgets | medium | `hold()`/`release()` track reservations only; `canSpend` checks a running total that only `recordSpend` moves. Market trade releases the hold immediately (trade completes synchronously). Real debit-on-trade is a v1.0.0-rc candidate; harness A3 keeps watch. |
-| protocol state in-memory only | structural | consensus/market/msg/trust Maps die with the process — the v0.2 node-crew PRD item (persistence via storage layer). Fine for single-process v1.0.0; blocks true parallel nodes. |
+| protocol state in-memory only | structural | ✅ CLOSED pass 37+38 (prd-vant-os Waves 1-3) — node-registry, trust, msg conversations, consensus ledgers, and market listings/bids/trades all persist via lib/state-store.js at models/private/\<brain\>/state/, write-through with real process-death round-trip pins. |
 | 108 pre-existing eslint warnings in bin/ | low | unused vars, zero errors. Cleanup candidate, not stability. |
 | `test/` count gap | low | ✅ CLOSED pass 32 — `test/run-all.js` (`npm run sweep`) runs all 115 suites in own processes with 120s timeouts; exit 1 on failures, 2 on timeouts. |
 

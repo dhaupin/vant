@@ -118,6 +118,21 @@ test('orgchart stores: brain-scoped default only, no .agent_tmp fallback (pass 2
     return null;
 });
 
+test('relay.js stays deleted; crew-bus is the one transport (pass 39)', () => {
+    if (fs.existsSync(path.join(ROOT, 'lib', 'relay.js'))) return 'lib/relay.js resurrected';
+    if (fs.existsSync(path.join(ROOT, 'bin', 'relay.js'))) return 'bin/relay.js resurrected';
+    // Live code only: the removal docs and transform's removal comment name
+    // relay on purpose; a require() or a COMMANDS route is a regression.
+    const scan = (rel, re) => {
+        const code = fs.readFileSync(path.join(ROOT, rel), 'utf8').replace(/\/\/.*$/gm, '');
+        return re.test(code);
+    };
+    if (scan('lib/transform.js', /require\('\.\/relay'\)|require\("\.\/relay"\)/)) return 'transform.js requires relay again';
+    if (scan('bin/vant.js', /relay:\s*'relay\.js'/)) return 'vant.js routes relay again';
+    if (scan('bin/help.js', /vant relay/)) return 'help.js advertises relay again';
+    return null;
+});
+
 test('transform.js: no legacy privateBrains producer/writer (pass 29)', () => {
     const src = readLib('transform.js');
     // Strip // comments first: reject messages and removal docs may name the

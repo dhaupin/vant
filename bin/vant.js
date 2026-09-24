@@ -252,7 +252,6 @@ const COMMANDS = {
     zen: 'zen.js',
     consciousness: 'consciousness.js',
     recursion: 'recursion.js',
-    relay: 'relay.js',
     spirit: 'spirit.js',
     encounter: 'encounter.js',
     forum: 'forum.js',

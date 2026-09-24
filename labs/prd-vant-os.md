@@ -1,9 +1,9 @@
 # Vant OS Consolidation — Pulling the Society Together — Product Requirements Document
 
-**Version:** 1.0
+**Version:** 1.1
 **Branch:** axolotl
 **Date:** 2026-09-24
-**Status:** Planning (owner-approved architecture A; wave plan below)
+**Status:** COMPLETE — Waves 1-4 shipped (passes 36-39). Success criteria met; see labs/TASKS.md pass 39.
 
 ---
 
@@ -205,17 +205,29 @@ Escrow stays in-memory this PRD (known non-blocker, holds don't debit).
   (no cost to debit); numeric credit-mode amounts unchanged. ✅
 - Sweep green + new pins. ✅
 
-### Wave 4 — relay removal + OS wiring (pass ~39)
-- **Delete relay.js**; move transform's relay seam to crew-bus
-  (`gatherBus()` / crew-bus `status()` + `nodes()` as the restore
-  payload). Update system.js/vant.js dashboard references.
-- **Crew demo v0.2**: rerun labs/node-crew genesis as **two real node
-  processes** on one machine — state persists across restarts, peers
-  find each other via node-registry, signed messages flow over crew-bus,
-  consensus verifies registry-anchored votes from both nodes. This is
-  the PRD's definition of done.
-- Dead-exports sweep on the relay deletion; STABILITY.md non-blocker
-  "protocol state in-memory only" → CLOSED.
+### Wave 4 — relay removal + OS wiring (pass ~39) ✅
+- **relay.js deleted** (lib + bin/relay.js CLI + test/relay.test.js); the
+  transform relay restore branch removed — legacy data.relay payloads in
+  old horcrux/backup files are ignored (crew-bus topology is the live
+  gather payload). Routing/help/docs references stripped; spirit.js header
+  comment now names crew-bus. no-legacy-bloat pin added (relay stays
+  deleted; no route, no help card, no require). ✅
+- **Crew demo v0.2 shipped** (labs/node-crew/demo-v02.js): TWO REAL node
+  processes — master creates+vets a consensus topic, casts its vote, then
+  sends a signed genesis envelope over crew-bus; the peer verifies,
+  dispatches, casts ITS vote in its own process against its own registry
+  view, and a cold third process tallies the RESTARTED state (2 votes,
+  ratify, passed). 4/4 phases ×3 consecutive runs; v0.1 demo still 9/9.
+  Setup notes baked into the demo: network allowlist takes HOSTNAMES
+  ('127.0.0.1', not origin URLs); a peer re-hydrates consensus before
+  voting on a topic another process created (its boot-hydrated map is
+  stale by definition). ✅
+- **Dead-export sweep:** zero live requires of relay anywhere (lib/bin/
+test/scripts); relay's brain-config exports had no external consumers;
+  crew-bus already exposes the full transport surface (send/broadcast/
+  nodes/status). STABILITY.md non-blocker "protocol state in-memory only"
+  → CLOSED (Waves 1-3). ✅
+- Sweep 116/116 (relay suite gone) + docs style/links PASS. ✅
 
 ### Out of scope (this PRD)
 - encounter/spirit/forum/realm wiring (kept, not wired).
@@ -249,11 +261,13 @@ Escrow stays in-memory this PRD (known non-blocker, holds don't debit).
 
 ## 8. Success Criteria
 
-1. Kill any node process mid-protocol; restart; consensus topics, market
-   listings, trust scores, registry peers, and msg channels are intact.
-2. `vant` runs with zero in-memory-only protocol state (STABILITY.md
-   non-blocker closed).
-3. Crew demo v0.2: two processes, one genesis, signed transport,
-   registry-verified votes — 9/9 phases across the pair.
-4. Full sweep green with every new pin; no-legacy policy intact (relay
-   gone, no aliases).
+1. ✅ Kill any node process mid-protocol; restart; consensus topics,
+   market listings, trust scores, registry peers, and msg conversations
+   are intact (process-death round-trip pins, Waves 1-3).
+2. ✅ `vant` runs with zero in-memory-only protocol state (STABILITY.md
+   non-blocker CLOSED, pass 39).
+3. ✅ Crew demo v0.2: two real processes, one genesis, signed transport,
+   registry-verified votes from both nodes, cold-process tally — 4/4
+   phases ×3 consecutive runs (pass 39).
+4. ✅ Full sweep green with every new pin; no-legacy policy intact (relay
+   deleted + pinned deleted, no aliases).

@@ -695,11 +695,6 @@ See: vant memory --help`
         usage: 'vant recursion run|unwind',
         detail: 'Recursion.\nSee: vant recursion --help'
     },
-    relay: {
-        desc: 'Relay operations',
-        usage: 'vant relay status|connect|send',
-        detail: 'Relay system.\nSee: vant relay --help'
-    },
     spirit: {
         desc: 'Spirit system',
         usage: 'vant spirit status|invoke',

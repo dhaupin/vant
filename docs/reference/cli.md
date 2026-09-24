@@ -469,7 +469,6 @@ with its own `--help`.
 | `vant context` | Prompt caching and context engine |
 | `vant consciousness` | Consciousness engine |
 | `vant spirit` | Spirit system |
-| `vant relay` | Relay operations |
 | `vant recursion` | Recursion engine |
 | `vant registry` | General registry |
 | `vant webhooks` | Webhook management |
