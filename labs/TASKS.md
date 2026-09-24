@@ -2091,3 +2091,50 @@ build-test 15/15; bin/test-all 17/17; `npm run check` syntax OK.
 verify backup.create's spread doesn't leak anchorRoot into toHorcrux opts;
 DEAD_EXPORTS.md long tail re-triage after 24/25; teams.store config path
 (escrow/governance) never exercised by tests.
+
+## Session (2026-09-24 — pass 26: legacy/bloat cleanup, error alias eradication)
+
+**Policy (owner decision, binding):** 0.8.6 axolotl supports NO legacy code —
+everything is new, no bloat fallbacks, no legacy wrappers, no compat aliases.
+Legacy BRAIN data is supported only to migrate OFF old paths (lib/migrations).
+Pass-25 correction: teams' audit try/catch stub was COMPLETED then — under
+this policy it (and its 3 siblings) should have been questioned instead.
+tmp.js T7 was already the precedent.
+
+**Tier 1 — dead code (all zero-caller-verified):**
+- backup.backup() "Legacy one-time backup" alias removed.
+- geometry.generateBarcode @deprecated shim removed (live twin:
+  generateBarcodeFromContent). Stale "backwards compat" comment fixed.
+- sync.js: isCircuitClosed/recordFailure/recordSuccess unexported
+  (pass-through aliases; 6 internal call sites stay; getAllCircuits keeps
+  its export — bin/validate.js consumes it).
+- 4× silent-stub audit fallbacks (teams/auth/lock/qos) → direct top-level
+  require('./audit') (no cycle exists; tmp.js pattern). Silent-stub would
+  mask a broken install as quiet success.
+
+**Tier 2 — errors.Error → errors.VantError (~177 call sites):**
+- 24 lib files renamed (sed batch, verified by file-tool read-back after
+  catching the policy violation), bin/build-test.js contract check updated.
+- THREE import-alias variants existed: errors.Error (24 files), error.Error
+  (rls.js — singular import, would have been a live TypeError on RLS deny),
+  err.Error (sandbox.js 3 sites). First grep-only sweep caught 1; the
+  widened `\.Error\(` sweep caught all. Lesson: rename sweeps must match on
+  the ACCESS PATTERN, not the assumed local variable name.
+- Alias export removed from error.js; test-error.js asserts its ABSENCE now.
+- Guard: new test/no-legacy-bloat.test.js (8 checks) pins all of the above,
+  including "any X.Error( call form" and "no try/catch require('./audit')".
+
+**Evidence:** require-load smoke 92/92 lib modules; syntax OK; suites green:
+storage 40, brain 77, sandbox 22, api 21, search 22, audit 22, teams 22,
+auth 12, vaf 12, stego 12, server 11, lock 10, qos 10, tmp 10, escrow 15,
+sync 18 (1 assertion flipped: unexported wrapper), audit-report 10,
+snapshots 9, security 20, shell 8, backup 8, pipeline 9, encrypt 3,
+backup-restore 4, backup-create-safety 3, test-error 7, build-test 15/15,
+test-all 17/17. Docs grep clean.
+
+**Tier 3 decisions recorded (owner, for follow-up passes):**
+1. teams rehydrate dual store format → MIGRATE OR REJECT (no dual parsing).
+2. teams _getStorePath .agent_tmp default → brain-scoped path is THE default;
+   .agent_tmp only via explicit config override.
+3. transform.restore() legacy privateBrains path → require new format, use
+   `vant migrate` as the bridge.

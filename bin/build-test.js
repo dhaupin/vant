@@ -104,7 +104,7 @@ test('audit.js works', () => {
 // Test: error.js works
 test('error.js works', () => {
     const errors = require('../lib/error');
-    if (typeof errors.Error !== 'function') {
+    if (typeof errors.VantError !== 'function') {
         throw new Error('error.js missing vantError()');
     }
 });

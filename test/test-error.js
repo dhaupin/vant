@@ -41,8 +41,10 @@ function skip(name, reason) {
 console.log('\n=== Error Module Tests ===\n');
 
 // Test 1: Core exports
-test('has Error class', () => {
-    return typeof error.Error === 'function';
+// (pass 26) the Error->VantError compat alias is REMOVED — asserting its
+// absence is the regression guard.
+test('has no Error compat alias (removed in pass 26)', () => {
+    return error.Error === undefined;
 });
 
 test('has VantError class', () => {

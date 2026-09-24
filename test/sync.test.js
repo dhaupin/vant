@@ -81,9 +81,11 @@ test('sync has markStale function', () => {
     return { success: typeof sync.markStale === 'function' };
 });
 
-test('sync has isCircuitClosed function', () => {
+test('sync does NOT export isCircuitClosed (pass 26: internal, not surface)', () => {
+    // Pass-through wrapper export removed in pass 26 — it was an alias for
+    // internal circuit-breaker plumbing, not a supported API.
     const sync = require(path.join(ROOT, 'lib', 'sync'));
-    return { success: typeof sync.isCircuitClosed === 'function' };
+    return { success: sync.isCircuitClosed === undefined };
 });
 
 test('sync has getLayerStatus function', () => {
