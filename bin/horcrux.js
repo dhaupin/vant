@@ -10,8 +10,6 @@
  *   vant horcrux refresh [password]         # Regenerate boot horcrux in place
  */
 
-const boot = require('../lib/boot');
-
 const args = process.argv.slice(2);
 const subcmd = args[0] || 'help';
 
@@ -105,7 +103,6 @@ function findDefaultHorcrux(repoRoot) {
 
 async function run() {
     const path = require('path');
-    const fs = require('fs');
     const REPO_ROOT = path.resolve(__dirname, '..');
     const defaultPath = findDefaultHorcrux(REPO_ROOT);
 
@@ -265,7 +262,7 @@ async function run() {
 
         await safeWriteHorcrux(path.relative(REPO_ROOT, target), {
             label: 'horcrux',
-            log: (m) => console.log(m.replace(/^   /, '  ')),
+            log: (m) => console.log(m.replace(/^ {3}/, '  ')),
             password,
             encode: (rel, o) => transform.toHorcrux(rel, { password: o.password }),
             decode: (rel, o) => transform.validateHorcruxFile(rel, { password: o.password }),

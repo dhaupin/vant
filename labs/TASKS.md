@@ -2234,3 +2234,58 @@ Dead CLI surface; candidate for next bloat sweep.
 malicious-restore 7/7, transform 5, backup 8, teams 22, agents 17,
 escrow 15, orgflow 24, snapshots 9, fresh-dir 16, build-test 15/15,
 test-all 17/17, syntax OK.
+
+## Session (2026-09-24 — pass 30: CLI dead-surface fixes, sync push hardening, node-crew genesis)
+
+**Fixes (owner-requested):**
+- bin/transform.js: extract/restore rewired to the REAL lib API
+  (fromHorcrux + restore). The old code called transform.fromSvg() /
+  transform.restoreFull() — neither is exported; both cases could only
+  throw. Dead full-restore case dropped (restore IS the full restore since
+  the 0.9.0 payload-unwrap fix); usage text matches the real surface.
+- bin/horcrux.js: pre-existing eslint no-regex-spaces error fixed
+  (/^   / → /^ {3}/) plus unused boot/fs requires removed. bin/ now lints
+  with 0 errors.
+- bin/sync.js push: (1) message is now execFileSync argv — the old
+  execSync(`git commit -m "${message}"`) let brain-file content execute
+  (P0 pattern git-injection.test.js hunts). (2) The credential block is
+  deleted: it persisted the token PLAINTEXT to /tmp/vant-*/git-credentials
+  and left credential.helper=store configured in the repo (the store
+  helper never even reads that path), plus wrote a junk masked value to
+  user.token in .git/config. Credentials are the caller's job.
+- Verified end-to-end in /tmp: transform horcrux → extract → restore
+  round-trip, exit 0, all sections restored.
+
+**labs/node-crew — multi-brain parallel society (new PRD + demo):**
+- labs/prd-node-crew.md: architecture, node isolation matrix (per-brain
+  orgchart/agents/escrow/config/soul), protocol call surface, genesis
+  phases, security notes, roadmap.
+- labs/node-crew/demo.js: 9-phase genesis — master seeds brain memory,
+  spawns crew agents, registers live nodes (node-registry), opens msg
+  channel, consensus ratification (crew votes), governance decisions from
+  every node, market list→bid→trade (escrow holds, trust recorded),
+  leaderboard, encrypted stego soul horcrux. 9/9, idempotent (agents
+  respawned, run-scoped topics).
+- test/node-crew.test.js: 7 protocol pins (registry-verified votes, async
+  consensus shape, trust-weighted tally, canTrade-vs-canWrite gate, stego
+  arg order).
+
+**Field findings (the point of labs):**
+- worker_threads do NOT share module state — consensus/market/msg/trust
+  are in-memory Maps; crew votes cast in a thread vanish. True parallel
+  nodes = v0.2 protocol persistence via storage layer (PRD roadmap).
+- node-registry IS the node concept: consensus votes verify voters
+  against it by default (requireRegistry) — register() auto-heartbeats
+  to alive.
+- consensus: topic charset [a-zA-Z0-9_-] (no colons); create() requires
+  an explicit options array (≥2); quorum option is minQuorum; create/vote
+  are async (lock-chained); tally is sync and counts are TRUST-WEIGHTED
+  (assert totalVotes + leading, not raw counts).
+- Sandbox: setCapabilities flips untouched-default → explicitly-enforced
+  (every unlisted capability then denied). canSpawn gates agents.spawn;
+  canTrade is distinct from canWrite (market trade vs list/bid).
+- stego.encodeSvg(message, carrierSvg, password) — message FIRST.
+
+**Evidence:** node-crew demo 9/9 ×2 (idempotent), node-crew pins 7/7,
+sync 18/18, sync-pull 15/15, git-injection 7/7, no-legacy-bloat 11/11,
+brain-storage-strict 14/14, syntax + eslint bin/ 0 errors.

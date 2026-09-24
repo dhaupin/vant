@@ -39,7 +39,7 @@ const action = (argsSet.has('-p') || argsSet.has('--push')) ? 'push' :
 const branchFlagIdx = args.indexOf('--branch');
 const branchFlag = branchFlagIdx !== -1 ? args[branchFlagIdx + 1] : undefined;
 
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 const fs = require('fs');
 
 // Lazy-load sandbox
@@ -193,7 +193,6 @@ function pull() {
  * Push to GitHub
  */
 function push(message = 'Vant update') {
-    const token = process.env.GITHUB_TOKEN;
     vaf.check(message, {type: "string", name: "message", maxLength: 200});
     const url = getRemoteUrl();
     if (!url) {
@@ -206,22 +205,23 @@ function push(message = 'Vant update') {
     try {
         execSync('git add -A', { stdio: 'pipe' });
         const status = execSync('git status --porcelain', { encoding: 'utf8' });
-        
+
         if (!status.trim()) {
             console.log('[Sync] No changes to push');
             return { success: true, changes: false };
         }
-        
-        execSync(`git commit -m "${message}"`, { stdio: 'pipe' });
-        // SECURITY: Use git config token instead of URL
-if (token) {
-    const os = require('os');
-    const tmp = fs.mkdtempSync(os.tmpdir() + '/vant-');
-    fs.writeFileSync(tmp + '/git-credentials', `https://${token}:x-oauth-basic@github.com\n`);
-    execSync(`git config --local credential.helper store`);
-    execSync(`git config --local credential.useHttpPath true`);
-    execSync(`git config --local user.token ${token.replace(/./, '*')}`);
-}
+
+        // (pass 30) execFileSync with argv-passed message — data, never
+        // shell. The old execSync(`git commit -m "${message}"`) let
+        // brain-file content execute (the P0 pattern
+        // git-injection.test.js hunts).
+        execFileSync('git', ['commit', '-m', message], { stdio: 'pipe' });
+        // (pass 30) credential handling removed: the old block persisted the
+        // token PLAINTEXT to /tmp/vant-*/git-credentials and left
+        // credential.helper=store configured in the repo (the store helper
+        // never even reads that path), plus wrote a junk masked value to
+        // user.token in .git/config. Credentials are the caller's job
+        // (managed credential injection, GCM, ssh remotes) — never ours.
         // (axolotl fix) push the CURRENT branch — the old code pushed
         // DEFAULT_BRANCH unconditionally, so feature-branch work targeted main
         const branch = resolveTargetBranch({ branch: branchFlag });

@@ -111,7 +111,8 @@ async function main() {
             console.log(`  0 3 * * * cd ${ROOT} && node bin/vant.js backup create >> vant-backup.log 2>&1`);
             process.exit(1);
         }
-            
+        break; // (process.exit above makes this unreachable; satisfies no-fallthrough)
+
         default:
             console.log('Unknown action:', action);
             console.log('Run: vant backup --help');
