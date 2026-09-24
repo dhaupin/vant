@@ -222,11 +222,6 @@ See: vant node --help`
         usage: 'vant validate --check',
         detail: 'Full validation suite.\nSee: vant validate --help'
     },
-    vibe: {
-        desc: 'Show/set current vibe',
-        usage: 'vant vibe [experimental|safety_first]',
-        detail: 'Track agent mood for context.\nSee: vant vibe --help'
-    },
     compress: {
         desc: 'Compress brain for transfer',
         usage: 'vant compress',

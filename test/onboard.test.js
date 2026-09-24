@@ -67,13 +67,37 @@ test('onboard has getStackOnboardStatus function', () => {
     return { success: typeof onboard.getStackOnboardStatus === 'function' };
 });
 
-test('getStackOnboardStatus returns object with source stack', () => {
+// (pass 35) getStackOnboardStatus is now async — it awaits per-brain
+// summaries instead of storing raw Promises (every brain reported truthy
+// hasOnboard before). Sync harness: signature check here, resolution check
+// in the async tail below.
+test('getStackOnboardStatus returns a Promise (async rework)', () => {
     const onboard = require(path.join(ROOT, 'lib', 'onboard'));
     const result = onboard.getStackOnboardStatus();
-    return { success: result && result.source === 'stack' };
+    if (!result || typeof result.then !== 'function') {
+        return { success: false, error: 'must return a Promise' };
+    }
+    return { success: true };
 });
 
-console.log('\n--- RESULTS ---\n');
-console.log(`  Passed:  ${results.passed}`);
-console.log(`  Failed:  ${results.failed}`);
-process.exit(results.failed > 0 ? 1 : 0);
+(async () => {
+    const onboard = require(path.join(ROOT, 'lib', 'onboard'));
+    try {
+        const r = await onboard.getStackOnboardStatus();
+        if (r && r.source === 'stack') {
+            results.passed++;
+            console.log('  ✓ resolved status has source stack');
+        } else {
+            results.failed++;
+            console.log('  ✗ resolved status missing source: ' + JSON.stringify(r).slice(0, 120));
+        }
+    } catch (e) {
+        results.failed++;
+        console.log('  ✗ getStackOnboardStatus rejected: ' + e.message);
+    }
+
+    console.log('\n--- RESULTS ---\n');
+    console.log(`  Passed:  ${results.passed}`);
+    console.log(`  Failed:  ${results.failed}`);
+    process.exit(results.failed > 0 ? 1 : 0);
+})();

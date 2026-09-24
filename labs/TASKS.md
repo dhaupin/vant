@@ -2405,3 +2405,47 @@ Useful or remove?
 - Fallback chains, adapters registry, hooks registry: 0 consumers each.
 - Deleted lib/do.js + test/do.test.js. Zero remaining refs; sweep 111/111
   green (113 minus the two do.js suites).
+
+---
+
+## Pass 35 (2026-09-24) — dormant machinery resolved: vibe ⚰️, onboard hub, crew-bus 🚌
+
+**Queue from pass 34:** 4 orphaned modules; do.js already gone. This pass
+closed out vibe (removed) and onboard (wired), and shipped the node-crew
+v0.2 transport (crew-bus) on top of pass 33's webhook wire.
+
+**vibe.js — removed.** Full forensics: zero runtime consumers (316-line
+mood system with getCommitVibe/onTaskSuccess hooks nobody ever called).
+No-legacy-bloat policy says wired-or-removed; owner's queue framing
+offered wire-or-propose-removal — removal won on merit. Deleted:
+lib/vibe.js, bin/vibe.js, test/vibe.test.js, coverage.js section,
+bin/vant.js registry + help entry, bin/help.js command card, and all doc
+references (5 files + the advanced/vibe.md page). test/evals/vibe.js
+kept — island keyword evals, name collision only.
+
+**onboard — install/migration hub.** getInstallStatus() classifies
+fresh/legacy/current with next steps; getWakeBriefing() bundles it with
+the onboarding summary. bin/onboard grew `status` + `wake` subcommands;
+bin/start prints the install line in its banner (post-seed/post-migrate,
+cosmetic). Honesty fix: getStackOnboardStatus now truly async (was
+storing Promises — every brain "had" onboard). Latent fire: _checkRead
+threw errors.VantError with no errors import — ReferenceError eaten by
+its own catch, read gate no-op'd.
+
+**lib/crew-bus.js — node-crew v0.2 transport.** Signed envelopes between
+node processes via the webhook wire. createBus factory + default
+singleton; HMAC sign (Encrypt) / verify (webhooks inbound, timing-safe);
+outbound via network.fetch(system:true); SSRF allowlist = documented
+setup step; brain/topic charset names. New test suite 13/13: real
+child-process peer delivery, ack handler count, tampered 401, twin-bus
+isolation (filter by route name), dispatcher containment, malformed
+envelope drops, broadcast per-node results, NOT_FOUND pin, secret-leak
+pins.
+
+**Bonus fires:** CODES.NOT_FOUND never existed (sudo.js:380 + crew-bus
+both used it → undefined → UNKNOWN); webhooks._checkNetwork had the same
+missing-errors-module bug as onboard._checkRead. Both fixed.
+
+**Verification:** onboard 10/10, webhooks 11/11, migrations 28/28, error
+19/19, brain-storage-strict 14/14, crew-bus 13/13. Full sweep ×2:
+114/114, 0 timeouts. eslint 0 errors on touched files.

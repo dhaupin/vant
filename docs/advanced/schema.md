@@ -84,4 +84,3 @@ if (!result.valid) {
 ## Related
 
 - [Configuration](/vant/reference/config) - Config validation
-- [Vibe Controls](/vant/advanced/vibe) - Dynamic settings

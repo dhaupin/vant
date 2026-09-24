@@ -124,7 +124,6 @@ function main() {
         const health = spawn('node', [path.join(BIN_DIR, 'health.js')], {
             stdio: 'inherit'
         });
-
         health.on('close', (code) => {
             console.log(`\n[Start] Health: ${code === 0 ? 'OK' : 'WARNINGS'}`);
 
@@ -146,8 +145,26 @@ function main() {
         });
     };
 
+    // (pass 35) Install state via the onboard hub (lib/onboard) — one honest
+    // "where am I" line instead of ad-hoc state guessing in bin/. Computed
+    // AFTER seeding/migration so a freshly seeded or just-migrated tree
+    // reports its real state. Cosmetic: never blocks or fails startup.
+    const showInstallState = async () => {
+        try {
+            const onboard = require('../lib/onboard');
+            const install = await onboard.getInstallStatus();
+            const icons = { fresh: '🌱', legacy: '⏳', current: '🧠' };
+            console.log(`[Start] Install: ${icons[install.state] || '•'} ${install.state} — brain: ${install.brain.files} files`);
+            if (install.state === 'legacy') {
+                console.log('        Run "vant migrate" — your brain is on the old layout and invisible to the loader.');
+            }
+        } catch (e) { /* install status is cosmetic; startup continues */ }
+    };
+
+    const proceed = () => showInstallState().then(runHealth);
+
     if (!doMigrate) {
-        runHealth();
+        proceed();
         return;
     }
 
@@ -199,12 +216,12 @@ function main() {
             // visible, not fatal — health check reports the state next.
             console.log(`[Start] Brain layout migration exited ${code} — continuing (see output above).`);
         }
-        runHealth();
+        proceed();
     });
 
     mig.on('error', () => {
         console.log('[Start] Could not run layout migration — continuing.');
-        runHealth();
+        proceed();
     });
 }
 

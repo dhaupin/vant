@@ -98,3 +98,57 @@ Fixed + pinned (webhooks.test.js 11/11):
 
 This is the seed of the node-crew v0.2 transport: signed webhooks as the
 network bridge between nodes.
+
+## Pass 35 — dormant machinery: vibe removed, onboard hub, crew-bus transport
+
+The census queue from pass 34: 4 orphaned modules (do.js deleted in 34;
+onboard, vibe, webhooks remained). This pass resolved all of them and
+landed the node-crew v0.2 transport seed.
+
+**vibe.js — REMOVED** (no-legacy-bloat policy; wired-or-removed verdict:
+remove). Zero runtime consumers ever materialized; the mood system was an
+early proto superseded by config/identity workflows. Deleted lib/vibe.js,
+bin/vibe.js, test/vibe.test.js + coverage section, CLI registry/help/usage
+rows, and all docs references (reference/cli.md, essential/islands.md,
+advanced/schema.md, advanced/index.md, advanced/vibe.md page itself).
+`test/evals/vibe.js` stays — it tests island keyword routing, not the mood
+module (name collision only).
+
+**onboard — wired as the install/migration hub.** New in lib/onboard:
+- `getInstallStatus()` — one honest "where am I" surface: fresh |
+  legacy (needs `vant migrate`) | current, with real brain-file counts
+  and next steps. Consumed by bin/onboard (`status` cmd) and bin/start's
+  banner (computed after seeding/migration so freshly seeded trees report
+  their real state; cosmetic — never blocks startup).
+- `getWakeBriefing()` — install status + onboarding summary in one call;
+  the first thing an agent (or human) should read (`vant onboard wake`).
+- Honesty fix: `getStackOnboardStatus()` was async (pipeline-wrapped) but
+  called without await and stored a Promise — every brain reported truthy
+  `hasOnboard`. Now awaits per brain, reports real file counts. Latent
+  bug class fire: `_checkRead` threw `new errors.VantError` with no
+  errors module in scope — its own try/catch swallowed the
+  ReferenceError, so the sandbox read gate silently no-op'd.
+- test/onboard.test.js updated for the async rework (10/10).
+
+**lib/crew-bus.js — node-crew v0.2 transport (PRD).** Signed envelope
+bridge between node processes over the pass-33 webhook wire:
+`configure/registerNode/onDispatch/listen/send/broadcast/stop` +
+`createBus` factory (twin buses in-process for tests). Envelopes are
+HMAC-SHA256 signed (Encrypt.hmacSign) and verified by lib/webhooks'
+inbound route before anything dispatches; outbound rides
+network.fetch(system:true) with the SSRF allowlist as the documented
+setup step; node names share the brain/topic charset. Verified end to
+end: real child-process peer, signed delivery + ack handler count,
+tampered-payload 401, twin-bus isolation, dispatcher-error containment,
+secret-free snapshots. test/crew-bus.test.js 13/13.
+
+**Bonus fires (latent-bug class, same as pass 33's brain import):**
+- `errors.CODES.NOT_FOUND` never existed — lib/sudo.js:380 and crew-bus
+  both referenced it, so those VantErrors carried `undefined` → fell
+  back to `CODES.UNKNOWN`. Code added; pinned in crew-bus suite.
+- webhooks.js `_checkNetwork` had the SAME missing-errors-module bug as
+  onboard `_checkRead` — ReferenceError swallowed by its own catch, so
+  the network capability gate silently no-op'd. Import wired.
+
+**Sweep: 114/114 green** (115 − vibe.test.js; + crew-bus). Version lock
+respected: still 0.8.6 per owner decision (pass 33).

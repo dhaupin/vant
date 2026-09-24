@@ -163,7 +163,6 @@ vant geometry locate <barcode>     # Retrieve by barcode
 | `vant trust` | Reputation and trust scores |
 | `vant resolution` | Thought resolution tracking |
 | `vant succession` | Trust level management |
-| `vant vibe` | Show/set runtime mood |
 | `vant snapshot` | Verifiable stego-SVG brain snapshot |
 | `vant brain-unlock` | Restore a brain from an SVG horcrux |
 | `vant error` | Error code lookup and stats |
@@ -205,9 +204,6 @@ vant resolution reject           # Mark rejected
 vant succession                  # Show current trust level
 vant succession get
 vant succession set <level>
-
-vant vibe                        # Show current vibe
-vant vibe experimental           # or safety_first
 
 vant snapshot                    # Default output: <brain>/boot/<agent>-p_<pw>.svg
 vant snapshot --agent nova       # Snapshot under a specific agent name

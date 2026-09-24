@@ -124,7 +124,6 @@ const COMMANDS = {
     
     // Automation
     prune: 'prune.js',
-    vibe: 'vibe.js',
     repos: 'repos.js',
     hybrid: 'hybrid-sync.js',
     search: 'search.js',
@@ -485,7 +484,6 @@ Brain:
   vant mirror     Storage replication (status/verify/resync)
 
 State:
-  vant vibe        Show/set vibe
   vant watch      Poll GitHub for changes
   vant summary    Session stats
 

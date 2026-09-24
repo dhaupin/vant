@@ -29,7 +29,6 @@ description: Deep dives - search architecture, rerank, NSC9 geometry, RPC, style
 | [Frontend](/vant/advanced/frontend) | Frontend-facing surfaces |
 | [Pruning](/vant/advanced/pruning) | Prune strategies and LTC |
 | [Release](/vant/advanced/release) | Release process |
-| [Vibe](/vant/advanced/vibe) | The mood system |
 
 ## Where to start
 

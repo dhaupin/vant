@@ -154,7 +154,6 @@ gallery.linkToBrain();
 
 ## Related
 
-- [Vibe](/vant/advanced/vibe) - Dynamic mood system
 - [Brain](/vant/memory/brain) - Public/Private brain split
 - [External Repos](/vant/integrations/repos) - Mount external repos
 

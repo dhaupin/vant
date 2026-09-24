@@ -2,11 +2,15 @@
 /**
  * Vant onboard - knowledge base / onboarding browser
  *
- * Usage: vant onboard [summary|files|read <file>|search <term>|system|help]
+ * Usage: vant onboard [status|wake|summary|files|read <file>|search <term>|system|help]
  *
  * Note: this file was rewritten around an explicit async main() with a
  * guaranteed process.exit. The previous un-awaited IIFE lost the exit race
  * in some contexts (redirected stdout, spawned children) and printed nothing.
+ *
+ * (pass 35) Now hosts the install/migration hub: `status` and `wake` are the
+ * single "where am I" surface — fresh vs legacy (needs `vant migrate`) vs
+ * current — instead of each bin/ ad-hoc guessing at tree state.
  */
 const vaf = require("../lib/vaf");
 const onboard = require("../lib/onboard");
@@ -18,6 +22,8 @@ if (args[0] === '-h' || args[0] === '--help' || args[0] === 'help') {
 Vant Onboard - Knowledge base / onboarding
 
 Commands:
+  vant onboard status       Install state (fresh | legacy | current) + next steps
+  vant onboard wake         Wake briefing: install status + brain summary
   vant onboard summary      Show full onboarding summary
   vant onboard files        List brain files
   vant onboard read <file>  Read a brain file
@@ -56,10 +62,42 @@ function printSummary(summary) {
     console.log(`\nGenerated: ${summary.generated}`)
 }
 
+function printStatus(install) {
+    const icons = { fresh: '🌱', legacy: '⏳', current: '🧠' };
+    console.log(`\n${icons[install.state] || '❓'} Install state: ${install.state.toUpperCase()}`);
+    console.log(`   Layout: ${install.layout.upToDate ? 'v' + install.layout.targetVersion + ' (multi-brain)' : 'pending migrations (' + (install.layout.pending || []).length + ')'}`);
+    console.log(`   Brain:  ${install.brain.files} files, ${install.brain.systemFiles} system files`);
+    console.log('\nNext steps:');
+    install.next.forEach((s, i) => console.log(`  ${i + 1}. ${s}`));
+    console.log('');
+}
+
+function printWakeBriefing(briefing) {
+    printStatus(briefing.install);
+    if (!briefing.summary) return;
+    const s = briefing.summary;
+    console.log('=== Wake Briefing ===');
+    console.log(`Version: ${s.version} | Status: ${s.status}`);
+    if (s.description) console.log(`Description: ${s.description}`);
+    console.log(`Brain: ${s.brainFiles} files, ${s.systemFiles} system files\n`);
+    s.files.slice(0, 12).forEach(f => {
+        console.log(`  ${f.filename}: ${f.title} (${f.sections} sections)`);
+    });
+    if (s.files.length > 12) console.log(`  ... and ${s.files.length - 12} more (vant onboard files)`);
+    if (s.succession) {
+        console.log(`\nSuccession: ${s.succession.version || 'unknown'} | Trust: ${s.succession.succession?.trust?.default ?? 'n/a'}`);
+    }
+    console.log(`\nGenerated: ${s.generated}`);
+}
+
 async function main() {
     if (!cmd || cmd === 'summary' || cmd === 'list') {
         const summary = await onboard.getOnboardSummary()
         printSummary(summary)
+    } else if (cmd === 'status') {
+        printStatus(await onboard.getInstallStatus())
+    } else if (cmd === 'wake') {
+        printWakeBriefing(await onboard.getWakeBriefing())
     } else if (cmd === 'files') {
         const files = await onboard.getBrainFiles()
         console.log('Brain files:')
