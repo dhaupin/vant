@@ -152,3 +152,31 @@ secret-free snapshots. test/crew-bus.test.js 13/13.
 
 **Sweep: 114/114 green** (115 − vibe.test.js; + crew-bus). Version lock
 respected: still 0.8.6 per owner decision (pass 33).
+
+## Pass 36 — prd-vant-os Wave 1: the registry remembers
+
+**Shipped (labs/prd-vant-os.md, architecture A):**
+- **node-registry persistence**: peer table hydrates from
+  `models/private/<brain>/state/node-registry.json` on first touch,
+  writes through on register/heartbeat/unregister. Per-call store
+  resolution (teams pattern) so pushBrain moves state with the active
+  brain; VANT_BRAIN env override honored (getBrainPath semantics).
+  Consensus's vote anchor no longer dies with the process.
+- **Read-denial ≠ reset** enforced: sandbox read denial throws
+  `E_STATE_READ`; only parse failures reset (loudly). Pass-31 rule now
+  a protocol-layer property.
+- **crew-bus ↔ registry interop**: `listen()` registers `crew_<name>`
+  (deterministic id — re-listen refreshes, not duplicates) as an alive
+  peer with metadata.kind='crew-node'; `stop()` unregisters. Crew
+  nodes are now first-class peers consensus can verify and quorum-count.
+
+**wal.js verdict** (Wave 2 input): the Wal class is FileStorage-internal
+intent machinery (write/delete intents + mtime-based replay). msg JSONL
+will FOLLOW its pattern (append-only records, atomic writes) but not
+reuse the class — replay semantics would misbehave on appends.
+
+**Verification:** test/registry-persistence.test.js 6/6 — including the
+money pin: register → kill → brand-new process hydrates both peers.
+Corruption, denial, brain-scoping, and interop all pinned. Regressions:
+crew-bus 13/13, consensus 8/8, node-crew 9/9. Full sweep 115/115, 0
+timeouts. eslint 0 errors. Version lock respected: 0.8.6.

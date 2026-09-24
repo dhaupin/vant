@@ -2449,3 +2449,34 @@ missing-errors-module bug as onboard._checkRead. Both fixed.
 **Verification:** onboard 10/10, webhooks 11/11, migrations 28/28, error
 19/19, brain-storage-strict 14/14, crew-bus 13/13. Full sweep ×2:
 114/114, 0 timeouts. eslint 0 errors on touched files.
+
+---
+
+## Pass 36 (2026-09-24) — Wave 1: node-registry persistence + crew-bus interop
+
+**Plan:** labs/prd-vant-os.md (owner-approved arch A). This pass is the
+foundation wave: the registry consensus trusts now survives restarts,
+and crew nodes self-register as peers.
+
+**node-registry.js:** hydrate-on-first-touch + write-through (register/
+heartbeat/unregister/_persist) via FileStorage at
+models/private/<brain>/state/node-registry.json. Store resolved PER
+CALL (teams pattern — pushBrain moves it). _hydrate(): missing=fresh,
+parse-fail=warn+empty, READ-DENIAL=throw E_STATE_READ (never reset).
+discover/get/list/getStats all hydrate. Seams: _resetHydration,
+clearState. Brain resolution matches getBrainPath (VANT_BRAIN env >
+currentBrain).
+
+**crew-bus.js:** listen() → registry.register({id:'crew_'+name, status:
+'alive', metadata.kind:'crew-node'}); stop() → unregister. Deterministic
+id: re-listen refreshes.
+
+**Test-harness lessons (cost 3 iterations):** audit [INFO] lines mix
+into child stdout — parse with first-{..last-} extraction, not
+JSON.parse(whole). pushBrain ≠ path-active: currentBrain(name) sets the
+path brain (getBrainPath reads _currentBrain, not the stack).
+JSON.stringify drops undefined — `|| null` before asserting absence.
+
+**Verification:** registry-persistence 6/6 (incl. real process-death
+round-trip), crew-bus 13/13, consensus 8/8, node-crew 9/9. Sweep
+115/115 ×1 (after +1 suite), eslint 0 errors.
