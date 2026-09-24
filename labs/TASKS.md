@@ -2354,3 +2354,32 @@ owner go decision.
 **Evidence:** sweep 115/115 ×2, stress 0 fires ×2 (gate #2),
 node-crew pins 9/9, demo 9/9, migrations 28/28, error.test 19/19,
 syntax OK, eslint 0 errors.
+
+## Session (2026-09-24 — pass 33: webhook event wire + owner version-lock decision)
+
+**Owner decision recorded in STABILITY.md:** version STAYS 0.8.6 until all
+0.8.6 refactor waves are solved. Release gate green is necessary, not
+sufficient — no bump until the owner calls it.
+
+**lib census (92 modules):** 4 with zero importers — do.js (483 lines, and
+its comment claims storage uses do.guard() but storage uses gate.js
+directly), onboard.js, vibe.js (full mood system, no runtime consumers),
+webhooks.js. bin/ CLIs exist for all four; vant.js routes them.
+
+**THE WIRE (webhooks.js):** the header promised "HTTP triggers emit
+globally" but only webhook:registered emitted — inbound events were
+dropped after the brain audit log. Fixed: events now emit webhook:<event>
+{ source, webhook, event, body, timestamp } after HMAC verify + filter;
+_emit returns handler count, HTTP response reports it. Bonus fire caught
+live: brain was used-but-never-imported, so every event's audit write
+died on 'brain is not defined'. Import wired + regression pin.
+
+**webhooks.test.js rebuilt (11/11):** live-server wire probe (signed POST
+→ event fires, handlers counted), 401 on bad signature, brain-import pin,
+proper async settlement before exit. Full sweep 113/113 (port suites
+excluded), stress 0 fires, demo 9/9.
+
+**Next dormant machinery to wire (owner: "epic shit"):** do.js universal
+handler (nobody imports it — either wire it as THE operation registry for
+MCP/crew or fold it into pipeline), vibe.js into runtime/commit flow,
+webhook transport for node-crew v0.2.

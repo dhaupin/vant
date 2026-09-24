@@ -67,6 +67,34 @@ Sweep history:
 | 6 | Horcrux create → extract → restore round-trip in a fresh dir | ✅ verified pass 30 (tmp dir, exit 0) |
 | 7 | No plaintext credential persistence anywhere in lib/ + bin/ | ✅ sync.js block removed pass 30; git-injection 7/7 |
 
-**Gate status: ALL GREEN.** Remaining pre-release work is mechanical:
-version bump to 1.0.0 (package.json + the MANUAL surfaces version.js
-lists), CHANGELOG entry, and the owner's go decision.
+**Gate status: ALL GREEN.**
+
+> **OWNER DECISION (2026-09-24, pass 33) — VERSION STAYS 0.8.6.**
+> 0.8.6 was a deliberate breaking-change build and has stayed there on
+> purpose through waves of refactors. The sprint to 1.0.0 happens only
+> when every 0.8.6 refactor/explosion is solved. Do NOT bump the version
+> until the owner calls it — the release gate being green is necessary,
+> not sufficient. There is much more dormant machinery in lib/ to wire
+> first (do.js, vibe, webhooks transport, ...).
+
+## Pass 33 — the webhook wire (lib wiring continues)
+
+The lib census (92 modules, 4 with zero require()s: do, onboard, vibe,
+webhooks) surfaced a broken promise in webhooks.js: the header claimed
+"HTTP triggers emit globally" but only `webhook:registered` ever emitted —
+inbound events were logged to brain audit and DROPPED. Nothing (consensus,
+islands, cron, crew nodes) could react to an HTTP trigger.
+
+Fixed + pinned (webhooks.test.js 11/11):
+- Inbound events now emit `webhook:<event>` with { source, webhook,
+  event, body, timestamp } after signature verification + filter match.
+- `_emit` returns the handler count; the HTTP response reports `handlers`
+  (and 0 on recursion-guard block).
+- Bonus fire caught live: `brain` was USED but never imported — every
+  event's audit write failed with 'brain is not defined'. Import wired;
+  regression pin added.
+- Live probe: signed POST → HMAC verify → event handler fires ✓;
+  invalid signature → 401 ✓.
+
+This is the seed of the node-crew v0.2 transport: signed webhooks as the
+network bridge between nodes.
