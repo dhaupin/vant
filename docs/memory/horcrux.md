@@ -42,7 +42,9 @@ vant horcrux refresh
 The password resolves the same way as restore (arg → `VANT_BRAIN_PASSWORD`
 env → `p_<password>` in the filename). The fresh snapshot is written to a
 temp file and round-trip validated before it replaces the original, so a
-failed refresh never destroys your only backup. Run this after meaningful
+failed refresh never destroys your only backup; after the swap the final
+file is re-verified and the previous bytes restored if verification fails.
+Run this after meaningful
 brain changes if you rely on horcrux restore for disaster recovery.
 
 ## Restore

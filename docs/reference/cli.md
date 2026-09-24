@@ -292,7 +292,10 @@ vant s3 ls [prefix]         # List remote keys
 vant s3 push [--dry-run]    # Push local brain to remote
 vant s3 pull [--dry-run]    # Pull remote brain to local
 
-vant backup create
+vant backup create          # same backup-safety as snapshot/horcrux refresh:
+                            # existing targets go through tmp→validate→replace,
+                            # and the final file is re-verified after the swap
+                            # (original restored if verification fails)
 vant backup restore <file>   # validates the file first — wrong password /
                              # corrupt file fails before anything is restored
 vant backup list

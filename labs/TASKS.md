@@ -2042,3 +2042,52 @@ bin/audit.js report generation itself could move to a lib module (CLI is
 backup file before lib/backup.restore runs.
 
 
+
+## Session (2026-09-23 — pass 25: transform rate-limit enforcement,
+## backup.create safety, teams lazy-logger audit)
+
+**transform.js _checkSecurity (the :230 dead branch + 3 stacked bugs):**
+- Dead branch replaced: vaf.validateString THROWS on invalid input (returns
+  `true`, never a {valid} object) — old `!validation && !validation.valid`
+  could never fire (and TypeError'd on undefined if the throw ever vanished).
+- Rate limit enforcement was a no-op THREE ways: fresh RateLimiter per call
+  (empty window every time), wrong option name (`max` vs maxPerMinute), and
+  check() (async) called un-awaited (truthy Promise). Now: module-singleton
+  limiter, real option, all 23 call sites awaited.
+- Limit sized 200/min module-wide: RateLimiter enforces a GLOBAL bucket AND
+  per-client bucket at the same number, and one compound op (backup/gather)
+  fans out to ~16-20 _checkSecurity sub-steps — 20/min false-tripped any
+  real workload once enforcement actually worked.
+- secret.js: same singleton pattern (60/min module-wide, was 10/min and
+  never enforced).
+
+**teams.js lazy-logger audit:** all 6 _audit call sites use .info only;
+fallback stub now mirrors the real audit surface (info/warn/error) — the
+added error stub is future-proofing, nothing else to fix.
+
+**backup.create → lib/horcrux-safe (tmp→validate→replace):** same contract
+as snapshot/refresh — a failed or corrupt encode can no longer clobber the
+only good backup. outputPath is cwd-relative BY DESIGN (user-tree artifact)
+→ new anchorRoot option (pass cwd) keeps tmp/rename in the caller's tree.
+NEW: post-rename re-verify — if the FINAL file fails to decode, the captured
+original bytes are restored via primitives.atomicWriteFile (pass-25 first
+draft read absTmp AFTER the rename consumed it and wrote the tmp path back:
+recovery was itself broken; fixed 25.1 + pinned).
+
+**Tests:** backup-create-safety (3: new→replace→crash-safety round-trip in
+an isolated repo copy, limiter-enforcement probe, anchorRoot contract);
+fresh-dir horcrux-safe scenario `post-rename-fail` (final-file failure →
+byte-for-byte restore, tmp cleaned). Two prior-session test bugs fixed
+en route: `before` snapshot taken before the LEGIT replace (nondeterministic
+stego bytes → false "clobbered"); sync harness misread a returned Promise
+as failure (limiter probe now runs in a child node -e, like the scenarios).
+
+**Evidence:** fresh-dir 16/16; atomic-writes 13/13 (incl. no-raw-fs
+structural rule); backup-create-safety 3/3; transform 5; secret-free suites
+(teams 22, qos 10, escrow 15, snapshots 9, backup 8, backup-restore 4);
+build-test 15/15; bin/test-all 17/17; `npm run check` syntax OK.
+
+**Next candidates:** horcrux-safe callers pass opts straight through —
+verify backup.create's spread doesn't leak anchorRoot into toHorcrux opts;
+DEAD_EXPORTS.md long tail re-triage after 24/25; teams.store config path
+(escrow/governance) never exercised by tests.

@@ -280,6 +280,26 @@ const { safeWriteHorcrux } = require(process.env.HSAFE_LIB);
                 && fs.readFileSync(path.join(dir, 'backups/h.svg'), 'utf8') === '<svg>FRESH</svg>'
                 && !fs.existsSync(path.join(dir, 'backups/h.tmp.svg'))
         }));
+    } else if (scenario === 'post-rename-fail') {
+        // (pass 25.1) Decode succeeds on the TMP (pre-rename gate) but fails
+        // on the FINAL target — the last good copy must come back intact.
+        try {
+            await safeWriteHorcrux('backups/h.svg', {
+                encode: enc('<svg>FRESH2</svg>'),
+                decode: async (rel) => {
+                    if (rel === 'backups/h.svg') throw new Error('final file corrupt');
+                    return { ok: true };
+                }
+            });
+            console.log(JSON.stringify({ ok: false, why: 'should have thrown' }));
+        } catch (e) {
+            console.log(JSON.stringify({
+                ok: /replaced but FAILED post-rename verification/.test(e.message)
+                    && /original restored byte-for-byte/.test(e.message)
+                    && fs.readFileSync(path.join(dir, 'backups/h.svg'), 'utf8') === '<svg>FRESH</svg>'
+                    && !fs.existsSync(path.join(dir, 'backups/h.tmp.svg'))
+            }));
+        }
     } else if (scenario === 'decode-fail' || scenario === 'validate-fail') {
         try {
             await safeWriteHorcrux('backups/h.svg', scenario === 'decode-fail'
@@ -328,6 +348,8 @@ test('horcrux-safe: existing target tmp→validate→rename', () => runHsafeScen
 test('horcrux-safe: decode failure leaves original + cleans tmp', () => runHsafeScenario('decode-fail', true));
 
 test('horcrux-safe: validation failure leaves original + cleans tmp', () => runHsafeScenario('validate-fail', true));
+
+test('horcrux-safe: post-rename failure restores original byte-for-byte', () => runHsafeScenario('post-rename-fail', true));
 
 test('anchor: VANT_REPO_ROOT env wins over install tree', () => {
     const anchor = require(path.join(ROOT, 'lib', 'anchor'));
