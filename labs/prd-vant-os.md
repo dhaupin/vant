@@ -1,0 +1,221 @@
+# Vant OS Consolidation — Pulling the Society Together — Product Requirements Document
+
+**Version:** 1.0
+**Branch:** axolotl
+**Date:** 2026-09-24
+**Status:** Planning (owner-approved architecture A; wave plan below)
+
+---
+
+## 1. Overview
+
+Vant has a dormant **"Vant OS" ecosystem layer** from an earlier era —
+node-registry, encounter, relay, forum, realm, spirit, consciousness,
+habitat, nature, lineage — built to make agents into a society. The
+attempt stalled before it pulled together: the pieces exist and half of
+them are live (node-registry is consensus's vote-verification anchor;
+forum is MCP-wired), but they never formed a whole.
+
+This PRD is the pull-together. Two moves:
+
+1. **Persistence** — protocol state (consensus/market/msg/trust/
+   node-registry) currently lives in in-memory Maps that die with the
+   process. Move it to the storage layer (owner-approved **Architecture
+   A**: per-module write-through, `models/private/<brain>/state/`).
+2. **One transport** — crew-bus (pass 35, HMAC-signed webhook envelopes)
+   **replaces relay.js** as the agent-to-agent transport (owner decision:
+   wipe relay, make crew-bus the resident). encounter/spirit/forum/realm
+   are **kept** for later wiring (owner decision).
+
+The result: a node is a brain with state that survives restarts, a roster
+in the registry that consensus trusts, and a signed bus to talk to peer
+nodes — the substrate the old OS layer was reaching for.
+
+### Why now
+
+- The pass-34/35 lib census resolved all orphaned modules; the census
+  flagged this ecosystem as the remaining epic.
+- node-crew v0.2 (prd-node-crew.md) already called for protocol
+  persistence + signed transport. Crew-bus shipped; persistence is the
+  open half.
+- The old layer's own seams point here: relay/msg/teams all carry
+  `gatherState()/restoreState()` methods **nobody ever calls**, and
+  transform.js was built as the gather engine for horcrux/backup/sync.
+  The architecture always intended persisted state; it was never wired.
+
+---
+
+## 2. Findings: the old node system (forensics, pass 36)
+
+| Module | Role | State | Verdict |
+|---|---|---|---|
+| **node-registry.js** | Peer discovery (register/discover/heartbeat/status) | `_nodes` Map, in-memory | **LIVE & canonical** — consensus verifies every vote against it (`requireRegistry` default true), counts alive peers for quorum. Genesis registers crew nodes here. **Keep; persist first.** |
+| **relay.js** | Agent-to-agent transport: HTTP/WebSocket/brain/MCP | connections Map + brain-relay configs | **SUPERSEDED by crew-bus.** Only code consumer is transform's gather/restore seam (spirit mentions it in a doc comment only). Its HTTP method is unsigned and untested. **Delete; crew-bus takes the route.** |
+| **encounter.js** | Agent discovery & meeting protocol | Map, in-memory | Keep (owner: may wire later). MCP tools exist. |
+| **forum.js** | 3D geometric forum (isohedrons/quasicrystal) | brain-backed | Keep. MCP tools wired (`forum_enter`, `forum_message`). |
+| **realm.js** | Unified decision space (forum+consensus+governance+teams) | — | Keep (owner: may wire later). |
+| **spirit.js** | Complete autonomous agent composition | — | Keep. |
+| consciousness/habitat/nature/lineage | Identity / RLS workspaces / spark engine / origins | mixed | Keep; out of scope this PRD except where persistence touches them. |
+| **transform.js** | Universal gather/restore engine (23 gatherers, incl. every protocol module's state) | stateless orchestrator | **Keep — becomes the backup/audit layer** (option B demoted to backup role, per owner decision A). |
+| **wal.js** | Write-ahead log module | — | Examine during Wave 1; msg JSONL may use it or follow its pattern. |
+| system.js / vant.js | Layer-3 dashboards / facade | — | Consumers that will need relay references swapped to crew-bus. |
+
+**Key insight:** crew-bus does not compete with the old OS — it completes
+it. The old design had identity (node-registry), discovery (encounter),
+collaboration (forum/realm), composition (spirit), but its transport
+(relay) never grew teeth: no signatures, no audit chain, no tests. Crew-bus
+is that transport finished properly — HMAC-signed, webhook-verified,
+sandbox-gated outbound, 13/13 pinned.
+
+---
+
+## 3. Owner Decisions (2026-09-24)
+
+1. **Architecture A** — per-module write-through persistence. Each module
+   saves via the storage layer on mutation, hydrates on boot through
+   `brain.register` DI. transform.js stays as the backup/audit gather
+   layer (its gather→horcrux/backup path becomes "blessed snapshots").
+2. **relay.js is wiped and replaced** — crew-bus becomes the transport
+   resident. Whether that means `lib/crew-bus.js` content moves into
+   `lib/relay.js` or relay dies and references point at crew-bus is an
+   implementation detail decided by the no-legacy rule: **one name, one
+   job, zero aliases.** Chosen: **delete relay.js; keep `lib/crew-bus.js`
+   as the name** (it's tested 13/13, has a fresh suite, and "bus" is the
+   honest word for what it does). transform/system references to relay's
+   gather/restore seam move to crew-bus equivalents.
+3. **encounter/spirit/forum/realm stay** — wire later.
+4. **State home: `models/private/<brain>/state/`** — brain-scoped so
+   multibrain isolation holds; gitignored like all runtime state; gated
+   by the sandbox/storage chain like every other models/ write.
+
+---
+
+## 4. Architecture A: Persistence Contract
+
+### Where
+
+```
+models/private/<brain>/state/
+  node-registry.json     # peer table (host/port/status/lastSeen)
+  trust.json             # trust scores
+  msg-<channel>.jsonl    # append-only channel logs
+  consensus-<topic>.json # topic record incl. votes (written at lock points)
+  market.json            # listings + escrow reservations (commit points)
+```
+
+### Rules (per module)
+
+1. **Write-through on mutation** — every state-changing call persists
+   before returning (the modules are already lock-chained where races
+   matter: consensus `_lockTopic`, market atomic reserve; writes
+   serialize the same way).
+2. **Hydrate on first touch** — lazy load on module init via
+   `brain.register` DI wiring (boot.js registers the loader; first API
+   call hydrates if not yet). Missing/corrupt file = start empty, log,
+   never crash the boot.
+3. **Read-denial ≠ reset** — pass-31 rule (agents/internal.js) applies
+   everywhere: a sandbox read denial throws structured
+   (`E_STATE_READ`-class codes), it never silently wipes state. Only
+   parse failures may reset, and they must log loudly.
+4. **Storage layer only** — all reads/writes go through FileStorage
+   (sandbox → vaf chain), never raw fs. Same discipline as brain files.
+5. **Atomic writes** — storage layer's atomic-write path (tmp+rename)
+   for JSON snapshots; JSONL appends for logs.
+6. **worker-thread semantics fixed for free** — per-thread Maps become
+   disk-shared state on the same machine; cross-machine peers sync via
+   crew-bus envelopes. Document in each module header.
+
+### What persists per module (Wave 1-3 scope)
+
+| Module | Persisted | Cadence |
+|---|---|---|
+| node-registry | full peer table | on register/heartbeat/status-change |
+| trust | scores + history tail | on score change |
+| msg | channel messages | append-only JSONL |
+| consensus | topic + votes + status | inside `_lockTopic` commit point |
+| market | listings + supply/reservations | at trade commit points (after `_unreserve` rollback logic settles) |
+
+Escrow stays in-memory this PRD (known non-blocker, holds don't debit).
+
+---
+
+## 5. Wave Plan
+
+### Wave 1 — foundation (pass ~36)
+- **node-registry persistence** (consensus's trust anchor; smallest,
+  highest leverage). Hydrate + write-through + `E_STATE_READ` pin.
+- **crew-bus ↔ node-registry interop**: `crewBus.listen()` auto-registers
+  the node into node-registry (name, port, status alive, heartbeat via
+  existing `register()` path). Crew nodes become first-class registry
+  peers that consensus can verify.
+- Read wal.js; decide use-vs-pattern for msg JSONL.
+- Sweep green + new pins.
+
+### Wave 2 — memory & scores (pass ~37)
+- **trust.json** (write-through on score change).
+- **msg JSONL** per channel (append; channel list recovered by scan or
+  an index file if wal.js doesn't fit).
+- transform.js: swap relay gather/restore seam → crew-bus status/peers.
+- Sweep green + new pins.
+
+### Wave 3 — ledgers (pass ~38)
+- **consensus-<topic>.json** inside `_lockTopic` commit points (create/
+  vote/tally-state transitions).
+- **market.json** at trade commit points (listings, supply, active
+  reservations) — careful to persist *after* the atomic
+  reserve/rollback dance settles so a crash can't resurrect a
+  phantom reservation.
+- Sweep green + new pins.
+
+### Wave 4 — relay removal + OS wiring (pass ~39)
+- **Delete relay.js**; move transform's relay seam to crew-bus
+  (`gatherBus()` / crew-bus `status()` + `nodes()` as the restore
+  payload). Update system.js/vant.js dashboard references.
+- **Crew demo v0.2**: rerun labs/node-crew genesis as **two real node
+  processes** on one machine — state persists across restarts, peers
+  find each other via node-registry, signed messages flow over crew-bus,
+  consensus verifies registry-anchored votes from both nodes. This is
+  the PRD's definition of done.
+- Dead-exports sweep on the relay deletion; STABILITY.md non-blocker
+  "protocol state in-memory only" → CLOSED.
+
+### Out of scope (this PRD)
+- encounter/spirit/forum/realm wiring (kept, not wired).
+- escrow debit-on-trade (separate rc candidate).
+- Cross-machine state sync beyond crew-bus envelopes (no replication
+  protocol yet — state is per-node, transport is the sync).
+
+---
+
+## 6. Security Notes
+
+- All state files ride the storage chain (sandbox/vaf) — path traversal,
+  symlink, and proto-pollution guards apply as everywhere else in models/.
+- node-registry's role as consensus's vote anchor makes its persistence
+  integrity critical: the peer table on disk is *verified* content
+  (charset-validated names, port ranges), same as in-memory today.
+- crew-bus keeps its posture: HMAC-signed envelopes, SSRF allowlist for
+  peers, secrets never leave the process, no new crypto.
+- Write-through never persists secrets (market escrow secrets, webhook
+  secrets stay in process memory).
+
+## 7. Files
+
+- **New:** labs/prd-vant-os.md (this file)
+- **Wave 1-3 touched:** lib/node-registry.js, lib/trust.js, lib/msg.js,
+  lib/consensus.js, lib/market.js, lib/crew-bus.js, lib/boot.js (DI
+  wiring), test pins per wave.
+- **Wave 4:** lib/relay.js (deleted), lib/transform.js, lib/system.js,
+  lib/vant.js, labs/node-crew/demo.js (v0.2), labs/STABILITY.md,
+  labs/TASKS.md.
+
+## 8. Success Criteria
+
+1. Kill any node process mid-protocol; restart; consensus topics, market
+   listings, trust scores, registry peers, and msg channels are intact.
+2. `vant` runs with zero in-memory-only protocol state (STABILITY.md
+   non-blocker closed).
+3. Crew demo v0.2: two processes, one genesis, signed transport,
+   registry-verified votes — 9/9 phases across the pair.
+4. Full sweep green with every new pin; no-legacy policy intact (relay
+   gone, no aliases).
