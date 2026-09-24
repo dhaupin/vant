@@ -108,6 +108,14 @@ test('backup.js: no legacy backup() alias', () => {
     return null;
 });
 
+test('orgchart stores: brain-scoped default only, no .agent_tmp fallback (pass 28)', () => {
+    for (const rel of ['teams.js', 'escrow.js', 'agents/internal.js']) {
+        const src = readLib(rel);
+        if (/agent_tmp/.test(src)) return rel + ' still references .agent_tmp';
+    }
+    return null;
+});
+
 test('smoke: error.js still exports VantError + CODES', () => {
     const errors = require(path.join(ROOT, 'lib', 'error.js'));
     if (typeof errors.VantError !== 'function') return 'VantError missing';

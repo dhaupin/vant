@@ -2168,3 +2168,27 @@ test-all 17/17. Docs grep clean.
 
 **Evidence:** teams 22, orgflow 24/24 ×2, agents 17, transform 5,
 backup-create-safety 3, fresh-dir 16, no-legacy-bloat 8, syntax OK.
+
+## Session (2026-09-24 — pass 28: brain-scoped orgchart default, no .agent_tmp fallback)
+
+**Tier 3 #2 (owner: brain-scoped path is THE default; .agent_tmp via
+migration/config only):**
+- teams.js / escrow.js / agents/internal.js _getStorePath reshaped: explicit
+  config override (teams.store / escrow.store) wins, else brain-scoped
+  models/private/<brain>/orgchart/<store>.json — ALWAYS. The silent
+  .agent_tmp fallback is deleted from all three; an unusable brain name
+  throws instead of scattering orgchart state outside the models tree.
+  brain.js currentBrain() always yields a usable name ('vant' default), so
+  the old catch-fallbacks were dead code masking breakage.
+- migrations.js v2 step (orgchart.brain-scope) remains THE bridge for
+  existing .agent_tmp stores — runs on vant start, content-verified.
+- Guard test extended: no-legacy-bloat pins that teams/escrow/agents
+  internal stores never reference .agent_tmp again.
+
+**Evidence:** teams 22, orgflow 24/24, agents 17, escrow 15, audit 22,
+fresh-dir 16 (escrow containment), no-legacy-bloat 9, build-test 15/15,
+test-all 17/17, syntax OK.
+
+**Remaining .agent_tmp refs (out of scope here):** security/gates.js GATE_DB
+(separate store, own migration decision), bin/format-test temp artifacts,
+bin/clean.js cleanup list.
