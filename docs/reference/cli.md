@@ -464,11 +464,9 @@ with its own `--help`.
 | `vant teams` | Organization and team management |
 | `vant governance` | Governance decision making |
 | `vant market` | Knowledge trading (list, bid) |
-| `vant encounter` | Agent encounter tracking |
 | `vant forum` | Forum and discussion |
 | `vant context` | Prompt caching and context engine |
 | `vant consciousness` | Consciousness engine |
-| `vant spirit` | Spirit system |
 | `vant recursion` | Recursion engine |
 | `vant registry` | General registry |
 | `vant webhooks` | Webhook management |

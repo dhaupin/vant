@@ -252,8 +252,6 @@ const COMMANDS = {
     zen: 'zen.js',
     consciousness: 'consciousness.js',
     recursion: 'recursion.js',
-    spirit: 'spirit.js',
-    encounter: 'encounter.js',
     forum: 'forum.js',
 
     // Bin CLIs that existed but were never routed (pass 18 bin sweep)

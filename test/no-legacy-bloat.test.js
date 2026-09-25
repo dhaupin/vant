@@ -133,6 +133,29 @@ test('relay.js stays deleted; crew-bus is the one transport (pass 39)', () => {
     return null;
 });
 
+test('realm/encounter/spirit stay deleted; trust owns quarantine (pass 40)', () => {
+    for (const rel of ['lib/realm.js', 'lib/encounter.js', 'lib/spirit.js',
+                       'bin/spirit.js', 'bin/encounter.js']) {
+        if (fs.existsSync(path.join(ROOT, rel))) return rel + ' resurrected';
+    }
+    // Live code only: fold annotations may name the old modules on purpose;
+    // a require() or a COMMANDS route is a regression.
+    const scan = (rel, re) => {
+        const code = fs.readFileSync(path.join(ROOT, rel), 'utf8').replace(/\/\/.*$/gm, '');
+        return re.test(code);
+    };
+    const reRequire = /require\(['"]\.\/(realm|encounter|spirit)['"]\)/;
+    for (const dir of ['lib', 'bin']) {
+        for (const f of fs.readdirSync(path.join(ROOT, dir))) {
+            if (!f.endsWith('.js')) continue;
+            if (scan(dir + '/' + f, reRequire)) return dir + '/' + f + ' requires a retired module';
+        }
+    }
+    if (scan('bin/vant.js', /(spirit|encounter):\s*'(spirit|encounter)\.js'/)) return 'vant.js routes spirit/encounter again';
+    if (scan('bin/help.js', /vant spirit|vant encounter/)) return 'help.js advertises spirit/encounter again';
+    return null;
+});
+
 test('transform.js: no legacy privateBrains producer/writer (pass 29)', () => {
     const src = readLib('transform.js');
     // Strip // comments first: reject messages and removal docs may name the

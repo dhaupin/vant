@@ -152,7 +152,6 @@ async function run() {
         console.log('Consensus:', result.preview.hasConsensus ? result.preview.consensusCount + ' ledgers' : 'No');
         console.log('Escrow:', result.preview.hasEscrow ? result.preview.escrowCount + ' budgets' : 'No');
         console.log('Msg:', result.preview.hasMsg ? result.preview.msgCount + ' conversations' : 'No');
-        console.log('Realm:', result.preview.hasRealm ? result.preview.realmCount + ' realms' : 'No');
         console.log('Market:', result.preview.hasMarket ? result.preview.marketCount + ' listings' : 'No');
         console.log('Teams/Orgs:', result.preview.hasTeams ? `${result.preview.orgCount} orgs, ${result.preview.teams2Count} teams` : 'No');
         if (result.teamsError) {

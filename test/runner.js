@@ -228,8 +228,10 @@ async function main() {
   }
   
   if (!filter || filter === 'errors') {
+    // (pass 40) Error alias was removed in pass 26 (no-legacy-bloat pins its
+    // absence); the class export is VantError. Pin moved off the dead name.
     testLib('errors', './lib/error', {
-      functions: { Error: 1, handle: 1 }
+      functions: { VantError: 1, handle: 1 }
     });
   }
   

@@ -695,16 +695,6 @@ See: vant memory --help`
         usage: 'vant recursion run|unwind',
         detail: 'Recursion.\nSee: vant recursion --help'
     },
-    spirit: {
-        desc: 'Spirit system',
-        usage: 'vant spirit status|invoke',
-        detail: 'Spirit system.\nSee: vant spirit --help'
-    },
-    encounter: {
-        desc: 'Agent encounters',
-        usage: 'vant encounter list|meet',
-        detail: 'Encounter tracking.\nSee: vant encounter --help'
-    },
     forum: {
         desc: 'Forum/discussion',
         usage: 'vant forum list|post|view',

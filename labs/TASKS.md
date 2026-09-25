@@ -1,8 +1,67 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-09-23  
-**Session:** Wave: docs+lander restructure — brand/content PRDs, memory-first IA, new memory/ section, agent onboarding, lander rewrite, nav.yml, link migration
+**Last Updated:** 2026-09-24  
+**Session:** Wave: agora (scope + protocol loop) + retirements (realm/encounter/spirit) — pass 40
+
+---
+
+## Session (2026-09-24 — pass 40: agora + retirements, prd-agora)
+
+Waves 5+6 in one pass per labs/prd-agora.md (owner-locked dispositions:
+realm DELETE — concept becomes scope; encounter DELETE — discovery lives in
+node-registry + crew-bus; spirit FOLD into trust then DELETE). Prior agent
+crashed mid-reasoning with the wave fully coded; this pass verified,
+finished, and committed it.
+
+**Wave 5 — agora foundation:**
+- lib/scope.js (NEW): the agora membership rule. normalize/parseOwner/
+  isValid/resolveMembers/canAccess/assertOwner, backed by teams.js (the
+  ONE org model). Fail-closed: unknown org/dept/team/agent => DENY, never
+  empty-allow; missing/legacy scope => public/unscoped (lenient read);
+  malformed scope on create => reject. No hierarchy leak (team scope does
+  not leak to the org).
+- consensus: optional scope on create (rejects malformed), persisted with
+  the ledger (state-store write-through, so the privacy boundary survives
+  restarts), enforced in _voteInternal (non-members denied).
+- market: scope on list/trade/search — scoped listings invisible to
+  outsiders, tradable by members; malformed scope rejected; public
+  listings unchanged.
+- forum: publish/message carry scope; forum.castVote SWAPPED-ARG FIX
+  (was vote(voteId, name, choice) — voter name recorded as OUTCOME, choice
+  as AGENT; now aligned with consensus's vote(topic, outcome, agentId));
+  vote ledger shape aligned with the real consensus.create contract.
+- Decision return path (the wire that never existed): vote:consensus
+  event -> forum records the decision back in the originating thread.
+- crew-bus: agora envelope types crew.forum/crew.market/crew.decision;
+  inbound scope gate — a scoped payload not passing canAccess for THIS
+  node is dropped (scoped means unseen); configure({ agentId }) links a
+  node to its principal; without an agentId scoped payloads are
+  invisible (fail-closed).
+
+**Wave 6 — retirements:**
+- DELETED: lib/realm.js (781 lines — the second voting state machine with
+  its own swapped-arg consensus seam dies with it), lib/encounter.js,
+  lib/spirit.js, bin/encounter.js, bin/spirit.js, their test suites.
+- spirit's quarantine/verify moved into trust (persisted via the Wave 2
+  state-store) — registry now quarantine-gates on trust, same logic in
+  the live system.
+- Seams swept: transform gather/restore (realm + encounter entries gone),
+  registry, mcp (encounter/forum tools), bin/vant.js, bin/help.js,
+  bin/horcrux.js, docs/reference/cli.md. Zero live refs (grep-verified).
+- test/no-legacy-bloat.test.js extended: realm/encounter/spirit stay
+  deleted; errors.Error alias stays gone.
+
+**Runner fix (pre-existing drift, found by the sweep):** test/runner.js
+still pinned `errors.Error: 1` — the alias was removed in pass 26 and
+no-legacy-bloat pins its ABSENCE, so the runner lib-pin failed. Repinned
+to VantError; runner back to 37/37.
+
+**Verification:** scope 9/9, agora-loop 7/7 (two-process loop: scoped
+thread -> scoped vote -> decision back in thread; market scope gates;
+crew-bus member-delivered/non-member-dropped). Sweep 116/116 suites;
+ci 414/0/2; runner 37/37. Boot-horcrux svg churn from suite runs is
+stego re-randomization, restored before commit.
 
 ---
 
