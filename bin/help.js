@@ -549,7 +549,7 @@ See: vant s3 --help`
     all: {
         desc: 'Start everything (MCP + API servers)',
         usage: 'vant all',
-        detail: 'Trifecta mode: starts MCP and API servers together.\nSame as: vant mcp && vant api'
+        detail: 'All mode: starts MCP and API servers together.\nSame as: vant mcp && vant api'
     },
 
     org: {
@@ -614,9 +614,9 @@ See: vant spawn --help`
         detail: 'Rerank.\nSee: vant rerank --help'
     },
     api: {
-        desc: 'Trifecta API server mode',
+        desc: 'API server mode (part of all mode)',
         usage: 'vant api',
-        detail: 'Starts the API server via vant.startFull (trifecta mode).\nStatus/routes: `node bin/api.js status|routes|call|docs` — the\nutility CLI is not routed as `vant api` to avoid shadowing the\nserver mode.\nSee: vant all --help'
+        detail: 'Starts the API server via vant.startFull (all mode).\nStatus/routes: `node bin/api.js status|routes|call|docs` — the\nutility CLI is not routed as `vant api` to avoid shadowing the\nserver mode.\nSee: vant all --help'
     },
     runop: {
         desc: 'Runtime operations (absorbed into pipeline)',

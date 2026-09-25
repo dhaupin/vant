@@ -14,7 +14,7 @@ nav_order: 63
 
 ### Enable Debug
 
-Debug logging is always enabled in the trifecta server modes:
+Debug logging is always enabled in the `vant all` server modes:
 
 ```bash
 # MCP server with debug output

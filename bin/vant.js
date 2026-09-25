@@ -99,7 +99,7 @@ const COMMANDS = {
     // Server modes
     node: 'node.js',
 
-    // Trifecta modes (via vant.startFull)
+    // All-mode servers (via vant.startFull)
     mcp: null,  // handled inline
     api: null,  // handled inline
     all: null,  // handled inline
@@ -225,7 +225,7 @@ const COMMANDS = {
     
     // Core modules
     // NOTE: api.js is intentionally NOT routed here. `api` stays with the
-    // trifecta inline handler below (startFull mode 'api') — a later
+    // all-mode inline handler below (startFull mode 'api') — a later
     // `api: 'api.js'` key in this object literal used to shadow it silently
     // (duplicate-key footgun). bin/api.js remains reachable for utilities
     // (status/routes/call/docs) via its documented direct invocation.
@@ -273,7 +273,7 @@ const COMMANDS = {
 
     // Unrouted on purpose:
     //   mcp.js        — standalone server entry (npm bin "mcp"); `vant mcp`
-    //                   is the inline trifecta handler.
+    //                   is the inline all-mode handler.
     //   cli-standard.js — doc-only template for new CLIs, not a command.
 };
 
@@ -624,7 +624,7 @@ if (!script) {
         });
     } else if (cmd === 'mcp' || cmd === 'api' || cmd === 'all') {
         // (pass 20) `vant api <subcmd>` = the utility CLI (bin/api.js:
-        // status/routes/call/docs); bare `vant api` = trifecta API-server
+        // status/routes/call/docs); bare `vant api` = all-mode API-server
         // mode. Previously the utility CLI was unreachable — the inline
         // handler swallowed its subcommands too.
         if (cmd === 'api' && args[1]) {
@@ -633,7 +633,7 @@ if (!script) {
             child.on('exit', (code) => process.exit(code || 0));
             return;
         }
-        // Trifecta mode handler
+        // All-mode handler
         const mode = cmd;
         const vant = require('../lib/vant');
         vant.startFull({ mode, debug: true }).then(r => {
