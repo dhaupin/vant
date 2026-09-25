@@ -2,7 +2,61 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-25  
-**Session:** Next wave candidate 2 — cross-machine state sync (pass 49)
+**Session:** Next-wave closeout — PRD refresh + live-fire hardening (pass 51)
+
+---
+
+## Session (2026-09-25 — pass 51: PRD refresh + live-fire round 3, 2 wire-adversary bugs fixed)
+
+Owner brief: refresh the stale PRDs, then hunt gaps/edges/bugs in the
+pass 48-50 work. Both halves landed.
+
+**PRD refresh:** labs/prd-agora.md → v1.2 (Wave 8 federation wave,
+passes 47-51, new success criterion 5); labs/prd-vant-os.md → v1.3
+(next-wave shortlist ALL THREE marked SHIPPED with pass references,
+candidate follow-ons listed).
+
+**Live-fire findings (fixed + pinned):**
+1. **Merge scope-filter (ballot injection):** the envelope VOTE path
+   gated scope (pass 50), but the SYNC path did not — a registered peer
+   could `state.push` a scoped snapshot with its own pre-stuffed
+   non-member ballot and the owner would tally it. mergeTopic now
+   filters every adopted/born ballot through the owner's own
+   scope.resolveMembers; an unresolvable scope rejects the merge
+   (fail-closed, no partial state). BOTH merge branches (adopt + wire-born).
+2. **Sender-bound reply legs (reqId spoofing):** agora-sync's vote.ack
+   and crew.state dispatchers resolved any pending reqId regardless of
+   sender — a hostile registered peer that observed a reqId could forge
+   a "vote accepted" verdict or feed the merge path a ledger of its
+   choosing. Pending entries now carry the addressed node; replies from
+   any other origin are dropped (legit replies unaffected).
+3. **Edge probes (clean, no bugs):** escrow debit — zero-price costs the
+   default 1 (mirrors _checkBudget), a consumed listing cannot
+   double-debit ("sold out" refusal, spent unchanged), barter stays
+   free.
+
+**Live wire demo v0.3** (labs/node-crew/demo-v03-agora-wire.js): the
+pass-50 promised probe, TWO REAL node processes — owner builds team +
+scope + topic owner-side; peer casts a REMOTE ballot via agora-sync.vote
+over the signed bus; the owner's FULL gate stack runs (scope where the
+team lives, registry vetting, one vote); the ack carries the live tally
+(2 votes, passed); a cold third process tallies the persisted state.
+4/4 phases ×3 consecutive runs. Harness notes inherited from v0.2:
+network allowlist takes HOSTNAMES ('127.0.0.1'); configure() agentId on
+BOTH nodes (the peer's principal must be a team member owner-side);
+owner stays up ~9s for the ballot + ack; peer staggers past owner setup.
+
+**Pins:** test/agora-sync.test.js 7/7 (+2 live-fire: scope-filter,
+sender-binding — forged ack/ledger-replay resolves nothing, legit
+traffic unaffected). Sweep green: agora-distributed 6/6, agora-loop 7/7,
+consensus 8/8, crew-bus 13/13, market 22/22, market-debit 4/4,
+mcp-agora 5/5, forum-decisions-persistence 4/4, scope 9/9, escrow 0F.
+eslint 0 errors (6 pre-existing consensus warnings untouched).
+
+**Next steps:** all three next-wave candidates SHIPPED. Candidate
+follow-ons from the hunt: agora-sync MCP surface (vote/pull/push as
+tools), synced-ledger TTL/reaper, gossip-style pull scheduler. Or
+whatever the owner wants next.
 
 ---
 

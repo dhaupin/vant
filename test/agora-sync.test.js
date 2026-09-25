@@ -15,6 +15,11 @@
  *   5. agora-sync: install idempotent; pull validates topics; push refuses
  *      missing topics; pull round-trip merges over a stub bus (the real
  *      2-process wire is live-probed separately)
+ *   6. (pass 51 live-fire) merge scope-filter: non-member ballots in a
+ *      pushed/pulled snapshot are dropped; unresolvable scope rejects
+ *   7. (pass 51 live-fire) reply legs are sender-bound: a forged ack or
+ *      ledger reply from a peer that merely observed the reqId resolves
+ *      nothing
  *
  * Run: node test/agora-sync.test.js
  */
@@ -51,6 +56,7 @@ fs.rmSync(path.join(ROOT, 'models', 'private', 'vant', 'orgchart'), { recursive:
 const consensus = require(path.join(ROOT, 'lib', 'consensus'));
 const sync = require(path.join(ROOT, 'lib', 'agora-sync'));
 const registry = require(path.join(ROOT, 'lib', 'node-registry'));
+const teams = require(path.join(ROOT, 'lib', 'teams'));
 
 registry.clearState();
 for (const v of ['local-agent', 'rt-a', 'rt-b', 'rt-b-mirror']) {
@@ -176,6 +182,109 @@ async function main() {
         const pulled = await pending;
         assert(pulled.pulled === true, 'pull failed: ' + JSON.stringify(pulled));
         assert(pulled.merged.merged === true, 'pulled snapshot not merged: ' + JSON.stringify(pulled.merged));
+    });
+
+    await test('merge scope-filter: non-member ballots in a snapshot are dropped (pass 51)', async () => {
+        for (const v of ['member-a', 'member-b', 'outsider']) {
+            registry.register({ id: v, name: v, host: '127.0.0.1', port: 1 });
+        }
+        const org = teams.createOrg('p51-acme');
+        const dept = teams.createDept('p51-infra', { org: org.id });
+        const team = teams.createTeam('p51-crew', { dept: dept.id });
+        teams.assign('member-a', { org: org.id, dept: dept.id, team: team.id });
+        teams.assign('member-b', { org: org.id, dept: dept.id, team: team.id });
+        const SCOPE = { owner: 'team:' + team.id, visibility: 'scope' };
+
+        await consensus.create('p51-scoped', { options: ['yes', 'no'], minQuorum: 3, useTrustWeight: false, scope: SCOPE });
+        const local = await consensus.vote('p51-scoped', 'yes', 'member-a');
+        assert(!local.error, 'member local vote denied: ' + JSON.stringify(local));
+
+        // Hostile push: member ballot (adoptable) + a NON-MEMBER ballot
+        // pre-stuffed by the peer. Only the member's ballot may land.
+        const r = consensus.mergeTopic({
+            topic: 'p51-scoped',
+            votes: {
+                'member-b': { outcome: 'yes', signature: 'sig', ts: now },
+                'outsider': { outcome: 'no', signature: 'sig', ts: now }
+            },
+            minQuorum: 3,
+            created: now - 1000,
+            deadline: now + 3600000,
+            from: 'hostile-peer'
+        });
+        assert(r.merged === true, 'legit member ballot not adopted: ' + JSON.stringify(r));
+        assert(r.adopted === 1, 'adoption count wrong: ' + JSON.stringify(r));
+        const ledger = consensus.get('p51-scoped');
+        assert(!ledger.votes['outsider'], 'NON-MEMBER BALLOT ADOPTED from the wire');
+        assert(ledger.votes['member-b'] && ledger.votes['member-b'].outcome === 'yes', 'member ballot missing');
+
+        // Fail-closed: a wire-born topic whose scope owner does not exist
+        // locally rejects the merge — we cannot prove its ballots are legit.
+        const bad = consensus.mergeTopic({
+            topic: 'p51-scoped-2',
+            votes: { 'someone': { outcome: 'yes', signature: 'sig', ts: now } },
+            minQuorum: 2,
+            scope: { owner: 'team:ghost-team-xyz', visibility: 'scope' }
+        });
+        assert(bad.merged === false && bad.reason === 'scope_unresolved', 'unresolvable scope accepted: ' + JSON.stringify(bad));
+        assert(!consensus.get('p51-scoped-2'), 'rejected snapshot left partial state');
+    });
+
+    await test('reply legs are sender-bound: forged ack/reply resolves nothing (pass 51)', async () => {
+        const handlers = new Map();
+        const sent = [];
+        const bus = {
+            onDispatch: (t, fn) => handlers.set(t, fn),
+            send: async (to, type, payload) => { sent.push({ to, type, payload }); return { ok: true, handlers: 1 }; },
+            nodes: () => [{ name: 'stub-peer', url: 'http://127.0.0.1:1' }],
+            status: () => ({ name: 'stub-bus' })
+        };
+        sync.install(bus);
+
+        // PULL leg: forged ledger reply with a STOLEN reqId but the wrong
+        // sender must not resolve the pull — it must die on its timeout.
+        const pullP = sync.pull(bus, 'stub-peer', 'p49-rt', { timeoutMs: 250 });
+        const req = sent.filter((s) => s.type === 'state.request').pop();
+        assert(req && req.payload.reqId, 'pull request malformed');
+        handlers.get('state')({
+            from: 'reqid-sniffer-node',
+            payload: { ledger: consensus.exportTopic('p49-rt'), from: 'reqid-sniffer-node', reqId: req.payload.reqId }
+        });
+        const race = await Promise.race([pullP, new Promise((r) => setTimeout(() => r('still-pending'), 60))]);
+        assert(race === 'still-pending', 'FORGED ledger reply resolved the pull: ' + JSON.stringify(race));
+        const timedOut = await pullP;
+        assert(timedOut.pulled === false && timedOut.reason === 'timeout', 'pull resolved wrong: ' + JSON.stringify(timedOut));
+        // The REAL peer, same reqId flow, still works.
+        const pull2P = sync.pull(bus, 'stub-peer', 'p49-rt', { timeoutMs: 2000 });
+        const req2 = sent.filter((s) => s.type === 'state.request').pop();
+        handlers.get('state')({
+            from: 'stub-peer',
+            payload: { ledger: consensus.exportTopic('p49-rt'), from: 'stub-peer', reqId: req2.payload.reqId }
+        });
+        const ok = await pull2P;
+        assert(ok.pulled === true, 'legit reply blocked by binding: ' + JSON.stringify(ok));
+
+        // VOTE leg: a spoofed "accepted" verdict (error null, tally 99)
+        // must not resolve the voter's promise; the real owner's ack does.
+        const voteP = sync.vote(bus, 'stub-peer', 'p49-rt', 'yes', { timeoutMs: 250 });
+        const vreq = sent.filter((s) => s.type === 'vote').pop();
+        assert(vreq && vreq.payload.reqId, 'vote envelope malformed');
+        handlers.get('vote.ack')({
+            from: 'reqid-sniffer-node',
+            payload: { reqId: vreq.payload.reqId, result: { error: null, code: null, status: 'passed', totalVotes: 99 } }
+        });
+        const vrace = await Promise.race([voteP, new Promise((r) => setTimeout(() => r('still-pending'), 60))]);
+        assert(vrace === 'still-pending', 'FORGED vote verdict resolved the ballot: ' + JSON.stringify(vrace));
+        const vTimedOut = await voteP;
+        assert(vTimedOut.voted === false && vTimedOut.reason === 'timeout', 'vote resolved wrong: ' + JSON.stringify(vTimedOut));
+        const vote2P = sync.vote(bus, 'stub-peer', 'p49-rt', 'yes', { timeoutMs: 2000, agentId: 'rt-b' });
+        const vreq2 = sent.filter((s) => s.type === 'vote').pop();
+        handlers.get('vote.ack')({
+            from: 'stub-peer',
+            payload: { reqId: vreq2.payload.reqId, result: { error: 'Already voted', code: null, status: null, totalVotes: null } }
+        });
+        const vOk = await vote2P;
+        assert(vOk.voted === false && /Already voted/.test(vOk.reason || ''), 'real ack blocked by binding: ' + JSON.stringify(vOk));
     });
 
     console.log(`\n=== Agora state sync: ${results.passed} passed, ${results.failed} failed ===\n`);

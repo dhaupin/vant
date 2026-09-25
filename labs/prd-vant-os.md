@@ -1,12 +1,14 @@
 # Vant OS Consolidation — Pulling the Society Together — Product Requirements Document
 
-**Version:** 1.2
+**Version:** 1.3
 **Branch:** axolotl
-**Date:** 2026-09-24 (v1.2 2026-09-25: closeout + next-wave shortlist)
+**Date:** 2026-09-24 (v1.3 2026-09-25: next-wave shortlist fully shipped, passes 48-51)
 **Status:** COMPLETE — Waves 1-4 shipped (passes 36-39). Success criteria
 met (labs/TASKS.md pass 39). Post-PRD follow-through in the agora wave
 (passes 40-46): encounter/spirit/realm retired, agora loop wired
-(scope + MCP surface), forum decision log made durable.
+(scope + MCP surface), forum decision log made durable. Next-wave
+shortlist below: ALL THREE SHIPPED (passes 48-51) — see labs/prd-agora.md
+v1.2 Wave 8 for the federation details.
 
 ---
 
@@ -267,18 +269,28 @@ live candidates for the next PRD, all building on that substrate:
    creates + votes, node B pulls, votes, pushes — both nodes tally
    PASSED with 2 votes. Pinned test/agora-sync.test.js 5/5.
 
-3. **Distributed agora.** Decisions owned by a team on node A, voted on
-   by peers on node B, with the full scope + registry-verification chain
-   across the bus. Scope records already ride crew.forum/market/decision
-   envelopes (pass 40); what's missing is the cross-node enforcement
-   path (remote canAccess against a replicated member set, or scope
-   resolution delegated to the owning node) plus verification of remote
-   votes against the owner's registry view. Depends on (2) for coherent
-   state.
+3. ~~**Distributed agora.**~~ **SHIPPED (passes 50-51):** decisions owned
+   by a team on node A are voted on by vetted peers on node B —
+   agora-sync.vote() carries only {topic, outcome, agentId} on the wire;
+   the OWNER applies its full local gate stack (scope resolved where the
+   team registry lives, requireRegistry vetting against the owner's
+   registry, quarantine, one vote) and acks the verdict. Unknown peers
+   get silence (no vote oracle). Scope-gate-first hardening: a non-member
+   cannot distinguish open/closed/expired on a topic it cannot see.
+   Pass-51 live-fire closed two wire-adversary gaps: merge scope-filter
+   (synced ballots are filtered through the owner's own member set — a
+   pushed snapshot cannot stuff non-member ballots) and sender-bound
+   reply legs (an observed reqId cannot forge verdicts or ledger
+   replies). Live 2-process wire demo v0.3: remote ballot → owner gates →
+   ack tally → cold-process persisted tally, 4/4 ×3.
 
-Recommended order: (1) then (2) then (3) — each is a dependency of the
-next; the economic loop closes before the federation work begins.
-Owner to confirm sequencing before a next-wave PRD is drafted.
+Recommended order (1) → (2) → (3) — executed as shipped: the economic
+loop closed (48), then the sync seam (49), then the federation (50-51).
+The shortlist is complete; next-wave planning starts from a clean slate.
+Candidate follow-ons surfaced during pass 51 (owner to prioritize):
+synced-ledger TTL/reaper for stale pushed ledgers, agora-sync MCP
+surface (remote vote/pull/push as tools), and a gossip-style pull
+scheduler so peers converge without manual pulls.
 
 ---
 

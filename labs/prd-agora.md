@@ -1,12 +1,14 @@
 # The Agora — Protocol Loop with Scope — Product Requirements Document
 
-**Version:** 1.1
+**Version:** 1.2
 **Branch:** axolotl
-**Date:** 2026-09-24 (v1.1 2026-09-25: closeout + passes 42-46)
-**Status:** SHIPPED — Wave 5 (pass 40), Wave 6 (pass 41). Hardening: 42
-(live-fire round 2), 43 (decision return path survives restart via ledger
-metadata), 44 (forum decision log durable, state/forum.json), 45 (the
-other "trifecta" name retired), 46 (agora MCP surface). See labs/TASKS.md.
+**Date:** 2026-09-24 (v1.2 2026-09-25: federation wave, passes 47-51)
+**Status:** SHIPPED — Waves 5-6 (passes 40-41), hardening 42-46 (live-fire
+round 2, restart-durable return path, durable forum log, the other
+"trifecta" retired, agora MCP surface). Wave 8 federation (passes 47-51):
+escrow debit-on-trade, cross-machine state sync, the DISTRIBUTED AGORA
+(remote voting over the crew-bus) + pass-51 live-fire hardening with the
+live 2-process wire demo. See labs/TASKS.md.
 
 ---
 
@@ -128,6 +130,60 @@ Persistence: free on consensus/market (state-store write-through, Waves
   consensus_create/vote/tally/get/list added (scope-aware, schema-gated).
   Pinned via the real mcp.execute door (test/mcp-agora.test.js 5/5).
 
+### Wave 8 — federation: the distributed agora (2026-09-25, passes 47-51)
+
+The agora loop crossed machines. The vant-os PRD's next-wave shortlist,
+shipped in dependency order — the economic loop closes before the
+federation work begins:
+
+- **Pass 47**: PRD closeout + the next-wave shortlist (this file's v1.1,
+  vant-os v1.2).
+- **Pass 48 — escrow debit-on-trade:** trades now DEBIT the buyer at the
+  settle point (escrow.recordSpend — the old hold/release dance never
+  moved budget; credit was reserved, never spent). Missing/zero price
+  costs the default 1 (mirrors _checkBudget); barter strings stay free;
+  debit refusal unwinds reservation + hold before settlement;
+  trade.debit records the settlement. Pinned test/market-debit.test.js.
+- **Pass 49 — cross-machine state sync:** lib/agora-sync.js, a pull/push
+  seam over the crew-bus (crew.state.request → crew.state reply,
+  crew.state.push return leg), NOT replication — state stays per-node.
+  consensus exportTopic/mergeTopic re-derive ALL derived fields locally:
+  THE WIRE CAN NEVER DECLARE A TOPIC PASSED. Adopt-only-unknown ballots,
+  syncedFrom provenance, sanitized wire fields. Live 2-process probe.
+- **Pass 50 — the distributed agora:** agora-sync.vote() casts a ballot
+  on a PEER's topic by envelope. The OWNER runs its full local gate
+  stack — scope resolves where the team registry lives, requireRegistry
+  verifies the voter against the OWNER's registry, quarantine + one vote
+  — and acks the verdict. The wire carries only {topic, outcome,
+  agentId}; remote agents must be pre-registered (vetted) in the owner's
+  node-registry. Unknown peers get silence (no vote oracle).
+  Consensus hardening: the scope gate now runs BEFORE any state read —
+  "scoped means unseen": a non-member cannot distinguish
+  open/closed/expired on a topic it cannot see, nor flip a scoped ledger
+  to 'expired' via a denied ballot. crew-bus.status() exposes the node's
+  configured agentId for ballot attribution.
+- **Pass 51 — live-fire hardening** (the adversarial round against 48-50):
+  - **Merge scope-filter:** the envelope VOTE path gated scope, but the
+    SYNC path did not — a registered peer could push a scoped snapshot
+    with its own pre-stuffed ballot and the owner would tally it.
+    mergeTopic now filters every adopted/born ballot through the owner's
+    own scope.resolveMembers; an unresolvable scope rejects the merge
+    (fail-closed, no partial state).
+  - **Sender-bound reply legs:** vote.ack and crew.state replies resolve
+    a pending round-trip ONLY when env.from matches the node that was
+    addressed. An observed reqId can no longer forge a "vote accepted"
+    verdict or feed the merge path a snapshot of its choosing.
+  - **Edge probes (clean):** escrow debit — zero-price costs the default
+    1, a consumed listing cannot double-debit, barter stays free.
+  - **Live wire demo v0.3** (labs/node-crew/demo-v03-agora-wire.js): the
+    pass-50 promised probe, on TWO REAL node processes — owner builds
+    team + scope + topic owner-side; the peer casts a REMOTE ballot by
+    envelope over the signed bus; the owner's gate stack runs; the ack
+    carries the live tally (2 votes, passed); a cold third process
+    tallies the persisted state. 4/4 phases ×3 consecutive runs.
+  - Pins: test/agora-sync.test.js 7/7 (+2 live-fire),
+    test/agora-distributed.test.js 6/6.
+
 ## 7. Files
 
 - New: lib/scope.js, labs/prd-agora.md (this file), test/scope.test.js,
@@ -142,6 +198,13 @@ Persistence: free on consensus/market (state-store write-through, Waves
   docs/operations/testing.md (pass 45); lib/mcp.js (agora tools),
   test/mcp-agora.test.js, test/forum-decisions-persistence.test.js
   (pass 46, plus 43/44 pins).
+- Wave 8 touched: lib/market.js, lib/escrow.js, test/market-debit.test.js
+  (pass 48); lib/agora-sync.js, lib/consensus.js (exportTopic/mergeTopic),
+  test/agora-sync.test.js, labs/node-crew probe (pass 49); lib/agora-sync.js
+  (vote + dispatchers), lib/consensus.js (scope-gate-first), lib/crew-bus.js
+  (agentId in status), test/agora-distributed.test.js (pass 50); pass 51
+  hardening: lib/consensus.js (merge scope-filter), lib/agora-sync.js
+  (sender binding), labs/node-crew/demo-v03-agora-wire.js.
 
 ## 8. Success criteria
 
@@ -152,3 +215,8 @@ Persistence: free on consensus/market (state-store write-through, Waves
 3. realm/encounter/spirit deleted with zero live references (pin).
 4. Full sweep green; trust gains persisted quarantine/verify; no second
    voting state machine remains.
+5. (Wave 8) A team-scoped decision owned on node A can be voted on by a
+   vetted peer on node B over the signed wire, with the full
+   scope + registry chain enforced OWNER-side and every wire-born tally
+   re-derived locally (demo v0.3 4/4 ×3; agora-sync 7/7,
+   agora-distributed 6/6).

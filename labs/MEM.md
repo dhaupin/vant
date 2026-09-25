@@ -7,35 +7,25 @@
 
 ## Handoff
 
-**Last known good commit:** pass 49 — cross-machine state sync SHIPPED (candidate 2); see labs/TASKS.md top block.
-**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 46.
-**Status:** pass 47 complete (PRD closeout); commit + push pending at session end.
+**Last known good commit:** pass 51 — PRD refresh + live-fire round 3 (2 wire-adversary bugs fixed); see labs/TASKS.md top block.
+**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 51.
+**Status:** next-wave shortlist fully shipped (48/49/50) + hardened (51); nothing in flight.
 
 ---
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 49: agora state sync shipped as a PULL/PUSH seam
-(lib/agora-sync.js + consensus exportTopic/mergeTopic); wire can never
-declare a topic passed — tally() re-derives everything locally; adopt-
-only-unknown ballots; syncedFrom provenance; scope rides crew-bus's
-pass-40 gate. Live 2-process probe: A creates+votes, B pulls/votes/pushes,
-both nodes tally PASSED. Pins: test/agora-sync.test.js 5/5. Probe quirks:
-network allowlist takes '127.0.0.1'; vote agents need node-registry
-registration; stagger peer past owner setup. Previous pass 48: market
-trades now DEBIT the buyer's escrow
-budget at the settle point (escrow.recordSpend; the old hold/release dance
-never moved budget — credit was reserved, never spent). Numeric prices
-debit (missing/zero price costs default 1, mirroring _checkBudget); barter
-strings stay free; debit refusal (runaway guard) unwinds reservation+hold
-before settlement; trade.debit records the settlement. NOTE: market's
-_getEscrow returns the MODULE — recordSpend is instance-level, so the
-debit builds a fresh persisted Escrow() per trade. Pin:
-test/market-debit.test.js 4/4 (debit+persist, barter-free, insufficient-
-budget refusal, unwind-on-refusal; runaway 31st spend itself refused →
-recorded spend is 30, not 31). Sweep: market 22/22, agora 7/7, live-fire
-26/26. PRD next-wave candidate 1 marked SHIPPED; candidates 2 (cross-
-machine state sync) + 3 (distributed agora) remain, in that order.)
+(nothing in flight — pass 51: PRDs refreshed (prd-agora v1.2 Wave 8,
+prd-vant-os v1.3 shortlist shipped). Live-fire found 2 real bugs, both
+fixed+pinned: merge scope-filter (synced snapshots could stuff
+non-member ballots into scoped topics — mergeTopic now filters through
+scope.resolveMembers, unresolvable scope rejects fail-closed) and
+sender-bound reply legs (vote.ack/crew.state resolved any pending reqId
+from any origin — now bound to the addressed node). Escrow edges clean.
+Live wire demo v0.3 (labs/node-crew/demo-v03-agora-wire.js): distributed
+agora on 2 REAL processes, 4/4 ×3. Pins: agora-sync 7/7,
+agora-distributed 6/6. Candidate follow-ons: agora-sync MCP surface,
+synced-ledger TTL, gossip pull scheduler.)
 
 ---
 
