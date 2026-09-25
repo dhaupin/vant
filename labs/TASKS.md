@@ -1,8 +1,110 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-09-24  
-**Session:** Wave: agora (scope + protocol loop) + retirements (realm/encounter/spirit) — pass 40
+**Last Updated:** 2026-09-25  
+**Session:** Live-fire exercise — run vant for real, find bugs/vulns (pass 41)
+
+---
+
+## Session (2026-09-25 — pass 41: LIVE-FIRE exercise, 7 real finds)
+
+User: "let's actually run vant, try out all the stuff, see what bugs/vulns
+we can find." Method: copied the repo to /tmp/vant-live (real tree
+pristine), booted it fresh (start/health/setup), then exercised the agora
+loop, crew demo v0.2, trust/quarantine, msg, teams, brain writes, and the
+MCP server over real HTTP — with adversarial inputs throughout. Probes
+lived in /tmp + scripts/_*.js (gitignored); findings were fixed in the
+REAL tree and pinned by a new suite.
+
+**What survived live exercise (worth recording):** boot/migrate/health
+clean; agora loop (scoped thread -> scoped vote -> decision return) works
+end to end with correct arg orders; market scope gates (search/get/trade)
+hold; crew demo v0.2 four phases green; brain read traversal blocked;
+brain_write MCP traversal blocked at the storage layer; msg channel ids
+are not path components (single state file); scope parseOwner rejects
+hostile owners; teams reject hostile agents; consensus VAF/rate/deposit
+chains all fire.
+
+**FINDINGS (all fixed + pinned in test/live-fire-regressions.test.js, 15/15):**
+
+1. **Consensus quorum units bug (behavioral, found only live):** minQuorum
+   is a HEADCOUNT but the pass-38 default path compared it against
+   trust-WEIGHTED totals (fresh agent = 0.5), so a unanimous 2-voter team
+   could never reach quorum 2 (needed 4+ voters) — silently, with status
+   stuck at 'quorum'. Every existing test dodged it by pinning
+   useTrustWeight:false; agora-loop pinned the opt-out, not the default.
+   Fix: quorum counts totalVotes (per-head participation); threshold stays
+   trust-weighted (majority). quorumNeeded now a count. percentages are
+   unweighted share (weighted view lives in weightedPercentages as before).
+2. **Tally checksum != hash:** in the passed branch the second _hashTally
+   call ran AFTER results.hash was stamped, so the extra key changed the
+   JSON.stringify whitelist input and checksum could never equal hash.
+   Fix: hash once, derive both.
+3. **Quarantine gate missing where it matters (exploit chain, live-repro'd):**
+   pass 40 claimed "registry now quarantine-gates on trust" but the gate
+   landed only in lib/registry.js (module registry); node-registry.js —
+   the PEER registry consensus requireRegistry anchors on — accepted a
+   quarantined agent as alive AND COUNTED THEIR VOTE. Chain:
+   quarantine -> node-registry.register -> vote on requireRegistry ledger
+   -> accepted. Fix at both layers: register() refuses quarantined ids
+   (E_QUARANTINED) and _voteInternal denies quarantine at decision time
+   (a peer registered before turning bad stays 'alive' via heartbeats).
+4. **MCP exec server: unauthenticated brain/tool HTTP API on *:3457 with
+   CORS '*':** live probes: ss showed *:3457; any LAN device could read
+   the brain and execute tools; worse, the exec route ignored
+   Content-Type, so a cross-site text/plain fetch skips CORS preflight
+   entirely (drive-by writes from any website); no Host check either
+   (DNS-rebinding). Also: config's mcpBindAddress() (default 127.0.0.1)
+   was never honored, and the auth-bearing start() at :2533 is dead code —
+   module.exports shadows it with the unauthenticated arrow server.
+   Fix (proportional, zero-config): honor VANT_MCP_BIND (loopback default)
+   + three gates on the exec route — Host-header loopback match (rebinding),
+   Content-Type application/json required on POST (forces preflight),
+   Origin refused when non-loopback. Legit localhost MCP clients unchanged
+   (crew-bus deliveries send application/json — verified). Remaining
+   posture notes: the auth start() is still dead code; VANT_MCP_REQUIRE_KEY
+   only guards the OTHER server. LAN/remote MCP clients need VANT_MCP_BIND
+   + a real auth story (follow-up, deliberate non-goal today).
+5. **brain.writeTo born broken:** called storage.set(), which exists on
+   StateStorage only — BrainStorage has get/write — so EVERY call threw
+   'storage.set is not a function'. Introduced in the multibrain commit,
+   zero callers (why nothing noticed), but it advertised a working API.
+   Fix: validate {name,type}/key (coded VantErrors), delegate to
+   format.saveFile with the resolved brain root (flat-in-brain layout,
+   the one brain.read() can read back), ext-appended. Round-trips strings
+   and objects; hostile input throws coded.
+6. **format.serialize silently ate primitives:** `if (!data || typeof
+   data !== 'object') return ''` meant every STRING input serialized to
+   '' — saveFile wrote EMPTY files and reported { success: true }. Silent
+   data loss for any string-body caller of the format layer. Fix: strings
+   pass through; numbers/booleans/null stringify.
+7. **market.getStackMarketStats permanently broken (bare-ref class #5):**
+   called bare `stats()` — no such module-scope identifier — every brain
+   returned { error: 'stats is not defined' } swallowed by try/catch.
+   Same class as error.js (pass 22) and agents emit() (pass 32). Fix:
+   getMarket().stats(). Bonus hardening in the same function family:
+   market.stats() leaked SCOPED listing ids through the byType/byTags
+   indexes to any caller — stats now filters by canAccess (anonymous
+   callers get counts-only; members pass agentId).
+8. **crew-bus scope gate failed OPEN on missing scope module:** if
+   require('./scope') threw, a scoped envelope fell through to dispatch.
+   Now fail-closed (drop + warn). Same TRUST note: consensus also gained
+   the belt-and-suspenders quarantine check (see 3).
+
+**Verification:** live-fire regressions 15/15 (quorum headcount, checksum,
+both quarantine gates, writeTo string+object round-trip + coded errors,
+format.serialize primitives, MCP bind + three hostile-request refusals +
+legit-client pass, stats leak, stack-stats); agora-loop 7/7; crew demo
+v0.2 4/4; FULL sweep 117/117 suites by exit code; runner 37/37;
+build-test 15/15. No boot-svg churn this pass.
+
+**Follow-ups queued (deliberate non-goals):** dead auth-bearing start()
+vs shadowing exports (pick one server, wire VANT_MCP_REQUIRE_KEY through
+the live one); MCP auth story for non-loopback binds; brain.read() has no
+category paths (write categorizes via brain.write, read is flat-only —
+asymmetry documented, not changed); msg.create accepts 500-participant
+convos without cap; lib/mcp.js is 4,000+ lines and now carries two HTTP
+servers (split candidate).
 
 ---
 
