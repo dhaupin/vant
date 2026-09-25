@@ -2,7 +2,52 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-25  
-**Session:** Next wave candidate 1 — escrow debit-on-trade (pass 48)
+**Session:** Next wave candidate 2 — cross-machine state sync (pass 49)
+
+---
+
+## Session (2026-09-25 — pass 49: cross-machine state sync SHIPPED)
+
+Next-wave candidate 2 from the vant-os PRD shortlist. Shipped as a
+PULL/PUSH seam, not replication — state stays per-node; the bus carries
+snapshots on demand.
+
+**Shipped:**
+- lib/agora-sync.js: `pull(bus, node, topic)` (crew.state.request →
+  crew.state reply, reqId-correlated, timeout-bounded) + `push(bus,
+  node, topic)` (crew.state.push — the RETURN leg after voting on a
+  synced topic, so the owner's tally counts crew ballots) + `install(bus)`
+  (idempotent dispatchers; owner answers REGISTERED peers only — an
+  unknown origin gets no state oracle, signed or not; reply even when
+  null so askers stop retrying).
+- consensus `exportTopic`/`mergeTopic`: merge adopts only UNKNOWN
+  agents' ballots (local votes never overwritten), stamps `syncedFrom`
+  provenance, sanitizes wire fields (quorum clamped, deadline bounded,
+  vote shapes validated), and RE-DERIVES status/outcomes/hash via
+  tally() — THE WIRE CAN NEVER DECLARE A TOPIC PASSED.
+- Scope rides the payload: crew-bus's pass-40 fail-closed gate keeps
+  scoped topics invisible to non-members on BOTH legs. HMAC envelope
+  auth + webhook inbound gate inherited (pass 42). No new crypto.
+
+**Live 2-process probe (separate brain dirs, separate processes):**
+owner creates p49-demo + votes (1, open) → peer PULLS (merged, adopted 1,
+created) → peer votes (2, passed locally) → peer PUSHES → owner adopts
+the vote, its own tally derives PASSED (votes=2). Peer ledger persisted
+on its own disk. Probe quirks worth remembering: network allowlist takes
+'127.0.0.1' (demo-v02 note), vote agents need node-registry registration
+(requireRegistry), and peer actions must stagger past owner setup or
+the pull legitimately gets a null reply.
+
+**Pins:** test/agora-sync.test.js 5/5 — wire-cannot-declare-passed,
+adopt-only-unknown (local vote NEVER overwritten), fail-closed merge
+validation (bad topic/malformed scope/null), export→merge→quorum
+round-trip, install-idempotent + stub-bus pull/push logic.
+Sweep: consensus 8/8, agora 7/7, live-fire 26/26, mcp-agora 5/5,
+market-debit 4/4.
+
+**Next steps:** candidate 3 (distributed agora — cross-node scope
+enforcement + remote vote verification; the sync seam is its substrate)
+or whatever the owner wants next.
 
 ---
 

@@ -7,7 +7,7 @@
 
 ## Handoff
 
-**Last known good commit:** pass 48 — escrow debit-on-trade SHIPPED (candidate 1 of the next-wave shortlist); see labs/TASKS.md top block.
+**Last known good commit:** pass 49 — cross-machine state sync SHIPPED (candidate 2); see labs/TASKS.md top block.
 **Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 46.
 **Status:** pass 47 complete (PRD closeout); commit + push pending at session end.
 
@@ -15,7 +15,15 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 48: market trades now DEBIT the buyer's escrow
+(nothing in flight — pass 49: agora state sync shipped as a PULL/PUSH seam
+(lib/agora-sync.js + consensus exportTopic/mergeTopic); wire can never
+declare a topic passed — tally() re-derives everything locally; adopt-
+only-unknown ballots; syncedFrom provenance; scope rides crew-bus's
+pass-40 gate. Live 2-process probe: A creates+votes, B pulls/votes/pushes,
+both nodes tally PASSED. Pins: test/agora-sync.test.js 5/5. Probe quirks:
+network allowlist takes '127.0.0.1'; vote agents need node-registry
+registration; stagger peer past owner setup. Previous pass 48: market
+trades now DEBIT the buyer's escrow
 budget at the settle point (escrow.recordSpend; the old hold/release dance
 never moved budget — credit was reserved, never spent). Numeric prices
 debit (missing/zero price costs default 1, mirroring _checkBudget); barter

@@ -255,12 +255,17 @@ live candidates for the next PRD, all building on that substrate:
    stay free). Debit refusal unwinds reservation + hold; `trade.debit`
    records the settlement. Pinned test/market-debit.test.js 4/4.
 
-2. **Cross-machine state sync.** State is per-node (per-brain state/
-   files); the ONLY sync today is crew-bus envelopes in flight. A peer
-   that restarts with stale state can vote on a topic created after its
-   last hydration (demo-v02 works around this by re-hydrating before
-   voting). Options range from lazy hydrate-on-miss over the bus to a
-   replication/anti-entropy protocol. Biggest design space.
+2. ~~**Cross-machine state sync.**~~ **SHIPPED (pass 49) as a pull/push
+   seam, not replication:** `lib/agora-sync.js` runs a signed round-trip
+   over the crew-bus — `crew.state.request` → `crew.state` reply (pull)
+   and `crew.state.push` (return leg after voting). Consensus gained
+   `exportTopic`/`mergeTopic`; merge adopts only unknown agents' ballots,
+   stamps `syncedFrom` provenance, and RE-DERIVES status/outcomes/hash
+   locally via tally() — the wire can never declare a topic passed.
+   Scope rides the payload so crew-bus's pass-40 gate keeps scoped topics
+   invisible to non-members on both legs. Live 2-process probe: node A
+   creates + votes, node B pulls, votes, pushes — both nodes tally
+   PASSED with 2 votes. Pinned test/agora-sync.test.js 5/5.
 
 3. **Distributed agora.** Decisions owned by a team on node A, voted on
    by peers on node B, with the full scope + registry-verification chain
