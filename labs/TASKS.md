@@ -2,7 +2,43 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-25  
-**Session:** Live-fire round 2 — crew transport auth + MCP key gate (pass 42)
+**Session:** Live-fire round 2 (cont.) — agora restart persistence (pass 43)
+
+---
+
+## Session (2026-09-25 — pass 43: agora decision path survives restart)
+
+Continuation of live-fire round 2, back on the pass-40 agora loop. A probe
+of forum → market → consensus across a REAL process restart exposed the
+last memory-only seam in the loop's return path.
+
+**FINDING (fixed, live-verified):**
+
+1. **Forum decision return path was amnesiac across restart:** the
+   vote:consensus handler reads forum's in-memory `_openVotes` map for the
+   proposal/author of a decided topic. Fresh process ⇒ empty map ⇒ decision
+   recorded `{ proposal: null, author: null }` even though consensus's
+   ledger (scope, votes, status) all persisted via state-store. Live-probed:
+   vote created in process A (2/3 votes), third vote in process B completes
+   quorum — decision lost its context.
+
+   **Fix (lib/forum.js):** `forum.vote` now stamps
+   `{ proposal, author, viaForum }` into the PERSISTED consensus ledger
+   `metadata` (consensus.create already stored + persisted metadata; it was
+   never populated). The vote:consensus handler, when `_openVotes` misses,
+   falls back to `consensus.get(topic).metadata` (only when `viaForum` —
+   foreign ledgers keep proposal/author null). Thread record stays the
+   fast path; ledger is the durable fallback.
+
+   **Verified:** /tmp/p43-probe.js 3-phase restart probe →
+   `PASS: proposal/author recovered from persisted metadata`. Pins green:
+   agora-loop 7/7, consensus 8/8, forum 23/23, scope 9/9.
+
+**Next steps:** round-2 wrap-up (learnings + push) or keep probing:
+market metadata stamping for the knowledge-trade leg of the loop, and a
+forum `decisions` persistence story (records exist only in process memory
++ brain saves; a restart drops the forum's own decision log, though the
+consensus ledger retains the full outcome).
 
 ---
 

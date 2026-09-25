@@ -7,23 +7,23 @@
 
 ## Handoff
 
-**Last known good commit:** (pre-commit) pass 42 — live-fire round 2, see labs/TASKS.md top block. Pass 41 shipped as bf0edb1 (+ MEM reset 5fb1383); BOTH unpushed on origin/axolotl.
+**Last known good commit:** pass 43 — agora decision return path survives restart; see labs/TASKS.md top block.
 **Branch:** axolotl — origin github.com/dhaupin/vant
-**Status:** pass 42 complete and verified; commit pending at session end.
+**Status:** pass 43 complete and verified (live 3-phase restart probe + pins green); commit pending at session end.
 
 ---
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 42 live-fire round 2 shipped: crew transport auth
-(fail-closed HMAC, replay window, loopback bind), secretless crew nodes
-refused, MCP REQUIRE_KEY gate wired into the live server + dead auth-bearing
-start() removed (+ Auth-ctor hotfix the live probe caught), config getFlag
-null bug, msg participant cap. Pins: test/live-fire-regressions.test.js
-26/26. Sweep 117/117 (a,b,c chunk + per-suite; run-all hits the harness's
-terminal time cap), runner 37/37. market.list {error} diagnosed as the
-pass-38 consent gate (by-design, pinned). Sandbox /tmp/vant-live-r2 is
-stale vs lib/ now — re-sync if reused.)
+(nothing in flight — pass 43 live-fire round 2 continued: the pass-40 agora
+loop's decision return path lost proposal/author across a restart (memory-only
+_openVotes). Fix: forum.vote stamps { proposal, author, viaForum } into the
+PERSISTED consensus ledger metadata; the vote:consensus handler falls back to
+the ledger when the thread record is gone. Live-probed across a real process
+restart in /tmp/vant-live-r2: ledger hydrated, 3rd vote completes quorum,
+decision recovers proposal+author. Pins: agora-loop 7/7, consensus 8/8,
+forum 23/23, scope 9/9. Probe script /tmp/p43-probe.js (phases 1/3; phase 2
+shells out via a wrapper — direct env writes are blocked in this sandbox).
 
 ---
 
@@ -39,10 +39,7 @@ stale vs lib/ now — re-sync if reused.)
 
 ## Session End Checklist
 
-- [x] tests green (runner + full loop)
-- [x] labs/TASKS.md session block written
-- [x] priv brain lessons updated
-- [ ] pushed to origin/axolotl
-- [x] this file wiped back to template + one-line handoff
-
-— Buffy, agent on the axolotl branch
+1. Update `labs/TASKS.md` — new top session block (what shipped, next steps)
+2. Write brain learnings (models/private/buffy/)
+3. Update this file — wipe CURRENT DUMP to "(nothing in flight)", set Handoff
+4. Commit: `axolotl: pass NN — <one-liner>`
