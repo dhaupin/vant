@@ -2,7 +2,98 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-25  
-**Session:** Live-fire exercise — run vant for real, find bugs/vulns (pass 41)
+**Session:** Live-fire round 2 — crew transport auth + MCP key gate (pass 42)
+
+---
+
+## Session (2026-09-25 — pass 42: LIVE-FIRE ROUND 2, 6 fixed + 2 by-design)
+
+Round 2 of "run vant for real, find bugs/vulns" on a fresh sandbox
+(/tmp/vant-live-r2 @ bf0edb1), targeting the pass-41 follow-ups: the dead
+auth-bearing MCP start(), VANT_MCP_REQUIRE_KEY not wired to the live
+server, and the crew transport's fail-open HMAC discovered while probing
+it. Same method: adversarial probes (scripts/_r2_*.js, gitignored), fixes
+in the real tree, pins in the regression suite.
+
+**What survived round 2 (worth recording):** crew-bus envelope signing and
+dispatch over real 2-process HTTP (forge/replay/stale/tamper all refused
+post-fix); consensus double-vote + vote-after-close refusals confirmed
+again; market trade of a missing listing refused cleanly; brain read/
+write chains unbroken by the transport hardening.
+
+**FINDINGS (fixed + pinned; pins extend test/live-fire-regressions.test.js to 26):**
+
+1. **webhooks.verifySignature FAIL-OPEN (critical):** `if (!signature ||
+   !secret) return true` meant ANY route with a configured secret still
+   accepted an unsigned request — an attacker who can reach the port forges
+   crew envelopes wholesale (live-repro'd: unsigned dispatch 200 with the
+   secret configured). Fix: fail-closed; secretless routes were already
+   refused at register() so the belt never breaks a real flow.
+2. **No replay/freshness defense on the webhook route:** signed bytes
+   could be banked and replayed forever (probe-verified identical envelope
+   dispatched twice). Fix: _replayCheck — per-route signature-hex dedupe
+   (REPLAY_SEEN_MAX 5000, drop-oldest-half) + 5-minute freshness window
+   on body.ts (ABS age, so banked future-ts envelopes die too). Duplicate
+   => 409, stale => 401. Wired after verifySignature in the POST handler.
+3. **Webhook server bound ALL interfaces:** startServer listen(port) with
+   no host advertised HMAC-authenticated endpoints to the LAN. Fix:
+   loopback default, VANT_WEBHOOK_BIND is the explicit opt-out (mirrors
+   pass-41's MCP bind fix). ss-verified: 127.0.0.1, no wildcard.
+4. **config env dead code (getFlag null-vs-undefined class):**
+   mcpRequireKey() checked `getFlag('mcp.requireKey') !== undefined` but
+   getFlag returns NULL for unset — the check was always true, so
+   VANT_MCP_REQUIRE_KEY could never apply. Fix: `!== null && !==
+   undefined`. Audit note: same bare-comparison pattern should be assumed
+   hostile anywhere getFlag/getFlag-like accessors are used.
+5. **MCP dead start() removed + REQUIRE_KEY gate wired into the live
+   server (V5):** the auth-bearing start() at :2533 was unreachable
+   (shadowed by module.exports.start — the unauthenticated arrow server),
+   so VANT_MCP_REQUIRE_KEY guarded nothing. Fix: deleted the dead server
+   + its consts; the LIVE module.exports.start gained the mcpRequireKey()
+   gate on POST /mcp/exec (x-api-key or Bearer; 401 + mcp:auth:failed
+   emit; no key configured = allow, local companion posture), restored
+   GET /tools + /health aliases the docs reference, and captured _server
+   so stop() stops the live server. Spliced via scripts/_r2_fix_mcp.js
+   (file >3.9k lines, str_replace can't reach).
+   **V5 follow-up bug found by the live probe:** the gate's
+   `new (require('./auth'))()` threw — auth exports { Auth, ... }, not a
+   constructor — so every gated POST hung with an Unhandled Rejection.
+   Fixed to `require('./auth').Auth` (scripts/_r2_fix_auth_ctor.js).
+   Lesson: a gate that throws is worse than no gate; the probe caught it
+   only because the POST was live-repro'd, not unit-called.
+6. **crew-bus secretless nodes refused:** configure() now throws coded
+   VantError on missing/empty secret — outbound HMAC already required one,
+   but a listening node without a secret was zero-transport-auth.
+   Outbound-only nodes may omit it (documented in the error text).
+
+**By-design (documented + pinned, not changed):**
+- market.list is CREATE-a-listing (pass-38 governance consent gate:
+  refuses without consentGiven — a fresh-cwd probe misread this as a
+  browse-bug). MCP market_list exposes context.consentGiven. Pinned so
+  the gate can't silently regress.
+- msg participant scale: addParticipant was fully unbounded AND persisted
+  every add. Capped at 1000 (matching the maxMessages ceiling) + id
+  validation (1-200 chars, coded errors); re-adds stay idempotent and
+  never trip the cap.
+
+**Verification:** live-fire regressions 26/26 (15 pass-41 + 11 pass-42:
+fail-closed HMAC matrix, replay 409/stale 401, real-HTTP forge/tamper/
+replay refusals + legit dispatch, loopback bind via ss, crew secretless
+throw, config null fall-through, msg cap, market consent gate, MCP
+REQUIRE_KEY 401/401/200/Bearer/tools/health/rebind-403 over real HTTP);
+webhooks 11/11, crew-bus 13/13, node-crew 9/9, demo-v02 4/4,
+test-webhooks 7/7; runner 37/37; FULL sweep 117/117 by exit code (run
+via a+b+c chunk + per-suite — run-all itself exceeded the harness's
+175s terminal cap this session; every suite passed individually);
+npm run check OK; eslint clean for touched files.
+
+**Follow-ups queued (deliberate non-goals):** non-loopback MCP/crew auth
+story for real multi-host deployments (VANT_MCP_BIND + REQUIRE_KEY exist;
+a token scheme does not); mcp.js split (now ~3.98k lines, one dead server
+removed); brain.read() category asymmetry (documented pass-41); AGENTS.md
+advertises /rpc + brain_agent_spawn MCP tools that don't exist in code
+(phantom docs — either implement or fix the docs); webhook freshness
+depends on sender clock sanity (abs-window; consider max-age-only).
 
 ---
 

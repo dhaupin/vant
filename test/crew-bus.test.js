@@ -187,10 +187,12 @@ async function main() {
         assert(threw, 'invalid name should throw');
         threw = null;
         try { bus.configure({ name: 'ok-name', port: 99999 }); } catch (e) { threw = e; }
-        assert(threw, 'invalid port should throw');
-        threw = null;
-        try { bus.configure({ name: 'ok-name', port: 5000 }); } catch (e) { threw = e; }
-        assert(!threw, 'valid config should not throw');
+        assert(threw, 'invalid port should throw');	        threw = null;
+	        try { bus.configure({ name: 'ok-name', port: 5000 }); } catch (e) { threw = e; }
+	        assert(threw, 'secretless config should throw (pass 42: transport auth mandatory)');
+	        threw = null;
+	        try { bus.configure({ name: 'ok-name', port: 5000, secret: 's-' + process.pid }); } catch (e) { threw = e; }
+	        assert(!threw, 'valid config with secret should not throw');
         threw = null;
         try { bus.registerNode({ name: 'peer', url: 'ftp://x', secret: 's' }); } catch (e) { threw = e; }
         assert(threw, 'non-http url should throw');

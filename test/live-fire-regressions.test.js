@@ -23,6 +23,27 @@
  *      Content-Type (no-preflight drive-by), and Origin (cross-site) gates
  *      refuse hostile requests; legit localhost JSON clients pass
  *
+ * Pass 42 (live-fire round 2 — crew transport auth + MCP key gate):
+ *   7. webhooks.verifySignature is FAIL-CLOSED (was `if (!sig || !secret)
+ *      return true` — unsigned crew envelopes dispatched with 200)
+ *   8. replay gate: duplicate signature 409; stale/future ts 401 (pure
+ *      check + over real HTTP)
+ *   9. webhook HTTP posture: unsigned forge / wrong secret / tampered
+ *      payload refused 401; legit signed envelope 200; exact replay 409
+ *  10. webhook server binds loopback by default (was listen(port) on all
+ *      interfaces; VANT_WEBHOOK_BIND is the explicit opt-out)
+ *  11. crew-bus: secretless configure() throws coded error (secretless
+ *      nodes were zero-transport-auth)
+ *  12. config: unset flag is exactly null and mcpRequireKey falls through
+ *      to VANT_MCP_REQUIRE_KEY (was `!== undefined` — env var dead code)
+ *  13. msg: addParticipant validates ids and caps roster at 1000 (was
+ *      unbounded, persisted every add)
+ *  14. market: governance consent gate refuses default listing-create and
+ *      allows consented (by-design; pinned after a fresh-cwd probe
+ *      mistook the refusal for a bug)
+ *  15. MCP REQUIRE_KEY over real HTTP: no/wrong key 401, valid key +
+ *      Bearer 200, /tools + /health 200, hostile Host 403 even with key
+ *
  * Run: node test/live-fire-regressions.test.js
  */
 
@@ -76,7 +97,7 @@ function httpPost(port, { headers = {}, body = '', host = '127.0.0.1' }) {
 }
 
 async function main() {
-    console.log('\n🔥 LIVE-FIRE REGRESSION TESTS (pass 41)\n');
+    console.log('\n🔥 LIVE-FIRE REGRESSION TESTS (pass 41+42)\n');
 
     // ---------- 1+2: consensus quorum headcount + checksum ----------
     registry.clearState();
@@ -268,6 +289,192 @@ async function main() {
     });
 
     child.kill('SIGTERM');
+
+    // ==================== PASS 42 (live-fire round 2) ====================
+    const crypto = require('crypto');
+    const errors = require(path.join(ROOT, 'lib', 'error'));
+    const Encrypt = require(path.join(ROOT, 'lib', 'encrypt'));
+    const webhooks = require(path.join(ROOT, 'lib', 'webhooks'));
+    const crewBus = require(path.join(ROOT, 'lib', 'crew-bus'));
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    const msg = require(path.join(ROOT, 'lib', 'msg'));
+
+    // ---------- 7: webhook HMAC is fail-closed ----------
+    await test('webhooks.verifySignature is FAIL-CLOSED (unsigned/secretless refused)', () => {
+        assert(webhooks.verifySignature('body', undefined, 'secret') === false, 'missing signature must refuse');
+        assert(webhooks.verifySignature('body', '', 'secret') === false, 'empty signature must refuse');
+        assert(webhooks.verifySignature('body', 'sig', undefined) === false, 'missing secret must refuse');
+        assert(webhooks.verifySignature('body', 'sig', '') === false, 'empty secret must refuse');
+        const sig = Encrypt.hmacSign('body', 'secret');
+        assert(webhooks.verifySignature('body', sig, 'secret') === true, 'valid HMAC must verify');
+        assert(webhooks.verifySignature('tampered', sig, 'secret') === false, 'tampered payload must refuse');
+    });
+
+    // ---------- 8: replay gate (pure check) ----------
+    await test('webhook replay gate: duplicate sig 409, stale/future ts 401', () => {
+        const route = 'pin-replay-' + Date.now().toString(36);
+        const fresh = { ts: Date.now() };
+        assert(webhooks._replayCheck(route, fresh, 'sig-a').ok === true, 'first delivery must pass');
+        const dup = webhooks._replayCheck(route, fresh, 'sig-a');
+        assert(dup.ok === false && dup.code === 409, 'identical signed bytes must 409, got ' + JSON.stringify(dup));
+        const stale = webhooks._replayCheck(route, { ts: Date.now() - 6 * 60 * 1000 }, 'sig-b');
+        assert(stale.ok === false && stale.code === 401, 'stale ts must 401, got ' + JSON.stringify(stale));
+        const future = webhooks._replayCheck(route, { ts: Date.now() + 6 * 60 * 1000 }, 'sig-c');
+        assert(future.ok === false && future.code === 401, 'future ts must 401 (abs age), got ' + JSON.stringify(future));
+    });
+
+    // ---------- 9+10: webhook HTTP posture over a real server ----------
+    const WH_PORT = 46000 + (process.pid % 2000);
+    const ROUTE = 'pin-sec-route';
+    const SECRET = 'pin-secret-42';
+    webhooks.register({ name: ROUTE, source: ROUTE, eventKeyExpr: 'event', secret: SECRET });
+    const whServer = webhooks.startServer(WH_PORT);
+    for (let i = 0; i < 40 && !whServer.listening; i++) await wait(100);
+
+    const whPost = (headers, raw) => new Promise((resolve, reject) => {
+        const req = http.request({ host: '127.0.0.1', port: WH_PORT, path: '/' + ROUTE, method: 'POST', headers }, (res) => {
+            let data = ''; res.on('data', (c) => { data += c; }); res.on('end', () => resolve({ status: res.statusCode, body: data }));
+        });
+        req.on('error', reject); req.setTimeout(5000, () => req.destroy(new Error('http timeout'))); req.end(raw);
+    });
+
+    await test('webhook HTTP: unsigned / wrong-secret / tampered refused, legit signed 200', async () => {
+        assert(whServer.listening, 'webhook server did not start');
+        const envelope = { event: 'crew.ping', from: 'pin', type: 'ping', payload: { n: 1 }, ts: Date.now(), nonce: 'pin-nonce' };
+        const raw = JSON.stringify(envelope);
+        const sig = crypto.createHmac('sha256', SECRET).update(raw).digest('hex');
+        const noSig = await whPost({ 'Content-Type': 'application/json' }, raw);
+        assert(noSig.status === 401, 'unsigned must 401 (was fail-open), got ' + noSig.status);
+        const wrongSig = await whPost({ 'Content-Type': 'application/json', 'X-Signature-256': crypto.createHmac('sha256', 'WRONG').update(raw).digest('hex') }, raw);
+        assert(wrongSig.status === 401, 'wrong secret must 401, got ' + wrongSig.status);
+        const tampered = await whPost({ 'Content-Type': 'application/json', 'X-Signature-256': sig }, JSON.stringify({ ...envelope, payload: { n: 2 } }));
+        assert(tampered.status === 401, 'tampered payload must 401, got ' + tampered.status);
+        const legit = await whPost({ 'Content-Type': 'application/json', 'X-Signature-256': sig }, raw);
+        assert(legit.status === 200 && JSON.parse(legit.body).received === true, 'legit signed envelope must dispatch, got ' + legit.status + ' ' + legit.body.slice(0, 80));
+    });
+
+    await test('webhook HTTP: exact replay of a DELIVERED envelope is 409', async () => {
+        const envelope = { event: 'crew.ping', from: 'pin', type: 'ping', payload: { n: 3 }, ts: Date.now(), nonce: 'pin-replay-nonce' };
+        const raw = JSON.stringify(envelope);
+        const sig = crypto.createHmac('sha256', SECRET).update(raw).digest('hex');
+        const first = await whPost({ 'Content-Type': 'application/json', 'X-Signature-256': sig }, raw);
+        assert(first.status === 200, 'first delivery must 200, got ' + first.status);
+        const replay = await whPost({ 'Content-Type': 'application/json', 'X-Signature-256': sig }, raw);
+        assert(replay.status === 409, 'exact replay must 409, got ' + replay.status);
+    });
+
+    await test('webhook server binds loopback by default (ss, no wildcard)', async () => {
+        const { execSync } = require('child_process');
+        const ss = execSync('ss -ltn', { encoding: 'utf8' });
+        const line = ss.split('\n').find((l) => l.includes(':' + WH_PORT + ' ')) || '';
+        assert(/127\.0\.0\.1:\d+/.test(line), 'must bind 127.0.0.1, got: ' + line.trim());
+        assert(!/(0\.0\.0\.0|\*):\d+/.test(line.split(/\s+/).find((t) => t.includes(':' + WH_PORT)) || ''), 'must NOT bind wildcard, got: ' + line.trim());
+    });
+
+    whServer.close();
+
+    // ---------- 11: crew-bus refuses secretless nodes ----------
+    await test('crew-bus configure without a secret throws coded VantError', () => {
+        const bus = crewBus.createBus();
+        let threw = null;
+        try { bus.configure({ name: 'pin-node', port: 5100 }); } catch (e) { threw = e; }
+        assert(threw instanceof errors.VantError, 'missing secret must throw VantError, got ' + threw);
+        assert(threw.code === errors.CODES.INPUT_VALIDATION_FAILED, 'coded error expected, got ' + threw.code);
+        threw = null;
+        try { bus.configure({ name: 'pin-node', port: 5100, secret: '' }); } catch (e) { threw = e; }
+        assert(threw && threw.code, 'empty secret must throw too');
+        const ok = bus.configure({ name: 'pin-node', port: 5100, secret: 'pin-crew-secret' });
+        assert(ok && ok.name === 'pin-node', 'valid config must still configure');
+    });
+
+    // ---------- 12: config getFlag null + mcpRequireKey env fall-through ----------
+    await test('config: unset flag is exactly null; mcpRequireKey honors VANT_MCP_REQUIRE_KEY', () => {
+        assert(config.getFlag('pin-definitely-unset-flag') === null, 'unset flag must be exactly null (was the `!== undefined` bug)');
+        const prev = process.env.VANT_MCP_REQUIRE_KEY;
+        try {
+            process.env.VANT_MCP_REQUIRE_KEY = 'true';
+            assert(config.mcpRequireKey() === 'true', 'env true must enable gate');
+            process.env.VANT_MCP_REQUIRE_KEY = 'false';
+            assert(config.mcpRequireKey() === 'false', 'env false must disable gate');
+        } finally {
+            if (prev === undefined) delete process.env.VANT_MCP_REQUIRE_KEY; else process.env.VANT_MCP_REQUIRE_KEY = prev;
+        }
+    });
+
+    // ---------- 13: msg addParticipant validation + cap ----------
+    await test('msg: addParticipant validates ids and caps roster at 1000', () => {
+        if (msg.clearState) msg.clearState();
+        const conv = msg.create({});
+        assert(msg.addParticipant(conv.id, 'alice') === true, 'add must succeed');
+        assert(msg.addParticipant(conv.id, 'alice') === true, 're-add must stay idempotent');
+        assert(msg.participants(conv.id).length === 1, 're-add must not duplicate');
+        let threw = null;
+        try { msg.addParticipant(conv.id, 'x'.repeat(250)); } catch (e) { threw = e; }
+        assert(threw instanceof errors.VantError, 'oversized id must throw coded error, got ' + threw);
+        assert(msg.participants(conv.id).length === 1, 'failed add must not mutate roster');
+        threw = null;
+        try { for (let i = 0; i < 1500; i++) msg.addParticipant(conv.id, 'p-' + i); } catch (e) { threw = e; }
+        assert(threw instanceof errors.VantError, 'cap must throw coded error, got ' + threw);
+        assert(msg.participants(conv.id).length === 1000, 'roster must cap at 1000, got ' + msg.participants(conv.id).length);
+        assert(msg.addParticipant(conv.id, 'p-0') === true, 're-add at cap stays idempotent');
+        assert(msg.participants(conv.id).length === 1000, 're-add must not grow roster');
+        if (msg.clearState) msg.clearState();
+    });
+
+    // ---------- 14: market governance consent gate (by-design, pinned) ----------
+    await test('market: listing-create refuses without consent, allows with consent', async () => {
+        if (market.clearState) await market.clearState();
+        const noConsent = await market.list('knowledge', { title: 'pin item', summary: 's' }, { agentId: 'pin-anon', consentGiven: false });
+        assert(noConsent && noConsent.error === 'Governance: listing not allowed',
+            'no-consent must hit governance gate, got ' + JSON.stringify(noConsent).slice(0, 120));
+        const consented = await market.list('knowledge', { title: 'pin item', summary: 's' }, { agentId: 'pin-anon', consentGiven: true });
+        assert(consented && !consented.error && consented.id, 'consented must create listing, got ' + JSON.stringify(consented).slice(0, 120));
+        if (market.clearState) await market.clearState();
+    });
+
+    // ---------- 15: MCP REQUIRE_KEY gate over real HTTP ----------
+    const MCP2_PORT = 48600 + (process.pid % 300);
+    const child2 = spawn(process.execPath, [path.join(ROOT, 'bin', 'mcp.js'), '-S', '-p', String(MCP2_PORT)], {
+        cwd: ROOT,
+        env: { ...process.env, VANT_MCP_REQUIRE_KEY: 'true', VANT_API_KEY: 'pin-mcp-key-42', VANT_MCP_API_KEY: '' },
+        stdio: ['ignore', 'pipe', 'pipe']
+    });
+    let server2Up = false;
+    child2.stdout.on('data', (d) => { if (String(d).includes('Server on')) server2Up = true; });
+    child2.stderr.on('data', (d) => { if (String(d).includes('Server on')) server2Up = true; });
+    for (let i = 0; i < 150 && !server2Up; i++) await wait(100);
+
+    const mcp2Post = (headers, body) => httpPost(MCP2_PORT, { headers, body });
+    const mcp2Get = (p) => new Promise((resolve, reject) => {
+        const req = http.request({ host: '127.0.0.1', port: MCP2_PORT, path: p, method: 'GET' }, (res) => {
+            let data = ''; res.on('data', (c) => { data += c; }); res.on('end', () => resolve({ status: res.statusCode, body: data }));
+        });
+        req.on('error', reject); req.setTimeout(5000, () => req.destroy(new Error('http timeout'))); req.end();
+    });
+    const EXEC_BODY = JSON.stringify({ tool: 'brain_list', args: {} });
+
+    await test('MCP REQUIRE_KEY: no/wrong key 401, valid key + Bearer 200', async () => {
+        assert(server2Up, 'gated MCP server did not report startup');
+        const noKey = await mcp2Post({ 'Content-Type': 'application/json' }, EXEC_BODY);
+        assert(noKey.status === 401, 'no key must 401, got ' + noKey.status);
+        const wrongKey = await mcp2Post({ 'Content-Type': 'application/json', 'x-api-key': 'wrong' }, EXEC_BODY);
+        assert(wrongKey.status === 401, 'wrong key must 401, got ' + wrongKey.status);
+        const withKey = await mcp2Post({ 'Content-Type': 'application/json', 'x-api-key': 'pin-mcp-key-42' }, EXEC_BODY);
+        assert(withKey.status === 200 && JSON.parse(withKey.body).result, 'valid key must 200, got ' + withKey.status + ' ' + withKey.body.slice(0, 80));
+        const bearer = await mcp2Post({ 'Content-Type': 'application/json', authorization: 'Bearer pin-mcp-key-42' }, EXEC_BODY);
+        assert(bearer.status === 200, 'Bearer must be accepted, got ' + bearer.status);
+    });
+
+    await test('MCP REQUIRE_KEY: /tools + /health aliases 200; hostile Host 403 even with key', async () => {
+        const tools = await mcp2Get('/tools');
+        assert(tools.status === 200 && tools.body.includes('tools'), '/tools alias must 200, got ' + tools.status);
+        const health = await mcp2Get('/health');
+        assert(health.status === 200, '/health alias must 200, got ' + health.status);
+        const rebinding = await mcp2Post({ 'Content-Type': 'application/json', Host: 'evil.example.com', 'x-api-key': 'pin-mcp-key-42' }, EXEC_BODY);
+        assert(rebinding.status === 403, 'hostile Host must 403 even with a valid key, got ' + rebinding.status);
+    });
+
+    child2.kill('SIGTERM');
 
     // cleanup shared state touched by this suite
     try { fs.rmSync(path.join(ROOT, 'models', 'private', 'vant', 'state'), { recursive: true, force: true }); } catch (e) {}

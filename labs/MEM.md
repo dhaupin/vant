@@ -7,20 +7,23 @@
 
 ## Handoff
 
-**Last known good commit:** 5fb1383 — pass 41, live-fire exercise (see labs/TASKS.md top block)
+**Last known good commit:** (pre-commit) pass 42 — live-fire round 2, see labs/TASKS.md top block. Pass 41 shipped as bf0edb1 (+ MEM reset 5fb1383); BOTH unpushed on origin/axolotl.
 **Branch:** axolotl — origin github.com/dhaupin/vant
-**Status:** clean session ended with everything committed; this dump is the template again.
+**Status:** pass 42 complete and verified; commit pending at session end.
 
 ---
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 41 live-fire shipped: 7 real bugs/vulns found by
-RUNNING vant (boot, agora, crew demo, MCP HTTP, adversarial probes), all
-fixed + pinned in test/live-fire-regressions.test.js 15/15. Sweep 117/117,
-runner 37/37. Follow-ups queued at the bottom of the TASKS.md pass-41
-block: dead auth-bearing mcp start(), non-loopback MCP auth story,
-brain.read() category asymmetry, mcp.js split.)
+(nothing in flight — pass 42 live-fire round 2 shipped: crew transport auth
+(fail-closed HMAC, replay window, loopback bind), secretless crew nodes
+refused, MCP REQUIRE_KEY gate wired into the live server + dead auth-bearing
+start() removed (+ Auth-ctor hotfix the live probe caught), config getFlag
+null bug, msg participant cap. Pins: test/live-fire-regressions.test.js
+26/26. Sweep 117/117 (a,b,c chunk + per-suite; run-all hits the harness's
+terminal time cap), runner 37/37. market.list {error} diagnosed as the
+pass-38 consent gate (by-design, pinned). Sandbox /tmp/vant-live-r2 is
+stale vs lib/ now — re-sync if reused.)
 
 ---
 
@@ -38,7 +41,7 @@ brain.read() category asymmetry, mcp.js split.)
 
 - [x] tests green (runner + full loop)
 - [x] labs/TASKS.md session block written
-- [ ] priv brain lessons updated
+- [x] priv brain lessons updated
 - [ ] pushed to origin/axolotl
 - [x] this file wiped back to template + one-line handoff
 
