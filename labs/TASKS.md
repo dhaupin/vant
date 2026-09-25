@@ -2,7 +2,58 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-25  
-**Session:** Next-wave closeout — PRD refresh + live-fire hardening (pass 51)
+**Session:** Two-org JV live exercise (pass 52)
+
+---
+
+## Session (2026-09-25 — pass 52: two-org joint venture, the federation stress test)
+
+Owner brief: "run vant as an agent, with your org, depts, teams, agents,
+and have another agent run his own stack — two orgs coming together to
+work on a project, hashing out plans, then executing. See what happens."
+
+**The exercise** (labs/node-crew/exercise-two-orgs.js): TWO REAL vant
+stacks — host org Nova Crew (nova-lead/nova-eng) and partner org Buffy
+Labs (buffy-lead/buffy-eng) — form a joint venture live:
+1. independent boots + genesis handshake over the HMAC bus
+2. host forms the JV org model (org > dept > team, ALL FOUR agents from
+   BOTH orgs assigned)
+3. host proposes the plan via forum.vote under JV team scope; host crew
+   votes locally
+4. partner crew votes REMOTELY via agora-sync.vote — the owner-side gate
+   stack (scope resolved where the model lives + registry vetting) admits
+   both partner ballots over the signed wire (the acks show quorum at 3
+   ballots, passed at 4)
+5. ONE joint ledger: 4 ballots from 2 orgs, PASSED
+6. decision broadcasts cross the boundary (scoped + plain notice)
+7. execution economics: scoped listing published on the wire, partner
+   payment settles into the budget ledger (8 credits)
+8. cold third process: the JV ledger (4 votes, passed) + the payment
+   survive every process exit
+
+**Result: 8/8 phases ×2 consecutive runs, 1 gap recorded.**
+
+**THE GAP (federation backlog, the exercise's real product):**
+teams.js hydrates its org model ONCE via an async IIFE at module init —
+no re-hydration seam (consensus/msg both expose _resetHydration; teams
+does not). Cross-node scope consistency on RECEIVING-side envelope gates
+is therefore boot-race-dependent: a node that hydrates BEFORE a partner
+writes new org data is permanently stale (fail-closed — real members get
+denied forever); a late hydrator sees it. The pass-50 owner-side design
+is what makes VOTING immune (the owner resolves scope LIVE where the
+model lives), but delivery-side gates resolve locally. Fix candidates:
+a teams refresh seam (_resetHydration + rehydrate on scope-miss), or an
+org-model sync leg over the bus.
+
+**Architecture lesson worth keeping:** the JV vote worked WITHOUT any
+org-model replication — the pass-50 rule "scope resolves where the team
+registry lives" carried the whole cross-org decision. The remaining work
+is delivery-side visibility + org-model distribution, not a new vote
+mechanism.
+
+**Next steps:** teams refresh seam (smallest, closes the gap), org-model
+sync leg, agora-sync MCP surface, synced-ledger TTL/reaper, gossip pull
+scheduler.
 
 ---
 

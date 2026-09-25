@@ -7,25 +7,24 @@
 
 ## Handoff
 
-**Last known good commit:** pass 51 — PRD refresh + live-fire round 3 (2 wire-adversary bugs fixed); see labs/TASKS.md top block.
-**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 51.
-**Status:** next-wave shortlist fully shipped (48/49/50) + hardened (51); nothing in flight.
+**Last known good commit:** pass 52 — two-org JV live exercise 8/8 ×2, 1 gap (teams hydration seam); see labs/TASKS.md top block.
+**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 52.
+**Status:** federation stress test passed; next candidate: teams refresh seam.
 
 ---
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 51: PRDs refreshed (prd-agora v1.2 Wave 8,
-prd-vant-os v1.3 shortlist shipped). Live-fire found 2 real bugs, both
-fixed+pinned: merge scope-filter (synced snapshots could stuff
-non-member ballots into scoped topics — mergeTopic now filters through
-scope.resolveMembers, unresolvable scope rejects fail-closed) and
-sender-bound reply legs (vote.ack/crew.state resolved any pending reqId
-from any origin — now bound to the addressed node). Escrow edges clean.
-Live wire demo v0.3 (labs/node-crew/demo-v03-agora-wire.js): distributed
-agora on 2 REAL processes, 4/4 ×3. Pins: agora-sync 7/7,
-agora-distributed 6/6. Candidate follow-ons: agora-sync MCP surface,
-synced-ledger TTL, gossip pull scheduler.)
+(nothing in flight — pass 52: two-org JV exercise
+(labs/node-crew/exercise-two-orgs.js) 8/8 phases ×2. Two real stacks
+(host Nova Crew + partner Buffy Labs) form a JV: genesis handshake, JV
+org model with both orgs, plan vote under JV scope, partner votes
+REMOTELY through owner gates, one ledger 4 ballots PASSED, decisions +
+scoped listing + payment cross the boundary, cold process proves
+persistence. GAP: teams.js hydrates once (async IIFE, no refresh seam) —
+receiving-side scope gates are boot-race-dependent; fix = _resetHydration
++ rehydrate-on-scope-miss or an org-model sync leg. VOTING is immune
+(pass-50 owner-side resolution). Next: teams refresh seam.)
 
 ---
 
