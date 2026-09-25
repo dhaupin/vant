@@ -352,13 +352,10 @@ async function main() {
         'votes=' + tally.votes + ' status=' + tally.status + ' voters=' + voters.join(','));
 
     if (obs.partnerRx && obs.partnerRx.scopedDecision === false) {
-        gap('crew-bus scope gate on the RECEIVING node resolved against a STALE teams view: the partner hydrated its org model before the host wrote the JV assignments, so the scoped decision envelope was dropped there. Root cause: teams.js hydrates ONCE via an async IIFE at module init — no re-hydration/refresh seam (consensus and msg both have _resetHydration; teams does not). Cross-node scope consistency is whatever the boot-time race gives you: a late hydrator sees the JV model, an early one is blind to it forever (fail-closed, but broken for real members). Unscoped notices still flow either way.');
+        gap('partner dropped the scoped decision even WITH the pass-53 refresh seam — investigate: the miss-retry should have rescued a stale teams view via teams._refreshSync (merge-only, throttled). This would mean the refresh raced or the store read failed.');
     }
-    if (obs.partnerRx && obs.partnerRx.scopedDecision === true) {
-        gap('teams.js hydration is a one-shot async IIFE with no refresh seam (consensus/msg have _resetHydration; teams does not). This run the partner hydrated AFTER the host wrote the JV org model, so the scoped envelope passed its gate — correct by luck of timing, not by design. A receiver hydrating earlier would be permanently stale (deny real members). Cross-node scope consistency needs a re-hydration seam or a sync leg for the org model.');
-    }
-    phase('6. decision crosses the boundary: host broadcast acked both nodes; partner receives per scope rules',
-        !!obs.bcastScoped && obs.bcastScoped.includes('true') && !!obs.partnerRx && (obs.partnerRx.scopedDecision === true || obs.partnerRx.plainDecision === true),
+    phase('6. decision crosses the boundary per scope rules — scoped delivery correct BY DESIGN (pass-53 refresh seam rescues the partner\'s stale teams view on scope-miss), plain notice flows',
+        !!obs.bcastScoped && obs.bcastScoped.includes('true') && !!obs.partnerRx && obs.partnerRx.scopedDecision === true && obs.partnerRx.plainDecision === true,
         'bcast acks ' + obs.bcastScoped + ' + ' + obs.bcastPlain + ', partner rx: ' + JSON.stringify(obs.partnerRx));
 
     if (obs.partnerRx && obs.partnerRx.listingRx && obs.partnerVisible === false) {

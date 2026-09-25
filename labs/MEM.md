@@ -7,24 +7,21 @@
 
 ## Handoff
 
-**Last known good commit:** pass 52 — two-org JV live exercise 8/8 ×2, 1 gap (teams hydration seam); see labs/TASKS.md top block.
-**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 52.
-**Status:** federation stress test passed; next candidate: teams refresh seam.
+**Last known good commit:** pass 53 — teams refresh seam (pass-52 gap closed, JV exercise 8/8 with 0 gaps); see labs/TASKS.md top block.
+**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 53.
+**Status:** nothing in flight; backlog: org-model sync leg, agora-sync MCP surface, TTL reaper, gossip pulls.
 
 ---
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 52: two-org JV exercise
-(labs/node-crew/exercise-two-orgs.js) 8/8 phases ×2. Two real stacks
-(host Nova Crew + partner Buffy Labs) form a JV: genesis handshake, JV
-org model with both orgs, plan vote under JV scope, partner votes
-REMOTELY through owner gates, one ledger 4 ballots PASSED, decisions +
-scoped listing + payment cross the boundary, cold process proves
-persistence. GAP: teams.js hydrates once (async IIFE, no refresh seam) —
-receiving-side scope gates are boot-race-dependent; fix = _resetHydration
-+ rehydrate-on-scope-miss or an org-model sync leg. VOTING is immune
-(pass-50 owner-side resolution). Next: teams refresh seam.)
+(nothing in flight — pass 53: teams refresh seam shipped (merge-only
+_hydrateTeams + throttled refresh/_refreshSync + _resetHydration, all
+exported); scope.resolveMembers rescues a stale view on miss (throttled
+sync refresh + retry, fail-closed preserved). teams+escrow store paths
+now go through state-store.currentBrain() so VANT_BRAIN-scoped processes
+keep org model + budgets WITH their protocol state. Pins:
+test/teams-refresh.test.js 6/6. JV exercise re-validated: 8/8, 0 gaps.)
 
 ---
 

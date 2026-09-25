@@ -2,7 +2,56 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-25  
-**Session:** Two-org JV live exercise (pass 52)
+**Session:** Pass 53 — teams refresh seam (the pass-52 gap closed)
+
+---
+
+## Session (2026-09-25 — pass 53: teams refresh seam + brain-resolution isolation)
+
+Closes the gap the pass-52 two-org JV exercise recorded: teams.js
+hydrated its org model ONCE via an async IIFE at module init, so a
+long-lived node could never see org-model writes made by another process
+after its boot — receiving-side scope gates were boot-race-dependent.
+
+**Shipped:**
+- **teams.js refresh seam:** `_hydrateTeams` (merge-only rehydrate:
+  unknown ids adopted, in-memory wins on conflict — the consensus
+  hydrate rule), `refresh()` (throttled 2s, `force` bypass),
+  `_refreshSync` (SYNCHRONOUS variant — scope gates are sync, so the
+  miss path must re-read without an await), `_resetHydration` (test/ops
+  reset; also clears the throttle window). All exported.
+- **scope.js stale-view rescue:** `resolveMembers` misses → ONE throttled
+  `_refreshSync` → single retry. Fail-closed preserved: merge-only means
+  the refresh can never fabricate members (adopts only what the shared
+  store actually contains); an entity that exists nowhere is denied
+  before AND after the refresh. Throttle bounds disk reads on adversarial
+  miss floods.
+- **Brain-resolution isolation (teams + escrow):** store paths now
+  resolve through `state-store.currentBrain()` (VANT_BRAIN env >
+  currentBrain) — the SAME seam consensus/market/trust use. Previously a
+  bare `getCurrentBrain()` ignored VANT_BRAIN, split-braining an
+  env-scoped process: protocol state in one brain, org model + budgets
+  in another.
+
+**Pins:** test/teams-refresh.test.js 6/6 — seam exists + merge rehydrate
+rebuilds a wiped view, stale-view rescue (a write made "after boot" is
+adopted), throttle + force bypass, the GATE-LEVEL miss→refresh→retry hit
+(with ghost entities still denied), merge-only conflict rule (disk never
+overwrites local), VANT_BRAIN routes teams.json AND escrow.json to the
+same brain.
+
+**Re-validation:** two-org JV exercise 8/8 phases, 0 GAPS — scoped
+decision delivery is now correct BY DESIGN (the partner's stale view is
+rescued on scope-miss; previously correct only by luck of hydration
+timing).
+
+**Sweep green:** teams (all), scope 9/9, agora-loop 7/7, agora-sync 7/7,
+agora-distributed 6/6, consensus 8/8, crew-bus 13/13, market 22/22,
+forum-persist 4/4, state-persistence 8/8.
+
+**Next steps:** org-model sync leg (full replication — optional now that
+the rescue covers the common case), agora-sync MCP surface, synced-
+ledger TTL/reaper, gossip pull scheduler.
 
 ---
 
