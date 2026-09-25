@@ -7,21 +7,21 @@
 
 ## Handoff
 
-**Last known good commit:** pass 53 — teams refresh seam (pass-52 gap closed, JV exercise 8/8 with 0 gaps); see labs/TASKS.md top block.
-**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 53.
-**Status:** nothing in flight; backlog: org-model sync leg, agora-sync MCP surface, TTL reaper, gossip pulls.
+**Last known good commit:** pass 54 — prd-mesh.md drafted (4-install shop mesh; Wave A = agora-sync MCP surface); see labs/TASKS.md top block.
+**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 54.
+**Status:** nothing in flight; next: Wave A MCP tools (agora_vote/pull/push/nodes/status).
 
 ---
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 53: teams refresh seam shipped (merge-only
-_hydrateTeams + throttled refresh/_refreshSync + _resetHydration, all
-exported); scope.resolveMembers rescues a stale view on miss (throttled
-sync refresh + retry, fail-closed preserved). teams+escrow store paths
-now go through state-store.currentBrain() so VANT_BRAIN-scoped processes
-keep org model + budgets WITH their protocol state. Pins:
-test/teams-refresh.test.js 6/6. JV exercise re-validated: 8/8, 0 gaps.)
+(nothing in flight — pass 54: labs/prd-mesh.md v1.0 — the owner's 4-
+install shop mesh (Buffy/Synmergia/Roving/Creadev-Ops) mapped to waves:
+A MCP surface, B genesis ceremony, C TTL reaper + gossip, D msg sync,
+E envelope versions, F HQ observability; org-model sync leg standing/
+optional. 3 owner decisions open with proposals (per-pair secrets, msg
+snapshots, version drop-on-major). Wave A next: agora-sync MCP tools
+through the real mcp.execute door.)
 
 ---
 

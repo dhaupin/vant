@@ -2,7 +2,35 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-25  
-**Session:** Pass 53 — teams refresh seam (the pass-52 gap closed)
+**Session:** Pass 54 — prd-mesh.md drafted (the shop-mesh plan)
+
+---
+
+## Session (2026-09-25 — pass 54: THE SHOP MESH — PRD draft, wave A next)
+
+Owner revealed the deployment: 4 separate vant installs (orgs) — Buffy
+(vant), Synmergia (godot MMORPG), Roving (wp+festival plugin et al), and
+Creadev Ops HQ — each in its own repo, each agent in its own workspace.
+Use vant to build vant (and everything else). Buffy = builder + first
+real user; the pass-52 JV exercise already simulated this topology.
+
+**Shipped:** labs/prd-mesh.md v1.0 — the 4-install mesh PRD:
+- mesh map + what's already real (passes 35-53 inventory)
+- owner decisions: 4 installs/4 repos, brain rides repo / protocol state
+  does not, Wave A (MCP surface) first, dogfood a 2-node mesh after A+B
+- gap list → waves, ALL backlog items placed: agora-sync MCP surface
+  (A), genesis ceremony (B), TTL reaper + gossip pull scheduler (C),
+  cross-node msg (D), envelope version compatibility (E), HQ
+  observability (F); org-model sync leg = standing/optional with a
+  revisit trigger
+- 3 open owner decisions flagged (secret distribution, msg approach,
+  version negotiation) with proposals
+- live-fire acceptance harness (§5): real 2-node mesh running an actual
+  task through Wave-A tools, then the 4-node soak
+
+**Next steps:** Wave A — agora-sync MCP surface (agora_vote/pull/push/
+nodes/sync_status through the real mcp.execute door, pins in
+test/mcp-agora-sync.test.js, optional CLI parity).
 
 ---
 
