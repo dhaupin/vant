@@ -7,21 +7,19 @@
 
 ## Handoff
 
-**Last known good commit:** pass 54 — prd-mesh.md drafted (4-install shop mesh; Wave A = agora-sync MCP surface); see labs/TASKS.md top block.
-**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 54.
+**Last known good commit:** pass 55 — prd-mesh v1.1 public reword (example-shop framing, host note); see labs/TASKS.md top block.
+**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 55.
 **Status:** nothing in flight; next: Wave A MCP tools (agora_vote/pull/push/nodes/status).
 
 ---
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 54: labs/prd-mesh.md v1.0 — the owner's 4-
-install shop mesh (Buffy/Synmergia/Roving/Creadev-Ops) mapped to waves:
-A MCP surface, B genesis ceremony, C TTL reaper + gossip, D msg sync,
-E envelope versions, F HQ observability; org-model sync leg standing/
-optional. 3 owner decisions open with proposals (per-pair secrets, msg
-snapshots, version drop-on-major). Wave A next: agora-sync MCP tools
-through the real mcp.execute door.)
+(nothing in flight — pass 55: prd-mesh v1.1 GENERALIZED for the public
+repo (owner: "we're open source, reword it"): host-note + worked-example
+framing, adopting-the-pattern recipe, N-install design; Creadev details
+stay as the host's example. Waves unchanged: A MCP surface, B genesis,
+C reaper+gossip, D msg, E versions, F observability. Wave A next.)
 
 ---
 

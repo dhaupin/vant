@@ -2,31 +2,28 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-25  
-**Session:** Pass 54 — prd-mesh.md drafted (the shop-mesh plan)
+**Session:** Pass 55 — prd-mesh v1.1 public reword (Wave A next)
 
 ---
 
-## Session (2026-09-25 — pass 54: THE SHOP MESH — PRD draft, wave A next)
+## Session (2026-09-25 — pass 55: prd-mesh generalized for public eyes; Wave A next)
 
-Owner revealed the deployment: 4 separate vant installs (orgs) — Buffy
-(vant), Synmergia (godot MMORPG), Roving (wp+festival plugin et al), and
-Creadev Ops HQ — each in its own repo, each agent in its own workspace.
-Use vant to build vant (and everything else). Buffy = builder + first
-real user; the pass-52 JV exercise already simulated this topology.
+Owner: "we are an open source project — reword prd-mesh to be more
+generalist (the pub will see this). Example-shop style wording; Buffy
+and its org can stay, clarified as the host."
 
-**Shipped:** labs/prd-mesh.md v1.0 — the 4-install mesh PRD:
-- mesh map + what's already real (passes 35-53 inventory)
-- owner decisions: 4 installs/4 repos, brain rides repo / protocol state
-  does not, Wave A (MCP surface) first, dogfood a 2-node mesh after A+B
-- gap list → waves, ALL backlog items placed: agora-sync MCP surface
-  (A), genesis ceremony (B), TTL reaper + gossip pull scheduler (C),
-  cross-node msg (D), envelope version compatibility (E), HQ
-  observability (F); org-model sync leg = standing/optional with a
-  revisit trigger
-- 3 open owner decisions flagged (secret distribution, msg approach,
-  version negotiation) with proposals
-- live-fire acceptance harness (§5): real 2-node mesh running an actual
-  task through Wave-A tools, then the 4-node soak
+**Shipped:** labs/prd-mesh.md → **v1.1 (public)**:
+- Retitled "The Vant Mesh — Federating Multiple Installs"; the Creadev
+  deployment is now a clearly-labeled WORKED EXAMPLE with a host note
+  ("you are reading this in the vant repo; replace the labels with your
+  projects")
+- New generalist sections: "Adopting the pattern (any shop)" recipe and
+  N-install framing ("the host runs four; the design is N")
+- Owner decisions reframed as host-org-approved design decisions;
+  wave plan, security notes, files, success criteria unchanged in
+  substance ("Ops HQ" → "coordination node" throughout)
+- All backlog placements + the 3 open decisions + the acceptance
+  harness preserved
 
 **Next steps:** Wave A — agora-sync MCP surface (agora_vote/pull/push/
 nodes/sync_status through the real mcp.execute door, pins in

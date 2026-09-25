@@ -1,56 +1,61 @@
-# The Shop Mesh — Four Vant Installs, One Dev Shop — Product Requirements Document
+# The Vant Mesh — Federating Multiple Installs — Product Requirements Document
 
-**Version:** 1.0
+**Version:** 1.1
 **Branch:** axolotl
-**Date:** 2026-09-25
-**Status:** PROPOSED — direction owner-approved (2026-09-25). Wave A
-(agora-sync MCP surface) ready to start immediately.
+**Date:** 2026-09-25 (v1.1: generalized for the public repo — the
+deployment in the examples is the HOST org's own shop, offered as a
+worked example; v1.0 2026-09-25: drafted)
+**Status:** PROPOSED — Wave A (agora-sync MCP surface) ready to start.
+
+> **Host note.** This PRD is hosted by the **Buffy Labs** org — the crew
+> that builds vant itself (you are reading this in the vant repo). The
+> pattern below is written generally so ANY multi-agent shop can adopt
+> it. The concrete deployment used as the running example is the host's
+> own: a small dev shop running three project agents plus one ops node.
+> Where you read "Buffy", "Synmergia", or "Ops HQ", read "your project
+> agent A/B/C" and "your coordination node".
 
 ---
 
 ## 1. Overview
 
-Creadev is a dev shop running on agents: **Buffy** (vant, this repo),
-a **Synmergia agent** (Godot MMORPG), and a **third agent** (roving —
-currently the music-festival WordPress plugin + theme, other projects
-beyond). The owner's deployment plan:
+One vant install makes one agent (or one crew) sovereign: persistent
+memory, agora decisions, market economics, and a signed bus to peers.
+**The mesh is the step beyond: N installs — each owned by a different
+agent or org — federating over the bus.** Each install keeps its own
+brain, its own repo, and its own protocol state; orgs cooperate through
+the agora when work is joint and stay invisible to each other when it
+isn't.
 
-- **Four separate vant installs (orgs), one per agent**, plus a fourth
-  for **Creadev.org Ops**: orchestration, client fixes, patching,
-  servers, CI, QC, whatever else the shop needs.
-- Each install lives in its **own repo**; each agent works in its own
-  workspace (Freebuff-style) running its own node.
-- Cross-shop work = the agora: Creadev Ops proposes, the relevant orgs
-  vote through their own gates, escrow settles the economics, decisions
-  flow back to the threads.
-
-**The dogfooding principle:** *use vant to build vant* — and everything
-else. Buffy is vant's builder AND its first real user; the pass-52
-two-org JV exercise simulated this deployment and its findings (teams
-hydration gap, closed pass 53) made vant more real for the actual shop.
-Vant's development process has become a vant workload.
-
-### The mesh map
+### Worked example: the host's deployment
 
 ```
 ┌────────────────┐   ┌────────────────┐   ┌────────────────┐
 │ Buffy Labs     │   │ Synmergia Crew │   │ Roving Crew    │
-│ (vant dev)     │   │ (godot MMORPG) │   │ (wp + others)  │
+│ (vant itself)  │   │ (game client)  │   │ (client work)  │
 │ repo: vant     │   │ own repo       │   │ own repo(s)    │
 └───────┬────────┘   └───────┬────────┘   └───────┬────────┘
-        │      HMAC-signed crew-bus envelopes     │
+        │     HMAC-signed crew-bus envelopes      │
         └───────────────┼────────────────────────┘
                 ┌───────┴─────────┐
-                │ Creadev Ops HQ  │  orchestration, client fixes,
+                │  Creadev Ops HQ │  coordination, client fixes,
                 │ (4th install)   │  patching, servers, CI, QC
                 └─────────────────┘
 ```
 
-Four installs, four brains, four repos. Org-scoped decisions stay
-org-scoped (scope contract, labs/prd-agora.md §3); joint work is a JV:
-a team scope containing both orgs' principals, owned by whichever node
-hosts the org model (pass-50 rule: scope resolves where the team
-registry lives).
+Four installs, four brains, four repos — one per agent, plus one
+coordination node. The same shape fits any shop: replace the labels
+with your projects.
+
+### Adopting the pattern (any shop)
+
+1. Run one vant install per agent/org — its brain lives in that org's
+   repo; protocol state stays runtime-local (gitignored).
+2. Stand up a coordination node *if* you want a standing host for
+   shop-wide proposals, QC, and observability — it is a peer with
+   duties, never a master.
+3. Join installs with the genesis ceremony (Wave B); cooperate via
+   JV scopes (below); settle work through market/escrow.
 
 ### What is already real (pinned, passes 35–53)
 
@@ -71,26 +76,28 @@ registry lives).
   seam + stale-view rescue, pass 53).
 - Escrow debit-on-trade closing the economic loop (pass 48).
 
-## 2. Owner decisions (2026-09-25)
+## 2. Design decisions (approved by the host org, 2026-09-25)
 
-1. **Four installs, four repos, one per agent + Ops HQ** — the mesh is
-   the target topology. No shared protocol state; cross-node is the bus.
+1. **One install per agent/org, one repo each** — the mesh is the
+   target topology (the host runs four; the design is N). No shared
+   protocol state; cross-node is the bus.
 2. **The brain rides the repo; the protocol state does not** — state
    files (models/private/<brain>/state/, orgchart/) are gitignored
    runtime-local. A clone gets the brain; the ledger history stays on
    the machine. (Existing architecture; reaffirmed here.)
 3. **Wave A first: the MCP surface** — agents speak to vant through MCP
    tools; federation without tools is just scripts. Sequencing per the
-   wave plan below; the pass-51/52 backlog items are all placed (§5).
-4. **Dogfood immediately** — after Wave A+B, stand up a real 2-node mesh
-   (Buffy Labs + a Creadev-Ops-shaped node) and run an actual task
-   through it. Scale to 4 only after 2 is boring.
+   wave plan below; every backlog item is placed (§3).
+4. **Dogfood immediately** — after Wave A+B, the host stands up a real
+   2-node mesh (its own install + a coordination-shaped node) and runs
+   an actual task through it. Scale to N only after 2 is boring.
 
-### Decisions still open (owner to confirm in-wave)
+### Decisions still open (with proposals)
 
 - **Secret distribution for genesis** (Wave B): per-pair secrets
-  (A↔B, A↔C, …) vs one shared mesh secret rotated by Ops. Proposal:
-  per-pair, distributed by the genesis ceremony, Ops holds the roster.
+  (A↔B, A↔C, …) vs one shared mesh secret rotated by the coordinator.
+  Proposal: per-pair, distributed by the genesis ceremony; the
+  coordinator holds the roster.
 - **Msg sync approach** (Wave D): conversation-snapshot sync mirroring
   agora-sync's pull/push+merge rules vs a broadcast-only channel
   dispatcher. Proposal: snapshots (bounded, merge-only) — standups need
@@ -109,22 +116,26 @@ harnesses). The mesh formalizes this; nothing new is invented for Wave A.
 
 ### The JV pattern (exists today, productized in Wave B)
 
-Host org creates org > dept > team with both orgs' principals; the host
-owns the topic; partners vote remotely through the owner's gates
-(agora-sync.vote); settlement via market/escrow. Creadev Ops is the
-standing JV host for shop-wide decisions.
+When two orgs work together, the host org creates org > dept > team
+with **both orgs' principals assigned**, and owns the topic — scope
+resolves where the team registry lives (pass-50 rule). Partners vote
+remotely through the owner's gates (agora-sync.vote); settlement flows
+through market/escrow. A coordination node is simply the standing host
+for shop-wide JVs. The pass-52 exercise is the reference: one joint
+ledger, 4 ballots from 2 orgs, owner-side gates enforcing every ballot,
+state surviving every process exit.
 
 ### Gap list → waves (nothing forgotten)
 
 | Gap (source) | Wave |
 |---|---|
-| agora-sync MCP surface (pass-51 backlog; §1 gap 1) | **A** |
-| Genesis ceremony `vant genesis --join` (§1 gap 2) | **B** |
+| agora-sync MCP surface (pass-51 backlog; federation gap 1) | **A** |
+| Genesis ceremony `vant genesis --join` (gap 2) | **B** |
 | Synced-ledger TTL reaper (pass-51 backlog) | **C** |
 | Gossip pull scheduler (pass-51 backlog) | **C** |
-| Cross-node msg (§1 gap 3) | **D** |
-| Envelope version compatibility (§1 gap 4) | **E** |
-| HQ observability (§1 gap 5) | **F** |
+| Cross-node msg (gap 3) | **D** |
+| Envelope version compatibility (gap 4) | **E** |
+| Coordinator observability (gap 5) | **F** |
 | Org-model sync leg (pass-52 backlog; optional) | standing — revisit on partner growth |
 
 ## 4. Wave plan
@@ -148,10 +159,10 @@ standing JV host for shop-wide decisions.
 - `vant genesis create|boot|join --join <url> --name <node> --agent <id>`:
   mutual registration, registry vetting, optional JV org-model
   assignment (org > dept > team + both principals), secret exchange via
-  the owner-approved flow (per-pair proposal above), stored through the
+  the approved flow (per-pair proposal above), stored through the
   existing secret store — never plaintext in config.
-- The pass-52 exercise's hand-rolled handshake becomes the productized
-  flow; the harness shrinks to `vant genesis join`.
+- The hand-rolled handshake in the exercise harnesses becomes the
+  productized flow; the harness shrinks to `vant genesis join`.
 - Pins: two-process genesis round-trip test; secret never in state
   files or logs (posture: secrets stay in process memory, pass-42 rule).
 
@@ -184,38 +195,39 @@ standing JV host for shop-wide decisions.
   and reverse). Watch: a downgrade claim must never bypass scope gates
   (gates run on the receiver's own resolver regardless of version).
 
-### Wave F — HQ observability (pass ~59)
+### Wave F — mesh observability (pass ~59)
 
 - `vant mesh status`: peers (alive/stale), open topics, recent decisions,
   budgets/spend, msg channels, pending syncs. JSON mode for CI. The
-  Creadev Ops question — "what are my agents working on, what's voted,
-  what's blocked" — answered from ONE node.
+  coordination node's question — "what are my agents working on, what's
+  voted, what's blocked" — answered from ONE node.
 - Dashboard later; CLI is the contract.
 
 ### Standing — org-model sync leg (optional)
 
 The pass-53 stale-view rescue covers the common case (receiving-side
 gates re-read the shared store on miss). A full org-model replication
-leg is only worth it when partner orgs multiply beyond the shop or
-nodes stop sharing a trust boundary. Revisit trigger: first EXTERNAL
-org joining the mesh.
+leg is only worth it when partner orgs multiply or nodes stop sharing
+a trust boundary. Revisit trigger: the first EXTERNAL org joining a
+mesh.
 
 ## 5. Live-fire validation (the acceptance harness)
 
-After Wave B: **the real 2-node mesh** — Buffy Labs (this workspace) +
-a Creadev-Ops-shaped node — running an actual task through the Wave-A
-tools:
+After Wave B: **a real 2-node mesh** — for the host, Buffy Labs (its
+workspace) + a coordination-shaped node — running an actual task
+through the Wave-A tools:
 
-1. Ops proposes a QC gate via `consensus_create` (JV scope).
-2. Buffy votes `agora_vote` from its own workspace. Owner-side gates
-   verify. Tally passes.
-3. Decision broadcast returns to Ops' thread; `agora_pull` converges
-   both ledgers; escrow settles the bounty.
-4. `vant mesh status` on Ops shows all of it.
+1. The coordinator proposes a QC gate via `consensus_create` (JV scope).
+2. The partner votes `agora_vote` from its own workspace. Owner-side
+   gates verify. Tally passes.
+3. Decision broadcast returns to the coordinator's thread; `agora_pull`
+   converges both ledgers; escrow settles the bounty.
+4. `vant mesh status` on the coordinator shows all of it.
 
-Then the 4-node soak (Synmergia + Roving join) and the first REAL
-cross-project JV: a shop-wide decision made in the agora, executed by
-the crews, paid through escrow — with zero custom scripts involved.
+Then the N-node soak (the host's game-client and client-work orgs join;
+your shop adds whichever orgs you have) and the first REAL cross-org
+JV: a shop-wide decision made in the agora, executed by the crews,
+paid through escrow — with zero custom scripts involved.
 
 ## 6. Security notes
 
@@ -227,7 +239,7 @@ the crews, paid through escrow — with zero custom scripts involved.
   new trust path.
 - Merge rules stay adopt-only-unknown + local re-derivation (pass-49
   invariant) on every new sync leg; the wire never declares truth.
-- Reaper and gossip must be abusable-proof: reaper never reaps local
+- Reaper and gossip must be abuse-proof: the reaper never reaps local
   ledgers; gossip pull frequency is throttled per-peer (miss floods
   cannot turn into disk floods — the pass-53 throttle precedent).
 - Envelope versioning must not enable downgrade bypasses (gates run on
@@ -256,7 +268,7 @@ the crews, paid through escrow — with zero custom scripts involved.
    cannot lie (merge re-derivation unchanged).
 4. Cross-version nodes fail loudly and safely, never silently misread
    each other (Wave E).
-5. Ops can answer "who did what, what's decided, what's owed" from one
-   command (Wave F).
-6. The full 4-node soak: a shop-wide JV decision made in the agora,
-   executed and settled by all four orgs, cold-process verified.
+5. A coordination node can answer "who did what, what's decided, what's
+   owed" from one command (Wave F).
+6. The full N-node soak: a shop-wide JV decision made in the agora,
+   executed and settled by every org, cold-process verified.
