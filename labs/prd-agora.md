@@ -1,9 +1,12 @@
 # The Agora — Protocol Loop with Scope — Product Requirements Document
 
-**Version:** 1.0
+**Version:** 1.1
 **Branch:** axolotl
-**Date:** 2026-09-24
-**Status:** Approved (owner pass 40: realm/encounter/spirit dispositions locked; naming approved)
+**Date:** 2026-09-24 (v1.1 2026-09-25: closeout + passes 42-46)
+**Status:** SHIPPED — Wave 5 (pass 40), Wave 6 (pass 41). Hardening: 42
+(live-fire round 2), 43 (decision return path survives restart via ledger
+metadata), 44 (forum decision log durable, state/forum.json), 45 (the
+other "trifecta" name retired), 46 (agora MCP surface). See labs/TASKS.md.
 
 ---
 
@@ -69,6 +72,10 @@ decision flows back to the thread. Concretely:
    scope-invisible; public listings anyone can trade).
 4. On `vote:consensus` (passed/rejected), the decision record posts back
    to the originating thread — the return path that never existed.
+   (Passes 43+44: the return path now SURVIVES restarts — proposal/author
+   ride the persisted consensus ledger metadata, and forum's own decision
+   log writes through to `state/forum.json`, FIFO-capped, hydrated at
+   module load. All three legs of the loop are restart-durable.)
 5. crew-bus envelope types `crew.forum` / `crew.market` / `crew.decision`
    carry scope so cross-node visibility matches local rules (a peer node
    must pass canAccess before it sees/dispatches the payload).
@@ -110,6 +117,17 @@ Persistence: free on consensus/market (state-store write-through, Waves
 - no-legacy pin: realm/encounter/spirit stay deleted.
 - Full sweep + docs + TASKS entries + PRD closeout.
 
+### Wave 7 — surface + naming closeout (2026-09-25, passes 45-46)
+- The OTHER "trifecta" retired: the combined MCP+API server mode (`vant
+  all`) also carried the name; live-tree mentions swept to "all mode"
+  (pass 45). Historical records keep original wording.
+- Agora MCP surface (pass 46): the 4 forum_* tools were mis-wired to the
+  pre-agora API (forum_vote's (forumId,userId,topic,vote) into
+  vote(proposal,options) — an MCP "up vote" silently CREATED a vote) —
+  re-wired + forum_castVote added; consensus had NO tools —
+  consensus_create/vote/tally/get/list added (scope-aware, schema-gated).
+  Pinned via the real mcp.execute door (test/mcp-agora.test.js 5/5).
+
 ## 7. Files
 
 - New: lib/scope.js, labs/prd-agora.md (this file), test/scope.test.js,
@@ -120,6 +138,10 @@ Persistence: free on consensus/market (state-store write-through, Waves
   lib/mcp.js (encounter/forum tools), bin/vant.js, bin/help.js,
   docs/reference/cli.md; deleted: lib/realm.js, lib/encounter.js,
   lib/spirit.js.
+- Wave 7 touched: bin/help.js, bin/vant.js, lib/api.js,
+  docs/operations/testing.md (pass 45); lib/mcp.js (agora tools),
+  test/mcp-agora.test.js, test/forum-decisions-persistence.test.js
+  (pass 46, plus 43/44 pins).
 
 ## 8. Success criteria
 

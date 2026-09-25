@@ -1,9 +1,12 @@
 # Vant OS Consolidation — Pulling the Society Together — Product Requirements Document
 
-**Version:** 1.1
+**Version:** 1.2
 **Branch:** axolotl
-**Date:** 2026-09-24
-**Status:** COMPLETE — Waves 1-4 shipped (passes 36-39). Success criteria met; see labs/TASKS.md pass 39.
+**Date:** 2026-09-24 (v1.2 2026-09-25: closeout + next-wave shortlist)
+**Status:** COMPLETE — Waves 1-4 shipped (passes 36-39). Success criteria
+met (labs/TASKS.md pass 39). Post-PRD follow-through in the agora wave
+(passes 40-46): encounter/spirit/realm retired, agora loop wired
+(scope + MCP surface), forum decision log made durable.
 
 ---
 
@@ -51,10 +54,10 @@ nodes — the substrate the old OS layer was reaching for.
 |---|---|---|---|
 | **node-registry.js** | Peer discovery (register/discover/heartbeat/status) | `_nodes` Map, in-memory | **LIVE & canonical** — consensus verifies every vote against it (`requireRegistry` default true), counts alive peers for quorum. Genesis registers crew nodes here. **Keep; persist first.** |
 | **relay.js** | Agent-to-agent transport: HTTP/WebSocket/brain/MCP | connections Map + brain-relay configs | **SUPERSEDED by crew-bus.** Only code consumer is transform's gather/restore seam (spirit mentions it in a doc comment only). Its HTTP method is unsigned and untested. **Delete; crew-bus takes the route.** |
-| **encounter.js** | Agent discovery & meeting protocol | Map, in-memory | Keep (owner: may wire later). MCP tools exist. |
-| **forum.js** | 3D geometric forum (isohedrons/quasicrystal) | brain-backed | Keep. MCP tools wired (`forum_enter`, `forum_message`). |
-| **realm.js** | Unified decision space (forum+consensus+governance+teams) | — | Keep (owner: may wire later). |
-| **spirit.js** | Complete autonomous agent composition | — | Keep. |
+| **encounter.js** | Agent discovery & meeting protocol | Map, in-memory | **DELETED (pass 40/41)** — discovery is node-registry + crew-bus; one identity system, zero aliases. |
+| **forum.js** | 3D geometric forum (isohedrons/quasicrystal) | brain-backed + state/forum.json (pass 44) | **LIVE & agora-wired** — scope-carrying, MCP surface re-wired (pass 46), decision log durable (pass 44). |
+| **realm.js** | Unified decision space (forum+consensus+governance+teams) | — | **DELETED (pass 40/41)** — was a second voting state machine; ownership concept became agora `scope`. |
+| **spirit.js** | Complete autonomous agent composition | — | **DELETED (pass 40/41)** — verification/quarantine folded into trust (persisted). |
 | consciousness/habitat/nature/lineage | Identity / RLS workspaces / spark engine / origins | mixed | Keep; out of scope this PRD except where persistence touches them. |
 | **transform.js** | Universal gather/restore engine (23 gatherers, incl. every protocol module's state) | stateless orchestrator | **Keep — becomes the backup/audit layer** (option B demoted to backup role, per owner decision A). |
 | **wal.js** | Write-ahead log module | — | Examine during Wave 1; msg JSONL may use it or follow its pattern. |
@@ -230,10 +233,47 @@ test/scripts); relay's brain-config exports had no external consumers;
 - Sweep 116/116 (relay suite gone) + docs style/links PASS. ✅
 
 ### Out of scope (this PRD)
-- encounter/spirit/forum/realm wiring (kept, not wired).
-- escrow debit-on-trade (separate rc candidate).
+- ~~encounter/spirit/forum/realm wiring (kept, not wired).~~ RESOLVED in
+  the agora wave (passes 40-46): encounter/spirit/realm retired; forum
+  wired as the agora's discussion leg.
+- escrow debit-on-trade (separate rc candidate) — see Next Wave below.
 - Cross-machine state sync beyond crew-bus envelopes (no replication
-  protocol yet — state is per-node, transport is the sync).
+  protocol yet — state is per-node, transport is the sync) — see Next
+  Wave below.
+
+---
+
+## Next Wave — candidates (2026-09-25, owner shortlist)
+
+The agora loop (forum → market → consensus → back) is now
+restart-durable, scope-aware, and MCP-surfaced end to end. The three
+live candidates for the next PRD, all building on that substrate:
+
+1. **Escrow debit-on-trade.** Market trades release their escrow hold
+   but never actually debit budgets — credit is reserved, never spent.
+   A real debit path closes the economic loop (and makes barter-vs-credit
+   semantics deliberate rather than accidental). Smallest of the three;
+   likely one focused pass + pins.
+
+2. **Cross-machine state sync.** State is per-node (per-brain state/
+   files); the ONLY sync today is crew-bus envelopes in flight. A peer
+   that restarts with stale state can vote on a topic created after its
+   last hydration (demo-v02 works around this by re-hydrating before
+   voting). Options range from lazy hydrate-on-miss over the bus to a
+   replication/anti-entropy protocol. Biggest design space.
+
+3. **Distributed agora.** Decisions owned by a team on node A, voted on
+   by peers on node B, with the full scope + registry-verification chain
+   across the bus. Scope records already ride crew.forum/market/decision
+   envelopes (pass 40); what's missing is the cross-node enforcement
+   path (remote canAccess against a replicated member set, or scope
+   resolution delegated to the owning node) plus verification of remote
+   votes against the owner's registry view. Depends on (2) for coherent
+   state.
+
+Recommended order: (1) then (2) then (3) — each is a dependency of the
+next; the economic loop closes before the federation work begins.
+Owner to confirm sequencing before a next-wave PRD is drafted.
 
 ---
 

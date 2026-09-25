@@ -2,7 +2,53 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-25  
-**Session:** Live-fire round 2 (cont.) — durable forum decision log (pass 44)
+**Session:** Naming + MCP surface + PRD closeout (passes 45-47)
+
+---
+
+## Session (2026-09-25 — passes 45-47: naming, agora MCP surface, PRD closeout)
+
+Owner's 4-step plan executed in order. All work PUSHED to origin/axolotl.
+
+**Pass 45 — the second "trifecta" retired.** The agora rename (pass 40)
+retired "trifecta" for the loop, but the term ALSO named the combined
+MCP+API server mode (`vant all`). Live-tree mentions swept to "all mode"
+(help cards, comments, docs/operations/testing.md); historical records
+(CHANGELOG/QC_WAVE/TASKS/PRD retirement note) keep original wording.
+Sweep green: agora 7/7, vant 16/16, live-fire 26/26.
+
+**Pass 46 — agora MCP surface.** Inventory found 272→275 tools, market
+richly surfaced (8 tools), forum 4 tools, consensus ZERO. Worse: the 4
+forum_* tools were mis-wired to the pre-agora API — forum_vote passed
+(forumId, userId, topic, vote) into vote(proposal, options), so an MCP
+"up vote" silently CREATED a consensus vote titled by the forumId;
+enter/message/status ignored inputs the same way. No test covered them.
+Fix: re-wired all 4 to the real agora signatures, added forum_castVote,
+added consensus_create/vote/tally/get/list (scope-aware, schema-gated).
+Pinned test/mcp-agora.test.js 5/5 through the REAL mcp.execute door
+(rules → schema → handler): tool registration, real-ledger forum_vote,
+castVote/consensus_vote round-trip + double-vote refusal, tally/get/list,
+schema-door rejections. Test note: with minQuorum=2 the topic PASSES on
+the second vote, so the double-vote refusal comes from the closed-topic
+gate (before the hasVoted gate) — assert ANY error + no tally, not the
+gate name.
+
+**Pass 47 — PRD closeout.** prd-agora.md v1.1: status SHIPPED (Waves 5-6
++ hardening 42-46), Wave 7 section, files list extended. prd-vant-os.md
+v1.2: forensics table corrected (encounter/spirit/realm are DELETED rows;
+forum now LIVE/agora-wired), out-of-scope items resolved-annotated, new
+"Next Wave — candidates" section: (1) escrow debit-on-trade, (2)
+cross-machine state sync, (3) distributed agora — recommended in that
+order (each is a dependency of the next); owner to confirm sequencing.
+Docs style+links PASS (118 files).
+
+**Parked (owner-aware):** rls audit — test/test-rls.js core tests are
+skipped ("needs habitat init first") and rls.js fails open without a
+habitat; also the rls/habitat (tenant-facing) vs scope.js (agent-facing)
+delineation deserves a deliberate decision.
+
+**Next steps:** owner picks the next-wave candidate (escrow debit-on-
+trade recommended first), or anything else.
 
 ---
 
