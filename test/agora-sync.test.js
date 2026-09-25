@@ -121,7 +121,11 @@ async function main() {
         const ledger = consensus.get('p49-local');
         assert(ledger.votes['local-agent'].outcome === 'yes', 'local vote OVERWRITTEN by wire');
         assert(ledger.votes['remote-agent'] && ledger.votes['remote-agent'].outcome === 'yes', 'new vote not adopted');
-        assert(ledger.syncedFrom === 'peer-node', 'provenance missing on adopt path');
+        // (pass 58) Adopt-path provenance moved to lastSyncFrom: a LOCAL
+        // topic that adopted a remote ballot must never be branded synced
+        // (syncedFrom) — the reaper would eat it. Audit provenance lives on.
+        assert(ledger.lastSyncFrom === 'peer-node', 'provenance missing on adopt path');
+        assert(!ledger.syncedFrom, 'LOCAL ledger branded syncedFrom — reapable local state!');
     });
 
     await test('merge validation: invalid topic / malformed scope rejected fail-closed', async () => {

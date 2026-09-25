@@ -5,7 +5,9 @@
 **Date:** 2026-09-25 (v1.1: generalized for the public repo — the
 deployment in the examples is the HOST org's own shop, offered as a
 worked example; v1.0 2026-09-25: drafted)
-**Status:** PROPOSED — Wave A (agora-sync MCP surface) ready to start.
+**Status:** ACTIVE — Wave A shipped (pass 56: agora-sync MCP surface),
+Wave B shipped (pass 57: genesis ceremony), Wave C shipped (pass 58:
+ledger hygiene + gossip). Next: Wave D (cross-node msg).
 
 > **Host note.** This PRD is hosted by the **Buffy Labs** org — the crew
 > that builds vant itself (you are reading this in the vant repo). The
@@ -127,15 +129,15 @@ state surviving every process exit.
 
 ### Gap list → waves (nothing forgotten)
 
-| Gap (source) | Wave |
-|---|---|
-| agora-sync MCP surface (pass-51 backlog; federation gap 1) | **A** |
-| Genesis ceremony `vant genesis --join` (gap 2) | **B** |
-| Synced-ledger TTL reaper (pass-51 backlog) | **C** |
-| Gossip pull scheduler (pass-51 backlog) | **C** |
-| Cross-node msg (gap 3) | **D** |
-| Envelope version compatibility (gap 4) | **E** |
-| Coordinator observability (gap 5) | **F** |
+| Gap (source) | Wave | Status |
+|---|---|---|
+| agora-sync MCP surface (pass-51 backlog; federation gap 1) | **A** | shipped (pass 56) |
+| Genesis ceremony `vant genesis --join` (gap 2) | **B** | shipped (pass 57) |
+| Synced-ledger TTL reaper (pass-51 backlog) | **C** | shipped (pass 58) |
+| Gossip pull scheduler (pass-51 backlog) | **C** | shipped (pass 58) |
+| Cross-node msg (gap 3) | **D** | next |
+| Envelope version compatibility (gap 4) | **E** | — |
+| Coordinator observability (gap 5) | **F** | — |
 | Org-model sync leg (pass-52 backlog; optional) | standing — revisit on partner growth |
 
 ## 4. Wave plan
@@ -166,19 +168,32 @@ state surviving every process exit.
 - Pins: two-process genesis round-trip test; secret never in state
   files or logs (posture: secrets stay in process memory, pass-42 rule).
 
-### Wave C — ledger hygiene + gossip (pass ~56)
+### Wave C — ledger hygiene + gossip (pass 58, SHIPPED)
 
-- **TTL reaper:** synced ledgers (syncedFrom-stamped) age out unless
-  locally owned or terminal-and-referenced. Reaper runs at hydrate +
-  interval; NEVER reaps locally-created ledgers; reaped topics
-  re-pullable by design (the pull seam is the recovery path).
-- **Gossip pull scheduler:** interval-based pulls of topic lists from
-  registered peers (backoff + jitter), so peers converge without manual
-  pulls. Bounded: pull summaries first, merge-then-pull-details only
-  for topics below local quorum.
-- Pins: reaper never touches local ledgers; reaped-then-re-pulled
-  round-trip; gossip convergence (2 stub nodes, N topics) + offline
-  peer backoff.
+- **TTL reaper:** synced ledgers (wire-BORN: syncedFrom-stamped AND not
+  localOrigin) age out (24h default) or reap when terminal-and-
+  unreferenced. Reaper runs at hydrate-adjacent call sites + interval
+  callers' discretion; throttled to 1/min per bus (pass-53 precedent);
+  NEVER reaps locally created ledgers — enforced INSIDE consensus
+  (`reapSynced` refuses any ledger without the wire-born marks, so a
+  broken caller predicate cannot leak local state). `localOrigin` is a
+  birth flag set only by `consensus.create`; mergeTopic's adopt path
+  records `lastSyncFrom` (audit provenance) WITHOUT branding local
+  topics as synced. Reaped topics re-pullable by design (the pull seam
+  is the recovery path); a msg conversation named for the topic pins it.
+- **Gossip pull scheduler:** `gossipAsk` (summary leg) + `gossipRound`
+  (bounded detail pulls, merge-then-pull only for topics below local
+  quorum) + `startGossip`/`stopGossip` (interval loop, ×2 backoff on
+  fully-failed rounds, 30-min cap, per-peer pull floor shared by
+  standalone rounds). OWN-SIDE scope filter on the summary leg: a
+  scoped topic is never NAMED to a non-member (pass-50 rule on the
+  summary leg); reply legs sender-bound (pass-51 rule).
+- Pins: test/agora-hygiene.test.js 6/6 — localOrigin hard guard (local
+  ledger adopting remote ballots survives a reap-everything predicate),
+  age/terminal/reference rules + throttle, reaped-then-re-pulled round
+  trip, scoped-summary filter (member sees, outsider never named),
+  2-node convergence (pulls only below-quorum, terminal skipped,
+  per-peer floor), sender-bound gossip reply.
 
 ### Wave D — cross-node msg (pass ~57, approach per owner)
 

@@ -6,6 +6,38 @@
 
 ---
 
+## Pass 58 — 2026-09-25 — Wave C: the mesh learns to clean up after itself
+
+- **The reaper, and the bug the test suite caught before it could
+  eat real data:** my first "hard guard" refused ledgers without a
+  syncedFrom stamp — and a probe against real state immediately showed
+  a LOCALLY created topic carrying the stamp. mergeTopic had been
+  stamping syncedFrom onto existing local ledgers since pass 49 (the
+  adopt path); pass-49's own test pinned that stamping as provenance.
+  Reaping by that stamp alone would have eaten every local ledger that
+  ever adopted a remote ballot. The fix is structural: `localOrigin` is
+  a birth flag set ONLY by consensus.create; the adopt path now records
+  `lastSyncFrom` (provenance survives for audit) WITHOUT branding the
+  ledger synced; `consensus.reapSynced` requires BOTH marks, inside
+  consensus, so no caller predicate can ever leak local state.
+- **Hygiene rules:** synced ledgers age out at 24h; terminal ones reap
+  when unreferenced — where "referenced" means a msg conversation named
+  for the topic (the JV-standup pattern). Throttled 1/min per bus
+  (pass-53 precedent). Reaped topics re-pullable by design; the round-
+  trip pin proves a reaped ledger re-adopts cleanly via the pull seam.
+- **Gossip:** the summary leg asks peers what topics they hold; the
+  OWNER filters its own summary by the asker's member set — a scoped
+  topic is never NAMED to a non-member (pass-50 rule now on the summary
+  leg; the wire carries names only, details ride the gated pulls).
+  Rounds pull details only for topics below local quorum, back off ×2
+  on fully-failed rounds (30-min cap), enforce a per-peer pull floor
+  shared by standalone rounds (a direct-gossipRound caller cannot
+  bypass the miss-flood guard), and reply legs stay sender-bound
+  (pass-51 rule).
+- Pins: test/agora-hygiene.test.js 6/6. Full regression: agora-sync 7,
+  agora-distributed 6, mcp-agora-sync 8, genesis 5, JV exercise 8/8 —
+  all green in one sweep.
+
 ## Pass 57 — 2026-09-25 — Wave B: the genesis ceremony is a product
 
 - `vant genesis create|join|status` (lib/genesis.js + bin/genesis.js):
