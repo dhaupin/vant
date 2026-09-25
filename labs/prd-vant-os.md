@@ -249,11 +249,11 @@ The agora loop (forum → market → consensus → back) is now
 restart-durable, scope-aware, and MCP-surfaced end to end. The three
 live candidates for the next PRD, all building on that substrate:
 
-1. **Escrow debit-on-trade.** Market trades release their escrow hold
-   but never actually debit budgets — credit is reserved, never spent.
-   A real debit path closes the economic loop (and makes barter-vs-credit
-   semantics deliberate rather than accidental). Smallest of the three;
-   likely one focused pass + pins.
+1. ~~**Escrow debit-on-trade.**~~ **SHIPPED (pass 48):** trades now debit
+   the buyer's escrow budget at the settle point (`escrow.recordSpend` for
+   numeric prices; missing/zero price costs the default 1; barter strings
+   stay free). Debit refusal unwinds reservation + hold; `trade.debit`
+   records the settlement. Pinned test/market-debit.test.js 4/4.
 
 2. **Cross-machine state sync.** State is per-node (per-brain state/
    files); the ONLY sync today is crew-bus envelopes in flight. A peer

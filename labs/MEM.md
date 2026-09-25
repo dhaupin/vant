@@ -7,7 +7,7 @@
 
 ## Handoff
 
-**Last known good commit:** pass 47 — naming + PRD closeout (agora "all mode", agora/vant-os PRDs refreshed); see labs/TASKS.md top block.
+**Last known good commit:** pass 48 — escrow debit-on-trade SHIPPED (candidate 1 of the next-wave shortlist); see labs/TASKS.md top block.
 **Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 46.
 **Status:** pass 47 complete (PRD closeout); commit + push pending at session end.
 
@@ -15,26 +15,19 @@
 
 ## CURRENT DUMP
 
-(nothing in flight — owner's 4-step plan EXECUTED: (1) naming — the agora
-rename was already done pass 40; the COLLIDING second "trifecta" (MCP+API
-server mode via `vant all`) retired pass 45; (2) ALL commits pushed to
-origin/axolotl through pass 46 (a3e9c7c); (3) agora MCP surface pass 46:
-4 stale forum_* tools RE-WIRED (they called pre-agora signatures —
-forum_vote's (forumId,userId,topic,vote) into vote(proposal,options)
-meant an MCP "up vote" silently CREATED a vote), forum_castVote added,
-consensus_create/vote/tally/get/list added (zero consensus tools before);
-pinned test/mcp-agora.test.js 5/5 via real mcp.execute door; (4) PRDs
-refreshed pass 47: prd-agora.md v1.1 closeout + Wave 7 section,
-prd-vant-os.md v1.2 forensics table corrected (encounter/spirit/realm now
-DELETED rows) + "Next Wave — candidates" section with owner shortlist:
-escrow debit-on-trade → cross-machine state sync → distributed agora,
-recommended in that order (each is a dependency of the next); owner to
-confirm sequencing. Docs style+links PASS (118 files). RLS audit (skipped
-test-rls tests; two-permission-systems delineation) parked as a standalone
-item. rls summary delivered in chat: rls.js is a thin adapter over
-habitat.js (workspaces/roles/boundaries), wired live at boot via
-sandbox.initRLS, pipeline stage capability→vaf→qos→rls→escrow, fails open
-without habitat.)
+(nothing in flight — pass 48: market trades now DEBIT the buyer's escrow
+budget at the settle point (escrow.recordSpend; the old hold/release dance
+never moved budget — credit was reserved, never spent). Numeric prices
+debit (missing/zero price costs default 1, mirroring _checkBudget); barter
+strings stay free; debit refusal (runaway guard) unwinds reservation+hold
+before settlement; trade.debit records the settlement. NOTE: market's
+_getEscrow returns the MODULE — recordSpend is instance-level, so the
+debit builds a fresh persisted Escrow() per trade. Pin:
+test/market-debit.test.js 4/4 (debit+persist, barter-free, insufficient-
+budget refusal, unwind-on-refusal; runaway 31st spend itself refused →
+recorded spend is 30, not 31). Sweep: market 22/22, agora 7/7, live-fire
+26/26. PRD next-wave candidate 1 marked SHIPPED; candidates 2 (cross-
+machine state sync) + 3 (distributed agora) remain, in that order.)
 
 ---
 

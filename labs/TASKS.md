@@ -2,7 +2,42 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-25  
-**Session:** Naming + MCP surface + PRD closeout (passes 45-47)
+**Session:** Next wave candidate 1 — escrow debit-on-trade (pass 48)
+
+---
+
+## Session (2026-09-25 — pass 48: escrow debit-on-trade SHIPPED)
+
+Next-wave candidate 1 from the vant-os PRD shortlist, owner-approved order.
+
+**FINDING (fixed, pinned):** market trades "paid" nothing. The trade path
+held budget (escrow.hold — a condition entry) and released it (delete the
+entry) — no budget ever moved. Credit was reserved, never spent: an agent
+with budget 1000 could buy forever.
+
+**Fix (lib/market.js trade settle point):** after ALL gates pass, debit
+the buyer via escrow.recordSpend:
+- numeric price → debit that amount (missing/zero price costs the default
+  1, mirroring _checkBudget's normalization); barter strings stay free
+- debit REFUSAL (e.g. escrow runaway guard) → unwind BEFORE settlement:
+  atomic reservation rolled back + hold released, structured error
+  (code E_RUNAWAY surfaced), listing not consumed
+- trade.debit records the settlement { agent, amount } (null for barter)
+
+**Wiring note:** market's _getEscrow returns the MODULE (whose exported
+recordSpend was removed in a dead-export sweep); the debit builds a fresh
+persisted Escrow() per trade — budgets load from orgchart/escrow.json so
+the debit lands on the real budget.
+
+**Pins:** test/market-debit.test.js 4/4 — debit+persist, barter-free,
+insufficient-budget refusal (no supply consumed), unwind-on-refusal.
+Test arithmetic note: the runaway hammer's 31st recordSpend is ITSELF
+refused by the 30/min guard, so recorded spend is 30, not 31.
+Sweep: market 22/22, agora 7/7, live-fire 26/26.
+
+**Next steps:** candidate 2 (cross-machine state sync — stale-peer
+voting hazard, biggest design space) or candidate 3 (distributed agora,
+depends on 2).
 
 ---
 
