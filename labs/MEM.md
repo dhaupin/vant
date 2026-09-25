@@ -7,18 +7,20 @@
 
 ## Handoff
 
-**Last known good commit:** see `git log --oneline -3` (TASKS.md latest session block has the verified record)
+**Last known good commit:** 5fb1383 — pass 41, live-fire exercise (see labs/TASKS.md top block)
 **Branch:** axolotl — origin github.com/dhaupin/vant
-**Status:** clean sessions end with everything committed + pushed; this dump should be the template again.
+**Status:** clean session ended with everything committed; this dump is the template again.
 
 ---
 
 ## CURRENT DUMP
 
-(nothing in flight — docs round 6 shipped: phantom CLI commands purged,
-MCP port split fixed in bin/mcp.js + 9 docs, stale versions repaired,
-legacy brain paths modernized, scripts/ scratch ignored. Linters green,
-full battery 108/108. See labs/TASKS.md top block.)
+(nothing in flight — pass 41 live-fire shipped: 7 real bugs/vulns found by
+RUNNING vant (boot, agora, crew demo, MCP HTTP, adversarial probes), all
+fixed + pinned in test/live-fire-regressions.test.js 15/15. Sweep 117/117,
+runner 37/37. Follow-ups queued at the bottom of the TASKS.md pass-41
+block: dead auth-bearing mcp start(), non-loopback MCP auth story,
+brain.read() category asymmetry, mcp.js split.)
 
 ---
 
@@ -34,10 +36,10 @@ full battery 108/108. See labs/TASKS.md top block.)
 
 ## Session End Checklist
 
-- [ ] tests green (runner + full loop)
-- [ ] labs/TASKS.md session block written
+- [x] tests green (runner + full loop)
+- [x] labs/TASKS.md session block written
 - [ ] priv brain lessons updated
 - [ ] pushed to origin/axolotl
-- [ ] this file wiped back to template + one-line handoff
+- [x] this file wiped back to template + one-line handoff
 
 — Buffy, agent on the axolotl branch
