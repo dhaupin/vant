@@ -7,23 +7,27 @@
 
 ## Handoff
 
-**Last known good commit:** pass 43 — agora decision return path survives restart; see labs/TASKS.md top block.
+**Last known good commit:** pass 44 — forum decision log durable (state/forum.json); see labs/TASKS.md top block.
 **Branch:** axolotl — origin github.com/dhaupin/vant
-**Status:** pass 43 complete and verified (live 3-phase restart probe + pins green); commit pending at session end.
+**Status:** pass 44 complete and verified (pins + 2-restart live probe); commit pending at session end.
 
 ---
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 43 live-fire round 2 continued: the pass-40 agora
-loop's decision return path lost proposal/author across a restart (memory-only
-_openVotes). Fix: forum.vote stamps { proposal, author, viaForum } into the
-PERSISTED consensus ledger metadata; the vote:consensus handler falls back to
-the ledger when the thread record is gone. Live-probed across a real process
-restart in /tmp/vant-live-r2: ledger hydrated, 3rd vote completes quorum,
-decision recovers proposal+author. Pins: agora-loop 7/7, consensus 8/8,
-forum 23/23, scope 9/9. Probe script /tmp/p43-probe.js (phases 1/3; phase 2
-shells out via a wrapper — direct env writes are blocked in this sandbox).
+(nothing in flight — pass 44 live-fire round 2 continued: forum's decision
+feed was memory-only (lost on restart even though the consensus ledger kept
+outcomes). Fix: decision records now write through to state/forum.json
+(state-store, FIFO-capped at 200) and hydrate at module load, same pattern
+as consensus/market (pass 38). clearState() seam added to lib/forum exports.
+Pin: test/forum-decisions-persistence.test.js 4/4 (restart simulated via
+require-cache eviction of forum+event together — evicting forum alone leaks
+the old singleton's vote:consensus listener and double-counts; consensus.create
+is lock-wrapped and returns a PROMISE, tests must await it). Market verified
+already durable (pass 38) — no change needed. Live: /tmp/p43-probe.js +
+/tmp/p44-probe.js chain — decision made in process B, hydrated in process C.
+Sweep: agora 7/7, forum 23/23, consensus 8/8, scope 9/9, live-fire 26/26,
+market 22/22, runner 37/37.)
 
 ---
 

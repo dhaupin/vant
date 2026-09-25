@@ -2,7 +2,46 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-25  
-**Session:** Live-fire round 2 (cont.) — agora restart persistence (pass 43)
+**Session:** Live-fire round 2 (cont.) — durable forum decision log (pass 44)
+
+---
+
+## Session (2026-09-25 — pass 44: forum decision log made durable)
+
+Live-fire round 2 wrap-up of the agora loop's restart gaps, following the
+pass-43 metadata stamp.
+
+**FINDING (fixed, live-verified):**
+
+2. **Forum decision feed was memory-only:** consensus keeps the vote
+   outcome in its ledger, but forum's own decision records — the feed an
+   agent reads to learn "we decided X because of Y" — evaporated on
+   restart. (Discovered while re-probing the pass-43 chain: the ledger
+   side survived; the forum side didn't.)
+
+   **Fix (lib/forum.js):** decision records write through to
+   `state/forum.json` via state-store (pass-38 pattern, per-brain,
+   kind-marked, atomic), hydrated at module load BEFORE any vote can
+   resolve. FIFO-capped at 200 (working memory, not an archive).
+   `clearState()` seam added (consensus/market parity).
+
+   **Verified:** pin test 4/4 (persist, hydrate-on-restart, FIFO cap,
+   clearState) + real-process chain in /tmp/vant-live-r2: decision made
+   in process B, hydrated in process C from state/forum.json.
+
+**Also verified (no change):** market already persists listings/trades
+(pass 38) — the loop's three legs (forum/consensus/market) are all
+restart-durable now.
+
+**Test-harness notes worth keeping:** evict forum+event TOGETHER when
+simulating restarts via require cache (forum-only eviction leaks the old
+singleton's vote:consensus listener and double-counts decisions);
+consensus.create is lock-wrapped and returns a PROMISE — always await it.
+
+**Next steps:** round-2 fully closed. Candidates for next session: the
+"decider" word (owner-naming), pushing the axolotl branch, MCP surface
+for the agora loop (crew.forum/market/decision already have envelopes),
+or the vant-os PRD's next wave.
 
 ---
 
