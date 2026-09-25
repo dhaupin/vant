@@ -7,19 +7,18 @@
 
 ## Handoff
 
-**Last known good commit:** pass 55 — prd-mesh v1.1 public reword (example-shop framing, host note); see labs/TASKS.md top block.
-**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 55.
-**Status:** nothing in flight; next: Wave A MCP tools (agora_vote/pull/push/nodes/status).
+**Last known good commit:** pass 56 — Wave A shipped (agora-sync MCP tools + vant agora CLI, 8/8 pins); see labs/TASKS.md top block.
+**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 56.
+**Status:** nothing in flight; next: Wave B genesis ceremony, then the real 2-node live-fire through the tools.
 
 ---
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 55: prd-mesh v1.1 GENERALIZED for the public
-repo (owner: "we're open source, reword it"): host-note + worked-example
-framing, adopting-the-pattern recipe, N-install design; Creadev details
-stay as the host's example. Waves unchanged: A MCP surface, B genesis,
-C reaper+gossip, D msg, E versions, F observability. Wave A next.)
+(nothing in flight — pass 56: Wave A shipped. MCP: agora_vote/pull/
+push/nodes/sync_status via mcp.execute; agora-sync.status() roster;
+CLI bin/agora.js routed as `vant agora`. Pins: mcp-agora-sync 8/8.
+Unrelated untracked dir labs/whitepaper/ left untouched.)
 
 ---
 

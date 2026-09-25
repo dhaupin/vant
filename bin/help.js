@@ -157,6 +157,11 @@ See: vant node --help`
         usage: 'vant market list|bid|search|trade|stats',
         detail: 'Trade knowledge with escrow.\nSee: vant market --help'
     },
+    agora: {
+        desc: 'Cross-node agora operations (the mesh)',
+        usage: 'vant agora vote|pull|push|nodes|status',
+        detail: 'Vote/sync with peer vant nodes over the crew-bus.\nSee: vant agora --help'
+    },
     config: {
         desc: 'Get/set configuration',
         usage: 'vant config get|set|list <key> [value]',

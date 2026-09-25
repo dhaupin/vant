@@ -2,7 +2,46 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-25  
-**Session:** Pass 55 — prd-mesh v1.1 public reword (Wave A next)
+**Session:** Pass 56 — Wave A shipped: agora-sync MCP surface + CLI
+
+---
+
+## Session (2026-09-25 — pass 56: Wave A — agora-sync MCP surface + CLI)
+
+prd-mesh.md Wave A executed: the mesh surface agents actually use.
+All gates stay owner-side — the tools add convenience, never a trust
+path (the PRD's rule).
+
+**Shipped:**
+- **MCP tools through the real mcp.execute door** (lib/mcp.js):
+  `agora_vote` (peer ballot; owner runs its local gate stack and acks
+  the verdict; agentId defaults to the node's principal), `agora_pull` /
+  `agora_push` (state sync legs; merges re-derive status locally —
+  the wire can never declare a topic passed), `agora_nodes` (mesh
+  roster + self identity), `agora_sync_status` (installed buses,
+  pending round-trips). Schema-gated; unconfigured-bus refusals are
+  structured, never crashes.
+- **agora-sync.status()** (lib/agora-sync.js): inspectable roster of
+  installed buses (label, name, agentId, configured, listening, peer
+  count) + pending round-trips. Read-only, no secrets.
+- **CLI parity:** bin/agora.js (`vant agora vote|pull|push|nodes|status`),
+  routed in bin/vant.js, help card in bin/help.js. JSON output;
+  exit code reflects the operation result.
+
+**Pins:** test/mcp-agora-sync.test.js 8/8 through mcp.execute — tool
+registration, schema door (missing params rejected pre-handler),
+unconfigured-bus structured refusal, agora_vote round-trip (tool →
+agora-sync → owner gates → ack verdict), refusal passthrough (double
+vote via owner gate; client-side validation stays local), agora_pull
+round-trip with local re-derivation, agora_push, read-only surfaces.
+
+**Sweep green:** mcp-agora 5/5, mcp-agora-sync 8/8, agora-sync 7/7,
+agora-distributed 6/6, agora-loop 7/7, consensus 8/8, crew-bus 13/13,
+mcp (full) 0F. eslint 0 errors.
+
+**Next steps:** Wave B — genesis ceremony (`vant genesis
+create|boot|join`), then the real 2-node live-fire through these tools
+(prd-mesh §5).
 
 ---
 
