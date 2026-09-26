@@ -2,9 +2,49 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-26  
-**Session:** Pass 62 — Waves E+F shipped: envelope versions + mesh status (all six mesh waves done)
+**Session:** Pass 63 — OSS convergence started: prd-oss.md + Wave OSS-A (no phantom endpoints)
 
 ---
+
+## Session (2026-09-26 — pass 63: prd-oss.md + Wave OSS-A — the surface gets a checker)
+
+Owner scoped the OSS work: "convergence and consistency through the
+frames, while backing with real endpoints." labs/prd-oss.md written
+(the public layer gets the frames' discipline); Wave OSS-A executed
+same session.
+
+**The find (thesis in miniature):** AGENTS.md advertised
+brain_agent_spawn/list/kill over POST /rpc — BOTH PHANTOM (zero hits
+in lib/bin). But the capability was real: agent_spawn/agent_list/
+agent_kill are registered _methods behind POST /mcp/exec. Docs wrong,
+code right — fixed docs to the true door + real names (Option B; the
+PRD's Option A story stays available). Retired in the same sweep:
+wrong-repo links (dhaupin/discussions -> dhaupin/vant/discussions,
+issues; one caught only by the checker), the phantom Discord invite.
+
+**New doors:** .github/SUPPORT.md (question/bug/idea/vuln routing with
+vant-shaped expectations) + .github/SECURITY.md (GitHub private
+advisory reporting; advertised = defended as policy). Env vars
+documented there verified against lib/config.js + lib/webhooks.js.
+
+**The checker:** scripts/check-surface-consistency.js (npm run
+lint:surface + a CI step): advertised MCP tools must be registered,
+/rpc stays dead, documented env vars must be read by code, community
+links point at the right repo, community doors exist. 20/20. It
+proved itself on first run by catching a wrong link the manual pass
+missed.
+
+**Verification:** checker exit 0; docs.test 6/6; build-test 15/15;
+workflow YAML parses; eslint clean.
+
+**Next steps (prd-oss.md waves):** OSS-B single sources of truth
+(CONTRIBUTING split, AGENTS.md/onboarding alignment), OSS-C deeper
+claims registry (CLI verbs vs bin/, all MCP tools vs docs), OSS-D
+community-layer depth, OSS-E the agent-contributor chapter.
+
+---
+
+## Session (2026-09-26 — pass 61+62: Wave E envelope versions + Wave F mesh status — the wave plan COMPLETE)
 
 ## Session (2026-09-26 — pass 61+62: Wave E envelope versions + Wave F mesh status — the wave plan COMPLETE)
 
