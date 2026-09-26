@@ -7,21 +7,22 @@
 
 ## Handoff
 
-**Last known good commit:** pass 64 — Wave OSS-B (contributing surfaces converged, canonical markers, checker at 31 checks).
-**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 64.
-**Status:** next per prd-oss.md: OSS-C claims registry at scale, OSS-D community depth, OSS-E the agent-contributor chapter.
-**Owner context:** the crashed "isss" session was a TYPO for OSS (open source software) — owner confirmed. The real scope: convergence and consistency through the frames, backing docs with real endpoints. prd-oss.md is the plan.
+**Last known good commit:** pass 65 — THREE-NODE STAR exercise 9/9 (labs/node-crew/exercise-three-nodes.js) + 2 security finds fixed and pinned: consensus read-path scope gate (get/list viewerId), honest webhook acks (dispatched field), registry.refresh seam.
+**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 65.
+**Status:** next: synmergia world/state/seed models → Vant world-building frame (owner directive: vant axolotl local distributed mesh is paramount); then OSS waves C-E, mesh gaps (ask-peers, trio genesis).
+**Owner context:** "look at this like a world building exercise — the world needs state and interaction"; synmergia (github.com/dhaupin/synmergia, Godot) has deep models/services/states/seed worth porting. Not a human flex — a system built over hundreds of sessions.
 
 ---
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 64: Wave OSS-B shipped. Root CONTRIBUTING
-= front door, docs guide = canonical, commit-format conflict resolved
-(type: description vs agent-name pass format both documented),
-AGENTS.md layout examples current, checker 31/31 incl. CLI-claims-vs-
-bin and front-door-size drift proxy. Owner's frame: OSS waves help
-other wise agents meet vant.)
+(nothing in flight — pass 65: STAR 9/9. Two security finds fixed:
+consensus get/list had NO scope gate (a non-member hub could read a
+scoped JV ledger — fixed with viewerId semantics, pinned 9/9 in
+test/consensus-read-scope.test.js); webhook acks reported subscriber
+count as handlers, making silent refusal look like delivery (fixed
+with honest dispatched field). Registry refresh seam added. Next:
+synmergia model extraction.)
 
 ---
 
