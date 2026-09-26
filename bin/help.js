@@ -167,6 +167,11 @@ See: vant node --help`
         usage: 'vant genesis create|join|status',
         detail: 'Mutual registration + vetted membership + per-pair secret.\nSee: vant genesis --help'
     },
+    mesh: {
+        desc: 'Mesh observability — the coordinator one-command view (Wave F)',
+        usage: 'vant mesh status [--json]',
+        detail: 'Peers, topics, decisions, budgets, channels, pending syncs\nfrom ONE node. Read-only; --json for CI.\nSee: vant mesh --help'
+    },
     config: {
         desc: 'Get/set configuration',
         usage: 'vant config get|set|list <key> [value]',

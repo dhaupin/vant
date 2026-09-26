@@ -235,6 +235,7 @@ const COMMANDS = {
     nature: 'nature.js',
     agora: 'agora.js',
     genesis: 'genesis.js',
+    mesh: 'mesh-status.js',
 
     // Advertised in help but previously unrouted (pass 16 gap sweep).
     // All 16 have real bin/*.js CLIs; help promised them, the map didn't.
