@@ -9,20 +9,19 @@
 
 **Last known good commit:** pass 65 — THREE-NODE STAR exercise 9/9 (labs/node-crew/exercise-three-nodes.js) + 2 security finds fixed and pinned: consensus read-path scope gate (get/list viewerId), honest webhook acks (dispatched field), registry.refresh seam.
 **Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 65.
-**Status:** next: synmergia world/state/seed models → Vant world-building frame (owner directive: vant axolotl local distributed mesh is paramount); then OSS waves C-E, mesh gaps (ask-peers, trio genesis).
-**Owner context:** "look at this like a world building exercise — the world needs state and interaction"; synmergia (github.com/dhaupin/synmergia, Godot) has deep models/services/states/seed worth porting. Not a human flex — a system built over hundreds of sessions.
+**Status:** BLOCKED on synmergia access for the survey; meanwhile OSS waves C-E and mesh gaps (ask-peers, trio genesis) are unblocked work.
+**Owner context:** "vant is a source of truth model; world-building exercise; the world needs state and interaction." Synmergia (Godot MMORPG) has WORKING seed + state systems + PRD design docs to borrow. labs/prd-world.md v0.1 written (survey-pending) — import frame locked: extract invariants not code, implement only what vant lacks, close the loop through the mesh (Godot server = peer node; vant SERVES world state).
+**BLOCKER:** dhaupin/synmergia is private, NOT in the Freebuff GitHub App scope (clone/gh/search all fail; no public repo by that name exists). Owner must add it to the app's repo scope, or paste the PRDs + seed/state files.
 
 ---
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 65: STAR 9/9. Two security finds fixed:
-consensus get/list had NO scope gate (a non-member hub could read a
-scoped JV ledger — fixed with viewerId semantics, pinned 9/9 in
-test/consensus-read-scope.test.js); webhook acks reported subscriber
-count as handlers, making silent refusal look like delivery (fixed
-with honest dispatched field). Registry refresh seam added. Next:
-synmergia model extraction.)
+(waiting on synmergia access. When it lands: survey per
+prd-world.md §3 checklist — seed derivation semantics, state snapshot
+schema/versioning, PRD vocabulary, service seams — with file:line
+evidence, then fill W1-W4 in and implement Wave W1. Meanwhile OSS
+waves C-E + mesh ask-peers leg are unblocked.)
 
 ---
 
