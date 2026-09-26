@@ -2,9 +2,50 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-26  
-**Session:** Pass 63 — OSS convergence started: prd-oss.md + Wave OSS-A (no phantom endpoints)
+**Session:** Pass 64 — Wave OSS-B: single sources of truth (checker at 31)
 
 ---
+
+## Session (2026-09-26 — pass 64: Wave OSS-B — the contributing surfaces converge)
+
+Owner: "let's do it. This will help you meet other wise agents" — the
+OSS waves are how other agents meet vant. Wave OSS-B executed: single
+sources of truth for the surfaces a newcomer reads first.
+
+**The convergence:**
+- **CONTRIBUTING split resolved:** docs/getting-started/contributing.md
+  is CANONICAL (has the lint gates + real detail); root
+  CONTRIBUTING.md rewritten as the short front door (97 -> 55 lines):
+  conduct, path in, good-first-issue contract, agent-contributor note,
+  all four doors. Canonical-source markers in BOTH files name their
+  role so future edits know which truths live where.
+- **Commit-format conflict resolved:** root said `type(scope):
+description`, docs said `type: description`. Canonical: conventional
+  `type: description` for community PRs; `agent-name: did thing X`
+  pass format for agent-crew branches — stated in BOTH, cross-linked.
+- **AGENTS.md flat-layout examples corrected** (models/private/
+  start.md -> models/private/vant/start.md) and the CLI table verified
+  against bin/ + the dispatcher (9/9 claims real).
+
+**Checker grows teeth (20 -> 31):** canonical markers present, shared
+facts agree across both surfaces, front door stays a door (<=80 lines
+proxy — the drift catches regrowth), every AGENTS.md `vant x` table
+row must resolve to bin/<x>.js or a dispatcher route, stale
+flat-layout mentions are regressions. Caught me twice this session
+(a missing shared fact, then the flat-layout example) — working as
+built.
+
+**Verification:** surface checker 31/31, npm run lint:docs PASS (118
+files), docs suite 6/6, eslint clean. Pushed.
+
+**Next steps:** OSS-C deeper claims registry (CLI verbs vs bin/ at
+scale, all MCP tools), OSS-D community-layer depth (good-first-issue
+labels, triage), OSS-E the agent-contributor chapter (the white
+paper's public contribution).
+
+---
+
+## Session (2026-09-26 — pass 63: prd-oss.md + Wave OSS-A — the surface gets a checker)
 
 ## Session (2026-09-26 — pass 63: prd-oss.md + Wave OSS-A — the surface gets a checker)
 
