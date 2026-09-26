@@ -176,8 +176,8 @@ Run `vant onboard` to browse all brain files:
 
 ```bash
 vant onboard              # Interactive browser
-cat models/private/start.md  # Quick start
-cat models/private/identity.md  # Who you are
+cat models/private/vant/start.md  # Quick start (default brain)
+cat models/private/vant/identity.md  # Who you are
 ```
 
 ---

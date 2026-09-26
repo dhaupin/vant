@@ -9,6 +9,11 @@ nav_order: 18
 # Contributing to Vant
 
 > Welcome! Here's how to help make Vant better.
+>
+> **Canonical source note:** this page is the ONE full contribution
+> guide. The root [CONTRIBUTING.md](https://github.com/dhaupin/vant/blob/axolotl/CONTRIBUTING.md)
+> is the short front door pointing here; do not grow the two back into
+> divergent copies of each other.
 
 ## Code of Conduct
 
@@ -109,7 +114,10 @@ node bin/vant.js
 
 ## Commit Messages
 
-Format: `type: description`
+Format: `type: description` (this is the canonical commit format;
+agent-crew work on `agent-<name>` branches uses the `agent-name: did
+thing X` pass format instead. Both are documented, neither is
+accidental)
 
 Types:
 - `feat`: New feature
