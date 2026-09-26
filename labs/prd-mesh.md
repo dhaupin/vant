@@ -218,13 +218,18 @@ state surviving every process exit.
   and reverse). Watch: a downgrade claim must never bypass scope gates
   (gates run on the receiver's own resolver regardless of version).
 
-### Wave F — mesh observability (pass ~59)
+### Wave F — mesh observability (pass 62, SHIPPED)
 
-- `vant mesh status`: peers (alive/stale), open topics, recent decisions,
-  budgets/spend, msg channels, pending syncs. JSON mode for CI. The
-  coordination node's question — "what are my agents working on, what's
-  voted, what's blocked" — answered from ONE node.
-- Dashboard later; CLI is the contract.
+- SHIPPED (pass 62): `vant mesh status` (+ `--json` for CI) — peers
+  (alive/stale), agora topics + recent decisions, market counts, budget
+  aggregates, msg channel summaries, installed buses + pending syncs,
+  genesis role/JV, wire version. Read-only (pinned: a report changes no
+  state), no secrets, scope stays owner-side (scoped topics filtered in
+  consensus.list, anonymous market stats, msg counts never content).
+  DEGRADED NOT DEAD: every subsystem probed independently — a broken
+  leg degrades its section, the report stands
+  (test/mesh-status.test.js 7/7). Dashboard later; the CLI is the
+  contract, and the contract is met.
 
 ### Standing — org-model sync leg (optional)
 
@@ -278,8 +283,9 @@ paid through escrow — with zero custom scripts involved.
 - Wave C: lib/agora-sync.js (reaper + gossip), test/agora-hygiene.test.js.
 - Wave D: lib/msg.js + lib/agora-sync.js (msg legs), lib/node-registry.js
   (resolvePrincipal), test/msg-sync.test.js.
-- Wave E: lib/crew-bus.js (v field), test/envelope-versions.test.js.
-- Wave F: bin/mesh-status.js (+ route/help), test/mesh-status.test.js.
+- Wave E: lib/crew-bus.js (v field), test/crew-bus.test.js.
+- Wave F: lib/mesh-status.js + bin/mesh-status.js (+ route/help),
+  test/mesh-status.test.js.
 
 ## 8. Success criteria
 
@@ -293,6 +299,6 @@ paid through escrow — with zero custom scripts involved.
 4. Cross-version nodes fail loudly and safely, never silently misread
    each other (Wave E).
 5. A coordination node can answer "who did what, what's decided, what's
-   owed" from one command (Wave F).
+   owed" from one command (Wave F — SHIPPED, `vant mesh status`).
 6. The full N-node soak: a shop-wide JV decision made in the agora,
    executed and settled by every org, cold-process verified.

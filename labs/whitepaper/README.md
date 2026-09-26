@@ -80,6 +80,14 @@ Every item below is pinned in-repo as of this writing:
   snapshots, merge-only adoption, owner-side gates on request and push,
   sender-bound replies; a vetted identity always beats the crew
   transport self-registration (test/msg-sync.test.js).
+- **Observability from one node** — `vant mesh status` answers the
+  coordinator's question read-only: peers, topics, decisions, budgets,
+  channels, pending syncs; JSON mode for CI; degraded sections print
+  their error instead of dying (test/mesh-status.test.js).
+- **Interoperable wire** — envelope version stamps with a loud-refusal
+  matrix: major mismatch (either direction) refused with an event,
+  minor tolerated, unstamped = v1.0; a version claim never widens what
+  a receiver accepts (test/crew-bus.test.js).
 - **Adversarial hardening** — merge scope-filter (synced snapshots
   cannot stuff non-member ballots) and sender-bound reply legs (an
   observed reqId cannot forge verdicts); found by live-fire, pinned.
@@ -91,9 +99,10 @@ Every item below is pinned in-repo as of this writing:
 
 ## 5. The roadmap from here
 
-The mesh PRD's wave plan (A–F) is the build schedule: MCP surface →
-genesis ceremony → ledger hygiene + gossip → cross-node msg (shipped,
-pass 59) → envelope versioning → coordinator observability. The
+The mesh PRD's wave plan (A–F) is the build schedule and ALL SIX WAVES
+ARE SHIPPED: MCP surface → genesis ceremony → ledger hygiene + gossip →
+cross-node msg (pass 59) → envelope versioning (pass 61) → coordinator
+observability (pass 62). The
 [BUILD-LOG](./BUILD-LOG.md) tracks each pass as it lands, including
 what broke and how it was found — the honest part.
 

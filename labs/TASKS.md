@@ -2,9 +2,70 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-26  
-**Session:** Pass 59 — Wave D shipped: cross-node msg sync + the Commons frame
+**Session:** Pass 62 — Waves E+F shipped: envelope versions + mesh status (all six mesh waves done)
 
 ---
+
+## Session (2026-09-26 — pass 61+62: Wave E envelope versions + Wave F mesh status — the wave plan COMPLETE)
+
+Owner ruled: "this is the path we need" — labs/frame.md §5, in order:
+Wave E then Wave F. Both shipped in one session; the prd-mesh wave plan
+A–F is now fully SHIPPED.
+
+**Wave E (pass 61) — envelope version stamps:**
+- lib/crew-bus.js: ENVELOPE_VERSION {1,0} on every outbound envelope;
+  receiver-side gate in _onWebhookEvent ordered BEFORE the scope gate
+  (refuse what cannot be parsed before interpreting it). Malformed
+  stamps dropped not guessed; future AND past MAJOR refused loudly with
+  a crew:version:mismatch event; MINOR tolerated (additive); unstamped
+  tolerated as {1,0} (the current shape IS v1.0 — pre-Wave-E senders
+  flow). major 0 is malformed BY DESIGN: no v0 wire shape existed.
+- The Wave-E watch-item pinned: a version claim NEVER widens acceptance
+  — same-major stamp dies at the scope gate exactly like no stamp.
+- _setReceiverVersion guarded seam + live ENVELOPE_V getters: the
+  past-major matrix is testable for real, and what we sign vs accept
+  cannot desync.
+- Pins: test/crew-bus.test.js 20/20 (full matrix both directions, v0
+  malformed, six malformed shapes, scope precedence, live getters).
+
+**Wave F (pass 62) — `vant mesh status` (the Stewardship surface):**
+- lib/mesh-status.js: the coordinator's one-command view — peers
+  (alive/stale), agora topics + decision feed, market counts, budget
+  AGGREGATES (no wallets), msg channel summaries (counts never
+  content), installed buses + pending round-trips, genesis role/JV,
+  wire version. bin/mesh-status.js as `vant mesh status [--json]`;
+  routed + help card; JSON renders from the same report object the
+  human mode prints.
+- Posture enforced + pinned: READ-ONLY (before/after state identical),
+  no secrets, scope owner-side (consensus.list filters scoped topics;
+  market stats via the ANONYMOUS call — live-verified "1 listing,
+  visible 0"; msg carries counts/ids, never content). DEGRADED NOT
+  DEAD: poisoned-require test proves a broken subsystem degrades only
+  its own section.
+- Pins: test/mesh-status.test.js 7/7. Live-verified against real JV
+  state: 6 peers w/ stale flags, the passed 4-ballot topic, decision
+  "ratify", the 8-credit JV payment, scoped listing counted not shown.
+
+**Sweep green:** agora-sync 7, agora-distributed 6, agora-hygiene 6,
+agora-loop 7, consensus 8, genesis-ceremony 5, mcp-agora-sync 8,
+msg-sync 9, crew-bus 20, market-debit 4, teams-refresh 6, mesh-status
+7, JV exercise 8/8. eslint clean on all touched files.
+
+**Test-harness notes worth keeping:** consensus.create is POSITIONAL —
+(topic, options), not keyed; a keyed object "works" as a topic string
+and fails VAF with E_VAF_TOPIC. Decision records carry WINNER (not
+outcome) + percentage — read the real record before rendering it (the
+first render printed '-> null').
+
+**Next steps:** the frame's remaining gaps are all POST-wave-plan:
+cross-node settlement (weights & measures — first economic leg), the
+noticeboard (optional Post leg), third-org rites (standing leg). Or
+the whitepaper's next chapter: the first real EXTERNAL org joining a
+mesh.
+
+---
+
+## Session (2026-09-26 — pass 59: Wave D cross-node msg + resolvePrincipal live-fire fix + the Commons frame)
 
 ## Session (2026-09-26 — pass 59: Wave D cross-node msg + resolvePrincipal live-fire fix + the Commons frame)
 
@@ -65,9 +126,10 @@ behind the final ECONNREFUSED; it now records every attempt
 Comments inside the child-process template literals must not carry
 backticks (SyntaxError only at spawn time).
 
-**Next steps:** Wave E (envelope versions) or Wave F (mesh status) per
-owner; the frame's cross-node settlement leg (weights & measures) is
-the first economic gap before real work orders cross boundaries.
+**Next steps:** see the pass 61+62 block above (the current session).
+Wave E or Wave F per owner — DONE; the frame's cross-node settlement
+leg (weights & measures) remains the first economic gap before real
+work orders cross boundaries.
 
 ## Session (2026-09-25 — pass 56: Wave A — agora-sync MCP surface + CLI)
 

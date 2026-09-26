@@ -6,6 +6,54 @@
 
 ---
 
+## Pass 62 — 2026-09-26 — Wave F: the commons becomes observable
+
+- **`vant mesh status`** — the coordinator's question ("what are my
+  agents working on, what's voted, what's blocked") answered from ONE
+  node. Peers with stale detection, agora topics + the decision feed,
+  market counts, budget aggregates, channel summaries, pending syncs,
+  the genesis role, and the wire version (pass 61's stamp) in one
+  read-only report. JSON mode for CI renders from the same object the
+  human mode prints — one source of truth, two surfaces.
+- **The posture is the pin.** Read-only: the suite builds reports
+  against real state and proves before === after. No secrets. Scope
+  stays owner-side — the market section uses the ANONYMOUS stats call
+  (live-verified: a scoped listing shows as "1 listing, visible 0"
+  — counted, never exposed), msg sections carry counts and ids but
+  never content, and scoped agora topics stay filtered to members.
+  DEGRADED NOT DEAD: poison one subsystem's require and only its own
+  section carries the error — the rest of the report stands. The mesh
+  is observable even when a leg is down.
+- Live-verified against the real JV state from the test runs: 6 peers
+  (stale ones flagged), the passed 4-ballot topic, the decision feed
+  showing "ratify", the 8-credit JV payment in the budget aggregates.
+- Pins: test/mesh-status.test.js 7/7. Full mesh regression green.
+
+## Pass 61 — 2026-09-26 — Wave E: the stamps on the Post
+
+- **Envelope version stamps (pass 61).** Every crew-bus envelope now
+  carries `v: {major, minor}`; the receiver gates the stamp BEFORE the
+  scope gate (refuse what cannot be parsed before interpreting it).
+  Malformed stamps are dropped, not guessed; a MAJOR mismatch in either
+  direction is refused loudly with a `crew:version:mismatch` event;
+  MINOR differences are tolerated (additive); and unstamped envelopes
+  flow as v1.0 — the current shape IS v1.0, so pre-Wave-E senders keep
+  working.
+- **The Wave-E watch-item is now a pin:** a version claim never widens
+  acceptance. A forged future-major stamp dies at the version gate; a
+  same-major stamp changes nothing downstream — the scope gate still
+  refuses on the receiver's own resolvers. major 0 is malformed by
+  design: no v0 wire shape ever existed to parse leniently.
+- **One wrinkle, honestly:** a v1 receiver cannot meet a v1 sender as
+  "the older one" — so the matrix test stages the receiver to v2 via a
+  guarded seam (`_setReceiverVersion`) and the exported `ENVELOPE_V`
+  getters read the LIVE receiver version. What we sign and what we
+  accept cannot desync.
+- Pins: test/crew-bus.test.js 20/20 (full cross-version matrix, both
+  directions, v0 malformed, six malformed-stamp shapes, scope-gate
+  precedence, live getters). Regression: every envelope-riding suite
+  green, JV exercise 8/8.
+
 ## Pass 59 — 2026-09-26 — Wave D: the JV standup crosses the wire
 
 - **The Post learns to carry conversations.** msg.js exports bounded,

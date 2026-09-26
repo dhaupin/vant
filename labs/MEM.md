@@ -7,18 +7,20 @@
 
 ## Handoff
 
-**Last known good commit:** pass 59 — Wave D shipped (cross-node msg sync + resolvePrincipal live-fire fix + the Commons frame, labs/frame.md; msg-sync 9/9, full mesh regression green); see labs/TASKS.md top block.
-**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 59.
-**Status:** nothing in flight; next: Wave E (envelope versions) or Wave F (mesh status), or the frame's cross-node settlement gap.
+**Last known good commit:** pass 62 — Wave F shipped (`vant mesh status` + Stewardship surface, mesh-status 7/7). Waves A–F ALL SHIPPED — the prd-mesh wave plan is complete.
+**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 62.
+**Status:** nothing in flight on the mesh; next per labs/frame.md §5: cross-node settlement (first economic leg), third-org rites, or the noticeboard.
+**Owner context:** a prior session ("helping and guiding the isss community") died without leaving any trace in this workspace — no commits, files, or brain notes. Owner asked to resume it; awaiting their recap of what ISSS work was in flight.
 
 ---
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 59: Wave D shipped. msg snapshots +
-msg.request/msg/msg.push legs, resolvePrincipal precedence fix,
-labs/frame.md v0.1 the Commons. Pins: msg-sync 9/9 incl. the
-two-process JV standup; sweep green; JV exercise 8/8.)
+(nothing in flight — pass 62: Wave E+F shipped. Envelope version
+stamps w/ cross-version matrix, crew-bus 20/20; vant mesh status
+lib+CLI+JSON, mesh-status 7/7; wave plan A–F COMPLETE. Owner mentioned
+a crashed session about guiding the ISSS community — no artifacts of
+it exist here; do not fabricate, ask the owner.)
 
 ---
 
