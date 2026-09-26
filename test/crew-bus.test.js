@@ -187,12 +187,13 @@ async function main() {
         assert(threw, 'invalid name should throw');
         threw = null;
         try { bus.configure({ name: 'ok-name', port: 99999 }); } catch (e) { threw = e; }
-        assert(threw, 'invalid port should throw');	        threw = null;
-	        try { bus.configure({ name: 'ok-name', port: 5000 }); } catch (e) { threw = e; }
-	        assert(threw, 'secretless config should throw (pass 42: transport auth mandatory)');
-	        threw = null;
-	        try { bus.configure({ name: 'ok-name', port: 5000, secret: 's-' + process.pid }); } catch (e) { threw = e; }
-	        assert(!threw, 'valid config with secret should not throw');
+        assert(threw, 'invalid port should throw');
+        threw = null;
+        try { bus.configure({ name: 'ok-name', port: 5000 }); } catch (e) { threw = e; }
+        assert(threw, 'secretless config should throw (pass 42: transport auth mandatory)');
+        threw = null;
+        try { bus.configure({ name: 'ok-name', port: 5000, secret: 's-' + process.pid }); } catch (e) { threw = e; }
+        assert(!threw, 'valid config with secret should not throw');
         threw = null;
         try { bus.registerNode({ name: 'peer', url: 'ftp://x', secret: 's' }); } catch (e) { threw = e; }
         assert(threw, 'non-http url should throw');
@@ -289,6 +290,137 @@ async function main() {
         assert(!snap.includes('super-secret-value'), 'peer secret leaked via nodes()');
         const st = JSON.stringify(bus.status());
         assert(!st.includes('super-secret-value'), 'peer secret leaked via status()');
+        await bus.stop();
+    });
+
+    // ---------- (pass 61 / Wave E) envelope version matrix ----------
+    // The stamps on the Post: nodes of different ages interoperate on
+    // minor differences, refuse loudly on major ones, and a version
+    // claim NEVER widens what a receiver accepts (gates run on the
+    // receiver regardless of the stamp — the Wave-E watch-item).
+    const CB = require(path.join(ROOT, 'lib/crew-bus.js'));
+    const V = CB.ENVELOPE_V;
+
+    await test('ENVELOPE_V reads the receiver version live (staging seam is the truth)', async () => {
+        assert(V.major >= 1 && Number.isFinite(V.minor), 'ENVELOPE_V should expose major>=1 and minor, got ' + JSON.stringify(V));
+        // The getters must read the LIVE receiver version — the past-major
+        // matrix test stages v2 and the version gate + outbound stamps both
+        // follow. Stale getters would desynchronize what we sign vs accept.
+        CB._setReceiverVersion({ major: 2, minor: 3 });
+        try {
+            assert(V.major === 2 && V.minor === 3, 'ENVELOPE_V must reflect staged version, got ' + JSON.stringify(V));
+        } finally {
+            CB._setReceiverVersion({ major: V.major === 2 ? 1 : V.major, minor: 0 });
+        }
+        assert(V.major === 1, 'restore failed: ' + JSON.stringify(V));
+    });
+
+    await test('cross-version matrix: v(n) -> v(n) dispatches, minor diffs tolerated', async () => {
+        const bus = createBus({ name: 'ver-node', port: PORT_C, secret: SECRET });
+        let dispatched = [];
+        bus.onDispatch('vping', (env) => dispatched.push(env.payload.n));
+        const event = require(path.join(ROOT, 'lib/event.js'));
+        const fire = (body) => event.emit('webhook:crew.vping', { webhook: 'ver-node', source: 'vant-crew', event: 'crew.vping', body });
+        const base = { event: 'crew.vping', from: 'peer', type: 'vping', payload: {}, ts: 1, nonce: 1 };
+        // same major, same minor, no v at all (pre-Wave-E sender), minor ahead, minor behind
+        const n = [0, 1, 2, 3, 4];
+        fire({ ...base, payload: { n: n[0] }, v: { major: V.major, minor: V.minor } });
+        fire({ ...base, payload: { n: n[1] } });                                   // unstamped = v1.0
+        fire({ ...base, payload: { n: n[2] }, v: { major: V.major, minor: V.minor + 3 } });
+        fire({ ...base, payload: { n: n[3] }, v: { major: V.major, minor: Math.max(0, V.minor - 1) } });
+        fire({ ...base, payload: { n: n[4] }, v: null });                          // explicit null tolerated
+        await new Promise((r) => setTimeout(r, 30));
+        assert(dispatched.length === 5, 'all same-major envelopes should dispatch, got ' + JSON.stringify(dispatched));
+        await bus.stop();
+    });
+
+    await test('cross-version matrix: future MAJOR refused loudly + mismatch event; receiver stays healthy', async () => {
+        const bus = createBus({ name: 'fut-node', port: PORT_C, secret: SECRET });
+        let dispatched = 0;
+        bus.onDispatch('fping', () => dispatched++);
+        const event = require(path.join(ROOT, 'lib/event.js'));
+        let mismatch = null;
+        event.on('crew:version:mismatch', (d) => { mismatch = d; });
+        event.emit('webhook:crew.fping', { webhook: 'fut-node', source: 'vant-crew', event: 'crew.fping', body: { event: 'crew.fping', from: 'newer-peer', type: 'fping', payload: { n: 1 }, ts: 1, nonce: 1, v: { major: V.major + 1, minor: 0 } } });
+        await new Promise((r) => setTimeout(r, 30));
+        assert(dispatched === 0, 'future-major envelope must NOT dispatch');
+        assert(mismatch && mismatch.from === 'newer-peer' && mismatch.sender && mismatch.sender.major === V.major + 1, 'loud mismatch event missing: ' + JSON.stringify(mismatch));
+        assert(mismatch.direction === 'newer sender', 'direction should be newer sender');
+        assert(bus.status().configured === true, 'receiver must stay healthy after refusal');
+        await bus.stop();
+    });
+
+    await test('cross-version matrix: past MAJOR refused loudly (no lenient misparse)', async () => {
+        // A v1 receiver cannot meet a v1 sender as "the older one" — stage
+        // the receiver to v2 for this test only (guarded seam), meet it
+        // with a true v1 sender, then restore. Zero (v0) is refused by the
+        // validator itself: no v0 wire shape ever existed to parse.
+        const bus = createBus({ name: 'old-node', port: PORT_C, secret: SECRET });
+        let dispatched = 0;
+        bus.onDispatch('oping', () => dispatched++);
+        const event = require(path.join(ROOT, 'lib/event.js'));
+        CB._setReceiverVersion({ major: 2, minor: 0 });
+        try {
+            let mismatch = null;
+            event.on('crew:version:mismatch', (d) => { mismatch = d; });
+            event.emit('webhook:crew.oping', { webhook: 'old-node', source: 'vant-crew', event: 'crew.oping', body: { event: 'crew.oping', from: 'older-peer', type: 'oping', payload: { n: 1 }, ts: 1, nonce: 1, v: { major: 1, minor: 0 } } });
+            await new Promise((r) => setTimeout(r, 30));
+            assert(dispatched === 0, 'past-major envelope must NOT dispatch');
+            assert(mismatch && mismatch.direction === 'older sender', 'loud refusal missing: ' + JSON.stringify(mismatch));
+            // ...and a same-major envelope still flows on the staged receiver.
+            event.emit('webhook:crew.oping', { webhook: 'old-node', source: 'vant-crew', event: 'crew.oping', body: { event: 'crew.oping', from: 'peer', type: 'oping', payload: { n: 2 }, ts: 1, nonce: 2, v: { major: 2, minor: 0 } } });
+            await new Promise((r) => setTimeout(r, 30));
+            assert(dispatched === 1, 'same-major envelope must dispatch on the staged receiver');
+        } finally {
+            CB._setReceiverVersion({ major: V.major, minor: V.minor }); // ALWAYS restore
+        }
+        await bus.stop();
+    });
+
+    await test('validator treats major 0 as malformed (no v0 wire shape to parse)', async () => {
+        const bus = createBus({ name: 'zero-node', port: PORT_C, secret: SECRET });
+        let dispatched = 0;
+        bus.onDispatch('zping', () => dispatched++);
+        const event = require(path.join(ROOT, 'lib/event.js'));
+        event.emit('webhook:crew.zping', { webhook: 'zero-node', source: 'vant-crew', event: 'crew.zping', body: { event: 'crew.zping', from: 'zero-peer', type: 'zping', payload: {}, ts: 1, nonce: 1, v: { major: 0, minor: 3 } } });
+        await new Promise((r) => setTimeout(r, 30));
+        assert(dispatched === 0, 'v0 must be malformed-dropped, never parsed leniently');
+        await bus.stop();
+    });
+
+    await test('malformed version stamps are dropped, not guessed', async () => {
+        const bus = createBus({ name: 'badver-node', port: PORT_C, secret: SECRET });
+        let dispatched = 0;
+        bus.onDispatch('bping', () => dispatched++);
+        const event = require(path.join(ROOT, 'lib/event.js'));
+        const fire = (v) => event.emit('webhook:crew.bping', { webhook: 'badver-node', source: 'vant-crew', event: 'crew.bping', body: { event: 'crew.bping', from: 'peer', type: 'bping', payload: {}, ts: 1, nonce: 1, v } });
+        fire('2');                    // string
+        fire({ major: 1 });           // missing minor
+        fire({ major: 1, minor: -3 }); // negative
+        fire({ major: 'x', minor: 1 }); // non-numeric
+        fire([1, 0]);                 // array
+        fire({ major: 1001, minor: 0 }); // out of range
+        await new Promise((r) => setTimeout(r, 30));
+        assert(dispatched === 0, 'malformed stamps must not dispatch');
+        await bus.stop();
+    });
+
+    await test('version claim never widens acceptance: scoped envelope refused regardless of stamp', async () => {
+        // The Wave-E watch-item, pinned: a FUTURE-version stamp on a
+        // scoped payload the receiver cannot access must still die — at
+        // the version gate (major mismatch), and even at the same major
+        // the scope gate refuses on the receiver's own resolvers.
+        const bus = createBus({ name: 'widen-node', port: PORT_C, secret: SECRET, agentId: 'widen-outsider-agent' });
+        let dispatched = 0;
+        bus.onDispatch('wping', () => dispatched++);
+        const event = require(path.join(ROOT, 'lib/event.js'));
+        const scopeMod = require(path.join(ROOT, 'lib/scope.js'));
+        let hostileScope = { owner: 'team:no-such-team-anywhere-' + process.pid, visibility: 'scope' };
+        try { hostileScope = scopeMod.normalize(hostileScope) || hostileScope; } catch (e) { /* keep raw shape */ }
+        event.emit('webhook:crew.wping', { webhook: 'widen-node', source: 'vant-crew', event: 'crew.wping', body: { event: 'crew.wping', from: 'liar', type: 'wping', payload: { scope: hostileScope }, ts: 1, nonce: 1, v: { major: V.major, minor: V.minor } } });
+        event.emit('webhook:crew.wping', { webhook: 'widen-node', source: 'vant-crew', event: 'crew.wping', body: { event: 'crew.wping', from: 'liar', type: 'wping', payload: { scope: hostileScope }, ts: 1, nonce: 1, v: { major: V.major + 5, minor: 9 } } });
+        await new Promise((r) => setTimeout(r, 30));
+        assert(dispatched === 0, 'a version claim must never bypass the scope gate');
         await bus.stop();
     });
 
