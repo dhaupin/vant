@@ -1,10 +1,73 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-09-25  
-**Session:** Pass 56 — Wave A shipped: agora-sync MCP surface + CLI
+**Last Updated:** 2026-09-26  
+**Session:** Pass 59 — Wave D shipped: cross-node msg sync + the Commons frame
 
 ---
+
+## Session (2026-09-26 — pass 59: Wave D cross-node msg + resolvePrincipal live-fire fix + the Commons frame)
+
+prd-mesh.md Wave D executed: conversation snapshots over the wire — the
+JV standup channel, both orgs reading it, with the agora trust posture
+throughout. Plus the frame doc naming the environment above the agora.
+
+**Shipped:**
+- **lib/msg.js:** bounded wire snapshots (`exportSnapshot` /
+  `mergeSnapshot`, kind-marked `vant-msg-snapshot`) — merge-only
+  adoption (unknown ids only, in-memory wins, batch dedup, locally
+  re-sorted + capped) and a scope record seam on conversations
+  (`create({ scope })`, `getScope`); a wire snapshot may NEVER rewrite
+  a local scope boundary in either direction.
+- **lib/agora-sync.js msg legs:** `msgPull` (crew.msg.request →
+  crew.msg reply, reqId-correlated, sender-bound, timeout-bounded) +
+  `msgPush` (crew.msg.push) + idempotent install dispatchers. Owner-
+  side scope gate on the request leg (principal resolved through
+  node-registry; a non-member's null is indistinguishable from
+  not-found), receiver-side gate on push, registered peers only,
+  fail-closed everywhere.
+- **lib/node-registry.js `resolvePrincipal(name)`** (the live-fire
+  fix): a node name can carry TWO registry entries — the crew-bus
+  transport self-registration (`crew_<name>`, written by listen()) and
+  the genesis-vetted agent identity. The two-process leg exposed the
+  joiner's owner-side gate resolving the HOST to its crew_ transport
+  id (first-match name scan, order-dependent) and fail-closing every
+  scoped request (8× not_found while alive, ECONNREFUSED after exit —
+  invisible until the test recorded per-attempt reasons).
+  resolvePrincipal makes the vetted identity win deterministically;
+  the transport id is only the fallback when nothing was vetted.
+- **labs/frame.md (v0.1):** the Commons frame — the environment above
+  the agora named as seven commons (Ground, Bodies, Memory, Norms, the
+  Agora, the Post, Workshops) + Stewardship, with the sovereignty line
+  (what stays local vs what may federate) and the gap list the mesh
+  experiments feed. Every lib/ file mapped; unsettled ground marked
+  honestly.
+
+**Pins:** test/msg-sync.test.js 9/9 — snapshot round-trip (bounded,
+merge-only, dedup, scope recorded), junk refusal, boundary
+immutability, owner-side gate (member/outsider/unscoped), sender-bound
+reply (pass-51 rule on the msg legs), push gate (foreign scope,
+malformed), registered-peers-only, resolvePrincipal precedence (both
+insertion orders + fallback + null cases), and the two-process JV
+standup over the genesis gates (host posts under JV scope → joiner
+pulls through the vetted principal → joiner posts locally → host's
+return pull converges BOTH orgs' messages, merge-only).
+
+**Sweep green:** agora-sync 7, agora-distributed 6, agora-hygiene 6,
+agora-loop 7, genesis-ceremony 5, teams-refresh 6, mcp-agora-sync 8,
+market-debit 4, msg-sync 9, JV exercise 8/8.
+
+**Test-harness notes worth keeping:** the two-process host loop
+overwrote its result each retry — all mid-run failure reasons hid
+behind the final ECONNREFUSED; it now records every attempt
+(HOST_ATTEMPTS). The JOIN_GATE probe parsed JOIN_GATE: with slice(11)
+(off by one — the tag is 10 chars), so the diagnostic never printed.
+Comments inside the child-process template literals must not carry
+backticks (SyntaxError only at spawn time).
+
+**Next steps:** Wave E (envelope versions) or Wave F (mesh status) per
+owner; the frame's cross-node settlement leg (weights & measures) is
+the first economic gap before real work orders cross boundaries.
 
 ## Session (2026-09-25 — pass 56: Wave A — agora-sync MCP surface + CLI)
 

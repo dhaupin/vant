@@ -6,6 +6,37 @@
 
 ---
 
+## Pass 59 — 2026-09-26 — Wave D: the JV standup crosses the wire
+
+- **The Post learns to carry conversations.** msg.js exports bounded,
+  kind-marked snapshots; mergeSnapshot adopts only what the receiving
+  conversation has never seen (in-memory wins, the wire never edits,
+  reorders, or deletes local history) and records scope without ever
+  REWRITING a local boundary. agora-sync gains the three legs — request
+  (owner-side scope gate), reply (sender-bound), push (receiver-side
+  gate) — the same posture ballots travel under.
+- **The find of the pass: one node name, two identities.** The
+  two-process JV standup leg failed 8/8→7/8 for a whole session. The
+  break was invisible until the test recorded per-attempt reasons (the
+  loop used to overwrite its result, so every mid-run failure hid
+  behind the final ECONNREFUSED): the joiner was ALIVE and answering —
+  replying not_found to the host's ask, then ECONNREFUSED after exit.
+  Cause: a node name carries TWO registry entries (the crew-bus
+  transport self-registration `crew_<name>` and the genesis-vetted
+  agent identity), and the request leg's first-match name scan picked
+  whichever hydrated first — the transport id — so the owner-side gate
+  fail-closed a MEMBER's request. The fix is a registry-level
+  `resolvePrincipal`: vetted identity beats transport id,
+  deterministically, both insertion orders pinned. Gates run where
+  identity state lives — Bodies, not the Post.
+- **Also shipped:** labs/frame.md v0.1 — the Commons frame naming the
+  environment above the agora (seven commons + stewardship, the
+  sovereignty line, the gap list the mesh experiments feed).
+- Pins: test/msg-sync.test.js 9/9, including the two-process standup
+  (host posts under JV scope → joiner pulls through the vetted
+  principal → joiner posts locally → the host's return pull converges
+  BOTH orgs). Full mesh regression green in one sweep.
+
 ## Pass 58 — 2026-09-25 — Wave C: the mesh learns to clean up after itself
 
 - **The reaper, and the bug the test suite caught before it could

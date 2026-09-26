@@ -7,18 +7,18 @@
 
 ## Handoff
 
-**Last known good commit:** pass 56 — Wave A shipped (agora-sync MCP tools + vant agora CLI, 8/8 pins); see labs/TASKS.md top block.
-**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 56.
-**Status:** nothing in flight; next: Wave B genesis ceremony, then the real 2-node live-fire through the tools.
+**Last known good commit:** pass 59 — Wave D shipped (cross-node msg sync + resolvePrincipal live-fire fix + the Commons frame, labs/frame.md; msg-sync 9/9, full mesh regression green); see labs/TASKS.md top block.
+**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 59.
+**Status:** nothing in flight; next: Wave E (envelope versions) or Wave F (mesh status), or the frame's cross-node settlement gap.
 
 ---
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 56: Wave A shipped. MCP: agora_vote/pull/
-push/nodes/sync_status via mcp.execute; agora-sync.status() roster;
-CLI bin/agora.js routed as `vant agora`. Pins: mcp-agora-sync 8/8.
-Unrelated untracked dir labs/whitepaper/ left untouched.)
+(nothing in flight — pass 59: Wave D shipped. msg snapshots +
+msg.request/msg/msg.push legs, resolvePrincipal precedence fix,
+labs/frame.md v0.1 the Commons. Pins: msg-sync 9/9 incl. the
+two-process JV standup; sweep green; JV exercise 8/8.)
 
 ---
 

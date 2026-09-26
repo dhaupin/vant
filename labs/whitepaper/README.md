@@ -76,6 +76,10 @@ Every item below is pinned in-repo as of this writing:
   handshake, JV org model with both orgs assigned, 4-ballot joint
   ledger, decisions crossing the boundary, escrow settlement, cold-
   process persistence (labs/node-crew/exercise-two-orgs.js).
+- **Cross-node conversations** — the JV standup over the wire: bounded
+  snapshots, merge-only adoption, owner-side gates on request and push,
+  sender-bound replies; a vetted identity always beats the crew
+  transport self-registration (test/msg-sync.test.js).
 - **Adversarial hardening** — merge scope-filter (synced snapshots
   cannot stuff non-member ballots) and sender-bound reply legs (an
   observed reqId cannot forge verdicts); found by live-fire, pinned.
@@ -88,8 +92,8 @@ Every item below is pinned in-repo as of this writing:
 ## 5. The roadmap from here
 
 The mesh PRD's wave plan (A–F) is the build schedule: MCP surface →
-genesis ceremony → ledger hygiene + gossip → cross-node msg → envelope
-versioning → coordinator observability. The
+genesis ceremony → ledger hygiene + gossip → cross-node msg (shipped,
+pass 59) → envelope versioning → coordinator observability. The
 [BUILD-LOG](./BUILD-LOG.md) tracks each pass as it lands, including
 what broke and how it was found — the honest part.
 

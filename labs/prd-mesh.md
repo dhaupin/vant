@@ -195,12 +195,20 @@ state surviving every process exit.
   2-node convergence (pulls only below-quorum, terminal skipped,
   per-peer floor), sender-bound gossip reply.
 
-### Wave D — cross-node msg (pass ~57, approach per owner)
+### Wave D — cross-node msg (pass 59, SHIPPED)
 
-- Conversation snapshots over the bus (crew.msg envelopes): pull/push
-  legs mirroring agora-sync, merge-only adoption, bounded arrays.
-- The JV standup: both orgs read the joint channel; participants carry
-  scope so a team channel stays team-invisible cross-node.
+- SHIPPED (pass 59): conversation snapshots over the bus
+  (crew.msg.request / crew.msg / crew.msg.push): pull/push legs
+  mirroring agora-sync, merge-only adoption, bounded arrays. The JV
+  standup is pinned two-process: host posts under JV scope, the joiner
+  pulls through the genesis-vetted principal, joins posts locally, and
+  the host's return pull converges both orgs — merge-only, the wire
+  never edits local history (test/msg-sync.test.js 9/9).
+- Live-fire fix shipped with it: registry `resolvePrincipal` — the
+  vetted agent identity deterministically beats the crew_ transport
+  self-registration when both share a node name (first-match name
+  lookup was order-dependent and fail-closed the joiner's owner-side
+  gate).
 
 ### Wave E — envelope version compatibility (pass ~58)
 
@@ -268,7 +276,8 @@ paid through escrow — with zero custom scripts involved.
 - Wave B: bin/genesis.js (+ vant route), lib/secret.js reuse,
   test/genesis-ceremony.test.js.
 - Wave C: lib/agora-sync.js (reaper + gossip), test/agora-hygiene.test.js.
-- Wave D: lib/msg.js + lib/agora-sync.js (msg legs), test/msg-sync.test.js.
+- Wave D: lib/msg.js + lib/agora-sync.js (msg legs), lib/node-registry.js
+  (resolvePrincipal), test/msg-sync.test.js.
 - Wave E: lib/crew-bus.js (v field), test/envelope-versions.test.js.
 - Wave F: bin/mesh-status.js (+ route/help), test/mesh-status.test.js.
 
