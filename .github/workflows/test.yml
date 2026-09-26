@@ -45,5 +45,8 @@ jobs:
           node test/evals/vibe.js
           node test/coverage.js
 
+      - name: Surface consistency (no phantom endpoints, links, community doors)
+        run: npm run lint:surface
+
       - name: Run standalone suites
         run: for f in test/*.test.js; do node "$f" || exit 1; done

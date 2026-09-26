@@ -108,9 +108,8 @@ Get help when you need it.
 
 ### How do I get help?
 
-- [GitHub Issues](https://github.com/dhaupin/issues) - Bug reports
-- [Discussions](https://github.com/dhaupin/discussions) - Q&A
-- [Discord](https://discord.gg/vant) - Chat (if available)
+- [GitHub Issues](https://github.com/dhaupin/vant/issues) - Bug reports
+- [Discussions](https://github.com/dhaupin/vant/discussions) - Q&A
 
 ### Where's the roadmap?
 

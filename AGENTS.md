@@ -243,29 +243,35 @@ Up to 4 agents can work together (you + 3 coworkers).
 
 ### Join via MCP
 
-External agents connect via MCP JSON-RPC:
+External agents connect through the MCP HTTP door (POST /mcp/exec,
+JSON-RPC-style body — `{tool, args}` or `{method, params}` both work):
 
 ```javascript
-const response = await fetch('http://localhost:3457/rpc', {
+const response = await fetch('http://localhost:3457/mcp/exec', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'brain_agent_spawn',  // brain_ prefix required
-        params: { name: 'Claude', role: 'Assistant' },
-        id: 1
+        method: 'agent_spawn',
+        params: { name: 'Claude', role: 'Assistant' }
     })
 });
-// → { result: { id: 'agent_xxx', name: 'Claude' } }
+// → { result: { id: 'agent_xxx', name: 'Claude', role: 'Assistant', state: 'idle', ... } }
 ```
+
+Browse everything available: `GET http://localhost:3457/tools`
+(and `POST /mcp/exec` with `{tool: 'vant_config_get', args: {tool: '<name>'}}`
+to probe a single tool's schema). Auth optional locally; set
+`mcp.requireKey true` (or `VANT_MCP_REQUIRE_KEY=true`) to require
+x-api-key/Bearer on POSTs.
 
 ### Available Tools
 
 | Tool | Description |
 |------|-------------|
-| `brain_agent_spawn` | Spawn new agent (max 4) |
-| `brain_agent_list` | List all agents |
-| `brain_agent_kill` | Kill agent by ID |
+| `agent_spawn` | Spawn new agent (quota via agents.maxAgents, default crew of 4) |
+| `agent_list` | List active agents |
+| `agent_kill` | Kill agent by ID |
+| `agent_proto_list` / `agent_proto_load` | Agent protos (templates) |
 
 ### Orchestrator
 

@@ -139,13 +139,13 @@ Contributors get added to README. Thanks for making Vant better!
 
 ## Questions?
 
-- Open a [GitHub Discussion](https://github.com/dhaupin/discussions)
-- Ask in [Issues](https://github.com/dhaupin/issues)
+- Open a [GitHub Discussion](https://github.com/dhaupin/vant/discussions)
+- Report a bug via [Issues](https://github.com/dhaupin/vant/issues)
 
 ---
 
 ## Related
 
 - [GitHub Repo](https://github.com/dhaupin/vant)
-- [Issues](https://github.com/dhaupin/issues)
-- [Discussions](https://github.com/dhaupin/discussions)
+- [Issues](https://github.com/dhaupin/vant/issues)
+- [Discussions](https://github.com/dhaupin/vant/discussions)
