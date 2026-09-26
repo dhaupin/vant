@@ -27,7 +27,7 @@ const fs = require('fs');
 // Lazy-load sandbox
 let _sandbox = null;
 function _getSandbox() {
-    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    if (!_sandbox) { try { _sandbox = require("../lib/sandbox"); } catch (e) {} }
     return _sandbox;
 }
 function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
@@ -78,7 +78,14 @@ async function getModelPath(args) {
     }
     
     if (args[2]) {
-        return `models/${args[2]}`;
+        // (R-6/O-9) arg becomes a path segment — charset-validate it
+        // (vaf.check alone allows 'sub/dir'; segment must be a single name)
+        const name = args[2];
+        if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(name) || name.includes('..')) {
+            console.error(`\u26a0 Invalid model name: ${name}`);
+            return 'models/private';
+        }
+        return `models/${name}`;
     }
     return modelPath;
 }
@@ -100,6 +107,11 @@ function loadModel(modelPath) {
         return null;
     }
 
+    // (fs→storage migration) brain-file reads go through FileStorage so the
+    // sandbox + vaf security chain gates every read. Enumeration stays on fs
+    // (documented readdir-withFileTypes exception); content reads are routed.
+    const store = new (require('../lib/storage').FileStorage)({ basePath: allowed });
+
     const files = fs.readdirSync(modelPath).filter(f => {
         const filePath = path.join(modelPath, f);
         const ext = path.extname(f).toLowerCase();
@@ -110,7 +122,8 @@ function loadModel(modelPath) {
     const model = {};
     files.forEach(file => {
         const filePath = path.join(modelPath, file);
-        const content = fs.readFileSync(filePath, 'utf8');
+        const content = store.read(path.relative(allowed, path.resolve(filePath)), 'utf8');
+        if (content === null) return;
         const ext = path.extname(file).toLowerCase();
         const name = path.basename(file, ext);
         

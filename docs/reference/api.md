@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/api
 layout: default
 title: API Reference
-nav_order: 81
+nav_order: 114
 ---
 
 > Vant Agent OS API Reference.
@@ -333,7 +333,7 @@ Get config value.
 const config = require('vant').config;
 
 const port = config.get('server.port');
-// 3100
+// 3457
 ```
 
 ### githubToken()

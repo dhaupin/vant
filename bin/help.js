@@ -36,6 +36,11 @@ const COMMANDS = {
         desc: 'Run build tests',
         usage: 'vant test'
     },
+    'test-all': {
+        desc: '17-check CLI self-test (health/search/islands/lib exports)',
+        usage: 'vant test-all',
+        detail: 'Runs from any directory; exit 1 on any failure.\nSee: vant test-all --help'
+    },
     changelog: {
         desc: 'View recent changes',
         usage: 'vant changelog'
@@ -83,8 +88,9 @@ const COMMANDS = {
 See: vant lock --help`
     },
     branch: {
-        desc: 'List/switch brain branches',
-        usage: 'vant branch [list|switch|create] [name]'
+        desc: 'Brain branch manager (auto-commit/push brain writes)',
+        usage: 'vant branch status|auto|commit|push|pr',
+        detail: 'Git-backed brain branching.\nSee: vant branch --help'
     },
     
     // Integrations
@@ -141,6 +147,56 @@ See: vant node --help`
     },
 
     // New / Additional
+    trust: {
+        desc: 'Trust & reputation system',
+        usage: 'vant trust score|record|leaderboard|can|required',
+        detail: 'Manage trust scores and permissions.\nSee: vant trust --help'
+    },
+    market: {
+        desc: 'Knowledge trading market',
+        usage: 'vant market list|bid|search|trade|stats',
+        detail: 'Trade knowledge with escrow.\nSee: vant market --help'
+    },
+    agora: {
+        desc: 'Cross-node agora operations (the mesh)',
+        usage: 'vant agora vote|pull|push|nodes|status',
+        detail: 'Vote/sync with peer vant nodes over the crew-bus.\nSee: vant agora --help'
+    },
+    genesis: {
+        desc: 'Mesh join ceremony (pair a node with a peer)',
+        usage: 'vant genesis create|join|status',
+        detail: 'Mutual registration + vetted membership + per-pair secret.\nSee: vant genesis --help'
+    },
+    mesh: {
+        desc: 'Mesh observability — the coordinator one-command view (Wave F)',
+        usage: 'vant mesh status [--json]',
+        detail: 'Peers, topics, decisions, budgets, channels, pending syncs\nfrom ONE node. Read-only; --json for CI.\nSee: vant mesh --help'
+    },
+    config: {
+        desc: 'Get/set configuration',
+        usage: 'vant config get|set|list <key> [value]',
+        detail: 'Manage vant configuration.'
+    },
+    teams: {
+        desc: 'Team permissions & roles',
+        usage: 'vant teams list|add|remove|perm',
+        detail: 'Manage team permissions.\nSee: vant teams --help'
+    },
+    consensus: {
+        desc: 'Voting & decision system',
+        usage: 'vant consensus vote|propose|results',
+        detail: 'Distributed decision making.\nSee: vant consensus --help'
+    },
+    escrow: {
+        desc: 'Escrow quota management',
+        usage: 'vant escrow status|hold|release',
+        detail: 'Manage operation quotas.\nSee: vant escrow --help'
+    },
+    governance: {
+        desc: 'System governance rules',
+        usage: 'vant governance check|set',
+        detail: 'Governance & consent.\nSee: vant governance --help'
+    },
     repos: {
         desc: 'Mount external repositories',
         usage: 'vant repos --list|--mount|--pull',
@@ -148,7 +204,7 @@ See: vant node --help`
     },
     hybrid: {
         desc: 'Hybrid sync (public/private split)',
-        usage: 'vant hybrid --public|--private',
+        usage: 'vant hybrid [-p|--public] [-r|--private]',
         detail: 'Push public or private only.\nSee: vant hybrid --help'
     },
     search: {
@@ -181,11 +237,6 @@ See: vant node --help`
         usage: 'vant validate --check',
         detail: 'Full validation suite.\nSee: vant validate --help'
     },
-    vibe: {
-        desc: 'Show/set current vibe',
-        usage: 'vant vibe [experimental|safety_first]',
-        detail: 'Track agent mood for context.\nSee: vant vibe --help'
-    },
     compress: {
         desc: 'Compress brain for transfer',
         usage: 'vant compress',
@@ -195,6 +246,484 @@ See: vant node --help`
         desc: 'Build docs for release',
         usage: 'vant docs',
         detail: 'Generate documentation.'
+    },
+    
+    // Dev / Build
+    audit: {
+        desc: 'Generate AUDIT.md report',
+        usage: 'vant audit [--out FILE]',
+        detail: 'Codebase analysis report.\nSee: vant audit --help'
+    },
+    format: {
+        desc: 'Format code with prettier',
+        usage: 'vant format [--check]',
+        detail: 'Format all JS files.\nSee: vant format --help'
+    },
+    schema: {
+        desc: 'Validate JSON schemas',
+        usage: 'vant schema validate',
+        detail: 'Validate schema files.\nSee: vant schema --help'
+    },
+    
+    // Storage / Data
+    cache: {
+        desc: 'Cache operations',
+        usage: 'vant cache get|set|clear',
+        detail: 'In-memory cache.\nSee: vant cache --help'
+    },
+    storage: {
+        desc: 'Persistent storage',
+        usage: 'vant storage get|set|list',
+        detail: 'File-based storage.\nSee: vant storage --help'
+    },
+    sandbox: {
+        desc: 'Sandbox permissions',
+        usage: 'vant sandbox allow|deny|status',
+        detail: 'Manage sandbox capabilities.\nSee: vant sandbox --help'
+    },
+    
+    // Security
+    security: {
+        desc: 'Security utilities',
+        usage: 'vant security scan|check',
+        detail: 'Security scanning.\nSee: vant security --help'
+    },
+    encrypt: {
+        desc: 'Encrypt/decrypt files',
+        usage: 'vant encrypt <file>',
+        detail: 'AES-256 encryption.\nSee: vant encrypt --help'
+    },
+    
+    // System
+    system: {
+        desc: 'System info and utils',
+        usage: 'vant system info',
+        detail: 'System diagnostics.\nSee: vant system --help'
+    },
+    vaf: {
+        desc: 'Validate input (vaf)',
+        usage: 'vant vaf check|validate',
+        detail: 'Input validation.\nSee: vant vaf --help'
+    },
+    error: {
+        desc: 'Error handling utilities',
+        usage: 'vant error handle|parse',
+        detail: 'Error utilities.\nSee: vant error --help'
+    },
+    event: {
+        desc: 'Event emitter system',
+        usage: 'vant event emit|listen',
+        detail: 'Event system.\nSee: vant event --help'
+    },
+    
+    // Network
+    network: {
+        desc: 'Network utilities',
+        usage: 'vant network status',
+        detail: 'Network diagnostics.\nSee: vant network --help'
+    },
+    connector: {
+        desc: 'External service connectors',
+        usage: 'vant connector list|add',
+        detail: 'Connect to services.\nSee: vant connector --help'
+    },
+    
+    // Data / Analytics
+    metrics: {
+        desc: 'Metrics collection',
+        usage: 'vant metrics get|set',
+        detail: 'Metrics tracking.\nSee: vant metrics --help'
+    },
+    qos: {
+        desc: 'Quality of service',
+        usage: 'vant qos status|limits',
+        detail: 'Rate limiting & QoS.\nSee: vant qos --help'
+    },
+    lineage: {
+        desc: 'Data lineage tracking',
+        usage: 'vant lineage track',
+        detail: 'Track data origins.\nSee: vant lineage --help'
+    },
+    stream: {
+        desc: 'Stream processing',
+        usage: 'vant stream process',
+        detail: 'Stream utilities.\nSee: vant stream --help'
+    },
+    
+    // External
+    telegram: {
+        desc: 'Telegram bot',
+        usage: 'vant telegram start',
+        detail: 'Run Telegram bot.\nSee: vant telegram --help'
+    },
+    skills: {
+        desc: 'Skill management',
+        usage: 'vant skills list|add',
+        detail: 'Manage skills.\nSee: vant skills --help'
+    },
+    
+    // Integrations
+    embed: {
+        desc: 'Embed brain in images',
+        usage: 'vant embed encode|decode',
+        detail: 'Steganography embed.\nSee: vant embed --help'
+    },
+    rerank: {
+        desc: 'Rerank search results',
+        usage: 'vant rerank query',
+        detail: 'Rerank with models.\nSee: vant rerank --help'
+    },
+    
+    // Brain / Memory
+    brain: {
+        desc: 'Brain source mode switching',
+        usage: 'vant brain mode|modes|pipeline|set',
+        detail: `Switch brain source (dual|public|private|remote).
+  mode             Show current mode
+  mode <mode>      Set mode (dual|public|private|remote)
+  modes            List available modes
+  pipeline         Show pipeline for current mode
+  set <key> <val>  Set brain config
+See: vant brain --help`
+    },
+    framework: {
+        desc: 'Framework (absorbed into vant.js)',
+        usage: 'vant framework info|version',
+        detail: 'Framework helpers.\nSee: vant framework --help'
+    },
+    compute: {
+        desc: 'Compute engine',
+        usage: 'vant compute run',
+        detail: 'Run computations.\nSee: vant compute --help'
+    },
+    canvas: {
+        desc: 'Canvas rendering',
+        usage: 'vant canvas render',
+        detail: 'Canvas operations.\nSee: vant canvas --help'
+    },
+    
+    // Advanced
+    geometry: {
+        desc: 'NSC9 Quasicrystal geometric storage',
+        usage: 'vant geometry store <key> <value>',
+        detail: `NSC9 Quasicrystal storage.
+  store <key> <val>   Store in NSC9 (via memory)
+  retrieve <key>       Retrieve from NSC9
+  barcode <content>    Generate barcode
+  address <data>       Store at geometric address
+  locate <barcode>     Locate by barcode
+See: vant geometry --help`,
+    },
+    nature: {
+        desc: 'Nature simulation',
+        usage: 'vant nature simulate',
+        detail: 'Nature algorithms.\nSee: vant nature --help'
+    },
+    habitat: {
+        desc: 'Habitat simulation',
+        usage: 'vant habitat run',
+        detail: 'Habitat engine.\nSee: vant habitat --help'
+    },
+    theme: {
+        desc: 'Theme utilities',
+        usage: 'vant theme get|set',
+        detail: 'Theme management.\nSee: vant theme --help'
+    },
+    shell: {
+        desc: 'Shell commands',
+        usage: 'vant shell exec',
+        detail: 'Execute shell.\nSee: vant shell --help'
+    },
+    legal: {
+        desc: 'Legal/compliance utils',
+        usage: 'vant legal check',
+        detail: 'Compliance tools.\nSee: vant legal --help'
+    },
+    horcrux: {
+        desc: 'Split brain into shards',
+        usage: 'vant horcrux split|join',
+        detail: 'Shard brain.\nSee: vant horcrux --help'
+    },
+    msg: {
+        desc: 'Message handling',
+        usage: 'vant msg send|receive',
+        detail: 'Messaging system.\nSee: vant msg --help'
+    },
+    nodes: {
+        desc: 'Node management',
+        usage: 'vant nodes list|add',
+        detail: 'Node operations.\nSee: vant nodes --help'
+    },
+    remote: {
+        desc: 'Remote operations',
+        usage: 'vant remote connect',
+        detail: 'Remote access.\nSee: vant remote --help'
+    },
+    rules: {
+        desc: 'Rule engine',
+        usage: 'vant rules evaluate',
+        detail: 'Rule system.\nSee: vant rules --help'
+    },
+    rls: {
+        desc: 'Row-level security',
+        usage: 'vant rls check',
+        detail: 'RLS utilities.\nSee: vant rls --help'
+    },
+    tmp: {
+        desc: 'Temp file handling',
+        usage: 'vant tmp create|cleanup',
+        detail: 'Temp files.\nSee: vant tmp --help'
+    },
+    
+    // Additional missing
+    agents: {
+        desc: 'Agent management',
+        usage: 'vant agents list|spawn',
+        detail: 'Manage agents.\nSee: vant agents --help'
+    },
+    auth: {
+        desc: 'Authentication',
+        usage: 'vant auth login|logout',
+        detail: 'Auth utilities.\nSee: vant auth --help'
+    },
+    citations: {
+        desc: 'Citation management',
+        usage: 'vant citations add|list',
+        detail: 'Manage citations.\nSee: vant citations --help'
+    },
+    clean: {
+        desc: 'Clean temp files',
+        usage: 'vant clean',
+        detail: 'Clean caches.\nSee: vant clean --help'
+    },
+    cron: {
+        desc: 'Scheduled tasks',
+        usage: 'vant cron list|add',
+        detail: 'Schedule tasks.\nSee: vant cron --help'
+    },
+    spawn: {
+        desc: 'Spawn agents (agent spawner)',
+        usage: 'vant spawn spawn|list|delegate|kill|mcp',
+        detail: `Multi-agent management via MCP or direct library.
+  spawn --name <n> --role <r>   Spawn an agent (max 4)
+  list                          List all agents
+  delegate <id> <task>          Delegate a task
+  kill <id>                     Kill an agent
+  mcp                           Start MCP server
+See: vant spawn --help`
+    },
+
+    "brain-unlock": {
+        desc: 'Unlock a stego-locked brain',
+        usage: 'vant brain-unlock [--status|--clear|--info]',
+        detail: 'Unlock horcrux-protected brains.\nSee: vant brain-unlock --help'
+    },
+    migrate: {
+        desc: 'Brain layout migration (multi-brain import)',
+        usage: 'vant migrate [--status|--dry-run] [--brain-name <name>]',
+        detail: `Layout versioning. No args applies pending migrations.
+  --status              Show layout version + pending migrations
+  --dry-run             Preview what would move (no changes)
+  --brain-name <name>   Name the imported brain (default: vant)
+See: vant migrate --help`
+    },
+    wal: {
+        desc: 'Write-ahead journal operations',
+        usage: 'vant wal --status|--drill|--reset <basePath>',
+        detail: `Journal state, replay drills, reset.
+  --status <path>   Journal state (records, pending intents)
+  --drill <path>    Reopen, replay, verify, report
+  --reset <path>    Drop the journal (DANGEROUS)
+See: vant wal --help`
+    },
+    mirror: {
+        desc: 'Replicated store mirrors',
+        usage: 'vant mirror --status|--verify|--resync',
+        detail: `Replication config and drift control.
+  --status            Config + stats
+  --verify <path>     Drift report (match/missing/differing/extra)
+  --resync            Full primary-to-mirror sync
+See: vant mirror --help`
+    },
+    s3: {
+        desc: 'S3 remote backup for the models tree',
+        usage: 'vant s3 --status|--test|--ls|--push|--pull',
+        detail: `Remote object storage sync.
+  --status          Config summary (no secrets)
+  --test            Connectivity probe (put/get/delete)
+  --ls [prefix]     List remote keys
+  --push            Push local models tree to remote
+  --pull            Pull remote keys to local models tree
+See: vant s3 --help`
+    },
+    distributed: {
+        desc: 'Start as a distributed agent node',
+        usage: 'vant distributed',
+        detail: 'Registers this node with the registry and enables\nconsensus layers. See: vant start --distributed'
+    },
+    all: {
+        desc: 'Start everything (MCP + API servers)',
+        usage: 'vant all',
+        detail: 'All mode: starts MCP and API servers together.\nSame as: vant mcp && vant api'
+    },
+
+    org: {
+        desc: 'Org operator grant + org flow',
+        usage: 'vant org',
+        detail: 'Orgchart operations.\nSee: vant org --help'
+    },
+    snapshot: {
+        desc: 'Create a verifiable stego-SVG brain snapshot',
+        usage: 'vant snapshot [--agent <name>] [--output <path>]',
+        detail: 'Stego-SVG horcrux snapshots.\nSee: vant snapshot --help'
+    },
+    "islands-boot": {
+        desc: 'Boot from islands instead of single brain',
+        usage: 'vant islands-boot [--prompt "<text>"]',
+        detail: 'Lazy-hydrating islands boot.\nSee: vant islands-boot --help'
+    },
+    "docs-build": {
+        desc: 'Update docs frontmatter versions',
+        usage: 'vant docs-build',
+        detail: 'Docs release helper.\nSee: vant docs-build --help'
+    },
+    "build-test": {
+        desc: 'Build test',
+        usage: 'vant build-test run',
+        detail: 'Build tests.\nSee: vant build-test --help'
+    },
+    "format-test": {
+        desc: 'Format test',
+        usage: 'vant format-test run',
+        detail: 'Format tests.\nSee: vant format-test --help'
+    },
+    'git-branch': {
+        desc: 'Git branch utilities for the repo (list/create/switch/delete)',
+        usage: 'vant git-branch [list|create|switch|delete] [name]',
+        detail: 'Plain git-branch ops on the working repo.\nBrain branching is `vant branch` (status/auto/commit/push/pr/diff).\nSee: vant git-branch --help'
+    },
+    spawn: {
+        desc: 'Spawn/manage agents (agent spawner)',
+        usage: 'vant spawn spawn|list|delegate|kill|mcp',
+        detail: `Multi-agent management via MCP or direct library.
+  spawn --name <n> --role <r>   Spawn an agent (max 4)
+  list                          List all agents
+  delegate <id> <task>          Delegate a task
+  kill <id>                     Kill an agent
+  mcp                           Start MCP server
+See: vant spawn --help`
+    },
+    webhook: {
+        desc: 'Webhook management (routed to webhooks CLI)',
+        usage: 'vant webhook list|add|remove|test',
+        detail: 'Alias of `vant webhooks`.\nSee: vant webhooks --help'
+    },
+    "lineage": {
+        desc: 'Data lineage',
+        usage: 'vant lineage track',
+        detail: 'Track lineage.\nSee: vant lineage --help'
+    },
+    "rerank": {
+        desc: 'Rerank results',
+        usage: 'vant rerank query',
+        detail: 'Rerank.\nSee: vant rerank --help'
+    },
+    api: {
+        desc: 'API server mode (part of all mode)',
+        usage: 'vant api',
+        detail: 'Starts the API server via vant.startFull (all mode).\nStatus/routes: `node bin/api.js status|routes|call|docs` — the\nutility CLI is not routed as `vant api` to avoid shadowing the\nserver mode.\nSee: vant all --help'
+    },
+    runop: {
+        desc: 'Runtime operations (absorbed into pipeline)',
+        usage: 'vant runop init|status|stop',
+        detail: 'Pipeline runtime ops.\nSee: vant runop --help'
+    },
+    secret: {
+        desc: 'Secret management',
+        usage: 'vant secret get|set',
+        detail: 'Manage secrets.\nSee: vant secret --help'
+    },
+    sudo: {
+        desc: 'Elevated permissions',
+        usage: 'vant sudo',
+        detail: 'Run as admin.\nSee: vant sudo --help'
+    },
+    transform: {
+        desc: 'Transform data',
+        usage: 'vant transform',
+        detail: 'Data transform.\nSee: vant transform --help'
+    },
+    context: {
+        desc: 'Prompt caching & context engine',
+        usage: 'vant context build|inspect|refresh|layers|heartbeat|cache',
+        detail: `Prompt caching for token optimization.
+  build              Build context from brain files
+  inspect            Inspect context state
+  refresh            Force refresh
+  layers             List context layers
+  heartbeat start   Start heartbeat (4 min interval)
+  heartbeat stop    Stop heartbeat
+  cache <model>     Get cache control for model
+See: vant context --help`
+    },
+    
+    // New from lib coverage
+    backup: {
+        desc: 'Brain backup & restore',
+        usage: 'vant backup create|restore|list',
+        detail: 'Backup brain.\nSee: vant backup --help'
+    },
+    memory: {
+        desc: 'Memory & learning system',
+        usage: 'vant memory state|learn|address|list|clear',
+        detail: `Unified memory API (sandbox + RLS secured).
+  state <key> <val>   Key-value state (TTL cache)
+  recall <key>        Get state
+  learn <key> <val>   Document storage
+  query <key>        Query document
+  address <data>      Store at geometric address
+  locate <barcode>   Retrieve by barcode
+See: vant memory --help`
+    },
+    registry: {
+        desc: 'General registry',
+        usage: 'vant registry get|set|list',
+        detail: 'Registry operations.\nSee: vant registry --help'
+    },
+    webhooks: {
+        desc: 'Webhook management',
+        usage: 'vant webhooks list|add|remove',
+        detail: 'Webhook handling.\nSee: vant webhooks --help'
+    },
+    zen: {
+        desc: 'Zen utilities',
+        usage: 'vant zen quote|breathe',
+        detail: 'Zen utilities.\nSee: vant zen --help'
+    },
+    consciousness: {
+        desc: 'Consciousness engine',
+        usage: 'vant consciousness status|think',
+        detail: 'Consciousness.\nSee: vant consciousness --help'
+    },
+    recursion: {
+        desc: 'Recursion engine',
+        usage: 'vant recursion run|unwind',
+        detail: 'Recursion.\nSee: vant recursion --help'
+    },
+    forum: {
+        desc: 'Forum/discussion',
+        usage: 'vant forum list|post|view',
+        detail: 'Forum system.\nSee: vant forum --help'
+    },
+    "brain-registry": {
+        desc: 'Brain registration',
+        usage: 'vant brain-registry list|register',
+        detail: 'Brain registry.\nSee: vant brain-registry --help'
+    },
+    "node-registry": {
+        desc: 'Node registration',
+        usage: 'vant node-registry list|register',
+        detail: 'Node registry.\nSee: vant node-registry --help'
     }
 };
 
@@ -236,8 +765,8 @@ function showHelp(command) {
     console.log('   vant setup              # Interactive setup');
     console.log('   vant start              # Full startup');
     console.log('   vant health             # Check system');
-    console.log('    vant sync push          # Push brain to GitHub');
-    console.log('    vant branch create experiment-1  # New brain branch');
+    console.log('   vant sync push          # Push brain to GitHub');
+    console.log('   vant git-branch create feature-1  # Repo branch (brain branching is: vant branch)');
     console.log('    vant help sync          # Help for specific command');
     console.log('');
     console.log('  Docs:  https://github.com/dhaupin/vant#readme');
@@ -247,9 +776,10 @@ function showHelp(command) {
 
 // Get command from args
 const args = process.argv.slice(2);
-const cmd = args[0] || 'help';
+const cmd = args[0] || '';
 const target = ALIASES[cmd] || cmd;
 
 // Show specific help if command is provided, otherwise show all
-showHelp(args[1] || (COMMANDS[target] ? target : null));
+// Empty cmd or 'help' shows all commands
+showHelp(args[0] && args[0] !== 'help' && COMMANDS[target] ? target : null);
     if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});

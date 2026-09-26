@@ -1,0 +1,20 @@
+{
+  "brain": {
+    "readableBy": ["public"],
+    "writableBy": ["admin", "editor"],
+    "container": "default",
+    "description": "Default brain policies - readable by anyone, writable by admin/editor roles"
+  },
+  "island": {
+    "readableBy": ["public"],
+    "writableBy": ["admin"],
+    "container": "default",
+    "description": "Island/state policies - readable by anyone, writable by admin"
+  },
+  "private": {
+    "readableBy": ["owner"],
+    "writableBy": ["owner"],
+    "container": "self",
+    "description": "Private resources - only accessible by owner"
+  }
+}

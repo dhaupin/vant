@@ -81,6 +81,29 @@ test('branch has getStatus function', () => {
     return { success: typeof branch.getStatus === 'function' };
 });
 
+// Multibrain tests
+test('branch has getBrainBranchConfig function', () => {
+    const branch = require(path.join(ROOT, 'lib', 'branch'));
+    return { success: typeof branch.getBrainBranchConfig === 'function' };
+});
+
+test('branch has setBrainBranchConfig function', () => {
+    const branch = require(path.join(ROOT, 'lib', 'branch'));
+    return { success: typeof branch.setBrainBranchConfig === 'function' };
+});
+
+// Stack tests
+test('branch has getStackBranchConfigs function', () => {
+    const branch = require(path.join(ROOT, 'lib', 'branch'));
+    return { success: typeof branch.getStackBranchConfigs === 'function' };
+});
+
+test('getStackBranchConfigs returns object with source stack', () => {
+    const branch = require(path.join(ROOT, 'lib', 'branch'));
+    const result = branch.getStackBranchConfigs();
+    return { success: result && result.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

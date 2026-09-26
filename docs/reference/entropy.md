@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/entropy
 layout: default
 title: Entropy Patching Protocol
-nav_order: 87
+nav_order: 125
 ---
 
 # Entropy Patching Protocol
@@ -28,14 +28,14 @@ LLMs are token-limited. Loading 60+ brain files on startup is expensive. Entropy
 
 The algorithm scans data with a sliding window (default 8 bytes), calculating Shannon entropy for each position:
 
-```
+```text
 Input: "aaaaaaaaXYaabcdefg..."
          ↓ entropy scan
 Output: [stable][spike][stable][spike]...
 ```
 
 **Shannon Entropy Formula:**
-```
+```text
 H = -Σ P(x) log₂ P(x)  (normalized 0-1)
 ```
 
@@ -53,7 +53,7 @@ H = -Σ P(x) log₂ P(x)  (normalized 0-1)
 
 The seed is a semantic summary - not the data itself, but a summary:
 
-```
+```text
 "spikes:0.92,0.88,0.91"  →  3 high-entropy regions
 "stable:AAAA...BBBB"    →  all low-entropy
 ```
@@ -237,8 +237,7 @@ All paths are validated through VAF (Vant Application Firewall):
 
 ## Related
 
-- [CLI.md](../CLI.md#compress) - compress command
-- [LIBS.md](../LIBS.md#entropyjs) - module reference
+- [CLI Reference](/vant/reference/cli) - compress command
 
 ---
 
@@ -257,8 +256,8 @@ The `k` factor (sensitivity) controls threshold = μ + k×σ:
 | 2.0+ | Higher threshold, less pruning | Agents feel "forgetful" |
 
 **Tuning tips:**
-- Agent feels "forgetful" → increase k (pruning too much)
-- Hitting token limits → decrease k (too many spikes)
+- Agent feels "forgetful" -> increase k (pruning too much)
+- Hitting token limits -> decrease k (too many spikes)
 
 ### 2. Calibration Phase (Recommended)
 
@@ -275,7 +274,7 @@ Recommended: Add to `vant start` sequence for auto k-detection.
 
 ### 3. Semantic Seed (Anchoring)
 
-Stable patches should include a "semantic seed"—a summary that anchors high-entropy spikes:
+Stable patches should include a "semantic seed",a summary that anchors high-entropy spikes:
 
 ```javascript
 // Example patch with seed
@@ -303,4 +302,4 @@ patch.metadata.currentEntropy = 0.48;
 
 Low entropy delta = stable evolution
 High entropy drift = review needed
-- [schema.md](reference/schema) - brain file schema
+- [schema.md](/vant/reference/schema) - brain file schema

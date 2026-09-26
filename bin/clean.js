@@ -20,6 +20,16 @@ const path = require('path');
 
 const config = require('../lib/config');
 
+// (1b) Capability gates — CLI writes route through the same sandbox check
+// as lib/ (sandbox.canX() is sudo-aware since the canX→can unification).
+function _getSandbox() {
+    try { return require('../lib/sandbox'); } catch (e) { return null; }
+}
+function _checkWrite() {
+    const sandbox = _getSandbox();
+    if (sandbox && !sandbox.canWrite()) throw new Error('Write capability required for clean operations');
+}
+
 // Handle cron setup commands early
 if (args.includes('--setup-cron') || args.includes('--install')) {
     const cron = require('../lib/cron');
@@ -166,8 +176,16 @@ async function cleanLogs() {
     const now = Date.now();
     const maxAgeMs = maxAge * 24 * 60 * 60 * 1000;
     
-    // Clean vant.log
-    const logFile = 'vant.log';
+    // NOTE (fs→storage census): cleanLogs targets vant.log/vant.log.old at
+    // the repo root — process logs, not models-data. Stay-on-fs by design
+    // (prd-storage.md): no security chain applies to the app's own logs.
+    // 
+    // NOTE: cleanTmp targets OS-level dirs (.agent_tmp, tmp, /tmp) — outside
+    // the storage tree, so stay-on-fs per prd-storage.md. lib/tmp.js's
+    // store-backed spaces (models/tmp-space/*) are the storage-managed tmp:
+    // use `vant clean` + lib/tmp clear() for those. The bare '/tmp' sweep is
+    // aggressive (shared OS dir) and is a candidate for removal — flagged,
+    // not changed, to keep this commit migration-only.
     if (fs.existsSync(logFile)) {
         const stats = fs.statSync(logFile);
         
@@ -271,13 +289,25 @@ async function cleanCache() {
         '.vector-index.json'
     ];
     
+    // (fs→storage migration) models/ cache files are models-data: delete
+    // through FileStorage so the sandbox + vaf security chain gates every
+    // unlink. Other cache locations stay raw by design.
+    let store = null;
+    function _cacheStore() {
+        if (!store) {
+            const Storage = require('../lib/storage');
+            store = new Storage.FileStorage({ basePath: path.resolve('models') });
+        }
+        return store;
+    }
+    
     for (const cacheFile of cacheFiles) {
-        const cachePath = path.join('models', cacheFile);
-        if (fs.existsSync(cachePath)) {
-            dry(`Removing cache: ${cachePath}`);
-            if (!flags.dryRun) {
-                fs.unlinkSync(cachePath);
-                cleaned++;
+        dry(`Removing cache: models/${cacheFile}`);
+        if (!flags.dryRun) {
+            try {
+                if (_cacheStore().delete(cacheFile)) cleaned++;
+            } catch (e) {
+                if (flags.verbose) log(`Cache delete blocked for ${cacheFile}: ${e.message}`);
             }
         }
     }
@@ -312,6 +342,11 @@ async function run() {
     console.log('╔══════════════════════════════════════════╗');
     console.log('║         Vant Clean                      ║');
     console.log('╚══════════════════════════════════════════╝');
+    
+    // (1b) destructive ops require write capability — checked AFTER the
+    // banner so smoke/usage output is visible; refusal still precedes any
+    // deletion. Dry-run stays ungated.
+    if (!flags.dryRun) _checkWrite();
     
     if (flags.dryRun) {
         console.log('[DRY-RUN MODE - No changes will be made]\n');

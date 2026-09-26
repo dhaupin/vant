@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/resolution
 layout: default
 title: Resolution
-nav_order: 89
+nav_order: 128
 ---
 # Thought Resolution
 
@@ -138,6 +138,6 @@ This doc has advanced API reference. See GitHub for latest.
 
 ## Related
 
-- [Succession](essential/succession) - Trust levels
-- [Brain](essential/brain) - Brain structure
-- [Audit](advanced/audit) - Activity logging
+- [Succession](/vant/multi-agent/succession) - Trust levels
+- [Brain](/vant/memory/brain) - Brain structure
+- [Audit](/vant/advanced/audit) - Activity logging

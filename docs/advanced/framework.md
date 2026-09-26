@@ -5,7 +5,7 @@ permalink: /advanced/framework
 layout: default
 title: Framework
 
-nav_order: 63
+nav_order: 103
 ---
 
 
@@ -96,13 +96,13 @@ const api = require('./lib/api');
 const result = await api.execute('read', () => brain.get('key'));
 ```
 
-See [API](essential/runtime) for programmatic API.
+See [API](/vant/runtime/runtime) for programmatic API.
 
 ---
 
 
 ## Related
 
-- [Runtime](essential/runtime) - Runtime API
-- [Server](advanced/server) - HTTP server
-- [MCP](integrations/mcp) - MCP server
+- [Runtime](/vant/runtime/runtime) - Runtime API
+- [Server](/vant/runtime/server) - HTTP server
+- [MCP](/vant/runtime/mcp) - MCP server

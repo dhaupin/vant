@@ -41,24 +41,28 @@ function skip(name, reason) {
 console.log('\n=== Metrics Module Tests ===\n');
 
 // Test 1: Core exports
+// (pass 19 bin sweep: aligned with the registry API shipped in 59325b8 —
+// inc/setGauge/observe/startTimer/snapshot/reset replaced the old
+// increment/gauge/timing/getStats/clear exports. The old names were
+// removed with no aliases, so this suite checked ghosts and always failed.)
 test('has increment function', () => {
-    return typeof metrics.increment === 'function';
+    return typeof metrics.inc === 'function';
 });
 
 test('has gauge function', () => {
-    return typeof metrics.gauge === 'function';
+    return typeof metrics.setGauge === 'function';
 });
 
 test('has timing function', () => {
-    return typeof metrics.timing === 'function';
+    return typeof metrics.startTimer === 'function';
 });
 
 test('has getStats function', () => {
-    return typeof metrics.getStats === 'function';
+    return typeof metrics.snapshot === 'function';
 });
 
 test('has clear function', () => {
-    return typeof metrics.clear === 'function';
+    return typeof metrics.reset === 'function';
 });
 
 console.log('\n=== Results: %d passed, %d failed, %d skipped ===\n', results.passed, results.failed, results.skipped);

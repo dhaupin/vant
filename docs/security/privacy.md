@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /security/privacy
 layout: default
 title: Privacy Policy
-nav_order: 103
+nav_order: 73
 ---
 
 # Privacy Policy
@@ -19,7 +19,7 @@ Data collection.
 - Configuration in `.env` - Your tokens, your settings
 - Custom modifications - Your code, your prompts
 **Want to share your brain as open source?**
-Use `models/public/` for files you want to publish. Push to a public GitHub repo to share your agent's learnings, prompts, and patterns with the community. See [Hybrid Sync](integrations/hybrid) for split public/private brain setup.
+Use `models/public/` for files you want to publish. Push to a public GitHub repo to share your agent's learnings, prompts, and patterns with the community. See [Hybrid Sync](/vant/integrations/hybrid) for split public/private brain setup.
 **Vant does NOT require:**
 - Personal information
 - Registration
@@ -229,5 +229,5 @@ If you have concerns:
 ---
 ## SEE ALSO
 - [GitHub Privacy](https://docs.github.com/en/github/site-policy/github-privacy-statement) - GitHub's policy
-- [Terms](reference/index) - Our legal terms
-- [Security](security/security) - Security practices
+- [Terms](/vant/reference/legal) - Our legal terms
+- [Security](/vant/security/) - Security practices

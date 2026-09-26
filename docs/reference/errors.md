@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/errors
 layout: default
 title: Error Codes
-nav_order: 86
+nav_order: 116
 ---
 # Error Codes
 
@@ -118,4 +118,4 @@ if (error.retryable) {
 | `NETWORK_OFFLINE` | Check internet connection |
 | `LOCK_TIMEOUT` | Another agent holds the lock |
 
-See also: [Troubleshooting](advanced/troubleshooting), [CLI Reference](reference/cli)
+See also: [Troubleshooting](/vant/advanced/troubleshooting), [CLI Reference](/vant/reference/cli)

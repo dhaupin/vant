@@ -81,6 +81,29 @@ test('event has isOperationAllowed function', () => {
     return { success: typeof event.isOperationAllowed === 'function' };
 });
 
+// Multibrain tests
+test('event has getBrainEventConfig function', () => {
+    const event = require(path.join(ROOT, 'lib', 'event'));
+    return { success: typeof event.getBrainEventConfig === 'function' };
+});
+
+test('event has setBrainEventConfig function', () => {
+    const event = require(path.join(ROOT, 'lib', 'event'));
+    return { success: typeof event.setBrainEventConfig === 'function' };
+});
+
+// Stack tests
+test('event has getStackEventConfigs function', () => {
+    const event = require(path.join(ROOT, 'lib', 'event'));
+    return { success: typeof event.getStackEventConfigs === 'function' };
+});
+
+test('getStackEventConfigs returns object with source stack', () => {
+    const event = require(path.join(ROOT, 'lib', 'event'));
+    const result = event.getStackEventConfigs();
+    return { success: result && result.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

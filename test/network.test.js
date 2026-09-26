@@ -181,4 +181,16 @@ async function _printResults() {
     process.exit(results.failed > 0 ? 1 : 0);
 }
 
+// Stack tests
+test('network has getStackNetworkStatus function', () => {
+    const network = require(path.join(ROOT, 'lib', 'network'));
+    return { success: typeof network.getStackNetworkStatus === 'function' };
+});
+
+test('getStackNetworkStatus returns object with source stack', () => {
+    const network = require(path.join(ROOT, 'lib', 'network'));
+    const result = network.getStackNetworkStatus();
+    return { success: result && result.source === 'stack' };
+});
+
 _printResults();

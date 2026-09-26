@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /faq
+permalink: /getting-started/faq
 layout: default
 title: FAQ
-nav_order: 15
+nav_order: 17
 ---
 
 # Frequently Asked Questions
@@ -13,7 +13,7 @@ Common questions about Vant.
 
 ### What is Vant?
 
-Vant (Versatile Autonomous Networked Tool) is an open source system for AI agent memory persistence. It uses GitHub as storage so agents can remember everything between sessions.
+Vant is persistent memory for AI agents, stored as plain files in your GitHub repo. Agents read the memory when a session starts and write what they learned before it ends. A runtime underneath keeps the memory operations safe, and an MCP server exposes the whole surface as tools.
 
 ### Do I need GitHub?
 
@@ -42,7 +42,7 @@ Technical details and implementation.
 ### How does brain transfer work?
 How memory persists across sessions.
 
-```
+```text
 Session 1 ends:
   1. Save brain files
   2. Commit to GitHub
@@ -63,7 +63,7 @@ Vant's version tracking:
 
 ### Can multiple agents share one brain?
 
-Yes! Use the [Multi-Agent System](tutorials/multi-agent) with:
+Yes! Use the [Multi-Agent System](/vant/multi-agent/coordination) with:
 - Git branches per agent
 - File locks for coordination
 
@@ -108,9 +108,8 @@ Get help when you need it.
 
 ### How do I get help?
 
-- [GitHub Issues](https://github.com/dhaupin/issues) - Bug reports
-- [Discussions](https://github.com/dhaupin/discussions) - Q&A
-- [Discord](https://discord.gg/vant) - Chat (if available)
+- [GitHub Issues](https://github.com/dhaupin/vant/issues) - Bug reports
+- [Discussions](https://github.com/dhaupin/vant/discussions) - Q&A
 
 ### Where's the roadmap?
 
@@ -118,12 +117,12 @@ See [ROADMAP](https://github.com/dhaupin/blob/main/ROADMAP.md) in the repo.
 
 ### Can I contribute?
 
-Yes! See [Contributing Guide](getting-started/contributing) in the docs.
+Yes! See [Contributing Guide](/vant/getting-started/contributing) in the docs.
 
 ---
 
 ## Related
 
-- [Quickstart](getting-started/quick-start)
-- [Architecture](essential/architecture)
-- [Build Agent Tutorial](tutorials/build-agent)
+- [Quickstart](/vant/getting-started/quick-start)
+- [Architecture](/vant/essential/architecture)
+- [Build Agent Tutorial](/vant/getting-started/agent-onboarding)

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /integrations/agent-skills
 layout: default
 title: Agent Skills
-nav_order: 30
+nav_order: 82
 description: Using Vant with Agent Skills format (Claude Code, Codex, Cursor)
 ---
 
@@ -15,7 +15,7 @@ Vant supports the [Agent Skills](https://agentskills.io) specification, making i
 
 Vant exports a skill in the Agent Skills format:
 
-```
+```bash
 vant/
 ├── SKILL.md                    # Required: YAML frontmatter + instructions
 ├── references/
@@ -65,8 +65,7 @@ Activate this skill when:
 
 | Command | Description |
 |---------|-------------|
-| `vant init` | Initialize brain |
-| `vant start` | Start session (load + sync + run) |
+| `vant start` | Full startup (health, sync, load, run) |
 | `vant sync` | Sync brain with GitHub |
 | `vant islands list` | Show available islands |
 | `vant config set` | Set configuration |
@@ -130,6 +129,6 @@ vant branch create agent-b
 
 ## Related
 
-- [Getting Started](getting-started/quick-start)
-- [MCP Integration](reference/mcp-tools)
-- [Multi-Agent Guide](essential/multi-agent)
+- [Getting Started](/vant/getting-started/quick-start)
+- [MCP Integration](/vant/reference/mcp-tools)
+- [Multi-Agent Guide](/vant/multi-agent/agents)

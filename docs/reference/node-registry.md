@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/node-registry
 layout: default
 title: Node Registry API
-nav_order: 85
+nav_order: 127
 ---
 
 # Node Registry API

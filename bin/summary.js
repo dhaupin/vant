@@ -4,7 +4,6 @@
  *
  * Usage: vant summary
  */
-const vaf = require("../lib/vaf");
 
 // -h/--help
 const args = process.argv.slice(2);
@@ -20,7 +19,6 @@ if (args[0] === '-h' || args[0] === '--help') {
  *        vant summary --json
  */
 
-const autoUpdate = require('../lib/update');
 const fs = require('fs');
 const path = require('path');
 
@@ -28,15 +26,20 @@ const MODELS_PATH = process.env.MODEL_PATH || 'models';
 
 /**
  * Get session summary from brain
+ * Note: Session tracking is not yet fully implemented in lib/update
+ * Returns placeholder data for now
  */
 function getSessionSummary() {
-    const summary = autoUpdate.getSessionSummary();
-    
-    if (!summary) {
-        return { message: 'No session data. Start a session first.' };
-    }
-    
-    return summary;
+    // TODO: Implement actual session tracking
+    // For now, return empty summary
+    return {
+        message: 'No session data. Session tracking not yet implemented.',
+        messages: 0,
+        tokens: 0,
+        decisions: 0,
+        filesModified: [],
+        learnings: []
+    };
 }
 
 /**

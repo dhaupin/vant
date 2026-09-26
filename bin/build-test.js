@@ -2,6 +2,11 @@ const version = require('../lib/version');
 /**
  * Vant Build Test
  * Validates all scripts can load without errors
+ *
+ * CWD-INDEPENDENT (pass 18 bin sweep): file checks resolve from this
+ * script's location, not the caller's cwd, so `vant build-test` returns
+ * the same verdict from any directory. Previously config.example.ini and
+ * .env.example were checked cwd-relative and false-failed in fresh dirs.
  */
 
 const { execSync } = require('child_process');
@@ -10,12 +15,16 @@ const fs = require('fs');
 // Lazy-load sandbox
 let _sandbox = null;
 function _getSandbox() {
-    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    // was './lib/sandbox' - broken relative require that silently never loaded
+    if (!_sandbox) { try { _sandbox = require("../lib/sandbox"); } catch (e) {} }
     return _sandbox;
 }
 function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
 function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
+
+// Repo root = parent of bin/ (all template file checks anchor here)
+const ROOT = path.resolve(__dirname, '..');
 
 const TESTS = [];
 
@@ -25,14 +34,14 @@ function test(name, fn) {
 
 // Test: Config example exists
 test('config.example.ini exists', () => {
-    if (!fs.existsSync('config.example.ini')) {
+    if (!fs.existsSync(path.join(ROOT, 'config.example.ini'))) {
         throw new Error('config.example.ini not found');
     }
 });
 
 // Test: Env example exists
 test('.env.example exists', () => {
-    if (!fs.existsSync('.env.example')) {
+    if (!fs.existsSync(path.join(ROOT, '.env.example'))) {
         throw new Error('.env.example not found');
     }
 });
@@ -86,8 +95,8 @@ test('qos.js works', () => {
     }
 });
 
-// Test: logger.js works
-test('logger.js works', () => {
+// Test: audit.js works (audit is Vant's logger)
+test('audit.js works', () => {
     const logger = require('../lib/audit');
     logger.info('Test log', { test: true });
 });
@@ -95,7 +104,7 @@ test('logger.js works', () => {
 // Test: error.js works
 test('error.js works', () => {
     const errors = require('../lib/error');
-    if (typeof errors.Error !== 'function') {
+    if (typeof errors.VantError !== 'function') {
         throw new Error('error.js missing vantError()');
     }
 });
@@ -130,7 +139,7 @@ test('resolution.js loads', () => {
 test('example configs exist', () => {
     const configs = ['config.example.ini', '.env.example'];
     configs.forEach(c => {
-        if (!fs.existsSync(c)) {
+        if (!fs.existsSync(path.join(ROOT, c))) {
             throw new Error(`${c} not found`);
         }
     });

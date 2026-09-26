@@ -75,6 +75,21 @@ test('Throttler is constructor', () => {
 });
 
 // ============================================
+// STACK TESTS
+// ============================================
+
+test('qos has getStackQoSStatus function', () => {
+    const qos = require(path.join(ROOT, 'lib', 'qos'));
+    return { success: typeof qos.getStackQoSStatus === 'function' };
+});
+
+test('getStackQoSStatus returns object with source stack', () => {
+    const qos = require(path.join(ROOT, 'lib', 'qos'));
+    const result = qos.getStackQoSStatus();
+    return { success: result && result.source === 'stack' };
+});
+
+// ============================================
 // SUMMARY
 // ============================================
 

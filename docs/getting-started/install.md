@@ -82,7 +82,7 @@ node bin/vant.js health
 ```
 
 ### What's Included
-```
+```bash
 vant/
 ├── bin/          # CLI executables
 ├── lib/          # Core modules
@@ -216,7 +216,7 @@ Give this to your AI agent to self-configure:
 
 > "Set up Vant (https://github.com/dhaupin/vant) as my persistent brain. Clone the repo, configure it with GITHUB_REPO and GITHUB_TOKEN, then run `vant start` to begin."
 
-See also: [Quick Start](getting-started/quick-start)
+See also: [Quick Start](/vant/getting-started/quick-start)
 
 ---
 
@@ -239,7 +239,7 @@ vant sync
 ```
 
 You should see output like:
-```
+```text
 ✅ Vant v0.8.6
 ✅ Config loaded
 ✅ GitHub connected
@@ -307,6 +307,6 @@ docker run -it dhaupin/vant vant health
 
 ## Related
 
-- [Quick Start](getting-started/quick-start) - Run your first commands
-- [Configuration](reference/configuration) - Customize Vant
-- [Build First Agent](tutorials/build-agent) - Tutorial
+- [Quick Start](/vant/getting-started/quick-start) - Run your first commands
+- [Configuration](/vant/reference/config) - Customize Vant
+- [Build First Agent](/vant/getting-started/agent-onboarding) - Tutorial

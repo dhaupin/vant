@@ -1,3 +1,6 @@
+# Brain (private - per user/agent)
+models/private/
+
 # Dependencies
 node_modules/
 
@@ -10,6 +13,13 @@ node_modules/
 models/public/.state.json
 models/public/repos/
 
+# Runtime state files (explicit)
+models/.resolution.json
+models/.providers.json
+models/state.json
+models/**/.*.json
+models/**/.*.ini
+
 # IDE
 .vscode/
 .idea/
@@ -20,12 +30,9 @@ models/public/repos/
 .DS_Store
 Thumbs.db
 
-# Runtime state (generated at runtime)
-models/.*.json
-models/private/
+# Runtime state (dotfiles - generated at runtime)
 models/private/**
 .agent_tmp/
-models/backup/
 storage/
 temp/
 
@@ -43,6 +50,31 @@ build/
 *.tmp
 temp/models/latent/*.vpatch
 
+# Migration test fixture scratch (test/migrations.test.js)
+.migration-fixture/
+.migration-fixture-legacy-main/
+
+# Snapshot test scratch + runtime point-in-time snapshots
+.snapshot-scratch/
+models/.snapshots/
+# (pass 23) safe-write horcrux tmp files (snapshot/refresh encode targets)
+*.tmp.svg
+
+# Runtime tmp-space data (myStuff dropbox etc. — per-runtime, not template)
+models/tmp-space/
+
+# QC drill scratch (real-tree migration drills)
+.drill-*/
+
+# Agent capability-probe scratch (sandbox gate tests, never tracked)
+/private/
+
+# scripts/ scratch (one-shot repair/probe scripts) - see scripts/.gitignore
+# for the convention: underscore/tmp- prefixed tools stay untracked.
+scripts/_*
+scripts/tmp-*
+scripts/*.local.js
+
 # Lock files (brain + storage)
 .lock-brain-token
 .locks/
@@ -50,6 +82,7 @@ temp/models/latent/*.vpatch
 # Circuit breakers (runtime state)
 .circuit*.json
 models/latent/*.vpatch
+models/latent/.*
 
 # Geometry storage in brain (runtime-generated)
 models/*/geometry
@@ -58,7 +91,19 @@ models/*/geometry
 data/
 config.ini
 
-# My private brain (scribe)
-models/private/scribe/
+# NOTE: models/public/vant/boot/ contents (including <agent>-p_*.svg
+# horcrux snapshots) are PUBLIC by design. The p_ convention embeds
+# the password in the filename — the file IS the public artifact.
+# See models/public/vant/boot/README.md. Do NOT gitignore them.
+#
+# Sidecar files (.manifest.json, .sha256) for snapshots are reproducible
+# side-products of bin/snapshot.js — ignore them, keep only the .svg.
+models/public/vant/boot/*-p_*.svg.manifest.json
+models/public/vant/boot/*-p_*.svg.sha256
+# Existing tracked public-template horcruxes (nova, scribe, hypha)
+# stay tracked; new snapshots from bin/snapshot.js get tracked too.
 
-models/backup/
+
+# Backup files
+*.bak
+settings.ini

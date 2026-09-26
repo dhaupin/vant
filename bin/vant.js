@@ -42,7 +42,7 @@ async function distributed(args) {
     
     // Initialize as distributed
     console.log('\n→ Initializing OS...');
-    vant.runop({ distributed: true, layers: { registry: true, consensus: true } });
+    vant.init({ distributed: true, layers: { registry: true, consensus: true } });
     
     // Register this node
     const registry = vant.registry();
@@ -99,7 +99,7 @@ const COMMANDS = {
     // Server modes
     node: 'node.js',
 
-    // Trifecta modes (via vant.startFull)
+    // All-mode servers (via vant.startFull)
     mcp: null,  // handled inline
     api: null,  // handled inline
     all: null,  // handled inline
@@ -124,7 +124,6 @@ const COMMANDS = {
     
     // Automation
     prune: 'prune.js',
-    vibe: 'vibe.js',
     repos: 'repos.js',
     hybrid: 'hybrid-sync.js',
     search: 'search.js',
@@ -145,6 +144,18 @@ const COMMANDS = {
     
     // Brain horcrux (backup/restore)
     horcrux: 'horcrux.js',
+    
+    // Brain layout migrations (prd-storage.md)
+    migrate: 'migrate.js',
+    
+    // Storage WAL crash recovery (prd-storage.md)
+    wal: 'wal.js',
+    
+    // Storage mirror replication (prd-storage.md)
+    mirror: 'mirror.js',
+    
+    // Remote storage connectors — S3/R2/MinIO/B2 (prd-storage.md)
+    s3: 's3.js',
     
     // Agent spawning
     spawn: 'agent-spawner.js',
@@ -168,12 +179,8 @@ const COMMANDS = {
     // Brain & Geometry
     brain: 'brain.js',
     geometry: 'geometry.js',
-    duality: 'geometry.js',
     
     // Additional utilities
-    audit: 'audit.js',
-    branch: 'branch-manager.js',
-    repos: 'repos.js',
     teams: 'teams.js',
     governance: 'governance.js',
     
@@ -217,11 +224,60 @@ const COMMANDS = {
     vaf: 'vaf.js',
     
     // Core modules
+    // NOTE: api.js is intentionally NOT routed here. `api` stays with the
+    // all-mode inline handler below (startFull mode 'api') — a later
+    // `api: 'api.js'` key in this object literal used to shadow it silently
+    // (duplicate-key footgun). bin/api.js remains reachable for utilities
+    // (status/routes/call/docs) via its documented direct invocation.
     agents: 'agents.js',
-    api: 'api.js',
     error: 'error.js',
     escrow: 'escrow.js',
-    nature: 'nature.js'
+    nature: 'nature.js',
+    agora: 'agora.js',
+    genesis: 'genesis.js',
+    mesh: 'mesh-status.js',
+
+    // Advertised in help but previously unrouted (pass 16 gap sweep).
+    // All 16 have real bin/*.js CLIs; help promised them, the map didn't.
+    trust: 'trust.js',
+    market: 'market.js',
+    secret: 'secret.js',
+    transform: 'transform.js',
+    context: 'context.js',
+    backup: 'backup.js',
+    memory: 'memory.js',
+    registry: 'registry.js',
+    webhooks: 'webhooks.js',
+    // Singular alias — help/banner advertised `vant webhook` for months but
+    // no route existed (bare command hit unknown-command). webhooks.js shows
+    // usage on a bare/unknown subcommand, so the alias is safe.
+    webhook: 'webhooks.js',
+    zen: 'zen.js',
+    consciousness: 'consciousness.js',
+    recursion: 'recursion.js',
+    forum: 'forum.js',
+
+    // Bin CLIs that existed but were never routed (pass 18 bin sweep)
+    org: 'org.js',
+    snapshot: 'snapshot.js',
+    'brain-registry': 'brain-registry.js',
+    'brain-unlock': 'brain-unlock.js',
+    'node-registry': 'node-registry.js',
+    'islands-boot': 'islands-boot.js',
+    'docs-build': 'docs-build.js',
+    'build-test': 'build-test.js',
+    'format-test': 'format-test.js',
+    'test-all': 'test-all.js',
+
+    // Git-branch utility (repo-code branches; distinct from `vant branch`,
+    // which manages the BRAIN's git-backed branching). Was unroutable for
+    // months because `branch` shadows it in this table.
+    'git-branch': 'branch.js'
+
+    // Unrouted on purpose:
+    //   mcp.js        — standalone server entry (npm bin "mcp"); `vant mcp`
+    //                   is the inline all-mode handler.
+    //   cli-standard.js — doc-only template for new CLIs, not a command.
 };
 
 const args = process.argv.slice(2);
@@ -230,11 +286,16 @@ if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
 
 // Handle: vant help <cmd>
 if (cmd === 'help' && args[1]) {
-    const { spawn } = require('child_process');
     // Validate command name to prevent injection
     const helpCmd = args[1].replace(/[^a-zA-Z0-9_-]/g, '');
-    const child = spawn('node', ['bin/help.js', helpCmd], { stdio: 'inherit' });
+    // (pass 20) Path must be __dirname-anchored: a cwd-relative 'bin/help.js'
+    // broke `vant help <cmd>` from any directory other than the install root
+    // (MODULE_NOT_FOUND). And without the return below, the parent fell
+    // through to its own banner + process.exit(0), racing/losing the child's
+    // specific help output.
+    const child = spawn('node', [path.join(BIN_DIR, 'help.js'), helpCmd], { stdio: 'inherit' });
     child.on('exit', (code) => process.exit(code || 0));
+    return;
 }
 
 // Handle learn/remember commands directly
@@ -271,10 +332,12 @@ if (cmd === 'learn' || cmd === 'remember') {
         try {
             await vant.init({ debug: false });
             
+            const memory = require('../lib/memory');
+            
             if (cmd === 'learn') {
                 const options = ttl ? { ttl } : {};
                 const result = await vant.withSecurity(
-                    () => vant.learn(key, content || '', options),
+                    () => memory.learn(key, content || '', options),
                     { type: 'write', key, args: { key, content: content || '' } }
                 );
                 console.log(`✅ Learned: ${key}`, result.ttl ? `(TTL: ${result.ttl}ms)` : '');
@@ -284,18 +347,55 @@ if (cmd === 'learn' || cmd === 'remember') {
                     // Store
                     const options = ttl ? { ttl } : {};
                     const result = await vant.withSecurity(
-                        () => vant.remember(key, content, options),
+                        () => memory.state(key, content, options),
                         { type: 'write', key, args: { key, content } }
                     );
                     console.log(`✅ Remembered: ${key}`, result.ttl ? `(TTL: ${result.ttl}ms)` : '');
                 } else {
                     // Recall
                     const result = await vant.withSecurity(
-                        () => vant.remember(key),
+                        () => memory.recall(key),
                         { type: 'read', key, args: { key } }
                     );
                     console.log(result || '(not found)');
                 }
+            }
+            process.exit(0);
+        } catch (e) {
+            console.error('Error:', e.message);
+            process.exit(1);
+        }
+    })();
+    return;
+}
+
+
+// Handle address/locate commands
+if (cmd === 'address' || cmd === 'locate') {
+    const vant = require('../lib/vant');
+    
+    let data = args.slice(1).join(' ');
+    
+    if (!data) {
+        console.error(`Usage: vant ${cmd} <data|barcode>`);
+        console.error(`Example: vant address '{"note": "test"}'`);
+        console.error(`       vant locate 1-12345-67890-5`);
+        process.exit(1);
+    }
+    
+    (async () => {
+        try {
+            await vant.init({ debug: false });
+            const memory = require('../lib/memory');
+            
+            if (cmd === 'address') {
+                let parsed;
+                try { parsed = JSON.parse(data); } catch(e) { parsed = data; }
+                const barcode = await memory.address(parsed);
+                console.log(`✅ Addressed: ${barcode}`);
+            } else {
+                const result = await memory.locate(data);
+                console.log(result || '(not found)');
             }
             process.exit(0);
         } catch (e) {
@@ -348,14 +448,18 @@ System:
   vant network  Network operations
   vant theme    Theme management
 
-Memory:
-  vant learn <key> <content> [--ttl ms]  Store learning
-  vant remember <key> [content] [--ttl ms]  Store/recall memory
+Memory (Unified API - sandbox + RLS secured):
+  vant learn <key> <content> [--ttl ms]  Store document (markdown)
+  vant remember <key> [content] [--ttl ms]  Store/recall state
+  vant address <data> [--ttl ms]          Store at NSC9 geometric address
+  vant locate <barcode>                  Retrieve from NSC9 address
+  vant memory <cmd>                       Full memory CLI (state|learn|query|...)
 
 Development:
   vant test         Run smoke tests
   vant test core    Run core test suite
   vant test full    Run all tests (500+)
+  vant test-all     17-check self-test (health/search/islands/lib exports)
   vant validate    Schema + audit + circuits
   vant changelog   View changes
 
@@ -374,19 +478,23 @@ Brain:
   vant lock       Brain write lock (acquire/release/status)
   vant horcrux    Backup/restore brain to images
   vant stego      Stego brain recovery
+  vant migrate    Brain layout versioning (status/dry-run/apply)
+  vant wal        Storage crash-recovery journal (status/drill/reset)
+  vant s3         Remote storage connectors — S3/R2/MinIO/B2 (status/test/ls/push/pull)
+  vant mirror     Storage replication (status/verify/resync)
 
 State:
-  vant vibe        Show/set vibe
   vant watch      Poll GitHub for changes
   vant summary    Session stats
 
 Integrations:
   vant mcp        MCP server for AI tools
   vant node       Persistent node
-  vant webhook   Webhook server + send
+  vant webhooks   Webhook management (list/add/remove/test)
   vant server     HTTP/HTTPS server with security chain
 
 Utilities:
+  vant spawn      Spawn/manage agents (agent-spawner)
   vant canvas     Visualization tools
   vant compress   Compression tools
   vant compute   Multi-language runner
@@ -427,8 +535,13 @@ Core:
 
 Brain:
   vant brain mode <mode>  Set brain mode (dual/public/private/remote)
-  vant geometry          Brain-Quasicrystal duality bridge
-  vant duality          Alias for geometry
+  vant geometry          NSC9 quasicrystal storage (barcode addressing)
+
+NSC9 Geometric:
+  vant geometry store <key> <val>   Store in quasicrystal
+  vant geometry retrieve <key>       Retrieve from quasicrystal
+  vant geometry address <data>      Store at random barcode
+  vant geometry locate <barcode>    Retrieve by barcode
 
 Auth:
   MCP requires API key if VANT_MCP_REQUIRE_KEY=true.
@@ -456,8 +569,8 @@ Headless:
     await vant.startHeadless({ port: 3000 });
   Or: export VANT_MODE=headless
 
-  vant notify    Send notifications
-  vant linear   Linear issue tracking (requires island)
+  (vant notify / vant linear were removed: no backing CLI exists.
+  Notifications and Linear live on the islands/lib API, not the shell.)
 
 Config:
   vant config get <key>   Get config value
@@ -475,6 +588,24 @@ Setup:
   vant help      Show help (this message)
 `);
     process.exit(0);
+}
+
+// Levenshtein distance for the unknown-command suggestion (small n, plain DP
+// is fine; no dep needed).
+function _editDistance(a, b) {
+    const m = a.length, n = b.length;
+    const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            dp[i][j] = Math.min(
+                dp[i - 1][j] + 1,
+                dp[i][j - 1] + 1,
+                dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+            );
+        }
+    }
+    return dp[m][n];
 }
 
 const script = COMMANDS[cmd];
@@ -495,7 +626,17 @@ if (!script) {
             process.exit(1);
         });
     } else if (cmd === 'mcp' || cmd === 'api' || cmd === 'all') {
-        // Trifecta mode handler
+        // (pass 20) `vant api <subcmd>` = the utility CLI (bin/api.js:
+        // status/routes/call/docs); bare `vant api` = all-mode API-server
+        // mode. Previously the utility CLI was unreachable — the inline
+        // handler swallowed its subcommands too.
+        if (cmd === 'api' && args[1]) {
+            const sub = args[1].replace(/[^a-zA-Z0-9_-]/g, '');
+            const child = spawn('node', [path.join(BIN_DIR, 'api.js'), sub, ...args.slice(2)], { stdio: 'inherit' });
+            child.on('exit', (code) => process.exit(code || 0));
+            return;
+        }
+        // All-mode handler
         const mode = cmd;
         const vant = require('../lib/vant');
         vant.startFull({ mode, debug: true }).then(r => {
@@ -509,6 +650,18 @@ if (!script) {
         });
     } else {
         console.error('Unknown command:', cmd);
+        // Suggest the closest real command (edit distance over routed names
+        // + built-ins). Catches typos like `vant helth` → health.
+        const candidates = Object.keys(COMMANDS)
+            .filter(k => k !== cmd)
+            .map(k => ({ k, d: _editDistance(cmd, k) }))
+            .filter(x => x.d <= Math.max(2, Math.floor(cmd.length / 3)))
+            .sort((a, b) => a.d - b.d)
+            .slice(0, 3);
+        if (candidates.length) {
+            console.error('Did you mean: ' + candidates.map(x => x.k).join(', ') + '?');
+        }
+        console.error('Run `vant help` to see all commands.');
         process.exit(1);
     }
     return;
@@ -517,7 +670,20 @@ if (!script) {
 const scriptPath = path.join(BIN_DIR, script);
 const child = spawn('node', [scriptPath, ...process.argv.slice(3)], {
     stdio: 'inherit',
-    cwd: path.dirname(__dirname)
+    env: {
+        ...process.env,
+        // (pass 23) Tell routed subcommands where the INSTALL tree lives.
+        // cwd stays the user's project (see below); libs that need the
+        // install tree (horcrux targets, templates, boot dirs) resolve it
+        // via lib/anchor.js getRepoRoot() instead of guessing from cwd or
+        // __dirname. Brain CONTENT paths stay cwd-anchored BY DESIGN.
+        VANT_REPO_ROOT: path.resolve(__dirname, '..')
+    }
+    // cwd: intentionally NOT overridden. Subcommands must run in the user's
+    // working directory - the brain runtime resolves models/ relative to cwd
+    // (lib/brain.js getBrainPath). The previous cwd=package-root meant every
+    // spawned subcommand (start/health/sync/migrate...) read and wrote the
+    // install directory instead of the user's project.
 });
 
 child.on('exit', (code) => process.exit(code || 0));

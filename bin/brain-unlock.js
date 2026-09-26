@@ -29,7 +29,7 @@ async function main() {
     }
     
     if (args.includes('--clear') || args.includes('-c')) {
-        secret.clear('brain');
+        await secret.clear('brain');
         console.log('Brain password cleared');
         return;
     }
@@ -53,7 +53,7 @@ Uses lib/secret for password management:
     }
     
     if (args.includes('--info')) {
-        const svgPath = args[1] || 'hypha-brain.svg';
+        const svgPath = args[1] || 'models/public/vant/boot/axolotl-p_axolotl2026.svg';
         if (!fs.existsSync(svgPath)) {
             console.log('File not found:', svgPath);
             return;
@@ -69,7 +69,7 @@ Uses lib/secret for password management:
         return;
     }
     
-    const svgFile = args[0] || 'hypha-brain.svg';
+    const svgFile = args[0] || 'models/public/vant/boot/axolotl-p_axolotl2026.svg';
     if (!fs.existsSync(svgFile)) {
         console.error('File not found:', svgFile);
         process.exit(1);
@@ -93,7 +93,7 @@ Uses lib/secret for password management:
         
         if (result.error) {
             console.error('Decryption failed:', result.error);
-            secret.clear('brain');
+            await secret.clear('brain');
             process.exit(1);
         }
         
@@ -105,7 +105,7 @@ Uses lib/secret for password management:
         
     } catch (e) {
         console.error('Error:', e.message);
-        secret.clear('brain');
+        await secret.clear('brain');
         process.exit(1);
     }
 }

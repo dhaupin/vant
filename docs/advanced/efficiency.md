@@ -5,7 +5,7 @@ permalink: /advanced/efficiency
 layout: default
 title: Efficiency
 
-nav_order: 62
+nav_order: 100
 ---
 
 
@@ -23,7 +23,7 @@ Vant is designed to be lightweight and efficient. This guide covers optimization
 
 - Use concise prompts
 - Avoid repetition
-- Leverage brain files for context
+- Use brain files for context
 
 ### Context Window
 
@@ -61,8 +61,8 @@ Vant is designed to be lightweight and efficient. This guide covers optimization
 
 ## Related
 
-- [Operations](operations/operations) - CLI commands
-- [Configuration](reference/configuration) - Config options
-- [Architecture](essential/architecture) - System design
-- [Testing](tutorials/testing) - Quality assurance
-- [Troubleshooting](advanced/troubleshooting) - Problem solving
+- [Operations](/vant/operations/operations) - CLI commands
+- [Configuration](/vant/reference/config) - Config options
+- [Architecture](/vant/essential/architecture) - System design
+- [Testing](/vant/operations/testing) - Quality assurance
+- [Troubleshooting](/vant/advanced/troubleshooting) - Problem solving

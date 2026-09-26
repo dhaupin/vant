@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /examples
+permalink: /getting-started/examples
 layout: default
 title: Examples & Showcase
-nav_order: 14
+nav_order: 16
 ---
 
 # Examples & Showcase
@@ -36,7 +36,7 @@ Common scenarios where Vant excels.
 
 Agent runs that take days/weeks and need context preserved:
 
-```
+```text
 Session 1: Research topic ──→ GitHub
 Session 2: Analyze data  ──→ GitHub  
 Session 3: Write report  ──→ GitHub
@@ -47,7 +47,7 @@ Session 3: Write report  ──→ GitHub
 
 Coordinated agents with branch isolation:
 
-```
+```text
 main (production brain)
     │
     ├── researcher-agent/
@@ -59,7 +59,7 @@ main (production brain)
 
 Deploy to devices that lose power:
 
-```
+```text
 Edge device starts → Load brain from GitHub
                   Does work
                   Save brain to GitHub
@@ -305,7 +305,7 @@ async function versionExample() {
 
 ### Auto-Save on Exit
 
-> ⚠️ **Warning for GitHub.com**: Auto-save triggers a sync which counts against rate limits and violates GitHub.com ToS if used for continuous polling. **Use for manual save only**, or use with self-hosted GitLab/Gitea.
+> **Warning for GitHub.com**: Auto-save triggers a sync which counts against rate limits and violates GitHub.com ToS if used for continuous polling. **Use for manual save only**, or use with self-hosted GitLab/Gitea.
 
 ```javascript
 const autoUpdate = require('./lib/auto-update');
@@ -355,7 +355,7 @@ async function customBrainExample() {
 
 ## Related
 
-- [Build Agent Tutorial](tutorials/build-agent)
-- [Multi-Agent Tutorial](tutorials/multi-agent)
-- [Telegram Bot Tutorial](tutorials/telegram-bot)
+- [Build Agent Tutorial](/vant/getting-started/agent-onboarding)
+- [Multi-Agent Tutorial](/vant/multi-agent/coordination)
+- [Telegram Bot Tutorial](/vant/integrations/telegram-bot)
 - [GitHub](https://github.com/dhaupin/vant) - star us!

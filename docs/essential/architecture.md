@@ -3,14 +3,14 @@ version: 0.8.6
 permalink: /essential/architecture
 layout: default
 title: System Architecture
-nav_order: 6
+nav_order: 37
 ---
 
 # Architecture
 
 How Vant is designed - persistent memory system using Git.
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Vant Architecture                          │
 │                                                                   │
@@ -36,7 +36,7 @@ Vant uses **Git for persistence** + ** Islands for lazy-loading** + **Branches f
 
 ### Data Flow
 
-```
+```text
 Start → Sync from GitHub → Load brain → Think/Learn → Commit → Push to GitHub
   │           │              │         │          │         │
   ▼           ▼              ▼         ▼          ▼         ▼
@@ -73,7 +73,7 @@ Start → Sync from GitHub → Load brain → Think/Learn → Commit → Push to
 
 ### Models Structure
 
-```
+```text
 models/
 ├── public/           # Brain (syncs to GitHub)
 │   ├── identity.md   # Who you are
@@ -116,7 +116,7 @@ await sync({ direction: 'push' });
 
 ### MCP Flow
 
-```
+```text
 HTTP Request (MCP)
     │
     ▼
@@ -135,7 +135,7 @@ Response
 
 ## Security Layers
 
-```
+```text
 Request → VAF (filter) → Sandbox (capabilities) → Escrow (budget) → Execute
             │               │                    │              │
          [block]        [permission]        [budget]      [run]
@@ -156,12 +156,12 @@ See for details.
 
 ## Related
 
-- [Branch](essential/branch) - Git branch isolation
-- [Lock](essential/multi-agent) - Distributed coordination
-- [VAF](security/vaf) - Input filtering
-- [Sandbox](security/sandbox) - Security sandbox
+- [Branch](/vant/multi-agent/branches) - Git branch isolation
+- [Lock](/vant/multi-agent/agents) - Distributed coordination
+- [VAF](/vant/security/vaf) - Input filtering
+- [Sandbox](/vant/security/sandbox) - Security sandbox
 
 ## Next
 
-- [Runtime](essential/runtime) - Runtime API
-- [Boot](essential/boot) - Startup sequence
+- [Runtime](/vant/runtime/runtime) - Runtime API
+- [Boot](/vant/essential/boot) - Startup sequence

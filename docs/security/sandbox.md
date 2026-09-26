@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /security/sandbox
 layout: default
 title: Sandbox
-nav_order: 52
+nav_order: 67
 ---
 
 # Sandbox
@@ -149,7 +149,7 @@ await s.write(() => doWork());
 console.log(s.getBudget()); // 9999
 ```
 
-Budget tracking uses the escrow system. See [Security](security/security) for details.
+Budget tracking uses the escrow system. See [Escrow](/vant/security/escrow) for details.
 
 ## Multi-Agent
 
@@ -243,6 +243,6 @@ const s = sandbox.create({
 
 ---
 ## Related
-- [Security](security/security) - VAF and encryption
-- [Runtime](essential/runtime) - Programmatic API
-- [Multi-Agent](essential/multi-agent) - Branch and lock system
+- [Security](/vant/security/) - VAF and encryption
+- [Runtime](/vant/runtime/runtime) - Programmatic API
+- [Multi-Agent](/vant/multi-agent/agents) - Branch and lock system

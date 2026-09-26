@@ -1,9 +1,9 @@
 /**
  * Brain Branch Manager (v0.0.1)
- * 
+ *
  * Auto-git-branch on brain writes with smart commits.
  * Auto-push to remote for backup.
- * 
+ *
  * Usage:
  *   node bin/branch-manager.js status   # Show branch status
  *   node bin/branch-manager.js auto      # Auto-branch on dirty
@@ -14,7 +14,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 
 const MODELS_DIR = path.join(__dirname, '..', 'models');
 const PRIVATE_BRAINS = path.join(MODELS_DIR, 'private');
@@ -22,12 +22,21 @@ const PRIVATE_BRAINS = path.join(MODELS_DIR, 'private');
 const GIT_BIN = process.env.GIT_BIN || 'git';
 
 /**
- * Run git command
+ * Run git command (QC_WAVE gap #1: args-array execFileSync — no shell).
+ *
+ * Every argument is passed to git as a single literal argv element, so
+ * metacharacters in branch names, commit messages, or revs (`;`, `&&`,
+ * quotes, backticks, `$()`) are data, never shell syntax. Commit messages
+ * come from brain-file content, which makes this a real injection surface,
+ * not a theoretical one.
+ *
+ * @param {string[]} args - git arguments, one string per argv element
+ * @param {Object} opts - { silent: return null instead of throwing }
+ * @returns {string} trimmed stdout
  */
 function git(args, opts = {}) {
-    const cmd = `${GIT_BIN} ${args}`;
     try {
-        return execSync(cmd, {
+        return execFileSync(GIT_BIN, args, {
             cwd: path.join(__dirname, '..'),
             encoding: 'utf8',
             ...opts
@@ -42,14 +51,14 @@ function git(args, opts = {}) {
  * Get current branch
  */
 function getBranch() {
-    return git('rev-parse --abbrev-ref HEAD');
+    return git(['rev-parse', '--abbrev-ref', 'HEAD']);
 }
 
 /**
  * Get status
  */
 function getStatus() {
-    return git('status --porcelain');
+    return git(['status', '--porcelain']);
 }
 
 /**
@@ -57,7 +66,7 @@ function getStatus() {
  */
 function getCommit() {
     try {
-        return git('rev-parse HEAD').slice(0, 7);
+        return git(['rev-parse', 'HEAD']).slice(0, 7);
     } catch {
         return null;
     }
@@ -67,8 +76,8 @@ function getCommit() {
  * Get diff from remote
  */
 function getRemoteDiff() {
-    return git('diff origin/main..HEAD --stat', { silent: true }) || 
-           git('diff origin/master..HEAD --stat', { silent: true }) || '';
+    return git(['diff', 'origin/main..HEAD', '--stat'], { silent: true }) ||
+           git(['diff', 'origin/master..HEAD', '--stat'], { silent: true }) || '';
 }
 
 /**
@@ -84,7 +93,7 @@ function isDirty() {
 function getChangedBrains() {
     const status = getStatus();
     if (!status) return [];
-    
+
     return status.split('\n')
         .filter(line => line.includes('private/'))
         .map(line => {
@@ -100,21 +109,21 @@ function getChangedBrains() {
  */
 function autoBranch(options = {}) {
     const { prefix = 'agent' } = options;
-    
+
     if (!isDirty()) {
         console.log('[branch] No changes to branch');
         return null;
     }
-    
+
     const brains = getChangedBrains();
     const branchName = `${prefix}-${brains.join('-') || 'changes'}-${Date.now().toString(36)}`;
-    
-    // Create branch
-    git(`checkout -b ${branchName}`);
-    
+
+    // Create branch (args-array: branchName is a single argv element)
+    git(['checkout', '-b', branchName]);
+
     console.log(`[branch] Created branch: ${branchName}`);
     console.log(`[branch] Changed brains: ${brains.join(', ')}`);
-    
+
     return branchName;
 }
 
@@ -126,17 +135,20 @@ function autoCommit(options = {}) {
         console.log('[commit] No changes to commit');
         return null;
     }
-    
+
     const brains = getChangedBrains();
     const branch = getBranch();
-    
+
     // Generate commit message from first brain
     let message = `Auto-commit: ${brains.join(', ')}`;
-    
+
     if (brains.length > 0) {
         const firstBrain = brains[0];
-        const brainPath = path.join(PRIVATE_BRAINS, firstBrain + '.md');
-        if (fs.existsSync(brainPath)) {
+        // (R-6/O-9) brain name from git status becomes a path segment — validate
+        const brainPath = /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(firstBrain)
+            ? path.join(PRIVATE_BRAINS, firstBrain + '.md')
+            : null;
+        if (brainPath && fs.existsSync(brainPath)) {
             const content = fs.readFileSync(brainPath, 'utf8');
             const firstLine = content.split('\n').find(l => l.trim() && !l.startsWith('#'));
             if (firstLine && firstLine.length < 50) {
@@ -144,13 +156,16 @@ function autoCommit(options = {}) {
             }
         }
     }
-    
-    git(`add -A`);
-    git(`commit -m "${message}"`);
-    
+
+    git(['add', '-A']);
+    // The fix that matters: message is ONE argv element. The old
+    // `commit -m "${message}"` shell string let a brain file's first line
+    // (quotes, ;, &&, backticks) execute arbitrary shell commands.
+    git(['commit', '-m', message]);
+
     console.log(`[commit] Committed: ${message}`);
     console.log(`[commit] Branch: ${branch}`);
-    
+
     return message;
 }
 
@@ -160,12 +175,12 @@ function autoCommit(options = {}) {
 function push(options = {}) {
     const { remote = 'origin', force = false } = options;
     const branch = getBranch();
-    
-    const flags = force ? '-f' : '';
-    git(`push ${flags} ${remote} ${branch}`);
-    
+
+    const flags = force ? ['-f'] : [];
+    git(['push', ...flags, remote, branch]);
+
     console.log(`[push] Pushed ${branch} to ${remote}`);
-    
+
     return { remote, branch };
 }
 
@@ -175,21 +190,21 @@ function push(options = {}) {
 function createPR(options = {}) {
     const { title = null, body = '' } = options;
     const branch = getBranch();
-    
+
     // Check if divergent
     const diff = getRemoteDiff();
     if (!diff) {
         console.log('[pr] Branch is up to date with main');
         return null;
     }
-    
+
     // Auto PR title
     const prTitle = title || `Auto: ${getChangedBrains().join(', ') || branch}`;
-    
+
     console.log(`[pr] Would create PR: ${prTitle}`);
     console.log(`[pr] Branch: ${branch}`);
     console.log(`[pr] Run: gh pr create --title "${prTitle}" --base main --head ${branch}`);
-    
+
     return { title: prTitle, branch };
 }
 
@@ -202,7 +217,7 @@ function status() {
     const dirty = isDirty();
     const changed = getChangedBrains();
     const diff = getRemoteDiff();
-    
+
     return {
         branch,
         commit,
@@ -212,6 +227,22 @@ function status() {
         diffLines: diff.split('\n').filter(Boolean).length
     };
 }
+
+// Export for tests and programmatic use (test seam)
+module.exports = {
+    git,
+    getBranch,
+    getStatus,
+    getCommit,
+    getRemoteDiff,
+    isDirty,
+    getChangedBrains,
+    autoBranch,
+    autoCommit,
+    push,
+    createPR,
+    status
+};
 
 // CLI
 const cmd = process.argv[2];

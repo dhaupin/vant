@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /deprecations
+permalink: /reference/deprecations
 layout: default
 title: Deprecations
-nav_order: 92
+nav_order: 117
 ---
 
 > Track deprecated, orphaned, and planned-for-removal files.
@@ -60,22 +60,22 @@ nav_order: 92
 | `lib/conversation.js` | Use `lib/msg.js` - unified Msg class |
 | `lib/ipc.js` | Use `lib/msg.js` - Channel API |
 
-### All Resolved ✓
+### All Resolved
 
 | File | Resolution | Status |
 |------|------------|--------|
-| `lib/env.js` | ✅ Resolved | Now re-exports from config |
-| `lib/config-flag.js` | ✅ Resolved | Now re-exports from config |
-| `lib/buffer.js` | ✅ Resolved | Now re-exports from pool |
-| `lib/storage.js` | ✅ Resolved | Now re-exports from pool |
-| `lib/audit-log.js` | ✅ Resolved | Now re-exports from audit |
-| `lib/metrics.js` | ✅ Resolved | Now re-exports from audit |
-| `lib/horcrux.js` | ✅ Resolved | Now re-exports from stego |
-| `lib/rerank.js` | ✅ Resolved | Now re-exports from search |
-| `lib/search-hybrid.js` | ✅ Resolved | Now re-exports from search |
-| `lib/search-hyde.js` | ✅ Resolved | Now re-exports from search |
-| `lib/serializer.js` | ✅ Resolved | Now re-exports from compression |
-| `lib/entropy.js` | ✅ Resolved | Now re-exports from compression |
+| `lib/env.js` | Resolved | Now re-exports from config |
+| `lib/config-flag.js` | Resolved | Now re-exports from config |
+| `lib/buffer.js` | Resolved | Now re-exports from pool |
+| `lib/storage.js` | Resolved | Now re-exports from pool |
+| `lib/audit-log.js` | Resolved | Now re-exports from audit |
+| `lib/metrics.js` | Resolved | Now re-exports from audit |
+| `lib/horcrux.js` | Resolved | Now re-exports from stego |
+| `lib/rerank.js` | Resolved | Now re-exports from search |
+| `lib/search-hybrid.js` | Resolved | Now re-exports from search |
+| `lib/search-hyde.js` | Resolved | Now re-exports from search |
+| `lib/serializer.js` | Resolved | Now re-exports from compression |
+| `lib/entropy.js` | Resolved | Now re-exports from compression |
 
 ### Use Instead
 
@@ -118,9 +118,9 @@ module.exports = {
 
 ## v0.8.5 - 2026-05-07
 
-- lib/rerank.js → search.js
-- lib/search-hybrid.js → search.js
-- lib/search-hyde.js → search.js
+- lib/rerank.js -> search.js
+- lib/search-hybrid.js -> search.js
+- lib/search-hyde.js -> search.js
 
 ## v0.8.4 - 2026-05-06
 

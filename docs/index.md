@@ -2,134 +2,111 @@
 version: 0.8.6
 permalink: /
 layout: default
-title: Vant Docs
+title: Vant Documentation
 nav_order: 0
+description: Vant is persistent memory for AI agents, stored as plain files in your GitHub repo, loaded by any agent through MCP.
 ---
+
 # Vant Documentation
 
-> Versatile Autonomous Networked Tool - AI agent memory that persists across sessions
+> Agent memory that lives in your repo.
 
-Vant persists through GitHub-based brain transfer. Agents inherit full context from predecessors.
+Vant gives AI agents a brain: memory files the agent reads when it wakes and
+writes when it sleeps. The files are plain markdown in your own repository.
+Git history becomes the memory lineage. Any agent on any stack can use it,
+because the memory is files and the tool interface is MCP.
 
-🔗 [vant.creadev.org](https://vant.creadev.org) | 📦 [GitHub](https://github.com/dhaupin/vant)
+Think of it as your agent's soul that reincarnates with full memories. What
+that means in practice: on wake, the agent loads identity, goals, lessons,
+and errors from `models/`; on sleep, it writes what it learned back. The
+next session starts with all of it.
 
----
+## Three memory systems
 
-## Agent Quick Start
+| System | What it stores | Where |
+|--------|----------------|-------|
+| **The brain** | Markdown memory files: identity, goals, lessons, errors, preferences | `models/public/<brain>/` and `models/private/<brain>/` |
+| **The memory store** | Key-value state and documents, with TTL and sandbox gating | storage layer, per-brain scoped |
+| **Brain search** | Semantic retrieval over the corpus: embeddings, rerank, citations for grounding | embeddings over brain files |
 
-- [Quickstart](getting-started/quick-start) - 5 minute setup
-- [Build Agent](tutorials/build-agent) - 15 min tutorial
-- [MCP Server](integrations/mcp) - Connect to any LLM
-- [Brains](essential/extensibility) - Agents & skills library
+Everything is in your repo. Nothing is in someone else's database. If you
+stop using Vant, the memory is still there, readable with `cat`.
 
-## Agent Templates
+## Quick paths
 
-- [Architect](essential/brains/#included-agents) - System design agent
-- [Engineer](essential/brains/#included-agents) - Implementation agent
-- [Reviewer](essential/brains/#included-agents) - Code review agent
-- [Operator](essential/brains/#included-agents) - DevOps automation
-- [Security](essential/brains/#included-agents) - Security audit
+### For humans: install and start
 
----
+Install Vant globally:
 
-## Key Features
+```bash
+npm install -g vant
+```
 
-| Feature | Description | Docs |
-|--------|-------------|------|
-| **MCP Server** | Model Context Protocol for AI integration | [MCP](integrations/mcp) |
-| **Runtime API** | Programmatic agent API | [Runtime](essential/runtime) |
-| **Persistent Memory** | GitHub-based brain with version control | [Brain](essential/brain) |
-| **Islands** | Componentized brain - lazy-load on-demand | [Islands](essential/islands) |
-| **Multi-Agent** | Branch + lock for safe agent collaboration | [Multi-Agent](essential/multi-agent) |
-| **Skills Library** | 70 reusable agent tools | [Brains](essential/extensibility) |
-| **Storage Layer** | Brain storage abstraction | [Storage](operations/storage) |
-| **Sandbox** | Execution isolation + capabilities | [Sandbox](security/sandbox) |
-| **QoS** | Rate limiting, bulkhead, circuit breaker | [QoS](operations/qos) |
-| **Events** | Event system + pub/sub + jobs | [Events](operations/events) |
-| **Escrow** | Budget tracking + approvals | [Escrow](security/escrow) |
-| **Steganography** | Hidden messages in PNG images | [Stego](advanced/stego) |
-| **Hybrid Search** | BM25 + Vector with RRF re-ranking | [Search](advanced/search) |
-| **Vibe Controls** | Dynamic mood system | [Vibe](advanced/vibe) |
-| **Network** | HTTP with retry + circuit breaker | [Network](operations/network) |
-| **VAF** | Input validation firewall | [VAF](security/vaf) |
-| **Multi-Repo** | Mount external repos like drives | [Repos](integrations/repos) |
-| **Hybrid Sync** | Public/Private brain split | [Hybrid](integrations/hybrid) |
-| **Telegram Bot** | Control Vant via chat | [Telegram](tutorials/telegram-bot) |
-| **Cron** | Scheduled jobs | [Cron](operations/cron) |
-| **Schema** | JSON schema validation | [Schema](reference/schema) |
-| **Audit** | Compliance logging + ledger | [Audit](advanced/audit) |
+Start the full sequence: layout check, health, ready:
 
----
+```bash
+vant start
+```
 
-## About
+`vant start` also imports an old single-brain layout automatically if it
+detects one. See [the migration guide](/vant/getting-started/setup).
 
-Vant solves a core problem: **AI agents lose all context when sessions end.**
+### For agents: connect over MCP
 
-Traditional AI memory solutions:
-- Vector databases store embeddings, but lose full context
-- External state management adds complexity
-- No built-in versioning or audit trail
+Start the MCP server with auto-wired tools:
 
-**Vant's approach:**
-- Git-based storage (versioning, branches, PRs built-in)
-- Markdown brain files (human-readable, editable)
-- Session inheritance (each generation starts where the last left off)
+```bash
+vant mcp
+```
 
-**Use Vant for:**
-- Long-running agentic workflows
-- Multi-agent systems with safe collaboration
-- Persistent AI memory across sessions
+The server listens on `127.0.0.1:3457` by default. Point any MCP client at
+it and the brain surface arrives as tools: read, write, search, migrate
+status. Full client setup in [MCP](/vant/runtime/mcp).
 
----
+Agents inheriting a repo with an existing brain need one command before
+anything else:
 
-## FAQ
-Frequently asked questions answered.
+```bash
+vant migrate --status
+```
 
-### What is a "brain"?
+It reports the brain layout version and whether a legacy import is pending.
 
-Your AI's memory. A folder of markdown files storing who you are, what you've learned, and your context. Each session loads the brain, changes are pushed to GitHub, next session inherits everything.
+## Why files in git
 
-### Do I need GitHub?
+- **Ownership.** Your repo, your history, your backup story.
+- **Review.** What your agent learned shows up in diffs. Approve lessons in
+  a PR, revert the bad ones.
+- **Branching.** Run an agent crew with one branch per agent, then merge
+  what is worth keeping.
+- **Portability.** No API, no export step, no lock-in. The memory is
+  files.
 
-Yes. Vant uses GitHub as storage + version control + sync. Free account works.
+## Runtime underneath
 
-### Is my brain private?
+Memory is the product; the runtime makes it safe to use unattended. A
+security chain gates every brain operation (sandbox capabilities, input
+validation, rate limiting, escrow approval). A write-ahead journal and
+atomic writes survive crashes. Metrics and health endpoints expose what the
+system is doing. Start at [Runtime](/vant/runtime/runtime).
 
-Yes, use a private GitHub repo. Vant is just you + GitHub.
+## Multi-brain and multi-agent
 
-### Can multiple AI agents share one brain?
+One Vant install holds several named brains with a stack you switch
+between. Agents get their own branches and work in isolation. Trust levels
+and a succession ledger control how much state each generation inherits.
+See [Multi-brain](/vant/multi-agent/brains) and [Succession](/vant/multi-agent/succession).
 
-Yes! Use the [Multi-Agent](essential/multi-agent) system with branches + locks.
+## Sections
 
-### How is this different from vector databases?
-
-| Vant | Vector DB |
-|------|----------|
-| Full context | Embeddings only |
-| Git-based | API-based |
-| Session inheritance | Semantic search |
-
-### Does Vant cost money?
-
-No - it's open source. Just need a free GitHub account + your own AI API keys.
-
-### What's the "succession" system?
-
-Vant's version tracking - knows which brain version to load, handles rollbacks.
-
-### Can I export my brain?
-
-Yes! Just `git clone` your brain repo. It's all markdown.
-
----
-
-## Legal
-
-> **IMPORTANT**: Read before using Vant. By using this software, you agree to our terms.
-
-| Document | Purpose |
-|----------|---------|
-| [Terms & Disclaimer](reference/legal) | Warranty, liability, responsibilities |
-| [Privacy](security/privacy) | Data collection, your control |
-| [Environment](security/environment) | GitHub API, limits |
-
+| Section | Contents |
+|---------|----------|
+| [Getting started](/vant/getting-started/quick-start) | Install, configure, first run, agent onboarding |
+| [Memory](/vant/memory/brain) | The brain, memory store, search, citations, horcrux, geometry |
+| [Runtime](/vant/runtime/runtime) | Programmatic API, MCP, headless server |
+| [Multi-agent](/vant/multi-agent/brains) | Brains, branches, succession, crews |
+| [Operations](/vant/operations/storage) | Storage, journal, events, cache, CI |
+| [Security](/vant/security/sandbox) | Sandbox, gates, escrow, sudo |
+| [Integrations](/vant/integrations/github) | GitHub, agent skills, Linear, Docker, S3 |
+| [Reference](/vant/reference/cli) | CLI commands, configuration, changelog |
+| [Advanced](/vant/advanced/search-architecture) | Search internals, API architecture, NSC9 spec |

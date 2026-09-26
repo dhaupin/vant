@@ -265,6 +265,32 @@ test('isOperationAllowed has allowed boolean', () => {
 });
 
 // ============================================
+// ============================================
+// MULTIBRAIN TESTS
+// ============================================
+
+test('sandbox has getBrainSandboxConfig function', () => {
+    const sandbox = require(path.join(ROOT, 'lib', 'sandbox'));
+    return { success: typeof sandbox.getBrainSandboxConfig === 'function' };
+});
+
+test('sandbox has setBrainSandboxConfig function', () => {
+    const sandbox = require(path.join(ROOT, 'lib', 'sandbox'));
+    return { success: typeof sandbox.setBrainSandboxConfig === 'function' };
+});
+
+// Stack tests
+test('sandbox has getStackSandboxConfigs function', () => {
+    const sandbox = require(path.join(ROOT, 'lib', 'sandbox'));
+    return { success: typeof sandbox.getStackSandboxConfigs === 'function' };
+});
+
+test('getStackSandboxConfigs returns object with source stack', () => {
+    const sandbox = require(path.join(ROOT, 'lib', 'sandbox'));
+    const result = sandbox.getStackSandboxConfigs();
+    return { success: result && result.source === 'stack' };
+});
+
 // SUMMARY
 // ============================================
 

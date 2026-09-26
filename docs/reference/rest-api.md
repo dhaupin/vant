@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/rest-api
 layout: default
 title: REST API Reference
-nav_order: 82
+nav_order: 115
 ---
 # REST API Reference
 
@@ -16,7 +16,7 @@ Complete REST API documentation for Vant headless integration.
 | Env Variable | Description | Default |
 |-------------|-------------|---------|
 | `VANT_API_KEY` | API authentication | - |
-| `VANT_MCP_PORT` | HTTP server port | 3100 |
+| `VANT_MCP_PORT` | HTTP server port | 3457 |
 | `VANT_MODE` | Mode: cli, mcp, headless | headless |
 | `GITHUB_TOKEN` | GitHub auth token | - |
 | `GITHUB_REPO` | Repository owner/repo | - |
@@ -198,7 +198,7 @@ async function search(query, mode = 'hybrid') {
 | Enterprise | 6000 |
 
 Rate limit headers:
-```
+```text
 X-RateLimit-Limit: 60
 X-RateLimit-Remaining: 45
 X-RateLimit-Reset: 1640000000
@@ -241,7 +241,7 @@ call_tool("vant_set_memory", {"file": "lessons.md", "content": "..."})
 const fetch = require('node-fetch');
 const VANT_URL = 'http://localhost:3456';
 
-async function callTool(name, arguments) {
+async function callTool(name, args) {
   const res = await fetch(`${VANT_URL}/call`, {
     method: 'POST',
     headers: {
@@ -251,7 +251,7 @@ async function callTool(name, arguments) {
     body: JSON.stringify({
       jsonrpc: '2.0',
       method: 'tools/call',
-      params: { name, arguments },
+      params: { name, args },
       id: 1
     })
   });
@@ -305,4 +305,4 @@ io.on('error', (error) => {
 
 ---
 
-See also: [MCP Guide](integrations/mcp), [CLI Reference](reference/cli)
+See also: [MCP Guide](/vant/runtime/mcp), [CLI Reference](/vant/reference/cli)

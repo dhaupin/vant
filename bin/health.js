@@ -28,12 +28,21 @@ const fs = require('fs');
 // Lazy-load sandbox
 let _sandbox = null;
 function _getSandbox() {
-    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    if (!_sandbox) { try { _sandbox = require("../lib/sandbox"); } catch (e) {} }
     return _sandbox;
 }
 function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
 function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
+
+// (fs→storage migration) brain-file existence/reads go through FileStorage so
+// the sandbox + vaf security chain gates every access. config.ini/.env checks
+// and dir listings stay on fs (app-config + enumeration classes,
+// prd-storage.md).
+function _brainStore(brainPath) {
+    const Storage = require('../lib/storage');
+    return new Storage.FileStorage({ basePath: path.resolve(brainPath) });
+}
 
 // Check if file exists - tries .md first, falls back to .txt
 function fileExists(file) {
@@ -55,20 +64,21 @@ function checkModel() {
     const required = ['identity.md', 'identity.txt'];
     // Check user's brain (determined by MODEL_PATH or config)
     const brainPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || process.env.VANT_STORAGE_PATH || 'models/private';
-    const found = checks.some(pair => pair.some(f => fs.existsSync(path.join(brainPath, f))));
+    const brainFs = _brainStore(brainPath);
+    const found = checks.some(pair => pair.some(f => brainFs.has(f)));
     
     if (found) {
         console.log('  ' + theme.status.ok('Brain exists at ' + brainPath));
         
         // Try to read identity
-        const identityPath = fs.existsSync(brainPath + '/identity.md') 
-            ? brainPath + '/identity.md' 
-            : fs.existsSync(brainPath + '/identity.txt') 
-                ? brainPath + '/identity.txt' 
+        const identityRel = brainFs.has('identity.md') 
+            ? 'identity.md' 
+            : brainFs.has('identity.txt') 
+                ? 'identity.txt' 
                 : null;
         
-        if (identityPath) {
-            const content = fs.readFileSync(identityPath, 'utf8');
+        if (identityRel) {
+            const content = brainFs.read(identityRel, 'utf8');
             const modelMatch = content.match(/MODEL:\s*(.+)/);
             if (modelMatch) {
                 console.log('  → ' + theme.value(modelMatch[1]));
@@ -114,9 +124,25 @@ function checkDirs() {
     });
 
     // State now in brain path
-    if (fs.existsSync(brainPath + '/.state.json')) {
+    if (_brainStore(brainPath).has('.state.json')) {
         console.log('  ' + theme.status.ok(brainPath + '/.state.json'));
     }
+}
+
+function checkMigration() {
+    // Cheap, silent-when-happy alert surface: a legacy (pre-multibrain)
+    // tree is reported here on every `vant health` until it's migrated.
+    try {
+        const migrations = require('../lib/migrations');
+        const s = migrations.status();
+        const legacy = s.pending.find(p => p.id === 'legacy.multibrain-import');
+        if (legacy) {
+            console.log('\n' + theme.label('🧠 Brain layout:'));
+            console.log('  ' + theme.status.warn('OLD-STYLE BRAIN detected (pre-multi-brain layout)'));
+            console.log('  Your brain is not visible to the current loader until migrated.');
+            console.log('  Run: ' + theme.value('vant migrate') + '   (name it: vant migrate --brain-name <name>)');
+        }
+    } catch (e) { /* never fail health over the notice */ }
 }
 
 function run() {
@@ -126,6 +152,7 @@ function run() {
     checkConfig();
     checkEnv();
     checkDirs();
+    checkMigration();
     
     console.log('\n');
 }

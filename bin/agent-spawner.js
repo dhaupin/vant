@@ -52,7 +52,9 @@ async function listAgents() {
     if (!agents) await loadModules();
     if (!agents) return [];
     
-    const list = agents.list();
+    // agents.list() is async (reloads from storage) - the old sync call
+    // logged "Found undefined agents" and crashed iterating a promise.
+    const list = await agents.list();
     console.log(`[list] Found ${list.length} agents:`);
     for (const a of list) {
         console.log(`  - ${a.id}: ${a.name} (${a.role}) state=${a.state}`);
@@ -237,27 +239,26 @@ const opts = process.argv.slice(3);
                 }
                 await emitEvent(event, { message: data });
                 break;
-            }
-            default:
-                console.log(`
+            }        default:
+            console.log(`
 Agent Spawner CLI - Multi-agent management
 
 Usage:
-  vant agent spawn --name <name> --role <role>   # Spawn new agent
-  vant agent list                         # List active agents
-  vant agent delegate <id> <task>        # Delegate task to agent
-  vant agent fork                      # Fork current agent  
-  vant agent kill <id>                # Kill agent
-  vant agent get <id>                 # Get agent info
-  vant agent mcp [port]              # Start MCP server
-  vant agent tools                   # List MCP tools
-  vant agent emit <event> [data]    # Emit event
+  vant spawn spawn --name <name> --role <role>    # Spawn new agent
+  vant spawn list                                 # List active agents
+  vant spawn delegate <id> <task>                 # Delegate task to agent
+  vant spawn fork                                 # Fork current agent
+  vant spawn kill <id>                            # Kill agent
+  vant spawn get <id>                             # Get agent info
+  vant spawn mcp [port]                           # Start MCP server
+  vant spawn tools                                # List MCP tools
+  vant spawn emit <event> [data]                  # Emit event
 
 Notes:
   - Max 4 agents (you + 3 coworkers)
   - MCP server exposes JSON-RPC on port 3100
   - Agents share brain context
-                `);
+            `);
         }
     } catch (e) {
         console.error('[agent] Error:', e.message);

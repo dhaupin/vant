@@ -3,13 +3,13 @@ version: 0.8.6
 permalink: /operations/ci
 layout: default
 title: CI
-nav_order: 41
+nav_order: 62
 ---
 # CI
 
 Continuous integration for Vant.
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │              CI Pipeline                         │
 │                                                  │
@@ -29,65 +29,65 @@ Vant uses GitHub Actions for CI.
 
 | Workflow | Trigger | What | Status |
 |----------|---------|------|--------|
-| test.yml | push | Run tests | Required |
-| lint.yml | push | Lint code | Required |
-| deploy.yml | push to main | Deploy | Auto |
+| test.yml | push, pull_request, weekly schedule, manual | Tests, security checks, validation | Required |
+| docs.yml | push to main | Build and deploy docs to GitHub Pages | Auto |
+| docker.yml | push to main, release branches, tags | Build and push container image | Auto |
+
+CI is one job by design: tests, security checks, and validation run in a
+single `ci` job to keep GitHub Actions minutes low. Concurrency is set to
+`cancel-in-progress`, so a new push cancels the stale run on the same
+branch or PR instead of queueing behind it.
 
 ### Test Workflow
 
 ```yaml
 # .github/workflows/test.yml
-name: Test
+name: VANT CI
 
-on: [push, pull_request]
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, develop, 'agent-*']
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly (default branch only, single job = cheap)
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-    
-    - name: Install deps
-      run: npm ci
-    
-    - name: Run tests
-      run: npm test
-    
-    - name: Upload coverage
-      uses: codecov/codecov-action@v3
-```
-
-### Lint Workflow
-
-```yaml
-# .github/workflows/lint.yml
-name: Lint
-
-on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  lint:
+  ci:
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 8
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-    
-    - name: Install deps
-      run: npm ci
-    
-    - name: Lint
-      run: npm run lint
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Security checks (tokens + npm audit)
+        run: |
+          ! grep -rE "ghp_[a-zA-Z0-9]{36}" . --include="*.js"
+          npm audit --audit-level=high
+
+      - name: Run tests
+        run: |
+          node -e "console.log('vant', require('./package.json').version)"
+          node test/ci.js
+          node test/runner.js
+          node test/evals/vibe.js
+          node test/coverage.js
+
+      - name: Run standalone suites
+        run: for f in test/*.test.js; do node "$f" || exit 1; done
 ```
 
 ---
@@ -103,14 +103,17 @@ npm install
 ### Run Tests
 
 ```bash
-# All tests
+# Smoke tests
 npm test
 
-# Watch mode
-npm run test:watch
+# Full runner
+node test/runner.js
 
-# Coverage
-npm run test:coverage
+# Coverage summary
+node test/coverage.js
+
+# One suite
+node test/brain.test.js
 ```
 
 ### Lint
@@ -137,14 +140,9 @@ npm run build:watch
 
 ## Code Coverage
 
-Required: 80%+
-
 ```bash
-# Generate coverage report
-npm run test:coverage
-
-# View locally
-open coverage/lcov-report/index.html
+# Coverage summary across suites
+node test/coverage.js
 ```
 
 ---
@@ -154,13 +152,14 @@ open coverage/lcov-report/index.html
 Run before committing:
 
 ```bash
-# Single command - runs all checks
-npm run pre-commit
+# Syntax check every lib, bin, and test file
+npm run check
 
-# This runs:
-# 1. lint
-# 2. test
-# 3. build
+# Lint
+npm run lint
+
+# Smoke tests
+npm test
 ```
 
 ---
@@ -170,11 +169,11 @@ npm run pre-commit
 ### Tests Fail
 
 ```bash
-# Run with verbose output
-npm test -- --verbose
+# Run the full runner for details
+node test/runner.js
 
-# Run single test
-npm test -- --grep "specific test"
+# Run one suite to isolate
+node test/brain.test.js
 ```
 
 ### Lint Errors
@@ -191,5 +190,5 @@ npx eslint path/to/file.js
 
 ## Related
 
-- [Testing](tutorials/testing) - Test guide
-- [Release](advanced/release) - Release process
+- [Testing](/vant/operations/testing) - Test guide
+- [Release](/vant/advanced/release) - Release process

@@ -3,25 +3,23 @@ version: 0.8.6
 permalink: /operations/sync
 layout: default
 title: Multi-Provider RAID Sync
-nav_order: 49
+nav_order: 53
 ---
 
 # Multi-Provider RAID 1 - Sync Manager
 
-Sync Vant brain to multiple providers simultaneously for redundancy. If one provider fails |
-- the agent automatically fails over to the next available provider.
+Sync Vant brain to multiple providers simultaneously for redundancy. If one provider fails, the agent automatically fails over to the next available provider.
 
 ## Why RAID?
 
 - **Resilience**: No single point of failure
-- **Throttle resistance**: If GitHub throttles |
-- use GitLab
+- **Throttle resistance**: If GitHub throttles, use GitLab
 - **Geographic distribution**: Sync to global + self-hosted
 - **Peace of mind**: Your agent is always backed up
 
 ## How It Works
 
-```
+```text
        ┌──────────┐
        │   Brain  │
        └────┬─────┘
@@ -43,10 +41,8 @@ Sync Vant brain to multiple providers simultaneously for redundancy. If one prov
 const sync = require('./lib/sync');
 
 // Check RAID status
-console.log('RAID:' |
-- sync.isRAID() ? 'ACTIVE' : 'inactive');
-console.log('Providers:' |
-- sync.getProviderCount());
+console.log('RAID:', sync.isRAID() ? 'ACTIVE' : 'inactive');
+console.log('Providers:', sync.getProviderCount());
 
 // Push to ALL providers
 const result = await sync.pushAll({ 
@@ -80,8 +76,7 @@ export BITBUCKET_TOKEN=xxx
 
 ## Provider Priority
 
-On pull |
-- providers are tried in order:
+On pull, providers are tried in order:
 
 1. First configured provider
 2. Second configured provider
@@ -97,16 +92,13 @@ const brain = await sync.pullAny({ preference: 'gitlab' });
 
 ```javascript
 {
-    success: true |
--  // At least one succeeded
+    success: true,  // At least one succeeded
     results: {
         github: { success: true },
-        gitlab: { success: false |
-- error: 'rate limited' }
+        gitlab: { success: false, error: 'rate limited' }
     },
     errors: [
-        { provider: 'gitlab' |
-- error: 'rate limited' }
+        { provider: 'gitlab', error: 'rate limited' }
     ]
 }
 ```
@@ -127,6 +119,6 @@ const brain = await sync.pullAny({ preference: 'gitlab' });
 
 ## Related
 
-- [Hybrid Sync](integrations/hybrid) - Public/Private split
-- [Citations](advanced/citations) - Git-backed source tracking
-- [Multi-Repo](integrations/repos) - External repos
+- [Hybrid Sync](/vant/integrations/hybrid) - Public/Private split
+- [Citations](/vant/advanced/citations) - Git-backed source tracking
+- [Multi-Repo](/vant/integrations/repos) - External repos

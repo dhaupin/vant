@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /advanced/citations
 layout: default
 title: Citations
-nav_order: 61
+nav_order: 102
 
 ---
 # Citations
@@ -20,7 +20,7 @@ Vant can track what sources informed agent answers. Each citation links to a Git
 
 **Why?**
 - **Traceability** - Know where answers came from
-- **Verification** - Verify claims against source commits  
+- **Verification** - Verify claims against source commits
 - **Grounding** - Reduce hallucination by anchoring to facts
 - **Audit** - Full activity lineage for compliance
 
@@ -33,7 +33,7 @@ Vant can track what sources informed agent answers. Each citation links to a Git
 3. Final answer includes `[Source: abc1234]` footer
 4. User can verify by checking the commit
 
-```
+```text
 📋 Citations:
 - a1b2c3d: brain/identity.md
 - e5f6g7h: docs/advanced/audit.md
@@ -76,8 +76,8 @@ const receipt = citations.generateReceipts(results);
 
 ## Related
 
-- [Audit](advanced/audit) - Activity logging
-- [Hybrid Search](advanced/search) - RRF search with citations
-- [Search](advanced/search) - Search with source tracking
-- [Brain](essential/brain) - Where citations stored
-- [Sync](operations/sync) - Git-backed sync
+- [Audit](/vant/advanced/audit) - Activity logging
+- [Hybrid Search](/vant/advanced/search) - RRF search with citations
+- [Search](/vant/advanced/search) - Search with source tracking
+- [Brain](/vant/memory/brain) - Where citations stored
+- [Sync](/vant/operations/sync) - Git-backed sync

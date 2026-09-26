@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /advanced/release
 layout: default
 title: Release Process
-nav_order: 68
+nav_order: 106
 
 ---
 # Release Process
@@ -14,24 +14,16 @@ How to release a new version of Vant.
 
 Vant uses [Semantic Versioning](https://semver.org/):
 
-```
+```text
 MAJOR.MINOR.PATCH
 v0.8.6
 ```
 
-| Type
-- Example
-- When |
-|------|---------|-------|
-| PATCH
-- 0.8.6 → 0.8.5
-- Bug fixes |
-| MINOR
-- 0.8.6 → 0.9.0
-- New features |
-| MAJOR
-- 0.8.6 → 1.0.0
-- Breaking changes |
+| Type | Example | When |
+|------|---------|------|
+| PATCH | 0.8.6 -> 0.8.7 | Bug fixes |
+| MINOR | 0.8.6 -> 0.9.0 | New features |
+| MAJOR | 0.8.6 -> 1.0.0 | Breaking changes |
 
 ## Release Checklist
 
@@ -69,7 +61,7 @@ git push origin main --tags
 Use the bump command to increment versions:
 
 ```bash
-# Patch release (0.8.6 → 0.8.5)
+# Patch release (0.8.6 → 0.8.7)
 vant bump
 
 # Minor release (0.8.6 → 0.9.0)
@@ -95,7 +87,7 @@ git push origin main --tags
 
 After pushing tags:
 
-1. Go to [Releases](https://github.com/dhaupin/releases)
+1. Go to [Releases](https://github.com/dhaupin/vant/releases)
 2. Click "Draft a new release"
 3. Select the tag
 4. Add release notes
@@ -106,15 +98,15 @@ Deploy Vant in a container for consistent environments.
 
 ```bash
 # Build and push
-docker build -t dhaupin/vant:v0.8.5 .
-docker push dhaupin/vant:v0.8.5
+docker build -t dhaupin/vant:v0.8.7 .
+docker push dhaupin/vant:v0.8.7
 
 # Latest tag
-docker tag dhaupin/vant:v0.8.5 dhaupin/vant:latest
+docker tag dhaupin/vant:v0.8.7 dhaupin/vant:latest
 docker push dhaupin/vant:latest
 ```
 
 ## Related
 
-- [CLI Reference](reference/cli) - All commands
-- [Docker](integrations/docker) - Container build
+- [CLI Reference](/vant/reference/cli) - All commands
+- [Docker](/vant/integrations/docker) - Container build

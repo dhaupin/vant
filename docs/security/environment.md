@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /security/environment
 layout: default
 title: Environment & Limits
-nav_order: 102
+nav_order: 70
 ---
 
 # Environment & Limits
@@ -39,7 +39,7 @@ Vant does NOT use:
 **Source:** [GitHub Rate Limits](https://docs.github.com/en/rest/about-rest-api/rate-limits-and-concurrency)
 ### Token Scopes
 **Recommended minimal scopes:**
-```
+```text
 repo
   - repo:status    (check)
   - repo_deployment (read)
@@ -58,7 +58,7 @@ Timing and rate limit details.
 **Automated polling of GitHub.com is prohibited.** Self-hosted GitLab/Gitea is fine.
 
 > "Using GitHub as a database or for purposes unrelated to source code management."
-> — [GitHub Acceptable Use Policies](https://docs.github.com/en/github/site-policy/github-acceptable-use-policies)
+>, [GitHub Acceptable Use Policies](https://docs.github.com/en/github/site-policy/github-acceptable-use-policies)
 
 ### What This Means
 
@@ -72,10 +72,10 @@ Timing and rate limit details.
 ### Vant's Approach
 
 Vant defaults to:
-- **Manual sync** — Run `vant sync` when you want
-- **No polling** — Must explicitly opt-in
-- **Opt-in warnings** — Clear GitHub ToS warnings
-- **Two confirmations** — Env var OR stdin
+- **Manual sync**, Run `vant sync` when you want
+- **No polling**, Must explicitly opt-in
+- **Opt-in warnings**, Clear GitHub ToS warnings
+- **Two confirmations**, Env var OR stdin
 
 ---
 ## DATA CONSIDERATIONS
@@ -136,11 +136,11 @@ Keeping your GitHub token safe.
 **If exposed:**
 
 1. **Immediate**: Revoke token
-   - GitHub → Settings → Developer → Tokens
-   - Or: Settings → Tokens (classic)
+   - GitHub -> Settings -> Developer -> Tokens
+   - Or: Settings -> Tokens (classic)
 
 2. **Check Audit Log**
-   - GitHub → Settings → Audit log
+   - GitHub -> Settings -> Audit log
    - Look for suspicious activity
 
 3. **Generate New**
@@ -185,8 +185,8 @@ Network requirements and behavior.
 
 | Port | Service |
 |------|---------|
-| 3100 | MCP server (default) |
-| 3457 | MCP alt port |
+| 3457 | MCP server (default) |
+| 3456 | HTTP server (default) |
 | 443 | HTTPS (GitHub) |
 
 ### Firewall Rules
@@ -289,9 +289,9 @@ du -sh models/private/
 
 ### GitHub Monitoring
 
-- **Tokens**: Settings → Developer → Tokens
-- **Audit Log**: Settings → Audit log
-- **Usage**: Settings → Repositories
+- **Tokens**: Settings -> Developer -> Tokens
+- **Audit Log**: Settings -> Audit log
+- **Usage**: Settings -> Repositories
 
 ---
 ## COMPLIANCE CHECKLIST
@@ -309,7 +309,7 @@ Before using Vant with GitHub:
 
 ## SEE ALSO
 
-- [Terms](reference/index) - Legal disclaimer
-- [Privacy](security/privacy) - Privacy policy
+- [Terms](/vant/reference/legal) - Legal disclaimer
+- [Privacy](/vant/security/privacy) - Privacy policy
 - [GitHub API Docs](https://docs.github.com/en/rest) - Full API reference
 - [GitHub ToS](https://docs.github.com/en/github/site-policy) - All policies

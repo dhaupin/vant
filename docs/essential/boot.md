@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /essential/boot
 layout: default
 title: Ghost in the Machine
-nav_order: 8
+nav_order: 38
 ---
 
 # Ghost in the Machine - Stego Bootstrapping
@@ -15,8 +15,7 @@ Boot Vant from zero local state by fetching a stego image. The agent becomes tru
 1. **Fetch**: Load PNG from URL or local file
 2. **Decode**: Extract brain from steganographic data
 3. **Extract**: Get embedded config (no tokens!)
-4. **Resume**: Load brain state |
-- continue session
+4. **Resume**: Load brain state, continue session
 
 ## CLI Usage
 
@@ -33,20 +32,12 @@ vant boot --image=./brain.png --decrypt=secret123
 
 ## Security
 
-| Check
-- Description |
+| Check Description |
 |-------|-------------|
-| HTTPS
-- Required for remote URLs |
-| No internal
-- Blocks localhost |
-- 127.x |
-- 10.x |
-- 192.168.x |
-| No tokens
-- Config must be set separately |
-| Path traversal
-- Blocked in local paths |
+| HTTPS | Required for remote URLs |
+| No internal | Blocks localhost, 127.x, 10.x, 192.168.x |
+| No tokens | Config must be set separately |
+| Path traversal | Blocked in local paths |
 
 ## Embedded Config
 
@@ -94,10 +85,10 @@ vant boot --image=https://raw.githubusercontent.com/user/repo/main/brain.png
 
 ## Related
 
-- [Steganography](advanced/steganography) - Image encoding
-- [GitHub Integration](integrations/github) - GitHub integration
-- [Runtime](essential/runtime) - Runtime API
+- [Steganography](/vant/memory/stego) - Image encoding
+- [GitHub Integration](/vant/integrations/github) - GitHub integration
+- [Runtime](/vant/runtime/runtime) - Runtime API
 
 ## Next
 
-- [Onboard](essential/onboard) - Brain onboarding
+- [Onboard](/vant/essential/onboard) - Brain onboarding

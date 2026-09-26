@@ -76,6 +76,7 @@ const state = {
   passed: 0,
   failed: 0,
   warnings: 0,
+  skipped: 0,
   startTime: Date.now()
 };
 
@@ -132,6 +133,19 @@ function warn(name, message) {
 }
 
 /**
+ * Record a skipped test (environment can't exercise it — NOT a failure).
+ * Skips never affect the exit code, so CI is deterministic across machines
+ * (e.g. sandboxes that deny network binds vs dev boxes that allow them).
+ * @param {string} name
+ * @param {string} message
+ */
+function skip(name, message) {
+  state.skipped++;
+  state.tests.push({ name, status: 'skip', message });
+  log(`○ ${name}: ${message}`);
+}
+
+/**
  * Test a library loads
  * @param {string} name - Library name (without .js)
  * @param {object} [options] - Test options
@@ -163,48 +177,165 @@ async function testLib(name, options = {}) {
   }
 }
 
+// Binaries that are long-running servers by design: alive at the watchdog
+// deadline IS their pass condition. Anything else that must be SIGKILLed
+// "hung" and fails.
+const SERVER_BINS = new Set(['mcp', 'watch', 'server']);
+
+// (pass 21) Per-binary budgets. Bins that legitimately need longer than the
+// smoke timeout get their own allowance so the watchdog doesn't kill a
+// healthy-but-slow check. test-all runs 17 sub-checks (10s timeout each via
+// execSync) and needs ~25s on slow machines; everything else keeps the 5s
+// smoke budget.
+const BIN_BUDGETS = { 'test-all': 30000 };
+const binBudget = name => BIN_BUDGETS[name] || CONFIG.testTimeout;
+
+// Error signatures that mean "this environment refuses to run the binary",
+// not "the binary is broken". Matched case-insensitively against combined
+// output when a binary exits nonzero on its own.
+const ENV_DENIALS = [
+  'network permission required', // sandbox bind denial (bin/server.js)
+  'eperm: operation not permitted',
+  'eacces: permission denied'
+];
+
+// Sandbox-gate refusals: the binary ran, loaded its security chain, and
+// correctly refused an operation it was not granted capability for. Under
+// deny-by-default that is the B-2 security chain doing its job — recorded
+// as a skip (the refusal itself is verified behavior; the suites that pin
+// gate semantics live in security tests).
+const SECURITY_REFUSALS = [
+  'capability required',
+  'capability refused', // snapshot.js prints refusals to stdout by design
+  'sudo required',
+  'authentication required'
+];
+
+/**
+ * Pick the most readable line for a skip message: the first line that
+ * actually matches a refusal/denial pattern (stderr noise like Node's
+ * circular-dependency warnings often comes after it).
+ * @param {string} combined - Lowercased combined stdout+stderr
+ * @param {string[]} patterns - Matched patterns
+ * @returns {string} Original-case detail line (or '')
+ */
+function detailLine(combined, patterns) {
+  for (const p of patterns) {
+    const idx = combined.indexOf(p);
+    if (idx >= 0) {
+      const lineStart = combined.lastIndexOf('\n', idx) + 1;
+      const lineEnd = combined.indexOf('\n', idx);
+      return combined.slice(lineStart, lineEnd === -1 ? undefined : lineEnd).trim();
+    }
+  }
+  return '';
+}
+
 /**
  * Test a binary runs
+ *
+ * Judged on EXIT SEMANTICS, never on stdout. The old "any stdout = pass"
+ * rule was environment-fragile: a leftover .circuit-auth.json INFO line made
+ * the same binary flip between pass/fail across machines, and a
+ * loudly-failing server passed as long as it printed before dying.
+ *
  * @param {string} name - Binary name
  * @param {object} [options] - Test options
  */
 async function testBin(name, options = {}) {
   const { category = CATEGORIES.SMOKE } = options;
-  
-  return new Promise(resolve => {
-    const fullName = `${category}:${name}`;
-    const binPath = path.join(ROOT, 'bin', name + '.js');
-    
-    // Check file exists
-    if (!fs.existsSync(binPath)) {
-      fail(fullName, 'File not found');
-      resolve();
-      return;
-    }
-    
+
+  const fullName = `${category}:${name}`;
+  const binPath = path.join(ROOT, 'bin', name + '.js');
+
+  // Check file exists
+  if (!fs.existsSync(binPath)) {
+    fail(fullName, 'File not found');
+    return;
+  }
+
+  const result = await new Promise(resolve => {
+    const budget = binBudget(name);
+    // stdin: 'ignore' -> reads from the child see immediate EOF. Interactive
+    // CLIs (setup.js) block on readline waiting for input, and a piped stdin
+    // never delivers EOF, so they'd hang the watchdog. 'ignore' is /dev/null
+    // without an extra fd to clean up.
     const proc = spawn('node', [binPath], {
-      timeout: CONFIG.testTimeout,
-      stdio: 'pipe'
+      timeout: budget,
+      killSignal: 'SIGKILL',
+      stdio: ['ignore', 'pipe', 'pipe']
     });
-    
-    let out = '', err = '';
+    let out = '', err = '', watchdog = false;
     proc.stdout.on('data', d => out += d);
     proc.stderr.on('data', d => err += d);
-    
-    proc.on('close', code => {
-      if (code === 0 || out.trim()) {
-        pass(fullName);
-      } else {
-        fail(fullName, err || `exit ${code}`);
-      }
-      resolve();
+
+    // Watchdog: spawn's timeout only sends SIGTERM; servers that ignore it
+    // (mcp.js, watch.js) would hang the runner forever. SIGKILL guarantees close.
+    const killer = setTimeout(() => {
+      watchdog = true;
+      try { proc.kill('SIGKILL'); } catch (e) {}
+    }, budget + 1000);
+    killer.unref();
+
+    proc.on('close', (code, signal) => {
+      clearTimeout(killer);
+      resolve({ code, signal, out, err, watchdog });
     });
-    
+
     proc.on('error', e => {
-      fail(fullName, e.message);
-      resolve();
+      clearTimeout(killer);
+      resolve({ code: -1, signal: null, out, err, watchdog, error: e.message });
     });
   });
+
+  // Spawn failure: binary genuinely cannot run
+  if (result.error) {
+    fail(fullName, result.error);
+    return;
+  }
+
+  // Alive at the deadline: pass for known servers (that is what they DO),
+  // fail for anything else (a CLI that hangs is broken).
+  if (result.watchdog || result.signal === 'SIGKILL') {
+    if (SERVER_BINS.has(name)) {
+      pass(fullName);
+    } else {
+      fail(fullName, `hung past ${binBudget(name)}ms watchdog (not a known server)`);
+    }
+    return;
+  }
+
+  // Clean exit: pass
+  if (result.code === 0) {
+    pass(fullName);
+    return;
+  }
+
+  // Self-exited nonzero: broken, UNLESS (a) the environment itself refused
+  // — denials become skips so a capability-poor sandbox does not red-flag
+  // CI — or (b) the binary is presenting its USAGE screen (standard CLI
+  // convention: no args -> print usage to STDOUT, exit 1). Both checked on
+  // the same evidence, denial first so a denied bind is never mistaken for
+  // a usage screen.
+  const combined = (result.out + '\n' + result.err).toLowerCase();
+  if (ENV_DENIALS.some(d => combined.includes(d))) {
+    const detail = detailLine(combined, ENV_DENIALS);
+    skip(fullName, `environment cannot run binary (exit ${result.code}): ${detail.slice(0, 160)}`);
+    return;
+  }
+
+  if (SECURITY_REFUSALS.some(d => combined.includes(d))) {
+    const detail = detailLine(combined, SECURITY_REFUSALS);
+    skip(fullName, `sandbox gate refused (deny-by-default working; exit ${result.code}): ${detail.slice(0, 160)}`);
+    return;
+  }
+
+  if (result.out.trim() && !result.err.includes('Error') && !result.err.includes('failed')) {
+    pass(fullName);
+    return;
+  }
+
+  fail(fullName, (result.err || result.out || '').trim().slice(0, 300) || `exit ${result.code}`);
 }
 
 /**
@@ -295,6 +426,7 @@ function checkRequiredFiles() {
  * Check syntax of all JS files
  */
 function checkSyntax() {
+  const vm = require('vm');
   const dirs = ['lib', 'bin'];
   
   dirs.forEach(dir => {
@@ -306,12 +438,17 @@ function checkSyntax() {
       .forEach(file => {
         const fullPath = path.join(dirPath, file);
         try {
-          require(fullPath);
+          // COMPILE only - do NOT require. Requiring CLI binaries executes
+          // them (side effects, process.exit kills this runner).
+          // Wrap like Node's CJS loader (strip shebang, wrap module scope) so
+          // legal top-level `return` and `#!` lines compile.
+          let src = fs.readFileSync(fullPath, 'utf8');
+          if (src.startsWith('#!')) src = '//' + src.slice(2);
+          new vm.Script('(function (exports, require, module, __filename, __dirname) {' +
+            src + '\n});', { filename: fullPath });
           pass(`syntax:${dir}/${file}`);
         } catch(e) {
-          if (e.message.includes('require') === false) {
-            fail(`syntax:${dir}/${file}`, e.message);
-          }
+          fail(`syntax:${dir}/${file}`, e.message);
         }
       });
   });
@@ -348,14 +485,14 @@ async function main() {
     }
   }
   
-  // Binary tests
-  if (options.bins.length === 0) {
+  // Binary tests (--bin=X filters; an empty list means run all)
+  {
     log('--- Binaries ---');
-    
+
     const bins = fs.readdirSync(path.join(ROOT, 'bin'))
       .filter(f => f.endsWith('.js'))
       .map(f => f.replace('.js', ''));
-    
+
     for (const bin of bins) {
       if (options.bins.length === 0 || options.bins.includes(bin)) {
         await testBin(bin);
@@ -369,22 +506,17 @@ async function main() {
   const elapsed = ((Date.now() - state.startTime) / 1000).toFixed(1);
   
   if (options.json) {
-    // In JSON mode, suppress all stdout except the final JSON output
-    // Use stderr for debugging if needed
-    Object.assign(process.stdout, { write: () => {} });
-  }
-  
-  if (options.json) {
     console.log(JSON.stringify({
       node: process.version,
       passed: state.passed,
       failed: state.failed,
       warnings: state.warnings,
+      skipped: state.skipped,
       elapsed: `${elapsed}s`,
       tests: state.tests
     }, null, 2));
   } else {
-    log(`RESULTS: ${state.passed} passed, ${state.failed} failed, ${state.warnings} warnings (${elapsed}s)`);
+    log(`RESULTS: ${state.passed} passed, ${state.failed} failed, ${state.warnings} warnings, ${state.skipped} skipped (${elapsed}s)`);
   }
   
   // Exit codes

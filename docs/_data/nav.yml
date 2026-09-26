@@ -1,3 +1,6 @@
+# Vant docs nav (freestruct menu layer). URLs are /vant/<permalink>.
+# Sections follow labs/prd-content.md IA. Keep in sync with nav_order.
+
 - title: Getting Started
   items:
   - title: Quick Start
@@ -6,95 +9,105 @@
     url: /vant/getting-started/install
   - title: Setup
     url: /vant/getting-started/setup
+  - title: Agent Onboarding
+    url: /vant/getting-started/agent-onboarding
   - title: Examples
     url: /vant/getting-started/examples
+  - title: Omega Init
+    url: /vant/getting-started/omega-init
   - title: FAQ
     url: /vant/getting-started/faq
   - title: Contributing
     url: /vant/getting-started/contributing
 
+- title: Memory
+  items:
+  - title: Overview
+    url: /vant/memory/
+  - title: The Brain
+    url: /vant/memory/brain
+  - title: Memory Store
+    url: /vant/memory/memory-store
+  - title: Brain Search
+    url: /vant/memory/search
+  - title: Citations
+    url: /vant/memory/citations
+  - title: Horcrux
+    url: /vant/memory/horcrux
+  - title: Horcrux Bootstrap
+    url: /vant/memory/horcrux-bootstrap
+  - title: Stego
+    url: /vant/memory/stego
+  - title: Geometry
+    url: /vant/memory/geometry
+  - title: RAG Tutorial
+    url: /vant/memory/rag
+  - title: Pruning
+    url: /vant/memory/prune
+
+- title: Runtime
+  items:
+  - title: Overview
+    url: /vant/runtime/
+  - title: Runtime API
+    url: /vant/runtime/runtime
+  - title: MCP Server
+    url: /vant/runtime/mcp
+  - title: Server
+    url: /vant/runtime/server
+
+- title: Multi-Agent
+  items:
+  - title: Overview
+    url: /vant/multi-agent/
+  - title: Multi-brain
+    url: /vant/multi-agent/brains
+  - title: Branches
+    url: /vant/multi-agent/branches
+  - title: Trust & Succession
+    url: /vant/multi-agent/succession
+  - title: Agents
+    url: /vant/multi-agent/agents
+  - title: Coordination
+    url: /vant/multi-agent/coordination
+
 - title: Essential
   items:
-  - title: The Brain
-    url: /vant/essential/brain
-  - title: Runtime
-    url: /vant/essential/runtime
+  - title: Overview
+    url: /vant/essential/
   - title: Islands
     url: /vant/essential/islands
-  - title: Succession
-    url: /vant/essential/succession
   - title: Architecture
     url: /vant/essential/architecture
-  - title: Multi-Agent
-    url: /vant/essential/multi-agent
   - title: Boot
     url: /vant/essential/boot
   - title: Onboard
     url: /vant/essential/onboard
-
-- title: Agent Tools
-  items:
-  - title: MCP Server
-    url: /vant/integrations/mcp
-  - title: CLI
-    url: /vant/reference/cli
-  - title: Runtime API
-    url: /vant/essential/runtime
-  - title: Agent Skills
-    url: /vant/integrations/agent-skills
-  - title: Skills Library
-    url: /vant/essential/vant-skill-mcp
-  - title: Linear
-    url: /vant/integrations/linear
-
-- title: Agent Configs
-  items:
-  - title: Architect
-    url: /vant/essential/vant-agent-architect
-  - title: Engineer
-    url: /vant/essential/vant-agent-engineer
-  - title: Reviewer
-    url: /vant/essential/vant-agent-qc
-  - title: Operator
-    url: /vant/essential/vant-agent-ops
-  - title: Security
-    url: /vant/essential/vant-agent-security
-
-- title: Tutorials
-  items:
-  - title: Omega Init
-    url: /vant/tutorials/omega-init
-  - title: Build Agent
-    url: /vant/tutorials/build-agent
+  - title: Extensibility
+    url: /vant/essential/extensibility
   - title: Custom Island
-    url: /vant/tutorials/custom-island
-  - title: Multi-Agent
-    url: /vant/tutorials/multi-agent
-  - title: Telegram Bot
-    url: /vant/tutorials/telegram-bot
-  - title: Automation
-    url: /vant/tutorials/automation
-  - title: Deployment
-    url: /vant/tutorials/deployment
-  - title: RAG
-    url: /vant/tutorials/rag
+    url: /vant/essential/custom-island
+  - title: Plugins
+    url: /vant/essential/plugins
+  - title: Manual Brain
+    url: /vant/essential/manual-brain
 
 - title: Integrations
   items:
+  - title: Telegram Bot
+    url: /vant/integrations/telegram-bot
   - title: GitHub
     url: /vant/integrations/github
-  - title: MCP Server
-    url: /vant/integrations/mcp
+  - title: Agent Skills
+    url: /vant/integrations/agent-skills
   - title: Linear
     url: /vant/integrations/linear
   - title: Docker
     url: /vant/integrations/docker
-  - title: Hybrid Sync
-    url: /vant/integrations/hybrid
   - title: Providers
     url: /vant/integrations/providers
-  - title: Agent Skills
-    url: /vant/integrations/agent-skills
+  - title: Hybrid Sync
+    url: /vant/integrations/hybrid
 
 - title: Operations
   items:
@@ -102,58 +115,80 @@
     url: /vant/operations/storage
   - title: Sync
     url: /vant/operations/sync
+  - title: Automation
+    url: /vant/operations/automation
+  - title: Webhooks
+    url: /vant/operations/webhooks
   - title: Cron
     url: /vant/operations/cron
   - title: Events
     url: /vant/operations/events
-  - title: Webhooks
-    url: /vant/tutorials/webhooks
   - title: Notifications
     url: /vant/operations/notifications
   - title: CI
     url: /vant/operations/ci
+  - title: Testing
+    url: /vant/operations/testing
+  - title: Deployment
+    url: /vant/operations/deployment
+  - title: QoS
+    url: /vant/operations/qos
+  - title: Network
+    url: /vant/operations/network
+  - title: Cache
+    url: /vant/operations/cache
 
 - title: Security
   items:
-  - title: VAF
-    url: /vant/security/vaf
+  - title: Overview
+    url: /vant/security/
   - title: Sandbox
     url: /vant/security/sandbox
+  - title: VAF
+    url: /vant/security/vaf
   - title: Escrow
     url: /vant/security/escrow
+  - title: Environment & Limits
+    url: /vant/security/environment
   - title: Airgap
     url: /vant/security/airgap-propagation
+  - title: Best Practices
+    url: /vant/security/best-practices
+  - title: Privacy
+    url: /vant/security/privacy
+  - title: Encryption
+    url: /vant/security/encryption
 
 - title: Advanced
   items:
-  - title: Schema
-    url: /vant/advanced/schema
-  - title: Search
-    url: /vant/advanced/search
+  - title: Search Architecture
+    url: /vant/advanced/search-architecture
   - title: Rerank
     url: /vant/advanced/rerank
-  - title: Horcrux
-    url: /vant/advanced/horcrux
-  - title: Stego
-    url: /vant/advanced/stego
+  - title: API Architecture
+    url: /vant/advanced/architecture
+  - title: NSC9 Spec
+    url: /vant/advanced/nsc9-spec
+  - title: RPC
+    url: /vant/advanced/rpc
+  - title: Troubleshooting
+    url: /vant/advanced/troubleshooting
 
 - title: Reference
   items:
   - title: CLI
     url: /vant/reference/cli
-  - title: API
-    url: /vant/reference/api
   - title: Configuration
-    url: /vant/reference/configuration
-  - title: Schema
-    url: /vant/reference/schema
-  - title: Errors
-    url: /vant/reference/errors
+    url: /vant/reference/config
   - title: MCP Tools
     url: /vant/reference/mcp-tools
-  - title: Resolution
-    url: /vant/reference/resolution
-  - title: Entropy
-    url: /vant/reference/entropy
+  - title: API
+    url: /vant/reference/api
+  - title: REST API
+    url: /vant/reference/rest-api
+  - title: Errors
+    url: /vant/reference/errors
+  - title: Deprecations
+    url: /vant/reference/deprecations
   - title: CHANGELOG
     url: /vant/reference/CHANGELOG

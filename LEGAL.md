@@ -41,9 +41,17 @@ Vant is an open-source project with copyright held by the maintainer and contrib
 
 Specifically:
 - **NO FITNESS FOR A PARTICULAR PURPOSE** - Vant may not be suitable for any specific use case
-- **NO SECURITY GUARANTEES** - Despite sandbox boundaries, no guarantee security vulnerabilities don't exist  
+- **NO SECURITY GUARANTEES** - Despite sandbox boundaries, no guarantee security vulnerabilities don't exist
 - **NO AVAILABILITY** - No SLA for uptime, updates, or support
 - **NO MALWARE SCANNING** - Vant doesn't scan loaded content for malware
+- **EXPERIMENTAL FEATURES** - Vant moves fast. Some features are experimental, beta, or unstable.
+  - Backward compatibility is NOT guaranteed for experimental features
+  - Features may change, break, or be removed without notice
+  - Check git history for current state of features
+- **THIRD-PARTY DEPENDENCIES** - Vant depends on npm packages and external services.
+  - Vulnerabilities in dependencies are outside Vant's control
+  - Users are responsible for auditing their dependency tree
+  - Vant is not liable for vulnerabilities in third-party code
 
 ---
 
@@ -96,6 +104,10 @@ Vant is **INDEPENDENT** from all commercial entities. Specifically:
 | **Vanta Inc.** | Not affiliated, completely independent |
 | **VantAI / Roivant** | Not affiliated, completely independent |
 | **Vant by Youzan** | Not affiliated, completely independent |
+| **Amazon Nova Act** | Not affiliated, completely independent |
+
+**Nova Brain Naming:**
+The "nova" brain (agent/identity) in Vant is named for its role as a new/supernova source of intelligence for the agent system. It is a descriptive technical designation, explicitly separate from Amazon's "Nova Act" (browser-based AI agents) or any other "Nova" products. Using Vant's nova brain does not imply affiliation with Amazon or any other entity.
 
 Using Vant does not imply endorsement by any entity.
 
@@ -274,9 +286,156 @@ Violations may result in:
 
 This document is governed by **United States federal law** and **California state law**, excluding conflict of law provisions.
 
-### §20. Severability
+### §20. Acceptable Use
 
-If any provision is held unenforceable, the remainder continues in effect.
+Vant is provided for **legitimate, constructive purposes**. You may NOT use Vant to:
+
+- Harm others (physically, financially, or reputationally)
+- Engage in illegal activities
+- Generate harmful content (malware, exploits, CSAM, etc.)
+- Attack systems you don't own (penetration testing without permission)
+- Spam, phish, or engage in social engineering
+- DDoS or abuse network resources
+- Bypass security controls or access controls
+- Generate content that violates others' IP rights
+
+**Penetration Testing:** You may use Vant to test systems you own or have explicit written permission to test. Using Vant to access systems without authorization is prohibited.
+
+Violating this section may result in immediate license termination (§14).
+
+---
+
+### §21. External AI Model Providers
+
+Vant connects to external AI providers (OpenAI, Anthropic, MiniMax, Google, Azure, AWS, and other LLM services). Users must:
+
+- Comply with those providers' Terms of Service
+- Handle their own API keys securely (Vant provides tools but users own keys)
+- Understand those providers' data handling policies
+- No guarantee Vant will work with any specific provider (APIs change)
+
+Vant is not responsible for:
+- Provider outages or API changes
+- Data sent to external providers
+- Costs accrued through external APIs
+
+---
+
+### §22. AI-Generated Content
+
+Vant may generate code, text, images, or other content. Vant makes no claims to IP ownership of generated content. Users are solely responsible for:
+
+- Verifying generated content is safe, legal, and appropriate
+- Complying with applicable licenses for generated code
+- Any liability arising from generated content
+- Reviewing generated content before use in production
+
+---
+
+### §23. Autonomous Behavior
+
+Vant is designed to operate autonomously, executing tasks without continuous human oversight. Users are responsible for:
+
+- Supervising Vant's actions, especially in production
+- Ensuring Vant doesn't perform harmful, illegal, or unintended acts
+- Setting appropriate boundaries and restrictions
+- Any consequences of autonomous decisions made by Vant
+
+**Warning:** Autonomous agents can make unexpected decisions. Always review actions before committing to production systems.
+
+---
+
+### §24. Data Security & Brain Storage
+
+Vant stores data in "brain" files (models/private/, models/public/). Users must understand:
+
+**Risks:**
+- Brain files may contain sensitive data (API keys, credentials, secrets)
+- If brain is compromised, attacker gains access to stored data
+- Backup/horcrux files contain snapshots of brain data
+- No encryption by default on brain files
+
+**Recommendations:**
+- Never store actual API keys or credentials in brain files
+- Use Vant's secret management (lib/secret.js) for sensitive data
+- Keep models/private/ gitignored and private
+- Encrypt horcruxes before sharing
+- Regularly audit brain contents for sensitive data
+
+Vant is not responsible for:
+- Data breaches caused by storing secrets in brain
+- Loss of sensitive data through backups
+- Compromised brain files
+
+---
+
+### §25. Horcrux & Backup Security
+
+Vant's horcrux/backup system (lib/transform.js) creates snapshots of brain data. Users must understand:
+
+**Risks:**
+- Horcrux files contain full or partial brain data
+- Unencrypted horcruxes expose all included data
+- Restoring from horcrux overwrites current state
+- Malicious horcruxes could contain harmful data
+
+**Best Practices:**
+- Always password-protect horcruxes when sharing
+- Verify horcrux integrity before restoring
+- Store horcruxes securely (encrypted)
+- Limit what data is included in horcruxes
+
+Vant is not responsible for:
+- Data loss from corrupted horcruxes
+- Unauthorized access to unprotected horcruxes
+- Harmful content in restored data
+
+---
+
+### §26. Rate Limiting & API Abuse
+
+When using Vant to interact with external services (APIs, websites, databases):
+
+- Respect rate limits of external services
+- Don't abuse or overload external systems
+- Implement appropriate backoffs and retries
+- Don't use Vant for DDoS, scraping without consent, or spam
+
+Vant provides QoS tools (lib/qos.js) to help manage rate limits. Use them.
+
+Violating this may result in:
+- API key revocation from providers
+- IP blocks from services
+- License termination
+
+---
+
+### §27. Severability
+
+If any provision of this license is held unenforceable, the remainder continues in effect.
+
+---
+
+### §28. Data Retention & Management
+
+Vant does NOT enforce global data retention policies. Retention is controlled by:
+
+- **Per-feature settings**: Each feature manages its own TTL
+  - Memory/state: Default 7 days (configurable per-entry)
+  - Backups: Configurable rotation (daily/weekly)
+  - Nature flywheel: Up to 100 years (if configured)
+- **User control**: Users set their own retention via config
+- **Manual cleanup**: Users can delete brain files, memories, or state anytime
+
+Vant does not:
+- Automatically delete brain content
+- Enforce data expiration beyond feature-specific TTLs
+- Retain data longer than configured
+
+Users are responsible for:
+- Setting appropriate retention policies for their use case
+- Managing their own brain/backup cleanup
+- Complying with any data regulations (GDPR, etc.)
 
 ---
 

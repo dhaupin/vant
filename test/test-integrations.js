@@ -50,14 +50,15 @@ test('has getCanvasPath function', () => { return typeof canvas.getCanvasPath ==
 console.log('\n=== Embed Module Tests ===\n');
 const embed = require('../lib/embed');
 
-test('has register function', () => { return typeof embed.register === 'function'; });
-test('has setEmbedder function', () => { return typeof embed.setEmbedder === 'function'; });
-test('has getEmbedder function', () => { return typeof embed.getEmbedder === 'function'; });
-test('has listEmbedders function', () => { return typeof embed.listEmbedders === 'function'; });
-test('has embed function', () => { return typeof embed.embed === 'function'; });
-test('has embedBatch function', () => { return typeof embed.embedBatch === 'function'; });
+test('has generate function', () => { return typeof embed.generate === 'function'; });
+test('has generateBatch function', () => { return typeof embed.generateBatch === 'function'; });
+test('has setProvider function', () => { return typeof embed.setProvider === 'function'; });
+test('has getProvider function', () => { return typeof embed.getProvider === 'function'; });
+test('has listProviders function', () => { return typeof embed.listProviders === 'function'; });
 test('has cosineSimilarity function', () => { return typeof embed.cosineSimilarity === 'function'; });
 test('has EMBED_DIM constant', () => { return typeof embed.EMBED_DIM === 'number'; });
+test('has generateStack function', () => { return typeof embed.generateStack === 'function'; });
+test('has generateBatchStack function', () => { return typeof embed.generateBatchStack === 'function'; });
 
 // ============================================
 // THEME
@@ -92,19 +93,24 @@ test('version has string elements', () => { return typeof version[0] === 'string
 // ============================================
 // CACHE
 // ============================================
+// v0.9.0-axolotl T15a: cache module no longer exports a singleton.
+// Tests now assert against the Cache class and a fresh instance.
+// ============================================
 console.log('\n=== Cache Module Tests ===\n');
-const cache = require('../lib/cache');
+const { Cache } = require('../lib/cache');
+const cache = new Cache();
 
 test('has configure function', () => { return typeof cache.configure === 'function'; });
 test('has set function', () => { return typeof cache.set === 'function'; });
 test('has get function', () => { return typeof cache.get === 'function'; });
 test('has remove function', () => { return typeof cache.remove === 'function'; });
 test('has clear function', () => { return typeof cache.clear === 'function'; });
-test('has has function', () => { return typeof cache.has === 'function'; });
+test('has has function', () => { return cache.has && typeof cache.has === 'function'; });
 test('has size function', () => { return typeof cache.size === 'function'; });
 test('has compress function', () => { return typeof cache.compress === 'function'; });
 test('has decompress function', () => { return typeof cache.decompress === 'function'; });
 test('has createPool function', () => { return typeof cache.createPool === 'function'; });
+test('exports Cache class', () => { return typeof Cache === 'function'; });
 
 // ============================================
 // NETWORK

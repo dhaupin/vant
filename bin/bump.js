@@ -11,7 +11,8 @@ const vaf = require("../lib/vaf");
 // -h/--help
 const args = process.argv.slice(2);
 if (args[0] === '-h' || args[0] === '--help') {
-    console.log("'Usage: vant bump [options]'");
+    console.log("Usage: vant bump <major|minor|patch> [--yes]");
+    console.log("  An explicit bump type plus --yes is required to apply.");
     process.exit(0);
 }
 /**
@@ -27,7 +28,7 @@ const fs = require('fs');
 // Lazy-load sandbox
 let _sandbox = null;
 function _getSandbox() {
-    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    if (!_sandbox) { try { _sandbox = require("../lib/sandbox"); } catch (e) {} }
     return _sandbox;
 }
 function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
@@ -107,22 +108,40 @@ function tag(version) {
 
 /**
  * Main
+ * SAFETY: bare invocation mutates nothing. A release must explicitly name
+ * the bump type AND pass --yes. (Previously `node bin/bump.js` with no args
+ * silently bumped the version and created a git tag - this once fired from
+ * CI's binary smoke test and bumped the repo to 0.8.12.)
  */
-function main() { _checkRead(); 
-    const args = process.argv.slice(3);
-    const bumpType = args[0] || DEFAULT_BUMP;
-    
+function main() { _checkRead();
+    const argv = process.argv.slice(2);
+    const positional = argv.filter(a => !a.startsWith('-'));
+    const bumpType = positional.find(a => ['major', 'minor', 'patch'].includes(a));
+    const confirmed = argv.includes('--yes');
+
+    if (!bumpType) {
+        console.log('Usage: vant bump <major|minor|patch> [--yes]');
+        console.log('  (no changes made - an explicit bump type is required)');
+        return;
+    }
+    if (!confirmed) {
+        console.log(`[Bump] Would bump version (${bumpType}). Re-run with --yes to apply.`);
+        return;
+    }
+
     const current = getVersion();
     const newVersion = bump(bumpType);
-    
+
     console.log(`[Bump] ${current} → ${newVersion}`);
-    
+
     // Only update if different
     if (newVersion !== current) {
+        // (1b) write path gates on write capability (main() already checked read)
+        _checkWrite();
         updatePackageJson(newVersion);
-        
+
         const tagged = tag(newVersion);
-        
+
         console.log(`\n[Bump] Version ${newVersion} set!\n`);
         console.log('Next: git push && git push --tags');
     }

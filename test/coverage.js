@@ -185,34 +185,12 @@ function testState() {
         assert(typeof state.clearTemp === 'function' || typeof state.clear === 'function');
     });
 }
-
 // ============================================
-// VIBE TESTS
+// VIBE TESTS — REMOVED (pass 35): lib/vibe.js was an early proto,
+// deleted per no-legacy-bloat policy. Section kept out.
 // ============================================
 
-function testVibe() {
-    const vibe = require(path.join(ROOT, 'lib/vibe'));
-    
-    test('vibe loads', () => {
-        assert(vibe);
-    });
-    
-    test('vibe.setMood', () => {
-        assert(typeof vibe.setMood === 'function' || typeof vibe.set === 'function');
-    });
-    
-    test('vibe.getMood', () => {
-        assert(typeof vibe.getMood === 'function' || typeof vibe.get === 'function');
-    });
-    
-    test('vibe.onTaskSuccess', () => {
-        assert(typeof vibe.onTaskSuccess === 'function' || typeof vibe.success === 'function');
-    });
-    
-    test('vibe.onTaskError', () => {
-        assert(typeof vibe.onTaskError === 'function' || typeof vibe.error === 'function');
-    });
-}
+
 
 // ============================================
 // HYBRID SEARCH TESTS
@@ -385,9 +363,6 @@ function run() {
     
     console.log('\n📦 Testing: state');
     testState();
-    
-    console.log('\n📦 Testing: vibe');
-    testVibe();
     
     console.log('\n📦 Testing: hybrid-search');
     testHybridSearch();

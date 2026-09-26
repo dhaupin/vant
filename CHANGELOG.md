@@ -5,6 +5,164 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.6] - 2026-08-29 - Axolotl "Nuclear Breaking" Refactor
+
+> Branch `axolotl` — multibrain + dead-code bloat removal. Pinned at
+> 0.8.6 (no version bump). 5 b-T commits (4ae316b → 9a2583b) + T15 fix
+> (81ddedc). **No backward-compat shims, no test-only public APIs, no
+> stubs.** Breaking changes are packed in now.
+
+### Refactor - Multi-Brain (T1–T4)
+
+- `pipeline.run` now caches module resolution and supports `async`
+  execution with an options bag.
+- "Secured" variants of the brain surface are exported for callers that
+  need the locked-down VAF → QoS → Escrow chain.
+- A second private brain ("axolotl") is loaded alongside the public
+  template so multibrain callers can switch contexts.
+
+### Refactor - Dead-Code Bloat Removal (T10b–T14b-r1, 5 commits)
+
+The b-T round removed 30+ aliases, singletons, and legacy exports that
+accumulated during the v0.7.x → v0.8.x transition. Each removal is a
+hard break — callers must migrate to the canonical name.
+
+| Removed | Use instead |
+|---------|-------------|
+| `lib/storage.js` `exists` | `has` |
+| `lib/brain.js` `loadBrain`, `brainList` | `loadCorpus()` + per-name `read()` |
+| `lib/shell.js`, `lib/search.js`, `lib/qos.js` dead-code compat exports | direct API only |
+| `lib/cache.js` `defaultCache` singleton | `new Cache()` — consumers own their instance |
+| `lib/config.js` `setFlag` | `set` |
+| `lib/event.js` `EventBus`, `SimpleEventEmitter` | `EventEmitter` |
+| `lib/api.js` `get mode()` | read-only property, no getter |
+| `lib/vant.js` `Runtime` legacy class | top-level lazy getters |
+| `lib/compute.js` `eval` | `evaluate` |
+
+### Test - Stale Test Fixes (T15, 1 commit)
+
+T15 swept all 110 test files and fixed 24 of the 35 pre-existing
+failures that the b-T round exposed. The remaining 11 failures
+(embed: 9, test-escrow: 4) predate the axolotl work and are
+deferred.
+
+| Test file | Before | After | Net |
+|-----------|--------|-------|-----|
+| `test-integrations.js` | 10 fail | 0 fail | -10 |
+| `test-vant.js` | 7 fail | 0 fail | -7 |
+| `test-sandbox.js` | 3 fail | 0 fail (+4 new) | -3 |
+| `test-compute.js` | 1 fail | 0 fail | -1 |
+| `test-modules.js` | 1 fail | 0 fail | -1 |
+| `test-trifecta.js` | broken import | deleted | -1 file |
+| **Total** | **35 fail** | **11 fail** | **-24** |
+
+Net test count: 1451 → 1478 passing (+27).
+
+### Migration
+
+See `MIGRATING-0.8.6.md` for the cookbook (per-removed-API recipe
+with before/after snippets).
+
+### Known Issues
+
+- `test/embed.test.js` (9 fails): asserts an embedding abstraction
+  (setEmbedder/getEmbedder/listEmbedders/embedStack/embedBatchStack)
+  that was never implemented in `lib/embed.js`. Pre-existing.
+- `test/test-escrow.js` (4 fails): canSpend/recordSpend/agent
+  isolation/quota check. Likely related to the v0.7.x budget
+  subsystem changes. Pre-existing.
+
+Both files are deferred — not in the b-T scope.
+
+## [Unreleased] - Future
+
+### Added - Brain Layout Migration (merge-safety, axolotl)
+- `vant migrate` (lib/migrations.js, layout v3): imports pre-multibrain
+  (old single-brain) layouts into `models/{public,private}/<name>/` and
+  synthesizes the brain stack — old-style user brains stay readable after
+  the axolotl merge. `vant start` auto-runs it; `--no-migrate` opts out.
+- `--brain-name <name>` names BOTH imported scopes (default `vant`);
+  hostile/invalid names fall back to the default (never a path).
+- Detection is content-based and conservative; idempotent; failed imports
+  withhold the v3 marker so the next start retries (exit 1 + warning).
+- Alert surfaces: start banner (real imports only), `vant health`,
+  `vant migrate --status`, MCP `brain_migration_status`.
+
+### Fixed - Security & Robustness (axolotl QC waves)
+- Git CLI injection closed across `lib/branch.js` and all four git
+  connectors (github/gitlab/bitbucket/selfhosted): git ops are now
+  argv-array only (no shell); hostile refs rejected via `_gitRef`.
+  Pinned by `test/git-injection.test.js`.
+- `lib/branch.js` crashed with `audit is not defined` on every CLI-path
+  commit/checkout/merge (audit was called, never required).
+- Commit messages are arbitrary text again: strict content patterns no
+  longer reject quotes/backticks (argv-array made them inert).
+- Migration import is existing-wins (never clobbers live multibrain
+  files), skips symlinks, and one refused file can't abort an import.
+- Brain circuit breaker (BRAIN_CIRCUIT_OPEN) on repeated load failures.
+
+### Evolution - Temporal Learning System
+- Session tracking: changes, insights per session
+- Auto-start/end sessions
+- Brain load tracking → attention boosting
+- Memory integration: sessions persist for semantic search
+- Islands integration: lazy-load evolution data
+- MCP tools: brain_evolution_start, brain_evolution_end, brain_evolution_insight, brain_evolution_history, brain_evolution_status
+- Dream integration: evolution insights consolidate to learnings
+
+### Multi-Brain Architecture v0.9.0
+- Stack-based multi-brain loading (pushBrain, popBrain, getStack)
+- Brain switching (currentBrain, switchBrain)
+- Brain modes: silo, shared, governance
+- Brain types: public, private
+- State persistence: stack saves to models/state.json
+
+### Architecture - Areas to Address
+
+> Architectural improvements identified for future versions.
+
+#### Config Consolidation
+- Current state: Fragmented config across multiple files
+  - `lib/config.js` - Runtime config (env vars)
+  - `settings.ini` - User personality/preferences
+  - `settings.example.ini` - User settings template
+  - `config.example.ini` - System config template
+  - `models/private/_config.json` - Brain registry (new)
+- Issue: No single source of truth for configuration
+- Task: Unify into layered config system
+  - Layer 1: Runtime defaults (lib/config.js)
+  - Layer 2: System config (settings.ini)
+  - Layer 3: User preferences (settings.ini)
+  - Layer 4: Runtime overrides (env vars)
+- Benefit: Easier to understand, configure, migrate
+
+#### Boot Flow Modularization
+- Current state: lib/boot.js loads layers sequentially
+  - sudo → sandbox → qos → escrow → lock → audit → brain → islands
+- Issue: Rigid order, hard to customize, hard to add new layers
+- Task: Make boot more modular
+  - Configurable boot order via config
+  - Plugin hooks for boot stages
+  - Conditional layer loading
+  - Clear dependency chain
+- Benefit: More flexible, easier to extend, better debugging
+
+#### Plugin/Extension System
+- Current state: No formal plugin system
+- Vision: Runtime-extensible Vant
+  - Plugins register via standard interface
+  - Plugin can add: handlers, islands, tools, routes
+  - Plugin lifecycle: init → register → start → stop
+  - Plugin discovery: file-based or registry
+- Tasks:
+  - Define plugin interface (register, config, lifecycle)
+  - Plugin loader in lib/boot.js
+  - Plugin registry (which plugins active)
+  - Sandboxed plugin execution
+- Benefit: Ecosystem of shareable extensions
+
+---
+
 ## [0.8.6] - 2026-06-30
 
 ### Feature - Headless Mode (v0.8.6 SCOPE)
@@ -54,6 +212,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - TODO: MCP tool exposure for brain CRUD
   - TODO: Geometry storage tools (barcodes)
   - TODO: Canvas/sharing tools
+
+- **Index Engine** (Roadmap)
+  - TODO: High-performance index for geometry/semantic/flat storage
+  - TODO: Nature-inspired indexing (math constants, golden ratio patterns)
+  - TODO: Unified index across brain types (private/public/gov)
+  - TODO: Efficient recall and assimilation system
+
+- **Config System Consolidation** (Roadmap)
+  - DONE: Per-brain JSON config with global fallback (v0.8.7)
+  - TODO: Additional config utilities per brain
 
 > Original intent: VANT gates all endpoints as OS functions
 > - vant.execute(tool, args) wraps all operations

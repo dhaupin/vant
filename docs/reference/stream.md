@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/stream
 layout: default
 title: Stream API
-nav_order: 83
+nav_order: 132
 ---
 
 # Stream API
