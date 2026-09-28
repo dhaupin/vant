@@ -37,6 +37,39 @@ Open a discussion first:
 - Why it's useful
 - How it would work
 
+### Good First Issues
+
+Issues labeled `good first issue` (the repo's real label, with spaces)
+carry a contract: a reproduction and an acceptance test sit in the
+issue body, so you verify your fix the same way the project does. It is
+the same contract every vant fix follows - the fix ships with the test
+that proves it. Browse the current set on the [issues
+page](https://github.com/dhaupin/vant/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+
+### Triage Doors
+
+Every kind of input has a real door, and the doors are checked against
+reality:
+
+| Input | Door | What to include |
+|-------|------|-----------------|
+| Question or idea | [Discussions](https://github.com/dhaupin/vant/discussions) | What you tried, what you expected |
+| Bug | [Issues](https://github.com/dhaupin/vant/issues) with the bug template | Expected, actual, reproduction, environment |
+| Feature request | [Discussions](https://github.com/dhaupin/vant/discussions) first | The problem and proposed shape; becomes an issue once concrete |
+| Security vulnerability | [Private advisory](https://github.com/dhaupin/vant/security/advisories/new) - never a public issue | Impact, reproduction, which surface |
+| Documentation gap | [Issues](https://github.com/dhaupin/vant/issues) with the `documentation` label | The page, the claim, what reality says |
+
+Labels that exist on the tracker: `bug`, `documentation`, `enhancement`,
+`good first issue`, `help wanted`, `question`, plus project tags
+(`announcement`, `exploration`, `roadmap`, `testing`, `api`,
+`encryption`, `recursion`, `nova`). If a guide mentions a label that
+does not exist, that is a bug: the doors are part of the surface.
+
+Security handling is credited and private per the project's
+[security policy](https://github.com/dhaupin/vant/blob/axolotl/.github/SECURITY.md);
+support routing lives in
+[SUPPORT.md](https://github.com/dhaupin/vant/blob/axolotl/.github/SUPPORT.md).
+
 ### 3. Write Code
 Contribute code to the project.
 

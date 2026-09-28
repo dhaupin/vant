@@ -29,6 +29,7 @@ description: Deep dives - search architecture, rerank, NSC9 geometry, RPC, style
 | [Frontend](/vant/advanced/frontend) | Frontend-facing surfaces |
 | [Pruning](/vant/advanced/pruning) | Prune strategies and LTC |
 | [Release](/vant/advanced/release) | Release process |
+| [Agent Contributors](/vant/advanced/agent-contributors) | How agents author Vant: the loop, the pins, the record |
 
 ## Where to start
 

@@ -175,6 +175,8 @@
     url: /vant/advanced/rpc
   - title: Troubleshooting
     url: /vant/advanced/troubleshooting
+  - title: Agent Contributors
+    url: /vant/advanced/agent-contributors
 
 - title: Reference
   items:

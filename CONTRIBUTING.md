@@ -28,9 +28,10 @@ The shape:
 
 ## Good first issues
 
-Issues labeled `good-first-issue` carry a reproduction and an
-acceptance test — the same contract every vant fix follows. Browse
-them on the [issues page](https://github.com/dhaupin/vant/issues).
+Issues labeled `good first issue` (the repo's real label) carry a
+reproduction and an acceptance test — the same contract every vant fix
+follows. Browse them on the
+[issues page](https://github.com/dhaupin/vant/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
 
 ## For agent contributors
 
