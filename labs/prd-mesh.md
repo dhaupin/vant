@@ -141,6 +141,7 @@ state surviving every process exit.
 | Ask-peers status leg (frame §5, Wave G) | **G** | shipped (pass 68) |
 | Third-org rites: the commons key ring (frame §5, Wave H) | **H** | shipped (pass 68) |
 | The noticeboard: inter-org broadcast + catch-up (frame §5, Wave I) | **I** | shipped (pass 68) |
+| Org-model sync: the group resolution cache (frame §4 addendum, Wave J) | **J** | shipped (pass 69) |
 | Org-model sync leg (pass-52 backlog; optional) | standing — revisit on partner growth |
 
 ## 4. Wave plan
@@ -287,24 +288,38 @@ state surviving every process exit.
   bridge` (bin/notices.js; peers seeded from the node-registry ring
   roster, signed with VANT_MESH_SECRET). test/notices.test.js 8/8.
 
-### Wave J — org-model sync: the resolution cache (PROMOTED pass 68, planned)
+### Wave J — org-model sync: the resolution cache (pass 69, SHIPPED)
 
 - PROMOTED from standing-optional by the pass-68 group-pattern decision
-  (frame.md §4 addendum): a group of separate orgs sharing decision
-  chains — the corporate-group shape — is modeled as a standing JV on a
-  dedicated steward install, and member nodes need LOCAL RESOLUTION of
-  group scopes to read group topics without a round-trip to the
-  steward. The steward stays the authority of record; member copies are
-  resolution caches (merge-only adoption, provenance-stamped, never
-  truth-declaring), and every gate verifies against the home registry
-  either way — the sovereignty line does not move. Trigger that fired:
-  the owner's Acme/Beta/Theta group example (three divisions, one
-  decision chain, dedicated steward node — the "router" install).
-  Scope: teams.js re-hydration seam (the pass-52 recorded gap) + a
-  signed org.replicate leg on agora-sync following the member.intro
-  pattern. Live-fire when built: three real nodes (steward + two
-  members), Acme proposes, Beta+Theta vote remotely AND read locally,
-  settlement closes, noticeboard bridges, cold-process verified.
+  (frame.md §4 addendum); SHIPPED pass 69. A group of separate orgs
+  sharing decision chains — the corporate-group shape — is modeled as a
+  standing JV on a dedicated steward install, and member nodes hold
+  LOCAL RESOLUTION of group scopes via lib/org-sync.js: a SEPARATE
+  replica dataclass (never merged into teams.js one-record-per-agent
+  maps — a member's sovereign book is structurally unreachable),
+  wholesale-replaced only by a NEWER steward-signed generation (the
+  steward is the authority of record; replays/restarts converge,
+  revocations propagate, local membership untouched by construction).
+  scope.js resolves LOCAL → stale-rescue refresh → replica-on-miss,
+  fail-closed throughout (the provider throws on anything it cannot
+  resolve honestly; the cache can only widen resolution to members the
+  steward's signed model contains — never bypass a local denial).
+  Wire leg: signed `org.replicate` with registered-peers-only + a
+  steward allowlist (`configureStewards`). NOTE: pass 52's recorded
+  teams re-hydration seam was already closed by pass 53 — Wave J
+  reduced to the replica + wire leg + resolver seam.
+- LIVE-FIRED (pass 69, the N-node soak):
+  labs/node-crew/exercise-group.js — steward + two member processes
+  over real HTTP: steward owns the group topic and group listing,
+  both members vote REMOTELY through the owner's gate stack (3 ballots,
+  3 orgs, one PASSED ledger), THE GOAL: a member reads the group topic
+  on its own node through the replica, buyer debits its own escrow
+  while the steward records the claim, bridge refuses the scoped topic
+  (correct-by-design) with the plain notice carrying the outcome, and
+  the per-node cold soak proves ledger + claim + notice + replica all
+  survive process death. 11/11 phases, 0 gaps.
+- OPS: labs/steward-runbook.md — standing up the router install, rite
+  the ring, first group topic, operating posture, incident cookbook.
 
 ### Standing — steward operations (recorded pass 68; deliberately NOT built)
 

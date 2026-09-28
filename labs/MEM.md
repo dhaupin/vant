@@ -7,31 +7,28 @@
 
 ## Handoff
 
-**Last known good commit:** pass 68 — the three frame §5 gaps closed.
-Waves G/H/I shipped: (G, 4b9486c) ask-peers — agora-sync status legs +
-`askStatus`, mesh-status shareable/federated reports, `vant mesh status
---peers`; pins 8/8. (H, 5f6494d) third-org rites — `genesis.admit`/
-`accept`, the commons key ring that grows WITHOUT re-keying,
-member.intro merge-only adoption; THREE latent secret.js bugs fixed
-(get-after-set shape mismatch, shapeless-expiry delete, dead colon-key
-VAF path — genesis now stores `mesh-<a>-<b>`); pins 8/8 incl. a live
-two-process round-trip. (I, ab5806d) the noticeboard — lib/notices.js
-board + wire legs + scoped-topic-refusing decision bridge + `vant
-notices` CLI; pins 8/8.
+**Last known good commit:** pass 69 — Wave J shipped + live-fired; Lane 1
+(mesh) CLOSED end to end. (Core 17b0bc8) lib/org-sync.js: a SEPARATE
+generation-stamped replica dataclass on members (sovereign local books
+structurally unreachable), wholesale replacement from the steward
+(authority of record; revocations propagate via the generation),
+scope.js LOCAL → refresh → replica fail-closed resolution, signed
+org.replicate leg + configureStewards allowlist; pins 9/9. (Live-fire
+c75f127) labs/node-crew/exercise-group.js — steward + 2 members over
+real HTTP: remote votes (3 ballots/3 orgs/PASSED), remote read through
+the replica (the Wave-J goal), steward-side claim, scoped-bridge
+refusal pin + plain notice, per-node cold soak — 11/11, 0 gaps. En-route
+lib fix: _setReplica writes maps BEFORE generation (commit marker).
+(labs/steward-runbook.md) the ops guide for the router install.
 **Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED
 through pass 68.
-**Status:** UNBLOCKED. Frame §5 is CLOSED except the small msg-snapshot
-TTL leg (gap 6). **Decisions recorded (owner-approved):** the group
-pattern (corporate-group shape = standing JV on a dedicated steward
-install; org-model sync PROMOTED to planned Wave J as a resolution
-cache — steward stays authority of record; `group:` scope kind set
-aside) and the steward install (no new code needed: fail-closed gates,
-claims-not-cash, merge-only sync, re-key-free rite admission all
-pinned; election/standby/rotation deliberately deferred). Open
-candidates: Wave J org-model sync (teams re-hydration seam + signed
-org.replicate leg; live-fire = 3 real nodes), msg TTL leg, genesis CLI
-parity, OSS-D/OSS-E, prd-world intake (waiting on the synmergia
-backwards-PR).
+**Status:** UNBLOCKED. Lane 1 (mesh) CLOSED: Waves A→J shipped, the
+N-node soak is clean, the steward runbook is written. Remaining:
+OSS-D/OSS-E (Lane 2), prd-world intake validator + synmergia
+backwards-PR (Lane 3), small opts (msg TTL leg, genesis CLI parity).
+Decisions of record (frame.md §4 addendum): group pattern = standing
+JV on a dedicated steward; `group:` scope kind set aside;
+election/standby/rotation deliberately deferred.
 **Owner context:** "vant is a source of truth model; world-building
 exercise; the world needs state and interaction." Owner greenlit all
 three §5 gaps this pass ("#1, #2a, and this #3"). Post-pass direction:
@@ -46,8 +43,9 @@ revisit from desktop).
 
 ## CURRENT DUMP
 
-(nothing in flight — Waves G/H/I shipped, verified, committed, pushed.
-Next agent wakes to a closed §5 and an unblocked board.)
+(nothing in flight — Wave J shipped, live-fired 11/11, runbook written,
+committed. Next agent wakes to a closed mesh lane and an unblocked
+board; Lane 2/3 per the owner's sequencing.)
 
 ---
 

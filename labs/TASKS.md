@@ -2,7 +2,58 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-28  
-**Session:** Pass 68 — frame §5 closed: ask-peers, third-org rites, the noticeboard
+**Session:** Pass 69 — Wave J shipped: org-model sync + the three-org live-fire (N-node soak clean)
+
+---
+
+## Session (2026-09-28 — pass 69: Wave J, the group resolution cache + steward runbook)
+
+Continued from pass 68's recorded decisions (group pattern + steward
+install, owner-approved). Wave J shipped in two commits plus the runbook.
+
+**Discovery:** pass 52's recorded teams re-hydration gap was already
+closed by pass 53 (refresh/_refreshSync/_resetHydration + the
+scope-miss rescue). Wave J therefore reduced to: the replica + the
+wire leg + the resolver seam.
+
+**Core (17b0bc8):** lib/org-sync.js — a SEPARATE replica dataclass on
+member nodes (teams.js assignment maps are one-record-per-agent;
+merging group assignments there would shadow a member's sovereign
+local record). Wholesale generation-stamped replacement from the
+steward (the authority of record never merges; replays/restarts
+converge; revocation propagates; local membership untouchable by
+construction). scope.js resolveMembers: LOCAL → stale-rescue refresh →
+replica-on-miss, fail-closed throughout (provider THROWS on what it
+cannot resolve honestly; the cache can only widen resolution to
+members the steward's signed model contains). `org.replicate` leg:
+signed + registered-peers-only + `configureStewards` allowlist.
+`resolveMembersRouted` for explicit-book callers. Pins
+test/org-sync.test.js 9/9; full sweep green.
+
+**Live-fire (c75f127):** labs/node-crew/exercise-group.js — the owner's
+Acme/Beta/Theta shape at three real processes over real HTTP: steward
+owns the group topic (pass-50) and the group listing; both members vote
+REMOTELY (3 ballots, 3 orgs, PASSED); THE GOAL — beta-1 reads the group
+topic on its own node through the replica; buyer debits own escrow,
+steward records the claim; bridge refuses the scoped topic (pin) with
+the plain notice carrying the outcome; per-node cold soak (steward:
+ledger+claim, acme: notice, beta: replica). **11/11 phases, 0 gaps —
+the N-node soak is clean.** En-route lib fix: _setReplica writes maps
+BEFORE the generation (the generation is the commit marker; the old
+order opened a fail-closed window mid-replacement, caught by the
+exercise's pre-vote scope check). Harness honesty: per-child VANT_BRAIN
+isolation (the shared-disk draft poisoned beta's local book and wiped
+registry anchors), stderr fed to the parent, dispatcher-before-hello,
+pass-59 anchor shapes.
+
+**Runbook:** labs/steward-runbook.md — trust inventory, steward boot,
+ring rites, replication, first group topic, operating posture, incident
+cookbook, provenance. Lane 2/3 up next per the owner's sequencing.
+
+**Next:** Lane 1 (mesh) is now CLOSED end to end — A→J shipped, soak
+clean, ops documented. Remaining: OSS-D/OSS-E (Lane 2), prd-world
+intake validator + the synmergia backwards-PR (Lane 3), small opts
+(msg TTL leg, genesis CLI parity).
 
 ---
 

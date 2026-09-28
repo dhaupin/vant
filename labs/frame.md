@@ -124,6 +124,17 @@ grade means recorded upgrade paths and fail-closed defaults, not
 speculative machinery — the first real distributed crew will say
 whether standby is ever needed.
 
+**SHIPPED (pass 69): the org-model sync leg — Wave J.** The steward
+pushes its signed org model (org.replicate, generation-stamped); members
+hold a SEPARATE resolution cache (never merged into their own org
+books) and resolve LOCAL → refresh → replica, fail-closed. Revocation
+propagates with the generation; a member's local membership is
+untouchable by construction. Live-fired end-to-end at three real
+processes (labs/node-crew/exercise-group.js, 11/11 — the N-node soak:
+remote votes from both members, remote read through the replica, claims
+settlement, plain-notice bridge, per-node cold verification). Ops
+guide: labs/steward-runbook.md.
+
 ## 5. Gaps the frame exposes (the multi-vant experiment list)
 
 Mapped against the mesh waves, the frame's open work is:
