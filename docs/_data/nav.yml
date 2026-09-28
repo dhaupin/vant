@@ -70,6 +70,8 @@
     url: /vant/multi-agent/agents
   - title: Coordination
     url: /vant/multi-agent/coordination
+  - title: Federation
+    url: /vant/multi-agent/federation
 
 - title: Essential
   items:
@@ -133,6 +135,8 @@
     url: /vant/operations/deployment
   - title: Steward Runbook
     url: /vant/operations/steward-runbook
+  - title: Federation Playbooks
+    url: /vant/operations/federation-playbooks
   - title: QoS
     url: /vant/operations/qos
   - title: Network

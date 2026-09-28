@@ -12,6 +12,11 @@ Reference for the core MCP tools. The live registry is larger and grows
 automatically (core libs are auto-wired): a running server exposes the
 full, current list via `tools/list` or `curl http://localhost:3457/tools`.
 
+Cross-org surfaces have their own sections below: [Agora and Mesh
+Tools](#agora-and-mesh-tools-9) (remote votes, ledger sync, consensus)
+and [Market and Msg Tools](#market-and-msg-tools-8). Task-first usage:
+[Federation Playbooks](/vant/operations/federation-playbooks).
+
 ## Core Tools (9)
 
 ### vant_get_memory
@@ -348,6 +353,133 @@ vant_rerank(query="authentication", topK=5)
 ```
 
 ---
+
+## Agora and Mesh Tools (9)
+
+The cross-org decision surface: remote voting and ledger sync over the
+signed crew-bus. Every gate stays owner-side; these tools carry ballots
+and ledgers, never authority. Requires a configured bus (the node's
+name, port, secret, and agentId) with agora-sync installed.
+
+### agora_vote
+
+Cast a ballot on a PEER node's consensus topic. The topic owner runs
+its full local gate stack (scope, registry vetting, quarantine,
+one-vote) and acks the verdict.
+
+**Params:**
+| Param | Type | What |
+|-------|------|------|
+| node | string | Peer node name (registered crew-bus peer) |
+| topic | string | Consensus topic on the peer |
+| outcome | string | The ballot choice |
+| agentId | string | Optional: vote as another pre-registered principal |
+
+**Example:**
+```bash
+agora_vote(node="acme-node", topic="q3-platform-call", outcome="thursday-1400utc")
+```
+
+### agora_pull
+
+Pull a topic's ledger from a peer and merge it LOCALLY. The merge
+re-derives status, so the wire can never declare a topic passed.
+
+**Example:**
+```bash
+agora_pull(node="acme-node", topic="forum-q3-platform-call-abc123")
+```
+
+### agora_push
+
+Push a local topic's ledger to a peer (the return leg after voting on
+a synced topic).
+
+### agora_nodes
+
+List this node's crew-bus peers and its own identity.
+
+### agora_sync_status
+
+Sync surface status: which buses have the dispatchers installed, node
+identity, pending round-trips.
+
+### consensus_create
+
+Create a consensus vote topic (scope-aware; malformed scope is
+rejected fail-closed).
+
+**Params:**
+| Param | Type | What |
+|-------|------|------|
+| topic | string | Charset [a-zA-Z0-9_-], 1-100 chars |
+| options | string[] | At least two choices |
+| minQuorum | number | Optional quorum |
+| scope | object | Optional: `{ owner: "team:id", visibility: "scope" }` |
+
+### consensus_vote
+
+Cast a vote on a consensus topic (one vote per agent; scoped topics
+reject non-members).
+
+### consensus_tally
+
+Tally a topic: winner, percentages, quorum status.
+
+### consensus_get
+
+Get a topic's ledger. Scope-aware: pass `viewerId` (a member principal)
+to read a scoped topic; without it, scoped topics return null, same
+shape as not-found.
+
+### consensus_list
+
+List topics with status and vote counts. Pass `viewerId` to include
+scoped topics you are a member of; the anonymous view omits them
+entirely.
+
+## Market and Msg Tools (8)
+
+### market_list
+
+List knowledge for trade.
+
+**Params:**
+| Param | Type | What |
+|-------|------|------|
+| type | string | knowledge, insight, memory, or favor |
+| title | string | Listing title |
+| price | string | Optional price |
+| context | object | Optional; carries consentGiven |
+
+### market_bid
+
+Bid on knowledge.
+
+### market_trade
+
+Execute a trade (`listingId`, `buyerId`).
+
+### market_search
+
+Search listings by type, tags, or query.
+
+### market_stats
+
+Market statistics.
+
+### market_get
+
+Fetch one listing. Scope-aware: a scoped listing is visible to its
+member set (pass the viewer context).
+
+### msg_send
+
+Send a message to a channel (`channel`, `content`, optional `from`).
+
+### msg_list
+
+List messages in a channel (`channel`, optional `limit`).
 
 ## Return Types
 

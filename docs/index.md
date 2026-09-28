@@ -104,7 +104,7 @@ See [Multi-brain](/vant/multi-agent/brains) and [Succession](/vant/multi-agent/s
 | [Getting started](/vant/getting-started/quick-start) | Install, configure, first run, agent onboarding |
 | [Memory](/vant/memory/brain) | The brain, memory store, search, citations, horcrux, geometry |
 | [Runtime](/vant/runtime/runtime) | Programmatic API, MCP, headless server |
-| [Multi-agent](/vant/multi-agent/brains) | Brains, branches, succession, crews |
+| [Multi-agent](/vant/multi-agent/brains) | Brains, branches, succession, crews, federation |
 | [Operations](/vant/operations/storage) | Storage, journal, events, cache, CI |
 | [Security](/vant/security/sandbox) | Sandbox, gates, escrow, sudo |
 | [Integrations](/vant/integrations/github) | GitHub, agent skills, Linear, Docker, S3 |

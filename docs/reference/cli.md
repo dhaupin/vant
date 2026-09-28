@@ -326,6 +326,9 @@ vant brain mode dual            # dual | public | private | remote
 | `vant event` | Event handling |
 | `vant telegram` | Telegram bot |
 
+See also the [Federation](#federation) section below for cross-org
+verbs (`genesis`, `agora`, `mesh`, `notices`).
+
 ```bash
 vant server --port 8080                  # Custom port
 vant server --host 0.0.0.0               # Bind host
@@ -450,6 +453,49 @@ vant system status
 vant system healthy
 ```
 
+## Federation
+
+Cross-org verbs: sovereign nodes meeting over the signed crew-bus wire.
+Concepts and playbooks: [Federation](/vant/multi-agent/federation) and
+[Federation Playbooks](/vant/operations/federation-playbooks). The
+operator guide for a group's steward install is the [Steward
+Runbook](/vant/operations/steward-runbook).
+
+| Command | Description |
+|---------|-------------|
+| `vant genesis` | Mesh join ceremony (create, join, status) |
+| `vant agora` | Cross-node agora ops (nodes, status, vote, pull, push) |
+| `vant mesh status` | Node + federated status view (--json, --peers) |
+| `vant notices` | The board: post, list, pull, broadcast, bridge decisions |
+| `vant node-registry` | Vetted node/principal registrations |
+
+```bash
+# Pair join: their side hosts, yours joins with the out-of-band secret
+vant genesis create --name acme-node --agent acme-1 --port 4890 --joiner beta-node --joiner-agent beta-1
+vant genesis join --name beta-node --agent beta-1 --port 4891 --host acme-node --host-port 4890 --secret <pair-secret>
+vant genesis status
+
+# Cross-node agora: vote on a peer's topic; pull the ledger back
+vant agora nodes
+vant agora vote acme-node q3-platform-call thursday-1400utc
+vant agora pull acme-node forum-q3-platform-call-abc123
+
+# The board: post a plain notice, catch up after downtime
+vant notices post "Q3 platform call set" --body "Thursday 1400 UTC, three orgs" --ttl-ms 604800000
+vant notices list
+vant notices pull --all
+vant notices broadcast
+vant notices bridge forum-q3-platform-call-abc123   # scoped topics refuse by design
+
+# Observability
+vant mesh status
+vant mesh status --peers --json
+```
+
+Trust posture (unchanged across all of these): registered peers only,
+sender-bound replies, scope resolves where the model lives, merges
+re-derive status locally, and the wire never carries the ring secret.
+
 ## Ecosystem
 
 Experimental social, governance, and meta surfaces. Each is a real module
@@ -457,10 +503,12 @@ with its own `--help`.
 
 | Command | Description |
 |---------|-------------|
-| `vant teams` | Organization and team management |
+| `vant teams` | Organization and team management (org, dept, team, assign) |
 | `vant governance` | Governance decision making |
-| `vant market` | Knowledge trading (list, bid) |
-| `vant forum` | Forum and discussion |
+| `vant market` | Knowledge trading (list, bid, trade, search, stats) |
+| `vant forum` | Forum and discussion (list, post; votes ride consensus) |
+| `vant escrow` | Budgets and holds (status, hold, release) |
+| `vant consensus` | Consensus ledger operations (status, propose, vote) |
 | `vant context` | Prompt caching and context engine |
 | `vant consciousness` | Consciousness engine |
 | `vant recursion` | Recursion engine |

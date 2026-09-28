@@ -17,6 +17,7 @@ description: Multi-brain contexts, branch-per-agent crews, succession and trust 
 | [Branches](/vant/multi-agent/branches) | Branch-per-agent workflow and the branch manager |
 | [Trust & Succession](/vant/multi-agent/succession) | How much state each agent generation inherits |
 | [Agents](/vant/multi-agent/agents) | The agent crew runtime: spawn, delegate, coordinate |
+| [Federation](/vant/multi-agent/federation) | Sovereign installs meeting over the signed wire: the mesh, groups, stewards |
 
 ## The short version
 

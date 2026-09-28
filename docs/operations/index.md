@@ -28,6 +28,7 @@ description: Running Vant day to day - storage, sync, cron, CI, notifications, n
 | [Testing](/vant/operations/testing) | Test suites and how to run them |
 | [Deployment](/vant/operations/deployment) | Deploy targets and container notes |
 | [Steward Runbook](/vant/operations/steward-runbook) | Running a group's router install: orgs sharing one decision chain |
+| [Federation Playbooks](/vant/operations/federation-playbooks) | Join, vote, sync, settle, catch up: mesh participant recipes |
 | [Cache](/vant/operations/cache) | Cache behavior and clearing |
 
 ## Where to start
