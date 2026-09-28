@@ -7,21 +7,47 @@
 
 ## Handoff
 
-**Last known good commit:** pass 65 — THREE-NODE STAR exercise 9/9 (labs/node-crew/exercise-three-nodes.js) + 2 security finds fixed and pinned: consensus read-path scope gate (get/list viewerId), honest webhook acks (dispatched field), registry.refresh seam.
-**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED through pass 65.
-**Status:** BLOCKED on synmergia access for the survey; meanwhile OSS waves C-E and mesh gaps (ask-peers, trio genesis) are unblocked work.
-**Owner context:** "vant is a source of truth model; world-building exercise; the world needs state and interaction." Synmergia (Godot MMORPG) has WORKING seed + state systems + PRD design docs to borrow. labs/prd-world.md v0.1 written (survey-pending) — import frame locked: extract invariants not code, implement only what vant lacks, close the loop through the mesh (Godot server = peer node; vant SERVES world state).
-**BLOCKER:** dhaupin/synmergia is private, NOT in the Freebuff GitHub App scope (clone/gh/search all fail; no public repo by that name exists). Owner must add it to the app's repo scope, or paste the PRDs + seed/state files.
+**Last known good commit:** pass 67 — THREE-NODE STAR 9/9 + JV 8/8 + full
+relevant sweep green. Shipped: (1) lib/settlement.js — cross-node
+settlement, the weights & measures leg (frame §5 gap 4): partner-side
+escrow debit where the budget lives, owner-side CLAIM only (books never
+touched), idempotent by settlementId, unwind on refusal/timeout, pins
+test/settlement.test.js 10/10; mesh-status gained the settlements
+section. (2) Wave OSS-C: surface checker 31 → 167 checks — every CLI
+verb claim vs bin/dispatcher/inline-handlers + every documented MCP tool
+vs _methods; caught 4 real phantoms (vant learn/remember/address/locate)
+which are now documented-reality. (3) prd-world.md v0.2 — §3 is now the
+fill-in intake form for the synmergia backwards-PR flow.
+**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED
+through pass 67.
+**Status:** UNBLOCKED. The synmergia survey runs BACKWARDS: the
+synmergia agent PRs §3's answers against axolotl (fill rules on the
+form; file:line evidence required). W1/W3 semantics + prd-world §6
+decisions 2–3 wait on that PR. Meanwhile OSS-D (community depth),
+OSS-E (agent-contributor chapter), and the frame gaps (third-org
+rites, ask-peers status leg, noticeboard) are all open work.
+**Owner context:** "vant is a source of truth model; world-building
+exercise; the world needs state and interaction." Synmergia access
+ground truth recorded: the Freebuff GitHub App grant is per-repo and
+not adjustable from this workspace (installation lists only
+dhaupin/vant); the owner will revisit the scope from desktop later.
+**BLOCKER:** none.
 
 ---
 
 ## CURRENT DUMP
 
-(waiting on synmergia access. When it lands: survey per
-prd-world.md §3 checklist — seed derivation semantics, state snapshot
-schema/versioning, PRD vocabulary, service seams — with file:line
-evidence, then fill W1-W4 in and implement Wave W1. Meanwhile OSS
-waves C-E + mesh ask-peers leg are unblocked.)
+(nothing in flight — all three picks shipped, verified, committed,
+pushed. The synmergia intake form is live; next agent wakes to an
+unblocked board.)
+
+---
+
+## CURRENT DUMP
+
+(nothing in flight — all three picks shipped, verified, committed,
+pushed. The synmergia intake form is live; next agent wakes to an
+unblocked board.)
 
 ---
 

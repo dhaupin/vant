@@ -1,8 +1,100 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-09-26  
-**Session:** Pass 64 — Wave OSS-B: single sources of truth (checker at 31)
+**Last Updated:** 2026-09-28  
+**Session:** Pass 67 — weights & measures + OSS-C claims registry + the world-PR intake
+
+---
+
+## Session (2026-09-28 — pass 67: the economic leg, the claims registry, the intake form)
+
+Owner greenlit all three picks in one session. Synmergia access RESOLVED
+as the backwards-PR flow (ground truth: `GET /installation/repositories`
+returns total_count 1 — only dhaupin/vant is in the Freebuff app's
+scope, and the mobile UI exposes no adjustment; the owner will revisit
+from desktop. The PR flow needs no grant at all).
+
+**T1 — prd-world.md v0.2, the intake form:** §3 restructured from prose
+checklist into fill-in tables with evidence slots (3.1 seed, 3.2 state,
+3.3 vocabulary, 3.4 service seams, 3.5 the boundary, 3.6 intake
+verdict). Fill rules stated on the form: answer from CODE not docs,
+one evidence line per claim, `UNSETTLED`/`NOT FOUND` are real answers,
+never guesses. The synmergia agent's PR now drops straight in. §6
+decision 1 marked RESOLVED.
+
+**T2 — Wave OSS-C, the claims registry (checker 31 → 167 checks):**
+- Section 8: EVERY `vant <verb>` claim in docs/reference/cli.md (plus
+  AGENTS.md, shared dedupe set) must resolve to bin/<verb>.js, a
+  COMMANDS route in bin/vant.js, or the documented INLINE_HANDLERS
+  (version/distributed/mcp/api/all — the `if (!script)` built-ins).
+- Section 9: every tool documented in docs/reference/mcp-tools.md must
+  be a registered _methods entry in lib/mcp.js (22 documented, all
+  registered).
+- **CAUGHT 4 REAL PHANTOMS on first run:** `vant learn`, `vant
+  remember`, `vant address`, `vant locate` — top-level shortcut rows
+  with usage examples in cli.md (including `--ttl` flags that exist
+  NOWHERE) but no bin file, no route, no handler. Capability real via
+  `vant memory <sub>` → rows deleted, examples rewritten to real forms
+  (the pass-63 "document reality" precedent). The checker proved
+  itself again: built to catch phantoms, immediately caught phantoms.
+- Regex lesson pinned in the code: the COMMANDS-route probe needs the
+  'm' flag — `^` must match line starts or every routed alias
+  (hybrid/webhook/test/spawn) false-fails.
+
+**T3 — weights & measures, lib/settlement.js (frame §5 gap 4):** the
+first ECONOMIC leg. Design holds the frame's line: the DEBIT runs
+where the budget lives (partner's own escrow, sync critical section
+canSpend→recordSpend→hold); the OWNER records a CLAIM only — the
+owner's books are never touched (credit-side accounting is a
+deliberate v1 non-goal; frame §4: "settlement records cross as data").
+Envelopes: settle.request / settle.record / settle.query /
+settle.status. Trust posture inherited, nothing new: registered peers
+only; owner-side scope with the pass-59 principal match (invoice buyer
+must equal resolvePrincipal(sender)); envelope provenance, not payload;
+sender-bound replies (pass-51); price integrity vs the listing;
+idempotent by settlementId (replay re-acks the SAME claim);
+unwind on refusal/timeout — money never hangs in flight.
+- **Pins: test/settlement.test.js 10/10** — claim recording + sovereign
+debit, idempotent replay, local budget refusal pre-wire, explicit
+listing refusal with refund, buyer-identity refusal with unwind,
+timeout unwind, forged-record sender binding, strangers get no
+recorder, malformed-invoice matrix, aggregate status (no memo/topic
+leak).
+- **Two real bugs found by the pins, both fixed:**
+  1. `_validInvoice` null-vs-undefined: the function's own
+     normalization emitted `topic: null`, which failed the
+     `!== undefined` typeof check — every no-topic invoice was
+     silently dropped owner-side. Rule now stated in code: undefined
+     OR null = absent; present-but-non-string = malformed.
+  2. The owner-side listing lookup was ANONYMOUS — the pass-40 rule
+     ("scoped means unseen") refused EVERY scoped settlement with
+     E_NO_LISTING. The owner must look up its own listing AS ITSELF
+     ({ agentId }); the BUYER's admission is still gated separately.
+- mesh-status grew the settlements section (counts only — claims/paid/
+  pending; memo/topic never leave the claims ledger) + the human
+  `settle` line. mesh-status 7/7.
+
+**The star-exercise forensic (worth keeping):** phase 7 failed 4×
+deterministically (ECONNRESET on the first-ever ops→nova POST).
+Bisected with `git stash`: THE PRISTINE TREE FAILS TOO — pre-existing
+and environment-sensitive, not this pass's code. Root cause: the JV
+exercise masks first-connection TCP resets with its genesis RETRY
+loop; the star's probe was one-shot. Hardened: 3 attempts, FRESH
+body/signature per attempt (the pass-42 replay dedupe is never in
+play — a banked signature would 409), transport-error-only. Result:
+9/9, and the version-gate assertion is now GENUINELY live-exercised
+(futureMajor dispatched:0) instead of being masked by a reset. The
+"fix" made the exercise more honest.
+
+**Verification:** settlement 10/10, market-debit 4, agora-sync 7,
+crew-bus 20, mesh-status 7, consensus-read-scope 9, msg-sync 9,
+agora-loop 7, teams-refresh 6, JV 8/8 (0 gaps), STAR 9/9, checker
+167/167 green, npm run lint:docs PASS, eslint clean.
+
+**Next steps:** the synmergia PR fills §3 (backwards flow is live —
+W1/W3 semantics + §6 decisions 2–3 wait on it). OSS-D (community
+depth) and OSS-E (agent-contributor chapter) remain. Frame gaps:
+third-org rites, ask-peers status leg, noticeboard.
 
 ---
 
