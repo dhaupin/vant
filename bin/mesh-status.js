@@ -12,6 +12,11 @@
  * Read-only. No secrets. Scope stays owner-side: the report shows what
  * THIS node can see, nothing more (the PRD's rule). Every subsystem is
  * probed independently — a broken leg degrades its section, not the run.
+ *
+ * (pass 67) The report carries the settlements section — the weights &
+ * measures leg (frame.md §5 gap 4): claim counts, role split, in-flight
+ * invoices. Aggregates only; settlement memo/topic never leave the
+ * claims ledger (the Stewardship surface sees counts, not wallets).
  */
 
 const args = process.argv.slice(2);
@@ -26,8 +31,9 @@ USAGE:
 
 WHAT IT ANSWERS:
   Who are my peers, what's voted, what's decided, what's traded,
-  what's spent, which channels exist, what's pending on the wire —
-  from THIS node's point of view (scope stays owner-side).
+  what's spent, what's SETTLED across nodes, which channels exist,
+  what's pending on the wire — from THIS node's point of view
+  (scope stays owner-side).
 
 POSTURE:
   Read-only. No secrets. Degraded sections print their error —

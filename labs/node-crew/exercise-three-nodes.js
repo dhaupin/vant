@@ -159,15 +159,28 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
         return { body, signature };
     };
     const sendProbe = async (v) => {
-        const p = mkProbe(v);
-        try {
-            const raw = await network.fetch('http://127.0.0.1:' + PORT_NOVA + '/nova-crew', {
-                method: 'POST', body: p.body,
-                headers: { 'Content-Type': 'application/json', 'X-Signature-256': p.signature },
-                circuit: false, system: true
-            });
-            return JSON.parse(raw);
-        } catch (e) { return { error: e.message }; }
+        // (pass 67 harness note) A FIRST-ever POST to a fresh listener can
+        // die at the TCP layer in this sandbox (read ECONNRESET) before the
+        // server reads the body — the JV exercise masks this with its
+        // genesis retry loop; the probe was one-shot. Retry with a FRESH
+        // body each attempt (new ts/nonce/signature) so the pass-42 replay
+        // dedupe is never in play, and only when the error is
+        // transport-level (no ack received at all). The gate assertions
+        // below are unchanged: a reset never produced a mismatch event.
+        let last = { error: 'unsent' };
+        for (let attempt = 0; attempt < 3; attempt++) {
+            if (attempt > 0) await wait(250);
+            const p = mkProbe(v);
+            try {
+                const raw = await network.fetch('http://127.0.0.1:' + PORT_NOVA + '/nova-crew', {
+                    method: 'POST', body: p.body,
+                    headers: { 'Content-Type': 'application/json', 'X-Signature-256': p.signature },
+                    circuit: false, system: true
+                });
+                return JSON.parse(raw);
+            } catch (e) { last = { error: e.message }; }
+        }
+        return last;
     };
     const refused = await sendProbe({ major: 9, minor: 0 });   // future major: refused at the version gate
     const honest = await sendProbe({ major: 1, minor: 0 });    // current major: dispatches

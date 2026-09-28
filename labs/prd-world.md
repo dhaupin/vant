@@ -1,11 +1,14 @@
 # The World Layer — Vant as Source of Truth for Synthetic Worlds — PRD
 
-> **Status: SURVEY-PENDING (v0.1).** The import frame is locked; the
-> survey of synmergia's working seed/state systems is pending repo
-> access (private repo; add `dhaupin/synmergia` to the Freebuff GitHub
-> App scope, or drop the PRDs + seed/state files into this workspace).
+> **Status: SURVEY-PENDING (v0.2).** The import frame is locked; the
+> survey of synmergia's working seed/state systems runs BACKWARDS
+> (owner's call, 2026-09-28): the repo-reading agent fills §3's slots
+> in a PR against `axolotl`. Direct repo access is not available from
+> this workspace — the Freebuff GitHub App grant is per-repo and its
+> scope is not adjustable from here (the installation lists only
+> dhaupin/vant). The PR flow needs no grant at all.
 > Nothing in this document claims to know synmergia's internals yet —
-> sections marked SURVEY fill in when the repo is readable.
+> the _FILL_ slots in §3 answer when the PR lands.
 >
 > Owner framing: "Vant is a source of truth model. Look at all this like
 > a world-building exercise — the world needs state and interaction."
@@ -50,25 +53,65 @@ primitives vant's runtime lacks.
    rendered by the game. The white paper's thesis with a game as the
    first real client.
 
-## 3. SURVEY — what to extract from synmergia (the checklist)
+## 3. SURVEY — the intake form (filled by PR from synmergia)
 
-When access lands, the survey answers these, with file:line evidence:
+> **How this works (the backwards flow):** the synmergia agent holds
+> the repo; this agent holds the vant side. The survey is answered BY
+> the repo-reading agent in a PR against `axolotl` — every claim
+> carries file:line evidence, the same rule the surface checker
+> enforces on docs. Filling rules: answer from CODE, not docs (docs
+> drift; code is the truth); one evidence line per claim; write
+> `UNSETTLED` where the source repo has not decided yet; write
+> `NOT FOUND` where nothing exists — both are real answers, never
+> guesses. The vant side fills §3.6 after merge.
 
-- **Seed system (working):** What does a seed DERIVE? (world layout?
-  entity spawns? resource distribution?) Deterministic across what
-  boundary (process restart? platform? version)? What is the seed's
-  TYPE and entropy budget? Is derivation one-shot or incremental?
-- **State system (working):** What is a world-state snapshot? (schema,
-  versioning, migration story) How are transitions guarded? What is
-  authoritative vs simulated client-side? Save/persistence cadence?
-- **PRD design docs:** What models did synmergia's docs settle that
-  vant should adopt as vocabulary (region/chunk semantics, entity
-  lifecycle, time/tick model, ownership of spawned entities)?
-- **Service seams:** What does synmergia's server expose that a
-  vant-native implementation should mirror (so the game client
-  migrates to vant-backed state with minimal client rework)?
-- **What stays in synmergia:** rendering, physics, client prediction —
-  the game's job, never vant's.
+### 3.1 Seed system (working — confirm + measure)
+
+| # | Slot | Answer (fill) | Evidence (file:line) |
+|---|------|---------------|----------------------|
+| 1.1 | What does a seed DERIVE? (world layout? entity spawns? resource distribution? something else?) | _FILL_ | _FILL_ |
+| 1.2 | Determinism boundary: same seed ⇒ same world across WHAT? (process restart / platform / engine version / all of these) | _FILL_ | _FILL_ |
+| 1.3 | Seed TYPE and entropy budget (string? integer? how many bits of real entropy?) | _FILL_ | _FILL_ |
+| 1.4 | Derivation model: one-shot at world genesis, or incremental (per-region/per-chunk on demand)? | _FILL_ | _FILL_ |
+
+### 3.2 State system (working — confirm + measure)
+
+| # | Slot | Answer (fill) | Evidence (file:line) |
+|---|------|---------------|----------------------|
+| 2.1 | What is a world-state snapshot? (schema shape — top-level fields + one example) | _FILL_ | _FILL_ |
+| 2.2 | Versioning + migration story: how does an old save open in a new build? | _FILL_ | _FILL_ |
+| 2.3 | Transition guards: what prevents illegal state changes? (validation layer? state machine? trust boundary?) | _FILL_ | _FILL_ |
+| 2.4 | Authoritative vs simulated: what does the SERVER own vs what does the client predict? | _FILL_ | _FILL_ |
+| 2.5 | Save/persistence cadence (per tick? per event? on interval?) and crash story | _FILL_ | _FILL_ |
+
+### 3.3 Vocabulary (what vant should call things)
+
+| Concept | Synmergia term | Evidence | Adopt into vant as |
+|---------|----------------|----------|--------------------|
+| World subdivision | _FILL_ (region? chunk? zone?) | _FILL_ | _FILL_ |
+| Entity birth/death | _FILL_ | _FILL_ | _FILL_ |
+| Time | _FILL_ (tick? frame? epoch?) | _FILL_ | _FILL_ |
+| Who owns a spawned entity | _FILL_ | _FILL_ | _FILL_ |
+
+### 3.4 Service seams (what the game server exposes)
+
+| Seam | What it does | Evidence | W3 mirror? |
+|------|--------------|----------|------------|
+| _FILL_ | _FILL_ | _FILL_ | _FILL_ |
+
+### 3.5 What stays in synmergia (the boundary)
+
+Rendering, physics, client prediction never move to vant — confirm
+and list anything ELSE that stays (plus anything surprisingly
+server-side worth knowing about):
+
+_FILL_
+
+### 3.6 Intake verdict (vant side, post-merge)
+
+- W1 (`derive`) semantics adjustments: _PENDING SURVEY_
+- W3 read-only vs read+write serving (§6 decision 2): _PENDING SURVEY_
+- Module name input (§6 decision 3): _PENDING SURVEY_
 
 ## 4. Wave plan (provisional; survey adjusts)
 
@@ -107,8 +150,12 @@ second real client and the "any shop, any runtime" proof.
 
 ## 6. Open decisions (owner)
 
-1. Access: add `dhaupin/synmergia` to the Freebuff app scope, or drop
-   the PRD/state/seed files into this workspace?
+1. Access: RESOLVED (2026-09-28) — the backwards PR flow. The
+   repo-reading agent PRs §3's answers against `axolotl`; no repo
+   grant is needed on the vant side. (Ground truth recorded:
+   `GET /installation/repositories` returns total_count 1 — only
+   dhaupin/vant is in the app's scope, and the mobile UI exposes no
+   adjustment.)
 2. Is synmergia's server authoritative-multiplayer already (determines
    whether W3 is read-only serving or read+write)?
 3. Name: "world" as the module/frame term — too generic? (alternates:

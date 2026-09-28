@@ -97,10 +97,6 @@ addressing. See [Memory](/vant/memory/brain) and [Brain Search](/vant/memory/sea
 | Command | Description |
 |---------|-------------|
 | `vant memory` | Full memory CLI (state, learn, query, address, locate) |
-| `vant learn` | Shortcut: store a document |
-| `vant remember` | Shortcut: store/recall state |
-| `vant address` | Shortcut: store at an NSC9 geometric address |
-| `vant locate` | Shortcut: retrieve by NSC9 barcode |
 | `vant search` | Search the brain corpus (basic, rag, hybrid, hyde) |
 | `vant rerank` | Rerank and compress results for LLM context |
 | `vant embed` | Embedding provider management |
@@ -117,8 +113,8 @@ vant memory locate <barcode>       # Locate by barcode
 vant memory list                   # Show stats
 vant memory clear                  # Clear all
 
-vant learn goals "Ship the T2 sweep." --ttl 60000
-vant remember goals --ttl 3600000     # Recall with TTL
+vant memory learn goals "Ship the T2 sweep."  # Store a document (persists)
+vant memory recall goals                      # Recall state by key
 
 vant search <query>                # Default: hybrid
 vant search <query> --mode basic   # Text search

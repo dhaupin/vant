@@ -19,6 +19,13 @@
  *      surfaces: the same commit-format and test commands appear in
  *      both; each file carries a canonical-source marker; the front
  *      door stays short (a proxy for "didn't regrow into a full guide")
+ *   7. (Wave OSS-B) AGENTS.md CLI claims resolve to bin/ or the
+ *      dispatcher; brain-layout mentions are current (multi-brain)
+ *   8. (Wave OSS-C) CLI claims registry: EVERY `vant <verb>` claim in
+ *      docs/reference/cli.md resolves to bin/<verb>.js, a dispatcher
+ *      route in bin/vant.js, or a documented inline handler
+ *   9. (Wave OSS-C) MCP claims registry: every tool documented in
+ *      docs/reference/mcp-tools.md is registered in lib/mcp.js
  *
  * Exit 0 = consistent; exit 1 = a claim broke (printed loudly).
  * CI: runs in test.yml beside check-docs-links/style. Local: node
@@ -146,6 +153,11 @@ check('front door links the canonical guide', /docs\/getting-started\/contributi
 const onboardDoc = read('docs/getting-started/agent-onboarding.md');
 const vantRouter = read('bin/vant.js');
 
+// Shared claim set for the CLI registries: AGENTS.md claims (section 7)
+// and cli.md claims (section 8) resolve against the SAME reality (bin/
+// + dispatcher) and are deduped together — one claim, one check.
+const seenCliVerbs = new Set();
+
 // Every `vant x` table row in AGENTS.md must resolve to bin/<x>.js or
 // a dispatcher route.
 const claimedCmds = [...agentsDoc.matchAll(/^\| `vant ([a-z-]+)`/gm)].map((m) => m[1]);
@@ -168,6 +180,48 @@ for (const [name, src] of [['AGENTS.md', agentsDoc], ['agent-onboarding.md', onb
 }
 check('onboarding doc teaches migrate --status', onboardDoc.includes('vant migrate --status'));
 check('AGENTS.md multi-brain layout matches onboarding', agentsDoc.includes('models/private/<brain>/') && onboardDoc.includes('models/public/<brain>/'));
+
+// ---------- 8. (Wave OSS-C) CLI claims registry: docs/reference/cli.md ----------
+// The PRD's claim: cli.md carries hundreds of `vant <verb>` references
+// against 100+ bin/ files; nothing mechanical verified the mapping.
+// EVERY distinct verb claimed in the CLI reference must resolve to:
+//   bin/<verb>.js, a COMMANDS route in bin/vant.js (incl. the inline
+//   all-mode handlers mcp/api/all + the special null handler), or an
+//   internal command invoked by another bin/ file (documented as such).
+const cliDoc = read('docs/reference/cli.md');
+// Inline BUILT-IN handlers in bin/vant.js (the `if (!script)` block):
+// version/distributed/mcp/api/all never appear in COMMANDS — they are
+// handled inline and documented as such. The registry counts them as
+// real doors (verified by hand once, listed here forever after).
+const INLINE_HANDLERS = new Set(['version', 'distributed', 'mcp', 'api', 'all']);
+const cliVerbs = [...cliDoc.matchAll(/\bvant ([a-z][a-z0-9-]*)\b/g)]
+    .map((m) => m[1])
+    .filter((v) => v.length > 1); // drop doc placeholder vars ('a' etc.)
+for (const verb of new Set(cliVerbs)) {
+    if (seenCliVerbs.has(verb)) continue;
+    seenCliVerbs.add(verb);
+    if (INLINE_HANDLERS.has(verb)) continue;
+    const binExists = fs.existsSync(path.join(ROOT, 'bin', verb + '.js'));
+    // 'm' flag: ^ must match LINE starts — bin/vant.js's COMMANDS table
+    // is one entry per line ('    hybrid: \'hybrid-sync.js\',').
+    const routed = new RegExp("^\\s+" + verb + ": ", 'm').test(vantRouter);
+    check('CLI claim resolves: vant ' + verb, binExists || routed,
+        'no bin/' + verb + '.js and no COMMANDS route in bin/vant.js');
+}
+
+// ---------- 9. (Wave OSS-C) MCP claims registry: docs/reference/mcp-tools.md ----------
+// Every tool documented in the MCP reference must be a registered
+// _methods entry in lib/mcp.js. (The inverse direction — tools that
+// exist but are undocumented — is a docs-completeness gap, tracked in
+// prd-oss.md; the checker enforces the phantom direction, where a doc
+// claim breaks a newcomer.)
+const mcpDoc = read('docs/reference/mcp-tools.md');
+const mcpToolClaims = [...mcpDoc.matchAll(/### ([a-z][a-z0-9_]+)\b/g)].map((m) => m[1]);
+for (const tool of new Set(mcpToolClaims)) {
+    const registered = new RegExp("_methods\\.set\\('" + tool + "'").test(mcpSource);
+    check('MCP tool documented + registered: ' + tool, registered,
+        'docs/reference/mcp-tools.md documents ' + tool + ' but lib/mcp.js never registers it');
+}
 
 // ---------- verdict ----------
 console.log('');
