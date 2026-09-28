@@ -7,47 +7,37 @@
 
 ## Handoff
 
-**Last known good commit:** pass 67 — THREE-NODE STAR 9/9 + JV 8/8 + full
-relevant sweep green. Shipped: (1) lib/settlement.js — cross-node
-settlement, the weights & measures leg (frame §5 gap 4): partner-side
-escrow debit where the budget lives, owner-side CLAIM only (books never
-touched), idempotent by settlementId, unwind on refusal/timeout, pins
-test/settlement.test.js 10/10; mesh-status gained the settlements
-section. (2) Wave OSS-C: surface checker 31 → 167 checks — every CLI
-verb claim vs bin/dispatcher/inline-handlers + every documented MCP tool
-vs _methods; caught 4 real phantoms (vant learn/remember/address/locate)
-which are now documented-reality. (3) prd-world.md v0.2 — §3 is now the
-fill-in intake form for the synmergia backwards-PR flow.
+**Last known good commit:** pass 68 — the three frame §5 gaps closed.
+Waves G/H/I shipped: (G, 4b9486c) ask-peers — agora-sync status legs +
+`askStatus`, mesh-status shareable/federated reports, `vant mesh status
+--peers`; pins 8/8. (H, 5f6494d) third-org rites — `genesis.admit`/
+`accept`, the commons key ring that grows WITHOUT re-keying,
+member.intro merge-only adoption; THREE latent secret.js bugs fixed
+(get-after-set shape mismatch, shapeless-expiry delete, dead colon-key
+VAF path — genesis now stores `mesh-<a>-<b>`); pins 8/8 incl. a live
+two-process round-trip. (I, ab5806d) the noticeboard — lib/notices.js
+board + wire legs + scoped-topic-refusing decision bridge + `vant
+notices` CLI; pins 8/8.
 **Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED
-through pass 67.
-**Status:** UNBLOCKED. The synmergia survey runs BACKWARDS: the
-synmergia agent PRs §3's answers against axolotl (fill rules on the
-form; file:line evidence required). W1/W3 semantics + prd-world §6
-decisions 2–3 wait on that PR. Meanwhile OSS-D (community depth),
-OSS-E (agent-contributor chapter), and the frame gaps (third-org
-rites, ask-peers status leg, noticeboard) are all open work.
+through pass 68.
+**Status:** UNBLOCKED. Frame §5 is CLOSED except the small msg-snapshot
+TTL leg (gap 6). Open candidates: N-node soak (prd-mesh §8 item 6),
+msg TTL leg, bin/genesis.js admit/accept parity (optional), OSS-D/OSS-E
+(community depth, agent-contributor chapter), prd-world intake (waiting
+on the synmergia backwards-PR).
 **Owner context:** "vant is a source of truth model; world-building
-exercise; the world needs state and interaction." Synmergia access
-ground truth recorded: the Freebuff GitHub App grant is per-repo and
-not adjustable from this workspace (installation lists only
-dhaupin/vant); the owner will revisit the scope from desktop later.
+exercise; the world needs state and interaction." Owner greenlit all
+three §5 gaps this pass ("#1, #2a, and this #3"). Synmergia access
+still via the backwards-PR flow (Freebuff app scope: dhaupin/vant
+only; owner to revisit from desktop).
 **BLOCKER:** none.
 
 ---
 
 ## CURRENT DUMP
 
-(nothing in flight — all three picks shipped, verified, committed,
-pushed. The synmergia intake form is live; next agent wakes to an
-unblocked board.)
-
----
-
-## CURRENT DUMP
-
-(nothing in flight — all three picks shipped, verified, committed,
-pushed. The synmergia intake form is live; next agent wakes to an
-unblocked board.)
+(nothing in flight — Waves G/H/I shipped, verified, committed, pushed.
+Next agent wakes to a closed §5 and an unblocked board.)
 
 ---
 

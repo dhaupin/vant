@@ -95,36 +95,63 @@ first EXTERNAL org (prd-mesh §4).
 
 Mapped against the mesh waves, the frame's open work is:
 
-1. **Stamps on the Post (Wave E, open).** Envelope schema versions:
-   nodes of different ages must interoperate or refuse loudly, never
-   silently misparse. Watch-item from the PRD: a downgrade claim must
-   never bypass gates — gates run on the receiver regardless of version.
-2. **Stewardship over the whole commons (Wave F, open).** `vant mesh
-   status`: peers, open topics, recent decisions, budgets, channels,
-   pending syncs — the coordination node's question ("what is everyone
-   working on, what's blocked") answered from one node, JSON mode for CI.
-3. **Rites for the third org (standing leg).** Genesis pairs are proven;
-   a commons of three-plus needs the join rite to scale (registry
-   membership propagation, invite flows) without diluting the
-   sovereignty line.
-4. **Weights & measures across nodes (new gap, exposed by this frame).**
-   Escrow settles locally (pass 48); the JV exercise settled within one
-   node. Cross-node settlement — a partner's budget honoring an owner's
-   listing — is the first economic leg the commons lacks. Needed before
-   real work orders cross boundaries with money attached.
-5. **The noticeboard (new gap, optional).** Msg snapshots are
-   point-to-point; a federated noticeboard (announcements any member
-   node can read) is the natural next Post leg if inter-org comms grow
-   beyond the standup pattern.
-6. **Post hygiene for msg (new gap, small).** The agora reaper and
+1. **Stamps on the Post (Wave E — SHIPPED, pass 61).** Envelope schema
+   versions: every crew envelope carries a version stamp — a MAJOR
+   mismatch is refused loudly (event + drop, receiver stays healthy), a
+   minor difference is tolerated with a warning, malformed stamps (v0,
+   wrong shapes) are dropped, never guessed. The pass-61 pin "version
+   claim never widens acceptance" is the frame's rule made testable: a
+   downgrade claim never bypasses gates — gates run on the receiver
+   regardless of version.
+2. **Stewardship over the whole commons (Wave F — SHIPPED, pass 62).**
+   `vant mesh status`: peers, open topics, recent decisions, budgets,
+   channels, pending syncs — the coordination node's question ("what is
+   everyone working on, what's blocked") answered from one node, JSON
+   mode for CI. Pass 67 added the settlements section (gap 4's
+   aggregates); pass 68 added the federated `--peers` view (Wave G):
+   each registered peer serves a shareable, scope-filtered report and
+   the coordinator renders the degraded-per-peer aggregate.
+3. **Rites for the third org (standing leg — SHIPPED, pass 68 Wave H).**
+   The commons key ring: `genesis.admit` grows the ring WITHOUT
+   re-keying (the standing pair secret is reused from memory or env,
+   never forked), appends the member to the non-secret topology, and
+   introduces them to standing members via `crew.member.intro`
+   (merge-only registry adoption, provenance metadata, no secret on the
+   wire). `genesis.accept` boots the member and hellos until the host's
+   vetting ack — the ack is the live proof of ring membership, exactly
+   the pair ceremony's rule. Sovereignty line intact: every gate
+   (scope, registry, quarantine) stays owner-side; the rite adds
+   vetted MEMBERSHIP, never bypass rights.
+4. **Weights & measures across nodes (SHIPPED, pass 67).**
+   Cross-node settlement lives: a partner's budget honors an owner's
+   listing — claim, invoice, settle, budget-debit — with the claims
+   registry and OSS-C checker pinning the memo schema. Money now
+   crosses boundaries with real work orders.
+5. **The noticeboard (SHIPPED, pass 68 Wave I).** Inter-org broadcast
+   + durable catch-up — NOT a second forum. Agora stays where
+   deliberation happens (consensus, scoped ledgers, gates); the board
+   is where the Post goes up: `lib/notices.js` posts plain notes
+   (ttlMs 0 = sticky, 30-day clamp, 200-note cap oldest-evicted,
+   merge-only first-writer-wins), pushes on post, and pulls catch-up
+   after downtime (`notice.post` / `notice.request` / `notice.board`
+   legs — registered peers only, sender-bound). The decision→board
+   bridge absorbs the pass-52 manual broadcast, and REFUSES scoped
+   topics: a scope's existence is not nameable on the commons board
+   (frame §4 — membership facts federate, scope-internal content does
+   not). CLI: `vant notices post|list|pull|broadcast|bridge`.
+6. **Post hygiene for msg (open, small).** The agora reaper and
    gossip cover topics; conversation snapshots have bounds but no TTL
-   leg. Fine at JV scale; revisit with the noticeboard.
+   leg. The noticeboard solved TTL for NOTES; msg snapshots are fine
+   at JV scale — revisit when conversation volume grows.
 
 Everything else on the old backlog is shipped: MCP surface (Wave A),
 genesis ceremony (Wave B), ledger hygiene + gossip (Wave C), cross-node
 msg (Wave D — pass 59, including the resolvePrincipal fix: a vetted
 agent identity now always beats the crew transport self-registration
-when both share a node name).
+when both share a node name), and the three §5 gaps above — ask-peers
+(Wave G, pass 68), the third-org rites (Wave H, pass 68), the
+noticeboard (Wave I, pass 68). The only §5 item still open is the
+small msg-snapshot TTL leg (gap 6).
 
 ## 6. How the frame earns its keep
 

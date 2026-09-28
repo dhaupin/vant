@@ -2,7 +2,73 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-28  
-**Session:** Pass 67 — weights & measures + OSS-C claims registry + the world-PR intake
+**Session:** Pass 68 — frame §5 closed: ask-peers, third-org rites, the noticeboard
+
+---
+
+## Session (2026-09-28 — pass 68: the three §5 gaps — Waves G, H, I)
+
+Owner greenlit "#1, #2a, and this #3" (ask-peers status leg, third-org
+rites option A: commons key ring, noticeboard — clarified as inter-org
+broadcast + durable catch-up, NOT intra-org; the forum stays Agora, the
+board is Post; a decision→board bridge absorbs the pass-52 manual
+broadcast). One session crash mid-Wave-I; recovery verified state from
+git, not memory (Wave H was already committed — stale todo lists lie).
+
+**Wave G — ask-peers (committed 4b9486c, prior session).** agora-sync
+`crew.status.request`/`status.reply` legs (registered peers only,
+sender-bound, reqId-correlated) + `askStatus(bus,node)`;
+mesh-status `shareableReport(viewerPrincipal)` (scope-filtered,
+aggregates only) + `buildFederatedReport`/`renderFederated`;
+`vant mesh status --peers [--json]`. Pins test/ask-status.test.js 8/8.
+
+**Wave H — third-org rites: the commons key ring (committed 5f6494d).**
+`genesis.admit`/`accept`: the ring grows WITHOUT re-keying (secret
+reused from memory types or VANT_MESH_SECRET env, never forked),
+non-secret topology appends (`ring: true`), `crew.member.intro`
+broadcast with merge-only registry adoption (provenance
+`{kind:'ring-member', introducedBy}`, no secret on the wire), hello
+dispatcher rewired per admission. **THREE latent secret.js bugs fixed**
+(get-after-set cache-shape mismatch; shapeless-entry expiry deleting
+live cache; the dead `'mesh:<a>:<b>'` colon-key type that could never
+pass VAF — genesis stores `'mesh-<a>-<b>'` now). `_waitForAck` helper
+shared by join/accept (kills both no-async-promise-executor errors).
+Pins test/genesis-ring.test.js 8/8 incl. a live two-process
+admit→accept round-trip over real HTTP (parent-generated SHARED secret
+via env; host child boots its bus MANUALLY — genesis is one-node-per-
+process by design).
+
+**Wave I — the noticeboard (committed ab5806d).** lib/notices.js: the
+board (ttlMs 0 = sticky, 30-day clamp, 200-note cap oldest-evicted by
+age, merge-only first-writer-wins, kind-marked state/notices.json,
+dirty write-through on read — no timers). Wire legs on the crew bus
+(registered-peers-only, sender-bound): notice.post push (wire data
+re-clamped field by field), notice.request/notice.board catch-up
+(empty reply stops retries). Decision→board bridge: SCOPED TOPICS ARE
+REFUSED — a scope's existence is not nameable on the commons board
+(frame §4). CLI bin/notices.js (`vant notices
+post|list|pull|broadcast|bridge`; peers seeded from the node-registry
+ring roster, signed with VANT_MESH_SECRET; wired into bin/vant.js).
+Pins test/notices.test.js 8/8.
+
+**Verification:** full sweep green — notices 8/8, genesis-ring 8/8,
+genesis-ceremony 5/5, agora-sync 7/7, crew-bus 20/20 (one
+non-reproducible port-timing flake seen once), ask-status 8/8,
+settlement 10/10, mesh-status 7/7, consensus-read-scope 9/9,
+msg-sync 9/9. ESLint clean on all touched files (one pre-existing
+`selfAgent` warning inherited from HEAD left alone).
+
+**Docs:** frame.md §5 rewritten — gaps 2/3/4/5 now SHIPPED with
+mechanism notes; only the small msg-snapshot TTL leg (gap 6) stays
+open. prd-mesh.md: wave table rows G/H/I added (and D/E/F stale
+statuses corrected), three SHIPPED wave sections, Files + success
+criteria extended.
+
+**Next:** §5 is closed — candidates for next pass: the msg-snapshot TTL
+leg (gap 6, small), the N-node soak (prd-mesh §8 item 6: shop-wide JV
+decision → execution → settlement, cold-process verified), optional
+bin/genesis.js CLI parity for admit/accept, or OSS-D/OSS-E per the
+pass-67 handoff.
 
 ---
 

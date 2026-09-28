@@ -135,9 +135,12 @@ state surviving every process exit.
 | Genesis ceremony `vant genesis --join` (gap 2) | **B** | shipped (pass 57) |
 | Synced-ledger TTL reaper (pass-51 backlog) | **C** | shipped (pass 58) |
 | Gossip pull scheduler (pass-51 backlog) | **C** | shipped (pass 58) |
-| Cross-node msg (gap 3) | **D** | next |
-| Envelope version compatibility (gap 4) | **E** | — |
-| Coordinator observability (gap 5) | **F** | — |
+| Cross-node msg (gap 3) | **D** | shipped (pass 59) |
+| Envelope version compatibility (gap 4) | **E** | shipped (pass 61) |
+| Coordinator observability (gap 5) | **F** | shipped (pass 62) |
+| Ask-peers status leg (frame §5, Wave G) | **G** | shipped (pass 68) |
+| Third-org rites: the commons key ring (frame §5, Wave H) | **H** | shipped (pass 68) |
+| The noticeboard: inter-org broadcast + catch-up (frame §5, Wave I) | **I** | shipped (pass 68) |
 | Org-model sync leg (pass-52 backlog; optional) | standing — revisit on partner growth |
 
 ## 4. Wave plan
@@ -231,6 +234,59 @@ state surviving every process exit.
   (test/mesh-status.test.js 7/7). Dashboard later; the CLI is the
   contract, and the contract is met.
 
+### Wave G — ask-peers status leg (pass 68, SHIPPED)
+
+- SHIPPED (pass 68): the coordinator can ASK the wire. agora-sync grew
+  `crew.status.request` / `crew.status.reply` legs (registered peers
+  only, sender-bound, reqId-correlated — the pass-51 forged-reqId rule
+  pinned in test/ask-status.test.js 8/8) and exports
+  `askStatus(bus, node, {timeoutMs})`. mesh-status gained
+  `shareableReport(viewerPrincipal)` (kind `vant-mesh-status-shareable`;
+  scope filtering inherits pass-65 `consensus.list(viewerId)` — scoped
+  topics are never NAMED to non-members; aggregates and public names
+  only, no content) and `buildFederatedReport(bus)` + `renderFederated`
+  (per-peer degradation, kind-checked). CLI: `vant mesh status --peers
+  [--json]` (env: VANT_NODE_NAME/PORT/AGENT, VANT_MESH_SECRET,
+  VANT_MESH_TIMEOUT).
+
+### Wave H — third-org rites: the commons key ring (pass 68, SHIPPED)
+
+- SHIPPED (pass 68): a commons of three-plus without re-keying.
+  `genesis.admit` (host side) REUSES the ring secret — memory pair
+  types or VANT_MESH_SECRET env, never generated, never forked —
+  appends the member to the non-secret topology (`ring: true`),
+  broadcasts `crew.member.intro` (NON-secret topology only), and
+  rewires the hello dispatcher per admission. `genesis.accept` (member
+  side) boots on the ring secret and hellos with the join backoff loop
+  (shared `_waitForAck` helper with join) — the ack is the live proof
+  of ring membership. agora-sync's member.intro dispatcher: ring
+  members only, merge-only registry adoption (unknown ids only),
+  provenance `{kind:'ring-member', introducedBy}`. The rite flushed
+  out THREE latent secret.js bugs (get-after-set cache-shape mismatch,
+  shapeless-entry expiry deleting live cache, and the dead 'mesh:a:b'
+  colon-key path that could never pass VAF — genesis now stores under
+  'mesh-<a>-<b>'). test/genesis-ring.test.js 8/8, incl. a live
+  two-process admit→accept round-trip over real HTTP.
+
+### Wave I — the noticeboard (pass 68, SHIPPED)
+
+- SHIPPED (pass 68): inter-org broadcast + durable catch-up — NOT a
+  second forum. Agora stays where deliberation happens; the board is
+  where the Post goes up. lib/notices.js: notes
+  {id, from, title, body, ts, ttlMs, ref} — ttlMs 0 = sticky, 30-day
+  clamp, 200-note cap (oldest evicted by AGE, not stickiness),
+  merge-only adoption (first writer wins; wire re-posts never clobber),
+  kind-marked state (state/notices.json) with dirty write-through on
+  read (no timers). Wire legs on the crew envelope bus
+  (registered-peers-only, sender-bound): notice.post push leg (wire
+  data re-clamped field by field), notice.request/notice.board
+  catch-up legs (empty reply stops retries). Decision→board bridge
+  absorbs the pass-52 manual broadcast — and REFUSES scoped topics
+  (a scope's existence is not nameable on the commons board; frame
+  §4). CLI: `vant notices post|list|pull [--all|<peer>]|broadcast|
+  bridge` (bin/notices.js; peers seeded from the node-registry ring
+  roster, signed with VANT_MESH_SECRET). test/notices.test.js 8/8.
+
 ### Standing — org-model sync leg (optional)
 
 The pass-53 stale-view rescue covers the common case (receiving-side
@@ -286,6 +342,13 @@ paid through escrow — with zero custom scripts involved.
 - Wave E: lib/crew-bus.js (v field), test/crew-bus.test.js.
 - Wave F: lib/mesh-status.js + bin/mesh-status.js (+ route/help),
   test/mesh-status.test.js.
+- Wave G: lib/agora-sync.js (status legs + askStatus), lib/mesh-status.js
+  (shareableReport/buildFederatedReport/renderFederated), bin/mesh-status.js
+  (--peers), test/ask-status.test.js.
+- Wave H: lib/genesis.js (admit/accept), lib/secret.js (three latent-bug
+  fixes), lib/agora-sync.js (member.intro leg), test/genesis-ring.test.js.
+- Wave I: lib/notices.js + bin/notices.js (+ vant route),
+  test/notices.test.js.
 
 ## 8. Success criteria
 
@@ -299,6 +362,12 @@ paid through escrow — with zero custom scripts involved.
 4. Cross-version nodes fail loudly and safely, never silently misread
    each other (Wave E).
 5. A coordination node can answer "who did what, what's decided, what's
-   owed" from one command (Wave F — SHIPPED, `vant mesh status`).
+   owed" from one command (Wave F — SHIPPED, `vant mesh status`) — and
+   ask each PEER for its own shareable view (Wave G — SHIPPED,
+   `vant mesh status --peers`).
 6. The full N-node soak: a shop-wide JV decision made in the agora,
    executed and settled by every org, cold-process verified.
+7. A third org joins the ring WITHOUT re-keying (Wave H — SHIPPED,
+   `genesis.admit`/`accept`); announcements reach every member with
+   durable catch-up after downtime (Wave I — SHIPPED, `vant notices`);
+   both usable from CLI with zero custom scripts (pass 68).
