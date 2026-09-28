@@ -21,15 +21,25 @@ notices` CLI; pins 8/8.
 **Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED
 through pass 68.
 **Status:** UNBLOCKED. Frame §5 is CLOSED except the small msg-snapshot
-TTL leg (gap 6). Open candidates: N-node soak (prd-mesh §8 item 6),
-msg TTL leg, bin/genesis.js admit/accept parity (optional), OSS-D/OSS-E
-(community depth, agent-contributor chapter), prd-world intake (waiting
-on the synmergia backwards-PR).
+TTL leg (gap 6). **Decisions recorded (owner-approved):** the group
+pattern (corporate-group shape = standing JV on a dedicated steward
+install; org-model sync PROMOTED to planned Wave J as a resolution
+cache — steward stays authority of record; `group:` scope kind set
+aside) and the steward install (no new code needed: fail-closed gates,
+claims-not-cash, merge-only sync, re-key-free rite admission all
+pinned; election/standby/rotation deliberately deferred). Open
+candidates: Wave J org-model sync (teams re-hydration seam + signed
+org.replicate leg; live-fire = 3 real nodes), msg TTL leg, genesis CLI
+parity, OSS-D/OSS-E, prd-world intake (waiting on the synmergia
+backwards-PR).
 **Owner context:** "vant is a source of truth model; world-building
 exercise; the world needs state and interaction." Owner greenlit all
-three §5 gaps this pass ("#1, #2a, and this #3"). Synmergia access
-still via the backwards-PR flow (Freebuff app scope: dhaupin/vant
-only; owner to revisit from desktop).
+three §5 gaps this pass ("#1, #2a, and this #3"). Post-pass direction:
+"enterprise grade — over-built plumbing NOW to avoid integration pain
+later; defense in depth." The Acme/Beta/Theta triple-company group is
+the owner's reference scenario for Wave J. Synmergia access still via
+the backwards-PR flow (Freebuff app scope: dhaupin/vant only; owner to
+revisit from desktop).
 **BLOCKER:** none.
 
 ---

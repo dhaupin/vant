@@ -64,11 +64,19 @@ open. prd-mesh.md: wave table rows G/H/I added (and D/E/F stale
 statuses corrected), three SHIPPED wave sections, Files + success
 criteria extended.
 
-**Next:** §5 is closed — candidates for next pass: the msg-snapshot TTL
-leg (gap 6, small), the N-node soak (prd-mesh §8 item 6: shop-wide JV
-decision → execution → settlement, cold-process verified), optional
-bin/genesis.js CLI parity for admit/accept, or OSS-D/OSS-E per the
-pass-67 handoff.
+**Next:** §5 is closed. Pass-68 addendum decisions recorded
+(owner-approved): the GROUP PATTERN (corporate-group shape = standing
+JV on a dedicated steward install; org-model sync PROMOTED to planned
+Wave J — local resolution cache, steward stays authority of record;
+`group:` scope kind set aside) and the STEWARD INSTALL (the owner's
+"router" node — no new code needed, all required properties already
+pinned: fail-closed gates, claims-not-cash books, merge-only sync,
+re-key-free rite admission; election/standby/rotation deliberately
+deferred until a real distributed crew demands it). Top candidate for
+next pass: Wave J (teams.js re-hydration seam + signed org.replicate
+leg; live-fire = steward + two member nodes, remote vote AND remote
+read, settlement, bridge, cold-process verify). Then the N-node soak,
+msg TTL leg, genesis CLI parity, OSS-D/OSS-E.
 
 ---
 

@@ -287,13 +287,34 @@ state surviving every process exit.
   bridge` (bin/notices.js; peers seeded from the node-registry ring
   roster, signed with VANT_MESH_SECRET). test/notices.test.js 8/8.
 
-### Standing — org-model sync leg (optional)
+### Wave J — org-model sync: the resolution cache (PROMOTED pass 68, planned)
 
-The pass-53 stale-view rescue covers the common case (receiving-side
-gates re-read the shared store on miss). A full org-model replication
-leg is only worth it when partner orgs multiply or nodes stop sharing
-a trust boundary. Revisit trigger: the first EXTERNAL org joining a
-mesh.
+- PROMOTED from standing-optional by the pass-68 group-pattern decision
+  (frame.md §4 addendum): a group of separate orgs sharing decision
+  chains — the corporate-group shape — is modeled as a standing JV on a
+  dedicated steward install, and member nodes need LOCAL RESOLUTION of
+  group scopes to read group topics without a round-trip to the
+  steward. The steward stays the authority of record; member copies are
+  resolution caches (merge-only adoption, provenance-stamped, never
+  truth-declaring), and every gate verifies against the home registry
+  either way — the sovereignty line does not move. Trigger that fired:
+  the owner's Acme/Beta/Theta group example (three divisions, one
+  decision chain, dedicated steward node — the "router" install).
+  Scope: teams.js re-hydration seam (the pass-52 recorded gap) + a
+  signed org.replicate leg on agora-sync following the member.intro
+  pattern. Live-fire when built: three real nodes (steward + two
+  members), Acme proposes, Beta+Theta vote remotely AND read locally,
+  settlement closes, noticeboard bridges, cold-process verified.
+
+### Standing — steward operations (recorded pass 68; deliberately NOT built)
+
+- The pass-68 steward-install decision (frame.md §4 addendum) needs no
+  new code: fail-closed gates, claims-not-cash books, merge-only sync,
+  and re-key-free rite admission already cover it, all pinned. What is
+  deliberately deferred until a real distributed crew demands it:
+  steward election, standby quorum, steward rotation. Enterprise-grade
+  = recorded upgrade paths + fail-closed defaults, not speculative
+  machinery.
 
 ## 5. Live-fire validation (the acceptance harness)
 

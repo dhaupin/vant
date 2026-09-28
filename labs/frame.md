@@ -88,8 +88,41 @@ Note what is deliberately absent from the right column: norms and the
 org model. Pass 50's rule — scope resolves where the team registry
 lives — means a partner node never needs org-model replication to vote
 safely (the pass-52 JV proved voting immune to the split the whole
-time). The standing org-model sync leg stays optional; revisit on the
-first EXTERNAL org (prd-mesh §4).
+time).
+
+**Decision (pass 68 addendum, owner-approved): the group pattern.** A
+group of separate orgs sharing knowledge and decision chains — the
+corporate-group shape (Acme engineering, Beta datacenters, Theta
+design; separate companies, one decision chain) — is modeled as a
+STANDING JV on a dedicated group install, not a new scope kind.
+Concretely: the steward node hosts the group org model; group topics
+scope to group teams there; votes still cross the wire per-node (the
+pass-50 rule, unchanged); money settles via claims where the budgets
+live (the pass-67 rule); outcomes bridge to the noticeboard. The
+org-model sync leg is PROMOTED from standing-optional to planned
+(prd-mesh Wave J): its job is local RESOLUTION on member nodes — a
+cache so Beta/Theta can read group topics without a round-trip to the
+steward — while the steward stays the authority of record. Gates
+verify against the home registry either way; the sovereignty line
+does not move. A first-class `group:` scope kind is set aside unless
+org-model sync proves insufficient.
+
+**Decision (pass 68 addendum): the steward install.** Large groups
+run a DEDICATED steward node — the owner's "router" install — rather
+than hosting the group's commons on any member's production box
+(production work must not ride the orchestrator; one org must not both
+execute and steward its own cross-org gates). This needs NO new code —
+every property the pattern needs already exists and is pinned:
+fail-closed gates (a down steward blocks group writes, never
+misresolves them); claims-not-cash books (the steward records
+settlement CLAIMS only — budgets stay on member nodes, pass-67);
+merge-only sync (the steward declares no truth the wire didn't sign);
+and the pass-68 rite admits the steward as a ring member WITHOUT
+re-keying the members' working pairs. What is deliberately NOT built
+yet: steward election, standby quorum, steward rotation. Enterprise-
+grade means recorded upgrade paths and fail-closed defaults, not
+speculative machinery — the first real distributed crew will say
+whether standby is ever needed.
 
 ## 5. Gaps the frame exposes (the multi-vant experiment list)
 
