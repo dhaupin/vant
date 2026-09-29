@@ -2,7 +2,55 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-29  
-**Session:** Pass 74 — multibrain/stacks across the board (census items migrated)
+**Session:** Pass 75 — #98 sudo per-brain escalations + #99 opt-in stack fallback
+
+---
+
+## Session (2026-09-29 — pass 75: the two design calls came back)
+
+Owner ruled on both filed design calls; both implemented, harness-
+verified, issues closed. Every Tier B census item is now resolved.
+
+**#98 — sudo state scoping (implemented as ruled).** Escalations are
+the agent's memory: the audit trail path resolves PER CALL via
+state-store currentBrain() → models/private/<brain>/sudo/escalations.jsonl
+(legacy flat path kept as fallback when no brain is resolvable, and as
+the migration source). _migrateLegacyAudit handles BOTH orderings —
+legacy-only (carry+remove), both-exist (merge legacy INTO the live
+trail, then remove; hardened after the restored-backup case caught the
+carry-only version), empty husk (remove). TEMPLATES_REL and POLICIES_REL
+stay GLOBAL BY DESIGN (OS-level concern) with the ruling documented at
+the constants. Verified in /tmp/mb-harness: S1 per-brain trail (cairn,
+no flat file), S2 VANT_BRAIN pin moves the trail + isolation between
+brains, S3 read-back, M2 both-exist merge, M3 legacy-only carry.
+
+**#99 — cross-brain read() stack fallback (opt-in, as ruled).**
+brain.read(name, { stackFallback: true }): when the name misses in the
+active brain (and no explicit { type } pin), walk the REST of the stack
+in order, private-then-public per lower brain, all extensions. Result
+carries provenance: viaStack: true + viaStackPosition + source + brain,
+so a dialect can tell a baseline hit from its own file. Default remains
+exact-brain-only — no precedence change for any existing consumer.
+Pinned reads ({ type }) never walk (a pin means "only this tree").
+Verified: F1 no-opt-in → null, F2 baseline hit (vant@1, public
+provenance), F3 active brain wins, F4 pin blocks the walk, F5
+own-brain-first (correct once the fixture string was fixed), F5b
+viaStack tag.
+
+**Docs:** docs/memory/brain.md gains "Cross-brain stack fallback
+(opt-in)" under Read API. Census doc gains a pass-75 resolution note:
+census complete, every Tier B item resolved.
+
+Gates: npm test 15/15, brain 77, storage 40, sudo 7, security-hardening
+22, memory 18, mcp 6, boot 15, vant 16, transform 5 — all green.
+lint:docs PASS (126 files), lint:surface PASS. Mesh NOT re-run (no
+shared-state/mesh code touched).
+
+Issues: #98 CLOSED, #99 CLOSED (fix-reference comments). Only #86
+(stego transport) remains open.
+
+Next: airgap leg exercise; prd-whitepaper §9 (publication target +
+length) await owner answers.
 
 ---
 

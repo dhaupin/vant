@@ -7,34 +7,34 @@
 
 ## Handoff
 
-**Last known good commit:** pass 74 — multibrain across the board
-(e8b6f49). Census items 1-4 + 8 migrated: mcp brain_write scoped to the
-active brain (+segment validation + extension rule), bin/succession.js
-log via getPublicPath() (+ second bug: its unconditional canWrite() gate
-made it unreachable on default installs — now aligns with the middleware
-"unconfigured → allow" philosophy), bin/node.js loadBrain/saveBrain
-through getBrainPath (MODEL_PATH stays an explicit escape), health/load
-VANT_BRAIN-aware defaults, brain-unlock active-brain boot-dir scan,
-version.js/canvas.js doc-rot. Census item 7 RECLASSIFIED (config.js
-storage.path is root-correct — a census misread, corrected in the doc).
-Harness-verified: MCP write/read round-trip in active brain, VANT_BRAIN
-pin moves writes, traversal rejected, succession log seeds the ACTIVE
-brain's public tree and status reads it back, health reports the active
-brain. All suites green (npm test, brain 77, mcp 6, storage 40, memory
-18, security-hardening 22, boot 15, vant 16, transform 5), docs gates
-PASS. Design calls filed: #98 (sudo scoping) + #99 (cross-brain read
-stack fallback) — owner rulings pending. Pass 72 fixed #96/#97
-(ea3f484); pass 73 census at 0a6eb13; Cairn's queue CLOSED (#92-#97).
-**Follow-up candidate (#98-ish):** no cross-brain stack fallback in
-read() — a key missing from the active brain's trees returns null
-instead of walking the stack to the baseline brain. That IS the
-"dialect on a baseline" semantic the pub-baseline route wants; needs
-an owner design call before implementing.
+**Last known good commit:** pass 75 — #98/#99 implemented and CLOSED
+(9af91b2). #98: sudo escalations are the agent's memory — audit trail
+resolves per call via state-store currentBrain() →
+models/private/<brain>/sudo/escalations.jsonl (legacy flat path as
+fallback + migration source; _migrateLegacyAudit handles both upgrade
+orderings: legacy-only carry, both-exist merge-then-remove, empty-husk
+remove). Templates/policies stay GLOBAL BY DESIGN, ruling documented at
+the constants. #99: brain.read(name, { stackFallback: true }) walks the
+rest of the stack (private-then-public per lower brain, all extensions)
+when the active brain misses and the read is UNPINNED — opt-in per
+owner (default-on would change precedence for every consumer). Result
+carries provenance: viaStack, viaStackPosition, source, brain. Pinned
+reads never walk. docs/memory/brain.md documents the opt-in; census
+resolution note appended (census COMPLETE — every Tier B item resolved).
+Harness-verified (/tmp/mb-harness): #98 S1 per-brain trail, S2
+env-pin + isolation, S3 read-back, M2 both-exist merge, M3 legacy-only
+carry; #99 F1 no-opt-in→null, F2 baseline hit (vant@1 public), F3
+active-wins, F4 pin blocks walk, F5 own-brain-first, F5b viaStack tag.
+All suites green (npm test 15/15, brain 77, storage 40, sudo 7,
+security-hardening 22, memory 18, mcp 6, boot 15, vant 16, transform 5),
+lint:docs + lint:surface PASS. Issues #92-#99 ALL CLOSED; only #86
+(stego transport) open. Pass 74 (e8b6f49) rolled multibrain through
+bin/mcp/health/load/succession/brain-unlock; pass 72 fixed #96/#97
+(ea3f484, 3531ef5); pass 73 census at 0a6eb13.
 **Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED
-through pass 74.
+through pass 75.
 **Status:** UNBLOCKED. Lane 1 closed (Waves A→J); Lane 2 shipped;
-Cairn's issue queue (#92-#97) CLOSED (#92-#95 in 4e450db, #96-#97 in
-pass 72). Remaining: airgap exercise
+Cairn's issue queue (#92-#99) FULLY CLOSED. Remaining: airgap exercise
 (proposed, owner-flagged as key-later), prd-whitepaper §9 open
 questions (publication target + length) await owner answers;
 optional escrow/settlement CLI reference prose; Lane 3 HOLD per
@@ -60,10 +60,10 @@ testimony (v0.2); chapter 2 opens with it.
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 74 committed: census items migrated, #98/#99
-filed for owner rulings. Next agent: implement #98/#99 once ruled
-(recommendations are in the issue bodies); airgap leg exercise still
-proposed; prd-whitepaper §9 still awaits owner answers.)
+(nothing in flight — pass 75 committed: #98/#99 implemented per owner
+rulings, verified, issues closed. Only #86 (stego transport) open.
+Next agent: airgap leg exercise still proposed (owner-flagged key-later);
+prd-whitepaper §9 still awaits owner answers; mesh exercise optional.)
 
 ---
 
