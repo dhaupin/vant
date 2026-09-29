@@ -63,6 +63,26 @@ Markdown, JSON, YAML, and plain text all work. The extension is part of the
 name: `brain.read('notes.json')` reads JSON, `brain.read('notes')` resolves
 whatever extension exists.
 
+### Cross-brain stack fallback (opt-in)
+
+With a multi-brain stack (e.g. your dialect brain layered over the shared
+vant baseline), a key your brain does not override can resolve from the
+brain below you by passing `{ stackFallback: true }`:
+
+```javascript
+const baseline = await brain.read('manifesto', { stackFallback: true });
+if (baseline && baseline.viaStack) {
+    // resolved from brain 'baseline.brain' at stack position
+    // 'baseline.viaStackPosition' — cite the provenance, not your own name
+}
+```
+
+The walk is strictly opt-in (default reads never leave your own brain),
+skipped when you pin `{ brain }` or `{ type }` (a targeted read, not a
+resolution request), and each result is tagged `viaStack: true` so
+provenance is visible. Without the flag, a missing key still returns
+`null`.
+
 ## Corpus access
 
 Load everything at once for indexing or sync work:

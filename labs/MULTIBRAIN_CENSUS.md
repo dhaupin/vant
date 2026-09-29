@@ -86,6 +86,14 @@ bin/brain-unlock.js (active-brain boot-dir scan, flat legacy fallback),
 version.js + canvas.js doc-rot. Remaining: item 5 (sudo.js — design
 call, see the filed issue).
 
+> **Pass 75 resolution (items 5 + #99):** owner ruled on both filed
+> calls. sudo: escalations.jsonl is now per-ACTIVE-brain (the agent's
+> memory) with one-time legacy migration; policies + templates stay
+> platform-global (documented in-code). read(): opt-in
+> `{ stackFallback: true }` walks the stack below the active brain,
+> results tagged `viaStack`/`viaStackPosition`; skipped when brain/type
+> are pinned. Census complete — every Tier B item resolved.
+
 ## Tier C — global by design (leave; named so nobody "fixes" them)
 
 - `models/state.json` — the stack itself. Global by definition.
