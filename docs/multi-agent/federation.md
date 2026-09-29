@@ -50,10 +50,10 @@ Every mesh node has four things, all local by construction:
 | Part | What it does | Interface |
 |------|--------------|-----------|
 | Genesis and the ring rite | Two nodes form a pair; the ring admits members without re-keying | `vant genesis`, [CLI](/vant/reference/cli) |
-| agora-sync | Remote votes and ledger sync over the signed bus | `agora_vote`, `agora_pull` MCP tools; `vant agora` |
+| agora-sync | Remote votes and ledger sync over the signed bus | [Agora](/vant/operations/agora): `agora_vote`, `agora_pull` |
 | org-sync | The steward's org model, replicated as a resolution cache | Automatic on push; read locally |
-| Settlement | Cross-node payment: buyer debits its own escrow, the other side records a claim | `settle.request` wire leg |
-| Notices | The board: plain announcements with durable catch-up | `vant notices`, `notice.post` leg |
+| Settlement | Cross-node payment: buyer debits its own escrow, the other side records a claim | [Settlement](/vant/operations/settlement) |
+| Notices | The board: plain announcements with durable catch-up | [Notices](/vant/operations/notices) |
 | Mesh status | What is everyone working on, one command, federated view | `vant mesh status --peers` |
 
 ## The authority rules

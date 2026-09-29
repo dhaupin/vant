@@ -98,6 +98,33 @@ asyncTest('query retrieves document', async () => {
     return true;
 });
 
+// (pass 69 funnel-audit pins) The two learn/state CROSS-PROCESS paths.
+// Same-process learn->query hits the memo cache and masks disk-path bugs:
+// (1) query handed brain.load a pre-suffixed key and the read doubled to
+// default.md.md; (2) recall parsed brain.load's WRAPPER object instead of
+// its .content, so parsed.value was undefined. Both round-trips must work
+// with a COLD cache, exactly as a second CLI process sees them.
+asyncTest('query retrieves document from DISK with a cold cache (cross-process shape)', async () => {
+    const m = require('../lib/memory').memory; // the INSTANCE (wrapper fns hide _cache)
+    await m.learn('cold-cache-doc', 'disk body ' + Date.now(), { ttl: 600000 });
+    // Drop the memo entry so the next read must go through brain.load.
+    const cacheKey = (m._getBrainName ? m._getBrainName() : 'default') + ':learn:cold-cache-doc';
+    m._cache.delete(cacheKey);
+    const c = await m.query('cold-cache-doc');
+    assert(c && c.startsWith('disk body'), 'cold query missed the disk path: ' + JSON.stringify(c));
+    return true;
+});
+
+asyncTest('recall retrieves state from DISK with a cold cache (wrapper-content shape)', async () => {
+    const m = require('../lib/memory').memory;
+    await m.state('cold-cache-state', 'val-' + Date.now(), { ttl: 600000 });
+    const cacheKey = (m._getBrainName ? m._getBrainName() : 'default') + ':state:cold-cache-state';
+    m._cache.delete(cacheKey);
+    const v = await m.recall('cold-cache-state');
+    assert(typeof v === 'string' && v.startsWith('val-'), 'cold recall missed the disk path: ' + JSON.stringify(v));
+    return true;
+});
+
 asyncTest('address generates barcode', async () => {
     const m = require('../lib/memory');
     const b = await m.address({ test: 'data' });

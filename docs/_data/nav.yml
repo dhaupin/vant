@@ -137,6 +137,12 @@
     url: /vant/operations/steward-runbook
   - title: Federation Playbooks
     url: /vant/operations/federation-playbooks
+  - title: Agora
+    url: /vant/operations/agora
+  - title: Notices
+    url: /vant/operations/notices
+  - title: Settlement
+    url: /vant/operations/settlement
   - title: QoS
     url: /vant/operations/qos
   - title: Network

@@ -29,6 +29,9 @@ description: Running Vant day to day - storage, sync, cron, CI, notifications, n
 | [Deployment](/vant/operations/deployment) | Deploy targets and container notes |
 | [Steward Runbook](/vant/operations/steward-runbook) | Running a group's router install: orgs sharing one decision chain |
 | [Federation Playbooks](/vant/operations/federation-playbooks) | Join, vote, sync, settle, catch up: mesh participant recipes |
+| [Agora](/vant/operations/agora) | Cross-node votes and ledger sync: the `vant agora` verbs |
+| [Notices](/vant/operations/notices) | The board: post, catch up, bridge decisions |
+| [Settlement](/vant/operations/settlement) | Cross-node payment: claims-not-cash |
 | [Cache](/vant/operations/cache) | Cache behavior and clearing |
 
 ## Where to start
