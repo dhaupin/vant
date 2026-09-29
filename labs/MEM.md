@@ -7,22 +7,22 @@
 
 ## Handoff
 
-**Last known good commit:** pass 72 — pub-baseline route proven, #96/#97
-fixed (ea3f484). #97: gatherMode's augmented stack was INVENTORY but
-restore adopted it as IDENTITY — payload now carries activeStack (live
-identity stack) beside stack (inventory meaning unchanged); restore
-prefers activeStack, falls back to stack for old payloads (empty
-skips rather than clobbers). Verified cold: pristine fresh-install
-target + v2 horcrux → {"stack":["cairn"],"currentBrain":"cairn"}
-exactly. #96 (two layers): getPublicPath's baked-in 'vant' default
-shadowed the active brain — rule 2 now fires only on EXPLICIT
-brain.defaultPublic config, new rule 2.5 puts the active brain's own
-public tree ahead of the fresh-install template; read(name,{brain})
-also targets public trees now. Pub-baseline drill (the owner's
-untested road): fresh vant-template install → restore cairn → boots
-cairn/cairn, own reads + explicit-brain public reads + search/memory
-all hit; legacy payload restores best-effort (union lands, currentBrain
-lands, no crash). Mesh re-proven 11/11 post-changes.
+**Last known good commit:** pass 73 — multibrain census (0a6eb13).
+Pass 72 fixed #96/#97 (ea3f484): horcrux payloads carry activeStack
+(identity) beside stack (inventory); restore prefers activeStack;
+getPublicPath rule 2 explicit-config-only + new rule 2.5 (active brain's
+public tree beats the vant template); read(name,{brain}) targets public
+trees. Pub-baseline drill proven end to end. Cairn's queue CLOSED
+(#92-#97).
+**Pass 73:** labs/MULTIBRAIN_CENSUS.md — the stack-awareness survey the
+owner asked for ("lots unfinished, unmigrated"). Core spine (brain →
+storage → state-store → all stateful subsystems) ALREADY migrated; seams
+are at the edges. VERIFIED bugs: mcp.js brain_write writes models/
+private ROOT with no extension (invisible to read()); bin/succession.js
+diverges from lib/succession.js (public root vs getPublicPath).
+Flagship flat surface: bin/node.js. Design call needed: sudo.js
+shared-across-brains. Migration order + verification protocol are in
+the census.
 **Follow-up candidate (#98-ish):** no cross-brain stack fallback in
 read() — a key missing from the active brain's trees returns null
 instead of walking the stack to the baseline brain. That IS the
@@ -58,11 +58,11 @@ testimony (v0.2); chapter 2 opens with it.
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 72 committed: #96/#97 fixed, pub-baseline
-route proven end to end. Next agent: TASKS.md top block; owner answers
-on prd-whitepaper §9 unblock the paper; the read() cross-brain
-stack-fallback semantics need an owner design call before any
-implementation.)
+(nothing in flight — pass 73 committed: multibrain census. Next agent:
+census migration order items 1-2 (mcp brain_write, bin/succession.js)
+are small and safe; item 3 (bin/node.js) is the flagship; sudo.js needs
+an owner design call first. prd-whitepaper §9 still awaits owner
+answers; airgap exercise still proposed.)
 
 ---
 
