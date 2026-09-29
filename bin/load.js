@@ -58,7 +58,11 @@ async function loadConfig() {
     }
     
     console.warn('⚠ No config file found, using defaults');
-    return { VANT_VERSION: 'unknown', MODEL_PATH: 'models/private' };
+    // (pass 74, multibrain census) Default to the ACTIVE brain when the
+    // brain module is reachable, not a flat models/private scan.
+    let defaultPath = 'models/private';
+    try { defaultPath = require('../lib/brain').getBrainPath(); } catch (e) { /* flat fallback */ }
+    return { VANT_VERSION: 'unknown', MODEL_PATH: defaultPath };
 }
 
 /**
@@ -68,8 +72,8 @@ async function loadConfig() {
 async function getModelPath(args) {
     if (args[2]) vaf.check(args[2], {type: "string", name: "version", maxLength: 20});
     const config = await loadConfig();  // async
-    // Default to private (agent's brain) to keep separate from user's public brain
-    let modelPath = config.MODEL_PATH || 'models/private';
+    // Default to the ACTIVE brain (pass 74); config MODEL_PATH still wins
+    let modelPath = config.MODEL_PATH || (() => { try { return require('../lib/brain').getBrainPath(); } catch (e) { return 'models/private'; } })();
     
     // SECURITY: Validate MODEL_PATH (block path traversal)
     if (modelPath.startsWith('/') || modelPath.includes('..')) {

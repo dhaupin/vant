@@ -62,8 +62,13 @@ function checkModel() {
     ];
     
     const required = ['identity.md', 'identity.txt'];
-    // Check user's brain (determined by MODEL_PATH or config)
-    const brainPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || process.env.VANT_STORAGE_PATH || 'models/private';
+    // Check the ACTIVE brain (pass 74, multibrain census): getBrainPath()
+    // honors VANT_BRAIN env > currentBrain; MODEL_PATH / VANT_BRAIN_PATH /
+    // VANT_STORAGE_PATH remain explicit escapes.
+    let brainPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || process.env.VANT_STORAGE_PATH || null;
+    if (!brainPath) {
+        try { brainPath = require('../lib/brain').getBrainPath(); } catch (e) { brainPath = 'models/private'; }
+    }
     const brainFs = _brainStore(brainPath);
     const found = checks.some(pair => pair.some(f => brainFs.has(f)));
     
@@ -85,7 +90,7 @@ function checkModel() {
             }
         }
     } else {
-        console.log('  ' + theme.status.fail('Private model not initialized (run vant setup)'));
+        console.log('  ' + theme.status.fail('Private model not initialized at ' + brainPath + ' (run vant setup)'));
         console.log('  Use models/public templates for fresh install');
     }
     
@@ -112,8 +117,12 @@ function checkEnv() {
 
 function checkDirs() {
     console.log('\n' + theme.label('📁 Directories:'));
-    // Check base dirs + user's brain (MODEL_PATH or default private)
-    const brainPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || 'models/private';
+    // Check base dirs + the ACTIVE brain (pass 74: VANT_BRAIN-aware
+    // resolution; explicit env escapes win)
+    let brainPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || null;
+    if (!brainPath) {
+        try { brainPath = require('../lib/brain').getBrainPath(); } catch (e) { brainPath = 'models/private'; }
+    }
     const dirs = ['models', 'models/private', 'lib', 'bin', brainPath];
     dirs.forEach(d => {
         if (fs.existsSync(d)) {

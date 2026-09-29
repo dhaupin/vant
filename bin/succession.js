@@ -12,7 +12,18 @@ const vaf = require("../lib/vaf");
 function _checkWrite() {
     try {
         const sandbox = require('../lib/sandbox');
-        if (sandbox && !sandbox.canWrite()) throw new Error('Write capability required for succession log');
+        if (!sandbox) return;
+        // (pass 74) Align with the storage middleware philosophy: a fresh,
+        // unconfigured sandbox ALLOWS with a warning — that is how every
+        // other write path in the CLI works (storage.js logs "Sandbox not
+        // configured; allowing by default"). The old unconditional
+        // canWrite() gate made `vant succession log` unreachable on every
+        // default install, since DEFAULT_CAPABILITIES.canWrite is false.
+        // Enforce denial only when the sandbox was explicitly configured.
+        if (sandbox.defaultSandbox && sandbox.defaultSandbox._explicitlyConfigured !== true) return;
+        if (!sandbox.canWrite()) {
+            throw new Error('Write capability required for succession log - grant write to this process (explicit sandbox capabilities or sudo escalate) and retry in the SAME process');
+        }
     } catch (e) {
         if (/capability/i.test(e.message)) throw e;
     }
@@ -102,13 +113,27 @@ if (cmd === 'status' || !cmd) {
   const label = args.slice(2).join(' ') || `Update to ${to}`
   _checkWrite()
   const commit = getGitCommit()
-  const config = require('../models/public/_succession.json')
+  // (pass 74, multibrain census) The succession config lives in the ACTIVE
+  // brain's public tree — getPublicPath(), exactly where lib/succession
+  // reads it and where the file actually exists on every real install
+  // (models/public/vant/_succession.json). The old hardcoded
+  // models/public root path threw MODULE_NOT_FOUND on this repo: a root
+  // _succession.json was never deployed anywhere.
+  const brain = require('../lib/brain')
+  const fsMod = require('fs')
+  const configPath = path.join(brain.getPublicPath(), '_succession.json')
+  let config
+  try {
+    config = JSON.parse(fsMod.readFileSync(configPath, 'utf8'))
+  } catch (e) {
+    // Fresh install with no succession config yet — seed one from the
+    // running version instead of crashing.
+    config = { version: brain.getVersion(), succession: {} }
+  }
+  config.succession = config.succession || {}
   config.succession.previous = config.succession.previous || {}
   config.succession.previous.commit = commit
-  require('fs').writeFileSync(
-    path.join(__dirname, '..', 'models', 'public', '_succession.json'),
-    JSON.stringify(config, null, 2)
-  )
+  fsMod.writeFileSync(configPath, JSON.stringify(config, null, 2))
   const ledger = succession.logSuccession(to, label)
   console.log(`Logged succession: ${label}`)
   console.log(`Active: ${ledger.active}`)
