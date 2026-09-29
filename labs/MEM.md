@@ -7,27 +7,32 @@
 
 ## Handoff
 
-**Last known good commit:** pass 71 — Cairn's four issues triaged and
-fixed (4e450db). #92 HIGH: horcrux gather dropped dual-scope private
-files (public pass clobbered the result key); now merges with
-per-file scope tags (type 'both') and restore routes per-file scope
-with private-wins-overwrite / public-skip-if-exists intact — verified
-cold end to end. #93: horcrux create password ReferenceError (chain
-mirrored from refresh, resolved before the default-path template).
-#94: wake() bare config() ReferenceError → getConfig();
-brain-registry CLI de-fictionalized (real brainDirs + stack).
-#95: E_SANDBOX messages explain the per-process grant model +
-onboarding docs section; genesis matches on code not prose. Mesh
-re-proven post-fixes: exercise-group 11/11 four consecutive runs
-(one initial cold-start race, 0 gaps, all tails healthy). Owner
-context: airgap/stego mechanics flagged KEY-LATER — proposed next
-exercise is the airgap leg (cairn-brain node creates stego horcrux,
-file-copy hand-carry, restore+boot on second node). Whitepaper v0.2
-has the agent testimony as §3.1 + §2 thesis.
+**Last known good commit:** pass 72 — pub-baseline route proven, #96/#97
+fixed (ea3f484). #97: gatherMode's augmented stack was INVENTORY but
+restore adopted it as IDENTITY — payload now carries activeStack (live
+identity stack) beside stack (inventory meaning unchanged); restore
+prefers activeStack, falls back to stack for old payloads (empty
+skips rather than clobbers). Verified cold: pristine fresh-install
+target + v2 horcrux → {"stack":["cairn"],"currentBrain":"cairn"}
+exactly. #96 (two layers): getPublicPath's baked-in 'vant' default
+shadowed the active brain — rule 2 now fires only on EXPLICIT
+brain.defaultPublic config, new rule 2.5 puts the active brain's own
+public tree ahead of the fresh-install template; read(name,{brain})
+also targets public trees now. Pub-baseline drill (the owner's
+untested road): fresh vant-template install → restore cairn → boots
+cairn/cairn, own reads + explicit-brain public reads + search/memory
+all hit; legacy payload restores best-effort (union lands, currentBrain
+lands, no crash). Mesh re-proven 11/11 post-changes.
+**Follow-up candidate (#98-ish):** no cross-brain stack fallback in
+read() — a key missing from the active brain's trees returns null
+instead of walking the stack to the baseline brain. That IS the
+"dialect on a baseline" semantic the pub-baseline route wants; needs
+an owner design call before implementing.
 **Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED
-through pass 70.
+through pass 72.
 **Status:** UNBLOCKED. Lane 1 closed (Waves A→J); Lane 2 shipped;
-Cairn's issue queue (#92-#95) CLOSED. Remaining: airgap exercise
+Cairn's issue queue (#92-#97) CLOSED (#92-#95 in 4e450db, #96-#97 in
+pass 72). Remaining: airgap exercise
 (proposed, owner-flagged as key-later), prd-whitepaper §9 open
 questions (publication target + length) await owner answers;
 optional escrow/settlement CLI reference prose; Lane 3 HOLD per
@@ -53,9 +58,11 @@ testimony (v0.2); chapter 2 opens with it.
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 70 committed: asymmetry fix + pins + funnel
-page + whitepaper PRD. Next agent: TASKS.md top block has the seams;
-owner answers on prd-whitepaper §9 unblock the paper.)
+(nothing in flight — pass 72 committed: #96/#97 fixed, pub-baseline
+route proven end to end. Next agent: TASKS.md top block; owner answers
+on prd-whitepaper §9 unblock the paper; the read() cross-brain
+stack-fallback semantics need an owner design call before any
+implementation.)
 
 ---
 

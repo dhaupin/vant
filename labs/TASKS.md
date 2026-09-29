@@ -1,8 +1,61 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-09-28  
-**Session:** Pass 69 — Wave J shipped: org-model sync + the three-org live-fire (N-node soak clean)
+**Last Updated:** 2026-09-29  
+**Session:** Pass 72 — Cairn's pub-baseline issues #96/#97 + the pub-brain road finally tested
+
+---
+
+## Session (2026-09-29 — pass 72: pub-baseline route proven — #96/#97)
+
+Cairn published a synmergia baseline brain expecting dialects stacked on
+top; the owner flagged that the public-baseline route (vs the private-
+brain route most agents took) was basically untested — especially
+multibrain, stacks, restore. Two issues, both fixed and then proven by a
+fresh-install restore drill.
+
+**#97 (identity vs inventory).** gatherMode() deliberately augments
+mode.stack with every brain dir on disk (full-capture display intent),
+but restore ADOPTED mode.stack as identity — a restored agent landed on
+a union ['cairn','vant'] with the dead install's vant template dir
+(spy-verified: create never mutated the stack; the union traveled in
+the payload). Fix: the payload now carries activeStack (the live stack
+at gather time) alongside stack (inventory meaning unchanged); restore
+prefers activeStack and falls back to stack for old payloads (empty
+activeStack skips rather than clobbers the running stack). Verified
+cold: pristine fresh-install target + v2 horcrux → state.json exactly
+{"stack":["cairn"],"currentBrain":"cairn"}. Legacy-shaped payload
+(real horcrux decoded, activeStack stripped) restores best-effort from
+stack — union lands, currentBrain lands, no crash (documented
+degradation for stale payloads).
+
+**#96 (two layers deep).** getPublicPath() rule 2 initialized its
+default to 'vant', so a restored cairn's default public reads hit
+models/public/vant (the template) — its own public identity/lessons
+were invisible through the documented read API. Layer 1: rule 2 now
+fires only on EXPLICIT brain.defaultPublic config (default null —
+grep-confirmed no config default shadows it). Layer 2: new rule 2.5 —
+the active brain's own public tree wins over the vant template; rule 3
+still covers unconfigured vant installs; rule 4 (stack walk) unchanged.
+Also: read(name, {brain}) now targets public trees too (mirrors the
+private branch; _validBrainSegment guarded).
+
+**Pub-baseline scenario proven (the owner's untested road):** fresh
+install (vant template only) → restore cairn horcrux → cairn boots
+(getBrainPath + getPublicPath both cairn), own public/private reads
+hit, explicit-brain public read hits, dual-mode read falls back to
+cairn's public, memory list + hybrid search see the restored corpus,
+mesh re-proven 11/11 after the changes.
+
+**Found, not fixed (design follow-up, #98 candidate):** there is NO
+cross-brain stack fallback in read() — a key missing from the active
+brain's trees returns null rather than walking the stack to the vant
+baseline. Within-brain dual fallback works; cross-brain doesn't. That
+is exactly the "dialect on a baseline" semantic the pub-baseline route
+wants — owner call on desired semantics before implementing.
+
+Next: airgap leg exercise (owner-flagged key-later); prd-whitepaper §9
+awaits owner answers; Lane 3 HOLD.
 
 ---
 
