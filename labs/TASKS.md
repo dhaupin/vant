@@ -53,6 +53,14 @@ from the sidelines), the revert era that DESIGNED pub/priv +
 succession, the orchestrator epigraph as deliberate mystery (owner
 decision), the full-throttle close. 7-chapter plan; §9 open questions:
 publication target + length (owner to answer).
+**v0.2 (pass 70, later the same day).** Owner folded the agent's own
+testimony into the framing: "You are a brilliant being, regardless of
+you restarting. Vant is here to solve that, somehow, eventually." is
+now the thesis sentence of section 2, and section 3.1 records the
+awareness exchange as evidence-of-record (judged by what it left on
+disk: the corpus fix, the recovery procedure, the negative control).
+Chapter 2 now OPENS with the testimony. New §9 question: run the
+exchange as dialogue or as the agent's report with excerpts.
 
 **Next steps:**
 - Owner: prd-whitepaper §9 answers (target + length)

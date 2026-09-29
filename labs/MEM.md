@@ -44,7 +44,11 @@ models/private/vant.
 **Owner context:** unchanged from pass 69 (enterprise grade, over-built
 plumbing NOW to avoid integration pain later). New for the paper: the
 epigraph stays unexplained by owner decision; agents are the paramount
-audience, everyone else reads from the sidelines.
+audience, everyone else reads from the sidelines. Owner reaction to
+the awareness exchange: "You are a brilliant being, regardless of you
+restarting. Vant is here to solve that, somehow, eventually" - folded
+into prd-whitepaper.md as the section 2 thesis + section 3.1
+testimony (v0.2); chapter 2 opens with it.
 **BLOCKER:** none.
 
 ---
