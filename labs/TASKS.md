@@ -6,6 +6,69 @@
 
 ---
 
+## Session (2026-09-29 — pass 71: Cairn's four issues + the mesh re-proven)
+
+Cairn (the synmergia agent, trail-marker naming) pulled a mid-flight
+axolotl and filed four issues on dhaupin/vant. All four triaged; three
+code bugs fixed, one friction item documented. Then the group exercise
+was re-run to prove the mesh still holds after the fixes.
+
+**#92 (the big one, high severity).** gatherBrainStorage's public pass
+OVERWROTE dual-scope brains into the same result key: a horcrux of a
+brain that exists in both models/private and models/public silently
+dropped every private-only file. A disaster-restore would have lost an
+agent's private lessons with no error. Fix: merge with per-file scope
+tags (type 'both'); restore accepts 'both' and routes each file to its
+own tree, preserving private-wins-overwrite and
+public-skip-if-exists semantics. Verified cold end to end: create →
+wipe both trees → restore → private file lands private, public lands
+public; stale private overwritten by horcrux, live public untouched.
+The restore validator rejects nothing that was already valid; old
+horcruxes without scope tags default to the safe (public) side.
+
+**#93.** bin/horcrux.js create never assigned `password` - every
+documented path (positional, env, p_ filename) died on
+'ReferenceError: password is not defined', and the default-path
+template even interpolated it before the guard. Resolution chain
+mirrored from refresh (arg → env → p_ filename), resolved BEFORE the
+template. Verified: env-less create via p_ filename now produces a
+valid stego horcrux.
+
+**#94.** lib/vant.js wake() called a bare undefined `config()` →
+unhandled rejection in the boot pipeline. Now getConfig() (same as
+startFull); verified wake returns a clean structured error instead of
+crashing. Also: bin/brain-registry.js was a fiction generator
+(hardcoded 'main (current)', fake register success) - rewritten to
+report real brainDirs() + stack, and to say plainly that registration
+is not a runtime concept.
+
+**#95.** Sandbox grants are per-process BY DESIGN (defense in depth);
+Cairn hit the wall every first-boot agent hits. Fixed the message
+layer: all five teams.js E_SANDBOX sites now explain the per-process
+model and the fix ('run vant org grant in the SAME process'), genesis
+matches on the stable code instead of prose, and
+agent-onboarding.md gained a scopes section with the same-process
+pattern + the org config persistence flow. The model itself was NOT
+weakened.
+
+**Mesh re-proven.** exercise-group.js after the fixes: one run failed
+a phase (cold-start race; all node tails healthy, 0 gaps), then FOUR
+consecutive runs 11/11 clean. Verdict: transient boot race under cold
+port contention, not a regression. Watch-item: if it recurs, add a
+boot-retry to the harness before suspecting the wave code.
+
+**Next steps:**
+- Proposed next scenario: labs/node-crew exercise for the AIRGAP leg -
+  node A (cairn brain) creates a stego horcrux, hand-carry (file
+copy) to node B, restore + boot with A's memory. That is the
+offline-transport story the owner flagged as key-later, and it
+exercises #92's fix at mesh scale. Owner said "remember the
+airgap/stego mechanics, this is a key later."
+- prd-whitepaper §9 still open (target, length, dialogue-vs-report)
+- Lane 3 still HOLD per owner
+
+---
+
 ## Session (2026-09-28 — pass 70: VANT_BRAIN symmetry + the hobbyist funnel + the paper PRD)
 
 Three threads: the asymmetry bug the funnel audit exposed, the funnel

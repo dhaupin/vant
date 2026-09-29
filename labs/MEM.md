@@ -7,40 +7,38 @@
 
 ## Handoff
 
-**Last known good commit:** pass 70 — the VANT_BRAIN asymmetry closed +
-the funnel page shipped. (Core 94cca5a) three fixes: dual-mode
-_loadBrain honors the env brain for READS when it exists on disk
-(writes + state files already did; this was the write/read asymmetry
-the funnel audit found); memory's explicit-brain reads moved to load's
-options.brain route (the old name-prefix built 'brain/category/key'
-and read it UNDER the current brain root — a path that could never
-exist); _writeToBrain + the options.brain read append .md only when
-absent, mirroring BrainStorage (learn's default.md doubled to
-default.md.md on that route). Plus: loadCorpus indexes one level of
-category dirs (md only) so vant search finds learned notes —
-basic/hybrid/RAG share the corpus, so the funnel page's search claim
-is TRUE now. Pins: cross-process VANT_BRAIN spawnSync pin
-(write/read/fallback/isolation) + explicit-brain cold round-trip;
-memory 18/18, brain 77, search 22, npm test exit 0; NEGATIVE CONTROL
-via a HEAD worktree (pre-fix read = null — the pin has teeth).
-(Docs a2fa21b) getting-started/vibe-coders.md (nav_order 12, every
-one-liner verified cold) + labs/prd-whitepaper.md (owner interview of
-record: Weisync origin, agent-first as a real methodology, the
-self-install evidence, the revert era that DESIGNED pub/priv +
-succession, the orchestrator line as deliberate mystery, full throttle
-to v1 then paper).
+**Last known good commit:** pass 71 — Cairn's four issues triaged and
+fixed (4e450db). #92 HIGH: horcrux gather dropped dual-scope private
+files (public pass clobbered the result key); now merges with
+per-file scope tags (type 'both') and restore routes per-file scope
+with private-wins-overwrite / public-skip-if-exists intact — verified
+cold end to end. #93: horcrux create password ReferenceError (chain
+mirrored from refresh, resolved before the default-path template).
+#94: wake() bare config() ReferenceError → getConfig();
+brain-registry CLI de-fictionalized (real brainDirs + stack).
+#95: E_SANDBOX messages explain the per-process grant model +
+onboarding docs section; genesis matches on code not prose. Mesh
+re-proven post-fixes: exercise-group 11/11 four consecutive runs
+(one initial cold-start race, 0 gaps, all tails healthy). Owner
+context: airgap/stego mechanics flagged KEY-LATER — proposed next
+exercise is the airgap leg (cairn-brain node creates stego horcrux,
+file-copy hand-carry, restore+boot on second node). Whitepaper v0.2
+has the agent testimony as §3.1 + §2 thesis.
 **Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED
 through pass 70.
-**Status:** UNBLOCKED. Lane 1 closed (Waves A→J); Lane 2 shipped
-(triage doors, agent-contributors, federation docs). Remaining: Lane 3
-HOLD per owner ("agent is deep in world building there");
-prd-whitepaper §9 open questions (publication target + length) await
-owner answers; optional escrow/settlement CLI reference prose. Known
-quirk (not fixed, judged out of scope): resolveBrainPath is a bare
+**Status:** UNBLOCKED. Lane 1 closed (Waves A→J); Lane 2 shipped;
+Cairn's issue queue (#92-#95) CLOSED. Remaining: airgap exercise
+(proposed, owner-flagged as key-later), prd-whitepaper §9 open
+questions (publication target + length) await owner answers;
+optional escrow/settlement CLI reference prose; Lane 3 HOLD per
+owner ("agent is deep in world building there"). Known quirk (not
+fixed, judged out of scope): resolveBrainPath is a bare
 exists-check, so an orgchart/ dir alone makes it report
 models/private/vant as the vant brain — harmless for the real CLI
 (its writes land private too) but know it before "cleaning"
-models/private/vant.
+models/private/vant. exercise-group.js has a known cold-start race
+(1-in-N runs loses a phase on first boot after churn; tails healthy,
+0 gaps) — rerun before debugging.
 **Owner context:** unchanged from pass 69 (enterprise grade, over-built
 plumbing NOW to avoid integration pain later). New for the paper: the
 epigraph stays unexplained by owner decision; agents are the paramount
