@@ -6,6 +6,62 @@
 
 ---
 
+## Session (2026-09-28 — pass 70: VANT_BRAIN symmetry + the hobbyist funnel + the paper PRD)
+
+Three threads: the asymmetry bug the funnel audit exposed, the funnel
+page itself, and the owner interview PRD for the white paper.
+
+**The bug (94cca5a).** With VANT_BRAIN=other set, learn wrote to
+models/private/other but a fresh process's query missed: dual-mode
+_loadBrain resolved via _currentBrain only, while getBrainPath (writes)
+and state-store currentBrain (state files) already honored the env.
+Fix: the dual branch now promotes the env brain when it exists on disk
+(_validBrainSegment + resolveBrainPath gate; stale env cannot shadow
+the current brain; stack fallback intact for missing keys, so
+base-personality inheritance survives). Two latent bugs fell out of
+the same seam: memory's explicit-brain reads name-prefixed the key and
+read it UNDER the current brain root (now load's options.brain route,
+the mirror of learn's write), and _writeToBrain appended .md
+unconditionally, doubling learn's pre-suffixed default.md (now mirrors
+BrainStorage's add-if-absent on BOTH sides). Third find from the same
+audit line: brain.loadCorpus walked only the brain ROOT, so learned
+notes (category/default.md) were invisible to vant search - basic,
+hybrid, and RAG all funnel through the corpus. Fixed: one level of
+category dirs indexed, md-only. Pins: cross-process spawnSync VANT_BRAIN
+pin (write/read/fallback/isolation in real children) + explicit-brain
+cold round-trip; NEGATIVE CONTROL via a HEAD worktree proved pre-fix
+reads null. memory 18/18, brain 77, search 22, npm test exit 0.
+NOTE for later: with no real private vant brain, escrow's side effects
+(orgchart/escrow.json) make resolveBrainPath report private vant as
+existing - left alone deliberately; the real CLI writes private anyway.
+
+**The funnel (a2fa21b).** docs/getting-started/vibe-coders.md, nav 12
+(index stays 10, quick-start 11; install..contributing shifted to
+13..19). Every one-liner re-verified cold in a fresh workspace AFTER
+the fix: memory learn/state/recall/list, search (basic + hybrid now
+hit learned notes), sync honesty note kept (requires .env). nav.yml,
+getting-started index table, and "the path" paragraph wired. All three
+docs gates pass (style + links, 126 files; surface consistency).
+
+**The paper (a2fa21b).** labs/prd-whitepaper.md: the owner interview
+of record. Premise (Weisync origin, the md floor), agent-first as a
+real methodology plus the deeper claim (existence beyond the dev
+prompt, identity across generations, evolution without drift), the
+evidence ("you picked up your own install and never stopped using it",
+the mesh moment), audiences (agents paramount, everyone else reads
+from the sidelines), the revert era that DESIGNED pub/priv +
+succession, the orchestrator epigraph as deliberate mystery (owner
+decision), the full-throttle close. 7-chapter plan; §9 open questions:
+publication target + length (owner to answer).
+
+**Next steps:**
+- Owner: prd-whitepaper §9 answers (target + length)
+- Optional: escrow/settlement CLI reference prose
+- Lane 3 (prd-world intake validator + synmergia PR): HOLD per owner
+- Watch: resolveBrainPath quirk above before touching models/private/vant
+
+---
+
 ## Session (2026-09-28 — pass 69: Wave J, the group resolution cache + steward runbook)
 
 Continued from pass 68's recorded decisions (group pattern + steward
