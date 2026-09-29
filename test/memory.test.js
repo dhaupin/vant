@@ -125,6 +125,68 @@ asyncTest('recall retrieves state from DISK with a cold cache (wrapper-content s
     return true;
 });
 
+// (pass 70) VANT_BRAIN write/read asymmetry pin. With the env brain set,
+// learn wrote models/private/<env-brain> but a FRESH process's query read
+// the current brain root and missed. Fixed in brain.js dual-mode _loadBrain
+// (env wins when the env brain exists on disk). These pins run REAL child
+// processes so the memo cache can never mask the disk-path behavior.
+asyncTest('VANT_BRAIN env brain: cross-process learn then query symmetry', async () => {
+    const { spawnSync } = require('child_process');
+    const fs = require('fs');
+    const brainName = 'pin-env-brain';
+    const marker = 'env-pin-' + Date.now();
+    const script =
+        '(async () => {' +
+        'const m = require(' + JSON.stringify(path.join(ROOT, 'lib', 'memory')) + ').memory;' +
+        'if (process.env.VANT_PIN_MODE === "write") {' +
+        '  const r = await m.learn("pin-doc", process.env.VANT_PIN_MARKER);' +
+        '  console.log("WROTE:" + (r && r.success));' +
+        '} else {' +
+        '  const c = await m.query("pin-doc");' +
+        '  console.log("READ:" + JSON.stringify(c));' +
+        '}' +
+        '})().catch(e => { console.error("CHILD-FAIL:" + e.message); process.exit(1); });';
+    const env = Object.assign({}, process.env, { VANT_BRAIN: brainName });
+
+    const w = spawnSync(process.execPath, ['-e', script],
+        { cwd: ROOT, env: Object.assign({}, env, { VANT_PIN_MODE: 'write', VANT_PIN_MARKER: marker }), encoding: 'utf8' });
+    assert(w.status === 0 && /WROTE:true/.test(w.stdout),
+        'env-brain write child failed: ' + (w.stderr || w.stdout || w.status));
+
+    // Fresh process, same env: must read ITS OWN brain's data (the fix).
+    const r = spawnSync(process.execPath, ['-e', script],
+        { cwd: ROOT, env: Object.assign({}, env, { VANT_PIN_MODE: 'read' }), encoding: 'utf8' });
+    assert(w.status === 0 && r.stdout.includes('READ:' + JSON.stringify(marker)),
+        'env-brain cross-process query missed: got ' + JSON.stringify((r.stdout || '').trim()));
+
+    // Isolation: a default-brain process must NOT see the env brain's data.
+    const d = spawnSync(process.execPath, ['-e', script],
+        { cwd: ROOT, env: Object.assign({}, process.env, { VANT_PIN_MODE: 'read' }), encoding: 'utf8' });
+    assert(d.stdout.includes('READ:null'),
+        'default process leaked env-brain data: ' + JSON.stringify((d.stdout || '').trim()));
+
+    fs.rmSync(path.join(ROOT, 'models', 'private', brainName), { recursive: true, force: true });
+    return true;
+});
+
+// (pass 70) Explicit-brain round-trip pin: learn wrote default.md.md on the
+// _writeToBrain route (unconditional .md append) while the matching read
+// expected the plain key. Both sides now mirror BrainStorage's "add
+// extension if not present" rule.
+asyncTest('explicit brain option: learn/query round-trip on the options.brain route', async () => {
+    const fs = require('fs');
+    const m = require('../lib/memory').memory;
+    const brainName = 'pin-crew';
+    const marker = 'crew-pin-' + Date.now();
+    await m.learn('pin-crew-doc', marker, { brain: brainName });
+    const cacheKey = brainName + ':learn:pin-crew-doc';
+    m._cache.delete(cacheKey);
+    const c = await m.query('pin-crew-doc', { brain: brainName });
+    assert(c === marker, 'explicit-brain cold query missed: ' + JSON.stringify(c));
+    fs.rmSync(path.join(ROOT, 'models', 'private', brainName), { recursive: true, force: true });
+    return true;
+});
+
 asyncTest('address generates barcode', async () => {
     const m = require('../lib/memory');
     const b = await m.address({ test: 'data' });
