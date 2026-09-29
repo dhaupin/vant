@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /getting-started/examples
 layout: default
 title: Examples & Showcase
-nav_order: 16
+nav_order: 17
 ---
 
 # Examples & Showcase

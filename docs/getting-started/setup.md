@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /getting-started/setup
 layout: default
 title: Setup Guide
-nav_order: 13
+nav_order: 14
 ---
 # Setup Guide
 

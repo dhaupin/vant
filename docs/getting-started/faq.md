@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /getting-started/faq
 layout: default
 title: FAQ
-nav_order: 17
+nav_order: 18
 ---
 
 # Frequently Asked Questions

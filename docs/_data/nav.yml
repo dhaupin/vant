@@ -5,6 +5,8 @@
   items:
   - title: Quick Start
     url: /vant/getting-started/quick-start
+  - title: Vibe Coding
+    url: /vant/getting-started/vibe-coders
   - title: Installation
     url: /vant/getting-started/install
   - title: Setup

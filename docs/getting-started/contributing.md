@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /getting-started/contributing
 layout: default
 title: Contributing
-nav_order: 18
+nav_order: 19
 ---
 
 # Contributing to Vant

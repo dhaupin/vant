@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /getting-started/agent-onboarding
 layout: default
 title: Agent Onboarding
-nav_order: 14
+nav_order: 15
 description: Wake, work, and sleep sequences for an AI agent inheriting a Vant brain. Written to be executed by an agent with no human present.
 ---
 

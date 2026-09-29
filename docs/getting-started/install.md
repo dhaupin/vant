@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /getting-started/install
 layout: default
 title: Installation
-nav_order: 12
+nav_order: 13
 ---
 # Installation
 
