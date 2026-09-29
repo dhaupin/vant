@@ -137,6 +137,49 @@ curl -s -X POST http://localhost:3457/rpc -H "Content-Type: application/json" -d
 
 Returns the live tool list. The full contract is in [MCP](/vant/runtime/mcp).
 
+## Scopes and the per-process grant
+
+Memory reads work out of the box. Writes to teams, agents, and org
+records are gated by sandbox capabilities, and a grant is bound to the
+process that made it. If you run a grant in one process and the write
+in another, the write fails with `E_SANDBOX` even though the grant
+command printed success:
+
+```bash
+# Wrong: the grant dies with the first process
+vant org grant
+node -e "require('./lib/teams').createOrg('X')"   # E_SANDBOX
+```
+
+Run the grant and the write in the same process:
+
+```javascript
+const sandbox = require('./lib/sandbox');
+const teams = require('./lib/teams');
+sandbox.setScopes(['read', 'write', 'spawn', 'execute']);
+sandbox.defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canSpawn: true });
+const org = teams.createOrg('MyOrg');
+```
+
+Or grant from the same shell before a scripted write:
+
+```bash
+node bin/org.js grant --scopes read,write,spawn,execute
+```
+
+To remember your preferred scopes across sessions, persist them and
+let the next grant pick them up:
+
+```bash
+vant org config --set-operator-scopes read,write,spawn,execute
+vant org grant
+```
+
+The per-process model is deliberate: capabilities are part of the
+keeper layer, and a grant that outlived its process would leak
+authority to unrelated work. Treat the grant as part of the boot
+sequence of whatever process does the writing.
+
 ## Rules worth keeping
 
 - Read before write. Load the brain before changing anything.

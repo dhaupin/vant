@@ -196,6 +196,19 @@ async function run() {
             const stack = readBrainStack(REPO_ROOT);
             return stack[0] || 'vant';
         })();
+        // (pass 71, issue #93) Resolve the password BEFORE the default-path
+        // template (which embeds it) and before the guard below. The create
+        // branch never assigned `password`, so every documented path -
+        // positional arg, env var, p_ filename - died on
+        // 'Error: password is not defined'. Chain mirrors the refresh
+        // branch: arg -> env -> p_ filename.
+        const positionalPw = args[2];
+        let password = positionalPw || process.env.VANT_BRAIN_PASSWORD || null;
+        if (!password) {
+            const guessed = args[1] || path.join(REPO_ROOT, 'models', 'public', currentBrain, 'boot', `${currentBrain}-p_.svg`);
+            const m = path.basename(guessed).match(/-p_([^.]+)\.svg$/);
+            if (m) password = m[1];
+        }
         const outputPath = args[1] || path.join(REPO_ROOT, 'models', 'public', currentBrain, 'boot', `${currentBrain}-p_${password}.svg`);
         if (!password) {
             console.log('❌ Password required');
