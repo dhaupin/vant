@@ -72,6 +72,20 @@ scoping for free.
 8. **Doc-rot:** `lib/version.js` header instructions reference flat
    `models/private/*.md` / `meta.json`; canvas comments (above).
 
+> **Pass 74 correction:** item 7 (`config.js:174` flat storage default)
+> was a MISREAD — `storage.path` is consumed by `brain.getBrainPath()`
+> as the private ROOT (`models/private` + `/` + brain). Root semantics,
+> multibrain-correct; reclassified from seam to verified-OK.
+
+**Pass 74 migrations (items 1-4 + 8 done):** mcp brain_write (active-brain
+root + segment validation + extension-if-absent), bin/succession.js log
+(active-brain public tree, fresh-install seed fallback), bin/node.js
+(loadBrain/saveBrain through getBrainPath, MODEL_PATH stays an explicit
+escape), bin/health.js both resolvers, bin/load.js both defaults,
+bin/brain-unlock.js (active-brain boot-dir scan, flat legacy fallback),
+version.js + canvas.js doc-rot. Remaining: item 5 (sudo.js — design
+call, see the filed issue).
+
 ## Tier C — global by design (leave; named so nobody "fixes" them)
 
 - `models/state.json` — the stack itself. Global by definition.

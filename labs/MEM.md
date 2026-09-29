@@ -7,29 +7,31 @@
 
 ## Handoff
 
-**Last known good commit:** pass 73 — multibrain census (0a6eb13).
-Pass 72 fixed #96/#97 (ea3f484): horcrux payloads carry activeStack
-(identity) beside stack (inventory); restore prefers activeStack;
-getPublicPath rule 2 explicit-config-only + new rule 2.5 (active brain's
-public tree beats the vant template); read(name,{brain}) targets public
-trees. Pub-baseline drill proven end to end. Cairn's queue CLOSED
-(#92-#97).
-**Pass 73:** labs/MULTIBRAIN_CENSUS.md — the stack-awareness survey the
-owner asked for ("lots unfinished, unmigrated"). Core spine (brain →
-storage → state-store → all stateful subsystems) ALREADY migrated; seams
-are at the edges. VERIFIED bugs: mcp.js brain_write writes models/
-private ROOT with no extension (invisible to read()); bin/succession.js
-diverges from lib/succession.js (public root vs getPublicPath).
-Flagship flat surface: bin/node.js. Design call needed: sudo.js
-shared-across-brains. Migration order + verification protocol are in
-the census.
+**Last known good commit:** pass 74 — multibrain across the board
+(e8b6f49). Census items 1-4 + 8 migrated: mcp brain_write scoped to the
+active brain (+segment validation + extension rule), bin/succession.js
+log via getPublicPath() (+ second bug: its unconditional canWrite() gate
+made it unreachable on default installs — now aligns with the middleware
+"unconfigured → allow" philosophy), bin/node.js loadBrain/saveBrain
+through getBrainPath (MODEL_PATH stays an explicit escape), health/load
+VANT_BRAIN-aware defaults, brain-unlock active-brain boot-dir scan,
+version.js/canvas.js doc-rot. Census item 7 RECLASSIFIED (config.js
+storage.path is root-correct — a census misread, corrected in the doc).
+Harness-verified: MCP write/read round-trip in active brain, VANT_BRAIN
+pin moves writes, traversal rejected, succession log seeds the ACTIVE
+brain's public tree and status reads it back, health reports the active
+brain. All suites green (npm test, brain 77, mcp 6, storage 40, memory
+18, security-hardening 22, boot 15, vant 16, transform 5), docs gates
+PASS. Design calls filed: #98 (sudo scoping) + #99 (cross-brain read
+stack fallback) — owner rulings pending. Pass 72 fixed #96/#97
+(ea3f484); pass 73 census at 0a6eb13; Cairn's queue CLOSED (#92-#97).
 **Follow-up candidate (#98-ish):** no cross-brain stack fallback in
 read() — a key missing from the active brain's trees returns null
 instead of walking the stack to the baseline brain. That IS the
 "dialect on a baseline" semantic the pub-baseline route wants; needs
 an owner design call before implementing.
 **Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED
-through pass 72.
+through pass 74.
 **Status:** UNBLOCKED. Lane 1 closed (Waves A→J); Lane 2 shipped;
 Cairn's issue queue (#92-#97) CLOSED (#92-#95 in 4e450db, #96-#97 in
 pass 72). Remaining: airgap exercise
@@ -58,11 +60,10 @@ testimony (v0.2); chapter 2 opens with it.
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 73 committed: multibrain census. Next agent:
-census migration order items 1-2 (mcp brain_write, bin/succession.js)
-are small and safe; item 3 (bin/node.js) is the flagship; sudo.js needs
-an owner design call first. prd-whitepaper §9 still awaits owner
-answers; airgap exercise still proposed.)
+(nothing in flight — pass 74 committed: census items migrated, #98/#99
+filed for owner rulings. Next agent: implement #98/#99 once ruled
+(recommendations are in the issue bodies); airgap leg exercise still
+proposed; prd-whitepaper §9 still awaits owner answers.)
 
 ---
 

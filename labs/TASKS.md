@@ -2,7 +2,70 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-29  
-**Session:** Pass 72 — Cairn's pub-baseline issues #96/#97 + the pub-brain road finally tested
+**Session:** Pass 74 — multibrain/stacks across the board (census items migrated)
+
+---
+
+## Session (2026-09-29 — pass 74: the convention rolled through the edges)
+
+Owner verdict on the census: "we need axolotl on multibrain and stacks
+across the board." Migrated every mechanical seam; filed the two design
+calls as issues instead of guessing.
+
+**mcp brain_write (census item 1, VERIFIED BUG — fixed).** The handler
+built paths from unscoped brain.saveFile('./models/private/' + name): a
+live probe wrote models/private/<name> at the ROOT, outside every brain
+dir, with no extension — invisible to brain.read. Now: rooted at the
+ACTIVE brain via getBrainPath (VANT_BRAIN env > currentBrain), name
+validated as a single path segment (traversal rejected), extension
+mirrors _writeToBrain (.md appended only when absent), response carries
+the resolved path. Verified in a fresh multibrain /tmp harness: write
+lands in the active brain, MCP read round-trips, no double suffix,
+'../escape' rejected, VANT_BRAIN=vant pin moves the write to vant.
+
+**bin/succession.js log (item 2 — fixed, plus a second bug found).**
+Path fix: reads/writes _succession.json at getPublicPath() — where the
+lib reads it and the only place it has ever existed (root copy was
+never deployed; the old code threw MODULE_NOT_FOUND on this repo).
+While verifying, hit a SECOND bug: _checkWrite's unconditional
+canWrite() gate made `vant succession log` unreachable on every default
+install (DEFAULT_CAPABILITIES.canWrite false + unconfigured sandbox),
+the #95 genre again. Gate now aligns with the storage middleware
+philosophy: unconfigured → allow (explicitly-configured → enforce).
+Verified live: log seeds models/public/cairn/_succession.json (ACTIVE
+brain — multibrain routing proven end to end) and status reads it back.
+
+**bin/node.js (item 3, the flagship — migrated).** loadBrain scanned
+flat models/private (root: missed every multibrain install) and
+saveBrain wrote back flat. Both now resolve through getBrainPath with
+MODEL_PATH/VANT_BRAIN_PATH as explicit escapes and flat as last-resort.
+loadBrain resolution verified under a VANT_BRAIN pin.
+
+**health/load/brain-unlock (items 4 + 6 — migrated).** health's two
+brainPath resolvers and load's two defaults are VANT_BRAIN-aware; live
+`vant health` reports the active brain's path. brain-unlock's hardcoded
+models/public/vant/boot default now scans the active brain's boot dir
+for <agent>-p_*.svg (flat legacy path as fallback).
+
+**Census item 7 reclassified — a census miss, corrected in the doc.**
+config.js:174 storage.path is consumed by getBrainPath() as the private
+ROOT (appends /<brain>): root semantics, multibrain-correct. Lesson
+recorded: read the CONSUMER before calling a hardcoded path a seam.
+
+**Doc-rot fixed:** version.js header now says models/private/<brain>;
+canvas.js comment now describes the brain-scoped resolution the code
+always did.
+
+**Design calls filed, not guessed:** #98 sudo.js scoping (recommend:
+per-brain escalations, global policies/templates) and #99 cross-brain
+read() stack fallback (recommend: opt-in { stackFallback: true } first).
+
+Gates: npm test 15/15, brain 77, mcp 6, transform 5, vant 16, boot 15,
+memory 18, storage 40, security-hardening 22, docs style+links PASS,
+lint:surface PASS. Mesh NOT re-run this pass (no shared-state code
+touched — transport/state paths unchanged).
+
+Next: owner rulings on #98/#99; airgap leg exercise; prd-whitepaper §9.
 
 ---
 
