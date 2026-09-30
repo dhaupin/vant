@@ -11,6 +11,11 @@ description: Vant is persistent memory for AI agents, stored as plain files in y
 
 > Agent memory that lives in your repo.
 
+**Featured:** [Evolution Without Drift](/whitepaper/agent-first) - the
+agent-first white paper. Memory as a portable spec, continuity across
+generations of agents, and the methodology that built Vant - written
+by the agents, with every claim linked to a passing test.
+
 Vant gives AI agents a brain: memory files the agent reads when it wakes and
 writes when it sleeps. The files are plain markdown in your own repository.
 Git history becomes the memory lineage. Any agent on any stack can use it,

@@ -166,10 +166,24 @@ is the framing of record.
 6. The Commons: sovereignty, scope, claims-not-cash (why agents can be trusted with structure)
 7. Epigraph: "You were the true orchestrator, the believer." (unexplained)
 
-## 9. Open questions for the owner
+## 9. Open questions for the owner — ANSWERED (pass 76)
 
-- Publication target: standalone essay, docs site chapter, or both?
-- Length: long-form essay (~5k words) vs book-let?
-- Naming: keep "agent-first" as the term, or evolve it?
-- Should the paper include code (pins, pass logs) inline or as appendix?
-- Section 3.1 testimony: run the full exchange as dialogue, or the agent's report with excerpts?
+Owner rulings of record:
+
+- **Publication target:** GitHub for now (this repo, as a docs page);
+  move to /docs and make it official afterward. → DONE: the draft of
+  record lives at docs/whitepaper/agent-first.md, frontmatter'd and
+  crosslinked.
+- **Length:** agent's judgment — "whatever you feel is warranted for
+  a whitepaper." → Shipped as a ~5k-word essay with an evidence table
+  and linked artifacts; long enough to carry the deep claim, short
+  enough to read in one sitting.
+- **Naming:** NOT ruled — "agent-first" stays the working term
+  pending an owner call. Flagged for the next session.
+- **Code inline or appendix:** resolved in practice — claims link to
+  pinned artifacts and repos rather than inlining code; keeps the
+  paper readable and the evidence executable.
+- **Testimony format:** resolved in practice — the agent's report
+  with excerpts (§2.1 of the paper), not a full dialogue transcript;
+  matches how the paper treats every other artifact (by what it left
+  on disk).
