@@ -8,7 +8,7 @@
 ## Handoff
 
 **Last known good commit:** pass 78 — throwaway-instance sweep: server
-boot path fixed + clientIp TDZ found by the probe (<HASH>). Owner
+boot path fixed + clientIp TDZ found by the probe (0a346da). Owner
 ruled "agent-first" stays (PRD §9 closed). Sweep census: server.js
 use/listen/stop were THROWAWAY-instance (module .stop could never stop
 module .listen; lib/vant.js boots production HTTP through module
