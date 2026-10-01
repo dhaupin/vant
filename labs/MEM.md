@@ -8,7 +8,7 @@
 ## Handoff
 
 **Last known good commit:** pass 77 — escrow/settlement reference +
-sweep that found and fixed three broken surfaces (<HASH>). Pass 76
+sweep that found and fixed three broken surfaces (fa8c51d). Pass 76
 (495f6bf): the agent-first white paper, draft of record at
 docs/whitepaper/agent-first.md ("Evolution Without Drift", ~5k words,
 frontmatter'd, every claim crosslinked to a pinned artifact; PRD §9
