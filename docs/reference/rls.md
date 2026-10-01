@@ -142,7 +142,33 @@ in `lib/islands.js`:
 The MCP tools `islands_canAccess` (decision, resolving the current
 agent's identity when no context is passed) and `vant_island_status`
 (reports `boundary` info: gated, readableBy, writableBy, container)
-complete the surface.
+complete the surface. On the CLI, `vant islands boundaries` lists the
+gated islands and `vant islands load <name> --as <agentId>` loads one
+through a specific agent's habitat identity.
+
+## Per-workspace memory namespacing
+
+Memory state (`memory.state`/`memory.recall`) participates in the same
+subject chain. When a workspace resolves - explicit `workspace`/`userCtx`
+options, else the current agent's habitat identity - the key is scoped
+into a per-workspace namespace on disk: `ws<wsLen>.<ws>.<key>`
+(e.g. `ws4.acme.proj`). The length prefix + dot separators keep the
+namespace unambiguous under the storage key sanitizer (colons do not
+survive; bare concatenation is collidable), and a 100-char composite
+budget fails closed with `VAF_INPUT_INVALID` instead of silently
+truncating.
+
+- Namespaces are **isolating, not additive**: a resolved workspace reads
+  only its own rows; anonymous callers never see scoped rows; flat keys
+  keep working unchanged for anonymous callers.
+- `workspace: null` (or `""`) pins a call **unscoped** - the escape hatch
+  used by process-global state (habitat `_habitat`, nature `_flywheel`,
+  context history) so persistence never fragments per workspace.
+- Workspace names must match `[A-Za-z][A-Za-z0-9._-]{0,63}` (they become
+  part of a filename).
+- `vant_memory_state` / `vant_memory_recall` accept an optional
+  `workspace` argument (omit = current agent identity when one exists;
+  `""` = flat).
 
 ## Persistence
 

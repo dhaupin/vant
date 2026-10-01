@@ -2,7 +2,58 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-01  
-**Session:** Pass 84 — island boundaries enforced at load (RLS alongside)
+**Session:** Pass 85 — #5 per-workspace memory namespacing + islands CLI touch-up
+
+---
+
+## Session (2026-10-01 — pass 85: #5 workspace memory namespacing)
+
+Owner: "What's best next? I feel like #5 is important" → agreed: #5
+per-workspace memory namespacing + the promised islands CLI touch-up.
+
+**lib/memory.js — workspace namespacing for state/recall:**
+- Subject chain mirrors islands._resolveRlsContext: explicit
+  opts.workspace / opts.userCtx.workspace -> current agent's habitat
+  identity (agents.agentContext of getCurrentAgentId) -> anonymous
+  (null = flat, pre-85 keys). _resolveWorkspace/_stateKey private.
+- Composite key shape: ws<wsLen>.<ws>.<key> (e.g. ws4.acme.proj).
+  WHY: state keys become FILENAMES and lib/storage.js:1032-33
+  sanitizes to [A-Za-z0-9._-] + truncates at 100 — colons do NOT
+  survive (ws:<ws>:<key> collapses to wsacmeproj on disk) and bare
+  concatenation is collidable (ab+cx vs abc+x). Length prefix + dots +
+  letter-start workspace names parse unambiguously under that exact
+  sanitizer. WORKSPACE_KEY_RE [A-Za-z][A-Za-z0-9._-]{0,63};
+  VAF_INPUT_INVALID on bad names and on 100-char composite overflow
+  (STORAGE_KEY_BUDGET).
+- Namespaces ISOLATING not additive: resolved workspace reads ONLY its
+  rows; anonymous never sees scoped rows; flat keys unchanged for
+  anonymous callers. Cache keyed by storeKey (no in-process collisions).
+- state()/recall() return { key, storeKey, workspace, ttl }; memory.
+  stateKey(ws, key) export = disk-path source of truth. recall wrapper
+  now forwards opts (was dropped).
+- PINNED UNSCOPED (workspace: null): habitat save/restore (_habitat),
+  nature (_flywheel), context._gatherHistory — process-global state
+  must not fragment per workspace. Empty string "" = explicit flat.
+
+**MCP (291 unchanged):** vant_memory_state/_recall gained optional
+`workspace` arg (omit = current agent identity; "" = flat).
+
+**Islands CLI touch-up (bin/islands.js):** `load <name> --as <agentId>`
+(threads agents.agentContext as userCtx; unknown agent fails loudly
+exit 1) + `boundaries` subcommand (islands.listBoundaries()).
+
+**Tests:** NEW test/workspace-memory.test.js 21/21 (flat compat, disk
+paths, isolation, cold-cache disk read, collision-shape pins, budget
+fail-closed, userCtx/identity resolution, workspace:null pin,
+habitat-flat-row pin, validation, CLI boundaries/--as e2e incl.
+same-process spawn→CLI probe).
+
+**Docs:** rls.md gained "Per-workspace memory namespacing" section;
+cli.md islands rows updated (load --as, boundaries).
+
+**Gates:** npm test, runner 37/37, workspace-memory 21/21, memory 18,
+island-boundaries 14, habitat-rls 23, workspace-budget 22, boot, mcp;
+lint:docs/surface/helpers; audit 291 THREW(0).
 
 ---
 

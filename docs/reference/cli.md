@@ -178,7 +178,8 @@ vant agents kill <id>
 
 vant islands                # Show islands
 vant islands boot           # Boot islands
-vant islands load <name>    # Load an island
+vant islands load <name> [--as <agentId>]   # Load an island (optionally as an agent)
+vant islands boundaries     # List RLS-gated islands + rules
 
 vant mcp --stdio            # STDIO mode
 vant mcp --server --port 3457

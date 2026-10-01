@@ -7,22 +7,30 @@
 
 ## Handoff
 
-**Last known good commit:** pass 84 — island boundary enforcement (#3).
-islands.load()/hydrate()/save() now check habitat boundaries
-(_island:<name>) BEFORE content moves; subject chain: explicit
-userCtx -> current agent's habitat identity (agents.agentContext of
-currentAgentId) -> anonymous; row-level filter/mask applies to
-storage/runtime island DATA; anonymous writes on gated islands fail
-closed (E_ISLAND_WRITE_DENIED); no policy = open island (pre-84
-behavior preserved); denials emit island:denied. PRE-EXISTING FIX:
-islands.save() called island.write() which never existed (IslandStorage
-API is get/set) — every storage-island save TypeError'd since
-inception, forum.js swallowed it; now island.set(). MCP +1 (291):
-islands_canAccess (mirrors actual gate semantics — ungated islands
-report allowed, NOT defaultPolicy admin-only) + vant_island_status
-boundary info. NEW SUITE test/island-boundaries.test.js 14/14.
-Gates all green; audit 291 THREW(0); rls.md gained frontmatter
-permalink (docs link-checker requirement). Pass 83 (d6c2758):
+**Last known good commit:** pass 85 — #5 per-workspace memory
+namespacing + islands CLI touch-up.
+memory.state/recall now resolve a workspace subject chain (explicit
+opts.workspace/userCtx -> current agent habitat identity -> anonymous)
+and scope keys to ws<wsLen>.<ws>.<key> on disk (e.g. ws4.acme.proj).
+KEY-SHAPE WHY: state keys become filenames; storage sanitizer strips
+colons + truncates at 100, so ws:<ws>:<key> collapses and bare concat
+collides — length prefix + dots + letter-start ws names parse
+unambiguously; 100-char composite overflows throw VAF_INPUT_INVALID.
+Namespaces ISOLATING (no flat fallback, anon never sees scoped rows);
+flat keys unchanged for anonymous callers; workspace:null pins
+UNSCOPED (habitat _habitat, nature _flywheel, context history all
+pinned — process-global state must not fragment). MCP: vant_memory_
+state/_recall gained optional workspace arg (291 tools unchanged).
+CLI: islands load --as <agentId> + islands boundaries.
+NEW SUITE test/workspace-memory.test.js 21/21. Gates all green
+(memory 18, island-boundaries 14, habitat-rls 23, workspace-budget
+22, runner 37, npm test, boot, mcp, 3 lints, audit 291 THREW(0)).
+Pass 84 (1146749): island boundaries enforced at load/hydrate/save
+(_island:<name>, subject chain identical, anonymous writes fail
+closed E_ISLAND_WRITE_DENIED, no policy = open); PRE-EXISTING FIX:
+islands.save() called nonexistent island.write() → island.set();
+MCP +1 islands_canAccess; suite 14/14; rls.md permalink frontmatter
+required by docs link-checker. Pass 83 (d6c2758):
 workspace budgets ws:<ws>:<agent>/ws:<ws>::org, two-rows-one-pool,
 persistent member caps, registry-verified admin (RLS_DENIED), market
 context.workspace pool draw, STALE-SINGLETON merge fix (hold/release
