@@ -531,7 +531,7 @@ Release a hold by id. Returns `{ released: boolean }`.
 Read the escrow ledger. No params: budgets, holds, approvals, quotas
 counts. With `org`: that agent's budget plus the holds map.
 
-## Habitat Tools (8)
+## Habitat Tools (11)
 
 Habitat is the RLS layer: workspaces (isolated containers), roles,
 and boundary policies. These replaced the dead `vant_environment_*`
@@ -540,7 +540,10 @@ shipped (scrapped in favor of habitat), but its 7 tools stayed
 registered against a module that never existed: every call was
 MODULE_NOT_FOUND. All habitat tools route through the shared instance
 (`lib/habitat.js` `getShared()`), which boot adopts rather than
-replaces. Mutations auto-persist to the brain state store.
+replaces. Mutations auto-persist to the brain state store. Pass 82
+added the enforcement surface (`vant_habitat_can`,
+`vant_habitat_check`, `vant_habitat_agentContext`) and agent
+identity - see [RLS](rls.md).
 
 ### vant_habitat_status
 
@@ -582,8 +585,28 @@ Set an RLS boundary policy for a resource. Params: `resource`,
 
 List all boundary policies. No params.
 
+### vant_habitat_can
+
+RLS decision: can a context access a resource? **Params:** `resource`
+(string, required), `userCtx` (object: `userId`, `roles`, `workspace`,
+`team`, `brain` - optional), `mode` (`read` | `write`, default
+`read`). Returns `{ allowed, resource, mode, workspace }`.
+
+### vant_habitat_check
+
+Throwing enforcement form. Same params as `vant_habitat_can`; denial
+throws a coded `RLS_DENIED` error instead of returning a boolean.
+Returns `{ checked: true, resource, mode }` on success.
+
+### vant_habitat_agentContext
+
+RLS subject for a spawned agent: its workspace, roles, team, and
+brain. **Params:** `agentId` (string, required). Unknown agents
+return `{ error: "AGENT_NOT_FOUND: ..." }`. See
+[RLS](rls.md) for the identity model.
+
 Same surface on the CLI: `vant habitat
-<status|list|init|use|roles|grant|policy|boundaries>`.
+<status|list|init|use|roles|grant|policy|boundaries|can|identity>`.
 
 ## Return Types
 

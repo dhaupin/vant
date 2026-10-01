@@ -7,24 +7,38 @@
 
 ## Handoff
 
-**Last known good commit:** pass 81 — environment family DELETED per
-owner ruling (was a scrapped subsystem whose 7 tools shipped registered
-against a never-existing module; pass 80 stopgapped with coded
-refusals, 81 removed). Replaced with the REAL subsystem, fully wired:
-habitat MCP tools x8 (vant_habitat_status/listWorkspaces/
-createWorkspace/setWorkspace/addRole/getUserRoles/setPolicy/
-getBoundaries — all live-probed incl. two-process persistence) + real
-CLI (bin/habitat.js rebuilt from facade: status/list/init/use/roles/
-grant/policy/boundaries). All surfaces share ONE instance via
-habitat.getShared()/getSharedReady() claiming global.__vant_habitat;
-boot (lib/vant.js) now ADOPTS a pre-claimed instance instead of
+**Last known good commit:** pass 82 — agents got habitat identity +
+RLS came online (owner: "Let's do #1, but bring RLS online too").
+Habitat now: evaluate()/check()/containerAdmits() + REAL filter/mask
+(was policy-shape vapor), agentContext()/provisionAgent(); spawn()
+auto-provisions identity (team -> 'org-<team>' workspace, spawner
+owns/gets admin, role granted, idempotent, non-fatal); agents facade
+export agentContext. RLS WOKE UP: sandbox.generateCaps auto-claims
+shared habitat + fail-closed on unknown-workspace ctx claims (was:
+fabricated role:admin ctx rode through pre-boot, silent baseCaps
+passthrough); lib/rls.js auto-claims + delegates to habitat.check;
+isOperationAllowed now real+exported; middleware passes the token.
+MCP +3 (284 total): vant_habitat_can / _check (throwing RLS_DENIED) /
+_agentContext. CLI: habitat can|identity; bin/rls.js context/allow
+fixed (Promise-printing). NEW SUITE test/habitat-rls.test.js 23/23
+(scratch-brain isolated). CRITICAL latent pass-81 bug FIXED:
+habitat._persist chain resolved to undefined not the instance ->
+first mutation made every later getSharedReady() hand out undefined
+(h.can TypeError); single-call probes masked it, multi-step hit it;
+chain now resolves to `this`. All gates green (npm test, runner 37,
+mcp/boot/agents/sandbox/rls suites, 3 lints, audit 284 THREW(0)).
+**Prior — pass 81:** environment family DELETED per owner ruling
+(was a scrapped subsystem whose 7 tools shipped registered against a
+never-existing module; pass 80 stopgapped with coded refusals, 81
+removed). Replaced with the REAL subsystem, fully wired: habitat MCP
+tools x8 (all live-probed incl. two-process persistence) + real CLI
+(bin/habitat.js rebuilt from facade). All surfaces share ONE instance
+via habitat.getShared()/getSharedReady() claiming
+global.__vant_habitat; boot ADOPTS a pre-claimed instance instead of
 clobbering. Habitat fixes en route: addRole fails closed on unknown
-workspace (was silent phantom-grant); mutations auto-persist
-(save() existed since v0.8.6, never called — hold/release genre);
-restore serialized on _readyPromise (wholesale-replace cannot race
-live mutations); setWorkspace stays session-only by design. Audit
-281 tools THREW(0). All gates green incl. docs (habitat section added
-to mcp-tools.md "Habitat Tools (8)").
+workspace; mutations auto-persist; restore serialized on
+_readyPromise; setWorkspace stays session-only by design. Audit 281
+THREW(0).
 **Prior — pass 80:** full MCP surface audit (scripts/
 audit-mcp-surface.js, new): 280 tools probed, THREW(0)/PHANTOM(0);
 9 bug clusters fixed (boot.js detached-method, brain_evolution_ x5,

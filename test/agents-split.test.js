@@ -58,8 +58,11 @@ _sandbox.defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canSpaw
 
 const readLib = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 
-// Pre-split export snapshot (captured from the monolith before the split)
-const PRE_SPLIT_EXPORTS = ["Agents","approve","clearCache","completeWork","delegate","delegateAsync","emit","escalate","fork","gatherState","get","getBrainAgentsConfig","getCurrentAgentId","getLayerStatus","getMaxAgents","getMetrics","getStackAgentsConfigs","getStatus","isOperationAllowed","join","kill","list","listFolders","listProtos","loadChain","loadFolder","loadProto","on","pause","pollWork","prune","reject","restoreState","resume","retry","setBrainAgentsConfig","setCurrentAgentId","setDeadline","setPriority","signOff","spawn","startMCP","terminate"];
+// Pre-split export snapshot (captured from the monolith before the split).
+// (pass 82) `agentContext` is a DELIBERATE addition: delegates to
+// habitat.agentContext() so spawned agents present an RLS subject. Added
+// to the expected surface instead of reverting the feature.
+const PRE_SPLIT_EXPORTS = ["Agents","agentContext","approve","clearCache","completeWork","delegate","delegateAsync","emit","escalate","fork","gatherState","get","getBrainAgentsConfig","getCurrentAgentId","getLayerStatus","getMaxAgents","getMetrics","getStackAgentsConfigs","getStatus","isOperationAllowed","join","kill","list","listFolders","listProtos","loadChain","loadFolder","loadProto","on","pause","pollWork","prune","reject","restoreState","resume","retry","setBrainAgentsConfig","setCurrentAgentId","setDeadline","setPriority","signOff","spawn","startMCP","terminate"];
 
 // ---------- 1. Facade contract ----------
 

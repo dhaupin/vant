@@ -2,11 +2,79 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-01  
-**Session:** Pass 80 — full MCP surface audit (280 tools) + bin/ truthfulness gate
+**Session:** Pass 82 — agents get habitat identity + RLS comes online
 
 ---
 
-## Session (2026-10-01 — pass 81: delete the dead family, wire the real one)
+## Session (2026-10-01 — pass 82: agents in habitat + RLS online)
+
+Owner greenlight: "Let's do #1, but bring RLS online while we do
+this." #1 = agents/orgs/teams identity in habitat (the top-ranked
+integration from the pass-81 survey). RLS = the row-level policy fields
+that were shape-only vapor.
+
+**RLS core (lib/habitat.js):**
+- evaluate(userCtx, resource, mode, data) — policy filter (strip
+  fields) + mask (redact to '[masked]'), array OR function forms,
+  filter-then-mask composition. The 'row-level' in RLS is REAL now.
+- check(userCtx, resource, mode) — throwing form, RLS_DENIED contract.
+- containerAdmits(userCtx, resource) — sync container gate for
+  sandbox.generateCaps.
+- agentContext(agentId) + provisionAgent(agentId, opts) — identity
+  builder (idempotent provisioning).
+- can() hardened: null ctx no longer TypeErrors.
+
+**Agents -> habitat:**
+- agents/core.js spawn() auto-provisions habitat identity: team maps
+to 'org-<team>' workspace (spawner becomes owner/admin per
+createWorkspace owner contract), role granted ('viewer'/'editor'/'admin'
+pass through, others default 'editor'). Idempotent. Non-fatal on
+habitat failure. agent.workspace/habitatRoles stamped on record.
+- agents.agentContext(id) facade export (delegates to habitat).
+
+**RLS online (previously asleep or hollow):**
+- sandbox.generateCaps: auto-claims shared habitat (was: silently
+returned baseCaps pre-boot); fail-closed — a ctx claiming an UNKNOWN
+workspace gets ZERO caps (was: fabricated ctx with role:admin rode
+through); roles must be an array.
+- lib/rls.js: auto-claims shared habitat (was: every check silently
+returned true without initRLS); delegates to habitat.check (ONE denial
+contract); isOperationAllowed now exported+real (bin/rls.js 'allow'
+was calling a nonexistent export); middleware passes the token to
+context() (was: called with NO arg, tokens always anonymous).
+- bin/rls.js 'context'/'allow' now await the async results.
+
+**MCP (+3 = 284 tools):** vant_habitat_can (boolean decision),
+vant_habitat_check (throwing RLS_DENIED), vant_habitat_agentContext
+(RLS subject; AGENT_NOT_FOUND error shape). All schema-validated,
+live-probed incl. allow/deny/isolation/unknown-agent paths.
+
+**CLI:** vant habitat can <mode> <resource> <userId> + identity
+<agentId>. bin/rls.js context/allow fixed (Promise-printing bugs).
+
+**CRITICAL BUG FIX (latent since pass 81):** habitat._persist() chain
+resolved to undefined, not the instance. First mutation swapped
+_readyPromise for an undefined-resolving promise -> every subsequent
+getSharedReady() handed callers undefined -> h.can TypeError.
+Masked in pass 81 because probes were single-call; multi-step probes
+(mutate then read) hit it immediately. Chain now resolves to `this`.
+
+**Tests:** NEW test/habitat-rls.test.js — 23 cases (RLS core,
+filter/mask incl. fn forms, identity e2e, fail-closed caps, rls auto-
+claim + denial contract, persistence round-trip). agents-split export
+snapshot updated with agentContext (deliberate addition, documented).
+All suites: habitat-rls 23/23, agents-split 23/23, habitat 6/6,
+agents 17/17, sandbox 22/22, rls, mcp, boot. npm test + runner 37/37
++ lint:docs/surface/helpers + audit (284 tools, 0 phantom) all PASS.
+
+**Next up (owner picked #1 of the ranked list):** #2 escrow budgets
+per workspace, #3 islands boundary enforcement at load time, #4 MCP
+auth ctx through habitat.context(token), #5 memory per-workspace
+namespacing, #6 mesh/agora tenancy.
+
+---
+
+## Prior (2026-10-01 — pass 81: delete the dead family, wire the real one)
 
 Owner ruling received: "environment" was a scrapped idea (built
 partially elsewhere, replaced by habitat/engine in the OSS); its 7 MCP

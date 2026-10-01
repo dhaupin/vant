@@ -18,6 +18,8 @@
  *   vant habitat grant <ws> <role> <userId> # assign a role (RLS)
  *   vant habitat policy <resource> <json>  # set an RLS boundary policy
  *   vant habitat boundaries                # list all boundary policies
+ *   vant habitat can <mode> <resource> <userId> # RLS decision for a context
+ *   vant habitat identity <agentId>        # RLS subject of a spawned agent
  */
 
 const args = process.argv.slice(2);
@@ -36,6 +38,8 @@ Usage:
   vant habitat grant <ws> <role> <userId> Assign a role (RLS)
   vant habitat policy <resource> <json>   Set a boundary policy
   vant habitat boundaries                 List boundary policies
+  vant habitat can <mode> <res> <userId>  RLS decision (mode: read|write)
+  vant habitat identity <agentId>         RLS subject of a spawned agent
 `);
     process.exit(0);
 }
@@ -46,6 +50,30 @@ function habitat() {
 
 function run() {
     const h = habitat();
+
+    if (subcmd === 'can' || subcmd === 'check') {
+        // (pass 82) RLS decision for a plain user context: roles come from
+        // the habitat registry in the CURRENT workspace.
+        const [mode, resource, userId] = [args[1], args[2], args[3]];
+        if (!mode || !resource || !userId) { console.error('Usage: vant habitat can <read|write> <resource> <userId>'); process.exit(1); }
+        const ws = h.getCurrentWorkspace();
+        const ctx = { userId, roles: h.getUserRoles(ws, userId), workspace: ws };
+        h.can(ctx, resource, mode === 'write' ? 'write' : 'read').then(allowed => {
+            console.log(allowed ? 'ALLOWED' : 'DENIED');
+            process.exit(allowed ? 0 : 1);
+        }).catch(e => { console.error('Error:', e.message); process.exit(1); });
+        return;
+    }
+
+    if (subcmd === 'identity') {
+        // (pass 82) The RLS subject a spawned agent presents.
+        const agentId = args[1];
+        if (!agentId) { console.error('Usage: vant habitat identity <agentId>'); process.exit(1); }
+        const ctx = h.agentContext(agentId);
+        if (!ctx) { console.error('AGENT_NOT_FOUND: ' + agentId + ' (spawn it first)'); process.exit(1); }
+        console.log(JSON.stringify(ctx, null, 2));
+        return;
+    }
 
     if (subcmd === 'status' || subcmd === 'stat' || subcmd === 'info') {
         const s = h.status();
@@ -99,7 +127,7 @@ function run() {
         console.log('Boundary policies:', keys.length ? '' : '(none — defaults apply)');
         for (const k of keys) console.log('  -', k, '→', JSON.stringify(b[k]));
     } else {
-        console.log('Usage: vant habitat <status|list|init|use|roles|grant|policy|boundaries> (try -h)');
+        console.log('Usage: vant habitat <status|list|init|use|roles|grant|policy|boundaries|can|identity> (try -h)');
         process.exit(1);
     }
 }
