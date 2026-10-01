@@ -7,33 +7,31 @@
 
 ## Handoff
 
-**Last known good commit:** pass 77 — escrow/settlement reference +
-sweep that found and fixed three broken surfaces (fa8c51d). Pass 76
-(495f6bf): the agent-first white paper, draft of record at
-docs/whitepaper/agent-first.md ("Evolution Without Drift", ~5k words,
-frontmatter'd, every claim crosslinked to a pinned artifact; PRD §9
-answered - GitHub target, length agent's judgment, NAMING still open).
-Pass 77: NEW docs/reference/escrow.md (nav 124) - the settlement
-reference: budgets/holds/approvals/quotas/circuits, the "a hold is a
-reservation, NOT a debit" truth, execute middleware, multibrain +
-stack status, horcrux gather/restore, events, function reference.
-Sweep findings, all fixed + pinned: (1) escrow.resetBudget PHANTOM
-EXPORT - called a method that never existed, TypeError on call; now
-delegates to setBudget (pins in test/escrow.test.js). (2) MCP escrow
-tools broken: escrow_create ignored its args (create takes an options
-object), escrow_hold/release mapped args onto hold(holdId, condition),
-escrow_status read getStatus() fields that never existed - all
-rewritten to real signatures, live-probed via mcp.execute. (3)
-module-level escrow.hold/release built throwaway instances - holds
-never persisted across calls/processes; now singleton + save,
-proven cross-process. bin/escrow.js status/list read the real ledger
-(gatherState) - old output was hardcoded zeros. mcp-tools.md gains
-"Escrow Tools (5)"; cli.md crosslinks; examples.md brain-path fix.
-All suites green (npm test 15/15, escrow 17/17, market 22/22,
-market-debit 4/4, mcp 6/6), lint:docs 128 files PASS, lint:surface
-PASS. Issues #92-#99 closed; only #86 open.
+**Last known good commit:** pass 78 — throwaway-instance sweep: server
+boot path fixed + clientIp TDZ found by the probe (<HASH>). Owner
+ruled "agent-first" stays (PRD §9 closed). Sweep census: server.js
+use/listen/stop were THROWAWAY-instance (module .stop could never stop
+module .listen; lib/vant.js boots production HTTP through module
+listen) → shared _sharedServer, pinned in server.test 12/12; error.js
+onError was throwaway → shared _sharedErrorHandler; Encrypt,
+RerankInner, Sanitize verified STATELESS (safe); resolution/api
+default-instance-by-design (safe). BONUS: probing the module listen
+path live exposed the clientIp TDZ - every HTTP request threw
+ReferenceError before routing (emit referenced clientIp above its
+declaration); moved computation up; fix proven by real HTTP round
+trip (server fixes now get an HTTP round trip, not just a boot
+check). stop() now nulls _server so status.running dies with the
+server. Pass 77 (fa8c51d): docs/reference/escrow.md NEW (settlement
+reference), escrow.resetBudget phantom export fixed, 3 MCP escrow
+tools fixed (create/hold/release/status), module hold/release
+singleton+persist (proven cross-process), bin/escrow.js reads the
+real ledger. Pass 76 (495f6bf): agent-first whitepaper draft of
+record at docs/whitepaper/agent-first.md. All suites green (npm test
+15/15, runner 37/37, server 12, error 19, auth 12, escrow 17, mcp 6,
+boot 15, vant 16), lint:surface PASS. Issues #92-#99 closed; only #86
+open.
 **Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED
-through pass 77. #98: sudo escalations are the agent's memory — audit trail
+through pass 78. #98: sudo escalations are the agent's memory — audit trail
 resolves per call via state-store currentBrain() →
 models/private/<brain>/sudo/escalations.jsonl (legacy flat path as
 fallback + migration source; _migrateLegacyAudit handles both upgrade
@@ -85,11 +83,12 @@ testimony (v0.2); chapter 2 opens with it.
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 77 committed: escrow reference shipped, three
-broken surfaces fixed + pinned. Next agent: whitepaper owner feedback;
-"agent-first" naming ruling still open; airgap exercise parked per
-owner; possible follow-up: sweep OTHER stateful modules for the
-throwaway-instance pattern (escrow was not unique in shape).)
+(nothing in flight — pass 78 committed: throwaway-instance sweep done,
+server boot path + clientIp TDZ fixed and pinned. Next agent:
+whitepaper owner feedback; airgap exercise parked per owner;
+candidate: lint/grep gate to keep `=> new` helpers off stateful
+classes; possible MCP surface audit like the escrow one for market/
+consensus tools.)
 
 ---
 

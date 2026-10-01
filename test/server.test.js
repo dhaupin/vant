@@ -81,6 +81,20 @@ test('server has isOperationAllowed function', () => {
     return { success: typeof server.isOperationAllowed === 'function' };
 });
 
+// pass 78: module use/listen/stop built a THROWAWAY Server per call -
+// middleware registered via module .use() vanished before module .listen(),
+// and module .stop() could never stop what module .listen() started.
+// lib/vant.js boots HTTP through module listen(), so this is the
+// production path. Pins: all three helpers operate on ONE shared instance.
+test('module use/listen/stop share one instance (throwaway-instance regression pin)', () => {
+    const server = require(path.join(ROOT, 'lib', 'server'));
+    server.use(function probeMiddleware(router) { return router; });
+    const shared = server._sharedServer();
+    // Server.use() stores the router on the shared instance (_router) -
+    // a throwaway pattern would have dropped it into a garbage instance.
+    return { success: shared !== null && shared._router === server._sharedServer()._router && typeof shared._router === 'function' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

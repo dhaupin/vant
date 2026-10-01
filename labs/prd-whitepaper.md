@@ -178,8 +178,8 @@ Owner rulings of record:
   a whitepaper." → Shipped as a ~5k-word essay with an evidence table
   and linked artifacts; long enough to carry the deep claim, short
   enough to read in one sitting.
-- **Naming:** NOT ruled — "agent-first" stays the working term
-  pending an owner call. Flagged for the next session.
+- **Naming:** RULED (pass 78) — "agent-first" stays. Owner: "yeah
+  agents first for the whitepaper."
 - **Code inline or appendix:** resolved in practice — claims link to
   pinned artifacts and repos rather than inlining code; keeps the
   paper readable and the evidence executable.

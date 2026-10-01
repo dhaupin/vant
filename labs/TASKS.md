@@ -2,7 +2,62 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-30  
-**Session:** Pass 77 — escrow/settlement reference + the sweep that found three broken tools
+**Session:** Pass 78 — throwaway-instance sweep: server boot path fixed + clientIp TDZ
+
+---
+
+## Session (2026-09-30 — pass 78: the sweep extends; the boot path was the prize)
+
+Owner ruled: "agent-first" stays (recorded in PRD §9). Then the
+promised follow-up: probe stateful modules' module-level helpers for
+the escrow throwaway-instance pattern.
+
+**Sweep census (grep `=> new X()` across module exports):**
+
+| Surface | Class state? | Verdict |
+|---------|-------------|---------|
+| server.js use/listen/stop | _server, _router, options | **BUG — fixed** |
+| error.js onError | _handlers Map | **BUG — fixed** |
+| auth.js hashPassword | Encrypt stateless | safe |
+| search.js rerank/compress/refine/stripFluff | RerankInner pure scoring | safe |
+| resolution.js create | default-instance-by-design | safe |
+| vaf.js sanitize* | Sanitize stateless | safe |
+
+**server.js (the critical one).** Module use/listen/stop each built a
+THROWAWAY Server: middleware registered via module .use() vanished
+before module .listen() booted, and module .stop() could never stop
+what module .listen() started. lib/vant.js boots production HTTP
+through module listen() - this is the real path. Fix: shared default
+instance (_sharedServer, exported as a test/observability hook).
+Verified by chaining on the MODULE surface: use → listen → real HTTP
+request → stop, all one instance; status.running flips false after a
+real stop (stop() now nulls _server in the close callback - status
+must die when the thing dies). Regression pin in test/server.test.js
+(module suite now 12/12).
+
+**BONUS FIND - the clientIp TDZ (fourth bug of the arc).** Probing the
+module listen path live threw ReferenceError: 'clientIp' used in the
+server:request emit ABOVE its declaration - every HTTP request died
+before routing, on every install, forever. The pass-71 genre again
+(ReferenceError hiding before the guard). Fix: move the computation
+up. THE server fix was not believed fixed until a real request
+round-tripped (404 = routed) - new personal bar: server fixes get an
+HTTP round trip, not just a boot check.
+
+**error.js.** Module onError built a throwaway ErrorHandler - custom
+handlers registered on the module surface never survived to any
+call. Now a shared instance (module.exports._sharedErrorHandler);
+verified: onError(418) then handle routes through the shared table.
+Near-miss recorded: I first also added a module `handle` - which
+clobbered the EXISTING standalone handle(error, context) that has its
+own pinned tests; error suite caught it instantly, addition reverted.
+
+Gates: npm test 15/15, runner 37/37, server 12/12 (+1 pin), error
+19/19, auth 12/12, escrow 17/17, mcp 6/6, boot 15/15, vant 16/16,
+lint:surface PASS.
+
+Next: possible lint rule/grep gate for `=> new` stateful helpers;
+whitepaper feedback; airgap still parked.
 
 ---
 
