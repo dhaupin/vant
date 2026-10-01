@@ -2,11 +2,65 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-01  
-**Session:** Pass 83 — workspace budgets (org pools) + RLS admin gates
+**Session:** Pass 84 — island boundaries enforced at load (RLS alongside)
 
 ---
 
-## Session (2026-10-01 — pass 83: #2 workspace budgets, RLS alongside)
+## Session (2026-10-01 — pass 84: #3 island boundary enforcement)
+
+Owner: "do #3! Same plan, rls along side, wiring it all up."
+
+**Enforcement in lib/islands.js (load/hydrate/save):**
+- Resource key _island:<name> (lib/rls.js convention) FINALLY read at
+  the enforcement site. Subject resolution: explicit userCtx option ->
+  current agent's habitat identity (agents.agentContext of
+  getCurrentAgentId) -> anonymous.
+- load(): boundary check BEFORE content moves; row-level filter/mask
+  applies to storage/runtime island DATA (corpus strings untouched).
+- hydrate(): passes options through to load().
+- save(): SYNC boundary twin (_islandBoundaryCheckSync via
+  containerAdmits + habitat._matches — same decision tree as can()).
+- Fail closed: anonymous write on gated island = E_ISLAND_WRITE_DENIED
+  (even when readableBy is public); identified writers need writableBy.
+- NO policy = open island (pre-84 behavior; all existing islands and
+  suites untouched). Opt in: vant habitat policy _island:<name> '<json>'.
+- Denials emit island:denied (audit trail).
+
+**PRE-EXISTING BUG FIXED:** islands.save() called island.write() —
+IslandStorage's API is get/set, write NEVER existed → every
+storage-island save threw TypeError since inception. forum.js's
+island-save swallowed it in try/catch (saved:false nobody read). Now
+island.set(name, data). This also unblocked boundary testing of
+storage islands.
+
+**MCP +1 (291):** islands_canAccess — RLS decision mirroring the ACTUAL
+gate semantics (ungated = allowed, not defaultPolicy admin-only).
+vant_island_status now reports boundary {gated, readableBy,
+writableBy, container}. islands.listBoundaries() enumerates island
+policies.
+
+**Tests:** NEW test/island-boundaries.test.js 14/14 (open islands,
+public reads w/ filter+mask, role-holder reads, RLS_DENIED denials,
+container isolation, anonymous-write fail-closed, admin writes,
+spawn→agentContext→gate e2e, MCP decisions, boundary introspection).
+islands/forum/boot/mcp suites green.
+
+**Docs:** rls.md island-boundaries section (+ frontmatter permalink —
+docs link checker requires it); mcp-tools vant_load_island +
+islands_canAccess entries.
+
+**Gates:** npm test, runner 37/37, island-boundaries 14/14, islands,
+forum, habitat-rls, workspace-budget, boot, mcp suites; lint:docs,
+lint:surface, lint:helpers; audit 291 tools THREW(0).
+
+**Next up:** #4 MCP auth ctx through habitat.context(token) (remote
+callers get real RLS), #5 memory per-workspace namespacing, #6
+mesh/agora tenancy. Whitepaper rewrite + TASKS/MEM → notify board/
+memory still queued per owner.
+
+---
+
+## Prior (2026-10-01 — pass 83: #2 workspace budgets, RLS alongside)
 
 Owner: "do #2 (with more rls along side if it needs)." #2 = escrow/
 market budgets per workspace.

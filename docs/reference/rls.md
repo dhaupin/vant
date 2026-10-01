@@ -1,3 +1,7 @@
+---
+permalink: /reference/rls
+---
+
 # RLS (Row-Level Security)
 
 Habitat is Vant's RLS layer: workspaces (isolated containers), roles,
@@ -114,6 +118,31 @@ The RLS subject for an agent is built by `habitat.agentContext(agentId)`
   [MCP tools](mcp-tools.md)).
 - **CLI**: `vant habitat status|list|init|use|roles|grant|policy|boundaries|can|identity`
   and `vant rls context|allow|workspace` (see [CLI](cli.md)).
+
+## Island boundaries (enforced at load)
+
+Islands are RLS subjects under the resource key `_island:<name>`
+(the same convention lib/rls.js always documented). Enforcement lives
+in `lib/islands.js`:
+
+- `load()`, `hydrate()`, and `save()` resolve an RLS subject (explicit
+  `userCtx` option, else the current agent's habitat identity, else
+  anonymous) and check the boundary policy BEFORE content moves.
+- Row-level `filter`/`mask` policy fields apply to island DATA on load
+  (storage/runtime islands; corpus content is a string and passes
+  through untouched).
+- Writes fail closed: an anonymous write to a gated island throws
+  `E_ISLAND_WRITE_DENIED`; identified contexts need `writableBy`.
+- **No policy = open island** (pre-84 behavior for all existing
+  islands). Opt in per island with
+  `vant habitat policy _island:<name> '<json>'` or the
+  `vant_habitat_setPolicy` tool.
+- Denials emit `island:denied` for the audit trail.
+
+The MCP tools `islands_canAccess` (decision, resolving the current
+agent's identity when no context is passed) and `vant_island_status`
+(reports `boundary` info: gated, readableBy, writableBy, container)
+complete the surface.
 
 ## Persistence
 

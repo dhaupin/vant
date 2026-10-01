@@ -7,32 +7,29 @@
 
 ## Handoff
 
-**Last known good commit:** pass 83 — workspace budgets (org pools)
-shipped (#2) with RLS admin gates. Composite keys ws:<ws>:<agent> /
-ws:<ws>::org over habitat workspaces; member spends debit member row
-AND org pool (two rows one pool); persistent member caps;
-beforeExecute/afterExecute honor userCtx.workspace (habitat identity
-flows straight into escrow gates); market.trade(context.workspace)
-draws the pool; flat ledgers byte-identical. Fail-closed draws on
-unknown workspaces (E_UNKNOWN_WORKSPACE, no phantom rows);
-enforceWorkspaceRLS:false = documented opt-out. MCP +6 (290):
-escrow_setWorkspaceBudget/_getWorkspacePool/_listWorkspacePools/
-_setWorkspaceMemberLimit/_workspaceCanSpend/_workspaceRecordSpend —
-money-admin tools take adminId and VERIFY admin in the habitat
-registry (never self-declared), denial = RLS_DENIED. CLI: escrow
-pool|cap|pools. CRITICAL PRE-EXISTING BUG FIXED: market trade ran
-hold (lazy SINGLETON, disk loaded once) -> debit (fresh) -> release
-(SAME stale singleton + save) — stale pool row won the pass-79 merge
-and CLOBBERED the debit; merge-save only protects keys the writer's
-snapshot DOESN'T have. hold/release/reserveIsland/releaseIsland now
-FRESH instances (disk-coherent by construction; singleton bought
-nothing — they already saved explicitly). Market-debit pins never
-caught it (their keys postdated the singleton load). NEW SUITE test/
-workspace-budget.test.js 22/22. Gates: npm test, runner 37, all 3
-lints, audit 290 THREW(0). Pass 82 (77504ff): agents got habitat
-identity + RLS online (agentContext/provisionAgent, filter/mask
-enforcement, generateCaps fail-closed, _readyPromise undefined-
-resolution fix).
+**Last known good commit:** pass 84 — island boundary enforcement (#3).
+islands.load()/hydrate()/save() now check habitat boundaries
+(_island:<name>) BEFORE content moves; subject chain: explicit
+userCtx -> current agent's habitat identity (agents.agentContext of
+currentAgentId) -> anonymous; row-level filter/mask applies to
+storage/runtime island DATA; anonymous writes on gated islands fail
+closed (E_ISLAND_WRITE_DENIED); no policy = open island (pre-84
+behavior preserved); denials emit island:denied. PRE-EXISTING FIX:
+islands.save() called island.write() which never existed (IslandStorage
+API is get/set) — every storage-island save TypeError'd since
+inception, forum.js swallowed it; now island.set(). MCP +1 (291):
+islands_canAccess (mirrors actual gate semantics — ungated islands
+report allowed, NOT defaultPolicy admin-only) + vant_island_status
+boundary info. NEW SUITE test/island-boundaries.test.js 14/14.
+Gates all green; audit 291 THREW(0); rls.md gained frontmatter
+permalink (docs link-checker requirement). Pass 83 (d6c2758):
+workspace budgets ws:<ws>:<agent>/ws:<ws>::org, two-rows-one-pool,
+persistent member caps, registry-verified admin (RLS_DENIED), market
+context.workspace pool draw, STALE-SINGLETON merge fix (hold/release
+now fresh disk-coherent instances). Pass 82 (77504ff): agents got
+habitat identity + RLS online (agentContext/provisionAgent,
+filter/mask enforcement, generateCaps fail-closed, _readyPromise
+undefined-resolution fix).
 **Prior — pass 81:** environment family DELETED per owner ruling
 (was a scrapped subsystem whose 7 tools shipped registered against a
 never-existing module; pass 80 stopgapped with coded refusals, 81

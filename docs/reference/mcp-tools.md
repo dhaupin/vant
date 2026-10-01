@@ -179,17 +179,41 @@ vant_get_islands
 
 ### vant_load_island
 
-Load island.
+Load island. Islands with a habitat boundary policy (`_island:<name>`)
+are RLS-gated at load (see [RLS island boundaries](/reference/rls)):
+optional `userCtx` / `options` carry the caller's context; the current
+agent's habitat identity is used otherwise. Row-level filter/mask
+applies to island data.
 
 **Params:**
 | Param | Type | What |
 |-------|------|------|
 | name | string | Island name |
+| options.userCtx | object | Optional RLS context (else current agent / anonymous) |
+| options.brain | string | Optional brain override for corpus islands |
 
 **Example:**
 ```bash
 vant_load_island(name="github")
 ```
+
+---
+
+### islands_canAccess
+
+RLS decision for an island: resolves the same context chain as the
+enforcement gates (explicit `userCtx` -> current agent's habitat
+identity -> anonymous) against the island's boundary policy. Policy-less
+islands report `gated: false` and `allowed: true`.
+
+**Params:**
+| Param | Type | What |
+|-------|------|------|
+| name | string | Island name |
+| userCtx | object | Optional RLS context |
+| mode | string | `read` (default) or `write` |
+
+Returns `{ name, mode, allowed, gated, resolved }`.
 
 ---
 
