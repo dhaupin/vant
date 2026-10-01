@@ -13,8 +13,10 @@ automatically (core libs are auto-wired): a running server exposes the
 full, current list via `tools/list` or `curl http://localhost:3457/tools`.
 
 Cross-org surfaces have their own sections below: [Agora and Mesh
-Tools](#agora-and-mesh-tools-9) (remote votes, ledger sync, consensus)
-and [Market and Msg Tools](#market-and-msg-tools-8). Task-first usage:
+Tools](#agora-and-mesh-tools-9) (remote votes, ledger sync, consensus),
+[Market and Msg Tools](#market-and-msg-tools-8), and [Escrow
+Tools](#escrow-tools-5) (budgets, holds, ledger status). Escrow
+semantics in depth: [Escrow API](/reference/escrow). Task-first usage:
 [Federation Playbooks](/vant/operations/federation-playbooks).
 
 ## Core Tools (9)
@@ -480,6 +482,54 @@ Send a message to a channel (`channel`, `content`, optional `from`).
 ### msg_list
 
 List messages in a channel (`channel`, optional `limit`).
+
+## Return Types
+
+## Escrow Tools (5)
+
+Escrow is the accountability layer: budgets, holds, and the ledger
+behind them. These tools were undocumented before pass 77 - and three
+of them were broken (see the [Escrow API export note](/reference/escrow)).
+
+### escrow_create
+
+Create an escrow budget for an agent or org.
+
+**Params:**
+| Param | Type | What |
+|-------|------|------|
+| org | string | Agent or org id that owns the budget |
+| budget | number | Optional; budget limit (default 1000) |
+
+Returns `{ ok: true, org, budget: { spent, limit, available } }`.
+
+### escrow_canSpend
+
+Check whether an agent can afford an amount.
+
+Returns `{ allowed, reason, layer, available }`.
+
+### escrow_hold
+
+Place a hold: a reservation with a timeout (default 5 minutes). **A
+hold does not debit budget** - it records a condition entry.
+
+**Params:**
+| Param | Type | What |
+|-------|------|------|
+| holdId | string | Unique hold id |
+| condition | object | Optional condition payload (amount, agent, type, ...) |
+
+Returns `{ held: true, holdId }`. Holds persist to the escrow store.
+
+### escrow_release
+
+Release a hold by id. Returns `{ released: boolean }`.
+
+### escrow_status
+
+Read the escrow ledger. No params: budgets, holds, approvals, quotas
+counts. With `org`: that agent's budget plus the holds map.
 
 ## Return Types
 

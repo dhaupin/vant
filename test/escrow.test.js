@@ -105,6 +105,24 @@ test('escrow has getStackEscrowStatus function', () => {
     return { success: typeof escrow.getStackEscrowStatus === 'function' };
 });
 
+// pass 77: resetBudget was a phantom export - advertised on module.exports
+// but called .resetBudget on the class, a method that never existed.
+// Any call threw TypeError. Pin BOTH the fix and the API contract.
+test('resetBudget is callable (phantom export regression pin)', () => {
+    const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    const result = escrow.resetBudget('test-phantom-agent', 777);
+    return { success: result && result.limit === 777 && result.available === 777 && result.spent === 0 };
+});
+
+test('setBudgetLimit preserves spent metrics (resetBudget contract)', () => {
+    const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    const E = escrow.create({});
+    E.recordSpend('test-limit-agent', 100);
+    E.setBudgetLimit('test-limit-agent', 500);
+    const b = E.getBudget('test-limit-agent');
+    return { success: b.limit === 500 && b.spent === 100 };
+});
+
 test('getStackEscrowStatus returns object with source stack', () => {
     const escrow = require(path.join(ROOT, 'lib', 'escrow'));
     const result = escrow.getStackEscrowStatus();

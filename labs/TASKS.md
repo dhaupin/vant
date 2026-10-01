@@ -1,10 +1,86 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-09-29  
-**Session:** Pass 75 — #98 sudo per-brain escalations + #99 opt-in stack fallback
+**Last Updated:** 2026-09-30  
+**Session:** Pass 77 — escrow/settlement reference + the sweep that found three broken tools
 
 ---
+
+## Session (2026-09-30 — pass 77: documenting the ledger broke it open)
+
+Owner greenlit both modernization focals. The docs sweep of the escrow
+surface turned into a live audit and found real bugs.
+
+**docs/reference/escrow.md (NEW — the settlement reference).** Full
+page for the escrow layer, nav_order 124 (slot was free): mental model
+(budget/hold/approval/quota/circuit), default cost table, the crucial
+"a hold is a reservation, not a debit" truth (confirmed against
+market.js's own comment), the execute middleware with before/after
+example, CLI table, multibrain/stack status calls, horcrux
+gather/restore, events, function reference. Crosslinked from
+docs/reference/cli.md (2 rows) and docs/reference/mcp-tools.md.
+
+**The sweep found three broken surfaces (all fixed + pinned):**
+
+1. `escrow.resetBudget` - PHANTOM EXPORT: called `.resetBudget()` on
+   the class, a method that never existed; any call threw TypeError.
+   Export now delegates to setBudget + returns the budget. Regression
+   pins in test/escrow.test.js (resetBudget callable + setBudgetLimit
+   preserves spent).
+2. MCP escrow tools (lib/mcp.js, probed live via mcp.execute):
+   escrow_create called create(org, budget, period) but create takes
+   an OPTIONS OBJECT - args silently ignored, tool returned a raw
+   Escrow instance at defaults (a no-op). escrow_hold/escrow_release
+   mapped (org, amount, operation) onto hold(holdId, condition).
+   escrow_status called getStatus(org) - module export takes no args
+   and returns {enabled} only. All four rewritten to the real lib
+   signatures; escrow_status now reads gatherState with optional org
+   filter.
+3. Module-level escrow.hold/release built THROWAWAY instances - CLI
+   holds vanished between invocations, MCP holds evaporated between
+   calls. Now singleton (_getEscrow) + save() on every hold/release.
+   Proven cross-process: hold in process A, checkHold in fresh B.
+
+**bin/escrow.js status/list read the real ledger now** (gatherState):
+the old output printed status.held/used/budget from fields that never
+existed - hardcoded zeros on every install, reported as success. New
+status shows held items, budget used/total, tracked agents,
+approvals, quotas; hold prints the not-a-debit note; list shows
+budgets per agent. Live-verified: status (5 agents, real numbers),
+hold/list/release round trip.
+
+**Docs:** mcp-tools.md gains "Escrow Tools (5)" section (the 5 tools
+existed in the registry but were never documented; notes that three
+were broken); cli.md escrow/market rows link to the new reference;
+examples.md brain-path fix (models/private/lessons →
+models/private/<brain>/lessons). CENSUS-ADJACENT ROT SWEEP:
+version.js/canvas.js already fixed in pass 74; docs-wide flat-path
+scan found only the examples.md instance; mcp-tools.md header already
+says live registry is larger (accurate).
+
+Gates: npm test 15/15, escrow 17/17 (2 new pins), market 22/22,
+market-debit 4/4, mcp 6/6, lint:docs PASS (style + links, 128 files),
+lint:surface PASS.
+
+Next: whitepaper owner feedback; naming ruling ("agent-first" term)
+still open from §9; airgap exercise still parked per owner.
+
+---
+
+## Session (2026-09-30 — pass 76: the agent-first white paper, draft of record)
+
+Owner answered §9: publication target GitHub for now (move to /docs
+officially later); length at the agent's judgment. Shipped
+
+docs/whitepaper/agent-first.md - "Evolution Without Drift":
+frontmatter'd docs page (permalink /whitepaper/agent-first), ~5k-word
+essay with evidence table linking every claim to a pinned artifact
+(AGENTS.md, MEM.md, TASKS.md, frame.md, the dev-shop whitepaper,
+horcrux-safe, the surface checker, node-crew demos - all paths
+verified before writing). docs/index.md features the paper; PRD §9
+records the rulings; the "agent-first" NAMING ruling stays open for
+the owner. Gates: lint:docs PASS (127 files), npm test 15/15,
+lint:surface PASS. Committed 495f6bf, pushed.
 
 ## Session (2026-09-29 — pass 75: the two design calls came back)
 

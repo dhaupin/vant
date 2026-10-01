@@ -140,9 +140,9 @@ async function safeWrite(agentId, content) {
     await branch.checkout(agentId);
     
     // 3. Do work
-    const lessons = readFile('models/private/lessons');
+    const lessons = readFile('models/private/<brain>/lessons');
     lessons += `\n${content}`;
-    writeFile('models/private/lessons', lessons);
+    writeFile('models/private/<brain>/lessons', lessons);
     
     // 4. Commit
     await branch.commit(agentId, `Agent ${agentId}: ${content}`);

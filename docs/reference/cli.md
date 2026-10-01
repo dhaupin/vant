@@ -355,7 +355,7 @@ vant telegram
 | `vant rls` | Row-level security context |
 | `vant security` | Security utilities |
 | `vant legal` | Compliance tools |
-| `vant escrow` | Escrow service for operations |
+| `vant escrow` | Escrow service for operations ([reference](/reference/escrow)) |
 | `vant audit` | Generate an audit report |
 
 ```bash
@@ -505,9 +505,9 @@ with its own `--help`.
 |---------|-------------|
 | `vant teams` | Organization and team management (org, dept, team, assign) |
 | `vant governance` | Governance decision making |
-| `vant market` | Knowledge trading (list, bid, trade, search, stats) |
+| `vant market` | Knowledge trading (list, bid, trade, search, stats) ([reference](/reference/escrow)) |
 | `vant forum` | Forum and discussion (list, post; votes ride consensus) |
-| `vant escrow` | Budgets and holds (status, hold, release) |
+| `vant escrow` | Budgets and holds (status, hold, release, list) ([reference](/reference/escrow)) |
 | `vant consensus` | Consensus ledger operations (status, propose, vote) |
 | `vant context` | Prompt caching and context engine |
 | `vant consciousness` | Consciousness engine |
