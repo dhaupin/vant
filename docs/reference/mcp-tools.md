@@ -529,7 +529,44 @@ Release a hold by id. Returns `{ released: boolean }`.
 ### escrow_status
 
 Read the escrow ledger. No params: budgets, holds, approvals, quotas
-counts. With `org`: that agent's budget plus the holds map.
+counts, and `workspacePools`. With `org`: that agent's budget plus the
+holds map.
+
+## Workspace Budget Tools (6)
+
+Org pools + member caps over habitat workspaces (pass 83) - see
+[Escrow workspace budgets](/reference/escrow). RLS: draws fail closed
+on unknown workspaces; setting a pool or cap is admin-gated (the
+admin role is verified against the habitat registry, never
+self-declared).
+
+### escrow_setWorkspaceBudget
+
+Set a workspace's org-pool budget. **Params:** `workspaceId`,
+`amount`, `adminId` (must hold admin in the workspace).
+
+### escrow_getWorkspacePool
+
+Read a workspace's org pool. **Params:** `workspaceId`.
+
+### escrow_listWorkspacePools
+
+List all org pools. No params. Returns `{ pools: [...] }`.
+
+### escrow_setWorkspaceMemberLimit
+
+Cap a member's draw from its workspace pool. **Params:**
+`workspaceId`, `agentId`, `limit`, `adminId`.
+
+### escrow_workspaceCanSpend
+
+Check whether a member can draw an amount from its pool.
+**Params:** `workspaceId`, `agentId`, `amount` (default 1).
+
+### escrow_workspaceRecordSpend
+
+Record a pool-scoped spend: debits the member row AND the org pool.
+**Params:** `workspaceId`, `agentId`, `amount`.
 
 ## Habitat Tools (11)
 

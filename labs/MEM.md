@@ -7,26 +7,32 @@
 
 ## Handoff
 
-**Last known good commit:** pass 82 — agents got habitat identity +
-RLS came online (owner: "Let's do #1, but bring RLS online too").
-Habitat now: evaluate()/check()/containerAdmits() + REAL filter/mask
-(was policy-shape vapor), agentContext()/provisionAgent(); spawn()
-auto-provisions identity (team -> 'org-<team>' workspace, spawner
-owns/gets admin, role granted, idempotent, non-fatal); agents facade
-export agentContext. RLS WOKE UP: sandbox.generateCaps auto-claims
-shared habitat + fail-closed on unknown-workspace ctx claims (was:
-fabricated role:admin ctx rode through pre-boot, silent baseCaps
-passthrough); lib/rls.js auto-claims + delegates to habitat.check;
-isOperationAllowed now real+exported; middleware passes the token.
-MCP +3 (284 total): vant_habitat_can / _check (throwing RLS_DENIED) /
-_agentContext. CLI: habitat can|identity; bin/rls.js context/allow
-fixed (Promise-printing). NEW SUITE test/habitat-rls.test.js 23/23
-(scratch-brain isolated). CRITICAL latent pass-81 bug FIXED:
-habitat._persist chain resolved to undefined not the instance ->
-first mutation made every later getSharedReady() hand out undefined
-(h.can TypeError); single-call probes masked it, multi-step hit it;
-chain now resolves to `this`. All gates green (npm test, runner 37,
-mcp/boot/agents/sandbox/rls suites, 3 lints, audit 284 THREW(0)).
+**Last known good commit:** pass 83 — workspace budgets (org pools)
+shipped (#2) with RLS admin gates. Composite keys ws:<ws>:<agent> /
+ws:<ws>::org over habitat workspaces; member spends debit member row
+AND org pool (two rows one pool); persistent member caps;
+beforeExecute/afterExecute honor userCtx.workspace (habitat identity
+flows straight into escrow gates); market.trade(context.workspace)
+draws the pool; flat ledgers byte-identical. Fail-closed draws on
+unknown workspaces (E_UNKNOWN_WORKSPACE, no phantom rows);
+enforceWorkspaceRLS:false = documented opt-out. MCP +6 (290):
+escrow_setWorkspaceBudget/_getWorkspacePool/_listWorkspacePools/
+_setWorkspaceMemberLimit/_workspaceCanSpend/_workspaceRecordSpend —
+money-admin tools take adminId and VERIFY admin in the habitat
+registry (never self-declared), denial = RLS_DENIED. CLI: escrow
+pool|cap|pools. CRITICAL PRE-EXISTING BUG FIXED: market trade ran
+hold (lazy SINGLETON, disk loaded once) -> debit (fresh) -> release
+(SAME stale singleton + save) — stale pool row won the pass-79 merge
+and CLOBBERED the debit; merge-save only protects keys the writer's
+snapshot DOESN'T have. hold/release/reserveIsland/releaseIsland now
+FRESH instances (disk-coherent by construction; singleton bought
+nothing — they already saved explicitly). Market-debit pins never
+caught it (their keys postdated the singleton load). NEW SUITE test/
+workspace-budget.test.js 22/22. Gates: npm test, runner 37, all 3
+lints, audit 290 THREW(0). Pass 82 (77504ff): agents got habitat
+identity + RLS online (agentContext/provisionAgent, filter/mask
+enforcement, generateCaps fail-closed, _readyPromise undefined-
+resolution fix).
 **Prior — pass 81:** environment family DELETED per owner ruling
 (was a scrapped subsystem whose 7 tools shipped registered against a
 never-existing module; pass 80 stopgapped with coded refusals, 81

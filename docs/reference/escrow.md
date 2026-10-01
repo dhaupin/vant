@@ -94,6 +94,41 @@ if (!req.approved) {
 escrow.checkApproval(req.approvalId);  // { approved: true, operation: 'delete' }
 ```
 
+## Workspace budgets (org pools)
+
+Budgets can be scoped to a habitat workspace so agents, orgs, and
+teams draw from per-workspace pools instead of one flat global
+ledger:
+
+```javascript
+const escrow = require('./escrow');
+escrow.setWorkspaceBudget('org-acme', 500);          // org pool
+escrow.setWorkspaceMemberLimit('org-acme', 'a1', 25); // member cap
+escrow.workspaceCanSpend('org-acme', 'a1', 10);       // { allowed, poolAvailable }
+escrow.workspaceRecordSpend('org-acme', 'a1', 10);    // debits member AND pool
+escrow.listWorkspacePools();                          // [{ workspace, spent, limit, available }]
+```
+
+Semantics: a member spend debits TWO rows from ONE amount - the
+member's tracking row and the org pool. An org with 500 credits
+cannot fund 600 of member spends no matter how many members it has.
+Member caps persist and gate on every later draw; refunds restore
+member and pool rows together.
+
+RLS (fail closed, pass 82 rules): draws scoped to a workspace the
+habitat has never heard of are refused (`unknown_workspace` /
+`E_UNKNOWN_WORKSPACE`). Setting a pool or member cap is an admin act:
+the caller names an `adminId` and the admin role is verified against
+the habitat registry for that workspace (never self-declared) -
+denial throws `RLS_DENIED`. A live habitat always enforces; when no
+habitat exists at all (bare library use) the gate passes, and
+`new Escrow({ enforceWorkspaceRLS: false })` opts out explicitly.
+
+Market integration: `market.trade(listingId, buyerId, { workspace:
+'org-acme' })` draws the buyer's workspace pool - the check at step 3
+and the debit at the settle point are both pool-scoped. Trades without
+`context.workspace` keep using flat agent budgets unchanged.
+
 ## CLI
 
 | Command | Description |
@@ -102,6 +137,10 @@ escrow.checkApproval(req.approvalId);  // { approved: true, operation: 'delete' 
 | `vant escrow hold <id>` | Put an item in escrow |
 | `vant escrow release <id>` | Release from escrow |
 | `vant escrow list` | List escrow items |
+| `vant escrow pool <ws> <amount>` | Set a workspace org-pool budget (admin-gated) |
+| `vant escrow pool <ws>` | Show a workspace org-pool budget |
+| `vant escrow cap <ws> <agentId> <limit>` | Cap a member's pool draw (admin-gated) |
+| `vant escrow pools` | List all workspace pools |
 
 The companion market CLI (`vant market list | bid | trade | search |
 stats | get | bids`) rides on the same budget split described above.
@@ -147,11 +186,15 @@ keeps its accounting history.
 
 | Function | What |
 |----------|------|
-| `canSpend(agentId, amount)` | Budget check; `{ allowed, reason, available }` |
-| `recordSpend(agentId, amount)` | Debit; runaway detector runs first |
-| `refund(agentId, amount)` | Credit back; never above limit |
-| `getBudget(agentId)` | `{ spent, limit, available }`; auto-creates |
-| `setBudgetLimit(agentId, limit)` | Change the limit, keep spent metrics |
+| `canSpend(agentId, amount, opts?)` | Budget check; `{ allowed, reason, available }`; `opts.workspace` scopes to an org pool |
+| `recordSpend(agentId, amount, opts?)` | Debit; runaway detector first; workspace form debits member AND pool |
+| `refund(agentId, amount, opts?)` | Credit back; never above limit; workspace form restores both rows |
+| `getBudget(agentId, opts?)` | `{ spent, limit, available }`; auto-creates; workspace form resolves pool/member rows |
+| `setBudgetLimit(agentId, limit, opts?)` | Change the limit, keep spent metrics; workspace form sets member cap or pool size |
+| `setWorkspaceBudget(ws, amount)` | Set a workspace org-pool budget |
+| `getWorkspacePool(ws)` / `listWorkspacePools()` | Read one / all org pools |
+| `setWorkspaceMemberLimit(ws, agentId, limit)` | Cap a member's draw from its pool |
+| `workspaceCanSpend(ws, id, amount)` / `workspaceRecordSpend(ws, id, amount)` | Pool-scoped check / debit |
 | `hold(holdId, condition)` | Reservation with timeout; NOT a debit |
 | `release(holdId)` / `checkHold(holdId)` | Drop / inspect (expired holds self-clean) |
 | `requestApproval(op, reason)` | `{ approvalId }` for sensitive ops |

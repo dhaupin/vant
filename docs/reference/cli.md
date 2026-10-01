@@ -507,7 +507,7 @@ with its own `--help`.
 | `vant governance` | Governance decision making |
 | `vant market` | Knowledge trading (list, bid, trade, search, stats) ([reference](/reference/escrow)) |
 | `vant forum` | Forum and discussion (list, post; votes ride consensus) |
-| `vant escrow` | Budgets and holds (status, hold, release, list) ([reference](/reference/escrow)) |
+| `vant escrow` | Budgets and holds (status, hold, release, list, pool, cap, pools) ([reference](/reference/escrow)) |
 | `vant consensus` | Consensus ledger operations (status, propose, vote) |
 | `vant context` | Prompt caching and context engine |
 | `vant consciousness` | Consciousness engine |

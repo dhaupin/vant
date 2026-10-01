@@ -4,9 +4,13 @@
  * Escrow operations
  * 
  * Usage:
- *   vant escrow status             # Show escrow status
- *   vant escrow hold <id>         # Put in escrow
- *   vant escrow release <id>      # Release from escrow
+ *   vant escrow status                       # Show escrow status
+ *   vant escrow hold <id>                    # Put in escrow
+ *   vant escrow release <id>                 # Release from escrow
+ *   vant escrow pool <ws> <amount>           # Set workspace org-pool budget
+ *   vant escrow pool <ws>                    # Show workspace org-pool budget
+ *   vant escrow cap <ws> <agentId> <limit>   # Cap a member's pool draw
+ *   vant escrow pools                        # List all workspace pools
  */
 
 const args = process.argv.slice(2);
@@ -17,10 +21,14 @@ if (subcmd === '-h' || subcmd === '--help') {
 Vant Escrow CLI - Escrow operations
 
 Usage:
-  vant escrow status                Show escrow status
-  vant escrow hold <id>            Put item in escrow
-  vant escrow release <id>          Release from escrow
-  vant escrow list                  List escrow items
+  vant escrow status                    Show escrow status
+  vant escrow hold <id>                 Put item in escrow
+  vant escrow release <id>              Release from escrow
+  vant escrow list                      List escrow items
+  vant escrow pool <ws> <amount>        Set workspace org-pool budget
+  vant escrow pool <ws>                 Show workspace org-pool budget
+  vant escrow cap <ws> <agentId> <n>    Cap a member's pool draw
+  vant escrow pools                     List all workspace pools
 `);
     process.exit(0);
 }
@@ -76,6 +84,57 @@ async function run() {
             for (const [agent, b] of agents) {
                 console.log('  ' + agent + ': spent ' + (b.spent || 0) + ' / ' + (b.limit || 0));
             }
+        }
+    } else if (subcmd === 'pool' || subcmd === 'budget') {
+        // (pass 83) Workspace org-pool budget. Setting REQUIRES the caller
+        // to hold admin in that workspace (registry-verified, not
+        // self-declared) - same gate as the MCP tool.
+        const ws = args[1];
+        if (!ws) { console.error('Usage: vant escrow pool <ws> [amount]'); process.exit(1); }
+        const amount = args[2];
+        if (amount === undefined) {
+            const pool = escrow.getWorkspacePool(ws);
+            console.log('Workspace pool ' + ws + ':');
+            console.log('  spent ' + (pool.spent || 0) + ' / ' + (pool.limit || 0) + ' (available ' + (pool.available || 0) + ')');
+            return;
+        }
+        if (!Number.isFinite(parseFloat(amount))) {
+            console.error('Amount must be a number');
+            process.exit(1);
+        }
+        const adminId = process.env.VANT_ADMIN_ID || 'cli-admin';
+        const habitat = require('../lib/habitat');
+        const h = await habitat.getSharedReady();
+        const roles = h.getUserRoles(ws, adminId);
+        if (!roles.includes('admin')) {
+            console.error('✗ Access denied: admin role required in workspace ' + ws);
+            console.error('  (grant one: vant habitat grant ' + ws + ' admin <your-user-id>, or set VANT_ADMIN_ID)');
+            process.exit(1);
+        }
+        const pool = escrow.setWorkspaceBudget(ws, parseFloat(amount));
+        console.log('✓ Workspace pool ' + ws + ': limit ' + pool.limit + ' (admin: ' + adminId + ')');
+    } else if (subcmd === 'cap' || subcmd === 'member') {
+        // (pass 83) Member cap on a workspace pool draw (admin-gated).
+        const [ws, agentId, limitArg] = [args[1], args[2], args[3]];
+        if (!ws || !agentId || !limitArg) { console.error('Usage: vant escrow cap <ws> <agentId> <limit>'); process.exit(1); }
+        const limit = parseFloat(limitArg);
+        if (!Number.isFinite(limit)) { console.error('Limit must be a number'); process.exit(1); }
+        const adminId = process.env.VANT_ADMIN_ID || 'cli-admin';
+        const habitat = require('../lib/habitat');
+        const h = await habitat.getSharedReady();
+        const roles = h.getUserRoles(ws, adminId);
+        if (!roles.includes('admin')) {
+            console.error('✗ Access denied: admin role required in workspace ' + ws);
+            process.exit(1);
+        }
+        const member = escrow.setWorkspaceMemberLimit(ws, agentId, limit);
+        console.log('✓ Member cap ' + agentId + ' @ ' + ws + ': limit ' + member.limit);
+    } else if (subcmd === 'pools') {
+        // (pass 83) All workspace pools.
+        const pools = escrow.listWorkspacePools();
+        console.log('Workspace pools:', pools.length ? '' : '(none)');
+        for (const p of pools) {
+            console.log('  ' + p.workspace + ': spent ' + p.spent + ' / ' + p.limit + ' (available ' + p.available + ')');
         }
     } else {
         console.log('Usage: vant escrow <command>');

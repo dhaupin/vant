@@ -2,11 +2,76 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-01  
-**Session:** Pass 82 — agents get habitat identity + RLS comes online
+**Session:** Pass 83 — workspace budgets (org pools) + RLS admin gates
 
 ---
 
-## Session (2026-10-01 — pass 82: agents in habitat + RLS online)
+## Session (2026-10-01 — pass 83: #2 workspace budgets, RLS alongside)
+
+Owner: "do #2 (with more rls along side if it needs)." #2 = escrow/
+market budgets per workspace.
+
+**Workspace budgets (lib/escrow.js):**
+- Composite keys: ws:<ws>:<agentId> (member) / ws:<ws>::org (pool).
+  Bare keys = legacy flat budgets, byte-identical behavior.
+- setWorkspaceBudget/getWorkspacePool/listWorkspacePools/
+  setWorkspaceMemberLimit/workspaceCanSpend/workspaceRecordSpend.
+- TWO ROWS ONE POOL: a member spend debits the member row AND the org
+  pool (org with 500 cannot fund 600 of member spends). Refunds restore
+  both. Member caps persist and gate on every draw (getBudget inherits
+  the pool limit when no explicit cap was set).
+- beforeExecute/afterExecute honor context.workspace OR
+  userCtx.workspace — an agent with habitat identity spends its org
+  pool with zero extra wiring.
+- Fail-closed RLS: draws on unknown workspaces refused
+  (unknown_workspace / E_UNKNOWN_WORKSPACE, no phantom rows written).
+  enforceWorkspaceRLS:false = documented opt-out; no habitat at all =
+  legacy tolerance.
+
+**Market integration:** trade(listingId, buyerId, { workspace }) —
+budget check (step 3) AND settle debit both draw the org pool. No
+workspace in context = flat budget, unchanged.
+
+**MCP +6 (290 total):** escrow_setWorkspaceBudget /
+_getWorkspacePool / _listWorkspacePools / _setWorkspaceMemberLimit /
+_workspaceCanSpend / _workspaceRecordSpend. Admin-gated tools take
+adminId and VERIFY the admin role in the habitat registry (never
+self-declared — pass-82 forged-ctx rule); denial throws RLS_DENIED.
+
+**CLI:** vant escrow pool <ws> [amount] / cap <ws> <agent> <limit> /
+pools (pool+cap admin-gated via registry; VANT_ADMIN_ID env names the
+caller).
+
+**CRITICAL BUG FIX (pre-existing, pass-77/79 genre):** market trade
+path ran hold (lazy SINGLETON: loads disk once) -> debit (fresh
+instance) -> release (SAME stale singleton + save) — the singleton's
+stale pool row won the pass-79 merge and CLOBBERED the debit (pool
+reverted to spent:0). The pass-79 merge-save only protects keys the
+writer's snapshot DOESN'T have; a stale snapshot holding the key
+always wins. The market-debit pins never caught it (their keys were
+created after the singleton loaded — absent keys merge safely).
+Fix: hold/release/reserveIsland/releaseIsland helpers now build FRESH
+instances (loads current disk -> mutate -> merge-save; the explicit
+save() they already did makes fresh disk-coherent by construction —
+the singleton bought nothing). Verified: trade debits pool correctly.
+
+**Tests:** NEW test/workspace-budget.test.js 22/22 (key protocol,
+pool semantics, caps, RLS fail-closed, registry-verified admin gates,
+market pool debit, flat/settlement backward compat). market-debit,
+escrow, market, settlement, ledger-persistence, islands all green.
+
+**Gates:** npm test, runner 37/37, lint:docs/surface/helpers (helpers
+gate demanded HELPER-MODEL tags on the new fresh-instance exports —
+working as designed), audit 290 tools THREW(0).
+
+**Next up:** #3 islands boundary enforcement at load time (consume
+agentContext), #4 MCP auth ctx through habitat.context(token), #5
+memory per-workspace namespacing, #6 mesh/agora tenancy. Whitepaper
+rewrite + TASKS/MEM -> notify board/memory still queued per owner.
+
+---
+
+## Prior (2026-10-01 — pass 82: agents in habitat + RLS online)
 
 Owner greenlight: "Let's do #1, but bring RLS online while we do
 this." #1 = agents/orgs/teams identity in habitat (the top-ranked
