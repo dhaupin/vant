@@ -8,7 +8,7 @@
 ## Handoff
 
 **Last known good commit:** pass 79 — lint:helpers gate + market/consensus
-MCP audit CLEAN + escrow.json merge-save root-cause fix (<HASH>).
+MCP audit CLEAN + escrow.json merge-save root-cause fix (46717a7).
 Gate: scripts/check-stateful-helpers.js blocks `=> new X()`
 call-through helpers on stateful classes (negative-controlled on BOTH
 syntaxes incl. member-expression; factories exempt; HELPER-MODEL tag
