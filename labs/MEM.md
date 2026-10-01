@@ -7,12 +7,43 @@
 
 ## Handoff
 
-**Last known good commit:** pass 79 — lint:helpers gate + market/consensus
-MCP audit CLEAN + escrow.json merge-save root-cause fix (46717a7).
-Gate: scripts/check-stateful-helpers.js blocks `=> new X()`
-call-through helpers on stateful classes (negative-controlled on BOTH
-syntaxes incl. member-expression; factories exempt; HELPER-MODEL tag
-documents deliberate fresh-per-call). Escrow budget helpers tagged
+**Last known good commit:** pass 80 — full MCP surface audit (280
+tools) + bin/ truthfulness gate. Audit (scripts/audit-mcp-surface.js,
+new): 280 registered tools probed with {}, 62 destructive skipped —
+final **THREW(0)/PHANTOM(0), exit 0**; 80 OK + 218 correct fail-closed
+refusals. 9 bug clusters fixed: boot.js detached-method
+(`(obj?.method||fb)()` → this===undefined AFTER init), brain_evolution_
+×5 (wrong signature + _getBrain undefined), vant_geometry_init
+(awaited an object), branch.js getChangedBrains/isDirty (status()
+object split as string → porcelain), vant_get/set_memory (bare-brain
+ReferenceError + schema/docs disagreement → documented category/
+filename shape, round trip verified), vant_switch_branch
+(→ switchBrain()), context_build circular JSON (state.context
+backref stripped), vant_environment_×7 (module NEVER existed → coded
+ENVIRONMENT_NOT_WIRED refusals, alternative: lib/habitat.js; owner
+ruling pending on delete-vs-habitat), schema holes (create_island +
+storage read/write/list/exists lacked required:[]).
+NEW GATE: scripts/check-bin-truthfulness.js wired into lint:helpers —
+throwaway-helper scan over bin/ + status-field cross-check vs lib
+bodies (escrow hardcoded-zeros genre). Negative-controlled on BOTH
+genres; immediately caught 5 live phantoms + 2 caps.length undefined,
+all fixed truthful: bin/api (.running/.port → mode/requests/errors/
+uptime), bin/qos (.maxConcurrent/.circuitOpen → circuit.open +
+MAX_CONCURRENT), bin/sandbox (.enabled → counters; caps object not
+array ×2). Gate lessons: delegation chain = UNKNOWABLE not empty;
+module-level body beats same-name class method; strip comments or the
+gate flags its own fix notes; negative-control both genres then delete
+the fixture.
+Open items for next pass: environment family ruling (delete vs
+habitat shim), duplicate brain_load registration (L231 shadowed by
+L348), gate delegation-chain resolution.
+---
+**Prior — pass 79** (lint:helpers gate + market/consensus MCP audit
+CLEAN + escrow.json merge-save, 46717a7): gate
+scripts/check-stateful-helpers.js blocks `=> new X()` call-through
+helpers on stateful classes (negative-controlled on BOTH syntaxes incl.
+member-expression; factories exempt; HELPER-MODEL tag documents
+deliberate fresh-per-call). Escrow budget helpers tagged
 fresh-by-contract (disk-coherent: every mutation persists, every
 fresh instance reloads — market debit depends on it); hold/release
 singleton+persist. Fifth phantom: auth.hashPassword (hash is STATIC).

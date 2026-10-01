@@ -30,10 +30,16 @@ async function run() {
     
     if (subcmd === 'status' || subcmd === 'stat' || subcmd === 'info') {
         const status = await qos.getStatus();
+        // pass 80: status.maxConcurrent/.circuitOpen never existed on the
+        // module getStatus() shape ({active, canProceed, circuit, ...}) —
+        // hardcoded-zeros genre, now blocked by the bin-truthfulness gate.
+        // Circuit truth lives in status.circuit.open; maxConcurrent is a
+        // module constant, printed as such.
         console.log('QoS status:');
         console.log('  Active:', status.active || 0);
-        console.log('  Max concurrent:', status.maxConcurrent || 'N/A');
-        console.log('  Circuit open:', status.circuitOpen || false);
+        console.log('  Can proceed:', status.canProceed ?? 'N/A');
+        console.log('  Max concurrent:', qos.MAX_CONCURRENT || 'N/A');
+        console.log('  Circuit open:', status.circuit ? !!status.circuit.open : 'N/A');
     } else if (subcmd === 'limits' || subcmd === 'limits') {
         console.log('Rate limits:');
         console.log('  Max concurrent:', qos.MAX_CONCURRENT || 'N/A');

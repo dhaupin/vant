@@ -1,10 +1,74 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-09-30  
-**Session:** Pass 79 — stateful-helper gate (lint:helpers) + market/consensus MCP audit + escrow.json merge-save
+**Last Updated:** 2026-10-01  
+**Session:** Pass 80 — full MCP surface audit (280 tools) + bin/ truthfulness gate
 
 ---
+
+## Session (2026-10-01 — pass 80: the audit scales; the gate goes to bin/)
+
+Owner-sequenced: (1) MCP surface audit across remaining families, (2)
+extend lint:helpers to bin/ + status-field truthfulness. BOTH DONE.
+
+**Full MCP surface audit — scripts/audit-mcp-surface.js (new).** Live-
+probes all 280 registered tools (62 destructive skipped) via mcp.execute
+with `{}`, classifies OK / REFUSED / INVALID / THREW / TIMEOUT, exits 1
+on TypeError/ReferenceError. Final state: **THREW (0), PHANTOM (0),
+exit 0** — 80 OK, 218 correct fail-closed refusals.
+
+Bugs found + FIXED this pass:
+1. lib/boot.js getLayerStatus — detached `(global._escrow?.getLayerStatus
+   || fallback)()` gave `this === undefined` after vant_boot_init.
+2. brain_evolution_* ×5 — wrong 2-arg handler signature + _getBrain()
+   undefined → all threw; now single-params + _brain() + real schemas.
+3. vant_geometry_init — awaited a plain OBJECT as a function.
+4. lib/branch.js getChangedBrains/isDirty — status() returns an OBJECT;
+   code split a string. Now porcelain-based; autoBranch made async.
+5. vant_get/set_memory — bare `brain` (never in scope) + writeBrain()
+   (doesn't exist) + schema/docs disagreement; rebuilt on documented
+   category/filename shape, round trip verified live.
+6. vant_switch_branch — brain.switchBranch doesn't exist; now
+   switchBrain() (the real multibrain API).
+7. context_build circular JSON — state.context backref stripped from
+   returned cache.state.
+8. vant_environment_* ×7 — required a module that NEVER existed
+   (MODULE_NOT_FOUND); now coded ENVIRONMENT_NOT_WIRED refusals pointing
+   at lib/habitat.js. Owner may still rule: delete vs shim vs habitat.
+9. Schema holes: vant_create_island + vant_storage_read/write/list/exists
+   lacked required:[] → empty args crashed fs internals instead of
+   refusing at the door.
+
+**bin/ truthfulness gate — scripts/check-bin-truthfulness.js (new),
+wired into lint:helpers.** Two checks: throwaway-helper scan over bin/
+(same detection as pass 79's lib gate) + status-field cross-check of
+bin reads against the lib bodies that define the status methods
+(phantom-field tripwire for the escrow held/budgets genre). Negative-
+controlled on BOTH genres before trusting the PASS. It immediately
+caught 5 live phantoms + 2 caps.length-undefined, all FIXED truthful:
+- bin/api.js status: .running/.port never existed → mode/requests/
+  errors/uptime (the real getStatus shape).
+- bin/qos.js status: .maxConcurrent/.circuitOpen → status.circuit.open
+  + MAX_CONCURRENT constant.
+- bin/sandbox.js: .enabled → active/reads/writes counters; caps.length
+  → Object.keys(caps).length in both subcommands (objects, not arrays).
+
+Gate mechanics paid for in blood: delegation chains (no literal to
+prove absence) = UNKNOWABLE, never empty-shape; module-level function
+bodies preferred over same-name class methods; comments stripped or
+the gate flags its own fix notes; negative-control BOTH genres then
+delete the fixture.
+
+**Gates at handoff:** npm test 15/15, test/runner.js 37/37, mcp 6/6,
+boot 15/15, branch-manager 10/10, storage 40, memory 18, error 19,
+lint:docs PASS (128 files), lint:surface PASS, lint:helpers PASS
+(both gates). Audit THREW(0).
+
+**Next pass candidates:** owner ruling on environment family (coded
+refusal shipped; delete/habitat-shim both open); duplicate brain_load
+registration (L231 shadowed by L348 — first is dead, dedup pending);
+gate could learn delegation-chain resolution (rate.js false positive
+was fixed by the unknowable rule, real chains still unverified).
 
 ## Session (2026-09-30 — pass 79: the gate finds what the sweep normalized)
 
