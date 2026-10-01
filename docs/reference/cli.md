@@ -518,7 +518,7 @@ with its own `--help`.
 | `vant zen` | Zen utilities |
 | `vant brain-registry` | Brain registration |
 | `vant node-registry` | Node registration |
-| `vant habitat` | Runtime environment |
+| `vant habitat` | Workspace/RLS management (workspaces, roles, boundaries) |
 | `vant consensus` | Consensus mechanisms |
 | `vant framework` | Agent framework |
 | `vant runop` | Run operator |

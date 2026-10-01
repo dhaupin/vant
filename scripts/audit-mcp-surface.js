@@ -27,18 +27,17 @@ const SKIP = new Set([
     'vant_tmp_yourStuffDelete', 'vant_storage_rm', 'vant_delete_island',
     'vant_bulk_create_islands', 'vant_export_islands', 'vant_boot_reset',
     'agent_kill', 'vant_shell_exec', 'vant_shell_spawn', 'vant_shell_capture',
-    'vant_environment_exec', 'compute_invoke', 'vant_compute_invoke',
+    'compute_invoke', 'vant_compute_invoke',
     'compute_eval', 'vant_compute_eval', 'cron_run', 'cron_cancel',
     'vant_sync_pushAll', 'vant_sync_rebase', 'vant_sync_pullAny', 'vant_sync',
     'vant_branch_auto', 'agora_push', 'agora_pull', 'vant_update_island_triggers',
-    'vant_network_fetch', 'vant_network_fetchJson', 'vant_remote_call',
-    'vant_remote_addProvider', 'vant_remote_removeProvider', 'stream_watch',
+    'vant_network_fetch', 'vant_network_fetchJson',    'vant_remote_call', 'vant_remote_addProvider', 'vant_remote_removeProvider', 'stream_watch',
     'vant_stego_encode', 'vant_stego_decode', 'skill_proto_load',
     'agent_proto_load', 'vant_load_island', 'brain_load', 'vant_brain_backup',
-    'vant_environment_register', 'vant_connector_connect', 'vant_commit',
+    'vant_connector_connect', 'vant_commit',
     'vant_create_branch', 'vant_switch_branch', 'vant_sudo_revoke',
     'sudo_revoke', 'vant_sudo_grant', 'sudo_grant', 'governance_decide',
-    'trust_setRequired', 'vant_environment_use', 'vant_sandbox_status'
+    'trust_setRequired', 'vant_sandbox_status'
 ]);
 
 async function main() {

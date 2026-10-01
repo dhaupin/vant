@@ -6,6 +6,52 @@
 
 ---
 
+## Session (2026-10-01 — pass 81: delete the dead family, wire the real one)
+
+Owner ruling received: "environment" was a scrapped idea (built
+partially elsewhere, replaced by habitat/engine in the OSS); its 7 MCP
+tools snuck in and never left. Ruling: DELETE the dead ends, verify
+habitat is good to go with the MCP/CLI it needs. BOTH DONE.
+
+**Deleted:** vant_environment_* x7 + the pass-80 refusal helper. Not
+documented anywhere (checked docs/reference/mcp-tools.md + lint:surface
+registry), so removal is code-only.
+
+**Habitat wired for real — all three surfaces through ONE instance:**
+- MCP: vant_habitat_status / listWorkspaces / createWorkspace /
+  setWorkspace / addRole / getUserRoles / setPolicy / getBoundaries.
+  All live-probed; schema-refuses bad args at the door.
+- CLI: bin/habitat.js rebuilt from a facade (never required the lib,
+  status was a hardcoded string) into real subcommands: status / list /
+  init / use / roles / grant / policy / boundaries — 1:1 with MCP.
+- Shared instance: habitat.getShared()/getSharedReady() claims
+  global.__vant_habitat; boot (lib/vant.js) now ADOPTS a pre-claimed
+  instance instead of silently discarding it (dual-instance discipline,
+  boot-side).
+
+**Real bugs found while wiring (all fixed):**
+1. habitat mutations NEVER persisted — save() existed since v0.8.6 and
+   nothing called it; every process start was amnesiac (two-process CLI
+   probe: init succeeded in P1, use failed in P2). Mutators now
+   auto-persist via _persist() serialized on _readyPromise.
+2. addRole silently created roles for NONEXISTENT workspaces (grant
+   "succeeded" against a phantom). Now HABITAT_UNKNOWN_WORKSPACE
+   fail-closed.
+3. restore() wholesale-REPLACES state — the first fire-and-forget
+   restore could clobber mutations landing during the async window.
+   All transitions now serialize on one promise chain.
+4. setWorkspace deliberately NOT persisted (session context, not state)
+   — documented at the site.
+
+Audit: 281 tools, THREW(0), habitat tools all OK/INVALID (schema).
+Gates: npm test 15, runner 37, mcp 6, boot 15, lint:docs (128),
+lint:surface, lint:helpers (both gates) — ALL PASS. Docs: "Habitat
+Tools (8)" section in mcp-tools.md; CLI table + router descriptions
+updated.
+
+**Still queued:** duplicate brain_load registration (L231 shadowed by
+L348); whitepaper awaiting owner review; #86 stego open.
+
 ## Session (2026-10-01 — pass 80: the audit scales; the gate goes to bin/)
 
 Owner-sequenced: (1) MCP surface audit across remaining families, (2)

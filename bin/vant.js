@@ -511,7 +511,7 @@ System Utilities:
   vant citations  Citation management
   vant consensus  Consensus mechanisms
   vant framework  Framework utilities
-  vant habitat    Environment management
+  vant habitat    Workspace/RLS management (lib/habitat.js)
   vant legal       Legal/compliance
   vant qos        Quality of Service
   vant rules      Rule management

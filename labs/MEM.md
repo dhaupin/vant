@@ -7,36 +7,39 @@
 
 ## Handoff
 
-**Last known good commit:** pass 80 — full MCP surface audit (280
-tools) + bin/ truthfulness gate. Audit (scripts/audit-mcp-surface.js,
-new): 280 registered tools probed with {}, 62 destructive skipped —
-final **THREW(0)/PHANTOM(0), exit 0**; 80 OK + 218 correct fail-closed
-refusals. 9 bug clusters fixed: boot.js detached-method
-(`(obj?.method||fb)()` → this===undefined AFTER init), brain_evolution_
-×5 (wrong signature + _getBrain undefined), vant_geometry_init
-(awaited an object), branch.js getChangedBrains/isDirty (status()
-object split as string → porcelain), vant_get/set_memory (bare-brain
-ReferenceError + schema/docs disagreement → documented category/
-filename shape, round trip verified), vant_switch_branch
-(→ switchBrain()), context_build circular JSON (state.context
-backref stripped), vant_environment_×7 (module NEVER existed → coded
-ENVIRONMENT_NOT_WIRED refusals, alternative: lib/habitat.js; owner
-ruling pending on delete-vs-habitat), schema holes (create_island +
-storage read/write/list/exists lacked required:[]).
-NEW GATE: scripts/check-bin-truthfulness.js wired into lint:helpers —
-throwaway-helper scan over bin/ + status-field cross-check vs lib
-bodies (escrow hardcoded-zeros genre). Negative-controlled on BOTH
-genres; immediately caught 5 live phantoms + 2 caps.length undefined,
-all fixed truthful: bin/api (.running/.port → mode/requests/errors/
-uptime), bin/qos (.maxConcurrent/.circuitOpen → circuit.open +
-MAX_CONCURRENT), bin/sandbox (.enabled → counters; caps object not
-array ×2). Gate lessons: delegation chain = UNKNOWABLE not empty;
-module-level body beats same-name class method; strip comments or the
-gate flags its own fix notes; negative-control both genres then delete
-the fixture.
-Open items for next pass: environment family ruling (delete vs
-habitat shim), duplicate brain_load registration (L231 shadowed by
-L348), gate delegation-chain resolution.
+**Last known good commit:** pass 81 — environment family DELETED per
+owner ruling (was a scrapped subsystem whose 7 tools shipped registered
+against a never-existing module; pass 80 stopgapped with coded
+refusals, 81 removed). Replaced with the REAL subsystem, fully wired:
+habitat MCP tools x8 (vant_habitat_status/listWorkspaces/
+createWorkspace/setWorkspace/addRole/getUserRoles/setPolicy/
+getBoundaries — all live-probed incl. two-process persistence) + real
+CLI (bin/habitat.js rebuilt from facade: status/list/init/use/roles/
+grant/policy/boundaries). All surfaces share ONE instance via
+habitat.getShared()/getSharedReady() claiming global.__vant_habitat;
+boot (lib/vant.js) now ADOPTS a pre-claimed instance instead of
+clobbering. Habitat fixes en route: addRole fails closed on unknown
+workspace (was silent phantom-grant); mutations auto-persist
+(save() existed since v0.8.6, never called — hold/release genre);
+restore serialized on _readyPromise (wholesale-replace cannot race
+live mutations); setWorkspace stays session-only by design. Audit
+281 tools THREW(0). All gates green incl. docs (habitat section added
+to mcp-tools.md "Habitat Tools (8)").
+**Prior — pass 80:** full MCP surface audit (scripts/
+audit-mcp-surface.js, new): 280 tools probed, THREW(0)/PHANTOM(0);
+9 bug clusters fixed (boot.js detached-method, brain_evolution_ x5,
+geometry_init object-await, branch.js porcelain, get/set_memory
+bare-brain + schema/docs split, switch_branch -> switchBrain(),
+context_build circular JSON, environment x7 -> coded refusals,
+required:[] schema holes). NEW GATE: check-bin-truthfulness.js in
+lint:helpers (bin throwaway helpers + status-field cross-check vs lib
+bodies) — caught 5 live phantoms + 2 caps.length lies, fixed truthful.
+**Pass 79** (46717a7): lib helpers gate, escrow.json merge-save,
+hashPassword phantom. **Pass 78** (0a346da): server shared-instance +
+clientIp TDZ. **Pass 77** (fa8c51d): escrow reference + MCP tools.
+**Pass 76** (495f6bf): whitepaper draft of record — STILL awaiting
+owner review. Issues #92-#99 closed; only #86 open.
+
 ---
 **Prior — pass 79** (lint:helpers gate + market/consensus MCP audit
 CLEAN + escrow.json merge-save, 46717a7): gate

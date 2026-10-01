@@ -531,6 +531,60 @@ Release a hold by id. Returns `{ released: boolean }`.
 Read the escrow ledger. No params: budgets, holds, approvals, quotas
 counts. With `org`: that agent's budget plus the holds map.
 
+## Habitat Tools (8)
+
+Habitat is the RLS layer: workspaces (isolated containers), roles,
+and boundary policies. These replaced the dead `vant_environment_*`
+family in pass 81 - "environment" was a planned subsystem that never
+shipped (scrapped in favor of habitat), but its 7 tools stayed
+registered against a module that never existed: every call was
+MODULE_NOT_FOUND. All habitat tools route through the shared instance
+(`lib/habitat.js` `getShared()`), which boot adopts rather than
+replaces. Mutations auto-persist to the brain state store.
+
+### vant_habitat_status
+
+Overview: workspaces, boundaries count, inputs, current workspace.
+No params.
+
+### vant_habitat_listWorkspaces
+
+List all workspaces. No params. Returns `{ workspaces: [...] }`.
+
+### vant_habitat_createWorkspace
+
+Create a workspace (container). **Params:** `workspaceId` (string,
+required), `options` (object: `name`, `owner`, `policy`). A geometric
+address is attached when the geometry module is available.
+
+### vant_habitat_setWorkspace
+
+Switch the current workspace context. Params: `workspaceId` (must
+exist). Session context only - deliberately not persisted.
+
+### vant_habitat_addRole
+
+Assign a role (`admin`/`editor`/`viewer`) to a user in a workspace.
+Params: `workspaceId`, `role`, `userId`. Refuses unknown workspaces
+(`HABITAT_UNKNOWN_WORKSPACE`).
+
+### vant_habitat_getUserRoles
+
+Read a user's roles in a workspace. Params: `workspaceId`, `userId`.
+
+### vant_habitat_setPolicy
+
+Set an RLS boundary policy for a resource. Params: `resource`,
+`policy` (object: `readableBy`, `writableBy`, `container`, `filter`,
+`mask`). Merged over defaults.
+
+### vant_habitat_getBoundaries
+
+List all boundary policies. No params.
+
+Same surface on the CLI: `vant habitat
+<status|list|init|use|roles|grant|policy|boundaries>`.
+
 ## Return Types
 
 | Tool | Returns |
