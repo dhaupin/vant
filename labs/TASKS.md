@@ -2,7 +2,70 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-09-30  
-**Session:** Pass 78 — throwaway-instance sweep: server boot path fixed + clientIp TDZ
+**Session:** Pass 79 — stateful-helper gate (lint:helpers) + market/consensus MCP audit + escrow.json merge-save
+
+---
+
+## Session (2026-09-30 — pass 79: the gate finds what the sweep normalized)
+
+Owner greenlit both follow-ups. The MCP audit came back CLEAN; the
+lint gate surfaced a fifth phantom and a latent economic bug.
+
+**market/consensus MCP audit (the escrow treatment) — ALL CLEAN.**
+Live-probed every tool via mcp.execute: consensus create/vote/tally/
+get/list all work against the real ledger; vote correctly refuses an
+unregistered agent (E_NOT_REGISTRY fail-closed) and scoped-topic
+semantics documented in pass 65 held. market list/search/stats/get/
+getBids/getTrade all return real state; bid/trade correctly refuse
+through governance ("not allowed" shapes, not throws);
+cancelTrade correct not-found shape. Zero handler fixes needed - the
+escrow section was the rot; market/consensus handlers map correctly
+onto their (singleton-backed) lib surfaces.
+
+**auth.hashPassword — FIFTH PHANTOM EXPORT, found by the gate.**
+`(pwd) => new Encrypt().hash(pwd)` - hash is a STATIC; TypeError on
+any call, forever hidden by a typeof-existence test. Fixed to
+Encrypt.hash(pwd).
+
+**lint:helpers — scripts/check-stateful-helpers.js (NEW gate).**
+Blocks module-level `=> new X()` call-through helpers on stateful
+classes (this.-assignment detection from the class body, cross-file
+class registry, member-expression constructors matched after the
+negative control exposed that hole). Factories exempt (instance
+escapes to caller - no laundering). HELPER-MODEL tag documents
+deliberate fresh-per-call. Wired as `npm run lint:helpers`.
+Negative-controlled: a temp violation file with BOTH syntaxes fails
+the gate (exit 1), clean tree passes.
+
+**HELPER-MODEL doc pass (escrow/vaf).** Escrow's budget helpers
+(canSpend, checkQuota, approvals, quotas, before/afterExecute,
+checkHold, resetBudget, checkIslandQuota) stay fresh-per-call BY
+CONTRACT - every mutation auto-persists, every fresh instance
+reloads, so budget state is disk-coherent across callers (market's
+debit path depends on it). vaf sanitize* tagged (Sanitize is
+effectively stateless). hold/release stay singleton+persist (pass
+77). First attempt moved ALL escrow helpers onto the singleton and
+BROKE the market-debit pins - the correct model per helper, not a
+blanket rule.
+
+**BONUS ROOT-CAUSE FIX — escrow.json whole-file last-write-wins.**
+The broke-pins investigation traced a real trade: debit happens,
+trade completes, buyer ABSENT from disk. escrow.json saves overwrite
+the whole file, and market's async hold-save could land AFTER the
+debit-save with a stale view - silently reverting the buyer's
+payment (an economic bug predating this arc, surfaced by changed
+write timing). _saveEscrow now MERGES per key (budgets/holds/
+approvals/quotas): same-key last-writer wins, different keys never
+destroy each other. All 4 market-debit pins green; state-
+persistence 8/8; escrow 17/17; corrupt-disk falls back to plain
+overwrite.
+
+Gates: lint:helpers PASS (new, negative-controlled), npm test 15/15,
+escrow 17/17, market-debit 4/4, market 22/22, mcp 6/6, auth 12/12,
+state-persistence 8/8, lint:surface PASS.
+
+Next: whitepaper feedback (owner reading); candidate: extend gate to
+bin/ + status-field truthfulness checks; airgap still parked.
 
 ---
 

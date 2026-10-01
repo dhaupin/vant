@@ -7,31 +7,26 @@
 
 ## Handoff
 
-**Last known good commit:** pass 78 — throwaway-instance sweep: server
-boot path fixed + clientIp TDZ found by the probe (0a346da). Owner
-ruled "agent-first" stays (PRD §9 closed). Sweep census: server.js
-use/listen/stop were THROWAWAY-instance (module .stop could never stop
-module .listen; lib/vant.js boots production HTTP through module
-listen) → shared _sharedServer, pinned in server.test 12/12; error.js
-onError was throwaway → shared _sharedErrorHandler; Encrypt,
-RerankInner, Sanitize verified STATELESS (safe); resolution/api
-default-instance-by-design (safe). BONUS: probing the module listen
-path live exposed the clientIp TDZ - every HTTP request threw
-ReferenceError before routing (emit referenced clientIp above its
-declaration); moved computation up; fix proven by real HTTP round
-trip (server fixes now get an HTTP round trip, not just a boot
-check). stop() now nulls _server so status.running dies with the
-server. Pass 77 (fa8c51d): docs/reference/escrow.md NEW (settlement
-reference), escrow.resetBudget phantom export fixed, 3 MCP escrow
-tools fixed (create/hold/release/status), module hold/release
-singleton+persist (proven cross-process), bin/escrow.js reads the
-real ledger. Pass 76 (495f6bf): agent-first whitepaper draft of
-record at docs/whitepaper/agent-first.md. All suites green (npm test
-15/15, runner 37/37, server 12, error 19, auth 12, escrow 17, mcp 6,
-boot 15, vant 16), lint:surface PASS. Issues #92-#99 closed; only #86
-open.
+**Last known good commit:** pass 79 — lint:helpers gate + market/consensus
+MCP audit CLEAN + escrow.json merge-save root-cause fix (<HASH>).
+Gate: scripts/check-stateful-helpers.js blocks `=> new X()`
+call-through helpers on stateful classes (negative-controlled on BOTH
+syntaxes incl. member-expression; factories exempt; HELPER-MODEL tag
+documents deliberate fresh-per-call). Escrow budget helpers tagged
+fresh-by-contract (disk-coherent: every mutation persists, every
+fresh instance reloads — market debit depends on it); hold/release
+singleton+persist. Fifth phantom: auth.hashPassword (hash is STATIC).
+MCP audit: market/consensus handlers ALL CLEAN live-probed (governance
+gates + E_NOT_REGISTRY are correct fail-closed shapes). BONUS economic
+fix: escrow.json was whole-file last-write-wins — stale hold-save
+could silently revert a settled trade's debit; _saveEscrow now merges
+per key; all 4 market-debit pins green. Pass 78 (0a346da): server
+shared-instance + clientIp TDZ; pass 77 (fa8c51d): escrow reference +
+3 MCP tools + resetBudget phantom; pass 76 (495f6bf): whitepaper
+draft of record. All suites green; lint:helpers + lint:surface PASS.
+Issues #92-#99 closed; only #86 open.
 **Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED
-through pass 78. #98: sudo escalations are the agent's memory — audit trail
+through pass 79. #98: sudo escalations are the agent's memory — audit trail
 resolves per call via state-store currentBrain() →
 models/private/<brain>/sudo/escalations.jsonl (legacy flat path as
 fallback + migration source; _migrateLegacyAudit handles both upgrade
@@ -83,12 +78,11 @@ testimony (v0.2); chapter 2 opens with it.
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 78 committed: throwaway-instance sweep done,
-server boot path + clientIp TDZ fixed and pinned. Next agent:
-whitepaper owner feedback; airgap exercise parked per owner;
-candidate: lint/grep gate to keep `=> new` helpers off stateful
-classes; possible MCP surface audit like the escrow one for market/
-consensus tools.)
+(nothing in flight — pass 79 committed: gate shipped, MCP audit clean,
+escrow.json merge-save landed. Next agent: whitepaper owner feedback;
+airgap parked; candidates: extend gate to bin/ + status-field
+truthfulness checks, MCP surface audit for remaining tool families
+(qos, config, islands).)
 
 ---
 
