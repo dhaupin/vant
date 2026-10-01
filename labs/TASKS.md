@@ -2,7 +2,68 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-01  
-**Session:** Pass 85 — #5 per-workspace memory namespacing + islands CLI touch-up
+**Session:** Pass 86 — #4 MCP auth ctx via habitat tokens (verified identity)
+
+---
+
+## Session (2026-10-01 — pass 86: #4 habitat tokens / MCP auth ctx)
+
+Owner: "That's a keystone! ... let's do #4 next pass now that the
+engines are running on more cylinders" → #4: MCP auth ctx via
+habitat tokens.
+
+**lib/habitat.js — token subsystem (registry-anchored):**
+- mintToken(agentId, {ttlMs=24h}) → raw 'vant_'+32B hex shown ONCE;
+  only sha256 hash persisted. Fails closed AGENT_NOT_FOUND (tokens
+  anchor to habitat identities, never declared claims).
+- verifyToken(raw) → registry-verified subject via agentContext at
+  USE time → role changes after mint apply immediately (authority
+  not snapshot). Unknown/expired/revoked/deregistered → null.
+- COLD-PROCESS FALLBACK: agents registry is memory-only but
+  provisionAgent's role rows are durable — agentContext now falls back
+  to _agentContextFromRegistry (subject from durable rows; identity
+  exists iff ≥1 role row remains). Tokens verify in fresh processes;
+  stripping all role rows kills the identity.
+- revokeToken(raw|hash) persists via _persist; listTokens (hash-prefixed,
+  never raw). Tokens ride the _habitat state row (save/restore).
+
+**lib/mcp.js — request credential (AsyncLocalStorage):**
+- HTTP door accepts Authorization: Bearer vant_... (or
+  x-habitat-token) IN ADDITION to the shared key; a VALID token also
+  satisfies mcp.requireKey by itself. Captured ctx rides the whole
+  execution via _requestAls.
+- _requestCtx(declared) priority: VERIFIED TOKEN > DECLARED userCtx >
+  current agent identity > anonymous (verified beats declared —
+  anti-spoof). Wired into vant_memory_state/_recall (auto-scoping
+  uses token workspace unless workspace:"") , vant_habitat_can/_check,
+  islands_canAccess (+verified flag in results).
+- escrow money-admin (setWorkspaceBudget/setWorkspaceMemberLimit):
+  token path = _verifiedAdminGate (workspace match + registry admin
+  role), adminId no longer required in schema; legacy adminId path
+  stays for shared-key callers.
+- NEW tools: vant_habitat_mintToken/_verifyToken/_revokeToken
+  (294 total, audit THREW(0)). mcp.start(): explicit port 0 honored
+  (falsy-|| previously skipped it — listen promise never settled on
+  bind errors); _serverRef test hook.
+
+**bin/habitat.js — token subcommand:** mint/verify/list/revoke.
+FIXED PRE-EXISTING RACE for token ops: bare getShared() raced restore
+→ fresh-process mint AGENT_NOT_FOUND'd; token ops now await
+getSharedReady() (whole CLI body in a .then, same behavior otherwise).
+
+**Tests:** NEW test/habitat-token.test.js 15/15 (mint/verify/revoke,
+role-change-after-mint, fail-closed matrix, durable-identity pin,
+cross-process cold mint+revoke, MCP round-trip, priority probe,
+HTTP e2e: Bearer token → vant_memory_state auto-scoped to org-http
+with spoofed declared ctx losing, CLI exit codes).
+
+**Docs:** rls.md "Verified identity: habitat tokens" section;
+mcp-tools Habitat Tools (14) + 3 token entries; cli.md habitat row.
+
+**Gates:** npm test, runner 37/37, habitat-token 15/15, habitat-rls 23,
+workspace-budget 22, island-boundaries 14, workspace-memory 21,
+memory 18, boot 15, mcp 6; lint:docs/surface/helpers; audit 294
+THREW(0).
 
 ---
 

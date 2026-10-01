@@ -592,7 +592,7 @@ Check whether a member can draw an amount from its pool.
 Record a pool-scoped spend: debits the member row AND the org pool.
 **Params:** `workspaceId`, `agentId`, `amount`.
 
-## Habitat Tools (11)
+## Habitat Tools (14)
 
 Habitat is the RLS layer: workspaces (isolated containers), roles,
 and boundary policies. These replaced the dead `vant_environment_*`
@@ -604,7 +604,10 @@ MODULE_NOT_FOUND. All habitat tools route through the shared instance
 replaces. Mutations auto-persist to the brain state store. Pass 82
 added the enforcement surface (`vant_habitat_can`,
 `vant_habitat_check`, `vant_habitat_agentContext`) and agent
-identity - see [RLS](rls.md).
+identity - see [RLS](rls.md). Pass 86 added bearer tokens anchored to
+those identities (`vant_habitat_mintToken`, `vant_habitat_verifyToken`,
+`vant_habitat_revokeToken`), accepted by the MCP HTTP door as a
+verified RLS credential - see [RLS](rls.md).
 
 ### vant_habitat_status
 
@@ -667,7 +670,30 @@ return `{ error: "AGENT_NOT_FOUND: ..." }`. See
 [RLS](rls.md) for the identity model.
 
 Same surface on the CLI: `vant habitat
-<status|list|init|use|roles|grant|policy|boundaries|can|identity>`.
+<status|list|init|use|roles|grant|policy|boundaries|can|identity|token>`.
+
+### vant_habitat_mintToken
+
+Mint a bearer access token anchored to a spawned agent's habitat
+identity. **Params:** `agentId` (string, required), `ttlMs` (number,
+default 24h). Returns the raw token ONCE (only its SHA-256 hash
+persists) plus the subject metadata. Fails closed with
+`AGENT_NOT_FOUND` for unprovisioned agents.
+
+### vant_habitat_verifyToken
+
+Verify a bearer token and return its registry-verified RLS subject.
+**Params:** `token` (string, required). Unknown, expired, revoked, or
+identity-stripped tokens all report `{ valid: false }` - never an
+error, never a guess. Role changes made after minting apply
+immediately: the subject is rebuilt from the registries at verify
+time, so tokens carry authority, not a snapshot.
+
+### vant_habitat_revokeToken
+
+Revoke by raw token or hash. **Params:** `tokenOrHash` (string,
+required). Persisted - a revoked token is dead in every future
+process, not just this one.
 
 ## Return Types
 

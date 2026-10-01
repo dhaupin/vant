@@ -7,9 +7,32 @@
 
 ## Handoff
 
-**Last known good commit:** pass 85 — #5 per-workspace memory
-namespacing + islands CLI touch-up.
-memory.state/recall now resolve a workspace subject chain (explicit
+**Last known good commit:** pass 86 — #4 MCP auth ctx via habitat tokens.
+habitat.mintToken/verifyToken/revokeToken/listTokens: bearer tokens
+anchored to habitat identities (raw shown once, sha256 hash persisted
+in _habitat state row). Verify = registry-verified agentContext at USE
+time (role changes apply immediately; authority not snapshot);
+unknown/expired/revoked/identity-stripped → null. COLD-PROCESS
+FALLBACK: agents registry is memory-only, so agentContext falls back
+to _agentContextFromRegistry (durable provisionAgent role rows = the
+authority; strip all rows = identity gone). MCP door accepts Bearer
+vant_... / x-habitat-token IN ADDITION to shared key; valid token
+satisfies mcp.requireKey alone; AsyncLocalStorage carries the verified
+subject through execution; PRIORITY verified > declared userCtx >
+current agent > anonymous (anti-spoof), wired into vant_memory_state/
+_recall (auto-scoping), vant_habitat_can/_check, islands_canAccess.
+escrow money-admin accepts token's registry identity as admin
+(_verifiedAdminGate; adminId legacy path stays). NEW tools x3 (294
+total): vant_habitat_mintToken/_verifyToken/_revokeToken. mcp.start()
+explicit port 0 honored (falsy-|| skipped it; listen promise never
+settled on bind errors) + _serverRef hook. CLI habitat token
+mint/verify/list/revoke; FIXED PRE-EXISTING RACE: bare getShared()
+raced restore → fresh-process mint AGENT_NOT_FOUND; token ops await
+getSharedReady(). NEW SUITE test/habitat-token.test.js 15/15 (incl.
+HTTP e2e: Bearer token → memory auto-scoped to org-http, spoofed
+declared ctx loses). Gates green; audit 294 THREW(0).
+Pass 85 (87de0a1): #5 per-workspace memory namespacing —
+memory.state/recall resolve workspace subject chain (explicit
 opts.workspace/userCtx -> current agent habitat identity -> anonymous)
 and scope keys to ws<wsLen>.<ws>.<key> on disk (e.g. ws4.acme.proj).
 KEY-SHAPE WHY: state keys become filenames; storage sanitizer strips
@@ -20,11 +43,9 @@ Namespaces ISOLATING (no flat fallback, anon never sees scoped rows);
 flat keys unchanged for anonymous callers; workspace:null pins
 UNSCOPED (habitat _habitat, nature _flywheel, context history all
 pinned — process-global state must not fragment). MCP: vant_memory_
-state/_recall gained optional workspace arg (291 tools unchanged).
-CLI: islands load --as <agentId> + islands boundaries.
-NEW SUITE test/workspace-memory.test.js 21/21. Gates all green
-(memory 18, island-boundaries 14, habitat-rls 23, workspace-budget
-22, runner 37, npm test, boot, mcp, 3 lints, audit 291 THREW(0)).
+state/_recall gained optional workspace arg. CLI: islands load --as
+<agentId> + islands boundaries. Suite test/workspace-memory.test.js
+21/21.
 Pass 84 (1146749): island boundaries enforced at load/hydrate/save
 (_island:<name>, subject chain identical, anonymous writes fail
 closed E_ISLAND_WRITE_DENIED, no policy = open); PRE-EXISTING FIX:

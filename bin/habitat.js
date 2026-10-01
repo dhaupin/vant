@@ -40,6 +40,10 @@ Usage:
   vant habitat boundaries                 List boundary policies
   vant habitat can <mode> <res> <userId>  RLS decision (mode: read|write)
   vant habitat identity <agentId>         RLS subject of a spawned agent
+  vant habitat token mint <agentId>       Mint a bearer token for an agent
+  vant habitat token verify <token>       Verify + show the RLS subject
+  vant habitat token list                 List token lifecycle rows
+  vant habitat token revoke <token|hash>  Revoke (persists)
 `);
     process.exit(0);
 }
@@ -49,8 +53,16 @@ function habitat() {
 }
 
 function run() {
-    const h = habitat();
+    let h = habitat();
 
+    // (pass 86) Token ops NEED restored state (durable role rows + token
+    // hashes). getSharedReady() is awaitable and hands back the same
+    // instance post-restore.
+    const tokenReady = (subcmd === 'token')
+        ? require('../lib/habitat').getSharedReady().then(inst => { h = inst; })
+        : Promise.resolve();
+
+    tokenReady.then(() => {
     if (subcmd === 'can' || subcmd === 'check') {
         // (pass 82) RLS decision for a plain user context: roles come from
         // the habitat registry in the CURRENT workspace.
@@ -126,10 +138,51 @@ function run() {
         const keys = Object.keys(b);
         console.log('Boundary policies:', keys.length ? '' : '(none — defaults apply)');
         for (const k of keys) console.log('  -', k, '→', JSON.stringify(b[k]));
+    } else    if (subcmd === 'token') {
+        // (pass 86) Token lifecycle over the shared habitat singleton.
+        const op = args[1];
+        if (op === 'mint') {
+            const [agentId, ttlArg] = [args[2], args[3]];
+            if (!agentId) { console.error('Usage: vant habitat token mint <agentId> [ttlMs]'); process.exit(1); }
+            try {
+                const t = h.mintToken(agentId, ttlArg ? { ttlMs: parseInt(ttlMs, 10) } : {});
+                console.log('✓ Token minted for', agentId, '(workspace: ' + t.workspace + ')');
+                console.log('  token:', t.token);
+                console.log('  expires:', new Date(t.expiresAt).toISOString());
+                console.log('  Use it: Authorization: Bearer ' + t.token);
+                console.log('  (raw token is shown ONCE — only its hash persists)');
+            } catch (e) {
+                console.error('✗', e.message);
+                process.exit(1);
+            }
+        } else if (op === 'verify') {
+            const token = args[2];
+            if (!token) { console.error('Usage: vant habitat token verify <token>'); process.exit(1); }
+            const ctx = h.verifyToken(token);
+            if (!ctx) { console.error('✗ INVALID (unknown, expired, or agent deregistered)'); process.exit(1); }
+            console.log('✓ VALID — registry-verified subject:');
+            console.log(JSON.stringify(ctx, null, 2));
+        } else if (op === 'list') {
+            const list = h.listTokens();
+            console.log('Tokens:', list.length ? '' : '(none)');
+            for (const t of list) {
+                console.log('  -', t.hash, '→', t.agentId, t.expired ? '(EXPIRED)' : '(expires ' + new Date(t.expiresAt).toISOString() + ')');
+            }
+        } else if (op === 'revoke') {
+            const tokenOrHash = args[2];
+            if (!tokenOrHash) { console.error('Usage: vant habitat token revoke <token|hash>'); process.exit(1); }
+            const ok = h.revokeToken(tokenOrHash);
+            console.log(ok ? '✓ Revoked' : '✗ No such token');
+            process.exit(ok ? 0 : 1);
+        } else {
+            console.error('Usage: vant habitat token <mint|verify|list|revoke> ...');
+            process.exit(1);
+        }
     } else {
-        console.log('Usage: vant habitat <status|list|init|use|roles|grant|policy|boundaries|can|identity> (try -h)');
+        console.log('Usage: vant habitat <status|list|init|use|roles|grant|policy|boundaries|can|identity|token> (try -h)');
         process.exit(1);
     }
+    }).catch(e => { console.error('Error:', e.message); process.exit(1); });
 }
 
 run();

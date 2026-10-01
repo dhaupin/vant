@@ -170,6 +170,36 @@ truncating.
   `workspace` argument (omit = current agent identity when one exists;
   `""` = flat).
 
+## Verified identity: habitat tokens (pass 86)
+
+Spawned agents have habitat identities; MCP callers historically
+declared `userCtx` arguments instead - self-asserted. Habitat tokens
+make identity verified, not claimed:
+
+- `vant habitat token mint <agentId>` (or `vant_habitat_mintToken`)
+  anchors a bearer token to a spawned agent's habitat identity. The raw
+  token is shown once; only its SHA-256 hash persists with the habitat
+  state.
+- Verification is registry-anchored: the token maps back to the
+  agent's `agentContext()` subject at USE time, so roles granted or
+  revoked after minting apply immediately - tokens carry authority,
+  not a snapshot. Unknown/expired/revoked tokens and identities whose
+  durable role rows are gone all fail closed (null).
+- The MCP HTTP door (`POST /mcp/exec`) accepts the token as
+  `Authorization: Bearer vant_...` (or `x-habitat-token`). A valid
+  token satisfies the `mcp.requireKey` boundary by itself, and its
+  registry-verified subject rides the whole request: for the wired
+  tools (`vant_memory_state`, `vant_memory_recall`,
+  `vant_habitat_can`, `vant_habitat_check`, `islands_canAccess`) the
+  priority is **verified token > declared userCtx > current agent
+  identity > anonymous** - a declared context never overrides the
+  token. Money-admin tools (`escrow_setWorkspaceBudget`,
+  `escrow_setWorkspaceMemberLimit`) accept the token's registry
+  identity as the admin instead of a self-declared `adminId`.
+- Revoke with `vant habitat token revoke` (persisted - dead in every
+  future process). Tokens survive cold processes via the durable
+  habitat role rows, not the memory-only agents registry.
+
 ## Persistence
 
 Workspaces, roles, and boundaries persist to the brain state store
