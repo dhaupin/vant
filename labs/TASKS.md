@@ -2,7 +2,49 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-02  
-**Session:** Pass 89 — horcrux/teams/brain-naming triage (prime #100–#104, #111, #112)
+**Session:** Pass 90 — RLS hookups: enforcement-vapor closed (sync core + explicit-ctx doctrine)
+
+---
+
+## Session (2026-10-02 — pass 90: RLS hookups / enforcement vapor)
+
+Owner: "More habitat/rls hookups?" — survey found the RLS carrier
+chain mostly VAPOR (async checks fired un-awaited from sync code;
+denials became orphaned rejections AFTER the op ran), plus two
+live mis-fires. All closed:
+
+**Doctrine (central decision):** explicit userCtx → RLS enforces
+INLINE; anonymous (no ctx) → internal actuator op, allowed
+(enforcing on {} would deny every internal write — default policy
+is writableBy ['role:admin']). Roles match BARE names.
+
+**Core:** habitat.canSync() sync decision core (async can()
+delegates, signature preserved); rls.assertSync() throws
+RLS_DENIED + emits; sandbox `rls` getter auto-claims the shared
+habitat (pass-82 generateCaps doctrine) so un-booted CLI/early-MCP
+processes stay enforcing.
+
+**Carriers converted to inline enforcement:** brain (3209 — dream
+was the only awaited site), storage, islands, lineage, msg,
+teams (_checkRLS returned the promise — discarded by callers),
+memory (dropped the {} vapor calls; gate+namespacing remain),
+config (try/catch around a promise = dead E_RLS branch),
+audit (userCtx fed to param-LESS checkers → any cap holder could
+read any tenant's audit trail — _checkRls added), cache.
+
+**Live bugs found by wiring:** cache.js s.can(userCtx,'write',res)
+MIS-BOUND (can(cap) takes one name → ctx in cap slot → userCtx'd
+get() threw EFORBIDDEN live; _checkWrite never called; set() had
+no gate); _cacheLock POISONING (one denial made the rejected
+promise the chain — every later op inherited it; task.catch
+fixes); config/teams _getSandbox pinned the PARTIAL early sandbox
+export during the boot require cycle (gate.js F-2 pattern applied:
+verify defaultSandbox before caching).
+
+**Gates:** full sweep 143/143 chunked; NEW test/rls-hookups.test.js
+19/19; lint:docs (129)/surface/helpers PASS; eslint touched 0
+errors; npm run check; audit-mcp 296 THREW(0); npm test 15;
+test-all/test-core exit 0.
 
 ---
 

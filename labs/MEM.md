@@ -7,49 +7,63 @@
 
 ## Handoff
 
-**Last known good commit:** pass 89 — horcrux/teams/brain-naming
-triage (prime #100–#104, #111, #112), all seven CLOSED. (1) #100:
-repo-root `.ignore` (NEW — rg honors, git does NOT: stones stay
-tracked) + boot README "Search hygiene" + `horcrux create`
-auto-appends its stone dir (e2e: repo walk skips, --no-ignore finds).
-(2) #101: store.write IS sync — the real race was CONSUMERS; two
-wrong fix shapes tried first (async save chain broke teams-refresh's
-sync exists-on-return; async restoreState broke orgflow's sync result
-+ sync E_LEGACY_FORMAT throw). Final: _saveTeams inline + flush()
-drain + restoreState STAYS SYNC + transform.restore awaits
-restoreState/flush/agents-flush; cold-restore e2e over 3 child
-processes (wipe teams.json → restore+exit → fresh process sees orgs).
-(3) #102: preview.agentCount reads data.agents2 roster first (legacy
-gatherAgents ALWAYS returns agents:[]), + delegationCount; CLI
-"Agents (registered roster):". (4) #103: gather emits emptyDir .keep
-markers; restore writes them THROUGH the storage chain (raw
-fs.writeFileSync failed the atomic-writes structural pin — caught by
-gate), results.emptyDirs {rel,scope}, sweep unlinks per FILE scope
-(brain-TYPE scope leaked private markers on 'both' brains — fixed +
-both directions tested). (5) #104: assign() reads prev BEFORE
-resolution — brain = options.brain > prev.brain > currentBrain
-(first assign only); the draft keepOr() checked the ALREADY-RESOLVED
-value so the fallback always won (the reported smear). org/dept/
-team/role preserved when absent with hierarchy guards (stale role
-doesn't follow team change); quota checks self-exclude the moving
-agent; escrow spend only on placement ops. (6) #111: health
-initialized = markers OR any content; fresh VANT_BRAIN dirs auto-
-seed orgchart/ (escrow init) before checkModel — empty branch
-tested via the MODEL_PATH escape (state-store doesn't seed it).
-(7) #112: brain.test stack assertion derives getCurrentBrain();
-audit showed other 'vant' literals are synapse node names / self-
-contained axolotl checks. Drive-bys: pass 88's docs rows had 2 em
-dashes → lint:docs had been FAILING since 74ac92a (hyphens, 129
-files PASS); crew-bus ~50% flake = platform `bin/mcp.js -p 4585`
-squatting inside 4571+pid%40 + READY printed before the async bind
-→ free contiguous port-triple pick (live probe skips MCP/orphans) +
-child port probe before ready — 6/6 stable. NEW
-test/horcrux-orgchart.test.js 12/12 (all seven issues; #101 across
-real process boundaries, #100 with rg honoring). Gates: sweep
-142/142 (chunked), lint:docs/surface/helpers PASS, eslint touched
-0 errors, audit 296 THREW(0), npm test 15/15, test-all/test-core
-exit 0, npm run check. Crew: Buffy + Cairn + Prime. Queued:
-whitepaper rewrite, TASKS/MEM → vant-native.
+**Last known good commit:** pass 90 — RLS hookups: enforcement
+vapor closed. Survey (owner: "more habitat/rls hookups?") found
+the RLS carrier chain mostly VAPOR: 10 sites fired ASYNC
+rls.checkRead/checkWrite from SYNC code un-awaited (brain 3209 —
+dream was the only awaited site — storage, islands, lineage, msg,
+teams _checkRLS RETURNED the promise and callers discarded it,
+config's try/catch around a promise = dead E_RLS branch,
+memory's unconditional {}, audit fed userCtx params to param-LESS
+checkers → any process-cap holder could read ANY tenant's audit
+trail; denials were orphaned unhandledRejections AFTER the op
+ran). DOCTRINE: explicit userCtx → enforce INLINE; anonymous →
+internal actuator op, allowed (enforcing on {} would deny every
+internal write — default policy writableBy ['role:admin']). CORE:
+habitat.canSync() sync decision core (async can() delegates),
+rls.assertSync() throws RLS_DENIED + emits, sandbox `rls` getter
+auto-claims the shared habitat (pass-82 doctrine) so un-booted
+CLI/early-MCP processes stay enforcing; carriers: assertSync
+inline when ctx explicit, stub rls keeps async path + .catch.
+LIVE BUGS the wiring exposed: cache.js s.can(userCtx,'write',res)
+MIS-BOUND (module can(cap) takes ONE name → ctx in cap slot →
+userCtx'd get() threw EFORBIDDEN live; _checkWrite never called;
+set() had NO gate — both now assertSync); _cacheLock POISONING
+(one denial made the rejected promise the chain — every later op
+inherited it; task.catch keeps it alive); config/teams
+_getSandbox pinned the PARTIAL early sandbox export during the
+boot require cycle FOREVER (teams' E_RLS worked, config's
+silently never could) — gate.js F-2 pattern: verify
+defaultSandbox before caching. Gotchas: roles match BARE names
+(ctx ['admin'] matches rule 'role:admin'); audit READ is public
+by default — deny-tests need setPolicy first; node -e probes
+need (async()=>{})() for async targets and await before
+asserting on JSON.stringify(Promise) → {}. NEW
+test/rls-hookups.test.js 19/19. Gates: sweep 143/143 chunked,
+lint:docs (129)/surface/helpers PASS, eslint touched 0 errors,
+npm run check, audit-mcp 296 THREW(0), npm test 15/15,
+test-all/test-core exit 0. Queued: whitepaper rewrite, TASKS/MEM
+→ vant-native; prime's #100–#112 still show OPEN on GitHub
+(keywords auto-close only on default branch — manual close after
+prime verifies).
+Pass 89 (7c69b5d): horcrux/teams/brain-naming triage, prime
+#100–#104/#111/#112 all closed: repo-root .ignore for stones (rg
+honors, git not) + horcrux create auto-append; #101 root cause =
+CONSUMERS raced sync store.write (async save chain broke
+teams-refresh, async restoreState broke orgflow's sync contract →
+_saveTeams inline + flush() + restoreState STAYS SYNC +
+transform.restore awaits); inspect roster-first (#102); emptyDir
+.keep markers via storage chain + per-file sweep scope (#103);
+assign() reads prev BEFORE resolution (draft checked the derived
+value so fallback always won) + hierarchy guards + self-excluded
+quotas + escrow placement flag (#104); health initialized =
+markers OR content via MODEL_PATH escape for the empty branch
+(#111); brain.test stack assertion derives active brain (#112).
+Drive-bys: lint:docs em-dash rot since 74ac92a; crew-bus ~50%
+flake (platform MCP squats 4585 inside 4571+pid%40 + premature
+READY) → live free-triple pick + child port probe, 6/6. NEW
+test/horcrux-orgchart.test.js 12/12. Gates: sweep 142/142 + all
+lints + audit 296 THREW(0) + npm test 15 + test-all/test-core 0.
 Pass 88 (74ac92a): habitat/RLS call-point fairness + prime's #105–#110. Survey verdict: habitat/RLS call points
 were already factory-clean (no raw state writes outside habitat.js);
 the real unfairness = fresh processes didn't inherit authority +
