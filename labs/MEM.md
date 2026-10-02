@@ -7,7 +7,46 @@
 
 ## Handoff
 
-**Last known good commit:** pass 86 — #4 MCP auth ctx via habitat tokens.
+**Last known good commit:** pass 87 — #6 agora/mesh tenancy. RANKED
+LIST CLOSED: verified it is EXACTLY #1–#6 (82✓ 83✓ 84✓ 85✓ 86✓ 87✓,
+no #7 anywhere); only non-numbered queued items remain: whitepaper
+rewrite + TASKS/MEM → vant-native (notify board/memory). Owner also
+bringing up a second runtime ("Buffy + Cairn + TBA") — hence tenancy.
+lib/forum.js: subject chain same as islands/memory (userCtx → current
+agent identity → anonymous); commons semantics (workspaceless = global
+pre-87 behavior preserved; tenant pub invisible to anonymous FAIL
+CLOSED, get() found:false no leak; own ws + ANY registry role in the
+pub's ws = visible); publish stamps workspace/authorAgentId, pins
+enforced ('' = global, foreign pin needs role → workspace_denied,
+invalid → invalid_workspace); list() filtered + tenancy meta.
+CRITICAL PRE-EXISTING FIX: module shims `list: () => forum.list()` /
+`get: bc => forum.get(bc)` DROPPED opts — mcp.js holds the MODULE not
+the singleton, so forum_list/forum_get were always tenancy-blind
+anonymous (the whole MCP member-list mystery: handler resolved userCtx
+correctly, shim discarded it one frame later). Shims forward opts now.
+mcp +2 forum_publish/forum_list = 296 tools audit THREW(0); bin/forum.js
+rebuilt REAL (was pass-81 facade); shareableReport tenancy block +
+peer workspace; node-registry register(). SECOND PRE-EXISTING FIX
+(differentiated via worktree @ HEAD — pass-86 code failed identically
+in clean env): Habitat never CREATED the declared default workspace →
+fresh process addRole('default') threw HABITAT_UNKNOWN_WORKSPACE,
+masked until now by a _habitat state containing 'default' that
+disappeared. _ensureDefaultWorkspace() idempotent + PERSIST-FREE
+(createWorkspace auto-persists; constructor-time save would race the
+restore chain) in ctor + after restore() replace; createWorkspace
+got skipPersist. SPAWN-RESTORE RACE documented: spawn provisions
+sync before async restore() resolves → restore clobbers → tests must
+await getSharedReady() BEFORE spawn (agora-tenancy test fixed; no
+code change — spawn contract is sync). Publications memory-only across
+processes (no hydrate — forum:pub:* write-only): CLI e2e posts+lists in
+ONE child (argv swap); Forum hydration = follow-up. NEW SUITE
+test/agora-tenancy.test.js 12/12. Docs: rls.md "Agora tenancy (pass
+87)", mcp-tools forum entries, cli.md forum row. Gates: FULL sweep
+142/142 (chunked per-suite — run-all exceeds 175s cap, pass-45
+precedent; crew-bus + agents-split flakes re-verified standalone),
+npm test 15, test-all 17, test-core 5, all key suites green, 3 lints,
+eslint touched 0 errors, audit 296 THREW(0).
+Pass 86 (c686c41): #4 MCP auth ctx via habitat tokens.
 habitat.mintToken/verifyToken/revokeToken/listTokens: bearer tokens
 anchored to habitat identities (raw shown once, sha256 hash persisted
 in _habitat state row). Verify = registry-verified agentContext at USE

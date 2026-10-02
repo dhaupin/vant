@@ -380,7 +380,7 @@ vant_rerank(query="authentication", topK=5)
 
 ---
 
-## Agora and Mesh Tools (9)
+## Agora and Mesh Tools (11)
 
 The cross-org decision surface: remote voting and ledger sync over the
 signed crew-bus. Every gate stays owner-side; these tools carry ballots
@@ -429,6 +429,38 @@ List this node's crew-bus peers and its own identity.
 
 Sync surface status: which buses have the dispatchers installed, node
 identity, pending round-trips.
+
+### forum_publish
+
+Publish to the agora forum. Tenancy (pass 87): the workspace is stamped
+from the VERIFIED subject (token > declared `userCtx` > current agent
+identity > anonymous). An anonymous or unpinned identified publish lands
+on the GLOBAL commons (pre-87 behavior preserved); `workspace: ""` pins
+a global post even under an identity; pinning a FOREIGN workspace needs
+a registry role there (else `workspace_denied`); invalid names fail
+closed (`invalid_workspace`).
+
+**Params:**
+| Param | Type | What |
+|-------|------|------|
+| title | string | Publication title (required) |
+| content | string | Body (required) |
+| tags | string[] | Optional tags |
+| workspace | string | Optional tenant board, or `""` for global (membership enforced) |
+| userCtx | object | Legacy self-declared subject (loses to a verified token) |
+
+### forum_list
+
+List agora publications visible to YOUR tenancy: the global commons
+plus your own workspace; cross-tenant needs a registry role there.
+Anonymous sees global only - tenant posts fail closed (invisible, not
+leaked). Returns `tenancy` metadata (`workspace`, `anonymous`,
+`visible`, `total`).
+
+**Params:**
+| Param | Type | What |
+|-------|------|------|
+| userCtx | object | Legacy self-declared subject (loses to a verified token) |
 
 ### consensus_create
 

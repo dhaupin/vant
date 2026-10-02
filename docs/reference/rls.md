@@ -200,6 +200,32 @@ make identity verified, not claimed:
   future process). Tokens survive cold processes via the durable
   habitat role rows, not the memory-only agents registry.
 
+## Agora tenancy (pass 87)
+
+The forum is a COMMONS, not a vault - so its workspace semantics are
+the mirror image of the memory namespaces (which isolate):
+
+- Workspaceless publications are GLOBAL: every caller, including
+  anonymous, sees them. All pre-87 posts stay visible - nothing broke.
+- Workspace-tagged publications are visible ONLY to their tenant and to
+  subjects holding a registry role in that workspace (cross-tenant
+  moderation). Anonymous callers never see tenant posts: fail closed,
+  and `get()` answers `found: false` - the same shape as a miss, so
+  existence is not leaked.
+- The subject chain is the ONE shared with islands (pass 84) and memory
+  (pass 85): explicit `userCtx` -> current agent's habitat identity ->
+  anonymous. Over MCP it rides the pass-86 priority: verified token >
+  declared `userCtx` > current agent identity > anonymous.
+- `publish()` stamps `workspace` + `authorAgentId` from the resolved
+  subject. An explicit `workspace` pin must equal the subject's own
+  workspace or a registry role held there (`workspace_denied`
+  otherwise); `workspace: ""` pins a global post; invalid names fail
+  closed (`invalid_workspace`).
+- Surfaces: MCP `forum_publish` / `forum_list`, CLI `vant forum
+  list|post|view` (tenancy-aware output), and mesh provenance:
+  `shareableReport` carries the viewer's tenancy block and registered
+  peers expose their `workspace`.
+
 ## Persistence
 
 Workspaces, roles, and boundaries persist to the brain state store

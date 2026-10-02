@@ -1,8 +1,109 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-10-01  
-**Session:** Pass 86 — #4 MCP auth ctx via habitat tokens (verified identity)
+**Last Updated:** 2026-10-02  
+**Session:** Pass 87 — #6 agora/mesh tenancy (ranked list CLOSED)
+
+---
+
+## Session (2026-10-02 — pass 87: #6 mesh/agora tenancy)
+
+Owner: "We missed one # I think, make sure it's not lost, but let's
+def hit #6 next. Bringing a fellow runtime up atm. Buffy + Cairn + TBA
+let's see!" → worked #6, AND re-verified the list: it is EXACTLY
+#1–#6, nothing was ever missed. Full closure:
+- **#1** agents→habitat identity + RLS online (pass 82 ✓)
+- **#2** escrow workspace budgets (pass 83 ✓)
+- **#3** island boundaries enforced at load (pass 84 ✓)
+- **#5** per-workspace memory namespacing (pass 85 ✓)
+- **#4** MCP auth ctx via habitat tokens (pass 86 ✓)
+- **#6** mesh/agora tenancy (pass 87 ✓ — this pass)
+The only non-numbered items still queued (deliberate, never part of
+the ranked list): **whitepaper rewrite** + **TASKS/MEM → vant-native
+(notify board/memory)**. No #7 exists anywhere (pass-81/82/84 blocks,
+learnings, PRDs all re-checked).
+
+**lib/forum.js — agora tenancy (the commons, not a vault):**
+- Subject chain = the ONE shared with islands(84)/memory(85):
+  explicit userCtx → current agent habitat identity → anonymous
+  (_tenancySubject). MCP layer adds the pass-86 priority on top
+  (verified token > declared > current agent > anonymous).
+- Visibility (_publicationVisible): workspaceless pub = GLOBAL commons
+  (pre-87 behavior preserved); tenant pub invisible to anonymous (fail
+  closed — get() returns {found:false, reason:'tenancy'}, same shape
+  as a miss, existence not leaked); own-workspace subject sees it;
+  subjects with ANY registry role in the pub's workspace see it
+  (cross-tenant moderation, computed live from habitat).
+- publish(): explicit options.workspace pin (own property — '' →
+  global; invalid name → invalid_workspace; foreign pin without a
+  registry role → workspace_denied) else auto-stamps
+  publication.workspace + authorAgentId from the subject. list()
+  filters + returns tenancy meta {workspace, anonymous, visible, total}.
+- **CRITICAL PRE-EXISTING BUG FOUND+FIXED:** module.exports shims
+  `list: () => forum.list()` / `get: (bc) => forum.get(bc)` DROPPED
+  their trailing options arg — lib/mcp.js holds the MODULE (not the
+  singleton), so forum_list/forum_get ran tenancy-blind (always
+  anonymous) no matter the declared ctx. This was the whole "MCP
+  member-list missing tenant post" mystery: handler received and
+  resolved userCtx correctly (proven by instrumentation), the shim
+  discarded it one frame later. Shims now forward opts like publish.
+
+**lib/mcp.js:** NEW tools forum_publish + forum_list (296 total,
+audit THREW(0)/PHANTOM(0)), both _requestCtx-driven; pass-86
+_requestCtx tab-indent lint errors (mixed spaces/tabs 51-54) fixed.
+
+**bin/forum.js — rebuilt REAL** (pass-81-genre facade before: printed
+"✅ Posted" without touching lib, list always "(none)"): list/post/view/
+message all through lib/forum.js, tenancy-aware output.
+
+**Mesh provenance:** mesh-status.shareableReport gains tenancy block
+{workspace, agentId} + registry peers expose workspace; node-registry
+register() accepts entry.workspace (additive/optional, state-store
+persistent).
+
+**PRE-EXISTING BUG (differentiated, not pass-87's):** island-boundaries
+failed 13/14 (HABITAT_UNKNOWN_WORKSPACE: default). Proved NOT our diff
+via `git worktree add /tmp/vant-head HEAD` — pass-86 code fails
+IDENTICALLY in a clean env. Root cause: Habitat declares
+defaultWorkspace='default' but never CREATED it (fresh process:
+workspaces={} until provisioning); a persisted _habitat state that
+happened to contain 'default' had masked the hole, then vanished.
+FIX: _ensureDefaultWorkspace() — idempotent, PERSIST-FREE by design
+(createWorkspace auto-persists; a constructor-time save would race the
+getShared() restore chain and clobber real disk state with a
+near-empty snapshot). Called in the constructor + after restore()'s
+wholesale replace; createWorkspace gained skipPersist.
+
+**Spawn-restore race (documented, test-disciplined):** spawn()
+provisions habitat SYNCHRONOUSLY before getShared()'s async restore()
+resolves; restore replaces workspaces/roles wholesale → provisioning
+evaporates (HABITAT_UNKNOWN_WORKSPACE org-ago). Fix pattern = await
+habitat.getSharedReady() BEFORE any spawn (habitat-rls precedent; now
+also top of agora-tenancy test). Not code-fixed: spawn() is sync and
+many suites depend on that contract — noted for a future pass.
+
+**Memory-only across processes:** forum publications are NOT hydrated
+from brain (saveToBrain writes forum:pub:<barcode>; no load path — the
+pass-77 amnesia genre). CLI e2e therefore does post+list in ONE child
+process (argv-swap, the workspace-memory --as pattern). Forum hydration
+= follow-up.
+
+**Tests:** NEW test/agora-tenancy.test.js 12/12 (stamp/pin matrix,
+visibility incl. cross-tenant registry admin live add+remove, get()
+non-leak, MCP verified-ctx chain, mesh provenance, CLI round-trip).
+
+**Docs:** rls.md "Agora tenancy (pass 87)"; mcp-tools Agora section
+gained forum_publish/forum_list ((11)); cli.md forum row now real
+(list/post/view/message, tenancy-aware).
+
+**Gates:** FULL sweep 142/142 (run-all exceeds the 175s cap — chunked
+per-suite per pass-45 precedent; flakes crew-bus + agents-split
+re-verified green standalone 20/20, 23/23), npm test 15/15, test-all
+17/17, test-core 5/5, agora-tenancy 12, habitat-token 15,
+habitat-rls 23, habitat 6, workspace-budget 22, island-boundaries 14,
+workspace-memory 21, memory 18, boot 15, mcp 6; lint:docs (129 files),
+lint:surface, lint:helpers; eslint touched 0 errors (29 pre-existing
+warnings mcp/forum); npm run check syntax OK; audit 296 THREW(0).
 
 ---
 
