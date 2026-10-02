@@ -22,6 +22,20 @@
 const transform = require('../lib/transform');
 
 const args = process.argv.slice(2);
+// (pass 92) -h/--help prints the subcommands instead of falling into the
+// dispatch switch as an unknown command and exiting 1.
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log('Usage: node bin/transform.js <command>');
+    console.log('');
+    console.log('  gather                 Gather basic data');
+    console.log('  full                   Gather EVERYTHING (full state)');
+    console.log('  horcrux <svg> <pass>   Create horcrux (SVG embed)');
+    console.log('  backup                 Full backup to JSON');
+    console.log('  extract <svg> <pass>   Decode horcrux, print data');
+    console.log('  restore <svg> <pass>   Decode + full restore');
+    console.log('  status                 Show security status');
+    process.exit(0);
+}
 const command = args[0];
 
 async function main() {

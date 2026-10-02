@@ -7,8 +7,35 @@
 
 ## Handoff
 
-**Last known good commit:** pass 91 — #113 + habitat/RLS
-adversarial QC. #113: horcrux create's auto-.ignore used
+**Last known good commit:** pass 92 — vapor hunt + CLI smoke
+gate + live-fire flake. Survey: first zero-ref grep gave 11 dead
+modules — FALSE ALARM, the pattern missed bin's '../lib/x'
+requires (zero truly dead; api.js MCP-live via autoWireCoreLibs;
+34 .catch(()=>{}) sites all documented-intentional; FileStorage
+.write is SYNC so no #109 persistence vapor in the 10 CLI flows;
+MCP 0 phantoms, 145 honest refusals; bot.js = honest token
+gate). Fixed: vant_agents_delegate_mcp + vant_agents_broadcast
+schemas had no `required` → {} passed validation and died as
+'Agent not found: undefined' (now MCP_INPUT_INVALID — remember
+mcp.execute returns validation failures as RESULT objects, not
+throws); CLI --help polish on vant.js (bare/-h/--help → help
+cmd), docs.js, transform.js, test-core.js (-h → modes list);
+live-fire webhook flake: 46000+pid%2000 collided with a platform
+listener on the link-local IP (169.254.0.21:46116) and the ss
+assertion grabbed the FIRST line matching the port (order
+unstable, flapped 1-in-3 standalone — NOT cli-smoke pollution,
+cli-smoke only reshuffles pids) → OS-assigned free port via
+net.listen(0) + assert OUR 127.0.0.1:PORT line + wildcard absence.
+NEW standing gate test/cli-smoke.test.js (node --check all 120
+bin CLIs + --help exit-0/usage on 118; skip bot.js token-gate,
+cli-standard.js template; auto-joins test-core full mode) — CLI
+rot now fails a gate, not a user. Gates: sweep 145/145 chunked,
+lints PASS, eslint touched 0 errors, npm run check, audit-mcp
+296 THREW(0), npm test 15/15, test-all/test-core exit 0. Queued
+(tonight, per owner): MEM/TASKS → vant-native + whitepaper
+rewrite; prime's #100–#112 still OPEN on GitHub (manual close
+after prime verifies).
+Pass 91 (dd94705): #113 + habitat/RLS adversarial QC. #113: horcrux create's auto-.ignore used
 REPO_ROOT = __dirname/.. (INSTALL root) → '../../..' escape
 chains from mounted sandbox cwds, file landed nowhere. Fix:
 workspace root = nearest ancestor (inclusive) of the CALLER's cwd

@@ -282,7 +282,10 @@ const COMMANDS = {
 };
 
 const args = process.argv.slice(2);
-const cmd = args[0];
+// (pass 92) -h/--help (or bare invocation) routes to the help command
+// instead of 'Unknown command' + exit 1 — every other vant CLI treats
+// -h as first-class, the dispatcher was the odd one out.
+let cmd = (!args[0] || args[0] === '-h' || args[0] === '--help') ? 'help' : args[0];
 if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
 
 // Handle: vant help <cmd>

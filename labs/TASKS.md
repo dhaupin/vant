@@ -2,7 +2,44 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-02  
-**Session:** Pass 91 — #113 horcrux .ignore workspace resolution + habitat/RLS adversarial QC/vuln scan
+**Session:** Pass 92 — vapor hunt (lib/cli/mcp) + CLI smoke gate + live-fire port flake
+
+---
+
+## Session (2026-10-02 — pass 92: stabilization sweep)
+
+Owner: hold MEM/TASKS/whitepaper; continue stabilizing + wiring
+axolotl — "other libs/cli/mcp may be vapor or not utilized."
+
+**Survey verdict: healthier than feared.** First zero-ref grep
+reported 11 dead modules — FALSE ALARM: the pattern missed bin's
+'../lib/x' requires (correct: `[./]*(lib/)?name`). Zero truly
+dead modules; api.js is MCP-live via autoWireCoreLibs. The 34
+.catch(()=>{}) sites triaged (rls fallbacks = pass-90 design;
+sudo revalidate tick + agents save chains = documented; no new
+vapor). FileStorage.write is SYNC → no #109 persistence vapor in
+the prune/notices/succession/resolution/skills CLI flows.
+MCP: 0 phantoms; 145 refusals all honest (125 schema +
+containment/cap fail-closed). bot.js = honest token gate.
+
+**Fixed:** (1) MCP schemas — vant_agents_delegate_mcp +
+vant_agents_broadcast had no `required`, so {} passed validation
+and died as 'Agent not found: undefined'; now MCP_INPUT_INVALID
+at the door (refusals 144→145). (2) CLI --help polish: vant.js
+(bare/-h/--help → help), docs.js, transform.js, test-core.js
+(-h → modes) — all exited 1 on --help before. (3) live-fire
+webhook flake: 46000+pid%2000 collided with a long-lived platform
+listener on the link-local IP; ss grabbed the FIRST matching line
+(order-unstable) → loopback pin flapped 1-in-3. Fix: OS-assigned
+free port + assert OUR 127.0.0.1:PORT line. Same class as pass-89
+4585. (4) NEW standing gate test/cli-smoke.test.js: node --check
+ALL 120 bin CLIs + --help exit-0/usage on 118 (skip bot.js,
+cli-standard.js) — CLI rot now fails a gate, not a user.
+
+**Gates:** sweep 145/145 chunked; cli-smoke 2/2; live-fire 26/26
+standalone AND after cli-smoke; lints PASS; eslint touched 0
+errors; npm run check; audit-mcp 296 THREW(0); npm test 15;
+test-all/test-core exit 0.
 
 ---
 

@@ -140,5 +140,15 @@ async function runTests(mode = 'smoke') {
 
 // CLI args
 const args = process.argv.slice(2);
+// (pass 92) -h/--help documents the modes instead of 'Unknown mode' + exit 1.
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log('Usage: node bin/test-core.js [mode]');
+    console.log('');
+    console.log('Modes:');
+    for (const m of Object.keys(TEST_MODES)) {
+        console.log('  ' + m.padEnd(8) + TEST_MODES[m].length + ' test file(s)');
+    }
+    process.exit(0);
+}
 const mode = args[0] || 'smoke';
 runTests(mode);

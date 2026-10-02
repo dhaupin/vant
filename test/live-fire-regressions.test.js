@@ -324,7 +324,19 @@ async function main() {
     });
 
     // ---------- 9+10: webhook HTTP posture over a real server ----------
-    const WH_PORT = 46000 + (process.pid % 2000);
+    // (pass 92) Probe an OS-assigned free loopback port instead of
+    // 46000 + pid%2000: pid arithmetic collided with a long-lived platform
+    // listener on the link-local IP, and the ss assertion below grabbed the
+    // FIRST line matching the port — order-unstable → flaky binds pin.
+    // net.listen(0) hands out a port free on 127.0.0.1 by construction.
+    const WH_PORT = await new Promise((resolve, reject) => {
+        const srv = require('net').createServer();
+        srv.listen(0, '127.0.0.1', () => {
+            const p = srv.address().port;
+            srv.close(() => resolve(p));
+        });
+        srv.on('error', reject);
+    });
     const ROUTE = 'pin-sec-route';
     const SECRET = 'pin-secret-42';
     webhooks.register({ name: ROUTE, source: ROUTE, eventKeyExpr: 'event', secret: SECRET });
@@ -366,9 +378,14 @@ async function main() {
     await test('webhook server binds loopback by default (ss, no wildcard)', async () => {
         const { execSync } = require('child_process');
         const ss = execSync('ss -ltn', { encoding: 'utf8' });
-        const line = ss.split('\n').find((l) => l.includes(':' + WH_PORT + ' ')) || '';
-        assert(/127\.0\.0\.1:\d+/.test(line), 'must bind 127.0.0.1, got: ' + line.trim());
-        assert(!/(0\.0\.0\.0|\*):\d+/.test(line.split(/\s+/).find((t) => t.includes(':' + WH_PORT)) || ''), 'must NOT bind wildcard, got: ' + line.trim());
+        const lines = ss.split('\n').filter((l) => l.includes(':' + WH_PORT + ' '));
+        // (pass 92) Match OUR loopback line specifically — another process
+        // may legitimately hold the same port number on a different address
+        // (link-local squatters) and ss output order is not stable.
+        const ours = lines.find((l) => l.includes('127.0.0.1:' + WH_PORT + ' ')) || '';
+        assert(ours, 'must bind 127.0.0.1:' + WH_PORT + ', ss lines for port: ' + (lines.join(' | ') || '(none)'));
+        const wildcard = lines.find((l) => /(0\.0\.0\.0|\*):\d+/.test(l)) || '';
+        assert(!wildcard, 'must NOT bind wildcard, got: ' + wildcard.trim());
     });
 
     whServer.close();

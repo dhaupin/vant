@@ -12,6 +12,15 @@ const { execSync } = require('child_process');
 const path = require('path');
 
 const args = process.argv.slice(2);
+// (pass 92) -h/--help documents the subcommands instead of falling into the
+// switch as an unknown command and exiting 1.
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log('Usage: vant docs [build|serve]');
+    console.log('');
+    console.log('  build   Build docs for release');
+    console.log('  serve   Serve docs locally (needs docsify)');
+    process.exit(0);
+}
 const command = args[0] || 'build';
 
 switch (command) {
