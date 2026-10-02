@@ -7,7 +7,32 @@
 
 ## Handoff
 
-**Last known good commit:** pass 94 — second-boot gate (10/10,
+**Last known good commit:** pass 95 — cross-process seams: roster
+merge + config persistence. Survey note: pass-95 work was already on
+disk (uncommitted) when this session resumed; it was INCOMPLETE.
+(1) ROSTER: lib/agents/internal.js cross-process merge — lockfile
+(agents.json.lock in the orgchart dir) + _seenIds tombstone +
+_noteAgentSeen; adoption of never-seen ids; _saveAgents() now takes
+NO param (writes _agents after the merge). test/roster-
+crossprocess.test.js 6/6 (4 concurrent children + tombstone gate).
+(2) CONFIG: lib/config.js setConfig() persists into the CURRENT
+brain config.json (loadBrainConfig/saveBrainConfig), bin/config.js
+set/get rewired; MCP vant_config_get/set were PURE STUBS → now real
++ required[] (audit OK→REFUSED +2). FINISHING SEAM: mcpRequireKey()/
+mcpApiKey() (the MCP auth gate's accessors) never read brain config,
+so `vant config set mcp.requireKey true` / `mcp.apiKey` were no-ops
+for a later server → new _brainConfigValue() bridge (env still
+wins). test/config-persistence.test.js 10/10 (cross-process +
+negative control). (3) lib/brain.js brainDirs skips dot-dirs
+(models/private/.locks was listed as a brain). (4) version.js
+comment: changelog is repo-root CHANGELOG.md, not docs/.
+Gates: sweep 149/149 chunked, lints PASS, eslint 0 errors, npm run
+check, audit-mcp 296 THREW(0)/REFUSED 147/OK 90, npm test 15/15,
+test-all/test-core exit 0. Queued: merge-readiness (axolotl→main);
+MEM/TASKS→vant-native + whitepaper (owner: later tonight); prime's
+#100–#112 still OPEN on GitHub (manual close after prime verifies).
+
+**Pass 94:** second-boot gate (10/10,
 ZERO product bugs — the existing-brain path is healthy).
 Verified by hand (boot1 seed → mutate → boot2 → boot3), then
 codified: no re-seed/clobber, identity sha-stable across boots,

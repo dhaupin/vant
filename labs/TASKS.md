@@ -2,7 +2,54 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-02  
-**Session:** Pass 94 — second-boot live fire: existing-brain path gated (healthy)
+**Session:** Pass 95 — cross-process seams: agent-roster merge + config persistence
+
+---
+
+## Session (2026-10-02 — pass 95: cross-process seams — roster merge + config persistence)
+
+Owner: "continue" — mid-pass-95 work was already on disk (uncommitted);
+survey found it INCOMPLETE and finished it.
+
+**Cross-process agent roster (lib/agents/internal.js):** pass 88
+serialized the SAME-process save chain, but separate CLI processes each
+held their own agents.json snapshot — 4 concurrent `vant agents spawn`
+invocations persisted only 3 entries (the write stayed atomic; the last
+writer clobbered). Every save now takes a short-lived lockfile in the
+orgchart dir, re-reads the disk roster, ADOPTS ids this process has never
+seen (_seenIds), and tombstones deletes (a killed/pruned id is never
+re-adopted — a stale peer snapshot can't resurrect it). _saveAgents() now
+takes no snapshot param: after the merge the only correct thing to write
+is _agents itself. NEW test/roster-crossprocess.test.js 6/6 (4 genuinely
+concurrent child spawns + a tombstone/adoption gate).
+
+**Config persistence (lib/config.js + bin/config.js):** `vant config set`
+called config.set() = setFlag() — an in-memory Map that died with the CLI
+process while printing "✓ Set k v", so a fresh `config get` always
+returned null. New setConfig() keeps the flag round-trip AND persists into
+the CURRENT brain's config.json; `vant config get` consults it.
+**MCP vant_config_get/set were PURE STUBS** ({value:null} /
+{status:'set'}) — the code comment even admitted it; now real, with
+required[] so empty args refuse at the door (audit OK→REFUSED +2).
+Finishing seam: the DEDICATED accessors mcpRequireKey()/mcpApiKey() that
+the MCP auth gate calls never read loadBrainConfig, so the documented
+`vant config set mcp.requireKey true` / `mcp.apiKey …` still did nothing
+to a later MCP server — new _brainConfigValue() bridge (env still wins,
+for deployment overrides). NEW test/config-persistence.test.js 10/10
+(cross-process; includes a negative control on an empty brain).
+
+**DOT-DIRS (lib/brain.js):** models/private/.locks was surfacing in
+brain_list / transform.gather as if it were a brain; brainDirs now skips
+dot-prefixed directories in both the public and private scans.
+
+**lib/version.js:** stale comment pointed version bumps at
+docs/CHANGELOG.md; the real changelog is repo-root CHANGELOG.md
+(bin/changelog.js reads it — docs/ has no changelog file).
+
+**Gates:** sweep 149/149 chunked; roster 6/6; config 10/10; lints PASS
+(docs 129 / surface / helpers); eslint touched 0 errors; npm run check;
+audit-mcp 296 THREW(0)/PHANTOM(0)/REFUSED 147/OK 90; npm test 15/15;
+test-all/test-core exit 0.
 
 ---
 
