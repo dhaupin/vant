@@ -2,7 +2,32 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-02  
-**Session:** Pass 93 — fresh-boot live fire: 3 real bugs + standing gate
+**Session:** Pass 94 — second-boot live fire: existing-brain path gated (healthy)
+
+---
+
+## Session (2026-10-02 — pass 94: second-boot live fire)
+
+Owner asked for the pass-93 companion: existing-brain boots.
+Verdict: **HEALTHY — zero product bugs** (first pass with no
+finds since the gates started earning their keep). Verified by
+hand then codified: no re-seed on boot 2 (no clobber), identity
+byte-identical (sha256), migrate idempotent, teams orgs + agent
+roster + habitat workspaces (incl. a created one) rehydrate in
+fresh processes, agent FIELD bindings env-correct across boots
+(pass-93 seam holds), vant brain untouched (orgchart byte-
+stable, 0 refs in state.json), no tree deletion across boots
+(pass-89 canvas class), honest sync/update refusals, MCP
+round-trip lands in the env brain. Probe gotchas recorded:
+agents.list() is ASYNC and PROJECTS {id,name,role,state,mcp}
+only — assert brain bindings via orgchart/agents.json (Map
+entry shape). transform.gather capturing ALL brains = documented
+multibrain full-capture, not a leak. NEW
+test/second-boot.test.js 10/10 (joins the sweep).
+
+**Gates:** sweep 147/147 chunked; second-boot 10/10; lints
+PASS; eslint touched 0 errors; npm run check; audit-mcp 296
+THREW(0); npm test 15; test-all/test-core exit 0.
 
 ---
 

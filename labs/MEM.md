@@ -7,7 +7,30 @@
 
 ## Handoff
 
-**Last known good commit:** pass 93 — fresh-boot live fire, 3
+**Last known good commit:** pass 94 — second-boot gate (10/10,
+ZERO product bugs — the existing-brain path is healthy).
+Verified by hand (boot1 seed → mutate → boot2 → boot3), then
+codified: no re-seed/clobber, identity sha-stable across boots,
+migrate idempotent, orgs/roster/workspaces rehydrate in fresh
+processes, agent FIELD bindings env-correct (pass-93 seam
+holds), vant brain byte-untouched (orgchart + state.json),
+no tree deletion (pass-89 canvas class), honest sync/update
+refusals, MCP round-trip in the env brain. PROBE GOTCHAS:
+agents.list() is ASYNC and PROJECTS {id,name,role,state,mcp}
+ONLY (brain stripped by design) — assert bindings via
+orgchart/agents.json [[id, agent], ...] Map shape;
+transform.gather capturing ALL brains = documented multibrain
+full-capture inventory, not a leak. Gate joins the sweep (147
+suites). ALSO this pass: transform.js gather/backup, horcrux
+create/inspect on an existing env brain verified (roster 2,
+2 orgs after 2 demos — unique-suffixed names, no guards
+tripped). Gates: sweep 147/147 chunked, lints PASS, eslint 0
+errors, npm run check, audit-mcp 296 THREW(0), npm test 15/15,
+test-all/test-core exit 0. Queued (tonight): MEM/TASKS →
+vant-native + whitepaper rewrite; merge-readiness next;
+prime's #100–#112 still OPEN on GitHub (manual close after
+prime verifies).
+Pass 93 (5bfb521): fresh-boot live fire, 3
 real bugs + standing gate. (1) SEED SEAM: bin/start.js
 seedStarterBrain read state.json stack[0] ONLY, ignored
 VANT_BRAIN → env-brain starts found the default brain populated
