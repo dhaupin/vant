@@ -2,7 +2,53 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-02  
-**Session:** Pass 90 — RLS hookups: enforcement-vapor closed (sync core + explicit-ctx doctrine)
+**Session:** Pass 91 — #113 horcrux .ignore workspace resolution + habitat/RLS adversarial QC/vuln scan
+
+---
+
+## Session (2026-10-02 — pass 91: #113 + habitat/RLS QC scan)
+
+Owner: "Prime found #113; run qc/edge/vulns scans on habitat +
+rls."
+
+**#113:** horcrux create's auto-.ignore built its path from
+REPO_ROOT = __dirname/.. (the INSTALL root) — from a mounted
+sandbox cwd that yields '../../..' escape chains and the file
+lands nowhere. Fixed: resolve the WORKSPACE root from the caller's
+cwd (nearest ancestor with .git/ or models/), write root-relative
+globs; stone outside workspace → skip with hint; no marker →
+stone's own dir. e2e-proven from a temp workspace; #100 suite
+12/12 still.
+
+**QC/vuln scan (habitat + rls):** the naive ({}).polluted probe
+MISSes the real class — on plain-object maps, map['__proto__'] =
+x REPLACES the prototype (missing-key fallthrough corruption),
+and goes GLOBAL only when the write lands on a prototype object.
+Fixed with safeMapKey/safeMapAssign guards at every write gate:
+- P1 createWorkspace('__proto__') → workspaces proto replaced
+- P2 setPolicy('__proto__') + policy-FIELD '__proto__' → direct
+  RLS bypass shape (poisoned policy = writableBy public)
+- P3 module restoreState configs raw Object.assign (stones!)
+- P4 provisionAgent(workspace '__proto__') → exists-check fell
+  through the proto chain → roles['__proto__']['editor'] = [] =
+  GLOBAL Object.prototype pollution (sharpest variant)
+- P5 instance restore() of a crafted snapshot → all RLS maps
+  corrupted in every fresh process hydrated from a malicious
+  stone (stones are the SANCTIONED cross-process transport)
+- P1b setWorkspace('__proto__') accepted via fallthrough
+- token-cache role confusion: cached ctx kept tenant-A roles
+  after the session workspace moved to B (re-derived now)
+- rls.middleware: x-workspace HEADER pivoted the process-global
+  session workspace (no live callers; req.rlsWorkspace now)
+Held/verified solid: generateCaps fail-closed tenancy (pass 82)
+blocks fabricated workspaces even on a polluted map; evaluate()
+mask/filter paths are spec-safe; canSync/parity intact.
+
+**Gates:** sweep 144/144 chunked; NEW test/habitat-rls-qc.test.js
+13/13; horcrux-orgchart 12/12 + rls-hookups 19/19 + all
+habitat/sandbox/teams/security suites green; lints PASS; eslint
+touched 0 errors; npm run check; audit-mcp 296 THREW(0); npm test
+15; test-all/test-core exit 0.
 
 ---
 

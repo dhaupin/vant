@@ -7,8 +7,42 @@
 
 ## Handoff
 
-**Last known good commit:** pass 90 — RLS hookups: enforcement
-vapor closed. Survey (owner: "more habitat/rls hookups?") found
+**Last known good commit:** pass 91 — #113 + habitat/RLS
+adversarial QC. #113: horcrux create's auto-.ignore used
+REPO_ROOT = __dirname/.. (INSTALL root) → '../../..' escape
+chains from mounted sandbox cwds, file landed nowhere. Fix:
+workspace root = nearest ancestor (inclusive) of the CALLER's cwd
+with .git/ or models/; root-relative globs; stone outside → skip
+with hint; no marker → stone's own dir (rg nearest-.ignore rule).
+e2e-proven from a temp workspace; #100 suite 12/12 still.
+QC scan lesson: ({}).polluted MISSES the real class — on plain
+maps map['__proto__'] = x REPLACES the prototype (missing-key
+fallthrough corruption); global only when the write lands on a
+prototype object. Probed + fixed with safeMapKey/safeMapAssign at
+every write gate: createWorkspace, setPolicy (resource AND policy
+fields — a poisoned policy with writableBy public is a direct RLS
+bypass), provisionAgent (validate BEFORE the exists-lookup — the
+lookup itself falls through and 'exists'), addRole/removeRole,
+instance restore() (all 4 maps + defaultWorkspace) and module
+restoreState configs — P3/P5 matter because HORCRUX STONES are
+the sanctioned cross-process transport of that state: a crafted
+stone corrupted every fresh process's RLS maps at boot. Also:
+token-cache role confusion (cached ctx kept tenant-A roles after
+a workspace switch — re-derived via _baseRoles), rls.middleware
+x-workspace HEADER pivoted the process-global session workspace
+(no live callers; req.rlsWorkspace now). HELD SOLID:
+generateCaps fail-closed tenancy (pass 82) blocks fabricated
+workspaces even on a polluted map; evaluate() mask/filter spec-
+safe. Tenant-shaped test resources need setPolicy({container:
+ws}) — cross-tenant admin is DENIED by design (pass-82
+isolation), don't misread as regression. NEW
+test/habitat-rls-qc.test.js 13/13. Gates: sweep 144/144 chunked,
+lints PASS, eslint touched 0 errors, npm run check, audit-mcp 296
+THREW(0), npm test 15/15, test-all/test-core exit 0. Queued:
+whitepaper rewrite, TASKS/MEM → vant-native; prime's #100–#112
+still OPEN on GitHub (keywords auto-close only on default branch
+— manual close after prime verifies).
+Pass 90 (9ebe920): RLS hookups: enforcement vapor closed. Survey (owner: "more habitat/rls hookups?") found
 the RLS carrier chain mostly VAPOR: 10 sites fired ASYNC
 rls.checkRead/checkWrite from SYNC code un-awaited (brain 3209 —
 dream was the only awaited site — storage, islands, lineage, msg,

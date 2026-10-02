@@ -233,21 +233,44 @@ async function run() {
         // ciphertext; a repo-wide match echoes the whole wall. Auto-ensure a
         // repo-root .ignore covers the stone's directory (ripgrep honors it,
         // git does NOT — the stone stays tracked for disaster recovery).
+        // (pass 91 — prime #113) The .ignore must live at the WORKSPACE root
+        // (where the caller runs vant / where rg walks), NOT the install
+        // root: REPO_ROOT is __dirname/.., so when vant runs from a global
+        // install or a cwd unrelated to the install tree, path.relative
+        // produced '../../..' escape chains and the file landed nowhere
+        // (mounted sandbox roots). Resolve the workspace from the caller's
+        // cwd — nearest ancestor (inclusive) holding .git or models/ — and
+        // write workspace-root-relative globs. Stone outside the workspace
+        // → skip with a hint instead of silently writing the wrong tree;
+        // no ancestor marker at all → fall back to the stone's own dir
+        // (rg applies the nearest .ignore, so a sibling .ignore still works).
         try {
             const fs = require('fs');
-            const relStone = path.relative(REPO_ROOT, path.resolve(result.path || outputPath));
-            const stoneGlob = path.join(path.dirname(relStone), '*.svg');
-            const ignorePath = path.join(REPO_ROOT, '.ignore');
-            let ignore = '';
-            if (fs.existsSync(ignorePath)) ignore = fs.readFileSync(ignorePath, 'utf8');
-            const dirPattern = path.dirname(relStone).split(path.sep).join('/') + '/*.svg';
-            if (!ignore.split(/\r?\n/).some(l => l.trim() === dirPattern)) {
-                const note = ignore.trimEnd()
-                    + '\n\n# horcrux stone (auto-added by vant horcrux create, prime #100):\n'
-                    + '# one ~800KB+ base64 line per stone — search tools: skip, git: keep tracking.\n'
-                    + dirPattern + '\n';
-                fs.writeFileSync(ignorePath, note);
-                console.log('Search hygiene: added ' + dirPattern + ' to .ignore (stones stay git-tracked).');
+            let wsRoot = path.resolve(process.cwd());
+            while (true) {
+                if (fs.existsSync(path.join(wsRoot, '.git')) || fs.existsSync(path.join(wsRoot, 'models'))) break;
+                const parent = path.dirname(wsRoot);
+                if (parent === wsRoot) { wsRoot = null; break; }
+                wsRoot = parent;
+            }
+            const stoneAbs = path.resolve(result.path || outputPath);
+            if (!wsRoot) wsRoot = path.dirname(stoneAbs);
+            const relStone = path.relative(wsRoot, stoneAbs);
+            if (relStone.startsWith('..') || path.isAbsolute(relStone)) {
+                console.log('Search hygiene skipped: stone is outside the workspace root (' + wsRoot + ').');
+            } else {
+                const dirPattern = path.dirname(relStone).split(path.sep).join('/') + '/*.svg';
+                const ignorePath = path.join(wsRoot, '.ignore');
+                let ignore = '';
+                if (fs.existsSync(ignorePath)) ignore = fs.readFileSync(ignorePath, 'utf8');
+                if (!ignore.split(/\r?\n/).some(l => l.trim() === dirPattern)) {
+                    const note = ignore.trimEnd()
+                        + '\n\n# horcrux stone (auto-added by vant horcrux create, prime #100):\n'
+                        + '# one ~800KB+ base64 line per stone — search tools: skip, git: keep tracking.\n'
+                        + dirPattern + '\n';
+                    fs.writeFileSync(ignorePath, note);
+                    console.log('Search hygiene: added ' + dirPattern + ' to ' + ignorePath + ' (stones stay git-tracked).');
+                }
             }
         } catch (e) { /* non-fatal — hint only */ }
 
