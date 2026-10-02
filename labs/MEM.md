@@ -7,7 +7,37 @@
 
 ## Handoff
 
-**Last known good commit:** pass 92 — vapor hunt + CLI smoke
+**Last known good commit:** pass 93 — fresh-boot live fire, 3
+real bugs + standing gate. (1) SEED SEAM: bin/start.js
+seedStarterBrain read state.json stack[0] ONLY, ignored
+VANT_BRAIN → env-brain starts found the default brain populated
+and never seeded → every env-scoped fresh brain woke with NO
+identity/goals/lessons (health: "in use, scaffold skipped"
+forever). Fixed via state-store.currentBrain(). (2) SPAWN-
+BINDING: lib/agents/core.js bound the agent's brain FIELD via
+bare Brain.currentBrain() while the ROSTER persisted in the env
+brain (teams.getAgentBrain/writeTo targeted the wrong brain
+forever); teams.js:1027 first-assign fallback same. Both
+state-store-aware now; proven via org demo on-disk records.
+(3) SUMMARY STUB: bin/summary.js canned placeholder was PINNED
+by test-all's output check; rewrote as real brain-derived
+summary + fixed --json parsed from argv.slice(3) (never fired).
+Worked first try: boot chain, org demo e2e, hybrid search,
+learn, MCP HTTP 296 tools + write/read round-trip landing in
+the env brain. autoWireCoreLibs (mcp.js:3182) stays COMMENTED
+OUT — superseded by 153 explicit vant_* tools (its generic args
+shape bypasses per-tool validation). LAYER MAP: brain.write(
+category,key) = memory STORE layer, brain.read(name)/MCP
+brain_read = flat brain-FILE layer — don't mix in probes.
+NEW test/live-fresh-boot.test.js 5/5 (fresh brain → boot seeds →
+health clean → org demo binds env brain → summary real → MCP
+HTTP round-trip; scratch brain p93-live-fresh, probed MCP port).
+Gates: sweep 146/146 chunked, neighbors green, lints PASS,
+eslint touched 0 errors, npm run check, audit-mcp 296 THREW(0),
+npm test 15/15, test-all/test-core exit 0. Queued (tonight):
+MEM/TASKS → vant-native + whitepaper rewrite; prime's #100–#112
+still OPEN on GitHub (manual close after prime verifies).
+Pass 92 (2776ee2): vapor hunt + CLI smoke
 gate + live-fire flake. Survey: first zero-ref grep gave 11 dead
 modules — FALSE ALARM, the pattern missed bin's '../lib/x'
 requires (zero truly dead; api.js MCP-live via autoWireCoreLibs;

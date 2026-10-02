@@ -2,7 +2,53 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-02  
-**Session:** Pass 92 — vapor hunt (lib/cli/mcp) + CLI smoke gate + live-fire port flake
+**Session:** Pass 93 — fresh-boot live fire: 3 real bugs + standing gate
+
+---
+
+## Session (2026-10-02 — pass 93: fresh-boot live fire)
+
+Owner: "have we ACTUALLY tried running axolotl fresh? Live
+fires? cli/mcp? I bet there's lots we will find." Correct:
+three real fresh-brain bugs, invisible to the component suites.
+
+**SEED SEAM (bin/start.js):** seedStarterBrain read brain name
+from state.json stack[0] only, ignoring VANT_BRAIN — env-brain
+starts found the DEFAULT brain populated and never seeded, so
+every env-scoped fresh brain woke with no identity/goals/lessons
+("brain is in use, scaffold skipped" forever). Now resolves via
+state-store.currentBrain() (pass-88 seam).
+
+**SPAWN-BINDING seam (lib/agents/core.js + teams.js:1027):**
+agents spawned under an env brain were FIELD-bound to 'vant'
+while their roster persisted in the env brain —
+teams.getAgentBrain/writeTo targeted the wrong brain forever.
+Both bare currentBrain() fallbacks now state-store-aware.
+Proven: org demo agent carries the env brain name on disk.
+
+**SUMMARY STUB (bin/summary.js):** canned placeholder PINNED by
+test-all's output check. Rewrote as a real brain-derived summary
+(identity name, goals/lessons bullets, ledger count, honest
+empty-brain message) + fixed --json parsed from argv.slice(3)
+(never fired on `vant summary --json`).
+
+**Worked first try:** boot migrate→health chain; org demo
+end-to-end w/ flush discipline; hybrid search; learn; MCP over
+HTTP (296 tools, /health//tools//mcp/exec, write→read lands in
+the env brain). autoWireCoreLibs stays dead: superseded by 153
+explicit vant_* tools with real schemas.
+
+**Layer map:** brain.write(category,key) = memory store layer;
+brain.read(name)/MCP brain_read = flat brain-FILE layer — don't
+mix in probes ('Brain not found' = layer confusion).
+
+**NEW test/live-fresh-boot.test.js 5/5** — the standing live
+fire: fresh brain → boot seeds → health clean → org demo binds
+correctly → summary real → MCP HTTP round-trip in the env brain.
+
+**Gates:** sweep 146/146 chunked; neighbors green; lints PASS;
+eslint touched 0 errors; npm run check; audit-mcp 296 THREW(0);
+npm test 15; test-all/test-core exit 0.
 
 ---
 

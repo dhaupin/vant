@@ -37,16 +37,27 @@ const BIN_DIR = __dirname;
  * CWD-relative models/ paths, so seeding must match that root.
  */
 function seedStarterBrain() {
-    // Brain name: first entry of the layout stack, else 'vant'
+    // Brain name: (pass 93) resolve via state-store's path-active resolver
+    // (VANT_BRAIN env > stack[0]) — the SAME seam agents/teams got in passes
+    // 88/93. The raw stack[0] lookup ignored VANT_BRAIN, so `VANT_BRAIN=x
+    // vant start` checked the DEFAULT brain for existing .md files, found
+    // it populated, and never seeded the env brain — every env-scoped fresh
+    // brain woke with no identity/goals/lessons ("brain is in use, scaffold
+    // skipped" in health) and stayed that way forever.
     let brainName = 'vant';
-    const statePath = path.join('models', 'state.json');
     try {
-        const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
-        if (Array.isArray(state.stack) && state.stack.length &&
-            /^[A-Za-z0-9_-]+$/.test(state.stack[0])) {
-            brainName = state.stack[0];
-        }
-    } catch (e) { /* no state yet - default name */ }
+        const stateStore = require('../lib/state-store');
+        brainName = stateStore.currentBrain() || 'vant';
+    } catch (e) {
+        const statePath = path.join('models', 'state.json');
+        try {
+            const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+            if (Array.isArray(state.stack) && state.stack.length &&
+                /^[A-Za-z0-9_-]+$/.test(state.stack[0])) {
+                brainName = state.stack[0];
+            }
+        } catch (e2) { /* no state yet - default name */ }
+    }
 
     const brainDir = path.join('models', 'private', brainName);
     try {
