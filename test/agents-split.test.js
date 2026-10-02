@@ -62,7 +62,9 @@ const readLib = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 // (pass 82) `agentContext` is a DELIBERATE addition: delegates to
 // habitat.agentContext() so spawned agents present an RLS subject. Added
 // to the expected surface instead of reverting the feature.
-const PRE_SPLIT_EXPORTS = ["Agents","agentContext","approve","clearCache","completeWork","delegate","delegateAsync","emit","escalate","fork","gatherState","get","getBrainAgentsConfig","getCurrentAgentId","getLayerStatus","getMaxAgents","getMetrics","getStackAgentsConfigs","getStatus","isOperationAllowed","join","kill","list","listFolders","listProtos","loadChain","loadFolder","loadProto","on","pause","pollWork","prune","reject","restoreState","resume","retry","setBrainAgentsConfig","setCurrentAgentId","setDeadline","setPriority","signOff","spawn","startMCP","terminate"];
+// (pass 88) `flush` is a DELIBERATE addition (prime #109): drains the
+// serialized agent-roster save chain so CLI flows can't race process exit.
+const PRE_SPLIT_EXPORTS = ["Agents","agentContext","approve","clearCache","completeWork","delegate","delegateAsync","emit","escalate","flush","fork","gatherState","get","getBrainAgentsConfig","getCurrentAgentId","getLayerStatus","getMaxAgents","getMetrics","getStackAgentsConfigs","getStatus","isOperationAllowed","join","kill","list","listFolders","listProtos","loadChain","loadFolder","loadProto","on","pause","pollWork","prune","reject","restoreState","resume","retry","setBrainAgentsConfig","setCurrentAgentId","setDeadline","setPriority","signOff","spawn","startMCP","terminate"];
 
 // ---------- 1. Facade contract ----------
 

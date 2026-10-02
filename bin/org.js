@@ -42,6 +42,13 @@ async function main() {
         return config.get('orgchart.operatorScopes', null, { brain });
     }
 
+    // (pass 88) Persisted capabilities — boot widens fresh processes with
+    // these (lib/boot.js), closing the two-layer grant trap.
+    function getOperatorCaps() {
+        const brain = require('../lib/brain').getCurrentBrain();
+        return config.get('orgchart.operatorCapabilities', null, { brain });
+    }
+
     if (cmd === 'status' || cmd === '--status') {
         const ds = sandbox.defaultSandbox;
         console.log('Org operator status:');
@@ -49,33 +56,43 @@ async function main() {
         console.log('  canWrite:', sandbox.canWrite(), ' canSpawn:', sandbox.canSpawn());
         console.log('  explicitlyConfigured:', !!ds._explicitlyConfigured);
         console.log('  config orgchart.operatorScopes:', JSON.stringify(getOperatorScopes()));
+        console.log('  config orgchart.operatorCapabilities:', JSON.stringify(getOperatorCaps()));
+        console.log('  (boot applies persisted capabilities in every fresh process — pass 88)');
         return;
     }
 
     if (cmd === 'config') {
-        const i = args.indexOf('--set-operator-scopes');
-        if (i === -1) {
-            console.log('Usage: vant org config --set-operator-scopes read,write,spawn,execute');
-            console.log('Persists scopes applied by "vant org grant" when no --scopes given.');
+        const si = args.indexOf('--set-operator-scopes');
+        const ci = args.indexOf('--set-operator-caps');
+        if (si === -1 && ci === -1) {
+            console.log('Usage: vant org config --set-operator-scopes read,write,spawn,execute [--set-operator-caps canRead,canWrite,canSpawn]');
+            console.log('Persists the operator grant applied by boot in every fresh process.');
             return;
         }
-        const scopes = parseList(args[i + 1]);
-        if (!scopes.length) { console.error('No scopes given'); process.exit(1); }
-        // Persist in the brain's config.json (survives across processes;
-        // config.setFlag is an in-memory runtime map and never persisted,
-        // so the old setFlag call silently lost the value on next boot).
-        // Read back through config.get('orgchart.operatorScopes') - the
-        // same key 'grant' and 'status' consult.
         const brain = require('../lib/brain').getCurrentBrain();
         const existing = config.loadBrainConfig(brain) || {};
-        const merged = { ...existing, orgchart: { ...(existing.orgchart || {}), operatorScopes: scopes } };
+        const orgchart = { ...(existing.orgchart || {}) };
+        if (si !== -1) {
+            const scopes = parseList(args[si + 1]);
+            if (!scopes.length) { console.error('No scopes given'); process.exit(1); }
+            orgchart.operatorScopes = scopes;
+        }
+        if (ci !== -1) {
+            const capNames = parseList(args[ci + 1]);
+            if (!capNames.length) { console.error('No capabilities given'); process.exit(1); }
+            const capObj = {};
+            for (const c of capNames) capObj[c] = true;
+            orgchart.operatorCapabilities = capObj;
+        }
+        const merged = { ...existing, orgchart };
         const saved = config.saveBrainConfig(brain, merged);
         if (!saved) {
-            console.error('Could not persist orgchart.operatorScopes (brain config write failed).');
+            console.error('Could not persist operator grant (brain config write failed).');
             process.exit(1);
         }
-        console.log('Saved orgchart.operatorScopes =', JSON.stringify(scopes));
-        console.log('  (persisted in brain config for: ' + brain + ')');
+        if (orgchart.operatorScopes) console.log('Saved orgchart.operatorScopes =', JSON.stringify(orgchart.operatorScopes));
+        if (orgchart.operatorCapabilities) console.log('Saved orgchart.operatorCapabilities =', JSON.stringify(orgchart.operatorCapabilities));
+        console.log('  (persisted in brain config for: ' + brain + '; boot widens fresh processes)');
         return;
     }
 
@@ -101,12 +118,17 @@ async function main() {
         console.log('  agent:', agent.id, agent.name, 'brain:', agent.brain);
         console.log('  assign:', assignment && !assignment.error ? 'OK (brain: ' + assignment.brain + ')' : JSON.stringify(assignment));
         console.log("\nClean up with: teams.deleteOrg('" + org.id + "') or teams.deleteOrg('" + org.id + "', {dryRun:true}) to preview cascade");
+        // (pass 88 — prime #109) The spawn's persistence is async; exiting
+        // before it lands silently lost the agent (agents.json never
+        // written). Drain the save chain before exit.
+        await agents.flush();
         return;
     }
 
     if (cmd === 'grant' || cmd === '--grant') {
         const si = args.indexOf('--scopes');
         const ci = args.indexOf('--capabilities');
+        const sessionOnly = args.includes('--session-only');
         const scopes = si !== -1 ? parseList(args[si + 1])
             : (getOperatorScopes() || OPERATOR_DEFAULT);
         const caps = ci !== -1 ? parseList(args[ci + 1]) : CAP_DEFAULT;
@@ -123,17 +145,44 @@ async function main() {
         console.log('  scopes:', JSON.stringify(scopes));
         console.log('  capabilities:', JSON.stringify(caps));
         console.log('  sudo task: org-operator');
-        console.log('\nTeams/agents write ops are now permitted. Persist defaults:');
-        console.log('  vant org config --set-operator-scopes ' + scopes.join(','));
+
+        // (pass 88 — prime #108/#105) Persist the grant by default. The
+        // grant used to die with the process ("for this process" output,
+        // issue #108's two-layer trap); boot now hydrates the persisted
+        // capabilities, so `vant org grant` once = every future process
+        // inherits it. Opt out for a throwaway session: --session-only.
+        if (!sessionOnly) {
+            const brain = require('../lib/brain').getCurrentBrain();
+            const existing = config.loadBrainConfig(brain) || {};
+            const merged = {
+                ...existing,
+                orgchart: {
+                    ...(existing.orgchart || {}),
+                    operatorScopes: scopes,
+                    operatorCapabilities: capObj
+                }
+            };
+            const saved = config.saveBrainConfig(brain, merged);
+            if (saved) {
+                console.log('  persisted to brain config (' + brain + ') — fresh processes inherit it');
+            } else {
+                console.log('  ⚠ could not persist (brain config write failed) — this process only');
+            }
+        } else {
+            console.log('  session-only (--session-only): not persisted');
+        }
+        console.log('\nTeams/agents write ops are now permitted (this process and, unless');
+        console.log('--session-only, every future process that boots this brain).');
         return;
     }
 
     console.log(`Vant Org CLI
 
 Usage:
-  vant org grant [--scopes a,b,c] [--capabilities x,y]   Grant operator scopes+caps (this process)
-  vant org status                                        Show sandbox scopes/caps + config
+  vant org grant [--scopes a,b,c] [--capabilities x,y] [--session-only]  Grant operator scopes+caps (persists unless --session-only)
+  vant org status                                        Show sandbox scopes/caps + persisted config
   vant org config --set-operator-scopes a,b,c            Persist default grant scopes
+  vant org config --set-operator-caps canRead,canWrite   Persist default grant capabilities
   vant org demo                                          Run a full org→dept→team→role→spawn→assign flow
 `);
 }

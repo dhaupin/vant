@@ -55,14 +55,17 @@ function habitat() {
 function run() {
     let h = habitat();
 
-    // (pass 86) Token ops NEED restored state (durable role rows + token
-    // hashes). getSharedReady() is awaitable and hands back the same
-    // instance post-restore.
-    const tokenReady = (subcmd === 'token')
-        ? require('../lib/habitat').getSharedReady().then(inst => { h = inst; })
-        : Promise.resolve();
+    // (pass 86/88) EVERY subcommand needs restored state — restore()
+    // replaces workspaces/roles wholesale, so mutating on bare getShared()
+    // raced the async restore and evaporated (grant/init threw
+    // HABITAT_UNKNOWN_WORKSPACE on freshly-init'd workspaces; the pass-86
+    // conditional only awaited for token ops). getSharedReady() for all.
+    const tokenReady = require('../lib/habitat').getSharedReady().then(inst => { h = inst; });
 
-    tokenReady.then(() => {
+    // (pass 88) async body: mutating subcommands await h.flush() so the
+    // auto-persist save (chained on _readyPromise) lands before exit —
+    // the fire-and-forget save used to race process exit (issue #109 class).
+    tokenReady.then(async () => {
     if (subcmd === 'can' || subcmd === 'check') {
         // (pass 82) RLS decision for a plain user context: roles come from
         // the habitat registry in the CURRENT workspace.
@@ -105,6 +108,7 @@ function run() {
         const created = h.createWorkspace(id, {});
         console.log('✓ Workspace created:', created.id || id);
         console.log('  Current workspace is still:', h.getCurrentWorkspace(), '(use `vant habitat use ' + (created.id || id) + '` to switch)');
+        await h.flush();
     } else if (subcmd === 'use' || subcmd === 'switch' || subcmd === 'activate') {
         const id = args[1];
         if (!id) { console.error('Usage: vant habitat use <id>'); process.exit(1); }
@@ -114,6 +118,7 @@ function run() {
             process.exit(1);
         }
         console.log('✓ Current workspace:', h.getCurrentWorkspace());
+        await h.flush();
     } else if (subcmd === 'roles') {
         const [ws, userId] = [args[1], args[2]];
         if (!ws || !userId) { console.error('Usage: vant habitat roles <ws> <userId>'); process.exit(1); }
@@ -125,6 +130,7 @@ function run() {
         h.addRole(ws, role, userId);
         console.log('✓ Granted', role, 'to', userId, 'in', ws);
         console.log('  Roles now:', h.getUserRoles(ws, userId).join(', '));
+        await h.flush();
     } else if (subcmd === 'policy') {
         const [resource, json] = [args[1], args[2]];
         if (!resource || !json) { console.error('Usage: vant habitat policy <resource> <json>'); process.exit(1); }
@@ -133,6 +139,7 @@ function run() {
         h.setPolicy(resource, policy);
         console.log('✓ Policy set for', resource);
         console.log(' ', JSON.stringify(h.getBoundaries()[resource]));
+        await h.flush();
     } else if (subcmd === 'boundaries') {
         const b = h.getBoundaries();
         const keys = Object.keys(b);
@@ -151,6 +158,7 @@ function run() {
                 console.log('  expires:', new Date(t.expiresAt).toISOString());
                 console.log('  Use it: Authorization: Bearer ' + t.token);
                 console.log('  (raw token is shown ONCE — only its hash persists)');
+                await h.flush();
             } catch (e) {
                 console.error('✗', e.message);
                 process.exit(1);
@@ -172,6 +180,7 @@ function run() {
             const tokenOrHash = args[2];
             if (!tokenOrHash) { console.error('Usage: vant habitat token revoke <token|hash>'); process.exit(1); }
             const ok = h.revokeToken(tokenOrHash);
+            await h.flush();
             console.log(ok ? '✓ Revoked' : '✗ No such token');
             process.exit(ok ? 0 : 1);
         } else {

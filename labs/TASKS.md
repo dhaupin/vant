@@ -2,10 +2,110 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-02  
-**Session:** Pass 87 — #6 agora/mesh tenancy (ranked list CLOSED)
+**Session:** Pass 88 — habitat/RLS call-point fairness + prime's #105–#110
 
 ---
 
+## Session (2026-10-02 — pass 88: sec-chain call points + prime's issues)
+
+Owner: "finish the habitat and rls, especially making sure the call
+points play fair with the sec chain and primitives/factories... Prime
+left some issues on Vant main, but they were mid stream." Prime = the
+third runtime (festival/event management layer IRL); crew is
+Buffy + Cairn + Prime. Survey first: habitat/RLS call points were
+already CLEAN (readers use getShared(), mutations route through
+factories, no raw workspaces/roles writes outside habitat.js) — the
+real unfairness was prime's issue classes, all sharing one theme:
+**fresh processes didn't inherit authority, and mutations raced their
+own persistence.**
+
+**#108/#105 ROOT FIX (lib/boot.js):** boot hydrates persisted
+`orgchart.operatorCapabilities` from the current brain's config —
+widen-only (explicit `true` over a fixed allowlist; absent key =
+nothing; host-configured sandboxes skipped, same guard as the identity
+link). Scopes persisted earlier (pass 87-adjacent), capabilities did
+not — the F-1 two-layer trap made `vant org grant && vant agents
+spawn` IMPOSSIBLE (every CLI is a fresh process; canSpawn flipped back
+to false). e2e: negative control (read/write scopes only + no caps →
+denied) / positive (persist caps → cold child spawns) / widen-only
+(host caps survive boot).
+
+**bin/org.js:** `grant` now PERSISTS scopes+caps to brain config by
+default (`--session-only` opts out — old behavior); `config` gained
+`--set-operator-caps`; `status` shows the caps key; demo flushes
+agents before exit.
+
+**#109 FLUSH DISCIPLINE:** lib/agents/internal.js — serialized save
+chain (`_saveChain`) + `_dirty` tracking + `flushAgents()`; every save
+appends to ONE chain (old fire-and-forget writes raced the exit —
+spawn "succeeded" but agents.json was never written). `agents.flush()`
+facades it; spawn/kill CLI + org demo await it; bin/habitat.js mutating
+subcommands `await h.flush()` (habitat.flush() = await _readyPromise,
+which serializes saves). beforeExit safety net re-queues a dirty save.
+CLI kill e2e across real process boundaries proves persistence.
+
+**#106/#107 bin/agents.js REBUILT REAL** (was a stub: printed
+"Spawning agent: X" without touching lib; duplicated dead status/info
+branches): spawn/kill/info/status/list/prune all real; mutation =
+operator intent → grantOperator() (boot + caps, org-demo pattern);
+subcommand-level --help guarded (--help no longer "spawns an agent
+named --help"); limits documented (crew of 4, 10/min rate).
+**FOLLOW-THROUGH BUG the stub masked:** terminate() deleted from the
+in-memory map only — a fresh process (every CLI invocation) returned
+false for an agent that was ON DISK. terminate now hydrates before
+delete; kill CLI round-trip is cold-process-proven.
+
+**#110 lib/audit.js:** healthCheck() contract drift — validate.js read
+{healthy, issues} but it returned {status, entries}; healthy was
+always undefined → EVERY `vant validate` printed "✗ Issues:" with an
+empty list. healthCheck now returns {healthy, issues, status, entries}
+(health derives from ledger verify()); old keys preserved.
+
+**BONUS — cross-brain agent bleed (prime #104's seam class):**
+lib/agents/internal.js `_getAgentStorePath()` used bare
+`brain.getCurrentBrain()` which IGNORES VANT_BRAIN (module-global
+_currentBrain comes from models/state.json stack[0]) — env-scoped
+processes (tests, multi-runtime hosts) wrote every roster into the
+vant brain: 22 agents accumulated, agents.maxAgents=10 tripped as
+PHANTOM QUOTA errors on fresh scratch brains. Fixed via state-store's
+path-active resolver (the pass-53 teams.js seam; consensus/market/
+trust/node-registry already use it). Vant brain's stray probe agents
+purged from the roster.
+
+**Tests:** NEW test/operator-caps.test.js 8/8 (cold-process e2e for
+every class above incl. habitat grant flush + subcommand help).
+agents-split snapshot gained `flush` (deliberate addition, documented
+in-file). Full battery green.
+
+**Docs:** cli.md agents/org rows + grant/caps examples + boot-hydration
+note; rls.md persistence section gained the operator-grant + flush
+discipline.
+
+**Gates:** FULL sweep 143/143 (chunked per-suite — run-all exceeds the
+175s cap), npm test 15/15, agents-split 23/23, operator-caps 8/8,
+agora-tenancy 12, habitat-rls 23, habitat-token 15, habitat 6,
+workspace-memory 21, island-boundaries 14, memory 18, boot 15, mcp 6;
+lint:docs (129 files) / surface / helpers; eslint touched 0 errors;
+audit 296 THREW(0); npm run check.
+
+---
+
+## Prior (2026-10-02 — pass 87: #6 mesh/agora tenancy)
+
+Owner: "We missed one # I think, make sure it's not lost, but let's
+def hit #6 next. Bringing a fellow runtime up atm. Buffy + Cairn + TBA
+let's see!" → worked #6, AND re-verified the list: it is EXACTLY
+#1–#6, nothing was ever missed. Full closure:
+- **#1** agents→habitat identity + RLS online (pass 82 ✓)
+- **#2** escrow workspace budgets (pass 83 ✓)
+- **#3** island boundaries enforced at load (pass 84 ✓)
+- **#5** per-workspace memory namespacing (pass 85 ✓)
+- **#4** MCP auth ctx via habitat tokens (pass 86 ✓)
+- **#6** mesh/agora tenancy (pass 87 ✓ — this pass)
+The only non-numbered items still queued (deliberate, never part of
+the ranked list): **whitepaper rewrite** + **TASKS/MEM → vant-native
+(notify board/memory)**. No #7 exists anywhere (pass-81/82/84 blocks,
+learnings, PRDs all re-checked).
 ## Session (2026-10-02 — pass 87: #6 mesh/agora tenancy)
 
 Owner: "We missed one # I think, make sure it's not lost, but let's

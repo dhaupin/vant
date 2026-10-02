@@ -7,7 +7,34 @@
 
 ## Handoff
 
-**Last known good commit:** pass 87 — #6 agora/mesh tenancy. RANKED
+**Last known good commit:** pass 88 — habitat/RLS call-point fairness
++ prime's issues #105–#110. Survey verdict: habitat/RLS call points
+were already factory-clean (no raw state writes outside habitat.js);
+the real unfairness = fresh processes didn't inherit authority +
+mutations raced their own persistence. (1) BOOT HYDRATES persisted
+orgchart.operatorCapabilities (widen-only, host-configured skipped)
+— `vant org grant` now PERSISTS by default (--session-only opts out)
+and CLI spawn/kill just work afterward (#108/#105 root fix). (2) FLUSH
+discipline: agents internal serialized save chain + flushAgents()
+(agents.flush() facade), habitat.flush() = _readyPromise, all
+mutating CLI flows (agents spawn/kill/prune, habitat grant/init/
+policy/token, org grant/demo) drain before exit (#109). (3) bin/
+agents.js REBUILT real (was stub; spawn/kill/info/status/prune, --help
+guarded at subcommand level, operator self-grant on mutation) and
+terminate() now HYDRATES before delete — a fresh process used to
+return false for on-disk agents (masked by the stub for months)
+(#106/#107). (4) audit.healthCheck restored {healthy, issues, status,
+entries} — validate always failed before (#110). (5) CROSS-BRAIN
+AGENT BLEED fixed: _getAgentStorePath used bare getCurrentBrain()
+which ignores VANT_BRAIN → every env-scoped process wrote rosters
+into the vant brain (22 agents, phantom agents.maxAgents=10 quota
+hits); now state-store.currentBrain() resolver (pass-53 teams seam).
+Vant roster purged of probe agents. NEW test/operator-caps.test.js
+8/8 (cold-process e2e). Gates: sweep 143/143, all key suites, 3
+lints, audit 296 THREW(0). Crew: Buffy + Cairn + Prime (festival/event
+management layer IRL). Queued: whitepaper rewrite, TASKS/MEM →
+vant-native.
+Pass 87 (463fcbf): #6 agora/mesh tenancy. RANKED
 LIST CLOSED: verified it is EXACTLY #1–#6 (82✓ 83✓ 84✓ 85✓ 86✓ 87✓,
 no #7 anywhere); only non-numbered queued items remain: whitepaper
 rewrite + TASKS/MEM → vant-native (notify board/memory). Owner also

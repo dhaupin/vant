@@ -151,11 +151,11 @@ vant geometry locate <barcode>     # Retrieve by barcode
 |---------|-------------|
 | `vant run` | Long-running agent loop |
 | `vant node` | Persistent node (continuous run with brain loaded) |
-| `vant agents` | Multi-agent management |
+| `vant agents` | Multi-agent management (list, spawn, kill, info, status, prune — real, persisted) |
 | `vant islands` | Island component boot |
 | `vant mcp` | MCP server for AI tools |
 | `vant api` | API utilities (status, routes, call) |
-| `vant org` | Operator scope/capability grant for this process |
+| `vant org` | Operator scope/capability grant (persists unless `--session-only`; boot widens fresh processes) |
 | `vant trust` | Reputation and trust scores |
 | `vant resolution` | Thought resolution tracking |
 | `vant succession` | Trust level management |
@@ -173,8 +173,9 @@ vant node --mcp             # Node plus MCP server
 vant node --mcp-port 4000   # Custom MCP port
 
 vant agents list
-vant agents spawn <name>
-vant agents kill <id>
+vant agents spawn <name> [--role r] [--brain b]   # Real spawn; self-grants caps; persists
+vant agents kill <id>                              # Real terminate; persists
+vant agents info <id>
 
 vant islands                # Show islands
 vant islands boot           # Boot islands
@@ -184,11 +185,16 @@ vant islands boundaries     # List RLS-gated islands + rules
 vant mcp --stdio            # STDIO mode
 vant mcp --server --port 3457
 
-vant org grant                                  # Grant operator scopes
-vant org grant --scopes read,write,spawn
+vant org grant                                  # Grant operator scopes+caps (persists by default)
+vant org grant --scopes read,write,spawn --capabilities canWrite,canSpawn
+vant org grant --session-only                   # Throwaway session: don't persist
 vant org status
-vant org config --set-operator-scopes read,write,spawn   # Persist in brain config
+vant org config --set-operator-scopes read,write,spawn   # Persist grant scopes
+vant org config --set-operator-caps canRead,canWrite,canSpawn    # Persist grant caps
 vant org demo                                   # Run the demo org flow
+
+# (pass 88) Boot hydrates persisted orgchart.operatorCapabilities in every
+# fresh process — `vant org grant` once, then CLI spawn/kill just work.
 
 vant trust score <entity>
 vant trust record <entity> <type> <delta>
