@@ -7,7 +7,29 @@
 
 ## Handoff
 
-**Last known good commit:** pass 95 — cross-process seams: roster
+**Last known good commit:** pass 96 — merge-readiness checklist + QC.
+MERGE-READY VERDICT: axolotl→main conflict scan is DEFINITIVELY clean —
+main's tip tree (`c11ae19…`) is byte-identical to the merge base
+(`36d6f62`); the single main-only commit (5965e14, merge of PR #52
+"evolution") is content-neutral, so main adds nothing. 615 commits our
+side, 0 files changed on both sides since base. QC found + FIXED:
+(1) teams.json cross-process last-writer-wins (proven 4 concurrent
+createOrg → 1 org; fixed with lockfile+adopt+tombstone mirroring pass 95;
+NEW test/teams-crossprocess.test.js 5/5; _resetHydration now clears
+tombstones). (2) MCP stubs in the audit OK bucket: vant_audit_log /
+_audit_list / _succession_info / _sandbox_status were hardcoded — now real
+(succession reported the brain's REAL 'medium', the stub lied 'high').
+QC found + DEFERRED: (3) habitat state has the same cross-process class
+(4 concurrent createWorkspace → 2) — deferred because it's the
+pass-91-hardened RLS/tenancy/token map surface and needs a tombstone-safe
+merge on its own pass. Also fixed bin/build.sh (was broken+stale:
+missing states/REGISTRY.txt, hardcoded v0.5.0 → now reads package.json)
+and lib/version.js's false "docs has no changelog" note. Gates: sweep
+150/150, lints PASS, eslint 0 err, npm run check, audit-mcp 296 THREW(0)/
+REFUSED 148/OK 89, npm test 15/15, test-all/test-core exit 0. Queued:
+habitat merge (finding #3); MEM/TASKS→vant-native + whitepaper (tonight).
+
+**Pass 95:** cross-process seams: roster
 merge + config persistence. Survey note: pass-95 work was already on
 disk (uncommitted) when this session resumed; it was INCOMPLETE.
 (1) ROSTER: lib/agents/internal.js cross-process merge — lockfile

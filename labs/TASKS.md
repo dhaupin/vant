@@ -2,7 +2,67 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-02  
-**Session:** Pass 95 — cross-process seams: agent-roster merge + config persistence
+**Session:** Pass 96 — merge-readiness checklist + QC (teams race fixed, habitat deferred)
+
+---
+
+## Session (2026-10-02 — pass 96: merge-readiness + QC sweep)
+
+Owner: "continue" (context restored) + a merge-readiness checklist pass +
+"keep doing qc and live fire… bugs, gaps, edge, vulns, stubs". All three
+ran.
+
+**MERGE-READINESS (axolotl → main):** divergence = main 1 commit, axolotl
+615. Conflict scan DEFINITIVELY clean: main's tip tree (`c11ae19…`) is
+byte-identical to the merge base (`36d6f62`) — the one main-only commit
+(5965e14, "Merge PR #52 evolution") is content-neutral (its merge resolved
+to the base tree), so main adds NOTHING and there is nothing to conflict.
+Versions consistent at 0.8.6 (package.json / dist/index.html /
+docs/index.md / CHANGELOG frontmatter); lint:docs 129 PASS. dist/ lander
+fresh + version-consistent (no generator; hand-maintained, unchanged since
+2026-09-23). Fixed two freshness defects: (a) `bin/build.sh` was BROKEN +
+STALE — copied the non-existent `states`/`REGISTRY.txt` (errors silent,
+no set -e) and hardcoded "VANT v0.5.0"; now reads the version from
+package.json, skips absent files, wipes its output dir. (b) lib/version.js
+comment falsely claimed "docs site has no changelog file" — the pass-95
+text; docs/reference/CHANGELOG.md DOES exist and is a version spot —
+corrected.
+
+**QC FINDING #1 — teams.json cross-process loss (FIXED):** pass 95 fixed
+this class for agents.json; teams.json had it too. `_saveTeams()` writes
+the WHOLE in-memory snapshot while the adopt-on-hydrate merge only runs at
+module load, so two CLI processes that both hydrated before either wrote
+clobber each other — PROVEN by barrier-synchronized live fire: 4
+concurrent `createOrg` persisted only 1 org. Fixed with the pass-95 shape:
+lockfile (`teams.json.lock` in the orgchart dir) + re-read + adopt unseen
+ids (`_seenKeys`) + tombstone deletes; `_resetHydration()` now clears the
+tombstones too. Re-proven 4→4. NEW test/teams-crossprocess.test.js 5/5
+(4 barrier-synced creates + a tombstone/adoption gate).
+
+**QC FINDING #2 — habitat state same class (DEFERRED, documented):**
+4 concurrent `createWorkspace` → only 2 (default + 1). Same root: `save()`
+writes whole state, `restore()` replaces wholesale. DEFERRED on purpose —
+that state IS the pass-91-hardened RLS/tenancy/token map surface, and a
+tombstone-correct merge (revoked tokens / removed roles must not
+resurrect) is security-sensitive and deserves its own pass with its own
+gate, not a rushed tail. Repro recorded.
+
+**QC FINDING #3 — MCP stub bucket (FIXED):** the audit's OK bucket hid
+pure stubs (same genre as pass-95's config stubs). `vant_audit_log`
+claimed {status:'logged'} without touching the ledger; `vant_audit_list`
+ALWAYS returned {events:[]}; `vant_succession_info` hardcoded
+{trustLevel:'high'}; `vant_sandbox_status` hardcoded {status:'active',
+budget:100}. All now route to real modules — and succession now reports
+the brain's REAL level **medium** (the stub was actively lying).
+required[] added to audit_log (audit REFUSED 147→148 / OK 90→89).
+
+**Gates:** sweep 150/150 chunked; teams-crossprocess 5/5; lints PASS
+(docs 129 / surface / helpers); eslint touched 0 errors; npm run check;
+audit-mcp 296 THREW(0)/PHANTOM(0)/REFUSED 148/OK 89; npm test 15/15;
+test-all/test-core exit 0.
+
+**Queued:** habitat cross-process merge (finding #2); MEM/TASKS→vant-native
++ whitepaper (owner: later tonight).
 
 ---
 
