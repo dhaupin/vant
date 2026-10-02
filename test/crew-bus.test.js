@@ -17,6 +17,7 @@
  */
 
 const { spawn } = require('child_process');
+const net = require('net');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -44,11 +45,31 @@ function assert(cond, msg) {
     if (!cond) throw new Error(msg || 'assertion failed');
 }
 
-const PORT_BASE = 4571 + (process.pid % 40);
-const PORT_A = PORT_BASE;
-const PORT_B = PORT_BASE + 1;
-const PORT_C = PORT_BASE + 2;
+// Ports: 4571+pid%40 to avoid collisions with parallel suite runs — but the
+// range can still hold a squatter (a long-lived `bin/mcp.js -p 4585`, an
+// orphaned child from a failed run), so the base is re-picked against a
+// live free-port probe in main() before anything binds.
+let PORT_BASE = 4571 + (process.pid % 40);
+let PORT_A = PORT_BASE;
+let PORT_B = PORT_BASE + 1;
+let PORT_C = PORT_BASE + 2;
 const SECRET = 'crew-bus-test-secret-' + process.pid;
+
+function portFree(p) {
+    return new Promise((resolve) => {
+        const sock = net.connect(p, '127.0.0.1');
+        sock.once('connect', () => { sock.destroy(); resolve(false); });
+        sock.once('error', () => { sock.destroy(); resolve(true); });
+    });
+}
+
+async function pickPortBase() {
+    const tryBase = async (b) => (await portFree(b)) && (await portFree(b + 1)) && (await portFree(b + 2));
+    const start = 4571 + (process.pid % 40);
+    for (let b = start; b + 2 <= 4610; b++) { if (await tryBase(b)) return b; }
+    for (let b = 4571; b + 2 <= 4610 && b < start; b++) { if (await tryBase(b)) return b; }
+    throw new Error('no free port triple in 4571..4610');
+}
 
 // Child process source: a full crew node listening on argv[2] with its own
 // bus, dispatching into a log file so the parent can await delivery.
@@ -80,15 +101,35 @@ function runChild(port) {
     return new Promise((resolve, reject) => {
         const timer = setTimeout(() => reject(new Error('child did not become ready')), 8000);
         let out = '';
+        let waitingPort = false;
         child.stdout.on('data', (d) => {
             out += d.toString();
-            if (out.includes('READY')) {
+            if (!waitingPort && out.includes('READY')) {
+                waitingPort = true;
                 clearTimeout(timer);
-                resolve({
-                    log,
-                    kill: () => { try { child.kill('SIGKILL'); } catch (e) {} },
-                    cleanup: () => { try { fs.unlinkSync(tmp); } catch (e) {} try { fs.unlinkSync(log); } catch (e) {} }
-                });
+                // (pass 89) READY prints right after bus.listen(), but the
+                // socket bind is async — the first send raced it and failed
+                // with intermittent ECONNREFUSED. Probe until the port
+                // actually accepts before declaring the child ready.
+                const deadline = Date.now() + 5000;
+                const probe = () => {
+                    const sock = net.connect(port, '127.0.0.1');
+                    const retry = () => {
+                        sock.destroy();
+                        if (Date.now() > deadline) { reject(new Error('child port never opened')); return; }
+                        setTimeout(probe, 40);
+                    };
+                    sock.once('connect', () => {
+                        sock.destroy();
+                        resolve({
+                            log,
+                            kill: () => { try { child.kill('SIGKILL'); } catch (e) {} },
+                            cleanup: () => { try { fs.unlinkSync(tmp); } catch (e) {} try { fs.unlinkSync(log); } catch (e) {} }
+                        });
+                    });
+                    sock.once('error', retry);
+                };
+                probe();
             }
         });
         child.stderr.on('data', (d) => { if (out.length < 4000) out += d.toString(); });
@@ -119,6 +160,12 @@ const { createBus } = require(path.join(ROOT, 'lib/crew-bus.js'));
 
 async function main() {
     console.log('\n🚌 CREW BUS TESTS\n');
+
+    // Pick a triple nobody (platform MCP server, orphaned children) holds.
+    PORT_BASE = await pickPortBase();
+    PORT_A = PORT_BASE;
+    PORT_B = PORT_BASE + 1;
+    PORT_C = PORT_BASE + 2;
 
     // ---------- 1. Signed cross-process delivery ----------
     // Documented crew setup step: each node allowlists its peers' hosts —

@@ -489,10 +489,17 @@ test('getStack returns array', () => {
     return { success: Array.isArray(stack) };
 });
 
-test('getStack includes vant', () => {
+// (pass 89 — prime #112) Assert against the ACTIVE brain, never the
+// default name: deployments name brains anything (cairn, axolotl, …) and
+// this hardcoded 'vant' failed 1/77 on every non-default install.
+test('getStack includes the active brain', () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     const stack = brain.getStack();
-    return { success: stack.includes('vant') };
+    const active = brain.getCurrentBrain() || brain.currentBrain() || 'vant';
+    return {
+        success: Array.isArray(stack) && stack.length > 0 && stack.includes(active),
+        error: `stack=${JSON.stringify(stack)} active=${active}`
+    };
 });
 
 test('currentBrain returns brain name', () => {

@@ -144,7 +144,8 @@ async function run() {
         console.log('Created:', new Date(result.timestamp));
         console.log('\n--- Contents Preview ---');
         console.log('Brains:', result.preview.brainCount);
-        console.log('Agents:', result.preview.agentCount);
+        console.log('Agents (registered roster):', result.preview.agentCount);
+        if (result.preview.delegationCount) console.log('Delegation records:', result.preview.delegationCount);
         console.log('Islands:', result.preview.islandCount);
         console.log('Corpus:', result.preview.corpusCount);
         console.log('Config:', result.preview.hasConfig ? 'Yes' : 'No');
@@ -227,7 +228,29 @@ async function run() {
         console.log('Path:', result.path);
         console.log('Size:', result.size);
         console.log('Format:', result.format || 'steganography');
-        
+
+        // (pass 89 — prime #100) Search hygiene: stones are one huge line of
+        // ciphertext; a repo-wide match echoes the whole wall. Auto-ensure a
+        // repo-root .ignore covers the stone's directory (ripgrep honors it,
+        // git does NOT — the stone stays tracked for disaster recovery).
+        try {
+            const fs = require('fs');
+            const relStone = path.relative(REPO_ROOT, path.resolve(result.path || outputPath));
+            const stoneGlob = path.join(path.dirname(relStone), '*.svg');
+            const ignorePath = path.join(REPO_ROOT, '.ignore');
+            let ignore = '';
+            if (fs.existsSync(ignorePath)) ignore = fs.readFileSync(ignorePath, 'utf8');
+            const dirPattern = path.dirname(relStone).split(path.sep).join('/') + '/*.svg';
+            if (!ignore.split(/\r?\n/).some(l => l.trim() === dirPattern)) {
+                const note = ignore.trimEnd()
+                    + '\n\n# horcrux stone (auto-added by vant horcrux create, prime #100):\n'
+                    + '# one ~800KB+ base64 line per stone — search tools: skip, git: keep tracking.\n'
+                    + dirPattern + '\n';
+                fs.writeFileSync(ignorePath, note);
+                console.log('Search hygiene: added ' + dirPattern + ' to .ignore (stones stay git-tracked).');
+            }
+        } catch (e) { /* non-fatal — hint only */ }
+
     } else if (subcmd === 'refresh') {
         // (pass 21) Boot horcruxes are point-in-time snapshots that ONLY ever
         // get restored, never regenerated — the backup drifts further from the

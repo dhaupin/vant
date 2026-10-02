@@ -2,7 +2,96 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-02  
-**Session:** Pass 88 — habitat/RLS call-point fairness + prime's #105–#110
+**Session:** Pass 89 — horcrux/teams/brain-naming triage (prime #100–#104, #111, #112)
+
+---
+
+## Session (2026-10-02 — pass 89: horcrux/teams/brain-naming triage)
+
+Owner: "What do we need for triage? Let's solve #100–#104, #111–#112"
+— prime's seven-issue horcrux/orgchart/naming batch (filed on main).
+All seven root-caused and closed this pass.
+
+**#100 stone flood (line-search starvation):** repo-root `.ignore`
+(NEW; ripgrep honors it, git does NOT — stones stay tracked for
+disaster recovery) covering `models/public/*/boot/*.svg` +
+`horcrux/*.svg`; boot README gained a "Search hygiene" section;
+`vant horcrux create` auto-appends its own stone dir to .ignore and
+prints the hint. e2e-proven: repo walk skips the stone, `--no-ignore`
+still sees it (never truly hidden).
+
+**#101 cold restore orgless:** persistence durability, root-caused
+properly MID-PASS (two wrong fix shapes tried first): store.write IS
+synchronous, so the pre-89 save already landed — what raced were
+CONSUMERS. An async save chain broke teams-refresh's sync
+exists-on-return assert; an async restoreState broke orgflow's sync
+result object + sync E_LEGACY_FORMAT throw. FINAL: `_saveTeams()`
+writes inline (the chain records the completed save),
+`teams.flush()` drains, `restoreState` STAYS SYNC (durability
+guaranteed by the inline write), transform.restore awaits
+restoreState + flush + agents flush before returning. Cold-process
+e2e: child A snapshots → parent wipes teams.json (genuinely cold) →
+child B transform.restore + immediate exit → file on disk → child C
+hydrates orgs ≥ 1.
+
+**#102 inspect lies (Teams/Orgs 0, wrong agent count):** legacy
+gatherAgents ALWAYS returns `agents: []` (it only ever carried
+delegation metadata) while the real roster rides `data.agents2`.
+preview.agentCount now reads agents2 first (fallback chain intact),
+new delegationCount field; CLI prints "Agents (registered roster):",
+"Delegation records:" and "Teams/Orgs: N orgs, N teams".
+
+**#103 empty dirs dropped:** gather `_readDir` emits
+`{path: prefix+'.keep', emptyDir:true}` for empty dirs (boot/ still
+design-excluded); restore mkdirs + writes the marker — through the
+STORAGE chain (raw fs.writeFileSync tripped the atomic-writes
+structural pin; found by gate) — records `results.emptyDirs {rel,
+scope}`, and the sweep unlinks per FILE scope. Sweep bug found while
+testing: scope was keyed off the brain's TYPE, so 'both'-scope
+brains leaked private-side .keep markers (fixed; both directions
+regression-tested).
+
+**#104 assign smears brain:** assign() reads `prev` BEFORE
+resolution: brain = explicit `options.brain` > stored `prev.brain` >
+caller's currentBrain (first assign only). The pass-89 draft keptOr()
+check used the ALREADY-RESOLVED value — the currentBrain fallback
+always won, i.e. the exact smear reported; presence must be checked
+on `options.brain` before any fallback. org/dept/team/role preserved
+when absent, with hierarchy consistency guards (a stale role does
+NOT follow a team change; dept derived from an explicit team wins);
+quota checks SELF-EXCLUDE the agent being moved (a full org no longer
+rejects its own member on re-assign); escrow spend only on placement
+ops (a pure partial re-assign neither spends nor is budget-blocked).
+
+**#111 health false negative:** initialized = template markers OR
+any recursive content in the brain dir. Grown marker-less brains
+print "Brain exists" + an actionable "No template markers (wanted: ...)"
+hint; genuinely empty brains print the wanted-markers line. Env
+note: a fresh VANT_BRAIN dir auto-seeds orgchart/ (escrow store
+init) before checkModel runs — the empty branch is exercised via the
+MODEL_PATH escape (state-store does not seed that path).
+
+**#112 hardcoded 'vant':** brain.test stack assertion derives
+`getCurrentBrain()` (active brain), error prints stack + active.
+Audit of the rest: synapse 'vant' labels are node names, not brains;
+the axolotl stack-top checks control their own preconditions.
+
+**Drive-by gate fixes:** (a) pass 88's own docs rows (cli.md agents
+row, rls.md grant note) carried 2 em dashes — lint:docs had been
+FAILING since 74ac92a; hyphens now, 129 files PASS. (b)
+test/crew-bus flake (~50% fail): port range 4571+pid%40 collided with
+the long-lived platform `bin/mcp.js -p 4585` (probe hit the MCP door
+→ 404 {error:'not found', endpoints:[mcp…]}) and READY printed before
+the async bind (ECONNREFUSED). Suite now picks a FREE contiguous
+port triple via live probe (skips MCP/orphans) and probes the child
+port before declaring ready — 6/6 stable.
+
+**Tests:** NEW test/horcrux-orgchart.test.js 12/12 (all seven issues;
+#101 across three real process boundaries, #100 with rg honoring).
+**Gates:** full sweep 142/142 (chunked per-suite), crew-bus 6/6,
+atomic-writes 13/13, npm test 15/15, test-all exit 0, test-core
+exit 0, lint:docs/surface/helpers PASS, eslint touched files 0
+errors, audit 296 THREW(0), npm run check.
 
 ---
 

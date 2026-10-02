@@ -7,8 +7,50 @@
 
 ## Handoff
 
-**Last known good commit:** pass 88 — habitat/RLS call-point fairness
-+ prime's issues #105–#110. Survey verdict: habitat/RLS call points
+**Last known good commit:** pass 89 — horcrux/teams/brain-naming
+triage (prime #100–#104, #111, #112), all seven CLOSED. (1) #100:
+repo-root `.ignore` (NEW — rg honors, git does NOT: stones stay
+tracked) + boot README "Search hygiene" + `horcrux create`
+auto-appends its stone dir (e2e: repo walk skips, --no-ignore finds).
+(2) #101: store.write IS sync — the real race was CONSUMERS; two
+wrong fix shapes tried first (async save chain broke teams-refresh's
+sync exists-on-return; async restoreState broke orgflow's sync result
++ sync E_LEGACY_FORMAT throw). Final: _saveTeams inline + flush()
+drain + restoreState STAYS SYNC + transform.restore awaits
+restoreState/flush/agents-flush; cold-restore e2e over 3 child
+processes (wipe teams.json → restore+exit → fresh process sees orgs).
+(3) #102: preview.agentCount reads data.agents2 roster first (legacy
+gatherAgents ALWAYS returns agents:[]), + delegationCount; CLI
+"Agents (registered roster):". (4) #103: gather emits emptyDir .keep
+markers; restore writes them THROUGH the storage chain (raw
+fs.writeFileSync failed the atomic-writes structural pin — caught by
+gate), results.emptyDirs {rel,scope}, sweep unlinks per FILE scope
+(brain-TYPE scope leaked private markers on 'both' brains — fixed +
+both directions tested). (5) #104: assign() reads prev BEFORE
+resolution — brain = options.brain > prev.brain > currentBrain
+(first assign only); the draft keepOr() checked the ALREADY-RESOLVED
+value so the fallback always won (the reported smear). org/dept/
+team/role preserved when absent with hierarchy guards (stale role
+doesn't follow team change); quota checks self-exclude the moving
+agent; escrow spend only on placement ops. (6) #111: health
+initialized = markers OR any content; fresh VANT_BRAIN dirs auto-
+seed orgchart/ (escrow init) before checkModel — empty branch
+tested via the MODEL_PATH escape (state-store doesn't seed it).
+(7) #112: brain.test stack assertion derives getCurrentBrain();
+audit showed other 'vant' literals are synapse node names / self-
+contained axolotl checks. Drive-bys: pass 88's docs rows had 2 em
+dashes → lint:docs had been FAILING since 74ac92a (hyphens, 129
+files PASS); crew-bus ~50% flake = platform `bin/mcp.js -p 4585`
+squatting inside 4571+pid%40 + READY printed before the async bind
+→ free contiguous port-triple pick (live probe skips MCP/orphans) +
+child port probe before ready — 6/6 stable. NEW
+test/horcrux-orgchart.test.js 12/12 (all seven issues; #101 across
+real process boundaries, #100 with rg honoring). Gates: sweep
+142/142 (chunked), lint:docs/surface/helpers PASS, eslint touched
+0 errors, audit 296 THREW(0), npm test 15/15, test-all/test-core
+exit 0, npm run check. Crew: Buffy + Cairn + Prime. Queued:
+whitepaper rewrite, TASKS/MEM → vant-native.
+Pass 88 (74ac92a): habitat/RLS call-point fairness + prime's #105–#110. Survey verdict: habitat/RLS call points
 were already factory-clean (no raw state writes outside habitat.js);
 the real unfairness = fresh processes didn't inherit authority +
 mutations raced their own persistence. (1) BOOT HYDRATES persisted

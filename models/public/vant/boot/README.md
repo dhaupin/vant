@@ -2,6 +2,18 @@
 
 This directory contains encrypted horcrux brains - the agent's persistent memory, embedded as SVG.
 
+## Search hygiene (prime #100)
+
+Stones are ONE huge line (~800 KB+) of base64 ciphertext: never grep
+them — a single common-word match echoes the entire wall and starves
+the result budget. A repo-root `.ignore` (checked in) already hides
+`models/public/*/boot/*.svg` and `horcrux/*.svg` from ripgrep-family
+search tools while git keeps tracking them. Humans and agents: use
+`vant horcrux inspect <stone> <password>` — it reports brains, agents,
+islands, corpus, escrow, and teams counts without echoing a byte of
+ciphertext. When creating a stone OUTSIDE those paths, add its glob to
+`.ignore` (horcrux create now prints a hint if you forget).
+
 ## Horcrux Files
 
 | File | Description |

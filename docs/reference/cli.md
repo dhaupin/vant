@@ -151,7 +151,7 @@ vant geometry locate <barcode>     # Retrieve by barcode
 |---------|-------------|
 | `vant run` | Long-running agent loop |
 | `vant node` | Persistent node (continuous run with brain loaded) |
-| `vant agents` | Multi-agent management (list, spawn, kill, info, status, prune — real, persisted) |
+| `vant agents` | Multi-agent management (list, spawn, kill, info, status, prune - real, persisted) |
 | `vant islands` | Island component boot |
 | `vant mcp` | MCP server for AI tools |
 | `vant api` | API utilities (status, routes, call) |

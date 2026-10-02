@@ -237,7 +237,7 @@ deliberately session-scoped and not persisted.
 Operator grants follow the same discipline (pass 88):
 `orgchart.operatorCapabilities` (plus the existing
 `operatorScopes`) persist in the brain's config, and boot applies them
-to every fresh process — widen-only, so a persisted grant can never
+to every fresh process - widen-only, so a persisted grant can never
 narrow a host's authority. Mutating CLI flows
 (`vant habitat grant/init/policy/token`, `vant agents spawn/kill`,
 `vant org grant/demo`) drain the serialized save chain before exit, so

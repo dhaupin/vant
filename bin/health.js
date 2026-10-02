@@ -70,10 +70,33 @@ function checkModel() {
         try { brainPath = require('../lib/brain').getBrainPath(); } catch (e) { brainPath = 'models/private'; }
     }
     const brainFs = _brainStore(brainPath);
-    const found = checks.some(pair => pair.some(f => brainFs.has(f)));
-    
+    const markerFound = checks.some(pair => pair.some(f => brainFs.has(f)));
+    // (pass 89 — prime #111) Template markers are NOT the definition of
+    // "initialized": a brain grown by real use (orgchart/, state/, learned
+    // docs) may never create identity.md/meta.json/lessons.md at its root,
+    // and health contradicted itself — "not initialized" for a brain whose
+    // very next section confirms the dir exists. Any content = initialized.
+    const wantedMarkers = 'identity.md, meta.json, lessons.md';
+    let contentCount = 0;
+    try {
+        const walk = (dir) => {
+            for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+                if (ent.isDirectory()) walk(path.join(dir, ent.name));
+                else contentCount++;
+            }
+        };
+        walk(brainPath);
+    } catch (e) {
+        // Missing/unreadable dir → no content → genuinely uninitialized
+        contentCount = 0;
+    }
+    const found = markerFound || contentCount > 0;
+
     if (found) {
         console.log('  ' + theme.status.ok('Brain exists at ' + brainPath));
+        if (!markerFound) {
+            console.log('  ' + theme.status.warn('No template markers at root (wanted: ' + wantedMarkers + ') — brain is in use, scaffold skipped'));
+        }
         
         // Try to read identity
         const identityRel = brainFs.has('identity.md') 
@@ -91,6 +114,7 @@ function checkModel() {
         }
     } else {
         console.log('  ' + theme.status.fail('Private model not initialized at ' + brainPath + ' (run vant setup)'));
+        console.log('  Wanted marker files: ' + wantedMarkers);
         console.log('  Use models/public templates for fresh install');
     }
     
