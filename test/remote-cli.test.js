@@ -140,6 +140,29 @@ test('CLI smoke: --status never echoes secret env values', () => {
     return true;
 });
 
+test('top-level help: wal/mirror/s3/migrate advertise FLAG syntax (pass 101 help-vs-syntax fix)', () => {
+    // The `vant --help` summary used bare-word parentheticals
+    // ("Storage crash-recovery journal (status/drill/reset)") that read as
+    // subcommands, but the parsers require flags — `vant wal status` exits 1
+    // while `vant wal --status` works. bin/help.js and each tool's own
+    // --help already used flags; align the summary. Pin it.
+    const src = fs.readFileSync(VANT, 'utf8');
+    const wants = [
+        /vant wal\s+Storage crash-recovery journal \(--status/,
+        /vant s3\s+Remote storage connectors[^\n]*\(--status/,
+        /vant mirror\s+Storage replication \(--status/,
+        /vant migrate\s+Brain layout versioning \(--status/
+    ];
+    for (const re of wants) if (!re.test(src)) return { success: false, error: 'missing flag-form help: ' + re };
+    const stale = [
+        /Storage crash-recovery journal \(status\//,
+        /Storage replication \(status\//,
+        /Remote storage connectors[^\n]*\(status\/test/
+    ];
+    for (const re of stale) if (re.test(src)) return { success: false, error: 'stale bare-word help: ' + re };
+    return true;
+});
+
 (async () => {
     console.log(`\n  ${results.passed} passed, ${results.failed} failed`);
     if (results.failed > 0) {

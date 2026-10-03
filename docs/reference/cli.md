@@ -286,10 +286,10 @@ vant mirror --status        # Replication config and stats
 vant mirror --status --base <path> --mirror <path>...
 
 vant s3 --status            # Config summary (no secrets printed)
-vant s3 test                # Connectivity probe
-vant s3 ls [prefix]         # List remote keys
-vant s3 push [--dry-run]    # Push local brain to remote
-vant s3 pull [--dry-run]    # Pull remote brain to local
+vant s3 --test              # Connectivity probe
+vant s3 --ls [prefix]       # List remote keys
+vant s3 --push [--dry-run]  # Push local brain to remote
+vant s3 --pull [--dry-run]  # Pull remote brain to local
 
 vant backup create          # same backup-safety as snapshot/horcrux refresh:
                             # existing targets go through tmp→validate→replace,

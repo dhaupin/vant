@@ -7,6 +7,23 @@
 
 ## Handoff
 
+**Last known good commit:** pass 101 — market lock limitation + CLI help-syntax + escrow hold leak.
+(1) MARKET: open-ended listings no longer take the per-listing flock; the
+lock body is now fully synchronous (budget/hold/trust/governance hoisted
+above it); fail-closed `E_TRADE_LOCK` + release buyer hold when the lock is
+unavailable (no more proceed-unlocked). test/market-crossprocess.test.js
+8/8 (open-ended no-lock pinned via a `flock.withLock` spy). (2) CLI HELP:
+`vant --help` summary now shows `--status/--drill/--reset` etc. (was bare
+words); docs/reference/cli.md s3 lines fixed; regression in
+test/remote-cli.test.js. (3) ESCROW HOLD LEAK (found while fixing 1):
+`escrow.release()` never removed the persisted hold — the additive
+`_saveEscrow` union re-added it; holds accumulated to `maxHolds` and then
+ALL trades failed. Fixed with `_deletedHolds` applied after the union;
+test/escrow.test.js gate added. (4) LOCKS: labs/LOCKS.md inventory +
+canonicalization proposal; no refactor yet. Gates: sweep 155/155, lints
+PASS, eslint 0 err, check, audit-mcp 296 THREW0/TIMEOUT0/INVALID0/REFUSED149/
+OK88/PHANTOM0, npm test 15/15, test-all 0, test-core 5/5, zero leaked locks.
+
 **Last known good commit:** pass 100 — live-fire (single install + mesh), 2 bugs.
 Scratch-brain live fire of the CLI/MCP. (1) CROSS-PROCESS MARKET OVERSELL:
 the scarcity reserve in market.trade is per-process (`_reserved` not

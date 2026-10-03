@@ -129,6 +129,26 @@ test('getStackEscrowStatus returns object with source stack', () => {
     return { success: result && result.source === 'stack' };
 });
 
+// (pass 101) release must REMOVE the persisted hold. The merge-save was an
+// additive union, so a RELEASED hold (absent from the writer's snapshot) was
+// re-added from the disk copy and leaked forever — market trades accumulated
+// holds toward escrow.maxHolds and eventually ALL later trades failed with
+// max_holds_exceeded. Pin the hold→release→reload round-trip.
+test('release removes the persisted hold (pass 101 union-merge leak fix)', () => {
+    const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    const id = 'p101-hold-release-' + process.pid;
+    const held = escrow.hold(id, { probe: true });
+    if (!held || !held.held) return { success: false, error: 'hold did not take: ' + JSON.stringify(held) };
+    const before = escrow.checkHold(id);
+    escrow.release(id);
+    const after = escrow.checkHold(id);
+    try { escrow.release(id); } catch (e) { /* best-effort cleanup */ }
+    return {
+        success: before.held === true && after.held === false,
+        error: `before=${JSON.stringify(before)} after=${JSON.stringify(after)}`
+    };
+});
+
 // ============================================
 // SUMMARY
 // ============================================

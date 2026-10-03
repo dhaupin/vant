@@ -2,9 +2,60 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-03  
-**Session:** Pass 100 — live-fire (single install + mesh): 2 real bugs fixed
+**Session:** Pass 101 — market lock limitation + CLI help-syntax + escrow hold leak
 
 ---
+
+## Session (2026-10-03 — pass 101: market lock + CLI help + escrow hold leak + locks inventory)
+
+Owner asked to fix two carried-over limitations, then discuss locks.
+
+**Fix 1 — market lock limitation (`lib/market.js`).** (a) Open-ended
+(`supply: Infinity`) listings no longer take the per-listing cross-process
+lock — no scarcity to protect, so not over-serialized. (b) The degraded
+"proceed unlocked with a warning" posture is GONE: when the lock cannot be
+taken (scarce listing) the trade FAILS CLOSED with `E_TRADE_LOCK` and
+releases the buyer's escrow hold. (c) The lock no longer straddles awaits:
+budget/escrow-hold/trust/governance were hoisted ABOVE the lock, so the
+locked body is fully synchronous (reserve → debit → release → trades++ →
+persist) — the reservation cannot outlive the lock. `test/market-crossprocess.test.js`
+extended 3→8 (oversell pinned; open-ended no-lock pinned via a
+`flock.withLock` spy; fail-closed + hold-release pinned). NOTE: the
+open-ended `trades` counter is now a best-effort stat (both trades persist,
+both succeed) — the exact cross-process count only existed BECAUSE of the
+lock we removed, so gate B asserts both succeed + both rows persist +
+counter >= 1.
+
+**Fix 2 — `vant wal/mirror/s3 status` help-vs-syntax mismatch.** The
+`vant --help` summary advertised bare-word parentheticals
+(`wal (status/drill/reset)`, `s3 (status/test/ls/push/pull)`,
+`mirror (status/verify/resync)`, `migrate (status/dry-run/apply)`) but the
+parsers require FLAGS (`vant wal --status` works; `vant wal status` exits
+1). `bin/help.js` and each tool's own `--help` already used flags. Aligned
+the summary to `(--status | --drill | --reset <basePath>)` etc., and fixed
+the bare-word s3 lines in `docs/reference/cli.md`. Regression pinned in
+`test/remote-cli.test.js`.
+
+**Fix 3 (found while fixing 1) — escrow holds leaked forever.** Adding
+`_releaseBudget` to the early-return paths exposed that `escrow.release()`
+never removed the persisted hold: `_saveEscrow` merged `{...disk, ...data}`,
+and a RELEASED hold is simply absent from the writer's snapshot, so the
+union re-added the disk copy. Holds accumulated toward `escrow.maxHolds`
+(100) and then ALL later trades failed with `max_holds_exceeded`. Fix: track
+`_deletedHolds` per instance and apply the deletions AFTER the union in
+`_saveEscrow`. Gate added to `test/escrow.test.js`.
+
+**Locks discussion (owner item 3) — `labs/LOCKS.md`.** Inventory +
+canonicalization proposal. Confirms the "scattered/spaghetti" hunch: two
+concepts share the word "lock" (authorization lease `lib/lock.js` vs mutex
+`lib/flock.js`), a dead third engine (`storage.LockStorage`), four lock-path
+formulas, two ad-hoc in-process mutex families, and two failure postures.
+No refactor done — pending owner direction.
+
+Gates: sweep 155/155 chunked; lint:docs PASS (129)/lint:surface/lint:helpers;
+eslint 0 errors; `npm run check`; audit-mcp 296 reg / 59 skip / THREW 0 /
+TIMEOUT 0 / INVALID 0 / REFUSED 149 / OK 88 / PHANTOM 0; npm test 15/15;
+test-all exit 0; test-core 5/5; zero leaked locks.
 
 ## Session (2026-10-03 — pass 100: live-fire hunt — oversell + prototype pollution)
 

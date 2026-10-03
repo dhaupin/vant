@@ -482,10 +482,10 @@ Brain:
   vant lock       Brain write lock (acquire/release/status)
   vant horcrux    Backup/restore brain to images
   vant stego      Stego brain recovery
-  vant migrate    Brain layout versioning (status/dry-run/apply)
-  vant wal        Storage crash-recovery journal (status/drill/reset)
-  vant s3         Remote storage connectors — S3/R2/MinIO/B2 (status/test/ls/push/pull)
-  vant mirror     Storage replication (status/verify/resync)
+  vant migrate    Brain layout versioning (--status | --dry-run | apply)
+  vant wal        Storage crash-recovery journal (--status | --drill | --reset <basePath>)
+  vant s3         Remote storage connectors — S3/R2/MinIO/B2 (--status | --test | --ls | --push | --pull)
+  vant mirror     Storage replication (--status | --verify <path> | --resync)
 
 State:
   vant watch      Poll GitHub for changes
