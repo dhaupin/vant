@@ -30,6 +30,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const BRAIN = 'qc-roster-gate';
 const STORE = path.join(ROOT, 'models', 'private', BRAIN, 'orgchart', 'agents.json');
+const LOCK = path.join(ROOT, 'models', 'private', BRAIN, '.locks', 'agents.lock');
 
 const results = { passed: 0, failed: 0, tests: [] };
 
@@ -103,7 +104,7 @@ function wipe() {
             ids.length === 4 && ids.every(id => roster.has(id)),
             `spawned=${ids.length} persisted=${roster.size}`);
         report('roster file parses as a Map (atomic write held)', roster.size >= 4);
-        report('lock file released after saves', !fs.existsSync(STORE + '.lock'));
+        report('lock file released after saves', !fs.existsSync(LOCK));
     } catch (e) {
         report('gate A (concurrent spawns)', false, e.message);
     }

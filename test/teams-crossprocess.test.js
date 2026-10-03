@@ -29,6 +29,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const BRAIN = 'qc-teams-gate';
 const STORE = path.join(ROOT, 'models', 'private', BRAIN, 'orgchart', 'teams.json');
+const LOCK = path.join(ROOT, 'models', 'private', BRAIN, '.locks', 'teams.lock');
 
 const results = { passed: 0, failed: 0 };
 
@@ -106,7 +107,7 @@ const S = ${START};
         report('4 barrier-synced concurrent createOrg → 4 orgs (was 1 pre-fix)',
             okCount === 4 && orgs.length === 4,
             `spawned=${okCount} persisted=${orgs.length}`);
-        report('lock file released after saves', !fs.existsSync(STORE + '.lock'));
+        report('lock file released after saves', !fs.existsSync(LOCK));
     } catch (e) {
         report('gate A (concurrent createOrg)', false, e.message);
     }

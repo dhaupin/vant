@@ -7,6 +7,21 @@
 
 ## Handoff
 
+**Last known good commit:** pass 103 — locks §4 (posture, one lock root, mutex collapse, fail-closed, audit).
+`lib/lock.js` mutex now: `acquire()`→`{ok,reason}` (acquired|held|unavailable);
+`withLock(path,fn,{failMode})` closed-by-default (never runs fn without the
+lock; returns `{ok:false,reason,aborted:true}`), open runs fn(result), sync fn
+released synchronously; new `mutex()` and `pathFor(kind,id)`. All file locks
+moved to `models/private/<brain>/.locks/` (retired the 4 ad-hoc formulas).
+In-process mutexes (consensus/cache/canvas) now use `lock.mutex()`; deleted the
+dead `storage.LockStorage`. Fail-CLOSED at persistMerged/teams/agents/habitat
+(refuse unlocked write + log reason) — no more last-writer-wins. Bonus: agents
+roster lock now spans merge+write. `scripts/audit-locks.js` + `npm run
+lint:locks` enumerate 8 mutex / 10 lease requires, 0 leaks. Tests updated for
+new lock paths; new test/lock.test.js (11). Gates: sweep 156/156, lints
+PASS, eslint 0 err, check, audit-mcp 296 THREW0/TIMEOUT0/INVALID0/REFUSED149/
+OK88/PHANTOM0, npm test 15/15, test-all 0, test-core 5/5, zero leaked locks.
+
 **Last known good commit:** pass 102 — lock naming split (brain-lock lease vs lock mutex).
 Owner chose to keep both lock concepts but name them unambiguously. `lib/lock.js`
 (authorization lease) → `lib/brain-lock.js`; `lib/flock.js` (cross-process

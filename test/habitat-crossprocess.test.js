@@ -32,7 +32,7 @@ const ROOT = path.resolve(__dirname, '..');
 const BRAIN = 'qc-habitat-gate';
 const STATE_DIR = path.join(ROOT, 'models', 'private', BRAIN, 'state');
 const STATE_FILE = path.join(STATE_DIR, '_habitat.json.md');
-const LOCK_FILE = path.join(ROOT, 'models', 'private', BRAIN, '.habitat.lock');
+const LOCK_FILE = path.join(ROOT, 'models', 'private', BRAIN, '.locks', 'habitat.lock');
 
 const results = { passed: 0, failed: 0 };
 

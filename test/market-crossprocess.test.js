@@ -192,7 +192,9 @@ const boot = require("./lib/boot");
 boot.init({ taskId: "market-d", scopes: ["read", "write", "spawn", "execute"], debug: false });
 require("./lib/sandbox").defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canNetwork: true, canTrade: true, canSpawn: true });
 const lock = require("./lib/lock");
-lock.withLock = (p, fn) => fn(false);   // simulate lock acquisition failure
+// (pass 103) withLock failMode:'closed' aborts WITHOUT running fn and returns
+// { ok:false, reason, aborted:true } — simulate that exact shape.
+lock.withLock = () => Promise.resolve({ ok: false, reason: 'held', aborted: true });
 const market = require("./lib/market");
 const escrow = require("./lib/escrow");
 (async () => {

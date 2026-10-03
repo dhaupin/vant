@@ -127,3 +127,48 @@ owning `lock: 'lock.js'` is a *bin* mapping, not the lib, so it is unchanged.
 change, not a rename): item 2 (`{ok,reason}` + `failMode`), item 3 (one lock
 root + `flock.pathFor`), item 4 (collapse the in-process mutexes + delete dead
 `LockStorage`), item 5 (decide the fail-open call sites), item 6 (lock audit).
+
+---
+
+## 7. Pass 103 — §4 items 2–6 IMPLEMENTED (2026-10-03)
+
+Owner: "another labs/locks pass. This is needed." Done:
+
+**Item 2 — posture in the primitive (`lib/lock.js`).**
+`acquire()` now returns `{ ok, reason }` with
+`reason ∈ {acquired, held, unavailable}` (so callers tell peer contention from
+a broken filesystem). `withLock(path, fn, { failMode })`:
+`failMode:'closed'` (DEFAULT) never runs `fn` without the lock and returns
+`{ ok:false, reason, aborted:true }`; `'open'` runs `fn(result)` anyway. A sync
+`fn` is released synchronously (no forced await). Added `mutex()` (see item 4).
+
+**Item 3 — one lock root + `pathFor`.**
+All file locks now live under `models/private/<brain>/.locks/` via
+`lock.pathFor(kind, id)`. The four old formulas are gone; `state-store.lockPathFor`
+delegates to `pathFor('state', …)`, and teams/agents/habitat/market use
+`pathFor('teams'|'agents'|'habitat'|'market-trade', …)`. `.locks/` is a
+brain-root dot-dir: migrations only sweeps `<brain>/state/`, and lib/brain
+treats dot-dirs as infrastructure.
+
+**Item 4 — one in-process mutex + dead code deleted.**
+`lock.mutex()` (promise-chain, pass-90 poison-proof) now backs consensus
+`_topicLocks`, `cache._withLock`, and `canvas._withLock` — three hand-rolled
+copies deleted. `storage.LockStorage` (engine #3, zero call sites) removed
+(class + `getStorage('lock')` case + export).
+
+**Item 5 — fail-open sites decided → FAIL CLOSED.**
+`state-store.persistMerged`, `teams._saveTeams`, `agents._saveAgents`,
+`habitat.save` no longer degrade to an unlocked last-writer-wins write; on a
+failed acquire they refuse the write and log the `reason`. BONUS: the agents
+roster lock now spans merge **and** write (previously released in the gap);
+teams already held it across merge+write.
+
+**Item 6 — enumerable surface.**
+`scripts/audit-locks.js` (`npm run lint:locks`) enumerates every lock require
+and fails if any file outside `lib/lock.js`/`lib/brain-lock.js` builds an
+ad-hoc lock path (`+ '.lock'` / `'.locks'`), if the old `lib/flock.js`
+reappears, or if any `.locks/` lockfile is left behind. First run: 8 mutex
+requires, 10 lease requires, 0 leaks.
+
+New `test/lock.test.js` pins the primitive (reason, failMode, sync fn,
+mutex poison-proofing, pathFor naming/sanitizing).

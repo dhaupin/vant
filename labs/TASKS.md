@@ -2,7 +2,50 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-03  
-**Session:** Pass 102 — lock naming split (brain-lock lease vs lock mutex)
+**Session:** Pass 103 — locks §4: posture, one lock root, mutex collapse, fail-closed, audit
+
+---
+
+## Session (2026-10-03 — pass 103: labs/LOCKS.md §4 items 2–6)
+
+Owner: "another labs/locks pass. This is needed." LOCKS.md §4 now DONE
+(items 2–6; item 1 was pass 102).
+
+**Item 2 — posture in the primitive (`lib/lock.js`).** `acquire()` returns
+`{ ok, reason }` with `reason ∈ {acquired, held, unavailable}` — callers can
+tell peer contention from a broken FS. `withLock(path, fn, { failMode })`:
+`'closed'` (DEFAULT) never runs `fn` without the lock and returns
+`{ ok:false, reason, aborted:true }`; `'open'` runs `fn(result)`. A sync `fn`
+is released synchronously. Added `mutex()`.
+
+**Item 3 — one lock root.** All file locks now
+`models/private/<brain>/.locks/<kind>[__<id>].lock` via `lock.pathFor(kind,id)`.
+Retired the four ad-hoc formulas (state-store `.<x>.lock`, teams/agents
+`<store>.lock`, habitat `.habitat.lock`, market's reuse of state-store's
+formula → now `pathFor('market-trade', id)`).
+
+**Item 4 — collapse + delete.** `lock.mutex()` (pass-90 poison-proof) now backs
+consensus `_topicLocks`, `cache._withLock`, `canvas._withLock`. Deleted the
+dead `storage.LockStorage` (class + `case 'lock'` + export).
+
+**Item 5 — fail-closed.** `state-store.persistMerged`, `teams._saveTeams`,
+`agents._saveAgents`, `habitat.save` no longer degrade to an unlocked
+last-writer-wins write; they refuse the write and log the
+`reason`. BONUS: the agents roster lock now spans merge AND write (was
+released in the gap).
+
+**Item 6 — audit.** `scripts/audit-locks.js` + `npm run lint:locks`. Enumerates
+lock requires (8 mutex / 10 lease) and fails on any ad-hoc lock path outside
+lib/lock.js|brain-lock.js, a resurrected lib/flock.js, or a leaked lockfile.
+
+Tests updated for the new lock paths (teams/roster/habitat crossprocess) and
+market gate D now simulates the real `{ok:false,aborted:true}` abort shape.
+New `test/lock.test.js` (11 cases) pins the primitive.
+
+Gates: sweep 156/156 chunked; lint:docs PASS (129)/lint:surface/lint:helpers/
+lint:locks; eslint 0 errors; `npm run check`; audit-mcp 296 reg / 59 skip /
+THREW 0 / TIMEOUT 0 / INVALID 0 / REFUSED 149 / OK 88 / PHANTOM 0; npm test
+15/15; test-all exit 0; test-core 5/5; zero leaked locks.
 
 ---
 

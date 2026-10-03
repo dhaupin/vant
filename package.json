@@ -42,6 +42,7 @@
     "lint:docs": "node scripts/check-docs-style.js && node scripts/check-docs-links.js",
     "lint:surface": "node scripts/check-surface-consistency.js",
     "lint:helpers": "node scripts/check-stateful-helpers.js && node scripts/check-bin-truthfulness.js",
+    "lint:locks": "node scripts/audit-locks.js",
     "check": "for f in lib/*.js bin/*.js test/*.js; do node --check \"$f\" || exit 1; done && echo 'syntax OK'"
   },
   "devDependencies": {
