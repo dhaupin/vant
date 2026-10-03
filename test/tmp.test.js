@@ -137,6 +137,41 @@ asyncTest('tmp cacheSet/get still works after T7 refactor', async () => {
     };
 });
 
+// ==================== S3 / F6 (pass 107) ====================
+
+// Code-usage pattern (property access / assignment), NOT prose in comments —
+// the pass-107 comments deliberately mention `global._lock` by name.
+const USES_GLOBAL_LOCK = /global\._lock\s*(\?|\.|\[|=)/;
+
+test('lib/tmp.js requires brain-lock directly, no global._lock (F6)', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'lib', 'tmp.js'), 'utf8');
+    const requiresLock = /require\(\s*['"]\.\/brain-lock['"]\s*\)/.test(src);
+    const usesGlobal = USES_GLOBAL_LOCK.test(src);
+    return { success: requiresLock && !usesGlobal, error: `requiresLock=${requiresLock} usesGlobal=${usesGlobal}` };
+});
+
+test('no lib module reaches the lease through global._lock (F6)', () => {
+    const targets = ['lib/tmp.js', 'lib/shell.js'];
+    const offenders = targets.filter(f => USES_GLOBAL_LOCK.test(fs.readFileSync(path.join(ROOT, f), 'utf8')));
+    return { success: offenders.length === 0, error: offenders.join(', ') };
+});
+
+asyncTest('vant tmp create works with no global._lock set (F6)', async () => {
+    // bin/tmp.js USED to be the only reason put/delete had a lock (it wired
+    // global._lock). lib/tmp.js now requires brain-lock directly, so the CLI
+    // must still work without any global being set.
+    delete global._lock;
+    const spawnSync = require('child_process').spawnSync;
+    const r = spawnSync(process.execPath, [path.join(ROOT, 'bin', 'tmp.js'), 'create', 'f6-probe'], { cwd: ROOT, encoding: 'utf8' });
+    const out = (r.stdout || '') + (r.stderr || '');
+    // clean up whatever the CLI wrote (best-effort)
+    try { spawnSync(process.execPath, [path.join(ROOT, 'bin', 'tmp.js'), 'clean'], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { /* ignore */ }
+    return {
+        success: r.status === 0 && /Created temp file/.test(out) && typeof global._lock === 'undefined',
+        error: out.slice(0, 300)
+    };
+});
+
 // ============================================
 // MULTIBRAIN TESTS
 // ============================================

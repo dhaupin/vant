@@ -58,6 +58,17 @@ test('getStackHealthStatus returns object with source stack', () => {
     return { success: result && result.source === 'stack' };
 });
 
+test('getStackHealthStatus surfaces the lock layer (S3)', () => {
+    const health = require(path.join(ROOT, 'lib', 'health'));
+    const result = health.getStackHealthStatus();
+    const lock = result && result.lock;
+    return {
+        success: !!lock && !!lock.layer && lock.layer.type === 'authorization_lease'
+            && Array.isArray(lock.held) && !!lock.byBrain,
+        error: lock ? JSON.stringify(lock).slice(0, 200) : 'no lock field'
+    };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

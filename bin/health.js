@@ -178,6 +178,28 @@ function checkMigration() {
     } catch (e) { /* never fail health over the notice */ }
 }
 
+function checkLock() {
+    // (pass 107, S3) `vant health` shows lock state. Reports the active brain's
+    // authorization lease (who may write) and the leases held across the stack;
+    // never fails health over a lock-probe error.
+    console.log('\n' + theme.label('🔐 Lock:'));
+    try {
+        const brainLock = require('../lib/brain-lock');
+        const layer = brainLock.getLayerStatus();
+        console.log('  ' + theme.status.ok(layer.name + ' (' + layer.type + ') enabled=' + layer.enabled));
+        const status = brainLock.brainLockStatus();
+        if (status && status.valid) {
+            console.log('  ' + theme.status.ok('Lease held by ' + status.agentId + ' (' + status.age + 'ms old)'));
+        } else {
+            console.log('  ' + theme.status.ok('No active lease (brain is free to write)'));
+        }
+        const held = brainLock.listStackLocks();
+        console.log('  Held across stack: ' + held.length);
+    } catch (e) {
+        console.log('  ' + theme.status.warn('Lock status unavailable: ' + e.message));
+    }
+}
+
 function run() {
     console.log('\n' + theme.vantHeader + ' Health Check\n');
     
@@ -186,6 +208,7 @@ function run() {
     checkEnv();
     checkDirs();
     checkMigration();
+    checkLock();
     
     console.log('\n');
 }

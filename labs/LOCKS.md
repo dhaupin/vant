@@ -340,12 +340,41 @@ locks · scratch brains wiped.
 
 - [x] **S1 — Truth-up the lease (F1–F5)** — done pass 105 (see §8.11)
 - [x] **S2 — Separation-of-concern contract (F8–F11)** — done pass 106 (see §8.11)
-- [ ] S3 — Complete the wire-up (F6, health, MCP)
+- [x] **S3 — Complete the wire-up (F6, health, MCP)** — done pass 107 (see §8.11)
 - [ ] S4 — Migrate to `withLock` (F7)
 - [ ] S5 — Unguarded-writer triage (F12)
 - [ ] S6 — Documentation (F13)
 
 ## 8.11 Execution log
+
+### S3 — Complete the wire-up (pass 107, done)
+
+- **F6 (tmp lease) — fixed.** `lib/tmp.js` put/delete lazy-require
+  `./brain-lock` and call `acquireBrainLock`(`tmp:<space>:write|delete`) /
+  `releaseBrainLock` directly, replacing `global._lock?.acquire?.` (a shared
+  global only bin/tmp.js / shell / sandbox set — any other caller silently ran
+  unlocked). shell.js was the last `global._lock` writer; it now uses a local
+  lazy cache, so the global is gone. bin/tmp.js no longer wires it.
+- **Health surface — wired.** `health.getStackHealthStatus` returns a `lock`
+  field `{layer, byBrain, held}` from brain-lock's stack helpers (read-only; the
+  helpers pass the brain explicitly, no pushBrain mutation). `vant health`
+  prints a Lock section.
+- **MCP — wired.** `vant_lock` `status` now includes `stack`+`held`; added a
+  `stack` action for the whole-stack view (enum updated).
+- **CLI — wired.** `vant lock status` prints the whole-stack view; help text
+  updated.
+- **boot init — surfaced.** Removed the dead `if (lock.init)` (brain-lock has no
+  init); loading the module is what makes `getLayerStatus().lock` real.
+- **Tests:** test/brain-lock.test.js +4 (MCP status/stack, health lock, CLI
+  status), test/health.test.js +1, test/tmp.test.js +3 (static F6 gates + a
+  `vant tmp create` spawn with no global). 11 files.
+- **Harness note:** run the 157 sweep WITHOUT `VANT_BRAIN`;
+  test/migrations.test.js's spawned probe inherits it and false-fails the
+  legacy-main read test (157/157 with it unset).
+- **Gates:** sweep 157/157; lint:locks/docs/surface/helpers PASS; eslint 0
+  errors on touched; `npm run check`; npm test 15/15; test-core 5/5; test-all
+  exit 0; MCP audit 296 reg / THREW 0 / PHANTOM 0; zero leaked locks; scratch
+  wiped.
 
 ### S2 — Separation-of-concern contract (pass 106, done)
 

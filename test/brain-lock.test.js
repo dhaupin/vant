@@ -140,6 +140,52 @@ test('vant lock release reports FAILURE + keeps the token on a denied release (F
 });
 
 // ============================================
+// S3 WIRE-UP (pass 107)
+// ============================================
+
+console.log('\n🔌 S3 WIRE-UP TESTS (pass 107)\n');
+
+test('MCP vant_lock status reports stack status (S3)', async () => {
+    const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+    const r = await mcp.execute('vant_lock', { action: 'status' });
+    return {
+        success: !!r && r.action === 'status' && !!r.stack && r.stack.source === 'stack'
+            && Array.isArray(r.held) && !!r.stack.byBrain && typeof r.stack.byBrain === 'object',
+        error: JSON.stringify(r).slice(0, 240)
+    };
+});
+
+test('MCP vant_lock stack action returns the whole-stack view (S3)', async () => {
+    const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+    const r = await mcp.execute('vant_lock', { action: 'stack' });
+    return {
+        success: !!r && r.action === 'stack' && r.source === 'stack' && Array.isArray(r.held),
+        error: JSON.stringify(r).slice(0, 240)
+    };
+});
+
+test('health.getStackHealthStatus surfaces the lock layer (S3)', () => {
+    const health = require(path.join(ROOT, 'lib', 'health'));
+    const r = health.getStackHealthStatus();
+    return {
+        success: !!r && !!r.lock && !!r.lock.layer && r.lock.layer.type === 'authorization_lease'
+            && Array.isArray(r.lock.held) && !!r.lock.byBrain,
+        error: JSON.stringify(r && r.lock).slice(0, 240)
+    };
+});
+
+test('vant lock status reports the whole stack (S3)', () => {
+    const r = spawnSync(process.execPath, [path.join(ROOT, 'bin', 'lock.js'), 'status'], {
+        cwd: ROOT, encoding: 'utf8', env: { ...process.env, VANT_BRAIN: 'vant' }
+    });
+    const out = (r.stdout || '') + (r.stderr || '');
+    return {
+        success: r.status === 0 && /Stack:/.test(out) && /Held across stack:/.test(out),
+        error: out.slice(0, 240)
+    };
+});
+
+// ============================================
 
 (async () => {
     for (const t of suite) {

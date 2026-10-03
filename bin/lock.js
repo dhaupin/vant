@@ -107,6 +107,20 @@ async function main() {
             } else {
                 console.log(theme.status.warn('No lock held'));
             }
+            // (pass 107, S3) Report the whole STACK too, not just the
+            // process-active brain — mirrors MCP `vant_lock status|stack`.
+            try {
+                const stackStatus = lock.getStackLockStatus();
+                const heldLocks = lock.listStackLocks();
+                console.log('Stack:');
+                for (const b of (stackStatus.brains || [])) {
+                    const s = stackStatus.byBrain[b];
+                    console.log('  - ' + b + ': ' + (s && s.valid ? 'held by ' + s.agentId : 'free'));
+                }
+                console.log('  Held across stack:', heldLocks.length);
+            } catch (e) {
+                console.log('  ' + theme.status.warn('Stack lock status unavailable: ' + e.message));
+            }
             break;
             
         case 'force':
@@ -123,7 +137,7 @@ Usage: vant lock <command>
 Commands:
   acquire (acq)   Acquire brain lock for writes
   release (rel)    Release brain lock [token]
-  status (stat)    Show lock status
+  status (stat)    Show lock status (active brain + whole stack)
   force           Force release (admin)
 
 Examples:

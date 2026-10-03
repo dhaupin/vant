@@ -7,6 +7,19 @@
 
 ## Handoff
 
+**Last known good commit:** pass 107 — locks stage S3 (wire-up completion).
+F6 closed: `lib/tmp.js` put/delete now lazy-require `./brain-lock` and call
+`acquireBrainLock`/`releaseBrainLock` directly — no more implicit
+`global._lock` (shell.js was the last writer; it now uses a local lazy cache, so
+the global is gone; bin/tmp.js no longer wires it). Surfaces: `health.
+getStackHealthStatus` returns a `lock` field `{layer,byBrain,held}` and `vant
+health` prints it; MCP `vant_lock` status includes `stack`+`held` (+ new `stack`
+action); `vant lock status` prints the whole-stack view; boot.init dropped the
+dead `if (lock.init)`. Tests +8 across brain-lock/health/tmp. 11 files.
+⚠️ HARNESS: run the 157 sweep WITHOUT `VANT_BRAIN` — test/migrations.test.js's
+spawned probe inherits it and false-fails on the legacy-main read test (157/157
+with it unset). All gates green. Next: S4 (migrate to `withLock`, F7).
+
 **Last known good commit:** pass 106 — locks stage S2 (separation-of-concern
 contract). F8–F11 closed. Documented the two lock roots in code headers: mutex
 `lib/lock.js` = per-brain `models/private/<brain>/.locks/` (pathFor); lease

@@ -2,7 +2,41 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-03  
-**Session:** Pass 106 — locks S2 executed (separation-of-concern contract)
+**Session:** Pass 107 — locks S3 executed (wire-up completion)
+
+---
+
+## Session (2026-10-03 — pass 107: stage S3, wire-up completion)
+
+Owner: "Let's do s3!" Executed PRD stage S3 (labs/LOCKS.md §8), closing F6 and
+finishing the wire-up matrix's S3 row.
+
+- **F6 — tmp direct require.** `lib/tmp.js` put/delete now lazy-require
+  `./brain-lock` and call `acquireBrainLock`/`releaseBrainLock` directly,
+  instead of `global._lock?.acquire?.` (a shared global only bin/tmp.js/shell/
+  sandbox set — any other caller silently ran unlocked). shell.js was the only
+  remaining `global._lock` writer; it now uses a local lazy cache, so the global
+  is gone. bin/tmp.js no longer wires it.
+- **Health surface.** `health.getStackHealthStatus` returns a `lock` field
+  `{layer, byBrain, held}` (read-only stack helpers, no pushBrain mutation).
+  `vant health` prints a Lock section.
+- **MCP.** `vant_lock` `status` now includes `stack` + `held`; added a `stack`
+  action for the whole-stack view.
+- **CLI.** `vant lock status` prints the whole-stack view; help text updated.
+- **boot init.** Removed the dead `if (lock.init)` branch (brain-lock has no
+  init); loading the module is what makes `getLayerStatus().lock` real.
+
+Tests: test/brain-lock.test.js +4 (MCP status/stack, health lock, CLI status),
+test/health.test.js +1, test/tmp.test.js +3 (static F6 gates + a `vant tmp
+create` spawn with no global). 11 files.
+
+**Harness note:** the sweep must run WITHOUT `VANT_BRAIN` set —
+test/migrations.test.js's spawned read probe inherits it and overrides the
+migrated currentBrain, producing a false failure. 157/157 with it unset.
+
+Gates: sweep 157/157, lint:locks/docs/surface/helpers PASS, eslint 0 errors,
+`npm run check`, npm test 15/15, test-core 5/5, test-all exit 0, MCP audit 296
+reg / THREW 0 / PHANTOM 0, zero leaked locks, scratch wiped.
 
 ---
 

@@ -33,11 +33,10 @@ async function run() {
     // process (taskId 'default', never registered) got EPERM on EVERY
     // operation — the command was advertised but never worked standalone.
     // boot.init() creates the task with CLI scopes (same trust level as
-    // `vant org grant`). Also wire global._lock for TmpSpace put/delete,
-    // which acquire through it.
+    // `vant org grant`). (pass 107, F6) no global._lock wiring needed anymore —
+    // lib/tmp.js requires brain-lock directly.
     try {
         await boot.init({ taskId: 'vant-cli', scopes: ['read', 'write', 'exec'] });
-        if (!global._lock) global._lock = require('../lib/brain-lock');
     } catch (e) {
         console.error('[tmp] boot failed:', e.message);
         process.exit(1);
