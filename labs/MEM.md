@@ -7,6 +7,26 @@
 
 ## Handoff
 
+**Last known good commit:** pass 98 — state-store family cross-process lock.
+Fixed the two items pass 97 documented-not-fixed. (1) STATE-STORE FAMILY:
+consensus / market / node-registry / settlement all wrote whole snapshots
+with no cross-process lock (peers that hydrated before either wrote
+clobbered each other). New `stateStore.persistMerged` (lock at the brain
+root via new `lib/flock.js`, re-read disk, adopt unseen, write union) wired
+into all four. node-registry `unregister` and consensus `reap` are
+tombstone-safe (seen-set); consensus also UNIONS votes for held topics;
+market/settlement are append-only so adopt-unseen only. Gotcha: consensus
+marking must cover EVERY `_ledgers.set` path — mergeTopic was missed and
+agora-hygiene caught the reap-resurrection. (2) LOCK LEAK: `lib/flock.js`
+registers a `process.on('exit')` that unlinks held locks (finally can't run
+on abrupt mid-await exit); habitat/teams/agents-internal refactored onto
+flock. Verified ZERO leaked locks after the full 152-suite sweep. NEW
+test/state-store-crossprocess.test.js 5/5. Gates: sweep 152/152 chunked,
+lints PASS (docs 129/surface/helpers), eslint 0 err, npm run check,
+audit-mcp 296 THREW(0)/TIMEOUT(0)/INVALID(0)/REFUSED 149/OK 88, npm test
+15/15, test-all exit 0, test-core 5/5. Queued: draft axolotl→main PR
+(merge-readiness done pass 96); MEM/TASKS→vant-native + whitepaper.
+
 **Last known good commit:** pass 97 — habitat cross-process fix + QC.
 HABITAT FIX (the pass-96 deferred finding): save() wrote the whole
 in-memory snapshot (workspaces/roles/boundaries/tokens) while

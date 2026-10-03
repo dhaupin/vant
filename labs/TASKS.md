@@ -2,7 +2,42 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-03  
-**Session:** Pass 97 — habitat cross-process fix + QC (MCP stubs, migration-collision)
+**Session:** Pass 98 — state-store family cross-process lock + shared flock
+
+---
+
+## Session (2026-10-03 — pass 98: state-store family cross-process lock)
+
+Owner: "fix this: consensus / market / node-registry / settlement write
+whole state-store snapshots with no cross-process lock; fire-and-forget
+habitat saves can leak a lock on abrupt exit." Both fixed.
+
+**Shared primitive `lib/flock.js`** (new): 'wx' create, stale takeover,
+symlink guard, + ONE `process.on('exit')` hook that unlinks every held
+lock — `finally` cannot run on an abrupt mid-await teardown, so it removes
+the leak class (verified: ZERO leaked locks after the full 152-suite
+sweep, vs several before). habitat / teams / agents-internal refactored
+onto it (their hand-rolled lock copies removed).
+
+**`stateStore.persistMerged` + `lockPathFor`** (new): lock (brain root,
+hidden — NOT `state/`, which lib/migrations sweeps), re-read the on-disk
+snapshot, adopt unseen rows, write the union. Wired into:
+- **node-registry**: seen-set + `unregister` tombstone.
+- **consensus**: seen-set + `reap` tombstone + vote UNION for held topics
+  (votes are immutable, so a peer ballot must not be lost). Marked seen on
+  EVERY `_ledgers.set` path (create, hydrate, mergeTopic, restoreState) —
+  the mergeTopic omission was caught by agora-hygiene.
+- **market** / **settlement**: append-only ids → adopt-unseen, no tombstone.
+
+**NEW `test/state-store-crossprocess.test.js` 5/5**: 4 concurrent
+register / 4 concurrent consensus.create all persist; unregister tombstone
+not resurrected while an unseen newcomer is adopted.
+
+**GATES (all green):** sweep 152/152 chunked; lint:docs PASS (129);
+lint:surface PASS; lint:helpers PASS; eslint touched 0 errors; `npm run
+check` syntax OK; audit-mcp 296 / THREW 0 / TIMEOUT 0 / INVALID 0 /
+REFUSED 149 / OK 88; `npm test` 15/15; test-all exit 0; test-core 5/5;
+zero leaked locks.
 
 ---
 
