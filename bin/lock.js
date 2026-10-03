@@ -84,11 +84,14 @@ async function main() {
         case 'rel':
             const inputToken = args[1] || loadToken();
             const result = await lock.releaseBrainLock('brain', inputToken);
-            if (result) {
+            // (pass 105) releaseBrainLock ALWAYS returns an object; test the
+            // `.success` flag, not truthiness — otherwise a DENIED release
+            // printed "Lock released" and deleted the token file.
+            if (result && result.success) {
                 clearToken();
                 console.log(theme.status.ok('Lock released'));
             } else {
-                console.log(theme.status.fail('Release failed'));
+                console.log(theme.status.fail((result && result.message) || 'Release failed'));
             }
             break;
             

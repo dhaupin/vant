@@ -338,9 +338,41 @@ locks · scratch brains wiped.
 
 ## 8.10 Stage tracker
 
-- [ ] S1 — Truth-up the lease (F1–F5)
+- [x] **S1 — Truth-up the lease (F1–F5)** — done pass 105 (see §8.11)
 - [ ] S2 — Separation-of-concern contract (F8–F11)
 - [ ] S3 — Complete the wire-up (F6, health, MCP)
 - [ ] S4 — Migrate to `withLock` (F7)
 - [ ] S5 — Unguarded-writer triage (F12)
 - [ ] S6 — Documentation (F13)
+
+## 8.11 Execution log
+
+### S1 — Truth-up the lease (pass 105, done)
+
+- **F1 (rate limit) — RESOLVED by REMOVAL, on separation-of-concern grounds.**
+  The lease is acquired HOT by internal writers (`sandbox-write`, `shell:exec`,
+  `tmp:*`) as well as by `vant lock`; a per-agent per-minute cap there would
+  throttle legitimate internal acquires. Rate limiting is **QoS's** concern
+  (`lib/qos.js`), not the lock's. Deleted the dead `_checkRateLimit`, the
+  `RATE_LIMIT_WINDOW`/`MAX_ACQUIRES_PER_MINUTE` constants, the unused
+  `rateLimits`/`acquireAttempts` maps, and the docstring's "rate-limited"
+  claim — so the header stops promising a limit that never fired (and that
+  would have thrown `ReferenceError` if it had).
+- **F2 (layer status) — `getLayerStatus()` added**
+  (`{name:'Brain lock', type:'authorization_lease', enabled:true,
+  trackedBrains, defaultTtlMs}`), so `vant boot` reports the real layer instead
+  of the hardcoded fallback.
+- **F3 (stack listing) — fixed.** `listStackLocks` now emits real held-lock
+  rows (`{brain,agentId,token,age,valid}`) instead of spreading brain-name
+  strings; `listBrainLocks` (the junk source) removed. Both stack helpers now
+  pass the brain EXPLICITLY to `brainLockStatus` instead of mutating the
+  process-active brain via `pushBrain`/`removeBrain`.
+- **F4 (CLI release) — fixed.** `bin/lock.js release` tests `result.success`,
+  not truthiness, and no longer prints "Lock released" / wipes the token on a
+  denied release.
+- **F5 (`getState().lockStatus`) — fixed** to report the live status value, not
+  the function reference.
+- **Gates:** new/updated `test/brain-lock.test.js` (14, incl. F2/F3/F4/F5
+  gates); sweep 157/157 chunked; lint:docs/surface/helpers/locks PASS; `npm run
+  check`; eslint 0 errors on touched; audit-mcp 296 / THREW 0 / PHANTOM 0;
+  `npm test` 15/15; test-all exit 0; test-core 5/5; zero leaked locks.

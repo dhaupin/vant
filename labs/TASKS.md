@@ -2,7 +2,37 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-03  
-**Session:** Pass 104 — lock system PRD (walk-back audit → S1–S6 stages)
+**Session:** Pass 105 — locks S1 executed (truth-up the lease)
+
+---
+
+## Session (2026-10-03 — pass 105: stage S1, truth-up the lease)
+
+Owner: "start fixing and building." Executed PRD stage S1 (labs/LOCKS.md §8),
+closing findings F1–F5.
+
+- **F1 rate limit — REMOVED, not wired.** The lease is acquired HOT by internal
+  writers (sandbox write, shell exec, tmp) as well as `vant lock`; a per-agent
+  per-minute cap would throttle those. Rate limiting is QoS's concern. Deleted
+  the dead `_checkRateLimit` (which also referenced an undefined `errors`), the
+  `RATE_LIMIT_WINDOW`/`MAX_ACQUIRES_PER_MINUTE` constants, the unused
+  `rateLimits`/`acquireAttempts` maps, and the docstring claim.
+- **F2** added `getLayerStatus()` matching sibling layers → `vant boot` no
+  longer hardcodes the lock layer.
+- **F3** `listStackLocks` now emits real held-lock rows (was spreading
+  brain-name strings into `{0:'a',...}` junk); `listBrainLocks` removed; stack
+  helpers pass the brain explicitly instead of pushBrain/removeBrain.
+- **F4** `bin/lock.js release` tests `result.success` (was truthiness on an
+  always-object → false "Lock released" + token wipe on a DENIED release).
+- **F5** `getState().lockStatus` returns the status value, not the function.
+
+`test/brain-lock.test.js` rewritten (async runner, 14 cases incl. F2–F5 gates;
+F4 spawns `bin/lock.js release` with a wrong token and asserts no success + the
+.token file survives). Gates: sweep 157/157 chunked; lint:docs/surface/helpers/
+locks PASS; `npm run check`; eslint 0 err; audit-mcp 296 / THREW 0 / PHANTOM 0;
+npm test 15/15; test-all exit 0; test-core 5/5; zero leaked locks.
+
+**Next:** S2 — separation-of-concern contract (F8–F11).
 
 ---
 

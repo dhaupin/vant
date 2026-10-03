@@ -7,6 +7,17 @@
 
 ## Handoff
 
+**Last known good commit:** pass 105 — locks stage S1 (truth-up the lease).
+F1–F5 closed. F1 was REMOVED (not wired): the lease is acquired hot by internal
+writers, so rate limiting is QoS's job — deleted the dead `_checkRateLimit`
+(undefined `errors`), its constants/maps, and the docstring claim. F2 added
+`getLayerStatus()`. F3 fixed `listStackLocks` (was spreading strings) + dropped
+`listBrainLocks`; stack helpers now pass brain explicitly (no pushBrain). F4
+`bin/lock.js release` honours `.success` (was false success + token wipe on a
+denied release). F5 `getState().lockStatus` is data now. test/brain-lock.test.js
+= 14 (async runner). Marker for S1 file locations in labs/TASKS.md. Next: S2
+(separation-of-concern contract).
+
 **Last known good commit:** pass 104 — lock-system PRD (labs/LOCKS.md §8, S1–S6).
 Walk-back audit found 13 issues; High: F1 (brain-lock rate limit dead AND would
 ReferenceError — `errors` undefined, no caller), F4 (`vant lock release`
