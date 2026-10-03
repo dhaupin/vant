@@ -1,8 +1,49 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-10-02  
-**Session:** Pass 96 — merge-readiness checklist + QC (teams race fixed, habitat deferred)
+**Last Updated:** 2026-10-03  
+**Session:** Pass 97 — habitat cross-process fix + QC (MCP stubs, migration-collision)
+
+---
+
+## Session (2026-10-03 — pass 97: habitat cross-process fix + QC)
+
+Owner: "do the habitat fix you found instead of deferring. then run another
+qc pass across everything." Both ran.
+
+**HABITAT CROSS-PROCESS FIX (the pass-96 deferred finding).** `save()`
+wrote the whole in-memory snapshot (workspaces/roles/boundaries/tokens)
+while adopt-on-load ran once at `restore()` — two processes that hydrated
+before either wrote clobbered each other (proven live pre-fix: 4 concurrent
+`createWorkspace` → 2 workspaces). Now every save takes a short-lived
+lockfile, re-reads the persisted `_habitat` row FRESH, adopts unseen
+newcomers, writes the union. Tombstone-safe: seen-but-absent ids are local
+deletes and stay deleted; roles tracked per-triple so one membership
+removal survives a stale peer snapshot. The persistence seam needed a
+`fresh` flag on BOTH `memory.recall` and `brain._loadBrain` (two caches).
+NEW `test/habitat-crossprocess.test.js` 5/5.
+
+**Self-inflicted regression caught + fixed:** the first lock path was
+`<brain>/state/_habitat.json.lock`, which lib/migrations' `dropfiles.tmp-space`
+step sweeps as legacy drop content → broke `test/migrations.test.js`
+idempotency (and relocated a leaked lock to models/tmp-space). Moved the
+lock to the brain root as hidden `.habitat.lock`.
+
+**QC (round 2) — 5 more MCP stubs wired to reality:** `vant_commit`,
+`vant_sync`, `vant_lock` (+`required:['action']`), `vant_health`,
+`vant_create_branch` — all previously returned fabricated success without
+touching the real modules.
+
+**Documented, not fixed (flagged for a future pass):** consensus /
+market / node-registry / settlement all write whole state-store snapshots
+with no cross-process lock (single-writer-hub assumption) — same class,
+lower blast radius. Fire-and-forget habitat saves can leak a lock on abrupt
+exit; >5s stale takeover reclaims it.
+
+**GATES (all green):** sweep 151/151 chunked; lint:docs PASS (129 files);
+lint:surface PASS; lint:helpers PASS; eslint touched 0 errors;
+`npm run check` syntax OK; audit-mcp 296 / THREW 0 / TIMEOUT 0 / INVALID 0 /
+REFUSED 149 / OK 88; `npm test` 15/15; test-all exit 0; test-core 5/5.
 
 ---
 

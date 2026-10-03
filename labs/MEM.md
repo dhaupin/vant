@@ -7,6 +7,30 @@
 
 ## Handoff
 
+**Last known good commit:** pass 97 — habitat cross-process fix + QC.
+HABITAT FIX (the pass-96 deferred finding): save() wrote the whole
+in-memory snapshot (workspaces/roles/boundaries/tokens) while
+adopt-on-load ran once at restore(), so peers that hydrated before either
+wrote clobbered each other (pre-fix: 4 concurrent createWorkspace → 2).
+Now every save takes a lockfile, re-reads the _habitat row FRESH, adopts
+unseen newcomers, writes the union; tombstone-safe (seen-but-absent ids
+stay deleted), roles per-triple. Required a `fresh` flag on BOTH
+memory.recall and brain._loadBrain (two caches). NEW
+test/habitat-crossprocess.test.js 5/5. SELF-INFLICTED BUG caught + fixed:
+lock at `<brain>/state/_habitat.json.lock` collided with lib/migrations'
+dropfiles.tmp-space sweeper → broke migrations idempotency; moved to brain
+root `.habitat.lock`. QC round 2: 5 more MCP stubs wired real —
+vant_commit / vant_sync / vant_lock (+required action) / vant_health /
+vant_create_branch. DOCUMENTED NOT FIXED: consensus/market/node-registry/
+settlement whole-snapshot writes with no cross-process lock (single-writer
+hub assumption, lower blast radius); fire-and-forget habitat saves can leak
+a lock on abrupt exit (stale >5s takeover reclaims). Gates: sweep 151/151
+chunked, lints PASS (docs 129 / surface / helpers), eslint 0 err, npm run
+check, audit-mcp 296 THREW(0)/TIMEOUT(0)/INVALID(0)/REFUSED 149/OK 88,
+npm test 15/15, test-all exit 0, test-core 5/5. Queued: consensus/market
+family lock parity; MEM/TASKS→vant-native + whitepaper (owner: later);
+draft axolotl→main PR (merge-readiness done in pass 96).
+
 **Last known good commit:** pass 96 — merge-readiness checklist + QC.
 MERGE-READY VERDICT: axolotl→main conflict scan is DEFINITIVELY clean —
 main's tip tree (`c11ae19…`) is byte-identical to the merge base
