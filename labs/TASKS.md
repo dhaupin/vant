@@ -2,7 +2,52 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-03  
-**Session:** Pass 98 — state-store family cross-process lock + shared flock
+**Session:** Pass 99 — proactive tombstones + cross-process reap convergence
+
+---
+
+## Session (2026-10-03 — pass 99: proactive tombstones + cross-process reap)
+
+Owner read the two pass-98 caveats and asked to close BOTH now.
+
+**Observation 1 — append-only modules now tombstone-ready (market /
+settlement).** They are append-only today (no op hard-deletes an id), so
+adopt-unseen was already correct — but the owner wanted the machinery IN
+PLACE so a future delete is not an "if". Added `_seenListings/_seenBids/`
+`_seenTrades` and `_seenSettlements`: every id ever hydrated/adopted/created
+is marked, and the merge SKIPS a seen-but-absent id (tombstone) while still
+adopting unseen ones. Same behaviour today; a future `removeListing`-style
+path just drops the row and the id stays seen → no resurrection from a
+stale peer snapshot. Regression test drives the invariant through a
+`_deleteForTest` seam → `test/state-store-tombstones.test.js` 2/2.
+
+**Observation 2 — consensus reap is now CONVERGENT across processes.** A
+`reap` is a DELETE; under in-memory-wins a peer still holding the topic
+re-serialized it on its next write (resurrection). New `_reapedTopics` map
+(topic→reapedAt) is PERSISTED (`reaped:[{topic,at}]`) and consulted by
+`_mergeLedgers`/`_applyLedgers`: a peer that persists after a reap adopts
+the tombstone and DROPS its held copy. Wired into reapSynced (set),
+create/mergeTopic (clear — re-pull is the recovery path),
+clearState/restoreState/gatherState. Bounded (oldest evicted past 1000).
+
+**BUG CAUGHT BY THE NEW GATE:** a re-pull's own persist re-read the stale
+on-disk reap and re-tombstoned the just-recovered topic. Fixed with
+`_reapRecovered` — a clock-free "our intent wins this tick" set consulted in
+`_adoptReaped`. (Would also have broken agora-hygiene's round-trip.)
+
+**NEW `test/consensus-reap-crossprocess.test.js` 6/6**: holder holds a wire
+topic while a peer reaps → holder persists and does NOT resurrect it;
+tombstone persisted; survives a cold rehydrate; re-pull clears it.
+
+**GATES (all green, 154 suites now):** sweep 154/154 chunked; lint:docs
+PASS (129); lint:surface PASS; lint:helpers PASS; eslint touched 0 errors;
+`npm run check` syntax OK; audit-mcp 296 / THREW 0 / TIMEOUT 0 / INVALID 0 /
+REFUSED 149 / OK 88 / PHANTOM 0; `npm test` 15/15; test-all exit 0;
+test-core 5/5; zero leaked locks.
+
+Files: lib/market.js, lib/settlement.js, lib/consensus.js,
+test/state-store-tombstones.test.js (new),
+test/consensus-reap-crossprocess.test.js (new).
 
 ---
 

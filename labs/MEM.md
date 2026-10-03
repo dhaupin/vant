@@ -7,6 +7,25 @@
 
 ## Handoff
 
+**Last known good commit:** pass 99 — proactive tombstones + cross-process reap.
+Closed the two pass-98 caveats. (1) market/settlement got the `_seen*` +
+tombstone-aware merge UP FRONT (append-only today, so a no-op behaviourally,
+but a future hard-delete is now safe by construction) — proves via a
+`_deleteForTest` seam. (2) consensus reap is now CONVERGENT across processes:
+`_reapedTopics` (topic→reapedAt) is persisted in the snapshot (`reaped`
+array) and `_mergeLedgers`/`_applyLedgers` adopt peer reaps and drop held
+copies — no more resurrection by a peer that still held the reaped topic.
+BUG the new gate caught: a re-pull's own persist re-read the stale on-disk
+reap and re-tombstoned the recovered topic → fixed with a clock-free
+`_reapRecovered` intent set (also keeps agora-hygiene's round-trip green).
+NEW tests: test/state-store-tombstones.test.js 2/2;
+test/consensus-reap-crossprocess.test.js 6/6. Gates: sweep 154/154 chunked,
+lints PASS (docs 129/surface/helpers), eslint 0 err, npm run check,
+audit-mcp 296 THREW(0)/TIMEOUT(0)/INVALID(0)/REFUSED 149/OK 88, npm test
+15/15, test-all exit 0, test-core 5/5, zero leaked locks. Queued: draft
+axolotl→main PR (merge-readiness done pass 96); MEM/TASKS→vant-native +
+whitepaper.
+
 **Last known good commit:** pass 98 — state-store family cross-process lock.
 Fixed the two items pass 97 documented-not-fixed. (1) STATE-STORE FAMILY:
 consensus / market / node-registry / settlement all wrote whole snapshots
