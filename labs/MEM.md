@@ -7,6 +7,26 @@
 
 ## Handoff
 
+**Last known good commit:** pass 100 — live-fire (single install + mesh), 2 bugs.
+Scratch-brain live fire of the CLI/MCP. (1) CROSS-PROCESS MARKET OVERSELL:
+the scarcity reserve in market.trade is per-process (`_reserved` not
+persisted; `trades` commits only after the escrow awaits) and `_applyMarket`
+skips held listings, so two processes both sold a supply-1 listing (persisted
+counter desynced to 1 vs 2 trade records). Fixed with a per-listing
+cross-process `flock` across reserve→commit + `_adoptCommittedTrades`
+re-reading disk `trades` under the lock. (2) CONFIG PROTOTYPE POLLUTION:
+`config.setConfig` walked dotted keys with `node = node[part]`; `__proto__`
+hit Object.prototype, so MCP `vant_config_set` key `__proto__.x` polluted
+every object (`({}).x === v`). Fixed: refuse `__proto__`/`constructor`/
+`prototype` segments (E_KEY_SEGMENT). NEW test/market-crossprocess.test.js
+3/3; test/config-persistence.test.js +gate D 13/13. NOTE: `vant wal/mirror/s3
+status` (bare word) exit 1 — real syntax is `--status`; help is misleading.
+Gates: sweep 155/155 chunked, lints PASS (docs 129/surface/helpers), eslint 0
+err, npm run check, audit-mcp 296 THREW(0)/TIMEOUT(0)/INVALID(0)/REFUSED
+149/OK 88/PHANTOM 0, npm test 15/15, test-all exit 0, test-core 5/5, zero
+leaked locks. Queued: left the wal/mirror/s3 help-vs-syntax mismatch
+unfixed (doc-only); draft axolotl→main PR; MEM/TASKS→vant-native + whitepaper.
+
 **Last known good commit:** pass 99 — proactive tombstones + cross-process reap.
 Closed the two pass-98 caveats. (1) market/settlement got the `_seen*` +
 tombstone-aware merge UP FRONT (append-only today, so a no-op behaviourally,

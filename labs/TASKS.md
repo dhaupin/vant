@@ -2,7 +2,48 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-03  
-**Session:** Pass 99 — proactive tombstones + cross-process reap convergence
+**Session:** Pass 100 — live-fire (single install + mesh): 2 real bugs fixed
+
+---
+
+## Session (2026-10-03 — pass 100: live-fire hunt — oversell + prototype pollution)
+
+Owner: "try to break it or hack it, both single install and a mesh." Scratch
+brains only. Live-fired the CLI/MCP on a fresh install and a cross-process
+trade; found and fixed TWO real bugs (both with cross-process regression gates).
+
+**Bug 1 — cross-process market oversell (mesh, economic race).** The
+scarcity reserve in `market.trade` is per-process (`_reserved` deliberately
+not persisted; `trades` commits only after the escrow awaits) and
+`_applyMarket` skips held listings, so a peer's committed count never
+arrived. Proven: two barrier-synced processes BOTH sold a supply-1 listing,
+and the persisted counter desynced to 1 while two trade records existed. Fix:
+per-listing cross-process `flock` across reserve→commit + `_adoptCommittedTrades`
+re-reads disk `trades` under the lock. `test/market-crossprocess.test.js` 3/3
+(oversell pinned; open-ended listings NOT over-serialized).
+
+**Bug 2 — config prototype pollution (long-lived MCP server).**
+`config.setConfig` walked a dotted key with `node = node[part]`; `__proto__`
+resolved to `Object.prototype`, so `vant_config_set` with key
+`__proto__.lfPolluted` polluted every object in the process (proven:
+`({}).lfPolluted === 'yes'`). CLI shares the setter. Fix: refuse
+`__proto__`/`constructor`/`prototype` segments (E_KEY_SEGMENT). Gate D in
+`test/config-persistence.test.js` (13/13).
+
+**Also probed, all correctly blocked:** storage/brain path traversal
+(THREW Security: Path blocked), `vant_tmp_get` traversal (EPATH), compute eval
+without sudo (EPERM), `vant_call` arbitrary module require (Tool not found).
+Unwired/mismatch noted: `vant wal/mirror/s3 status` (bare word) exit 1 — the
+real syntax is `--status` (help lists them as "status/drill/reset").
+
+**GATES (all green, 155 suites now):** sweep 155/155 chunked; lint:docs PASS
+(129); lint:surface PASS; lint:helpers PASS; eslint touched 0 errors;
+`npm run check` syntax OK; audit-mcp 296 / THREW 0 / TIMEOUT 0 / INVALID 0 /
+REFUSED 149 / OK 88 / PHANTOM 0; `npm test` 15/15; test-all exit 0;
+test-core 5/5; zero leaked locks.
+
+Files: lib/market.js, lib/config.js, test/market-crossprocess.test.js (new),
+test/config-persistence.test.js (+gate D).
 
 ---
 

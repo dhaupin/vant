@@ -153,6 +153,36 @@ console.log('AK=' + c.mcpApiKey());`;
     }
 
     // ============================================
+    // GATE D — prototype-pollution key segments refused (pass 100)
+    // ============================================
+    try {
+        const pollScript = `
+const mcp = require('./lib/mcp');
+(async () => {
+    const p = await mcp.execute('vant_config_set', { key: '__proto__.lfPolluted', value: 'yes' });
+    const c = await mcp.execute('vant_config_set', { key: 'constructor.prototype.lfPolluted', value: 'yes' });
+    const k = await mcp.execute('vant_config_set', { key: 'prototype.lfPolluted', value: 'yes' });
+    console.log('PROTO=' + JSON.stringify(p));
+    console.log('CTOR=' + JSON.stringify(c));
+    console.log('PROTOKEY=' + JSON.stringify(k));
+    console.log('POLLUTED=' + (({}).lfPolluted === undefined ? 'clean' : 'DIRTY'));
+    process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });
+`;
+        const out = await runNode(pollScript);
+        report('MCP config_set refuses __proto__ / constructor / prototype segments',
+            (out.match(/E_KEY_SEGMENT/g) || []).length === 3, out.trim());
+        report('Object.prototype NOT polluted (no cross-object contamination)',
+            /POLLUTED=clean/.test(out), out.trim());
+        let raw = '';
+        try { raw = fs.readFileSync(CFG, 'utf8'); } catch (e) {}
+        report('no polluting key reached the config file',
+            !/lfPolluted/.test(raw), raw.trim());
+    } catch (e) {
+        report('gate D (prototype-pollution guard)', false, e.message);
+    }
+
+    // ============================================
     // Summary
     // ============================================
     console.log(`\n${results.passed} passed, ${results.failed} failed`);
