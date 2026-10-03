@@ -7,6 +7,17 @@
 
 ## Handoff
 
+**Last known good commit:** pass 106 — locks stage S2 (separation-of-concern
+contract). F8–F11 closed. Documented the two lock roots in code headers: mutex
+`lib/lock.js` = per-brain `models/private/<brain>/.locks/` (pathFor); lease
+`lib/brain-lock.js` = cross-brain `models/private/.locks/.lock-<brain>.json`
+(temp+rename, not O_EXCL) — MUST stay separate. F11: `lib/recursion.js guard`
+labelled a depth guard, not a lock (requires neither module). F10: in-process
+save chains (`_teamsSaveChain`/`_saveChain`) labelled write-ordering-only.
+`scripts/audit-locks.js` now ASSERTS the contract (two roots, no cross-require,
+recursion non-lock, writers take the mutex). 6 files. All gates green (sweep
+157/157, MCP 296 reg / PHANTOM 0). Next: S3 (wire-up completion, F6/F7).
+
 **Last known good commit:** pass 105 — locks stage S1 (truth-up the lease).
 F1–F5 closed. F1 was REMOVED (not wired): the lease is acquired hot by internal
 writers, so rate limiting is QoS's job — deleted the dead `_checkRateLimit`

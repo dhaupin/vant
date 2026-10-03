@@ -11,6 +11,9 @@
  *   2. Every mutex consumer requires ./lock (or ../lock); the brain-lock
  *      lease module exists and the old flat filename lib/flock.js is gone.
  *   3. No lockfile is left behind under any `.locks/` directory.
+ *   4. Separation of concern (pass 106, §8.3 / F8-F11): the mutex and the
+ *      lease keep separate roots and modules; lib/recursion.js (a depth
+ *      guard) requires neither; the whole-snapshot writers take the mutex.
  *
  * Prints the enumerated call sites; exits 1 on any violation.
  */
@@ -81,6 +84,58 @@ if (mutexRequires.length === 0) {
     problems.push('no module requires lib/lock.js — the mutex primitive is unwired?');
 }
 
+// 2b. separation-of-concern contract (pass 106, labs/LOCKS.md §8.3 / F8-F11).
+// The mutex and the lease keep SEPARATE roots and mechanisms ON PURPOSE; this
+// asserts they are not folded together and that the non-locks stay non-locks.
+const srcCache = {};
+function source(relPath) {
+    if (!(relPath in srcCache)) {
+        const full = path.join(ROOT, relPath);
+        srcCache[relPath] = fs.existsSync(full) ? fs.readFileSync(full, 'utf8') : null;
+    }
+    return srcCache[relPath];
+}
+function requires(text, mod) {
+    return new RegExp(`require\\(['\"](\\.\\.?\\/)*${mod}['\"]\\)`).test(text);
+}
+
+const mutexSrc = source('lib/lock.js') || '';
+const leaseSrc = source('lib/brain-lock.js') || '';
+
+// F8 — two distinct roots, by design.
+if (!/models\/private[\s\S]{0,40}\.locks/.test(mutexSrc)) {
+    problems.push('lib/lock.js no longer builds the per-brain mutex root models/private/<brain>/.locks/');
+}
+if (!/LOCK_DIR = '\.locks'/.test(leaseSrc)) {
+    problems.push("lib/brain-lock.js no longer defines LOCK_DIR = '.locks'");
+}
+if (!/getBrainPath\(\)[\s\S]{0,120}'\.\.'/.test(leaseSrc)) {
+    problems.push('lib/brain-lock.js lease root is no longer one dir above the per-brain dirs (models/private/.locks/)');
+}
+if (requires(leaseSrc, 'lock')) {
+    problems.push('lib/brain-lock.js requires lib/lock.js — the lease must NOT depend on the mutex (roots differ on purpose, PRD §8.3 F8)');
+}
+if (requires(mutexSrc, 'brain-lock')) {
+    problems.push('lib/lock.js requires lib/brain-lock.js — the mutex must NOT depend on the lease (roots differ on purpose, PRD §8.3 F8)');
+}
+
+// F11 — explicitly NOT locks; must not pull in a lock module.
+for (const f of ['lib/recursion.js']) {
+    const s = source(f);
+    if (s && (requires(s, 'lock') || requires(s, 'brain-lock'))) {
+        problems.push(`${f} is classified as a NON-lock (PRD §8.3 F11) but now requires a lock module`);
+    }
+}
+
+// F10 — whole-snapshot writers must take the cross-process mutex; their
+// in-process save chains are write ordering, not the concurrency control.
+for (const f of ['lib/teams.js', 'lib/agents/internal.js']) {
+    const s = source(f);
+    if (s && !requires(s, 'lock')) {
+        problems.push(`${f} writes a whole snapshot but no longer requires lib/lock.js — a save chain is not a lock (PRD §8.3 F10)`);
+    }
+}
+
 // 3. no leaked lockfiles under any .locks/ root
 const leaked = [];
 function findLocks(dir) {
@@ -108,6 +163,10 @@ for (const c of mutexRequires) console.log(`    - ${c}`);
 console.log(`  lease requires (lib/brain-lock.js):  ${leaseRequires.length}`);
 for (const c of leaseRequires) console.log(`    - ${c}`);
 console.log(`  path-formula owners:                 lib/lock.js, lib/brain-lock.js`);
+console.log(`  mutex root:                          models/private/<brain>/.locks/  (per-brain)`);
+console.log(`  lease root:                          models/private/.locks/           (cross-brain, separate by design)`);
+console.log(`  non-locks (must require neither):    lib/recursion.js`);
+console.log(`  guarded whole-snapshot writers:      lib/teams.js, lib/agents/internal.js`);
 console.log(`  leaked lockfiles:                    ${leaked.length}`);
 
 if (problems.length) {

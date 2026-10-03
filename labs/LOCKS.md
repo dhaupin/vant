@@ -339,13 +339,41 @@ locks · scratch brains wiped.
 ## 8.10 Stage tracker
 
 - [x] **S1 — Truth-up the lease (F1–F5)** — done pass 105 (see §8.11)
-- [ ] S2 — Separation-of-concern contract (F8–F11)
+- [x] **S2 — Separation-of-concern contract (F8–F11)** — done pass 106 (see §8.11)
 - [ ] S3 — Complete the wire-up (F6, health, MCP)
 - [ ] S4 — Migrate to `withLock` (F7)
 - [ ] S5 — Unguarded-writer triage (F12)
 - [ ] S6 — Documentation (F13)
 
 ## 8.11 Execution log
+
+### S2 — Separation-of-concern contract (pass 106, done)
+
+- **F8 (two roots) — documented + asserted.** Mutex `lib/lock.js` root =
+  `models/private/<brain>/.locks/` via `pathFor()`. Lease `lib/brain-lock.js`
+  root = `models/private/.locks/.lock-<brain>.json` — one dir ABOVE the
+  per-brain dirs, REPLACED atomically (temp+rename), not O_EXCL. Added a
+  separation-of-concern header to each stating neither substitutes for the
+  other and they must not be folded. `audit-locks` now fails if either module
+  requires the other.
+- **F11 (recursion guard) — classified.** `lib/recursion.js` `guard` header
+  now says it is a depth/reentrancy guard, NOT a lock, and deliberately
+  requires NEITHER lock module; asserted by the audit.
+- **F10 (save chains) — classified.** `_teamsSaveChain` (lib/teams.js) and
+  `_saveChain` (lib/agents/internal.js) labelled IN-PROCESS write-ordering
+  only; the cross-process control is the lockfile taken in `_saveTeams` /
+  `_saveAgents`. `audit-locks` fails if either writer stops requiring the mutex.
+- **Audit (`scripts/audit-locks.js`) — extended** with the §8.3 contract:
+  mutex root per-brain, lease root cross-brain, no cross-require, `recursion.js`
+  non-lock, whole-snapshot writers take the mutex. Report now prints both roots
+  + the non-lock + the guarded writers.
+- **No renames** (PRD §8.9: avoid unless cheap). 6 files: lib/lock.js,
+  lib/brain-lock.js, lib/recursion.js, lib/teams.js, lib/agents/internal.js,
+  scripts/audit-locks.js.
+- **Gates:** sweep 157/157 chunked; lint:locks PASS; lint:docs (129)
+  /surface/helpers PASS; `npm run check`; eslint 0 errors on touched; audit-mcp
+  296 reg / THREW 0 / PHANTOM 0; `npm test` 15/15; test-all exit 0; test-core
+  5/5; zero leaked locks; scratch wiped.
 
 ### S1 — Truth-up the lease (pass 105, done)
 

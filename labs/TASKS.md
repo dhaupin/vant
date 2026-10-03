@@ -2,7 +2,35 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-03  
-**Session:** Pass 105 — locks S1 executed (truth-up the lease)
+**Session:** Pass 106 — locks S2 executed (separation-of-concern contract)
+
+---
+
+## Session (2026-10-03 — pass 106: stage S2, separation-of-concern contract)
+
+Owner: "Let's continue on LOCKS 2!" Executed PRD stage S2 (labs/LOCKS.md §8),
+closing findings F8–F11 by naming the contract in code and making the audit
+assert it.
+
+- **F8** two lock roots documented in the code headers: mutex `/lib/lock.js`
+  = per-brain `models/private/<brain>/.locks/` (via `pathFor`); lease
+  `/lib/brain-lock.js` = cross-brain `models/private/.locks/.lock-<brain>.json`,
+  replaced atomically (temp+rename), NOT O_EXCL. Added a SOC block to each
+  saying neither substitutes for the other and they must not be folded.
+- **F11** `lib/recursion.js guard` header now states it is a depth/reentrancy
+  guard, not a lock, and deliberately requires NEITHER lock module.
+- **F10** the in-process save chains (`_teamsSaveChain` lib/teams.js,
+  `_saveChain` lib/agents/internal.js) are labelled write-ordering-only in code;
+  the cross-process control is the lockfile taken in `_saveTeams`/`_saveAgents`.
+- **Audit** `scripts/audit-locks.js` extended to ASSERT the contract:
+  mutex root per-brain, lease root cross-brain, neither module requires the
+  other, `recursion.js` requires neither lock module, and both whole-snapshot
+  writers require the mutex. Prints the roots + non-lock + guarded-writer rows.
+
+No renames (PRD: avoid unless cheap). 6 files touched. Gates: sweep 157/157,
+lint:locks PASS, lint:docs/surface/helpers PASS, eslint 0 errors, `npm run
+check`, npm test 15/15, test-core 5/5, test-all exit 0, MCP audit 296 reg /
+THREW 0 / PHANTOM 0, zero leaked locks.
 
 ---
 
