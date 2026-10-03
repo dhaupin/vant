@@ -122,9 +122,9 @@ test('branch.js loads', () => {
     const branch = require('../lib/branch');
 });
 
-// Test: lock.js loads
-test('lock.js loads', () => {
-    const lock = require('../lib/lock');
+// Test: brain-lock.js loads
+test('brain-lock.js loads', () => {
+    const lock = require('../lib/brain-lock');
 });
 
 // Test: resolution.js loads

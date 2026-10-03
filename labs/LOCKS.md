@@ -104,3 +104,26 @@ the lock body is now **fully synchronous** (await-free) and the posture is
 shape items 1–3 generalize. The `flock.withLock(async (locked) => ...)`
 signature still forces an `async` wrapper even when the body is sync — a
 canonical `withLock` should accept a sync fn and only go async when asked.
+
+---
+
+## 6. Pass 102 — naming split IMPLEMENTED (2026-10-03)
+
+Owner decision: keep BOTH concepts but give them unambiguous names, at the
+module **and** the fn/method/event level. OSS-facing, DRY/KISS.
+
+| Concept | Old | New | Namescope |
+|---------|-----|-----|-----------|
+| Authorization lease (A) | `lib/lock.js` | **`lib/brain-lock.js`** | `acquireBrainLock` / `releaseBrainLock` / `brainLockStatus` / `forceReleaseBrainLock`; events `brain-lock:acquired\|released\|writePermissionMissing`; config `BRAIN_LOCK_CONFIG` |
+| Cross-process mutex (B) | `lib/flock.js` | **`lib/lock.js`** | `acquire` / `release` / `withLock` (already lock-y; the module path is the namescope) |
+
+Both module headers now cross-reference the other explicitly. The CLI
+`vant lock` (bin/lock.js) still drives the **brain-lock** lease; the router
+owning `lock: 'lock.js'` is a *bin* mapping, not the lib, so it is unchanged.
+`.gitignore` now lists the lock schema explicitly (`models/**/*.lock` plus the
+`.locks/` dirs and `.lock-brain-token`).
+
+**Still open from §4** (deliberately NOT done in pass 102 — each is a behavior
+change, not a rename): item 2 (`{ok,reason}` + `failMode`), item 3 (one lock
+root + `flock.pathFor`), item 4 (collapse the in-process mutexes + delete dead
+`LockStorage`), item 5 (decide the fail-open call sites), item 6 (lock audit).

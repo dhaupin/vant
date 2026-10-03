@@ -10,12 +10,10 @@ node_modules/
 .env.*.local
 
 # State (in brain - removed states/ directory)
-models/public/.state.json
 models/public/repos/
 
 # Runtime state files (explicit)
-models/.resolution.json
-models/.providers.json
+# (models/**/.*.json already covers .state/.resolution/.providers)
 models/state.json
 models/**/.*.json
 models/**/.*.ini
@@ -48,7 +46,6 @@ build/
 
 # Temp
 *.tmp
-temp/models/latent/*.vpatch
 
 # Migration test fixture scratch (test/migrations.test.js)
 .migration-fixture/
@@ -75,9 +72,13 @@ scripts/_*
 scripts/tmp-*
 scripts/*.local.js
 
-# Lock files (brain + storage)
+# Lock artifacts — brain-lock lease + cross-process mutex
+#   brain lock:  models/.locks/.lock-<brain>.json  (bin/lock.js token at root)
+#   mutex:       models/<brain>/.*.lock, models/<brain>/orgchart/*.json.lock,
+#                models/<brain>/.habitat.lock
 .lock-brain-token
 .locks/
+models/**/*.lock
 
 # Circuit breakers (runtime state)
 .circuit*.json

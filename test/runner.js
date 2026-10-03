@@ -203,9 +203,9 @@ async function main() {
     });
   }
   
-  if (!filter || filter === 'lock') {
-    testLib('lock', './lib/lock', {
-      functions: { acquire: 1, release: 1, status: 1 }
+  if (!filter || filter === 'brain-lock') {
+    testLib('brain-lock', './lib/brain-lock', {
+      functions: { acquireBrainLock: 1, releaseBrainLock: 1, brainLockStatus: 1 }
     });
   }
   

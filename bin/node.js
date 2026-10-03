@@ -144,7 +144,7 @@ class VantNode {
         this.modules = {
             brain: loadModule('brain'),
             branch: loadModule('branch'),
-            lock: loadModule('lock'),
+            brainLock: loadModule('brain-lock'),
             config: loadModule('config'),
             logger: loadModule('logger'),
             errors: loadModule('errors')

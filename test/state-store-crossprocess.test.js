@@ -6,7 +6,7 @@
  * consensus / market / node-registry / settlement all hydrate once with
  * "in-memory wins" and write their WHOLE snapshot on every mutation — so two
  * processes that hydrated before either wrote clobbered each other. Fixed by
- * stateStore.persistMerged(): lock (lib/flock), re-read the on-disk snapshot,
+ * stateStore.persistMerged(): lock (lib/lock), re-read the on-disk snapshot,
  * adopt unseen rows, write the union. Delete-capable modules (node-registry
  * unregister, consensus reap) track a seen-set so a local delete is NOT
  * resurrected by a peer's stale snapshot.

@@ -2,9 +2,58 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-03  
-**Session:** Pass 101 — market lock limitation + CLI help-syntax + escrow hold leak
+**Session:** Pass 102 — lock naming split (brain-lock lease vs lock mutex)
 
 ---
+
+## Session (2026-10-03 — pass 102: lock naming split, module + fn/method/event namescope)
+
+Owner (on `labs/LOCKS.md`): rename `lib/lock.js` → `lib/brain-lock.js` FIRST,
+then `lib/flock.js` → `lib/lock.js` ("flock is confusing — lock is clear"),
+extend the naming to the fn/method level, and fix `.gitignore` for the lock
+schema. OSS-facing, DRY/KISS.
+
+**Module split.** `lib/lock.js` (authorization lease) → `lib/brain-lock.js`;
+`lib/flock.js` (cross-process mutex) → `lib/lock.js`. Both headers now
+cross-reference each other by the new names (the old notes inverted).
+
+**fn/method/event namescope.** The lease exports are now brain-scoped:
+`acquire→acquireBrainLock`, `release→releaseBrainLock`, `status→brainLockStatus`,
+`forceRelease→forceReleaseBrainLock`; events `lock:*`→`brain-lock:acquired|released|writePermissionMissing`;
+config `LOCK_CONFIG`→`BRAIN_LOCK_CONFIG`; internals `_getLockFile`→`_getBrainLockFile`,
+`ensureLockDir`→`ensureBrainLockDir`, log prefix `[Lock]`→`[brain-lock]`.
+The mutex keeps `acquire`/`release`/`withLock` — its module path IS the
+namescope now.
+
+**Call sites updated.** brain-lock consumers: lib/config, shell, security,
+vant, boot(×2), mcp, sandbox, brain; bin/lock.js, bin/build-test.js,
+bin/tmp.js, bin/node.js (`loadModule('brain-lock')`); docs/getting-started/
+examples.md; ROADMAP.md layer table. mutex consumers: lib/teams, state-store,
+habitat, agents/internal, market (local `flock`→`lock`), plus
+market-/state-store-crossprocess tests. `lib/mcp.js` `vant_lock` handler
+repointed. `bin/vant.js` router `lock: 'lock.js'` is a **bin** mapping (to
+bin/lock.js) — unchanged.
+
+**Tests.** `test/lock.test.js`→`test/brain-lock.test.js` (repointed + new
+names); deleted dead `test/test-lock.js` (never collected: not `.test.js` nor
+`-test.js`); `test/runner.js` lib entry → brain-lock with new fn names;
+`test/ci.js` requiredFiles → `lib/brain-lock.js`; `test/concurrent-agents.test.js`
+repointed (20+ method renames).
+
+**.gitignore.** New lock-schema block: `.lock-brain-token`, `.locks/`,
+`models/**/*.lock` (covers `<brain>/orgchart/*.json.lock` + `.habitat.lock`).
+Removed rot: `models/public/.state.json`, `models/.resolution.json`,
+`models/.providers.json` (all already covered by `models/**/.*.json`) and
+`temp/models/latent/*.vpatch` (wrong path; `temp/` already ignored).
+
+**Left open from LOCKS.md §4** (behavior changes, not renames): `{ok,reason}`+`failMode`,
+one lock root + `pathFor`, collapse in-process mutexes + delete `LockStorage`,
+fail-open call-site decisions, lock audit.
+
+Gates: sweep 155/155 chunked; lint:docs PASS (129)/lint:surface/lint:helpers;
+eslint 0 errors; `npm run check`; audit-mcp 296 reg / 59 skip / THREW 0 /
+TIMEOUT 0 / INVALID 0 / REFUSED 149 / OK 88 / PHANTOM 0; npm test 15/15;
+test-all exit 0; test-core 5/5; zero leaked locks.
 
 ## Session (2026-10-03 — pass 101: market lock + CLI help + escrow hold leak + locks inventory)
 

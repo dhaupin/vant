@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Lock Module Unit Tests
+ * Brain Lock Module Unit Tests (lib/brain-lock.js)
  */
 
 const path = require('path');
@@ -24,39 +24,39 @@ function test(name, fn) {
     }
 }
 
-console.log('\n🔒 LOCK MODULE TESTS\n');
+console.log('\n🔒 BRAIN LOCK MODULE TESTS\n');
 
 // ============================================
 // LOAD
 // ============================================
 
-test('lock module loads', () => {
-    const lock = require(path.join(ROOT, 'lib', 'lock'));
+test('brain-lock module loads', () => {
+    const lock = require(path.join(ROOT, 'lib', 'brain-lock'));
     return { success: !!lock };
 });
 
-test('lock has acquire function', () => {
-    const lock = require(path.join(ROOT, 'lib', 'lock'));
-    return { success: typeof lock.acquire === 'function' };
+test('brain-lock has acquireBrainLock function', () => {
+    const lock = require(path.join(ROOT, 'lib', 'brain-lock'));
+    return { success: typeof lock.acquireBrainLock === 'function' };
 });
 
-test('lock has release function', () => {
-    const lock = require(path.join(ROOT, 'lib', 'lock'));
-    return { success: typeof lock.release === 'function' };
+test('brain-lock has releaseBrainLock function', () => {
+    const lock = require(path.join(ROOT, 'lib', 'brain-lock'));
+    return { success: typeof lock.releaseBrainLock === 'function' };
 });
 
-test('lock has status function', () => {
-    const lock = require(path.join(ROOT, 'lib', 'lock'));
-    return { success: typeof lock.status === 'function' };
+test('brain-lock has brainLockStatus function', () => {
+    const lock = require(path.join(ROOT, 'lib', 'brain-lock'));
+    return { success: typeof lock.brainLockStatus === 'function' };
 });
 
-test('lock has forceRelease function', () => {
-    const lock = require(path.join(ROOT, 'lib', 'lock'));
-    return { success: typeof lock.forceRelease === 'function' };
+test('brain-lock has forceReleaseBrainLock function', () => {
+    const lock = require(path.join(ROOT, 'lib', 'brain-lock'));
+    return { success: typeof lock.forceReleaseBrainLock === 'function' };
 });
 
-test('lock has getAgentId function', () => {
-    const lock = require(path.join(ROOT, 'lib', 'lock'));
+test('brain-lock has getAgentId function', () => {
+    const lock = require(path.join(ROOT, 'lib', 'brain-lock'));
     return { success: typeof lock.getAgentId === 'function' };
 });
 
@@ -66,24 +66,24 @@ test('lock has getAgentId function', () => {
 
 console.log('\n📚 STACK SUPPORT TESTS\n');
 
-test('lock has getStackLockStatus function', () => {
-    const lock = require(path.join(ROOT, 'lib', 'lock'));
+test('brain-lock has getStackLockStatus function', () => {
+    const lock = require(path.join(ROOT, 'lib', 'brain-lock'));
     return { success: typeof lock.getStackLockStatus === 'function' };
 });
 
-test('lock has listStackLocks function', () => {
-    const lock = require(path.join(ROOT, 'lib', 'lock'));
+test('brain-lock has listStackLocks function', () => {
+    const lock = require(path.join(ROOT, 'lib', 'brain-lock'));
     return { success: typeof lock.listStackLocks === 'function' };
 });
 
 test('getStackLockStatus returns object with source stack', () => {
-    const lock = require(path.join(ROOT, 'lib', 'lock'));
+    const lock = require(path.join(ROOT, 'lib', 'brain-lock'));
     const status = lock.getStackLockStatus();
     return { success: status && status.source === 'stack' };
 });
 
 test('listStackLocks returns array', () => {
-    const lock = require(path.join(ROOT, 'lib', 'lock'));
+    const lock = require(path.join(ROOT, 'lib', 'brain-lock'));
     const locks = lock.listStackLocks();
     return { success: Array.isArray(locks) };
 });

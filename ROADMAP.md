@@ -1389,7 +1389,7 @@ Once do.js exists, skipped modules can be revisited:
 | `lib/stream.js` | vaf, sandbox, qos, escrow | ✅ Has own pipeline (manual) |
 | `lib/webhooks.js` | vaf | ✅ Done (Batch 4) |
 | `lib/sync.js` | sandbox, vaf | ⏳ Skipped - complex nested code |
-| `lib/lock.js` | sandbox | ⏳ Skipped - sync interface |
+| `lib/brain-lock.js` | sandbox | ⏳ Skipped - sync interface |
 | `lib/rls.js` | sandbox | ⏳ Skipped - sync interface |
 
 #### OTHER MODULES - Not in Original List:

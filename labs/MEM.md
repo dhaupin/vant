@@ -7,6 +7,23 @@
 
 ## Handoff
 
+**Last known good commit:** pass 102 — lock naming split (brain-lock lease vs lock mutex).
+Owner chose to keep both lock concepts but name them unambiguously. `lib/lock.js`
+(authorization lease) → `lib/brain-lock.js`; `lib/flock.js` (cross-process
+mutex) → `lib/lock.js`. Extended to fn/method/event level: the lease exports
+are now `acquireBrainLock`/`releaseBrainLock`/`brainLockStatus`/
+`forceReleaseBrainLock`, events `brain-lock:*`, config `BRAIN_LOCK_CONFIG`,
+internals `_getBrainLockFile`/`ensureBrainLockDir`, log prefix `[brain-lock]`;
+the mutex keeps `acquire`/`release`/`withLock`. Updated all 8 lib consumers +
+bin/lock,build-test,tmp,node + mcp `vant_lock` + docs/ROADMAP + tests.
+`test/lock.test.js`→`test/brain-lock.test.js`; deleted dead `test/test-lock.js`.
+`.gitignore`: added `models/**/*.lock` + relabeled lock block, removed redundant
+rot (`models/public/.state.json`, `models/.resolution.json`, `models/.providers.json`,
+`temp/models/latent/*.vpatch`). LOCKS.md §4 behavior items still open. Gates:
+sweep 155/155, lints PASS, eslint 0 err, check, audit-mcp 296 THREW0/TIMEOUT0/
+INVALID0/REFUSED149/OK88/PHANTOM0, npm test 15/15, test-all 0, test-core 5/5,
+zero leaked locks.
+
 **Last known good commit:** pass 101 — market lock limitation + CLI help-syntax + escrow hold leak.
 (1) MARKET: open-ended listings no longer take the per-listing flock; the
 lock body is now fully synchronous (budget/hold/trust/governance hoisted

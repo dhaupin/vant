@@ -125,12 +125,12 @@ async function agentLoop() {
 ### With Locking (Multi-Agent Safe)
 
 ```javascript
-const lock = require('./lib/lock');
+const brainLock = require('./lib/brain-lock');
 const branch = require('./lib/branch');
 
 async function safeWrite(agentId, content) {
   // 1. Acquire lock
-  const token = await lock.acquire(agentId);
+  const token = await brainLock.acquireBrainLock(agentId);
   if (!token) {
     throw new Error('Brain is locked by another agent');
   }
@@ -149,7 +149,7 @@ async function safeWrite(agentId, content) {
     
   } finally {
     // 5. Always release
-    await lock.release(agentId, token);
+    await brainLock.releaseBrainLock(agentId, token);
   }
 }
 ```

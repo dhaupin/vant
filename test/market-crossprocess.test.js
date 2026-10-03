@@ -12,7 +12,7 @@
  * never reached the other process.
  *
  * Fix (pass 100): `market.trade` holds a per-listing cross-process lock
- * (lib/flock) across reserve→commit and re-reads the committed `trades` from
+ * (lib/lock) across reserve→commit and re-reads the committed `trades` from
  * disk under it (`_adoptCommittedTrades`), so peers serialize on a listing.
  *
  * Gated here:
@@ -20,8 +20,8 @@
  *      succeeds, the other gets "Listing sold out", persisted trades === 1.
  *   B. an open-ended (supply: Infinity) listing is NOT over-serialized — two
  *      concurrent trades both succeed and both trade rows persist.
- *   C. pass 101 lock scope: a scarce trade takes the per-listing flock, an
- *      open-ended trade takes NONE (proven with a flock.withLock spy).
+ *   C. pass 101 lock scope: a scarce trade takes the per-listing lock, an
+ *      open-ended trade takes NONE (proven with a lock.withLock spy).
  *   D. pass 101 fail-closed: when the lock cannot be acquired a scarce trade
  *      is REFUSED (E_TRADE_LOCK) instead of proceeding unlocked, and the
  *      buyer's escrow hold is released (no leak).
@@ -155,9 +155,9 @@ const S = ${start};
 const boot = require("./lib/boot");
 boot.init({ taskId: "market-c", scopes: ["read", "write", "spawn", "execute"], debug: false });
 require("./lib/sandbox").defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canNetwork: true, canTrade: true, canSpawn: true });
-const flock = require("./lib/flock");
-let calls = 0; const _orig = flock.withLock;
-flock.withLock = (...a) => { calls++; return _orig(...a); };
+const lock = require("./lib/lock");
+let calls = 0; const _orig = lock.withLock;
+lock.withLock = (...a) => { calls++; return _orig(...a); };
 const market = require("./lib/market");
 `;
     const spyTrade = (supplyJson) => SPY_HEAD + `
@@ -171,12 +171,12 @@ const market = require("./lib/market");
     try {
         wipe();
         const scarceOut = await runChild(spyTrade('1'));
-        report('scarce listing takes exactly one per-listing flock',
+        report('scarce listing takes exactly one per-listing lock',
             /CALLS=1\b/.test(scarceOut) && /RESULT=OK:/.test(scarceOut), scarceOut.trim());
 
         wipe();
         const openOut = await runChild(spyTrade('Infinity'));
-        report('open-ended listing takes NO per-listing flock (over-serialization removed)',
+        report('open-ended listing takes NO per-listing lock (over-serialization removed)',
             /CALLS=0\b/.test(openOut) && /RESULT=OK:/.test(openOut), openOut.trim());
     } catch (e) {
         report('gate C (lock scope)', false, e.message);
@@ -191,8 +191,8 @@ const market = require("./lib/market");
 const boot = require("./lib/boot");
 boot.init({ taskId: "market-d", scopes: ["read", "write", "spawn", "execute"], debug: false });
 require("./lib/sandbox").defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canNetwork: true, canTrade: true, canSpawn: true });
-const flock = require("./lib/flock");
-flock.withLock = (p, fn) => fn(false);   // simulate lock acquisition failure
+const lock = require("./lib/lock");
+lock.withLock = (p, fn) => fn(false);   // simulate lock acquisition failure
 const market = require("./lib/market");
 const escrow = require("./lib/escrow");
 (async () => {

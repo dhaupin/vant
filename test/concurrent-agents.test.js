@@ -3,7 +3,7 @@
  * Concurrent Agent Operation Tests
  * The real multi-agent contention flow: lock acquisition races, mutual
  * exclusion, token-secured release, stale-lock takeover, and multibrain
- * isolation. Kills the typeof-only coverage gap in lock.test.js that
+ * isolation. Kills the typeof-only coverage gap in brain-lock.test.js that
  * hid F-4/F-7/F-9/F-11.
  *
  * Run: node test/concurrent-agents.test.js
@@ -34,12 +34,12 @@ function test(name, fn) {
     });
 }
 
-const lock = require(path.join(ROOT, 'lib', 'lock'));
+const lock = require(path.join(ROOT, 'lib', 'brain-lock'));
 
 console.log('\n🤝 CONCURRENT AGENT TESTS\n');
 
 // Collect test invocations into an ordered runner so async assertions
-// complete before the summary (lock.test.js convention is sync; these are
+// complete before the summary (brain-lock.test.js convention is sync; these are
 // real-async by nature).
 const suite = [];
 function define(name, fn) { suite.push({ name, fn }); }
@@ -53,8 +53,8 @@ define('two agents cannot both hold the brain lock (contention race)', async () 
     try { require('fs').unlinkSync(lockPath); } catch (e) {}
 
     const [a, b] = await Promise.all([
-        lock.acquire('agent-A', 1500),
-        lock.acquire('agent-B', 1500)
+        lock.acquireBrainLock('agent-A', 1500),
+        lock.acquireBrainLock('agent-B', 1500)
     ]);
 
     // Exactly one gets a token; the loser gets null (or the SAME token only
@@ -65,14 +65,14 @@ define('two agents cannot both hold the brain lock (contention race)', async () 
     if (b) validCount++;
 
     // Verify exactly one lock file state consistent with one winner
-    const status = lock.status ? lock.status() : null;
+    const status = lock.brainLockStatus ? lock.brainLockStatus() : null;
     if (validCount !== 1) {
         // Both acquired = broken mutual exclusion... unless one was a
         // re-entrant refresh of the other's process — not the case here.
         return { success: false, error: `both agents acquired (${a}/${b}) — no mutual exclusion` };
     }
     holders.add(a || b);
-    await lock.release(a ? 'agent-A' : 'agent-B', a || b);
+    await lock.releaseBrainLock(a ? 'agent-A' : 'agent-B', a || b);
     return { success: true };
 });
 
@@ -83,21 +83,21 @@ define('loser can acquire after winner releases', async () => {
     // Long TTLs (30s) so no test's retry backoff can outlive a held lock and
     // hit stale takeover mid-assertion (the timing trap that produced false
     // "lock was gone" failures).
-    const tokenA = await lock.acquire('agent-A', 30000);
+    const tokenA = await lock.acquireBrainLock('agent-A', 30000);
     if (!tokenA) return { success: false, error: 'A could not acquire empty lock' };
 
-    const tokenB = await lock.acquire('agent-B', 300); // short timeout, expect fail
+    const tokenB = await lock.acquireBrainLock('agent-B', 300); // short timeout, expect fail
     if (tokenB) {
-        await lock.release('agent-B', tokenB);
+        await lock.releaseBrainLock('agent-B', tokenB);
         return { success: false, error: 'B acquired while A held the lock' };
     }
 
-    const rel = await lock.release('agent-A', tokenA);
+    const rel = await lock.releaseBrainLock('agent-A', tokenA);
     if (!rel.success) return { success: false, error: `A release failed: ${rel.message}` };
 
-    const tokenB2 = await lock.acquire('agent-B', 1000);
+    const tokenB2 = await lock.acquireBrainLock('agent-B', 1000);
     if (!tokenB2) return { success: false, error: 'B could not acquire after A released' };
-    await lock.release('agent-B', tokenB2);
+    await lock.releaseBrainLock('agent-B', tokenB2);
     return { success: true };
 });
 
@@ -109,23 +109,23 @@ define('release with wrong token is refused (lock survives)', async () => {
     const lockPath = path.join(ROOT, 'models', 'locks', 'brain.lock');
     try { require('fs').unlinkSync(lockPath); } catch (e) {}
 
-    const tokenA = await lock.acquire('agent-A', 30000);
+    const tokenA = await lock.acquireBrainLock('agent-A', 30000);
     if (!tokenA) return { success: false, error: 'acquire failed' };
 
-    const evil = await lock.release('agent-B', 'forged-token-123');
+    const evil = await lock.releaseBrainLock('agent-B', 'forged-token-123');
     if (evil.success) {
-        await lock.release('agent-A', tokenA);
+        await lock.releaseBrainLock('agent-A', tokenA);
         return { success: false, error: 'wrong agent + forged token released the lock!' };
     }
 
     // Lock must still be held by A
-    const tokenB = await lock.acquire('agent-B', 200);
+    const tokenB = await lock.acquireBrainLock('agent-B', 200);
     if (tokenB) {
-        await lock.release('agent-B', tokenB);
+        await lock.releaseBrainLock('agent-B', tokenB);
         return { success: false, error: 'lock was gone after refused release' };
     }
 
-    await lock.release('agent-A', tokenA);
+    await lock.releaseBrainLock('agent-A', tokenA);
     return { success: true };
 });
 
@@ -137,7 +137,7 @@ define('release without token from a FOREIGN process is refused', async () => {
     // A 1s TTL lapses while B is still backing off, and B's stale takeover
     // then succeeds - indistinguishable from a broken lock, but it is just
     // the lock expiring mid-retry (the child refusal itself is correct).
-    const tokenA = await lock.acquire('agent-A', 30000);
+    const tokenA = await lock.acquireBrainLock('agent-A', 30000);
     if (!tokenA) return { success: false, error: 'acquire failed' };
 
     // In-process tokenless release is allowed (owner convenience: the
@@ -145,8 +145,8 @@ define('release without token from a FOREIGN process is refused', async () => {
     // a fresh process has NO cache, so a tokenless release must be refused.
     const { spawnSync } = require('child_process');
     const probe = spawnSync(process.execPath, ['-e', `
-        const lock = require('${path.join(ROOT, 'lib', 'lock').replace(/'/g, "\\'")}');
-        lock.release('agent-A', null).then(r => {
+        const lock = require('${path.join(ROOT, 'lib', 'brain-lock').replace(/'/g, "\\'")}');
+        lock.releaseBrainLock('agent-A', null).then(r => {
             console.log('RESULT:' + (r.success ? 'released' : 'refused'));
             process.exit(0);
         });
@@ -154,18 +154,18 @@ define('release without token from a FOREIGN process is refused', async () => {
 
     const out = (probe.stdout || '') + (probe.stderr || '');
     if (!out.includes('RESULT:refused')) {
-        await lock.release('agent-A', tokenA);
+        await lock.releaseBrainLock('agent-A', tokenA);
         return { success: false, error: `foreign tokenless release was NOT refused (out: ${out.slice(0, 120)})` };
     }
 
     // Lock must still be held by A
-    const tokenB = await lock.acquire('agent-B', 200);
+    const tokenB = await lock.acquireBrainLock('agent-B', 200);
     if (tokenB) {
-        await lock.release('agent-B', tokenB);
+        await lock.releaseBrainLock('agent-B', tokenB);
         return { success: false, error: 'lock was gone after foreign tokenless release' };
     }
 
-    await lock.release('agent-A', tokenA);
+    await lock.releaseBrainLock('agent-A', tokenA);
     return { success: true };
 });
 
@@ -179,18 +179,18 @@ define('stale lock (expired timeout) can be taken over', async () => {
 
     // Acquire with a tiny timeout, then simulate a crashed agent by NOT
     // releasing and waiting past expiry.
-    const tokenA = await lock.acquire('agent-A', 50);
+    const tokenA = await lock.acquireBrainLock('agent-A', 50);
     if (!tokenA) return { success: false, error: 'acquire failed' };
 
     // Wait for expiry (timeout 50ms + poll margin)
     await new Promise(r => setTimeout(r, 150));
 
-    const tokenB = await lock.acquire('agent-B', 1000);
+    const tokenB = await lock.acquireBrainLock('agent-B', 1000);
     if (!tokenB) {
-        await lock.release('agent-A', tokenA);
+        await lock.releaseBrainLock('agent-A', tokenA);
         return { success: false, error: 'stale lock not takeable — B starved' };
     }
-    await lock.release('agent-B', tokenB);
+    await lock.releaseBrainLock('agent-B', tokenB);
     return { success: true };
 });
 
@@ -199,18 +199,18 @@ define('stale lock (expired timeout) can be taken over', async () => {
 // ============================================
 
 define('different brains lock independently', async () => {
-    const t1 = await lock.acquire('agent-A', 1000, { brain: 'brain-one' });
+    const t1 = await lock.acquireBrainLock('agent-A', 1000, { brain: 'brain-one' });
     if (!t1) return { success: false, error: 'brain-one acquire failed' };
 
     // Same agent, different brain — must succeed independently
-    const t2 = await lock.acquire('agent-B', 1000, { brain: 'brain-two' });
+    const t2 = await lock.acquireBrainLock('agent-B', 1000, { brain: 'brain-two' });
     if (!t2) {
-        await lock.release('agent-A', t1, { brain: 'brain-one' });
+        await lock.releaseBrainLock('agent-A', t1, { brain: 'brain-one' });
         return { success: false, error: 'brain-two lock blocked by brain-one — no isolation' };
     }
 
-    await lock.release('agent-A', t1, { brain: 'brain-one' });
-    await lock.release('agent-B', t2, { brain: 'brain-two' });
+    await lock.releaseBrainLock('agent-A', t1, { brain: 'brain-one' });
+    await lock.releaseBrainLock('agent-B', t2, { brain: 'brain-two' });
     return { success: true };
 });
 

@@ -37,7 +37,7 @@ async function run() {
     // which acquire through it.
     try {
         await boot.init({ taskId: 'vant-cli', scopes: ['read', 'write', 'exec'] });
-        if (!global._lock) global._lock = require('../lib/lock');
+        if (!global._lock) global._lock = require('../lib/brain-lock');
     } catch (e) {
         console.error('[tmp] boot failed:', e.message);
         process.exit(1);

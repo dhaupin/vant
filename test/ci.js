@@ -54,7 +54,7 @@ const CONFIG = {
     'bin/vant.js',
     'lib/vaf.js', 
     'lib/config.js',
-    'lib/lock.js',
+    'lib/brain-lock.js',
     'lib/branch.js'
   ]
 };
