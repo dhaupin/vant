@@ -4,6 +4,7 @@ permalink: /getting-started/quick-start
 layout: default
 title: Quick Start
 nav_order: 11
+description: Install Vant, configure GitHub sync, and run your first start in about two minutes.
 ---
 # Quick Start
 
@@ -25,11 +26,12 @@ node bin/vant.js start
 
 ## 2. Configure
 
-Create a `.env` file with your GitHub credentials:
+Create a `.env` file with your GitHub credentials (a token with repo
+scope; the brain repo can be any GitHub repo you own):
 
 ```bash
 VANT_GITHUB_REPO=your-username/your-brain-repo
-VANT_GITHUB_TOKEN=ghp_xxxxxxxxxxxx
+GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 ```
 
 Or run interactive setup:
@@ -43,14 +45,15 @@ vant setup
 Start Vant to load your brain and begin:
 
 ```bash
-vant start     # Full startup (health → sync → load → run)
-vant health   # Verify system setup
-vant load    # Load brain from previous session
-vant sync   # Push brain changes to GitHub
+vant start     # Full startup (migrate, health, sync, load, run)
+vant health    # Verify system setup
+vant load      # Load brain from previous session
+vant sync      # Push brain changes to GitHub
 ```
 
 ## What's Next?
 
-- [Build Your First Agent](tutorials/build-agent) - 15 min tutorial
-- [CLI Reference](reference/cli) - All commands
-- [Configuration](reference/configuration) - Customize Vant
+- [Agent Onboarding](/vant/getting-started/agent-onboarding) - the wake, work, sleep loop for agents
+- [The Brain](/vant/memory/brain) - what the memory files are and where they live
+- [MCP Server](/vant/runtime/mcp) - connect any MCP client
+- [CLI Reference](/vant/reference/cli) - all commands

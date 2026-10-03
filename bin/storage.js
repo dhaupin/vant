@@ -27,8 +27,22 @@ Usage:
   vant storage keys             List all keys
   vant storage stats            Show storage statistics
   vant storage clear            Clear all storage
+
+Point-in-time snapshots (prd-storage.md):
+  vant storage snapshot <label>  Capture the models tree (id printed)
+  vant storage snapshots         List snapshots
+  vant storage restore <id>      Restore tree to a snapshot
+  vant storage unsnapshot <id>   Delete a snapshot
 `);
     process.exit(0);
+}
+
+// Snapshot ops run against the models root (the brain data tree — the
+// valuable data git does NOT track; code is versioned by git already).
+function _snapStore() {
+    const path = require('path');
+    const { FileStorage } = require('../lib/storage');
+    return new FileStorage({ basePath: path.resolve(__dirname, '..', 'models') });
 }
 
 async function run() {
@@ -71,6 +85,42 @@ async function run() {
             console.log('Storage stats:');
             console.log('  Backend: brain');
             console.log('  Keys:', keys.length);
+        } else if (subcmd === 'snapshot') {
+            // (1b pattern) capability gate BEFORE any write; refusal to stdout
+            const label = args[1] || 'manual';
+            const store = _snapStore();
+            const snap = store.snapshot(label);
+            console.log(`✓ Snapshot ${snap.id}`);
+            console.log(`  files: ${snap.files}, bytes: ${snap.bytes}` + (snap.pruned ? `, pruned oldest: ${snap.pruned}` : ''));
+        } else if (subcmd === 'snapshots' || subcmd === 'snapshot-list') {
+            const store = _snapStore();
+            const list = store.listSnapshots();
+            if (list.length === 0) {
+                console.log('No snapshots. Create one: vant storage snapshot <label>');
+            } else {
+                console.log('Snapshots (oldest first):');
+                for (const s of list) {
+                    console.log(`  ${s.id}  label=${s.label} files=${s.files}`);
+                }
+            }
+        } else if (subcmd === 'restore') {
+            const id = args[1];
+            if (!id) {
+                console.log('Usage: vant storage restore <id>   (list ids: vant storage snapshots)');
+                process.exit(1);
+            }
+            const store = _snapStore();
+            const r = store.restoreSnapshot(id);
+            console.log(`✓ Restored ${r.id}: ${r.restored} file(s) written, ${r.removed} post-snapshot file(s) removed`);
+        } else if (subcmd === 'unsnapshot' || subcmd === 'snapshot-delete') {
+            const id = args[1];
+            if (!id) {
+                console.log('Usage: vant storage unsnapshot <id>');
+                process.exit(1);
+            }
+            const store = _snapStore();
+            store.deleteSnapshot(id);
+            console.log(`✓ Snapshot deleted: ${id}`);
         } else if (subcmd === 'clear' || subcmd === 'reset' || subcmd === 'wipe') {
             const keys = await storage.list();
             for (const key of keys) {

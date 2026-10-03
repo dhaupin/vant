@@ -79,10 +79,6 @@ test('has getManifest', () => {
     return typeof islands.getManifest === 'function';
 });
 
-test('has getManifestSync', () => {
-    return typeof islands.getManifestSync === 'function';
-});
-
 // Test 2: Get hydrated
 test('getHydrated returns array', () => {
     return Array.isArray(islands.getHydrated());
@@ -93,12 +89,9 @@ test('getAvailable returns array', () => {
     return Array.isArray(islands.getAvailable());
 });
 
-// Test 4: Get manifest sync
-test('getManifestSync returns object', () => {
-    return typeof islands.getManifestSync() === 'object';
-});
-
-// Test 5: Islands class
+// Test 4: Get manifest sync (REMOVED — getManifestSync was a test-only
+// public API; tests now use the async getManifest via asyncTest in
+// test/islands.test.js)// Test 5: Islands class
 test('Islands class instantiates', () => {
     const i = new islands.Islands();
     return i !== undefined;

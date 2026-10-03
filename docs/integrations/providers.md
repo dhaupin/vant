@@ -3,36 +3,21 @@ version: 0.8.6
 permalink: /integrations/providers
 layout: default
 title: Multi-Git Provider Support
-nav_order: 37
+nav_order: 86
 ---
 
 # Multi-Git Provider Support
 
-Vant now supports multiple git providers through a universal abstraction layer. This enables branching |
-- commit |
-- and PR operations across GitHub |
-- GitLab |
-- Bitbucket |
-- and self-hosted git instances.
+Vant now supports multiple git providers through a universal abstraction layer. This enables branching, commit, and PR operations across GitHub, GitLab, Bitbucket, and self-hosted git instances.
 
 ## Supported Providers
 
-| Provider
-- Token Env Var
-- PR Type |
+| Provider | Token Env Var | PR Type |
 |----------|--------------|---------|
-| GitHub
-- `GITHUB_TOKEN`
-- Pull Request |
-| GitLab
-- `GITLAB_TOKEN`
-- Merge Request |
-| Bitbucket
-- `BITBUCKET_TOKEN`
-- Pull Request |
-| Self-Hosted
-- Generic git CLI
-- N/A |
+| GitHub | `GITHUB_TOKEN` | Pull Request |
+| GitLab | `GITLAB_TOKEN` | Merge Request |
+| Bitbucket | `BITBUCKET_TOKEN` | Pull Request |
+| Self-Hosted | Generic git CLI | N/A |
 
 ## Auto-Detection
 
@@ -76,14 +61,10 @@ export BITBUCKET_REPO=repo
 ## Usage in Code
 
 ```javascript
-const { getProvider |
-- detectProvider } = require('vant').providers;
+const { getProvider } = require('./lib/remote');
 
-// Auto-detect provider
+// Auto-detect provider (or pass a type: getProvider('github'))
 const provider = getProvider();
-
-// Or specify explicitly
-const provider = getProvider('github');
 
 // Check if configured
 if (provider.isConfigured()) {
@@ -107,13 +88,10 @@ if (provider.isConfigured()) {
 The `lib/branch.js` module now automatically uses providers:
 
 ```javascript
-const branch = require('vant').branch;
+const branch = require('./lib/branch');
 
 const status = await branch.status();
-console.log(status.provider); // 'github' |
-- 'gitlab' |
-- 'bitbucket' |
-- 'cli'
+console.log(status.provider); // 'github', 'gitlab', 'bitbucket', or 'cli'
 
 const pr = await branch.createPR({
   source: 'agents/my-agent',
@@ -126,43 +104,26 @@ const pr = await branch.createPR({
 
 ### GitProvider Methods
 
-| Method
-- Description |
+| Method Description |
 |-------|-------------|
-| `getType()`
-- Returns provider name |
-| `isConfigured()`
-- Check if token is set |
-| `checkout(branch |
-- create)`
-- Switch/create branch |
-| `commit(message |
-- options)`
-- Commit changes |
-| `push(branch)`
-- Push to remote |
-| `pull(branch)`
-- Pull from remote |
-| `listBranches()`
-- List all branches |
-| `currentBranch()`
-- Get current branch |
-| `createPR(options)`
-- Create PR/MR |
-| `getPRStatus(id)`
-- Get PR status |
-| `getRepoInfo()`
-- Get repo info |
-| `updateAvatar(path)`
-- Update profile picture |
+| `getType()` | Returns provider name |
+| `isConfigured()` | Check if token is set |
+| `checkout(branch, options)` | Switch/create branch |
+| `commit(message, options)` | Commit changes |
+| `push(branch)` | Push to remote |
+| `pull(branch)` | Pull from remote |
+| `listBranches()` | List all branches |
+| `currentBranch()` | Get current branch |
+| `createPR(options)` | Create PR/MR |
+| `getPRStatus(id)` | Get PR status |
+| `getRepoInfo()` | Get repo info |
+| `updateAvatar(path)` | Update profile picture |
 
 ## Fallback Behavior
 
-If no provider token is configured |
-- Vant falls back to generic git CLI commands. All operations work the same way - providers are used when available |
-- CLI when not.
+If no provider token is configured, Vant falls back to generic git CLI commands. All operations work the same way - providers are used when available, CLI when not.
 
 ## Related
 
-- [GitHub](integrations/github) - GitHub provider
-- [Sync](operations/sync) - Sync operations
+- [GitHub](/vant/integrations/github) - GitHub provider
+- [Sync](/vant/operations/sync) - Sync operations

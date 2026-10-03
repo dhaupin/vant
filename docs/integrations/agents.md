@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /integrations/agents
 layout: default
 title: Agents
-nav_order: 31
+nav_order: 88
 ---
 
 # Agents
@@ -89,10 +89,10 @@ Agent states:
 
 ## Related
 
-- [Runtime](essential/runtime) - Runtime API
-- [Multi-Agent](essential/multi-agent) - Multi-agent workflows
-- [Lock](essential/multi-agent) - Coordination
+- [Runtime](/vant/runtime/runtime) - Runtime API
+- [Multi-Agent](/vant/multi-agent/agents) - Multi-agent workflows
+- [Lock](/vant/multi-agent/agents) - Coordination
 
 ## Next
 
-- [GitHub Integration](integrations/github) - GitHub workflows
+- [GitHub Integration](/vant/integrations/github) - GitHub workflows

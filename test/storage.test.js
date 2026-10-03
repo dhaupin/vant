@@ -146,6 +146,208 @@ test('isOperationAllowed returns object', () => {
 });
 
 // ============================================
+// MULTIBRAIN STACK TESTS
+// ============================================
+
+console.log('\n📚 STACK SUPPORT TESTS\n');
+
+test('storage has listStack function', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof Storage.listStack === 'function' };
+});
+
+test('storage has readStack function', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof Storage.readStack === 'function' };
+});
+
+test('storage has existsStack function', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof Storage.existsStack === 'function' };
+});
+
+test('storage has getStackStats function', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof Storage.getStackStats === 'function' };
+});
+
+test('listStack returns array', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const files = Storage.listStack();
+    return { success: Array.isArray(files) };
+});
+
+test('existsStack returns object', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const result = Storage.existsStack('nonexistent');
+    return { success: typeof result === 'object' };
+});
+
+test('getStackStats returns object with source stack', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const stats = Storage.getStackStats();
+    return { success: stats && stats.source === 'stack' };
+});
+
+// ============================================
+// v0.9.0-axolotl PIPELINE-BACKED VARIANTS
+// ============================================
+asyncTest('storage: readSecured returns content for existing file', async () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const s = Storage.get('file', { basePath: path.join(ROOT, 'models', 'public', 'vant') });
+    const content = await s.readSecured('identity.md');
+    return { success: typeof content === 'string' && content.length > 0 };
+});
+
+asyncTest('storage: readSecured returns null for missing file', async () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const s = Storage.get('file', { basePath: path.join(ROOT, 'models', 'public', 'vant') });
+    const content = await s.readSecured('does-not-exist-' + Date.now() + '.md');
+    return { success: content === null };
+});
+
+asyncTest('storage: writeSecured writes and readSecured reads back', async () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const tmpBase = path.join(ROOT, 'models', 'private', 'vant', '.test-tmp');
+    require('fs').mkdirSync(tmpBase, { recursive: true });
+    const s = Storage.get('file', { basePath: tmpBase });
+    const f = 'pipeline-test-' + Date.now() + '.md';
+    try {
+        const wrote = await s.writeSecured(f, 'hello pipeline');
+        if (!wrote) return { success: false, error: 'writeSecured returned falsy' };
+        const back = await s.readSecured(f);
+        return { success: back === 'hello pipeline' };
+    } finally {
+        try { s.deleteSecured(f); } catch (e) {}
+        try { require('fs').rmdirSync(tmpBase); } catch (e) {}
+    }
+});
+
+asyncTest('storage: deleteSecured removes a file', async () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const tmpBase = path.join(ROOT, 'models', 'private', 'vant', '.test-tmp');
+    require('fs').mkdirSync(tmpBase, { recursive: true });
+    const s = Storage.get('file', { basePath: tmpBase });
+    const f = 'pipeline-delete-' + Date.now() + '.md';
+    try {
+        await s.writeSecured(f, 'tmp');
+        const removed = await s.deleteSecured(f);
+        const still = await s.readSecured(f);
+        return { success: removed === true && still === null };
+    } finally {
+        try { s.delete(f); } catch (e) {}
+        try { require('fs').rmdirSync(tmpBase); } catch (e) {}
+    }
+});
+
+asyncTest('storage: listSecured returns array', async () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const s = Storage.get('file', { basePath: path.join(ROOT, 'models', 'public', 'vant') });
+    const result = await s.listSecured('*.md');
+    return { success: Array.isArray(result) };
+});
+
+asyncTest('storage: Secured variants throw on path traversal', async () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const s = Storage.get('file', { basePath: path.join(ROOT, 'models', 'public', 'vant') });
+    let blocked = false;
+    try {
+        await s.readSecured('../../../etc/passwd');
+    } catch (e) {
+        blocked = e.message.includes('blocked') || e.message.includes('Path');
+    }
+    return { success: blocked, error: blocked ? null : 'expected path-traversal block' };
+});
+
+// ==================== v0.9.0-axolotl SAFE-BY-DEFAULT ====================
+
+test('storage module exports readRaw', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof Storage.readRaw === 'function' };
+});
+
+test('storage module exports writeRaw', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof Storage.writeRaw === 'function' };
+});
+
+test('storage module exports deleteRaw', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof Storage.deleteRaw === 'function' };
+});
+
+test('storage module exports listRaw', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof Storage.listRaw === 'function' };
+});
+
+test('FileStorage has readRaw method', () => {
+    const { FileStorage } = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof FileStorage.prototype.readRaw === 'function' };
+});
+
+test('FileStorage has writeRaw method', () => {
+    const { FileStorage } = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof FileStorage.prototype.writeRaw === 'function' };
+});
+
+test('FileStorage has deleteRaw method', () => {
+    const { FileStorage } = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof FileStorage.prototype.deleteRaw === 'function' };
+});
+
+test('FileStorage has listRaw method', () => {
+    const { FileStorage } = require(path.join(ROOT, 'lib', 'storage'));
+    return { success: typeof FileStorage.prototype.listRaw === 'function' };
+});
+
+test('safe read still works (VAF check, not blocked)', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const s = Storage.get('file', { basePath: path.join(ROOT, 'models', 'public', 'vant') });
+    const content = s.read('identity.md');
+    return { success: typeof content === 'string' && content.length > 0 };
+});
+
+test('safe read blocks path traversal', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const s = Storage.get('file', { basePath: path.join(ROOT, 'models', 'public', 'vant') });
+    let blocked = false;
+    try {
+        s.read('../../../etc/passwd');
+    } catch (e) {
+        blocked = e.message.includes('blocked') || e.message.includes('Path');
+    }
+    return { success: blocked, error: blocked ? null : 'expected path-traversal block' };
+});
+
+test('readRaw does NOT block path traversal (explicit unsafe)', () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const s = Storage.get('file', { basePath: path.join(ROOT, 'models', 'public', 'vant') });
+    // readRaw should not throw on traversal; it either returns the content
+    // or null. The point is it does not do the vaf check.
+    let threw = false;
+    let result = null;
+    try {
+        result = s.readRaw('../../../etc/passwd');
+    } catch (e) {
+        threw = true;
+    }
+    return { success: !threw, error: threw ? 'readRaw should not throw on traversal' : null };
+});
+
+asyncTest('readSecured throws on path traversal', async () => {
+    const Storage = require(path.join(ROOT, 'lib', 'storage'));
+    const s = Storage.get('file', { basePath: path.join(ROOT, 'models', 'public', 'vant') });
+    let blocked = false;
+    try {
+        await s.readSecured('../../../etc/passwd');
+    } catch (e) {
+        blocked = true;
+    }
+    return { success: blocked, error: blocked ? null : 'readSecured should block traversal' };
+});
+
+// ============================================
 // SUMMARY
 // ============================================
 

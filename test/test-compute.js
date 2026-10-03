@@ -54,7 +54,8 @@ test('has invoke function', () => {
 });
 
 test('has eval function', () => {
-    return typeof compute.eval === 'function';
+    // v0.9.0-axolotl: compute.eval was renamed to compute.evaluate
+    return typeof compute.evaluate === 'function';
 });
 
 test('has status function', () => {

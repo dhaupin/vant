@@ -1,0 +1,9 @@
+{
+  "default": {
+    "name": "Default Workspace",
+    "owner": "system",
+    "roles": ["admin", "editor", "viewer"],
+    "members": [],
+    "description": "Default workspace for public brain users"
+  }
+}

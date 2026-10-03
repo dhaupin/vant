@@ -10,6 +10,11 @@
 
 const config = require('../lib/config');
 const theme = require('../lib/theme');
+// (pass 95) Resolver of record for the active brain (VANT_BRAIN env > current).
+const currentBrain = () => {
+    try { const ss = require('../lib/state-store'); if (ss.currentBrain) return ss.currentBrain(); } catch (e) {}
+    try { return config.brainGetCurrent ? config.brainGetCurrent() : 'vant'; } catch (e) { return 'vant'; }
+};
 
 const args = process.argv.slice(2);
 const action = args[0];
@@ -23,7 +28,11 @@ async function main() {
                 console.log('Usage: vant config get <key>');
                 process.exit(1);
             }
-            const val = config.get(key);
+            // (pass 95) Consult the current brain's persisted config too —
+            // `vant config set` writes there (setConfig); a fresh CLI process
+            // has no runtime flags, so get() without the brain option always
+            // returned null for anything the CLI itself had set.
+            const val = config.get(key, null, { brain: currentBrain() });
             console.log(`${key}=${val}`);
             break;
 
@@ -32,8 +41,15 @@ async function main() {
                 console.log('Usage: vant config set <key> <value>');
                 process.exit(1);
             }
-            config.set(key, value);
-            console.log(theme.status.ok('Set ' + key + ' '+ value));
+            // (pass 95) config.set was setFlag — an in-process Map that died
+            // with this very process while the CLI printed success. setConfig
+            // persists into the current brain's config.json.
+            const setRes = config.setConfig(key, value);
+            if (setRes && setRes.error) {
+                console.log(theme.status.err('Set failed: ' + setRes.error));
+                process.exit(1);
+            }
+            console.log(theme.status.ok('Set ' + key + ' ' + value + (setRes.persisted ? ' (persisted to ' + setRes.brain + ')' : ' (runtime only)')));
             break;
 
         case 'list':

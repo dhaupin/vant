@@ -3,14 +3,14 @@ version: 0.8.6
 permalink: /integrations/hybrid
 layout: default
 title: Hybrid Sync
-nav_order: 34
+nav_order: 87
 ---
 
 # Vant Hybrid Sync
 
 > Public/Private brain - split sync
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │           Hybrid Sync Architecture                  │
 │                                                      │
@@ -27,8 +27,8 @@ nav_order: 34
 ## What Is Hybrid?
 
 Sync different parts to different repos:
-- Sensitive state → private repo
-- Public logs/summaries → public repo
+- Sensitive state -> private repo
+- Public logs/summaries -> public repo
 
 ## Why
 
@@ -68,10 +68,10 @@ hybrid.getSummary();
 ## CLI
 
 ```bash
-vant hybrid-sync                # Summary
-vant hybrid-sync --public     # Push to public
-vant hybrid-sync --private    # Push to private
-vant hybrid-sync --set github private
+vant hybrid                     # Summary
+vant hybrid --public            # Push to public
+vant hybrid --private           # Push to private
+vant hybrid --set github private  # Set a repo's privacy
 ```
 
 ## Use Cases

@@ -30,10 +30,14 @@ async function run() {
     
     if (subcmd === 'status' || subcmd === 'stat' || subcmd === 'info') {
         const status = await api.getStatus();
+        // pass 80: status.running/.port never existed on API.getStatus()
+        // ({mode, requests, errors, uptime}) — the hardcoded-zeros genre the
+        // bin-truthfulness gate now blocks. Truthful fields only.
         console.log('API Status:');
-        console.log('  Running:', status.running || false);
-        console.log('  Port:', status.port || 'N/A');
         console.log('  Mode:', status.mode || 'N/A');
+        console.log('  Requests:', status.requests ?? 'N/A');
+        console.log('  Errors:', status.errors ?? 'N/A');
+        console.log('  Uptime (s):', Math.round((status.uptime || 0) / 1000));
     } else if (subcmd === 'routes' || subcmd === 'list' || subcmd === 'ls') {
         // MCP methods as "routes"
         const mcp = require('../lib/mcp');

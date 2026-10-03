@@ -185,40 +185,55 @@ test('format.serialize - TXT output uses intent', () => {
 
 // ==================== PIPELINE TESTS ====================
 
-test('format.pipeline - auto detect yaml', () => {
+test('format.prepare - auto detect yaml', () => {
     const format = require('../lib/format');
-    const result = format.pipeline('intent: test\ngoal: done');
+    const result = format.prepare('intent: test\ngoal: done');
     assertEq(result.data.intent, 'test', 'Should auto-detect and parse');
     assertEq(result.format, 'yaml', 'Should detect format');
 });
 
-test('format.pipeline - explicit json format', () => {
+test('format.prepare - explicit json format', () => {
     const format = require('../lib/format');
-    const result = format.pipeline('{"a":1}', { format: 'json' });
+    const result = format.prepare('{"a":1}', { format: 'json' });
     assertEq(result.data.a, 1, 'Should use explicit format');
 });
 
-test('format.pipeline - string input passes through', () => {
+test('format.prepare - string input passes through', () => {
     const format = require('../lib/format');
     // Note: pipeline expects string input, not objects
-    const result = format.pipeline('intent: test\ngoal: done');
+    const result = format.prepare('intent: test\ngoal: done');
     assertEq(result.data.intent, 'test', 'Should handle string input');
 });
 
 // ==================== FILE LOAD TESTS ====================
 
+// Pass 19 bin sweep: lib/format.loadFile routes through storage.read(),
+// which resolves paths against process.cwd() and blocks absolute ones. Anchor
+// the suite at the repo root (derived from this script, not the caller's cwd)
+// and use repo-relative paths, so `vant format-test` gives the same verdict
+// from any directory. 'models/islands.json' never existed anywhere; the real
+// file is models/public/vant/islands.json.
+const REPO_ROOT = path.resolve(__dirname, '..');
+if (process.cwd() !== REPO_ROOT) process.chdir(REPO_ROOT);
+
+// Pass 20 fresh-dir fix: these two previously read repo-content files
+// (models/public/vant/islands.json, docker-compose.yml) — repo-relative, so
+// they false-failed wherever the repo tree was partial (npm installs, sandbox
+// copies without models/). They now load the suite's own setup() fixtures,
+// which exist in every environment and still prove loadFile parses
+// JSON/YAML through storage.read().
 test('format.loadFile - json file', async () => {
     const format = require('../lib/format');
-    const result = await format.loadFile('models/islands.json');
+    const result = await format.loadFile('.agent_tmp/format-test/test.json');
     assert(result.data, 'Should load JSON');
-    assertEq(result.data.version, '1.0', 'Should parse version');
+    assertEq(result.data.intent, 'Test json', 'Should parse intent');
 });
 
 test('format.loadFile - yaml file', async () => {
     const format = require('../lib/format');
-    const result = await format.loadFile('docker-compose.yml');
+    const result = await format.loadFile('.agent_tmp/format-test/test.yaml');
     assert(result.data, 'Should load YAML');
-    assert(result.data.services, 'Should parse services');
+    assertEq(result.data.format, 'yaml', 'Should parse format key');
 });
 
 test('format.loadFile - ini example', async () => {

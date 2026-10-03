@@ -1,0 +1,15 @@
+# scripts/ convention
+#
+# Durable tools (default): any script without a leading underscore is
+# tracked and reusable by contributors. Current keepers:
+#   check-docs-style.js - docs voice/format gate (fence tags, heading
+#     order, em dashes, emoji, pipe-table shape, whitespace)
+#   check-docs-links.js - docs link gate (every link resolves)
+# Run both via: npm run lint:docs
+#
+# Scratch (ignored): one-shot repair/probe scripts, prefixed with
+# underscore or tmp-, or suffixed .local.js. Workspace-local by design:
+# run, review the diff, delete. Never commit them.
+/_*
+/tmp-*
+/*.local.js

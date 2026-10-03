@@ -3,13 +3,13 @@ version: 0.8.6
 permalink: /essential/onboard
 layout: default
 title: Knowledge Base Browser
-nav_order: 13
+nav_order: 39
 ---
 # Knowledge Base Browser
 
 Browse and search your Vant brain.
 
-```
+```text
 ┌─────────────────────────────────────────────┐
 │          Vant Onboard CLI                     │
 │                                              │
@@ -176,17 +176,17 @@ vant onboard decisions
 
 ```bash
 # One-liner
-cat models/private/identity.md
+cat models/private/vant/identity.md
 ```
 
 ---
 
 ## Related
 
-- [Brain](essential/brain) - Brain structure
+- [Brain](/vant/memory/brain) - Brain structure
 - [Getting Started/getting-started/index) - Getting started guide
-- [Hybrid Search](integrations/hybrid) - Hybrid search
+- [Hybrid Search](/vant/integrations/hybrid) - Hybrid search
 
 ## Next
 
-- [Islands](essential/islands) - Lazy-loading integrations
+- [Islands](/vant/essential/islands) - Lazy-loading integrations

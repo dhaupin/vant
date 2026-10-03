@@ -35,13 +35,24 @@ const brain = require('./lib/brain');
 // Mode switch: dual | public | private | remote
 brain.setMode('dual');  // default: private overrides public
 
+// NEW (v0.8.6): Unified read - reads any brain file by name
+// Supports all extensions: .md, .json, .yaml, .yml, .txt, .ini
+const item = await brain.read('identity');  // or 'identity.json', 'notes.yaml'
+console.log(item.format);   // 'md' | 'json' | 'yaml' | 'txt'
+console.log(item.source);   // 'public' | 'private'
+console.log(item.content);  // raw content
+console.log(item.data);     // parsed data
+
 // Load single brain (async)
-const item = await brain.loadBrain('identity');
-console.log(item.source);  // 'public' | 'private' | 'remote'
+const item2 = await brain.loadBrain('identity');
+console.log(item2.source);  // 'public' | 'private' | 'remote'
 
 // Load all brains (sync)
 const corpus = brain.loadCorpus();
 console.log(corpus.length);  // 62 files
+
+// NEW (v0.8.6): Corpus now includes format field
+// corpus[0].format === 'md' | 'json' | 'yaml' | 'txt'
 
 // Sources returned:
 // corpus[0].source === 'public' | 'private'
@@ -57,6 +68,50 @@ Loading goes through: sandbox → vaf → qos → escrow
 ### Paths
 - `brain.getBrainPath()` → 'models/private' (runtime)
 - `brain.getPublicPath()` → 'models/public' (OS template)
+
+### Brain Layout (v0.9+ multi-brain)
+Since axolotl, brains live in per-brain directories:
+`models/private/<brain>/` and `models/public/<brain>/` (default brain:
+`vant`), with the active stack in `models/state.json`.
+
+**Legacy layouts migrate automatically**: pre-0.9 trees (flat
+`models/public/*.md`, no stack) are imported on `vant start` by
+`lib/migrations.js` (layout v3). Never hand-move brain files — use
+`vant migrate --status` / `--dry-run` / `--brain-name <name>`, or the MCP
+`brain_migration_status` tool. Migration is content-detected, idempotent,
+and never fires on an already-multi-brain tree.
+
+Read semantics in dual mode: `brain.read(name)` checks the current brain's
+root first, then falls back to the public root (restored main-style
+behavior; pin `{ type: 'public' }` or `{ type: 'private' }` to skip the
+fallback).
+
+### Format Support (v0.8.6)
+Brain files now support multiple formats:
+
+```javascript
+const format = require('./lib/format');
+
+// Supported extensions
+format.DEFAULT_EXTENSIONS; // ['.yaml', '.yml', '.json', '.md', '.txt', '.ini']
+
+// List files with specific extensions
+const files = format.listFiles('./models/private', format.DEFAULT_EXTENSIONS, { 
+    recursive: true,      // include subdirectories
+    excludeDirs: ['boot']  // exclude boot directories
+});
+// ['models/private/nova/identity.md', 'models/private/nova/geometry/coordinates.json']
+
+// Get brain name from file path (strips extension)
+format.getBrainName('models/private/nova/notes.json');  // 'notes'
+
+// Load file with auto-detection
+const data = await format.loadFile('./data/config.json');
+// { data: {...}, format: 'json', content: '...' }
+
+// Save with auto-serialization
+await format.saveFile('./data/config.json', { key: 'value' }, { format: 'json' });
+```
 
 ## Islands (Brain Modules)
 
@@ -121,8 +176,8 @@ Run `vant onboard` to browse all brain files:
 
 ```bash
 vant onboard              # Interactive browser
-cat models/private/start.md  # Quick start
-cat models/private/identity.md  # Who you are
+cat models/private/vant/start.md  # Quick start (default brain)
+cat models/private/vant/identity.md  # Who you are
 ```
 
 ---
@@ -173,10 +228,11 @@ Check your level at session start.
 ### Docs TOC
 
 - [Quick Start](https://docs.creadev.org/vant/getting-started/quick-start) — 2 min setup
-- [The Brain](https://docs.creadev.org/vant/essential/brain) — Memory files
-- [Runtime](https://docs.creadev.org/vant/essential/runtime) — Programmatic API
-- [MCP Tools](https://docs.creadev.org/vant/integrations/mcp) — 21 AI tools
-- [Multi-Agent Crew](https://docs.creadev.org/vant/essential/agents) — 4 agents max
+- [Agent Onboarding](https://docs.creadev.org/vant/getting-started/agent-onboarding) — the wake/work/sleep loop
+- [The Brain](https://docs.creadev.org/vant/memory/brain) — Memory files
+- [Runtime](https://docs.creadev.org/vant/runtime/runtime) — Programmatic API
+- [MCP Tools](https://docs.creadev.org/vant/reference/mcp-tools) — AI tools (auto-wired registry)
+- [Multi-Agent Crew](https://docs.creadev.org/vant/multi-agent/agents) — 4 agents max
 - [CLI](https://docs.creadev.org/vant/reference/cli) — All commands
 
 ---
@@ -187,29 +243,35 @@ Up to 4 agents can work together (you + 3 coworkers).
 
 ### Join via MCP
 
-External agents connect via MCP JSON-RPC:
+External agents connect through the MCP HTTP door (POST /mcp/exec,
+JSON-RPC-style body — `{tool, args}` or `{method, params}` both work):
 
 ```javascript
-const response = await fetch('http://localhost:3457/rpc', {
+const response = await fetch('http://localhost:3457/mcp/exec', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'brain_agent_spawn',  // brain_ prefix required
-        params: { name: 'Claude', role: 'Assistant' },
-        id: 1
+        method: 'agent_spawn',
+        params: { name: 'Claude', role: 'Assistant' }
     })
 });
-// → { result: { id: 'agent_xxx', name: 'Claude' } }
+// → { result: { id: 'agent_xxx', name: 'Claude', role: 'Assistant', state: 'idle', ... } }
 ```
+
+Browse everything available: `GET http://localhost:3457/tools`
+(and `POST /mcp/exec` with `{tool: 'vant_config_get', args: {tool: '<name>'}}`
+to probe a single tool's schema). Auth optional locally; set
+`mcp.requireKey true` (or `VANT_MCP_REQUIRE_KEY=true`) to require
+x-api-key/Bearer on POSTs.
 
 ### Available Tools
 
 | Tool | Description |
 |------|-------------|
-| `brain_agent_spawn` | Spawn new agent (max 4) |
-| `brain_agent_list` | List all agents |
-| `brain_agent_kill` | Kill agent by ID |
+| `agent_spawn` | Spawn new agent (quota via agents.maxAgents, default crew of 4) |
+| `agent_list` | List active agents |
+| `agent_kill` | Kill agent by ID |
+| `agent_proto_list` / `agent_proto_load` | Agent protos (templates) |
 
 ### Orchestrator
 
@@ -266,7 +328,7 @@ agent-name: Did thing X
 | `vant search <query>` | RAG search |
 | `vant config get <key>` | Get config |
 | `vant config set <key> <val>` | Set config |
-| `vant mcp` | Start MCP server (21 tools) |
+| `vant mcp` | Start MCP server (auto-wired tools) |
 
 ---
 
@@ -300,7 +362,7 @@ PURPOSE: Exploring Vant's codebase
 
 ## Discovery: 2026-05-11
 
-- MCP exposes brain as 21 JSON-RPC tools
+- MCP exposes brain as auto-wired JSON-RPC tools
 - Agent branch workflow isolates work
 - Trust levels control autonomy
 

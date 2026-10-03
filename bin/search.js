@@ -94,7 +94,9 @@ Options:
             console.log('\n=== Basic Search: ' + query + ' ===');
             console.log('Results:', results.length);
             for (const r of results) {
-                console.log(' -', r.title, r.summary?.substring(0, 60));
+                // corpus docs have content, not summary - print a content snippet
+                const snippet = (r.content || r.summary || '').replace(/\s+/g, ' ').trim().substring(0, 60);
+                console.log(' -', r.title, snippet);
             }
         }
         process.exit(0);
@@ -163,8 +165,9 @@ Options:
             }
         } else {
             console.log('\n=== Hybrid Search: ' + query + ' ===');
-            console.log('Sparse:', results.sparse.length);
-            console.log('Dense:', results.dense.length);
+            // lib hybrid() returns { fused, reranked } - a BM25-ranked array
+            // (no separate sparse/dense stages exist yet; don't invent them)
+            console.log('Results:', results.fused.length);
             console.log('Fused:', results.fused.length);
             for (const r of results.fused.slice(0, 5)) {
                 const title = r.title || r.id;
@@ -184,7 +187,8 @@ Options:
     // Stats
     if (action === '--stats') {
         const searchLib = require(path.join(DIR, 'lib', 'search'));
-        console.log(searchLib.getStats());
+        const stats = await searchLib.getStats();
+        console.log(JSON.stringify(stats, null, 2));
         process.exit(0);
     }
 

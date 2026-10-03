@@ -1,0 +1,141 @@
+---
+version: 0.8.6
+permalink: /multi-agent/coordination
+layout: default
+title: Multi-Agent System
+nav_order: 50
+---
+
+# Tutorial: Multi-Agent Coordination
+
+> Build a team of AI agents that work together without conflicts
+
+## The Problem
+
+When multiple agents access the same brain:
+- Agent A writes to `lessons.md`
+- Agent B writes to `lessons.md` at the same time
+- One overwrites the other!
+
+## The Solution: Branch + Lock
+
+Vant uses **Git branches** for isolation + **file locks** for coordination.
+
+```text
+main branch (production)
+    │
+    ├── agent-1/          # Agent 1's brain
+    ├── agent-2/          # Agent 2's brain  
+    └── experiment-alpha/   # Experimental branch
+```
+
+## Setup
+Configure for your environment.
+
+```bash
+# Each agent gets own branch
+vant branch create agent-1
+vant branch create agent-2
+```
+
+## Agent Code
+Build a working agent using Vant.
+
+```javascript
+const branch = require('vant').branch;
+const lock = require('vant').lock;
+
+const AGENT_ID = 'agent-1';
+
+async function work() {
+  // 1. Acquire lock
+  const token = await lock.acquire(AGENT_ID);
+  if (!token) {
+    console.log('Brain locked, retrying...');
+    return;
+  }
+
+  // 2. Switch to your branch
+  await branch.checkout(AGENT_ID);
+
+  // 3. Do work on your brain...
+  const lessonsPath = `models/private/${AGENT_ID}/lessons.md`;
+  const lessons = await readFile(lessonsPath);
+  lessons += `\n- Agent ${AGENT_ID}: learned something`;
+  await writeFile(lessonsPath, lessons);
+
+  // 4. Commit changes
+  await branch.commit(AGENT_ID, 'Updated lessons');
+
+  // 5. Release lock
+  await lock.release(AGENT_ID, token);
+}
+```
+
+## Workflow
+Multi-agent workflow steps.
+
+```text
+┌─────────────────┐
+│  Agent A wants   │
+│     to work     │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Acquire Lock   │◄────────┐
+└────────┬────────┘         │
+         │                │
+    ┌────┴────┐         │
+    │         │         │
+    ▼ SUCCESS │ FAILED  │       
+    │         │         │
+    ▼         ▼         │
+┌─────────┴─────────┐  │
+│ Checkout branch   │  │
+│ Do work          │  │
+│ Commit          │  │
+│ Release lock   │──┘
+└─────────────────┘
+```
+
+## Multi-Agent Patterns
+Coordinate multiple AI agents with Vant.
+
+### Pattern 1: Solo Agent (Safe)
+Coordination patterns for multi-agent.
+```javascript
+// Just commit to main directly
+await branch.checkout('main');
+await branch.commit('agent-1', 'Updated memory');
+```
+
+### Pattern 2: Branch Isolation
+Coordination patterns for multi-agent.
+```javascript
+// Each agent uses own branch
+await branch.checkout('agent-1');
+// ... work ...
+await branch.commit('agent-1', 'Work complete');
+```
+
+### Pattern 3: Merge via PR
+Coordination patterns for multi-agent.
+```javascript
+// When done, merge to main via PR
+// Don't auto-merge - human reviews first
+// Prevents bad writes to main
+```
+
+## Best Practices
+
+1. **Always acquire lock** - Even single-agent prevents race conditions
+2. **Branch per agent** - `agent-1`, `agent-2`, etc.
+3. **Commit frequently** - Small commits easier to review
+4. **Merge via PR** - Don't auto-merge to main
+
+## Related
+
+- [Multi-Agent Guide](/vant/multi-agent/agents) - Full guide
+- [Lock API](/vant/reference/cli) - Lock module
+- [Branch API](/vant/reference/cli) - Branch module

@@ -5,7 +5,7 @@ permalink: /advanced/search-architecture
 layout: default
 title: Search Architecture
 
-nav_order: 70
+nav_order: 91
 ---
 
 
@@ -16,7 +16,7 @@ nav_order: 70
 Your brain lives in `models/private/` - thousands of files with learnings, decisions, context. When you search, it has to scan all of them. That's slow.
 
 **Without optimization:**
-```
+```text
 Query "python"
 → Scan 1000s files
 → Parse each for relevance
@@ -91,7 +91,7 @@ The search-hybrid module loads only when you call `search.hybrid()` or `search.q
 
 **Concept**: Your memories are **islands of context**. Search connects them.
 
-```
+```text
 Query → Find islands → Re-hydrate context
     ↓        ↓              ↓
   Bridge  Discovery    Full content
@@ -128,16 +128,16 @@ search.searchLTC('python');     // Text search (fast)
 search.query('python');        // RAG: search + rehydrate
 search.hybrid('python');      // BM25 + Vector + RRF
 search.query('python', { compact: true });  // Summaries only
-
-// CLI
-vant search python -l 3
-vant search python --mode rag --compact
-
-// MCP
-{ "name": "vant_search", "arguments": { "query": "python", "compact": true } }
 ```
 
-**MCP tool available as `vant_search`.**
+```bash
+# CLI
+vant search python -l 3
+vant search python --mode rag --compact
+```
+
+**MCP tool available as `vant_search`** - call it with
+`{ "query": "python", "compact": true }`.
 
 ## Security
 
@@ -149,7 +149,7 @@ Unchanged limits:
 
 ## Related
 
-- [Hybrid Search](integrations/hybrid) - BM25 + Vector + RRF
-- [Brain](essential/brain) - Memory islands
-- [CLI](reference/cli) - Search command
-- [MCP](integrations/mcp) - Search tool
+- [Hybrid Search](/vant/integrations/hybrid) - BM25 + Vector + RRF
+- [Brain](/vant/memory/brain) - Memory islands
+- [CLI](/vant/reference/cli) - Search command
+- [MCP](/vant/runtime/mcp) - Search tool

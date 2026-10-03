@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/sudo
 layout: default
 title: Sudo API
-nav_order: 84
+nav_order: 133
 ---
 
 # Sudo API

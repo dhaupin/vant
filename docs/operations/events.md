@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/events
 layout: default
 title: Events
-nav_order: 43
+nav_order: 57
 ---
 
 # Events
@@ -287,6 +287,6 @@ sandbox.on('blocked', (info) => {
 
 ## Related
 
-- [Runtime](essential/runtime) - Programmatic API
-- [Sandbox](security/sandbox) - Execution isolation
-- [Multi-Agent](essential/multi-agent) - Branch and lock
+- [Runtime](/vant/runtime/runtime) - Programmatic API
+- [Sandbox](/vant/security/sandbox) - Execution isolation
+- [Multi-Agent](/vant/multi-agent/agents) - Branch and lock

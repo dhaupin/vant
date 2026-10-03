@@ -91,6 +91,29 @@ test('agents has isOperationAllowed function', () => {
     return { success: typeof agents.isOperationAllowed === 'function' };
 });
 
+// Multibrain tests
+test('agents has getBrainAgentsConfig function', () => {
+    const agents = require(path.join(ROOT, 'lib', 'agents'));
+    return { success: typeof agents.getBrainAgentsConfig === 'function' };
+});
+
+test('agents has setBrainAgentsConfig function', () => {
+    const agents = require(path.join(ROOT, 'lib', 'agents'));
+    return { success: typeof agents.setBrainAgentsConfig === 'function' };
+});
+
+// Stack tests
+test('agents has getStackAgentsConfigs function', () => {
+    const agents = require(path.join(ROOT, 'lib', 'agents'));
+    return { success: typeof agents.getStackAgentsConfigs === 'function' };
+});
+
+test('getStackAgentsConfigs returns object with source stack', () => {
+    const agents = require(path.join(ROOT, 'lib', 'agents'));
+    const result = agents.getStackAgentsConfigs();
+    return { success: result && result.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

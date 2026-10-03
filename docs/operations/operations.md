@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/operations
 layout: default
 title: Operations
-nav_order: 46
+nav_order: 61
 ---
 # Operations
 
@@ -130,5 +130,5 @@ tail -f .vant.log
 
 ## Related
 
-- [AI Onboarding](essential/ai-onboard) - Getting started
-- [Troubleshooting](advanced/troubleshooting) - Problem solving
+- [Agent Onboarding](/vant/getting-started/agent-onboarding) - Getting started
+- [Troubleshooting](/vant/advanced/troubleshooting) - Problem solving

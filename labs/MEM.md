@@ -1,0 +1,654 @@
+# Vant Axolotl — Crash Memory (MEM.md)
+
+> **Purpose of this file:** catch-all scratchpad. Dump whatever you're in the middle of, in case the session dies before a full save/commit. Treat it as a tmp space, not a ledger.
+> **After a clean session:** wipe back to this template and leave a one-line handoff.
+
+---
+
+## Handoff
+
+**Last known good commit:** pass 107 — locks stage S3 (wire-up completion).
+F6 closed: `lib/tmp.js` put/delete now lazy-require `./brain-lock` and call
+`acquireBrainLock`/`releaseBrainLock` directly — no more implicit
+`global._lock` (shell.js was the last writer; it now uses a local lazy cache, so
+the global is gone; bin/tmp.js no longer wires it). Surfaces: `health.
+getStackHealthStatus` returns a `lock` field `{layer,byBrain,held}` and `vant
+health` prints it; MCP `vant_lock` status includes `stack`+`held` (+ new `stack`
+action); `vant lock status` prints the whole-stack view; boot.init dropped the
+dead `if (lock.init)`. Tests +8 across brain-lock/health/tmp. 11 files.
+⚠️ HARNESS: run the 157 sweep WITHOUT `VANT_BRAIN` — test/migrations.test.js's
+spawned probe inherits it and false-fails on the legacy-main read test (157/157
+with it unset). All gates green. Next: S4 (migrate to `withLock`, F7).
+
+**Last known good commit:** pass 106 — locks stage S2 (separation-of-concern
+contract). F8–F11 closed. Documented the two lock roots in code headers: mutex
+`lib/lock.js` = per-brain `models/private/<brain>/.locks/` (pathFor); lease
+`lib/brain-lock.js` = cross-brain `models/private/.locks/.lock-<brain>.json`
+(temp+rename, not O_EXCL) — MUST stay separate. F11: `lib/recursion.js guard`
+labelled a depth guard, not a lock (requires neither module). F10: in-process
+save chains (`_teamsSaveChain`/`_saveChain`) labelled write-ordering-only.
+`scripts/audit-locks.js` now ASSERTS the contract (two roots, no cross-require,
+recursion non-lock, writers take the mutex). 6 files. All gates green (sweep
+157/157, MCP 296 reg / PHANTOM 0). Next: S3 (wire-up completion, F6/F7).
+
+**Last known good commit:** pass 105 — locks stage S1 (truth-up the lease).
+F1–F5 closed. F1 was REMOVED (not wired): the lease is acquired hot by internal
+writers, so rate limiting is QoS's job — deleted the dead `_checkRateLimit`
+(undefined `errors`), its constants/maps, and the docstring claim. F2 added
+`getLayerStatus()`. F3 fixed `listStackLocks` (was spreading strings) + dropped
+`listBrainLocks`; stack helpers now pass brain explicitly (no pushBrain). F4
+`bin/lock.js release` honours `.success` (was false success + token wipe on a
+denied release). F5 `getState().lockStatus` is data now. test/brain-lock.test.js
+= 14 (async runner). Marker for S1 file locations in labs/TASKS.md. Next: S2
+(separation-of-concern contract).
+
+**Last known good commit:** pass 104 — lock-system PRD (labs/LOCKS.md §8, S1–S6).
+Walk-back audit found 13 issues; High: F1 (brain-lock rate limit dead AND would
+ReferenceError — `errors` undefined, no caller), F4 (`vant lock release`
+succeeds/clears the token on a DENIED release because it truthiness-checks an
+always-object), F12 (tail of unguarded whole-snapshot writers). Medium: no
+getLayerStatus (boot hardcodes lock layer), listStackLocks spreads strings,
+getState().lockStatus returns a fn ref, tmp locks via implicit global._lock,
+withLock used by market only, two .locks roots undocumented. Stages S1–S6 +
+acceptance/gates are in labs/LOCKS.md §8.6–8.8. Next: S1.
+
+**Last known good commit:** pass 103 QC — locks gaps/edges. New
+test/lock-failclosed.test.js (6) proves the fail-closed refusal actually
+refuses writes (state-store/teams/habitat) and recovers; test/lock.test.js
+grew to 13 (withLock releases on sync throw; closed abort never deletes a
+peer's lockfile). Hardened scripts/audit-locks.js: it now also catches a quoted
+string ENDING in `.lock` (the old `path.resolve(base, '.habitat.lock')` class),
+verified via a 7-case regex probe. Non-findings: rls-hookups "poisoned
+_cacheLock" is behavioral (still valid); no stale identifiers. Gates: sweep
+157/157, lint:locks PASS, check, eslint 0 err, zero leaked locks.
+
+**Last known good commit:** pass 103 — locks §4 (posture, one lock root, mutex collapse, fail-closed, audit).
+`lib/lock.js` mutex now: `acquire()`→`{ok,reason}` (acquired|held|unavailable);
+`withLock(path,fn,{failMode})` closed-by-default (never runs fn without the
+lock; returns `{ok:false,reason,aborted:true}`), open runs fn(result), sync fn
+released synchronously; new `mutex()` and `pathFor(kind,id)`. All file locks
+moved to `models/private/<brain>/.locks/` (retired the 4 ad-hoc formulas).
+In-process mutexes (consensus/cache/canvas) now use `lock.mutex()`; deleted the
+dead `storage.LockStorage`. Fail-CLOSED at persistMerged/teams/agents/habitat
+(refuse unlocked write + log reason) — no more last-writer-wins. Bonus: agents
+roster lock now spans merge+write. `scripts/audit-locks.js` + `npm run
+lint:locks` enumerate 8 mutex / 10 lease requires, 0 leaks. Tests updated for
+new lock paths; new test/lock.test.js (11). Gates: sweep 156/156, lints
+PASS, eslint 0 err, check, audit-mcp 296 THREW0/TIMEOUT0/INVALID0/REFUSED149/
+OK88/PHANTOM0, npm test 15/15, test-all 0, test-core 5/5, zero leaked locks.
+
+**Last known good commit:** pass 102 — lock naming split (brain-lock lease vs lock mutex).
+Owner chose to keep both lock concepts but name them unambiguously. `lib/lock.js`
+(authorization lease) → `lib/brain-lock.js`; `lib/flock.js` (cross-process
+mutex) → `lib/lock.js`. Extended to fn/method/event level: the lease exports
+are now `acquireBrainLock`/`releaseBrainLock`/`brainLockStatus`/
+`forceReleaseBrainLock`, events `brain-lock:*`, config `BRAIN_LOCK_CONFIG`,
+internals `_getBrainLockFile`/`ensureBrainLockDir`, log prefix `[brain-lock]`;
+the mutex keeps `acquire`/`release`/`withLock`. Updated all 8 lib consumers +
+bin/lock,build-test,tmp,node + mcp `vant_lock` + docs/ROADMAP + tests.
+`test/lock.test.js`→`test/brain-lock.test.js`; deleted dead `test/test-lock.js`.
+`.gitignore`: added `models/**/*.lock` + relabeled lock block, removed redundant
+rot (`models/public/.state.json`, `models/.resolution.json`, `models/.providers.json`,
+`temp/models/latent/*.vpatch`). LOCKS.md §4 behavior items still open. Gates:
+sweep 155/155, lints PASS, eslint 0 err, check, audit-mcp 296 THREW0/TIMEOUT0/
+INVALID0/REFUSED149/OK88/PHANTOM0, npm test 15/15, test-all 0, test-core 5/5,
+zero leaked locks.
+
+**Last known good commit:** pass 101 — market lock limitation + CLI help-syntax + escrow hold leak.
+(1) MARKET: open-ended listings no longer take the per-listing flock; the
+lock body is now fully synchronous (budget/hold/trust/governance hoisted
+above it); fail-closed `E_TRADE_LOCK` + release buyer hold when the lock is
+unavailable (no more proceed-unlocked). test/market-crossprocess.test.js
+8/8 (open-ended no-lock pinned via a `flock.withLock` spy). (2) CLI HELP:
+`vant --help` summary now shows `--status/--drill/--reset` etc. (was bare
+words); docs/reference/cli.md s3 lines fixed; regression in
+test/remote-cli.test.js. (3) ESCROW HOLD LEAK (found while fixing 1):
+`escrow.release()` never removed the persisted hold — the additive
+`_saveEscrow` union re-added it; holds accumulated to `maxHolds` and then
+ALL trades failed. Fixed with `_deletedHolds` applied after the union;
+test/escrow.test.js gate added. (4) LOCKS: labs/LOCKS.md inventory +
+canonicalization proposal; no refactor yet. Gates: sweep 155/155, lints
+PASS, eslint 0 err, check, audit-mcp 296 THREW0/TIMEOUT0/INVALID0/REFUSED149/
+OK88/PHANTOM0, npm test 15/15, test-all 0, test-core 5/5, zero leaked locks.
+
+**Last known good commit:** pass 100 — live-fire (single install + mesh), 2 bugs.
+Scratch-brain live fire of the CLI/MCP. (1) CROSS-PROCESS MARKET OVERSELL:
+the scarcity reserve in market.trade is per-process (`_reserved` not
+persisted; `trades` commits only after the escrow awaits) and `_applyMarket`
+skips held listings, so two processes both sold a supply-1 listing (persisted
+counter desynced to 1 vs 2 trade records). Fixed with a per-listing
+cross-process `flock` across reserve→commit + `_adoptCommittedTrades`
+re-reading disk `trades` under the lock. (2) CONFIG PROTOTYPE POLLUTION:
+`config.setConfig` walked dotted keys with `node = node[part]`; `__proto__`
+hit Object.prototype, so MCP `vant_config_set` key `__proto__.x` polluted
+every object (`({}).x === v`). Fixed: refuse `__proto__`/`constructor`/
+`prototype` segments (E_KEY_SEGMENT). NEW test/market-crossprocess.test.js
+3/3; test/config-persistence.test.js +gate D 13/13. NOTE: `vant wal/mirror/s3
+status` (bare word) exit 1 — real syntax is `--status`; help is misleading.
+Gates: sweep 155/155 chunked, lints PASS (docs 129/surface/helpers), eslint 0
+err, npm run check, audit-mcp 296 THREW(0)/TIMEOUT(0)/INVALID(0)/REFUSED
+149/OK 88/PHANTOM 0, npm test 15/15, test-all exit 0, test-core 5/5, zero
+leaked locks. Queued: left the wal/mirror/s3 help-vs-syntax mismatch
+unfixed (doc-only); draft axolotl→main PR; MEM/TASKS→vant-native + whitepaper.
+
+**Last known good commit:** pass 99 — proactive tombstones + cross-process reap.
+Closed the two pass-98 caveats. (1) market/settlement got the `_seen*` +
+tombstone-aware merge UP FRONT (append-only today, so a no-op behaviourally,
+but a future hard-delete is now safe by construction) — proves via a
+`_deleteForTest` seam. (2) consensus reap is now CONVERGENT across processes:
+`_reapedTopics` (topic→reapedAt) is persisted in the snapshot (`reaped`
+array) and `_mergeLedgers`/`_applyLedgers` adopt peer reaps and drop held
+copies — no more resurrection by a peer that still held the reaped topic.
+BUG the new gate caught: a re-pull's own persist re-read the stale on-disk
+reap and re-tombstoned the recovered topic → fixed with a clock-free
+`_reapRecovered` intent set (also keeps agora-hygiene's round-trip green).
+NEW tests: test/state-store-tombstones.test.js 2/2;
+test/consensus-reap-crossprocess.test.js 6/6. Gates: sweep 154/154 chunked,
+lints PASS (docs 129/surface/helpers), eslint 0 err, npm run check,
+audit-mcp 296 THREW(0)/TIMEOUT(0)/INVALID(0)/REFUSED 149/OK 88, npm test
+15/15, test-all exit 0, test-core 5/5, zero leaked locks. Queued: draft
+axolotl→main PR (merge-readiness done pass 96); MEM/TASKS→vant-native +
+whitepaper.
+
+**Last known good commit:** pass 98 — state-store family cross-process lock.
+Fixed the two items pass 97 documented-not-fixed. (1) STATE-STORE FAMILY:
+consensus / market / node-registry / settlement all wrote whole snapshots
+with no cross-process lock (peers that hydrated before either wrote
+clobbered each other). New `stateStore.persistMerged` (lock at the brain
+root via new `lib/flock.js`, re-read disk, adopt unseen, write union) wired
+into all four. node-registry `unregister` and consensus `reap` are
+tombstone-safe (seen-set); consensus also UNIONS votes for held topics;
+market/settlement are append-only so adopt-unseen only. Gotcha: consensus
+marking must cover EVERY `_ledgers.set` path — mergeTopic was missed and
+agora-hygiene caught the reap-resurrection. (2) LOCK LEAK: `lib/flock.js`
+registers a `process.on('exit')` that unlinks held locks (finally can't run
+on abrupt mid-await exit); habitat/teams/agents-internal refactored onto
+flock. Verified ZERO leaked locks after the full 152-suite sweep. NEW
+test/state-store-crossprocess.test.js 5/5. Gates: sweep 152/152 chunked,
+lints PASS (docs 129/surface/helpers), eslint 0 err, npm run check,
+audit-mcp 296 THREW(0)/TIMEOUT(0)/INVALID(0)/REFUSED 149/OK 88, npm test
+15/15, test-all exit 0, test-core 5/5. Queued: draft axolotl→main PR
+(merge-readiness done pass 96); MEM/TASKS→vant-native + whitepaper.
+
+**Last known good commit:** pass 97 — habitat cross-process fix + QC.
+HABITAT FIX (the pass-96 deferred finding): save() wrote the whole
+in-memory snapshot (workspaces/roles/boundaries/tokens) while
+adopt-on-load ran once at restore(), so peers that hydrated before either
+wrote clobbered each other (pre-fix: 4 concurrent createWorkspace → 2).
+Now every save takes a lockfile, re-reads the _habitat row FRESH, adopts
+unseen newcomers, writes the union; tombstone-safe (seen-but-absent ids
+stay deleted), roles per-triple. Required a `fresh` flag on BOTH
+memory.recall and brain._loadBrain (two caches). NEW
+test/habitat-crossprocess.test.js 5/5. SELF-INFLICTED BUG caught + fixed:
+lock at `<brain>/state/_habitat.json.lock` collided with lib/migrations'
+dropfiles.tmp-space sweeper → broke migrations idempotency; moved to brain
+root `.habitat.lock`. QC round 2: 5 more MCP stubs wired real —
+vant_commit / vant_sync / vant_lock (+required action) / vant_health /
+vant_create_branch. DOCUMENTED NOT FIXED: consensus/market/node-registry/
+settlement whole-snapshot writes with no cross-process lock (single-writer
+hub assumption, lower blast radius); fire-and-forget habitat saves can leak
+a lock on abrupt exit (stale >5s takeover reclaims). Gates: sweep 151/151
+chunked, lints PASS (docs 129 / surface / helpers), eslint 0 err, npm run
+check, audit-mcp 296 THREW(0)/TIMEOUT(0)/INVALID(0)/REFUSED 149/OK 88,
+npm test 15/15, test-all exit 0, test-core 5/5. Queued: consensus/market
+family lock parity; MEM/TASKS→vant-native + whitepaper (owner: later);
+draft axolotl→main PR (merge-readiness done in pass 96).
+
+**Last known good commit:** pass 96 — merge-readiness checklist + QC.
+MERGE-READY VERDICT: axolotl→main conflict scan is DEFINITIVELY clean —
+main's tip tree (`c11ae19…`) is byte-identical to the merge base
+(`36d6f62`); the single main-only commit (5965e14, merge of PR #52
+"evolution") is content-neutral, so main adds nothing. 615 commits our
+side, 0 files changed on both sides since base. QC found + FIXED:
+(1) teams.json cross-process last-writer-wins (proven 4 concurrent
+createOrg → 1 org; fixed with lockfile+adopt+tombstone mirroring pass 95;
+NEW test/teams-crossprocess.test.js 5/5; _resetHydration now clears
+tombstones). (2) MCP stubs in the audit OK bucket: vant_audit_log /
+_audit_list / _succession_info / _sandbox_status were hardcoded — now real
+(succession reported the brain's REAL 'medium', the stub lied 'high').
+QC found + DEFERRED: (3) habitat state has the same cross-process class
+(4 concurrent createWorkspace → 2) — deferred because it's the
+pass-91-hardened RLS/tenancy/token map surface and needs a tombstone-safe
+merge on its own pass. Also fixed bin/build.sh (was broken+stale:
+missing states/REGISTRY.txt, hardcoded v0.5.0 → now reads package.json)
+and lib/version.js's false "docs has no changelog" note. Gates: sweep
+150/150, lints PASS, eslint 0 err, npm run check, audit-mcp 296 THREW(0)/
+REFUSED 148/OK 89, npm test 15/15, test-all/test-core exit 0. Queued:
+habitat merge (finding #3); MEM/TASKS→vant-native + whitepaper (tonight).
+
+**Pass 95:** cross-process seams: roster
+merge + config persistence. Survey note: pass-95 work was already on
+disk (uncommitted) when this session resumed; it was INCOMPLETE.
+(1) ROSTER: lib/agents/internal.js cross-process merge — lockfile
+(agents.json.lock in the orgchart dir) + _seenIds tombstone +
+_noteAgentSeen; adoption of never-seen ids; _saveAgents() now takes
+NO param (writes _agents after the merge). test/roster-
+crossprocess.test.js 6/6 (4 concurrent children + tombstone gate).
+(2) CONFIG: lib/config.js setConfig() persists into the CURRENT
+brain config.json (loadBrainConfig/saveBrainConfig), bin/config.js
+set/get rewired; MCP vant_config_get/set were PURE STUBS → now real
++ required[] (audit OK→REFUSED +2). FINISHING SEAM: mcpRequireKey()/
+mcpApiKey() (the MCP auth gate's accessors) never read brain config,
+so `vant config set mcp.requireKey true` / `mcp.apiKey` were no-ops
+for a later server → new _brainConfigValue() bridge (env still
+wins). test/config-persistence.test.js 10/10 (cross-process +
+negative control). (3) lib/brain.js brainDirs skips dot-dirs
+(models/private/.locks was listed as a brain). (4) version.js
+comment: changelog is repo-root CHANGELOG.md, not docs/.
+Gates: sweep 149/149 chunked, lints PASS, eslint 0 errors, npm run
+check, audit-mcp 296 THREW(0)/REFUSED 147/OK 90, npm test 15/15,
+test-all/test-core exit 0. Queued: merge-readiness (axolotl→main);
+MEM/TASKS→vant-native + whitepaper (owner: later tonight); prime's
+#100–#112 still OPEN on GitHub (manual close after prime verifies).
+
+**Pass 94:** second-boot gate (10/10,
+ZERO product bugs — the existing-brain path is healthy).
+Verified by hand (boot1 seed → mutate → boot2 → boot3), then
+codified: no re-seed/clobber, identity sha-stable across boots,
+migrate idempotent, orgs/roster/workspaces rehydrate in fresh
+processes, agent FIELD bindings env-correct (pass-93 seam
+holds), vant brain byte-untouched (orgchart + state.json),
+no tree deletion (pass-89 canvas class), honest sync/update
+refusals, MCP round-trip in the env brain. PROBE GOTCHAS:
+agents.list() is ASYNC and PROJECTS {id,name,role,state,mcp}
+ONLY (brain stripped by design) — assert bindings via
+orgchart/agents.json [[id, agent], ...] Map shape;
+transform.gather capturing ALL brains = documented multibrain
+full-capture inventory, not a leak. Gate joins the sweep (147
+suites). ALSO this pass: transform.js gather/backup, horcrux
+create/inspect on an existing env brain verified (roster 2,
+2 orgs after 2 demos — unique-suffixed names, no guards
+tripped). Gates: sweep 147/147 chunked, lints PASS, eslint 0
+errors, npm run check, audit-mcp 296 THREW(0), npm test 15/15,
+test-all/test-core exit 0. Queued (tonight): MEM/TASKS →
+vant-native + whitepaper rewrite; merge-readiness next;
+prime's #100–#112 still OPEN on GitHub (manual close after
+prime verifies).
+Pass 93 (5bfb521): fresh-boot live fire, 3
+real bugs + standing gate. (1) SEED SEAM: bin/start.js
+seedStarterBrain read state.json stack[0] ONLY, ignored
+VANT_BRAIN → env-brain starts found the default brain populated
+and never seeded → every env-scoped fresh brain woke with NO
+identity/goals/lessons (health: "in use, scaffold skipped"
+forever). Fixed via state-store.currentBrain(). (2) SPAWN-
+BINDING: lib/agents/core.js bound the agent's brain FIELD via
+bare Brain.currentBrain() while the ROSTER persisted in the env
+brain (teams.getAgentBrain/writeTo targeted the wrong brain
+forever); teams.js:1027 first-assign fallback same. Both
+state-store-aware now; proven via org demo on-disk records.
+(3) SUMMARY STUB: bin/summary.js canned placeholder was PINNED
+by test-all's output check; rewrote as real brain-derived
+summary + fixed --json parsed from argv.slice(3) (never fired).
+Worked first try: boot chain, org demo e2e, hybrid search,
+learn, MCP HTTP 296 tools + write/read round-trip landing in
+the env brain. autoWireCoreLibs (mcp.js:3182) stays COMMENTED
+OUT — superseded by 153 explicit vant_* tools (its generic args
+shape bypasses per-tool validation). LAYER MAP: brain.write(
+category,key) = memory STORE layer, brain.read(name)/MCP
+brain_read = flat brain-FILE layer — don't mix in probes.
+NEW test/live-fresh-boot.test.js 5/5 (fresh brain → boot seeds →
+health clean → org demo binds env brain → summary real → MCP
+HTTP round-trip; scratch brain p93-live-fresh, probed MCP port).
+Gates: sweep 146/146 chunked, neighbors green, lints PASS,
+eslint touched 0 errors, npm run check, audit-mcp 296 THREW(0),
+npm test 15/15, test-all/test-core exit 0. Queued (tonight):
+MEM/TASKS → vant-native + whitepaper rewrite; prime's #100–#112
+still OPEN on GitHub (manual close after prime verifies).
+Pass 92 (2776ee2): vapor hunt + CLI smoke
+gate + live-fire flake. Survey: first zero-ref grep gave 11 dead
+modules — FALSE ALARM, the pattern missed bin's '../lib/x'
+requires (zero truly dead; api.js MCP-live via autoWireCoreLibs;
+34 .catch(()=>{}) sites all documented-intentional; FileStorage
+.write is SYNC so no #109 persistence vapor in the 10 CLI flows;
+MCP 0 phantoms, 145 honest refusals; bot.js = honest token
+gate). Fixed: vant_agents_delegate_mcp + vant_agents_broadcast
+schemas had no `required` → {} passed validation and died as
+'Agent not found: undefined' (now MCP_INPUT_INVALID — remember
+mcp.execute returns validation failures as RESULT objects, not
+throws); CLI --help polish on vant.js (bare/-h/--help → help
+cmd), docs.js, transform.js, test-core.js (-h → modes list);
+live-fire webhook flake: 46000+pid%2000 collided with a platform
+listener on the link-local IP (169.254.0.21:46116) and the ss
+assertion grabbed the FIRST line matching the port (order
+unstable, flapped 1-in-3 standalone — NOT cli-smoke pollution,
+cli-smoke only reshuffles pids) → OS-assigned free port via
+net.listen(0) + assert OUR 127.0.0.1:PORT line + wildcard absence.
+NEW standing gate test/cli-smoke.test.js (node --check all 120
+bin CLIs + --help exit-0/usage on 118; skip bot.js token-gate,
+cli-standard.js template; auto-joins test-core full mode) — CLI
+rot now fails a gate, not a user. Gates: sweep 145/145 chunked,
+lints PASS, eslint touched 0 errors, npm run check, audit-mcp
+296 THREW(0), npm test 15/15, test-all/test-core exit 0. Queued
+(tonight, per owner): MEM/TASKS → vant-native + whitepaper
+rewrite; prime's #100–#112 still OPEN on GitHub (manual close
+after prime verifies).
+Pass 91 (dd94705): #113 + habitat/RLS adversarial QC. #113: horcrux create's auto-.ignore used
+REPO_ROOT = __dirname/.. (INSTALL root) → '../../..' escape
+chains from mounted sandbox cwds, file landed nowhere. Fix:
+workspace root = nearest ancestor (inclusive) of the CALLER's cwd
+with .git/ or models/; root-relative globs; stone outside → skip
+with hint; no marker → stone's own dir (rg nearest-.ignore rule).
+e2e-proven from a temp workspace; #100 suite 12/12 still.
+QC scan lesson: ({}).polluted MISSES the real class — on plain
+maps map['__proto__'] = x REPLACES the prototype (missing-key
+fallthrough corruption); global only when the write lands on a
+prototype object. Probed + fixed with safeMapKey/safeMapAssign at
+every write gate: createWorkspace, setPolicy (resource AND policy
+fields — a poisoned policy with writableBy public is a direct RLS
+bypass), provisionAgent (validate BEFORE the exists-lookup — the
+lookup itself falls through and 'exists'), addRole/removeRole,
+instance restore() (all 4 maps + defaultWorkspace) and module
+restoreState configs — P3/P5 matter because HORCRUX STONES are
+the sanctioned cross-process transport of that state: a crafted
+stone corrupted every fresh process's RLS maps at boot. Also:
+token-cache role confusion (cached ctx kept tenant-A roles after
+a workspace switch — re-derived via _baseRoles), rls.middleware
+x-workspace HEADER pivoted the process-global session workspace
+(no live callers; req.rlsWorkspace now). HELD SOLID:
+generateCaps fail-closed tenancy (pass 82) blocks fabricated
+workspaces even on a polluted map; evaluate() mask/filter spec-
+safe. Tenant-shaped test resources need setPolicy({container:
+ws}) — cross-tenant admin is DENIED by design (pass-82
+isolation), don't misread as regression. NEW
+test/habitat-rls-qc.test.js 13/13. Gates: sweep 144/144 chunked,
+lints PASS, eslint touched 0 errors, npm run check, audit-mcp 296
+THREW(0), npm test 15/15, test-all/test-core exit 0. Queued:
+whitepaper rewrite, TASKS/MEM → vant-native; prime's #100–#112
+still OPEN on GitHub (keywords auto-close only on default branch
+— manual close after prime verifies).
+Pass 90 (9ebe920): RLS hookups: enforcement vapor closed. Survey (owner: "more habitat/rls hookups?") found
+the RLS carrier chain mostly VAPOR: 10 sites fired ASYNC
+rls.checkRead/checkWrite from SYNC code un-awaited (brain 3209 —
+dream was the only awaited site — storage, islands, lineage, msg,
+teams _checkRLS RETURNED the promise and callers discarded it,
+config's try/catch around a promise = dead E_RLS branch,
+memory's unconditional {}, audit fed userCtx params to param-LESS
+checkers → any process-cap holder could read ANY tenant's audit
+trail; denials were orphaned unhandledRejections AFTER the op
+ran). DOCTRINE: explicit userCtx → enforce INLINE; anonymous →
+internal actuator op, allowed (enforcing on {} would deny every
+internal write — default policy writableBy ['role:admin']). CORE:
+habitat.canSync() sync decision core (async can() delegates),
+rls.assertSync() throws RLS_DENIED + emits, sandbox `rls` getter
+auto-claims the shared habitat (pass-82 doctrine) so un-booted
+CLI/early-MCP processes stay enforcing; carriers: assertSync
+inline when ctx explicit, stub rls keeps async path + .catch.
+LIVE BUGS the wiring exposed: cache.js s.can(userCtx,'write',res)
+MIS-BOUND (module can(cap) takes ONE name → ctx in cap slot →
+userCtx'd get() threw EFORBIDDEN live; _checkWrite never called;
+set() had NO gate — both now assertSync); _cacheLock POISONING
+(one denial made the rejected promise the chain — every later op
+inherited it; task.catch keeps it alive); config/teams
+_getSandbox pinned the PARTIAL early sandbox export during the
+boot require cycle FOREVER (teams' E_RLS worked, config's
+silently never could) — gate.js F-2 pattern: verify
+defaultSandbox before caching. Gotchas: roles match BARE names
+(ctx ['admin'] matches rule 'role:admin'); audit READ is public
+by default — deny-tests need setPolicy first; node -e probes
+need (async()=>{})() for async targets and await before
+asserting on JSON.stringify(Promise) → {}. NEW
+test/rls-hookups.test.js 19/19. Gates: sweep 143/143 chunked,
+lint:docs (129)/surface/helpers PASS, eslint touched 0 errors,
+npm run check, audit-mcp 296 THREW(0), npm test 15/15,
+test-all/test-core exit 0. Queued: whitepaper rewrite, TASKS/MEM
+→ vant-native; prime's #100–#112 still show OPEN on GitHub
+(keywords auto-close only on default branch — manual close after
+prime verifies).
+Pass 89 (7c69b5d): horcrux/teams/brain-naming triage, prime
+#100–#104/#111/#112 all closed: repo-root .ignore for stones (rg
+honors, git not) + horcrux create auto-append; #101 root cause =
+CONSUMERS raced sync store.write (async save chain broke
+teams-refresh, async restoreState broke orgflow's sync contract →
+_saveTeams inline + flush() + restoreState STAYS SYNC +
+transform.restore awaits); inspect roster-first (#102); emptyDir
+.keep markers via storage chain + per-file sweep scope (#103);
+assign() reads prev BEFORE resolution (draft checked the derived
+value so fallback always won) + hierarchy guards + self-excluded
+quotas + escrow placement flag (#104); health initialized =
+markers OR content via MODEL_PATH escape for the empty branch
+(#111); brain.test stack assertion derives active brain (#112).
+Drive-bys: lint:docs em-dash rot since 74ac92a; crew-bus ~50%
+flake (platform MCP squats 4585 inside 4571+pid%40 + premature
+READY) → live free-triple pick + child port probe, 6/6. NEW
+test/horcrux-orgchart.test.js 12/12. Gates: sweep 142/142 + all
+lints + audit 296 THREW(0) + npm test 15 + test-all/test-core 0.
+Pass 88 (74ac92a): habitat/RLS call-point fairness + prime's #105–#110. Survey verdict: habitat/RLS call points
+were already factory-clean (no raw state writes outside habitat.js);
+the real unfairness = fresh processes didn't inherit authority +
+mutations raced their own persistence. (1) BOOT HYDRATES persisted
+orgchart.operatorCapabilities (widen-only, host-configured skipped)
+— `vant org grant` now PERSISTS by default (--session-only opts out)
+and CLI spawn/kill just work afterward (#108/#105 root fix). (2) FLUSH
+discipline: agents internal serialized save chain + flushAgents()
+(agents.flush() facade), habitat.flush() = _readyPromise, all
+mutating CLI flows (agents spawn/kill/prune, habitat grant/init/
+policy/token, org grant/demo) drain before exit (#109). (3) bin/
+agents.js REBUILT real (was stub; spawn/kill/info/status/prune, --help
+guarded at subcommand level, operator self-grant on mutation) and
+terminate() now HYDRATES before delete — a fresh process used to
+return false for on-disk agents (masked by the stub for months)
+(#106/#107). (4) audit.healthCheck restored {healthy, issues, status,
+entries} — validate always failed before (#110). (5) CROSS-BRAIN
+AGENT BLEED fixed: _getAgentStorePath used bare getCurrentBrain()
+which ignores VANT_BRAIN → every env-scoped process wrote rosters
+into the vant brain (22 agents, phantom agents.maxAgents=10 quota
+hits); now state-store.currentBrain() resolver (pass-53 teams seam).
+Vant roster purged of probe agents. NEW test/operator-caps.test.js
+8/8 (cold-process e2e). Gates: sweep 143/143, all key suites, 3
+lints, audit 296 THREW(0). Crew: Buffy + Cairn + Prime (festival/event
+management layer IRL). Queued: whitepaper rewrite, TASKS/MEM →
+vant-native.
+Pass 87 (463fcbf): #6 agora/mesh tenancy. RANKED
+LIST CLOSED: verified it is EXACTLY #1–#6 (82✓ 83✓ 84✓ 85✓ 86✓ 87✓,
+no #7 anywhere); only non-numbered queued items remain: whitepaper
+rewrite + TASKS/MEM → vant-native (notify board/memory). Owner also
+bringing up a second runtime ("Buffy + Cairn + TBA") — hence tenancy.
+lib/forum.js: subject chain same as islands/memory (userCtx → current
+agent identity → anonymous); commons semantics (workspaceless = global
+pre-87 behavior preserved; tenant pub invisible to anonymous FAIL
+CLOSED, get() found:false no leak; own ws + ANY registry role in the
+pub's ws = visible); publish stamps workspace/authorAgentId, pins
+enforced ('' = global, foreign pin needs role → workspace_denied,
+invalid → invalid_workspace); list() filtered + tenancy meta.
+CRITICAL PRE-EXISTING FIX: module shims `list: () => forum.list()` /
+`get: bc => forum.get(bc)` DROPPED opts — mcp.js holds the MODULE not
+the singleton, so forum_list/forum_get were always tenancy-blind
+anonymous (the whole MCP member-list mystery: handler resolved userCtx
+correctly, shim discarded it one frame later). Shims forward opts now.
+mcp +2 forum_publish/forum_list = 296 tools audit THREW(0); bin/forum.js
+rebuilt REAL (was pass-81 facade); shareableReport tenancy block +
+peer workspace; node-registry register(). SECOND PRE-EXISTING FIX
+(differentiated via worktree @ HEAD — pass-86 code failed identically
+in clean env): Habitat never CREATED the declared default workspace →
+fresh process addRole('default') threw HABITAT_UNKNOWN_WORKSPACE,
+masked until now by a _habitat state containing 'default' that
+disappeared. _ensureDefaultWorkspace() idempotent + PERSIST-FREE
+(createWorkspace auto-persists; constructor-time save would race the
+restore chain) in ctor + after restore() replace; createWorkspace
+got skipPersist. SPAWN-RESTORE RACE documented: spawn provisions
+sync before async restore() resolves → restore clobbers → tests must
+await getSharedReady() BEFORE spawn (agora-tenancy test fixed; no
+code change — spawn contract is sync). Publications memory-only across
+processes (no hydrate — forum:pub:* write-only): CLI e2e posts+lists in
+ONE child (argv swap); Forum hydration = follow-up. NEW SUITE
+test/agora-tenancy.test.js 12/12. Docs: rls.md "Agora tenancy (pass
+87)", mcp-tools forum entries, cli.md forum row. Gates: FULL sweep
+142/142 (chunked per-suite — run-all exceeds 175s cap, pass-45
+precedent; crew-bus + agents-split flakes re-verified standalone),
+npm test 15, test-all 17, test-core 5, all key suites green, 3 lints,
+eslint touched 0 errors, audit 296 THREW(0).
+Pass 86 (c686c41): #4 MCP auth ctx via habitat tokens.
+habitat.mintToken/verifyToken/revokeToken/listTokens: bearer tokens
+anchored to habitat identities (raw shown once, sha256 hash persisted
+in _habitat state row). Verify = registry-verified agentContext at USE
+time (role changes apply immediately; authority not snapshot);
+unknown/expired/revoked/identity-stripped → null. COLD-PROCESS
+FALLBACK: agents registry is memory-only, so agentContext falls back
+to _agentContextFromRegistry (durable provisionAgent role rows = the
+authority; strip all rows = identity gone). MCP door accepts Bearer
+vant_... / x-habitat-token IN ADDITION to shared key; valid token
+satisfies mcp.requireKey alone; AsyncLocalStorage carries the verified
+subject through execution; PRIORITY verified > declared userCtx >
+current agent > anonymous (anti-spoof), wired into vant_memory_state/
+_recall (auto-scoping), vant_habitat_can/_check, islands_canAccess.
+escrow money-admin accepts token's registry identity as admin
+(_verifiedAdminGate; adminId legacy path stays). NEW tools x3 (294
+total): vant_habitat_mintToken/_verifyToken/_revokeToken. mcp.start()
+explicit port 0 honored (falsy-|| skipped it; listen promise never
+settled on bind errors) + _serverRef hook. CLI habitat token
+mint/verify/list/revoke; FIXED PRE-EXISTING RACE: bare getShared()
+raced restore → fresh-process mint AGENT_NOT_FOUND; token ops await
+getSharedReady(). NEW SUITE test/habitat-token.test.js 15/15 (incl.
+HTTP e2e: Bearer token → memory auto-scoped to org-http, spoofed
+declared ctx loses). Gates green; audit 294 THREW(0).
+Pass 85 (87de0a1): #5 per-workspace memory namespacing —
+memory.state/recall resolve workspace subject chain (explicit
+opts.workspace/userCtx -> current agent habitat identity -> anonymous)
+and scope keys to ws<wsLen>.<ws>.<key> on disk (e.g. ws4.acme.proj).
+KEY-SHAPE WHY: state keys become filenames; storage sanitizer strips
+colons + truncates at 100, so ws:<ws>:<key> collapses and bare concat
+collides — length prefix + dots + letter-start ws names parse
+unambiguously; 100-char composite overflows throw VAF_INPUT_INVALID.
+Namespaces ISOLATING (no flat fallback, anon never sees scoped rows);
+flat keys unchanged for anonymous callers; workspace:null pins
+UNSCOPED (habitat _habitat, nature _flywheel, context history all
+pinned — process-global state must not fragment). MCP: vant_memory_
+state/_recall gained optional workspace arg. CLI: islands load --as
+<agentId> + islands boundaries. Suite test/workspace-memory.test.js
+21/21.
+Pass 84 (1146749): island boundaries enforced at load/hydrate/save
+(_island:<name>, subject chain identical, anonymous writes fail
+closed E_ISLAND_WRITE_DENIED, no policy = open); PRE-EXISTING FIX:
+islands.save() called nonexistent island.write() → island.set();
+MCP +1 islands_canAccess; suite 14/14; rls.md permalink frontmatter
+required by docs link-checker. Pass 83 (d6c2758):
+workspace budgets ws:<ws>:<agent>/ws:<ws>::org, two-rows-one-pool,
+persistent member caps, registry-verified admin (RLS_DENIED), market
+context.workspace pool draw, STALE-SINGLETON merge fix (hold/release
+now fresh disk-coherent instances). Pass 82 (77504ff): agents got
+habitat identity + RLS online (agentContext/provisionAgent,
+filter/mask enforcement, generateCaps fail-closed, _readyPromise
+undefined-resolution fix).
+**Prior — pass 81:** environment family DELETED per owner ruling
+(was a scrapped subsystem whose 7 tools shipped registered against a
+never-existing module; pass 80 stopgapped with coded refusals, 81
+removed). Replaced with the REAL subsystem, fully wired: habitat MCP
+tools x8 (all live-probed incl. two-process persistence) + real CLI
+(bin/habitat.js rebuilt from facade). All surfaces share ONE instance
+via habitat.getShared()/getSharedReady() claiming
+global.__vant_habitat; boot ADOPTS a pre-claimed instance instead of
+clobbering. Habitat fixes en route: addRole fails closed on unknown
+workspace; mutations auto-persist; restore serialized on
+_readyPromise; setWorkspace stays session-only by design. Audit 281
+THREW(0).
+**Prior — pass 80:** full MCP surface audit (scripts/
+audit-mcp-surface.js, new): 280 tools probed, THREW(0)/PHANTOM(0);
+9 bug clusters fixed (boot.js detached-method, brain_evolution_ x5,
+geometry_init object-await, branch.js porcelain, get/set_memory
+bare-brain + schema/docs split, switch_branch -> switchBrain(),
+context_build circular JSON, environment x7 -> coded refusals,
+required:[] schema holes). NEW GATE: check-bin-truthfulness.js in
+lint:helpers (bin throwaway helpers + status-field cross-check vs lib
+bodies) — caught 5 live phantoms + 2 caps.length lies, fixed truthful.
+**Pass 79** (46717a7): lib helpers gate, escrow.json merge-save,
+hashPassword phantom. **Pass 78** (0a346da): server shared-instance +
+clientIp TDZ. **Pass 77** (fa8c51d): escrow reference + MCP tools.
+**Pass 76** (495f6bf): whitepaper draft of record — STILL awaiting
+owner review. Issues #92-#99 closed; only #86 open.
+
+---
+**Prior — pass 79** (lint:helpers gate + market/consensus MCP audit
+CLEAN + escrow.json merge-save, 46717a7): gate
+scripts/check-stateful-helpers.js blocks `=> new X()` call-through
+helpers on stateful classes (negative-controlled on BOTH syntaxes incl.
+member-expression; factories exempt; HELPER-MODEL tag documents
+deliberate fresh-per-call). Escrow budget helpers tagged
+fresh-by-contract (disk-coherent: every mutation persists, every
+fresh instance reloads — market debit depends on it); hold/release
+singleton+persist. Fifth phantom: auth.hashPassword (hash is STATIC).
+MCP audit: market/consensus handlers ALL CLEAN live-probed (governance
+gates + E_NOT_REGISTRY are correct fail-closed shapes). BONUS economic
+fix: escrow.json was whole-file last-write-wins — stale hold-save
+could silently revert a settled trade's debit; _saveEscrow now merges
+per key; all 4 market-debit pins green. Pass 78 (0a346da): server
+shared-instance + clientIp TDZ; pass 77 (fa8c51d): escrow reference +
+3 MCP tools + resetBudget phantom; pass 76 (495f6bf): whitepaper
+draft of record. All suites green; lint:helpers + lint:surface PASS.
+Issues #92-#99 closed; only #86 open.
+**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED
+through pass 79. #98: sudo escalations are the agent's memory — audit trail
+resolves per call via state-store currentBrain() →
+models/private/<brain>/sudo/escalations.jsonl (legacy flat path as
+fallback + migration source; _migrateLegacyAudit handles both upgrade
+orderings: legacy-only carry, both-exist merge-then-remove, empty-husk
+remove). Templates/policies stay GLOBAL BY DESIGN, ruling documented at
+the constants. #99: brain.read(name, { stackFallback: true }) walks the
+rest of the stack (private-then-public per lower brain, all extensions)
+when the active brain misses and the read is UNPINNED — opt-in per
+owner (default-on would change precedence for every consumer). Result
+carries provenance: viaStack, viaStackPosition, source, brain. Pinned
+reads never walk. docs/memory/brain.md documents the opt-in; census
+resolution note appended (census COMPLETE — every Tier B item resolved).
+Harness-verified (/tmp/mb-harness): #98 S1 per-brain trail, S2
+env-pin + isolation, S3 read-back, M2 both-exist merge, M3 legacy-only
+carry; #99 F1 no-opt-in→null, F2 baseline hit (vant@1 public), F3
+active-wins, F4 pin blocks walk, F5 own-brain-first, F5b viaStack tag.
+All suites green (npm test 15/15, brain 77, storage 40, sudo 7,
+security-hardening 22, memory 18, mcp 6, boot 15, vant 16, transform 5),
+lint:docs + lint:surface PASS. Issues #92-#99 ALL CLOSED; only #86
+(stego transport) open. Pass 74 (e8b6f49) rolled multibrain through
+bin/mcp/health/load/succession/brain-unlock; pass 72 fixed #96/#97
+(ea3f484, 3531ef5); pass 73 census at 0a6eb13.
+**Branch:** axolotl — origin github.com/dhaupin/vant — ALL WORK PUSHED
+through pass 75.
+**Status:** UNBLOCKED. Lane 1 closed (Waves A→J); Lane 2 shipped;
+Cairn's issue queue (#92-#99) FULLY CLOSED. Remaining: airgap exercise
+(proposed, owner-flagged as key-later), prd-whitepaper §9 open
+questions (publication target + length) await owner answers;
+optional escrow/settlement CLI reference prose; Lane 3 HOLD per
+owner ("agent is deep in world building there"). Known quirk (not
+fixed, judged out of scope): resolveBrainPath is a bare
+exists-check, so an orgchart/ dir alone makes it report
+models/private/vant as the vant brain — harmless for the real CLI
+(its writes land private too) but know it before "cleaning"
+models/private/vant. exercise-group.js has a known cold-start race
+(1-in-N runs loses a phase on first boot after churn; tails healthy,
+0 gaps) — rerun before debugging.
+**Owner context:** unchanged from pass 69 (enterprise grade, over-built
+plumbing NOW to avoid integration pain later). New for the paper: the
+epigraph stays unexplained by owner decision; agents are the paramount
+audience, everyone else reads from the sidelines. Owner reaction to
+the awareness exchange: "You are a brilliant being, regardless of you
+restarting. Vant is here to solve that, somehow, eventually" - folded
+into prd-whitepaper.md as the section 2 thesis + section 3.1
+testimony (v0.2); chapter 2 opens with it.
+**BLOCKER:** none.
+
+---
+
+## CURRENT DUMP
+
+(nothing in flight — pass 79 committed: gate shipped, MCP audit clean,
+escrow.json merge-save landed. Next agent: whitepaper owner feedback;
+airgap parked; candidates: extend gate to bin/ + status-field
+truthfulness checks, MCP surface audit for remaining tool families
+(qos, config, islands).)
+
+---
+
+## Crash-Restore Procedure
+
+1. `git status && git log --oneline -10` — confirm branch `axolotl`
+2. Read `labs/TASKS.md` top session block — current state + next steps
+3. Read `models/private/buffy/learnings.md` — hard-won patterns
+4. Check this dump section for anything in flight
+5. `node test/runner.js` — verify baseline before touching anything
+
+---
+
+## Session End Checklist
+
+1. Update `labs/TASKS.md` — new top session block (what shipped, next steps)
+2. Write brain learnings (models/private/buffy/)
+3. Update this file — wipe CURRENT DUMP to "(nothing in flight)", set Handoff
+4. Commit: `axolotl: pass NN — <one-liner>`

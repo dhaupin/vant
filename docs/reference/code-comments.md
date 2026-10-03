@@ -1,9 +1,9 @@
 ---
 version: 0.8.6
-permalink: /code-comments
+permalink: /reference/code-comments
 layout: default
 title: Code Comments
-nav_order: 91
+nav_order: 121
 ---
 # Code Comments
 
@@ -78,7 +78,7 @@ Use for:
 
 ### Don't
 
-- Use em dashes (—) - use short dashes (-)
+- Use em dashes (,) - use short dashes (-)
 - Use AI clichés (leverage, unlock, empower, seamless)
 - Restate obvious code
 - Use passive voice
@@ -134,8 +134,8 @@ function getUser(name) {
 
 - [ ] Header comment on every file
 - [ ] @param on every function
-- [ ] @returns on every function  
+- [ ] @returns on every function
 - [ ] SECURITY section if handling credentials
 - [ ] No stale TODO/FIXME
 - [ ] No AI clichés
-- [ ] Short dashes (- not —)
+- [ ] Short dashes (- not ,)

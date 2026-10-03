@@ -18,6 +18,26 @@ const path = require('path');
 const secret = require('../lib/secret');
 const stego = require('../lib/stego');
 
+// (pass 74, multibrain census) Default horcrux location resolves through
+// the ACTIVE brain's public tree + the boot-dir scan, not a hardcoded
+// models/public/vant path that breaks if the default brain is renamed.
+// Falls back to the flat legacy path for pre-multibrain installs.
+function _defaultHorcrux() {
+    try {
+        const brain = require('../lib/brain');
+        const publicRoot = brain.getPublicPath();
+        const bootDir = path.join(publicRoot, 'boot');
+        if (fs.existsSync(bootDir)) {
+            const hits = fs.readdirSync(bootDir)
+                .filter(f => f.endsWith('.svg') && /-p_/.test(f))
+                .sort();
+            if (hits.length) return path.join(bootDir, hits[0]);
+        }
+        if (fs.existsSync(publicRoot)) return path.join(publicRoot, 'boot');
+    } catch (e) { /* fall through to legacy default */ }
+    return 'models/public/vant/boot/axolotl-p_axolotl2026.svg';
+}
+
 const args = process.argv.slice(2);
 
 async function main() {
@@ -29,7 +49,7 @@ async function main() {
     }
     
     if (args.includes('--clear') || args.includes('-c')) {
-        secret.clear('brain');
+        await secret.clear('brain');
         console.log('Brain password cleared');
         return;
     }
@@ -53,7 +73,7 @@ Uses lib/secret for password management:
     }
     
     if (args.includes('--info')) {
-        const svgPath = args[1] || 'hypha-brain.svg';
+        const svgPath = args[1] || _defaultHorcrux();
         if (!fs.existsSync(svgPath)) {
             console.log('File not found:', svgPath);
             return;
@@ -69,7 +89,7 @@ Uses lib/secret for password management:
         return;
     }
     
-    const svgFile = args[0] || 'hypha-brain.svg';
+    const svgFile = args[0] || _defaultHorcrux();
     if (!fs.existsSync(svgFile)) {
         console.error('File not found:', svgFile);
         process.exit(1);
@@ -93,7 +113,7 @@ Uses lib/secret for password management:
         
         if (result.error) {
             console.error('Decryption failed:', result.error);
-            secret.clear('brain');
+            await secret.clear('brain');
             process.exit(1);
         }
         
@@ -105,7 +125,7 @@ Uses lib/secret for password management:
         
     } catch (e) {
         console.error('Error:', e.message);
-        secret.clear('brain');
+        await secret.clear('brain');
         process.exit(1);
     }
 }

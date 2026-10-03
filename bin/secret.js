@@ -53,18 +53,18 @@ async function main() {
             console.error('Usage: vant secret set <type> <value>');
             process.exit(1);
         }
-        secret.set(type, val);
+        await secret.set(type, val);
         console.log(`${type}: set`);
         return;
     }
     
     if (subcmd === 'clear') {
         if (args[1] === '--all') {
-            secret.clearAll();
+            await secret.clearAll();
             console.log('All secrets cleared');
         } else {
             const type = args[1] || 'brain';
-            secret.clear(type);
+            await secret.clear(type);
             console.log(`${type}: cleared`);
         }
         return;

@@ -121,6 +121,18 @@ test('api has isOperationAllowed function', () => {
     return { success: typeof api.isOperationAllowed === 'function' };
 });
 
+// Stack tests
+test('api has getStackAPIStatus function', () => {
+    const api = require(path.join(ROOT, 'lib', 'api'));
+    return { success: typeof api.getStackAPIStatus === 'function' };
+});
+
+test('getStackAPIStatus returns object with source stack', () => {
+    const api = require(path.join(ROOT, 'lib', 'api'));
+    const result = api.getStackAPIStatus();
+    return { success: result && result.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

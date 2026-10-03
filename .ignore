@@ -1,0 +1,7 @@
+# horcrux stones — vant stego horcruxes are ONE 800 KB+ line of base64
+# ciphertext; any line-oriented search match echoes the whole wall and
+# starves the result budget (prime #100). ripgrep-family tools honor this
+# file, git does NOT — the stones stay tracked and committed for disaster
+# recovery. Use `vant horcrux inspect <stone>` to see contents; never grep.
+models/public/*/boot/*.svg
+horcrux/*.svg
