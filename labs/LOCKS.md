@@ -172,3 +172,175 @@ requires, 10 lease requires, 0 leaks.
 
 New `test/lock.test.js` pins the primitive (reason, failMode, sync fn,
 mutex poison-proofing, pathFor naming/sanitizing).
+
+---
+
+# 8. Lock System PRD — full-system, multi-stage
+
+> Owner brief: "walk back through, make sure the lock garden we planted is
+> fully seeded, watered, and ready to grow. Everything needs to be wired up,
+> and we need to look for stuff that should be wired. … ensure both types of
+> lock are proper separation of concern. … document all."
+>
+> This PRD is the forward plan. Sections 1–7 are the history (inventory →
+> proposal → rename → §4 execution). Sections 8.x are the work still to do,
+> broken into stages **S1–S6** so each can be hit in detail. A stage is only
+> "done" when its acceptance criteria AND the §8.8 gates are green.
+
+## 8.1 System model (what exists today)
+
+Two **lock** types, deliberately separate (separation of concern):
+
+| | `lib/brain-lock.js` | `lib/lock.js` |
+|---|---|---|
+| Semantics | authorization **lease** — *who may write to this brain* | cross-process **mutex** — *serialize a whole-snapshot write* |
+| Lifetime | long (TTL default 1h) | short (hold across one write) |
+| Identity | token + agentId, rate-guarded | none (advisory file) |
+| Root | `models/private/.locks/.lock-<brain>.json` | `models/private/<brain>/.locks/<kind>[__<id>].lock` |
+| Public API | `acquireBrainLock`/`releaseBrainLock`/`brainLockStatus`/`forceReleaseBrainLock` | `acquire`/`release`/`withLock` + `mutex()` + `pathFor()` |
+| Used by | `bin/lock.js` (`vant lock`), MCP `vant_lock`, sandbox, shell, vant, tmp, security, boot | state-store, market, teams, agents, habitat, consensus/cache/canvas (in-proc) |
+
+Three **non-lock serializers** that must NOT be confused with either (see §8.3):
+
+* `lock.mutex()` — in-process promise-chain mutual exclusion (cache/canvas/consensus).
+* in-process **save chains** — `teams._teamsSaveChain`, `agents._saveChain` (same-process write ordering, *not* cross-process safe).
+* `lib/recursion.js` `guard` — reentrancy/depth guard, **not** a lock.
+
+## 8.2 Walk-back audit — findings (grounded, with evidence)
+
+| # | Finding | Evidence | Severity |
+|---|---------|----------|----------|
+| F1 | Lease "rate-limited 10/min" is **declared but never wired**; `_checkRateLimit` has no caller AND references an undefined `errors` (would `ReferenceError`) | `lib/brain-lock.js:128-136`; no `_checkRateLimit(` caller; no `errors` require | **High** |
+| F2 | `brain-lock` exports **no `getLayerStatus`** → `vant boot` reports a hardcoded `{name:'Lock',enabled:true}` while every peer layer reports truth | `lib/boot.js:529`; compare `lib/qos.js`, `lib/escrow.js`, `lib/sandbox.js` | Medium |
+| F3 | `listStackLocks` spreads brain-name **strings** (`{...'abc'}` → `{0:'a',…}`) → junk; `listBrainLocks(options)` ignores `options` | `lib/brain-lock.js:104`, `:498-508` | Medium |
+| F4 | `vant lock release` checks **truthiness** of an always-object result → prints "Lock released" and **deletes the token** even on a denied release | `bin/lock.js:86-92` vs `releaseBrainLock` returning `{success,message}` | **High** |
+| F5 | `getState().lockStatus` returns the **function reference**, not the status | `lib/vant.js:856` | Low |
+| F6 | `lib/tmp.js` takes the lease through an **implicit `global._lock`**; if a caller never set it the lock is silently skipped | `lib/tmp.js:169,190,222,232`; only `bin/tmp.js` (and shell/sandbox) set `global._lock` | Medium |
+| F7 | `withLock` (the shared RAII helper) is used by **market only**; teams/agents/habitat/state-store hand-roll acquire/try/finally | `lib/market.js:714` vs `teams:500`, `agents:258`, `habitat:83`, `state-store:175` | Medium (DRY) |
+| F8 | **Two `.locks` roots** (lease `models/private/.locks/`, mutex `models/private/<brain>/.locks/`) — boundary is real but undocumented | `lib/brain-lock.js:44,122` vs `lib/lock.js pathFor` | Medium (doc) |
+| F9 | `brain-lock` **reimplements** coordination (TTL/backoff/stale) instead of sharing `lib/lock.js` primitives | `lib/brain-lock.js` vs LOCKS.md §3.1 | Low |
+| F10 | A **third** serializer family — in-process save chains — is unclassified | `lib/teams.js:482`, `lib/agents/internal.js:248` | Low |
+| F11 | `lib/recursion.js` `guard` is **not a lock** but sits in the same conceptual space; must be explicitly excluded | `lib/recursion.js:223` | Doc |
+| F12 | A long tail of **whole-snapshot writers bypass the mutex** (the pass-95/96/98 bug class) — needs per-module triage | §8.5 | **High (triage)** |
+| F13 | **No `docs/` page** documents the lock system | `docs/` has no lock page | Doc |
+
+## 8.3 Separation-of-concern contract (to be asserted, not just described)
+
+1. **Lease answers "who", mutex answers "not-at-the-same-time".** A module uses
+   the lease to gate an *authorized writer*, the mutex to make one *snapshot
+   write* atomic across processes. Neither substitutes for the other.
+2. **Lease ≠ mutex internally.** The lease must not be used to serialize a
+   state write; the mutex must never carry token/agent/authorization meaning.
+3. **Cross-process vs in-process is explicit.** `lock.acquire`/`withLock` are
+   cross-process. `lock.mutex()` is in-process only. Save chains are in-process
+   ordering only and must never be described as "locking".
+4. **`guard` (recursion) is out of scope** — it is a depth/reentrancy guard.
+5. **One mutex root, one lease root**, both documented in §8.1 and locked in
+   by `scripts/audit-locks.js`.
+
+## 8.4 Wire-up matrix ("stuff that should be wired")
+
+| Seam | Current | Target | Stage |
+|------|---------|--------|-------|
+| Lease rate limit | dead + broken (F1) | wired, correct error, tested (or the claim removed) | S1 |
+| Boot `lock` layer status | hardcoded fallback (F2) | real `getLayerStatus()` | S1 |
+| Stack lock listing | spreads strings (F3) | real rows `{brain,agentId,valid,age,…}` | S1 |
+| `vant lock release` | false success + token wipe (F4) | honours `result.success` | S1 |
+| `getState().lockStatus` | function ref (F5) | live status object | S1 |
+| `tmp` locking | implicit `global._lock` (F6) | direct `require('./brain-lock')`, no global | S3 |
+| Health surface | absent | lock status in `health.getStackHealthStatus` | S3 |
+| MCP | `vant_lock` only | `vant_lock` reports stack status honestly | S3 |
+| Snapshot writers | ad-hoc acquire (F7) | `withLock` where RAII fits | S4 |
+| Unguarded writers | unaudited (F12) | triaged (§8.5) + guarded/merged or explicitly accepted | S5 |
+
+## 8.5 Unguarded whole-snapshot writer triage (F12)
+
+These write a whole in-memory snapshot and are **not** on the mutex path. Each
+needs a per-module decision: **(a)** guard with `lock.withLock` + adopt-on-hydrate
+merge, **(b)** accept because it is single-writer/append-only, or **(c)** merge
+on read. Candidate list (from a `store.write(...JSON.stringify...)` sweep):
+`audit.js` (ledger + rotate), `citations.js`, `sync.js` (states/privacy),
+`skills.js` (manifest), `succession.js` (config + `.ledger.json`),
+`auth.js` (lockout), `config.js`, `islands.js` (manifest), `vaf.js` (blocked),
+`migrations.js`, `mcp.js` (insights). Record each decision inline in this doc
+as S5 progresses.
+
+## 8.6 Stages
+
+### S1 — Truth-up the lease (`lib/brain-lock.js`)  · fixes F1, F2, F3, F4, F5
+- **Changes:** wire the rate limit correctly (require `./error`; call
+  `_checkRateLimit` in `acquireBrainLock`; add a test that the 11th acquire in
+  a window raises the coded error) OR remove the dead claim plus its constant;
+  add `getLayerStatus()`; fix `listStackLocks` to emit real rows and
+  `listBrainLocks` to be honest about its args; `bin/lock.js` release honours
+  `result.success`; `getState().lockStatus` returns data.
+- **Acceptance:** a test drives >10 acquires and asserts the coded error; a test
+  asserts `listStackLocks()` rows have `{brain, agentId, valid}`; `bin/lock.js
+  release` with a wrong token exits non-zero and keeps the token file; `boot`
+  layer status for `lock` is not the hardcoded fallback.
+
+### S2 — Separation-of-concern contract  · fixes F8, F9, F10, F11
+- **Changes:** write §8.3 into the code as headers + a `labs/` note; decide and
+  document the two roots; classify save chains and `guard` (rename comments,
+  not symbols, unless a rename is cheap); optionally have the lease reuse
+  `lock.pathFor`-style helpers without taking mutex semantics.
+- **Acceptance:** every lock-ish symbol in `lib/` is either in the §8.1 table or
+  explicitly listed as a non-lock; `scripts/audit-locks.js` asserts the two-root
+  invariant and that `guard`/save-chains are not lock files.
+
+### S3 — Complete the wire-up  · fixes F6, F2-health, F4-CLI, MCP
+- **Changes:** `tmp` requires `brain-lock` directly (drop `global._lock`); add
+  lock status to `health.getStackHealthStatus`; make MCP `vant_lock` and
+  `vant lock --help|--status` report stack status; ensure `boot` init surfaces
+  the layer.
+- **Acceptance:** `vant health` shows lock state; `tmp` works with no global set.
+
+### S4 — Migrate hand-rolled acquire/release onto `withLock`  · fixes F7
+- **Changes:** convert `state-store.persistMerged`, `teams._saveTeams`,
+  `agents._saveAgents`, `habitat.save` to `lock.withLock(path, fn, {failMode})`
+  preserving the fail-closed posture and the merge-under-lock atomicity.
+- **Acceptance:** all crossprocess suites stay green; the fail-closed gates in
+  `test/lock-failclosed.test.js` stay green; no behaviour change except DRY.
+
+### S5 — Unguarded-writer triage  · fixes F12
+- **Changes:** work §8.5; implement (a)/(b)/(c) per module with tests for any
+  that adopt a guard. Record the decision matrix in this doc.
+- **Acceptance:** each §8.5 module has an explicit decision + test or a written
+  "accept because…".
+
+### S6 — Documentation  · fixes F13 and all
+- **Deliverables:** `docs/operations/locks.md` (the two types, roots, failure
+  postures, examples), `docs/reference/locks.md` + MCP reference entry for
+  `vant_lock`, README pointer, refreshed `ROADMAP.md` lock lines (557/599/606),
+  and accurate module docstrings.
+- **Acceptance:** `npm run lint:docs` green; docs describe the shipped behaviour
+  (no aspirational claims like the old rate limit).
+
+## 8.7 Definition of done
+
+All of: §8.2 findings F1–F13 closed or consciously accepted; §8.3 asserted by
+`scripts/audit-locks.js`; §8.4/§8.6 stages complete; §8.8 gates green; docs
+shipped. State is captured by the tracker below.
+
+## 8.8 Gates (every stage)
+
+sweep chunked (all `test/*.test.js`) · `lint:docs`/`lint:surface`/`lint:helpers`/
+`lint:locks` · `npm run check` · `npx eslint <touched>` (0 errors) · `npm test`
+· `test-all` · `test-core` · `audit-mcp` (THREW 0 / PHANTOM 0) · zero leaked
+locks · scratch brains wiped.
+
+## 8.9 Non-goals / risks
+
+- Not redesigning the lease into the mutex or vice-versa (§8.3 keeps them apart).
+- S5 may conclude some writers stay unguarded — that is a valid, documented outcome.
+- Renames are avoided unless they cheaply reduce confusion; behaviour changes
+  are gated behind the fail-closed posture already shipped.
+
+## 8.10 Stage tracker
+
+- [ ] S1 — Truth-up the lease (F1–F5)
+- [ ] S2 — Separation-of-concern contract (F8–F11)
+- [ ] S3 — Complete the wire-up (F6, health, MCP)
+- [ ] S4 — Migrate to `withLock` (F7)
+- [ ] S5 — Unguarded-writer triage (F12)
+- [ ] S6 — Documentation (F13)

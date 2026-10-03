@@ -2,7 +2,37 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-03  
-**Session:** Pass 103 — locks §4 + QC (fail-closed gates, audit hardening)
+**Session:** Pass 104 — lock system PRD (walk-back audit → S1–S6 stages)
+
+---
+
+## Session (2026-10-03 — pass 104: lock-system walk-back audit + full PRD)
+
+Owner: walk back through the lock system, find what should be wired, verify
+separation of concern, document all — as a multi-stage plan in labs/LOCKS.md.
+
+**Delivered:** `labs/LOCKS.md` §8 — a full-system PRD with a grounded
+walk-back audit (13 findings), a separation-of-concern contract, a wire-up
+matrix, an unguarded-writer triage list, and stages **S1–S6** with acceptance
+criteria + gates.
+
+**High-severity findings (evidence in §8.2):**
+- F1: `brain-lock` rate limit is **declared but never wired**, and its
+  `_checkRateLimit` references an undefined `errors` (would `ReferenceError`).
+- F4: `vant lock release` checks truthiness of an always-object result →
+  prints "Lock released" and deletes the token even on a DENIED release.
+- F12: a long tail of whole-snapshot writers bypass the mutex (the pass-95/96/98
+  class) — needs per-module triage.
+
+**Medium/low:** F2 no `getLayerStatus` (boot hardcodes the lock layer);
+F3 `listStackLocks` spreads strings → junk; F5 `getState().lockStatus` returns
+a function ref; F6 `tmp` locks via an implicit `global._lock`; F7 `withLock`
+used by market only (4 hand-rolled sites); F8 two `.locks` roots (lease vs
+mutex) undocumented; F9 lease reimplements coordination; F10 in-process save
+chains unclassified; F11 recursion `guard` is not a lock; F13 no docs page.
+
+**Next:** execute S1 (truth-up the lease). Gates unchanged; nothing executed
+this pass beyond the audit + PRD.
 
 ---
 

@@ -7,6 +7,16 @@
 
 ## Handoff
 
+**Last known good commit:** pass 104 — lock-system PRD (labs/LOCKS.md §8, S1–S6).
+Walk-back audit found 13 issues; High: F1 (brain-lock rate limit dead AND would
+ReferenceError — `errors` undefined, no caller), F4 (`vant lock release`
+succeeds/clears the token on a DENIED release because it truthiness-checks an
+always-object), F12 (tail of unguarded whole-snapshot writers). Medium: no
+getLayerStatus (boot hardcodes lock layer), listStackLocks spreads strings,
+getState().lockStatus returns a fn ref, tmp locks via implicit global._lock,
+withLock used by market only, two .locks roots undocumented. Stages S1–S6 +
+acceptance/gates are in labs/LOCKS.md §8.6–8.8. Next: S1.
+
 **Last known good commit:** pass 103 QC — locks gaps/edges. New
 test/lock-failclosed.test.js (6) proves the fail-closed refusal actually
 refuses writes (state-store/teams/habitat) and recovers; test/lock.test.js
