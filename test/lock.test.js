@@ -84,6 +84,24 @@ test('withLock runs + releases a sync fn (lock free afterwards)', async () => {
     return { success: out === 42 && again.ok === true };
 });
 
+test('withLock releases the lock when fn throws (no leak)', async () => {
+    let threw = false;
+    try { await lock.withLock(p('g.lock'), () => { throw new Error('boom'); }); }
+    catch (e) { threw = true; }
+    const again = lock.acquire(p('g.lock'));
+    lock.release(p('g.lock'));
+    return { success: threw && again.ok === true };
+});
+
+test('withLock closed does NOT delete a peer-held lock on abort', async () => {
+    const peer = p('h.lock');
+    lock.acquire(peer); // "peer" holds it
+    const out = await lock.withLock(peer, () => 'nope', { waitMs: 0 });
+    const stillHeld = fs.existsSync(peer);
+    lock.release(peer);
+    return { success: out && out.aborted === true && stillHeld };
+});
+
 // ============================================
 // mutex()
 // ============================================

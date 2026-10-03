@@ -2,7 +2,34 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-03  
-**Session:** Pass 103 — locks §4: posture, one lock root, mutex collapse, fail-closed, audit
+**Session:** Pass 103 — locks §4 + QC (fail-closed gates, audit hardening)
+
+---
+
+## Session (2026-10-03 — pass 103 QC: gaps, edge checks)
+
+Owner: "hit it with qc, gaps, and edge checks." Two real gaps closed + edge
+coverage added.
+
+**GAP 1 — fail-closed was untested outside market.** Added
+`test/lock-failclosed.test.js` (6 cases): stub `lock.acquire` to
+`{ok:false,reason:'held'}` and prove the write is REFUSED and disk is
+untouched, then that it recovers when the lock returns — for
+`state-store.persistMerged`, `teams._saveTeams`, `habitat.save`. (teams needs
+`defaultSandbox.setCapabilities({canWrite:true})` or `createOrg` returns
+`E_SANDBOX` and nothing is even attempted.)
+
+**GAP 2 — audit regex missed a formula class.** `scripts/audit-locks.js` only
+caught `+ '.lock'` and bare `'.locks'`; the old
+`path.resolve(base, '.habitat.lock')` slipped through. Added a
+quoted-string-ending-in-`.lock` pattern; probed all four retired formulas →
+caught, comment prose still ignored.
+
+**EDGE checks** in `test/lock.test.js` (11→13): `withLock` releases when a sync
+fn throws; `withLock` closed does NOT delete a peer-held lockfile on abort.
+
+Gates: sweep 157/157 chunked; lint:locks PASS; `npm run check`; eslint 0 err;
+zero leaked locks.
 
 ---
 

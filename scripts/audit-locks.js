@@ -42,9 +42,11 @@ const mutexRequires = [];
 const leaseRequires = [];
 
 // Ad-hoc lock-path formulas (code, not prose): string concat of a `.lock`
-// literal, or a bare `'.locks'` root literal.
+// literal, a bare `'.locks'` root literal, or any quoted string ENDING in
+// `.lock` (catches path.resolve(base, '.habitat.lock')).
 const CONCAT_LOCK = /\+\s*['"`]\.lock/;
 const DOTLOCKS = /['"`]\.locks['"`]/;
+const QUOTED_LOCK = /['"`][^'"`]*\.lock['"`]/;
 
 for (const file of files) {
     const r = rel(file);
@@ -58,7 +60,7 @@ for (const file of files) {
 
     if (!PATH_LITERAL_OK.has(r)) {
         lines.forEach((line, i) => {
-            if (CONCAT_LOCK.test(line) || DOTLOCKS.test(line)) {
+            if (CONCAT_LOCK.test(line) || DOTLOCKS.test(line) || QUOTED_LOCK.test(line)) {
                 problems.push(`${r}:${i + 1} builds a lock path outside lib/lock.js — use lock.pathFor()\n      ${line.trim()}`);
             }
         });

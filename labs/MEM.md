@@ -7,6 +7,16 @@
 
 ## Handoff
 
+**Last known good commit:** pass 103 QC — locks gaps/edges. New
+test/lock-failclosed.test.js (6) proves the fail-closed refusal actually
+refuses writes (state-store/teams/habitat) and recovers; test/lock.test.js
+grew to 13 (withLock releases on sync throw; closed abort never deletes a
+peer's lockfile). Hardened scripts/audit-locks.js: it now also catches a quoted
+string ENDING in `.lock` (the old `path.resolve(base, '.habitat.lock')` class),
+verified via a 7-case regex probe. Non-findings: rls-hookups "poisoned
+_cacheLock" is behavioral (still valid); no stale identifiers. Gates: sweep
+157/157, lint:locks PASS, check, eslint 0 err, zero leaked locks.
+
 **Last known good commit:** pass 103 — locks §4 (posture, one lock root, mutex collapse, fail-closed, audit).
 `lib/lock.js` mutex now: `acquire()`→`{ok,reason}` (acquired|held|unavailable);
 `withLock(path,fn,{failMode})` closed-by-default (never runs fn without the
