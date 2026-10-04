@@ -7,6 +7,19 @@
 
 ## Handoff
 
+**Last known good commit:** pass 108 — lock defect hunt (four bugs fixed).
+Owner said the recent lock commits have def bugs; a probe-driven hunt
+confirmed: (L1) brain-lock same-agent re-acquire FAILED (dead
+`existing.token === token` refresh branch) — now refreshes by agentId with a
+stable file token; (L2) stale takeover was a blind atomic REPLACE — two
+takers could both win (1/12 races observed) — now re-check + O_EXCL create
+(CAS); (L3) lib/lock.js release()/exit hook deleted by path with no
+ownership check — a stalled predecessor clobbered the successor's live lock
+— now pid-verified, takeover loop bounded; (L4) forceReleaseBrainLock
+returned undefined — now boolean (MCP `vant_lock force` truthful). Tests:
+lock 13→15, brain-lock 18→21. All gates green (sweep 157/157 env-free, MCP
+296/0/0, audit-locks 0 leaked). Next: S4 (migrate to `withLock`, F7).
+
 **Last known good commit:** pass 107 — locks stage S3 (wire-up completion).
 F6 closed: `lib/tmp.js` put/delete now lazy-require `./brain-lock` and call
 `acquireBrainLock`/`releaseBrainLock` directly — no more implicit

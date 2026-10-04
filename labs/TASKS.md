@@ -1,8 +1,40 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-10-03  
-**Session:** Pass 107 — locks S3 executed (wire-up completion)
+**Last Updated:** 2026-10-04  
+**Session:** Pass 108 — lock defect hunt (four bugs found + fixed)
+
+---
+
+## Session (2026-10-04 — pass 108: lock defect hunt, four bugs fixed)
+
+Owner: "Let's do a solid pass on recent lock commits, there are Def bugs."
+Probe-driven hunt over the lock commits (102–107); confirmed and fixed FOUR:
+
+- **L1 (brain-lock) — same-agent re-acquire failed.** Dead branch
+  (`existing.token === token`, token freshly generated per call) meant a
+  re-acquire of the agent's OWN held lease was treated as contention and
+  returned null after ~1.5s of backoff. Fixed: refresh by agentId, file
+  token kept stable, emits `brain-lock:refreshed`.
+- **L2 (brain-lock) — takeover race → two holders.** Stale takeover was a
+  blind atomic REPLACE (temp+rename, no re-check): two takers of the same
+  stale lease could both replace and both verify (1/12 probe races). Fixed:
+  re-check + O_EXCL (`wx`) create = CAS; losers re-read and back off;
+  symlink guard preserved.
+- **L3 (lock mutex) — release clobbered successor.** release()/exit hook
+  unlinked by path with no ownership check; after a stale takeover the
+  stalled predecessor deleted the successor's live lockfile (deterministic
+  repro). Fixed: pid-verified `_ownsLock` in both paths + bounded takeover
+  loop (hostile replant).
+- **L4 (brain-lock) — forceReleaseBrainLock returned undefined** → MCP
+  `vant_lock force` reported `forceReleased: undefined`. Now boolean +
+  `brain-lock:force-released` event.
+
+Evidence: scratch probe (pre-fix A null / B 1-of-12 double-win / C successor
+lock deleted / E undefined; post-fix all clean), then deleted. Tests:
+lock 13→15, brain-lock 18→21. Gates: sweep 157/157 (env-free), lints ×4,
+eslint 0, check, npm test, test-core, test-all, audit-locks (0 leaked),
+MCP audit at baseline (296/0/0). Scratch wiped.
 
 ---
 

@@ -341,11 +341,52 @@ locks · scratch brains wiped.
 - [x] **S1 — Truth-up the lease (F1–F5)** — done pass 105 (see §8.11)
 - [x] **S2 — Separation-of-concern contract (F8–F11)** — done pass 106 (see §8.11)
 - [x] **S3 — Complete the wire-up (F6, health, MCP)** — done pass 107 (see §8.11)
+- [x] **Interim QC — lease/mutex defect hunt (L1–L4)** — done pass 108 (see §8.11)
 - [ ] S4 — Migrate to `withLock` (F7)
 - [ ] S5 — Unguarded-writer triage (F12)
 - [ ] S6 — Documentation (F13)
 
 ## 8.11 Execution log
+
+### Interim QC — lease/mutex defect hunt (pass 108, done)
+
+Owner flagged "def bugs" in the recent lock commits; a probe-driven hunt
+(scratch script, since deleted) confirmed FOUR and fixed all of them.
+
+- **L1 — same-agent re-acquire FAILED (brain-lock).** The "we already own
+  it" branch compared the file token against a token freshly generated in
+  the same call — dead code — so a same-agent re-acquire (nested
+  sandbox.write, `vant lock acquire` twice) was misclassified as contention
+  and returned null after ~1.5s of backoff WHILE ALREADY HOLDING the lease.
+  Fixed: refresh by agentId; the FILE token is kept stable so outstanding
+  references stay valid; emits `brain-lock:refreshed`.
+- **L2 — stale-takeover race could yield TWO holders (brain-lock).**
+  Takeover was a blind atomic REPLACE (writeRaw = temp+rename, no freshness
+  re-check): two agents reading the same stale lock could both replace it
+  and both pass the read-back verify (last writer wins the file). Probe: 1
+  in 12 two-child races produced two live holders of an exclusive lease.
+  Fixed: takeover re-checks staleness, then takes the file with O_EXCL
+  (`wx`) — a create-or-fail CAS; losers re-read and back off. Symlink guard
+  preserved (planted symlink refuses O_EXCL and is swept).
+- **L3 — release() clobbered a successor's live lock (lock mutex).**
+  release() (and the exit hook) unlinked by path with no ownership check,
+  so a stalled holder whose lock was stale-taken-over deleted the
+  SUCCESSOR's fresh lockfile — two writers inside the mutex. Deterministic
+  probe repro. Fixed: release/exit-hook only unlink when the file's pid is
+  ours (`_ownsLock`); corrupt/vanished files are left to the stale sweep.
+  Also bounded the takeover loop (hostile symlink replant could spin it
+  forever).
+- **L4 — forceReleaseBrainLock() returned undefined (brain-lock).** MCP
+  `vant_lock force` reported `forceReleased: undefined`. Now returns a
+  boolean and emits `brain-lock:force-released`.
+- **Tests:** test/lock.test.js 13→15 (release-ownership, exit-hook vs
+  successor), test/brain-lock.test.js 18→21 (refresh gate, CAS race gate
+  over 4 two-child iterations, boolean force). Pre-existing gates unchanged
+  and green.
+- **Gates:** sweep 157/157 (env-free); lint:locks/docs/surface/helpers
+  PASS; eslint 0 errors on touched; `npm run check`; npm test 15/15;
+  test-core 5/5; test-all exit 0; audit-locks PASS (0 leaked); MCP audit
+  296 reg / THREW 0 / PHANTOM 0 (baseline); scratch wiped.
 
 ### S3 — Complete the wire-up (pass 107, done)
 

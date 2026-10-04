@@ -144,6 +144,48 @@ test('pathFor namespaces kind + id and sanitizes separators', () => {
 });
 
 // ============================================
+// PASS 108 — OWNERSHIP-CHECKED RELEASE
+// ============================================
+
+test('release does NOT delete a successor lock after stale takeover (pass 108)', () => {
+    const f = p('succ.lock');
+    lock.acquire(f); // ours
+    // Simulate a successor taking over via stale sweep: file replaced with a foreign pid.
+    fs.writeFileSync(f, JSON.stringify({ pid: process.pid + 999999, at: Date.now() }));
+    lock.release(f); // stalled original holder lets go
+    const survived = fs.existsSync(f); // pre-fix: deleted — successor left exposed
+    // cleanup: restore our pid so release removes it
+    fs.writeFileSync(f, JSON.stringify({ pid: process.pid, at: Date.now() }));
+    lock.release(f);
+    return { success: survived === true, error: survived ? null : 'successor live lock was clobbered by predecessor release' };
+});
+
+test('exit hook leaves a successor lock alone (pass 108)', async () => {
+    const { spawn } = require('child_process');
+    const f = p('hook.lock');
+    const flag = p('hook.flag');
+    const child = spawn(process.execPath, ['-e', `
+        const lock = require(${JSON.stringify(path.join(ROOT, 'lib', 'lock.js'))});
+        const fs = require('fs');
+        const r = lock.acquire(process.argv[1]);
+        if (r.ok) {
+            fs.writeFileSync(process.argv[2], '1');
+            setTimeout(() => process.exit(0), 2500); // hold, then exit (hook runs)
+        } else process.exit(1);
+    `, f, flag], { cwd: ROOT });
+    const t0 = Date.now();
+    while (!fs.existsSync(flag) && Date.now() - t0 < 3000) { /* wait for child hold */ }
+    // Successor takeover while the child holds: file replaced with a foreign pid.
+    fs.writeFileSync(f, JSON.stringify({ pid: process.pid + 999999, at: Date.now() }));
+    await new Promise((resolve) => child.on('exit', resolve));
+    const survived = fs.existsSync(f); // child's exit hook must NOT delete it
+    fs.writeFileSync(f, JSON.stringify({ pid: process.pid, at: Date.now() }));
+    lock.release(f);
+    try { fs.unlinkSync(flag); } catch (e) { /* already gone */ }
+    return { success: survived === true, error: survived ? null : 'exit hook clobbered a successor lock' };
+});
+
+// ============================================
 
 (async () => {
     for (const t of suite) {

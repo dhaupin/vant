@@ -8,7 +8,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { spawnSync } = require('child_process');
+const { spawnSync, spawn } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const BRAIN_LOCK = path.join(ROOT, 'lib', 'brain-lock');
@@ -183,6 +183,85 @@ test('vant lock status reports the whole stack (S3)', () => {
         success: r.status === 0 && /Stack:/.test(out) && /Held across stack:/.test(out),
         error: out.slice(0, 240)
     };
+});
+
+// ============================================
+// PASS 108 — LEASE STATE MACHINE + CAS DEFECT GATES
+// ============================================
+
+console.log('\n🧯 PASS 108 DEFECT GATES\n');
+
+test('same-agent re-acquire REFRESHES instead of failing (pass 108)', async () => {
+    const lock = require(BRAIN_LOCK);
+    const agent = 'qc-refresh-agent';
+    const t1 = await lock.acquireBrainLock(agent, 60000);
+    const t2 = t1 ? await lock.acquireBrainLock(agent, 60000) : null;
+    try {
+        return {
+            success: !!t1 && !!t2 && t2 === t1,
+            error: !t1 ? 'first acquire failed'
+                : (!t2 ? 're-acquire failed — own lease treated as contention (dead refresh branch)'
+                    : 'file token changed on refresh')
+        };
+    } finally {
+        if (t1) await lock.releaseBrainLock(agent, t1);
+    }
+});
+
+test('forceReleaseBrainLock returns a boolean (pass 108)', () => {
+    const lock = require(BRAIN_LOCK);
+    const ret = lock.forceReleaseBrainLock(); // nothing held -> false, not undefined
+    return { success: typeof ret === 'boolean', error: 'returned ' + typeof ret };
+});
+
+test('stale-takeover race yields exactly ONE holder (pass 108 CAS)', async () => {
+    const lock = require(BRAIN_LOCK);
+    const lockDir = path.join(ROOT, 'models', '.locks');
+    const leasePath = path.join(lockDir, lock.getBrainLock(null).lockFile);
+    const startFile = path.join(lockDir, '.qc-race-start.flag');
+    const readyA = path.join(lockDir, '.qc-race-ready-a.flag');
+    const readyB = path.join(lockDir, '.qc-race-ready-b.flag');
+    const ITERS = 4;
+    let doubleWins = 0;
+    const waitFlag = (f, ms) => { const t0 = Date.now(); while (!fs.existsSync(f) && Date.now() - t0 < ms) { /* spin */ } };
+    for (let i = 0; i < ITERS; i++) {
+        lock.forceReleaseBrainLock();
+        fs.mkdirSync(lockDir, { recursive: true });
+        const stale = { token: 'ghost', agentId: 'ghost', timestamp: Date.now() - 7200000, timeout: 3600000, pid: 1 };
+        fs.writeFileSync(leasePath, JSON.stringify(stale, null, 2) + '\n---\nghost');
+        [startFile, readyA, readyB].forEach(f => { try { fs.unlinkSync(f); } catch (e) {} });
+        const runChild = (id, ready) => new Promise((res) => {
+            const c = spawn(process.execPath, ['-e', `
+                const fs = require('fs');
+                const bl = require(process.argv[1]);
+                fs.writeFileSync(process.argv[2], '1');
+                const t0 = Date.now();
+                while (!fs.existsSync(process.argv[3]) && Date.now() - t0 < 5000) {}
+                bl.acquireBrainLock('qc-racer-' + process.argv[4], 60000).then(t => {
+                    console.log(JSON.stringify({ got: !!t }));
+                    process.exit(0);
+                }).catch(() => { console.log(JSON.stringify({ got: false })); process.exit(0); });
+            `, path.join(ROOT, 'lib', 'brain-lock.js'), ready, startFile, String(id)], { cwd: ROOT });
+            let out = '';
+            c.stdout.on('data', d => { out += d; });
+            c.on('exit', () => {
+                let r = { got: false };
+                try { r = JSON.parse(out.trim().split('\n').pop()); } catch (e) {}
+                res(r);
+            });
+        });
+        const pa = runChild('a', readyA);
+        const pb = runChild('b', readyB);
+        waitFlag(readyA, 5000);
+        waitFlag(readyB, 5000);
+        fs.writeFileSync(startFile, 'go'); // both children race the stale lease
+        const pair = await Promise.all([pa, pb]);
+        const wins = (pair[0].got ? 1 : 0) + (pair[1].got ? 1 : 0);
+        if (wins === 2) doubleWins++;
+        lock.forceReleaseBrainLock();
+    }
+    [startFile, readyA, readyB].forEach(f => { try { fs.unlinkSync(f); } catch (e) {} });
+    return { success: doubleWins === 0, error: doubleWins + '/' + ITERS + ' races had two live holders of the exclusive lease' };
 });
 
 // ============================================
