@@ -2,7 +2,34 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-04  
-**Session:** Pass 109 — locks S4 executed (withLock migration, F7)
+**Session:** Pass 110 — native lock contention (monkeypatch seam dropped)
+
+---
+
+## Session (2026-10-04 — pass 110: native lock contention)
+
+Owner: "Qtf is anything called a monkey patch involved... We need to make
+native fixes no fallbacks, shims."
+
+- **lib/lock.js:** withLock calls the internal `acquire` directly again —
+  the pass-109 `module.exports.acquire` indirection existed only to keep the
+  tests' `lock.acquire = heldFail` property replacement intercepting.
+  Product code no longer bends around a test technique.
+- **Native contention in gates:** lock-failclosed + market gate D now place
+  a regular FILE at the scratch brain's lock root — every real acquire()
+  fails `unavailable` instantly (mkdirSync on a file throws). Real
+  filesystem failure path, no property replacement. Gate C's spy stays
+  (wraps + delegates — measurement, not behavior).
+- **Bonus bug flushed out:** teams._saveTeams checked `.aborted` on
+  withLock's PROMISE return without awaiting — the fail-closed log had been
+  dead since pass 109 (refusal worked, observability didn't; disk-state
+  assertions never caught it). Now awaited; write stays synchronous (withLock
+  runs the body synchronously when the lock is available) so the pass-89
+  restoreState exit-safety contract holds.
+
+Gates: sweep 157/157 (env-free), lints ×4, eslint 0 errors, check, npm
+test, test-core, test-all, audit-locks 0 leaked, MCP audit baseline
+(296/0/0), scratch wiped.
 
 ---
 

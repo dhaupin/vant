@@ -161,7 +161,9 @@ const lock = require("./lib/lock");
 // (pass 109) Count ONLY per-listing locks: withLock is now the ONE
 // acquire/release implementation (F7), so persistMerged's state lock goes
 // through it too — filtering by the 'market-trade' lock path keeps this
-// gate about lock SCOPE (pass 101), not total withLock traffic.
+// gate about lock SCOPE (pass 101), not total withLock traffic. The spy
+// wraps and delegates to the real implementation — measurement only, no
+// behavior is replaced.
 let calls = 0; const _orig = lock.withLock;
 lock.withLock = (p, ...rest) => { if (String(p).includes('market-trade')) calls++; return _orig(p, ...rest); };
 const market = require("./lib/market");
@@ -197,10 +199,12 @@ const market = require("./lib/market");
 const boot = require("./lib/boot");
 boot.init({ taskId: "market-d", scopes: ["read", "write", "spawn", "execute"], debug: false });
 require("./lib/sandbox").defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canNetwork: true, canTrade: true, canSpawn: true });
-const lock = require("./lib/lock");
-// (pass 103) withLock failMode:'closed' aborts WITHOUT running fn and returns
-// { ok:false, reason, aborted:true } — simulate that exact shape.
-lock.withLock = () => Promise.resolve({ ok: false, reason: 'held', aborted: true });
+const fs = require("fs");
+// (pass 110) Native contention, no property replacement: a regular FILE at
+// the lock root makes every real acquire() fail with 'unavailable'
+// (mkdirSync on a file path throws) — the actual filesystem failure path.
+fs.rmSync("models/private/qc-market-x/.locks", { recursive: true, force: true });
+fs.writeFileSync("models/private/qc-market-x/.locks", "not a directory");
 const market = require("./lib/market");
 const escrow = require("./lib/escrow");
 (async () => {

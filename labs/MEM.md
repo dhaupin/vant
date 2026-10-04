@@ -7,6 +7,22 @@
 
 ## Handoff
 
+**Last known good commit:** pass 110 — native lock contention (monkeypatch
+seam dropped). withLock calls internal acquire directly again (the pass-109
+module.exports.acquire indirection existed only for the tests' property
+replacement). lock-failclosed + market gate D now create REAL contention: a
+regular FILE at the scratch brain's lock root makes every acquire() fail
+`unavailable` instantly (mkdirSync on a file throws) — real filesystem path,
+zero stubs. Gate C's withLock spy remains (wraps + delegates, measurement
+only). BONUS: switching the technique flushed a real pass-109 bug —
+teams._saveTeams checked `.aborted` on withLock's PROMISE without awaiting,
+so the fail-closed log was dead (refusal worked, log didn't); now awaited,
+write stays synchronous (restoreState exit-safety contract preserved).
+Census: zero lock-module property replacements in product code. Gates: sweep
+157/157 env-free, lints ×4, eslint 0 errors, check, npm test, test-core,
+test-all, audit-locks 0 leaked, MCP 296/0/0. Next: S5 (unguarded-writer
+triage, F12 decision matrix), then S6 (docs).
+
 **Last known good commit:** pass 109 — locks S4 (withLock migration, F7).
 All four whole-snapshot writers (state-store.persistMerged,
 teams._saveTeams, agents/internal._saveAgents, habitat.save) now go through

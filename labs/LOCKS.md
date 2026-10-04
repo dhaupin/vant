@@ -348,6 +348,41 @@ locks · scratch brains wiped.
 
 ## 8.11 Execution log
 
+### Native lock contention — drop the monkeypatch seam (pass 110, done)
+
+Owner flagged the "monkey patch" language from pass 109 and asked for native
+fixes — no fallbacks, shims, or test-shaped wiring. Done:
+
+- **lib/lock.js: withLock calls the internal `acquire` directly again.** The
+  pass-109 `module.exports.acquire` indirection existed ONLY so the fail-
+  closed tests' `lock.acquire = heldFail` property replacement kept
+  intercepting — production structure shaped by a test's patching style.
+  Reverted to the direct call.
+- **Fail-closed gates now create REAL contention.** lock-failclosed and
+  market-crossprocess gate D no longer replace any module property: they
+  place a regular FILE at the scratch brain's lock root
+  (`models/private/<brain>/.locks`), which makes every real `acquire()` fail
+  with `unavailable` instantly (mkdirSync on a file path throws). The actual
+  filesystem failure path is exercised end-to-end — strictly stronger than
+  the stub. Gate C's withLock spy stays: it wraps and delegates to the real
+  implementation (measurement only, no behavior replaced).
+- **BONUS: the switch flushed a real pass-109 bug.** `teams._saveTeams`
+  checked `.aborted` on withLock's return WITHOUT awaiting — withLock
+  resolves to a Promise, so teams' fail-closed log had been dead since pass
+  109 (the write refusal still worked via closed mode; only observability
+  was lost — the disk-state assertions never caught it). Now awaited; log
+  fires (`[teams] Orgchart lock unavailable — refusing unlocked write`). The
+  write itself remains synchronous (withLock runs the body synchronously
+  when the lock is available), preserving the pass-89 restoreState exit-
+  safety contract; both docstring blocks updated.
+- **Census after:** zero property replacements on lock modules in product
+  code; remaining in tests: gate C's wrap-and-delegate spy only.
+- **Gates:** sweep 157/157 (env-free); lint:locks/docs/surface/helpers
+  PASS; eslint 0 errors on touched (6 pre-existing warnings); `npm run
+  check`; npm test 15/15; test-core 5/5; test-all exit 0; audit-locks PASS
+  (0 leaked); MCP audit 296 reg / THREW 0 / PHANTOM 0 (baseline); scratch
+  wiped.
+
 ### S4 — Migrate to `withLock` (pass 109, done)
 
 - **F7 closed.** All four whole-snapshot writers now go through

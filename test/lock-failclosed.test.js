@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 /**
- * Fail-closed gates (pass 103)
+ * Fail-closed gates (pass 103; native contention pass 110)
  *
  * Pass 103 changed state-store/teams/agents/habitat from "warn + last-writer-
  * wins" to FAIL-CLOSED: when the lock cannot be acquired, the write is refused
  * rather than performed unlocked. These are the adversarial gates proving it —
- * stub lock.acquire to fail and assert NOTHING is written (and that the caller
- * recovers once the lock is available again).
+ * and they do it NATIVELY (pass 110): a regular FILE at the brain's lock root
+ * makes every real acquire() fail with 'unavailable' instantly (mkdirSync on
+ * a file path throws), so the actual filesystem failure path is exercised
+ * end-to-end. No property replacement anywhere.
  *
  * market's fail-closed path is pinned separately in market-crossprocess gate D.
  * (scratch brain qc-lock-fc, wiped at start)
@@ -36,8 +38,19 @@ const suite = [];
 
 function test(name, fn) { suite.push({ name, fn }); }
 
-// A failing acquire stub that mimics a peer holding the lock.
-const heldFail = () => ({ ok: false, reason: 'held' });
+// (pass 110) Real contention, native technique: a regular FILE at the brain's
+// lock root (models/private/qc-lock-fc/.locks) makes every acquire() in this
+// brain return { ok:false, reason:'unavailable' } instantly — mkdirSync on a
+// file path throws and acquire() reports the unusable root. The REAL failure
+// path is exercised; nothing is stubbed or patched.
+const LOCK_ROOT = path.join(BRAIN, '.locks');
+function brokenLockRoot() {
+    fs.rmSync(LOCK_ROOT, { recursive: true, force: true });
+    fs.writeFileSync(LOCK_ROOT, 'not a directory');
+}
+function fixLockRoot() {
+    fs.rmSync(LOCK_ROOT, { recursive: true, force: true });
+}
 
 console.log('\n🔒 FAIL-CLOSED GATES (pass 103)\n');
 
@@ -54,8 +67,7 @@ function readState() {
 
 test('persistMerged refuses an unlocked write and leaves disk untouched', async () => {
     stateStore.persist({ moduleName: 'qc', stateFile: SF, data: { sentinel: 'original' } });
-    const real = lock.acquire;
-    lock.acquire = heldFail;
+    brokenLockRoot();
     let ret;
     try {
         ret = await stateStore.persistMerged({
@@ -65,7 +77,7 @@ test('persistMerged refuses an unlocked write and leaves disk untouched', async 
             serialize: () => ({ sentinel: 'clobbered' })
         });
     } finally {
-        lock.acquire = real;
+        fixLockRoot();
     }
     const disk = readState();
     return { success: ret === false && disk && disk.sentinel === 'original' };
@@ -89,14 +101,13 @@ test('persistMerged writes normally once the lock is available', async () => {
 const TEAMS_STORE = path.join(BRAIN, 'orgchart', 'teams.json');
 
 test('teams refuses an unlocked save (org not persisted) but keeps it in memory', async () => {
-    const real = lock.acquire;
-    lock.acquire = heldFail;
+    brokenLockRoot();
     let org;
     try {
         org = teams.createOrg('FcDenied-' + Date.now());
         await teams.flush();
     } finally {
-        lock.acquire = real;
+        fixLockRoot();
     }
     const persisted = fs.existsSync(TEAMS_STORE)
         ? JSON.parse(fs.readFileSync(TEAMS_STORE, 'utf8'))
@@ -124,13 +135,12 @@ test('habitat refuses an unlocked save (returns null, no write)', async () => {
             state: async () => { wrote = true; }
         }
     });
-    const real = lock.acquire;
-    lock.acquire = heldFail;
+    brokenLockRoot();
     let out;
     try {
         out = await h.save();
     } finally {
-        lock.acquire = real;
+        fixLockRoot();
     }
     return { success: out === null && wrote === false };
 });
