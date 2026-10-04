@@ -109,3 +109,4 @@ models/public/vant/boot/*-p_*.svg.sha256
 *.bak
 settings.ini
 .locks-global/
+models/audit-rotate/

@@ -2,9 +2,60 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-04  
-**Session:** Pass 112 — locks S6 executed (documentation, F13)
+**Session:** Pass 113 — live-fire: EPIPE fatal storm destroyed (handler guard + ledger cap)
 
 ---
+
+## Session (2026-10-04 — pass 113: live-fire, EPIPE target)
+
+Live-fire target 1 per the owner's list. Found, fixed, verified:
+
+- **The storm was LIVE.** models/private/vant/.audit.json had grown to 47.55
+  MB / ~165k rows and was still appending at ~1/sec during this session. 100%
+  of rows were `fatal/uncaughtException/write EPIPE` noise (25-29 legit rows
+  preserved).
+- **Root cause chain (three defects):** (1) two zombie QC probe processes
+  from Sep 30 (`node -e` MCP probe + `bin/trust.js --help`) spun at ~85% CPU
+  each for 3.5 days writing to dead pipes -> EPIPE; (2) lib/vant.js's global
+  uncaughtException handler console.error()'d every fatal — on a dead pipe
+  that write throws EPIPE AGAIN, re-entering the handler (self-feeding loop,
+  172k re-entries observed in the repro) — and audit.log()'d every pass;
+  (3) audit.log() rewrites the ENTIRE ledger per append, so each fatal cost
+  O(filesize) — the amplifier that turned noise into 47 MB.
+- **Fixes (native, no shims):** lib/vant.js fatal handlers now use a
+  re-entrancy flag + 1s cool-down (`FATAL_LOG_COOLDOWN_MS`) + stderr writes
+  wrapped so a throwing stream can never re-enter; lib/audit.js caps the
+  ledger at LEDGER_MAX_ENTRIES=10000 at the write sites (log/batch via
+  _capLedger: trim between 1x-2x, in-place archive to models/audit-rotate/
+  at 2x — in-place so the caller's pending entry survives; rotate() itself
+  unchanged).
+- **Probe caught a bug in the fix itself:** first version referenced
+  FATAL_LOG_COOLODEDOWN_MS (typo) — child died exit 7 (handler-internal
+  failure, silent under a broken stderr). Exactly the class of defect this
+  session exists to catch.
+- **Verification:** deterministic repro (broken-stderr simulation + real
+  uncaughtException storm): 397-415 fatals + 172-175k EPIPE re-entries -> 3
+  cool-down-spaced ledger rows (was unbounded). Promoted to permanent gates:
+  test/epipe-guard.test.js (forked child, scratch brain via VANT_BRAIN, 2
+  gates) + test/audit.test.js (+2 cap gates: trim at 1x, archive at 2x).
+- **Zombies killed:** PIDs 372828 + 374259 (SIGKILL); the two bin/mcp.js
+  MCP-door servers were left alone (idle, plausibly wanted).
+- **Ledger sanitized:** 165,311 -> 29 rows (all legit ops history:
+  governance/memory_state/consensus), 47.55 MB -> 14.3 KB. models/
+  audit-rotate/ gitignored.
+- **Gotchas for future passes:** getBrainPath() honours process.env.
+  VANT_BRAIN FIRST — that (not pushBrain) is the test-isolation lever;
+  audit archives are BARE ARRAYS (rotate()'s shape), not {entries:[]};
+  the 2x archive's overflow row lands in the KEPT half (it is newest), so
+  cleanup must track the exact filename.
+
+Gates: sweep 159/159 env-free (new suite), npm test 15/15, test-core 5/5,
+test-all exit 0, lint:locks 0 leaked, audit-mcp 296/0/0 baseline, lint:docs
+131 green, surface/helpers PASS, eslint 0 errors (pre-existing warnings
+only), check syntax OK, scratch wiped. NEXT: remaining live-fire targets —
+kill-9 mid-save races across all guarded writers, TTL-expiry under load,
+force-release during active writes, CAS two-holder stress at scale, symlink
+replant attacks.
 
 ## Session (2026-10-04 — pass 112: stage S6, documentation)
 

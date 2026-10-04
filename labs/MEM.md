@@ -7,6 +7,28 @@
 
 ## Handoff
 
+**Last known good commit:** pass 113 — live-fire: EPIPE fatal storm destroyed.
+Root cause was a three-link chain: two Sep-30 zombie QC probes (~85% CPU each,
+writing to dead pipes) + vant.js's fatal handler console.error()ing into the
+broken stream (self-feeding re-entry, 172k re-entries in the repro) +
+audit.log() rewriting the whole ledger per append (47.55 MB / 165k rows, still
+growing during the session). Fixed natively: handler re-entrancy flag + 1s
+cool-down + wrapped stderr writes; audit ledger capped LEDGER_MAX_ENTRIES=
+10000 at the write sites (trim 1x-2x, in-place archive at 2x). Verified: 397
+fatals + 172k re-entries -> 3 cool-down rows. Permanent gates:
+test/epipe-guard.test.js (2) + test/audit.test.js cap gates (+2, now 24).
+Zombies SIGKILLed (372828/374259); MCP-door servers left alone. Ledger
+sanitized 165,311 -> 29 legit rows (47.55 MB -> 14.3 KB); models/audit-rotate/
+gitignored. LESSONS: getBrainPath() honours process.env.VANT_BRAIN FIRST
+(that is the test-isolation lever, not pushBrain); audit archives are BARE
+ARRAYS; a broken stderr swallows crash reports (exit 7 = handler-internal
+failure — the probe caught MY OWN typo this way: FATAL_LOG_COOLDOWN_MS).
+Gates: sweep 159/159 env-free, npm test 15/15, test-core 5/5, test-all 0,
+lint:locks 0 leaked, audit-mcp 296/0/0, lint:docs 131, surface/helpers PASS,
+eslint 0 errors. NEXT (live-fire continues): kill-9 mid-save races across all
+guarded writers, TTL-expiry under load, force-release during active writes,
+CAS two-holder stress at scale, symlink replant attacks.
+
 **Last known good commit:** pass 112 — locks S6 (documentation, F13).
 docs/operations/locks.md + docs/reference/locks.md written (two types,
 roots, postures, exact exports/returns; CLI verbs verified against
