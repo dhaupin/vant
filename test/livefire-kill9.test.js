@@ -184,7 +184,7 @@ function runChildKilledAfterMarker(script, markerPath, staggerMs) {
         const teams = require("./lib/teams");
         const fs = require("fs");
         (async () => {
-            let refusals = 0, ok = false, lastErr = "";
+            let refusals = 0, ok = false, lastErr = "", refusedCode = null;
             const start = Date.now();
             const stateFile = ${JSON.stringify(STATE)};
             const persisted = () => {
@@ -196,13 +196,17 @@ function runChildKilledAfterMarker(script, markerPath, staggerMs) {
             while (Date.now() - start < 25000) {
                 if (persisted()) { ok = true; break; }
                 try {
-                    teams.createOrg("RecoveryOrg-" + Date.now(), { agentId: "childB" });
+                    // (pass 115) The refusal must be SURFACED: a fail-closed
+                    // save returns {error, code:'E_SAVE_REFUSED'} instead of a
+                    // success that would vanish on restart.
+                    const r = teams.createOrg("RecoveryOrg-" + Date.now(), { agentId: "childB" });
+                    if (r && r.code && !refusedCode) refusedCode = r.code;
                 } catch (e) { lastErr = e.message; }
                 refusals++;
                 await new Promise(res => setTimeout(res, 500));
             }
             ok = ok || persisted();
-            console.log("B:" + JSON.stringify({ ok, refusals, lastErr }));
+            console.log("B:" + JSON.stringify({ ok, refusals, refusedCode, lastErr }));
             process.exit(ok ? 0 : 1);
         })().catch(e => { console.error(e.message); process.exit(1); });
     `);
@@ -211,8 +215,37 @@ function runChildKilledAfterMarker(script, markerPath, staggerMs) {
         && teamsState.orgs.some(o => String(o.name || '').startsWith('RecoveryOrg-'));
     report('gate C: SIGKILLed teams-lock holder leaves a stale lock', a.out.includes('A-acquired:true') && staleLeft,
         'acquired=' + a.out.trim() + ' staleLeft=' + staleLeft);
+    const bJson = (() => { try { const m = b.out.match(/B:(\{.*\})/); return m ? JSON.parse(m[1]) : {}; } catch (e) { return {}; } })();
+    report('gate C: teams.createOrg surfaces E_SAVE_REFUSED during the stale window', bJson.refusedCode === 'E_SAVE_REFUSED',
+        'B=' + b.out.trim());
     report('gate C: teams.createOrg recovers via stale takeover (fail-closed refusals before), teams.json valid', b.code === 0 && hasOrg && teamsState !== null,
         'B=' + b.out.trim() + ' err=' + b.err.trim() + ' orgs=' + (teamsState ? teamsState.orgs.length : 'unparseable'));
+
+    // ---------- Gate D: atomicWrite debris sweep (pass 115) ----------
+    // Gate B's kills only strand <target>.<uuid> temps when a kill lands
+    // mid-writeFileSync (nondeterministic — sometimes 0). If none landed,
+    // plant one deterministic temp so the sweep is always exercised with
+    // real debris on disk. Age everything past the 60s threshold, then one
+    // write to the same target must sweep them; unrelated files stay untouched.
+    const debrisFromKills = fs.readdirSync(DIR).filter(f => f.startsWith('kill9-blob.json.') && f !== 'kill9-blob.json');
+    if (debrisFromKills.length === 0) {
+        fs.writeFileSync(path.join(DIR, 'kill9-blob.json.11111111-2222-3333-4444-555555555555'), '{"gen":42,"pad":"x"}');
+    }
+    const debrisBefore = fs.readdirSync(DIR).filter(f => f.startsWith('kill9-blob.json.') && f !== 'kill9-blob.json');
+    const bystander = path.join(DIR, 'kill9-bystander.txt');
+    fs.writeFileSync(bystander, 'bystander');
+    const old = new Date(Date.now() - 90000);
+    for (const f of debrisBefore) fs.utimesSync(path.join(DIR, f), old, old);
+    await runChild(`
+        const { FileStorage } = require("./lib/storage");
+        const store = new FileStorage({ basePath: ${JSON.stringify(DIR)} });
+        store.write("kill9-blob.json", JSON.stringify({ gen: 99, pad: "" }));
+        console.log("done");
+    `);
+    const debrisAfter = fs.readdirSync(DIR).filter(f => f.startsWith('kill9-blob.json.') && f !== 'kill9-blob.json');
+    report('gate D: aged atomicWrite debris swept on next write (' + debrisBefore.length + (debrisFromKills.length === 0 ? ' planted (kills left none)' : ' produced by the kills') + '); bystander untouched',
+        debrisBefore.length >= 1 && debrisAfter.length === 0 && fs.readFileSync(bystander, 'utf8') === 'bystander',
+        'before=' + debrisBefore.length + ' after=' + debrisAfter.length);
 
     console.log('\n--- RESULTS ---\n');
     console.log(`  Passed:  ${results.passed}`);

@@ -7,7 +7,26 @@
 
 ## Handoff
 
-**Last known good commit:** pass 114 — live-fire targets 2-6 destroyed, gates permanent.
+**Last known good commit:** pass 115 — BOTH pass-114 live-fire product findings fixed.
+(1) create* lying success: new lock.withLockSync (sync twin, plain-value return,
+aborts as {ok:false,reason,aborted:true}) + _saveTeams() now SYNC returning the
+honest {ok,reason}; all 11 teams mutators do snapshot→mutate→rollback and return
+{error, code:'E_SAVE_REFUSED', reason} on refusal; store.write failures inside the
+lock body also surface (body owns its outcome — the second flavor of the lie).
+(2) atomicWrite debris: _sweepStaleTemps before every write — same-dir
+<basename>.<uuid> (uuid regex) with lstat mtime older than 60s, unlinked,
+best-effort, scoped per target (fresh in-flight temps safe).
+Gates: livefire-kill9 6/6 (gate D plants its own debris when the kills leave
+none — deterministic), lock.test 19/19 (+4 withLockSync), teams-crossprocess
+9/9 (new gate C: held lock → refusal + no memory row; release → persists),
+lock-failclosed 6/6 (updated — the old gate PINNED the lying success).
+Full: sweep 162/162 env-free, npm test 15/15, test-core 5/5, test-all 0,
+lint:locks PASS — F7 regex is `withLock(?:Sync)?\(`; NOTE `withLockSync?\(`
+is a footgun (Syn mandatory, stops matching withLock(), other writers break),
+audit-mcp 296/59/0/0/0/149/88/0 exact baseline, eslint 0 errors, scratch wiped.
+withLockSync documented in docs/reference/locks.md + docs/operations/locks.md.
+
+**Previous (pass 114)** — live-fire targets 2-6 destroyed, gates permanent.
 test/livefire-kill9.test.js (4) + test/livefire-lease.test.js (2) +
 test/livefire-stress.test.js (4). Results: kill-9 stale takeover 5/5;
 FileStorage temp+rename survived 5 mid-write SIGKILLs of 5MB writes; teams

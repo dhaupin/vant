@@ -103,6 +103,42 @@ test('withLock closed does NOT delete a peer-held lock on abort', async () => {
 });
 
 // ============================================
+// withLockSync (pass 115, live-fire)
+// ============================================
+
+test('withLockSync returns the fn result and releases (lock free afterwards)', () => {
+    const out = lock.withLockSync(p('s1.lock'), () => 42);
+    const again = lock.acquire(p('s1.lock'));
+    lock.release(p('s1.lock'));
+    return { success: out === 42 && again.ok === true };
+});
+
+test('withLockSync closed: does NOT run fn without the lock, marker is a plain value', () => {
+    lock.acquire(p('s2.lock'));
+    let ran = false;
+    const out = lock.withLockSync(p('s2.lock'), () => { ran = true; }, { waitMs: 0 });
+    lock.release(p('s2.lock'));
+    return { success: !ran && out && out.ok === false && out.aborted === true && out.reason === 'held' };
+});
+
+test('withLockSync open: passthrough like withLock open', () => {
+    lock.acquire(p('s3.lock'));
+    let seen = null;
+    const out = lock.withLockSync(p('s3.lock'), (res) => { seen = res; return 'ran-open'; }, { waitMs: 0, failMode: 'open' });
+    lock.release(p('s3.lock'));
+    return { success: !!seen && seen.ok === false && out === 'ran-open' };
+});
+
+test('withLockSync releases when fn throws (rethrow, no leak)', () => {
+    let threw = false;
+    try { lock.withLockSync(p('s4.lock'), () => { throw new Error('boom'); }); }
+    catch (e) { threw = true; }
+    const again = lock.acquire(p('s4.lock'));
+    lock.release(p('s4.lock'));
+    return { success: threw && again.ok === true };
+});
+
+// ============================================
 // mutex()
 // ============================================
 

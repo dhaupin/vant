@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Fail-closed gates (pass 103; native contention pass 110)
+ * Fail-closed gates (pass 103; native contention pass 110; pass 115 contract)
  *
  * Pass 103 changed state-store/teams/agents/habitat from "warn + last-writer-
  * wins" to FAIL-CLOSED: when the lock cannot be acquired, the write is refused
@@ -9,6 +9,11 @@
  * makes every real acquire() fail with 'unavailable' instantly (mkdirSync on
  * a file path throws), so the actual filesystem failure path is exercised
  * end-to-end. No property replacement anywhere.
+ *
+ * (pass 115) teams create* no longer keep a refused row in memory: the
+ * mutation is rolled back and the caller gets { error, code:'E_SAVE_REFUSED' }
+ * instead of a success that would vanish on restart. The teams gate below
+ * pins the NEW honest contract.
  *
  * market's fail-closed path is pinned separately in market-crossprocess gate D.
  * (scratch brain qc-lock-fc, wiped at start)
@@ -100,7 +105,7 @@ test('persistMerged writes normally once the lock is available', async () => {
 
 const TEAMS_STORE = path.join(BRAIN, 'orgchart', 'teams.json');
 
-test('teams refuses an unlocked save (org not persisted) but keeps it in memory', async () => {
+test('teams refuses an unlocked save honestly: E_SAVE_REFUSED, row rolled back (pass 115)', async () => {
     brokenLockRoot();
     let org;
     try {
@@ -113,7 +118,11 @@ test('teams refuses an unlocked save (org not persisted) but keeps it in memory'
         ? JSON.parse(fs.readFileSync(TEAMS_STORE, 'utf8'))
         : { orgs: [] };
     const onDisk = (persisted.orgs || []).some((o) => o.id === org.id);
-    return { success: !!org.id && !onDisk };
+    // (pass 115) The refusal is SURFACED ({error, code:'E_SAVE_REFUSED'}) and
+    // the row is ROLLED BACK out of memory — no id leaks, no memory-only org
+    // that silently vanishes on restart (the old lying success this gate
+    // used to pin). Nothing about the refusal is a success.
+    return { success: org && org.code === 'E_SAVE_REFUSED' && !org.id && !onDisk };
 });
 
 test('teams persists again once the lock is available', async () => {

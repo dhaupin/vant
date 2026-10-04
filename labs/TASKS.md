@@ -2,9 +2,58 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-04  
-**Session:** Pass 114 — live-fire: kill-9 / TTL / force-release / CAS / symlink — all destroyed, tests permanent
+**Session:** Pass 115 — live-fire findings fixed: create* honest outcomes + atomicWrite debris sweep
 
 ---
+
+## Session (2026-10-04 — pass 115: the two pass-114 findings, fixed)
+
+Owner asked to fix both product findings from the live-fire session. Both
+destroyed, with gates:
+
+- **create* LYING SUCCESS — FIXED.** Root cause: `_saveTeams()` was an
+  async wrapper around a lock whose acquire (bounded wait included) already
+  completed synchronously — the promise only HID the outcome, so
+  fire-and-forget callers reported success while the save was fail-closed
+  refused. Fix: new `lock.withLockSync()` (sync twin of withLock, same
+  acquire/failMode/release discipline, plain-value return) + `_saveTeams()`
+  is now SYNC returning the honest `{ok, reason}`; all 11 mutators snapshot
+  the org model (`_snapshotOrgModel` with shallow-copied values +
+  `_seenKeys`), mutate, and on refusal ROLL BACK + return
+  `{error, code:'E_SAVE_REFUSED', reason}` (existing {error,code} contract;
+  bin/org.js already handles .error). `restoreState` returns `persisted`.
+  Second flavor found mid-pass and fixed: a store.write failure inside the
+  lock body was swallowed — would have returned {ok:true}; the body now
+  returns its own outcome (withLockSync resolves to the fn's value).
+- **atomicWrite DEBRIS — FIXED.** `atomicWrite` calls
+  `_sweepStaleTemps(filePath)` before writing: same-dir scan for
+  `<basename>.<uuid>` (strict uuid regex), lstat mtime older than
+  TEMP_DEBRIS_MS=60s, unlink best-effort try/catch. Scoped per target;
+  fresh in-flight temps (concurrent writers) untouched by the age guard.
+- **Gates:** livefire-kill9 6/6 — gate C now asserts the refusal is
+  SURFACED (refusedCode === 'E_SAVE_REFUSED'); new gate D debris sweep,
+  deterministic (plants its own `<target>.<uuid>` temp when the kills
+  happen to leave none — kills landed mid-writeFileSync only sometimes).
+  lock.test 19/19 (+4 withLockSync). teams-crossprocess 9/9 — new gate C:
+  in-process fresh held lock → createOrg refuses E_SAVE_REFUSED with NO
+  in-memory row; after release the same call persists for real.
+  lock-failclosed 6/6 — the old pass-103 gate Pinned the lying success
+  ("refuses but keeps it in memory"); updated to the new honest contract.
+- **Regex footgun caught by the gate itself:** `withLockSync?\(` makes only
+  the final `c` optional (Syn mandatory) — it stopped matching plain
+  `withLock(` and lint:locks failed on the three writers that never
+  changed. Correct form: `withLock(?:Sync)?\(`.
+- **Docs:** withLockSync added to docs/reference/locks.md export table +
+  notes, and docs/operations/locks.md key facts.
+
+Gates: sweep 162/162 env-free, npm test 15/15, test-core 5/5, test-all
+exit 0, lint:locks 0 leaked (F7/F12 green), lint:docs 131 files,
+lint:surface + lint:helpers PASS, npm run check syntax OK, eslint touched
+files 0 errors (pre-existing warnings only), audit-mcp 296 reg / 59 skip /
+THREW 0 / TIMEOUT 0 / INVALID 0 / REFUSED 149 / OK 88 / PHANTOM 0 (exact
+pass-114 baseline), scratch wiped (legit brains only).
+NEXT: no open work from the live-fire list. Candidates: audit ledger
+rotation inspection helper, lease-ttl doc example, owner's next targets.
 
 ## Session (2026-10-04 — pass 114: live-fire, targets 2-6)
 

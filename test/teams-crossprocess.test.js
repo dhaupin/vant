@@ -17,6 +17,9 @@
  *   A. 4 barrier-synchronized concurrent createOrg → all 4 land, lock released
  *   B. Tombstone: hydrate→delete→stale-snapshot write does NOT resurrect the
  *      deleted org, while an unseen newcomer IS adopted and the own org kept
+ *   C. (pass 115) Honest create* outcome: a FRESH held lock makes createOrg
+ *      return {code:'E_SAVE_REFUSED'} with NO in-memory row (the old lying
+ *      success is gone); after release the same call persists for real
  *
  * Run: node test/teams-crossprocess.test.js
  * (scratch brain qc-teams-gate wiped before and after)
@@ -158,6 +161,43 @@ const STORE = ${STORE_EXPR};
         report('own org persisted', names.includes('gate-b-keeper'), `names=${names}`);
     } catch (e) {
         report('gate B (tombstone + adoption)', false, e.message);
+    }
+
+    // ============================================
+    // GATE C — honest create* outcome under a held lock (pass 115)
+    // ============================================
+    try {
+        // In-process (no child): give the parent the same capability setup the
+        // children get from PRELUDE, and make the scratch brain the ACTIVE
+        // brain so lock.pathFor('teams') and the store resolve inside it.
+        process.env.VANT_BRAIN = BRAIN;
+        const boot = require(path.join(ROOT, 'lib', 'boot'));
+        boot.init({ taskId: 'teams-gate-c', scopes: ['read', 'write', 'spawn', 'execute'], debug: false });
+        require(path.join(ROOT, 'lib', 'sandbox')).defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canSpawn: true, canExecute: true });
+        const lock = require(path.join(ROOT, 'lib', 'lock'));
+        const teams = require(path.join(ROOT, 'lib', 'teams'));
+        wipe();
+
+        // Phase 1: FRESH (unexpired) held lock — createOrg must fail-closed
+        // REFUSE, not report a success that would vanish on restart.
+        const acq = lock.acquire(lock.pathFor('teams'), { staleMs: 600000, waitMs: 100 });
+        report('gate C setup: fresh teams.lock held in-process', !!(acq && acq.ok), JSON.stringify(acq));
+        const r = teams.createOrg('gate-c-held-' + Date.now()); // waitMs 8000 inside _saveTeams: refusal takes ~8s
+        report('gate C: createOrg refuses with E_SAVE_REFUSED under a held lock',
+            !!(r && r.code === 'E_SAVE_REFUSED' && r.error), JSON.stringify(r));
+        report('gate C: refused org left NO in-memory row (rollback)',
+            !teams.listOrgs().some(o => String(o.name || '').startsWith('gate-c-held-')),
+            'names=' + teams.listOrgs().map(o => o.name).join(','));
+        lock.release(lock.pathFor('teams'));
+
+        // Phase 2: lock released — the SAME call must persist for real.
+        const r2 = teams.createOrg('gate-c-free-' + Date.now());
+        const diskNames = (readStore().orgs || []).map(o => o.name);
+        report('gate C: after release, createOrg persists (no error, org on disk)',
+            !!(r2 && !r2.error && r2.name && diskNames.includes(r2.name)),
+            'r=' + JSON.stringify(r2) + ' disk=' + diskNames.join(','));
+    } catch (e) {
+        report('gate C (honest outcome under held lock)', false, e.message);
     }
 
     // ============================================

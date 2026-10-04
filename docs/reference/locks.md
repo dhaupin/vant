@@ -52,6 +52,7 @@ processes. No identity, no TTL semantics; stale takeover is mtime-based.
 | `acquire` | `(lockPath, { staleMs?, waitMs? }?)` | `{ ok, reason }`, reason in `acquired \| held \| unavailable` |
 | `release` | `(lockPath)` | void; only unlinks when the file's pid is this process |
 | `withLock` | `(lockPath, fn, { failMode?, staleMs?, waitMs? }?)` | Promise; body result, or `{ ok: false, reason, aborted: true }` in fail-closed mode |
+| `withLockSync` | `(lockPath, fn, { failMode?, staleMs?, waitMs? }?)` | fn's return value, or `{ ok: false, reason, aborted: true }` in fail-closed mode; sync `fn` required (pass 115) |
 | `mutex` | `()` | `{ run(fn): Promise, pending: number }` in-process chain |
 | `pathFor` | `(kind, id?, { brain }?)` | `models/private/<brain>/.locks/<kind>[__<id>].lock` |
 | `pathForGlobal` | `(kind, id?)` | `models/.locks-global/<kind>[__<id>].lock` |
@@ -63,6 +64,11 @@ Notes:
 - `withLock` ALWAYS returns a Promise. A synchronous `fn` runs and is
   released synchronously; an async `fn` is released on settle (the exit hook
   also covers process death between them).
+- `withLockSync` (pass 115) is the sync twin: the outcome comes back as a
+  plain value instead of a Promise, so callers that must stay synchronous
+  read the fail-closed refusal directly instead of through a wrapper that
+  can hide it. A thrown `fn` error is re-thrown after release; use `withLock`
+  for async bodies.
 - `failMode: 'closed'` (default) never runs `fn` without the lock.
   `failMode: 'open'` runs `fn(result)` anyway and passes the return through.
 - `held` = a live peer owns the file; `unavailable` = the filesystem is

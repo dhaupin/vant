@@ -136,7 +136,10 @@ for (const f of ['lib/state-store.js', 'lib/teams.js', 'lib/agents/internal.js',
     if (s && !requires(s, 'lock')) {
         problems.push(`${f} writes a whole snapshot but no longer requires lib/lock.js — a save chain is not a lock (PRD §8.3 F10)`);
     }
-    if (s && !/withLock\(/.test(s)) {
+    // (pass 115) withLockSync counts: identical primitive, sync surface —
+    // callers that must stay synchronous (teams create*/restoreState) read
+    // the honest outcome directly instead of through the promise wrapper.
+    if (s && !/withLock(?:Sync)?\(/.test(s)) {
         problems.push(`${f} writes a whole snapshot but no longer goes through lock.withLock — hand-rolled acquire/release is the F7 regression (PRD §8.6 S4)`);
     }
 }

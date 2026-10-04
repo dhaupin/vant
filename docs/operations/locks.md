@@ -104,6 +104,11 @@ Key facts:
   never runs `fn` without the lock and returns
   `{ ok: false, reason, aborted: true }`. `failMode: 'open'` runs `fn`
   anyway and passes its return through.
+- `withLockSync(path, fn, opts)` (pass 115) is the sync twin for callers
+  that must stay synchronous (teams create*/restoreState): the outcome is a
+  plain value, so a fail-closed refusal is read directly instead of being
+  hidden behind a promise wrapper. Read the honest outcome and surface it:
+  a refused save must roll back and return an error, never a success.
 - `mutex()` is the in-process promise-chain helper (cache, canvas, consensus
   use it). It is **not** cross-process safe.
 - `pathFor(kind, id, { brain })` builds paths under the per-brain root.
