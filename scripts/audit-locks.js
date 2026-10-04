@@ -127,12 +127,17 @@ for (const f of ['lib/recursion.js']) {
     }
 }
 
-// F10 — whole-snapshot writers must take the cross-process mutex; their
-// in-process save chains are write ordering, not the concurrency control.
-for (const f of ['lib/teams.js', 'lib/agents/internal.js']) {
+// F10/F7 — whole-snapshot writers must take the cross-process mutex THROUGH
+// withLock (pass 109: the ONE acquire/release implementation, failMode
+// 'closed'); their in-process save chains are write ordering, not the
+// concurrency control.
+for (const f of ['lib/state-store.js', 'lib/teams.js', 'lib/agents/internal.js', 'lib/habitat.js']) {
     const s = source(f);
     if (s && !requires(s, 'lock')) {
         problems.push(`${f} writes a whole snapshot but no longer requires lib/lock.js — a save chain is not a lock (PRD §8.3 F10)`);
+    }
+    if (s && !/withLock\(/.test(s)) {
+        problems.push(`${f} writes a whole snapshot but no longer goes through lock.withLock — hand-rolled acquire/release is the F7 regression (PRD §8.6 S4)`);
     }
 }
 
@@ -166,7 +171,7 @@ console.log(`  path-formula owners:                 lib/lock.js, lib/brain-lock.
 console.log(`  mutex root:                          models/private/<brain>/.locks/  (per-brain)`);
 console.log(`  lease root:                          models/private/.locks/           (cross-brain, separate by design)`);
 console.log(`  non-locks (must require neither):    lib/recursion.js`);
-console.log(`  guarded whole-snapshot writers:      lib/teams.js, lib/agents/internal.js`);
+console.log(`  guarded whole-snapshot writers:      lib/state-store.js, lib/teams.js, lib/agents/internal.js, lib/habitat.js (withLock, F7)`);
 console.log(`  leaked lockfiles:                    ${leaked.length}`);
 
 if (problems.length) {

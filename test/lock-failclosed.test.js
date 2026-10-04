@@ -58,7 +58,7 @@ test('persistMerged refuses an unlocked write and leaves disk untouched', async 
     lock.acquire = heldFail;
     let ret;
     try {
-        ret = stateStore.persistMerged({
+        ret = await stateStore.persistMerged({
             moduleName: 'qc',
             stateFile: SF,
             merge: () => {},
@@ -72,7 +72,7 @@ test('persistMerged refuses an unlocked write and leaves disk untouched', async 
 });
 
 test('persistMerged writes normally once the lock is available', async () => {
-    const ret = stateStore.persistMerged({
+    const ret = await stateStore.persistMerged({
         moduleName: 'qc',
         stateFile: SF,
         merge: () => {},

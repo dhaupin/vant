@@ -342,11 +342,48 @@ locks · scratch brains wiped.
 - [x] **S2 — Separation-of-concern contract (F8–F11)** — done pass 106 (see §8.11)
 - [x] **S3 — Complete the wire-up (F6, health, MCP)** — done pass 107 (see §8.11)
 - [x] **Interim QC — lease/mutex defect hunt (L1–L4)** — done pass 108 (see §8.11)
-- [ ] S4 — Migrate to `withLock` (F7)
+- [x] **S4 — Migrate to `withLock` (F7)** — done pass 109 (see §8.11)
 - [ ] S5 — Unguarded-writer triage (F12)
 - [ ] S6 — Documentation (F13)
 
 ## 8.11 Execution log
+
+### S4 — Migrate to `withLock` (pass 109, done)
+
+- **F7 closed.** All four whole-snapshot writers now go through
+  `lock.withLock` (failMode 'closed') instead of hand-rolled
+  acquire/try/finally-release: `state-store.persistMerged`,
+  `teams._saveTeams`, `agents/internal._saveAgents`, `habitat.save`. The
+  dead `_acquire*/_release*` helpers in teams.js and habitat.js are gone
+  (path helpers kept). Fail-closed posture, merge-under-lock atomicity, the
+  `{ staleMs: 10000, waitMs: 8000 }` timings, and every return contract are
+  unchanged — the only behavior delta is DRY plus the exit-hook coverage
+  withLock already had.
+- **Interface note:** `persistMerged` is now async (withLock always returns
+  a Promise). Its four lib callers (consensus/settlement/node-registry/
+  market `_persist`) ignore the return; the two lock-failclosed tests now
+  `await` it. `teams._saveTeams` keeps its sync body and `_teamsSaveChain`
+  return; `habitat.save` stays async returning state/null.
+- **withLock honors the test seam.** `withLock` now routes acquire through
+  the exported binding (`module.exports.acquire`) so the fail-closed
+  tests' `lock.acquire = heldFail` monkeypatch keeps intercepting it
+  instead of being bypassed by the internal reference.
+- **Audit gate extended (F7).** `scripts/audit-locks.js` now requires ALL
+  four writers to contain `withLock(` (previously only teams/agents were
+  checked for a mutex require) — hand-rolled acquire/release sneaking back
+  is now an audit failure.
+- **Gate C spy scope fixed.** market-crossprocess's withLock spy counted
+  ALL withLock calls, so F7's persistMerged migration tripped it; the spy
+  now counts only `'market-trade'` path locks, preserving the pass-101
+  gate's actual intent (per-listing lock SCOPE). Gate D's wholesale
+  withLock stub needed no change.
+- **Tests:** no new suites; lock-failclosed 6/6, market-crossprocess 8/8,
+  state-store/teams/habitat/roster/consensus-reap crossprocess all green.
+- **Gates:** sweep 157/157 (env-free); lint:locks/docs/surface/helpers
+  PASS; eslint 0 errors on touched (5 pre-existing warnings); `npm run
+  check`; npm test 15/15; test-core 5/5; test-all exit 0; audit-locks PASS
+  (0 leaked); MCP audit 296 reg / THREW 0 / PHANTOM 0 (baseline); scratch
+  wiped.
 
 ### Interim QC — lease/mutex defect hunt (pass 108, done)
 

@@ -7,6 +7,22 @@
 
 ## Handoff
 
+**Last known good commit:** pass 109 — locks S4 (withLock migration, F7).
+All four whole-snapshot writers (state-store.persistMerged,
+teams._saveTeams, agents/internal._saveAgents, habitat.save) now go through
+lock.withLock (failMode 'closed', same 10s/8s timings, merge-under-lock
+kept, fail-closed messages unchanged); dead _acquire/_release helpers
+removed. persistMerged is now ASYNC (withLock returns a Promise) — lib
+callers ignore the return, lock-failclosed's two persistMerged tests await
+it. withLock routes acquire through module.exports.acquire so the
+fail-closed tests' lock.acquire monkeypatch still intercepts. audit-locks
+now FAILS if any of the four writers lacks withLock( (F7 gate).
+market-crossprocess gate C spy filters to 'market-trade' path locks (its
+intent is per-listing scope, not total withLock traffic). Gates: sweep
+157/157 env-free, lints ×4, eslint 0 errors, check, npm test, test-core,
+test-all, audit-locks 0 leaked, MCP 296/0/0. Next: S5 (unguarded-writer
+triage, F12 — decision matrix per module), then S6 (docs).
+
 **Last known good commit:** pass 108 — lock defect hunt (four bugs fixed).
 Owner said the recent lock commits have def bugs; a probe-driven hunt
 confirmed: (L1) brain-lock same-agent re-acquire FAILED (dead

@@ -2,7 +2,35 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-04  
-**Session:** Pass 108 — lock defect hunt (four bugs found + fixed)
+**Session:** Pass 109 — locks S4 executed (withLock migration, F7)
+
+---
+
+## Session (2026-10-04 — pass 109: stage S4, withLock migration)
+
+Owner: "Yeah let's def love to S4. Ty!" Executed PRD stage S4 (labs/LOCKS.md
+§8.6): migrated the four whole-snapshot writers onto lock.withLock, closing F7.
+
+- **Converted** state-store.persistMerged, teams._saveTeams,
+  agents/internal._saveAgents, habitat.save — failMode 'closed', same
+  {staleMs:10000, waitMs:8000}, merge-under-lock preserved, fail-closed
+  messages unchanged. Dead _acquire/_release helpers removed (path helpers
+  kept).
+- **persistMerged is now async** (withLock returns a Promise). Lib callers
+  ignore the return; lock-failclosed's two persistMerged tests now await it.
+  teams._saveTeams keeps its sync body + _teamsSaveChain return; habitat
+  keeps state/null.
+- **withLock honors the lock.acquire monkeypatch seam** (routes through
+  module.exports.acquire) so fail-closed tests keep intercepting it.
+- **audit-locks F7 gate**: all four writers must contain withLock( —
+  hand-rolled acquire/release sneaking back fails the audit.
+- **market-crossprocess gate C spy** now counts only 'market-trade' path
+  locks (F7 legitimately added persistMerged to the withLock family; the
+  gate's intent is per-listing lock SCOPE).
+
+Gates: sweep 157/157 (env-free), lints ×4, eslint 0 errors (5 pre-existing
+warnings), check, npm test, test-core, test-all, audit-locks (0 leaked, F7
+gate active), MCP audit at baseline (296/0/0), scratch wiped.
 
 ---
 

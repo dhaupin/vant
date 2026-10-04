@@ -21,7 +21,9 @@
  *   B. an open-ended (supply: Infinity) listing is NOT over-serialized — two
  *      concurrent trades both succeed and both trade rows persist.
  *   C. pass 101 lock scope: a scarce trade takes the per-listing lock, an
- *      open-ended trade takes NONE (proven with a lock.withLock spy).
+ *      open-ended trade takes NONE (proven with a path-filtered
+ *      lock.withLock spy — pass 109 counts only 'market-trade' locks,
+ *      since persistMerged now goes through withLock as well).
  *   D. pass 101 fail-closed: when the lock cannot be acquired a scarce trade
  *      is REFUSED (E_TRADE_LOCK) instead of proceeding unlocked, and the
  *      buyer's escrow hold is released (no leak).
@@ -156,8 +158,12 @@ const boot = require("./lib/boot");
 boot.init({ taskId: "market-c", scopes: ["read", "write", "spawn", "execute"], debug: false });
 require("./lib/sandbox").defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canNetwork: true, canTrade: true, canSpawn: true });
 const lock = require("./lib/lock");
+// (pass 109) Count ONLY per-listing locks: withLock is now the ONE
+// acquire/release implementation (F7), so persistMerged's state lock goes
+// through it too — filtering by the 'market-trade' lock path keeps this
+// gate about lock SCOPE (pass 101), not total withLock traffic.
 let calls = 0; const _orig = lock.withLock;
-lock.withLock = (...a) => { calls++; return _orig(...a); };
+lock.withLock = (p, ...rest) => { if (String(p).includes('market-trade')) calls++; return _orig(p, ...rest); };
 const market = require("./lib/market");
 `;
     const spyTrade = (supplyJson) => SPY_HEAD + `
