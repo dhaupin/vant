@@ -7,6 +7,27 @@
 
 ## Handoff
 
+**Last known good commit:** pass 114 — live-fire targets 2-6 destroyed, gates permanent.
+test/livefire-kill9.test.js (4) + test/livefire-lease.test.js (2) +
+test/livefire-stress.test.js (4). Results: kill-9 stale takeover 5/5;
+FileStorage temp+rename survived 5 mid-write SIGKILLs of 5MB writes; teams
+recovers via fail-closed refusals + 10s takeover; TTL expiry under 3-contender
+load: ZERO two-holder samples (~70 sampled); force-release mid-write: lease
+changed hands, all mutex writes landed whole; CAS at scale 12x2 mutex + 8x3
+lease: all clean; symlink replant (mutex + lease): sweeps unlink the LINK,
+victims byte-intact. TWO PRODUCT FINDINGS for the owner: (1) atomicWrite
+debris — SIGKILL mid-writeFileSync leaves permanent <file>.<uuid> temps,
+nothing sweeps them (candidate: same-target temp sweep age > 60s on write);
+(2) create* LYING SUCCESS — teams.createOrg returns {id} even when _saveTeams
+was fail-closed refused (org memory-only, vanishes on restart); fix =
+propagate the abort marker through create* returns. Harness lessons:
+kills need a READY-MARKER file + stagger (module load eats spawn-timers);
+acquire staleness is MTIME-based (plant stale with fs.utimesSync, the JSON
+`at` field is ignored); lease file = JSON\n---\ntoken split format; judge
+success by PERSISTENCE not by create* returns. Gates: sweep 162/162 env-free,
+npm test 15/15, test-core 5/5, test-all 0, lint:locks 0 leaked, audit-mcp
+296/0/0, eslint 0 errors, scratch wiped.
+
 **Last known good commit:** pass 113 — live-fire: EPIPE fatal storm destroyed.
 Root cause was a three-link chain: two Sep-30 zombie QC probes (~85% CPU each,
 writing to dead pipes) + vant.js's fatal handler console.error()ing into the

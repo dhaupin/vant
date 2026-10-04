@@ -2,9 +2,60 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-04  
-**Session:** Pass 113 — live-fire: EPIPE fatal storm destroyed (handler guard + ledger cap)
+**Session:** Pass 114 — live-fire: kill-9 / TTL / force-release / CAS / symlink — all destroyed, tests permanent
 
 ---
+
+## Session (2026-10-04 — pass 114: live-fire, targets 2-6)
+
+The owner's remaining destructive list, executed as three permanent gate
+files (self-contained child-process tests, scratch brains, REAL kills):  
+`test/livefire-kill9.test.js` (4 gates) + `test/livefire-lease.test.js`
+(2 gates) + `test/livefire-stress.test.js` (4 gates).
+
+- **kill-9 mid-save (target 2): STURDY, two findings.** Stale takeover
+  after SIGKILL works (5/5 iterations: take-over, write, no leak);
+  FileStorage temp+rename survives 5 mid-write SIGKILLs of ~5 MB writes
+  (target always valid JSON). `teams._saveTeams` recovers via fail-closed
+  refusals then stale takeover at the real 10s staleness. FINDINGS:
+  (a) **atomicWrite debris gap** — SIGKILL during writeFileSync leaves
+  permanent `<file>.<uuid>` temp debris (3 files observed); nothing sweeps
+  it. Candidate fix: opportunistic same-target temp sweep (age > ~60s) on
+  write. (b) **create* LYING SUCCESS** — teams.createOrg returned
+  `{id,...}` while _saveTeams was fail-closed REFUSED: the org existed only
+  in memory and would vanish on restart. Top follow-up: propagate the
+  abort marker through the create* APIs (sync create + fire-and-forget
+  save makes the refusal invisible).
+- **TTL-expiry under load (target 3): HELD.** 2s-TTL holder + 3 contender
+  processes hammering: ~70 continuous samples during the storm showed ZERO
+  two-holder instants; contenders took turns cleanly via release. First
+  probe design error (planted lock's JSON `at` field vs REAL mtime —
+  acquire staleness is MTIME-based; fs.utimesSync to plant stale state).
+- **force-release during active writes (target 4): SAFE.** Admin
+  force-release landed mid-write-loop; the lease changed hands and EVERY
+  mutex-guarded write from both writers landed whole (A and B rows intact,
+  no interleaving corruption). Lease=who, mutex=not-at-the-same-time —
+  now proven under destruction.
+- **CAS two-holder stress at scale (target 5): HELD.** 12 iterations x 2
+  racers on a stale mutex lock: all rows serialized, zero leaks, zero lost
+  updates. 8 iterations x 3 racers on a stale lease: exactly ONE holder
+  per iteration (O_EXCL create-or-fail arbiters every race).
+- **symlink replant attacks (target 6): DEFENDED.** Attacker swapping the
+  lock path for a symlink to a victim file every 5ms, on both the mutex
+  path and the lease path: sweeps unlink the LINK (never the target),
+  victims survived byte-for-byte, writers completed all ops.
+- **Harness gotchas (for future destructive tests):** killAfterMs-from-
+  spawn is useless (module load eats the first ~1.5-2s — use a READY
+  MARKER file + staggered kill); withLock resolves to the fn's RETURN
+  VALUE (the {ok,reason} object only appears on the abort path); the lease
+  file is `JSON\n---\ntoken` split format (JSON.parse of the raw file
+  throws); judge success by PERSISTENCE, not by create* return values.
+
+Gates: sweep 162/162 env-free (3 new suites), npm test 15/15, test-core
+5/5, test-all exit 0, lint:locks 0 leaked, audit-mcp 296/0/0 baseline,
+eslint 0 errors, check OK, scratch wiped (legit brains only), zero leaked
+locks/temps. NEXT: owner decisions on the two live-fire product findings
+(atomicWrite debris sweep; create* lying success), then next targets.
 
 ## Session (2026-10-04 — pass 113: live-fire, EPIPE target)
 
