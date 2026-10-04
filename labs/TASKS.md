@@ -2,7 +2,36 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-04  
-**Session:** Pass 110 — native lock contention (monkeypatch seam dropped)
+**Session:** Pass 111 — locks S5 executed (unguarded-writer triage, F12)
+
+---
+
+## Session (2026-10-04 — pass 111: stage S5, unguarded-writer triage)
+
+Owner: "What else do we have in labs/locks? We can start live fire and
+destructive, real-time once we're done." Executed PRD stage S5 (labs/LOCKS.md
+§8.5): triaged all 11 unguarded whole-snapshot writers.
+
+- **(a) guarded (5):** auth lockout, vaf blocklist (both security state —
+  merge-under-lock via new `lock.pathForGlobal` repo-scoped root), brain
+  config (disk-only top-level keys preserved, stays sync), mcp insights
+  (re-read after embed awaits, dedupe by id, cap 100), citations (re-read,
+  fail-closed null). Behavioral gates in test/snapshot-guards.test.js (6).
+- **(b) accepted (6):** audit ledger (diagnostic, hash-chained), sync states
+  (self-healing), skills/islands manifests (regenerable), succession
+  (owner-operated), migrations marker (idempotent boot-time).
+- **Bonus fix:** auth's lockout branch never saved — lockouts were
+  memory-only until the next failure. Now persisted.
+- **Harness catch:** first vaf merge used Object.entries(Map) → [] → dropped
+  local blocks; the new gate caught it immediately. Map iteration required.
+- Matrix recorded in labs/LOCKS.md §8.5. audit-locks now FAILS if any of
+  the five drops its withLock guard (F12 regression gate).
+
+Gates: sweep 158/158 (env-free — new suite), lints ×4, eslint 0 errors,
+check, npm test, test-core, test-all, audit-locks 0 leaked, MCP audit
+baseline (296/0/0), scratch wiped. NEXT: S6 (docs — locks.md ops +
+reference, MCP entry, README, ROADMAP, docstrings), then the owner's
+live-fire/destructive real-time session (EPIPE audit pollution is a target).
 
 ---
 

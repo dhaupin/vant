@@ -141,14 +141,24 @@ for (const f of ['lib/state-store.js', 'lib/teams.js', 'lib/agents/internal.js',
     }
 }
 
-// 3. no leaked lockfiles under any .locks/ root
+// F12 (pass 111, S5) — the five writers that adopted merge-under-lock
+// guards in the unguarded-writer triage must KEEP them; hand-rolled
+// acquire/release sneaking back is a regression (labs/LOCKS.md §8.5).
+for (const f of ['lib/auth.js', 'lib/vaf.js', 'lib/config.js', 'lib/mcp.js', 'lib/citations.js']) {
+    const s = source(f);
+    if (s && !/withLock\(/.test(s)) {
+        problems.push(`${f} adopted a withLock guard in S5 (§8.5 decision (a)) but no longer uses it — the merge-under-lock regressed`);
+    }
+}
+
+// 3. no leaked lockfiles under any .locks/ or .locks-global/ root
 const leaked = [];
 function findLocks(dir) {
     if (!fs.existsSync(dir)) return;
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
         const full = path.join(dir, entry.name);
         if (entry.isDirectory()) {
-            if (entry.name === '.locks') {
+            if (entry.name === '.locks' || entry.name === '.locks-global') {
                 for (const lf of fs.readdirSync(full)) {
                     if (lf.endsWith('.lock')) leaked.push(path.relative(ROOT, path.join(full, lf)));
                 }
@@ -169,9 +179,11 @@ console.log(`  lease requires (lib/brain-lock.js):  ${leaseRequires.length}`);
 for (const c of leaseRequires) console.log(`    - ${c}`);
 console.log(`  path-formula owners:                 lib/lock.js, lib/brain-lock.js`);
 console.log(`  mutex root:                          models/private/<brain>/.locks/  (per-brain)`);
+console.log(`  global mutex root:                   models/.locks-global/            (repo-scoped resources, S5)`);
 console.log(`  lease root:                          models/private/.locks/           (cross-brain, separate by design)`);
 console.log(`  non-locks (must require neither):    lib/recursion.js`);
 console.log(`  guarded whole-snapshot writers:      lib/state-store.js, lib/teams.js, lib/agents/internal.js, lib/habitat.js (withLock, F7)`);
+console.log(`  guarded repo-scoped writers (S5):    lib/auth.js, lib/vaf.js, lib/config.js, lib/mcp.js, lib/citations.js`);
 console.log(`  leaked lockfiles:                    ${leaked.length}`);
 
 if (problems.length) {

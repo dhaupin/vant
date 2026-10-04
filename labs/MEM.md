@@ -7,6 +7,24 @@
 
 ## Handoff
 
+**Last known good commit:** pass 111 — locks S5 (unguarded-writer triage,
+F12). All 11 §8.5 candidates decided (matrix in LOCKS.md §8.5): five
+**(a) merge-under-lock guards** — auth lockout + vaf blocklist (security;
+new lock.pathForGlobal repo-scoped root models/.locks-global/), brain config
+(sync-preserving shallow merge; saveBrainConfig stays SYNC), mcp insights
+(re-read after embed awaits, dedupe by id), citations (re-read, fail-closed
+null); six **(b) accepted** with reasons. BONUS: auth's lockout branch never
+persisted (memory-only) — fixed. Harness catch: Object.entries(Map) yields
+[] — the vaf merge silently dropped local blocks until the new gate caught
+it; Map iteration required. audit-locks F12 gate: the five writers must keep
+withLock(; .locks-global leak-scanned + gitignored. Suite count 157→158
+(test/snapshot-guards.test.js, 6 gates). Gates: sweep 158/158 env-free,
+lints ×4, eslint 0 errors, check, npm test, test-core, test-all, audit-locks
+0 leaked, MCP 296/0/0. NEXT: S6 (docs — docs/operations/locks.md,
+docs/reference/locks.md + MCP entry, README pointer, ROADMAP 557/599/606,
+accurate docstrings), then owner's live-fire/destructive real-time session
+(EPIPE audit-log pollution is a queued target).
+
 **Last known good commit:** pass 110 — native lock contention (monkeypatch
 seam dropped). withLock calls internal acquire directly again (the pass-109
 module.exports.acquire indirection existed only for the tests' property

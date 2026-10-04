@@ -253,17 +253,33 @@ Three **non-lock serializers** that must NOT be confused with either (see §8.3)
 | Snapshot writers | ad-hoc acquire (F7) | `withLock` where RAII fits | S4 |
 | Unguarded writers | unaudited (F12) | triaged (§8.5) + guarded/merged or explicitly accepted | S5 |
 
-## 8.5 Unguarded whole-snapshot writer triage (F12)
+## 8.5 Unguarded whole-snapshot writer triage (F12) — DECIDED (pass 111)
 
-These write a whole in-memory snapshot and are **not** on the mutex path. Each
-needs a per-module decision: **(a)** guard with `lock.withLock` + adopt-on-hydrate
-merge, **(b)** accept because it is single-writer/append-only, or **(c)** merge
-on read. Candidate list (from a `store.write(...JSON.stringify...)` sweep):
-`audit.js` (ledger + rotate), `citations.js`, `sync.js` (states/privacy),
-`skills.js` (manifest), `succession.js` (config + `.ledger.json`),
-`auth.js` (lockout), `config.js`, `islands.js` (manifest), `vaf.js` (blocked),
-`migrations.js`, `mcp.js` (insights). Record each decision inline in this doc
-as S5 progresses.
+These write a whole in-memory snapshot and are **not** on the mutex path.
+Decision legend: **(a)** guard with `lock.withLock` + merge-under-lock,
+**(b)** accept because single-writer/append-only/self-healing, **(c)** merge
+on read. Swept from a `store.write(...JSON.stringify...)` pass over lib/.
+
+| Module · writer | Exposure | Decision | Rationale |
+|---|---|---|---|
+| `auth.js` lockout (`.circuit-auth.json`) | two processes recording failures → whole-map clobber silently UN-LOCKS a peer's brute-force hold | **(a) guard** | security state; merge keeps later `lockoutUntil` per id (tie → higher count). Also fixed: the lockout branch never persisted (memory-only until next failure) |
+| `vaf.js` blocklist (`.circuit-vaf.json`) | peer's block silently un-blocked | **(a) guard** | security state; merge keeps later `until` per ip, drops expired (the only delete path is expiry, so later-`until` union is safe) |
+| `config.js` brain config | concurrent `config set` of different keys loses one | **(a) guard** | authoritative file; merge preserves disk-only TOP-LEVEL keys, writer wins keys it carries. Stays SYNC (bin/org.js + operator-caps consume the boolean) |
+| `mcp.js` insights (`models/public/insights.json`) | read→write window spanned the embed awaits → concurrent `brain_share` drops a row | **(a) guard** | shared cross-brain knowledge feed; re-read under lock, dedupe by id, prepend, cap 100 |
+| `citations.js` addSource | concurrent adds drop a source row | **(a) guard** | provenance rows; re-read under lock, push. Fail-closed `null` when the lock cannot be taken (public API, no internal callers) |
+| `audit.js` ledger + rotate | multi-process appends could lose rows | **(b) accept** | diagnostic trail, hash-chain ordering makes cross-process merge lossy by design; the ops log is `.audit.json` (append via storage) |
+| `sync.js` provider states + privacy | last-writer-wins per-provider row | **(b) accept** | status rows self-heal on the next sync; cosmetic loss only |
+| `skills.js` manifest (`loaded/hydrated`) | loss = re-hydration work | **(b) accept** | regenerable cache marker, not data |
+| `islands.js` manifest | loss = island rediscovery | **(b) accept** | derived from a disk scan; regenerable |
+| `succession.js` config + `.ledger.json` | rare owner-operated writes could clash | **(b) accept** | human-gated single-operator workflow by design (§ trust levels) |
+| `migrations.js` marker | two migrators at boot | **(b) accept** | boot-time single-migrator (pass-97 collision handling); marker content is idempotent per layout version |
+
+**New primitive (pass 111):** `lock.pathForGlobal(kind, id)` →
+`models/.locks-global/<kind>[__<id>].lock` — repo-scoped resources (auth,
+vaf, cross-brain insights) are anchored OUTSIDE any brain, so a per-brain
+lock would split-brain two processes pinned to different brains. Same
+discipline as `pathFor()`; audit scans it for leaks. Behavioral gates:
+test/snapshot-guards.test.js (6).
 
 ## 8.6 Stages
 
@@ -343,10 +359,42 @@ locks · scratch brains wiped.
 - [x] **S3 — Complete the wire-up (F6, health, MCP)** — done pass 107 (see §8.11)
 - [x] **Interim QC — lease/mutex defect hunt (L1–L4)** — done pass 108 (see §8.11)
 - [x] **S4 — Migrate to `withLock` (F7)** — done pass 109 (see §8.11)
-- [ ] S5 — Unguarded-writer triage (F12)
+- [x] **S5 — Unguarded-writer triage (F12)** — done pass 111 (see §8.11 + §8.5 matrix)
 - [ ] S6 — Documentation (F13)
 
 ## 8.11 Execution log
+
+### S5 — Unguarded-writer triage (pass 111, done)
+
+- **F12 closed.** All eleven §8.5 candidates triaged — decision matrix recorded
+  in §8.5. Five adopted **(a) merge-under-lock guards** (auth lockout, vaf
+  blocklist, brain config, mcp insights, citations); six **(b) accepted** with
+  written reasons (audit ledger, sync states, skills/islands manifests,
+  succession, migrations marker). No (c) needed.
+- **New primitive:** `lock.pathForGlobal(kind, id)` → `models/.locks-global/`
+  for repo-scoped resources (auth/vaf state lives outside any brain; a
+  per-brain lock would split-brain). Same wx/stale/symlink discipline; audit
+  scans it for leaks; `.gitignore` covers it.
+- **Merge semantics:** auth keeps later `lockoutUntil` per id (tie → higher
+  count); vaf keeps later `until` and drops expired (only delete path is
+  expiry); config shallow-merges disk-only top-level keys under the per-brain
+  lock (stays SYNC — bin/org.js + operator-caps consume the boolean);
+  mcp re-reads under the repo-global lock after the embed awaits, dedupes by
+  id, caps 100; citations re-reads under the per-brain lock, fail-closed
+  `null` on refusal.
+- **BONUS fix:** auth's lockout branch returned WITHOUT saving — lockouts
+  were memory-only until the next failure (restart/peer never saw them).
+  Now persisted.
+- **Harness catch:** the first vaf merge used `Object.entries(map)` on a Map
+  (yields `[]`) and silently dropped local blocks — the new behavioral gate
+  caught it immediately. Map iteration (`for…of map`) is required.
+- **Tests:** test/snapshot-guards.test.js — 6 gates (4 behavioral merge,
+  auth lockout persistence, mcp static — the handler needs an embed provider
+  and is not offline-runnable). Suite count 157→158.
+- **Gates:** sweep 158/158 (env-free); lint:locks/docs/surface/helpers PASS;
+  eslint 0 errors on touched; `npm run check`; npm test 15/15; test-core
+  5/5; test-all exit 0; audit-locks PASS incl. new F12 gate (0 leaked); MCP
+  audit 296 reg / THREW 0 / PHANTOM 0 (baseline); scratch wiped.
 
 ### Native lock contention — drop the monkeypatch seam (pass 110, done)
 
