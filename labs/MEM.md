@@ -7,6 +7,27 @@
 
 ## Handoff
 
+**Last known good commit:** pass 112 — locks S6 (documentation, F13).
+docs/operations/locks.md + docs/reference/locks.md written (two types,
+roots, postures, exact exports/returns; CLI verbs verified against
+bin/lock.js — acquire/release/status/force, NO stack CLI verb); mcp-tools
+vant_lock entry expanded + Return Types row de-staled; ops/reference index
+rows (nav_order 66/136); README pointer; ROADMAP lock lines 557/599/606
+refreshed. Docstrings audited accurate. Gates: lint:docs green, lints ×4,
+check, sweep 158/158 env-free, npm test, test-core, test-all, audit-locks
+0 leaked, MCP 296/0/0, scratch wiped. STAGE S1-S6 ALL DONE — the locks PRD
+(labs/LOCKS.md §8) is complete. NEXT: owner's live-fire/destructive
+real-time session. Order: EPIPE audit-log pollution FIRST
+(models/private/vant/.audit.json was 44 MB / 147,913 write-EPIPE fatal
+uncaughtException entries since Oct 2 04:37Z, bursts at workspace wake-ups;
+candidate fix = drop/rate-limit EPIPE fatals + cap audit size), then
+kill-9 mid-save races across all guarded writers, TTL-expiry under load,
+force-release during active writes, CAS two-holder stress at scale, symlink
+replant attacks. Platform rules: no backgrounding — build destructive tests
+as self-contained child-process scripts (runChild + barrier flags pattern
+in test/market-crossprocess.test.js is the template); run the sweep WITHOUT
+VANT_BRAIN exported.
+
 **Last known good commit:** pass 111 — locks S5 (unguarded-writer triage,
 F12). All 11 §8.5 candidates decided (matrix in LOCKS.md §8.5): five
 **(a) merge-under-lock guards** — auth lockout + vaf blocklist (security;

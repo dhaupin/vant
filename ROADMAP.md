@@ -554,7 +554,7 @@ Each lib module will be updated to support multi-brain stack. Methodical approac
 
 | Module | Status | Brain-Specific State |
 |--------|--------|---------------------|
-| **lock.js** | TODO | Lock files, token cache, rate limits |
+| **lock.js** | DONE | Lock files + token cache (lease: `models/private/.locks/.lock-<brain>.json`; mutex: `models/private/<brain>/.locks/`, `models/.locks-global/`). The rate limit was removed in pass 105 - rate limiting is QoS's concern. See [docs/operations/locks.md](docs/operations/locks.md) |
 | **network.js** | TODO | Online status, latency, circuit breaker, domains |
 | **escrow.js** | TODO | Budgets, approvals, holds |
 | **qos.js** | TODO | Rate limits, circuit state, timeouts |
@@ -596,7 +596,7 @@ async function acquire(agentId, timeout) {
 ```
 
 **Current Status:**
-- [ ] lock.js - TODO
+- [x] lock.js - DONE (2026-10: passes 105-112: lease truth-up, separation of concern, wire-up, withLock migration, unguarded-writer triage, docs)
 - [ ] network.js - TODO
 - [ ] escrow.js - TODO
 - [ ] qos.js - TODO
@@ -604,6 +604,7 @@ async function acquire(agentId, timeout) {
 **Progress:**
 - 2026-07-22: Reverted stub work, verified clean state at 37b0549
 - 2026-07-22: Planning lock.js as first fully-wired module
+- 2026-10: lock.js delivered via the locks PRD (labs/LOCKS.md section 8), stages S1-S6: lease truth-up (S1), separation-of-contract audit (S2), tmp/health/MCP/CLI wire-up (S3), withLock migration (S4), unguarded-writer triage with merge-under-lock guards + pathForGlobal (S5), documentation (S6). Docs: docs/operations/locks.md, docs/reference/locks.md
 
 ---
 

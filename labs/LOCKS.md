@@ -360,9 +360,47 @@ locks · scratch brains wiped.
 - [x] **Interim QC — lease/mutex defect hunt (L1–L4)** — done pass 108 (see §8.11)
 - [x] **S4 — Migrate to `withLock` (F7)** — done pass 109 (see §8.11)
 - [x] **S5 — Unguarded-writer triage (F12)** — done pass 111 (see §8.11 + §8.5 matrix)
-- [ ] S6 — Documentation (F13)
+- [x] **S6 — Documentation (F13)** — done pass 112 (see §8.11)
 
 ## 8.11 Execution log
+
+### S6 — Documentation (pass 112, done)
+
+- **F13 closed.** Docs describe the SHIPPED system (postures, roots, exact
+  signatures verified against lib/ and bin/ — no aspirational claims; the
+  removed rate limit is mentioned only as a removed thing):
+  - `docs/operations/locks.md` (new): the two types side by side, both roots
+    and WHY they differ, the lease (CLI + programmatic examples, same-agent
+    refresh, CAS takeover, token-verified release, "rate limiting is not
+    here"), the mutex (withLock/pathFor/pathForGlobal, reason values, always-
+    Promise contract), the "which path helper?" table (per-brain vs
+    repo-scoped), failure postures (closed vs open), the NOT-a-lock table
+    (mutex() / save chains / recursion guard), diagnostics.
+  - `docs/reference/locks.md` (new): full export tables for both modules
+    (signatures + return shapes), `vant lock` CLI verbs (verified against
+    bin/lock.js: acquire/release/status/force + short forms; no `stack` CLI
+    verb — status covers the stack), the `vant_lock` MCP tool (all 5 actions
+    + return shapes), the on-disk path table.
+  - `docs/reference/mcp-tools.md`: vant_lock entry expanded (all 5 actions +
+    token/agentId params, link to the API page); Return Types row updated
+    from the pass-97-era `{ token }` to the real per-action shapes.
+  - Indexes: docs/operations/index.md + docs/reference/index.md rows added
+    (nav_order 66 / 136, next free slots). README Reference section points at
+    the operations page.
+  - `ROADMAP.md` lock lines refreshed (was stale "TODO / rate limits"):
+    module table row, checkbox, and progress log all now record the shipped
+    state and point at the docs.
+  - Module docstrings audited: already accurate (pass 105 removed the
+    rate-limit claim; the only `flock` mention left is lock.js's historical
+    "renamed from lib/flock.js, pass 102" note, which is correct).
+- **Style/links:** both new pages pass the docs linters (no em dashes, no
+  emoji/glyphs in prose, fenced blocks tagged, tables close with a pipe,
+  heading levels contiguous, all permalinks resolve).
+- **Gates:** lint:docs/style/links PASS; lint:locks PASS (0 leaked);
+  lint:surface/helpers PASS; `npm run check` syntax OK; sweep 158/158
+  (env-free); npm test 15/15; test-core 5/5; test-all exit 0; audit-mcp
+  296 reg / THREW 0 / PHANTOM 0; scratch wiped; eslint clean on touched
+  (docs only, no lib changes this pass).
 
 ### S5 — Unguarded-writer triage (pass 111, done)
 

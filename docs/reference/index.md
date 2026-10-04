@@ -23,6 +23,7 @@ description: Complete Vant reference - CLI, configuration, APIs, error codes, an
 | [Compute](/vant/reference/compute) | Multi-language code execution |
 | [Stream](/vant/reference/stream) | Async queues |
 | [Storage](/vant/reference/storage) | Storage API |
+| [Locks API](/vant/reference/locks) | Lease and mutex API, `vant lock`, `vant_lock` |
 | [Canvas](/vant/reference/canvas) | Brain visualization |
 | [Code Comments](/vant/reference/code-comments) | Comment conventions |
 | [Consensus](/vant/reference/consensus) | Voting mechanisms |

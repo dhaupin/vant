@@ -15,6 +15,7 @@ description: Running Vant day to day - storage, sync, cron, CI, notifications, n
 | Page | Job |
 |------|-----|
 | [Storage](/vant/operations/storage) | The storage layer: statuses, stats, WAL, mirrors |
+| [Locks](/vant/operations/locks) | The two lock types: lease and mutex, roots, failure postures |
 | [Sync](/vant/operations/sync) | Git sync flows and troubleshooting |
 | [Automation](/vant/operations/automation) | Scheduled and triggered workflows |
 | [Webhooks](/vant/operations/webhooks) | Outbound and inbound webhooks |

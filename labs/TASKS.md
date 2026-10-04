@@ -2,9 +2,42 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-04  
-**Session:** Pass 111 — locks S5 executed (unguarded-writer triage, F12)
+**Session:** Pass 112 — locks S6 executed (documentation, F13)
 
 ---
+
+## Session (2026-10-04 — pass 112: stage S6, documentation)
+
+Owner green-lit S6 then the live-fire session ("yeah let's light it up!").
+Executed PRD stage S6 (labs/LOCKS.md §8.6): F13 closed.
+
+- **docs/operations/locks.md (new):** the two types side by side, both lock
+  roots and why they differ, lease usage (CLI + programmatic, same-agent
+  refresh, CAS takeover, token-verified release), mutex usage (withLock /
+  pathFor / pathForGlobal, reason values, always-Promise contract), the
+  which-path-helper table (per-brain vs repo-scoped), failure postures, the
+  NOT-a-lock table, diagnostics.
+- **docs/reference/locks.md (new):** full export tables for both modules,
+  `vant lock` CLI verbs (verified against bin/lock.js — acquire/release/
+  status/force + short forms; no `stack` CLI verb), the `vant_lock` MCP
+  tool (all 5 actions + return shapes), on-disk path table.
+- **mcp-tools.md:** vant_lock entry expanded (5 actions, params, API link);
+  Return Types row updated from the stale `{ token }`.
+- **Indexes + README:** operations/reference index rows (nav_order 66/136);
+  README Reference section points at the ops page.
+- **ROADMAP.md:** stale "TODO / rate limits" lock lines (557/599/606)
+  refreshed to the shipped state with doc pointers.
+- **Docstrings:** audited — already accurate (pass 105 removed the
+  rate-limit claim; the only `flock` mention is lock.js's correct historical
+  rename note).
+
+Gates: lint:docs PASS (style + links), lint:locks/surface/helpers PASS,
+check OK, sweep 158/158 env-free, npm test 15/15, test-core 5/5, test-all
+exit 0, audit-locks 0 leaked, MCP audit 296/0/0, scratch wiped. NEXT: the
+owner's live-fire/destructive real-time session — EPIPE audit-log pollution
+first (models/private/vant/.audit.json hit 44 MB / 147,913 EPIPE fatals),
+then kill-9 mid-save races, TTL-expiry under load, force-release during
+active writes, CAS two-holder stress at scale, symlink replant attacks.
 
 ## Session (2026-10-04 — pass 111: stage S5, unguarded-writer triage)
 

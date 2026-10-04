@@ -135,12 +135,15 @@ vant_sync(direction="push")
 
 ### vant_lock
 
-Acquire/release brain lock.
+Acquire, release, or inspect the brain authorization lease. Full API:
+[Locks API](/vant/reference/locks).
 
 **Params:**
 | Param | Type | What |
 |-------|------|------|
-| action | string | "acquire" or "release" |
+| action | string | "acquire", "release", "status", "stack", or "force" |
+| token | string | Release token from acquire |
+| agentId | string | Agent identifier |
 
 **Example:**
 ```bash
@@ -738,7 +741,7 @@ process, not just this one.
 | vant_switch_branch | { success } |
 | vant_commit | { success, hash } |
 | vant_sync | { success } |
-| vant_lock | { token } |
+| vant_lock | { action, acquired, token } / { action, success, message } / { action, status, stack, held } / { action, forceReleased } |
 | vant_health | { status, version } |
 | brain_migration_status | { markerVersion, targetVersion, upToDate, legacy, guidance } |
 

@@ -164,6 +164,7 @@ Full docs at **[docs.creadev.org/vant](https://docs.creadev.org/vant)**
 
 - [CLI](https://docs.creadev.org/vant/reference/cli) - All commands
 - [Configuration](https://docs.creadev.org/vant/reference/config) - Env options
+- [Locks](https://docs.creadev.org/vant/operations/locks) - Brain lease + write mutex
 
 ---
 
