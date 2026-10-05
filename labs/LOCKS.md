@@ -632,3 +632,42 @@ Owner flagged "def bugs" in the recent lock commits; a probe-driven hunt
   gates); sweep 157/157 chunked; lint:docs/surface/helpers/locks PASS; `npm run
   check`; eslint 0 errors on touched; audit-mcp 296 / THREW 0 / PHANTOM 0;
   `npm test` 15/15; test-all exit 0; test-core 5/5; zero leaked locks.
+
+## 8.12 Save-refusal parity sweep (pass 116, done)
+
+> Post-PRD target #1: pass 115 fixed teams' lying success; this sweep extends
+> the honest-outcome contract to every OTHER §8.5 (a)-guarded writer, so a
+> fail-closed refusal is visible to callers everywhere — never a success
+> that vanishes on restart (or, for auth/vaf, silently unlocks an attacker).
+
+Findings and fixes (all proven by `test/save-refusal-parity.test.js`, 16
+broken-root gates using the pass-110 native technique):
+
+| Writer | Before (the lie) | After (honest) |
+|---|---|---|
+| `auth._saveLockedAuth` | discarded withLock's return entirely — a fail-closed abort was not even LOGGED; `recordFailedAttempt` reported `{locked:true}` while the brute-force LOCKOUT was memory-only (a restart unlocked the attacker) | `withLockSync` + honest `{ok,reason,aborted?}`; `recordFailedAttempt`/`clearFailedAttempt` surface `{persisted, code:'E_SAVE_REFUSED', reason}` |
+| `vaf._saveBlockedIPs` | same shape; `recordFailedAttempt` was void, abort invisible | same contract: `{count, blocked, persisted, code?}` |
+| `mcp brain_share` | returned `{shared:true}` on abort with the insight written NOWHERE | abort checked; returns `{error, code:'E_SAVE_REFUSED', reason}`; insights.json byte-identical under refusal (body never runs) |
+| `agents._saveAgents` | abort resolved `undefined` AND cleared `_dirty` — killing the flush()/beforeExit retry path; `spawn` fires the save with `.catch(()=>{})` (roster drain stays flush()'s documented job) | resolves `{ok,reason,aborted}`; `_dirty` KEPT on abort so drains retry (gate proves the retry lands); `terminate`/`prune`/`restoreState` surface `{persisted:false, code:'E_SAVE_REFUSED'}`; `bin/agents.js kill` prints the refusal |
+| `agents.restoreState` tombstone gap | restored ids were never noted seen → a refused `terminate` RESURRECTED the agent on the retry save (merge re-adopted the un-seen disk row — caught live by the gate) | restored ids call `_noteAgentSeen` so deletes stay authoritative |
+
+Second-order finding of the sweep: **auth/vaf called the ASYNC `withLock`
+from SYNC functions** — reading `.aborted` off the returned Promise is
+always `undefined`, so any abort check on the async call is dead code. Both
+converted to `withLockSync` (the pass-115 primitive). `config`,
+`citations`, `state-store.persistMerged`, and `habitat.save` were already
+honest (`false`/`null`/`false`/`null`) and are re-pinned for parity.
+`audit-locks` F12 now accepts `withLock(?:Sync)?\(` (same form as F7) —
+sync bodies in sync functions reading the outcome directly is the
+sanctioned pattern, not a regression.
+
+Judgment call kept from §8.5: the (b)-accept `persistMerged` callers
+(consensus/settlement/node-registry/market `_persist()`) stay fire-and-forget
+by design — their API is honest (false on refusal), they log loudly, and the
+next mutation's save self-heals the divergence; no dirty-flag kill exists on
+that path.
+
+Gates: `test/save-refusal-parity.test.js` 16/16; sweep 163/163 env-free;
+npm test 15/15; test-core 5/5; test-all exit 0; lint:locks (F7+F12)
+0 leaked; lint:docs/surface/helpers PASS; npm run check OK; eslint touched
+0 errors; audit-mcp 296/59/0/0/0/149/88/0 exact baseline; scratch wiped.
