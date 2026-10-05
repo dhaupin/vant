@@ -7,7 +7,27 @@
 
 ## Handoff
 
-**Last known good commit:** pass 115 — BOTH pass-114 live-fire product findings fixed.
+**Last known good commit:** pass 116 — save-refusal parity sweep done (post-PRD target #1).
+Every §8.5 (a)-guard now surfaces refusals honestly: auth (withLockSync +
+{persisted, code:'E_SAVE_REFUSED'} — the brute-force lockout lie is dead), vaf
+(same), mcp brain_share (no more {shared:true} on abort; insights.json untouched
+under refusal), agents (_saveAgents resolves {ok,reason,aborted}; _dirty KEPT on
+abort so flush()/beforeExit retry; terminate/prune/restoreState surface persisted;
+bin/agents kill prints the warning) + restoreState tombstone fix (_noteAgentSeen
+per restored id — a refused terminate used to RESURRECT the agent on the retry
+save; the parity gate caught it live).
+SECOND-ORDER LESSON: auth/vaf called the ASYNC withLock from SYNC functions —
+`.aborted` on a Promise is ALWAYS undefined; abort checks on unawaited promises
+are dead code. Sync bodies read withLockSync. F7+F12 now both accept
+`withLock(?:Sync)?\(`. Honest already: config/citations/habitat/state-store.
+Gates: test/save-refusal-parity.test.js 16/16 (broken-root, VANT_REPO_ROOT tmp
+isolation for auth/vaf circuit files), sweep 163/163 env-free, npm test 15/15,
+test-core 5/5, test-all 0, lint:locks 0 leaked, audit-mcp 296/59/0/0/0/149/88/0
+exact baseline, eslint 0 errors, scratch wiped. Full matrix: labs/LOCKS.md §8.12.
+NEXT: post-PRD target #2 (lock observability counters in health/MCP) or #3
+(debris janitor), owner's pick.
+
+**Previous (pass 115)** — BOTH pass-114 live-fire product findings fixed.
 (1) create* lying success: new lock.withLockSync (sync twin, plain-value return,
 aborts as {ok:false,reason,aborted:true}) + _saveTeams() now SYNC returning the
 honest {ok,reason}; all 11 teams mutators do snapshot→mutate→rollback and return

@@ -1,10 +1,51 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-10-04  
-**Session:** Pass 115 — live-fire findings fixed: create* honest outcomes + atomicWrite debris sweep
+**Last Updated:** 2026-10-05  
+**Session:** Pass 116 — save-refusal parity sweep: every (a)-guard surfaces refusals honestly
 
 ---
+
+## Session (2026-10-05 — pass 116: post-PRD target #1, honest outcomes everywhere)
+
+Extended the pass-115 honest-outcome contract to every other §8.5
+(a)-guarded writer. Four lies found, fixed, gated:
+
+- **auth._saveLockedAuth** discarded withLock's return entirely — the
+  fail-closed abort was not even logged, and `recordFailedAttempt` reported
+  `{locked:true}` while the brute-force LOCKOUT was memory-only (restart
+  unlocks the attacker). Now `withLockSync` + honest return;
+  `recordFailedAttempt`/`clearFailedAttempt` surface
+  `{persisted, code:'E_SAVE_REFUSED'}`.
+- **vaf._saveBlockedIPs** — same shape; `recordFailedAttempt` was void. Now
+  `{count, blocked, persisted, code?}`.
+- **mcp brain_share** returned `{shared:true}` on abort with the insight
+  written NOWHERE. Now `{error, code:'E_SAVE_REFUSED'}`; insights.json
+  byte-identical under refusal (body never runs).
+- **agents._saveAgents** resolved `undefined` on abort AND cleared `_dirty`
+  (killing the flush()/beforeExit retry path). Now resolves
+  `{ok,reason,aborted}`, keeps `_dirty`; `terminate`/`prune`/`restoreState`
+  surface `{persisted:false, code}` (terminate stays boolean-compatible:
+  true on clean kill, refusal OBJECT on refusal, false when not found);
+  `bin/agents.js kill` prints the warning.
+- **agents.restoreState tombstone gap (caught live by the gate):** restored
+  ids were never noted seen, so a refused `terminate` RESURRECTED the agent
+  on the retry save. Fixed with `_noteAgentSeen` per restored id.
+- **Second-order finding:** auth/vaf called the ASYNC `withLock` from SYNC
+  functions — `.aborted` on a Promise is always undefined; any abort check
+  on the async call is dead code. Both converted to `withLockSync`.
+  audit-locks F12 now `withLock(?:Sync)?\(` (same as F7).
+- Already honest, re-pinned for parity: config (false), citations (null),
+  habitat (null), state-store persistMerged (false). The (b)-accept
+  persistMerged callers stay fire-and-forget (API honest, logs loudly,
+  next-mutation save self-heals).
+
+Gates: test/save-refusal-parity.test.js 16/16 (broken-root, native); sweep
+163/163 env-free; npm test 15/15; test-core 5/5; test-all exit 0;
+lint:locks 0 leaked; lint:docs/surface/helpers PASS; npm run check OK;
+eslint touched 0 errors; audit-mcp 296/59/0/0/0/149/88/0 exact baseline;
+scratch wiped. Documented as labs/LOCKS.md §8.12. NEXT: post-PRD target #2
+(lock observability in health/MCP) or #3 (debris janitor), owner's pick.
 
 ## Session (2026-10-04 — pass 115: the two pass-114 findings, fixed)
 

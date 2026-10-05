@@ -148,8 +148,10 @@ for (const f of ['lib/state-store.js', 'lib/teams.js', 'lib/agents/internal.js',
 // guards in the unguarded-writer triage must KEEP them; hand-rolled
 // acquire/release sneaking back is a regression (labs/LOCKS.md §8.5).
 for (const f of ['lib/auth.js', 'lib/vaf.js', 'lib/config.js', 'lib/mcp.js', 'lib/citations.js']) {
-    const s = source(f);
-    if (s && !/withLock\(/.test(s)) {
+    const s = source(f);    // (pass 116) withLockSync counts here too — sync bodies in sync
+    // functions (auth/vaf) read the fail-closed outcome directly; the async
+    // wrapper only HIDES it (the parity-sweep finding).
+    if (s && !/withLock(?:Sync)?\(/.test(s)) {
         problems.push(`${f} adopted a withLock guard in S5 (§8.5 decision (a)) but no longer uses it — the merge-under-lock regressed`);
     }
 }

@@ -139,7 +139,13 @@ async function run() {
             const ok = await agents.kill(id);
             await agents.flush();
             if (!ok) { console.error('✗ Agent ' + id + ' not found'); process.exit(1); }
-            console.log('✓ Terminated agent:', id, '(persisted)');
+            // (pass 116) The kill outcome is now honest: a truthy refusal
+            // object means the termination is memory-only until a later save.
+            if (typeof ok === 'object' && ok.persisted === false) {
+                console.error('⚠ Terminated agent:', id, '- save REFUSED (' + (ok.reason || 'lock unavailable') + '); roster not persisted');
+            } else {
+                console.log('✓ Terminated agent:', id, '(persisted)');
+            }
             break;
         }
 
