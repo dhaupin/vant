@@ -7,7 +7,11 @@
 
 ## Handoff
 
-**Last known good commit:** pass 118 — post-PRD menu CLEARED (#4 lease live-fire, #5 spin hygiene, #6 small fry).
+**Last known good commit:** pass 119 — E2E grand tour + sudo_grant disconnect + dead lint hatch.
+NEW test/e2e-grand-tour.test.js (18 gates, ~1.5s): fresh clone boots (health/migrate/sweep, NODE_PATH bridges deps), LIVE MCP door (296 tools, deny-by-default agent_spawn, sudo_grant escalation CONNECTS via CAP_TO_SCOPE, spawn/list/kill lifecycle, malformed JSON no-500, DNS-rebind refused), edge (hostile VANT_BRAIN fallback, storage traversal, honest E_SANDBOX). THE FIX: MCP sudo_grant stored the RAW capability while sandbox.can asks sudo.can(agentId, MAPPED scope) — granted canSpawn could never satisfy canSpawn; now grants mapped scope + raw name. vant_sudo_grant was already right (param IS a scope). SECOND FIX: bin-truthfulness gate's STATUS-FIELD-OK hatch was dead since pass 80 (checked against comment-STRIPPED source); now checks RAW lines; bin/health.js's legit lock.stats().held read carries the marker (that read had been an unfixable red gate since pass 117 — the pass-117/118 "lint:helpers PASS" claims were WRONG). New test/bin-truthfulness.test.js 3/3 (unmarked fails, marked passes, hatch is line-scoped). Docs: sudo.md MCP-tools section (two grant doors). Gates: sweep 168/168 env-free, npm test 15/15, test-core 5/5, test-all 0, lints x4 PASS, check OK, eslint touched 0 errors (flushed a pre-existing zero-width space in check-bin-truthfulness.js docstring), audit-mcp 296/59/0/0/0/149/88/0 exact baseline, audit-locks PASS, scratch wiped, tmp clone cleaned.
+NEXT: no open work. Candidates: tour fresh-install against a real npm install (CI-slow, skipped by design); more cross-surface tours (CLI verbs vs lib returns); owner's next direction.
+
+**Previous (pass 118)** — post-PRD menu CLEARED (#4 lease live-fire, #5 spin hygiene, #6 small fry).
 #5: acquire's wait now SLEEPS (Atomics.wait, 5ms poll; bounded-spin fallback)
 — 400ms contended wait measured ~12ms CPU (was ~400ms); gate E in
 lock-observability asserts CPU << wall. #4: test/livefire-lease2.test.js 10/10

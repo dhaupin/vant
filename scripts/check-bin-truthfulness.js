@@ -194,9 +194,11 @@ function resolveMethod(receiver, name, varMap) {
  * Comment-stripped copy of the source, line-aligned. (pass 80) Without
  * this the gate flagged its OWN fix comments (`// status.running never
  * existed...`) — the escrow genre's documentation quote-marks the crime.
- * Handles // line comments and /* ... *​/ block comments; string literals
- * are left as-is (status code rarely hides '.field' inside strings, and
- * conservatism here only risks extra review, never a silent pass).
+ * Handles // line comments and block comments (slash-star pairs); string
+ * literals are left as-is (status code rarely hides '.field' inside
+ * strings, and conservatism here only risks extra review, never a silent
+ * pass). (pass 119) Reworded so the docstring no longer quotes the
+ * comment closer with a zero-width space defuser (no-irregular-whitespace).
  */
 function stripComments(src) {
     return src.split('\n').map(line => {
@@ -214,6 +216,10 @@ function scanStatusTruthfulness() {
         const rawSrc = fs.readFileSync(path.join(BIN_DIR, f), 'utf8');
         const src = stripComments(rawSrc);
         const lines = src.split('\n');
+        // (pass 119) The STATUS-FIELD-OK escape hatch is checked on the RAW
+        // lines: stripComments erases comments, so a marker written as a
+        // comment could never survive on `lines` (the documented hatch was
+        // dead code). stripComments is a 1:1 line map, so indexes align.
 
         // receiver -> lib module file (const x = require('../lib/y') / const { C } = require + new C)
         // (parsed from RAW src: require lines are never inside comments that
@@ -244,9 +250,10 @@ function scanStatusTruthfulness() {
         // (a) phantom-field tripwire: same file reads .held/.budgets/... off
         // a getStatus()/getLayerStatus() call or its result variable.
         const usesRealStatusMethod = /\.(?:getStatus|getLayerStatus)\s*\(\s*\)/.test(src);
+        const rawLines = rawSrc.split('\n');
         if (usesRealStatusMethod) {
             for (let i = 0; i < lines.length; i++) {
-                if (/STATUS-FIELD-OK:/.test(lines[i])) continue;
+                if (/STATUS-FIELD-OK:/.test(rawLines[i] || '')) continue;
                 for (const fld of PHANTOM_FIELDS) {
                     const re = new RegExp('\\.\\s*' + fld + '\\b');
                     if (re.test(lines[i])) {
@@ -279,7 +286,7 @@ function scanStatusTruthfulness() {
                 if (NON_FIELD.has(field)) continue;
                 if (union.has(field)) continue;
                 const lineNo = src.slice(0, fm.index).split('\n').length;
-                if (/STATUS-FIELD-OK:/.test(lines[lineNo - 1] || '')) continue;
+                if (/STATUS-FIELD-OK:/.test(rawLines[lineNo - 1] || '')) continue;
                 violations.push(`${rel}:${lineNo}  status field .${field} does not exist on ${prov.method}() returns (${bodies.map(b => 'lib/' + b.file).join(', ')}) — verify the real shape before printing it`);
             }
         }

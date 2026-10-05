@@ -203,7 +203,9 @@ function checkLock() {
         // counters — deltas between polls are the intended read.
         const lockMod = require('../lib/lock');
         const m = lockMod.stats();
-        console.log('  Mutex (this process): acquires=' + m.acquires + ' held=' + m.held
+        // STATUS-FIELD-OK: held is a REAL lock.stats() field (acquire refused
+        // because a live peer owns the file) — a mutex counter, not ledger data.
+        console.log('  Mutex (this process): acquires=' + m.acquires + ' held=' + m.held // STATUS-FIELD-OK: real lock.stats() field
             + ' unavailable=' + m.unavailable + ' takeovers=' + m.takeovers
             + ' refusals=' + m.aborted + ' bodyErrors=' + m.bodyErrors
             + ' holdMaxMs=' + m.holdMsMax);

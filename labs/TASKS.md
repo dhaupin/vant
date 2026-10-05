@@ -2,9 +2,63 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-05  
-**Session:** Pass 118 — post-PRD menu cleared: lease round-2 live-fire + spin hygiene + small fry
+**Session:** Pass 119 — E2E grand tour + the sudo_grant disconnect + the dead lint hatch
 
 ---
+
+## Session (2026-10-05 — pass 119: the whole system, exercised live)
+
+Continued from an interrupted session that had started an "actually use vant, cli,
+mcp, everything" E2E tour. Finished it; the tour found a REAL disconnect, and
+finishing it surfaced a second, older one in the gates themselves:
+
+- **E2E grand tour (test/e2e-grand-tour.test.js, 18 gates, ~1.5s):** the unit
+  sweep proves the parts; this proves the SYSTEM. Gate A: a clean `git clone`
+  of this tree (no node_modules, no private brains) boots — `vant health`
+  finds the template brain, `vant migrate` reaches layout v3, `--sweep`
+  reports no debris (NODE_PATH bridges deps; a real user runs npm install).
+  Gate B: the LIVE MCP door on a scratch port — /tools = 296, /mcp/exec
+  vant_health ok, agent_spawn is DENY-BY-DEFAULT with a surfaced refusal,
+  sudo_grant escalation CONNECTS (spawn/list/kill lifecycle after grant),
+  malformed JSON does not 500, DNS-rebind Host refused. Gate C: hostile
+  VANT_BRAIN (../../etc, .., a/b) falls back to a safe name, storage
+  traversal refused both ways, canWrite=false gives the honest E_SANDBOX
+  refusal (no id, no row).
+- **The disconnect the tour found: MCP `sudo_grant` stored the grant under
+  the RAW capability name while sandbox verdicts consult the MAPPED scope
+  (sandbox.can('canSpawn') asks sudo.can(agentId, 'spawn'), CAP_TO_SCOPE,
+  prd-sudo.md table). A granted canSpawn could never satisfy a canSpawn
+  check — the door's escalation path was disconnected.** Fix: grant the
+  mapped scope, keep the raw name too (widening union). `vant_sudo_grant`
+  was already correct (its param IS a scope). Gate: tour gate B proves
+  spawn-after-grant end-to-end; the live door's sandbox identity is
+  'default'.
+- **The older one: the bin-truthfulness gate's documented STATUS-FIELD-OK
+  escape hatch was dead code since pass 80** — the tripwire checked the
+  marker against the COMMENT-STRIPPED source, where comments no longer
+  exist. Consequence: bin/health.js's legitimate `lock.stats().held` mutex-
+  counter read (a REAL field, lib/lock.js _stats.held) was an unfixable red
+  gate since pass 117 (the pass-117/118 "lint:helpers PASS" claims were
+  wrong). Fix: the hatch now checks the RAW lines (stripComments is a 1:1
+  line map, indexes align); bin/health.js carries the marker with the
+  reason. New test/bin-truthfulness.test.js (3 gates, temp fixture
+  bin/zz-gate-tmp.js): unmarked phantom field fails, marked passes (hatch
+  alive), and the hatch is line-scoped (an unmarked SECOND phantom line in
+  the same file still fails).
+- **Docs:** docs/reference/sudo.md gained an MCP-tools section (the two
+  grant doors side by side: capability-style sudo_grant maps through
+  CAP_TO_SCOPE; vant_sudo_grant grants a scope directly).
+
+Gates: sweep 168/168 env-free (+2 suites), npm test 15/15, test-core 5/5,
+test-all 0, lint:locks 0 leaked, lint:docs 131 PASS, lint:surface PASS,
+lint:helpers PASS (hatch repaired), check OK, eslint touched 0 errors
+(also flushed a pre-existing zero-width space in check-bin-truthfulness.js's
+docstring), audit-mcp 296/59/0/0/0/149/88/0 exact baseline, audit-locks
+PASS, scratch wiped (legit brains only), tmp clone cleaned.
+NEXT: no open work from this pass. Candidates: run the tour's fresh-install
+gate against an actual `npm install` (CI-slow, skipped by design); more
+cross-surface tours (CLI verbs vs lib returns) if the owner wants them;
+otherwise owner's next direction.
 
 ## Session (2026-10-05 — pass 118: targets #4 + #5 + #6)
 
