@@ -16,6 +16,11 @@ const vaf = require("../lib/vaf");
  * Usage: vant start
  *        vant start --sync  (if you want to sync)
  *        vant start --no-migrate  (skip layout migration)
+ *
+ * (pass 121) Seeding happens AFTER the migrate child closes (never before:
+ * the starter placeholder must never shadow a legacy import), and the
+ * imported brain is named by migrate.js in the same order the seed's brain
+ * resolver already uses: --brain-name flag, then VANT_BRAIN, then 'vant'.
  */
 
 const { spawn } = require('child_process');
@@ -219,7 +224,7 @@ function main() {
                     console.log(`  Your old-style brain was imported${imported != null ? ` (${imported} files)` : ''} as brain "${brainName}".`);
                     console.log(`  Files now live in models/public/${brainName}/ and models/private/${brainName}/.`);
                     console.log('  Nothing was lost — verify with: vant migrate --status');
-                    console.log(`  Prefer a different name? vant migrate --brain-name <name>`);
+                    console.log(`  Prefer a different name? vant migrate --brain-name <name>${brainName === 'vant' && process.env.VANT_BRAIN ? ' (note: VANT_BRAIN=' + process.env.VANT_BRAIN + ' is set; the import used it as the default name)' : ''}`);
                     console.log('');
                 }
             } else if (/could not verify/.test(migOut)) {

@@ -11,6 +11,12 @@
  * brain-scoped orgchart stores, tmp-space anchoring) — distinct from the
  * package version. Every step is idempotent; detection is content-based
  * so the marker alone is never trusted.
+ *
+ * (pass 121) Default import name: --brain-name wins, then VANT_BRAIN (a
+ * scoped agent's own name for their brain), then 'vant'. Without this, a
+ * VANT_BRAIN-scoped start on a legacy tree imported the old brain as
+ * 'vant' and then seeded a starter placeholder in the scoped brain — the
+ * user's real content landed in the one brain they were not scoped to.
  */
 
 const args = process.argv.slice(2);
@@ -68,9 +74,22 @@ Layout target: v${migrations.LAYOUT_VERSION}
 
     // --brain-name <name>: names the brain for the legacy.multibrain-import
     // step (pre-multibrain single-public-brain layouts). Validated downstream
-    // by migrations._validBrainName; invalid names fall back to 'vant'.
+    // by migrations._validBrainName; invalid names (including a hostile
+    // VANT_BRAIN) fall back to 'vant'.
     const nameIdx = args.indexOf('--brain-name');
-    const brainName = nameIdx !== -1 && args[nameIdx + 1] ? args[nameIdx + 1] : undefined;
+    let brainName = nameIdx !== -1 && args[nameIdx + 1] ? args[nameIdx + 1] : undefined;
+    // (pass 121) Env-scoped default: the import lands where the runtime is
+    // scoped. Non-string/empty/whitespace env values are ignored; hostile
+    // values are rejected downstream by _validBrainName (safe fallback).
+    if (brainName === undefined) {
+        const envBrain = process.env.VANT_BRAIN;
+        if (typeof envBrain === 'string' && envBrain.trim().length > 0) {
+            brainName = envBrain.trim();
+            if (brainName !== 'vant') {
+                console.log(`[Migrate] No --brain-name given; using VANT_BRAIN for the imported brain: "${brainName}"`);
+            }
+        }
+    }
     const result = await migrations.migrate({ dryRun, brainName });
 
     if (result.applied.length === 0) {

@@ -277,6 +277,83 @@ define('start: fresh tree seeds the starter brain and reports CURRENT', async ()
              error: `preCode=${pre.status} fresh=${fresh} startCode=${r.status} seeded=${seeded} identity=${identity} current=${current} out=${out.slice(0, 350)} postOut=${(post.stdout || '').slice(0, 150)} preErr=${errOf(pre)}` };
 });
 
+// ---------- gates 12-14: import naming vs VANT_BRAIN (pass 121) ----------
+// The old-main trap: a user (or agent) running with VANT_BRAIN set pulled
+// the multibrain code, and start imported their old brain as 'vant' while
+// seeding a starter placeholder in the brain they were actually scoped to.
+// The import must land where the runtime is scoped: flag > VANT_BRAIN > vant.
+
+define('naming: VANT_BRAIN-scoped start imports the old brain into the scoped brain (no seed shadow)', async () => {
+    const dir = makeJourneyFixture('start-envbrain');
+    const env = childEnv();
+    env.VANT_BRAIN = 'axolotlbrain';
+    const r = spawnSync(process.execPath, [path.join(dir, 'bin', 'start.js')], {
+        cwd: dir, encoding: 'utf8', timeout: 90000, env
+    });
+    const out = r.stdout || '';
+    let realWon = false, flatDrained = false, noDefault = true, noSeed = true, current = false, announced = false;
+    try {
+        // The user's REAL identity (with MARK) owns the scoped brain dir.
+        realWon = fs.readFileSync(path.join(dir, 'models', 'private', 'axolotlbrain', 'identity.md'), 'utf8').includes(MARK);
+        flatDrained = !fs.existsSync(path.join(dir, 'models', 'private', 'identity.md'));
+        // No default 'vant' brain may materialize next to the scoped one.
+        noDefault = !fs.existsSync(path.join(dir, 'models', 'private', 'vant'));
+        noSeed = !/Seeded starter brain/.test(out);
+        announced = /using VANT_BRAIN for the imported brain/.test(out);
+    } catch (e) { /* read failures surface via flags */ }
+    const post = runCli(dir, 'onboard.js', ['status']);
+    current = /CURRENT/.test(post.stdout || '');
+    return { success: r.status === 0 && realWon && flatDrained && noDefault && noSeed && current && announced,
+             error: `code=${r.status} realWon=${realWon} drained=${flatDrained} noDefault=${noDefault} noSeed=${noSeed} current=${current} announced=${announced} out=${out.slice(0, 450)} postOut=${(post.stdout || '').slice(0, 150)} err=${errOf(r)}` };
+});
+
+define('naming: explicit --brain-name beats VANT_BRAIN (flag wins)', async () => {
+    const dir = makeJourneyFixture('flag-vs-env');
+    const env = childEnv();
+    env.VANT_BRAIN = 'envbrain';
+    const r = spawnSync(process.execPath, [path.join(dir, 'bin', 'migrate.js'), '--brain-name', 'flagwin'], {
+        cwd: dir, encoding: 'utf8', timeout: 90000, env
+    });
+    const out = r.stdout || '';
+    const flagWon = /"brain":"flagwin"/.test(out);
+    const flagNested = fs.existsSync(path.join(dir, 'models', 'public', 'flagwin', 'identity.md'));
+    // The runtime may materialize its VANT_BRAIN-scoped dirs (orgchart etc.);
+    // the CONTRACT is that none of the user's legacy CONTENT (MARK) leaks
+    // into that scoped brain. The import goes where the flag points.
+    let noUserContentInScoped = true;
+    const walk = (d) => {
+        let entries = [];
+        try { entries = fs.readdirSync(d, { withFileTypes: true }); } catch (e) { return; }
+        for (const e of entries) {
+            const p = path.join(d, e.name);
+            if (e.isDirectory()) walk(p);
+            else if (e.name.endsWith('.md') && fs.readFileSync(p, 'utf8').includes(MARK)) noUserContentInScoped = false;
+        }
+    };
+    walk(path.join(dir, 'models', 'private', 'envbrain'));
+    const post = runCli(dir, 'onboard.js', ['status']);
+    const current = /CURRENT/.test(post.stdout || '');
+    return { success: r.status === 0 && flagWon && noUserContentInScoped && flagNested && current,
+             error: `code=${r.status} flagWon=${flagWon} noUserContentInScoped=${noUserContentInScoped} flagNested=${flagNested} current=${current} out=${out.slice(0, 300)} err=${errOf(r)}` };
+});
+
+define('naming: hostile VANT_BRAIN falls back to the safe default name', async () => {
+    const dir = makeJourneyFixture('hostile-env');
+    const env = childEnv();
+    env.VANT_BRAIN = '../../pwn2';
+    const r = spawnSync(process.execPath, [path.join(dir, 'bin', 'migrate.js')], {
+        cwd: dir, encoding: 'utf8', timeout: 90000, env
+    });
+    const out = r.stdout || '';
+    const safe = /"brain":"vant"/.test(out);
+    const nested = fs.existsSync(path.join(dir, 'models', 'public', 'vant', 'identity.md'));
+    const noEscape = !fs.existsSync(path.join(dir, 'models', 'public', 'pwn2'))
+        && !fs.existsSync(path.join(dir, 'models', 'pwn2'))
+        && !fs.existsSync(path.join(dir, 'pwn2'));
+    return { success: r.status === 0 && safe && nested && noEscape,
+             error: `code=${r.status} safe=${safe} nested=${nested} noEscape=${noEscape} out=${out.slice(0, 300)} err=${errOf(r)}` };
+});
+
 // ---------- RUN ----------
 
 runSuite();
