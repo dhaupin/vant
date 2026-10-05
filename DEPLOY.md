@@ -160,9 +160,9 @@ Before pass 127: webhooks defaulted to the REST port (3456, a guaranteed collisi
 # a non-loopback bind without TLS refuses unless --insecure is passed)
 vant server --port 3456 --cert ./cert.pem --key ./key.pem --auth
 
-# MCP for AI agents (stdio or HTTP)
-vant mcp --stdio          # stdin/stdout mode
-vant mcp --server -p 3457 # HTTP mode
+# MCP for AI agents (HTTP is the door MCP clients use)
+vant mcp --stdio          # one-shot JSON dispatch on stdin (not an MCP transport)
+vant mcp --server -p 3457 # MCP-over-HTTP mode
 vant config set mcp.requireKey true
 vant config set mcp.apiKey "your-secret-key"
 ```

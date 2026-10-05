@@ -641,6 +641,15 @@ if (!script) {
             child.on('exit', (code) => process.exit(code || 0));
             return;
         }
+        // (pass 128) `vant mcp --stdio` and `vant mcp --help` previously fell
+        // through to the inline all-mode handler, which ignored the flag and
+        // started the HTTP server. bin/mcp.js owns those paths (stdio mode,
+        // -h/--help, -p/--port) — delegate to it instead.
+        if (cmd === 'mcp' && args.length > 1) {
+            const mcpChild = spawn('node', [path.join(BIN_DIR, 'mcp.js'), ...args.slice(1)], { stdio: 'inherit' });
+            mcpChild.on('exit', (code) => process.exit(code || 0));
+            return;
+        }
         // All-mode handler
         const mode = cmd;
         const vant = require('../lib/vant');

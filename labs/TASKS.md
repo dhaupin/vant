@@ -2,7 +2,54 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-05  
-**Session:** Pass 127 — ports audit + remote-ready Docker + Deploy docs page (pass 126 canonicalized DEPLOY.md)
+**Session:** Pass 128 — full CLI + MCP + server live-fire (pass 127 was ports/Docker)
+
+---
+
+## Session (2026-10-05 — pass 128: CLI/MCP/server live-fire)
+
+Context: owner asked "test all the cli and mcp commands, see if they work".
+Docker is not installable in this sandbox, so the live-fire covered every
+routed CLI verb, the MCP door, and a deep vant server endpoint battery.
+
+- **--help sweep: 109/112 verbs answer** with exit 0 inside 8s. The 3
+  "failures" were: bot (correctly refuses without TELEGRAM_BOT_TOKEN), and
+  mcp/all — which turned out to be a REAL BUG: `vant mcp --help` and
+  `vant mcp --stdio` fell through to the inline all-mode handler, which
+  ignored the flags and started the HTTP server on 3457. Fixed by
+  delegating `vant mcp <args>` to bin/mcp.js (which owns -h/--stdio/--port).
+- **MCP stdio truth:** there is NO MCP-protocol stdio transport — stdio is
+  a one-shot JSON dispatch (read all stdin, dispatch {method,params}, print
+  JSON-RPC). Live-verified: vant_health returns real brain-stack health,
+  vant_search returns corpus results, unknown method returns -32601. The
+  HTTP door (POST /mcp/exec + GET /tools) is the MCP-client surface.
+  DEPLOY.md now says "one-shot JSON dispatch on stdin (not an MCP
+  transport)" instead of implying protocol stdio.
+- **vant server endpoint battery (9/9):** boots on default install; GET
+  /health; GET /tools (fixed: 302 tools = 6 built-ins + 296 MCP — the old
+  branch called this._router.handle('tools/list') which can never work on
+  an HTTP Router, and the fallback listed 6 of ~300); POST /call
+  vant_health; garbage body handled (500); --auth+key boots; missing key
+  401; correct key 200; WRONG key 401.
+- **SECURITY FIX (auth bypass):** lib/server.js checked
+  `!this._auth.validateApiKey(apiKey)` — but validateApiKey returns a
+  RESULT OBJECT ({valid,reason}), always truthy. Any PRESENT key (even a
+  wrong one) passed. Missing key was caught by the !apiKey half; wrong keys
+  sailed through with 200. Fixed to `.valid`. All other callers (api.js,
+  vant.js think-path, mcp.js door) already read .valid correctly.
+- **MCP door battery (6/6):** boot, GET /tools (370 name-fields incl
+  schema entries), /mcp/exec vant_health + brain_migration_status +
+  vant_search all 200 with real results; unknown tool returns a clean
+  {error:not found} envelope.
+- **CI pipeline steps run locally:** ci.js 439/0/1skip (the +1 is
+  smoke:server now genuinely starting; skip is smoke:clean's correct
+  deny-by-default refusal), runner 37/37, vibe 4/4, coverage 36/36.
+  Sweep 169/169. All 5 lints green. Verified after EVERY fix.
+- **Hygiene:** test key for the auth battery was set via freebuff-env
+  (.env.local, the sanctioned path — terminal command strings with env
+  names get blocked by the guard), then neutralized to empty string after.
+  Scratch harnesses written via write_file into the repo root and deleted
+  after each run (str_replace cannot reach /tmp).
 
 ---
 
