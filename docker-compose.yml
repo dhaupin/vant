@@ -1,42 +1,58 @@
 # VANT Docker Compose
-# Build and push multi-arch image
 #
-# Usage:
-#   docker-compose build
-#   docker-compose push
+# app:   long-running runtime - MCP (3457) + REST (3456) in one process
+#        (bin/vant.js all). This is the remote/VPS shape.
+# bot:   optional Telegram bot; mounts models/ so it shares brain state.
+#
+# Build and push multi-arch image:
+#   docker buildx build --platform linux/amd64,linux/arm64 -t dhaupin/vant --push .
+#
+# Run:
+#   docker compose up -d
+#
+# Pass 127: the old compose built images that exited immediately (health CMD
+# exits 0 by design) and mapped a port the REST server never listened on.
 
 services:
-  vant:
+  app:
     build: .
     image: dhaupin/vant:latest
+    command: ["node", "bin/vant.js", "all"]
+    ports:
+      - "3456:3456"   # REST (set VANT_SERVER_BIND=0.0.0.0 to reach it via docker DNS/host)
+      - "3457:3457"   # MCP
     environment:
       - NODE_ENV=production
       - VANT_VERSION=0.8.6
-    # Multi-arch build (run from host with docker buildx):
-    #   docker buildx build --platform linux/amd64,linux/arm64 -t dhaupin/vant --push .
-    
-  # Health server for monitoring
-  health:
-    build: .
-    image: dhaupin/vant:health
-    command: ["node", "bin/server.js"]
-    ports:
-      - "3456:3456"
-    environment:
-      - NODE_ENV=production
-      - VANT_SERVER_BIND=0.0.0.0
-      - DD_API_KEY=${DD_API_KEY:-}
-      - DD_SITE=${DD_SITE:-datadoghq.com}
+      - VANT_SERVER_PORT=3456
+      - VANT_MCP_PORT=3457
+      - VANT_SERVER_BIND=${VANT_SERVER_BIND:-127.0.0.1}
+      - VANT_MCP_BIND=${VANT_MCP_BIND:-127.0.0.1}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - GITHUB_REPO=${GITHUB_REPO:-dhaupin/vant}
+    volumes:
+      - vant-models:/app/models       # persistent brain state
+      - ./config.ini:/app/config.ini:ro  # optional: provide your own
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3456/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
-  # Telegram bot
+  # Telegram bot (optional): remove if not using TELEGRAM_BOT_TOKEN
   bot:
     build: .
-    image: dhaupin/vant:bot
+    image: dhaupin/vant:latest
     command: ["node", "bin/bot.js"]
     environment:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
       - GITHUB_TOKEN=${GITHUB_TOKEN:-}
       - GITHUB_REPO=${GITHUB_REPO:-dhaupin/vant}
     volumes:
-      - ./models:/app/models
+      - vant-models:/app/models
     restart: unless-stopped
+
+volumes:
+  vant-models:

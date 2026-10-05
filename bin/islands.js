@@ -98,7 +98,8 @@ const opts = process.argv.slice(3);
             }
             case 'mcp': {
                 const mcp = require(path.join(REPO_ROOT, 'lib', 'mcp'));
-                const port = parseInt(process.env.VANT_MCP_PORT || '3100');
+                // (pass 127) Fallback was 3100 - Grafana Loki's home port.
+                const port = parseInt(process.env.VANT_MCP_PORT || '3457');
                 console.log(`[mcp] Starting on port ${port}...`);
                 await mcp.start();
                 console.log(`[mcp] Running on port ${port}`);

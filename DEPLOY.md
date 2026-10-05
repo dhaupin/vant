@@ -110,41 +110,50 @@ Run `vant migrate --status` (or `vant health`) any time you are unsure which lay
 
 ## 3. Docker Deployment
 
-The repo ships a real `Dockerfile` (node:20-alpine, multi-arch amd64/arm64) and a `docker-compose.yml` (app + health-server + telegram-bot services).
+The repo ships a remote-ready `Dockerfile` (node:20-alpine, multi-arch amd64/arm64) and a `docker-compose.yml` (long-running app + optional telegram bot).
 
 ```bash
 # Build the multi-arch image
 docker buildx build --platform linux/amd64,linux/arm64 -t dhaupin/vant --push .
 
-# Or compose (build + health server + bot)
-docker-compose build
-docker-compose up -d
+# Or compose: app (MCP 3457 + REST 3456) + bot, persistent brain volume
+docker compose up -d
 ```
 
-The image copies `bin/`, `lib/`, `models/public/`, and the example configs, and runs `node bin/vant.js health` as its default command. Mount your state when you want it to persist:
+The image installs runtime dependencies, runs as a non-root `vant` user, mounts state at `/app/models`, and its default command is the full runtime: `node bin/vant.js all` (MCP + REST in one process).
 
 ```bash
+# VPS / remote host: publish the ports, keep the brain on a volume
 docker run -d --name vant \
+  -p 3456:3456 -p 3457:3457 \
   -e GITHUB_TOKEN -e GITHUB_REPO=owner/repo \
-  -v "$PWD/models:/app/models" \
-  dhaupin/vant:latest node bin/vant.js health
+  -v vant-models:/app/models \
+  --restart unless-stopped \
+  dhaupin/vant:latest
 ```
 
 Notes:
 
-- The repo Dockerfile exposes **3456** (REST server) and **3457** (MCP server) - publish those when running `vant server` or `vant mcp` inside a container.
+- Listeners bind loopback **inside** the container by default (`VANT_SERVER_BIND`/`VANT_MCP_BIND` are set to `127.0.0.1` in the image). Docker port publishing (`-p 3456:3456`) reaches loopback-bound servers, so this is safe with `-p`. Only set the bind envs to `0.0.0.0` when running with `--network host` on a VPS or in front of a reverse proxy.
+- The image's `HEALTHCHECK` probes `GET /health` on the REST server; a bare container running the default command stays `healthy` only while servers answer. The old `vant health` CMD exited 0 immediately - it was never a service.
 - There is no Redis dependency anywhere in the codebase. Ignore older guides that mention one.
 
 ---
 
 ## 4. Services and Ports
 
-Two optional long-running listeners, both loopback-bound by default:
+The Vant port map (pass 127 audit). Four listeners, all loopback-bound by default, all env-overridable. 3456/3457/3467/3468 were checked against common co-tenants: 3000 (Grafana, Gitea, Next dev), 3100 (Loki), 5432 (postgres), 6379 (redis), 8080 (generic HTTP) are all avoided.
 
-| Service | Command | Port | Env override |
-|---------|---------|------|--------------|
-| REST server | `vant server` | 3456 | `VANT_SERVER_PORT` |
-| MCP server | `vant mcp` (or `node bin/mcp.js`) | 3457 | `VANT_MCP_PORT` |
+| Service | Command | Port | Env override | Bind env |
+|---------|---------|------|--------------|----------|
+| REST server | `vant server` | 3456 | `VANT_SERVER_PORT` | `VANT_SERVER_BIND` |
+| MCP server | `vant mcp` (or `node bin/mcp.js`) | 3457 | `VANT_MCP_PORT` | `VANT_MCP_BIND` |
+| Webhook receiver | `lib/webhooks.js` | 3467 | `VANT_WEBHOOK_PORT` | `VANT_WEBHOOK_BIND` |
+| Metrics/health HTTP | `lib/health.js start()` | 3468 | `VANT_HEALTH_PORT` | `VANT_HEALTH_BIND` |
+| Mesh crew bus | `lib/genesis.js` | 4890-4892 | per-call `port` opt | - |
+| Headless mode | `vant.startHeadless()` | follows 3456 | `VANT_SERVER_PORT` | `VANT_SERVER_BIND` |
+
+Before pass 127: webhooks defaulted to the REST port (3456, a guaranteed collision), the mesh node runner defaulted its MCP door to 3456 too, islands fell back to 3100 (Loki), headless hardcoded port 3000, and the health HTTP server bound 0.0.0.0 - the one listener with no bind argument.
 
 ```bash
 # REST API with TLS + API key (defaults to HTTP-refusing unless --insecure)
@@ -159,7 +168,7 @@ vant config set mcp.apiKey "your-secret-key"
 
 `vant mcp` auto-wires the module surface into JSON-RPC tools (brain read/write, memory store, search, migration status). Browse everything available at `GET http://localhost:3457/tools`. Optionally require `x-api-key`/Bearer via `mcp.requireKey`.
 
-Both servers bind to `127.0.0.1` by default. In containers or when exposing them, set `VANT_SERVER_BIND=0.0.0.0` (REST) and publish the ports.
+Every listener binds to `127.0.0.1` by default. On a VPS, either publish ports with your reverse proxy in front (`-p 127.0.0.1:3456:3456` from the host side keeps it private), or widen deliberately: `VANT_SERVER_BIND=0.0.0.0` and put TLS + auth in front. Always set `mcp.requireKey`/API keys before widening anything.
 
 `vant all` starts both in one process (`vant.startFull()`).
 

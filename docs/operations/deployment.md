@@ -15,33 +15,29 @@ nav_order: 64
 ### Local
 
 ```bash
-# CLI
+# Full runtime (layout check + health)
 vant start
 
-# As service
-vant start --daemon
+# Long-running servers
+vant server   # REST, port 3456
+vant mcp      # MCP, port 3457
+vant all      # Both in one process
 ```
 
 ### Docker
 
-```dockerfile
-FROM node:20-alpine
-
-WORKDIR /app
-COPY . .
-RUN npm install
-
-EXPOSE 3457 3456
-
-CMD ["node", "bin/vant.js", "serve"]
-```
-
-Build & run:
+The repo ships a remote-ready `Dockerfile` (non-root, deps installed, healthcheck) - use it rather than hand-rolling:
 
 ```bash
 docker build -t vant .
-docker run -d -p 3456:3456 vant
+docker run -d --name vant \
+  -p 3456:3456 -p 3457:3457 \
+  -v vant-models:/app/models \
+  --restart unless-stopped \
+  vant
 ```
+
+Default command is the full runtime (`bin/vant.js all`: REST 3456 + MCP 3457, `HEALTHCHECK` on `GET /health`). There is no `vant serve` or `vant start --daemon` command - run servers under your supervisor (systemd, pm2, docker restart policy).
 
 ### Vercel
 

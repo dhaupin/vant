@@ -2,7 +2,70 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-05  
-**Session:** Pass 126 — DEPLOY.md canonicalized (pass 125 was the docs+dist audit)
+**Session:** Pass 127 — ports audit + remote-ready Docker + Deploy docs page (pass 126 canonicalized DEPLOY.md)
+
+---
+
+## Session (2026-10-05 — pass 127: ports audit, remote Docker, deploy docs)
+
+Context: owner asked for (a) docs pointing at DEPLOY.md as source of truth,
+(b) a real ports audit (collisions + co-tenancy), (c) a remote-capable
+docker story. Recon found four real code bugs and one security bug.
+
+- **PORTS AUDIT (the map):** REST 3456 (VANT_SERVER_PORT), MCP 3457
+  (VANT_MCP_PORT), webhooks 3467 (VANT_WEBHOOK_PORT, was 3456 = guaranteed
+  collision with REST), metrics/health 3468 (VANT_HEALTH_PORT, was hardcoded
+  3000), mesh crew bus 4890-4892 (genesis), headless follows 3456/3457.
+  3456/3457 avoid common co-tenants (3000 Grafana/Gitea/Next, 3100 Loki,
+  5432 pg, 6379 redis, 8080 generic).
+- **BUG 1 — `vant all` was a no-op:** startFull only started MCP when mode
+  === 'mcp' and REST when mode === 'api' EXACTLY, so `vant all` started
+  NEITHER. Fixed with inclusive match (mcp|all / api|all). This also means
+  the Dockerfile CMD finally has a real long-running command.
+- **BUG 2 — `vant server` refused to start on EVERY default install:**
+  lib/server.js listen() demanded sandbox canNetwork to BIND a port, but
+  the sandbox network cap is deny-by-default. Also wrong per the PRD:
+  labs/prd-security.md scopes canNetwork to OUTBOUND HTTP/git. Gate
+  removed (bind is not outbound; MCP never had it); per-request security
+  (TLS enforcement, auth, QoS, escrow, body limits) all intact. Verified:
+  bin/server.js --insecure now binds and answers /health.
+- **BUG 3 — headless mode broken:** startHeadless hardcoded port 3000 +
+  bind 127.0.0.1 AND used the shared default Server() which refuses
+  plaintext HTTP. Now resolves port/bind via config (VANT_SERVER_PORT/
+  VANT_SERVER_BIND) and builds its own Server with allowInsecure (MCP
+  parity; TLS still wins automatically when VANT_SERVER_CERT/KEY set).
+  Live-verified /health 200.
+- **BUG 4 (security) — health HTTP was the one listener bound to
+  0.0.0.0:** app.listen(port) with no bind arg. Now loopback default via
+  VANT_HEALTH_BIND, port via VANT_HEALTH_PORT (was hardcoded 3000).
+- **MISC defaults aligned:** bin/islands.js mcp fallback 3100 (Loki) ->
+  3457; bin/node.js mesh runner MCP default 3456 -> 3457 (help + argv +
+  class default). startFull('all') composite runtimes allow plaintext on
+  loopback like MCP (strict TLS contract stays on the `vant server` CLI).
+- **DOCKER (remote-ready):** the shipped image had NO npm install — every
+  command died MODULE_NOT_FOUND (chalk/js-yaml/yaml missing). Rewrote:
+  npm ci --omit=dev, non-root vant user, EXPOSE 3456/3457, bind ENVs
+  (loopback INSIDE container — -p publishing reaches it; 0.0.0.0 only for
+  --network host), HEALTHCHECK on GET /health, CMD bin/vant.js all.
+  docker-compose: app service (ports, vant-models volume, config.ini ro
+  mount, healthcheck, restart policy) + bot; dead health/DD service
+  removed (it published 3000:3000 while the REST server sat on 3456).
+- **config.example.ini truth pass:** MCP_API_KEY/MCP_PORT/MCP_REQUIRE_API_KEY
+  etc were never read by the runtime — replaced with VANT_MCP_API_KEY/
+  VANT_MCP_REQUIRE_KEY and the real VANT_* port/bind keys; added note that
+  the vaf/rate tunables are read via config.get() (brain config.json /
+  vant.config.js), NOT config.ini; fixed dead docs/guides/security.md
+  pointer to docs/security/.
+- **DOCS:** new docs/getting-started/deploy.md (frontmatter, nav_order 5
+  slot in nav.yml after Setup, port map table, Docker quickstart; canonical
+  source = repo DEPLOY.md) + getting-started/index.md row;
+  docs/operations/deployment.md fiction removed (vant serve, vant start
+  --daemon — neither exists; real commands + repo Dockerfile now shown);
+  DEPLOY.md sections 3/4 rewritten to the new map.
+- **Verified:** live smoke (vant all: REST /health 200 + MCP /tools 200;
+  bin/server.js --insecure binds; startHeadless answers), node --check on
+  touched files, sweep 169/169 in 3 chunks, lint:docs (132 files) +
+  lint:surface + lint:helpers PASS.
 
 ---
 

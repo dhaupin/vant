@@ -14,7 +14,7 @@
  * Options:
  *   -h, --help          Show this help
  *   -m, --mcp         Start with MCP server
- *   -p, --mcp-port    MCP server port (default: 3456)
+ *   -p, --mcp-port    MCP server port (default: 3457)
  *   -P, --enable-polling   Enable background GitHub polling
  *   -i, --poll-interval    Polling interval in seconds (default: 60)
  * 
@@ -25,7 +25,7 @@
  * Environment:
  *   VANT_GITHUB_REPO       - GitHub repo (default: from config)
  *   VANT_GITHUB_TOKEN     - GitHub token
- *   VANT_MCP_PORT         - MCP server port (default: 3456)
+ *   VANT_MCP_PORT         - MCP server port (default: 3457)
  *   VANT_AGREE_AUTO_SYNC  - Required for polling: set to "true" to agree
  * 
  * What it does:
@@ -67,7 +67,7 @@ Usage: node bin/node.js [-h|--help] [-m|--mcp] [-p|--mcp-port <port>]
 Options:
   -h, --help          Show this help
   -m, --mcp         Start with MCP server
-  -p, --mcp-port    MCP server port (default: 3456)
+  -p, --mcp-port    MCP server port (default: 3457)
   -P, --enable-polling   Enable background GitHub polling
   -i, --poll-interval    Polling interval in seconds (default: 60)
   -v, --verbose      Verbose output
@@ -106,7 +106,7 @@ const config = {
     mcp: args.includes('--mcp') || args.includes('-m'),
     mcpPort: parseInt(args.find(a => a.startsWith('--mcp-port='))?.split('=')[1] || 
             args.find(a => a.startsWith('-p='))?.split('=')[1] ||
-            args.find(a => a.startsWith('-p'))?.slice(2) || '3456'),
+            args.find(a => a.startsWith('-p'))?.slice(2) || '3457'),
     pollInterval,
     enablePollingRequested: enablePollingArg,
     enablePolling: enablePollingArg && agreedAutoSync,
@@ -129,7 +129,7 @@ class VantNode {
     constructor(options = {}) {
         this.options = {
             mcp: options.mcp || false,
-            mcpPort: options.mcpPort || 3456,
+            mcpPort: options.mcpPort || 3457,
             pollInterval: options.pollInterval || 60,
             enablePolling: options.enablePolling || false,
             enablePollingRequested: options.enablePollingRequested || false,

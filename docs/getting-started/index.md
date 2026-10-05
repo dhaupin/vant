@@ -17,6 +17,7 @@ description: Install Vant, run setup, and get an agent wake-sleep loop working i
 | [Vibe Coding](/vant/getting-started/vibe-coders) | One-liner memory for hobbyists |
 | [Install](/vant/getting-started/install) | npm install and requirements |
 | [Setup](/vant/getting-started/setup) | Configuration and first-run wizard |
+| [Deploy](/vant/getting-started/deploy) | Local, Docker, VPS, and the port map (canonical guide: repo DEPLOY.md) |
 | [Agent Onboarding](/vant/getting-started/agent-onboarding) | The wake-work-sleep loop for agents |
 | [Omega Init](/vant/getting-started/omega-init) | One-prompt bootstrap for AI agents |
 | [Examples](/vant/getting-started/examples) | Copy-paste usage examples |

@@ -11,6 +11,8 @@
     url: /vant/getting-started/install
   - title: Setup
     url: /vant/getting-started/setup
+  - title: Deploy
+    url: /vant/getting-started/deploy
   - title: Agent Onboarding
     url: /vant/getting-started/agent-onboarding
   - title: Examples
