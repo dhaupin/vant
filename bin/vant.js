@@ -570,8 +570,9 @@ Resolution:
 Headless:
   Use Vant as library without MCP:
     const vant = require('../lib/vant');
-    await vant.startHeadless({ port: 3000 });
+    await vant.startHeadless({ port: 3456, bind: '127.0.0.1' });
   Or: export VANT_MODE=headless
+  Port/bind follow VANT_SERVER_PORT / VANT_SERVER_BIND.
 
   (vant notify / vant linear were removed: no backing CLI exists.
   Notifications and Linear live on the islands/lib API, not the shell.)

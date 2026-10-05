@@ -134,7 +134,7 @@ docker run -d --name vant \
 
 Notes:
 
-- Listeners bind loopback **inside** the container by default (`VANT_SERVER_BIND`/`VANT_MCP_BIND` are set to `127.0.0.1` in the image). Docker port publishing (`-p 3456:3456`) reaches loopback-bound servers, so this is safe with `-p`. Only set the bind envs to `0.0.0.0` when running with `--network host` on a VPS or in front of a reverse proxy.
+- The image binds **all interfaces inside the container** (`VANT_SERVER_BIND=0.0.0.0`). That is the correct container default: docker `-p` forwards to the container's IP, so a loopback bind inside would be unreachable through published ports. Exposure is controlled at the host edge - publish on host loopback (`-p 127.0.0.1:3456:3456`) to keep the port private, put a TLS reverse proxy in front, or run with `--network host` and set the bind envs to `127.0.0.1` yourself.
 - The image's `HEALTHCHECK` probes `GET /health` on the REST server; a bare container running the default command stays `healthy` only while servers answer. The old `vant health` CMD exited 0 immediately - it was never a service.
 - There is no Redis dependency anywhere in the codebase. Ignore older guides that mention one.
 
@@ -156,7 +156,8 @@ The Vant port map (pass 127 audit). Four listeners, all loopback-bound by defaul
 Before pass 127: webhooks defaulted to the REST port (3456, a guaranteed collision), the mesh node runner defaulted its MCP door to 3456 too, islands fell back to 3100 (Loki), headless hardcoded port 3000, and the health HTTP server bound 0.0.0.0 - the one listener with no bind argument.
 
 ```bash
-# REST API with TLS + API key (defaults to HTTP-refusing unless --insecure)
+# REST API with TLS + auth (plaintext is allowed on loopback binds;
+# a non-loopback bind without TLS refuses unless --insecure is passed)
 vant server --port 3456 --cert ./cert.pem --key ./key.pem --auth
 
 # MCP for AI agents (stdio or HTTP)
@@ -168,7 +169,7 @@ vant config set mcp.apiKey "your-secret-key"
 
 `vant mcp` auto-wires the module surface into JSON-RPC tools (brain read/write, memory store, search, migration status). Browse everything available at `GET http://localhost:3457/tools`. Optionally require `x-api-key`/Bearer via `mcp.requireKey`.
 
-Every listener binds to `127.0.0.1` by default. On a VPS, either publish ports with your reverse proxy in front (`-p 127.0.0.1:3456:3456` from the host side keeps it private), or widen deliberately: `VANT_SERVER_BIND=0.0.0.0` and put TLS + auth in front. Always set `mcp.requireKey`/API keys before widening anything.
+Every listener binds to `127.0.0.1` by default on bare installs (the Docker image overrides to `0.0.0.0` inside the container - see section 3). Plaintext HTTP is allowed on loopback binds; a non-loopback bind without TLS refuses to start unless you pass `--insecure` explicitly. On a VPS, either keep ports on host loopback and front them with a reverse proxy, or widen deliberately with TLS + auth. Always set `mcp.requireKey`/API keys before widening anything.
 
 `vant all` starts both in one process (`vant.startFull()`).
 

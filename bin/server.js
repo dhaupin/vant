@@ -14,7 +14,8 @@ const { Server } = require('../lib/server');
 const args = process.argv.slice(2);
 const options = {};
 
-// Parse flags
+// Parse flags (--insecure explicitly opts into plaintext when binding off
+// loopback; the lib/server.js listen() TLS rule handles everything else)
 for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     const next = args[i + 1];
@@ -53,7 +54,8 @@ Options:
   -h, --host <host>    Bind address (default: 127.0.0.1)
   -c, --cert <path>    TLS certificate path
   -k, --key <path>    TLS key path
-  -i, --insecure      Allow HTTP (dev only)
+  -i, --insecure      Allow plaintext HTTP off loopback (explicit opt-in;
+                      loopback binds allow HTTP by default)
   -a, --auth          Require API key
 
 Environment:
@@ -66,12 +68,17 @@ Environment:
   VANT_API_KEY          API key for authentication
 
 Examples:
-  # Development (HTTP)
-  vant server --insecure
-  
+  # Development (loopback, plaintext allowed by default)
+  vant server
+
   # Production with TLS
   vant server --cert /path/to/cert.pem --key /path/to/key.pem
-  
+
+  # Remote: widen the bind (TLS strongly recommended)
+  VANT_SERVER_BIND=0.0.0.0 vant server --cert cert.pem --key key.pem
+  # or explicitly accept plaintext:
+  VANT_SERVER_BIND=0.0.0.0 vant server --insecure
+
   # Remote with auth
   VANT_SERVER_AUTH_REQUIRED=1 VANT_API_KEY=mykey vant server
 

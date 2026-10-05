@@ -17,10 +17,15 @@
 #   GITHUB_REPO  - Required (owner/repo)
 #
 # Pass 127 (remote-ready): installs runtime deps, runs as non-root, binds
-# loopback INSIDE the container and publishes ports explicitly, healthcheck
-# on the real REST endpoint. VANT_SERVER_BIND stays 127.0.0.1 on purpose:
-# docker port publishing reaches loopback-bound servers; set 0.0.0.0 only
-# when the container runs on a host network.
+# all interfaces INSIDE the container, healthcheck on the real REST endpoint.
+# Inside a container, 0.0.0.0 is the correct default: docker -p forwards to
+# the container's eth0 IP, so a loopback-bound server would be unreachable
+# through published ports. Exposure is controlled at the host edge - publish
+# with -p 127.0.0.1:3456:3456 to keep the port off the host network, or
+# behind a reverse proxy with TLS. The plaintext-HTTP rule (lib/server.js)
+# allows loopback binds by default; startFull('all') opts into plaintext
+# for exactly this container shape and warns on non-loopback plaintext.
+# For direct TLS, mount certs and set VANT_SERVER_CERT/VANT_SERVER_KEY.
 
 ARG VERSION=0.8.6
 FROM node:20-alpine
@@ -59,10 +64,11 @@ ENV VANT_SERVER_PORT=3456
 ENV VANT_MCP_PORT=3457
 ENV VANT_WEBHOOK_PORT=3467
 ENV VANT_HEALTH_PORT=3468
-# Loopback INSIDE the container by default - publish ports with -p, or set
-# VANT_SERVER_BIND=0.0.0.0 when running with --network host on a VPS.
-ENV VANT_SERVER_BIND=127.0.0.1
-ENV VANT_MCP_BIND=127.0.0.1
+# All-interfaces INSIDE the container (docker -p forwards to the container
+# IP, so loopback binds would be unreachable). Restrict at the host edge:
+#   docker run -p 127.0.0.1:3456:3456 ...   # publish on host loopback only
+ENV VANT_SERVER_BIND=0.0.0.0
+ENV VANT_MCP_BIND=0.0.0.0
 
 # Expose for REST (3456) and MCP (3457) servers
 EXPOSE 3456 3457

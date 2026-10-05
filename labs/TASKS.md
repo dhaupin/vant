@@ -62,10 +62,31 @@ docker story. Recon found four real code bugs and one security bug.
   docs/operations/deployment.md fiction removed (vant serve, vant start
   --daemon — neither exists; real commands + repo Dockerfile now shown);
   DEPLOY.md sections 3/4 rewritten to the new map.
+- **CI FAIL (29s) on the first push — and the lesson:** the pass-123 era
+  gates "fixed" nothing about server startup; the old bind gate made
+  bin/server.js SELF-EXIT with "Network permission required", which ci.js
+  classifies as ENV_DENIALS -> SKIP. The smoke was green for months because
+  the server it was smoking never started. Un-bricking the bind exposed the
+  NEXT gate: "TLS not configured" -> hard fail (server is a SERVER_BIN, must
+  stay alive). Fixed with one coherent rule in lib/server.js listen():
+  plaintext HTTP allowed on LOOPBACK binds (MCP parity); non-loopback bind
+  without TLS refuses with guidance unless --insecure is passed explicitly.
+  startFull('all')/startHeadless pass allowInsecure deliberately (runtime
+  paths, loud warning printed; the deliberate `vant server` CLI keeps the
+  strict rule). Live-verified: bare bin/server.js binds+answers /health;
+  0.0.0.0 without certs refused; --insecure override works.
+- **SELF-CORRECTION (container bind):** I first wrote that the image should
+  bind loopback inside the container and that `-p` reaches it — WRONG: docker
+  -p forwards to the container's eth0 IP, so a loopback-bound server inside a
+  container is unreachable through published ports. Correct remote shape:
+  image ENV VANT_SERVER_BIND/VANT_MCP_BIND=0.0.0.0 (container-edge is the
+  boundary), compose publishes on HOST loopback (127.0.0.1:3456:3456) so the
+  port is private-by-default, TLS reverse proxy in front for exposure. DEPLOY
+  docs corrected to match.
 - **Verified:** live smoke (vant all: REST /health 200 + MCP /tools 200;
-  bin/server.js --insecure binds; startHeadless answers), node --check on
-  touched files, sweep 169/169 in 3 chunks, lint:docs (132 files) +
-  lint:surface + lint:helpers PASS.
+  bare bin/server.js binds; 0.0.0.0-no-TLS refused; headless answers),
+  node --check on touched files, sweep 169/169 in 3 chunks, lint:docs (132
+  files) + lint:surface + lint:helpers PASS.
 
 ---
 
