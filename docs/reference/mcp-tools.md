@@ -13,7 +13,7 @@ automatically (core libs are auto-wired): a running server exposes the
 full, current list via `tools/list` or `curl http://localhost:3457/tools`.
 
 Cross-org surfaces have their own sections below: [Agora and Mesh
-Tools](#agora-and-mesh-tools-9) (remote votes, ledger sync, consensus),
+Tools](#agora-and-mesh-tools-11) (remote votes, ledger sync, consensus),
 [Market and Msg Tools](#market-and-msg-tools-8), and [Escrow
 Tools](#escrow-tools-5) (budgets, holds, ledger status). Escrow
 semantics in depth: [Escrow API](/reference/escrow). Task-first usage:

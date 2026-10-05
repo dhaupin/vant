@@ -1,5 +1,10 @@
 ---
+version: 0.8.6
 permalink: /reference/rls
+layout: default
+title: RLS (Row-Level Security)
+nav_order: 138
+description: Habitat, Vant's row-level security layer - workspaces, roles, boundary policies, and filter/mask transforms.
 ---
 
 # RLS (Row-Level Security)

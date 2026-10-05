@@ -112,6 +112,8 @@
     url: /vant/integrations/providers
   - title: Hybrid Sync
     url: /vant/integrations/hybrid
+  - title: Agents
+    url: /vant/integrations/agents
 
 - title: Operations
   items:

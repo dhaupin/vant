@@ -21,6 +21,7 @@ description: Connecting Vant to external services - GitHub, Telegram, Linear, Do
 | [Providers](/vant/integrations/providers) | LLM provider configuration |
 | [Hybrid Sync](/vant/integrations/hybrid) | Public/private brain split sync |
 | [Repos](/vant/integrations/repos) | Mounting external repositories |
+| [Agents](/vant/integrations/agents) | Programmatic agent creation and management |
 
 Elsewhere in the docs: [MCP](/vant/runtime/mcp) is the tool surface for AI
 clients, [Embed](/vant/reference/embed) covers embedding providers, and

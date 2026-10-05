@@ -2,7 +2,50 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-05  
-**Session:** Pass 123 — CI failure root-caused (bin smoke × grant-default × brain-blind hydrate), three fixes, full CI simulation green
+**Session:** Pass 125 — pre-merge docs+dist accuracy audit (pass 124 was the grant-model docs pass)
+
+---
+
+## Session (2026-10-05 — pass 125: docs+dist audit before merge goes live)
+
+Context: owner merges PR 91 to main next; docs.creadev.org and the dist
+landing page go live with it. Full audit pass: frontmatter completeness,
+nav-to-permalink crosslinks, anchors, dist links, accuracy spot-checks,
+hobbyist+enterprise coverage.
+
+- **Audit method:** one-off scanner over all 131 docs (frontmatter fields,
+  permalinks, anchors) + docs/_data/nav.yml (never checked by lint:docs —
+  the markdown link linter only scans *.md) + dist/index.html + README/
+  AGENTS outbound docs links. FINDINGS: two broken anchors
+  (search.md #search-hybrid -> #hybrid-search after a heading rename;
+  mcp-tools.md #agora-and-mesh-tools-9 -> -11 after the tool count),
+  reference/rls.md frontmatter missing title/nav_order/version (site
+  sidebar would render it unnamed), reference/embed.md + escrow.md BOTH
+  had nav_order 124 (duplicate sidebar slot), and
+  integrations/agents.md was an orphan teaching a STALE API
+  (agents.create/update/delete do not exist; real surface is
+  spawn/list/get/pause/prune/terminate) plus a broken Lock crosslink
+  pointing at multi-agent/agents.
+- **Fixes:** anchors corrected; rls.md got full frontmatter (nav_order
+  138); escrow bumped to 137 to break the 124 tie; integrations/agents.md
+  rewritten to the real lib/agents.js surface (verified against
+  core.js: spawn sync, list/prune/terminate async, kill = terminate
+  alias, states are idle/paused - no pending/active/stopped) and
+  surfaced via nav.yml + integrations/index.md; setup.md migrate line now
+  documents the pass-121 naming order (--brain-name > VANT_BRAIN >
+  "vant"); dist labs link tree/axolotl -> tree/main (labs/ lands on main
+  with the merge; a branch link would die if axolotl is deleted).
+- **Verified clean:** all 16 docs.creadev.org/vant/* URLs in
+  AGENTS.md/README/dist resolve to real permalinks (earlier "broken"
+  readings were an audit-script bug, not the site); 296-tool claim
+  matches audit-mcp-surface; version 0.8.6 matches package.json; dist
+  ld+json 3/3 valid, og+twitter meta present; the migration bridge is on
+  both docs landing and dist; no stale tool/module counts anywhere.
+  Hobbyist path (quick-start/vibe-coders/examples) and enterprise path
+  (security: sandbox/vaf/escrow/airgap/privacy/best-practices;
+  operations: deployment/steward-runbook/CI/locks; docker) both exist in
+  nav and are linked from the landing pages. Gates: lint:docs PASS (131
+  files, style + links), lint:surface PASS, lint:helpers PASS.
 
 ---
 

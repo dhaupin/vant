@@ -34,7 +34,7 @@ Manual control:
 vant migrate --status              # what's pending / layout version
 vant migrate --dry-run             # preview the moves, touch nothing
 vant migrate --brain-name mybrain  # choose the imported brain's name
-vant migrate                       # apply (default name: vant)
+vant migrate                       # apply (import name: --brain-name > VANT_BRAIN > "vant")
 ```
 
 Detection is content-based and idempotent, safe to run any time, no-op on

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/escrow
 layout: default
 title: Escrow API
-nav_order: 124
+nav_order: 137
 description: Vant's escrow layer - per-agent budgets, holds, approvals, quotas, circuit breakers, and the execute middleware that gates operations before they run. Plus the market integration and the multibrain stack status calls.
 ---
 
