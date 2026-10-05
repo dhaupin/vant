@@ -155,7 +155,7 @@ vant geometry locate <barcode>     # Retrieve by barcode
 | `vant islands` | Island component boot |
 | `vant mcp` | MCP server for AI tools |
 | `vant api` | API utilities (status, routes, call) |
-| `vant org` | Operator scope/capability grant (persists unless `--session-only`; boot widens fresh processes) |
+| `vant org` | Operator grant utility (default `status`; `grant` persists unless `--session-only`; boot widens fresh processes) |
 | `vant trust` | Reputation and trust scores |
 | `vant resolution` | Thought resolution tracking |
 | `vant succession` | Trust level management |
@@ -185,7 +185,7 @@ vant islands boundaries     # List RLS-gated islands + rules
 vant mcp --stdio            # STDIO mode
 vant mcp --server --port 3457
 
-vant org grant                                  # Grant operator scopes+caps (persists by default)
+vant org grant                                  # Grant operator scopes+caps (persists by default; pass 123: bare `vant org` is status-only)
 vant org grant --scopes read,write,spawn --capabilities canWrite,canSpawn
 vant org grant --session-only                   # Throwaway session: don't persist
 vant org status

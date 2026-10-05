@@ -2,9 +2,55 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-05  
-**Session:** Pass 121 — env-aware import naming, boundary gates, PR 91 rewritten as the axolotl-vs-main summary
+**Session:** Pass 123 — CI failure root-caused (bin smoke × grant-default × brain-blind hydrate), three fixes, full CI simulation green
 
 ---
+
+## Session (2026-10-05 — pass 123: the CI failure was a cross-brain privilege leak)
+
+Context: PR 91's ci check failed on `test/operator-caps.test.js`'s negative
+control (`spawn:true` without a persisted grant) — passing 8/8 locally in
+every repro attempt. Unreproducible until the CI *job* was simulated whole.
+
+- **Root cause (three parts):** (1) `test/ci.js` smokes every `bin/*.js`
+  bare (`node bin/org.js`); (2) `bin/org.js`'s default subcommand was
+  `'grant'`, which PERSISTS `orgchart.operatorCapabilities` into the active
+  brain's config — in CI that's `'vant'`, so `models/private/vant/config.json`
+  was polluted before the standalone loop even started; (3) boot's pass-88
+  hydrate resolved the brain via `brain.getCurrentBrain()`, which IGNORES
+  `VANT_BRAIN` (reads only models/state.json — untracked in CI — so it falls
+  to 'vant'). The operator-caps suite's scratch-brain cold child therefore
+  hydrated the DEFAULT brain's caps: deny-by-default flipped to spawn:true.
+  Locally green because no repro ever ran test/ci.js first in the same tree.
+- **Fixes:** bin/org.js default subcommand `grant` → `status` (deny-by-default
+  CLIs must not grant on their no-arg path; full bin sweep confirmed org was
+  the only write-y bare default) + grant/status/config persist via
+  `config.currentBrainName()` (VANT_BRAIN-aware, same family as pass 121's
+  migrate fix); lib/boot.js hydrate reads the ACTIVE brain via
+  `config.currentBrainName()` with `brain.getCurrentBrain()` fallback —
+  writer and reader now agree on state-store semantics (VANT_BRAIN wins);
+  test/operator-caps.test.js grows 8 → 10 gates: the leak PIN (default-brain
+  caps planted via the resolved vant path must NOT reach a VANT_BRAIN-scoped
+  cold child; canSpawn is the discriminating signal since boot's own
+  read/write scopes legitimately satisfy canWrite via sudo linkage) and the
+  bare-`vant org` read-only pin (config.json byte-snapshot before/after —
+  runtime scribbles like the lazy escrow ledger are allowed, configs are not).
+- **Verification (CI simulated end-to-end):** fresh archive tree + git init
+  + npm-linked node_modules; test/ci.js 438, runner.js 37, vibe.js 4,
+  coverage.js 36 all green; `grep -rl operatorCapabilities models/` → empty
+  after the bin smoke (was the smoking gun); standalone loop **169/169** in
+  four chunks; local targeted suites (operator-caps 10/10, orgflow,
+  config-persistence, live-fresh-boot, migrations, grand tour) green;
+  env-scoped `vant org grant` lands in the scoped brain's config, session-only
+  persists nothing; eslint touched files 0 errors.
+- Note: first-round pin drafts had two self-inflicted bugs the pins themselves
+  caught (wrong write:true expectation — boot scopes; existence-not-equality
+  check — earlier suite tests persist scratch configs). resolveBrainPath
+  returns {path,type}, not a string. All fixed in-suite.
+
+---
+
+## Session (2026-10-05 — pass 121: solid for the 10k Docker Hub installs)
 
 ## Session (2026-10-05 — pass 121: solid for the 10k Docker Hub installs)
 

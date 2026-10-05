@@ -7,12 +7,19 @@
  * E_SANDBOX. This CLI is the documented grant path.
  *
  * Usage:
- *   vant org grant                       Grant operator scopes for this process tree (default)
+ *   vant org status                      Show current scopes/capabilities (default; read-only)
+ *   vant org grant                       Grant operator scopes for this process tree
+ *                                        (persists unless --session-only)
  *   vant org grant --scopes read,write,spawn,execute
  *   vant org grant --capabilities canWrite,canSpawn
- *   vant org status                      Show current scopes/capabilities
  *   vant org config --set-operator-scopes read,write,spawn   Persist default for future boots
  *   vant org demo                        Run the create org→dept→team→role→spawn→assign flow
+ *
+ * (pass 123) Bare `vant org` shows STATUS, not grant. The old 'grant'
+ * default meant any side-effect-free invocation of this CLI (CI bin smoke:
+ * `node bin/org.js`) silently PERSISTED operator capabilities into the
+ * current brain's config — escalating every future boot. Deny-by-default
+ * tools must not grant on their no-argument path.
  *
  * Grant model (PRD labs/prd-org-teams.md):
  *   - scopes map to sandbox operation types (read/write/spawn/execute/network)
@@ -26,27 +33,35 @@ const config = require('../lib/config');
 const OPERATOR_DEFAULT = ['read', 'write', 'spawn', 'execute'];
 const CAP_DEFAULT = ['canWrite', 'canSpawn', 'canRead'];
 
+// (pass 123) Active brain of record: config.currentBrainName() honors
+// VANT_BRAIN (the env a scoped agent/session runs under);
+// brain.getCurrentBrain() ignores that env entirely, so a scoped
+// `vant org grant` used to persist the operator grant into the DEFAULT
+// brain's config instead of the scoped brain's.
+function activeBrain() {
+    return config.currentBrainName ? config.currentBrainName()
+        : require('../lib/brain').getCurrentBrain();
+}
+
 function parseList(v) {
     return String(v || '').split(',').map(s => s.trim()).filter(Boolean);
 }
 
 async function main() {
     const args = process.argv.slice(2);
-    const cmd = args[0] || 'grant';
+    const cmd = args[0] || 'status';
 
     // Operator scopes persist in the CURRENT brain's config.json (see 'config'
     // below); reads must go through the brain-scoped get() or they only see
     // the global config and report null.
     function getOperatorScopes() {
-        const brain = require('../lib/brain').getCurrentBrain();
-        return config.get('orgchart.operatorScopes', null, { brain });
+        return config.get('orgchart.operatorScopes', null, { brain: activeBrain() });
     }
 
     // (pass 88) Persisted capabilities — boot widens fresh processes with
     // these (lib/boot.js), closing the two-layer grant trap.
     function getOperatorCaps() {
-        const brain = require('../lib/brain').getCurrentBrain();
-        return config.get('orgchart.operatorCapabilities', null, { brain });
+        return config.get('orgchart.operatorCapabilities', null, { brain: activeBrain() });
     }
 
     if (cmd === 'status' || cmd === '--status') {
@@ -69,7 +84,7 @@ async function main() {
             console.log('Persists the operator grant applied by boot in every fresh process.');
             return;
         }
-        const brain = require('../lib/brain').getCurrentBrain();
+        const brain = activeBrain();
         const existing = config.loadBrainConfig(brain) || {};
         const orgchart = { ...(existing.orgchart || {}) };
         if (si !== -1) {
@@ -152,7 +167,7 @@ async function main() {
         // capabilities, so `vant org grant` once = every future process
         // inherits it. Opt out for a throwaway session: --session-only.
         if (!sessionOnly) {
-            const brain = require('../lib/brain').getCurrentBrain();
+            const brain = activeBrain();
             const existing = config.loadBrainConfig(brain) || {};
             const merged = {
                 ...existing,

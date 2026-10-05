@@ -64,7 +64,6 @@ async function main() {
 
     const brain = require(lib('brain'));
     const config = require(lib('config'));
-    const sb = require(lib('sandbox'));
 
     // ---------- #108/#105: persisted caps hydrate at boot (cold) ----------
     console.log('  #108/#105 persisted operator capabilities:');
@@ -82,6 +81,80 @@ async function main() {
         assert(m, 'caps line missing: ' + out.slice(0, 200));
         const caps = JSON.parse(m[1]);
         assert(caps.spawn === false, 'expected canSpawn false without persisted grant: ' + m[1]);
+    });
+
+    // (pass 123) THE CI-FAILURE PIN, inverted into an assertion: with
+    // operator caps persisted in the DEFAULT ('vant') brain but NOT in the
+    // VANT_BRAIN-active brain, a scoped cold child must stay denied. The old
+    // hydrate resolved via brain.getCurrentBrain() (ignores VANT_BRAIN,
+    // falls to 'vant'), so pollution of the default brain leaked across the
+    // brain boundary — this exact scenario failed CI on pass 122. This pin
+    // FAILS if hydrate ever stops honoring VANT_BRAIN, or if any grant has
+    // already leaked into this checkout (diagnostic lists the offenders).
+    await test('default-brain caps do NOT leak into a VANT_BRAIN-scoped boot', () => {
+        // Plant via the RESOLVED vant path (private-leaning trees resolve
+        // private; bare CI trees fall back to the tracked public brain —
+        // resolveBrainPath is exactly what loadBrainConfig consults). It
+        // returns { path, type } (or null), matching config.js's use.
+        const resolved = brain.resolveBrainPath('vant');
+        const vantConfigPath = resolved && resolved.path ? path.join(resolved.path, 'config.json') : null;
+        let priorRaw = null;
+        if (vantConfigPath) { try { priorRaw = fs.readFileSync(vantConfigPath, 'utf8'); } catch (e) { priorRaw = null; } }
+        try {
+            if (vantConfigPath) {
+                let prior = null;
+                try { prior = JSON.parse(priorRaw); } catch (e) { prior = null; }
+                const merged = { ...(prior || {}), orgchart: { ...((prior && prior.orgchart) || {}), operatorCapabilities: { canRead: true, canWrite: true, canSpawn: true } } };
+                assert(config.saveBrainConfig('vant', merged), 'plant: saveBrainConfig(vant) failed');
+            }
+            const out = coldRun(`
+                require(${JSON.stringify(lib('boot'))}).init({ taskId: 'leak', scopes: ['read','write'], debug: false });
+                const sb = require(${JSON.stringify(lib('sandbox'))});
+                console.log('CAPS=' + JSON.stringify({ spawn: sb.can('canSpawn'), write: sb.can('canWrite') }));
+            `, 'leak-pin');
+            const m = out.match(/CAPS=(\{.*\})/);
+            assert(m, 'caps line missing: ' + out.slice(0, 200));
+            const caps = JSON.parse(m[1]);
+            // canSpawn is the discriminating signal: 'spawn' is NOT among the
+            // boot task's scopes, so spawn:true here could only come from the
+            // hydrate (the leak). canWrite stays true LEGITIMATELY — the boot
+            // task's own ['read','write'] scopes satisfy can('canWrite') via
+            // sudo linkage (see the negative control above).
+            assert(caps.spawn === false,
+                'default-brain operator caps leaked into the VANT_BRAIN-scoped child: ' + m[1]);
+        } catch (e) {
+            // Diagnostic pass over every brain config: name likely leak vectors.
+            const offenders = [];
+            const stack = [path.join(ROOT, 'models')];
+            while (stack.length) {
+                const dir = stack.pop();
+                let entries;
+                try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (e2) { continue; }
+                for (const ent of entries) {
+                    const p = path.join(dir, ent.name);
+                    if (ent.isDirectory()) stack.push(p);
+                    else if (ent.name === 'config.json') {
+                        try {
+                            const cfg = JSON.parse(fs.readFileSync(p, 'utf8'));
+                            if (cfg && cfg.orgchart && cfg.orgchart.operatorCapabilities) offenders.push(p);
+                        } catch (e2) { /* unreadable */ }
+                    }
+                }
+            }
+            const hint = offenders.length
+                ? ' — configs carrying operatorCapabilities: ' + offenders.join(', ')
+                    + ' (a grant leaked into this checkout; old bare `vant org` default was grant)'
+                : '';
+            throw new Error(e.message + hint);
+        } finally {
+            // Restore the exact prior state (or absence) even on failure.
+            if (vantConfigPath) {
+                try {
+                    if (priorRaw === null) fs.rmSync(vantConfigPath, { force: true });
+                    else fs.writeFileSync(vantConfigPath, priorRaw);
+                } catch (e) { /* surfaced by the leak-pin's next run */ }
+            }
+        }
     });
 
     await test('persist operatorCapabilities -> cold boot inherits them (#108 root fix)', () => {
@@ -156,6 +229,44 @@ async function main() {
         });
         assert(r2.status === 0 && /Usage:/.test(r2.stdout), 'kill --help must print usage');
         assert(!/Terminated/.test(r2.stdout), 'help must not kill');
+    });
+
+    // ---------- bare `vant org` must not grant (pass 123; ci.js smoke bug) ----------
+    console.log('\n  bare vant org is read-only (pass 123):');
+
+    await test('bare `vant org` shows status and persists nothing', () => {
+        // Snapshot every brain config.json under models/private (path + bytes)
+        // before/after: the bare run must not create, modify, or delete any.
+        // (Ordering-proof: earlier tests in this suite legitimately persisted
+        // configs — e.g. the positive test's scratch grant — so existence
+        // alone proves nothing; byte equality does. Runtime state like the
+        // lazy escrow ledger (orgchart/escrow.json) is allowed to appear.)
+        const modelsPrivate = path.join(ROOT, 'models', 'private');
+        const configSnapshot = () => {
+            const found = [];
+            const stack = [modelsPrivate];
+            while (stack.length) {
+                const dir = stack.pop();
+                let entries;
+                try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (e) { continue; }
+                for (const ent of entries) {
+                    const p = path.join(dir, ent.name);
+                    if (ent.isDirectory()) stack.push(p);
+                    else if (ent.name === 'config.json') {
+                        try { found.push(p + ':' + fs.readFileSync(p, 'utf8')); } catch (e) { found.push(p + ':<unreadable>'); }
+                    }
+                }
+            }
+            return found.sort().join('\n');
+        };
+        const before = configSnapshot();
+        const r = spawnSync('node', [path.join(ROOT, 'bin', 'org.js')], {
+            cwd: ROOT, encoding: 'utf8', env: { ...process.env, VANT_BRAIN: SCRATCH_BRAIN }
+        });
+        assert(r.status === 0, 'bare org exit ' + r.status + ': ' + (r.stderr || r.stdout).slice(0, 300));
+        assert(/Org operator status/.test(r.stdout), 'bare default must be read-only status: ' + r.stdout.slice(0, 200));
+        assert(!/granted for this process/.test(r.stdout), 'bare default must never grant');
+        assert(configSnapshot() === before, 'bare org must not create or modify any brain config.json');
     });
 
     // ---------- #110: audit healthCheck contract ----------

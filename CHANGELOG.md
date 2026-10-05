@@ -76,6 +76,19 @@ Both files are deferred — not in the b-T scope.
 
 ## [Unreleased] - Future
 
+### Fixed - Cross-Brain Privilege Leak via Boot Hydrate (axolotl pass 123)
+- Boot's persisted operator-capability hydrate resolved the brain via
+  `brain.getCurrentBrain()`, which ignores `VANT_BRAIN` — a VANT_BRAIN-scoped
+  process hydrated the DEFAULT brain's caps (cross-brain privilege leak;
+  surfaced in CI as a deny-by-default false negative). Hydrate now uses
+  `config.currentBrainName()` (state-store semantics: VANT_BRAIN wins),
+  matching where `vant org grant` and `config set` persist.
+- Bare `vant org` defaulted to the `grant` subcommand — any side-effect-free
+  invocation (including `test/ci.js`'s bin smoke) silently PERSISTED operator
+  capabilities into the active brain. Default is now read-only `status`;
+  granting is explicit. Pinned by `test/operator-caps.test.js` (10 gates:
+  leak pin + bare-org read-only pin).
+
 ### Added - Brain Layout Migration (merge-safety, axolotl)
 - `vant migrate` (lib/migrations.js, layout v3): imports pre-multibrain
   (old single-brain) layouts into `models/{public,private}/<name>/` and
