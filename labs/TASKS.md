@@ -2,9 +2,57 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-05  
-**Session:** Pass 117 — lock observability + debris janitor (post-PRD targets #2 + #3)
+**Session:** Pass 118 — post-PRD menu cleared: lease round-2 live-fire + spin hygiene + small fry
 
 ---
+
+## Session (2026-10-05 — pass 118: targets #4 + #5 + #6)
+
+All three remaining post-PRD targets delivered in one pass:
+
+- **#5 Sync-acquire spin hygiene.** The wait window in `lock.acquire`
+  busy-waited in 25ms full-CPU bursts (teams' waitMs=8000 → 8s of core
+  burn per contended create*). Now sleeps via `Atomics.wait` at 5ms
+  granularity (bounded-spin fallback only where Atomics.wait is
+  unavailable). Measured: a 400ms contended wait went from ~400ms CPU to
+  ~12ms CPU; takeover latency ≤5ms (strictly better than ≤25ms). Gate E
+  in lock-observability asserts CPU << wall and full-window wait.
+- **#4 Lease round-2 live-fire** (test/livefire-lease2.test.js, 10
+  gates): SIGKILL the live lease HOLDER (READY MARKER + stagger) → lease
+  file survives byte-parseable (`JSON\n---\ntoken` intact, token matches
+  the holder's marker); successor hammers acquire (real caller semantics
+  — acquireBrainLock gives up after ~750ms, well under the TTL) and takes
+  over via the O_EXCL CAS after frozen TTL expiry, token rotates; CHAINED
+  deaths (A killed → B inherits → B killed → C inherits, bounded wait)
+  then a live release clears the file; pass-117 lease counters show the
+  storm (granted/forced in the process that did the work).
+- **#6a Audit-rotate inspector.** `audit.listArchives()` /
+  `audit.readArchive(file?, {action, limit})` (read-only, name regex
+  `^audit-\d+\.json$` rejects traversal) + new `vant audit-ledger` CLI
+  (list / --all / <file> / --action / --limit / --json; a stray non-flag
+  arg that is not a valid archive name is E_INVALID_ARCHIVE, never a
+  silent list).
+- **#6b Global-lock coverage check.** audit-locks now scans every
+  `pathForGlobal('<kind>')` caller against the §8.5 allowlist
+  (auth-lockout, vaf-blocked, mcp-insights) and verifies the three S5
+  writers still use the global root — an unknown kind or a quiet swap to
+  per-brain pathFor fails the audit (gate proves it with a temp fixture,
+  removed after the live catch).
+- **Live-fire lessons (new):** the LEASE root is repo-level
+  `models/private/.locks/` (`.lock-<brain>.json` named for the BRAIN) —
+  the per-brain `.locks/` is the MUTEX root (§8.3 two-roots); passing
+  `{brain}` explicitly in lease tests is mandatory, otherwise children
+  fight over the REAL vant lease. `acquireBrainLock`'s bounded retry
+  budget makes single-shot takeover probes useless — hammer it. Base64
+  through nested template literals corrupted content; encodeURIComponent
+  is the safe child→parent channel for file text.
+- **Gates:** livefire-lease2 10/10; audit-ledger-cli 13/13 (inspector
+  lib + real CLI + allowlist break test); lock-observability 23/23
+  (+gate E); sweep 166/166 env-free; npm test 15/15; test-core 5/5;
+  test-all 0; lint:locks/docs/surface/helpers PASS; check OK; eslint
+  0 errors; audit-mcp 296/59/0/0/0/149/88/0 exact baseline; scratch wiped.
+  Docs: locks operations (wait posture), CLI reference (audit-ledger).
+  NEXT: post-PRD menu is EMPTY. Candidates: owner's next direction.
 
 ## Session (2026-10-05 — pass 117: observability + janitor)
 

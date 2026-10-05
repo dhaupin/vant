@@ -120,6 +120,11 @@ Key facts:
   `vant health --sweep` removes them (age-guarded, never touches fresh
   in-flight temps, bystanders, or symlinks). The passive per-target sweep
   in `atomicWrite` still reclaims a target's temps on its next write.
+- Wait posture (pass 118): a contended `acquire` SLEEPS between polls
+  (5ms granularity via `Atomics.wait`) instead of busy-waiting in 25ms
+  full-CPU bursts. Takeover latency is unaffected; a long `waitMs` no
+  longer burns a core. The lease (`brain-lock`) already slept via
+  exponential backoff with jitter.
 - `mutex()` is the in-process promise-chain helper (cache, canvas, consensus
   use it). It is **not** cross-process safe.
 - `pathFor(kind, id, { brain })` builds paths under the per-brain root.

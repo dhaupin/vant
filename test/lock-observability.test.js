@@ -131,6 +131,22 @@ console.log('\n📊 LOCK OBSERVABILITY + DEBRIS JANITOR (pass 117)\n');
         report('gate A: heldNow tracks live holds (up while held, down after release)',
             h.ok && nowHeld >= 1 && afterHeld === nowHeld - 1,
             `nowHeld=${nowHeld} afterHeld=${afterHeld}`);
+
+        // (pass 118, target #5) Spin hygiene: a contended wait must SLEEP,
+        // not burn a core. The old 25ms busy-wait bursts cost ~wallMs of CPU
+        // (teams' waitMs=8000 → 8s of full burn); the sleep-poll costs almost
+        // nothing. Measure CPU across a 400ms contended wait.
+        const heldCpu = lock.acquire(lock.pathFor('obs-cpu'), { waitMs: 10 });
+        const t0 = Date.now();
+        const c0 = process.cpuUsage();
+        const refusedCpu = lock.acquire(lock.pathFor('obs-cpu'), { staleMs: 60000, waitMs: 400 });
+        const c1 = process.cpuUsage();
+        const wall = Date.now() - t0;
+        lock.release(lock.pathFor('obs-cpu'));
+        const cpuMs = (c1.user - c0.user + c1.system - c0.system) / 1000;
+        report('gate E: 400ms contended wait sleeps (CPU << wall) and still waits the full window',
+            heldCpu.ok && refusedCpu.reason === 'held' && wall >= 350 && cpuMs < 200,
+            `wall=${wall}ms cpu=${cpuMs.toFixed(1)}ms refused=${refusedCpu.reason}`);
     } catch (e) {
         report('gate A (mutex counters)', false, e.message);
     }

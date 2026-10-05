@@ -7,7 +7,28 @@
 
 ## Handoff
 
-**Last known good commit:** pass 117 — lock observability + debris janitor (post-PRD #2 + #3).
+**Last known good commit:** pass 118 — post-PRD menu CLEARED (#4 lease live-fire, #5 spin hygiene, #6 small fry).
+#5: acquire's wait now SLEEPS (Atomics.wait, 5ms poll; bounded-spin fallback)
+— 400ms contended wait measured ~12ms CPU (was ~400ms); gate E in
+lock-observability asserts CPU << wall. #4: test/livefire-lease2.test.js 10/10
+— holder SIGKILLed via READY MARKER: lease file survives parseable, token
+rotates to exactly ONE CAS successor, chained deaths (A→B→C) + clean release,
+lease counters show the storm. #6a: audit.listArchives/readArchive +
+`vant audit-ledger` CLI (list/--all/<file>/--action/--limit; stray arg =
+E_INVALID_ARCHIVE, never a silent list). #6b: audit-locks GLOBAL_KINDS
+allowlist (auth-lockout, vaf-blocked, mcp-insights) — unknown kind or quiet
+swap to per-brain pathFor FAILS the audit (proven with temp fixture).
+Live-fire lessons: LEASE root is repo-level models/private/.locks/
+(.lock-<brain>.json) — per-brain .locks/ is the MUTEX root; pass {brain}
+explicitly in lease tests or children fight over the REAL vant lease;
+acquireBrainLock's ~750ms retry budget means takeover probes must HAMMER;
+encodeURIComponent (not base64) through nested template literals.
+Gates: sweep 166/166 env-free, npm test 15/15, test-core 5/5, test-all 0,
+lint:locks/docs/surface/helpers PASS, check OK, eslint 0 errors, audit-mcp
+296/59/0/0/0/149/88/0 exact baseline, scratch wiped.
+NEXT: post-PRD menu EMPTY — owner's next direction.
+
+**Previous (pass 117)** — lock observability + debris janitor (post-PRD #2 + #3).
 #2: lock.stats() (mutex counters incl. aborted/holdMsMax/heldNow) +
 brain-lock.leaseStats() (granted/refreshed/denied/released/releaseDenied/forced),
 process-local, delta-read, NO reset API; surfaced in vant health,

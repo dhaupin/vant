@@ -176,6 +176,42 @@ function findLocks(dir) {
 findLocks(path.join(ROOT, 'models'));
 if (leaked.length) problems.push(`${leaked.length} leaked lockfile(s): ${leaked.join(', ')}`);
 
+// 4. (pass 118, small fry #6b) GLOBAL-lock coverage: every pathForGlobal()
+// caller must genuinely be a CROSS-BRAIN resource. A per-brain pathFor()
+// used for a shared file split-brains two processes pinned to different
+// brains (the exact S5 reason pathForGlobal exists); a pathForGlobal() on a
+// brain-scoped file silently serializes unrelated brains against each
+// other. The allowlist is the §8.5 set; a new global kind is a deliberate
+// decision — add it here WITH its justification, like auth/vaf/insights.
+const GLOBAL_KINDS = new Set([
+    'auth-lockout',   // .circuit-auth.json at repo root — security state, all brains
+    'vaf-blocked',    // .circuit-vaf.json at repo root — security state, all brains
+    'mcp-insights'    // models/public/insights.json — cross-brain knowledge feed
+]);
+const globalCallers = [];
+for (const dir of ['lib', 'bin']) {
+    for (const f of fs.readdirSync(path.join(ROOT, dir))) {
+        if (!f.endsWith('.js')) continue;
+        const s = fs.readFileSync(path.join(ROOT, dir, f), 'utf8');
+        const re = /pathForGlobal\(\s*['"]([a-zA-Z0-9._-]+)['"]/g;
+        let m;
+        while ((m = re.exec(s)) !== null) {
+            globalCallers.push({ file: `${dir}/${f}`, kind: m[1] });
+            if (!GLOBAL_KINDS.has(m[1])) {
+                problems.push(`${dir}/${f} takes pathForGlobal('${m[1]}') but '${m[1]}' is not in the §8.5 global-kind allowlist — a global lock on a brain-scoped resource serializes unrelated brains (add it to scripts/audit-locks.js GLOBAL_KINDS with justification if this is truly cross-brain)`);
+            }
+        }
+    }
+}
+// And the inverse: the three §8.5 global writers must still be on the
+// global root (a quiet swap to per-brain pathFor would split-brain them).
+for (const [f, kind] of [['lib/auth.js', 'auth-lockout'], ['lib/vaf.js', 'vaf-blocked'], ['lib/mcp.js', 'mcp-insights']]) {
+    const s = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    if (!s.includes(`pathForGlobal('${kind}')`)) {
+        problems.push(`${f} no longer locks '${kind}' via pathForGlobal — the §8.5 repo-scoped guard regressed (a per-brain lock would split-brain two processes pinned to different brains)`);
+    }
+}
+
 // ---- report ----
 console.log('\n🔐 LOCK SURFACE\n');
 console.log(`  mutex requires (lib/lock.js):        ${mutexRequires.length}`);
@@ -185,6 +221,8 @@ for (const c of leaseRequires) console.log(`    - ${c}`);
 console.log(`  path-formula owners:                 lib/lock.js, lib/brain-lock.js`);
 console.log(`  mutex root:                          models/private/<brain>/.locks/  (per-brain)`);
 console.log(`  global mutex root:                   models/.locks-global/            (repo-scoped resources, S5)`);
+console.log(`  global kinds (allowlist):            ${[...GLOBAL_KINDS].join(', ')}`);
+console.log(`  global-lock callers:                 ${globalCallers.length}`);
 console.log(`  lease root:                          models/private/.locks/           (cross-brain, separate by design)`);
 console.log(`  non-locks (must require neither):    lib/recursion.js`);
 console.log(`  guarded whole-snapshot writers:      lib/state-store.js, lib/teams.js, lib/agents/internal.js, lib/habitat.js (withLock, F7)`);

@@ -364,6 +364,7 @@ vant telegram
 | `vant legal` | Compliance tools |
 | `vant escrow` | Escrow service for operations ([reference](/reference/escrow)) |
 | `vant audit` | Generate an audit report |
+| `vant audit-ledger` | Inspect rotated audit-ledger archives in models/audit-rotate/ (pass 118) |
 
 ```bash
 vant sandbox status
@@ -390,6 +391,11 @@ vant sudo metrics
 
 vant audit --json
 vant audit --out AUDIT.md      # --out FILE or --out=FILE; inside the repo
+
+vant audit-ledger                          # list rotated ledger archives
+vant audit-ledger --all                    # dump every archived entry (JSON)
+vant audit-ledger audit-1770000000000.json # dump one archive
+vant audit-ledger --all --action fatal --limit 20  # filter + newest N
 ```
 
 ## Operations
