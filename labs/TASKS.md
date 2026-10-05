@@ -2,7 +2,37 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-05  
-**Session:** Pass 120 — migration + onboard journey (the old-main user path), five real fixes, Uber PR prep
+**Session:** Pass 121 — env-aware import naming, boundary gates, PR 91 rewritten as the axolotl-vs-main summary
+
+---
+
+## Session (2026-10-05 — pass 121: solid for the 10k Docker Hub installs)
+
+Context: main has ~10k Docker Hub pulls, so PR 91 is effectively the release
+notes and the migration path is the front door. Owner asked for one more
+migration/onboard pass plus a real axolotl-vs-main PR description.
+
+- **Env-aware import naming (bin/migrate.js):** default import name now
+  resolves flag > VANT_BRAIN > 'vant'. The old-main trap: a VANT_BRAIN-scoped
+  agent running start on a legacy tree got the old brain imported as 'vant'
+  while the seed materialized a placeholder in the brain they were actually
+  scoped to — real content in the one brain they were not scoped to. Hostile
+  env values still fall back via _validBrainName; a notice line announces the
+  env-supplied name. bin/start.js banner notes when VANT_BRAIN supplied the
+  name; headers document the seed-after-migrate and naming-order contract.
+- **Journey suite grows to 14 gates:** scoped start imports into the scoped
+  brain (zero user content leaks into a default brain; runtime materializing
+  its scoped dirs is legitimate and the gate walks .md content, not dir
+  existence), explicit --brain-name beats VANT_BRAIN, hostile VANT_BRAIN
+  falls back safely.
+- **PR 91 rewritten** as the axolotl-vs-main summary: what axolotl is, the
+  upgrade path for existing installs (detection, naming order, existing-wins,
+  symlink safety, verify-or-withhold, re-run no-ops, honest status surfaces),
+  the large systems (multibrain, security chain, lock PRD, storage
+  hardening, MCP door, truthfulness gates, E2E tours), numbers, verification
+  at HEAD, merge plan. Suite counts fact-checked (169 test files, ls | wc -l).
+- Gates: journey 14/14, migrations 28/28, grand tour 18/18, eslint touched
+  0 errors (pre-existing vaf warning only).
 
 ---
 
