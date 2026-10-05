@@ -63,8 +63,13 @@ vant org status                                   # inspect current state
 vant org config --set-operator-scopes read,write  # persist defaults
 ```
 
-The grant lives for the process only. Persisted defaults are applied by
-`vant org grant`, never silently at boot, boot still grants `['read']` only.
+By default the grant ALSO persists (pass 88): operator scopes and
+capabilities are written into the active brain's config (`--session-only`
+keeps it process-local), and boot hydrates the persisted capabilities into
+every fresh process, widen-only, so a persisted grant can never narrow a
+host's authority. Bare `vant org` is read-only `status`; granting is always
+an explicit subcommand (pass 123: a side-effect-free invocation must never
+persist a grant). Boot itself still grants `['read']` scopes only.
 
 ## CLI write gates
 
