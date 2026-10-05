@@ -54,6 +54,7 @@ processes. No identity, no TTL semantics; stale takeover is mtime-based.
 | `withLock` | `(lockPath, fn, { failMode?, staleMs?, waitMs? }?)` | Promise; body result, or `{ ok: false, reason, aborted: true }` in fail-closed mode |
 | `withLockSync` | `(lockPath, fn, { failMode?, staleMs?, waitMs? }?)` | fn's return value, or `{ ok: false, reason, aborted: true }` in fail-closed mode; sync `fn` required (pass 115) |
 | `mutex` | `()` | `{ run(fn): Promise, pending: number }` in-process chain |
+| `stats` | `()` | observability counters for THIS process (pass 117): `acquires, held, unavailable, takeovers, releases, bodiesRun, bodyErrors, aborted, holdMsTotal, holdMsMax, heldNow` |
 | `pathFor` | `(kind, id?, { brain }?)` | `models/private/<brain>/.locks/<kind>[__<id>].lock` |
 | `pathForGlobal` | `(kind, id?)` | `models/.locks-global/<kind>[__<id>].lock` |
 | `DEFAULT_STALE_MS` | `5000` | mtime age for stale takeover |
@@ -78,6 +79,13 @@ Notes:
   symlink replant loop cannot spin forever.
 - `mutex()` serializes within one process only (cache, canvas, consensus use
   it) and never lets a rejection poison the chain.
+- `stats()` (pass 117) is process-local by design: cross-process
+  aggregation would need a shared sink (the audit ledger is the durable
+  trail). Read deltas between polls; there is no reset API. The lease side
+  exposes the same idea via `brain-lock.leaseStats()` (granted, refreshed,
+  denied, released, releaseDenied, forced). Both are surfaced in
+  `vant health`, `health.getStackHealthStatus()`, and MCP `vant_lock
+  action="stats"`.
 
 ## CLI: `vant lock`
 

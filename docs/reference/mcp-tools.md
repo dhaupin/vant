@@ -141,9 +141,16 @@ Acquire, release, or inspect the brain authorization lease. Full API:
 **Params:**
 | Param | Type | What |
 |-------|------|------|
-| action | string | "acquire", "release", "status", "stack", or "force" |
+| action | string | "acquire", "release", "status", "stack", "force", or "stats" |
 | token | string | Release token from acquire |
 | agentId | string | Agent identifier |
+
+`action="stats"` (pass 117) returns lock observability counters for this
+process: `mutex` (acquires, held, unavailable, takeovers, releases,
+bodiesRun, bodyErrors, aborted, holdMsTotal, holdMsMax, heldNow) plus
+`lease` (granted, refreshed, denied, released, releaseDenied, forced). Read
+deltas between polls: there is no reset API, so a counter can never lie
+about the past.
 
 **Example:**
 ```bash
@@ -741,7 +748,7 @@ process, not just this one.
 | vant_switch_branch | { success } |
 | vant_commit | { success, hash } |
 | vant_sync | { success } |
-| vant_lock | { action, acquired, token } / { action, success, message } / { action, status, stack, held } / { action, forceReleased } |
+| vant_lock | { action, acquired, token } / { action, success, message } / { action, status, stack, held } / { action, forceReleased } / { action, mutex, lease } |
 | vant_health | { status, version } |
 | brain_migration_status | { markerVersion, targetVersion, upToDate, legacy, guidance } |
 

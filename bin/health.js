@@ -16,12 +16,15 @@ if (args[0] === '-h' || args[0] === '--help') {
     console.log('');
     console.log('  -h, --help   Show this help');
     console.log('  -q, --quiet  Minimal output');
+    console.log('  --sweep      Remove stranded write temps (debris janitor, pass 117)');
     process.exit(0);
 }
 
-// Parse: support both -q/--quiet
+// Parse: support both -q/--quiet, and --sweep (pass 117 debris janitor:
+// operator intent to actually REMOVE stranded write temps, not just report)
 const argsSet = new Set(args);
 const quiet = argsSet.has('-q') || argsSet.has('--quiet');
+const sweep = argsSet.has('--sweep');
 
 const fs = require('fs');
 
@@ -195,8 +198,49 @@ function checkLock() {
         }
         const held = brainLock.listStackLocks();
         console.log('  Held across stack: ' + held.length);
+        // (pass 117, target #2) Observability counters: contention and
+        // fail-closed refusals as facts, not just stderr lines. In-process
+        // counters — deltas between polls are the intended read.
+        const lockMod = require('../lib/lock');
+        const m = lockMod.stats();
+        console.log('  Mutex (this process): acquires=' + m.acquires + ' held=' + m.held
+            + ' unavailable=' + m.unavailable + ' takeovers=' + m.takeovers
+            + ' refusals=' + m.aborted + ' bodyErrors=' + m.bodyErrors
+            + ' holdMaxMs=' + m.holdMsMax);
+        const l = brainLock.leaseStats();
+        console.log('  Lease (this process): granted=' + l.granted + ' refreshed=' + l.refreshed
+            + ' denied=' + l.denied + ' released=' + l.released
+            + ' releaseDenied=' + l.releaseDenied + ' forced=' + l.forced);
     } catch (e) {
         console.log('  ' + theme.status.warn('Lock status unavailable: ' + e.message));
+    }
+}
+
+// (pass 117, target #3) Debris janitor. `vant health` always REPORTS stranded
+// <file>.<uuid> temps (read path, never mutates). `vant health --sweep` is
+// the operator-intent action: actually remove them (age-guarded; fresh
+// in-flight temps are never touched).
+function checkDebris(sweep) {
+    console.log('\n' + theme.label('🧹 Write debris:'));
+    try {
+        const storage = require('../lib/storage');
+        const rep = storage.sweepTemps({ dryRun: !sweep });
+        if (rep.found.length === 0) {
+            console.log('  ' + theme.status.ok('No stranded write temps (' + rep.scanned + ' files scanned)'));
+            return;
+        }
+        if (sweep) {
+            console.log('  ' + theme.status.ok('Swept ' + rep.removed + ' debris file(s) of ' + rep.found.length + ' found (' + rep.scanned + ' scanned):'));
+        } else {
+            console.log('  ' + theme.status.warn(rep.found.length + ' stranded temp file(s) (' + rep.scanned + ' scanned) — run `vant health --sweep` to remove:'));
+        }
+        for (const f of rep.found.slice(0, 5)) {
+            console.log('    - ' + f.file + ' (' + Math.round(f.ageMs / 1000) + 's old, ' + f.bytes + 'B)');
+        }
+        if (rep.found.length > 5) console.log('    … and ' + (rep.found.length - 5) + ' more');
+        if (rep.errors > 0) console.log('  ' + theme.status.warn(rep.errors + ' unreadable entries skipped'));
+    } catch (e) {
+        console.log('  ' + theme.status.warn('Debris scan unavailable: ' + e.message));
     }
 }
 
@@ -209,6 +253,7 @@ function run() {
     checkDirs();
     checkMigration();
     checkLock();
+    checkDebris(sweep);
     
     console.log('\n');
 }

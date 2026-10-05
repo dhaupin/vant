@@ -7,7 +7,25 @@
 
 ## Handoff
 
-**Last known good commit:** pass 116 — save-refusal parity sweep done (post-PRD target #1).
+**Last known good commit:** pass 117 — lock observability + debris janitor (post-PRD #2 + #3).
+#2: lock.stats() (mutex counters incl. aborted/holdMsMax/heldNow) +
+brain-lock.leaseStats() (granted/refreshed/denied/released/releaseDenied/forced),
+process-local, delta-read, NO reset API; surfaced in vant health,
+health.getStackHealthStatus() (lock.mutex/lock.lease), MCP vant_lock
+action="stats". #3: storage.sweepTemps({root,maxAgeMs,dryRun,maxDepth}) —
+recursive <name>.<ext>.<uuid> aged-temp scan; vant health reports (dryRun,
+read path never mutates), `vant health --sweep` removes (operator intent);
+symlinks never followed, fresh temps + bystanders never touched; passive
+atomicWrite sweep unchanged.
+Gates: test/lock-observability.test.js 22/22 (delta-based, symlink + nested
+cases), sweep 164/164 env-free, npm test 15/15, test-core 5/5, test-all 0,
+lint:locks/docs/surface/helpers PASS, check OK, eslint 0 errors, audit-mcp
+296/59/0/0/0/149/88/0 exact baseline, scratch wiped. Docs updated (locks
+reference + operations, mcp-tools vant_lock stats row).
+NEXT: post-PRD #4 (lease round-2 live-fire), #5 (sync-acquire spin hygiene),
+#6 small fry — owner's pick.
+
+**Previous (pass 116)** — save-refusal parity sweep done (post-PRD target #1).
 Every §8.5 (a)-guard now surfaces refusals honestly: auth (withLockSync +
 {persisted, code:'E_SAVE_REFUSED'} — the brute-force lockout lie is dead), vaf
 (same), mcp brain_share (no more {shared:true} on abort; insights.json untouched

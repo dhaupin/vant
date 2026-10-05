@@ -109,6 +109,17 @@ Key facts:
   plain value, so a fail-closed refusal is read directly instead of being
   hidden behind a promise wrapper. Read the honest outcome and surface it:
   a refused save must roll back and return an error, never a success.
+- Observability (pass 117): `lock.stats()` and `brain-lock.leaseStats()`
+  count acquires, contention (`held`), unusable filesystems
+  (`unavailable`), stale takeovers, fail-closed refusals (`aborted`), body
+  errors and hold times (in-process, delta-read), surfaced in `vant health`
+  and MCP `vant_lock action="stats"`. If refusals climb, something is
+  holding locks too long (check `holdMsMax`) or a lock root is broken.
+- Write-debris janitor (pass 117): SIGKILL mid-`writeFileSync` can strand a
+  `<file>.<uuid>` temp. `vant health` reports stranded temps (read-only);
+  `vant health --sweep` removes them (age-guarded, never touches fresh
+  in-flight temps, bystanders, or symlinks). The passive per-target sweep
+  in `atomicWrite` still reclaims a target's temps on its next write.
 - `mutex()` is the in-process promise-chain helper (cache, canvas, consensus
   use it). It is **not** cross-process safe.
 - `pathFor(kind, id, { brain })` builds paths under the per-brain root.

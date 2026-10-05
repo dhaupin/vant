@@ -2,9 +2,42 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-05  
-**Session:** Pass 116 — save-refusal parity sweep: every (a)-guard surfaces refusals honestly
+**Session:** Pass 117 — lock observability + debris janitor (post-PRD targets #2 + #3)
 
 ---
+
+## Session (2026-10-05 — pass 117: observability + janitor)
+
+Both post-PRD targets delivered in one pass (they share the health seam):
+
+- **#2 Lock observability.** `lock.stats()` (new export): acquires, held,
+  unavailable, takeovers, releases, bodiesRun, bodyErrors, aborted,
+  holdMsTotal/holdMsMax, heldNow — instrumented inside acquire/release/
+  withLock/withLockSync. `brain-lock.leaseStats()`: granted, refreshed,
+  denied, released, releaseDenied, forced. Process-local by design (the
+  audit ledger is the durable cross-process trail); delta-read pattern;
+  NO reset API (a resettable counter can lie about the past). Surfaced in
+  `vant health` (mutex + lease lines), `health.getStackHealthStatus()`
+  (lock.mutex / lock.lease), and new MCP `vant_lock action="stats"`.
+- **#3 Debris janitor.** `storage.sweepTemps({root, maxAgeMs, dryRun,
+  maxDepth})`: recursive scan for `<name>.<ext>.<uuid>` files older than
+  the age guard (uuid shape + age = safe: in-flight temps are fresh; real
+  files do not end in a bare uuid). `vant health` REPORTS (read path,
+  dryRun — a read must never mutate); `vant health --sweep` REMOVES
+  (operator intent). The pass-115 passive per-target sweep still reclaims
+  on next write — the janitor covers targets never written again.
+- **Gates:** test/lock-observability.test.js 22/22 — delta-based mutex
+  counters (clean run / contended refusal / body error / stale takeover /
+  broken root / withLockSync / heldNow), lease counters (grant, same-agent
+  refresh with stable token, owner release, denied release, force), janitor
+  (dryRun finds aged incl. nested, never fresh/bystanders, symlink skipped
+  with victim intact, real sweep removes exactly the aged), surfacing
+  (health fields + MCP action). sweep 164/164 env-free; npm test 15/15;
+  test-core 5/5; test-all 0; lint:locks/docs/surface/helpers PASS; check
+  OK; eslint 0 errors; audit-mcp 296/59/0/0/0/149/88/0 exact baseline;
+  scratch wiped. Docs: locks reference + operations, mcp-tools vant_lock.
+  NEXT: post-PRD #4 (lease round-2 live-fire), #5 (sync-acquire spin
+  hygiene), #6 small fry — owner's pick.
 
 ## Session (2026-10-05 — pass 116: post-PRD target #1, honest outcomes everywhere)
 
