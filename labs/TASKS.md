@@ -2,7 +2,51 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-05  
-**Session:** Pass 125 — pre-merge docs+dist accuracy audit (pass 124 was the grant-model docs pass)
+**Session:** Pass 126 — DEPLOY.md canonicalized (pass 125 was the docs+dist audit)
+
+---
+
+## Session (2026-10-05 — pass 126: DEPLOY.md canonicalized)
+
+Context: DEPLOY.md (root) was the last big fiction surface — it predates the
+docs linters (lint:docs scans only docs/*.md) and nearly every command/
+config claim failed verification against the code. Full rewrite, not a patch.
+
+- **Removed fiction:** fabricated config.ini sections ([core]/[brain]/[sync]
+  with raid, [sandbox] default_* caps, [sudo] whitelist, [audit] level/
+  retention) — the real config.ini is the flat CONFIG_TEMPLATE surface
+  (VANT_VERSION/MODEL_PATH/STEGOFRAME_*/GITHUB_*/POLLING_INTERVAL/
+  MAX_REQUESTS_PER_HOUR); policy lives in code (sandbox DEFAULT_CAPABILITIES,
+  sudo policies.json via VANT_SUDO_POLICIES_PATH). Dead verbs killed:
+  `vant init`, `provider add`, `backup create --name/--password` (real: no
+  flags; schedule NOT IMPLEMENTED, prints cron recipe + exit 1),
+  `transform toHorcrux`, `health --json`, `--log-format=json`,
+  `agents.spawn('name', {...})` (real: SYNC spawn({name,role}) + await
+  flush()), `vant think/act`, `sync raid=true`, Redis "distributed locking"
+  (no redis client anywhere), pre-multibrain models tree (real:
+  models/{public,private}/<brain>/ + models/state.json, auto-migrate on
+  start via lib/migrations.js).
+- **Documented reality instead:** ports 3456 (VANT_SERVER_PORT) / 3457
+  (VANT_MCP_PORT) + 127.0.0.1 default binds + VANT_SERVER_BIND note; real
+  backup/horcrux/transform surfaces incl. the <agent>-p_<password>.svg
+  filename convention; sync protected-branch guards (--branch opt-in);
+  connector list/status/connect/disconnect; s3/mirror flags; monitoring via
+  system status JSON, the audit ledger (.audit.json) and health counters;
+  org grant model (bare `vant org` = read-only status, grant persists to the
+  ACTIVE brain's config, boot hydrate is widen-only).
+- **Collateral truth fixes found while cross-checking:** Dockerfile
+  ARG VERSION 0.8.4 -> 0.8.6 (package.json is 0.8.6) and EXPOSE 3000 ->
+  3456 3457 (the actual listener ports; 3000 exposed nothing). And a real
+  bug: docker-compose.yml's health service mapped 3000:3000 but
+  bin/server.js defaults to 3456 AND binds 127.0.0.1 — the published port
+  could never answer. Now 3456:3456 + VANT_SERVER_BIND=0.0.0.0.
+- **Verification:** command smoke (org status, health -q, migrate --status),
+  dash/emoji/quote style sweep clean, all 11 relative links resolve, fiction
+  grep (init|provider add|toHorcrux|raid|redis|default_read|log-format|
+  getSummary|health --json) only hits explicit "there is no X" corrections.
+  DEPLOY.md is a root file — lint:docs does not cover it; checks were manual
+  by design. Lesson for future passes: root docs (README/DEPLOY/AGENTS) sit
+  outside every lint gate; verify them by hand like dist/ and nav.yml.
 
 ---
 

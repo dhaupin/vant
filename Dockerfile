@@ -16,7 +16,7 @@
 #   GITHUB_TOKEN - Required for sync
 #   GITHUB_REPO  - Required (owner/repo)
 
-ARG VERSION=0.8.4
+ARG VERSION=0.8.6
 FROM node:20-alpine
 
 LABEL maintainer="VANT Project"
@@ -43,8 +43,8 @@ COPY package.json ./
 ENV VANT_VERSION=${VERSION}
 ENV NODE_ENV=production
 
-# Expose for health endpoint
-EXPOSE 3000
+# Expose for REST (3456) and MCP (3457) servers
+EXPOSE 3456 3457
 
 # Multi-arch: create platform-specific symlinks for node
 RUN if [ "$(uname -m)" = "aarch64" ]; then \

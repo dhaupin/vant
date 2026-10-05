@@ -1,6 +1,8 @@
 # Vant Deployment Guide
 
-> **Production Deployment Guide** — Local, Docker, Cloud, Edge. Defense-in-depth security, multi-provider sync, multi-agent crews.
+> **Production deployment** - local, Docker, cloud, edge. Deny-by-default security chain, git-backed sync, multi-brain layout, multi-agent crews.
+
+Every claim in this guide is checked against the code on `axolotl` (v0.8.6). Where a command is not implemented, this guide says so instead of guessing.
 
 ---
 
@@ -9,9 +11,11 @@
 | Target | Use Case | Complexity |
 |--------|----------|------------|
 | **Local** | Development, testing, single-user | Low |
-| **Docker** | Containerized, reproducible, CI/CD | Medium |
-| **Cloud** | Scalable, managed, multi-region | High |
-| **Edge/IoT** | ARM, Raspberry Pi, resource-constrained | Medium |
+| **Docker** | Containerized, reproducible | Medium |
+| **Cloud** | Scalable, managed | Medium |
+| **Edge/IoT** | ARM, Raspberry Pi, resource-constrained | Low |
+
+Vant is a Node.js process whose entire state is your repository: markdown brain files, a config file, and git. There is no external database to provision. Sizing is driven by the brain size and how many agents you run.
 
 ---
 
@@ -19,309 +23,263 @@
 
 | Requirement | Version | Notes |
 |-------------|---------|-------|
-| Node.js | 18+ | LTS recommended |
-| Git | 2.30+ | For provider sync |
-| SSH Keys | Ed25519 | For Git providers |
-| Provider Tokens | — | GitHub PAT, GitLab PAT, etc. |
+| Node.js | 18+ | `engines.node >= 18` in package.json; LTS recommended |
+| npm | 9+ | Ships with Node |
+| Git | 2.20+ | Brain sync works through git; branch awareness built in |
+| GitHub PAT | - | `repo` scope, set as `GITHUB_TOKEN` (env var, never in config) |
+
+Dependencies are deliberately tiny: `chalk`, `js-yaml`, `yaml`. No database driver, no Redis client.
 
 ---
 
 ## 1. Local Deployment
 
+### Install
+
 ```bash
-# Clone
+# From npm (recommended)
+npm install -g vant
+vant start
+
+# Or from source
 git clone https://github.com/dhaupin/vant.git
 cd vant
-
-# Run setup (creates config.ini, .env, models/)
-./bin/setup.js
-
-# Initialize brain
-./bin/vant.js init
-
-# Verify health
-./bin/vant.js health
+npm ci
+node bin/vant.js start
 ```
 
-### Configuration Files
+### Configure
 
-**config.ini** — Core settings
-```ini
-[core]
-branch = axolotl
-mode = dual
-
-[brain]
-path = models/private
-public_path = models/public
-
-[sync]
-providerTimeout = 30000
-raid = true
-
-[agents]
-max_agents = 4
-default_mode = PRIVATE
-```
-
-**.env** — Secrets (never commit)
 ```bash
-GITHUB_TOKEN=ghp_xxx
-GITLAB_TOKEN=glpat_xxx
-BITBUCKET_TOKEN=xpr_xxx
-GITEA_TOKEN=xxx
-GIT_TOKEN=xxx
+# Interactive setup: writes config.ini (repo, stegoframe room)
+# Never stores tokens. Set GITHUB_TOKEN as an environment variable.
+vant setup
+```
+
+That produces a `config.ini` from `config.example.ini` with keys:
+
+| Key | Purpose |
+|-----|---------|
+| `VANT_VERSION` | Version marker |
+| `MODEL_PATH` | Private brain root (default `models/private`) |
+| `STEGOFRAME_URL/ROOM/PASSPHRASE/MODE` | Transport for the stegoframe channel |
+| `GITHUB_REPO` / `GITHUB_BRANCH` | Sync target (`owner/repo`, branch) |
+| `GITHUB_TOKEN` | Placeholder reference - use the env var |
+| `POLLING_INTERVAL` | Poll interval in ms (default 10000) |
+| `MAX_REQUESTS_PER_HOUR` | Request budget (default 360) |
+
+Secrets live in the environment or `.env` (copy `.env.example`): `GITHUB_TOKEN` is the one required for sync. Keep `.env` out of version control.
+
+### Verify
+
+```bash
+vant health       # Brain, config, env, dirs, migration status, locks, debris
+vant sync --status
+```
+
+`vant health` also warns on an old single-brain layout. If it does:
+
+```bash
+vant migrate --status             # What would move
+vant migrate --dry-run            # Preview, touch nothing
+vant migrate                      # Import (default brain name: vant)
+vant migrate --brain-name mybrain # Or name it explicitly
 ```
 
 ---
 
-## 2. Docker Deployment
+## 2. Brain Layout (v0.9 Multi-Brain)
 
-### Dockerfile
-```dockerfile
-FROM node:18-alpine
+Since the axolotl line, brains live in per-brain directories with the active stack in `models/state.json`:
 
-WORKDIR /vant
-
-# Install dependencies
-COPY package*.json ./
-RUN npm ci --only=production
-
-# Copy source
-COPY . .
-
-# Create non-root user
-RUN adduser -D vant && chown -R vant:vant /vant
-USER vant
-
-# Entrypoint
-ENTRYPOINT ["node", "bin/vant.js"]
-```
-
-### docker-compose.yml
-```yaml
-version: '3.8'
-
-services:
-  vant:
-    build: .
-    volumes:
-      - ./models:/vant/models
-      - ./config.ini:/vant/config.ini
-      - .env:/vant/.env:ro
-    environment:
-      - NODE_ENV=production
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "node", "bin/vant.js", "health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # Optional: Redis for distributed locking
-  redis:
-    image: redis:7-alpine
-    volumes:
-      - redis-data:/data
-
-volumes:
-  redis-data:
-```
-
-### Build & Run
-```bash
-docker-compose build
-docker-compose up -d
-docker-compose logs -f vant
-```
-
----
-
-## 3. Cloud Deployment
-
-### AWS (EC2 / ECS / Lambda)
-
-**EC2 Launch Template**
-```bash
-# User data script
-#!/bin/bash
-yum update -y
-curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
-yum install -y nodejs git
-cd /opt
-git clone https://github.com/dhaupin/vant.git
-cd vant
-./bin/setup.js
-./bin/vant.js init
-pm2 start bin/vant.js --name vant
-```
-
-**ECS Task Definition** — Use Docker image, mount EFS for models/, secrets in Secrets Manager.
-
-### GCP (Compute Engine / Cloud Run)
-
-**Cloud Run** — Deploy Docker image, set env vars from Secret Manager, configure VPC connector for private Git.
-
-### Azure (Container Instances / AKS)
-
-**AKS** — Helm chart with persistent volumes for models/, Azure Key Vault for secrets.
-
----
-
-## 4. Provider Setup
-
-| Provider | Token Scope | API Endpoint |
-|----------|-------------|--------------|
-| **GitHub** | `repo`, `workflow` | `https://api.github.com` |
-| **GitLab** | `api`, `read_repository` | `https://gitlab.com/api/v4` |
-| **Bitbucket** | `repository:write`, `pullrequest:write` | `https://api.bitbucket.org/2.0` |
-| **Gitea** | `repo`, `admin:repo` | `https://gitea.com/api/v1` |
-| **SelfHosted** | SSH key + git CLI | `ssh://git@host` |
-
-### Setup Commands
-```bash
-# GitHub
-./bin/vant.js provider add github --token $GITHUB_TOKEN --repo owner/repo
-
-# GitLab
-./bin/vant.js provider add gitlab --token $GITLAB_TOKEN --repo owner/repo --url https://gitlab.com
-
-# Self-hosted
-./bin/vant.js provider add selfhosted --remote git@server:repo.git
-```
-
----
-
-## 5. Brain Initialization
-
-### Models Structure
 ```
 models/
-├── public/           # OS templates (read-only)
-│   ├── brain/
-│   ├── islands/
-│   └── providers/
-└── private/          # Runtime data (read-write)
-    ├── brain/
-    ├── islands/
-    ├── providers.json
-    └── .providers.json
+├── public/            # OS templates, shared across installs
+│   └── <brain>/       # e.g. models/public/vant/, boot/ with horcrux SVGs
+└── private/           # Runtime data, per-brain
+    └── <brain>/       # identity.md, lessons.md, state/, orgchart/, config.json
 ```
 
-### Initialize
+- The active brain resolves from `VANT_BRAIN` (env), then `models/state.json`, then the default brain `vant`.
+- Legacy flat layouts (`models/public/*.md`, no per-brain dirs) migrate automatically on `vant start` via `lib/migrations.js`. Detection is content-based, idempotent, and never fires on an already-multi-brain tree. Do not hand-move brain files; use `vant migrate`.
+- Per-brain runtime config lives in `models/private/<brain>/config.json`; `vant config get|set` reads and writes it.
+
+Run `vant migrate --status` (or `vant health`) any time you are unsure which layout a tree is on.
+
+---
+
+## 3. Docker Deployment
+
+The repo ships a real `Dockerfile` (node:20-alpine, multi-arch amd64/arm64) and a `docker-compose.yml` (app + health-server + telegram-bot services).
+
 ```bash
-# First run - creates private from public templates
-./bin/vant.js init
+# Build the multi-arch image
+docker buildx build --platform linux/amd64,linux/arm64 -t dhaupin/vant --push .
 
-# Or manually
-cp -r models/public/brain models/private/brain
-cp -r models/public/islands models/private/islands
-./bin/vant.js init
+# Or compose (build + health server + bot)
+docker-compose build
+docker-compose up -d
 ```
+
+The image copies `bin/`, `lib/`, `models/public/`, and the example configs, and runs `node bin/vant.js health` as its default command. Mount your state when you want it to persist:
+
+```bash
+docker run -d --name vant \
+  -e GITHUB_TOKEN -e GITHUB_REPO=owner/repo \
+  -v "$PWD/models:/app/models" \
+  dhaupin/vant:latest node bin/vant.js health
+```
+
+Notes:
+
+- The repo Dockerfile exposes **3456** (REST server) and **3457** (MCP server) - publish those when running `vant server` or `vant mcp` inside a container.
+- There is no Redis dependency anywhere in the codebase. Ignore older guides that mention one.
+
+---
+
+## 4. Services and Ports
+
+Two optional long-running listeners, both loopback-bound by default:
+
+| Service | Command | Port | Env override |
+|---------|---------|------|--------------|
+| REST server | `vant server` | 3456 | `VANT_SERVER_PORT` |
+| MCP server | `vant mcp` (or `node bin/mcp.js`) | 3457 | `VANT_MCP_PORT` |
+
+```bash
+# REST API with TLS + API key (defaults to HTTP-refusing unless --insecure)
+vant server --port 3456 --cert ./cert.pem --key ./key.pem --auth
+
+# MCP for AI agents (stdio or HTTP)
+vant mcp --stdio          # stdin/stdout mode
+vant mcp --server -p 3457 # HTTP mode
+vant config set mcp.requireKey true
+vant config set mcp.apiKey "your-secret-key"
+```
+
+`vant mcp` auto-wires the module surface into JSON-RPC tools (brain read/write, memory store, search, migration status). Browse everything available at `GET http://localhost:3457/tools`. Optionally require `x-api-key`/Bearer via `mcp.requireKey`.
+
+Both servers bind to `127.0.0.1` by default. In containers or when exposing them, set `VANT_SERVER_BIND=0.0.0.0` (REST) and publish the ports.
+
+`vant all` starts both in one process (`vant.startFull()`).
+
+---
+
+## 5. Brain Sync (Git Providers)
+
+Sync is git-backed and push/pull explicit by design. From `bin/sync.js`:
+
+```bash
+vant sync --push "brain update"   # Commit and push the current branch
+vant sync --pull                  # Default action: pull/reset to origin
+vant sync --status                # git status
+```
+
+Behavior worth knowing before you script around it:
+
+- Sync works on the **current branch**. It never hard-codes a branch.
+- Protected branches (`main`, `master`) require explicit opt-in: `--branch main`. A pull that would `git reset --hard` a protected branch is refused.
+- Tokens are the caller's job: pass `GITHUB_TOKEN` in the environment. Vant never persists credentials; the token is not written into config files or git helpers.
+- Remote/repo come from `config.ini` (`GITHUB_REPO`) plus `GITHUB_BRANCH`.
+
+Cloud targets are ordinary Node hosts. Run the process, mount or clone the repo, set `GITHUB_TOKEN` + `GITHUB_REPO`, and let the brain live on a persistent volume. There is no Vant-specific cloud controller, no scheduler, and no service mesh to configure.
 
 ---
 
 ## 6. Security Hardening
 
-### Deny-by-Default (Required)
-```ini
-# config.ini
-[sandbox]
-default_read = true
-default_write = false
-default_network = false
-default_exec = false
-default_spawn = false
-default_commit = false
-default_create_branch = false
-default_delete = false
-default_admin = false
-```
+The chain is deny-by-default and runs on every operation: sandbox capabilities, input validation (vaf), rate limiting (qos), escrow approval, brain locking. Key facts:
 
-### Sudo Whitelist
-```ini
-[sudo]
-# Service-specific allowed scopes
-boot = write,network,spawn,exec,compute:eval
-network = network
-storage = write,delete
-sync = write,network,commit,createBranch
-mcp = read,write,network,exec,compute:eval,admin
-agents = spawn,write
-default = admin
-```
+- **Sandbox capabilities** default in `lib/sandbox.js`: `read`/`load`/`list` are allowed, `write` is denied, and escalation goes through explicit grants. `vant org status` shows what the current process holds.
+- **Operator grants** are explicit and deliberate: `vant org grant` (persists to the current brain's config unless `--session-only`), optionally scoped with `--scopes` / `--capabilities`. Bare `vant org` is read-only status - it never grants. Boot hydration is widen-only: a persisted grant can widen a scoped boot's caps, never narrow them.
+- **Sudo policies are code plus an optional policy file**, not a config.ini section. `lib/sudo.js` loads `models/private/sudo/policies.json` (override with `VANT_SUDO_POLICIES_PATH`). A grant also creates a sudo task so scope-level sudo verdicts apply.
+- **Input validation** (vaf) enforces string length, depth, array length, path traversal blocks. Tunables like `MAX_STRING_LENGTH`, `MAX_DEPTH`, `BLOCK_PATH_TRAVERSAL` exist in `config.example.ini`.
+- **Audit** is a JSON ledger at `models/private/<brain>/.audit.json` (brain-scoped, capped and rotated into `models/audit-rotate/`). `vant audit` generates a dynamic `AUDIT.md` report from the codebase; `vant audit --json` for machine output.
+- **Brain locking**: file-mutex + lease (brain-lock layer) with in-process counters surfaced by `vant health`. A crash never leaves torn memory: writes go through a WAL plus atomic rename.
 
-### Audit Configuration
-```ini
-[audit]
-level = info
-retention_days = 90
-destination = file  # or syslog, elasticsearch
-```
+There is no `[sandbox]`/`[sudo]`/`[audit]` section in config.ini. Any guide showing one is fiction.
 
 ---
 
 ## 7. Monitoring
 
-### Health Checks
-```bash
-# Built-in health check
-./bin/vant.js health
+### Health
 
-# JSON output for monitoring
-./bin/vant.js health --json
+```bash
+vant health           # Full check (also reports legacy-layout notice, locks, debris)
+vant health --sweep   # Remove stranded write temps (debris janitor)
+vant system status    # Machine-readable JSON of layer status
 ```
+
+There is no `--json` flag on `health`; use `vant system status` for JSON.
 
 ### Key Metrics
-| Metric | Source | Alert Threshold |
-|--------|--------|-----------------|
-| Brain sync latency | `sync.getStatus()` | > 30s |
-| Agent task queue | `agents.getSummary()` | > 100 pending |
+
+| Metric | Source | Alert On |
+|--------|--------|----------|
 | Circuit breaker state | `qos.getCircuitBreakerStatus()` | OPEN |
-| Escrow budget | `escrow.canSpend()` | < 10% |
-| Sandbox violations | `audit.log` | Any |
+| Escrow budget headroom | `escrow.canSpend(agentId, amount)` | false |
+| Agent roster / queue | `agents.list()` / `agents.pollWork()` | quota reached |
+| Lock contention | `vant health` lock counters | rising refusals |
+| Audit anomalies | `models/private/<brain>/.audit.json` | sandbox denials |
 
-### Logging
+### Logs
+
 ```bash
-# Structured JSON logs
-./bin/vant.js --log-format=json > vant.log
+# Structured audit ledger (JSON entries, brain-scoped)
+tail -f models/private/<brain>/.audit.json
 
-# Audit trail
-tail -f logs/audit.log
+# Rotated archives
+ls models/audit-rotate/
+
+# Process logs are stdout/stderr; capture them with your supervisor
+pm2 logs vant   # or: journalctl -u vant, docker logs vant
 ```
+
+There is no `--log-format=json` flag. Use `vant audit --json` for machine-readable audit output.
 
 ---
 
-## 8. Backup & Restore
+## 8. Backup and Restore
 
-### Horcrux Backup (Encrypted)
+Three real tools. Passwords for horcrux/transform follow the filename convention `<agent>-p_<password>.svg` - the text after `p_` in the filename IS the passphrase (see `models/public/vant/boot/README.md`).
+
+### Point-in-time backup (`vant backup`)
+
 ```bash
-# Create backup
-./bin/vant.js backup create --name "daily-$(date +%Y%m%d)" --password $BACKUP_PASS
-
-# List backups
-./bin/vant.js backup list
-
-# Restore
-./bin/vant.js backup restore --name "daily-20240115" --password $BACKUP_PASS
+vant backup create              # Snapshot the brain into backups/
+vant backup list                # List backups/
+vant backup restore backups/brain-backup-2026-10-05.tar.gz
 ```
 
-### Horcrux (Portable Brain Export)
-```bash
-# Export
-./bin/vant.js transform toHorcrux --output brain.horcrux
+`backup create` takes no flags (no `--name`/`--password`). Scheduling is not implemented; `vant backup schedule` prints a cron recipe and exits 1. Drive it from cron:
 
-# Import (restores to new brain)
-./bin/vant.js transform restore --input brain.horcrux
+```bash
+# Daily at 03:00
+0 3 * * * cd /opt/vant && node bin/vant.js backup create >> vant-backup.log 2>&1
 ```
 
-### Scheduled Backups (cron)
-```bash
-# Daily at 2AM
-0 2 * * * /opt/vant/bin/vant.js backup create --name "daily-$(date +%Y%m%d)" --password $BACKUP_PASS
+### Horcrux (encrypted, portable brain-in-an-image)
 
-# Weekly full horcrux
-0 3 * * 0 /opt/vant/bin/vant.js transform toHorcrux --output /backups/brain-$(date +%Y%m%d).horcrux
+```bash
+vant horcrux inspect [path] [password]   # Preview what would restore
+vant horcrux create [path] [password]    # Create from current state
+vant horcrux restore [path] [password]   # Restore brain from SVG
+vant horcrux refresh [password]          # Regenerate the boot horcrux in place
+```
+
+With no path, horcrux scans the brain stack and uses the first `<agent>-p_*.svg` under `models/public/<brain>/boot/`.
+
+### Transform (full/horcrux/extract pipeline)
+
+```bash
+vant transform gather                  # Pull state together
+vant transform full                    # Full pipeline
+vant transform horcrux <svg> <pass>    # Embed brain into an SVG
+vant transform backup                  # Backup step
+vant transform extract <svg> <pass>    # Pull brain out of an SVG
+vant transform restore <svg> <pass>    # Restore from SVG
+vant transform status
 ```
 
 ---
@@ -329,69 +287,74 @@ tail -f logs/audit.log
 ## 9. Scaling
 
 ### Multi-Agent Crews
+
+Up to 4 agents per install (MCP door quota, `agents.maxAgents`). The programmatic API is synchronous spawn + explicit flush:
+
 ```javascript
-// Scale to 4 agents (max)
-const crew = await Promise.all([
-    agents.spawn('researcher', { capabilities: ['read', 'write'], budget: 100 }),
-    agents.spawn('coder', { capabilities: ['read', 'write', 'exec'], budget: 150 }),
-    agents.spawn('reviewer', { capabilities: ['read'], budget: 50 }),
-    agents.spawn('analyst', { capabilities: ['read', 'write'], budget: 100 })
-]);
+const agents = require('./lib/agents');
+
+// spawn is SYNC: pass an options object, get a record back
+const a = agents.spawn({ name: 'Claude', role: 'Assistant' });
+if (a.error) throw new Error(a.error);
+
+agents.list();                          // roster snapshot
+await agents.delegate(a.id, 'Task');    // hand off work
+await agents.flush();                   // drain before process exit
 ```
 
-### RAID Sync (Multi-Provider)
-```ini
-[sync]
-raid = true
-providers = github,gitlab,gitea
-```
+There is no `agents.spawn('name', {budget})` string-signature, no `getSummary()`, and no `terminate` in old docs' shape - use the exports above (`terminate`/`kill` take an agent id).
 
-### Load Balancing
-- Deploy multiple Vant instances
-- Shared Redis for distributed locking
-- Shared NFS/EFS for models/
-- Provider-specific sync workers
+### Multi-Brain
+
+Run multiple named brains side by side (`models/public/<brain>/`, `models/private/<brain>/`) and switch via `VANT_BRAIN` or the brain stack in `models/state.json`. Agents scoped with `VANT_BRAIN` get their own brain-scoped config, org capabilities, and audit ledger.
+
+### External Services
+
+Vector/search connectors exist behind `vant connector` (list / status / connect / disconnect). Code-available: qdrant, pinecone, weaviate, vector. Remote state via `vant s3` (`--status`, `--test`, `--ls`, `--push`, `--pull` with `VANT_REMOTE_*` env vars) and `vant mirror` (`--status`, `--verify`, `--resync`).
+
+There is no distributed-locking service to deploy. Brain locking is local file-mutex + lease, which is exactly right for single-host or repo-as-state deployments.
 
 ---
 
 ## 10. Troubleshooting
 
-| Issue | Diagnosis | Fix |
-|-------|-----------|-----|
-| `Sync failed: circuit open` | Provider failing | Check provider token, network; `qos.getCircuitBreakerStatus()` |
-| `Sudo escalation denied` | Not in whitelist | Check `config.ini [sudo]` service scopes |
-| `Path traversal blocked` | Invalid path | Use `vaf.validateSafePath()`; check `storage.get()` paths |
-| `Agent spawn failed` | Budget exceeded | Increase `default_budget` or `escrow` limits |
-| `Provider not configured` | Missing token | Set `GITHUB_TOKEN` etc. in `.env` |
+| Symptom | Diagnosis | Fix |
+|---------|-----------|-----|
+| `Sync failed` / push refused | Protected branch guard | Work on a feature branch or pass `--branch <name>` explicitly |
+| `Config not set. Run vant setup first.` | Missing `GITHUB_REPO` | `vant setup`, set `GITHUB_TOKEN` in env |
+| `E_SANDBOX` on a teams write | Deny-by-default caps | `vant org status`, then `vant org grant --scopes ...` |
+| `Agent quota reached (max 4)` | MCP crew full | Terminate idle agents (`agents.terminate(id)`) or raise `agents.maxAgents` |
+| Old-layout warning on every command | Legacy brain tree | `vant migrate` (see section 2) |
+| Stranded `<file>.<uuid>` temps | Crash during write | `vant health --sweep` |
+| `circuit OPEN` in logs | Provider failing repeatedly | Check token/network; breaker resets after timeout |
 
 ### Debug Commands
+
 ```bash
-# Full system status
-./bin/vant.js status --verbose
-
-# Sandbox capabilities
-node -e "console.log(require('./lib/sandbox').getStatus())"
-
-# Sudo state
-node -e "console.log(require('./lib/sudo').listTasks())"
-
-# Brain sync status
-./bin/vant.js sync status
+vant health                      # Everything, one screen
+vant system status               # JSON layer status
+vant org status                  # Current scopes + capabilities
+vant rate status                 # Rate limiter state (reset: vant rate reset <clientId>)
+vant config get <key>            # Effective brain-scoped config
+node -e "console.log(require('./lib/sandbox').canRead())"   # Direct sandbox probe
 ```
 
 ---
 
 ## 11. Cross-References
 
-| Topic | PRD |
+| Topic | Doc |
 |-------|-----|
 | Brain architecture | [labs/prd-brain.md](labs/prd-brain.md) |
 | Agent system | [labs/prd-agents.md](labs/prd-agents.md) |
 | Storage layer | [labs/prd-storage.md](labs/prd-storage.md) |
 | Security model | [labs/prd-security.md](labs/prd-security.md) |
 | Sudo system | [labs/prd-sudo.md](labs/prd-sudo.md) |
+| Org and teams | [labs/prd-org-teams.md](labs/prd-org-teams.md) |
 | Audit findings | [labs/AUDIT_FINDINGS.md](labs/AUDIT_FINDINGS.md) |
 | Task tracker | [labs/TASKS.md](labs/TASKS.md) |
+| Docs site | https://docs.creadev.org/vant |
+| CLI reference | https://docs.creadev.org/vant/reference/cli |
 
 ---
 
@@ -399,16 +362,21 @@ node -e "console.log(require('./lib/sudo').listTasks())"
 
 ```bash
 # Daily operations
-vant init              # Initialize brain
-vant think "query"     # Query brain
-vant act "command"     # Execute action
-vant agent spawn name  # Spawn agent
-vant sync push         # Push to all providers
-vant sync pull         # Pull from any provider
-vant backup create     # Encrypted backup
-vant health            # System health
+vant start                     # Full startup (health, layout check, auto-migrate)
+vant health                    # System health (+ --sweep for debris)
+vant sync --push "message"     # Commit + push brain
+vant sync --pull               # Pull brain (default action)
+vant mcp                       # MCP server on :3457
+vant server                    # REST server on :3456
+vant backup create             # Snapshot brain to backups/
+vant horcrux create            # Encrypted portable brain SVG
+vant migrate --status          # Brain layout status
+vant org status                # Current scopes/capabilities (read-only)
+vant system status             # JSON diagnostics
 ```
+
+For the full routed command list, run `vant --help` - every verb in the dispatcher is first-class, and `mcp`/`api`/`all` are handled inline.
 
 ---
 
-*For development setup, see [README.md](README.md). For agent API, see [AGENTS.md](AGENTS.md). For architecture, see [labs/ PRDs](labs/).*
+*For development setup, see [README.md](README.md). For the agent contract, see [AGENTS.md](AGENTS.md). For architecture PRDs, see [labs/](labs/).*

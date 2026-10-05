@@ -21,9 +21,10 @@ services:
     image: dhaupin/vant:health
     command: ["node", "bin/server.js"]
     ports:
-      - "3000:3000"
+      - "3456:3456"
     environment:
       - NODE_ENV=production
+      - VANT_SERVER_BIND=0.0.0.0
       - DD_API_KEY=${DD_API_KEY:-}
       - DD_SITE=${DD_SITE:-datadoghq.com}
 
