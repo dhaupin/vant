@@ -126,8 +126,14 @@ function main() {
 ╚═══════════════════════════════════════╝
 `);
 
-    // Seed a starter brain for brand-new projects (no-op when a brain exists).
-    if (doMigrate) seedStarterBrain();
+    // (pass 120) Seed AFTER the migration step completes (mig.on('close')
+    // below, and immediately in the --no-migrate branch). Seeding BEFORE the
+    // legacy import let the starter placeholder shadow the user's real flat
+    // brain files (existing-wins skipped identity.md/lessons.md, stranding
+    // them at the private root with the tree still detected legacy) and
+    // nested the seeded default dir inside a --brain-name import.
+    // Post-migration the seed resolves the imported brain from the
+    // synthesized stack and stays a no-op there.
 
     const runHealth = () => {
         // Run health check
@@ -175,6 +181,7 @@ function main() {
     const proceed = () => showInstallState().then(runHealth);
 
     if (!doMigrate) {
+        seedStarterBrain();
         proceed();
         return;
     }
@@ -227,11 +234,17 @@ function main() {
             // visible, not fatal — health check reports the state next.
             console.log(`[Start] Brain layout migration exited ${code} — continuing (see output above).`);
         }
+        // (pass 120) Seed after migration: on a fresh tree the no-op migrate
+        // leaves models/private empty and the seed creates the starter
+        // brain; on a legacy tree the import owns the brain dir and the
+        // seed skips (never shadows imported content).
+        seedStarterBrain();
         proceed();
     });
 
     mig.on('error', () => {
         console.log('[Start] Could not run layout migration — continuing.');
+        seedStarterBrain();
         proceed();
     });
 }

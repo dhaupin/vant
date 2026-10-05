@@ -24,7 +24,12 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 
 // The only files allowed to construct lock paths.
-const PATH_LITERAL_OK = new Set(['lib/lock.js', 'lib/brain-lock.js']);
+const PATH_LITERAL_OK = new Set(['lib/lock.js', 'lib/brain-lock.js',
+    // (pass 120) migrations._runtimeOnlyDir CLASSIFIES runtime scaffold dirs
+    // (orgchart, .locks, state/*.json.md) to keep them out of the legacy
+    // import plan. It never constructs or touches a lock path; the .locks
+    // literal here is a membership test, not a path builder.
+    'lib/migrations.js']);
 
 function collectJs(dir) {
     const out = [];

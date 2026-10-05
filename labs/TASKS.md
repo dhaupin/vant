@@ -2,7 +2,59 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-05  
-**Session:** Pass 119 — E2E grand tour + the sudo_grant disconnect + the dead lint hatch
+**Session:** Pass 120 — migration + onboard journey (the old-main user path), five real fixes, Uber PR prep
+
+---
+
+## Session (2026-10-05 — pass 120: migration + onboard journey)
+
+Owner picked path A (final sanity + merge to main) with one addition: test the
+migration and onboard systems first, because old main is the single-brain
+system and real users will cross that bridge. The journey suite found five
+real bugs the unit-level fixtures had missed:
+
+- **test/migrate-onboard-journey.test.js (NEW, 11 gates):** drives the REAL
+  CLIs on full repo-copy fixtures shaped like origin/main (flat public +
+  private brain, state.json with no stack): onboard status LEGACY + migrate
+  hints, onboard wake survives a not-yet-migrated brain, `vant migrate
+  --brain-name` imports exactly 9 files with verified:true, status flips to
+  CURRENT, onboard files/read/search all see the imported brain, re-run
+  settles ("Nothing to migrate"), hostile --brain-name falls back to a safe
+  name, `vant start` on a legacy tree shows the banner with REAL content
+  winning, `vant start` on a fresh tree seeds and reports CURRENT.
+- **Bug 1 (marker I/O booted the runtime):** migrations._readMarker and
+  _writeMarker routed through FileStorage, dragging the storage-to-brain
+  require chain into EVERY status()/detect() call. Brain boot's lazy escrow
+  init then materialized models/private/vant/orgchart/escrow.json on the
+  legacy tree BEFORE the import plan ran; the plan took it as a source and
+  nested the scaffold INSIDE the user's named brain (phantom <brain>/vant/).
+  Fix: plain fs read plus primitives.atomicWriteFile (zero-Vant-requires
+  tier) on the fixed metadata path.
+- **Bug 2 (dropfiles re-fired forever):** pure content re-detection made a
+  migrated brain's own state/*.json look like legacy dropfiles on every run:
+  the tree never reported up-to-date and each start re-moved a file. Fix:
+  marker-supersedes (status() and migrate() skip steps whose era the marker
+  covers; crash recovery intact: no marker means content-only detection),
+  plus an explicit deferral guard (dropfiles no-ops while the legacy import
+  owns the tree).
+- **Bug 3 (seed shadowing in start.js):** seedStarterBrain ran BEFORE the
+  migration spawn, so on a real old-main tree the placeholder identity.md
+  won existing-wins over the user's real files, stranding them at the
+  private root with the tree still LEGACY (skippedExisting:1 proves the
+  shadow). Fix: seed after mig.on('close'), and in the --no-migrate branch.
+- **Bug 4 (scaffold planned as content):** apply() opened the store BEFORE
+  plan(), so the boot writes above polluted even a fresh-process import.
+  Fix: plan-then-store ordering, plus _runtimeOnlyDir skips runtime-only
+  dirs (orgchart, .locks, live state) in the dir pass.
+- **audit-locks PATH_LITERAL_OK adds lib/migrations.js:** _runtimeOnlyDir
+  CLASSIFIES .locks dirs (a membership test, never a path builder); the
+  allowlist comment records why. audit-ledger-cli gate C is green again
+  (was 11/13 while the audit tripped).
+- Gates: journey 11/11, migrations.test.js 28/28, onboard 10/10, grand tour
+  18/18, sweep 168/168 (env-free), npm test exit 0, test-core 5/5, test-all
+  exit 0, npm run check exit 0, lints x4 PASS, audit-locks PASS, audit-mcp
+  296 reg / 59 skip / 0 threw / 0 timeout / 0 invalid / 149 refused / 88 ok /
+  0 phantom (exact baseline), eslint touched files 0 errors.
 
 ---
 
