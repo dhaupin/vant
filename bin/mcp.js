@@ -19,7 +19,7 @@ const path = require('path');
 // Parse args
 const args = process.argv.slice(2);
 let mode = 'server';
-let port = parseInt(process.env.VANT_MCP_PORT || '3100');
+let port = parseInt(process.env.VANT_MCP_PORT || '3457');
 let help = false;
 
 for (let i = 0; i < args.length; i++) {
@@ -72,7 +72,7 @@ Resolution:
 Headless Mode:
   Use Vant as library without MCP:
     const vant = require('../lib/vant');
-    await vant.startHeadless({ port: 3000 });
+    await vant.startHeadless({ port: 3456 });  // follows VANT_SERVER_PORT
   Or: process.env.VANT_MODE=headless
 `);
     process.exit(0);
@@ -91,11 +91,12 @@ if (mode === 'stdio') {
             const { method, params = {}, id } = request;
             
             const tools = mcp.methods;
-            const toolName = method.replace(/^vant_/, '').replace(/^brain_/, '');
-            const handler = tools.get(toolName);
+            // Method names in tools map have prefixes (brain_, context_, etc.)
+            // Don't strip prefixes - use method name as-is
+            const handler = tools.get(method);
             
             if (!handler) {
-                console.log(JSON.stringify({ jsonrpc: '2.0', error: { code: -32601, message: 'Method not found' }, id }));
+                console.log(JSON.stringify({ jsonrpc: '2.0', error: { code: -32601, message: 'Method not found: ' + method }, id }));
                 return;
             }
             

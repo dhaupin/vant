@@ -42,11 +42,15 @@ const TEST_MODES = {
 
 // Tests that need external test runners (mocha/jest) - skip in standalone mode
 const SKIP_TESTS = [
-    'cloudflare.test.js',        // needs mocha describe()
-    'cloudflare-adapter.test.js' // needs mocha describe()
+    // No skipped tests - all converted to standard format
 ];
 
 function getFullSuite() {
+    // (pass 20) Fresh installs / npm packages ship without test/ — readdirSync
+    // crashed with a raw ENOENT before the "No tests found" message could
+    // help. Treat a missing test dir as an empty suite; the mode loop below
+    // then reports a clean "no tests" result instead of stack-tracing.
+    if (!fs.existsSync(TEST_DIR)) return [];
     // Collect all .test.js and *-test.js files, excluding skip list
     const files = fs.readdirSync(TEST_DIR)
         .filter(f => (f.endsWith('.test.js') || f.endsWith('-test.js')) && !SKIP_TESTS.includes(f))
@@ -91,6 +95,14 @@ async function runTests(mode = 'smoke') {
     }
     
     printBanner(`Vant Test Suite: ${mode.toUpperCase()}`);
+    if (tests.length === 0) {
+        // (pass 20) Install without test/ (npm package, fresh clone subset):
+        // fail with guidance, not a stack trace.
+        console.log(`No test files found in ${TEST_DIR}`);
+        console.log('\nThe test/ directory ships with the repo, not npm installs.');
+        console.log('Clone https://github.com/dhaupin/vant to run the suite.');
+        process.exit(1);
+    }
     console.log(`Running ${tests.length} test files...\n`);
     
     let passed = 0, failed = 0;
@@ -128,5 +140,15 @@ async function runTests(mode = 'smoke') {
 
 // CLI args
 const args = process.argv.slice(2);
+// (pass 92) -h/--help documents the modes instead of 'Unknown mode' + exit 1.
+if (args[0] === '-h' || args[0] === '--help') {
+    console.log('Usage: node bin/test-core.js [mode]');
+    console.log('');
+    console.log('Modes:');
+    for (const m of Object.keys(TEST_MODES)) {
+        console.log('  ' + m.padEnd(8) + TEST_MODES[m].length + ' test file(s)');
+    }
+    process.exit(0);
+}
 const mode = args[0] || 'smoke';
 runTests(mode);

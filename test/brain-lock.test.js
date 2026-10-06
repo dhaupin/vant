@@ -1,0 +1,291 @@
+#!/usr/bin/env node
+/**
+ * Brain Lock Module Unit Tests (lib/brain-lock.js)
+ *
+ * Includes pass-105 "truth-up" gates: getLayerStatus shape (F2), real
+ * listStackLocks rows (F3), and the CLI release-vs-denied regression (F4).
+ */
+
+const fs = require('fs');
+const path = require('path');
+const { spawnSync, spawn } = require('child_process');
+
+const ROOT = path.resolve(__dirname, '..');
+const BRAIN_LOCK = path.join(ROOT, 'lib', 'brain-lock');
+
+const results = { passed: 0, failed: 0 };
+const suite = [];
+
+function test(name, fn) { suite.push({ name, fn }); }
+
+console.log('\n🔒 BRAIN LOCK MODULE TESTS\n');
+
+// ============================================
+// LOAD
+// ============================================
+
+test('brain-lock module loads', () => {
+    return { success: !!require(BRAIN_LOCK) };
+});
+
+test('brain-lock has acquireBrainLock function', () => {
+    const lock = require(BRAIN_LOCK);
+    return { success: typeof lock.acquireBrainLock === 'function' };
+});
+
+test('brain-lock has releaseBrainLock function', () => {
+    const lock = require(BRAIN_LOCK);
+    return { success: typeof lock.releaseBrainLock === 'function' };
+});
+
+test('brain-lock has brainLockStatus function', () => {
+    const lock = require(BRAIN_LOCK);
+    return { success: typeof lock.brainLockStatus === 'function' };
+});
+
+test('brain-lock has forceReleaseBrainLock function', () => {
+    const lock = require(BRAIN_LOCK);
+    return { success: typeof lock.forceReleaseBrainLock === 'function' };
+});
+
+test('brain-lock has getAgentId function', () => {
+    const lock = require(BRAIN_LOCK);
+    return { success: typeof lock.getAgentId === 'function' };
+});
+
+// ============================================
+// MULTIBRAIN STACK TESTS
+// ============================================
+
+console.log('\n📚 STACK SUPPORT TESTS\n');
+
+test('brain-lock has getStackLockStatus function', () => {
+    const lock = require(BRAIN_LOCK);
+    return { success: typeof lock.getStackLockStatus === 'function' };
+});
+
+test('brain-lock has listStackLocks function', () => {
+    const lock = require(BRAIN_LOCK);
+    return { success: typeof lock.listStackLocks === 'function' };
+});
+
+test('getStackLockStatus returns object with source stack', () => {
+    const lock = require(BRAIN_LOCK);
+    const status = lock.getStackLockStatus();
+    return { success: status && status.source === 'stack' };
+});
+
+test('listStackLocks returns array', () => {
+    const lock = require(BRAIN_LOCK);
+    const locks = lock.listStackLocks();
+    return { success: Array.isArray(locks) };
+});
+
+// ============================================
+// TRUTH-UP (pass 105)
+// ============================================
+
+console.log('\n🩺 TRUTH-UP TESTS (pass 105)\n');
+
+test('getLayerStatus matches the sibling-layer shape (F2)', () => {
+    const lock = require(BRAIN_LOCK);
+    const s = lock.getLayerStatus();
+    return { success: !!s && s.name === 'Brain lock' && s.type === 'authorization_lease' && s.enabled === true };
+});
+
+test('listStackLocks emits real rows for a held lock (F3)', async () => {
+    const lock = require(BRAIN_LOCK);
+    const brain = require(path.join(ROOT, 'lib', 'brain'));
+    const target = brain.getStack()[0];
+    const agent = 'stack-row-test';
+    const token = await lock.acquireBrainLock(agent, lock.DEFAULT_TIMEOUT_MS, { brain: target });
+    if (!token) return { success: false, error: 'could not acquire lease for ' + target };
+    let rows;
+    try {
+        rows = lock.listStackLocks();
+    } finally {
+        await lock.releaseBrainLock(agent, token, { brain: target });
+    }
+    const row = Array.isArray(rows) ? rows.find(r => r.brain === target && r.agentId === agent) : null;
+    // row[0] === undefined proves it is NOT the old spread-string junk shape.
+    return { success: !!row && row.valid === true && row[0] === undefined };
+});
+
+test('getState().lockStatus is DATA, not a function reference (F5)', () => {
+    const vant = require(path.join(ROOT, 'lib', 'vant'));
+    const st = vant.getState();
+    return { success: st && typeof st.lockStatus !== 'function' };
+});
+
+test('vant lock release reports FAILURE + keeps the token on a denied release (F4)', () => {
+    const tokenFile = path.join(ROOT, '.lock-brain-token');
+    const had = fs.existsSync(tokenFile);
+    const prev = had ? fs.readFileSync(tokenFile, 'utf8') : null;
+    fs.writeFileSync(tokenFile, 'definitely-wrong-token');
+    let out = '';
+    let preserved = false;
+    try {
+        const r = spawnSync(process.execPath, [path.join(ROOT, 'bin', 'lock.js'), 'release'], {
+            cwd: ROOT, encoding: 'utf8', env: { ...process.env }
+        });
+        out = (r.stdout || '') + (r.stderr || '');
+        // The old bug called clearToken() on a DENIED release — so the file
+        // must still be present here for the fix to be working.
+        preserved = fs.existsSync(tokenFile);
+    } finally {
+        if (had) fs.writeFileSync(tokenFile, prev);
+        else { try { fs.unlinkSync(tokenFile); } catch (e) {} }
+    }
+    return { success: /lock/i.test(out) && !/Lock released/.test(out) && preserved };
+});
+
+// ============================================
+// S3 WIRE-UP (pass 107)
+// ============================================
+
+console.log('\n🔌 S3 WIRE-UP TESTS (pass 107)\n');
+
+test('MCP vant_lock status reports stack status (S3)', async () => {
+    const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+    const r = await mcp.execute('vant_lock', { action: 'status' });
+    return {
+        success: !!r && r.action === 'status' && !!r.stack && r.stack.source === 'stack'
+            && Array.isArray(r.held) && !!r.stack.byBrain && typeof r.stack.byBrain === 'object',
+        error: JSON.stringify(r).slice(0, 240)
+    };
+});
+
+test('MCP vant_lock stack action returns the whole-stack view (S3)', async () => {
+    const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+    const r = await mcp.execute('vant_lock', { action: 'stack' });
+    return {
+        success: !!r && r.action === 'stack' && r.source === 'stack' && Array.isArray(r.held),
+        error: JSON.stringify(r).slice(0, 240)
+    };
+});
+
+test('health.getStackHealthStatus surfaces the lock layer (S3)', () => {
+    const health = require(path.join(ROOT, 'lib', 'health'));
+    const r = health.getStackHealthStatus();
+    return {
+        success: !!r && !!r.lock && !!r.lock.layer && r.lock.layer.type === 'authorization_lease'
+            && Array.isArray(r.lock.held) && !!r.lock.byBrain,
+        error: JSON.stringify(r && r.lock).slice(0, 240)
+    };
+});
+
+test('vant lock status reports the whole stack (S3)', () => {
+    const r = spawnSync(process.execPath, [path.join(ROOT, 'bin', 'lock.js'), 'status'], {
+        cwd: ROOT, encoding: 'utf8', env: { ...process.env, VANT_BRAIN: 'vant' }
+    });
+    const out = (r.stdout || '') + (r.stderr || '');
+    return {
+        success: r.status === 0 && /Stack:/.test(out) && /Held across stack:/.test(out),
+        error: out.slice(0, 240)
+    };
+});
+
+// ============================================
+// PASS 108 — LEASE STATE MACHINE + CAS DEFECT GATES
+// ============================================
+
+console.log('\n🧯 PASS 108 DEFECT GATES\n');
+
+test('same-agent re-acquire REFRESHES instead of failing (pass 108)', async () => {
+    const lock = require(BRAIN_LOCK);
+    const agent = 'qc-refresh-agent';
+    const t1 = await lock.acquireBrainLock(agent, 60000);
+    const t2 = t1 ? await lock.acquireBrainLock(agent, 60000) : null;
+    try {
+        return {
+            success: !!t1 && !!t2 && t2 === t1,
+            error: !t1 ? 'first acquire failed'
+                : (!t2 ? 're-acquire failed — own lease treated as contention (dead refresh branch)'
+                    : 'file token changed on refresh')
+        };
+    } finally {
+        if (t1) await lock.releaseBrainLock(agent, t1);
+    }
+});
+
+test('forceReleaseBrainLock returns a boolean (pass 108)', () => {
+    const lock = require(BRAIN_LOCK);
+    const ret = lock.forceReleaseBrainLock(); // nothing held -> false, not undefined
+    return { success: typeof ret === 'boolean', error: 'returned ' + typeof ret };
+});
+
+test('stale-takeover race yields exactly ONE holder (pass 108 CAS)', async () => {
+    const lock = require(BRAIN_LOCK);
+    const lockDir = path.join(ROOT, 'models', '.locks');
+    const leasePath = path.join(lockDir, lock.getBrainLock(null).lockFile);
+    const startFile = path.join(lockDir, '.qc-race-start.flag');
+    const readyA = path.join(lockDir, '.qc-race-ready-a.flag');
+    const readyB = path.join(lockDir, '.qc-race-ready-b.flag');
+    const ITERS = 4;
+    let doubleWins = 0;
+    const waitFlag = (f, ms) => { const t0 = Date.now(); while (!fs.existsSync(f) && Date.now() - t0 < ms) { /* spin */ } };
+    for (let i = 0; i < ITERS; i++) {
+        lock.forceReleaseBrainLock();
+        fs.mkdirSync(lockDir, { recursive: true });
+        const stale = { token: 'ghost', agentId: 'ghost', timestamp: Date.now() - 7200000, timeout: 3600000, pid: 1 };
+        fs.writeFileSync(leasePath, JSON.stringify(stale, null, 2) + '\n---\nghost');
+        [startFile, readyA, readyB].forEach(f => { try { fs.unlinkSync(f); } catch (e) {} });
+        const runChild = (id, ready) => new Promise((res) => {
+            const c = spawn(process.execPath, ['-e', `
+                const fs = require('fs');
+                const bl = require(process.argv[1]);
+                fs.writeFileSync(process.argv[2], '1');
+                const t0 = Date.now();
+                while (!fs.existsSync(process.argv[3]) && Date.now() - t0 < 5000) {}
+                bl.acquireBrainLock('qc-racer-' + process.argv[4], 60000).then(t => {
+                    console.log(JSON.stringify({ got: !!t }));
+                    process.exit(0);
+                }).catch(() => { console.log(JSON.stringify({ got: false })); process.exit(0); });
+            `, path.join(ROOT, 'lib', 'brain-lock.js'), ready, startFile, String(id)], { cwd: ROOT });
+            let out = '';
+            c.stdout.on('data', d => { out += d; });
+            c.on('exit', () => {
+                let r = { got: false };
+                try { r = JSON.parse(out.trim().split('\n').pop()); } catch (e) {}
+                res(r);
+            });
+        });
+        const pa = runChild('a', readyA);
+        const pb = runChild('b', readyB);
+        waitFlag(readyA, 5000);
+        waitFlag(readyB, 5000);
+        fs.writeFileSync(startFile, 'go'); // both children race the stale lease
+        const pair = await Promise.all([pa, pb]);
+        const wins = (pair[0].got ? 1 : 0) + (pair[1].got ? 1 : 0);
+        if (wins === 2) doubleWins++;
+        lock.forceReleaseBrainLock();
+    }
+    [startFile, readyA, readyB].forEach(f => { try { fs.unlinkSync(f); } catch (e) {} });
+    return { success: doubleWins === 0, error: doubleWins + '/' + ITERS + ' races had two live holders of the exclusive lease' };
+});
+
+// ============================================
+
+(async () => {
+    for (const t of suite) {
+        try {
+            const r = await t.fn();
+            if (r === true || (r && r.success)) {
+                results.passed++;
+                console.log(`  ✓ ${t.name}`);
+            } else {
+                results.failed++;
+                console.log(`  ✗ ${t.name}: ${(r && r.error) || 'assertion failed'}`);
+            }
+        } catch (e) {
+            results.failed++;
+            console.log(`  ✗ ${t.name}: ${e.message}`);
+        }
+    }
+
+    console.log('\n--- RESULTS ---\n');
+    console.log(`  Passed:  ${results.passed}`);
+    console.log(`  Failed:  ${results.failed}`);
+    console.log(`  Total:   ${results.passed + results.failed}`);
+    process.exit(results.failed > 0 ? 1 : 0);
+})();

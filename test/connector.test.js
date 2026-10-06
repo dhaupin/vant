@@ -46,6 +46,29 @@ test('connector has PineconeConnector class', () => {
     return { success: !!connector.PineconeConnector };
 });
 
+// Multibrain tests
+test('connector has getBrainConnectorConfig function', () => {
+    const connector = require(path.join(ROOT, 'lib', 'connector'));
+    return { success: typeof connector.getBrainConnectorConfig === 'function' };
+});
+
+test('connector has setBrainConnectorConfig function', () => {
+    const connector = require(path.join(ROOT, 'lib', 'connector'));
+    return { success: typeof connector.setBrainConnectorConfig === 'function' };
+});
+
+// Stack tests
+test('connector has getStackConnectorConfigs function', () => {
+    const connector = require(path.join(ROOT, 'lib', 'connector'));
+    return { success: typeof connector.getStackConnectorConfigs === 'function' };
+});
+
+test('getStackConnectorConfigs returns object with source stack', () => {
+    const connector = require(path.join(ROOT, 'lib', 'connector'));
+    const result = connector.getStackConnectorConfigs();
+    return { success: result && result.source === 'stack' };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

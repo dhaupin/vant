@@ -35,8 +35,91 @@ Modes:
     process.exit(0);
 }
 
+// Multi-brain commands
+async function runMultiBrain() {
+    const brain = require('../lib/brain');
+    
+    if (subcmd === 'list' || subcmd === 'ls') {
+        const dirs = brain.brainDirs();
+        console.log('\nBrains:');
+        if (dirs.private) {
+            console.log('  Private:');
+            for (const b of dirs.private) {
+                console.log('    -', b);
+            }
+        }
+        if (dirs.public) {
+            console.log('  Public:');
+            for (const b of dirs.public) {
+                console.log('    -', b);
+            }
+        }
+    } else if (subcmd === 'stack') {
+        const stack = brain.getStack();
+        console.log('\nCurrent stack:');
+        for (const b of stack) {
+            console.log('  -', b);
+        }
+    } else if (subcmd === 'push' && args[1]) {
+        const result = brain.pushBrain(args[1], args[2] || 'private');
+        console.log('\nPushed to stack:', result);
+    } else if (subcmd === 'pop' && args[1]) {
+        const result = brain.removeBrain(args[1]);
+        console.log('\nPopped from stack:', result);
+    } else if (subcmd === 'switch' && args[1]) {
+        const result = brain.switchBrain(args[1], args[2] || 'private');
+        console.log('\nSwitched to:', result);
+    } else if (subcmd === 'load' && args[1]) {
+        const result = await brain.load(args[1], { type: args[2] || 'private' });
+        console.log('\nLoaded:', result);
+    } else if (subcmd === 'merge' && args[1]) {
+        const result = await brain.merge([args[1]]);
+        console.log('\nMerged:');
+        for (const [key, values] of Object.entries(result.results)) {
+            console.log('  ', key + ':');
+            for (const v of values) {
+                console.log('    -', v.brain, ':', v.content?.slice(0, 50) + '...');
+            }
+        }
+    } else if (subcmd === 'geo' || subcmd === 'geometry') {
+        const geoCmd = args[1] || 'list';
+        
+        if (geoCmd === 'list') {
+            const dirs = brain.geoList();
+            console.log('\nGeometry storage:');
+            for (const d of dirs) {
+                console.log('  ', d);
+            }
+        } else if (geoCmd === 'load' && args[2]) {
+            const result = await brain.geoLoad(args[2]);
+            console.log('\nLoaded:', JSON.stringify(result, null, 2));
+        } else if (geoCmd === 'store' && args[2] && args[3]) {
+            const result = await brain.geoStore(args[2], JSON.parse(args[3]));
+            console.log('\nStored:', result);
+        } else if (geoCmd === 'search' && args[2]) {
+            // Search by key prefix
+            const dirs = brain.geoList();
+            console.log('\nSearching for:', args[2]);
+            // Would need to implement search
+            console.log('(search not implemented)');
+        } else {
+            console.log('Geo commands: list, load <barcode>, store <key> <json>, search <key>');
+        }
+    } else {
+        console.log('Unknown subcommand or missing args');
+        console.log('Multi-brain commands: list, stack, push, pop, switch, load, merge, geo');
+    }
+}
+
 function run() {
-    if (subcmd === 'mode' && !args[1]) {
+    // Check for multi-brain commands
+const multiBrainCmds = ['list', 'ls', 'stack', 'push', 'pop', 'switch', 'load', 'merge', 'geo', 'geometry'];
+if (multiBrainCmds.includes(subcmd)) {
+    runMultiBrain().catch(e => {
+        console.error('Error:', e.message);
+        process.exit(1);
+    });
+} else if (subcmd === 'mode' && !args[1]) {
         // Show current mode
         const mode = brain.getMode();
         console.log('Current mode:', mode);

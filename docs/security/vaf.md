@@ -3,22 +3,23 @@ version: 0.8.6
 permalink: /security/vaf
 layout: default
 title: VAF
-nav_order: 54
+nav_order: 68
+description: VAF, the Vant Application Firewall - input validation for every write path.
 ---
 
 # VAF
 
-Vant Application Firewall - input validation.
+VAF, the Vant Application Firewall, validates all input before it reaches
+storage, the runtime, or the MCP surface.
 
-## What
+## What it checks
 
-VAF validates all input:
-
-- Type checking
+- Type and shape validation
 - Length limits
 - Path traversal
-- Shell characters
-- Word stacking
+- Word and command stacking
+- Content filtering (script injection, control characters)
+- File extension allowlists
 
 ## Check
 
@@ -27,50 +28,61 @@ Validate input:
 ```javascript
 const vaf = require('./lib/vaf');
 
-vaf.check('input', { type: 'string', maxLength: 500 });
+vaf.check('input', { name: 'input', type: 'string', maxLength: 500 });
 ```
 
 ### Options
 
 | Option | What |
 |--------|------|
-| type | string, number, object, array |
-| maxLength | Max length |
-| pattern | Regex pattern |
-| required | Must be present |
+| `type` | Expected input type |
+| `name` | Field name for error messages |
+| `required` | Must be present |
+| `maxLength` | Max string length |
+| `allowContent` | Skip content filtering (for arbitrary text like commit messages) |
+| `category` | Validation category |
 
-## Blocked Patterns
-
-VAF blocks:
+## Blocked patterns
 
 | Pattern | Example |
-|--------|---------|
-| Path traversal | ../etc/passwd |
-| Shell chars | ; rm -rf |
-| Env vars | $HOME |
-| Word stacking | vant vant vant |
+|---------|---------|
+| Path traversal | `../etc/passwd` |
+| Word stacking | `vant vant vant` |
+| Command stacking | chained shell metacharacters |
+| Script injection | `<script>` tags |
+| Unsafe extensions | outside the allowlist |
 
 ## Configuration
 
+Tuning happens through the `CONFIG` surface and config keys, not a
+runtime setter:
+
 ```javascript
-vaf.configure({
-    maxLength: 50000,
-    blockPathTraversal: true,
-    blockShellChars: true,
-    blockEnvVars: true
-});
+const vaf = require('./lib/vaf');
+
+vaf.CONFIG.MAX_STRING_LENGTH;      // default 100000
+vaf.CONFIG.BLOCK_PATH_TRAVERSAL;   // default true
 ```
 
----
+`MAX_STRING_LENGTH` and `BLOCK_PATH_TRAVERSAL` can be set in config
+(`vant config set`) and are read at load time. Other exposed validators:
+`validateString`, `validateObject`, `validateSafePath`, `checkContent`,
+`sanitizeContent`, `checkFileExtension`, `checkWordStacking`,
+`checkCommandStacking`, `sanitize`, `middleware`, `getStatus`.
+
 ## Integration
-VAF runs on all inputs:
+
+VAF runs on all storage writes:
+
 ```javascript
 // All storage operations go through VAF
 brain.write('category', 'file', content);
 ```
----
+
+The same chain guards MCP tool arguments and headless server inputs.
 
 ## Related
 
-- [Security](security/security) - Security overview
-- [Sandbox](security/sandbox) - Execution isolation
+- [Security](/vant/security/) - Security overview
+- [Sandbox](/vant/security/sandbox) - Execution isolation
+- [Encryption](/vant/security/encryption) - Crypto primitives

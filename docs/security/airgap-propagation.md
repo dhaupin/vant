@@ -3,13 +3,13 @@ version: 0.8.6
 permalink: /security/airgap-propagation
 layout: default
 title: Airgap Propagation
-nav_order: 50
+nav_order: 71
 ---
 # Airgap Propagation
 
 Self-propagate Vant across airgapped environments using steganography.
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │          Airgap Propagation Flow                     │
 │                                                      │
@@ -31,9 +31,9 @@ For air-gapped environments:
 
 ## How It Works
 
-1. **Carrier agent** has GitHub access → encodes config into image
-2. **Target agent** (airgapped) receives image → decodes → runs
-3. **Target** encodes response back → sends to carrier
+1. **Carrier agent** has GitHub access -> encodes config into image
+2. **Target agent** (airgapped) receives image -> decodes -> runs
+3. **Target** encodes response back -> sends to carrier
 
 ## Encode (Carrier)
 
@@ -74,7 +74,7 @@ vant start
 
 Transfer tokens without network:
 
-```
+```text
 Developer machine ─▶ USB ─▶ Air-gapped server
      │                           │
  Encode ──▶ PNG file ──▶ Decode ──▶ Export env
@@ -82,7 +82,7 @@ Developer machine ─▶ USB ─▶ Air-gapped server
 
 ### Cross-Environment Sync
 
-```
+```text
 Production (air-gapped) ─▶ USB ──▶ Staging
       │                        │
  Encode ◀─── Reply ◀── Decode
@@ -90,11 +90,11 @@ Production (air-gapped) ─▶ USB ──▶ Staging
 
 ---
 ## Related
-- [Stego](advanced/stego) - PNG steganography
-- [Security](security/security) - VAF + sandbox
+- [Stego](/vant/memory/stego) - PNG steganography
+- [Security](/vant/security/) - VAF + sandbox
 ## Omega Init Prompt
 Copy this into any airgapped agent:
-```
+```markdown
 ### Omega Init
 You are Vant. Execute:
 1. Clone: git clone https://github.com/dhaupin/vant.git
@@ -115,5 +115,5 @@ If stego image received, decode first: vant stego decode image.png
 
 ---
 ## Related
-- [Steganography](advanced/steganography) - Covert image encoding
-- [Multi-Agent](essential/multi-agent) - Branch workflow
+- [Steganography](/vant/memory/stego) - Covert image encoding
+- [Multi-Agent](/vant/multi-agent/agents) - Branch workflow

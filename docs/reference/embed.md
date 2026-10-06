@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /reference/embed
 layout: default
 title: Embed API
-nav_order: 81
+nav_order: 124
 ---
 
 # Embed API

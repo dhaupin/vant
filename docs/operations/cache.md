@@ -3,14 +3,14 @@ version: 0.8.6
 permalink: /operations/cache
 layout: default
 title: Cache
-nav_order: 40
+nav_order: 65
 ---
 
 # Cache
 
 In-memory cache layer for fast recall.
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │              Cache Layer                            │
 │                                                      │
@@ -64,5 +64,5 @@ cache.clear();
 
 ## Related
 
-- [Storage](operations/storage) - Persistent storage
-- [Efficiency](advanced/efficiency) - Performance tips
+- [Storage](/vant/operations/storage) - Persistent storage
+- [Efficiency](/vant/advanced/efficiency) - Performance tips

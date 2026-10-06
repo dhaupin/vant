@@ -14,7 +14,7 @@
  * Options:
  *   -h, --help          Show this help
  *   -m, --mcp         Start with MCP server
- *   -p, --mcp-port    MCP server port (default: 3456)
+ *   -p, --mcp-port    MCP server port (default: 3457)
  *   -P, --enable-polling   Enable background GitHub polling
  *   -i, --poll-interval    Polling interval in seconds (default: 60)
  * 
@@ -25,11 +25,12 @@
  * Environment:
  *   VANT_GITHUB_REPO       - GitHub repo (default: from config)
  *   VANT_GITHUB_TOKEN     - GitHub token
- *   VANT_MCP_PORT         - MCP server port (default: 3456)
+ *   VANT_MCP_PORT         - MCP server port (default: 3457)
  *   VANT_AGREE_AUTO_SYNC  - Required for polling: set to "true" to agree
  * 
  * What it does:
- *   1. Loads brain from models/private
+ *   1. Loads the ACTIVE brain (multibrain: VANT_BRAIN env > currentBrain
+ *      via getBrainPath; MODEL_PATH/VANT_BRAIN_PATH remain explicit escapes)
  *   2. Starts MCP server (optional)
  *   3. Runs loop (brain updates done manually via vant sync)
  *   4. Optional: background GitHub polling (opt-in with warnings)
@@ -40,7 +41,7 @@ const fs = require('fs');
 // Lazy-load sandbox
 let _sandbox = null;
 function _getSandbox() {
-    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    if (!_sandbox) { try { _sandbox = require("../lib/sandbox"); } catch (e) {} }
     return _sandbox;
 }
 function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
@@ -66,7 +67,7 @@ Usage: node bin/node.js [-h|--help] [-m|--mcp] [-p|--mcp-port <port>]
 Options:
   -h, --help          Show this help
   -m, --mcp         Start with MCP server
-  -p, --mcp-port    MCP server port (default: 3456)
+  -p, --mcp-port    MCP server port (default: 3457)
   -P, --enable-polling   Enable background GitHub polling
   -i, --poll-interval    Polling interval in seconds (default: 60)
   -v, --verbose      Verbose output
@@ -105,7 +106,7 @@ const config = {
     mcp: args.includes('--mcp') || args.includes('-m'),
     mcpPort: parseInt(args.find(a => a.startsWith('--mcp-port='))?.split('=')[1] || 
             args.find(a => a.startsWith('-p='))?.split('=')[1] ||
-            args.find(a => a.startsWith('-p'))?.slice(2) || '3456'),
+            args.find(a => a.startsWith('-p'))?.slice(2) || '3457'),
     pollInterval,
     enablePollingRequested: enablePollingArg,
     enablePolling: enablePollingArg && agreedAutoSync,
@@ -128,7 +129,7 @@ class VantNode {
     constructor(options = {}) {
         this.options = {
             mcp: options.mcp || false,
-            mcpPort: options.mcpPort || 3456,
+            mcpPort: options.mcpPort || 3457,
             pollInterval: options.pollInterval || 60,
             enablePolling: options.enablePolling || false,
             enablePollingRequested: options.enablePollingRequested || false,
@@ -143,7 +144,7 @@ class VantNode {
         this.modules = {
             brain: loadModule('brain'),
             branch: loadModule('branch'),
-            lock: loadModule('lock'),
+            brainLock: loadModule('brain-lock'),
             config: loadModule('config'),
             logger: loadModule('logger'),
             errors: loadModule('errors')
@@ -161,8 +162,9 @@ class VantNode {
     async init() {
         this.log('Initializing Vant Node...');
         
-        // Load brain from local models/private
+        // Load the ACTIVE brain (multibrain-aware since pass 74)
         this.memory = this.loadBrain();
+        this.log('Brain path: ' + (this.brainPath || 'unknown'));
         
         // Start MCP server if enabled
         if (this.options.mcp) {
@@ -239,8 +241,21 @@ class VantNode {
      * Load brain from user's template (MODEL_PATH) or fallback
      */
     loadBrain() {
-        // Load user's brain template (MODEL_PATH), fallback to private for agent
-        const modelPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || 'models/private';
+        // (pass 74, multibrain census) Resolve the ACTIVE brain through the
+        // brain module - getBrainPath() honors VANT_BRAIN env > currentBrain
+        // (the same resolver state-store uses) - instead of a flat
+        // models/private scan that read the ROOT dir and missed every
+        // multibrain install. MODEL_PATH / VANT_BRAIN_PATH remain explicit
+        // escapes; the flat path stays as last-resort fallback.
+        let modelPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || null;
+        if (!modelPath) {
+            try {
+                modelPath = require('../lib/brain').getBrainPath();
+            } catch (e) {
+                modelPath = 'models/private';
+            }
+        }
+        this.brainPath = modelPath;
         const brain = {};
         
         if (!fs.existsSync(modelPath)) {
@@ -285,10 +300,19 @@ class VantNode {
      * Save brain to agent's private path ( MODEL_PATH for user overrides)
      */
     saveBrain(memory) {
-        // Agent's private path - keeps their brain separate from user
-        const modelPath = process.env.MODEL_PATH || process.env.VANT_STORAGE_PATH || 'models/private';
+        // Agent's active brain path (pass 74: same resolution as loadBrain -
+        // the write side matches the read side, VANT_BRAIN aware)
+        const modelPath = this.brainPath
+            || process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || null
+            || (() => { try { return require('../lib/brain').getBrainPath(); } catch (e) { return 'models/private'; } })();
         
         for (const [name, content] of Object.entries(memory)) {
+            // (R-6/O-9) name becomes a path segment — validate (the
+            // models/private/undefined artifact likely came from a path like this)
+            if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(String(name))) {
+                this.warn(`Skipping brain file with invalid name: ${String(name).slice(0, 40)}`);
+                continue;
+            }
             const filePath = path.join(modelPath, `${name}.md`);
             fs.writeFileSync(filePath, content, 'utf8');
         }

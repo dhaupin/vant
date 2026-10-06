@@ -3,7 +3,7 @@ version: 0.9.0
 permalink: /reference/compute
 layout: default
 title: Compute API
-nav_order: 82
+nav_order: 122
 ---
 
 # Compute API

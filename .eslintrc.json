@@ -12,6 +12,12 @@
     "no-undef": "off",
     "no-inner-declarations": "off",
     "no-const-assign": "off",
-    "no-dupe-keys": "off"
+    "no-dupe-keys": "off",
+    "no-shadow-restricted-names": "error",
+    "no-redeclare": "error",
+    "no-unreachable": "error",
+    "no-prototype-builtins": "error",
+    "no-dupe-class-members": "error",
+    "no-control-regex": "error"
   }
 }

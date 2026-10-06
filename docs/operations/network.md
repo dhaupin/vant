@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /operations/network
 layout: default
 title: Network
-nav_order: 44
+nav_order: 60
 ---
 
 # Network
@@ -156,12 +156,12 @@ const result = await network.fetch('https://evil.com');
 // Blocked by domain whitelist
 ```
 
-See [Security](security/security) for details.
+See [Security](/vant/security/) for details.
 
 ---
 
 ## Related
 
-- [Sandbox](security/sandbox) - Execution isolation
-- [Server](advanced/server) - HTTP server
-- [Security](security/security) - VAF and encryption
+- [Sandbox](/vant/security/sandbox) - Execution isolation
+- [Server](/vant/runtime/server) - HTTP server
+- [Security](/vant/security/) - VAF and encryption

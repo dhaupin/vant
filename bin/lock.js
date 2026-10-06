@@ -15,13 +15,13 @@ const theme = require('../lib/theme');
 // Lazy-load sandbox
 let _sandbox = null;
 function _getSandbox() {
-    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    if (!_sandbox) { try { _sandbox = require("../lib/sandbox"); } catch (e) {} }
     return _sandbox;
 }
 function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
 function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
-const lock = require('../lib/lock');
+const lock = require('../lib/brain-lock');
 
 const LOCK_TOKEN_FILE = path.join(__dirname, '..', '.lock-brain-token');
 
@@ -66,14 +66,14 @@ async function main() {
     switch (action) {
         case 'acquire':
         case 'acq':
-            const token = await lock.acquire('brain');
+            const token = await lock.acquireBrainLock('brain');
             if (token) {
                 saveToken(token);
                 console.log(theme.status.ok('Lock acquired'));
                 console.log('Token:', token);
             } else {
                 console.log(theme.status.fail('Could not acquire lock'));
-                const status = lock.status();
+                const status = lock.brainLockStatus();
                 if (status) {
                     console.log(`Held by: ${status.agentId} (${status.age}ms old)`);
                 }
@@ -83,18 +83,21 @@ async function main() {
         case 'release':
         case 'rel':
             const inputToken = args[1] || loadToken();
-            const result = await lock.release('brain', inputToken);
-            if (result) {
+            const result = await lock.releaseBrainLock('brain', inputToken);
+            // (pass 105) releaseBrainLock ALWAYS returns an object; test the
+            // `.success` flag, not truthiness — otherwise a DENIED release
+            // printed "Lock released" and deleted the token file.
+            if (result && result.success) {
                 clearToken();
                 console.log(theme.status.ok('Lock released'));
             } else {
-                console.log(theme.status.fail('Release failed'));
+                console.log(theme.status.fail((result && result.message) || 'Release failed'));
             }
             break;
             
         case 'status':
         case 'stat':
-            const status = lock.status();
+            const status = lock.brainLockStatus();
             if (status) {
                 console.log('Lock Status:');
                 console.log('  Agent:', status.agentId);
@@ -104,10 +107,24 @@ async function main() {
             } else {
                 console.log(theme.status.warn('No lock held'));
             }
+            // (pass 107, S3) Report the whole STACK too, not just the
+            // process-active brain — mirrors MCP `vant_lock status|stack`.
+            try {
+                const stackStatus = lock.getStackLockStatus();
+                const heldLocks = lock.listStackLocks();
+                console.log('Stack:');
+                for (const b of (stackStatus.brains || [])) {
+                    const s = stackStatus.byBrain[b];
+                    console.log('  - ' + b + ': ' + (s && s.valid ? 'held by ' + s.agentId : 'free'));
+                }
+                console.log('  Held across stack:', heldLocks.length);
+            } catch (e) {
+                console.log('  ' + theme.status.warn('Stack lock status unavailable: ' + e.message));
+            }
             break;
             
         case 'force':
-            lock.forceRelease();
+            lock.forceReleaseBrainLock();
             console.log(theme.status.ok('Lock force released'));
             break;
             
@@ -120,7 +137,7 @@ Usage: vant lock <command>
 Commands:
   acquire (acq)   Acquire brain lock for writes
   release (rel)    Release brain lock [token]
-  status (stat)    Show lock status
+  status (stat)    Show lock status (active brain + whole stack)
   force           Force release (admin)
 
 Examples:

@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /getting-started/setup
 layout: default
 title: Setup Guide
-nav_order: 13
+nav_order: 14
 ---
 # Setup Guide
 
@@ -19,6 +19,29 @@ vant setup
 export GITHUB_TOKEN=your_token
 vant start
 ```
+
+## Upgrading an old (single-brain) install
+
+Vant ≥0.9 stores brains in per-brain directories
+(`models/public/<brain>/`, `models/private/<brain>/`) plus a brain stack in
+`models/state.json`. If your install predates this (files sitting flat in
+`models/public/`), **`vant start` migrates you automatically** on first run
+and shows a confirmation banner, your brain name defaults to `vant`.
+
+Manual control:
+
+```bash
+vant migrate --status              # what's pending / layout version
+vant migrate --dry-run             # preview the moves, touch nothing
+vant migrate --brain-name mybrain  # choose the imported brain's name
+vant migrate                       # apply (import name: --brain-name > VANT_BRAIN > "vant")
+```
+
+Detection is content-based and idempotent, safe to run any time, no-op on
+already-multi-brain trees. `vant start --no-migrate` skips the auto-import.
+MCP clients can check via the `brain_migration_status` tool. The full
+contract, naming rules, and troubleshooting are in the
+[Migration Guide](/vant/getting-started/migration).
 
 ## Environment Variables
 
@@ -51,16 +74,16 @@ vant start
 
 | Variable | Description | Default |
 |----------|------------|---------|
-| `OPENAI_API_KEY` | OpenAI API key | - |
+| `OPENAI_API_KEY` | OpenAI API key (embeddings, rerank) | - |
 | `ANTHROPIC_API_KEY` | Anthropic API key | - |
-| `MODEL` | Model to use | gpt-4o |
 
 ### Optional - Storage
 
 | Variable | Description | Default |
 |----------|------------|---------|
-| `VANT_STATES_DIR` | States directory | states/active |
-| `VANT_MODELS_DIR` | Models directory | models/private |
+| `MODEL_PATH` | Primary brain path | models/private |
+| `VANT_BRAIN_PATH` | Brain path override (checked after `MODEL_PATH`) | - |
+| `VANT_MCP_PORT` | MCP server port | 3457 |
 
 ## TLS Setup
 
@@ -91,18 +114,19 @@ vant server --cert /etc/letsencrypt/live/yourdomain.com/fullchain.pem \
 
 ## Docker Setup
 
+Match the real image env contract (see the repo `Dockerfile`):
+
 ```dockerfile
-FROM node:20
+FROM node:20-alpine
 
 WORKDIR /app
-COPY package.json .
-RUN npm install
+COPY package.json ./
+RUN npm install --omit=dev
 
 COPY . .
 
 ENV GITHUB_TOKEN=your_token
-ENV VANT_SERVER_PORT=3456
-VANT_MCP_PORT=3100
+ENV GITHUB_REPO=your-username/your-brain-repo
 
 EXPOSE 3456
 
@@ -130,4 +154,5 @@ Check server is running: `vant health`
 
 ### "TLS certificate error"
 
-Use `--insecure` for development or set up TLS certificates.
+Set up TLS certificates (see [TLS Setup](#tls-setup) above); the dev server
+also accepts `VANT_SERVER_INSECURE=1` for plain HTTP.

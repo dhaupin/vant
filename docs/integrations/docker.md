@@ -3,28 +3,33 @@ version: 0.8.6
 permalink: /integrations/docker
 layout: default
 title: Docker
-nav_order: 32
+nav_order: 84
 ---
 # Docker
 
-Run Vant in containers.
+Run Vant in containers. Two ports are involved:
 
-```
+| Port | Service | Where |
+|------|---------|-------|
+| 3457 | MCP (JSON-RPC over HTTP) | `lib/mcp.js`, `VANT_MCP_PORT` |
+| 3456 | REST/health server | `lib/server.js`, `VANT_SERVER_PORT` |
+
+```text
 ┌─────────────────────────────────────────────┐
-│          Vant Docker Setup                    │
-│                                            │
-│  ┌─────────────────────────────────────┐   │
-│  │        Docker Container               │   │
-│  │                                     │   │
-│  │  /app/models  ← brain volume        │   │
-│  │  /app/config ← config volume       │   │
-│  │                                     │   │
-│  │  Port 3100 ← MCP              │   │
-│  │  Port 3456 ← API/Server        │   │
-│  └─────────────────────────────────────┘   │
-│                   │                        │
-│                   ▼                        │
-│         GitHub (external)                   │
+│          Vant Docker Setup                  │
+│                                             │
+│  ┌─────────────────────────────────────┐    │
+│  │        Docker Container             │    │
+│  │                                     │    │
+│  │  /app/models  <- brain volume       │    │
+│  │  /app/config  <- config volume      │    │
+│  │                                     │    │
+│  │  Port 3457    <- MCP                │    │
+│  │  Port 3456    <- API/Server         │    │
+│  └─────────────────────────────────────┘    │
+│                    │                        │
+│                    v                        │
+│          GitHub (external)                  │
 └─────────────────────────────────────────────┘
 ```
 
@@ -50,12 +55,12 @@ docker run -it \
 ### MCP Server
 
 ```bash
-# Run MCP server
-docker run -d -p 3456:3456 \
+# Run MCP server (default port 3457)
+docker run -d -p 3457:3457 \
   -e GITHUB_REPO=owner/repo \
   -e GITHUB_TOKEN=xxx \
   -v vant-brain:/app/models \
-  dhaupin/vant vant serve
+  dhaupin/vant vant mcp
 ```
 
 ## Image Tags
@@ -68,7 +73,7 @@ docker run -d -p 3456:3456 \
 
 ```bash
 # Pull specific version
-docker pull dhaupin/vant:v0.8.11
+docker pull dhaupin/vant:v0.8.6
 ```
 
 ## Volumes
@@ -87,15 +92,32 @@ docker volume create vant-brain
 docker run -v vant-brain:/app/models dhaupin/vant vant start
 ```
 
+## Upgrading an existing volume (pre-multi-brain layout)
+
+If your volume predates the multi-brain layout (brain files flat in
+`models/public/`), the first `vant start` on Vant 0.9 and later imports it
+automatically, default brain name `vant`, confirmation banner on the CLI.
+Skip with `--no-migrate`, or run manually:
+
+```bash
+docker run -v vant-brain:/app/models dhaupin/vant vant migrate --status
+docker run -v vant-brain:/app/models dhaupin/vant vant migrate --dry-run
+docker run -v vant-brain:/app/models dhaupin/vant vant migrate --brain-name mybrain
+docker run -v vant-brain:/app/models dhaupin/vant vant migrate
+```
+
+Detection is content-based and idempotent; nothing is lost, and repeat runs
+are no-ops.
+
 ## Environment Variables
 
 | Variable | Required | What |
 |----------|----------|------|
 | GITHUB_TOKEN | Yes | GitHub API token |
 | GITHUB_REPO | Yes | Brain repository |
-| VANT_PORT | No | Server port (default: 3456) |
-| VANT_DEBUG | No | Debug mode (0/1) |
-| MCP_REQUIRE_API_KEY | No | Require API key |
+| VANT_SERVER_PORT | No | REST/health port (default: 3456) |
+| VANT_MCP_PORT | No | MCP port (default: 3457) |
+| VANT_MCP_REQUIRE_KEY | No | Require API key for MCP (true/false) |
 
 ## Dockerfile
 
@@ -111,9 +133,9 @@ COPY . .
 
 ENV NODE_ENV=production
 
-EXPOSE 3456
+EXPOSE 3456 3457
 
-CMD ["node", "bin/vant.js", "serve"]
+CMD ["node", "bin/vant.js", "server"]
 ```
 
 ## docker-compose.yaml
@@ -126,6 +148,7 @@ services:
     image: dhaupin/vant:latest
     ports:
       - "3456:3456"
+      - "3457:3457"
     environment:
       - GITHUB_TOKEN=${GITHUB_TOKEN}
       - GITHUB_REPO=${GITHUB_REPO}
@@ -170,6 +193,7 @@ spec:
           value: owner/brain
         ports:
         - containerPort: 3456
+        - containerPort: 3457
         volumeMounts:
         - name: brain
           mountPath: /app/models
@@ -186,14 +210,13 @@ spec:
 curl http://localhost:3456/health
 
 # Response
-{"status": "ok", "version": "0.8.11", "uptime": 3600}
+{"status": "ok", "uptime": 3600}
 ```
 
 ---
 
 ## Related
 
-- [Deployment Tutorial](tutorials/deployment)
-- [Server](advanced/server) - HTTP server
-- [Security](security/security) - VAF + sandbox
-```
+- [Deployment](/vant/operations/deployment) - Deploy guidance
+- [Server](/vant/runtime/server) - HTTP server
+- [Security](/vant/security/) - VAF + sandbox

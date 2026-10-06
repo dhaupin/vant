@@ -26,11 +26,10 @@ const opts = process.argv.slice(3);
         switch (cmd) {
             case 'list': {
                 const list = islands.getAvailable();
-                const m = islands.getManifest();
+                const m = await islands.getManifest();
                 console.log(`[islands] ${list.length} islands:`);
-                for (const name of list) {
-                    const def = m.islands[name];
-                    console.log(`  - ${name} (${def?.type}) triggers=[${def?.triggers?.join(', ') || 'none'}]`);
+                for (const island of list) {
+                    console.log(`  - ${island.key} (${island.type}) triggers=[${island.triggers?.join(', ') || 'none'}]`);
                 }
                 break;
             }
@@ -58,16 +57,49 @@ const opts = process.argv.slice(3);
             case 'load': {
                 const name = opts[0];
                 if (!name) {
-                    console.error('Usage: load <name>');
+                    console.error('Usage: load <name> [--as <agentId>]');
                     process.exit(1);
                 }
-                const data = await islands.load(name);
+                // (pass 85) --as <agentId>: load AS a specific agent - its
+                // habitat identity becomes the RLS subject, so gated islands
+                // enforce against the agent's workspace/roles, not anonymous.
+                const asIdx = opts.indexOf('--as');
+                const asId = asIdx >= 0 ? opts[asIdx + 1] : null;
+                const loadOpts = {};
+                if (asId) {
+                    const agents = require(path.join(REPO_ROOT, 'lib', 'agents'));
+                    const ctx = agents.agentContext(asId);
+                    if (!ctx) {
+                        console.error('[islands] No habitat identity for agent: ' + asId);
+                        console.error('        (unknown agent, or it was never spawned/provisioned)');
+                        process.exit(1);
+                    }
+                    loadOpts.userCtx = ctx;
+                    console.log(`[islands] Acting as: ${ctx.agentId} (workspace: ${ctx.workspace || 'none'})`);
+                }
+                const data = await islands.load(name, loadOpts);
                 console.log(`[islands] Loaded ${name}:`, data?.content?.slice(0, 100) || 'empty');
+                break;
+            }
+            case 'boundaries': {
+                // (pass 85) Boundary introspection: which islands are RLS-gated
+                // and with what rules. Mirrors islands.listBoundaries().
+                const list = islands.listBoundaries();
+                if (!list.length) {
+                    console.log('[islands] 0 gated islands (no boundary policies set).');
+                    console.log('        Set one with: vant habitat policy');
+                    break;
+                }
+                console.log(`[islands] ${list.length} gated islands:`);
+                for (const b of list) {
+                    console.log(`  - ${b.island} readableBy=[${b.readableBy.join(', ') || 'public'}] writableBy=[${b.writableBy.join(', ') || 'none'}] container=${b.container}`);
+                }
                 break;
             }
             case 'mcp': {
                 const mcp = require(path.join(REPO_ROOT, 'lib', 'mcp'));
-                const port = parseInt(process.env.VANT_MCP_PORT || '3100');
+                // (pass 127) Fallback was 3100 - Grafana Loki's home port.
+                const port = parseInt(process.env.VANT_MCP_PORT || '3457');
                 console.log(`[mcp] Starting on port ${port}...`);
                 await mcp.start();
                 console.log(`[mcp] Running on port ${port}`);
@@ -83,11 +115,12 @@ const opts = process.argv.slice(3);
 Islands CLI (runtime wrapper)
 
 Usage:
-  islands list                     # List via lib/islands.js
-  islands create <name> --triggers x,y   # Create via runtime
-  islands trigger <query>           # Find triggers
-  islands load <name>             # Load island content
-  islands mcp                   # Start MCP server
+  islands list                        # List via lib/islands.js
+  islands create <name> --triggers x,y  # Create via runtime
+  islands trigger <query>             # Find triggers
+  islands load <name> [--as <agentId>]  # Load content (optionally as an agent)
+  islands boundaries                  # List RLS-gated islands + rules
+  islands mcp                         # Start MCP server
 
 Runtime: lib/islands.js + lib/mcp.js
                 `);

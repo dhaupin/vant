@@ -5,7 +5,7 @@ permalink: /advanced/rerank
 layout: default
 title: Rerank (RAG)
 
-nav_order: 98
+nav_order: 92
 ---
 
 
@@ -124,7 +124,7 @@ const pipeline = rerank.pipeline(memories, 'security', {
 
 ### Pipeline
 
-Runs rerank → compress in sequence, returns stats.
+Runs rerank -> compress in sequence, returns stats.
 
 ## Integration
 
@@ -137,7 +137,7 @@ Search can hook into rerank via `--rerank` flag (future).
 
 ## Related
 
-- [Search](advanced/search)
-- [Hybrid Search](advanced/search-architecture)
-- [Entropy](reference/entropy)
-- [CLI Reference](reference/cli)
+- [Search](/vant/advanced/search)
+- [Hybrid Search](/vant/advanced/search-architecture)
+- [Entropy](/vant/reference/entropy)
+- [CLI Reference](/vant/reference/cli)

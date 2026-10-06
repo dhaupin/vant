@@ -3,7 +3,7 @@ version: 0.8.6
 permalink: /integrations/linear
 layout: default
 title: Linear Integration
-nav_order: 35
+nav_order: 83
 description: Using Linear issue tracking with Vant
 ---
 
@@ -11,7 +11,7 @@ description: Using Linear issue tracking with Vant
 
 Vant integrates with Linear for issue tracking via GraphQL API.
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │         Linear Issue Flow                │
 │                                          │
@@ -36,7 +36,7 @@ Track agent work in Linear:
 ## Configuration
 
 Get API key:
-1. Go to Linear Settings → API
+1. Go to Linear Settings -> API
 2. Create API key
 3. Set environment:
 
@@ -109,7 +109,7 @@ await linear.updateIssue('SYS-123', {
 ```javascript
 vant.onGoalCreated(async (goal) => {
     const issue = await linear.createIssue(goal.title, {
-        description: Goal: `${goal.description}`,
+        description: `Goal: ${goal.description}`,
         priority: goal.priority
     });
     
@@ -150,6 +150,6 @@ When Linear island loaded:
 
 ## Related
 
-- [Islands](essential/islands) - Load on-demand
-- [MCP](reference/mcp-tools) - MCP server
-- [GitHub](integrations/github) - GitHub integration
+- [Islands](/vant/essential/islands) - Load on-demand
+- [MCP](/vant/reference/mcp-tools) - MCP server
+- [GitHub](/vant/integrations/github) - GitHub integration

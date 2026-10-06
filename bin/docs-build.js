@@ -1,5 +1,25 @@
 #!/usr/bin/env node
 const vaf = require("../lib/vaf");
+const args = process.argv.slice(2);
+
+// Show help
+if (args.includes('--help') || args.includes('-h')) {
+    console.log(`
+Vant Docs Builder
+
+USAGE:
+  vant docs-build         # Build docs
+
+OPTIONS:
+  --out DIR              # Output directory (default: docs/.vitepress/dist)
+  --version VERSION      # Set version manually
+
+EXAMPLES:
+  vant docs-build
+`);
+    process.exit(0);
+}
+
 // VAF: No user input - from package.json
 /**
  * docs-build.js - Build docs for release
@@ -15,7 +35,7 @@ const fs = require('fs');
 // Lazy-load sandbox
 let _sandbox = null;
 function _getSandbox() {
-    if (!_sandbox) { try { _sandbox = require("./lib/sandbox"); } catch (e) {} }
+    if (!_sandbox) { try { _sandbox = require("../lib/sandbox"); } catch (e) {} }
     return _sandbox;
 }
 function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }

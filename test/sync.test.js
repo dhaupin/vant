@@ -81,9 +81,11 @@ test('sync has markStale function', () => {
     return { success: typeof sync.markStale === 'function' };
 });
 
-test('sync has isCircuitClosed function', () => {
+test('sync does NOT export isCircuitClosed (pass 26: internal, not surface)', () => {
+    // Pass-through wrapper export removed in pass 26 — it was an alias for
+    // internal circuit-breaker plumbing, not a supported API.
     const sync = require(path.join(ROOT, 'lib', 'sync'));
-    return { success: typeof sync.isCircuitClosed === 'function' };
+    return { success: sync.isCircuitClosed === undefined };
 });
 
 test('sync has getLayerStatus function', () => {
@@ -94,6 +96,34 @@ test('sync has getLayerStatus function', () => {
 test('sync has isOperationAllowed function', () => {
     const sync = require(path.join(ROOT, 'lib', 'sync'));
     return { success: typeof sync.isOperationAllowed === 'function' };
+});
+
+// ============================================
+// MULTIBRAIN STACK TESTS
+// ============================================
+
+console.log('\n📚 STACK SUPPORT TESTS\n');
+
+test('sync has getStackSyncStatus function', () => {
+    const sync = require(path.join(ROOT, 'lib', 'sync'));
+    return { success: typeof sync.getStackSyncStatus === 'function' };
+});
+
+test('sync has getStackPrivacy function', () => {
+    const sync = require(path.join(ROOT, 'lib', 'sync'));
+    return { success: typeof sync.getStackPrivacy === 'function' };
+});
+
+test('getStackSyncStatus returns object with source stack', () => {
+    const sync = require(path.join(ROOT, 'lib', 'sync'));
+    const status = sync.getStackSyncStatus();
+    return { success: status && status.source === 'stack' };
+});
+
+test('getStackPrivacy returns object with source stack', () => {
+    const sync = require(path.join(ROOT, 'lib', 'sync'));
+    const privacy = sync.getStackPrivacy();
+    return { success: privacy && privacy.source === 'stack' };
 });
 
 console.log('\n--- RESULTS ---\n');

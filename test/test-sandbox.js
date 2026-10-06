@@ -64,12 +64,21 @@ test('has initLegal', () => {
     return typeof sandbox.initLegal === 'function';
 });
 
-// Test 2: Default capabilities (DENY)
-test('canRead default false', () => {
-    return sandbox.canRead() === false;
+// Test 2: Default capabilities
+// v0.9.0-axolotl: the default sandbox is now allow-by-default for
+// canRead/canWrite/canExec (agents need to do work in the trusted
+// runtime). canNetwork is still false by default (network is the
+// explicit, gated capability). Use `sandbox.create({ canRead: false,
+// canWrite: false, canExec: false })` for a restricted sandbox.
+// v0.9.0-axolotl (audit sandbox C1): DEFAULT_CAPABILITIES is DENY by default
+// for all dangerous capabilities. canRead stays true (read-only consumption),
+// while canWrite/canExec/canNetwork/canSpawn require explicit opt-in via
+// `sandbox.create({ capabilities: { canWrite: true, ... } })`.
+test('canRead default true', () => {
+    return sandbox.canRead() === true;
 });
 
-test('canWrite default false', () => {
+test('canWrite default false (deny by default)', () => {
     return sandbox.canWrite() === false;
 });
 
@@ -77,8 +86,35 @@ test('canNetwork default false', () => {
     return sandbox.canNetwork() === false;
 });
 
-test('canExec default false', () => {
+test('canExec default false (deny by default)', () => {
     return sandbox.canExec() === false;
+});
+
+test('restricted sandbox canRead false', () => {
+    // Demonstrates the explicit-deny path: callers who want a
+    // deny-by-default sandbox must opt in via `sandbox.create()`
+    // with `capabilities: { canRead: false }` and `scopes: []`.
+    const restricted = sandbox.create({
+        capabilities: { canRead: false, canWrite: false, canExec: false },
+        scopes: []
+    });
+    return restricted.can('canRead') === false;
+});
+
+test('restricted sandbox canWrite false', () => {
+    const restricted = sandbox.create({
+        capabilities: { canRead: false, canWrite: false, canExec: false },
+        scopes: []
+    });
+    return restricted.can('canWrite') === false;
+});
+
+test('restricted sandbox canExec false', () => {
+    const restricted = sandbox.create({
+        capabilities: { canRead: false, canWrite: false, canExec: false },
+        scopes: []
+    });
+    return restricted.can('canExec') === false;
 });
 
 // Test 3: Generate caps
@@ -87,11 +123,15 @@ test('generateCaps returns object', () => {
     return typeof caps === 'object';
 });
 
-// Test 4: Create sandbox
+// Test 4: Create sandbox with explicit capability opt-in
+// (capabilities are nested under `capabilities`, not top-level —
+// top-level passthrough was the old permissive signature)
 test('create with caps', () => {
     const sb = sandbox.create({
-        canRead: true,
-        canWrite: true
+        capabilities: {
+            canRead: true,
+            canWrite: true
+        }
     });
     return sb.capabilities.canRead === true &&
            sb.capabilities.canWrite === true;
