@@ -217,6 +217,6 @@ curl http://localhost:3456/health
 
 ## Related
 
-- [Deployment](/vant/operations/deployment) - Deploy guidance
+- [Deployment](/vant/getting-started/deploy) - Deploy guidance
 - [Server](/vant/runtime/server) - HTTP server
 - [Security](/vant/security/) - VAF + sandbox

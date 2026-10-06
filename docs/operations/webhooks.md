@@ -200,4 +200,4 @@ cron.cron('0 0 * * *', async () => {
 
 - [CLI](/vant/reference/cli)
 - [Sync](/vant/operations/sync)
-- [Search](/vant/advanced/search)
+- [Search](/vant/memory/search)

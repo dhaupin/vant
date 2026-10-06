@@ -258,5 +258,5 @@ const note = notices.post({ title: 'Q3 platform call set: thursday-1400utc (3 or
 - [Network](/vant/operations/network) - domains, allowlists, and transport posture
 - [Multi-Agent Coordination](/vant/multi-agent/coordination) - single-install crew patterns
 - [Best Practices](/vant/security/best-practices) - hardening a self-hosted deployment
-- [Deployment](/vant/operations/deployment) - production install guidance
+- [Deployment](/vant/getting-started/deploy) - production install guidance
 - [Testing](/vant/operations/testing) - how the mechanisms above are pinned

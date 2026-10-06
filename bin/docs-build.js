@@ -59,13 +59,11 @@ function updateDocsVersion(version) {
     'docs/index.md',
     'docs/getting-started/install.md',
     'docs/getting-started/quick-start.md',
+    'docs/getting-started/migration.md',
     'docs/reference/cli.md',
-    'docs/reference/configuration.md',
-    'docs/reference/api.md',
+    'docs/reference/config.md',
     'docs/reference/schema.md',
-    'docs/guides/architecture.md',
-    'docs/guides/security.md',
-    'docs/guides/multi-agent.md'
+    'docs/reference/api-runtime.md'
   ];
 
   let updated = 0;

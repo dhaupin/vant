@@ -72,7 +72,7 @@ const brainData = stego.decodeBrainChunked(outputs);
 
 The same module carries the SVG variant that horcrux uses
 (`encodeSvg` / `decodeSvg`) plus the manifest functions behind
-[hocrux bootstrap](/vant/memory/horcrux-bootstrap).
+[horcrux](/vant/memory/horcrux) boot-from-image.
 
 ## Capacity
 
@@ -93,6 +93,6 @@ The same module carries the SVG variant that horcrux uses
 
 ## Related
 
-- [Horcrux](/vant/memory/horcrux) - encrypted brain-in-image packaging
-- [Horcrux bootstrap](/vant/memory/horcrux-bootstrap) - zero-config boot from an image
+- [Horcrux](/vant/memory/horcrux) - encrypted brain-in-image packaging,
+  with zero-config boot from an image
 - [Boot](/vant/essential/boot) - the startup sequence

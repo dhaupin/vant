@@ -136,5 +136,5 @@ git push origin agent-yourname
 
 ## Next
 
-- [Branch](/vant/multi-agent/branches) - Git branch isolation
-- [Lock](/vant/multi-agent/agents) - Coordination
+- [Branches](/vant/multi-agent/branches) - Git branch isolation
+- [Locks](/vant/operations/locks) - Coordination

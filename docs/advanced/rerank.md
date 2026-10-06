@@ -137,7 +137,7 @@ Search can hook into rerank via `--rerank` flag (future).
 
 ## Related
 
-- [Search](/vant/advanced/search)
+- [Search](/vant/memory/search)
 - [Hybrid Search](/vant/advanced/search-architecture)
 - [Entropy](/vant/reference/entropy)
 - [CLI Reference](/vant/reference/cli)

@@ -75,7 +75,7 @@ function testLib(name, modPath, tests = {}) {
 // a hang (they serve until terminated).
 const BIN_SERVERS = new Set(['mcp']);
 
-function testBin(name, binPath, args = [], timeout = 3000) {
+function testBin(name, binPath, args = [], timeout = 3000, expectedCode = 0) {
   return new Promise((resolve) => {
     console.log(`\n🔧 Testing: ${name}`);
     
@@ -105,6 +105,8 @@ function testBin(name, binPath, args = [], timeout = 3000) {
         fail(`${name} syntax`, (error || '').toString().substring(0, 100));
       } else if (verdict === 'ok') {
         pass(detail || `${name} exits 0`);
+      } else if (verdict === 'expected-refusal') {
+        pass(`${name} exits nonzero on refusal (pinned)`);
       } else if (verdict === 'server') {
         pass(`${name} serves (killed at watchdog, expected for servers)`);
       } else if (verdict === 'hung') {
@@ -125,8 +127,8 @@ function testBin(name, binPath, args = [], timeout = 3000) {
         finish(BIN_SERVERS.has(name) ? 'server' : 'hung');
         return;
       }
-      if (code === 0) {
-        finish('ok');
+      if (code === expectedCode) {
+        finish(expectedCode === 0 ? 'ok' : 'expected-refusal');
       } else {
         finish('exit', code);
       }
@@ -280,7 +282,12 @@ async function main() {
   }
   
   if (!binFilter || binFilter === 'sync') {
-    await testBin('sync', './bin/sync.js');
+    // (pass 131) `vant sync` status works configless (exit 0). The bare
+    // default pull in a configless tree is a REFUSAL and must exit 1 - it
+    // used to exit 0, so scripts wrapping sync saw success on a refused
+    // pull. Pin both sides of the contract.
+    await testBin('sync', './bin/sync.js', ['status']);
+    await testBin('sync', './bin/sync.js', [], 3000, 1);
   }
   
   if (!binFilter || binFilter === 'mcp') {

@@ -60,8 +60,9 @@ Net test count: 1451 → 1478 passing (+27).
 
 ### Migration
 
-See `MIGRATING-0.8.6.md` for the cookbook (per-removed-API recipe
-with before/after snippets).
+See `labs/archives/docs/MIGRATING-0.8.6.md` for the cookbook (per-removed-API recipe
+with before/after snippets; archived there once brain-layout migration went
+automatic on `vant start`).
 
 ### Known Issues
 

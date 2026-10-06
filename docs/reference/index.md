@@ -15,8 +15,7 @@ description: Complete Vant reference - CLI, configuration, APIs, error codes, an
 |------|-----|
 | [CLI](/vant/reference/cli) | Every `vant` command, verified against `bin/` |
 | [Configuration](/vant/reference/config) | Config keys and `.env` values |
-| [API](/vant/reference/api) | The programmatic Vant API |
-| [API Runtime](/vant/reference/api-runtime) | Runtime API details |
+| [API Runtime](/vant/reference/api-runtime) | The programmatic Vant API (`lib/vant.js`) |
 | [REST API](/vant/reference/rest-api) | Headless server endpoints |
 | [MCP Tools](/vant/reference/mcp-tools) | Tool surface exposed over MCP |
 | [Embed](/vant/reference/embed) | Embedding providers |
@@ -37,8 +36,7 @@ description: Complete Vant reference - CLI, configuration, APIs, error codes, an
 | [Tmp](/vant/reference/tmp) | Temp file API |
 | [Entropy](/vant/reference/entropy) | Entropy patching (.vpatch) |
 | [Legal](/vant/reference/legal) | License and disclaimer |
-| [CHANGELOG](/vant/reference/CHANGELOG) | Release notes |
-| [Deprecations](/vant/reference/deprecations) | What is going away |
+| [CHANGELOG](https://github.com/dhaupin/vant/blob/main/CHANGELOG.md) | Release notes |
 
 ## Where to start
 

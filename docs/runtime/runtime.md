@@ -193,4 +193,4 @@ See [API Reference](/vant/reference/api-runtime) for complete documentation:
 ## Next
 
 - [Boot](/vant/essential/boot) - Startup sequence
-- [Onboard](/vant/essential/onboard) - Brain onboarding
+- [Knowledge Base Browser](/vant/essential/onboard) - the `vant onboard` brain browser

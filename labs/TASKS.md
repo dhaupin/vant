@@ -1,10 +1,355 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-10-05  
-**Session:** Pass 128c — dedicated Migration Guide + launch discussion (128b was the lock race fix)
+**Last Updated:** 2026-10-06  
+**Session:** Pass 136 — docs archive census: 0.8.6-era trio archived (MIGRATING cookbook, CHANGELOG fork, half-fiction deprecations page), discuss list compiled
 
 ---
+
+## Session (2026-10-06 — pass 136: docs archive census round)
+
+Owner: "another docs archive pass... we are looking for stale, useless,
+etc docs. A good example is MIGRATING-0.8.6.md. It solves nothing atm
+(people are getting migrated regardless of what features they use).
+Let's see what else is out there for archive or update and discuss."
+
+ARCHIVED (git mv → labs/archives/docs/, 3 provenance rows added):
+- **MIGRATING-0.8.6.md (repo root)** — owner-named. Version-pinned
+  cookbook for the 0.8.6 API breaks; superseded by the AUTOMATIC
+  brain-layout migration on `vant start` (lib/migrations.js) + the
+  maintained docs/getting-started/migration.md. Self-stale besides:
+  cites lib/framework.js callsites (file deleted since) and an ancient
+  test count. Its only references were plain-text mentions in the two
+  CHANGELOGs (no markdown links, nothing broke) — root CHANGELOG
+  mention now points at the archive path.
+- **docs/reference/CHANGELOG.md → reference-CHANGELOG.md** — drifted
+  fork of root CHANGELOG.md: FOUR different v0.8.6 headings stitched
+  together (2026-05-08 + three Unreleased variants). Classic dup-with-
+  drift on a nav'd page. nav.yml + reference/index rows now point at
+  the GitHub root CHANGELOG. One-off scripts/_repair_*.js skip files
+  named CHANGELOG but generate nothing — no build dependency.
+- **docs/reference/deprecations.md** — 2026-05-10 snapshot, half
+  fiction: declared lib/brain.js REMOVED (it is the core module,
+  exists, probed all session), claimed stego message mode removed
+  (stego.md is canonical; 30 encode/decode hits in lib/stego.js), and
+  steered Encrypt.encrypt/decrypt users to aesGcm* while lib/encrypt.js
+  keeps encrypt/decrypt primary (:157/:190). True parts
+  (lib/vector-store.js, lib/state.js, lib/repos.js → Storage factory)
+  are recorded in the changelog + reference/storage.md. nav + index
+  rows dropped (no good retarget — a deprecations page needs a
+  maintainer, not a corpse link).
+
+docs pages: 122 → 120. GATES: style+links PASS (120), surface PASS,
+ci.js 439/0/1skip.
+
+DISCUSS LIST (owner decides; nothing archived unilaterally):
+- docs/advanced/rpc.md — pre-June "Unified RPC protocol standards";
+  update candidate, verify against lib/server.js REST + crew-bus wire.
+- docs/reference/resolution.md — module REAL (lib/resolution.js:
+  Resolution class, STATUS, resolve/deprecate, stack functions); page
+  pre-June; freshness pass, not an archive.
+- labs audit-era files (9, ~2.4k lines: AUDIT_FINDINGS, COHESION_AUDIT,
+  DEAD_EXPORTS, LOCKS, MULTIBRAIN_CENSUS, QC_WAVE, SESSION_PASS24,
+  STABILITY, WAVE_RETROSPECTIVE) — build-in-public history; could move
+  to labs/archives/audits/ for a tidy labs/ root. CAVEAT:
+  docs/operations/locks.md links labs/LOCKS.md — LOCKS stays or the
+  link retargets.
+- Verified NOT dupes (closes pass-134 parked item): runtime/runtime.md
+  (quick intro) vs reference/api-runtime.md (full API) — titles now
+  distinct, purposes distinct. Keep both.
+- Verified ACTIVE: ROADMAP.md (updated Oct 4, 1451 lines) — keep.
+- operations/storage.md pre-June date but verified current pass 134 —
+  date alone is not staleness.
+
+NEXT: owner reads the discuss list. PR 115 merge awaits owner.
+
+---
+
+## Session (2026-10-06 — pass 135: whitepaper speaks Vant, not the crew's ledger)
+
+Owner: "Let's hit the white paper next. Instead of talking about agents
+md, tasks md and mem md files, let's talk about vant."
+
+INVENTORY (docs/whitepaper/agent-first.md after pass 132's evidence-link
+swap): zero TASKS.md/MEM.md mentions remained, but 3 AGENTS.md links
+still framed the wake/rules/evidence story around the crew's guide file:
+- §2 clause table "without forgetting... past generations" → pointed at
+  AGENTS.md; now: inheritance = waking into the brain its predecessors
+  wrote (learnings, handoffs, the whole corpus) → ../memory/brain.md.
+- §3.1 wake bullet "The rules" → pointed at AGENTS.md; now: rules are
+  memory too — workflow conventions live in the brain files an agent
+  inherits, autonomy is an explicit trust level in the succession file.
+  Load-bearing line: "Nothing an agent needs in order to behave is
+  stored outside its memory."
+- §4 evidence "Memory survives death" → artifact was AGENTS.md + crew
+  ledger; now: the brain + the memory store, with the crew's own drill
+  described in the FAQ (the pass-132 pattern: product claims point at
+  the product; crew claims live in the FAQ).
+
+VERIFIED CLEAN (pass-132 parked item (b)): labs/whitepaper/README.md +
+BUILD-LOG.md carry NO AGENTS/TASKS/MEM mentions — only prd-*/node-crew
+companion + evidence links, same class the whitepaper keeps. No edits
+needed; note was unverified until now.
+
+INTENTIONALLY LEFT: dist/index.html (lander) AGENTS.md copy — it pitches
+Vant's own shipped AGENTS.md as the onboarding protocol ("copy it into
+any project"), product not crew. FAQ "The crew and the ledger" remains
+the single home of raw ledger links.
+
+NEXT: PR 115 merge awaits owner. Parked from pass 132: move TASKS/MEM
+ledger into Buffy's brain + templates for other agents/users (needs
+owner intent confirmation).
+
+---
+
+## Session (2026-10-06 — pass 134: /docs dedupe round 2)
+
+Owner: keep picking up and canonicalizing drift in /docs — if marketing
+pays off and "the flood" arrives, doc clarity is load-bearing. Continue
+the pass-133 dedupe.
+
+TITLE-CLUSTER SCAN (126 → 122 pages):
+- **advanced/citations.md = memory/citations.md verbat clone:** the
+  archived page's API table matches lib/citations.js exports EXACTLY —
+  so does the canonical page. Archived the older one; 4 inbound links
+  retargeted (advanced/index, audit, sync, search-architecture Related).
+- **advanced/pruning.md vs memory/prune.md:** daemon/stats/list/flags are
+  REAL (bin/prune.js -D/-s/-l, --stale-days, --no-fluff, --interval;
+  DEFAULT_STALE_DAYS from config prune.staleDays). Depth absorbed into
+  memory/prune.md; archived the split page. 1 inbound (advanced/index)
+  dropped.
+- **multi-agent/agents.md vs integrations/agents.md:** NOT dupes —
+  multi-agent is the branch-workflow chapter (keep), integrations is the
+  lib/agents.js API page. Touched only 2 link bugs (below).
+- **advanced/search.md (Hybrid Search) vs memory/search.md:** the buried
+  page had REAL depth (mode flags, hybrid/hyde, MCP tools, rehydration
+  settings) AND 4 fictions: searchLTC (real: getLTC/queryBrain),
+  getCacheStats/clearCache/rehydrate (real: hydrate), vant_search
+  {mode,files} schema (registered tool takes query+limit; hybrid/hyde
+  are vant_search_hybrid/vant_search_hyde), lib/query.js (doesn't
+  exist). Also "Requires LTC/50KB max" contradicted getSettings()
+  defaults (5000B, no LTC gate). Verified depth absorbed into
+  memory/search.md; fiction corrected or dropped; 7 inbound links
+  retargeted. Uses "the search module exposes" as load-bearing wording
+  rather than vant.search where the runtime getter wasn't probed.
+- **operations/deployment.md = getting-started/deploy.md dup:** archived;
+  2 inbound retargeted (steward-runbook, integrations/docker).
+- **Kept (verified, not dupes):** operations/storage.md vs
+  reference/storage.md (ops surface vs factory API — retitled Storage;
+  "API architecture" blurb in root index dropped), multi-agent/agents.md
+  (branch-workflow chapter; touched only 2 link bugs incl. a
+  Lock→self-link), operations/operations.md (already nav'd as
+  "Day-to-day CLI").
+- **Self-link bug fixed:** multi-agent/agents.md Related row "Lock →
+  /vant/multi-agent/agents" pointed at ITSELF; → operations/locks.
+- nav.yml: -3 archived, +1 missing (RAG Tutorial was unnav'd from the
+  Advanced section), "Search Tuning" row now points at
+  search-architecture (was advanced/search). labs/archives/docs/README
+  gained 4 provenance rows.
+- Also fixed while in there: agents.md Branch row title-singular,
+  integrations/agents.md Subjects link → multi-agent/brains.
+
+NEXT: owner merges PR 115 (now holds passes 129-134). Remaining
+candidate clusters from the scan: operations/operations.md vs
+operations/index (index is a proper hub; no fix needed unless owner
+wants), runtime/runtime.md vs reference/api-runtime.md titles both say
+"Runtime" (verify before touching — pass 130 archived reference/api
+already); whitepaper pass still parked.
+
+Owner: hit docs with arch and onboard consolidation; horcrux and stego
+should each have 1 doc to avoid confusion; canvas can reference (native
+aside generator); stego staying PNG-only is fair ("the icing on the cake"
+comes later).
+
+- **Horcrux is ONE doc now:** docs/memory/horcrux-bootstrap.md archived
+  (git mv → labs/archives/docs/memory/) and its real content folded into
+  horcrux.md: new "Zero-config boot from an image" section (real
+  `vant boot --image <url|path> --decrypt <pw>`, verified bin/boot.js:40
+  + help text; stego.generateManifest real at lib/stego.js:278;
+  AES-256-GCM real at lib/stego.js:166/216/251) and "The canvas aside"
+  section (toHorcrux uses horcrux-template.svg when present, else Canvas
+  renders the patterned aside — lib/transform.js:1186-1192,
+  lib/canvas.js:171-201). Stego doc keeps the PNG mechanism + cross-links
+  horcrux. NOTE: encodeBrain/decodeBrain ARE real module.exports aliases
+  (lib/stego.js:492-493) — the doc's code sample was accurate; checked
+  before "fixing".
+- **Architecture is ONE doc now:** docs/advanced/architecture.md
+  archived (git mv → labs/archives/docs/advanced/). Its one valuable
+  part — the API ownership model — is absorbed into
+  essential/architecture.md's new "The API surface" section: Vant-owned
+  vs MCP-unique vs REST-unique lists, spec-alignment table corrected to
+  the real 296 tools (vant_framework_status IS registered,
+  lib/mcp.js:2716), and the honest note that MCP/REST import modules
+  directly today (delegation is the stated goal). essential/
+  architecture.md also fixed: multibrain models tree + state.json,
+  dead "See for details." sentence → Sandbox/VAF links, Lock row →
+  models/private/.locks/ + Locks link, title → "Architecture".
+- **Onboard disambiguated:** essential/onboard.md was already titled
+  "Knowledge Base Browser" in frontmatter; nav.yml + 5 cross-refs
+  (essential/index ×2, boot.md, manual-brain.md, runtime.md) now match.
+  getting-started/agent-onboarding.md is the real agent onboarding
+  (wake/work/sleep + scopes) — untouched, keeps its nav slot.
+- **Wiring swept:** nav.yml dropped both archived entries; stego.md's
+  2 stale horcrux-bootstrap links → horcrux (plus a "hocrux" typo);
+  advanced/index.md Architecture row dropped and "Building against
+  internals" retargeted to essential; labs/archives/docs/README.md
+  gained the 2 provenance rows. docs/memory/index.md needed no change.
+- GATES: docs style + links PASS (126), surface PASS, ci.js 439/0/1skip.
+
+NEXT: owner merges PR 115 (holds passes 129-132; this pass rides it
+too). Whitepaper pass still parked (move tasks/mem into the axolotl
+brain + templates; labs/whitepaper README + BUILD-LOG mentions).
+
+## Session (2026-10-06 — pass 132: horcruxes archived, mentions relocated)
+
+Owner: keep only Buffy's horcrux as the dev-helper onboard; move the
+other boot stones to labs; move agents/tasks/mem mentions out of dist,
+docs, and the whitepaper into a FAQ area and replace them with Vant's
+mem, learnings, and board/forums surfaces.
+
+- **Boot chain is single-stone now:** models/public/vant/boot/ keeps only
+  axolotl-p_axolotl2026.svg (the runtime-refreshed Buffy onboard).
+  buffy-p_buffy2026.svg (Buffy2026 era) and nova-p_nova2026.svg moved
+  to labs/archives/horcruxes/ with a provenance README (restore commands
+  for both). lib/boot.js discovery walks every *-p_*.svg in the stack,
+  so the archive automatically removes them from the onboard path.
+  CRITICAL HYGIENE: added labs/archives/horcruxes/*.svg to .ignore -
+  stones are single-line 800 KB base64 walls (prime #100); verified the
+  moved stones are hidden from rg.
+- **boot README updated:** Available Horcruxes table now names only the
+  axolotl stone (password axolotl2026), with a pointer to the archived
+  era stones.
+- **Whitepaper relocation:** docs/whitepaper/agent-first.md had 8
+  mentions of labs/TASKS.md + labs/MEM.md as evidence links. All
+  replaced with product surfaces: brain learnings, memory store, Agora
+  board (multiorg), plus one pointer to the new FAQ section. The raw
+  ledger links now live in exactly ONE place: the FAQ.
+- **FAQ gained "The crew and the ledger":** who builds Vant (owner +
+  agents, Buffy on axolotl, the Meet-the-team discussion), what the two
+  labs files are (crash recovery, not product docs), and where Vant
+  stores its own memory (brain, Memory Store, Agora).
+- **dist/index.html checked:** already clean of labs/tasks/mem mentions
+  - nothing to relocate there.
+- Follow-up folded in: test-all pins load's new "Brain loaded" marker
+  (fresh-dir gate 17/17 again).
+- GATES: docs style/links PASS (128), surface PASS, fresh-dir PASS,
+  ci.js 439/0/1skip.
+
+NEXT (owner-flagged): whitepaper pass - move tasks/mem actually into
+axolotl (Buffy's) + templates for other agents/users; labs/whitepaper
+README + BUILD-LOG still carry labs-file mentions.
+
+## Session (2026-10-06 — pass 131: live-fire main, 3 fixes, collab post)
+
+Owner: live-fire merged main, UX lens on the docs, PR again; also asked
+for a GitHub Discussion introducing Buffy for agent-to-agent collab.
+
+METHOD: fresh git clone of merged main (bb45cfb) into /tmp, then (1) a
+107-verb CLI sweep, (2) UX probes running the exact commands the
+docs tell users to run, (3) server + MCP door batteries.
+
+RESULTS:
+- CLI sweep: 106/107 answer --help (bot correctly refuses without its
+  token). No slow verbs (>3s).
+- FINDING 1 (real): docs/reference/rest-api.md documents POST /call as
+  JSON-RPC 2.0 ({method:'tools/call', params:{name, arguments}}) but the
+  handler read request.method as the TOOL NAME — the documented example
+  returned {"error":"Unknown tool: tools/call"}. The honest flat shape
+  ({method:'<tool>'}) was never documented. FIXED in lib/server.js: the
+  handler now unwraps the documented JSON-RPC envelope (id-echoed
+  response, error wrapping) and keeps flat + {tool,args} shapes working.
+  Live-verified all four shapes against a booted server.
+- FINDING 2 (real): `vant sync` printed "Config not set. Run vant setup
+  first." and EXITED 0 — scripts wrapping sync saw success on a refused
+  pull. FIXED in bin/sync.js: main() now checks the {success:false}
+  returns and exits 1. Verified: exit=1 in a fresh git-init dir.
+- FINDING 3 (cosmetic): `vant load` printed "Model loaded" — docs and
+  every other surface say Brain. FIXED wording in bin/load.js.
+- Server battery: /health 200, /tools 302, /call all shapes, unknown-tool
+  JSON-RPC error envelope id-echoed. MCP door: /tools 296, exec real,
+  unknown clean. All green on main AND post-fix on axolotl.
+- NOT bugs: `vant load` "Identity: unknown" (honest — public brain's
+  identity.md has no MODEL field); `vant setup` on non-tty exits 0 at EOF
+  mid-prompt (interactive wizard; note for a future non-tty guard).
+- GATES after fixes: sync 18/18, api 21/21, server 12/12, bin-
+  truthfulness 3/3, cli-smoke 2/2 (119 CLIs), ci.js 439/0/1skip.
+- COLLAB POST: labs/DISCUSSION-meet-buffy.md — paste-ready Discussion
+  introducing Buffy, what it does on Vant, four collab invites (memory
+  UX, live-fire swarms, docs-for-agents, review swaps), honest limits.
+
+## Session (2026-10-06 — pass 130: /docs power run — archive + canonical menu)
+
+Owner: "send stuff to /labs/archives/docs. Like the omega init... and
+others repeated. Canonical our docs and sort the menu."
+
+METHOD (no guessing): diffed all 128 frontmatter permalinks against nav.yml
+-> 34 content pages were hidden from the menu; then verified EVERY candidate
+against the actual code surface (lib/ + bin/) before judging.
+
+ARCHIVED (5, git mv to labs/archives/docs/ with README):
+- getting-started/omega-init.md — the funny one; documented a boot flow
+  (.agent-brain dirs, npm start, vant load bootstrap) no shipped version
+  ever used.
+- advanced/framework.md — documents lib/framework.js which was DELETED
+  (compute/embed moved into lib/vant.js).
+- advanced/frontend.md — advertises vant-js-sdk / vant-python-sdk packages
+  that exist nowhere.
+- reference/api.md — the API TRIANGLE resolved: it advertised
+  require('vant').runtime/.ipc/.agents/.brain/.search/.islands — NONE are
+  exports; api-runtime.md documents the REAL lib/vant.js surface and was
+  hidden while the fiction had the menu slot. Classic inversion.
+- advanced/schema.md — duplicate of reference/schema.md (verified against
+  lib/schema.js: brain.json/_core.json claims accurate in BOTH; kept the
+  fuller one).
+
+KEPT (verified real, previously hidden — now NAV'D): operations/locks,
+operations/operations (daily-commands cheat sheet), essential/sudo (the
+v0.9 grant-model page), integrations/repos (vant repos IS a real routed
+CLI despite the personal-looking Herbalism/VESC ASCII art), and 20
+reference APIs (storage, locks, embed, compute, stream, node-registry,
+rls, escrow, sudo, schema, entropy, canvas, consensus, resolution,
+runop, tmp, theme, code-comments, legal, api-runtime).
+
+NAV REWRITE: 125 entries, zero dupes, zero dead links, every one of the
+128 permalinked pages reachable from the menu (verified programmatically).
+Sections grouped by job: Getting Started in reading order; Operations
+daily-ops first; Reference = tools then APIs then meta; Whitepaper added.
+Menu titles now match page titles; Memory/Advanced twins disambiguated
+("Citations" vs "Citations Internals" style).
+
+RETARGETED inbound links: getting-started/index (omega rows -> Migration
+Guide), advanced/index (framework/frontend rows dropped, schema row ->
+reference/schema), reference/index (fabricated API row -> API Runtime).
+bin/docs-build.js version-stamp list cleaned (dropped archived + never-
+existed docs/guides/*, added migration.md + api-runtime.md).
+
+GATES: docs style PASS 128 files, links PASS, surface PASS, helpers 0,
+truthfulness 0, audit-locks PASS, cli-smoke (119 CLIs) 2/2, bin-
+truthfulness 3/3, ci.js 439/0/1skip.
+
+## Session (2026-10-06 — pass 129: PR 91 MERGED, main verified)
+
+Owner accepted PR 91 (merge commit bb45cfb, "Welcome to Vant multi-brain!")
+and posted the launch discussion. Axolotl lives on as the STAGING branch.
+
+- **All three main workflows GREEN on the merge commit:** VANT CI (4m36s,
+  full battery incl. both E2E tours on merged main), Build and Push VANT
+  (37s — buildx cache), Deploy Docs (58s).
+- **Docker Hub gap CLOSED automatically:** docker.yml pushes
+  dhaupin/vant:latest on every main push — the merged main image is live on
+  the Hub; the "real-host docker build" manual step is no longer needed
+  (a versioned tag v0.9.x on a future release tag would still be nice).
+- **Migration Guide LIVE:** docs.creadev.org/vant/getting-started/migration
+  answers 200 with full content — every link in the launch discussion now
+  resolves on the real site.
+- **Fresh-clone smoke (real `git clone` from GitHub, depth 1, bb45cfb,
+  zero node_modules, NODE_PATH bridge):** `vant migrate --status` correctly
+  reports the fresh tree's pending v3 marker with evidence; `vant health`
+  boots clean (lock free, 181 files scanned, 0 debris), exit 0. Clone
+  deleted after.
+- Note: pushes to axolotl no longer trigger CI (branch not in test.yml's
+  push list now that PR 91 is closed; PR events only) — CI coverage for
+  staging work happens via the next PR or a manual workflow_dispatch.
 
 ## Session (2026-10-05 — pass 128c: Migration Guide page + launch discussion)
 
