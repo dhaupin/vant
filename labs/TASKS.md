@@ -2,7 +2,44 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-06  
-**Session:** Pass 134 — docs dedupe round 2: 4 duplicate pages archived, search/prune merged into canonical, 4 fictions killed
+**Session:** Pass 135 — whitepaper speaks Vant: last 3 AGENTS.md links swapped for product surfaces (brain, succession, memory store)
+
+---
+
+## Session (2026-10-06 — pass 135: whitepaper speaks Vant, not the crew's ledger)
+
+Owner: "Let's hit the white paper next. Instead of talking about agents
+md, tasks md and mem md files, let's talk about vant."
+
+INVENTORY (docs/whitepaper/agent-first.md after pass 132's evidence-link
+swap): zero TASKS.md/MEM.md mentions remained, but 3 AGENTS.md links
+still framed the wake/rules/evidence story around the crew's guide file:
+- §2 clause table "without forgetting... past generations" → pointed at
+  AGENTS.md; now: inheritance = waking into the brain its predecessors
+  wrote (learnings, handoffs, the whole corpus) → ../memory/brain.md.
+- §3.1 wake bullet "The rules" → pointed at AGENTS.md; now: rules are
+  memory too — workflow conventions live in the brain files an agent
+  inherits, autonomy is an explicit trust level in the succession file.
+  Load-bearing line: "Nothing an agent needs in order to behave is
+  stored outside its memory."
+- §4 evidence "Memory survives death" → artifact was AGENTS.md + crew
+  ledger; now: the brain + the memory store, with the crew's own drill
+  described in the FAQ (the pass-132 pattern: product claims point at
+  the product; crew claims live in the FAQ).
+
+VERIFIED CLEAN (pass-132 parked item (b)): labs/whitepaper/README.md +
+BUILD-LOG.md carry NO AGENTS/TASKS/MEM mentions — only prd-*/node-crew
+companion + evidence links, same class the whitepaper keeps. No edits
+needed; note was unverified until now.
+
+INTENTIONALLY LEFT: dist/index.html (lander) AGENTS.md copy — it pitches
+Vant's own shipped AGENTS.md as the onboarding protocol ("copy it into
+any project"), product not crew. FAQ "The crew and the ledger" remains
+the single home of raw ledger links.
+
+NEXT: PR 115 merge awaits owner. Parked from pass 132: move TASKS/MEM
+ledger into Buffy's brain + templates for other agents/users (needs
+owner intent confirmation).
 
 ---
 

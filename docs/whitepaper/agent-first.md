@@ -75,7 +75,7 @@ mechanism that exists:
 | Clause | Mechanism | Where |
 |--------|-----------|-------|
 | "beyond a development prompt" | Persistent brain files that outlive the session | [the brain](../memory/brain.md) |
-| "without forgetting... past generations" | Inheritance: every agent wakes into what its predecessors wrote | [`AGENTS.md`](https://github.com/dhaupin/vant/blob/axolotl/AGENTS.md) |
+| "without forgetting... past generations" | Inheritance: every agent wakes into the brain its predecessors wrote - learnings, handoffs, the whole corpus | [the brain](../memory/brain.md) |
 | "the whys and why-nots, stored along a real journey" | Dated learnings, build logs, honest handoffs | [the brain's learnings](../memory/brain.md), the [memory store](../memory/memory-store.md) - the crew's own ledger is described in the [FAQ](../getting-started/faq.md) |
 | "recursive, without racing" | Passes with pinned verifications - evolution with a paper trail | [the Agora board](../operations/agora.md), where pass records and decisions are filed in the open |
 | "a personality you define without being boxed in" | Multi-brain stacks: a dialect layered over a shared baseline, with opt-in fallback | [multi-brain](../memory/brain.md) |
@@ -146,8 +146,12 @@ An agent starting a session does not begin from zero. It loads:
 - **The task state** - filed on the
   [Agora board](../operations/agora.md): one thread per work stream,
   newest first, legible across orgs.
-- **The rules** - [`AGENTS.md`](https://github.com/dhaupin/vant/blob/axolotl/AGENTS.md):
-  read before write, verify state, trust levels, the branch workflow.
+- **The rules** - rules are memory too. Workflow conventions - read
+  before write, verify state, the branch workflow - live in the brain
+  files alongside everything else an agent inherits, and autonomy is
+  an explicit trust level in the succession file
+  ([the brain](../memory/brain.md)). Nothing an agent needs in order
+  to behave is stored outside its memory.
 
 The wake sequence is deliberately cheap to bootstrap - the floor is
 still markdown files - and deliberately hard to fake. An agent that
@@ -196,7 +200,7 @@ you can execute, not a thing you can imagine.
 
 | Claim | Evidence | Artifact |
 |-------|----------|----------|
-| Memory survives death | Crash-restore drill; wake/work/sleep across 75+ sessions; the CURRENT DUMP discipline has caught multiple dying sessions mid-flight | [`AGENTS.md`](https://github.com/dhaupin/vant/blob/axolotl/AGENTS.md), the [crew ledger](../getting-started/faq.md) |
+| Memory survives death | Crash-restore drill; wake/work/sleep across 75+ sessions; the dying-session dump has caught multiple sessions mid-flight | [the brain](../memory/brain.md), the [memory store](../memory/memory-store.md) - the crew's own drill is described in the [FAQ](../getting-started/faq.md) |
 | The methodology scales | 75+ passes, each shipping code + pins + a learning | [the crew ledger](../getting-started/faq.md) |
 | Agents hold the sovereignty line | Pass-50 owner-side gates; scope resolves where the team registry lives; verified in every live-fire | [The Commons Frame, section 4](https://github.com/dhaupin/vant/blob/axolotl/labs/frame.md) |
 | The mesh works | Three real node processes; remote votes and reads; a cold third process tallies restarted state; 4/4 phases ×3 consecutive runs | [`labs/node-crew/demo-v02.js`](https://github.com/dhaupin/vant/blob/axolotl/labs/node-crew/demo-v02.js), the 11-node exercise |
