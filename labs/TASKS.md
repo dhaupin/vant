@@ -1,10 +1,56 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-10-05  
-**Session:** Pass 132 — horcrux archival + crew-ledger→FAQ relocation (131 was live-fire main)
+**Last Updated:** 2026-10-06  
+**Session:** Pass 133 — docs consolidation: one horcrux doc, one Architecture doc, onboard disambiguated
 
 ---
+
+## Session (2026-10-06 — pass 133: arch + onboard consolidation, horcrux/stego one-doc-each)
+
+Owner: hit docs with arch and onboard consolidation; horcrux and stego
+should each have 1 doc to avoid confusion; canvas can reference (native
+aside generator); stego staying PNG-only is fair ("the icing on the cake"
+comes later).
+
+- **Horcrux is ONE doc now:** docs/memory/horcrux-bootstrap.md archived
+  (git mv → labs/archives/docs/memory/) and its real content folded into
+  horcrux.md: new "Zero-config boot from an image" section (real
+  `vant boot --image <url|path> --decrypt <pw>`, verified bin/boot.js:40
+  + help text; stego.generateManifest real at lib/stego.js:278;
+  AES-256-GCM real at lib/stego.js:166/216/251) and "The canvas aside"
+  section (toHorcrux uses horcrux-template.svg when present, else Canvas
+  renders the patterned aside — lib/transform.js:1186-1192,
+  lib/canvas.js:171-201). Stego doc keeps the PNG mechanism + cross-links
+  horcrux. NOTE: encodeBrain/decodeBrain ARE real module.exports aliases
+  (lib/stego.js:492-493) — the doc's code sample was accurate; checked
+  before "fixing".
+- **Architecture is ONE doc now:** docs/advanced/architecture.md
+  archived (git mv → labs/archives/docs/advanced/). Its one valuable
+  part — the API ownership model — is absorbed into
+  essential/architecture.md's new "The API surface" section: Vant-owned
+  vs MCP-unique vs REST-unique lists, spec-alignment table corrected to
+  the real 296 tools (vant_framework_status IS registered,
+  lib/mcp.js:2716), and the honest note that MCP/REST import modules
+  directly today (delegation is the stated goal). essential/
+  architecture.md also fixed: multibrain models tree + state.json,
+  dead "See for details." sentence → Sandbox/VAF links, Lock row →
+  models/private/.locks/ + Locks link, title → "Architecture".
+- **Onboard disambiguated:** essential/onboard.md was already titled
+  "Knowledge Base Browser" in frontmatter; nav.yml + 5 cross-refs
+  (essential/index ×2, boot.md, manual-brain.md, runtime.md) now match.
+  getting-started/agent-onboarding.md is the real agent onboarding
+  (wake/work/sleep + scopes) — untouched, keeps its nav slot.
+- **Wiring swept:** nav.yml dropped both archived entries; stego.md's
+  2 stale horcrux-bootstrap links → horcrux (plus a "hocrux" typo);
+  advanced/index.md Architecture row dropped and "Building against
+  internals" retargeted to essential; labs/archives/docs/README.md
+  gained the 2 provenance rows. docs/memory/index.md needed no change.
+- GATES: docs style + links PASS (126), surface PASS, ci.js 439/0/1skip.
+
+NEXT: owner merges PR 115 (holds passes 129-132; this pass rides it
+too). Whitepaper pass still parked (move tasks/mem into the axolotl
+brain + templates; labs/whitepaper README + BUILD-LOG mentions).
 
 ## Session (2026-10-06 — pass 132: horcruxes archived, mentions relocated)
 

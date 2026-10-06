@@ -12,7 +12,10 @@ was removed, or a duplicate of a better-maintained page.
 | advanced/frontend.md | Advertised `vant-js-sdk` / `vant-python-sdk` client SDKs. No such packages exist in this repo or on npm. |
 | reference/api.md | Advertised a `require('vant').runtime / .ipc / .agents / .brain / .search / .islands` module surface. None of those exports exist in `lib/vant.js`. The honest API reference is the Runtime API Reference page in docs. |
 | advanced/schema.md | Duplicate of docs/reference/schema.md, which is the maintained, accurate schema page. |
+| memory/horcrux-bootstrap.md | Consolidated into docs/memory/horcrux.md ("Zero-config boot from an image" section). Horcrux and stego each keep one canonical doc; this split page was the confusion. |
+| advanced/architecture.md | Consolidated into docs/essential/architecture.md ("The API surface" section absorbed the ownership model); the rest was stale (flat pre-multibrain models tree, dead links). Architecture is now one canonical page in Essential. |
 
-Archived: 2026-10-06 (pass 130, docs power run on axolotl).
+Archived: 2026-10-06 (pass 130 docs power run; pass 133 added
+memory/horcrux-bootstrap.md and advanced/architecture.md).
 Restoring one? `git mv` it back under `docs/`, fix its claims against the
 current code, re-add frontmatter, and re-run the docs linters.

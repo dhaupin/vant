@@ -16,7 +16,6 @@ description: Deep dives - search architecture, rerank, NSC9 geometry, RPC, style
 | [Search Architecture](/vant/advanced/search-architecture) | How hybrid search and indexing work |
 | [Rerank](/vant/advanced/rerank) | The rerank pipeline and model |
 | [Search Tuning](/vant/advanced/search) | Modes, limits, and retrieval quality |
-| [Architecture](/vant/advanced/architecture) | Module map and source of truth |
 | [NSC9 Spec](/vant/advanced/nsc9-spec) | Quasicrystal addressing format |
 | [RPC](/vant/advanced/rpc) | RPC layer details |
 | [Schema](/vant/reference/schema) | Brain schema validation |
@@ -32,7 +31,7 @@ description: Deep dives - search architecture, rerank, NSC9 geometry, RPC, style
 
 Retrieval returning noise: [Search Tuning](/vant/advanced/search), then
 [Rerank](/vant/advanced/rerank). Building against internals:
-[Architecture](/vant/advanced/architecture) first. A crash you cannot
+[Architecture](/vant/essential/architecture) first. A crash you cannot
 explain: [Troubleshooting](/vant/advanced/troubleshooting).
 
 ## One example

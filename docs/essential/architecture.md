@@ -2,7 +2,7 @@
 version: 0.8.6
 permalink: /essential/architecture
 layout: default
-title: System Architecture
+title: Architecture
 nav_order: 37
 ---
 
@@ -73,15 +73,19 @@ Start → Sync from GitHub → Load brain → Think/Learn → Commit → Push to
 
 ### Models Structure
 
+The multi-brain layout (v0.9): per-brain directories plus the active
+stack in `models/state.json`. Legacy flat trees are imported by
+`vant migrate` (see the [Migration Guide](/vant/getting-started/migration)).
+
 ```text
 models/
-├── public/           # Brain (syncs to GitHub)
-│   ├── identity.md   # Who you are
-│   ├── goals.md     # What you're doing
-│   ├── lessons.md   # What you learned
-│   ├── preferences.md
+├── public/<brain>/    # Public brain (syncs to GitHub)
+│   ├── identity.md    # Who you are
+│   ├── goals.md       # What you're doing
+│   ├── lessons.md     # What you learned
 │   └── ...
-└── v1/              # Pruned versions (LTC)
+├── private/<brain>/   # Private tree the agent owns
+└── state.json         # { "stack": [...], ... }
 ```
 
 ## Execution Flow
@@ -141,7 +145,7 @@ Request → VAF (filter) → Sandbox (capabilities) → Escrow (budget) → Exec
          [block]        [permission]        [budget]      [run]
 ```
 
-See for details.
+See [Sandbox](/vant/security/sandbox) and [VAF](/vant/security/vaf) for details.
 
 ## State Management
 
@@ -149,15 +153,80 @@ See for details.
 |-------|-------|---------|
 | Agent ID | memory | Current agent |
 | Session | vant.js | Runtime context |
-| Brain | models/private/ | Persistent |
-| Lock | git ref | Coordination |
+| Brain | models/private/<brain>/ | Persistent |
+| Lock | models/private/.locks/ | Coordination (lease + mutex, see [Locks](/vant/operations/locks)) |
 
 ---
+
+## The API surface
+
+Everything above is served through one source of truth - `lib/vant.js` -
+with thin interfaces on top:
+
+```text
+lib/vant.js  <- SOURCE OF TRUTH (common calls)
+    |
+    +-- Brain: { load, save, list, search, corpus, state }
+    +-- Islands: { list, get, create, update, delete }
+    +-- Search: { semantic, hybrid, rerank }
+    +-- Storage: { read, write, list, exists }
+    +-- Stream: { enqueue, poll, complete, fail }
+    +-- Config: { get, set }
+    +-- Audit: { log, list }
+    +-- ... shared logic
+    |
+    +-> lib/mcp.js   (agent tools over JSON-RPC)
+    +-> lib/api.js   (REST endpoints for web tools)
+    +-> CLI          (stdin/stdout)
+```
+
+### Ownership model
+
+The tool surface is split by ownership - shared calls live in `lib/vant.js`
+and are delegated to; interface-specific calls live at the edge:
+
+- **Vant-owned (source of truth):** brain, branches, islands, citations,
+  connectors, framework status, config, audit, search, storage, stream,
+  network, tmp, boot, backup, embed.
+- **MCP-unique (agent tools):** agent spawn/list/kill, agent and skill
+  protos, delegation, sudo, shell, stego, resolution tracking.
+- **REST-unique (web tools):** file ops (drop/get/list/delete), execute,
+  hooks (onBeforeExecute/onAfterExecute/onError), auth
+  (setSecret/requireAuth/authenticate), mode detection, MCP start, tool
+  call.
+
+### Spec alignment
+
+| Interface | Spec | Notes |
+|-----------|------|-------|
+| MCP | JSON-RPC 2.0 | 296 tools, full power |
+| REST | OpenAPI 3.x | Subset for web tools |
+| Embed | OpenAI-compatible | `/v1/embeddings` |
+| Search | RAG-ready | Hybrid + rerank |
+| Auth | JWT + API keys | Gate all endpoints |
+| Streaming | SSE | Real-time agent updates |
+
+### Implementation pattern
+
+Each subsystem is accessed through the runtime object:
+
+```javascript
+const vant = require('./lib/vant');
+
+const brain = vant.brain();
+await brain.load('identity');
+
+const islands = vant.islands();
+await islands.list();
+```
+
+MCP and REST handlers currently import modules directly; the runtime
+object is the intended delegation target as the surface consolidates.
 
 ## Related
 
 - [Branch](/vant/multi-agent/branches) - Git branch isolation
-- [Lock](/vant/multi-agent/agents) - Distributed coordination
+- [Locks](/vant/operations/locks) - Lease + mutex coordination
 - [VAF](/vant/security/vaf) - Input filtering
 - [Sandbox](/vant/security/sandbox) - Security sandbox
 

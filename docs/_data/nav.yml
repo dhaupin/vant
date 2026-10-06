@@ -42,8 +42,6 @@
     url: /vant/memory/citations
   - title: Horcrux
     url: /vant/memory/horcrux
-  - title: Horcrux Bootstrap
-    url: /vant/memory/horcrux-bootstrap
   - title: Stego
     url: /vant/memory/stego
   - title: Geometry
@@ -89,7 +87,7 @@
     url: /vant/essential/architecture
   - title: Boot
     url: /vant/essential/boot
-  - title: Onboard
+  - title: Knowledge Base Browser
     url: /vant/essential/onboard
   - title: Islands
     url: /vant/essential/islands
@@ -209,8 +207,6 @@
     url: /vant/advanced/pruning
   - title: Efficiency
     url: /vant/advanced/efficiency
-  - title: Architecture
-    url: /vant/advanced/architecture
   - title: Audit & Compliance
     url: /vant/advanced/audit
   - title: NSC9 Spec

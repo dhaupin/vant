@@ -143,4 +143,4 @@ Create `models/public/` - shared brain that gets updated with Vant. Agents can a
 
 ## Next
 
-- [Onboard](/vant/essential/onboard) - Onboarding
+- [Knowledge Base Browser](/vant/essential/onboard) - the `vant onboard` brain browser

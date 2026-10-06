@@ -91,4 +91,4 @@ vant boot --image=https://raw.githubusercontent.com/user/repo/main/brain.png
 
 ## Next
 
-- [Onboard](/vant/essential/onboard) - Brain onboarding
+- [Knowledge Base Browser](/vant/essential/onboard) - the `vant onboard` brain browser
