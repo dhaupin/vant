@@ -227,5 +227,5 @@ audit.logHydrate('github');
 ## Related
 
 - [Security](/vant/security/vaf) - VAF validation
-- [Citations](/vant/advanced/citations) - Git-backed citations
+- [Citations](/vant/memory/citations) - Git-backed citations
 - [Operations](/vant/operations/operations) - CLI commands

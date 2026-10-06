@@ -2,13 +2,13 @@
 version: 0.8.6
 permalink: /operations/storage
 layout: default
-title: Storage Layer
+title: Storage
 nav_order: 52
----
+---# Storage
 
-# Storage Layer
-
-The storage module (lib/storage.js) - Vant's brain storage abstraction.
+The storage module (lib/storage.js) - Vant's brain storage abstraction
+and the operations surface around it (statuses, stats, WAL, mirrors).
+The factory-level API reference is [Storage](/vant/reference/storage).
 
 ## What
 
@@ -183,5 +183,5 @@ const storage = new Storage({
 
 - [Brain](/vant/memory/brain) - Brain file structure
 - [Islands](/vant/essential/islands) - Lazy brain components
-- [Search](/vant/advanced/search) - Hybrid search
+- [Search](/vant/memory/search) - Hybrid search
 - [Providers](/vant/integrations/providers) - GitHub, GitLab, etc

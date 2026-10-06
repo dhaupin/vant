@@ -2,11 +2,63 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-06  
-**Session:** Pass 133 — docs consolidation: one horcrux doc, one Architecture doc, onboard disambiguated
+**Session:** Pass 134 — docs dedupe round 2: 4 duplicate pages archived, search/prune merged into canonical, 4 fictions killed
 
 ---
 
-## Session (2026-10-06 — pass 133: arch + onboard consolidation, horcrux/stego one-doc-each)
+## Session (2026-10-06 — pass 134: /docs dedupe round 2)
+
+Owner: keep picking up and canonicalizing drift in /docs — if marketing
+pays off and "the flood" arrives, doc clarity is load-bearing. Continue
+the pass-133 dedupe.
+
+TITLE-CLUSTER SCAN (126 → 122 pages):
+- **advanced/citations.md = memory/citations.md verbat clone:** the
+  archived page's API table matches lib/citations.js exports EXACTLY —
+  so does the canonical page. Archived the older one; 4 inbound links
+  retargeted (advanced/index, audit, sync, search-architecture Related).
+- **advanced/pruning.md vs memory/prune.md:** daemon/stats/list/flags are
+  REAL (bin/prune.js -D/-s/-l, --stale-days, --no-fluff, --interval;
+  DEFAULT_STALE_DAYS from config prune.staleDays). Depth absorbed into
+  memory/prune.md; archived the split page. 1 inbound (advanced/index)
+  dropped.
+- **multi-agent/agents.md vs integrations/agents.md:** NOT dupes —
+  multi-agent is the branch-workflow chapter (keep), integrations is the
+  lib/agents.js API page. Touched only 2 link bugs (below).
+- **advanced/search.md (Hybrid Search) vs memory/search.md:** the buried
+  page had REAL depth (mode flags, hybrid/hyde, MCP tools, rehydration
+  settings) AND 4 fictions: searchLTC (real: getLTC/queryBrain),
+  getCacheStats/clearCache/rehydrate (real: hydrate), vant_search
+  {mode,files} schema (registered tool takes query+limit; hybrid/hyde
+  are vant_search_hybrid/vant_search_hyde), lib/query.js (doesn't
+  exist). Also "Requires LTC/50KB max" contradicted getSettings()
+  defaults (5000B, no LTC gate). Verified depth absorbed into
+  memory/search.md; fiction corrected or dropped; 7 inbound links
+  retargeted. Uses "the search module exposes" as load-bearing wording
+  rather than vant.search where the runtime getter wasn't probed.
+- **operations/deployment.md = getting-started/deploy.md dup:** archived;
+  2 inbound retargeted (steward-runbook, integrations/docker).
+- **Kept (verified, not dupes):** operations/storage.md vs
+  reference/storage.md (ops surface vs factory API — retitled Storage;
+  "API architecture" blurb in root index dropped), multi-agent/agents.md
+  (branch-workflow chapter; touched only 2 link bugs incl. a
+  Lock→self-link), operations/operations.md (already nav'd as
+  "Day-to-day CLI").
+- **Self-link bug fixed:** multi-agent/agents.md Related row "Lock →
+  /vant/multi-agent/agents" pointed at ITSELF; → operations/locks.
+- nav.yml: -3 archived, +1 missing (RAG Tutorial was unnav'd from the
+  Advanced section), "Search Tuning" row now points at
+  search-architecture (was advanced/search). labs/archives/docs/README
+  gained 4 provenance rows.
+- Also fixed while in there: agents.md Branch row title-singular,
+  integrations/agents.md Subjects link → multi-agent/brains.
+
+NEXT: owner merges PR 115 (now holds passes 129-134). Remaining
+candidate clusters from the scan: operations/operations.md vs
+operations/index (index is a proper hub; no fix needed unless owner
+wants), runtime/runtime.md vs reference/api-runtime.md titles both say
+"Runtime" (verify before touching — pass 130 archived reference/api
+already); whitepaper pass still parked.
 
 Owner: hit docs with arch and onboard consolidation; horcrux and stego
 should each have 1 doc to avoid confusion; canvas can reference (native

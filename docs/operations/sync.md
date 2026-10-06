@@ -120,5 +120,5 @@ const brain = await sync.pullAny({ preference: 'gitlab' });
 ## Related
 
 - [Hybrid Sync](/vant/integrations/hybrid) - Public/Private split
-- [Citations](/vant/advanced/citations) - Git-backed source tracking
+- [Citations](/vant/memory/citations) - Git-backed source tracking
 - [Multi-Repo](/vant/integrations/repos) - External repos

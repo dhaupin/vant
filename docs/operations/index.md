@@ -27,7 +27,6 @@ description: Running Vant day to day - storage, sync, cron, CI, notifications, n
 | [Day-to-day CLI](/vant/operations/operations) | The commands you type most |
 | [CI](/vant/operations/ci) | The GitHub Actions pipeline and local equivalents |
 | [Testing](/vant/operations/testing) | Test suites and how to run them |
-| [Deployment](/vant/operations/deployment) | Deploy targets and container notes |
 | [Steward Runbook](/vant/operations/steward-runbook) | Running a group's router install: orgs sharing one decision chain |
 | [Federation Playbooks](/vant/operations/federation-playbooks) | Join, vote, sync, settle, catch up: mesh participant recipes |
 | [Agora](/vant/operations/agora) | Cross-node votes and ledger sync: the `vant agora` verbs |

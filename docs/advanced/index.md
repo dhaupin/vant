@@ -15,21 +15,18 @@ description: Deep dives - search architecture, rerank, NSC9 geometry, RPC, style
 |------|-----|
 | [Search Architecture](/vant/advanced/search-architecture) | How hybrid search and indexing work |
 | [Rerank](/vant/advanced/rerank) | The rerank pipeline and model |
-| [Search Tuning](/vant/advanced/search) | Modes, limits, and retrieval quality |
 | [NSC9 Spec](/vant/advanced/nsc9-spec) | Quasicrystal addressing format |
 | [RPC](/vant/advanced/rpc) | RPC layer details |
 | [Schema](/vant/reference/schema) | Brain schema validation |
 | [Troubleshooting](/vant/advanced/troubleshooting) | Field guide to common failures |
 | [Audit](/vant/advanced/audit) | The audit report generator |
-| [Citations](/vant/advanced/citations) | Citation system internals |
 | [Efficiency](/vant/advanced/efficiency) | Token and storage efficiency |
-| [Pruning](/vant/advanced/pruning) | Prune strategies and LTC |
 | [Release](/vant/advanced/release) | Release process |
 | [Agent Contributors](/vant/advanced/agent-contributors) | How agents author Vant: the loop, the pins, the record |
 
 ## Where to start
 
-Retrieval returning noise: [Search Tuning](/vant/advanced/search), then
+Retrieval returning noise: [Brain Search](/vant/memory/search) and
 [Rerank](/vant/advanced/rerank). Building against internals:
 [Architecture](/vant/essential/architecture) first. A crash you cannot
 explain: [Troubleshooting](/vant/advanced/troubleshooting).
