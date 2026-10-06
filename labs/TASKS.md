@@ -2,9 +2,49 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-05  
-**Session:** Pass 128 — full CLI + MCP + server live-fire (pass 127 was ports/Docker)
+**Session:** Pass 128b — brain-lock TOCTOU race fix (pass 128 was CLI/MCP/server live-fire)
 
 ---
+
+## Session (2026-10-05 — pass 128b: brain-lock TOCTOU race fix)
+
+Context: pass 128's push re-triggered CI on PR 91 and gate B of
+test/livefire-stress.test.js FAILED on the runner (wins=2 — two racers
+claimed one lease) after 26+ clean local runs. Root-caused as a REAL
+pre-existing TOCTOU, not a flake.
+
+- **Root cause:** acquireBrainLock's stale-sweep did lstat → read+verify →
+  unlinkSync → O_EXCL create. A descheduled racer R1 can read a stale lock,
+  sleep while R2 completes a FULL takeover (sweep→create→write), then R1
+  resumes and unlinks R2's FRESH lock — its own O_EXCL create then succeeds
+  → two live holders of one exclusive lease. The pass-108 O_EXCL CAS only
+  arbitrates the create, never the unlink.
+- **Fix (lib/brain-lock.js):** split the sweep by file kind. Symlink →
+  immediate unconditional unlinkSync (removes only the link; the gates C/D
+  contract — an inode guard is actively WRONG here: openSync follows links,
+  so the guard would compare the victim target's inode vs the link and
+  refuse to sweep forever). Regular file → open with O_RDONLY|O_NOFOLLOW,
+  fstat-pin dev+ino, read via fd, verify stale, lstat again and unlink ONLY
+  if the path still holds that inode. The double-win window collapses to
+  two adjacent syscalls (fstat→unlink); a winner's inode can never match a
+  loser's pinned one.
+- **Fix attempt 1 (rejected):** inode-pinned unlink for ALL sweep cases —
+  broke gate D (symlink replant): guard compared victim-target inode vs the
+  link, refused forever, acquirer never won, suite 1/4.
+- **Self-inflicted bug caught in review:** first edit built flags as
+  `'r' + (rflag ? undefined : '')` → string "rundefined" → openSync throws
+  ERR_INVALID_ARG_VALUE, swallowed by the sweep's catch-all → unconditional
+  unlink = OLD racy behavior, silently. Numeric fs.constants flags fixed
+  it; O_NOFOLLOW=131072 verified live on Linux.
+- **Verification:** livefire-stress 6/6 clean (gates A-D); stress-hammer
+  24/24 x2 under 4-core CPU load; all 6 lock suites green (brain-lock 21,
+  lease 2, lease2 10, failclosed 6, observability 23, lock 19); ci.js
+  439/0/1skip; runner 37, vibe 4, coverage 36; sweep 169/169; surface PASS.
+- **Gotcha:** hammer racers process.exit WITHOUT releasing → the last
+  iteration's fresh 30s lease sat in models/private/.locks/ and made
+  brain-lock.test.js fail 2 (CORRECTLY refusing to acquire). Deleted the
+  leftover lease; 21/21 again. Don't weaken the suite for shared-state
+  scribbles — clean them.
 
 ## Session (2026-10-05 — pass 128: CLI/MCP/server live-fire)
 
