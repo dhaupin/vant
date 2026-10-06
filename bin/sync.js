@@ -246,16 +246,22 @@ function main() { _checkRead();
     // Use action parsed at top-level, or default to pull
     const message = args.slice(1).join(' ') || 'Vant update';
     
+    let result;
     if (action === 'push') {
-        push(message);
+        result = push(message);
     } else if (action === 'pull') {
-        pull();
+        result = pull();
     } else if (action === 'status') {
         console.log(git(['status']));
     } else {
         console.log('Usage: vant sync [-h|--help] [-p|-r|-s]');
         process.exit(1);
     }
+    // (pass 131) A sync that did not sync is a failure. push/pull return
+    // {success:false} on missing config, protected-branch refusal, or git
+    // errors — main() used to ignore that and exit 0, so scripts wrapping
+    // `vant sync` saw success on a refused pull.
+    if (result && result.success === false) process.exit(1);
 }
 
 main();

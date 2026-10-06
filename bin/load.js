@@ -158,14 +158,16 @@ function loadModel(modelPath) {
     const model = loadModel(modelPath);
 
     if (model) {
-        console.log(`✅ Model loaded: ${modelPath}`);
+        // (pass 131) Say "Brain", matching the docs and every other
+        // surface - `vant load` loads the brain, not a "model".
+        console.log(`✅ Brain loaded: ${modelPath}`);
         console.log(`  Files: ${Object.keys(model).join(', ')}`);
         
         if (model.identity || model.identity_md) {
             console.log(`  Identity: ${model.identity?.MODEL || model.identity_md?.MODEL || 'unknown'}`);
         }
     } else {
-        console.error('❌ Failed to load model');
+        console.error('❌ Failed to load brain');
         process.exit(1);
     }
 })();

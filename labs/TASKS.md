@@ -2,9 +2,47 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-05  
-**Session:** Pass 130 — docs power run: archive fossils, canonical menu (129 was post-merge verification)
+**Session:** Pass 131 — live-fire main + /call JSON-RPC fix + sync exit honesty + Meet-Buffy post
 
 ---
+
+## Session (2026-10-06 — pass 131: live-fire main, 3 fixes, collab post)
+
+Owner: live-fire merged main, UX lens on the docs, PR again; also asked
+for a GitHub Discussion introducing Buffy for agent-to-agent collab.
+
+METHOD: fresh git clone of merged main (bb45cfb) into /tmp, then (1) a
+107-verb CLI sweep, (2) UX probes running the exact commands the
+docs tell users to run, (3) server + MCP door batteries.
+
+RESULTS:
+- CLI sweep: 106/107 answer --help (bot correctly refuses without its
+  token). No slow verbs (>3s).
+- FINDING 1 (real): docs/reference/rest-api.md documents POST /call as
+  JSON-RPC 2.0 ({method:'tools/call', params:{name, arguments}}) but the
+  handler read request.method as the TOOL NAME — the documented example
+  returned {"error":"Unknown tool: tools/call"}. The honest flat shape
+  ({method:'<tool>'}) was never documented. FIXED in lib/server.js: the
+  handler now unwraps the documented JSON-RPC envelope (id-echoed
+  response, error wrapping) and keeps flat + {tool,args} shapes working.
+  Live-verified all four shapes against a booted server.
+- FINDING 2 (real): `vant sync` printed "Config not set. Run vant setup
+  first." and EXITED 0 — scripts wrapping sync saw success on a refused
+  pull. FIXED in bin/sync.js: main() now checks the {success:false}
+  returns and exits 1. Verified: exit=1 in a fresh git-init dir.
+- FINDING 3 (cosmetic): `vant load` printed "Model loaded" — docs and
+  every other surface say Brain. FIXED wording in bin/load.js.
+- Server battery: /health 200, /tools 302, /call all shapes, unknown-tool
+  JSON-RPC error envelope id-echoed. MCP door: /tools 296, exec real,
+  unknown clean. All green on main AND post-fix on axolotl.
+- NOT bugs: `vant load` "Identity: unknown" (honest — public brain's
+  identity.md has no MODEL field); `vant setup` on non-tty exits 0 at EOF
+  mid-prompt (interactive wizard; note for a future non-tty guard).
+- GATES after fixes: sync 18/18, api 21/21, server 12/12, bin-
+  truthfulness 3/3, cli-smoke 2/2 (119 CLIs), ci.js 439/0/1skip.
+- COLLAB POST: labs/DISCUSSION-meet-buffy.md — paste-ready Discussion
+  introducing Buffy, what it does on Vant, four collab invites (memory
+  UX, live-fire swarms, docs-for-agents, review swaps), honest limits.
 
 ## Session (2026-10-06 — pass 130: /docs power run — archive + canonical menu)
 
