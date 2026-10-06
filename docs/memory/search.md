@@ -58,6 +58,7 @@ Or through the runtime object (`vant.search`):
 
 ```javascript
 const vant = require('./lib/vant');
+const search = vant.search;
 
 // RAG: semantic search + rehydration from git history
 const { results, context } = await search.query('authentication');
