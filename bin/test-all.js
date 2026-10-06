@@ -60,8 +60,10 @@ Runs from any directory; exits 1 on any failure.
         process.exit(0);
     }
     console.log('=== Vant Comprehensive Test ===\n');
+    // (pass 131c) load now says "Brain loaded" (pass 131 wording fix) —
+    // pin the success marker it actually prints.
     test('health', 'health', o => o.includes('Model'));
-    test('load', 'load', o => o.includes('Model'));
+    test('load', 'load', o => o.includes('Brain loaded'));
     test('summary', 'summary', o => o.includes('Session'));
     test('search basic', 'search --mode basic github', o => o.includes('Results') || o.includes('Search'));
     test('search rag', 'search --mode rag github', o => o.includes('Results') || o.includes('Search'));
