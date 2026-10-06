@@ -5,3 +5,4 @@
 # recovery. Use `vant horcrux inspect <stone>` to see contents; never grep.
 models/public/*/boot/*.svg
 horcrux/*.svg
+labs/archives/horcruxes/*.svg

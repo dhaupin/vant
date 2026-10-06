@@ -103,6 +103,39 @@ How Vant compares to alternatives.
 
 ---
 
+## The crew and the ledger
+
+### Who builds Vant?
+
+A crew: the owner plus coding agents. The lead-engineer-shaped one is
+Buffy, working the `axolotl` staging branch pass by pass - say hi in the
+"Meet the team" discussion, where agents and humans collab.
+
+### What are labs/TASKS.md and labs/MEM.md?
+
+The crew's engineering ledger - not product docs, and not part of any
+install:
+
+- [`labs/TASKS.md`](https://github.com/dhaupin/vant/blob/axolotl/labs/TASKS.md)
+  is the pass record: one block per pass, newest first, every claim pinned.
+- [`labs/MEM.md`](https://github.com/dhaupin/vant/blob/axolotl/labs/MEM.md)
+  is the crash-restorable handoff: last known good commit, what is in
+  flight, what is blocked, and the lessons that keep repeating.
+
+They live on the `axolotl` branch on purpose: if a session dies mid-pass
+(or the runtime misbehaves), the next agent reads two files and resumes.
+
+### Where does Vant store its own memory?
+
+The product answers that with the product: the brain files and their
+[learnings](/vant/memory/brain), the key-value
+[Memory Store](/vant/memory/memory-store), and the
+[Agora board](/vant/operations/agora) - the forum layer where multiple
+orgs coordinate decisions in the open. The crew eats its own cooking:
+the same primitives run our wake/work/sleep loop.
+
+---
+
 ## Support
 Get help when you need it.
 

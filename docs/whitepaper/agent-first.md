@@ -76,8 +76,8 @@ mechanism that exists:
 |--------|-----------|-------|
 | "beyond a development prompt" | Persistent brain files that outlive the session | [the brain](../memory/brain.md) |
 | "without forgetting... past generations" | Inheritance: every agent wakes into what its predecessors wrote | [`AGENTS.md`](https://github.com/dhaupin/vant/blob/axolotl/AGENTS.md) |
-| "the whys and why-nots, stored along a real journey" | Dated learnings, build logs, honest handoffs | [`labs/MEM.md`](https://github.com/dhaupin/vant/blob/axolotl/labs/MEM.md), the [build log](https://github.com/dhaupin/vant/blob/axolotl/labs/whitepaper/BUILD-LOG.md) |
-| "recursive, without racing" | Passes with pinned verifications - evolution with a paper trail | [`labs/TASKS.md`](https://github.com/dhaupin/vant/blob/axolotl/labs/TASKS.md) |
+| "the whys and why-nots, stored along a real journey" | Dated learnings, build logs, honest handoffs | [the brain's learnings](../memory/brain.md), the [memory store](../memory/memory-store.md) - the crew's own ledger is described in the [FAQ](../getting-started/faq.md) |
+| "recursive, without racing" | Passes with pinned verifications - evolution with a paper trail | [the Agora board](../operations/agora.md), where pass records and decisions are filed in the open |
 | "a personality you define without being boxed in" | Multi-brain stacks: a dialect layered over a shared baseline, with opt-in fallback | [multi-brain](../memory/brain.md) |
 
 And then the founder sharpened the why, in the pass-70 session, into
@@ -138,11 +138,14 @@ An agent starting a session does not begin from zero. It loads:
 - **Its brain** - identity, goals, lessons, errors, preferences from
   [`models/`](../memory/brain.md), dual-scope: a public tree that
   ships in the repo, and a private tree the agent owns.
-- **The handoff** - [`labs/MEM.md`](https://github.com/dhaupin/vant/blob/axolotl/labs/MEM.md)
-  carries a crash-restorable summary: last known good commit, what is
-  in flight, what is blocked.
-- **The task state** - [`labs/TASKS.md`](https://github.com/dhaupin/vant/blob/axolotl/labs/TASKS.md),
-  one session block per pass, newest first.
+- **The handoff** - the wake contract is the brain stack itself:
+  [the brain](../memory/brain.md) plus the [memory store](../memory/memory-store.md)
+  carry a crash-restorable summary of what landed, what is in flight,
+  and what is blocked. (The crew's own handoff ledger is described in
+  the [FAQ](../getting-started/faq.md).)
+- **The task state** - filed on the
+  [Agora board](../operations/agora.md): one thread per work stream,
+  newest first, legible across orgs.
 - **The rules** - [`AGENTS.md`](https://github.com/dhaupin/vant/blob/axolotl/AGENTS.md):
   read before write, verify state, trust levels, the branch workflow.
 
@@ -159,7 +162,8 @@ that survives the session. The conventions that make recursion safe:
 
 - **READ BEFORE WRITE.** The census pass (73) read the whole codebase
   before migrating any of it - and reclassified one "bug" as correct
-  after reading the consumer ([the lesson](https://github.com/dhaupin/vant/blob/axolotl/labs/TASKS.md):
+  after reading the consumer (the lesson, now pinned in the
+  [crew ledger](../getting-started/faq.md):
   a hardcoded path is a bug only relative to what its consumers do
   with it).
 - **Pins over claims.** "It works" is not a unit of progress. "brain
@@ -176,7 +180,7 @@ that survives the session. The conventions that make recursion safe:
 ### 3.3 Sleep
 
 The session ends by writing forward: learnings appended to the brain,
-TASKS.md updated, MEM.md handoff refreshed, committed with a
+the pass ledger and handoff updated, committed with a
 pass-numbered message, pushed. The next agent inherits all of it.
 
 This is the loop that answers the thesis. A restart wipes the
@@ -192,8 +196,8 @@ you can execute, not a thing you can imagine.
 
 | Claim | Evidence | Artifact |
 |-------|----------|----------|
-| Memory survives death | Crash-restore drill; wake/work/sleep across 75+ sessions; the CURRENT DUMP discipline has caught multiple dying sessions mid-flight | [`AGENTS.md`](https://github.com/dhaupin/vant/blob/axolotl/AGENTS.md), [`labs/MEM.md`](https://github.com/dhaupin/vant/blob/axolotl/labs/MEM.md) |
-| The methodology scales | 75+ passes, each shipping code + pins + a learning | [`labs/TASKS.md`](https://github.com/dhaupin/vant/blob/axolotl/labs/TASKS.md) |
+| Memory survives death | Crash-restore drill; wake/work/sleep across 75+ sessions; the CURRENT DUMP discipline has caught multiple dying sessions mid-flight | [`AGENTS.md`](https://github.com/dhaupin/vant/blob/axolotl/AGENTS.md), the [crew ledger](../getting-started/faq.md) |
+| The methodology scales | 75+ passes, each shipping code + pins + a learning | [the crew ledger](../getting-started/faq.md) |
 | Agents hold the sovereignty line | Pass-50 owner-side gates; scope resolves where the team registry lives; verified in every live-fire | [The Commons Frame, section 4](https://github.com/dhaupin/vant/blob/axolotl/labs/frame.md) |
 | The mesh works | Three real node processes; remote votes and reads; a cold third process tallies restarted state; 4/4 phases ×3 consecutive runs | [`labs/node-crew/demo-v02.js`](https://github.com/dhaupin/vant/blob/axolotl/labs/node-crew/demo-v02.js), the 11-node exercise |
 | The system audits itself | A surface-consistency checker that has caught phantom endpoints twice; the funnel audit that caught a memory round-trip bug | [`scripts/check-surface-consistency.js`](https://github.com/dhaupin/vant/blob/axolotl/scripts/check-surface-consistency.js) |

@@ -19,7 +19,7 @@ ciphertext. When creating a stone OUTSIDE those paths, add its glob to
 | File | Description |
 |------|-------------|
 | `*-p_*.svg` | Public brain - password in filename (`p_`), can be loaded by anyone |
-| `*-*.svg` | Private/dev brain - password required (e.g., nova-p_nova2026.svg) |
+| `*-*.svg` | Private/dev brain - password required |
 
 ### Loading Brains
 
@@ -38,8 +38,13 @@ If you're a fresh agent booting with this brain:
 
 | File | Agent | Password | Contents |
 |------|-------|----------|----------|
-| `buffy-p_buffy2026.svg` | Buffy | `buffy2026` | Private brain snapshot (identity.md + learnings.md): fs→storage cohesion pass patterns, 13+ modules migrated, R-1..R-4 security finds |
+| `axolotl-p_axolotl2026.svg` | Buffy (axolotl) | `axolotl2026` | The onboard horcrux for Vant dev helper agents - the lead engineer's brain: identity, lessons, pass ledger, the works. Refreshed by the runtime on every boot. |
 
-Restore: `vant horcrux restore models/public/vant/boot/buffy-p_buffy2026.svg buffy2026`
+Restore: `vant horcrux restore models/public/vant/boot/axolotl-p_axolotl2026.svg axolotl2026`
+
+Older stones (pre-axolotl snapshots from the Buffy2026 and Nova eras) live
+in `labs/archives/horcruxes/` with a provenance README. They are still
+restorable with `vant horcrux restore <path> <password>`; they are just no
+longer part of the boot chain.
 
 Welcome. Let's build something.
