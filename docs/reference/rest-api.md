@@ -4,305 +4,136 @@ permalink: /reference/rest-api
 layout: default
 title: REST API Reference
 nav_order: 115
+description: The embedder HTTP surface - brain, stream, trust, and market routes over lib/server.js.
 ---
+
 # REST API Reference
 
-Complete REST API documentation for Vant headless integration.
+The REST surface is the embedder door: plain HTTP routes on `lib/server.js`,
+registered by `lib/api.js`. Every route is a thin proxy to an MCP tool, so a
+response is simply that tool's result JSON. The bind is loopback by default.
+
+For the protocol view of all Vant wires (including the MCP tool door and the
+crew bus), see [RPC](/vant/advanced/rpc).
+
+## Booting it
+
+```javascript
+const api = require('vant/lib/api');
+
+// REST routes only (default port 3456)
+await api.startREST({ port: 3456 });
+
+// REST + MCP together (REST 3456, MCP 3457)
+await api.startAll();
+```
+
+Ports come from `VANT_SERVER_PORT` (default 3456) and `VANT_MCP_PORT`
+(default 3457). TLS turns on automatically when `VANT_SERVER_CERT` and
+`VANT_SERVER_KEY` are set; `VANT_SERVER_BIND` widens the bind off loopback
+deliberately.
+
+## Request pipeline
+
+Every request passes the server's security chain before a route runs:
+
+1. VAF input validation on the URL and the body
+2. QoS rate limiting per client; responses carry `X-RateLimit-Limit` and
+   `X-RateLimit-Remaining` headers (remaining is a static placeholder today)
+3. API key check when `VANT_SERVER_AUTH_REQUIRED=1` (or the
+   `server.authRequired` config): the `x-api-key` header must carry a valid
+   key
+4. Every response carries an `X-Request-Id` header for tracing
 
 ---
 
-## Base Configuration
+## Built-in endpoints
 
-| Env Variable | Description | Default |
-|-------------|-------------|---------|
-| `VANT_API_KEY` | API authentication | - |
-| `VANT_MCP_PORT` | HTTP server port | 3457 |
-| `VANT_MODE` | Mode: cli, mcp, headless | headless |
-| `GITHUB_TOKEN` | GitHub auth token | - |
-| `GITHUB_REPO` | Repository owner/repo | - |
+Every `lib/server.js` instance serves three built-ins before any registered
+route runs:
 
----
-
-## Endpoints
-
-### GET /tools
-
-List all available MCP tools.
+| Method | Path | What |
+|--------|------|------|
+| GET | `/tools` | Tool catalog: the vant surface plus the full MCP tool list |
+| GET | `/health` | Liveness ping: `{ "status": "ok", "uptime": ... }` |
+| POST | `/call` | Execute any tool; accepts the JSON-RPC 2.0 `tools/call` envelope or flat `{ "tool", "args" }` |
 
 ```bash
-curl http://localhost:3456/tools
-```
+curl http://localhost:3456/health
 
-Response:
-```json
-{
-  "tools": [
-    {
-      "name": "vant_get_memory",
-      "description": "Read brain memory",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "file": { "type": "string" }
-        }
-      }
-    }
-  ]
-}
-```
-
-### POST /call
-
-Execute a tool via JSON-RPC 2.0.
-
-```bash
 curl -X POST http://localhost:3456/call \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $VANT_API_KEY" \
   -d '{
     "jsonrpc": "2.0",
     "method": "tools/call",
     "params": {
       "name": "vant_get_memory",
-      "arguments": { "file": "identity.md" }
+      "arguments": { "category": "learnings", "filename": "lessons" }
     },
     "id": 1
   }'
 ```
 
-Success response:
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": { "content": "..." }
-}
-```
+With the JSON-RPC envelope the response wraps as
+`{ "jsonrpc": "2.0", "id": 1, "result": ... }` (or carries `error`);
+flat shapes return the tool result directly.
 
-Error response:
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "error": {
-    "code": "BRAIN_LOAD_FAIL",
-    "message": "Failed to load brain"
-  }
-}
-```
+---
 
-### GET /health
+## Endpoints
 
-Health check.
+### Brain
+
+| Method | Path | Backs onto | What |
+|--------|------|------------|------|
+| GET | `/brain` | `brain_state` | Current brain state |
+| GET | `/brain/ls` | `brain_list` | List brain files |
+| GET | `/brain/:name` | `brain_load` | Load a brain file |
+| POST | `/brain/:name` | `brain_save` | Save a brain file |
 
 ```bash
-curl http://localhost:3456/health
+curl http://localhost:3456/brain/identity
+curl -X POST http://localhost:3456/brain/identity \
+  -H "Content-Type: application/json" \
+  -d '{"content": "# NAME: Nova"}'
 ```
 
-Response:
-```json
-{
-  "status": "ok",
-  "uptime": 3600,
-  "version": "0.8.6"
-}
-```
+A brain load returns `{ id, name, content }` (content truncated at 500
+characters); a save returns `{ saved: true, name: "..." }`.
 
-### GET /ready
+### Streams (work items)
 
-Readiness check.
+| Method | Path | Backs onto | What |
+|--------|------|------------|------|
+| GET | `/streams` | `stream_list` | List streams |
+| POST | `/streams` | `stream_create` | Create a stream |
+| GET | `/streams/:id` | `stream_info` | Stream info |
+| POST | `/streams/:id/enqueue` | `stream_enqueue` | Enqueue work |
+| POST | `/streams/:id/poll` | `stream_poll` | Poll for work |
 
-```bash
-curl http://localhost:3456/ready
-```
+### Trust
+
+| Method | Path | Backs onto | What |
+|--------|------|------------|------|
+| GET | `/trust/score/:entity` | `trust_getScore` | Score for an entity |
+| POST | `/trust/record` | `trust_record` | Record a trust event |
+| GET | `/trust/leaderboard` | `trust_leaderboard` | Trust leaderboard |
+
+### Market
+
+| Method | Path | Backs onto | What |
+|--------|------|------------|------|
+| GET | `/market/listings` | `market_search` | Search listings (query params) |
+| POST | `/market/list` | `market_list` | List listings |
+| POST | `/market/bid` | `market_bid` | Place a bid |
+| POST | `/market/trade` | `market_trade` | Execute a trade |
+| GET | `/market/stats` | `market_stats` | Market stats |
+| GET | `/market/listing/:id` | `market_get` | One listing by id |
 
 ---
 
-## Tool Examples
+## Related
 
-### Read Brain File
-
-```javascript
-async function getMemory(file) {
-  const res = await fetch('http://localhost:3456/call', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.VANT_API_KEY}`
-    },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      method: 'tools/call',
-      params: { name: 'vant_get_memory', arguments: { file } },
-      id: 1
-    })
-  });
-  const json = await res.json();
-  return json.result?.content;
-}
-```
-
-### Write Brain File
-
-```javascript
-async function setMemory(file, content) {
-  const res = await fetch('http://localhost:3456/call', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.VANT_API_KEY}`
-    },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      method: 'tools/call',
-      params: {
-        name: 'vant_set_memory',
-        arguments: { file, content }
-      },
-      id: 1
-    })
-  });
-  return res.json();
-}
-```
-
-### Search Brain
-
-```javascript
-async function search(query, mode = 'hybrid') {
-  const res = await fetch('http://localhost:3456/call', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      method: 'tools/call',
-      params: {
-        name: 'vant_search',
-        arguments: { query, mode }
-      },
-      id: 1
-    })
-  });
-  return res.json();
-}
-```
-
----
-
-## Rate Limiting
-
-| Plan | Requests/min |
-|------|---------------|
-| Free | 60 |
-| Pro | 600 |
-| Enterprise | 6000 |
-
-Rate limit headers:
-```text
-X-RateLimit-Limit: 60
-X-RateLimit-Remaining: 45
-X-RateLimit-Reset: 1640000000
-```
-
----
-
-## SDK Usage
-
-### Python SDK
-
-```python
-import requests
-
-VANT_URL = "http://localhost:3456"
-
-def call_tool(name, arguments):
-    res = requests.post(
-        f"{VANT_URL}/call",
-        json={
-            "jsonrpc": "2.0",
-            "method": "tools/call",
-            "params": {"name": name, "arguments": arguments},
-            "id": 1
-        },
-        headers={"Authorization": f"Bearer {os.environ['VANT_API_KEY']}"}
-    )
-    return res.json()
-
-# Read brain
-call_tool("vant_get_memory", {"file": "identity.md"})
-
-# Write brain
-call_tool("vant_set_memory", {"file": "lessons.md", "content": "..."})
-```
-
-### JavaScript SDK
-
-```javascript
-const fetch = require('node-fetch');
-const VANT_URL = 'http://localhost:3456';
-
-async function callTool(name, args) {
-  const res = await fetch(`${VANT_URL}/call`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.VANT_API_KEY}`
-    },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      method: 'tools/call',
-      params: { name, args },
-      id: 1
-    })
-  });
-  return res.json();
-}
-
-// Read brain
-await callTool('vant_get_memory', { file: 'identity.md' });
-
-// Write brain
-await callTool('vant_set_memory', { file: 'lessons.md', content: '...' });
-```
-
----
-
-## WebSocket Events
-
-Subscribe to real-time events via Socket.IO:
-
-```javascript
-const io = require('socket.io-client')('http://localhost:3456');
-
-io.on('connect', () => {
-  console.log('Connected to Vant');
-});
-
-io.on('brain:change', (data) => {
-  console.log('Brain changed:', data.file);
-});
-
-io.on('sync:complete', (data) => {
-  console.log('Sync complete:', data.branch);
-});
-
-io.on('error', (error) => {
-  console.error('Error:', error);
-});
-```
-
-### Events
-
-| Event | Description |
-|-------|-------------|
-| `brain:change` | Brain file modified |
-| `brain:save` | Brain saved to disk |
-| `sync:start` | Sync started |
-| `sync:complete` | Sync completed |
-| `sync:error` | Sync error |
-| `lock:acquired` | Lock acquired |
-| `lock:released` | Lock released |
-
----
-
-See also: [MCP Guide](/vant/runtime/mcp), [CLI Reference](/vant/reference/cli)
+- [RPC](/vant/advanced/rpc) - the wire map: MCP door, REST, crew bus
+- [MCP Server](/vant/runtime/mcp) - running and securing the tool door
+- [CLI Reference](/vant/reference/cli) - the `vant api` utility CLI

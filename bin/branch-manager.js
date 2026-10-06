@@ -22,7 +22,7 @@ const PRIVATE_BRAINS = path.join(MODELS_DIR, 'private');
 const GIT_BIN = process.env.GIT_BIN || 'git';
 
 /**
- * Run git command (QC_WAVE gap #1: args-array execFileSync — no shell).
+ * Run git command (QC_WAVE gap #1, labs/archives/audits/QC_WAVE.md: args-array execFileSync — no shell).
  *
  * Every argument is passed to git as a single literal argv element, so
  * metacharacters in branch names, commit messages, or revs (`;`, `&&`,

@@ -197,10 +197,6 @@
     url: /vant/advanced/search-architecture
   - title: Rerank
     url: /vant/advanced/rerank
-  - title: Search Tuning
-    url: /vant/advanced/search-architecture
-  - title: RAG Tutorial
-    url: /vant/memory/rag
   - title: Efficiency
     url: /vant/advanced/efficiency
   - title: Audit & Compliance

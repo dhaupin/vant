@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * S5 snapshot-writer guard tests (pass 111, labs/LOCKS.md §8.5)
+ * S5 snapshot-writer guard tests (pass 111, labs/archives/audits/LOCKS.md §8.5)
  *
  * Five whole-snapshot writers adopted merge-under-lock guards (F12 decision
  * (a)): auth lockouts, vaf blocklist, brain config, mcp insights (static

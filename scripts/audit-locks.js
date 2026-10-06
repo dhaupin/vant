@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Lock-surface audit (pass 103, labs/LOCKS.md §4 item 6)
+ * Lock-surface audit (pass 103, labs/archives/audits/LOCKS.md §4 item 6)
  *
  * "Scattered" becomes "listed". Asserts the invariants the locks canonicalization
  * set, so the four-formula spaghetti cannot quietly come back:
@@ -89,7 +89,7 @@ if (mutexRequires.length === 0) {
     problems.push('no module requires lib/lock.js — the mutex primitive is unwired?');
 }
 
-// 2b. separation-of-concern contract (pass 106, labs/LOCKS.md §8.3 / F8-F11).
+// 2b. separation-of-concern contract (pass 106, labs/archives/audits/LOCKS.md §8.3 / F8-F11).
 // The mutex and the lease keep SEPARATE roots and mechanisms ON PURPOSE; this
 // asserts they are not folded together and that the non-locks stay non-locks.
 const srcCache = {};
@@ -151,7 +151,7 @@ for (const f of ['lib/state-store.js', 'lib/teams.js', 'lib/agents/internal.js',
 
 // F12 (pass 111, S5) — the five writers that adopted merge-under-lock
 // guards in the unguarded-writer triage must KEEP them; hand-rolled
-// acquire/release sneaking back is a regression (labs/LOCKS.md §8.5).
+// acquire/release sneaking back is a regression (labs/archives/audits/LOCKS.md §8.5).
 for (const f of ['lib/auth.js', 'lib/vaf.js', 'lib/config.js', 'lib/mcp.js', 'lib/citations.js']) {
     const s = source(f);    // (pass 116) withLockSync counts here too — sync bodies in sync
     // functions (auth/vaf) read the fail-closed outcome directly; the async

@@ -114,7 +114,7 @@ if (asJson) {
     console.log(`  Timeouts: ${timeouts.length}${timeouts.length ? ' → ' + timeouts.map((r) => r.suite).join(', ') : ''}`);
     console.log(`  Wall:    ${(totalMs / 1000).toFixed(1)}s`);
     if (failed.length + timeouts.length > 0) {
-        console.log('\n  Triage: fires land in labs/STABILITY.md; fix cheap, track structural.');
+        console.log('\n  Triage: fires land in labs/archives/audits/STABILITY.md; fix cheap, track structural.');
     }
 }
 

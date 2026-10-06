@@ -604,7 +604,7 @@ async function acquire(agentId, timeout) {
 **Progress:**
 - 2026-07-22: Reverted stub work, verified clean state at 37b0549
 - 2026-07-22: Planning lock.js as first fully-wired module
-- 2026-10: lock.js delivered via the locks PRD (labs/LOCKS.md section 8), stages S1-S6: lease truth-up (S1), separation-of-contract audit (S2), tmp/health/MCP/CLI wire-up (S3), withLock migration (S4), unguarded-writer triage with merge-under-lock guards + pathForGlobal (S5), documentation (S6). Docs: docs/operations/locks.md, docs/reference/locks.md
+- 2026-10: lock.js delivered via the locks PRD (labs/archives/audits/LOCKS.md section 8), stages S1-S6: lease truth-up (S1), separation-of-contract audit (S2), tmp/health/MCP/CLI wire-up (S3), withLock migration (S4), unguarded-writer triage with merge-under-lock guards + pathForGlobal (S5), documentation (S6). Docs: docs/operations/locks.md, docs/reference/locks.md
 
 ---
 

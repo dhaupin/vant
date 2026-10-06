@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * branch-manager tests (QC_WAVE gap #1 — tests FIRST, refactor second)
+ * branch-manager tests (QC_WAVE gap #1, labs/archives/audits/QC_WAVE.md — tests FIRST, refactor second)
  *
  * Pins bin/branch-manager.js behavior before and after the args-array
  * execFileSync refactor:
@@ -40,7 +40,7 @@ function test(name, fn) {
 
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
 
-console.log('\n🌿 BRANCH-MANAGER TESTS (QC_WAVE gap #1)\n');
+console.log('\n🌿 BRANCH-MANAGER TESTS (QC_WAVE gap #1, labs/archives/audits/QC_WAVE.md)\n');
 
 const bm = require('../bin/branch-manager.js');
 

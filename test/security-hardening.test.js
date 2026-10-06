@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Security Hardening Tests (referenced by labs/TASKS.md + labs/AUDIT_FINDINGS.md P0/P1)
+ * Security Hardening Tests (referenced by labs/TASKS.md + labs/archives/audits/AUDIT_FINDINGS.md P0/P1)
  *
  * Verifies the claimed fixes are REAL, not just documented:
  * - P0-6: mcp vant_call cannot load arbitrary modules (registered tools only)

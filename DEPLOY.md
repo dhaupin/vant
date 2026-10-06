@@ -361,7 +361,7 @@ node -e "console.log(require('./lib/sandbox').canRead())"   # Direct sandbox pro
 | Security model | [labs/prd-security.md](labs/prd-security.md) |
 | Sudo system | [labs/prd-sudo.md](labs/prd-sudo.md) |
 | Org and teams | [labs/prd-org-teams.md](labs/prd-org-teams.md) |
-| Audit findings | [labs/AUDIT_FINDINGS.md](labs/AUDIT_FINDINGS.md) |
+| Audit findings | [labs/archives/audits/AUDIT_FINDINGS.md](labs/archives/audits/AUDIT_FINDINGS.md) |
 | Task tracker | [labs/TASKS.md](labs/TASKS.md) |
 | Docs site | https://docs.creadev.org/vant |
 | CLI reference | https://docs.creadev.org/vant/reference/cli |

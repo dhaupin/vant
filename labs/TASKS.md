@@ -2,7 +2,98 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-06  
-**Session:** Pass 136 — docs archive census: 0.8.6-era trio archived (MIGRATING cookbook, CHANGELOG fork, half-fiction deprecations page), discuss list compiled
+**Session:** Pass 137 — audits archived to labs/archives/audits/, rpc.md + rest-api.md + resolution.md rewritten against code, mcp.md de-fictioned, nav dupes fixed
+
+---
+
+## Session (2026-10-06 — pass 137: audits archive + RPC/REST/resolution truth-up)
+
+Owner approved the pass-136 discuss list and expanded it: move the 9
+audit-era labs files to labs/archives/audits/, UPDATE rpc.md + resolution.md
+(not archive), and "cleanup, dedupe, and update anything else you find in
+docs. We can also fix any menu sorts or whatnot."
+
+ARCHIVED (git mv → labs/archives/audits/, provenance README created):
+AUDIT_FINDINGS, COHESION_AUDIT, DEAD_EXPORTS, LOCKS, MULTIBRAIN_CENSUS,
+QC_WAVE, SESSION_PASS24, STABILITY, WAVE_RETROSPECTIVE (~2,409 lines).
+Content untouched per the archives convention. 13 inbound refs retargeted:
+docs/operations/locks.md, ROADMAP.md, DEPLOY.md (a real md link),
+scripts/audit-locks.js x3, test/run-all.js, test/snapshot-guards.test.js,
+test/integration-criticals.test.js, test/security-hardening.test.js,
+bin/branch-manager.js, test/branch-manager.test.js x2, labs/node-crew/
+stress.js x3. Left as point-in-time history: TASKS/MEM/learnings mentions,
+the prd-* file lists, and the archived files' own cross-references.
+
+rpc.md REWRITTEN (was "Unified RPC protocol standards", dated 2026-05-24):
+- MCP Theme Protocol claimed "Implemented" — false at the server layer.
+  `_theme` exists only inside lib/theme.js; lib/mcp.js loads the module
+  (dead import at :99) but wraps nothing; real consumers are CLI-side
+  (bin/config, bin/health, bin/help, bin/lock). Page now says: helpers
+  shipped, server adoption pending; labs/rfc-mcp-theme.md pointer kept.
+- "Skill Chain Protocol (Planned)" + "Agent Chain Protocol (Planned)" —
+  never existed as protocols. Replaced with real surfaces: lib/agents.js
+  (spawn/delegate/work items), MCP agent_* tools, msg.send channels, and
+  the crew bus for cross-node.
+- Page is now a wire map: MCP tool door (GET /mcp/tools + /tools, /health
+  aliases; POST /mcp/exec taking {tool,args} OR {method,params}; requireKey
+  gate, habitat tokens, DNS-rebind + Origin + JSON content-type guards) /
+  REST layer / crew bus (HMAC envelopes, envelope version major/minor,
+  SSRF allowlist, webhook:crew.<type> emission, genesis handshake).
+
+rest-api.md REWRITTEN (found during the rpc pass — worse than rpc.md):
+- /call with the tools/call envelope on 3456 is REAL: pass-131 made the
+  handler honor the documented shape, and the built-ins (/tools /health
+  /call) are checked BEFORE the router, so they shadow registered routes.
+  /ready, the Free/Pro/Enterprise rate-limit plans, Python/JS "SDKs", and
+  Socket.IO events NEVER existed — deleted.
+- Now documents: boot via api.startREST/startAll, the request pipeline
+  (VAF, QoS + X-RateLimit headers, x-api-key when VANT_SERVER_AUTH_REQUIRED=1,
+  X-Request-Id), built-ins, and all 19 REST routes mapped to the MCP tools
+  they proxy (streams/brain/trust/market).
+
+mcp.md DE-FICTIONED (Runtime MCP guide): the page taught POST /call with
+tools/call against port 3457 — the MCP server has no such route (that is
+the REST server's; the two ports were conflated throughout). Fixed:
+endpoint table (the real 4), "Connect a client" (stdio command for MCP
+clients, /mcp/exec for raw HTTP), env table (VANT_MCP_PORT/BIND/REQUIRE_KEY/
+API_KEY — MCP_PORT and MCP_BIND_ADDRESS were not real names), security
+chain flag (VANT_MCP_REQUIRE_KEY=1, not VANT_SERVER_AUTH_REQUIRED plus a
+--server flag that does not exist), auth section (keys ride headers, never
+JSON-RPC params; VANT_MCP_API_KEY real; lockouts persist across restarts),
+all ~16 tool examples re-shaped to the registered schemas (vant_get_memory
+{category,filename}; vant_set_memory {category,filename,content};
+vant_search {query,limit} with vant_search_hybrid as its own tool — the
+{mode: rag|compact|hybrid} examples contradicted the registry), Node and
+Python clients moved to /mcp/exec, config table trimmed to verified rows,
+error section now shows both response shapes.
+
+resolution.md REWRITTEN (module real, page stale): "Track decisions on the
+blockchain" line deleted (lib/consensus.js:7: no blockchain, no mining);
+phantom models/public/.resolutions/*.json dir deleted (the ledger is ONE
+file, models/public/.resolution.json, under the multibrain-aware public
+root; per-file records live in the ledger plus frontmatter stamps on the
+brain file); CLI section now matches bin/resolution.js exactly (status is
+the default, deltas need a file name, evict boots vant.init first); ledger
+JSON shows the real entry shape (file, entry, status, reason, resolved_by,
+branch, resolved_at, superseded_by, expiresAt); TTL + deltas-cap-100
+semantics; programming API table (sync core + pipeline-backed variants +
+the resolution:changed event). "Advanced — see GitHub" filler dropped.
+
+nav.yml: removed the two duplicate-row violations (header contract: every
+page appears exactly once) — "Search Tuning" (same URL as "Search
+Architecture" since the pass-134 retarget) and the Advanced-section "RAG
+Tutorial" (Memory keeps it). Title-vs-page scan over all 120 rows: no dup
+URLs remain; ~29 short-title rows (nav "Telegram Bot" vs page "Telegram
+Bot Integration" etc.) all resolve to the right subject — read as
+intentional menu shortening, left alone.
+
+VERIFIED NOT DRIFTED along the way: docs/runtime/server.md's /tools
+/health /call table is real (lib/server.js:525-548); mcp.md's tool names
+are all registered; reference/mcp-tools.md stays the canonical catalog
+(one suspect row: islands_canAccess is not in the registry — future pass).
+
+GATES: style+links PASS (120), surface PASS, ci.js 439 passed / 0 failed /
+1 skipped (30.8s).
 
 ---
 
