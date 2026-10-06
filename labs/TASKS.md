@@ -2,7 +2,66 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-06  
-**Session:** Pass 135 — whitepaper speaks Vant: last 3 AGENTS.md links swapped for product surfaces (brain, succession, memory store)
+**Session:** Pass 136 — docs archive census: 0.8.6-era trio archived (MIGRATING cookbook, CHANGELOG fork, half-fiction deprecations page), discuss list compiled
+
+---
+
+## Session (2026-10-06 — pass 136: docs archive census round)
+
+Owner: "another docs archive pass... we are looking for stale, useless,
+etc docs. A good example is MIGRATING-0.8.6.md. It solves nothing atm
+(people are getting migrated regardless of what features they use).
+Let's see what else is out there for archive or update and discuss."
+
+ARCHIVED (git mv → labs/archives/docs/, 3 provenance rows added):
+- **MIGRATING-0.8.6.md (repo root)** — owner-named. Version-pinned
+  cookbook for the 0.8.6 API breaks; superseded by the AUTOMATIC
+  brain-layout migration on `vant start` (lib/migrations.js) + the
+  maintained docs/getting-started/migration.md. Self-stale besides:
+  cites lib/framework.js callsites (file deleted since) and an ancient
+  test count. Its only references were plain-text mentions in the two
+  CHANGELOGs (no markdown links, nothing broke) — root CHANGELOG
+  mention now points at the archive path.
+- **docs/reference/CHANGELOG.md → reference-CHANGELOG.md** — drifted
+  fork of root CHANGELOG.md: FOUR different v0.8.6 headings stitched
+  together (2026-05-08 + three Unreleased variants). Classic dup-with-
+  drift on a nav'd page. nav.yml + reference/index rows now point at
+  the GitHub root CHANGELOG. One-off scripts/_repair_*.js skip files
+  named CHANGELOG but generate nothing — no build dependency.
+- **docs/reference/deprecations.md** — 2026-05-10 snapshot, half
+  fiction: declared lib/brain.js REMOVED (it is the core module,
+  exists, probed all session), claimed stego message mode removed
+  (stego.md is canonical; 30 encode/decode hits in lib/stego.js), and
+  steered Encrypt.encrypt/decrypt users to aesGcm* while lib/encrypt.js
+  keeps encrypt/decrypt primary (:157/:190). True parts
+  (lib/vector-store.js, lib/state.js, lib/repos.js → Storage factory)
+  are recorded in the changelog + reference/storage.md. nav + index
+  rows dropped (no good retarget — a deprecations page needs a
+  maintainer, not a corpse link).
+
+docs pages: 122 → 120. GATES: style+links PASS (120), surface PASS,
+ci.js 439/0/1skip.
+
+DISCUSS LIST (owner decides; nothing archived unilaterally):
+- docs/advanced/rpc.md — pre-June "Unified RPC protocol standards";
+  update candidate, verify against lib/server.js REST + crew-bus wire.
+- docs/reference/resolution.md — module REAL (lib/resolution.js:
+  Resolution class, STATUS, resolve/deprecate, stack functions); page
+  pre-June; freshness pass, not an archive.
+- labs audit-era files (9, ~2.4k lines: AUDIT_FINDINGS, COHESION_AUDIT,
+  DEAD_EXPORTS, LOCKS, MULTIBRAIN_CENSUS, QC_WAVE, SESSION_PASS24,
+  STABILITY, WAVE_RETROSPECTIVE) — build-in-public history; could move
+  to labs/archives/audits/ for a tidy labs/ root. CAVEAT:
+  docs/operations/locks.md links labs/LOCKS.md — LOCKS stays or the
+  link retargets.
+- Verified NOT dupes (closes pass-134 parked item): runtime/runtime.md
+  (quick intro) vs reference/api-runtime.md (full API) — titles now
+  distinct, purposes distinct. Keep both.
+- Verified ACTIVE: ROADMAP.md (updated Oct 4, 1451 lines) — keep.
+- operations/storage.md pre-June date but verified current pass 134 —
+  date alone is not staleness.
+
+NEXT: owner reads the discuss list. PR 115 merge awaits owner.
 
 ---
 

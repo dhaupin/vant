@@ -18,8 +18,13 @@ was removed, or a duplicate of a better-maintained page.
 | advanced/pruning.md | Duplicate of docs/memory/prune.md. Its extra depth (daemon mode, stats, list flags) is REAL (bin/prune.js -D/-s/-l all exist) but was absorbed into the canonical page rather than kept as a split doc. |
 | advanced/search.md | Overlap of docs/memory/search.md with real depth (hybrid/HyDE modes, MCP tools, rehydration settings) PLUS fiction: searchLTC and getCacheStats/clearCache/rehydrate do not exist in lib/search.js, the documented vant_search {mode,files} schema does not match the registered tool (query+limit only; hybrid/hyde are separate tools), lib/query.js does not exist, and the "Requires LTC / 50KB max" caveats contradicted lib defaults. Verified content absorbed into memory/search.md with the fiction corrected or dropped. |
 | operations/deployment.md | Duplicate of docs/getting-started/deploy.md, which is the canonical deployment guide (backed by repo DEPLOY.md). Older tutorial copy archived; inbound links retargeted. |
+| MIGRATING-0.8.6.md (repo root) | Version-pinned cookbook for the 0.8.6 API breaks. Superseded: brain-layout migration now runs automatically on `vant start` (lib/migrations.js) and the maintained guide is docs/getting-started/migration.md. Stale on its own terms too: cites lib/framework.js callsites (file since deleted) and a long-outdated test count. Owner call, pass 136. |
+| reference/CHANGELOG.md | Drifted fork of the root CHANGELOG.md — four different "v0.8.6" headings stitched together (2026-05-08 plus three Unreleased variants). Root CHANGELOG.md (rendered on GitHub) is canonical; the docs nav + reference index row now point there. |
+| reference/deprecations.md | 2026-05-10 snapshot, half fiction: declared lib/brain.js REMOVED (it is the core module and still exists), claimed the stego message mode was removed (docs/memory/stego.md is canonical; encode/decode real), and steered Encrypt.encrypt/decrypt users toward aesGcm* while lib/encrypt.js keeps encrypt/decrypt as the primary exports. The true parts (lib/vector-store.js, lib/state.js, lib/repos.js merged into the Storage factory) are recorded in the changelog and docs/reference/storage.md. |
 
 Archived: 2026-10-06 (pass 130 docs power run; pass 133 added
-memory/horcrux-bootstrap.md and advanced/architecture.md).
+memory/horcrux-bootstrap.md and advanced/architecture.md; pass 136 added
+the 0.8.6-era trio MIGRATING-0.8.6.md, reference/CHANGELOG.md,
+reference/deprecations.md).
 Restoring one? `git mv` it back under `docs/`, fix its claims against the
 current code, re-add frontmatter, and re-run the docs linters.

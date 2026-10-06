@@ -270,12 +270,10 @@
     url: /vant/reference/entropy
   - title: Errors
     url: /vant/reference/errors
-  - title: Deprecations
-    url: /vant/reference/deprecations
   - title: Legal & Policies
     url: /vant/reference/legal
   - title: CHANGELOG
-    url: /vant/reference/CHANGELOG
+    url: https://github.com/dhaupin/vant/blob/main/CHANGELOG.md
 
 - title: Whitepaper
   items:

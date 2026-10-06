@@ -36,8 +36,7 @@ description: Complete Vant reference - CLI, configuration, APIs, error codes, an
 | [Tmp](/vant/reference/tmp) | Temp file API |
 | [Entropy](/vant/reference/entropy) | Entropy patching (.vpatch) |
 | [Legal](/vant/reference/legal) | License and disclaimer |
-| [CHANGELOG](/vant/reference/CHANGELOG) | Release notes |
-| [Deprecations](/vant/reference/deprecations) | What is going away |
+| [CHANGELOG](https://github.com/dhaupin/vant/blob/main/CHANGELOG.md) | Release notes |
 
 ## Where to start
 
