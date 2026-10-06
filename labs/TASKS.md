@@ -2,9 +2,41 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-05  
-**Session:** Pass 128b — brain-lock TOCTOU race fix (pass 128 was CLI/MCP/server live-fire)
+**Session:** Pass 128c — dedicated Migration Guide + launch discussion (128b was the lock race fix)
 
 ---
+
+## Session (2026-10-05 — pass 128c: Migration Guide page + launch discussion)
+
+Context: owner asked for a paste-ready Discussion post for the merge and
+"make sure migration /docs are solid". Migration content existed but was
+scattered (setup.md section, brain.md pointer, cli.md notes, brains.md) with
+no dedicated, linkable page - weak for the ~10k Docker Hub users who are the
+migration audience.
+
+- **New `docs/getting-started/migration.md`**: what changed in 0.9, do you
+  need to act, automatic vs manual paths, naming order, the safety contract
+  table (content-based / existing-wins / symlink-safe / verified / marked
+  honestly / idempotent), post-import verification (migrate --status, health,
+  brain_migration_status MCP tool), Docker volume notes, troubleshooting.
+- **Wired in**: nav.yml (after Setup), setup.md now points to the guide,
+  brain.md + multi-agent/brains.md "migration guide" links retargeted,
+  cli.md migrate notes link it. New page nav_order 20 (no collisions).
+- **Solidity checks**: docs style + links PASS (133 files), 7/7 claims
+  probe-verified against bin/migrate.js, bin/start.js, lib/migrations.js,
+  lib/mcp.js; lint:surface PASS. (First probe FALSE-flagged start
+  --no-migrate - it lives in bin/start.js, not bin/vant.js; probe corrected,
+  claim is real.)
+- **Launch post**: `labs/DISCUSSION-multibrain-merge.md` - paste-ready
+  Discussion announcement (what's happening, what multibrain means, the
+  three migration lanes, safety table, docs links, brief rundown of the
+  release machinery, known gaps). All 7 docs links resolve to real
+  permalinks; GitHub links checked. Note: the migration page URL goes live
+  when Cloudflare Pages redeploys after the merge.
+- **PR 91**: body gained the Migration Guide bullet, a "Known gaps after the
+  merge" section (Docker Hub image timing, real-host docker build
+  outstanding, post-merge fresh-clone smoke), and a pointer to the
+  discussion draft.
 
 ## Session (2026-10-05 — pass 128b: brain-lock TOCTOU race fix)
 

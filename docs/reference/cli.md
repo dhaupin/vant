@@ -81,6 +81,8 @@ vant lock status
 - A failed import is retryable: the marker is withheld and the next run retries.
 - Existing brain files are never clobbered; existing files are skipped.
 - `vant health` warns on legacy (pre-multi-brain) trees until migrated.
+- The import contract, naming rules, and troubleshooting are in the
+  [Migration Guide](/vant/getting-started/migration).
 
 `vant watch` polls GitHub on an interval:
 

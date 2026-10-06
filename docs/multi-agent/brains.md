@@ -57,7 +57,7 @@ vant migrate --brain-name nova
 ```
 
 Names are segment-validated. Migration is content-detected and idempotent;
-the [migration guide](/vant/getting-started/setup) has the full contract.
+the [Migration Guide](/vant/getting-started/migration) has the full contract.
 
 ## Agents per brain
 

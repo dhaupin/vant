@@ -119,4 +119,4 @@ await memory.learn('lessons', 'Use exit codes, not tail text, to judge test suit
 
 A pre-multi-brain install keeps files flat in `models/public/`. `vant start`
 detects and imports it automatically on first run. The manual path and its
-safety guarantees are in the [migration guide](/vant/getting-started/setup).
+safety guarantees are in the [Migration Guide](/vant/getting-started/migration).

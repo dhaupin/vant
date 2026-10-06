@@ -39,7 +39,9 @@ vant migrate                       # apply (import name: --brain-name > VANT_BRA
 
 Detection is content-based and idempotent, safe to run any time, no-op on
 already-multi-brain trees. `vant start --no-migrate` skips the auto-import.
-MCP clients can check via the `brain_migration_status` tool.
+MCP clients can check via the `brain_migration_status` tool. The full
+contract, naming rules, and troubleshooting are in the
+[Migration Guide](/vant/getting-started/migration).
 
 ## Environment Variables
 
