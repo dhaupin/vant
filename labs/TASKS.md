@@ -2,9 +2,48 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-05  
-**Session:** Pass 131 — live-fire main + /call JSON-RPC fix + sync exit honesty + Meet-Buffy post
+**Session:** Pass 132 — horcrux archival + crew-ledger→FAQ relocation (131 was live-fire main)
 
 ---
+
+## Session (2026-10-06 — pass 132: horcruxes archived, mentions relocated)
+
+Owner: keep only Buffy's horcrux as the dev-helper onboard; move the
+other boot stones to labs; move agents/tasks/mem mentions out of dist,
+docs, and the whitepaper into a FAQ area and replace them with Vant's
+mem, learnings, and board/forums surfaces.
+
+- **Boot chain is single-stone now:** models/public/vant/boot/ keeps only
+  axolotl-p_axolotl2026.svg (the runtime-refreshed Buffy onboard).
+  buffy-p_buffy2026.svg (Buffy2026 era) and nova-p_nova2026.svg moved
+  to labs/archives/horcruxes/ with a provenance README (restore commands
+  for both). lib/boot.js discovery walks every *-p_*.svg in the stack,
+  so the archive automatically removes them from the onboard path.
+  CRITICAL HYGIENE: added labs/archives/horcruxes/*.svg to .ignore -
+  stones are single-line 800 KB base64 walls (prime #100); verified the
+  moved stones are hidden from rg.
+- **boot README updated:** Available Horcruxes table now names only the
+  axolotl stone (password axolotl2026), with a pointer to the archived
+  era stones.
+- **Whitepaper relocation:** docs/whitepaper/agent-first.md had 8
+  mentions of labs/TASKS.md + labs/MEM.md as evidence links. All
+  replaced with product surfaces: brain learnings, memory store, Agora
+  board (multiorg), plus one pointer to the new FAQ section. The raw
+  ledger links now live in exactly ONE place: the FAQ.
+- **FAQ gained "The crew and the ledger":** who builds Vant (owner +
+  agents, Buffy on axolotl, the Meet-the-team discussion), what the two
+  labs files are (crash recovery, not product docs), and where Vant
+  stores its own memory (brain, Memory Store, Agora).
+- **dist/index.html checked:** already clean of labs/tasks/mem mentions
+  - nothing to relocate there.
+- Follow-up folded in: test-all pins load's new "Brain loaded" marker
+  (fresh-dir gate 17/17 again).
+- GATES: docs style/links PASS (128), surface PASS, fresh-dir PASS,
+  ci.js 439/0/1skip.
+
+NEXT (owner-flagged): whitepaper pass - move tasks/mem actually into
+axolotl (Buffy's) + templates for other agents/users; labs/whitepaper
+README + BUILD-LOG still carry labs-file mentions.
 
 ## Session (2026-10-06 — pass 131: live-fire main, 3 fixes, collab post)
 
