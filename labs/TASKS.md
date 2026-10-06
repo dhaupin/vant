@@ -2,9 +2,33 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-05  
-**Session:** Pass 128c — dedicated Migration Guide + launch discussion (128b was the lock race fix)
+**Session:** Pass 129 — post-merge verification of main (128c was the Migration Guide + discussion)
 
 ---
+
+## Session (2026-10-06 — pass 129: PR 91 MERGED, main verified)
+
+Owner accepted PR 91 (merge commit bb45cfb, "Welcome to Vant multi-brain!")
+and posted the launch discussion. Axolotl lives on as the STAGING branch.
+
+- **All three main workflows GREEN on the merge commit:** VANT CI (4m36s,
+  full battery incl. both E2E tours on merged main), Build and Push VANT
+  (37s — buildx cache), Deploy Docs (58s).
+- **Docker Hub gap CLOSED automatically:** docker.yml pushes
+  dhaupin/vant:latest on every main push — the merged main image is live on
+  the Hub; the "real-host docker build" manual step is no longer needed
+  (a versioned tag v0.9.x on a future release tag would still be nice).
+- **Migration Guide LIVE:** docs.creadev.org/vant/getting-started/migration
+  answers 200 with full content — every link in the launch discussion now
+  resolves on the real site.
+- **Fresh-clone smoke (real `git clone` from GitHub, depth 1, bb45cfb,
+  zero node_modules, NODE_PATH bridge):** `vant migrate --status` correctly
+  reports the fresh tree's pending v3 marker with evidence; `vant health`
+  boots clean (lock free, 181 files scanned, 0 debris), exit 0. Clone
+  deleted after.
+- Note: pushes to axolotl no longer trigger CI (branch not in test.yml's
+  push list now that PR 91 is closed; PR events only) — CI coverage for
+  staging work happens via the next PR or a manual workflow_dispatch.
 
 ## Session (2026-10-05 — pass 128c: Migration Guide page + launch discussion)
 
