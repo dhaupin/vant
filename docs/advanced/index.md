@@ -19,14 +19,11 @@ description: Deep dives - search architecture, rerank, NSC9 geometry, RPC, style
 | [Architecture](/vant/advanced/architecture) | Module map and source of truth |
 | [NSC9 Spec](/vant/advanced/nsc9-spec) | Quasicrystal addressing format |
 | [RPC](/vant/advanced/rpc) | RPC layer details |
-| [Schema](/vant/advanced/schema) | Schema handling internals |
-| [Style](/vant/advanced/style) | Docs and code style rules |
+| [Schema](/vant/reference/schema) | Brain schema validation |
 | [Troubleshooting](/vant/advanced/troubleshooting) | Field guide to common failures |
 | [Audit](/vant/advanced/audit) | The audit report generator |
 | [Citations](/vant/advanced/citations) | Citation system internals |
 | [Efficiency](/vant/advanced/efficiency) | Token and storage efficiency |
-| [Framework](/vant/advanced/framework) | Agent framework integration |
-| [Frontend](/vant/advanced/frontend) | Frontend-facing surfaces |
 | [Pruning](/vant/advanced/pruning) | Prune strategies and LTC |
 | [Release](/vant/advanced/release) | Release process |
 | [Agent Contributors](/vant/advanced/agent-contributors) | How agents author Vant: the loop, the pins, the record |

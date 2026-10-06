@@ -1,8 +1,12 @@
 # Vant docs nav (freestruct menu layer). URLs are /vant/<permalink>.
-# Sections follow labs/prd-content.md IA. Keep in sync with nav_order.
+# Every docs/*.md page with a permalink appears here exactly once (pass 130:
+# archived pages removed, previously-hidden real pages added, sections
+# grouped by job, one idea per line).
 
 - title: Getting Started
   items:
+  - title: Overview
+    url: /vant/getting-started/
   - title: Quick Start
     url: /vant/getting-started/quick-start
   - title: Vibe Coding
@@ -19,8 +23,6 @@
     url: /vant/getting-started/agent-onboarding
   - title: Examples
     url: /vant/getting-started/examples
-  - title: Omega Init
-    url: /vant/getting-started/omega-init
   - title: FAQ
     url: /vant/getting-started/faq
   - title: Contributing
@@ -46,10 +48,10 @@
     url: /vant/memory/stego
   - title: Geometry
     url: /vant/memory/geometry
-  - title: RAG Tutorial
-    url: /vant/memory/rag
   - title: Pruning
     url: /vant/memory/prune
+  - title: RAG Tutorial
+    url: /vant/memory/rag
 
 - title: Runtime
   items:
@@ -68,12 +70,12 @@
     url: /vant/multi-agent/
   - title: Multi-brain
     url: /vant/multi-agent/brains
+  - title: Agents
+    url: /vant/multi-agent/agents
   - title: Branches
     url: /vant/multi-agent/branches
   - title: Trust & Succession
     url: /vant/multi-agent/succession
-  - title: Agents
-    url: /vant/multi-agent/agents
   - title: Coordination
     url: /vant/multi-agent/coordination
   - title: Federation
@@ -83,14 +85,14 @@
   items:
   - title: Overview
     url: /vant/essential/
-  - title: Islands
-    url: /vant/essential/islands
   - title: Architecture
     url: /vant/essential/architecture
   - title: Boot
     url: /vant/essential/boot
   - title: Onboard
     url: /vant/essential/onboard
+  - title: Islands
+    url: /vant/essential/islands
   - title: Extensibility
     url: /vant/essential/extensibility
   - title: Custom Island
@@ -99,9 +101,13 @@
     url: /vant/essential/plugins
   - title: Manual Brain
     url: /vant/essential/manual-brain
+  - title: Sudo & Escalation
+    url: /vant/essential/sudo
 
 - title: Integrations
   items:
+  - title: Overview
+    url: /vant/integrations/
   - title: Telegram Bot
     url: /vant/integrations/telegram-bot
   - title: GitHub
@@ -116,13 +122,21 @@
     url: /vant/integrations/providers
   - title: Hybrid Sync
     url: /vant/integrations/hybrid
+  - title: Multi-Repo Skills
+    url: /vant/integrations/repos
   - title: Agents
     url: /vant/integrations/agents
 
 - title: Operations
   items:
+  - title: Overview
+    url: /vant/operations/
+  - title: Operations
+    url: /vant/operations/operations
   - title: Storage
     url: /vant/operations/storage
+  - title: Locks
+    url: /vant/operations/locks
   - title: Sync
     url: /vant/operations/sync
   - title: Automation
@@ -141,22 +155,22 @@
     url: /vant/operations/testing
   - title: Deployment
     url: /vant/operations/deployment
-  - title: Steward Runbook
-    url: /vant/operations/steward-runbook
-  - title: Federation Playbooks
-    url: /vant/operations/federation-playbooks
-  - title: Agora
-    url: /vant/operations/agora
-  - title: Notices
-    url: /vant/operations/notices
-  - title: Settlement
-    url: /vant/operations/settlement
   - title: QoS
     url: /vant/operations/qos
   - title: Network
     url: /vant/operations/network
   - title: Cache
     url: /vant/operations/cache
+  - title: Agora
+    url: /vant/operations/agora
+  - title: Notices
+    url: /vant/operations/notices
+  - title: Settlement
+    url: /vant/operations/settlement
+  - title: Steward Runbook
+    url: /vant/operations/steward-runbook
+  - title: Federation Playbooks
+    url: /vant/operations/federation-playbooks
 
 - title: Security
   items:
@@ -181,16 +195,32 @@
 
 - title: Advanced
   items:
+  - title: Overview
+    url: /vant/advanced/
   - title: Search Architecture
     url: /vant/advanced/search-architecture
   - title: Rerank
     url: /vant/advanced/rerank
-  - title: API Architecture
+  - title: Search Tuning
+    url: /vant/advanced/search
+  - title: Citations
+    url: /vant/advanced/citations
+  - title: Pruning
+    url: /vant/advanced/pruning
+  - title: Efficiency
+    url: /vant/advanced/efficiency
+  - title: Architecture
     url: /vant/advanced/architecture
+  - title: Audit & Compliance
+    url: /vant/advanced/audit
   - title: NSC9 Spec
     url: /vant/advanced/nsc9-spec
   - title: RPC
     url: /vant/advanced/rpc
+  - title: Voice & Style
+    url: /vant/advanced/style
+  - title: Release Process
+    url: /vant/advanced/release
   - title: Troubleshooting
     url: /vant/advanced/troubleshooting
   - title: Agent Contributors
@@ -198,19 +228,64 @@
 
 - title: Reference
   items:
+  - title: Overview
+    url: /vant/reference/
   - title: CLI
     url: /vant/reference/cli
   - title: Configuration
     url: /vant/reference/config
-  - title: MCP Tools
-    url: /vant/reference/mcp-tools
-  - title: API
-    url: /vant/reference/api
+  - title: Runtime API
+    url: /vant/reference/api-runtime
   - title: REST API
     url: /vant/reference/rest-api
+  - title: MCP Tools
+    url: /vant/reference/mcp-tools
+  - title: Embed API
+    url: /vant/reference/embed
+  - title: Compute API
+    url: /vant/reference/compute
+  - title: Stream API
+    url: /vant/reference/stream
+  - title: Storage
+    url: /vant/reference/storage
+  - title: Locks API
+    url: /vant/reference/locks
+  - title: Brain Schema
+    url: /vant/reference/schema
+  - title: Sudo API
+    url: /vant/reference/sudo
+  - title: RLS (Row-Level Security)
+    url: /vant/reference/rls
+  - title: Escrow API
+    url: /vant/reference/escrow
+  - title: Node Registry API
+    url: /vant/reference/node-registry
+  - title: Canvas API
+    url: /vant/reference/canvas
+  - title: Consensus API
+    url: /vant/reference/consensus
+  - title: Resolution
+    url: /vant/reference/resolution
+  - title: Runop API
+    url: /vant/reference/runop
+  - title: Tmp API
+    url: /vant/reference/tmp
+  - title: Theme API
+    url: /vant/reference/theme
+  - title: Code Comments
+    url: /vant/reference/code-comments
+  - title: Entropy Patching Protocol
+    url: /vant/reference/entropy
   - title: Errors
     url: /vant/reference/errors
   - title: Deprecations
     url: /vant/reference/deprecations
+  - title: Legal & Policies
+    url: /vant/reference/legal
   - title: CHANGELOG
     url: /vant/reference/CHANGELOG
+
+- title: Whitepaper
+  items:
+  - title: Agent-First Whitepaper
+    url: /vant/whitepaper/agent-first

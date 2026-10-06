@@ -2,9 +2,59 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-05  
-**Session:** Pass 129 — post-merge verification of main (128c was the Migration Guide + discussion)
+**Session:** Pass 130 — docs power run: archive fossils, canonical menu (129 was post-merge verification)
 
 ---
+
+## Session (2026-10-06 — pass 130: /docs power run — archive + canonical menu)
+
+Owner: "send stuff to /labs/archives/docs. Like the omega init... and
+others repeated. Canonical our docs and sort the menu."
+
+METHOD (no guessing): diffed all 128 frontmatter permalinks against nav.yml
+-> 34 content pages were hidden from the menu; then verified EVERY candidate
+against the actual code surface (lib/ + bin/) before judging.
+
+ARCHIVED (5, git mv to labs/archives/docs/ with README):
+- getting-started/omega-init.md — the funny one; documented a boot flow
+  (.agent-brain dirs, npm start, vant load bootstrap) no shipped version
+  ever used.
+- advanced/framework.md — documents lib/framework.js which was DELETED
+  (compute/embed moved into lib/vant.js).
+- advanced/frontend.md — advertises vant-js-sdk / vant-python-sdk packages
+  that exist nowhere.
+- reference/api.md — the API TRIANGLE resolved: it advertised
+  require('vant').runtime/.ipc/.agents/.brain/.search/.islands — NONE are
+  exports; api-runtime.md documents the REAL lib/vant.js surface and was
+  hidden while the fiction had the menu slot. Classic inversion.
+- advanced/schema.md — duplicate of reference/schema.md (verified against
+  lib/schema.js: brain.json/_core.json claims accurate in BOTH; kept the
+  fuller one).
+
+KEPT (verified real, previously hidden — now NAV'D): operations/locks,
+operations/operations (daily-commands cheat sheet), essential/sudo (the
+v0.9 grant-model page), integrations/repos (vant repos IS a real routed
+CLI despite the personal-looking Herbalism/VESC ASCII art), and 20
+reference APIs (storage, locks, embed, compute, stream, node-registry,
+rls, escrow, sudo, schema, entropy, canvas, consensus, resolution,
+runop, tmp, theme, code-comments, legal, api-runtime).
+
+NAV REWRITE: 125 entries, zero dupes, zero dead links, every one of the
+128 permalinked pages reachable from the menu (verified programmatically).
+Sections grouped by job: Getting Started in reading order; Operations
+daily-ops first; Reference = tools then APIs then meta; Whitepaper added.
+Menu titles now match page titles; Memory/Advanced twins disambiguated
+("Citations" vs "Citations Internals" style).
+
+RETARGETED inbound links: getting-started/index (omega rows -> Migration
+Guide), advanced/index (framework/frontend rows dropped, schema row ->
+reference/schema), reference/index (fabricated API row -> API Runtime).
+bin/docs-build.js version-stamp list cleaned (dropped archived + never-
+existed docs/guides/*, added migration.md + api-runtime.md).
+
+GATES: docs style PASS 128 files, links PASS, surface PASS, helpers 0,
+truthfulness 0, audit-locks PASS, cli-smoke (119 CLIs) 2/2, bin-
+truthfulness 3/3, ci.js 439/0/1skip.
 
 ## Session (2026-10-06 — pass 129: PR 91 MERGED, main verified)
 
