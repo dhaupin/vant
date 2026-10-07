@@ -35,5 +35,5 @@ built-ins. Debugging privilege errors: [Sudo](/vant/essential/sudo).
 ## One command to remember
 
 ```bash
-vant onboard --list   # See every brain file an island can load
+vant onboard files    # See every brain file an island can load
 ```

@@ -88,7 +88,7 @@ provenance is visible. Without the flag, a missing key still returns
 Load everything at once for indexing or sync work:
 
 ```javascript
-const corpus = brain.loadCorpus();
+const corpus = await brain.loadCorpus();   // async by default; {sync:true} for sync mode
 corpus.length;   // number of brain items
 ```
 

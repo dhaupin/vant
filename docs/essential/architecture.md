@@ -54,19 +54,19 @@ Start → Sync from GitHub → Load brain → Think/Learn → Commit → Push to
 | load.js | Brain loader | vant.js |
 | health.js | Diagnostics | vant health |
 | mcp.js | MCP server | MCP clients |
-| webhook.js | Webhooks | External |
+| webhooks.js | Webhooks | External |
 
 ### lib/ - Core Modules
 
 | Module | Purpose | Key Functions |
 |--------|---------|-------------|
 | vant.js | Runtime | init(), think(), learn() |
-| brain.js | Storage | get(), set(), sync() |
-| storage.js | Abstraction | get(), put(), query() |
+| brain.js | Storage | read(), write(), loadCorpus() |
+| storage.js | Abstraction | getStorage(), FileStorage (read/write/has) |
 | islands.js | Lazy-load | load(), hydrate() |
 | branch.js | Isolation | create(), checkout() |
 | lock.js | Coordination | acquire(), release() |
-| sync.js | GitHub sync | push(), pull() |
+| sync.js | GitHub sync | pushAll(), pullAny() |
 | sandbox.js | Security | canRead(), canWrite() |
 | qos.js | Rate limit | limit(), breaker() |
 | search.js | Search | query(), hybrid() |
@@ -93,15 +93,15 @@ models/
 ### New Session
 
 ```javascript
-// 1. Sync from GitHub (via network module)
-const { sync } = require('vant/lib/network');
-await sync({ direction: 'pull' });
+// 1. Pull from GitHub (lib/sync.js)
+const sync = require('vant/lib/sync');
+await sync.pullAny();
 
 // 2. Load brain
 // await vant.load(); // automatic in init()
 
-// 3. Read identity
-const identity = await vant.brain().get('identity');
+// 3. Read identity (unified read; private-first with public fallback)
+const identity = await vant.brain().read('identity');
 
 // 4. Think with context
 const result = await vant.think('What should I do?');
@@ -113,9 +113,8 @@ await vant.learn('key', 'content');
 const { commit } = require('vant/lib/branch');
 await commit('MyAgent', 'Did work');
 
-// 7. Push to GitHub (via network/sync)
-const { sync } = require('vant/lib/network');
-await sync({ direction: 'push' });
+// 7. Push to GitHub
+await sync.pushAll();
 ```
 
 ### MCP Flow
@@ -140,9 +139,9 @@ Response
 ## Security Layers
 
 ```text
-Request → VAF (filter) → Sandbox (capabilities) → Escrow (budget) → Execute
-            │               │                    │              │
-         [block]        [permission]        [budget]      [run]
+Request → Sandbox (capabilities) → VAF (filter) → QoS (rate limit) → Escrow (budget) → Execute
+            │                        │              │                  │               │
+       [permission]              [block]        [throttle]         [budget]          [run]
 ```
 
 See [Sandbox](/vant/security/sandbox) and [VAF](/vant/security/vaf) for details.
@@ -199,7 +198,7 @@ and are delegated to; interface-specific calls live at the edge:
 
 | Interface | Spec | Notes |
 |-----------|------|-------|
-| MCP | JSON-RPC 2.0 | 296 tools, full power |
+| MCP | JSON-RPC 2.0 | the full tool catalog |
 | REST | OpenAPI 3.x | Subset for web tools |
 | Embed | OpenAI-compatible | `/v1/embeddings` |
 | Search | RAG-ready | Hybrid + rerank |

@@ -1,10 +1,89 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-10-06  
-**Session:** Pass 140 — judgment read-pass: wrong npm package taught in 9 places, phantom plugin system archived, FAQ succession/roadmap fixes
+**Last Updated:** 2026-10-07  
+**Session:** Pass 141 — mid-funnel judgment reads: architecture/onboarding/brain/cli truth-up
 
 ---
+
+## Session (2026-10-07 — pass 141: mid-funnel judgment reads)
+
+Owner: "mid-funnel pages (architecture, brain, cli, agent-onboarding)
+had their machine-checkable layers swept in passes 138-139 but not full
+judgment reads — natural next batch."
+
+METHOD: same as pass 140 — full judgment read of each page, verifying
+every claim a reader would act on against the code.
+
+architecture.md FIXED: bin/webhook.js -> bin/webhooks.js (real name);
+lib-table key functions -> real exports (brain read/write/loadCorpus,
+getStorage/FileStorage, sync pushAll/pullAny); Execution Flow code
+block `require('vant/lib/network')` sync fiction -> lib/sync.js
+pullAny()/pushAll() (network.js has no sync export; verified at
+lib/sync.js:266/:449/:786); `vant.brain().get('identity')` -> `.read`
+(getBrain returns the brain module; no .get); security-chain diagram
+was VAF->Sandbox->Escrow, real order is Sandbox->VAF->QoS->Escrow;
+"296 tools" de-numbered to "the full tool catalog". Verified real and
+left: branch.commit (lib/branch.js:192), vant.learn (lib/vant.js:704),
+search.js hybrid (lib/search.js:519), bin/load|health|mcp|sync.js.
+
+agent-onboarding.md FIXED: migration link /vant/getting-started/setup
+-> /vant/getting-started/migration (same wrong-link class as pass
+140's docs/index.md fix); MCP discovery curl `POST /rpc` (phantom
+route) -> `curl -s http://localhost:3457/mcp/tools`. Verified real and
+left: vant org grant/status (bin/org.js), sandbox.setScopes +
+defaultSandbox.setCapabilities, teams.createOrg, vant memory learn,
+brain.read private-first fallback.
+
+brain.md FIXED: corpus example brain.loadCorpus() -> await
+brain.loadCorpus() (async by default since 0.8.6). stackFallback/
+viaStack opts (lib/brain.js:1855), memory.learn export
+(lib/memory.js:812), format detection, invalidateCorpusCache all real.
+
+cli.md — the big one; its header claims "Signatures were verified
+against the command implementations in bin/". FRONT verified real:
+start --no-migrate (bin/start.js:126), load -v/-l, lock
+acquire/release/status/force, memory state/recall/learn/query/address/
+locate/list/clear (bin/memory.js:74-150), search --mode basic|rag|
+hybrid + --hyde + --stats + -r (bin/search.js help matches incl.
+"Semantic LTC"), watch --interval. FIXED (4 fictions + 1 wiring):
+(1) `vant onboard --list` — the dashed flag never existed;
+bin/onboard.js handles bare `list` (= full summary) and `files` (=
+file list); --list falls through to "Unknown command" exit 1.
+cli.md + essential/index.md now teach `vant onboard files`.
+(2) citations: bin/citations.js add/verify/search/export were
+console.log-only stubs while lib/citations.js has real lock-protected
+addSource(commit, context) (:75) and verify(commit) (:190). WIRED
+add/verify to the lib (gate is allow-by-default on the untouched stub
+sandbox; live-verified: add -> "Added citation #1", verify hit exit 0,
+miss exit 1), search/export now say "placeholder — not wired" in the
+bin help and runtime output; cli.md block made honest.
+(3) `vant run` documented as interactive loop / -p task / --mcp mode —
+bin/run.js is a 36-line banner-only stub that ignores all args;
+table row + bash block rewritten honest (use vant start / vant node).
+(4) `--ttl` for memory state — never a CLI flag (bin/memory.js state
+passes no opts); now points at the lib API memory.state(key, value,
+{ ttl }). (5) `node bin/sweep.sh` -> `bash bin/sweep.sh` (file is
+#!/bin/bash; --quick real). BACK HALF spot-verified real: snapshot
+--agent/--brain/--password/--output/--no-verify (bin/snapshot.js:
+103-107), node -m/-p/--enable-polling, agents spawn --role/--brain,
+org config --set-operator-scopes/--caps + --session-only, geometry
+store/retrieve/address/locate, test smoke/core/full (bin/test-core.js,
+"All 500+" matches), api status/routes/call (inline handler delegates
+to bin/api.js on subcommand), spawn list (bin/agent-spawner.js), docs
+build/serve, docs-build, bump type+--yes required, changelog
+--since/--format, wal --status/--drill/--reset, backup schedule "not
+implemented — prints a cron recipe" (already honest), s3 flags,
+audit-ledger filters.
+
+BONUS FIND (same fiction class, one row): runtime.md's vant.citations
+row advertised cite(), link(), verify() — cite/link are not exports of
+lib/citations.js (addSource, formatCitation(s), getAll, getCommitFooter,
+clear, generateReceipts, verify, getStackCitations are). Row now reads
+addSource(), getAll(), verify().
+
+GATES: style+links PASS (119), surface PASS, ci.js 439/0/1skip.
+Rides PR #116.
 
 ## Session (2026-10-06 — pass 140: judgment read-pass, first-touch funnel)
 

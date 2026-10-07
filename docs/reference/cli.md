@@ -61,7 +61,7 @@ vant load               # Load brain from models/private
 vant load --version 3   # Load a specific brain version
 vant load --latest      # Force latest
 
-vant onboard --list     # List brain files
+vant onboard files      # List brain files
 
 vant migrate --status   # Layout version and pending migrations
 vant migrate --dry-run  # Preview what would move, no changes
@@ -134,10 +134,10 @@ vant embed info                    # Show provider info
 vant embed generate "text"         # Generate an embedding
 vant embed batch "one" "two"       # Batch embeddings
 
-vant citations list
-vant citations add <ref>
-vant citations verify <ref>
-vant citations search <query>
+vant citations list               # List recorded sources
+vant citations add <ref>          # Record a source (ref = commit hash)
+vant citations verify <ref>       # Check whether a ref has been cited
+vant citations search <query>     # Placeholder — not wired to the lib yet
 
 vant geometry store <key> <val>    # Store in quasicrystal
 vant geometry retrieve <key>       # Retrieve by key
@@ -145,13 +145,14 @@ vant geometry address <data>       # Store at random barcode
 vant geometry locate <barcode>     # Retrieve by barcode
 ```
 
-`--ttl` auto-expires state entries and returns `{ ttl, expiresAt }`.
+State entries are TTL-cached; set `ttl`/`expiresAt` through the memory
+lib API (`memory.state(key, value, { ttl })`) - there is no `--ttl` CLI flag.
 
 ## Agents and runtime
 
 | Command | Description |
 |---------|-------------|
-| `vant run` | Long-running agent loop |
+| `vant run` | Stub - prints runtime quickstart guidance (use `vant start` or `vant node`) |
 | `vant node` | Persistent node (continuous run with brain loaded) |
 | `vant agents` | Multi-agent management (list, spawn, kill, info, status, prune - real, persisted) |
 | `vant islands` | Island component boot |
@@ -167,9 +168,7 @@ vant geometry locate <barcode>     # Retrieve by barcode
 | `vant compute` | Multi-language compute runner |
 
 ```bash
-vant run                    # Interactive loop
-vant run -p "task"          # Run one task and exit
-vant run --mcp              # MCP mode
+vant run                    # Stub: prints quickstart guidance and exits
 
 vant node --mcp             # Node plus MCP server
 vant node --mcp-port 4000   # Custom MCP port
@@ -588,7 +587,7 @@ Some dev tools are invoked with node directly rather than through the
 `vant` dispatcher:
 
 ```bash
-node bin/sweep.sh        # Test health gate (or: node bin/sweep.sh --quick)
+bash bin/sweep.sh        # Test health gate (or: bash bin/sweep.sh --quick)
 node test/runner.js      # Raw test runner
 ```
 

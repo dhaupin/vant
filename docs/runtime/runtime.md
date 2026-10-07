@@ -97,7 +97,7 @@ Access via `vant.<submodule>()`:
 | `vant.islands` | Lazy-loaded modules | load(), list(), hydrate() |
 | `vant.agents` | Agent management | spawn(), list(), kill() |
 | `vant.msg` | Agent messaging | send(), broadcast(), receive() |
-| `vant.citations` | Git-backed grounding | cite(), link(), verify() |
+| `vant.citations` | Git-backed grounding | addSource(), getAll(), verify() |
 | `vant.mcp` | MCP server | start(), stop(), handlers() |
 | `vant.embed` | Vector embeddings | embed(), similarity() |
 | `vant.compute` | Code execution | execute(), sandbox() |
