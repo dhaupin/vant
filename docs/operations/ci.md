@@ -126,15 +126,9 @@ npm run lint
 npm run lint:fix
 ```
 
-### Build
-
-```bash
-# Build
-npm run build
-
-# Watch mode
-npm run build:watch
-```
+There is no `npm run build` / `build:watch` - Vant is plain Node with
+no build step. The repo's other gates: `npm run lint:docs`,
+`npm run lint:surface`, `npm run lint:helpers`, `npm run lint:locks`.
 
 ---
 

@@ -27,8 +27,11 @@ Import storage:
 
 ```javascript
 const Storage = require('vant').storage;
-const brain = Storage.get('brain');
 ```
+
+`vant.storage` is the lib/storage.js module itself. `Storage.get(type)`
+returns factory instances; most APIs below take a `basePath` or use the
+brain path by default.
 
 ## Getting Storage
 
@@ -46,38 +49,41 @@ const vector = Storage.get('vector');
 
 // State storage
 const state = Storage.get('state');
+
+// Also: 'file', 'config', 'schema', 'repos', 'remote'
 ```
 
 ## Brain Operations
 
-Read from brain:
+BrainStorage keys files by (category, key):
 
 ```javascript
 // Get file content
 const content = brain.get('learnings', 'lesson-1');
 
-// Get identity
-const identity = brain.getIdentity();
-console.log(identity.name);  // "MyAgent"
+// List a category
+const files = brain.list('learnings');
 ```
 
 Write to brain:
 
 ```javascript
-// Write file
+// Write file (atomic)
 brain.write('learnings', 'lesson-1', '# New Learning\n\nContent here');
 
 // Append to file
-brain.append('lessons', 'default', '- New lesson\n');
+brain.append('learnings', 'lesson-1', '- New lesson\n');
 ```
+
+There is no `brain.getIdentity()` or `brain.getVersion()` on the
+storage class - identity lives in the brain files themselves (read them
+with `get('identity')`) and versioning is the CLI's (`vant load
+--version`, brain.json's version field).
 
 ### Get Version
 
-Get brain version:
-
 ```javascript
-console.log(brain.getVersion());
-// { version: "0.8.6", updated: "2026-05-11" }
+const schema = Storage.get('schema');  // brain.json/_core.json handling
 ```
 
 ## File Operations
@@ -88,37 +94,31 @@ Atomic writes ensure data integrity:
 // Write goes through atomicWrite internally
 brain.write('learnings', 'new', 'content');
 
-// Read with error handling
-const content = brain.read('learnings', 'new');
-if (content.error) {
+// Read with error handling: sandbox denials return { error }
+const content = brain.get('learnings', 'new');
+if (content && content.error) {
     console.log(content.error);
 }
 ```
 
 ## Models Path
 
-The default brain location:
-
-```javascript
-const brain = Storage.get('brain');
-console.log(brain.modelsPath); // "models/private"
-```
+The default brain location is the brain path (`models/private/<brain>`
+under the multibrain layout); FileStorage instances take an explicit
+`basePath` option.
 
 ## GitHub Sync
 
-Storage integrates with GitHub via connectors:
+Sync is its own module - `lib/sync.js` with the provider connectors in
+`lib/connectors/` (github, gitlab, bitbucket, gitea, selfhosted):
 
 ```javascript
-const connectors = require('./lib/connectors');
-
-// GitHub connector
-const github = new connectors.github({
-    token: process.env.GITHUB_TOKEN,
-    repo: 'owner/repo'
-});
+const sync = require('./lib/sync');
+await sync.pushAll({ commitMessage: 'Vant sync update' });
 ```
 
-See [Providers](/vant/integrations/providers) for all connectors.
+See [Multi-Provider RAID Sync](/vant/operations/sync) for the
+multi-provider surface.
 
 ## Islands
 
@@ -129,12 +129,11 @@ const islands = Storage.get('island');
 
 // Get island manifest
 const manifest = islands.getManifest();
-
-// Load island
-const data = islands.get('github');
 ```
 
-See [Islands](/vant/essential/islands) for details.
+Note: `IslandStorage.getManifest()` is sync in the storage class; the
+lib/islands.js module's `getManifest()` is async (use
+`getManifestSync()` there). See [Islands](/vant/essential/islands).
 
 ## Vector Store
 
@@ -143,39 +142,34 @@ Store embeddings for semantic search:
 ```javascript
 const vector = Storage.get('vector');
 
-// Add embeddings
-vector.add('doc-1', 'content text', [0.1, 0.2, 0.3]);
+// Add an entry (id, text, metadata) - embedding is derived or delegated
+vector.add('doc-1', 'content text', { title: 'Doc 1' });
 
-// Search
+// Search (topK defaults to 5)
 const results = vector.search('query text', { topK: 5 });
 ```
 
-## Sandbox Integration
-
-Storage respects sandbox permissions:
-
-```javascript
-// Read operation checks canRead
-const content = brain.get('learnings', 'lesson-1');
-// If !canRead, throws "Read permission required"
-```
-
-See [Sandbox](/vant/security/sandbox) for details.
-
----
+The doc's old `vector.add(id, content, [0.1, 0.2, 0.3])` signature was
+fiction: the third parameter is a metadata object, not a vector.
 
 ## Configuration
 
-Storage options:
+Storage options (FileStorage constructor):
 
 ```javascript
-const storage = new Storage({
-    path: 'models/private',     // brain location
-    sync: true,             // auto-sync
-    atomic: true,          // atomic writes
-    sandbox: true          // enable checks
+const { FileStorage } = require('./lib/storage');
+
+const store = new FileStorage({
+    basePath: 'models/private',       // store location
+    encrypt: true,                    // or VANT_STORAGE_ENCRYPT=1
+    wal: true,                        // write-ahead journal
+    mirrors: ['/backup/path']         // passive replicas
 });
 ```
+
+There is no `new Storage({ path, sync, atomic, sandbox })` constructor -
+`sandbox` integration is automatic (capability checks inside get/write,
+not an option).
 
 ---
 
@@ -184,4 +178,4 @@ const storage = new Storage({
 - [Brain](/vant/memory/brain) - Brain file structure
 - [Islands](/vant/essential/islands) - Lazy brain components
 - [Search](/vant/memory/search) - Hybrid search
-- [Providers](/vant/integrations/providers) - GitHub, GitLab, etc
+- [Multi-Provider RAID Sync](/vant/operations/sync) - Provider connectors

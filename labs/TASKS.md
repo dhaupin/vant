@@ -2,9 +2,82 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-07  
-**Session:** Pass 142 — operations/ judgment reads: notifications archive + qos/cache/cron/events/webhooks/automation truth-up
+**Session:** Pass 143 — operations/ COMPLETE: storage/sync/network/testing/ci truth-up + agora/settlement/steward/playbooks verified
 
 ---
+
+## Session (2026-10-07 — pass 143: operations/ section completed)
+
+Owner: PR #116 merged (passes 137-141); pass 142 opened PR #117.
+"What's next in /docs? We wanna read everything to an accurate, usable
+state." Also noted GitHub having issues 3 days running.
+
+COVERAGE MAP: full judgment reads now done on essential/ (140),
+getting-started funnel (140), mid-funnel architecture/onboarding/brain/cli
+(141), operations/ (142+143). Remaining unjudged: memory/, reference/
+(partial: storage/resolution/runop/entropy/mcp-tools/rest-api/rpc all
+touched in recent passes), multi-agent/, integrations/, security/,
+runtime/, advanced/, whitepaper tail.
+
+This pass finished operations/ (9 pages remaining after 142):
+
+VERIFIED REAL, no edits: agora.md (all 5 CLI verbs match bin/agora.js,
+all 5 MCP tools registered lib/mcp.js:873-940, consensus.get(topic,
+viewerId) scope gate real lib/consensus.js:693), settlement.md
+(makeInvoice/sendInvoice/list/get + settle.request/settle.record legs +
+refusal codes real lib/settlement.js:455/:491/:564/:569),
+steward-runbook.md (org-sync replicate/generation rules, genesis
+ring-admit lib, teams createOrg/createDept/createTeam/assign,
+node-registry anchors, mesh secret env), federation-playbooks.md
+(genesis CLI create/join/status real bin/genesis.js; agora verbs,
+notices pull, mesh status, market_list/forum_vote/consensus_tally/
+consensus_get MCP tools all registered), ci.md (test.yml triggers/steps
+match the real workflow file: dispatch/push/PR/schedule cron, single ci
+job, cancel-in-progress, npm audit, ci.js+runner+vibe+coverage;
+docker.yml + docs.yml exist), sync.md core (isRAID/getProviderCount/
+pushAll({commitMessage})/pullAny/getStatus/rebase all real; providers
+github/gitlab/bitbucket/gitea/selfhosted real lib/remote.js:234-241,
+GITLAB_TOKEN/BITBUCKET_TOKEN/GITLAB_REPO read by connector classes).
+
+FIXED:
+- storage.md: `require('vant').storage` is the module (getter real
+  lib/vant.js:1605) but the page taught fiction on top: brain.getIdentity()
+  and brain.getVersion() DO NOT EXIST (BrainStorage = get/write/append/
+  has/list/query/brainRead/brainList); "read with error handling" used a
+  phantom brain.read (the (category,key) reader is get(); FileStorage.read
+  is the path-based one); get() denial returns {error} (doc said throws);
+  connectors example `require('./lib/connectors')` + `new connectors.github`
+  (connectors is a directory, class is GitHubProvider via lib/remote.js);
+  Configuration ctor `new Storage({path,sync,atomic,sandbox})` fiction ->
+  real FileStorage({basePath, encrypt, wal, mirrors}); vector.add 3rd arg
+  is metadata object not a vector; islands getManifest sync-vs-async note.
+- network.md: fetch resolves to the BODY STRING, not {json,status}
+  (fetchJson is the JSON helper); fetchWithRetry/getPoolStats/configure()
+  DO NOT EXIST (retry(fn, {retries, backoff, maxBackoff}) is the real
+  retry surface; throws last error); isOnline() = cached flag,
+  checkOnline() = probe; getLatencyStats/measureLatency real; circuit
+  state CLOSED|OPEN (time-based, no half-open); real fetch options:
+  cache/circuit/timeout/headers/system (system opts out of the per-call
+  canNetwork gate); SSRF gate resolveAndCheckIP named.
+- testing.md: no test:watch/test:coverage npm scripts (real: npm test =
+  build-test, test/runner.js, test/coverage.js, test/ci.js, single
+  suites); unit-test example was mocha/jest style but the repo is
+  plain-Node scripts - rewritten to assert + async IIFE; vant.init({name})
+  returns {error,...} not {id} (verified lib/vant.js:403), think returns
+  {insights}, learn returns {success:true,key,ttl} - all now asserted
+  against the real shapes.
+- ci.md: `npm run build` / `build:watch` fiction (no build step exists;
+  package.json has none) - replaced with the real lint:* gate list.
+- sync.md polish: pullAny preference option is `{ provider: 'gitlab' }`
+  (destructured as {provider}); documented getStatus return shape + the
+  extra exports (rebase/diffCorpus/scanConflictMarkers/
+  getConfiguredProviders); provider-configured semantics + env names.
+- federation-playbooks.md: `vant genesis admit` CLI line corrected -
+  admit/accept are LIB-only exports (lib/genesis.js:555); the CLI ships
+  create/join/status only. Playbook now calls the lib directly.
+
+GATES: style+links PASS (118), surface PASS, ci.js 439/0/1skip.
+Rides PR #117 (with pass 142).
 
 ## Session (2026-10-07 — pass 142: operations/ judgment reads)
 

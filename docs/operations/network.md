@@ -31,12 +31,15 @@ const network = require('./lib/network');
 
 ## Fetch
 
-Make HTTP requests:
+Make HTTP requests - `fetch` resolves to the response BODY STRING on
+2xx and rejects on non-2xx (there is no `{ json, status }` wrapper):
 
 ```javascript
-const response = await network.fetch('https://api.example.com/data');
-console.log(response.json);   // parsed JSON
-console.log(response.status); // 200
+const body = await network.fetch('https://api.example.com/data');
+// body is a string; parse JSON yourself or use fetchJson
+
+const data = await network.fetchJson('https://api.example.com/data');
+// fetchJson: JSON.parse with a string fallback
 ```
 
 ### Options
@@ -48,25 +51,27 @@ const response = await network.fetch('https://api.example.com/data', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ key: 'value' }),
-    timeout: 30000,
-    retries: 3
+    timeout: 30000,          // per-request timeout
+    cache: true,             // GET responses are cached (default)
+    circuit: true,           // route through the circuit breaker (default)
+    system: false            // true opts system-initiated calls out of
+                             // the per-call sandbox canNetwork gate
 });
 ```
 
+Redirects (3xx + Location) are followed automatically.
+
 ## Retry
 
-Automatic retry with backoff:
+Retry is a separate export that wraps any function with exponential
+backoff (there is no `fetchWithRetry`):
 
 ```javascript
-// After failure, retries with exponential backoff
-const result = await network.fetchWithRetry('https://api.example.com/data', {
-    retries: 3,
-    backoff: 1000  // 1s, 2s, 4s
-});
-
-if (result.error) {
-    console.log(result.code); // "RETRY_EXHAUSTED"
-}
+const result = await network.retry(
+    () => network.fetch('https://api.example.com/data'),
+    { retries: 3, backoff: 1000, maxBackoff: 30000 }  // 1s, 2s, 4s...
+);
+// throws the last error when retries are exhausted
 ```
 
 ## Latency
@@ -75,9 +80,9 @@ Track API latency:
 
 ```javascript
 const stats = network.getLatencyStats();
-console.log(stats.avg);     // average ms
-console.log(stats.min);     // min ms
-console.log(stats.max);     // max ms
+console.log(stats);  // latency record set by measureLatency()
+
+await network.measureLatency('https://api.example.com');
 ```
 
 ## Online Check
@@ -85,9 +90,11 @@ console.log(stats.max);     // max ms
 Check if online:
 
 ```javascript
-const online = await network.isOnline();
+const online = await network.checkOnline();
 console.log(online); // true | false
 ```
+
+(`isOnline()` reads the cached flag; `checkOnline()` probes.)
 
 ## Domain Restrictions
 
@@ -97,63 +104,38 @@ Whitelist allowed domains:
 network.setAllowedDomains(['api.github.com', 'api.openai.com']);
 
 const allowed = network.isDomainAllowed('https://api.github.com/user');
-console.log(allowed); // true
+console.log(allowed);      // true
+console.log(network.getAllowedDomains());
 ```
 
 ## Circuit Breaker
 
-Network includes circuit breaker:
+Network routes external calls through a circuit breaker (shared with
+QoS):
 
 ```javascript
 const stats = network.getCircuitStatus();
-console.log(stats.state);  // "closed" | "open" | "half-open"
+console.log(stats.state);  // CLOSED | OPEN (time-based recovery)
 ```
 
-After failures, circuit opens to prevent cascade.
-
-## Connection Pool
-
-HTTP agent settings:
-
-```javascript
-console.log(network.getPoolStats());
-// { size: 5, free: 4 }
-```
-
----
-
-## Configuration
-
-Network options:
-
-```javascript
-const network = require('./lib/network');
-
-network.configure({
-    timeout: 30000,
-    retries: 3,
-    backoff: 1000,
-    poolSize: 5,
-    allowedDomains: []
-});
-```
+After repeated failures the circuit opens to prevent cascade; it
+closes again after the timeout elapses. Internal/reserved addresses
+are additionally guarded by `resolveAndCheckIP` (SSRF gate).
 
 ---
 
 ## Integration
 
-Network integrates with sandbox:
+Network integrates with sandbox: when the sandbox denies `canNetwork`,
+per-call fetches are refused (system-initiated calls can opt out with
+`system: true`). Domain restrictions are enforced inside network.js on
+every request plus an IP-resolution SSRF gate:
 
 ```javascript
-const sandbox = require('./lib/sandbox');
+network.setAllowedDomains(['api.github.com']);
 
-const s = sandbox.create({
-    allowedDomains: ['api.github.com'],
-    canNetwork: true
-});
-
-const result = await network.fetch('https://evil.com');
-// Blocked by domain whitelist
+await network.fetch('https://evil.com');
+// refused by the domain whitelist
 ```
 
 See [Security](/vant/security/) for details.

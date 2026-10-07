@@ -44,34 +44,44 @@ const sync = require('./lib/sync');
 console.log('RAID:', sync.isRAID() ? 'ACTIVE' : 'inactive');
 console.log('Providers:', sync.getProviderCount());
 
-// Push to ALL providers
-const result = await sync.pushAll({ 
-    commitMessage: 'Vant sync update' 
+// Push to ALL configured providers
+const result = await sync.pushAll({
+    commitMessage: 'Vant sync update'
 });
 
-// Pull from first available
-const brain = await sync.pullAny();
+// Pull from first available (order = registry order)
+const pulled = await sync.pullAny();
 
-// Get status per provider
+// Prefer a specific provider on pull
+const fromGitlab = await sync.pullAny({ provider: 'gitlab' });
+
+// Per-provider connectivity + branch counts
 const status = await sync.getStatus();
+// { providers: { github: { connected, branches, current }, ... } }
 ```
+
+`pullAny` returns the pulled corpus plus per-provider results; a
+provider that fails is skipped and the next is tried. Also exported:
+`rebase(provider)`, `diffCorpus()`, `scanConflictMarkers()`,
+`getConfiguredProviders()`.
 
 ## Configuration
 
-Set tokens for multiple providers:
+A provider is configured when its token + repo resolve. Tokens come
+from config or env per provider class (`lib/connectors/`):
 
 ```bash
 # GitHub
 export GITHUB_TOKEN=ghp_xxx
 
-# GitLab  
+# GitLab
 export GITLAB_TOKEN=glpat_xxx
+export GITLAB_REPO=owner/repo        # optional; else detected from git remote
 
 # Bitbucket
 export BITBUCKET_TOKEN=xxx
 
-# Self-hosted (via git config)
-# Uses CLI git commands
+# Gitea / self-hosted (git-over-HTTPS via CLI git)
 ```
 
 ## Provider Priority
@@ -82,10 +92,10 @@ On pull, providers are tried in order:
 2. Second configured provider
 3. ...and so on
 
-Set preference:
+Set preference (reorders the trial order):
 
 ```javascript
-const brain = await sync.pullAny({ preference: 'gitlab' });
+const pulled = await sync.pullAny({ provider: 'gitlab' });
 ```
 
 ## Results Structure

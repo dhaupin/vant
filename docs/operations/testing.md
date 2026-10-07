@@ -84,39 +84,46 @@ vant lock force
 
 ### Unit Test
 
+The repo's tests are plain-Node scripts with assert (no mocha/jest
+runner). A unit test looks like:
+
 ```javascript
 const assert = require('assert');
 const vant = require('vant');
 
-describe('Vant', () => {
-    it('should init', async () => {
-        const result = await vant.init({ name: 'Test' });
-        assert(result.id);
-    });
-    
-    it('should think', async () => {
-        const result = await vant.think('test query');
-        assert(result.insights);
-    });
-    
-    it('should learn', async () => {
-        const result = await vant.learn('test', 'content');
-        assert(result.success);
-    });
-});
+(async () => {
+    const inited = await vant.init({ name: 'Test' });
+    assert(!inited.error);
+
+    const thought = await vant.think('test query');
+    assert(Array.isArray(thought.insights));
+
+    const learned = await vant.learn('test', 'content');
+    assert(learned.success);
+
+    process.exit(0);
+})().catch(e => { console.error(e); process.exit(1); });
 ```
 
 ### Run Tests
 
+There are no test:watch/test:coverage npm scripts. The real surface:
+
 ```bash
-# All tests
+# Smoke (build-test)
 npm test
 
-# Watch mode
-npm run test:watch
+# Full runner (all suites)
+node test/runner.js
 
-# Coverage
-npm run test:coverage
+# Coverage summary
+node test/coverage.js
+
+# The CI battery end to end
+node test/ci.js
+
+# One suite
+node test/brain.test.js
 ```
 
 ---
