@@ -1,6 +1,7 @@
 ---
 version: 0.8.6
 permalink: /reference/locks
+layout: default
 title: Locks API
 nav_order: 136
 description: API reference for lib/brain-lock.js (authorization lease) and lib/lock.js (cross-process mutex), plus the vant lock CLI and vant_lock MCP tool.

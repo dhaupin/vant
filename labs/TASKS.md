@@ -2,7 +2,54 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-07  
-**Session:** Pass 150 — dist/ brought INTO the repo gates (scripts/check-dist-lander.js)
+**Session:** Pass 151 — docs crosslink/frontmatter sweep: 491 links 0 broken, 2 layout fields filled
+
+---
+
+## Session (2026-10-07 — pass 151: crosslink + frontmatter sweep)
+
+Owner: "one more pass across the docs — crosslinking makes sense, all
+crosslinks resolve, frontmatter is good to go."
+
+METHOD: scripted census, not spot-checks - 491 /vant/<permalink> links
+every permalink-set member (CORRECTED script: my first pass
+reported ~200 'bad' links that were my own trailing-slash
+normalization bug - verified 6 suspicious targets live 200 and
+re-ran with fixed normalization before believing anything; final
+census: 0 broken). Relative ./ ../ links: 100% resolve on disk.
+nav.yml <-> permalink census: 117 nav rows + docs/index.md home (by
+design), no orphans, no ghosts, no dup rows. Semantic sense-check:
+sampled 6 Related blocks across sections (rag, schema, efficiency,
+encryption, agora, mcp) - every 'Learn more' target matches its
+context topic.
+
+FIXED (frontmatter):
+- docs/reference/locks.md + docs/operations/locks.md were missing
+  `layout:` (both files, only 2 of 118). Real consequence found while
+  checking: docs/_config.yml has NO `defaults` block, so Jekyll renders
+  a layout-less page as raw HTML with NO site chrome - silent renderer
+  breakage the checker never catches because the field is optional to
+  the regexes. All 118 pages now carry all 5 style-required fields
+  (version, permalink, layout, title, nav_order).
+
+VERIFIED BENIGN, left alone:
+- duplicate nav_order values across sections (20/51/66/67/68 dups):
+  nav_order feeds docs/_plugins/nav_generator.rb which fills
+  site.config['nav'], but the RENDERED sidebar comes from
+  site.data.nav = nav.yml (layout/default.html:628) - the generated
+  nav is dead config. Dups cannot affect the menu.
+- 491 links re-checked with corrected script after 2-page edit: 0.
+
+GATES: style+links PASS (118), dist PASS, surface PASS, ci.js
+439/0/1skip. LESSONS: (1) trust tool output over my own one-off
+scripts - my script's first numbers contradicted the passing gate and
+the live 200s; the bug was mine, the gate was right; (2) 'frontmatter
+is good' needs the renderer's perspective, not just field presence -
+a missing layout is invisible to every regex gate yet breaks the page;
+worth a follow-up: consider a check-docs-frontmatter.js that requires
+all 5 fields (style.md says 'all 5' but no gate enforces it yet);
+(3) dead config (nav_generator.rb) is a drift hazard - two nav sources
+means they WILL diverge silently someday.
 
 ---
 
