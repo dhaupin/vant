@@ -4,24 +4,22 @@ permalink: /getting-started/quick-start
 layout: default
 title: Quick Start
 nav_order: 11
-description: Install Vant, configure GitHub sync, and run your first start in about two minutes.
+description: Install Vant, configure GitHub sync, and run your first start in about five minutes.
 ---
 # Quick Start
 
-> Get Vant running in 2 minutes
+> Get Vant running in 5 minutes
 
 ## 1. Install
 
-Install Vant globally:
+Vant is not on npm (the `vant` package there is an unrelated Vue UI
+library). Clone and install:
 
 ```bash
-npm install -g vant
-```
-
-Or run directly without installing:
-
-```bash
-node bin/vant.js start
+git clone https://github.com/dhaupin/vant.git
+cd vant
+npm ci
+npm link        # puts the `vant` command on your PATH
 ```
 
 ## 2. Configure

@@ -156,13 +156,15 @@ Why: Readers need context, not just commands.
 
 Example - Good code block documentation:
 
-Install Vant via npm:
+Install Vant from the repo and link the CLI:
 
 ```bash
-npm install -g vant
+git clone https://github.com/dhaupin/vant.git && cd vant
+npm ci && npm link
 ```
 
-This installs Vant globally. Use `-g` for CLI access anywhere.
+This puts the `vant` command on your PATH. Use `npm link` so CLI access
+works anywhere.
 
 Example output:
 

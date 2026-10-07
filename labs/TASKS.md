@@ -2,7 +2,60 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-06  
-**Session:** Pass 139 — narrative-claims sweep: AGENTS.md dead loadBrain + sync loadCorpus fixed, 21 marker hits triaged, corpus otherwise clean
+**Session:** Pass 140 — judgment read-pass: wrong npm package taught in 9 places, phantom plugin system archived, FAQ succession/roadmap fixes
+
+---
+
+## Session (2026-10-06 — pass 140: judgment read-pass, first-touch funnel)
+
+Owner: "misleading-but-true narrative framing can't be grepped - wanna
+read the docs please?"
+
+METHOD: full judgment reads of the first-touch funnel (quick-start,
+site index, install, README, DEPLOY, style, plugins, faq) + verification
+of every external claim a newcomer would act on.
+
+HEADLINE FINDING - the wrong npm package. `npm install -g vant` appears
+in 9 places (README front door, docs/index.md landing, quick-start,
+install.md x4, DEPLOY.md, style.md) and installs VANT UI - "Mobile UI
+Components built on Vue" (vant-ui/vant, v4.10.2, verified via npm view).
+Not this project, and @dhaupin/vant is 404. Every newcomer's first
+documented command installed a random Vue library. FIXED everywhere:
+from-source is now the documented path (git clone + npm ci + node
+bin/vant.js start, npm link for the global `vant` command), with a
+one-line warning naming the collision. `vant start --ai` also deleted
+(no such flag in bin/vant.js); DEPLOY.md's "From npm (recommended)"
+label gone.
+
+VERIFIED REAL and kept: docker pull dhaupin/vant (Docker Hub API: active,
+15,195 pulls, updated 2026-10-06), bin/build-test.js (exists), the
+one-click agent prompt (already taught clone + node bin/vant.js start).
+
+SECOND FINDING - plugins.md was a full-fiction page (archived):
+`vant.use(plugin)`, a plugins/ directory loader, and an npm plugin
+ecosystem ("npm install vant-my-plugin", packages vant-github and
+vant-linear) - no "plugin" reference exists anywhere in lib, and vant.use
+is not an export. Same class as the archived frontend.md SDK fiction.
+git mv -> labs/archives/docs/essential-plugins.md + provenance row; nav
+row and essential/index rows dropped. Real extension surface is islands
+(extensibility.md + custom-island.md).
+
+FAQ fixes (3):
+- Roadmap link was malformed (github.com/dhaupin/blob/... missing /vant)
+  and 404'd - external URLs skip the link checker, so it sailed through
+  every gate. Fixed to github.com/dhaupin/vant/blob/main/ROADMAP.md.
+- "What's the succession system?" described version tracking and
+  rollbacks - succession is the TRUST-LEVEL system (_succession.json:
+  high/medium/low/none autonomy). Rewritten + linked.
+- "Do I need GitHub?" said "Storage (your brain is a GitHub repo)" -
+  overstates it; the brain is local plain files, GitHub is sync/backup/
+  version control. Reworded.
+
+Also: quick-start said 2 minutes while getting-started/index said
+5-minute path - aligned on 5 minutes.
+
+GATES: style+links PASS (119 - plugins archived), surface PASS, ci.js
+439 passed / 0 failed / 1 skipped (28.2s).
 
 ---
 

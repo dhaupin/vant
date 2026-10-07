@@ -37,11 +37,7 @@ Dependencies are deliberately tiny: `chalk`, `js-yaml`, `yaml`. No database driv
 ### Install
 
 ```bash
-# From npm (recommended)
-npm install -g vant
-vant start
-
-# Or from source
+# From source (the npm `vant` package is an unrelated Vue UI library)
 git clone https://github.com/dhaupin/vant.git
 cd vant
 npm ci

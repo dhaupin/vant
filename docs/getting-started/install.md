@@ -11,20 +11,25 @@ Get Vant up and running in minutes. Choose your preferred method:
 
 | Method | Best For | Time | Requirements |
 |--------|----------|------|--------------|
-| [NPM Install](#npm-install) | Quick setup | 2 min | Node.js 18+ |
-| [Git Clone](#git-clone) | Development | 5 min | Node.js, Git |
+| [From Source](#from-source) | Quick setup | 5 min | Node.js 18+, Git |
 | [Docker](#docker) | Production | 1 min | Docker |
 | [AI Agent](#ai-agent-setup) | Self-setup | 2 min | GitHub token |
 
 ---
 
-## NPM Install
+## From Source
 
-The fastest way to get started:
+Vant is not on npm - the `vant` package there is an unrelated Vue UI
+library. Install from the repo:
 
 ```bash
-# Install globally
-npm install -g vant
+# Clone and install
+git clone https://github.com/dhaupin/vant.git
+cd vant
+npm ci
+
+# Optional: put the `vant` command on your PATH
+npm link
 
 # Verify installation
 vant --version
@@ -36,6 +41,7 @@ vant setup
 ### Requirements
 - Node.js 18 or higher
 - npm (comes with Node.js)
+- Git
 
 ### Check Node Version
 
@@ -62,40 +68,12 @@ nvm use 18
 
 ---
 
-## Git Clone
-
-For development or contributing:
-
-```bash
-# Clone the repository
-git clone https://github.com/dhaupin/vant.git
-cd vant
-
-# Install dependencies
-npm install
-
-# Run the setup wizard
-node bin/vant.js setup
-
-# Verify everything works
-node bin/vant.js health
-```
-
-### What's Included
-```bash
-vant/
-├── bin/          # CLI executables
-├── lib/          # Core modules
-├── models/       # Brain files
-├── docs/         # Documentation
-└── package.json  # Dependencies
-```
-
 ### Update Later
+
 ```bash
 cd vant
 git pull origin main
-npm install
+npm ci
 ```
 
 ---
@@ -177,11 +155,14 @@ For AI agents that need to self-configure:
 export GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 export GITHUB_REPO=your-username/your-brain-repo
 
-# Auto-install and run
-npm install -g vant && vant start --ai
+# Clone, configure, start
+git clone https://github.com/dhaupin/vant.git && cd vant
+npm ci
+node bin/vant.js start
 ```
 
-The `--ai` flag skips interactive prompts and uses environment variables directly.
+The exported variables above are what sync needs (`GITHUB_TOKEN`,
+`GITHUB_REPO`); `vant health` verifies them.
 
 ### One-Click Setup Prompt
 
@@ -251,14 +232,19 @@ You should see output like:
 ## Troubleshooting
 
 ### "vant: command not found"
-```bash
-# Reinstall globally
-npm uninstall -g vant
-npm install -g vant
 
-# Check npm prefix
-npm config get prefix
-# Should be something like /usr/local
+Vant is not an npm package (the npm `vant` is an unrelated Vue UI
+library). From the repo, use:
+
+```bash
+node bin/vant.js --version
+```
+
+Or put the command on your PATH once:
+
+```bash
+npm link
+vant --version
 ```
 
 ### "EACCES permission denied"
@@ -271,7 +257,7 @@ export PATH=~/.npm-global/bin:$PATH
 # Or use nvm
 nvm install 18
 nvm use 18
-npm install -g vant
+npm link
 ```
 
 ### "Node version too old"

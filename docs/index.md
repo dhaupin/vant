@@ -41,20 +41,22 @@ stop using Vant, the memory is still there, readable with `cat`.
 
 ### For humans: install and start
 
-Install Vant globally:
+Vant is not on npm (the `vant` package there is an unrelated Vue UI
+library). Clone and install:
 
 ```bash
-npm install -g vant
+git clone https://github.com/dhaupin/vant.git && cd vant
+npm ci
 ```
 
 Start the full sequence: layout check, health, ready:
 
 ```bash
-vant start
+node bin/vant.js start
 ```
 
 `vant start` also imports an old single-brain layout automatically if it
-detects one. See [the migration guide](/vant/getting-started/setup).
+detects one. See [the migration guide](/vant/getting-started/migration).
 
 ### For agents: connect over MCP
 

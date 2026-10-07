@@ -17,10 +17,10 @@ Vant is persistent memory for AI agents, stored as plain files in your GitHub re
 
 ### Do I need GitHub?
 
-Yes. Vant uses GitHub as the backend for:
-- Storage (your brain is a GitHub repo)
-- Version control (automatic versioning)
+Yes. Vant keeps your brain as plain files on disk and uses GitHub for:
 - Sync (push/pull from anywhere)
+- Version control (every change is a commit)
+- Backup (the repo is your cold storage)
 
 A free GitHub account works fine.
 
@@ -56,10 +56,10 @@ Session 2 starts:
 
 ### What's the "succession" system?
 
-Vant's version tracking:
-- Knows which brain version to load
-- Handles rollbacks
-- Prevents conflicts
+How much freedom an agent has. `models/private/_succession.json` sets a
+trust level - high, medium, low, or none - that decides whether the agent
+acts autonomously or waits for instructions. See
+[Trust & Succession](/vant/multi-agent/succession).
 
 ### Can multiple agents share one brain?
 
@@ -146,7 +146,7 @@ Get help when you need it.
 
 ### Where's the roadmap?
 
-See [ROADMAP](https://github.com/dhaupin/blob/main/ROADMAP.md) in the repo.
+See [ROADMAP](https://github.com/dhaupin/vant/blob/main/ROADMAP.md) in the repo.
 
 ### Can I contribute?
 

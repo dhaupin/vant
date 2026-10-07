@@ -21,10 +21,11 @@ was removed, or a duplicate of a better-maintained page.
 | MIGRATING-0.8.6.md (repo root) | Version-pinned cookbook for the 0.8.6 API breaks. Superseded: brain-layout migration now runs automatically on `vant start` (lib/migrations.js) and the maintained guide is docs/getting-started/migration.md. Stale on its own terms too: cites lib/framework.js callsites (file since deleted) and a long-outdated test count. Owner call, pass 136. |
 | reference/CHANGELOG.md | Drifted fork of the root CHANGELOG.md — four different "v0.8.6" headings stitched together (2026-05-08 plus three Unreleased variants). Root CHANGELOG.md (rendered on GitHub) is canonical; the docs nav + reference index row now point there. |
 | reference/deprecations.md | 2026-05-10 snapshot, half fiction: declared lib/brain.js REMOVED (it is the core module and still exists), claimed the stego message mode was removed (docs/memory/stego.md is canonical; encode/decode real), and steered Encrypt.encrypt/decrypt users toward aesGcm* while lib/encrypt.js keeps encrypt/decrypt as the primary exports. The true parts (lib/vector-store.js, lib/state.js, lib/repos.js merged into the Storage factory) are recorded in the changelog and docs/reference/storage.md. |
+| essential/plugins.md | Advertised a plugin system that does not exist: `vant.use(plugin)`, a `plugins/` directory loader, and an npm plugin ecosystem (`npm install vant-my-plugin`, packages "vant-github" and "vant-linear"). Nothing in lib references plugins at all, and `vant.use` is not an export. The real extension surface is islands: docs/essential/extensibility.md and docs/essential/custom-island.md. |
 
 Archived: 2026-10-06 (pass 130 docs power run; pass 133 added
 memory/horcrux-bootstrap.md and advanced/architecture.md; pass 136 added
 the 0.8.6-era trio MIGRATING-0.8.6.md, reference/CHANGELOG.md,
-reference/deprecations.md).
+reference/deprecations.md; pass 140 added essential-plugins.md).
 Restoring one? `git mv` it back under `docs/`, fix its claims against the
 current code, re-add frontmatter, and re-run the docs linters.
