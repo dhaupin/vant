@@ -2,9 +2,87 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-07  
-**Session:** Pass 141 — mid-funnel judgment reads: architecture/onboarding/brain/cli truth-up
+**Session:** Pass 142 — operations/ judgment reads: notifications archive + qos/cache/cron/events/webhooks/automation truth-up
 
 ---
+
+## Session (2026-10-07 — pass 142: operations/ judgment reads)
+
+Owner: PR #116 (passes 137-141) accepted and merged; keep reading docs
+for narratives, false info, stale docs, dedupe where necessary.
+
+METHOD: first full judgment read of docs/operations/ (20 pages; only
+narrative-marker sweeps in 139 and spot checks in 134/137 before).
+Read 11, verified every actionable claim against lib/ + bin/.
+
+notifications.md ARCHIVED (full fiction, plugins.md class):
+`require('./lib/notifications')` with slack/discord/email/pushover/
+telegram + broadcast() + status() — lib/notifications.js does not exist,
+no lib file mentions notifications, none of the SLACK/DISCORD/PUSHOVER/
+SMTP env vars are read anywhere in lib/ or bin/. git mv ->
+labs/archives/docs/operations-notifications.md + provenance row;
+nav.yml + operations/index rows dropped; operations.md Notifications
+section rewritten to the real outbound surfaces (Telegram bot, events,
+webhooks).
+
+qos.md FIXED (4 sections fictional): RateLimiter isAllowed()/consume()
+never existed (real: async check(clientId, op) that THROWS
+RATE_LIMIT_EXCEEDED, reset(clientId), getStatus(); default maxPerMinute
+is 60 via VANT_QOS_MAX_PER_MINUTE, not 100); CircuitBreaker
+execute()/onOpen()/onClose() never existed (real: recordFailure/
+recordSuccess/isClosed/getState/getStatus/reset, option is `threshold`
+not failureThreshold, throws SANDBOX_CIRCUIT_OPEN when open, no
+half-open state — time-based recovery; mode:'full' adds per-provider
+backoff); Bulkhead execute() -> run(fn) and options maxConcurrent/
+maxQueue -> single `concurrency` (default 10, queue-not-reject);
+sandbox.create({maxConcurrent, readQuota, writeQuota}) verified REAL
+and kept. Throttler/Debouncer sections verified accurate.
+
+cache.md FIXED (double fiction): module exports the Cache CLASS, not an
+instance (const { Cache } = require + new Cache({maxSize, defaultTTL}));
+TTL is options-object set(key, value, { ttl }), not positional (the old
+"60000" example set NO ttl); "-1 = no expiry" never existed (no such
+convention; defaultTTL 3600000); delete('key') -> remove('key'); clear()
+real; get() refreshes TTL on read (real behavior worth teaching).
+
+cron.md FIXED (whole API fictional): every()/after()/cron('0 * * * *')/
+jobs()/stop(jobId) — none exist. Real: schedule({id, interval, handler})
+with ms intervals VAF-validated 1000..86400000 (NO cron-expression
+parser), cancel(id), list(), status(id), once/on/off, scheduleCompute,
+scheduleEmbed; vant.cron getter real (lib/vant.js:191); bin/cron.js
+routed CLI noted.
+
+webhooks.md + automation.md FIXED (same phantom stack): `vant/lib/network`
+sync({direction}) (pass-141 class), cron.cron('0 0 * * *'), and
+vant.prune({keep}) — vant.prune is not an export. Rewrote to real
+surfaces: outbound webhooks = bin/webhooks.js list/add/remove/test on
+VANT_WEBHOOK_PORT 3467, requires VANT_WEBHOOK_SECRET, loopback bind by
+default (lib/webhooks.js:66/:133/:254) + webhook:crew.<type> events;
+scheduled sync = cron.schedule + lib/sync.js pushAll(); prune = the real
+CLI (`vant prune --stale-days --no-fluff`, pass-134-verified flags) via
+system crontab; GitHub push -> sync = `vant watch` (polling is the real
+mechanism, there is no inbound GitHub receiver). Verified real and kept:
+branch.commit(agentId, message) (lib/branch.js:192), vant.learn, vant.think,
+the generic Express signature/API-key patterns.
+
+events.md FIXED: Queue has NO user process() handler API and is not an
+EventEmitter (no .on('job:complete')) — lib/event.js Queue = enqueue/
+get/stats/clear with internal _process (job.run() then complete);
+options: concurrency only (default 1, no timeout option); the odd
+`require('./lib/qos').PubSub || ...` fallback line -> direct import
+(qos exports no PubSub). Event/PubSub classes + list/stats/subscribe/
+publish/join/leave all verified real.
+
+operations.md FIXED: `.vant.log` -> `vant.log` (clean.js rotates
+vant.log/vant.log.old; no dotfile ever existed); Notifications fiction ->
+real surfaces; Telegram section: /sync added (5 onCommand handlers,
+5 commands), TELEGRAM_BOT_TOKEN named (lib/telegram.js:28;
+notifications.md's TELEGRAM_TOKEN was also wrong). `vant rate` (bin/rate.js)
+and `vant bot` verified real and kept. notices.md verified real
+(bin/notices.js subcommands match exactly) and left alone.
+
+GATES: style+links PASS (118), surface PASS, ci.js 439/0/1skip.
+Rides PR #116.
 
 ## Session (2026-10-07 — pass 141: mid-funnel judgment reads)
 

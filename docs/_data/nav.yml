@@ -143,8 +143,6 @@
     url: /vant/operations/cron
   - title: Events
     url: /vant/operations/events
-  - title: Notifications
-    url: /vant/operations/notifications
   - title: CI
     url: /vant/operations/ci
   - title: Testing

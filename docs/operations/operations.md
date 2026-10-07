@@ -61,24 +61,27 @@ git push origin your-branch
 
 ## Notifications
 
-Slack/Discord when brain syncs.
+There is no built-in Slack/Discord/email notifier (lib/notifications.js
+does not exist). Vant's real outbound surfaces today:
 
-### Setup
-
-Set these env vars:
-
-```bash
-SLACK_WEBHOOK_URL=https://hooks.slack.com/...
-DISCORD_WEBHOOK_URL=https://discord.com/api/...
-```
-
-When vant syncs, you get notified.
+- **Telegram bot** (below) - status, brain, health, sync via chat
+- **Events** - subscribe in-process: `require('./lib/event')`
+- **Webhooks** - `vant webhooks add` to register outbound hooks
 
 ---
 
 ## Telegram (Optional)
 
 Control via Telegram bot.
+
+### Setup
+
+Set your bot token from [@BotFather](https://t.me/BotFather), then run
+the bot:
+
+```bash
+TELEGRAM_BOT_TOKEN=xxx vant bot
+```
 
 ### Commands
 
@@ -88,6 +91,7 @@ Control via Telegram bot.
 | `/status` | Vant status |
 | `/brain` | Brain version |
 | `/health` | Health check |
+| `/sync` | Trigger brain sync |
 
 ### Run
 
@@ -102,7 +106,7 @@ vant bot
 Follow what's happening:
 
 ```bash
-tail -f .vant.log
+tail -f vant.log
 ```
 
 ---

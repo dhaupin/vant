@@ -12,64 +12,68 @@ nav_order: 55
 
 ## What You'll Build
 
-Webhook handlers that trigger Vant actions:
-- GitHub webhooks -> sync brain
-- Scheduled webhooks -> brain prune
-- Custom webhooks -> agent actions
+Two real automation surfaces:
+- **Outbound webhooks** - Vant registers and sends hooks (`vant webhooks`)
+- **Scheduled jobs** - interval timers via `vant.cron` (brain prune, sync)
+
+There is no inbound webhook receiver for GitHub push events; to sync on
+GitHub activity, use `vant watch` (GitHub polling) or the scheduler below.
 
 ## Why Webhooks?
 
-- Automate sync on GitHub push
-- Schedule brain cleanup
-- Trigger agent actions from external tools
+- Notify external tools when brain events happen
+- Schedule brain cleanup on a timer
+- Keep GitHub in sync without manual pushes
 
-## GitHub Webhooks
+## Outbound Webhooks (Vant's)
 
-### Setup
+Vant ships its own webhook system (`bin/webhooks.js` + `lib/webhooks.js`),
+serving on port 3467 by default:
 
-1. Go to GitHub repo -> Settings -> Webhooks
-2. Add webhook:
-   - Payload URL: `https://your-domain.com/webhook`
-   - Events: Push
-
-### Handler
-
-```javascript
-const vant = require('vant');
-
-app.post('/webhook', async (req, res) => {
-    const { action, branch } = req.body;
-    
-    if (action === 'push') {
-        // Sync brain on push (via network module)
-        const { sync } = require('vant/lib/network');
-        await sync({ direction: 'pull' });
-        console.log('Synced brain');
-    }
-    
-    res.json({ success: true });
-});
+```bash
+vant webhooks list                 # registered hooks
+vant webhooks add <name> <url>     # register a target URL
+vant webhooks remove <name>        # unregister
+vant webhooks test <name>          # fire a test payload
 ```
 
-## Scheduled Webhooks
+Required env:
 
-Use cron:
+```bash
+VANT_WEBHOOK_SECRET=xxx   # the route refuses to bind without a secret
+VANT_WEBHOOK_PORT=3467    # optional (default 3467)
+VANT_WEBHOOK_BIND=127.0.0.1  # default loopback; set deliberately to widen
+```
+
+Crew-bus events are also emitted as `webhook:crew.<type>` events you can
+subscribe to in-process.
+
+## Scheduled Jobs
+
+Use cron - schedules are interval timers in milliseconds
+(1000-86400000), not cron expressions:
 
 ```javascript
 const cron = require('vant').cron;
 
-// Daily prune at midnight
-cron.cron('0 0 * * *', async () => {
-    await vant.prune({ keep: 10 });
-    console.log('Pruned brain');
+// Hourly sync
+const sync = require('./lib/sync');
+cron.schedule({
+    id: 'hourly-push',
+    interval: 3600000,
+    handler: async () => {
+        await sync.pushAll();
+        console.log('Synced to GitHub');
+    }
 });
+```
 
-// Hourly sync (via network)
-const { sync } = require('vant/lib/network');
-cron.cron('0 * * * *', async () => {
-    await sync({ direction: 'push' });
-    console.log('Synced to GitHub');
-});
+For pruning, use the real prune CLI on a schedule outside the process
+(cron tab or your scheduler of choice):
+
+```bash
+# Daily prune at 2am (system crontab)
+0 2 * * * cd /path/to/vant && vant prune --stale-days 14 --no-fluff
 ```
 
 ## Custom Webhooks
@@ -78,8 +82,8 @@ cron.cron('0 * * * *', async () => {
 
 ```javascript
 const vant = require('vant');
-const { sync } = require('vant/lib/network');
-const { commit } = require('vant/lib/branch');
+const sync = require('./lib/sync');
+const { commit } = require('./lib/branch');
 
 app.post('/webhook/trigger', async (req, res) => {
     const { action, params } = req.body;
@@ -95,7 +99,7 @@ app.post('/webhook/trigger', async (req, res) => {
             await commit('MyAgent', params.message);
             break;
         case 'sync':
-            await sync({ direction: 'push' });
+            await sync.pushAll();
             break;
     }
     
@@ -166,13 +170,10 @@ app.post('/webhook/trigger', (req, res) => {
 
 ### GitHub Push -> Sync
 
-```javascript
-// On every push, pull latest brain
-const { sync } = require('vant/lib/network');
-app.post('/webhook/github', async (req, res) => {
-    await sync({ direction: 'pull' });
-    console.log('Updated brain from GitHub');
-});
+Vant polls GitHub itself - run the watcher rather than a receiver:
+
+```bash
+vant watch --interval 30   # poll for changes every 30s
 ```
 
 ### Linear Issue -> Learn
@@ -187,11 +188,9 @@ app.post('/webhook/linear', async (req, res) => {
 
 ### Cron -> Prune
 
-```javascript
-// Daily brain cleanup
-cron.cron('0 0 * * *', async () => {
-    await vant.prune({ keep: 20 });
-});
+```bash
+# Daily brain cleanup (system crontab)
+0 2 * * * cd /path/to/vant && vant prune
 ```
 
 ---

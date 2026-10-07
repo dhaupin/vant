@@ -4,7 +4,7 @@ permalink: /operations/
 layout: default
 title: Operations
 nav_order: 51
-description: Running Vant day to day - storage, sync, cron, CI, notifications, networking, and cleanup.
+description: Running Vant day to day - storage, sync, cron, CI, events, networking, and cleanup.
 ---
 
 # Operations
@@ -21,7 +21,6 @@ description: Running Vant day to day - storage, sync, cron, CI, notifications, n
 | [Webhooks](/vant/operations/webhooks) | Outbound and inbound webhooks |
 | [Cron](/vant/operations/cron) | Scheduled jobs inside Vant |
 | [Events](/vant/operations/events) | The event system and handlers |
-| [Notifications](/vant/operations/notifications) | Slack, Discord, and push channels |
 | [QoS](/vant/operations/qos) | Rate limiting and request budgets |
 | [Network](/vant/operations/network) | Peer networking and the headless server |
 | [Day-to-day CLI](/vant/operations/operations) | The commands you type most |
