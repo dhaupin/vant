@@ -54,30 +54,42 @@ ufw allow 3456/tcp  # Vant only
 
 ### Enable Sandbox
 
+Sandbox capabilities are DENY-by-default when explicitly configured;
+grant exactly what the agent needs:
+
 ```javascript
-const sandbox = require('vant').sandbox;
+const sandbox = require('./lib/sandbox');
 
 const s = sandbox.create({
-    canRead: true,
-    canWrite: true,
-    canNetwork: false,  // Disable network
-    canExec: false     // Disable exec
+    capabilities: {
+        canRead: true,
+        canWrite: true,
+        canNetwork: false,  // deny network
+        canExec: false      // deny exec
+    }
 });
 ```
+
+(An untouched sandbox ALLOWS with a warning - the moment you pass
+`capabilities`, everything not granted is denied. See
+[Sandbox](/vant/security/sandbox).)
 
 ## VAF
 
 ### Configure VAF
 
+VAF has no `configure()` - tuning happens through config keys read at
+module load (`vant config set MAX_STRING_LENGTH 50000`), or per-call
+options on `vaf.check()`:
+
 ```javascript
 const vaf = require('./lib/vaf');
 
-vaf.configure({
-    maxLength: 50000,
-    blockPathTraversal: true,
-    blockShellChars: true,
-    blockEnvVars: true
-});
+vaf.CONFIG.MAX_STRING_LENGTH;      // default 100000
+vaf.CONFIG.BLOCK_PATH_TRAVERSAL;   // default true
+
+// Per-call hardening
+vaf.check(input, { name: 'input', type: 'string', maxLength: 50000 });
 ```
 
 ---

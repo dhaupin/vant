@@ -168,14 +168,16 @@ What you need to run Vant.
 | RAM | 1GB |
 | Disk | 500MB |
 | Git | 2.x |
+
 ### Dependencies
-Vant uses:
-- `express` - HTTP server
+
+Vant's runtime dependencies (package.json):
 - `chalk` - Terminal colors
-- `cli-progress` - Progress bars
-- `inquirer` - Interactive prompts
+- `js-yaml` - YAML parsing
 - `yaml` - YAML parsing
-- And ~30 other packages
+
+(The HTTP/MCP servers are plain Node `http` - there is no express,
+cli-progress, or inquirer.)
 ---
 
 ## NETWORK CONSIDERATIONS
@@ -248,14 +250,12 @@ How errors are managed.
 3. **GitHub down**: Use offline, wait
 4. **Conflict**: Pull rebase or merge manually
 
----
-## LIMITATIONS
+---## LIMITATIONS
 Known limitations and workarounds.
 ### Vant Limitations
-- Single brain per instance
-- No built-in encryption
-- Git-based sync only
-- No multi-user auth
+- Git-based sync for the brain files themselves (S3 backup is a separate CLI: `vant s3`)
+- No multi-user auth on the CLI (MCP/REST have key auth: `VANT_MCP_API_KEY`, `VANT_SERVER_AUTH_REQUIRED`)
+- Multi-brain exists (named brains per install) but one crew runtime per process
 ### GitHub Limitations
 - Not a database
 - Not for real-time apps

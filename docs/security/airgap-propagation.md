@@ -37,15 +37,25 @@ For air-gapped environments:
 
 ## Encode (Carrier)
 
-Encode config into image:
+The CLI exposes the brain pipeline (`vant stego` verbs: `snapshot`,
+`recover`, `capacity`, `upload`). Generic message encode/decode are
+lib-only - embed arbitrary config text programmatically:
 
-```bash
-# Encode into PNG
-vant stego encode --input config.png --output propagated.png --data "GITHUB_TOKEN=xxx,GITHUB_REPO=owner/brain"
+```javascript
+const stego = require('./lib/stego');
 
-# Verify encoded
-vant stego decode propagated.png
+// Embed a message into a PNG carrier (password optional)
+stego.encode('GITHUB_REPO=owner/brain', 'config.png', 'propagated.png',
+             { password: 'carrier-pass' });
+
+// And extract it on the other side
+const out = stego.decode('propagated.png', { password: 'carrier-pass' });
 ```
+
+For a whole-brain transfer, use the CLI directly - `vant stego snapshot`
+embeds the brain, `vant horcrux create` embeds it encrypted. No `vant
+stego encode`/`decode` CLI verbs exist (a reader following this page
+with the CLI would hit "Unknown command").
 
 ## Transfer
 
@@ -56,14 +66,17 @@ Transfer via:
 
 ## Decode (Target)
 
-On air-gapped system:
+On air-gapped system (lib surface):
+
+```javascript
+const out = require('./lib/stego').decode('propagated.png',
+                                          { password: 'carrier-pass' });
+// out = the embedded config text
+```
+
+Use config:
 
 ```bash
-# Decode from received image
-vant stego decode propagated.png
-# Output: GITHUB_TOKEN=xxx,GITHUB_REPO=owner/brain
-
-# Use config
 export GITHUB_TOKEN=xxx
 vant start
 ```
@@ -88,20 +101,21 @@ Production (air-gapped) ─▶ USB ──▶ Staging
  Encode ◀─── Reply ◀── Decode
 ```
 
----
-## Related
+---## Related
+
 - [Stego](/vant/memory/stego) - PNG steganography
-- [Security](/vant/security/) - VAF + sandbox
-## Omega Init Prompt
+- [Security](/vant/security/) - VAF + sandbox## Omega Init Prompt
+
 Copy this into any airgapped agent:
 ```markdown
 ### Omega Init
 You are Vant. Execute:
 1. Clone: git clone https://github.com/dhaupin/vant.git
 2. Create .env with GITHUB_TOKEN and GITHUB_REPO
-3. Run: npm start
+3. Run: node bin/vant.js start
 4. Sync: vant sync
-If stego image received, decode first: vant stego decode image.png
+If a stego image was received, decode it via lib/stego.js first
+(the CLI has no generic encode/decode verb).
 ```
 ---
 

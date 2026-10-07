@@ -2,9 +2,71 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-07  
-**Session:** Pass 145 — multi-agent/ judgment reads: coordination/branches truth-up + the "max 4 agents" fiction pulled out at the root
+**Session:** Pass 146 — security/ judgment reads: sandbox/escrow/airgap truth-up + stale Limitations killed
 
 ---
+
+## Session (2026-10-07 — pass 146: security/ judgment reads)
+
+Owner: "let's read security next."
+
+METHOD: full judgment read of all 9 security/ pages, claims verified
+against lib/sandbox.js, lib/escrow.js, lib/vaf.js, lib/encrypt.js,
+lib/stego.js, lib/config.js, bin/stego.js, package.json.
+
+VERIFIED REAL, no edits: index.md (hub chain + CLI examples all real:
+secret set / sandbox status / sudo --status), privacy.md (policy prose,
+nothing code-actionable), vaf.md (options table + CONFIG surface +
+validator list all match lib/vaf.js), encryption.md primitives table
+(Encrypt.encrypt/decrypt, aesGcm pair, signToken/verifyToken, rsaKeyPair
+2048, rsaEncrypt/Decrypt/Sign/Verify, hmac/hmacSign variants all real;
+VANT_TOKEN_SECRET real lib/config.js:442, VANT_MSG_ENCRYPTED real
+lib/config.js:221 default true), environment.md's GitHub/ToS/polling/
+token/port sections (3456/3457 correct, VANT_AGREE_AUTO_SYNC real).
+
+FIXED:
+- sandbox.md (worst of the batch, same class as pass-142 qos.md):
+  capabilities table claimed canWrite/canNetwork/canCommit default TRUE
+  - reality is DENY-by-default in DEFAULT_CAPABILITIES (write, canWrite,
+  canNetwork, canExec, canSpawn, canCommit all false; read-side true;
+  canTrade added by pass 38); the untouched-sandbox-allows warning
+  semantics documented explicitly. getStats() -> getStatus() (shape
+  {active, reads, writes, uptime}); s.getBudget() -> getBudgetStatus()
+  (budget delegates to escrow); blockExternal option never existed;
+  {error, code: 'RATE_LIMITED'} return shape -> throws coded errors;
+  phantom canExecuteCode/canUseFilesystem capabilities example ->
+  canTrade (the real declared extra); `require('vant').sandbox` getter
+  is real (kept, annotated) - the doc's example worked by luck.
+- escrow.md: hold(id, {until, timeout}) -> hold(id, condition) with
+  options.holdTimeout default 300000 (no per-hold timeout);
+  requestApproval returns {approvalId, approved} or
+  {approved: true, reason: 'auto_approved'} (no options arg, no
+  approval.id/state); escrow.canProceed and escrow.setQuota DO NOT
+  EXIST (checkHold instead; quotas come from options.defaultQuota/
+  quotaWindow with auto window reset); checkQuota(agentId, operation)
+  returns {allowed, used, limit}; there is no reject() (deny by not
+  approving; checkApproval real); setBudgetLimit(real) documented;
+  beforeExecute documented as async; beforeExecute/Integration example
+  used the phantom vant.sandbox getter -> require('./lib/sandbox').
+- best-practices.md: vaf.configure({maxLength, blockPathTraversal...) is
+  FICTION (no configure export) -> CONFIG keys + per-call check options;
+  sandbox example restructured to options.capabilities form with the
+  explicit-config-deny semantics named.
+- airgap-propagation.md: taught `vant stego encode/decode` CLI verbs that
+  do not exist (bin/stego.js: snapshot/recover/capacity/upload only;
+  generic message encode/decode are lib exports) -> lib code blocks +
+  honesty note; Omega init prompt's `vant stego decode image.png` and
+  `npm start` (no such script; start = node bin/vant.js start) fixed.
+- environment.md: Dependencies list (express, cli-progress, inquirer,
+  "~30 other packages") vs reality package.json deps = chalk/js-yaml/yaml
+  and plain-node http servers -> corrected; LIMITATIONS section was
+  pre-multibrain-era fiction ("Single brain per instance", "No built-in
+  encryption") -> replaced with true limitations (git-based sync,
+  no multi-user CLI auth, multi-brain exists).
+
+GATES: style+links PASS (118; one broken-table emission self-
+inflicted + fixed mid-run), surface PASS, ci.js 439/0/1skip.
+Rides PR #117 (with passes 142-145).
 
 ## Session (2026-10-07 — pass 145: multi-agent/ judgment reads)
 
