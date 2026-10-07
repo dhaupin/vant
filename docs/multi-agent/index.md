@@ -23,5 +23,6 @@ description: Multi-brain contexts, branch-per-agent crews, succession and trust 
 
 Give each agent a brain context with [multi-brain](/vant/multi-agent/brains), isolate their
 work with [branches](/vant/multi-agent/branches), and control what a new generation inherits
-with [succession](/vant/multi-agent/succession). Up to four agents coordinate per install
-through the [agent crew](/vant/multi-agent/agents) runtime.
+with [succession](/vant/multi-agent/succession). Agents coordinate per install through the
+[agent crew](/vant/multi-agent/agents) runtime; the roster size is a config key
+(`agents.maxAgents`, default 10 via `VANT_AGENTS_MAX`), not a hard-coded cap.

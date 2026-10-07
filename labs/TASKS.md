@@ -2,9 +2,63 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-07  
-**Session:** Pass 144 — memory/ judgment reads: rag/citations/geometry/horcrux/prune/memory-store truth-up
+**Session:** Pass 145 — multi-agent/ judgment reads: coordination/branches truth-up + the "max 4 agents" fiction pulled out at the root
 
 ---
+
+## Session (2026-10-07 — pass 145: multi-agent/ judgment reads)
+
+Owner: "let's read multi-agent docs next" (resumed after a dropped
+session; state recovered from the ledger + git status).
+
+METHOD: full judgment read of all 7 multi-agent/ pages, claims verified
+against lib/branch.js, lib/brain-lock.js, lib/lock.js, lib/agents/*,
+bin/branch-manager.js, bin/succession.js, bin/mesh-status.js.
+
+VERIFIED REAL, no edits: brains.md (state.json stack shape, setMode/
+getBrainPath/getPublicPath, read with type pinning, migrate --brain-name),
+succession.md (levels table matches lib/succession.js,
+models/public/vant/_succession.json path real for the default brain,
+`vant succession trust <level>` real bin/succession.js:96 ->
+setTrustLevel :106), federation.md authority rules + all six moving
+parts (genesis/agora-sync/settlement/notices/mesh --peers real
+bin/mesh-status.js:56), agents.md workflow prose (branches+lock+commit
+format).
+
+FIXED:
+- coordination.md: the agent-code block used `vant.branch`/`vant.lock`
+  getters (NOT exports of lib/vant.js — only brain/storage/search/
+  islands/mcp/agents/msg) and `lock.acquire(AGENT_ID)` returning a
+  token — lib/lock.acquire is path-based and returns {ok,reason}.
+  Rewritten to the real surface: lib/brain-lock.acquireBrainLock
+  (agentId, timeout) -> TOKEN STRING or null, releaseBrainLock(agentId,
+  token), try/finally; lib/lock.js described as the lower-level
+  path-lockfile primitive. Setup block's `vant branch create agent-1`
+  -> `vant git-branch create` (branch-manager has NO create verb:
+  status/auto/commit/push/pr/diff only).
+- branches.md: `require('vant').branch` -> require('./lib/branch') (no
+  vant.branch getter); branch.list -> listBranches; branch.create ->
+  checkout(create=true default) + fork(from,to); branch.delete ->
+  deleteBranch(agentId, remote=false); documented commit/push/status/
+  createPR + switchBranch/getStatus aliases (all verified in the
+  module.exports block).
+- agents.md: Related listed Succession twice (second row -> Coordination).
+- index.md: "Up to four agents coordinate per install" -> quota is
+  agents.maxAgents config (default 10 via VANT_AGENTS_MAX). The "max 4"
+  number traced to NOTHING in lib (core.js checks _getMaxAgents();
+  internal.js defaults 200; config default 10) — it is pure AGENTS.md
+  folklore that leaked into help text.
+- ROOT-CAUSE SWEEP of the same fiction: AGENTS.md "Up to 4 agents (you +
+  3 coworkers)" + agent_spawn row "default crew of 4" + bin/help.js two
+  spawn entries "(max 4)" + bin/agent-spawner.js help "Max 4 agents (you
+  + 3 coworkers)" all corrected to the agents.maxAgents config reality.
+  Grep-verified no test pins the old help text before editing.
+- federation.md: org-sync interface row "Automatic on push" -> explicit
+  `orgSync.replicate(bus, node)` after each model change (steward-runbook
+  is the accurate doc; the row overstated).
+
+GATES: style+links PASS (118), surface PASS, ci.js 439/0/1skip.
+Rides PR #117 (with passes 142-144).
 
 ## Session (2026-10-07 — pass 144: memory/ judgment reads)
 

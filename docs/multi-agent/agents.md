@@ -130,7 +130,7 @@ git push origin agent-yourname
 
 ## Related
 
-- [Succession](/vant/multi-agent/succession) - Workflow
+- [Coordination](/vant/multi-agent/coordination) - Locks in practice
 - [Brain](/vant/memory/brain) - Files
 - [Succession](/vant/multi-agent/succession) - Trust levels
 

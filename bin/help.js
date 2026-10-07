@@ -505,7 +505,7 @@ See: vant geometry --help`,
         desc: 'Spawn agents (agent spawner)',
         usage: 'vant spawn spawn|list|delegate|kill|mcp',
         detail: `Multi-agent management via MCP or direct library.
-  spawn --name <n> --role <r>   Spawn an agent (max 4)
+  spawn --name <n> --role <r>   Spawn an agent (quota: agents.maxAgents)
   list                          List all agents
   delegate <id> <task>          Delegate a task
   kill <id>                     Kill an agent
@@ -606,7 +606,7 @@ See: vant s3 --help`
         desc: 'Spawn/manage agents (agent spawner)',
         usage: 'vant spawn spawn|list|delegate|kill|mcp',
         detail: `Multi-agent management via MCP or direct library.
-  spawn --name <n> --role <r>   Spawn an agent (max 4)
+  spawn --name <n> --role <r>   Spawn an agent (quota: agents.maxAgents)
   list                          List all agents
   delegate <id> <task>          Delegate a task
   kill <id>                     Kill an agent

@@ -239,7 +239,8 @@ Check your level at session start.
 
 ## Multi-Agent Crew (v0.8.7)
 
-Up to 4 agents can work together (you + 3 coworkers).
+Agents coordinate per install through the agent crew runtime (roster size is
+the `agents.maxAgents` config key, default 10).
 
 ### Join via MCP
 
@@ -268,7 +269,7 @@ x-api-key/Bearer on POSTs.
 
 | Tool | Description |
 |------|-------------|
-| `agent_spawn` | Spawn new agent (quota via agents.maxAgents, default crew of 4) |
+| `agent_spawn` | Spawn new agent (quota via agents.maxAgents config) |
 | `agent_list` | List active agents |
 | `agent_kill` | Kill agent by ID |
 | `agent_proto_list` / `agent_proto_load` | Agent protos (templates) |

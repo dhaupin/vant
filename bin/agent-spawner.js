@@ -255,7 +255,7 @@ Usage:
   vant spawn emit <event> [data]                  # Emit event
 
 Notes:
-  - Max 4 agents (you + 3 coworkers)
+  - Agent quota comes from agents.maxAgents config (default 10)
   - MCP server exposes JSON-RPC on port 3100
   - Agents share brain context
             `);

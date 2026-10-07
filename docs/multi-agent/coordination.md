@@ -33,44 +33,52 @@ main branch (production)
 Configure for your environment.
 
 ```bash
-# Each agent gets own branch
-vant branch create agent-1
-vant branch create agent-2
+# Each agent gets own branch (repo branches - `vant branch` is the
+# brain-branch manager: status/auto/commit/push/pr/diff)
+vant git-branch create agent-1
+vant git-branch create agent-2
 ```
 
 ## Agent Code
-Build a working agent using Vant.
+Build a working agent using Vant's lib modules:
 
 ```javascript
-const branch = require('vant').branch;
-const lock = require('vant').lock;
+const branch = require('./lib/branch');
+const fs = require('fs');
 
 const AGENT_ID = 'agent-1';
 
 async function work() {
-  // 1. Acquire lock
-  const token = await lock.acquire(AGENT_ID);
+  // 1. Acquire the brain lock - resolves to the TOKEN STRING (or null)
+  const token = await require('./lib/brain-lock')
+      .acquireBrainLock(AGENT_ID, 10000);
   if (!token) {
     console.log('Brain locked, retrying...');
     return;
   }
 
-  // 2. Switch to your branch
-  await branch.checkout(AGENT_ID);
+  try {
+    // 2. Switch to your branch
+    await branch.checkout(AGENT_ID);
 
-  // 3. Do work on your brain...
-  const lessonsPath = `models/private/${AGENT_ID}/lessons.md`;
-  const lessons = await readFile(lessonsPath);
-  lessons += `\n- Agent ${AGENT_ID}: learned something`;
-  await writeFile(lessonsPath, lessons);
+    // 3. Do work on your brain...
+    const lessonsPath = `models/private/${AGENT_ID}/lessons.md`;
+    fs.appendFileSync(lessonsPath, `\n- Agent ${AGENT_ID}: learned something`);
 
-  // 4. Commit changes
-  await branch.commit(AGENT_ID, 'Updated lessons');
-
-  // 5. Release lock
-  await lock.release(AGENT_ID, token);
+    // 4. Commit changes
+    await branch.commit(AGENT_ID, 'Updated lessons');
+  } finally {
+    // 5. Release the lock (same agent id + the token you got back)
+    await require('./lib/brain-lock')
+        .releaseBrainLock(AGENT_ID, token);
+  }
 }
 ```
+
+`lib/lock.js` is the lower-level path-lockfile primitive
+(`acquire(lockPath, {staleMs, waitMs})` returns `{ok, reason}`);
+`lib/brain-lock.js` wraps it with tokens, staleness sweeps, and the
+capability gates most brain writes require.
 
 ## Workflow
 Multi-agent workflow steps.
