@@ -27,11 +27,9 @@ Styling utility for CLI/UI output.
 
 ## Modes
 
-| Mode | What |
-|------|------|
-| `cli` | Terminal output |
-| `json` | JSON safe |
-| `html` | HTML output |
+The default theme runs in `cli` mode; an `mcp` mode exists for the MCP
+result-shape helpers (`applyToMCP` with status/icon/color). There is no
+`json`/`html` enforcement - `create(mode)` just stores the mode string.
 
 ## Usage
 
@@ -42,5 +40,6 @@ console.log(theme.vant);     // VANT (cyan bold)
 console.log(theme.ok);       // ✓
 console.log(theme.fail);     // ✗
 
-const myTheme = theme.create({ mode: 'html' });
+const myTheme = theme.create({ mode: 'cli', prefix: '[MYAPP]' });
+console.log(myTheme.status('ok', 'done'));
 ```

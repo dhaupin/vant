@@ -27,15 +27,18 @@ This is distinct from search (semantic BM25/Vector) - rerank does keyword matchi
 vant rerank "lessons learned"
 vant rerank "security fixes" -k 10
 
-# Compress to token budget
-vant rerank compress -t 2000
+# Compress a file to token budget
+vant rerank compress lessons.md -t 2000
 
-# Pipeline: rerank + compress
-vant rerank pipeline "memory" -t 4000
+# Refine: rerank + compress
+vant rerank refine "security fixes" -k 10 -t 2000
 
 # Stats
 vant rerank -s
 ```
+
+(There is no `vant rerank pipeline` CLI verb - the pipeline shape lives
+in the lib as rerank-then-compress.)
 
 ### Options
 
@@ -48,42 +51,27 @@ vant rerank -s
 
 ## MCP Tools
 
+The registered `vant_rerank` tool takes `{ query, docs }` and reranks
+the docs array:
+
 ```javascript
-// Rerank mode
 await mcp.call('vant_rerank', {
     query: 'lessons learned',
-    mode: 'rerank',
-    topK: 5
+    docs: ['doc one...', 'doc two...']
 });
-
-// Compress mode  
-await mcp.call('vant_rerank', {
-    mode: 'compress',
-    maxTokens: 2000
-});
-
-// Pipeline mode
-await mcp.call('vant_rerank', {
-    query: 'security',
-    mode: 'pipeline',
-    topK: 10,
-    maxTokens: 4000
-});
+// { query, results } - reranked docs
 ```
 
-### Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `query` | string | Query to rerank against |
-| `mode` | string | One of: rerank, compress, pipeline |
-| `topK` | number | Top K results to return |
-| `maxTokens` | number | Max tokens for compression |
+(The `mode`/`topK`/`maxTokens` parameter surface was fiction - the
+registered schema is exactly `query` + `docs`; compression is the
+lib's `compress` function.)
 
 ## Programmatic Usage
 
+Rerank lives in lib/search.js (there is no `vant.rerank` getter):
+
 ```javascript
-const rerank = require('vant').rerank;
+const rerank = require('./lib/search');
 
 // Get memories from brain
 const memories = [
@@ -97,12 +85,12 @@ const results = rerank.rerank(memories, 'security fixes', 5);
 // Compress to token budget
 const compressed = rerank.compress(results, 2000);
 
-// Full pipeline
-const pipeline = rerank.pipeline(memories, 'security', { 
-    topK: 10, 
-    maxTokens: 4000 
-});
+// Refine: rerank + compress
+const refined = rerank.refine(memories, 'security', { topK: 10, maxTokens: 4000 });
 ```
+
+(The `pipeline` export name was fiction - the combined operation is
+`refine`.)
 
 ## How It Works
 
@@ -133,7 +121,8 @@ Rerank is separate from search. Use it to:
 - Prepare memories for LLM context
 - Optimize token usage
 
-Search can hook into rerank via `--rerank` flag (future).
+Search already hooks into rerank: `vant search <query> -r` reranks and
+compresses results (live since pass 134's search verification).
 
 ## Related
 

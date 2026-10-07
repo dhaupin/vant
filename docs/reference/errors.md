@@ -13,8 +13,10 @@ Reference for all Vant error codes.
 
 | Class | Description |
 |-------|-------------|
-| `VantError` | Base error class |
-| `VantRetryableError` | Errors that can be retried |
+| `VantError` | Base error class (code + retryable flag) |
+
+There is no `VantRetryableError` class - retryability is the `retryable`
+option on a `VantError`, checked as `error.retryable`.
 
 ## Error Codes
 
@@ -78,26 +80,27 @@ Common errors and their meanings.
 Error codes and troubleshooting.
 
 ### Throw an Error
-Handle this error case.
+
+Errors live in lib/error.js (there is no `vant.errors` getter - require
+the module directly):
 
 ```javascript
-const errors = require('vant').errors;
+const errors = require('./lib/error');
 
 throw new errors.VantError('Failed to sync', {
-    code: 'GITHUB_SYNC_FAIL',
+    code: errors.CODES.GITHUB_SYNC_FAIL,
     retryable: true
 });
 ```
 
 ### Retry Logic
-Logging configuration.
 
 ```javascript
-const errors = require('vant').errors;
+const errors = require('./lib/error');
 
 await errors.retry(async () => {
     await syncBrain();
-}, 3); // Retry 3 times
+}, 3); // (fn, maxRetries, baseDelay=1000) - 3 retries
 ```
 
 ### Check if Retryable

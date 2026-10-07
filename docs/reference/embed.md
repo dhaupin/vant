@@ -16,12 +16,13 @@ Vector embeddings for brain search and similarity.
 
 | Function | What |
 |----------|------|
-| `embed(text)` | Generate embedding vector |
-| `embedBatch(texts[])` | Batch generate |
+| `generate(text, options)` | Generate embedding vector |
+| `generateBatch(texts[], options)` | Batch generate |
+| `generateStack(text)` / `generateBatchStack(texts)` | Multibrain stack forms |
 | `cosineSimilarity(a, b)` | Similarity score |
-| `register(provider, fn)` | Register embedder |
-| `setEmbedder(name)` | Set active embedder |
-| `listEmbedders()` | List available |
+| `setProvider(name)` | Set active provider |
+| `listProviders()` | List available |
+| `getProviderInfo()` | Active provider info |
 
 ## Usage
 
@@ -29,16 +30,19 @@ Vector embeddings for brain search and similarity.
 const embed = require('vant/lib/embed');
 
 // Single embedding
-const vec = await embed.embed('natural language query');
-// → Float32Array of 1536 dims (OpenAI)
+const vec = await embed.generate('natural language query');
 
-// Similarity
-const sim = await embed.cosineSimilarity(vec1, vec2);
+// Similarity (sync)
+const sim = embed.cosineSimilarity(vec1, vec2);
 // → 0.0-1.0 score
 
 // Batch
-const vecs = await embed.embedBatch(['query1', 'query2']);
+const vecs = await embed.generateBatch(['query1', 'query2']);
 ```
+
+Providers (`hash`, `local`, `openai`) are managed with `setProvider` /
+`listProviders` - the CLI surface is `vant embed set/list/info/generate`
+(see the CLI Reference).
 
 ## Events
 

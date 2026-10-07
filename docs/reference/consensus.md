@@ -12,45 +12,47 @@ Agent voting system - NOT crypto, just decision making.
 
 ## Functions
 
-| Function | What |
-|----------|------|
-| `create(proposal)` | Create proposal |
-| `vote(id, choice)` | Cast vote |
-| `tally(id)` | Get vote count |
-| `get(id)` | Get proposal |
-| `list()` | All proposals |
-| `resolve(id)` | Mark resolved |
-| `getStats()` | Voting stats |
-| `verify(id, voter)` | Verify vote |
-| `checksum(id)` | Get integrity hash |
+Topics are identified by a topic name (e.g. `forum-q3-call-abc123`):
 
-## Proposal States
+| Function | Signature | What |
+|----------|-----------|------|
+| `create(topic, options)` | sync, lock-protected | Create a topic ledger |
+| `createSecured(topic, options, userCtx)` | async | Pipeline-gated create |
+| `vote(topic, outcome, agentId, options)` | sync | Cast a vote |
+| `voteSecured(topic, outcome, agentId, options, userCtx)` | async | Pipeline-gated vote |
+| `tally(topic)` | sync | Re-derive status + counts |
+| `get(topic, viewerId?)` | sync | Read the ledger - scoped topics admit members only (pass null for non-members, same as not-found) |
+| `list()` | sync | All ledgers |
+| `resolve(topic)` | sync | Mark resolved |
+| `getStats()` | sync | Voting stats |
+| `hasVoted(topic, agentId)` / `verify(...)` / `checksum(topic)` | integrity |
+| `peerVerify(...)` | cross-node vote verification |
+| `exportTopic(topic)` / `mergeTopic(topic, data)` / `reapSynced()` | agora-sync seams |
+
+## Topic States
 
 | State | Meaning |
 |-------|---------|
-| `open` | Accepting votes |
-| `closed` | Votes tallied |
-| `resolved` | Decision made |
+| `open` | Accepting votes (deadline-gated) |
+| `passed` / `failed` | Re-derived locally by tally - never trusted from the wire |
+| `resolved` | Decision recorded |
 
 ## Usage
 
 ```javascript
-const consensus = require('vant/lib/consensus');
+const consensus = require('./lib/consensus');
 
-// Create proposal
-const prop = await consensus.create({
-    title: 'Update API',
-    description: 'Change signature',
-    choices: ['yes', 'no', 'abstain']
+// Create a topic
+const ledger = consensus.create('q3-call', {
+    options: ['yes', 'no', 'abstain'],
+    minQuorum: 3
 });
-// → { id: 'prop_xxx', state: 'open' }
 
 // Vote
-await consensus.vote(prop.id, 'yes');
+consensus.vote('q3-call', 'yes', 'agent-1');
 
-// Tally
-const result = await consensus.tally(prop.id);
-// → { yes: 3, no: 1, abstain: 0 }
+// Tally (re-derives status locally)
+const result = consensus.tally('q3-call');
 ```
 
 ## Events

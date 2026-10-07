@@ -12,44 +12,35 @@ AI-first permission escalation system.
 
 ## Functions
 
-| Function | What |
-|----------|------|
-| `can(action)` | Check permission |
-| `grant(role, action)` | Grant permission |
-| `revoke(role, action)` | Revoke permission |
-| `escalate(action)` | Request elevation |
-| `calculateLevel(action)` | Required level |
-| `getScopes(user)` | User scopes |
-| `suggest(action)` | Suggest alternative |
-| `lock(user)` | Lock user |
-| `unlock(user)` | Unlock user |
+Sudo works on TASKS (an id you create with `createTask(taskSpec)`), not
+roles - the task id scopes every grant:
 
-## Levels
-
-| Level | What |
-|-------|------|
-| 0 | None |
-| 1 | Read |
-| 2 | Write |
-| 3 | Admin |
-| 4 | Root |
+| Function | Signature | What |
+|----------|-----------|------|
+| `createTask(spec)` / `getTask(id)` / `listTasks()` / `deleteTask(id)` | task registry | manage tasks |
+| `can(taskId, scope)` | sync | Check a scope on a task (false if unknown) |
+| `grant(taskId, scope)` | sync | Grant a scope |
+| `revoke(taskId, scope)` | sync | Revoke a scope |
+| `escalate(taskId, scope, options)` | async | Request elevation |
+| `calculateLevel(scopes)` | sync | Required level for scopes |
+| `getScopes()` | sync | Current scopes |
+| `used(taskId, scope)` | sync | Has the grant been used |
+| `suggest(taskId)` | sync | Suggest alternative |
+| `lock()` / `unlock()` / `isLocked()` | sync | Global sudo switch (no user arg) |
 
 ## Usage
 
 ```javascript
 const sudo = require('vant/lib/sudo');
 
-// Check
-const canWrite = await sudo.can('write');
-// → true/false
+// Check a task's scope
+const canWrite = sudo.can('my-task-id', 'write');
 
-// Escalate
-const elevated = await sudo.escalate('delete');
-// → { level: 2, expires: Date }
+// Escalate (async; policy-gated - see policies.json + VANT_SUDO_POLICIES_PATH)
+const elevated = await sudo.escalate('my-task-id', 'delete');
 
-// Suggest
-const suggestion = await sudo.suggest('delete');
-// → alternative action
+// Suggest an alternative
+const suggestion = sudo.suggest('my-task-id');
 ```
 
 ## MCP tools

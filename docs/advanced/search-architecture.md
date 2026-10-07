@@ -29,27 +29,15 @@ Query "python"
 
 | Layer | What | Speed |
 |-------|------|-------|
-| **Cache** | Store results per-session | Instant |
-| **Compact** | Skip re-hydration, return summaries | ~100ms |
+| **LTC index** | Pre-built Long-Term-Core index over the corpus | Fast first hop |
+| **Compact** | Skip re-hydration, return summaries | Fast |
 | **Lazy Load** | Defer heavy module loading | Fast boot |
 
-### Layer 1: Session Cache
+### Layer 1: The LTC Index
 
-Same search runs repeatedly? Cache it.
-
-**Cache stores results per session. Same query = instant return from cache.**
-
-```javascript
-// First call - slow
-const r1 = await search.hybrid('python');
-
-// Second call - instant (cached)
-const r2 = await search.hybrid('python');
-```
-
-- **Key**: MD5 hash of query (handles special chars)
-- **Max**: 50 entries per session
-- **Eviction**: LRU (least recently used)
+Search hits the LTC (Long Term Core) index instead of scanning raw
+files. Rebuild or refresh it with `freshLTC()`; read it with `getLTC()`
+(both real exports of lib/search.js).
 
 ### Layer 2: Compact Mode
 
@@ -58,9 +46,8 @@ Don't need full file content? Just summaries.
 **Compact returns summaries only. Skip re-hydration for speed.**
 
 ```javascript
-// Full search + rehydrate
+// Full search + rehydrate (rehydrateMaxSize: 5000 bytes default)
 const { results, context } = await search.query('python');
-// context: Full file contents (~50KB max)
 
 // Compact - summaries only
 const { results, context } = await search.query('python', { compact: true });
@@ -119,16 +106,21 @@ The LTC (Long Term Core) index is the "map". Git history is the "archive". Searc
 ```javascript
 const search = require('vant').search;
 
-// Cache management
-search.getCacheStats();    // { size: N, max: 50 }
-search.clearCache();     // Clear session cache
+// Index access
+search.getLTC();        // current LTC index
+await search.freshLTC(); // rebuild it
 
 // Search modes
-search.searchLTC('python');     // Text search (fast)
-search.query('python');        // RAG: search + rehydrate
-search.hybrid('python');      // BM25 + Vector + RRF
-search.query('python', { compact: true });  // Summaries only
+search.query('python');                       // RAG: search + rehydrate
+search.query('python', { compact: true });    // Summaries only
+search.hybrid('python');                      // BM25 (+ RRF-fused results)
+search.semantic('python', { limit: 10 });     // embedding-powered
+search.getSettings();  // { compressionThreshold: 2000, rehydrateMaxSize: 5000, ragLimitMax: 10, ragTokenLimit: 3000 }
 ```
+
+(The `getCacheStats`/`clearCache`/`searchLTC` surface was fiction -
+there is no query-result cache in lib/search.js and the text hop is
+`getLTC`.)
 
 ```bash
 # CLI
@@ -137,15 +129,16 @@ vant search python --mode rag --compact
 ```
 
 **MCP tool available as `vant_search`** - call it with
-`{ "query": "python", "compact": true }`.
+`{ "query": "python" }` (schema: `query` + `limit`; compact is a CLI
+option, not part of the registered tool schema).
 
 ## Security
 
-Unchanged limits:
-- Query: 500 chars max
-- Re-hydrate: 50KB max
-- Compression threshold: 5KB
-- Only reads from `models/vX/` directory
+Unchanged limits (lib/search.js getSettings + VAF check):
+- Query: 500 chars max (VAF-validated)
+- Re-hydrate: 5000 bytes max (`rehydrateMaxSize`)
+- Compression threshold: 2000 (`compressionThreshold`)
+- RAG limits: 10 results, 3000 tokens
 
 ## Related
 

@@ -8,7 +8,9 @@ nav_order: 135
 
 # Tmp API
 
-Temporary storage for AI-first OS.
+Scratch-file spaces for an agent install: files under the models root
+(optional per-space namespaces), optionally secured (VAF-checked names,
+sandbox-gated, audit-logged).
 
 ## Constructor
 
@@ -19,33 +21,42 @@ const tmp = new Tmp(options);
 
 ## Methods
 
+All file methods are async:
+
 | Method | What |
 |--------|------|
-| `set(key, value)` | Store temp |
-| `get(key)` | Retrieve |
-| `del(key)` | Delete |
-| `clear()` | Clear all |
-| `list()` | List keys |
-| `size()` | Count |
+| `put(name, content)` | Write a scratch file |
+| `get(name)` | Read one back |
+| `list()` | List scratch files |
+| `delete(name)` | Delete one |
+| `clear()` | Clear the space |
+
+The same five take a leading `space` name when spaces are used:
+`put(space, name, content)` etc.
 
 ## Options
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `ttl` | 86400000 | Time to live (ms) |
-| `dir` | /tmp/vant | Storage dir |
-| `maxSize` | 100MB | Max size |
+| `name` | 'default' | Space name |
+| `maxFileSize` | 1MB | Per-file size cap |
+| `maxFiles` | 100 | Per-space file cap |
+| `secured` | true | VAF/sandbox gates + audit logging |
+
+(There is no `ttl`, `dir`, or `maxSize` option - scratch files are not
+TTL'd; the TTL surface is lib/cache.js.)
 
 ## Usage
 
 ```javascript
 const tmp = new Tmp();
 
-// Store with TTL
-await tmp.set('session', data, { ttl: 3600000 });
+// Write / read / drop
+await tmp.put('session-cache', JSON.stringify(data));
+const raw = await tmp.get('session-cache');
+await tmp.delete('session-cache');
 
-// Retrieve
-const val = await tmp.get('session');
-
-// Auto-cleanup after TTL
+// Key-value in-memory helper (TTL'd, backed by lib/cache)
+tmp.cacheSet('session', data, 3600000);
+const val = tmp.cacheGet('session');
 ```

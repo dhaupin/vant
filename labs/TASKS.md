@@ -2,7 +2,64 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-07  
-**Session:** Pass 146 — security/ judgment reads: sandbox/escrow/airgap truth-up + stale Limitations killed
+**Session:** Pass 147 — reference/ + advanced/ COMPLETE: stream/sudo/errors/consensus/rerank truth-up, 9 pages verified real
+
+---
+
+## Session (2026-10-07 — pass 147: reference/ + advanced/ complete)
+
+Owner: "let's read all the docs reference and advanced next."
+
+METHOD: judgment read of the reference/ tail (stream, sudo, errors,
+consensus, node-registry, legal, escrow, code-comments, index + the
+small API pages) and all 9 advanced/ pages, claims verified against
+lib/stream.js, lib/sudo.js, lib/error.js, lib/consensus.js,
+lib/node-registry.js, lib/search.js, lib/audit.js, the lib/vant.js
+getter list, package.json scripts, bin/ parsers, and git log.
+
+VERIFIED REAL, no edits: escrow.md (pass-77 era, spot-verified against
+lib/escrow.js), code-comments.md (convention prose), efficiency.md,
+audit.md (ledger lib log/logHydrate/getLedger/healthCheck real;
+.audit.log real; vant audit CLI real), troubleshooting.md, release.md
+(bump/tag flow), agent-contributors.md (every claim real: pass commit
+format in git log, npm run lint:docs in package.json:42, lib/genesis.js
++ test/genesis-ring.test.js exist with 14 test groups - the "8 checks"
+quote is the historical pass-68 count), nsc9-spec.md (zero code backing
+by design - labeled Draft v0.1, no lib/bin/test refs, makes no code
+claims), style.md.
+
+FIXED:
+- stream.md: enqueue/poll are stream-scoped, name first
+  (enqueue('tasks', payload), poll('tasks')) - doc taught an anonymous
+  global queue; fabricated {id,status}/{id,expires} return shapes
+  dropped.
+- sudo.md: role-based fiction (can(action), grant(role, action), the
+  levels 0-4 table) -> task-scoped reality: createTask/getTask/
+  listTasks/deleteTask, can(taskId, scope) sync false-on-unknown,
+  grant/revoke(taskId, scope), escalate(taskId, scope, options) async,
+  calculateLevel(scopes).
+- errors.md: VantRetryableError class does not exist (retryability is
+  the retryable option/flag on VantError, checked as error.retryable);
+  `require('vant').errors` getter fiction -> require('./lib/error').
+- consensus.md: usage blocks -> create(topic, options), vote(topic,
+  outcome, agentId), get(id, viewerId) scope gate, real states.
+- node-registry.md: register(node), discover(filter), heartbeat;
+  refresh documented as extra.
+- legal.md: duplicate table rows removed.
+- index.md: missing Escrow + RLS rows added to the reference index.
+- rerank.md: vant_rerank MCP schema is {query, docs} NOT
+  {query, mode, topK}; no vant.rerank getter - rerank is a lib/search
+  export; CLI/pipeline claims aligned.
+- search-architecture.md: session-cache section aligned to lib/search
+  reality (no getCacheStats/clearCache; hydrate-era API).
+- canvas/compute/embed/schema/theme/tmp: API tables re-verified against
+  module exports (paint/save/share/list, run/invoke, register/set,
+  meta/verbosity, html/json/cli, set/get/del/list/clear/size/dir).
+
+GATES: lint:docs PASS (118 files; 1 trailing-whitespace fail on my own
+rerank.md line caught + fixed), lint:surface PASS, test/ci.js
+439 passed / 0 failed / 1 skipped. Boot stone runtime-refreshed (rides
+along). Rides PR #117 with 142-146.
 
 ---
 

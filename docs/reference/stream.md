@@ -29,20 +29,19 @@ Async queues and streaming jobs.
 
 ## Usage
 
+Stream functions are stream-scoped - the stream name comes first:
+
 ```javascript
 const stream = require('vant/lib/stream');
 
-// Enqueue
-await stream.enqueue({ type: 'task', data: { x: 1 } });
-// → { id: 'job_xxx', status: 'pending' }
+// Enqueue a task on a named stream
+await stream.enqueue('tasks', { type: 'task', data: { x: 1 } });
 
-// Poll
-const job = await stream.poll();
-// → { id, type, data, status }
+// Poll the next job from that stream
+const job = await stream.poll('tasks');
 
 // Lease (for distributed workers)
 const leased = await stream.lease(id, 5000);
-// → { id, expires }
 
 // Complete
 await stream.complete(id);
@@ -51,6 +50,12 @@ await stream.complete(id);
 const s = await stream.stats();
 // → { pending: 5, processing: 2, completed: 100 }
 ```
+
+Call `stream.init()` first (the module gates ops until initialized).
+Also exported: `create`/`deleteStream` (stream lifecycle), `peek`,
+`checkLease`, `load`, `info`, `watch(event, callback)`/`unwatch`
+(subscribe to stream events), and the multibrain `listStack`/`getStackStreamInfo`/
+`getStackStats`.
 
 ## Job States
 

@@ -14,28 +14,34 @@ Peer discovery system for distributed Vant nodes.
 
 | Function | What |
 |----------|------|
-| `register(node)` | Register peer |
+| `register(node)` | Register peer (`{id, name, host, port}` - id = principal, name = node) |
 | `discover(filter)` | Find peers |
-| `heartbeat(id)` | Keepalive |
+| `heartbeat(nodeId)` | Keepalive |
+| `refresh(nodeId)` | Refresh peer record |
 | `unregister(id)` | Remove peer |
 | `get(id)` | Get peer info |
 | `list()` | All peers |
-| `getStats()` | Network stats |
+| `resolvePrincipal(id)` | Transport-id to principal mapping |
+| `getStats()` | Registry stats |
+
+Registration enforces a quarantine gate: a quarantined agent registers
+but their vote does not count (the consensus vetting anchor reads from
+here).
 
 ## Usage
 
 ```javascript
 const registry = require('vant/lib/node-registry');
 
-// Register self
-await registry.register({ id: 'agent-1', capabilities: ['memory'] });
+// Register a peer (sync; ids become vetting anchors)
+registry.register({ id: 'acme-1', name: 'acme-node', host: '192.0.2.10', port: 4891 });
 
 // Discover
-const peers = await registry.discover({ capability: 'storage' });
+const peers = registry.discover({ capability: 'storage' });
 
 // Heartbeat
-await registry.heartbeat('agent-1');
+registry.heartbeat('acme-1');
 
 // List all
-const all = await registry.list();
+const all = registry.list();
 ```
