@@ -43,12 +43,12 @@ console.log(item.source);   // 'public' | 'private'
 console.log(item.content);  // raw content
 console.log(item.data);     // parsed data
 
-// Load single brain (async)
-const item2 = await brain.loadBrain('identity');
-console.log(item2.source);  // 'public' | 'private' | 'remote'
+// Single-brain read (async; pin a side to skip dual-mode fallback)
+const item2 = await brain.read('identity', { type: 'private' });
+console.log(item2.source);  // 'public' | 'private'
 
-// Load all brains (sync)
-const corpus = brain.loadCorpus();
+// Load all brains (async by default; {sync:true} for sync mode)
+const corpus = await brain.loadCorpus();
 console.log(corpus.length);  // 62 files
 
 // NEW (v0.8.6): Corpus now includes format field

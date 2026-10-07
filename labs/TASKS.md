@@ -2,7 +2,44 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-06  
-**Session:** Pass 138 — dead theme import removed, runop stop bug fixed, storage/islands/runop doc truth-up, 120-page sweep clean
+**Session:** Pass 139 — narrative-claims sweep: AGENTS.md dead loadBrain + sync loadCorpus fixed, 21 marker hits triaged, corpus otherwise clean
+
+---
+
+## Session (2026-10-06 — pass 139: narrative-claims sweep)
+
+Owner: "let's keep walking docs. We can do narrative level claims, let's
+see what we find."
+
+METHOD: swept 120 docs pages for lifecycle markers (was/were removed, no
+longer, deprecated, superseded, as of/since/new in/requires + version) —
+21 hits total, triaged one by one against code and the root CHANGELOG.
+Then README numeric claims and every brain.* call in AGENTS.md.
+
+FINDINGS (2, both in the AGENTS.md Brain Router Interface — the only
+dead-API claims in the corpus):
+- `brain.loadBrain('identity')` — REMOVED in the 0.8.6 b-T round
+  (CHANGELOG: "loadBrain, brainList -> loadCorpus() + per-name read()").
+  lib/brain.js has no public loadBrain (only internal _loadBrain).
+  Replaced with `brain.read('identity', { type: 'private' })` — read is
+  the exported unified read, opts.type pins the side.
+- `brain.loadCorpus()` taught as "Load all brains (sync)" with no await —
+  loadCorpus is ASYNC by default (its own export comment says "use
+  {sync:true} for sync mode"; internal calls await it). Fixed to
+  `await brain.loadCorpus()`.
+
+TRIAGED BENIGN: prune.md and resolution.md "deprecated/superseded" are
+domain vocabulary (status names), release.md semver-table examples,
+cli.md's `vant changelog --since v0.7.0` (rule-8 validated),
+migration.md's "What changed in v0.9" header (the repo's own working
+label for the axolotl era — compute.md says "Beta v0.9.0", sudo.md
+"0.9.0-axolotl", CHANGELOG says "pinned at 0.8.6 (no version bump)"),
+rls.md and whitepaper prose. README carries zero numeric claims.
+AGENTS.md's remaining brain.* calls verified exported (read, setMode,
+getBrainPath, getPublicPath).
+
+GATES: surface PASS (AGENTS.md is scanned by rules 1/2/7), style+links
+PASS (120), ci.js 439 passed / 0 failed / 1 skipped (31.6s).
 
 ---
 
