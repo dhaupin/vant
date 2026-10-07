@@ -41,7 +41,7 @@ async function run() {
         console.log('  Modes:', status.modes.join(', '));
         console.log('  Handlers:', Object.entries(status.handlers).map(([k,v]) => k + ':' + (v?'✓':'✗')).join(', '));
     } else if (subcmd === 'stop') {
-        const result = await pipeline.stop();
+        const result = await pipeline.runtimeStop();
         console.log('Runtime stopped:', result);
     } else {
         console.log('Usage: vant runop <init|start|status|stop>');

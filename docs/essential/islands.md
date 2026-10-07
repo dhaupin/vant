@@ -146,8 +146,6 @@ gallery.linkToBrain();
 ## Files
 
 - `lib/islands.js` - Island registry + lazy loader
-- `lib/state.js` - Static/Hydrated state separation
-- `lib/gallery.js` - Linked stego image chunks
 - `bin/islands-boot.js` - Islands boot CLI
 
 ---

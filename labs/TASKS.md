@@ -2,7 +2,57 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-06  
-**Session:** Pass 137 — audits archived to labs/archives/audits/, rpc.md + rest-api.md + resolution.md rewritten against code, mcp.md de-fictioned, nav dupes fixed
+**Session:** Pass 138 — dead theme import removed, runop stop bug fixed, storage/islands/runop doc truth-up, 120-page sweep clean
+
+---
+
+## Session (2026-10-06 — pass 138: dead import + doc-truth sweep round)
+
+Owner: fix the dead theme import + the islands_canAccess question, then
+"continue cleaning up, updating, and deduping docs pls. There are prob
+still a lot of inaccurate info."
+
+CODE (2 fixes, both found or confirmed by doc verification):
+- lib/mcp.js: dead `const theme = require('./theme')` (:99) removed —
+  grep-verified single occurrence, never referenced. rpc.md already
+  documents the honest theme status (helpers shipped, server adoption
+  pending).
+- bin/runop.js: `vant runop stop` called `pipeline.stop()`, which does
+  not exist (pipeline exports runtimeStop) — a TypeError on every stop.
+  Fixed to `pipeline.runtimeStop()`. Found BY checking the doc's claims
+  against the export list.
+
+islands_canAccess: the pass-137 candidate note was WRONG. It IS
+registered (lib/mcp.js:2541) and island-boundaries.test.js exercises it —
+my earlier registry dump truncated the list. mcp-tools.md row is correct;
+no action.
+
+DOC SWEEP (scratch checker, deleted after): 120 pages scanned for phantom
+tool names (0 hits), phantom lib/bin file mentions (5 hits, all fixed),
+phantom VANT_ env vars (0 of 33 referenced), unknown `vant <verb>` claims
+(0 real — hybrid/mesh are dispatcher-routed to bin/hybrid-sync.js and
+bin/mesh-status.js; my checker missed the COMMANDS map at first).
+
+FIXED:
+- docs/reference/storage.md: "Files Deleted: lib/brain.js" fiction
+corrected — brain.js was NOT deleted (it is the core brain router; the
+exact fiction archived with the deprecations page in pass 136). The real
+merges stand: vector-store/repos/state -> Storage factory classes,
+verified against the getStorage switch (lib/storage.js:2137-2170).
+- docs/essential/islands.md: Files section dropped lib/state.js and
+lib/gallery.js — neither exists, and islands.js references neither.
+- docs/reference/runop.md: rewritten. `require('vant/lib/runop')` was a
+MODULE_NOT_FOUND path — runop was absorbed into lib/pipeline.js
+(initLayers / runtimeRun / runtimeStop / runtimeStatus / getStatus) and
+fronts the `vant runop` CLI (bin/runop.js). Old page documented four
+functions against a module that never resolves.
+
+VERIFIED REAL (not drifted): reference/entropy.md (claims match
+bin/compress.js defaults exactly: window 8, threshold 0.85, .vpatch
+format, cli.md cross-link), mcp-tools.md islands_canAccess.
+
+GATES: style+links PASS (120), surface PASS, ci.js 439 passed / 0 failed /
+1 skipped (29.9s).
 
 ---
 
