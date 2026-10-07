@@ -2,7 +2,61 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-07  
-**Session:** Pass 147 — reference/ + advanced/ COMPLETE: stream/sudo/errors/consensus/rerank truth-up, 9 pages verified real
+**Session:** Pass 148 — root docs final touches: README/DEPLOY/AGENTS 'max 4' folklore uprooted
+
+---
+
+## Session (2026-10-07 — pass 148: root docs final touches)
+
+Owner: "let's actually read the root docs too like readme, deploy,
+contributing, code of conduct, agents, and all the rest."
+
+METHOD: full read of all 8 root markdown files (README, DEPLOY,
+CONTRIBUTING, CODE_OF_CONDUCT, AGENTS, LEGAL, ROADMAP, CHANGELOG),
+claims verified against lib/vant.js, lib/agents/core.js,
+lib/agents/internal.js, lib/config.js, lib/api.js, lib/memory.js,
+.gitignore, package.json, gh label list, and file existence.
+
+VERIFIED REAL, no edits: CONTRIBUTING.md (canonical-guide pointer
+pattern; docs/getting-started/contributing.md, .github/SECURITY.md,
+.github/SUPPORT.md, bug_report template, LICENSE all exist; the
+`good first issue` label is real on the repo), CODE_OF_CONDUCT.md
+(Contributor Covenant prose, nothing code-actionable), README.md
+startHeadless example (real lib/vant.js:1248, returns
+{started, mode:'headless', endpoints}), VANT_MODE (lib/api.js:73),
+learn/remember/init exports, migrate flags, npm warning, ports;
+DEPLOY.md (pass-126 canonicalization held up: port map, sync
+behavior, security chain, backup/horcrux/transform verbs, org
+grant/session-only, WAL, config.example.ini keys); LEGAL.md
+(7-day default TTL real lib/memory.js:82; models/private gitignored
+real .gitignore:2,32); ROADMAP.md (no phantom APIs, scope prose); 
+AGENTS.md body (truth-uped 139/145/147: getter list, v0.9 layout,
+maxAgents, MCP door).
+
+FIXED - the 'max 4 agents' folklore's LAST copies (pass 145 fixed
+bin/help.js + bin/agent-spawner.js but the README front door, DEPLOY
+section 9 + troubleshooting row, and the AGENTS.md docs TOC still
+carried it; reality: lib/agents/core.js:34 interpolates the dynamic
+'Agent quota reached (max N)' from _getMaxAgents(), config default 10
+via agents.maxAgents / VANT_AGENTS_MAX, lib/config.js:260):
+- README.md:72 'up to 4 agents per install' -> quota-configurable
+  roster (agents.maxAgents, default 10).
+- DEPLOY.md section 9 'Up to 4 agents per install (MCP door quota,
+  agents.maxAgents)' - self-contradicting the very key it cited ->
+  quota-configurable, default 10, VANT_AGENTS_MAX override.
+- DEPLOY.md troubleshooting row literal '(max 4)' -> '(max N)', N is
+  the configured agents.maxAgents.
+- AGENTS.md:235 docs TOC '4 agents max' -> crew roster
+  (agents.maxAgents, default 10).
+
+LEFT AS POINT-IN-TIME: CHANGELOG.md lines 212/409 ('max 4: you + 3
+coworkers') - historical v0.8.7-era release records; rewriting history
+would falsify the record, and the current surfaces are all corrected.
+
+GATES: lint:docs PASS (118), lint:surface PASS (AGENTS.md scanned by
+rules 1/2/7), test/ci.js 439 passed / 0 failed / 1 skipped. Residual
+'max 4'/'4 agents'/'up to 4' grep across README/DEPLOY/AGENTS/docs:
+clean. Rides PR #117 with 142-147.
 
 ---
 

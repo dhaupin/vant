@@ -69,7 +69,7 @@ The full agent loop, written to be executed without a human, is [Agent Onboardin
 | **Sync** | Push/pull brain state via GitHub API, with rebase conflict detection |
 | **MCP Server** | Auto-wired JSON-RPC tools for any MCP client (optional) |
 | **Multi-Brain** | Named brains with a stack: switch contexts, series or parallel |
-| **Multi-Agent** | Branch-per-agent workflow, up to 4 agents per install |
+| **Multi-Agent** | Branch-per-agent workflow, quota-configurable roster (`agents.maxAgents`, default 10) |
 | **Succession** | Trust levels control how much state each agent generation inherits |
 | **Horcrux** | Whole brain embedded in an image, encrypted, restorable anywhere |
 | **Security chain** | Sandbox capabilities, input validation, rate limiting, escrow approval on every op |
