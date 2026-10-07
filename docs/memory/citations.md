@@ -19,11 +19,13 @@ into commit footers, so memory and evidence travel together.
 
 ```javascript
 const citations = require('./lib/citations');
-citations.addSource('lessons.md#sync-race');
+citations.addSource('abc1234', 'lessons.md#sync-race');
 ```
 
-The argument is any reference your convention agrees on: a file, a file and
-anchor, or a commit-ish.
+The first argument is the commit hash the claim came from; the second is
+any context string your convention agrees on (a file, a file and anchor,
+a note). Recording is lock-protected, so concurrent writers cannot drop
+each other's rows.
 
 ## Render
 
@@ -50,16 +52,16 @@ into history, where `git blame` finds it again.
 
 ## Verify and clean up
 
-Check the stack:
+Check citations across the whole brain stack:
 
 ```javascript
-citations.getStack();
+citations.getStackCitations();
 ```
 
-Verify receipts point at things that exist:
+Verify a commit has been cited (takes a commit hash):
 
 ```javascript
-citations.verify();
+citations.verify('abc1234');   // true when that commit is in the ledger
 ```
 
 Clear the current set:

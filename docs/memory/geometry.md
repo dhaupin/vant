@@ -18,34 +18,41 @@ in content. **Experimental:** the format and spec may change.
 
 ## Store and locate
 
-From code:
+From code, the geometry module (`lib/geometry/`) exposes the NSC9
+projection and storage layer:
 
 ```javascript
 const geometry = require('./lib/geometry');
-geometry.store('a-key', 'the value');
+
+// Generate a barcode for content (content-hash based)
+const barcode = geometry.generateBarcodeFromContent('some content');
+
+// Store/retrieve operate on (barcode, data) pairs
+await geometry.store(barcode, 'the value');
+const recovered = await geometry.retrieve(barcode);
 ```
 
-Retrieve by address or barcode:
+The memory store wraps this with brain-aware addressing:
 
 ```javascript
-geometry.retrieve('a-key');
+const { address, locate } = require('./lib/memory');
+await address('The quasicrystal spreads keys without collisions.');
+const hit = await locate('the barcode you got back');
 ```
 
-Generate a barcode for content:
+Key-value convenience lives behind `vant geometry`:
 
-```javascript
-geometry.barcode('some content');
+```bash
+vant geometry store <key> <value>    # stored as a memory document
+vant geometry retrieve <key>         # read back
+vant geometry barcode <content>      # quasicrystal barcode
+vant geometry address <data>         # store at a random barcode
+vant geometry locate <barcode>       # read by barcode
 ```
 
-Locate what a barcode refers to:
+## CLI via memory
 
-```javascript
-geometry.locate('the-barcode');
-```
-
-## CLI
-
-The geometry surface is available through the memory command family:
+The memory command family exposes the same addressing:
 
 ```bash
 vant memory address <data>

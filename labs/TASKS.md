@@ -2,9 +2,66 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-07  
-**Session:** Pass 143 — operations/ COMPLETE: storage/sync/network/testing/ci truth-up + agora/settlement/steward/playbooks verified
+**Session:** Pass 144 — memory/ judgment reads: rag/citations/geometry/horcrux/prune/memory-store truth-up
 
 ---
+
+## Session (2026-10-07 — pass 144: memory/ judgment reads)
+
+Owner: "keep going on Remaining unjudged sections - memory/ next
+(core product surface, 10 pages), then multi-agent/, integrations/,
+security/, runtime/, advanced/."
+
+METHOD: full judgment read of all 10 memory/ pages, every actionable
+claim verified against lib/ + bin/.
+
+VERIFIED REAL, no edits: brain.md (pass 141 already), index.md hub
+(three-systems table + specialist formats + one-paragraph model all
+match reality), stego.md (CLI snapshot/recover/capacity real; capacity
+--image= flag is REAL in the capacity subparser — bin/stego.js:100;
+chunked encode/decode real lib/stego.js:329/:336; encodeSvg/decodeSvg
+real; BRN:ENC prefix + PBKDF2 real), horcrux.md CLI+
+refresh/restore/inspect subcommands (bin/horcrux.js:111/:166/:186/:277,
+default path = current brain's boot dir with p_<password> naming,
+password chain arg->env->filename).
+
+FIXED:
+- citations.md: addSource takes (commit, context) — the old example
+  passed a single 'lessons.md#sync-race' string (lib/citations.js:75
+  signature; formatCitation would print garbage); `citations.getStack()`
+  is NOT an export (getStackCitations is); verify() takes a commit hash
+  (verify(commit) — the old bare call always falsy-or-wrong).
+- rag.md: search.query returns { memories, results, context } — the old
+  code mapped result.memories AFTER already returning .context... wait,
+  the old code took (topK, maxTokens) options (not real; limit is) and
+  joined memories manually when context is already the joined string;
+  hybrid returns { fused } (BM25-ranked; pass-134 verified — { context,
+  scores } fiction); cache.set positional TTL
+  `cache.set(k, v, 60000)` -> { ttl: 60000 } (pass-142 cache fix class);
+  ragAgent's vant.think({topK}) -> bare think (topK not an option).
+- geometry.md: NO lib/geometry.js — the module is lib/geometry/ (a
+  directory), and store/retrieve take (barcode, data, basePath?)
+  not ('a-key','the value'); the key-value convenience the doc showed
+  is `vant geometry store <key> <value>` (bin/geometry.js routes store/
+  retrieve through memory.learn/query 'geometry:'+key — itself
+  documented now); barcode->generateBarcodeFromContent; memory-side
+  address/locate real lib/memory.js:599/:655.
+- horcrux.md programmatic block: toHorcrux({outputPath, password}) ->
+  real sig toHorcrux(outputPath, {password}) (lib/transform.js:1130;
+  object form tolerated but documented wrong); restore(data) ->
+  fromHorcrux(path, {password}) for the FILE-level entry (lib/transform
+  .js:1693; restore takes parsed data at :1931).
+- prune.md: `prune.run({dryRun})` -> `prune.prune({dryRun, userCtx})`
+  (no run export; prune is sandbox-gated and REQUIRES userCtx,
+  lib/prune.js:181 fail-closed); noted getStats/listPrunable/DEFAULT_
+  STALE_DAYS alongside.
+- memory-store.md: state/recall/learn/query are ASYNC — the old
+  `state('build-count', 42); recall('build-count')` snippets dropped the
+  await (recal would race the write in a fresh process); added the TTL
+  options-object example (no --ttl CLI flag, per pass 141's cli.md fix).
+
+GATES: style+links PASS (118), surface PASS, ci.js 439/0/1skip.
+Rides PR #117 (with passes 142-143).
 
 ## Session (2026-10-07 — pass 143: operations/ section completed)
 
