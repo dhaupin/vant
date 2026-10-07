@@ -2,7 +2,46 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-07  
-**Session:** Pass 149 — dist/ lander run-through: npm-install fiction x2, stale stats, max-4 residue
+**Session:** Pass 150 — dist/ brought INTO the repo gates (scripts/check-dist-lander.js)
+
+---
+
+## Session (2026-10-07 — pass 150: lander gate new)
+
+Owner: "I think /dist should be in repo gates. It's the lander/website.
+it may have other stuff in future."
+
+IMPLEMENTED (owner request, self-directed): NEW gate
+`scripts/check-dist-lander.js` + `npm run lint:dist` + a workflow step
+("dist/ lander gate (links, fiction, stat truth)") running after
+lint:surface. 6 checks per .html under dist/:
+1. fragments: href="#x" must match an id="x" in the same file
+2. local assets: every non-http/data/mailto href|src must exist on disk
+3. docs links: https://docs.creadev.org/vant/<p> must match a real
+   frontmatter permalink from docs/ (mirror of check-docs-links.js
+   normalization; handles the baseurl junction)
+4. github shape: links must be under github.com/dhaupin/vant(.git)
+5. FICTION: `npm install -g vant` must never appear (the wrong-package
+   trap caught 3 times now: pass 140 docs x9, pass 148 README, pass 149
+   lander x2)
+6. stat truth: every data-count must be a positive integer (markup
+   ships real values, counters only animate)
+
+PROVEN, not just written: clean dist PASSes (1 file, 118 permalinks);
+fault-injected a broken anchor -> FAIL with evidence; injected the
+`npm install -g vant` line -> FAIL; restored byte-identical to backup
+(diff-verified; first restore attempt was incomplete because a global
+sed hit 3 lines, caught by re-diffing, fixed by full-file copy).
+
+WIRING RATIONALE: lint:dist is its own script (lint:docs walks docs/*.md
+only and stays that way - semantic separation). Workflow order:
+security -> tests -> lint:surface -> lint:dist -> standalone suites.
+GATES: lint:dist PASS, style+links PASS (118), surface PASS, ci.js
+439/0/1skip. LESSONS: (1) fault-inject every new gate - a gate that has
+never failed is not a gate; (2) restore-from-backup must be diff-VERIFIED
+after, not assumed - the global-sed collateral was real; (3) gates grow
+by gap class: dist/ was the third unknowable surface (after root .md,
+dist) - any future one gets the same treatment rather than a memory rule.
 
 ---
 

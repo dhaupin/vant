@@ -40,6 +40,7 @@
     "lint": "eslint lib/ test/",
     "lint:fix": "eslint lib/ test/ --fix",
     "lint:docs": "node scripts/check-docs-style.js && node scripts/check-docs-links.js",
+    "lint:dist": "node scripts/check-dist-lander.js",
     "lint:surface": "node scripts/check-surface-consistency.js",
     "lint:helpers": "node scripts/check-stateful-helpers.js && node scripts/check-bin-truthfulness.js",
     "lint:locks": "node scripts/audit-locks.js",
