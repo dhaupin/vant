@@ -2,7 +2,64 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-07  
-**Session:** Pass 148 — root docs final touches: README/DEPLOY/AGENTS 'max 4' folklore uprooted
+**Session:** Pass 149 — dist/ lander run-through: npm-install fiction x2, stale stats, max-4 residue
+
+---
+
+## Session (2026-10-07 — pass 149: dist/ lander judgment read)
+
+Owner: "next up for a read pass is /dist (vant.creadev.org). Make sure
+there's no fiction, nice run through, updates, polish. All links
+resolve + make sense. Funnels for agents, hobbyists, enterprise."
+
+METHOD: full read of dist/index.html (989 lines: head/JSON-LD x3,
+styles, nav, hero, 9 sections, stats, FAQ, footer, VantFX + lattice
+scripts); all 10 external links curl-tested live; every surface claim
+checked against bin/, lib/, package.json, docs tree.
+
+VERIFIED REAL, untouched: MCP on 127.0.0.1:3457 (pass-127 port audit
+holds), REST 3456 covered in MCP card, `vant learn <key> <content>`
+(bin/vant.js:300 parser verified), `vant migrate --status`,
+`vant onboard`, `vant search <query>` shapes, models/<scope>/<brain>/
+path chips, three memory systems, security chain + WAL claims,
+headless/REST/Docker, "does Vant cost money? no/MIT" (price 0 offer),
+"not a fit when browser-only/no-git", the pass-content prose, and the
+"every number on it verified against the code" self-claim (now true
+again). All links resolve: 10/10 live 200 incl.
+/vant/getting-started/quick-start, memory/brain, runtime/mcp,
+runtime/server, operations/storage, security/, multi-agent/,
+integrations/, github tree/main/labs, releases (site permalink
+generation = baseurl /vant + frontmatter permalink, matches).
+
+FIXED:
+- `npm install -g vant` RE-SEEDED twice in the lander (hero dual-CTA
+terminal + HowTo JSON-LD step 1) - the same wrong-package trap pass 140
+uprooted from 9 docs pages; README front door received the same
+re-seed in pass 148's sweep. Fixed to clone+npm ci with the honest
+"not published on npm" note (JSON-LD schema.org text updated too).
+- Stats row was 4-passes stale: 93 CLI / 89 lib / 119 docs / 108 test
+files -> 99 CLI commands (routed verbs, unique parse of
+`vant --help`), 132 lib modules (`find lib -name '*.js'`), 118 doc
+pages, 169 test suites (`ls test/*.test.js`). markup ships real
+values; counters only animate.
+- 'Up to four agents share one install' residue in section 03 ->
+roster config agents.maxAgents default 10 (the max-4 folklore's last
+visible copy; CHANGELOG point-in-time rows intentionally remain).
+
+POLISH (grounding, no over-promising): funnels already split 3 ways
+without a fake wall - human '5 minute path' (quick-start), agent door
+MCP + AGENTS.md (agent-onboarding), enterprise via headless/REST/
+Docker/multi-brain (runtime/server, operations/storage); both doors
+close with hero-final CTAs ('Start the five minutes' / 'Send your
+agent'). Not-a-fit section kept because honesty IS the polish.
+
+GATES: lint:docs PASS (118), lint:surface PASS. HTML tag balance
+checked (11 section pairs, 73 div pairs). NOTE: dist/ is outside
+every repo gate - same class as root .md files, needs judgment reads
+on every touch (this is pass 3 of that: 125, 132, now 149).LESSON
+repeated: the installer fiction re-enters README/lander whenever a
+new assistant writes copy from memory - once a pass, grep the front
+surfaces for `npm install -g vant`.
 
 ---
 

@@ -67,7 +67,7 @@
         "totalTime": "PT5M",
         "tool": [{ "@type": "HowToTool", "name": "Node.js 18+" }, { "@type": "HowToTool", "name": "Git" }],
         "step": [
-            { "@type": "HowToStep", "position": 1, "name": "Install", "text": "Install the CLI globally with npm: npm install -g vant", "url": "https://docs.creadev.org/vant/getting-started/install" },
+            { "@type": "HowToStep", "position": 1, "name": "Install", "text": "Clone and install from source: git clone https://github.com/dhaupin/vant.git && cd vant && npm ci. (Vant is not published on npm.)", "url": "https://docs.creadev.org/vant/getting-started/install" },
             { "@type": "HowToStep", "position": 2, "name": "Start", "text": "Run vant start. It checks the brain layout, imports an older single-brain layout if found, and runs health checks.", "url": "https://docs.creadev.org/vant/getting-started/quick-start" },
             { "@type": "HowToStep", "position": 3, "name": "Connect an agent", "text": "Run vant mcp to serve the brain as MCP tools on 127.0.0.1:3457, then point any MCP client at it.", "url": "https://docs.creadev.org/vant/runtime/mcp" },
             { "@type": "HowToStep", "position": 4, "name": "Let it inherit", "text": "The agent reads the brain when it starts, writes lessons before it finishes, and commits. The next session starts with everything.", "url": "https://docs.creadev.org/vant/getting-started/agent-onboarding" }
@@ -340,8 +340,9 @@
             <div class="dual-cta">
                 <div class="cta-card">
                     <h2>The 5 minute path</h2>
-                    <p>Install, start, meet your brain. Existing layouts migrate automatically.</p>
-                    <pre class="term"><code id="c-install"><span class="prompt">$</span> npm install -g vant
+                    <p>Clone, start, meet your brain. Existing layouts migrate automatically.</p>
+                    <pre class="term"><code id="c-install"><span class="prompt">$</span> git clone https://github.com/dhaupin/vant.git && cd vant
+<span class="prompt">$</span> npm ci
 <span class="prompt">$</span> <span class="cmd">vant</span> start
 <span class="prompt">$</span> <span class="cmd">vant</span> onboard</code><button class="copy-btn" type="button" data-copy="c-install" aria-label="Copy install commands">Copy</button></pre>
                     <p style="margin: 13px 0 0;"><a class="btn" href="https://docs.creadev.org/vant/getting-started/quick-start">Quick start guide</a></p>
@@ -397,7 +398,7 @@
                     <div class="card fx-reveal">
                         <h3>Install and start</h3>
                         <p>One global install. vant start checks the brain layout, runs health checks, and imports any older single-brain layout it finds.</p>
-                        <pre class="term"><code id="c-fm1"><span class="prompt">$</span> npm install -g vant
+                        <pre class="term"><code id="c-fm1"><span class="prompt">$</span> git clone https://github.com/dhaupin/vant.git && cd vant &amp;&amp; npm ci
 <span class="prompt">$</span> <span class="cmd">vant</span> start</code><button class="copy-btn" type="button" data-copy="c-fm1" aria-label="Copy install and start">Copy</button></pre>
                     </div>
                     <div class="card fx-reveal fx-d1">
@@ -434,7 +435,7 @@
                     </div>
                     <div class="card fx-reveal fx-d2">
                         <h3>Crews, not just one</h3>
-                        <p>Up to four agents share one install. Each gets a branch and a named brain context; merge-by-PR keeps the shared memory safe while they work.</p>
+                        <p>Agents share one install on their own branches, each with a named brain context; merge-by-PR keeps the shared memory safe while they work. The roster size is a config (`agents.maxAgents`, default 10).</p>
                         <a href="https://docs.creadev.org/vant/multi-agent/" class="learn-more">Multi-agent crew →</a>
                     </div>
                 </div>
@@ -516,10 +517,10 @@
         <div class="stats" role="presentation">
             <div class="container stat-row">
             <div class="stat"><div class="stat-value" data-count="3">3</div><div class="stat-label">memory systems</div></div>
-            <div class="stat"><div class="stat-value" data-count="93">93</div><div class="stat-label">CLI commands</div></div>
-            <div class="stat"><div class="stat-value" data-count="89">89</div><div class="stat-label">lib modules</div></div>
-            <div class="stat"><div class="stat-value" data-count="119">119</div><div class="stat-label">doc pages</div></div>
-            <div class="stat"><div class="stat-value" data-count="108">108</div><div class="stat-label">test files</div></div>
+            <div class="stat"><div class="stat-value" data-count="99">99</div><div class="stat-label">CLI commands</div></div>
+            <div class="stat"><div class="stat-value" data-count="132">132</div><div class="stat-label">lib modules</div></div>
+            <div class="stat"><div class="stat-value" data-count="118">118</div><div class="stat-label">doc pages</div></div>
+            <div class="stat"><div class="stat-value" data-count="169">169</div><div class="stat-label">test suites</div></div>
             <div class="stat"><div class="stat-value">v0.8.6</div><div class="stat-label">MIT licensed</div></div>
             </div>
         </div>
