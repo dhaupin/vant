@@ -182,4 +182,4 @@ npm run lint:locks   # audit: two roots, no cross-require, zero leaked lockfiles
 Related pages: [QoS](/vant/operations/qos) for rate limiting,
 [Storage](/vant/operations/storage) for the storage layer the lease rides on,
 [Multi-agent crews](/vant/multi-agent/agents) for why write ownership exists.
-The full invariant list lives in `labs/LOCKS.md` (PRD section 8).
+The full invariant list lives in `labs/archives/audits/LOCKS.md` (PRD section 8).

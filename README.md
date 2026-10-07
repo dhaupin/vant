@@ -26,11 +26,14 @@ Everything is in your repo. Nothing is in someone else's database. If you stop u
 
 ### For humans: install and start
 
-Install globally, then run the full startup:
+Vant is not on npm (the `vant` package there is an unrelated Vue UI
+library). Clone, install, run the full startup:
 
 ```bash
-npm install -g vant
-vant start
+git clone https://github.com/dhaupin/vant.git
+cd vant
+npm ci
+node bin/vant.js start     # or: npm link, then `vant start`
 ```
 
 `vant start` checks the brain layout (and imports an old single-brain layout automatically), runs health checks, and gets you ready. Configure credentials first with interactive setup if you need them:

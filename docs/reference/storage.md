@@ -242,12 +242,13 @@ See [GitHub Terms of Service](https://docs.github.com/en/github/site-policy/gith
 
 **Warning**: This is a clean-slate refactor. No backward compatibility provided.
 
-### Files Deleted
+### Files Merged into the Factory
 
-- `lib/brain.js` -> Use `Storage.get('brain')`
-- `lib/vector-store.js` -> Use `Storage.get('vector')`
-- `lib/repos.js` -> Use `Storage.get('repos')` (or providers)
-- `lib/state.js` -> Use `Storage.get('state')`
+- `lib/vector-store.js` -> `Storage.get('vector')` (VectorStorage)
+- `lib/repos.js` -> `Storage.get('repos')` (ReposStorage)
+- `lib/state.js` -> `Storage.get('state')` (StateStorage)
+
+`lib/brain.js` was NOT deleted - it remains the core brain router.
 
 ### Migration Example
 

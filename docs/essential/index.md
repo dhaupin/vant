@@ -4,7 +4,7 @@ permalink: /essential/
 layout: default
 title: Essential
 nav_order: 35
-description: The essential Vant surfaces - islands, boot, onboard, plugins, and manual brain control.
+description: The essential Vant surfaces - islands, boot, onboard, and manual brain control.
 ---
 
 # Essential
@@ -20,7 +20,6 @@ description: The essential Vant surfaces - islands, boot, onboard, plugins, and 
 | [Knowledge Base Browser](/vant/essential/onboard) | Interactive brain browser for agents and humans |
 | [Extensibility](/vant/essential/extensibility) | Where Vant accepts new behavior |
 | [Custom Islands](/vant/essential/custom-island) | Write your own lazy-loaded module |
-| [Plugins](/vant/essential/plugins) | Packaging and loading plugins |
 | [Manual Brain](/vant/essential/manual-brain) | Drive the brain by hand, no runtime |
 | [Sudo](/vant/essential/sudo) | Privilege elevation and how to use it safely |
 
@@ -36,5 +35,5 @@ built-ins. Debugging privilege errors: [Sudo](/vant/essential/sudo).
 ## One command to remember
 
 ```bash
-vant onboard --list   # See every brain file an island can load
+vant onboard files    # See every brain file an island can load
 ```

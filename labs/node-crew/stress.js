@@ -3,7 +3,7 @@
  * Vant Node Crew — Protocol Stress Harness (pass 31, v1.0.0 stability)
  *
  * The crew hunts its own bugs. Every probe is adversarial; failures here
- * are FINDINGS for labs/STABILITY.md, not suite regressions (exit code is
+ * are FINDINGS for labs/archives/audits/STABILITY.md, not suite regressions (exit code is
  * always 0 — humans triage, suites pin).
  *
  * Probes:
@@ -14,7 +14,7 @@
  *   C. Hostile inputs — traversal/prototype payloads through the chain
  *
  * Run: node labs/node-crew/stress.js
- * Exit: always 0 (findings go to labs/STABILITY.md for triage)
+ * Exit: always 0 (findings go to labs/archives/audits/STABILITY.md for triage)
  */
 
 const path = require('path');
@@ -330,7 +330,7 @@ function section(name) {
         console.log(`  [${f.severity.toUpperCase()}] ${f.id}: ${f.title}`);
     }
     console.log(`\n${counts.fire || 0} fires, ${counts.finding || 0} findings, ${counts.ok || 0} held green`);
-    console.log('(exit 0 by design — triage lands in labs/STABILITY.md)');
+    console.log('(exit 0 by design — triage lands in labs/archives/audits/STABILITY.md)');
     process.exit(0);
 })().catch((e) => {
     console.error('Harness fatal:', e.message);

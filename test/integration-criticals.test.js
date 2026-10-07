@@ -2,7 +2,7 @@
 /**
  * P3 #35 — Cross-module integration regression suite
  *
- * The audit ledger (labs/AUDIT_FINDINGS.md) closed 23 criticals, but most
+ * The audit ledger (labs/archives/audits/AUDIT_FINDINGS.md) closed 23 criticals, but most
  * pins were module-local. This suite walks the closed items END-TO-END
  * through their real entry points — the way an actual caller (or attacker)
  * would reach them — so a future refactor that breaks a wire (export shape,

@@ -1,8 +1,318 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-10-06  
-**Session:** Pass 136 — docs archive census: 0.8.6-era trio archived (MIGRATING cookbook, CHANGELOG fork, half-fiction deprecations page), discuss list compiled
+**Last Updated:** 2026-10-07  
+**Session:** Pass 141 — mid-funnel judgment reads: architecture/onboarding/brain/cli truth-up
+
+---
+
+## Session (2026-10-07 — pass 141: mid-funnel judgment reads)
+
+Owner: "mid-funnel pages (architecture, brain, cli, agent-onboarding)
+had their machine-checkable layers swept in passes 138-139 but not full
+judgment reads — natural next batch."
+
+METHOD: same as pass 140 — full judgment read of each page, verifying
+every claim a reader would act on against the code.
+
+architecture.md FIXED: bin/webhook.js -> bin/webhooks.js (real name);
+lib-table key functions -> real exports (brain read/write/loadCorpus,
+getStorage/FileStorage, sync pushAll/pullAny); Execution Flow code
+block `require('vant/lib/network')` sync fiction -> lib/sync.js
+pullAny()/pushAll() (network.js has no sync export; verified at
+lib/sync.js:266/:449/:786); `vant.brain().get('identity')` -> `.read`
+(getBrain returns the brain module; no .get); security-chain diagram
+was VAF->Sandbox->Escrow, real order is Sandbox->VAF->QoS->Escrow;
+"296 tools" de-numbered to "the full tool catalog". Verified real and
+left: branch.commit (lib/branch.js:192), vant.learn (lib/vant.js:704),
+search.js hybrid (lib/search.js:519), bin/load|health|mcp|sync.js.
+
+agent-onboarding.md FIXED: migration link /vant/getting-started/setup
+-> /vant/getting-started/migration (same wrong-link class as pass
+140's docs/index.md fix); MCP discovery curl `POST /rpc` (phantom
+route) -> `curl -s http://localhost:3457/mcp/tools`. Verified real and
+left: vant org grant/status (bin/org.js), sandbox.setScopes +
+defaultSandbox.setCapabilities, teams.createOrg, vant memory learn,
+brain.read private-first fallback.
+
+brain.md FIXED: corpus example brain.loadCorpus() -> await
+brain.loadCorpus() (async by default since 0.8.6). stackFallback/
+viaStack opts (lib/brain.js:1855), memory.learn export
+(lib/memory.js:812), format detection, invalidateCorpusCache all real.
+
+cli.md — the big one; its header claims "Signatures were verified
+against the command implementations in bin/". FRONT verified real:
+start --no-migrate (bin/start.js:126), load -v/-l, lock
+acquire/release/status/force, memory state/recall/learn/query/address/
+locate/list/clear (bin/memory.js:74-150), search --mode basic|rag|
+hybrid + --hyde + --stats + -r (bin/search.js help matches incl.
+"Semantic LTC"), watch --interval. FIXED (4 fictions + 1 wiring):
+(1) `vant onboard --list` — the dashed flag never existed;
+bin/onboard.js handles bare `list` (= full summary) and `files` (=
+file list); --list falls through to "Unknown command" exit 1.
+cli.md + essential/index.md now teach `vant onboard files`.
+(2) citations: bin/citations.js add/verify/search/export were
+console.log-only stubs while lib/citations.js has real lock-protected
+addSource(commit, context) (:75) and verify(commit) (:190). WIRED
+add/verify to the lib (gate is allow-by-default on the untouched stub
+sandbox; live-verified: add -> "Added citation #1", verify hit exit 0,
+miss exit 1), search/export now say "placeholder — not wired" in the
+bin help and runtime output; cli.md block made honest.
+(3) `vant run` documented as interactive loop / -p task / --mcp mode —
+bin/run.js is a 36-line banner-only stub that ignores all args;
+table row + bash block rewritten honest (use vant start / vant node).
+(4) `--ttl` for memory state — never a CLI flag (bin/memory.js state
+passes no opts); now points at the lib API memory.state(key, value,
+{ ttl }). (5) `node bin/sweep.sh` -> `bash bin/sweep.sh` (file is
+#!/bin/bash; --quick real). BACK HALF spot-verified real: snapshot
+--agent/--brain/--password/--output/--no-verify (bin/snapshot.js:
+103-107), node -m/-p/--enable-polling, agents spawn --role/--brain,
+org config --set-operator-scopes/--caps + --session-only, geometry
+store/retrieve/address/locate, test smoke/core/full (bin/test-core.js,
+"All 500+" matches), api status/routes/call (inline handler delegates
+to bin/api.js on subcommand), spawn list (bin/agent-spawner.js), docs
+build/serve, docs-build, bump type+--yes required, changelog
+--since/--format, wal --status/--drill/--reset, backup schedule "not
+implemented — prints a cron recipe" (already honest), s3 flags,
+audit-ledger filters.
+
+BONUS FIND (same fiction class, one row): runtime.md's vant.citations
+row advertised cite(), link(), verify() — cite/link are not exports of
+lib/citations.js (addSource, formatCitation(s), getAll, getCommitFooter,
+clear, generateReceipts, verify, getStackCitations are). Row now reads
+addSource(), getAll(), verify().
+
+GATES: style+links PASS (119), surface PASS, ci.js 439/0/1skip.
+Rides PR #116.
+
+## Session (2026-10-06 — pass 140: judgment read-pass, first-touch funnel)
+
+Owner: "misleading-but-true narrative framing can't be grepped - wanna
+read the docs please?"
+
+METHOD: full judgment reads of the first-touch funnel (quick-start,
+site index, install, README, DEPLOY, style, plugins, faq) + verification
+of every external claim a newcomer would act on.
+
+HEADLINE FINDING - the wrong npm package. `npm install -g vant` appears
+in 9 places (README front door, docs/index.md landing, quick-start,
+install.md x4, DEPLOY.md, style.md) and installs VANT UI - "Mobile UI
+Components built on Vue" (vant-ui/vant, v4.10.2, verified via npm view).
+Not this project, and @dhaupin/vant is 404. Every newcomer's first
+documented command installed a random Vue library. FIXED everywhere:
+from-source is now the documented path (git clone + npm ci + node
+bin/vant.js start, npm link for the global `vant` command), with a
+one-line warning naming the collision. `vant start --ai` also deleted
+(no such flag in bin/vant.js); DEPLOY.md's "From npm (recommended)"
+label gone.
+
+VERIFIED REAL and kept: docker pull dhaupin/vant (Docker Hub API: active,
+15,195 pulls, updated 2026-10-06), bin/build-test.js (exists), the
+one-click agent prompt (already taught clone + node bin/vant.js start).
+
+SECOND FINDING - plugins.md was a full-fiction page (archived):
+`vant.use(plugin)`, a plugins/ directory loader, and an npm plugin
+ecosystem ("npm install vant-my-plugin", packages vant-github and
+vant-linear) - no "plugin" reference exists anywhere in lib, and vant.use
+is not an export. Same class as the archived frontend.md SDK fiction.
+git mv -> labs/archives/docs/essential-plugins.md + provenance row; nav
+row and essential/index rows dropped. Real extension surface is islands
+(extensibility.md + custom-island.md).
+
+FAQ fixes (3):
+- Roadmap link was malformed (github.com/dhaupin/blob/... missing /vant)
+  and 404'd - external URLs skip the link checker, so it sailed through
+  every gate. Fixed to github.com/dhaupin/vant/blob/main/ROADMAP.md.
+- "What's the succession system?" described version tracking and
+  rollbacks - succession is the TRUST-LEVEL system (_succession.json:
+  high/medium/low/none autonomy). Rewritten + linked.
+- "Do I need GitHub?" said "Storage (your brain is a GitHub repo)" -
+  overstates it; the brain is local plain files, GitHub is sync/backup/
+  version control. Reworded.
+
+Also: quick-start said 2 minutes while getting-started/index said
+5-minute path - aligned on 5 minutes.
+
+GATES: style+links PASS (119 - plugins archived), surface PASS, ci.js
+439 passed / 0 failed / 1 skipped (28.2s).
+
+---
+
+## Session (2026-10-06 — pass 139: narrative-claims sweep)
+
+Owner: "let's keep walking docs. We can do narrative level claims, let's
+see what we find."
+
+METHOD: swept 120 docs pages for lifecycle markers (was/were removed, no
+longer, deprecated, superseded, as of/since/new in/requires + version) —
+21 hits total, triaged one by one against code and the root CHANGELOG.
+Then README numeric claims and every brain.* call in AGENTS.md.
+
+FINDINGS (2, both in the AGENTS.md Brain Router Interface — the only
+dead-API claims in the corpus):
+- `brain.loadBrain('identity')` — REMOVED in the 0.8.6 b-T round
+  (CHANGELOG: "loadBrain, brainList -> loadCorpus() + per-name read()").
+  lib/brain.js has no public loadBrain (only internal _loadBrain).
+  Replaced with `brain.read('identity', { type: 'private' })` — read is
+  the exported unified read, opts.type pins the side.
+- `brain.loadCorpus()` taught as "Load all brains (sync)" with no await —
+  loadCorpus is ASYNC by default (its own export comment says "use
+  {sync:true} for sync mode"; internal calls await it). Fixed to
+  `await brain.loadCorpus()`.
+
+TRIAGED BENIGN: prune.md and resolution.md "deprecated/superseded" are
+domain vocabulary (status names), release.md semver-table examples,
+cli.md's `vant changelog --since v0.7.0` (rule-8 validated),
+migration.md's "What changed in v0.9" header (the repo's own working
+label for the axolotl era — compute.md says "Beta v0.9.0", sudo.md
+"0.9.0-axolotl", CHANGELOG says "pinned at 0.8.6 (no version bump)"),
+rls.md and whitepaper prose. README carries zero numeric claims.
+AGENTS.md's remaining brain.* calls verified exported (read, setMode,
+getBrainPath, getPublicPath).
+
+GATES: surface PASS (AGENTS.md is scanned by rules 1/2/7), style+links
+PASS (120), ci.js 439 passed / 0 failed / 1 skipped (31.6s).
+
+---
+
+## Session (2026-10-06 — pass 138: dead import + doc-truth sweep round)
+
+Owner: fix the dead theme import + the islands_canAccess question, then
+"continue cleaning up, updating, and deduping docs pls. There are prob
+still a lot of inaccurate info."
+
+CODE (2 fixes, both found or confirmed by doc verification):
+- lib/mcp.js: dead `const theme = require('./theme')` (:99) removed —
+  grep-verified single occurrence, never referenced. rpc.md already
+  documents the honest theme status (helpers shipped, server adoption
+  pending).
+- bin/runop.js: `vant runop stop` called `pipeline.stop()`, which does
+  not exist (pipeline exports runtimeStop) — a TypeError on every stop.
+  Fixed to `pipeline.runtimeStop()`. Found BY checking the doc's claims
+  against the export list.
+
+islands_canAccess: the pass-137 candidate note was WRONG. It IS
+registered (lib/mcp.js:2541) and island-boundaries.test.js exercises it —
+my earlier registry dump truncated the list. mcp-tools.md row is correct;
+no action.
+
+DOC SWEEP (scratch checker, deleted after): 120 pages scanned for phantom
+tool names (0 hits), phantom lib/bin file mentions (5 hits, all fixed),
+phantom VANT_ env vars (0 of 33 referenced), unknown `vant <verb>` claims
+(0 real — hybrid/mesh are dispatcher-routed to bin/hybrid-sync.js and
+bin/mesh-status.js; my checker missed the COMMANDS map at first).
+
+FIXED:
+- docs/reference/storage.md: "Files Deleted: lib/brain.js" fiction
+corrected — brain.js was NOT deleted (it is the core brain router; the
+exact fiction archived with the deprecations page in pass 136). The real
+merges stand: vector-store/repos/state -> Storage factory classes,
+verified against the getStorage switch (lib/storage.js:2137-2170).
+- docs/essential/islands.md: Files section dropped lib/state.js and
+lib/gallery.js — neither exists, and islands.js references neither.
+- docs/reference/runop.md: rewritten. `require('vant/lib/runop')` was a
+MODULE_NOT_FOUND path — runop was absorbed into lib/pipeline.js
+(initLayers / runtimeRun / runtimeStop / runtimeStatus / getStatus) and
+fronts the `vant runop` CLI (bin/runop.js). Old page documented four
+functions against a module that never resolves.
+
+VERIFIED REAL (not drifted): reference/entropy.md (claims match
+bin/compress.js defaults exactly: window 8, threshold 0.85, .vpatch
+format, cli.md cross-link), mcp-tools.md islands_canAccess.
+
+GATES: style+links PASS (120), surface PASS, ci.js 439 passed / 0 failed /
+1 skipped (29.9s).
+
+---
+
+## Session (2026-10-06 — pass 137: audits archive + RPC/REST/resolution truth-up)
+
+Owner approved the pass-136 discuss list and expanded it: move the 9
+audit-era labs files to labs/archives/audits/, UPDATE rpc.md + resolution.md
+(not archive), and "cleanup, dedupe, and update anything else you find in
+docs. We can also fix any menu sorts or whatnot."
+
+ARCHIVED (git mv → labs/archives/audits/, provenance README created):
+AUDIT_FINDINGS, COHESION_AUDIT, DEAD_EXPORTS, LOCKS, MULTIBRAIN_CENSUS,
+QC_WAVE, SESSION_PASS24, STABILITY, WAVE_RETROSPECTIVE (~2,409 lines).
+Content untouched per the archives convention. 13 inbound refs retargeted:
+docs/operations/locks.md, ROADMAP.md, DEPLOY.md (a real md link),
+scripts/audit-locks.js x3, test/run-all.js, test/snapshot-guards.test.js,
+test/integration-criticals.test.js, test/security-hardening.test.js,
+bin/branch-manager.js, test/branch-manager.test.js x2, labs/node-crew/
+stress.js x3. Left as point-in-time history: TASKS/MEM/learnings mentions,
+the prd-* file lists, and the archived files' own cross-references.
+
+rpc.md REWRITTEN (was "Unified RPC protocol standards", dated 2026-05-24):
+- MCP Theme Protocol claimed "Implemented" — false at the server layer.
+  `_theme` exists only inside lib/theme.js; lib/mcp.js loads the module
+  (dead import at :99) but wraps nothing; real consumers are CLI-side
+  (bin/config, bin/health, bin/help, bin/lock). Page now says: helpers
+  shipped, server adoption pending; labs/rfc-mcp-theme.md pointer kept.
+- "Skill Chain Protocol (Planned)" + "Agent Chain Protocol (Planned)" —
+  never existed as protocols. Replaced with real surfaces: lib/agents.js
+  (spawn/delegate/work items), MCP agent_* tools, msg.send channels, and
+  the crew bus for cross-node.
+- Page is now a wire map: MCP tool door (GET /mcp/tools + /tools, /health
+  aliases; POST /mcp/exec taking {tool,args} OR {method,params}; requireKey
+  gate, habitat tokens, DNS-rebind + Origin + JSON content-type guards) /
+  REST layer / crew bus (HMAC envelopes, envelope version major/minor,
+  SSRF allowlist, webhook:crew.<type> emission, genesis handshake).
+
+rest-api.md REWRITTEN (found during the rpc pass — worse than rpc.md):
+- /call with the tools/call envelope on 3456 is REAL: pass-131 made the
+  handler honor the documented shape, and the built-ins (/tools /health
+  /call) are checked BEFORE the router, so they shadow registered routes.
+  /ready, the Free/Pro/Enterprise rate-limit plans, Python/JS "SDKs", and
+  Socket.IO events NEVER existed — deleted.
+- Now documents: boot via api.startREST/startAll, the request pipeline
+  (VAF, QoS + X-RateLimit headers, x-api-key when VANT_SERVER_AUTH_REQUIRED=1,
+  X-Request-Id), built-ins, and all 19 REST routes mapped to the MCP tools
+  they proxy (streams/brain/trust/market).
+
+mcp.md DE-FICTIONED (Runtime MCP guide): the page taught POST /call with
+tools/call against port 3457 — the MCP server has no such route (that is
+the REST server's; the two ports were conflated throughout). Fixed:
+endpoint table (the real 4), "Connect a client" (stdio command for MCP
+clients, /mcp/exec for raw HTTP), env table (VANT_MCP_PORT/BIND/REQUIRE_KEY/
+API_KEY — MCP_PORT and MCP_BIND_ADDRESS were not real names), security
+chain flag (VANT_MCP_REQUIRE_KEY=1, not VANT_SERVER_AUTH_REQUIRED plus a
+--server flag that does not exist), auth section (keys ride headers, never
+JSON-RPC params; VANT_MCP_API_KEY real; lockouts persist across restarts),
+all ~16 tool examples re-shaped to the registered schemas (vant_get_memory
+{category,filename}; vant_set_memory {category,filename,content};
+vant_search {query,limit} with vant_search_hybrid as its own tool — the
+{mode: rag|compact|hybrid} examples contradicted the registry), Node and
+Python clients moved to /mcp/exec, config table trimmed to verified rows,
+error section now shows both response shapes.
+
+resolution.md REWRITTEN (module real, page stale): "Track decisions on the
+blockchain" line deleted (lib/consensus.js:7: no blockchain, no mining);
+phantom models/public/.resolutions/*.json dir deleted (the ledger is ONE
+file, models/public/.resolution.json, under the multibrain-aware public
+root; per-file records live in the ledger plus frontmatter stamps on the
+brain file); CLI section now matches bin/resolution.js exactly (status is
+the default, deltas need a file name, evict boots vant.init first); ledger
+JSON shows the real entry shape (file, entry, status, reason, resolved_by,
+branch, resolved_at, superseded_by, expiresAt); TTL + deltas-cap-100
+semantics; programming API table (sync core + pipeline-backed variants +
+the resolution:changed event). "Advanced — see GitHub" filler dropped.
+
+nav.yml: removed the two duplicate-row violations (header contract: every
+page appears exactly once) — "Search Tuning" (same URL as "Search
+Architecture" since the pass-134 retarget) and the Advanced-section "RAG
+Tutorial" (Memory keeps it). Title-vs-page scan over all 120 rows: no dup
+URLs remain; ~29 short-title rows (nav "Telegram Bot" vs page "Telegram
+Bot Integration" etc.) all resolve to the right subject — read as
+intentional menu shortening, left alone.
+
+VERIFIED NOT DRIFTED along the way: docs/runtime/server.md's /tools
+/health /call table is real (lib/server.js:525-548); mcp.md's tool names
+are all registered; reference/mcp-tools.md stays the canonical catalog
+(one suspect row: islands_canAccess is not in the registry — future pass).
+
+GATES: style+links PASS (120), surface PASS, ci.js 439 passed / 0 failed /
+1 skipped (30.8s).
 
 ---
 

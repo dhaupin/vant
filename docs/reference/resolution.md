@@ -4,18 +4,13 @@ permalink: /reference/resolution
 layout: default
 title: Resolution
 nav_order: 128
+description: Mark brain entries resolved, deprecated, or rejected, with reasons, TTL expiry, and a delta trail.
 ---
 # Thought Resolution
 
-Track thought status - resolved, deprecated, or rejected.
-
-## Concept
-
-**Resolution** tracks the state of thoughts:
-- **Active** - Currently relevant
-- **Resolved** - Addressed, completed
-- **Deprecated** - Outdated, use new approach
-- **Rejected** - Rejected, not applicable
+Track thought status: resolved, deprecated, or rejected. A status change
+lands in the ledger, is stamped into the brain file's frontmatter, and emits
+a `resolution:changed` event.
 
 ## Statuses
 
@@ -23,51 +18,50 @@ Track thought status - resolved, deprecated, or rejected.
 |--------|------|
 | `active` | Currently relevant |
 | `resolved` | Addressed, completed |
-| `deprecated` | Use new approach |
+| `deprecated` | Outdated, use the new approach |
 | `rejected` | Not applicable |
 
-## Running
-Run the resolution system.
+## CLI
+
+All commands live in `bin/resolution.js` (backed by `lib/resolution.js`):
 
 ```bash
-# Show status
+# Summary counts plus recent delta count (status is the default)
 vant resolution
 
-# List all
-vant resolution list
+# List resolutions, optionally filtered by status and file
+vant resolution list [status] [file]
 
-# List by status
-vant resolution list resolved
-vant resolution list deprecated
-vant resolution list rejected
-
-# Mark resolved
-vant resolution resolve fears "fear of X" overcame via therapy
-
-# Mark deprecated
-vant resolution deprecate goals "old goal" replaced by new
-
-# Mark rejected
-vant resolution reject identity "old belief" ethics changed
-
-# Show deltas
+# Delta trail for one file (deltas need a file name, not 'all')
 vant resolution deltas identity 5
 
-# Mark with TTL (auto-expiry)
-vant resolution resolve fears "fear of X" --ttl 86400000
-vant resolution deprecate goals "old goal" --ttl 604800000
-vant resolution reject identity "old belief" --ttl 2592000000
+# Mark an entry
+vant resolution resolve <file> <entry> <reason> [--ttl ms]
+vant resolution deprecate <file> <entry> <reason> [--ttl ms]
+vant resolution reject <file> <entry> <reason> [--ttl ms]
 
-# Check if still active (returns ACTIVE or RESOLVED/DEPRECATED/REJECTED)
-vant resolution is-active fears "fear of X"
+# Check whether an entry is still active (ACTIVE or the resolution status)
+vant resolution is-active <file> <entry>
 
-# Clean up expired resolutions
+# Permanently remove expired resolutions from the ledger
 vant resolution evict
 ```
 
-## TTL (Time-To-Live)
+Example:
 
-Resolutions can have optional TTL for automatic expiry:
+```bash
+vant resolution resolve fears "fear of failure" overcame via repetition
+vant resolution resolve fears "fear of X" --ttl 86400000
+```
+
+The target file must exist in the public brain (the resolver validates
+first and throws `FILE_NOT_FOUND` otherwise). The `resolved_by` stamp comes
+from `VANT_AGENT_ID` (default `unknown`); `branch` from `VANT_BRANCH`
+(default `main`).
+
+## TTL (time-to-live)
+
+`--ttl` is in milliseconds:
 
 ```bash
 --ttl 86400000      # 24 hours
@@ -75,69 +69,74 @@ Resolutions can have optional TTL for automatic expiry:
 --ttl 2592000000    # 30 days
 ```
 
-**Behavior:**
-- Expired resolutions are treated as `ACTIVE` (like they never happened)
-- Use `vant resolution evict` to permanently remove expired resolutions
-- Without TTL, resolutions persist forever
-- `is-active` checks both status AND TTL expiry
+Behavior:
+
+- The TTL is stamped as `expiresAt`; a null `expiresAt` never expires
+- An expired resolution reads as ACTIVE again, like it never happened
+  (`is-active` reports this)
+- `vant resolution evict` permanently drops expired entries from the ledger
+- Without a TTL, a resolution persists
 
 ## Files
 
-- `models/public/.resolutions/*.json` - Per-file resolutions
-- `models/public/.resolution.json` - Ledger
+One file holds everything:
 
-## Resolution File
-How Vant handles brain conflicts and resolution.
+- `models/public/.resolution.json` - the ledger, under the active brain's
+  public root (multibrain-aware; it resolves through the brain stack)
 
-```json
-{
-  "fears": [
-    {
-      "entry": "fear of X",
-      "status": "resolved",
-      "resolvedAt": "2026-04-20",
-      "reason": " overcame via therapy"
-    }
-  ],
-  "goals": [
-    {
-      "entry": "old goal",
-      "status": "deprecated",
-      "deprecatedAt": "2026-04-20",
-      "replacedBy": "new goal"
-    }
-  ]
-}
-```
+Each resolution is recorded twice:
+
+1. A ledger entry (the authoritative record, shown below)
+2. A frontmatter stamp on the matching line of the brain file itself
 
 ## Ledger
-Track decisions on the blockchain.
+
+The ledger is a plain JSON file, not a distributed anything:
 
 ```json
 {
   "resolutions": [
-    { "file": "fears", "status": "resolved", "entry": "fear of X" }
+    {
+      "file": "fears",
+      "entry": "fear of failure",
+      "status": "resolved",
+      "reason": "overcame via repetition",
+      "resolved_by": "buffy",
+      "branch": "axolotl",
+      "resolved_at": "2026-10-06T00:00:00.000Z",
+      "superseded_by": null,
+      "expiresAt": null
+    }
   ],
-  "deltas": [
-    { "file": "identity", "change": -3 }
-  ]
+  "deltas": []
 }
 ```
 
-## Use Cases
+Every resolve, deprecate, and reject appends a delta (file, change, who,
+when); the ledger keeps the last 100.
 
-- **Therapy** - Mark fears as resolved
-- **Pivot** - Deprecate old goals, add new
-- **Ethics** - Reject outdated beliefs
-- **Audit** - Track thinking changes
+## Programming API
 
+`lib/resolution.js` exports the sync core plus pipeline-backed variants
+(the same operations routed through sandbox, vaf, qos, and escrow):
 
-## Advanced
+| Function | What |
+|----------|------|
+| `resolve(file, entry, reason, options)` | Mark resolved |
+| `deprecate(file, entry, reason, options)` | Mark deprecated |
+| `reject(file, entry, reason, options)` | Mark rejected |
+| `list(status, file)` | List entries |
+| `get(file, entry)` | One resolution |
+| `isActive(file, entry)` | Status plus TTL check |
+| `getDeltas(file, limit)` | Delta trail for a file |
+| `getLedger()` | Read the whole ledger |
+| `evictExpired()` | Drop expired entries |
+| `resolveSecured`, `deprecateSecured`, `rejectSecured`, `listSecured`, `getSecured` | Same operations, routed through the security pipeline |
 
-This doc has advanced API reference. See GitHub for latest.
+Status changes emit `resolution:changed` through the event system.
 
 ## Related
 
-- [Succession](/vant/multi-agent/succession) - Trust levels
-- [Brain](/vant/memory/brain) - Brain structure
-- [Audit](/vant/advanced/audit) - Activity logging
+- [Succession](/vant/multi-agent/succession) - trust levels
+- [Brain](/vant/memory/brain) - brain structure
+- [Audit](/vant/advanced/audit) - activity logging
