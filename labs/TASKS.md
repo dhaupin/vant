@@ -2,7 +2,46 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 156 — lib comment audit batch 3 (persistence/security core)
+**Session:** Pass 157 — lib comment audit batch 4 (security-chain + mesh core)
+
+---
+
+## Session (2026-10-08 — pass 157: comment audit batch 4)
+
+Owner: "another pass on a batch pls. Let's see what we find!"
+
+BATCH 4 (habitat.js, genesis.js, pipeline.js, primitives.js,
+islands.js, qos.js, escrow.js, sudo.js) — 6 of 8 ACCURATE, 2 fixed:
+
+FIXED - lib/escrow.js Usage signature drift: header taught
+`escrow.hold('task-1', { until: 'condition' })` but the real signature
+is `hold(holdId, condition)` (2-arg, :654) — the second arg IS the
+condition, no options-object wrapper. Usage corrected.
+
+FIXED - lib/islands.js stale format list: "yaml, json, md, txt"
+omitted .ini (format.js DEFAULT_EXTENSIONS has 6; pass-156 fixed the
+same omission in format.js's own header — islands had the same drift).
+
+VERIFIED ACCURATE: genesis.js (create :128 / join :263 real; deep
+behavior — secret-returned-once, auto-ack vetting — is pinned by the
+genesis-ring suite per earlier passes), pipeline.js (all 5 modes real
+:96-100, state machine real :28/:378/:452), primitives.js (zero ./
+requires confirmed — the hard contract holds; atomicWriteFile/sleep
+contents match; stego.js:178 + backup.js:501/562 genuinely stay on
+storage.atomicWrite as the header claims), qos.js (all 5 components
+real: RateLimiter/CircuitBreaker/Bulkhead/Throttler/Debouncer),
+sudo.js (all 5 scopes real in allowedScopes config :46-67), habitat.js
+(conceptual header, no API claims to falsify; verifyToken surface
+already proven in pass-154 mcp.js check).
+
+GATES: claims PASS (846f/9sig), syntax OK. Suites: escrow 18/18,
+islands 14/14, primitives 8/8, qos 10/10, pipeline 9/9. Full sweep
+via CI.
+
+NEXT-UP: comment audit batch 5 (candidates: search.js internals,
+geometry/, connectors/, vat of remaining mid-size modules), format.js
+dedicated test pin (still open from 156), or owner direction. Rides
+PR #118.
 
 ---
 
