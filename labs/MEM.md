@@ -918,11 +918,11 @@ testimony (v0.2); chapter 2 opens with it.
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 79 committed: gate shipped, MCP audit clean,
-escrow.json merge-save landed. Next agent: whitepaper owner feedback;
-airgap parked; candidates: extend gate to bin/ + status-field
-truthfulness checks, MCP surface audit for remaining tool families
-(qos, config, islands).)
+(nothing in flight — pass 168 committed: rust bridge LIVE (sidecar
+handles compiled languages now), geometry engine on the sidecar with
+real-math fixes, connector run() rot fixed across python/ruby/php/julia.
+Next agent candidates: sidecar docs page, python-srv for numpy
+amortization, LangChain adapter transform() upgrade.)
 
 ---
 

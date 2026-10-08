@@ -1,0 +1,3 @@
+# (pass 168) rust-srv build artifacts — the binary is built on demand by
+# lib/sidecar.js buildCompiledSrv; never commit target/.
+lib/connectors/rust-srv/target/

@@ -2,7 +2,67 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 167 — julia sidecar LIVE (installed + smoke 5/5); health foreign-cwd false-FAIL fixed
+**Session:** Pass 168 — rust bridge LIVE + geometry on the sidecar + connector rot sweep
+
+---
+
+## Session (2026-10-08 — pass 168: rust bridge, geometry sidecar switch, connector sweep)
+
+Owner: "Let's do the rust bridge and the geometry sidecar switch next.
+Also migrate any other Lang connectors to sidecar if needed. Let's look
+at them all."
+
+RUST BRIDGE LIVE (1.99.0 via rustup, no-root, ~/.cargo; srv crate in
+lib/connectors/rust-srv/): the sidecar runtime now handles COMPILED
+languages — buildSpec/buildCompiledSpec split, buildCompiledSrv does a
+cached `cargo build --release` (first start pays the build; later starts
+reuse the binary via mtime check), spawnTarget returns the spawn tuple.
+rust-srv speaks the IDENTICAL julia-srv wire contract (health/eval/stop,
+token-checked, escape-aware JSON scanner, loopback-only, zero crates).
+lib/connectors/rust.js = subprocess fallback (rustc single-file
+compile+run, tmp-crate, honest compile errors). Compute discovery now
+tolerates BOTH export shapes (singleton vs named class) — rust.js was
+breaking `connector.eval is not a function`.
+
+LIVE PINS: test/rust-sidecar-live.test.js 5/5 (build+spawn+health, live
+eval, connector round-trip, amortization warm 71ms/call, clean /stop);
+honest SKIP without rustc. Direct curl smoke confirmed bad-token 405,
+compile errors surfaced in stderr.
+
+GEOMETRY ON THE SIDECAR (lib/geometry/engine.js): every Julia path now
+evals through compute mode 'auto' (one persistent sidecar, JIT once).
+TWO BROKEN MATH PATHS FIXED: goldenRatio emitted invalid Julia
+(`using .Base.Math常数` — always threw, silently degrading to float64)
+AND setprecision takes BITS not digits (pin-caught: 50-digit pin
+returned ~20 digits until bits = ceil(digits*3.322)+16). matrixMultiply's
+Julia path printed C then RETURNED A UNMODIFIED ("Simplified") — now
+parses the real product. Warm ops measured 3.6ms (subprocess model:
+2-30s per call). Pinned: test/geometry-engine.test.js 6/6 with julia,
+honest node-fallback pins without.
+
+CONNECTOR SWEEP (all language connectors exercised): python.eval +
+invoke(math.sqrt) OK; node VM eval OK; rust delegation OK. THREE MORE
+ROT BUGS CAUGHT AND FIXED: python/ruby/php run() passed an ARRAY
+([scriptPath]) into execute() as codeOrFile → `python3 -c ['/x.py']`
+SyntaxError — file mode NEVER worked (now direct script-mode spawn);
+julia.run() returned the raw child handle without awaiting output
+({ proc }) — now the standard result shape. ruby/go/php absent-here
+failures verified honest-and-fast (ENOENT in ms, no hang).
+
+Files: lib/sidecar.js (compiled-lang support), lib/connectors/rust-srv/
+(Cargo.toml + src/main.rs), lib/connectors/rust.js, lib/compute.js
+(discovery normalization), lib/geometry/engine.js (sidecar + 3 math
+fixes), lib/connectors/{python,ruby,php,julia}.js (run() fixes),
+test/{rust-sidecar-live,geometry-engine,connector-run}.test.js.
+
+Verification: focused sweep 7/7 suites (sidecar, julia-live, rust-live,
+geometry-engine, connector-run, compute, connector), pins green BOTH
+with and without julia/rust on PATH, eslint 0 errors, fiction
+signatures PASS (858 files), syntax OK.
+
+Next: sidecar docs page (lib/sidecar.js contract + srv authoring guide);
+consider python-srv (numpy-heavy workloads would amortize similarly);
+LangChain adapter sidecar transform() still parity-seam only.
 
 ---
 
