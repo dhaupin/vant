@@ -2,7 +2,91 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-07  
-**Session:** Pass 152 — buried-docs sweep: prd-agents max-4 + geometry README truth-up
+**Session:** Pass 153 — fiction-signature + frontmatter gates SHIPPED; core-lib comment audit
+
+---
+
+## Session (2026-10-08 — pass 153: gates + comment audit)
+
+Owner: "build these: repo-wide fiction-signature CI grep; frontmatter
+enforcement gate. Then any other cleanup opps? Code comments - are they
+consistent, doc-reader format, well explained? Read core lib files."
+
+SHIPPED GATE 1 - scripts/check-fiction-signatures.js (`npm run
+lint:claims`, own workflow step after lint:dist). 7 signatures = every
+fiction this project caught more than once: npm install -g vant, max-4
+agents folklore (5 variants), lib/framework.js, lib/notifications.js,
+VantRetryableError, loadBrain, vant.use plugin loader. Scope: 1978
+text files repo-wide; allow-list: archives/ (point-in-time), ledger
+(quotes fiction to fix it), CHANGELOG (history), scripts/check-*.js
+(gates may quote signatures), package-lock. Line-level negation filter
+(debunk lines like 'There is no VantRetryableError' are doing the
+gate's job in prose) - filter checks hit line PLUS previous line
+(negations wrap) with word-boundary matching (there is NO at EOL).
+
+SHIPPED GATE 2 - scripts/check-docs-frontmatter.js (chained into
+lint:docs). Enforces style.md's all-5-fields rule that NOTHING enforced
+(pass 151 found 2/118 missing layout). Also: permalink must start with
+/, nav_order integer, frontmatter block present. Version field is
+PRESENCE-only by design - style.md defines it as 'version introduced'
+which legitimately differs from package.json; equality would false-
+positive on the 0.9.0-era pages (sudo.md, compute.md - found + released
+on first run).
+
+PROVEN, not written: both bit on first run - fiction gate caught a REAL
+missed fiction (docs/getting-started/examples.md:258 taught
+require('./lib/notifications') - the phantom module pass 142 missed in
+examples) + 3 debunks + 1 gate self-quote; frontmatter gate caught the
+2 version-drift pages. Fault-injections: missing layout -> FAIL,
+injected npm-install + max-4 lines -> FAIL with file:line evidence;
+restorations diff-verified. OWN BUG CAUGHT: docstring containing
+docs/**/*.md terminates the block comment at the first */ (syntax
+error at run) - reworded.
+
+FIXED - docs/getting-started/examples.md Slack/Discord section: taught
+the phantom lib/notifications module -> real surfaces with VERIFIED
+APIs (defaultEvent.on('sync:push:complete') - event name + shape from
+lib/sync.js:346, lib/event.js:293/316-319; vant webhooks add <url>
+<event> from bin/webhooks.js:24; VANT_WEBHOOK_SECRET mandatory-bind
+from lib/webhooks.js:133).
+
+COMMENT AUDIT (core lib: brain.js, vant.js, sandbox.js, error.js,
+memory.js, agents.js, event.js):
+CENSUS: 981 JSDoc tags, 675 pass-numbered annotations, 116 SECURITY:
+markers, uniform module headers (Name (version) - role), only 3
+TODO/FIXME/HACK in ~30k lines (2 false positives - XXXXX in the
+barcode format comment; 1 is island-scaffold template text, not debt).
+STRENGTHS: sandbox.js flags DENY BY DEFAULT in 3 separate places;
+agents.js facade documents its module split + 'ONE public door'
+contract; brain.read() JSDoc documents opts + return shape exactly as
+docs teach; pass annotations give every fix provenance.
+FIXED (2):
+- lib/vant.js:1604 getter block - the crew's own cited 'gate' for
+  getter-count claims - now documents that the 7 defineProperty getters
+  are NOT the whole surface: the NEW: section at the bottom eagerly
+  attaches docs/memory/experience/audit/watch/governance/consciousness
+  and OVERRIDES audit (module object, not the getAudit function).
+  Verified by live probe (typeof vant.audit = object) before writing.
+- lib/error.js VantError docblock was 'Vant Error class' - now
+  documents the options contract (code, retryable, statusCode,
+  details) that errors.md + the fiction gate teach, including the
+  no-VantRetryableError note.
+VERDICT: comments are consistent, doc-reader-friendly, and well
+explained - the two gaps were export-surface clarity and one thin
+class docblock, both fixed.
+
+GATES: lint:docs PASS (style 118 + links 118 + frontmatter 118),
+lint:claims PASS (1978 files), dist PASS, surface PASS, ci.js
+439/0/1skip. LESSONS: (1) a block comment containing **/ sequences
+(like docs/**/*.md) self-terminates at */ - always node -c a new
+script before declaring it shipped; (2) debunking text is a filter
+problem, not a gate problem - negation context needs the previous
+line, word boundaries not trailing spaces; (3) the pass-149 lesson
+(catch fiction twice -> make it a signature) is now MECHANIZED - the
+next caught-twice fiction gets added to check-fiction-signatures.js
+in the same commit as the fix; (4) probe the live export surface
+(typeof checks) before writing comments ABOUT the export surface -
+the comment and the MEM folklore were both half-wrong.
 
 ---
 
