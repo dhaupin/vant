@@ -1,3 +1,6 @@
 # (pass 168) rust-srv build artifacts — the binary is built on demand by
 # lib/sidecar.js buildCompiledSrv; never commit target/.
-lib/connectors/rust-srv/target/
+# (pass 169) Pattern fix: nested .gitignore patterns are relative to THIS
+# directory, so the old absolute-ish path never matched and target/ got
+# staged by blanket adds.
+target/

@@ -918,11 +918,11 @@ testimony (v0.2); chapter 2 opens with it.
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 168 committed: rust bridge LIVE (sidecar
-handles compiled languages now), geometry engine on the sidecar with
-real-math fixes, connector run() rot fixed across python/ruby/php/julia.
-Next agent candidates: sidecar docs page, python-srv for numpy
-amortization, LangChain adapter transform() upgrade.)
+(nothing in flight — pass 169 committed: backbone unification — zero raw
+throws in lib/ (regression-gated), events wired into 9 gut modules,
+audit at the state-store choke point + connector external I/O, WAL
+default-on for protocol state. Substrate ready for the state+seed engine;
+waiting on Cairn's issue for the Synmergia contract.)
 
 ---
 

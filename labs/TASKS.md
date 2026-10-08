@@ -2,7 +2,63 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 168 — rust bridge LIVE + geometry on the sidecar + connector rot sweep
+**Session:** Pass 169 — backbone unification: errors/events/audit/WAL wired across lib/
+
+---
+
+## Session (2026-10-08 — pass 169: backbone wiring sweep)
+
+Owner: "You nailed it, let's hook em all up!" — the four-quadrant
+unification from the coverage audit:
+
+ERRORS (108 → 0 raw throws in lib/): every `throw new Error` is now a
+coded VantError. Code mapping: bus-required → INPUT_VALIDATION_FAILED;
+provider stubs (pinecone base, selfhosted issues/PRs, avatar endpoints)
+→ NEW code NOT_IMPLEMENTED; s3 client errors → VAF_INPUT_INVALID /
+CONFIG_MISSING / API_RESPONSE_ERROR / CAPABILITY_DENIED /
+SECURITY_PATH_TRAVERSAL / NETWORK_TIMEOUT (retryable); hermes → the
+correct gate code per leg (SANDBOX_EXEC_DENIED, ESCROW_DENIED,
+RATE_LIMIT_EXCEEDED, REMOTE_DISCONNECTED...); settlement/teams/transform
+validation → VAF_INPUT_INVALID; quasicrystal ECAP → STORAGE_*_DENIED.
+Behavior-compatible: VantError extends Error, messages preserved.
+The pin suite holds a REGRESSION GATE: zero raw throws in lib/.
+
+EVENTS (silent modules wired): state-store (state:saved/hydrated/cleared),
+wal (wal:intent/done/replayed), sidecar (sidecar:spawning/ready/eval/
+stopped), lock (lock:acquired/released), genesis (created/joined/admitted/
+accepted), migrations (migration:applied), metrics (metric:inc),
+horcrux-safe (horcrux:safe-write), habitat (habitat:provisioned).
+HONEST CORRECTIONS: agents was never silent (lib/agents/core.js already
+emits agent:spawned — the facade masked it from the top-level-only grep);
+bus-family modules covered via state-store choke point; util modules
+(docs/anchor/scope/zen/gate/audit-report) deliberately silent — no
+lifecycle to broadcast, noise would be worse.
+
+AUDIT (choke-point design): state-store is the ONE write path for
+protocol state (prd-vant-os Arch A), so audit lives there (state:persist /
+state:clear ledger entries) — covers teams/agents/consensus/market/
+settlement/org-sync/notices in one wiring. External I/O audits at the
+connector: s3 put/delete (key only, never body/credentials), hermes sync.
+
+WAL UNIFIED: discovery — FileStorage already integrates lib/wal.js but
+OPT-IN (options.wal or VANT_WAL=1). Protocol state is the exact data
+class WAL was built for: state-store now opts IN at getStore() — every
+protocol-state write is journaled by default, no env flag. Other
+FileStorage users stay opt-in.
+
+Files: lib/error.js (+NOT_IMPLEMENTED), 30 modules converted, state-store
+(events+audit+wal), wal/sidecar/lock/genesis/migrations/metrics/
+horcrux-safe/habitat (events), s3/hermes (audit). Pin:
+test/backbone-wiring.test.js 11/11 incl. the raw-throw regression gate.
+
+Verification: backbone pins 11/11; focused sweeps 14/14 + 24/24
+(state/agents/teams/habitat/storage/boot/brain/vant/mcp suites all green
+— the error conversions are behavior-compatible); eslint 0 errors; claim
+signatures PASS (859 files).
+
+Next: the state+seed engine (pass-168/169 substrate is ready for it);
+Cairn's issue triage when it lands; catch-block classifier (520 blocks,
+intentional-vs-lossy) as its own pass.
 
 ---
 
