@@ -2,7 +2,55 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 163-165 — /lib walk COMPLETE; forum msg+escrow WIRED w/ pins; /bin walked
+**Session:** Pass 166 — hybrid polyglot bridge: sidecar runtime + SidecarConnector + julia-srv + adapter parity
+
+---
+
+## Session (2026-10-08 — pass 166: polyglot sidecar bridge)
+
+Owner approved the hybrid design ("keep the existing connectors; both
+connectors AND adapters get sidecar abilities for parity" — the godot
+srv/redis/postgres model).
+
+SHIPPED:
+- lib/sidecar.js — SHARED sidecar runtime (spawn/health/eval/stop,
+  loopback-only, per-instance random token, srv prints SIDECAR_PORT
+  for OS-assigned ports). Deliberately shared by connectors AND
+  adapters (parity per owner).
+- lib/connectors/sidecar.js — SidecarConnector extends BaseConnector:
+  modes sidecar/auto/subprocess; auto = sidecar w/ subprocess fallback
+  (delegating to the language's OWN connector for cmd knowledge);
+  result shape identical either way.
+- lib/connectors/julia-srv.jl — stdlib-only Julia sidecar (token-
+  checked /health /eval /stop; loopback).
+- lib/adapters/sidecar.js — adapter-side parity seam (transform +
+  stopAll on the same runtime) for NEW heavy bridges; existing
+  in-process adapters untouched.
+- compute.js: opts.mode routing (sidecar/auto/subprocess), per-
+  (lang+mode) connector reuse (sidecar survives across evals — the
+  point), stopSidecars() export, header truth-up.
+
+PIN-CAUGHT BUGS (2 real, both would have shipped):
+1. spawnAndWait lacked proc.on('error') — spawn ENOENT (language not
+   installed) crashed the whole process instead of rejecting.
+2. BaseConnector.execute had the same gap for ALL subprocess
+   connectors. ALSO: fallback originally spawned bare getLang()
+   ('python' — ENOENT) instead of the language's real cmd (python3) —
+   fallback now delegates to the language's own connector module.
+   Third catch: gate wrapper in forum (pass 164) — pattern: pins keep
+   catching lifecycle/error-path bugs that happy-path tests miss.
+
+PINS: test/sidecar.test.js 8/8 (fake Node srv on the exact julia wire:
+spawn/health contract, evalOn shape, srv-failure surfacing, auto uses
+sidecar, auto falls back to subprocess, sidecar-mode honest failure,
+token enforcement, legacy compute path unchanged). Suites: compute,
+forum, escrow 0-fail. Gates: claims (851f) + syntax PASS. Sweep via CI.
+
+NOTE: julia not installed in this env — julia-srv.jl is pin-tested via
+the wire-contract fake; live julia smoke is an owner-side follow-up.
+
+NEXT-UP: connectors/rust.js + rust-srv (same contract), geometry
+switch to sidecar mode w/ fallback, or owner direction. Rides #118.
 
 ---
 
