@@ -37,6 +37,10 @@ Usage:
                                          (fresh brain snapshot, same path —
                                          without this, point-in-time boot
                                          backups go stale forever)
+  vant horcrux verify                    Verify the CURRENT brain against the
+                                         last anchor (#166 tier): recompute the
+                                         content root, compare to the anchor
+                                         ledger. Exit 1 on divergence — CI-safe.
 
 Password resolution (in order):
   1. Positional arg
@@ -331,6 +335,55 @@ async function run() {
         console.log('\n✅ Refreshed!');
         console.log('Path:', target);
         console.log('Timestamp:', new Date(Date.now()).toISOString());
+    } else if (subcmd === 'verify') {
+        // (pass 176) #166 acceptance as a command: recompute the current
+        // brain root, compare to the last anchor in the anchor ledger.
+        // CI-safe exit codes: 0 verified, 1 diverged/unreadable, 2 no
+        // anchor yet (fresh install — anchor it first with the printed
+        // command; deliberately NOT an error exit so cron/CI can
+        // distinguish "integrity failure" from "no baseline").
+        let brainPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || null;
+        if (!brainPath) {
+            try { brainPath = require('../lib/brain').getBrainPath(); } catch (e) { brainPath = 'models/private'; }
+        }
+        const { BrainVerifier } = require('../lib/state/brain-verify');
+        const bv = new BrainVerifier(brainPath);
+        const v = bv.verify();
+        if (v.ok) {
+            console.log('✅ Brain verified: current root matches the last anchor.');
+            console.log('   root: ' + v.current);
+            console.log('   anchored: ' + new Date(v.lastAnchored.timestamp).toISOString()
+                + ' (' + (v.lastAnchored.cause || 'unspecified') + ')');
+            process.exit(0);
+        }
+        if (v.lastAnchored === null) {
+            console.log('⚠️  No anchors recorded yet for ' + brainPath + ' — nothing to verify against.');
+            console.log('   Anchor a baseline first:');
+            console.log('     vant horcrux anchor');
+            process.exit(2);
+        }
+        console.log('❌ Brain DIVERGED from the last anchor.');
+        console.log('   ' + v.divergence);
+        console.log('   current:  ' + v.current);
+        console.log('   anchored: ' + v.lastAnchored.root_hash);
+        console.log('   If the change was intentional, re-anchor: vant horcrux anchor');
+        process.exit(1);
+    } else if (subcmd === 'anchor') {
+        // (pass 176) re-anchor after an intentional change (the escape hatch
+        // verify's divergence message points at). Not silent: prints what
+        // got anchored so an accidental re-anchor is visible in logs.
+        let brainPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || null;
+        if (!brainPath) {
+            try { brainPath = require('../lib/brain').getBrainPath(); } catch (e) { brainPath = 'models/private'; }
+        }
+        const { BrainVerifier } = require('../lib/state/brain-verify');
+        const bv = new BrainVerifier(brainPath);
+        const cause = args[1] || 'manual re-anchor (vant horcrux anchor)';
+        const entry = bv.anchorNow(cause);
+        console.log('✅ Anchored.');
+        console.log('   root: ' + entry.root_hash);
+        console.log('   cause: ' + entry.cause);
+        process.exit(0);
     } else {
         console.log('Unknown command:', subcmd);
         console.log('Run "vant horcrux --help" for usage');

@@ -37,6 +37,18 @@
  *                    reconstructs the same root hash, rejected writes
  *                    survive restarts (gaslight-proof across crashes), and
  *                    every delta is #161-provenance-stamped.
+ *   MESH → EVENTS  — every MeshTree mutation emits on the shared bus
+ *                    (pass 176, open-debt closure); { silent: true } keeps
+ *                    probe trees side-effect-free (mesh-status posture).
+ *   GEOMETRY → SPINE — quasicrystal content barcodes ride the ONE
+ *                    canonical encoder (#146): key-order-independent,
+ *                    cross-process equal — the last un-spined hash chain
+ *                    retired (payoff step ⑤ complete).
+ *   BRAIN-VERIFY → SURFACES — BrainVerifier onto `vant health` + the
+ *                    horcrux CLI (pass 176): health recomputes the brain
+ *                    root and verifies against the last anchor (auto-
+ *                    baseline on fresh installs); horcrux verify/anchor
+ *                    exit-code contract (0 ok, 1 diverged, 2 no anchor).
  *
  * Exit code is the verdict, per house test conventions.
  */
@@ -494,6 +506,180 @@ async function main() {
         const rec = mt2.tree.get('/mesh/r/n4/presence');
         assert.strictEqual(rec.state, 'PRESENT');
         assert.strictEqual(rec.value.heartbeat, t + 40, 'the LAST delta won (heartbeat n4)');
+    });
+
+    // ==================== MESH → EVENTS (pass 176) ====================
+    console.log('\n▓ MESH → EVENTS\n');
+
+    test('mesh events: every mutation emits on the shared bus', () => {
+        const fired = [];
+        const handlers = ['mesh:register', 'mesh:heartbeat', 'mesh:aoi', 'mesh:write', 'mesh:write:rejected', 'mesh:recovered']
+            .map(name => [name, (d) => fired.push({ name, d })]);
+        for (const [n, h] of handlers) events.on(n, h);
+        // mutable clock: authority lives per-instance, so the guaranteed
+        // loser is written into the SAME tree at an OLDER epoch
+        let clock = 100;
+        try {
+            const mt = new MeshTree({ universe: 'evt-universe', now: () => clock });
+            mt.register('r', 'n', {});
+            mt.heartbeat('r', 'n');
+            mt.subscribe('r', 'n', '/mesh/r');
+            mt.write('r', 'a', '/mesh/r/x', { v: 1 });
+            clock = 99; // challenger at an older epoch can never win
+            mt.write('r', 'b', '/mesh/r/x', { v: 2 });
+        } finally {
+            for (const [n, h] of handlers) events.off(n, h);
+        }
+        const names = fired.map(f => f.name);
+        for (const want of ['mesh:register', 'mesh:heartbeat', 'mesh:aoi', 'mesh:write', 'mesh:write:rejected']) {
+            assert.ok(names.includes(want), 'missing event ' + want + ' (got: ' + names.join(',') + ')');
+        }
+        // every event carries provenance (actor + epoch)
+        for (const f of fired) {
+            assert.ok(f.d.actor && typeof f.d.actor === 'string', 'actor rides the event');
+            assert.ok(Number.isFinite(f.d.epoch), 'epoch rides the event');
+        }
+    });
+
+    test('mesh events: silent trees emit nothing (a status probe is never a side effect)', () => {
+        const fired = [];
+        const h = (d) => fired.push(d);
+        events.on('mesh:register', h);
+        try {
+            const mt = new MeshTree({ universe: 'evt-universe', silent: true, now: () => 100 });
+            mt.register('r', 'n', {});
+            mt.heartbeat('r', 'n');
+            mt.write('r', 'n', '/mesh/r/n/state', { v: 1 });
+        } finally {
+            events.off('mesh:register', h);
+        }
+        assert.strictEqual(fired.length, 0, 'silent tree must be event-silent');
+    });
+
+    test('mesh events: persistent recovery emits mesh:recovered with the root hash', () => {
+        const dir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'vant-mesh-evt-'));
+        const seed = new MeshTree({ universe: 'evt-universe', dir, silent: true, now: () => 100 });
+        seed.register('r', 'n', {});
+        const fired = [];
+        const h = (d) => fired.push(d);
+        events.on('mesh:recovered', h);
+        try {
+            const mt = new MeshTree({ universe: 'evt-universe', dir, now: () => 100 });
+            assert.strictEqual(fired.length, 1, 'mesh:recovered fired once');
+            assert.strictEqual(fired[0].rootHash, mt.tree.rootHash(), 'recovery event carries the live root');
+            assert.strictEqual(fired[0].replayed, 1, 'replay count reported');
+        } finally {
+            events.off('mesh:recovered', h);
+        }
+    });
+
+    // ==================== GEOMETRY → SPINE (pass 176) ====================
+    console.log('\n▓ GEOMETRY → SPINE\n');
+
+    test('geometry: quasicrystal barcodes ride the ONE canonical encoder (#146)', () => {
+        const qc = require('../lib/geometry/quasicrystal');
+        const canonical = require('../lib/state/canonical');
+        // key-order independence: the #146 disease is gone at the generator
+        const a = qc.generateBarcodeFromContent({ beta: 2, alpha: 1 });
+        const b = qc.generateBarcodeFromContent({ alpha: 1, beta: 2 });
+        assert.strictEqual(a, b, 'same logical content → same barcode, any key order');
+        // deterministic + matches the canonical hash of the same content
+        const again = qc.generateBarcodeFromContent({ alpha: 1, beta: 2 });
+        assert.strictEqual(a, again);
+        const h = canonical.hash({ alpha: 1, beta: 2 });
+        assert.strictEqual(a, '9-' + String(10000 + (parseInt(h.slice(0, 5), 16) % 90000)).padStart(5, '0')
+            + '-' + String(parseInt(h.slice(5, 10), 16) % 100000).padStart(5, '0')
+            + '-' + (parseInt(h.slice(-1), 16) % 10));
+        // format contract intact: NSC 9, 12 digits
+        assert.ok(/^9-\d{5}-\d{5}-\d$/.test(a));
+        // distinct content still distinct
+        assert.notStrictEqual(a, qc.generateBarcodeFromContent({ alpha: 1, beta: 3 }));
+    });
+
+    test('geometry: barcode addressing still self-authenticates (store → retrieve roundtrip)', async () => {
+        const qc = require('../lib/geometry/quasicrystal');
+        const dir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'vant-qc-'));
+        const barcode = qc.generateBarcodeFromContent({ note: 'pass-176' });
+        const res = await qc.store(barcode, { note: 'pass-176' }, dir);
+        assert.strictEqual(res.stored, true);
+        const back = await qc.retrieve(barcode, dir);
+        assert.strictEqual(back.data.note, 'pass-176');
+        // re-deriving the barcode from the stored content still reaches the record
+        const rederived = qc.generateBarcodeFromContent({ note: 'pass-176' });
+        assert.strictEqual(rederived, barcode);
+        assert.ok(await qc.has(rederived, dir));
+    });
+
+    // ==================== BRAIN-VERIFY → SURFACES (pass 176) ====================
+    console.log('\n▓ BRAIN-VERIFY → SURFACES\n');
+
+    test('brain-verify: health section verifies a clean brain against its anchor', async () => {
+        const os = require('os');
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-bv-health-'));
+        fs.writeFileSync(path.join(dir, 'identity.md'), '# Me\nMODEL: pin');
+        const { checkBrainIntegrity } = require('../bin/health');
+        const bvMod = require('../lib/state/brain-verify');
+        // fresh brain: health anchors a baseline (warn path), then verifies
+        const logs1 = [];
+        const origLog = console.log;
+        console.log = (...a) => logs1.push(a.join(' '));
+        try {
+            process.env.MODEL_PATH = dir;
+            checkBrainIntegrity();
+            assert.ok(logs1.some(l => l.includes('baseline anchored')), 'fresh brain gets a baseline: ' + logs1.join('|'));
+            // second run: clean brain verifies ok
+            const logs2 = [];
+            console.log = (...a) => logs2.push(a.join(' '));
+            checkBrainIntegrity();
+            assert.ok(logs2.some(l => l.includes('verified against last anchor')), 'clean brain verifies: ' + logs2.join('|'));
+            // tamper: divergence is DETECTED
+            fs.writeFileSync(path.join(dir, 'identity.md'), '# Me\nMODEL: TAMPERED');
+            const logs3 = [];
+            console.log = (...a) => logs3.push(a.join(' '));
+            checkBrainIntegrity();
+            assert.ok(logs3.some(l => l.includes('DIVERGED')), 'tampered brain diverges: ' + logs3.join('|'));
+        } finally {
+            console.log = origLog;
+            delete process.env.MODEL_PATH;
+        }
+    });
+
+    test('brain-verify: horcrux verify/anchor exit-code contract (0 ok, 1 diverged, 2 no anchor)', async () => {
+        const os = require('os');
+        const { execFileSync } = require('child_process');
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-bv-cli-'));
+        fs.writeFileSync(path.join(dir, 'identity.md'), 'MODEL: pin');
+        const run = (args) => {
+            try {
+                const out = execFileSync('node', [path.join(ROOT, 'bin', 'horcrux.js'), ...args], {
+                    env: { ...process.env, MODEL_PATH: dir },
+                    encoding: 'utf8'
+                });
+                return { code: 0, out };
+            } catch (e) {
+                return { code: e.status, out: (e.stdout || '') + (e.stderr || '') };
+            }
+        };
+        // no anchor yet → exit 2
+        let r = run(['verify']);
+        assert.strictEqual(r.code, 2, 'no anchor → 2 (got ' + r.code + '): ' + r.out);
+        // anchor → 0
+        r = run(['anchor', 'pin baseline']);
+        assert.strictEqual(r.code, 0, 'anchor → 0: ' + r.out);
+        assert.ok(r.out.includes('Anchored'));
+        // verify clean → 0
+        r = run(['verify']);
+        assert.strictEqual(r.code, 0, 'clean verify → 0: ' + r.out);
+        // tamper → 1
+        fs.writeFileSync(path.join(dir, 'identity.md'), 'MODEL: TAMPERED');
+        r = run(['verify']);
+        assert.strictEqual(r.code, 1, 'diverged → 1 (got ' + r.code + '): ' + r.out);
+        assert.ok(r.out.includes('DIVERGED'));
+        // re-anchor intentionally → 0 again
+        r = run(['anchor', 'intentional change']);
+        assert.strictEqual(r.code, 0);
+        r = run(['verify']);
+        assert.strictEqual(r.code, 0, 're-anchored verify → 0');
     });
 
     // ==================== MESH-STATUS → MESHTREE ====================

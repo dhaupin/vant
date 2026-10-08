@@ -39,11 +39,11 @@
 | `canonical.js` | #146 | WIRED | tree, mesh, spine, checkpoint, delta | — |
 | `tree.js` (StateTree) | #145/#147/#148 | **WIRED** (pass 172) | state-store tree tier; **four live consumers**: trust (172), node-registry (173), consensus + market (174) — all via persistMerged/persist/hydrate with rootHash on events + audit | next: mesh deltas → checkpoint/WAL; geometry → spine/cellstore |
 | `seeds.js` (SeedChain) | #158 | WIRED | spine → mesh (pass 171). Env `VANT_UNIVERSE_SEED` → per-brain config `universeSeed` → fixed default | **RESOLVED (2026-10-08, owner):** fixed default stands — cross-install determinism is the point (mesh is the whole point). `VANT_UNIVERSE_SEED` is the sharding lever; per-brain `universeSeed` stays the durable override (READ path exists; nothing WRITES it yet) |
-| `mesh.js` (MeshTree) | #164 | **WIRED-PERSISTENT** (pass 175) | mesh-status report (pass 171: presence + seed scope); pass 175: opt-in `{ dir }` persistence — deltas ride the #151 SnapshottedLog, recovery is snapshot + bounded replay, rejected writes + #161 provenance survive restarts | in-memory by default (unchanged contract); no events on mutations yet |
+| `mesh.js` (MeshTree) | #164 | **WIRED-PERSISTENT** (pass 175) | mesh-status report (pass 171, now `{ silent: true }`); pass 175: opt-in `{ dir }` persistence — deltas ride the #151 SnapshottedLog, recovery is snapshot + bounded replay, rejected writes + #161 provenance survive restarts; pass 176: every mutation emits on the shared bus (`mesh:register/heartbeat/aoi/write/write:rejected/recovered`), `{ silent: true }` keeps probes side-effect-free | in-memory by default (unchanged contract) |
 | `spine.js` (AddressingSpine) | #165 | **WIRED** (pass 175) | mesh (pass 171); **raid fragmenter cells (pass 175)** | geometry `quasicrystal.js` storage still bypasses it |
 | `cellstore.js` (#150 rebate) | #150 | **WIRED** (pass 175) | **raid.fragment({ cellStore })** — shard cells claimed under the spine's /raid/<doc> space; rebate measured by savings_ratio | geometry quasicrystal + world consumers still absent |
 | `checkpoint.js` (SnapshottedLog) | #151 | **WIRED** (pass 175) | **MeshTree `{ dir }`** — mesh deltas are the designed log; snapshot + replay recovery pinned in state-wiring | generic WAL/snapshot story for other consumers unproven |
-| `anchor.js` (StateAnchor) | #152 | PARTIAL | brain-verify only (#166 tier) | state-store could anchor root hashes per persist (audit entry carries the hash but no chain exists) |
+| `anchor.js` (StateAnchor) | #152 | **WIRED** (pass 176) | brain-verify (#166 tier) — now on LIVE surfaces: `vant health` (brain-integrity section, auto-baselines fresh brains) + `vant horcrux verify` / `vant horcrux anchor` (exit-code contract 0/1/2). Ledger is PER-BRAIN (`<brainDir>/.brain-anchor.jsonl`) and the brain root EXCLUDES `state/` (protocol state has its own tree-tier story; including it made the tripwire cry wolf) | state-store could still anchor root hashes per persist |
 | `hotset.js` | #153 | ORPHAN | none | hot-path cache for tree reads when a consumer lands |
 | `fold.js` (4-ary capacity law) | #149 | ORPHAN | none | structural constraint for a future nested tree; nothing nests yet |
 | `delta.js` (DeltaLedger) | #161 | **WIRED** (pass 175) | **MeshTree provenance** — every register/heartbeat/aoi/write/rejected delta is actor-stamped; deterministic ledgerHash (clock injectable) | other consumers (presence-only feeds) absent |
@@ -56,7 +56,7 @@
 | `lattice-keys.js` | #155 | **WIRED** (pass 175) | **fragmenter.deriveLatticeKeys delegates to deriveShardKeys** — the last live Math.imul chain in the repo is retired; the legacy shim survives only as the tested lattice-keys export |
 | `precision.js` | #157 | ORPHAN | contract table + quantizer; no caller |
 | `fold.js` | #154 | ORPHAN | 1:4 + 24-bit budget; no caller |
-| `engine.js` / `fragmenter.js` / `quasicrystal.js` | pre-spine | PARTIAL (pass 175) | fragmenter now rides the #155 PRF for keys (live consumer: GitHub adapter); `quasicrystal.js` storage still has its own hashing/derivation — last un-spined geometry surface |
+| `engine.js` / `fragmenter.js` / `quasicrystal.js` | pre-spine | **WIRED** (pass 176) | fragmenter on the #155 PRF (pass 175); **quasicrystal content barcodes on the #146 canonical encoder** (pass 176 — the last un-spined hash chain retired; same logical content → same barcode across key orders/processes). #165 thesis complete: no second hash chain in the repo | engine.js math is compute (julia/node), not state hashing — out of scope by design |
 
 ## 5. Targeted repairs (pass 170)
 
@@ -64,7 +64,7 @@
 |---|---|---|
 | `lib/persistent-grants.js` → sandbox `can()` | #162 | WIRED (fail-closed, grantor mandatory, revocation honored) |
 | `lib/wal.js` DENIED ≠ EMPTY | #163 | WIRED (pinned) |
-| `lib/state/brain-verify.js` verify/anchor/horcrux | #166 | PARTIAL — the tier works; nothing calls `BrainVerifier` on a schedule (horcrux CLI + `vant health` are the natural hosts) |
+| `lib/state/brain-verify.js` verify/anchor/horcrux | #166 | **WIRED (pass 176)** — `vant health` verifies the brain against its anchor (auto-baselines fresh installs); `vant horcrux verify|anchor` expose the CI-safe exit-code contract (0 verified / 1 diverged / 2 no anchor). Per-brain ledger; `state/` excluded from the root |
 
 ## 6. Known open husks
 
@@ -99,7 +99,11 @@ wiring order that pays the most per commit:
    pinned; rejected writes + #161 provenance durable).
 3. **Geometry engine → spine/cellstore** — retires the last bespoke key
    derivation and the second hash chain (the #165 thesis, completed).
-   ✅ MOSTLY DONE pass 175 (fragmenter + GitHub adapter on the #155 PRF;
-   raid shards claim CellStore cells under /raid/<doc>). Remaining:
-   `quasicrystal.js` storage hashing.
+   ✅ DONE pass 175 + 176 (fragmenter + GitHub adapter on the #155 PRF;
+   raid shards claim CellStore cells under /raid/<doc>; quasicrystal
+   content barcodes on the #146 canonical encoder — no second hash
+   chain remains).
 4. **BrainVerifier onto a schedule** (`vant health` + horcrux CLI).
+   ✅ DONE pass 176 (health brain-integrity section + horcrux
+   verify/anchor; per-brain anchor ledger; state/ excluded from the
+   root so the tripwire only fires on content tampering).

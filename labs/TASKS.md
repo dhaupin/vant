@@ -2,7 +2,64 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 175 — mesh deltas → checkpoint/WAL (step ④ done; MeshTree is crash-safe) + geometry → PRF/cellstore (step ⑤ mostly done)
+**Session:** Pass 176 — payoff ledger complete: quasicrystal on the canonical encoder (step ⑤ done), mesh bus events, BrainVerifier on health + horcrux CLI (step ⑥ done)
+
+---
+
+## Session (2026-10-08 — pass 176: geometry → encoder, mesh → events, brain-verify → surfaces)
+
+**What shipped** (owner: "quasicrystal.js storage still has its own
+hashing... MeshTree mutations still don't emit bus events... Next payoff
+step: BrainVerifier onto vant health + horcrux CLI"):
+
+- **QUASICRYSTAL → CANONICAL ENCODER (step ⑤ COMPLETE):**
+  `generateBarcodeFromContent` rides the #146 canonical encoder — same
+  logical content → same barcode regardless of key order/process. The
+  LAST un-spined hash chain in the repo is retired; the #165 thesis
+  ("no second hash chain") is complete. Storage stays self-
+  authenticating (recovery recomputes from the barcode, never content),
+  so existing records stay reachable; only new barcode generation
+  changed.
+- **MESH → BUS EVENTS (open-debt closure):** every MeshTree mutation
+  emits — `mesh:register/heartbeat/aoi/write/write:rejected/recovered`
+  — with actor + epoch provenance on each. `{ silent: true }` keeps
+  probe trees side-effect-free; mesh-status passes it (a status probe
+  is never a side effect).
+- **BRAIN-VERIFY → SURFACES (step ⑥ COMPLETE):** `vant health` gains a
+  🧬 Brain integrity section (recomputes the content root, verifies
+  against the last anchor, auto-baselines fresh brains, never fails
+  health over a probe error). `vant horcrux verify` / `vant horcrux
+  anchor` expose the CI-safe exit-code contract (0 verified / 1
+  diverged / 2 no anchor yet).
+
+**Bugs the new pins caught (fixed at the cause):**
+
+- **Cross-brain anchor contamination:** the anchor ledger resolved via
+  `lock.pathFor` against the ACTIVE process brain — verifying brain X
+  while running as brain Y compared X's root against Y's anchors. The
+  ledger is now PER-BRAIN (`<brainDir>/.brain-anchor.jsonl`, inside the
+  tree it defends; a state ledger, not a lock — lock-audit untouched).
+- **Tripwire cried wolf:** the brain root covered `state/` (protocol
+  state mutating on every persist), so an active brain diverged within
+  minutes. `state/` is excluded — protocol state has its own tree-tier
+  integrity story (rootHash on every event, WAL writes); the #166 tier
+  now defends brain CONTENT (identity/lessons/learnings), which should
+  never move without intent.
+- **Syntax slip:** a doubled constructor brace in mesh.js (my own edit)
+  — caught by the first pin run.
+
+**Pin suite:** `test/state-wiring.test.js` extended with MESH →
+EVENTS (3), GEOMETRY → SPINE (2), BRAIN-VERIFY → SURFACES (2, incl. a
+real CLI subprocess pin of the horcrux exit-code contract). **46/46.**
+
+**Verification:** state-wiring 46/46; engine-parity-spine 70/70;
+mesh-status 7/7; backbone-wiring 11/11; atomic-writes 13/13;
+no-legacy-bloat 13/13; geometry-engine 1/1; state-persistence 8/8;
+tombstones 2/2; reap-crossprocess 6/6; audit-locks gate PASS.
+
+**Next:** #122–#144 husks; state-store root-hash anchoring per persist
+(the remaining §3 debt); optional: emit tree-tier rootHash on mesh
+persistence events too.
 
 ---
 

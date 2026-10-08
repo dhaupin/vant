@@ -263,6 +263,52 @@ function checkDebris(sweep) {
     }
 }
 
+// (pass 176) Brain integrity (#166): the BrainVerifier tier gets a live
+// surface. Recomputes the brain's content root and compares it to the last
+// anchor in the anchor ledger — a partial write, bad sync, or overeager
+// prune between "last horcrux" and now is DETECTED here, not at read time.
+// Never fails health over a probe error (same posture as checkLock).
+function checkBrainIntegrity() {
+    console.log('\n' + theme.label('🧬 Brain integrity:'));
+    try {
+        let brainPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || process.env.VANT_STORAGE_PATH || null;
+        if (!brainPath) {
+            try { brainPath = require('../lib/brain').getBrainPath(); } catch (e) { brainPath = 'models/private'; }
+        }
+        const { BrainVerifier } = require('../lib/state/brain-verify');
+        const bv = new BrainVerifier(brainPath);
+        const root = bv.currentRoot();
+        const files = bv.manifest();
+        const bad = files.filter(f => !f.ok);
+        console.log('  ' + theme.status.ok('root ' + root.slice(0, 12) + '… (' + files.length + ' content file(s))'));
+        if (bad.length > 0) {
+            for (const f of bad.slice(0, 3)) {
+                console.log('  ' + theme.status.fail('UNREADABLE: ' + f.path + ' — ' + f.error));
+            }
+            if (bad.length > 3) console.log('    … and ' + (bad.length - 3) + ' more');
+        }
+        const v = bv.verify();
+        if (v.ok) {
+            console.log('  ' + theme.status.ok('verified against last anchor'));
+        } else if (v.lastAnchored === null) {
+            // no anchors yet: a legitimate fresh install, not a divergence.
+            // Anchor NOW so the next health run has a baseline to defend.
+            try {
+                bv.anchorNow('vant health first anchor');
+                console.log('  ' + theme.status.warn('no anchor existed — baseline anchored (next run verifies against it)'));
+            } catch (e) {
+                console.log('  ' + theme.status.warn('no anchor recorded yet (baseline anchor failed: ' + e.message + ')'));
+            }
+        } else {
+            console.log('  ' + theme.status.fail('DIVERGED from last anchor'));
+            console.log('    ' + v.divergence);
+            console.log('    If this change was intentional, re-anchor: node -e "new (require(\'./lib/state/brain-verify\')).BrainVerifier(\'' + brainPath + '\').anchorNow(\'intentional change\')"');
+        }
+    } catch (e) {
+        console.log('  ' + theme.status.warn('Brain integrity unavailable: ' + e.message));
+    }
+}
+
 function run() {
     console.log('\n' + theme.vantHeader + ' Health Check\n');
     
@@ -272,10 +318,11 @@ function run() {
     checkDirs();
     checkMigration();
     checkLock();
+    checkBrainIntegrity();
     checkDebris(sweep);
     
     console.log('\n');
 }
 
 run();
-module.exports = { checkModel, checkConfig, checkEnv, checkDirs, run };
+module.exports = { checkModel, checkConfig, checkEnv, checkDirs, checkBrainIntegrity, run };
