@@ -2,7 +2,58 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 161 — comment audit batch 8 (mesh/org layer): forum integration overclaim fixed
+**Session:** Pass 162 — comment audit batch 9 (runtime/core): 2 drifts fixed; forum msg/escrow wiring scoped
+
+---
+
+## Session (2026-10-08 — pass 162: comment audit batch 9)
+
+Owner: "let's hit batch 9!" + asked what wiring forum's claimed msg
+and escrow integrations would take.
+
+BATCH 9 (compute.js, consciousness.js, nature.js, anchor.js, docs.js,
+onboard.js, metrics.js) — 5 of 7 accurate, 2 fixed:
+
+FIXED - lib/compute.js header listed rust.js as a discovered language
+connector — connectors/rust.js does NOT exist. Discovery code is
+honest (allowlist includes 'rust' but the file is missing), so the
+HEADER was the fiction. Noted in-header: add the file when you add
+the name.
+
+FIXED - lib/onboard.js Usage taught onboard.getAll() — not exported
+(exports: getBrainFiles/getSystemFiles/getFileInfo/getOnboardSummary/
+getFile/search/getInstallStatus/getWakeBriefing/getFile/getAll never
+existed). Usage now teaches search() + getWakeBriefing() (real).
+
+VERIFIED ACCURATE: consciousness (whoAmI :67/intend :109 statics
+match), nature (conceptual header, honest metaphor), anchor.js
+(pass-23 design doc matches dispatcher behavior), docs.js
+(generateOpenAPI :155/generateMarkdown :202 real), metrics.js
+(prom-style registry, never-throws contract matches). compute's
+other 5 connectors (python/julia/node/ruby/go/php) all exist.
+
+NO dedicated anchor test (covered indirectly by fresh-dir-routing +
+genesis-ring). Suites: compute/consciousness/nature/docs/onboard/
+metrics all 0-fail. Gates: claims PASS, syntax OK. Sweep via CI.
+
+FORUM MSG/ESCROW WIRING SCOPED (owner question, not yet built):
+- msg: forum actions emit events but never call msg.post/send. Wire
+  = notify thread subscribers on new post/vote via msg.post(convId,
+  content) with a conv per thread (convId = forum:<thread>), pipeline-
+  backed (msg now runs the unified chain itself, 0.8.6). ~30-40 lines
+  in forum.js + subscriber bookkeeping in thread state.
+- escrow: budget-gate action rows (createPost/vote spend ops) via
+  escrow.canSpend(agentId, amount) before the action lands; amount
+  maps to engagement cost (e.g. vote=1 unit). Without budgets config'd
+  escrow defaults allow — safe rollout. ~15-20 lines + tests.
+Estimate: one focused pass. NOT built this pass (audit discipline:
+edit comments only) — waiting on owner go-ahead.
+
+AUDIT TALLY: 9 batches, 66 files, 16 corrections.
+
+NEXT-UP: forum msg/escrow wiring pass (owner go-ahead?), remaining
+lib sweep (embedders/, connectors/ git providers, branches/doc家族),
+or owner direction. Rides PR #118.
 
 ---
 
