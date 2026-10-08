@@ -2,7 +2,69 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-07  
-**Session:** Pass 151 — docs crosslink/frontmatter sweep: 491 links 0 broken, 2 layout fields filled
+**Session:** Pass 152 — buried-docs sweep: prd-agents max-4 + geometry README truth-up
+
+---
+
+## Session (2026-10-08 — pass 152: buried docs sweep)
+
+Owner: "any other fictitious claims, or stale readmes (or other docs)
+buried elsewhere in repo? Update them, or archive them if not needed."
+
+METHOD: inventoried ALL .md outside docs/ + the root-8 (691 files -
+almost all gitignored runtime brain state, not docs). Live docs-
+adjacent set: .github/ (5), labs/ (~20), lib/geometry/README.md,
+models/public/vant/boot/README.md. Ran the fiction-signature grep
+(npm-install, dead modules, max-4, phantom getters, phantom classes,
+removed APIs) across all of them.
+
+VERIFIED REAL/CLEAN, untouched: .github/SECURITY.md (supported-versions
+table, private advisory flow, scope notes incl. 'a documented endpoint
+that behaves differently than documented is a security bug here, by
+policy'), .github/SUPPORT.md (routing: Discussions -> Issues ->
+advisories; all links real), .github templates, boot/README.md
+(single-stone boot chain matches pass-132 archival, restore command
+real, grep-hygiene prime #100 note intact), labs/whitepaper/*,
+labs/DISCUSSION-* (dated point-in-time drafts), labs/prd-* status
+headers honest (draft/proposed/survey-pending/framing).
+
+FIXED:
+- labs/prd-agents.md (Status: 'Implemented (v0.8.7+)' - so its claims
+  read as current fact): 'up to 4 concurrent agents (you + 3 coworkers)'
+  in the Overview + 'Up to 4 agents per session' design principle +
+  'brain_agent_spawn (max 4)' MCP table row - the max-4 folklore's
+  ORIGIN STORY, still live in the file DEPLOY.md cross-references as
+  'Agent system' architecture PRD. Corrected to the dynamic quota
+  (agents.maxAgents, default 10, VANT_AGENTS_MAX) with a dated errata
+  block. Everything else in the PRD verified real: delegate/
+  delegateAsync/pollWork/completeWork (lib/agents/work.js:32/116/151/
+  168), join/emit/on, fork, agent_spawn/agent_list/agent_kill/
+  agent_proto_list/load MCP tools (lib/mcp.js:2219+). The v0.8.7
+  version-history row '(4 agents)' left as point-in-time.
+- lib/geometry/README.md: directory listing omitted 2 real files
+  (engine.js, fragmenter.js); usage example passed project() COORDS to
+  quasicrystal.store() which takes (barcode, data, ...) - store-by-
+  barcode is the whole point of the module. Corrected to
+  geometry.store('1-...-8', {...}) / geometry.retrieve('1-...-8')
+  (the real convenience wrappers, lib/geometry/index.js:59-74),
+  noted quasicrystal() as the lower-level init-storage pattern.
+
+ARCHIVE CANDIDATES CONSIDERED, none taken: labs/discussion drafts and
+prd-* planning docs are honest point-in-time records with status
+headers - nothing was fiction-only (unlike notifications.md in pass
+142). Everything buried is either real, dated, or now corrected.
+
+GATES: style+links PASS (118), dist PASS, surface PASS, ci.js
+439/0/1skip. Residual max-4 grep outside archives/ledger-quotes/
+version-history rows: clean. LESSONS: (1) the max-4 folklore had ONE
+more live root: the PRD marked 'Implemented' - status headers turn
+planning docs into reference docs, so their claims must be checked
+against code when the status says shipped; (2) README.md inside lib/
+subdirectories is a THIRD unchecked docs surface (after root .md and
+dist/) - geometry's own README described a different API than the
+module exports (store-by-coords vs store-by-barcode); (3) inventory
+before sweeping - 691 .md files sound terrifying until you exclude
+gitignored runtime state, then it's ~30 real files.
 
 ---
 

@@ -9,11 +9,13 @@
 
 ## 1. Overview
 
-The Vant Agent System provides a **multi-agent crew** architecture supporting up to 4 concurrent agents (you + 3 coworkers). Agents can be spawned, delegated work, communicate via channels, and participate in approval workflows — all with per-agent isolation, capability-based security, and MCP integration for external agents.
+The Vant Agent System provides a **multi-agent crew** architecture with a quota-configurable roster (agents.maxAgents, default 10; override with VANT_AGENTS_MAX). Agents can be spawned, delegated work, communicate via channels, and participate in approval workflows — all with per-agent isolation, capability-based security, and MCP integration for external agents.
+
+> **Errata (2026-10-08, pass 152):** this PRD originally said "up to 4 agents (you + 3 coworkers)" — the number was folklore with no enforcing code. The real quota is dynamic: `lib/agents/core.js` interpolates "Agent quota reached (max N)" from `_getMaxAgents()`. Corrected above and in the design principles below.
 
 ### Design Principles
 
-- **Multi-Agent Crew**: Up to 4 agents per session (1 orchestrator + 3 workers)
+- **Multi-Agent Crew**: Quota-configurable crew per session (roster = `agents.maxAgents`, default 10)
 - **Per-Agent Isolation**: Each agent gets its own `AgentContext` with separate state, events, conversations, and sandbox
 - **Capability-Based Security**: Per-agent sandbox capabilities mapped to sudo scopes (`spawn`, `write`, `execute`, `read`)
 - **Delegation Pipeline**: Sync (`delegate`) and async (`delegateAsync`, `pollWork`, `completeWork`) patterns
@@ -579,7 +581,7 @@ await mcp.start({ port: 3100 });
 
 | Tool | Description | Parameters |
 |------|-------------|------------|
-| `brain_agent_spawn` | Spawn new agent (max 4) | `name`, `role`, `brain`, `team`, `roleId`, `reportsTo`, `mcp` |
+| `brain_agent_spawn` | Spawn new agent (quota = `agents.maxAgents`) | `name`, `role`, `brain`, `team`, `roleId`, `reportsTo`, `mcp` |
 | `brain_agent_list` | List active agents | none |
 | `brain_agent_kill` | Kill agent by ID | `id` |
 

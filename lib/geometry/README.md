@@ -45,7 +45,9 @@ The rhombus tiling P3 guarantees:
 
 ```
 lib/geometry/
-├── index.js           # Main export
+├── index.js           # Main export + convenience wrappers (store/retrieve/has/list/stats)
+├── engine.js          # Barcode generation from content hash
+├── fragmenter.js      # Chunked fragment encode/decode
 ├── icosahedral.js    # 3D coordinate system
 ├── projection.js      # Barcode → coord projection
 ├── tilings.js         # Penrose P3 distribution
@@ -61,13 +63,15 @@ const geometry = require('./geometry');
 const coords = geometry.project('1-31814-04200-8');
 // { theta: 2.34, phi: 0.72, depth: 0.418 }
 
-// Get quasicrystal storage
-const qstore = geometry.quasicrystal();
-await qstore.store(coords, { type: 'memory', content: '...' });
+// Store data AT a barcode address (store takes the BARCODE, not coords)
+await geometry.store('1-31814-04200-8', { type: 'memory', content: '...' });
 
-// Recover from barcode (any node can recompute!)
-const recovered = await qstore.retrieve('1-31814-04200-8');
+// Recover from barcode (any node can recompute the same address!)
+const recovered = await geometry.retrieve('1-31814-04200-8');
 ```
+
+The lower-level `geometry.quasicrystal()` module is also exposed
+(init-storage pattern), but the wrappers above are the intended API.
 
 ## Security Properties
 
