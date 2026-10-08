@@ -2,7 +2,47 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 157 — lib comment audit batch 4 (security-chain + mesh core)
+**Session:** Pass 158 — lib comment audit batch 5 (search/geometry/connectors/backup)
+
+---
+
+## Session (2026-10-08 — pass 158: comment audit batch 5)
+
+Owner: "let's run the next batch pls."
+
+BATCH 5 (search.js, geometry/index.js, connectors/s3.js, backup.js,
+stego.js, wal.js) — 4 of 6 ACCURATE, 2 fixed:
+
+FIXED - lib/search.js header version qualifier: "(v0.8.6-axolotl)" was
+a leftover from the pass-154 0.8.7→0.8.6 conversion (the -axolotl
+suffix rode along); pass-155's standardization pattern didn't target
+0.8.6-axolotl forms. Owner ruling = everything is 0.8.6 → now plain
+(v0.8.6). Only occurrence repo-wide (verified grep 0).
+
+FIXED - lib/connectors/s3.js Usage drift: header taught
+`require('./connectors/s3').s3({...})` but exports are createClient
+(:393; .s3 never existed). Same class as escrow's pass-157 find:
+Usage-example names vs real export names.
+
+VERIFIED ACCURATE: backup.js (create/validate/restore/start all
+exported — validate was the pass-24 ghost-fix, now real :602),
+stego.js (encode(message,input,output)/decode(imagePath) match
+:144/:190), geometry/index.js (project→{theta,phi,depth,fingerprint},
+quasicrystal/store/retrieve all exported :34+), wal.js (layout claims
+match .wal constants :38-41), search.js modes (basic/hybrid/hyde/rag
+confirmed :373).
+
+GAPS NOTED: lib/geometry/ has NO dedicated test file in test/ (only
+indirect coverage); backup.js validate+restore worth a round-trip pin
+someday. Recorded for future passes.
+
+GATES: claims PASS (846f/9sig), surface PASS, syntax OK. Suites:
+search 22/22, backup-create-safety 3/3, stego 12/12, wal 14/14,
+connector 8/8. Full sweep via CI.
+
+NEXT-UP: comment audit batch 6 (candidates: msg.js, network.js,
+node-registry.js, consensus.js, market.js, trust.js, embed.js,
+encrypt.js), or owner direction. Rides PR #118.
 
 ---
 
