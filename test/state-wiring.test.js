@@ -24,6 +24,12 @@
  *                    step ②): the peer table mirrors through persistMerged
  *                    (tree support added pass 173) and hydrate; root hash
  *                    rides events; merged-persist path carries the hash too.
+ *   CONSENSUS → TREE — third live consumer (pass 174, step ③): vote
+ *                    ledgers + reap tombstones mirror through persistMerged
+ *                    and hydrate; root hash rides events.
+ *   MARKET → TREE  — fourth live consumer (pass 174, step ③): listings /
+ *                    bids / trades mirror through persistMerged and
+ *                    hydrate; root hash rides events.
  *
  * Exit code is the verdict, per house test conventions.
  */
@@ -294,6 +300,89 @@ async function main() {
         const again = registry.register({ id: 'pin-node-1', host: 'localhost', port: 3457 });
         assert.ok(!again.error, 're-register after clearState works');
         registry.clearState();
+    });
+
+    // ==================== CONSENSUS + MARKET → TREE (steps ③, pass 174) ====================
+    console.log('\n▓ CONSENSUS + MARKET → TREE\n');
+
+    const consensus = require('../lib/consensus');
+    const market = require('../lib/market');
+
+    test('consensus: create mirrors the vote ledgers (persistMerged tree path)', async () => {
+        consensus.clearState();
+        const fired = [];
+        const onSaved = (d) => { if (d.moduleName === 'consensus') fired.push(d); };
+        events.on('state:saved', onSaved);
+        try {
+            const topic = 'wiring-pin-' + Date.now();
+            const res = consensus.create(topic, { options: ['y', 'n'] });
+            assert.ok(!res || !res.error, 'create accepted: ' + JSON.stringify(res));
+            const root = consensus._treeRoot();
+            assert.ok(root && /^[0-9a-f]{64}$/.test(root), 'root hash is a sha256 hex');
+            const mirrored = stateStore.fromTree('consensus', consensus._stateTree());
+            assert.ok(Array.isArray(mirrored.ledgers) && mirrored.ledgers.some(l => l.topic === topic),
+                'ledger present in the mirrored tree');
+            const saved = fired.filter(d => d.rootHash);
+            assert.ok(saved.length > 0 && saved.every(d => d.rootHash === root),
+                'persistMerged state:saved rides the consensus rootHash');
+        } finally {
+            events.off('state:saved', onSaved);
+        }
+    });
+
+    test('consensus: disk view matches the live mirror (treeFor === _treeRoot)', () => {
+        // persistMerged is async (lock handshake) — flush the microtask queue
+        // so the merged write has landed before reading disk state back.
+        return new Promise(r => setTimeout(r, 20)).then(() => {
+            const disk = stateStore.treeFor('state/consensus.json');
+            assert.strictEqual(disk.state, 'PRESENT');
+            assert.strictEqual(disk.rootHash, consensus._treeRoot());
+        });
+    });
+
+    test('consensus: clearState resets the mirror (tombstone maps dropped too)', () => {
+        assert.strictEqual(consensus.clearState(), true);
+        assert.strictEqual(consensus._treeRoot(), null);
+    });
+
+    test('market: list a listing and mirror the market state (persistMerged tree path)', async () => {
+        market.clearState();
+        const fired = [];
+        const onSaved = (d) => { if (d.moduleName === 'market') fired.push(d); };
+        events.on('state:saved', onSaved);
+        try {
+            const res = await market.list('knowledge', {
+                title: 'pass-174 pin',
+                description: 'tree-tier mirror pin',
+                seller: 'pin-seller',
+                price: 5,
+                supply: 1
+            });
+            assert.ok(!res || !res.error, 'list accepted: ' + JSON.stringify(res));
+            const root = market._treeRoot();
+            assert.ok(root && /^[0-9a-f]{64}$/.test(root), 'root hash is a sha256 hex');
+            const mirrored = stateStore.fromTree('market', market._stateTree());
+            assert.ok(Array.isArray(mirrored.listings) && mirrored.listings.length > 0,
+                'listing present in the mirrored tree');
+            const saved = fired.filter(d => d.rootHash);
+            assert.ok(saved.length > 0 && saved.every(d => d.rootHash === root),
+                'persistMerged state:saved rides the market rootHash');
+        } finally {
+            events.off('state:saved', onSaved);
+        }
+    });
+
+    test('market: disk view matches the live mirror (treeFor === _treeRoot)', () => {
+        return new Promise(r => setTimeout(r, 20)).then(() => {
+            const disk = stateStore.treeFor('state/market.json');
+            assert.strictEqual(disk.state, 'PRESENT');
+            assert.strictEqual(disk.rootHash, market._treeRoot());
+        });
+    });
+
+    test('market: clearState resets the mirror + search index', () => {
+        assert.strictEqual(market.clearState(), true);
+        assert.strictEqual(market._treeRoot(), null);
     });
 
     // ==================== MESH-STATUS → MESHTREE ====================

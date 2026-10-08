@@ -37,7 +37,7 @@
 | Module | Issue | Status | Consumers | Debt |
 |---|---|---|---|---|
 | `canonical.js` | #146 | WIRED | tree, mesh, spine, checkpoint, delta | — |
-| `tree.js` (StateTree) | #145/#147/#148 | **WIRED** (pass 172) | state-store tree tier; **trust (pass 172) + node-registry (pass 173) are live consumers** — trust via persist/hydrate, node-registry via persistMerged (tree support added pass 173) + hydrate; root hashes ride events + audit | next: consensus/market read the same tier; mesh deltas → checkpoint |
+| `tree.js` (StateTree) | #145/#147/#148 | **WIRED** (pass 172) | state-store tree tier; **four live consumers**: trust (172), node-registry (173), consensus + market (174) — all via persistMerged/persist/hydrate with rootHash on events + audit | next: mesh deltas → checkpoint/WAL; geometry → spine/cellstore |
 | `seeds.js` (SeedChain) | #158 | WIRED | spine → mesh (pass 171). Env `VANT_UNIVERSE_SEED` → per-brain config `universeSeed` → fixed default | **RESOLVED (2026-10-08, owner):** fixed default stands — cross-install determinism is the point (mesh is the whole point). `VANT_UNIVERSE_SEED` is the sharding lever; per-brain `universeSeed` stays the durable override (READ path exists; nothing WRITES it yet) |
 | `mesh.js` (MeshTree) | #164 | WIRED | mesh-status report (pass 171: presence + seed scope) | in-memory only — no persistence; silent (no events); rejected-writes not ledgered |
 | `spine.js` (AddressingSpine) | #165 | WIRED | mesh (pass 171); geometry/raid still bypass it | geometry consumers below |
@@ -91,7 +91,8 @@ wiring order that pays the most per commit:
 1. **One real state-store consumer onto the tree tier** (trust or
    node-registry) — proves the tier, gives anchor/diff a reason to exist.
    ✅ DONE pass 172 (trust) + pass 173 (node-registry, incl. persistMerged
-   tree support). Next in line: consensus/market.
+   tree support) + pass 174 (consensus + market — the protocol layer is
+   now fully on the tier). Next: mesh deltas → checkpoint/WAL.
 2. **Mesh deltas → checkpoint + WAL** — turns MeshTree from in-memory into
    crash-safe with the primitives that already exist.
 3. **Geometry engine → spine/cellstore** — retires the last bespoke key

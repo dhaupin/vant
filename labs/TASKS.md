@@ -2,7 +2,42 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 173 — node-registry onto the tree tier (step ②) + persistMerged tree support
+**Session:** Pass 174 — consensus + market onto the tree tier (step ③ done; the protocol layer is fully on the spine)
+
+---
+
+## Session (2026-10-08 — pass 174: consensus + market → tree tier)
+
+**What shipped** (owner: "let's keep going"):
+
+- **CONSENSUS → TREE (third live consumer, step ③):** vote ledgers +
+  reap tombstones mirror into one StateTree on hydrate and every
+  merged persist; rootHash rides state:saved + audit. Cross-process
+  "same vote ledgers?" is one string comparison — the vote-verification
+  story now has a hash, not just a file.
+- **MARKET → TREE (fourth live consumer, step ③):** listings / bids /
+  trades mirror the same way; the scarcity/trade state gets the same
+  cross-process same-state answer. clearState drops the mirror +
+  search index.
+- Together with trust (172) and node-registry (173), the entire
+  protocol-state layer is now on the tree tier. WIRING.md payoff step
+  ①–③ complete; remaining order: mesh deltas → checkpoint/WAL,
+  geometry → spine/cellstore, BrainVerifier onto health/horcrux.
+
+**Pin suite:** `test/state-wiring.test.js` extended with a
+CONSENSUS + MARKET → TREE section (6 new pins): create/list mirror
+through persistMerged with rootHash on the event, ledger/listing present
+in the mirrored tree, disk view === live mirror for both (async lock
+handshake flushed), clearState resets incl. tombstone maps. 33/33.
+
+**Verification:** state-wiring 33/33; consensus, market, trust,
+state-persistence 8/8, state-store-crossprocess 5/5,
+state-store-tombstones 2/2, backbone-wiring 11/11, mesh-status 7/7,
+agora-sync, engine-parity-spine 66/66; audit-locks gate PASS.
+
+**Next:** mesh deltas → checkpoint/WAL (MeshTree crash-safe); geometry
+→ spine/cellstore; BrainVerifier onto `vant health` + horcrux CLI;
+#122–#144 husks.
 
 ---
 
