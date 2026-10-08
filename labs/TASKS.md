@@ -2,7 +2,50 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 158 — lib comment audit batch 5 (search/geometry/connectors/backup)
+**Session:** Pass 159 — lib comment audit batch 6 (protocol/mesh layer): ALL CLEAN
+
+---
+
+## Session (2026-10-08 — pass 159: comment audit batch 6)
+
+Owner: "let's keep going pls."
+
+BATCH 6 (msg.js, network.js, node-registry.js, consensus.js,
+market.js, trust.js, embed.js, encrypt.js) — **8 of 8 ACCURATE, zero
+fixes. First fully-clean batch of the audit.**
+
+VERIFIED: msg.js (post/send exported as facade delegates :11/:34;
+encryption config defaults encrypted/autoEncrypt=true match config.js
+:221-223), network.js (all 7 claimed features real: exponential
+backoff :181, pooling POOL_SIZE :65, response cache CACHE_TTL :66),
+node-registry.js (register/discover exported; state-store persistence
+claim matches the pass-37 hydration), consensus.js (vote/voteSecured/
+tally exported; NOT-crypto disclaimer intact), market.js + trust.js
+(security-chain integration claims all real — vaf/sandbox/escrow/
+governance requires verified, QoS wired via chain block-reasons
+market:blocked qos :385/:482, trust:blocked qos :234), embed.js
+(3 embedders exist: openai/local/hash in lib/embedders/), encrypt.js
+(all statics: generateId/hash/encrypt/decrypt/verify/sha256/hmac;
+header usage matches).
+
+NOTE: trust.js was flagged mid-check for possibly missing QoS in its
+chain — disproven (qos enforced via pipeline, emits qos block-reason).
+Lesson: absence-of-require is not absence-of-feature when a unified
+pipeline owns the chain.
+
+GATES: claims PASS (846f/9sig), syntax OK. Suites: msg-sync 9,
+network 0-fail, registry-persistence 6, consensus-read-scope 9,
+market-crossprocess 8, trust 20, embed 0-fail, encrypt 0-fail. Full
+sweep via CI.
+
+AUDIT RUNNING TALLY: 6 batches, 43 files, 10 corrections (2 fiction,
+5 staleness, 3 Usage/signature drift). Newest pass-annotated modules
+are consistently clean; drift concentrates in older headers + Usage
+blocks.
+
+NEXT-UP: batch 7 candidates (cron.js, prune.js, tmp.js, branch.js,
+health.js, api.js, audit.js, auth.js), format.js/geometry test pins
+(still open), or owner direction. Rides PR #118.
 
 ---
 
