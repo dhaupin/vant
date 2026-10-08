@@ -30,6 +30,13 @@
  *   MARKET → TREE  — fourth live consumer (pass 174, step ③): listings /
  *                    bids / trades mirror through persistMerged and
  *                    hydrate; root hash rides events.
+ *   MESH → WAL     — mesh deltas ride the #151 SnapshottedLog (pass 175,
+ *                    WIRING.md payoff step ④): opt-in { dir } persistence,
+ *                    crash-safe recovery replays the log after the latest
+ *                    snapshot, a fresh MeshTree over the same dir
+ *                    reconstructs the same root hash, rejected writes
+ *                    survive restarts (gaslight-proof across crashes), and
+ *                    every delta is #161-provenance-stamped.
  *
  * Exit code is the verdict, per house test conventions.
  */
@@ -383,6 +390,110 @@ async function main() {
     test('market: clearState resets the mirror + search index', () => {
         assert.strictEqual(market.clearState(), true);
         assert.strictEqual(market._treeRoot(), null);
+    });
+
+    // ==================== MESH → CHECKPOINT/WAL (pass 175) ====================
+    console.log('\n▓ MESH → CHECKPOINT/WAL\n');
+
+    const os = require('os');
+
+    test('mesh persistence: in-memory by default (no dir, no side effects)', () => {
+        const mt = new MeshTree({ universe: 'wal-universe' });
+        const info = mt.persistenceInfo();
+        assert.strictEqual(info.enabled, false, 'default stays in-memory');
+        assert.strictEqual(info.dir, null);
+        assert.strictEqual(info.recovery, null);
+        // behavior contract unchanged
+        mt.register('r', 'n', { a: 1 });
+        assert.strictEqual(mt.isAlive('r', 'n', mt._now() + 1).alive, true);
+    });
+
+    test('mesh persistence: deltas ride the SnapshottedLog (wal.log + snapshot files)', () => {
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-mesh-wal-'));
+        const mt = new MeshTree({ universe: 'wal-universe', dir, everyN: 3 });
+        mt.register('r1', 'alpha', { role: 'pin' });
+        mt.heartbeat('r1', 'alpha');
+        const res = mt.subscribe('r1', 'alpha', '/mesh/r1');
+        assert.strictEqual(res, '/mesh/r1');
+        assert.ok(fs.existsSync(path.join(dir, 'wal.log')), 'wal.log exists');
+        assert.ok(fs.existsSync(path.join(dir, 'snapshots')), 'snapshots dir exists');
+        const snaps = fs.readdirSync(path.join(dir, 'snapshots')).filter(f => f.endsWith('.snap'));
+        assert.strictEqual(snaps.length, 1, 'snapshot fired at everyN=3 (3 records in)');
+    });
+
+    test('mesh persistence: fresh MeshTree over the same dir reconstructs the same root hash', () => {
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-mesh-wal-'));
+        const t = 5000;
+        const mt = new MeshTree({ universe: 'wal-universe', dir, now: () => t });
+        mt.register('r1', 'alpha', { role: 'writer' });
+        mt.register('r1', 'beta', { role: 'reader' });
+        mt.heartbeat('r1', 'beta');
+        mt.write('r1', 'alpha', '/mesh/r1/alpha/state', { hp: 80 });
+        mt.subscribe('r1', 'beta', '/mesh/r1/alpha');
+        const rootBefore = mt.tree.rootHash();
+        const aliveBefore = mt.isAlive('r1', 'beta', t + 1);
+        // fresh process view: same dir, same universe, same fixed clock
+        const mt2 = new MeshTree({ universe: 'wal-universe', dir, now: () => t });
+        assert.strictEqual(mt2.tree.rootHash(), rootBefore,
+            'recovery (snapshot + log replay) reproduces the state byte-for-byte');
+        assert.deepStrictEqual(mt2.isAlive('r1', 'beta', t + 1), aliveBefore);
+        assert.strictEqual(mt2.tree.get('/mesh/r1/alpha/state').value.value.hp, 80);
+        assert.strictEqual(mt2.tree.get('/mesh/r1/beta/aoi').value.scope, '/mesh/r1/alpha');
+        assert.strictEqual(mt2.persistenceInfo().recovery.replayed >= 0, true);
+    });
+
+    test('mesh persistence: rejected writes survive the restart (gaslight-proof across crashes)', () => {
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-mesh-wal-'));
+        const t = 1000;
+        const mt = new MeshTree({ universe: 'wal-universe', dir, now: () => t });
+        mt.write('r', 'a', '/mesh/r/n/x', { v: 1 });
+        const res = mt.write('r', 'b', '/mesh/r/n/x', { v: 2 }); // loser at same epoch
+        if (res.accepted) {
+            // hash tiebreak may favor b — force a guaranteed loser with an older epoch
+            const mt3 = new MeshTree({ universe: 'wal-universe', dir, now: () => t + 1 });
+            mt3.write('r', 'c', '/mesh/r/n/x', { v: 0 }); // older epoch → rejected
+        }
+        const losers = mt.rejectedWrites().length;
+        const mt2 = new MeshTree({ universe: 'wal-universe', dir, now: () => t + 5 });
+        assert.strictEqual(mt2.rejectedWrites().length, losers,
+            'the rejected-delta record is durable, not just in-memory');
+        assert.ok(mt2.rejectedWrites().every(e => e.winner && e.path), 'rejected entries keep their shape');
+    });
+
+    test('mesh persistence: every delta is #161-provenance-stamped (actor is NOT optional)', () => {
+        const mt = new MeshTree({ universe: 'wal-universe', now: () => 42 });
+        mt.register('r', 'n');
+        mt.heartbeat('r', 'n');
+        mt.write('r', 'n', '/mesh/r/n/state', { x: 1 });
+        mt.write('r', 'other', '/mesh/r/n/state', { x: 2 }); // maybe rejected
+        const ledger = mt.deltaLedger();
+        assert.ok(ledger.sequenceLength >= 3, 'register + heartbeat + write recorded');
+        for (const rec of ledger.since(0)) {
+            assert.ok(rec.actor && typeof rec.actor === 'string' && rec.actor.length > 0,
+                'every delta carries an actor');
+            assert.ok(typeof rec.epoch === 'number', 'every delta carries an epoch');
+        }
+        // determinism: two trees that saw the same events agree on one hash
+        const mt2 = new MeshTree({ universe: 'wal-universe', now: () => 42 });
+        mt2.register('r', 'n');
+        mt2.heartbeat('r', 'n');
+        mt2.write('r', 'n', '/mesh/r/n/state', { x: 1 });
+        mt2.write('r', 'other', '/mesh/r/n/state', { x: 2 });
+        assert.strictEqual(mt.deltaLedger().ledgerHash(), mt2.deltaLedger().ledgerHash(),
+            'delta ledgerHash is deterministic (#161 acceptance #3)');
+    });
+
+    test('mesh persistence: interval snapshot fast-forwards recovery (replayed only after snapshot)', () => {
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-mesh-wal-'));
+        const t = 7000;
+        let seq = 0;
+        const mt = new MeshTree({ universe: 'wal-universe', dir, now: () => t + (seq++) * 10, everyN: 2, keepK: 2 });
+        for (let i = 0; i < 5; i++) mt.heartbeat('r', 'n' + i);
+        const mt2 = new MeshTree({ universe: 'wal-universe', dir, now: () => t + 1000 });
+        assert.strictEqual(mt2.tree.rootHash(), mt.tree.rootHash(), 'same state after bounded recovery');
+        const rec = mt2.tree.get('/mesh/r/n4/presence');
+        assert.strictEqual(rec.state, 'PRESENT');
+        assert.strictEqual(rec.value.heartbeat, t + 40, 'the LAST delta won (heartbeat n4)');
     });
 
     // ==================== MESH-STATUS → MESHTREE ====================

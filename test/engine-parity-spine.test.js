@@ -430,6 +430,59 @@ async function geometry() {
             z => ({ re: z.re * 3, im: z.im * 2 }));
         assert.strictEqual(real.length, 2);
     });
+
+    // ---------- (pass 175) payoff step ⑤: geometry → spine/cellstore ----------
+
+    test('#155 fragmenter shard keys ride the PRF (live imul chain retired)', () => {
+        const fragmenter = require('../lib/geometry/fragmenter');
+        const { deriveShardKeys } = require('../lib/geometry/lattice-keys');
+        const keys = fragmenter.deriveLatticeKeys('doc-seq-1', 5);
+        assert.strictEqual(keys.length, 5);
+        // identical derivation to the #155 PRF module (one chain, no adapters)
+        assert.deepStrictEqual(keys, deriveShardKeys('doc-seq-1', 5));
+        // fixed 16-char width, base36, deterministic
+        assert.ok(keys.every(k => /^[0-9a-z]{16}$/.test(k)));
+        assert.deepStrictEqual(fragmenter.deriveLatticeKeys('doc-seq-1', 5), keys);
+        // domain separation: distinct documents never alias
+        assert.notDeepStrictEqual(fragmenter.deriveLatticeKeys('doc-seq-2', 5), keys);
+    });
+
+    test('#155 adapter uses the PRF keys too (GitHub fragmenter latticeKeys)', () => {
+        const { GitHubFragmenter } = require('../lib/adapters/github-fragmenter');
+        const gf = new GitHubFragmenter({});
+        const { deriveShardKeys } = require('../lib/geometry/lattice-keys');
+        assert.deepStrictEqual(gf.latticeKeys('seq-42', 5), deriveShardKeys('seq-42', 5),
+            'the live consumer derives via the ONE PRF, not the imul shim');
+    });
+
+    test('#150 RAID shards claim CellStore cells under the /raid space (rebate fires)', () => {
+        const raid = require('../lib/geometry/raid');
+        const { CellStore } = require('../lib/state/cellstore');
+        const cs = new CellStore();
+        const { shards, manifest, cells } = raid.fragment('parity payload', { k: 4, docId: 'doc-A', cellStore: cs });
+        assert.strictEqual(cells.length, k = manifest.k + 1, 'every shard claimed (data + parity)');
+        assert.ok(cells.every(c => /^[0-9a-f]{64}$/.test(c.cell)), 'cell addresses are spine-PRF hex');
+        const same = raid.fragment('parity payload', { k: 4, docId: 'doc-B', cellStore: cs });
+        // identical payload → identical shard bytes → content-hash rebate
+        const rebates = same.cells.filter(c => c.rebate).length;
+        assert.strictEqual(rebates, same.cells.length, 'identical shards across docs are re-claims, zero bytes stored');
+        const m = cs.metrics();
+        assert.ok(m.savings_ratio > 0, 'the #150 rebate is MEASURED, not assumed');
+        assert.strictEqual(m.distinct, manifest.k + 1, 'stored once, claimed twice');
+    });
+
+    test('#165 RAID cell addressing via the ONE PRF (no second chain)', () => {
+        const raid = require('../lib/geometry/raid');
+        const { CellStore } = require('../lib/state/cellstore');
+        const { AddressingSpine } = require('../lib/state/spine');
+        const cs = new CellStore();
+        const spine = new AddressingSpine({ universe: 'raid-universe' });
+        const { cells } = raid.fragment('x', { k: 2, docId: 'doc-C', cellStore: cs, spine });
+        const space = spine.spaceId('raid', 'doc-C');
+        assert.strictEqual(cells[0].cell, spine.cellAddress(space, 0));
+        assert.strictEqual(cells[1].cell, spine.cellAddress(space, 1));
+        assert.notStrictEqual(cells[0].cell, cells[1].cell, 'shard index rides the address derivation');
+    });
 }
 
 // ==================== WORLD/CLOCK ====================

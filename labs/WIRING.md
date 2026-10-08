@@ -39,24 +39,24 @@
 | `canonical.js` | #146 | WIRED | tree, mesh, spine, checkpoint, delta | — |
 | `tree.js` (StateTree) | #145/#147/#148 | **WIRED** (pass 172) | state-store tree tier; **four live consumers**: trust (172), node-registry (173), consensus + market (174) — all via persistMerged/persist/hydrate with rootHash on events + audit | next: mesh deltas → checkpoint/WAL; geometry → spine/cellstore |
 | `seeds.js` (SeedChain) | #158 | WIRED | spine → mesh (pass 171). Env `VANT_UNIVERSE_SEED` → per-brain config `universeSeed` → fixed default | **RESOLVED (2026-10-08, owner):** fixed default stands — cross-install determinism is the point (mesh is the whole point). `VANT_UNIVERSE_SEED` is the sharding lever; per-brain `universeSeed` stays the durable override (READ path exists; nothing WRITES it yet) |
-| `mesh.js` (MeshTree) | #164 | WIRED | mesh-status report (pass 171: presence + seed scope) | in-memory only — no persistence; silent (no events); rejected-writes not ledgered |
-| `spine.js` (AddressingSpine) | #165 | WIRED | mesh (pass 171); geometry/raid still bypass it | geometry consumers below |
-| `cellstore.js` (#150 rebate) | #150 | ORPHAN | none outside spine | RAID + geometry should claim cells here (the dedup savings never fire) |
-| `checkpoint.js` (SnapshottedLog) | #151 | ORPHAN | none | mesh deltas are the designed log; nothing snapshots yet |
+| `mesh.js` (MeshTree) | #164 | **WIRED-PERSISTENT** (pass 175) | mesh-status report (pass 171: presence + seed scope); pass 175: opt-in `{ dir }` persistence — deltas ride the #151 SnapshottedLog, recovery is snapshot + bounded replay, rejected writes + #161 provenance survive restarts | in-memory by default (unchanged contract); no events on mutations yet |
+| `spine.js` (AddressingSpine) | #165 | **WIRED** (pass 175) | mesh (pass 171); **raid fragmenter cells (pass 175)** | geometry `quasicrystal.js` storage still bypasses it |
+| `cellstore.js` (#150 rebate) | #150 | **WIRED** (pass 175) | **raid.fragment({ cellStore })** — shard cells claimed under the spine's /raid/<doc> space; rebate measured by savings_ratio | geometry quasicrystal + world consumers still absent |
+| `checkpoint.js` (SnapshottedLog) | #151 | **WIRED** (pass 175) | **MeshTree `{ dir }`** — mesh deltas are the designed log; snapshot + replay recovery pinned in state-wiring | generic WAL/snapshot story for other consumers unproven |
 | `anchor.js` (StateAnchor) | #152 | PARTIAL | brain-verify only (#166 tier) | state-store could anchor root hashes per persist (audit entry carries the hash but no chain exists) |
 | `hotset.js` | #153 | ORPHAN | none | hot-path cache for tree reads when a consumer lands |
 | `fold.js` (4-ary capacity law) | #149 | ORPHAN | none | structural constraint for a future nested tree; nothing nests yet |
-| `delta.js` (DeltaLedger) | #161 | ORPHAN | none | mesh rejected-writes + presence are natural deltas |
+| `delta.js` (DeltaLedger) | #161 | **WIRED** (pass 175) | **MeshTree provenance** — every register/heartbeat/aoi/write/rejected delta is actor-stamped; deterministic ledgerHash (clock injectable) | other consumers (presence-only feeds) absent |
 
 ## 4. Geometry (`lib/geometry/*`)
 
 | Module | Issue | Status | Debt |
 |---|---|---|---|
-| `raid.js` | #156 | ORPHAN | should read/write through CellStore + the spine's `/raid/<doc>` space |
-| `lattice-keys.js` | #155 | ORPHAN | sha256 PRF exists; imul chain demoted to tested shim — geometry engine still routes neither |
+| `raid.js` | #156 | **WIRED** (pass 175) | `fragment({ cellStore })` claims shard cells under `/raid/<doc>` via the spine's ONE PRF; identical shards across docs rebate (#150) |
+| `lattice-keys.js` | #155 | **WIRED** (pass 175) | **fragmenter.deriveLatticeKeys delegates to deriveShardKeys** — the last live Math.imul chain in the repo is retired; the legacy shim survives only as the tested lattice-keys export |
 | `precision.js` | #157 | ORPHAN | contract table + quantizer; no caller |
 | `fold.js` | #154 | ORPHAN | 1:4 + 24-bit budget; no caller |
-| `engine.js` / `fragmenter.js` / `quasicrystal.js` | pre-spine | WIRED (legacy surface) | pre-#165: own key derivation + hashes — the "where the spine got large" answer. Migrating them onto spine/cellstore is the biggest remaining blast radius |
+| `engine.js` / `fragmenter.js` / `quasicrystal.js` | pre-spine | PARTIAL (pass 175) | fragmenter now rides the #155 PRF for keys (live consumer: GitHub adapter); `quasicrystal.js` storage still has its own hashing/derivation — last un-spined geometry surface |
 
 ## 5. Targeted repairs (pass 170)
 
@@ -92,9 +92,14 @@ wiring order that pays the most per commit:
    node-registry) — proves the tier, gives anchor/diff a reason to exist.
    ✅ DONE pass 172 (trust) + pass 173 (node-registry, incl. persistMerged
    tree support) + pass 174 (consensus + market — the protocol layer is
-   now fully on the tier). Next: mesh deltas → checkpoint/WAL.
+   now fully on the tier).
 2. **Mesh deltas → checkpoint + WAL** — turns MeshTree from in-memory into
    crash-safe with the primitives that already exist.
+   ✅ DONE pass 175 (`MeshTree { dir }` → SnapshottedLog; snapshot+replay
+   pinned; rejected writes + #161 provenance durable).
 3. **Geometry engine → spine/cellstore** — retires the last bespoke key
    derivation and the second hash chain (the #165 thesis, completed).
+   ✅ MOSTLY DONE pass 175 (fragmenter + GitHub adapter on the #155 PRF;
+   raid shards claim CellStore cells under /raid/<doc>). Remaining:
+   `quasicrystal.js` storage hashing.
 4. **BrainVerifier onto a schedule** (`vant health` + horcrux CLI).

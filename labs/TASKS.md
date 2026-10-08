@@ -2,7 +2,68 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 174 — consensus + market onto the tree tier (step ③ done; the protocol layer is fully on the spine)
+**Session:** Pass 175 — mesh deltas → checkpoint/WAL (step ④ done; MeshTree is crash-safe) + geometry → PRF/cellstore (step ⑤ mostly done)
+
+---
+
+## Session (2026-10-08 — pass 175: mesh → WAL + geometry → spine/cellstore)
+
+**What shipped** (owner: "MeshTree is still in-memory — mesh deltas →
+checkpoint/WAL is the next payoff step... And keep moving through wiring
+the other stuff"):
+
+- **MESH → CHECKPOINT/WAL (payoff step ④):** `MeshTree` gains opt-in
+  `{ dir }` persistence — every delta (register, heartbeat, aoi
+  subscribe, accepted AND rejected writes) rides the #151 SnapshottedLog:
+  append-only wal.log + content-addressed snapshots every N records,
+  bounded history, bounded recovery (latest snapshot + replay after it).
+  In-memory remains the DEFAULT (zero side effects for probes/tests).
+  A fresh MeshTree over the same dir reconstructs the same root hash —
+  same-mesh-across-restarts is one string comparison. Rejected writes
+  are DURABLE now: the gaslight-proof record survives a crash. #163
+  honored (unreadable log = DENIED, never silently empty).
+- **DELTA → MESH (#161 wired):** every mesh delta is provenance-stamped
+  through DeltaLedger; `DeltaLedger` gained an injectable per-record
+  clock + epoch override so replay determinism holds (two ledgers that
+  saw the same events under the same clock agree on one ledgerHash).
+- **GEOMETRY → PRF (payoff step ⑤, half):** `fragmenter.deriveLatticeKeys`
+  now delegates to `lattice-keys.deriveShardKeys` — the LAST live
+  Math.imul chain in the repo is retired (#155). The live consumer
+  (lib/adapters/github-fragmenter.js → GitHub dead-drop) gets PRF keys
+  with zero API change. Legacy imul survives only as the tested shim.
+- **RAID → CELLSTORE (#150 wired):** `raid.fragment({ cellStore })`
+  claims every shard cell under the spine's ONE `/raid/<doc>` space
+  (AddressingSpine + the ONE PRF, per-shard index). Identical shard
+  content across documents stores ONCE — the #150 rebate fires and is
+  MEASURED via savings_ratio, not assumed.
+
+**Pin suites:**
+
+- `test/state-wiring.test.js` extended with a MESH → CHECKPOINT/WAL
+  section (6 new pins): in-memory default unchanged, wal.log + snapshot
+  files created, same-root-hash recovery across a fresh instance,
+  rejected writes survive restart, #161 provenance on every delta with
+  deterministic ledgerHash, interval snapshot fast-forwards bounded
+  recovery. **39/39.**
+- `test/engine-parity-spine.test.js` extended with 4 geometry pins
+  (#155 fragmenter + adapter on the PRF, #150 RAID cell claims + rebate
+  measured, #165 per-shard PRF addressing). **70/70.**
+
+**Verification:** state-wiring 39/39; engine-parity-spine 70/70;
+atomic-writes 13/13 (structural gates over the edited fragmenter);
+mesh-status 7/7; backbone-wiring 11/11; no-legacy-bloat 13/13;
+geometry-engine 1/1; state-persistence 8/8;
+state-store-tombstones 2/2; consensus-reap-crossprocess 6/6.
+
+**Mid-pass catches (fixed, not suppressed):** the delta ledger's default
+wall-clock epoch made ledgerHash non-deterministic across replay (pin
+catch #1) and re-reading the shared fixed clock double-advanced it (pin
+catch #2) — fixed with DeltaLedger's injectable clock + event-epoch
+override, assertions untouched.
+
+**Next:** quasicrystal.js storage onto the spine/cellstore (the last
+bespoke geometry hash); BrainVerifier onto `vant health` + horcrux CLI;
+#122–#144 husks.
 
 ---
 
