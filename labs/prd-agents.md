@@ -3,17 +3,19 @@
 **Version:** 1.0  
 **Branch:** axolotl  
 **Date:** 2026-09-19  
-**Status:** Implemented (v0.8.7+)
+**Status:** Implemented (v0.8.6, axolotl line)
 
 ---
 
 ## 1. Overview
 
-The Vant Agent System provides a **multi-agent crew** architecture supporting up to 4 concurrent agents (you + 3 coworkers). Agents can be spawned, delegated work, communicate via channels, and participate in approval workflows — all with per-agent isolation, capability-based security, and MCP integration for external agents.
+The Vant Agent System provides a **multi-agent crew** architecture with a quota-configurable roster (agents.maxAgents, default 10; override with VANT_AGENTS_MAX). Agents can be spawned, delegated work, communicate via channels, and participate in approval workflows — all with per-agent isolation, capability-based security, and MCP integration for external agents.
+
+> **Errata (2026-10-08, pass 152):** this PRD originally said "up to 4 agents (you + 3 coworkers)" — the number was folklore with no enforcing code. The real quota is dynamic: `lib/agents/core.js` interpolates "Agent quota reached (max N)" from `_getMaxAgents()`. Corrected above and in the design principles below.
 
 ### Design Principles
 
-- **Multi-Agent Crew**: Up to 4 agents per session (1 orchestrator + 3 workers)
+- **Multi-Agent Crew**: Quota-configurable crew per session (roster = `agents.maxAgents`, default 10)
 - **Per-Agent Isolation**: Each agent gets its own `AgentContext` with separate state, events, conversations, and sandbox
 - **Capability-Based Security**: Per-agent sandbox capabilities mapped to sudo scopes (`spawn`, `write`, `execute`, `read`)
 - **Delegation Pipeline**: Sync (`delegate`) and async (`delegateAsync`, `pollWork`, `completeWork`) patterns
@@ -579,7 +581,7 @@ await mcp.start({ port: 3100 });
 
 | Tool | Description | Parameters |
 |------|-------------|------------|
-| `brain_agent_spawn` | Spawn new agent (max 4) | `name`, `role`, `brain`, `team`, `roleId`, `reportsTo`, `mcp` |
+| `brain_agent_spawn` | Spawn new agent (quota = `agents.maxAgents`) | `name`, `role`, `brain`, `team`, `roleId`, `reportsTo`, `mcp` |
 | `brain_agent_list` | List active agents | none |
 | `brain_agent_kill` | Kill agent by ID | `id` |
 
@@ -981,13 +983,13 @@ fleet.forEach(a => console.log(`${a.name} (${a.role}): ${a.state}`));
 
 | Version | Changes |
 |---------|---------|
-| v0.8.7 | Multi-agent crew (4 agents), MCP JSON-RPC tools, AgentContext isolation |
-| v0.8.7 | Delegation: sync + async with stream queue, recursion guards |
-| v0.8.7 | Workflow: approve/reject/signOff/deadline/retry/escalate/priority |
-| v0.8.7 | Communication: per-agent channels + global fallback |
-| v0.8.7 | Metrics: getMetrics, list, get, getSummary |
-| v0.8.7 | Security: per-agent sandbox, sudo escalation for spawn/write, RLS |
-| v0.8.7 | Prototype system: loadProto, listProtos, loadChain, folder format |
+| v0.8.6 | Multi-agent crew, MCP JSON-RPC tools, AgentContext isolation |
+| v0.8.6 | Delegation: sync + async with stream queue, recursion guards |
+| v0.8.6 | Workflow: approve/reject/signOff/deadline/retry/escalate/priority |
+| v0.8.6 | Communication: per-agent channels + global fallback |
+| v0.8.6 | Metrics: getMetrics, list, get, getSummary |
+| v0.8.6 | Security: per-agent sandbox, sudo escalation for spawn/write, RLS |
+| v0.8.6 | Prototype system: loadProto, listProtos, loadChain, folder format |
 
 ---
 

@@ -102,7 +102,7 @@ test('boot layer list includes brain exactly once', () => {
     return { success: brainCount === 1, error: `brain pushed ${brainCount} times` };
 });
 
-// ==================== v0.9.0-axolotl T5 ====================
+// ==================== 0.8.6 T5 ====================
 
 test('boot.init failure surfaces failedLayer in return value', () => {
     // Read the source to verify the T5 fix is in place

@@ -7,9 +7,11 @@ nav_order: 130
 ---
 # Brain Schema
 
-> **Note:** Default location is `models/private/`. Configure via `MODEL_PATH` env var to use a different path. See [Configuration](/vant/reference/config).
+> **Note:** Brain content lives per-brain under `models/public/<brain>/`
+> and `models/private/<brain>/` (multibrain layout); `MODEL_PATH` is a
+> `config.ini` key for the models root. See [Configuration](/vant/reference/config).
 
-Files in your brain folder (default: `models/private/`):
+Files in your brain folder (default: the `vant` brain):
 
 ## Core Identity
 
@@ -59,8 +61,9 @@ Files in your brain folder (default: `models/private/`):
 
 | File | Description |
 |------|-------------|
-| `meta.json` | Version, stats |
-| `verbosity.ini` | Output settings |
+| `_succession.json` | Serialized succession state (trust levels, registry) |
+| `insights.json` | Generated insights |
+| `islands.json` | Island registry state |
 
 ## Version & State
 
@@ -72,12 +75,9 @@ Files in your brain folder (default: `models/private/`):
 
 ## Runtime State
 
-Files in `states/active/`:
-
-| File | Description |
-|------|-------------|
-| `current.json` | Current runtime state |
-| `rate-limit.json` | Rate limit tracking |
+Runtime state lives in code (config cache, memory store, locks under
+`models/private/<brain>/.locks/`), not in a `states/active/` folder.
+Rate limiting state is per-process (lib/qos, lib/escrow).
 
 ## Schema / Cargo
 

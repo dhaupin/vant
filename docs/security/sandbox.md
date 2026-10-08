@@ -25,7 +25,7 @@ The sandbox is Vant's "keeper" layer. It provides:
 Create a sandboxed agent:
 
 ```javascript
-const sandbox = require('vant').sandbox;
+const sandbox = require('./lib/sandbox');   // also: require('vant').sandbox (real getter)
 
 const s = sandbox.create({
     agentId: 'agent-1',
@@ -45,26 +45,35 @@ const s = sandbox.create({
 
 ## Capabilities
 
-What an agent can do:
+What an agent can do. The defaults below are the EXPLICIT-CONFIG
+defaults in `DEFAULT_CAPABILITIES` (lib/sandbox.js:304): the moment you
+pass a `capabilities` option, everything not granted is denied. An
+UNTOUCHED sandbox instead allows (with a one-time warning) so CLI
+commands work out of the box:
 
-| Capability | Default | What |
-|------------|---------|------|
-| canRead | true | Read from brain, search |
-| canWrite | true | Write to brain, commit |
-| canNetwork | true | Call external APIs |
-| canSpawn | false | Create sub-agents |
-| canCommit | true | Commit to git |
-| canCreateBranch | false | Create git branches |
-| canDelete | false | Delete files/branches |
-| canAdmin | false | Admin operations |
+| Capability | Explicit default | What |
+|------------|-----------------|------|
+| read / load / list / exists / search | true | Brain reads, corpus load, search |
+| write | **false** | Brain writes, commits |
+| canRead | true | File reads |
+| canWrite | **false** | File writes |
+| canNetwork | **false** | External API calls |
+| canExec | **false** | Shell execution |
+| canSpawn | **false** | Sub-agents |
+| canCommit | **false** | Git commits |
+| canCreateBranch | **false** | Git branches |
+| canDelete | **false** | Deletions |
+| canAdmin | **false** | Admin operations |
+| canTrade | **false** | Knowledge-market trades |
 
 ### Read Operations
 
 Read operations go through the read quota:
 
 ```javascript
-// Check if read is allowed
-s.canRead(); // true | false
+// Check a capability
+s.can('canRead');    // true | false (canRead/canWrite also exist in the
+                     // gate chain - see lib/sandbox.js)
 
 // Execute read operation
 await s.read(() => brain.get('learnings', 'lesson-1'));
@@ -72,28 +81,32 @@ await s.read(() => brain.get('learnings', 'lesson-1'));
 
 ### Write Operations
 
-Write operations go through write quota + lock:
+Write operations go through write quota + optional lock:
 
 ```javascript
-// Check if write is allowed
-s.canWrite(); // true | false
+// Check a capability
+s.can('canWrite');
 
 // Execute write operation
 await s.write(() => brain.write('lessons', 'new', 'content'));
 ```
 
+Wrapper methods on the class: `read`, `write`, `network`, `spawn`,
+`commit` (each with its own escrow cost), plus raw `execute(op, ctx)`.
+
 ## Network Restrictions
 
-Restrict which domains an agent can call:
+Restrict which domains an agent can call (empty allowlist = no domain
+filtering is applied by the sandbox itself; network.js enforces what is
+set):
 
 ```javascript
 const s = sandbox.create({
-    allowedDomains: ['api.github.com', 'api.openai.com'],
-    blockExternal: true  // block everything else
+    allowedDomains: ['api.github.com', 'api.openai.com']
 });
 ```
 
-Attempting to call an unallowed domain:
+Call an unallowed domain:
 
 ```javascript
 const allowed = s.isDomainAllowed('https://evil.com');
@@ -109,26 +122,27 @@ The sandbox enforces quotas:
 | maxConcurrent | 3 | Simultaneous operations |
 | readQuota | 100/min | Read rate limit |
 | writeQuota | 20/min | Write rate limit |
-| maxMemory | 100MB | Memory limit |
+| maxMemory | 100MB | Memory ceiling |
 
 Query current usage:
 
 ```javascript
-const stats = s.getStats();
-console.log(stats.reads);     // reads this minute
-console.log(stats.writes);    // writes this minute
-console.log(stats.concurrent); // active operations
-console.log(stats.budget);    // remaining budget
+const stats = s.getStatus();
+console.log(stats.reads);      // reads this session
+console.log(stats.writes);     // writes this session
+console.log(stats.active);     // active operations
+console.log(s.getBudgetStatus());  // escrow budget
 ```
 
 ### Rate Limited Operations
 
-Operations above quota are rejected:
+Operations above quota THROW (coded errors, not {error} returns):
 
 ```javascript
-const result = await s.read(() => someOperation());
-if (result.error) {
-    console.log(result.code); // "RATE_LIMITED"
+try {
+    await s.read(() => someOperation());
+} catch (e) {
+    console.log(e.code);  // e.g. SANDBOX_* codes; retryable flag attached
 }
 ```
 
@@ -142,14 +156,15 @@ const s = sandbox.create({
     budget: 10000
 });
 
-console.log(s.getBudget()); // 10000
+// Budget delegates to the escrow system
+console.log(s.getBudgetStatus());
 
-// Operations deduct from budget
+// Operations deduct from the agent's escrow budget
 await s.write(() => doWork());
-console.log(s.getBudget()); // 9999
 ```
 
-Budget tracking uses the escrow system. See [Escrow](/vant/security/escrow) for details.
+Budget exceeding throws `SANDBOX_BUDGET_EXCEEDED`. See
+[Escrow](/vant/security/escrow) for the spending API.
 
 ## Multi-Agent
 
@@ -199,10 +214,11 @@ Get sandbox status:
 
 ```javascript
 const status = s.getStatus();
-console.log(status.agentId);    // "agent-1"
-console.log(status.capabilities); // { canRead: true, ... }
-console.log(status.quota);     // { reads: 10, writes: 2 }
-console.log(status.errors);  // recent errors
+// { active, reads, writes, uptime } - operation counters
+
+console.log(s.getErrors());          // recent errors
+console.log(s.getCapabilities());    // capability snapshot
+console.log(s.getOperationHistory()); // what ran
 ```
 
 ## Advanced
@@ -215,11 +231,14 @@ Extend capabilities:
 const s = sandbox.create({
     capabilities: {
         ...sandbox.DEFAULT_CAPABILITIES,
-        canExecuteCode: true,
-        canUseFilesystem: false
+        canTrade: true   // real extra capability in the model (deny-by-default)
     }
 });
 ```
+
+There are no `canExecuteCode`/`canUseFilesystem` capabilities in the
+model - the declared set is what the gate checks (see
+DEFAULT_CAPABILITIES above).
 
 ### Custom Scopes
 

@@ -20,50 +20,61 @@ Run tasks on schedule:
 
 ## Schedule
 
-Simple interval:
+`lib/cron.js` exposes a scheduler backed by interval timers (not cron
+expressions). `vant.cron` returns it:
 
 ```javascript
 const cron = require('vant').cron;
 
-cron.every('1h', () => {
-    console.log('Hourly task');
+// Interval scheduling: interval is milliseconds (1000 - 86400000, 1 day max)
+const id = cron.schedule({
+    id: 'hourly-task',
+    interval: 3600000,           // every hour
+    handler: () => console.log('Hourly task')
 });
 ```
 
-Cron expression:
-
-```javascript
-cron.cron('0 * * * *', () => {
-    console.log('Every hour');
-});
-```
+There is no cron-expression parser - schedules are interval-based, and
+intervals outside 1s..1day are rejected (VAF-validated).
 
 ## One-Time
 
 Run once:
 
 ```javascript
-cron.after(60000, () => {
-    console.log('Run after 1 minute');
+cron.once('event-name', (data) => {
+    console.log('Fired once');
 });
 ```
 
 ## Stop
 
-Stop a job:
+Cancel a scheduled task by id:
 
 ```javascript
-const jobId = cron.every('1h', () => doWork());
-cron.stop(jobId);
+cron.schedule({ id: 'hourly', interval: 3600000, handler: doWork });
+cron.cancel('hourly');
 ```
 
 ## Status
 
-List jobs:
+List and inspect tasks:
 
 ```javascript
-console.log(cron.jobs());
+cron.list();            // all scheduled tasks
+cron.status('hourly');  // one task's status
 ```
+
+## Specialized Schedulers
+
+```javascript
+cron.scheduleCompute('nightly-embed', code, options);  // compute intervals
+cron.scheduleEmbed('reindex', options);                // vectorization
+```
+
+## CLI
+
+`vant cron` is also a routed command (see `vant cron --help`).
 
 ---
 

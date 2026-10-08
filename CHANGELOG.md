@@ -234,7 +234,7 @@ Both files are deferred — not in the b-T scope.
   - TODO: Efficient recall and assimilation system
 
 - **Config System Consolidation** (Roadmap)
-  - DONE: Per-brain JSON config with global fallback (v0.8.7)
+  - DONE: Per-brain JSON config with global fallback (v0.8.6)
   - TODO: Additional config utilities per brain
 
 > Original intent: VANT gates all endpoints as OS functions
@@ -404,9 +404,9 @@ Both files are deferred — not in the b-T scope.
   - ADDED: stream.js events - stream:enqueued, stream:polled, stream:completed
   - ADDED: sudo.js events - sudo:escalation
 
-### Feature - Multi-Agent Orchestration (v0.8.7)
+### Feature - Multi-Agent Orchestration (v0.8.6)
 - **MCP Agent Tools** (2026-05-13)
-  - ADDED: agent_spawn - Spawn new agent (max 4: you + 3 others)
+  - ADDED: agent_spawn - Spawn new agent (quota = agents.maxAgents)
   - ADDED: agent_list - List active agents with IDs and states
   - ADDED: agent_kill - Kill agent by ID
   - MCP server now exposes /rpc endpoint with brain_* prefixed tools

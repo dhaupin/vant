@@ -62,12 +62,14 @@ The stale-days default comes from the `prune.staleDays` config key
 
 ```javascript
 const prune = require('./lib/prune');
-const result = await prune.run({ dryRun: true });
+// NOTE: sandbox-gated - a userCtx is required (VAF fail-closed otherwise)
+const result = await prune.prune({ dryRun: true, userCtx });
 ```
 
-`run` takes `{ dryRun, staleDays, removeFluff }`. The result reports what
-was found and what was removed before anything is deleted, so the dry-run
-result can be reviewed in automation.
+`prune()` takes `{ dryRun, staleDays, removeFluff, userCtx }`. The result
+reports what was found and what was removed before anything is deleted,
+so the dry-run result can be reviewed in automation. Related exports:
+`getStats()`, `listPrunable()`, `isFluff()`, `DEFAULT_STALE_DAYS`.
 
 ## Practice
 

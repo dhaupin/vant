@@ -57,7 +57,7 @@ vant memory clear
 
 ## Code
 
-The same surface in code:
+The same surface in code (all calls are async):
 
 ```javascript
 const { memory } = require('./lib/memory');
@@ -69,8 +69,14 @@ Key-value state:
 
 ```javascript
 const { state, recall } = require('./lib/memory');
-state('build-count', 42);
-recall('build-count');   // 42
+await state('build-count', 42);
+await recall('build-count');   // 42
+```
+
+TTL is an options object on the lib side (there is no CLI flag):
+
+```javascript
+await state('session-token', 'abc', { ttl: 3600000 });
 ```
 
 ## Geometric addressing

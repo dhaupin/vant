@@ -232,14 +232,15 @@ Check your level at session start.
 - [The Brain](https://docs.creadev.org/vant/memory/brain) — Memory files
 - [Runtime](https://docs.creadev.org/vant/runtime/runtime) — Programmatic API
 - [MCP Tools](https://docs.creadev.org/vant/reference/mcp-tools) — AI tools (auto-wired registry)
-- [Multi-Agent Crew](https://docs.creadev.org/vant/multi-agent/agents) — 4 agents max
+- [Multi-Agent Crew](https://docs.creadev.org/vant/multi-agent/agents) — crew roster (`agents.maxAgents`, default 10)
 - [CLI](https://docs.creadev.org/vant/reference/cli) — All commands
 
 ---
 
-## Multi-Agent Crew (v0.8.7)
+## Multi-Agent Crew (v0.8.6)
 
-Up to 4 agents can work together (you + 3 coworkers).
+Agents coordinate per install through the agent crew runtime (roster size is
+the `agents.maxAgents` config key, default 10).
 
 ### Join via MCP
 
@@ -268,7 +269,7 @@ x-api-key/Bearer on POSTs.
 
 | Tool | Description |
 |------|-------------|
-| `agent_spawn` | Spawn new agent (quota via agents.maxAgents, default crew of 4) |
+| `agent_spawn` | Spawn new agent (quota via agents.maxAgents config) |
 | `agent_list` | List active agents |
 | `agent_kill` | Kill agent by ID |
 | `agent_proto_list` / `agent_proto_load` | Agent protos (templates) |

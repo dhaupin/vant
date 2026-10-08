@@ -416,7 +416,7 @@ test('getPipelineState has chain', () => {
 });
 
 // ============================================
-// MULTIBRAIN NEURONS (v0.9.0)
+// MULTIBRAIN NEURONS (v0.8.6)
 // ============================================
 
 test('brainNeurons returns object', () => {

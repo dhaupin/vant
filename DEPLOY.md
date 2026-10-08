@@ -294,7 +294,7 @@ vant transform status
 
 ### Multi-Agent Crews
 
-Up to 4 agents per install (MCP door quota, `agents.maxAgents`). The programmatic API is synchronous spawn + explicit flush:
+Quota-configurable roster per install (`agents.maxAgents`, default 10; override with `VANT_AGENTS_MAX`). The programmatic API is synchronous spawn + explicit flush:
 
 ```javascript
 const agents = require('./lib/agents');
@@ -329,7 +329,7 @@ There is no distributed-locking service to deploy. Brain locking is local file-m
 | `Sync failed` / push refused | Protected branch guard | Work on a feature branch or pass `--branch <name>` explicitly |
 | `Config not set. Run vant setup first.` | Missing `GITHUB_REPO` | `vant setup`, set `GITHUB_TOKEN` in env |
 | `E_SANDBOX` on a teams write | Deny-by-default caps | `vant org status`, then `vant org grant --scopes ...` |
-| `Agent quota reached (max 4)` | MCP crew full | Terminate idle agents (`agents.terminate(id)`) or raise `agents.maxAgents` |
+| `Agent quota reached (max N)` | MCP crew full (N is the configured `agents.maxAgents`) | Terminate idle agents (`agents.terminate(id)`) or raise `agents.maxAgents` |
 | Old-layout warning on every command | Legacy brain tree | `vant migrate` (see section 2) |
 | Stranded `<file>.<uuid>` temps | Crash during write | `vant health --sweep` |
 | `circuit OPEN` in logs | Provider failing repeatedly | Check token/network; breaker resets after timeout |

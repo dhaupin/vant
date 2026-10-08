@@ -75,14 +75,19 @@ contains.
 
 ```javascript
 const transform = require('./lib/transform');
-const data = await transform.toHorcrux({ outputPath: 'brain.svg', password: 'passphrase' });
+// Write the current brain to an SVG horcrux
+await transform.toHorcrux('brain.svg', { password: 'passphrase' });
 ```
 
 And the restore side:
 
 ```javascript
-const restored = await transform.restore('brain.svg', 'passphrase');
+// fromHorcrux reads + validates the carrier and restores the brain
+const result = await transform.fromHorcrux('brain.svg', { password: 'passphrase' });
 ```
+
+(`transform.restore(data)` is the lower-level half that takes already-
+parsed horcrux data; `fromHorcrux` is the file-level entry.)
 
 ## Zero-config boot from an image
 

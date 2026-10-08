@@ -65,12 +65,12 @@ test('has initLegal', () => {
 });
 
 // Test 2: Default capabilities
-// v0.9.0-axolotl: the default sandbox is now allow-by-default for
+// 0.8.6: the default sandbox is now allow-by-default for
 // canRead/canWrite/canExec (agents need to do work in the trusted
 // runtime). canNetwork is still false by default (network is the
 // explicit, gated capability). Use `sandbox.create({ canRead: false,
 // canWrite: false, canExec: false })` for a restricted sandbox.
-// v0.9.0-axolotl (audit sandbox C1): DEFAULT_CAPABILITIES is DENY by default
+// 0.8.6 (audit sandbox C1): DEFAULT_CAPABILITIES is DENY by default
 // for all dangerous capabilities. canRead stays true (read-only consumption),
 // while canWrite/canExec/canNetwork/canSpawn require explicit opt-in via
 // `sandbox.create({ capabilities: { canWrite: true, ... } })`.

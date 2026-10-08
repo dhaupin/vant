@@ -71,7 +71,7 @@ console.log('\n=== Brain Tests ===\n');
 
 // Test 1: Core exports
 test('loadBrain alias removed (T11b — nuclear breaking)', () => {
-    // v0.9.0-axolotl T11b: loadBrain was a compat alias for _loadBrain.
+    // 0.8.6 T11b: loadBrain was a compat alias for _loadBrain.
     // Removed. Use _loadBrain directly (or the unified `read`).
     return {
         success: brain.loadBrain === undefined,
@@ -80,7 +80,7 @@ test('loadBrain alias removed (T11b — nuclear breaking)', () => {
 });
 
 test('brainList alias removed (T11b — nuclear breaking)', () => {
-    // v0.9.0-axolotl T11b: brainList was a compat alias for brainDirs().
+    // 0.8.6 T11b: brainList was a compat alias for brainDirs().
     // Removed. Use listBrains() (the new array shape) or brainDirs().
     return {
         success: brain.brainList === undefined,

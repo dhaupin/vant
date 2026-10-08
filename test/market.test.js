@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Market Module Unit Tests (v0.9.0)
+ * Market Module Unit Tests (v0.8.6)
  */
 
 const path = require('path');
@@ -39,7 +39,7 @@ function test(name, fn) {
     }
 }
 
-console.log('\n🛒 MARKET MODULE TESTS (v0.9.0)\n');
+console.log('\n🛒 MARKET MODULE TESTS (v0.8.6)\n');
 
 test('market module loads', () => {
     const market = require(path.join(ROOT, 'lib', 'market'));

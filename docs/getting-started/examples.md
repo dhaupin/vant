@@ -252,31 +252,24 @@ Last Sync: ${health.lastSync}
 }
 ```
 
-### Slack/Discord Notifications
+### Outbound Notifications
+
+There is no built-in Slack/Discord/email notifier. The real outbound
+surfaces are the in-process event bus, outbound webhooks, and the
+Telegram bot (see [Operations](/vant/operations/operations)):
 
 ```javascript
-const notifications = require('./lib/notifications');
+// 1. React to brain events in-process (lib/event.js exports the Event
+//    class + a defaultEvent instance; sync emits sync:push:complete etc.)
+const { defaultEvent } = require('./lib/event');
 
-async function notifyExamples() {
-  // Slack notification
-  await notifications.slack('Brain synced!', {
-    channel: '#agents',
-    username: 'Vant Bot'
-  });
-  
-  // Discord notification
-  await notifications.discord('Deploy complete', {
-    embed: true,
-    color: 0x059669
-  });
-  
-  // Event notification
-  await notifications.event('sync', {
-    branch: 'main',
-    files: 19,
-    success: true
-  });
-}
+defaultEvent.on('sync:push:complete', (info) => {
+  console.log(`Synced across ${info.providers} provider(s)`);
+});
+
+// 2. Or register an outbound webhook - an HTTP endpoint gets POSTed
+//    (server refuses to bind without VANT_WEBHOOK_SECRET set)
+//    CLI: vant webhooks add <url> <event>
 ```
 
 ### Version & Succession

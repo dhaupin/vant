@@ -31,7 +31,7 @@ const qos = new QoS();
 
 ## Rate Limiter
 
-Limit how often operations can run.
+Sliding-window rate limiting per client id.
 
 Create a rate limiter:
 
@@ -39,35 +39,38 @@ Create a rate limiter:
 const { RateLimiter } = require('./lib/qos');
 
 const limiter = new RateLimiter({
-    windowMs: 60000,  // 1 minute window
-    maxPerMinute: 100  // max 100 requests
+    windowMs: 60000,      // 1 minute window
+    maxPerMinute: 100     // max requests per window (default: 60)
 });
 
-// Check if allowed
-const { allowed, remaining } = limiter.isAllowed();
-console.log(allowed);    // true | false
-console.log(remaining);  // 99
+// Check an operation - throws RATE_LIMIT_EXCEEDED when the limit is hit
+await limiter.check('client-1', 'read');
 
-// Consume a request
-limiter.consume();
+// Inspect current settings + unique clients
+console.log(limiter.getStatus());
 ```
 
-### Use with Network
+`check(clientId, operation)` is async and records the request when
+allowed; when the window is full it throws a retryable
+`RATE_LIMIT_EXCEEDED` error (and emits `qos:rate-limit`). There is no
+boolean `isAllowed()`/`consume()` API. Reset a client with
+`limiter.reset(clientId)`.
 
-Wrap API calls:
+Defaults come from `VANT_QOS_MAX_PER_MINUTE` (60) and
+`VANT_QOS_WINDOW_MS` (60000) when options are omitted.
+
+### Use with Sandbox
+
+The sandbox wires rate limiters for you - read/write quotas become
+per-minute `RateLimiter`s:
 
 ```javascript
-const limiter = new RateLimiter({ windowMs: 60000, maxPerMinute: 50 });
+const sandbox = require('./lib/sandbox');
 
-async function callAPI() {
-    const { allowed, remaining, resetIn } = limiter.isAllowed();
-    if (!allowed) {
-        await delay(resetIn);  // wait for window reset
-        return callAPI();
-    }
-    
-    return fetch('https://api.example.com/data');
-}
+const s = sandbox.create({
+    readQuota: 100,   // reads per minute
+    writeQuota: 20    // writes per minute
+});
 ```
 
 ### Options
@@ -75,7 +78,7 @@ async function callAPI() {
 | Option | Default | What |
 |--------|---------|------|
 | windowMs | 60000 | Time window (ms) |
-| maxPerMinute | 100 | Max requests per window |
+| maxPerMinute | 60 | Max requests per window |
 
 ## Circuit Breaker
 
@@ -87,9 +90,8 @@ Create a circuit breaker:
 const { CircuitBreaker } = require('./lib/qos');
 
 const breaker = new CircuitBreaker({
-    failureThreshold: 5,     // open after 5 failures
-    successThreshold: 3,    // close after 3 successes
-    timeout: 30000          // 30 second timeout
+    threshold: 5,    // open after 5 failures (default: 5)
+    timeout: 60000   // recovery window (default: 60s)
 });
 ```
 
@@ -97,44 +99,42 @@ const breaker = new CircuitBreaker({
 
 | State | What |
 |-------|------|
-| closed | Normal operation |
-| open | Failing - reject calls |
-| half-open | Testing recovery |
+| CLOSED | Normal operation |
+| OPEN | Failing - calls are refused until the timeout elapses |
 
-### Execute
+After the timeout passes, the circuit closes again and failure counting
+restarts. (`mode: 'full'` adds per-provider state with exponential
+backoff and optional persistence.)
 
-Execute through circuit breaker:
+### Record Outcomes
+
+The breaker does not wrap your function - you record outcomes:
 
 ```javascript
-async function callService() {
-    const result = await breaker.execute(() => {
-        return fetch('https://api.example.com/data');
-    });
-    
-    if (result.error) {
-        console.log(result.code); // "CIRCUIT_OPEN"
+const breaker = new CircuitBreaker({ threshold: 5 });
+
+if (breaker.isClosed('api')) {
+    try {
+        await fetch('https://api.example.com/data');
+        breaker.recordSuccess('api');
+    } catch (e) {
+        breaker.recordFailure('api');  // 5th failure opens the circuit
     }
-    
-    return result;
+} else {
+    console.log('Circuit open for api');
 }
 ```
 
-### Events
+Calling a gated operation while open throws a retryable
+`SANDBOX_CIRCUIT_OPEN` error.
 
-Listen to state changes:
+### Inspect
 
 ```javascript
-breaker.onOpen(() => console.log('Circuit opened'));
-breaker.onClose(() => console.log('Circuit closed'));
+breaker.getState();        // current state + failure count
+breaker.getStatus('api');  // per-key status
+breaker.reset('api');      // clear failures for one key
 ```
-
-### Options
-
-| Option | Default | What |
-|--------|---------|------|
-| failureThreshold | 5 | Failures before open |
-| successThreshold | 3 | Successes to close |
-| timeout | 30000 | Operation timeout |
 
 ## Bulkhead
 
@@ -146,31 +146,28 @@ Create a bulkhead:
 const { Bulkhead } = require('./lib/qos');
 
 const bulkhead = new Bulkhead({
-    maxConcurrent: 5,    // max 5 concurrent
-    maxQueue: 10         // max 10 queued
+    concurrency: 5    // max concurrent (default: 10)
 });
 ```
 
-### Execute
+### Run
 
-Execute through bulkhead:
+Execute through the bulkhead - excess calls queue instead of failing:
 
 ```javascript
-const result = await bulkhead.execute(async () => {
+const result = await bulkhead.run(async () => {
     return await doHeavyOperation();
 });
-
-if (result.error) {
-    console.log(result.code); // "BULKHEAD_REJECTED"
-}
 ```
+
+There is no `execute()` method or `BULKHEAD_REJECTED` rejection: calls
+beyond `concurrency` wait in the queue until a slot frees up.
 
 ### Options
 
 | Option | Default | What |
 |--------|---------|------|
-| maxConcurrent | 5 | Max concurrent |
-| maxQueue | 10 | Max queued |
+| concurrency | 10 | Max concurrent |
 
 ## Throttler
 
@@ -245,31 +242,27 @@ debounced.cancel();
 
 ## Combined Usage
 
-Use multiple QoS together:
+Use multiple QoS primitives together:
 
 ```javascript
 const { RateLimiter, CircuitBreaker, Bulkhead } = require('./lib/qos');
 
 const limiter = new RateLimiter({ windowMs: 60000, maxPerMinute: 50 });
-const breaker = new CircuitBreaker({ failureThreshold: 5 });
-const bulkhead = new Bulkhead({ maxConcurrent: 3 });
+const breaker = new CircuitBreaker({ threshold: 5 });
+const bulkhead = new Bulkhead({ concurrency: 3 });
 
-async function apiCall(url) {
-    // 1. Check rate limit
-    if (!limiter.isAllowed().allowed) {
-        throw new Error('Rate limited');
-    }
+async function apiCall(url, clientId) {
+    // 1. Rate limit (throws when exceeded)
+    await limiter.check(clientId, 'api');
     
-    // 2. Check circuit
-    const result = await breaker.execute(async () => {
-        // 3. Check bulkhead
-        return await bulkhead.execute(() => fetch(url));
-    });
-    
-    limiter.consume();
-    return result;
+    // 2. Bulkhead the concurrency, breaker-guard the failures
+    if (!breaker.isClosed('api')) throw new Error('Circuit open');
+    return bulkhead.run(() => fetch(url));
 }
 ```
+
+The `QoS` facade class combines the three for server pipelines - see
+`getLayerStatus()` / `check(clientId, operation)` on it.
 
 ## Integration
 

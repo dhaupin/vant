@@ -31,7 +31,7 @@ function test(name, fn) {
     }
 }
 
-// v0.9.0-axolotl: async test support. Mirrors storage.test.js pattern.
+// 0.8.6: async test support. Mirrors storage.test.js pattern.
 const _asyncTests = [];
 function asyncTest(name, fn) {
     _asyncTests.push({ name, fn });
@@ -217,7 +217,7 @@ test('listStackIntersections returns array', () => {
     return { success: Array.isArray(intersections) };
 });
 
-// ==================== v0.9.0-axolotl T6 ====================
+// ==================== 0.8.6 T6 ====================
 
 test('forum has unpublish method', () => {
     const forum = require(path.join(ROOT, 'lib', 'forum'));

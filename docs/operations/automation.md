@@ -14,32 +14,15 @@ nav_order: 54
 
 Automated workflows:
 - Scheduled brain sync
-- Auto-commit on changes
 - Periodic brain prune
 - Health monitoring
 
-## Cron Syntax
+## Scheduling Model
 
-Vant uses cron for scheduling:
-
-| Field | Values |
-|-------|--------|
-| minute | 0-59 |
-| hour | 0-23 |
-| day | 1-31 |
-| month | 1-12 |
-| weekday | 0-6 |
-
-```bash
-# Every hour
-0 * * * *
-
-# Every day at midnight
-0 0 * * *
-
-# Every Monday at 9am
-0 9 * * 1
-```
+Vant's scheduler (`vant.cron`) is interval-based, not cron-expression
+based: `schedule({ id, interval, handler })` with interval in
+milliseconds (1000-86400000, 1 day max). For day-of-week style
+schedules, use your system crontab and invoke the CLI.
 
 ## Basic Setup
 
@@ -47,51 +30,55 @@ Vant uses cron for scheduling:
 
 ```javascript
 const cron = require('vant').cron;
-const vant = require('vant');
+const sync = require('./lib/sync');
 
-// Sync brain every hour (via network module)
-const { sync } = require('vant/lib/network');
-cron.cron('0 * * * *', async () => {
-    await sync({ direction: 'push' });
-    console.log('Brain synced');
+// Sync brain every hour
+cron.schedule({
+    id: 'hourly-push',
+    interval: 3600000,
+    handler: async () => {
+        await sync.pushAll();
+        console.log('Brain synced');
+    }
 });
 ```
 
 ### Schedule Prune
 
-```javascript
-// Prune brain daily at 2am
-cron.cron('0 2 * * *', async () => {
-    await vant.prune({ keep: 20 });
-    console.log('Brain pruned');
-});
+Prune is a CLI verb - put it in your system crontab:
+
+```bash
+# Prune brain daily at 2am
+cd /path/to/vant && vant prune --stale-days 14 --no-fluff
 ```
+
+(If you must schedule it in-process, `cron.schedule` a handler that
+spawns `vant prune`.)
 
 ## Event Triggers
 
-### On Push
+### On GitHub Push
 
-```javascript
-// Trigger on GitHub push
-app.post('/webhook', async (req, res) => {
-    const { commits } = req.body;
-    
-    for (const commit of commits) {
-        await vant.learn('commits/' + commit.id, commit.message);
-    }
-    
-    res.json({ synced: commits.length });
-});
+Vant polls GitHub rather than receiving webhooks - run the watcher:
+
+```bash
+vant watch --interval 30
 ```
 
 ### On Schedule
 
 ```javascript
 // Daily report
-cron.cron('0 9 * * *', async () => {
-    const summary = await vant.think('What did I work on yesterday?');
-    
-    await notify.discord('Daily Summary: ' + summary.insights);
+const cron = require('vant').cron;
+
+cron.schedule({
+    id: 'daily-report',
+    interval: 86400000,
+    handler: async () => {
+        const summary = await vant.think('What did I work on yesterday?');
+        console.log('Summary:', summary);
+        // Delivery is yours: the Telegram bot or vant webhooks can carry it
+    }
 });
 ```
 
@@ -100,16 +87,13 @@ cron.cron('0 9 * * *', async () => {
 ### Queue Jobs
 
 ```javascript
-const queue = require('./lib/events').Queue;
+const { Queue } = require('./lib/event');
 
-// Add to queue
-await queue.add('sync', { priority: 'high' });
+const queue = new Queue({ concurrency: 2 });
 
-// Process queue
-queue.process('sync', async (job) => {
-    await vant.sync.push();
-    return { synced: true };
-});
+// Enqueue work - the queue runs it itself
+const job = queue.enqueue('sync', { priority: 'high' });
+console.log(queue.get(job.id).state);  // track completion
 ```
 
 ---

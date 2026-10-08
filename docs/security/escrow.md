@@ -79,11 +79,14 @@ escrow.setCost('delete', 10);
 escrow.setCost('admin', 50);
 ```
 
-Get cost for an operation:
+Get cost for an operation (falls back to `_costs.default`):
 
 ```javascript
 console.log(escrow.getCost('write')); // 5
 ```
+
+Budget methods: `setBudget(agentId, budget)` / `setBudgetLimit(agentId,
+limit)` / `canSpend` / `recordSpend` / `refund` / `getBudget`.
 
 ## Holds
 
@@ -92,17 +95,18 @@ Hold execution until conditions are met.
 Create a hold:
 
 ```javascript
-const holdId = escrow.hold('task-1', {
-    until: 'user_confirmation',
-    timeout: 60000  // 60 seconds
-});
+const r = escrow.hold('task-1', 'user_confirmation');
+// { held: true, holdId } - or { held: false, reason: 'max_holds_exceeded' }
 ```
 
-Check if on hold:
+The hold carries the CONDITION (a string tag) and expires after
+`options.holdTimeout` (default 300000 ms) - there is no per-hold timeout
+option.
+
+Check a hold:
 
 ```javascript
-const canProceed = escrow.canProceed('task-1');
-console.log(canProceed); // false
+escrow.checkHold('task-1');
 ```
 
 Release hold:
@@ -111,27 +115,18 @@ Release hold:
 escrow.release('task-1');
 ```
 
-### Hold Options
-
-| Option | Default | What |
-|--------|---------|------|
-| until | required | Release condition |
-| timeout | 300000 | Max wait time (ms) |
-
 ## Approvals
 
 Require approval for sensitive operations.
 
-Request approval:
+Request approval (sig: `(operation, reason)`; no options object):
 
 ```javascript
-const approval = escrow.requestApproval('delete', 'Delete all user data', {
-    approver: 'admin',
-    timeout: 30000
-});
-
-console.log(approval.id);      // approval ID
-console.log(approval.state);  // "pending"
+const approval = escrow.requestApproval('delete', 'Delete all user data');
+// auto-approved immediately when the op needs none:
+//   { approved: true, reason: 'auto_approved' }
+// otherwise:
+//   { approvalId: '<hex>', approved: false }
 ```
 
 ### Approve
@@ -139,16 +134,17 @@ console.log(approval.state);  // "pending"
 Approve an operation:
 
 ```javascript
-escrow.approve(approval.id, 'admin');
+escrow.approve(approval.approvalId, 'admin');
 ```
 
-### Reject
-
-Reject an operation:
+### Check
 
 ```javascript
-escrow.reject(approval.id, 'Not approved');
+escrow.checkApproval(approval.approvalId);
 ```
+
+(There is no `reject` method - deny by simply not approving; the
+approval stays `approved: false`.)
 
 ### Default Required
 
@@ -161,7 +157,7 @@ console.log(escrow.options.approvalRequired);
 
 ## Circuit Breaker
 
-Integrate with service circuit breakers.
+Integrate with service circuit breakers (crew-bus aware):
 
 Check service:
 
@@ -173,7 +169,6 @@ console.log(isOpen); // false (closed = OK)
 Open circuit on repeated failures:
 
 ```javascript
-// After 5 failures, circuit opens
 for (let i = 0; i < 5; i++) {
     escrow.recordFailure('payment-svc');
 }
@@ -181,10 +176,11 @@ for (let i = 0; i < 5; i++) {
 console.log(escrow.isOpen('payment-svc')); // true
 ```
 
-Reset circuit:
+Record successes and reset:
 
 ```javascript
-escrow.resetCircuit('payment-svc');
+escrow.recordSuccess('payment-svc');
+escrow.resetCircuit('payment-svc');   // via getBreaker().reset(service)
 ```
 
 ## Before Execute
@@ -192,7 +188,7 @@ escrow.resetCircuit('payment-svc');
 Validate operation before execution:
 
 ```javascript
-const result = escrow.beforeExecute({
+const result = await escrow.beforeExecute({
     agentId: 'agent-1',
     operation: 'read',
     cost: 5,
@@ -200,35 +196,33 @@ const result = escrow.beforeExecute({
 });
 
 console.log(result.allowed); // true | false
-console.log(result.reason); // "budget_available" | "budget_exceeded" | "hold" | "approval_required"
+console.log(result.reason);  // reason string on refusal
 ```
 
-This is the main entry point - all sandbox operations go through this.
+This is the main entry point - sandbox operations go through this
+(async; `isOperationAllowed(op, ctx)` delegates to it).
 
 ## Quotas
 
-Track quota usage per service.
-
-Set quota:
-
-```javascript
-escrow.setQuota('api', {
-    limit: 1000,
-    window: 3600000  // 1 hour
-});
-```
-
-Check quota:
+Track quota usage per agent+operation pair. Quotas come from
+`options.defaultQuota` + `options.quotaWindow` (defaults in the
+constructor); there is no `setQuota()` method:
 
 ```javascript
-const { allowed, remaining } = escrow.checkQuota('api');
+// checkQuota(agentId, operation = 'default')
+const { allowed, used, limit } = escrow.checkQuota('agent-1', 'api');
+
+// record usage yourself
+escrow.incrementQuota('agent-1', 'api');
 ```
+
+The window resets automatically when `quotaWindow` elapses.
 
 ---
 ## Integration
 Escrow integrates with sandbox:
 ```javascript
-const sandbox = require('vant').sandbox;
+const sandbox = require('./lib/sandbox');
 const s = sandbox.create({
     agentId: 'agent-1',
     budget: 10000

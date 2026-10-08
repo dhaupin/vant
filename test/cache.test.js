@@ -34,10 +34,10 @@ console.log('\n💨 CACHE MODULE TESTS\n');
 // ============================================
 // LOAD
 // ============================================
-// v0.9.0-axolotl T13b: legacy module-singleton API tests removed.
+// 0.8.6 T13b: legacy module-singleton API tests removed.
 // The singleton + 25+ proxy exports are gone; canonical usage is
 // `const { Cache } = require('./cache'); new Cache()`. See the
-// "v0.9.0-axolotl CACHE CLASS" block below for the new tests.
+// "0.8.6 CACHE CLASS" block below for the new tests.
 // ============================================
 
 // Stack tests (T13b — instances, not module singleton)
@@ -54,7 +54,7 @@ test('getStackCacheStats returns object with source stack', () => {
     return { success: result && result.source === 'stack' };
 });
 
-// ==================== v0.9.0-axolotl CACHE CLASS ====================
+// ==================== 0.8.6 CACHE CLASS ====================
 
 test('cache module exposes Cache class', () => {
     const cache = require(path.join(ROOT, 'lib', 'cache'));
@@ -134,7 +134,7 @@ test('instance has its own buffer pool', () => {
     return { success: bufA !== null && bufB !== null && bufA !== bufB };
 });
 
-// v0.9.0-axolotl T13b: the module-level `defaultCache` singleton is gone.
+// 0.8.6 T13b: the module-level `defaultCache` singleton is gone.
 // Two instances are now fully isolated (proves there's no shared state).
 asyncTest('two Cache instances are fully isolated (no module singleton)', async () => {
     const { Cache } = require(path.join(ROOT, 'lib', 'cache'));

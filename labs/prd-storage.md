@@ -82,7 +82,7 @@ The Vant Storage layer provides a **unified multi-backend storage abstraction** 
 - **`lib/sudo.js`** — Capability escalation for write operations
 - **`lib/sandbox.js`** — Deny-by-default capability gating
 
-### fs→storage Migration Standard (v0.9.0-axolotl)
+### fs→storage Migration Standard (0.8.6)
 
 All modules MUST route brain/models file I/O through FileStorage, not raw fs.
 The validated pattern (apply to any module still touching fs — see the
@@ -145,7 +145,7 @@ file.delete('old.txt');
 - Symlink detection (`_checkSymlink`) — blocks symlink attacks
 - VAF path traversal check (`vaf.checkPathTraversal`) — blocks `../`, absolute paths
 - Prototype pollution sanitization on object writes (`vaf.sanitizeObject`)
-- Capability gating via `_checkReadSafe()` / `_checkWriteSafe()` (v0.9.0-axolotl)
+- Capability gating via `_checkReadSafe()` / `_checkWriteSafe()` (0.8.6)
 
 ### 3.2 BrainStorage — Brain-Specific Storage
 **File:** `lib/storage.js:494-685`
@@ -550,7 +550,7 @@ function sanitizeObject(obj) {
 ### 6.3 Deny-by-Default Sandbox
 **File:** `lib/storage.js:152-201`
 
-v0.9.0-axolotl introduces safe-by-default capability gating:
+0.8.6 introduces safe-by-default capability gating:
 
 ```javascript
 // Capture default sandbox stub (deny-by-default)
@@ -717,7 +717,7 @@ Storage.writeJson(filePath, data);
 Storage.readJson(filePath);
 ```
 
-### Pipeline-Backed Variants (v0.9.0-axolotl)
+### Pipeline-Backed Variants (0.8.6)
 Full security chain: sandbox → vaf → qos → escrow
 
 ```javascript

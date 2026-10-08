@@ -1,5 +1,5 @@
 ---
-version: 0.9.0
+version: 0.8.6
 permalink: /reference/compute
 layout: default
 title: Compute API
@@ -10,50 +10,50 @@ nav_order: 122
 
 Execute code in sandboxed environments. Supports multiple languages.
 
-> Beta v0.9.0
+> Beta v0.8.6
 
 ## Languages Supported
 
-| Language | Shortcut | Notes |
-|----------|---------|-------|
-| Python | `compute.python()` | Via subprocess |
-| Julia | `compute.julia()` | Via subprocess |
-| Rust | `compute.rust()` | Via subprocess |
+Language connectors live in `lib/connectors/` (subprocess per language):
+python, julia, rust, plus node/ruby/go/php connectors.
 
 ## Functions
 
 | Function | What |
 |----------|------|
-| `invoke(lang, code)` | Execute code |
-| `eval(code)` | JavaScript eval |
-| `run(code)` | Run in sandbox |
+| `invoke(func, args, lang)` | Call a function in a language (default python) |
+| `evaluate(code, {lang, timeout})` | Evaluate raw foreign code |
+| `run(scriptPath, options)` | Run a script file |
 | `status()` | Worker status |
-| `list()` | Active runs |
-| `has(feature)` | Check capability |
+| `list()` | Available languages |
+| `has(lang)` | Check language availability |
+
+Shortcuts pass the language through: `compute.python(...)`,
+`compute.julia(...)`, `compute.rust(...)` - they call `invoke` with the
+same `(func, args)` signature.
 
 ## Usage
 
 ```javascript
 const compute = require('vant/lib/compute');
 
-// Direct execution
-const result = await compute.invoke('python', 'print(2 + 2)');
-// → { stdout: '4', stderr: '' }
+// Call a function with args in a language
+const result = await compute.invoke('numpy.linalg.eig', { matrix: [[1,2],[3,4]] }, 'python');
 
-// Shortcuts
-const py = await compute.python('import sys; print(sys.version)');
-const jl = await compute.julia('println(2 + 2)');
-const rs = await compute.rust('fn main() { println!("hello"); }');
+// Or evaluate raw code
+const out = await compute.evaluate('print("hello from python")', { lang: 'python' });
 
-// Status
+// Shortcuts use the same (func, args) shape
+const py = await compute.python('numpy.linalg.eig', { matrix: [[1,2],[3,4]] });
+
+// Languages + status
+const langs = compute.list();
 const s = compute.status();
-// → { workers: 3, active: 0 }
 ```
 
 ## Events
 
 | Event | When |
 |-------|------|
-| `compute:starting` | Before exec |
-| `compute:complete` | After completion |
-| `compute:error` | On error |
+| `compute:invoking` | Before exec |
+| `compute:invoked` | After completion |

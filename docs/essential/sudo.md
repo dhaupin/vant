@@ -1,5 +1,5 @@
 ---
-version: 0.9.0-axolotl
+version: 0.8.6
 permalink: /essential/sudo
 layout: default
 title: Sudo & Escalation

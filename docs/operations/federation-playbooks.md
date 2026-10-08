@@ -40,11 +40,15 @@ vant genesis join --name beta-node --agent beta-1 --port 4891 --host acme-node -
 
 ### Ring admission (every member after the first)
 
-The ring admits new members WITHOUT re-keying existing pairs. On the
-steward:
+The ring admits new members WITHOUT re-keying existing pairs. Ring
+admission is a lib surface (`lib/genesis.js` exports `admit` and
+`accept`; the `vant genesis` CLI ships create/join/status only):
 
-```bash
-vant genesis admit  # via lib: genesis.admit({ member: { name: 'theta-node', agentId: 'theta-1', port: 4893 } })
+```js
+const genesis = require('./lib/genesis');
+// on the steward (ring holder):
+const r = await genesis.admit({ member: { name: 'theta-node', agentId: 'theta-1', port: 4893 } });
+// r.secret is the ring secret - hand it to the new member out-of-band
 ```
 
 On the joining member:

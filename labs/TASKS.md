@@ -1,10 +1,815 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-10-07  
-**Session:** Pass 141 — mid-funnel judgment reads: architecture/onboarding/brain/cli truth-up
+**Last Updated:** 2026-10-08  
+**Session:** Pass 155 — version standardization: EVERYTHING is 0.8.6 (owner call)
 
 ---
+
+## Session (2026-10-08 — pass 155: version standardization)
+
+Owner sanity-checked the version story and ruled: "Standardize all 84
+refs — everything is 0.8.6 atm. We are ahead of schedule but it's still
+0.8.6 to avoid confusion." Axolotl work is EARLY 0.8.6-era work, not
+0.9.0 branding.
+
+CONVERTED (118 refs, 57 files): lib/bin module headers `(v0.9.0)` and
+`(v0.9.0-axolotl)` → `(v0.8.6)`; inline pass annotations `v0.9.0(-
+axolotl):` → `v0.8.6:`; test banners/annotations (26 refs); docs
+frontmatter (sudo.md, compute.md → 0.8.6); style.md version-introduced
+example; lib/geometry/README.md (v0.9.0-exp → v0.8.6-exp, caught by
+residual grep — .md files missed by the .js-only batch walk); labs
+prd-brain/prd-storage done-claims; ROADMAP done/in-progress sections
+(Multi-Brain, Multibrain Security Chain, market.js, Pipeline Cleanup).
+
+KEPT 0.9.0 (legitimate): release.md semver illustrations (MINOR row,
+bump example, docker example — mechanics, not claims) and ROADMAP
+"## v0.9.0 - Futures" (genuinely future: _dna.js airgap, parked).
+.migration-fixture/ untouched (gitignored point-in-time test fixture).
+CHANGELOG untouched per owner (axolotl section stays 0.8.6).
+
+GATE: signature #9 = `(v0.9.0...)` headers + `version: 0.9.0` front-
+matter — guards the exact pattern 84 refs embodied ("module IS 0.9.0"
+overclaims); #8 wording updated ("axolotl label: 0.9.0" → decision
+recorded). Allow-list +.migration-fixture/ (fixture mirrors lib
+headers point-in-time, like archives).
+
+GATES: lint:docs/claims(846f, 9 sigs)/dist/surface/helpers/locks PASS,
+syntax OK. Spot-tests on touched suites: cache 12/12, brain 77/77.
+Full sweep via CI (180s cap).
+
+NEXT-UP: CI verdict, owner PR decision, more lib comment batches, or
+owner direction. Rides PR #117.
+
+---
+
+## Session (2026-10-08 — pass 154: 0.8.7 purge + signature #8)
+
+Owner: "There is no 0.8.7 — put all the frontmatter (or other refs) to
+0.8.6. Then continue lib code comment updates and fiction checks."
+
+INVENTORY: 29 refs repo-wide (grep all text files). Mostly labs PRDs,
+docs, CHANGELOG, openapi.yaml, 1 lib header.
+
+CONVERTED to 0.8.6: lib/search.js header, AGENTS.md version header,
+docs/advanced/style.md, labs/prd-agents.md (x8), labs/prd-brain.md,
+CHANGELOG.md (x2), docs/openapi.yaml (caught by the NEW signature on
+its first run — the inventory grep covered *.yml but missed *.yaml:
+gate > grep). CHANGELOG "max 4" row removed too — its point-in-time
+cover was the wrong version label.
+
+GENERICIZED (not relabeled) in docs/advanced/release.md: semver bump
+illustrations are forward-dated examples, not claims — PATCH example
+now 1.2.3 -> 1.2.4, docker tags v0.9.0 (the real next label). Relabel
+to 0.8.6 would rot the moment a real 0.8.7 ships (learnings: forward-
+dated version claims rot instantly).
+
+SHIPPED SIGNATURE #8 in scripts/check-fiction-signatures.js: blanket
+\b0\.8\.7\b — no such release exists (current 0.8.6, axolotl label
+0.9.0). BIT ON FIRST RUN: docs/openapi.yaml:17. Allow-list +models/
+private/ (private-brain learnings quote fiction to debunk it — same
+rationale as the ledger; gitignored but the gate walks the fs).
+
+COMMENT AUDIT batch 2 (config.js, boot.js, sync.js, mcp.js) — ALL
+ACCURATE, zero drift: config header usage matches real exports
+(apiKey/mcpPort verified in tail); boot SECURITY layer order matches
+_bootState emission order (sudo 1 ... escrow 4 spot-checked); sync
+header's pushAll/pullAny/rebase all real (:266/:449/:612); mcp start()
+real, port default 3457 matches :4790.
+
+GATES: lint:docs PASS (style+links+frontmatter x118), claims PASS
+(846 files, 8 signatures), dist PASS, surface PASS, helpers PASS,
+locks PASS, node --check syntax OK. LIMIT: full `npm run sweep`
+exceeds the 180s terminal cap — CI runs it on the PR.
+
+NEXT-UP: CI verdict on PR #117, more lib comment batches (mcp.js
+internals, habitat/genesis), or owner direction. Rides PR #117.
+
+---
+
+## Session (2026-10-08 — pass 153: gates + comment audit)
+
+Owner: "build these: repo-wide fiction-signature CI grep; frontmatter
+enforcement gate. Then any other cleanup opps? Code comments - are they
+consistent, doc-reader format, well explained? Read core lib files."
+
+SHIPPED GATE 1 - scripts/check-fiction-signatures.js (`npm run
+lint:claims`, own workflow step after lint:dist). 7 signatures = every
+fiction this project caught more than once: npm install -g vant, max-4
+agents folklore (5 variants), lib/framework.js, lib/notifications.js,
+VantRetryableError, loadBrain, vant.use plugin loader. Scope: 1978
+text files repo-wide; allow-list: archives/ (point-in-time), ledger
+(quotes fiction to fix it), CHANGELOG (history), scripts/check-*.js
+(gates may quote signatures), package-lock. Line-level negation filter
+(debunk lines like 'There is no VantRetryableError' are doing the
+gate's job in prose) - filter checks hit line PLUS previous line
+(negations wrap) with word-boundary matching (there is NO at EOL).
+
+SHIPPED GATE 2 - scripts/check-docs-frontmatter.js (chained into
+lint:docs). Enforces style.md's all-5-fields rule that NOTHING enforced
+(pass 151 found 2/118 missing layout). Also: permalink must start with
+/, nav_order integer, frontmatter block present. Version field is
+PRESENCE-only by design - style.md defines it as 'version introduced'
+which legitimately differs from package.json; equality would false-
+positive on the 0.9.0-era pages (sudo.md, compute.md - found + released
+on first run).
+
+PROVEN, not written: both bit on first run - fiction gate caught a REAL
+missed fiction (docs/getting-started/examples.md:258 taught
+require('./lib/notifications') - the phantom module pass 142 missed in
+examples) + 3 debunks + 1 gate self-quote; frontmatter gate caught the
+2 version-drift pages. Fault-injections: missing layout -> FAIL,
+injected npm-install + max-4 lines -> FAIL with file:line evidence;
+restorations diff-verified. OWN BUG CAUGHT: docstring containing
+docs/**/*.md terminates the block comment at the first */ (syntax
+error at run) - reworded.
+
+FIXED - docs/getting-started/examples.md Slack/Discord section: taught
+the phantom lib/notifications module -> real surfaces with VERIFIED
+APIs (defaultEvent.on('sync:push:complete') - event name + shape from
+lib/sync.js:346, lib/event.js:293/316-319; vant webhooks add <url>
+<event> from bin/webhooks.js:24; VANT_WEBHOOK_SECRET mandatory-bind
+from lib/webhooks.js:133).
+
+COMMENT AUDIT (core lib: brain.js, vant.js, sandbox.js, error.js,
+memory.js, agents.js, event.js):
+CENSUS: 981 JSDoc tags, 675 pass-numbered annotations, 116 SECURITY:
+markers, uniform module headers (Name (version) - role), only 3
+TODO/FIXME/HACK in ~30k lines (2 false positives - XXXXX in the
+barcode format comment; 1 is island-scaffold template text, not debt).
+STRENGTHS: sandbox.js flags DENY BY DEFAULT in 3 separate places;
+agents.js facade documents its module split + 'ONE public door'
+contract; brain.read() JSDoc documents opts + return shape exactly as
+docs teach; pass annotations give every fix provenance.
+FIXED (2):
+- lib/vant.js:1604 getter block - the crew's own cited 'gate' for
+  getter-count claims - now documents that the 7 defineProperty getters
+  are NOT the whole surface: the NEW: section at the bottom eagerly
+  attaches docs/memory/experience/audit/watch/governance/consciousness
+  and OVERRIDES audit (module object, not the getAudit function).
+  Verified by live probe (typeof vant.audit = object) before writing.
+- lib/error.js VantError docblock was 'Vant Error class' - now
+  documents the options contract (code, retryable, statusCode,
+  details) that errors.md + the fiction gate teach, including the
+  no-VantRetryableError note.
+VERDICT: comments are consistent, doc-reader-friendly, and well
+explained - the two gaps were export-surface clarity and one thin
+class docblock, both fixed.
+
+GATES: lint:docs PASS (style 118 + links 118 + frontmatter 118),
+lint:claims PASS (1978 files), dist PASS, surface PASS, ci.js
+439/0/1skip. LESSONS: (1) a block comment containing **/ sequences
+(like docs/**/*.md) self-terminates at */ - always node -c a new
+script before declaring it shipped; (2) debunking text is a filter
+problem, not a gate problem - negation context needs the previous
+line, word boundaries not trailing spaces; (3) the pass-149 lesson
+(catch fiction twice -> make it a signature) is now MECHANIZED - the
+next caught-twice fiction gets added to check-fiction-signatures.js
+in the same commit as the fix; (4) probe the live export surface
+(typeof checks) before writing comments ABOUT the export surface -
+the comment and the MEM folklore were both half-wrong.
+
+---
+
+## Session (2026-10-08 — pass 152: buried docs sweep)
+
+Owner: "any other fictitious claims, or stale readmes (or other docs)
+buried elsewhere in repo? Update them, or archive them if not needed."
+
+METHOD: inventoried ALL .md outside docs/ + the root-8 (691 files -
+almost all gitignored runtime brain state, not docs). Live docs-
+adjacent set: .github/ (5), labs/ (~20), lib/geometry/README.md,
+models/public/vant/boot/README.md. Ran the fiction-signature grep
+(npm-install, dead modules, max-4, phantom getters, phantom classes,
+removed APIs) across all of them.
+
+VERIFIED REAL/CLEAN, untouched: .github/SECURITY.md (supported-versions
+table, private advisory flow, scope notes incl. 'a documented endpoint
+that behaves differently than documented is a security bug here, by
+policy'), .github/SUPPORT.md (routing: Discussions -> Issues ->
+advisories; all links real), .github templates, boot/README.md
+(single-stone boot chain matches pass-132 archival, restore command
+real, grep-hygiene prime #100 note intact), labs/whitepaper/*,
+labs/DISCUSSION-* (dated point-in-time drafts), labs/prd-* status
+headers honest (draft/proposed/survey-pending/framing).
+
+FIXED:
+- labs/prd-agents.md (Status: 'Implemented (v0.8.7+)' - so its claims
+  read as current fact): 'up to 4 concurrent agents (you + 3 coworkers)'
+  in the Overview + 'Up to 4 agents per session' design principle +
+  'brain_agent_spawn (max 4)' MCP table row - the max-4 folklore's
+  ORIGIN STORY, still live in the file DEPLOY.md cross-references as
+  'Agent system' architecture PRD. Corrected to the dynamic quota
+  (agents.maxAgents, default 10, VANT_AGENTS_MAX) with a dated errata
+  block. Everything else in the PRD verified real: delegate/
+  delegateAsync/pollWork/completeWork (lib/agents/work.js:32/116/151/
+  168), join/emit/on, fork, agent_spawn/agent_list/agent_kill/
+  agent_proto_list/load MCP tools (lib/mcp.js:2219+). The v0.8.7
+  version-history row '(4 agents)' left as point-in-time.
+- lib/geometry/README.md: directory listing omitted 2 real files
+  (engine.js, fragmenter.js); usage example passed project() COORDS to
+  quasicrystal.store() which takes (barcode, data, ...) - store-by-
+  barcode is the whole point of the module. Corrected to
+  geometry.store('1-...-8', {...}) / geometry.retrieve('1-...-8')
+  (the real convenience wrappers, lib/geometry/index.js:59-74),
+  noted quasicrystal() as the lower-level init-storage pattern.
+
+ARCHIVE CANDIDATES CONSIDERED, none taken: labs/discussion drafts and
+prd-* planning docs are honest point-in-time records with status
+headers - nothing was fiction-only (unlike notifications.md in pass
+142). Everything buried is either real, dated, or now corrected.
+
+GATES: style+links PASS (118), dist PASS, surface PASS, ci.js
+439/0/1skip. Residual max-4 grep outside archives/ledger-quotes/
+version-history rows: clean. LESSONS: (1) the max-4 folklore had ONE
+more live root: the PRD marked 'Implemented' - status headers turn
+planning docs into reference docs, so their claims must be checked
+against code when the status says shipped; (2) README.md inside lib/
+subdirectories is a THIRD unchecked docs surface (after root .md and
+dist/) - geometry's own README described a different API than the
+module exports (store-by-coords vs store-by-barcode); (3) inventory
+before sweeping - 691 .md files sound terrifying until you exclude
+gitignored runtime state, then it's ~30 real files.
+
+---
+
+## Session (2026-10-07 — pass 151: crosslink + frontmatter sweep)
+
+Owner: "one more pass across the docs — crosslinking makes sense, all
+crosslinks resolve, frontmatter is good to go."
+
+METHOD: scripted census, not spot-checks - 491 /vant/<permalink> links
+every permalink-set member (CORRECTED script: my first pass
+reported ~200 'bad' links that were my own trailing-slash
+normalization bug - verified 6 suspicious targets live 200 and
+re-ran with fixed normalization before believing anything; final
+census: 0 broken). Relative ./ ../ links: 100% resolve on disk.
+nav.yml <-> permalink census: 117 nav rows + docs/index.md home (by
+design), no orphans, no ghosts, no dup rows. Semantic sense-check:
+sampled 6 Related blocks across sections (rag, schema, efficiency,
+encryption, agora, mcp) - every 'Learn more' target matches its
+context topic.
+
+FIXED (frontmatter):
+- docs/reference/locks.md + docs/operations/locks.md were missing
+  `layout:` (both files, only 2 of 118). Real consequence found while
+  checking: docs/_config.yml has NO `defaults` block, so Jekyll renders
+  a layout-less page as raw HTML with NO site chrome - silent renderer
+  breakage the checker never catches because the field is optional to
+  the regexes. All 118 pages now carry all 5 style-required fields
+  (version, permalink, layout, title, nav_order).
+
+VERIFIED BENIGN, left alone:
+- duplicate nav_order values across sections (20/51/66/67/68 dups):
+  nav_order feeds docs/_plugins/nav_generator.rb which fills
+  site.config['nav'], but the RENDERED sidebar comes from
+  site.data.nav = nav.yml (layout/default.html:628) - the generated
+  nav is dead config. Dups cannot affect the menu.
+- 491 links re-checked with corrected script after 2-page edit: 0.
+
+GATES: style+links PASS (118), dist PASS, surface PASS, ci.js
+439/0/1skip. LESSONS: (1) trust tool output over my own one-off
+scripts - my script's first numbers contradicted the passing gate and
+the live 200s; the bug was mine, the gate was right; (2) 'frontmatter
+is good' needs the renderer's perspective, not just field presence -
+a missing layout is invisible to every regex gate yet breaks the page;
+worth a follow-up: consider a check-docs-frontmatter.js that requires
+all 5 fields (style.md says 'all 5' but no gate enforces it yet);
+(3) dead config (nav_generator.rb) is a drift hazard - two nav sources
+means they WILL diverge silently someday.
+
+---
+
+## Session (2026-10-07 — pass 150: lander gate new)
+
+Owner: "I think /dist should be in repo gates. It's the lander/website.
+it may have other stuff in future."
+
+IMPLEMENTED (owner request, self-directed): NEW gate
+`scripts/check-dist-lander.js` + `npm run lint:dist` + a workflow step
+("dist/ lander gate (links, fiction, stat truth)") running after
+lint:surface. 6 checks per .html under dist/:
+1. fragments: href="#x" must match an id="x" in the same file
+2. local assets: every non-http/data/mailto href|src must exist on disk
+3. docs links: https://docs.creadev.org/vant/<p> must match a real
+   frontmatter permalink from docs/ (mirror of check-docs-links.js
+   normalization; handles the baseurl junction)
+4. github shape: links must be under github.com/dhaupin/vant(.git)
+5. FICTION: `npm install -g vant` must never appear (the wrong-package
+   trap caught 3 times now: pass 140 docs x9, pass 148 README, pass 149
+   lander x2)
+6. stat truth: every data-count must be a positive integer (markup
+   ships real values, counters only animate)
+
+PROVEN, not just written: clean dist PASSes (1 file, 118 permalinks);
+fault-injected a broken anchor -> FAIL with evidence; injected the
+`npm install -g vant` line -> FAIL; restored byte-identical to backup
+(diff-verified; first restore attempt was incomplete because a global
+sed hit 3 lines, caught by re-diffing, fixed by full-file copy).
+
+WIRING RATIONALE: lint:dist is its own script (lint:docs walks docs/*.md
+only and stays that way - semantic separation). Workflow order:
+security -> tests -> lint:surface -> lint:dist -> standalone suites.
+GATES: lint:dist PASS, style+links PASS (118), surface PASS, ci.js
+439/0/1skip. LESSONS: (1) fault-inject every new gate - a gate that has
+never failed is not a gate; (2) restore-from-backup must be diff-VERIFIED
+after, not assumed - the global-sed collateral was real; (3) gates grow
+by gap class: dist/ was the third unknowable surface (after root .md,
+dist) - any future one gets the same treatment rather than a memory rule.
+
+---
+
+## Session (2026-10-07 — pass 149: dist/ lander judgment read)
+
+Owner: "next up for a read pass is /dist (vant.creadev.org). Make sure
+there's no fiction, nice run through, updates, polish. All links
+resolve + make sense. Funnels for agents, hobbyists, enterprise."
+
+METHOD: full read of dist/index.html (989 lines: head/JSON-LD x3,
+styles, nav, hero, 9 sections, stats, FAQ, footer, VantFX + lattice
+scripts); all 10 external links curl-tested live; every surface claim
+checked against bin/, lib/, package.json, docs tree.
+
+VERIFIED REAL, untouched: MCP on 127.0.0.1:3457 (pass-127 port audit
+holds), REST 3456 covered in MCP card, `vant learn <key> <content>`
+(bin/vant.js:300 parser verified), `vant migrate --status`,
+`vant onboard`, `vant search <query>` shapes, models/<scope>/<brain>/
+path chips, three memory systems, security chain + WAL claims,
+headless/REST/Docker, "does Vant cost money? no/MIT" (price 0 offer),
+"not a fit when browser-only/no-git", the pass-content prose, and the
+"every number on it verified against the code" self-claim (now true
+again). All links resolve: 10/10 live 200 incl.
+/vant/getting-started/quick-start, memory/brain, runtime/mcp,
+runtime/server, operations/storage, security/, multi-agent/,
+integrations/, github tree/main/labs, releases (site permalink
+generation = baseurl /vant + frontmatter permalink, matches).
+
+FIXED:
+- `npm install -g vant` RE-SEEDED twice in the lander (hero dual-CTA
+terminal + HowTo JSON-LD step 1) - the same wrong-package trap pass 140
+uprooted from 9 docs pages; README front door received the same
+re-seed in pass 148's sweep. Fixed to clone+npm ci with the honest
+"not published on npm" note (JSON-LD schema.org text updated too).
+- Stats row was 4-passes stale: 93 CLI / 89 lib / 119 docs / 108 test
+files -> 99 CLI commands (routed verbs, unique parse of
+`vant --help`), 132 lib modules (`find lib -name '*.js'`), 118 doc
+pages, 169 test suites (`ls test/*.test.js`). markup ships real
+values; counters only animate.
+- 'Up to four agents share one install' residue in section 03 ->
+roster config agents.maxAgents default 10 (the max-4 folklore's last
+visible copy; CHANGELOG point-in-time rows intentionally remain).
+
+POLISH (grounding, no over-promising): funnels already split 3 ways
+without a fake wall - human '5 minute path' (quick-start), agent door
+MCP + AGENTS.md (agent-onboarding), enterprise via headless/REST/
+Docker/multi-brain (runtime/server, operations/storage); both doors
+close with hero-final CTAs ('Start the five minutes' / 'Send your
+agent'). Not-a-fit section kept because honesty IS the polish.
+
+GATES: lint:docs PASS (118), lint:surface PASS. HTML tag balance
+checked (11 section pairs, 73 div pairs). NOTE: dist/ is outside
+every repo gate - same class as root .md files, needs judgment reads
+on every touch (this is pass 3 of that: 125, 132, now 149).LESSON
+repeated: the installer fiction re-enters README/lander whenever a
+new assistant writes copy from memory - once a pass, grep the front
+surfaces for `npm install -g vant`.
+
+---
+
+## Session (2026-10-07 — pass 148: root docs final touches)
+
+Owner: "let's actually read the root docs too like readme, deploy,
+contributing, code of conduct, agents, and all the rest."
+
+METHOD: full read of all 8 root markdown files (README, DEPLOY,
+CONTRIBUTING, CODE_OF_CONDUCT, AGENTS, LEGAL, ROADMAP, CHANGELOG),
+claims verified against lib/vant.js, lib/agents/core.js,
+lib/agents/internal.js, lib/config.js, lib/api.js, lib/memory.js,
+.gitignore, package.json, gh label list, and file existence.
+
+VERIFIED REAL, no edits: CONTRIBUTING.md (canonical-guide pointer
+pattern; docs/getting-started/contributing.md, .github/SECURITY.md,
+.github/SUPPORT.md, bug_report template, LICENSE all exist; the
+`good first issue` label is real on the repo), CODE_OF_CONDUCT.md
+(Contributor Covenant prose, nothing code-actionable), README.md
+startHeadless example (real lib/vant.js:1248, returns
+{started, mode:'headless', endpoints}), VANT_MODE (lib/api.js:73),
+learn/remember/init exports, migrate flags, npm warning, ports;
+DEPLOY.md (pass-126 canonicalization held up: port map, sync
+behavior, security chain, backup/horcrux/transform verbs, org
+grant/session-only, WAL, config.example.ini keys); LEGAL.md
+(7-day default TTL real lib/memory.js:82; models/private gitignored
+real .gitignore:2,32); ROADMAP.md (no phantom APIs, scope prose); 
+AGENTS.md body (truth-uped 139/145/147: getter list, v0.9 layout,
+maxAgents, MCP door).
+
+FIXED - the 'max 4 agents' folklore's LAST copies (pass 145 fixed
+bin/help.js + bin/agent-spawner.js but the README front door, DEPLOY
+section 9 + troubleshooting row, and the AGENTS.md docs TOC still
+carried it; reality: lib/agents/core.js:34 interpolates the dynamic
+'Agent quota reached (max N)' from _getMaxAgents(), config default 10
+via agents.maxAgents / VANT_AGENTS_MAX, lib/config.js:260):
+- README.md:72 'up to 4 agents per install' -> quota-configurable
+  roster (agents.maxAgents, default 10).
+- DEPLOY.md section 9 'Up to 4 agents per install (MCP door quota,
+  agents.maxAgents)' - self-contradicting the very key it cited ->
+  quota-configurable, default 10, VANT_AGENTS_MAX override.
+- DEPLOY.md troubleshooting row literal '(max 4)' -> '(max N)', N is
+  the configured agents.maxAgents.
+- AGENTS.md:235 docs TOC '4 agents max' -> crew roster
+  (agents.maxAgents, default 10).
+
+LEFT AS POINT-IN-TIME: CHANGELOG.md lines 212/409 ('max 4: you + 3
+coworkers') - historical v0.8.7-era release records; rewriting history
+would falsify the record, and the current surfaces are all corrected.
+
+GATES: lint:docs PASS (118), lint:surface PASS (AGENTS.md scanned by
+rules 1/2/7), test/ci.js 439 passed / 0 failed / 1 skipped. Residual
+'max 4'/'4 agents'/'up to 4' grep across README/DEPLOY/AGENTS/docs:
+clean. Rides PR #117 with 142-147.
+
+---
+
+## Session (2026-10-07 — pass 147: reference/ + advanced/ complete)
+
+Owner: "let's read all the docs reference and advanced next."
+
+METHOD: judgment read of the reference/ tail (stream, sudo, errors,
+consensus, node-registry, legal, escrow, code-comments, index + the
+small API pages) and all 9 advanced/ pages, claims verified against
+lib/stream.js, lib/sudo.js, lib/error.js, lib/consensus.js,
+lib/node-registry.js, lib/search.js, lib/audit.js, the lib/vant.js
+getter list, package.json scripts, bin/ parsers, and git log.
+
+VERIFIED REAL, no edits: escrow.md (pass-77 era, spot-verified against
+lib/escrow.js), code-comments.md (convention prose), efficiency.md,
+audit.md (ledger lib log/logHydrate/getLedger/healthCheck real;
+.audit.log real; vant audit CLI real), troubleshooting.md, release.md
+(bump/tag flow), agent-contributors.md (every claim real: pass commit
+format in git log, npm run lint:docs in package.json:42, lib/genesis.js
++ test/genesis-ring.test.js exist with 14 test groups - the "8 checks"
+quote is the historical pass-68 count), nsc9-spec.md (zero code backing
+by design - labeled Draft v0.1, no lib/bin/test refs, makes no code
+claims), style.md.
+
+FIXED:
+- stream.md: enqueue/poll are stream-scoped, name first
+  (enqueue('tasks', payload), poll('tasks')) - doc taught an anonymous
+  global queue; fabricated {id,status}/{id,expires} return shapes
+  dropped.
+- sudo.md: role-based fiction (can(action), grant(role, action), the
+  levels 0-4 table) -> task-scoped reality: createTask/getTask/
+  listTasks/deleteTask, can(taskId, scope) sync false-on-unknown,
+  grant/revoke(taskId, scope), escalate(taskId, scope, options) async,
+  calculateLevel(scopes).
+- errors.md: VantRetryableError class does not exist (retryability is
+  the retryable option/flag on VantError, checked as error.retryable);
+  `require('vant').errors` getter fiction -> require('./lib/error').
+- consensus.md: usage blocks -> create(topic, options), vote(topic,
+  outcome, agentId), get(id, viewerId) scope gate, real states.
+- node-registry.md: register(node), discover(filter), heartbeat;
+  refresh documented as extra.
+- legal.md: duplicate table rows removed.
+- index.md: missing Escrow + RLS rows added to the reference index.
+- rerank.md: vant_rerank MCP schema is {query, docs} NOT
+  {query, mode, topK}; no vant.rerank getter - rerank is a lib/search
+  export; CLI/pipeline claims aligned.
+- search-architecture.md: session-cache section aligned to lib/search
+  reality (no getCacheStats/clearCache; hydrate-era API).
+- canvas/compute/embed/schema/theme/tmp: API tables re-verified against
+  module exports (paint/save/share/list, run/invoke, register/set,
+  meta/verbosity, html/json/cli, set/get/del/list/clear/size/dir).
+
+GATES: lint:docs PASS (118 files; 1 trailing-whitespace fail on my own
+rerank.md line caught + fixed), lint:surface PASS, test/ci.js
+439 passed / 0 failed / 1 skipped. Boot stone runtime-refreshed (rides
+along). Rides PR #117 with 142-146.
+
+---
+
+## Session (2026-10-07 — pass 146: security/ judgment reads)
+
+Owner: "let's read security next."
+
+METHOD: full judgment read of all 9 security/ pages, claims verified
+against lib/sandbox.js, lib/escrow.js, lib/vaf.js, lib/encrypt.js,
+lib/stego.js, lib/config.js, bin/stego.js, package.json.
+
+VERIFIED REAL, no edits: index.md (hub chain + CLI examples all real:
+secret set / sandbox status / sudo --status), privacy.md (policy prose,
+nothing code-actionable), vaf.md (options table + CONFIG surface +
+validator list all match lib/vaf.js), encryption.md primitives table
+(Encrypt.encrypt/decrypt, aesGcm pair, signToken/verifyToken, rsaKeyPair
+2048, rsaEncrypt/Decrypt/Sign/Verify, hmac/hmacSign variants all real;
+VANT_TOKEN_SECRET real lib/config.js:442, VANT_MSG_ENCRYPTED real
+lib/config.js:221 default true), environment.md's GitHub/ToS/polling/
+token/port sections (3456/3457 correct, VANT_AGREE_AUTO_SYNC real).
+
+FIXED:
+- sandbox.md (worst of the batch, same class as pass-142 qos.md):
+  capabilities table claimed canWrite/canNetwork/canCommit default TRUE
+  - reality is DENY-by-default in DEFAULT_CAPABILITIES (write, canWrite,
+  canNetwork, canExec, canSpawn, canCommit all false; read-side true;
+  canTrade added by pass 38); the untouched-sandbox-allows warning
+  semantics documented explicitly. getStats() -> getStatus() (shape
+  {active, reads, writes, uptime}); s.getBudget() -> getBudgetStatus()
+  (budget delegates to escrow); blockExternal option never existed;
+  {error, code: 'RATE_LIMITED'} return shape -> throws coded errors;
+  phantom canExecuteCode/canUseFilesystem capabilities example ->
+  canTrade (the real declared extra); `require('vant').sandbox` getter
+  is real (kept, annotated) - the doc's example worked by luck.
+- escrow.md: hold(id, {until, timeout}) -> hold(id, condition) with
+  options.holdTimeout default 300000 (no per-hold timeout);
+  requestApproval returns {approvalId, approved} or
+  {approved: true, reason: 'auto_approved'} (no options arg, no
+  approval.id/state); escrow.canProceed and escrow.setQuota DO NOT
+  EXIST (checkHold instead; quotas come from options.defaultQuota/
+  quotaWindow with auto window reset); checkQuota(agentId, operation)
+  returns {allowed, used, limit}; there is no reject() (deny by not
+  approving; checkApproval real); setBudgetLimit(real) documented;
+  beforeExecute documented as async; beforeExecute/Integration example
+  used the phantom vant.sandbox getter -> require('./lib/sandbox').
+- best-practices.md: vaf.configure({maxLength, blockPathTraversal...) is
+  FICTION (no configure export) -> CONFIG keys + per-call check options;
+  sandbox example restructured to options.capabilities form with the
+  explicit-config-deny semantics named.
+- airgap-propagation.md: taught `vant stego encode/decode` CLI verbs that
+  do not exist (bin/stego.js: snapshot/recover/capacity/upload only;
+  generic message encode/decode are lib exports) -> lib code blocks +
+  honesty note; Omega init prompt's `vant stego decode image.png` and
+  `npm start` (no such script; start = node bin/vant.js start) fixed.
+- environment.md: Dependencies list (express, cli-progress, inquirer,
+  "~30 other packages") vs reality package.json deps = chalk/js-yaml/yaml
+  and plain-node http servers -> corrected; LIMITATIONS section was
+  pre-multibrain-era fiction ("Single brain per instance", "No built-in
+  encryption") -> replaced with true limitations (git-based sync,
+  no multi-user CLI auth, multi-brain exists).
+
+GATES: style+links PASS (118; one broken-table emission self-
+inflicted + fixed mid-run), surface PASS, ci.js 439/0/1skip.
+Rides PR #117 (with passes 142-145).
+
+## Session (2026-10-07 — pass 145: multi-agent/ judgment reads)
+
+Owner: "let's read multi-agent docs next" (resumed after a dropped
+session; state recovered from the ledger + git status).
+
+METHOD: full judgment read of all 7 multi-agent/ pages, claims verified
+against lib/branch.js, lib/brain-lock.js, lib/lock.js, lib/agents/*,
+bin/branch-manager.js, bin/succession.js, bin/mesh-status.js.
+
+VERIFIED REAL, no edits: brains.md (state.json stack shape, setMode/
+getBrainPath/getPublicPath, read with type pinning, migrate --brain-name),
+succession.md (levels table matches lib/succession.js,
+models/public/vant/_succession.json path real for the default brain,
+`vant succession trust <level>` real bin/succession.js:96 ->
+setTrustLevel :106), federation.md authority rules + all six moving
+parts (genesis/agora-sync/settlement/notices/mesh --peers real
+bin/mesh-status.js:56), agents.md workflow prose (branches+lock+commit
+format).
+
+FIXED:
+- coordination.md: the agent-code block used `vant.branch`/`vant.lock`
+  getters (NOT exports of lib/vant.js — only brain/storage/search/
+  islands/mcp/agents/msg) and `lock.acquire(AGENT_ID)` returning a
+  token — lib/lock.acquire is path-based and returns {ok,reason}.
+  Rewritten to the real surface: lib/brain-lock.acquireBrainLock
+  (agentId, timeout) -> TOKEN STRING or null, releaseBrainLock(agentId,
+  token), try/finally; lib/lock.js described as the lower-level
+  path-lockfile primitive. Setup block's `vant branch create agent-1`
+  -> `vant git-branch create` (branch-manager has NO create verb:
+  status/auto/commit/push/pr/diff only).
+- branches.md: `require('vant').branch` -> require('./lib/branch') (no
+  vant.branch getter); branch.list -> listBranches; branch.create ->
+  checkout(create=true default) + fork(from,to); branch.delete ->
+  deleteBranch(agentId, remote=false); documented commit/push/status/
+  createPR + switchBranch/getStatus aliases (all verified in the
+  module.exports block).
+- agents.md: Related listed Succession twice (second row -> Coordination).
+- index.md: "Up to four agents coordinate per install" -> quota is
+  agents.maxAgents config (default 10 via VANT_AGENTS_MAX). The "max 4"
+  number traced to NOTHING in lib (core.js checks _getMaxAgents();
+  internal.js defaults 200; config default 10) — it is pure AGENTS.md
+  folklore that leaked into help text.
+- ROOT-CAUSE SWEEP of the same fiction: AGENTS.md "Up to 4 agents (you +
+  3 coworkers)" + agent_spawn row "default crew of 4" + bin/help.js two
+  spawn entries "(max 4)" + bin/agent-spawner.js help "Max 4 agents (you
+  + 3 coworkers)" all corrected to the agents.maxAgents config reality.
+  Grep-verified no test pins the old help text before editing.
+- federation.md: org-sync interface row "Automatic on push" -> explicit
+  `orgSync.replicate(bus, node)` after each model change (steward-runbook
+  is the accurate doc; the row overstated).
+
+GATES: style+links PASS (118), surface PASS, ci.js 439/0/1skip.
+Rides PR #117 (with passes 142-144).
+
+## Session (2026-10-07 — pass 144: memory/ judgment reads)
+
+Owner: "keep going on Remaining unjudged sections - memory/ next
+(core product surface, 10 pages), then multi-agent/, integrations/,
+security/, runtime/, advanced/."
+
+METHOD: full judgment read of all 10 memory/ pages, every actionable
+claim verified against lib/ + bin/.
+
+VERIFIED REAL, no edits: brain.md (pass 141 already), index.md hub
+(three-systems table + specialist formats + one-paragraph model all
+match reality), stego.md (CLI snapshot/recover/capacity real; capacity
+--image= flag is REAL in the capacity subparser — bin/stego.js:100;
+chunked encode/decode real lib/stego.js:329/:336; encodeSvg/decodeSvg
+real; BRN:ENC prefix + PBKDF2 real), horcrux.md CLI+
+refresh/restore/inspect subcommands (bin/horcrux.js:111/:166/:186/:277,
+default path = current brain's boot dir with p_<password> naming,
+password chain arg->env->filename).
+
+FIXED:
+- citations.md: addSource takes (commit, context) — the old example
+  passed a single 'lessons.md#sync-race' string (lib/citations.js:75
+  signature; formatCitation would print garbage); `citations.getStack()`
+  is NOT an export (getStackCitations is); verify() takes a commit hash
+  (verify(commit) — the old bare call always falsy-or-wrong).
+- rag.md: search.query returns { memories, results, context } — the old
+  code mapped result.memories AFTER already returning .context... wait,
+  the old code took (topK, maxTokens) options (not real; limit is) and
+  joined memories manually when context is already the joined string;
+  hybrid returns { fused } (BM25-ranked; pass-134 verified — { context,
+  scores } fiction); cache.set positional TTL
+  `cache.set(k, v, 60000)` -> { ttl: 60000 } (pass-142 cache fix class);
+  ragAgent's vant.think({topK}) -> bare think (topK not an option).
+- geometry.md: NO lib/geometry.js — the module is lib/geometry/ (a
+  directory), and store/retrieve take (barcode, data, basePath?)
+  not ('a-key','the value'); the key-value convenience the doc showed
+  is `vant geometry store <key> <value>` (bin/geometry.js routes store/
+  retrieve through memory.learn/query 'geometry:'+key — itself
+  documented now); barcode->generateBarcodeFromContent; memory-side
+  address/locate real lib/memory.js:599/:655.
+- horcrux.md programmatic block: toHorcrux({outputPath, password}) ->
+  real sig toHorcrux(outputPath, {password}) (lib/transform.js:1130;
+  object form tolerated but documented wrong); restore(data) ->
+  fromHorcrux(path, {password}) for the FILE-level entry (lib/transform
+  .js:1693; restore takes parsed data at :1931).
+- prune.md: `prune.run({dryRun})` -> `prune.prune({dryRun, userCtx})`
+  (no run export; prune is sandbox-gated and REQUIRES userCtx,
+  lib/prune.js:181 fail-closed); noted getStats/listPrunable/DEFAULT_
+  STALE_DAYS alongside.
+- memory-store.md: state/recall/learn/query are ASYNC — the old
+  `state('build-count', 42); recall('build-count')` snippets dropped the
+  await (recal would race the write in a fresh process); added the TTL
+  options-object example (no --ttl CLI flag, per pass 141's cli.md fix).
+
+GATES: style+links PASS (118), surface PASS, ci.js 439/0/1skip.
+Rides PR #117 (with passes 142-143).
+
+## Session (2026-10-07 — pass 143: operations/ section completed)
+
+Owner: PR #116 merged (passes 137-141); pass 142 opened PR #117.
+"What's next in /docs? We wanna read everything to an accurate, usable
+state." Also noted GitHub having issues 3 days running.
+
+COVERAGE MAP: full judgment reads now done on essential/ (140),
+getting-started funnel (140), mid-funnel architecture/onboarding/brain/cli
+(141), operations/ (142+143). Remaining unjudged: memory/, reference/
+(partial: storage/resolution/runop/entropy/mcp-tools/rest-api/rpc all
+touched in recent passes), multi-agent/, integrations/, security/,
+runtime/, advanced/, whitepaper tail.
+
+This pass finished operations/ (9 pages remaining after 142):
+
+VERIFIED REAL, no edits: agora.md (all 5 CLI verbs match bin/agora.js,
+all 5 MCP tools registered lib/mcp.js:873-940, consensus.get(topic,
+viewerId) scope gate real lib/consensus.js:693), settlement.md
+(makeInvoice/sendInvoice/list/get + settle.request/settle.record legs +
+refusal codes real lib/settlement.js:455/:491/:564/:569),
+steward-runbook.md (org-sync replicate/generation rules, genesis
+ring-admit lib, teams createOrg/createDept/createTeam/assign,
+node-registry anchors, mesh secret env), federation-playbooks.md
+(genesis CLI create/join/status real bin/genesis.js; agora verbs,
+notices pull, mesh status, market_list/forum_vote/consensus_tally/
+consensus_get MCP tools all registered), ci.md (test.yml triggers/steps
+match the real workflow file: dispatch/push/PR/schedule cron, single ci
+job, cancel-in-progress, npm audit, ci.js+runner+vibe+coverage;
+docker.yml + docs.yml exist), sync.md core (isRAID/getProviderCount/
+pushAll({commitMessage})/pullAny/getStatus/rebase all real; providers
+github/gitlab/bitbucket/gitea/selfhosted real lib/remote.js:234-241,
+GITLAB_TOKEN/BITBUCKET_TOKEN/GITLAB_REPO read by connector classes).
+
+FIXED:
+- storage.md: `require('vant').storage` is the module (getter real
+  lib/vant.js:1605) but the page taught fiction on top: brain.getIdentity()
+  and brain.getVersion() DO NOT EXIST (BrainStorage = get/write/append/
+  has/list/query/brainRead/brainList); "read with error handling" used a
+  phantom brain.read (the (category,key) reader is get(); FileStorage.read
+  is the path-based one); get() denial returns {error} (doc said throws);
+  connectors example `require('./lib/connectors')` + `new connectors.github`
+  (connectors is a directory, class is GitHubProvider via lib/remote.js);
+  Configuration ctor `new Storage({path,sync,atomic,sandbox})` fiction ->
+  real FileStorage({basePath, encrypt, wal, mirrors}); vector.add 3rd arg
+  is metadata object not a vector; islands getManifest sync-vs-async note.
+- network.md: fetch resolves to the BODY STRING, not {json,status}
+  (fetchJson is the JSON helper); fetchWithRetry/getPoolStats/configure()
+  DO NOT EXIST (retry(fn, {retries, backoff, maxBackoff}) is the real
+  retry surface; throws last error); isOnline() = cached flag,
+  checkOnline() = probe; getLatencyStats/measureLatency real; circuit
+  state CLOSED|OPEN (time-based, no half-open); real fetch options:
+  cache/circuit/timeout/headers/system (system opts out of the per-call
+  canNetwork gate); SSRF gate resolveAndCheckIP named.
+- testing.md: no test:watch/test:coverage npm scripts (real: npm test =
+  build-test, test/runner.js, test/coverage.js, test/ci.js, single
+  suites); unit-test example was mocha/jest style but the repo is
+  plain-Node scripts - rewritten to assert + async IIFE; vant.init({name})
+  returns {error,...} not {id} (verified lib/vant.js:403), think returns
+  {insights}, learn returns {success:true,key,ttl} - all now asserted
+  against the real shapes.
+- ci.md: `npm run build` / `build:watch` fiction (no build step exists;
+  package.json has none) - replaced with the real lint:* gate list.
+- sync.md polish: pullAny preference option is `{ provider: 'gitlab' }`
+  (destructured as {provider}); documented getStatus return shape + the
+  extra exports (rebase/diffCorpus/scanConflictMarkers/
+  getConfiguredProviders); provider-configured semantics + env names.
+- federation-playbooks.md: `vant genesis admit` CLI line corrected -
+  admit/accept are LIB-only exports (lib/genesis.js:555); the CLI ships
+  create/join/status only. Playbook now calls the lib directly.
+
+GATES: style+links PASS (118), surface PASS, ci.js 439/0/1skip.
+Rides PR #117 (with pass 142).
+
+## Session (2026-10-07 — pass 142: operations/ judgment reads)
+
+Owner: PR #116 (passes 137-141) accepted and merged; keep reading docs
+for narratives, false info, stale docs, dedupe where necessary.
+
+METHOD: first full judgment read of docs/operations/ (20 pages; only
+narrative-marker sweeps in 139 and spot checks in 134/137 before).
+Read 11, verified every actionable claim against lib/ + bin/.
+
+notifications.md ARCHIVED (full fiction, plugins.md class):
+`require('./lib/notifications')` with slack/discord/email/pushover/
+telegram + broadcast() + status() — lib/notifications.js does not exist,
+no lib file mentions notifications, none of the SLACK/DISCORD/PUSHOVER/
+SMTP env vars are read anywhere in lib/ or bin/. git mv ->
+labs/archives/docs/operations-notifications.md + provenance row;
+nav.yml + operations/index rows dropped; operations.md Notifications
+section rewritten to the real outbound surfaces (Telegram bot, events,
+webhooks).
+
+qos.md FIXED (4 sections fictional): RateLimiter isAllowed()/consume()
+never existed (real: async check(clientId, op) that THROWS
+RATE_LIMIT_EXCEEDED, reset(clientId), getStatus(); default maxPerMinute
+is 60 via VANT_QOS_MAX_PER_MINUTE, not 100); CircuitBreaker
+execute()/onOpen()/onClose() never existed (real: recordFailure/
+recordSuccess/isClosed/getState/getStatus/reset, option is `threshold`
+not failureThreshold, throws SANDBOX_CIRCUIT_OPEN when open, no
+half-open state — time-based recovery; mode:'full' adds per-provider
+backoff); Bulkhead execute() -> run(fn) and options maxConcurrent/
+maxQueue -> single `concurrency` (default 10, queue-not-reject);
+sandbox.create({maxConcurrent, readQuota, writeQuota}) verified REAL
+and kept. Throttler/Debouncer sections verified accurate.
+
+cache.md FIXED (double fiction): module exports the Cache CLASS, not an
+instance (const { Cache } = require + new Cache({maxSize, defaultTTL}));
+TTL is options-object set(key, value, { ttl }), not positional (the old
+"60000" example set NO ttl); "-1 = no expiry" never existed (no such
+convention; defaultTTL 3600000); delete('key') -> remove('key'); clear()
+real; get() refreshes TTL on read (real behavior worth teaching).
+
+cron.md FIXED (whole API fictional): every()/after()/cron('0 * * * *')/
+jobs()/stop(jobId) — none exist. Real: schedule({id, interval, handler})
+with ms intervals VAF-validated 1000..86400000 (NO cron-expression
+parser), cancel(id), list(), status(id), once/on/off, scheduleCompute,
+scheduleEmbed; vant.cron getter real (lib/vant.js:191); bin/cron.js
+routed CLI noted.
+
+webhooks.md + automation.md FIXED (same phantom stack): `vant/lib/network`
+sync({direction}) (pass-141 class), cron.cron('0 0 * * *'), and
+vant.prune({keep}) — vant.prune is not an export. Rewrote to real
+surfaces: outbound webhooks = bin/webhooks.js list/add/remove/test on
+VANT_WEBHOOK_PORT 3467, requires VANT_WEBHOOK_SECRET, loopback bind by
+default (lib/webhooks.js:66/:133/:254) + webhook:crew.<type> events;
+scheduled sync = cron.schedule + lib/sync.js pushAll(); prune = the real
+CLI (`vant prune --stale-days --no-fluff`, pass-134-verified flags) via
+system crontab; GitHub push -> sync = `vant watch` (polling is the real
+mechanism, there is no inbound GitHub receiver). Verified real and kept:
+branch.commit(agentId, message) (lib/branch.js:192), vant.learn, vant.think,
+the generic Express signature/API-key patterns.
+
+events.md FIXED: Queue has NO user process() handler API and is not an
+EventEmitter (no .on('job:complete')) — lib/event.js Queue = enqueue/
+get/stats/clear with internal _process (job.run() then complete);
+options: concurrency only (default 1, no timeout option); the odd
+`require('./lib/qos').PubSub || ...` fallback line -> direct import
+(qos exports no PubSub). Event/PubSub classes + list/stats/subscribe/
+publish/join/leave all verified real.
+
+operations.md FIXED: `.vant.log` -> `vant.log` (clean.js rotates
+vant.log/vant.log.old; no dotfile ever existed); Notifications fiction ->
+real surfaces; Telegram section: /sync added (5 onCommand handlers,
+5 commands), TELEGRAM_BOT_TOKEN named (lib/telegram.js:28;
+notifications.md's TELEGRAM_TOKEN was also wrong). `vant rate` (bin/rate.js)
+and `vant bot` verified real and kept. notices.md verified real
+(bin/notices.js subcommands match exactly) and left alone.
+
+GATES: style+links PASS (118), surface PASS, ci.js 439/0/1skip.
+Rides PR #116.
 
 ## Session (2026-10-07 — pass 141: mid-funnel judgment reads)
 

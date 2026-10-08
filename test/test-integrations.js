@@ -93,7 +93,7 @@ test('version has string elements', () => { return typeof version[0] === 'string
 // ============================================
 // CACHE
 // ============================================
-// v0.9.0-axolotl T15a: cache module no longer exports a singleton.
+// 0.8.6 T15a: cache module no longer exports a singleton.
 // Tests now assert against the Cache class and a fresh instance.
 // ============================================
 console.log('\n=== Cache Module Tests ===\n');

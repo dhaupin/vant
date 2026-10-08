@@ -48,5 +48,11 @@ jobs:
       - name: Surface consistency (no phantom endpoints, links, community doors)
         run: npm run lint:surface
 
+      - name: dist/ lander gate (links, fiction, stat truth)
+        run: npm run lint:dist
+
+      - name: Fiction signatures (repo-wide, wrong-claims regression gate)
+        run: npm run lint:claims
+
       - name: Run standalone suites
         run: for f in test/*.test.js; do node "$f" || exit 1; done

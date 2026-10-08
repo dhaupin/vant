@@ -105,7 +105,7 @@ test('storage.write is function', () => {
 });
 
 test('storage.exists is removed (T10b — nuclear breaking)', () => {
-    // v0.9.0-axolotl T10b: removed the `exists` alias for `has`. Callers
+    // 0.8.6 T10b: removed the `exists` alias for `has`. Callers
     // should use `storage.has(path)`. No compat shim in this branch.
     return {
         success: storage.exists === undefined,

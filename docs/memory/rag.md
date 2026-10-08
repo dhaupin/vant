@@ -51,13 +51,13 @@ Context + User Query
 const search = require('vant').search;
 
 async function queryBrain(question) {
-    // Search brain
-    const results = await search.query(question, {
-        topK: 5,
-        maxTokens: 2000
+    // Search brain; returns { memories, results, context }
+    const result = await search.query(question, {
+        limit: 5
     });
-    
-    return results.memories.map(m => m.content).join('\n\n');
+
+    // context is the joined snippet string, ready for a prompt
+    return result.context;
 }
 
 const context = await queryBrain('authentication');
@@ -112,17 +112,14 @@ const search = require('vant').search;
 async function ragAgent(question) {
     // Initialize
     await vant.init({ name: 'RAGAgent' });
-    
-    // Think using RAG
-    const result = await vant.think(question, { topK: 5 });
-    
-    // Use memories in response
-    const context = result.memories.map(m => m.content).join('\n\n');
-    
+
+    // Think: runs the same retrieval internally and returns insights
+    const result = await vant.think(question);
+
     return {
         question,
-        context,
-        insights: result.insights
+        insights: result.insights,
+        memories: result.memories
     };
 }
 ```
@@ -132,27 +129,26 @@ async function ragAgent(question) {
 Use BM25 + Vector for better results:
 
 ```javascript
-const { context, scores } = await search.hybrid('question', {
-    topK: 5,
-    rerank: true
-});
+const result = await search.hybrid('question', { limit: 5 });
+// result.fused is the BM25-ranked result list
 ```
 
 See [Brain Search](/vant/memory/search) for details.
 
 ## Cache Results
 
-Cache common queries:
+Cache common queries (TTL is an options object):
 
 ```javascript
-const cache = require('./lib/cache');
+const { Cache } = require('./lib/cache');
+const cache = new Cache({ defaultTTL: 60000 });
 
 async function cachedQuery(question) {
     const cached = cache.get('rag:' + question);
     if (cached) return cached;
-    
+
     const result = await ragAgent(question);
-    cache.set('rag:' + question, result, 60000);
+    cache.set('rag:' + question, result, { ttl: 60000 });
     return result;
 }
 ```

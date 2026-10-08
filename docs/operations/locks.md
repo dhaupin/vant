@@ -1,6 +1,7 @@
 ---
 version: 0.8.6
 permalink: /operations/locks
+layout: default
 title: Locks
 nav_order: 66
 description: The two lock types (authorization lease and cross-process mutex), their roots, failure postures, and how to use each.

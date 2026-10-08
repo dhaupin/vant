@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Timer Lifecycle Registry Tests
- * The v0.9.0-axolotl registry (lib/boot.js) is the single owner of
+ * The 0.8.6 registry (lib/boot.js) is the single owner of
  * background intervals: modules register named timers, boot can account
  * for every one, and reset/shutdown clears them. Previously 9 intervals
  * ran with no lifecycle and kept handles alive after boot reset.

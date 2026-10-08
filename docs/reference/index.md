@@ -27,6 +27,8 @@ description: Complete Vant reference - CLI, configuration, APIs, error codes, an
 | [Code Comments](/vant/reference/code-comments) | Comment conventions |
 | [Consensus](/vant/reference/consensus) | Voting mechanisms |
 | [Errors](/vant/reference/errors) | Error codes and meanings |
+| [Escrow API](/vant/reference/escrow) | Budgets, holds, approvals, quotas |
+| [RLS](/vant/reference/rls) | Row-level security |
 | [Resolution](/vant/reference/resolution) | Thought resolution API |
 | [Runop](/vant/reference/runop) | Run operators |
 | [Schema](/vant/reference/schema) | Schema validation |

@@ -16,12 +16,13 @@ Manage git branches programmatically:
 
 - Create/checkout branches
 - List branches
-- Switch branches
+- Switch branches## Get Current Branch
 
-## Get Current Branch
+Branches live in `lib/branch.js` (there is no `vant.branch` getter -
+`vant.agents` covers the runtime crew):
 
 ```javascript
-const branch = require('vant').branch;
+const branch = require('./lib/branch');
 
 const current = await branch.currentBranch();
 console.log(current); // "main" or "agent-name"
@@ -30,27 +31,31 @@ console.log(current); // "main" or "agent-name"
 ## List Branches
 
 ```javascript
-const branches = await branch.list();
+const branches = await branch.listBranches();
 console.log(branches);
 // ["main", "agent-1", "agent-2"]
 ```
 
 ## Create Branch
 
+There is no bare `create` - checkout creates the branch when missing:
+
 ```javascript
-await branch.create('agent-1');
+await branch.checkout('agent-1');        // creates if absent (default)
+await branch.fork('agent-1', 'agent-2'); // copy one agent's branch to another
 ```
 
 ## Checkout Branch
 
 ```javascript
-await branch.checkout('agent-1');
+await branch.checkout('agent-1', true);  // (agentId, create = true)
 ```
 
 ## Delete Branch
 
 ```javascript
-await branch.delete('agent-1');
+await branch.deleteBranch('agent-1');          // local
+await branch.deleteBranch('agent-1', true);    // also on the remote
 ```
 
 ## Merge Branch
@@ -58,6 +63,10 @@ await branch.delete('agent-1');
 ```javascript
 await branch.merge('agent-1');  // into current
 ```
+
+Also exported: `commit(agentId, message)`, `push()`, `status()`,
+`createPR()`, and the aliases `switchBranch` (= checkout) and
+`getStatus` (= status).
 
 ---
 

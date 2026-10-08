@@ -105,7 +105,7 @@ Channel-based pub/sub with rooms.
 Create a pub/sub:
 
 ```javascript
-const { PubSub } = require('./lib/qos').PubSub || require('./lib/event').PubSub;
+const { PubSub } = require('./lib/event');
 
 const ps = new PubSub();
 ```
@@ -156,44 +156,29 @@ Create a queue:
 const { Queue } = require('./lib/event');
 
 const queue = new Queue({
-    concurrency: 3,  // max concurrent jobs
-    timeout: 30000   // job timeout
+    concurrency: 3  // max concurrent jobs (default: 1)
 });
 ```
 
 ### Enqueue
 
-Add a job:
+Add a job - the queue processes it automatically:
 
 ```javascript
 const job = queue.enqueue('process', { data: 'hello' });
-console.log(job.id);  // "job_abc123"
-console.log(job.state); // "pending"
+console.log(job.id);    // job id
+console.log(job.state); // pending -> completed/failed
 ```
 
-### Process
+### Track
 
-Define job handler:
-
-```javascript
-queue.process('process', async (job) => {
-    console.log('Processing:', job.id);
-    return { result: 'done' };
-});
-```
-
-### Events
-
-Listen to job events:
+The queue runs jobs itself (there is no user `process()` handler API
+and the queue is not an EventEmitter - no `.on('job:complete')`).
+Track jobs by id and watch stats:
 
 ```javascript
-queue.on('job:complete', (job) => {
-    console.log('Job done:', job.id);
-});
-
-queue.on('job:failed', (job) => {
-    console.log('Job failed:', job.error);
-});
+const job = queue.get(jobId);  // job state after the fact
+console.log(queue.stats());    // { queued, running, total, uptime }
 ```
 
 ### Job States
@@ -209,8 +194,7 @@ queue.on('job:failed', (job) => {
 
 | Option | Default | What |
 |--------|---------|------|
-| concurrency | 3 | Max concurrent jobs |
-| timeout | 30000 | Job timeout (ms) |
+| concurrency | 1 | Max concurrent jobs |
 
 ---
 
@@ -241,17 +225,15 @@ const { Queue } = require('./lib/event');
 
 const queue = new Queue({ concurrency: 2 });
 
-// Enqueue work
+// Enqueue work - the queue tracks and processes it
 const job = queue.enqueue('email', {
     to: 'user@example.com',
     subject: 'Hello',
     body: 'Message'
 });
 
-// Process
-queue.process('email', async (job) => {
-    await sendEmail(job.data);
-});
+// Check on it later
+console.log(queue.get(job.id).state);  // e.g. completed
 ```
 
 ### Notifications
