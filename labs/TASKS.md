@@ -2,7 +2,38 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 172 — first live tree-tier consumer (trust) + #158 universe decision RESOLVED + search hygiene
+**Session:** Pass 173 — node-registry onto the tree tier (step ②) + persistMerged tree support
+
+---
+
+## Session (2026-10-08 — pass 173: node-registry → tree tier)
+
+**What shipped** (owner: "let's keep wiring pls"):
+
+- **STATE-STORE: persistMerged gains `tree` support** — the merged
+  snapshot mirrors into the caller's StateTree INSIDE the lock, root
+  hash rides `state:saved` + audit, same contract as `persist()`. One
+  wiring shape across both write paths.
+- **NODE-REGISTRY → TREE (second live consumer, step ②):** the peer
+  table (consensus's vote-verification anchor) mirrors into one
+  StateTree on hydrate and on every merged persist. Cross-process
+  "same peer table?" is one string comparison. New seams:
+  `_treeRoot()`, `_stateTree()`; `clearState` drops the mirror while
+  preserving the pass-98 tombstone semantics.
+
+**Pin suite:** `test/state-wiring.test.js` extended with a
+NODE-REGISTRY → TREE section (4 new pins): register mirrors through
+persistMerged with rootHash on the event, heartbeat moves the root,
+disk view === live mirror, clearState resets + tombstones hold. 27/27.
+
+**Verification:** state-wiring 27/27; trust, state-persistence 8/8,
+state-store-crossprocess 5/5, state-store-tombstones 2/2,
+backbone-wiring 11/11, mesh-status 7/7, engine-parity-spine 66/66;
+audit-locks gate PASS.
+
+**Next:** consensus/market onto the tree tier; mesh deltas →
+checkpoint/WAL; geometry → spine/cellstore; BrainVerifier onto
+`vant health` + horcrux CLI; #122–#144 husks.
 
 ---
 

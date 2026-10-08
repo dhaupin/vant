@@ -20,6 +20,10 @@
  *                    WIRING.md step ①): the ledger mirrors into a StateTree
  *                    on hydrate and persist; root hash rides events; the
  *                    disk view (treeFor) matches the live mirror.
+ *   REGISTRY → TREE— node-registry is the SECOND live consumer (pass 173,
+ *                    step ②): the peer table mirrors through persistMerged
+ *                    (tree support added pass 173) and hydrate; root hash
+ *                    rides events; merged-persist path carries the hash too.
  *
  * Exit code is the verdict, per house test conventions.
  */
@@ -237,6 +241,59 @@ async function main() {
     test('trust: clearState resets the mirror (no hash for state that no longer exists)', () => {
         trust.clearState();
         assert.strictEqual(trust._treeRoot(), null, 'mirror dropped with the ledger');
+    });
+
+    // ==================== NODE-REGISTRY → TREE (second live consumer, pass 173) ====================
+    console.log('\n▓ NODE-REGISTRY → TREE\n');
+
+    const registry = require('../lib/node-registry');
+
+    test('registry: persistMerged carries the tree (register mirrors the peer table)', async () => {
+        registry.clearState();
+        const fired = [];
+        const onSaved = (d) => { if (d.moduleName === 'node-registry') fired.push(d); };
+        events.on('state:saved', onSaved);
+        try {
+            const res = registry.register({ id: 'pin-node-1', host: 'localhost', port: 3457 });
+            assert.ok(!res.error, 'register accepted: ' + JSON.stringify(res));
+            const root = registry._treeRoot();
+            assert.ok(root && /^[0-9a-f]{64}$/.test(root), 'root hash is a sha256 hex');
+            const tree = registry._stateTree();
+            assert.ok(tree.paths().some(p => p.startsWith('/node-registry/')), 'tree paths live under /node-registry/');
+            const mirrored = stateStore.fromTree('node-registry', tree);
+            assert.ok(Array.isArray(mirrored.nodes) && mirrored.nodes.some(n => n.id === 'pin-node-1'),
+                'peer present in the mirrored tree');
+            const saved = fired.filter(d => d.rootHash);
+            assert.ok(saved.length > 0 && saved.every(d => d.rootHash === root),
+                'persistMerged state:saved rides the rootHash too (the pass-173 persistMerged contract)');
+        } finally {
+            events.off('state:saved', onSaved);
+        }
+    });
+
+    test('registry: heartbeat (merge-path mutation) moves the root hash', async () => {
+        const before = registry._treeRoot();
+        await new Promise(r => setTimeout(r, 5)); // heartbeat timestamps must differ
+        registry.heartbeat('pin-node-1');
+        assert.notStrictEqual(registry._treeRoot(), before, 'merged persist re-mirrors and re-hashes');
+    });
+
+    test('registry: hydrated disk state matches the live mirror (treeFor === _treeRoot)', () => {
+        const disk = stateStore.treeFor('state/node-registry.json');
+        assert.strictEqual(disk.state, 'PRESENT', 'node-registry.json exists after the pins above');
+        assert.strictEqual(disk.rootHash, registry._treeRoot(),
+            'disk view and live mirror agree on one hash — consensus\'s cross-process same-peer-table check');
+    });
+
+    test('registry: clearState resets the mirror (tombstone semantics preserved)', () => {
+        const gone = registry.clearState();
+        assert.strictEqual(gone, true);
+        assert.strictEqual(registry._treeRoot(), null, 'mirror dropped with the peer table');
+        // tombstone rule (pass 98): _resetHydration keeps _seenNodes; clearState
+        // wipes everything — re-registering the same id must work cleanly.
+        const again = registry.register({ id: 'pin-node-1', host: 'localhost', port: 3457 });
+        assert.ok(!again.error, 're-register after clearState works');
+        registry.clearState();
     });
 
     // ==================== MESH-STATUS → MESHTREE ====================
