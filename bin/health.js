@@ -150,12 +150,29 @@ function checkDirs() {
     if (!brainPath) {
         try { brainPath = require('../lib/brain').getBrainPath(); } catch (e) { brainPath = 'models/private'; }
     }
-    const dirs = ['models', 'models/private', 'lib', 'bin', brainPath];
+    // (pass 167) lib/ and bin/ live at the INSTALL root, not the user's
+    // project — when vant runs from outside its own repo (the design:
+    // dispatcher spawns in the caller's cwd), cwd-relative existsSync
+    // false-FAILED them and trained users to ignore health's red output.
+    // Resolve through lib/anchor (VANT_REPO_ROOT) per its stated purpose;
+    // models/ + brain stay cwd-relative (the user's project IS the brain
+    // home).
+    let installRoot = '.';
+    try { installRoot = require('../lib/anchor').getRepoRoot(); } catch (e) {}
+    const dirs = ['models', 'models/private', brainPath];
+    const installDirs = ['lib', 'bin'];
     dirs.forEach(d => {
         if (fs.existsSync(d)) {
             console.log('  ' + theme.status.ok(d + '/'));
         } else {
             console.log('  ' + theme.status.fail(d + '/ missing'));
+        }
+    });
+    installDirs.forEach(d => {
+        if (fs.existsSync(path.join(installRoot, d))) {
+            console.log('  ' + theme.status.ok(d + '/ (install root)'));
+        } else {
+            console.log('  ' + theme.status.fail(d + '/ missing (install root: ' + installRoot + ')'));
         }
     });
 

@@ -2,7 +2,49 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 166 — hybrid polyglot bridge: sidecar runtime + SidecarConnector + julia-srv + adapter parity
+**Session:** Pass 167 — julia sidecar LIVE (installed + smoke 5/5); health foreign-cwd false-FAIL fixed
+
+---
+
+## Session (2026-10-08 — pass 167: live julia + health fix)
+
+Owner: "You can install Julia! Try it out!" + flagged another agent's
+claim that lib//bin health warnings are "cosmetic, outside-repo run".
+
+HEALTH CLAIM — VERIFIED HALF-TRUE, FIXED AT SOURCE: bin/health.js
+checkDirs used cwd-relative existsSync('lib'/'bin') — vant running
+from a foreign cwd (the design: dispatcher spawns in the caller's cwd)
+false-FAILED them. Mechanics of the claim correct, brain ops
+unaffected (anchor/brain-path resolve) — BUT a false FAIL in a
+diagnostic tool trains users to ignore red. FIXED: install dirs now
+resolve through lib/anchor.getRepoRoot() (that module's stated
+purpose) and report "ok (install root)"; models/brain stay
+cwd-relative (the user's project IS the brain home). Verified: health
+run FROM /tmp shows lib/ (install root) OK instead of FAIL.
+
+JULIA LIVE (1.10.4 installed from official tarball, no-root, /tmp):
+LIVE SMOKE 5/5 — spawn+health through lib/sidecar.js, real token-
+checked wire eval (JULIA-LIVE: 4), SidecarConnector round-trip (21),
+JIT amortization MEASURED: warm per-call average 1.3ms (subprocess
+model pays 2-30s JIT per call — 3+ orders of magnitude), clean /stop
+exit 0.
+
+julia-srv.jl TRUTH-UPS (all caught by the live smoke, none by the
+wire fake): r'...' JS-style regex literals (Julia needs r"..." w/
+escaped quotes), missing `using Sockets` + getsockname port discovery,
+body read-to-EOF deadlock (client holds write side; must read exactly
+Content-Length), redirect idiom (redirect_stdout(f, IOBuffer) has no
+method → zero-arg capture-pair idiom w/ finally-restore), payload
+take! on a now-String var. LESSON: wire-fake pins pin the CONTRACT;
+the language runtime still needs a live smoke — both are now permanent
+(test/sidecar.test.js 8/8 protocol + test/julia-sidecar-live.test.js
+5/5, SKIPs when julia absent).
+
+GATES: claims (852f) + syntax PASS; health/sidecar suites green
+(sidecar 8/8 protocol; live 5/5 w/ julia, skip w/o).
+
+NEXT-UP: connectors/rust.js + rust-srv, geometry sidecar switch, or
+owner direction. Rides #118.
 
 ---
 

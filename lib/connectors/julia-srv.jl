@@ -17,6 +17,8 @@ a Julia install. Designed for the vant sidecar contract — do not
 expose beyond 127.0.0.1.
 =#
 
+using Sockets
+
 const TOKEN = length(ARGS) >= 1 ? ARGS[1] : ""
 const HOST = get(ENV, "VANT_SIDECAR_HOST", "127.0.0.1")
 
@@ -46,12 +48,38 @@ function respond(sock, status::Int, body::AbstractString)
         "Connection: close\r\n\r\n$body")
 end
 
+#= (pin-caught, live smoke) regex-extracting nested JSON strings is fragile
+(escaped quotes inside code defeat single-pass patterns). This scanner
+walks the value char-by-char with escape awareness and unescapes as it
+goes. Returns nothing when the field is absent. =#
+function extract_string_field(body::AbstractString, field::AbstractString)
+    key = "\"" * field * "\":\""
+    i = findfirst(key, body)
+    i === nothing && return nothing
+    j = i[end] + 1
+    buf = IOBuffer()
+    while j <= length(body)
+        c = body[j]
+        if c == '\\' && j < length(body)
+            nxt = body[j+1]
+            print(buf, nxt == 'n' ? '\n' : nxt == 't' ? '\t' : nxt == 'r' ? '\r' : nxt)
+            j += 2
+        elseif c == '"'
+            return String(take!(buf))
+        else
+            print(buf, c)
+            j += 1
+        end
+    end
+    return nothing
+end
+
 function handle(sock)
     req = ""
-    # minimal HTTP read: request line + headers + optional body
+    # minimal HTTP read: request line + headers (until blank line)
     while true
         line = readline(sock)
-        isempty(line) && break
+        isempty(strip(line)) && break
         req *= line * "\n"
     end
     firstline = split(req, "\n")[1]
@@ -59,18 +87,24 @@ function handle(sock)
     length(parts) < 2 && (respond(sock, 405, "{}"); return)
     method, path = parts[1], parts[2]
 
+    # (pin-caught, live smoke) the client holds its write side open until the
+    # response arrives — read the body by Content-Length, never to EOF.
+    clen = 0
+    for line in split(req, "\n")
+        m = match(r"(?i)content-length:\s*(\d+)", line)
+        m !== nothing && (clen = parse(Int, m.captures[1]); break)
+    end
+
     if method == "GET" && startswith(path, "/health")
         respond(sock, 200, "{\"ok\":true,\"lang\":\"julia\"}")
         return
     end
 
     if method == "POST" && (startswith(path, "/eval") || startswith(path, "/stop"))
-        # NOTE: minimal parse — read remaining bytes as body (Content-Length
-        # respected by the client closing; vant's client always sends JSON).
-        raw = String(read(sock, String))
+        raw = clen > 0 ? String(read(sock, clen)) : ""
         body = occursin("{\"token\"", raw) ? raw[findfirst("{\"token\"", raw)[1]:end] : "{}"
-        tok = match(r'"token"\s*:\s*"([^"]*)"', body)
-        if tok === nothing || tok.captures[1] != TOKEN
+        tok = extract_string_field(body, "token")
+        if tok === nothing || tok != TOKEN
             respond(sock, 405, "{\"ok\":false,\"stderr\":\"bad token\"}")
             return
         end
@@ -79,28 +113,35 @@ function handle(sock)
             close(sock)
             exit(0)
         end
-        code = match(r'"code"\s*:\s*"((?:[^"\\]|\\.)*)"', body)
+        code = extract_string_field(body, "code")
         if code === nothing
             respond(sock, 200, "{\"ok\":false,\"stderr\":\"missing code\"}")
             return
         end
-        # unescape the JSON string back to raw code
-        src = replace(code.captures[1], "\\n" => "\n", "\\t" => "\t",
-            "\\r" => "\r", "\\\"" => "\"", "\\\\" => "\\")
-        out = IOBuffer(); err = IOBuffer()
+        src = code
+        # Capture stdout/stderr via the documented zero-arg redirect idiom:
+        # rd, wr = redirect_stdout() swaps global stdout to wr and returns the
+        # reader. Restore in finally; close write ends so readers see EOF.
+        orig_out = stdout
+        orig_err = stderr
+        out_r, out_w = redirect_stdout()
+        err_r, err_w = redirect_stderr()
         ok = true
         try
-            redirect(stdout, out) do
-                redirect(stderr, err) do
-                    include_string(Main, src)
-                end
-            end
+            include_string(Main, src)
         catch e
             ok = false
-            println(err, sprint(showerror, e))
+            println(err_w, sprint(showerror, e))
+        finally
+            close(out_w)
+            close(err_w)
+            redirect_stdout(orig_out)
+            redirect_stderr(orig_err)
         end
-        payload = "{\"ok\":$ok,\"stdout\":\"$(json_escape(String(take!(out))))\"," *
-            "\"stderr\":\"$(json_escape(String(take!(err))))\"}"
+        out = String(read(out_r, String))
+        err = String(read(err_r, String))
+        payload = "{\"ok\":$ok,\"stdout\":\"$(json_escape(out))\"," *
+            "\"stderr\":\"$(json_escape(err))\"}"
         respond(sock, 200, payload)
         return
     end
@@ -109,8 +150,8 @@ function handle(sock)
 end
 
 function main()
-    server = listen(HOST, 0)   # OS-assigned port
-    port = getport(server)
+    server = listen(parse(IPAddr, HOST), 0)   # OS-assigned port
+    port = getsockname(server)[2]
     println("SIDECAR_PORT=$port")
     flush(stdout)
     while true
@@ -126,7 +167,5 @@ function main()
         end
     end
 end
-
-getport(server) = parse(Int, split(string(server.status), ":")[end])
 
 isinteractive() || main()
