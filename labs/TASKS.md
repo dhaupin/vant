@@ -2,7 +2,58 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 162 — comment audit batch 9 (runtime/core): 2 drifts fixed; forum msg/escrow wiring scoped
+**Session:** Pass 163-165 — /lib walk COMPLETE; forum msg+escrow WIRED w/ pins; /bin walked
+
+---
+
+## Session (2026-10-08 — passes 163/164/165: lib-finish, forum wiring, bin walk)
+
+Owner: "if we fully walked /lib, hook up those 2 finds (forum msg +
+escrow); read all of /bin after."
+
+PASS 163 — /lib walk COMPLETE (batch 10, remaining 30 files):
+canvas paint→paintSpiral (Usage never matched impl/docs), skills
+'Skils' typo, succession Usage wrong names (getLevel/setLevel(3)/can
+→ getTrustLevel/setTrustLevel('high')/getFilesForTrust). All 96 lib
+files now audited: 21 corrections across 10 batches.
+
+PASS 164 — FORUM MSG+ESCROW WIRED (owner-approved, closes the
+pass-161 header overclaim at the source):
+- escrow: _escrowGate on publish(1)/vote(2)/castVote(1) — DEFAULT-
+  OPEN until escrow.setBudget configured (opt-in sovereignty; wiring
+  invisible out of the box). CRITICAL FIX found by the pin: gate's
+  try/catch originally wrapped the block-decision emit — an emit
+  failure fail-opened the block; restructured so only the emit is
+  best-effort. SECOND fix: escrow FRESH-PER-CHECK (the pass-79
+  fresh-instance-by-design note) — a cached singleton silently missed
+  persisted budgets and pin2 false-passed until fixed.
+- msg: publish notify — PRIMARY msg.send('forum', event) channel
+  shout (sandbox-free, works everywhere; consume via msg.on/
+  channelMessages) + BONUS per-thread conversation forum:<barcode>
+  (created idempotently; its msg.post stays sandbox-gated by design).
+- NEW PIN test/forum-msg-escrow.test.js 4/4: default-open, opt-in
+  bite, notify lands, poisoned-msg cannot fail a publish.
+- forum.js header updated: escrow+msg rows now say WIRED w/ contracts.
+
+PASS 165 — /bin WALKED (121 files): mechanical sweeps — 273 relative
+requires checked (only miss: bin/watch.js's dead ../lib/logger shim
+require → replaced with explicit shim + phantom-hygiene comment),
+version labels clean, fiction-gate clean, bin/framework.js verified
+honest compat shim (computeEval/embedText typeof checks real),
+bin-truthfulness gate PASS, CLI smoke (help/version) OK.
+
+GATES: docs/claims(849f,10sig)/dist/surface/helpers/locks + syntax
+PASS. Suites: forum x2, forum-msg-escrow 4/4, escrow 18, msg-sync 9,
+watch, canvas, skills, succession, org-sync, resolution, compute,
+consciousness, nature, docs, onboard, metrics all 0-fail. Sweep via CI.
+
+AUDIT GRAND TALLY: /lib 96/96 files walked (21 corrections), /bin 121
+files swept (1 fix + 2 phantom-require false-positives resolved), 5
+fiction signatures mechanized, 1 live-code bug fixed (stego), forum
+msg+escrow delivered with pins.
+
+NEXT-UP: merge PR #118, then: remaining test pins (geometry, backup
+round-trip), connectors/rust.js, or owner direction.
 
 ---
 
