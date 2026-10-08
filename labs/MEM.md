@@ -918,11 +918,14 @@ testimony (v0.2); chapter 2 opens with it.
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 169 committed: backbone unification — zero raw
-throws in lib/ (regression-gated), events wired into 9 gut modules,
-audit at the state-store choke point + connector external I/O, WAL
-default-on for protocol state. Substrate ready for the state+seed engine;
-waiting on Cairn's issue for the Synmergia contract.)
+(nothing in flight — pass 169 committed + CI ✅ (ada82f7): backbone
+unification — zero raw throws in lib/ (regression-gated, bootstrap
+exception documented), events wired into 9 gut modules, audit at the
+state-store choke point + connector external I/O, WAL default-on for
+protocol state. BONUS: closed a real latent lock TOCTOU (stale-takeover
+could clobber a live peer's lock — now rename-based). Substrate ready
+for the state+seed engine; waiting on Cairn's issue for the Synmergia
+contract.)
 
 ---
 

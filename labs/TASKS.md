@@ -56,6 +56,21 @@ Verification: backbone pins 11/11; focused sweeps 14/14 + 24/24
 — the error conversions are behavior-compatible); eslint 0 errors; claim
 signatures PASS (859 files).
 
+THREE CI-CAUGHT REPAIRS (each its own commit, all closed on ada82f7 ✅):
+1. LOCK TOCTOU (real latent bug my events merely timing-exposed):
+   stale-takeover did unlinkSync-then-open — a racer could unlink a
+   SUCCESSOR's fresh lock planted between lstat and unlink → two writers
+   inside the mutex (CI live-fire gate A, deterministic class). Fixed via
+   renameSync-to-graveyard (fails ENOENT if peer replaced it; peer's wx
+   sees EEXIST). 10 single-core live-fire runs green after.
+2. julia.run timeout: fixed 30s was under CI's cold-JIT floor — now
+   options.runTimeout, 60s default.
+3. primitives require-cycle: my backbone edit added require('./error')
+   to the ZERO-VANT-REQUIRES bootstrap module; primitives-loading-first
+   broke error.js's compat re-exports (primitives.test caught it).
+   Reverted; the one bootstrap-window plain-Error throw is a DOCUMENTED
+   exception in the backbone regression gate (not hidden).
+
 Next: the state+seed engine (pass-168/169 substrate is ready for it);
 Cairn's issue triage when it lands; catch-block classifier (520 blocks,
 intentional-vs-lossy) as its own pass.
