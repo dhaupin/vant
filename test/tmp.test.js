@@ -31,7 +31,7 @@ function test(name, fn) {
     }
 }
 
-// v0.9.0-axolotl: async test support for tests that need to await.
+// 0.8.6: async test support for tests that need to await.
 const _asyncTests = [];
 function asyncTest(name, fn) {
     _asyncTests.push({ name, fn });
@@ -112,7 +112,7 @@ test('tmp has clear function', () => {
     return { success: typeof tmp.clear === 'function' };
 });
 
-// ==================== v0.9.0-axolotl T7 ====================
+// ==================== 0.8.6 T7 ====================
 
 test('tmp instantiates Cache class directly (T7)', () => {
     // Verify the T7 architectural migration: tmp.js uses `new cacheModule.Cache()`

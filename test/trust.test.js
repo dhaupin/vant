@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Trust Module Unit Tests (v0.9.0)
+ * Trust Module Unit Tests (v0.8.6)
  */
 
 const path = require('path');
@@ -24,7 +24,7 @@ function test(name, fn) {
     }
 }
 
-console.log('\n🔐 TRUST MODULE TESTS (v0.9.0)\n');
+console.log('\n🔐 TRUST MODULE TESTS (v0.8.6)\n');
 
 test('trust module loads', () => {
     const trust = require(path.join(ROOT, 'lib', 'trust'));

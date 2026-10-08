@@ -16,7 +16,7 @@
  *
  * NOTE: the version field is PRESENCE-only. style.md defines it as
  * "version introduced", which legitimately differs from package.json
- * (e.g. "0.9.0" pages on a 0.8.6 package); equality would be a false
+ * (e.g. "0.8.5" pages on a 0.8.6 package); equality would be a false
  * positive. Drift of the *current* version is caught in judgment reads.
  *
  * Exit 1 on any violation, evidence inline.

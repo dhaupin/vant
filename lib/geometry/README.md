@@ -1,4 +1,4 @@
-# Geometry Module (v0.9.0-exp)
+# Geometry Module (v0.8.6-exp)
 
 **Aperiodic Quasicrystal Memory Addressing for Vant**
 
@@ -81,5 +81,5 @@ The lower-level `geometry.quasicrystal()` module is also exposed
 
 ## Version
 
-Experimental: 0.9.0-exp
+Experimental: 0.8.6-exp
 Reference: Penrose 1974, Shechtman 1984, de Bruijn 1981

@@ -1,5 +1,5 @@
 ---
-version: 0.9.0
+version: 0.8.6
 permalink: /reference/compute
 layout: default
 title: Compute API
@@ -10,7 +10,7 @@ nav_order: 122
 
 Execute code in sandboxed environments. Supports multiple languages.
 
-> Beta v0.9.0
+> Beta v0.8.6
 
 ## Languages Supported
 

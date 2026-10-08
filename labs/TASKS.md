@@ -2,7 +2,44 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 154 — 0.8.7 fictional-version purge; gate signature #8; core-batch comment audit
+**Session:** Pass 155 — version standardization: EVERYTHING is 0.8.6 (owner call)
+
+---
+
+## Session (2026-10-08 — pass 155: version standardization)
+
+Owner sanity-checked the version story and ruled: "Standardize all 84
+refs — everything is 0.8.6 atm. We are ahead of schedule but it's still
+0.8.6 to avoid confusion." Axolotl work is EARLY 0.8.6-era work, not
+0.9.0 branding.
+
+CONVERTED (118 refs, 57 files): lib/bin module headers `(v0.9.0)` and
+`(v0.9.0-axolotl)` → `(v0.8.6)`; inline pass annotations `v0.9.0(-
+axolotl):` → `v0.8.6:`; test banners/annotations (26 refs); docs
+frontmatter (sudo.md, compute.md → 0.8.6); style.md version-introduced
+example; lib/geometry/README.md (v0.9.0-exp → v0.8.6-exp, caught by
+residual grep — .md files missed by the .js-only batch walk); labs
+prd-brain/prd-storage done-claims; ROADMAP done/in-progress sections
+(Multi-Brain, Multibrain Security Chain, market.js, Pipeline Cleanup).
+
+KEPT 0.9.0 (legitimate): release.md semver illustrations (MINOR row,
+bump example, docker example — mechanics, not claims) and ROADMAP
+"## v0.9.0 - Futures" (genuinely future: _dna.js airgap, parked).
+.migration-fixture/ untouched (gitignored point-in-time test fixture).
+CHANGELOG untouched per owner (axolotl section stays 0.8.6).
+
+GATE: signature #9 = `(v0.9.0...)` headers + `version: 0.9.0` front-
+matter — guards the exact pattern 84 refs embodied ("module IS 0.9.0"
+overclaims); #8 wording updated ("axolotl label: 0.9.0" → decision
+recorded). Allow-list +.migration-fixture/ (fixture mirrors lib
+headers point-in-time, like archives).
+
+GATES: lint:docs/claims(846f, 9 sigs)/dist/surface/helpers/locks PASS,
+syntax OK. Spot-tests on touched suites: cache 12/12, brain 77/77.
+Full sweep via CI (180s cap).
+
+NEXT-UP: CI verdict, owner PR decision, more lib comment batches, or
+owner direction. Rides PR #117.
 
 ---
 

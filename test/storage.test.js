@@ -190,7 +190,7 @@ test('getStackStats returns object with source stack', () => {
 });
 
 // ============================================
-// v0.9.0-axolotl PIPELINE-BACKED VARIANTS
+// 0.8.6 PIPELINE-BACKED VARIANTS
 // ============================================
 asyncTest('storage: readSecured returns content for existing file', async () => {
     const Storage = require(path.join(ROOT, 'lib', 'storage'));
@@ -259,7 +259,7 @@ asyncTest('storage: Secured variants throw on path traversal', async () => {
     return { success: blocked, error: blocked ? null : 'expected path-traversal block' };
 });
 
-// ==================== v0.9.0-axolotl SAFE-BY-DEFAULT ====================
+// ==================== 0.8.6 SAFE-BY-DEFAULT ====================
 
 test('storage module exports readRaw', () => {
     const Storage = require(path.join(ROOT, 'lib', 'storage'));

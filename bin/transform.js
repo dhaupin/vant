@@ -13,7 +13,7 @@
  *
  * (pass 30) extract/restore use the REAL lib API: transform.fromHorcrux()
  * (handles .svg stego + .json, filename p_<pw>, VANT_BRAIN_PASSWORD) +
- * transform.restore() — which IS the full restore since the 0.9.0 payload
+ * transform.restore() — which IS the full restore since the 0.8.6 payload
  * unwrap fix. The old code called transform.fromSvg()/restoreFull(), which
  * do not exist in lib/transform.js exports; both cases could only ever
  * throw "transform.fromSvg is not a function".

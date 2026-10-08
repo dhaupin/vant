@@ -145,7 +145,7 @@ test('getStackStats returns object with source stack', () => {
     return { success: stats && stats.source === 'stack' };
 });
 
-// ==================== v0.9.0-axolotl T9 ====================
+// ==================== 0.8.6 T9 ====================
 
 test('stream has _getSecurity bundle helper (T9)', () => {
     // Read the source; _getSecurity should exist and return all 5 modules
@@ -173,7 +173,7 @@ test('stream _gate uses _getSecurity bundle (T9)', () => {
     };
 });
 
-// ==================== v0.9.0-axolotl T9b ====================
+// ==================== 0.8.6 T9b ====================
 // Nuclear breaking: 5 individual _get* getters removed. 0.8.6 → 1.0.0 is a
 // fresh foundation; no backward-compat wrappers.
 

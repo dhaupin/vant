@@ -381,7 +381,7 @@ Beyond series + parallel, graph mode could support:
 - [ ] Backup scheduling with horcrux
 - [ ] Full corpus through transform (public + private brains)
 
-### Multi-Brain Architecture (v0.9.0)
+### Multi-Brain Architecture (v0.8.6)
 
 **Layers Model:**
 ```
@@ -544,7 +544,7 @@ Each lib module will be updated to support multi-brain stack. Methodical approac
 
 ---
 
-## v0.9.0 - Multibrain Security Chain
+## v0.8.6 - Multibrain Security Chain
 
 > Each lib/ module gets per-brain state isolation. No cross-brain contention.
 
@@ -854,7 +854,7 @@ Each lib module will be updated to support multi-brain stack. Methodical approac
 
 ---
 
-## v0.9.0
+## v0.8.6
 
 ### lib/market.js - Knowledge & Insight Trading
 
@@ -1156,7 +1156,7 @@ functionNameSync(); // alias
 
 ---
 
-## Pipeline System Cleanup (v0.9.0-axolotl)
+## Pipeline System Cleanup (v0.8.6)
 
 **Status:** IN PROGRESS
 
@@ -1175,7 +1175,7 @@ Unified security pipeline (`lib/pipeline.js`) that runs handlers:
 - `STACK` - all brains in stack (iterates)
 
 ### Modules Updated:
-- ✅ `lib/pipeline.js` - NEW (v0.9.0-axolotl)
+- ✅ `lib/pipeline.js` - NEW (v0.8.6)
 - ✅ `lib/embed.js` - uses pipeline.run()
 - ✅ `lib/search.js` - uses pipeline.run()
 - ✅ `lib/api.js` - DONE (Batch 1)

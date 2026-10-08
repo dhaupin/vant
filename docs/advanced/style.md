@@ -92,7 +92,7 @@ nav_order: 75
 
 | Field | Required | What |
 |-------|----------|------|
-| version | Required | Version introduced (0.8.6, 0.9.0-axolotl, etc.) |
+| version | Required | Version introduced (0.8.6, 0.8.5, etc.) |
 | permalink | Required | URL path (/guides/name or /name) |
 | layout | Required | Use `default` |
 | title | Required | Display title |

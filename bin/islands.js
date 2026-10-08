@@ -1,5 +1,5 @@
 /**
- * Islands CLI (v0.9.0)
+ * Islands CLI (v0.8.6)
  * 
  * CLI wrapper using runtime - lib/islands.js and lib/mcp.js
  * 

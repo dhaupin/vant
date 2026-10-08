@@ -17,11 +17,14 @@
  *                                 option on VantError)
  *   6. vant.loadBrain(         — removed 0.8.6 alias for read()/loadCorpus()
  *   7. vant.use(               — phantom plugin loader (real surface: islands)
- *   8. 0.8.7                   — no such release exists (current: 0.8.6,
- *                                 axolotl label: 0.9.0); caught twice —
- *                                 forward-dated feature claims and a
- *                                 CHANGELOG section with a "max 4" row
- *                                 hiding inside it
+ *   8. 0.8.7                   — no such release exists (current: 0.8.6);
+ *                                 caught twice — forward-dated feature
+ *                                 claims and a CHANGELOG section with a
+ *                                 "max 4" row hiding inside it
+ *   9. (v0.9.0…) headers       — owner call (pass 155): EVERYTHING ships
+ *                                 as 0.8.6; axolotl work lands early but
+ *                                 is never branded 0.9.0. 84+ refs were
+ *                                 converted; this guards the pattern.
  *
  * SCOPE: every tracked text file EXCEPT the allow-list below. Allowed:
  *   - scripts/check-fiction-signatures.js (this file: the signatures)
@@ -57,7 +60,9 @@ const SIGNATURES = [
     [/vant\.use\s*\(|require\(['"]vant\/plugins/i,
      'no plugin loader — the extensibility surface is islands (docs/essential/islands)'],
     [/\b0\.8\.7\b/,
-     'no 0.8.7 release exists — current is 0.8.6 (axolotl label: 0.9.0); never date features to 0.8.7'],
+     'no 0.8.7 release exists — current is 0.8.6; never date features to 0.8.7'],
+    [/\(v0\.9\.0(-axolotl|-exp)?\)|^version:\s*['"]?v?0\.9\.0(-axolotl)?/m,
+     'nothing is 0.9.0 — owner call: everything ships as 0.8.6 (axolotl work included); use 0.8.6 in headers and frontmatter'],
 ];
 
 // path is relative to ROOT; return true to skip the file
@@ -67,6 +72,7 @@ function allowListed(rel) {
     if (rel.startsWith('labs/archives/')) return true;
     if (rel === 'labs/TASKS.md' || rel === 'labs/MEM.md') return true;
     if (rel.startsWith('models/private/')) return true; // private brain learnings QUOTE fiction to debunk it
+    if (rel.startsWith('.migration-fixture/')) return true; // gitignored pre-multi-brain test fixture, point-in-time by design
     if (rel === 'CHANGELOG.md') return true;
     if (rel === 'package-lock.json') return true;
     if (rel.startsWith('node_modules/') || rel.startsWith('.git/')) return true;
