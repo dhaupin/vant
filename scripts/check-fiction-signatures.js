@@ -17,6 +17,11 @@
  *                                 option on VantError)
  *   6. vant.loadBrain(         — removed 0.8.6 alias for read()/loadCorpus()
  *   7. vant.use(               — phantom plugin loader (real surface: islands)
+ *   8. 0.8.7                   — no such release exists (current: 0.8.6,
+ *                                 axolotl label: 0.9.0); caught twice —
+ *                                 forward-dated feature claims and a
+ *                                 CHANGELOG section with a "max 4" row
+ *                                 hiding inside it
  *
  * SCOPE: every tracked text file EXCEPT the allow-list below. Allowed:
  *   - scripts/check-fiction-signatures.js (this file: the signatures)
@@ -51,6 +56,8 @@ const SIGNATURES = [
      'brain.loadBrain() was removed in 0.8.6 — use brain.read() / brain.loadCorpus()'],
     [/vant\.use\s*\(|require\(['"]vant\/plugins/i,
      'no plugin loader — the extensibility surface is islands (docs/essential/islands)'],
+    [/\b0\.8\.7\b/,
+     'no 0.8.7 release exists — current is 0.8.6 (axolotl label: 0.9.0); never date features to 0.8.7'],
 ];
 
 // path is relative to ROOT; return true to skip the file
@@ -59,6 +66,7 @@ function allowListed(rel) {
     if (/^scripts\/check-.*\.js$/.test(rel)) return true; // gates may quote signatures in their own checks/messages
     if (rel.startsWith('labs/archives/')) return true;
     if (rel === 'labs/TASKS.md' || rel === 'labs/MEM.md') return true;
+    if (rel.startsWith('models/private/')) return true; // private brain learnings QUOTE fiction to debunk it
     if (rel === 'CHANGELOG.md') return true;
     if (rel === 'package-lock.json') return true;
     if (rel.startsWith('node_modules/') || rel.startsWith('.git/')) return true;

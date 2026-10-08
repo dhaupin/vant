@@ -21,7 +21,7 @@ v0.8.6
 
 | Type | Example | When |
 |------|---------|------|
-| PATCH | 0.8.6 -> 0.8.7 | Bug fixes |
+| PATCH | 1.2.3 -> 1.2.4 | Bug fixes |
 | MINOR | 0.8.6 -> 0.9.0 | New features |
 | MAJOR | 0.8.6 -> 1.0.0 | Breaking changes |
 
@@ -61,7 +61,7 @@ git push origin main --tags
 Use the bump command to increment versions:
 
 ```bash
-# Patch release (0.8.6 → 0.8.7)
+# Patch release (example: 1.2.3 → 1.2.4)
 vant bump
 
 # Minor release (0.8.6 → 0.9.0)
@@ -97,12 +97,12 @@ After pushing tags:
 Deploy Vant in a container for consistent environments.
 
 ```bash
-# Build and push
-docker build -t dhaupin/vant:v0.8.7 .
-docker push dhaupin/vant:v0.8.7
+# Build and push (example: v0.9.0)
+docker build -t dhaupin/vant:v0.9.0 .
+docker push dhaupin/vant:v0.9.0
 
 # Latest tag
-docker tag dhaupin/vant:v0.8.7 dhaupin/vant:latest
+docker tag dhaupin/vant:v0.9.0 dhaupin/vant:latest
 docker push dhaupin/vant:latest
 ```
 

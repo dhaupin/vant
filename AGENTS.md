@@ -237,7 +237,7 @@ Check your level at session start.
 
 ---
 
-## Multi-Agent Crew (v0.8.7)
+## Multi-Agent Crew (v0.8.6)
 
 Agents coordinate per install through the agent crew runtime (roster size is
 the `agents.maxAgents` config key, default 10).

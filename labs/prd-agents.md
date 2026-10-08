@@ -3,7 +3,7 @@
 **Version:** 1.0  
 **Branch:** axolotl  
 **Date:** 2026-09-19  
-**Status:** Implemented (v0.8.7+)
+**Status:** Implemented (v0.8.6, axolotl line)
 
 ---
 
@@ -983,13 +983,13 @@ fleet.forEach(a => console.log(`${a.name} (${a.role}): ${a.state}`));
 
 | Version | Changes |
 |---------|---------|
-| v0.8.7 | Multi-agent crew (4 agents), MCP JSON-RPC tools, AgentContext isolation |
-| v0.8.7 | Delegation: sync + async with stream queue, recursion guards |
-| v0.8.7 | Workflow: approve/reject/signOff/deadline/retry/escalate/priority |
-| v0.8.7 | Communication: per-agent channels + global fallback |
-| v0.8.7 | Metrics: getMetrics, list, get, getSummary |
-| v0.8.7 | Security: per-agent sandbox, sudo escalation for spawn/write, RLS |
-| v0.8.7 | Prototype system: loadProto, listProtos, loadChain, folder format |
+| v0.8.6 | Multi-agent crew, MCP JSON-RPC tools, AgentContext isolation |
+| v0.8.6 | Delegation: sync + async with stream queue, recursion guards |
+| v0.8.6 | Workflow: approve/reject/signOff/deadline/retry/escalate/priority |
+| v0.8.6 | Communication: per-agent channels + global fallback |
+| v0.8.6 | Metrics: getMetrics, list, get, getSummary |
+| v0.8.6 | Security: per-agent sandbox, sudo escalation for spawn/write, RLS |
+| v0.8.6 | Prototype system: loadProto, listProtos, loadChain, folder format |
 
 ---
 

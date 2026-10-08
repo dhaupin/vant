@@ -996,7 +996,7 @@ await islands.createIsland('research', {
 | v0.8.6 | Sync 3-way merge, rebase, circuit breaker via QoS |
 | v0.8.6 | Dream consolidation, evolution sessions, neural pathways |
 | v0.8.6 | Security chain: Sandbox → VAF → QoS → RLS → Escrow |
-| v0.8.7 | Multi-agent crew, MCP brain tools (21 tools) |
+| v0.8.6 | Multi-agent crew, MCP brain tools (21 tools) |
 | v0.9.0 | Trust/Market/Evolution islands, NSC9 geometry, stego backup |
 | v0.9.6 | Framework config absorption, brain.myStuff/yourStuff |
 

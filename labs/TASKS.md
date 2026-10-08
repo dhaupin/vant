@@ -1,8 +1,52 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-10-07  
-**Session:** Pass 153 — fiction-signature + frontmatter gates SHIPPED; core-lib comment audit
+**Last Updated:** 2026-10-08  
+**Session:** Pass 154 — 0.8.7 fictional-version purge; gate signature #8; core-batch comment audit
+
+---
+
+## Session (2026-10-08 — pass 154: 0.8.7 purge + signature #8)
+
+Owner: "There is no 0.8.7 — put all the frontmatter (or other refs) to
+0.8.6. Then continue lib code comment updates and fiction checks."
+
+INVENTORY: 29 refs repo-wide (grep all text files). Mostly labs PRDs,
+docs, CHANGELOG, openapi.yaml, 1 lib header.
+
+CONVERTED to 0.8.6: lib/search.js header, AGENTS.md version header,
+docs/advanced/style.md, labs/prd-agents.md (x8), labs/prd-brain.md,
+CHANGELOG.md (x2), docs/openapi.yaml (caught by the NEW signature on
+its first run — the inventory grep covered *.yml but missed *.yaml:
+gate > grep). CHANGELOG "max 4" row removed too — its point-in-time
+cover was the wrong version label.
+
+GENERICIZED (not relabeled) in docs/advanced/release.md: semver bump
+illustrations are forward-dated examples, not claims — PATCH example
+now 1.2.3 -> 1.2.4, docker tags v0.9.0 (the real next label). Relabel
+to 0.8.6 would rot the moment a real 0.8.7 ships (learnings: forward-
+dated version claims rot instantly).
+
+SHIPPED SIGNATURE #8 in scripts/check-fiction-signatures.js: blanket
+\b0\.8\.7\b — no such release exists (current 0.8.6, axolotl label
+0.9.0). BIT ON FIRST RUN: docs/openapi.yaml:17. Allow-list +models/
+private/ (private-brain learnings quote fiction to debunk it — same
+rationale as the ledger; gitignored but the gate walks the fs).
+
+COMMENT AUDIT batch 2 (config.js, boot.js, sync.js, mcp.js) — ALL
+ACCURATE, zero drift: config header usage matches real exports
+(apiKey/mcpPort verified in tail); boot SECURITY layer order matches
+_bootState emission order (sudo 1 ... escrow 4 spot-checked); sync
+header's pushAll/pullAny/rebase all real (:266/:449/:612); mcp start()
+real, port default 3457 matches :4790.
+
+GATES: lint:docs PASS (style+links+frontmatter x118), claims PASS
+(846 files, 8 signatures), dist PASS, surface PASS, helpers PASS,
+locks PASS, node --check syntax OK. LIMIT: full `npm run sweep`
+exceeds the 180s terminal cap — CI runs it on the PR.
+
+NEXT-UP: CI verdict on PR #117, more lib comment batches (mcp.js
+internals, habitat/genesis), or owner direction. Rides PR #117.
 
 ---
 
