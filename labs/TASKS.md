@@ -2,7 +2,55 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 159 — lib comment audit batch 6 (protocol/mesh layer): ALL CLEAN
+**Session:** Pass 160 — comment audit batch 7: PHANTOM lib/providers found + fixed (live code!)
+
+---
+
+## Session (2026-10-08 — pass 160: comment audit batch 7)
+
+Owner: "let's do batch 7 pls."
+
+BATCH 7 (cron.js, prune.js, tmp.js, branch.js, health.js, api.js,
+audit.js, auth.js) — 7 of 8 headers accurate, 1 FICTION with a LIVE
+CODE bug riding on it:
+
+PHANTOM MODULE - lib/providers/ never existed, but 3 surfaces
+referenced it: (1) lib/branch.js:14 header claimed "Uses
+lib/providers/index.js for multi-git provider abstraction"; (2)
+docs/reference/storage.md:173 "Same pattern as lib/providers/"; (3)
+**bin/stego.js:156 — LIVE CODE**: `vant stego upload` did
+`require('../lib/providers')` → MODULE_NOT_FOUND on every run. The
+real registry is lib/remote.js (getProvider/detectProvider
+:217/:200; providers github/gitlab/bitbucket/gitea/selfhosted via
+lib/connectors/; updateAvatar API matches what stego expected).
+
+FIXED ALL THREE: stego require → '../lib/remote' (VERIFIED: `vant
+stego upload` now reaches its real arg validation — 'Image not
+found' instead of module error); branch.js header → lib/remote.js;
+storage.md cross-ref → lib/remote.js. Gate signature #10 added
+(/lib\/providers/) — third phantom module after framework.js and
+notifications.js; this one justified mechanizing immediately because
+it broke live code, not just docs.
+
+OTHER 7 VERIFIED ACCURATE: cron (schedule :116/run :191/JobWorker
+:35), prune (prune :181/getCore :336), tmp (4 spaces :352), health
+(start :58 + /health /health/ready /health/live :64-86), api
+(execute :225/hooks :199-207/getMode :133), audit (merged
+audit+audit-log+metrics real :136-234), auth (Auth class +
+validateApiKey :158/isOperationAllowed :308/getLayerStatus :290 +
+lockout real).
+
+GATES: claims PASS (846f/10sig), docs style/links/frontmatter PASS
+(118), syntax OK. Suites: branch 10, stego 12, audit-ledger-cli,
+auth, api, health, cron, prune all 0-fail, tmp 8. Full sweep via CI.
+
+AUDIT TALLY: 7 batches, 51 files, 13 corrections (3 fiction incl. 1
+live-code bug, 5 staleness, 3 Usage/signature drift, 2 version
+labeling).
+
+NEXT-UP: batch 8 candidates (mesh/agora/forum/teams/governance/legal
+/lineage/context), format.js + geometry test pins, or owner
+direction. Rides PR #118.
 
 ---
 

@@ -170,7 +170,7 @@ lock.release('resource_id', token);
 
 ### Location
 
-`lib/storage/connectors/` - Same pattern as `lib/providers/`
+`lib/storage/connectors/` - Same pattern as `lib/remote.js` (the git-provider registry)
 
 ### Connector Interface
 
