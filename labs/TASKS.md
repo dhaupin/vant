@@ -2,7 +2,52 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 170 — engine-parity spine: state core, storage laws, world/clock, geometry fixes, targeted repairs (#145–#166)
+**Session:** Pass 171 — consumer wiring: seeds→mesh, state-store→tree tier, mesh-status→MeshTree + the wiring ledger
+
+---
+
+## Session (2026-10-08 — pass 171: consumer wiring)
+
+**What shipped** (owner: "let's finish out everything. Nothing is off
+limits" + "assemble a list of shit to wire back up"):
+
+- **SEEDS → MESH (#158 → mesh):** `MeshTree` now owns an
+  `AddressingSpine` (#165) by default — region identity (`seedScope`),
+  cell addressing (`cellAddress`), and writer authority all ride the ONE
+  seed chain and the ONE canonical encoder. `VANT_UNIVERSE_SEED` env (or
+  per-brain `universeSeed` config, or explicit universe) now actually
+  shards mesh addressing; the ad-hoc `node + '|' + JSON.stringify` hash
+  chain is retired.
+- **STATE-STORE → TREE (opt-in tier):** `toTree`/`fromTree`/`treeFor`
+  plus `tree` options on `persist`/`hydrate`. Root hashes ride the
+  `state:saved`/`state:hydrated` events and the audit entries. Metadata
+  excluded; roundtrip law pinned.
+- **MESH-STATUS → MESHTREE:** new `mesh` section — registry peers
+  projected onto tree paths, presence as the pure TTL read (#164), the
+  region's seed scope visible (proof the env flows). Read-only,
+  degraded-not-dead, JSON-safe.
+- **labs/WIRING.md:** the wiring-debt ledger — every state/seed/errors/
+  events/audit/WAL surface marked WIRED / OPT-IN / ORPHAN / GAP, plus
+  "where the spine got large" (6 of 13 state modules + 4 of 12 geometry
+  modules are orphans) and the highest-payoff wiring order.
+
+**Pin suite:** `test/state-wiring.test.js` — 18 assertions, one per
+acceptance criterion. 18/18.
+
+**Gate teeth:** the pass-169 raw-throw gate caught a `throw new Error`
+in the new mesh-status section within one run — converted to coded
+VantError (INPUT_VALIDATION_FAILED).
+
+**Verification:** state-wiring 18/18; engine-parity-spine 66/66;
+mesh-status 7/7; backbone-wiring 11/11; state-store-crossprocess 5/5;
+state-store-tombstones 2/2; state-persistence 8/8; horcrux-orgchart,
+lock-failclosed, save-refusal-parity all exit 0; audit-locks gate PASS.
+
+**Next:** wire a real consumer onto the tree tier (trust or
+node-registry); mesh deltas → checkpoint/WAL; geometry → spine/cellstore;
+BrainVerifier onto `vant health` + horcrux CLI; #122–#144 husks. The
+#158 universe decision (fixed default vs per-install seed) is still the
+owner's call — recommendation in labs/WIRING.md §6.
 
 ---
 
