@@ -132,12 +132,19 @@ async function main() {
             ], { encoding: 'utf8' });
         } catch (e) { out = e.stdout || ''; } // grep exits 1 on no matches — that's the pass
         const offenders = out.split('\n').filter(Boolean)
-            .filter(l => !l.includes('throw new Error') || l.includes('.js:'));
-        if (out.trim() === '') {
-            ok('gate: zero raw throw new Error( in lib/ (backbone discipline holds)');
+            // (pass 169) Documented exception: lib/primitives.js is the
+            // ZERO-VANT-REQUIRES bootstrap module — it cannot throw VantError
+            // because error.js re-exports primitives' helpers (the cycle is
+            // by design; test/primitives.test.js pins both the contract and
+            // the compat surface). Its one validation throw stays a plain
+            // Error with the pinned message. Any OTHER raw throw is a
+            // regression.
+            .filter(l => !(l.startsWith('lib/primitives.js') && l.includes("throw new Error('atomicWriteFile: filePath required')")));
+        if (offenders.length === 0) {
+            ok('gate: zero raw throw new Error( in lib/ (primitives bootstrap window documented)');
         } else {
             // tolerate none — this pin holds the sweep
-            fail('gate: raw throws reintroduced', out.trim().split('\n').slice(0, 3).join(' | '));
+            fail('gate: raw throws reintroduced', offenders.slice(0, 3).join(' | '));
         }
     }
 
