@@ -2,7 +2,48 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 171 — consumer wiring: seeds→mesh, state-store→tree tier, mesh-status→MeshTree + the wiring ledger
+**Session:** Pass 172 — first live tree-tier consumer (trust) + #158 universe decision RESOLVED + search hygiene
+
+---
+
+## Session (2026-10-08 — pass 172: trust → tree tier)
+
+**What shipped** (owner: "we Def want shared universe seeds" + "let's
+start wiring first consumers pls"):
+
+- **#158 UNIVERSE DECISION RESOLVED:** fixed default stands (mesh is the
+  whole point — cross-install determinism IS the feature);
+  `VANT_UNIVERSE_SEED` is the sharding lever; per-brain `universeSeed`
+  stays the durable override. Marked RESOLVED in labs/WIRING.md §3 + §6.
+  Nothing depreciates: all content-addressed layers (factHash, tree
+  roots, delta ledgerHash, authority hashes) are universe-independent;
+  only PRF-derived addressing (region seedScope, cell addresses) moves
+  with the constant, and the default never moves.
+- **TRUST → TREE (first live consumer, WIRING.md step ① done):**
+  `lib/trust.js` hydrates + persists through the state-store tree tier —
+  the ledger mirrors into one StateTree; the root hash rides the
+  `state:saved`/`state:hydrated` events and the audit entry, so
+  cross-process "same trust ledger?" is one string comparison.
+  Content lives where it always did (`state/trust.json`); the tree is a
+  mirror, not a second source of truth. New seams: `_treeRoot()`,
+  `_stateTree()`; `clearState` drops the mirror (no hash for state that
+  no longer exists).
+- **Search hygiene:** `package-lock.json` added to `.ignore` — it was
+  clogging every broad ripgrep with dependency-metadata noise.
+
+**Pin suite:** `test/state-wiring.test.js` extended with a TRUST → TREE
+section (5 new pins): mirror populates on record, root moves on mutate,
+disk view (treeFor) === live mirror root, rootHash rides state:saved,
+clearState resets. 23/23.
+
+**Verification:** state-wiring 23/23; trust 8/8; state-persistence
+8/8; state-store-crossprocess 5/5; state-store-tombstones 2/2;
+backbone-wiring 11/11; mesh-status 7/7; engine-parity-spine 66/66;
+audit-locks gate PASS.
+
+**Next:** node-registry → tree tier (step ②), then consensus/market;
+mesh deltas → checkpoint/WAL; geometry → spine/cellstore; BrainVerifier
+onto `vant health` + horcrux CLI; #122–#144 husks.
 
 ---
 

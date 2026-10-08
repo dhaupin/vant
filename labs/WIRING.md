@@ -37,8 +37,8 @@
 | Module | Issue | Status | Consumers | Debt |
 |---|---|---|---|---|
 | `canonical.js` | #146 | WIRED | tree, mesh, spine, checkpoint, delta | — |
-| `tree.js` (StateTree) | #145/#147/#148 | OPT-IN | state-store tree tier (pass 171); **no live consumer passes `tree` yet** | wire one real consumer end-to-end (trust or node-registry is the natural first) |
-| `seeds.js` (SeedChain) | #158 | WIRED | spine → mesh (pass 171). Env `VANT_UNIVERSE_SEED` → per-brain config `universeSeed` → fixed default | **owner decision still open:** fixed default (fresh installs share one universe) vs per-install seed. Config READ path exists; nothing WRITES `universeSeed` yet |
+| `tree.js` (StateTree) | #145/#147/#148 | **WIRED** (pass 172) | state-store tree tier; **trust is the first live consumer** (pass 172: ledger mirrors into a StateTree on hydrate + persist, root hash rides state:saved/state:hydrated + audit; pinned in state-wiring suite) | next: node-registry, then consensus/market read the same tier |
+| `seeds.js` (SeedChain) | #158 | WIRED | spine → mesh (pass 171). Env `VANT_UNIVERSE_SEED` → per-brain config `universeSeed` → fixed default | **RESOLVED (2026-10-08, owner):** fixed default stands — cross-install determinism is the point (mesh is the whole point). `VANT_UNIVERSE_SEED` is the sharding lever; per-brain `universeSeed` stays the durable override (READ path exists; nothing WRITES it yet) |
 | `mesh.js` (MeshTree) | #164 | WIRED | mesh-status report (pass 171: presence + seed scope) | in-memory only — no persistence; silent (no events); rejected-writes not ledgered |
 | `spine.js` (AddressingSpine) | #165 | WIRED | mesh (pass 171); geometry/raid still bypass it | geometry consumers below |
 | `cellstore.js` (#150 rebate) | #150 | ORPHAN | none outside spine | RAID + geometry should claim cells here (the dedup savings never fire) |
@@ -70,10 +70,14 @@
 
 - **#122–#144 husk series** — still open (tracked in TASKS; the mass-close
   was pending the spine landing — it has landed).
-- **#158 universe decision** — see seeds row above. Recommendation: keep
-  the fixed default (cross-install determinism is the #158 point) and treat
-  `VANT_UNIVERSE_SEED` as the opt-in sharding lever; per-brain
-  `universeSeed` config stays the durable override once something writes it.
+- **#158 universe decision** — **RESOLVED (2026-10-08, owner):** keep the
+  fixed default (cross-install determinism IS the #158 point — mesh is the
+  whole point); `VANT_UNIVERSE_SEED` is the opt-in sharding lever;
+  per-brain `universeSeed` config stays the durable override once something
+  writes it. Nothing depreciates: all content-addressed layers (factHash,
+  tree roots, delta ledgerHash, authority hashes) are universe-independent
+  by construction; only PRF-derived addressing (region seedScope, cell
+  addresses) moves with the constant, and the default never moves.
 
 ---
 
@@ -86,6 +90,7 @@ wiring order that pays the most per commit:
 
 1. **One real state-store consumer onto the tree tier** (trust or
    node-registry) — proves the tier, gives anchor/diff a reason to exist.
+   ✅ DONE pass 172 (trust). Next in line: node-registry → consensus/market.
 2. **Mesh deltas → checkpoint + WAL** — turns MeshTree from in-memory into
    crash-safe with the primitives that already exist.
 3. **Geometry engine → spine/cellstore** — retires the last bespoke key

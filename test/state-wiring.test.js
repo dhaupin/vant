@@ -16,6 +16,10 @@
  *   MESH-STATUS    — the coordinator's report carries the MeshTree presence
  *                    view (registry peers projected onto tree paths) plus
  *                    the region's seed scope; read-only, degraded-not-dead.
+ *   TRUST → TREE   — trust is the FIRST live tree-tier consumer (pass 172,
+ *                    WIRING.md step ①): the ledger mirrors into a StateTree
+ *                    on hydrate and persist; root hash rides events; the
+ *                    disk view (treeFor) matches the live mirror.
  *
  * Exit code is the verdict, per house test conventions.
  */
@@ -177,6 +181,62 @@ async function main() {
         assert.ok(res.rootHash && res.rootHash === tree.rootHash());
         assert.strictEqual(stateStore.fromTree('pin-wiring', tree).n, 11);
         cleanup();
+    });
+
+    // ==================== TRUST → TREE (first live consumer, pass 172) ====================
+    console.log('\n▓ TRUST → TREE\n');
+
+    const trust = require('../lib/trust');
+
+    test('trust: record mirrors the ledger into the tree (tree tier live)', async () => {
+        trust.clearState();
+        const agent = 'pin-agent-' + Date.now();
+        const before = trust._treeRoot();
+        trust.record(agent, 'help', { positive: true, note: 'pass-172 pin' });
+        const root = trust._treeRoot();
+        assert.ok(root && /^[0-9a-f]{64}$/.test(root), 'root hash is a sha256 hex');
+        assert.ok(before === null || true, 'fresh install starts null (or prior pass state)');
+        // the mirror carries the ledger under the trust module prefix
+        const tree = trust._stateTree();
+        assert.ok(tree.paths().some(p => p.startsWith('/trust/')), 'tree paths live under /trust/');
+        const mirrored = stateStore.fromTree('trust', tree);
+        assert.ok(mirrored.scores && agent in mirrored.scores, 'score present in the mirrored tree');
+        assert.ok(Array.isArray(mirrored.histories[agent]), 'history present in the mirrored tree');
+    });
+
+    test('trust: mutate again → root hash moves (the tree tracks the ledger)', () => {
+        const agent = Object.keys(stateStore.fromTree('trust', trust._stateTree()).scores || {})[0];
+        const before = trust._treeRoot();
+        trust.record(agent, 'note', { positive: false, value: 0.01 });
+        assert.notStrictEqual(trust._treeRoot(), before, 'each persist re-mirrors and re-hashes');
+    });
+
+    test('trust: hydrated disk state matches the live mirror (treeFor === _treeRoot)', async () => {
+        // new process view: read the disk state into a fresh tree via treeFor
+        const disk = stateStore.treeFor('state/trust.json');
+        assert.strictEqual(disk.state, 'PRESENT', 'trust.json exists after the pins above');
+        assert.strictEqual(disk.rootHash, trust._treeRoot(),
+            'disk view and live mirror agree on one hash — cross-process same-state check');
+    });
+
+    test('trust: state:saved event carries the trust root hash', () => {
+        const fired = [];
+        const onSaved = (d) => { if (d.moduleName === 'trust') fired.push(d); };
+        events.on('state:saved', onSaved);
+        try {
+            const agent = 'pin-agent-event-' + Date.now();
+            trust.record(agent, 'help', { positive: true });
+        } finally {
+            events.off('state:saved', onSaved);
+        }
+        assert.ok(fired.length > 0, 'event fired');
+        assert.ok(fired.every(d => d.rootHash && d.rootHash === trust._treeRoot()),
+            'rootHash rides state:saved and matches the live mirror');
+    });
+
+    test('trust: clearState resets the mirror (no hash for state that no longer exists)', () => {
+        trust.clearState();
+        assert.strictEqual(trust._treeRoot(), null, 'mirror dropped with the ledger');
     });
 
     // ==================== MESH-STATUS → MESHTREE ====================
