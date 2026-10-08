@@ -2,7 +2,48 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 160 — comment audit batch 7: PHANTOM lib/providers found + fixed (live code!)
+**Session:** Pass 161 — comment audit batch 8 (mesh/org layer): forum integration overclaim fixed
+
+---
+
+## Session (2026-10-08 — pass 161: comment audit batch 8)
+
+Owner: "let's continue on next batch 8 pls."
+
+BATCH 8 (agora-sync.js, forum.js, teams.js, governance.js, legal.js,
+lineage.js, context.js, crew-bus.js) — 7 of 8 accurate, 1 fixed:
+
+FIXED - lib/forum.js header INTEGRATION overclaims: "Security:
+Sandbox, escrow, governance checks" and "Msg: Agent-to-agent forum
+messages" — but forum.js requires/uses NEITHER escrow NOR msg (grep:
+zero non-header occurrences). Real surface: brain, islands (via
+vant.islands save/load), sandbox, governance, consensus, geometry,
+stream. Header rewritten with a "do not add claims without the
+require() to back them" guard note + explicit NOT-wired list. This
+is the mirror image of the cache.js find (pass 156): that taught a
+REMOVED API; this claimed NEVER-EXISTED integrations.
+
+VERIFIED ACCURATE: agora-sync.js (crew.state.request/crew.state
+dispatchers + consensus.mergeTopic real :176/:498), teams.js
+(createOrg :604/createDept :754/assign exported; header's await-on-
+sync is harmless JS style, not fiction), governance.js (decide :52),
+legal.js (DORMANT status real :42/:64 — honest dormancy claim),
+lineage.js (record :75/trace :119), context.js (OS-chain claims;
+embedders reference), crew-bus.js (configure :223/registerNode :252/
+listen :285/send :353 — signed-envelope design doc matches).
+
+GATES: claims PASS (846f/10sig), surface PASS, syntax OK. Suites:
+forum 2 suites 0-fail, teams-crossprocess 9, agora-distributed 6,
+governance/legal/lineage 0-fail, crew-bus 20, context n/a (no
+dedicated file). Full sweep via CI.
+
+AUDIT TALLY: 8 batches, 59 files, 14 corrections (3 fiction + 1 live
+bug, 6 staleness/overclaim, 3 Usage/signature drift, 2 version).
+
+NEXT-UP: batch 9 candidates (remaining lib/: compute.js,
+consciousness.js, market-adjacent, adapters/, embedders/, etc.),
+test pins (format.js, geometry, backup round-trip), or owner
+direction. Rides PR #118.
 
 ---
 
