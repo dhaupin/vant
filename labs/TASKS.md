@@ -2,7 +2,57 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 169 — backbone unification: errors/events/audit/WAL wired across lib/
+**Session:** Pass 170 — engine-parity spine: state core, storage laws, world/clock, geometry fixes, targeted repairs (#145–#166)
+
+---
+
+## Session (2026-10-08 — pass 170: engine-parity spine, issues #145–#166)
+
+**What shipped:** the world-frame crew's 22-issue series implemented as
+Vant-native modules (thesis adapted, not imported). All six quadrants:
+
+- STATE CORE: `lib/state/canonical.js` (#146 encoder + decode-able wire
+  format), `lib/state/tree.js` (#145 one root hash; #147 diff/snapshot/
+  apply with scope-root verification; #148 coarse scopes, defaults 'main')
+- STORAGE: `lib/state/fold.js` (#149 4-ary capacity law, overflow refused),
+  `cellstore.js` (#150 rebate + savings_ratio), `checkpoint.js` (#151
+  snapshots-as-checkpoints, fast-forward recovery, bounded history),
+  `anchor.js` (#152 root-hash anchors), `hotset.js` (#153 LRU, eviction
+  never touches durability)
+- GEOMETRY: `lib/geometry/fold.js` (#154 1:4 + 24-bit budget),
+  `lattice-keys.js` (#155 sha256 PRF; imul chain demoted to tested shim),
+  `raid.js` (#156 manifest-as-data + XOR parity + recover(); tamper
+  reported), `precision.js` (#157 contract table + quantizer + parity
+  harness)
+- WORLD/CLOCK: `lib/state/seeds.js` (#158 SeedChain, prefix folding),
+  `orbits.js` (#159 pure closed-form orbits; #160 PHASE-based windows —
+  the distance-bug class pinned dead by a synodic-oscillation test),
+  `delta.js` (#161 {payload, actor, epoch}; erasure is an auditable record)
+- TARGETED: `lib/persistent-grants.js` (#162 durable grant tier wired into
+  sandbox can() fail-closed; grantor mandatory; revocation honored),
+  `lib/wal.js` (#163 DENIED ≠ empty journal)
+- MESH/BRAINS: `lib/state/mesh.js` (#164 tree-path identity, timerless
+  presence TTL, AOI delivery, deterministic authority + recorded losers),
+  `spine.js` (#165 one addressing spine — fact-shared-once primitive),
+  `brain-verify.js` (#166 root anchors + verifiable horcrux + corruption
+  detection pre-context)
+
+**Pin suite:** `test/engine-parity-spine.test.js` — 66 assertions, one per
+acceptance criterion. 66/66.
+
+**CI lessons (both caught by existing gates — they have teeth):**
+1. atomic-writes structural gate flagged raw writeFileSync in checkpoint.js
+   → routed through primitives.atomicWriteFile.
+2. audit-locks gate flagged the hand-built .locks path in brain-verify.js
+   → lock.pathFor('brain-anchor','ledger') (one lock-path authority).
+
+**Known pre-existing local failures (NOT this pass):** audit-ledger-cli and
+epipe-guard fail identically on a clean tree in this workspace (dirty
+models/ ledger). CI green on 9cd116d.
+
+**Next:** wire consumers (state-store → tree as opt-in tier; horcrux →
+brain-verify; mesh-status → MeshTree); close the #122–#144 husks; the
+seeded-universe constant needs a user decision (VANT_UNIVERSE_SEED).
 
 ---
 
