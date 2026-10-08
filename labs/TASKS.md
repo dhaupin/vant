@@ -2,7 +2,52 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-08  
-**Session:** Pass 155 — version standardization: EVERYTHING is 0.8.6 (owner call)
+**Session:** Pass 156 — lib comment audit batch 3 (persistence/security core)
+
+---
+
+## Session (2026-10-08 — pass 156: comment audit batch 3)
+
+Owner: accepted PR #117 (142-155 merged to main). "Continue reading
+code comments in lib for fiction, accuracy, staleness."
+
+BATCH 3 (cache.js, citations.js, format.js, storage.js, vaf.js,
+lock.js, brain-lock.js, state-store.js) — 6 of 8 ACCURATE, 2 fixed:
+
+FIXED - lib/cache.js header FICTION: Usage block taught module-level
+cache.set/get/compress, but the 0.8.6 cache refactor removed the
+defaultCache singleton — module.exports = { Cache } ONLY (verified
+:429; test/cache.test.js T13b comments confirm removal). Header now
+teaches class-only surface and says explicitly there is NO cache.set/
+get on module exports (the pass-153 "live-probe the export surface"
+lesson applied). NOTE: the gate does not catch inverted fiction
+(header claims LESS than reality or dead APIs) — this one was caught
+by reading exports, extending the lesson: verify Usage blocks against
+module.exports, not just names against docs.
+
+FIXED - lib/format.js header STALE: "Supports: .yaml .yml .json .md
+.txt" omitted .ini — code (DEFAULT_EXTENSIONS :60, txt handler covers
+.ini) and AGENTS.md both document it. Header updated.
+
+VERIFIED ACCURATE: citations.js (addSource/formatCitation real
+:75/:121, exports match), storage.js (Storage.get→getStorage factory
+:2125/:2318, BrainStorage.get(category,key) matches Usage), vaf.js
+(check/sanitize/isBlocked all in exports :1013+), lock.js (mutex is
+in-process promise chain :284; snapshot-writer caller list matches
+lock-audit gate output exactly), brain-lock.js (TTL 3600000=1h :56,
+brain-lock:* events, .lock-<brain>.json cross-brain root — all real),
+state-store.js (consumers incl. node-registry/trust/msg/consensus/
+market confirmed).
+
+GATES: lint:claims PASS (846f/9sig), syntax OK. Touched-area suites:
+cache 12/12, citations 9/9, brain-lock 21/21, brain-storage-strict
+14/14, atomic-writes 13/13. Full sweep via CI. GAP NOTED: lib/format.js
+has NO dedicated test file (only indirect coverage via brain.test.js/
+live-fire/missing-modules) — candidate pin for a future pass.
+
+NEXT-UP: comment audit batch 4 (candidates: habitat.js, genesis.js,
+pipeline.js, primitives.js, islands.js, qos/escrow/sudo), or owner
+direction. New PR (117 merged).
 
 ---
 
