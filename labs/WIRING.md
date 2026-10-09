@@ -43,7 +43,7 @@
 | `spine.js` (AddressingSpine) | #165 | **WIRED** (pass 175) | mesh (pass 171); **raid fragmenter cells (pass 175)** | geometry `quasicrystal.js` storage still bypasses it |
 | `cellstore.js` (#150 rebate) | #150 | **WIRED** (pass 175) | **raid.fragment({ cellStore })** — shard cells claimed under the spine's /raid/<doc> space; rebate measured by savings_ratio | geometry quasicrystal + world consumers still absent |
 | `checkpoint.js` (SnapshottedLog) | #151 | **WIRED** (pass 175) | **MeshTree `{ dir }`** — mesh deltas are the designed log; snapshot + replay recovery pinned in state-wiring | generic WAL/snapshot story for other consumers unproven |
-| `anchor.js` (StateAnchor) | #152 | **WIRED** (pass 176) | brain-verify (#166 tier) — now on LIVE surfaces: `vant health` (brain-integrity section, auto-baselines fresh brains) + `vant horcrux verify` / `vant horcrux anchor` (exit-code contract 0/1/2). Ledger is PER-BRAIN (`<brainDir>/.brain-anchor.jsonl`) and the brain root EXCLUDES `state/` (protocol state has its own tree-tier story; including it made the tripwire cry wolf) | state-store could still anchor root hashes per persist |
+| `anchor.js` (StateAnchor) | #152 | **WIRED** (pass 176) | brain-verify (#166 tier) — `vant health` (brain-integrity section, auto-baselines fresh brains) + `vant horcrux verify` / `vant horcrux anchor` (exit-code contract 0/1/2). Ledger is PER-BRAIN (`<brainDir>/.brain-anchor.jsonl`); brain root EXCLUDES `state/`/`orgchart/` (protocol state has its own integrity story). **Pass 177: state-store tree tier anchors too** — every persist/persistMerged with a tree appends the root hash to a per-brain per-file ledger (`<brainDir>/.state-anchor.jsonl`, carrier = state file); unchanged roots dedupe (in-process + ledger check); `verifyStateRoot(file)` detects on-disk tampering against the last anchor; hydrate NEVER anchors (a restart must not re-bless disk) | — |
 | `hotset.js` | #153 | ORPHAN | none | hot-path cache for tree reads when a consumer lands |
 | `fold.js` (4-ary capacity law) | #149 | ORPHAN | none | structural constraint for a future nested tree; nothing nests yet |
 | `delta.js` (DeltaLedger) | #161 | **WIRED** (pass 175) | **MeshTree provenance** — every register/heartbeat/aoi/write/rejected delta is actor-stamped; deterministic ledgerHash (clock injectable) | other consumers (presence-only feeds) absent |
@@ -107,3 +107,11 @@ wiring order that pays the most per commit:
    ✅ DONE pass 176 (health brain-integrity section + horcrux
    verify/anchor; per-brain anchor ledger; state/ excluded from the
    root so the tripwire only fires on content tampering).
+5. **State-store anchors root hashes per persist** (the §3 debt line).
+   ✅ DONE pass 177 — tree-tier persist/persistMerged appends the root
+   hash to the brain's `.state-anchor.jsonl` (per state file, cause =
+   persist path); `verifyStateRoot()` + `lastAnchorFor()` exposed; a
+   choke-point bypass (direct file tampering) is now detectable. Also
+   pass 177: BrainVerifier.verify() contract fixed to return the anchor
+   ENTRY (was a bare hex string while horcrux.js read `.timestamp` off
+   it — "Invalid time value" on every successful verify).

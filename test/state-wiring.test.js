@@ -49,6 +49,13 @@
  *                    root and verifies against the last anchor (auto-
  *                    baseline on fresh installs); horcrux verify/anchor
  *                    exit-code contract (0 ok, 1 diverged, 2 no anchor).
+ *   STATE-STORE → ANCHOR — §3 debt closure (pass 177): every tree-tier
+ *                    persist/persistMerged anchors its root hash into the
+ *                    brain's per-file StateAnchor ledger (#152); unchanged
+ *                    roots dedupe (in-process + ledger); verifyStateRoot
+ *                    detects on-disk tampering against the last anchor;
+ *                    hydrate deliberately does NOT anchor (a restart must
+ *                    not re-bless whatever is on disk).
  *
  * Exit code is the verdict, per house test conventions.
  */
@@ -210,6 +217,133 @@ async function main() {
         assert.ok(res.rootHash && res.rootHash === tree.rootHash());
         assert.strictEqual(stateStore.fromTree('pin-wiring', tree).n, 11);
         cleanup();
+    });
+
+    // ==================== STATE-STORE → ANCHOR (pass 177, §3 debt closure) ====================
+    console.log('\n▓ STATE-STORE → ANCHOR\n');
+
+    const ANCHOR_PIN = 'state/pin-anchor.json';
+    const anchorLedger = path.join(ROOT, 'models', 'private', stateStore.currentBrain(), '.state-anchor.jsonl');
+    const anchorCleanup = () => {
+        try { stateStore.clear(ANCHOR_PIN); } catch (e) { /* best effort */ }
+    };
+    // Count ACTUAL chain entries for a carrier: the ledger is append-only and
+    // shared across the whole test run, so assertions count occurrences rather
+    // than just checking presence (lastAnchorFor only exposes the tail).
+    const chainCountFor = (file) => {
+        const ledger = path.join(ROOT, 'models', 'private', stateStore.currentBrain(), '.state-anchor.jsonl');
+        if (!fs.existsSync(ledger)) return 0;
+        return fs.readFileSync(ledger, 'utf8').split('\n').filter(Boolean)
+            .map(l => { try { return JSON.parse(l); } catch (e) { return null; } })
+            .filter(e => e && e.carrier === file).length;
+    };
+
+    test('anchor: tree-tier persist appends the root hash to the per-brain anchor ledger', () => {
+        anchorCleanup();
+        const fired = [];
+        const h = (d) => fired.push(d);
+        events.on('state:anchored', h);
+        try {
+            const tree = new stateStore.StateTree();
+            assert.strictEqual(stateStore.persist({
+                moduleName: 'pin-anchor', stateFile: ANCHOR_PIN, data: { n: 1 }, tree
+            }), true);
+            const last = stateStore.lastAnchorFor(ANCHOR_PIN);
+            assert.strictEqual(last.state, 'PRESENT', 'anchor recorded');
+            assert.strictEqual(last.entry.root_hash, tree.rootHash(), 'anchored root === tree root');
+            assert.strictEqual(last.entry.carrier, ANCHOR_PIN, 'ledger is per-state-file (carrier)');
+            assert.ok(fired.length === 1 && fired[0].rootHash === tree.rootHash(), 'state:anchored fired once with the root');
+            assert.ok(fs.existsSync(anchorLedger), 'ledger lives at the brain root');
+        } finally {
+            events.off('state:anchored', h);
+            anchorCleanup();
+        }
+    });
+
+    test('anchor: unchanged root dedupes — the chain is an event history, not a heartbeat log', () => {
+        anchorCleanup();
+        try {
+            // the ledger is append-only and shared across the whole test run
+            // (and across runs) — assert on DELTAS, not absolute counts
+            const base = chainCountFor(ANCHOR_PIN);
+            const tree = new stateStore.StateTree();
+            stateStore.persist({ moduleName: 'pin-anchor', stateFile: ANCHOR_PIN, data: { n: 2 }, tree });
+            assert.strictEqual(chainCountFor(ANCHOR_PIN), base + 1, 'first root anchored exactly once');
+            stateStore.persist({ moduleName: 'pin-anchor', stateFile: ANCHOR_PIN, data: { n: 2 }, tree });
+            assert.strictEqual(chainCountFor(ANCHOR_PIN), base + 1, 'identical root NOT re-anchored (in-process dedupe)');
+            stateStore.persist({ moduleName: 'pin-anchor', stateFile: ANCHOR_PIN, data: { n: 3 }, tree });
+            assert.strictEqual(chainCountFor(ANCHOR_PIN), base + 2, 'changed root IS anchored');
+            // fresh-mirror view of the same rule: a DIFFERENT tree with the
+            // same content has the same root — the ledger-check dedupe keeps
+            // the chain an event history even across mirrors/processes
+            const tree2 = new stateStore.StateTree();
+            stateStore.persist({ moduleName: 'pin-anchor', stateFile: ANCHOR_PIN, data: { n: 3 }, tree: tree2 });
+            assert.strictEqual(chainCountFor(ANCHOR_PIN), base + 2, 'ledger-known root not re-anchored (ledger dedupe)');
+        } finally {
+            anchorCleanup();
+        }
+    });
+
+    test('anchor: verifyStateRoot detects on-disk tampering against the last anchor', () => {
+        anchorCleanup();
+        try {
+            const tree = new stateStore.StateTree();
+            stateStore.persist({ moduleName: 'pin-anchor', stateFile: ANCHOR_PIN, data: { secret: 'good' }, tree });
+            let v = stateStore.verifyStateRoot(ANCHOR_PIN);
+            assert.strictEqual(v.ok, true, 'clean state verifies');
+            // tamper: mutate the file OUTSIDE the store (the exact threat the
+            // anchor exists to catch — a write that bypassed the choke point)
+            const raw = JSON.parse(fs.readFileSync(path.join(ROOT, 'models', 'private', stateStore.currentBrain(), ANCHOR_PIN), 'utf8'));
+            raw.secret = 'TAMPERED';
+            fs.writeFileSync(path.join(ROOT, 'models', 'private', stateStore.currentBrain(), ANCHOR_PIN), JSON.stringify(raw, null, 2));
+            v = stateStore.verifyStateRoot(ANCHOR_PIN);
+            assert.strictEqual(v.ok, false, 'tampered state DIVERGES');
+            assert.ok(v.current !== v.lastAnchored.root_hash);
+            assert.ok(/diverged since anchor/.test(v.firstDivergence), 'divergence names the anchor: ' + v.firstDivergence);
+        } finally {
+            anchorCleanup();
+        }
+    });
+
+    test('anchor: no tree tier → no anchor; hydrate never anchors (no self-blessing restarts)', () => {
+        // a state file that has NEVER been anchored in any run (unique name;
+        // the ledger is append-only so reused names would inherit history)
+        const FRESH_PIN = 'state/pin-anchor-fresh-' + Date.now() + '.json';
+        try {
+            // persist WITHOUT a tree: rootHash is null, nothing to anchor
+            stateStore.persist({ moduleName: 'pin-anchor', stateFile: FRESH_PIN, data: { n: 5 } });
+            assert.strictEqual(stateStore.lastAnchorFor(FRESH_PIN).state, 'ABSENT', 'no tree → no anchor entry');
+            const v = stateStore.verifyStateRoot(FRESH_PIN);
+            assert.strictEqual(v.state, 'PRESENT');
+            assert.strictEqual(v.anchored, false, 'typed not-yet-anchored verdict');
+            assert.strictEqual(v.ok, false);
+            // hydrate (even with a tree) must NOT append to the ledger
+            const before = chainCountFor(FRESH_PIN);
+            const hydrTree = new stateStore.StateTree();
+            stateStore.hydrate({ moduleName: 'pin-anchor', stateFile: FRESH_PIN, apply: () => {}, tree: hydrTree });
+            assert.strictEqual(chainCountFor(FRESH_PIN), before, 'hydrate never anchors — a restart must not re-bless disk');
+        } finally {
+            try { stateStore.clear(FRESH_PIN); } catch (e) { /* best effort */ }
+        }
+    });
+
+    test('anchor: persistMerged anchors too (the lock-path write rides the same contract)', async () => {
+        anchorCleanup();
+        try {
+            const tree = new stateStore.StateTree();
+            const res = await stateStore.persistMerged({
+                moduleName: 'pin-anchor', stateFile: ANCHOR_PIN,
+                merge: () => {}, serialize: () => ({ n: 6 }), tree
+            });
+            assert.strictEqual(res, true);
+            const last = stateStore.lastAnchorFor(ANCHOR_PIN);
+            assert.strictEqual(last.state, 'PRESENT');
+            assert.strictEqual(last.entry.root_hash, tree.rootHash());
+            assert.ok(/persistMerged:pin-anchor/.test(last.entry.cause), 'cause names the path: ' + last.entry.cause);
+            assert.strictEqual(stateStore.verifyStateRoot(ANCHOR_PIN).ok, true);
+        } finally {
+            anchorCleanup();
+        }
     });
 
     // ==================== TRUST → TREE (first live consumer, pass 172) ====================

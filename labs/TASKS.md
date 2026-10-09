@@ -1,8 +1,54 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-10-08  
-**Session:** Pass 176 — payoff ledger complete: quasicrystal on the canonical encoder (step ⑤ done), mesh bus events, BrainVerifier on health + horcrux CLI (step ⑥ done)
+**Last Updated:** 2026-10-09  
+**Session:** Pass 177 — §3 debt closed: state-store anchors root hashes per persist
+
+---
+
+## Session (2026-10-09 — pass 177: state-store → StateAnchor, §3 debt closed)
+
+**What shipped** (owner: "What's left in wiring? … yeah we can do §3 debt:
+state-store could still anchor root hashes per persist"):
+
+- **STATE-STORE → STATE-ANCHOR (§3 DEBT CLOSED):** every tree-tier
+  persist/persistMerged now ANCHORS the root hash into the brain's
+  per-file StateAnchor ledger (#152): `models/private/<brain>/
+  .state-anchor.jsonl`, carrier = the state file, cause = the persist
+  path (persist:<module> / persistMerged:<module>). A state write that
+  bypassed the choke point (direct tampering, partial write) is now
+  DETECTABLE against the last known-good root — not just against an
+  in-process mirror that dies with the process.
+- **Dedupe:** unchanged roots are NOT re-anchored — in-process cache
+  first, then a ledger check for the fresh-process case. The chain is
+  an event history, not a heartbeat log.
+- **New surface:** `stateStore.anchorStateRoot(file, root, cause)`,
+  `stateStore.verifyStateRoot(file)` (typed verdict: ABSENT /
+  PRESENT-anchored ok|diverged / PRESENT-unanchored),
+  `stateStore.lastAnchorFor(file)`. New event: `state:anchored`.
+- **Hydrate deliberately does NOT anchor:** a restart must not re-bless
+  whatever happens to be on disk — otherwise the tripwire launders its
+  own divergences. Pinned.
+- **Bug fix (pass 176 leftover):** BrainVerifier.verify() returned
+  `lastAnchored` as a bare hex STRING while bin/horcrux.js read entry
+  fields off it (`v.lastAnchored.timestamp`) — "Invalid time value"
+  on every SUCCESSFUL `vant horcrux verify`. Contract unified: all
+  three verifiers (StateAnchor / BrainVerifier / verifyStateRoot) now
+  return the anchor ENTRY. Caught by hand-running the CLI after the
+  suite, not by the suite — the exit-code pin only checked codes, and
+  exit 0 masked the stdout crash. Pin note for the future: assert on
+  the success-path OUTPUT too when the contract is a printout.
+
+**Pin suite:** `test/state-wiring.test.js` extended with STATE-STORE →
+ANCHOR (5): ledger append per persist, in-process + ledger dedupe,
+tamper detection, no-tree/hydrate-never-anchors, persistMerged path.
+**51/51**, stable across consecutive runs (ledger is append-only and
+shared across runs — assertions use per-carrier deltas + unique fresh
+file names, not absolute counts).
+
+**Next:** #122–#144 husks; hotset/fold/precision ORPHANs await
+consumers; per-brain `universeSeed` config still has no writer (by
+resolved #158 design).
 
 ---
 
@@ -57,7 +103,7 @@ mesh-status 7/7; backbone-wiring 11/11; atomic-writes 13/13;
 no-legacy-bloat 13/13; geometry-engine 1/1; state-persistence 8/8;
 tombstones 2/2; reap-crossprocess 6/6; audit-locks gate PASS.
 
-**Next:** #122–#144 husks; state-store root-hash anchoring per persist
+**Next:** #122–#144 husks; state-store root-hash anchoring per persist → DONE pass 177 (see top session)
 (the remaining §3 debt); optional: emit tree-tier rootHash on mesh
 persistence events too.
 
