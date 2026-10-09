@@ -1,5 +1,9 @@
 # Vant Canonicalization Roadmap — pass 179 (2026-10-09)
 
+> **The PRD for this work is `labs/prd-canonicalization.md`** (waves,
+> acceptance criteria, out-of-scope lines). This doc remains the measured
+> evidence base it was written from.
+>
 > Written after the stego pass proved the pattern: **one canonical module +
 > exported interop helpers + suite pins** makes disconnected systems
 > interoperate and stay fixed. The stego PNG pipeline (ce7b7d5) and the
