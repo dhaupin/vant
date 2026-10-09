@@ -77,6 +77,37 @@ Both files are deferred — not in the b-T scope.
 
 ## [Unreleased] - Future
 
+### Added - Event Bus Observability + Wiring (pass 179, prd-canonicalization Wave A)
+- The shared bus emitted 266 distinct event names with only 8 heard
+  anywhere. New: opt-in JSONL session sink in `lib/event.js`
+  (`event.sinkEnable/Tail/Stats`, OFF by default, ring-bounded, never
+  breaks emission), `vant events` CLI (tail/enable/disable/stats,
+  cross-process read of the most recent session), and MCP tools
+  `event_tail` / `event_sink_enable` / `event_sink_stats`.
+- `lib/event-wiring.js` (wired at boot): security denials
+  (`vaf:blocked`, `rls:denied`, `trust:blocked`, `market:blocked`),
+  `storage:error`, stego and secret lifecycle events → the hash-chained
+  audit ledger (audit.log — the warn/info/error family is console-only);
+  `sync:push/pull:failed` → surfaced in `vant health` as the `sync`
+  check. Pinned by `test/event-observability.test.js` (40 pins).
+- FIXED (pre-existing): `lib/health.js runChecks()` crashed on every
+  call with `ReferenceError: _checkRead` (the sandbox read gate helper
+  was removed in an earlier refactor; the call site survived). Restored
+  with the stego/sandbox `_checkRead` shape.
+
+### Added - Config Env Registry (pass 179, Wave B)
+- `lib/config.js` now owns a 24-entry `ENV_REGISTRY` of every `VANT_*`
+  env var the codebase consumes (server/mcp/webhook/health/runtime),
+  with `envRegistry()`, `listEnvConfig({maskSecrets,includeUnset})`
+  (typed coercion, masked secrets), and `unknownEnvVars()` (typo scan).
+  `vant config list env` prints the resolved registry view.
+- Straggler modules migrated off direct `process.env` reads:
+  webhooks (port/bind/secret/url), health (port), via new config
+  getters `webhookPort/Bind/Secret/Url`, `healthPort/Bind`,
+  `agentsMax`. Health gains the `config-env` check flagging set
+  VANT_* vars the registry does not know. Pinned by
+  `test/config-registry.test.js` (23 pins).
+
 ### Fixed - Cross-Brain Privilege Leak via Boot Hydrate (axolotl pass 123)
 - Boot's persisted operator-capability hydrate resolved the brain via
   `brain.getCurrentBrain()`, which ignores `VANT_BRAIN` — a VANT_BRAIN-scoped

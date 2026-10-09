@@ -81,6 +81,21 @@
 
 ---
 
+## 8. Event observability (pass 179 — Waves A+B, "event bus forgot" finding)
+
+| Work | Status | Detail |
+|---|---|---|
+| Bus sink (JSONL) | DONE | `lib/event.js`: `enableSink/Tail/Stats` — off by default, ring-bounded, best-effort writes; pinned in test/event-observability.test.js (+ env sink gating from config) |
+| Consumers | DONE | security denials (vaf/rls/trust/market blocked, storage:error, stego + secret lifecycle) → hash-chained audit ledger; sync:push/pull:failed → health `sync` check |
+| CLI | DONE | `vant events` (tail/enable/disable/stats) reading the most recent session sink cross-process |
+| MCP | DONE | `event_tail` / `event_sink_enable` / `event_sink_stats` tools |
+| Env registry (Wave B) | DONE | 24-entry `ENV_REGISTRY` in lib/config.js + `vant config list env`; webhooks/health/agents stragglers moved onto config getters; unknown-env scan surfaced via health check |
+| Pre-existing fix | DONE | lib/health.js `runChecks` ReferenceError (`_checkRead` removed in an earlier refactor) restored |
+
+NEXT WIRING CANDIDATES (pass 180+):
+1. `hotset` (#153): back state-store tree reads — cache consumers exist since 172/173; first `hydrate` touchpoint wins.
+2. Excellence gap: nothing writes per-brain `universeSeed` yet — first writer is the mesh genesis path.
+
 ## Where the spine got large (the honest answer)
 
 `lib/state/` is 13 modules and `lib/geometry/` is 12; six of the state
