@@ -77,6 +77,32 @@ Both files are deferred — not in the b-T scope.
 
 ## [Unreleased] - Future
 
+### Refactored - One Hashing Module (pass 180, prd-canonicalization Wave C)
+- New canonical surface `lib/hash.js`: `sha256(input)` (one-shot hex),
+  `sha256H()` (incremental `Hasher` with the exact update()/digest()
+  shape the migrated call sites used), `crc32(buf)` (unsigned, via core
+  `zlib.crc32` — the stego PNG checksum's core call, made importable),
+  `canonicalBytes(value)` (the #146 state/canonical encoder), `hash()`
+  and default `hmac()`. No new algorithms — delegates to core
+  crypto/zlib.
+- Every direct `crypto.createHash('sha256')` call site in `lib/` now
+  routes through it: audit (entry chain), wal (blob spam digests), vaf
+  (hashIP), encrypt (sha256 + hybridRandom seed mix), s3 connector
+  (SigV4 hex), habitat (token hash), storage (_hashToVector), and the
+  full state/geometry spine (tree roots/scopes/snapshots, canonical,
+  checkpoint ids, seeds universe/scope/int/child, spine cellAddress,
+  raid shardHash, lattice-keys). Digests are **byte-identical** to the
+  outgoing impls (same `update()` call shape preserved by the Hasher
+  shim) — pinned, not assumed.
+- Pinned by `test/hash-canon.test.js` (29 pins): byte-identity vectors
+  vs direct crypto, `hash() === canonical.hash()`, golden vectors for
+  the migrated contracts, `crc32 === zlib.crc32`, a fail-closed
+  non-Buffer rejection, and a **grep gate** proving no lib module calls
+  `crypto.createHash('sha256')` outside `lib/hash.js`.
+- Migrated suites re-run green: audit, wal, state-wiring,
+  engine-parity-spine, backbone, encrypt, vaf, geometry-engine,
+  habitat-token, mesh-status, stego ×2, state-persistence.
+
 ### Added - Event Bus Observability + Wiring (pass 179, prd-canonicalization Wave A)
 - The shared bus emitted 266 distinct event names with only 8 heard
   anywhere. New: opt-in JSONL session sink in `lib/event.js`

@@ -81,7 +81,7 @@
 
 ---
 
-## 8. Event observability (pass 179 — Waves A+B, "event bus forgot" finding)
+## 8. Event observability (pass 179 — Waves A+B, "event bus forgot" finding) — SEE ALSO §9
 
 | Work | Status | Detail |
 |---|---|---|
@@ -92,9 +92,22 @@
 | Env registry (Wave B) | DONE | 24-entry `ENV_REGISTRY` in lib/config.js + `vant config list env`; webhooks/health/agents stragglers moved onto config getters; unknown-env scan surfaced via health check |
 | Pre-existing fix | DONE | lib/health.js `runChecks` ReferenceError (`_checkRead` removed in an earlier refactor) restored |
 
-NEXT WIRING CANDIDATES (pass 180+):
+NEXT WIRING CANDIDATES (pass 181+):
+
+## 9. One hashing module (pass 180 — prd-canonicalization Wave C)
+
+| Work | Status | Detail |
+|---|---|---|
+| `lib/hash.js` canonical surface | DONE | `sha256` / `sha256H` (incremental Hasher, legacy update() shape preserved) / `crc32` (core zlib) / `canonicalBytes` (#146 encoder) / `hash` / `hmac` |
+| Consumers migrated | DONE | audit, wal, vaf, encrypt (sha256 + hybridRandom), connectors/s3 (SigV4), habitat (token), storage (_hashToVector), state/tree (roots+scopes+snapshots), state/canonical, state/checkpoint, state/seeds, state/spine, state/brain-verify (fileHash + currentRoot), geometry/raid (shardHash), geometry/lattice-keys — every direct `crypto.createHash('sha256')` in lib/ retired |
+| Digest stability | DONE (pinned) | `test/hash-canon.test.js` 29 pins: byte-identity vs direct crypto, `hash()===canonical.hash()`, goldens, `crc32===zlib.crc32`, fail-closed non-Buffer, grep gate |
+| Grep gate | LIVE | no lib module calls `crypto.createHash('sha256')` outside lib/hash.js — enforced by test, fails CI on regression |
+| Migrated suites | DONE | audit, wal, state-wiring, engine-parity-spine, backbone, encrypt, vaf, geometry-engine, habitat-token, mesh-status, stego ×2, state-persistence — all green |
+
+NEXT WIRING CANDIDATES (pass 181+):
 1. `hotset` (#153): back state-store tree reads — cache consumers exist since 172/173; first `hydrate` touchpoint wins.
 2. Excellence gap: nothing writes per-brain `universeSeed` yet — first writer is the mesh genesis path.
+3. Wave D (storage ownership matrix → storage.js split) per labs/prd-canonicalization.md §5.
 
 ## Where the spine got large (the honest answer)
 

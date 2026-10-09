@@ -3,7 +3,8 @@
 **Version:** 1.0
 **Branch:** axolotl
 **Date:** 2026-10-09
-**Status:** ACTIVE — Wave A (event bus observability + listener wiring) in progress
+**Status:** ACTIVE — Wave A+B landed (pass 179), Wave C landed (pass 180). Next: Wave D (storage ownership matrix → storage.js split)
+**Completed:** §2 Wave A (event observability, 40 pins), §3 Wave B (config env registry, 23 pins), §4 Wave C (lib/hash.js, 29 pins + grep gate) — all per the §8 acceptance standard
 **Evidence base:** `labs/CANONICALIZATION-ROADMAP.md` (measured inventory, pass 179)
 **Related:** `labs/WIRING.md` (state-spine ledger — the model for what "done"
 looks like), stego pass 178 (ce7b7d5 — the pattern case study)
