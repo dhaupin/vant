@@ -184,7 +184,7 @@ push converges it; the latest generation makes any queue unnecessary.
 ```js
 const forum = require('./lib/forum');
 const v = await forum.vote('q3-platform-call', {
-    options: ['thursday-1400utc', 'friday-0900utc'],
+    ballot: ['thursday-1400utc', 'friday-0900utc'],
     minQuorum: 3,
     scope: { owner: 'team:' + team.id, visibility: 'scope' }
 });

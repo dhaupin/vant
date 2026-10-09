@@ -88,7 +88,7 @@ const PORT_PEER = ${PORT_PEER};
     teams.assign('owner-agent', { org: org.id, dept: dept.id, team: team.id });
 
     const SCOPE = { owner: 'team:' + team.id, visibility: 'scope' };
-    const ledger = await consensus.create(TOPIC, { options: ['ratify', 'reject'], minQuorum: 2, useTrustWeight: false, scope: SCOPE });
+    const ledger = await consensus.create(TOPIC, { ballot: ['ratify', 'reject'], minQuorum: 2, useTrustWeight: false, scope: SCOPE });
     if (ledger.error) throw new Error('consensus.create: ' + ledger.error);
     const v = await consensus.vote(TOPIC, 'ratify', 'owner-agent');
     if (v.error && !v.totalVotes) throw new Error('owner vote: ' + JSON.stringify(v).slice(0, 120));

@@ -93,7 +93,7 @@ async function main() {
     console.log('\n🧹 AGORA HYGIENE TESTS (pass 58 / Wave C)\n');
 
     await test('reaper hard guard: locally created ledgers NEVER reapable, even after adopting remote ballots', async () => {
-        await consensus.create('hy-local-1', { options: ['a', 'b'], minQuorum: 2, useTrustWeight: false });
+        await consensus.create('hy-local-1', { ballot: ['a', 'b'], minQuorum: 2, useTrustWeight: false });
         await consensus.vote('hy-local-1', 'a', 'hy-a');
         // A remote ballot arrives via sync for the LOCAL topic (adopt path).
         const r = consensus.mergeTopic({
@@ -191,11 +191,11 @@ async function main() {
         const replies = new Map([['rich-peer', null], ['offline-peer', null]]);
         const { bus, sent } = stubBus('hy-converge-bus', replies);
         // rich-peer summarizes two topics: one we lack, one we hold terminal.
-        await consensus.create('hy-conv-have', { options: ['a', 'b'], minQuorum: 2, useTrustWeight: false });
+        await consensus.create('hy-conv-have', { ballot: ['a', 'b'], minQuorum: 2, useTrustWeight: false });
         await consensus.vote('hy-conv-have', 'a', 'hy-a');
         await consensus.vote('hy-conv-have', 'a', 'hy-b');
         consensus.tally('hy-conv-have');
-        await consensus.create('hy-conv-local', { options: ['a', 'b'], minQuorum: 9, useTrustWeight: false }); // under quorum, but LOCAL: no pull needed to vote later
+        await consensus.create('hy-conv-local', { ballot: ['a', 'b'], minQuorum: 9, useTrustWeight: false }); // under quorum, but LOCAL: no pull needed to vote later
         replies.set('rich-peer', ['hy-conv-missing', 'hy-conv-have']);
         // offline-peer: registered, but its reply NEVER comes (true offline).
 

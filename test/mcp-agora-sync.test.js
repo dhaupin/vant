@@ -119,7 +119,7 @@ async function main() {
         agoraSync.install(ownerBus);
 
         // Owner's REAL ledger; the owner's gates decide the verdict.
-        await consensus.create('p56-topic', { options: ['yes', 'no'], minQuorum: 2, useTrustWeight: false });
+        await consensus.create('p56-topic', { ballot: ['yes', 'no'], minQuorum: 2, useTrustWeight: false });
 
         const p = mcp.execute('agora_vote', { node: 'mcp-owner', topic: 'p56-topic', outcome: 'yes' });
         await wait(30);

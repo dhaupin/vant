@@ -260,7 +260,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
     // ---- The plan: propose under JV scope; host crew votes locally ----
     const v = await forum.vote('JV: ship the joint deliverable in 2 sprints', {
-        options: ['ratify', 'reject'], minQuorum: 4, useTrustWeight: false,
+        ballot: ['ratify', 'reject'], minQuorum: 4, useTrustWeight: false,
         scope: SCOPE
     });
     if (!v.voted) throw new Error('forum.vote: ' + JSON.stringify(v).slice(0, 140));

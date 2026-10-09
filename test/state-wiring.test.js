@@ -468,7 +468,7 @@ async function main() {
         events.on('state:saved', onSaved);
         try {
             const topic = 'wiring-pin-' + Date.now();
-            const res = consensus.create(topic, { options: ['y', 'n'] });
+            const res = consensus.create(topic, { ballot: ['y', 'n'] });
             assert.ok(!res || !res.error, 'create accepted: ' + JSON.stringify(res));
             const root = consensus._treeRoot();
             assert.ok(root && /^[0-9a-f]{64}$/.test(root), 'root hash is a sha256 hex');

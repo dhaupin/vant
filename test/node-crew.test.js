@@ -45,7 +45,7 @@ sandbox.defaultSandbox.setCapabilities({
 
     // 2. consensus: async create with options array + minQuorum
     const topic = 'crew-pin-topic-' + Date.now().toString(36);
-    let ledger = await consensus.create(topic, { options: ['ratify', 'reject'], minQuorum: 1, threshold: 0.5 });
+    let ledger = await consensus.create(topic, { ballot: ['ratify', 'reject'], minQuorum: 1, threshold: 0.5 });
     test('consensus.create is async and returns the ledger', ledger && !ledger.error && ledger.topic === topic,
         JSON.stringify(ledger && ledger.error));
 

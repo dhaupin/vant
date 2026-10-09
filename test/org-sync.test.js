@@ -178,7 +178,7 @@ async function main() {
         assert(scope.canAccess({ scope: SCOPE }, 'steward-lead'), 'steward-lead denied');
         assert(!scope.canAccess({ scope: SCOPE }, 'rogue-1'), 'non-member ADMITTED — fail-closed broken');
         // The group topic reads locally on the member now (the thing Wave J exists for).
-        const created = await consensus.create('group-read-pin', { options: ['a', 'b'], minQuorum: 1, requireRegistry: false, scope: SCOPE });
+        const created = await consensus.create('group-read-pin', { ballot: ['a', 'b'], minQuorum: 1, requireRegistry: false, scope: SCOPE });
         assert(!created.error, 'scoped create failed: ' + JSON.stringify(created));
         assert(consensus.get('group-read-pin', 'beta-1') !== null, 'group member cannot READ the group topic locally');
         assert(consensus.get('group-read-pin', 'rogue-1') === null, 'non-member read leaked');

@@ -44,7 +44,7 @@ const consensus = require('./lib/consensus');
 
 // Create a topic
 const ledger = consensus.create('q3-call', {
-    options: ['yes', 'no', 'abstain'],
+    ballot: ['yes', 'no', 'abstain'],
     minQuorum: 3
 });
 

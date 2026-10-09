@@ -75,7 +75,7 @@ const runId = Date.now().toString(36);
         withBrain('up-def-pin', async () => {
             const cons = require('../lib/consensus');
             const topic = 'pin-min-' + runId;
-            const r = await cons.create(topic, { options: ['a', 'b'], minQuorum: 1, requireRegistry: false });
+            const r = await cons.create(topic, { ballot: ['a', 'b'], minQuorum: 1, requireRegistry: false });
             assert.ok(r && !r.error, 'create refused unexpectedly: ' + JSON.stringify(r));
             const file = 'state/consensus.json';
             const tier = stateStore.treeFor(file);
@@ -89,7 +89,7 @@ const runId = Date.now().toString(36);
             const cons = require('../lib/consensus');
             const topic = 'pin-vote-' + runId;
             const voter = 'pin-voter-' + runId;
-            const r = await cons.create(topic, { options: ['a', 'b'], minQuorum: 1, requireRegistry: false });
+            const r = await cons.create(topic, { ballot: ['a', 'b'], minQuorum: 1, requireRegistry: false });
             assert.ok(r && !r.error, 'create refused unexpectedly: ' + JSON.stringify(r));
             const v = await cons.vote(topic, 'a', voter);
             assert.ok(v && !v.error, 'vote refused unexpectedly: ' + JSON.stringify(v));
@@ -107,7 +107,7 @@ const runId = Date.now().toString(36);
         withBrain('up-def-pin', async () => {
             const cons = require('../lib/consensus');
             const topic = 'pin-dep-' + runId;
-            await cons.create(topic, { options: ['a', 'b'], minQuorum: 1, requireRegistry: false });
+            await cons.create(topic, { ballot: ['a', 'b'], minQuorum: 1, requireRegistry: false });
             const v = await cons.vote(topic, 'a', 'pin-dep-v-' + runId, { deposit: 0 });
             assert.ok(v && !v.error, 'staked-0 vote refused unexpectedly: ' + JSON.stringify(v));
             const d = stateStore.fromTree('consensus', stateStore.treeFor('state/consensus.json').tree);
