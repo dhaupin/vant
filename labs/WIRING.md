@@ -149,7 +149,19 @@ NEXT WIRING CANDIDATES (pass 182+):
 4. ~~Wave E (messaging charters)~~ ✅ DONE pass 182 — see §11.
 5. ~~Wave F (RemoteTransport interface)~~ ✅ DONE pass 183 — see §12.
 6. ~~Transport adoption wave 2 (explicit verify on sync + agora state keeper)~~ ✅ DONE pass 184 — see §13.
-7. Remaining ORPHANs per §3/§4 (precision.js, fold.js geometry, mesh generic WAL consumers) — pick up when a consumer exists.
+7. ~~precision.js geometry (#157)~~ ✅ WIRED pass 185 — see §14; fold.js (#154) remains a tested primitive — facet-layout SKETCH in labs/SKETCH-facet-layout.md (impl waits for a consumer).
+8. Remaining ORPHANs per §3 (fold geometry #154, mesh generic WAL consumers) — pick up when a consumer exists.
+
+## 14. Geometry precision wiring + shim retirement (pass 185)
+
+| Work | Status | Detail |
+|---|---|---|
+| Legacy imul shim retired | DONE | `lib/geometry/lattice-keys.js` — the raw `Math.imul` chain + `LATTICE_MULTIPLIER` export GONE (grep-proved zero live consumers: fragmenter's `deriveLatticeKeys` delegates to the #155 PRF; the GitHub adapter rides fragmenter). `fragmenter.deriveLatticeKeys` remains the single surviving name — one derivation chain in the repo |
+| #157 precision WIRED | DONE | `lib/geometry/quasicrystal.js` store quantizes the address-bearing metadata (position triple, theta/phi/depth) through the #157 deterministic quantizer (grid 1e-9) — cross-engine last-ulp drift can never become two different cells; stored integer-grid form is byte-stable across re-derivation |
+| Engine-parity over REAL math | DONE (pinned) | `qc.engineParity()` — the SAME golden-angle rotation through two algebraically distinct evaluation orders (direct libm coefficients vs an angle-sum double-rotation) must agree after quantization; returns mismatches, never asserts in-process. julia-optional policy unchanged |
+| Pins | DONE | `test/geometry-parity.test.js` 8 pins — retirement (source grep code-not-docs, delegation, require-shape), quantized-record shape, round-trip honesty, golden + 200-vector stress parity, and a sensitivity leg (a genuinely different rotation IS caught) |
+| Verified | DONE | geometry-parity 8 + geometry-engine 1, connector 8, engine-parity-spine 70, hash-canon 29, sidecar 8, julia-sidecar-live (skip policy OK) — all green |
+| fold (#154) | SKETCH ONLY | `labs/SKETCH-facet-layout.md` — facet layout stays a document; implementation waits for the /world space consumer or capacity pressure |
 
 ## Where the spine got large (the honest answer)
 

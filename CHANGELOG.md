@@ -77,6 +77,33 @@ Both files are deferred — not in the b-T scope.
 
 ## [Unreleased] - Future
 
+### Added - Geometry Precision Wiring + Shim Retirement (pass 185)
+
+- **Legacy `Math.imul` lattice shim retired.** `lib/geometry/lattice-keys.js`
+  no longer carries the raw imul chain or `LATTICE_MULTIPLIER` — grep-proved
+  zero live consumers (the fragmenter's `deriveLatticeKeys` delegates to the
+  #155 sha256 PRF; the GitHub adapter rides the fragmenter). One derivation
+  chain in the repo, completely now.
+- **`lib/geometry/precision.js` (#157) is WIRED.** Quasicrystal store now
+  quantizes the address-bearing metadata (position triple, theta/phi/depth)
+  through the #157 deterministic quantizer (grid 1e-9): stored records carry
+  EXACT integer grid values, so cross-engine last-ulp drift (the sidecar
+  future) can never become two different cells, and re-derivation is byte-
+  stable. Round-trip honesty unaffected.
+- **Real engine-parity leg.** `quasicrystal.engineParity()` runs the SAME
+  golden-angle rotation through two algebraically distinct evaluation orders
+  (direct libm coefficients vs an angle-sum double-rotation path) and reports
+  quantized mismatches — both agree at grid 1e-9; a genuinely different
+  rotation IS caught (sensitivity pinned). julia-optional live policy
+  unchanged (the wire stays tested separately).
+- Pinned by `test/geometry-parity.test.js` (8 pins); suites green:
+  geometry-engine, connector, engine-parity-spine 70, hash-canon 29,
+  sidecar 8.
+- **`lib/geometry/fold.js` (#154) stays a tested primitive** — the facet
+  storage layout is now a design sketch (labs/SKETCH-facet-layout.md:
+  compat read, refusal contract, /world space consumer) with
+  implementation deferred until a real consumer exists.
+
 ### Added - Wiring Candidates Landed (pass 184 — hotset, universeSeed, transport verify)
 
 - **HotSet (#153) backs the state spine's tree-read hot path.** `stateStore.treeFor()`
