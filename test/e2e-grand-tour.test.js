@@ -107,8 +107,10 @@ console.log('\n🚌 E2E GRAND TOUR (pass 119)\n');
             await new Promise(r => setTimeout(r, 250));
         }
         const tools = toolsBody ? JSON.parse(toolsBody) : [];
-        report('gate B: door ready; /tools = 296 tools (array shape)',
-            Array.isArray(tools) && tools.length === 296, 'len=' + tools.length);
+        // (pass 179) count grew 296 → 299: Wave A added event_tail,
+        // event_sink_enable, event_sink_stats (prd-canonicalization §2)
+        report('gate B: door ready; /tools = 299 tools (array shape; +3 event tools pass 179)',
+            Array.isArray(tools) && tools.length === 299, 'len=' + tools.length);
 
         const health = JSON.parse((await req(PORT, 'POST', '/mcp/exec', { tool: 'vant_health', args: {} })).body);
         report('gate B: /mcp/exec vant_health → ok',

@@ -77,6 +77,205 @@ Both files are deferred — not in the b-T scope.
 
 ## [Unreleased] - Future
 
+### Added - Geometry Precision Wiring + Shim Retirement (pass 185)
+
+- **Legacy `Math.imul` lattice shim retired.** `lib/geometry/lattice-keys.js`
+  no longer carries the raw imul chain or `LATTICE_MULTIPLIER` — grep-proved
+  zero live consumers (the fragmenter's `deriveLatticeKeys` delegates to the
+  #155 sha256 PRF; the GitHub adapter rides the fragmenter). One derivation
+  chain in the repo, completely now.
+- **`lib/geometry/precision.js` (#157) is WIRED.** Quasicrystal store now
+  quantizes the address-bearing metadata (position triple, theta/phi/depth)
+  through the #157 deterministic quantizer (grid 1e-9): stored records carry
+  EXACT integer grid values, so cross-engine last-ulp drift (the sidecar
+  future) can never become two different cells, and re-derivation is byte-
+  stable. Round-trip honesty unaffected.
+- **Real engine-parity leg.** `quasicrystal.engineParity()` runs the SAME
+  golden-angle rotation through two algebraically distinct evaluation orders
+  (direct libm coefficients vs an angle-sum double-rotation path) and reports
+  quantized mismatches — both agree at grid 1e-9; a genuinely different
+  rotation IS caught (sensitivity pinned). julia-optional live policy
+  unchanged (the wire stays tested separately).
+- Pinned by `test/geometry-parity.test.js` (8 pins); suites green:
+  geometry-engine, connector, engine-parity-spine 70, hash-canon 29,
+  sidecar 8.
+- **`lib/geometry/fold.js` (#154) stays a tested primitive** — the facet
+  storage layout is now a design sketch (labs/SKETCH-facet-layout.md:
+  compat read, refusal contract, /world space consumer) with
+  implementation deferred until a real consumer exists.
+
+### Added - Wiring Candidates Landed (pass 184 — hotset, universeSeed, transport verify)
+
+- **HotSet (#153) backs the state spine's tree-read hot path.** `stateStore.treeFor()`
+  re-parses a state file on every call — and `verifyStateRoot` + health's
+  integrity pass re-call it for the same few files. `lib/state-store.js` now
+  backs `treeFor` with a bounded `HotSet` (cap 64 — the ORPHAN #153 gets its
+  first consumer) keyed by a CORRECTNESS fingerprint (`stateFile:mtime:size`
+  + raw content): repeated reads of an UNCHANGED file reuse the parsed
+  payload; any disk change — including external tamper — changes the
+  fingerprint → miss → fresh honest read. Hot-set eviction touches only the
+  cache (never durability, #153's own law). Metrics: `stateStore.treeHot.metrics()`.
+- **`universeSeed` got its first WRITER (#158).** Genesis's `_writeTopology`
+  (all four ceremony legs) now persists the per-brain config `universeSeed`
+  override — derived from the SAME `resolveUniverse()` resolution the
+  spine's SeedChain uses, never clobbering an existing pin, never
+  overriding an explicit `VANT_UNIVERSE_SEED` env. The read path existed
+  since pass 171; the durable override is now real for mesh installs.
+- **Transport verify adoption (Wave F §7, wave 2).** `lib/sync.js` gains
+  `verifyProvider(name)` / `verifyAllProviders()` — the GitProvider stack's
+  explicit honest verify: reachable repo + branch probe + corpus snapshot;
+  unreachable/not-found report `verified:false`, never silently blessed
+  (the Wave F rule applied to the sync stacks). `lib/agora-sync.js`'s state
+  keeper stamps its reply with the OWNER's locally re-derived `tallyHash`;
+  the asker verifies its own post-merge re-tally against it — a forged or
+  stale stamp is REPORTED (`verify.verified:false`), never blessed, and
+  adopted ballots still survive on their own merge gates. Backward
+  compatible: a reply without `tallyHash` → `verify:null`.
+- Pinned by `test/wiring-184.test.js` (10 pins): hot cache hit + identical
+  root, tamper-detection (no stale blessing), hydrate unaffected, typed
+  absence; writer precedence + never-clobber + config↔explicit universe
+  round-trip; provider verify honest matrix through the test-DI seam; agora
+  stamp agree + forged-disagree legs. 14 consumer suites re-run green
+  (state tiers, sync trio, consensus, spine parity, remote-transport).
+
+### Added - RemoteTransport Seam (pass 183, prd-canonicalization Wave F)
+- The five "send state elsewhere" stacks (sync, org-sync, agora-sync,
+  mirror, connectors/s3) carried private auth lookup, retry
+  classification, and verify steps. New `lib/remote-transport.js` is
+  the shared seam, built from the git-connector argv-array hardening
+  (the security template generalized):
+  - `RemoteTransport` interface: `auth()` (the ONE credential door —
+    tokens live in the closure, never instance fields), `push()`,
+    `pull()`, `verify()`, plus the shared `_run()` ceremony (once-per-
+    call auth, classify, exponential backoff from the GitProvider
+    semantics).
+  - Shared validators (`refLike`/`secretLike`/`payloadLike`) — the
+    `_gitRef` fail-closed pattern made requirable.
+  - Shared `classifyError`: only VantError's retryable flag is trusted
+    for classified errors; message-string matching only as the
+    non-VantError fallback; attempts beyond the ladder are a caller
+    bug and return non-retryable (never an invented delay).
+  - Base `verify()` returns false (honest: "not verified"), never a
+    silent bless; unimplemented `push/pull/auth` throw loudly.
+- First adopter: `lib/connectors/s3.js` gains `S3Transport` — SigV4
+  signing under the shared ceremony; `createClient` stays unchanged.
+  Further stacks adopt per-stack (org-sync/agora-sync already align
+  on the shared `classifyError` semantics through GitProvider).
+- Pinned by `test/remote-transport.test.js` (23 pins): validators
+  block traversal/absolute/space/dash/empty/non-string/too-long;
+  ceremony (transient retries, auth-once, no backoff burn on hard
+  fails, attempts-override, exhausted-throw); verify honesty;
+  s3 adopter shape + secret-not-on-instance; describe() leaks no
+  secrets. 10 consumer suites re-run green.
+
+### Added - Messaging Trio Charters + Shared Envelope (pass 182, prd-canonicalization Wave E)
+- The charter is law (labs/prd-canonicalization.md §6): **msg.js owns
+  conversations** (persisted transcripts + in-process channel pub/sub),
+  **stream.js owns the work queue** (durable rows, lease, escrow-gated),
+  **crew-bus.js owns peer transport** (HMAC-signed HTTP, version +
+  scope gates). Overlaps are banned — no dual-ownership channels; a
+  record goes to msg OR stream, never both-as-truth; only crew-bus
+  leaves the process.
+- New `lib/messaging.js`: the ONE shared envelope — crew-bus's wire
+  shape `{event:'crew.<type>', from, type, payload, ts, nonce,
+  v:{major,minor}}` — now requirable without the network stack:
+  `makeEnvelope/validateEnvelope/versionGate/signEnvelope/
+  verifyEnvelope/setReceiverVersion`. Crew-bus delegates `_validVersion`
+  and `_setReceiverVersion` to it (single home; the pass-61 staging seam
+  byte-identical; the unstamped-v1.0 sender tolerance preserved).
+  Gate detail: a well-shaped `{major:0,x}` remains shape-valid but
+  reports `past-major` (loud refuse) — matching the pass-61 receiver
+  contract, while staging still throws on major<1.
+- Pinned by `test/messaging-envelope.test.js` (32 pins): shape
+  contract, version-gate matrix (garbage/unstamped/both-major-
+  directions/minor-additive), sign/verify vs Encrypt on the same bytes,
+  crew-bus parity (staging moves one object both layers read), and
+  integration legs — a msg conversation snapshot and a stream work row
+  both ride the envelope and round-trip with **zero semantic loss**
+  (task object survives verbatim; the snapshot still merges).
+- Consumer suites re-run green: crew-bus 20, stream, agents, forum,
+  webhooks, msg, msg-sync 9, forum-msg-escrow, node-crew 9,
+  grand-tour 18.
+
+### Refactored - storage.js Split (pass 181, prd-canonicalization Wave D)
+- The 2,391-line, 8-class monolith `lib/storage.js` is split into
+  `lib/storage/` per-class files (`file`, `brain`, `vector`, `state`,
+  `config`, `schema`, `island`, `remote`) with the security plumbing
+  (sandbox/VAF/gates, metrics, events, WAL wiring, atomic write)
+  single-sourced in `lib/storage/shared.js`.
+- **`lib/storage.js` REMAINS THE IMPORT SURFACE** as the factory facade
+  (2,391 → 275 lines): every existing `require('./storage')` consumer
+  keeps its exact shape — `get(type)`, safe-by-default shortcuts
+  (read/write/delete/has/list), the 0.8.6 raw bypass, used classes,
+  `Wal`, `atomicWrite`/`atomicWriteFile`, metrics, multibrain stack
+  helpers. **Zero consumer churn.**
+- Ownership matrix landed in `labs/prd-canonicalization.md` appendix
+  (every data kind → canonical store → backup/WAL/mirror/API).
+- Structural gate updated for the split: the atomic-writes structural
+  pin now whitelists the relocated single temp-writer in
+  `lib/storage/shared.js` (the same one write, new canonical home).
+- Suites green: storage 40, brain-strict 14, remote 13,
+  storage-metrics 8, storage-mirror 10, wal 14, state-persistence 8,
+  atomic-writes 13, grand-tour 18, missing-modules 41, canvas,
+  test-storage 14.
+
+### Refactored - One Hashing Module (pass 180, prd-canonicalization Wave C)
+- New canonical surface `lib/hash.js`: `sha256(input)` (one-shot hex),
+  `sha256H()` (incremental `Hasher` with the exact update()/digest()
+  shape the migrated call sites used), `crc32(buf)` (unsigned, via core
+  `zlib.crc32` — the stego PNG checksum's core call, made importable),
+  `canonicalBytes(value)` (the #146 state/canonical encoder), `hash()`
+  and default `hmac()`. No new algorithms — delegates to core
+  crypto/zlib.
+- Every direct `crypto.createHash('sha256')` call site in `lib/` now
+  routes through it: audit (entry chain), wal (blob spam digests), vaf
+  (hashIP), encrypt (sha256 + hybridRandom seed mix), s3 connector
+  (SigV4 hex), habitat (token hash), storage (_hashToVector), and the
+  full state/geometry spine (tree roots/scopes/snapshots, canonical,
+  checkpoint ids, seeds universe/scope/int/child, spine cellAddress,
+  raid shardHash, lattice-keys). Digests are **byte-identical** to the
+  outgoing impls (same `update()` call shape preserved by the Hasher
+  shim) — pinned, not assumed.
+- Pinned by `test/hash-canon.test.js` (29 pins): byte-identity vectors
+  vs direct crypto, `hash() === canonical.hash()`, golden vectors for
+  the migrated contracts, `crc32 === zlib.crc32`, a fail-closed
+  non-Buffer rejection, and a **grep gate** proving no lib module calls
+  `crypto.createHash('sha256')` outside `lib/hash.js`.
+- Migrated suites re-run green: audit, wal, state-wiring,
+  engine-parity-spine, backbone, encrypt, vaf, geometry-engine,
+  habitat-token, mesh-status, stego ×2, state-persistence.
+
+### Added - Event Bus Observability + Wiring (pass 179, prd-canonicalization Wave A)
+- The shared bus emitted 266 distinct event names with only 8 heard
+  anywhere. New: opt-in JSONL session sink in `lib/event.js`
+  (`event.sinkEnable/Tail/Stats`, OFF by default, ring-bounded, never
+  breaks emission), `vant events` CLI (tail/enable/disable/stats,
+  cross-process read of the most recent session), and MCP tools
+  `event_tail` / `event_sink_enable` / `event_sink_stats`.
+- `lib/event-wiring.js` (wired at boot): security denials
+  (`vaf:blocked`, `rls:denied`, `trust:blocked`, `market:blocked`),
+  `storage:error`, stego and secret lifecycle events → the hash-chained
+  audit ledger (audit.log — the warn/info/error family is console-only);
+  `sync:push/pull:failed` → surfaced in `vant health` as the `sync`
+  check. Pinned by `test/event-observability.test.js` (40 pins).
+- FIXED (pre-existing): `lib/health.js runChecks()` crashed on every
+  call with `ReferenceError: _checkRead` (the sandbox read gate helper
+  was removed in an earlier refactor; the call site survived). Restored
+  with the stego/sandbox `_checkRead` shape.
+
+### Added - Config Env Registry (pass 179, Wave B)
+- `lib/config.js` now owns a 24-entry `ENV_REGISTRY` of every `VANT_*`
+  env var the codebase consumes (server/mcp/webhook/health/runtime),
+  with `envRegistry()`, `listEnvConfig({maskSecrets,includeUnset})`
+  (typed coercion, masked secrets), and `unknownEnvVars()` (typo scan).
+  `vant config list env` prints the resolved registry view.
+- Straggler modules migrated off direct `process.env` reads:
+  webhooks (port/bind/secret/url), health (port), via new config
+  getters `webhookPort/Bind/Secret/Url`, `healthPort/Bind`,
+  `agentsMax`. Health gains the `config-env` check flagging set
+  VANT_* vars the registry does not know. Pinned by
+  `test/config-registry.test.js` (23 pins).
+
 ### Fixed - Cross-Brain Privilege Leak via Boot Hydrate (axolotl pass 123)
 - Boot's persisted operator-capability hydrate resolved the brain via
   `brain.getCurrentBrain()`, which ignores `VANT_BRAIN` — a VANT_BRAIN-scoped

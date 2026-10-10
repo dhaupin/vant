@@ -61,9 +61,9 @@ async function main() {
     const SCOPE = { owner: 'team:' + team.id, visibility: 'scope' };
 
     await test('setup: scoped + unscoped ledgers exist; members registered', async () => {
-        const v = await consensus.create('rs-scoped', { options: ['a', 'b'], quorum: 2, scope: SCOPE });
+        const v = await consensus.create('rs-scoped', { ballot: ['a', 'b'], quorum: 2, scope: SCOPE });
         assert(!v.error, 'scoped create failed: ' + JSON.stringify(v).slice(0, 120));
-        const u = await consensus.create('rs-open', { options: ['a', 'b'], quorum: 2 });
+        const u = await consensus.create('rs-open', { ballot: ['a', 'b'], quorum: 2 });
         assert(!u.error, 'unscoped create failed: ' + JSON.stringify(u).slice(0, 120));
     });
 

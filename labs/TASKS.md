@@ -1,8 +1,953 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-10-08  
-**Session:** Pass 155 — version standardization: EVERYTHING is 0.8.6 (owner call)
+**Last Updated:** 2026-10-09  
+**Session:** Pass 177 — §3 debt closed: state-store anchors root hashes per persist
+
+---
+
+## Session (2026-10-09 — pass 177: state-store → StateAnchor, §3 debt closed)
+
+**What shipped** (owner: "What's left in wiring? … yeah we can do §3 debt:
+state-store could still anchor root hashes per persist"):
+
+- **STATE-STORE → STATE-ANCHOR (§3 DEBT CLOSED):** every tree-tier
+  persist/persistMerged now ANCHORS the root hash into the brain's
+  per-file StateAnchor ledger (#152): `models/private/<brain>/
+  .state-anchor.jsonl`, carrier = the state file, cause = the persist
+  path (persist:<module> / persistMerged:<module>). A state write that
+  bypassed the choke point (direct tampering, partial write) is now
+  DETECTABLE against the last known-good root — not just against an
+  in-process mirror that dies with the process.
+- **Dedupe:** unchanged roots are NOT re-anchored — in-process cache
+  first, then a ledger check for the fresh-process case. The chain is
+  an event history, not a heartbeat log.
+- **New surface:** `stateStore.anchorStateRoot(file, root, cause)`,
+  `stateStore.verifyStateRoot(file)` (typed verdict: ABSENT /
+  PRESENT-anchored ok|diverged / PRESENT-unanchored),
+  `stateStore.lastAnchorFor(file)`. New event: `state:anchored`.
+- **Hydrate deliberately does NOT anchor:** a restart must not re-bless
+  whatever happens to be on disk — otherwise the tripwire launders its
+  own divergences. Pinned.
+- **Bug fix (pass 176 leftover):** BrainVerifier.verify() returned
+  `lastAnchored` as a bare hex STRING while bin/horcrux.js read entry
+  fields off it (`v.lastAnchored.timestamp`) — "Invalid time value"
+  on every SUCCESSFUL `vant horcrux verify`. Contract unified: all
+  three verifiers (StateAnchor / BrainVerifier / verifyStateRoot) now
+  return the anchor ENTRY. Caught by hand-running the CLI after the
+  suite, not by the suite — the exit-code pin only checked codes, and
+  exit 0 masked the stdout crash. Pin note for the future: assert on
+  the success-path OUTPUT too when the contract is a printout.
+
+**Pin suite:** `test/state-wiring.test.js` extended with STATE-STORE →
+ANCHOR (5): ledger append per persist, in-process + ledger dedupe,
+tamper detection, no-tree/hydrate-never-anchors, persistMerged path.
+**51/51**, stable across consecutive runs (ledger is append-only and
+shared across runs — assertions use per-carrier deltas + unique fresh
+file names, not absolute counts).
+
+**Next:** #122–#144 husks; hotset/fold/precision ORPHANs await
+consumers; per-brain `universeSeed` config still has no writer (by
+resolved #158 design).
+
+---
+
+## Session (2026-10-08 — pass 176: geometry → encoder, mesh → events, brain-verify → surfaces)
+
+**What shipped** (owner: "quasicrystal.js storage still has its own
+hashing... MeshTree mutations still don't emit bus events... Next payoff
+step: BrainVerifier onto vant health + horcrux CLI"):
+
+- **QUASICRYSTAL → CANONICAL ENCODER (step ⑤ COMPLETE):**
+  `generateBarcodeFromContent` rides the #146 canonical encoder — same
+  logical content → same barcode regardless of key order/process. The
+  LAST un-spined hash chain in the repo is retired; the #165 thesis
+  ("no second hash chain") is complete. Storage stays self-
+  authenticating (recovery recomputes from the barcode, never content),
+  so existing records stay reachable; only new barcode generation
+  changed.
+- **MESH → BUS EVENTS (open-debt closure):** every MeshTree mutation
+  emits — `mesh:register/heartbeat/aoi/write/write:rejected/recovered`
+  — with actor + epoch provenance on each. `{ silent: true }` keeps
+  probe trees side-effect-free; mesh-status passes it (a status probe
+  is never a side effect).
+- **BRAIN-VERIFY → SURFACES (step ⑥ COMPLETE):** `vant health` gains a
+  🧬 Brain integrity section (recomputes the content root, verifies
+  against the last anchor, auto-baselines fresh brains, never fails
+  health over a probe error). `vant horcrux verify` / `vant horcrux
+  anchor` expose the CI-safe exit-code contract (0 verified / 1
+  diverged / 2 no anchor yet).
+
+**Bugs the new pins caught (fixed at the cause):**
+
+- **Cross-brain anchor contamination:** the anchor ledger resolved via
+  `lock.pathFor` against the ACTIVE process brain — verifying brain X
+  while running as brain Y compared X's root against Y's anchors. The
+  ledger is now PER-BRAIN (`<brainDir>/.brain-anchor.jsonl`, inside the
+  tree it defends; a state ledger, not a lock — lock-audit untouched).
+- **Tripwire cried wolf:** the brain root covered `state/` (protocol
+  state mutating on every persist), so an active brain diverged within
+  minutes. `state/` is excluded — protocol state has its own tree-tier
+  integrity story (rootHash on every event, WAL writes); the #166 tier
+  now defends brain CONTENT (identity/lessons/learnings), which should
+  never move without intent.
+- **Syntax slip:** a doubled constructor brace in mesh.js (my own edit)
+  — caught by the first pin run.
+
+**Pin suite:** `test/state-wiring.test.js` extended with MESH →
+EVENTS (3), GEOMETRY → SPINE (2), BRAIN-VERIFY → SURFACES (2, incl. a
+real CLI subprocess pin of the horcrux exit-code contract). **46/46.**
+
+**Verification:** state-wiring 46/46; engine-parity-spine 70/70;
+mesh-status 7/7; backbone-wiring 11/11; atomic-writes 13/13;
+no-legacy-bloat 13/13; geometry-engine 1/1; state-persistence 8/8;
+tombstones 2/2; reap-crossprocess 6/6; audit-locks gate PASS.
+
+**Next:** #122–#144 husks; state-store root-hash anchoring per persist → DONE pass 177 (see top session)
+(the remaining §3 debt); optional: emit tree-tier rootHash on mesh
+persistence events too.
+
+---
+
+## Session (2026-10-08 — pass 175: mesh → WAL + geometry → spine/cellstore)
+
+**What shipped** (owner: "MeshTree is still in-memory — mesh deltas →
+checkpoint/WAL is the next payoff step... And keep moving through wiring
+the other stuff"):
+
+- **MESH → CHECKPOINT/WAL (payoff step ④):** `MeshTree` gains opt-in
+  `{ dir }` persistence — every delta (register, heartbeat, aoi
+  subscribe, accepted AND rejected writes) rides the #151 SnapshottedLog:
+  append-only wal.log + content-addressed snapshots every N records,
+  bounded history, bounded recovery (latest snapshot + replay after it).
+  In-memory remains the DEFAULT (zero side effects for probes/tests).
+  A fresh MeshTree over the same dir reconstructs the same root hash —
+  same-mesh-across-restarts is one string comparison. Rejected writes
+  are DURABLE now: the gaslight-proof record survives a crash. #163
+  honored (unreadable log = DENIED, never silently empty).
+- **DELTA → MESH (#161 wired):** every mesh delta is provenance-stamped
+  through DeltaLedger; `DeltaLedger` gained an injectable per-record
+  clock + epoch override so replay determinism holds (two ledgers that
+  saw the same events under the same clock agree on one ledgerHash).
+- **GEOMETRY → PRF (payoff step ⑤, half):** `fragmenter.deriveLatticeKeys`
+  now delegates to `lattice-keys.deriveShardKeys` — the LAST live
+  Math.imul chain in the repo is retired (#155). The live consumer
+  (lib/adapters/github-fragmenter.js → GitHub dead-drop) gets PRF keys
+  with zero API change. Legacy imul survives only as the tested shim.
+- **RAID → CELLSTORE (#150 wired):** `raid.fragment({ cellStore })`
+  claims every shard cell under the spine's ONE `/raid/<doc>` space
+  (AddressingSpine + the ONE PRF, per-shard index). Identical shard
+  content across documents stores ONCE — the #150 rebate fires and is
+  MEASURED via savings_ratio, not assumed.
+
+**Pin suites:**
+
+- `test/state-wiring.test.js` extended with a MESH → CHECKPOINT/WAL
+  section (6 new pins): in-memory default unchanged, wal.log + snapshot
+  files created, same-root-hash recovery across a fresh instance,
+  rejected writes survive restart, #161 provenance on every delta with
+  deterministic ledgerHash, interval snapshot fast-forwards bounded
+  recovery. **39/39.**
+- `test/engine-parity-spine.test.js` extended with 4 geometry pins
+  (#155 fragmenter + adapter on the PRF, #150 RAID cell claims + rebate
+  measured, #165 per-shard PRF addressing). **70/70.**
+
+**Verification:** state-wiring 39/39; engine-parity-spine 70/70;
+atomic-writes 13/13 (structural gates over the edited fragmenter);
+mesh-status 7/7; backbone-wiring 11/11; no-legacy-bloat 13/13;
+geometry-engine 1/1; state-persistence 8/8;
+state-store-tombstones 2/2; consensus-reap-crossprocess 6/6.
+
+**Mid-pass catches (fixed, not suppressed):** the delta ledger's default
+wall-clock epoch made ledgerHash non-deterministic across replay (pin
+catch #1) and re-reading the shared fixed clock double-advanced it (pin
+catch #2) — fixed with DeltaLedger's injectable clock + event-epoch
+override, assertions untouched.
+
+**Next:** quasicrystal.js storage onto the spine/cellstore (the last
+bespoke geometry hash); BrainVerifier onto `vant health` + horcrux CLI;
+#122–#144 husks.
+
+---
+
+## Session (2026-10-08 — pass 174: consensus + market → tree tier)
+
+**What shipped** (owner: "let's keep going"):
+
+- **CONSENSUS → TREE (third live consumer, step ③):** vote ledgers +
+  reap tombstones mirror into one StateTree on hydrate and every
+  merged persist; rootHash rides state:saved + audit. Cross-process
+  "same vote ledgers?" is one string comparison — the vote-verification
+  story now has a hash, not just a file.
+- **MARKET → TREE (fourth live consumer, step ③):** listings / bids /
+  trades mirror the same way; the scarcity/trade state gets the same
+  cross-process same-state answer. clearState drops the mirror +
+  search index.
+- Together with trust (172) and node-registry (173), the entire
+  protocol-state layer is now on the tree tier. WIRING.md payoff step
+  ①–③ complete; remaining order: mesh deltas → checkpoint/WAL,
+  geometry → spine/cellstore, BrainVerifier onto health/horcrux.
+
+**Pin suite:** `test/state-wiring.test.js` extended with a
+CONSENSUS + MARKET → TREE section (6 new pins): create/list mirror
+through persistMerged with rootHash on the event, ledger/listing present
+in the mirrored tree, disk view === live mirror for both (async lock
+handshake flushed), clearState resets incl. tombstone maps. 33/33.
+
+**Verification:** state-wiring 33/33; consensus, market, trust,
+state-persistence 8/8, state-store-crossprocess 5/5,
+state-store-tombstones 2/2, backbone-wiring 11/11, mesh-status 7/7,
+agora-sync, engine-parity-spine 66/66; audit-locks gate PASS.
+
+**Next:** mesh deltas → checkpoint/WAL (MeshTree crash-safe); geometry
+→ spine/cellstore; BrainVerifier onto `vant health` + horcrux CLI;
+#122–#144 husks.
+
+---
+
+## Session (2026-10-08 — pass 173: node-registry → tree tier)
+
+**What shipped** (owner: "let's keep wiring pls"):
+
+- **STATE-STORE: persistMerged gains `tree` support** — the merged
+  snapshot mirrors into the caller's StateTree INSIDE the lock, root
+  hash rides `state:saved` + audit, same contract as `persist()`. One
+  wiring shape across both write paths.
+- **NODE-REGISTRY → TREE (second live consumer, step ②):** the peer
+  table (consensus's vote-verification anchor) mirrors into one
+  StateTree on hydrate and on every merged persist. Cross-process
+  "same peer table?" is one string comparison. New seams:
+  `_treeRoot()`, `_stateTree()`; `clearState` drops the mirror while
+  preserving the pass-98 tombstone semantics.
+
+**Pin suite:** `test/state-wiring.test.js` extended with a
+NODE-REGISTRY → TREE section (4 new pins): register mirrors through
+persistMerged with rootHash on the event, heartbeat moves the root,
+disk view === live mirror, clearState resets + tombstones hold. 27/27.
+
+**Verification:** state-wiring 27/27; trust, state-persistence 8/8,
+state-store-crossprocess 5/5, state-store-tombstones 2/2,
+backbone-wiring 11/11, mesh-status 7/7, engine-parity-spine 66/66;
+audit-locks gate PASS.
+
+**Next:** consensus/market onto the tree tier; mesh deltas →
+checkpoint/WAL; geometry → spine/cellstore; BrainVerifier onto
+`vant health` + horcrux CLI; #122–#144 husks.
+
+---
+
+## Session (2026-10-08 — pass 172: trust → tree tier)
+
+**What shipped** (owner: "we Def want shared universe seeds" + "let's
+start wiring first consumers pls"):
+
+- **#158 UNIVERSE DECISION RESOLVED:** fixed default stands (mesh is the
+  whole point — cross-install determinism IS the feature);
+  `VANT_UNIVERSE_SEED` is the sharding lever; per-brain `universeSeed`
+  stays the durable override. Marked RESOLVED in labs/WIRING.md §3 + §6.
+  Nothing depreciates: all content-addressed layers (factHash, tree
+  roots, delta ledgerHash, authority hashes) are universe-independent;
+  only PRF-derived addressing (region seedScope, cell addresses) moves
+  with the constant, and the default never moves.
+- **TRUST → TREE (first live consumer, WIRING.md step ① done):**
+  `lib/trust.js` hydrates + persists through the state-store tree tier —
+  the ledger mirrors into one StateTree; the root hash rides the
+  `state:saved`/`state:hydrated` events and the audit entry, so
+  cross-process "same trust ledger?" is one string comparison.
+  Content lives where it always did (`state/trust.json`); the tree is a
+  mirror, not a second source of truth. New seams: `_treeRoot()`,
+  `_stateTree()`; `clearState` drops the mirror (no hash for state that
+  no longer exists).
+- **Search hygiene:** `package-lock.json` added to `.ignore` — it was
+  clogging every broad ripgrep with dependency-metadata noise.
+
+**Pin suite:** `test/state-wiring.test.js` extended with a TRUST → TREE
+section (5 new pins): mirror populates on record, root moves on mutate,
+disk view (treeFor) === live mirror root, rootHash rides state:saved,
+clearState resets. 23/23.
+
+**Verification:** state-wiring 23/23; trust 8/8; state-persistence
+8/8; state-store-crossprocess 5/5; state-store-tombstones 2/2;
+backbone-wiring 11/11; mesh-status 7/7; engine-parity-spine 66/66;
+audit-locks gate PASS.
+
+**Next:** node-registry → tree tier (step ②), then consensus/market;
+mesh deltas → checkpoint/WAL; geometry → spine/cellstore; BrainVerifier
+onto `vant health` + horcrux CLI; #122–#144 husks.
+
+---
+
+## Session (2026-10-08 — pass 171: consumer wiring)
+
+**What shipped** (owner: "let's finish out everything. Nothing is off
+limits" + "assemble a list of shit to wire back up"):
+
+- **SEEDS → MESH (#158 → mesh):** `MeshTree` now owns an
+  `AddressingSpine` (#165) by default — region identity (`seedScope`),
+  cell addressing (`cellAddress`), and writer authority all ride the ONE
+  seed chain and the ONE canonical encoder. `VANT_UNIVERSE_SEED` env (or
+  per-brain `universeSeed` config, or explicit universe) now actually
+  shards mesh addressing; the ad-hoc `node + '|' + JSON.stringify` hash
+  chain is retired.
+- **STATE-STORE → TREE (opt-in tier):** `toTree`/`fromTree`/`treeFor`
+  plus `tree` options on `persist`/`hydrate`. Root hashes ride the
+  `state:saved`/`state:hydrated` events and the audit entries. Metadata
+  excluded; roundtrip law pinned.
+- **MESH-STATUS → MESHTREE:** new `mesh` section — registry peers
+  projected onto tree paths, presence as the pure TTL read (#164), the
+  region's seed scope visible (proof the env flows). Read-only,
+  degraded-not-dead, JSON-safe.
+- **labs/WIRING.md:** the wiring-debt ledger — every state/seed/errors/
+  events/audit/WAL surface marked WIRED / OPT-IN / ORPHAN / GAP, plus
+  "where the spine got large" (6 of 13 state modules + 4 of 12 geometry
+  modules are orphans) and the highest-payoff wiring order.
+
+**Pin suite:** `test/state-wiring.test.js` — 18 assertions, one per
+acceptance criterion. 18/18.
+
+**Gate teeth:** the pass-169 raw-throw gate caught a `throw new Error`
+in the new mesh-status section within one run — converted to coded
+VantError (INPUT_VALIDATION_FAILED).
+
+**Verification:** state-wiring 18/18; engine-parity-spine 66/66;
+mesh-status 7/7; backbone-wiring 11/11; state-store-crossprocess 5/5;
+state-store-tombstones 2/2; state-persistence 8/8; horcrux-orgchart,
+lock-failclosed, save-refusal-parity all exit 0; audit-locks gate PASS.
+
+**Next:** wire a real consumer onto the tree tier (trust or
+node-registry); mesh deltas → checkpoint/WAL; geometry → spine/cellstore;
+BrainVerifier onto `vant health` + horcrux CLI; #122–#144 husks. The
+#158 universe decision (fixed default vs per-install seed) is still the
+owner's call — recommendation in labs/WIRING.md §6.
+
+---
+
+## Session (2026-10-08 — pass 170: engine-parity spine, issues #145–#166)
+
+**What shipped:** the world-frame crew's 22-issue series implemented as
+Vant-native modules (thesis adapted, not imported). All six quadrants:
+
+- STATE CORE: `lib/state/canonical.js` (#146 encoder + decode-able wire
+  format), `lib/state/tree.js` (#145 one root hash; #147 diff/snapshot/
+  apply with scope-root verification; #148 coarse scopes, defaults 'main')
+- STORAGE: `lib/state/fold.js` (#149 4-ary capacity law, overflow refused),
+  `cellstore.js` (#150 rebate + savings_ratio), `checkpoint.js` (#151
+  snapshots-as-checkpoints, fast-forward recovery, bounded history),
+  `anchor.js` (#152 root-hash anchors), `hotset.js` (#153 LRU, eviction
+  never touches durability)
+- GEOMETRY: `lib/geometry/fold.js` (#154 1:4 + 24-bit budget),
+  `lattice-keys.js` (#155 sha256 PRF; imul chain demoted to tested shim),
+  `raid.js` (#156 manifest-as-data + XOR parity + recover(); tamper
+  reported), `precision.js` (#157 contract table + quantizer + parity
+  harness)
+- WORLD/CLOCK: `lib/state/seeds.js` (#158 SeedChain, prefix folding),
+  `orbits.js` (#159 pure closed-form orbits; #160 PHASE-based windows —
+  the distance-bug class pinned dead by a synodic-oscillation test),
+  `delta.js` (#161 {payload, actor, epoch}; erasure is an auditable record)
+- TARGETED: `lib/persistent-grants.js` (#162 durable grant tier wired into
+  sandbox can() fail-closed; grantor mandatory; revocation honored),
+  `lib/wal.js` (#163 DENIED ≠ empty journal)
+- MESH/BRAINS: `lib/state/mesh.js` (#164 tree-path identity, timerless
+  presence TTL, AOI delivery, deterministic authority + recorded losers),
+  `spine.js` (#165 one addressing spine — fact-shared-once primitive),
+  `brain-verify.js` (#166 root anchors + verifiable horcrux + corruption
+  detection pre-context)
+
+**Pin suite:** `test/engine-parity-spine.test.js` — 66 assertions, one per
+acceptance criterion. 66/66.
+
+**CI lessons (both caught by existing gates — they have teeth):**
+1. atomic-writes structural gate flagged raw writeFileSync in checkpoint.js
+   → routed through primitives.atomicWriteFile.
+2. audit-locks gate flagged the hand-built .locks path in brain-verify.js
+   → lock.pathFor('brain-anchor','ledger') (one lock-path authority).
+
+**Known pre-existing local failures (NOT this pass):** audit-ledger-cli and
+epipe-guard fail identically on a clean tree in this workspace (dirty
+models/ ledger). CI green on 9cd116d.
+
+**Next:** wire consumers (state-store → tree as opt-in tier; horcrux →
+brain-verify; mesh-status → MeshTree); close the #122–#144 husks; the
+seeded-universe constant needs a user decision (VANT_UNIVERSE_SEED).
+
+---
+
+## Session (2026-10-08 — pass 169: backbone wiring sweep)
+
+Owner: "You nailed it, let's hook em all up!" — the four-quadrant
+unification from the coverage audit:
+
+ERRORS (108 → 0 raw throws in lib/): every `throw new Error` is now a
+coded VantError. Code mapping: bus-required → INPUT_VALIDATION_FAILED;
+provider stubs (pinecone base, selfhosted issues/PRs, avatar endpoints)
+→ NEW code NOT_IMPLEMENTED; s3 client errors → VAF_INPUT_INVALID /
+CONFIG_MISSING / API_RESPONSE_ERROR / CAPABILITY_DENIED /
+SECURITY_PATH_TRAVERSAL / NETWORK_TIMEOUT (retryable); hermes → the
+correct gate code per leg (SANDBOX_EXEC_DENIED, ESCROW_DENIED,
+RATE_LIMIT_EXCEEDED, REMOTE_DISCONNECTED...); settlement/teams/transform
+validation → VAF_INPUT_INVALID; quasicrystal ECAP → STORAGE_*_DENIED.
+Behavior-compatible: VantError extends Error, messages preserved.
+The pin suite holds a REGRESSION GATE: zero raw throws in lib/.
+
+EVENTS (silent modules wired): state-store (state:saved/hydrated/cleared),
+wal (wal:intent/done/replayed), sidecar (sidecar:spawning/ready/eval/
+stopped), lock (lock:acquired/released), genesis (created/joined/admitted/
+accepted), migrations (migration:applied), metrics (metric:inc),
+horcrux-safe (horcrux:safe-write), habitat (habitat:provisioned).
+HONEST CORRECTIONS: agents was never silent (lib/agents/core.js already
+emits agent:spawned — the facade masked it from the top-level-only grep);
+bus-family modules covered via state-store choke point; util modules
+(docs/anchor/scope/zen/gate/audit-report) deliberately silent — no
+lifecycle to broadcast, noise would be worse.
+
+AUDIT (choke-point design): state-store is the ONE write path for
+protocol state (prd-vant-os Arch A), so audit lives there (state:persist /
+state:clear ledger entries) — covers teams/agents/consensus/market/
+settlement/org-sync/notices in one wiring. External I/O audits at the
+connector: s3 put/delete (key only, never body/credentials), hermes sync.
+
+WAL UNIFIED: discovery — FileStorage already integrates lib/wal.js but
+OPT-IN (options.wal or VANT_WAL=1). Protocol state is the exact data
+class WAL was built for: state-store now opts IN at getStore() — every
+protocol-state write is journaled by default, no env flag. Other
+FileStorage users stay opt-in.
+
+Files: lib/error.js (+NOT_IMPLEMENTED), 30 modules converted, state-store
+(events+audit+wal), wal/sidecar/lock/genesis/migrations/metrics/
+horcrux-safe/habitat (events), s3/hermes (audit). Pin:
+test/backbone-wiring.test.js 11/11 incl. the raw-throw regression gate.
+
+Verification: backbone pins 11/11; focused sweeps 14/14 + 24/24
+(state/agents/teams/habitat/storage/boot/brain/vant/mcp suites all green
+— the error conversions are behavior-compatible); eslint 0 errors; claim
+signatures PASS (859 files).
+
+THREE CI-CAUGHT REPAIRS (each its own commit, all closed on ada82f7 ✅):
+1. LOCK TOCTOU (real latent bug my events merely timing-exposed):
+   stale-takeover did unlinkSync-then-open — a racer could unlink a
+   SUCCESSOR's fresh lock planted between lstat and unlink → two writers
+   inside the mutex (CI live-fire gate A, deterministic class). Fixed via
+   renameSync-to-graveyard (fails ENOENT if peer replaced it; peer's wx
+   sees EEXIST). 10 single-core live-fire runs green after.
+2. julia.run timeout: fixed 30s was under CI's cold-JIT floor — now
+   options.runTimeout, 60s default.
+3. primitives require-cycle: my backbone edit added require('./error')
+   to the ZERO-VANT-REQUIRES bootstrap module; primitives-loading-first
+   broke error.js's compat re-exports (primitives.test caught it).
+   Reverted; the one bootstrap-window plain-Error throw is a DOCUMENTED
+   exception in the backbone regression gate (not hidden).
+
+Next: the state+seed engine (pass-168/169 substrate is ready for it);
+Cairn's issue triage when it lands; catch-block classifier (520 blocks,
+intentional-vs-lossy) as its own pass.
+
+---
+
+## Session (2026-10-08 — pass 168: rust bridge, geometry sidecar switch, connector sweep)
+
+Owner: "Let's do the rust bridge and the geometry sidecar switch next.
+Also migrate any other Lang connectors to sidecar if needed. Let's look
+at them all."
+
+RUST BRIDGE LIVE (1.99.0 via rustup, no-root, ~/.cargo; srv crate in
+lib/connectors/rust-srv/): the sidecar runtime now handles COMPILED
+languages — buildSpec/buildCompiledSpec split, buildCompiledSrv does a
+cached `cargo build --release` (first start pays the build; later starts
+reuse the binary via mtime check), spawnTarget returns the spawn tuple.
+rust-srv speaks the IDENTICAL julia-srv wire contract (health/eval/stop,
+token-checked, escape-aware JSON scanner, loopback-only, zero crates).
+lib/connectors/rust.js = subprocess fallback (rustc single-file
+compile+run, tmp-crate, honest compile errors). Compute discovery now
+tolerates BOTH export shapes (singleton vs named class) — rust.js was
+breaking `connector.eval is not a function`.
+
+LIVE PINS: test/rust-sidecar-live.test.js 5/5 (build+spawn+health, live
+eval, connector round-trip, amortization warm 71ms/call, clean /stop);
+honest SKIP without rustc. Direct curl smoke confirmed bad-token 405,
+compile errors surfaced in stderr.
+
+GEOMETRY ON THE SIDECAR (lib/geometry/engine.js): every Julia path now
+evals through compute mode 'auto' (one persistent sidecar, JIT once).
+TWO BROKEN MATH PATHS FIXED: goldenRatio emitted invalid Julia
+(`using .Base.Math常数` — always threw, silently degrading to float64)
+AND setprecision takes BITS not digits (pin-caught: 50-digit pin
+returned ~20 digits until bits = ceil(digits*3.322)+16). matrixMultiply's
+Julia path printed C then RETURNED A UNMODIFIED ("Simplified") — now
+parses the real product. Warm ops measured 3.6ms (subprocess model:
+2-30s per call). Pinned: test/geometry-engine.test.js 6/6 with julia,
+honest node-fallback pins without.
+
+CONNECTOR SWEEP (all language connectors exercised): python.eval +
+invoke(math.sqrt) OK; node VM eval OK; rust delegation OK. THREE MORE
+ROT BUGS CAUGHT AND FIXED: python/ruby/php run() passed an ARRAY
+([scriptPath]) into execute() as codeOrFile → `python3 -c ['/x.py']`
+SyntaxError — file mode NEVER worked (now direct script-mode spawn);
+julia.run() returned the raw child handle without awaiting output
+({ proc }) — now the standard result shape. ruby/go/php absent-here
+failures verified honest-and-fast (ENOENT in ms, no hang).
+
+Files: lib/sidecar.js (compiled-lang support), lib/connectors/rust-srv/
+(Cargo.toml + src/main.rs), lib/connectors/rust.js, lib/compute.js
+(discovery normalization), lib/geometry/engine.js (sidecar + 3 math
+fixes), lib/connectors/{python,ruby,php,julia}.js (run() fixes),
+test/{rust-sidecar-live,geometry-engine,connector-run}.test.js.
+
+Verification: focused sweep 7/7 suites (sidecar, julia-live, rust-live,
+geometry-engine, connector-run, compute, connector), pins green BOTH
+with and without julia/rust on PATH, eslint 0 errors, fiction
+signatures PASS (858 files), syntax OK.
+
+Next: sidecar docs page (lib/sidecar.js contract + srv authoring guide);
+consider python-srv (numpy-heavy workloads would amortize similarly);
+LangChain adapter sidecar transform() still parity-seam only.
+
+---
+
+## Session (2026-10-08 — pass 167: live julia + health fix)
+
+Owner: "You can install Julia! Try it out!" + flagged another agent's
+claim that lib//bin health warnings are "cosmetic, outside-repo run".
+
+HEALTH CLAIM — VERIFIED HALF-TRUE, FIXED AT SOURCE: bin/health.js
+checkDirs used cwd-relative existsSync('lib'/'bin') — vant running
+from a foreign cwd (the design: dispatcher spawns in the caller's cwd)
+false-FAILED them. Mechanics of the claim correct, brain ops
+unaffected (anchor/brain-path resolve) — BUT a false FAIL in a
+diagnostic tool trains users to ignore red. FIXED: install dirs now
+resolve through lib/anchor.getRepoRoot() (that module's stated
+purpose) and report "ok (install root)"; models/brain stay
+cwd-relative (the user's project IS the brain home). Verified: health
+run FROM /tmp shows lib/ (install root) OK instead of FAIL.
+
+JULIA LIVE (1.10.4 installed from official tarball, no-root, /tmp):
+LIVE SMOKE 5/5 — spawn+health through lib/sidecar.js, real token-
+checked wire eval (JULIA-LIVE: 4), SidecarConnector round-trip (21),
+JIT amortization MEASURED: warm per-call average 1.3ms (subprocess
+model pays 2-30s JIT per call — 3+ orders of magnitude), clean /stop
+exit 0.
+
+julia-srv.jl TRUTH-UPS (all caught by the live smoke, none by the
+wire fake): r'...' JS-style regex literals (Julia needs r"..." w/
+escaped quotes), missing `using Sockets` + getsockname port discovery,
+body read-to-EOF deadlock (client holds write side; must read exactly
+Content-Length), redirect idiom (redirect_stdout(f, IOBuffer) has no
+method → zero-arg capture-pair idiom w/ finally-restore), payload
+take! on a now-String var. LESSON: wire-fake pins pin the CONTRACT;
+the language runtime still needs a live smoke — both are now permanent
+(test/sidecar.test.js 8/8 protocol + test/julia-sidecar-live.test.js
+5/5, SKIPs when julia absent).
+
+GATES: claims (852f) + syntax PASS; health/sidecar suites green
+(sidecar 8/8 protocol; live 5/5 w/ julia, skip w/o).
+
+NEXT-UP: connectors/rust.js + rust-srv, geometry sidecar switch, or
+owner direction. Rides #118.
+
+---
+
+## Session (2026-10-08 — pass 166: polyglot sidecar bridge)
+
+Owner approved the hybrid design ("keep the existing connectors; both
+connectors AND adapters get sidecar abilities for parity" — the godot
+srv/redis/postgres model).
+
+SHIPPED:
+- lib/sidecar.js — SHARED sidecar runtime (spawn/health/eval/stop,
+  loopback-only, per-instance random token, srv prints SIDECAR_PORT
+  for OS-assigned ports). Deliberately shared by connectors AND
+  adapters (parity per owner).
+- lib/connectors/sidecar.js — SidecarConnector extends BaseConnector:
+  modes sidecar/auto/subprocess; auto = sidecar w/ subprocess fallback
+  (delegating to the language's OWN connector for cmd knowledge);
+  result shape identical either way.
+- lib/connectors/julia-srv.jl — stdlib-only Julia sidecar (token-
+  checked /health /eval /stop; loopback).
+- lib/adapters/sidecar.js — adapter-side parity seam (transform +
+  stopAll on the same runtime) for NEW heavy bridges; existing
+  in-process adapters untouched.
+- compute.js: opts.mode routing (sidecar/auto/subprocess), per-
+  (lang+mode) connector reuse (sidecar survives across evals — the
+  point), stopSidecars() export, header truth-up.
+
+PIN-CAUGHT BUGS (2 real, both would have shipped):
+1. spawnAndWait lacked proc.on('error') — spawn ENOENT (language not
+   installed) crashed the whole process instead of rejecting.
+2. BaseConnector.execute had the same gap for ALL subprocess
+   connectors. ALSO: fallback originally spawned bare getLang()
+   ('python' — ENOENT) instead of the language's real cmd (python3) —
+   fallback now delegates to the language's own connector module.
+   Third catch: gate wrapper in forum (pass 164) — pattern: pins keep
+   catching lifecycle/error-path bugs that happy-path tests miss.
+
+PINS: test/sidecar.test.js 8/8 (fake Node srv on the exact julia wire:
+spawn/health contract, evalOn shape, srv-failure surfacing, auto uses
+sidecar, auto falls back to subprocess, sidecar-mode honest failure,
+token enforcement, legacy compute path unchanged). Suites: compute,
+forum, escrow 0-fail. Gates: claims (851f) + syntax PASS. Sweep via CI.
+
+NOTE: julia not installed in this env — julia-srv.jl is pin-tested via
+the wire-contract fake; live julia smoke is an owner-side follow-up.
+
+NEXT-UP: connectors/rust.js + rust-srv (same contract), geometry
+switch to sidecar mode w/ fallback, or owner direction. Rides #118.
+
+---
+
+## Session (2026-10-08 — passes 163/164/165: lib-finish, forum wiring, bin walk)
+
+Owner: "if we fully walked /lib, hook up those 2 finds (forum msg +
+escrow); read all of /bin after."
+
+PASS 163 — /lib walk COMPLETE (batch 10, remaining 30 files):
+canvas paint→paintSpiral (Usage never matched impl/docs), skills
+'Skils' typo, succession Usage wrong names (getLevel/setLevel(3)/can
+→ getTrustLevel/setTrustLevel('high')/getFilesForTrust). All 96 lib
+files now audited: 21 corrections across 10 batches.
+
+PASS 164 — FORUM MSG+ESCROW WIRED (owner-approved, closes the
+pass-161 header overclaim at the source):
+- escrow: _escrowGate on publish(1)/vote(2)/castVote(1) — DEFAULT-
+  OPEN until escrow.setBudget configured (opt-in sovereignty; wiring
+  invisible out of the box). CRITICAL FIX found by the pin: gate's
+  try/catch originally wrapped the block-decision emit — an emit
+  failure fail-opened the block; restructured so only the emit is
+  best-effort. SECOND fix: escrow FRESH-PER-CHECK (the pass-79
+  fresh-instance-by-design note) — a cached singleton silently missed
+  persisted budgets and pin2 false-passed until fixed.
+- msg: publish notify — PRIMARY msg.send('forum', event) channel
+  shout (sandbox-free, works everywhere; consume via msg.on/
+  channelMessages) + BONUS per-thread conversation forum:<barcode>
+  (created idempotently; its msg.post stays sandbox-gated by design).
+- NEW PIN test/forum-msg-escrow.test.js 4/4: default-open, opt-in
+  bite, notify lands, poisoned-msg cannot fail a publish.
+- forum.js header updated: escrow+msg rows now say WIRED w/ contracts.
+
+PASS 165 — /bin WALKED (121 files): mechanical sweeps — 273 relative
+requires checked (only miss: bin/watch.js's dead ../lib/logger shim
+require → replaced with explicit shim + phantom-hygiene comment),
+version labels clean, fiction-gate clean, bin/framework.js verified
+honest compat shim (computeEval/embedText typeof checks real),
+bin-truthfulness gate PASS, CLI smoke (help/version) OK.
+
+GATES: docs/claims(849f,10sig)/dist/surface/helpers/locks + syntax
+PASS. Suites: forum x2, forum-msg-escrow 4/4, escrow 18, msg-sync 9,
+watch, canvas, skills, succession, org-sync, resolution, compute,
+consciousness, nature, docs, onboard, metrics all 0-fail. Sweep via CI.
+
+AUDIT GRAND TALLY: /lib 96/96 files walked (21 corrections), /bin 121
+files swept (1 fix + 2 phantom-require false-positives resolved), 5
+fiction signatures mechanized, 1 live-code bug fixed (stego), forum
+msg+escrow delivered with pins.
+
+NEXT-UP: merge PR #118, then: remaining test pins (geometry, backup
+round-trip), connectors/rust.js, or owner direction.
+
+---
+
+## Session (2026-10-08 — pass 162: comment audit batch 9)
+
+Owner: "let's hit batch 9!" + asked what wiring forum's claimed msg
+and escrow integrations would take.
+
+BATCH 9 (compute.js, consciousness.js, nature.js, anchor.js, docs.js,
+onboard.js, metrics.js) — 5 of 7 accurate, 2 fixed:
+
+FIXED - lib/compute.js header listed rust.js as a discovered language
+connector — connectors/rust.js does NOT exist. Discovery code is
+honest (allowlist includes 'rust' but the file is missing), so the
+HEADER was the fiction. Noted in-header: add the file when you add
+the name.
+
+FIXED - lib/onboard.js Usage taught onboard.getAll() — not exported
+(exports: getBrainFiles/getSystemFiles/getFileInfo/getOnboardSummary/
+getFile/search/getInstallStatus/getWakeBriefing/getFile/getAll never
+existed). Usage now teaches search() + getWakeBriefing() (real).
+
+VERIFIED ACCURATE: consciousness (whoAmI :67/intend :109 statics
+match), nature (conceptual header, honest metaphor), anchor.js
+(pass-23 design doc matches dispatcher behavior), docs.js
+(generateOpenAPI :155/generateMarkdown :202 real), metrics.js
+(prom-style registry, never-throws contract matches). compute's
+other 5 connectors (python/julia/node/ruby/go/php) all exist.
+
+NO dedicated anchor test (covered indirectly by fresh-dir-routing +
+genesis-ring). Suites: compute/consciousness/nature/docs/onboard/
+metrics all 0-fail. Gates: claims PASS, syntax OK. Sweep via CI.
+
+FORUM MSG/ESCROW WIRING SCOPED (owner question, not yet built):
+- msg: forum actions emit events but never call msg.post/send. Wire
+  = notify thread subscribers on new post/vote via msg.post(convId,
+  content) with a conv per thread (convId = forum:<thread>), pipeline-
+  backed (msg now runs the unified chain itself, 0.8.6). ~30-40 lines
+  in forum.js + subscriber bookkeeping in thread state.
+- escrow: budget-gate action rows (createPost/vote spend ops) via
+  escrow.canSpend(agentId, amount) before the action lands; amount
+  maps to engagement cost (e.g. vote=1 unit). Without budgets config'd
+  escrow defaults allow — safe rollout. ~15-20 lines + tests.
+Estimate: one focused pass. NOT built this pass (audit discipline:
+edit comments only) — waiting on owner go-ahead.
+
+AUDIT TALLY: 9 batches, 66 files, 16 corrections.
+
+NEXT-UP: forum msg/escrow wiring pass (owner go-ahead?), remaining
+lib sweep (embedders/, connectors/ git providers, branches/doc家族),
+or owner direction. Rides PR #118.
+
+---
+
+## Session (2026-10-08 — pass 161: comment audit batch 8)
+
+Owner: "let's continue on next batch 8 pls."
+
+BATCH 8 (agora-sync.js, forum.js, teams.js, governance.js, legal.js,
+lineage.js, context.js, crew-bus.js) — 7 of 8 accurate, 1 fixed:
+
+FIXED - lib/forum.js header INTEGRATION overclaims: "Security:
+Sandbox, escrow, governance checks" and "Msg: Agent-to-agent forum
+messages" — but forum.js requires/uses NEITHER escrow NOR msg (grep:
+zero non-header occurrences). Real surface: brain, islands (via
+vant.islands save/load), sandbox, governance, consensus, geometry,
+stream. Header rewritten with a "do not add claims without the
+require() to back them" guard note + explicit NOT-wired list. This
+is the mirror image of the cache.js find (pass 156): that taught a
+REMOVED API; this claimed NEVER-EXISTED integrations.
+
+VERIFIED ACCURATE: agora-sync.js (crew.state.request/crew.state
+dispatchers + consensus.mergeTopic real :176/:498), teams.js
+(createOrg :604/createDept :754/assign exported; header's await-on-
+sync is harmless JS style, not fiction), governance.js (decide :52),
+legal.js (DORMANT status real :42/:64 — honest dormancy claim),
+lineage.js (record :75/trace :119), context.js (OS-chain claims;
+embedders reference), crew-bus.js (configure :223/registerNode :252/
+listen :285/send :353 — signed-envelope design doc matches).
+
+GATES: claims PASS (846f/10sig), surface PASS, syntax OK. Suites:
+forum 2 suites 0-fail, teams-crossprocess 9, agora-distributed 6,
+governance/legal/lineage 0-fail, crew-bus 20, context n/a (no
+dedicated file). Full sweep via CI.
+
+AUDIT TALLY: 8 batches, 59 files, 14 corrections (3 fiction + 1 live
+bug, 6 staleness/overclaim, 3 Usage/signature drift, 2 version).
+
+NEXT-UP: batch 9 candidates (remaining lib/: compute.js,
+consciousness.js, market-adjacent, adapters/, embedders/, etc.),
+test pins (format.js, geometry, backup round-trip), or owner
+direction. Rides PR #118.
+
+---
+
+## Session (2026-10-08 — pass 160: comment audit batch 7)
+
+Owner: "let's do batch 7 pls."
+
+BATCH 7 (cron.js, prune.js, tmp.js, branch.js, health.js, api.js,
+audit.js, auth.js) — 7 of 8 headers accurate, 1 FICTION with a LIVE
+CODE bug riding on it:
+
+PHANTOM MODULE - lib/providers/ never existed, but 3 surfaces
+referenced it: (1) lib/branch.js:14 header claimed "Uses
+lib/providers/index.js for multi-git provider abstraction"; (2)
+docs/reference/storage.md:173 "Same pattern as lib/providers/"; (3)
+**bin/stego.js:156 — LIVE CODE**: `vant stego upload` did
+`require('../lib/providers')` → MODULE_NOT_FOUND on every run. The
+real registry is lib/remote.js (getProvider/detectProvider
+:217/:200; providers github/gitlab/bitbucket/gitea/selfhosted via
+lib/connectors/; updateAvatar API matches what stego expected).
+
+FIXED ALL THREE: stego require → '../lib/remote' (VERIFIED: `vant
+stego upload` now reaches its real arg validation — 'Image not
+found' instead of module error); branch.js header → lib/remote.js;
+storage.md cross-ref → lib/remote.js. Gate signature #10 added
+(/lib\/providers/) — third phantom module after framework.js and
+notifications.js; this one justified mechanizing immediately because
+it broke live code, not just docs.
+
+OTHER 7 VERIFIED ACCURATE: cron (schedule :116/run :191/JobWorker
+:35), prune (prune :181/getCore :336), tmp (4 spaces :352), health
+(start :58 + /health /health/ready /health/live :64-86), api
+(execute :225/hooks :199-207/getMode :133), audit (merged
+audit+audit-log+metrics real :136-234), auth (Auth class +
+validateApiKey :158/isOperationAllowed :308/getLayerStatus :290 +
+lockout real).
+
+GATES: claims PASS (846f/10sig), docs style/links/frontmatter PASS
+(118), syntax OK. Suites: branch 10, stego 12, audit-ledger-cli,
+auth, api, health, cron, prune all 0-fail, tmp 8. Full sweep via CI.
+
+AUDIT TALLY: 7 batches, 51 files, 13 corrections (3 fiction incl. 1
+live-code bug, 5 staleness, 3 Usage/signature drift, 2 version
+labeling).
+
+NEXT-UP: batch 8 candidates (mesh/agora/forum/teams/governance/legal
+/lineage/context), format.js + geometry test pins, or owner
+direction. Rides PR #118.
+
+---
+
+## Session (2026-10-08 — pass 159: comment audit batch 6)
+
+Owner: "let's keep going pls."
+
+BATCH 6 (msg.js, network.js, node-registry.js, consensus.js,
+market.js, trust.js, embed.js, encrypt.js) — **8 of 8 ACCURATE, zero
+fixes. First fully-clean batch of the audit.**
+
+VERIFIED: msg.js (post/send exported as facade delegates :11/:34;
+encryption config defaults encrypted/autoEncrypt=true match config.js
+:221-223), network.js (all 7 claimed features real: exponential
+backoff :181, pooling POOL_SIZE :65, response cache CACHE_TTL :66),
+node-registry.js (register/discover exported; state-store persistence
+claim matches the pass-37 hydration), consensus.js (vote/voteSecured/
+tally exported; NOT-crypto disclaimer intact), market.js + trust.js
+(security-chain integration claims all real — vaf/sandbox/escrow/
+governance requires verified, QoS wired via chain block-reasons
+market:blocked qos :385/:482, trust:blocked qos :234), embed.js
+(3 embedders exist: openai/local/hash in lib/embedders/), encrypt.js
+(all statics: generateId/hash/encrypt/decrypt/verify/sha256/hmac;
+header usage matches).
+
+NOTE: trust.js was flagged mid-check for possibly missing QoS in its
+chain — disproven (qos enforced via pipeline, emits qos block-reason).
+Lesson: absence-of-require is not absence-of-feature when a unified
+pipeline owns the chain.
+
+GATES: claims PASS (846f/9sig), syntax OK. Suites: msg-sync 9,
+network 0-fail, registry-persistence 6, consensus-read-scope 9,
+market-crossprocess 8, trust 20, embed 0-fail, encrypt 0-fail. Full
+sweep via CI.
+
+AUDIT RUNNING TALLY: 6 batches, 43 files, 10 corrections (2 fiction,
+5 staleness, 3 Usage/signature drift). Newest pass-annotated modules
+are consistently clean; drift concentrates in older headers + Usage
+blocks.
+
+NEXT-UP: batch 7 candidates (cron.js, prune.js, tmp.js, branch.js,
+health.js, api.js, audit.js, auth.js), format.js/geometry test pins
+(still open), or owner direction. Rides PR #118.
+
+---
+
+## Session (2026-10-08 — pass 158: comment audit batch 5)
+
+Owner: "let's run the next batch pls."
+
+BATCH 5 (search.js, geometry/index.js, connectors/s3.js, backup.js,
+stego.js, wal.js) — 4 of 6 ACCURATE, 2 fixed:
+
+FIXED - lib/search.js header version qualifier: "(v0.8.6-axolotl)" was
+a leftover from the pass-154 0.8.7→0.8.6 conversion (the -axolotl
+suffix rode along); pass-155's standardization pattern didn't target
+0.8.6-axolotl forms. Owner ruling = everything is 0.8.6 → now plain
+(v0.8.6). Only occurrence repo-wide (verified grep 0).
+
+FIXED - lib/connectors/s3.js Usage drift: header taught
+`require('./connectors/s3').s3({...})` but exports are createClient
+(:393; .s3 never existed). Same class as escrow's pass-157 find:
+Usage-example names vs real export names.
+
+VERIFIED ACCURATE: backup.js (create/validate/restore/start all
+exported — validate was the pass-24 ghost-fix, now real :602),
+stego.js (encode(message,input,output)/decode(imagePath) match
+:144/:190), geometry/index.js (project→{theta,phi,depth,fingerprint},
+quasicrystal/store/retrieve all exported :34+), wal.js (layout claims
+match .wal constants :38-41), search.js modes (basic/hybrid/hyde/rag
+confirmed :373).
+
+GAPS NOTED: lib/geometry/ has NO dedicated test file in test/ (only
+indirect coverage); backup.js validate+restore worth a round-trip pin
+someday. Recorded for future passes.
+
+GATES: claims PASS (846f/9sig), surface PASS, syntax OK. Suites:
+search 22/22, backup-create-safety 3/3, stego 12/12, wal 14/14,
+connector 8/8. Full sweep via CI.
+
+NEXT-UP: comment audit batch 6 (candidates: msg.js, network.js,
+node-registry.js, consensus.js, market.js, trust.js, embed.js,
+encrypt.js), or owner direction. Rides PR #118.
+
+---
+
+## Session (2026-10-08 — pass 157: comment audit batch 4)
+
+Owner: "another pass on a batch pls. Let's see what we find!"
+
+BATCH 4 (habitat.js, genesis.js, pipeline.js, primitives.js,
+islands.js, qos.js, escrow.js, sudo.js) — 6 of 8 ACCURATE, 2 fixed:
+
+FIXED - lib/escrow.js Usage signature drift: header taught
+`escrow.hold('task-1', { until: 'condition' })` but the real signature
+is `hold(holdId, condition)` (2-arg, :654) — the second arg IS the
+condition, no options-object wrapper. Usage corrected.
+
+FIXED - lib/islands.js stale format list: "yaml, json, md, txt"
+omitted .ini (format.js DEFAULT_EXTENSIONS has 6; pass-156 fixed the
+same omission in format.js's own header — islands had the same drift).
+
+VERIFIED ACCURATE: genesis.js (create :128 / join :263 real; deep
+behavior — secret-returned-once, auto-ack vetting — is pinned by the
+genesis-ring suite per earlier passes), pipeline.js (all 5 modes real
+:96-100, state machine real :28/:378/:452), primitives.js (zero ./
+requires confirmed — the hard contract holds; atomicWriteFile/sleep
+contents match; stego.js:178 + backup.js:501/562 genuinely stay on
+storage.atomicWrite as the header claims), qos.js (all 5 components
+real: RateLimiter/CircuitBreaker/Bulkhead/Throttler/Debouncer),
+sudo.js (all 5 scopes real in allowedScopes config :46-67), habitat.js
+(conceptual header, no API claims to falsify; verifyToken surface
+already proven in pass-154 mcp.js check).
+
+GATES: claims PASS (846f/9sig), syntax OK. Suites: escrow 18/18,
+islands 14/14, primitives 8/8, qos 10/10, pipeline 9/9. Full sweep
+via CI.
+
+NEXT-UP: comment audit batch 5 (candidates: search.js internals,
+geometry/, connectors/, vat of remaining mid-size modules), format.js
+dedicated test pin (still open from 156), or owner direction. Rides
+PR #118.
+
+---
+
+## Session (2026-10-08 — pass 156: comment audit batch 3)
+
+Owner: accepted PR #117 (142-155 merged to main). "Continue reading
+code comments in lib for fiction, accuracy, staleness."
+
+BATCH 3 (cache.js, citations.js, format.js, storage.js, vaf.js,
+lock.js, brain-lock.js, state-store.js) — 6 of 8 ACCURATE, 2 fixed:
+
+FIXED - lib/cache.js header FICTION: Usage block taught module-level
+cache.set/get/compress, but the 0.8.6 cache refactor removed the
+defaultCache singleton — module.exports = { Cache } ONLY (verified
+:429; test/cache.test.js T13b comments confirm removal). Header now
+teaches class-only surface and says explicitly there is NO cache.set/
+get on module exports (the pass-153 "live-probe the export surface"
+lesson applied). NOTE: the gate does not catch inverted fiction
+(header claims LESS than reality or dead APIs) — this one was caught
+by reading exports, extending the lesson: verify Usage blocks against
+module.exports, not just names against docs.
+
+FIXED - lib/format.js header STALE: "Supports: .yaml .yml .json .md
+.txt" omitted .ini — code (DEFAULT_EXTENSIONS :60, txt handler covers
+.ini) and AGENTS.md both document it. Header updated.
+
+VERIFIED ACCURATE: citations.js (addSource/formatCitation real
+:75/:121, exports match), storage.js (Storage.get→getStorage factory
+:2125/:2318, BrainStorage.get(category,key) matches Usage), vaf.js
+(check/sanitize/isBlocked all in exports :1013+), lock.js (mutex is
+in-process promise chain :284; snapshot-writer caller list matches
+lock-audit gate output exactly), brain-lock.js (TTL 3600000=1h :56,
+brain-lock:* events, .lock-<brain>.json cross-brain root — all real),
+state-store.js (consumers incl. node-registry/trust/msg/consensus/
+market confirmed).
+
+GATES: lint:claims PASS (846f/9sig), syntax OK. Touched-area suites:
+cache 12/12, citations 9/9, brain-lock 21/21, brain-storage-strict
+14/14, atomic-writes 13/13. Full sweep via CI. GAP NOTED: lib/format.js
+has NO dedicated test file (only indirect coverage via brain.test.js/
+live-fire/missing-modules) — candidate pin for a future pass.
+
+NEXT-UP: comment audit batch 4 (candidates: habitat.js, genesis.js,
+pipeline.js, primitives.js, islands.js, qos/escrow/sudo), or owner
+direction. New PR (117 merged).
 
 ---
 

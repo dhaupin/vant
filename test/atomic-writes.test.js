@@ -138,7 +138,8 @@ test('structural: lib has no bare fs.writeFileSync outside storage.js temp-path 
             const src = fs.readFileSync(full, 'utf8');
             const rel = path.relative(ROOT, full).replace(/\\/g, '/');
             if (/fs\.writeFileSync\s*\(/.test(src)) {
-            if (rel === 'lib/storage.js' || rel === 'lib/primitives.js') {
+            // (Wave D split) the storage temp-auth writer lives in lib/storage/shared.js
+            if (rel === 'lib/storage.js' || rel === 'lib/primitives.js' || rel === 'lib/storage/shared.js') {
                 // lib/storage.js: only the temp-path line inside atomicWrite is legal.
                 // lib/primitives.js: the helper ITSELF (temp-fd write) is the one
                 // legitimate direct write outside the storage layer.

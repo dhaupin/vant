@@ -58,12 +58,28 @@ async function main() {
             Object.entries(all).forEach(([k, v]) => {
                 console.log(`${k}=${v}`);
             });
+            // env  — the pass-179 registry view: every VANT_* env var vant
+            // consumes, resolved with source (env vs fallback) + typo flags
+            if (args[1] === 'env') {
+                const reg = config.listEnvConfig({ maskSecrets: true, includeUnset: true });
+                console.log('\n# environment registry (VANT_* vars)');
+                for (const e of reg) {
+                    const mark = e.source === 'env' ? '●' : ' ';
+                    const sec = e.secret ? ' (secret)' : '';
+                    console.log(`${mark} ${e.env} → ${e.key}${sec} = ${JSON.stringify(e.value)}${e.source === 'fallback' ? '  [default]' : ''}`);
+                }
+                const unknown = config.unknownEnvVars();
+                if (unknown.length) {
+                    console.log('\n⚠ unknown VANT_* vars (typo?): ' + unknown.map(u => u.env).join(', '));
+                }
+            }
             break;
 
         default:
             console.log('Usage: vant config get <key>');
             console.log('       vant config set <key> <value>');
             console.log('       vant config list');
+            console.log('       vant config list env   # registry view of VANT_* env vars');
     }
 }
 

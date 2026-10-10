@@ -98,8 +98,8 @@ async function main() {
     registry.register({ id: 'org-agent', name: 'org-node', host: 'h', port: 2 });
 
     // Topics: one JV-scoped, one public — both on the ORG node.
-    await consensus.create('p68-public-topic', { options: ['yes', 'no'], minQuorum: 9, useTrustWeight: false });
-    await consensus.create('p68-scoped-topic', { options: ['yes', 'no'], minQuorum: 9, useTrustWeight: false, scope: SCOPE });
+    await consensus.create('p68-public-topic', { ballot: ['yes', 'no'], minQuorum: 9, useTrustWeight: false });
+    await consensus.create('p68-scoped-topic', { ballot: ['yes', 'no'], minQuorum: 9, useTrustWeight: false, scope: SCOPE });
     const scopedListing = await market.list('knowledge', {
         title: 'p68 secret sauce', summary: 'scoped', seller: 'org-agent', price: 5, scope: SCOPE
     }, { agentId: 'org-agent', consentGiven: true });

@@ -1,0 +1,12 @@
+[package]
+name = "rust-srv"
+version = "0.1.0"
+edition = "2021"
+description = "Vant rust sidecar: the srv half of the hybrid polyglot bridge (pass 168)"
+
+[[bin]]
+name = "rust-srv"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 2

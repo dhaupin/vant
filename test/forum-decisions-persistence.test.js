@@ -69,7 +69,7 @@ async function main() {
     let topic = null;
     await test('decision return -> decision logged AND persisted to state/forum.json', async () => {
         const ledger = await consensus.create('p44-durable-topic', {
-            options: ['yes', 'no'],
+            ballot: ['yes', 'no'],
             minQuorum: 1,
             metadata: { proposal: 'Persist the decision feed', author: 'tester', viaForum: true }
         });

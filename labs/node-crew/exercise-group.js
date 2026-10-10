@@ -141,7 +141,7 @@ const PORT_BETA = ${PORT_BETA}, PORT_ACME = ${PORT_ACME}, PORT_STEW = ${PORT_STE
     const forum = forumMod.forum || forumMod;
     const SCOPE = { owner: 'team:' + team.id, visibility: 'scope' };
     const v = await forum.vote('group-q3-platform-call', {
-        options: ['thursday-1400utc', 'friday-0900utc'], minQuorum: 3, useTrustWeight: false,
+        ballot: ['thursday-1400utc', 'friday-0900utc'], minQuorum: 3, useTrustWeight: false,
         scope: SCOPE
     });
     if (!v || !v.voted) throw new Error('forum.vote failed: ' + JSON.stringify(v).slice(0, 140));

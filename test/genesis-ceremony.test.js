@@ -69,7 +69,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     if (!r.ok) { console.log('HOST_FAIL:' + JSON.stringify(r)); process.exit(1); }
     console.log('HOST_SECRET:' + r.secret);
     const c = await consensus.create(${JSON.stringify(TOPIC)}, {
-        options: ['ratify', 'reject'], minQuorum: 2, useTrustWeight: false, scope: r.jv.scope
+        ballot: ['ratify', 'reject'], minQuorum: 2, useTrustWeight: false, scope: r.jv.scope
     });
     if (c.error) { console.log('HOST_FAIL:create ' + c.error); process.exit(1); }
     const v = await consensus.vote(${JSON.stringify(TOPIC)}, 'ratify', 'g57-host-agent');

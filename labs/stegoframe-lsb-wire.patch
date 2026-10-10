@@ -1,0 +1,427 @@
+From 0eed657c7a2bfd1f04fec171ab60230fc208a86d Mon Sep 17 00:00:00 2001
+From: "Codebuff Agent (via dhaupin)" <noreply@codebuff.com>
+Date: Fri, 9 Oct 2026 20:28:19 +0000
+Subject: [PATCH] Fix LSB carrier: reader was dead on arrival; adopt Vant's
+ canonical [len][packet] wire
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The LSB path could never work: lsbRead called _b2B (bits→bytes),
+which was never defined — every onload threw inside the promise, so
+LSB decode hung forever. And even with that fixed, the reader expected
+an 8-byte SGF binary header (0x534746 magic + version + length) that
+lsbWrite never emitted (it wrote a bare packet, no framing at all).
+Writer and reader never agreed on anything.
+
+This PR:
+
+- Defines _barr2b (the missing _b2B), and replaces the SGF framing
+  with the canonical wire Vant's PNG pipeline emits as of pass 178:
+  [4-byte big-endian payload length][packet bytes], MSB-first, one
+  bit per pixel in the R channel's LSB, x-major.
+- Rewrites _lsbExtract as a single, testable packet parser with the
+  "BRN:" (colon INCLUDED) start-of-packet guard, so random noise
+  images correctly read as no-payload rather than garbage-packet.
+- Sizing: lsbWrite now dims for header + packet (the old writer
+  sized for packet alone — it never accounted for a header because
+  it never wrote one).
+- Drops legacy SGF read branches from _up (writer never emitted SGF)
+  and from the test copy of _up which had drifted from index.html.
+- Tests: 5 new wire-level tests (round-trip long/short, noise plane
+  null, non-BRN packet empty, exact Vant-layout pin) — suite 25/25.
+- README + AGENTS LSB sections now describe the real wire; new
+  docs/lsb-spec.md pins the cross-system contract (also fixes an SVG
+  extraction snippet that referenced a data-p= attribute no code
+  writes).
+
+Cross-decode verified against dhaupin/vant branch axolotl (pass-178
+stego rework): Stegoframe wire parses a Vant stone, and Vant extracts
+a Stegoframe wire — both directions OK.
+
+🤖 Generated with Codebuff
+Co-Authored-By: Codebuff <noreply@codebuff.com>
+---
+ AGENTS.md           |   6 +--
+ README.md           |  10 ++---
+ docs/lsb-spec.md    | 106 ++++++++++++++++++++++++++++++++++++++++++++
+ index.html          |  65 ++++++++++++++++++++++-----
+ tests/codec.test.js | 100 ++++++++++++++++++++++++++++++++++++-----
+ 5 files changed, 256 insertions(+), 31 deletions(-)
+ create mode 100644 docs/lsb-spec.md
+
+diff --git a/AGENTS.md b/AGENTS.md
+index 40b3269..570fc3d 100755
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -106,9 +106,9 @@ The packed frame (hex-encoded string "BRN:ENC:...") is encoded into the least-si
+ Pixel layout:  R G B A  (ImageData order)
+ Payload bit:   LSB of R channel only
+ Order:         sequential, left-to-right, top-to-bottom
+-Header:        first 64 pixels encode the 8-byte frame header
+-               (used to detect presence and read payload length)
+-Remaining:     LENGTH*8 pixels encode the ciphertext bytes
++Framing:       first 4 pixels encode a big-endian u32 payload length N
++Next:          N*8 pixels encode the payload bytes ("BRN:ENC:hex_payload"),
++               MSB-first. Shared with Vant lib/stego.js — see docs/lsb-spec.md.
+ ```
+ 
+ Canvas dimensions: `ceil(sqrt(packedLength * 8))` × same, minimum 32×32.
+diff --git a/README.md b/README.md
+index d01d658..8219c79 100755
+--- a/README.md
++++ b/README.md
+@@ -198,9 +198,8 @@ Brief overview: AI systems interact with Stegoframe as a transport layer, not a
+ Encryption:     AES-GCM-256
+ Key derivation: PBKDF2-SHA256, 100,000 iterations, 16-byte random salt
+ IV:             12 bytes random per message
+-Frame header:   8 bytes (magic 3 + version 1 + length 4)
+-Magic:          0x534746 ("SGF")
+-Version:        0x02
++Wire framing:   4-byte big-endian payload length + payload bytes
++                (shared with Vant lib/stego.js — see docs/lsb-spec.md)
+ ```
+ 
+ SVG carrier extraction:
+@@ -212,8 +211,9 @@ const packed = base64ToBytes(m[1]);  // 8-byte header + ciphertext
+ LSB carrier extraction:
+ ```js
+ // Read R-channel LSBs sequentially from pixel data
+-// First 64 bits = 8-byte frame header
+-// Remaining LENGTH*8 bits = ciphertext bytes
++// Read R-channel LSBs sequentially from pixel data, MSB-first
++// First 32 bits = big-endian payload length N
++// Next N*8 bits  = payload bytes ("BRN:ENC:hex_payload")
+ ```
+ 
+ ---
+diff --git a/docs/lsb-spec.md b/docs/lsb-spec.md
+new file mode 100644
+index 0000000..7352c43
+--- /dev/null
++++ b/docs/lsb-spec.md
+@@ -0,0 +1,106 @@
++# LSB carrier wire spec (v1.1)
++
++The LSB (PNG) carrier ships BOTH a fix for a reader/writer that never
++agreed, and a framing standard shared with Vant's `lib/stego.js` PNG
++pipeline (pass 178). This doc pins the wire so future changes keep both
++systems reading each other.
++
++## The bug this PR fixes
++
++`lsbRead` referenced a helper (`_b2B`, bits→bytes) that was never defined
++in `index.html` — every `onload` threw a `ReferenceError` inside the
++promise and the read NEVER resolved: LSB decode silently hung forever.
++Even with that fixed, the reader expected an 8-byte SGF binary header
++(`0x534746` magic + version + u32 length) that `lsbWrite` (and the SVG
++path) never emitted — the writer produced a bare packet with no framing.
++Writer and reader could never talk to each other. The README/AGENTS docs
++also documented this SGF header (and an SVG `data-p=` extraction snippet
++that doesn't match the SVG code either) — updated in this PR.
++
++## Canonical LSB wire (shared with Vant lib/stego.js)
++
++```
++bit stream:  MSB-first over UTF-8 bytes, ONE bit per pixel, taking the
++             LSB of the RED channel byte of each pixel (ImageData order
++             R,G,B,A → only index i*4 carries a bit), traversed
++             x-major (left-to-right, top-to-bottom).
++
++byte stream: [4-byte big-endian payload length N][N payload bytes]
++
++payload:     the packet string, i.e. "BRN:ENC:<hex>" where
++             <hex> = hex(salt):hex(iv):hex(authTag):hex(ciphertext)
++             (AES-256-GCM, PBKDF2-SHA256 100k, salt 16B, IV 12B —
++             unchanged from v1.0 and Vant-compatible).
++```
++
++Notes:
++
++- The length header covers ONLY the packet (not itself). Read side:
++  `N = readUInt32BE(0)`, packet = bytes[4, 4+N).
++- Reader semantics: a length that is absurd (0, negative-as-unsigned beyond
++  capacity) ⇒ no payload. A length that parses but whose payload does not
++  start with the `BRN:` magic (colon INCLUDED) ⇒ empty, not a payload —
++  this is how a random noise image ("looks like static") is told apart
++  from a stone that isn't in our dialect.
++- Carrier carrying capacity is NOT part of the wire: any producer may pick
++  square dimensions ≥ ceil(sqrt((N+4)*8)), min 32×32 (we keep the writer's
++  noise background + alpha=255 so the image still looks like static and
++  never transparent). A reader must not assume the payload fills the image.
++
++## Cross-system compatibility
++
++Because Vant's PNG pipeline (lib/stego.js `_lsbRoundTrip`, pass 178)
++now emits the identical wire, a stone written by one decodes in the
++other with zero conversion:
++
++| Producer | Consumer | Works |
++|---|---|---|
++| Stegoframe LSB (this spec) | Vant `stego.decode` | yes |
++| Vant `stego.encode` (PNG) | Stegoframe `lsbRead` | yes (canvas-rasterized stone) |
++| Stegoframe SVG | Vant `decodeSvg` | yes (previous interop pass) |
++| Vant encodeSvg | Stegoframe `svgRead` | yes (previous interop pass) |
++
++Desktop/test interop note: `stego.decode` operates on the DECODED
++pixel stream of a real PNG (zlib-inflated, unfiltered), while
++Stegoframe operates in the browser on a already-rasterized canvas. Both
++is the same wire — the bit layout is identical once the image is
++treated as a flat pixel stream. Vant re-filters to filter-type None on
++re-emit (spec-legal). Browser rasterization of a Vant-written PNG gives
++the same R-channel sequence (carriers written by Vant use a noise
++background; carriers written by Stegoframe use noise too — random data
++on encode means the LSB plane of an untouched pixel is unpredictable,
++which strengthens steganographic cover, and the length header still
++reparses).
++
++## The v1.0 compatibility story
++
++- SVG path: unchanged from v1.0 (and from the Vant interop pass) —
++  still `BRN:ENC:<hex>` base64 in `<brn:secret>`. Nothing moves.
++- LSB path: the wire CHANGED vs. v1.0, but the v1.0 LSB path was already
++  unshippable (see bug section): no stone written by v1.0 could ever have
++  been read back by v1.0. There is no compatibility debt to carry:
++  LSB stones can simply be re-encoded. The SGF binary magic is dropped
++  from the read path too (it never existed on any write path).
++
++## Reader pseudocode (drop-in for any platform)
++
++```js
++// d = flat RGBA pixel bytes (alpha channel present, length%4==0)
++function readLsb(d) {
++  const capacity = Math.floor(d.length / 4);      // one bit per pixel
++  if (capacity < 4) return null;
++  const bits = new Array(Math.min(capacity * 8, 65536 * 8));
++  for (let i = 0; i < bits.length; i++) bits[i] = d[i * 4] & 1;
++  const bytes = bitsToBytesMsbFirst(bits);
++  const len = (bytes[0]<<24) | (bytes[1]<<16) | (bytes[2]<<8) | bytes[3];
++  if (!Number.isSafeInteger(len) || len <= 0 || 4 + len > bytes.length) return null;
++  const packet = utf8Decode(bytes.slice(4, 4 + len));
++  return packet.startsWith("BRN:") ? packet : "";
++}
++```
++
++Implementations:
++
++- Stegoframe (browser): `_lsbExtract` in `index.html` + `lsbRead`.
++- Vant (Node): `extractData`/`_lsbRoundTrip(writeMode=false)` in
++  `lib/stego.js` on dhaupin/vant branch `axolotl` (pass 178).
+diff --git a/index.html b/index.html
+index 698e899..304febd 100755
+--- a/index.html
++++ b/index.html
+@@ -340,21 +340,68 @@ function _up(b) {
+   return null;
+ }
+ 
+-// ── Bit helpers ───────────────────────────────────────────────────────────────
++// ── LSB wire helpers (shared dialect with Vant lib/stego.js) ──────────────────
++// Canonical LSB wire: [4-byte big-endian payload length][payload bytes],
++// packed MSB-first over UTF-8 bytes, ONE bit per pixel in the red channel's
++// LSB, x-major, left-to-right, top-to-bottom. A carrier with room to hold
++// the packet but different dims still reads correctly — capacity is never
++// part of the wire. Matches the new (pass-178) Vant PNG pipeline exactly.
++
++// Convert a bit array (MSB-first stream) into bytes.
++function _barr2b(bits) {
++  const out = new Uint8Array(Math.floor(bits.length / 8));
++  for (let i = 0; i < out.length; i++) {
++    let byte = 0;
++    for (let j = 0; j < 8; j++) byte = (byte << 1) | (bits[i * 8 + j] & 1);
++    out[i] = byte;
++  }
++  return out;
++}
++
++// Build the canonical LSB payload: u32 BE length header + packet bytes.
++function _lsbPayload(pkStr) {
++  const pkBytes = new TextEncoder().encode(pkStr);
++  const w = new DataView(new ArrayBuffer(4));
++  w.setUint32(0, pkBytes.length, false); // big-endian
++  const out = new Uint8Array(4 + pkBytes.length);
++  out.set(new Uint8Array(w.buffer), 0);
++  out.set(pkBytes, 4);
++  return out;
++}
++
++// Stream R-channel LSB bits (MSB-first) into bytes and parse the wire as
++// [u32 len][packet]; return the packet string ("" when no Vant packet), null
++// when no coherent length header is present. Caller passes a Uint8ClampedArray
++// of ImageData.data. Ceiling on bytes: every R-channel pixel is a bit.
++function _lsbExtract(d) {
++  const capacity = Math.floor(d.length / 4); // one bit per pixel
++  if (capacity < 4) return null;
++  const bits = new Array(Math.min(capacity * 8, 65536 * 8));
++  for (let i = 0; i < bits.length; i++) bits[i] = d[i * 4] & 1;
++  const bytes = _barr2b(bits);
++  if (bytes.length < 4) return null;
++  const len = (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
++  if (!Number.isSafeInteger(len) || len <= 0 || 4 + len > bytes.length) return null;
++  const packet = new TextDecoder().decode(bytes.slice(4, 4 + len));
++  return packet.startsWith(_BRN) ? packet : "";
++}
+ 
+ // ── LSB carrier ───────────────────────────────────────────────────────────────
+ 
+ // Writes payload into LSB of red channel pixels of a square noise PNG.
+ // Alpha forced to 255 — transparency would reveal the image is synthetic.
++// Dimensions: now sized to carry the FULL canonical wire (header + packet),
++// not just the packet — the old writer never accounted for the 4-byte
++// length header its own reader tried to parse.
+ function lsbWrite(payload) {
+-  const pk=_pk(payload);
+-  const dim=Math.max(32,Math.ceil(Math.sqrt(pk.length*8)));
++  const wire=_lsbPayload(_pk(payload));
++  const dim=Math.max(32,Math.ceil(Math.sqrt(wire.length*8)));
+   const cv=document.createElement("canvas"); cv.width=cv.height=dim;
+   const cx=cv.getContext("2d"), im=cx.createImageData(dim,dim);
+   crypto.getRandomValues(im.data);
+   for(let i=3;i<im.data.length;i+=4) im.data[i]=255;
+-  for(let i=0;i<pk.length*8;i++){
+-    const bit=(pk[Math.floor(i/8)]>>(7-(i%8)))&1;
++  for(let i=0;i<wire.length*8;i++){
++    const bit=(wire[Math.floor(i/8)]>>(7-(i%8)))&1;
+     im.data[i*4]=(im.data[i*4]&0xFE)|bit;
+   }
+   cx.putImageData(im,0,0); return cv.toDataURL("image/png");
+@@ -369,12 +416,8 @@ async function lsbRead(url) {
+       const cv=document.createElement("canvas"); cv.width=im.width; cv.height=im.height;
+       const cx=cv.getContext("2d"); cx.drawImage(im,0,0);
+       const d=cx.getImageData(0,0,im.width,im.height).data;
+-      const hb=[]; for(let i=0;i<64;i++) hb.push(d[i*4]&1);
+-      const hdr=_b2B(hb);
+-      if(!_up(hdr)){res(null);return;}
+-      const l=(hdr[4]<<24)|(hdr[5]<<16)|(hdr[6]<<8)|hdr[7],tb=(8+l)*8,ab=[];
+-      for(let i=0;i<tb;i++) ab.push(d[i*4]&1);
+-      res(_up(_b2B(ab)));
++      const packet=_lsbExtract(d);
++      res(packet ? _up(packet) : null); // "" → wrong dialect → null
+     };
+     im.onerror=()=>res(null); im.src=url;
+   });
+diff --git a/tests/codec.test.js b/tests/codec.test.js
+index c8b31aa..08b8e69 100644
+--- a/tests/codec.test.js
++++ b/tests/codec.test.js
+@@ -81,21 +81,45 @@ function _pk(p) {
+ function _up(b) {
+   const s = typeof b === 'string' ? b : new TextDecoder().decode(b);
+   if (s.startsWith(_BRN + "ENC:")) {
+-    const hex = s.slice(_BRN.length + 4);
+-    return hex;
+-  }
+-  if (typeof b !== 'string' && b.length >= 8) {
+-    const magic = (b[0] << 16) | (b[1] << 8) | b[2];
+-    if (magic === 0x534746 && b[3] === 0x02) {
+-      const len = (b[4] << 24) | (b[5] << 16) | (b[6] << 8) | b[7];
+-      if (len > 0 && len <= b.length - 8) {
+-        return b.slice(8, 8 + len);
+-      }
+-    }
++    return s.slice(_BRN.length + 4);
+   }
+   return null;
+ }
+ 
++// ── LSB wire helpers (mirror index.html exactly — keep in sync) ──────────────
++function _barr2b(bits) {
++  const out = new Uint8Array(Math.floor(bits.length / 8));
++  for (let i = 0; i < out.length; i++) {
++    let byte = 0;
++    for (let j = 0; j < 8; j++) byte = (byte << 1) | (bits[i * 8 + j] & 1);
++    out[i] = byte;
++  }
++  return out;
++}
++
++function _lsbPayload(pkStr) {
++  const pkBytes = new TextEncoder().encode(pkStr);
++  const w = new DataView(new ArrayBuffer(4));
++  w.setUint32(0, pkBytes.length, false); // big-endian
++  const out = new Uint8Array(4 + pkBytes.length);
++  out.set(new Uint8Array(w.buffer), 0);
++  out.set(pkBytes, 4);
++  return out;
++}
++
++function _lsbExtract(d) {
++  const capacity = Math.floor(d.length / 4);
++  if (capacity < 4) return null;
++  const bits = new Array(Math.min(capacity * 8, 65536 * 8));
++  for (let i = 0; i < bits.length; i++) bits[i] = d[i * 4] & 1;
++  const bytes = _barr2b(bits);
++  if (bytes.length < 4) return null;
++  const len = (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
++  if (!Number.isSafeInteger(len) || len <= 0 || 4 + len > bytes.length) return null;
++  const packet = new TextDecoder().decode(bytes.slice(4, 4 + len));
++  return packet.startsWith(_BRN) ? packet : "";
++}
++
+ // ── Tests ────────────────────────────────────────────────────────────────────
+ 
+ describe('Hex Encoding', () => {
+@@ -237,7 +261,59 @@ describe('Full Codec Round-trip', () => {
+   });
+ });
+ 
+-describe('Room ID Derivation', () => {
++// ── Wire-level LSB tests (canvas-free): exercise _lsbPayload/_lsbExtract
++// exactly as lsbWrite/lsbRead do, minus the DOM round-trip (which is
++// browser-only). The bit plane is a fake ImageData.data: R at [i*4].
++describe('LSB wire (canonical [len][packet] header)', () => {
++  function fakeRPlane(bytes) {
++    const dim = Math.max(32, Math.ceil(Math.sqrt(bytes.length * 8)));
++    const d = new Uint8ClampedArray(dim * dim * 4);
++    for (let i = 0; i < d.length; i++) d[i] = (i * 37) & 0xFF; // deterministic noise
++    for (let i = 0; i < bytes.length * 8; i++) {
++      const bit = (bytes[Math.floor(i / 8)] >> (7 - (i % 8))) & 1;
++      d[i * 4] = (d[i * 4] & 0xFE) | bit;
++    }
++    return d;
++  }
++
++  it('round-trips a packet through the wire', () => {
++    const hex = _toHex(crypto.getRandomValues(new Uint8Array(48)));
++    const wire = _lsbPayload(_pk(hex));
++    const packet = _lsbExtract(fakeRPlane(wire));
++    assert.strictEqual(packet, _pk(hex));
++    assert.strictEqual(_up(packet), hex);
++  });
++
++  it('round-trips a long packet (500+ chars) through the wire', () => {
++    const hex = _toHex(crypto.getRandomValues(new Uint8Array(400)));
++    const packet = _lsbExtract(fakeRPlane(_lsbPayload(_pk(hex))));
++    assert.strictEqual(_up(packet), hex);
++  });
++
++  it('returns null on a random (non-payload) bit plane', () => {
++    const d = new Uint8ClampedArray(64 * 64 * 4);
++    for (let i = 0; i < d.length; i++) d[i] = crypto.getRandomValues(new Uint8Array(1))[0];
++    assert.strictEqual(_lsbExtract(d), null);
++  });
++
++  it('returns "" on a plane whose length is valid but no BRN packet follows', () => {
++    const d = fakeRPlane(_lsbPayload('NOT-BRN'));
++    assert.strictEqual(_lsbExtract(d), '');
++  });
++
++  it('matches the exact Vant LSB layout pass-178 pins: BE length + MSB-first', () => {
++    // Build the Vant wire by hand: u32BE(4) + 'BRN:' → bits MSB-first.
++    // (Packet must start with the 'BRN:' magic INCLUSIVE of the colon to
++    // pass the guard — 'BRN' without colon is correctly rejected as '' —
++    // and the roundtrip test above covers the full _pk/_up path.)
++    const msg = 'BRN:';
++    const bytes = new Uint8Array([0, 0, 0, 4, 0x42, 0x52, 0x4E, 0x3A]);
++    const packet = _lsbExtract(fakeRPlane(bytes));
++    assert.strictEqual(packet, msg);
++  });
++});
++
++describe('Full Codec Round-trip', () => {
+   it('should derive a 6-character alphanumeric room ID', async () => {
+     const roomId = await deriveRoomId('my-secret-passphrase');
+     assert.strictEqual(roomId.length, 6);
+-- 
+2.34.1
+
