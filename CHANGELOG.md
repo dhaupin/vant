@@ -77,6 +77,28 @@ Both files are deferred — not in the b-T scope.
 
 ## [Unreleased] - Future
 
+### Refactored - storage.js Split (pass 181, prd-canonicalization Wave D)
+- The 2,391-line, 8-class monolith `lib/storage.js` is split into
+  `lib/storage/` per-class files (`file`, `brain`, `vector`, `state`,
+  `config`, `schema`, `island`, `remote`) with the security plumbing
+  (sandbox/VAF/gates, metrics, events, WAL wiring, atomic write)
+  single-sourced in `lib/storage/shared.js`.
+- **`lib/storage.js` REMAINS THE IMPORT SURFACE** as the factory facade
+  (2,391 → 275 lines): every existing `require('./storage')` consumer
+  keeps its exact shape — `get(type)`, safe-by-default shortcuts
+  (read/write/delete/has/list), the 0.8.6 raw bypass, used classes,
+  `Wal`, `atomicWrite`/`atomicWriteFile`, metrics, multibrain stack
+  helpers. **Zero consumer churn.**
+- Ownership matrix landed in `labs/prd-canonicalization.md` appendix
+  (every data kind → canonical store → backup/WAL/mirror/API).
+- Structural gate updated for the split: the atomic-writes structural
+  pin now whitelists the relocated single temp-writer in
+  `lib/storage/shared.js` (the same one write, new canonical home).
+- Suites green: storage 40, brain-strict 14, remote 13,
+  storage-metrics 8, storage-mirror 10, wal 14, state-persistence 8,
+  atomic-writes 13, grand-tour 18, missing-modules 41, canvas,
+  test-storage 14.
+
 ### Refactored - One Hashing Module (pass 180, prd-canonicalization Wave C)
 - New canonical surface `lib/hash.js`: `sha256(input)` (one-shot hex),
   `sha256H()` (incremental `Hasher` with the exact update()/digest()

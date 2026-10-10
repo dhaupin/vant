@@ -3,8 +3,11 @@
 **Version:** 1.0
 **Branch:** axolotl
 **Date:** 2026-10-09
-**Status:** ACTIVE — Wave A+B landed (pass 179), Wave C landed (pass 180). Next: Wave D (storage ownership matrix → storage.js split)
-**Completed:** §2 Wave A (event observability, 40 pins), §3 Wave B (config env registry, 23 pins), §4 Wave C (lib/hash.js, 29 pins + grep gate) — all per the §8 acceptance standard
+**Status:** ACTIVE — Waves A–D landed (passes 179–181). Next: Wave E (messaging charters)
+**Completed:** §2 Wave A (event observability, 40 pins), §3 Wave B (config env registry,
+23 pins), §4 Wave C (lib/hash.js, 29 pins + grep gate), §5 Wave D
+(ownership matrix + storage.js split, zero consumer churn) — all per
+the §8 acceptance standard
 **Evidence base:** `labs/CANONICALIZATION-ROADMAP.md` (measured inventory, pass 179)
 **Related:** `labs/WIRING.md` (state-spine ledger — the model for what "done"
 looks like), stego pass 178 (ce7b7d5 — the pattern case study)
@@ -145,6 +148,44 @@ no documented ownership.
    `lib/storage.js` remaining as the factory re-export (imports stay
    stable; consumers don't churn).
 4. Pins: the storage suite moves first (move, don't rewrite tests).
+
+---
+
+## 5a. Appendix — Storage ownership matrix (Wave D, pass 181)
+
+Measured on the tree: consumer counts via `getStorage('<type>')` and
+`new <Class>()` across lib/ bin/ test/ scripts/.
+
+| Data kind | Canonical store | Consumers | Backup | WAL | Mirror | API surface |
+|---|---|---|---|---|---|---|
+| **File/blob (RW, safe-by-default)** |
+| anything a caller writes/reads (brain files, canvas art, health probes, islands boot) | `FileStorage` | ~15 modules via `new`/`storage.read` (canvas, backup, bin, health, wal-bin) | `vant backup` snapshots the brain | repairable per-store (`{ wal: true }`) | rclone/s3 by operators | `storage.read/write/delete/has/list` + raw bypass + `new FileStorage` |
+| **Brain content** |
+| category/key brain docs | `BrainStorage` (path-scoped FileStorage) | brain.js (the only consumer) | ✅ horcrux/backup | ✅ (brain WAL) | git (brain repo IS the mirror) | `storage.get('brain')` — via brain.js only |
+| **Vector search index** |
+| embedding records | `VectorStorage` (connector delegate) | 0 external (embed'ers call connectors directly) | — | — | connector-side | `storage.get('vector')` — orphan OK (embed stack is the surface) |
+| **Protocol state** |
+| `.state.json` stack + protocol state | `StateStorage` (layered private-over-public) | brain stack (models/state.json) | brain backup | — | git | `storage.get('state')` via brain.js |
+| **Ini file** |
+| `vant.config.js` read | `ConfigStorage` | 0 external (config.js owns ini) | git | — | git | `storage.get('config')` — superseded by brain-scoped config.json |
+| **Schema JSON** |
+| schema dir | `SchemaStorage` | 0 external | git | — | git | `storage.get('schema')` — orphan |
+| **Islands registry** |
+| island manifests | `IslandStorage` | 0 external (islands.js uses storage.shortcuts) | git | — | git | `storage.get('island')` — orphan |
+| **Git repositories** |
+| repos metadata | `ReposStorage` | 0 external | git | — | git | `storage.get('repos')` — orphan |
+| **Remote (S3-shaped)** |
+| mirror/pull trees | `RemoteStorage` (client DI) | connectors/index, bin/s3, remote test | — | — | ✅ IS the mirror | `storage.get('remote')`, `new RemoteStorage({ client })` |
+
+**Deal-rule verdicts (per PRD §5):**
+- `FileStorage`, `BrainStorage`, `StateStorage`, `RemoteStorage`: LIVE
+  narrow roles, documented above. Split verbatim into `lib/storage/*`.
+- `ConfigStorage`, `SchemaStorage`, `IslandStorage`, `ReposStorage`,
+  `VectorStorage`: documented narrow/orphan roles, KEPT (no new roles; no
+  deletions in Wave D stage 1 per PRD out-of-scope). A later wave may
+  retire orphans once their consumers' surfaces are confirmed.
+- Security plumbing (sandbox/VAF/gates/metrics/events/atomic write) is
+  SINGLE-SOURCE in `lib/storage/shared.js`; every class file requires it.
 
 ---
 

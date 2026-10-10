@@ -92,7 +92,7 @@
 | Env registry (Wave B) | DONE | 24-entry `ENV_REGISTRY` in lib/config.js + `vant config list env`; webhooks/health/agents stragglers moved onto config getters; unknown-env scan surfaced via health check |
 | Pre-existing fix | DONE | lib/health.js `runChecks` ReferenceError (`_checkRead` removed in an earlier refactor) restored |
 
-NEXT WIRING CANDIDATES (pass 181+):
+NEXT WIRING CANDIDATES (pass 182+):
 
 ## 9. One hashing module (pass 180 — prd-canonicalization Wave C)
 
@@ -104,10 +104,20 @@ NEXT WIRING CANDIDATES (pass 181+):
 | Grep gate | LIVE | no lib module calls `crypto.createHash('sha256')` outside lib/hash.js — enforced by test, fails CI on regression |
 | Migrated suites | DONE | audit, wal, state-wiring, engine-parity-spine, backbone, encrypt, vaf, geometry-engine, habitat-token, mesh-status, stego ×2, state-persistence — all green |
 
-NEXT WIRING CANDIDATES (pass 181+):
+## 10. Storage split (pass 181 — prd-canonicalization Wave D)
+
+| Work | Status | Detail |
+|---|---|---|
+| Ownership matrix | DONE | prd-canonicalization.md §5a — every data kind → store → backup/WAL/mirror/API; 6 classes documented as narrow/orphan |
+| storage.js split | DONE | lib/storage/ per-class files (file/brain/vector/state/config/schema/island/remote), plumbing single-sourced in lib/storage/shared.js; lib/storage.js = 275-line factory FACADE — zero consumer churn |
+| Verified | DONE | facade surface pinned by suite run (storage 40, strict 14, remote 13, metrics 8, mirror 10, wal 14, state-persistence 8, atomic-writes 13, grand-tour 18, missing-modules 41, test-storage 14, canvas) |
+| Structural gate | UPDATED | atomic-writes structural pin whitelists the relocated one temp-writer in lib/storage/shared.js (the same single write, new canonical home) |
+
+NEXT WIRING CANDIDATES (pass 182+):
 1. `hotset` (#153): back state-store tree reads — cache consumers exist since 172/173; first `hydrate` touchpoint wins.
 2. Excellence gap: nothing writes per-brain `universeSeed` yet — first writer is the mesh genesis path.
-3. Wave D (storage ownership matrix → storage.js split) per labs/prd-canonicalization.md §5.
+3. ~~Wave D (storage ownership matrix → storage.js split)~~ ✅ DONE pass 181 — see §10.
+4. Wave E (messaging charters) per labs/prd-canonicalization.md §6.
 
 ## Where the spine got large (the honest answer)
 
