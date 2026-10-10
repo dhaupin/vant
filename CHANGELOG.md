@@ -77,6 +77,35 @@ Both files are deferred — not in the b-T scope.
 
 ## [Unreleased] - Future
 
+### Added - Messaging Trio Charters + Shared Envelope (pass 182, prd-canonicalization Wave E)
+- The charter is law (labs/prd-canonicalization.md §6): **msg.js owns
+  conversations** (persisted transcripts + in-process channel pub/sub),
+  **stream.js owns the work queue** (durable rows, lease, escrow-gated),
+  **crew-bus.js owns peer transport** (HMAC-signed HTTP, version +
+  scope gates). Overlaps are banned — no dual-ownership channels; a
+  record goes to msg OR stream, never both-as-truth; only crew-bus
+  leaves the process.
+- New `lib/messaging.js`: the ONE shared envelope — crew-bus's wire
+  shape `{event:'crew.<type>', from, type, payload, ts, nonce,
+  v:{major,minor}}` — now requirable without the network stack:
+  `makeEnvelope/validateEnvelope/versionGate/signEnvelope/
+  verifyEnvelope/setReceiverVersion`. Crew-bus delegates `_validVersion`
+  and `_setReceiverVersion` to it (single home; the pass-61 staging seam
+  byte-identical; the unstamped-v1.0 sender tolerance preserved).
+  Gate detail: a well-shaped `{major:0,x}` remains shape-valid but
+  reports `past-major` (loud refuse) — matching the pass-61 receiver
+  contract, while staging still throws on major<1.
+- Pinned by `test/messaging-envelope.test.js` (32 pins): shape
+  contract, version-gate matrix (garbage/unstamped/both-major-
+  directions/minor-additive), sign/verify vs Encrypt on the same bytes,
+  crew-bus parity (staging moves one object both layers read), and
+  integration legs — a msg conversation snapshot and a stream work row
+  both ride the envelope and round-trip with **zero semantic loss**
+  (task object survives verbatim; the snapshot still merges).
+- Consumer suites re-run green: crew-bus 20, stream, agents, forum,
+  webhooks, msg, msg-sync 9, forum-msg-escrow, node-crew 9,
+  grand-tour 18.
+
 ### Refactored - storage.js Split (pass 181, prd-canonicalization Wave D)
 - The 2,391-line, 8-class monolith `lib/storage.js` is split into
   `lib/storage/` per-class files (`file`, `brain`, `vector`, `state`,

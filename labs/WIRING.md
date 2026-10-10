@@ -113,11 +113,22 @@ NEXT WIRING CANDIDATES (pass 182+):
 | Verified | DONE | facade surface pinned by suite run (storage 40, strict 14, remote 13, metrics 8, mirror 10, wal 14, state-persistence 8, atomic-writes 13, grand-tour 18, missing-modules 41, test-storage 14, canvas) |
 | Structural gate | UPDATED | atomic-writes structural pin whitelists the relocated one temp-writer in lib/storage/shared.js (the same single write, new canonical home) |
 
-NEXT WIRING CANDIDATES (pass 182+):
+## 11. Messaging trio charter + shared envelope (pass 182 — prd-canonicalization Wave E)
+
+| Work | Status | Detail |
+|---|---|---|
+| Charter | DONE | prd-canonicalization §6: msg=conversations+channels, stream=work queue, crew-bus=peer transport; overlaps BANNED (no dual-ownership channels, msg OR stream as truth, only crew-bus crosses the wire) |
+| Shared envelope | DONE | lib/messaging.js — crew-bus's v1.0 wire shape + version gate + sign/verify; crew-bus delegates validator/staging to it |
+| Pins | DONE | test/messaging-envelope.test.js 32 pins incl. integration legs (msg snapshot + stream row ride the envelope, zero semantic loss) |
+| Parity | DONE | staging seam moves the one object both layers read; unstamped v1.0 tolerance preserved |
+| Consumer suites | DONE | crew-bus 20, stream, agents, forum, webhooks, msg, msg-sync 9, forum-msg-escrow, node-crew 9, grand-tour 18 |
+
+NEXT WIRING CANDIDATES (pass 183+):
 1. `hotset` (#153): back state-store tree reads — cache consumers exist since 172/173; first `hydrate` touchpoint wins.
 2. Excellence gap: nothing writes per-brain `universeSeed` yet — first writer is the mesh genesis path.
 3. ~~Wave D (storage ownership matrix → storage.js split)~~ ✅ DONE pass 181 — see §10.
-4. Wave E (messaging charters) per labs/prd-canonicalization.md §6.
+4. ~~Wave E (messaging charters)~~ ✅ DONE pass 182 — see §11.
+5. Wave F (RemoteTransport interface) per labs/prd-canonicalization.md §7.
 
 ## Where the spine got large (the honest answer)
 

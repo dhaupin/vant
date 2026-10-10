@@ -3,10 +3,11 @@
 **Version:** 1.0
 **Branch:** axolotl
 **Date:** 2026-10-09
-**Status:** ACTIVE — Waves A–D landed (passes 179–181). Next: Wave E (messaging charters)
+**Status:** ACTIVE — Waves A–E landed (passes 179–182). Next: Wave F (RemoteTransport). The §6 charter table is the ruling ownership doc for the messaging trio.
 **Completed:** §2 Wave A (event observability, 40 pins), §3 Wave B (config env registry,
 23 pins), §4 Wave C (lib/hash.js, 29 pins + grep gate), §5 Wave D
-(ownership matrix + storage.js split, zero consumer churn) — all per
+(ownership matrix + storage.js split, zero consumer churn), §6 Wave E
+(messaging charters + shared envelope, pinned) — all per
 the §8 acceptance standard
 **Evidence base:** `labs/CANONICALIZATION-ROADMAP.md` (measured inventory, pass 179)
 **Related:** `labs/WIRING.md` (state-spine ledger — the model for what "done"
@@ -206,6 +207,35 @@ with overlapping semantics.
    transport-level crypto — its envelope becomes the cross-cutting one.
 3. Pins: each surface's suite stays green; integration test proves
    msg + stream can ride a shared envelope without semantic loss.
+
+### CHARTER (measured on the tree, pass 182)
+
+| Surface | OWNS | Must NOT do (banned overlap) |
+|---|---|---|
+| `lib/msg.js` | **Conversations** — persisted, ordered, decrypt-able transcripts (category/key via state-store) + in-process channel pub/sub (`msg.send`/`subscribe` for IPC-style shouts, e.g. forum) | no cross-node delivery (that's crew-bus), no task lifecycle (that's stream); a channel shout is not a queue row |
+| `lib/stream.js` | **Work queue** — durable task rows per stream, lease/watch, enqueue → poll → complete/fail, escrow-gated | no transcript/history semantics (post to msg for the record), no cross-node transport (hand the task across via crew-bus, row stays local) |
+| `lib/crew-bus.js` | **Peer transport** — HMAC-signed HTTP envelopes between registered nodes, version + scope gates on the receiver, node-registry presence | no storage (envelopes are fire-dispatch-ack, never persisted as truth), no queueing (undelivered = dropped loudly, never parked) |
+| `lib/messaging.js` (NEW, pass 182) | **The shared envelope** — crew-bus's wire shape `{event:'crew.<type>', from, type, payload, ts, nonce, v:{major,minor}}` + the receiver's version gate (major strict / minor additive) + sign/verify helpers | no dispatch, no storage, no transport — a pure seam so msg/stream ride the shape without requiring crew-bus |
+
+**Banned overlaps summary:** no dual-ownership channels; a record goes to
+msg OR stream, never both-as-truth; only crew-bus leaves the process.
+
+### Wave E landed (pass 182)
+
+- `lib/messaging.js`: `makeEnvelope/validateEnvelope/versionGate/
+  signEnvelope/verifyEnvelope/setReceiverVersion` — the v1.0 envelope
+  crew-bus has been sending since pass 61, made requirable without the
+  network stack. Crew-bus now delegates `_validVersion` and
+  `_setReceiverVersion` to it (single home; staging seam preserved
+  byte-identically; the unstamped-v1.0 tolerance preserved exactly).
+- Pins: `test/messaging-envelope.test.js` — shape contract, version
+  gate matrix (incl. garbage/unstamped/both-major-directions/minor),
+  sign/verify vs Encrypt, crew-bus parity (staging moves the same
+  object both layers read).
+- Integration: msg conversation snapshot leg + stream work row wrap
+  into the shared envelope and round-trip without semantic loss.
+- Consumer suites re-run green: msg, stream, crew-bus,
+  agents, forum, mcp smoke, grand-tour.
 
 ---
 
