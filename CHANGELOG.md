@@ -77,6 +77,40 @@ Both files are deferred — not in the b-T scope.
 
 ## [Unreleased] - Future
 
+### Added - Wiring Candidates Landed (pass 184 — hotset, universeSeed, transport verify)
+
+- **HotSet (#153) backs the state spine's tree-read hot path.** `stateStore.treeFor()`
+  re-parses a state file on every call — and `verifyStateRoot` + health's
+  integrity pass re-call it for the same few files. `lib/state-store.js` now
+  backs `treeFor` with a bounded `HotSet` (cap 64 — the ORPHAN #153 gets its
+  first consumer) keyed by a CORRECTNESS fingerprint (`stateFile:mtime:size`
+  + raw content): repeated reads of an UNCHANGED file reuse the parsed
+  payload; any disk change — including external tamper — changes the
+  fingerprint → miss → fresh honest read. Hot-set eviction touches only the
+  cache (never durability, #153's own law). Metrics: `stateStore.treeHot.metrics()`.
+- **`universeSeed` got its first WRITER (#158).** Genesis's `_writeTopology`
+  (all four ceremony legs) now persists the per-brain config `universeSeed`
+  override — derived from the SAME `resolveUniverse()` resolution the
+  spine's SeedChain uses, never clobbering an existing pin, never
+  overriding an explicit `VANT_UNIVERSE_SEED` env. The read path existed
+  since pass 171; the durable override is now real for mesh installs.
+- **Transport verify adoption (Wave F §7, wave 2).** `lib/sync.js` gains
+  `verifyProvider(name)` / `verifyAllProviders()` — the GitProvider stack's
+  explicit honest verify: reachable repo + branch probe + corpus snapshot;
+  unreachable/not-found report `verified:false`, never silently blessed
+  (the Wave F rule applied to the sync stacks). `lib/agora-sync.js`'s state
+  keeper stamps its reply with the OWNER's locally re-derived `tallyHash`;
+  the asker verifies its own post-merge re-tally against it — a forged or
+  stale stamp is REPORTED (`verify.verified:false`), never blessed, and
+  adopted ballots still survive on their own merge gates. Backward
+  compatible: a reply without `tallyHash` → `verify:null`.
+- Pinned by `test/wiring-184.test.js` (10 pins): hot cache hit + identical
+  root, tamper-detection (no stale blessing), hydrate unaffected, typed
+  absence; writer precedence + never-clobber + config↔explicit universe
+  round-trip; provider verify honest matrix through the test-DI seam; agora
+  stamp agree + forged-disagree legs. 14 consumer suites re-run green
+  (state tiers, sync trio, consensus, spine parity, remote-transport).
+
 ### Added - RemoteTransport Seam (pass 183, prd-canonicalization Wave F)
 - The five "send state elsewhere" stacks (sync, org-sync, agora-sync,
   mirror, connectors/s3) carried private auth lookup, retry

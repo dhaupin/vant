@@ -133,13 +133,23 @@ NEXT WIRING CANDIDATES (pass 182+):
 | Pins | DONE | `test/remote-transport.test.js` 23 pins — validators (traversal/absolute/space/dash/empty/non-string/too-long), ceremony (transient retries, auth-once, no backoff burn on hard fails, attempts-override, exhausted-throw), verify honesty, s3 adopter shape + secret-not-on-instance |
 | Verified | DONE | remote-transport 23, git-injection, s3/connector sync 18, sync-pull 15, org-sync 9, agora-sync 7, remote 10, state-wiring 51, messaging-envelope 32, hash-canon 29 — all green |
 
-NEXT WIRING CANDIDATES (pass 184+):
-1. `hotset` (#153): back state-store tree reads — cache consumers exist since 172/173; first `hydrate` touchpoint wins.
-2. Excellence gap: nothing writes per-brain `universeSeed` yet — first writer is the mesh genesis path.
+## 13. Wiring candidates landed (pass 184 — the pass-183 queue)
+
+| Work | Status | Detail |
+|---|---|---|
+| `hotset` (#153) backed state-store tree reads | **WIRED** (pass 184) | `lib/state-store.js` treeFor is backed by a bounded HotSet (cap 64) keyed by a CORRECTNESS fingerprint (`stateFile:mtime:size` + raw) — repeated reads of an unchanged file reuse the parsed payload (metrics via `stateStore.treeHot.metrics()`); any disk change including external tamper changes the fingerprint → miss → fresh honest read (no stale blessing, pinned). Hydrate/persist paths unchanged |
+| universeSeed first writer (#158) | **WIRED** (pass 184) | genesis's `_writeTopology` (all four ceremony legs: create/join/admit/accept) calls `_persistUniverseSeed()` — derives from the SAME `resolveUniverse()` resolution the spine's SeedChain uses and persists the per-brain config `universeSeed` override; NEVER clobbers an existing pin and NEVER overrides an explicit `VANT_UNIVERSE_SEED` env. The seeds.js read path was live; the writer fills the durability gap |
+| Transport verify (Wave F §7 adoption wave 2) | **WIRED** (pass 184) | `lib/sync.js` gains `verifyProvider(name)` / `verifyAllProviders()` — honest verify at the GitProvider stack: repo reachable + branch probe + corpus snapshot; unreachable/not-found report `verified:false`, never blessed. `lib/agora-sync.js` state-reply now carries the OWNER's locally re-derived `tallyHash`; the asker verifies its OWN post-merge re-tally against it — a mismatch (forged/corrupt stamp) is reported `verify.verified:false`, votes stay adopted on their own merge gates. Backward compatible (no `tallyHash` → `verify:null`) |
+| Pins | DONE | `test/wiring-184.test.js` 10 pins — hot cache hit/miss + identical-root, tamper-detection (no stale blessing), hydrate unaffected, typed absence; writer precedence + never-clobber + read-path round-trip; provider verify honest matrix via the test-DI seam; agora stamp agree/forged-disagree legs |
+| Verified | DONE | wiring-184 10 + 14 consumer suites re-run green: state-wiring 51, state-persistence 8, state-store-crossprocess 5, tombstones 2, sync 18, sync-pull 15, agora-sync 7, mcp-agora-sync 8, msg-sync 9, org-sync 9, engine-parity-spine 70, mesh-status 7, consensus 8, remote-transport 23 |
+
+1. ~~`hotset` (#153) backs state-store tree reads~~ ✅ DONE pass 184 — see §13.
+2. ~~universeSeed first writer~~ ✅ DONE pass 184 — see §13.
 3. ~~Wave D (storage ownership matrix → storage.js split)~~ ✅ DONE pass 181 — see §10.
 4. ~~Wave E (messaging charters)~~ ✅ DONE pass 182 — see §11.
 5. ~~Wave F (RemoteTransport interface)~~ ✅ DONE pass 183 — see §12.
-6. Transport adoption wave 2: sync.js GitProvider + org-sync/agora-sync gain an explicit `verify()` step on the seam (per PRD §7 — adoption is per-stack, remaining stacks align on `classifyError` semantics already via GitProvider).
+6. ~~Transport adoption wave 2 (explicit verify on sync + agora state keeper)~~ ✅ DONE pass 184 — see §13.
+7. Remaining ORPHANs per §3/§4 (precision.js, fold.js geometry, mesh generic WAL consumers) — pick up when a consumer exists.
 
 ## Where the spine got large (the honest answer)
 

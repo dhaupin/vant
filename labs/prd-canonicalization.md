@@ -3,7 +3,7 @@
 **Version:** 1.0
 **Branch:** axolotl
 **Date:** 2026-10-09
-**Status:** ACTIVE — Waves A–F landed (passes 179–183). The §6 charter table is the ruling ownership doc for the messaging trio.
+**Status:** ACTIVE — Waves A–F landed (passes 179–183); Wave F adoption wave 2 + the §12/§13 wiring candidates landed pass 184. The §6 charter table is the ruling ownership doc for the messaging trio.
 **Completed:** §2 Wave A (event observability, 40 pins), §3 Wave B (config env registry,
 23 pins), §4 Wave C (lib/hash.js, 29 pins + grep gate), §5 Wave D
 (ownership matrix + storage.js split, zero consumer churn), §6 Wave E
