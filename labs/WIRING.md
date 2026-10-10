@@ -123,12 +123,23 @@ NEXT WIRING CANDIDATES (pass 182+):
 | Parity | DONE | staging seam moves the one object both layers read; unstamped v1.0 tolerance preserved |
 | Consumer suites | DONE | crew-bus 20, stream, agents, forum, webhooks, msg, msg-sync 9, forum-msg-escrow, node-crew 9, grand-tour 18 |
 
-NEXT WIRING CANDIDATES (pass 183+):
+## 12. RemoteTransport seam (pass 183 — prd-canonicalization Wave F)
+
+| Work | Status | Detail |
+|---|---|---|
+| Interface | DONE | `lib/remote-transport.js` — the shared "send state elsewhere" seam built from the git-connector argv-array hardening: `auth()` (the ONE credential door; tokens in closures, never instance fields), `push()`/`pull()`/`verify()`, shared `_run()` ceremony (auth-once, classify, exponential backoff from GitProvider semantics), shared fail-closed validators (`refLike`/`secretLike`/`payloadLike`) and `classifyError` (VantError retryable flag trusted; beyond-ladder attempts = caller bug, non-retryable, never an invented delay) |
+| Base honesty | DONE (pinned) | unimplemented `push/pull/auth` THROW loudly; base `verify()` returns FALSE ("not verified") — never a silent bless; `describe()` leaks no secrets |
+| First adopter | DONE | `lib/connectors/s3.js` `S3Transport` — SigV4 credentials via the `auth()` door (closure-captured), pushes/pulls under the shared ceremony; `createClient` surface unchanged |
+| Pins | DONE | `test/remote-transport.test.js` 23 pins — validators (traversal/absolute/space/dash/empty/non-string/too-long), ceremony (transient retries, auth-once, no backoff burn on hard fails, attempts-override, exhausted-throw), verify honesty, s3 adopter shape + secret-not-on-instance |
+| Verified | DONE | remote-transport 23, git-injection, s3/connector sync 18, sync-pull 15, org-sync 9, agora-sync 7, remote 10, state-wiring 51, messaging-envelope 32, hash-canon 29 — all green |
+
+NEXT WIRING CANDIDATES (pass 184+):
 1. `hotset` (#153): back state-store tree reads — cache consumers exist since 172/173; first `hydrate` touchpoint wins.
 2. Excellence gap: nothing writes per-brain `universeSeed` yet — first writer is the mesh genesis path.
 3. ~~Wave D (storage ownership matrix → storage.js split)~~ ✅ DONE pass 181 — see §10.
 4. ~~Wave E (messaging charters)~~ ✅ DONE pass 182 — see §11.
-5. Wave F (RemoteTransport interface) per labs/prd-canonicalization.md §7.
+5. ~~Wave F (RemoteTransport interface)~~ ✅ DONE pass 183 — see §12.
+6. Transport adoption wave 2: sync.js GitProvider + org-sync/agora-sync gain an explicit `verify()` step on the seam (per PRD §7 — adoption is per-stack, remaining stacks align on `classifyError` semantics already via GitProvider).
 
 ## Where the spine got large (the honest answer)
 

@@ -77,6 +77,36 @@ Both files are deferred — not in the b-T scope.
 
 ## [Unreleased] - Future
 
+### Added - RemoteTransport Seam (pass 183, prd-canonicalization Wave F)
+- The five "send state elsewhere" stacks (sync, org-sync, agora-sync,
+  mirror, connectors/s3) carried private auth lookup, retry
+  classification, and verify steps. New `lib/remote-transport.js` is
+  the shared seam, built from the git-connector argv-array hardening
+  (the security template generalized):
+  - `RemoteTransport` interface: `auth()` (the ONE credential door —
+    tokens live in the closure, never instance fields), `push()`,
+    `pull()`, `verify()`, plus the shared `_run()` ceremony (once-per-
+    call auth, classify, exponential backoff from the GitProvider
+    semantics).
+  - Shared validators (`refLike`/`secretLike`/`payloadLike`) — the
+    `_gitRef` fail-closed pattern made requirable.
+  - Shared `classifyError`: only VantError's retryable flag is trusted
+    for classified errors; message-string matching only as the
+    non-VantError fallback; attempts beyond the ladder are a caller
+    bug and return non-retryable (never an invented delay).
+  - Base `verify()` returns false (honest: "not verified"), never a
+    silent bless; unimplemented `push/pull/auth` throw loudly.
+- First adopter: `lib/connectors/s3.js` gains `S3Transport` — SigV4
+  signing under the shared ceremony; `createClient` stays unchanged.
+  Further stacks adopt per-stack (org-sync/agora-sync already align
+  on the shared `classifyError` semantics through GitProvider).
+- Pinned by `test/remote-transport.test.js` (23 pins): validators
+  block traversal/absolute/space/dash/empty/non-string/too-long;
+  ceremony (transient retries, auth-once, no backoff burn on hard
+  fails, attempts-override, exhausted-throw); verify honesty;
+  s3 adopter shape + secret-not-on-instance; describe() leaks no
+  secrets. 10 consumer suites re-run green.
+
 ### Added - Messaging Trio Charters + Shared Envelope (pass 182, prd-canonicalization Wave E)
 - The charter is law (labs/prd-canonicalization.md §6): **msg.js owns
   conversations** (persisted transcripts + in-process channel pub/sub),
