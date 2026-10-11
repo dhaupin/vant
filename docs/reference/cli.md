@@ -285,7 +285,7 @@ vant universe record child.my-world --fork        # Record a folded fork manifes
 vant universe diff <idA> <idB>      # Cell-hash delta (same-universe contract)
 vant universe resume <id> --actor me  # Lock-gated, WAL-backed resume marker
 vant scenario crew audit-world --agents 3 --budget 500   # Crew over one shared escrow pool
-vant scenario task audit-world "Verify the pinned ledger" --cost 250  # Quarantine→escrow→consensus gates
+vant scenario task audit-world "Verify the pinned ledger" --cost 250  # Quarantine->escrow->consensus gates
 vant scenario status audit-world  # Roster + live pool headroom
 vant export bundle --out compliance-2026 --password <pw>  # Self-verifying bundle (Wave U5)
 vant export verify compliance-2026        # Recompute the hash chain (fail-closed on tamper)
@@ -308,7 +308,7 @@ vant s3 --push [--dry-run]  # Push local brain to remote
 vant s3 --pull [--dry-run]  # Pull remote brain to local
 
 vant backup create          # same backup-safety as snapshot/horcrux refresh:
-                            # existing targets go through tmp→validate→replace,
+                            # existing targets go through tmp->validate->replace,
                             # and the final file is re-verified after the swap
                             # (original restored if verification fails)
 vant backup restore <file>   # validates the file first - wrong password /
@@ -534,16 +534,16 @@ with its own `--help`.
 |---------|-------------|
 | `vant teams` | Organization and team management (org, dept, team, assign) |
 | `vant governance` | Governance decision making |
-| `vant market` | Knowledge trading (list, bid, trade, search, stats) + paid skills (Wave U6.5 productized: `skill-list/buy/deliver/settle/status/gate` — delivery-confirmed settlement over real escrow; gated by `market.skillsEnabled`, env alias `VANT_MARKET_SKILLS_ENABLED`) ([reference](/reference/escrow), [playbook](/operations-skills-marketplace)) |
-| `vant forum` | Forum and discussion (list, post, view, message) - tenancy-aware: anonymous sees the global commons only; votes ride consensus; `decisions <barcode>` inspects a thread's deliberation→decision trail (link, ballots, escrow holds, voted outcome — Wave U4) |
+| `vant market` | Knowledge trading (list, bid, trade, search, stats) + paid skills (Wave U6.5/6.6 productized: `skill-list/buy/deliver/settle/status/sweep/gate` - delivery-confirmed settlement over real escrow, TTL evidence sweep for stale holds, shill-resistant pre-trade reputation; gated by `market.skillsEnabled`, env alias `VANT_MARKET_SKILLS_ENABLED`, sweep TTL `VANT_MARKET_SKILLS_TRADE_TTL_MS`) ([reference](/reference/escrow), [playbook](/operations-skills-marketplace)) |
+| `vant forum` | Forum and discussion (list, post, view, message) - tenancy-aware: anonymous sees the global commons only; votes ride consensus; `decisions <barcode>` inspects a thread's deliberation->decision trail (link, ballots, escrow holds, voted outcome - Wave U4) |
 
 ```bash
 vant forum post "Adopt decision log" "We should persist outcomes"  # Publish (tenancy-stamped)
 vant forum list                                                    # Publications visible to your tenancy
 vant forum view PUB-1791683485237                                  # Read one
 
-# Wave U4: a vote can belong to a thread — the decision trail reads back
-vant forum decisions PUB-1791683485237      # link → ballots → escrow holds → outcome
+# Wave U4: a vote can belong to a thread - the decision trail reads back
+vant forum decisions PUB-1791683485237      # link -> ballots -> escrow holds -> outcome
 vant forum decisions PUB-1791683485237 --json   # machine-readable
 vant forum links                            # every thread with a linked vote
 ```

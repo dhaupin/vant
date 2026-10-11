@@ -284,7 +284,7 @@ NOTIFY_ON_NEW=true
 
 ### Search (RAG)
 
-Search/MCP tool settings (pass 194: these are LIVE now — `lib/config.js`
+Search/MCP tool settings (pass 194: these are LIVE now - `lib/config.js`
 exposes RAG getters `ragRehydrateMaxSize`/`ragCompressionThreshold`/
 `ragLimitMax`, wired into lib/search.js hydrate/compress/query/limit and
 bin/search.js. Bare names like `REHYDRATE_MAX_SIZE` are accepted as env
@@ -359,7 +359,7 @@ See these files in the repo for full examples:
   `VANT_*` env vars or brain config keys instead (see the four-surface
   precedence table above). As of pass 194 the RAG keys ARE live (`lib/config.js`
   RAG getters + lib/search.js wiring), so `REHYDRATE_MAX_SIZE` etc. are no
-  longer spec-only — but prefer the canonical `VANT_RAG_*` names.
+  longer spec-only - but prefer the canonical `VANT_RAG_*` names.
 - `mood.example.ini` - Mood template (**documentation-only, same caveat**):
   no code reads `mood.ini`; mood-style behavior is a personality concern
   the brain files (identity.md, persona sections) own.

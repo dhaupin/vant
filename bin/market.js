@@ -18,6 +18,7 @@
  *                              (payload '-' = read stdin)
  *   vant market skill-settle <tradeId> confirm|refute [--buyer <agentId>]
  *   vant market skill-status <listingId>
+ *   vant market skill-sweep
  *   vant market skill-gate [on|off]
  *
  * Exit codes: 0 ok; 1 typed lib error (code on stderr); 2 usage error.
@@ -167,9 +168,26 @@ require('../lib/sandbox').defaultSandbox.setCapabilities({
             console.log(`\nSkill: ${r.title} (${r.listingId})`);
             console.log(`  price:       ${r.price} credits`);
             console.log(`  payloadKind: ${r.payloadKind}`);
-            console.log(`  seller:      ${r.seller} (reputation: ${JSON.stringify(r.sellerReputation)})`);
+            console.log(`  seller:      ${r.seller} (legacy rep: ${JSON.stringify(r.sellerReputation)})`);
+            if (r.reputation) {
+                console.log(`  market rep:  score=${r.reputation.score} tx=${r.reputation.transactions} buyers=${r.reputation.distinctBuyers}` + (r.reputation.shillSuspicion ? ` ALERT: ${r.reputation.shillSuspicion} (top buyer owns ${Math.round(r.reputation.maxBuyerShare * 100)}% of sales)` : ''));
+            }
             console.log(`  revoked:     ${r.revoked}`);
             console.log(`  awaiting buyer confirmation: ${r.awaitingConfirmation}`);
+            break;
+        }
+
+        case 'skill-sweep': {
+            // (U6.6) on-demand evidence sweep: release stale pending_delivery
+            // holds. Read-only on young trades; a sweep of nothing exits 0.
+            const r = await market.skillSweep({ agentId: callerId() });
+            if (r && r.error) return _fail(r);
+            if (r.timedOut === 0) {
+                console.log(`✓ sweep clean — no trades exceeded the TTL (${r.ttlMs}ms).`);
+            } else {
+                console.log(`✓ swept ${r.timedOut} stale trade(s) (TTL ${r.ttlMs}ms):`);
+                for (const t of r.trades) console.log(`  - ${t.tradeId} (listing ${t.listingId}) aged ${t.agedMs}ms — hold released, NO debit, no trust penalty`);
+            }
             break;
         }
 
@@ -219,6 +237,9 @@ Paid skills (delivery-confirmed; gated: market.skillsEnabled):
                                  refute releases the hold (no debit) + rep-down
   vant market skill-status <listingId>
                                  Pre-trade snapshot incl. seller reputation
+                                 + shill-resistant market rep (concentration flag)
+  vant market skill-sweep        Release stale pending_delivery holds (TTL
+                                 evidence rules; no debit, no trust penalty)
   vant market skill-gate [on|off]  Show/toggle the marketplace gate
 
 Exit codes: 0 ok · 1 typed lib error · 2 usage · 3 skill gate off`);

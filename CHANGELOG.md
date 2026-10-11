@@ -5,6 +5,49 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 203 (U6.6 — the last three follow-ups resolved)
+
+### Added - Wave U6.6: timeout evidence sweep + shill-resistant reputation + the launch decision
+
+All three documented follow-ups from U6.5 resolved in one pass,
+everything additive to the productized contract:
+
+- **Timeout automation with evidence rules:** `skillSweep()` releases
+  stale `pending_delivery` escrow holds — on-demand (CLI `vant market
+  skill-sweep`; MCP `market_skill_sweep`, 317 → 318) - never a
+  background timer. TTL is `market.skillsTradeTtlMs` (default 72h;
+  env alias `VANT_MARKET_SKILLS_TRADE_TTL_MS` registered in
+  ENV_REGISTRY + consumed by `load()`, clamped 60s–30d).
+  EVIDENCE ONLY: the sweep releases the hold, restores listing supply,
+  and touches NO trust record (seller silence is not mis-delivery
+  evidence); `delivered` trades are NEVER auto-forfeited (the buyer
+  owns the settle decision — auto-forfeiting would favor whoever
+  stops reacting); terminal states untouched. The trade row records
+  `evidence.stage`/`agedMs` and `settleDecision: 'timeout'`.
+- **Shill-resistant reputation aggregation:**
+  `_shillResistantReputation(sellerId)` recomputes a seller's market
+  rep from their OWN settled trade legs with three teeth: a per-buyer
+  contribution cap (`min(3, ceil(n/2))`), distinct/total buyer
+  weighting, and a concentration flag (`shillSuspicion:
+  'concentrated'` when one buyer owns ≥ 50% of ≥ 3 settled sales)
+  surfaced to the buyer BEFORE paying via `skillStatus` (alongside the
+  legacy trust score). Refusals stay out of the score by design: the
+  tool marks, buyers decide.
+- **'launch'-payload decision — RESOLVED, not deferred:** the whole
+  credentialed-execution class (launch/eval/exec, anything not
+  text|code) is refused at LISTING time with `E_SKILL_PAYLOAD_KIND`;
+  the refusal message carries the why (a sandboxed eval surface +
+  threat model that does not exist). Pinned as the permanent
+  disposition — a product decision, no longer a prototype TODO.
+- **Pins:** `test/market-skills.test.js` 14 → 19 (sweep evidence
+  rules incl. no-debit/no-trust-penalty + supply restoration, sweep
+  scoping (young untouched / delivered never forfeited), shill-ring
+  score suppression + concentration flag, pre-trade rep surface,
+  launch-disposition). Grand-tour gate B 317 → 318.
+- **Docs:** playbook §6/6b (sweep economics + reputation teeth) and §7
+  (launch RESOLVED); cli.md market row; mcp-tools.md
+  `market_skill_sweep` row; PRD U6.6 checkboxes closed.
+
 ## [Unreleased] - pass 202 (U6.5 PRODUCTIZED — the skills marketplace is a product)
 
 ### Added - Wave U6.5: credentialed marketplace gets its product surface (gate ON is an explicit act)

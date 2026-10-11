@@ -473,7 +473,7 @@ Read history back with `vant_resolution_list(file="lessons.md")`.
 ### vant_universe_snapshot
 
 Derive a world's Genesis snapshot (Wave U1, `labs/prd-universe.md`): a
-PASS-derived identity from the universe constant — SeedChain seed, five
+PASS-derived identity from the universe constant - SeedChain seed, five
 generation cells (root + ring 1), and a canonical-encoder fingerprint.
 No state is written; the same (name, universe) always yields a
 byte-identical snapshot. Failures return typed
@@ -490,7 +490,7 @@ byte-identical snapshot. Failures return typed
 vant_universe_snapshot(name="my-world")
 ```
 
-Fork with `vant_universe_fork(parent="my-world", child="sub")` — the
+Fork with `vant_universe_fork(parent="my-world", child="sub")` - the
 child derives via SeedChain prefix folding, so `parent.child` never
 collapses onto a direct `child` derivation. Universe source reported by
 `vant_universe_status()` (`explicit` / `VANT_UNIVERSE_SEED env` /
@@ -541,7 +541,7 @@ vant_universe_status()
 Record a STORED, content-addressed scenario manifest (Wave U2,
 `labs/prd-universe.md`): freezes the world's snapshot (seed, five
 generation cells) plus a state root into a manifest whose id IS the
-hash of its payload — the same (world, universe, state root) recorded
+hash of its payload - the same (world, universe, state root) recorded
 from two fresh processes yields a byte-identical manifest and id, and
 a re-record of identical input is a dedup no-op (`added: false`).
 Persisted through the brain-scoped arch-A state store
@@ -572,9 +572,9 @@ Diff two stored manifests (U2.2): one structural comparison per genesis
 cell plus the frozen state-root crosscheck. Identical manifests report
 `identical: true` with zero changes. Contract-refused (typed, never
 noisy) when the manifests come from DIFFERENT universe constants
-(`E_SNAPSHOT_UNIVERSE` — the same-universe contract, carried by a
+(`E_SNAPSHOT_UNIVERSE` - the same-universe contract, carried by a
 universe-canary identity tag at record time) or address DIFFERENT
-worlds (`E_SNAPSHOT_WORLD_MISMATCH` — a rename, not a delta).
+worlds (`E_SNAPSHOT_WORLD_MISMATCH` - a rename, not a delta).
 
 **Params:**
 | Param | Type | What |
@@ -600,9 +600,9 @@ crosschecks the frozen state root against a live probe
 (`liveRootMatch`: `true` match / `false` drifted / `null` no probe),
 and writes a restore marker. The marker goes through
 `stateStore.persistMerged`, which takes the brain-root lock with
-fail-closed semantics — while a peer holds the region the resume is
+fail-closed semantics - while a peer holds the region the resume is
 REFUSED (`{ ok:false, code:'E_STATE_LOCKED' }`), never degraded to an
-unlocked write — and rides the arch-A WAL.
+unlocked write - and rides the arch-A WAL.
 
 U2 shipped the lock-gated VERIFIED MARKER path; Wave U3 added the
 escrow-backed byte-restoring executor (below).
@@ -623,7 +623,7 @@ Typed refusals: `E_SNAPSHOT_ABSENT` (unknown id),
 (fail-closed). CLI: `vant universe resume`.
 
 U3 addition: pass `materialize: true` to run the escrow-backed
-byte-restoring executor — recorded cell VALUES are restored through the
+byte-restoring executor - recorded cell VALUES are restored through the
 arch-A store, billed 1 credit per cell against
 `scenario:materialize:<actor>`, and a broke actor is refused typed
 (`E_SNAPSHOT_BUDGET`) before any write. See the
@@ -635,7 +635,7 @@ arch-A store, billed 1 credit per cell against
 
 Governance playbook (Wave U3, `labs/prd-universe.md`): assemble a
 scenario crew of N agents over ONE shared escrow budget pool. The pool
-is real — later tasks draw from it through the live escrow workspace
+is real - later tasks draw from it through the live escrow workspace
 gate. Ledger rides the arch-A state store
 (`state/universe-scenarios.json`, WAL included).
 
@@ -643,7 +643,7 @@ gate. Ledger rides the arch-A state store
 | Param | Type | What |
 |-------|------|------|
 | name | string | Crew name (alnum + `._-`, ≤64) (required) |
-| agents | number | Crew size 2–10 (default 3) |
+| agents | number | Crew size 2-10 (default 3) |
 | budget | number | Shared pool credits (default 120; ≥ crew size, ≤ 100000) |
 | universe | string | Universe constant override (optional) |
 
@@ -660,7 +660,7 @@ Typed refusals: `E_SCENARIO_NAME` / `E_SCENARIO_CREW` /
 ### vant_scenario_task
 
 Governance playbook (Wave U3): delegate ONE task end-to-end under the
-real gates — quarantine first (fail-closed, refusal recorded who/why,
+real gates - quarantine first (fail-closed, refusal recorded who/why,
 BEFORE any budget draw), escrow hold against the shared pool, then a
 CONSENSUS voted closeout (quorum ballot; no single-agent bless) logged
 via `resolution.logDelta`.
@@ -677,7 +677,7 @@ via `resolution.logDelta`.
 ```bash
 vant_scenario_task(crew="audit-world", task="Verify the pinned ledger", cost=250)
 ```
-Typed refusals: `E_SCENARIO_QUARANTINED` (every member quarantined —
+Typed refusals: `E_SCENARIO_QUARANTINED` (every member quarantined -
 escrow never touched), `E_SCENARIO_BUDGET` (empty pool),
 `E_SCENARIO_DELEGATE`, `E_SCENARIO_NO_QUORUM` (no voted pass),
 `E_SCENARIO_ABSENT` (crew not assembled), `E_SCENARIO_TASK` (hostile
@@ -687,7 +687,7 @@ text). CLI: `vant scenario task`.
 
 ### vant_scenario_status
 
-Governance playbook (Wave U3): inspect an assembled scenario crew —
+Governance playbook (Wave U3): inspect an assembled scenario crew -
 ledger row (phase, roster, workspace) plus the live escrow pool
 headroom, null-safe when escrow is absent.
 
@@ -926,15 +926,15 @@ identity, pending round-trips.
 
 ### forum_decisions
 
-Decision trail of a forum thread (Wave U4, `labs/prd-universe.md` —
-deliberation→decision records). A vote created with `thread: "PUB-..."`
+Decision trail of a forum thread (Wave U4, `labs/prd-universe.md` -
+deliberation->decision records). A vote created with `thread: "PUB-..."`
 is durably LINKED to that thread (`state/forum-threads.json`, WAL-
 backed); when the consensus tally resolves, the decision record carries
 the thread and the trail reads back the whole story:
 
-```
+```text
 forum_decisions(thread="PUB-1791683525171")
-→ { ok: true, thread, topic, proposal, author,
+-> { ok: true, thread, topic, proposal, author,
     ledger: { status, ballot, minQuorum, hash },
     votes: [ { voter, outcome, votedAt } ... ],
     holds: [ { holdId: "forum:<topic>", held, condition } ... ],
@@ -944,11 +944,11 @@ forum_decisions(thread="PUB-1791683525171")
 
 - `votes` comes from the consensus ledger (per-voter outcomes)
 - `holds` reports the escrow hold touched under the consensus hold id
-  (`forum:<topic>`) — present while held, empty after release
+  (`forum:<topic>`) - present while held, empty after release
 - `decision`/`outcome` appear once the tally resolves and the decision
   return path records it (persisted; survives restart)
 
-No link → typed `E_FORUM_ABSENT` (never a silent empty trail).
+No link -> typed `E_FORUM_ABSENT` (never a silent empty trail).
 Companion `forum_thread_links` lists every linked thread with its
 decided/open state. CLI: `vant forum decisions <barcode>` (+ `--json`)
 and `vant forum links`.
@@ -1423,7 +1423,8 @@ Caught by the coverage crosscheck - no prose for these (yet); params are exact f
 | market_skill_buy | listingId, buyerId, workspace - required: listingId, buyerId (escrow HOLD only; debit on confirm) |
 | market_skill_deliver | tradeId, payload (≤64KB), agentId - required: tradeId, payload (agentId = seller; buyer delivery refused E_SKILL_NOT_SELLER) |
 | market_skill_settle | tradeId, decision (confirm\|refute), agentId - required: tradeId, decision (agentId = buyer; confirm DEBITS once, refute releases the hold; double settlement E_SKILL_ALREADY_SETTLED) |
-| market_skill_status | listingId - required: listingId (pre-trade snapshot incl. seller reputation) |
+| market_skill_status | listingId - required: listingId (pre-trade snapshot incl. legacy + shill-resistant reputation with concentration flag) |
+| market_skill_sweep | (none) - run the TTL evidence sweep: stale pending_delivery trades release their hold (no debit, no trust penalty, supply restored; TTL via market.skillsTradeTtlMs / VANT_MARKET_SKILLS_TRADE_TTL_MS, default 72h) |
 | market_skill_gate | value (omit to read) - shows/toggles market.skillsEnabled (OFF by default; env alias VANT_MARKET_SKILLS_ENABLED) |
 
 ---

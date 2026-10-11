@@ -303,6 +303,23 @@ disposition) is the open item.**
   on the listing. Suite 8 → 14 pins; playbook:
   `docs/operations/skills-marketplace.md`. Still additive follow-ups:
   timeout automation, shill-resistant aggregation, 'launch' payloads.
+- [x] U6.6 FOLLOW-UPS RESOLVED (all three): (1) **Timeout automation
+  with evidence rules** — `skillSweep()` (CLI `vant market skill-sweep`,
+  MCP `market_skill_sweep`, 317 → 318) releases stale `pending_delivery`
+  escrow holds past `market.skillsTradeTtlMs` (default 72h; env alias
+  `VANT_MARKET_SKILLS_TRADE_TTL_MS`, clamped 60s–30d). Evidence rules:
+  release ONLY, no debit, supply restored, NO trust record (seller
+  silence ≠ mis-delivery evidence); `delivered` trades are NEVER
+  auto-forfeited (the buyer owns the settle decision); the trade row
+  records `evidence.stage` + aged TTL. (2) **Shill-resistant reputation**
+  — `_shillResistantReputation()` recomputes the seller's market rep from
+  their own settled legs with a per-buyer contribution cap, distinct/
+  total buyer weighting, and a `shillSuspicion: 'concentrated'` flag
+  (one buyer ≥ 50% of sales) surfaced pre-trade via `skillStatus`.
+  (3) **'launch' payload resolution** — the disposition is FINAL: the
+  whole credentialed-execution class (launch/eval/exec, anything not
+  text|code) is refused at LISTING time with `E_SKILL_PAYLOAD_KIND`.
+  Suite 14 → 19 pins.
 
 ## 4. Open questions (proposals attached)
 

@@ -65,6 +65,9 @@ vant market skill-deliver <tradeId> - --seller seller-1 < payload.txt
 # BUYER settles - the ONLY release paths:
 vant market skill-settle <tradeId> confirm --buyer buyer-1
 vant market skill-settle <tradeId> refute  --buyer buyer-1
+
+# OPERATOR SWEEP (on-demand; cron-able) - release stale holds:
+vant market skill-sweep
 ```
 
 Every verb: exit 0 ok · 1 typed lib error (code on stderr) ·
@@ -121,7 +124,8 @@ Six tools, same invariants as the CLI, plus gate:
 | `market_skill_buy` | `listingId`, `buyerId` (req), `workspace` | hold-only buy |
 | `market_skill_deliver` | `tradeId`, `payload` ≤64KB (req), `agentId` | `agentId` = the seller |
 | `market_skill_settle` | `tradeId`, `decision` confirm\|refute (req), `agentId` | `agentId` = the buyer |
-| `market_skill_status` | `listingId` | pre-trade snapshot incl. reputation |
+| `market_skill_sweep` | (none) | TTL evidence sweep for stale pending_delivery trades |
+| `market_skill_status` | `listingId` | pre-trade snapshot incl. legacy + shill-resistant reputation |
 | `market_skill_gate` | `value` (true/false) or none to read | persisted brain-config write |
 
 All six are gate-inert (`E_SKILLS_DISABLED`) while `market.skillsEnabled`
@@ -129,7 +133,50 @@ is off - including the allowlist path through `lib/rules.js` (the skill
 tool names contain no deny-substring; adding a name to
 `SAFE_TOOL_ALLOWLIST` stays a deliberate review act).
 
-## 6. Failure modes (each typed)
+## 6. Timeout automation + evidence rules (U6.6)
+
+A trade left in `pending_delivery` releases its escrow hold when it
+ages past `market.skillsTradeTtlMs` (default 72h; env alias
+`VANT_MARKET_SKILLS_TRADE_TTL_MS`, clamp 60s-30d). The sweep is
+ON-DEMAND - `vant market skill-sweep` / MCP `market_skill_sweep` (drive
+it from cron if you want it periodic) - and it acts ONLY WITH EVIDENCE:
+
+| skillState at sweep | What happens | Why |
+|---|---|---|
+| `pending_delivery` (aged out) | hold RELEASED, no debit, supply restored, NO trust record | silence from the seller is not mis-delivery evidence |
+| `delivered` (even aged out) | untouched | the buyer owes the settle decision; auto-forfeiting favors whoever stops reacting |
+| `settled` / `refuted` | untouched | terminal |
+
+The trade row carries its evidence (`evidence.stage = 'pending_delivery'`,
+aged TTL) and `settleDecision: 'timeout'`. Timeout is NOT a punishment:
+no trust record is written in either direction.
+
+## 6b. Shill-resistant reputation (U6.6)
+
+`skillStatus` now surfaces a market reputation computed from the
+seller's OWN settled trades, with three teeth against a shill ring:
+
+1. **Per-buyer cap** - one buyer contributes at most `min(3, ceil(n/2))`
+   weighted settles, so burst-pumping is capped.
+2. **Distinct-buyer weighting** - the score scales by
+   `distinct / total`; a high score needs real separate counterparties.
+3. **Concentration flag** - `shillSuspicion: 'concentrated'` when one
+   buyer owns >= 50% of the seller's sales (>= 3 transactions);
+   surfaced to the buyer BEFORE paying.
+
+Refusals stay out of the score on purpose: the tool refuses to pretend
+it can prove a shill - it marks, buyers decide.
+
+## 7. Boundary: 'launch' payloads (credentialed execution) - RESOLVED
+
+The U6.6 disposition is FINAL: the whole credentialed-execution class
+(`launch`, `eval`, `exec`, anything not `text` or `code`) is refused at
+LISTING time with `E_SKILL_PAYLOAD_KIND`. The refusal message states
+the why: credentialed execution needs a sandboxed eval surface plus a
+threat model that does not exist. This is a product decision, not a
+prototype TODO; the pin `U6.6 launch-payload DISPOSITION` enforces it.
+
+## 8. Failure modes (each typed)
 
 | Failure | Contract answer |
 |---|---|
@@ -144,15 +191,7 @@ tool names contain no deny-substring; adding a name to
 | gate off | `E_SKILLS_DISABLED` (CLI exit 3 on a bare query) |
 | destroyed/truncated state | arch-A store hydrate semantics (denied ≠ absent) |
 
-## 7. Boundary: 'launch' payloads (credentialed execution)
-
-Still a documented boundary - refused at listing time, not
-accepted-and-ignored. Credentialed execution would need a nerve-splice
-surface (sandboxed eval with a bought-context) and its own threat model.
-It is the natural NEXT productization step; nothing here pretends
-otherwise.
-
-## 8. Pin map
+## 9. Pin map
 
 | Pin | Where |
 |---|---|
@@ -167,4 +206,8 @@ otherwise.
 | **skill fields persist** (payloadKind/capabilityTag) | same (U6.5) |
 | **env-alias gate mounting** | same (U6.5) |
 | **MCP door loop** (all six tools, typed) | same (U6.5) |
+| **U6.6 sweep evidence rules** (release-only, no debit, no trust pen) | same (U6.6) |
+| **U6.6 sweep scoping** (young trade untouched; delivered never auto-forfeits) | same (U6.6) |
+| **U6.6 shill-resistant rep** (cap + weighting + concentration flag) | same (U6.6) |
+| **U6.6 launch disposition** (whole executed-kind class refused) | same (U6.6) |
 | grand tour door count 311 to 317 | `test/e2e-grand-tour.test.js` gate B |

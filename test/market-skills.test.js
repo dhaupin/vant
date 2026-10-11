@@ -263,6 +263,112 @@ async function main() {
         assert.strictEqual(status.title, 'door-skill', JSON.stringify(status).slice(0, 140));
     });
 
+    // ====================================================================
+    // (WAVE U6.6) Timeout sweep with evidence rules + shill-resistant rep
+    // ====================================================================
+
+    await ok('U6.6 sweep: stale pending_delivery hold released, NO debit, NO trust penalty, supply restored', async () => {
+        marketMod.clearState();
+        const escrow = require('../lib/escrow');
+        if (escrow.create) { const e = escrow.create(); if (e.setBudget) e.setBudget('sweep-buyer', 100); }
+        const listed = await marketMod.listSkill({ title: 'stale-skill', payloadKind: 'text', price: 20, supply: 1 }, { agentId: 'slow-seller', consentGiven: true });
+        const bought = await marketMod.buySkill(listed.listingId, 'sweep-buyer', { agentId: 'sweep-buyer', consentGiven: true });
+        assert(bought.bought === true, JSON.stringify(bought).slice(0, 120));
+        // Force the trade stale by aging its timestamp past the TTL.
+        const tradeRow = marketMod.getTrade(bought.tradeId);
+        assert(tradeRow, 'trade row missing');
+        tradeRow.timestamp = Date.now() - (marketMod.SKILLS_TTL_KEY ? (7 * 24 * 60 * 60 * 1000) : (7 * 24 * 60 * 60 * 1000));
+        const inst = trust.getTrust();
+        const repBefore = inst.getScore('slow-seller');
+        const swept = await marketMod.skillSweep({ agentId: 'cli' });
+        assert(swept.swept === true && swept.timedOut === 1, JSON.stringify(swept).slice(0, 140));
+        const entry = swept.trades[0];
+        assert.strictEqual(entry.tradeId, bought.tradeId, 'wrong trade swept');
+        assert.strictEqual(entry.stage, 'pending_delivery', 'evidence stage not recorded');
+        // Post-sweep: hold released, NO debit (escrow untouched beyond the hold), trade terminal.
+        const after = marketMod.getTrade(bought.tradeId);
+        assert.strictEqual(after.skillState, 'timed_out', 'trade not marked timed_out: ' + after.skillState);
+        assert.strictEqual(after.debit, null, 'sweep DEBITED — evidence rules forbid a blind debit');
+        assert(after.settleDecision === 'timeout' && after.evidence.agedMs > 0, 'evidence not recorded on the trade');
+        // No trust record: the seller's reputation did not move.
+        const repAfter = inst.getScore('slow-seller');
+        assert.strictEqual(repAfter, repBefore, 'sweep wrote a trust penalty (evidence rule violated)');
+        // Supply restored: a fresh buyer can take the single unit.
+        if (escrow.create) { const e2 = escrow.create(); if (e2.setBudget) e2.setBudget('sweep-buyer2', 100); }
+        const bought2 = await marketMod.buySkill(listed.listingId, 'sweep-buyer2', { agentId: 'sweep-buyer2', consentGiven: true });
+        assert(bought2.bought === true, 'sweep did not restore listing supply: ' + JSON.stringify(bought2).slice(0, 120));
+    });
+
+    await ok('U6.6 sweep evidence rules: young trade untouched; delivered trade NEVER auto-forfeited', async () => {
+        marketMod.clearState();
+        const young = await marketMod.listSkill({ title: 'young-skill', payloadKind: 'text', price: 4 }, { agentId: 'young-seller', consentGiven: true });
+        const by = await marketMod.buySkill(young.listingId, 'young-buyer', { agentId: 'young-buyer', consentGiven: true });
+        const r1 = await marketMod.skillSweep({});
+        const t1 = marketMod.getTrade(by.tradeId);
+        assert.strictEqual(t1.skillState, 'pending_delivery', 'young trade was swept: ' + JSON.stringify(r1).slice(0, 120));
+        // DELIVERED trades are also out of sweep scope (the buyer owes the settle
+        // decision; taking it away would favor the side that never reacts).
+        await marketMod.deliverSkill(by.tradeId, 'deliverable', { agentId: 'young-seller' });
+        // Even aged-past-TTL, delivered stays.
+        marketMod.getTrade(by.tradeId).timestamp = Date.now() - (90 * 24 * 60 * 60 * 1000);
+        await marketMod.skillSweep({});
+        const t2 = marketMod.getTrade(by.tradeId);
+        assert.strictEqual(t2.skillState, 'delivered', 'delivered trade was auto-forfeited by the sweep');
+    });
+
+    await ok('U6.6 shill-resistant rep: one buyer cannot own the score (per-buyer cap + distinct weighting + concentration flag)', async () => {
+        marketMod.clearState();
+        const listed = await marketMod.listSkill({ title: 'shill-skill', payloadKind: 'text', price: 1 }, { agentId: 'shill-seller', consentGiven: true });
+        // 6 settled trades: 5 by the SAME buyer (the shill pattern), 1 by a real one.
+        for (let i = 0; i < 5; i++) {
+            const bought = await marketMod.buySkill(listed.listingId, 'shill-buyer', { agentId: 'shill-buyer', consentGiven: true });
+            await marketMod.deliverSkill(bought.tradeId, 'payload ' + i, { agentId: 'shill-seller' });
+            await marketMod.settleSkill(bought.tradeId, 'confirm', { agentId: 'shill-buyer' });
+        }
+        const other = await marketMod.buySkill(listed.listingId, 'real-buyer', { agentId: 'real-buyer', consentGiven: true });
+        await marketMod.deliverSkill(other.tradeId, 'the one real delivery', { agentId: 'shill-seller' });
+        await marketMod.settleSkill(other.tradeId, 'confirm', { agentId: 'real-buyer' });
+        const rep = marketMod._shillResistantReputation('shill-seller');
+        assert(rep && rep.transactions === 6, 'settled trades not counted: ' + JSON.stringify(rep).slice(0, 160));
+        assert.strictEqual(rep.distinctBuyers, 2, 'distinct buyer count wrong');
+        // Score well below synthetic 1.0: the 5 repeats are capped and scaled down.
+        assert(rep.score < 0.5, 'shill ring scored too high (score=' + rep.score + ')');
+        assert(rep.score > 0, 'real settle contribution lost entirely');
+        // Concentration flag: the top buyer owns 5/6 ≥ 50% of sales.
+        assert.strictEqual(rep.shillSuspicion, 'concentrated', 'concentration not flagged: ' + JSON.stringify(rep.maxBuyerShare));
+        // Control: an even distribution across distinct buyers is NOT flagged.
+        const even = marketMod._shillResistantReputation('even-nobody');
+        assert(even && even.transactions === 0 && even.shillSuspicion === null, 'unknown seller should return a zero-transaction rep');
+    });
+
+    await ok('U6.6 skillStatus surfaces the shill-resistant rep pre-trade', async () => {
+        // Use the shill-skill listing from the previous pin (listSkill result
+        // variable is scoped inside it) — re-list for a standalone snapshot.
+        const repListed = await marketMod.listSkill({ title: 'rep-surface-skill', payloadKind: 'text', price: 1 }, { agentId: 'shill-seller2', consentGiven: true });
+        const st = await marketMod.skillStatus(repListed.listingId);
+        assert(st.reputation && typeof st.reputation.score === 'number', 'reputation not surfaced: ' + JSON.stringify(st && st.reputation).slice(0, 120));
+        assert.strictEqual(st.reputation.sellerId, 'shill-seller2', 'rep keyed to the wrong seller');
+        const withHistory = marketMod._shillResistantReputation('shill-seller');
+        assert(withHistory && withHistory.transactions === 6 && withHistory.shillSuspicion === 'concentrated', 'concentration flag not visible pre-trade: ' + JSON.stringify(withHistory).slice(0, 120));
+    });
+
+    marketMod.clearState();
+
+    await ok('U6.6 launch-payload DISPOSITION: permanently refused at listing time, with the evidence trail', async () => {
+        marketMod.clearState();
+        // The boundary is not 'prototype-only' anymore — it is THE decision:
+        // credentialed execution (a bought-context run) needs a sandboxed
+        // eval surface + threat model that does not exist. Shipped products
+        // refuse typed — not accepted-and-ignored, not 'maybe later'.
+        for (const kind of ['launch', 'eval', 'exec']) {
+            const r = await marketMod.listSkill({ title: 'forbidden', payloadKind: kind, payload: 'rm -rf /' }, { agentId: 'brazen-seller', consentGiven: true });
+            assert.strictEqual(r.code, 'E_SKILL_PAYLOAD_KIND', kind + ' not refused at listing');
+        }
+        // No listing state ever landed for any refused kind.
+        const rep = marketMod._shillResistantReputation('brazen-seller');
+        assert(rep && rep.transactions === 0, 'a refused listing left state behind: ' + JSON.stringify(rep).slice(0, 120));
+    });
+
     marketMod.clearState();
     config.set('market.skillsEnabled', false);
 
