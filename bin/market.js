@@ -94,21 +94,40 @@ require('../lib/sandbox').defaultSandbox.setCapabilities({
 
         case 'skill-list': {
             const title = args[1];
-            if (!title) { console.error('Usage: vant market skill-list <title> [--price N] [--kind text|code] [--desc <text>] [--seller <id>]'); process.exit(2); }
+            if (!title) { console.error('Usage: vant market skill-list <title> [--price N] [--kind text|code] [--desc <text>] [--seller <id>] [--supply N|Infinity]'); process.exit(2); }
             const payloadKind = flagVal('--kind') || 'text';
             const priceRaw = flagVal('--price');
             const price = priceRaw !== undefined ? Number(priceRaw) : undefined;
             if (priceRaw !== undefined && (!Number.isFinite(price))) { console.error('Market refused: --price must be a number\n  code: E_SKILL_PRICE'); process.exit(1); }
+            // (QC pass-205) Supply parity with the library: default is
+            // unlimited labor; an explicit finite count is enforced at
+            // buy time (E_SKILL_SOLD_OUT). 'Infinity' names the default
+            // explicitly; anything else must be a positive integer.
+            let supply;
+            const supplyRaw = flagVal('--supply');
+            if (supplyRaw !== undefined) {
+                if (supplyRaw === 'Infinity' || supplyRaw === 'unlimited') {
+                    supply = Infinity;
+                } else {
+                    supply = Number(supplyRaw);
+                    if (!Number.isInteger(supply) || supply <= 0) {
+                        console.error('Market refused: --supply must be a positive integer (or Infinity)\n  code: E_SKILL_SUPPLY');
+                        process.exit(1);
+                    }
+                }
+            }
             // Payload is NOT accepted at listing time — payloads are validated
             // AT DELIVERY (the contract: delivery never blesses unverified bytes).
             const r = await market.listSkill({
                 title, payloadKind, price,
+                ...(supply !== undefined ? { supply } : {}),
                 description: flagVal('--desc') || 'Listed via CLI'
             }, ctx);
             if (r && r.error) return _fail(r);
             console.log(`\n✓ Skill listed: ${r.listingId}`);
             console.log(`  title:       ${title}`);
             console.log(`  price:       ${r.listing.price} credits`);
+            console.log(`  supply:      ${r.listing.supply === Infinity ? 'unlimited (labor)' : r.listing.supply}`);
             console.log(`  payloadKind: ${payloadKind} (payload validated at delivery)`);
             console.log(`  seller:      ${r.listing.seller || 'anonymous'}`);
             console.log(`\nBuyer pays BEFORE seeing the payload — settle only after delivery.`);

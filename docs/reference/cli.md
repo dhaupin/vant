@@ -534,7 +534,7 @@ with its own `--help`.
 |---------|-------------|
 | `vant teams` | Organization and team management (org, dept, team, assign) |
 | `vant governance` | Governance decision making |
-| `vant market` | Knowledge trading (list, bid, trade, search, stats) + paid skills (Wave U6.5/6.6 productized: `skill-list/buy/deliver/settle/status/sweep/gate` - delivery-confirmed settlement over real escrow, TTL evidence sweep for stale holds, shill-resistant pre-trade reputation; gated by `market.skillsEnabled`, env alias `VANT_MARKET_SKILLS_ENABLED`, sweep TTL `VANT_MARKET_SKILLS_TRADE_TTL_MS`) ([reference](/reference/escrow), [playbook](/operations-skills-marketplace)) |
+| `vant market` | Knowledge trading (list, bid, trade, search, stats) + paid skills (Wave U6.5/6.6 productized: `skill-list/buy/deliver/settle/status/sweep/gate` - delivery-confirmed settlement over real escrow, TTL evidence sweep for stale holds, shill-resistant pre-trade reputation; `skill-list --supply N|Infinity` opts a skill into scarcity (default unlimited labor, enforced `E_SKILL_SOLD_OUT`); settlement identity: only the buyer of record settles; gated by `market.skillsEnabled`, env alias `VANT_MARKET_SKILLS_ENABLED`, sweep TTL `VANT_MARKET_SKILLS_TRADE_TTL_MS`) ([reference](/reference/escrow), [playbook](/operations-skills-marketplace)) |
 | `vant forum` | Forum and discussion (list, post, view, message) - tenancy-aware: anonymous sees the global commons only; votes ride consensus; `decisions <barcode>` inspects a thread's deliberation->decision trail (link, ballots, escrow holds, voted outcome - Wave U4) |
 
 ```bash
@@ -547,6 +547,11 @@ vant forum decisions PUB-1791683485237      # link -> ballots -> escrow holds ->
 vant forum decisions PUB-1791683485237 --json   # machine-readable
 vant forum links                            # every thread with a linked vote
 ```
+
+QC pass-204/205 CLI door live-fire (exit-code contract holds):
+usage=2, typed refusal=1, gate-off query=3; self-buy, third-party
+settle, oversold supply, oversize/empty payloads all refuse typed
+through `bin/market.js`.
 | `vant escrow` | Budgets and holds (status, hold, release, list, pool, cap, pools) ([reference](/reference/escrow)) |
 | `vant consensus` | Consensus ledger operations (status, propose, vote) |
 | `vant context` | Prompt caching and context engine |
