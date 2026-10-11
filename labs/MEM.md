@@ -7,7 +7,24 @@
 
 ## Handoff
 
-**Last known good commit:** pass 197 — Wave U3 LANDED: governance
+**Last known good commit:** pass 198 — post-merge audit of U1–U3:
+found + fixed the POOL-DEBIT bug (scenario escrow hold was bookkeeping-
+only; the shared pool never drained — live-fire caught 3 draws leaving
+the pool at 100/100). Fix: hold converts to a REAL workspace
+`Escrow.recordSpend` (auto-persists; draw routed through a fresh
+instance so the `{ orgLimit }` cap the `workspaceCanSpend` helper drops
+still bites); refusal paths refund member+pool rows; completed tasks
+stay charged. Pinned (suite 8→10, makeStubs gains an Escrow-class
+stub); live-verified 100→70→40 + over-budget refuses with refund
+intact. U1–U3 committed as `9738019` (70 files). Audit otherwise clean:
+MCP/scenario/universe surfaces match their docs; grand tour 18/18,
+manifest 22/0, genesis 11/0 still green. LESSON: a hold is an audit
+row, never a debit — "the gate is real" claims must be tested against
+the LEDGER, not the boolean. NEXT-UP: U4 forum decision records, U5
+provenance bundle, U6 marketplace prototype, merge #118, or owner
+direction.
+
+**Previous (pass 197) — Wave U1+U2+U3 LANDED:** governance
 scenario playbook (`lib/scenario.js` + `bin/scenario.js`: crew of N
 agents over ONE shared escrow workspace pool, per-task gates
 quarantine→escrow→consensus, quorum closeout via resolution.logDelta;

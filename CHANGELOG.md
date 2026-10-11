@@ -5,6 +5,35 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 198 (post-merge audit — the pool now REALLY debits)
+
+### Fixed - scenario escrow debit was bookkeeping-only: the shared pool never drained
+
+The fresh-process live-fire sweep of the U1–U3 waves caught the exact
+PRD-claim-vs-ledger divergence the wave was built to prevent: three
+successful `vant scenario task` runs left the shared pool at 100/100 —
+`escrowMod.hold()` is an AUDIT row (a boolean of "the gate fired"), not
+a debit. `runScenarioTask` now converts the hold into a REAL
+workspace-charged `Escrow.recordSpend` (auto-persisting; draw check
+routed through a fresh disk-coherent instance so the `{ orgLimit }`
+one-shot cap survives — the module-level `workspaceCanSpend` helper
+drops it): a completed task consumes budget; every refusal path
+(delegate failure, consensus unavailable, no-quorum closeout) refunds
+member AND pool rows via `Escrow.refund` before the typed verdict is
+recorded — a refused task never eats credits. Pinned: two new pins in
+`test/scenario-crew.test.js` (success charges the pool; refused closeout
+restores it — stub Escrow models canSpend/recordSpend/refund), suite
+8 → 10. Live-verified through the REAL escrow store: 30-credit +
+30-credit draws drain 100 → 70 → 40, an 80-credit over-budget draw
+refuses `E_SCENARIO_BUDGET` and leaves the pool at 40 (refund intact).
+Also fixed while here: the stub `/tmp` scope note in the audit trail
+(the `escrowTouched` gate-order assertions are unchanged and still
+hold — debit now fires inside the gate, after the draw check). No other
+callers of `workspaceCanSpend` were affected (market/consensus/teams
+gates do not pass `orgLimit`).
+
+---
+
 ## [Unreleased] - pass 197 (Wave U3 — governance scenario playbook + resume materialization)
 
 ### Added - Wave U3: Governance Scenario Playbook

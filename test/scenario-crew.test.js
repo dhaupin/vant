@@ -62,6 +62,7 @@ function makeStubs(opt = {}) {
     let holdSeq = 0;
     const deltas = [];
     let escrowTouched = false;
+    const spends = [], refunds = [];
 
     const trust = {
         isQuarantined: (id) => quarantine.has(id),
@@ -76,7 +77,20 @@ function makeStubs(opt = {}) {
         },
         checkQuota: () => ({ allowed: true }),
         hold: (id, cond) => { const holdId = 'hold-' + (++holdSeq); holds.set(id, { cond, holdId }); return { held: true, holdId }; },
-        release: (id) => ({ released: holds.delete(id) })
+        release: (id) => ({ released: holds.delete(id) }),
+        // (pass-198 debit contract) the stub exposes an Escrow class whose
+        // instance methods mirror the real escrow helper model: canSpend,
+        // recordSpend (the pool debit), refund (restores member + pool).
+        Escrow: class {
+            canSpend(_agentId, amount, _opts) { escrowTouched = true; return poolSpent + amount > poolLimit ? { allowed: false, reason: 'workspace_pool_exceeded', available: poolLimit - poolSpent } : { allowed: true, reason: 'budget_available', available: poolLimit - poolSpent }; }
+            recordSpend(_agentId, amount) {
+                if (poolSpent + amount > poolLimit) return { recorded: false, reason: 'workspace_pool_exceeded' };
+                poolSpent += amount; spends.push(amount);
+                return { recorded: true, spent: poolSpent };
+            }
+            refund(_agentId, amount) { refunds.push(amount); poolSpent = Math.max(0, poolSpent - amount); return { refunded: true };
+            }
+        }
     };
 
     // Consensus double honoring the create/vote/tally contract: one vote per
@@ -116,7 +130,12 @@ function makeStubs(opt = {}) {
 
     return {
         gates: { trust, escrow, consensus, resolution },
-        _interior: { quarantine, deltas, holds, setPool: (limit, spent) => { poolLimit = limit; poolSpent = spent; }, escrowTouched: () => escrowTouched }
+        _interior: {
+            quarantine, deltas, holds, spends, refunds,
+            setPool: (limit, spent) => { poolLimit = limit; poolSpent = spent; },
+            pool: () => ({ spent: poolSpent, limit: poolLimit }),
+            escrowTouched: () => escrowTouched
+        }
     };
 }
 
@@ -241,6 +260,39 @@ ok('U3.3: one live voter left (quarantined peer) → E_SCENARIO_NO_QUORUM, no si
     assert.strictEqual(r.ok, false);
     assert.strictEqual(r.code, 'E_SCENARIO_NO_QUORUM');
     assert.strictEqual(stubs._interior.holds.size, 0, 'hold released on refused closeout');
+});
+
+// ------------------------------------------------------------------
+// (pass-198 audit) Escrow DEBIT contract — the pool is REALLY charged
+// ------------------------------------------------------------------
+
+ok('U3.1 debit: a successful task really charges the shared pool (hold + recordSpend)', async () => {
+    const name = 'debit-success';
+    forgeCrewLedger(name, [
+        { id: 'agent_d1', name: 'd1', perm: 'lead' },
+        { id: 'agent_d2', name: 'd2', perm: 'worker' }
+    ]);
+    const stubs = makeStubs();
+    const r = await scenarioMod.runScenarioTask({ gates: stubs.gates, crew: name, task: 'paid work', cost: 40, ledgerFile: LEDGER });
+    assert.strictEqual(r.ok, true, JSON.stringify(r).slice(0, 200));
+    assert.deepStrictEqual(stubs._interior.spends(), [40], 'one debit lands for the task cost');
+    assert.strictEqual(stubs._interior.pool().spent, 40, 'pool headroom shrinks by the cost');
+    assert.deepStrictEqual(stubs._interior.refunds(), [], 'success does NOT refund');
+});
+
+ok('U3.1 debit: a refused closeout REFUNDS the pool debit (refused task never eats credits)', async () => {
+    const name = 'debit-refund';
+    forgeCrewLedger(name, [
+        { id: 'agent_r1', name: 'r1', perm: 'lead' },
+        { id: 'agent_r2', name: 'r2', perm: 'worker' }
+    ]);
+    // Solo live voter → closeout refusal → refund path fires.
+    const stubs = makeStubs({ quarantined: ['agent_r2'] });
+    const r = await scenarioMod.runScenarioTask({ gates: stubs.gates, crew: name, task: 'refund drill', cost: 30, ledgerFile: LEDGER });
+    assert.strictEqual(r.ok, false);
+    assert.strictEqual(r.code, 'E_SCENARIO_NO_QUORUM');
+    assert.deepStrictEqual(stubs._interior.refunds(), [30], 'the debit is restored on refusal');
+    assert.strictEqual(stubs._interior.pool().spent, 0, 'pool back to zero spent');
 });
 
 // ------------------------------------------------------------------

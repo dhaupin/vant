@@ -3,11 +3,35 @@
 **Branch:** axolotl  
 **Last Updated:** 2026-10-10  
 **Session:** Pass 197+ — prd-universe.md authored (U1–U6 waves);
-Wave U3 LANDED (governance scenario playbook + resume's escrow-backed
-byte-restoring materialization) — see labs/prd-universe.md §3 for
-per-wave checklists
+Wave U3 LANDED + pass-198 post-merge audit fixed the escrow-debit bug
+(see labs/prd-universe.md §3 for per-wave checklists)
 
 ---
+
+## Session (2026-10-10 — pass 198: post-merge audit — pool-debit bug fixed)
+
+**What shipped** (owner: "commit then look for bugs, stuff we missed,
+stuff that isn't wired in the first 3 u passes"):
+
+- **Committed Wave U1–U3 as `9738019`** (70 files, 6708 insertions).
+- **AUDIT of all three U passes** — surfaces cross-checked against code
+  (escrow helpers, agents spawn/delegate/flush, consensus create/vote/
+  tally async contract, rules allowlist, MCP registration incl.
+  consensus-type fields, docs coverage gates). One real bug found.
+- **POOL-DEBIT BUG (fixed + pinned):** `runScenarioTask`'s escrow gate
+  never debited the shared pool — `hold()` is an audit row, not a
+  debit, so three successful tasks left the pool at 100/100 while the
+  PRD claimed "the budget is the REAL gate". Fix: convert the hold into
+  a workspace-charged `Escrow.recordSpend` (draw check now through a
+  fresh disk-coherent instance so the `{ orgLimit }` one-shot cap
+  survives — the `workspaceCanSpend` helper drops it); every refusal
+  path (delegate/consensus/no-quorum) refunds member + pool rows; a
+  completed task STAYS charged. Live-verified through the real store:
+  100 → 70 → 40, over-budget draw refuses`E_SCENARIO_BUDGET` charged-
+  nothing, refund intact. Pins: makeStubs gains an Escrow class stub
+  (canSpend/recordSpend/refund) + 2 debit-contract pins (suite 8 → 10).
+- **Exit-code check:** `vant scenario task --cost 500` correctly exits
+  1 (earlier 0 was a `| tail` pipeline masking PIPESTATUS, not a bug).
 
 ## Session (2026-10-10 — pass 197: Wave U3 governance scenario playbook + resume materialization)
 
