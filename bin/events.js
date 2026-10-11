@@ -132,9 +132,15 @@ if (!events.sinkPath()) {
             process.exit(0);
         }
     }
-    console.error('Sink is OFF and no prior session file exists.');
+    // (QC pass-205) A tail with nothing to read is a CLEAN empty result,
+    // not an error: the sink being OFF is normal operation (the docs tell
+    // you how to enable it), and a fresh CI runner has no prior session
+    // files. This used to exit 2 — which failed test/ci.js's bin-smoke on
+    // every machine where /tmp/vant-events had never been written — the
+    // exact 'works on my laptop' trap the exit-semantics runner resists.
+    console.log('(no events yet — the sink is OFF and no prior session file exists)');
     console.error('Start recording in the emitting process first: vant events enable');
-    process.exit(2);
+    process.exit(0);
 }
 
 const render = (res) => {
