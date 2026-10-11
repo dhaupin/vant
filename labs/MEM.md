@@ -7,7 +7,24 @@
 
 ## Handoff
 
-**Last known good commit:** pass 199 — Wave U4 LANDED: deliberation→
+**Last known good commit:** pass 200 — Wave U5 LANDED: provenance/
+compliance bundle (`lib/export-bundle.js` + `bin/export.js`, routed).
+`vant export bundle --out <dir>` (registry manifest, citations,
+scoped audit excerpt, encrypted horcrux, L-hashed RUNNING content
+manifest — entry i folds i-1's digest, lib/hash.js only); bundle.json
+names the terminal digest OUTSIDE the chain so rerooting is caught;
+`vant export verify <dir>` recomputes from actual bytes, fail-closed
+typed (`E_BUNDLE_TAMPERED/ABSENT/DENIED`); extra/missing files are
+tamper, not noise. Pins 11/11 (six tamper negatives); CLI coverage
+124→125; live-fired. LESSONS: (1) transform.toHorcrux re-vaf-validates
+its sink — absolute /home/… paths blocked; exporter requires repo-
+relative --out (typed refusal), which is the honest posture anyway;
+(2) a self-declared chain is tamper-EVIDENCE not trust ROOT — full
+re-forge recomputes consistently; root = horcrux password + external
+anchoring (documented in-suite). NEXT-UP: U6 credentialed marketplace
+prototype (labs/, research frontier), merge #118, or owner direction.
+
+**Previous (pass 199) — Wave U4: deliberation→decision records.**
 decision records. `forum.vote({ thread })` durably links a publication
 barcode to its consensus topic (`state/forum-threads.json`, WAL,
 FIFO 500); the decision return path reads the durable link first so a

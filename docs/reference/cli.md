@@ -272,6 +272,7 @@ Clients authenticate with `X-API-Key: <key>` or
 | `vant schema` | JSON/YAML schema validation |
 | `vant universe` | Genesis snapshots + stored scenario manifests: derive/fork a world's deterministic identity; record/diff/resume content-addressed manifests; resume `--materialize` restores recorded cell values escrow-gated (Wave U3) (`bin/universe.js`) |
 | `vant scenario` | Governance playbook (Wave U3): scenario crew over one shared escrow pool, delegated task under quarantine+escrow+consensus gates, roster/pool status (`bin/scenario.js`) |
+| `vant export` | Provenance/compliance bundle (Wave U5): `bundle --out <dir>` assembles a self-verifying bundle (registry manifest, citations, audit excerpt, encrypted horcrux, L-hashed running content manifest); `verify <dir>` recomputes the chain and FAILS CLOSED on tamper (`E_BUNDLE_TAMPERED`) (`bin/export.js`) |
 
 ```bash
 vant storage                # Show storage status
@@ -286,6 +287,8 @@ vant universe resume <id> --actor me  # Lock-gated, WAL-backed resume marker
 vant scenario crew audit-world --agents 3 --budget 500   # Crew over one shared escrow pool
 vant scenario task audit-world "Verify the pinned ledger" --cost 250  # Quarantine→escrow→consensus gates
 vant scenario status audit-world  # Roster + live pool headroom
+vant export bundle --out compliance-2026 --password <pw>  # Self-verifying bundle (Wave U5)
+vant export verify compliance-2026        # Recompute the hash chain (fail-closed on tamper)
 vant tmp list               # List temp files (workspace space)
 vant tmp create "text"      # Create a temp file
 vant tmp clean              # Clear the workspace temp space

@@ -3,10 +3,38 @@
 **Branch:** axolotl  
 **Last Updated:** 2026-10-10  
 **Session:** Pass 197+ — prd-universe.md authored (U1–U6 waves);
-Waves U1–U4 LANDED (+ pass-198 audit fixed the escrow-debit bug) —
+Waves U1–U5 LANDED (+ pass-198 audit fixed the escrow-debit bug) —
 see labs/prd-universe.md §3 for per-wave checklists
 
 ---
+
+## Session (2026-10-10 — pass 200: Wave U5 provenance/compliance bundle)
+
+**What shipped** (owner: "u5 next! then right to u6"):
+
+- **U5.1 BUNDLE ASSEMBLY (`lib/export-bundle.js` + `bin/export.js`,
+  dispatcher-routed):** `vant export bundle --out <dir>` writes
+  manifest.json (registry export), citations.json, audit-excerpt.json
+  (scoped), horcrux.svg (ENCRYPTED through the production
+  transform.toHorcrux pipeline), content-manifest.json (L-hash chain),
+  bundle.json (the handle naming the terminal digest). The L-hash is a
+  RUNNING list (entry i folds i-1's digest) — byte change, delete,
+  insert, or reorder breaks the tip.
+- **U5.2 FAIL-CLOSED VERIFY:** recompute per-entry hashes + chain links
+  + terminal digest + bundle.json from the ACTUAL bytes; extra/missing
+  files are tamper, unreadable is E_BUNDLE_DENIED (denied ≠ absent);
+  typed codes everywhere. Rerooting attacks caught at the bundle.json
+  door; full re-forges are tamper-EVIDENCE not trust ROOT (noted
+  honestly in-suite: the root is the horcrux password + external
+  anchoring).
+- **U5.3 PINS:** `test/export-bundle.test.js` 11/11 (roundtrip, six
+  tamper negatives, typed password/absolute-path refusals). CLI
+  coverage 124 → 125; grand-tour/lint:coverage/fiction/frontmatter all
+  PASS; both verbs live-fired (bundle digest b6f5397…, verify ✓).
+- Real-world trap en route: transform.toHorcrux re-vaf-validates its
+  sink path and BLOCKS absolute /home/… residency paths — the exporter
+  now requires repo-relative `--out` (typed `E_BUNDLE_OUT`), which is
+  also the honest product posture (export artifacts live in the repo).
 
 ## Session (2026-10-10 — pass 199: Wave U4 deliberation→decision records)
 

@@ -229,17 +229,37 @@ Estimate was: **2–3 passes.** Landed in one pass, same shape as U1–U3.
   ops-parity for the links store. Grand-tour gate B bumped 309 → 311,
   re-run 18/18.
 
-### Wave U5 — Provenance / Compliance Bundle
-Estimate: **2 passes.**
+### Wave U5 — Provenance / Compliance Bundle — SHIPPED (pass 200, one pass)
+Estimate was: **2 passes.** Landed in one pass, same shape as U1–U4.
 
-- [ ] U5.1 `vant export bundle --out <dir>` — manifest.json (registry
+- [x] U5.1 `vant export bundle --out <dir>` — manifest.json (registry
   export), citations file, audit ledger excerpt (scoped), horcrux
   (encrypted, password-gated), all files L-hashed in a content
-  manifest (hash.js).
-- [ ] U5.2 `vant export verify <bundle-dir>` — recompute the manifest
-  hash, fail-closed on tamper detection.
-- [ ] U5.3 Pin suite `test/export-bundle.test.js` (roundtrip +
-  tamper-detection negative).
+  manifest (hash.js). Landed as `lib/export-bundle.js` +
+  `bin/export.js` (dispatcher-routed): the L-hash is a RUNNING hash
+  list — entry i folds entry i-1's digest
+  (sha256(prev + file + ':' + fileHash); lib/hash.js sha256 only) —
+  so any byte change, delete, insert, or reorder breaks the terminal
+  digest. `bundle.json` names the chain's terminal digest while living
+  OUTSIDE the chain (verify compares the recomputed digest against it —
+  a rerooting attack is caught at that door). Horcrux omission
+  (`--no-horcrux`) and password absence refuse typed
+  (`E_BUNDLE_PASSWORD`); absolute out paths refuse typed (the vaf
+  traversal gate takes /home/… residency paths, and export artifacts
+  stay repo-relative)
+- [x] U5.2 `vant export verify <bundle-dir>` — recompute the manifest
+  hash, fail-closed on tamper detection. Verify recomputes from the
+  ACTUAL bytes: per-entry hashes + chain links + terminal digest +
+  bundle.json all compared; extra/missing files are tamper, not noise
+  (typed `E_BUNDLE_TAMPERED` / `E_BUNDLE_ABSENT` / `E_BUNDLE_DENIED`).
+- [x] U5.3 Pin suite `test/export-bundle.test.js` — 11 pins (roundtrip
+  + tamper negatives: byte-drift, chain-recompute-without-bundle, full
+  reroot-vs-bundle.json, extra file, missing file, absent dir, typed
+  password/absolute-path refusals). Honest scope note (in-suite): a
+  FULL re-forge of every artifact recomputes consistently — a
+  self-declared chain is tamper-EVIDENCE, not a trust ROOT; the root is
+  the horcrux password + external anchoring (e.g. record the digest
+  somewhere outside the bundle). CLI live-fired both verbs.
 
 ### Wave U6 — Credentialed Marketplace (research frontier)
 Estimate: **6–8 passes**, split: prototype in `labs/`, productize later.

@@ -5,6 +5,47 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 200 (Wave U5 — provenance/compliance bundle)
+
+### Added - Wave U5: a self-verifying export bundle (tamper-EVIDENCE, fail-closed)
+
+Fifth wave of the universe PRD (`labs/prd-universe.md` U5.1–U5.3, one
+pass). `vant export bundle --out <dir>` assembles ONE directory an
+operator can hand to an auditor, and `vant export verify <dir>`
+recomputes every hash from the actual bytes:
+
+- **The L-hash is a RUNNING hash list** (`lib/export-bundle.js`):
+  entry i's digest folds entry i-1's (sha256(prev + file + ':' +
+  fileHash) — lib/hash.js sha256 is the ONLY hash source), so deleting,
+  inserting, reordering, or byte-drifting ANY file breaks the terminal
+  digest. `bundle.json` names the terminal digest while living OUTSIDE
+  the chain — a rerooting attack (forge the file, re-record the
+  manifest, recompute the chain) is caught at the bundle.json door;
+  bundle.json itself is compared against the RECOMPUTED digest, the
+  truth.
+- **The bundle:** `manifest.json` (registry export, point-in-time),
+  `citations.json` (citation ledger), `audit-excerpt.json` (scoped:
+  action/level/limit, default last 100), `horcrux.svg` (ENCRYPTED brain
+  snapshot through the production transform.toHorcrux pipeline —
+  password-gated; `--no-horcrux` omits it, missing password refuses
+  typed `E_BUNDLE_PASSWORD`), `content-manifest.json` (the chain),
+  `bundle.json` (the handle).
+- **Fail-closed verify (U5.2):** extra or missing files are TAMPER, not
+  noise; unreadable manifest is `E_BUNDLE_DENIED` (denied ≠ absent);
+  every refusal typed (`E_BUNDLE_TAMPERED` / `E_BUNDLE_ABSENT`).
+  Absolute out paths refuse typed (the vaf gate owns /home/… residency
+  paths; export artifacts stay repo-relative — the same gate caught the
+  first implementation passing an absolutized horcrux sink path).
+- **Honest scope note (pinned in-suite):** a FULL re-forge of every
+  artifact recomputes consistently — a self-declared chain is
+  tamper-EVIDENCE, not a trust ROOT. The root is the horcrux password +
+  external anchoring (record the digest somewhere outside the bundle).
+- **CLI +1 bin (`bin/export.js`, dispatcher-routed) +2 verbs; pins:**
+  `test/export-bundle.test.js` 11/11 (roundtrip, six tamper negatives,
+  typed refusals); CLI coverage 124 → 125; both verbs live-fired.
+
+---
+
 ## [Unreleased] - pass 199 (Wave U4 — deliberation→decision records)
 
 ### Added - Wave U4: a forum decision now knows its THREAD (and the trail survives restart)
