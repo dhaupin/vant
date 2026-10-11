@@ -175,6 +175,34 @@ ok('crew assembly: hostile names/sizes/budgets fail closed typed', () => {
     }
 });
 
+// (QC pass-202 live-fire) Explicit-but-invalid numeric flags must refuse
+// typed, never silently adopt the default — the old `parseInt(x) || 3`
+// turned `--agents 0` / `--agents notanumber` into a 3-agent "success".
+ok('crew assembly: agents=0 / garbage refuse typed (E_SCENARIO_CREW), not a default crew', () => {
+    for (const bad of [0, '0', 'notanumber', '']) {
+        const r = scenarioMod.assembleCrew({ name: 'ok-crew', agents: bad, budget: 50, ledgerFile: LEDGER });
+        assert.strictEqual(r.ok, false, 'agents=' + JSON.stringify(bad) + ' must refuse');
+        assert.strictEqual(r.code, 'E_SCENARIO_CREW');
+    }
+});
+
+ok('crew assembly: budget=garbage refuse typed (E_SCENARIO_BUDGET)', () => {
+    const r = scenarioMod.assembleCrew({ name: 'ok-crew', agents: 3, budget: 'garbage', ledgerFile: LEDGER });
+    assert.strictEqual(r.ok, false);
+    assert.strictEqual(r.code, 'E_SCENARIO_BUDGET');
+});
+
+ok('task cost: negative/zero/garbage/over-pool refuse typed (E_SCENARIO_COST) before gates', async () => {
+    const stubs = makeStubs();
+    for (const cost of ['-50', '0', 'garbage', '999999999']) {
+        const r = await scenarioMod.runScenarioTask({ gates: stubs.gates, crew: 'g', task: 'hostile cost probe', cost, ledgerFile: LEDGER });
+        assert.strictEqual(r.ok, false, 'cost=' + JSON.stringify(cost));
+        assert.strictEqual(r.code, 'E_SCENARIO_COST');
+    }
+    // Cost validation happens BEFORE the quarantine gate — escrow untouched.
+    assert.strictEqual(stubs._interior.escrowTouched(), false);
+});
+
 ok('hostile task text fails closed typed (E_SCENARIO_TASK) before any gate', async () => {
     const stubs = makeStubs();
     for (const task of ['', '   ', 'x'.repeat(513), null]) {

@@ -278,6 +278,64 @@ asyncTest('forum unpublish returns not_found for missing barcode', async () => {
     };
 });
 
+// (QC pass-202) publish() had NO length caps: a hostile 5MB body was
+// accepted whole into the publications Map + brain.write() (verified
+// live before the fix). Typed caps matching market.js's 64KB skill
+// payload cap now fail closed before any state mutation.
+asyncTest('forum publish caps: empty/oversize title refused typed (E_FORUM_TITLE)', async () => {
+    const forumPath = path.join(ROOT, 'lib', 'forum.js');
+    const sandboxPath = path.join(ROOT, 'lib', 'sandbox.js');
+    const originalSandbox = require.cache[sandboxPath];
+    delete require.cache[sandboxPath];
+    require.cache[sandboxPath] = {
+        id: sandboxPath, filename: sandboxPath, loaded: true,
+        exports: { canWrite: () => true, canRead: () => true }
+    };
+    delete require.cache[forumPath];
+    const forum = require(forumPath);
+    try {
+        const empty = await forum.publish('', 'body');
+        const oversize = await forum.publish('t'.repeat(250), 'body');
+        const ok = await forum.publish('caps-boundary', 'x'.repeat(190));
+        return {
+            success: empty && empty.published === false && empty.code === 'E_FORUM_TITLE'
+                && oversize && oversize.published === false && oversize.code === 'E_FORUM_TITLE'
+                && ok && ok.published === true,
+            error: `got: ${JSON.stringify({ empty, oversize, ok: ok && ok.published })}`
+        };
+    } finally {
+        delete require.cache[forumPath];
+        if (originalSandbox) require.cache[sandboxPath] = originalSandbox;
+    }
+});
+
+asyncTest('forum publish caps: empty/oversize body refused typed (E_FORUM_CONTENT), no 5MB sink', async () => {
+    const forumPath = path.join(ROOT, 'lib', 'forum.js');
+    const sandboxPath = path.join(ROOT, 'lib', 'sandbox.js');
+    const originalSandbox = require.cache[sandboxPath];
+    delete require.cache[sandboxPath];
+    require.cache[sandboxPath] = {
+        id: sandboxPath, filename: sandboxPath, loaded: true,
+        exports: { canWrite: () => true, canRead: () => true }
+    };
+    delete require.cache[forumPath];
+    const forum = require(forumPath);
+    try {
+        const empty = await forum.publish('caps-probe', '   ');
+        const oversize = await forum.publish('caps-probe', 'B'.repeat(70000));
+        const exactly64k = await forum.publish('caps-boundary', 'B'.repeat(65536));
+        return {
+            success: empty && empty.published === false && empty.code === 'E_FORUM_CONTENT'
+                && oversize && oversize.published === false && oversize.code === 'E_FORUM_CONTENT'
+                && exactly64k && exactly64k.published === true,
+            error: `got: ${JSON.stringify({ empty, oversize, exactly: exactly64k && exactly64k.published })}`
+        };
+    } finally {
+        delete require.cache[forumPath];
+        if (originalSandbox) require.cache[sandboxPath] = originalSandbox;
+    }
+});
+
 // ============================================
 // SUMMARY
 // ============================================
