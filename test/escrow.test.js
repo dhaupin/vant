@@ -116,11 +116,17 @@ test('resetBudget is callable (phantom export regression pin)', () => {
 
 test('setBudgetLimit preserves spent metrics (resetBudget contract)', () => {
     const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    // (QC pass-204) Budgets PERSIST across suite runs; a shared agent id
+    // makes `spent === 100` order-dependent (a veteran test-limit-agent
+    // already carries prior cumulative spend — observed live: spent=700
+    // after the exec of one fresh 100-credit draw). Isolate the agent per
+    // run; the CONTRACT under test is setBudgetLimit PRESERVING spent.
+    const agent = 'test-limit-agent-' + process.pid;
     const E = escrow.create({});
-    E.recordSpend('test-limit-agent', 100);
-    E.setBudgetLimit('test-limit-agent', 500);
-    const b = E.getBudget('test-limit-agent');
-    return { success: b.limit === 500 && b.spent === 100 };
+    E.recordSpend(agent, 100);
+    E.setBudgetLimit(agent, 500);
+    const b = E.getBudget(agent);
+    return { success: b.limit === 500 && b.spent === 100, error: `limit=${b && b.limit} spent=${b && b.spent}` };
 });
 
 test('getStackEscrowStatus returns object with source stack', () => {
