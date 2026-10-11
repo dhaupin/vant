@@ -7,7 +7,24 @@
 
 ## Handoff
 
-**Last known good commit:** pass 200 — Wave U5 LANDED: provenance/
+**Last known good commit:** pass 201 — Wave U6 PROTOTYPE landed
+(owner disposition U6.5 open). `labs/prototype-marketplace.md` (schema,
+reputation, hold→deliver→release, failure modes) + gated skills
+surface in `lib/market.js` (`listSkill/buySkill/deliverSkill/
+settleSkill/skillStatus` behind `market.skillsEnabled`, OFF default,
+typed `E_SKILLS_DISABLED` when off). Pins `test/market-skills.test.js`
+8/8; market/crossprocess/debit/trust suites green. U5 committed
+`b9f6b59` (pass 200). LESSONS from the suite: (1) skills block must
+predate `module.exports` (TDZ) — the const-order bug; (2)
+`market.list` returns the listing ITSELF; (3) trade rows stamp
+`seller: 'anonymous'` unless data.seller is passed — skills routes the
+LISTING's seller as the trust/me settlement identity; (4) trade
+`buyer` field not `buyerId`; (5) `_persistNow` is the exports seam,
+module fn is `_persist`. NEXT-UP: U6.5 owner disposition (productize
+= MCP + CLI + timeout automation + rep aggregation; archive = gate
+stays off, pins stay), merge #118, or owner direction.
+
+**Previous (pass 200) — Wave U5: provenance/compliance bundle.**
 compliance bundle (`lib/export-bundle.js` + `bin/export.js`, routed).
 `vant export bundle --out <dir>` (registry manifest, citations,
 scoped audit excerpt, encrypted horcrux, L-hashed RUNNING content

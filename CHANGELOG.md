@@ -5,6 +5,44 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 201 (Wave U6 prototype — credentialed marketplace)
+
+### Added - Wave U6 PROTOTYPE: skills as paid digital labor, gated OFF by default
+
+Sixth wave of the universe PRD — the research frontier. Ships the
+prototype (U6.1–U6.4) for owner disposition (U6.5): the gate
+(`market.skillsEnabled`) is **OFF by default**, every skill op returns
+typed `E_SKILLS_DISABLED` while it is (inert surface, discoverable
+contract):
+
+- **The contract (`labs/prototype-marketplace.md`):** buyers pay
+  BEFORE seeing the payload, so escrow holds the money, delivery must
+  be verifiable, trust punishes mis-delivery. Delivery contract:
+  `buy` holds (no debit), `deliver` verifies + hashes the payload
+  (lib/hash.js only — one hash source), buyer `confirm` DEBITS +\n  writes a positive trust record (value `min(0.2, price/50)`), buyer
+  `refute` refunds with NO debit + writes a negative record. The
+  seller can never settle their own sale; the buyer can never settle
+  twice (`E_SKILL_ALREADY_SETTLED`).
+- **Prototype surface (`lib/market.js` / U6.2):** `listSkill`,
+  `buySkill`, `deliverSkill`, `settleSkill`, `skillStatus` (pre-trade
+  seller-reputation visibility). Payloads `text|code` only — `launch`
+  (credentialed execution) is a DOCUMENTED boundary, refused at listing
+  time with its own typed code, not accepted-and-ignored.
+- **Trust feed (U6.3):** settle outcomes write real cooperation
+  records keyed to the LISTING's seller (the trade row's own `seller`
+  field can be 'anonymous' — the listing is the authoritative who-
+  made-it; caught by the suite and routed through `listing.seller`).
+- **Adversarial pins (U6.4):** `test/market-skills.test.js` 8/8 —
+  gate-inert typed, listing boundaries (launch/hostile price/empty
+  title), full loop debit-on-confirm-only, seller-keyed reputation
+  movement up AND down, double-settlement refusal, buyer-cannot-
+  deliver / seller-cannot-settle scoping, payload refusals (empty,
+  oversize 64KB cap), no-debit refute path.
+- **Regression:** market/crossprocess/debit/trust suites green.
+**U6.5 disposition (productize vs demo-archive) is the owner's call.**
+
+---
+
 ## [Unreleased] - pass 200 (Wave U5 — provenance/compliance bundle)
 
 ### Added - Wave U5: a self-verifying export bundle (tamper-EVIDENCE, fail-closed)

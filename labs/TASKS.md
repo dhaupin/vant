@@ -3,10 +3,38 @@
 **Branch:** axolotl  
 **Last Updated:** 2026-10-10  
 **Session:** Pass 197+ — prd-universe.md authored (U1–U6 waves);
-Waves U1–U5 LANDED (+ pass-198 audit fixed the escrow-debit bug) —
+Waves U1–U6 LANDED (U6 at prototype grade; U6.5 disposition open) —
 see labs/prd-universe.md §3 for per-wave checklists
 
 ---
+
+## Session (2026-10-10 — pass 201: Wave U6 marketplace prototype)
+
+**What shipped** (owner: "u5 next! then right to u6"):
+
+- **U6.1 PROTOTYPE DOC (`labs/prototype-marketplace.md`):** listing
+  schema (text|code; 'launch' refused at listing time — documented
+  boundary), reputation over the trust feed, escrow hold→deliver→
+  release delivery contract, failure-mode table (each row = a state
+  or a typed refusal).
+- **U6.2 GATED SURFACE (`lib/market.js`):** `listSkill/buySkill/
+  deliverSkill/settleSkill/skillStatus` behind `market.skillsEnabled`
+  (OFF default; typed `E_SKILLS_DISABLED` while off — inert, not
+  absent). Debit ONLY on buyer confirm; refute refunds + negative
+  trust; delivery hashes with lib/hash.js (one hash source).
+- **U6.3 TRUST FEED:** records key to the LISTING's seller (suite
+  caught market.trade stamping `seller: anonymous` — the listing is
+  the authoritative who-made-it).
+- **U6.4 PINS:** `test/market-skills.test.js` 8/8 (gate-inert,
+  boundaries, debit-only-on-confirm, trust up AND down,
+  double-settlement, scoping, payload refusals, refute path).
+  Regression: market/crossprocess/debit/trust suites green.
+- **Suite-caught fixes en route:** (1) const-order (skills block was
+  landed past `module.exports` — TDZ `SKILLS_ENABLED_KEY`); (2)
+  `market.list` returns the listing itself (shape); (3) `_persistNow`
+  is a module-exports seam, module-level fn is `_persist`; (4) trade
+  rows carry buyer as `buyer`; (5) seller identity must ride the
+  listing (data.seller), not the trade row.
 
 ## Session (2026-10-10 — pass 200: Wave U5 provenance/compliance bundle)
 

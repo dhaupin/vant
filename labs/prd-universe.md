@@ -261,17 +261,31 @@ Estimate was: **2 passes.** Landed in one pass, same shape as U1–U4.
   the horcrux password + external anchoring (e.g. record the digest
   somewhere outside the bundle). CLI live-fired both verbs.
 
-### Wave U6 — Credentialed Marketplace (research frontier)
-Estimate: **6–8 passes**, split: prototype in `labs/`, productize later.
+### Wave U6 — Credentialed Marketplace (research frontier) — PROTOTYPE SHIPPED (pass 201)
+Estimate was: **6–8 passes**, split: prototype in `labs/`, productize
+later. Prototype landed in one pass (U6.1–U6.4); **U6.5 (owner
+disposition) is the open item.**
 
-- [ ] U6.1 Prototype `labs/prototype-marketplace.md` — skill/tool
-  listing schema, reputation source (trust.js feed), agreement
-  delivery contract (escrow hold→deliver→release), failure modes.
-- [ ] U6.2 `lib/market.js` extension: `listSkill`, `deliverSkill`,
-  `settleSkill` behind a `market.skillsEnabled` config gate.
-- [ ] U6.3 Trust feed: settle outcomes write real cooperation records.
-- [ ] U6.4 Adversarial suite (delivery never blesses unverified pay-
-  load, double-settlement refused, reputation impact pinned).
+- [x] U6.1 Prototype `labs/prototype-marketplace.md` — skill/tool
+  listing schema (text|code payloads; 'launch' a DOCUMENTED boundary,
+  refused at listing time), reputation source (trust.js feed — settle
+  outcomes write real `trust.record` lines keyed to the LISTING's
+  seller), agreement delivery contract (escrow hold→deliver→release:
+  hold at buy, DEBIT only on buyer confirm, refund-by-refutation,
+  double-settlement refused), failure modes table (every row maps to a
+  state or a typed refusal).
+- [x] U6.2 `lib/market.js` extension: `listSkill`, `buySkill`,
+  `deliverSkill`, `settleSkill`, `skillStatus` behind the
+  `market.skillsEnabled` config gate (OFF by default — ops return
+  typed `E_SKILLS_DISABLED` when the gate is down: inert, not absent).
+- [x] U6.3 Trust feed: settle outcomes write real cooperation records
+  (confirm: positive, value scaled `min(0.2, price/50)`; refute:
+  negative — both visible through `getScore`, pinned).
+- [x] U6.4 Pin suite lite `test/market-skills.test.js` — 8 pins
+  (gate-inert typed, listing boundaries, full loop with debit-on-
+  confirm-only, seller-keyed trust movement up AND down, double-
+  settlement refusal, buyer-cannot-deliver / seller-cannot-settle
+  scoping, payload refusals incl. the 64KB cap, no-debit refute path).
 - [ ] U6.5 Decide productize/demo-archive per owner review.
 
 ## 4. Open questions (proposals attached)
