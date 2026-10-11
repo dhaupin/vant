@@ -3,7 +3,7 @@
 **Version:** 1.0
 **Branch:** axolotl
 **Date:** 2026-10-09
-**Status:** ACTIVE — Waves A–F landed (passes 179–183); Wave F adoption wave 2 + the §12/§13 wiring candidates landed pass 184. The §6 charter table is the ruling ownership doc for the messaging trio.
+**Status:** ACTIVE — Waves A–F landed (passes 179–183); Wave F adoption wave 2 + the §12/§13 wiring candidates landed pass 184; adoption wave 3 (§7 Wave G: GitProvider stack onto RemoteTransport + transport env registry family) landed pass 195. The §6 charter table is the ruling ownership doc for the messaging trio.
 **Completed:** §2 Wave A (event observability, 40 pins), §3 Wave B (config env registry,
 23 pins), §4 Wave C (lib/hash.js, 29 pins + grep gate), §5 Wave D
 (ownership matrix + storage.js split, zero consumer churn), §6 Wave E
@@ -255,6 +255,14 @@ msg OR stream, never both-as-truth; only crew-bus leaves the process.
    once at the interface, inherited by all adopters.
 
 ---
+
+### Wave G (pass 195) — adoption wave 3: the GitProvider stack
+
+- `GitProvider` (github/gitlab/gitea/bitbucket/selfhosted base) now extends
+  RemoteTransport — Wave G. The auth() door is THE credential resolution;
+  `this.token` is gone from all five connectors. Transport tuning keys
+  (sync op / git / http timeouts + provider tokens as secrets) registered
+  in the env registry (43 → 52).
 
 ## 8. Acceptance per wave
 

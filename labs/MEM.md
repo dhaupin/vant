@@ -7,7 +7,24 @@
 
 ## Handoff
 
-**Last known good commit:** pass 167 — julia sidecar LIVE: Julia 1.10.4 installed (no-root tarball), LIVE SMOKE 5/5 (spawn/health through lib/sidecar.js, token-checked wire eval, connector round-trip, JIT amortization MEASURED at 1.3ms warm/call vs 2-30s subprocess JIT — 3+ orders of magnitude, clean stop). julia-srv.jl truth-ups all caught by live smoke NOT the wire fake: r'...' JS regex literals, missing using Sockets/getsockname, read-to-EOF body deadlock (must read Content-Length — client holds write side open), redirect_stdout idiom (zero-arg capture-pair w/ finally-restore), payload take! on String. Live pin is PERMANENT: test/julia-sidecar-live.test.js 5/5 w/ julia, SKIPs w/o (wire contract stays pinned protocol-level in sidecar.test.js 8/8). ALSO FIXED: other agent's health claim (lib//bin warnings "cosmetic outside-repo") — mechanics true but bin/health.js checkDirs false-FAILED install dirs from foreign cwd; now resolves via lib/anchor.getRepoRoot() reporting "ok (install root)"; models/brain stay cwd-relative. LESSONS: (1) wire-fake pins pin the CONTRACT, live smoke pins the RUNTIME — both needed; (2) a half-true claim from another agent still gets code-verified before repeat — and half-true means fix the half; (3) Julia for JS natives: r"..." regex, using Sockets, Content-Length reads, redirect capture-pair. NEXT-UP: rust connector + rust-srv, geometry sidecar switch, merge #118, or owner direction. lib/sidecar.js shared runtime (spawn/health/eval/stop, loopback+token, SIDECAR_PORT discovery) used by BOTH connectors (SidecarConnector: modes sidecar/auto/subprocess, per-(lang+mode) reuse, stopSidecars) AND adapters (sidecar.js transform/stopAll parity seam per owner); julia-srv.jl (stdlib-only, token-checked); compute.js opts.mode routing w/ header truth-up. PIN-CAUGHT 2 real bugs: (1) spawnAndWait + BaseConnector.execute both lacked proc.on('error') — ENOENT crashed the process; (2) fallback spawned bare getLang() ('python' ENOENT) instead of delegating to the language's own connector (python3). Pattern from pass 164 repeats: pins catch lifecycle/error-path bugs happy-path tests miss. PINS test/sidecar.test.js 8/8 (fake Node srv on the julia wire — julia not installed here, live smoke is owner-side). GATES: claims(851f)/syntax PASS; compute/forum/escrow suites 0-fail; sweep via CI. NEXT-UP: rust connector + rust-srv, geometry sidecar switch, merge #118, or owner direction.
+**Last known good commit:** pass 197 — Wave U3 LANDED: governance
+scenario playbook (`lib/scenario.js` + `bin/scenario.js`: crew of N
+agents over ONE shared escrow workspace pool, per-task gates
+quarantine→escrow→consensus, quorum closeout via resolution.logDelta;
+8-pin suite `test/scenario-crew.test.js`) + U2.3 carry-over closed:
+resume's escrow-backed BYTE-RESTORING materialization (`record --values`
+freezes cell values in the content-addressed manifest, `resume
+--materialize` restores through the arch-A store at 1 credit/cell,
+`E_SNAPSHOT_BUDGET` before any write, refund on denial; manifest suite
+18→22). MCP 306→309 (`vant_scenario_crew/_task/_status`, live-fired
+incl. rules+sandbox doors; rules allowlist extended). Docs:
+scenario-playbook.md, cli.md, mcp-tools.md. PRD §3 U1–U3 all checked;
+U4–U6 open. GATES: grand tour 18/18 (gate B 309), lint:coverage PASS
+(MCP 309/309, CLI 124), fiction + frontmatter PASS, CI green. NEXT-UP:
+U4 forum decision records, U5 provenance bundle, U6 marketplace
+prototype, merge #118, or owner direction.
+
+**Previous (pass 197, earlier) — Wave U1 + U2 SHIPPED: genesis snapshots (PASS-derived) + stored content-addressed scenario manifests.** Julia 1.10.4 installed (no-root tarball), LIVE SMOKE 5/5 (spawn/health through lib/sidecar.js, token-checked wire eval, connector round-trip, JIT amortization MEASURED at 1.3ms warm/call vs 2-30s subprocess JIT — 3+ orders of magnitude, clean stop). julia-srv.jl truth-ups all caught by live smoke NOT the wire fake: r'...' JS regex literals, missing using Sockets/getsockname, read-to-EOF body deadlock (must read Content-Length — client holds write side open), redirect_stdout idiom (zero-arg capture-pair w/ finally-restore), payload take! on String. Live pin is PERMANENT: test/julia-sidecar-live.test.js 5/5 w/ julia, SKIPs w/o (wire contract stays pinned protocol-level in sidecar.test.js 8/8). ALSO FIXED: other agent's health claim (lib//bin warnings "cosmetic outside-repo") — mechanics true but bin/health.js checkDirs false-FAILED install dirs from foreign cwd; now resolves via lib/anchor.getRepoRoot() reporting "ok (install root)"; models/brain stay cwd-relative. LESSONS: (1) wire-fake pins pin the CONTRACT, live smoke pins the RUNTIME — both needed; (2) a half-true claim from another agent still gets code-verified before repeat — and half-true means fix the half; (3) Julia for JS natives: r"..." regex, using Sockets, Content-Length reads, redirect capture-pair. NEXT-UP: rust connector + rust-srv, geometry sidecar switch, merge #118, or owner direction. lib/sidecar.js shared runtime (spawn/health/eval/stop, loopback+token, SIDECAR_PORT discovery) used by BOTH connectors (SidecarConnector: modes sidecar/auto/subprocess, per-(lang+mode) reuse, stopSidecars) AND adapters (sidecar.js transform/stopAll parity seam per owner); julia-srv.jl (stdlib-only, token-checked); compute.js opts.mode routing w/ header truth-up. PIN-CAUGHT 2 real bugs: (1) spawnAndWait + BaseConnector.execute both lacked proc.on('error') — ENOENT crashed the process; (2) fallback spawned bare getLang() ('python' ENOENT) instead of delegating to the language's own connector (python3). Pattern from pass 164 repeats: pins catch lifecycle/error-path bugs happy-path tests miss. PINS test/sidecar.test.js 8/8 (fake Node srv on the julia wire — julia not installed here, live smoke is owner-side). GATES: claims(851f)/syntax PASS; compute/forum/escrow suites 0-fail; sweep via CI. NEXT-UP: rust connector + rust-srv, geometry sidecar switch, merge #118, or owner direction.
 
 **Previous (pass 166) — hybrid polyglot bridge SHIPPED (sidecar runtime + SidecarConnector + julia-srv + adapter parity).**
 
@@ -918,14 +935,36 @@ testimony (v0.2); chapter 2 opens with it.
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 169 committed + CI ✅ (ada82f7): backbone
-unification — zero raw throws in lib/ (regression-gated, bootstrap
-exception documented), events wired into 9 gut modules, audit at the
-state-store choke point + connector external I/O, WAL default-on for
-protocol state. BONUS: closed a real latent lock TOCTOU (stale-takeover
-could clobber a live peer's lock — now rename-based). Substrate ready
-for the state+seed engine; waiting on Cairn's issue for the Synmergia
-contract.)
+(IN FLIGHT — pass 197+: **prd-universe.md** authored, owner-approved to
+BUILD ALL. Waves U1–U6 in labs/prd-universe.md. **U1 LANDED** (genesis-
+snapshot 11/0 caps + universe CLI + 3 MCP tools, one pass vs est. 2).
+**U2 LANDED** (stored content-addressed scenario manifests:
+recordSnapshot/loadSnapshot/diffManifests/resumeSnapshot over the arch-A
+state store; rules SAFE_TOOL_ALLOWLIST unblocks vant_universe_fork;
+scenario-manifest pins 18/0 incl. genuine fail-closed lock contention
++ cross-process byte-identical ids; CLI record/diff/resume live-fired;
+MCP +3 → 306 tools; CI 455/0). NEXT WAVE: **U3 — governance scenario
+playbook** (escrow gating a shared task — the demo wave).
+Owner cadence ruling: multiple passes/DAY, estimates in passes not
+weeks; headless+browser UI EXPLICITLY post-poned until U1–U5 base loops
+land. Build order: U1 → U2 → U3 → U4 → U5 → U6, one wave = one landed
+pinned improvement.)
+
+(Interlude — MiroFish refdrop, owner-approved: social-world simulator that
+is a NATURAL VANT CONSUMER, not a competitor — github.com/666ghj/MiroFish
+(~77k stars, AGPL-3.0, Shanda-incubated). Pipeline = seed docs → Zep
+knowledge-graph → OASIS persona-crowd sim → scenario report. Nothing it
+has (per-run SQLite state, scenario-config "governance", no simulation
+persistence) competes with the stack; everything it needs (seeded world
+from a doc set, durable scenario memory across runs, real governance
+records, provenance) is what Vant builds. Position as "works with": the
+scenario-runner consumer shape exercises nearly every module —
+state/seeds.js Genesis determinism, AddressingSpine, checkpoint,
+consensus/escrow, citations/horcrux export. Ideas teed for POV: forkable
+world snapshots, spine-addressed scenario refs, untrusted-agent shared
+nesting, decision-linked forum deliberation, credentialed marketplace,
+compliance provenance bundle. Superseded by the IN FLIGHT block above:
+the scope now lives in labs/prd-universe.md with per-wave TASKS checklists.)
 
 ---
 

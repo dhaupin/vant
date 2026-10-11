@@ -237,6 +237,8 @@ const COMMANDS = {
     genesis: 'genesis.js',
     mesh: 'mesh-status.js',
     notices: 'notices.js',
+    universe: 'universe.js',
+    scenario: 'scenario.js',   // (Wave U3) governance scenario playbook (prd-universe.md)
 
     // Advertised in help but previously unrouted (pass 16 gap sweep).
     // All 16 have real bin/*.js CLIs; help promised them, the map didn't.
@@ -507,6 +509,8 @@ Utilities:
   vant metrics   Metrics dashboard
   vant rls       Row-level security
   vant system    System diagnostics
+  vant universe  Genesis snapshots + manifests (Waves U1–U3)
+  vant scenario  Governance scenario playbook (Wave U3)
   vant bot       Bot utilities
 
 System Utilities:

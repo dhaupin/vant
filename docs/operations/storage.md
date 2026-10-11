@@ -179,3 +179,4 @@ not an option).
 - [Islands](/vant/essential/islands) - Lazy brain components
 - [Search](/vant/memory/search) - Hybrid search
 - [Multi-Provider RAID Sync](/vant/operations/sync) - Provider connectors
+- [State Spine](/vant/memory/state-spine) - Protocol-state persistence, tree tier, anchors

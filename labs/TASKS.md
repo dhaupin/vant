@@ -1,8 +1,55 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-10-09  
-**Session:** Pass 177 — §3 debt closed: state-store anchors root hashes per persist
+**Last Updated:** 2026-10-10  
+**Session:** Pass 197+ — prd-universe.md authored (U1–U6 waves);
+Wave U3 LANDED (governance scenario playbook + resume's escrow-backed
+byte-restoring materialization) — see labs/prd-universe.md §3 for
+per-wave checklists
+
+---
+
+## Session (2026-10-10 — pass 197: Wave U3 governance scenario playbook + resume materialization)
+
+**What shipped** (owner: "U3 — governance scenario playbook (escrow
+gating a shared task) plus resume's byte-restoring materialization"):
+
+- **WAVE U3 — GOVERNANCE SCENARIO PLAYBOOK:** `lib/scenario.js` +
+  `bin/scenario.js` demo the product over the EXISTING consensus/escrow
+  stack — a scenario crew of N agents draws from ONE shared escrow
+  workspace pool (`ensureWorkspaceBudget` sizes it idempotently, never
+  refills), and each delegated task must pass three real gates:
+  (1) QUARANTINE — refuse fail-closed BEFORE any escrow draw, refusal
+  recorded in the verdict; full-quarantine crews can't delegate at all;
+  (2) ESCROW — the shared pool is charged per-task (hold released on
+  refusal; empty pool → `E_SCENARIO_BUDGET`); (3) CONSENSUS — the
+  verdict is a VOTED outcome requiring quorum (`minQuorum = max(2,
+  live voters)`), single-agent bless refused
+  (`E_SCENARIO_NO_QUORUM`), decision logged via `resolution.logDelta`
+  (persisted, survives restart).
+- **U3 CARRY-OVER (U2.3's honest-scope note closed):** resume's
+  escrow-backed BYTE-RESTORING executor landed. `record --values`
+  freezes cell VALUES inside the manifest (id covers them — content-
+  addressing bites), `resume --materialize` restores them through the
+  arch-A store billed 1 escrow credit/cell under
+  `scenario:materialize:<actor>`; a broke actor is refused typed
+  (`E_SNAPSHOT_BUDGET`) BEFORE any write, and a store-write denial
+  refunds.
+- **CLI:** `vant scenario crew <name> --agents N --budget N`,
+  `vant scenario task <crew> <desc> [--cost N]`,
+  `vant scenario status <crew>` (+ `--json` per verb; live-fired).
+- **MCP +3:** `vant_scenario_crew/_task/_status` (309 tools) —
+  live-fired through mcp.execute incl. rules + sandbox doors; rules
+  SAFE_TOOL_ALLOWLIST extended for the three names.
+- **Docs:** `docs/operations/scenario-playbook.md` (flow diagram, gate
+  table, pin map); cli.md rows + usage block; mcp-tools.md full pages
+  for the three tools + the U3 materialize note on `vant_universe_resume`.
+- **Verified:** `test/scenario-crew.test.js` **8/0** (typed gates,
+  gate-order, quarantine drills, no-single-bless, rules door);
+  scenario-manifest suite extended 18 → 22 (materialize pins); U1 suite
+  11/0; grand tour 18/18 with gate B bumped 306 → 309;
+  `npm run lint:coverage` PASS (MCP 309/309, CLI 119+5 = 124);
+  fiction-signatures PASS; frontmatter PASS; full CI green.
 
 ---
 

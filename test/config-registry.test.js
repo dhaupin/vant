@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Config Registry pins (pass 179, prd-canonicalization Wave B)
+ * Config Registry pins (pass 179, prd-canonicalization Wave B; extended pass 186)
  *
  * Pins:
  *   1. Registry is non-empty and complete-shaped (env/key/type/fallback/secret).
@@ -11,6 +11,9 @@
  *      honor env overrides.
  *   6. Registering known names: the registry must include the vars the
  *      main flows read (server/mcp/webhook/health + log level).
+ *   7. (pass 186) Rogue fixes: steveframe typo, duplicate msg key,
+ *      stale getGithub/getStegoframe, cfR2Bucket zombie removal, and the
+ *      Wave-B straggler registration (registry ≥ 40 entries).
  */
 let pass = 0, fail = 0;
 const ok = (name, cond, extra) => {
@@ -47,7 +50,7 @@ let raw;
 try { raw = JSON.parse(sub({ VANT_MCP_API_KEY: 'abcdef0123456789' }, "console.log(JSON.stringify(require('./lib/config').listEnvConfig({maskSecrets:false}).find(e=>e.key==='mcp.apiKey')))")); } catch (e) { raw = null; }
 ok('maskSecrets:false exposes raw (caller opted in', raw && raw.value === 'abcdef0123456789');
 
-// ── 4. Unknown-env typо scan ──────────────────────────────────────────────
+// ── 4. Unknown-env typo scan ──────────────────────────────────────────────
 let unknown;
 try { unknown = JSON.parse(sub({ VANT_TYPO_PORT: '9', VANT_OTHER_XYZ: 'x' }, "console.log(JSON.stringify(require('./lib/config').unknownEnvVars()))")); } catch (e) { unknown = null; }
 ok('unknownEnvVars flags set-but-unregistered VANT_*',
@@ -67,6 +70,16 @@ ok('env overrides flow through stragglers', override.trim() === '25 3500 3501', 
 for (const env of ['VANT_SERVER_PORT', 'VANT_SERVER_BIND', 'VANT_MCP_PORT', 'VANT_MCP_REQUIRE_KEY', 'VANT_WEBHOOK_PORT', 'VANT_WEBHOOK_SECRET', 'VANT_HEALTH_PORT', 'VANT_LOG_LEVEL']) {
     ok('registry covers ' + env, reg.some(e => e.env === env));
 }
+
+// ── 7. Pass-186 rogue pins ────────────────────────────────────────────────
+ok('getStegoframe returns the template url (steveframe typo fixed)', (() => { const sf = config.getStegoframe(); return !!sf && sf.url === 'https://app.all-hands.dev' && !!sf.version; })());
+ok('getGithub routes through load() without crashing', (() => { const g = config.getGithub(); return typeof g === 'object' && 'token' in g && 'repo' in g; })());
+ok('msg config holds BOTH defaults and depth cap (dup-key fix)', (() => { const all = config.getAll(); return !!all.msg && 'encrypted' in all.msg && 'autoEncrypt' in all.msg && 'maxPublishDepth' in all.msg; })());
+ok('cfR2Bucket zombie removed from surface', typeof config.cfR2Bucket !== 'function');
+ok('registry covers the VANT_MSG_* family', ['VANT_MSG_ENCRYPTED', 'VANT_MSG_AUTO_ENCRYPT', 'VANT_MSG_MAX_PUBLISH_DEPTH'].every(v => reg.some(e => e.env === v)));
+ok('registry covers the prune/clean family', ['VANT_PRUNE_STALE_DAYS', 'VANT_PRUNE_AUTO_CLEAN', 'VANT_CLEAN_LOGS', 'VANT_CLEAN_MAX_LOG_AGE_DAYS'].every(v => reg.some(e => e.env === v)));
+ok('registry covers VANT_STORAGE_PATH + escrow + agent.id + qos', ['VANT_STORAGE_PATH', 'VANT_ESCROW_DEFAULT_BUDGET', 'VANT_AGENT_ID', 'VANT_QOS_MAX_PER_MINUTE'].every(v => reg.some(e => e.env === v)));
+ok('registry grew past 40 entries (Wave-B stragglers registered)', config.envRegistry().length >= 40);
 
 console.log(`\n=== config-registry pins: ${pass} passed, ${fail} failed ===`);
 process.exit(fail ? 1 : 0);

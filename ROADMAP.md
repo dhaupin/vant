@@ -375,7 +375,7 @@ Beyond series + parallel, graph mode could support:
 - [ ] This audit helps secure and clean up the codebase significantly
 
 ### Horcrux System
-- [ ] Horcrux sharing/distribution (to steveframe.creadev.org)
+- [ ] Horcrux sharing/distribution (to stegoframe.creadev.org)
 - [ ] Version migration for horcrux files
 - [ ] Horcrux validation/metadata inspection
 - [ ] Backup scheduling with horcrux

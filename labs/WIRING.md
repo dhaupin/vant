@@ -92,7 +92,19 @@
 | Env registry (Wave B) | DONE | 24-entry `ENV_REGISTRY` in lib/config.js + `vant config list env`; webhooks/health/agents stragglers moved onto config getters; unknown-env scan surfaced via health check |
 | Pre-existing fix | DONE | lib/health.js `runChecks` ReferenceError (`_checkRead` removed in an earlier refactor) restored |
 
-NEXT WIRING CANDIDATES (pass 182+):
+## 8b. Wave A stage 2 + registry decision (pass 193)
+
+| Work | Status | Detail |
+|---|---|---|
+| Private emitters RETIRED | DONE | ALL of them — backup (scheduler lifecycle → `backup:*`), cron (`_scheduler` + JobWorker base → `task:*`/`job:*` via bus; `cron.on/emit/once/off` now attach to the bus), context (`_emitter` → `context:*`/`heartbeat:*` via bus), trust + market (dead `extends EventEmitter` bases dropped; everything was already on the bus), habitat (`feed()` → `habitat:chaos` on the bus), nature (`spark/start/stop` → `nature:spark/start/stop`; `wireSharedBus()` + `Nature.sharedBusWired()` canonical construction). Grep gate: `extends EventEmitter\|new EventEmitter(` in lib/ returns ZERO (outside lib/event.js's own PubSub) |
+| Consumers migrated | DONE | vant.js spark→dream + backup.js spark→entropy-backup listeners moved to `nature:spark` on the bus; nature→habitat chaos chain now flows habitat.feed() → bus `habitat:chaos` → nature.wireSharedBus() → accumulate |
+| Agent-registry persistence | DONE (pass 193) | lib/registry.js hydrates from `models/private/<brain>/state/agent-registry.json` via the shared state spine (WAL + tree tier); registration survives restarts; brain-scoped by construction |
+| Registry → trust feed | DONE | register() writes one positive cooperation record into trust's persisted ledger; quarantine gate = deny path (pinned) |
+| `registerBrainAgent` dead store retired | DONE | `_brainRegistries` (pushed to, never read, zero callers) removed; getBrainRegistry/registerBrainAgent delegate to the real persistent singleton; gatherState/restoreState carry the real book (transform.js consumer intact) |
+| Pins | DONE | test/agent-registry.test.js (11) + e2e grand-tour 18 (stale 299-tool pin updated to documented 300 — `vant_resolution_list`, pass 190) |
+| Verified | DONE | trust 20, cron 14+legacy, backup 8/3/4, habitat 6+23+15+13+crossprocess 5, nature 7, event 15+legacy, event-observability 40, missing-modules 41, e2e 18/18, CI **453/0**, syntax+coverage gates PASS |
+
+NEXT WIRING CANDIDATES (pass 194+):
 
 ## 9. One hashing module (pass 180 — prd-canonicalization Wave C)
 
@@ -133,6 +145,17 @@ NEXT WIRING CANDIDATES (pass 182+):
 | Pins | DONE | `test/remote-transport.test.js` 23 pins — validators (traversal/absolute/space/dash/empty/non-string/too-long), ceremony (transient retries, auth-once, no backoff burn on hard fails, attempts-override, exhausted-throw), verify honesty, s3 adopter shape + secret-not-on-instance |
 | Verified | DONE | remote-transport 23, git-injection, s3/connector sync 18, sync-pull 15, org-sync 9, agora-sync 7, remote 10, state-wiring 51, messaging-envelope 32, hash-canon 29 — all green |
 
+## 16. RemoteTransport adoption wave 3: the GitProvider stack (pass 195 — prd-canonicalization §7 wave G)
+
+| Work | Status | Detail |
+|---|---|---|
+| GitProvider extends RemoteTransport | DONE | `lib/remote.js` — the base class of every Git provider (github/gitlab/gitea/bitbucket/selfhosted) now extends `lib/remote-transport.js`'s `RemoteTransport`. Constructor calls super() (name/retryPolicy/counters); the connector keeps its domain surface |
+| auth() door enforced | DONE | The ONE credential door: tokens resolve per-use via `auth()` (config override → provider env → config.githubToken()). `this.token` instance fields are GONE from all five connectors — redaction by construction (error paths / JSON dumps / describe() cannot leak). `isConfigured()` consults auth() |
+| Timeout getters via config | DONE | `_gitTimeoutMs`/`_requestJson` fallback read `config.gitTimeoutMs()`/`config.httpTimeoutMs()` (env-fallback preserved); sync's `SYNC_OP_TIMEOUT_MS` registered too |
+| Env registry growth | DONE | 43 → 52 entries: transport family (VANT_SYNC_OP_TIMEOUT_MS, VANT_GIT_TIMEOUT_MS, VANT_HTTP_TIMEOUT_MS, GITLAB_TOKEN/URL, GITEA_TOKEN/URL, BITBUCKET_TOKEN, GIT_TOKEN) registered incl. secret flags |
+| Pins | DONE | remote-transport suite re-run (23/23 — adopters inherit the adversarial contract by construction), git-injection 7/7, probe: instanceof RemoteTransport, no `token` field, describe() leaks nothing, base verify() honest false, config-registry registry grew |
+| Pre-existing failure NOTED | — | test/sync-pull.test.js 12/15 (3 fails) is env-dependent (needs a live GITHUB_TOKEN to reach api.github.com — HTTP 403 in CI sandbox); verified identical BEFORE and AFTER the change via git stash diff |
+
 ## 13. Wiring candidates landed (pass 184 — the pass-183 queue)
 
 | Work | Status | Detail |
@@ -150,7 +173,8 @@ NEXT WIRING CANDIDATES (pass 182+):
 5. ~~Wave F (RemoteTransport interface)~~ ✅ DONE pass 183 — see §12.
 6. ~~Transport adoption wave 2 (explicit verify on sync + agora state keeper)~~ ✅ DONE pass 184 — see §13.
 7. ~~precision.js geometry (#157)~~ ✅ WIRED pass 185 — see §14; fold.js (#154) remains a tested primitive — facet-layout SKETCH in labs/SKETCH-facet-layout.md (impl waits for a consumer).
-8. Remaining ORPHANs per §3 (fold geometry #154, mesh generic WAL consumers) — pick up when a consumer exists.
+8. ~~Config rogue cleanup + registry completion~~ ✅ DONE pass 186 — see §15.
+9. Remaining ORPHANs per §3 (fold geometry #154, mesh generic WAL consumers) — pick up when a consumer exists.
 
 ## 14. Geometry precision wiring + shim retirement (pass 185)
 
@@ -162,6 +186,24 @@ NEXT WIRING CANDIDATES (pass 182+):
 | Pins | DONE | `test/geometry-parity.test.js` 8 pins — retirement (source grep code-not-docs, delegation, require-shape), quantized-record shape, round-trip honesty, golden + 200-vector stress parity, and a sensitivity leg (a genuinely different rotation IS caught) |
 | Verified | DONE | geometry-parity 8 + geometry-engine 1, connector 8, engine-parity-spine 70, hash-canon 29, sidecar 8, julia-sidecar-live (skip policy OK) — all green |
 | fold (#154) | SKETCH ONLY | `labs/SKETCH-facet-layout.md` — facet layout stays a document; implementation waits for the /world space consumer or capacity pressure |
+
+## 15. Config rogue cleanup + registry completion (pass 186)
+
+| Work | Status | Detail |
+|---|---|---|
+| Duplicate `msg:` key retired | DONE | `config.load()` defined `msg:` twice (encryption defaults + publish-depth cap); last-key-wins silently killed `msg.encrypted`/`msg.autoEncrypt`. One merged object carries all three |
+| `steveframe` typo fixed | DONE | `_config.steveframe` → `_config.stegoframe`; `getStegoframe()` read the correct spelling and always got null — the template URL is reachable again. (Docs pass 187: the last live mention — ROADMAP.md's horcrux-sharing todo — also fixed) |
+| State-spine docs | DONE | [docs/memory/state-spine.md](docs/memory/state-spine.md) — new architecture page for the `lib/state/` system (canonical #146, tree #145/147/148, seeds #158, spine #165, cellstore #150, anchor #152, checkpoint #151, hotset #153 + brain-verify #166): tiers, usage, design laws. Crossed into the memory index, storage reference (split + spine disambiguation), architecture map, and operations storage doc |
+| Placeholder CLI verbs wired | DONE | citations search/export + node-registry list/register/unregister/status wired to their real libs (citations.js, node-registry.js consensus anchor); theme re-scoped to the real renderer surface (show/status/set). Config-precedence (4 layers) documented atop docs/reference/config.md. `getStorage('repos')` ReferenceError from the Wave-D rename fixed (CI smoke-caught, 453/453 green) |
+| CLI walk (all 122 bins) | DONE | Six more CLIs had canned/wrong-shape verbs, all rewired: nodes (discover/ping/info/register to the real registry), registry (agent-registry shapes), network (real measureLatency ping, instant status + explicit 5s probe verb, fantasy peer verbs retired), connector (real getConnector status/connect/disconnect, fake catalog removed), cache (post-T13b class-only export fixed + gzip b64 round-trip), backup schedule (drives the REAL BackupScheduler), brain geo search (real filter). Julia live-fire confirmed honest-skip; CI "1 skipped" is smoke:clean's deny-by-default, not julia |
+| MCP fiction audit (all 299 tools) | DONE | Six canned tools routed to their real libs: stego encode/decode (lib/stego.js, typed failures), resolution_track (logDelta reshaped + new resolution_list) — MCP audit caught the LIB bug that logDelta never persisted (every restart dropped delta history; now saves like the other ledger writers, fresh-process persist proven), citations list/add/format (listSources didn't exist; addSource merge-under-lock), stream_watch + qos_withTimeout made honest (one-shot/reality constraints stated, pointers to the real gates). Remaining 134 flagged handlers triaged: param-wrappers over real calls. mcp 6/6, schema 13/13, resolution 12/12, CI 453/0 |
+| MCP + CLI docs to full coverage | DONE | mcp-tools.md: ~60 → 300/300 tool coverage (programmatically crosschecked vs mcp.methods; A-Z param tables from registered inputSchema; Remaining-Tools table keeps it honest). runtime/mcp.md de-fictioned: stale tool tables (wrong params) + invented error-code table replaced with the real error contract + dedupe link to the reference catalog. cli.md: the 15 never-mentioned bins added (events/qos/rate/nature/rules/mesh-status/islands-boot/connector/nodes...), theme verbs corrected to show/status/set, consensus triple-dupe collapsed. Doc examples spot-fired through mcp.execute — all OK; gates PASS |
+| Docs-coverage gates (durable) | DONE | scripts/check-mcp-coverage.js (every registered tool in mcp-tools.md or dispositioned — 300/300, word-boundary match) + scripts/check-cli-coverage.js (every bin/*.js in cli.md or dispositioned — 117 documented + 5 dispositioned = 122; first run caught agent-spawner/bot/branch-manager/hybrid-sync/test-all documented only under routed names, rows now carry both). Wired as npm run lint:coverage |
+| Stale getters wired | DONE | `getGithub()`/`getStegoframe()` read `_config` directly — null on any fresh caller (bin/auth.js session check). Both route through `load()` |
+| `cfR2Bucket()` zombie removed | DONE | grep-proved zero consumers; the feature was deleted in 0.8.6 but the getter survived |
+| ENV_REGISTRY Wave-B completion | DONE | 24 → 43 entries: the 19 vars `load()`/getters already consumed but the registry omitted (VANT_MSG_*, VANT_PRUNE_*, VANT_CLEAN_*, storage path/sync interval/brain password timeout/escrow budget/agent id/qos limits/wal) are registered; per-domain families (spine seeds, genesis mesh, sudo, s3 REMOTE) stay out with an explicit note — their domain modules are the reader of record |
+| Pins | DONE | `test/config-registry.test.js` 31 pins (8 new: merged msg shape, stegoframe reachability, fresh-load getGithub, cfR2 removal, msg/prune-clean/escrow-qos family coverage, registry ≥ 40) |
+| Verified | DONE | config-registry 31, config 20, config-persistence 13, agents 17, agents-split 23 — all green |
 
 ## Where the spine got large (the honest answer)
 

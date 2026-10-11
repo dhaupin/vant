@@ -39,7 +39,7 @@ vant health
 | Command | Description |
 |---------|-------------|
 | `vant sync` | Pull/push brain from/to GitHub |
-| `vant hybrid` | Public/private brain split sync (runs hybrid-sync) |
+| `vant hybrid` | Public/private brain split sync (routes bin/hybrid-sync.js) |
 | `vant watch` | Poll GitHub for changes |
 | `vant repos` | Mount and sync external repositories |
 | `vant load` | Load brain files (.md, .json, .yaml, .ini, .txt) |
@@ -137,7 +137,7 @@ vant embed batch "one" "two"       # Batch embeddings
 vant citations list               # List recorded sources
 vant citations add <ref>          # Record a source (ref = commit hash)
 vant citations verify <ref>       # Check whether a ref has been cited
-vant citations search <query>     # Placeholder — not wired to the lib yet
+vant citations search <query>     # Placeholder - not wired to the lib yet
 
 vant geometry store <key> <val>    # Store in quasicrystal
 vant geometry retrieve <key>       # Retrieve by key
@@ -195,7 +195,7 @@ vant org config --set-operator-caps canRead,canWrite,canSpawn    # Persist grant
 vant org demo                                   # Run the demo org flow
 
 # (pass 88) Boot hydrates persisted orgchart.operatorCapabilities in every
-# fresh process — `vant org grant` once, then CLI spawn/kill just work.
+# fresh process - `vant org grant` once, then CLI spawn/kill just work.
 
 vant trust score <entity>
 vant trust record <entity> <type> <delta>
@@ -216,11 +216,11 @@ vant snapshot --password <pw>    # Explicit password
 vant snapshot --output <path>    # Custom output path (inside the repo)
 vant snapshot --no-verify        # Skip the round-trip verification
                                  # (REFUSED when overwriting an existing
-                                 #  horcrux — see below)
+                                 #  horcrux - see below)
 
 # Backup safety: if the target already exists (i.e. it IS some brain's live
 # boot horcrux), snapshot writes to a sibling tmp file, round-trip validates
-# it, and only then replaces the original — same contract as
+# it, and only then replaces the original - same contract as
 # `vant horcrux refresh`. A failed or corrupt encode never destroys the only
 # backup. Brand-new targets write directly. The default output follows the
 # current brain (models/public/<brain>/boot/<agent>-p_<pw>.svg), not a
@@ -270,10 +270,22 @@ Clients authenticate with `X-API-Key: <key>` or
 | `vant brain` | Brain mode control (dual/public/private/remote) |
 | `vant format` | Format detection and conversion |
 | `vant schema` | JSON/YAML schema validation |
+| `vant universe` | Genesis snapshots + stored scenario manifests: derive/fork a world's deterministic identity; record/diff/resume content-addressed manifests; resume `--materialize` restores recorded cell values escrow-gated (Wave U3) (`bin/universe.js`) |
+| `vant scenario` | Governance playbook (Wave U3): scenario crew over one shared escrow pool, delegated task under quarantine+escrow+consensus gates, roster/pool status (`bin/scenario.js`) |
 
 ```bash
 vant storage                # Show storage status
 vant cache --clear          # Clear cache
+vant universe snapshot my-world   # Derive (seed, cells, fingerprint) from (universe, name)
+vant universe fork my-world child # Prefix-folded child world (fork = filename)
+vant universe status        # Universe constant source + default-world fingerprint
+vant universe record my-world --state-root <hash>  # Store a content-addressed manifest
+vant universe record child.my-world --fork        # Record a folded fork manifest
+vant universe diff <idA> <idB>      # Cell-hash delta (same-universe contract)
+vant universe resume <id> --actor me  # Lock-gated, WAL-backed resume marker
+vant scenario crew audit-world --agents 3 --budget 500   # Crew over one shared escrow pool
+vant scenario task audit-world "Verify the pinned ledger" --cost 250  # Quarantine→escrow→consensus gates
+vant scenario status audit-world  # Roster + live pool headroom
 vant tmp list               # List temp files (workspace space)
 vant tmp create "text"      # Create a temp file
 vant tmp clean              # Clear the workspace temp space
@@ -296,10 +308,10 @@ vant backup create          # same backup-safety as snapshot/horcrux refresh:
                             # existing targets go through tmp→validate→replace,
                             # and the final file is re-verified after the swap
                             # (original restored if verification fails)
-vant backup restore <file>   # validates the file first — wrong password /
+vant backup restore <file>   # validates the file first - wrong password /
                              # corrupt file fails before anything is restored
 vant backup list
-vant backup schedule         # not implemented — prints a cron recipe
+vant backup schedule         # not implemented - prints a cron recipe
 
 vant horcrux inspect [path] [password]
 vant horcrux restore [path] [password]
@@ -332,7 +344,7 @@ vant brain mode dual            # dual | public | private | remote
 | `vant remote` | Remote add/remove/list |
 | `vant msg` | Messaging system |
 | `vant event` | Event handling |
-| `vant telegram` | Telegram bot |
+| `vant telegram` | Telegram bot (bin/bot.js) |
 
 See also the [Federation](#federation) section below for cross-org
 verbs (`genesis`, `agora`, `mesh`, `notices`).
@@ -524,21 +536,29 @@ with its own `--help`.
 | `vant escrow` | Budgets and holds (status, hold, release, list, pool, cap, pools) ([reference](/reference/escrow)) |
 | `vant consensus` | Consensus ledger operations (status, propose, vote) |
 | `vant context` | Prompt caching and context engine |
-| `vant consciousness` | Consciousness engine |
-| `vant recursion` | Recursion engine |
-| `vant registry` | General registry |
+| `vant consciousness` | Consciousness engine (status, think, journal) |
+| `vant recursion` | Recursion engine (run, unwind) |
+| `vant registry` | Agent registry (trust-gated: list, get, register, remove, count, summary) |
+| `vant connector` | Vector-DB connectors (list, status, connect, disconnect - the real getConnector factory) |
 | `vant webhooks` | Webhook management |
 | `vant webhook` | Alias of `vant webhooks` |
 | `vant zen` | Zen utilities |
 | `vant brain-registry` | Brain registration |
-| `vant node-registry` | Node registration |
+| `vant node-registry` | Node registration (list, register, unregister, status - the real peer registry) |
+| `vant nodes` | Peer discovery view of the same registry (list/discover, ping, info, status) |
 | `vant habitat` | Workspace/RLS management (workspaces, roles, boundaries, identity, tokens) |
-| `vant consensus` | Consensus mechanisms |
 | `vant framework` | Agent framework |
 | `vant runop` | Run operator |
 | `vant skills` | Skill management |
-| `vant theme` | Theme management |
-| `vant branch` | Branch management (runs branch-manager) |
+| `vant theme` | The CLI/MCP rendering surface (show, status, set) - not a theme picker |
+| `vant branch` | Branch management (routes bin/branch-manager.js) |
+| `vant events` | Event-bus observability (tail, stats, enable/disable) |
+| `vant qos` | Quality of service (status, enable, disable) |
+| `vant rate` | Rate limiter (status, reset clientId) |
+| `vant nature` | Nature module (status, simulate) |
+| `vant rules` | Rule engine (list, test, reload) |
+| `vant mesh-status` | The coordinator's one-command mesh view (Wave F) |
+| `vant islands-boot` | Boot as a componentized brain with lazy-loading |
 | `vant canvas` | Brain data visualization |
 
 ```bash
@@ -549,10 +569,21 @@ vant skills search <q>
 vant skills add <url>
 vant skills remove <name>
 
-vant theme list
-vant theme apply <name>
-vant theme create <name>
-vant theme preview <name>
+vant theme show           # Render the live CLI/MCP surface (header + status icons)
+vant theme status         # Theme config per brain on the stack
+vant theme set accent '"#ff8800"'
+
+vant connector list       # pinecone | qdrant | weaviate (the real factory surface)
+vant connector status qdrant
+vant connector connect qdrant
+
+vant nodes list           # Registry view (adopts peer registrations)
+vant nodes ping <id>      # Heartbeat liveness
+vant node-registry status # total/alive/joining/dead + state-spine tree root
+
+vant events tail [--follow]
+vant qos status
+vant mesh status --peers
 
 vant canvas spiral [count]
 vant canvas svg [name]
@@ -567,15 +598,19 @@ These commands support development and CI. Most users will not need them.
 | Command | Description |
 |---------|-------------|
 | `vant test` | Test runner (`smoke`, `core`, `full` modes) |
-| `vant spawn` | Agent spawning utility |
+| `vant spawn` | Agent spawning utility (routes bin/agent-spawner.js) |
+| `vant telegram` | Telegram bot (bin/bot.js; needs TELEGRAM_BOT_TOKEN) |
+| `vant hybrid` | Split sync (routes bin/hybrid-sync) |
+| `vant branch` | Branch management (routes bin/branch-manager) |
+| `vant test-all` | 17-check self-test (health/search/islands/lib exports) |
 
 ```bash
 vant test          # Smoke tests (default)
 vant test core     # Brain, storage, core modules
 vant test full     # All tests (500+)
 
-test-all           # 17 self-checks across health/search/islands/lib exports
-test-all           # (cwd-independent: runs from any directory)
+vant test-all      # 17 self-checks across health/search/islands/lib exports
+                   # (routes bin/test-all.js; cwd-independent: runs from any directory)
 
 vant spawn list    # List spawned agents
 vant spawn --help  # Agent spawner usage

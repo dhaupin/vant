@@ -95,23 +95,35 @@ for (const expected of ['vaf:blocked', 'rls:denied', 'trust:blocked', 'market:bl
     ok('wired: ' + expected, wiring.isWired(expected));
 }
 
-// reaction: denial → audit.warn appears in the audit log
+// reaction: denial → audit.log appears in the ledger
+// (pass 197 fix) Counting entries.length cannot prove the reaction once the
+// ledger sits at LEDGER_MAX_ENTRIES (10000): the cap keeps LENGTH constant
+// by design (newest kept, oldest spliced), so a wiring that works fine shows
+// "10000 → 10000" forever. The reaction is pinned CONTENT-based instead: a
+// new 'event-wiring:vaf:blocked' action must appear in the ledger array
+// within the settle window, at any fill level.
 const audit = require('../lib/audit');
-const tally = async (fn) => {
-    const before = audit.list ? audit.list().length : 0;
-    fn();
-    await new Promise(r => setTimeout(r, 30));
-    const after = audit.list ? audit.list().length : 0;
-    return after - before;
+const countAction = (needle) => {
+    const l = audit.getLedger();
+    const entries = Array.isArray(l?.entries) ? l.entries : (Array.isArray(l) ? l : []);
+    return entries.filter(e => e && e.action === needle).length;
 };
-// audit reaction: entry count in the ledger grows when the event fires
-const countEntries = (l) => Array.isArray(l?.entries) ? l.entries.length : (Array.isArray(l) ? l.length : -1);
-const before = countEntries(audit.getLedger());
-ok('audit ledger readable for pin', before >= 0, before);
+const NEEDLE = 'event-wiring:vaf:blocked';
+const beforeHits = countAction(NEEDLE);
+ok('audit ledger readable for pin', beforeHits >= 0, beforeHits + ' pre-existing pins');
 ev.emit('vaf:blocked', { reason: 'eo-test', path: 'p' });
 await new Promise(r => setTimeout(r, 50));
-const after = countEntries(audit.getLedger());
-ok('vaf:blocked → audit reacts (entry count grows', after > before, before + ' → ' + after);
+// emit twice more: one survives only if the wiring fired (cap shape proof:
+// even at a FULL ledger, length stays constant while content rotates)
+const afterHits = countAction(NEEDLE);
+ok('vaf:blocked → audit reacts (pinned action appears in ledger)', afterHits > beforeHits, beforeHits + ' → ' + afterHits);
+// and prove the cap did not silently swallow it by checking the entry shape
+const last = (() => {
+    const l = audit.getLedger();
+    const entries = Array.isArray(l?.entries) ? l.entries : (Array.isArray(l) ? l : []);
+    return entries.find(e => e && e.action === NEEDLE && e.data && e.data.reason === 'eo-test') || null;
+})();
+ok('vaf:blocked audit entry carries payload context', !!last, JSON.stringify(last ? Object.keys(last) : null));
 
 // sync failure → health surfacing (also pins the _checkRead fix)
 const health = require('../lib/health');

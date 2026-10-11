@@ -70,6 +70,8 @@ Start → Sync from GitHub → Load brain → Think/Learn → Commit → Push to
 | sandbox.js | Security | canRead(), canWrite() |
 | qos.js | Rate limit | limit(), breaker() |
 | search.js | Search | query(), hybrid() |
+| state-store.js | Protocol-state persistence | hydrate(), persist(), persistMerged() |
+| state/tree.js | Content-addressed state tree (#145) | get(), put(), rootHash(), diff() |
 
 ### Models Structure
 
