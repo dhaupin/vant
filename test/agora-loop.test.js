@@ -79,7 +79,7 @@ async function main() {
     let topic = null;
     await test('forum vote -> consensus ledger carries the scope', async () => {
         const v = await forumMod.vote('Ship the agora wave', {
-            options: ['ratify', 'reject'], minQuorum: 2, useTrustWeight: false,
+            ballot: ['ratify', 'reject'], minQuorum: 2, useTrustWeight: false,
             scope: { owner: 'team:backend', visibility: 'scope' }
         });
         assert(v.voted === true, 'vote create failed: ' + JSON.stringify(v).slice(0, 120));

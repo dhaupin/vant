@@ -25,6 +25,10 @@
  *                                 as 0.8.6; axolotl work lands early but
  *                                 is never branded 0.9.0. 84+ refs were
  *                                 converted; this guards the pattern.
+ *  10. lib/providers           — phantom module (pass 160): never existed;
+ *                                 3 surfaces referenced it incl. LIVE code
+ *                                 (bin/stego.js upload require) — real
+ *                                 registry is lib/remote.js
  *
  * SCOPE: every tracked text file EXCEPT the allow-list below. Allowed:
  *   - scripts/check-fiction-signatures.js (this file: the signatures)
@@ -53,6 +57,8 @@ const SIGNATURES = [
      'lib/framework.js was deleted — do not describe it as a live module'],
     [/lib\/notifications\.js|require\(['"]\.\/lib\/notifications/i,
      'lib/notifications.js never existed — real surfaces: Telegram bot, events, webhooks'],
+    [/lib\/providers/i,
+     'lib/providers never existed — the git-provider registry is lib/remote.js (getProvider/detectProvider)'],
     [/VantRetryableError/,
      'no VantRetryableError class — retryability is the retryable option on VantError'],
     [/vant\.loadBrain\s*\(|brain\.loadBrain\s*\(/,

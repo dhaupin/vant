@@ -35,27 +35,33 @@ Options:
         process.exit(0);
     }
 
-    // Parse flags
+    // Parse flags.
+    // (pass 194) RAG tuning is LIVE: defaults come from config (VANT_RAG_*
+    // env > brain config rag.* > lib/search.js defaults) instead of the
+    // hardcoded 5/2000 — the settings.example.ini spec rows now actually
+    // configure the CLI, and --limit is clamped to rag.limitMax.
+    let ragSettings = null;
+    try { ragSettings = require(path.join(DIR, 'lib', 'search')).getSettings(); } catch (e) { ragSettings = { ragLimitMax: 20, ragTokenLimit: 3000 }; }
     let mode = null;
-    let limit = 5;
+    let limit = ragSettings.ragLimitMax;
     let query = action;
     let compact = false;
     let rerank = false;
-    let maxTokens = 2000;
+    let maxTokens = null; // unset → compress() honors ragTokenLimit
     
     for (let i = 1; i < args.length; i++) {
         if (args[i] === '--mode' && args[i+1]) {
             mode = args[i+1];
             i++;
         } else if ((args[i] === '-l' || args[i] === '--limit') && args[i+1]) {
-            limit = parseInt(args[i+1]) || 5;
+            limit = Math.max(1, Math.min(ragSettings.ragLimitMax, parseInt(args[i+1]) || ragSettings.ragLimitMax));
             i++;
         } else if (args[i] === '--compact') {
             compact = true;
         } else if (args[i] === '-r' || args[i] === '--rerank') {
             rerank = true;
         } else if ((args[i] === '-t' || args[i] === '--max-tokens') && args[i+1]) {
-            maxTokens = parseInt(args[i+1]) || 2000;
+            maxTokens = parseInt(args[i+1]) || null; // explicit 0/nonsense → unset (config default)
             i++;
         }
     }

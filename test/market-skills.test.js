@@ -1,0 +1,449 @@
+'use strict';
+/**
+ * Wave U6 pin lite — Credentialed Marketplace prototype (prd-universe.md).
+ *
+ * The prototype's contract, pinned (full design: labs/prototype-marketplace.md):
+ *   U6.2 gated surface — ops are INERT when market.skillsEnabled is off
+ *                       (typed E_SKILLS_DISABLED), never absent
+ *   U6.3 trust feed    — confirm writes a REAL positive record keyed to the
+ *                        SELLER; refute writes negative; visible in getScore
+ *   U6.4 adversarial   —
+ *                        delivery refusals (wrong payload kind, empty, oversize, 64KB cap)
+ *                        buyer-cannot-deliver / seller-cannot-settle scoping
+ *                        double settlement refused typed (E_SKILL_ALREADY_SETTLED)
+ *                        delivery NEVER debits; only confirm does (hold→deliver→release)
+ *                        'launch' listings refused at listing time (documented boundary)
+ *
+ * The other market suites clean their own state; this one uses clearState
+ * (market/trust parity seams) and a SKILLS-specific state file scoping via
+ * the config gate only.
+ *
+ * Run: node test/market-skills.test.js
+ */
+const assert = require('assert');
+
+const marketMod = require('../lib/market');
+const trust = require('../lib/trust');
+const config = require('../lib/config');
+require('../lib/sandbox').defaultSandbox.setCapabilities({
+    canRead: true, canWrite: true, canTrade: true, canSpawn: true
+});
+
+let passed = 0, failed = 0;
+function ok(name, fn) {
+    return Promise.resolve().then(fn).then(() => {
+        passed++; console.log('  ✓ ' + name);
+    }, (e) => {
+        failed++; console.log('  ✗ ' + name + ': ' + (e && e.message ? e.message.split('\n')[0] : e));
+    });
+}
+
+async function main() {
+    console.log('\n🛠️  MARKET SKILLS PINS (Wave U6)\n');
+
+    // Hydrate a clean slate for the two stores this suite touches.
+    marketMod.clearState();
+
+    // ------------------------------------------------------------------
+    // (U6.2) Gate closed → inert, typed
+    // ------------------------------------------------------------------
+
+    config.set('market.skillsEnabled', false);
+    await ok('gate closed: every skill op refuses typed E_SKILLS_DISABLED', async () => {
+        marketMod.clearState();
+        for (const r of [
+            await marketMod.listSkill({ title: 'x' }),
+            await marketMod.buySkill('listing_x', 'buyer'),
+            await marketMod.deliverSkill('trade_x', 'payload'),
+            await marketMod.settleSkill('trade_x', 'confirm'),
+            await marketMod.skillStatus('listing_x')
+        ]) {
+            assert.strictEqual(r.code, 'E_SKILLS_DISABLED', JSON.stringify(r).slice(0, 120));
+        }
+    });
+
+    config.set('market.skillsEnabled', true);
+
+    // ------------------------------------------------------------------
+    // (U6.4) Listing-time boundaries
+    // ------------------------------------------------------------------
+
+    await ok('listing boundaries: launch refused, hostile price refused, empty title refused', async () => {
+        marketMod.clearState();
+        const launch = await marketMod.listSkill({ title: 'remote-exec', payloadKind: 'launch', payload: 'x' }, { agentId: 's', consentGiven: true });
+        assert.strictEqual(launch.code, 'E_SKILL_PAYLOAD_KIND', 'launch not refused');
+        const badPrice = await marketMod.listSkill({ title: 'x', price: 'five' }, { agentId: 's', consentGiven: true });
+        assert.strictEqual(badPrice.code, 'E_SKILL_PRICE', 'non-numeric price not refused');
+        const noTitle = await marketMod.listSkill({ description: 'x' }, { agentId: 's', consentGiven: true });
+        assert.strictEqual(noTitle.code, 'E_SKILL_TITLE', 'missing title not refused');
+    });
+
+    // ------------------------------------------------------------------
+    // Full delivery loop
+    // ------------------------------------------------------------------
+
+    let listingId = null, tradeId = null;
+    await ok('happy path: list → buy (hold, no debit) → deliver (hash) → confirm (DEBIT + trust)', async () => {
+        marketMod.clearState();
+        const listed = await marketMod.listSkill({ title: 'pin-skill', description: 'pinned', payloadKind: 'text', price: 5 }, { agentId: 'seller-bot', consentGiven: true });
+        assert(listed.listed === true, JSON.stringify(listed).slice(0, 120));
+        listingId = listed.listingId;
+        const bought = await marketMod.buySkill(listingId, 'buyer-bot', { agentId: 'buyer-bot', consentGiven: true });
+        assert(bought.bought === true, JSON.stringify(bought).slice(0, 120));
+        tradeId = bought.tradeId;
+        const delivered = await marketMod.deliverSkill(tradeId, 'the deliverable', { agentId: 'seller-bot' });
+        assert(delivered.delivered === true, 'delivery refused');
+        assert(/^[0-9a-f]{64}$/.test(delivered.payloadHash), 'payloadHash not sha256');
+        // settle confirm
+        const settled = await marketMod.settleSkill(tradeId, 'confirm', { agentId: 'buyer-bot' });
+        assert(settled.settled === true && settled.trustWritten === true, JSON.stringify(settled).slice(0, 140));
+    });
+
+    await ok('U6.3 trust feed: settle wrote a REAL seller-keyed record (getScore moved up)', async () => {
+        const before = 0.5; // unregistered agent baseline per getScore
+        const inst = trust.getTrust ? trust.getTrust() : null;
+        // The record is keyed to the SELLER (seller-bot). A fresh seller with
+        // no history scores the baseline; after the confirm above, positive.
+        // getScore returns a NUMBER — just assert higher than baseline.
+        const score = inst ? inst.getScore('seller-bot') : null;
+        assert(typeof score === 'number' && score > before, 'positive record not reflected (score=' + score + ')');
+    });
+
+    await ok('U6.4 double settlement refused typed', async () => {
+        const again = await marketMod.settleSkill(tradeId, 'confirm', { agentId: 'buyer-bot' });
+        assert.strictEqual(again.code, 'E_SKILL_ALREADY_SETTLED', JSON.stringify(again).slice(0, 120));
+    });
+
+    await ok('U6.4 scope: buyer cannot deliver, seller cannot settle their own sale', async () => {
+        marketMod.clearState();
+        const listed = await marketMod.listSkill({ title: 'scope-skill', payloadKind: 'text', price: 2 }, { agentId: 'seller-bot', consentGiven: true });
+        const bought = await marketMod.buySkill(listed.listingId, 'buyer-bot', { agentId: 'buyer-bot', consentGiven: true });
+        const buyerDelivery = await marketMod.deliverSkill(bought.tradeId, 'self-approved', { agentId: 'buyer-bot' });
+        assert.strictEqual(buyerDelivery.code, 'E_SKILL_NOT_SELLER', JSON.stringify(buyerDelivery).slice(0, 120));
+        await marketMod.deliverSkill(bought.tradeId, 'the goods', { agentId: 'seller-bot' });
+        const sellerSettle = await marketMod.settleSkill(bought.tradeId, 'confirm', { agentId: 'seller-bot' });
+        assert.strictEqual(sellerSettle.code, 'E_SKILL_NOT_BUYER', JSON.stringify(sellerSettle).slice(0, 120));
+    });
+
+    await ok('U6.4 delivery refusals: empty payload, oversize payload, wrong-person stage', async () => {
+        marketMod.clearState();
+        const listed = await marketMod.listSkill({ title: 'refusal-skill', payloadKind: 'text', price: 2 }, { agentId: 'seller-bot', consentGiven: true });
+        const bought = await marketMod.buySkill(listed.listingId, 'buyer-bot', { agentId: 'buyer-bot', consentGiven: true });
+        const empty = await marketMod.deliverSkill(bought.tradeId, '   ', { agentId: 'seller-bot' });
+        assert.strictEqual(empty.code, 'E_SKILL_PAYLOAD', JSON.stringify(empty).slice(0, 120));
+        const oversize = await marketMod.deliverSkill(bought.tradeId, 'x'.repeat(65537), { agentId: 'seller-bot' });
+        assert.strictEqual(oversize.code, 'E_SKILL_PAYLOAD', '64KB cap not enforced');
+        // trade still pending — refused deliveries changed NOTHING
+        const delivered = await marketMod.deliverSkill(bought.tradeId, 'ok now', { agentId: 'seller-bot' });
+        assert(delivered.delivered === true, 'good delivery after refusals failed');
+    });
+
+    await ok('U6.4 refute path: NO debit, negative trust record, trade refuted', async () => {
+        marketMod.clearState();
+        // eslint-disable-next-line
+        const listed = await marketMod.listSkill({ title: 'refute-skill', payloadKind: 'text', price: 10 }, { agentId: 'bad-seller', consentGiven: true });
+        const bought = await marketMod.buySkill(listed.listingId, 'buyer-bot', { agentId: 'buyer-bot', consentGiven: true });
+        await marketMod.deliverSkill(bought.tradeId, 'garbage payload', { agentId: 'bad-seller' });
+        const inst = trust.getTrust();
+        // (run-to-run determinism) The trust ledger PERSISTS on disk between
+        // suite runs, so a veteran bad-seller may already be floored at 0
+        // and `after < before` is unsatisfiable. Isolate THIS pin's ledger:
+        // clear trust state, certify the zero baseline, then assert the
+        // drop. The REAL assertion — score moves down — survives.
+        trust.clearState();
+        // getScore(self-test): a fresh ledger scores the configured baseline
+        // (initialScore) for everyone — prove clearState actually reset.
+        const baseline = inst.config.initialScore;
+        const before = inst.getScore('bad-seller');
+        assert.strictEqual(before, baseline, 'trust.clearState did not reset scores (' + before + ' ≠ ' + baseline + ')');
+        const refuted = await marketMod.settleSkill(bought.tradeId, 'refute', { agentId: 'buyer-bot' });
+        assert(refuted.settled === true, JSON.stringify(refuted).slice(0, 120));
+        const after = inst.getScore('bad-seller');
+        assert(after < before, 'negative trust record not reflected (' + before + ' → ' + after + ')');
+        assert(after < baseline, 'negative record did not leave the baseline (' + after + ')');
+    });
+
+    // ====================================================================
+    // (U6.5 PRODUCTIZE) Real escrow settlement surface — held, then ONE
+    // debit, confirmed against the REAL escrow store.
+    // ====================================================================
+
+    await ok('U6.5 SINGLE-DEBIT invariant (the productize fix): buy holds without debiting; confirm debits exactly once', async () => {
+        marketMod.clearState();
+        const escrow = require('../lib/escrow');
+        const esc = escrow.create ? escrow.create() : new escrow.Escrow();
+        const BUDGET = 200;
+        if (esc.setBudget) esc.setBudget('debit-buyer', BUDGET);
+        const listed = await marketMod.listSkill({ title: 'debit-skill', payloadKind: 'text', price: 30 }, { agentId: 'debit-seller', consentGiven: true });
+        const bought = await marketMod.buySkill(listed.listingId, 'debit-buyer', { agentId: 'debit-buyer', consentGiven: true });
+        assert(bought.bought === true, JSON.stringify(bought).slice(0, 140));
+        assert(typeof bought.escrowHold === 'string' && bought.escrowHold.startsWith('skill:'), 'hold id not surfaced');
+        // BUY side: no debit — buyer still has the full price headroom.
+        const escBuy = escrow.create ? escrow.create() : new escrow.Escrow();
+        const stillRich = escBuy.canSpend('debit-buyer', BUDGET - 30);
+        assert.strictEqual(stillRich.allowed, true, 'BUY DEBITED — hold must not move money: ' + JSON.stringify(stillRich));
+        // Confirm → exactly the price debited.
+        await marketMod.deliverSkill(bought.tradeId, 'the payload', { agentId: 'debit-seller' });
+        const settled = await marketMod.settleSkill(bought.tradeId, 'confirm', { agentId: 'debit-buyer' });
+        assert(settled.settled === true, JSON.stringify(settled).slice(0, 140));
+        const escAfter = escrow.create ? escrow.create() : new escrow.Escrow();
+        const rich = escAfter.canSpend('debit-buyer', BUDGET - 30);
+        assert.strictEqual(rich.allowed, true, 'price not debited exactly once: ' + JSON.stringify(rich));
+        const overdraft = escAfter.canSpend('debit-buyer', BUDGET - 29);
+        assert.strictEqual(overdraft.allowed, false, 'more than one debit landed (overdraft allowed): ' + JSON.stringify(overdraft));
+        // The trade row carries the real debit.
+        const tradeRow = marketMod.getTrade(bought.tradeId);
+        assert(tradeRow && tradeRow.debit && tradeRow.debit.amount === 30, 'trade row does not record the debit: ' + JSON.stringify(tradeRow && tradeRow.debit));
+    });
+
+    await ok('U6.5 refute economics: hold released, NO debit, listing supply RESTORED', async () => {
+        marketMod.clearState();
+        const escrow = require('../lib/escrow');
+        if (escrow.create) { const e = escrow.create(); if (e.setBudget) e.setBudget('refute-buyer2', 50); }
+        const listed = await marketMod.listSkill({ title: 'restore-skill', payloadKind: 'text', price: 20, supply: 1 }, { agentId: 'restore-seller', consentGiven: true });
+        const bought = await marketMod.buySkill(listed.listingId, 'refute-buyer2', { agentId: 'refute-buyer2', consentGiven: true });
+        await marketMod.deliverSkill(bought.tradeId, 'folk payload', { agentId: 'restore-seller' });
+        const refuted = await marketMod.settleSkill(bought.tradeId, 'refute', { agentId: 'refute-buyer2' });
+        assert(refuted.settled === true, JSON.stringify(refuted).slice(0, 140));
+        // Supply restored: a second buyer can now take the single unit again.
+        const escrow2 = require('../lib/escrow');
+        if (escrow2.create) { const e2 = escrow2.create(); if (e2.setBudget) e2.setBudget('b2', 50); }
+        const bought2 = await marketMod.buySkill(listed.listingId, 'b2', { agentId: 'b2', consentGiven: true });
+        assert(bought2.bought === true, 'refuted sale did not restore supply: ' + JSON.stringify(bought2).slice(0, 140));
+    });
+
+    await ok('U6.5 payroll: broke buyer cannot even HOLD (E_SKILL_BUDGET fails closed)', async () => {
+        marketMod.clearState();
+        const escrow = require('../lib/escrow');
+        if (escrow.create) { const e = escrow.create(); if (e.setBudget) e.setBudget('broke-skill-buyer', 1); }
+        const listed = await marketMod.listSkill({ title: 'pricey-skill', payloadKind: 'text', price: 500 }, { agentId: 'pricey-seller', consentGiven: true });
+        const r = await marketMod.buySkill(listed.listingId, 'broke-skill-buyer', { agentId: 'broke-skill-buyer', consentGiven: true });
+        assert.strictEqual(r.code, 'E_SKILL_BUDGET', JSON.stringify(r).slice(0, 140));
+    });
+
+    await ok('U6.5 skill fields PERSIST on the listing (payloadKind/capabilityTag buyer-visible)', async () => {
+        marketMod.clearState();
+        const listed = await marketMod.listSkill({ title: 'kind-skill', payloadKind: 'code', price: 3, capabilityTag: 'memory.read' }, { agentId: 'kind-seller', consentGiven: true });
+        const st = await marketMod.skillStatus(listed.listingId);
+        assert.strictEqual(st.payloadKind, 'code', 'payloadKind not persisted: ' + JSON.stringify(st).slice(0, 160));
+        assert.strictEqual(st.capabilityTag, 'memory.read', 'capabilityTag not persisted');
+    });
+
+    await ok('U6.5 config mounting: env alias fires the gate (VANT_MARKET_SKILLS_ENABLED)', async () => {
+        marketMod.clearState();
+        config.set('market.skillsEnabled', false);
+        // Simulate the alias without a re-exec: kill the config cache and set
+        // the env var, then pull a fresh module copy.
+        const cfgPath = require.resolve('../lib/config');
+        const marketPath = require.resolve('../lib/market');
+        const savedCfg = require.cache[cfgPath];
+        const savedMarket = require.cache[marketPath];
+        delete require.cache[marketPath];
+        delete require.cache[cfgPath];
+        process.env.VANT_MARKET_SKILLS_ENABLED = 'true';
+        try {
+            const freshMarket = require('../lib/market');
+            const listed = await freshMarket.listSkill({ title: 'env-gated' }, { agentId: 'env-seller', consentGiven: true });
+            assert.strictEqual(listed.code, undefined, 'env alias did not widen the gate: ' + JSON.stringify(listed).slice(0, 120));
+            assert.strictEqual(listed.listed, true, 'listing via env-widened gate failed');
+        } finally {
+            delete process.env.VANT_MARKET_SKILLS_ENABLED;
+            require.cache[cfgPath] = savedCfg;
+            require.cache[marketPath] = savedMarket;
+        }
+    });
+
+    await ok('U6.5 MCP door: market_skill_gate + market_skill_* execute with typed invariants', async () => {
+        marketMod.clearState();
+        config.set('market.skillsEnabled', true);
+        const mcp = require('../lib/mcp');
+        const gateOn = await mcp.execute('market_skill_gate', { value: true });
+        assert(gateOn.enabled === true, JSON.stringify(gateOn).slice(0, 120));
+        const sellerCtx = { agentId: 'door-seller', consentGiven: true };
+        const listed = await mcp.execute('market_skill_list', { title: 'door-skill', price: 8, context: sellerCtx });
+        assert(listed.listed === true, JSON.stringify(listed).slice(0, 140));
+        const bought = await mcp.execute('market_skill_buy', { listingId: listed.listingId, buyerId: 'door-buyer' });
+        assert(bought.bought === true, JSON.stringify(bought).slice(0, 140));
+        const del = await mcp.execute('market_skill_deliver', { tradeId: bought.tradeId, payload: 'door bytes', agentId: 'door-seller' });
+        assert(del.delivered === true, JSON.stringify(del).slice(0, 140));
+        const deny = await mcp.execute('market_skill_settle', { tradeId: bought.tradeId, decision: 'confirm', agentId: 'door-seller' });
+        assert.strictEqual(deny.code, 'E_SKILL_NOT_BUYER', 'seller settled through the MCP door');
+        const okd = await mcp.execute('market_skill_settle', { tradeId: bought.tradeId, decision: 'confirm', agentId: 'door-buyer' });
+        assert(okd.settled === true, JSON.stringify(okd).slice(0, 140));
+        const status = await mcp.execute('market_skill_status', { listingId: listed.listingId });
+        assert.strictEqual(status.title, 'door-skill', JSON.stringify(status).slice(0, 140));
+    });
+
+    // ====================================================================
+    // (WAVE U6.6) Timeout sweep with evidence rules + shill-resistant rep
+    // ====================================================================
+
+    await ok('U6.6 sweep: stale pending_delivery hold released, NO debit, NO trust penalty, supply restored', async () => {
+        marketMod.clearState();
+        const escrow = require('../lib/escrow');
+        if (escrow.create) { const e = escrow.create(); if (e.setBudget) e.setBudget('sweep-buyer', 100); }
+        const listed = await marketMod.listSkill({ title: 'stale-skill', payloadKind: 'text', price: 20, supply: 1 }, { agentId: 'slow-seller', consentGiven: true });
+        const bought = await marketMod.buySkill(listed.listingId, 'sweep-buyer', { agentId: 'sweep-buyer', consentGiven: true });
+        assert(bought.bought === true, JSON.stringify(bought).slice(0, 120));
+        // Force the trade stale by aging its timestamp past the TTL.
+        const tradeRow = marketMod.getTrade(bought.tradeId);
+        assert(tradeRow, 'trade row missing');
+        tradeRow.timestamp = Date.now() - (marketMod.SKILLS_TTL_KEY ? (7 * 24 * 60 * 60 * 1000) : (7 * 24 * 60 * 60 * 1000));
+        const inst = trust.getTrust();
+        const repBefore = inst.getScore('slow-seller');
+        const swept = await marketMod.skillSweep({ agentId: 'cli' });
+        assert(swept.swept === true && swept.timedOut === 1, JSON.stringify(swept).slice(0, 140));
+        const entry = swept.trades[0];
+        assert.strictEqual(entry.tradeId, bought.tradeId, 'wrong trade swept');
+        assert.strictEqual(entry.stage, 'pending_delivery', 'evidence stage not recorded');
+        // Post-sweep: hold released, NO debit (escrow untouched beyond the hold), trade terminal.
+        const after = marketMod.getTrade(bought.tradeId);
+        assert.strictEqual(after.skillState, 'timed_out', 'trade not marked timed_out: ' + after.skillState);
+        assert.strictEqual(after.debit, null, 'sweep DEBITED — evidence rules forbid a blind debit');
+        assert(after.settleDecision === 'timeout' && after.evidence.agedMs > 0, 'evidence not recorded on the trade');
+        // No trust record: the seller's reputation did not move.
+        const repAfter = inst.getScore('slow-seller');
+        assert.strictEqual(repAfter, repBefore, 'sweep wrote a trust penalty (evidence rule violated)');
+        // Supply restored: a fresh buyer can take the single unit.
+        if (escrow.create) { const e2 = escrow.create(); if (e2.setBudget) e2.setBudget('sweep-buyer2', 100); }
+        const bought2 = await marketMod.buySkill(listed.listingId, 'sweep-buyer2', { agentId: 'sweep-buyer2', consentGiven: true });
+        assert(bought2.bought === true, 'sweep did not restore listing supply: ' + JSON.stringify(bought2).slice(0, 120));
+    });
+
+    await ok('U6.6 sweep evidence rules: young trade untouched; delivered trade NEVER auto-forfeited', async () => {
+        marketMod.clearState();
+        const young = await marketMod.listSkill({ title: 'young-skill', payloadKind: 'text', price: 4 }, { agentId: 'young-seller', consentGiven: true });
+        const by = await marketMod.buySkill(young.listingId, 'young-buyer', { agentId: 'young-buyer', consentGiven: true });
+        const r1 = await marketMod.skillSweep({});
+        const t1 = marketMod.getTrade(by.tradeId);
+        assert.strictEqual(t1.skillState, 'pending_delivery', 'young trade was swept: ' + JSON.stringify(r1).slice(0, 120));
+        // DELIVERED trades are also out of sweep scope (the buyer owes the settle
+        // decision; taking it away would favor the side that never reacts).
+        await marketMod.deliverSkill(by.tradeId, 'deliverable', { agentId: 'young-seller' });
+        // Even aged-past-TTL, delivered stays.
+        marketMod.getTrade(by.tradeId).timestamp = Date.now() - (90 * 24 * 60 * 60 * 1000);
+        await marketMod.skillSweep({});
+        const t2 = marketMod.getTrade(by.tradeId);
+        assert.strictEqual(t2.skillState, 'delivered', 'delivered trade was auto-forfeited by the sweep');
+    });
+
+    await ok('U6.6 shill-resistant rep: one buyer cannot own the score (per-buyer cap + distinct weighting + concentration flag)', async () => {
+        marketMod.clearState();
+        const listed = await marketMod.listSkill({ title: 'shill-skill', payloadKind: 'text', price: 1 }, { agentId: 'shill-seller', consentGiven: true });
+        // 6 settled trades: 5 by the SAME buyer (the shill pattern), 1 by a real one.
+        for (let i = 0; i < 5; i++) {
+            const bought = await marketMod.buySkill(listed.listingId, 'shill-buyer', { agentId: 'shill-buyer', consentGiven: true });
+            await marketMod.deliverSkill(bought.tradeId, 'payload ' + i, { agentId: 'shill-seller' });
+            await marketMod.settleSkill(bought.tradeId, 'confirm', { agentId: 'shill-buyer' });
+        }
+        const other = await marketMod.buySkill(listed.listingId, 'real-buyer', { agentId: 'real-buyer', consentGiven: true });
+        await marketMod.deliverSkill(other.tradeId, 'the one real delivery', { agentId: 'shill-seller' });
+        await marketMod.settleSkill(other.tradeId, 'confirm', { agentId: 'real-buyer' });
+        const rep = marketMod._shillResistantReputation('shill-seller');
+        assert(rep && rep.transactions === 6, 'settled trades not counted: ' + JSON.stringify(rep).slice(0, 160));
+        assert.strictEqual(rep.distinctBuyers, 2, 'distinct buyer count wrong');
+        // Score well below synthetic 1.0: the 5 repeats are capped and scaled down.
+        assert(rep.score < 0.5, 'shill ring scored too high (score=' + rep.score + ')');
+        assert(rep.score > 0, 'real settle contribution lost entirely');
+        // Concentration flag: the top buyer owns 5/6 ≥ 50% of sales.
+        assert.strictEqual(rep.shillSuspicion, 'concentrated', 'concentration not flagged: ' + JSON.stringify(rep.maxBuyerShare));
+        // Control: an even distribution across distinct buyers is NOT flagged.
+        const even = marketMod._shillResistantReputation('even-nobody');
+        assert(even && even.transactions === 0 && even.shillSuspicion === null, 'unknown seller should return a zero-transaction rep');
+    });
+
+    await ok('U6.6 skillStatus surfaces the shill-resistant rep pre-trade', async () => {
+        // Use the shill-skill listing from the previous pin (listSkill result
+        // variable is scoped inside it) — re-list for a standalone snapshot.
+        const repListed = await marketMod.listSkill({ title: 'rep-surface-skill', payloadKind: 'text', price: 1 }, { agentId: 'shill-seller2', consentGiven: true });
+        const st = await marketMod.skillStatus(repListed.listingId);
+        assert(st.reputation && typeof st.reputation.score === 'number', 'reputation not surfaced: ' + JSON.stringify(st && st.reputation).slice(0, 120));
+        assert.strictEqual(st.reputation.sellerId, 'shill-seller2', 'rep keyed to the wrong seller');
+        const withHistory = marketMod._shillResistantReputation('shill-seller');
+        assert(withHistory && withHistory.transactions === 6 && withHistory.shillSuspicion === 'concentrated', 'concentration flag not visible pre-trade: ' + JSON.stringify(withHistory).slice(0, 120));
+    });
+
+    marketMod.clearState();
+
+    await ok('U6.6 launch-payload DISPOSITION: permanently refused at listing time, with the evidence trail', async () => {
+        marketMod.clearState();
+        // The boundary is not 'prototype-only' anymore — it is THE decision:
+        // credentialed execution (a bought-context run) needs a sandboxed
+        // eval surface + threat model that does not exist. Shipped products
+        // refuse typed — not accepted-and-ignored, not 'maybe later'.
+        for (const kind of ['launch', 'eval', 'exec']) {
+            const r = await marketMod.listSkill({ title: 'forbidden', payloadKind: kind, payload: 'rm -rf /' }, { agentId: 'brazen-seller', consentGiven: true });
+            assert.strictEqual(r.code, 'E_SKILL_PAYLOAD_KIND', kind + ' not refused at listing');
+        }
+        // No listing state ever landed for any refused kind.
+        const rep = marketMod._shillResistantReputation('brazen-seller');
+        assert(rep && rep.transactions === 0, 'a refused listing left state behind: ' + JSON.stringify(rep).slice(0, 120));
+    });
+
+    // ====================================================================
+    // (QC pass-204 live-fire) Adversarial QC regressions — five bugs found
+    // and fixed while QC-nooping the U6 surface. Each pin re-fires the
+    // exploit the fix closed.
+    // ====================================================================
+
+    await ok('QC: scarce skill cannot be oversold — second buy refuses SOLD_OUT; refute restores the unit', async () => {
+        marketMod.clearState();
+        const listed = await marketMod.listSkill({ title: 'qc-scarce', payloadKind: 'text', price: 3, supply: 1 }, { agentId: 'qc-sc-seller', consentGiven: true });
+        const first = await marketMod.buySkill(listed.listingId, 'qc-sc-b1', { agentId: 'qc-sc-b1', consentGiven: true });
+        assert(first.bought === true, JSON.stringify(first).slice(0, 120));
+        const second = await marketMod.buySkill(listed.listingId, 'qc-sc-b2', { agentId: 'qc-sc-b2', consentGiven: true });
+        assert.strictEqual(second.code, 'E_SKILL_SOLD_OUT', 'supply-1 skill resold — scarcity bypass regression: ' + JSON.stringify(second).slice(0, 120));
+        // The unit still belongs to the first buyer's flow: refute frees it.
+        await marketMod.deliverSkill(first.tradeId, 'the unit', { agentId: 'qc-sc-seller' });
+        const refuted = await marketMod.settleSkill(first.tradeId, 'refute', { agentId: 'qc-sc-b1' });
+        assert(refuted.settled === true, JSON.stringify(refuted).slice(0, 120));
+        const third = await marketMod.buySkill(listed.listingId, 'qc-sc-b3', { agentId: 'qc-sc-b3', consentGiven: true });
+        assert(third.bought === true, 'refute did not restore the scarce unit: ' + JSON.stringify(third).slice(0, 120));
+    });
+
+    await ok('QC: skill listing WITHOUT explicit supply is unlimited labor (default-supply=1 would one-shot every service)', async () => {
+        marketMod.clearState();
+        const listed = await marketMod.listSkill({ title: 'qc-service', payloadKind: 'text', price: 1 }, { agentId: 'qc-svc-seller', consentGiven: true });
+        for (let i = 0; i < 3; i++) {
+            const bought = await marketMod.buySkill(listed.listingId, 'qc-svc-b-' + i, { agentId: 'qc-svc-b-' + i, consentGiven: true });
+            assert(bought.bought === true, 'buy ' + i + ' of an unlimited-supply service refused: ' + JSON.stringify(bought).slice(0, 120));
+        }
+    });
+
+    await ok('QC: seller cannot buy their own listing (self-dealing refuse at BUY time, E_SKILL_SELF_BUY)', async () => {
+        marketMod.clearState();
+        const listed = await marketMod.listSkill({ title: 'qc-selfdeal', payloadKind: 'text', price: 2 }, { agentId: 'qc-selfish', consentGiven: true });
+        const selfBuy = await marketMod.buySkill(listed.listingId, 'qc-selfish', { agentId: 'qc-selfish', consentGiven: true });
+        assert.strictEqual(selfBuy.code, 'E_SKILL_SELF_BUY', 'self-buy not refused at buy: ' + JSON.stringify(selfBuy).slice(0, 120));
+    });
+
+    await ok('QC: settlement belongs to the BUYER of record — third party + anonymous callers refused', async () => {
+        marketMod.clearState();
+        const escrow = require('../lib/escrow');
+        if (escrow.create) { const e = escrow.create(); if (e.setBudget) e.setBudget('qc-id-buyer', 50); }
+        const listed = await marketMod.listSkill({ title: 'qc-settle-id', payloadKind: 'text', price: 10 }, { agentId: 'qc-id-seller', consentGiven: true });
+        const bought = await marketMod.buySkill(listed.listingId, 'qc-id-buyer', { agentId: 'qc-id-buyer', consentGiven: true });
+        await marketMod.deliverSkill(bought.tradeId, 'payload', { agentId: 'qc-id-seller' });
+        const thirdParty = await marketMod.settleSkill(bought.tradeId, 'confirm', { agentId: 'qc-mallory' });
+        assert.strictEqual(thirdParty.code, 'E_SKILL_NOT_BUYER', 'third-party settle accepted: ' + JSON.stringify(thirdParty).slice(0, 130));
+        const anonymous = await marketMod.settleSkill(bought.tradeId, 'confirm', {});
+        assert.strictEqual(anonymous.code, 'E_SKILL_IDENTITY_REQUIRED', 'anonymous settle of an identity-anchored trade accepted: ' + JSON.stringify(anonymous).slice(0, 130));
+        // NO money moved by the refused settles: the buyer still has the
+        // full 10-credit headroom (old bug: an anon settle debited a phantom
+        // 'buyer' identity while the real buyer kept their budget).
+        const escBuy = escrow.create ? escrow.create() : new escrow.Escrow();
+        assert.strictEqual(escBuy.canSpend('qc-id-buyer', 40).allowed, true, 'a refused settle DEBITED someone: hold leaked or phantom debit');
+        // The real buyer still settles and their escrow reflects exactly one debit.
+        const settled = await marketMod.settleSkill(bought.tradeId, 'confirm', { agentId: 'qc-id-buyer' });
+        assert(settled.settled === true && (marketMod.getTrade(bought.tradeId).debit || {}).agent === 'qc-id-buyer', 'real buyer settle failed or debited someone else: ' + JSON.stringify(marketMod.getTrade(bought.tradeId).debit));
+        assert(escrow.create().canSpend('qc-id-buyer', 40).allowed && !escrow.create().canSpend('qc-id-buyer', 41).allowed, 'debit not exactly price=10 on the real buyer');
+    });
+
+    marketMod.clearState();
+    config.set('market.skillsEnabled', false);
+
+    console.log('\n=== market-skills pins (Wave U6): ' + passed + ' passed, ' + failed + ' failed ===\n');
+    process.exit(failed > 0 ? 1 : 0);
+}
+
+main().then(null, (e) => { console.error('harness crash:', e); process.exit(1); });

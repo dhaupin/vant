@@ -120,7 +120,7 @@ agents.spawn({ name, role, org }) → { id, name, brain } (sandbox.canSpawn
 nodeRegistry.register({ id, name, metadata }) → auto-heartbeats to 'alive'
 nodeRegistry.getStats() → { total, alive, joining, dead }
 
-consensus.create(topic, { options: ['a','b'], minQuorum, threshold })
+consensus.create(topic, { ballot: ['a','b'], minQuorum, threshold })
   → ASYNC (lock-chained); topic charset [a-zA-Z0-9_-] (no colons);
   topics cannot be recreated (E_COLLISION) — use run-scoped names
 consensus.vote(topic, outcome, agentId) → ASYNC; voter must be a live

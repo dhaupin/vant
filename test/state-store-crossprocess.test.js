@@ -146,7 +146,7 @@ const consensus = require("./lib/consensus");
 const S = ${START};
 (async () => {
     while (Date.now() < S) {}
-    const r = await consensus.create("gate-c-" + process.pid, { options: ["yes", "no"], minQuorum: 1 });
+    const r = await consensus.create("gate-c-" + process.pid, { ballot: ["yes", "no"], minQuorum: 1 });
     if (!r || !r.topic) throw new Error("create failed: " + JSON.stringify(r));
     console.log("OK");
     process.exit(0);

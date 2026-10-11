@@ -145,7 +145,7 @@ async function main() {
         // quorum option is minQuorum; create/vote are async — lock-chained.
         // Topic is run-scoped: topics cannot be recreated — E_COLLISION.)
         const TOPIC = 'crew-genesis-ratification-' + Date.now().toString(36);
-        const ledger = await consensus.create(TOPIC, { options: ['ratify', 'reject'], minQuorum: CREW.length, threshold: 0.5 });
+        const ledger = await consensus.create(TOPIC, { ballot: ['ratify', 'reject'], minQuorum: CREW.length, threshold: 0.5 });
         if (ledger && ledger.error) throw new Error('create: ' + ledger.error);
         const topic = (ledger && ledger.topic) || TOPIC;
 

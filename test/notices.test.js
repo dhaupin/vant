@@ -246,7 +246,7 @@ async function main() {
         // minQuorum 1 + requireRegistry false: self-contained unit vote
         // (registry/quorum gates are pinned in their own suites). create is
         // async (lock-serialized) — await it or the bridge races the ledger.
-        const c1 = await consensus.create('bridge-open-topic', { options: ['ship it', 'hold'], minQuorum: 1, requireRegistry: false });
+        const c1 = await consensus.create('bridge-open-topic', { ballot: ['ship it', 'hold'], minQuorum: 1, requireRegistry: false });
         assert(!c1.error, 'open create failed: ' + JSON.stringify(c1));
         const v = await consensus.vote('bridge-open-topic', 'ship it', 'voter-1');
         assert(v && !v.error, 'vote failed: ' + JSON.stringify(v));
@@ -256,7 +256,7 @@ async function main() {
         assert(b.note.body.includes('passed') && b.note.ref === 'bridge-open-topic', 'bad body/ref: ' + JSON.stringify(b.note));
 
         // Scoped topic: existence must NOT be nameable on the commons board.
-        const c2 = await consensus.create('bridge-secret-topic', { options: ['a', 'b'], scope: { owner: 'org:no-such-org-xyz', visibility: 'scope' } });
+        const c2 = await consensus.create('bridge-secret-topic', { ballot: ['a', 'b'], scope: { owner: 'org:no-such-org-xyz', visibility: 'scope' } });
         assert(!c2.error, 'scoped create failed: ' + JSON.stringify(c2));
         const s = notices.bridgeDecision('bridge-secret-topic', { bus: busA });
         assert(!s.bridged && s.reason === 'scoped_topic', 'scoped topic BRIDGED: ' + JSON.stringify(s));

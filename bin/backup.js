@@ -6,7 +6,7 @@
  *   vant backup create          # Create backup
  *   vant backup restore <file>  # Restore from backup
  *   vant backup list           # List backups
- *   vant backup schedule       # NOT IMPLEMENTED (prints a cron recipe)
+ *   vant backup schedule       # Start the real in-process backup scheduler
  */
 
 const path = require('path');
@@ -24,13 +24,13 @@ USAGE:
   vant backup create                    # Create backup
   vant backup restore <file>           # Restore from backup
   vant backup list                     # List backups
-  vant backup schedule [interval]      # Schedule backups
+  vant backup schedule [start|stop|status]  # Drive the backup scheduler
 
 EXAMPLES:
   vant backup create
   vant backup restore brain-backup-2024.tar.gz
   vant backup list
-  vant backup schedule daily
+  vant backup schedule start
 `);
     process.exit(0);
 }
@@ -103,15 +103,41 @@ async function main() {
             
         case 'schedule': {
             // (pass 23 census) this was a silent stub — printed 'Scheduling'
-            // and did nothing. There is no scheduler plumbing for full brain
-            // backups yet; say so instead of pretending.
-            const interval = args[1] || 'daily';
-            console.log(`Backup scheduling (${interval}) is not implemented yet.`);
-            console.log('Until then, drive it from cron:');
-            console.log(`  0 3 * * * cd ${ROOT} && node bin/vant.js backup create >> vant-backup.log 2>&1`);
-            process.exit(1);
+            // and did nothing. (pass 189) REAL PLUMBING EXISTS now:
+            // lib/backup.js's BackupScheduler registers the daily/weekly
+            // backup jobs with lib/cron.js (and the nature entropy trigger),
+            // so the CLI drives THAT instead of printing a cron recipe.
+            // Note: like every CLI run this is its own process — 'start'
+            // schedules jobs into that process; a long-running runtime
+            // should call lib/backup.start() at boot, or run the scheduler
+            // via cron driving `vant backup create`.
+            const sub = (args[1] || 'status').toLowerCase();
+            const scheduler = mod.getInstance && mod.getInstance();
+            if (sub === 'start') {
+                const sched = mod.start();
+                console.log('Backup scheduler started in this process.');
+                console.log('  Registered jobs:');
+                for (const s of sched.config.schedules) {
+                    console.log(`    ${s.id}: cron ${s.cron} (keep ${s.retention})`);
+                }
+                console.log('  Keep-alive: this process stays alive running the schedules.');
+                await new Promise(() => {}); // hold the process for the cron jobs
+            } else if (sub === 'stop') {
+                mod.stop();
+                console.log('Backup scheduler stopped.');
+            } else if (sub === 'status') {
+                const jobs = scheduler && scheduler._jobs ? [...scheduler._jobs.keys()] : [];
+                console.log('Backup scheduler:');
+                console.log('  type: in-process BackupScheduler (lib/backup.js)');
+                console.log('  jobs defined (daily/weekly): ' + (scheduler && scheduler.config ? scheduler.config.schedules.map(s => `${s.id} ${s.cron}`).join(', ') : 'n/a'));
+                console.log('  jobs registered in THIS process: ' + (jobs.length ? jobs.join(', ') : 'none (start first)'));
+                console.log('  backups dir: ' + path.join(ROOT, 'backups'));
+            } else {
+                console.error('Usage: vant backup schedule [start|stop|status]');
+                process.exit(1);
+            }
         }
-        break; // (process.exit above makes this unreachable; satisfies no-fallthrough)
+        break;
 
         default:
             console.log('Unknown action:', action);

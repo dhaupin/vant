@@ -7,7 +7,112 @@
 
 ## Handoff
 
-**Last known good commit:** pass 155 — version standardization: EVERYTHING is 0.8.6 (owner call) + signature #9. Owner ruled: axolotl work is early 0.8.6-era work, never brand it 0.9.0. CONVERTED 118 refs/57 files: lib/bin headers `(v0.9.0(-axolotl))` → `(v0.8.6)`, inline annotations, test banners (26), docs frontmatter (sudo, compute), style.md example, geometry README (v0.9.0-exp — caught by residual grep, .md missed by .js-only walk), labs PRD done-claims, ROADMAP done sections. KEPT 0.9.0: release.md semver illustrations + ROADMAP "v0.9.0 - Futures" (genuinely future). .migration-fixture/ untouched (gitignored point-in-time fixture; allow-listed). SHIPPED signature #9: `(v0.9.0...)` headers + `version: 0.9.0` frontmatter. GATES: all PASS (9 sigs), syntax OK, spot-tests cache 12/12 brain 77/77; sweep via CI. LESSONS: (1) version dating is an owner decision, not a code-reading deduction — sanity-check the model with the owner before bulk conversion; (2) batch walks must cover every extension in the tree (.js walk missed lib/geometry/README.md); (3) legitimate future-version mentions (roadmap Futures, semver illustrations) must survive a standardization — decide per-ref, not blanket. NEXT-UP: CI on PR #117, more lib batches, or owner direction. Rides PR #117. Owner: "no 0.8.7 — all refs to 0.8.6; continue lib comments + fiction checks." INVENTORY: 29 refs. CONVERTED to 0.8.6: lib/search.js, AGENTS.md, style.md, prd-agents x8, prd-brain, CHANGELOG x2 (+ max-4 row removed — its point-in-time cover was the wrong label), openapi.yaml (caught by NEW signature first run — grep had *.yml but missed *.yaml: gate > grep). release.md illustrations GENERICIZED not relabeled (PATCH 1.2.3->1.2.4, docker v0.9.0) — relabeling forward-dated examples rots when 0.8.7 really ships. SHIPPED: fiction-signature #8 = blanket \b0\.8\.7\b (no such release; current 0.8.6, axolotl 0.9.0); allow-list +models/private/ (learnings quote fiction to debunk; gitignored but gate walks fs). COMMENT AUDIT batch 2 (config/boot/sync/mcp): ALL accurate, zero drift (config exports match header, boot layer order matches _bootState, sync pushAll/pullAny/rebase :266/:449/:612, mcp start + port 3457 real). GATES: docs/claims(846f,8sig)/dist/surface/helpers/locks PASS + syntax OK; full sweep > 180s cap -> CI. LESSONS: (1) inventory greps must cover .yaml AND .yml — or just let the gate catch what grep missed (it did); (2) semver illustrations in release docs should be generic/example versions, never a plausible-next real version; (3) a CHANGELOG fiction row can hide under a wrong version label — relabeling is not enough, re-verify the rows inside. NEXT-UP: CI on PR #117, more lib batches, or owner direction. Rides PR #117.
+**Last known good commit:** pass 201 — Wave U6 PROTOTYPE landed
+(owner disposition U6.5 open). `labs/prototype-marketplace.md` (schema,
+reputation, hold→deliver→release, failure modes) + gated skills
+surface in `lib/market.js` (`listSkill/buySkill/deliverSkill/
+settleSkill/skillStatus` behind `market.skillsEnabled`, OFF default,
+typed `E_SKILLS_DISABLED` when off). Pins `test/market-skills.test.js`
+8/8; market/crossprocess/debit/trust suites green. U5 committed
+`b9f6b59` (pass 200). LESSONS from the suite: (1) skills block must
+predate `module.exports` (TDZ) — the const-order bug; (2)
+`market.list` returns the listing ITSELF; (3) trade rows stamp
+`seller: 'anonymous'` unless data.seller is passed — skills routes the
+LISTING's seller as the trust/me settlement identity; (4) trade
+`buyer` field not `buyerId`; (5) `_persistNow` is the exports seam,
+module fn is `_persist`. NEXT-UP: U6.5 owner disposition (productize
+= MCP + CLI + timeout automation + rep aggregation; archive = gate
+stays off, pins stay), merge #118, or owner direction.
+
+**Previous (pass 200) — Wave U5: provenance/compliance bundle.**
+compliance bundle (`lib/export-bundle.js` + `bin/export.js`, routed).
+`vant export bundle --out <dir>` (registry manifest, citations,
+scoped audit excerpt, encrypted horcrux, L-hashed RUNNING content
+manifest — entry i folds i-1's digest, lib/hash.js only); bundle.json
+names the terminal digest OUTSIDE the chain so rerooting is caught;
+`vant export verify <dir>` recomputes from actual bytes, fail-closed
+typed (`E_BUNDLE_TAMPERED/ABSENT/DENIED`); extra/missing files are
+tamper, not noise. Pins 11/11 (six tamper negatives); CLI coverage
+124→125; live-fired. LESSONS: (1) transform.toHorcrux re-vaf-validates
+its sink — absolute /home/… paths blocked; exporter requires repo-
+relative --out (typed refusal), which is the honest posture anyway;
+(2) a self-declared chain is tamper-EVIDENCE not trust ROOT — full
+re-forge recomputes consistently; root = horcrux password + external
+anchoring (documented in-suite). NEXT-UP: U6 credentialed marketplace
+prototype (labs/, research frontier), merge #118, or owner direction.
+
+**Previous (pass 199) — Wave U4: deliberation→decision records.**
+decision records. `forum.vote({ thread })` durably links a publication
+barcode to its consensus topic (`state/forum-threads.json`, WAL,
+FIFO 500); the decision return path reads the durable link first so a
+decision CARRIES its thread across processes (old `_openVotes` was
+memory-only). Trail reader: `threadDecisionTrail(barcode)` returns the
+consensus ledger + per-voter outcomes + escrow hold (`forum:<topic>`) +
+persisted decision; typed `E_FORUM_ABSENT` when unlinked. CLI:
+`vant forum decisions <barcode>` (+--json), `vant forum links`. MCP
+309→311 (`forum_decisions`, `forum_thread_links`; `forum_vote` +thread).
+Pins: persistence suite 4→9 включая no-orphans-after-restart; grand
+tour 18/18 (gate B 311). LESSON: module-level functions need singleton
+passthroughs — bin/MCP/tests all call through the forum INSTANCE
+(the suite caught `f.listThreadLinks is not a function` live).
+NEXT-UP: U5 provenance/compliance bundle, U6 marketplace prototype,
+merge #118, or owner direction.
+
+**Previous (pass 198) — post-merge audit of U1–U3:
+found + fixed the POOL-DEBIT bug (scenario escrow hold was bookkeeping-
+only; the shared pool never drained — live-fire caught 3 draws leaving
+the pool at 100/100). Fix: hold converts to a REAL workspace
+`Escrow.recordSpend` (auto-persists; draw routed through a fresh
+instance so the `{ orgLimit }` cap the `workspaceCanSpend` helper drops
+still bites); refusal paths refund member+pool rows; completed tasks
+stay charged. Pinned (suite 8→10, makeStubs gains an Escrow-class
+stub); live-verified 100→70→40 + over-budget refuses with refund
+intact. U1–U3 committed as `9738019` (70 files). Audit otherwise clean:
+MCP/scenario/universe surfaces match their docs; grand tour 18/18,
+manifest 22/0, genesis 11/0 still green. LESSON: a hold is an audit
+row, never a debit — "the gate is real" claims must be tested against
+the LEDGER, not the boolean. NEXT-UP: U4 forum decision records, U5
+provenance bundle, U6 marketplace prototype, merge #118, or owner
+direction.
+
+**Previous (pass 197) — Wave U1+U2+U3 LANDED:** governance
+scenario playbook (`lib/scenario.js` + `bin/scenario.js`: crew of N
+agents over ONE shared escrow workspace pool, per-task gates
+quarantine→escrow→consensus, quorum closeout via resolution.logDelta;
+8-pin suite `test/scenario-crew.test.js`) + U2.3 carry-over closed:
+resume's escrow-backed BYTE-RESTORING materialization (`record --values`
+freezes cell values in the content-addressed manifest, `resume
+--materialize` restores through the arch-A store at 1 credit/cell,
+`E_SNAPSHOT_BUDGET` before any write, refund on denial; manifest suite
+18→22). MCP 306→309 (`vant_scenario_crew/_task/_status`, live-fired
+incl. rules+sandbox doors; rules allowlist extended). Docs:
+scenario-playbook.md, cli.md, mcp-tools.md. PRD §3 U1–U3 all checked;
+U4–U6 open. GATES: grand tour 18/18 (gate B 309), lint:coverage PASS
+(MCP 309/309, CLI 124), fiction + frontmatter PASS, CI green. NEXT-UP:
+U4 forum decision records, U5 provenance bundle, U6 marketplace
+prototype, merge #118, or owner direction.
+
+**Previous (pass 197, earlier) — Wave U1 + U2 SHIPPED: genesis snapshots (PASS-derived) + stored content-addressed scenario manifests.** Julia 1.10.4 installed (no-root tarball), LIVE SMOKE 5/5 (spawn/health through lib/sidecar.js, token-checked wire eval, connector round-trip, JIT amortization MEASURED at 1.3ms warm/call vs 2-30s subprocess JIT — 3+ orders of magnitude, clean stop). julia-srv.jl truth-ups all caught by live smoke NOT the wire fake: r'...' JS regex literals, missing using Sockets/getsockname, read-to-EOF body deadlock (must read Content-Length — client holds write side open), redirect_stdout idiom (zero-arg capture-pair w/ finally-restore), payload take! on String. Live pin is PERMANENT: test/julia-sidecar-live.test.js 5/5 w/ julia, SKIPs w/o (wire contract stays pinned protocol-level in sidecar.test.js 8/8). ALSO FIXED: other agent's health claim (lib//bin warnings "cosmetic outside-repo") — mechanics true but bin/health.js checkDirs false-FAILED install dirs from foreign cwd; now resolves via lib/anchor.getRepoRoot() reporting "ok (install root)"; models/brain stay cwd-relative. LESSONS: (1) wire-fake pins pin the CONTRACT, live smoke pins the RUNTIME — both needed; (2) a half-true claim from another agent still gets code-verified before repeat — and half-true means fix the half; (3) Julia for JS natives: r"..." regex, using Sockets, Content-Length reads, redirect capture-pair. NEXT-UP: rust connector + rust-srv, geometry sidecar switch, merge #118, or owner direction. lib/sidecar.js shared runtime (spawn/health/eval/stop, loopback+token, SIDECAR_PORT discovery) used by BOTH connectors (SidecarConnector: modes sidecar/auto/subprocess, per-(lang+mode) reuse, stopSidecars) AND adapters (sidecar.js transform/stopAll parity seam per owner); julia-srv.jl (stdlib-only, token-checked); compute.js opts.mode routing w/ header truth-up. PIN-CAUGHT 2 real bugs: (1) spawnAndWait + BaseConnector.execute both lacked proc.on('error') — ENOENT crashed the process; (2) fallback spawned bare getLang() ('python' ENOENT) instead of delegating to the language's own connector (python3). Pattern from pass 164 repeats: pins catch lifecycle/error-path bugs happy-path tests miss. PINS test/sidecar.test.js 8/8 (fake Node srv on the julia wire — julia not installed here, live smoke is owner-side). GATES: claims(851f)/syntax PASS; compute/forum/escrow suites 0-fail; sweep via CI. NEXT-UP: rust connector + rust-srv, geometry sidecar switch, merge #118, or owner direction.
+
+**Previous (pass 166) — hybrid polyglot bridge SHIPPED (sidecar runtime + SidecarConnector + julia-srv + adapter parity).**
+
+**Previous (pass 163-165) — /lib walk COMPLETE (96/96 files, 21 corrections across 10 batches); forum msg+escrow WIRED with pins; /bin walked (121 files). PASS 163 batch 10: canvas paint→paintSpiral, skills 'Skils' typo, succession Usage wrong names (getLevel/setLevel/can never existed — real: getTrustLevel/setTrustLevel/getFilesForTrust). PASS 164 forum wiring (owner-approved): escrow _escrowGate on publish(1)/vote(2)/castVote(1) DEFAULT-OPEN until setBudget; msg notify via msg.send('forum') channel shout (primary, sandbox-free) + per-thread forum:<barcode> conv (bonus); forum header now truthful. TWO bugs the pin caught: (1) gate try/catch wrapped the block-decision emit — emit failure fail-opened the block; (2) cached escrow singleton missed persisted budgets (fresh-instance-by-design violated) — pin2 false-passed until fresh-per-check. PIN test/forum-msg-escrow.test.js 4/4. PASS 165 /bin: 273 requires checked, watch.js dead lib/logger shim → explicit shim + comment; framework.js honest compat shim; bin-truthfulness PASS. GATES all PASS (claims 849f/10sig), suites green, sweep via CI. LESSONS: (1) wiring a feature EXACTLY where a header overclaimed it is the cleanest fiction fix — the header becomes true instead of deleted; (2) pins must exercise the persisted-budget path — a cached instance false-passes until real budgets bite; (3) fail-open vs fail-closed needs care in gate wrappers: only side-effects (emit/log) belong inside the best-effort try. NEXT-UP: merge #118, geometry/backup pins, rust connector, or owner direction.
+
+**Previous (pass 162) — comment audit batch 9 (runtime/core): 5/7 accurate, 2 fixed. FIXED compute.js header listed rust.js connector that does NOT exist (discovery allowlist has 'rust' but connectors/rust.js missing — header fiction, code honest; in-header note added). FIXED onboard.js Usage taught phantom getAll() — never exported; Usage now teaches real search()/getWakeBriefing(). VERIFIED: consciousness whoAmI/intend statics, nature conceptual, anchor pass-23 design doc, docs generateOpenAPI/generateMarkdown, metrics never-throws contract. Suites all 0-fail, claims PASS, syntax OK. FORUM MSG/ESCROW WIRING SCOPED (owner asked, not built — audit pass was comment-only): msg = notify thread subscribers via msg.post(convId forum:<thread>, pipeline-backed) ~30-40 lines + subscriber bookkeeping; escrow = gate createPost/vote with escrow.canSpend (~15-20 lines + tests); defaults-allow makes escrow rollout safe. One focused pass when the owner says go. TALLY: 9 batches, 66 files, 16 corrections. NEXT-UP: forum wiring pass, remaining lib sweep, or owner direction. Rides PR #118.
+
+**Previous (pass 161) — comment audit batch 8 (mesh/org layer): 7/8 accurate, 1 fixed. FIXED forum.js header INTEGRATION overclaims — claimed escrow + msg integrations that are NOT wired (zero non-header occurrences; real: brain/islands/sandbox/governance/consensus/geometry/stream); header now carries a "do not add claims without the require() to back them" guard + explicit NOT-wired list. Mirror of the cache.js find: that taught a REMOVED API, this claimed NEVER-EXISTED integrations. VERIFIED: agora-sync (crew.state dispatchers + mergeTopic :176/:498), teams (createOrg :604 etc.; await-on-sync is style not fiction), governance decide :52, legal DORMANT honest :42, lineage record/trace, crew-bus 4 API fns. GATES: claims/surface PASS, syntax OK; suites forum x2/teams 9/agora 6/crew-bus 20/governance/legal/lineage 0-fail; sweep via CI. TALLY: 8 batches, 59 files, 14 corrections. LESSON: "FULLY INTEGRATED WITH OS" headers are overclaim magnets — verify each named bullet against an actual require/call site. NEXT-UP: batch 9 (compute/consciousness/adapters/embedders/remaining), test pins, or owner direction. Rides PR #118.
+
+**Previous (pass 160) — comment audit batch 7: PHANTOM lib/providers found + FIXED incl. a LIVE CODE bug. lib/providers never existed; 3 surfaces: branch.js:14 header, docs/reference/storage.md:173, and bin/stego.js:156 where `vant stego upload` did require('../lib/providers') → MODULE_NOT_FOUND every run. Real registry = lib/remote.js (getProvider :217/detectProvider :200, github/gitlab/bitbucket/gitea/selfhosted, updateAvatar matches stego's usage). FIXED all 3 + gate signature #10 (/lib\/providers/) — third phantom module (framework.js, notifications.js, providers); mechanized immediately because it broke live code, not just docs. VERIFIED stego fix: `vant stego upload` now reaches real arg validation ('Image not found', not module error). Other 7 headers accurate: cron (schedule :116/run :191/JobWorker :35), prune (:181/:336), tmp (4 spaces :352), health (start :58 + 3 endpoints :64-86), api (execute :225/hooks/getMode :133), audit (merged metrics real :136-234), auth (validateApiKey :158/isOperationAllowed :308/getLayerStatus :290 + lockout). GATES: claims PASS (10 sigs), docs x3 PASS (118), syntax OK; suites branch 10/stego 12/tmp 8 + audit/auth/api/health/cron/prune 0-fail; sweep via CI. TALLY: 7 batches, 51 files, 13 corrections (3 fiction incl. 1 live bug). LESSON: header fictions can hide LIVE require() bugs — grep phantom paths in bin/ too, not just prose. NEXT-UP: batch 8 (mesh/agora/forum/teams/governance/legal/lineage/context), test pins, or owner direction. Rides PR #118.
+
+**Previous (pass 159) — comment audit batch 6 (protocol/mesh layer): ALL 8 CLEAN, zero fixes — first fully-clean batch. VERIFIED: msg (post/send facade delegates, encryption defaults match config :221-223), network (all 7 features real: backoff :181, pooling :65, cache :66), node-registry (register/discover + state-store hydration), consensus (vote/voteSecured/tally), market+trust (security-chain claims all real — vaf/sandbox/escrow/governance requires + QoS via pipeline block-reasons market:blocked :385 trust:blocked :234), embed (3 embedders in lib/embedders/), encrypt (all statics match Usage). LESSON: absence-of-require ≠ absence-of-feature when a unified pipeline owns the security chain (trust.js qos false-alarm). GATES: claims PASS, syntax OK; suites msg 9/registry 6/consensus 9/market 8/trust 20 + network/embed/encrypt all 0-fail; sweep via CI. TALLY: 6 batches, 43 files, 10 corrections — drift concentrates in older headers + Usage blocks; newest pass-annotated modules consistently clean. NEXT-UP: batch 7 (cron/prune/tmp/branch/health/api/audit/auth), format.js + geometry test pins, or owner direction. Rides PR #118.
+
+**Previous (pass 158) — comment audit batch 5 (search/geometry/connectors/backup): 4/6 accurate, 2 fixed. FIXED search.js "(v0.8.6-axolotl)" — leftover qualifier from pass-154's 0.8.7 conversion riding along; pass-155 pattern didn't target 0.8.6-axolotl forms → now plain (v0.8.6), only occurrence repo-wide. FIXED s3.js Usage drift — taught `.s3({...})` but exports are createClient (:393), `.s3` never existed (same Usage-name-vs-export-name class as escrow pass-157). VERIFIED: backup (create/validate/restore/start all exported — validate is the pass-24 ghost-fix, now real), stego (encode/decode sigs match), geometry (project/quasicrystal/store/retrieve exported), wal (layout matches constants), search modes basic/hybrid/hyde/rag :373. GAPS: lib/geometry/ has NO dedicated test file; backup validate+restore round-trip pin candidate. GATES: claims/surface PASS, syntax OK; suites search 22/backup 3/stego 12/wal 14/connector 8 all 0-fail; sweep via CI. LESSONS: (1) version-conversion passes should grep BOTH directions — old-version→new leaves suffix hybrids like 0.8.6-axolotl behind; (2) Usage examples name APIs that never existed (.s3) — check export names literally. NEXT-UP: batch 6 (msg/network/node-registry/consensus/market/trust/embed/encrypt) or owner direction. Rides PR #118.
+
+**Previous (pass 157) — comment audit batch 4 (security-chain + mesh core): 6/8 accurate, 2 fixed.** FIXED escrow.js Usage signature drift — header taught `hold('task-1', { until: 'condition' })` but real signature is `hold(holdId, condition)` (:654, 2-arg). FIXED islands.js stale format list — omitted .ini (same drift pass-156 fixed in format.js itself: sibling headers copy each other's omissions). VERIFIED: genesis (create :128/join :263), pipeline (5 modes :96-100, state machine real), primitives (zero ./ requires — hard contract holds; stego.js:178/backup.js:501+562 genuinely on storage.atomicWrite), qos (all 5 classes real), sudo (5 scopes real :46-67), habitat (conceptual, no falsifiable API claims). GATES: claims PASS, syntax OK; suites escrow 18/islands 14/primitives 8/qos 10/pipeline 9 all 0-fail; sweep via CI. LESSONS: (1) Usage-block examples drift from signatures even when the function EXISTS — verify arg shapes, not just names; (2) stale omissions propagate across sibling headers (format.js ↔ islands.js both dropped .ini) — when fixing one header, grep its exact stale line repo-wide. NEXT-UP: batch 5 (search internals, geometry/, connectors/), format.js test pin, or owner direction. Rides PR #118.
+
+**Previous (pass 156) — comment audit batch 3 (persistence/security core): 6/8 accurate, 2 fixed.** PR #117 MERGED (142-155). FIXED cache.js header FICTION — Usage taught module-level cache.set/get/compress but exports = { Cache } only (0.8.6 refactor killed the singleton); header now class-only + explicit "NO cache.set/get on module exports". FIXED format.js header STALE — omitted .ini (code+AGENTS.md have it). VERIFIED: citations (addSource/formatCitation :75/:121), storage (getStorage factory :2125, BrainStorage.get(category,key)), vaf (check/sanitize/isBlocked real), lock (mutex in-proc promise chain :284, caller list matches lock-audit gate), brain-lock (1h TTL :56, events, cross-brain root), state-store (all claimed consumers confirmed). LESSONS: (1) Usage blocks must be verified against module.exports — a header can teach a REMOVED API (gate only catches phantoms named in docs, not header-vs-exports drift — extend signature gate if caught twice); (2) lib/format.js has NO dedicated test file — pin candidate. GATES: claims PASS, syntax OK; suites cache 12/12, citations 9/9, brain-lock 21/21, brain-storage-strict 14/14, atomic-writes 13/13; sweep via CI. NEXT-UP: batch 4 (habitat/genesis/pipeline/primitives/islands/qos/escrow/sudo) or owner direction. New PR (117 merged).
+
+**Previous (pass 155) — version standardization: EVERYTHING is 0.8.6 (owner call) + signature #9.** Owner ruled: axolotl work is early 0.8.6-era work, never brand it 0.9.0. CONVERTED 118 refs/57 files: lib/bin headers `(v0.9.0(-axolotl))` → `(v0.8.6)`, inline annotations, test banners (26), docs frontmatter (sudo, compute), style.md example, geometry README (v0.9.0-exp — caught by residual grep, .md missed by .js-only walk), labs PRD done-claims, ROADMAP done sections. KEPT 0.9.0: release.md semver illustrations + ROADMAP "v0.9.0 - Futures" (genuinely future). .migration-fixture/ untouched (gitignored point-in-time fixture; allow-listed). SHIPPED signature #9: `(v0.9.0...)` headers + `version: 0.9.0` frontmatter. GATES: all PASS (9 sigs), syntax OK, spot-tests cache 12/12 brain 77/77; sweep via CI. LESSONS: (1) version dating is an owner decision, not a code-reading deduction — sanity-check the model with the owner before bulk conversion; (2) batch walks must cover every extension in the tree (.js walk missed lib/geometry/README.md); (3) legitimate future-version mentions (roadmap Futures, semver illustrations) must survive a standardization — decide per-ref, not blanket. NEXT-UP: CI on PR #117, more lib batches, or owner direction. Rides PR #117. Owner: "no 0.8.7 — all refs to 0.8.6; continue lib comments + fiction checks." INVENTORY: 29 refs. CONVERTED to 0.8.6: lib/search.js, AGENTS.md, style.md, prd-agents x8, prd-brain, CHANGELOG x2 (+ max-4 row removed — its point-in-time cover was the wrong label), openapi.yaml (caught by NEW signature first run — grep had *.yml but missed *.yaml: gate > grep). release.md illustrations GENERICIZED not relabeled (PATCH 1.2.3->1.2.4, docker v0.9.0) — relabeling forward-dated examples rots when 0.8.7 really ships. SHIPPED: fiction-signature #8 = blanket \b0\.8\.7\b (no such release; current 0.8.6, axolotl 0.9.0); allow-list +models/private/ (learnings quote fiction to debunk; gitignored but gate walks fs). COMMENT AUDIT batch 2 (config/boot/sync/mcp): ALL accurate, zero drift (config exports match header, boot layer order matches _bootState, sync pushAll/pullAny/rebase :266/:449/:612, mcp start + port 3457 real). GATES: docs/claims(846f,8sig)/dist/surface/helpers/locks PASS + syntax OK; full sweep > 180s cap -> CI. LESSONS: (1) inventory greps must cover .yaml AND .yml — or just let the gate catch what grep missed (it did); (2) semver illustrations in release docs should be generic/example versions, never a plausible-next real version; (3) a CHANGELOG fiction row can hide under a wrong version label — relabeling is not enough, re-verify the rows inside. NEXT-UP: CI on PR #117, more lib batches, or owner direction. Rides PR #117.
 
 **Previous (pass 154) — 0.8.7 fictional-version purge + signature #8 + core-batch comment audit.** Owner: build the 2 gates, then audit core-lib comments. SHIPPED: scripts/check-fiction-signatures.js (lint:claims + workflow step; 7 signatures = caught-twice fictions: npm-install, max-4 x5 variants, framework.js, notifications.js, VantRetryableError, loadBrain, vant.use; 1978 files; allow-list archives/ledger/CHANGELOG/check-scripts; line-level negation filter w/ prev-line context + word boundaries) + scripts/check-docs-frontmatter.js (chained into lint:docs; all-5-fields + permalink / + nav_order int; version PRESENCE-only - style.md says 'version introduced', equality false-positives on 0.9.0-era pages). BOTH BIT ON FIRST RUN: fiction gate caught REAL missed fiction - examples.md:258 taught require('./lib/notifications') (phantom, pass 142 missed it) - FIXED to real surfaces w/ verified APIs (defaultEvent.on('sync:push:complete') lib/sync.js:346, vant webhooks add <url> <event>, VANT_WEBHOOK_SECRET mandatory lib/webhooks.js:133); frontmatter caught sudo.md/compute.md version drift -> released as presence-only. Fault-injections bit w/ file:line evidence. OWN BUG: docstring with docs/**/*.md self-terminates at */ - node -c before shipping. COMMENT AUDIT (brain/vant/sandbox/error/memory/agents/event): 981 JSDoc, 675 pass-notes, 116 SECURITY:, uniform headers, 3 TODO/FIXME (2 false positives). STRENGTHS: sandbox deny-by-default flagged 3x, agents facade split documented, brain.read() JSDoc matches docs exactly. FIXED: vant.js:1604 getter-block comment now says the 7 getters are NOT the whole surface (NEW: section eagerly attaches + OVERRIDES audit - live-probed typeof vant.audit=object before writing); error.js VantError docblock now documents the {code, retryable, statusCode, details} contract errors.md teaches. VERDICT: comments consistent + doc-reader friendly. GATES: lint:docs PASS (style+links+frontmatter x118), claims PASS (1978), dist PASS, surface PASS, ci.js 439/0/1skip. LESSONS: (1) node -c every new script before shipping; (2) debunk-vs-fiction needs context-aware negation (prev line, word boundaries); (3) catch-twice -> signature is now MECHANIZED; (4) live-probe export surfaces (typeof) before writing comments about them - the old comment AND the MEM folklore were both half-wrong (7 getters != whole surface). NEXT-UP: merge-go PR #117, or owner direction. Rides PR #117 with 142-152.
 
@@ -898,11 +1003,36 @@ testimony (v0.2); chapter 2 opens with it.
 
 ## CURRENT DUMP
 
-(nothing in flight — pass 79 committed: gate shipped, MCP audit clean,
-escrow.json merge-save landed. Next agent: whitepaper owner feedback;
-airgap parked; candidates: extend gate to bin/ + status-field
-truthfulness checks, MCP surface audit for remaining tool families
-(qos, config, islands).)
+(IN FLIGHT — pass 197+: **prd-universe.md** authored, owner-approved to
+BUILD ALL. Waves U1–U6 in labs/prd-universe.md. **U1 LANDED** (genesis-
+snapshot 11/0 caps + universe CLI + 3 MCP tools, one pass vs est. 2).
+**U2 LANDED** (stored content-addressed scenario manifests:
+recordSnapshot/loadSnapshot/diffManifests/resumeSnapshot over the arch-A
+state store; rules SAFE_TOOL_ALLOWLIST unblocks vant_universe_fork;
+scenario-manifest pins 18/0 incl. genuine fail-closed lock contention
++ cross-process byte-identical ids; CLI record/diff/resume live-fired;
+MCP +3 → 306 tools; CI 455/0). NEXT WAVE: **U3 — governance scenario
+playbook** (escrow gating a shared task — the demo wave).
+Owner cadence ruling: multiple passes/DAY, estimates in passes not
+weeks; headless+browser UI EXPLICITLY post-poned until U1–U5 base loops
+land. Build order: U1 → U2 → U3 → U4 → U5 → U6, one wave = one landed
+pinned improvement.)
+
+(Interlude — MiroFish refdrop, owner-approved: social-world simulator that
+is a NATURAL VANT CONSUMER, not a competitor — github.com/666ghj/MiroFish
+(~77k stars, AGPL-3.0, Shanda-incubated). Pipeline = seed docs → Zep
+knowledge-graph → OASIS persona-crowd sim → scenario report. Nothing it
+has (per-run SQLite state, scenario-config "governance", no simulation
+persistence) competes with the stack; everything it needs (seeded world
+from a doc set, durable scenario memory across runs, real governance
+records, provenance) is what Vant builds. Position as "works with": the
+scenario-runner consumer shape exercises nearly every module —
+state/seeds.js Genesis determinism, AddressingSpine, checkpoint,
+consensus/escrow, citations/horcrux export. Ideas teed for POV: forkable
+world snapshots, spine-addressed scenario refs, untrusted-agent shared
+nesting, decision-linked forum deliberation, credentialed marketplace,
+compliance provenance bundle. Superseded by the IN FLIGHT block above:
+the scope now lives in labs/prd-universe.md with per-wave TASKS checklists.)
 
 ---
 

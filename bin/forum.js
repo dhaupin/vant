@@ -15,6 +15,11 @@
  *                                    from the current agent identity)
  *   vant forum view <barcode>        Read one (tenancy-checked)
  *   vant forum message <agent> <text> Direct forum message
+ *
+ * (Wave U4, prd-universe.md) Deliberation→decision trail:
+ *   vant forum decisions <barcode>   Decision trail of a thread: linked
+ *                                    consensus vote, ballots, escrow
+ *                                    holds touched, voted outcome
  */
 
 const args = process.argv.slice(2);
@@ -29,12 +34,21 @@ Usage:
   vant forum post <title> [body]    Publish (workspace stamped from identity)
   vant forum view <barcode>         Read one publication
   vant forum message <agent> <text> Direct forum message
+  vant forum decisions <barcode>    Decision trail of a thread (Wave U4):
+                                    linked vote, ballots, escrow holds,
+                                    voted outcome
+  vant forum links                  Threads with linked votes
+
+Options:
+  --json                            Machine-readable output (decisions/links)
 
 Tenancy (pass 87): anonymous sees the global commons only; workspace-
 tagged posts are visible to their tenant (+ registry admins).
 `);
     process.exit(0);
 }
+
+const jsonOut = args.includes('--json');
 
 function forum() { return require('../lib/forum').forum; }
 
@@ -97,8 +111,52 @@ async function main() {
             break;
         }
 
+        case 'decisions': {
+            // (Wave U4 / U4.2) Inspect the decision trail of a thread:
+            // votes, escrow holds touched, outcome. Read-only.
+            const barcode = args[1];
+            if (!barcode) { console.error('Usage: vant forum decisions <barcode>'); process.exit(1); }
+            const trail = f.threadDecisionTrail(barcode);
+            if (!trail.ok) {
+                console.error('✗ ' + (trail.code === 'E_FORUM_ABSENT' ? 'no vote linked to thread ' + barcode : (trail.error || 'unknown')));
+                process.exit(1);
+            }
+            if (jsonOut) {
+                console.log(JSON.stringify(trail, null, 2));
+                break;
+            }
+            console.log('\nDecision trail: ' + trail.thread + ' → vote ' + trail.topic);
+            console.log('  proposal: ' + (trail.proposal || '(unstamped)'));
+            console.log('  author:   ' + (trail.author || '(unknown)'));
+            if (trail.ledger) {
+                console.log('  ledger:   ' + trail.ledger.status + (trail.ledger.hash ? ' (hash ' + String(trail.ledger.hash).slice(0, 12) + '…)' : ''));
+                console.log('  ballot:   ' + (Array.isArray(trail.ledger.ballot) ? trail.ledger.ballot.join(' / ') : '(n/a)'));
+            } else {
+                console.log('  ledger:   (not visible / absent)');
+            }
+            console.log('  votes:    ' + (trail.votes.length ? trail.votes.map(v => v.voter + '→' + v.outcome).join(', ') : '(none cast)'));
+            console.log('  holds:    ' + (trail.holds.length ? trail.holds.map(h => h.holdId + (h.held ? ' (held)' : '')).join(', ') : '(none touched / all released)'));
+            if (trail.decision) {
+                console.log('  outcome:  ' + trail.decision.winner + ' (' + trail.decision.percentage + '% of ' + trail.decision.votes + ' ballots)');
+            } else {
+                console.log('  outcome:  ' + (trail.outcome || 'undecided') + ' (no decision record yet)');
+            }
+            break;
+        }
+
+        case 'links': {
+            const links = f.listThreadLinks();
+            if (jsonOut) { console.log(JSON.stringify(links, null, 2)); break; }
+            if (!links.length) { console.log('No thread→vote links (create a vote with a thread: the forum layer links it automatically).'); break; }
+            console.log(`Thread→vote links (${links.length}):`);
+            for (const l of links) {
+                console.log('  -', l.thread, '→', l.topic, l.decided ? '(decided)' : '(open)');
+            }
+            break;
+        }
+
         default:
-            console.log('Usage: vant forum <list|post|view|message> (try -h)');
+            console.log('Usage: vant forum <list|post|view|message|decisions|links> (try -h)');
             process.exit(1);
     }
 }

@@ -5,6 +5,578 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 204 (QC live-fire — five adversarial holes closed)
+
+### Fixed - QC sweep of the U-wave surface (marketplace skills + escrow)
+
+Live-fired the U6 surface adversarially (identity/permission exploits,
+scarcity races, evidence-rule edges, escrow economics). Five real bugs,
+each found by probe and closed with a typed invariant + pin:
+
+- **Score-settlement exploit (`settleSkill`):** settlement moved REAL
+  money but only excluded the seller — any third party, or an
+  identity-less MCP call, could settle/confirm someone else's trade.
+  Worse, the debit anchored to `trade.buyerId || 'buyer'` (the row's
+  real field is `trade.buyer`), so an anonymous settle debited a PHANTOM
+  identity while the real buyer kept their budget (money creation).
+  Settlement now belongs to the buyer of record: third parties refuse
+  `E_SKILL_NOT_BUYER`, anonymous settles of identity-anchored trades
+  refuse `E_SKILL_IDENTITY_REQUIRED`, and the debit always lands on the
+  real buyer — exactly once (pinned with an escrow-observed balance).
+- **Scarcity bypass (`buySkill`):** the supply-1 oversell — a skill
+  bought N times concurrently (two buyers racing the same scarce unit).
+  buySkill now mirrors market.trade's reserve contract: committed-peer
+  counter adoption + per-listing trade lock + typed
+  `E_SKILL_SOLD_OUT`; refute/sweep still restore the unit. (Also caught
+  the await bug IN the fix: lock.withLock returns a promise — the
+  un-awaited result made every refusal envelope invisibly truthy.)
+- **Self-dealing (`buySkill`):** a seller could buy their own listing —
+  a wash trade manufacturing settled sales for the reputation score.
+  Refused at BUY time (`E_SKILL_SELF_BUY`), not after the hold moved.
+- **Stealth-refute TTL (`_skillsTtlMs`):** the brain-config TTL path was
+  unclamped — `market.skillsTradeTtlMs = 1` insta-swept fresh trades (a
+  timed-out refute with zero evidence). Both paths now clamp to the env
+  alias's 60s–30d window.
+- **Escrow max-holds starvation (`lib/escrow.js`):** expired holds were
+  never pruned at load — they hydrated into every fresh instance and
+  counted toward `maxHolds: 100`. Observed live: 99 long-expired legacy
+  holds made EVERY new hold fail closed (a permanent DoS that only
+  manual releases cleared). Holds are now pruned at load (the same
+  past-timeout semantics `checkHold` already applies lazily) and the
+  prune persists. Pinned in `test/escrow.test.js`.
+- **Supply semantics (decided, not just fixed):** skills are labor — a
+  skill listing WITHOUT explicit `supply` now defaults to unlimited
+  (the old market-listing default of 1 would have one-shot-shot every
+  service under the new enforcement). Scarcity is opt-in and enforced.
+- **Pins:** `test/market-skills.test.js` 19 → 23 (sold-out oversell,
+  unlimited-default service, self-buy, settle-identity incl.
+  escrow-observed no-phantom-debit); `test/escrow.test.js` 18 → 19
+  (expired-hold prune). Suites: skills 23/0 ×3, escrow 19/0, market
+  22/0, trust 20/0, market-debit 4/0, grand tour 18/18; lint:coverage
+  PASS (MCP 318/318, CLI documented 120).
+- **Docs:** playbook §8 failure-mode rows + §10 supply semantics
+  (TTL clamp note) + pin-map additions.
+
+## [Unreleased] - pass 203 (U6.6 — the last three follow-ups resolved)
+
+### Added - Wave U6.6: timeout evidence sweep + shill-resistant reputation + the launch decision
+
+All three documented follow-ups from U6.5 resolved in one pass,
+everything additive to the productized contract:
+
+- **Timeout automation with evidence rules:** `skillSweep()` releases
+  stale `pending_delivery` escrow holds — on-demand (CLI `vant market
+  skill-sweep`; MCP `market_skill_sweep`, 317 → 318) - never a
+  background timer. TTL is `market.skillsTradeTtlMs` (default 72h;
+  env alias `VANT_MARKET_SKILLS_TRADE_TTL_MS` registered in
+  ENV_REGISTRY + consumed by `load()`, clamped 60s–30d).
+  EVIDENCE ONLY: the sweep releases the hold, restores listing supply,
+  and touches NO trust record (seller silence is not mis-delivery
+  evidence); `delivered` trades are NEVER auto-forfeited (the buyer
+  owns the settle decision — auto-forfeiting would favor whoever
+  stops reacting); terminal states untouched. The trade row records
+  `evidence.stage`/`agedMs` and `settleDecision: 'timeout'`.
+- **Shill-resistant reputation aggregation:**
+  `_shillResistantReputation(sellerId)` recomputes a seller's market
+  rep from their OWN settled trade legs with three teeth: a per-buyer
+  contribution cap (`min(3, ceil(n/2))`), distinct/total buyer
+  weighting, and a concentration flag (`shillSuspicion:
+  'concentrated'` when one buyer owns ≥ 50% of ≥ 3 settled sales)
+  surfaced to the buyer BEFORE paying via `skillStatus` (alongside the
+  legacy trust score). Refusals stay out of the score by design: the
+  tool marks, buyers decide.
+- **'launch'-payload decision — RESOLVED, not deferred:** the whole
+  credentialed-execution class (launch/eval/exec, anything not
+  text|code) is refused at LISTING time with `E_SKILL_PAYLOAD_KIND`;
+  the refusal message carries the why (a sandboxed eval surface +
+  threat model that does not exist). Pinned as the permanent
+  disposition — a product decision, no longer a prototype TODO.
+- **Pins:** `test/market-skills.test.js` 14 → 19 (sweep evidence
+  rules incl. no-debit/no-trust-penalty + supply restoration, sweep
+  scoping (young untouched / delivered never forfeited), shill-ring
+  score suppression + concentration flag, pre-trade rep surface,
+  launch-disposition). Grand-tour gate B 317 → 318.
+- **Docs:** playbook §6/6b (sweep economics + reputation teeth) and §7
+  (launch RESOLVED); cli.md market row; mcp-tools.md
+  `market_skill_sweep` row; PRD U6.6 checkboxes closed.
+
+## [Unreleased] - pass 202 (U6.5 PRODUCTIZED — the skills marketplace is a product)
+
+### Added - Wave U6.5: credentialed marketplace gets its product surface (gate ON is an explicit act)
+
+Owner disposition resolved: productize. Everything additive to the
+prototype contract (labs/prototype-marketplace.md §1–§4 — nothing
+invalidated):
+
+- **Real escrow settlement (the honest gap closed this pass):**
+  `buySkill` used to delegate to `market.trade()`, whose pass-48 settle
+  path DEBITS AT TRADE TIME — then `settleSkill('confirm')` debited
+  AGAIN: a buyer paid twice for one skill. The skill flow now implements
+  the hold-first contract the PRD documented: buy = `canSpend` check +
+  escrow HOLD (`skill:<listing>:<buyer>`, an audit entry — NO money
+  moves) + a scarcity-reserving trade row (`skill_pending_delivery`);
+  confirm = the ONE `recordSpend` debit + hold release (the trade row
+  gains its real `debit` entry); refute = hold release ONLY, NO debit,
+  and the listing's supply reservation is restored (an unsold skill
+  resells). Verified against the REAL escrow store: 100-credit buyer,
+  30-credit skill → buy leaves the price untouched, confirm leaves
+  exactly 70; the pins enforce the boundaries.
+- **Config mounting:** `VANT_MARKET_SKILLS_ENABLED` env alias registered
+  in ENV_REGISTRY + consumed by `load()` (`market.skillsEnabled`, default
+  false); `_skillsEnabled()` now falls through runtime flag > env >
+  BRAIN config — `vant market skill-gate on|off` persists through
+  `setConfig` (pass-95 precedent) and actually moves the live gate (the
+  prototype's brainless get() could not see brain-config writes; the
+  same reporting gap pass-196 fixed for the RAG keys).
+- **CLI verb family on `bin/market.js`:** `skill-list` (title, --price,
+  --kind, --desc, --seller), `skill-buy` (--buyer), `skill-deliver`
+  (payload from arg or `-` = stdin), `skill-settle confirm|refute`,
+  `skill-status`, `skill-gate [on|off]`. Exit codes: 0 ok · 1 typed lib
+  error · 2 usage · 3 gate-off (discoverable-not-active). All live-fired
+  end-to-end (list → buy → deliver → settle, with the seller-settle
+  refusal and double-settlement refusal asserted through the CLI).
+- **MCP +6:** `market_skill_list/_buy/_deliver/_settle/_status/_gate`
+  (311 → 317 registered tools), live-fired through `mcp.execute` —
+  full door loop with typed invariants (NOT_SELLER, ALREADY_SETTLED).
+  `market_skill_gate` reads or persists the toggle via setConfig.
+- **Skill fields persist:** `payloadKind`, `capabilityTag`,
+  `attestation` now ride the STORED listing — `market.list()` silently
+  dropped unlisted keys, so `skillStatus` reported `payloadKind: null`
+  and `deliverSkill` validated against a hardwired 'text' default.
+  Pinned.
+- **Docs:** `docs/operations/skills-marketplace.md` (productized
+  playbook: gate mounting, CLI lifecycle, settlement economics table,
+  trust economics, MCP tool table, failure modes, pin map);
+  `labs/prototype-marketplace.md` §5.1 (disposition resolution); PRD
+  U6.5 checkbox closed; cli.md/mcp-tools.md reference rows.
+- **Pins:** `test/market-skills.test.js` 8 → 14 (SINGLE-DEBIT invariant
+  against real escrow, refute economics incl. supply restoration,
+  payroll fail-closed, field persistence, env-alias gate widening,
+  MCP-door full loop); grand-tour gate B 311 → 317, suite 18/18.
+- **Still additive follow-ups (unchanged):** timeout automation with
+  evidence rules, shill-resistant reputation aggregation, the
+  'launch'-payload decision. 'launch' remains a DOCUMENTED boundary,
+  refused at listing time.
+## [Unreleased] - pass 201 (Wave U6 prototype — credentialed marketplace)
+
+### Added - Wave U6 PROTOTYPE: skills as paid digital labor, gated OFF by default
+
+Sixth wave of the universe PRD — the research frontier. Ships the
+prototype (U6.1–U6.4) for owner disposition (U6.5): the gate
+(`market.skillsEnabled`) is **OFF by default**, every skill op returns
+typed `E_SKILLS_DISABLED` while it is (inert surface, discoverable
+contract):
+
+- **The contract (`labs/prototype-marketplace.md`):** buyers pay
+  BEFORE seeing the payload, so escrow holds the money, delivery must
+  be verifiable, trust punishes mis-delivery. Delivery contract:
+  `buy` holds (no debit), `deliver` verifies + hashes the payload
+  (lib/hash.js only — one hash source), buyer `confirm` DEBITS +\n  writes a positive trust record (value `min(0.2, price/50)`), buyer
+  `refute` refunds with NO debit + writes a negative record. The
+  seller can never settle their own sale; the buyer can never settle
+  twice (`E_SKILL_ALREADY_SETTLED`).
+- **Prototype surface (`lib/market.js` / U6.2):** `listSkill`,
+  `buySkill`, `deliverSkill`, `settleSkill`, `skillStatus` (pre-trade
+  seller-reputation visibility). Payloads `text|code` only — `launch`
+  (credentialed execution) is a DOCUMENTED boundary, refused at listing
+  time with its own typed code, not accepted-and-ignored.
+- **Trust feed (U6.3):** settle outcomes write real cooperation
+  records keyed to the LISTING's seller (the trade row's own `seller`
+  field can be 'anonymous' — the listing is the authoritative who-
+  made-it; caught by the suite and routed through `listing.seller`).
+- **Adversarial pins (U6.4):** `test/market-skills.test.js` 8/8 —
+  gate-inert typed, listing boundaries (launch/hostile price/empty
+  title), full loop debit-on-confirm-only, seller-keyed reputation
+  movement up AND down, double-settlement refusal, buyer-cannot-
+  deliver / seller-cannot-settle scoping, payload refusals (empty,
+  oversize 64KB cap), no-debit refute path.
+- **Regression:** market/crossprocess/debit/trust suites green.
+**U6.5 disposition (productize vs demo-archive) is the owner's call.**
+
+---
+
+## [Unreleased] - pass 200 (Wave U5 — provenance/compliance bundle)
+
+### Added - Wave U5: a self-verifying export bundle (tamper-EVIDENCE, fail-closed)
+
+Fifth wave of the universe PRD (`labs/prd-universe.md` U5.1–U5.3, one
+pass). `vant export bundle --out <dir>` assembles ONE directory an
+operator can hand to an auditor, and `vant export verify <dir>`
+recomputes every hash from the actual bytes:
+
+- **The L-hash is a RUNNING hash list** (`lib/export-bundle.js`):
+  entry i's digest folds entry i-1's (sha256(prev + file + ':' +
+  fileHash) — lib/hash.js sha256 is the ONLY hash source), so deleting,
+  inserting, reordering, or byte-drifting ANY file breaks the terminal
+  digest. `bundle.json` names the terminal digest while living OUTSIDE
+  the chain — a rerooting attack (forge the file, re-record the
+  manifest, recompute the chain) is caught at the bundle.json door;
+  bundle.json itself is compared against the RECOMPUTED digest, the
+  truth.
+- **The bundle:** `manifest.json` (registry export, point-in-time),
+  `citations.json` (citation ledger), `audit-excerpt.json` (scoped:
+  action/level/limit, default last 100), `horcrux.svg` (ENCRYPTED brain
+  snapshot through the production transform.toHorcrux pipeline —
+  password-gated; `--no-horcrux` omits it, missing password refuses
+  typed `E_BUNDLE_PASSWORD`), `content-manifest.json` (the chain),
+  `bundle.json` (the handle).
+- **Fail-closed verify (U5.2):** extra or missing files are TAMPER, not
+  noise; unreadable manifest is `E_BUNDLE_DENIED` (denied ≠ absent);
+  every refusal typed (`E_BUNDLE_TAMPERED` / `E_BUNDLE_ABSENT`).
+  Absolute out paths refuse typed (the vaf gate owns /home/… residency
+  paths; export artifacts stay repo-relative — the same gate caught the
+  first implementation passing an absolutized horcrux sink path).
+- **Honest scope note (pinned in-suite):** a FULL re-forge of every
+  artifact recomputes consistently — a self-declared chain is
+  tamper-EVIDENCE, not a trust ROOT. The root is the horcrux password +
+  external anchoring (record the digest somewhere outside the bundle).
+- **CLI +1 bin (`bin/export.js`, dispatcher-routed) +2 verbs; pins:**
+  `test/export-bundle.test.js` 11/11 (roundtrip, six tamper negatives,
+  typed refusals); CLI coverage 124 → 125; both verbs live-fired.
+
+---
+
+## [Unreleased] - pass 199 (Wave U4 — deliberation→decision records)
+
+### Added - Wave U4: a forum decision now knows its THREAD (and the trail survives restart)
+
+Fourth wave of the universe PRD (`labs/prd-universe.md` §4 — U4.1–U4.3,
+landed in one pass). The pass-40/44 loop already persisted the decision
+FEED; what it never had is the LINK from a discussion to the vote that
+resolved it — and `_openVotes` is memory-only, so a thread's decision
+trail died with the process that created the vote:
+
+- **Durable thread→vote linkage (U4.1):** `forum.vote(proposal,
+  { thread: 'PUB-...' })` records the barcode→consensus-topic pairing
+  in `state/forum-threads.json` (arch-A store, WAL included, FIFO cap
+  500 by `linkedAt`). The pass-43/44 decision return path reads the
+  durable link FIRST (before the memory map), so a decision record
+  CARRIES its `thread` even when the tally resolves in a fresh process
+  — mcp-consistent with the agora metadata stamp (proposal/author on
+  both sides).
+- **Decision trail reader (U4.2):** `forum.threadDecisionTrail(barcode)`
+  reconstructs the whole story from the link: the consensus ledger
+  (status, ballot, per-voter outcomes), the escrow holds touched under
+  the consensus hold id (`forum:<topic>`), and the persisted decision
+  record (winner/percentage/decidedAt). Unlinked thread → typed
+  `E_FORUM_ABSENT`, never a silent empty trail. CLI:
+  `vant forum decisions <barcode>` (+ `--json`) and `vant forum links`;
+  MCP: `forum_decisions` + `forum_thread_links` (309 → 311 tools), and
+  `forum_vote` gains the `thread` param — all live-fired.
+- **Pins (U4.3):** `test/forum-decisions-persistence.test.js`
+  4 → 9: on-disk link persistence, decision-carries-thread roundtrip
+  in-process, NO ORPHANS after restart (link AND hydrated decision
+  both survive; unlinked thread still refuses typed), link FIFO cap,
+  clearState wipes both stores. Grand-tour gate B bumped 309 → 311 and
+  re-run 18/18.
+
+---
+
+## [Unreleased] - pass 198 (post-merge audit — the pool now REALLY debits)
+
+### Fixed - scenario escrow debit was bookkeeping-only: the shared pool never drained
+
+The fresh-process live-fire sweep of the U1–U3 waves caught the exact
+PRD-claim-vs-ledger divergence the wave was built to prevent: three
+successful `vant scenario task` runs left the shared pool at 100/100 —
+`escrowMod.hold()` is an AUDIT row (a boolean of "the gate fired"), not
+a debit. `runScenarioTask` now converts the hold into a REAL
+workspace-charged `Escrow.recordSpend` (auto-persisting; draw check
+routed through a fresh disk-coherent instance so the `{ orgLimit }`
+one-shot cap survives — the module-level `workspaceCanSpend` helper
+drops it): a completed task consumes budget; every refusal path
+(delegate failure, consensus unavailable, no-quorum closeout) refunds
+member AND pool rows via `Escrow.refund` before the typed verdict is
+recorded — a refused task never eats credits. Pinned: two new pins in
+`test/scenario-crew.test.js` (success charges the pool; refused closeout
+restores it — stub Escrow models canSpend/recordSpend/refund), suite
+8 → 10. Live-verified through the REAL escrow store: 30-credit +
+30-credit draws drain 100 → 70 → 40, an 80-credit over-budget draw
+refuses `E_SCENARIO_BUDGET` and leaves the pool at 40 (refund intact).
+Also fixed while here: the stub `/tmp` scope note in the audit trail
+(the `escrowTouched` gate-order assertions are unchanged and still
+hold — debit now fires inside the gate, after the draw check). No other
+callers of `workspaceCanSpend` were affected (market/consensus/teams
+gates do not pass `orgLimit`).
+
+---
+
+## [Unreleased] - pass 197 (Wave U3 — governance scenario playbook + resume materialization)
+
+### Added - Wave U3: Governance Scenario Playbook
+
+Third wave of the universe PRD (`labs/prd-universe.md` §3; U1 + U2
+landed same-day). Demos the product over the EXISTING consensus/escrow
+stack — no new security primitives, the gates are the real ones. One
+PRF / one encoder still holds:
+
+- **`lib/scenario.js` + `bin/scenario.js` (U3.1):** `vant scenario
+  crew <name> --agents N --budget N`, `vant scenario task <crew>
+  <desc> [--cost N]`, `vant scenario status <crew>`. A crew of N
+  agents draws from ONE shared escrow workspace pool —
+  `ensureWorkspaceBudget` sizes it idempotently (never refills) — and
+  each delegated task must pass real gates, in order:
+  (1) QUARANTINE — `trust.isQuarantined` checked for EVERY member
+  fail-closed BEFORE any escrow draw; the refusal is recorded in the
+  verdict (agentId + staging); a fully-quarantined crew can't delegate
+  at all. (2) ESCROW — the shared pool is charged (hold + quota);
+  empty pool → typed `E_SCENARIO_BUDGET`; holds release on refusal.
+  (3) CONSENSUS — the closeout verdict is a VOTED outcome requiring
+  quorum (`minQuorum = max(2, live voters)`): one remaining live voter
+  can never pass single-agent bless (`E_SCENARIO_NO_QUORUM`), and the
+  decision rides `resolution.logDelta` (persisted, survives restart).
+- **U3 carry-over — resume's byte-restoring materialization (closes
+  U2.3's honest-scope note):** `record --values` freezes cell VALUES
+  inside the manifest (the manifest id covers them — content-
+  addressing bites), and `resume --materialize` restores them through
+  the arch-A state store, billed 1 escrow credit/cell under hold
+  id `scenario:materialize:<actor>`. A broke actor is refused typed
+  (`E_SNAPSHOT_BUDGET`) BEFORE any store write; a store-write denial
+  refunds the hold.
+- **MCP +3:** `vant_scenario_crew/_task/_status` (309 registered
+  tools), live-fired through `mcp.execute` incl. rules + sandbox
+  doors; `SAFE_TOOL_ALLOWLIST` extended for the three names.
+- **Docs:** `docs/operations/scenario-playbook.md` (task flow
+diagram, gate table, pin map); `docs/reference/cli.md` scenario/
+universe rows + usage block; `docs/reference/mcp-tools.md` full pages
+  for the three tools + the materialize note on `vant_universe_resume`.
+- **Verified:** `test/scenario-crew.test.js` **8/0** (typed gates,
+  gate-order, one-quarantined + all-quarantined drills,
+  no-single-bless, rules door); `test/scenario-manifest.test.js`
+  extended 18 → 22 (materialization pins); U1 suite still 11/0;
+  grand tour 18/18 with gate B bumped 306 → 309; `npm run
+  lint:coverage` PASS (MCP 309/309, CLI 119+5 = 124);
+  fiction-signatures PASS; frontmatter PASS; full CI green.
+
+---
+
+## [Unreleased] - pass 197 (Wave U2 — prd-universe.md)
+
+### Added - Wave U2: Stored, Content-Addressed Scenario Manifests
+
+Continues the universe PRD (Wave U1 landed pass 197 same-day; see
+`labs/prd-universe.md` §3 for per-wave checklists). One PRF / one
+encoder still holds — every hash in this wave rides
+`lib/state/canonical.js` and the arch-A state store, no second chain:
+
+- **`lib/state/genesis-snapshot.js` U2 surface:** `recordSnapshot()`
+  freezes a U1 snapshot + a state root into a manifest whose id IS the
+  hash of its payload — deterministic (no timestamp/uuid), so two fresh
+  processes recording the same content produce byte-identical manifests
+  (U2.4, child-process-pinned), and a re-record is a dedup no-op
+  (`added: false`). Persisted brain-scoped through state/universe-
+  manifests.json (WAL included). `loadSnapshot()` accepts unambiguous
+  id prefixes; ambiguity and absence are typed.
+  `diffManifests()` (U2.2) is pure: identical manifests →
+  `identical: true, changed: []`; the same-universe contract is enforced
+  by a per-manifest universe-canary identity tag and different
+  universes/worlds refuse typed (`E_SNAPSHOT_UNIVERSE` /
+  `E_SNAPSHOT_WORLD_MISMATCH`) instead of emitting all-cells noise.
+  `resumeSnapshot()` (U2.3) writes a restore marker through
+  `stateStore.persistMerged` — brain-root lock fail-closed (a peer
+  holding the region → REFUSED `E_STATE_LOCKED`, never an unlocked
+  write, contended pin included) and WAL-backed, with an optional
+  frozen-root-vs-live-root crosscheck (`liveRootMatch`). Honest scope
+  note: U2 ships the verified-marker path; byte-restoring
+  materialization deliberately lands with U3's escrow-backed executor.
+- **Rules fix (the U2 opener, from U1's honest limitation):**
+  `lib/rules.js` stopped substring-matching `fork` across MCP tool
+  names — `vant_universe_fork` (a SEED fork; no process involvement)
+  was refused at the rules door. Exact-name `SAFE_TOOL_ALLOWLIST` for
+  the six vetted universe tools; adding a name is a deliberate review
+  act, dangerous substrings still deny, custom rules still win (pinned).
+- **MCP +3:** `vant_universe_record/_diff/_resume` (306 registered tools,
+  live-fired through `mcp.execute` incl. inputSchema + rules doors).
+- **CLI +3 verbs on `bin/universe.js`:** `record` (--fork, --state-root),
+  `diff` (typed refusals same as the lib), `resume` (--actor;
+  live-root verdict on stdout) — all live-fired.
+- **Verified:** `test/scenario-manifest.test.js` **18/0** (U2.1–U2.5 +
+  rules pins, incl. genuine cross-process contention against a planted
+  fresh foreign-pid lockfile); U1 suite still 11/0; grand tour 18/18
+  with gate B bumped 303 → 306; `npm run lint:coverage` PASS (MCP 306/306,
+  CLI 118+5 = 123); fiction-signatures PASS (924 files); frontmatter
+  PASS (119 pages); full CI **455/0**.
+
+---
+
+## [Unreleased] - pass 196
+
+### Fixed - `vant config get` now reports LIVE values for the domain-tuning keys
+
+A live-fire CLI round found a reporting gap, not a behavior gap. The
+pass-194 RAG keys and pass-195 transport timeouts resolve through their
+dedicated getters (env aliases + clamps + brain-config precedence), but
+`config.get()`'s generic dotted walk only knew the internal config object,
+so `vant config get rag.rehydrateMaxSize` printed `null` while the runtime
+enforced 51200. `config.get()` now falls through to a domain-getter table
+(`rag.rehydrateMaxSize/compressionThreshold/limitMax`,
+`sync.opTimeoutMs/gitTimeoutMs/httpTimeoutMs`) as the last resolver — the
+CLI reports exactly what the runtime enforces. Verified live: all six keys
+resolve through the CLI, `github.token`/unknown keys still print null, and
+config/config-persistence/config-registry suites stay green.
+
+---
+
+## [Unreleased] - pass 195
+
+### Added - Wave G: GitProvider stack adopts RemoteTransport (prd-canonicalization §7 adoption wave 3)
+
+The canonicalization's §7 seam (Wave F, pass 183) had one adopter
+(`S3Transport`) and a queue of stacks still carrying private auth/verify.
+Wave G adopts the biggest one:
+
+- **`lib/remote.js` — `GitProvider extends RemoteTransport`.** Every Git
+  provider (github/gitlab/gitea/bitbucket/selfhosted) inherits the shared
+  contract: shared retry policy, honest base `verify()` (unverified ≠
+  blessed), shared validators. Constructor chains to super().
+- **The auth() door is THE credential resolution.** `this.token` instance
+  fields are retired from all five connectors — tokens resolve per-use via
+  `auth()` (config override → connector env → config layer) so an error
+  path, JSON dump, or `describe()` can never leak them (redaction by
+  construction). `isConfigured()` now consults `auth()`.
+- **Transport tuning registered:** `VANT_SYNC_OP_TIMEOUT_MS`,
+  `VANT_GIT_TIMEOUT_MS`, `VANT_HTTP_TIMEOUT_MS` + provider token/env family
+  (GITLAB_TOKEN/URL, GITEA_TOKEN/URL, BITBUCKET_TOKEN, GIT_TOKEN)
+  registered in ENV_REGISTRY (43 → 52, secrets flagged); sync.js/remote.js
+  read the timeout trio through new config getters (`syncOpTimeoutMs`,
+  `gitTimeoutMs`, `httpTimeoutMs`) — env fallbacks preserved.
+- **Read-path compatibility:** shared headers/URLs/_requestJson/_gitExec
+  unchanged; the adversarial remote-transport suite (23/23) and
+  git-injection (7/7) pass unchanged because the base class was already
+  built from their templates.
+- Verified: CI **453/0**; probe pins — providers are instanceof
+  RemoteTransport, no token instance field remains in any connector,
+  describe() leaks nothing, base verify() honest-false. Known note:
+  `test/sync-pull.test.js` has a PRE-EXISTING env-dependent failure set
+  (3/15, needs a live `GITHUB_TOKEN` — HTTP 403 in the sandbox); verified
+  identical before and after via git-stash diff.
+
+---
+
+## [Unreleased] - pass 194
+
+### Fixed - trust.quarantine() async gap
+
+`lib/trust.js` quarantine used to mark the agent in a follow-up async
+step, so a fire-and-forget caller (or a `quarantined` read on the next
+tick) could race ahead of the state change and see the agent still
+trusted. The set is now synchronous at the top of `quarantine()`
+(`immediate: true` option retained for callers that opt out), and the
+persist/effect steps run after; re-entering quarantine on an already
+quarantined agent now keeps the original reason instead of clobbering it
+(idempotent re-entry). All real callers already awaited, but the API no
+longer depends on that.
+
+### Added - RAG tuning keys go live (spec → implementation)
+
+The RAG tuning keys documented in `settings.example.ini`
+(`REHYDRATE_MAX_SIZE`, `COMPRESSION_THRESHOLD`, `RAG_LIMIT_MAX`) were a
+spec with **no runtime consumer** (see the pass-193 honesty note). They
+are now implemented:
+
+- **`lib/config.js`** gains RAG getters — `ragRehydrateMaxSize` (default
+  51200, clamp 256–1048576), `ragCompressionThreshold` (default 5120,
+  clamp 512–262144), `ragLimitMax` (default 20, clamp 1–100) — reading
+  `VANT_RAG_*` env vars > brain-config `rag.*` keys > defaults, with the
+  legacy bare names (`VANT_RAG_REHYDRATE_MAX_SIZE` etc.) registered in
+  the env registry and bare names (`REHYDRATE_MAX_SIZE` etc.) accepted as
+  aliases.
+- **`lib/search.js`** enforces them: `hydrate()` applies
+  `rag.rehydrateMaxSize` as a HARD bound on the rehydrated context — any
+  fragment (first or not) is truncated to keep the output under the cap
+  (previously a single oversized fragment was returned whole, blowing
+  through 50KB); `compress()` defaults its token budget to
+  `rag.rehydrateMaxSize`-derived sizing and honors explicit budgets;
+  `queryBrain()` and `semanticSearch()` clamp `limit/topK` to
+  `rag.limitMax`; `getSettings()` returns the live values.
+- **`bin/search.js`** uses `rag.limitMax` as its default limit ceiling
+  instead of a hardcoded 2000.
+
+Docs updated to match: `docs/memory/search.md`,
+`docs/reference/config.md`, and `settings.example.ini` no longer mark
+these rows spec-only. Pinned by the trust and config-registry suites.
+
+---
+
+## [Unreleased] - pass 193
+
+### Fixed - Wave A stage 2: the bus is the ONLY emitter (prd-canonicalization §2)
+
+Pass 179 stage 1 left ~10 modules dual-emitting (private EventEmitter
+**alongside** the shared bus). Stage 2 finished the adoption: every
+private emitter in `lib/` is retired — `grep -r "extends EventEmitter\|new
+EventEmitter(" lib` now returns nothing (lib/event.js's own PubSub excepted
+by design).
+
+| Module | Change | Consumers migrated |
+|---------|--------|--------------------|
+| `lib/backup.js` | `BackupScheduler` loses the `extends EventEmitter` base; lifecycle events are `backup:started/stopped/start/complete/error` on the bus only | none existed (0 listeners repo-wide) |
+| `lib/cron.js` | module `_scheduler` emitter + `JobWorker` base retired; `cron.on/emit/once/off` now attach to the bus; `task:run` replaces the private `run` event | none existed |
+| `lib/context.js` | `_emitter` retired; `context.on/off` attach to the bus; `context:built`, `context:invalidated`, `context:built:stack`, `heartbeat:*` ride the bus | none existed |
+| `lib/trust.js` | `extends EventEmitter` base retired (all trust:* was already on the bus) | none existed |
+| `lib/market.js` | `extends EventEmitter` base retired (same posture) | none existed |
+| `lib/habitat.js` | base retired; `feed()` emits `habitat:chaos` on the bus (workspace/type/chaos/timestamp payload); instance emit removed | `nature.wire(habitat)` — never called in production|
+| `lib/nature.js` | base retired; `spark` is `nature:spark` on the bus; `start/stop` are `nature:start/stop`; `wireSharedBus()` listens for `habitat:chaos` (idempotent); `Nature.sharedBusWired(options)` is the canonical construction; `wire(habitat)` delegates to the bus path | `lib/vant.js` spark→dream and `lib/backup.js` spark→entropy-backup listeners now attach to `nature:spark` on the bus |
+
+Pinned by `test/agent-registry.test.js` + the re-run suites (below); the
+stale e2e pin `"/tools = 299"` was updated to the documented 300
+(`vant_resolution_list` joined in pass 190 — the pin predated it).
+
+Verified: trust 20/20, cron 14+1, backup 8+3+4, habitat 6+all+23+15+13,
+nature 7, event 15+all+40, e2e grand-tour 18/18, missing-modules 41, CI
+**453/0**, `npm run check` + `npm run lint:coverage` PASS.
+
+### Changed - Registry decision: WIRED WIDER (agent-registry persistence + trust feed)
+
+The registry absorbs config-adjacent "who is who" duty for real. Three
+wiring gaps closed in `lib/registry.js`:
+
+- **Persistent** — the agent book hydrates from
+  `models/private/<brain>/state/agent-registry.json` on first touch and
+  writes through on every mutation via the shared `lib/state-store.js`
+  (arch-A rules, WAL included) — same pattern as node-registry (pass 36)
+  and trust (pass 172). Registered agents survive restarts; the state
+  file is brain-scoped by construction. The tree-tier mirror rides
+  `persistMerged` so the root hash is available for integrity checks.
+- **Trust feed** — a successful registration now writes ONE positive
+  cooperation record into trust's persisted ledger ("registered in agent
+  registry"), so the address book and the trust ledger agree; the
+  quarantine gate stays the deny path (pinned: quarantined → refused).
+- **`registerBrainAgent` wired** — the pass-old `_brainRegistries` dead
+  store (pushed to, never read, never persisted, zero callers) is retired;
+  both `getBrainRegistry()`/`registerBrainAgent()` delegate to the real
+  persistent singleton. `gatherState/restoreState` (horcrux backup
+  surface, consumed by transform.js) now carry the real book and
+  round-trip.
+- Pin suite: `test/agent-registry.test.js` (11 pins — persist, trust
+  feed, tree root, registerBrainAgent delegation, gather/restore
+  round-trip, quarantine gate, seed baseline).
+
+### Fixed - Config-doc honesty: settings.ini/mood.ini fiction retired (item-1 closeout)
+
+The config-canonicalization sweep found two orphan template files with
+NOTHING reading them, while the docs kept instructing users to configure
+them:
+
+- **`settings.example.ini` / `mood.example.ini`: zero runtime readers.**
+  Grep across `lib/` and `bin/` proves neither `settings.ini` nor
+  `mood.ini` (nor `REHYDRATE_MAX_SIZE`/`RAG_LIMIT_MAX`/
+  `COMPRESSION_THRESHOLD`) is read by any module. The only runtime-read
+  `.ini` is `config.ini` (bin/sync.js parses GITHUB_REPO/GITHUB_BRANCH;
+  bin/health.js checks it exists; lib/config.js's file peer is
+  `vant.config.js`).
+- **Docs reconciled to the truth:** `docs/reference/config.md` now labels
+  both sections with passing notes ("documentation-only, no reader —
+  configure via brain config / VANT_* env instead") and the Example Files
+  table says which .ini files actually load. `docs/memory/search.md`'s
+  rehydration table is likewise marked spec-only (no consumer yet).
+  Template files stay at the root (they are intent/spec records and the
+  format.js `.ini` parser pins test against them) — nothing was deleted.
+- The config-precedence contract stands unchanged as landed in pass 188:
+  runtime flags → brain config.json → global (env + vant.config.js) →
+  built-in defaults; secrets through `lib/secret.js` (the one secrets
+  door; env tolerated but not encouraged).
+
 ## [0.8.6] - 2026-08-29 - Axolotl "Nuclear Breaking" Refactor
 
 > Branch `axolotl` — multibrain + dead-code bloat removal. Pinned at
@@ -76,6 +648,470 @@ automatic on `vant start`).
 Both files are deferred — not in the b-T scope.
 
 ## [Unreleased] - Future
+
+### Added - Durable Docs-Coverage Gates: MCP 300/300 + CLI 122 (pass 192)
+
+The pass-191 coverage crosschecks were one-off node snippets. Now durable
+gates in `scripts/`, wired as `npm run lint:coverage` (both PASS):
+
+- **`scripts/check-mcp-coverage.js`** — every tool registered in
+  `lib/mcp.js` must be mentioned in `docs/reference/mcp-tools.md`
+  (word-boundary match so a similar name cannot cover a sibling) or
+  explicitly dispositioned in the script's dispositions table (currently
+  none — the catalog documents all 300). FAIL lists the missing tools
+  inline with the fix instruction.
+- **`scripts/check-cli-coverage.js`** — every `bin/*.js` must be
+  documented in `docs/reference/cli.md` (accepts `vant <name>` rows,
+  `bin/<name>.js` path mentions, or an explicit disposition). Initial
+  run caught 5 real gaps: agent-spawner, bot, branch-manager,
+  hybrid-sync, test-all were only referenced under their ROUTED names
+  (vant spawn/telegram/hybrid/branch) or not at all. cli.md rows now
+  name both the routed command AND the underlying bin; test-all got its
+  table row. Dispositions: the dispatcher itself (vant), the reference-
+  text bin (cli-standard), and the internal CI helpers (test-core,
+  summary). Final tally: **117 documented + 5 dispositioned = 122**.
+- Why "mentioned" (word match) is the right contract: the shape of a
+  doc entry legitimately varies (param table row / code example /
+  prose reference). The gate guarantees the question cannot regress -
+  no registered tool or shipped bin can be absent from its reference
+  page. Lying-while-mentioning is the fiction gates' job
+  (check-fiction-signatures + spot-firing, both green).
+- Verified: `npm run lint:coverage` PASS; all four doc gates re-run
+  PASS; CI 453/0.
+
+### Added - Docs Pass: Full MCP Catalog + CLI Coverage Closeout (docs pass 191)
+
+- **MCP docs brought up to the CLI doc's standard.** Two MCP docs existed;
+  the reference (`docs/reference/mcp-tools.md`, the catalog) and the
+  runtime page (`docs/runtime/mcp.md`, how to connect). Both had fiction:
+  - **reference:** covered ~60 of 300 tools. Now **300/300 coverage** —
+    verified programmatically against the live registry (`mcp.methods`):
+    prose + examples for the high-value groups (brain family, islands,
+    configs, citations, compute, memory, geometry, boot, branches,
+    agents, events, embed, network, remote, context, cron, recursion,
+    lineage), complete param tables (required-first, copied from the
+    registered inputSchema') for every remaining domain, and a
+    "Remaining Tools" crosscheck table so nothing can silently drop
+    out again. Return-shape conventions documented (typed not-blessed
+    failures, verified-beats-declared RLS).
+  - **runtime:** its "tool reference" tables were a stale fiction
+    (`vant_stego_encode` params `text/input` vs the real
+    `image/message/output`; `vant_audit_log` params `action/details`;
+    res_track `id/outcome`; a 15-row error-code table whose codes are
+    invented vs the real lib/error.js catalog). Deduplicated to the
+    reference page: the core-9 table + a small sample table (kept true)
+    + the real error contract (typed not-blessed results), with a link
+    to the full catalog. Setup/connect/TLS/stdio sections were already
+    real and stay.
+- **CLI doc closeout** (`docs/reference/cli.md`): the 15 bins without a
+  single mention triaged — real CLIs added to Ecosystem (events, qos,
+  rate, nature, rules, mesh-status, islands-boot, connector, nodes),
+  agent-spawner reflected as `vant spawn`, internal helpers (test-core/
+  cli-standard reference doc) left with notes. Fiction fixed in place:
+  the theme section now shows the REAL verbs (show/status/set — the old
+  list/apply/create recipe was fiction since the pass-188 rescope) and
+  the passage had `vant consensus` duplicated 3× — now 1.
+- Executable verification: doc examples spot-fired through `mcp.execute`
+  (vant_help, vant_search_hybrid, vant_lock status, habitat_verifyToken
+  honest-miss, config_get) — all OK. Doc gates: frontmatter PASS (119
+  pages), fiction-signatures PASS (909 files), docs-links PASS (119
+  files).
+
+### Fixed - MCP Fiction Audit: canned tools routed to their real libs (pass 190)
+
+- **The walk.** All 299 hand-registered MCP tools swept for handlers that
+  return canned values instead of calling their lib (the pass-95/96 audits
+  had already fixed config/audit/succession; this pass continues the same
+  policy). Fiction found and fixed, each verified live through `mcp.execute`:
+  - **vant_stego_encode / _decode** — `{status:'encoded'}` / `{message:''}`
+    without touching anything. Now route through the REAL suite-pinned
+    stego engine (`lib/stego.js`): encode(message, image, output[, password]),
+    decode(image[, password]) — VAF path checks + password stay the lib's
+    job; failures surface typed (`{encoded:false, error, code}`), never a
+    silent bless.
+  - **vant_resolution_track** — accepted (id, outcome) and returned
+    `{status:'tracked'}`. Reshaped to the ledger's real record
+    (`resolution.logDelta(file, change)`) + new `vant_resolution_list` over
+    `getDeltas`.
+  - **lib/resolution.js `logDelta` never PERSISTED** (MCP audit-caught lib
+    bug): it mutated an in-memory copy and returned — every restart dropped
+    the whole delta history, so all track-decision callers were writing to
+    /dev/null. Now saves the same way the other ledger writers
+    (addResolution/evictExpired) do; write failures return typed. Proven
+    with a fresh-process read-back.
+  - **vant_citations_list / _add / _format** — list called a method that
+    doesn't exist (`listSources`, so it always returned []), add returned
+    `{added:true}` writing nothing, format ignored the lib's context rule.
+    All through the real module: getAll / addSource (merge-under-lock,
+    lock failure = honest added:false) / verify + formatCitation.
+  - **stream_watch** — returned `{watching}` for a callback-based lib API a
+    one-shot MCP call cannot hold (a noop registration would have been
+    another lie). Now reports the watchers state and the honest constraint
+    with a pointer to event_tail / event_sink_enable.
+  - **qos_withTimeout** — claimed 'Execute with timeout' and returned
+    `{allowed:true}`; the real `qos.withTimeout(promise, ms)` races a
+    PROMISE an MCP call cannot ship. Now tells the truth (enforcing:false +
+    constraint + pointer to the real concurrency gate, qos_canProceed).
+- **Handler-shape scan:** the remaining 134 auto-flagged handlers were
+  triaged by eye — all are param-shaping wrappers over real lib calls
+  (require/`_module.` present); no further canned bodies.
+- **docs/reference/mcp-tools.md** updated: resolution_track's real params
+  (file/change), stego's real params (image/message/output/password) +
+  honest-failure shape, and a new citations tools section.
+- Verified: mcp.test 6/6, mcp-schema 13/13, resolution 12/12, test-mcp
+  green, CI **453/0**; fixed tools exercised via `mcp.execute` (citation
+  add→list→format hit+miss, resolution track→list fresh-process persist
+  proof, stego decode missing-file typed error).
+
+### Fixed - CLI Walk: bin/nodes, registry, network, connector, cache + backup/brain stubs (pass 189)
+
+- **The walk.** All 122 `bin/` CLIs swept for verbs that print canned strings
+  or call their lib with the wrong shape. Six more CLIs had real gaps:
+  - **bin/nodes.js** — `discover/ping/info/register` were pure canned
+    strings; `metrics` read fields that don't exist (stats.count/active vs
+    the real total/alive/joining/dead). All verbs now run the real
+    node-registry lib (refresh-first list, heartbeat-ping, JSON info,
+    real register with --id/--host/--port, both stats verbs). Verified
+    live: register → info → ping → metrics → cleanup.
+  - **bin/registry.js** — called the lib with wrong shapes
+    (`register(key,value)` / awaited Map getters). Rewired to the real
+    AGENT registry: register({name,type}) trust-gated, get/remove by name,
+    count/summary real. Verified live (4 known agents + register/remove).
+  - **bin/network.js** — `connect/disconnect` were strings for a P2P fantasy
+    (this lib is fetch/whitelist/latency); `ping` printed and did nothing.
+    Now: `ping <url>` runs the REAL measureLatency (whitelist-gated),
+    `status` prints the flag view instantly (a 5s live probe raced the CI
+    smoke watchdog in the first cut — the probe is its own `probe` verb,
+    `latency`/`domains` expose the recorded stats). Fantasy peer verbs
+    retired with a pointer to vant nodes / crew-bus.
+  - **bin/connector.js** — fake catalog (elasticsearch/postgresql/redis/
+    slack/github — none exist); `connect` did nothing. Now lists exactly
+    what getConnector() supports (pinecone|qdrant|weaviate), `status`
+    instantiates + describes, `connect` runs the real async connect(),
+    `disconnect` runs close(), `configs` prints per-brain connector
+    configs. Unknown types exit 1.
+  - **bin/cache.js** — the 0.8.6 T13b removal of the `defaultCache`
+    singleton left the CLI calling `cache.get/set/clear` on a module that
+    exports only the Cache class (broken since 0.8.6 in disguise).
+    Fixes: one Cache per process, real stats(), and the compress/decompress
+    pair now base64-round-trips (compress() returns a raw gzip Buffer —
+    the old print made decompress impossible). Verified: set/get, stats,
+    gzip round-trip.
+  - **bin/backup.js `schedule`** — the pass-23 silent stub printed a cron
+    recipe, but lib/backup.js GAINED a real BackupScheduler since (registers
+    daily/weekly jobs with lib/cron.js + a nature entropy trigger). The
+    verb drove it for the first time: start (with the process held open to
+    run the jobs), stop, and a real status (jobs defined vs registered
+    in this process).
+  - **bin/brain.js `geo search`** — printed '(search not implemented)' while
+    geoList() already returned the barcodes; now a real substring filter
+    with hit counts (misses exit 1).
+- **Julia live-fire verdict (the tracked "skipped" test):** the test is
+  already honest — it self-skips with the reason when julia is not on
+  PATH (exit 0; CI and foreign machines without the language are a
+  supported configuration), and the wire contract it exercises live is
+  pinned protocol-level in test/sidecar.test.js (8/8 green without julia).
+  Nothing to fix in the test; CI's "1 skipped" isn't even this test —
+  it is smoke:clean refusing a write under deny-by-default (a skip by
+  design). Recorded so the number stops raising eyebrows.
+- Sweep confirmed clean: no "not wired yet", "placeholder", "coming soon",
+  or "not implemented" strings remain in bin/ outside documented behavior
+  notes. Verified: node test/ci.js **453 passed, 0 failed** (the smoke
+  failing cut was reverted by making status instant); direct live-fires
+  green on all rewired CLIs.
+
+### Fixed + Added - Placeholder CLI Verbs Wired + Config-Precedence Docs (pass 188)
+
+- **Placeholder CLI verbs wired to their real libs.** Four verbs printed
+canned strings while their lib sat fully functional behind them:
+  - `vant citations search` — matches commit hash OR context text
+    (case-insensitive) through `lib/citations.js`; miss exits 1.
+  - `vant citations export` — prints the citation file as JSON
+    (version/exported/count/sources) via the gated `getAll()`.
+  - `vant node-registry list|register|unregister|status` — all four
+    route through `lib/node-registry.js` (the consensus vote-verification
+    anchor): list refreshes + adopts peer processes' registrations;
+    register honors `--id/--name/--host/--port` (quarantine gate
+    failures exit 1); unregister tombstones (never re-hydrated);
+    status prints getStats() counts + the state-spine tree root.
+  - `vant theme` — the real lib is the CLI/MCP rendering surface,
+    not a theme picker; verbs re-scoped to `show | status | set` (renders
+    the live surface, prints per-brain theme configs on the stack, sets
+    the current brain's config). The old fantasy verbs (list/apply/
+    create/preview/import) are gone.
+  - `bin/auth.js` left alone — its fresh-process null bug was the pass-186
+    config getter fix; no placeholder verbs inside.
+- **WHY they were placeholders:** each CLI was authored against a lib
+  surface that either didn't exist at the time (citations search/export),
+  or whose real shape was discovered only later (theme is a renderer,
+  not skins; node-registry became the protocol anchor post-pass-36) —
+  the CLIs were never revisited when the libs grew up.
+- **Config-precedence docs landed** at the top of
+  `docs/reference/config.md`: the four surfaces (runtime flags →
+  brain config → global config → built-in defaults) with lifetimes,
+  setters, and the `config.get()` resolution ladder as implemented;
+  `ENV_REGISTRY` positioned as an inventory, not the rule.
+- **`getStorage('repos')` ReferenceError fixed (CI-caught).** The Wave-D
+  split renamed the binding to `ReposStorageImpl` but the 'repos' factory
+  case still referenced the old bare name — bin/repos.js crashed on every
+  invocation. Caught by `test/ci.js`'s smoke:repos; suite now 453/0.
+- Verified: `node test/ci.js` **453 passed, 0 failed** (was 452/1);
+  storage.test 40/40 re-run; all wired verbs exercised live
+  (add→search→export round-trip, register→list→status→unregister
+tombstone, theme show/status/set).
+
+### Added - State-Spine Documentation + Last steveframe Typo (docs pass 187)
+
+- **New page: [docs/memory/state-spine.md](docs/memory/state-spine.md).** The
+  `lib/state/` system from the WIRING passes (canonical #146, tree #145/147/148,
+  seeds #158, spine #165, cellstore #150, anchor #152, checkpoint #151,
+  hotset #153, brain-verify #166) had a ledger and test pins but NO user-facing
+  doc. The page covers the one-paragraph mental model, the building blocks
+  table, the two tiers (plain-JSON file tier with WAL + fail-closed locks, and
+  the opt-in tree tier with rootHash + anchoring), full usage examples
+  (hydrate/persist/persistMerged, StateTree mirror + diff + snapshot,
+  SeedChain, AddressingSpine, the #150 rebate honesty primitive), equivalent
+  CLI/API surfaces, and the design laws (typed absence, determinism, tamper
+  detection, structural dedup, caches never lie).
+- **Crosslinked into existing docs:** memory index (specialist-formats table),
+  storage reference (pass-181 split + the StateStorage-vs-state-spine
+  disambiguation), the architecture map (state-store.js / state/tree.js rows),
+  and the operations storage page's Related list.
+- **Last live `steveframe` typo fixed:** ROADMAP.md's horcrux-sharing todo
+  pointed at `steveframe.creadev.org` — now `stegoframe`. Remaining mentions
+  of `steveframe` in the repo are only fix-documentation (CHANGELOG, the pass-
+  186 test pin comment, WIRING ledger).
+- Doc gates re-run green: frontmatter (now 119 pages) + fiction-signature scan.
+
+### Fixed - Config Rogue Cleanup + Registry Completion (pass 186)
+
+- **Duplicate `msg:` object key retired.** `config.load()` defined `msg:`
+  twice — once for the encryption defaults, once for the publish-depth
+  cap — and last-object-key-wins silently killed `msg.encrypted` /
+  `msg.autoEncrypt`. One merged `msg` object now carries all three.
+  (Grep-proved: the new merged shape is what `getAll()` returns.)
+- **`steveframe` → `stegoframe` typo fixed.** The `_config` key was
+  misspelled while `getStegoframe()` read the correct spelling — the
+  getter returned `{url:null, version:null}` forever. The template URL
+  is reachable again.
+- **Stale getters wired through `load()`.** `getGithub()` and
+  `getStegoframe()` read `_config` directly — null on any fresh caller
+  that hadn't warmed the cache (bin/auth.js' session check was one).
+  Both route through `load()` now.
+- **`cfR2Bucket()` zombie removed.** Zero consumers (grep-proved + the
+  neighboring comment said Cloudflare config was deleted in 0.8.6 —
+  this getter outlived the feature).
+- **ENV_REGISTRY Wave-B completion: 24 → 43 entries.** The 19 vars that
+  `load()`/module getters already consumed but the registry omitted
+  (VANT_MSG_*, VANT_PRUNE_*, VANT_CLEAN_*, VANT_STORAGE_PATH,
+  VANT_SYNC_INTERVAL, VANT_BRAIN_PASSWORD_TIMEOUT,
+  VANT_ESCROW_DEFAULT_BUDGET, VANT_AGENT_ID, VANT_QOS_MAX_PER_MINUTE/
+  PER_HOUR, VANT_WAL_ENABLED) are registered — `vant config list env`
+  inventory is truthful. Per-domain `VANT_*` families (spine seeds,
+  genesis mesh, sudo, s3 REMOTE_*) stay out with an explicit note:
+  their domain modules are the reader of record.
+- Pinned by `test/config-registry.test.js` (31 pins now, 8 new).
+  Suites green: config 20, config-persistence 13, agents 17,
+  agents-split 23.
+
+### Added - Geometry Precision Wiring + Shim Retirement (pass 185)
+
+- **Legacy `Math.imul` lattice shim retired.** `lib/geometry/lattice-keys.js`
+  no longer carries the raw imul chain or `LATTICE_MULTIPLIER` — grep-proved
+  zero live consumers (the fragmenter's `deriveLatticeKeys` delegates to the
+  #155 sha256 PRF; the GitHub adapter rides the fragmenter). One derivation
+  chain in the repo, completely now.
+- **`lib/geometry/precision.js` (#157) is WIRED.** Quasicrystal store now
+  quantizes the address-bearing metadata (position triple, theta/phi/depth)
+  through the #157 deterministic quantizer (grid 1e-9): stored records carry
+  EXACT integer grid values, so cross-engine last-ulp drift (the sidecar
+  future) can never become two different cells, and re-derivation is byte-
+  stable. Round-trip honesty unaffected.
+- **Real engine-parity leg.** `quasicrystal.engineParity()` runs the SAME
+  golden-angle rotation through two algebraically distinct evaluation orders
+  (direct libm coefficients vs an angle-sum double-rotation path) and reports
+  quantized mismatches — both agree at grid 1e-9; a genuinely different
+  rotation IS caught (sensitivity pinned). julia-optional live policy
+  unchanged (the wire stays tested separately).
+- Pinned by `test/geometry-parity.test.js` (8 pins); suites green:
+  geometry-engine, connector, engine-parity-spine 70, hash-canon 29,
+  sidecar 8.
+- **`lib/geometry/fold.js` (#154) stays a tested primitive** — the facet
+  storage layout is now a design sketch (labs/SKETCH-facet-layout.md:
+  compat read, refusal contract, /world space consumer) with
+  implementation deferred until a real consumer exists.
+
+### Added - Wiring Candidates Landed (pass 184 — hotset, universeSeed, transport verify)
+
+- **HotSet (#153) backs the state spine's tree-read hot path.** `stateStore.treeFor()`
+  re-parses a state file on every call — and `verifyStateRoot` + health's
+  integrity pass re-call it for the same few files. `lib/state-store.js` now
+  backs `treeFor` with a bounded `HotSet` (cap 64 — the ORPHAN #153 gets its
+  first consumer) keyed by a CORRECTNESS fingerprint (`stateFile:mtime:size`
+  + raw content): repeated reads of an UNCHANGED file reuse the parsed
+  payload; any disk change — including external tamper — changes the
+  fingerprint → miss → fresh honest read. Hot-set eviction touches only the
+  cache (never durability, #153's own law). Metrics: `stateStore.treeHot.metrics()`.
+- **`universeSeed` got its first WRITER (#158).** Genesis's `_writeTopology`
+  (all four ceremony legs) now persists the per-brain config `universeSeed`
+  override — derived from the SAME `resolveUniverse()` resolution the
+  spine's SeedChain uses, never clobbering an existing pin, never
+  overriding an explicit `VANT_UNIVERSE_SEED` env. The read path existed
+  since pass 171; the durable override is now real for mesh installs.
+- **Transport verify adoption (Wave F §7, wave 2).** `lib/sync.js` gains
+  `verifyProvider(name)` / `verifyAllProviders()` — the GitProvider stack's
+  explicit honest verify: reachable repo + branch probe + corpus snapshot;
+  unreachable/not-found report `verified:false`, never silently blessed
+  (the Wave F rule applied to the sync stacks). `lib/agora-sync.js`'s state
+  keeper stamps its reply with the OWNER's locally re-derived `tallyHash`;
+  the asker verifies its own post-merge re-tally against it — a forged or
+  stale stamp is REPORTED (`verify.verified:false`), never blessed, and
+  adopted ballots still survive on their own merge gates. Backward
+  compatible: a reply without `tallyHash` → `verify:null`.
+- Pinned by `test/wiring-184.test.js` (10 pins): hot cache hit + identical
+  root, tamper-detection (no stale blessing), hydrate unaffected, typed
+  absence; writer precedence + never-clobber + config↔explicit universe
+  round-trip; provider verify honest matrix through the test-DI seam; agora
+  stamp agree + forged-disagree legs. 14 consumer suites re-run green
+  (state tiers, sync trio, consensus, spine parity, remote-transport).
+
+### Added - RemoteTransport Seam (pass 183, prd-canonicalization Wave F)
+- The five "send state elsewhere" stacks (sync, org-sync, agora-sync,
+  mirror, connectors/s3) carried private auth lookup, retry
+  classification, and verify steps. New `lib/remote-transport.js` is
+  the shared seam, built from the git-connector argv-array hardening
+  (the security template generalized):
+  - `RemoteTransport` interface: `auth()` (the ONE credential door —
+    tokens live in the closure, never instance fields), `push()`,
+    `pull()`, `verify()`, plus the shared `_run()` ceremony (once-per-
+    call auth, classify, exponential backoff from the GitProvider
+    semantics).
+  - Shared validators (`refLike`/`secretLike`/`payloadLike`) — the
+    `_gitRef` fail-closed pattern made requirable.
+  - Shared `classifyError`: only VantError's retryable flag is trusted
+    for classified errors; message-string matching only as the
+    non-VantError fallback; attempts beyond the ladder are a caller
+    bug and return non-retryable (never an invented delay).
+  - Base `verify()` returns false (honest: "not verified"), never a
+    silent bless; unimplemented `push/pull/auth` throw loudly.
+- First adopter: `lib/connectors/s3.js` gains `S3Transport` — SigV4
+  signing under the shared ceremony; `createClient` stays unchanged.
+  Further stacks adopt per-stack (org-sync/agora-sync already align
+  on the shared `classifyError` semantics through GitProvider).
+- Pinned by `test/remote-transport.test.js` (23 pins): validators
+  block traversal/absolute/space/dash/empty/non-string/too-long;
+  ceremony (transient retries, auth-once, no backoff burn on hard
+  fails, attempts-override, exhausted-throw); verify honesty;
+  s3 adopter shape + secret-not-on-instance; describe() leaks no
+  secrets. 10 consumer suites re-run green.
+
+### Added - Messaging Trio Charters + Shared Envelope (pass 182, prd-canonicalization Wave E)
+- The charter is law (labs/prd-canonicalization.md §6): **msg.js owns
+  conversations** (persisted transcripts + in-process channel pub/sub),
+  **stream.js owns the work queue** (durable rows, lease, escrow-gated),
+  **crew-bus.js owns peer transport** (HMAC-signed HTTP, version +
+  scope gates). Overlaps are banned — no dual-ownership channels; a
+  record goes to msg OR stream, never both-as-truth; only crew-bus
+  leaves the process.
+- New `lib/messaging.js`: the ONE shared envelope — crew-bus's wire
+  shape `{event:'crew.<type>', from, type, payload, ts, nonce,
+  v:{major,minor}}` — now requirable without the network stack:
+  `makeEnvelope/validateEnvelope/versionGate/signEnvelope/
+  verifyEnvelope/setReceiverVersion`. Crew-bus delegates `_validVersion`
+  and `_setReceiverVersion` to it (single home; the pass-61 staging seam
+  byte-identical; the unstamped-v1.0 sender tolerance preserved).
+  Gate detail: a well-shaped `{major:0,x}` remains shape-valid but
+  reports `past-major` (loud refuse) — matching the pass-61 receiver
+  contract, while staging still throws on major<1.
+- Pinned by `test/messaging-envelope.test.js` (32 pins): shape
+  contract, version-gate matrix (garbage/unstamped/both-major-
+  directions/minor-additive), sign/verify vs Encrypt on the same bytes,
+  crew-bus parity (staging moves one object both layers read), and
+  integration legs — a msg conversation snapshot and a stream work row
+  both ride the envelope and round-trip with **zero semantic loss**
+  (task object survives verbatim; the snapshot still merges).
+- Consumer suites re-run green: crew-bus 20, stream, agents, forum,
+  webhooks, msg, msg-sync 9, forum-msg-escrow, node-crew 9,
+  grand-tour 18.
+
+### Refactored - storage.js Split (pass 181, prd-canonicalization Wave D)
+- The 2,391-line, 8-class monolith `lib/storage.js` is split into
+  `lib/storage/` per-class files (`file`, `brain`, `vector`, `state`,
+  `config`, `schema`, `island`, `remote`) with the security plumbing
+  (sandbox/VAF/gates, metrics, events, WAL wiring, atomic write)
+  single-sourced in `lib/storage/shared.js`.
+- **`lib/storage.js` REMAINS THE IMPORT SURFACE** as the factory facade
+  (2,391 → 275 lines): every existing `require('./storage')` consumer
+  keeps its exact shape — `get(type)`, safe-by-default shortcuts
+  (read/write/delete/has/list), the 0.8.6 raw bypass, used classes,
+  `Wal`, `atomicWrite`/`atomicWriteFile`, metrics, multibrain stack
+  helpers. **Zero consumer churn.**
+- Ownership matrix landed in `labs/prd-canonicalization.md` appendix
+  (every data kind → canonical store → backup/WAL/mirror/API).
+- Structural gate updated for the split: the atomic-writes structural
+  pin now whitelists the relocated single temp-writer in
+  `lib/storage/shared.js` (the same one write, new canonical home).
+- Suites green: storage 40, brain-strict 14, remote 13,
+  storage-metrics 8, storage-mirror 10, wal 14, state-persistence 8,
+  atomic-writes 13, grand-tour 18, missing-modules 41, canvas,
+  test-storage 14.
+
+### Refactored - One Hashing Module (pass 180, prd-canonicalization Wave C)
+- New canonical surface `lib/hash.js`: `sha256(input)` (one-shot hex),
+  `sha256H()` (incremental `Hasher` with the exact update()/digest()
+  shape the migrated call sites used), `crc32(buf)` (unsigned, via core
+  `zlib.crc32` — the stego PNG checksum's core call, made importable),
+  `canonicalBytes(value)` (the #146 state/canonical encoder), `hash()`
+  and default `hmac()`. No new algorithms — delegates to core
+  crypto/zlib.
+- Every direct `crypto.createHash('sha256')` call site in `lib/` now
+  routes through it: audit (entry chain), wal (blob spam digests), vaf
+  (hashIP), encrypt (sha256 + hybridRandom seed mix), s3 connector
+  (SigV4 hex), habitat (token hash), storage (_hashToVector), and the
+  full state/geometry spine (tree roots/scopes/snapshots, canonical,
+  checkpoint ids, seeds universe/scope/int/child, spine cellAddress,
+  raid shardHash, lattice-keys). Digests are **byte-identical** to the
+  outgoing impls (same `update()` call shape preserved by the Hasher
+  shim) — pinned, not assumed.
+- Pinned by `test/hash-canon.test.js` (29 pins): byte-identity vectors
+  vs direct crypto, `hash() === canonical.hash()`, golden vectors for
+  the migrated contracts, `crc32 === zlib.crc32`, a fail-closed
+  non-Buffer rejection, and a **grep gate** proving no lib module calls
+  `crypto.createHash('sha256')` outside `lib/hash.js`.
+- Migrated suites re-run green: audit, wal, state-wiring,
+  engine-parity-spine, backbone, encrypt, vaf, geometry-engine,
+  habitat-token, mesh-status, stego ×2, state-persistence.
+
+### Added - Event Bus Observability + Wiring (pass 179, prd-canonicalization Wave A)
+- The shared bus emitted 266 distinct event names with only 8 heard
+  anywhere. New: opt-in JSONL session sink in `lib/event.js`
+  (`event.sinkEnable/Tail/Stats`, OFF by default, ring-bounded, never
+  breaks emission), `vant events` CLI (tail/enable/disable/stats,
+  cross-process read of the most recent session), and MCP tools
+  `event_tail` / `event_sink_enable` / `event_sink_stats`.
+- `lib/event-wiring.js` (wired at boot): security denials
+  (`vaf:blocked`, `rls:denied`, `trust:blocked`, `market:blocked`),
+  `storage:error`, stego and secret lifecycle events → the hash-chained
+  audit ledger (audit.log — the warn/info/error family is console-only);
+  `sync:push/pull:failed` → surfaced in `vant health` as the `sync`
+  check. Pinned by `test/event-observability.test.js` (40 pins).
+- FIXED (pre-existing): `lib/health.js runChecks()` crashed on every
+  call with `ReferenceError: _checkRead` (the sandbox read gate helper
+  was removed in an earlier refactor; the call site survived). Restored
+  with the stego/sandbox `_checkRead` shape.
+
+### Added - Config Env Registry (pass 179, Wave B)
+- `lib/config.js` now owns a 24-entry `ENV_REGISTRY` of every `VANT_*`
+  env var the codebase consumes (server/mcp/webhook/health/runtime),
+  with `envRegistry()`, `listEnvConfig({maskSecrets,includeUnset})`
+  (typed coercion, masked secrets), and `unknownEnvVars()` (typo scan).
+  `vant config list env` prints the resolved registry view.
+- Straggler modules migrated off direct `process.env` reads:
+  webhooks (port/bind/secret/url), health (port), via new config
+  getters `webhookPort/Bind/Secret/Url`, `healthPort/Bind`,
+  `agentsMax`. Health gains the `config-env` check flagging set
+  VANT_* vars the registry does not know. Pinned by
+  `test/config-registry.test.js` (23 pins).
 
 ### Fixed - Cross-Brain Privilege Leak via Boot Hydrate (axolotl pass 123)
 - Boot's persisted operator-capability hydrate resolved the brain via

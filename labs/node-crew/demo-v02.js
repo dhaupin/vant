@@ -71,7 +71,7 @@ const PEER_URL = 'http://127.0.0.1:' + ${PORT_PEER};
     // Registry-anchored voting: both ids must be alive in THIS process's view.
     registry.register({ id: 'vant-master', name: NAME, host: '127.0.0.1', port: ${PORT_MASTER} });
     registry.register({ id: 'aria-peer', name: 'aria', host: '127.0.0.1', port: ${PORT_PEER} });
-    const ledger = await consensus.create(TOPIC, { options: ['ratify', 'reject'], minQuorum: 2, useTrustWeight: false });
+    const ledger = await consensus.create(TOPIC, { ballot: ['ratify', 'reject'], minQuorum: 2, useTrustWeight: false });
     if (ledger.error) throw new Error('consensus.create: ' + ledger.error);
     const v = await consensus.vote(TOPIC, 'ratify', 'vant-master');
     if (v.error && !v.totalVotes) throw new Error('vote: ' + JSON.stringify(v).slice(0, 120));

@@ -127,7 +127,7 @@ async function main() {
     console.log('\n🌐 DISTRIBUTED AGORA TESTS (pass 50)\n');
 
     // Owner-side topic: team-scoped, quorum 2 (owner + one remote).
-    await consensus.create('p50-team-vote', { options: ['yes', 'no'], minQuorum: 2, useTrustWeight: false, scope: SCOPE });
+    await consensus.create('p50-team-vote', { ballot: ['yes', 'no'], minQuorum: 2, useTrustWeight: false, scope: SCOPE });
     const ownerVote = await consensus.vote('p50-team-vote', 'yes', 'owner-agent');
     assert(!ownerVote.error, 'owner vote denied (scope applies to the owner too!): ' + JSON.stringify(ownerVote));
 

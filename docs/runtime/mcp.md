@@ -240,70 +240,57 @@ wire map in [RPC](/vant/advanced/rpc).
 
 ## Tool Reference
 
-### MCP Tools
+The complete, current catalog lives in
+[MCP Tools Reference](/vant/reference/mcp-tools) - ~299 registered tools
+across 67 domain prefixes, each with its params and examples, kept true to
+the registry (last audited pass 190: canned handlers found and rerouted to
+their real libs; the doc matches `mcp.execute` behavior).
 
-| Tool | Description | Parameters |
-|------|-------------|------------|
-| `vant_get_memory` | Read brain file | `file` (string) |
-| `vant_set_memory` | Write brain file | `file`, `content` |
+The nine core brain tools:
+
+| Tool | Description | Params |
+|------|-------------|--------|
+| `vant_get_memory` | Read brain file | `category`, `filename` |
+| `vant_set_memory` | Write brain file | `category`, `filename`, `content` |
 | `vant_list_branches` | List branches | - |
 | `vant_create_branch` | Create branch | `name` |
 | `vant_switch_branch` | Switch branch | `name` |
 | `vant_commit` | Commit changes | `message` |
 | `vant_sync` | Push/pull | - |
-| `vant_lock` | Lock brain | `token` |
+| `vant_lock` | Lock brain | `action` (acquire/release/status/force-release/mutex/lease) |
 | `vant_health` | Health check | - |
 
-### Extended Tools (12)
+Sample of the wider surface (full list in the reference):
 
-| Tool | Description | Parameters |
-|------|-------------|------------|
-| `vant_get_islands` | List islands | - |
-| `vant_load_island` | Load island | `name` |
-| `vant_resolution_track` | Track decision | `id`, `outcome` |
-| `vant_stego_encode` | Encode stego | `text`, `image` |
-| `vant_stego_decode` | Decode stego | `image` |
-| `vant_config_get` | Get config | `key` |
-| `vant_config_set` | Set config | `key`, `value` |
-| `vant_audit_log` | Log audit | `action`, `details` |
-| `vant_audit_list` | List audit | `filters` |
-| `vant_succession_info` | Trust config | - |
-| `vant_search` | Search brain | `query`, `mode` |
-| `vant_rerank` | Rerank results | `query`, `topK` |
+| Tool | Description | Params |
+|------|-------------|--------|
+| `vant_search_hybrid` | BM25+vector+RRF search | `query`, `topK` |
+| `vant_config_get` | Get config (flags then brain then global) | `key` |
+| `vant_config_set` | Set config (persists to current brain) | `key`, `value` |
+| `vant_habitat_mintToken` | Mint a bearer RLS token | `agentId`, `ttlMs?` |
+| `escrow_*` | Escrow budgets/holds/pools | see reference |
+| `stream_enqueue/poll/lease…` | The work queue | see reference |
+| `brain_migration_status` | Brain layout status | - |
 
 ---
 
-## Error Codes
+## Error Handling
 
-| Code | HTTP Status | Retryable | Description |
-|------|-------------|-----------|-------------|
-| `UNKNOWN` | 500 | true | Unknown error |
-| `CONFIG_MISSING` | 500 | false | Missing config |
-| `CONFIG_INVALID` | 400 | false | Invalid config |
-| `GITHUB_AUTH` | 401 | false | Auth failed |
-| `GITHUB_NOT_FOUND` | 404 | false | Not found |
-| `GITHUB_RATE_LIMIT` | 429 | true | Rate limited |
-| `GITHUB_SYNC_FAIL` | 500 | true | Sync failed |
-| `BRAIN_LOAD_FAIL` | 500 | true | Load failed |
-| `BRAIN_SAVE_FAIL` | 500 | true | Save failed |
-| `NETWORK_TIMEOUT` | 504 | true | Timeout |
-| `NETWORK_OFFLINE` | 503 | true | Offline |
-| `LOCK_TIMEOUT` | 409 | false | Lock conflict |
-| `LOCK_FAILED` | 409 | false | Lock error |
-| `STEGO_ENCODE_FAIL` | 500 | false | Encode failed |
-| `STEGO_DECODE_FAIL` | 500 | false | Decode failed |
+Failures cross the wire as JSON with a `result.error` payload (tool-level
+results) or a bare `{error: '...'}` (thrown handlers). Error codes follow
+[lib/error.js](https://github.com/dhaupin/vant/blob/main/lib/error.js) -
+the code's [Errors reference](/vant/reference/errors) is the catalog.
+Common ones:
 
-Error response format:
-```json
-{
-  "jsonrpc": "2.0",
-  "error": {
-    "code": "BRAIN_LOAD_FAIL",
-    "message": "Failed to load brain"
-  },
-  "id": 1
-}
-```
+- `Security check failed` - input failed VAF validation
+- `Circuit open` - QoS circuit breaker open (too many failures); wait and retry
+- `Server busy` - max concurrent requests reached
+- `Unknown tool` - tool name not registered
+
+Handlers increasingly return typed not-blessed results, e.g.
+`{added:false, reason}` (citations lock unavailable) or
+`{encoded:false, error, code}` (stego path blocked) - check the flag,
+don't assume success.
 
 ## Running Modes
 
@@ -340,28 +327,10 @@ MCP_PORT=3457
 
 ## Available Tools
 
-| Tool | Description |
-|------|-------------|
-| `vant_get_memory` | Read brain files |
-| `vant_set_memory` | Write to brain |
-| `vant_list_branches` | List branches |
-| `vant_create_branch` | Create branch |
-| `vant_switch_branch` | Switch branch |
-| `vant_commit` | Commit changes |
-| `vant_sync` | Sync with GitHub |
-| `vant_lock` | Acquire/release lock |
-| `vant_health` | System health check |
-| `vant_search` | Search brain (basic/rag/hybrid) |
-| `vant_get_islands` | List brain islands |
-| `vant_load_island` | Load specific island |
-| `vant_resolution_track` Track thought resolutions |
-| `vant_stego_encode` Encode data in image |
-| `vant_stego_decode` Decode stego image |
-| `vant_config_get` Get config value |
-| `vant_config_set` Set config value |
-| `vant_audit_log` Write audit log |
-| `vant_audit_list` List audit entries |
-| `vant_succession_info` Get succession state |
+The registry is ~299 tools across 67 domains - the authoritative, kept-true
+catalog (params + examples per tool) is
+[MCP Tools Reference](/vant/reference/mcp-tools). This page deliberately
+keeps only the nine core brain tools and the integration examples.
 
 ## API Examples
 

@@ -20,7 +20,29 @@ const teams = require('../lib/teams');
 const args = process.argv.slice(2);
 const cmd = args[0];
 
+// (live-fire fix — new-user path) The CLI is a fresh PROCESS: without boot,
+// the persisted `vant org grant` (orgchart.operatorCapabilities in brain
+// config) NEVER hydrated here, so `vant org grant && vant teams create`
+// dead-denied with a misleading "run vant org grant in the SAME process"
+// message — the grant WAS persisted, this process just didn't read it.
+// Mirror bin/agents.js: mutating subcommands boot the security chain FIRST
+// (boot hydrates the persisted grant, widen-only), read-only subcommands
+// stay boot-free. A self-granting absolute fallback would weaken
+// deny-by-default, so none is added — no persisted grant = write denied,
+// and the error now tells the honest story.
+const MUTATIONS = new Set(['create', 'dept', 'team', 'role', 'assign']);
+function bootOperator() {
+    // READ-scope boot only: write authority comes from the PERSISTED grant
+    // (boot hydrates orgchart.operatorCapabilities widen-only into the
+    // sandbox). Booting with a 'write' scope here would self-grant the CLI
+    // canWrite on every invocation — deny-by-default would hold only on a
+    // technicality. No grant persisted → create/dept/team/role/assign deny
+    // (and the error's advice — run `vant org grant` — now actually works).
+    require('../lib/boot').init({ taskId: 'teams-cli', scopes: ['read'], debug: false });
+}
+
 async function main() {
+    if (MUTATIONS.has(cmd)) bootOperator();
     switch (cmd) {
         case 'create':
             // vant teams create <name> [--plan <plan>]

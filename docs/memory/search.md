@@ -117,14 +117,20 @@ The full list lives in [MCP Tools Reference](/vant/reference/mcp-tools).
 
 RAG mode searches the LTC index - the distilled core pruning generates at
 `<version>/_core.json` - then rehydrates full matching content from git
-history. The settings come from `settings.ini` (see
-`settings.example.ini`):
+history. The tuning keys (`REHYDRATE_MAX_SIZE`, `COMPRESSION_THRESHOLD`,
+`RAG_LIMIT_MAX`) are LIVE as of pass 194: `lib/config.js` exposes
+`ragRehydrateMaxSize`/`ragCompressionThreshold`/`ragLimitMax` and
+`lib/search.js` enforces them (a hard rehydrate bound, compress default
+budget, limit clamps in `queryBrain`/`semanticSearch`, and bin/search.js's
+limit ceiling). Bare names are accepted legacy env aliases; canonical env
+vars are `VANT_RAG_REHYDRATE_MAX_SIZE`, `VANT_RAG_COMPRESSION_THRESHOLD`,
+`VANT_RAG_LIMIT_MAX`, brain-config keys `rag.rehydrateMaxSize` etc.
 
 | Setting | Example default | Purpose |
 |---------|-----------------|---------|
-| `REHYDRATE_MAX_SIZE` | 51200 (50KB, max 1MB) | max bytes returned in RAG context |
-| `COMPRESSION_THRESHOLD` | 5120 (5KB) | when to apply the compression hint |
-| `RAG_LIMIT_MAX` | 20 | max results from an LTC query |
+| `REHYDRATE_MAX_SIZE` | 51200 (50KB, max 1MB) | hard bound on rehydrated-context bytes |
+| `COMPRESSION_THRESHOLD` | 5120 (5KB) | compress() default token budget |
+| `RAG_LIMIT_MAX` | 20 | max results a search call may return |
 
 The module's code defaults live in `search.getSettings()` and can differ
 from the example file - call it if you need the exact values a given

@@ -4,7 +4,7 @@ permalink: /memory/
 layout: default
 title: Memory
 nav_order: 20
-description: Vant memory systems - the brain files, the memory store, brain search with citations, horcrux, and geometry.
+description: Vant memory systems - the brain files, the memory store, brain search with citations, horcrux, the state spine, and geometry.
 ---
 
 # Memory
@@ -25,6 +25,7 @@ Specialist formats:
 
 | Format | Job | Page |
 |--------|-----|------|
+| **State spine** | Content-addressed state tree, seeds, anchors, checkpoints - "same state?" is one string comparison | [State spine](/vant/memory/state-spine) |
 | **Horcrux** | A whole brain embedded in an image, encrypted | [Horcrux](/vant/memory/horcrux) |
 | **Geometry** | Quasicrystal addressing for spatial retrieval (experimental) | [Geometry](/vant/memory/geometry) |
 

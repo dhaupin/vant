@@ -6,3 +6,9 @@
 models/public/*/boot/*.svg
 horcrux/*.svg
 labs/archives/horcruxes/*.svg
+
+# package-lock.json — 5k+ lines of dependency metadata; every broad
+# ripgrep search matched node_modules package names and drowned real
+# hits in noise (plus giant truncated output). Tracked in git, just
+# excluded from line-oriented search.
+package-lock.json

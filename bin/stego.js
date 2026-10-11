@@ -152,8 +152,8 @@ async function upload(args) {
     }
     
     try {
-        // Load providers
-        const { getProvider } = require('../lib/providers');
+        // Load providers (the registry lives in lib/remote.js — lib/providers never existed)
+        const { getProvider } = require('../lib/remote');
         const p = getProvider(provider);
         
         if (!p.isConfigured()) {

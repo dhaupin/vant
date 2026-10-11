@@ -101,7 +101,7 @@ async function main() {
 
     await test('merge adopts only unknown votes; local votes never overwritten', async () => {
         // Local topic with one vote from 'local-agent'.
-        await consensus.create('p49-local', { options: ['yes', 'no'], minQuorum: 3, useTrustWeight: false });
+        await consensus.create('p49-local', { ballot: ['yes', 'no'], minQuorum: 3, useTrustWeight: false });
         await consensus.vote('p49-local', 'yes', 'local-agent');
         // Peer snapshot: local-agent voted NO on the peer (conflict), plus
         // a genuinely new vote from 'remote-agent'.
@@ -138,7 +138,7 @@ async function main() {
     });
 
     await test('round-trip: export -> merge into a fresh node view -> passed at quorum', async () => {
-        await consensus.create('p49-rt', { options: ['yes', 'no'], minQuorum: 2, useTrustWeight: false });
+        await consensus.create('p49-rt', { ballot: ['yes', 'no'], minQuorum: 2, useTrustWeight: false });
         await consensus.vote('p49-rt', 'yes', 'rt-a');
         const snap = consensus.exportTopic('p49-rt');
         assert(snap && snap.topic === 'p49-rt', 'export failed');
@@ -199,7 +199,7 @@ async function main() {
         teams.assign('member-b', { org: org.id, dept: dept.id, team: team.id });
         const SCOPE = { owner: 'team:' + team.id, visibility: 'scope' };
 
-        await consensus.create('p51-scoped', { options: ['yes', 'no'], minQuorum: 3, useTrustWeight: false, scope: SCOPE });
+        await consensus.create('p51-scoped', { ballot: ['yes', 'no'], minQuorum: 3, useTrustWeight: false, scope: SCOPE });
         const local = await consensus.vote('p51-scoped', 'yes', 'member-a');
         assert(!local.error, 'member local vote denied: ' + JSON.stringify(local));
 

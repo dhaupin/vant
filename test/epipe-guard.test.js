@@ -52,6 +52,20 @@ const readRows = () => {
 
 console.log('\n📋 EPIPE FATAL-STORM GUARD\n');
 
+// (pass 197 fix) Baseline BEFORE the child runs. The old check counted
+// ABSOLUTE EPIPE rows in the real vant ledger — a single historical residue
+// row (the Oct 2-4 incident left one) failed it forever, with no way to
+// recover. The contract is a DELTA: this storm must add zero NEW rows. Any
+// pre-existing ledger state is simply the baseline.
+const readRealEpipes = () => {
+    try {
+        const real = JSON.parse(fs.readFileSync(path.join(ROOT, 'models', 'private', 'vant', '.audit.json'), 'utf8'));
+        return (real.entries || []).filter(e => e.action && e.action.component === 'fatal'
+            && e.action.error === 'write EPIPE').length;
+    } catch (e) { return 0; } // no real ledger = clean baseline
+};
+const realBaseline = readRealEpipes();
+
 // ---------- child branch ----------
 if (process.argv.includes('--child')) {
     process.env.VANT_BRAIN = 'qc-epipe-guard'; // isolate: scratch brain ledger
@@ -122,12 +136,11 @@ function runSuite() {
     });
 
     test('storm stayed on the scratch brain (real ledger untouched)', () => {
-        try {
-            const real = JSON.parse(fs.readFileSync(path.join(ROOT, 'models', 'private', 'vant', '.audit.json'), 'utf8'));
-            const epipes = (real.entries || []).filter(e => e.action && e.action.component === 'fatal'
-                && e.action.error === 'write EPIPE').length;
-            return { success: epipes === 0, error: epipes + ' EPIPE rows in the real vant ledger' };
-        } catch (e) { return { success: true }; } // no real ledger = untouched
+        // Delta vs the PRE-CHILD baseline (see readRealEpipes above): only
+        // rows ADDED during this run are violations. Historical residue is
+        // acknowledged, not re-failed forever.
+        const now = readRealEpipes();
+        return { success: now === realBaseline, error: now + ' EPIPE rows now vs ' + realBaseline + ' before the storm (' + (now - realBaseline) + ' NEW) — storm leaked to the real vant ledger' };
     });
 
     // ---------- cleanup ----------

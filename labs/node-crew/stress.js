@@ -60,7 +60,7 @@ function section(name) {
     // one-vote-per-agent must hold under parallel load.
     {
         const topic = 'stress-blitz-' + Date.now().toString(36);
-        await consensus.create(topic, { options: ['yes', 'no'], minQuorum: 4, threshold: 0.5 });
+        await consensus.create(topic, { ballot: ['yes', 'no'], minQuorum: 4, threshold: 0.5 });
         const jobs = [];
         for (let i = 0; i < 12; i++) {
             const voter = VOTERS[i % VOTERS.length];
@@ -88,7 +88,7 @@ function section(name) {
     // just reject.
     {
         const topic = 'stress-dbl-' + Date.now().toString(36);
-        await consensus.create(topic, { options: ['yes', 'no'], minQuorum: 1, threshold: 0.5 });
+        await consensus.create(topic, { ballot: ['yes', 'no'], minQuorum: 1, threshold: 0.5 });
         await consensus.vote(topic, 'yes', VOTERS[0]);
         const second = await consensus.vote(topic, 'no', VOTERS[0]);
         const ok = second && second.error === 'Already voted' &&
@@ -309,7 +309,7 @@ function section(name) {
         const escaped = fs.existsSync(path.join(ROOT, 'models', 'evil')) ||
             fs.existsSync(path.join(require('os').tmpdir(), 'evil'));
         const topic = 'stress-trav-' + Date.now().toString(36);
-        await consensus.create(topic, { options: ['a', 'b'], minQuorum: 1, threshold: 0.5 });
+        await consensus.create(topic, { ballot: ['a', 'b'], minQuorum: 1, threshold: 0.5 });
         const voteRes = await consensus.vote(topic, 'a', evil);
         registry.unregister(evil);
         if (!escaped) {

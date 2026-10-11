@@ -108,7 +108,7 @@ async function main() {
 
     const T1 = 'livefire-quorum-' + Date.now().toString(36);
     await test('quorum is a headcount: unanimous 2-voter passes under default trust weight', async () => {
-        const led = await consensus.create(T1, { options: ['yes', 'no'] }); // minQuorum defaults 2, trust weight ON
+        const led = await consensus.create(T1, { ballot: ['yes', 'no'] }); // minQuorum defaults 2, trust weight ON
         assert(!led.error, 'create failed: ' + JSON.stringify(led).slice(0, 120));
         const v1 = await consensus.vote(T1, 'yes', 'qf-a');
         assert(v1.status === 'quorum', 'one of two voters must still be waiting, got ' + v1.status);
@@ -142,7 +142,7 @@ async function main() {
         await trust.clearState();
         registry.register({ id: 'lf-latemal', host: '127.0.0.1', port: 4 });
         const T2 = 'livefire-late-' + Date.now().toString(36);
-        const led = await consensus.create(T2, { options: ['a', 'b'], requireRegistry: true });
+        const led = await consensus.create(T2, { ballot: ['a', 'b'], requireRegistry: true });
         assert(!led.error, 'create failed');
         await trust.quarantine('lf-latemal', 'turned bad post-registration');
         const v = await consensus.vote(T2, 'a', 'lf-latemal');

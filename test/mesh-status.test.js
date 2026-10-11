@@ -77,7 +77,7 @@ async function main() {
     await test('READ-ONLY: a report changes no state (probe is never a side effect)', async () => {
         consensus.clearState(); market.clearState(); msg.clearState();
         // Baseline: create one topic, one listing, one conversation.
-        const t = await consensus.create('ms-f1', { options: ['a', 'b'], quorum: 1 });
+        const t = await consensus.create('ms-f1', { ballot: ['a', 'b'], quorum: 1 });
         assert(!t.error, 'topic create failed: ' + JSON.stringify(t));
         market._resetHydration();
         const l = await market.list('insight', { content: 'f-listing', price: 2 }, { agentId: 'ms-f-agent', consentGiven: true });

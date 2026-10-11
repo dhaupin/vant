@@ -170,7 +170,7 @@ lock.release('resource_id', token);
 
 ### Location
 
-`lib/storage/connectors/` - Same pattern as `lib/providers/`
+`lib/storage/connectors/` - Same pattern as `lib/remote.js` (the git-provider registry)
 
 ### Connector Interface
 
@@ -340,6 +340,28 @@ Returns: Storage instance
 | has(id) | Check lock exists |
 | renew(id, options) | Renew lock |
 | release(id, token) | Release lock |
+
+---
+
+## Storage Split (pass 181)
+
+The 2,391-line, 8-class monolith is split into `lib/storage/` per-class
+files with security plumbing (sandbox/VAF/gates, metrics, events, WAL,
+atomic write) single-sourced in `lib/storage/shared.js`.
+**`lib/storage.js` remains the import surface** - every
+`require('./storage')` keeps its exact shape. Zero consumer churn.
+
+### Protocol state vs StateStorage
+
+Two different things share the word "state":
+
+- **`StateStorage`** (`Storage.get('state')`) - general key-value with
+  static/temp sections. Legacy role, documented above.
+- **The state spine** (`lib/state-store.js` + `lib/state/`) - protocol
+  state persistence with the content-addressed tier: hydrate/persist/
+  persistMerged with fail-closed cross-process locks, a WAL-backed
+  store, root-hash anchoring, and verify. See
+  [State Spine](/vant/memory/state-spine).
 
 ---
 

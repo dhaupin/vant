@@ -97,11 +97,20 @@ async function runMultiBrain() {
             const result = await brain.geoStore(args[2], JSON.parse(args[3]));
             console.log('\nStored:', result);
         } else if (geoCmd === 'search' && args[2]) {
-            // Search by key prefix
+            // (pass 189) Was a literal '(search not implemented)' stub while
+            // geoList() already returned the barcodes. A geo "key" is a
+            // directory name derived from content hash — search = substring
+            // filter over that list (client-side, honest).
             const dirs = brain.geoList();
+            const needle = args[2].toLowerCase();
+            const hits = dirs.filter(d => d.toLowerCase().includes(needle));
             console.log('\nSearching for:', args[2]);
-            // Would need to implement search
-            console.log('(search not implemented)');
+            console.log(`  ${hits.length} / ${dirs.length} barcode(s) match`);
+            for (const d of hits) console.log('  ', d);
+            if (hits.length === 0) {
+                console.error('✗ No geometry keys match: ' + args[2]);
+                process.exit(1);
+            }
         } else {
             console.log('Geo commands: list, load <barcode>, store <key> <json>, search <key>');
         }

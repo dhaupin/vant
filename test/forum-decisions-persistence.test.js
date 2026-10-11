@@ -69,7 +69,7 @@ async function main() {
     let topic = null;
     await test('decision return -> decision logged AND persisted to state/forum.json', async () => {
         const ledger = await consensus.create('p44-durable-topic', {
-            options: ['yes', 'no'],
+            ballot: ['yes', 'no'],
             minQuorum: 1,
             metadata: { proposal: 'Persist the decision feed', author: 'tester', viaForum: true }
         });
@@ -123,6 +123,84 @@ async function main() {
         forumMod4.clearState();
         assert(forumMod4.forum.decisions.length === 0, 'clearState left decisions in memory');
         assert(!fs.existsSync(STATE_FILE), 'clearState left the state file on disk');
+    });
+
+    // ================================================================
+    // (Wave U4 — prd-universe.md) Deliberation→Decision Records
+    // U4.1 thread linkage; U4.3 roundtrip + no-orphans after restart
+    // ================================================================
+
+    let u4Thread = null, u4Topic = null;
+    await test('U4.1: vote created on a thread links thread→topic durably', async () => {
+        const forumMod = restartForum();
+        const eventMod = require(path.join(ROOT, 'lib', 'event'));
+        const f = forumMod.forum;
+        const v = await f.vote('Adopt the agora decision log', { thread: 'PUB-U4TEST01' });
+        assert(v.voted === true, 'vote create failed: ' + JSON.stringify(v).slice(0, 120));
+        u4Thread = 'PUB-U4TEST01';
+        u4Topic = v.topic;
+        assert(v.thread === u4Thread, 'vote result missing its thread');
+        const links = f.listThreadLinks();
+        const row = links.find(l => l.thread === u4Thread);
+        assert(row, 'thread link not listed');
+        assert(row.topic === u4Topic, 'link points at the wrong topic');
+        const trailFile = path.join(ROOT, 'models', 'private', 'vant', 'state', 'forum-threads.json');
+        assert(fs.existsSync(trailFile), 'links file not persisted');
+        const disk = JSON.parse(fs.readFileSync(trailFile, 'utf8'));
+        assert(disk.links && disk.links[u4Thread] && disk.links[u4Thread].topic === u4Topic, 'link not on disk');
+    });
+
+    await test('U4.3: decision → thread retains the linkage (roundtrip in-process)', async () => {
+        const eventMod = require(path.join(ROOT, 'lib', 'event'));
+        const f = require(path.join(ROOT, 'lib', 'forum')).forum;
+        eventMod.emit('vote:consensus', { topic: u4Topic, winner: 'yes', votes: 2, percentage: '100.0' });
+        const d = f.decisions.find(x => x.topic === u4Topic);
+        assert(d, 'decision not logged');
+        assert(d.thread === u4Thread, 'decision record does not carry its thread');
+        const trail = f.threadDecisionTrail(u4Thread);
+        assert(trail.ok === true, 'trail refused: ' + (trail.error || ''));
+        assert(trail.topic === u4Topic, 'trail resolved wrong topic');
+        assert(trail.decision && trail.decision.winner === 'yes', 'trail missing the decision outcome');
+        assert(trail.proposal === 'Adopt the agora decision log', 'trail proposal lost');
+    });
+
+    await test('U4.3: no-orphans after restart — trail survives a fresh process', async () => {
+        const forumMod2 = restartForum();
+        const f2 = forumMod2.forum;
+        // _openVotes died with the old process; the LINK must not have.
+        const trail = f2.threadDecisionTrail(u4Thread);
+        assert(trail.ok === true, 'post-restart trail refused: ' + (trail.error || ''));
+        assert(trail.topic === u4Topic, 'post-restart link orphaned');
+        const d2 = f2.decisions.find(x => x.topic === u4Topic);
+        assert(d2, 'decision history lost on restart (pre-pass-44 regression)');
+        assert(d2.thread === u4Thread, 'hydrated decision lost its thread field');
+        // A thread with NO link still refuses typed (no silent empty trail).
+        const orph = f2.threadDecisionTrail('PUB-NEVER-LINKED');
+        assert(orph.ok === false && orph.code === 'E_FORUM_ABSENT', 'unlinked thread should refuse typed');
+    });
+
+    await test('U4.1 link FIFO cap: the links map stays bounded (max 500)', async () => {
+        const forumMod = restartForum();
+        const f = forumMod.forum;
+        for (let i = 0; i < 520; i++) {
+            const r = f.linkThreadToVote('PUB-CAP-' + i, 'topic-cap-' + i, { proposal: 'cap', author: 't' });
+            assert(r.ok, 'link ' + i + ' refused');
+        }
+        const links = f.listThreadLinks();
+        assert(links.length === 500, 'link cap not enforced: ' + links.length);
+        assert(!links.find(l => l.thread === 'PUB-CAP-0'), 'FIFO dropped the wrong end');
+        assert(links.find(l => l.thread === 'PUB-CAP-519'), 'newest link evicted');
+        // hostile inputs typed
+        assert(f.linkThreadToVote('', 't').ok === false, 'empty thread accepted');
+        assert(f.threadDecisionTrail('').ok === false, 'empty trail thread accepted');
+    });
+
+    await test('U4 closeout: clearState wipes the links store too (ops parity)', async () => {
+        const forumMod = restartForum();
+        assert(forumMod.forum.listThreadLinks().length > 0, 'precondition: links present');
+        forumMod.clearState();
+        assert(forumMod.forum.listThreadLinks().length === 0, 'clearState left thread links');
+        assert(!fs.existsSync(path.join(ROOT, 'models', 'private', 'vant', 'state', 'forum-threads.json')), 'clearState left forum-threads.json on disk');
     });
 
     console.log(`\n=== Forum decision persistence: ${results.passed} passed, ${results.failed} failed ===\n`);

@@ -95,7 +95,7 @@ consensus.clearState ? consensus.clearState() : null;
 if (!registry.get('wave3_voter')) {
     registry.register({ id: 'wave3_voter', name: 'wave3-voter', host: 'localhost', port: 4300 });
 }
-const c1 = consensus.create('wave3-topic', { options: ['alpha', 'beta'], minQuorum: 1, useTrustWeight: false });
+const c1 = consensus.create('wave3-topic', { ballot: ['alpha', 'beta'], minQuorum: 1, useTrustWeight: false });
 if (c1.error) { console.error('CREATE_FAIL:' + JSON.stringify(c1)); process.exit(1); }
 const v = consensus.vote('wave3-topic', 'alpha', 'wave3_voter');
 if (v.error) { console.error('VOTE_FAIL:' + JSON.stringify(v)); process.exit(1); }

@@ -34,16 +34,14 @@ function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.c
 function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
 
-let logger;
-try {
-    logger = require('../lib/logger');
-} catch (e) {
-    logger = {
-        info: console.log.bind(console),
-        warn: console.warn.bind(console),
-        error: console.error.bind(console)
-    };
-}
+// (pass 165) lib/logger.js does not exist and never has — the console
+// shim below IS the live logger for this CLI. Keep the shim; do not
+// "restore" the require (phantom-module hygiene, pass 160).
+const logger = {
+    info: console.log.bind(console),
+    warn: console.warn.bind(console),
+    error: console.error.bind(console)
+};
 
 const DEFAULT_INTERVAL = 60; // seconds
 const PID_FILE = '.vant-watch.pid';
