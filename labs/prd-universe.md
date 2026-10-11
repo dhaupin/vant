@@ -286,7 +286,23 @@ disposition) is the open item.**
   confirm-only, seller-keyed trust movement up AND down, double-
   settlement refusal, buyer-cannot-deliver / seller-cannot-settle
   scoping, payload refusals incl. the 64KB cap, no-debit refute path).
-- [ ] U6.5 Decide productize/demo-archive per owner review.
+- [x] U6.5 PRODUCTIZED per owner review (pass 202): the gate mounts
+  through `VANT_MARKET_SKILLS_ENABLED` (ENV_REGISTRY alias + `load()`) or
+  `vant market skill-gate on|off` (persisted brain-config write; the
+  reader consults runtime flag > env > brain config); `vant market
+  skill-*` CLI family (list/buy/deliver/settle/status/gate, typed
+  exits 0/1/2/3); six MCP tools (`market_skill_list/_buy/_deliver
+  /_settle/_status/_gate`, 311 → 317, live-fired). Settlement is REAL:
+  buy = canSpend + escrow HOLD (no money); confirm = the ONE debit +
+  hold release (verified against the real escrow store, pinned); refute
+  = release only + listing supply restored; broke buyer typed
+  `E_SKILL_BUDGET` before any hold. The prototype's double-charge
+  (buySkill → market.trade debited at trade time, then confirm again)
+  is closed — the skill flow owns a hold-first contract, `trade.debit`
+  null until confirm. Skill fields (payloadKind/capabilityTag) persist
+  on the listing. Suite 8 → 14 pins; playbook:
+  `docs/operations/skills-marketplace.md`. Still additive follow-ups:
+  timeout automation, shill-resistant aggregation, 'launch' payloads.
 
 ## 4. Open questions (proposals attached)
 

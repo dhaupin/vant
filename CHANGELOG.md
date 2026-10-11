@@ -5,6 +5,63 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 202 (U6.5 PRODUCTIZED — the skills marketplace is a product)
+
+### Added - Wave U6.5: credentialed marketplace gets its product surface (gate ON is an explicit act)
+
+Owner disposition resolved: productize. Everything additive to the
+prototype contract (labs/prototype-marketplace.md §1–§4 — nothing
+invalidated):
+
+- **Real escrow settlement (the honest gap closed this pass):**
+  `buySkill` used to delegate to `market.trade()`, whose pass-48 settle
+  path DEBITS AT TRADE TIME — then `settleSkill('confirm')` debited
+  AGAIN: a buyer paid twice for one skill. The skill flow now implements
+  the hold-first contract the PRD documented: buy = `canSpend` check +
+  escrow HOLD (`skill:<listing>:<buyer>`, an audit entry — NO money
+  moves) + a scarcity-reserving trade row (`skill_pending_delivery`);
+  confirm = the ONE `recordSpend` debit + hold release (the trade row
+  gains its real `debit` entry); refute = hold release ONLY, NO debit,
+  and the listing's supply reservation is restored (an unsold skill
+  resells). Verified against the REAL escrow store: 100-credit buyer,
+  30-credit skill → buy leaves the price untouched, confirm leaves
+  exactly 70; the pins enforce the boundaries.
+- **Config mounting:** `VANT_MARKET_SKILLS_ENABLED` env alias registered
+  in ENV_REGISTRY + consumed by `load()` (`market.skillsEnabled`, default
+  false); `_skillsEnabled()` now falls through runtime flag > env >
+  BRAIN config — `vant market skill-gate on|off` persists through
+  `setConfig` (pass-95 precedent) and actually moves the live gate (the
+  prototype's brainless get() could not see brain-config writes; the
+  same reporting gap pass-196 fixed for the RAG keys).
+- **CLI verb family on `bin/market.js`:** `skill-list` (title, --price,
+  --kind, --desc, --seller), `skill-buy` (--buyer), `skill-deliver`
+  (payload from arg or `-` = stdin), `skill-settle confirm|refute`,
+  `skill-status`, `skill-gate [on|off]`. Exit codes: 0 ok · 1 typed lib
+  error · 2 usage · 3 gate-off (discoverable-not-active). All live-fired
+  end-to-end (list → buy → deliver → settle, with the seller-settle
+  refusal and double-settlement refusal asserted through the CLI).
+- **MCP +6:** `market_skill_list/_buy/_deliver/_settle/_status/_gate`
+  (311 → 317 registered tools), live-fired through `mcp.execute` —
+  full door loop with typed invariants (NOT_SELLER, ALREADY_SETTLED).
+  `market_skill_gate` reads or persists the toggle via setConfig.
+- **Skill fields persist:** `payloadKind`, `capabilityTag`,
+  `attestation` now ride the STORED listing — `market.list()` silently
+  dropped unlisted keys, so `skillStatus` reported `payloadKind: null`
+  and `deliverSkill` validated against a hardwired 'text' default.
+  Pinned.
+- **Docs:** `docs/operations/skills-marketplace.md` (productized
+  playbook: gate mounting, CLI lifecycle, settlement economics table,
+  trust economics, MCP tool table, failure modes, pin map);
+  `labs/prototype-marketplace.md` §5.1 (disposition resolution); PRD
+  U6.5 checkbox closed; cli.md/mcp-tools.md reference rows.
+- **Pins:** `test/market-skills.test.js` 8 → 14 (SINGLE-DEBIT invariant
+  against real escrow, refute economics incl. supply restoration,
+  payroll fail-closed, field persistence, env-alias gate widening,
+  MCP-door full loop); grand-tour gate B 311 → 317, suite 18/18.
+- **Still additive follow-ups (unchanged):** timeout automation with
+  evidence rules, shill-resistant reputation aggregation, the
+  'launch'-payload decision. 'launch' remains a DOCUMENTED boundary,
+  refused at listing time.
 ## [Unreleased] - pass 201 (Wave U6 prototype — credentialed marketplace)
 
 ### Added - Wave U6 PROTOTYPE: skills as paid digital labor, gated OFF by default

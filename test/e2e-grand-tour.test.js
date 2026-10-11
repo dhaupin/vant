@@ -117,9 +117,11 @@ console.log('\n🚌 E2E GRAND TOUR (pass 119)\n');
         // (U3) → 309 (+vant_scenario_crew/_task/_status, governance
         // playbook over the shared escrow pool);
         // (U4) → 311 (+forum_decisions/forum_thread_links,
-        // deliberation→decision trail over the linked thread).
-        report('gate B: door ready; /tools = 311 tools (array shape; +3 event pass 179, +resolution pass 190, +universe U1/U2, +scenario U3, +forum U4)',
-            Array.isArray(tools) && tools.length === 311, 'len=' + tools.length);
+        // deliberation→decision trail over the linked thread);
+        // (U6.5) → 317 (+market_skill_list/_buy/_deliver/_settle/_status
+        // /_gate, productized credentialed marketplace).
+        report('gate B: door ready; /tools = 317 tools (array shape; +3 event pass 179, +resolution pass 190, +universe U1/U2, +scenario U3, +forum U4, +skills U6.5)',
+            Array.isArray(tools) && tools.length === 317, 'len=' + tools.length);
 
         const health = JSON.parse((await req(PORT, 'POST', '/mcp/exec', { tool: 'vant_health', args: {} })).body);
         report('gate B: /mcp/exec vant_health → ok',

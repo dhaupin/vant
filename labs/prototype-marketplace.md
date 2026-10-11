@@ -116,3 +116,43 @@ sale, and the buyer cannot settle twice.
   follow-ups are additive to this schema.
 - Demo-archive = keep the gate OFF, keep the pins (they document the
   contract), stop.
+
+### 5.1 U6.5 DISPOSITION — RESOLVED: PRODUCTIZED (owner call, pass 202)
+
+The owner chose productize. What shipped (all additive to the §1–§4
+schema — nothing above is invalidated):
+
+- **(a) DONE — MCP + CLI wired.** Six MCP tools (`market_skill_list
+  /_buy/_deliver/_settle/_status/_gate`, door count 311 → 317, pinned
+  through the live door) and a `vant market skill-*` CLI verb family
+  (`skill-list/buy/deliver/settle/status/gate`; exit 0 ok · 1 typed ·
+  2 usage · 3 gate-off). Operating guide:
+  `docs/operations/skills-marketplace.md`.
+- **Real escrow settlement (the honest gap this disposition closed).**
+  The prototype's `buySkill` delegated to `market.trade()`, whose
+  pass-48 settle path DEBITS AT TRADE TIME — then `settleSkill('confirm')`
+  debited AGAIN: a buyer paid twice for one skill. The skill flow now
+  owns its own hold-first contract (§3 updated in spirit): buy =
+  `canSpend` + ESCROW HOLD (audit entry, no money moved) + a
+  scarcity-reserving trade row; confirm = the ONE `recordSpend` debit +
+  hold release; refute = hold release ONLY + listing supply restored.
+  Verified against the real escrow store (100-credit budget, 30-credit
+  skill → exactly 70 available after confirm) and pinned
+  (`U6.5 SINGLE-DEBIT invariant`, `U6.5 refute economics`, `U6.5
+  payroll` — a broke buyer cannot even hold, typed `E_SKILL_BUDGET`).
+  `trade.debit` stays null until the buyer's confirm.
+- **Config mounting.** `VANT_MARKET_SKILLS_ENABLED` env alias registered
+  in the config ENV_REGISTRY + `load()`; `market.skillsEnabled` falls
+  back through runtime flag > env > brain `config.json` — `vant market
+  skill-gate on` writes the BRAIN config (setConfig, pass-95 precedent)
+  and the reader consults both layers (the same gap the pass-196 config
+  CLI report found; here it would have silently left the CLI toggle
+  inert).
+- **Skill fields persist.** `payloadKind`/`capabilityTag`/`attestation`
+  now ride the stored listing (list() used to drop unlisted fields —
+  `skillStatus` reported `payloadKind: null` and delivery validated
+  against a silent 'text' default). Pinned.
+- **(b)(c)(d) REMAIN additive follow-ups, unchanged:** timeout
+  automation with evidence rules, shill-resistant reputation
+  aggregation, the 'launch' payload decision. 'launch' stays a
+  documented boundary — refused at listing time, not weaker.

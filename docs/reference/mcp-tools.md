@@ -1419,6 +1419,12 @@ Caught by the coverage crosscheck - no prose for these (yet); params are exact f
 | market_getTrade | tradeId - required: tradeId |
 | market_getBids | - |
 | market_cancelTrade | tradeId, agentId - required: tradeId, agentId |
+| market_skill_list | title, description, payloadKind, price, capabilityTag, context - required: title (gated: market.skillsEnabled; launch-payload listings refused) |
+| market_skill_buy | listingId, buyerId, workspace - required: listingId, buyerId (escrow HOLD only; debit on confirm) |
+| market_skill_deliver | tradeId, payload (≤64KB), agentId - required: tradeId, payload (agentId = seller; buyer delivery refused E_SKILL_NOT_SELLER) |
+| market_skill_settle | tradeId, decision (confirm\|refute), agentId - required: tradeId, decision (agentId = buyer; confirm DEBITS once, refute releases the hold; double settlement E_SKILL_ALREADY_SETTLED) |
+| market_skill_status | listingId - required: listingId (pre-trade snapshot incl. seller reputation) |
+| market_skill_gate | value (omit to read) - shows/toggles market.skillsEnabled (OFF by default; env alias VANT_MARKET_SKILLS_ENABLED) |
 
 ---
 

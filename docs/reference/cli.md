@@ -534,7 +534,7 @@ with its own `--help`.
 |---------|-------------|
 | `vant teams` | Organization and team management (org, dept, team, assign) |
 | `vant governance` | Governance decision making |
-| `vant market` | Knowledge trading (list, bid, trade, search, stats) ([reference](/reference/escrow)) |
+| `vant market` | Knowledge trading (list, bid, trade, search, stats) + paid skills (Wave U6.5 productized: `skill-list/buy/deliver/settle/status/gate` — delivery-confirmed settlement over real escrow; gated by `market.skillsEnabled`, env alias `VANT_MARKET_SKILLS_ENABLED`) ([reference](/reference/escrow), [playbook](/operations-skills-marketplace)) |
 | `vant forum` | Forum and discussion (list, post, view, message) - tenancy-aware: anonymous sees the global commons only; votes ride consensus; `decisions <barcode>` inspects a thread's deliberation→decision trail (link, ballots, escrow holds, voted outcome — Wave U4) |
 
 ```bash
