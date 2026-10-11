@@ -5,6 +5,42 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 199 (Wave U4 — deliberation→decision records)
+
+### Added - Wave U4: a forum decision now knows its THREAD (and the trail survives restart)
+
+Fourth wave of the universe PRD (`labs/prd-universe.md` §4 — U4.1–U4.3,
+landed in one pass). The pass-40/44 loop already persisted the decision
+FEED; what it never had is the LINK from a discussion to the vote that
+resolved it — and `_openVotes` is memory-only, so a thread's decision
+trail died with the process that created the vote:
+
+- **Durable thread→vote linkage (U4.1):** `forum.vote(proposal,
+  { thread: 'PUB-...' })` records the barcode→consensus-topic pairing
+  in `state/forum-threads.json` (arch-A store, WAL included, FIFO cap
+  500 by `linkedAt`). The pass-43/44 decision return path reads the
+  durable link FIRST (before the memory map), so a decision record
+  CARRIES its `thread` even when the tally resolves in a fresh process
+  — mcp-consistent with the agora metadata stamp (proposal/author on
+  both sides).
+- **Decision trail reader (U4.2):** `forum.threadDecisionTrail(barcode)`
+  reconstructs the whole story from the link: the consensus ledger
+  (status, ballot, per-voter outcomes), the escrow holds touched under
+  the consensus hold id (`forum:<topic>`), and the persisted decision
+  record (winner/percentage/decidedAt). Unlinked thread → typed
+  `E_FORUM_ABSENT`, never a silent empty trail. CLI:
+  `vant forum decisions <barcode>` (+ `--json`) and `vant forum links`;
+  MCP: `forum_decisions` + `forum_thread_links` (309 → 311 tools), and
+  `forum_vote` gains the `thread` param — all live-fired.
+- **Pins (U4.3):** `test/forum-decisions-persistence.test.js`
+  4 → 9: on-disk link persistence, decision-carries-thread roundtrip
+  in-process, NO ORPHANS after restart (link AND hydrated decision
+  both survive; unlinked thread still refuses typed), link FIFO cap,
+  clearState wipes both stores. Grand-tour gate B bumped 309 → 311 and
+  re-run 18/18.
+
+---
+
 ## [Unreleased] - pass 198 (post-merge audit — the pool now REALLY debits)
 
 ### Fixed - scenario escrow debit was bookkeeping-only: the shared pool never drained

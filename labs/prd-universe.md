@@ -203,16 +203,31 @@ escrow-backed byte-restoring materialization).
   lint:coverage PASS (MCP 309/309, CLI 119+5 = 124); fiction +
   frontmatter gates PASS; CI green (this pass's suites + live-fire).
 
-### Wave U4 — Deliberation→Decision Records
-Estimate: **2–3 passes.**
+### Wave U4 — Deliberation→Decision Records — SHIPPED (pass 199, one pass)
+Estimate was: **2–3 passes.** Landed in one pass, same shape as U1–U3.
 
-- [ ] U4.1 `forum.js` gains a `decision` linkage: thread →
+- [x] U4.1 `forum.js` gains a `decision` linkage: thread →
   `consensus.create(topic)` id → on tally, write a decision record
-  (mcp-consistent with agora reasoning).
-- [ ] U4.2 `vant forum decisions <thread>` — inspect the decision
-  trail of any thread (votes, escrow holds touched, outcome).
-- [ ] U4.3 Pin suite: `test/forum-decisions-persistence.test.js`
+  (mcp-consistent with agora reasoning). Durable: `vote(proposal,
+  { thread })` records the barcode→topic pairing in
+  `state/forum-threads.json` (WAL-backed, FIFO cap 500 — restart-proof,
+  unlike the memory-only `_openVotes`); the decision return path reads
+  the link first, so a decision record CARRIES its thread even when the
+  tally happens in a fresh process (`thread` field on the persisted
+  decision). Escrow-hold audit rides the trail (`forum:<topic>` hold id
+  surfaced when held). MCP: `forum_decisions`, `forum_thread_links`;
+  `forum_vote` gains the `thread` param (311 tools).
+- [x] U4.2 `vant forum decisions <thread>` — inspect the decision
+  trail of any thread (votes, escrow holds touched, outcome). Typed
+  `E_FORUM_ABSENT` on an unlinked thread (no silent empty trail);
+  `vant forum links` roster; `--json` on both verbs. Exit codes 0/1.
+- [x] U4.3 Pin suite: `test/forum-decisions-persistence.test.js`
   extension (thread→decision roundtrip, no-orphans after restart).
+  Suite 4 → 9: link persistence on disk, decision-carries-thread
+  roundtrip, no-orphans-after-restart (link + hydrated decision both
+  survive), unlinked-thread typed refusal, link FIFO cap (500) + clearState
+  ops-parity for the links store. Grand-tour gate B bumped 309 → 311,
+  re-run 18/18.
 
 ### Wave U5 — Provenance / Compliance Bundle
 Estimate: **2 passes.**

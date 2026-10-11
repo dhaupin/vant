@@ -3,10 +3,37 @@
 **Branch:** axolotl  
 **Last Updated:** 2026-10-10  
 **Session:** Pass 197+ — prd-universe.md authored (U1–U6 waves);
-Wave U3 LANDED + pass-198 post-merge audit fixed the escrow-debit bug
-(see labs/prd-universe.md §3 for per-wave checklists)
+Waves U1–U4 LANDED (+ pass-198 audit fixed the escrow-debit bug) —
+see labs/prd-universe.md §3 for per-wave checklists
 
 ---
+
+## Session (2026-10-10 — pass 199: Wave U4 deliberation→decision records)
+
+**What shipped** (owner: "let's do u4 pls"):
+
+- **U4.1 THREAD LINKAGE:** `forum.vote(proposal, { thread })` now
+  durably links a publication barcode to its consensus topic in
+  `state/forum-threads.json` (arch-A store, WAL included, FIFO cap
+  500). The pass-43/44 decision return path reads the durable link
+  FIRST — a decision record CARRIES its thread even when the tally
+  happens in a fresh process (the old `_openVotes` map is memory-only
+  and dies with the process; only the disk keeps the pairing).
+- **U4.2 DECISION TRAIL READER:** `threadDecisionTrail(barcode)` —
+  the linked consensus ledger (status/ballot/per-voter outcomes), the
+  escrow hold touched under `forum:<topic>` (present while held, empty
+  after release), and the persisted decision record. Unlinked thread
+  refuses typed `E_FORUM_ABSENT`. CLI: `vant forum decisions <barcode>`
+  (+ `--json`) and `vant forum links`; exit 0/1 verified live.
+- **MCP +2:** `forum_decisions`, `forum_thread_links` (311 tools); `forum_vote`
+  gains `thread`; all four live-fired through mcp.execute.
+- **U4.3 PINS:** persistence suite 4 → 9 (link on disk,
+  decision-carries-thread roundtrip, NO-ORPHANS-after-restart, typed
+  absent, FIFO cap, clearState ops-parity). Grand-tour gate B 309 →
+  311, 18/18. Suite caught one real shape bug en route: the Wave U4
+  functions were module-level only — `f.listThreadLinks is not a
+  function` on the singleton — fixed with singleton passthroughs
+  (operators reach everything through the forum instance).
 
 ## Session (2026-10-10 — pass 198: post-merge audit — pool-debit bug fixed)
 

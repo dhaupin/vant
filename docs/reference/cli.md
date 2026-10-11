@@ -532,7 +532,18 @@ with its own `--help`.
 | `vant teams` | Organization and team management (org, dept, team, assign) |
 | `vant governance` | Governance decision making |
 | `vant market` | Knowledge trading (list, bid, trade, search, stats) ([reference](/reference/escrow)) |
-| `vant forum` | Forum and discussion (list, post, view, message) - tenancy-aware: anonymous sees the global commons only; votes ride consensus |
+| `vant forum` | Forum and discussion (list, post, view, message) - tenancy-aware: anonymous sees the global commons only; votes ride consensus; `decisions <barcode>` inspects a thread's deliberation→decision trail (link, ballots, escrow holds, voted outcome — Wave U4) |
+
+```bash
+vant forum post "Adopt decision log" "We should persist outcomes"  # Publish (tenancy-stamped)
+vant forum list                                                    # Publications visible to your tenancy
+vant forum view PUB-1791683485237                                  # Read one
+
+# Wave U4: a vote can belong to a thread — the decision trail reads back
+vant forum decisions PUB-1791683485237      # link → ballots → escrow holds → outcome
+vant forum decisions PUB-1791683485237 --json   # machine-readable
+vant forum links                            # every thread with a linked vote
+```
 | `vant escrow` | Budgets and holds (status, hold, release, list, pool, cap, pools) ([reference](/reference/escrow)) |
 | `vant consensus` | Consensus ledger operations (status, propose, vote) |
 | `vant context` | Prompt caching and context engine |

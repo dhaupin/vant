@@ -7,7 +7,24 @@
 
 ## Handoff
 
-**Last known good commit:** pass 198 — post-merge audit of U1–U3:
+**Last known good commit:** pass 199 — Wave U4 LANDED: deliberation→
+decision records. `forum.vote({ thread })` durably links a publication
+barcode to its consensus topic (`state/forum-threads.json`, WAL,
+FIFO 500); the decision return path reads the durable link first so a
+decision CARRIES its thread across processes (old `_openVotes` was
+memory-only). Trail reader: `threadDecisionTrail(barcode)` returns the
+consensus ledger + per-voter outcomes + escrow hold (`forum:<topic>`) +
+persisted decision; typed `E_FORUM_ABSENT` when unlinked. CLI:
+`vant forum decisions <barcode>` (+--json), `vant forum links`. MCP
+309→311 (`forum_decisions`, `forum_thread_links`; `forum_vote` +thread).
+Pins: persistence suite 4→9 включая no-orphans-after-restart; grand
+tour 18/18 (gate B 311). LESSON: module-level functions need singleton
+passthroughs — bin/MCP/tests all call through the forum INSTANCE
+(the suite caught `f.listThreadLinks is not a function` live).
+NEXT-UP: U5 provenance/compliance bundle, U6 marketplace prototype,
+merge #118, or owner direction.
+
+**Previous (pass 198) — post-merge audit of U1–U3:
 found + fixed the POOL-DEBIT bug (scenario escrow hold was bookkeeping-
 only; the shared pool never drained — live-fire caught 3 draws leaving
 the pool at 100/100). Fix: hold converts to a REAL workspace

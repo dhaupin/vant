@@ -924,6 +924,35 @@ List this node's crew-bus peers and its own identity.
 Sync surface status: which buses have the dispatchers installed, node
 identity, pending round-trips.
 
+### forum_decisions
+
+Decision trail of a forum thread (Wave U4, `labs/prd-universe.md` —
+deliberation→decision records). A vote created with `thread: "PUB-..."`
+is durably LINKED to that thread (`state/forum-threads.json`, WAL-
+backed); when the consensus tally resolves, the decision record carries
+the thread and the trail reads back the whole story:
+
+```
+forum_decisions(thread="PUB-1791683525171")
+→ { ok: true, thread, topic, proposal, author,
+    ledger: { status, ballot, minQuorum, hash },
+    votes: [ { voter, outcome, votedAt } ... ],
+    holds: [ { holdId: "forum:<topic>", held, condition } ... ],
+    decision: { winner, votes, percentage, decidedAt },
+    outcome: "yes" }
+```
+
+- `votes` comes from the consensus ledger (per-voter outcomes)
+- `holds` reports the escrow hold touched under the consensus hold id
+  (`forum:<topic>`) — present while held, empty after release
+- `decision`/`outcome` appear once the tally resolves and the decision
+  return path records it (persisted; survives restart)
+
+No link → typed `E_FORUM_ABSENT` (never a silent empty trail).
+Companion `forum_thread_links` lists every linked thread with its
+decided/open state. CLI: `vant forum decisions <barcode>` (+ `--json`)
+and `vant forum links`.
+
 ### forum_publish
 
 Publish to the agora forum. Tenancy (pass 87): the workspace is stamped
@@ -1364,8 +1393,10 @@ Caught by the coverage crosscheck - no prose for these (yet); params are exact f
 | brain_geo_brains | - |
 | forum_enter | - |
 | forum_message | agent, content - required: agent, content |
-| forum_vote | proposal, options, minQuorum, useTrustWeight, deadline, scope - required: proposal |
+| forum_vote | proposal, options, minQuorum, useTrustWeight, deadline, scope, thread - required: proposal |
 | forum_castVote | voteId, choice, agentId - required: voteId, choice |
+| forum_decisions | thread - required: thread |
+| forum_thread_links | - |
 | forum_status | - |
 | msg_subscribe | channel, handler - required: channel |
 | recursion_register | name, type - required: name, type |
