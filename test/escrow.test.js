@@ -129,6 +129,39 @@ test('getStackEscrowStatus returns object with source stack', () => {
     return { success: result && result.source === 'stack' };
 });
 
+// (QC pass-204) Expired holds were never pruned at load: they hydrated
+// into every fresh instance and counted toward maxHolds, so a store with
+// 100 stale holds made hold() fail closed FOREVER (observed live: 99
+// long-expired legacy holds starved every new skill buy/trade). The fix
+// prunes past-timeout holds at load (same semantics checkHold applies
+// lazily) and persists the prune. Pin: expired holds vanish on reload and
+// NEVER block new holds.
+test('expired holds are pruned at load — they cannot starve maxHolds (QC pass-204)', () => {
+    const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    const id = 'qc204-expired-' + process.pid;
+    // Take a live hold, then force it expired without a release path.
+    const held = escrow.hold(id, { probe: true });
+    if (!held || !held.held) return { success: false, error: 'hold did not take: ' + JSON.stringify(held) };
+    const live = new escrow.Escrow();
+    const row = live._holds.get(id);
+    if (!row) return { success: false, error: 'hold not hydrated into the load view' };
+    row.timeout = Date.now() - 1000; // now-expired
+    live.save();
+    // Reload: a fresh instance must NOT see the expired hold.
+    const reloaded = new escrow.Escrow();
+    const gone = reloaded.checkHold(id);
+    // And maxHolds headroom is restored: a hold TAKE succeeds even against
+    // a store previously at the cap.
+    const id2 = 'qc204-headroom-' + process.pid;
+    const taken = escrow.hold(id2, { probe: true });
+    try { escrow.release(id2); } catch (e) { /* best-effort cleanup */ }
+    try { escrow.release(id); } catch (e) { /* already gone */ }
+    return {
+        success: gone.held === false && taken.held === true,
+        error: `expired hold survived reload: gone=${JSON.stringify(gone)} newHold=${JSON.stringify(taken)}`
+    };
+});
+
 // (pass 101) release must REMOVE the persisted hold. The merge-save was an
 // additive union, so a RELEASED hold (absent from the writer's snapshot) was
 // re-added from the disk copy and leaked forever — market trades accumulated

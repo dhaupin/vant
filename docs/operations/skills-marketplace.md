@@ -183,13 +183,33 @@ prototype TODO; the pin `U6.6 launch-payload DISPOSITION` enforces it.
 | seller never delivers | hold stays; buyer refutes: refund + trust hit; no automated timeout penalty (no evidence) |
 | double settlement | second confirm/refute: `E_SKILL_ALREADY_SETTLED` |
 | seller settles own sale | `E_SKILL_NOT_BUYER` |
+| ANYONE but the buyer of record settles (third party, anonymous MCP call) | `E_SKILL_NOT_BUYER` / `E_SKILL_IDENTITY_REQUIRED` (QC pass-204: settlement moves real money - it belongs to the buyer, like delivery belongs to the seller) |
+| seller buys their own listing | `E_SKILL_SELF_BUY` at BUY time (a wash trade would manufacture settled sales feeding the rep score) |
+| buy of a sold-out scarce listing | `E_SKILL_SOLD_OUT` (QC pass-204: skill buys now enforce the listing's supply reserve like market.trade) |
 | buyer tries to deliver | `E_SKILL_NOT_SELLER` |
 | `payloadKind: 'launch'` | refused at LISTING time (`E_SKILL_PAYLOAD_KIND`) - documented boundary |
 | empty / >64KB payload | `E_SKILL_PAYLOAD` (validated AT delivery, before any state change) |
 | trade on revoked listing | `E_SKILL_REVOKED` |
+| hold id reuse across a buyer's concurrent buys | fixed (QC pass-204): hold ids are minted per-trade - two open buys by the same buyer no longer overwrite one escrow row |
+| stale expired holds starving the escrow | fixed (QC pass-204): expired holds are pruned at escrow load and cannot exhaust `maxHolds` |
 | broke buyer | `E_SKILL_BUDGET` - the hold cannot even open |
 | gate off | `E_SKILLS_DISABLED` (CLI exit 3 on a bare query) |
 | destroyed/truncated state | arch-A store hydrate semantics (denied ≠ absent) |
+
+## 10. Supply semantics (QC pass-204)
+
+market.list defaults a listing to `supply: 1` (a listing IS a scarce
+artifact). Skills are labor - the refute/timeout paths restore supply so
+the same unit resells and every trade re-delivers - so `listSkill`
+DEFAULTS skills to unlimited supply. Scarcity applies ONLY when the
+seller explicitly passes a finite `supply`; that count is then enforced
+at BUY time (per-listing trade lock, peer-counter adoption, typed
+`E_SKILL_SOLD_OUT`) exactly like market.trade does.
+
+The TTL clamp is also dual-path now: `market.skillsTradeTtlMs` is
+clamped to 60s-30d whether it arrives by env alias (`lib/config.js`) or
+brain config (`_skillsTtlMs`) - a 1ms brain-config TTL used to
+insta-sweep fresh trades (a stealth refute with no evidence).
 
 ## 9. Pin map
 
@@ -210,4 +230,9 @@ prototype TODO; the pin `U6.6 launch-payload DISPOSITION` enforces it.
 | **U6.6 sweep scoping** (young trade untouched; delivered never auto-forfeits) | same (U6.6) |
 | **U6.6 shill-resistant rep** (cap + weighting + concentration flag) | same (U6.6) |
 | **U6.6 launch disposition** (whole executed-kind class refused) | same (U6.6) |
+| **QC sold-out** (scarce skill oversell refused; refute restores the unit) | same (QC pass-204) |
+| **QC unlimited default** (no explicit supply = labor service) | same (QC pass-204) |
+| **QC self-buy refused** at buy time | same (QC pass-204) |
+| **QC settle identity** (third-party/anonymous refused; debit lands on the real buyer exactly once) | same (QC pass-204) |
+| **QC expired-hold prune** (starvation regress) | `test/escrow.test.js` (QC pass-204) |
 | grand tour door count 311 to 317 | `test/e2e-grand-tour.test.js` gate B |

@@ -5,6 +5,58 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 204 (QC live-fire — five adversarial holes closed)
+
+### Fixed - QC sweep of the U-wave surface (marketplace skills + escrow)
+
+Live-fired the U6 surface adversarially (identity/permission exploits,
+scarcity races, evidence-rule edges, escrow economics). Five real bugs,
+each found by probe and closed with a typed invariant + pin:
+
+- **Score-settlement exploit (`settleSkill`):** settlement moved REAL
+  money but only excluded the seller — any third party, or an
+  identity-less MCP call, could settle/confirm someone else's trade.
+  Worse, the debit anchored to `trade.buyerId || 'buyer'` (the row's
+  real field is `trade.buyer`), so an anonymous settle debited a PHANTOM
+  identity while the real buyer kept their budget (money creation).
+  Settlement now belongs to the buyer of record: third parties refuse
+  `E_SKILL_NOT_BUYER`, anonymous settles of identity-anchored trades
+  refuse `E_SKILL_IDENTITY_REQUIRED`, and the debit always lands on the
+  real buyer — exactly once (pinned with an escrow-observed balance).
+- **Scarcity bypass (`buySkill`):** the supply-1 oversell — a skill
+  bought N times concurrently (two buyers racing the same scarce unit).
+  buySkill now mirrors market.trade's reserve contract: committed-peer
+  counter adoption + per-listing trade lock + typed
+  `E_SKILL_SOLD_OUT`; refute/sweep still restore the unit. (Also caught
+  the await bug IN the fix: lock.withLock returns a promise — the
+  un-awaited result made every refusal envelope invisibly truthy.)
+- **Self-dealing (`buySkill`):** a seller could buy their own listing —
+  a wash trade manufacturing settled sales for the reputation score.
+  Refused at BUY time (`E_SKILL_SELF_BUY`), not after the hold moved.
+- **Stealth-refute TTL (`_skillsTtlMs`):** the brain-config TTL path was
+  unclamped — `market.skillsTradeTtlMs = 1` insta-swept fresh trades (a
+  timed-out refute with zero evidence). Both paths now clamp to the env
+  alias's 60s–30d window.
+- **Escrow max-holds starvation (`lib/escrow.js`):** expired holds were
+  never pruned at load — they hydrated into every fresh instance and
+  counted toward `maxHolds: 100`. Observed live: 99 long-expired legacy
+  holds made EVERY new hold fail closed (a permanent DoS that only
+  manual releases cleared). Holds are now pruned at load (the same
+  past-timeout semantics `checkHold` already applies lazily) and the
+  prune persists. Pinned in `test/escrow.test.js`.
+- **Supply semantics (decided, not just fixed):** skills are labor — a
+  skill listing WITHOUT explicit `supply` now defaults to unlimited
+  (the old market-listing default of 1 would have one-shot-shot every
+  service under the new enforcement). Scarcity is opt-in and enforced.
+- **Pins:** `test/market-skills.test.js` 19 → 23 (sold-out oversell,
+  unlimited-default service, self-buy, settle-identity incl.
+  escrow-observed no-phantom-debit); `test/escrow.test.js` 18 → 19
+  (expired-hold prune). Suites: skills 23/0 ×3, escrow 19/0, market
+  22/0, trust 20/0, market-debit 4/0, grand tour 18/18; lint:coverage
+  PASS (MCP 318/318, CLI documented 120).
+- **Docs:** playbook §8 failure-mode rows + §10 supply semantics
+  (TTL clamp note) + pin-map additions.
+
 ## [Unreleased] - pass 203 (U6.6 — the last three follow-ups resolved)
 
 ### Added - Wave U6.6: timeout evidence sweep + shill-resistant reputation + the launch decision

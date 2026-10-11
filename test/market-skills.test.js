@@ -380,6 +380,65 @@ async function main() {
         assert(rep && rep.transactions === 0, 'a refused listing left state behind: ' + JSON.stringify(rep).slice(0, 120));
     });
 
+    // ====================================================================
+    // (QC pass-204 live-fire) Adversarial QC regressions — five bugs found
+    // and fixed while QC-nooping the U6 surface. Each pin re-fires the
+    // exploit the fix closed.
+    // ====================================================================
+
+    await ok('QC: scarce skill cannot be oversold — second buy refuses SOLD_OUT; refute restores the unit', async () => {
+        marketMod.clearState();
+        const listed = await marketMod.listSkill({ title: 'qc-scarce', payloadKind: 'text', price: 3, supply: 1 }, { agentId: 'qc-sc-seller', consentGiven: true });
+        const first = await marketMod.buySkill(listed.listingId, 'qc-sc-b1', { agentId: 'qc-sc-b1', consentGiven: true });
+        assert(first.bought === true, JSON.stringify(first).slice(0, 120));
+        const second = await marketMod.buySkill(listed.listingId, 'qc-sc-b2', { agentId: 'qc-sc-b2', consentGiven: true });
+        assert.strictEqual(second.code, 'E_SKILL_SOLD_OUT', 'supply-1 skill resold — scarcity bypass regression: ' + JSON.stringify(second).slice(0, 120));
+        // The unit still belongs to the first buyer's flow: refute frees it.
+        await marketMod.deliverSkill(first.tradeId, 'the unit', { agentId: 'qc-sc-seller' });
+        const refuted = await marketMod.settleSkill(first.tradeId, 'refute', { agentId: 'qc-sc-b1' });
+        assert(refuted.settled === true, JSON.stringify(refuted).slice(0, 120));
+        const third = await marketMod.buySkill(listed.listingId, 'qc-sc-b3', { agentId: 'qc-sc-b3', consentGiven: true });
+        assert(third.bought === true, 'refute did not restore the scarce unit: ' + JSON.stringify(third).slice(0, 120));
+    });
+
+    await ok('QC: skill listing WITHOUT explicit supply is unlimited labor (default-supply=1 would one-shot every service)', async () => {
+        marketMod.clearState();
+        const listed = await marketMod.listSkill({ title: 'qc-service', payloadKind: 'text', price: 1 }, { agentId: 'qc-svc-seller', consentGiven: true });
+        for (let i = 0; i < 3; i++) {
+            const bought = await marketMod.buySkill(listed.listingId, 'qc-svc-b-' + i, { agentId: 'qc-svc-b-' + i, consentGiven: true });
+            assert(bought.bought === true, 'buy ' + i + ' of an unlimited-supply service refused: ' + JSON.stringify(bought).slice(0, 120));
+        }
+    });
+
+    await ok('QC: seller cannot buy their own listing (self-dealing refuse at BUY time, E_SKILL_SELF_BUY)', async () => {
+        marketMod.clearState();
+        const listed = await marketMod.listSkill({ title: 'qc-selfdeal', payloadKind: 'text', price: 2 }, { agentId: 'qc-selfish', consentGiven: true });
+        const selfBuy = await marketMod.buySkill(listed.listingId, 'qc-selfish', { agentId: 'qc-selfish', consentGiven: true });
+        assert.strictEqual(selfBuy.code, 'E_SKILL_SELF_BUY', 'self-buy not refused at buy: ' + JSON.stringify(selfBuy).slice(0, 120));
+    });
+
+    await ok('QC: settlement belongs to the BUYER of record — third party + anonymous callers refused', async () => {
+        marketMod.clearState();
+        const escrow = require('../lib/escrow');
+        if (escrow.create) { const e = escrow.create(); if (e.setBudget) e.setBudget('qc-id-buyer', 50); }
+        const listed = await marketMod.listSkill({ title: 'qc-settle-id', payloadKind: 'text', price: 10 }, { agentId: 'qc-id-seller', consentGiven: true });
+        const bought = await marketMod.buySkill(listed.listingId, 'qc-id-buyer', { agentId: 'qc-id-buyer', consentGiven: true });
+        await marketMod.deliverSkill(bought.tradeId, 'payload', { agentId: 'qc-id-seller' });
+        const thirdParty = await marketMod.settleSkill(bought.tradeId, 'confirm', { agentId: 'qc-mallory' });
+        assert.strictEqual(thirdParty.code, 'E_SKILL_NOT_BUYER', 'third-party settle accepted: ' + JSON.stringify(thirdParty).slice(0, 130));
+        const anonymous = await marketMod.settleSkill(bought.tradeId, 'confirm', {});
+        assert.strictEqual(anonymous.code, 'E_SKILL_IDENTITY_REQUIRED', 'anonymous settle of an identity-anchored trade accepted: ' + JSON.stringify(anonymous).slice(0, 130));
+        // NO money moved by the refused settles: the buyer still has the
+        // full 10-credit headroom (old bug: an anon settle debited a phantom
+        // 'buyer' identity while the real buyer kept their budget).
+        const escBuy = escrow.create ? escrow.create() : new escrow.Escrow();
+        assert.strictEqual(escBuy.canSpend('qc-id-buyer', 40).allowed, true, 'a refused settle DEBITED someone: hold leaked or phantom debit');
+        // The real buyer still settles and their escrow reflects exactly one debit.
+        const settled = await marketMod.settleSkill(bought.tradeId, 'confirm', { agentId: 'qc-id-buyer' });
+        assert(settled.settled === true && (marketMod.getTrade(bought.tradeId).debit || {}).agent === 'qc-id-buyer', 'real buyer settle failed or debited someone else: ' + JSON.stringify(marketMod.getTrade(bought.tradeId).debit));
+        assert(escrow.create().canSpend('qc-id-buyer', 40).allowed && !escrow.create().canSpend('qc-id-buyer', 41).allowed, 'debit not exactly price=10 on the real buyer');
+    });
+
     marketMod.clearState();
     config.set('market.skillsEnabled', false);
 
