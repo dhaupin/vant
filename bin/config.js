@@ -56,7 +56,19 @@ async function main() {
         case 'ls':
             const all = config.getAll();
             Object.entries(all).forEach(([k, v]) => {
-                console.log(`${k}=${v}`);
+                // (Issue #169 QC) Object-valued config keys printed literally
+                // as "[object Object]" — unreadable and useless. Flatten one
+                // level: nested keys print as `section.key=value`, arrays
+                // and scalars stay inline.
+                if (v && typeof v === 'object' && !Array.isArray(v)) {
+                    for (const [sk, sv] of Object.entries(v)) {
+                        console.log(`${k}.${sk}=${typeof sv === 'object' ? JSON.stringify(sv) : sv}`);
+                    }
+                } else if (Array.isArray(v)) {
+                    console.log(`${k}=${JSON.stringify(v)}`);
+                } else {
+                    console.log(`${k}=${v}`);
+                }
             });
             // env  — the pass-179 registry view: every VANT_* env var vant
             // consumes, resolved with source (env vs fallback) + typo flags

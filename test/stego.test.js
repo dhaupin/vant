@@ -24,7 +24,7 @@ function test(name, fn) {
     }
 }
 
-console.log('\n�肀 TEGO MODULE TESTS\n');
+console.log('\n🔍 STEGO MODULE TESTS\n');
 
 test('stego module loads', () => {
     const stego = require(path.join(ROOT, 'lib', 'stego'));

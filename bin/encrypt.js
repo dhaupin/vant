@@ -76,8 +76,14 @@ function run() {
             console.error('Usage: vant encrypt verify <hash> <data>');
             process.exit(1);
         }
-        const computed = Encrypt.hash(data);
-        console.log(hash === computed ? 'Valid ✓' : 'Invalid ✗');
+        // (Issue #171 QC) hash() is SALTED PBKDF2 — two calls NEVER produce
+        // the same string (fresh random salt each time), so re-hash-compare
+        // was always Invalid. Encrypt.verify(data, hash) is the real
+        // verifier: it splits the salt out of the stored hash and
+        // recomputes. Exit status encodes the verdict (0 valid / 1 invalid).
+        const valid = Encrypt.verify(data, hash);
+        console.log(valid ? 'Valid ✓' : 'Invalid ✗');
+        process.exit(valid ? 0 : 1);
     } else {
         console.log('Usage: vant encrypt <command>');
         process.exit(1);

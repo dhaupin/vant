@@ -195,6 +195,58 @@ async function main() {
         assert(f.threadDecisionTrail('').ok === false, 'empty trail thread accepted');
     });
 
+    await test('QC-205 publications persist: publish → disk → fresh module load hydrates the board', async () => {
+        const forumMod = restartForum();
+        const f = forumMod.forum;
+        const r = await f.publish('QC-205 durability', 'must survive restart');
+        assert(r.published, 'publish refused: ' + JSON.stringify(r).slice(0, 120));
+        const barcode = r.publication.id;
+        assert(barcode && barcode.startsWith('PUB-'), 'no barcode: ' + barcode);
+
+        const PUB_FILE = path.join(ROOT, 'models', 'private', 'vant', 'state', 'forum-publications.json');
+        assert(fs.existsSync(PUB_FILE), 'forum-publications.json not written');
+        const onDisk = JSON.parse(fs.readFileSync(PUB_FILE, 'utf8'));
+        assert(onDisk.pubs && onDisk.pubs[barcode], 'file missing the publication');
+        assert(onDisk.pubs[barcode].title === 'QC-205 durability', 'stored record lost its title');
+
+        const forum2 = restartForum().forum;
+        const got = await forum2.get(barcode);
+        assert(got.found, 'publication NOT visible after restart (the evaporated-board bug)');
+        assert(got.publication.title === 'QC-205 durability', 'hydrated title lost');
+        assert(got.publication.content === 'must survive restart', 'hydrated content lost');
+    });
+
+    await test('QC-205 unpublish tombstone persists: restarted process still cannot see it', async () => {
+        const forumMod = restartForum();
+        const f = forumMod.forum;
+        const r = await f.publish('QC-205 to be deleted', 'gone soon');
+        assert(r.published, 'publish refused');
+        const barcode = r.publication.id;
+
+        const del = await f.unpublish(barcode);
+        assert(del.unpublished, 'unpublish refused: ' + JSON.stringify(del));
+
+        const forum2 = restartForum().forum;
+        assert(!(await forum2.get(barcode)).found, 'tombstoned publication resurrected after restart');
+        const listed = await forum2.list({});
+        assert(!listed.publications.find(p => p.id === barcode), 'tombstone leaked into list');
+    });
+
+    await test('QC-205 publication FIFO cap: the board stays bounded (max 500)', async () => {
+        const forumMod = restartForum();
+        const f = forumMod.forum;
+        for (let i = 0; i < 520; i++) {
+            const r = await f.publish('cap-' + String(i).padStart(4, '0'), 'x'.repeat(8));
+            assert(r.published, 'cap publish ' + i + ' refused');
+        }
+        const listed = await f.list({});
+        assert(listed.publications.length === 500, 'pub cap not enforced: ' + listed.publications.length);
+        assert(!listed.publications.find(p => p.title === 'cap-0000'), 'FIFO dropped the wrong end');
+        assert(listed.publications.find(p => p.title === 'cap-0519'), 'newest publication evicted');
+        const onDisk = JSON.parse(fs.readFileSync(path.join(ROOT, 'models', 'private', 'vant', 'state', 'forum-publications.json'), 'utf8'));
+        assert(Object.keys(onDisk.pubs).length === 500, 'persisted board unbounded: ' + Object.keys(onDisk.pubs).length);
+    });
+
     await test('U4 closeout: clearState wipes the links store too (ops parity)', async () => {
         const forumMod = restartForum();
         assert(forumMod.forum.listThreadLinks().length > 0, 'precondition: links present');
