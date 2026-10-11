@@ -145,11 +145,22 @@ async function main() {
         const bought = await marketMod.buySkill(listed.listingId, 'buyer-bot', { agentId: 'buyer-bot', consentGiven: true });
         await marketMod.deliverSkill(bought.tradeId, 'garbage payload', { agentId: 'bad-seller' });
         const inst = trust.getTrust();
+        // (run-to-run determinism) The trust ledger PERSISTS on disk between
+        // suite runs, so a veteran bad-seller may already be floored at 0
+        // and `after < before` is unsatisfiable. Isolate THIS pin's ledger:
+        // clear trust state, certify the zero baseline, then assert the
+        // drop. The REAL assertion — score moves down — survives.
+        trust.clearState();
+        // getScore(self-test): a fresh ledger scores the configured baseline
+        // (initialScore) for everyone — prove clearState actually reset.
+        const baseline = inst.config.initialScore;
         const before = inst.getScore('bad-seller');
+        assert.strictEqual(before, baseline, 'trust.clearState did not reset scores (' + before + ' ≠ ' + baseline + ')');
         const refuted = await marketMod.settleSkill(bought.tradeId, 'refute', { agentId: 'buyer-bot' });
         assert(refuted.settled === true, JSON.stringify(refuted).slice(0, 120));
         const after = inst.getScore('bad-seller');
         assert(after < before, 'negative trust record not reflected (' + before + ' → ' + after + ')');
+        assert(after < baseline, 'negative record did not leave the baseline (' + after + ')');
     });
 
     // ====================================================================
