@@ -115,6 +115,25 @@ asyncTest('query retrieves document from DISK with a cold cache (cross-process s
     return true;
 });
 
+// (Issue #174 QC pin) learn('key', body) writes the LEARN layout —
+// <category-or-key>/default.md on disk, NOT state/. The pass-203 fix mirrors
+// that layout in recall()'s fallback, so a learn→recall round-trip must now
+// succeed COLD (fresh process semantics): drop the state memo entries, then
+// recall must find the learn-layout row through brain.load and unwrap it.
+asyncTest('recall retrieves a LEARN-layout write with a cold cache (learn→recall round-trip, #174)', async () => {
+    const m = require('../lib/memory').memory;
+    const body = 'learn-body-' + Date.now();
+    await m.learn('pin-174-roundtrip', body, { ttl: 600000 });
+    // Cold cache: drop BOTH layout memo entries so recall must hit disk.
+    const brain = (m._getBrainName ? m._getBrainName() : 'default');
+    m._cache.delete(brain + ':state:pin-174-roundtrip');
+    m._cache.delete(brain + ':learn:pin-174-roundtrip');
+    const v = await m.recall('pin-174-roundtrip');
+    assert(typeof v === 'string' && v.startsWith('learn-body-'),
+        'cold recall missed the learn layout (#174 fallback): ' + JSON.stringify(v));
+    return true;
+});
+
 asyncTest('recall retrieves state from DISK with a cold cache (wrapper-content shape)', async () => {
     const m = require('../lib/memory').memory;
     await m.state('cold-cache-state', 'val-' + Date.now(), { ttl: 600000 });

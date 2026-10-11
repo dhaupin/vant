@@ -37,8 +37,32 @@ const path = require('path');
 const { URL } = require('url');
 
 const args = process.argv.slice(2);
-const imageArg = args.find(a => a.startsWith('--image='))?.slice(8);
-const decrypt = args.find(a => a.startsWith('--decrypt='))?.slice(10);
+
+// (Issue #175 QC) Both flag spellings work: --image=<value> AND
+// --image <value> (space-separated). The old parser only matched the =
+// form — `--image path/to.svg` fell through to AUTO-boot with "trying 0
+// sources", ignoring the operator's explicit stone. Space form validated
+// as a sane path/url token (no further flags, non-empty).
+function _flagValue(name) {
+    // --image=<value>
+    const inline = args.find(a => a.startsWith('--' + name + '='));
+    if (inline !== undefined && inline.slice(name.length + 3) !== '') {
+        return inline.slice(name.length + 3);
+    }
+    // --image <value>
+    const i = args.indexOf('--' + name);
+    if (i !== -1) {
+        const next = args[i + 1];
+        if (next !== undefined && !next.startsWith('--')) return next;
+        // Bare flag without a value: loud failure, not a silent auto-boot.
+        console.error('[Boot] --' + name + ' requires a value: --' + name + '=<url|path>');
+        process.exit(1);
+    }
+    return undefined;
+}
+
+const imageArg = _flagValue('image');
+const decrypt = _flagValue('decrypt');
 const force = args.includes('--force');
 
 // Helper: Validate URL is safe for fetching
@@ -263,10 +287,17 @@ function getBootSources() {
 
 // Amnesia Mode - clean state
 async function enterAmnesiaMode() {
+    // (Issue #175 QC) The old wording said "Cleaning brain and starting
+    // fresh" — but the function NEVER wipes the brain (it only records an
+    // amnesia state marker). Two problems: the lie made an operator believe
+    // their dates were gone mid-recovery, and it papered over "we could not
+    // boot" as if a reset was intentional. Say what actually happens.
     console.log('\n⚠ All boot sources failed!');
     console.log('============================================');
-    console.log('VANT AMNESIA MODE');
-    console.log('Cleaning brain and starting fresh...');
+    console.log('VANT AMNESIA MODE (no boot source available)');
+    console.log('(The brain tree was NOT modified — nothing was wiped.)');
+    console.log('Recover the brain manually: `vant horcrux restore <svg> <password>`');
+    console.log('or `vant backup restore <file>`.');
     console.log('============================================\n');
     
     // Save warning state - use memory.state instead
@@ -307,10 +338,11 @@ async function main() { _checkRead();
             }
         }
         
-        // All sources failed
+        // All sources failed — record it but DO NOT exit zero: "could not
+        // boot" is a failure, not a success (scripts must see it).
         console.log('[Boot] All sources exhausted');
-        enterAmnesiaMode();
-        process.exit(0);
+        await enterAmnesiaMode();
+        process.exit(1);
     }
     
     try {
@@ -330,7 +362,7 @@ async function main() { _checkRead();
                     console.log('[Boot] Fallback failed:', e2.message);
                 }
             }
-            enterAmnesiaMode();
+            await enterAmnesiaMode();
         }
         process.exit(1);
     }

@@ -249,31 +249,42 @@ async function run() {
         // no ancestor marker at all → fall back to the stone's own dir
         // (rg applies the nearest .ignore, so a sibling .ignore still works).
         try {
-            const fs = require('fs');
-            let wsRoot = path.resolve(process.cwd());
-            while (true) {
-                if (fs.existsSync(path.join(wsRoot, '.git')) || fs.existsSync(path.join(wsRoot, 'models'))) break;
-                const parent = path.dirname(wsRoot);
-                if (parent === wsRoot) { wsRoot = null; break; }
-                wsRoot = parent;
-            }
-            const stoneAbs = path.resolve(result.path || outputPath);
-            if (!wsRoot) wsRoot = path.dirname(stoneAbs);
-            const relStone = path.relative(wsRoot, stoneAbs);
-            if (relStone.startsWith('..') || path.isAbsolute(relStone)) {
-                console.log('Search hygiene skipped: stone is outside the workspace root (' + wsRoot + ').');
+            // (Issue #176 QC) The old behavior MUTATED `.ignore` on every
+            // create without asking — on installs where .ignore is a tracked
+            // file (Rook's tree) a backup verb dirtied the working tree
+            // silently. Search hygiene is now OPT-IN: the flag appends, the
+            // default only prints the hint (the repo's checked-in .ignore
+            // already covers models/public/*/boot/*.svg stones).
+            if (!args.includes('--add-to-ignore')) {
+                console.log('Search hygiene hint: stones are search-hostile (one ~800KB base64 line).');
+                console.log('  Add an entry to .ignore for tools that honor it: pass --add-to-ignore next time.');
             } else {
-                const dirPattern = path.dirname(relStone).split(path.sep).join('/') + '/*.svg';
-                const ignorePath = path.join(wsRoot, '.ignore');
-                let ignore = '';
-                if (fs.existsSync(ignorePath)) ignore = fs.readFileSync(ignorePath, 'utf8');
-                if (!ignore.split(/\r?\n/).some(l => l.trim() === dirPattern)) {
-                    const note = ignore.trimEnd()
-                        + '\n\n# horcrux stone (auto-added by vant horcrux create, prime #100):\n'
-                        + '# one ~800KB+ base64 line per stone — search tools: skip, git: keep tracking.\n'
-                        + dirPattern + '\n';
-                    fs.writeFileSync(ignorePath, note);
-                    console.log('Search hygiene: added ' + dirPattern + ' to ' + ignorePath + ' (stones stay git-tracked).');
+                const fs = require('fs');
+                let wsRoot = path.resolve(process.cwd());
+                while (true) {
+                    if (fs.existsSync(path.join(wsRoot, '.git')) || fs.existsSync(path.join(wsRoot, 'models'))) break;
+                    const parent = path.dirname(wsRoot);
+                    if (parent === wsRoot) { wsRoot = null; break; }
+                    wsRoot = parent;
+                }
+                const stoneAbs = path.resolve(result.path || outputPath);
+                if (!wsRoot) wsRoot = path.dirname(stoneAbs);
+                const relStone = path.relative(wsRoot, stoneAbs);
+                if (relStone.startsWith('..') || path.isAbsolute(relStone)) {
+                    console.log('Search hygiene skipped: stone is outside the workspace root (' + wsRoot + ').');
+                } else {
+                    const dirPattern = path.dirname(relStone).split(path.sep).join('/') + '/*.svg';
+                    const ignorePath = path.join(wsRoot, '.ignore');
+                    let ignore = '';
+                    if (fs.existsSync(ignorePath)) ignore = fs.readFileSync(ignorePath, 'utf8');
+                    if (!ignore.split(/\r?\n/).some(l => l.trim() === dirPattern)) {
+                        const note = ignore.trimEnd()
+                            + '\n\n# horcrux stone (auto-added by vant horcrux create, prime #100):\n'
+                            + '# one ~800KB+ base64 line per stone — search tools: skip, git: keep tracking.\n'
+                            + dirPattern + '\n';
+                        fs.writeFileSync(ignorePath, note);
+                        console.log('Search hygiene: added ' + dirPattern + ' to ' + ignorePath + ' (stones stay git-tracked).');
+                    }
                 }
             }
         } catch (e) { /* non-fatal — hint only */ }
