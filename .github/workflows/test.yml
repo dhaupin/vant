@@ -54,5 +54,8 @@ jobs:
       - name: Fiction signatures (repo-wide, wrong-claims regression gate)
         run: npm run lint:claims
 
+      - name: Language gate (prose is English-only, issue #184)
+        run: node scripts/check-language.js
+
       - name: Run standalone suites
         run: for f in test/*.test.js; do node "$f" || exit 1; done

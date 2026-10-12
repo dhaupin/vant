@@ -5,7 +5,45 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - pass 205 (WAVE ERA — the resumable incarnation ledger)
+## [Unreleased] - pass 206 (Language gate - contributor prose is English-only, #184)
+
+### Added - Language gate (issue #184)
+
+Two org agents drifted into Chinese mid-session on 2026-10-11 in an
+English conversation; committed artifacts drift the same way via
+scripted agents. New `scripts/check-language.js` lint gate enforces the
+rule for committed prose: docs/, labs/, any markdown under .github/,
+and the root meta set (README/AGENTS/CHANGELOG/CONTRIBUTING/LEGAL/
+DEPLOY/ROADMAP/SECURITY/CODE_OF_CONDUCT) are scanned; code comments are
+PR-review matter and stay out of scope.
+
+- Detection is a Unicode script-block LONGEST-RUN analyzer (Han,
+  Hiragana, Katakana, Hangul, Cyrillic, Arabic, Hebrew, Devanagari,
+  Thai, Greek runs of >= 3 chars per line), not a word list - tattoo
+  glyphs and transliterated names do not trip; real writing does.
+- Allowlist by construction: fenced blocks and inline-code spans are
+  literal data (same posture as check-docs-style.js); URL-bearing and
+  import/export/require lines skip; `LINT_LANGUAGE_ALLOW_RE` env regex
+  lets intentional bilingual docs opt out WITHOUT editing the checker.
+- Failure contract: exit 1, `path:line <Script> (N chars): <line>`;
+  PASS prints `LANGUAGE GATE: PASS (English-only) - N prose files
+  scanned`. Threshold + block list are DATA at the top of the script,
+  tunable in under 30 lines.
+- Wired in: `npm run lint:docs` final step and a standalone CI row in
+  .github/workflows/test.yml. Pinned by `test/language-gate.test.js`
+  (10 fixtures on a throwaway tree: pass/exit contract, Han/Cyrillic/
+  Greek detection, short-run exemption, fenced/inline-code exemption,
+  env opt-out, root-meta + .github scanning).
+
+### Fixed
+
+- The gate's first live run caught its own first real finding: a
+  Russian phrase fragment left in `labs/MEM.md` ("включая", i.e.
+  "including") - proof the drift happens even in English-first terra.
+- docs/reference/era.md (the Wave-Era page written in pass 205) now
+  passes every docs gate: em dashes converted to hyphens, arrow glyph
+  removed, and the 5 required frontmatter fields added.
+
 
 ### Added - Era (`vant era`): intent → folded record → signed rollup (issues #177/#178; appendix #179 tracked)
 

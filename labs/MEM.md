@@ -51,7 +51,7 @@ consensus ledger + per-voter outcomes + escrow hold (`forum:<topic>`) +
 persisted decision; typed `E_FORUM_ABSENT` when unlinked. CLI:
 `vant forum decisions <barcode>` (+--json), `vant forum links`. MCP
 309→311 (`forum_decisions`, `forum_thread_links`; `forum_vote` +thread).
-Pins: persistence suite 4→9 включая no-orphans-after-restart; grand
+Pins: persistence suite 4→9 including no-orphans-after-restart; grand
 tour 18/18 (gate B 311). LESSON: module-level functions need singleton
 passthroughs — bin/MCP/tests all call through the forum INSTANCE
 (the suite caught `f.listThreadLinks is not a function` live).

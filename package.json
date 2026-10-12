@@ -39,7 +39,7 @@
     "health": "node bin/health.js",
     "lint": "eslint lib/ test/",
     "lint:fix": "eslint lib/ test/ --fix",
-    "lint:docs": "node scripts/check-docs-style.js && node scripts/check-docs-links.js && node scripts/check-docs-frontmatter.js",
+    "lint:docs": "node scripts/check-docs-style.js && node scripts/check-docs-links.js && node scripts/check-docs-frontmatter.js && node scripts/check-language.js",
     "lint:coverage": "node scripts/check-mcp-coverage.js && node scripts/check-cli-coverage.js",
     "lint:claims": "node scripts/check-fiction-signatures.js",
     "lint:dist": "node scripts/check-dist-lander.js",
