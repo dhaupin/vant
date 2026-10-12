@@ -145,6 +145,9 @@ const COMMANDS = {
     // Brain horcrux (backup/restore)
     horcrux: 'horcrux.js',
     
+    // Era — the resumable incarnation ledger (issues #177-#179)
+    era: 'era.js',
+    
     // Brain layout migrations (prd-storage.md)
     migrate: 'migrate.js',
     

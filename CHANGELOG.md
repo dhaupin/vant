@@ -5,6 +5,57 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 205 (WAVE ERA — the resumable incarnation ledger)
+
+### Added - Era (`vant era`): intent → folded record → signed rollup (issues #177/#178; appendix #179 tracked)
+
+One record per wake: WHY the agent got up (`intent`, REQUIRED), WHAT
+happened (subscribed bus events folded by FAMILY into threads/spend/
+social/stones/memory), and the one sentence the NEXT wake starts with
+(`next` — the #175 resurrection hook via `vant horcrux refresh`).
+The "pull it all together" moment from the first-user QC: #168–#176
+subsystems were each separately amnesiac because no record occupied
+"the span of one wake". Era is the event-bus SUBSCRIBER — no subsystem
+changes to write into it, and folding is a strict NO-OP without an open
+era (zero behavioral change for installs that never run `era start`).
+
+- **The contract (`lib/era.js`):** arch-A state store persistence
+  (`state/era-current.json` open era, `state/era-eras.json` rollups,
+  FIFO cap 200) — reads fail CLOSED: an unreadable state file is typed
+  `E_STATE_READ`, never a silent blank wake. One era open at a time
+  (`E_ERA_ALREADY_OPEN`); typed refusals for intent-less starts
+  (`E_ERA_INTENT`) and era-less closes (`E_ERA_NONE`). Line-items cap
+  250/field with an `overflow` flag; `close` compacts to
+  `{count, byType}` and signs the rollup with sha256 (lib/hash — the
+  ONE hash source). A mutated archived rollup FAILS verify —
+  tamper-EVIDENCE, not silent re-signing.
+- **Event catalogue (`FIELD_FOR_EVENT`):** 16 families → 5 fields,
+  matched on the FIRST `:` so subtypes ride along; `era:*` events are
+  NEVER self-folded (recursion guard); unknown families are skipped,
+  never guessed. `close` emits `era:closed` AND `era:succession` — the
+  A3 hand-off event mesh consumers can key on before sign-off lands.
+- **CLI (`bin/era.js`, dispatcher-routed):** `era start <intent>` /
+  `era current` (default bare verb) / `era close --next <sentence>` /
+  `era list` / `era verify <id-prefix>` — all `--json`, exit codes
+  0/1/2. `close` prints the rollup path + the horcrux-refresh reminder.
+- **MCP +5:** `era_start/era_log/era_close/era_current/era_list`
+  (318 → 323 tools), all live-fired through `mcp.call` with typed
+  invariants (schema-refused missing intent, `E_ERA_UNROUTED` for
+  unknown families, `E_ERA_NONE` post-close).
+- **Pins:** `test/era.test.js` 7/0 — typed refusals, subscriber no-op
+  without an era, cross-process persistence across THREE real child
+  processes (open+fold→die / resume+close / verify archive integrity),
+  double-open refusal, tamper detection, MCP door loop. Grand-tour gate
+  B 318 → 323, suite 18/18.
+- **Docs:** `docs/reference/era.md` (storage, record shape, routing
+  table, the horcrux hook, the deliberate #179 boundary).
+- **Appendix (#179) tracked separately:** scope-aware eras, agora
+  sign-off on close, horcrux AUTO-refresh, namescope. Not open-coded
+  here — the build issue's acceptance criteria already hold: fresh
+  process persistence, zero change to existing subsystems pre-start.
+
+---
+
 ## [Unreleased] - pass 204 (QC live-fire — five adversarial holes closed)
 
 ### Fixed - QC sweep of the U-wave surface (marketplace skills + escrow)
