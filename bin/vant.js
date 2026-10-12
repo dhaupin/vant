@@ -266,6 +266,8 @@ const COMMANDS = {
     trace: 'trace.js',
     // vant qc: the first-user battery (issue #181 Part B)
     qc: 'qc.js',
+    // vant init: the First Five Minutes wizard (issue #182)
+    init: 'init.js',
 
     // Bin CLIs that existed but were never routed (pass 18 bin sweep)
     org: 'org.js',
