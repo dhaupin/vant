@@ -448,9 +448,9 @@ vant metrics storage            # Per-store aggregation
 # Cron: interval specs only ("30s", "10m", "2h", ms). Jobs are scheduler
 # slots in the running process - not persisted across restarts. For fixed
 # system-time schedules drive this from a real crontab entry.
-vant cron list
-vant cron add <spec> <cmd>
-vant cron remove <id>
+vant cron list                 # Scheduled slots in THIS process
+vant cron add <spec> <cmd>     # Prints the job id to paste into remove
+vant cron remove <id>          # Removes a slot added in this process
 vant cron run <id>
 vant cron status
 

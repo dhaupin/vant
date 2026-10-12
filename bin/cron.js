@@ -56,23 +56,40 @@ async function run() {
                 console.error('Usage: vant cron add <spec> <command>');
                 process.exit(1);
             }
-            const id = await cron.add(spec, cmd);
-            console.log('Added job:', id);
+            const result = await cron.add(spec, cmd);
+            // add() returns the schedule() envelope ({ id, scheduled }) —
+            // print the human copyable id, not the envelope, so the id the
+            // user pastes into `cron remove` is the id remove accepts.
+            if (result && typeof result === 'object' && result.id) {
+                if (!result.scheduled) console.log('  (scheduled in this process only — not persisted)');
+                console.log('Added job:', result.id);
+            } else {
+                console.log('Added job:', result);
+            }
         } else if (subcmd === 'remove' || subcmd === 'rm' || subcmd === 'delete') {
             const id = args[1];
             if (!id) {
                 console.error('Usage: vant cron remove <id>');
                 process.exit(1);
             }
-            await cron.remove(id);
-            console.log('Removed job:', id);
+            const existed = await cron.remove(id);
+            if (existed) {
+                console.log('Removed job:', id);
+            } else {
+                console.log('No scheduled job with id:', id, '(nothing was scheduled in this process)');
+            }
         } else if (subcmd === 'run' || subcmd === 'execute' || subcmd === 'now') {
             const id = args[1];
             if (!id) {
                 console.error('Usage: vant cron run <id>');
                 process.exit(1);
             }
-            console.log('Running job:', id);
+            const r = cron.run(id);
+            if (r && r.error) {
+                console.log('Run failed:', r.error);
+            } else {
+                console.log('Ran job:', id);
+            }
         } else if (subcmd === 'status' || subcmd === 'info') {
             // (bin-truthfulness) lib/cron.getStatus() returns
             // { enabled, tasks } — the arrow-property shape the gate's fn/class
@@ -92,3 +109,10 @@ async function run() {
 }
 
 run();
+
+// (R4-F1, #194) A scheduled interval keeps the event loop alive — without an
+// explicit exit, `vant cron add 30s ...` HUNG after printing its result. The
+// CLI is one-shot: report, then leave (the schedule itself is in-process only
+// and dies with the process, which the add/list copy already says).
+process.on('exit', () => {});
+setTimeout(() => process.exit(0), 150).unref();
