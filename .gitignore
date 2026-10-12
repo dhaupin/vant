@@ -110,3 +110,6 @@ models/public/vant/boot/*-p_*.svg.sha256
 settings.ini
 .locks-global/
 models/audit-rotate/
+
+# Entropy patch scratch dirs (mkdtemp vestiges from createAdaptivePatch — see lib/entropy-patch.js)
+entropy-adaptive-*/

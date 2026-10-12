@@ -22,63 +22,72 @@ const config = require('../lib/config');
 
 // (1b) Capability gates — CLI writes route through the same sandbox check
 // as lib/ (sandbox.canX() is sudo-aware since the canX→can unification).
+// (R4-F2, #194) clean now uses the SAME posture as bin/snapshot.js's
+// documented self-grant: a direct user CLI invocation carries the same
+// trust as `vant org grant`, so a fresh (allow-with-warning) sandbox
+// self-grants with notice — while an explicitly locked-down host still
+// refuses. Previously every clean subverb demanded Write even for tmp/cache
+// and bounced fresh installs (cli.md documented all verbs as working).
 function _getSandbox() {
     try { return require('../lib/sandbox'); } catch (e) { return null; }
 }
 function _checkWrite() {
     const sandbox = _getSandbox();
-    if (sandbox && !sandbox.canWrite()) throw new Error('Write capability required for clean operations');
+    if (!sandbox) return;
+    if (sandbox.canWrite()) return;
+    const ds = sandbox.defaultSandbox;
+    if (ds && ds._explicitlyConfigured) {
+        throw new Error('Write capability required for clean operations (sandbox explicitly locked down; ask the host to grant canWrite)');
+    }
+    ds.setCapabilities({ canRead: true, canWrite: true });
+    console.log('[clean] granted write capability for this process (fresh sandbox)');
 }
 
 // Handle cron setup commands early
+// (R4-F6, #194) Jobs now use cron's OWN interval grammar ("24h", "1h")
+// via lib/cron.add — the local parseCronToMs cron-expression fork
+// ("0 3 * * *") is gone; the two paths and the docs now speak ONE model:
+// intervals in-process, real crontab entries for fixed system-time
+// schedules. These slots are in-process (not persisted), like every
+// scheduler the lib ships.
 if (args.includes('--setup-cron') || args.includes('--install')) {
     const cron = require('../lib/cron');
     const jobs = [
-        { spec: '0 3 * * *', cmd: 'vant clean prune', name: 'daily-prune' },
-        { spec: '0 * * * *', cmd: 'vant clean cache', name: 'hourly-cache-clean' },
-        { spec: '0 2 * * *', cmd: 'vant clean logs', name: 'daily-log-clean' },
-        { spec: '0 0 * * *', cmd: 'vant clean tmp', name: 'daily-tmp-clean' }
+        { spec: '24h', cmd: 'vant clean prune', name: 'daily-prune' },
+        { spec: '1h', cmd: 'vant clean cache', name: 'hourly-cache-clean' },
+        { spec: '24h', cmd: 'vant clean logs', name: 'daily-log-clean' },
+        { spec: '24h', cmd: 'vant clean tmp', name: 'daily-tmp-clean' }
     ];
-    console.log('Setting up auto-clean cron jobs...\n');
+    console.log('Setting up auto-clean jobs (this process, interval schedulers)...\n');
     for (const job of jobs) {
         try {
             const existing = cron.list().find(j => j.id === job.name);
             if (existing) console.log(`  [SKIP] ${job.name} (exists)`);
-            else { 
-                // Parse cron spec to get interval in ms
-                const parts = job.spec.split(' ');
-                const intervalMs = parseCronToMs(job.spec);
-                cron.schedule({ 
-                    id: job.name, 
+            else {
+                cron.schedule({
+                    id: job.name,
                     handler: () => console.log(`[CLEAN] Running: ${job.cmd}`),
-                    interval: intervalMs,
+                    interval: _intervalSpecToMs(job.spec),
                     enabled: true
-                }); 
-                console.log(`  [ADD] ${job.name}: ${job.spec} (${intervalMs/1000}s)`); 
+                });
+                console.log(`  [ADD] ${job.name}: every ${job.spec}`);
             }
         } catch (e) { console.log(`  [ERROR] ${job.name}: ${e.message}`); }
     }
-    console.log('\n✓ Done. Run "vant cron list" to verify.');
+    console.log('\n✓ Done. Note: these are in-process scheduler slots (not persisted across restarts). For durable schedules, put the clean command in a real crontab entry.');
     process.exit(0);
 }
 
-// Simple cron spec to ms converter (supports basic specs)
-function parseCronToMs(spec) {
-    const parts = spec.trim().split(/\s+/);
-    if (parts.length < 5) return 60000; // Default 1 min
-    
-    const [min, hour, day, month, dow] = parts;
-    
-    // Simple cases
-    if (min === '*' && hour === '*') return 60000; // Every minute
-    if (min === '0' && hour === '*') return 3600000; // Every hour
-    if (min === '0' && hour === '2') return 86400000; // Daily at 2am
-    if (min === '0' && hour === '3') return 86400000; // Daily at 3am
-    
-    // Weekly (Sunday) - use 6 days as max is 1 day
-    if (min === '0' && hour === '0' && dow === '0') return 518400000; // Every 6 days
-    
-    return 3600000; // Default to hourly
+// (R4-F6) Interval-spec resolver (shared grammar with lib/cron _specToMs).
+function _intervalSpecToMs(spec) {
+    const s = String(spec).trim();
+    const m = s.match(/^(\d+)([smh])$/);
+    if (m) {
+        const n = parseInt(m[1], 10);
+        if (n < 1) return 60000;
+        return m[2] === 's' ? n * 1000 : m[2] === 'm' ? n * 60000 : n * 3600000;
+    }
+    return 3600000; // fallback: hourly
 }
 
 if (args.includes('--remove-cron') || args.includes('--uninstall')) {
@@ -186,6 +195,11 @@ async function cleanLogs() {
     // use `vant clean` + lib/tmp clear() for those. The bare '/tmp' sweep is
     // aggressive (shared OS dir) and is a candidate for removal — flagged,
     // not changed, to keep this commit migration-only.
+    // (R4-F2, #194) `logFile` was a refactor orphan — never declared since
+    // the migration-era rewrite, so EVERY clean run that reached this loop
+    // crashed with plain `logFile is not defined`. The census note above is
+    // the source of truth: the process logs live at the repo root.
+    const logFile = 'vant.log';
     if (fs.existsSync(logFile)) {
         const stats = fs.statSync(logFile);
         

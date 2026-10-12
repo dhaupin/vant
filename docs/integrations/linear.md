@@ -2,154 +2,35 @@
 version: 0.8.6
 permalink: /integrations/linear
 layout: default
-title: Linear Integration
+title: Linear
 nav_order: 83
-description: Using Linear issue tracking with Vant
+description: Status of the Linear issue-tracking integration
 ---
 
-# Linear Integration
+# Linear
 
-Vant integrates with Linear for issue tracking via GraphQL API.
+Not integrated (as of v0.8.6). The `linear` key exists in the island
+manifest (`lib/islands.js`) as a lazy slot, but no Linear client code
+ships: there is no connector, no `vant.linear` module, no MCP tools, and
+`islands.load('linear')` returns `null` (the slot has no data source
+wired). The config layer carries a `linear.apiKey` placeholder that
+nothing reads.
 
-```text
-┌─────────────────────────────────────────┐
-│         Linear Issue Flow                │
-│                                          │
-│  Vant ──▶ Create issue ──▶ Linear       │
-│           │                             │
-│           ▼                             │
-│      Sync to brain                      │
-│           │                             │
-│           ▼                             │
-│      Link issue in comments           │
-└─────────────────────────────────────────┘
-```
+## What exists
 
-## Why
+- Island manifest entry (lazy, unwired)
+- `linear.apiKey` in `getSecretKeys()` (masking only - no consumer)
 
-Track agent work in Linear:
-- Agent creates issues for tasks
-- Updates status as it works
-- Links to brain learnings
-- Full audit trail
+## How to actually connect Linear today
 
-## Configuration
-
-Get API key:
-1. Go to Linear Settings -> API
-2. Create API key
-3. Set environment:
-
-```bash
-LINEAR_API_KEY=lin_api_xxx
-LINEAR_TEAM=your-team-id
-```
-
-## Usage
-
-### Create Issue
-
-```javascript
-const linear = require('vant').linear;
-
-const issue = await linear.createIssue('Fix authentication bug', {
-    description: 'User cannot login with OAuth',
-    priority: 1,
-    teamId: process.env.LINEAR_TEAM
-});
-
-console.log(issue.id);    // "SYS-123"
-console.log(issue.url);   // "https://linear.app/team/SYS-123"
-```
-
-### List Issues
-
-```javascript
-// Get open issues
-const issues = await linear.listIssues({
-    state: { name: { ne: 'Done' } }
-});
-
-// Filter by label
-const bugs = await linear.listIssues({
-    labels: { name: { eq: 'bug' } }
-});
-```
-
-### Update Issue
-
-```javascript
-// Update status
-await linear.updateIssue('SYS-123', {
-    state: 'In Progress'
-});
-
-// Add comment
-await linear.addComment('SYS-123', 'Working on this!');
-
-// Assign
-await linear.updateIssue('SYS-123', {
-    assigneId: 'user_id'
-});
-```
-
-### Close Issue
-
-```javascript
-await linear.updateIssue('SYS-123', {
-    state: 'Done',
-    resolution: 'Fixed in PR #45'
-});
-```
-
-## Vant Integration
-
-### Auto-Create Issues
-
-```javascript
-vant.onGoalCreated(async (goal) => {
-    const issue = await linear.createIssue(goal.title, {
-        description: `Goal: ${goal.description}`,
-        priority: goal.priority
-    });
-    
-    await vant.learn('goals/' + issue.id, goal.description);
-});
-```
-
-### Sync to Brain
-
-```javascript
-// When issue closes, learn from it
-linear.onIssueClosed(async (issue) => {
-    await vant.learn('decisions/' + issue.id, issue.resolution);
-});
-```
-
-## GraphQL
-
-Linear uses GraphQL. Key queries:
-
-```javascript
-// Issues query
-const issues = await linear.query('query { issues { nodes { id title state { name } priority } } }');
-
-// Create mutation
-const result = await linear.query('mutation { issueCreate(input: { title: "New issue" teamId: "team_id" }) { success issue { id } } }');
-```
-
-## MCP Tools
-
-When Linear island loaded:
-- vant_linear_create_issue
-- vant_linear_list_issues
-- vant_linear_update_issue
-- vant_linear_add_comment
-
----
+Make a custom connector around the Linear GraphQL API yourself (a thin
+`fetch` wrapper in an external script, storing results with
+`vant learn linear/<issue-id> ...` so the brain indexes them), or use a
+generic webhook into `vant webhooks`. If you want this productized,
+file an issue with your workflow shape.
 
 ## Related
 
 - [Islands](/vant/essential/islands) - Load on-demand
 - [MCP](/vant/reference/mcp-tools) - MCP server
-- [GitHub](/vant/integrations/github) - GitHub integration
+- [GitHub](/vant/integrations/github) - The built-in integration

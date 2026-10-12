@@ -406,10 +406,12 @@ TELEGRAM_TOKEN=bot-token
 
 ## Linear
 
+Placeholder only. `LINEAR_API_KEY` is a recognized secret name, but no
+Linear integration code exists (see
+[integrations/linear](/vant/integrations/linear) for the detail).
+
 ```bash
 LINEAR_API_KEY=your-api-key
-LINEAR_TEAM=team-id
-LINEAR_ENDPOINT=https://api.linear.app/graphql
 ```
 
 ## MCP Tools

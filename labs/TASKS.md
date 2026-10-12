@@ -8,6 +8,136 @@ see labs/prd-universe.md §3 for per-wave checklists
 
 ---
 
+## Session (2026-10-12 — pass 213: R3-F9 truthfulness gate LANDED)
+
+**Owner: "noice work ty, let's keep going."**
+
+- **R3-F9 SHIPPED — the docs truthfulness gate.**
+  `scripts/check-docs-truthfulness.js`: every `require('./lib/…')` and
+  `vant <verb>` inside docs markdown must resolve to the real tree
+  (COMMANDS map + inline `case` handlers + bin/ file routes + help.js
+  card names as the verb truth source). Only PROVEN-absent promises
+  fail; unknown shapes are skipped. `<!-- TRUTHFULNESS-OK: reason -->`
+  exempts the next line for deliberate demos.
+  - First live run caught 3 REAL fictions in the swept tree:
+    (1) examples.md sold `lib/auto-update` with an `enable()/on('save')/
+    trigger()` API that never existed — rewired the example to the real
+    `lib/sync.js` push path with an honest no-module note;
+    (2)+3) coordination.md sold `vant git-branch create` which was never
+    a verb — pointed at plain `git checkout -b` + the real `vant branch`
+    manager (status/auto/commit/push/pr).
+  - Negative controls (pass-79 rule): test/docs-truthfulness.test.js
+    4/4 — clean-tree PASS, fictional lib FAILs, unroutable verb FAILs,
+    exemption honored across a throwaway tree.
+  - Wired: `lint:docs` final step + standalone CI row in
+    .github/workflows/test.yml. Every future docs-parity round is now a
+    CI run on the proven-absent class instead of a manual audit.
+- Checker tuning en route: npm/git/docker/node toolchain words are not
+  vant verbs (BIN_ALLOW); verb match requires shell-prompt/path context
+  ("environment" false positive gone); COMMANDS slice bounded before
+  handler object-literals drip in.
+
+**Verification:** docs-truthfulness PASS (123 files, 129 verbs
+verified), test/docs-truthfulness.test.js 4/0, r1-r4 fixtures clean,
+syntax OK. lint:docs now runs 5 gates.
+
+## Session (2026-10-12 — pass 212: #193 round-3 sweep closed + EW2 pin + R4-F6)
+
+**Owner: "let's hit more issues, this will be epic."**
+
+Round 3 (#193) findings closed with live probes (R3-F1/F7/F8/F10 were
+already receipts or done in pass 211):
+
+- **R3-F4 examples.md:** the fabricated community showcase re-titled
+  "Ideas for Projects" (no invented attribution, headings h2, submit
+  link pointed at the real dhaupin/vant/issues - the old URL was dead).
+- **R3-F2 settlement.md:** export-surface table now names the REAL
+  lib surface (install/makeInvoice/sendInvoice/requestStatus/list/get/
+  status) with an inline note that settle.request/settle.record are
+  wire message names, not API exports.
+- **R3-F3 network.md:** "Response caching" struck (verified no cache
+  export in lib/network.js); circuit-breaking re-pointed to lib/qos.js
+  where CircuitBreaker actually lives; bullets now name the real
+  exports.
+- **R3-F5 faq.md succession path:** corrected to the verified on-disk
+  location (models/public/<brain>/_succession.json, public scope,
+  per-brain - the doc said models/private/ for years).
+- **R3-F6 memory list undercount:** root cause = the doc ("Read
+  everything the brain holds: vant memory list") promised the wrong
+  surface. vibe-coders.md now teaches the honest pair: `memory list`
+  (engine stats) + `onboard files`/cat (actual brain docs). No lib
+  change needed; probe confirmed learn-then-list still reports engine
+  counters 0 as expected while the doc no longer promises they exist.
+- **R3-F8 "500+" tests drift:** cli.md + bin/vant.js help now say the
+  real count (~2,300 cases across /test).
+
+- **R4-F6 (#194) clean.js cron fork removed:** the local
+  parseCronToMs cron-expression parser ("0 3 * * *" → fuzzy ms) is gone;
+  `vant clean --setup-cron` now uses cron's own interval grammar
+  ("24h"/"1h") with an honest in-process/non-persisted note. Verified
+  live: setup (4 jobs added), list, remove all exit 0.
+- **EW2 pin landed (#190):** NEW test/leash-pin.test.js 6/6 - four
+  static handler pins (uncaughtException/unhandledRejection/SIGTERM+
+  SIGINT/forceReleaseBrainLock/double-exit guard) plus two LIVE-process
+  probes: `vant all` booted for real, SIGTERM and SIGINT each answered
+  by the leash (exit 0, leash line on stderr).
+
+**Verification:** leash-pin 6/6, memory 19/19 (regression), syntax OK,
+docs frontmatter 122 PASS, style 122 PASS, language gate 194 PASS.
+
+## Session (2026-10-12 — pass 211: parity sweep r2-r4 + EW pins)
+
+**Owner: "record gaps/suggestions, solve them, then hit next triage."**
+
+Closed from the issue queue (#190/#192/#193/#194) with live probes:
+
+- **#192 R2-F2 geometry round-trip FIXED:** storage write path had the
+  raw-category vs sanitized-path asymmetry AND a TDZ regression from the
+  fix attempt itself (`filePath` referenced before init). Verified:
+  store→retrieve via CLI, cross-process memory.query, brain.load all
+  round-trip; suites green (storage 40, brain 77, memory 19,
+  brain-storage-strict 14).
+- **#190 EW shore:** EW1 MCP 1MB body cap + JSON-RPC 413 + 400-on-bad-JSON
+  (pinned in test/mcp.test.js 8/8 with real HTTP against the door);
+  EW2 crash/SIGTERM leash (bin/vant.js); EW3 setMaxListeners (lib/event);
+  EW5 ANTHROPIC_API_KEY retired from transport auth LIB/config.js
+  (pinned in test/config.test.js 22/22); EW6 crew-bus secretless refuse;
+  EW7 auth ring-trim.
+- **#194 R4-F1 cron CLI verbs:** bin/cron.js was SyntaxError-dead at HEAD
+  (broken template literal) AND sold phantom add/remove verbs. lib/cron
+  gained add(spec,cmd)/remove(id) with interval specs (30s/10m/2h/ms);
+  add is now HOURLY-honest: prints "scheduled in this process - not
+  persisted," and list/status show it. Fixed live: add→status→remove
+  round-trip 3/3.
+- **#194 R4-F2 clean verbs:** logFile orphan + sandbox self-grant parity
+  with vant snapshot. EVERY verb now exits 0 live (dry-run/logs/tmp/
+  cache/prune/all).
+- **#194 R4-F3 onboard grammar:** docs' 8 dead variants (onboard N,
+  onboard name, --search, --context, --preview, --recent) swept out of
+  docs/essential/onboard.md; page now teaches the verified verb set
+  (status/wake/summary/files/read/search/system/help).
+- **#194 R4-F5 version wording:** "≥0.9 / pre-0.9" fiction swept from six
+  pages (setup, migration, getting-started index, architecture, README);
+  canonical phrasing = "the axolotl line (first shipped in v0.8.6-axolotl)".
+- **#192/#191 docs fiction:** Linear integration page rewritten as an
+  honest status page (probe: islands.load('linear')→null, no client);
+  cron.md self-contradiction fixed (interval-only + event-hook relabel);
+  mcp-tools.md registry recount 299→324 via live mcp.listTools().
+
+**Gaps/suggestions recorded (not solved this pass):**
+- EW2/EW4/EW7 fixes are in without dedicated pin-tests yet (EW2 leash
+  and EW4 per-IP limiter are the two worth pins next).
+- #193 leftovers: examples.md fictional projects + dead link,
+  settlement/network export drift, memory list undercount.
+- R4-F4 auth login wording (marginal honesty) - fold into #186-R1.
+- bin/clean.js still ships local parseCronToMs accepting cron strings
+  (R4-F6) - harmless now but should move to cron's interval grammar.
+
+**Verification:** config 22/22 (2 new EW5 pins), mcp 8/8 (2 new EW1
+live-HTTP pins), docs frontmatter 122 PASS, docs style 122 PASS,
+language gate 194 PASS, docs.test 6/6, cron 14/14, door pins 28+1, CLI
+contract pins 9/9, runner 39.
+
 ## Session (2026-10-10 — pass 201: Wave U6 marketplace prototype)
 
 **What shipped** (owner: "u5 next! then right to u6"):

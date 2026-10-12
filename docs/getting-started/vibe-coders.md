@@ -52,10 +52,13 @@ vant memory state session-id abc123
 vant memory recall session-id
 ```
 
-Read everything the brain holds:
+Read everything the brain holds (it is plain markdown under
+`models/private/<brain>/` - `vant onboard files` or plain `cat` will
+show every entry):
 
 ```bash
-vant memory list
+vant memory list            # engine stats (semantic/state/counters)
+vant onboard files          # the actual brain files, by category
 ```
 
 ## Ask your notes

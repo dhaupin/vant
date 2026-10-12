@@ -194,8 +194,9 @@ Everything after this point is grouped by domain. Params listed are the
 `inputSchema` exactly as registered (`curl http://<host>:3457/tools` is
 the live source of truth for your install).
 
-> Registry facts (audited pass 190): ~299 hand-registered tools across 67
-> domain prefixes, plus the `vant_call` umbrella. Every tool's handler
+> Registry facts (audited pass 190, recount pass 210): ~300 hand-registered
+> tools across 67 domain prefixes (324 total `mcp.listTools()` entries
+> incl. generated/wrapper tools), plus the `vant_call` umbrella. Every tool's handler
 > routes through a real lib call - the canned handlers found by audits
 > (configs pass 95/96, this pass) were rerouted. Two tools report honest
 > not-applicable instead of pretending: `stream_watch`, `qos_withTimeout`.

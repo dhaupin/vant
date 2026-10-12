@@ -14,12 +14,13 @@ Network layer for external connections (lib/network.js).
 
 The network layer handles HTTP/HTTPS communication:
 
-- Fetch with retries
-- Latency tracking
-- Exponential backoff
-- Circuit breaker
-- Domain whitelist
-- Response caching
+- Fetch with retries and exponential backoff (built into `fetch`)
+- Latency tracking (`measureLatency`, `getLatencyStats`)
+- Domain whitelist (`setAllowedDomains` / `isDomainAllowed`)
+- Online state (`isOnline`, `checkOnline`)
+
+Circuit breaking lives in `lib/qos.js` (`CircuitBreaker`), not here;
+there is no response cache in this module.
 
 ## Quick Start
 

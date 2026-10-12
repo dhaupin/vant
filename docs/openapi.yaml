@@ -2,17 +2,22 @@ openapi: 3.1.0
 info:
   title: Vant API
   description: |
-    Vant is a persistent memory system for AI agents. 
-    
-    ## Spec Alignment
-    - Embeddings endpoint is OpenAI-compatible (`/v1/embeddings`)
-    - All endpoints gated behind JWT/API key auth
-    - QoS enforced via rate limiting
-    
-    ## Authentication
-    Bearer token in Authorization header:
+    Vant is a persistent memory system for AI agents.
+
+    ## Spec Alignment (verified against lib/server.js + lib/api.js)
+    - Auth: OPTIONAL API key — active only when VANT_SERVER_AUTH_REQUIRED=1
+      (or server.authRequired config); the credential is the x-api-key
+      header compared against VANT_API_KEY. There is NO JWT issuance
+      anywhere in the tree; bearerFormat JWT is not a thing Vant serves.
+    - QoS enforced via rate limiting (X-RateLimit-* headers)
+    - Live surface: /health, /tools, /call plus the registered REST
+      routes (brain/streams/trust/market) from lib/api.js startREST —
+      NOT /v1/embeddings or /api/v1/* (those endpoints do not exist in
+      this tree; this spec lists the real ones below).
+
+    ## Authentication (when authRequired is on)
     ```
-    Authorization: Bearer <token>
+    x-api-key: <VANT_API_KEY>
     ```
   version: 0.8.6
   contact:
@@ -20,20 +25,26 @@ info:
     url: https://vant.creadev.org
 
 servers:
-  - url: https://api.vant.creadev.org
-    description: Production
-  - url: http://localhost:3457
-    description: Local development
+  - url: http://localhost:3456
+    description: Local (loopback default)
 
 security:
-  - BearerAuth: []
+  - ApiKeyAuth: []
 
 components:
   securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
 
   schemas:
     # Common
@@ -101,49 +112,6 @@ components:
               content:
                 type: string
 
-    EmbeddingRequest:
-      type: object
-      properties:
-        input:
-          oneOf:
-            - type: string
-            - type: array
-              items:
-                type: string
-        model:
-          type: string
-          default: vant-embed-001
-
-    EmbeddingResponse:
-      type: object
-      properties:
-        object:
-          type: string
-          default: list
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              object:
-                type: string
-                default: embedding
-              embedding:
-                type: array
-                items:
-                  type: number
-              index:
-                type: integer
-        model:
-          type: string
-        usage:
-          type: object
-          properties:
-            prompt_tokens:
-              type: integer
-            total_tokens:
-              type: integer
-
     ConfigValue:
       type: object
       properties:
@@ -168,8 +136,6 @@ tags:
     description: Island (brain module) operations
   - name: Search
     description: Search and RAG operations
-  - name: Embeddings
-    description: OpenAI-compatible embeddings
   - name: Config
     description: Configuration management
   - name: Stream
@@ -179,373 +145,9 @@ tags:
 
 paths:
   # ============================================
-  # EMBEDDINGS (OpenAI-compatible)
+  # SYSTEM (built-ins on every lib/server.js instance)
   # ============================================
-  /v1/embeddings:
-    post:
-      tags:
-        - Embeddings
-      summary: Create embeddings
-      description: |
-        OpenAI-compatible endpoint for creating embeddings.
-        Model: `vant-embed-001`
-      operationId: createEmbeddings
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EmbeddingRequest'
-      responses:
-        '200':
-          description: Embeddings created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EmbeddingResponse'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '429':
-          description: Rate limited
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  # ============================================
-  # BRAIN
-  # ============================================
-  /api/v1/brain:
-    get:
-      tags:
-        - Brain
-      summary: List all brains
-      operationId: listBrains
-      responses:
-        '200':
-          description: List of brains
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BrainList'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-
-    post:
-      tags:
-        - Brain
-      summary: Create/update brain file
-      operationId: saveBrain
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                content:
-                  type: string
-                source:
-                  type: string
-                  enum: [public, private]
-      responses:
-        '200':
-          description: Brain saved
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-
-  /api/v1/brain/{name}:
-    get:
-      tags:
-        - Brain
-      summary: Get brain file
-      operationId: getBrain
-      parameters:
-        - name: name
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Brain file
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BrainFile'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          description: Not found
-
-    delete:
-      tags:
-        - Brain
-      summary: Delete brain file
-      operationId: deleteBrain
-      parameters:
-        - name: name
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Brain deleted
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-
-  # ============================================
-  # ISLANDS
-  # ============================================
-  /api/v1/islands:
-    get:
-      tags:
-        - Islands
-      summary: List all islands
-      operationId: listIslands
-      responses:
-        '200':
-          description: List of islands
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  islands:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Island'
-
-    post:
-      tags:
-        - Islands
-      summary: Create island
-      operationId: createIsland
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Island'
-      responses:
-        '200':
-          description: Island created
-
-  /api/v1/islands/{name}:
-    get:
-      tags:
-        - Islands
-      summary: Get island
-      operationId: getIsland
-      parameters:
-        - name: name
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Island details
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Island'
-
-    delete:
-      tags:
-        - Islands
-      summary: Delete island
-      operationId: deleteIsland
-      parameters:
-        - name: name
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Island deleted
-
-  # ============================================
-  # SEARCH
-  # ============================================
-  /api/v1/search:
-    post:
-      tags:
-        - Search
-      summary: Search brains
-      operationId: searchBrains
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                query:
-                  type: string
-                limit:
-                  type: integer
-                  default: 10
-                type:
-                  type: string
-                  enum: [semantic, hybrid, keyword]
-      responses:
-        '200':
-          description: Search results
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SearchResult'
-
-  # ============================================
-  # CONFIG
-  # ============================================
-  /api/v1/config/{key}:
-    get:
-      tags:
-        - Config
-      summary: Get config value
-      operationId: getConfig
-      parameters:
-        - name: key
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Config value
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ConfigValue'
-
-    post:
-      tags:
-        - Config
-      summary: Set config value
-      operationId: setConfig
-      parameters:
-        - name: key
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                value:
-                  type: string
-      responses:
-        '200':
-          description: Config set
-
-  # ============================================
-  # STREAM
-  # ============================================
-  /api/v1/stream:
-    get:
-      tags:
-        - Stream
-      summary: List streams
-      operationId: listStreams
-      responses:
-        '200':
-          description: List of streams
-
-    post:
-      tags:
-        - Stream
-      summary: Create stream
-      operationId: createStream
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-
-  /api/v1/stream/{name}:
-    get:
-      tags:
-        - Stream
-      summary: Get stream info
-      operationId: getStream
-      parameters:
-        - name: name
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Stream info
-
-    delete:
-      tags:
-        - Stream
-      summary: Delete stream
-      operationId: deleteStream
-      parameters:
-        - name: name
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Stream deleted
-
-  /api/v1/stream/{name}/enqueue:
-    post:
-      tags:
-        - Stream
-      summary: Enqueue message
-      operationId: enqueueStream
-      parameters:
-        - name: name
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                payload:
-                  type: object
-      responses:
-        '200':
-          description: Message enqueued
-
-  # ============================================
-  # SYSTEM
-  # ============================================
-  /api/v1/health:
+  /health:
     get:
       tags:
         - System
@@ -559,26 +161,333 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthStatus'
 
-  /api/v1/status:
+  /tools:
     get:
       tags:
         - System
-      summary: Get Vant status
-      operationId: getStatus
+      summary: Tool catalog (vant surface + MCP list)
+      operationId: listTools
       responses:
         '200':
-          description: System status
+          description: Tool list
 
-  # ============================================
-  # MCP (passthrough)
-  # ============================================
-  /api/v1/mcp:
+  /call:
     post:
       tags:
         - System
-      summary: Direct MCP call
-      description: Forward to MCP server
-      operationId: mcpCall
+      summary: Execute a tool
+      description: Accepts the JSON-RPC tools/call envelope or flat {tool, args}
+      operationId: callTool
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Tool result
+
+  # ============================================
+  # BRAIN (REST routes from lib/api.js startREST)
+  # ============================================
+  /brain:
+    get:
+      tags:
+        - Brain
+      summary: Current brain state (backs onto brain_state)
+      operationId: getBrainState
+      responses:
+        '200':
+          description: Brain state
+
+  /brain/ls:
+    get:
+      tags:
+        - Brain
+      summary: List brain files (backs onto brain_list)
+      operationId: listBrainFiles
+      responses:
+        '200':
+          description: File list
+
+  /brain/{name}:
+    get:
+      tags:
+        - Brain
+      summary: Load a brain file (backs onto brain_load)
+      operationId: loadBrain
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: File content (id/name/content)
+
+    post:
+      tags:
+        - Brain
+      summary: Save a brain file (backs onto brain_save)
+      operationId: saveBrain
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Saved
+
+  # ============================================
+  # STREAMS (work items)
+  # ============================================
+  /streams:
+    get:
+      tags:
+        - Streams
+      summary: List streams (stream_list)
+      operationId: listStreams
+      responses:
+        '200':
+          description: Stream list
+
+    post:
+      tags:
+        - Streams
+      summary: Create a stream (stream_create)
+      operationId: createStream
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Created
+
+  /streams/{id}:
+    get:
+      tags:
+        - Streams
+      summary: Stream info (stream_info)
+      operationId: streamInfo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stream info
+
+  /streams/{id}/enqueue:
+    post:
+      tags:
+        - Streams
+      summary: Enqueue work (stream_enqueue)
+      operationId: enqueueWork
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Enqueued
+
+  /streams/{id}/poll:
+    post:
+      tags:
+        - Streams
+      summary: Poll for work (stream_poll)
+      operationId: pollStream
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Work item or empty
+
+  # ============================================
+  # TRUST
+  # ============================================
+  /trust/score/{entity}:
+    get:
+      tags:
+        - Trust
+      summary: Score for an entity (trust_getScore)
+      operationId: getScore
+      parameters:
+        - name: entity
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Score
+
+  /trust/record:
+    post:
+      tags:
+        - Trust
+      summary: Record a trust event (trust_record)
+      operationId: recordTrust
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Recorded
+
+  /trust/leaderboard:
+    get:
+      tags:
+        - Trust
+      summary: Trust leaderboard (trust_leaderboard)
+      operationId: trustLeaderboard
+      responses:
+        '200':
+          description: Leaderboard
+
+  # ============================================
+  # MARKET
+  # ============================================
+  /market/listings:
+    get:
+      tags:
+        - Market
+      summary: Search listings (market_search, query params)
+      operationId: searchListings
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Listings
+
+  /market/list:
+    post:
+      tags:
+        - Market
+      summary: List a new listing (market_list)
+      operationId: createListing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Created
+
+  /market/bid:
+    post:
+      tags:
+        - Market
+      summary: Place a bid (market_bid)
+      operationId: placeBid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Bid placed
+
+  /market/trade:
+    post:
+      tags:
+        - Market
+      summary: Execute a trade (market_trade)
+      operationId: executeTrade
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Traded
+
+  /market/stats:
+    get:
+      tags:
+        - Market
+      summary: Market stats (market_stats)
+      operationId: marketStats
+      responses:
+        '200':
+          description: Stats
+
+  /market/listing/{id}:
+    get:
+      tags:
+        - Market
+      summary: One listing by id (market_get)
+      operationId: getListing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Listing
+        '404':
+          description: Not found
+
+  # ============================================
+  # MCP door on the MCP server (startMCP, port 3457)
+  # ============================================
+  /mcp/tools:
+    get:
+      tags:
+        - System
+      summary: The MCP tool list (MCP server door)
+      operationId: mcpTools
+      responses:
+        '200':
+          description: Tools
+
+  /mcp/exec:
+    post:
+      tags:
+        - System
+      summary: Execute an MCP tool (MCP server door)
+      operationId: mcpExec
       requestBody:
         required: true
         content:
@@ -586,21 +495,10 @@ paths:
             schema:
               type: object
               properties:
-                method:
+                tool:
                   type: string
-                params:
+                args:
                   type: object
       responses:
         '200':
-          description: MCP response
-        '400':
-          description: Bad request
-
-components:
-  responses:
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
+          description: Tool result

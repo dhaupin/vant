@@ -128,8 +128,10 @@ vant search --stats                # Index stats
 vant rerank <query>                # Rerank for context
 vant rerank compress <file>        # Compress a results file
 
-vant embed list                    # Providers: hash, local, openai
-vant embed set openai              # Set provider
+vant embed list                    # List AVAILABLE providers (always: hash;
+                                    # openai only with OPENAI_API_KEY set,
+                                    # local only with @xenova/transformers)
+vant embed set openai              # Set provider (must be available)
 vant embed info                    # Show provider info
 vant embed generate "text"         # Generate an embedding
 vant embed batch "one" "two"       # Batch embeddings
@@ -440,13 +442,17 @@ vant metrics                    # Registry summary
 vant metrics --prom             # Prometheus exposition format
 vant metrics storage            # Per-store aggregation
 
+# Cron: interval specs only ("30s", "10m", "2h", ms). Jobs are scheduler
+# slots in the running process - not persisted across restarts. For fixed
+# system-time schedules drive this from a real crontab entry.
 vant cron list
 vant cron add <spec> <cmd>
 vant cron remove <id>
 vant cron run <id>
 vant cron status
 
-vant clean --dry-run            # Preview without changes
+vant clean --dry-run            # Preview without changes (self-grants write
+                                # on a fresh sandbox, like vant snapshot)
 vant clean logs                 # Clean logs only
 vant clean tmp
 vant clean cache
@@ -626,7 +632,7 @@ These commands support development and CI. Most users will not need them.
 ```bash
 vant test          # Smoke tests (default)
 vant test core     # Brain, storage, core modules
-vant test full     # All tests (500+)
+vant test full     # All tests (~2,300 cases across /test)
 
 vant test-all      # 17 self-checks across health/search/islands/lib exports
                    # (routes bin/test-all.js; cwd-independent: runs from any directory)

@@ -56,10 +56,11 @@ Session 2 starts:
 
 ### What's the "succession" system?
 
-How much freedom an agent has. `models/private/_succession.json` sets a
-trust level - high, medium, low, or none - that decides whether the agent
-acts autonomously or waits for instructions. See
-[Trust & Succession](/vant/multi-agent/succession).
+How much freedom an agent has. `models/public/<brain>/_succession.json`
+(per-brain, public scope - `lib/succession.js` reads it via the public
+brain path) sets a trust level - high, medium, low, or none - that
+decides whether the agent acts autonomously or waits for instructions.
+See [Trust & Succession](/vant/multi-agent/succession).
 
 ### Can multiple agents share one brain?
 

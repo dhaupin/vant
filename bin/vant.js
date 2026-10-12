@@ -473,7 +473,7 @@ Memory (Unified API - sandbox + RLS secured):
 Development:
   vant test         Run smoke tests
   vant test core    Run core test suite
-  vant test full    Run all tests (500+)
+  vant test full    Run all tests (~2,300 cases across /test)
   vant test-all     17-check self-test (health/search/islands/lib exports)
   vant validate    Schema + audit + circuits
   vant changelog   View changes
@@ -568,6 +568,8 @@ Auth:
   Or:   export VANT_MCP_API_KEY=your-secret-key
   Env:  export VANT_MCP_REQUIRE_KEY=true
   Use:  Header X-API-Key: <key> or Authorization: Bearer <key>
+  REST: server auth is optional by default — set VANT_SERVER_AUTH_REQUIRED=1
+        + VANT_API_KEY to require it (see: vant server --help)
 
 TTL:
   Use --ttl flag with learn/remember to auto-expire entries:
@@ -667,6 +669,29 @@ if (!script) {
         // All-mode handler
         const mode = cmd;
         const vant = require('../lib/vant');
+        // (EW2, #190) THIS is the long-lived in-process door (startFull keeps
+        // the event loop alive in THIS process). The crash leash registers
+        // HERE — before the servers boot — so a stray uncaught rejection
+        // releases brain-lock leases and Ctrl-C/SIGTERM exits gracefully
+        // instead of dying handler-less.
+        let _leashing = false;
+        function _leashExit(code, reason) {
+            if (_leashing) return;   // double-exit guard: first verdict wins
+            _leashing = true;
+            try {
+                console.error('[leash] ' + reason);
+                try {
+                    require('../lib/brain-lock').forceReleaseBrainLock({ reason: 'leash' });
+                } catch (e) { /* lock layer unavailable — still exit */ }
+            } finally {
+                process.exit(code);
+            }
+        }
+        process.on('uncaughtException', (e) => _leashExit(1, 'uncaught exception: ' + (e && e.stack || e)));
+        process.on('unhandledRejection', (e) => _leashExit(1, 'unhandled rejection: ' + (e && (e.stack || e.message) || e)));
+        for (const SIG of ['SIGTERM', 'SIGINT']) {
+            process.on(SIG, () => _leashExit(0, SIG + ' — releasing leases and exiting'));
+        }
         vant.startFull({ mode, debug: true }).then(r => {
             console.log(`✓ Started in ${mode} mode`);
             console.log('  Ports:', r.ports);
@@ -700,7 +725,7 @@ const child = spawn('node', [scriptPath, ...process.argv.slice(3)], {
     stdio: 'inherit',
     env: {
         ...process.env,
-        // (pass 23) Tell routed subcommands where the INSTALL tree lives.
+// Spawned subcommand (start/health/sync/migrate...) read and wrote the
         // cwd stays the user's project (see below); libs that need the
         // install tree (horcrux targets, templates, boot dirs) resolve it
         // via lib/anchor.js getRepoRoot() instead of guessing from cwd or

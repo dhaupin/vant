@@ -327,7 +327,7 @@ MCP_PORT=3457
 
 ## Available Tools
 
-The registry is ~299 tools across 67 domains - the authoritative, kept-true
+The registry is ~300 hand-registered tools (324 total `mcp.listTools()` entries, ~67 domains) - the authoritative, kept-true
 catalog (params + examples per tool) is
 [MCP Tools Reference](/vant/reference/mcp-tools). This page deliberately
 keeps only the nine core brain tools and the integration examples.

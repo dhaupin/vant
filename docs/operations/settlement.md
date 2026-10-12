@@ -47,7 +47,11 @@ exists anywhere in the mesh.
 | Books | One node | Buyer node + seller-side claims |
 | Debit | `canSpend` then `recordSpend` | Debit first, then the wire leg |
 | Failure mode | Refusal, no state change | Refusal, then an explicit unwind of the local debit |
-| Surface | [Escrow](/vant/security/escrow) | `lib/settlement.js`, wire legs `settle.request` / `settle.record` |
+| Surface | [Escrow](/vant/security/escrow) | `lib/settlement.js` (JS surface: `install, makeInvoice, sendInvoice, requestStatus, list, get, status`) |
+
+`settle.request` / `settle.record` are WIRE message names routed
+through `install(bus)`, not exported API names - call `makeInvoice` /
+`sendInvoice` / `requestStatus` as in the example below.
 
 Local escrow remains the budget guard for everything inside one
 install; settlement is the same discipline extended across the wire.

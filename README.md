@@ -77,34 +77,47 @@ The full agent loop, written to be executed without a human, is [Agent Onboardin
 
 ## Headless Mode
 
-Use Vant as a library with a REST API (no MCP required):
+Use Vant as a library with a REST API (no MCP required). Mode is detected
+automatically (imported as a module → headless) or forced with `VANT_MODE`:
 
 ```javascript
 const vant = require('./lib/vant');
 
-// Start headless server
-const result = await vant.startHeadless({ port: 3000, debug: true });
-// Returns: { started: true, mode: 'headless', endpoints: { health, tools, brain } }
+// Start headless server (defaults: port VANT_SERVER_PORT or 3456,
+// bind VANT_SERVER_BIND or 127.0.0.1)
+const result = await vant.startHeadless({ debug: true });
+// Returns: { started: true, mode: 'headless', status, id, session,
+//            endpoints: { health, tools, brain } }
+// Direct TLS: set VANT_SERVER_CERT/VANT_SERVER_KEY (plaintext HTTP is
+// loopback-bound unless you pass allowInsecure posture intentionally).
 
-// Or programmatic API (no server)
-await vant.init({ taskId: 'my-task' });
-await vant.learn('key', 'content');
-const content = await vant.remember('key');
+// Or programmatic API (no server) — memory persistence via learn/remember:
+await vant.init({ taskId: 'my-task' });   // boots security layers + habitat
+await vant.learn('key', 'content');       // store (category comes from key prefix)
+const content = await vant.remember('key'); // recall (cache, then brain)
 ```
+
+REST surface on the headless server: `/health`, `/tools`, `/call` plus the
+registered routes in
+[REST API](docs/reference/rest-api.md) and
+[openapi.yaml](docs/openapi.yaml).
 
 ### Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `VANT_MODE` | Force mode: `cli`, `mcp`, or `headless` |
-| `VANT_MCP_PORT` | MCP server port |
+| `VANT_MODE` | Force mode: `cli`, `mcp`, or `headless` (default: auto-detect) |
+| `VANT_SERVER_PORT` | Headless/REST server port (default `3456`) |
+| `VANT_SERVER_BIND` | Bind address (default `127.0.0.1`) |
+| `VANT_SERVER_CERT` / `VANT_SERVER_KEY` | TLS cert/key for direct HTTPS |
+| `VANT_MCP_PORT` | MCP server port (default `3457`) |
 | `VANT_MCP_REQUIRE_KEY` | Require API key for MCP access (`true`/`false`) |
 
 ## Upgrading from an older Vant (single-brain layout)
 
 Older versions stored the brain **flat**, all files directly in
-`models/public/` with no per-brain folders and no brain stack. Vant ≥0.9
-(axolotl) uses a **multi-brain layout**: `models/public/<brain>/`,
+`models/public/` with no per-brain folders and no brain stack. Current
+Vant (the axolotl line, v0.8.6) uses a **multi-brain layout**: `models/public/<brain>/`,
 `models/private/<brain>/`, and a brain stack in `models/state.json`.
 
 **If you're upgrading, your brain migrates automatically:** `vant start`
