@@ -37,6 +37,17 @@ PR-review matter and stay out of scope.
 
 ### Fixed
 
+- #119: `vant org grant` persisted the operator grant, but the write
+  path the grant advice points at never saw it in some flows, and bare
+  `vant org` status contradicted the persisted config by reporting a
+  PRE-boot denial. `vant org status` now boots the security chain
+  read-scope first (exactly what the teams write path does), so what it
+  reports is the authority a fresh writing process would hold. Hed the
+  honest-error side too: `vant teams dept/team create`, `role create`,
+  and `assign` now surface the typed error and exit 1 instead of
+  printing undefined fields on a refusal. Pinned end-to-end in
+  `test/operator-caps.test.js`: the reporter's exact grant → status →
+  separate-process `vant teams create` flow (11/11).
 - #120: `teams.createDept` / `teams.createTeam` silently stored the
   PARENT id in the `name` field when called with the parent-first
   positional convention (`createDept(orgId, 'engineering')`) - the

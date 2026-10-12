@@ -96,6 +96,7 @@ async function main() {
                 }
                 
                 const dept = teams.createDept(deptName, { org: deptOrgId });
+                if (dept.error) { console.error('Error:', dept.error); process.exit(1); }
                 console.log('Dept created:', dept.name, '(' + dept.id + ')');
             } else if (deptCmd === 'list') {
                 const listOrgId = args[2];
@@ -126,6 +127,7 @@ async function main() {
                 }
                 
                 const team = teams.createTeam(teamName, { dept: teamDeptId });
+                if (team.error) { console.error('Error:', team.error); process.exit(1); }
                 console.log('Team created:', team.name, '(' + team.id + ')');
             } else if (teamCmd === 'list') {
                 const listDeptId = args[2];
@@ -157,6 +159,7 @@ async function main() {
                 }
                 
                 const role = await teams.createRole(roleName, { team: roleTeamId, permissions: perms });
+                if (role.error) { console.error('Error:', role.error); process.exit(1); }
                 console.log('Role created:', role.name, '(' + role.id + ')');
                 console.log('  Permissions:', role.permissions);
             } else {
@@ -188,6 +191,7 @@ async function main() {
                 team: teamId,
                 role: roleId
             });
+            if (assignment && assignment.error) { console.error('Error:', assignment.error); process.exit(1); }
             console.log('Assigned:', assignAgentId);
             console.log('  Org:', assignment.org);
             console.log('  Dept:', assignment.dept);
