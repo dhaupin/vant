@@ -67,7 +67,13 @@ function run() {
             process.exit(1);
         }
     } else if (subcmd === 'key' || subcmd === 'genkey') {
-        const key = Encrypt.generateId();
+        // (pass 206, issue #186 bug 3 / #188-A7) A UUID was printed as
+        // "ENCRYPT_KEY": 16 bytes of entropy rendered where the AES-256
+        // path expects 32 (padded/truncated keys are weaker). Encrypt.key()
+        // is the canonical secret-material generator (it IS what
+        // generateShortId derives from) - the same function the brain
+        // README's key convention names.
+        const key = Encrypt.key(32);
         console.log('ENCRYPT_KEY=' + key);
     } else if (subcmd === 'verify' || subcmd === 'check') {
         const hash = args[1];

@@ -37,6 +37,27 @@ PR-review matter and stay out of scope.
 
 ### Fixed
 
+- #186/#188 fix-first (crash + honesty bugs, independent of the R1-R5
+  canon wave, which stays specced in the issues):
+  + #188-A1 `Encrypt.verify()` crashed the CALLER on malformed stored
+    hashes - `verify('x', 'ab:cd')` threw `Input buffers must have the
+    same byte length` because the shape guard did not check the
+    expected half's hex validity/length before `timingSafeEqual`.
+    verify() now answers `false` on any malformed input and keeps
+    truthful verdicts for real hashes (pinned 4 fixtures in
+    `test/encrypt.test.js`).
+  + #188-A2 `auth.validateApiKey` compared the transport credential
+    with a plain string `===` while the same codebase's
+    Encrypt.verify/hmacVerify already use timing-safe compare. The
+    verdicts are IDENTICAL (pinned: prefix/suffix/NUL-pad probes
+    rejected, non-string garbage answers without throwing) but the
+    compare is now length-padded constant-fold (`_timingSafeEqualKey`),
+    matching the codebase's own security story.
+  + #186 bug 3: `vant encrypt key` output a UUID as `ENCRYPT_KEY` (16
+    bytes of entropy where the AES-256 path expects 32). It now emits
+    `Encrypt.key(32)` - the canonical secret-material generator the
+    boot README's key convention names (8/0 + 14/0 across the two
+    suites; stego 12/0, mcp 6/0 regression green).
 - #119: `vant org grant` persisted the operator grant, but the write
   path the grant advice points at never saw it in some flows, and bare
   `vant org` status contradicted the persisted config by reporting a
