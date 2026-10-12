@@ -68,6 +68,25 @@ test('getStats works', () => {
     return true;
 });
 
+// (R3-F6, #193) `memory list` reported `state:0 categories:{}` even right
+// after a successful learn: getStats() only counted the in-process caches and
+// never the learn store. getStats() now reports the actual learn-store doc
+// count (category .md files under the ACTIVE brain root), so the CLI stat is
+// truthful. Pin: learn two UNIQUE docs (unique per run - a repeated key would
+// overwrite and show no delta) and assert the count moves by exactly +2.
+asyncTest('getStats reports the learn store (#193 R3-F6)', async () => {
+    const m = require('../lib/memory');
+    const before = m.getStats().learn;
+    const stamp = Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+    await m.learn('r3f6-pin-' + stamp + '/doc-one', 'pin body one', { ttl: 600000 });
+    await m.learn('r3f6-pin-' + stamp + '/doc-two', 'pin body two', { ttl: 600000 });
+    const stats = m.getStats();
+    assert(typeof stats.learn === 'number', 'learn count missing from getStats');
+    assert(stats.learn === before + 2,
+        'learn count did not include the two new docs: ' + (before) + ' -> ' + stats.learn);
+    return true;
+});
+
 asyncTest('state stores value', async () => {
     const m = require('../lib/memory');
     const r = await m.state('test-key', 'test-value', { ttl: 60000 });

@@ -210,9 +210,9 @@ vant resolution status
 vant resolution resolve          # Mark resolved
 vant resolution reject           # Mark rejected
 
-vant succession                  # Show current trust level
-vant succession get
-vant succession set <level>
+vant succession                  # Show current trust level (status)
+vant succession set <level>      # high | medium | low | none
+                                 # (there is no `get` verb - bare is the reader)
 
 vant snapshot                    # Default output: <brain>/boot/<agent>-p_<pw>.svg
 vant snapshot --agent nova       # Snapshot under a specific agent name
