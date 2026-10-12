@@ -119,6 +119,51 @@ async function asyncTest(name, fn) {
         }
     });
 
+    await asyncTest('per-client fixed-window limiter answers 429 + Retry-After beyond the budget; env=0 disables (EW4, #190)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const port = 13457 + ((process.pid + 2) % 500);
+        process.env.VANT_MCP_RATE_LIMIT = '3'; // tiny budget so the pin trips
+        await mcp.start({ port, silent: true });
+        try {
+            const codes = [];
+            for (let i = 0; i < 5; i++) {
+                const res = await fetch(`http://127.0.0.1:${port}/health`, {
+                    headers: { 'x-forwarded-for': '10.0.0.77' } // same client key
+                });
+                codes.push({ status: res.status, retry: res.headers.get('retry-after') });
+                await res.text();
+            }
+            const firstThreeOk = codes.slice(0, 3).every(c => c.status === 200);
+            const [fourth, fifth] = codes.slice(3);
+            const limited = fourth && fourth.status === 429
+                && fourth.retry && parseInt(fourth.retry, 10) >= 1
+                && fifth && fifth.status === 429;
+            if (!(firstThreeOk && limited)) {
+                return { success: false, error: 'got ' + codes.map(c => c.status).join(',') };
+            }
+            // Budget disabled: a fresh door (new port) with limit=0 never 429s.
+            process.env.VANT_MCP_RATE_LIMIT = '0';
+            const port2 = 13457 + ((process.pid + 3) % 500);
+            await mcp.start({ port: port2, silent: true });
+            try {
+                const codes2 = [];
+                for (let i = 0; i < 5; i++) {
+                    const res = await fetch(`http://127.0.0.1:${port2}/health`, {
+                        headers: { 'x-forwarded-for': '10.0.0.78' }
+                    });
+                    codes2.push(res.status);
+                    await res.text();
+                }
+                return { success: codes2.every(s => s === 200), error: 'disabled-mode codes: ' + codes2.join(',') };
+            } finally {
+                await mcp.stop();
+            }
+        } finally {
+            delete process.env.VANT_MCP_RATE_LIMIT;
+            await mcp.stop();
+        }
+    });
+
     console.log('\n--- RESULTS ---\n');
     console.log(`  Passed:  ${results.passed}`);
     console.log(`  Failed:  ${results.failed}`);
