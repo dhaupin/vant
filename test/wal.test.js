@@ -237,6 +237,76 @@ test('compaction truncates fully-acked oversized journals', () => {
     } finally { rm(base); }
 });
 
+// (pass 215) Blob GC pins: done'd spills vanish in-process; crash-pending
+// survives until replay, then is reclaimed; compact() sweeps all-acked dirs.
+test('pass 215: done() unlinks the spill blob (no debris after ack)', () => {
+    const base = mk();
+    try {
+        const big = 'y'.repeat(200000); // > MAX_INLINE
+        const w = new Wal(base, { enabled: true });
+        const seq = w.intent('write', 'gc.txt', big);
+        const blobPath = path.join(base, '.wal', 'blobs');
+        if (fs.readdirSync(blobPath).length !== 1) return { success: false, error: 'no spill blob created' };
+        w.done(seq, 'gc.txt');
+        if (fs.readdirSync(blobPath).length !== 0) return { success: false, error: 'blob survived done()' };
+        return true;
+    } finally { rm(base); }
+});
+
+test('pass 215: crash-pending blob survives to replay, then is reclaimed', () => {
+    const base = mk();
+    try {
+        const big = 'x'.repeat(200000);
+        const w = new Wal(base, { enabled: true });
+        w.intent('write', 'gc2.txt', big); // no done — crash point
+        const blobPath = path.join(base, '.wal', 'blobs');
+        if (fs.readdirSync(blobPath).length !== 1) return { success: false, error: 'pending blob missing pre-replay' };
+        const w2 = new Wal(base, { enabled: true });
+        let payload = null;
+        w2.replay((op, file, p) => { payload = p; });
+        if (payload !== big) return { success: false, error: 'pending blob not recovered' };
+        if (fs.readdirSync(blobPath).length !== 0) return { success: false, error: 'blob survived successful replay' };
+        return true;
+    } finally { rm(base); }
+});
+
+test('pass 215: abort() unlinks the spill blob', () => {
+    const base = mk();
+    try {
+        const big = 'w'.repeat(200000);
+        const w = new Wal(base, { enabled: true });
+        const seq = w.intent('write', 'gc3.txt', big);
+        const blobPath = path.join(base, '.wal', 'blobs');
+        if (fs.readdirSync(blobPath).length !== 1) return { success: false, error: 'no spill blob created' };
+        w.abort(seq, 'gc3.txt');
+        if (fs.readdirSync(blobPath).length !== 0) return { success: false, error: 'blob survived abort()' };
+        return true;
+    } finally { rm(base); }
+});
+
+test('pass 215: compact() all-acked truncate also sweeps blob dir', () => {
+    const base = mk();
+    try {
+        const w = new Wal(base, { enabled: true });
+        const blobPath = path.join(base, '.wal', 'blobs');
+        fs.mkdirSync(blobPath, { recursive: true });
+        fs.writeFileSync(path.join(blobPath, 'a'.repeat(64)), 'debris');
+        fs.writeFileSync(path.join(blobPath, 'b'.repeat(64)), 'debris');
+        fs.mkdirSync(path.join(base, '.wal'), { recursive: true });
+        // Fully acked journal above the 4MB limit
+        const lines = [];
+        for (let i = 0; i < 40000; i++) {
+            lines.push(JSON.stringify({ seq: i, op: 'write', file: `f${i}.txt`, ts: Date.now() }));
+            lines.push(JSON.stringify({ seq: i, done: true, file: `f${i}.txt`, ts: Date.now() }));
+        }
+        fs.writeFileSync(path.join(base, '.wal', 'wal.log'), lines.join('\n') + '\n');
+        const r = w.compact();
+        if (!r.compacted) return { success: false, error: `not compacted: ${JSON.stringify(r)}` };
+        if (fs.readdirSync(blobPath).length !== 0) return { success: false, error: 'compact left blobs' };
+        return true;
+    } finally { rm(base); }
+});
+
 // cleanup any registry series from these tests
 try { require('../lib/metrics').reset(); } catch (e) { /* noop */ }
 
