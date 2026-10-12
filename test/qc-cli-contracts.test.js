@@ -119,5 +119,26 @@ test('#168 sync --status prints real git status (was "status: not found")', () =
     }
 });
 
+// ---- #190 EW8: truth-in-help (auth posture named on every door) ----------
+test('#190 EW8 root help names the auth posture of every network door', () => {
+    const out = cli('vant.js', ['help']);
+    if (!out.includes('Security posture')) throw new Error('root help lost the EW8 posture block');
+    for (const key of ['server', 'mcp', 'loopback']) {
+        if (!new RegExp(key).test(out)) throw new Error(`posture block missing "${key}"`);
+    }
+});
+
+test('#190 EW8 server help names VANT_SERVER_AUTH_REQUIRED + VANT_API_KEY', () => {
+    const out = cli('vant.js', ['server', '--help']);
+    if (!out.includes('VANT_SERVER_AUTH_REQUIRED')) throw new Error('server help does not name VANT_SERVER_AUTH_REQUIRED');
+    if (!out.includes('VANT_API_KEY')) throw new Error('server help does not name VANT_API_KEY');
+});
+
+test('#190 EW8 mcp help names the requireKey config + header shape', () => {
+    const out = cli('mcp.js', ['--help']);
+    if (!out.includes('mcp.requireKey')) throw new Error('mcp help does not name mcp.requireKey');
+    if (!out.includes('X-API-Key')) throw new Error('mcp help does not show the header shape');
+});
+
 console.log(`\n=== QC CLI contract pins: ${results.passed} passed, ${results.failed} failed ===\n`);
 process.exit(results.failed > 0 ? 1 : 0);

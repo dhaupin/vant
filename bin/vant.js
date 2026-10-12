@@ -607,6 +607,15 @@ Maintenance:
 Setup:
   vant setup     Interactive wizard
   vant help      Show help (this message)
+
+Security posture (EW8, #190):
+  Network doors authenticate differently — check the door you expose:
+    server   mcp.requireKey true + mcp.apiKey set; server additionally honors
+             --auth / VANT_SERVER_AUTH_REQUIRED for VANT_API_KEY.
+    mcp      same keys as server (mcp.requireKey / mcp.apiKey); set them
+             BEFORE exposing the MCP port beyond loopback.
+    stdout   Loopback-bound plaintext by design; TLS + auth required before
+             any non-loopback bind (--insecure is the explicit escape).
 `);
     process.exit(0);
 }
