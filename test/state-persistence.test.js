@@ -12,7 +12,8 @@
  *   5. msg conversations round-trip across a REAL process death
  *      (post → kill → new process has messages + participants; Sets
  *      restored)
- *   6. msg channels are NOT persisted (ephemeral IPC by design)
+ *   6. msg channels persist across a fresh process (the #170 QC decision:
+ *      FIFO-capped channel tails ride the arch-A snapshot)
  *   7. msg delete() removes the conversation from disk
  *   8. transform gather exposes crewBus (relay seam swapped); restore
  *      does NOT fabricate secrets (topology-note only)
@@ -247,22 +248,26 @@ try {
         assert(d.firstAuthor === 'aria', 'first message author aria, got ' + d.firstAuthor);
     });
 
-    await test('msg: channels are NOT persisted (ephemeral IPC by design)', async () => {
+    await test('msg: channels persist across a fresh process (#170, FIFO cap 100)', async () => {
         const s = await run(`
+require(${JSON.stringify(path.join(ROOT, 'lib/sandbox.js'))}).defaultSandbox.setCapabilities({ canRead: true, canWrite: true });
 const msg = require(${JSON.stringify(path.join(ROOT, 'lib/msg.js'))});
-msg.send('wave2-channel', { from: 'a', text: 'ephemeral' });
+const r = msg.send('wave2-channel', { from: 'a', text: 'durable-tail' });
+if (r && r.error) { console.error('SEND_FAIL:' + JSON.stringify(r)); process.exit(1); }
 console.log('SENT');
 `);
         assert(lastLine(s.out) === 'SENT', 'send failed: ' + s.out + s.err);
-        const onDisk = fs.existsSync(msgPath) ? JSON.parse(fs.readFileSync(msgPath, 'utf8')) : { conversations: [] };
+        const onDisk = fs.existsSync(msgPath) ? JSON.parse(fs.readFileSync(msgPath, 'utf8')) : { channels: [] };
         const serialized = JSON.stringify(onDisk);
-        assert(!serialized.includes('wave2-channel'), 'channels must never hit disk');
+        const chan = (onDisk.channels || []).find((c) => c.channel === 'wave2-channel');
+        assert(Array.isArray(chan && chan.messages) && chan.messages.some((m) => m && m.text === 'durable-tail'),
+            'channel tail must hit the arch-A snapshot (#170), got: ' + serialized.slice(0, 200));
         const r = await run(`
 const msg = require(${JSON.stringify(path.join(ROOT, 'lib/msg.js'))});
 console.log(JSON.stringify({ channelMsgs: msg.channelMessages('wave2-channel').length }));
 `);
         const d = parseJsonOut(r.out);
-        assert(d.channelMsgs === 0, 'channel should be empty in a fresh process');
+        assert(d.channelMsgs >= 1, 'fresh process must see the persisted channel tail (#170), got ' + d.channelMsgs);
     });
 
     await test('msg: delete() removes the conversation from disk', async () => {

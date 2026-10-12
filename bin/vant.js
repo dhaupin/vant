@@ -263,6 +263,7 @@ const COMMANDS = {
     consciousness: 'consciousness.js',
     recursion: 'recursion.js',
     forum: 'forum.js',
+    trace: 'trace.js',
 
     // Bin CLIs that existed but were never routed (pass 18 bin sweep)
     org: 'org.js',

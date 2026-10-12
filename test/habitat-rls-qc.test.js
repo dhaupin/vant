@@ -76,7 +76,7 @@ async function main() {
             fs.writeFileSync(path.join(proj, '.git'), '');
             const before = fs.existsSync(path.join(ROOT, '.ignore'))
                 ? fs.readFileSync(path.join(ROOT, '.ignore'), 'utf8') : '';
-            const r = spawnSync(process.execPath, [path.join(ROOT, 'bin', 'horcrux.js'), 'create', 'stones/p113-p_x.svg', 'x'], {
+            const r = spawnSync(process.execPath, [path.join(ROOT, 'bin', 'horcrux.js'), 'create', 'stones/p113-p_x.svg', 'x', '--add-to-ignore'], {
                 cwd: proj, encoding: 'utf8', timeout: 60000,
                 env: Object.assign({}, process.env, { VANT_BRAIN: SCRATCH_BRAIN })
             });
@@ -100,7 +100,7 @@ async function main() {
         const IGNORE = path.join(ROOT, '.ignore');
         const before = fs.readFileSync(IGNORE, 'utf8');
         try {
-            const r = spawnSync(process.execPath, [path.join(ROOT, 'bin', 'horcrux.js'), 'create', 'p91-stones/p91-p_x.svg', 'x'], {
+            const r = spawnSync(process.execPath, [path.join(ROOT, 'bin', 'horcrux.js'), 'create', 'p91-stones/p91-p_x.svg', 'x', '--add-to-ignore'], {
                 cwd: ROOT, encoding: 'utf8', timeout: 60000,
                 env: Object.assign({}, process.env, { VANT_BRAIN: SCRATCH_BRAIN })
             });
