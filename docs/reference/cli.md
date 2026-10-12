@@ -107,16 +107,17 @@ addressing. See [Memory](/vant/memory/brain) and [Brain Search](/vant/memory/sea
 
 ```bash
 vant memory state <key> <value>    # Store state (TTL cache)
-vant memory recall <key>           # Get state
+vant memory recall <key>           # Get state (state first, then LEARN-LAYOUT fallback)
 vant memory learn <key> <content>  # Learn document (persists)
-vant memory query <key>            # Query document
+vant memory query <key>            # Query document (learn-store reader)
 vant memory address <data>         # Store at geometric address
 vant memory locate <barcode>       # Locate by barcode
 vant memory list                   # Show stats
 vant memory clear                  # Clear all
 
 vant memory learn goals "Ship the T2 sweep."  # Store a document (persists)
-vant memory recall goals                      # Recall state by key
+vant memory recall goals                      # Recall it (learn-layout fallback reads what learn wrote)
+vant memory query goals                       # Read the learned doc directly (same layout, query path)
 
 vant search <query>                # Default: hybrid
 vant search <query> --mode basic   # Text search
@@ -131,7 +132,8 @@ vant rerank compress <file>        # Compress a results file
 vant embed list                    # List AVAILABLE providers (always: hash;
                                     # openai only with OPENAI_API_KEY set,
                                     # local only with @xenova/transformers)
-vant embed set openai              # Set provider (must be available)
+vant embed set openai              # Set provider for THIS process (does not
+                                    # persist; if unavailable nothing switches)
 vant embed info                    # Show provider info
 vant embed generate "text"         # Generate an embedding
 vant embed batch "one" "two"       # Batch embeddings
