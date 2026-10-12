@@ -241,10 +241,12 @@ wire map in [RPC](/vant/advanced/rpc).
 ## Tool Reference
 
 The complete, current catalog lives in
-[MCP Tools Reference](/vant/reference/mcp-tools) - ~299 registered tools
-across 67 domain prefixes, each with its params and examples, kept true to
-the registry (last audited pass 190: canned handlers found and rerouted to
-their real libs; the doc matches `mcp.execute` behavior).
+[MCP Tools Reference](/vant/reference/mcp-tools), kept true to the
+registry (each entry lists its params and examples and matches
+`mcp.execute` behavior). The registry GROWS by design - every core
+library pass auto-wires new verbs - so this page never hard-codes a
+count: run `tools/list` against the live server (or GET /tools) for the
+authoritative number.
 
 The nine core brain tools:
 
@@ -327,9 +329,12 @@ MCP_PORT=3457
 
 ## Available Tools
 
-The registry is ~300 hand-registered tools (324 total `mcp.listTools()` entries, ~67 domains) - the authoritative, kept-true
-catalog (params + examples per tool) is
-[MCP Tools Reference](/vant/reference/mcp-tools). This page deliberately
+The registry is hand-registered and auto-wired per module, so the count
+drifts by design (it passed 300 in pass 205 and grows with every
+library wave) - do not trust any number printed HERE; the authoritative,
+kept-true catalog (params + examples per tool) is
+[MCP Tools Reference](/vant/reference/mcp-tools), and `tools/list` on
+the live server is always exact. This page deliberately
 keeps only the nine core brain tools and the integration examples.
 
 ## API Examples

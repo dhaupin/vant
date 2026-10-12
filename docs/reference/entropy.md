@@ -8,19 +8,41 @@ nav_order: 125
 
 # Entropy Patching Protocol
 
-> Token-aware latent transport for Vant v0.8.6+
+> Lossless entropy scan + verbatim-segment patching for Vant v0.8.6
+> (the pipeline lives in `lib/entropy-patch.js`; this page describes what
+> IS shipped - see Path policy before running it)
 
 ## What is Entropy Patching?
 
-**Entropy Patching** is a compression protocol that separates high-entropy data (unique, random-looking content) from low-entropy data (repeated, predictable patterns). It transforms Vant from a "Context Storage" system into a "Latent Transport" system.
+**Entropy Patching** is a compression protocol that separates high-entropy data (unique, random-looking content) from low-entropy data (repeated, predictable patterns). It gives Vant a lossless, tamper-evident patch format (`.vpatch`).
 
 ### Why Does It Exist?
 
 LLMs are token-limited. Loading 60+ brain files on startup is expensive. Entropy Patching enables:
 
-1. **Token reduction** - Agents load one `.vpatch` file instead of 19 `.md` files
-2. **Git-native diffs** - Tracks entropy spikes instead of line changes
-3. **Selective hydration** - Load only the high-entropy portions needed
+1. **Tamper-evident lossless restore** - `decompress()` refuses any
+   envelope whose seed no longer hashes its restored bytes
+2. **Git-native diffs** - Segments are stored verbatim, so the diff
+   story stays whole
+3. **Selective inspection** - Read the scan stats without hydrating
+
+## Path policy (read this first)
+
+Input and output paths go through the VAF path gate (`lib/vaf.js
+checkPathTraversal`): **operate inside the repository tree**. Paths typed
+as system locations (`/tmp/`, `/home/`, `/etc/`, `/var/`, `/bin/`,
+`/opt/`, `/boot/`, `/dev/`, `/sys/`, `/proc/`, `/snap/`, `/lib*`),
+Windows drive letters, `~`/`$HOME` expansions, encoded traversal
+(`%2e%2e`, double-encoding), or anything containing `..` are blocked
+with `SECURITY_PATH_TRAVERSAL`.
+
+In practice this means the file 19-mind-fusion compression examples below
+run on files under `models/`, `docs/`, or the repo root - not on
+`/tmp` scratch files. Use a project-local working directory if you need
+scratch space.
+
+This gate is deliberate and shared with every other CLI input path; do
+not file it as a bug.
 
 ## How It Works
 
@@ -51,11 +73,10 @@ H = -Σ P(x) log₂ P(x)  (normalized 0-1)
 
 ### 3. Latent Seed
 
-The seed is a semantic summary - not the data itself, but a summary:
+The seed is a STATUS ANCHOR: we sha256 the original source file to create:
 
-```text
-"spikes:0.92,0.88,0.91"  →  3 high-entropy regions
-"stable:AAAA...BBBB"    →  all low-entropy
+```json
+"latentSeed": "93f2e8bbb696dddb..."  // = lib/hash.sha256(original bytes)
 ```
 
 This enables lightweight "what changed" queries without full hydration.
@@ -64,14 +85,15 @@ This enables lightweight "what changed" queries without full hydration.
 
 ### Use Case 1: Brain Compression
 
-Compress Vant's brain files for faster loading:
+Compress a brain file (or a directory of them) for storage as
+`.vpatch` envelopes; restore exactly with `--decompress`:
 
 ```bash
-# Compress all brain files (use $MODEL_PATH or models/private/)
-vant compress ${MODEL_PATH:-models/private}/ --output models/latent
+# Compress one file into models/latent/
+vant compress models/private/goals.md -o models/latent
 
-# Now agents can load:
-# - models/latent/*.vpatch  (instead of models/private/*.md)
+# Compress a directory of files
+vant compress models/private/ -o models/latent
 ```
 
 ### Use Case 2: Generational Evolution
@@ -89,8 +111,8 @@ git commit -m "Updated chapter 4"
 Ask lightweight questions without full hydration:
 
 ```bash
-# Get stats on any file (use $MODEL_PATH or models/private/)
-vant compress ${MODEL_PATH:-models/private}/goals.md --stats
+# Get stats on any file
+vant compress models/private/goals.md --stats
 ```
 
 ## CLI Commands
@@ -120,8 +142,11 @@ vant compress <file> -t 0.9       # Custom threshold
 ### Decompress
 
 ```bash
-vant compress <file.vpatch> --decompress
+vant compress <file.vpatch> -d     # -d / --decompress
 ```
+
+(The older `--output` long spelling is accepted too; `-o` and `--output`
+are the same flag, as are `-d` and `--decompress`.)
 
 ## API Reference
 
