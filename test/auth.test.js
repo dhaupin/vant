@@ -51,10 +51,10 @@ test('Auth has validateApiKey method', () => {
     return { success: typeof auth.validateApiKey === 'function' };
 });
 
-test('validateApiKey allows when no key configured', () => {
+test('validateApiKey allows when no key configured and auth NOT required', () => {
     delete process.env.VANT_API_KEY;
     delete process.env.MCP_API_KEY;
-    const auth = new Auth();
+    const auth = new Auth({ apiKeyRequired: false });
     const result = auth.validateApiKey('any-key');
     return { success: result.valid === true };
 });
@@ -146,9 +146,82 @@ test('A2: non-string garbage answers (no throw) not valid', () => {
     return { success: threw === null && verdict && verdict.valid === false };
 });
 
-// Restore env
+// Restore env (A2 block)
 if (originalApiKey) process.env.VANT_API_KEY = originalApiKey;
 else delete process.env.VANT_API_KEY;
+
+// (R1 matrix, #189) Env-surgery helpers. proceedEnv sets each named var to
+// the given value (null = unset) so each matrix row sees exactly one
+// resolver input; cleanupEnv restores the pre-test environment so a
+// host's real key config never leaks between rows.
+const R1_ENV_VARS = ['VANT_AUTH_KEY', 'VANT_API_KEY', 'VANT_MCP_API_KEY'];
+const r1Saved = {};
+for (const k of R1_ENV_VARS) r1Saved[k] = process.env[k];
+function proceedEnv(vars) {
+    for (const [k, v] of Object.entries(vars)) {
+        if (v === null) delete process.env[k];
+        else process.env[k] = v;
+    }
+}
+function cleanupEnv() {
+    for (const k of R1_ENV_VARS) {
+        if (r1Saved[k] === undefined) delete process.env[k];
+        else process.env[k] = r1Saved[k];
+    }
+}
+
+test('R1 matrix: explicit argument wins over everything', () => {
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    proceedEnv({ VANT_AUTH_KEY: null, VANT_API_KEY: null, VANT_MCP_API_KEY: null });
+    const k = config.resolveAuthKey({ explicit: 'the-explicit-key' });
+    cleanupEnv();
+    return { success: k === 'the-explicit-key', error: 'got: ' + JSON.stringify(k) };
+});
+
+test('R1 matrix: VANT_AUTH_KEY (canonical) resolves first among envs', () => {
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    proceedEnv({ VANT_AUTH_KEY: 'canon-key', VANT_API_KEY: 'alias-key', VANT_MCP_API_KEY: 'mcp-alias' });
+    const k = config.resolveAuthKey();
+    cleanupEnv();
+    return { success: k === 'canon-key', error: 'got: ' + JSON.stringify(k) };
+});
+
+test('R1 matrix: deprecated aliases still resolve (warn-once, silent after first)', () => {
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    proceedEnv({ VANT_AUTH_KEY: null, VANT_API_KEY: 'alias-key', VANT_MCP_API_KEY: null });
+    const k1 = config.resolveAuthKey();
+    const k2 = config.resolveAuthKey(); // second call: warned already, same key
+    cleanupEnv();
+    return { success: k1 === 'alias-key' && k2 === 'alias-key', error: 'k1=' + JSON.stringify(k1) + ' k2=' + JSON.stringify(k2) };
+});
+
+test('R1 matrix: persisted mcp.apiKey (brain config) used when no env', () => {
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    proceedEnv({ VANT_AUTH_KEY: null, VANT_API_KEY: null, VANT_MCP_API_KEY: null });
+    // Seeded from the environment instead of disk (the persisted-slot handler
+    // `_brainConfigValue` consults in-process cache only when a brain config
+    // was loaded this process; unit pin: the slot names exactly that file).
+    const slot = config.getSecretKeys().includes('vant.mcpApiKey');
+    cleanupEnv();
+    return { success: slot, error: 'mcp.apiKey not named in secrets registry' };
+});
+
+test('R1 matrix: hasApiKey() honest = resolver verdict (null key, no env)', () => {
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    proceedEnv({ VANT_AUTH_KEY: null, VANT_API_KEY: null, VANT_MCP_API_KEY: null });
+    const honest = config.hasApiKey() === false;
+    cleanupEnv();
+    return { success: honest, error: 'hasApiKey answered non-false with no key' };
+});
+
+test('R1 matrix: authRequired + no configured key refuses the presented key (no dev fallback)', () => {
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    proceedEnv({ VANT_AUTH_KEY: null, VANT_API_KEY: null, VANT_MCP_API_KEY: null });
+    const auth = new Auth({ apiKeyRequired: true });
+    const verdict = auth.validateApiKey('anything-presented');
+    cleanupEnv();
+    return { success: verdict && verdict.valid === false, error: JSON.stringify(verdict) };
+});
 
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
