@@ -299,6 +299,25 @@ async function main() {
   }
   
   // ============================================
+  // DOOR PINS (issue #181: contract pin per CLI door)
+  // ============================================
+  
+  // The output-shape half `testBin` lacked: each door's DOCUMENTED argv
+  // contract (exit code + stdout), sourced from the door's own help. A
+  // pin failing is a bug, never a pin-weakening (see test/door-pin.js).
+  if (!binFilter || binFilter === 'doors') {
+    try {
+      const { runDoorPins } = require('./door-pin');
+      const { PINS } = require('./door-pins');
+      const r = runDoorPins(PINS);
+      if (r.failed > 0) throw new Error(r.failed + ' door pin(s) failed');
+      pass('door pins batch (' + (r.passed + r.failed) + ' doors, ' + r.passed + ' held)');
+    } catch (e) {
+      fail('door pins batch', e.message);
+    }
+  }
+  
+  // ============================================
   // SUMMARY
   // ============================================
   

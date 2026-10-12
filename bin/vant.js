@@ -264,6 +264,8 @@ const COMMANDS = {
     recursion: 'recursion.js',
     forum: 'forum.js',
     trace: 'trace.js',
+    // vant qc: the first-user battery (issue #181 Part B)
+    qc: 'qc.js',
 
     // Bin CLIs that existed but were never routed (pass 18 bin sweep)
     org: 'org.js',
