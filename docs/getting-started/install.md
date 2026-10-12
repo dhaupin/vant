@@ -92,11 +92,13 @@ docker run -it \
   dhaupin/vant vant start
 ```
 
-### With Config File
+### With Config File (sync target only)
 ```bash
-# Create config locally
+# vant setup writes config.ini (repo/branch/stegoframe record).
+# The one thing the runtime reads from it is GITHUB_REPO for
+# `vant sync` (bin/sync.js). Everything else is env vars:
 cp config.example.ini config.ini
-# Edit config.ini with your values
+cp .env.example .env   # then put GITHUB_TOKEN in .env (never in config.ini)
 
 # Mount config and brain
 docker run -it \
@@ -176,7 +178,8 @@ Set up Vant (https://github.com/dhaupin/vant) as my persistent brain.
 Steps to run:
 - Clone: git clone https://github.com/dhaupin/vant.git && cd vant
 - Configure: cp config.example.ini config.ini && cp .env.example .env
-- Edit config.ini with GITHUB_REPO=your-username/your-repo
+- Edit config.ini with GITHUB_REPO=your-username/your-repo (this is what
+  `vant sync` reads - the one runtime consumer; other settings go in .env)
 - Add GITHUB_TOKEN to .env
 - Test: node bin/build-test.js
 - Start: node bin/vant.js start

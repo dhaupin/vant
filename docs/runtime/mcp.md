@@ -316,15 +316,14 @@ node bin/mcp.js --stdio
 ```
 
 ### With Configuration
-Set via env vars or config file:
+Set via environment variables (there is no config.ini reader in the
+MCP server - the `VANT_*` envs are the config surface):
 
 ```bash
-# Using environment variables
 VANT_MCP_PORT=3457 vant mcp --server
-
-# Or in config.ini
-MCP_SERVER=true
-MCP_PORT=3457
+# Optional key auth (header x-api-key / Bearer):
+export VANT_MCP_API_KEY=your-secret-key
+export VANT_MCP_REQUIRE_KEY=true
 ```
 
 ## Available Tools

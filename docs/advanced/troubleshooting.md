@@ -129,7 +129,7 @@ Error: Request timed out
 ```
 
 **Fix**:
-- Increase POLLING_INTERVAL in config.ini
+- Increase POLLING_INTERVAL in the environment (export POLLING_INTERVAL=...) - config.ini has no reader for it
 - Check firewall/network
 - Use different network
 

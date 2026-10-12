@@ -156,7 +156,7 @@ lib API (`memory.state(key, value, { ttl })`) - there is no `--ttl` CLI flag.
 
 | Command | Description |
 |---------|-------------|
-| `vant run` | Stub - prints runtime quickstart guidance (use `vant start` or `vant node`) |
+| `vant run` | Banner + quickstart pointing to `vant start`/`vant node` (a stub by design; `-p`/`-m` in the usage line are accepted but not wired) |
 | `vant node` | Persistent node (continuous run with brain loaded) |
 | `vant agents` | Multi-agent management (list, spawn, kill, info, status, prune - real, persisted) |
 | `vant islands` | Island component boot |
@@ -173,6 +173,7 @@ lib API (`memory.state(key, value, { ttl })`) - there is no `--ttl` CLI flag.
 
 ```bash
 vant run                    # Stub: prints quickstart guidance and exits
+                            # (use vant start or vant node for the real runtime)
 
 vant node --mcp             # Node plus MCP server
 vant node --mcp-port 4000   # Custom MCP port
