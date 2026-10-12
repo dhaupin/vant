@@ -37,9 +37,18 @@ PR-review matter and stay out of scope.
 
 ### Fixed
 
+- #120: `teams.createDept` / `teams.createTeam` silently stored the
+  PARENT id in the `name` field when called with the parent-first
+  positional convention (`createDept(orgId, 'engineering')`) - the
+  chosen name was thrown away via the options-object position. Calls
+  are now reordered into the documented `(name, { org/dept })` shape
+  when arg0 resolves to an existing parent record and arg1 is a string;
+  name-first callers are unaffected (a plain name never resolves to an
+  existing ID). Pinned by four new #120 fixtures in `test/teams.test.js`
+  (26/26 across consecutive runs).
 - The gate's first live run caught its own first real finding: a
-  Russian phrase fragment left in `labs/MEM.md` ("включая", i.e.
-  "including") - proof the drift happens even in English-first terra.
+  Russian word left in `labs/MEM.md` (`включая`, meaning `including`)
+  - proof the drift happens even in English-first terra.
 - docs/reference/era.md (the Wave-Era page written in pass 205) now
   passes every docs gate: em dashes converted to hyphens, arrow glyph
   removed, and the 5 required frontmatter fields added.
