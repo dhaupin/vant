@@ -8,7 +8,7 @@
 
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..');
+const _ROOT = path.resolve(__dirname, '..');
 const rls = require('../lib/rls');
 const Habitat = require('../lib/habitat');
 const sandbox = require('../lib/sandbox');

@@ -108,12 +108,12 @@ define('restore rejects absolute path in file path (payload-level)', async () =>
 
 define('restore() with traversal payload writes NOTHING outside the tree', async () => {
     cleanup();
-    let threw = false;
+        false;
     try {
         await transform.restore(payload({
             'qc-probe': { type: 'private', files: [{ path: '../pwned.txt', content: 'evil' }] }
         }));
-    } catch (e) { threw = true; }
+    } catch (e) { _threw = true; }
 
     // Either restore threw (validation) or it completed — either way, the
     // canary files must NOT exist. Note: '../pwned.txt' relative to the
@@ -125,12 +125,12 @@ define('restore() with traversal payload writes NOTHING outside the tree', async
 
 define('restore() with absolute-path payload writes NOTHING outside the tree', async () => {
     cleanup();
-    let threw = false;
+        false;
     try {
         await transform.restore(payload({
             'qc-probe': { type: 'private', files: [{ path: '/tmp/pwned-abs.txt', content: 'evil' }] }
         }));
-    } catch (e) { threw = true; }
+    } catch (e) { _threw = true; }
     return { success: !fs.existsSync('/tmp/pwned-abs.txt') && !fs.existsSync(path.join(MODELS, 'private', 'pwned-abs.txt')), error: 'absolute-path file materialized' };
 });
 
@@ -140,13 +140,13 @@ define('restore() with absolute-path payload writes NOTHING outside the tree', a
 
 define('restore rejects slash-traversal brain name (R-6 gate)', async () => {
     cleanup();
-    let result = null, threw = false;
+    let _result = null, _threw = false;
     try {
-        result = await transform.restore(payload({
+        _result = await transform.restore(payload({
             '../../evilbrain': { type: 'private', files: [] }
             , evil: undefined
         }));
-    } catch (e) { threw = true; }
+    } catch (e) { _threw = true; }
     const escaped = fs.existsSync(path.join(MODELS, 'evilbrain')) || fs.existsSync(path.join(ROOT, 'evilbrain'));
     return { success: !escaped, error: 'brain-name traversal materialized a directory' };
 });
@@ -156,12 +156,12 @@ define('restore rejects dotfile brain name (dotfile weaponization)', dotfileCase
 // The dotfile case (defined below to keep cases tidy)
 async function dotfileCase() {
     cleanup();
-    let threw = false;
+        false;
     try {
         await transform.restore(payload({
             '.evil-hidden': { type: 'private', files: [] }
         }));
-    } catch (e) { threw = true; }
+    } catch (e) { _threw = true; }
     const landed = fs.existsSync(path.join(MODELS, 'private', '.evil-hidden')) ||
                    fs.existsSync(path.join(MODELS, 'public', '.evil-hidden'));
     return { success: !landed, error: 'dotfile brain materialized' };
@@ -174,7 +174,7 @@ async function dotfileCase() {
 
 define('benign payload still restores brain files through the store', async () => {
     cleanup();
-    const r = await transform.restore(payload({
+    const _r = await transform.restore(payload({
         [MAL]: { type: 'private', files: [
             { path: 'identity.md', content: '# probe\nNAME: QC' },
             { path: 'notes/sub/probe.md', content: 'nested ok' }

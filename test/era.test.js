@@ -33,7 +33,7 @@ async function runAll(tests) {
 }
 
 const tests = [];
-const script = (mode) =>
+const script = (_mode) =>
     '(async () => {' +
     'const era = require(' + JSON.stringify(path.join(ROOT, 'lib', 'era')) + ');' +
     'if (process.env.VANT_ERA_PIN_MODE === "open") {' +

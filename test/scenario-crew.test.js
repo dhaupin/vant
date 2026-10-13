@@ -28,7 +28,7 @@ function ok(name, fn) {
     try { fn(); passed++; console.log('  ✓ ' + name); }
     catch (e) { failed++; console.log('  ✗ ' + name + ': ' + e.message); }
 }
-async function okAsync(name, fn) {
+async function _okAsync(name, fn) {
     try { await fn(); passed++; console.log('  ✓ ' + name); }
     catch (e) { failed++; console.log('  ✗ ' + name + ': ' + e.message); }
 }
@@ -140,11 +140,11 @@ function makeStubs(opt = {}) {
 }
 
 /** Spy on the delegation path (agents module inside lib/scenario.js only). */
-function spyAgents(scenarioPath) {
+function spyAgents(_scenarioPath) {
     const Module = require('module');
     const orig = Module._load;
     let delegatedTo = null;
-    Module._load = function (request, parent, isMain) {
+    Module._load = function (request, parent, _isMain) {
         if (request === './agents' && parent && String(parent.filename).includes('lib/scenario.js')) {
             return { delegate: async (agentId) => { delegatedTo = agentId; return {}; } };
         }

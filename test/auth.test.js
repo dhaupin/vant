@@ -214,8 +214,39 @@ test('R1 matrix: hasApiKey() honest = resolver verdict (null key, no env)', () =
     return { success: honest, error: 'hasApiKey answered non-false with no key' };
 });
 
-test('R1 matrix: authRequired + no configured key refuses the presented key (no dev fallback)', () => {
+// (Battery item 4, #189 door sweep) authPosture() — the one truthful line
+// every key door prints must BE the resolver's posture, in both directions.
+test('authPosture: OPEN — no key resolvable, line names all consulted canon sources', () => {
     const config = require(path.join(ROOT, 'lib', 'config'));
+    proceedEnv({ VANT_AUTH_KEY: null, VANT_API_KEY: null, VANT_MCP_API_KEY: null });
+    const p = config.authPosture();
+    cleanupEnv();
+    const open = p.keyed === false && p.source === null
+        && /OPEN/.test(p.line)
+        && /VANT_AUTH_KEY/.test(p.line) && /mcp\.apiKey/.test(p.line);
+    return { success: open, error: JSON.stringify(p) };
+});
+
+test('authPosture: KEYED via VANT_AUTH_KEY — names the canonical source', () => {
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    proceedEnv({ VANT_AUTH_KEY: 'canon-key', VANT_API_KEY: null, VANT_MCP_API_KEY: null });
+    const p = config.authPosture();
+    cleanupEnv();
+    const keyed = p.keyed === true && p.source === 'VANT_AUTH_KEY' && /KEYED via VANT_AUTH_KEY/.test(p.line);
+    return { success: keyed, error: JSON.stringify(p) };
+});
+
+test('authPosture: KEYED via deprecated alias — line says to move the secret', () => {
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    proceedEnv({ VANT_AUTH_KEY: null, VANT_API_KEY: 'alias-key', VANT_MCP_API_KEY: null });
+    const p = config.authPosture();
+    cleanupEnv();
+    const ok = p.keyed === true && /deprecated alias/.test(String(p.source)) && /VANT_AUTH_KEY/.test(String(p.source));
+    return { success: ok, error: JSON.stringify(p) };
+});
+
+test('R1 matrix: authRequired + no configured key refuses the presented key (no dev fallback)', () => {
+    const _config = require(path.join(ROOT, 'lib', 'config'));
     proceedEnv({ VANT_AUTH_KEY: null, VANT_API_KEY: null, VANT_MCP_API_KEY: null });
     const auth = new Auth({ apiKeyRequired: true });
     const verdict = auth.validateApiKey('anything-presented');

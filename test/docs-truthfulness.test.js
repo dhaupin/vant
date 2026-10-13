@@ -12,7 +12,7 @@
  * Run: node test/docs-truthfulness.test.js
  */
 
-const { execFileSync, spawnSync } = require('child_process');
+const { execFileSync: _execFileSync, spawnSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 

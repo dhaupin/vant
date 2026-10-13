@@ -225,8 +225,23 @@ async function run() {
         console.log('Creating horcrux:', outputPath);
         
         const transform = require('../lib/transform');
+        // (#195, pass 207) Optional carrier art pack: `vant horcrux create <path> <pw> --art backup|stone|comms|airgap`.
+        // Default = the transform fallback's AMBER-DEEP backup pack (seeded
+        // from the active brain name). Unknown pack → refuse before gather.
+        const artFlagIdx = args.indexOf('--art');
+        const templateStyle = artFlagIdx >= 0 && args[artFlagIdx + 1] && !args[artFlagIdx + 1].startsWith('-')
+            ? args[artFlagIdx + 1] : null;
+        if (artFlagIdx >= 0) {
+            const reserved = require('../lib/art-packs').PACKS;
+            if (!templateStyle || !reserved.includes(templateStyle)) {
+                console.error('❌ Unknown art pack: ' + (args[artFlagIdx + 1] || '(none)'));
+                console.error('   Reserved packs: ' + reserved.join(', '));
+                process.exit(1);
+            }
+            console.log('Art pack:', templateStyle);
+        }
         // Gather full corpus (now default)
-        const result = await transform.toHorcrux(outputPath, { password });
+        const result = await transform.toHorcrux(outputPath, { password, templateStyle });
         
         console.log('\n✅ Created!');
         console.log('Path:', result.path);
@@ -320,6 +335,20 @@ async function run() {
             process.exit(1);
         }
 
+        // (#195, pass 207) Optional carrier art pack: `vant horcrux refresh <pw> --art backup|stone|comms|airgap`.
+        const _artIdx = args.indexOf('--art');
+        let _artPack = null;
+        if (_artIdx >= 0) {
+            _artPack = args[_artIdx + 1] && !args[_artIdx + 1].startsWith('-') ? args[_artIdx + 1] : null;
+            const _reserved = require('../lib/art-packs').PACKS;
+            if (!_artPack || !_reserved.includes(_artPack)) {
+                console.error('❌ Unknown art pack: ' + (args[_artIdx + 1] || '(none)'));
+                console.error('   Reserved packs: ' + _reserved.join(', '));
+                process.exit(1);
+            }
+            console.log('Art pack:', _artPack);
+        }
+
         const transform = require('../lib/transform');
         // (pass 23) Shared safe-write flow via lib/horcrux-safe.js:
         // tmp → round-trip validate → rename. Also cwd-safe: the helper
@@ -337,7 +366,9 @@ async function run() {
             label: 'horcrux',
             log: (m) => console.log(m.replace(/^ {3}/, '  ')),
             password,
-            encode: (rel, o) => transform.toHorcrux(rel, { password: o.password }),
+            templateStyle: _artPack,
+            // (#195) Optional art pack carried through for the encode step.
+            encode: (rel, o) => transform.toHorcrux(rel, { password: o.password, templateStyle: o.templateStyle || null }),
             decode: (rel, o) => transform.validateHorcruxFile(rel, { password: o.password }),
             validate: (check) => (check && check.valid !== false)
                 ? true

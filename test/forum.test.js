@@ -148,7 +148,7 @@ console.log('\n🧠 MULTIBRAIN TESTS\n');
 
 // Test 11: forum integrates with brain module
 test('forum integrates with brain module', () => {
-    const forum = require(path.join(ROOT, 'lib', 'forum'));
+    const _forum = require(path.join(ROOT, 'lib', 'forum'));
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     
     const currentBrain = brain.currentBrain();

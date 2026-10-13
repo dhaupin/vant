@@ -8,7 +8,7 @@
  *        node test/runner.js --bin vant
  */
 
-const fs = require('fs');
+const _fs = require('fs');
 const path = require('path');
 
 // Get vant root directory
@@ -21,7 +21,7 @@ const results = {
   errors: []
 };
 
-function pass(name, details = '') {
+function pass(name, _details = '') {
   results.passed++;
   console.log(`✓ ${name}`);
 }
@@ -53,7 +53,7 @@ function testLib(name, modPath, tests = {}) {
     
     // Function tests
     if (tests.functions) {
-      for (const [fn, expected] of Object.entries(tests.functions)) {
+      for (const [fn, _expected] of Object.entries(tests.functions)) {
         if (typeof mod[fn] === 'function') {
           pass(`${name}.${fn} is function`);
         } else {

@@ -180,7 +180,7 @@ console.log('\n🧠 MULTIBRAIN TESTS\n');
 
 // Test: tmp integrates with brain module
 test('tmp integrates with brain module', () => {
-    const tmp = require(path.join(ROOT, 'lib', 'tmp'));
+    const _tmp = require(path.join(ROOT, 'lib', 'tmp'));
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     
     const currentBrain = brain.currentBrain();

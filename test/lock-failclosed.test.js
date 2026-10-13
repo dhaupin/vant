@@ -28,7 +28,7 @@ const ROOT = path.resolve(__dirname, '..');
 const BRAIN = path.join(ROOT, 'models', 'private', 'qc-lock-fc');
 fs.rmSync(BRAIN, { recursive: true, force: true });
 
-const lock = require(path.join(ROOT, 'lib', 'lock'));
+const _lock = require(path.join(ROOT, 'lib', 'lock'));
 const stateStore = require(path.join(ROOT, 'lib', 'state-store'));
 const teams = require(path.join(ROOT, 'lib', 'teams'));
 const Habitat = require(path.join(ROOT, 'lib', 'habitat'));

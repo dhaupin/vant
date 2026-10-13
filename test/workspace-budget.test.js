@@ -250,7 +250,7 @@ async function main() {
         e.setBudget(null, 100, { workspace: 'org-globex' });
         const before = await e.beforeExecute({ agentId: 'm1', operation: 'read', cost: 5, userCtx: { workspace: 'org-globex' } });
         assert(before.allowed === true, 'userCtx.workspace accepted');
-        const pool = e.getBudget(null, { workspace: 'org-globex' });
+        const _pool = e.getBudget(null, { workspace: 'org-globex' });
         const after = e.afterExecute({ agentId: 'm1', cost: 5, success: true, userCtx: { workspace: 'org-globex' } });
         assert(after.recorded === true && e.getBudget(null, { workspace: 'org-globex' }).available === 95, 'userCtx.workspace debits pool');
     });

@@ -8,7 +8,7 @@
 
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..');
+const _ROOT = path.resolve(__dirname, '..');
 const vaf = require('../lib/vaf');
 
 // Test results

@@ -326,9 +326,9 @@ test('readRaw does NOT block path traversal (explicit unsafe)', () => {
     // readRaw should not throw on traversal; it either returns the content
     // or null. The point is it does not do the vaf check.
     let threw = false;
-    let result = null;
+    
     try {
-        result = s.readRaw('../../../etc/passwd');
+        _result = s.readRaw('../../../etc/passwd');
     } catch (e) {
         threw = true;
     }

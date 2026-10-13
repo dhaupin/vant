@@ -66,8 +66,17 @@ test('primitive: encrypt decrypts BOTH widths (12B modern, 16B legacy)', () => {
 test('primitive: unsupported IV width fails with an honest message', () => {
     const bad = Encrypt.encrypt('x', PW).split(':');
     bad[1] = 'aabb'; // 1-byte IV — neither shape
-    const r = Encrypt.decrypt(bad.join(':'), PW);
-    assert.ok(r.error && /IV length/.test(r.error), 'expected IV-length complaint: ' + JSON.stringify(r));
+    // (pin refresh, pass-190 sweep) decrypt's contract is single-envelope
+    // (F8, #189/A5): it either RETURNS the plaintext or THROWS a typed
+    // error. The old split shape ({error} on failure) was retired when F8
+    // landed. The pin now asserts the throw + honest typed message the
+    // lib actually produces (E_DECRYPT_FORMAT, "IV length" complaint).
+    let threw = null;
+    try { Encrypt.decrypt(bad.join(':'), PW); }
+    catch (e) { threw = e; }
+    assert.ok(threw, 'expected decrypt to throw on unsupported IV width (F8 single-envelope)');
+    assert.ok(/IV length/.test(threw.message || ''), 'expected IV-length complaint, got: ' + JSON.stringify(threw && threw.message));
+    assert.ok(threw.code === 'E_DECRYPT_FORMAT', 'expected typed E_DECRYPT_FORMAT code, got: ' + threw.code);
 });
 
 test('vant reads a Stegoframe stone (12B IV, attributed open tag, bare wrap)', () => {

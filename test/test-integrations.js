@@ -7,7 +7,7 @@
 
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..');
+const _ROOT = path.resolve(__dirname, '..');
 
 // Test results
 const results = { passed: 0, failed: 0, skipped: 0, tests: [] };

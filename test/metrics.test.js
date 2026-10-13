@@ -77,7 +77,7 @@ test('observe builds cumulative histogram buckets + sum/count', () => {
     if (!h) return { success: false, error: 'histogram series missing' };
     if (h.count !== 3) return { success: false, error: `count ${h.count} != 3` };
     // cumulative buckets: 3 falls in le=5 (and all larger), 250 in le=250..500, 99999 only in +Inf
-    const idx = (b) => h.buckets.findIndex(x => x >= 250);
+    const idx = (_b) => h.buckets.findIndex(x => x >= 250);
     if (h.counts[idx(0)] !== 2) return { success: false, error: `le=250 bucket ${h.counts[idx(0)]} != 2` };
     if (h.sum <= 99998) return { success: false, error: 'sum should include big value' };
     return true;

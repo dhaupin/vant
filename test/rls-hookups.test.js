@@ -40,7 +40,7 @@ async function test(name, fn) {
     }
 }
 
-function assert(cond, msg) {
+function _assert(cond, msg) {
     if (!cond) throw new Error(msg || 'assertion failed');
 }
 

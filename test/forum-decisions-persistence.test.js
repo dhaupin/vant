@@ -133,7 +133,7 @@ async function main() {
     let u4Thread = null, u4Topic = null;
     await test('U4.1: vote created on a thread links thread→topic durably', async () => {
         const forumMod = restartForum();
-        const eventMod = require(path.join(ROOT, 'lib', 'event'));
+        const _eventMod = require(path.join(ROOT, 'lib', 'event'));
         const f = forumMod.forum;
         const v = await f.vote('Adopt the agora decision log', { thread: 'PUB-U4TEST01' });
         assert(v.voted === true, 'vote create failed: ' + JSON.stringify(v).slice(0, 120));

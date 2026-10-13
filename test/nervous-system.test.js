@@ -91,7 +91,7 @@ ev.sinkEnable();
 ev.emit('era:closed', { id: 'pre1', sentinel: 'history_1' });
 ev.emit('era:closed', { id: 'pre2', sentinel: 'history_2' });
 // Snapshot the attach boundary: the subscriber starts AFTER pre1/pre2.
-const replayerEventSeqBase = (ev.sinkTail({ max: 1 }).events[0] || {}).seq || 0;
+const _replayerEventSeqBase = (ev.sinkTail({ max: 1 }).events[0] || {}).seq || 0;
 const sub = durable(ev, { subscriber: 'nervous-a', stateFile: SCRATCH_STATE('a') });
 const gotA = [];
 sub.attach('era:closed', (d) => gotA.push(d.sentinel));

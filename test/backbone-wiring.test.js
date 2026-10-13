@@ -18,7 +18,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const assert = require('assert');
+const _assert = require('assert');
 const errors = require('../lib/error');
 const events = require('../lib/event');
 

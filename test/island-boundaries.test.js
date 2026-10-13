@@ -125,7 +125,7 @@ async function main() {
     });
 
     await test('admin write succeeds', () => {
-        const before = islands.load('notes', {}).then ? null : null;  // (load is async; shape only)
+        const _before = islands.load('notes', {}).then ? null : null;  // (load is async; shape only)
         islands.save('notes', { title: 'updated', by: 'boss' }, { userCtx: { userId: 'boss', roles: ['admin'] } });
         return islands.load('notes', {}).then(d => {
             assert(d.by === 'boss', 'admin write landed: ' + JSON.stringify(d));

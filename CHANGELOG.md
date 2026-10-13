@@ -5,6 +5,74 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 207 (pass-190/206 close-out: #189 wave-3 gate, R5 truth, door sweep, #195 art packs)
+
+### Fixed - #189 close-out: the last two unexecuted battery items landed
+
+- **Wave 3 gate (R4, #189): `lib/nature.js` `accumulateCosmic()` now rides
+  the same Category-H gate as habitat.** `habitat.js:503,1176` were gated in
+  pass 206 but `nature.js:100` (the third live caller the wave named) still
+  reached `encrypt.getCosmicEntropy()` unconditionally. Now: default OFF —
+  local `crypto.randomBytes` chaos, the network-ish cosmic fetcher only when
+  the operator turns `entropy.cosmic` ON. The wave's missing unit pin is in:
+  `test/nature.test.js` asserts the default-OFF verdict for BOTH modules
+  (spy: the fetcher is unreachable with the gate unset).
+- **Wave 2 / R5 truth-in-help: `bin/encrypt.js` encrypt/decrypt now encrypt
+  ONLY with a key the R1 resolver resolves.** The silent
+  `process.env.ENCRYPT_KEY || 'default-key-change-me'` fallback is gone; a
+  missing key prints the canon error naming all three consulted sources
+  (VANT_AUTH_KEY, deprecated aliases, persisted `mcp.apiKey`) and exits 1.
+  Resolved-key round-trip verified through the CLI (encrypt → decrypt
+  exit 0, plaintext intact).
+- **Battery item 3: `vant health` exit 0; brain re-anchored with descriptive
+  cause** (pass-190/206 sweep) and `vant horcrux verify` now reports green.
+
+### Added - #195 art packs: horcrux stones upgrade from 3 circles to generative math-art
+
+- **`lib/art-packs.js` (NEW)** — deterministic generative art engine for the
+  horcrux carrier: four starter packs seeded from the brain name (fnv1a →
+  mulberry32, no `Math.random`, no `Date.now`, pure SVG string out, no
+  fs/storage/sandbox/event side effects — a crash in art can never take a
+  backup down): `backup` (AMBER-DEEP · phyllotaxis sunflower), `stone`
+  (INDIGO-VAULT · sealed lattice), `comms` (SIGNAL-TEAL · radiating rings),
+  `airgap` (MASK-MONO · interference grids).
+- **Wiring:** `canvas.generateHorcruxTemplate` delegates the four reserved
+  pack styles to the engine (seed defaults to the active brain name, so
+  install stones are per-brain distinct at zero config); `canvas` exposes
+  `renderStoneArt` + `artPacks`; the `transform.toHorcrux` no-template
+  fallback now paints the `backup` pack instead of the old raw
+  `rect+circles` placeholder; `vant horcrux create|refresh --art <pack>` is
+  the sugar, with the honest unknown-pack refusal before any gather.
+- **Legacy is byte-exact:** `minimal`/`spiral`/default styles keep their
+  historical output bytes (pinned). Zero wire changes — stego untouched,
+  pass-178 contract intact.
+- **End-to-end receipt:** `vant horcrux create --art backup` → 9.5 MB stone,
+  visible head now the amber field (`#140f05` → `#b8860b`),
+  `vant horcrux inspect` → ✅ Valid Horcrux with full payload preview behind
+  the new art.
+- **Pins:** `test/art-packs.test.js` (14) — determinism (same style+seed →
+  byte-identical), per-brain distinctness across 3 seeds, seed-locked
+  engine (no nondeterminism primitives in code), honest reserved-list
+  refusal, legacy byte-exactness, stego round-trip on ALL 4 carriers,
+  and the transform fallback contract. Operator note in
+  `.vant-art-packs.md`.
+- Future (documented in the note, not this pass): durable seed = brain
+  identity id (rename changes refreshed stone appearance), PNG/LSB-parity,
+  gallery gallery receipt.
+
+### Added - Battery item 4 (door sweep): honest auth posture at every key door
+
+- New `config.authPosture()` in `lib/config.js`: ONE resolver-derived
+  `{keyed, source, line}` — the printed posture IS the enforcing posture
+  (derived from `resolveAuthKey()` itself, no second truth).
+- The HTTP server door (`lib/server.js`) prints the posture line on listen;
+  the MCP door (`lib/mcp.js`) prints it on startup; headless boot inherits
+  both (it starts through the shared Server). One-shot CLI doors (encrypt)
+  state it under `--verbose` and via the canon error on a missing key.
+- Pinned by `test/auth.test.js` (`authPosture`: OPEN names all consulted
+  canon sources; KEYED names the canonical env; alias posture tells the
+  operator to move the secret).
+
 ## [Unreleased] - pass 206 (Language gate - contributor prose is English-only, #184)
 
 ### Added - Language gate (issue #184)

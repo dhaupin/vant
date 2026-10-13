@@ -216,7 +216,7 @@ test('P1-16: atomic write replaces a symlink instead of writing through it', () 
 
 test('trust.record keeps scores numeric (no NaN from corruption)', () => {
     const trust = require(path.join(ROOT, 'lib', 'trust'));
-    const r = trust.record('sec-nan-entity', 'help', { positive: true, value: 0.1 });
+    const _r = trust.record('sec-nan-entity', 'help', { positive: true, value: 0.1 });
     const score = trust.getScore('sec-nan-entity');
     return { success: typeof score === 'number' && !Number.isNaN(score) };
 });

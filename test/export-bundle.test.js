@@ -26,7 +26,7 @@ const path = require('path');
 const eb = require('../lib/export-bundle');
 require('../lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true });
 
-const ROOT = path.resolve(__dirname, '..');
+const _ROOT = path.resolve(__dirname, '..');
 const OUT = path.join('bundles', 'u5-pin-bundle');
 
 let passed = 0, failed = 0;
@@ -49,7 +49,7 @@ async function main() {
     // ------------------------------------------------------------------
 
     let digest = null;
-    let bundle = null;
+    
     ok('U5.1: no-horcrux bundle assembles with four hashed files + manifest + handle', async () => {
         const r = await eb.exportBundle({ out: OUT, includeHorcrux: false, label: 'pin-suite' });
         assert(r.ok === true, 'assemble refused: ' + JSON.stringify(r).slice(0, 140));

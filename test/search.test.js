@@ -121,7 +121,7 @@ test('loadCorpusEx accepts stack option', () => {
 });
 
 test('search integrates with brain module', () => {
-    const search = require(path.join(ROOT, 'lib', 'search'));
+    const _search = require(path.join(ROOT, 'lib', 'search'));
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     
     const currentBrain = brain.currentBrain();

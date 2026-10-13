@@ -17,7 +17,7 @@
  */
 
 const path = require('path');
-const fs = require('fs');
+const _fs = require('fs');
 const ROOT = path.resolve(__dirname, '..');
 
 const sync = require(path.join(ROOT, 'lib', 'sync'));

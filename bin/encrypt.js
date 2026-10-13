@@ -29,6 +29,35 @@ Usage:
     process.exit(0);
 }
 
+// (Wave 2/R5, #189) The encrypt CLI encrypts ONLY with a key the R1 resolver
+// resolves — the silent `process.env.ENCRYPT_KEY || 'default-key-change-me'`
+// fallback is gone (R5 truth-in-help: the error names exactly which of the
+// three canon sources were consulted, so a missing key is never guessed
+// silently). Also dies fast before any crypto on a cipher-shaped input so a
+// missing key shows the canon error, not a decrypt stack.
+function _resolveKeyOrFail() {
+    const config = require('../lib/config');
+    const key = config.resolveAuthKey();
+    if (key) {
+        // (Battery item 4, #189 door sweep) Same resolver-derived posture line
+        // every key door prints; one-shot commands state it under --verbose
+        // instead of on "startup".
+        if (args.includes('--verbose')) {
+            try { console.error(config.authPosture().line); } catch (e) { /* never blocks crypto */ }
+        }
+        return key;
+    }
+    console.error(
+        'No auth key resolvable. The R1 canon was consulted in order:\n' +
+        '  1. VANT_AUTH_KEY          (canonical env)\n' +
+        '  2. VANT_API_KEY / VANT_MCP_API_KEY (deprecated aliases)\n' +
+        '  3. persisted brain config: mcp.apiKey (vant config set mcp.apiKey <key>)\n' +
+        'Set one of these and retry. Encryption with an unresolvable key would\n' +
+        'silently use a guessed secret — which is exactly what it never does.'
+    );
+    process.exit(1);
+}
+
 function run() {
     const Encrypt = require('../lib/encrypt');
     
@@ -49,8 +78,7 @@ function run() {
             console.error('Usage: vant encrypt encrypt <data>');
             process.exit(1);
         }
-        const key = process.env.ENCRYPT_KEY || 'default-key-change-me';
-        const encrypted = Encrypt.encrypt(data, key);
+        const encrypted = Encrypt.encrypt(data, _resolveKeyOrFail());
         console.log(encrypted);
     } else if (subcmd === 'decrypt' || subcmd === 'dec') {
         const data = args[1];
@@ -58,9 +86,8 @@ function run() {
             console.error('Usage: vant encrypt decrypt <data>');
             process.exit(1);
         }
-        const key = process.env.ENCRYPT_KEY || 'default-key-change-me';
         try {
-            const decrypted = Encrypt.decrypt(data, key);
+            const decrypted = Encrypt.decrypt(data, _resolveKeyOrFail());
             console.log(decrypted);
         } catch (e) {
             console.error('Decryption failed:', e.message);

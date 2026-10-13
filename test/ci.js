@@ -363,7 +363,7 @@ async function testSecurity(name, input, testFn, shouldBlock = true) {
 /**
  * Run security tests using VAF
  */
-async function testSecurityTests() {
+async function _testSecurityTests() {
   try {
     const vafPath = path.join(ROOT, 'lib/vaf.js');
     const vaf = require(vafPath);

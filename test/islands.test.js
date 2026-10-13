@@ -6,7 +6,7 @@
  * Run: node test/islands.test.js
  */
 
-const fs = require('fs');
+const _fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -38,7 +38,7 @@ function test(name, fn) {
     }
 }
 
-function skip(name, reason) {
+function _skip(name, reason) {
     results.skipped++;
     results.tests.push({ name, status: 'skipped', reason });
     console.log(`  ⊘ ${name}: ${reason}`);

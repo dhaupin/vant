@@ -179,7 +179,7 @@ test('deleteOrg cascades and reports children (F-5)', () => {
 
 console.log('🧬 horcrux gather/restore (reincarnation)\n');
 
-const transform = require(path.join(ROOT, 'lib', 'transform'));
+const _transform = require(path.join(ROOT, 'lib', 'transform'));
 
 // Rebuild a fresh hierarchy for the soul test (pass 27: SETUP runs as a
 // queued step, not at load — load-time side effects raced section 5's

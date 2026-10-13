@@ -22,7 +22,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const assert = require('assert');
+const _assert = require('assert');
 
 let passed = 0, failed = 0;
 function ok(name) { passed++; console.log('  ✓ ' + name); }

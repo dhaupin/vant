@@ -57,7 +57,7 @@ function vant(args, extraEnv = {}) {
 }
 
 const { spawnSync } = require('child_process');
-const wait = (ms) => new Promise(r => setTimeout(r, ms));
+const _wait = (ms) => new Promise(r => setTimeout(r, ms));
 const sha = (f) => crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex');
 
 async function main() {

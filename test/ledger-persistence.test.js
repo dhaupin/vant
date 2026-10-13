@@ -169,7 +169,7 @@ console.log(JSON.stringify({
 }));
 `;
 
-const LJ2 = null; // (kept: LJ/MJ defined above; child() shim no longer needed)
+const _LJ2 = null; // (kept: LJ/MJ defined above; child() shim no longer needed)
 const child = (tpl) => tpl;
 
 async function main() {

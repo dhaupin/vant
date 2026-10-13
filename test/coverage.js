@@ -39,7 +39,7 @@ function test(name, fn) {
     }
 }
 
-function warn(name, fn) {
+function _warn(name, fn) {
     try {
         fn();
         results.warnings++;

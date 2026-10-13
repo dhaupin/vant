@@ -192,7 +192,7 @@ test('listAssignments accepts brain filter', () => {
 
 // Test 15: Brain module integration
 test('teams integrates with brain module', () => {
-    const teams = require(path.join(ROOT, 'lib', 'teams'));
+    const _teams = require(path.join(ROOT, 'lib', 'teams'));
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     
     const currentBrain = brain.currentBrain();

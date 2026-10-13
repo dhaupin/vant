@@ -146,8 +146,8 @@ test('breaker: threshold consecutive load failures open it; calls short-circuit 
 
     return attempt().then(r1 => {
         if (!r1.rejected) return { success: false, error: 'poisoned pipeline did not throw' };
-        return attempt().then(r2 =>
-            attempt().then(r3 => {
+        return attempt().then(_r2 =>
+            attempt().then(_r3 => {
                 const st = brain.getLoadCircuitStatus();
                 if (st.state !== 'OPEN') return { success: false, error: `state after 3 failures: ${st.state} (failures=${st.failures})` };
                 // Next call must SHORT-CIRCUIT with the coded error

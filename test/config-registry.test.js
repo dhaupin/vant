@@ -23,7 +23,7 @@ const ok = (name, cond, extra) => {
 
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
+const _os = require('os');
 const { execFileSync } = require('child_process');
 const config = require('../lib/config');
 
