@@ -2,10 +2,49 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-13  
-**Session:** Pass 213 — H5 LANDED: per-tenant list filtering (the pass-211
-boundary closed); pass 212 H2/H3/H4 + pass 211 H1 landed before it
+**Session:** Pass 214 — channel scope LANDED: owner concept for msg
+channels (msg_list/msg_send tenant posture = the agent_list rule); two
+live bugs the survey caught fixed in the same pass
 
 ---
+
+## Session (2026-10-13 — pass 214: #185 channel scope — the msg_list follow-through)
+
+**Owner: "let's work on these: the channel-scope story (owner concept for
+msg channels, so msg_list can filter per tenant the same way agent_list
+does now)."**
+
+**What landed:**
+
+- `lib/msg.js`: channels carry a claim-once OWNER ref —
+  `send(chan, msg, { scopeOwner })` stamps NEW channels (loud on invalid
+  refs, ignored on existing), `setChannelOwner` claims unowned ones and
+  refuses steals typed (`E_CHANNEL_OWNED`), `channelOwner` accessor,
+  `clear()` drops the owner WITH the channel, and the owner rides the
+  arch-A snapshot (restart survival, pinned).
+- Door (`lib/mcp.js` exec path): msg verbs get the pass-213 tenant
+  posture — foreign scoped channels withheld on `msg_list` (honest empty,
+  no existence leak), refused on `msg_send` (`E_TENANT_CHANNEL`) BEFORE
+  the write; the gate itself fails closed on BOTH verbs; a first guest
+  write stamps their `scopeOwner` (claim-once); unscoped = public; hosts
+  untouched; a scopeOwner-less guest IS the default tenant.
+
+**Two live bugs the survey caught (fixed same pass):**
+
+- `msg_send` passed STRING content into `msg.send`, whose `{...message}`
+  spread wrote `{"0":"c",...}` garbage on every channel write (forum's
+  internal object calls hid it). Messages now `{from, content, timestamp}`.
+- `msg_list` called `_msg.list(channel, limit)` — `Msg.list()` takes NO
+  args and returns CONVERSATIONS, so channel/limit were silently ignored
+  and every call answered the conversation roster.
+
+**Verification:** msg 29/29 and guests 25/25 (each x2), plus the adjacent
+contract suites (forum-msg-escrow, messaging-envelope, mcp) green; syntax
+OK; docs updated (multi-guest-auth boundary + mcp-tools msg section).
+
+**NEXT-UP:** H6 stays HELD (owner call, frontend story); #185 runway now
+matches the tracked list (cross-tenant enumeration throttling beyond the
+guest-management block); frontend/headless maturation = next big project.
 
 ## Session (2026-10-13 — pass 213: #185 H5 per-tenant list filtering LANDED)
 
@@ -38,7 +77,12 @@ truth, and the DOOR truth: host sees all / team guest sees exactly its
 member / bare guest sees none); syntax OK on lib/guests.js + lib/mcp.js;
 changelog + multi-guest-auth.md updated.
 
-**NEXT-UP:** #185 H6 (QR pairing UX), msg channel-scope marking story.
+**NEXT-UP:** #185 H6 (QR pairing UX) HELD by owner pending the frontend
+story - the pairing machinery itself is DONE (hash-at-rest via the
+canonical lib/hash.sha256, timing-safe, single-use, TTL); all H6 adds is a
+RENDERER (terminal blocks / SVG matrix; no new system needed — NSC9 is
+storage addressing, stego is payload-hiding, neither substitutes for a QR
+renderer). msg channel-scope marking remains the next candidate.
 
 ## Session (2026-10-13 — pass 211: #185 H1 multi-guest auth LANDED)
 

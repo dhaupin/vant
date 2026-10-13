@@ -1083,7 +1083,16 @@ Send a message to a channel (`channel`, `content`, optional `from`).
 
 ### msg_list
 
-List messages in a channel (`channel`, optional `limit`).
+List messages in a channel (`channel`, optional `limit`). Answers the
+channel's FIFO tail (pass 214 also fixed this verb: it previously called
+`Msg.list()` and returned the conversation roster, ignoring its arguments).
+
+Per-tenant posture (pass 214): msg channels carry a claim-once owner ref
+(`msg.send(chan, msg, { scopeOwner })` stamps a NEW channel;
+`msg.setChannelOwner` claims unowned ones and refuses steals). The door
+withholds another tenant's scoped channel from guests on `msg_list` and
+refuses their `msg_send` typed (`E_TENANT_CHANNEL`) before the write.
+Unscoped channels stay public.
 
 ## Domains A-Z param tables
 

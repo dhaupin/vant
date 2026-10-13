@@ -385,6 +385,99 @@ async function run() {
 
     await h5TenantPins();
 
+    // ---------- pass 214: msg channel-scope (owner concept) at the door ----------
+    // Channels gain a claim-once owner ref; the door applies the same tenant
+    // posture agent_list got in pass 213: foreign scoped channels are withheld
+    // on msg_list (honest empty) and REFUSED on msg_send (typed E_TENANT_CHANNEL,
+    // BEFORE the write); a first guest write to an UNOWNED channel stamps the
+    // guest's scopeOwner (claim-once); unscoped channels stay public.
+    async function csChannelDoor() {
+        const prevBrain = process.env.VANT_BRAIN;
+        process.env.VANT_BRAIN = BRAIN;
+        try {
+            const _sb = require(path.join(ROOT, 'lib', 'sandbox')).defaultSandbox;
+            _sb.setCapabilities({ canRead: true, canWrite: true, canSpawn: true });
+            const guests2 = require(path.join(ROOT, 'lib', 'guests'));
+            const msg = require(path.join(ROOT, 'lib', 'msg'));
+            const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+            const u = Date.now().toString(36);
+            // Host setup: one public channel, one foreign-tenant channel.
+            msg.send('cspub_' + u, { from: 'host', content: 'public board' });
+            const b = msg.setChannelOwner('csfor_' + u, 'team:T2_' + u);
+            if (!b || b.ok !== true) { failed++; console.log('  ✗ CS door: foreign channel bind refused — ' + JSON.stringify(b)); return; }
+            msg.send('csfor_' + u, { from: 't2', content: 'secret of T2' });
+
+            const gtok = guests2.issue('pin-cs-guest', { role: 'human', scopeOwner: 'team:T1_' + u }).token;
+            const btok = guests2.issue('pin-cs-bare', { role: 'human' }).token;
+
+            const port = 13477 + (process.pid % 40);
+            const call = async (tool, args, hdrs) => {
+                const res = await fetch('http://127.0.0.1:' + port + '/mcp/exec', {
+                    method: 'POST',
+                    headers: Object.assign({ 'Content-Type': 'application/json' }, hdrs || {}),
+                    body: JSON.stringify({ tool, args })
+                });
+                return (await res.json()).result;
+            };
+            const H = { Authorization: 'Bearer ' + gtok }, BH = { Authorization: 'Bearer ' + btok };
+            await mcp.start({ port, silent: true });
+            try {
+                // 1) public channel readable by a scoped guest (proper message shape now).
+                const r1 = await call('msg_list', { channel: 'cspub_' + u }, H);
+                const ok1 = Array.isArray(r1) && r1.length === 1 && r1[0].from === 'host' && r1[0].content === 'public board' && typeof r1[0].timestamp === 'number';
+                passed += ok1 ? 1 : 0; failed += ok1 ? 0 : 1;
+                console.log(ok1 ? '  ✓ CS door: public channel readable by a scoped guest (proper message shape)' : '  ✗ CS door: public read — ' + JSON.stringify(r1));
+
+                // 2) guest first-write to an UNOWNED channel stamps THEIR tenant.
+                await call('msg_send', { channel: 'csown_' + u, content: 'hi team', from: 'guest' }, H);
+                const ownRef = msg.channelOwner('csown_' + u);
+                const ok2 = ownRef === 'team:T1_' + u;
+                passed += ok2 ? 1 : 0; failed += ok2 ? 0 : 1;
+                console.log(ok2 ? '  ✓ CS door: guest first-write claims the channel for its tenant (claim-once)' : '  ✗ CS door: owner=' + ownRef);
+
+                // 3) guest reads its OWN tenant channel.
+                const r3 = await call('msg_list', { channel: 'csown_' + u }, H);
+                const ok3 = Array.isArray(r3) && r3.length === 1 && r3[0].content === 'hi team';
+                passed += ok3 ? 1 : 0; failed += ok3 ? 0 : 1;
+                console.log(ok3 ? '  ✓ CS door: guest lists its own tenant channel' : '  ✗ CS door: own list — ' + JSON.stringify(r3));
+
+                // 4) foreign tenant channel: withheld on read, refused on write, content untouched.
+                const r4 = await call('msg_list', { channel: 'csfor_' + u }, H);
+                const ok4 = Array.isArray(r4) && r4.length === 0;
+                passed += ok4 ? 1 : 0; failed += ok4 ? 0 : 1;
+                console.log(ok4 ? '  ✓ CS door: foreign tenant channel withheld on msg_list (no existence leak)' : '  ✗ CS door: foreign read — ' + JSON.stringify(r4));
+                const r5 = await call('msg_send', { channel: 'csfor_' + u, content: 'intrude', from: 'guest' }, H);
+                const after = msg.channelMessages('csfor_' + u);
+                const ok5 = r5 && r5.ok === false && r5.code === 'E_TENANT_CHANNEL' && after.length === 1 && after[0].content === 'secret of T2';
+                passed += ok5 ? 1 : 0; failed += ok5 ? 0 : 1;
+                console.log(ok5 ? '  ✓ CS door: foreign write refused typed E_TENANT_CHANNEL BEFORE the write' : '  ✗ CS door: foreign send — ' + JSON.stringify(r5) + ' tail=' + JSON.stringify(after).slice(0, 80));
+
+                // 5) hosts are untouched: full foreign read; and bare guests claim nothing.
+                const r6 = await call('msg_list', { channel: 'csfor_' + u });
+                const ok6 = Array.isArray(r6) && r6.length === 1 && r6[0].content === 'secret of T2';
+                passed += ok6 ? 1 : 0; failed += ok6 ? 0 : 1;
+                console.log(ok6 ? '  ✓ CS door: hosts unaffected — full channel read' : '  ✗ CS door: host read — ' + JSON.stringify(r6));
+                await call('msg_send', { channel: 'csopen_' + u, content: 'default', from: 'bare' }, BH);
+                const ok7 = msg.channelOwner('csopen_' + u) === null;
+                passed += ok7 ? 1 : 0; failed += ok7 ? 0 : 1;
+                console.log(ok7 ? '  ✓ CS door: scopeOwner-less guest claims nothing (unscoped = default tenant)' : '  ✗ CS door: bare claim owner=' + msg.channelOwner('csopen_' + u));
+                const r8 = await call('msg_list', { channel: 'csfor_' + u }, BH);
+                const ok8 = Array.isArray(r8) && r8.length === 0;
+                passed += ok8 ? 1 : 0; failed += ok8 ? 0 : 1;
+                console.log(ok8 ? '  ✓ CS door: bare guest cannot read another tenant\'s channel either' : '  ✗ CS door: bare foreign read — ' + JSON.stringify(r8));
+            } finally {
+                await mcp.stop();
+            }
+        } catch (e) {
+            failed++;
+            console.log('  ✗ CS door block error — ' + (e.stack || e.message));
+        } finally {
+            if (prevBrain === undefined) delete process.env.VANT_BRAIN; else process.env.VANT_BRAIN = prevBrain;
+        }
+    }
+
+    await csChannelDoor();
+
     console.log('\n=== guests: ' + passed + ' passed, ' + failed + ' failed ===\n');
     process.exit(failed > 0 ? 1 : 0);
 }

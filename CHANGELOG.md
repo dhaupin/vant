@@ -5,6 +5,54 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 214 (#185 channel scope: the owner concept for msg channels + two live bugs found by its own survey)
+
+The pass-213 follow-through the boundary statement promised: msg channels
+gain a claim-once OWNER ref so `msg_list` filters per tenant the same way
+`agent_list` does. Two pre-existing bugs fell out of the survey and are
+fixed in the same pass.
+
+### Fixed - two live bugs the survey caught
+
+- **`msg_send` wrote garbage**: the MCP handler passed the STRING content
+  into `msg.send(channel, message)`, and send's `{...message}` spread turned
+  the string into `{"0":"c","1":"o",...}` on EVERY channel write (internal
+  callers like `lib/forum.js` always pass objects, which is why it hid).
+  Channel messages now carry `{ from, content, timestamp }`.
+- **`msg_list` ignored its own arguments**: the handler called
+  `_msg.list(channel, limit)` — but `Msg.list()` takes NO arguments and
+  returns CONVERSATIONS, so every `msg_list` call answered the conversation
+  roster regardless of channel/limit (the docs always said "List messages
+  in channel"). Now answers the channel's FIFO tail, sliced by `limit`.
+
+### Added - channel owner (`lib/msg.js` + the MCP door)
+
+- **`msg.send(chan, msg, { scopeOwner })`**: stamp-on-create binds a NEW
+  channel to a tenant; invalid refs throw loud; on an existing channel the
+  stamp is ignored (claim-once).
+- **`msg.setChannelOwner(chan, ref)`**: claims an unowned channel
+  (reserving its bucket), REFUSES to steal a differently-owned one
+  (`E_CHANNEL_OWNED`, typed), idempotent for the same owner.
+- **`msg.channelOwner(chan)`** accessor; `clear()` drops the owner WITH the
+  channel; the owner rides the arch-A snapshot (restart survival).
+- **Door tenant posture (same rule as `agent_list`, pass 213)**: foreign
+  scoped channels are WITHHELD on `msg_list` (honest empty tail, no
+  existence leak) and REFUSED on `msg_send` (`E_TENANT_CHANNEL`, BEFORE the
+  write — the gate itself fails closed on both verbs). A first guest write
+  to an unowned channel stamps the guest's `scopeOwner`. Unscoped channels
+  stay PUBLIC (the `lib/scope normalize()` legacy read rule) and a
+  scopeOwner-less guest IS the default tenant. Hosts are untouched.
+
+### Pins
+
+- `test/msg.test.js` (+4, 29/29 ×2): stamp-on-create + loud invalid ref,
+  claim/typed-steal-refusal/idempotence, owner dies with the channel,
+  restart survival.
+- `test/guests.test.js` (+8, 25/25 ×2): the door truth — public readable,
+  claim-once stamp, own-tenant read, foreign withheld + typed refusal with
+  content untouched, host unaffected, bare guest claims nothing and reads
+  nothing foreign.
+
 ## [Unreleased] - pass 213 (#185 H5: per-tenant list filtering — the pass-211 boundary closed)
 
 Pass 211 shipped the guest layer honestly and DECLARED its boundary: org-wide

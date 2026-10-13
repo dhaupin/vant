@@ -266,6 +266,61 @@ function openEra(intent) {
         return { success: ok, error: JSON.stringify(ec) };
     });
 
+    // ==================== pass 214: channel-scope (owner concept) ====================
+    // Channels gain a claim-once OWNER ref (org:/dept:/team:/agent:<id>).
+    // Unscoped channels stay PUBLIC (the lib/scope legacy read rule); scoped
+    // ones answer visitors through guests.tenantVisible at the door. The unit
+    // contract: stamp-on-create, loud invalid refs, typed steal refusal,
+    // idempotent same-owner claim, owner dies WITH the channel, and the owner
+    // rides the arch-A snapshot (restart survival).
+
+    const u214 = Date.now().toString(36);
+
+    test('CS: send stamp-on-create binds a NEW channel; accessor answers; invalid ref throws loud', () => {
+        const msg0 = require(path.join(ROOT, 'lib', 'msg'));
+        const ch = 'cs_new_' + u214;
+        msg0.send(ch, { from: 'x', content: 'y' }, { scopeOwner: 'team:cs_' + u214 });
+        if (msg0.channelOwner(ch) !== 'team:cs_' + u214) {
+            return { success: false, error: 'owner not stamped: ' + msg0.channelOwner(ch) };
+        }
+        try {
+            msg0.send('cs_bad_' + u214, { a: 1 }, { scopeOwner: 'not-a-ref' });
+            return { success: false, error: 'invalid scopeOwner accepted' };
+        } catch (e) {
+            return { success: /org:\/dept|scopeOwner/.test(e.message) };
+        }
+    });
+
+    test('CS: setChannelOwner claims an unowned channel and refuses to steal a claimed one (typed)', () => {
+        const msg0 = require(path.join(ROOT, 'lib', 'msg'));
+        const ch = 'cs_claim_' + u214;
+        msg0.send(ch, { from: 'x', content: 'y' });   // unscoped so far
+        const c1 = msg0.setChannelOwner(ch, 'org:cs_' + u214);
+        if (!c1.ok) return { success: false, error: 'claim refused: ' + JSON.stringify(c1) };
+        const c2 = msg0.setChannelOwner(ch, 'team:other_' + u214);
+        if (c2.ok !== false || c2.code !== 'E_CHANNEL_OWNED' || c2.ownerRef !== 'org:cs_' + u214) {
+            return { success: false, error: 'steal not refused: ' + JSON.stringify(c2) };
+        }
+        const c3 = msg0.setChannelOwner(ch, 'org:cs_' + u214);
+        return { success: c3.ok === true && c3.created === false, error: JSON.stringify(c3) };
+    });
+
+    test('CS: clear() drops the owner WITH the channel', () => {
+        const msg0 = require(path.join(ROOT, 'lib', 'msg'));
+        const ch = 'cs_del_' + u214;
+        msg0.send(ch, { from: 'x', content: 'y' }, { scopeOwner: 'agent:cs_' + u214 });
+        msg0.clear(ch);
+        return { success: msg0.channelOwner(ch) === null, error: 'owner=' + msg0.channelOwner(ch) };
+    });
+
+    await testA('CS: the owner rides the snapshot — survives a module restart', async () => {
+        const msg0 = loadMsg();
+        const ch = 'cs_persist_' + u214;
+        msg0.send(ch, { from: 'x', content: 'y' }, { scopeOwner: 'dept:cs_' + u214 });
+        const again = loadMsg();
+        return { success: again.channelOwner(ch) === 'dept:cs_' + u214, error: 'owner=' + again.channelOwner(ch) };
+    });
+
     console.log('\n--- RESULTS ---\n');
     console.log(`  Passed:  ${results.passed}`);
     console.log(`  Failed:  ${results.failed}`);

@@ -163,9 +163,19 @@ same routing - the documented no-op note now applies only to non-guest keys.
   any record carrying an owner ref: unscoped record = public; scoped row is
   visible only to its own tenant or an ancestor container (org sees its depts
   and chained teams; dept sees its teams; an agent member sees its container).
-- Still tracked as #185 runway: H6 QR pairing UX, cross-tenant enumeration
-  throttling beyond the guest-management block. Channel-scope marking for
-  `msg_list` is a separate story (channels have no owner concept yet).
+- Shipped pass 214 (channel scope): msg channels carry a claim-once OWNER
+  ref. `msg_list` withholds another tenant's scoped channel entirely
+  (honest empty tail, no existence leak) and `msg_send` refuses it typed
+  (`E_TENANT_CHANNEL`) BEFORE the write; a first guest write to an unowned
+  channel stamps the guest's `scopeOwner` (claim-once). Unscoped channels
+  stay public (the legacy read rule) - a scopeOwner-less guest IS the
+  default tenant. The two bugs the story uncovered are fixed too: the
+  handler passed STRING content into `msg.send` (garbage spread shape) and
+  called `Msg.list()` with ignored arguments (every msg_list answered the
+  conversation roster).
+- Still tracked as #185 runway: H6 QR pairing UX (held by owner pending
+  the frontend story), cross-tenant enumeration throttling beyond the
+  guest-management block.
 
 *Transport-level security (loopback binds, TLS, requireKey) is unchanged and
 removes nothing: [MCP Server](/vant/runtime/mcp) covers running and
