@@ -5,6 +5,85 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 209 (#196 ruling: contained ledgers + kernel-driven leisure.autoPursue, ONE pass)
+
+Owner ruling this pass: leisure keeps live INSIDE the brain (not a parallel
+`models/leisure/` universe), tempo rides the same containment, and the
+kernel-driven autonomy (`leisure.autoPursue`) lands DEFAULT OFF with every
+budget-protection layer the repo already carries.
+
+### Added - containment: the keepers move into the brain tree
+
+- **`lib/leisure.js`**: ledger relocated `models/leisure/<brain>.json` →
+  `models/private/<brain>/.leisure.json` (the `.audit.json` precedent:
+  brain-scoped, dotted, runtime JSON). CONSEQUENCE FIXED: the old location
+  sat outside the horcrux/backup gather walk (`lib/transform.js` reads only
+  `models/{private,public}/<brain>/`) - a restored stone used to DROP the
+  whole want-list. Now play wakes from the stone like every other memory.
+  Legacy migration on first load (rename-into-brain; copy fallback;
+  best-effort, never fatal; empty legacy dir swept).
+- **`lib/tempo.js`**: ledger relocated `models/tempo/ledger.json` →
+  `models/private/<brain>/.tempo.json` - same ruling applied to the
+  D-constant telemetry receipts (a restored stone keeps its receipts trail).
+  Cache is path-keyed (brain switches reload honestly), legacy migration on
+  first ledger touch. Tempo's time math stays process-truth; the receipts
+  now persist like brain files.
+- Both ledgers ride the gitignored private tree (zero sync traffic);
+  brain-name sanitation unchanged (hostile names cannot escape
+  `models/private/<cleaned>/`).
+
+### Added - `leisure.autoPursue`: kernel-driven autonomy, default OFF
+
+The gate (`leisure.maybeAutoPursue()`, called from the consciousness idle
+seam AFTER the consult) lets the kernel pursue a held want - only when
+EVERY layer allows:
+
+- **Kill switch:** `leisure.autoPursue` (config or env
+  `VANT_LEISURE_AUTO_PURSUE`) - **default OFF**, and OFF is a SILENT no-op
+  (a stock idle consult costs nothing and spams nothing).
+- **Caps:** `leisure.autoPursueMaxWindowMs` (default 15 min) +
+  `leisure.autoPursueDailyMs` (default 30 min, day-rolled usage in the
+  ledger's `.auto` meta). Windows shrink-to-fit; exhausted days refuse.
+- **QoS breaker:** circuit OPEN → no play.
+- **Work precedence:** an open era (work owns the attention) or a live
+  tempo budget → no play. (`sliceMs` shrinks with short windows - tempo
+  refuses a slice longer than its budget, caught live by the arm pin.)
+- **Executable provider:** the kernel executes NO prose - the agent runtime
+  attaches a provider via `leisure.registerAutoStepProvider(fn,
+  { skill: 'rest', chain: [...] })`, so the behavior source stays the
+  EXISTING skills chain (`lib/skills.js` manifest + `skill.chain`
+  recursive loading; `vant-skill-rest` is the chain head).
+- **Escrow for token-cost steps:** a provider declaring `tokenCost: true`
+  must pass a ZERO-DEFAULT escrow probe (`escrow.create({ defaultBudget: 0
+  }).canSpend('brain:<id>', 1)`) - ONLY identities the operator explicitly
+  funded (persisted budget row) open the token lane. The helper model's
+  ready default (1000 units for any unknown id) would have let a stock
+  install grant token play silently - exactly the bill-run scenario the
+  owner asked to prevent. Free-lane local steps always remain (a $0 agent
+  can still stare at sunflower seeds).
+- **Events:** `leisure:auto_pursued` { want, windowMs, dailyUsed, dailyCap,
+  skill, chain } and `leisure:auto_refused` { reason } declared in
+  event-types; refused-but-enabled is NON-silent (off = silent, refusal =
+  receipt); `consciousness:leisure_auto` rides the idle seam on arm.
+
+### Pins + docs
+
+- `test/leisure.test.js` 15 → 22: containment path pin, legacy-migration
+  pin (rename + payload arrival + legacy consumed), and the FULL gate
+  matrix - default-off silence, no-provider non-silent refusal event,
+  cap-respecting REAL budget arm with daily-usage accrual (in the
+  contained ledger), daily-cap exhaustion, breaker OPEN, open-era
+  precedence, and the token-cost escalation (refuses unfunded → opens
+  explicitly funded → zero-tombstone cleanup; order-proof via a self-heal
+  reset). `test/tempo.test.js` 13 → 14 (containment path pin + legacy
+  migration pin with payload arrival). Two live bugs the pins caught:
+  the same-ms mtime tie between a renamed legacy file and the previous
+  ledger write (cache staleness - `_migrateLegacy` now invalidates), and
+  the short-window slice overflow (auto windows now shrink sliceMs).
+- Docs: `docs/memory/leisure.md` + `docs/memory/tempo.md` contract paths
+  updated; runtime ledgers' gitignore entries dropped (the dirs no longer
+  exist; `models/private/` is ignored wholesale).
+
 ## [Unreleased] - pass 208 (#196 leisure: the free-time keeper + the zen/dream/tempo loop)
 
 Issues closed this pass: **#197** (tempo loop-first pass delivered in 207c;

@@ -42,8 +42,8 @@ let leisure = load();
 const tempo = require(path.join(ROOT, 'lib', 'tempo'));
 
 const LW_FILE = leisure._ledgerPath(BRAIN);
-assert.ok(LW_FILE.includes(path.join('models', 'leisure')), 'ledger stays under models/leisure: ' + LW_FILE);
-assert.ok(/lwtest\.json$/.test(LW_FILE), 'per-brain filename: ' + LW_FILE);
+assert.ok(/models[\\\/]private[\\\/]lwtest[\\\/]\.leisure\.json$/.test(LW_FILE.replace(/\\/g, '/')), 'ledger INSIDE the brain (pass 209 containment): ' + LW_FILE);
+assert.ok(/\.leisure\.json$/.test(LW_FILE), 'per-brain dotted filename: ' + LW_FILE);
 
 function resetLedger() {
     try { fs.rmSync(LW_FILE, { force: true }); } catch (e) {}
@@ -213,14 +213,138 @@ test('isolation: re-require is side-effect free and path-stable', () => {
     assert.ok(Array.isArray(fresh.wantsToDo(OPT)) && fresh.wantsToDo(OPT).length === 1, 'reload sees the persisted list (disk truth)');
 });
 
-test('isolation: non-safe brain names cannot escape models/leisure', () => {
+test('isolation: non-safe brain names cannot escape models/private/<brain>', () => {
     for (const hostile of ['../../evil', '../..', '/abs/path', 'a/b/c']) {
         const p = leisure._ledgerPath(hostile);
         const resolved = path.resolve(p);
         assert.ok(!p.includes('..'), 'no traversal survives the brain name: ' + p);
-        assert.ok(resolved.endsWith(path.join('models', 'leisure') + path.sep + path.basename(p)), 'every ledger stays inside models/leisure: ' + resolved);
+        assert.ok(resolved.endsWith(path.join('models', 'private') + path.sep + path.basename(resolved.replace(/\.leisure\.json$/, '')) + path.sep + '.leisure.json'), 'every ledger stays inside the private brain tree: ' + resolved);
     }
 });
+
+test('containment migration: a legacy models/leisure/<brain>.json rides into the brain', () => {
+    const legacyDir = path.join(ROOT, 'models', 'leisure');
+    const legacyFile = path.join(legacyDir, BRAIN + '.json');
+    fs.mkdirSync(legacyDir, { recursive: true });
+    fs.writeFileSync(legacyFile, JSON.stringify({ brain: BRAIN, wants: [{ id: 'lw-legacy', want: 'legacy pin want', brain: BRAIN, addedAt: 1, pursuedCount: 0, lastPursued: null }], history: [] }));
+    fs.rmSync(LW_FILE, { force: true });
+    let moved = false;
+    try { moved = leisure._migrateLegacy(BRAIN); } catch (e) { assert.fail('migration must never throw: ' + e.message); }
+    assert.strictEqual(moved, true, 'rename-into-brain reported');
+    assert.ok(leisure.wantsToDo(OPT).some(w => w.want === 'legacy pin want'), 'the legacy payload arrived at the contained path');
+    assert.ok(!fs.existsSync(legacyFile), 'legacy file consumed');
+    fs.rmSync(LW_FILE, { force: true }); // clean slate for later pins
+});
+
+// ---------- the autonomy gate (#196 pass 209, kernel-driven option A) ----------
+
+const evMod = require(path.join(ROOT, 'lib', 'event'));
+
+function withEnv(map, fn) {
+    const prev = {};
+    for (const [k, v] of Object.entries(map)) { prev[k] = process.env[k]; if (v === undefined) delete process.env[k]; else process.env[k] = v; }
+    try { return fn(); }
+    finally { for (const [k, v] of Object.entries(prev)) { if (v === undefined) delete process.env[k]; else process.env[k] = v; } }
+}
+
+resetLedger();
+leisure.want('auto-pin: the walkthrough want', OPT);
+
+const TEMPO_FILE_AUTO = tempo._ledgerPath();
+try { fs.rmSync(TEMPO_FILE_AUTO, { force: true }); } catch (e) {}
+
+test('gate: default OFF is a silent no-op (stock idle consult arms nothing)', () => withEnv({ VANT_LEISURE_AUTO_PURSUE: undefined }, () => {
+    let out = null;
+    try { out = leisure.maybeAutoPursue(OPT); } catch (e) { assert.fail('default OFF must be a silent no-op, never throw: ' + e.message); }
+    assert.ok(out && out.ok === false && out.silent === true, 'default OFF → silent no-op: ' + JSON.stringify(out));
+    assert.ok(!tempo.budgetActive(), 'nothing armed on a stock install');
+}));
+
+test('gate: enabled but no provider → honest, non-silent refusal event', () => withEnv({ VANT_LEISURE_AUTO_PURSUE: 'true' }, () => {
+    const refusals = [];
+    evMod.on('leisure:auto_refused', d => refusals.push(d));
+    leisure.registerAutoStepProvider(null); // no runtime attached
+    const out = leisure.maybeAutoPursue(OPT);
+    assert.ok(out && out.ok === false && /provider/.test(out.reason), 'no provider → honest refusal: ' + JSON.stringify(out));
+    assert.strictEqual(out.silent, undefined, 'enabled-but-refused is NOT silent (operators need the receipt)');
+    assert.ok(refusals.length === 1, 'auto_refused event emitted exactly once');
+}));
+
+test('gate: provider + kill switch on → REAL budget arms within caps; daily usage accrues', () => withEnv({
+    VANT_LEISURE_AUTO_PURSUE: 'true',
+    VANT_LEISURE_AUTO_MAX_WINDOW_MS: '6000',
+    VANT_LEISURE_AUTO_DAILY_MS: '60000'
+}, () => {
+    let stepCalls = 0;
+    leisure.registerAutoStepProvider((want) => { stepCalls++; return { learned: 'auto-pin step for ' + want }; }, { skill: 'rest', chain: ['vant-skill-rest'] });
+    const out = leisure.maybeAutoPursue(OPT);
+    assert.ok(out && out.ok === true, 'armed under the gate (want: ' + out.want + ', windowMs: ' + out.windowMs + ')');
+    assert.ok(out.windowMs <= 6000, 'window within the configured cap: ' + out.windowMs);
+    assert.ok(!!tempo.budgetActive(), 'a REAL tempo budget is carrying the play');
+    const ledger = JSON.parse(fs.readFileSync(LW_FILE, 'utf8'));
+    assert.ok(ledger.auto && ledger.auto.usedMs <= 6000 && ledger.auto.day, 'daily usage accrues in the contained ledger');
+    out.controller.end('auto-pin done');
+    leisure.forget('auto-pin walkthrough', OPT);
+}));
+
+test('gate: daily cap exhaustion refuses honestly', () => withEnv({ VANT_LEISURE_AUTO_PURSUE: 'true', VANT_LEISURE_AUTO_DAILY_MS: '1' }, () => {
+    const out = leisure.maybeAutoPursue(OPT);
+    assert.ok(out && out.ok === false && /daily auto-pursue budget exhausted/.test(out.reason), 'daily cap refuses: ' + JSON.stringify(out));
+}));
+
+test('gate: circuit breaker OPEN refuses', () => withEnv({ VANT_LEISURE_AUTO_PURSUE: 'true' }, () => {
+    const qos = require(path.join(ROOT, 'lib', 'qos'));
+    const realStatus = qos.getCircuitStatus;
+    qos.getCircuitStatus = () => ({ open: true, failures: 99 });
+    try {
+        const out = leisure.maybeAutoPursue(OPT);
+        assert.ok(out && out.ok === false && /circuit breaker open/.test(out.reason), 'breaker OPEN refuses: ' + JSON.stringify(out));
+    } finally {
+        qos.getCircuitStatus = realStatus;
+    }
+}));
+
+test('gate: open era (work precedence) refuses', () => withEnv({ VANT_LEISURE_AUTO_PURSUE: 'true' }, () => {
+    const era = require(path.join(ROOT, 'lib', 'era'));
+    const realCurrent = era.current;
+    era.current = () => ({ open: true, era: { intent: 'work pin' } });
+    try {
+        const out = leisure.maybeAutoPursue(OPT);
+        assert.ok(out && out.ok === false && /era is open/.test(out.reason), 'open-era work precedence refuses: ' + JSON.stringify(out));
+    } finally {
+        era.current = realCurrent;
+    }
+}));
+
+test('gate: token-cost step refuses unfunded, opens explicitly funded, zero-leak cleanup', () => withEnv({ VANT_LEISURE_AUTO_PURSUE: 'true' }, () => {
+    const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    leisure.registerAutoStepProvider(() => ({ learned: 'token pin' }), { tokenCost: true });
+    try {
+        // (0) self-heal: an earlier partial run may have persisted funding —
+        // zero the row first so the refusal half is order-proof.
+        escrow.create({}).setBudget('brain:lwtest', 0);
+
+        // (a) UNFUNDED identity → the zero-default probe refuses closed.
+        // (The escrow helper's ready default of 1000 units for any unknown
+        // id would let a stock install grant token play silently — the
+        // probe deliberately builds with defaultBudget: 0.)
+        let out = leisure.maybeAutoPursue(OPT);
+        assert.ok(out && out.ok === false && /escrow/.test(out.reason), 'unfunded token-cost play refuses closed');
+        assert.ok(!tempo.budgetActive(), 'refused before any budget armed (zero tokens spent)');
+
+        // (b) EXPLICITLY funded identity (persisted row) → the gate opens.
+        escrow.create({}).setBudget('brain:lwtest', 5);
+        out = leisure.maybeAutoPursue(OPT);
+        assert.ok(out && out.ok === true, 'funded identity opens the token gate (want: ' + out.want + ')');
+        out.controller.end('token-pin done');
+
+        // (c) cleanup: drop the row to zero (an inert tombstone in the
+        // shared, gitignored escrow store — no default grants leak out).
+        escrow.create({}).setBudget('brain:lwtest', 0);
+    } finally {
+        leisure.registerAutoStepProvider(null);
+    }
+}));
 
 // ---------- report ----------
 

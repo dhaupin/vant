@@ -48,7 +48,7 @@ tempo.parseDuration("1h 30m")            -> 5400000 (natural phrasing OK)
 tempo.beginBudget({duration, sliceMs, label, onSlice})
     -> controller { id, start, windowEnd, slicesTotal, remaining(), stop(), end(reason) }
 tempo.pace(want, stepFn)                 -> { ok, learned, line }  (explore, learn, note)
-tempo.budgetActive()                     -> { id, label, remaining } | null
+tempo.budgetActive() -> an active window's identity, or null (we're free)
 tempo.status() / tempo.reconcile()
 ```
 
@@ -57,7 +57,12 @@ Events (catalogue-declared in `lib/event-types.js`): `tempo:budget-start`,
 
 ## Contracts
 
-- **Isolation:** the ledger lives at `models/tempo/ledger.json` (outside
+- **Isolation:** the ledger lives INSIDE the brain at
+  `models/private/<brain>/.tempo.json` (pass 209 containment ruling: the
+  per-slice receipts are the D-constant telemetry, and they ride the
+  horcrux/backup gather - a restored stone keeps its receipts trail). The
+  pre-209 `models/tempo/ledger.json` location is migrated on first ledger
+  touch (time accounting stays process math; the receipts persist).
   the brain stack, no work-path storage chain); writes are crash-safe
   (`lib/primitives.atomicWriteFile`); a broken or failing slice callback
   is recorded as its own receipt line and **never** blocks any work path.

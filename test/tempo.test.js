@@ -7,8 +7,8 @@
  * resumability semantics (epoch clock; reconcile closes unsupervised
  * expiry, never restarts from T+0), pace() loop-shape, budgetActive()
  * consult for consciousness-idle, and the isolation rule (a broken tempo
- * call never throws into a caller's work path; ledger stays in
- * models/tempo).
+ * call never throws into a caller's work path; ledger stays in the brain
+ * (models/private/<brain>/.tempo.json, pass 209 containment ruling).
  *
  * Async note: the window-drain pin runs on REAL timers (6s budget, 2s
  * slice, ~8s settle) — the only honest way to pin "slices SAMPLE the
@@ -30,10 +30,16 @@ console.log('\n⏳ TEMPO TESTS (#197 — time-dilation keeper, loop first)\n');
 
 const tempo = require(path.join(ROOT, 'lib', 'tempo'));
 
-// clean slate per run — tempo writes ONLY under models/tempo
-const TEMPO_DIR = path.join(ROOT, 'models', 'tempo');
-if (!/tempo$/.test(TEMPO_DIR)) throw new Error('tempo dir assertion broke');
-try { fs.rmSync(TEMPO_DIR, { recursive: true, force: true }); } catch (e) {}
+// clean slate per run — tempo writes ONLY its own per-brain ledger file
+// (models/private/<current brain>/.tempo.json). ONLY the ledger file is
+// removed — never the brain directory it lives in.
+const TEMPO_FILE = tempo._ledgerPath();
+if (!/\.tempo\.json$/.test(TEMPO_FILE)) throw new Error('tempo ledger assertion broke: ' + TEMPO_FILE);
+try { fs.rmSync(TEMPO_FILE, { force: true }); } catch (e) {}
+// legacy leftover from a pre-209 install (if any) — the migration pin
+// below needs a controlled copy, so sweep the real one here.
+const LEGACY_FILE = path.join(ROOT, 'models', 'tempo', 'ledger.json');
+try { fs.rmSync(LEGACY_FILE, { force: true }); } catch (e) {} // (dir left intact if real files exist — never rm -rf the private tree)
 
 // ---------- parseDuration (owner phrasing → epoch delta) ----------
 
@@ -82,6 +88,7 @@ test('sliceMs accepts parsed forms too (2m / epoch ms)', () => {
     const c = tempo.beginBudget({ duration: '6 min', sliceMs: '2m', label: 'slice-parse' });
     assert.strictEqual(c.slicesTotal, 3);
     c.stop();
+    c.end('pin: slice-parse verified - nothing left live in the real brain ledger');
 });
 
 // ---------- the sampled loop (async drain pin, REAL timers) ----------
@@ -171,9 +178,25 @@ test('module re-require is side-effect free (tempo never gates a work path)', ()
     assert.strictEqual(typeof fresh.parseDuration, 'function');
 });
 
-test('ledger stays inside models/tempo — zero coupling into workspace storage', () => {
+test('ledger lives INSIDE the brain — models/private/<brain>/.tempo.json (pass 209 containment)', () => {
     const norm = tempo._ledgerPath().replace(/\\/g, '/');
-    assert.ok(/models\/tempo\/ledger\.json$/.test(norm));
+    assert.ok(/models\/private\/[^/]+\/\.tempo\.json$/.test(norm), 'per-brain contained: ' + norm);
+});
+
+test('containment migration: a legacy models/tempo/ledger.json rides into the brain', () => {
+    const legacyDir = path.join(ROOT, 'models', 'tempo');
+    const legacy = path.join(legacyDir, 'ledger.json');
+    fs.mkdirSync(legacyDir, { recursive: true });
+    fs.writeFileSync(legacy, JSON.stringify({ budgets: { 'legacy-budget': { id: 'legacy-budget', state: 'expired' } }, receipts: [{ ts: 1, line: 'legacy receipt' }] }));
+    fs.rmSync(TEMPO_FILE, { force: true });
+    let moved = false;
+    try { moved = tempo._migrateLegacy(); } catch (e) { assert.fail('migration must never throw: ' + e.message); }
+    assert.strictEqual(moved, true, 'rename-into-brain reported');
+    const raw = tempo._readLedger();
+    assert.ok(raw.budgets['legacy-budget'], 'the legacy payload arrived');
+    assert.ok(fs.existsSync(TEMPO_FILE), 'ledger at the contained path');
+    assert.ok(!fs.existsSync(legacy), 'legacy file consumed');
+    fs.rmSync(TEMPO_FILE, { force: true }); // leave the clean slate for later pins
 });
 
 // ---------- settle: let the async drain pin resolve, then verdict ----------

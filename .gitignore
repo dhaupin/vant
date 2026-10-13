@@ -114,6 +114,6 @@ models/audit-rotate/
 # Entropy patch scratch dirs (mkdtemp vestiges from createAdaptivePatch — see lib/entropy-patch.js)
 entropy-adaptive-*/
 
-# Tempo + leisure runtime ledgers (live receipts / want-lists are per-runtime state, not template)
-models/leisure/
-models/tempo/
+# (pass 209: tempo/leisure ledgers moved INSIDE the brain — models/private/
+# is already ignored wholesale; the legacy models/tempo / models/leisure
+# dirs are migrated away on first load.)
