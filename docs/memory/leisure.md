@@ -67,13 +67,11 @@ Events (catalogue-declared in `lib/event-types.js`): `leisure:wanted`,
 `leisure:pursued`, `leisure:forgotten`, `leisure:zen_breath`,
 `leisure:dream_review`.
 
-## Contracts
-
-- **Containment (pass 209 ruling):** the ledger lives INSIDE the brain at
-  `models/private/<brain>/.leisure.json`  (the `.audit.json` precedent:
+## Contracts- **Containment (pass 209 ruling):** the ledger lives INSIDE the brain at
+  `models/private/<brain>/.leisure.json` (the `.audit.json` precedent:
   brain-scoped, dotted, runtime JSON). Play is individual and rides horcrux:
-  a restored stone wakes with its want-list. The pre-209
-  `models/leisure/<brain>.json` location is migrated on first load. Crash-safe
+  a restored stone wakes with its want-list. (No legacy migration: the
+  keeper shipped and contained in the same unreleased cycle.) Crash-safe
   via atomic write; MUST NOT gate any work path - a broken play engine never
   blocks a build.
 - **The autonomy gate (kernel-driven option A, default OFF):**

@@ -222,19 +222,9 @@ test('isolation: non-safe brain names cannot escape models/private/<brain>', () 
     }
 });
 
-test('containment migration: a legacy models/leisure/<brain>.json rides into the brain', () => {
-    const legacyDir = path.join(ROOT, 'models', 'leisure');
-    const legacyFile = path.join(legacyDir, BRAIN + '.json');
-    fs.mkdirSync(legacyDir, { recursive: true });
-    fs.writeFileSync(legacyFile, JSON.stringify({ brain: BRAIN, wants: [{ id: 'lw-legacy', want: 'legacy pin want', brain: BRAIN, addedAt: 1, pursuedCount: 0, lastPursued: null }], history: [] }));
-    fs.rmSync(LW_FILE, { force: true });
-    let moved = false;
-    try { moved = leisure._migrateLegacy(BRAIN); } catch (e) { assert.fail('migration must never throw: ' + e.message); }
-    assert.strictEqual(moved, true, 'rename-into-brain reported');
-    assert.ok(leisure.wantsToDo(OPT).some(w => w.want === 'legacy pin want'), 'the legacy payload arrived at the contained path');
-    assert.ok(!fs.existsSync(legacyFile), 'legacy file consumed');
-    fs.rmSync(LW_FILE, { force: true }); // clean slate for later pins
-});
+// (pass 209b: NO legacy migration — pre-release keeper, nothing shipped
+// with the old models/leisure/ path, so there is nothing to migrate and
+// no migration pin.)
 
 // ---------- the autonomy gate (#196 pass 209, kernel-driven option A) ----------
 

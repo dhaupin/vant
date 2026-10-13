@@ -60,9 +60,9 @@ Events (catalogue-declared in `lib/event-types.js`): `tempo:budget-start`,
 - **Isolation:** the ledger lives INSIDE the brain at
   `models/private/<brain>/.tempo.json` (pass 209 containment ruling: the
   per-slice receipts are the D-constant telemetry, and they ride the
-  horcrux/backup gather - a restored stone keeps its receipts trail). The
-  pre-209 `models/tempo/ledger.json` location is migrated on first ledger
-  touch (time accounting stays process math; the receipts persist).
+  horcrux/backup gather - a restored stone keeps its receipts trail). No
+  legacy migration: this keeper shipped and contained in the same
+  unreleased cycle. Time accounting stays process math; the receipts persist).
   the brain stack, no work-path storage chain); writes are crash-safe
   (`lib/primitives.atomicWriteFile`); a broken or failing slice callback
   is recorded as its own receipt line and **never** blocks any work path.

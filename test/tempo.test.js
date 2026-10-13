@@ -36,10 +36,8 @@ const tempo = require(path.join(ROOT, 'lib', 'tempo'));
 const TEMPO_FILE = tempo._ledgerPath();
 if (!/\.tempo\.json$/.test(TEMPO_FILE)) throw new Error('tempo ledger assertion broke: ' + TEMPO_FILE);
 try { fs.rmSync(TEMPO_FILE, { force: true }); } catch (e) {}
-// legacy leftover from a pre-209 install (if any) — the migration pin
-// below needs a controlled copy, so sweep the real one here.
-const LEGACY_FILE = path.join(ROOT, 'models', 'tempo', 'ledger.json');
-try { fs.rmSync(LEGACY_FILE, { force: true }); } catch (e) {} // (dir left intact if real files exist — never rm -rf the private tree)
+// (pass 209b: NO legacy migration — pre-release keeper, nothing shipped
+// with the old models/tempo/ path, so there is nothing to migrate.)
 
 // ---------- parseDuration (owner phrasing → epoch delta) ----------
 
@@ -181,22 +179,6 @@ test('module re-require is side-effect free (tempo never gates a work path)', ()
 test('ledger lives INSIDE the brain — models/private/<brain>/.tempo.json (pass 209 containment)', () => {
     const norm = tempo._ledgerPath().replace(/\\/g, '/');
     assert.ok(/models\/private\/[^/]+\/\.tempo\.json$/.test(norm), 'per-brain contained: ' + norm);
-});
-
-test('containment migration: a legacy models/tempo/ledger.json rides into the brain', () => {
-    const legacyDir = path.join(ROOT, 'models', 'tempo');
-    const legacy = path.join(legacyDir, 'ledger.json');
-    fs.mkdirSync(legacyDir, { recursive: true });
-    fs.writeFileSync(legacy, JSON.stringify({ budgets: { 'legacy-budget': { id: 'legacy-budget', state: 'expired' } }, receipts: [{ ts: 1, line: 'legacy receipt' }] }));
-    fs.rmSync(TEMPO_FILE, { force: true });
-    let moved = false;
-    try { moved = tempo._migrateLegacy(); } catch (e) { assert.fail('migration must never throw: ' + e.message); }
-    assert.strictEqual(moved, true, 'rename-into-brain reported');
-    const raw = tempo._readLedger();
-    assert.ok(raw.budgets['legacy-budget'], 'the legacy payload arrived');
-    assert.ok(fs.existsSync(TEMPO_FILE), 'ledger at the contained path');
-    assert.ok(!fs.existsSync(legacy), 'legacy file consumed');
-    fs.rmSync(TEMPO_FILE, { force: true }); // leave the clean slate for later pins
 });
 
 // ---------- settle: let the async drain pin resolve, then verdict ----------

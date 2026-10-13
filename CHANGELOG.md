@@ -20,14 +20,14 @@ budget-protection layer the repo already carries.
   sat outside the horcrux/backup gather walk (`lib/transform.js` reads only
   `models/{private,public}/<brain>/`) - a restored stone used to DROP the
   whole want-list. Now play wakes from the stone like every other memory.
-  Legacy migration on first load (rename-into-brain; copy fallback;
-  best-effort, never fatal; empty legacy dir swept).
+  (Pass 209b owner simplification: NO legacy migration - this keeper was
+  built and contained in the same unreleased cycle, nothing ever shipped
+  on the old path, so there is nothing to migrate.)
 - **`lib/tempo.js`**: ledger relocated `models/tempo/ledger.json` →
   `models/private/<brain>/.tempo.json` - same ruling applied to the
   D-constant telemetry receipts (a restored stone keeps its receipts trail).
-  Cache is path-keyed (brain switches reload honestly), legacy migration on
-  first ledger touch. Tempo's time math stays process-truth; the receipts
-  now persist like brain files.
+  Cache is path-keyed (brain switches reload honestly). Tempo's time math
+  stays process-truth; the receipts now persist like brain files.
 - Both ledgers ride the gitignored private tree (zero sync traffic);
   brain-name sanitation unchanged (hostile names cannot escape
   `models/private/<cleaned>/`).
@@ -68,18 +68,20 @@ EVERY layer allows:
 
 ### Pins + docs
 
-- `test/leisure.test.js` 15 → 22: containment path pin, legacy-migration
-  pin (rename + payload arrival + legacy consumed), and the FULL gate
+- `test/leisure.test.js` 15 → 21: containment path pin and the FULL gate
   matrix - default-off silence, no-provider non-silent refusal event,
   cap-respecting REAL budget arm with daily-usage accrual (in the
   contained ledger), daily-cap exhaustion, breaker OPEN, open-era
   precedence, and the token-cost escalation (refuses unfunded → opens
   explicitly funded → zero-tombstone cleanup; order-proof via a self-heal
-  reset). `test/tempo.test.js` 13 → 14 (containment path pin + legacy
-  migration pin with payload arrival). Two live bugs the pins caught:
-  the same-ms mtime tie between a renamed legacy file and the previous
-  ledger write (cache staleness - `_migrateLegacy` now invalidates), and
-  the short-window slice overflow (auto windows now shrink sliceMs).
+  reset). `test/tempo.test.js`: containment path pin (13 total). A live
+  bug the first containment pins caught: the same-ms mtime tie between a
+  renamed legacy file and the previous ledger write could mask the swap
+  from the cache (disk-truth refresh hardening landed); the short-window
+  slice overflow (auto windows now shrink sliceMs) was caught the same
+  way. (Pass 209b: the migration machinery itself was REMOVED per owner
+  ruling - pre-release keepers carry no compat code; the pins moved with
+  it.)
 - Docs: `docs/memory/leisure.md` + `docs/memory/tempo.md` contract paths
   updated; runtime ledgers' gitignore entries dropped (the dirs no longer
   exist; `models/private/` is ignored wholesale).
