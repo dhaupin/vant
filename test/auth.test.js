@@ -254,6 +254,35 @@ test('R1 matrix: authRequired + no configured key refuses the presented key (no 
     return { success: verdict && verdict.valid === false, error: JSON.stringify(verdict) };
 });
 
+console.log('\n🔐 #186-R2 HONESTY PINS (pass 207)\n');
+
+test('R2: revokeToken answers honestly — never silently succeeds on stateless tokens', () => {
+    const auth = new Auth({});
+    const r = auth.revokeToken('any-token');
+    const ok = r && r.revoked === false && r.stateless === true && /H1/.test(r.note) && /\(\#185\)/.test(r.note);
+    return { success: ok, error: JSON.stringify(r) };
+});
+
+test('R2: checkPermission validates the key, documents the unenforced permission (no lie)', () => {
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    proceedEnv({ VANT_AUTH_KEY: null, VANT_API_KEY: null, VANT_MCP_API_KEY: null });
+    const auth = new Auth({ apiKeyRequired: false });
+    const r = auth.checkPermission('some-key', 'org:write');
+    cleanupEnv();
+    const ok = r.allowed === true && r.permissionEnforced === false && /H1/.test(String(r.note));
+    return { success: ok, error: JSON.stringify(r) };
+});
+
+test('R2: getAccessLevel — valid key is admin (single-key canon, documented)', () => {
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    proceedEnv({ VANT_AUTH_KEY: 'pin-key', VANT_API_KEY: null, VANT_MCP_API_KEY: null });
+    const auth = new Auth({});
+    const lvl = auth.getAccessLevel('pin-key');
+    const nope = auth.getAccessLevel('wrong-key');
+    cleanupEnv();
+    return { success: lvl === 'admin' && nope === 'none', error: 'lvl=' + lvl + ' nope=' + nope };
+});
+
 console.log('\n🔒 #190-EW7 LOCKOUT RING-TRIM HERMETIC PINS (pass 226)\n');
 
 // Each pin runs in a throwaway repo root (VANT_REPO_ROOT) so the real
