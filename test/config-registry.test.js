@@ -81,5 +81,46 @@ ok('registry covers the prune/clean family', ['VANT_PRUNE_STALE_DAYS', 'VANT_PRU
 ok('registry covers VANT_STORAGE_PATH + escrow + agent.id + qos', ['VANT_STORAGE_PATH', 'VANT_ESCROW_DEFAULT_BUDGET', 'VANT_AGENT_ID', 'VANT_QOS_MAX_PER_MINUTE'].every(v => reg.some(e => e.env === v)));
 ok('registry grew past 40 entries (Wave-B stragglers registered)', config.envRegistry().length >= 40);
 
+// ── 8. Pass-225 pins: config.example.ini truthfulness + coverage ───────
+// ROADMAP said the example ini drifts from config.js; these pins make
+// that drift CI-detectable instead of a manual audit.
+const EXAMPLE_INI = fs.readFileSync(path.resolve(__dirname, '..', 'config.example.ini'), 'utf8');
+const registryNames = new Set(reg.map(e => e.env));
+// The ini dialect (MODEL_PATH/STEGOFRAME_*/GITHUB_* etc.) is READ by the
+// config.ini loader, not the env registry — legacy names stay allowed.
+const INI_DIALECT_ALLOWLIST = new Set([
+    'VANT_VERSION', 'MODEL_PATH', 'STEGOFRAME_URL', 'STEGOFRAME_ROOM',
+    'STEGOFRAME_PASSPHRASE', 'STEGOFRAME_MODE', 'GITHUB_REPO', 'GITHUB_BRANCH',
+    'GITHUB_TOKEN', 'POLLING_INTERVAL', 'MAX_REQUESTS_PER_HOUR',
+    'MAX_STRING_LENGTH', 'MAX_DEPTH', 'MAX_ARRAY_LENGTH',
+    'MAX_REQUESTS_PER_MINUTE', 'MAX_BURST', 'MAX_PATH_LENGTH',
+    'BLOCK_PATH_TRAVERSAL', 'AUDIT_LOG', 'AUDIT_FILE',
+]);
+const iniEnvNames = new Set(([...EXAMPLE_INI.matchAll(/^\s*#?\s*([A-Z][A-Z0-9_]{2,})(?==)/gm)] || []).map(m => m[1]));
+const fabricated = [...iniEnvNames].filter(n => !registryNames.has(n) && !INI_DIALECT_ALLOWLIST.has(n));
+ok('every env-name assignment in config.example.ini is a real runtime var (no fiction)',
+    fabricated.length === 0, 'fabricated: ' + fabricated.join(','));
+// Coverage (non-secret entries only): secrets and provider connector tokens
+// stay env-pointer-only BY DISPOSITION (an example file must never
+// normalize copying secrets into a config ini).
+const BEYOND_INI_DISPOSITION = new Set([
+    'VANT_GITHUB_TOKEN', 'VANT_AUTH_KEY', 'VANT_API_KEY', 'VANT_MCP_API_KEY',
+    'VANT_TOKEN_SECRET', 'VANT_WEBHOOK_SECRET',
+    'GITLAB_TOKEN', 'GITEA_TOKEN', 'BITBUCKET_TOKEN', 'GIT_TOKEN',
+]);
+const uncovered = reg
+    .filter(e => !e.secret && !BEYOND_INI_DISPOSITION.has(e.env))
+    .map(e => e.env)
+    .filter(env => !EXAMPLE_INI.includes(env));
+ok('every non-secret registry var is documented in config.example.ini',
+    uncovered.length === 0, 'uncovered: ' + uncovered.join(','));
+// The ROADMAP-named four + the #189-R1 canon var are registered.
+ok('registry covers the ROADMAP-named vars + VANT_AUTH_KEY canon',
+    ['VANT_BRAIN_PASSWORD_TIMEOUT', 'VANT_SERVER_INSECURE', 'VANT_SERVER_AUTH_REQUIRED', 'VANT_STORAGE_PATH', 'VANT_AUTH_KEY']
+        .every(v => registryNames.has(v)));
+const authKey = reg.find(e => e.env === 'VANT_AUTH_KEY');
+ok('VANT_AUTH_KEY registered canon (api.key, secret)',
+    authKey && authKey.key === 'api.key' && authKey.secret === true, JSON.stringify(authKey));
+
 console.log(`\n=== config-registry pins: ${pass} passed, ${fail} failed ===`);
 process.exit(fail ? 1 : 0);
