@@ -2,11 +2,43 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-13  
-**Session:** Pass 211 — H1 LANDED: per-identity multi-guest auth for the
-door (`lib/guests.js` + the door gate + the auth seam + `vant guest`);
-#187 headless pod + honest REST retire landed in pass 210
+**Session:** Pass 213 — H5 LANDED: per-tenant list filtering (the pass-211
+boundary closed); pass 212 H2/H3/H4 + pass 211 H1 landed before it
 
 ---
+
+## Session (2026-10-13 — pass 213: #185 H5 per-tenant list filtering LANDED)
+
+**Owner: "please push to Github and then let's continue on the issues."**
+Pushed pass 211+212 first (9d51951), then took the next runway item.
+
+**What landed:**
+
+- `guests.tenantAgentVisible(agentId, guestOwnerRef)` — the crew-roster
+  tenant rule is MEMBERSHIP truth: agents assigned inside the guest's
+  resolved container (scope.resolveMembers over the guest's scopeOwner)
+  are the guest's crew; unscoped guest = empty roster (fail-closed);
+  unknown container = deny; roster-module miss = deny.
+- `guests.tenantVisible(recordOwnerRef, guestOwnerRef)` — general matcher
+  for owner-ref records: unscoped record = public (the scope normalize()
+  legacy read rule); scoped rows visible to their own tenant or an
+  ANCESTOR CONTAINER, chained through REAL teams rows (org→dept→team);
+  member-set truth for agent-kind viewers; no hierarchy guessing.
+- Door wiring (mcp.js exec path): `agent_list` filters per tenant for
+  guests, reports the honest count, and degrades to an honest empty
+  roster on filter failure — never a crash, never unfiltered rows.
+  Non-guest calls untouched.
+- Boundary statement updated: the pass-211 "org-wide lists are
+  operator-trust surfaces" caveat is RETIRED for the roster; still tracked:
+  H6 QR pairing UX + channel-scope marking for msg_list (channels have no
+  owner concept yet).
+
+**Verification:** guests 17/17 (×2 — matcher rules, ancestry chain, member
+truth, and the DOOR truth: host sees all / team guest sees exactly its
+member / bare guest sees none); syntax OK on lib/guests.js + lib/mcp.js;
+changelog + multi-guest-auth.md updated.
+
+**NEXT-UP:** #185 H6 (QR pairing UX), msg channel-scope marking story.
 
 ## Session (2026-10-13 — pass 211: #185 H1 multi-guest auth LANDED)
 

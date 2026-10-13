@@ -76,8 +76,8 @@ escape `models/private/<cleaned>/`).
 
 - `scopeOwner` is a `lib/scope.js` owner ref (`org:`/`dept:`/`team:`/`agent:`,
   validated by the same parser, fail-closed on unknown kinds) - the tenancy
-  anchor for era-scoped listing (full per-tenant filtering of org-wide lists
-  is the #185 remaining item, see MVP boundary below).
+  anchor for era-scoped listing (per-tenant filtering of org-wide lists
+  landed in pass 213, see MVP boundary below).
 - `trustLevel` is a `lib/trust.js` level (`high`/`medium`/`low`/`none`) and can
   only RESTRICT, never grant beyond the role map: `medium`/`high` keep the role
   grants (the #185 acceptance - a remote browser must be able to spawn work),
@@ -151,15 +151,21 @@ same routing - the documented no-op note now applies only to non-guest keys.
 
 ---
 
-## MVP boundary (stated, not hidden)
+## MVP boundary (stated, then closed in pass 213)
 
 - Shipped: issuance, verification, per-role door gating, revocation, pairing
   redemption, brain-scoped durable ledgers, guest-scoped calling identity.
-- NOT yet shipped (tracked as #185's remaining runway): full per-tenant
-  filtering of org-wide list surfaces (the era-scoped tenancy in the issue's
-  acceptance), SSE taps (H2), cross-tenant enumeration throttling beyond the
-  guest-management block. Until then, treat org-wide lists behind the door as
-  operator-trust surfaces - guests must be issued knowing that.
+- Shipped pass 213 (H5, #185): PER-TENANT LIST FILTERING. The org-wide crew
+  roster (`agent_list`) answers a guest with ONLY its tenant's rows:
+  membership truth via `scope.resolveMembers` over the guest's `scopeOwner`; an
+  unscoped guest sees an empty roster (fail-closed); another tenant's agents are
+  withheld. A general matcher (`guests.tenantVisible`) applies the same rule to
+  any record carrying an owner ref: unscoped record = public; scoped row is
+  visible only to its own tenant or an ancestor container (org sees its depts
+  and chained teams; dept sees its teams; an agent member sees its container).
+- Still tracked as #185 runway: H6 QR pairing UX, cross-tenant enumeration
+  throttling beyond the guest-management block. Channel-scope marking for
+  `msg_list` is a separate story (channels have no owner concept yet).
 
 *Transport-level security (loopback binds, TLS, requireKey) is unchanged and
 removes nothing: [MCP Server](/vant/runtime/mcp) covers running and

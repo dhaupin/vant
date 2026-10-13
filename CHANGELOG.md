@@ -5,6 +5,45 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 213 (#185 H5: per-tenant list filtering — the pass-211 boundary closed)
+
+Pass 211 shipped the guest layer honestly and DECLARED its boundary: org-wide
+list surfaces answered a guest with the whole board. That blockade is now
+lifted — the crew roster answers a guest with ITS tenant's rows only.
+
+### Added - per-tenant roster filtering (`lib/guests.js` + the MCP door)
+
+- **`guests.tenantAgentVisible(agentId, guestOwnerRef)`**: the crew-roster
+  rule is MEMBERSHIP truth — agents assigned inside the guest's resolved
+  container (`scope.resolveMembers` over the guest's `scopeOwner`) are the
+  guest's crew; everything else is another tenant's roster. Fail-closed at
+  every miss: an unscoped guest sees an EMPTY roster; an unknown container
+  denies; a roster-module miss denies (never fail-open).
+- **`guests.tenantVisible(recordOwnerRef, guestOwnerRef)`**: the general
+  matcher for records that carry an owner ref. Unscoped record = public
+  (the `lib/scope normalize()` legacy read rule); a scoped row is visible
+  only to its own tenant or an ANCESTOR CONTAINER (org sees its depts and
+  chained teams; dept sees its teams; an agent member sees its member-set
+  containers). No hierarchy guessing — every step reads a real row.
+- **Door wiring (`lib/mcp.js`)**: `agent_list` behind the exec door filters
+  per tenant when the caller is a guest and reports the honest `count`.
+  Non-guest calls flow through untouched. A filter failure degrades to an
+  honest empty roster — never a crash, never unfiltered rows.
+
+### Boundary statement (docs/security/multi-guest-auth.md)
+
+- The pass-211 "org-wide lists are operator-trust surfaces" caveat is
+  RETIRED for the roster; what remains tracked: H6 QR pairing UX and
+  channel-scope marking for `msg_list` (channels have no owner concept yet).
+
+### Pins
+
+- `test/guests.test.js` (+4, 17/17 × 2 runs): matcher rules (public row /
+  own row / stranger row / scoped-row-vs-default-tenant), ancestry chain
+  through real teams rows (consistency with `resolveMembers` itself),
+  fail-closed misses, and the DOOR truth: host sees all, a team-scoped
+  guest sees exactly its member agent, an unscoped guest sees none.
+
 ## [Unreleased] - pass 212 (#185 H2/H3/H4: the event tap, era-context chat, and the composed work order)
 
 Three more #185 hits, each small in surface and heavy in composition.

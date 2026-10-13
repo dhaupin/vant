@@ -283,6 +283,108 @@ async function run() {
         guests._resetForTest();
     });
 
+    // ---------- pass 213 H5: per-tenant LIST filtering ----------
+    // Closes the pass-211 declared runway: org-wide roster surfaces filter an
+    // unscoped guest view nothing. The tenant rule is MEMBER truth through
+    // scope.resolveMembers + the teams rows; fail-closed at every miss.
+    async function h5TenantPins() {
+        const prevBrain = process.env.VANT_BRAIN;
+        process.env.VANT_BRAIN = BRAIN; // scope door state to the throwaway brain
+        try {
+            const _sb = require(path.join(ROOT, 'lib', 'sandbox')).defaultSandbox;
+            _sb.setCapabilities({ canRead: true, canWrite: true, canSpawn: true });
+            const teams = require(path.join(ROOT, 'lib', 'teams'));
+            const agents = require(path.join(ROOT, 'lib', 'agents'));
+            const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+            const scope = require(path.join(ROOT, 'lib', 'scope'));
+            const uniq = Date.now().toString(36);
+
+            test('H5 matcher: tenantVisible — public row / own row / stranger row / scoped row vs default tenant', () => {
+                const teamRef = 'team:pin_' + uniq;
+                assert.strictEqual(guests.tenantVisible(null, teamRef), true, 'unscoped record = public');
+                assert.strictEqual(guests.tenantVisible(teamRef, teamRef), true, 'own tenant row');
+                assert.strictEqual(guests.tenantVisible('team:stranger_' + uniq, teamRef), false, 'another team row withheld');
+                assert.strictEqual(guests.tenantVisible(teamRef, null), false, 'scoped row vs the default tenant withheld');
+            });
+
+            test('H5 matcher: ancestry — org sees its dept + chained team; dept sees its team; unrelated denies', async () => {
+                const org = teams.createOrg('H5org_' + uniq);
+                assert.ok(!org.error && org.id, 'org created: ' + JSON.stringify(org).slice(0, 80));
+                const dept = teams.createDept(org.id, 'H5dept_' + uniq);
+                assert.ok(!dept.error && dept.id, 'dept created: ' + JSON.stringify(dept).slice(0, 80));
+                const team = teams.createTeam('H5team_' + uniq, { dept: dept.id });
+                assert.ok(!team.error && team.id, 'team created: ' + JSON.stringify(team).slice(0, 80));
+                assert.strictEqual(guests.tenantVisible('dept:' + dept.id, 'org:' + org.id), true, 'org ancestor sees dept row');
+                assert.strictEqual(guests.tenantVisible('team:' + team.id, 'org:' + org.id), true, 'org ancestor sees its chained team row');
+                assert.strictEqual(guests.tenantVisible('team:' + team.id, 'dept:' + dept.id), true, 'dept ancestor sees its team row');
+                // member truth: an agent inside the container sees its rows
+                const memberTeam = teams.createTeam('H5mteam_' + uniq, { dept: dept.id });
+                const guestRef = 'agent:probe_' + uniq;
+                // Member truth: the matcher agrees with resolveMembers itself.
+                const memberOfTeam = (scope.resolveMembers('team:' + memberTeam.id) || new Set()).has('probe_' + uniq);
+                assert.strictEqual(guests.tenantVisible('team:' + memberTeam.id, guestRef), memberOfTeam, 'agent member truth honored (consistency with resolveMembers)');
+            });
+
+            test('H5 matcher: tenantAgentVisible — exact agent scope; container membership; fail-closed misses', async () => {
+                assert.strictEqual(guests.tenantAgentVisible('agent_1', 'agent:agent_1'), true, 'agent-scoped guest sees itself');
+                assert.strictEqual(guests.tenantAgentVisible('agent_1', 'agent:agent_2'), false, 'another agent withheld');
+                assert.strictEqual(guests.tenantAgentVisible('agent_1', null), false, 'unscoped guest = no roster');
+                assert.strictEqual(guests.tenantAgentVisible('agent_1', 'org:entity_' + uniq + '_nonesuch'), false, 'unknown container = fail-closed deny');
+            });
+
+            // Door-level: the REAL filtered views across /mcp/exec.
+            const port = 13477 + (process.pid % 40);
+            const call = async (hdrs) => {
+                const res = await fetch('http://127.0.0.1:' + port + '/mcp/exec', {
+                    method: 'POST',
+                    headers: Object.assign({ 'Content-Type': 'application/json' }, hdrs || {}),
+                    body: JSON.stringify({ tool: 'agent_list', args: {} })
+                });
+                const body = await res.json();
+                return body.result;
+            };
+
+            await (async () => {
+                // Build: org->dept->team, two agents (one assigned), scoped + bare guests.
+                const org = teams.createOrg('H5doororg_' + uniq);
+                const dept = teams.createDept(org.id, 'H5doordept_' + uniq);
+                const team = teams.createTeam('H5doorteam_' + uniq, { dept: dept.id });
+                const a1 = agents.spawn({ name: 'H5TenantBot_' + uniq });
+                const a2 = agents.spawn({ name: 'H5StrangerBot_' + uniq });
+                if (a1.error || a2.error) { failed++; console.log('  ✗ H5 door: agent spawn refused — ' + (a1.error || a2.error)); return; }
+                const asg = teams.assign(a1.id, { team: team.id });
+                if (asg && asg.error) { failed++; console.log('  ✗ H5 door: assign refused — ' + asg.error); return; }
+                const guestTok = guests.issue('pin-h5-guest', { role: 'human', scopeOwner: 'team:' + team.id }).token;
+                const bareTok = guests.issue('pin-h5-bare', { role: 'human' }).token;
+
+                await mcp.start({ port, silent: true });
+                try {
+                    const host = await call();
+                    const guestView = await call({ Authorization: 'Bearer ' + guestTok });
+                    const bareView = await call({ Authorization: 'Bearer ' + bareTok });
+                    const namesOf = (r) => (r && Array.isArray(r.agents)) ? r.agents.map(a => a.name) : [];
+                    const hN = namesOf(host), gN = namesOf(guestView), bN = namesOf(bareView);
+                    let ok = true, why = [];
+                    if (!hN.includes(a1.name) || !hN.includes(a2.name)) { ok = false; why.push('host view lost rows: ' + hN.length); }
+                    if (gN.length !== 1 || gN[0] !== a1.name) { ok = false; why.push('guest view wrong: ' + JSON.stringify(gN)); }
+                    if (bN.length !== 0) { ok = false; why.push('bare guest not empty: ' + JSON.stringify(bN)); }
+                    if (guestView.count !== undefined && guestView.count !== 1) { ok = false; why.push('count mismatch: ' + guestView.count); }
+                    passed += ok ? 1 : 0; failed += ok ? 0 : 1;
+                    console.log(ok ? '  ✓ H5 door: host sees all, team guest sees ONLY its member, bare guest sees none' : '  ✗ H5 door: ' + why.join('; '));
+                } finally {
+                    await mcp.stop();
+                }
+            })();
+        } catch (e) {
+            failed++;
+            console.log('  ✗ H5 block error — ' + (e.stack || e.message));
+        } finally {
+            if (prevBrain === undefined) delete process.env.VANT_BRAIN; else process.env.VANT_BRAIN = prevBrain;
+        }
+    }
+
+    await h5TenantPins();
+
     console.log('\n=== guests: ' + passed + ' passed, ' + failed + ' failed ===\n');
     process.exit(failed > 0 ? 1 : 0);
 }
