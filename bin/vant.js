@@ -268,6 +268,8 @@ const COMMANDS = {
     qc: 'qc.js',
     // vant init: the First Five Minutes wizard (issue #182)
     init: 'init.js',
+    // vant tempo: the time-dilation keeper door (issue #197)
+    tempo: 'tempo.js',
 
     // Bin CLIs that existed but were never routed (pass 18 bin sweep)
     org: 'org.js',

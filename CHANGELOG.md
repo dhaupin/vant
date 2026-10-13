@@ -5,7 +5,7 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - pass 207 (pass-190/206 close-out: #189 wave-3 gate, R5 truth, door sweep, #195 art packs)
+## [Unreleased] - pass 207c (pass-190/206 close-out + #195 art packs + #197 tempo)
 
 ### Fixed - #189 close-out: the last two unexecuted battery items landed
 
@@ -26,6 +26,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   exit 0, plaintext intact).
 - **Battery item 3: `vant health` exit 0; brain re-anchored with descriptive
   cause** (pass-190/206 sweep) and `vant horcrux verify` now reports green.
+
+### Added - #197 tempo: the time-dilation keeper (loop first, formula later)
+
+- **`lib/tempo.js` (NEW)** — an owner-stated wall-clock budget becomes N
+  sampled exploration slices spread ACROSS the interval (fixed-slice
+  floor: default one slice per 2 wall-minutes; a "30 minutes" budget is
+  15 slices) - the loop from the issue: explore, learn, note, re-enter,
+  until the epoch tick catches up. The dilation constant D lands later
+  from per-slice telemetry (the receipts ARE that telemetry).
+- **Door:** `vant tempo begin|status|stop|end|receipts|pace` (wired in
+  bin/vant.js dispatcher). Durations take cron-style specs, epoch ms, and
+  natural owner phrasings ("30 minutes", "1h 30m", "an hour").
+- **Persistence + resumability:** ledger at `models/tempo/ledger.json`
+  (outside the brain stack; crash-safe atomic writes); budgets persist
+  with window bounds; `reconcile()` closes unsupervised expiry on load
+  (the epoch is the clock, NOT the invocation - a crash resumes with the
+  remaining window, never restarting from T+0). Cross-process truth via
+  mtime freshness checks (the CLI end verb writes from another process).
+- **Isolation rule:** a failing slice callback is recorded as its own
+  receipt line and NEVER blocks a work path; module load is side-effect
+  free; ledger pinned inside `models/tempo/`.
+- **Consciousness idle consult (#196 integration):**
+  `consciousness.setState('idle')` checks `tempo.budgetActive()` and
+  emits `consciousness:tempo_idle` when a window is live - idle no longer
+  decays silently into nothing.
+- **Catalogue:** `tempo:budget-start` / `tempo:slice` / `tempo:budget-end`
+  / `tempo:budget-cancelled` / `tempo:paced` declared in event-types (the
+  durable-subscriber contract).
+- **Pins:** `test/tempo.test.js` (14) - duration matrix, sampled-window
+  drain (REAL timers: 6s budget/2s slices drained near T+6s with per-slice
+  receipts, not at T+0), reconcile-once semantics, pace loop-shape (learn
+  AND misfire recorded), ledger-path pin, side-effect-free re-require.
+  Two live bugs caught and fixed by the packet: the slice ledger wrote a
+  fresh-read copy (dropping the receipt the slice just appended) and the
+  writer left the cache stale across processes. Docs:
+  `docs/memory/tempo.md` (frontmatter + style gates PASS).
 
 ### Added - #195 art packs: horcrux stones upgrade from 3 circles to generative math-art
 
