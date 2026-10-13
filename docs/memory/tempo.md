@@ -81,6 +81,6 @@ Events (catalogue-declared in `lib/event-types.js`): `tempo:budget-start`,
 | Question | Provisional answer shipped |
 |---|---|
 | Fixed-slice floor v1? | Yes - loop ships now, formula tuned later from receipts |
-| Where does the budget live? | Ledger at `models/tempo/` (process truth, per-invocation via CLI) |
+| Where does the budget live? | Ledger at `models/private/<brain>/.tempo.json` (contained in the brain tree; process truth, per-invocation via CLI) |
 | End early allowed? | Only explicitly (`end(reason)`); default drains the window |
 | Name | `tempo` (pace, not physics) |

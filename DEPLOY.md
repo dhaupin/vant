@@ -147,7 +147,7 @@ The Vant port map (pass 127 audit). Four listeners, all loopback-bound by defaul
 | Webhook receiver | `lib/webhooks.js` | 3467 | `VANT_WEBHOOK_PORT` | `VANT_WEBHOOK_BIND` |
 | Metrics/health HTTP | `lib/health.js start()` | 3468 | `VANT_HEALTH_PORT` | `VANT_HEALTH_BIND` |
 | Mesh crew bus | `lib/genesis.js` | 4890-4892 | per-call `port` opt | - |
-| Headless mode | `vant.startHeadless()` | follows 3456 | `VANT_SERVER_PORT` | `VANT_SERVER_BIND` |
+| Headless pod | `vant headless` (`vant.startHeadless()`) | MCP 3457 + REST 3456 | `VANT_MCP_PORT` / `VANT_SERVER_PORT` | `VANT_SERVER_BIND` |
 
 Before pass 127: webhooks defaulted to the REST port (3456, a guaranteed collision), the mesh node runner defaulted its MCP door to 3456 too, islands fell back to 3100 (Loki), headless hardcoded port 3000, and the health HTTP server bound 0.0.0.0 - the one listener with no bind argument.
 

@@ -73,21 +73,27 @@ The full agent loop, written to be executed without a human, is [Agent Onboardin
 | **Succession** | Trust levels control how much state each agent generation inherits |
 | **Horcrux** | Whole brain embedded in an image, encrypted, restorable anywhere |
 | **Security chain** | Sandbox capabilities, input validation, rate limiting, escrow approval on every op |
+| **Guest auth** | Per-identity tokens for the MCP door (`vant guest issue/list/revoke`): observer/human/agent roles on the sandbox capability vocabulary, denylist revocation, single-use pairing voucher for the headless pod |
 | **Crash safety** | Write-ahead journal plus atomic writes: a crash never leaves torn memory |
 
 ## Headless Mode
 
-Use Vant as a library with a REST API (no MCP required). Mode is detected
-automatically (imported as a module → headless) or forced with `VANT_MODE`:
+The serving pod (`vant headless`, issue #187): the MCP door IS the headless
+API (every registered tool any client gets - no privileged dashboard
+surface exists), with a health-only REST sidecar, node discovery
+registration, the one auth posture, and a pairing code that redeems once
+into an operator guest. Mode is NEVER inferred for an imported module -
+a library import claims no mode until a door is actually used - and
+`VANT_MODE` still forces explicitly:
 
 ```javascript
 const vant = require('./lib/vant');
 
-// Start headless server (defaults: port VANT_SERVER_PORT or 3456,
-// bind VANT_SERVER_BIND or 127.0.0.1)
+// Start the pod (defaults: MCP door on VANT_MCP_PORT or 3457, REST
+// sidecar on VANT_SERVER_PORT or 3456, bind VANT_SERVER_BIND or 127.0.0.1)
 const result = await vant.startHeadless({ debug: true });
-// Returns: { started: true, mode: 'headless', status, id, session,
-//            endpoints: { health, tools, brain } }
+// Returns: { mode: 'headless', ports, endpoints: { mcp, health },
+//            posture, pairing, registered }
 // Direct TLS: set VANT_SERVER_CERT/VANT_SERVER_KEY (plaintext HTTP is
 // loopback-bound unless you pass allowInsecure posture intentionally).
 
@@ -97,17 +103,21 @@ await vant.learn('key', 'content');       // store (category comes from key pref
 const content = await vant.remember('key'); // recall (cache, then brain)
 ```
 
-REST surface on the headless server: `/health`, `/tools`, `/call` plus the
-registered routes in
+The pod's REST sidecar answers `/health` (and the registered routes);
+`GET /tools` answers **410 Gone** there since the #187 retire - browse or
+execute tools through the MCP door, whose `/tools` and `/call` aliases
+stay live. Full REST routes in
 [REST API](docs/reference/rest-api.md) and
-[openapi.yaml](docs/openapi.yaml).
+[openapi.yaml](docs/openapi.yaml); guest identities in
+[Multi-Guest Auth](docs/security/multi-guest-auth.md).
 
 ### Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `VANT_MODE` | Force mode: `cli`, `mcp`, or `headless` (default: auto-detect) |
-| `VANT_SERVER_PORT` | Headless/REST server port (default `3456`) |
+| `VANT_MODE` | Force mode: `cli`, `mcp`, or `headless` (default: real doors resolve, imports claim nothing) |
+| `VANT_MCP_PORT` | MCP door / headless API port (default `3457`) |
+| `VANT_SERVER_PORT` | REST sidecar / `vant server` port (default `3456`) |
 | `VANT_SERVER_BIND` | Bind address (default `127.0.0.1`) |
 | `VANT_SERVER_CERT` / `VANT_SERVER_KEY` | TLS cert/key for direct HTTPS |
 | `VANT_MCP_PORT` | MCP server port (default `3457`) |

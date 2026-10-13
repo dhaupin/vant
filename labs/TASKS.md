@@ -1,12 +1,91 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-10-10  
-**Session:** Pass 197+ — prd-universe.md authored (U1–U6 waves);
-Waves U1–U6 LANDED (U6 at prototype grade; U6.5 disposition open) —
-see labs/prd-universe.md §3 for per-wave checklists
+**Last Updated:** 2026-10-13  
+**Session:** Pass 211 — H1 LANDED: per-identity multi-guest auth for the
+door (`lib/guests.js` + the door gate + the auth seam + `vant guest`);
+#187 headless pod + honest REST retire landed in pass 210
 
 ---
+
+## Session (2026-10-13 — pass 211: #185 H1 multi-guest auth LANDED)
+
+**Owner: "Let's do it. Next in queue: #185 H1. Spec it from
+labs/prd-security.md and land the MVP this pass."**
+
+- **H1 SHIPPED: `lib/guests.js` (NEW).** Per-identity guest tokens
+  (`vguest_<id>_<secret>`, random - NOT claim-derived, so revocation is
+  denylist-backed and honest), SHA-256-at-rest (habitat precedent),
+  ledger `models/private/<brain>/.guests.json` (the .audit.json
+  containment precedent). Roles map onto the EXISTING trio -
+  scope.normalize owner kinds (fail-closed parse), sandbox capability
+  vocabulary (observer/human/agent), trust levels (RESTRICT only; none
+  caps to read). NO fourth permission system.
+- **The door gate (lib/mcp.js):** guest verify BEFORE execute; own
+  identity in the ALS ctx (userId guest:<id>, registry fields honestly
+  null - a guest never impersonates an agent); verb classification
+  (read patterns, unknown = write fail-closed, spawn-class checks
+  canSpawn, exec-class checks canExec); guest_issue/list/revoke are
+  admin-only (enumeration defense per the issue). requireKey accepts
+  valid guest tokens like habitat tokens.
+- **Pairing voucher:** headless persists the code's HASH in the guest
+  ledger; `vant guest pair` redeems single-use into the operator's
+  human guest. Voucher, not credential.
+- **The auth.js seam is REAL for guests now:** revokeToken routes to
+  the denylist (the pass-207 honesty pins updated - same truth, newer
+  stronger claim); checkPermission ENFORCES for guest keys.
+- **LIVE BUG FIXED (found by the pins):** the original token alphabet
+  (base64url for id AND secret) made the `<id>_<secret>` split
+  ambiguous - random `_` inside either part let the greedy capture
+  swallow the separator, so freshly-issued tokens INTERMITTENTLY failed
+  verify (we had already chased this exact flake on the module probe
+  level before naming it). Both parts hex now; 13/13 pins x 5
+  consecutive runs green.
+- **Docs + doors:** docs/security/multi-guest-auth.md (contract + the
+  honest MVP boundary: full per-tenant filtering of org-wide lists
+  stays #185 runway); `vant guest` CLI routed; guest_* MCP tools;
+  cli.md got rows for guest AND six pre-existing unrouted bins the
+  coverage gate had been flagging (era/init/leisure/qc/tempo/trace) -
+  gate PASS at 132 bins for the first time this cycle.
+
+**Verification:** guests 13/13 (x5), auth 29/29, mcp/server/habitat-
+token/security/schema/docs green, syntax sweep OK, all 5 lint:docs
+gates PASS, language gate PASS (197 files, English-only).
+
+**NEXT-UP:** #185's remaining runway (H2 SSE taps, per-tenant list
+filtering, H4 work_assign, H6 QR pairing) - owner picks.
+
+## Session (2026-10-13 — pass 210: #187 headless serving pod LANDED)
+
+**Owner: "no migratory needed — it was just built, nobody uses it. Keep
+going on next steps.”**
+
+- **#187 CLOSED: `vant headless` = the serving pod.** One boot: MCP door
+  (every registered tool — the door IS the headless API) + REST sidecar
+  (health-only) + node discovery registration + the ONE auth posture
+  print + a pairing code handed out. Ports/bind stay the existing env map.
+- **Honest retire:** REST `GET /tools` → 410 Gone (pointer to the MCP
+  door; no parallel tool catalog), the pre-registry `/brain` stub → 410,
+  `/health` stays 200. The Router-registered `/brain` route remains
+  (registry-backed — audited, distinct from the stub). `detectMode()` no
+  longer claims an ambient "headless" on a plain import.
+- **Pins:** `test/headless-retire.test.js` (14) — mode claims, 410s,
+  health liveness, child-process pod door (boot, tool surface, posture,
+  pairing code).
+- **Owner ruling verified in code:** no leisure/tempo legacy migration
+  exists and none will be built; the ruling flushed 2 stale path claims
+  (`bin/leisure.js` help text, `docs/memory/tempo.md` FAQ) — both now
+  name the contained ledger path.
+- **CHANGELOG pass-210 section written;** docs suite + lint:docs (5
+  gates) PASS; headless pins 14/14.
+
+**Verification:** chunked full sweep 217/217 suite results (0 failed,
+0 timeouts — the sweep exceeds the 180s terminal cap; run via
+`node test/run-all.js` in --only slices). `npm test` build smoke green.
+Docs 124/124, language gate 196 files English-only.
+
+**NEXT-UP:** #185 H1 (per-identity multi-guest auth for the door) is the
+TOP remaining named item; owner go-ahead before starting that surface.
 
 ## Session (2026-10-12 — pass 213: R3-F9 truthfulness gate LANDED)
 

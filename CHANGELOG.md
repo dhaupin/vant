@@ -5,6 +5,166 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 212 (#185 H2/H3/H4: the event tap, era-context chat, and the composed work order)
+
+Three more #185 hits, each small in surface and heavy in composition.
+H2 was a live bug hunt: the tap's events never boarded because the bus
+dispatches `fn(data, type)` and the door handler declared `(type, data)`
+— every arrivee was the type string swapped for the payload. H3 fixed a
+second one found by its own pins: the era/task tag rode the in-memory
+conversation but not its snapshot, so a restart dropped it.
+
+### Added - work_assign: the composed verb (`lib/mcp.js`)
+
+- **`work_assign`**: one call = the full work handoff — task text +
+  optional escrow budget hold + agent spawn (or reuse an existing agent
+  by id) + task delegation + era fold (`task:assigned` — a bare
+  work_assign matches no era catalogue prefix and would no-op silently).
+- **Refusal law**: every failed leg returns a typed honest refusal
+  (`E_TASK_ABSENT` via the schema gate, `E_AGENT_ABSENT`,
+  `E_BUDGET_REFUSED`, `E_SPAWN_REFUSED`, `E_DELEGATE_REFUSED`). Leg
+  order is deliberate: budget gates fire BEFORE spawn, so a refused
+  budget leaves no orphan agent; a refused delegation RELEASES the hold
+  so nothing strands reserved budget.
+- Explicit `agentId` is honored exactly — never silently replaced with
+  a fresh spawn.
+
+### Added - era-context chat tagging (`lib/msg.js`)
+
+- **`msg.create({ era, task })`** tags a chat thread with the era (and
+  task) it belongs to; `msg.info()` exposes it; **`msg.eraContext(id)`**
+  is the side-panel rollup: `open` = live record from `era.current()`
+  with honest bucket counts; `closed` = light archived record from
+  `era.list()`; `unknown` = tagged with an id neither open nor archived
+  — no fabricated zeros. `era.current()` takes NO args; an open era
+  never makes someone else's conversation "open" (the cross-era pin).
+- era/task ride the arch-A snapshot (`state/msg-conversations.json`),
+  so a chat keeps its tag through a restart.
+
+### Added - the MCP event tap (`lib/mcp.js`)
+
+- Guests with the spawn role subscribe to a live event family
+  (`*`/family regex): `emit` beats keep the door's taps alive on a
+  timer and any arriving event updates the tap frame directly.
+
+### Pins
+
+- `test/mcp.test.js` (+5): schema gate, absent-agent refusal (roster
+  untouched), verbatim sandbox refusal, pre-spawn budget refusal (no
+  orphan), and composition LIVE (spawn + hold + delegate + fold in one
+  call). 14/14 green.
+- `test/msg.test.js` (+9): tagging, hostile-tag rejection, honest
+  absence, open/closed/unknown rollup states, restart survival, and the
+  cross-era honesty pin. 25/25 green across three runs.
+- `test/tap.test.js`: the fix to the emit→dispatch path plus honest
+  beat timing.
+
+## [Unreleased] - pass 211 (#185 H1: per-identity multi-guest auth)
+
+Issue #185's TOP item lands: one authenticated boot, many concurrent
+guests. A live bug fired during the pins and was fixed: the original
+token alphabet (`_` inside base64url ids/secrets) made the
+`vguest_<id>_<secret>` split ambiguous — greedy captures swallowed the
+separator into a bogus id and freshly-issued tokens intermittently
+failed verify. Both parts are hex now; the split is total.
+
+### Added - guests: the per-identity layer (`lib/guests.js`, NEW)
+
+- **`guests.issue/verify/revoke/list/pair`**: tokens `vguest_<id>_<secret>`
+  (random, NOT message-derived, so revocation is denylist-backed and
+  honest), SHA-256 hashed at rest (the habitat precedent), the raw
+  secret shown ONCE. Ledger `models/private/<brain>/.guests.json` (the
+  `.audit.json` containment precedent; inside the gather walk so a
+  restored stone keeps its roster). Honest failure: a failed write
+  issues NO token (fail-closed) and is audible (`audit` line).
+- **Roles ride the capability vocabulary** (never a fourth permission
+  system): observer = read/load/list; human = +write/+spawn (the
+  #185 acceptance — a remote browser CAN spawn work); agent = +exec.
+  `trustLevel` RESTRICTS only: medium/high keep role grants, low strips
+  exec+spawn, none caps to read. `scopeOwner` validates through the
+  `lib/scope.js` parser (fail-closed on unknown kinds).
+- **The door gate (lib/mcp.js)**: guest tokens verify BEFORE execute and
+  carry their OWN identity (userId `guest:<id>`, defensive-null registry
+  fields — a guest never impersonates an agent). Verbs classify
+  read/write/exec/admin; unknown = write fail-closed; spawn-class verbs
+  check `canSpawn`; `guest_issue/list/revoke` are ADMIN-ONLY (a guest
+  can never enumerate guests — the issue's enumeration lesson). The
+  requireKey boundary accepts valid guest tokens like habitat tokens.
+- **Pairing voucher**: `vant headless` persists its pairing code as a
+  HASH in the guest ledger; `vant guest pair --code ...` redeems
+  single-use (wrong code refuses timing-safely; second use refuses;
+  expiry after 24h) into an operator (`human`) guest. A voucher, not a
+  standing credential.
+- **The auth.js seam is REAL for guests**: `revokeToken('vguest_...')`
+  routes to the denylist (the pass-207 honesty note updated,
+  still naming the seam); `getAccessLevel` grades guest keys as
+  `guest:<role>`; `checkPermission` answers ENFORCED verdicts for guest
+  keys and keeps its documented no-op for shared keys.
+- **Doors**: CLI `vant guest issue|list|revoke|pair` (routed; cli.md row
+  landed — the coverage gate had been flagging 7 unrouted bins: era,
+  guest, init, leisure, qc, tempo, trace — ALL classes now have their
+  cli.md rows, gate PASS at 132 bins). MCP tools `guest_issue/guest_list/
+  guest_revoke` (admin-only, repeated at the handler so stdio inherits
+  the verdict).
+- **Spec + pins**: docs/security/multi-guest-auth.md (the full contract
+  AND the honest MVP boundary: full per-tenant filtering of org-wide
+  lists remains #185's runway). `test/guests.test.js` (13): lifecycle,
+  hashed-at-rest, role maps, trust floors, door verb classification,
+  denylist-survives-reload, expiry, pairing voucher, LIVE door
+  integration (200 write / 403 observer / 403 guest-admin / 401 bad
+  token / live revocation kills a connected client), and the auth.js
+  seam. `test/auth.test.js` honesty pins updated to the H1-era note
+  text (the truth claims they assert still hold, now stronger).
+
+Envelope: guest pins 13/13 x5 consecutive; mcp/auth/habitat-token/
+security/server/docs/schema suites green; syntax sweep OK; all 5 doc
+gates PASS (125-126 files; 131 verbs).
+
+## [Unreleased] - pass 210 (#187 headless: the serving pod + the honest REST retire)
+
+Issue closed this pass: **#187** — "the pod, not 'REST without MCP'". One
+combined serving command; the REST sidecar stops pretending to be an API.
+
+### Added - `vant headless` (the headless serving pod)
+
+- One boot = MCP door (3457-class, every registered tool — the door IS the
+  headless API; no privileged dashboard surface exists) + REST sidecar
+  (health-only) + node discovery registration + the ONE auth posture print
+  + a pairing code handed out. Ports/bind are the existing env map
+  (`VANT_MCP_PORT`, `VANT_SERVER_PORT`, `VANT_SERVER_BIND`).
+- `--help` is honest (dispatcher branch answers it), per the truth-in-help
+  gate; per-identity multi-guest auth stays #185's TOP item (deliberately
+  not attempted here).
+- Pins: `test/headless-retire.test.js` (14) — detectMode claims no mode on
+  a plain import; explicit `VANT_MODE`/door-pod env still resolve; REST
+  `/tools` + retired `/brain` stub answer 410 Gone with a pointer to the
+  MCP door while `/health` stays 200; a child-process pod boots, serves
+  the tool surface, prints the posture and hands out the code.
+
+### Fixed - the honest retire + stale-path sweep
+
+- REST sidecar is health-only everywhere: GET `/tools` → 410 (the MCP door
+  owns the tool surface — no parallel catalog to keep in sync), the
+  pre-registry `/brain` stub → 410. The Router-registered `/brain` route
+  was audited and stays (registry-backed, distinct from the stub).
+- `lib/api.js detectMode()`: a plain import no longer claims an ambient
+  "headless" mode — an unclaimed module answers honestly; explicit env
+  still resolves.
+- Docs truth: `docs/reference/rest-api.md`, the DEPLOY.md port-map row,
+  and the cli.md command table carry the pod; language gate clean.
+
+### Owner ruling carried through (no code, verified)
+
+- Leisure/tempo containment: no legacy `models/{leisure,tempo}/` migration
+  will EVER be built (pass 209b stands — nothing shipped on the old path).
+  Sweep verified only history prose remains AND flushed two stale path
+  claims: `bin/leisure.js` help text and the `docs/memory/tempo.md` FAQ
+  still named the pre-containment ledger path; both now name
+  `models/private/<brain>/.{leisure,tempo}.json`. Suites re-run green.
+
+Envelope: chunked full sweep 217/217 suite results green (0 failed, 0
+timeouts); `npm test` build smoke green.
+
 ## [Unreleased] - pass 209 (#196 ruling: contained ledgers + kernel-driven leisure.autoPursue, ONE pass)
 
 Owner ruling this pass: leisure keeps live INSIDE the brain (not a parallel

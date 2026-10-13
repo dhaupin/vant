@@ -123,8 +123,11 @@ console.log('\n🚌 E2E GRAND TOUR (pass 119)\n');
         // (U6.6) → 318 (+market_skill_sweep, the TTL evidence sweep).
         // (Era #177-#179) → 323 (+era_start/era_log/era_close/era_current/
         // era_list — the incarnantion ledger twins).
-        report('gate B: door ready; /tools = 324 tools (array shape; +3 event pass 179, +resolution pass 190, +universe U1/U2, +scenario U3, +forum U4, +skills U6.5/U6.6, +era #177-#179, +era_trace #183)',
-            Array.isArray(tools) && tools.length === 324, 'len=' + tools.length);
+        // (H1 #185) → 327 (+guest_issue/guest_list/guest_revoke, the
+        // per-identity multi-guest door layer).
+        // (H4 #185) → 328 (+work_assign pass 212, the composed work order)
+        report('gate B: door ready; /tools = 328 tools (array shape; +3 event pass 179, +resolution pass 190, +universe U1/U2, +scenario U3, +forum U4, +skills U6.5/U6.6, +era #177-#179, +era_trace #183, +guests H1 #185, +work_assign H4 #185)',
+            Array.isArray(tools) && tools.length === 328, 'len=' + tools.length);
 
         const health = JSON.parse((await req(PORT, 'POST', '/mcp/exec', { tool: 'vant_health', args: {} })).body);
         report('gate B: /mcp/exec vant_health → ok',

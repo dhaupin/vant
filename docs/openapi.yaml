@@ -10,8 +10,10 @@ info:
       header compared against VANT_API_KEY. There is NO JWT issuance
       anywhere in the tree; bearerFormat JWT is not a thing Vant serves.
     - QoS enforced via rate limiting (X-RateLimit-* headers)
-    - Live surface: /health, /tools, /call plus the registered REST
+    - Live surface: /health, /call plus the registered REST
       routes (brain/streams/trust/market) from lib/api.js startREST —
+      GET /tools answers 410 Gone (retired, issue #187; the MCP door is
+      the tool surface and keeps its own /tools alias at 200)
       NOT /v1/embeddings or /api/v1/* (those endpoints do not exist in
       this tree; this spec lists the real ones below).
 
@@ -165,11 +167,11 @@ paths:
     get:
       tags:
         - System
-      summary: Tool catalog (vant surface + MCP list)
+      summary: "Retired (issue #187): 410 Gone - the MCP door is the tool surface"
       operationId: listTools
       responses:
-        '200':
-          description: Tool list
+        '410':
+          description: Retired with a pointer to the MCP door (GET /tools there stays 200)
 
   /call:
     post:

@@ -161,6 +161,7 @@ lib API (`memory.state(key, value, { ttl })`) - there is no `--ttl` CLI flag.
 | `vant agents` | Multi-agent management (list, spawn, kill, info, status, prune - real, persisted) |
 | `vant islands` | Island component boot |
 | `vant mcp` | MCP server for AI tools |
+| `vant headless` | Serving pod front door (#187): MCP door as THE API, REST health-only, node registration, pairing code, one honest auth posture |
 | `vant api` | API utilities (status, routes, call) |
 | `vant org` | Operator grant utility (default `status`; `grant` persists unless `--session-only`; boot widens fresh processes) |
 | `vant trust` | Reputation and trust scores |
@@ -386,6 +387,18 @@ vant telegram
 | `vant escrow` | Escrow service for operations ([reference](/reference/escrow)) |
 | `vant audit` | Generate an audit report |
 | `vant audit-ledger` | Inspect rotated audit-ledger archives in models/audit-rotate/ (pass 118) |
+| `vant guest` | Per-identity multi-guest auth (issue/list/revoke + pairing redemption; H1 of #185 - [reference](/security/multi-guest-auth)) |
+
+```bash
+vant guest issue --name <name> [--role human|agent|observer] [--scope team:backend] [--expires 7d]
+vant guest list
+vant guest revoke <id>
+vant guest pair --code <code-from-vant-headless>
+```
+
+Guest tokens are `vguest_<id>_<secret>` randoms, hashed at rest; roles ride
+the sandbox capability vocabulary (observer read-only, human +write+spawn,
+agent +exec), never a fourth permission system.
 
 ```bash
 vant sandbox status
@@ -439,6 +452,15 @@ vant audit-ledger --all --action fatal --limit 20  # filter + newest N
 | `vant system` | System diagnostics and layer status |
 | `vant shell` | Shell operations |
 | `vant boot` | Ghost boot from a stego image |
+| `vant headless` | The serving pod: MCP door as THE headless API + health-only REST sidecar + node registration + pairing code (#187) |
+| `vant tempo` | Time-dilation keeper: wall-clock budget samples exploration slices spread ACROSS the interval (`begin/status/stop/end/receipts/pace`; #197) |
+| `vant leisure` | Want-list keeper: play persistence (`want/list/pursued/forget/suggest/pursue/status`; #196) |
+| `vant zen` | The breathing/idle seam |
+| `vant consciousness` | The idle/state consults engine |
+| `vant era` | Era sessions: work sessions with rollups |
+| `vant trace` | Event-trail tracing |
+| `vant init` | The First Five Minutes wizard (interactive first-boot setup; #182) |
+| `vant qc` | First-user self-check battery (reality, brain, membrane, doors; #181 Part B) |
 
 ```bash
 vant metrics                    # Registry summary
@@ -635,7 +657,7 @@ These commands support development and CI. Most users will not need them.
 ```bash
 vant test          # Smoke tests (default)
 vant test core     # Brain, storage, core modules
-vant test full     # All tests (~2,300 cases across /test)
+vant test full     # All tests (~1,800 declared cases across 200+ /test suites)
 
 vant test-all      # 17 self-checks across health/search/islands/lib exports
                    # (routes bin/test-all.js; cwd-independent: runs from any directory)

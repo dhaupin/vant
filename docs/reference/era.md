@@ -89,6 +89,28 @@ no era is open - zero behavior change for any install that never runs
 | `era_current` | open era + integrity flag, or `open:false` |
 | `era_list` | archived rollups with recomputed integrity |
 
+## Chat threads ride the era (pass 212, #185 H3)
+
+Every conversation can carry the era it belongs to (the side-panel rule):
+
+```javascript
+const msg = require('./lib/msg');
+const era = require('./lib/era');
+await era.start('map the boot surface');
+const c = msg.create({ era: era.current().era.id, task: 'map-sweep-1' });
+msg.eraContext(c.id);
+// → { era, task, eraState:'open', rollup:{ intent, startedAt, integrity, lines:{...} } }
+```
+
+`eraContext` reports HONESTLY per state: `open` = the live record from
+`era.current()` (bucket counts only, the shapes follow the era contract,
+which compacts buckets to `{count, byType}` at close); `closed` = the
+light archived record from `era.list()`; `unknown` = tagged with an id
+neither open nor archived (no fabricated zeros); `untagged` = no era tag.
+An OPEN era never makes someone else's conversation "open", the tag
+must match the folding era's id (the cross-era pin). The era/task tag
+rides the arch-A snapshot, so a chat keeps its tag through a restart.
+
 ## The horcrux hook (the #175 resurrection contract)
 
 `era close` prints the rollup path and reminds about `vant horcrux refresh`:

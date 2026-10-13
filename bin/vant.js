@@ -272,6 +272,8 @@ const COMMANDS = {
     tempo: 'tempo.js',
     // vant leisure: the want-list keeper door (issue #196)
     leisure: 'leisure.js',
+    // vant guest: per-identity multi-guest auth door (H1 of #185)
+    guest: 'guest.js',
 
     // Bin CLIs that existed but were never routed (pass 18 bin sweep)
     org: 'org.js',
@@ -477,7 +479,7 @@ Memory (Unified API - sandbox + RLS secured):
 Development:
   vant test         Run smoke tests
   vant test core    Run core test suite
-  vant test full    Run all tests (~2,300 cases across /test)
+  vant test full    Run all tests (~1,800 declared cases across 200+ /test suites)
   vant test-all     17-check self-test (health/search/islands/lib exports)
   vant validate    Schema + audit + circuits
   vant changelog   View changes
@@ -587,12 +589,16 @@ Resolution:
     vant resolution resolve   Mark as resolved
     vant resolution reject    Mark as rejected
 
-Headless:
-  Use Vant as library without MCP:
-    const vant = require('../lib/vant');
-    await vant.startHeadless({ port: 3456, bind: '127.0.0.1' });
-  Or: export VANT_MODE=headless
-  Port/bind follow VANT_SERVER_PORT / VANT_SERVER_BIND.
+Headless (the serving pod):
+  vant headless [--port <n>] [--api-port <n>] [--bind <addr>]
+    Boots the combined pod: the MCP door IS the headless API (Rook's prime
+    directive, #185/#187); the REST listener drops to health-only. The node
+    registers for discovery; the ONE auth posture prints; a pairing code
+    is handed out for a dashboard session. Programmatic door:
+    await require('../lib/vant').startHeadless();
+  Ports follow VANT_MCP_PORT / VANT_SERVER_PORT; bind follows VANT_SERVER_BIND.
+  Per-identity multi-guest auth (H1) is LIVE: 'vant guest issue|list|revoke'
+  + the door gate (docs/security/multi-guest-auth.md).
 
   (vant notify / vant linear were removed: no backing CLI exists.
   Notifications and Linear live on the islands/lib API, not the shell.)
@@ -659,7 +665,7 @@ if (!script) {
             console.error(e);
             process.exit(1);
         });
-    } else if (cmd === 'mcp' || cmd === 'api' || cmd === 'all') {
+    } else if (cmd === 'mcp' || cmd === 'api' || cmd === 'all' || cmd === 'headless') {
         // (pass 20) `vant api <subcmd>` = the utility CLI (bin/api.js:
         // status/routes/call/docs); bare `vant api` = all-mode API-server
         // mode. Previously the utility CLI was unreachable — the inline
@@ -704,6 +710,41 @@ if (!script) {
         process.on('unhandledRejection', (e) => _leashExit(1, 'unhandled rejection: ' + (e && (e.stack || e.message) || e)));
         for (const SIG of ['SIGTERM', 'SIGINT']) {
             process.on(SIG, () => _leashExit(0, SIG + ' — releasing leases and exiting'));
+        }
+        // (#187) `vant all` = the legacy name for the combined server; the
+        // audit retired the trifecta framing. Keep it working (honest
+        // pointer; no removal), but the front door is `vant headless`.
+        if (cmd === 'all') {
+            console.log('Note: `vant all` is the legacy name. Prefer `vant headless` - the serving pod\n  with the MCP door as THE API (REST drops to health-only), node registration,\n  and a pairing code. (Issue #187 retire list.)\n');
+        }
+        // (#187, H6) `vant headless` = the pod's front door: MCP door as THE
+        // API, REST health-only, node registration, pairing code, ONE honest
+        // auth posture. Runs STARTUP ONLY here - the long-lived pod keeps
+        // the event loop alive through the same leash below.
+        if (cmd === 'headless') {
+            if (args[1] === '-h' || args[1] === '--help') {
+                console.log(`\nHeadless serving pod (issue #187): the pod, not "REST without MCP".\n\n  vant headless [--port <mcp>] [--api-port <rest>] [--bind <addr>]\n\nBoots the combined pod:\n\n  - the MCP door IS the headless API (the same 300+ tools any client gets -\n    no privileged dashboard surface exists)\n  - the REST listener drops to health-only (/tools and /brain retired)\n  - the node registers for discovery\n  - the ONE auth posture prints, and a pairing code is handed out\n\nPer-identity multi-guest auth (H1) is LIVE: guest tokens gate the door by\nrole (observer/human/agent), revoke is denylist-backed, and the pairing\ncode redeems single-use via 'vant guest pair --code ...'.\n\nPorts: VANT_MCP_PORT (default 3457), VANT_SERVER_PORT (default 3456),\nbind: VANT_SERVER_BIND (default 127.0.0.1).\n`);
+                process.exit(0);
+            }
+            const opts = { debug: true };
+            for (let i = 1; i < args.length; i++) {
+                const a = args[i];
+                if (a === '--port') opts.mcpPort = parseInt(args[++i], 10);
+                else if (a === '--api-port') opts.apiPort = parseInt(args[++i], 10);
+                else if (a === '--bind') opts.bind = args[++i];
+            }
+            vant.startHeadless(opts).then(r => {
+                console.log('✓ Headless pod up (mode: headless)');
+                console.log('  Ports:', r.ports);
+                console.log('  API:', r.endpoints && r.endpoints.mcp);
+                console.log('  Health:', r.endpoints && r.endpoints.health);
+                console.log('  Node registry:', r.registered ? 'registered (' + (r.registered.id || r.registered.name || 'ok') + ')' : 'skipped');
+                console.log('\n🛑 Press Ctrl+C to stop\n');
+            }).catch(e => {
+                console.error('Failed to start headless pod:', e.message);
+                process.exit(1);
+            });
+            return;
         }
         vant.startFull({ mode, debug: true }).then(r => {
             console.log(`✓ Started in ${mode} mode`);

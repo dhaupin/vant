@@ -43,8 +43,9 @@ Usage:
   vant leisure pursue <want> [--duration <dur>]   DO a want (one-shot or stretched)
   vant leisure status                             Ledger summary
 
-Persistence: models/leisure/<brain>.json — per-brain, crash-safe, isolated
-(a broken play engine never blocks a build).
+Persistence: models/private/<brain>/.leisure.json — per-brain (the
+.audit.json precedent), crash-safe, isolated (a broken play engine never
+blocks a build).
 `);
     process.exit(0);
 }

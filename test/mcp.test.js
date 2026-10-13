@@ -164,6 +164,79 @@ async function asyncTest(name, fn) {
         }
     });
 
+    // ==================== pass 212 H4 pins (#185 work_assign) ====================
+    // The composed verb: ONE call = task + escrow budget hold + spawn-or-reuse
+    // agent + task delegation + era fold. Refusal law: every failed leg is a
+    // TYPED honest refusal, and refusals fire BEFORE side effects so a refused
+    // work_assign leaves no orphan agents and no stranded budget.
+    console.log('\nH4 WORK_ASSIGN PINS (pass 212, #185)\n');
+
+    const _sb = require(path.join(ROOT, 'lib', 'sandbox')).defaultSandbox;
+
+    await asyncTest('H4: missing task refuses through the schema gate (MCP_INPUT_INVALID)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const r = await mcp.execute('work_assign', {});
+        const ok = r && r.error === 'MCP_INPUT_INVALID' && Array.isArray(r.problems) && r.problems.some(p => /task/.test(p));
+        return { success: ok, error: JSON.stringify(r).slice(0, 140) };
+    });
+
+    await asyncTest('H4: absent explicit agent refuses E_AGENT_ABSENT — roster untouched (no silent spawn)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const agents = require(path.join(ROOT, 'lib', 'agents'));
+        const before = (await agents.list()).length;
+        const r = await mcp.execute('work_assign', { task: 'pin', agentId: 'agent_definitely_absent_pin' });
+        const after = (await agents.list()).length;
+        const ok = r && r.ok === false && r.code === 'E_AGENT_ABSENT' && /does not silently spawn/.test(r.error || '') && before === after;
+        return { success: ok, error: JSON.stringify(r).slice(0, 140) + ' roster ' + before + '→' + after };
+    });
+
+    await asyncTest('H4: sandbox-denied spawn surfaces verbatim as E_SPAWN_REFUSED', async () => {
+        _sb.setCapabilities({ canRead: true, canWrite: true, canSpawn: false });
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const r = await mcp.execute('work_assign', { task: 'pin spawn refusal' });
+        const ok = r && r.ok === false && r.code === 'E_SPAWN_REFUSED' && /canSpawn/.test(r.error || '');
+        return { success: ok, error: JSON.stringify(r).slice(0, 160) };
+    });
+
+    await asyncTest('H4: over-budget refusal fires BEFORE spawn (no orphan agent)', async () => {
+        _sb.setCapabilities({ canRead: true, canWrite: true, canSpawn: true });
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const agents = require(path.join(ROOT, 'lib', 'agents'));
+        const before = (await agents.list()).length;
+        const r = await mcp.execute('work_assign', { task: 'pin budget refusal', budget: 999999999 });
+        const after = (await agents.list()).length;
+        const ok = r && r.ok === false && r.code === 'E_BUDGET_REFUSED' && r.agentId === undefined && r.gate && r.gate.allowed === false && before === after;
+        return { success: ok, error: JSON.stringify(r).slice(0, 160) + ' roster ' + before + '→' + after };
+    });
+
+    await asyncTest('H4: composition LIVE — spawn + escrow hold + delegate + era fold in one call', async () => {
+        _sb.setCapabilities({ canRead: true, canWrite: true, canSpawn: true });
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const era = require(path.join(ROOT, 'lib', 'era'));
+        const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+        const agents = require(path.join(ROOT, 'lib', 'agents'));
+        let cur = era.current();
+        if (cur.open) await era.close({ next: 'H4 pin teardown' });
+        await era.start('H4 composition pin');
+        const r = await mcp.execute('work_assign', { task: 'H4 pin: fold me', name: 'PinBot', budget: 5 });
+        try {
+            const roster = await agents.list();
+            const got = roster.find(a => a.id === r.agentId);
+            const hold = escrow.checkHold(r.workId);
+            const after = era.current();
+            const foldHit = after.era && Array.isArray(after.era.threads)
+                && after.era.threads.some(t => t.type === 'task:assigned' && t.data && t.data.workId === r.workId);
+            const ok = r && r.ok === true && !!got && r.delegated === true && r.eraFolded === true
+                && hold.held === true && hold.condition.amount === 5 && foldHit;
+            return { success: ok, error: JSON.stringify({ r, got, hold, foldHit }).slice(0, 260) };
+        } finally {
+            // Leave no era/hold residue for later pins.
+            cur = era.current();
+            if (cur.open) await era.close({ next: 'H4 pin done' });
+            escrow.release(r.workId);
+        }
+    });
+
     console.log('\n--- RESULTS ---\n');
     console.log(`  Passed:  ${results.passed}`);
     console.log(`  Failed:  ${results.failed}`);

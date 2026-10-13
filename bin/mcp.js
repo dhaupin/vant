@@ -69,11 +69,11 @@ Resolution:
     vant resolution resolve <entry>
     vant resolution reject <entry>
 
-Headless Mode:
-  Use Vant as library without MCP:
-    const vant = require('../lib/vant');
-    await vant.startHeadless({ port: 3456 });  // follows VANT_SERVER_PORT
-  Or: process.env.VANT_MODE=headless
+Headless Mode (issue #187 - the pod, not "REST without MCP"):
+  vant headless
+    Boot the combined pod: the MCP door IS the headless API, the REST
+    listener drops to health-only, the node registers for discovery,
+    and the ONE honest auth posture prints with a pairing code.
 `);
     process.exit(0);
 }

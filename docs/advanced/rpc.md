@@ -65,6 +65,11 @@ boundaries tighten it:
 2. Habitat tokens (a `vant_` bearer token or the `x-habitat-token` header)
    are accepted wherever a shared key is, and anchor the request to its
    registry-verified RLS subject.
+   Guest tokens (`vguest_<id>_<secret>`, the H1 #185 layer) satisfy the
+   same boundary with their OWN identity: each carries a role on the
+   sandbox capability vocabulary (observer/human/agent), the door gates
+   verbs by class, and revocation is denylist-backed. Issue with
+   `vant guest issue` - see [Multi-Guest Auth](/security/multi-guest-auth).
 3. The Host header must be loopback (DNS-rebinding guard), cross-origin
    POSTs are refused, and bodies must be `application/json`.
 4. The bind is loopback by default: `VANT_MCP_BIND` widens it deliberately,
@@ -120,9 +125,10 @@ tool's result JSON:
 | GET | `/market/listing/:id` | `market_get` |
 
 Three built-ins sit on every `lib/server.js` instance before any route:
-`GET /tools` (tool catalog), `GET /health` (liveness), and `POST /call`,
-which executes any tool and honors both the JSON-RPC 2.0 `tools/call`
-envelope and flat `{ tool, args }` bodies.
+`GET /health` (liveness), `POST /call` (executes any tool, honors both the
+JSON-RPC 2.0 `tools/call` envelope and flat `{ tool, args }` bodies), and
+`GET /tools`, which answers **410 Gone** since the #187 retire (the MCP
+door is the tool surface, and its own `GET /tools` alias stays 200).
 
 The full request and response reference is the
 [REST API Reference](/vant/reference/rest-api). The `vant api` utility CLI

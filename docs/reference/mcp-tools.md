@@ -194,9 +194,12 @@ Everything after this point is grouped by domain. Params listed are the
 `inputSchema` exactly as registered (`curl http://<host>:3457/tools` is
 the live source of truth for your install).
 
-> Registry facts (audited pass 190, recount pass 210): ~300 hand-registered
-> tools across 67 domain prefixes (324 total `mcp.listTools()` entries
-> incl. generated/wrapper tools), plus the `vant_call` umbrella. Every tool's handler
+> Registry facts (audited pass 190, recount pass 210, recount pass 211 -
+> guests #185, recount pass 212 - work_assign): ~300 hand-registered
+> tools across 67 domain prefixes (328 total `mcp.listTools()` entries
+> incl. generated/wrapper tools - the H1 guest layer added guest_issue/
+> guest_list/guest_revoke, pass 212 added the composed `work_assign`),
+> plus the `vant_call` umbrella. Every tool's handler
 > routes through a real lib call - the canned handlers found by audits
 > (configs pass 95/96, this pass) were rerouted. Two tools report honest
 > not-applicable instead of pretending: `stream_watch`, `qos_withTimeout`.
@@ -210,6 +213,25 @@ vant_agent_proto_list()                 # agent templates
 vant_agent_proto_load(name="x")
 vant_agent_spawn(name="A", role="Asst") # runtime spawn (agents.maxAgents quota)
 ```
+
+### Work orders (pass 212, #185 H4)
+
+`work_assign` is the composed verb: one call hands off work end-to-end.
+
+```bash
+vant_work_assign(task="sweep the map", name="Scout", budget=5)
+# -> { ok:true, workId, agentId, delegated:true, eraFolded:true, hold:{...} }
+
+vant_work_assign(task="grow the map", agentId="agent_...")  # reuse an existing agent
+# explicit agentId is honored exactly - never silently replaced by a spawn
+```
+
+Refusal law: every failed leg answers a typed honest refusal and fires
+BEFORE side effects. `E_BUDGET_REFUSED` leaves no orphan agent
+(budget gates precede spawn); a refused delegation releases the escrow
+hold, so nothing strands reserved budget. The era fold records the work
+under `task:` -> threads (the era catalogue) only when an era is OPEN
+(the era subscriber's no-op contract); `eraFolded:false` says so.
 
 ### Brain family (46 tools - cor member-related core)
 
@@ -1403,6 +1425,7 @@ Caught by the coverage crosscheck - no prose for these (yet); params are exact f
 | recursion_register | name, type - required: name, type |
 | brain_share | insight, source, tags - required: insight |
 | agent_spawn | name, role, parent, brain, team, roleId, reportsTo |
+| work_assign | task, agentId, name, role, budget - required: task (composition verb: spawn-or-reuse + escrow hold + delegate + era fold; typed refusals fire before side effects) |
 | agent_list | - |
 | agent_kill | id |
 | agent_proto_list | - |
@@ -1628,6 +1651,42 @@ time, so tokens carry authority, not a snapshot.
 Revoke by raw token or hash. **Params:** `tokenOrHash` (string,
 required). Persisted - a revoked token is dead in every future
 process, not just this one.
+
+### guest_issue
+
+Issue a guest identity for the door (H1 of #185): a `vguest_` random
+token with a role, scope owner, trust level, and optional expiry.
+**Params:** `name` (string, required), `role` (`observer`/`human`/
+`agent`, default `human`), `scopeOwner` (a `lib/scope.js` owner ref
+like `team:backend`), `trustLevel` (`high`/`medium`/`low`/`none`),
+`expires` (`7d`-style spec or ms). Returns the raw token ONCE (the
+ledger stores only the SHA-256 hash). Admin-only.
+
+### guest_list
+
+The guest roster as public projections (no hashes, no secrets).
+**Params:** None. Admin-only - the door gate refuses `guest_list` for
+any guest token (the issue's enumeration defense).
+
+### guest_revoke
+
+Revoke a guest by id or name. Denylist-backed: the hold of that token
+is locked out at once, in every future process. **Params:** `id`
+(string, required). Admin-only.
+
+### era_start / era_log / era_close / era_current / era_list
+
+The era-session ledger twins (#177-#179): `era_start` opens a work era,
+`era_log` appends an entry, `era_close` closes with a rollup,
+`era_current` reads the open era, `era_list` lists closed eras.
+**Params:** verb-specific (see `vant era --help`); all handlers route
+through `lib/era.js`.
+
+### era_trace
+
+Trace: the execution-span tail for this wake - span waterfall metadata
+(count, failures with typed codes, slowest span), bounded at 500. Debug
+aid; spans ride era close via `lib/trace.tail()`. **Params:** None.
 
 ### brain_migration_status
 
