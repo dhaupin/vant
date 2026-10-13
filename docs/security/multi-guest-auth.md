@@ -173,9 +173,15 @@ same routing - the documented no-op note now applies only to non-guest keys.
   handler passed STRING content into `msg.send` (garbage spread shape) and
   called `Msg.list()` with ignored arguments (every msg_list answered the
   conversation roster).
+- Shipped pass 215 (enumeration throttle): guest read-class verbs carry a
+  per-IDENTITY fixed-window read budget at the door (default 120 per 60s -
+  a dashboard cadence, not a crawler; env `VANT_GUESTS_READ_BUDGET` to
+  change, `0` disables; `VANT_GUESTS_READ_WINDOW_MS` is the tuning seam for
+  tests). Exhaustion answers typed `429 E_GUEST_THROTTLED` with
+  `retryAfterMs`; identity-keyed means two guests behind one NAT keep
+  independent budgets and one burned budget never throttles a neighbor.
 - Still tracked as #185 runway: H6 QR pairing UX (held by owner pending
-  the frontend story), cross-tenant enumeration throttling beyond the
-  guest-management block.
+  the frontend story). The pass-211 boundary list is otherwise closed.
 
 *Transport-level security (loopback binds, TLS, requireKey) is unchanged and
 removes nothing: [MCP Server](/vant/runtime/mcp) covers running and

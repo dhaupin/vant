@@ -5,6 +5,53 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 215 (#185 closed: per-guest read-verb enumeration throttle + the docs freshness sweep)
+
+The last #185 runway item. The guest-management verbs were already
+admin-blocked (a guest never manages guests); the remaining enumeration
+vector was read-class verbs themselves — a guest machine-walking rosters,
+lists and counters learns the SHAPE and SIZE of tenants it cannot see.
+
+### Added - the per-guest read budget (`lib/guests.js` + the door)
+
+- **`guests.checkReadBudget(guestId)`**: fixed-window budget on the door
+  for guest read-class verbs. Identity-keyed by design (NOT IP): two
+  guests behind one NAT keep independent budgets, and one burned budget
+  never throttles a neighbor. EW4-mechanics: bounded FIFO-evicted bucket
+  map, refusals charged only by the clock.
+- **Defaults**: 120 reads per 60s window (a dashboard cadence, not a
+  crawler). Env `VANT_GUESTS_READ_BUDGET` (0 disables) tunes the budget;
+  `VANT_GUESTS_READ_WINDOW_MS` is the honest tuning seam — the window is
+  read PER CALL, so runtime/test tuning applies after first require (the
+  pin caught a module-load-snapshot window that made late env tuning a
+  lie — fixed before it shipped).
+- **Refusal shape**: typed `429` with `reasonCode: E_GUEST_THROTTLED` and
+  `retryAfterMs`; the event bus hears `guest:throttled` and the door logs
+  `guest_throttled` like every other denial.
+- Hosts and write/exec verbs untouched (the EW4 per-client IP limiter
+  still covers everything above this layer).
+
+### Docs freshness sweep (owner ask)
+
+- Greps for claims made stale by passes 211-215: none found beyond the
+  accurate historical references to the FIXED bugs (the pass-214 notes).
+  Registry counts (328), REST/CLI coverage, era/chat and channel-scope
+  docs verified current.
+- Full lint stack green: style, links, frontmatter, language, fiction
+  signatures, truthfulness (126 files, 131 routed verbs), MCP docs
+  coverage 328 = 328, CLI coverage 132.
+- New env knobs documented at [Multi-Guest
+  Auth](/vant/security/multi-guest-auth), consistent with the
+  `VANT_MCP_RATE_LIMIT` env-side precedent.
+
+### Pins
+
+- `test/mcp.test.js` (+3, 17/17 x2): the budget trips typed (reads 1-3
+  pass, read 4 answers 429 `E_GUEST_THROTTLED` + `retryAfterMs` while the
+  host sails through); PER-IDENTITY isolation with clock recharge (a
+  second guest reads fine while the first is exhausted, and the first
+  recharges after the window); `budget=0` disables cleanly.
+
 ## [Unreleased] - pass 214 (#185 channel scope: the owner concept for msg channels + two live bugs found by its own survey)
 
 The pass-213 follow-through the boundary statement promised: msg channels

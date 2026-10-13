@@ -2,11 +2,45 @@
 
 **Branch:** axolotl  
 **Last Updated:** 2026-10-13  
-**Session:** Pass 214 — channel scope LANDED: owner concept for msg
-channels (msg_list/msg_send tenant posture = the agent_list rule); two
-live bugs the survey caught fixed in the same pass
+**Session:** Pass 215 — #185 CLOSED: per-guest read-verb enumeration
+throttle (last runway item) passed; docs freshness sweep requested by the
+owner came back clean
 
 ---
+
+## Session (2026-10-13 — pass 215: enumeration throttle + docs sweep)
+
+**Owner: "We can do enumeration throttling the remaining runway item. We
+should prob go through docs again too, to make sure everything is fresh,
+accurate, etc."**
+
+**What landed:**
+
+- `guests.checkReadBudget(guestId)`: per-IDENTITY fixed-window read
+  budget on the door for guest read-class verbs (default 120/60s, env
+  `VANT_GUESTS_READ_BUDGET` with `0` = off; `VANT_GUESTS_READ_WINDOW_MS`
+  tuning seam). Identity-keyed so guests behind one NAT stay independent.
+  EW4-shaped buckets (FIFO-evicted, refusals charged only by the clock).
+- Door: read-class guest calls answer typed `429 E_GUEST_THROTTLED` +
+  `retryAfterMs` when exhausted; emits `guest:throttled`; hosts and
+  write/exec verbs untouched; the EW4 IP limiter still layers above.
+- Bug the pins caught before ship: the window was a MODULE-LOAD snapshot,
+  so late env tuning silently failed; the window is now read PER CALL.
+
+**Docs freshness sweep (owner ask):** no stale claims found beyond
+accurate historical references to the fixed pass-214 bugs; registry
+counts (328), REST/CLI rooms, era/chat/channel docs verified current;
+new env knobs documented at multi-guest-auth (the VANT_MCP_RATE_LIMIT
+env-side precedent). Full lint stack green: style, links, frontmatter,
+language, fiction signatures, truthfulness (126 files / 131 routed
+verbs), MCP coverage 328 = 328, CLI coverage 132.
+
+**Verification:** mcp 17/17 (x2: trip/retryAfter + host pass-through,
+per-identity isolation + clock recharge, budget=0 off); adjacent
+contract suites re-run green.
+
+**NEXT-UP:** #185 fully closed. Owner queue: H6 held (frontend story),
+frontend/headless maturation = next big project.
 
 ## Session (2026-10-13 — pass 214: #185 channel scope — the msg_list follow-through)
 

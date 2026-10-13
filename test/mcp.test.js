@@ -237,6 +237,113 @@ async function asyncTest(name, fn) {
         }
     });
 
+    // ==================== pass 215: per-guest read-verb enumeration throttle ====================
+    // The last #185 runway item. Read-class verbs behind the door are the
+    // enumeration vector (a guest crawling lists learns the shape/size of
+    // tenants it cannot see). The budget is per GUEST IDENTITY (not IP),
+    // EW4-shaped, refusals charged only by the clock, and typed 429s carry
+    // E_GUEST_THROTTLED + retryAfterMs.
+    console.log('\nPASS 215 GUEST READ THROTTLE PINS\n');
+
+    await asyncTest('pass 215: guest read budget trips typed (429 E_GUEST_THROTTLED + retryAfterMs); host unaffected', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const guests = require(path.join(ROOT, 'lib', 'guests'));
+        process.env.VANT_GUESTS_READ_BUDGET = '3';
+        process.env.VANT_GUESTS_READ_WINDOW_MS = '30000';
+        guests._resetReadBudgets();
+        const port = 13527 + ((process.pid + 4) % 500);
+        await mcp.start({ port, silent: true });
+        try {
+            const gtok = guests.issue('pin-215-a', { role: 'human' }).token;
+            const call = async (hdrs) => {
+                const res = await fetch(`http://127.0.0.1:${port}/mcp/exec`, {
+                    method: 'POST',
+                    headers: Object.assign({ 'Content-Type': 'application/json' }, hdrs || {}),
+                    body: JSON.stringify({ tool: 'era_list', args: {} })
+                });
+                return { status: res.status, body: await res.json() };
+            };
+            const H = { Authorization: 'Bearer ' + gtok };
+            const seq = [];
+            for (let i = 0; i < 4; i++) seq.push(await call(H));
+            const [a, b, c, d] = seq;
+            const host4 = await call();
+            const ok = a.status === 200 && b.status === 200 && c.status === 200
+                && d.status === 429 && d.body.error && d.body.error.reasonCode === 'E_GUEST_THROTTLED'
+                && typeof d.body.error.retryAfterMs === 'number' && d.body.error.retryAfterMs > 0
+                && host4.status === 200;
+            return { success: ok, error: JSON.stringify(seq.map(s => s.status)) + ' host4=' + host4.status };
+        } finally {
+            delete process.env.VANT_GUESTS_READ_BUDGET;
+            delete process.env.VANT_GUESTS_READ_WINDOW_MS;
+            guests._resetReadBudgets();
+            await mcp.stop();
+        }
+    });
+
+    await asyncTest('pass 215: budgets are PER IDENTITY (one exhausted guest never throttles a neighbor) and recharge by the clock', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const guests = require(path.join(ROOT, 'lib', 'guests'));
+        process.env.VANT_GUESTS_READ_BUDGET = '2';
+        process.env.VANT_GUESTS_READ_WINDOW_MS = '200';   // tuning seam: recovery observable fast
+        guests._resetReadBudgets();
+        const port = 13527 + ((process.pid + 5) % 500);
+        await mcp.start({ port, silent: true });
+        try {
+            const tokA = guests.issue('pin-215-a2', { role: 'human' }).token;
+            const tokB = guests.issue('pin-215-b2', { role: 'human' }).token;
+            const call = async (hdrs) => {
+                const res = await fetch(`http://127.0.0.1:${port}/mcp/exec`, {
+                    method: 'POST',
+                    headers: Object.assign({ 'Content-Type': 'application/json' }, hdrs || {}),
+                    body: JSON.stringify({ tool: 'era_list', args: {} })
+                });
+                return res.status;
+            };
+            const HA = { Authorization: 'Bearer ' + tokA }, HB = { Authorization: 'Bearer ' + tokB };
+            await call(HA); await call(HA);
+            const thirdA = await call(HA);                 // A exhausted
+            const neighborB = await call(HB);              // B unaffected (per-identity)
+            await new Promise(r => setTimeout(r, 260));     // window recharges A
+            const recoveredA = await call(HA);
+            const ok = thirdA === 429 && neighborB === 200 && recoveredA === 200;
+            return { success: ok, error: 'thirdA=' + thirdA + ' neighborB=' + neighborB + ' recoveredA=' + recoveredA };
+        } finally {
+            delete process.env.VANT_GUESTS_READ_BUDGET;
+            delete process.env.VANT_GUESTS_READ_WINDOW_MS;
+            guests._resetReadBudgets();
+            await mcp.stop();
+        }
+    });
+
+    await asyncTest('pass 215: VANT_GUESTS_READ_BUDGET=0 disables the throttle cleanly', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const guests = require(path.join(ROOT, 'lib', 'guests'));
+        process.env.VANT_GUESTS_READ_BUDGET = '0';
+        guests._resetReadBudgets();
+        const port = 13527 + ((process.pid + 6) % 500);
+        await mcp.start({ port, silent: true });
+        try {
+            const tok = guests.issue('pin-215-off', { role: 'human' }).token;
+            const H = { Authorization: 'Bearer ' + tok };
+            const statuses = [];
+            for (let i = 0; i < 6; i++) {
+                const res = await fetch(`http://127.0.0.1:${port}/mcp/exec`, {
+                    method: 'POST',
+                    headers: Object.assign({ 'Content-Type': 'application/json' }, H),
+                    body: JSON.stringify({ tool: 'era_list', args: {} })
+                });
+                statuses.push(res.status);
+            }
+            const ok = statuses.every(s => s === 200);
+            return { success: ok, error: 'statuses=' + statuses.join(',') };
+        } finally {
+            delete process.env.VANT_GUESTS_READ_BUDGET;
+            guests._resetReadBudgets();
+            await mcp.stop();
+        }
+    });
+
     console.log('\n--- RESULTS ---\n');
     console.log(`  Passed:  ${results.passed}`);
     console.log(`  Failed:  ${results.failed}`);
