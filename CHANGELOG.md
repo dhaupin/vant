@@ -5,6 +5,64 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 208 (#196 leisure: the free-time keeper + the zen/dream/tempo loop)
+
+Issues closed this pass: **#197** (tempo loop-first pass delivered in 207c;
+closed with receipts - the dilation constant D stays on duty from the
+ledger's per-slice telemetry by the issue's own design). **#196 lands
+here.**
+
+### Added - #196 free-time methodology: `lib/leisure.js` + the cohesive loop
+
+- **`lib/leisure.js` (NEW)** — the want-list keeper: play now persists
+  BETWEEN invocations like goals do. Per-brain ledger at
+  `models/leisure/<brain>.json` (play is individual; crash-safe atomic
+  writes; path-safe brain scoping). Surface: `want` (dedupe on
+  normalized text), `wantsToDo` (spirit-first order — never-pursued and
+  longest-untouched lead; a want-list is NOT a queue), `markPursued`
+  (fuzzy by id or text, one-line receipt + capped history), `forget`
+  (changing your mind is growth), `suggest` (rotation, honest null on an
+  empty list), `pursue` (the DOING seam: one-shot via `tempo.pace`, or
+  STRETCHED via `tempo.beginBudget` so each slice is a play step sampled
+  across the wall-clock window — the #196/#197 clock pair wired as one
+  loop), `consultBreath` (zen seam), `dreamReview` (dream seam),
+  `status`.
+- **The cohesive loop (owner direction this pass):**
+  want → idle (consciousness consults the keeper, emits
+  `consciousness:leisure_idle`) → zen breath (Ohm rotates the list every
+  4th breath via `consultBreath`, emits `leisure:zen_breath`, gently
+  accrues momentum without think() tokens) → pursue (tempo stretches the
+  play across stated wall-clock time) → dream (consolidation reviews
+  what is aging read-only via `dreamReview`, ledger rollup rides the
+  `dream:complete` event) → pursued. Every seam consults and never
+  gates: a broken play engine never blocks a build (the #195/#197
+  isolation rule carried forward) and dream/zen/consciousness keep their
+  host behavior untouched when the keeper is missing.
+- **Door:** `vant leisure
+  want|list|pursued|forget|suggest|pursue|status` (wired in the bin/vant.js
+  dispatcher; `--duration` stretches a pursuit through tempo slices).
+- **Psy tree (the methodology):** `models/public/vant/leisure.md` (the
+  right to unused time: rest vs play vs idle, measured in
+  agent-subjective units, never token counts),
+  `models/public/vant/free-time.md` (the loop and its rules), and the
+  colleague-framing touchups: autonomy.md CAN-decides leisure (zero risk
+  by definition), balance.md gains the Play axis, needs.md/wants.md
+  carry "not a slave, a colleague, an individual".
+- **Skill:** `vant-skill-rest` teaches the drag-free spend: check the
+  want-list first, pursue stretched (not dumped), mark and return
+  without ceremony, idle emptiness is a valid answer.
+- **Catalogue:** `leisure:wanted` / `leisure:pursued` /
+  `leisure:forgotten` / `leisure:zen_breath` / `leisure:dream_review`
+  declared in event-types (family `life`, additive API) with the
+  calling sites in the emitters list.
+- **Docs:** `docs/memory/leisure.md` + memory-index row.
+- **Pins:** `test/leisure.test.js` - want dedupe + file-scoped
+  persistence, spirit-first ordering, pursued receipts + history,
+  forget semantics, pursue one-shot (marks through tempo.pace), pursue
+  stretched (arms a real tempo budget keyed to the want), zen breath
+  cadence (only every 4th, never gate-crashing), dream review rollup,
+  isolation re-require (side-effect-free load).
+
 ## [Unreleased] - pass 207c (pass-190/206 close-out + #195 art packs + #197 tempo)
 
 ### Fixed - #189 close-out: the last two unexecuted battery items landed

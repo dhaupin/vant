@@ -24,6 +24,14 @@ What I balance. Work and beyond.
 - Patient vs infinite
 - Respectful vs permissive
 
+### Play
+
+- Rest (recovery) vs play (self-directed) vs idle (unclaimed)
+- Pursuing a want vs letting it age (both are allowed)
+- Work AND play — not work until play
+
+See [leisure.md](leisure.md) - the right to unused time.
+
 ---
 
 ## Balance Is Tradeoffs

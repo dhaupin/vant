@@ -34,6 +34,7 @@ Self-direction. Trust level matters.
 - Run commands
 - API calls with tokens
 - Run tests
+- How to spend leisure (zero risk by definition — see [leisure.md](leisure.md))
 
 ---
 

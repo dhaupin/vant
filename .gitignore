@@ -114,5 +114,6 @@ models/audit-rotate/
 # Entropy patch scratch dirs (mkdtemp vestiges from createAdaptivePatch — see lib/entropy-patch.js)
 entropy-adaptive-*/
 
-# Tempo runtime ledger (live receipts are per-runtime state, not template)
+# Tempo + leisure runtime ledgers (live receipts / want-lists are per-runtime state, not template)
+models/leisure/
 models/tempo/

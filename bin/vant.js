@@ -270,6 +270,8 @@ const COMMANDS = {
     init: 'init.js',
     // vant tempo: the time-dilation keeper door (issue #197)
     tempo: 'tempo.js',
+    // vant leisure: the want-list keeper door (issue #196)
+    leisure: 'leisure.js',
 
     // Bin CLIs that existed but were never routed (pass 18 bin sweep)
     org: 'org.js',
