@@ -223,6 +223,79 @@ test('R1 matrix: authRequired + no configured key refuses the presented key (no 
     return { success: verdict && verdict.valid === false, error: JSON.stringify(verdict) };
 });
 
+console.log('\n🔒 #190-EW7 LOCKOUT RING-TRIM HERMETIC PINS (pass 226)\n');
+
+// Each pin runs in a throwaway repo root (VANT_REPO_ROOT) so the real
+// .circuit-auth.json at the workspace root is never touched.
+const os = require('os');
+const fs = require('fs');
+function ew7Run(envs, seedDiskFile, childCode) {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ew7-pin-'));
+    try {
+        fs.writeFileSync(path.join(tmp, '.circuit-auth.json'), JSON.stringify(seedDiskFile));
+        const all = require('child_process').execFileSync(process.execPath, ['-e', childCode], {
+            encoding: 'utf8', timeout: 30000,
+            env: { ...process.env, VANT_REPO_ROOT: tmp, VANT_AUTH_LOCKOUT_CAP: '100', ...envs },
+            cwd: ROOT,
+        });
+        // The child logs audit/WARN lines before its JSON sentinel line.
+        const lines = all.trim().split('\n');
+        return JSON.parse(lines[lines.length - 1]);
+    } finally {
+        try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (e) { /* best effort */ }
+    }
+}
+const CHILD_PROBE = `const {Auth} = require(${JSON.stringify(path.join(ROOT, 'lib', 'auth'))});
+const fs = require('fs');
+const path = require('path');
+const DISK = path.join(process.env.VANT_REPO_ROOT, '.circuit-auth.json');
+const a = new Auth();
+const r = a.recordFailedAttempt('fresh-probe');
+const disk = JSON.parse(fs.readFileSync(DISK, 'utf8'));
+console.log(JSON.stringify({ result: r, ids: Object.keys(disk), disk }));`;
+
+// (a) Expired disk entries drop first; the fresh in-process streak survives.
+const expired = 50;
+const seedA = {};
+for (let i = 0; i < expired; i++) seedA['rot-' + i] = { count: 5, lockoutUntil: Date.now() - 60000 };
+test('EW7a: expired junk dropped on save, fresh streak survives, save reported', () => {
+    const pinA = ew7Run({}, seedA, CHILD_PROBE);
+    const aur = pinA && pinA.result && pinA.result.locked === false && pinA.result.persisted === true;
+    const aok = aur && pinA.ids.includes('fresh-probe')
+        && pinA.ids.filter(id => id.startsWith('rot-')).length === 0;
+    return { success: !!aok, error: JSON.stringify({ ids: pinA && pinA.ids && pinA.ids.length, r: pinA && pinA.result }) };
+});
+
+// (b) Cap-trim: 102 active junk lockouts + 1 fresh streak (lockoutUntil 0)
+// with CAP=100 => 3 oldest junk dropped; the zero-lockout streak survives
+// (it sorts oldest — the pass-226 finding the guard exists for).
+const seedB = {};
+const base = Date.now() + 600000;
+for (let i = 0; i < 102; i++) seedB['junk-' + String(i).padStart(3, '0')] = { count: 5, lockoutUntil: base + i * 1000 };
+test('EW7b: ring capped at 100, zero-lockout streak never evicted', () => {
+    const pinB = ew7Run({}, seedB, CHILD_PROBE);
+    const bIds = pinB && pinB.ids || [];
+    const bOk = bIds.includes('fresh-probe') && bIds.length === 100
+        && bIds.every(id => id === 'fresh-probe' || id.startsWith('junk-'))
+        && ['junk-000', 'junk-001', 'junk-002'].every(d => !bIds.includes(d));
+    return { success: !!bOk, error: JSON.stringify({ count: bIds.length, hasFresh: bIds.includes('fresh-probe'), r: pinB && pinB.result }) };
+});
+
+// (c) Flood realism: junk lockouts LOADED by the constructor (they become
+// the process map) are still droppable — in-process membership is NOT the
+// guard (an over-wide guard would make the attacker bound unenforceable).
+test('EW7c: constructor-loaded junk lockouts still trim to the cap', () => {
+    const pinC = ew7Run({}, seedB, `const {Auth} = require(${JSON.stringify(path.join(ROOT, 'lib', 'auth'))});
+const fs = require('fs');
+const a = new Auth(); // constructor loads 102 junk into the map
+const r = a.recordFailedAttempt('fresh-probe');
+const disk = JSON.parse(fs.readFileSync(require('path').join(process.env.VANT_REPO_ROOT, '.circuit-auth.json'), 'utf8'));
+console.log(JSON.stringify({ ids: Object.keys(disk) }));`);
+    const cOk = pinC && pinC.ids.length === 100 && pinC.ids.includes('fresh-probe')
+        && ['junk-000', 'junk-001', 'junk-002'].every(d => !pinC.ids.includes(d));
+    return { success: !!cOk, error: JSON.stringify({ count: pinC && pinC.ids && pinC.ids.length }) };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

@@ -125,8 +125,14 @@ Closed from the issue queue (#190/#192/#193/#194) with live probes:
   mcp-tools.md registry recount 299→324 via live mcp.listTools().
 
 **Gaps/suggestions recorded (not solved this pass):**
-- EW2/EW4/EW7 fixes are in without dedicated pin-tests yet (EW2 leash
-  and EW4 per-IP limiter are the two worth pins next).
+- EW2/EW4/EW7 pin debt CLEARED by pass 226: EW2 leash pin
+  (test/leash-pin.test.js, pass 212), EW4 per-client door budget
+  (pass 222), and EW7 lockout ring-trim now has 3 hermetic pins in
+  test/auth.test.js (23/0) - pin EW7b caught + fixed a real trim bug in
+  the same pass: the cap-trim sorted zero-lockout ACTIVE streaks first
+  and evicted exactly the identity the process was counting; the guard
+  now protects never-locked (lockoutUntil === 0) records while junk -
+  constructor-loaded included - still trims to the cap.
 - #193 leftovers: examples.md fictional projects + dead link,
   settlement/network export drift, memory list undercount.
 - R4-F4 auth login wording (marginal honesty) - fold into #186-R1.
@@ -8240,9 +8246,9 @@ npm test && node test/coverage.js
 - [x] Add integration tests for sudo escalation flows
 - [x] Add security tests: path traversal, prototype pollution, symlink escape
 - [x] Add MCP tool injection tests
-- [ ] Add concurrent agent operation tests
-- [ ] Add backup restore with malicious content tests
-- [ ] Add sync recursion guard leak tests
+- [x] Add concurrent agent operation tests (pass 226 audit: test/concurrent-agents.test.js already exists and runs 6/0 — box was stale)
+- [x] Add backup restore with malicious content tests (pass 226 audit: test/malicious-restore.test.js exists, 7/0)
+- [x] Add sync recursion guard leak tests (pass 226 audit: test/sync-recursion.test.js exists, 6/0)
 - [ ] Test coverage target: >80% for security-critical modules
 
 ### Sudo Integration (from prd-sudo.md)
