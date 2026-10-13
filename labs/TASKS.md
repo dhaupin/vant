@@ -8,6 +8,54 @@ owner came back clean
 
 ---
 
+## Session (2026-10-13 — prd-web: the frontend PRD, spec-only)
+
+**Owner: "Let's do it. We should make a /labs prd for this... let's craft
+prd, don't build code yet."**
+
+**What landed (spec only):** `labs/prd-web.md` v0.1 —
+
+- DIRECTORY CONTRACT: frontends live in `/web/<kebab-name>/`, each
+  self-contained (own package.json/build/artifact) so an install base
+  runs several frontends; `/app`,`/src` rejected with reasons; `/dist`
+  stays the Cloudflare Pages lander, gaining only a Dashboard link.
+- REACH MATRIX: Mode A (primary) = Cloudflare Pages Worker Functions
+  proxy `/api/*` to the pod's MCP door (same-origin, NO CORS needed,
+  pod may stay loopback); Mode B = pod same-origin static serve
+  (phase P4); Mode C = direct, dev-only, needs the (unbuilt) CORS grant.
+- TIERS: O observer board / H working seat (work console + msg console +
+  market) / A agent explorer (deliberate, P4) / S owner seat (guests,
+  pairing QR - which UN-HOLDS #185 H6 at this phase - budgets, era next).
+- PHASES P0..P4 each with acceptance criteria; security review says
+  tenant truth stays server-side (the UI renders what the door filtered)
+  and payloads are sanitized at source (no innerHTML from wire data).
+
+**Open questions parked for P1 — ALL FOUR RESOLVED (owner, 2026-10-13):**
+1. Session binding: MVP = operator pastes the vguest_ token per load;
+   worker-side binding (paste once, Worker holds it) is the P3 upgrade.
+2. Deploy URL: each frontend ships as its OWN Pages project with its
+   OWN <name>.creadev.org subdomain (see prd-web.md §2.3).
+3. CF egress policy: IP-based allowlisting, AND it needs refresh after
+   a period - the P1 plan must include a refresh mechanism (Cloudflare's
+   published egress ranges are the realistic allowlist target; a stable
+   egress alternative like a tunnel stays the fallback if ranges drift
+   too often). See prd-web.md §8.
+4. Brand kit: labs/prd-brand.md IS the design foundation (owner: update
+   it if required); dashboard ships BOTH dark and light modes.
+5. Admin-UX stack: RESOLVED 2026-10-13 - the owner recalled the old
+   thread's content ("Tailwind, Shadcn, Radix, Framer"); fresh late-2026
+   comparison confirmed that lean over Ant Design 6 / Mantine 9 and added
+   the periphery (TanStack Router v1 / Query v5 / Table v9, zod,
+   Recharts, react-hook-form, Motion-for-React v14). Recorded
+   prd-web.md §2.6. Extensibility requirement -> the in-dashboard MODULE
+   FRAME (prd-web.md §3.3): modules = self-contained folders with typed
+   manifests (id/route/nav/tiers/families), frame owns nav-from-registry,
+   lazy routes, ONE SSE fanout (pod caps connections at 32), one typed
+   exec client, refusal primitive, tokens-only theming; new capability =
+   an existing pod tool or a spec'd pod verb - never a new Worker route.
+
+**NEXT-UP:** owner green-lights P1 (Observer MVP).
+
 ## Session (2026-10-13 — pass 215: enumeration throttle + docs sweep)
 
 **Owner: "We can do enumeration throttling the remaining runway item. We
