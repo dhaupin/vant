@@ -163,6 +163,16 @@ Notes:
 
 ---
 
+## Web Dashboard (planned)
+
+A React dashboard ("a guest identity with a browser") is specced and
+planned - no code yet. The contract lives in
+[labs/prd-web.md](labs/prd-web.md): `web/<app>` self-contained frontends,
+a Cloudflare Pages Worker proxy to the pod's MCP door, identity tiers,
+a multi-install property switcher, and an in-dashboard module frame.
+Until it ships, the MCP door plus `vant guest` remain the headless
+interface.
+
 ## Documentation
 
 Full docs at **[docs.creadev.org/vant](https://docs.creadev.org/vant)**

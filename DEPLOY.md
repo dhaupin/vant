@@ -359,8 +359,37 @@ node -e "console.log(require('./lib/sandbox').canRead())"   # Direct sandbox pro
 | Org and teams | [labs/prd-org-teams.md](labs/prd-org-teams.md) |
 | Audit findings | [labs/archives/audits/AUDIT_FINDINGS.md](labs/archives/audits/AUDIT_FINDINGS.md) |
 | Task tracker | [labs/TASKS.md](labs/TASKS.md) |
+| Web frontend PRD | [labs/prd-web.md](labs/prd-web.md) |
 | Docs site | https://docs.creadev.org/vant |
 | CLI reference | https://docs.creadev.org/vant/reference/cli |
+
+## 12. Frontends on Cloudflare Pages (planned)
+
+The web frontends (see `labs/prd-web.md` v0.2) deploy to Cloudflare
+Pages. Each frontend is its OWN Pages project with its OWN subdomain.
+No frontend code exists yet; this is the contract it will follow.
+
+| Aspect | Rule |
+|--------|------|
+| Location | `web/<app>/` - fully self-contained (src, functions, package.json, configs); nothing the frontend needs lives at repo root |
+| Build | Vite build producing static output in the app's own `dist/`; the app exits after build (serving is Pages' job) |
+| Functions | `web/<app>/functions/` ships the Pages Worker functions: the `/api/*` proxy to the pod's MCP door (auth forwarded, never logged) |
+| Cloudflare config | PAGES SETTINGS ONLY: env vars and bindings (property origins, email sender keys, KV/D1 account store). NO wrangler strings in code; the repo ships `.example` templates only |
+| Pod posture | pod stays loopback/private; the Worker function is the single network bridge; pod code untouched by the deploy |
+| Auth | MVP: paste a guest token per load; P2: email-OTP logins (resend + cooldown, hashed codes) with worker-side session binding |
+| Multi-install | `VANT_PROPERTY_<ID>_NAME` / `VANT_PROPERTY_<ID>_ORIGIN` env registry = one deployment, N attached Vant installs ("properties"), switchable in the UI with view state preserved |
+
+Planned steps once `web/dashboard` scaffolds in P1:
+
+1. Create the Pages project from the `web/dashboard` folder.
+2. Set its env vars in Pages settings (the pod MCP origin for the
+   proxy, plus any account-store binding for later phases).
+3. Install and build inside the app directory; the pod's own
+   dependencies stay untouched (`web/` is outside the pod's graph).
+4. Point the lander's new "Dashboard" link at the project's subdomain.
+
+Everything in sections 1-11 remains the POD guide; frontends never
+change the pod's deployment face.
 
 ---
 

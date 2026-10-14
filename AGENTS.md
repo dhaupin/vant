@@ -291,6 +291,24 @@ Broadcast via msg.send('channel', message).
 
 ---
 
+## Web Frontends (web/)
+
+Frontends live ONLY in `web/<app>` (one subdirectory per frontend; see
+`labs/prd-web.md`). Each app is fully self-contained: own `package.json`,
+own build, own `functions/`, own deploy artifact.
+
+- **One-way boundary, never crossed**: the pod must NEVER require
+  anything under `web/`; frontends must NEVER require the pod's lib
+  graph. The pod suite staying green with `web/` present is the check
+  that keeps this true.
+- **Cloudflare contract**: every frontend deploys as its own Pages
+  project with its own subdomain. All Cloudflare config (pod origins,
+  bindings, keys) lives in PAGES SETTINGS as env vars - never as
+  strings in code; repos ship only `.example` templates.
+- Do not build frontend features into the pod's `package.json` or MCP
+  surface without a filed spec; the module frame PRD (v0.2) defines the
+  module catalog and phases P0-P5.
+
 ## Commit Message Format
 
 Prefix with your agent identifier:
