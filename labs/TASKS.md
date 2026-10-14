@@ -79,6 +79,31 @@ prd, don't build code yet."**
   requirements (PRD 3.3 resp. 8 + section 10). Owner greenlight: update
   PRD, push, START BUILDING (P1 scaffold).
 
+**Session 2026-10-14 (build day 2):** PRD fidelity kept, P1 grows real:
+- brain kept current: models/private/axolotl/lessons.md pass block; the
+  boot horcrux REFRESHED via `vant horcrux refresh` + verified by
+  `horcrux inspect` (valid, 279 brains embedded) - the svg is tracked
+  PUBLIC by design (boot/README note; .gitignore explicitly does NOT
+  exclude it - committed below).
+- web/dashboard WORKER BRIDGE implemented (functions/lib/bridge.ts +
+  routes): /api/mcp/exec + /tools + /health + /events SSE passthrough;
+  per-session edge rate budget (EW4 mirror, default 120/min); per-
+  property circuit breaker (5 fails -> open, 15s cooldown, half-open;
+  exposed via /api/breakers); property origins ONLY from Pages settings
+  env vars - zero wrangler strings (3.7); upstream timeout knob.
+- SSE auth solved honestly: EventSource cannot send headers -> the
+  login gate now establishes an HttpOnly session cookie for the active
+  property (MVP; P2 sessions replace the raw bearer), and the bridge
+  injects Authorization pod-soard - the browser never exposes the
+  token in a query string (6).
+- the frame's board connection is LIVE in code: ONE EventSource per
+  ACTIVE property (32-cap honored), family fanout store with ring
+  buffer; live-board renders from the fanout with honest
+  connecting/live/down chips and dead-board copy; other modules render
+  from the same store as they grow.
+- verified: tsc clean (src + functions), vite build clean (per-module
+  chunks incl. board), style+links gates, ci.js battery.
+
 **NEXT-UP:** owner green-lights P1 (Observer MVP).
 
 ## Session (2026-10-13 — pass 215: enumeration throttle + docs sweep)
