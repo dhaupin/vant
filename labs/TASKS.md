@@ -147,7 +147,43 @@ that; no filler lists, no invented shapes. Consequences shipped:
   ci.js 496/0; boot horcrux re-refreshed post-suite + inspected before
   push (the every-suite drift pattern made explicit).
 
-**NEXT-UP:** owner green-lights P1 (Observer MVP).
+**Session 2026-10-14 (build day 5 - multi-install behavior + brains module):**
+the owner's questions drove this round: what is a pod vs node vs mesh,
+and "only one pod in Pages vars defeats the multi-pod runner?" -
+answered in the tree, not just in prose:
+- Multi-install switcher made REAL (was a one-property skeleton):
+  /api/properties bridge route (reads the VANT_PROPERTY_<ID>_*
+  registry; origins stay server-side, serving labels + ids only),
+  typed PropertiesOut in api.ts, frame/Properties.tsx (list hook) +
+  the frame-topbar PropertySwitcher (listing + switching, honest
+  "not registered" state when the URL rides an unknown id), ?p=
+  validated as a typed search param on the root route; switching goes
+  through the router's history adapter (documented v1 typed-reducer
+  quirk, not a workaround-in-disguise). One dashboard deployment now
+  serves N attached installs, one var pair each, in the SAME Pages
+  project.
+- DEPLOY.md 12.1: the one-dashboard->N-installs var model spelled out
+  with a concrete FOUR-install example (LOCAL/WORK/STAFF/LAB pairs) -
+  installer-facing answer to the multi-pod question.
+- prd-web.md 3.4: pod/node/mesh/property terminology block (pod = one
+  install serving its MCP door; node = registry-registered install;
+  mesh = bus-federated set; property = any attached install).
+- Brains module landed (catalog #18, route /brain, tiers O A S,
+  section observe): corpus browser auto-calls the door's real
+  brain_/corpus_ list tool (raw-response fallback + typed refusals,
+  no invented shapes), real brain_search with the rank-vs-score map
+  (canvas, labeled "real door data, not an embedding projection" in
+  the help layer + legend), and the IDs/NSC9 tab (addressing-tool
+  discovery + 9-NNNNN-NNNNN-N shape detection; matching keys mark
+  amber in the map; no coordinates are ever invented). Registry = 14
+  modules; route MODULES[13] added.
+- verified: tsc exit 0, vite build exit 0, docs style/truthfulness/
+  links PASS, ci.js 496 passed / 0 failed.
+
+**NEXT-UP:** P2 email-OTP accounts (KV/D1 binding + provider pick at
+build time, worker-side session binding lands with it) per owner's
+stated order; then real embedding-vector plumbing when a pod exposes
+it (the map upgrades itself, honestly by name).
 
 ## Session (2026-10-13 — pass 215: enumeration throttle + docs sweep)
 

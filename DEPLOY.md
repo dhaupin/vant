@@ -394,9 +394,26 @@ Each frontend is its OWN Pages project with its OWN subdomain.
    | `VANT_EDGE_RATE_PER_MIN` | `120` | optional; per-session edge budget |
 
    The property ID for this first install is **`local`** (the URL its
-   views ride is `?p=local`; the resolver reads
-   `VANT_PROPERTY_<ID>_ORIGIN` upper-cased). More installs later = add
-   `VANT_PROPERTY_<NEWID>_ORIGIN` and they appear in the switcher.
+   views ride is `?p=local`;   the resolver reads `VANT_PROPERTY_<ID>_ORIGIN` upper-cased). This
+   is a ONE dashboard -> N installs model: each attached Vant install
+   gets its OWN pair of vars in THIS SAME Pages project. The vars take
+   multiple definitions - one pair per install:
+
+   ```ini
+   VANT_PROPERTY_LOCAL_ORIGIN=https://home-pod.example.com   # install 1
+   VANT_PROPERTY_LOCAL_NAME=home pod
+   VANT_PROPERTY_WORK_ORIGIN=https://work-pod.example.com    # install 2
+   VANT_PROPERTY_WORK_NAME=work pod
+   VANT_PROPERTY_STAFF_ORIGIN=https://crew.example.com       # install 3
+   VANT_PROPERTY_STAFF_NAME=crew pod
+   VANT_PROPERTY_LAB_ORIGIN=https://lab-pod.example.com      # install 4
+   VANT_PROPERTY_LAB_NAME=lab test pod
+   ```
+
+   Each new pair appears in the dashboard's property switcher (4 above,
+   4 entries) without redeploying app code. Switching keeps your route,
+   module, and filters; everything data-side re-keys to the chosen pod
+   and the SSE stream reconnects (prd-web.md 3.4).
 4. **Make the pod reachable from the edge** - pick ONE:
    - **Tunnel (recommended for home/VPS pods):** `cloudflared tunnel
      create vant-pod`, route a hostname like

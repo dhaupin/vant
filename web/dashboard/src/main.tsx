@@ -18,6 +18,16 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const AppError = lazy(() => import("./pages/AppError"));
 
 const rootRoute = createRootRoute({
+  // The multi-install property rides ?p= (prd-web.md 3.4). Declaring it
+  // here makes it a typed search param: TS guards every switch, the
+  // router preserves it across navigations, and hostile values fail the
+  // charset gate instead of reaching the bridge.
+  validateSearch: (search: Record<string, unknown>): { p?: string } => ({
+    p:
+      typeof search.p === "string" && /^[a-z0-9-]{1,40}$/.test(search.p)
+        ? search.p
+        : undefined,
+  }),
   component: () => (
     <QueryClientProvider client={queryClient}>
       <FrameWithOutlet />
@@ -81,6 +91,7 @@ const moduleRoutes = [
   routeFor(MODULES[10]),
   routeFor(MODULES[11]),
   routeFor(MODULES[12]),
+  routeFor(MODULES[13]),
 ];
 
 const routeTree = rootRoute.addChildren([termsRoute, privacyRoute, ...moduleRoutes]);

@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import {
   Activity,
+  Brain,
   Briefcase,
   Cpu,
   Gauge,
@@ -129,6 +130,17 @@ export const MODULES = [
     families: ["market"],
     icon: ShoppingBag,
     load: () => import("../modules/market"),
+  },
+  {
+    id: "brains",
+    title: "Brains",
+    blurb: "Corpus browser, real search, NSC9-style addressing tools.",
+    route: "/brain",
+    tiers: ["O", "A", "S"],
+    section: "observe",
+    families: [],
+    icon: Brain,
+    load: () => import("../modules/brains"),
   },
   {
     id: "guests",

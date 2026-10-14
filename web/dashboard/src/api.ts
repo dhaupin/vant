@@ -113,6 +113,20 @@ export async function breakers() {
   return readJson("/api/breakers", BreakersOut);
 }
 
+/** GET /api/properties - ids + labels of attached installs; origins
+ *  stay server-side (the bridge resolves them for forwarding only). */
+export const PropertiesOut = z
+  .object({
+    properties: z
+      .array(z.object({ id: z.string(), name: z.string() }))
+      .optional(),
+  })
+  .passthrough();
+
+export async function properties() {
+  return readJson("/api/properties", PropertiesOut);
+}
+
 async function readJson<S extends z.ZodTypeAny>(path: string, schema: S): Promise<z.infer<S>> {
   let res: Response;
   try {

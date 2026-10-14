@@ -239,6 +239,15 @@ which stays barred until a second frontend exists (rule 7).
 
 ### 3.4 Multi-install: properties + context switching (owner, round 2)
 
+Terminology, kept consistent below (source: labs/prd-mesh.md + the node
+registry): a **pod** is one vant install serving its MCP door. A
+**node** is an install registered in the mesh's node registry for
+consensus/gossip - every node is a pod; not every pod joins the mesh.
+The **mesh** is the set of N pods federating over the signed bus. In
+dashboard vocabulary, ANY attached install (mesh-joined or not) is a
+PROPERTY - the switcher is over pods, with mesh discovery feeding the
+list later (last bullet below).
+
 The dashboard manages MORE THAN ONE Vant install. Each attached install
 (mesh and node attachments included) is a PROPERTY, and the shell gives
 you a context switcher across them:
