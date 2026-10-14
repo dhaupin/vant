@@ -1,5 +1,14 @@
 import type { ComponentType } from "react";
-import { Activity, Cpu, Gauge, Settings } from "lucide-react";
+import {
+  Activity,
+  Briefcase,
+  Cpu,
+  Gauge,
+  MessagesSquare,
+  Settings,
+  ShoppingBag,
+  UsersRound,
+} from "lucide-react";
 import type { Tier } from "../state";
 
 /**
@@ -71,6 +80,50 @@ export const MODULES = [
     families: [],
     icon: Settings,
     load: () => import("../modules/settings"),
+  },
+  {
+    id: "work",
+    title: "Work",
+    blurb: "Assign work to the crew; typed refusals surfaced.",
+    route: "/work",
+    tiers: ["H", "S"],
+    section: "work",
+    families: ["tasks"],
+    icon: Briefcase,
+    load: () => import("../modules/work"),
+  },
+  {
+    id: "chat",
+    title: "Chat",
+    blurb: "msg channels + agent sessions.",
+    route: "/chat",
+    tiers: ["H", "S"],
+    section: "work",
+    families: ["msg"],
+    icon: MessagesSquare,
+    load: () => import("../modules/chat"),
+  },
+  {
+    id: "forum",
+    title: "Forum",
+    blurb: "forum-family events, tenant-filtered by the door.",
+    route: "/forum",
+    tiers: ["O", "H", "A", "S"],
+    section: "observe",
+    families: ["forum"],
+    icon: UsersRound,
+    load: () => import("../modules/forum"),
+  },
+  {
+    id: "market",
+    title: "Market",
+    blurb: "market-family events + market_ tool calls.",
+    route: "/market",
+    tiers: ["O", "H", "S"],
+    section: "observe",
+    families: ["market"],
+    icon: ShoppingBag,
+    load: () => import("../modules/market"),
   },
 ] as const satisfies readonly ModuleManifest[];
 

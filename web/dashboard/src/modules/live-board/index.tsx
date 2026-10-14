@@ -81,9 +81,7 @@ export default function LiveBoard() {
 
       <div className="mt-6">
         {bridge.kind === "down" ? (
-          <>
-            <Refusal error={bridge.err} onRetry={() => setBridge({ kind: "loading" })} detail="Bridge probe below the board stays authoritative for exec paths." />
-          </>
+          <Refusal error={bridge.err} onRetry={() => setBridge({ kind: "loading" })} />
         ) : null}
         {fan.status === "live" && visible.length === 0 ? (
           <EmptyState

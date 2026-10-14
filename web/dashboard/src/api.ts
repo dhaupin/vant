@@ -101,6 +101,18 @@ export async function health() {
   return readJson("/api/health", HealthOut);
 }
 
+/** GET /api/breakers - the edge's per-property breaker view (3.6). */
+export const BreakersOut = z
+  .object({
+    breakers: z.record(z.string(), z.object({ fails: z.number(), state: z.string() })).optional(),
+    note: z.string().optional(),
+  })
+  .passthrough();
+
+export async function breakers() {
+  return readJson("/api/breakers", BreakersOut);
+}
+
 async function readJson<S extends z.ZodTypeAny>(path: string, schema: S): Promise<z.infer<S>> {
   let res: Response;
   try {

@@ -72,6 +72,10 @@ const moduleRoutes = [
   routeFor(MODULES[1]),
   routeFor(MODULES[2]),
   routeFor(MODULES[3]),
+  routeFor(MODULES[4]),
+  routeFor(MODULES[5]),
+  routeFor(MODULES[6]),
+  routeFor(MODULES[7]),
 ];
 
 const routeTree = rootRoute.addChildren([termsRoute, privacyRoute, ...moduleRoutes]);

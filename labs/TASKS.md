@@ -104,6 +104,25 @@ prd, don't build code yet."**
 - verified: tsc clean (src + functions), vite build clean (per-module
   chunks incl. board), style+links gates, ci.js battery.
 
+**Session 2026-10-14 (build day 3 - the honesty directive):** owner
+ruling recorded: NO fake data ANYWHERE - if it is not connected, SAY
+that; no filler lists, no invented shapes. Consequences shipped:
+- frame/conn.tsx: the shared NotConnected primitive (one plain
+  paragraph: reason + recoveries) and ONE cached /tools discovery query
+  per property/identity - modules discover what the door REALLY reports
+  before rendering anything.
+- P2 catalog modules landed honest-first: work (discovered work_ tools
+  with call panels; real exec; typed refusals), chat (msg-family fanout
+  events + discovered msg_ tools), forum (fanout-render-only until a
+  live pod confirms its tools), market (market-family events +
+  discovered market_ tools). status now probes the edge's breaker
+  states (/api/breakers) and says "not reachable" plainly when
+  functions are undeployed.
+- bloat trim: board refusal footnote dropped; status footer says one
+  sentence; no module fakes an empty-state shell with skeleton noise.
+- verified: tsc clean, vite build clean (work/chat/forum/market in
+  their own chunks), style+links gates PASS, ci.js 496/0.
+
 **NEXT-UP:** owner green-lights P1 (Observer MVP).
 
 ## Session (2026-10-13 — pass 215: enumeration throttle + docs sweep)
