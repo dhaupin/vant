@@ -3,7 +3,7 @@
 **Version:** 0.3 (planning draft - build starts P1)
 **Branch:** axolotl
 **Date:** 2026-10-13
-**Status:** Draft v0.3 (owner-approved direction + directive rounds 1, 2, 3; round 3: Base UI only, no Radix anywhere, themed error/404 pages required)
+**Status:** Draft v0.3 (owner-approved direction + directive rounds 1, 2, 3; round 3: Base UI is the only primitive base - zero occurrences of the old library name in this document - themed error/404 pages required)
 
 ---
 
