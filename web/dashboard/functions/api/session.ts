@@ -3,7 +3,7 @@ import { establishSession, clearSession } from "../lib/bridge";
 
 export const onRequestPost: Handler = async (context: PagesContext) => {
   const property = new URL(context.request.url).searchParams.get("p") ?? "local";
-  return establishSession(context.request, property);
+  return establishSession(context.request, context.env, property);
 };
 
 export const onRequestDelete: Handler = async (context: PagesContext) => {

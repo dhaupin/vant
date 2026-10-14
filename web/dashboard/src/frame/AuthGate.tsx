@@ -1,54 +1,334 @@
-import { useState } from "react";
-import { actions, useApp } from "../state";
+import { useEffect, useRef, useState } from "react";
+import { actions, useApp, type DashRole } from "../state";
 import { Help } from "./Tooltip";
 
 /**
- * Login gate (prd-web.md 3.5, MVP): the operator pastes a vguest_ token
- * per load. It lives in MEMORY ONLY - never in localStorage - and the
- * Worker forwards it without logging. The email-OTP account flow is the
- * P2 replacement; this gate remains the fallback for local installs.
+ * Login gate (prd-web.md 3.5, P2): email + one-time code is the
+ * PRIMARY flow now; the vguest_ paste stays as the honestly-labeled
+ * fallback for local installs without email/store config. The session
+ * itself is server-side (`bsess_` HttpOnly cookie) - the browser never
+ * holds the pod token or the email. On load we PROBE /api/auth/session
+ * so a live session is restored without flashing the login screen.
  */
+
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const token = useApp((s) => s.tokens[s.property] ?? null);
-  if (token === null) {
+  const account = useApp((s) => s.account);
+  const [probeState, setProbeState] = useState<"probing" | "done">("probing");
+
+  // Restore a live server-side session before rendering anything.
+  useEffect(() => {
+    if (token || account) {
+      setProbeState("done");
+      return;
+    }
+    let alive = true;
+    fetch(`/api/auth/session?p=${encodeURIComponent(getProperty())}`)
+      .then(async (res) => {
+        if (!alive) return;
+        if (res.ok) {
+          const data = (await res.json()) as { role?: string; bound?: boolean };
+          const role: DashRole = data.role === "admin" ? "admin" : "viewer";
+          actions.setAccount({ role }, data.bound ? [getProperty()] : []);
+        }
+      })
+      .catch(() => undefined) // undeployed functions: the login screen is honest
+      .finally(() => {
+        if (alive) setProbeState("done");
+      });
+    return () => {
+      alive = false;
+    };
+  }, [token, account]);
+
+  if (token === null && account === null) {
+    if (probeState === "probing") {
+      return (
+        <GateShell>
+          <p className="text-sm text-ink-soft">Checking for a live session...</p>
+        </GateShell>
+      );
+    }
     return <Login />;
   }
   return children;
 }
 
-function Login() {
-  const [value, setValue] = useState("");
-  const [err, setErr] = useState<string | null>(null);
-  const [note, setNote] = useState<string | null>(null);
-  const property = useApp((s) => s.property);
+function getProperty(): string {
+  try {
+    return new URLSearchParams(window.location.search).get("p") ?? "local";
+  } catch {
+    return "local";
+  }
+}
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const token = value.trim();
-    if (!token.startsWith("vguest_")) {
-      setErr("That is not a guest token. It starts with vguest_.");
+type Step =
+  | { s: "email" }
+  | { s: "sent"; email: string; resendIn: number };
+
+function Login() {
+  const [step, setStep] = useState<Step>({ s: "email" });
+  const [mode, setMode] = useState<"email" | "token">("email");
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  const resendTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (step.s !== "sent") return;
+    const interval = window.setInterval(() => {
+      setStep((current) =>
+        current.s === "sent" && current.resendIn > 0
+          ? { ...current, resendIn: current.resendIn - 1 }
+          : current,
+      );
+    }, 1000);
+    resendTimer.current = interval;
+    return () => window.clearInterval(interval);
+  }, [step.s]);
+
+  const request = async () => {
+    const clean = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) {
+      setErr("That is not an email address shape.");
       return;
     }
     setErr(null);
-    // Best-effort session cookie setup: HttpOnly cookie lets the bridge
-    // inject Authorization for the SSE stream (EventSource can't send
-    // headers). If functions aren't deployed (first boot), the paste still
-    // works for non-SSE proxy calls - the board will say what's missing.
     try {
-      const res = await fetch(`/api/session?p=${encodeURIComponent(property)}`, {
+      const res = await fetch("/api/auth/request-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({ email: clean }),
       });
-      if (!res.ok) {
-        setNote("Functions not reachable yet.");
+      const data = (await res.json().catch(() => ({}))) as { error?: string; detail?: string };
+      if (res.ok) {
+        setStep({ s: "sent", email: clean, resendIn: 60 });
+      } else if (data.error === "E_EMAIL_UNCONFIGURED" || data.error === "E_STORE_UNCONFIGURED") {
+        setErr("Email sign-in is not configured on this deployment yet - use the paste-token fallback.");
+        setMode("token");
+      } else if (data.error === "E_OTP_COOLDOWN") {
+        setErr("A code was requested for that address recently. Wait a minute.");
+      } else {
+        setErr(data.detail ?? "the request was refused");
       }
     } catch {
-      setNote("Functions not reachable yet.");
+      setErr("Functions not reachable (undeployed or offline).");
     }
-    actions.setToken(property, token);
   };
 
+  const verify = async () => {
+    if (step.s !== "sent") return;
+    setErr(null);
+    try {
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: step.email, code: code.trim() }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        role?: string;
+        error?: string;
+        detail?: string;
+      };
+      if (res.ok && data.ok) {
+        const role: DashRole = data.role === "admin" ? "admin" : "viewer";
+        actions.setAccount({ role }, []);
+        return;
+      }
+      const shaped =
+        data.error === "E_OTP_MISMATCH"
+          ? "That code is not right. Attempts are budgeted."
+          : data.error === "E_OTP_BURNED"
+            ? "Too many wrong attempts; the code was burned. Request a fresh one."
+            : data.error === "E_OTP_EXPIRED"
+              ? "No live code for that address. Request one."
+              : (data.detail ?? "the door said no");
+      setErr(shaped);
+      if (data.error === "E_OTP_BURNED" || data.error === "E_OTP_EXPIRED") setStep({ s: "email" });
+    } catch {
+      setErr("Functions not reachable (undeployed or offline).");
+    }
+  };
+
+  return <GateShell>{mode === "email" ? <EmailMode /> : <TokenMode />}</GateShell>;
+
+  function EmailMode() {
+    const sent = step.s === "sent";
+    return (
+      <div className="mt-6 rounded-lg border border-line bg-surface p-4">
+        <p className="text-sm font-medium">Sign in with a one-time code</p>
+        {!sent ? (
+          <>
+            <p className="mt-1 text-xs text-ink-soft">
+              Enter your dashboard email; a single-use code arrives by
+              mail. The email is stored hashed server-side.
+            </p>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void request();
+              }}
+              className="mt-4 space-y-3"
+            >
+              <input
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="operator@example.com"
+                className="w-full rounded-md border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-accent"
+              />
+              <button
+                type="submit"
+                className="w-full rounded-md bg-accent px-3 py-2 text-sm font-medium text-paper hover:bg-accent-deep"
+              >
+                Send code
+              </button>
+            </form>
+          </>
+        ) : (
+          <>
+            <p className="mt-1 text-xs text-ink-soft">
+              A code was sent to <span className="font-mono">{step.email}</span>.
+              It expires in 10 minutes and works once.
+            </p>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void verify();
+              }}
+              className="mt-4 space-y-3"
+            >
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={8}
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                placeholder="000000"
+                className="w-full rounded-md border border-line bg-paper px-3 py-2 text-center font-mono text-lg tracking-widest outline-none focus:border-accent"
+              />
+              <button
+                type="submit"
+                className="w-full rounded-md bg-accent px-3 py-2 text-sm font-medium text-paper hover:bg-accent-deep"
+              >
+                Verify
+              </button>
+              <div className="flex items-center justify-between text-xs">
+                <button
+                  type="button"
+                  disabled={step.resendIn > 0}
+                  onClick={() => void request()}
+                  className="text-ink-soft hover:text-ink disabled:opacity-50"
+                >
+                  Resend{step.resendIn > 0 ? ` (wait ${step.resendIn}s)` : ""}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStep({ s: "email" })}
+                  className="text-ink-soft hover:text-ink"
+                >
+                  use another email
+                </button>
+              </div>
+            </form>
+          </>
+        )}
+        {err ? <p className="mt-3 text-xs text-err">{err}</p> : null}
+        <button
+          type="button"
+          onClick={() => setMode("token")}
+          className="mt-4 text-xs text-ink-soft underline hover:text-ink"
+        >
+          Paste a vguest_ token instead
+        </button>
+      </div>
+    );
+  }
+
+  function TokenMode() {
+    const [value, setValue] = useState("");
+    const property = useApp((s) => s.property);
+    const account = useApp((s) => s.account);
+    const [note, setNote] = useState<string | null>(null);
+
+    const submit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      const pasted = value.trim();
+      if (!pasted.startsWith("vguest_")) {
+        setErr("That is not a guest token. It starts with vguest_.");
+        return;
+      }
+      setErr(null);
+      if (account) {
+        // live account session: bind the pod token SERVER-SIDE; the
+        // browser never holds it (prd-web.md 3.5 session binding)
+        try {
+          const res = await fetch(`/api/session?p=${encodeURIComponent(property)}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: pasted }),
+          });
+          const data = (await res.json().catch(() => ({}))) as { bound?: boolean };
+          if (res.ok && data.bound) {
+            actions.markBound(property);
+            setNote("Bound server-side to this session.");
+            setValue("");
+            return;
+          }
+          setNote("Functions refused the bind - falling back to memory.");
+        } catch {
+          setNote("Functions not reachable - keeping the token memory-only.");
+        }
+      }
+      actions.setToken(property, pasted);
+    };
+
+    return (
+      <div className="mt-6 rounded-lg border border-line bg-surface p-4">
+        <p className="text-sm font-medium">Show your identity (fallback)</p>
+        <p className="mt-1 text-xs text-ink-soft">
+          Paste the guest token for this pod. With a live account session
+          it binds SERVER-SIDE; without one it stays in memory for this
+          load, never stored and never logged.
+        </p>
+        <form onSubmit={submit} className="mt-4 space-y-3">
+          <input
+            type="password"
+            autoComplete="off"
+            spellCheck={false}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="vguest_..."
+            className="w-full rounded-md border border-line bg-paper px-3 py-2 font-mono text-sm outline-none focus:border-accent"
+          />
+          <button
+            type="submit"
+            className="w-full rounded-md bg-accent px-3 py-2 text-sm font-medium text-paper hover:bg-accent-deep"
+          >
+            Enter
+          </button>
+        </form>
+        <Help text="Tokens are issued with `vant guest issue` on the pod. Roles ride the sandbox capability vocabulary.">
+          <span className="mt-2 inline-block text-xs text-ink-soft">Where do tokens come from?</span>
+        </Help>
+        {note ? <p className="mt-3 text-xs text-ink-soft">{note}</p> : null}
+        {err ? <p className="mt-3 text-xs text-err">{err}</p> : null}
+        <button
+          type="button"
+          onClick={() => setMode("email")}
+          className="mt-3 block text-xs text-ink-soft underline hover:text-ink"
+        >
+          Use email code sign-in
+        </button>
+      </div>
+    );
+  }
+}
+
+function GateShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid min-h-screen place-items-center p-6">
       <div className="w-full max-w-sm">
@@ -61,39 +341,7 @@ function Login() {
           Bolete
         </h1>
         <p className="mt-1 text-sm text-ink-soft">the Vant dashboard</p>
-        <div className="mt-6 rounded-lg border border-line bg-surface p-4">
-          <p className="text-sm font-medium">Show your identity</p>
-          <p className="mt-1 text-xs text-ink-soft">
-            Paste the guest token for this pod. It stays in memory and is
-            forwarded via the bridge, but never stored and never logged.
-          </p>
-          <form onSubmit={submit} className="mt-4 space-y-3">
-            <input
-              type="password"
-              autoComplete="off"
-              spellCheck={false}
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              placeholder="vguest_..."
-              className="w-full rounded-md border border-line bg-paper px-3 py-2 font-mono text-sm outline-none focus:border-accent"
-            />
-            {err ? <p className="text-xs text-err">{err}</p> : null}
-            {note ? <p className="text-xs text-ink-soft">{note}</p> : null}
-            <Help text="Tokens are issued with `vant guest issue` on the pod. Roles ride the sandbox capability vocabulary.">
-              <span className="text-xs text-ink-soft">Where do tokens come from?</span>
-            </Help>
-            <button
-              type="submit"
-              className="w-full rounded-md bg-accent px-3 py-2 text-sm font-medium text-paper hover:bg-accent-deep"
-            >
-              Enter
-            </button>
-          </form>
-          <p className="mt-4 text-[11px] text-ink-soft">
-            Email-code sign-in lands at P2; this paste gate stays the
-            fallback for installs without email. See prd-web.md 3.5.
-          </p>
-        </div>
+        {children}
       </div>
     </div>
   );

@@ -63,12 +63,17 @@ function PropertySync() {
 }
 
 /** The frame-owned board connection: ONE EventSource per active property
- *  (prd-web.md 3.3 resp. 3). Connects after the session cookie exists. */
+ *  (prd-web.md 3.3 resp. 3). Connects when a pasted token exists OR a
+ *  live account session has the pod token bound server-side (P2; the
+ *  HttpOnly cookie carries auth). */
 function BoardConnection({ property }: { property: string }) {
   const token = useApp((s) => s.tokens[s.property] ?? null);
+  const account = useApp((s) => s.account);
+  const bound = useApp((s) => s.boundFor.includes(s.property));
+  const open = !!token || (!!account && bound);
   useEffect(() => {
-    if (token) setDesiredProperty(property);
-  }, [property, token]);
+    if (open) setDesiredProperty(property);
+  }, [property, open]);
   return null;
 }
 

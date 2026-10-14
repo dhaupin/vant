@@ -180,10 +180,48 @@ answered in the tree, not just in prose:
 - verified: tsc exit 0, vite build exit 0, docs style/truthfulness/
   links PASS, ci.js 496 passed / 0 failed.
 
-**NEXT-UP:** P2 email-OTP accounts (KV/D1 binding + provider pick at
-build time, worker-side session binding lands with it) per owner's
-stated order; then real embedding-vector plumbing when a pod exposes
-it (the map upgrades itself, honestly by name).
+**Session 2026-10-14 (build day 6 - P2 email-OTP accounts, honest to the seams):**
+the owner queued P2 explicitly; the PRD's build-time decisions are now
+REAL, not deferred:
+- Account store SHIPPED on KV (binding `BOLETE_KV`, zero code strings;
+  chosen over D1 for native TTLs + tiny map, one-file swappable later):
+  functions/lib/kv.ts (typed E_STORE_UNCONFIGURED 503 when unbound -
+  a STATE, not a crash) + functions/lib/accounts.ts ( PURE, injectably
+  stored, 15 unit tests): 6-digit code (rejection-sampled), sha-256 +
+  per-code random salt, ~10-min TTL, SINGLE-USE (burned on success
+  and after 5 mismatches), 60s per-address cooldown, hashed email
+  (`VANT_EMAIL_SALT` recommended), roles admin|viewer with the FIRST
+  verified account bootstrapping admin (single-operator race stated,
+  not pretended atomic).
+- Sender SHIPPED provider-agnostic, zero SDK: first-party Resend
+  (`RESEND_API_KEY` + `EMAIL_FROM` -> api.resend.com/emails, plain
+  fetch) or generic `EMAIL_WEBHOOK_URL`[+`_TOKEN`]; nothing configured
+  = typed E_EMAIL_UNCONFIGURED 503, never a fake send (the PRD's own
+  "no orchestration hop" verdict held - catalog's wrapper suggestion
+  rejected per 2026-10-13 reasoning).
+- Routes: POST /api/auth/request-otp, POST /api/auth/verify-otp
+  (HttpOnly `bdash_session` cookie), GET/DELETE /api/auth/session;
+  every outcome typed (E_EMAIL_INVALID/E_OTP_COOLDOWN/E_OTP_MISMATCH/
+  E_OTP_BURNED/E_OTP_EXPIRED/E_NO_SESSION...).
+- Session binding (P3 pull-forward) LANDED: bridge resolves tokens in
+  the order explicit Bearer -> SERVER-BOUND session token -> raw MVP
+  cookie; pasting while signed-in binds server-side (browser never
+  holds the pod token); AuthGate probes /api/auth/session on load so
+  a live session restores without flashing the gate.
+- Frontend: AuthGate email-code primary (resend countdown," typed
+  refusals surfaced verbatim) with the honestly-labeled paste-token
+  fallback; state.ts account + boundFor; conn/Frame recognize bound
+  sessions; settings sign-out destroys the server-side session.
+- web/dashboard got test infra: vitest, `npm test`, 15 tests green.
+- verified: tsc exit 0, vite build exit 0, vitest 15/15, docs gates
+  PASS, ci.js full suite PASS (boot horcrux re-refreshed + inspected
+  before push, the drift pattern applied).
+
+**NEXT-UP:** real-token walkthrough of the P2 flow once the Pages
+deployment is live (owner: resend.com key + KV binding in settings);
+then the P2 polish row - audit/observability module (#11) and the
+Tier-A explorer stay P4. Real embedding-vector plumbing waits for a
+pod that exposes vectors (the map upgrades by name, honestly).
 
 ## Session (2026-10-13 — pass 215: enumeration throttle + docs sweep)
 

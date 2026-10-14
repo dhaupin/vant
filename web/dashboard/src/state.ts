@@ -9,9 +9,19 @@ import { useSyncExternalStore } from "react";
 
 export type Tier = "O" | "H" | "A" | "S";
 
+/** The dashboard account (P2 email-OTP, prd-web.md 3.5). The server
+ *  never shows the email or its hash to the browser - only the role.
+ *  Pod guest tokens stay MEMORY ONLY below. */
+export type DashRole = "admin" | "viewer";
+
 export interface AppState {
   /** one pasted vguest_ token per property id (never persisted) */
   tokens: Record<string, string>;
+  /** live dashboard session, probed from the server on load; null =
+   *  no account session (the paste gate stays the fallback) */
+  account: { role: DashRole } | null;
+  /** properties with a SERVER-BOUND pod token for this session */
+  boundFor: string[];
   /** URL ride-along property id (prd-web.md 3.4); default single property */
   property: string;
   theme: "light" | "dark" | "system";
@@ -21,6 +31,8 @@ export interface AppState {
 const listeners = new Set<() => void>();
 let state: AppState = {
   tokens: {},
+  account: null,
+  boundFor: [],
   property: readPropertyFromUrl(),
   theme: (readRawPref("bolete-theme") as AppState["theme"] | null) ?? "system",
   help: readRawPref("bolete-help") !== "0",
@@ -91,5 +103,18 @@ export const actions = {
   switchPropertyFromUrl() {
     const fromUrl = readPropertyFromUrl();
     if (fromUrl !== state.property) set({ property: fromUrl });
+  },
+  /** account session probed/verified (P2; the server owns the truth) */
+  setAccount(account: { role: DashRole }, boundFor: string[]) {
+    set({ account, boundFor });
+  },
+  markBound(property: string) {
+    if (state.account && !state.boundFor.includes(property)) {
+      set({ boundFor: [...state.boundFor, property] });
+    }
+  },
+  /** sign out: clear the account session AND pasted tokens (memory) */
+  clearAccount() {
+    set({ account: null, boundFor: [], tokens: {} });
   },
 };

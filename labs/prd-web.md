@@ -285,6 +285,21 @@ you a context switcher across them:
   Catalog check 2026-10-13 returned no direct provider recommendation
   (orchestration wrappers exist, e.g. Knock's free tier, but add a hop
   for one OTP template); the concrete pick happens at P2 build time.
+- **P2 build-time decisions, RESOLVED (2026-10-14):**
+  - Account store: **KV**, binding name `BOLETE_KV` (Pages settings;
+    zero code strings) - codes and sessions get native TTLs and the
+    aggregate map stays tiny; a D1 swap is a one-file change later if
+    an install prefers SQL. Facts: codes hashed sha-256 with a per-code
+    random salt; email stored as a hash (deployment salt env
+    `VANT_EMAIL_SALT`, recommended); role admin|viewer with the FIRST
+    verified account bootstrapping admin; verify attempts capped (5)
+    and the request side cooldown-toned (60s).
+  - Sender: the provider-agnostic interface SHIPPED with a first-party
+    Resend path (`RESEND_API_KEY` + `EMAIL_FROM` -> api.resend.com,
+    fetch-only, no SDK - no orchestration hop) and a generic fallback
+    (`EMAIL_WEBHOOK_URL` [+ `EMAIL_WEBHOOK_TOKEN`]) so ANY provider
+    remains one env-swap away. Nothing configured returns a typed
+    `E_EMAIL_UNCONFIGURED` 503, never a fake send.
 - The paste-token MVP (Q1) remains the FALLBACK for local installs
   without email config. Worker-side session binding ARRIVES WITH
   ACCOUNTS at P2 - pulled forward from P3, since the session layer

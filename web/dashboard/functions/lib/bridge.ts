@@ -1,4 +1,6 @@
 import type { Handler, PagesContext } from "../types";
+import { makeAccounts, SESSION_COOKIE } from "./accounts";
+import { storeFor } from "./kv";
 
 /**
  * The bridge (prd-web.md 3.1 + 3.6): the Worker forwards and streams -
@@ -15,7 +17,7 @@ export function podOriginFor(context: PagesContext, property: string): string | 
   if (!ROUTE_RE.test(property)) return null;
   const key = `VANT_PROPERTY_${property.toUpperCase()}_ORIGIN`;
   const origin = context.env[key];
-  if (!origin || origin.length === 0) return null;
+  if (typeof origin !== "string" || origin.length === 0) return null;
   return origin.replace(/\/+$/, "");
 }
 
@@ -23,21 +25,61 @@ export function podOriginFor(context: PagesContext, property: string): string | 
 
 const cookieFor = (property: string) => `vg_session_${property}`;
 
-export function sessionTokenFor(request: Request, property: string): string | null {
-  const auth = request.headers.get("Authorization");
-  if (auth && auth.startsWith("Bearer ")) return auth.slice(7);
-  if (!ROUTE_RE.test(property)) return null;
-  const cookie = request.headers.get("Cookie") ?? "";
-  const row = cookie
-    .split(/;\s*/)
-    .find((c) => c.startsWith(`${cookieFor(property)}=`));
-  return row ? decodeURIComponent(row.split("=").slice(1).join("=")) : null;
+function parseCookies(request: Request): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const part of (request.headers.get("Cookie") ?? "").split(/;\s*/)) {
+    if (!part.includes("=")) continue;
+    const name = part.slice(0, part.indexOf("="));
+    out[name] = decodeURIComponent(part.slice(part.indexOf("=") + 1));
+  }
+  return out;
 }
 
-/** MVP session cookie: HttpOnly, memory-of-the-browser only in spirit;
- *  P2 replaces the raw bearer value with a server-side session id. */
+export function sessionCookieHeader(): string {
+  return SESSION_COOKIE;
+}
+
+/** Access token resolution order: explicit Authorization header, then
+ *  the SERVER-SIDE bound session token (P2 session binding, prd-web.md
+ *  3.5), then the MVP raw-token cookie (unbound fallback, e.g. local
+ *  installs with no account store). The token value never leaves this
+ *  process except as the upstream Authorization header. */
+export async function podTokenFor(
+  context: PagesContext,
+  request: Request,
+  property: string,
+): Promise<string | null> {
+  const auth = request.headers.get("Authorization");
+  if (auth && auth.startsWith("Bearer ")) return auth.slice(7);
+  const cookies = parseCookies(request);
+  const sessionId = cookies[SESSION_COOKIE];
+  if (sessionId && sessionId.startsWith("bsess_")) {
+    try {
+      const accounts = makeAccounts(storeFor(context), emailSalt(context));
+      const session = await accounts.sessionFor(sessionId);
+      const bound = session ? session.tokens[property] : undefined;
+      if (typeof bound === "string" && bound.length > 0) return bound;
+    } catch {
+      // no account store configured: fall through to the raw cookie
+    }
+  }
+  if (!ROUTE_RE.test(property)) return null;
+  const raw = cookies[cookieFor(property)];
+  return raw || null;
+}
+
+function emailSalt(context: PagesContext): string {
+  const salt = context.env["VANT_EMAIL_SALT"];
+  return typeof salt === "string" ? salt : "";
+}
+
+/** Token intake: ACCOUNT-bound sessions store the pasted token
+ *  SERVER-SIDE (prd-web.md 3.5 session binding); the raw-token cookie
+ *  path remains the unbound MVP fallback for installs without an
+ *  account store. */
 export async function establishSession(
   request: Request,
+  env: PagesContext["env"],
   property: string,
 ): Promise<Response> {
   if (!ROUTE_RE.test(property)) {
@@ -53,7 +95,22 @@ export async function establishSession(
   if (!token.startsWith("vguest_") || token.length > 512) {
     return json({ error: "not a guest token" }, 400);
   }
-  return new Response(JSON.stringify({ ok: true }), {
+
+  const cookies = parseCookies(request);
+  const sessionId = cookies[SESSION_COOKIE];
+  if (sessionId && sessionId.startsWith("bsess_")) {
+    try {
+      const accounts = makeAccounts(storeFor({ request, env, params: {} } as unknown as PagesContext), emailSalt({ request, env, params: {} } as unknown as PagesContext));
+      const session = await accounts.sessionFor(sessionId);
+      if (session) {
+        await accounts.bindToken(sessionId, property, token);
+        return json({ ok: true, bound: true });
+      }
+    } catch {
+      // account store unavailable: legacy path below
+    }
+  }
+  return new Response(JSON.stringify({ ok: true, bound: false }), {
     status: 200,
     headers: {
       "Content-Type": "application/json",
@@ -79,10 +136,12 @@ export function clearSession(property: string): Response {
 const buckets = new Map<string, { window: number; count: number }>();
 const RATE_PER_MIN_DEFAULT = 120;
 
-export function rateGate(context: PagesContext, property: string, ip: string): Response | null {
-  const limit = Number(context.env.VANT_EDGE_RATE_PER_MIN) || RATE_PER_MIN_DEFAULT;
+export function rateGate(context: PagesContext, scope: string, ip: string): Response | null {
+  const limitSetting = context.env["VANT_EDGE_RATE_PER_MIN"];
+  const limit =
+    typeof limitSetting === "string" && limitSetting !== "" ? Number(limitSetting) || RATE_PER_MIN_DEFAULT : RATE_PER_MIN_DEFAULT;
   const now = Math.floor(Date.now() / 60000);
-  const key = `${property}:${ip}`;
+  const key = `${scope}:${ip}`;
   const bucket = buckets.get(key);
   if (!bucket || bucket.window !== now) {
     buckets.set(key, { window: now, count: 1 });
@@ -155,28 +214,31 @@ export function breakerStates(): Record<string, { fails: number; state: string }
 
 // ---- the forward itself ----
 
-export function bridgeOptions(context: PagesContext, request: Request): {
+export async function bridgeOptions(context: PagesContext, request: Request): Promise<{
   origin: string | null;
   path: string;
   property: string;
   init: RequestInit;
-} {
+}> {
   const url = new URL(request.url);
   const property = /^[a-z0-9-]{1,40}$/.test(url.searchParams.get("p") ?? "")
     ? (url.searchParams.get("p") as string)
     : "local";
   const path = url.pathname.replace(/^\/api/, ""); // /api/mcp/exec -> /mcp/exec
-  const token = sessionTokenFor(request, property);
+  const token = await podTokenFor(context, request, property);
   const headers = new Headers();
   headers.set("Accept", request.headers.get("Accept") ?? "*/*");
   if (token) headers.set("Authorization", `Bearer ${token}`);
   const isStream = path === "/mcp/events";
   if (isStream) headers.set("Accept", "text/event-stream");
+  const timeoutSetting = context.env["VANT_BRIDGE_TIMEOUT_MS"];
   // teleport the body only for POSTs; never re-stream GET bodies
   const init: RequestInit = {
     method: request.method,
     headers,
-    signal: AbortSignal.timeout(Number(context.env.VANT_BRIDGE_TIMEOUT_MS) || 10_000),
+    signal: AbortSignal.timeout(
+      (typeof timeoutSetting === "string" ? Number(timeoutSetting) : 0) || 10_000,
+    ),
   };
   if (request.method === "POST") {
     init.body = request.body;
@@ -188,7 +250,7 @@ export async function forward(
   context: PagesContext,
   request: Request,
 ): Promise<Response> {
-  const { origin, path, property, init } = bridgeOptions(context, request);
+  const { origin, path, property, init } = await bridgeOptions(context, request);
   if (!origin) {
     return json(
       {
@@ -226,7 +288,7 @@ function streamResponse(upstream: Response): Response {
 }
 
 // ---- note: import ordering (json used before definition) ----
-export function json(payload: unknown, status: number): Response {
+export function json(payload: unknown, status = 200): Response {
   return new Response(JSON.stringify(payload), {
     status,
     headers: { "Content-Type": "application/json" },

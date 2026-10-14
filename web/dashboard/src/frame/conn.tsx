@@ -11,10 +11,15 @@ import { useApp } from "../state";
 export function useToolsQuery() {
   const property = useApp((s) => s.property);
   const token = useApp((s) => s.tokens[s.property] ?? null);
+  const account = useApp((s) => s.account);
+  const bound = useApp((s) => s.boundFor.includes(s.property));
+  // authed = pasted token OR a live account session (pod tokens bound
+  // SERVER-SIDE ride the HttpOnly cookie; prd-web.md 3.5)
+  const authed = !!token || (!!account && bound);
   return useQuery({
-    queryKey: ["tools", property, token ? "tokened" : "anon"],
+    queryKey: ["tools", property, token ? "tokened" : account && bound ? "bound" : "anon"],
     queryFn: tools,
-    enabled: !!token,
+    enabled: authed,
     staleTime: 60_000,
     retry: false,
   });

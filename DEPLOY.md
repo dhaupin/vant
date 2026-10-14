@@ -393,6 +393,23 @@ Each frontend is its OWN Pages project with its OWN subdomain.
    | `VANT_PROPERTY_LOCAL_NAME` | `home pod` (any label) | optional; shown in the switcher |
    | `VANT_EDGE_RATE_PER_MIN` | `120` | optional; per-session edge budget |
 
+   **Email-OTP accounts (P2) - the KV binding:** create a KV namespace
+   (Workers & Pages -> KV -> create, any name; then the Pages project
+   -> Settings -> Functions -> KV namespace bindings) and bind it as
+   `BOLETE_KV`. Until the binding exists, email sign-in answers a
+   typed `E_STORE_UNCONFIGURED` and the paste-token gate stays the
+   fallback - honest by design.
+
+   The email vars (all PAGES SETTINGS, never code):
+
+   | Variable | Value | Notes |
+   |----------|-------|-------|
+   | `RESEND_API_KEY` | your resend.com API key | first-party sender path (no SDK; plain fetch) |
+   | `EMAIL_FROM` | `Bolete <signin@your-domain.com>` | a verified sender domain |
+   | `EMAIL_WEBHOOK_URL` | any provider's send endpoint | optional generic fallback (JSON: `{to, subject, text}`) |
+   | `EMAIL_WEBHOOK_TOKEN` | Bearer secret for the webhook | optional |
+   | `VANT_EMAIL_SALT` | a long random string | RECOMMENDED: hashes the email (and codes' key hashing); unset = unsalted hash |
+
    The property ID for this first install is **`local`** (the URL its
    views ride is `?p=local`;   the resolver reads `VANT_PROPERTY_<ID>_ORIGIN` upper-cased). This
    is a ONE dashboard -> N installs model: each attached Vant install
