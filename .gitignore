@@ -117,3 +117,9 @@ entropy-adaptive-*/
 # (pass 209: tempo/leisure ledgers moved INSIDE the brain — models/private/
 # is already ignored wholesale; the legacy models/tempo / models/leisure
 # dirs are migrated away on first load.)
+
+# web/ frontends (labs/prd-web.md): each app is self-contained; its
+# install + build artifacts never enter the repo; only source + configs.
+web/*/node_modules/
+web/*/dist/
+web/*/.vite/
