@@ -1,9 +1,9 @@
 # Vant Web — Dashboard & Frontend Architecture — Product Requirements Document
 
-**Version:** 0.1 (planning draft — NO CODE THIS PASS)
+**Version:** 0.3 (planning draft - build starts P1)
 **Branch:** axolotl
 **Date:** 2026-10-13
-**Status:** Draft (owner-approved direction: "I like it. Let's do it")
+**Status:** Draft v0.3 (owner-approved direction + directive rounds 1, 2, 3; round 3: Base UI only, no Radix anywhere, themed error/404 pages required)
 
 ---
 
@@ -91,16 +91,19 @@ individually.
 
 ### 2.6 The stack (owner direction + 2026-10-13 turf comparison)
 
-Owner direction: the mid-2026 admin-UX thread was "Tailwind, Shadcn,
-Radix, Framer - not saying we need them all, but all could help". That
-lean SURVIVES the comparison - and it gains a named periphery:
+Owner direction: the mid-2026 admin-UX thread leaned Tailwind, a
+shadcn-style kit, and a minimal-motion layer (-"
+not saying we need them all, but all could help"). That lean SURVIVES
+the comparison - and it gains a named periphery:
 
 - **shadcn/ui (CLI v4)**: copy-in source components; ships Recharts-v3-
-  based charts (`shadcn add chart`); registry/CLI ecosystem; supports
-  Radix OR Base UI as the primitive base. (In mid-2026 shadcn made
-  Base UI the default for NEW projects while keeping Radix fully
-  supported - no migration required.) Our lean stays Radix; a Base UI
-  swap is allowed later if a primitive gap appears - not a fork.
+  based charts (`shadcn add chart`); registry/CLI ecosystem.
+- **PRIMITIVE BASE (owner directive, rounds 2+3): Base UI, ONLY Base
+  UI.** Base UI (from the Floating-UI/MUI creators) is stable 1.x and
+  is shadcn's supported base today; it is the ONLY headless-primitive
+  source this frontend targets (owner round 3: no second base, no
+  fallback library). If a primitive is missing, it gets built
+  frame-owned rather than pulled from another library.
 - **Ant Design 6** (v6.6.x, ConfigProvider tokens, dark algorithm,
   zeroRuntime): brings its own design language - fighting it for the
   brand PRD's identity costs more than it returns for a board + tables
@@ -217,6 +220,10 @@ Frame responsibilities - built ONCE at P1, modules NEVER rebuild them:
    withheld/E_* states - modules import it, never re-implement it.
 7. Tokens-only theming: modules style with Tailwind + brand CSS vars
    (prd-brand.md). No per-module theme code, ever.
+8. Route fallback + error boundaries (owner round 3): a THEMED 404 page
+   for unknown routes, plus per-module error boundaries that render
+   themed typed-error states with recovery paths - never a raw stack
+   trace inside the app (full spec: section 10 Error pages).
 
 Module review checklist (every module, every pass):
 
@@ -230,45 +237,142 @@ cuteness). Boundary note: this frame is IN-dashboard extensibility for
 ONE app - it is explicitly NOT the cross-frontend "shared web kit",
 which stays barred until a second frontend exists (rule 7).
 
-## 4. The dashboard by identity tier
+### 3.4 Multi-install: properties + context switching (owner, round 2)
 
-### Tier O - Observer (read-only; role `observer`)
+The dashboard manages MORE THAN ONE Vant install. Each attached install
+(mesh and node attachments included) is a PROPERTY, and the shell gives
+you a context switcher across them:
 
-- Live board: `/api/mcp/events` over EventSource (era open/fold/close,
-  agents, tasks, escrow holds/spends, market, forum, msg families)
-- Rosters: `agent_list` (tenant-filtered), era list + rollup side panel
-  (`msg.eraContext` shapes exist for exactly this view)
-- System: `/api/health`, machine `system status` style reads
-- No writes of any kind surface here (door refuses them regardless)
+- Property registry is CONFIG, not code: CF Pages env vars defining
+  `VANT_PROPERTY_<ID>_NAME` and `VANT_PROPERTY_<ID>_ORIGIN` (the pod
+  MCP origin this project's Worker functions proxy to). One deployed
+  dashboard = N properties, set entirely in Pages settings (3.7).
+- The active property rides the URL (`?p=<property-id>`), so switching
+  context keeps route, module, filters, and view position: switching
+  away from property A's forum lands you in property B's forum, same
+  shape. Module stores key their state per property.
+- Auth is per property: each install has its own pod guest identity;
+  the session (3.5) holds one token per property after binding.
+- SSE discipline: ONE EventSource per ACTIVE property; switching closes
+  the old stream before opening the next (the per-pod connection cap of
+  32 still applies per pod).
+- MVP attach = manual (env registry). Mesh/node DISCOVERY feeding the
+  property list is a later branch; the nodes module reads discovery
+  data from the pod tools in the meantime.
 
-### Tier H - Working seat (role `human`; `+write +spawn`)
+### 3.5 Login + accounts (owner round 2): email OTP - YES it is required
 
-- All of Tier O
-- **Work console**: `work_assign` form (task text, budget, agent spawn vs
-  reuse by id, explicit refusals surfaced as checked states); live
-  delegation status off the SSE board
-- Msg console: tenant-scoped channels (`msg_list` tails, `msg_send`),
-  public channels readable (the legacy read rule), own channels claimable
-- Market browsing/offering surfaces (read + gated writes)
+- Dashboard accounts are a SEPARATE layer from pod guest tokens.
+  Login = email + OTP code (6-8 numeric digits, ~10-minute expiry,
+  single-use), sent by email. RESEND support with a cooldown and an
+  attempt budget. Codes stored HASHED; the identifier is a hashed
+  email; no plaintext PI (the phrase owner cares about) beyond what
+  email delivery itself requires.
+- Account/session store: a Cloudflare KV or D1 binding, configured in
+  Pages settings - never in code (3.7). Minimal tables: accounts
+  (id, email-hash, role admin|viewer, status), sessions, otp codes.
+- Email sending: a provider-agnostic sender interface inside the Pages
+  functions (plain HTTPS fetch to an env-configured endpoint + key).
+  Catalog check 2026-10-13 returned no direct provider recommendation
+  (orchestration wrappers exist, e.g. Knock's free tier, but add a hop
+  for one OTP template); the concrete pick happens at P2 build time.
+- The paste-token MVP (Q1) remains the FALLBACK for local installs
+  without email config. Worker-side session binding ARRIVES WITH
+  ACCOUNTS at P2 - pulled forward from P3, since the session layer
+  gets built for it anyway.
+- Pod identities stay the pod's model (3.2); /users admin manages
+  dashboard accounts (module catalog 4).
 
-### Tier A - Agent trust (role `agent`; `+exec`) - deliberate, default-off
+### 3.6 Edge hardening (owner round 2): WAF, QoS, circuit breakers, defense in depth
 
-- The full 328-tool explorer, generated from `GET /tools` schemas
-- P4 phase; the owner said most installs want this rare
+The pod's deny-by-default chain gets an edge twin - layered, never
+duplicated:
 
-### Tier S - Owner/admin seat (the "admin framing")
+- **WAF**: Cloudflare managed + custom WAF rules on the zone, shaped to
+  this app's routes - configured in CF settings, zero code (3.7).
+- **QoS at the edge**: per-session rate budget in the Worker functions
+  (a mirror of the pod's EW4 posture; the door remains the authority),
+  request-size caps, content-type pinning.
+- **Circuit breaker** per property: N consecutive pod failures open a
+  breaker - typed 503 + an honest dead state with retry-after; a
+  half-open probe recovers it. NO silent retries on exec POSTs
+  (idempotency is not owned by the Worker).
+- **Session hygiene**: httponly + secure cookies, CSRF tokens on
+  dashboard-auth POSTs, strict CSP (no inline), HTTPS-only, no token in
+  any log (6).
+- **Defense in depth, stated plainly**: edge WAF -> function
+  auth/session -> POD DOOR AUTH (the guests authorizer, unchanged) ->
+  sandbox capabilities inside the pod. Four independent deny-by-default
+  layers; the UI never assumes any one of them failed quietly.
 
-The seat only staff reach (their guest is scoped with `scopeOwner`, high
-trust, or the operator CLI holds admin keys for generation):
+### 3.7 web/<app> self-containment + Cloudflare config (owner round 2)
 
-- Guest issuance form: role + trustLevel + scopeOwner + expiry; live
-  roster with only-last-seen hints; revoke with typed confirmation
-- Pairing & onboarding: issue voucher, render QR (H6 UN-HOLDS here -
-  scan lands on the dashboard's redeem view; terminal QR still exists)
-- Budgets & posture: workspace/escrow budget views, read-budget knobs
-  display, auth-posture line display
-- Era: close with the `next` sentence (the hand-off the horcrux bakes)
-- Config read views (no standing config writes MVP - the pod CLI edits)
+- EVERYTHING the frontend needs lives inside its `web/<app>/` folder:
+  `src/`, `functions/` (the Pages Worker functions incl. the 3.1 proxy
+  contract), `package.json`, configs/README/Deploy notes. Nothing the
+  frontend needs lives at the repo ROOT.
+- **NO wrangler strings in code**: every Cloudflare value (property
+  origins, email sender keys, KV/D1 bindings) lives in PAGES SETTINGS
+  as env vars / bindings. Code references binding NAMES only, and the
+  repo ships only `.example` templates for any frontend config - real
+  values are per-deployment.
+- The pod's `package.json` stays untouched (rule 7) and the require
+  graph stays one-way: the frontend never requires the pod (2.1).
+
+## 4. The module catalog (every route the frontend ships)
+
+Identity tier map (WHO sees what; the door still gates the DATA -
+presentation only, per 3.3): O observer (role `observer`, read-only) |
+H working seat (`human`; writes +spawn) | A agent trust (`agent`;
+deliberate, P4) | S owner/admin (scopeOwner / high trust) | ALL =
+logged-in dashboard users where the data itself is tenant-filtered.
+
+The shell is NOT a module: nav + property switcher (3.4) + help layer
+(10) + footer (10) + login gate (3.5) are frame-owned and everywhere.
+
+| # | module | route | tiers | phase | UI overview |
+|---|--------|-------|-------|-------|-------------|
+| 1 | live-board | `/` | O A S | P1 | SSE family feed (era open/fold/close, agents, tasks, escrow, market, forum, msg), era rollup side panel, filter chips per family; the honest dead-board state when a stream dies (6) |
+| 2 | agents | `/agents` | O A S | P1 | roster cards with tenant filtering; agent detail drawer (capabilities, budgets, last-seen) |
+| 3 | status | `/status` | ALL | P1 | health cards: this frontend's build/page health, each Pages function endpoint, and per property the pod's `/health` + node registration; breaker state chips (3.6) |
+| 4 | settings | `/settings` | ALL | P1 | theme (dark/light/dim system), help-layer toggle, property list (attach/manage notes), sign-out |
+| 5 | login | `/login` | pre-auth | P1 | paste-token gate (MVP); becomes the email-OTP flow at P2 (3.5) with resend + cooldown UI |
+| 6 | terms / privacy | `/terms`, `/privacy` | ALL | P1 | static pages + footer links (10; content per 10 legal paragraph) |
+| 7 | work | `/work` | H S | P2 | work console: `work_assign` form (task text, budget, spawn vs reuse by id), live delegation status off the board, explicit refusals as checked states |
+| 8 | chat | `/chat` | H S | P2 | msg console: tenant-scoped channel sidebar, `msg` tails, public channels readable, own claimable; era-context chat WITH AGENTS lives here (H3 shapes) |
+| 9 | forum | `/forum` | O A H S | P2 | topics + decision threads (tenant-scoped); votes/writes render honest gate states for tier O |
+| 10 | market | `/market` | O (read) H (write) | P2 | skills/offerings browse; offer forms behind gate states |
+| 11 | audit | `/audit` | S | P3 | the frontend's OWN logs + typed-error inbox (10); per property, views of the pod's audit ledger and event observability via read tools |
+| 12 | guests | `/guests` | S | P3 | guest lifecycle: issuance form (role + trustLevel + scopeOwner + expiry), roster with only-last-seen hints, revoke with typed confirmation |
+| 13 | users | `/users` | S | P3 | dashboard-ACCOUNT admin (3.5): emails, roles admin/viewer, disable; distinct from pod guests |
+| 14 | pairing | `/pairing` | S | P3 | voucher issue + QR (H6 un-holds here); scan/deep-link lands on the redeem view |
+| 15 | budgets | `/budgets` | S | P3 | workspace/escrow budget views, read-budget knobs display, auth-posture line |
+| 16 | config | `/config` | S | P3 | config + posture views, read-only MVP (the pod CLI owns writes) |
+| 17 | nodes | `/nodes` | O A S | P3 | node registry + mesh status through pod tools; later: mesh discovery feeding property attach (3.4) |
+| 18 | brains | `/brain` | O A S | P3 | corpus browser (brain read/list/search tools); TWO visualizations: the semantic memory map (embedding vectors as a canvas scatter with neighborhood zoom) and the NSC9 view (automation-addressed storage keys per [nsc9-spec](/advanced/nsc9-spec) - deterministic self-authenticating addresses); both read-only |
+| 19 | era | side panel | O A S | P1 | era list/close with the `next` sentence (the horcrux hand-off) lives as the live-board side panel + an S-tier action, not its own route |
+
+Later-stage additions (not yet routed; recorded so they are not
+forgotten): the full Tier A tool explorer (P4, generated from
+`GET /tools`), and the workbench below (P5).
+
+### 4.1 The workbench (P5 - vibe coding, deliberately LAST)
+
+Owner throw (round 2): a way to chat with agents and effectively VIBE
+CODE through the dashboard, leveraging the pod's GitHub connections -
+aspirationally on par with OpenHands-class coding platforms. Design
+sketch, phase P5 (after the platform surfaces are stable):
+
+- Same work console lineage (`work` module grows): task trees with
+  live session streams; per-task agent seat.
+- GitHub-backed loop: issue -> assign -> watch the agent's branch,
+  diffs, and PRs through the pod's sync/connect surfaces; approvals
+  stay HUMAN (the seat), execution stays the pod's.
+- Chat is the interface: `chat` (module 8) carries the session UI; the
+  workbench adds artifact views (diffs, run logs, PR cards).
+- Honest scope note: parity with platforms built on long-running sand-
+  boxes is a PROGRAM, not a phase trick - P5 lands the loop (task ->
+  branch -> PR -> review) and grows from real usage.
 
 ## 5. Build phases (each phase = a shippable app increment)
 
@@ -285,12 +389,23 @@ trust, or the operator CLI holds admin keys for generation):
   loopback-allowed pod; blood-shaped data planes only (tools/exec/events/
   health); the live board renders the SSE families with typed-refusal
   surfaces.
+- Round-2 additions land here too: the module frame LIVE (3.3) with
+  nav-from-registry; catalog backbone modules 1-6 (live-board, agents,
+  status, settings, login-as-paste-gate, terms/privacy); the property
+  switcher skeleton (3.4, one property MVP); the single loading/modal
+  systems + help layer (10); the every-page footer with the do-follow
+  creadev.org plug + terms/privacy links (10).
 - Acceptance: board live against a real pod; refusals render typed;
   zero CORS config; lint+build clean; tokens never land in logs.
 
 ### P2 - Working seat (Tier H)
 
-- Work console + msg console (+market read).
+- Work console + chat/msg console (+market read).
+- Round-2 additions land here too: EMAIL-OTP LOGINS (3.5) with resend
+  + cooldown + hashed codes over a KV/D1 binding; worker-side session
+  binding (pulled forward from P3 - the session layer ships with it);
+  the property switcher goes multi (3.4) once sessions hold per-
+  property tokens; edge QoS + breaker polish (3.6).
 - Acceptance: a `human` guest can issue work to a spawned crew agent
   and watch its track through the board; tenant scoping VISIBLE
   (a foreign channel shows as withheld/empty state, stated by name).
@@ -298,6 +413,9 @@ trust, or the operator CLI holds admin keys for generation):
 ### P3 - Owner seat (Tier S) + QR revival
 
 - Guest lifecycle UI + pairing voucher QR flow (deep-link redeem view).
+- Round-2 additions land here too: audit/observability module (the app's
+  own logs + per-property pod views); user admin (/users); brains
+  visualizations (semantic memory map + NSC9 view); nodes/mesh views.
 - Acceptance: pair a browser FROM the dashboard without the terminal
   (voucher shown once, hash-at-rest guarantees unchanged); H6 lands
   here (spec inherits `labs` notes from the held discussion).
@@ -306,6 +424,14 @@ trust, or the operator CLI holds admin keys for generation):
 
 - Static bundle serving from the pod (Mode B) - zero-CORS local ops.
 - Explorer only if/when an install asks for Tier A.
+
+### P5 - The workbench (vibe coding; spec in 4.1)
+
+- Task tree + live session stream + GitHub-backed branch/PR loop with
+  human approvals. Sits on the work + chat modules; grows from real
+  usage, not from a big-bang build.
+- Acceptance: one real task shipped branch -> PR -> merged FROM the
+  browser, with the seat (human) approving every write.
 
 ## 6. Security review (frontend-specific)
 
@@ -353,16 +479,26 @@ trust, or the operator CLI holds admin keys for generation):
 New open item re-parked for P1: the admin-UX tooling pack decision (the
 "Ant Design vs other dashboard packs" discussion from mid-2026 did NOT
 survive in the repo - checked labs/archive and the designer agent's
-notes; only traces are the 2026-08-30 admin-UI prep task and that agent's
-stack learn-list of Tailwind/Shadcn/Radix). Re-discussed fresh at P1:
-Ant Design vs Mantine vs shadcn/Radix-based kit.
+notes; only traces are the 2026-08-30 admin-UI prep task). Re-discussed
+fresh at P1: Ant Design vs Mantine vs a Tailwind+shadcn kit.
+
+Round-2 ADDITIONS to this list (owner, 2026-10-13):
+
+5. Email sender for OTP: provider-agnostic interface (3.5) stands;
+   pick the concrete provider at P2 build time (catalog found no
+   direct-provider recommendation on the ask date).
+6. Account store binding: KV vs D1 - decided at build time, either tab
+   is zero-code-strings (3.7).
+7. Workbench depth (4.1): which agent-coding loops reach parity first
+   (issue-driven branch/PR is the sketch's answer; owner may reorder).
 
 UPDATE 2026-10-13: RESOLVED. The owner recalled the thread's content
-(Tailwind + Shadcn + Radix + Framer); the fresh comparison confirmed
+(Tailwind + shadcn kit + minimal motion); the fresh comparison confirmed
 that lean over Ant 6 and Mantine 9 and added the periphery (TanStack
-Router/Query/Table, zod, Recharts, react-hook-form, Motion). Recorded
-in §2.6. The extensibility requirement produced the module frame (§3.3)
-- P1 builds it once; modules plug in as folders.
+Router/Query/Table, zod, Recharts, react-hook-form, Motion). Round-3
+owner call: the primitive base is Base UI ONLY. Recorded in §2.6. The
+extensibility requirement produced the module frame (§3.3) - P1 builds
+it once; modules plug in as folders.
 
 ## 9. Success criteria for P1 (the phase the owner green-lights next)
 
@@ -377,3 +513,64 @@ in §2.6. The extensibility requirement produced the module frame (§3.3)
 - The module frame (3.3) is live for P1's FIRST module (the live board):
   nav-from-registry, lazy routes, one-SSE fanout, and the refusal
   primitive are all frame-owned before the second module ever lands.
+
+## 10. Cross-cutting UX + platform requirements (owner, round 2)
+
+These apply to EVERY module; modules never re-implement them (the
+frame owns each one once):
+
+- **Theme**: modern, clean, extensible; MOBILE-FIRST responsive design
+  (phone widths are the design baseline, desktop extends). prd-brand.md
+  tokens carry both dark and light modes. NO heavy transitions or
+  animations - Motion appears only where it is functional (state
+  changes you could otherwise miss), never decorative.
+- **Help system**: a global help layer; a help icon on every confusing
+  control, setting, input, and surface, styled with tooltip primitives
+  explaining it in plain language. Copy lives close to the thing it
+  explains. Toggle: settings.
+- **Loading**: ONE loading system everywhere - skeleton shapes for
+  panels, one spinner accent, progress bars for long operations; every
+  async surface declares its loading / refusal / dead states; no
+  ad-hoc per-module spinners show up in review.
+- **Error pages (owner round 3)**: themed handlers everywhere, all
+  frame-owned: 404 for unknown routes; 5xx/network-off when the API is
+  unreachable; the breaker-open dead state (3.6); and a generic app
+  error boundary page. Every error surface uses honest copy plus its
+  recovery paths (re-login, retry, the status module) - no apology
+  fluff, no scare copy, and the prd-brand voice applies even when
+  things are broken.
+- **Modals**: ONE modal system (Base UI Dialog behind the frame) for
+  confirmations, forms, and detail drawers; escalation-grade actions
+  (revoke, close, restore) always use typed confirmations.
+- **Encryption / transport**: everything is SSL-terminated at the edge;
+  the pod stays loopback/private behind the Worker; no plaintext hop
+  anywhere; strict CSP (6). Gated, authed APIs are the only shape the
+  frontend knows how to call (3.1, 3.5).
+- **The frontend's own logging, audit, and errors**: the app keeps a
+  capped function-side audit ledger of its own (auth events, refusals,
+  breaker states) and renders a typed-error inbox; beyond that it
+  exposes views of the SAME classes from attached properties (module
+  11). Failures are never silent on either side.
+- **Footer (every page, no exceptions)**: a do-follow plug for
+  https://creadev.org plus terms and privacy links. The footer is
+  frame-owned so a module cannot drop it.
+- **Terms + privacy pages**: real pages rendered in-app from static
+  content, laying out honestly: open-source software, NO WARRANTY,
+  no liability for data loss, PII leaks, or WHAT the agents do; use
+  at your own risk; no data sharing by this dashboard itself. Legal-PRD
+  calibration with LEGAL.md's posture happens at P1 (the lander and
+  the dashboard must not contradict each other).
+- **Status module**: monitors frontend build health, Pages function
+  endpoints, and each attached property's pod + mesh node healths
+  (module 3).
+- **Cross-linking**: the header/footer cross-link to the repo docs
+  (vendored README sections first); NEW repo docs sections for the
+  frontend are a LATER deliverable and must not block web work (the
+  docs gates stay scoped to docs/ + labs until then).
+- **README / AGENTS / DEPLOY updates**: the repo's front-door docs get
+  the frontend contract: README (a dashboard pointer), AGENTS.md (the
+  require-graph rule: pod never requires web/, web apps never require
+  the pod; where frontend work is allowed to live), DEPLOY.md (a
+  first-class section: how to set up and run the frontend on Cloudflare
+  Pages - env vars in Pages settings, functions contract, zero
+  wrangler strings).

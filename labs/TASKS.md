@@ -54,6 +54,31 @@ prd, don't build code yet."**
    exec client, refusal primitive, tokens-only theming; new capability =
    an existing pod tool or a spec'd pod verb - never a new Worker route.
 
+**Owner directive round 2 (2026-10-13), all folded into prd-web.md v0.2:**
+- Stack: Base UI is the primitive base (Radix stays fallback-only).
+- Multi-install: "properties" (env-registry in Pages settings) + context
+  switcher with `?p=` URL state - same module/filters/view on switch;
+  one SSE stream per ACTIVE property (PRD 3.4).
+- Auth: email-OTP logins (resend support, cooldown, hashed codes) over
+  a KV-or-D1 binding; worker-side session binding PULLED FORWARD to P2;
+  paste-token stays the local fallback (PRD 3.5).
+- Edge hardening: WAF/QoS/circuit breakers/defense-in-depth (PRD 3.6);
+  web self-containment + zero wrangler strings in code (PRD 3.7).
+- Module catalog: 19 routes with UI overviews (PRD 4) + later-stage
+  workbench P5 (vibe coding, OpenHands-class aspiration, GitHub-backed
+  branch/PR loop with human approvals) + brains visualizations (semantic
+  memory map from embed vectors + NSC9 addressed-keys view).
+- Cross-cutting (PRD 10): mobile-first theme, global help layer, ONE
+  loading system, ONE modal system, the app's own log/audit/error UI
+  plus views into attached installs, every-page footer with do-follow
+  https://creadev.org plug + terms/privacy, status module, and README /
+  AGENTS / DEPLOY update obligations - all three updated this pass.
+- Round 3 (2026-10-13): THE PRD DROPS RADIX COMPLETELY - Base UI is the
+  only headless-primitive source, no fallback base (PRD 2.6, v0.3);
+  themed 404 + 5xx/breaker/error-boundary pages are frame-owned
+  requirements (PRD 3.3 resp. 8 + section 10). Owner greenlight: update
+  PRD, push, START BUILDING (P1 scaffold).
+
 **NEXT-UP:** owner green-lights P1 (Observer MVP).
 
 ## Session (2026-10-13 — pass 215: enumeration throttle + docs sweep)
