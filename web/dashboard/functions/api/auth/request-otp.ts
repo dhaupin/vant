@@ -6,6 +6,7 @@ import {
 } from "../../lib/email";
 import { StoreUnavailableError, storeFor } from "../../lib/kv";
 import { OTP_TTL_SECONDS, makeAccounts } from "../../lib/accounts";
+import { makeLedger, verdictKind } from "../../lib/ledger";
 import { clientIp, json, rateGate } from "../../lib/bridge";
 
 /**
@@ -38,11 +39,16 @@ export const onRequestPost: Handler = async (context: PagesContext) => {
     throw err;
   }
   const accounts = makeAccounts(store, emailSalt(context));
+  // the app's own ledger records auth outcomes WITHOUT PII (no email
+  // bodies, addresses, or session ids - kind + outcome only)
+  const ledger = makeLedger(store);
   const verdict = await accounts.requestOtp(email);
   if (verdict.verdict === "invalid") {
+    await ledger.append("auth.otp.failed", { reason: "invalid_email" });
     return json({ error: "E_EMAIL_INVALID", detail: "that is not an email address shape" }, 400);
   }
   if (verdict.verdict === "cooldown") {
+    await ledger.append(verdictKind(verdict));
     return json(
       { error: "E_OTP_COOLDOWN", detail: "a code was requested for this address recently" },
       429,
@@ -52,6 +58,7 @@ export const onRequestPost: Handler = async (context: PagesContext) => {
   try {
     await sendOtpEmail(context, { to: email.trim(), code: verdict.code, ttlMinutes: Math.round(OTP_TTL_SECONDS / 60) });
   } catch (err) {
+    await ledger.append("bridge.refused", { reason: err instanceof EmailSenderUnavailableError ? "sender_unconfigured" : "delivery" });
     if (err instanceof EmailSenderUnavailableError) {
       return json({ error: "E_EMAIL_UNCONFIGURED", detail: err.message }, 503);
     }
@@ -60,6 +67,7 @@ export const onRequestPost: Handler = async (context: PagesContext) => {
     }
     return json({ error: "E_EMAIL_DELIVERY", detail: "sender failed" }, 502);
   }
+  await ledger.append(verdictKind(verdict));
   return json({ ok: true });
 };
 

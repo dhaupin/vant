@@ -29,6 +29,9 @@ function memoryStore(): KVStore & { dump: () => Map<string, unknown> } {
     async delete(key) {
       rows.delete(key);
     },
+    async list(prefix) {
+      return [...rows.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name }));
+    },
     dump: () => rows,
   };
 }

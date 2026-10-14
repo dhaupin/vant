@@ -29,7 +29,17 @@ DELETE /api/auth/session          -> destroy the session server-side
 POST   /api/session?p=<id>        (existing paste intake) binds the
        vguest_ token SERVER-SIDE when a live account session exists;
        without one it stays the MVP raw-token cookie fallback
+GET    /api/audit?limit=50        -> the frontend's OWN ledger (module
+       #11): auth outcomes, refusals, session lifecycles; ADMIN-ONLY
+       (typed 401/403/503 for unauthenticated/viewer/no-binding)
 ```
+
+The app's own audit ledger (functions/lib/ledger.ts) records
+PII-free rows (kind + safe detail, NO emails/tokens/session ids)
+under `aud:<zero-padded-ts>:<rand>` with a two-week KV TTL as the
+cap. Writes are BEST-EFFORT by design: a ledger failure never fails
+the request it observes. Malformed keys under the prefix cannot eat
+read-cap slots (the reader shape-gates names before capping).
 
 Account-store rules:
 

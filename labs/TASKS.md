@@ -217,11 +217,43 @@ REAL, not deferred:
   PASS, ci.js full suite PASS (boot horcrux re-refreshed + inspected
   before push, the drift pattern applied).
 
-**NEXT-UP:** real-token walkthrough of the P2 flow once the Pages
-deployment is live (owner: resend.com key + KV binding in settings);
-then the P2 polish row - audit/observability module (#11) and the
-Tier-A explorer stay P4. Real embedding-vector plumbing waits for a
-pod that exposes vectors (the map upgrades by name, honestly).
+**Session 2026-10-14 (build day 7 - audit/observability + nodes, while
+Pages setup waits):** owner confirmed CF Pages isn't set up yet; kept
+building what builds without it:
+- The app's OWN audit ledger landed (prd-web.md 10's function-side
+  ledger, module #11's core): functions/lib/ledger.ts - PII-free rows
+  (kind + safe detail; NO emails/tokens/session ids), row key
+  `aud:<zero-padded-ts>:<rand>` with a 2-week KV TTL as the cap
+  (binding-driven aging, no janitor), best-effort writes that never
+  fail the observed request, newest-first reads that SHAPE-GATE names
+  before capping (a malformed key can't eat a cap slot - found by the
+  tests, fixed in the ledger, not bent around in the test).
+- Ledger wired at the honest points: auth verdicts (request-otp:
+  requested/cooldown/failures; verify-otp: verified/failed/burned),
+  session create/destroy, and the bridge's TYPED refusals (origin
+  missing, breaker open, unreachable).
+- GET /api/audit shipped: ADMIN-ONLY reader with typed
+  E_NO_SESSION/E_FORBIDDEN/E_STORE_UNCONFIGURED states.
+- audit module (#11, /audit, S) landed: typed-error inbox (viewer sees
+  the admin-only 403 stated verbatim - never a quiet empty list),
+  edge-breaker chips card, and the door's audit_/ledger_ tools via the
+  shared panels or an honest none-registered.
+- nodes module (#17, /nodes, O A S) landed: discovery-first
+  node_/mesh_/registry_ panels; the page renders nothing the pod did
+  not hand over (mesh discovery feeding property attach stays a later
+  branch per prd-web.md 3.4).
+- KV surface grew the minimal `list` shape (types + guard + test fakes).
+- registry = 16 modules; routes MODULES[14]/[15] added.
+- verified: vitest 19/19 (15 accounts + 4 ledger), tsc exit 0, vite
+  build exit 0, docs gates PASS, ci.js full suite (boot horcrux
+  re-refresh + inspect before push, drift pattern applied).
+
+**NEXT-UP:** users-module admin surface (list/disable dashboard
+accounts over the same KV store, admin-only) - the last P3 row that
+builds without the live pod; then the Pages-deploy walkthrough
+(owner-side) unlocks the live-token P2/P3 verification pass. Real
+embedding-vector plumbing still waits for a pod that exposes vectors
+(the map upgrades by name, honestly).
 
 ## Session (2026-10-13 — pass 215: enumeration throttle + docs sweep)
 

@@ -9,6 +9,8 @@ export interface KVNamespaceLike {
     get(key: string): Promise<string | null>;
     put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
     delete(key: string): Promise<void>;
+    /** minimal list shape: names only, lex-ordered by key */
+    list(prefix: string): Promise<Array<{ name: string }>>;
 }
 
 export interface PagesEnv {

@@ -1,6 +1,7 @@
 import type { Handler, PagesContext } from "../types";
 import { makeAccounts, SESSION_COOKIE } from "./accounts";
 import { storeFor } from "./kv";
+import { makeLedger } from "./ledger";
 
 /**
  * The bridge (prd-web.md 3.1 + 3.6): the Worker forwards and streams -
@@ -252,6 +253,7 @@ export async function forward(
 ): Promise<Response> {
   const { origin, path, property, init } = await bridgeOptions(context, request);
   if (!origin) {
+    ledgerRecord(context, "bridge.refused", { reason: "origin_missing", property });
     return json(
       {
         error: `VANT_PROPERTY_${property.toUpperCase()}_ORIGIN` + " is not configured",
@@ -262,6 +264,7 @@ export async function forward(
   }
   const gate = breakerGate(property);
   if (!gate.allow) {
+    ledgerRecord(context, "bridge.refused", { reason: "breaker_open", property });
     return json({ error: "E_BRIDGE_BREAKER", detail: gate.reason }, 503);
   }
   const budget = rateGate(context, property, clientIp(request));
@@ -276,7 +279,21 @@ export async function forward(
     return new Response(upstream.body, { status: upstream.status, headers });
   } catch {
     breakerNote(property, false);
+    ledgerRecord(context, "bridge.unreachable", { property });
     return json({ error: "E_BRIDGE_UNREACHABLE", property }, 502);
+  }
+}
+
+/** Ledger writes NEVER break the forward (best-effort, PII-free). */
+function ledgerRecord(
+  context: PagesContext,
+  kind: Parameters<ReturnType<typeof makeLedger>["append"]>[0],
+  detail: Record<string, string | number>,
+): void {
+  try {
+    void makeLedger(storeFor(context)).append(kind, detail);
+  } catch {
+    // no account store bound: the ledger is a state, not a dependency
   }
 }
 

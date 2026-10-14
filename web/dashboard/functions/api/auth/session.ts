@@ -1,6 +1,7 @@
 import type { Handler, PagesContext } from "../../types";
 import { StoreUnavailableError, storeFor } from "../../lib/kv";
 import { SESSION_COOKIE, makeAccounts } from "../../lib/accounts";
+import { makeLedger } from "../../lib/ledger";
 import { json } from "../../lib/bridge";
 
 /**
@@ -46,6 +47,8 @@ export const onRequestDelete: Handler = async (context: PagesContext) => {
     try {
       const accounts = makeAccounts(storeFor(context), emailSalt(context));
       await accounts.destroySession(sessionId);
+      // the ledger note records the LOGOUT event (no session id - PII-free)
+      makeLedger(storeFor(context)).append("auth.session.destroyed", {});
     } catch {
       // store missing: the cookie is being cleared regardless
     }

@@ -25,6 +25,7 @@ export interface KVStore {
   get(key: string): Promise<string | null>;
   put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
   delete(key: string): Promise<void>;
+  list(prefix: string): Promise<Array<{ name: string }>>;
 }
 
 /** The deployment leaves the binding undefined until an owner attaches
@@ -36,7 +37,8 @@ export function storeFor(context: PagesContext): KVStore {
   if (
     typeof ns.get !== "function" ||
     typeof ns.put !== "function" ||
-    typeof ns.delete !== "function"
+    typeof ns.delete !== "function" ||
+    typeof ns.list !== "function"
   ) {
     throw new StoreUnavailableError();
   }
