@@ -19,17 +19,33 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 function Login() {
   const [value, setValue] = useState("");
   const [err, setErr] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
   const property = useApp((s) => s.property);
 
-  const submit = (e: React.FormEvent) => {
-    const eHandler = e;
-    eHandler.preventDefault();
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
     const token = value.trim();
     if (!token.startsWith("vguest_")) {
       setErr("That is not a guest token. It starts with vguest_.");
       return;
     }
     setErr(null);
+    // Best-effort session cookie setup: HttpOnly cookie lets the bridge
+    // inject Authorization for the SSE stream (EventSource can't send
+    // headers). If functions aren't deployed (first boot), the paste still
+    // works for non-SSE proxy calls - the board will say what's missing.
+    try {
+      const res = await fetch(`/api/session?p=${encodeURIComponent(property)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      if (!res.ok) {
+        setNote("Functions not reachable yet.");
+      }
+    } catch {
+      setNote("Functions not reachable yet.");
+    }
     actions.setToken(property, token);
   };
 
@@ -62,6 +78,7 @@ function Login() {
               className="w-full rounded-md border border-line bg-paper px-3 py-2 font-mono text-sm outline-none focus:border-accent"
             />
             {err ? <p className="text-xs text-err">{err}</p> : null}
+            {note ? <p className="text-xs text-ink-soft">{note}</p> : null}
             <Help text="Tokens are issued with `vant guest issue` on the pod. Roles ride the sandbox capability vocabulary.">
               <span className="text-xs text-ink-soft">Where do tokens come from?</span>
             </Help>

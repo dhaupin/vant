@@ -21,6 +21,17 @@ Hard rules (prd-web.md 3.1, 3.6):
 - Per-session rate budget + request caps + the per-property circuit
   breaker live in these functions (prd-web.md 3.6).
 
-Status in this scaffold: **contract documented, code lands with the P1
-build-out** so the pod-side contract is exercised against a real door
-first. The frontend already speaks this exact surface (`src/api.ts`).
+Status: **implemented** - the bridge (`lib/bridge.ts`) forwards auth
+(Bearer header, or the HttpOnly session cookie for the SSE stream -
+browsers' EventSource cannot send headers), streams POST bodies, and
+per-property resolves origins ONLY from Pages settings env vars
+(`VANT_PROPERTY_<ID>_ORIGIN`). Edge owes: per-session rate budget
+(`VANT_EDGE_RATE_PER_MIN`, default 120/min), a per-property circuit
+breaker (opens after 5 consecutive failures, 15s cooldown, half-open
+probe; `GET /api/breakers` exposes states for the status module), and
+`VANT_BRIDGE_TIMEOUT_MS` (default 10s) on every upstream call. The pod
+remains the authority for everything else.
+
+Not yet deployed: these functions require a real Pages project with
+property origins in settings; until then the frontend renders its
+honest offline/dead states rather than faking data (prd-web.md 6).

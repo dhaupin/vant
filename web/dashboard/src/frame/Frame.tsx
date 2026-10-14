@@ -7,6 +7,7 @@ import { PanelSkeleton } from "./ui";
 import { AuthGate } from "./AuthGate";
 import { actions, useApp } from "../state";
 import { Help } from "./Tooltip";
+import { setDesiredProperty } from "./events";
 
 /**
  * The frame (prd-web.md 3.3): nav + routes render FROM the module
@@ -32,6 +33,8 @@ export function Frame({ children }: { children?: React.ReactNode }) {
       <PropertySync />
       <div className="flex min-h-screen flex-col">
         <TopBar property={property} />
+        {/* the frame owns the one SSE connection: property change -> reconnect (3.4) */}
+        <BoardConnection property={property} />
         <div className="mx-auto flex w-full max-w-5xl flex-1 gap-6 px-4 py-4">
           <SideNav />
           <main id="main" className="min-w-0 flex-1">
@@ -54,6 +57,16 @@ function PropertySync() {
   useEffect(() => {
     actions.switchPropertyFromUrl();
   }, [location.pathname]);
+  return null;
+}
+
+/** The frame-owned board connection: ONE EventSource per active property
+ *  (prd-web.md 3.3 resp. 3). Connects after the session cookie exists. */
+function BoardConnection({ property }: { property: string }) {
+  const token = useApp((s) => s.tokens[s.property] ?? null);
+  useEffect(() => {
+    if (token) setDesiredProperty(property);
+  }, [property, token]);
   return null;
 }
 
