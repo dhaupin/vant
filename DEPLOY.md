@@ -363,30 +363,71 @@ node -e "console.log(require('./lib/sandbox').canRead())"   # Direct sandbox pro
 | Docs site | https://docs.creadev.org/vant |
 | CLI reference | https://docs.creadev.org/vant/reference/cli |
 
-## 12. Frontends on Cloudflare Pages (planned)
+## 12. Frontends on Cloudflare Pages (set up YOUR dashboard now)
 
-The web frontends (see `labs/prd-web.md` v0.2) deploy to Cloudflare
-Pages. Each frontend is its OWN Pages project with its OWN subdomain.
-No frontend code exists yet; this is the contract it will follow.
+The web frontends (see `labs/prd-web.md`) deploy to Cloudflare Pages.
+Each frontend is its OWN Pages project with its OWN subdomain.
+
+### 12.1 Setup walkthrough (dashboard, do this while code lands)
+
+1. **Create the Pages project** in the CF dashboard: connect this git
+   repo, production branch `axolotl` (or `main` after merge).
+2. **Configure the build** in project settings:
+
+   | Setting | Value |
+   |---------|-------|
+   | Framework preset | Vite |
+   | Root directory | `web/dashboard` |
+   | Build command | `npm run build` |
+   | Build output directory | `dist` |
+   | Node version | 20+ (environment var `NODE_VERSION=20` if the panel asks) |
+
+   Functions under `web/dashboard/functions/` deploy AUTOMATICALLY with
+   the project - no wrangler config anywhere (prd-web.md 3.7).
+3. **Set the Pages variables** (Settings - Environment variables, both
+   Production and Preview):
+
+   | Variable | Value | Notes |
+   |----------|-------|-------|
+   | `VANT_PROPERTY_LOCAL_ORIGIN` | your pod's MCP door, e.g. `https://pod.example.com` or the tunnel URL below | REQUIRED. Make it HTTPS (Works' runtime upgrades it otherwise) |
+   | `VANT_PROPERTY_LOCAL_NAME` | `home pod` (any label) | optional; shown in the switcher |
+   | `VANT_EDGE_RATE_PER_MIN` | `120` | optional; per-session edge budget |
+
+   The property ID for this first install is **`local`** (the URL its
+   views ride is `?p=local`; the resolver reads
+   `VANT_PROPERTY_<ID>_ORIGIN` upper-cased). More installs later = add
+   `VANT_PROPERTY_<NEWID>_ORIGIN` and they appear in the switcher.
+4. **Make the pod reachable from the edge** - pick ONE:
+   - **Tunnel (recommended for home/VPS pods):** `cloudflared tunnel
+     create vant-pod`, route a hostname like
+     `pod-<murmur>.<your-domain>.com` to `http://localhost:3457`, run
+     the connector on the pod host. Stable egress identity, no ports
+     opened, no allowlist churn - this is the prd-web.md 8.3 fallback
+     path and it dodges the IP-allowlist refresh problem entirely.
+   - **IP allowlist path:** let pages origin fetches hit the door
+     (fetch egress comes from Cloudflare IP ranges,
+     https://www.cloudflare.com/ips/) and allowlist those ranges at the
+     pod's firewall with a scheduled refresh - broad by nature, and
+     refreshes are the owner-posture requirement (prd-web.md 8.3).
+5. **Mint an identity** on the pod:
+   `vant guest issue --name <seat>` and copy the `vguest_` token.
+6. **Log in**: open the dashboard's subdomain, paste the token at the
+   gate. The status page will name anything still missing (functions,
+   origin var, bridge), exactly as built.
+7. **Point the lander's "Dashboard" link** at the new subdomain when
+   satisfied.
+
+### 12.2 The contract (unchanged)
 
 | Aspect | Rule |
 |--------|------|
-| Location | `web/<app>/` - fully self-contained (src, functions, package.json, configs); nothing the frontend needs lives at repo root |
-| Build | Vite build producing static output in the app's own `dist/`; the app exits after build (serving is Pages' job) |
-| Functions | `web/<app>/functions/` ships the Pages Worker functions: the `/api/*` proxy to the pod's MCP door (auth forwarded, never logged) |
-| Cloudflare config | PAGES SETTINGS ONLY: env vars and bindings (property origins, email sender keys, KV/D1 account store). NO wrangler strings in code; the repo ships `.example` templates only |
-| Pod posture | pod stays loopback/private; the Worker function is the single network bridge; pod code untouched by the deploy |
-| Auth | MVP: paste a guest token per load; P2: email-OTP logins (resend + cooldown, hashed codes) with worker-side session binding |
-| Multi-install | `VANT_PROPERTY_<ID>_NAME` / `VANT_PROPERTY_<ID>_ORIGIN` env registry = one deployment, N attached Vant installs ("properties"), switchable in the UI with view state preserved |
-
-Planned steps once `web/dashboard` scaffolds in P1:
-
-1. Create the Pages project from the `web/dashboard` folder.
-2. Set its env vars in Pages settings (the pod MCP origin for the
-   proxy, plus any account-store binding for later phases).
-3. Install and build inside the app directory; the pod's own
-   dependencies stay untouched (`web/` is outside the pod's graph).
-4. Point the lander's new "Dashboard" link at the project's subdomain.
+| Location | `web/<app>/` - fully self-contained; nothing it needs lives at repo root |
+| Build | Vite build producing `dist/`; the build exits (serving is Pages' job) |
+| Functions | `web/<app>/functions/` = the `/api/*` Worker proxy (auth forwarded, never logged) |
+| Cloudflare config | PAGES SETTINGS ONLY: vars/bindings. Zero wrangler strings in code |
+| Pod posture | pod stays loopback/private; the Worker is the single bridge |
+| Auth | MVP: paste a guest token (HttpOnly session cookie set by the bridge drives the SSE stream); P2: email-OTP accounts + server-side session binding |
+| Multi-install | the `VANT_PROPERTY_<ID>_*` env registry = one deployment, N installs, view state preserved on switch |
 
 Everything in sections 1-11 remains the POD guide; frontends never
 change the pod's deployment face.

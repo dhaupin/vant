@@ -123,6 +123,30 @@ that; no filler lists, no invented shapes. Consequences shipped:
 - verified: tsc clean, vite build clean (work/chat/forum/market in
   their own chunks), style+links gates PASS, ci.js 496/0.
 
+**Session 2026-10-14 (build day 4 - Tier S set + Count's Pages runbook):**
+- DEPLOY.md section 12 rewritten as an actionable walkthrough: Pages
+  project config table (root web/dashboard, build npm run build ->
+  dist, functions auto-deploy with the project), the REQUIRED vars
+  (VANT_PROPERTY_LOCAL_ORIGIN - the property id for the first install
+  is `local`; NAME optional; EDGE rate knob optional), pod reachability
+  via cloudflared tunnel (recommended: stable egress identity, dodges
+  allowlist churn) or the CF-ranges allowlist path, `vant guest issue`
+  identity minting, and the lander link step.
+- Tier S set landed honest-first (five new modules + one shared
+  primitive): guests (real guest_ tools or the CLI pointer), users (one
+  plain statement: dashboard accounts arrive with P2 email-OTP - no
+  phantom table), pairing (pairing_/voucher_ tools or the CLI voucher
+  flow stated as CLI), budgets (escrow_/budget_ tools or an honest
+  none-exposed), config (config-related tools with the PRD's write
+  caution). ToolCall extracted to frame/ToolCall.tsx - the ONE call
+  panel for every module (work refactored onto it, per-module result
+  logs deduped).
+- registry now 13 modules; routes render per-entry, tier presentation
+  stays presentation-only (the door owns the data verdict).
+- verified: tsc clean, vite build clean, style+links gates PASS,
+  ci.js 496/0; boot horcrux re-refreshed post-suite + inspected before
+  push (the every-suite drift pattern made explicit).
+
 **NEXT-UP:** owner green-lights P1 (Observer MVP).
 
 ## Session (2026-10-13 — pass 215: enumeration throttle + docs sweep)
