@@ -32,6 +32,13 @@ POST   /api/session?p=<id>        (existing paste intake) binds the
 GET    /api/audit?limit=50        -> the frontend's OWN ledger (module
        #11): auth outcomes, refusals, session lifecycles; ADMIN-ONLY
        (typed 401/403/503 for unauthenticated/viewer/no-binding)
+GET    /api/users                 -> the dashboard ACCOUNT roster
+       (module #13, admin-only): {emailHash, role, status, created}s,
+       newest-first, capped 200 at the store
+POST   /api/users/set-status      {emailHash, status: active|disabled}
+       -> admin-only flip. Disabled accounts die at EVERY gate
+       (verify, identity probe, bridge bound tokens, audit) through
+       accountActive(); self-disable is refused (E_SELF_DISABLE)
 ```
 
 The app's own audit ledger (functions/lib/ledger.ts) records

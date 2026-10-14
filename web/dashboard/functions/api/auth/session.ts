@@ -33,6 +33,10 @@ export const onRequestGet: Handler = async (context: PagesContext) => {
   const accounts = makeAccounts(store, emailSalt(context));
   const session = await accounts.sessionFor(sessionId);
   if (!session) return json({ error: "E_NO_SESSION" }, 401);
+  // disabled accounts die at every gate, including the identity probe
+  if (!(await accounts.accountActive(sessionId))) {
+    return json({ error: "E_ACCOUNT_DISABLED" }, 401);
+  }
   const property =
     new URL(context.request.url).searchParams.get("p") ?? "local";
   return json({

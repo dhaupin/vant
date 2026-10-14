@@ -248,12 +248,43 @@ building what builds without it:
   build exit 0, docs gates PASS, ci.js full suite (boot horcrux
   re-refresh + inspect before push, drift pattern applied).
 
-**NEXT-UP:** users-module admin surface (list/disable dashboard
-accounts over the same KV store, admin-only) - the last P3 row that
-builds without the live pod; then the Pages-deploy walkthrough
-(owner-side) unlocks the live-token P2/P3 verification pass. Real
-embedding-vector plumbing still waits for a pod that exposes vectors
-(the map upgrades by name, honestly).
+**Session 2026-10-14 (build day 8 - users admin module, the last
+builds-without-pages P3 row):** owner said LFG; the users module (#13)
+went from the honest placeholder to the REAL admin surface:
+- accounts lib grew the admin ops: listAccounts (roster newest-first,
+  shape-gated acct: rows so foreign keys cannot fabricate entries,
+  capped 200, hash = the identity shown - it never expands back) and
+  setAccountStatus (32-hex validated, unknown/missing hashes refused):
+  functions/lib/accounts.ts.
+- Disabled-account enforcement is ONE honest check used at EVERY gate:
+  accountActive() now refuses mint (verify -> new
+  E_ACCOUNT_DISABLED 403), the identity probe (/api/auth/session
+  -> 401), bridge bound tokens (podTokenFor -> null) and paste intake
+  (403), and the admin surfaces (lib/auth_guard.ts route them to 401).
+- lib/auth_guard.ts = the ONE admin gate for dashboard-account
+  surfaces (audit users both ride it): typed
+  E_NO_SESSION/E_ACCOUNT_DISABLED/E_FORBIDDEN/E_STORE_UNCONFIGURED,
+  single source so a gate change lands once.
+- routes: GET /api/users (roster, admin-only) + POST
+  /api/users/set-status (flip with E_SELF_DISABLE - an admin cannot
+  lock themselves out; by design the ledger rows carry NO target
+  hash, the roster is the only place a hash lives).
+- users module (#13, /users, S) is REAL: roster with role/status
+  chips, disable/enable through the typed modal (Base UI, escalation
+  -grade confirm), viewer identities see the typed 403 stated
+  verbatim, E_NO_ACCOUNT/E_SELF_DISABLE surface verbatim.
+- registry blurb updated (no longer "arrives with P2"); ledger kinds
+  grew auth.account.disabled/activated.
+- verified: vitest 26/26 (15 accounts + 4 ledger + 7 users-admin),
+  tsc exit 0, vite build exit 0; docs gates + ci.js after the final
+  doc edits; horcrux inspect before push (drift pattern).
+
+**NEXT-UP:** everything left on the catalog needs the LIVE Pages
+deploy: the walkthrough (DEPLOY.md 12.1) unlocks P2/P3 verification
+against a real door (live-token pass for work/chat/forum/market,
+OTP emails end-to-end, audit inbox populating). Real embedding-vector
+plumbing still waits for a pod that exposes vectors (the map upgrades
+by name, honestly).
 
 ## Session (2026-10-13 — pass 215: enumeration throttle + docs sweep)
 

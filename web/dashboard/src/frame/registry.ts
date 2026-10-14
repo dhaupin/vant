@@ -158,7 +158,7 @@ export const MODULES = [
   {
     id: "users",
     title: "Users",
-    blurb: "Dashboard accounts - arrive with P2 email-OTP.",
+    blurb: "Dashboard accounts admin (email-OTP backed; admin-only).",
     route: "/users",
     tiers: ["S"],
     section: "ops",

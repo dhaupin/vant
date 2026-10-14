@@ -57,6 +57,7 @@ export async function podTokenFor(
   if (sessionId && sessionId.startsWith("bsess_")) {
     try {
       const accounts = makeAccounts(storeFor(context), emailSalt(context));
+      if (!(await accounts.accountActive(sessionId))) return null;
       const session = await accounts.sessionFor(sessionId);
       const bound = session ? session.tokens[property] : undefined;
       if (typeof bound === "string" && bound.length > 0) return bound;
@@ -101,7 +102,11 @@ export async function establishSession(
   const sessionId = cookies[SESSION_COOKIE];
   if (sessionId && sessionId.startsWith("bsess_")) {
     try {
-      const accounts = makeAccounts(storeFor({ request, env, params: {} } as unknown as PagesContext), emailSalt({ request, env, params: {} } as unknown as PagesContext));
+      const ctx = { request, env, params: {} } as unknown as PagesContext;
+      const accounts = makeAccounts(storeFor(ctx), emailSalt(ctx));
+      if (!(await accounts.accountActive(sessionId))) {
+        return json({ error: "E_ACCOUNT_DISABLED", detail: "this account is disabled" }, 403);
+      }
       const session = await accounts.sessionFor(sessionId);
       if (session) {
         await accounts.bindToken(sessionId, property, token);

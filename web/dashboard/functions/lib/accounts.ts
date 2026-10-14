@@ -29,7 +29,14 @@ export type DashRole = "admin" | "viewer";
 export interface AccountRecord {
   created: number;
   role: DashRole;
-  status: "active";
+  status: "active" | "disabled";
+}
+
+export interface AccountsRow {
+  emailHash: string;
+  role: DashRole;
+  status: "active" | "disabled";
+  created: number;
 }
 
 export interface CodeRecord {
@@ -137,12 +144,22 @@ export interface AccountsApi {
     code: string,
   ): Promise<
     | { verdict: "ok"; sessionId: string; account: AccountRecord }
-    | { verdict: "mismatch" | "expired" | "burned" | "invalid" }
+    | { verdict: "mismatch" | "expired" | "burned" | "invalid" | "disabled" }
   >;
   sessionFor(sessionId: string): Promise<SessionRecord | null>;
   bindToken(sessionId: string, property: string, token: string): Promise<boolean>;
   destroySession(sessionId: string): Promise<boolean>;
   accountFor(sessionId: string): Promise<{ emailHash: string; role: DashRole } | null>;
+  /** TRUE when the session is live AND its account row is active.
+   *  Disabled accounts die at every gate through this one check. */
+  accountActive(sessionId: string): Promise<boolean>;
+  /** The users-module admin surface (catalog #13): roster + status.
+   *  Newest-first, capped 200; the emailHash NEVER expands back. */
+  listAccounts(): Promise<AccountsRow[]>;
+  setAccountStatus(
+    emailHash: string,
+    status: AccountRecord["status"],
+  ): Promise<boolean>;
 }
 
 export function makeAccounts(store: KVStore, emailSalt: string): AccountsApi {
@@ -213,6 +230,9 @@ export function makeAccounts(store: KVStore, emailSalt: string): AccountsApi {
       // SUCCESS: single-use burn, account upsert, session mint
       await store.delete(keys.code(eh));
       let account = await readJson<AccountRecord>(keys.account(eh));
+      if (account && account.status === "disabled") {
+        return { verdict: "disabled" };
+      }
       if (!account) {
         account = { created: now(), role: "viewer", status: "active" };
         const bootstrap = await store.get(keys.bootstrap());
@@ -260,6 +280,37 @@ export function makeAccounts(store: KVStore, emailSalt: string): AccountsApi {
     async accountFor(sessionId) {
       const rec = await api.sessionFor(sessionId);
       return rec ? { emailHash: rec.emailHash, role: rec.role } : null;
+    },
+
+    async accountActive(sessionId) {
+      const rec = await api.sessionFor(sessionId);
+      if (!rec) return false;
+      const account = await readJson<AccountRecord>(keys.account(rec.emailHash));
+      return account ? account.status === "active" : true;
+    },
+
+    async listAccounts() {
+      const names = (await store.list("acct:"))
+        .map((r) => r.name)
+        .filter((n) => /^acct:[0-9a-f]{32}$/.test(n))
+        .slice(0, 200);
+      const rows: AccountsRow[] = [];
+      for (const name of names) {
+        const account = await readJson<AccountRecord>(name);
+        if (!account) continue; // honest gaps, never fabricated rows
+        rows.push({ emailHash: name.slice("acct:".length), role: account.role, status: account.status, created: account.created });
+      }
+      rows.sort((a, b) => b.created - a.created);
+      return rows;
+    },
+
+    async setAccountStatus(emailHash, status) {
+      if (!/^[0-9a-f]{32}$/.test(emailHash)) return false;
+      const account = await readJson<AccountRecord>(keys.account(emailHash));
+      if (!account) return false;
+      account.status = status;
+      await store.put(keys.account(emailHash), JSON.stringify(account));
+      return true;
     },
   };
 

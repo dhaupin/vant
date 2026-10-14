@@ -25,6 +25,8 @@ export type LedgerKind =
   | "auth.otp.burned"
   | "auth.session.created"
   | "auth.session.destroyed"
+  | "auth.account.disabled"
+  | "auth.account.activated"
   | "bridge.refused"
   | "bridge.unreachable";
 

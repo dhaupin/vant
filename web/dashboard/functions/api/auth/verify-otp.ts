@@ -65,6 +65,9 @@ export const onRequestPost: Handler = async (context: PagesContext) => {
     case "mismatch":
       await ledger.append(verdictKind(verdict));
       return json({ error: "E_OTP_MISMATCH", detail: "that code is not right (attempts are budgeted)" }, 401);
+    case "disabled":
+      await ledger.append("auth.otp.failed", { reason: "account_disabled" });
+      return json({ error: "E_ACCOUNT_DISABLED", detail: "this account is disabled; an admin re-enables it" }, 403);
     case "burned":
       await ledger.append(verdictKind(verdict));
       return json({ error: "E_OTP_BURNED", detail: "too many attempts; request a fresh code" }, 401);

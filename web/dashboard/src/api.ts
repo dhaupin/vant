@@ -127,6 +127,52 @@ export async function properties() {
   return readJson("/api/properties", PropertiesOut);
 }
 
+/** GET /api/users - the dashboard ACCOUNT roster (admin-only; prd-web
+ *  3.5). The email hash is the identity shown; it never expands back. */
+export const UsersOut = z
+  .object({
+    users: z
+      .array(
+        z.object({
+          emailHash: z.string(),
+          role: z.enum(["admin", "viewer"]),
+          status: z.enum(["active", "disabled"]),
+          created: z.number(),
+        }),
+      )
+      .optional(),
+  })
+  .passthrough();
+
+export async function users() {
+  return readJson("/api/users", UsersOut);
+}
+
+/** POST /api/users/set-status - activate|disable an account (admin-only;
+ *  self-disable is refused with E_SELF_DISABLE by the door). */
+export async function setUserStatus(emailHash: string, status: "active" | "disabled") {
+  let res: Response;
+  try {
+    res = await fetch("/api/users/set-status", {
+      method: "POST",
+      headers: headers(true),
+      body: JSON.stringify({ emailHash, status }),
+    });
+  } catch {
+    throw new ApiError("unreachable", "network");
+  }
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new ApiError(shortRefusal(res.status, detail), "refused", res.status);
+  }
+  const parsed = ExecOut.safeParse(await res.json().catch(() => null));
+  if (!parsed.success) throw new ApiError("unparseable response", "shape");
+  if (parsed.data.error) {
+    throw new ApiError(`door: ${parsed.data.error.message ?? "refused"}`, "refused");
+  }
+  return parsed.data.result;
+}
+
 async function readJson<S extends z.ZodTypeAny>(path: string, schema: S): Promise<z.infer<S>> {
   let res: Response;
   try {
