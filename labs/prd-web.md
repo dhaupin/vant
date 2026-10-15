@@ -240,6 +240,16 @@ Frame responsibilities - built ONCE at P1, modules NEVER rebuild them:
    capability = an existing pod tool, or a pod-side verb filed by spec
    (rule 7). The frame is not a second API surface.
 5. Shared hooks: `useExec`, `useEvents(family)`, `useTenant`, `useTheme`.
+5b. Nav presentation (AMENDED 2026-10-15, owner-approved after the live
+   preview — described FROM the shipped frame): ONE nav truth (the
+   registry), two presentations. A burger button in the top bar toggles
+   BOTH: ≥sm shows/collapses the static sidebar column (open by
+   default, `w-44`); <sm slides the same nav in as a left overlay
+   drawer (open by default CLOSED — mobile viewport economy), with a
+   dimmed backdrop tap-to-close and module taps closing the drawer.
+   Drawer state resets on reload from viewport width (no persistence).
+   There is NO <select> fallback module picker — the drawer IS the
+   mobile nav.
 6. Honest-refusal primitive: ONE component renders typed 403/429/
    withheld/E_* states - modules import it, never re-implement it.
 7. Tokens-only theming: modules style with Tailwind + brand CSS vars
@@ -327,7 +337,14 @@ you a context switcher across them:
 - The paste-token MVP (Q1) remains the FALLBACK for local installs
   without email config. Worker-side session binding ARRIVES WITH
   ACCOUNTS at P2 - pulled forward from P3, since the session layer
-  gets built for it anyway.
+  gets built for it anyway. Paste-token persistence (AMENDED 2026-10-15,
+  owner-approved after the live preview): the pasted token persists to
+  per-tab `sessionStorage` (key `bolete-token-<property>`; rehydrated
+  once on gate mount; wiped on sign-out via the clear action). Tab close
+  still ends it; NO `localStorage`, no cross-tab copy — the tab remains
+  the device boundary for the paste fallback. The r/2 note: a page does
+  NOT hand the token to a relay; the bridge intake's browser lane
+  carries intent only (prd-relay.md §3.3), auth spent server-side.
 - Pod identities stay the pod's model (3.2); /users admin manages
   dashboard accounts (module catalog 4).
 

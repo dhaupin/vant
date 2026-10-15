@@ -145,6 +145,28 @@ ok('6b. the face teaches the webhook route + HMAC posture',
     faceSource.includes("RELAY_SIGNATURE_HEADER = 'X-Signature-256'")
     && kitLive.includes("SIGNATURE_HEADER = 'X-Signature-256'"));
 
+// ---- 7. the intake's browser lane (pass 237, owner-approved after the
+// live preview): the dashboard edge accepts Bearer-vguest_ intents with NO
+// HMAC (clients hand intent, never credentials), while the relay lane
+// still demands X-Signature-256. Pinned against the vendored intake
+// source so drift cannot silently re-fuse the browser lane.
+const intakeSource = fs.readFileSync(
+    path.join(ROOT, 'web/dashboard/functions/api/r/relay.ts'), 'utf8').replace(/\/\/.*$/gm, '');
+ok('7a. the intake carries the browser lane (Bearer vguest_ intent, no HMAC)',
+    intakeSource.includes('browserLane')
+    && intakeSource.includes('bearer.startsWith("vguest_")')
+    && intakeSource.includes('headers.get(SIGNATURE_HEADER) === null'),
+    'the pass-237 lane: intent rides the bridge, credentials never enter the envelope');
+ok('7b. the relay lane still demands the HMAC gate',
+    intakeSource.includes('signatureVerdictOk')
+    && intakeSource.includes('!browserLane')
+    && intakeSource.includes('TRANSPORT_STATUS.UNAUTHENTICATED'),
+    'external webhook senders keep the r/2 gate; the browser lane adds, never replaces');
+ok('7c. ts freshness gates BOTH lanes (stale is 401 everywhere)',
+    intakeSource.includes('FRESHNESS_WINDOW_MS')
+    && !/browserLane[^;]*FRESHNESS/.test(intakeSource.replace(/\s+/g, ' ')),
+    'freshness is checked after lane resolution, unsplit');
+
 console.log('\n--- RESULTS ---');
 console.log('  Passed:  ' + passNum);
 console.log('  Failed:  ' + failNum);

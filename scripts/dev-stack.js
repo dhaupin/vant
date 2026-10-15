@@ -69,6 +69,13 @@ const ORIGIN = `http://${POD_HOST}:${POD_PORT}`;
 
 const wantProbe = process.argv.includes('--probe');
 
+// Fresh per-boot relay gate secret for the preview (crypto.randomBytes,
+// 32-byte hex — the same shape pod-side secrets use). Only steering env
+// (VANT_DEV_RELAY_GATE) pins a stable value across boots; otherwise every
+// boot mints a fresh secret. Never committed, never a constant.
+const nodeCrypto = require('crypto');
+const RELAY_GATE_KEY = process.env.VANT_DEV_RELAY_GATE || nodeCrypto.randomBytes(32).toString('hex');
+
 function log(...a) { console.log('[dev-stack]', ...a); }
 
 
@@ -259,11 +266,15 @@ function bootWrangler() {
         '-k', 'BOLETE_KV',
         '-b', `VANT_PROPERTY_${PROPERTY.toUpperCase()}_ORIGIN=${ORIGIN}`,
         '-b', `VANT_PROPERTY_${PROPERTY.toUpperCase()}_NAME=Devstage pod (test)`,
-        // test-based posture opt-in: rides the same EDGE_ENV_KEYS.enabled
+        // test-scope posture opt-in: rides the same EDGE_ENV_KEYS.enabled
         // contract the kit vendors. In production this stays OFF until the
-        // operator opts in via Pages settings - this is preview-only.
+        // operator opts in via Pages settings — this is preview-only.
+        // The gate secret is FRESH PER BOOT (crypto.randomBytes hex, the
+        // repo's own token-alphabet posture): no placeholder string ever
+        // sits in code; an external relay sender would take it from the
+        // boot logs like any operator takes their Pages env value.
         '-b', 'VANT_RELAY_ENABLED=1',
-        '-b', `VANT_RELAY_GATE_KEY=${process.env.VANT_DEV_RELAY_GATE || 'dev-relay-gate-key-not-a-secret'}`,
+        '-b', `VANT_RELAY_GATE_KEY=${RELAY_GATE_KEY}`,
     ];
     wrangler = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', args, {
         cwd: path.join(ROOT, 'web', 'dashboard'),
