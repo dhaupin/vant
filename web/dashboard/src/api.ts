@@ -6,6 +6,14 @@ import { getState } from "./state";
  * speaks ONLY the /api/* proxy contract (3.1) - modules never add Worker
  * routes. The pod door remains the authority; this client renders what
  * comes back and maps typed refusals.
+ *
+ * (pass 237 rung) The BRIDGE FAMILIES (web/kit/relay/relay-contract.js
+ * r/2: relay.sync | relay.lost | relay.call) land here as the browser
+ * consumer: the dashboard pastes INTENT into POST /api/r/relay (the
+ * dashboard-relay intake; HMAC-signed SERVER-SIDE — the browser holds
+ * no gate secret). The intake translates families onto the pod door's
+ * existing verbs and answers the r/2 ack: reply.ok=false carries the
+ * typed E_RELAY_* / E_RIDE_* codes; reply.ok=true carries the door answer.
  */
 
 // The exec envelope is intentionally loose here: the DOOR owns shapes.
@@ -194,4 +202,92 @@ function shortRefusal(status: number, detail: string): string {
   if (status === 503) return "breaker open: pod bridge cooling down";
   const e = /\b(E_[A-Z_]+)\b/.exec(detail);
   return e ? `refused: ${e[1]}` : `refused: HTTP ${status}`;
+}
+
+// ==================== the bridge families (pass 237 rung) ====================
+
+/**
+ * The r/2 ack (web/kit/relay/relay-contract.js): every bridge POST answers
+ * { received, event, handlers, dispatched, reply } — application refusals
+ * ride TYPED codes inside the 200 ack (E_RELAY_* / E_RIDE_*), transport
+ * refusals ride HTTP statuses (401/409/404/413). Typed, never silent.
+ */
+export const BridgeAck = z
+  .object({
+    received: z.boolean(),
+    event: z.string(),
+    handlers: z.number(),
+    dispatched: z.number(),
+    reply: z
+      .object({
+        ok: z.boolean(),
+        code: z.string().optional(),      // the typed refusal family
+        error: z.string().optional(),
+        family: z.string().optional(),   // ok replies name the family
+        answer: z.unknown().optional(),  // the door's answer (families)
+        raw: z.string().optional(),      // hop's verbatim upstream body
+        ms: z.number().optional(),
+      })
+      .passthrough()
+      .optional(),
+  })
+  .passthrough();
+
+export type BridgeReply = NonNullable<z.infer<typeof BridgeAck>["reply"]>;
+
+async function bridgeSend(event: string, payload: Record<string, unknown>): Promise<BridgeReply> {
+  let res: Response;
+  try {
+    res = await fetch("/api/r/relay", {
+      method: "POST",
+      headers: headers(true),
+      body: JSON.stringify({
+        event,
+        from: "bolete-browser",
+        ts: Date.now(),
+        nonce: crypto.randomUUID(),
+        payload,
+        v: { major: 2 },
+      }),
+    });
+  } catch {
+    throw new ApiError("the relay intake is unreachable", "network");
+  }
+  if (!res.ok) {
+    // transport-level refusal: the honest HTTP the webhook transport owns
+    const detail = await res.text().catch(() => "");
+    throw new ApiError(shortRefusal(res.status, detail), "refused", res.status);
+  }
+  const parsed = BridgeAck.safeParse(await res.json().catch(() => null));
+  if (!parsed.success) throw new ApiError("unparseable relay ack", "shape");
+  const reply = parsed.data.reply ?? { ok: false, error: "the ack carried no reply" };
+  return reply;
+}
+
+/** relay.sync → brain_write on the door (single {name,content} or batched
+ *  {entries:[{name,content,format?}]}, 64 cap enforced by the intake).
+ *  format rides the door's enum: md | json | yaml | txt. */
+export function bridgeSync(entry: { name: string; content: string; format?: string }): Promise<BridgeReply>;
+export function bridgeSync(entries: Array<{ name: string; content: string; format?: string }>): Promise<BridgeReply>;
+export function bridgeSync(a: unknown): Promise<BridgeReply> {
+  const payload = Array.isArray(a) ? { entries: a } : a;
+  return bridgeSend("relay.sync", payload as Record<string, unknown>);
+}
+
+/** relay.lost → "where one stands": context_heartbeat(status) +
+ *  brain_current off the door; the ack reply.answer carries both. */
+export function bridgeLost(): Promise<BridgeReply> {
+  return bridgeSend("relay.lost", {});
+}
+
+/** relay.call → any door tool through the intake (the shape gate does
+ *  the rest; typed refusals surface as reply.code). */
+export function bridgeCall(tool: string, args: Record<string, unknown> = {}): Promise<BridgeReply> {
+  return bridgeSend("relay.call", { tool, args });
+}
+
+/** The typed bridge refusal, shaped for UI surfaces (the code first). */
+export function bridgeRefusal(reply: BridgeReply): string | null {
+  if (reply.ok) return null;
+  return reply.code ? `${reply.code}: ${reply.error ?? "refused"}` : (reply.error ?? "refused");
 }

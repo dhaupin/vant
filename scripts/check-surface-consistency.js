@@ -193,7 +193,11 @@ const cliDoc = read('docs/reference/cli.md');
 // version/distributed/mcp/api/all never appear in COMMANDS — they are
 // handled inline and documented as such. The registry counts them as
 // real doors (verified by hand once, listed here forever after).
-const INLINE_HANDLERS = new Set(['version', 'distributed', 'mcp', 'api', 'all']);
+const INLINE_HANDLERS = new Set(['version', 'distributed', 'mcp', 'api', 'all', 'headless']);
+// 'headless' rides the same inline block (bin/vant.js: `cmd === 'mcp' ||
+// cmd === 'api' || cmd === 'all' || cmd === 'headless'`) - the pass-210
+// serving pod front door was documented (cli.md 2 rows) but never added
+// to this hand-verified inventory.
 const cliVerbs = [...cliDoc.matchAll(/\bvant ([a-z][a-z0-9-]*)\b/g)]
     .map((m) => m[1])
     .filter((v) => v.length > 1); // drop doc placeholder vars ('a' etc.)

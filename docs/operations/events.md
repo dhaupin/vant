@@ -198,6 +198,26 @@ console.log(queue.stats());    // { queued, running, total, uptime }
 
 ---
 
+## The MCP tap stream (`GET /mcp/events`)
+
+The board tap is a filtered, throttled, sanitized SSE view of THIS bus
+(auth posture identical to `/mcp/exec`; the pass-212 sanitization: listed
+keys only, values capped). Wire contract (build-day-11 fix - the frames
+are DEFAULT-message events):
+
+```text
+id: <ms>
+data: {"tapType":"<full bus type>",...listed fields}
+```
+
+`tapType` is the full type (e.g. `agent:spawned`); consumers key on the
+ROOT segment (`agent`). Named exceptions: `event: tap.revoked` is the
+pod's mid-stream revocation note - it kills the stream at the next beat
+and a browser closes its EventSource when it sees it. Internal families
+(`guest|mcp|sudo|config:*`) never board.
+
+---
+
 ## Use Cases
 
 ### Multi-Agent Communication

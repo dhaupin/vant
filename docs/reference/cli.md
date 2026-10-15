@@ -348,6 +348,7 @@ vant brain mode dual            # dual | public | private | remote
 | Command | Description |
 |---------|-------------|
 | `vant server` | HTTP/HTTPS server with security chain |
+| `vant relay` | Headless relay posture (Mode R status + gate key; prd-relay.md R0) |
 | `vant network` | Peer network operations |
 | `vant nodes` | Peer discovery |
 | `vant remote` | Remote add/remove/list |

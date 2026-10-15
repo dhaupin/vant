@@ -1,5 +1,6 @@
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
+import { Menu as MenuIcon } from "lucide-react";
 import { MODULES, SECTIONS } from "./registry";
 import { Footer } from "./Footer";
 import { ErrorBoundary } from "./ErrorBoundary";
@@ -21,6 +22,13 @@ import { usePropertyList } from "./Properties";
 export function Frame({ children }: { children?: React.ReactNode }) {
   const theme = useApp((s) => s.theme);
   const property = useApp((s) => s.property);
+  // The module menu: open by default on desktop, collapsed on phones
+  // (viewport economy — CF-dashboard pattern). The burger toggles BOTH
+  // sizes: on <sm it opens a left drawer, on ≥sm it collapses/shows
+  // the static sidebar.
+  const [navOpen, setNavOpen] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth >= 640 : true,
+  );
 
   // theme token application: .dark on <html> (prd-web.md 2.6: tokens via class)
   useEffect(() => {
@@ -34,11 +42,11 @@ export function Frame({ children }: { children?: React.ReactNode }) {
     <AuthGate>
       <PropertySync />
       <div className="flex min-h-screen flex-col">
-        <TopBar property={property} />
+        <TopBar property={property} navOpen={navOpen} onToggleNav={() => setNavOpen((v) => !v)} />
         {/* the frame owns the one SSE connection: property change -> reconnect (3.4) */}
         <BoardConnection property={property} />
         <div className="mx-auto flex w-full max-w-5xl flex-1 gap-6 px-4 py-4">
-          <SideNav />
+          <SideNav open={navOpen} onClose={() => setNavOpen(false)} />
           <main id="main" className="min-w-0 flex-1">
             <ErrorBoundary>
               <Suspense fallback={<PanelSkeleton />}>
@@ -77,10 +85,19 @@ function BoardConnection({ property }: { property: string }) {
   return null;
 }
 
-function TopBar({ property }: { property: string }) {
+function TopBar({ property, navOpen, onToggleNav }: { property: string; navOpen: boolean; onToggleNav: () => void }) {
   return (
     <header className="border-b border-line bg-surface">
       <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
+        <button
+          type="button"
+          aria-label={navOpen ? "Hide module menu" : "Show module menu"}
+          aria-expanded={navOpen}
+          onClick={onToggleNav}
+          className="shrink-0 rounded-md border border-line p-1.5 text-ink-soft hover:bg-ink/5"
+        >
+          <MenuIcon size={16} />
+        </button>
         <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
           <img
             alt=""
@@ -160,10 +177,13 @@ function HelpToggle() {
   );
 }
 
-function SideNav() {
+function SideNav({ open, onClose }: { open: boolean; onClose: () => void }) {
   const location = useLocation();
-  return (
-    <nav aria-label="Modules" className="hidden w-44 shrink-0 space-y-4 pt-1 sm:block">
+  // ONE nav truth (registry), two presentations:
+  //   ≥sm: static column, burger toggles it open/closed (CF-dashboard)
+  //   <sm: left drawer overlay, burger opens, backdrop click closes
+  const nav = (
+    <nav aria-label="Modules" className="w-44 shrink-0 space-y-4 pt-1">
       {SECTIONS.map((section) => {
         const items = MODULES.filter((m) => m.section === section);
         if (items.length === 0) return null;
@@ -179,17 +199,16 @@ function SideNav() {
                 const Icon = m.icon;
                 return (
                   <li key={m.id}>
-                    <Help text={m.blurb}>
-                      <Link
-                        to={m.route}
-                        className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-ink/5 ${
-                          active ? "bg-ink/10 font-medium" : "text-ink-soft"
-                        }`}
-                      >
-                        <Icon size={15} />
-                        {m.title}
-                      </Link>
-                    </Help>
+                    <Link
+                      to={m.route}
+                      onClick={onClose}
+                      className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-ink/5 ${
+                        active ? "bg-ink/10 font-medium" : "text-ink-soft"
+                      }`}
+                    >
+                      <Icon size={15} />
+                      {m.title}
+                    </Link>
                   </li>
                 );
               })}
@@ -198,5 +217,28 @@ function SideNav() {
         );
       })}
     </nav>
+  );
+  return (
+    <>
+      {/* ≥sm static column */}
+      <div className={open ? "hidden sm:block" : "hidden"}>{nav}</div>
+      {/* <sm drawer: overlay + panel; onClose kills state so a resize to
+          desktop never leaves a phantom-open drawer state */}
+      <div
+        className={`sm:hidden fixed inset-0 z-40 ${open ? "" : "hidden"}`}
+        role="dialog"
+        aria-modal="true"
+      >
+        <button
+          type="button"
+          aria-label="Close module menu"
+          onClick={onClose}
+          className="absolute inset-0 bg-ink/30"
+        />
+        <div className="absolute inset-y-0 left-0 w-60 max-w-[80vw] overflow-y-auto border-r border-line bg-surface p-4 shadow-xl">
+          {nav}
+        </div>
+      </div>
+    </>
   );
 }

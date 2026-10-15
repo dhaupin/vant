@@ -127,6 +127,21 @@ Configuration via environment.
 | `VANT_MCP_REQUIRE_KEY` | No | Force API key auth (`true`/`false`) |
 | `VANT_AGREE_AUTO_SYNC` | No | Enable auto-polling: set to `"true"` to confirm (see notes) |
 
+### Relay posture (Mode R - brain config keys, NOT env vars)
+
+The headless relay core (lib/relay.js, prd-relay.md R0) reads three
+brain-config keys (layer 2 - set with `vant config set`, per brain):
+
+| Key | Required | Description |
+|-----|----------|-------------|
+| `relay.enabled` | No | Enable the gated Mode R hop surface on the REST server (`true`/`false`, default `false`) |
+| `relay.gateKey` | No | The hop gate credential; hops MUST present it as `x-relay-gate` (timing-safe). No key set = fail-closed (hops refuse until `vant relay gate` generates one) |
+| `relay.allowPrivateOrigins` | No | LAB ESCAPE ONLY: allow http/private-range hop targets (loopback targets for tests/labs). Cloud-metadata ranges (169.254/16, 0.0.0.0) refuse in EVERY posture |
+
+Recommended order: `vant config set relay.enabled true` then
+`vant relay gate` (shows the key once). The posture mounts on the SAME
+REST server security chain - the pod exposes nothing new.
+
 ### Notifications
 
 | Variable | Required | Description |

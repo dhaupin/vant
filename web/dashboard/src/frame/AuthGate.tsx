@@ -17,6 +17,13 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const [probeState, setProbeState] = useState<"probing" | "done">("probing");
 
   // Restore a live server-side session before rendering anything.
+  // First: rehydrate THIS TAB's pasted token from sessionStorage (a full
+  // page load used to drop the in-memory token and flash the login gate —
+  // live-caught on the preview). One-shot, not part of the probe loop.
+  useEffect(() => {
+    actions.restoreToken(getProperty());
+  }, []);
+
   useEffect(() => {
     if (token || account) {
       setProbeState("done");

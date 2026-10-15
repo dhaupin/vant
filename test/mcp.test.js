@@ -234,6 +234,12 @@ async function asyncTest(name, fn) {
             cur = era.current();
             if (cur.open) await era.close({ next: 'H4 pin done' });
             escrow.release(r.workId);
+            // (day-11 hygiene) and no ROSTER residue either: this pin spawns
+            // PinBot every run; an unterminated spawn leaks a row into the
+            // shared orgchart and eventually starves the 10-agent quota for
+            // this very suite on the next run (the phantom-quota class the
+            // agents/internal.js comment warns about).
+            try { if (r && r.agentId) agents.terminate(r.agentId); } catch (e) { /* already gone */ }
         }
     });
 

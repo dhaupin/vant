@@ -392,6 +392,8 @@ Each frontend is its OWN Pages project with its OWN subdomain.
    | `VANT_PROPERTY_LOCAL_ORIGIN` | your pod's MCP door, e.g. `https://pod.example.com` or the tunnel URL below | REQUIRED. Make it HTTPS (Works' runtime upgrades it otherwise) |
    | `VANT_PROPERTY_LOCAL_NAME` | `home pod` (any label) | optional; shown in the switcher |
    | `VANT_EDGE_RATE_PER_MIN` | `120` | optional; per-session edge budget |
+   | `VANT_RELAY_ENABLED` | `1` | optional; PIGGYBACK THE RELAY on THIS deploy (dashboard-relay flavor, prd-relay.md 4.0): mounts the gated `/api/r/*` Mode R surface on your Pages functions. Off = the routes do not exist (404), same as the pod's unmounted posture |
+   | `VANT_RELAY_GATE_KEY` | 256-bit hex (mint with `vant relay gate`) | REQUIRED when the relay posture is on; hops MUST present it as `x-relay-gate` (timing-safe). No key set = the surface serves NOTHING (fail-closed). Hop bodies are encrypted envelopes only - plaintext refuses; the edge holds no channel keys |
 
    **Email-OTP accounts (P2) - the KV binding:** create a KV namespace
    (Workers & Pages -> KV -> create, any name; then the Pages project
@@ -451,7 +453,36 @@ Each frontend is its OWN Pages project with its OWN subdomain.
 7. **Point the lander's "Dashboard" link** at the new subdomain when
    satisfied.
 
-### 12.2 The contract (unchanged)
+### 12.2 Mode B — pod same-origin (the local-ops fallback, OFF by default)
+
+When a Pages deployment is not answering (or a workstation cannot reach
+the tunnel), the pod can serve a frontend bundle itself: the browser
+calls `/mcp/*` directly, same origin, zero CORS, zero Worker hop.
+
+```bash
+vant config set mcp.serveWeb web/dashboard   # or env VANT_MCP_SERVE_WEB
+```
+
+Honest mechanics (pins: `test/pod-serve-web.test.js`):
+
+- The value is a frontend DIRECTORY (e.g. `web/dashboard`) whose `dist/`
+  build must exist. Missing `dist/index.html` = serving stays OFF with a
+  loud warning - the door serves nothing it did not build.
+- The MCP door keeps every owned route: `/mcp/exec`, `/mcp/events`,
+  `/mcp/tools`, `/health`, and tool routes all answer first. Static GETs
+  only; POSTs unknown to the door keep the same 404 JSON as before.
+- Static GETs ride the door's OWN deny chain: the DNS-rebinding Host
+  guard, the cross-origin POST/origin guard, and the EW4 per-client rate
+  budget all apply - serving is not a second, weaker surface. Auth on
+  `/mcp/exec` is UNCHANGED: requireKey and guest tokens gate exec exactly
+  as they do in Mode A.
+- Path guards: dot-led segments (`.env`, `.git`) and anything that would
+  resolve outside the bundle are refused 403; client-side routes fall
+  back to `index.html` (the dashboard router owns its own 404 pages).
+- One door serves one frontend bundle. A second attached install goes
+  through Pages vars per the main table above.
+
+### 12.3 The contract (unchanged)
 
 | Aspect | Rule |
 |--------|------|
@@ -465,6 +496,34 @@ Each frontend is its OWN Pages project with its OWN subdomain.
 
 Everything in sections 1-11 remains the POD guide; frontends never
 change the pod's deployment face.
+
+### 12.4 The relay postures (prd-relay.md; the two sides never blur)
+
+Four honest postures, each fully supported, off by default:
+
+| Posture | Where it is set | What it does |
+|---------|-----------------|--------------|
+| OFF (default) | nothing to set | no /api/r surface exists anywhere; a browser that probes it gets the same 404 a pod's unmounted mode gives |
+| POD-ONLY relay (headless flavor) | the pod: `vant config set relay.enabled true` + `vant relay gate` | the REST server mounts the gated `/api/r/*` Mode R surface on its EXISTING posture (loopback/private; widening for WAN hops is YOUR deliberate edge - TLS + auth posture per section 4) |
+| DASHBOARD PIGGYBACK (dashboard-relay flavor) | Pages settings: `VANT_RELAY_ENABLED=1` + `VANT_RELAY_GATE_KEY=<256-bit hex, mint with `vant relay gate`>` | the dashboard's OWN functions serve the same gated Mode R contract (vendored kit, parity-pinned - no separate Pages project; it rides this deploy) |
+| SOLO relay (solo-relay flavor) | its OWN Pages project rooted at `web/relay/` (same two env keys, read at request time) | the PURE live endpoint: chain hops only, no admin surfaces by construction, no default profile pin; exec + the R1 SSE stream-through (`GET /api/r/events`) |
+
+Fail-closed in every posture: enabled without a gate key serves NOTHING
+(hops answer `E_RELAY_GATE_REQUIRED`); hop bodies are encrypted
+envelopes ONLY (plaintext refuses, no downgrade); the gate header is
+spent at the gate, never forwarded.
+
+**Using relays is the USER'S side** and never env-side: dashboard
+Settings #4 carries a **Use relays** toggle (reach pod through relay
+hops / direct, persisted) plus the operator's run-a-relay posture card
+that reads `/api/r/capabilities` and states the truth. Under the
+corrected arc (pass 233) the dashboard also RUNS WITH a relay as a
+setting: **Run with a relay (web/relay endpoint)** takes the relay's
+origin and verifies it live against that relay's public caps page. The full
+operational walkthrough lives in the [relay playbook](/vant/operations/relay-playbook)
+(serving, hosting the solo flavor, piggybacking, using, verifying); the mechanism spec is
+[labs/prd-relay.md](labs/prd-relay.md) and the operations page is
+[docs/operations/relay.md](docs/operations/relay.md).
 
 ---
 

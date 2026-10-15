@@ -108,12 +108,16 @@ async function run() {
         setTimeout(() => eventBus.emit('tap.target.done', { marker: true }), 200);
         const buf2 = await pumpUntil(res2, 0, 2500);
         const frames = sseFrames(buf2);
-        const agentFrame = frames.find(f => f.event === 'agent:spawned');
+        // (dashboard-board fix) Family frames are DEFAULT-message events with
+        // the type embedded as `tapType` — a browser EventSource's bare
+        // onmessage receives them (named frames are invisible to onmessage,
+        // which is exactly how the board sat silent on its own wire).
+        const agentFrame = frames.find(f => f.data && f.data.includes('"tapType":"agent:spawned"'));
         assert.ok(agentFrame, 'dashboard-family event rides the stream');
         assert.ok(agentFrame.data.includes('dashboard-agent'), 'sanitized payload keeps listed keys');
         assert.ok(!agentFrame.data.includes('SHOULD-NOT-LEAK'), 'unlisted keys NEVER board (sanitation)');
-        assert.ok(!frames.some(f => f.event === 'guest:issued'), 'internal guest:* never boards');
-        assert.ok(frames.some(f => f.event === 'task:queue'), 'task family rides the board');
+        assert.ok(!frames.some(f => f.data && f.data.includes('"tapType":"guest:issued"')), 'internal guest:* never boards');
+        assert.ok(frames.some(f => f.data && f.data.includes('"tapType":"task:queue"')), 'task family rides the board');
 
         // ---- tap 4: mid-stream revocation kills at the next beat ----
         const revAbort = new AbortController();

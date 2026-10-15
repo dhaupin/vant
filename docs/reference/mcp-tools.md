@@ -1254,7 +1254,7 @@ Every published tool (except those documented fully in the sections above) as a 
 | vant_search_hybrid | query, topK |
 | vant_search_hyde | query, topK |
 | vant_search_multiquery | query, topK |
-| vant_search_semantic | query, limit - required: query |
+| vant_search_semantic | query, limit, withProjection - required: query. withProjection (opt-in, boolean) adds a REAL embedding-space 2D projection alongside the hits: `projection.points` where point 0 is the query anchor and `points[i + 1]` pairs BY INDEX with `results[i]` (dims 2, fixed seed 9, deterministic); scoring embeds each corpus doc's first 20000 chars. |
 
 **set**:
 
@@ -1719,6 +1719,37 @@ brain_migration_status()
   "upToDate": false,
   "legacy": true,
   "guidance": "Run `vant migrate` (name it: vant migrate --brain-name <name>; default: vant)."
+}
+```
+
+---
+
+### relay_status
+
+The headless relay posture truth (prd-relay.md v0.2 R0): flavor, caps
+version, enabled/gated/gateReady, the mounted Mode R surface, and the
+liveness counters of this process. The gated hop surface itself lives on
+the REST server (`POST /api/r/exec`); hops MUST be gate-credentialed and
+envelope-encrypted - plain hop bodies do not exist. Read-only.
+
+**Params:** None
+
+**Example:**
+```text
+relay_status()
+```
+
+**Returns:**
+```json
+{
+  "ok": true,
+  "flavor": "headless-pod-relay",
+  "caps": "r/1",
+  "enabled": true,
+  "gated": true,
+  "gateReady": true,
+  "surface": ["POST /api/r/exec"],
+  "stats": { "hopsServed": 12, "gateRefused": 3, "bytesRelayed": 840 }
 }
 ```
 

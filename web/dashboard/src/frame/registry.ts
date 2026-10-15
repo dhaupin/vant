@@ -52,7 +52,7 @@ export const MODULES = [
     route: "/",
     tiers: ["O", "H", "A", "S"],
     section: "observe",
-    families: ["era", "agents", "tasks", "escrow", "market", "forum", "msg"],
+    families: ["era", "agent", "task", "escrow", "market", "forum", "msg"], // door SSE tap ROOTS (see frame/events.ts familyOf)
     icon: Activity,
     load: () => import("../modules/live-board"),
   },
@@ -63,7 +63,7 @@ export const MODULES = [
     route: "/agents",
     tiers: ["O", "H", "A", "S"],
     section: "observe",
-    families: ["agents", "tasks"],
+    families: ["agent", "task"], // door SSE tap ROOTS (see frame/events.ts familyOf)
     icon: Cpu,
     load: () => import("../modules/agents"),
   },

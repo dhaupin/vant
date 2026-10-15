@@ -1,0 +1,27 @@
+/* The solo relay page: dark, sparse, honest. No framework - the relay
+   explains itself in plain text (prd-relay.md 4.0). */
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: #191512;
+  color: #e9d9b4;
+  font: 15px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+  padding: 32px max(24px, calc(50vw - 480px));
+}
+h1 { font-size: 20px; margin: 0 0 4px; color: #e9c576; }
+h2 { font-size: 14px; margin: 28px 0 4px; color: #e9c576; text-transform: uppercase; letter-spacing: 0.08em; }
+p { margin: 8px 0; max-width: 72ch; }
+li { margin: 4px 0; max-width: 72ch; }
+ul { padding-left: 20px; margin: 8px 0; }
+.soft { color: #a89a80; }
+.mono, pre { color: #cbe3c0; }
+pre {
+  background: #211c18; border: 1px solid #382f27; border-radius: 6px;
+  padding: 10px 14px; margin: 8px 0; max-width: 72ch; overflow: auto;
+}
+.btn {
+  margin: 20px 0 40px; padding: 4px 12px; cursor: pointer;
+  background: transparent; color: #e9d9b4;
+  border: 1px solid #4a4036; border-radius: 6px; font: inherit; font-size: 13px;
+}
+.btn:hover { background: #28221d; }

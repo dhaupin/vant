@@ -36,7 +36,13 @@ web/                    <- the frontends ONLY; the Node pod never requires it
     src/                <- app source (React + Vite + TS)
     package.json        <- app-local dependencies and scripts
     dist/               <- build OUTPUT (deploy artifact, gitignored)
-  <next-app>/           <- app 2: whatever the project needs later
+  relay/                <- app 2 (P6, prd-relay.md 4.0): the PURE relay,
+                           hostable SOLO without the full dashboard
+  kit/                  <- the shared-kit SOURCE + vendoring pins (P6;
+                           the cross-frontend ban lifts ONLY here - apps
+                           never read each other's sources, only hash-
+                           pinned vendored kit copies)
+  <next-app>/           <- app 3: whatever the project needs later
 ```
 
 - **Every frontend is self-contained**: own `package.json`, own build
@@ -84,7 +90,8 @@ individually.
 - `/dist/index.html` remains the LANDER artifact checked into the repo
   for the Cloudflare Pages project. The dashboard is a DIFFERENT app
   with its own artifact; `/dist` does not become a dumping ground for
-  frontend builds.
+  frontend builds. The relay (app 2, P6) deploys as its OWN Pages
+  project (relay.creadev.org per the owner subdomain pattern).
 - The lander gains ONE new link "Dashboard" that points at whatever
   deploy URL the dashboard project gets (static link only; no build
   coupling).
@@ -135,12 +142,20 @@ brand-defined kit: the tokens ARE the brand PRD, verbatim.
 
 ## 3. Runtime architecture (how the browser reaches the pod)
 
+> (P6 draft, 2026-10-14) The scope-split direction: the INSTANCE scope
+> (property origins today in `VANT_PROPERTY_*` Pages vars, bound tokens,
+> accounts) moves CLIENT-SIDE, encrypted - hosted dashboard deploys
+> become INTERCHANGEABLE relays in a user-held chain, so one relay going
+> down never severs a pod's reach. The dedicated spec:
+> [prd-relay.md](prd-relay.md) (P6a scope split + Mode R relay proxy +
+> P6b end-to-end channel; phases below unchanged until P6 starts).
+
 ### 3.1 The reach matrix
 
 | Mode | Where the app runs | How it reaches `3457` | CORS | Status |
 |------|--------------------|-----------------------|------|--------|
 | A. Worker proxy (PRIMARY) | Cloudflare Pages (a `web/dashboard` project) | Pages **Worker Functions** proxy `/api/*` to the pod's MCP door over the network | none needed (same-origin) | planned P1 |
-| B. Pod same-origin (FALLBACK) | static bundle served BY the pod | direct `/mcp/*` | none needed (same-origin) | phase P4 |
+| B. Pod same-origin (FALLBACK) | static bundle served BY the pod | direct `/mcp/*` | none needed (same-origin) | SHIPPED P4 (opt-in, OFF by default) |
 | C. Direct cross-origin | dev workstation | direct | REQUIRES the MCP-door CORS grant (not built today) | dev only |
 
 - **Mode A is the recommended primary** for the owner's cloud posture:
@@ -151,6 +166,15 @@ brand-defined kit: the tokens ARE the brand PRD, verbatim.
   cleaner posture than any grant.)
 - The Worker proxy contract (in the Pages project's `functions/`):
   - `GET/POST /api/mcp/exec` -> pod `POST /mcp/exec` (auth header forwarded)
+- **Mode B, shipped (P4)**: `mcp.serveWeb` (`vant config set`) or env
+  `VANT_MCP_SERVE_WEB`, value = a frontend dir whose `dist/` build exists
+  (e.g. `web/dashboard`); the MCP door then serves that bundle at `/` and
+  the browser calls `/mcp/*` directly. Honest defaults: OFF until set; a
+  configured-but-unbuilt dir serves NOTHING with a warning, never a guess;
+  static GETs ride the door's own deny chain (host guard, origin guard,
+  EW4 rate) - not a second, weaker surface; dot-led segments and anything
+  resolving outside the bundle are refused; unknown routes fall back to
+  index.html (the client router owns its 404s). Pins: `test/pod-serve-web.test.js`.
   - `GET  /api/mcp/events` -> pod `GET /mcp/events` (SSE streamed through)
   - `GET  /api/mcp/tools` -> pod `GET /tools`
   - `GET  /api/health` -> pod `/health`
@@ -359,7 +383,7 @@ The shell is NOT a module: nav + property switcher (3.4) + help layer
 | 1 | live-board | `/` | O A S | P1 | SSE family feed (era open/fold/close, agents, tasks, escrow, market, forum, msg), era rollup side panel, filter chips per family; the honest dead-board state when a stream dies (6) |
 | 2 | agents | `/agents` | O A S | P1 | roster cards with tenant filtering; agent detail drawer (capabilities, budgets, last-seen) |
 | 3 | status | `/status` | ALL | P1 | health cards: this frontend's build/page health, each Pages function endpoint, and per property the pod's `/health` + node registration; breaker state chips (3.6) |
-| 4 | settings | `/settings` | ALL | P1 | theme (dark/light/dim system), help-layer toggle, property list (attach/manage notes), sign-out |
+| 4 | settings | `/settings` | ALL | P1 | theme (dark/light/dim system), help-layer toggle, property list (attach/manage notes), sign-out; relay sides live here (prd-relay.md 6.1): the operator's run-a-relay posture card (reads the deploy's capabilities; names the env keys) + the user's reach toggle (through relay hops / direct, persisted pref; honest about what it drives today) |
 | 5 | login | `/login` | pre-auth | P1 | paste-token gate (MVP); becomes the email-OTP flow at P2 (3.5) with resend + cooldown UI |
 | 6 | terms / privacy | `/terms`, `/privacy` | ALL | P1 | static pages + footer links (10; content per 10 legal paragraph) |
 | 7 | work | `/work` | H S | P2 | work console: `work_assign` form (task text, budget, spawn vs reuse by id), live delegation status off the board, explicit refusals as checked states |
@@ -373,7 +397,8 @@ The shell is NOT a module: nav + property switcher (3.4) + help layer
 | 15 | budgets | `/budgets` | S | P3 | workspace/escrow budget views, read-budget knobs display, auth-posture line |
 | 16 | config | `/config` | S | P3 | config + posture views, read-only MVP (the pod CLI owns writes) |
 | 17 | nodes | `/nodes` | O A S | P3 | node registry + mesh status through pod tools; later: mesh discovery feeding property attach (3.4) |
-| 18 | brains | `/brain` | O A S | P3 | corpus browser (brain read/list/search tools); TWO visualizations: the semantic memory map (embedding vectors as a canvas scatter with neighborhood zoom) and the NSC9 view (automation-addressed storage keys per [nsc9-spec](/advanced/nsc9-spec) - deterministic self-authenticating addresses); both read-only |
+| 18 | brains | `/brain` | O A S | P3 | corpus browser (brain read/list/search tools); TWO visualizations: the semantic memory map (NOW consuming the pod's REAL vectors - `vant_search_semantic` withProjection answers a deterministic seeded 2D embedding projection, query-anchored, consumed fail-closed; neighborhood zoom stays on the path) and the NSC9 view (automation-addressed storage keys per [nsc9-spec](/advanced/nsc9-spec) - deterministic self-authenticating addresses); both read-only |
+| 20 | chain | `/chain` | ALL | P6 | the relay chain card (prd-relay.md 3.3): hops + probe verdicts per property, the ACTIVE hop named; settings holds the editor, this route reads it; the e2e/plain badge per hop as the e2e core rung lands (prd-relay.md v0.2 1.1.2) |
 | 19 | era | side panel | O A S | P1 | era list/close with the `next` sentence (the horcrux hand-off) lives as the live-board side panel + an S-tier action, not its own route |
 
 Later-stage additions (not yet routed; recorded so they are not
@@ -457,6 +482,23 @@ sketch, phase P5 (after the platform surfaces are stable):
 - Acceptance: one real task shipped branch -> PR -> merged FROM the
   browser, with the seat (human) approving every write.
 
+### P6 - The relay chain + the sovereign instance scope (spec: prd-relay.md)
+
+- Scope split first (P6a): instance config moves client-side encrypted
+  (WebCrypto; profile export/import), relays become interchangeable
+  (Same bundle + the generic /api/r/* Mode R proxy, now CORE-served:
+  edge functions AND the pod's headless `vant relay` posture, per
+  prd-relay.md v0.2 1.1), the chain fails
+  over with the ACTIVE hop named in the UI. The pairing-time e2e
+  channel is no longer an era after P6a - it is CORE ladder work
+  (ciphertext bodies end to end), closing the "relay saw the body"
+  boundary stated in the spec.
+- Acceptance: two unrelated dashboard hosts reach one install for one
+  user; the primary relay dies mid-session and the client hops
+  (status chip names the hop); relays stay demonstrably
+  content-blind in P6b growth and store NOTHING about non-signin
+  sovereign users from day one (P6a).
+
 ## 6. Security review (frontend-specific)
 
 - **Tenant truth is server-side.** The UI MUST never gate visibility on
@@ -478,10 +520,15 @@ sketch, phase P5 (after the platform surfaces are stable):
 
 - NO backend code in P0. NO new MCP verbs invented for the dashboard
   (that would mean the board needs MORE than the pod gives - file a spec
-  instead). NO build tooling in the pod's package.json. NO shared CROSS-
-  FRONTEND web kit until a SECOND frontend exists (premature abstraction
-  guard) - the in-dashboard module frame (3.3) is explicitly NOT that
-  kit; it is the dashboard's own extension surface.
+  instead). NO build tooling in the pod's package.json. The shared
+  CROSS-FRONTEND web kit ban (2026-10-13) LIFTS for P6 (prd-relay.md
+  4.0): web/relay is the trigger's second frontend, so web/kit/ exists
+  ONLY as the hash-pinned vending source for surfaces that must be
+  byte-identical across relays (the /api/r contract client, chain probe,
+  chain fragments, brand tokens/footer/help primitives); a kit-pin
+  mismatch is a LINT failure, never a runtime "close enough". The
+  in-dashboard module frame (3.3) is still NOT that kit; it is the
+  dashboard's own extension surface.
 - The lander stays the lander (its only change: the Dashboard link).
 
 ## 8. Open questions (owner, when P1 starts) - ANSWERED 2026-10-13

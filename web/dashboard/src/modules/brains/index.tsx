@@ -4,6 +4,7 @@ import { Refusal } from "../../frame/Refusal";
 import { NotConnected, useToolsQuery, toolsByPrefix, ToolCap } from "../../frame/conn";
 import { ToolCall } from "../../frame/ToolCall";
 import { Help } from "../../frame/Tooltip";
+import { mapProjection } from "./projection";
 import { useApp } from "../../state";
 
 /**
@@ -48,7 +49,13 @@ export default function Brains() {
   }
 
   const corpusCaps = [...toolsByPrefix(toolsQ.data, "brain_"), ...toolsByPrefix(toolsQ.data, "corpus_")];
-  const searchCaps = toolsByPrefix(toolsQ.data, "brain_search");
+  // (P4) The search tab detects REAL search tools by name - the door's
+  // semantic searcher is `vant_search_semantic`, and a `brain_search`
+  // prefix alone would have missed it. A semantic-named tool is preferred
+  // because it can answer the REAL embedding projection (withProjection).
+  const searchCaps = (toolsQ.data?.tools ?? []).filter(
+    (t) => typeof t.name === "string" && /search/i.test(t.name),
+  );
   // Addressing side: geometry/memory-store/addressing metadata tools the
   // door actually registers (nsc9-spec, docs/advanced/nsc9-spec.md).
   const idCaps: ToolCap[] = (toolsQ.data?.tools ?? []).filter(
@@ -203,23 +210,30 @@ function Corpus({ caps }: { caps: ToolCap[] }) {
 }
 
 function Search({ caps }: { caps: ToolCap[] }) {
-  const searchTool = caps[0];
+  // prefer the semantic searcher: it can answer the REAL embedding
+  // projection (withProjection) on top of the hits
+  const searchTool = caps.find((c) => /semantic/i.test(c.name)) ?? caps[0];
   const [query, setQuery] = useState("");
   const [type, setType] = useState<"idle" | "loading" | "ok" | "refused">("idle");
   const [rows, setRows] = useState<Row[]>([]);
+  const [proj, setProj] = useState<unknown>(null);
   const [msg, setMsg] = useState("");
 
   const run = async () => {
     if (!searchTool || !searchTool.name || !query.trim()) return;
     setType("loading");
     try {
-      const result = await exec(searchTool.name, { query: query.trim() });
+      const args: Record<string, unknown> = { query: query.trim() };
+      if (/semantic/i.test(searchTool.name)) args.withProjection = true;
+      const result = await exec(searchTool.name, args);
       const parsed = parseResults(result);
       setRows(parsed.rows);
+      setProj((result as { projection?: unknown } | null)?.projection ?? null);
       setMsg(parsed.rows.length === 0 ? "The search returned an empty set for that query - shown as received." : "");
       setType("ok");
     } catch (err) {
       setRows([]);
+      setProj(null);
       setMsg(err instanceof ApiError ? err.message : String(err));
       setType("refused");
     }
@@ -252,13 +266,16 @@ function Search({ caps }: { caps: ToolCap[] }) {
         <p className="mt-3 rounded border border-err/40 bg-err/5 p-3 text-xs text-err">{msg}</p>
       ) : null}
       {type === "ok" && msg ? <p className="mt-3 text-sm text-ink-soft">{msg}</p> : null}
-      {type === "ok" && rows.length > 0 ? <MapAndList rows={rows} /> : null}
+      {type === "ok" && rows.length > 0 ? <MapAndList rows={rows} projection={proj} /> : null}
     </div>
   );
 }
 
-/** x = rank order (left = best match); y = score the pod returned. */
-function MapAndList({ rows }: { rows: Row[] }) {
+// The REAL embedding-space scatter when the pod's projection contract
+// checks out (mapProjection is fail-closed); otherwise the honest
+// rank-vs-score fallback, identical to before P4 vector plumbing.
+function MapAndList({ rows, projection }: { rows: Row[]; projection: unknown }) {
+  const mapped = mapProjection(projection, rows.map((r) => r.key));
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -269,31 +286,73 @@ function MapAndList({ rows }: { rows: Row[] }) {
     const W = canvas.width;
     const H = canvas.height;
     ctx.clearRect(0, 0, W, H);
-    const n = rows.length;
-    for (let i = 0; i < n; i++) {
-      const row = rows[i];
-      const x = 24 + ((i + 1) / (n + 1)) * (W - 48);
-      // unscored results sit in the middle band and say so in the legend
-      const sc = typeof row.score === "number" ? row.score : 0.5;
-      const y = 12 + (1 - Math.max(0, Math.min(1, sc))) * (H - 24);
-      ctx.beginPath();
-      ctx.arc(x, y, 4, 0, Math.PI * 2);
-      ctx.fillStyle = nscLike(row.key) ? "#a9701e" : "#6d6152";
-      ctx.fill();
+    if (mapped) {
+      // REAL projection: x/y ARE the pod's embedding coordinates (JL
+      // projection, seed 9), scaled to the plot box. The ring is the
+      // query anchor; thin spokes connect anchor -> hit to show geometry.
+      const box = Math.min(W, H) / 2 - 20;
+      const cx = W / 2;
+      const cy = H / 2;
+      const px = (v: number) => cx + Math.max(-1, Math.min(1, v)) * box;
+      const py = (v: number) => cy - Math.max(-1, Math.min(1, v)) * box;
+      if (mapped.anchor) {
+        for (const pt of mapped.pts) {
+          ctx.strokeStyle = "rgba(109, 97, 82, 0.25)";
+          ctx.beginPath();
+          ctx.moveTo(px(mapped.anchor.x), py(mapped.anchor.y));
+          ctx.lineTo(px(pt.x), py(pt.y));
+          ctx.stroke();
+        }
+        ctx.beginPath();
+        ctx.arc(px(mapped.anchor.x), py(mapped.anchor.y), 5, 0, Math.PI * 2);
+        ctx.strokeStyle = "#3f6fb5";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.lineWidth = 1;
+      }
+      for (const pt of mapped.pts) {
+        ctx.beginPath();
+        ctx.arc(px(pt.x), py(pt.y), 4, 0, Math.PI * 2);
+        ctx.fillStyle = pt.amber ? "#a9701e" : "#6d6152";
+        ctx.fill();
+      }
+      ctx.font = "10px monospace";
+      ctx.fillStyle = "#6d6152";
+      ctx.fillText("real embedding projection (seeded JL, per pod contract)", 24, 10);
+    } else {
+      const n = rows.length;
+      for (let i = 0; i < n; i++) {
+        const row = rows[i];
+        const x = 24 + ((i + 1) / (n + 1)) * (W - 48);
+        // unscored results sit in the middle band and say so in the legend
+        const sc = typeof row.score === "number" ? row.score : 0.5;
+        const y = 12 + (1 - Math.max(0, Math.min(1, sc))) * (H - 24);
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = nscLike(row.key) ? "#a9701e" : "#6d6152";
+        ctx.fill();
+      }
+      ctx.font = "10px monospace";
+      ctx.fillStyle = "#6d6152";
+      ctx.fillText("rank ->  (door's real ordering)", 24, H - 2);
+      ctx.fillText("score (^, real per result)", 24, 10);
     }
-    ctx.font = "10px monospace";
-    ctx.fillStyle = "#6d6152";
-    ctx.fillText("rank ->  (door's real ordering)", 24, H - 2);
-    ctx.fillText("score (^, real per result)", 24, 10);
-  }, [rows]);
+  }, [rows, mapped]);
 
   const anyNsc = rows.some((r) => nscLike(r.key));
   return (
     <div>
       <Help
-        text="Every dot is a REAL search result: x is its rank in the door's ordering, y is the score the pod returned for it. The catalog's full semantic map (plotting real embedding vectors) lands when the pod exposes vector data - this view will not pretend to be that."
+        text={mapped
+          ? "Every dot IS a real embedding: the pod projected its own vectors to 2D (deterministic seeded projection, seed 9) with the query as the ringed anchor. Nearby dots are near each other in embedding space; spokes show query-to-hit geometry. The list below is the pod's ranking of the same results."
+          : "Every dot is a REAL search result: x is its rank in the door's ordering, y is the score the pod returned for it. This pod did not answer the vector projection for that call (or it failed contract checks) - the map shows the honest rank view instead of pretending."
+        }
       >
-        <p className="text-xs text-ink-soft">rank vs score - real door data, not an embedding projection</p>
+        <p className="text-xs text-ink-soft">
+          {mapped
+            ? "embedding-space map - REAL pod vectors, deterministic projection"
+            : "rank vs score - real door data, no vector projection answered"}
+        </p>
       </Help>
       <canvas ref={canvasRef} width={640} height={220} className="mt-2 w-full max-w-2xl rounded-lg border border-line bg-surface" />
       <p className="mt-1 text-[11px] text-ink-soft">

@@ -1,14 +1,28 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** 2026-10-13  
-**Session:** Pass 215 — #185 CLOSED: per-guest read-verb enumeration
-throttle (last runway item) passed; docs freshness sweep requested by the
-owner came back clean
+**Last Updated:** axolotl relay arc, passes 216-237  
+**Session:** Pass 237 — THE INTERFACE HANDLER: the bridge families land
+(relay.sync ingest, relay.lost beacon, relay.call api bridge) - typed
+families translate onto the DOOR's existing verbs; the relay spends the
+gate + the delegated pod access server-side so webapps hand INTENT,
+never credentials. Solo stays minimal (hop only). PRD §3.3 doctrinal.
 
 ---
 
-## Session (2026-10-13 — prd-web: the frontend PRD, spec-only)
+## THE LEDGER RULE (owner ruling, recorded so it STAYS)
+
+**Passes and pins ONLY.** The frontend arc briefly used a "build day N"
+ledger; it is retired: a day is not a house rule, it does not obey time
+dilation nor epoch, and there is no room for fantasy in vant
+dev/engineering cycles - even at the frontend. Every entry below is a
+PASS in the house ledger (pass 216 = the P1 scaffold, ascending
+chronologically to pass 230); the in-history dates are ambient calendar
+scratch, not the unit of work. New entries open as `Pass <n>`.
+
+---
+
+## Passes 216-230 (2026-10-13..14 — the frontend arc: prd-web, relay, parity)
 
 **Owner: "Let's do it. We should make a /labs prd for this... let's craft
 prd, don't build code yet."**
@@ -79,7 +93,7 @@ prd, don't build code yet."**
   requirements (PRD 3.3 resp. 8 + section 10). Owner greenlight: update
   PRD, push, START BUILDING (P1 scaffold).
 
-**Session 2026-10-14 (build day 2):** PRD fidelity kept, P1 grows real:
+**Pass 216 (frontend, 2026-10-14):** PRD fidelity kept, P1 grows real:
 - brain kept current: models/private/axolotl/lessons.md pass block; the
   boot horcrux REFRESHED via `vant horcrux refresh` + verified by
   `horcrux inspect` (valid, 279 brains embedded) - the svg is tracked
@@ -104,7 +118,7 @@ prd, don't build code yet."**
 - verified: tsc clean (src + functions), vite build clean (per-module
   chunks incl. board), style+links gates, ci.js battery.
 
-**Session 2026-10-14 (build day 3 - the honesty directive):** owner
+**Pass 217 (frontend, 2026-10-14) - the honesty directive:** owner
 ruling recorded: NO fake data ANYWHERE - if it is not connected, SAY
 that; no filler lists, no invented shapes. Consequences shipped:
 - frame/conn.tsx: the shared NotConnected primitive (one plain
@@ -123,7 +137,7 @@ that; no filler lists, no invented shapes. Consequences shipped:
 - verified: tsc clean, vite build clean (work/chat/forum/market in
   their own chunks), style+links gates PASS, ci.js 496/0.
 
-**Session 2026-10-14 (build day 4 - Tier S set + Count's Pages runbook):**
+**Pass 218 (frontend, 2026-10-14) - Tier S set + Count's Pages runbook:**
 - DEPLOY.md section 12 rewritten as an actionable walkthrough: Pages
   project config table (root web/dashboard, build npm run build ->
   dist, functions auto-deploy with the project), the REQUIRED vars
@@ -147,7 +161,7 @@ that; no filler lists, no invented shapes. Consequences shipped:
   ci.js 496/0; boot horcrux re-refreshed post-suite + inspected before
   push (the every-suite drift pattern made explicit).
 
-**Session 2026-10-14 (build day 5 - multi-install behavior + brains module):**
+**Pass 219 (frontend, 2026-10-14) - multi-install behavior + brains module:**
 the owner's questions drove this round: what is a pod vs node vs mesh,
 and "only one pod in Pages vars defeats the multi-pod runner?" -
 answered in the tree, not just in prose:
@@ -180,7 +194,7 @@ answered in the tree, not just in prose:
 - verified: tsc exit 0, vite build exit 0, docs style/truthfulness/
   links PASS, ci.js 496 passed / 0 failed.
 
-**Session 2026-10-14 (build day 6 - P2 email-OTP accounts, honest to the seams):**
+**Pass 220 (frontend, 2026-10-14) - P2 email-OTP accounts, honest to the seams:**
 the owner queued P2 explicitly; the PRD's build-time decisions are now
 REAL, not deferred:
 - Account store SHIPPED on KV (binding `BOLETE_KV`, zero code strings;
@@ -217,7 +231,7 @@ REAL, not deferred:
   PASS, ci.js full suite PASS (boot horcrux re-refreshed + inspected
   before push, the drift pattern applied).
 
-**Session 2026-10-14 (build day 7 - audit/observability + nodes, while
+**Pass 221 (frontend, 2026-10-14) - audit/observability + nodes, while
 Pages setup waits):** owner confirmed CF Pages isn't set up yet; kept
 building what builds without it:
 - The app's OWN audit ledger landed (prd-web.md 10's function-side
@@ -248,7 +262,7 @@ building what builds without it:
   build exit 0, docs gates PASS, ci.js full suite (boot horcrux
   re-refresh + inspect before push, drift pattern applied).
 
-**Session 2026-10-14 (build day 8 - users admin module, the last
+**Pass 222 (frontend, 2026-10-14) - users admin module, the last
 builds-without-pages P3 row):** owner said LFG; the users module (#13)
 went from the honest placeholder to the REAL admin surface:
 - accounts lib grew the admin ops: listAccounts (roster newest-first,
@@ -279,12 +293,707 @@ went from the honest placeholder to the REAL admin surface:
   tsc exit 0, vite build exit 0; docs gates + ci.js after the final
   doc edits; horcrux inspect before push (drift pattern).
 
-**NEXT-UP:** everything left on the catalog needs the LIVE Pages
-deploy: the walkthrough (DEPLOY.md 12.1) unlocks P2/P3 verification
-against a real door (live-token pass for work/chat/forum/market,
-OTP emails end-to-end, audit inbox populating). Real embedding-vector
-plumbing still waits for a pod that exposes vectors (the map upgrades
-by name, honestly).
+**Pass 223 (frontend, 2026-10-14) - P4 Mode B: the pod's same-origin
+serve, the next buildable-without-Pages phase row):** the owner queued
+"remaining limitations then next for prd-web.md". All 17 catalog rows
+through P3 were already in the tree (registration closes 16 modules +
+the two frame-routed legal pages); the next phase row that does NOT
+need a deploy is P4's Mode B pod same-origin (prd-web.md 3.1):
+- `mcp.serveWeb` (config/env `VANT_MCP_SERVE_WEB`, registry row so
+  `vant config get|set` work; lib/config.js `mcpServeWeb()`): value = a
+  frontend DIR whose `dist/` build exists (web/dashboard). The MCP door
+  (lib/mcp.js start) then serves that bundle at `/` - the browser calls
+  `/mcp/*` DIRECTLY, same origin, zero CORS, zero Worker hop. OFF until
+  set; a configured-but-unbuilt dir serves NOTHING with a loud warning
+  (never a guess), pins included.
+- Static GETs ride the door's OWN deny chain that already ran (Host
+  DNS-rebinding guard, cross-origin origin guard, EW4 per-client rate
+  budget): serving is not a second, weaker surface. Auth posture on
+  /mcp/exec unchanged (requireKey + guest tokens exactly as Mode A).
+- Path discipline: GET/HEAD only; dot-led segments (.env/.git) refuse
+  403; anything resolving outside the bundle refuses 403;
+  encodeURIComponent'd vectors on the raw wire are caught (the WHATWG
+  URL parser defuses the naive /../ and %2e segments before the guard -
+  the pins pin the CONTENT property there, not a status);
+  unknown client routes fall back to index.html (the dashboard router
+  owns its 404s); index.html no-store, /assets/* 1h, unknown types
+  octet-stream. Every owned door route (/mcp/exec, /mcp/events, /mcp/
+  tools, /health, /tools) answers BEFORE the serve - nothing moved.
+- Pins: NEW test/pod-serve-web.test.js (19 tests, runs live against the
+  real door like the EW1 pins; RAW-socket client for traversal vectors
+  because undici fetch normalizes dot-segments client-side): config
+  accessor default null + env override, shell/asset MIME-cache headers,
+  SPA fallback, three traversal vectors guard (content-never-leaks),
+  dotfile 403, HEAD, health/tools/404-JSON posture UNCHANGED while
+  serving, inactive default (GET / is still the honest 404 JSON),
+  missing-dist honesty.
+- Docs: prd-web.md 3.1 matrix row B now SHIPPED P4 (opt-in OFF-by-
+  default) + the Mode B mechanics paragraph; DEPLOY.md 12.2 = the Mode
+  B walkthrough (original 12.2 contract section renumbered 12.3).
+
+**Pass 224 (frontend, 2026-10-14) - P4 vector plumbing: the brains map
+consumes REAL pod embeddings; found that the entire semantic-search
+layer had been dead-on-arrival):** owner: "keep going... Mastercraft
+lesson". The tracker's non-deploy-dependent NEXT-UP row was "real
+embedding-vector plumbing waits for a pod that exposes vectors". The
+build made the pod EXPOSE them - and caught a right haul of
+never-yet-attached surfaces on the way:
+
+- **Pod repair #1 - vant_search_semantic NEVER answered results**:
+  the handler sliced the RESULT OBJECT as an array (`results.slice` on
+  `{results, memories, context}`), so every call for the tool's whole
+  life answered a typed error - the same handler-shape class as the
+  pass-214 msg_send bug. No suite had ever run it live. Fixed: the
+  handler slices the hit array; schema grew opt-in `withProjection`.
+- **Pod repair #2 - the RAG scorer fed FULL corpus docs through the
+  input pipeline** (a >100k brain file (CHANGELOG-class docs) tripped
+  the vaf length cap; after a documented per-doc embed window cap
+  (RAG_SEMANTIC_EMBED_CAP 20000) the path pattern scan still tripped on
+  doc PROSE ('/tmp/' refs, '../' mentions, percent-encode examples) -
+  genuinely dead even repaired). The narrow internal seam: vaf option
+  `blobContent` (length gate ONLY for owner-owned doc content; the
+  caller-input path and every MCP schema keep ALL scans; the flag rides
+  ctx.options, callers can never set it), pipeline case 'vaf' passes
+  ctx.options.blobContent through, search.semantic marks its corpus
+  embedding calls; the QUERY stays fully scan-gated. Precedent line:
+  the repo's own `allowContent` memory-content flag.
+- **Pod side NEW - lib/embed.project2d**: deterministic seeded
+  Johnson-Lindenstrauss random projection of 384-dim embeddings to the
+  plane (mulberry32 + Box-Muller, FIXED seed 9 - the NSC9 homology),
+  point scale bounded; typed guards (empty/ragged/non-numeric/NaN all
+  E_EMBED_PROJECTION); zero deps per the pod rule.
+- **the contract**: `vant_search_semantic` now answers `projection` on
+  the opt-in (dims 2, seed 9, `points` with point 0 = QUERY anchor and
+  `points[i + 1]` = by index `results[i]`, provider label, embeddedDim
+  honored): the SAME vectors the scoring just computed (retained by
+  identity at the scoring loop, so hits join their vectors without
+  re-embedding; payload bounded by limit, never corpus size). A loading
+  failure degrades to an honest null projection (event emitted) without
+  killing the search.
+- **Dashboards side - the Brains map consumes it fail-closed BY
+  CONTRACT**: NEW src/modules/brains/projection.ts (pure, unit-pinned):
+  mapProjection validates dims/anchor/offsets/lengths/finiteness and
+  maps rows by index; ANY mismatch = null = the rank view, honestly
+  labeled (never a half-guessed plot). The Search tab now detects REAL
+  search tools BY NAME (the door's semantic tool is vant_search_semantic
+  - the old brain_search prefix detection missed the whole surface) and
+  preferentially calls the semantic tool with withProjection:true; the
+  map draws the REAL scatter (ring = query anchor, spokes to hits, amber
+  = NSC9 keys) when the contract checks out and keeps the old rank view
+  verbatim otherwise. Web slash growing pains: vitest 32/32 (26 + 6
+  NEW), tsc 0, vite build 0.
+- Pins: test/embed-projection.test.js (9, LIVE against the real door
+  like the EW1 pins): project2d determinism + seed load-bearing + shape
+  contract + typed guards; semanticSearch withProjection index-join +
+  null-projection honesty; DOOR truth: vant_search_semantic answers
+  REAL hits (the repair), projection rides /mcp/exec, and the schema
+  gate refuses a string withProjection typed.
+- Docs truth: mcp-tools.md vant_search_semantic row (full contract
+  incl. the 20000-char cap), rag.md "Semantic Search + the Vector Map"
+  (both seams stated plainly), prd-web.md 4 #18 row - the semantic map
+  now consumes the pod's REAL vectors.
+
+**Pass 225 (frontend, 2026-10-14) - pre-deploy honesty sweep: the
+board's own wire sat silent, plus two whole tool surfaces looked
+"empty" against a door that had them):** owner: "dashboard full build
+run tonight" — a live-door walkthrough depends on the board, so the
+audit trail of "what would look broken tonight" landed first:
+
+- **THE LIVE BOARD WOULD HAVE SHOWN NOTHING, FOREVER**: the door's
+  /mcp/events tap frames family events as NAMED SSE events
+  (`event: agent:spawned`), and a browser EventSource's bare onmessage
+  NEVER receives named events — the board would have hung on
+  "Connected, no events yet" against a perfectly live stream. Door
+  contract fix: family frames are now DEFAULT-message events with the
+  full type embedded as `tapType` (single frame, no duplicate bytes;
+  the named `tap.revoked` annihilation note keeps its own contract and
+  the frontend closes on it). tap.test.js pins updated to assert the
+  new contract strictly (tapType-prefixed data), 1/0.
+- **the fan finally lands on door roots**: frame/events.ts familyOf()
+  maps `tapType` root ('agent' from 'agent:spawned'); registry.ts
+  families are the door's ROOT vocabulary now (era/agent/task/escrow/
+  market/forum/msg — the old 'agents'/'tasks' plurals never matched
+  anything the tap sends).
+- **tool detection repairs (the brains pass-224 class again):**
+  - nodes/#17: matched `nodes_list` + `agora_nodes` (the old node_/
+    mesh_/registry_ prefixes matched NEITHER — "no tools" against a
+    door that had them);
+  - audit/#11: matched `vant_audit_list`/`vant_audit_log` (old
+    audit_/ledger_ prefixes missed the vant_-prefixed pair).
+- **docs claim freshness**: docs/operations/events.md gains "The MCP
+  tap stream" with the wire contract verbatim (default frames,
+  tapType + root keying, the tap.revoked named exception, the
+  internal-family exclusion).
+- verified at delivery: tap 1/0, web vitest 32/0, tsc 0, vite build 0;
+  full repo gate + docs stack + horcrux cadence at the envelope below.
+
+**Pass 226 (frontend, 2026-10-14) - PLANNING round, owner-vision
+landing: the relay chain + the sovereign instance scope, the dashboard
+becomes an OSS relay layer):** the owner saw the deployment shift
+"this dashboard is bigger than you and I - an oss means to make
+relays": ANY self-hosted instance can be an orchestrator to anyone's
+install; if brain.creadev.org goes down, someone else's relay still
+reaches the pod. Recorded as spec + parent-PRD amendments, NO code:
+- NEW labs/prd-relay.md v0.1 (the dedicated spec):
+  - scope split: the INSTANCE scope (property origins from the old
+    env registry, bound tokens, session/account layers) moves CLIENT-
+    SIDE encrypted (WebCrypto AES-GCM, non-extractable keys, two
+    documented unlock paths: passphrase KEK / passkey-PRF KEK;
+    profile exports as one encrypted file - the horcrux pattern at
+    web scale). The relay's ONLY pin is an ONBOARDING template the
+    client imports once - never a standing claim.
+  - the relay chain (like mesh on the backend, a service layer on
+    the frontend): ordered hops ending in Mode B direct as the
+    dead-last fallback; degradation is named BY HOP in the UI,
+    never silent; status/#3 grows the chain card (P6 adds route
+    #20 /chain to the catalog).
+  - Mode R, the relay proxy contract: the /api/r/* surface takes a
+    CLIENT-declared upstream origin (https-only, public-DNS,
+    SSRF-typed refusals for private ranges) + SSE stream-through;
+    mode B posture edges (rate budget/breaker) per relay per hop;
+    the pod's door is UNTOUCHED (that has been true since the host
+    posture table - Mode R is frontend-only).
+  - the honesty boundary, stated and never conflated: MVP relays
+    are transport-aware and CONTENT-SEEING ("use relays you trust,
+    or wait for P6b"); P6b = end-to-end channel negotiated at
+    PAIRING TIME (the voucher/QR path becomes the key-binding
+    moment) so relays route ciphertext, cannot replay or downgrade;
+    caps/edges pin the per-hop posture, chains are hand-curated
+    until mesh discovery is later opted into.
+  - modules under the split: settings grows the profile/chain
+    editor + export/import; users/#13 + email-OTP stay the RELAY
+    OPERATOR'S own surface (never sovereign scope); pairing grows
+    the P6b key-binding step; work/chat/forum/etc. unchanged (only
+    the hop moves under them).
+  - migration: brain.creadev.org keeps Mode A onboarding AND
+    imports into the client-held profile on first load (AuthGate
+    seam owns first paint); DEPLOY.md gets a "host a relay"
+    appendix at P6 build time.
+- labs/prd-web.md amended: the scope-split direction block at §3,
+  a P6 phase row, and catalog row #20 (/chain) added; phases P0-P5
+  unchanged - P6 starts when the owner says.
+- deliverable posture: PLANNING ONLY this round (spec + PRD +
+  tracker); gates re-run green, no code touched, horcrux cadence
+  observed.
+
+**Pass 227 (frontend, 2026-10-14) - STRUCTURE ruling for P6: the relay
+runs SOLO; the second-frontend trigger fires; the kit ban lifts as
+hash-pinned vendoring):** the owner asked the structural question
+directly ("split the relay out in /web so it can run solo, outside of a
+full dashboard? whereas full dashboard can still enable and run it?").
+The ruling, written into the spec (prd-relay.md 4.0): YES -
+- web/relay = a standalone PURE relay app under the directory
+  contract (own package.json/build/dist/functions, own subdomain
+  relay.creadev.org): one posture page + the /api/r/* Mode R
+  functions + a capabilities endpoint advertising the SOLO flavor
+  (pins NO default profile - nothing to pin) with zero auth/account/
+  admin surfaces BY CONSTRUCTION. "A different app whose honest sum
+  is one page and four functions" - a host can serve the chain
+  WITHOUT running a full dashboard, and holds nobody's instance
+  config because the app has nowhere to put it.
+- web/dashboard keeps "participate as a relay" as a POSTURE toggle
+  (settings, off = exactly today's Mode A deploy): enabled = its own
+  functions serve /api/r/* too (DASHBOARD-relay flavor; a pinned
+  default profile allowed there).
+- the kit: prd-web's cross-frontend ban was ALWAYS phrased as "until
+  a SECOND frontend exists" - this is that second frontend, so
+  web/kit/ exists as the vending SOURCE for the byte-identical-across-
+  relays surfaces only (/api/r contract client, chain probe, chain
+  fragment build/parse, brand tokens/footer/help primitives); a
+  vendoring script copies kit files into each app under src/kit/
+  with .sha256 pin sidecars (the repo's own checksum cadence), and
+  the lint gate FAILS on pin mismatch. Apps stay self-contained:
+  they never read each other's sources, ever - only the vendored,
+  hash-pinned copies.
+- build ladder inside P6a: R0 kit extraction + vendoring gate; R1
+  web/relay standalone verified alone; R2 dashboard participation
+  toggle + chain editor + chain card; P6b (E2E channel) unchanged,
+  later.
+- prd-web.md amendments: directory model gains web/relay + web/kit
+  (vendored-pins note), the non-goals guard records its OWN lift
+  (citing the trigger), and 2.5 notes the relay.creadev.org deploy.
+- deliverable posture: PLANNING (spec amendments only, no code).
+
+**Pass 228 (frontend, 2026-10-14) - CORE-PRINCIPLE ruling for the
+relay: real, not proto; headless-first; it keeps the network alive):**
+the owner elevated the mechanism itself ("we should make that real,
+not like a proto/mvp. Like the relay mechanism powers the pod
+connections, and possibly other encrypted tx. It should be a core
+principle between vant and a front end... Or no front end. It's
+another masterclass in using the vant headless... And it happens to
+keep the network alive."). Recorded as prd-relay.md v0.2 (spec only,
+no code):
+- NEW prd-relay.md §1.1: the relay is a CONNECTION LAYER of vant, not
+  an app. Mode R is now served BOTH by the Pages edge functions AND a
+  headless serving posture (`vant relay`, the sibling of `vant
+  headless`: one boot, the /api/r/* shapes, a capabilities line, zero
+  UI mandated). Consumers generalized: browser dashboard, pod CLI,
+  MCP agent, pod-to-pod; the browser is ONE renderer and "no front
+  end" is supported posture (a chain is a config, not a page).
+- E2E IS THE CORE (not the distant P6b era): §5's MVP content-seeing
+  relay is an INTERIM migration posture with a named sunset; bodies
+  cross hops as ciphertext by default and other encrypted tx (msg
+  payloads, escrow movements relayed verbatim) ride the same blind
+  hop; new chain entries keep the e2e/plain verified-capacity badge
+  so the sunset is mechanical, not aspirational.
+- the relay keeps the network alive: chain hops double as mesh
+  liveness (prd-mesh.md substrate) - the client's chain probe is also
+  the liveness feed the node registry and mesh status read; a healthy
+  chain IS a healthy mesh edge seen from the client side.
+- §8's old "Mode R is purely frontend / NO pod code changes" non-goal
+  was RETIRED; the one invariant it truly protected is kept verbatim
+  (no door-auth-posture changes; the pod stays loopback/private and
+  the relay layer requires no new exposure). R0 grows to COMMIT THE
+  HEADLESS CORE CONTRACT first (Mode R shapes + capabilities
+  semantics + the `vant relay` posture), the contract the solo relay
+  app and the dashboard toggle then render.
+- deliverable posture: SPEC ONLY (prd-relay.md v0.2 + tracker); no
+  code this round; gates re-run after the last edit.
+
+**Pass 229 (frontend, 2026-10-14) - R0 LANDED: the headless relay core,
+"it works, but gated"):** the owner said build it - the relay is a
+pipeline for future agent processes too, encrypted pipes connecting
+installs and/or each other, GATED so not just anyone flows; the
+dashboard uses the pipes and auths the gates. Landed as real code:
+- lib/relay.js (NEW): the headless Mode R core - `POST /api/r/exec`
+  (GATED) + `GET /api/r/capabilities` (public posture proof, no
+  secrets). Gate ladder fail-closed at every rung: relay off = typed
+  503 E_RELAY_OFFLINE before any work; enabled without a gate key =
+  503 E_RELAY_GATE_REQUIRED (serves NOTHING); missing header = 401;
+  wrong key = 403 (timing-safe sha256 digest compare - length never
+  taken from the wire); the credential is spent at the gate only, it
+  never rides upstream.
+- ENCRYPTED PIPES ONLY: hop bodies must be lib/encrypt's AES-256-GCM
+  envelope (salt:iv:tag:cipher); the relay verifies SHAPE and forwards
+  byte-verbatim, holds no channel keys, cannot read content; plaintext
+  bodies refuse typed 415 E_RELAY_NEEDS_ENVELOPE (no downgrade - v0.2
+  1.1.2 as code). SSRF guard: origins are explicit client-declared,
+  https-only in the public posture, DNS resolves ALL records fail-
+  closed; cloud-metadata (169.254/16) + 0.0.0.0 are HARD-private and
+  refuse EVEN under the documented relay.allowPrivateOrigins lab
+  escape (which opens loopback lab targets, never the metadata hole).
+- liveness: every served/refused hop emits relay:hop:served / refused
+  (origin + bytes + ms ONLY, never content) - the mesh-registry feed
+  the R-ladder promised; counters ride relay.status().
+- client seam: relay.sendThrough REQUIRES the e2e channel key
+  (E_RELAY_NO_KEY typed refusal otherwise - no plaintext hops, ever);
+  assembled envelope rides origin+path exactly (forward joins the
+  declared pair, one pin caught the first draft dropping path).
+- mounting: lib/server.js listen() mounts the posture when
+  relay.enabled - SAME server, SAME security chain (vaf, qos, TLS,
+  auth posture), no new port, no new exposure.
+- doors: `vant relay status|gate` CLI (gate generates + persists the
+  256-bit key through config.setConfig, shown once), MCP
+  `relay_status` (read-only posture truth) - 328->329 tools, docs row
+  landed same turn.
+- docs: docs/operations/relay.md (the whole posture: five gates, the
+  encrypted-pipe walkthrough, bring-up, honest replay-posture note),
+  config.md relay.* rows (brain-config keys, NOT env vars), cli.md
+  row (coverage 132->133 PASS).
+- pins: test/relay.test.js 26/26 - gate ladder, hard-private
+  invariant, envelope-only, byte-verbatim forward, holder-only
+  decryption, NO-PLAINTEXT-LEAK truth (the upstream frame carries only
+  { ct }), caps honesty without secrets, status/liveness truth.
+- adjacent repairs by the gates: surface-consistency caught the
+  pre-existing `vant headless` inline-dispatcher gap (pass 210's
+  inline route never joined the hand-verified INLINE_HANDLERS
+  inventory) - registry repaired, claims resolve; mcp suite re-run
+  after roster debris (10 leaked ag-test agents from an earlier
+  crashed pin run) hit the honest max-10 quota gate - debris purged
+  (backup /tmp), suite 17/17 again.
+- deliverable posture: CODE LANDS (lib/relay.js, lib/server.js seam,
+  bin/relay.js, MCP tool, tests, docs); gates green: cli 128+5=133,
+  mcp 329=329, surface-consistency PASS, docs-truthfulness PASS, style
+  PASS (126), frontmatter/language/fiction PASS.
+
+**Pass 230 (frontend, 2026-10-14) - KIT PARITY + the dashboard
+piggyback: "baseline works with parity between relay and full
+dashboard; a setting to run a relay; the important relay services
+WORK"):** the owner ruled the next relay rung. Landed as code:
+- web/kit/relay/relay-contract.js (+ .d.ts twin): THE UPLIFT SOURCE of
+  one Mode R contract - routes, gate header, typed codes AND their
+  statuses (parity law: same situation = same code+status on every
+  renderer), the envelope rule, the three-flavor registry (pod /
+  dashboard / solo - solo pins NO default profile), honest capsShape,
+  pure IP guard, hard-private split metadata rule. Runtime-agnostic
+  BY CONTRACT (no Node/Workers APIs in the source).
+- vendoring: scripts/vendor-relay-kit.js copies the kit byte-
+  identically into each renderer with .sha256 pin sidecars; --check
+  mode verifies pins for CI; tests FAIL on pin-vs-kit-head drift (the
+  horcrux checksum cadence). Dashboard vendored: functions/lib/
+  relay-contract.{js,d.ts} + sidecars, BOTH pins verify.
+- PARITY NOT IMPORT: the pod's one-way boundary (pod never requires
+  web/) is kept physical - lib/relay.js holds its own plain-copy
+  constants, and the parity pins deep-compare pod-vs-kit (routes,
+  caps/header, CODES, STATUS, envelope rule, body cap, timeout,
+  flavors, shape verdicts on real freight).
+- dashboard-relay flavor lands (R2-lite piggyback):
+  functions/api/r/exec.ts + capabilities.ts import the VENDORED kit
+  (no hand-strung env literals, no private regex copies - the kit is
+  the single law); env posture keys VANT_RELAY_ENABLED /
+  VANT_RELAY_GATE_KEY read at REQUEST time through EDGE_ENV_KEYS;
+  the five gates mirror the pod (most-off = 404 like an unmounted
+  route; no-key = fail-closed 503; missing header 401; wrong key 403
+  via WebCrypto digest compare with a constant-time buffer walk; edge
+  holds NO channel keys); envelope-only pipes; forward via fetch,
+  verbatim, gate never rides upstream, ms truth measured.
+- settings (#4) gains the "Run a relay (piggyback)" card: reads the
+  deploy's public /api/r/capabilities and states the truth
+  (flavor/gated/gate-ready/e2ePOSTURE); names the operator env keys;
+  NEVER pretends the browser can flip the posture (the pass-217
+  honesty law) - the toggle is the deploy.
+- the important relay services WORK - full-socket pins joined the
+  suite (relay.test.js 26->31): boot the pod server with the posture
+  ON and the mount seam must fire INSIDE listen(); capabilities over
+  real HTTP; the WHOLE client hop (sendThrough -> gate -> envelope ->
+  verbatim forward -> holder opens) across REAL sockets; wrong gate
+  over the socket = 403 no-flow.
+- DEPLOY.md carries the two piggyback env rows (Pages settings,
+  both-scopes); docs/operations/relay.md grew the kit table + the
+  piggyback section (parity law stated; the edge's no-DNS-oracle
+  difference stated ON the caps page, not hidden).
+- verification battery: relay.test.js 31/31; relay-parity.test.js
+  19/19 (byte-identity, constants, env-through-contract, single-law,
+  honest settings card); vendor --check PASS both targets; web/
+  dashboard tsc -b --noEmit clean (src + functions, vendored JS +
+  edge flavor typed).
+- deliverable posture: CODE LANDS (kit + vendor + edge flavor +
+  settings card + pins + docs); no CLI/MCP surface change (coverage
+  unchanged).
+
+**Pass 231 (frontend, 2026-10-14) - relay reinforcement + ledger
+formalized + the docs face:** the owner ordered the record hardened ("hit
+prds, brain, etc. to reinforce the relay mechanism so we don't lose it"),
+the DEPLOY + /docs playbook face, and a REAL user-side setting - "users
+can run a relay on or off in their settings of dashboard", with the
+warning that the sides must never blur - plus the pass-ledger rule to
+stay. Landed:
+- THE LEDGER RULE recorded in the tracker head verbatim (passes and
+  pins only); the day-ledger scan shows only the ruling's own quote of
+  the retired structure.
+- prd-relay.md GAINS 6.1 - the TWO-SIDED SETTINGS CONTRACT (owner
+  direction recorded verbatim in spirit): SERVING = the operator's env
+  posture (the card READS it, names the keys, no browser switch - a
+  browser cannot flip an env, period) vs USING = the user's own reach
+  choice (persisted non-sensitive pref `bolete-relay-usage`); OFF is
+  first-class on both sides; the honesty law holds: ON is saved INTENT,
+  stated in plain text, until the chain editor + the pairing-time e2e
+  rung make it live - nothing fake-routes. The §6 settings row +
+  prd-web.md's #4 row now name both sides explicitly.
+- settings (#4) REALITY: two sections, never blurred - "Use relays
+  (your reach)" (the REAL persisted toggle with its today-truth copy)
+  and "Run a relay (piggyback)" (operator posture card, now with a
+  re-read-posture button so the card can never stale-cache its own
+  conclusion).
+- DEPLOY.md 12.4: the three postures (OFF default / POD-ONLY headless
+  relay / DASHBOARD PIGGYBACK), the fail-closed laws, and the
+  serving-vs-using split; points at the playbook.
+- /docs playbook: docs/operations/relay-playbook.md (nav 69) - serve
+  (pod), piggyback (dashboard), use (user side), verify (the
+  401/503/415 ladder + curl checks + suite commands), a troubleshooting
+  table; ops index TOC gains BOTH relay rows (relay.md had never been
+  indexed - fixed in the same breath).
+- BRAIN + MEM reinforcement: models/private/axolotl/lessons.md gains
+  the relay-arc pass block (the mechanism, where it lives, the
+  two-sided law, the ledger rule, verify-from-anywhere commands); MEM
+  handoff is rewritten for the current state (the old pass-201 handoff
+  demoted, retained).
+- deliverable posture: SPEC + CODE + DOCS (state.ts relayUsage pref,
+  settings card work, docs, brain, tracker); no pod-core change
+  (lib/relay.js untouched this pass).
+
+**NEXT-UP:** (1) the LIVE Pages deploy walk stays first; (2) then the
+owner's circle-back: relay CORE work continues - R2's chain editor +
+chain card make the usage toggle LIVE routing (the chain it governs),
+with the pairing-time e2e decode rung right behind it - the dashboard
+is BUILT ON the pipes, not beside them; (3) then web/relay standalone
+(R1, the solo flavor from the same kit); (4) owner queue otherwise
+unchanged (neighborhood zoom, Tier A explorer, P5 workbench,
+prune-orphans).
+
+**Pass 232 (frontend, 2026-10-14) - THE FRESH PRD: relay v1.0, the
+definitive definition ("we wanna define all"):** the owner ordered a
+clean relay PRD - everything defined, nothing named-but-fuzzy.
+- labs/prd-relay.md REWRITTEN as v1.0 (THE DEFINITIVE DEFINITION),
+  superseding the v0.1/v0.2 planning drafts, which survive verbatim in
+  the new §0 direction log (all eight owner rulings, pass-numbered).
+- EVERY SECTION ANCHOR PRESERVED (the code + docs that cite §1.1,
+  §1.1.2, §4.0, §5, §6.1 keep resolving) and the definition debt is
+  zero: §3.2 now carries the FULL interface table - roots, gate
+  header, caps shape (exact JSON), exec request/response shapes, the
+  SEVEN typed refusal codes with their statuses (the parity law:
+  same situation = same code + same status on ANY renderer), refusal
+  payload shape, the gate rule (sha256 both, constant-time digests,
+  length never from the wire), the envelope law (salt:iv:tag:cipher
+  + true replay posture), the origin guard incl. the edge's no-DNS
+  difference (stated on the caps page, not hidden), and both config
+  seam families (pod brain-config keys / edge Pages env).
+- §11 THE DEFINITION LEDGER: every named element gets its truth-state
+  (defined / built / built+pinned / defined-rung) and its home - the
+  no-fantasy guarantee in table form.
+- §12 ACCEPTANCE CRITERIA PER RUNG: R0 (done, with the concrete pins
+  that prove it), R1 (web/relay standalone + SSE stream-through), R2
+  (the usage toggle becomes LIVE routing through the chain - intent
+  to live, never silent hops), e2e rung (pairing binds the key; the
+  door decodes; the interim sunset becomes mechanical).
+- §13 verify-from-anywhere commands; links to the three faces (mech
+  ops page, playbook, DEPLOY 12.4 / config docs).
+- adjacent repairs: bin/relay.js help typo ("prs-relay" -> prd-relay)
+  caught by the same sweep.
+- deliverable posture: SPEC + one help-text typo repair (bin/relay.js;
+  no core/door change); the doc gates + truthfulness + links re-run
+  green after the last edit.
+
+**Pass 237 (relay, 2026-10-14) - THE INTERFACE HANDLER: the bridge
+families.** The owner formalized the relay's true role after the
+fold-in: a series of triggers making a schema + pub runtime at /web/relay,
+running independent and minimal always (server/proxy), while the
+dashboard keeps certain pipes THROUGH it and outsources auth - "the
+interface handler, so front or back don't have to worry so much, yet
+heavily tied to dashboard and backend." This turn made that REAL on
+the pass-236 composition (zero new lib files):
+- THE DOCTRINE (PRD §3.3): role map recorded - server/proxy (solo,
+  minimal always), the auth shaman (clients hand INTENT, never
+  credentials; the face spends its own gate secret + its OWN delegated
+  pod access server-side), ingest/states (no new planners), im-lost
+  beacons, and the api bridge catch-all. The one-way credential law
+  from pass 234 stands UNBROKEN: adding families put no pod secrets
+  into holding anywhere.
+- KIT r/2 (additive): EVENTS gains sync/lost/call (the wire shape,
+  gate, replay, freshness, cap mechanics all unchanged - the schema
+  approves new families, not new mechanisms). Both d.ts twins updated
+  FIRST-run lag caught by the dashboard typecheck (one repair, one
+  re-vendor).
+- POD FACE: `relay.sync` -> door brain_write (single or { entries: []
+  }, 64 cap), `relay.lost` -> context_heartbeat status + brain_current
+  (the door answers WHERE one stands), `relay.call` -> any door tool as
+  sent (the door verifies the rest). Broken payload shapes answer typed
+  E_RIDE_DECODE; unknown families E_RELAY_UNKNOWN_EVENT. The E_RIDE_*
+  family is reused deliberately: the bridge IS a ride - one refusal
+  language per door disposition.
+- DASHBOARD EDGE: bridge families forward through the edge's EXISTING
+  pod bridge lib (functions/lib/bridge) - the edge spends its own
+  delegated pod access server-side; the browser JS never sees a
+  credential. Capabilities page lists the families truthfully.
+- SOLO EDGE: hop only, minimal always (the doctrine row - nothing
+  added to its held-nothing posture).
+- SUITE: the fresh r/2 suite grows 26 -> 31 pins (the bridge loop over
+  real sockets, door translation truth, bent/unknown family refusals
+  typed). Vendoring re-pinned to kit head (--check 0); both web trees
+  tsc -b --noEmit 0.
+
+Verification (exits preserved): test/relay.test.js exit 0 (31/31);
+scripts/vendor-relay-kit.js --check exit 0; web/dashboard and web/relay
+tsc -b --noEmit each exit 0. Remaining named limits: the browser-side
+consumer of the bridge families (dashboard api.ts helper) is the next
+rung; full test/ci.js battery not run this pass; the live-subdomain
+walk still owns solo-arm real-reach truth.
+
+**Pass 236 (relay, 2026-10-14) - THE FOLD-IN: no lib/relay module,
+wire r/2, tests rebuilt fresh.** The owner ruled (frankly, and
+right): the relay as a NEW lib/ module was a rogue parallel system -
+its own gate ladder, stats map, mounting seam, refusal codes, even its
+own http machinery and DNS SSRF check - while every one of those
+concepts already had a home (webhooks' HMAC routes + replay check;
+network.fetch's SSRF wall + breaker; encrypt.js's envelope + HMAC
+law; the MCP door's auth chain). The pass-233 lesson, relearned as a
+lib file instead of a verb file. EXECUTED:
+- THE FACE IS A COMPOSITION (no new file, the guard is mechanical:
+  no-legacy-bloat FAILS if lib/relay.js reappears; bin/relay.js stays
+  as the CLI OVER the face and is pinned against requiring a lib
+  module): intake = lib/webhooks.js ONE registered route (POST /relay,
+  HMAC-gated by the route secret = relay.gateKey, replay-refused,
+  1 MiB-capped - the doors' shared cap posture added to the webhook
+  server while there); outbound = network.fetch (the SSRF IP wall,
+  DNS-rebinding refusal and breaker are the transport's own -
+  PROBE-VERIFIED in public posture: the loopback hop IS refused by the
+  wall, and the lab escape widens scheme + IP-wall together); envelope
+  = encrypt.js directly; ride dispatch = the pod's OWN door (loopback
+  POST /mcp/exec, the door's auth chain intact); the face lives in
+  lib/api.js relay (mount/status/relaySend); boot wiring in
+  startFull/startHeadless; the server.js SEAM REMOVED; bin/relay.js
+  rebased; MCP relay_status re-pointed to the face.
+- WIRE r/2 ("free to break -> new version", owner ruling): the
+crew-bus envelope shape ships as the relay wire - HMAC-SHA256 hex
+over the RAW body bytes in X-Signature-256 (the webhook transport's
+own signature header - the gate IS the route secret, one mechanism,
+zero bespoke gates), { event: 'relay.hop' | 'relay.ride', from, ts,
+nonce, payload, v.major=2 }, ack carries `reply` (the forward/door
+answer rides the SAME post back - the replyCapable + awaited-dispatch
+extension of the webhook transport: the live-fire lesson was
+  event.emit's handlers NOT awaited; the await lives in a per-route
+dispatch hook now). Transport statuses keep 401/409/404/413;
+application refusals ride typed E_RELAY_*/E_RIDE_* replies INSIDE the
+200 ack (reasons survive any chain).
+- KIT r/2: web/kit/relay/relay-contract.js (+ d.ts) rewritten (routes,
+EVENTS, TRANSPORT_STATUS, reply codes, wireEnvelope, capsShape,
+private-IP helpers kept pure); vendoring re-run, all four copies pin
+to the kit head (--check 0). BOTH web flavors rewired to r/2
+dashboards: intake POST /api/r/relay (WebCrypto HMAC + freshness
+window + ack-with-reply), capabilities surface naming, the solo events
+stream re-gated (HMAC over the query declaration), settings-card caps
+check r/2, relay page gate wording. Both trees tsc -b --noEmit exit
+0. The dashboard stays a SECONDARY consumer (the ruling).
+- TESTS REBUILT FRESH ("old work: rebuild tests fresh", owner):
+test/relay.test.js written from scratch (26 pins: face truth, the OFF
+posture, fail-closed mount, the HMAC gate ladder over real sockets,
+transport replay 409, the FULL hop loop with the verbatim answer and
+no-body-leak, typed ride loop with the bearer inside the envelope,
+ride refusals through the pipe, body cap, counters, the sender seam
+relaySend); test/relay-parity.test.js rewritten (16 pins: vendored
+byte-identity, face-constant pins vs kit head, envelope-shape
+agreement, the retired-wire lies caught); no-legacy guard updated to
+the pass-236 ruling (13/13).
+- HONEST DELTAS from r/1, named: /api/r/capabilities per-route on the
+pod GONE (discovery = the webhook transport's own /info/<route>); the
+DNS-seam SSRF checker deleted (network's walls are the posture now);
+the caps route's public CORS on the edge stays; the edge freshness
+window replaces the stateless edge's absent replay cache (the pod
+keeps the byte-replay 409).
+
+Verification (exits preserved): test/relay.test.js exit 0 (26/26);
+test/relay-parity.test.js exit 0 (16/16);
+test/no-legacy-bloat.test.js exit 0 (13/13); test/mcp.test.js exit 0
+(17/17); scripts/vendor-relay-kit.js --check exit 0; web/dashboard
+tsc -b --noEmit exit 0; web/relay tsc -b --noEmit exits 0.
+
+**Pass 235 (relay, 2026-10-14) - THE RIDE FACE: the pod's door acceptor
+(PRD §5 rung 3 + rung 2-lite) built and pinned; answers the owner's
+"is our relay working properly with dashboard?" with the flow that
+makes headless relay runners contrib-ready:** a relayed envelope now
+ARRIVES at the pod and gets opened, replay-checked, dispatched to the
+pod's OWN MCP door, and answered as an envelope - the pod half of the
+e2e rung is real, not defined-on-paper.
+- POD FLOW (lib/relay.js handleRide + the ride transport seam in
+  server.js, lib/relay.js defaultTransport): rides land at
+  POST /api/relay/ride under the relay posture; open the envelope with
+  the pod's channel key (rung 3); refuse replays by nonce in a
+  TTL-windowed FIFO-capped cache (rung 2-lite); dispatch the inner
+  JSON-RPC to the pod's own tool door with the pod-realm bearer riding
+  INSIDE the envelope (§5's credential tunnel - the relay sees a
+  per-relay bearer, the door sees one honest subject); wrap the door's
+  answer in an envelope back - anyone between holds ciphertext.
+- REFUSAL FRAMING LAW (the honest lesson of the pass): ride refusals
+  answer HTTP 200 with application-level { ok:false, code } from the
+  E_RIDE_* family (OFFLINE/DECODE/REPLAY/DISPATCH) - refusals are not
+  HTTP errors at the door, and it is the ONLY framing whose typed
+  reasons ride back through ANY hop chain with the kit's verbatim-2xx
+  law untouched (a non-2xx upstream answer becomes an opaque 502 hop).
+  The FIRST run of the pin suite caught this for real: 16d/16e came
+  back opaque E_RELAY_UPSTREAM 502s exactly as the law predicts - the
+  framing was repaired at the source, not in the pins.
+- PINS: test/relay.test.js 31 -> 38. Block 16 walks the FULL ride
+  loop over REAL sockets (envelope -> relay hop -> ride -> door
+  dispatch -> envelope back), pins the bearer INSIDE the envelope
+  (16c2), the replay refusal (16d), the malformed-frame refusal
+  (16e), and the liveness counters (16f).
+- PRD FACE: labs/prd-relay.md §5 gains the rung-3 framing law, §11
+  flips the door-acceptor row to BUILT + PINNED (pass 235), §13
+  refreshes the counts; the e2e-rung acceptance names the pod halves
+  pinned and the client half (key binding at pairing) still with R2.
+- Limits, named not silent: the ride face is a POD surface - the
+  dashboard-side key binding at pairing and the chain rung (R2) stay
+  client-side build items; the deploy walk still owns live-subdomain
+  truth for the solo arm.
+
+Verification after the final state of each file (exits preserved):
+- test/relay.test.js exit 0 (38/38); test/relay-parity.test.js exit 0
+  (40/40); test/mcp.test.js exit 0 (17/17);
+  scripts/check-bin-truthfulness.js exit 0.
+- No pod door auth posture changed; the kit contract untouched (no
+  re-vendor owed - parity suite still passes against the checked-in
+  vendor). Tree is Save/commit-ready.
+
+
+**Pass 234 (frontend, 2026-10-14) - /web/relay HARDENING: the fallback
+share, held-nothing guarantees ("no one knows logins, info, etc; the
+transport is encrypted before it hits the relay"):** the owner ordered
+one more pass over the small-fry arm - the one that matters when
+brain.creadev.org goes dark and OTHER relays take the slots. Landed:
+- THE FALLBACK SHARE, stated on the relay's own page (new "fallback
+  share" block): this relay is INTERCHANGEABLE - any other r/1 relay
+  takes a slot when a primary goes dark; the CLIENT owns the chain
+  order, never the relay; nothing lives here to migrate (no logins,
+  no instance info, no profiles); every hop body arrives as an
+  AES-256-GCM envelope encrypted by the client BEFORE it touches the
+  host, and the relay holds no key to open it.
+- HELD-NOTHING GUARANTEES MADE MECHANICAL (parity block 12, suite
+  35 -> 40): 12a functions/lib carries ONLY the checksummed contract
+  pair (no accounts/kv/ledger module ever ships beside it); 12b ZERO
+  credential identifiers (session/cookie/Bearer/channelKey/apiKey) in
+  the solo runtime path - the relay cannot learn logins even if
+  compromised; 12c no module-scope caches, no KV/store bindings -
+  stateless hop-to-hop by construction; 12d the page states the
+  interchangeability + pre-encryption law (contiguous prose, pin-
+  checked - the first run tripped on a line-split phrase and the
+  WORDING was fixed, not the pin); 12e every route answers nosniff +
+  no-referrer.
+- EDGE HARDENING (small, real): caps/exec/events every answer carries
+  `x-content-type-options: nosniff` + `referrer-policy: no-referrer`;
+  CORS stays wildcard ONLY on the public secrets-free caps route.
+- DOCS FACE: playbook Recipe 3 gains the fallback-share paragraph; the
+  relay README gains "The fallback arm" section naming each pin.
+- deliverable posture: CODE + DOCS (web/relay page + headers, parity
+  pins, README/playbook); NO pod-core change, NO kit change, NO
+  re-vendoring needed (both flavors still pinned to the same head).
+
+
+**Pass 233 (frontend, 2026-10-14) - THE CORRECTED ARC: web/relay is
+the solo live endpoint; the dashboard RUNS WITH a relay (a setting).**
+The owner ruled the arc mid-pass with an interception ("you bypassed the
+whole web and headless... created your own lib outside of os"): the
+agent's first attempt invented a client attach face inside the pod lib
+(useRelay/hopThrough + vant relay use/hop verbs) - a second, unelected
+definition outside the kit. RECTIFIED IN PLACE: both files reverted to
+the pinned R0 state, verified live (relay 31/31, parity 19/19 unchanged
+by the revert), nothing else landed from the bypass.
+
+
+Then the corrected arc, executed in the owner's construction order:
+- web/relay LANDED (R1, the solo flavor): own package.json / tsconfig /
+  vite config / index.html; a vanilla-TS POSTURE PAGE (no framework,
+  states what the relay IS and what it does NOT have - the
+  no-default-profile-pin guarantee is on the page); the three Mode R
+  functions (capabilities cross-origin readable, exec = the same
+  five-guard ladder, events = the R1 SSE stream-through: gated,
+  byte-verbatim, no-envelope-honesty stated live).
+- VENDOR + PARITY: scripts/vendor-relay-kit.js gained the third target
+  (web/relay/functions/lib); kit head comment names R1 as landed; all
+  four vendored copies re-pinned; parity suite grew 19 -> 35 (the R1
+  block: vendored byte-identity both flavors, solo exec reads the
+  contract authority for every gate, caps = solo flavor + CORS read +
+  no profile pin + stream named, events = same posture ladder +
+  byte-verbatim + no-envelope honesty).
+- THE DASHBOARD SETTING (owner: "dashboard uses /web/relay ... make it
+  a setting"): state.ts gains the persisted non-sensitive
+  `bolete-relay-endpoint` pref + actions.setRelayEndpoint; settings
+  #4 gains "Run with a relay (web/relay endpoint)" - enter the relay's
+  origin, VERIFY LIVE against its public caps (https-only, r/1,
+  envelope-required contract read; 404 = not a relay, typed), and the
+  card states the honest today-truth: the endpoint is verified and
+  remembered NOW; execution through it routes with the pairing-time
+  e2e rung (6.1 law: nothing fake-routes).
+- DOCS FACE: DEPLOY.md 12.3 -> FOUR postures (the solo row NEW);
+  docs/operations/relay.md gains the solo section + the third vendored
+  renderer row; the playbook gains Recipe 3 (host the PURE relay) and
+  the run-with-a-relay setting in Recipe 4 + two troubleshooting rows;
+  web/relay/README.md carries the deploy walkthrough.
+- deliverable posture: CODE + SPEC + DOCS (web/relay app + functions +
+  vendoring + dashboard setting + docs); NO pod-core change (lib/relay.js
+  and bin/relay.js stand at their pinned R0 state).
+
+**Verification:** relay 31/31; parity 35/35 (vendor --check covers all
+four targets); web/dashboard `tsc -b --noEmit` clean; web/relay `tsc -b
+--noEmit` clean + `vite build` green (dist artifact built); doc gates
+rerun after the last edit (see count line below).
+
+**NEXT-UP:** first row stands - the LIVE Pages deploy walk (DEPLOY.md
+12.1), now with the solo flavor deployable TOO (Recipe 3); then the
+pairing-time e2e rung (receiving-side envelope decode) which makes the
+dashboard's run-with-relay setting ROUTE (verified-remembered ->
+verified-routing); then R2's chain editor + chain card (live routing,
+the toggle governs); then neighborhood zoom / Tier A / P5 workbench /
+prune-orphans.
 
 ## Session (2026-10-13 — pass 215: enumeration throttle + docs sweep)
 

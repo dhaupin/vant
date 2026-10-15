@@ -136,6 +136,9 @@ const COMMANDS = {
     // Islands (componentized brain)
     islands: 'islands.js',
     
+    // Relay (the headless Mode R posture - prd-relay.md v0.2 §1.1)
+    relay: 'relay.js',
+    
     // Brain lock management
     lock: 'lock.js',
     

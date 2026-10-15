@@ -1,6 +1,6 @@
 import { ApiError } from "../../api";
 import { Refusal } from "../../frame/Refusal";
-import { NotConnected, useToolsQuery, toolsByPrefix } from "../../frame/conn";
+import { NotConnected, useToolsQuery } from "../../frame/conn";
 import { ToolCall } from "../../frame/ToolCall";
 
 /**
@@ -24,12 +24,14 @@ export default function Nodes() {
     return <p className="text-sm text-ink-soft">Asking the door for its tool list...</p>;
   }
 
-  const caps = [
-    ...toolsByPrefix(toolsQ.data, "node_"),
-    ...toolsByPrefix(toolsQ.data, "mesh_"),
-    ...toolsByPrefix(toolsQ.data, "node-registry"),
-    ...toolsByPrefix(toolsQ.data, "registry_"),
-  ];
+  // (detection repair, pass 225) The door really registers
+  // `nodes_list` and `agora_nodes` — the old prefix list matched
+  // NEITHER (node_ ≠ nodes_, and nothing matched agora_nodes), so
+  // this page showed "no tools" against a door that had them.
+  const all = toolsQ.data?.tools ?? [];
+  const caps = all.filter(
+    (t) => typeof t.name === "string" && /^(nodes?_|mesh_|agora_nodes|node-registry|registry_)/.test(t.name),
+  );
 
   return (
     <div>

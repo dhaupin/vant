@@ -7,7 +7,36 @@
 
 ## Handoff
 
-**Last known good commit:** pass 201 — Wave U6 PROTOTYPE landed
+**Current handoff (pass 231, 2026-10-14):** step 231 closed the pass-231
+run (reinforcement + playbook round). What future wakes MUST know (also
+written into models/private/axolotl/lessons.md, the same turn):
+
+- THE RELAY IS CORE NOW: mechanism record in prd-relay.md v0.2 (a
+  connection layer, not an app); pod core lib/relay.js (pinned 31,
+  real-socket hops); ONE vendor-checked contract (web/kit/relay/
+  relay-contract.js + .d.ts, .sha256 pins, check: script
+  scripts/vendor-relay-kit.js --check + pins in
+  test/relay-parity.test.js 19 - the pod never imports web/); the
+  dashboard piggyback is real (functions/api/r/* behind
+  VANT_RELAY_ENABLED/VANT_RELAY_GATE_KEY, fail-closed); user reach
+  toggle (bolete-relay-usage pref) + operator posture card in
+  Settings #4 (prd-relay.md 6.1: the two sides never blur; ON = saved
+  intent until the chain editor + pairing-time e2e rung).
+- THE LEDGER RULE (owner ruling): passes and pins ONLY - the "build
+  day N" ledger is retired; the frontend arc = passes 216-230, and
+  the tracker head carries the rule verbatim so it STAYS.
+- DOCS FACE: docs/operations/relay.md (mechanism) +
+  docs/operations/relay-playbook.md (serve/piggyback/use/verify
+  recipes) + index TOC rows; DEPLOY.md 12.4 names the three postures
+  (off / pod-only / dashboard piggyback) and links the playbook.
+- NEXT-UP: (1) the LIVE Pages deploy walk still first; (2) then R2's
+  chain editor + chain card - the usage toggle's live routing - and
+  the pairing-time e2e decode rung; (3) then web/relay (R1, the solo
+  flavor from the same kit); (4) owner queue otherwise unchanged.
+- Verification marks: parity 19/19, relay 31/31, vendor --check PASS,
+  dashboard tsc clean, doc gates green at the pass-231 close.
+
+**Previous handoff (pass 201):** Wave U6 PROTOTYPE landed
 (owner disposition U6.5 open). `labs/prototype-marketplace.md` (schema,
 reputation, hold→deliver→release, failure modes) + gated skills
 surface in `lib/market.js` (`listSkill/buySkill/deliverSkill/

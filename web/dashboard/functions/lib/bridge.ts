@@ -237,6 +237,13 @@ export async function bridgeOptions(context: PagesContext, request: Request): Pr
   if (token) headers.set("Authorization", `Bearer ${token}`);
   const isStream = path === "/mcp/events";
   if (isStream) headers.set("Accept", "text/event-stream");
+  if (request.method === "POST") {
+    // The pod door refuses POSTs without an application/json Content-Type
+    // (its own gate: simple cross-site text/plain bodies skip the CORS
+    // preflight it defends against). The old bridge forwarded the body but
+    // NOT its Content-Type — every exec upstream answered typed 415.
+    headers.set("Content-Type", "application/json");
+  }
   const timeoutSetting = context.env["VANT_BRIDGE_TIMEOUT_MS"];
   // teleport the body only for POSTs; never re-stream GET bodies
   const init: RequestInit = {

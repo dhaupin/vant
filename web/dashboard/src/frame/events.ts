@@ -15,6 +15,20 @@ export interface BoardEvent {
   at: number;
 }
 
+/** The tap contract: family frames arrive as DEFAULT-message events with
+ *  the full bus type embedded as `tapType` (prd door /mcp/events tap).
+ *  Modules key on the ROOT segment. The one NAMED frame survives as its
+ *  own contract: `tap.revoked` (the pod announcing the stream kill at the
+ *  next beat after a mid-stream guest revocation). */
+function familyOf(raw: unknown, evType: string): string {
+  let t = evType && evType !== "message" ? evType : "";
+  if (!t && raw && typeof raw === "object" && typeof (raw as Record<string, unknown>).tapType === "string") {
+    t = String((raw as Record<string, unknown>).tapType);
+  }
+  if (!t) return "other";
+  return t.split(":")[0] || t;
+}
+
 const RING_MAX = 80;
 
 interface FanoutState {
@@ -75,6 +89,8 @@ function reconnect() {
   next.onerror = () => {
     if (es === next) setState({ status: "down" });
   };
+  // board contract: family frames are DEFAULT-message events (data only,
+  // type embedded as `tapType`); this onmessage finally receives them.
   next.onmessage = (ev) => {
     if (es !== next) return;
     let family = "";
@@ -82,12 +98,7 @@ function reconnect() {
     try {
       const parsed = JSON.parse(ev.data) as Record<string, unknown>;
       raw = parsed;
-      family =
-        (typeof parsed.family === "string" && parsed.family) ||
-        (typeof parsed.type === "string" && parsed.type) ||
-        (typeof (parsed as { event?: unknown }).event === "string" &&
-          String(parsed.event)) ||
-        "other";
+      family = familyOf(parsed, ev.type);
     } catch {
       family = "other";
       raw = ev.data;
@@ -96,6 +107,20 @@ function reconnect() {
       ring: [...state.ring.slice(-(RING_MAX - 1)), { family, raw, at: Date.now() }],
     });
   };
+  // the pod's own annihilation note: a guest token revoked mid-stream is
+  // announced as a NAMED frame at the next beat; the browser closes the
+  // connection and renders the honest dead state instead of a silent clog.
+  next.addEventListener("tap.revoked", () => {
+    if (es !== next) return;
+    setState({
+      ring: [
+        ...state.ring.slice(-(RING_MAX - 1)),
+        { family: "sys", raw: { tapType: "tap.revoked" }, at: Date.now() },
+      ],
+      status: "down",
+    });
+    next.close();
+  });
 }
 
 /** Module-level helper: subscribe while mounted (families honored by the

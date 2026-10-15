@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ApiError, breakers } from "../../api";
-import { useToolsQuery, toolsByPrefix, ToolCap } from "../../frame/conn";
+import { useToolsQuery, ToolCap } from "../../frame/conn";
 import { ToolCall } from "../../frame/ToolCall";
 import { Help } from "../../frame/Tooltip";
 import { useApp } from "../../state";
@@ -35,10 +35,14 @@ export default function Audit() {
   const account = useApp((s) => s.account);
   const toolsQ = useToolsQuery();
 
-  const podCaps: ToolCap[] = [
-    ...toolsByPrefix(toolsQ.data, "audit_"),
-    ...toolsByPrefix(toolsQ.data, "ledger_"),
-  ];
+  // (detection repair, pass 225) The door really registers
+  // `vant_audit_list` / `vant_audit_log` — the old `audit_`/`ledger_`
+  // prefixes matched NEITHER, so the pod audit surface read "none
+  // registered" against a door that had it.
+  const all = toolsQ.data?.tools ?? [];
+  const podCaps: ToolCap[] = all.filter(
+    (t) => typeof t.name === "string" && /^(audit_|ledger_|vant_audit_)/.test(t.name),
+  );
 
   return (
     <div>
