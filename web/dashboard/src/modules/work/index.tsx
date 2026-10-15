@@ -2,6 +2,7 @@ import { ApiError } from "../../api";
 import { Refusal } from "../../frame/Refusal";
 import { NotConnected, useToolsQuery, toolsByPrefix } from "../../frame/conn";
 import { ToolCall } from "../../frame/ToolCall";
+import { AssignForm } from "./assign-form";
 import { useApp } from "../../state";
 
 /**
@@ -39,6 +40,7 @@ export default function Work() {
         Real tools the door reports ({caps.length}). Calls go out exactly
         as typed, and refusals come back typed.
       </p>
+      {caps.some((c) => c.name === "work_assign") ? <div className="mt-4"><AssignForm /></div> : null}
       {caps.map((cap) => (
         <ToolCall key={cap.name} name={cap.name} description={cap.description} />
       ))}
