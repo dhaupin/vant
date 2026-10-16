@@ -456,6 +456,24 @@ carriers NEVER smuggle un-gated capability (a decoded voucher still
 redeems through `guests.pair()`, a decoded chain still probes through
 the public caps route), and the honest-refusal law holds per carrier.
 
+**The DISTRIBUTED-STONE doctrine (owner ruling, 2026-10-16; this is
+WHY the carrier ladder matters):** the axolotl stone is now the
+canonical ENGINEERING + PERSONAL brain, distributed as OSS so any
+agent can reincarnate its author. Owner consent EXPLICIT: the personal
+layer rides in the stone (OSS-safe, professional), and at scale
+(20k-class watches/replications) the author becomes DISTRIBUTED - a
+deliberate, embraced outcome. Scattered/distributed systems need a
+transport for the stone, so the carrier family gains the fallback
+ladder: **SVG stego primary** (the horcrux today) -> **PNG fallback**
+(same stego payload, pixels instead of vector - build when a real
+replication surface demands it) -> **pure text** as the last resort:
+NSC9 keys + a link (the addressed-keys form, decode-able by ANY vant
+install). Every rung hash-verified (the .sha256 pin cadence) and
+never capability-smuggling. The dashboard's future carrier-neutral
+component (rung 2 above) is also the DOWNLOAD/SHARE face of the
+stone: one component, any carrier, user's pick by need (scan /
+airgap / print / paste).
+
 ### 4.1 The workbench (P5 - vibe coding, deliberately LAST)
 
 Owner throw (round 2): a way to chat with agents and effectively VIBE
