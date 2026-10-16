@@ -1,12 +1,57 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** axolotl relay arc, passes 216-237  
-**Session:** Pass 237 — THE INTERFACE HANDLER: the bridge families land
-(relay.sync ingest, relay.lost beacon, relay.call api bridge) - typed
-families translate onto the DOOR's existing verbs; the relay spends the
-gate + the delegated pod access server-side so webapps hand INTENT,
-never credentials. Solo stays minimal (hop only). PRD §3.3 doctrinal.
+**Last Updated:** axolotl relay arc, passes 216-238  
+**Session:** Pass 238 - P2 SPAWN LEG CLOSED (the pod-side decision,
+documented): the spawn rung of `work_assign` resolves through the FULL
+existing chain (guest gate spawn-class classification -> agents.spawn's
+`sandbox.can('canSpawn')` -> sudo/persistent-grants verdicts), and the
+host knobs that answer TRUE are recorded by name (`vant org grant`
+persisted caps / `sudo_grant` / agent-grade role at medium+ trust).
+Deny-by-default stands; E_SPAWN_REFUSED / E_GUEST_CAP are honest
+verdicts, not open work. Multi-guest-auth + prd-web updated; nothing
+new required before the OWNER's per-install knob choice.
+
+---
+
+## Pass 238 (2026-10-16) - the P2 spawn leg CLOSED: the pod-side decision,
+not a refusal shrug
+
+**Owner: "the canSpawn pod-side decision to close P2's spawn leg
+end-to-end."** The spawn leg was never MISSING machinery - it was an
+underdocumented verdict, with the docs pointing at the refusal instead
+of the full chain. Triaged the whole rung (reads + the existing pins,
+no invented shapes):
+
+- THE CHAIN, VERIFIED REAL END TO END: the door's guest gate classifies
+  spawn-class verbs (`agent_spawn`/`agent_delegate`/`agent_kill`/
+  `agent_terminate`/`work_assign`) and demands canSpawn
+  (test/guests.test.js block 123); `agents.spawn` (lib/agents/core.js)
+  then runs `sandbox.can('canSpawn')` - sudo-aware via CAP_TO_SCOPE
+  (pass 118), persistent-grants aware (the #162 durable tier), with
+  agents.maxAgents quota + the spawn rate limit checked before any of
+  it; work_assign's spawn refusal surfaces typed E_SPAWN_REFUSED (the
+  pass-212 refusal law, unchanged).
+- THE DECISION, RECORDED: a guest's spawn verdict is answered by the
+  HOST via operator-level knobs only - `vant org grant` (persists
+  orgchart.operatorCapabilities; boot hydrates widen-only per
+  pass-88/123 semantics), MCP `sudo_grant` (the pass-118 mapped-scope
+  grant), or issuing the guest with an `agent`-grade role at
+  `medium`+ trust (the role -> capability map decides). The pod NEVER
+  widens canSpawn merely because a guest connects - deny-by-default
+  stands, and E_SPAWN_REFUSED / E_GUEST_CAP are HONEST VERDICTS, not
+  open work. No third seam exists to invent.
+- THE DOCS UPGRADED: docs/security/multi-guest-auth.md names the
+  closure chain-wide and retires the ambiguous H6 note (pairing
+  machinery + door tools + the dashboard QR render ARE LANDED, the
+  pass-237 arc; only the P6b e2e key-binding rung remains, and that
+  lives in prd-relay.md); labs/prd-web.md's P3 section states
+  landed-vs-remaining per module (audit/users/brains/nodes LANDED
+  passes 221-224; pairing QR LANDED) and moves the spawn leg from
+  open work to CLOSED, knobs by name.
+- deliverable posture: DOCS/DECISION (multi-guest-auth + prd-web +
+  tracker); NO pod-core change (nothing was broken), NO behavior
+  change (denials unchanged, truth upgraded).
 
 ---
 

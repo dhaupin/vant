@@ -180,8 +180,25 @@ same routing - the documented no-op note now applies only to non-guest keys.
   tests). Exhaustion answers typed `429 E_GUEST_THROTTLED` with
   `retryAfterMs`; identity-keyed means two guests behind one NAT keep
   independent budgets and one burned budget never throttles a neighbor.
-- Still tracked as #185 runway: H6 QR pairing UX (held by owner pending
-  the frontend story). The pass-211 boundary list is otherwise closed.
+- Shipped (spawn-leg closure): the spawn leg of `work_assign` resolves
+  through the FULL sandbox chain end-to-end - the door's guest gate
+  classifies spawn-class verbs (`agents.spawn/delegate/kill/terminate/
+  work_assign`, tested in `test/guests.test.js`), `lib/agents/core.js`
+  spawn runs `sandbox.can('canSpawn')` (sudo-aware via CAP_TO_SCOPE,
+  pass-118 connected, #162 persistent-grants aware), and the P2
+dashboard renders the typed refusal verbatim when a guest's trust
+  floor strips spawn. The knobs a HOST turns to answer TRUE are
+  operator, pod-level, not guest-facing: `vant org grant` (persisted,
+  boot hydrates widen-only), `sudo_grant`/escalation, or issuing the
+  guest with an `agent`-grade role at `medium`/`high` trust. The pod
+  NEVER widens canSpawn for a guest connection by default - deny-by-
+  default stands; the refusal is the honest answer, not a missing
+  feature.
+- H6 QR pairing FYI: LANDED (pass-237-arc) - the pairing voucher is on
+  the door (`pairing_offer`/`pairing_redeem`) and the dashboard's
+  pairing module renders the scannable QR; `vant guest pair` remains
+  the CLI door. What stays deliberate is the P6b e2e key-binding rung
+  (prd-relay.md), not H6 itself.
 
 *Transport-level security (loopback binds, TLS, requireKey) is unchanged and
 removes nothing: [MCP Server](/vant/runtime/mcp) covers running and

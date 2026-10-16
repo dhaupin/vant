@@ -479,9 +479,26 @@ sketch, phase P5 (after the platform surfaces are stable):
 ### P3 - Owner seat (Tier S) + QR revival
 
 - Guest lifecycle UI + pairing voucher QR flow (deep-link redeem view).
-- Round-2 additions land here too: audit/observability module (the app's
-  own logs + per-property pod views); user admin (/users); brains
-  visualizations (semantic memory map + NSC9 view); nodes/mesh views.
+- P3 LANDED through pass 237-arc: guests (pass-219 arc: real owner-seat
+  roster), users admin (pass 222), audit/observability + nodes (pass
+  221), pairing voucher QR flow (H6 un-held + LANDED - door tools
+  `pairing_offer`/`pairing_redeem`, the scannable QR render, hash-at-
+  rest guarantees unchanged; `vant guest pair` stays the CLI twin).
+- Round-2 additions status: audit/observability module - LANDED (pass
+  221, edge ledger + typed-error inbox + door audit panels); user
+  admin (/users) - LANDED (pass 222); brains visualizations - LANDED
+  (pass 224, the semantic map consumes the pod's REAL vectors); nodes/
+  mesh views - LANDED (pass 221).
+- The ONE remaining P2/P3 named limit, now DECIDED (pod-side, pass
+  237-arc close-out): the spawn leg of `work_assign` resolves through
+  the full sandbox chain (guest gate classifies spawn-class verbs,
+  agents.spawn checks `sandbox.can('canSpawn')` sudo-aware), and a
+  host whose guest needs spawn answers TRUE via operator-level knobs
+  (`vant org grant` persisted caps / `sudo_grant` / an agent-grade
+  role at medium+ trust). Deny-by-default stands; `E_SPAWN_REFUSED` /
+  `E_GUEST_CAP` are honest verdicts, rendered verbatim in the work
+  console - NOT open work. The pod-side decision is CLOSED; what
+  remains for the owner is the per-install CHOICE of those knobs.
 - Acceptance: pair a browser FROM the dashboard without the terminal
   (voucher shown once, hash-at-rest guarantees unchanged); H6 lands
   here (spec inherits `labs` notes from the held discussion).

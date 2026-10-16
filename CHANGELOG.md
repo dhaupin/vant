@@ -5,6 +5,49 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 238 (the P2 spawn leg closed: the canSpawn pod-side decision, documented)
+
+No new mechanism - the spawn leg of `work_assign` was already resolving
+through the full sandbox chain end-to-end, and the honest gap was
+DOCUMENTATION: the surface story named the refusal (`E_SPAWN_REFUSED`)
+without naming the chain or the knobs that answer TRUE. This pass triaged
+the rung and upgraded the truth.
+
+### Documented - the spawn-leg chain, verified live
+
+- **The door's guest gate** classifies spawn-class verbs
+  (`agent_spawn`/`agent_delegate`/`agent_kill`/`agent_terminate`/
+  `work_assign`) and demands the `canSpawn` capability (the H1-era law
+  from pass 211; pinned in `test/guests.test.js` - a medium-trust guest
+  keeps spawn, a low-trust guest is stripped).
+- **`agents.spawn` (lib/agents/core.js)** then runs
+  `sandbox.can('canSpawn')` - sudo-aware via the CAP_TO_SCOPE mapping
+  (the pass-118 live-fire fix: a granted `canSpawn` satisfies the mapped
+  `spawn` scope), persistent-grants aware (the #162 durable tier), with
+  the `agents.maxAgents` quota and the spawn rate limit checked before
+  any capability question. The spawn refusal rides `work_assign`'s typed
+  `E_SPAWN_REFUSED` (the pass-212 refusal law, unchanged).
+- **The host knobs that answer TRUE, by name**: `vant org grant`
+  (persists `orgchart.operatorCapabilities`; boot hydrates widen-only
+  per the pass-88/123 semantics), the MCP `sudo_grant` escalation door,
+  or issuing the guest with an `agent`-grade role at `medium`+ trust
+  (the role -> capability map decides). The pod NEVER widens `canSpawn`
+  merely because a guest connects: deny-by-default stands and
+  `E_SPAWN_REFUSED`/`E_GUEST_CAP` are honest verdicts, not open work.
+
+### Docs truth upgraded
+
+- `docs/security/multi-guest-auth.md`: the spawn-leg closure stated
+  chain-wide; the ambiguous "H6 runway" note retired - pairing
+  machinery, the door tools and the dashboard QR render are LANDED
+  (the pass-237 arc), the remaining rung is P6b e2e key-binding
+  (prd-relay.md), which is not H6.
+- `labs/prd-web.md`: the P3 phase section states landed-vs-remaining
+  per module and moves the spawn leg from open work to CLOSED.
+
+No pod-core change (nothing was broken), no behavior change (denials
+unchanged, truth upgraded).
+
 ## [Unreleased] - pass 215 (#185 closed: per-guest read-verb enumeration throttle + the docs freshness sweep)
 
 The last #185 runway item. The guest-management verbs were already
