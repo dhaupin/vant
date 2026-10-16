@@ -1,11 +1,18 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** axolotl relay arc, passes 216-240  
-**Session:** Pass 240 - THE DEBRIS SWEEP: 277 test-debris brain trees deleted
-from models/private/ (incl. rook119, the org-drill artifact), keeping
-axolotl + buffy + vant + shared state; the canonical stone refreshed
-(same password) and now carries exactly 3 brains, 11.4 MB -> 2.9 MB.
+**Last Updated:** axolotl relay arc, passes 216-242  
+**Session:** Pass 242 - THE NAV + MISSIONS SPEC: eight new modules queued
+(consensus, resolution/citations, era/succession, nature flywheel,
+habitats, cron manager, settlements, origins), the hierarchical
+Cloudflare-sidebar model adopted (3.3-5c), and the two frame
+requirements: ui-state memory (return to your page after the 15-min
+window) and the vetted cache-busting framework (?hash= breaker,
+3 layers). Next: the FRAME pass lands 5c + memory + breaker at once.  
+**Prior:** Pass 240 - THE DEBRIS SWEEP: 277 test-debris brain trees
+deleted from models/private/ (incl. rook119, the org-drill artifact),
+keeping axolotl + buffy + vant + shared state; the canonical stone
+refreshed (same password), exactly 3 brains, 11.4 MB -> 2.9 MB.
 
 ---
 
@@ -27,6 +34,53 @@ verbatim in [TASKS-ARCHIVE.md](TASKS-ARCHIVE.md). That file is the
 long-history half; this file is the working half. When this file
 grows past ~2k lines again, split at session boundary INTO the
 archive (newest-first append there) - never delete history.
+
+## Pass 242 (2026-10-16) - THE NAV + MISSIONS SPEC: eight new modules, the
+hierarchical sidebar, ui-state memory, and the cache-busting framework
+
+**Owner: "we will have to more fully embrace the Cloudflare sidebar
+model... and a cache busting framework, vetted and in place."** Spec
+lands in prd-web.md, three seams:
+
+- MODULES GROW (prd-web 4.3, the missions set): consensus (/consensus,
+  live votes + quorum meters off the consensus_ family), resolution
+  (/resolution, resolution_ + citations_ registry),
+  era-succession (/era, PROMOTED from the side panel to its own
+  ladder + succession view), nature (/nature, the flywheel console -
+  the honest manual flick: typed requests + named config knobs,
+  never a silent env flip, the 6.1 law), habitats (/habitats,
+  RLS/workspace provisioning posture), cron (/cron, the in-built
+  job manager through the door's real cron/schedule verbs, CLI
+  pointer where writes are door-absent) - plus the owner-asked
+  extras: settlements (27, escrow write-history) and origins (28,
+  the genesis/horcrux lineage view). All ride the SAME module-frame
+  contract; no nav redesign per module.
+- THE HIERARCHICAL SIDEBAR (3.3-5c, the Cloudflare-sidebar model):
+  the registry gains navCategory; clicking a category DESTROYS the
+  sidebar contents and loads that category's items (computed from
+  the registry, never a second nav list); a BACK link re-loads the
+  parent, the brand mark returns to root; depth bounded at TWO
+  levels; drawer/column presentation (5b) preserved - the hierarchy
+  swaps WHAT the sidebar shows, not HOW.
+- UI-STATE MEMORY (10): a small non-sensitive localStorage store per
+  property (last category, last route, last instance - open channel,
+  selected era) rehydrated on boot so the 15-min window expiry never
+  loses a place; returnTo after re-auth honors the explicit navigate
+  over the memory; never tokens/drafts/gated payloads.
+- CACHE-BUSTING FRAMEWORK (10, vetted three layers): (1) Vite native
+  content-hashed assets + immutable headers, index.html no-store;
+  (2) the owner's `?hash=<breaker>` shape - an app build stamp on
+  every bridge API call, VERIFIED at boot, mismatch = honest
+  'stale deploy - hard refresh' state instead of a mismatched
+  module graph; (3) endpoint contracts - auth/session no-store, SSE
+  uncacheable, GETs that can cache declare explicit short max-age.
+  Canonical rule: hashes change only when content changes; NO
+  per-request timestamp seeds.
+
+Phase note: the sidebar 5c + ui-state memory + cache breaker are the
+frame's three new build items - they land as the next FRAME pass
+(module missions come after) so every current + future module
+inherits them at once.
 
 ## Pass 241 (2026-10-16) - THE REINCARNATION RULING + the gather guard + the ledger split
 

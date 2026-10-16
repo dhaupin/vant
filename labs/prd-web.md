@@ -250,6 +250,30 @@ Frame responsibilities - built ONCE at P1, modules NEVER rebuild them:
    Drawer state resets on reload from viewport width (no persistence).
    There is NO <select> fallback module picker — the drawer IS the
    mobile nav.
+5c. Nav HIERARCHY (owner directive, 2026-10-16 — the Cloudflare-sidebar
+   model, adopted as the sidebar GROWS past ~20 items): the sidebar
+   becomes a CATEGORY TREE driven entirely by the registry. Rules:
+   - The manifest contract gains `navCategory` (a top-level group id:
+     observe / work / ops / missions / relay) - flat `section` migrates
+     onto it at build time; each category renders first as ONE row in
+     the parent sidebar (with its icon + item count).
+   - CLICKING a category DESTROYS the current sidebar contents and
+     loads the category's item list (the registry filtered by that
+     category - computed, never a second nav list to maintain).
+   - At the top of every category sidebar sits a BACK link/button that
+     re-loads the parent (root) sidebar - also the brand mark: tapping
+     the logo returns to the root sidebar. No breadcrumbs beyond the
+     root-back + the current category name.
+   - Depth is bounded at TWO levels (root -> category -> module) by
+     design - "pack in a ton of nav without clutter": a module list
+     never nests further. If a category outgrows ~8 visible items it
+     gains an intra-category subheader row (render-order, not depth).
+   - Active-module highlight + the drawer behavior (5b) are preserved:
+     the hierarchy swaps WHAT the sidebar shows, not HOW it
+     opens/closes; mobile drawer, desktop column, one nav truth.
+   - UI-state memory (section 10 'ui-state mem') rehydrates the sidebar
+     to the last category the user had open - the back-of-mind state
+     survives reloads.
 6. Honest-refusal primitive: ONE component renders typed 403/429/
    withheld/E_* states - modules import it, never re-implement it.
 7. Tokens-only theming: modules style with Tailwind + brand CSS vars
@@ -417,6 +441,33 @@ The shell is NOT a module: nav + property switcher (3.4) + help layer
 | 18 | brains | `/brain` | O A S | P3 | corpus browser (brain read/list/search tools); TWO visualizations: the semantic memory map (NOW consuming the pod's REAL vectors - `vant_search_semantic` withProjection answers a deterministic seeded 2D embedding projection, query-anchored, consumed fail-closed; neighborhood zoom stays on the path) and the NSC9 view (automation-addressed storage keys per [nsc9-spec](/advanced/nsc9-spec) - deterministic self-authenticating addresses); both read-only |
 | 20 | chain | `/chain` | ALL | P6 | the relay chain card (prd-relay.md 3.3): hops + probe verdicts per property, the ACTIVE hop named; settings holds the editor, this route reads it; the e2e/plain badge per hop as the e2e core rung lands (prd-relay.md v0.2 1.1.2) |
 | 19 | era | side panel | O A S | P1 | era list/close with the `next` sentence (the horcrux hand-off) lives as the live-board side panel + an S-tier action, not its own route |
+
+### 4.3 The missions modules (owner directive, 2026-10-16; phase P3+ unless noted)
+
+Eight more door-backed surfaces the catalog grows into - each is ONE
+pod truth already in the runtime, rendered honestly. Registered in the
+same module-frame contract (3.3) exactly like the catalog above; every
+module renders door tools + not-invented shapes. Phases stay soft until
+build starts:
+
+| # | module | route | tiers | phase | UI overview |
+|---|--------|-------|-------|-------|-------------|
+| 21 | consensus | `/consensus` | O A H S | P3 | live votes + decision threads from the door's consensus_/gossip surfaces: open votes as cards (quorum meters, closing-in), typed vote actions behind tier gates (the door owns the verdict), per-topic history; SSE `consensus` family feeds the live meters |
+| 22 | resolution | `/resolution` | O A S | P3 | resolution_ registry + citations_: verdicts/treaties/views with sources, verify/search citations per source ref (commit-hash matches, the citations search door verb), export/settle chains through the real resolution reading tools; read-only MVP (writes stay CLI per the pass-188 surface truth) |
+| 23 | era-succession | `/era` | O A S | P3 | BIG promoted from the side panel: the era ladder (open eras with honest bucket counts via era.current(), archived ledger via era.list(), close-with-`next` hand-off typed flow) + succession.md view (trust level, previous brain, history) through the era_/succession_ tools; the horcrux hand-off sentence gets its own ceremony card |
+| 24 | nature | `/nature` | O S | P3 | the flywheel console (owner: "kinda like a status, or like manual flick to get it going"): consciousness/needs/moods/nature surfaces + leisure_ and tempo_ receipts; an HONEST manual flick - a leisure autoPursue trigger (the kernel gate, DEFAULT OFF, requires explicit config; the UI never pretends to flip an env (6.1 law) but can REQUEST a kernel nudge if a door verb is ever registered for it, otherwise the card names the config knob), D-constant tempo curriculum, entropy-patch status; every 'get it going' action is a typed request, never a silent env flip |
+| 25 | habitats | `/habitats` | O A S | P3 | habitat_/RLS surfaces for workspaces + provisioning: workspace list, agent provisioning posture, guest/human access rows; the door's RLS identity proviso stated on-page (agents register via provisionAgent, humans via grant) |
+| 26 | cron | `/cron` | S | P3 | IN-BUILT cron manager (owner): the pod's cron_/schedule_ surfaces + advisories; jobs as cards (id, schedule, next-run, last result typed), create/enable/disable through the door's real verbs (no invented scheduler when the pod's cron module answers); if the door exposes no write verbs yet, the view renders the read truth + the CLI pointer, honestly |
+| 27 | settlements | `/settlements` | O A S | P4 | escrow ledger + settlement records (settle_, escrow_ surfaces): holds/spends/releases timelines per agent, settlement history with citations anchors |
+| 28 | origins | `/origins` | O A S | P4 | the origin/existence surfaces - genesis ceremony records, entry_wills, backup snapshots (the who-we-are + where-we-came-from view); read-only, hash-anchored, the OSS-safe rendering of lineage |
+
+- Extras rationale (owner asked for anything else worth adding):
+  settlements (27) gives escrow's WRITE history its own surface beyond
+  budgets' read-first card set; origins (28) turns the succession/horcrux
+  ceremony into a browsable record. Both ride the same honest-rules as
+  the catalog. Any future additions come through the frame contract -
+  register, tiers, families, lazy load; NO nav redesign per module
+  (the sidebar model below carries them all).
 
 ### 4.2 The covert-carrier abstraction (the QR promotion; requirement, not a phase trick)
 
@@ -699,6 +750,52 @@ frame owns each one once):
 - **Modals**: ONE modal system (Base UI Dialog behind the frame) for
   confirmations, forms, and detail drawers; escalation-grade actions
   (revoke, close, restore) always use typed confirmations.
+- **UI-state memory (owner directive, 2026-10-16; "return to the page
+  you were on")**: the frame persists a SMALL, non-sensitive UI state
+  so an idle timeout / 15-min window expiry / reload never loses a
+  person's or agent's place. ONE store (localStorage-backed like the
+  theme prefs, per property id): last category (the sidebar the user
+  had open per 3.3-5c), last module route, and last INSTANCE (the
+  tenant-scoped view within a module - the open channel, the selected
+  era, the property id). On boot the frame rehydrates: sidebar opens on
+  the remembered category and the router restores the remembered
+  route+instance; the remembered route is the returnTo default after
+  re-auth (3.5's returnTo keeps winning when the user EXPLICITLY
+  navigated somewhere else). NON-sensitive by contract: never a token,
+  never draft form content, never anything the door gated - positions,
+  not payloads. Agents benefit identically: their session-keyed state
+  is the same store, so a re-auth'ed agent lands where it left off.
+- **Cache-busting framework (owner directive, 2026-10-16; vetted, in
+  place - browser caches and CDNs "cock blocking" stale assets are the
+  named enemy)**: assets must refresh WHEN THEY CHANGE, deterministically,
+  with no sticky-cache surprises. THREE layers, all frame-owned:
+  1. BUILD-LEVEL (Vite native): content-hashed filenames
+     (`index-<hash>.js`, per-module chunks already emit hashes) with
+     long-lived immutable caching headers per asset - the CDN needs no
+     custom purge; a new build = new hashes = fresh fetches.
+     index.html ships `no-store` (already the Mode B door-served case,
+     pass 223 posture; the Pages deploy mirrors it), so the SHELL never
+     stale-caches the module graph.
+  2. APP-LEVEL (`?hash=<breaker>` appendage, owner's exact shape): the
+     frame computes a UI build stamp (the vendored-bundle hash of the
+     current deploy; the Mode B door serves it as a constant from the
+     build, the Pages bridge bakes it at build time) and an API-level
+     cache breaker: every bridge `/api/*` call appends `?h=<asset-hash>`
+     (or a per-worker instance stamp) so intermediaries can NEVER serve
+     a pasted/stale Worker response across deploys. The breaker is
+     VERIFIED at boot: if the shell's hash and the API answer's hash
+     ever disagree (a CDN pinning an old frame against a new functions
+     bundle), the app renders the honest 'stale deploy - hard refresh'
+     state instead of limping on mismatched graphs.
+  3. FUNCTION-LEVEL (endpoint contracts): all door-parity routes
+     already answer `no-store` on every auth/session response (the
+     cookie/session surfaces never cache); SSE is uncacheable by
+     content-type; the bridge's GET endpoints that CAN cache (caps,
+      properties list) declare short explicit max-age instead of
+     heuristics, so no intermediary guesses.
+  Canonical rule: NO timestamp/query-seed cache busters that change
+  every request (they break caching honestly where it helps); hashes
+  change ONLY when content changes - that's the vetted pattern.
 - **Encryption / transport**: everything is SSL-terminated at the edge;
   the pod stays loopback/private behind the Worker; no plaintext hop
   anywhere; strict CSP (6). Gated, authed APIs are the only shape the
