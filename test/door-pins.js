@@ -23,9 +23,15 @@ const PINS = [
     // ---- Priority: the drift-class doors --------------------------------
 
     {   // #168: --status was joined OFF the program name (ran literal `status`)
+        // (ci fix) the pin used to require /On branch/ — an environment
+        // assumption: CI checks out the PR DETACHED ("HEAD detached at
+        // <sha>" on modern git, "Not currently on any branch" on older
+        // ones). The pin still demands REAL git status output — all three
+        // truthful branch-state renderings are accepted, a regressed door
+        // printing an error or 'status: not found' still fails.
         name: 'sync --status (git porcelain, #168)',
         bin: 'sync.js', args: ['--status'], exit: 0,
-        match: [/On branch/]
+        match: [/On branch|HEAD detached at|Not currently on any branch|no commits yet/]
     },
     {   // bare default pull on a configless tree is a REFUSAL (exit 1)
         name: 'sync bare => refusal exit 1 (configless)',
