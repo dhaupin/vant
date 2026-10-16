@@ -76,7 +76,11 @@ function allowListed(rel) {
     if (rel === 'scripts/check-fiction-signatures.js') return true;
     if (/^scripts\/check-.*\.js$/.test(rel)) return true; // gates may quote signatures in their own checks/messages
     if (rel.startsWith('labs/archives/')) return true;
-    if (rel === 'labs/TASKS.md' || rel === 'labs/MEM.md') return true;
+    // (pass 241) TASKS-ARCHIVE.md joins the archive exemption (same
+    // reason as labs/archives/**): it IS the historical ledger half
+    // (verbatim sessions) and quotes the fiction it fixed. Splitting
+    // TASKS.md must not turn history into a red gate.
+    if (rel === 'labs/TASKS.md' || rel === 'labs/MEM.md' || rel === 'labs/TASKS-ARCHIVE.md') return true;
     if (rel.startsWith('models/private/')) return true; // private brain learnings QUOTE fiction to debunk it
     if (rel.startsWith('.migration-fixture/')) return true; // gitignored pre-multi-brain test fixture, point-in-time by design
     if (rel === 'CHANGELOG.md') return true;
