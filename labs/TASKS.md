@@ -35,6 +35,43 @@ long-history half; this file is the working half. When this file
 grows past ~2k lines again, split at session boundary INTO the
 archive (newest-first append there) - never delete history.
 
+## Pass 243d (2026-10-16) - THE CI STABILIZATION TRAIL: green on Actions, four latent classes fixed at cause
+
+**Owner: "Pr ci failed, pls check it out, and we can push after."** The PR
+ci job failed in Actions while everything was green locally — because the
+standalone suites CI runs (alpha-loop over test/*.test.js) had been masked
+failure-after-failure; each fix unmasked the next latent breakage. Four
+real classes, each fixed at cause (never skipped, never weakened):
+
+- **Detached-HEAD wording (2 occurrences)**: Actions checks a PR out at a
+  merge ref; `git status` renders `HEAD detached at pull/N/merge` / `Not
+  currently on any branch`, not `On branch`. Both `test/door-pins.js`
+  (door pins) and `test/qc-cli-contracts.test.js` (#168 contract) encoded
+  the on-branch assumption. Pins now accept every TRUTHFUL rendering and
+  still reject shell-garbage output — proven against a throwaway detached
+  worktree print.
+- **Raw throw in lib/ (the pass-169 sweep):** the RAG projection guard
+  (lib/search.js) threw a plain Error; now a typed `errors.VantError` (the
+  surrounding catch already degrades to an honest null projection + an
+  audible event — behavior unchanged, only the thrown SHAPE conformant).
+- **`vant qc --help` side-ran the whole battery:** bin/qc.js had NO help
+  branch, so `--help` illegally executed every probe (writes from a help
+  call) and exited per their flakiness. `--help` is now a real door:
+  usage + exit 0, no side effects.
+- **Same-port restart flake (guests.test.js):** the CS door block rebound
+  the same port family the H5 block had just closed; undici's keep-alive
+  pool handed back a stale socket → `fetch failed`. The CS block now owns
+  its own port family (13577+pid%40); reproduced locally through CI's
+  standalone sequencing, verified 25/0 x3 + the crash slice clean.
+- **Exact-count pins:** the grand-tour gate B demanded /tools === 328 —
+  stale on every registration (docs-parity gate owns exactness; gate B
+  keeps door-ready + shape + floor). The init-wizard suite ran --yes ONCE
+  then demanded rerun phrases — only true on an already-initialized tree;
+  now runs the wizard twice so rerun idempotence is verified on ANY tree.
+
+Oracle: `ci pass` (6m27s) at 4edd00b — tests 500/0 + all standalone suites
++ the whole lint/docs/coverage stack, plus Cloudflare Pages pass.
+
 ## Pass 243 (2026-10-16) - THE SECURITY-PIPELINE SCAN LANDS: `security_pipeline_report` (pod verb + scanner + status card) + the 4.4/objects spec
 
 **Owner: "scan lib, confirm they're using the pipeline; display lib modules

@@ -5,6 +5,58 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 243d (the CI stabilization trail: green on Actions, four latent classes fixed at cause)
+
+The PR ci job failed in Actions while everything was green locally — each
+real fix unmasked the next failure that prior breakage had masked. All
+fixed at cause (no skips, no weakened checks); CI ends **pass (6m27s)**.
+
+### Fixed - the four classes
+
+- **Detached-HEAD wording, twice**: Actions checks out a PR at a merge
+  ref, where `git status` renders `HEAD detached at pull/N/merge` (modern
+  git) / `Not currently on any branch.` (older) — both `test/door-pins.js`
+  and `test/qc-cli-contracts.test.js` (#168) had encoded an on-branch
+  checkout assumption. Pins now accept every truthful branch-state
+  rendering and still fail a regressed door printing shell garbage.
+- **Raw throw reintroduced into lib/**: the RAG projection guard
+  (`lib/search.js`, the retained-vector invariant) threw a plain Error;
+  the pass-169 raw-throw regression gate caught it in Actions' standalone
+  suites. Now a typed `errors.VantError` — the surrounding catch already
+  degrades any throw to an honest null projection + an audible
+  `search:projection:failed` event, so behavior is unchanged, only the
+  thrown shape is house-conformant.
+- **`vant qc --help` side-ran the full battery**: `bin/qc.js` had no help
+  branch, so `--help` executed every first-user probe (brain/forum/escrow
+  writes from a help call) and exited with whatever the probes decided.
+  `--help` is now a real door: usage + exit 0, no side effects; the
+  battery runs only when asked for.
+- **Same-port server restart flake**: the messages CS door block rebound
+  the same port family the H5 block had just closed in the same process;
+  node's fetch keep-alive pool reused a stale socket to the dead server
+  → `TypeError: fetch failed` right after the fresh server logged it was
+  listening. The CS block now owns its own port family (13577+), removing
+  the whole class.
+
+### Fixed - the two exact-count/one-time assumptions
+
+- `test/e2e-grand-tour.test.js` gate B demanded `/tools === 328` — stale
+  on every tool registration (the registry is at 332; the docs-parity gate
+  `check-mcp-coverage.js` owns exactness). Gate B keeps its own job: door
+  ready, array shape, documented floor.
+- `test/init-wizard.test.js` ran `init --yes` ONCE then demanded rerun
+  phrases — only true on an already-initialized tree, false on a fresh
+  Actions checkout. Rerun idempotence is now verified by RUNNING the
+  wizard twice (create-or-keep, then the rerun must report both "kept"
+  lines).
+
+### Pins
+
+- Door pins 28/28 locally + detached-wording probes against a throwaway
+  detached worktree; qc-cli-contracts 12/0; cli-smoke 2/2; grand tour
+  18/0; guests 25/0 x3 + the crash slice clean under CI's alphabetical
+  sequencing; init-wizard 11/0; backbone-wiring 11/0 (zero raw throws).
+
 ## [Unreleased] - pass 243 (the security-pipeline scan: the pod verb, the scanner, the status card, and the objects container spec'd)
 
 Owner ask: "scan lib, confirm they're using the pipeline; display lib
