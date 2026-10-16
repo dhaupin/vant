@@ -65,6 +65,13 @@ async function main() {
     }
 
     if (cmd === 'status' || cmd === '--status') {
+        // (issue #119) This status MUST reflect what a real writing process
+        // would hold: mutate-path CLIs (bin/teams.js) boot the security
+        // chain first, which hydrates the persisted operator grant
+        // (widen-only). A read-only boot mirrors that without granting
+        // anything extra, so the reported canWrite is the truth a fresh
+        // `vant teams create` would see - not a pre-boot denial.
+        require('../lib/boot').init({ taskId: 'org-status', scopes: ['read'], debug: false });
         const ds = sandbox.defaultSandbox;
         console.log('Org operator status:');
         console.log('  scopes:', JSON.stringify(ds.scopes));

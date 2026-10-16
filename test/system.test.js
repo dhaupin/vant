@@ -76,7 +76,7 @@ console.log('\n🧠 MULTIBRAIN TESTS\n');
 
 // Test 7: system integrates with brain module
 test('system integrates with brain module', () => {
-    const system = require(path.join(ROOT, 'lib', 'system'));
+    const _system = require(path.join(ROOT, 'lib', 'system'));
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     
     const currentBrain = brain.currentBrain();

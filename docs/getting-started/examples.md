@@ -8,26 +8,27 @@ nav_order: 17
 
 # Examples & Showcase
 
-> Real-world projects and code examples built with Vant
+> Real-world projects and code examples built with Vant## Ideas for Projects
 
-## Community Projects
+*(No community showcase yet - these are directions worth building, not
+shipped projects. Submit yours via
+[GitHub Issues](https://github.com/dhaupin/vant/issues) and it will land
+here with a real link.)*
 
-*(Submit yours via [GitHub Issues](https://github.com/dhaupin/issues))*
+## AI Development Agents
 
-### AI Development Agents
+- **Auto-Dev Agent**: a self-improving code agent that learns from debugging sessions
+- **Code Review Bot**: an AI that performs code reviews and remembers patterns
 
-- **Auto-Dev Agent** - Self-improving code agent that learns from debugging sessions
-- **Code Review Bot** - AI that performs code reviews and remembers patterns
+## Research Agents
 
-### Research Agents
+- **Literature Review Agent**: reads papers, synthesizes findings across sessions
+- **Data Analysis Agent**: persistent data exploration and visualization
 
-- **Literature Review Agent** - Reads papers, synthesizes findings across sessions
-- **Data Analysis Agent** - Persistent data exploration and visualization
+## Personal Assistants
 
-### Personal Assistants
-
-- **Writing Coach** - Helps with writing, remembers style preferences
-- **Learning Assistant** - Tracks learning progress across sessions
+- **Writing Coach**: helps with writing, remembers style preferences
+- **Learning Assistant**: tracks learning progress across sessions
 
 ## Use Cases
 Common scenarios where Vant excels.
@@ -300,23 +301,15 @@ async function versionExample() {
 
 > **Warning for GitHub.com**: Auto-save triggers a sync which counts against rate limits and violates GitHub.com ToS if used for continuous polling. **Use for manual save only**, or use with self-hosted GitLab/Gitea.
 
-```javascript
-const autoUpdate = require('./lib/auto-update');
+There is no `lib/auto-update` module. Auto-save-on-exit is what
+`lib/sync.js` push does: wire a SIGINT handler around `vant sync
+--push`, or run `vant sync --push "session save"` before you exit.
 
-function setupAutoSave() {
-  // Enable auto-save
-  autoUpdate.enable();
-  
-  // Configure
-  autoUpdate.on('save', () => {
-    console.log('Brain auto-saved');
-  });
-  
-  // Trigger manually
-  process.on('SIGINT', async () => {
-    await autoUpdate.trigger();
-    process.exit();
-  });
+```javascript
+const sync = require('./lib/sync');
+
+async function saveOnExit() {
+  await sync.push('session save'); // your own rate-limit guard applies
 }
 ```
 

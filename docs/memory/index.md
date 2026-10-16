@@ -28,6 +28,8 @@ Specialist formats:
 | **State spine** | Content-addressed state tree, seeds, anchors, checkpoints - "same state?" is one string comparison | [State spine](/vant/memory/state-spine) |
 | **Horcrux** | A whole brain embedded in an image, encrypted | [Horcrux](/vant/memory/horcrux) |
 | **Geometry** | Quasicrystal addressing for spatial retrieval (experimental) | [Geometry](/vant/memory/geometry) |
+| **Tempo** | The time-dilation keeper: agent attention sampled across an owner-stated wall-clock window | [Tempo](/vant/memory/tempo) |
+| **Leisure** | The want-list keeper: play held between invocations, tied into the zen/dream/tempo loop | [Leisure](/vant/memory/leisure) |
 
 Supporting surfaces: [pruning](/vant/memory/prune) keeps the corpus lean, [citations](/vant/memory/citations)
 ground agent claims in git-backed sources.

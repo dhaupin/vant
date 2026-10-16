@@ -33,11 +33,9 @@ A Telegram bot that lets you:
 ## Step 2: Configure Vant
 
 ```bash
-# Set your Telegram bot token
+# Set your Telegram bot token (ENV ONLY - no config.ini reader exists
+# for this; pasting it into a config file does nothing)
 export TELEGRAM_BOT_TOKEN=123456789:ABCdef...
-
-# Or add to config.ini
-TELEGRAM_BOT_TOKEN=123456789:ABCdef...
 ```
 
 ## Step 3: Start the Bot

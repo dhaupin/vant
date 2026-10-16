@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Bolete tokens - light is the paper default; .dark on <html> swaps sets.
+   prd-brand.md is the copy/voice foundation; these are the visual tokens. */
+:root {
+  --paper: #f5f1e8;
+  --surface: #fdfaf4;
+  --ink: #2b241a;
+  --ink-soft: #6d6152;
+  --accent: #a9701e;
+  --accent-deep: #7c4f11;
+  --line: #e0d6c4;
+  --moss: #4b7a58;
+  --err: #a63d1c;
+}
+.dark {
+  --paper: #16120d;
+  --surface: #211a12;
+  --ink: #ece3d4;
+  --ink-soft: #a3968a;
+  --accent: #dfa14f;
+  --accent-deep: #b07c2f;
+  --line: #3a2e21;
+  --moss: #7db691;
+  --err: #e07752;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-accent: var(--accent);
+  --color-accent-deep: var(--accent-deep);
+  --color-line: var(--line);
+  --color-moss: var(--moss);
+  --color-err: var(--err);
+}
+
+html {
+  background: var(--paper);
+}
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family:
+    Inter,
+    "SF Pro Text",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

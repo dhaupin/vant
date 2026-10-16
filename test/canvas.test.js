@@ -139,7 +139,7 @@ test('getCanvasPath accepts isPublic option', () => {
 
 // Test 14: canvas integrates with brain module
 test('canvas integrates with brain module', () => {
-    const canvas = require(path.join(ROOT, 'lib', 'canvas'));
+    const _canvas = require(path.join(ROOT, 'lib', 'canvas'));
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     
     const currentBrain = brain.currentBrain();

@@ -117,11 +117,13 @@ function loadConfig() {
  * Run git command
  */
 function git(args) {
-    try {
-        return execSync(args.join(' '), { encoding: 'utf8', stdio: 'pipe' });
-    } catch (e) {
-        return e.message;
-    }
+    // (Issue #168 QC) The helper ran `execSync(args.join(' '))` with NO
+    // program name — every status call site passed bare `['status']`, so
+    // the shell executed a program literally named `status` ("
+    // status: not found"), the catch returned the error MESSAGE as the
+    // output string, and main() printed it and exited 0. Program name now
+    // lives here; callers pass git subcommands only.
+    return execSync(['git', ...args].join(' '), { encoding: 'utf8', stdio: 'pipe' });
 }
 
 /**
@@ -252,7 +254,14 @@ function main() { _checkRead();
     } else if (action === 'pull') {
         result = pull();
     } else if (action === 'status') {
-        console.log(git(['status']));
+        // (Issue #168 QC) A failed status must be a failing exit, not a
+        // swallowed error message string printed as "output" with exit 0.
+        try {
+            console.log(git(['status']));
+        } catch (e) {
+            console.error('git status failed: ' + (e.message.split('\n')[0] || 'unknown'));
+            process.exit(1);
+        }
     } else {
         console.log('Usage: vant sync [-h|--help] [-p|-r|-s]');
         process.exit(1);

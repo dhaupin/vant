@@ -118,18 +118,26 @@ test('orgchart stores: brain-scoped default only, no .agent_tmp fallback (pass 2
     return null;
 });
 
-test('relay.js stays deleted; crew-bus is the one transport (pass 39)', () => {
+test('lib/relay.js stays deleted; the r/2 face composes the webhook/door transports (ruling, pass 236)', () => {
+    // (ruling update, pass 236) The owner ruled the LIB MODULE out of
+    // commission for good: the relay face composes webhooks + network +
+    // encrypt + the door and lives in lib/api.js relay. bin/relay.js is
+    // the CLI OVER that face - re-introduced legitimately with the r/2
+    // arc and kept here by the same ruling. What stays banned forever:
+    // ANY new lib/relay module, and a bin/relay.js that bypasses the face
+    // by requiring a lib/relay module.
     if (fs.existsSync(path.join(ROOT, 'lib', 'relay.js'))) return 'lib/relay.js resurrected';
-    if (fs.existsSync(path.join(ROOT, 'bin', 'relay.js'))) return 'bin/relay.js resurrected';
     // Live code only: the removal docs and transform's removal comment name
-    // relay on purpose; a require() or a COMMANDS route is a regression.
+    // relay on purpose; a lib require() inside bin/relay.js is the
+    // regression this guard exists for.
     const scan = (rel, re) => {
         const code = fs.readFileSync(path.join(ROOT, rel), 'utf8').replace(/\/\/.*$/gm, '');
         return re.test(code);
     };
+    if (fs.existsSync(path.join(ROOT, 'bin', 'relay.js'))
+        && scan('bin/relay.js', /require\(['"]\.\.\/lib\/relay['"]\)/)) return 'bin/relay.js requires a lib/relay module again';
     if (scan('lib/transform.js', /require\('\.\/relay'\)|require\("\.\/relay"\)/)) return 'transform.js requires relay again';
-    if (scan('bin/vant.js', /relay:\s*'relay\.js'/)) return 'vant.js routes relay again';
-    if (scan('bin/help.js', /vant relay/)) return 'help.js advertises relay again';
+    if (scan('lib/api.js', /require\(['"]\.\/relay['"]\)/)) return 'api.js requires a lib/relay module again';
     return null;
 });
 

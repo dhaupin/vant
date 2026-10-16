@@ -123,6 +123,29 @@ test('boot init catch block returns failedLayer referencing last loaded layer', 
     return { success: usesLastPushed, error: usesLastPushed ? null : 'failedLayer should reference last-pushed layer' };
 });
 
+// ==================== Issue #175 QC pins ====================
+
+test('boot CLI parses BOTH flag spellings (--image= and --image <value>)', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'bin', 'boot.js'), 'utf8');
+    // The inline (=) form and the space form both route through _flagValue.
+    const hasInline = src.includes(current => current) === false
+        && /startsWith\('--' \+ name \+ '='\)/.test(src);
+    const hasSpaceForm = /indexOf\('--' \+ name\)/.test(src)
+        && /args\[i \+ 1\]/.test(src);
+    const wired = /_flagValue\('image'\)/.test(src) && /_flagValue\('decrypt'\)/.test(src);
+    return { success: hasInline && hasSpaceForm && wired,
+        error: !hasInline ? 'no inline --flag=val parse' : !hasSpaceForm ? 'no space-separated --flag val parse' : !wired ? '_flagValue not wired for image/decrypt' : null };
+});
+
+test('amnesia mode does NOT lie about wiping the brain and exits nonzero', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'bin', 'boot.js'), 'utf8');
+    const honest = src.includes('was NOT modified') && src.includes('horcrux restore');
+    const noSilentZero = /enterAmnesiaMode\(\);\s*\n\s*process\.exit\(1\);/.test(src);
+    const staleZeroGone = !/VANT AMNESIA MODE[\s\S]{0,200}Cleaning brain/.test(src);
+    return { success: honest && noSilentZero && staleZeroGone,
+        error: !honest ? 'amnesia banner lost recovery guidance' : !noSilentZero ? 'all-sources-failed path still exits 0' : !staleZeroGone ? 'still claims brain is wiped' : null };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

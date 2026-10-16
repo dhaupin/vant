@@ -88,7 +88,7 @@ test('audit has isOperationAllowed function', () => {
 console.log('\n🧠 MULTIBRAIN TESTS\n');
 
 test('audit integrates with brain module', () => {
-    const audit = require(path.join(ROOT, 'lib', 'audit'));
+    const _audit = require(path.join(ROOT, 'lib', 'audit'));
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     
     const currentBrain = brain.currentBrain();
@@ -98,7 +98,7 @@ test('audit integrates with brain module', () => {
 });
 
 test('audit uses getBrainPath', () => {
-    const audit = require(path.join(ROOT, 'lib', 'audit'));
+    const _audit = require(path.join(ROOT, 'lib', 'audit'));
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     
     // Audit internally uses brain.getBrainPath()

@@ -54,7 +54,13 @@ async function run() {
                 console.error('Usage: vant geometry store <key> <value>');
                 process.exit(1);
             }
-            await memory.learn('geometry:' + key, value);
+            // (R2-F2, #192) Keys must round-trip through BOTH the learn-write
+            // and the query-read path: a ':' in the key made write land in
+            // geometryfoo/ while read looked in the unsanitized tree and
+            // answered '(not found)' forever. Normalize here so store →
+            // retrieve is the SAME key both ways.
+            const safeKey = key.replace(/[^a-zA-Z0-9._/-]/g, '-');
+            await memory.learn('geometry/' + safeKey, value);
             console.log('Stored:', key);
         } else if (subcmd === 'retrieve' || subcmd === 'recall' || subcmd === 'get') {
             const key = args[1];
@@ -62,7 +68,8 @@ async function run() {
                 console.error('Usage: vant geometry retrieve <key>');
                 process.exit(1);
             }
-            const result = await memory.query('geometry:' + key);
+            const safeKey = key.replace(/[^a-zA-Z0-9._/-]/g, '-');
+            const result = await memory.query('geometry/' + safeKey);
             console.log(result || '(not found)');
         } else if (subcmd === 'barcode') {
             const content = args.slice(1).join(' ');

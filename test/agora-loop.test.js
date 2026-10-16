@@ -49,7 +49,7 @@ fs.rmSync(path.join(ROOT, 'models', 'private', 'vant', 'orgchart'), { recursive:
 fs.rmSync(path.join(ROOT, 'models', 'private', 'vant', 'state'), { recursive: true, force: true });
 
 const teams = require(path.join(ROOT, 'lib', 'teams'));
-const scope = require(path.join(ROOT, 'lib', 'scope'));
+const _scope = require(path.join(ROOT, 'lib', 'scope'));
 const forumMod = require(path.join(ROOT, 'lib', 'forum'));
 const consensus = require(path.join(ROOT, 'lib', 'consensus'));
 const market = require(path.join(ROOT, 'lib', 'market'));

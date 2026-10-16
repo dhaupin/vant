@@ -18,16 +18,28 @@
  *   --stats, -s      Show entropy statistics only
  */
 
-const entropy = require('../lib/encrypt');
+// (R1-F1, #191) The entropy pipeline lives in lib/entropy-patch.js (the
+// REAL implementation - nothing in lib/encrypt.js ever exported the
+// compress family, so every invocation crashed). Same call shapes.
+const entropy = require('../lib/entropy-patch');
 const vaf = require('../lib/vaf');
 const { readFileSync, statSync, mkdirSync, readdirSync } = require('fs');
 const path = require('path');
 
-// (1b) Capability gate — vpatch writes land in models/latent
+// (1b) Capability gate — vpatch writes land in models/latent.
+// (parity with bin/snapshot.js / bin/clean.js) A user-invoked CLI write on
+// a fresh default sandbox self-grants with a notice; an EXPLICITLY locked
+// down sandbox still refuses.
 function _checkWrite() {
     try {
         const sandbox = require('../lib/sandbox');
-        if (sandbox && !sandbox.canWrite()) throw new Error('Write capability required for compress output');
+        if (sandbox.canWrite()) return;
+        const ds = sandbox.defaultSandbox;
+        if (ds && ds._explicitlyConfigured) {
+            throw new Error('Write capability required for compress output (sandbox explicitly locked down; ask the host to grant canWrite)');
+        }
+        ds.setCapabilities({ canRead: true, canWrite: true });
+        console.log('[compress] granted write capability for this process (fresh sandbox)');
     } catch (e) {
         if (/capability/i.test(e.message)) throw e;
     }

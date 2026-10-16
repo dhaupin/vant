@@ -12,11 +12,14 @@ Scheduled job execution.
 
 ## What
 
-Run tasks on schedule:
+Run tasks on a repeating interval:
 
-- Cron expressions
-- One-time jobs
-- Interval jobs
+- Interval jobs ("every 30s" / 1000..86400000 ms)
+- Compute and vectorization schedulers
+- Event emitter hooks (on/once/off for bus events)
+
+There is no cron-expression scheduler; for fixed system-time schedules
+("daily at midnight"), drive the CLI below from a real crontab entry.
 
 ## Schedule
 
@@ -37,13 +40,14 @@ const id = cron.schedule({
 There is no cron-expression parser - schedules are interval-based, and
 intervals outside 1s..1day are rejected (VAF-validated).
 
-## One-Time
+## Event Hooks
 
-Run once:
+The module also exposes the shared event bus (this is `once('<event>')`,
+an EVENT listener - not a scheduler):
 
 ```javascript
-cron.once('event-name', (data) => {
-    console.log('Fired once');
+cron.once('task:completed', (data) => {
+    console.log('Fired once when a task completes');
 });
 ```
 
@@ -74,7 +78,11 @@ cron.scheduleEmbed('reindex', options);                // vectorization
 
 ## CLI
 
-`vant cron` is also a routed command (see `vant cron --help`).
+`vant cron` is also a routed command (see `vant cron --help`):
+`list` / `add <spec> <cmd>` / `remove <id>` / `run <id>` / `status`.
+Specs are interval-style ("30s", "10m", "2h", or ms integer). Jobs are
+scheduler slots in the invoking process - they are not persisted across
+restarts; for durable system-time schedules use a real crontab entry.
 
 ---
 

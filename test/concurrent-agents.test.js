@@ -65,7 +65,7 @@ define('two agents cannot both hold the brain lock (contention race)', async () 
     if (b) validCount++;
 
     // Verify exactly one lock file state consistent with one winner
-    const status = lock.brainLockStatus ? lock.brainLockStatus() : null;
+    const _status = lock.brainLockStatus ? lock.brainLockStatus() : null;
     if (validCount !== 1) {
         // Both acquired = broken mutual exclusion... unless one was a
         // re-entrant refresh of the other's process — not the case here.

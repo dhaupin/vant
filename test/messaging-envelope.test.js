@@ -29,7 +29,7 @@ function pin(name, cond) {
 const M = require('../lib/messaging');
 const Encrypt = require('../lib/encrypt');
 const cb = require('../lib/crew-bus');
-const crypto = require('crypto');
+require('crypto');
 
 // 1. Shape contract
 {

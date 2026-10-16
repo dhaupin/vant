@@ -54,7 +54,7 @@ route runs:
 
 | Method | Path | What |
 |--------|------|------|
-| GET | `/tools` | Tool catalog: the vant surface plus the full MCP tool list |
+| GET | `/tools` | RETIRED (issue #187): `410 Gone` with a pointer to the MCP door's `/tools` - no dashboard-owned parallel tool catalog survives (the MCP door is the API) |
 | GET | `/health` | Liveness ping: `{ "status": "ok", "uptime": ... }` |
 | POST | `/call` | Execute any tool; accepts the JSON-RPC 2.0 `tools/call` envelope or flat `{ "tool", "args" }` |
 

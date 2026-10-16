@@ -114,6 +114,6 @@ See [Multi-brain](/vant/multi-agent/brains) and [Succession](/vant/multi-agent/s
 | [Multi-agent](/vant/multi-agent/brains) | Brains, branches, succession, crews, federation |
 | [Operations](/vant/operations/storage) | Storage, journal, events, cache, CI |
 | [Security](/vant/security/sandbox) | Sandbox, gates, escrow, sudo |
-| [Integrations](/vant/integrations/github) | GitHub, agent skills, Linear, Docker, S3 |
+| [Integrations](/vant/integrations/github) | GitHub, agent skills, Docker, S3 |
 | [Reference](/vant/reference/cli) | CLI commands, configuration, changelog |
 | [Advanced](/vant/advanced/search-architecture) | Search internals, NSC9 spec, style, release process |

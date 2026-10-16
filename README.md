@@ -73,38 +73,61 @@ The full agent loop, written to be executed without a human, is [Agent Onboardin
 | **Succession** | Trust levels control how much state each agent generation inherits |
 | **Horcrux** | Whole brain embedded in an image, encrypted, restorable anywhere |
 | **Security chain** | Sandbox capabilities, input validation, rate limiting, escrow approval on every op |
+| **Guest auth** | Per-identity tokens for the MCP door (`vant guest issue/list/revoke`): observer/human/agent roles on the sandbox capability vocabulary, denylist revocation, single-use pairing voucher for the headless pod |
 | **Crash safety** | Write-ahead journal plus atomic writes: a crash never leaves torn memory |
 
 ## Headless Mode
 
-Use Vant as a library with a REST API (no MCP required):
+The serving pod (`vant headless`, issue #187): the MCP door IS the headless
+API (every registered tool any client gets - no privileged dashboard
+surface exists), with a health-only REST sidecar, node discovery
+registration, the one auth posture, and a pairing code that redeems once
+into an operator guest. Mode is NEVER inferred for an imported module -
+a library import claims no mode until a door is actually used - and
+`VANT_MODE` still forces explicitly:
 
 ```javascript
 const vant = require('./lib/vant');
 
-// Start headless server
-const result = await vant.startHeadless({ port: 3000, debug: true });
-// Returns: { started: true, mode: 'headless', endpoints: { health, tools, brain } }
+// Start the pod (defaults: MCP door on VANT_MCP_PORT or 3457, REST
+// sidecar on VANT_SERVER_PORT or 3456, bind VANT_SERVER_BIND or 127.0.0.1)
+const result = await vant.startHeadless({ debug: true });
+// Returns: { mode: 'headless', ports, endpoints: { mcp, health },
+//            posture, pairing, registered }
+// Direct TLS: set VANT_SERVER_CERT/VANT_SERVER_KEY (plaintext HTTP is
+// loopback-bound unless you pass allowInsecure posture intentionally).
 
-// Or programmatic API (no server)
-await vant.init({ taskId: 'my-task' });
-await vant.learn('key', 'content');
-const content = await vant.remember('key');
+// Or programmatic API (no server) — memory persistence via learn/remember:
+await vant.init({ taskId: 'my-task' });   // boots security layers + habitat
+await vant.learn('key', 'content');       // store (category comes from key prefix)
+const content = await vant.remember('key'); // recall (cache, then brain)
 ```
+
+The pod's REST sidecar answers `/health` (and the registered routes);
+`GET /tools` answers **410 Gone** there since the #187 retire - browse or
+execute tools through the MCP door, whose `/tools` and `/call` aliases
+stay live. Full REST routes in
+[REST API](docs/reference/rest-api.md) and
+[openapi.yaml](docs/openapi.yaml); guest identities in
+[Multi-Guest Auth](docs/security/multi-guest-auth.md).
 
 ### Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `VANT_MODE` | Force mode: `cli`, `mcp`, or `headless` |
-| `VANT_MCP_PORT` | MCP server port |
+| `VANT_MODE` | Force mode: `cli`, `mcp`, or `headless` (default: real doors resolve, imports claim nothing) |
+| `VANT_MCP_PORT` | MCP door / headless API port (default `3457`) |
+| `VANT_SERVER_PORT` | REST sidecar / `vant server` port (default `3456`) |
+| `VANT_SERVER_BIND` | Bind address (default `127.0.0.1`) |
+| `VANT_SERVER_CERT` / `VANT_SERVER_KEY` | TLS cert/key for direct HTTPS |
+| `VANT_MCP_PORT` | MCP server port (default `3457`) |
 | `VANT_MCP_REQUIRE_KEY` | Require API key for MCP access (`true`/`false`) |
 
 ## Upgrading from an older Vant (single-brain layout)
 
 Older versions stored the brain **flat**, all files directly in
-`models/public/` with no per-brain folders and no brain stack. Vant ≥0.9
-(axolotl) uses a **multi-brain layout**: `models/public/<brain>/`,
+`models/public/` with no per-brain folders and no brain stack. Current
+Vant (the axolotl line, v0.8.6) uses a **multi-brain layout**: `models/public/<brain>/`,
 `models/private/<brain>/`, and a brain stack in `models/state.json`.
 
 **If you're upgrading, your brain migrates automatically:** `vant start`
@@ -139,6 +162,16 @@ Notes:
   private state). The old flat files are moved, not copied.
 
 ---
+
+## Web Dashboard (planned)
+
+A React dashboard ("a guest identity with a browser") is specced and
+planned - no code yet. The contract lives in
+[labs/prd-web.md](labs/prd-web.md): `web/<app>` self-contained frontends,
+a Cloudflare Pages Worker proxy to the pod's MCP door, identity tiers,
+a multi-install property switcher, and an in-dashboard module frame.
+Until it ships, the MCP door plus `vant guest` remain the headless
+interface.
 
 ## Documentation
 

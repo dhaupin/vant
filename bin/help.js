@@ -562,9 +562,19 @@ See: vant s3 --help`
         detail: 'Registers this node with the registry and enables\nconsensus layers. See: vant start --distributed'
     },
     all: {
-        desc: 'Start everything (MCP + API servers)',
+        desc: 'Legacy name for the combined server (prefer: vant headless)',
         usage: 'vant all',
-        detail: 'All mode: starts MCP and API servers together.\nSame as: vant mcp && vant api'
+        detail: 'Legacy (#187 retire list): same as the serving pod. Prefer:\n  vant headless - MCP door as THE API, REST health-only, node\n  registration, pairing code, one honest auth posture.'
+    },
+    headless: {
+        desc: 'Start the headless serving pod (MCP door as THE API)',
+        usage: 'vant headless [--port <mcp>] [--api-port <rest>] [--bind <addr>]',
+        detail: `The pod, not "REST without MCP" (issue #187).
+  --port <n>        MCP door port (default VANT_MCP_PORT || 3457)
+  --api-port <n>    REST sidecar port (default VANT_SERVER_PORT || 3456)
+  --bind <addr>     Bind address (default VANT_SERVER_BIND || 127.0.0.1)
+Registers the node, prints the one auth posture, hands out a pairing
+code. See: vant headless --help (tracked: per-identity H1 in #185)`
     },
 
     org: {

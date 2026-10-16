@@ -16,7 +16,7 @@
  */
 
 const path = require('path');
-const { execFileSync } = require('child_process');
+const { execFileSync: _execFileSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 let pass = 0, fail = 0;
@@ -63,7 +63,7 @@ ok('disabled → no further capture (stats disabled)', ev.sinkStats().enabled ==
 
 // ── CLI: producer enables + emits; a follow-up process reads ─────────────
 const { spawnSync } = require('child_process');
-const cli = (cmd, argsArr, env) => spawnSync(cmd, argsArr, { encoding: 'utf8', cwd: ROOT, timeout: 20000 });
+const cli = (cmd, argsArr, _env) => spawnSync(cmd, argsArr, { encoding: 'utf8', cwd: ROOT, timeout: 20000 });
 const producer = cli('node', [
     '-e',
     `const ev = require(${JSON.stringify(path.join(ROOT, 'lib', 'event'))}); ev.sinkEnable(); ev.on('cli:pin', () => {}); ev.emit('cli:pin', { pin: 1 }); ev.emit('cli:pin2', { pin: 2 });`

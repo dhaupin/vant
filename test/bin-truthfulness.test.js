@@ -20,7 +20,7 @@
  * (temp fixture bin/zz-gate-tmp.js, removed on exit)
  */
 
-const { execFileSync, spawnSync } = require('child_process');
+const { execFileSync: _execFileSync, spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 

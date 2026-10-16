@@ -147,7 +147,7 @@ The Vant port map (pass 127 audit). Four listeners, all loopback-bound by defaul
 | Webhook receiver | `lib/webhooks.js` | 3467 | `VANT_WEBHOOK_PORT` | `VANT_WEBHOOK_BIND` |
 | Metrics/health HTTP | `lib/health.js start()` | 3468 | `VANT_HEALTH_PORT` | `VANT_HEALTH_BIND` |
 | Mesh crew bus | `lib/genesis.js` | 4890-4892 | per-call `port` opt | - |
-| Headless mode | `vant.startHeadless()` | follows 3456 | `VANT_SERVER_PORT` | `VANT_SERVER_BIND` |
+| Headless pod | `vant headless` (`vant.startHeadless()`) | MCP 3457 + REST 3456 | `VANT_MCP_PORT` / `VANT_SERVER_PORT` | `VANT_SERVER_BIND` |
 
 Before pass 127: webhooks defaulted to the REST port (3456, a guaranteed collision), the mesh node runner defaulted its MCP door to 3456 too, islands fell back to 3100 (Loki), headless hardcoded port 3000, and the health HTTP server bound 0.0.0.0 - the one listener with no bind argument.
 
@@ -359,8 +359,171 @@ node -e "console.log(require('./lib/sandbox').canRead())"   # Direct sandbox pro
 | Org and teams | [labs/prd-org-teams.md](labs/prd-org-teams.md) |
 | Audit findings | [labs/archives/audits/AUDIT_FINDINGS.md](labs/archives/audits/AUDIT_FINDINGS.md) |
 | Task tracker | [labs/TASKS.md](labs/TASKS.md) |
+| Web frontend PRD | [labs/prd-web.md](labs/prd-web.md) |
 | Docs site | https://docs.creadev.org/vant |
 | CLI reference | https://docs.creadev.org/vant/reference/cli |
+
+## 12. Frontends on Cloudflare Pages (set up YOUR dashboard now)
+
+The web frontends (see `labs/prd-web.md`) deploy to Cloudflare Pages.
+Each frontend is its OWN Pages project with its OWN subdomain.
+
+### 12.1 Setup walkthrough (dashboard, do this while code lands)
+
+1. **Create the Pages project** in the CF dashboard: connect this git
+   repo, production branch `axolotl` (or `main` after merge).
+2. **Configure the build** in project settings:
+
+   | Setting | Value |
+   |---------|-------|
+   | Framework preset | Vite |
+   | Root directory | `web/dashboard` |
+   | Build command | `npm run build` |
+   | Build output directory | `dist` |
+   | Node version | 20+ (environment var `NODE_VERSION=20` if the panel asks) |
+
+   Functions under `web/dashboard/functions/` deploy AUTOMATICALLY with
+   the project - no wrangler config anywhere (prd-web.md 3.7).
+3. **Set the Pages variables** (Settings - Environment variables, both
+   Production and Preview):
+
+   | Variable | Value | Notes |
+   |----------|-------|-------|
+   | `VANT_PROPERTY_LOCAL_ORIGIN` | your pod's MCP door, e.g. `https://pod.example.com` or the tunnel URL below | REQUIRED. Make it HTTPS (Works' runtime upgrades it otherwise) |
+   | `VANT_PROPERTY_LOCAL_NAME` | `home pod` (any label) | optional; shown in the switcher |
+   | `VANT_EDGE_RATE_PER_MIN` | `120` | optional; per-session edge budget |
+   | `VANT_RELAY_ENABLED` | `1` | optional; PIGGYBACK THE RELAY on THIS deploy (dashboard-relay flavor, prd-relay.md 4.0): mounts the gated `/api/r/*` Mode R surface on your Pages functions. Off = the routes do not exist (404), same as the pod's unmounted posture |
+   | `VANT_RELAY_GATE_KEY` | 256-bit hex (mint with `vant relay gate`) | REQUIRED when the relay posture is on; hops MUST present it as `x-relay-gate` (timing-safe). No key set = the surface serves NOTHING (fail-closed). Hop bodies are encrypted envelopes only - plaintext refuses; the edge holds no channel keys |
+
+   **Email-OTP accounts (P2) - the KV binding:** create a KV namespace
+   (Workers & Pages -> KV -> create, any name; then the Pages project
+   -> Settings -> Functions -> KV namespace bindings) and bind it as
+   `BOLETE_KV`. Until the binding exists, email sign-in answers a
+   typed `E_STORE_UNCONFIGURED` and the paste-token gate stays the
+   fallback - honest by design.
+
+   The email vars (all PAGES SETTINGS, never code):
+
+   | Variable | Value | Notes |
+   |----------|-------|-------|
+   | `RESEND_API_KEY` | your resend.com API key | first-party sender path (no SDK; plain fetch) |
+   | `EMAIL_FROM` | `Bolete <signin@your-domain.com>` | a verified sender domain |
+   | `EMAIL_WEBHOOK_URL` | any provider's send endpoint | optional generic fallback (JSON: `{to, subject, text}`) |
+   | `EMAIL_WEBHOOK_TOKEN` | Bearer secret for the webhook | optional |
+   | `VANT_EMAIL_SALT` | a long random string | RECOMMENDED: hashes the email (and codes' key hashing); unset = unsalted hash |
+
+   The property ID for this first install is **`local`** (the URL its
+   views ride is `?p=local`;   the resolver reads `VANT_PROPERTY_<ID>_ORIGIN` upper-cased). This
+   is a ONE dashboard -> N installs model: each attached Vant install
+   gets its OWN pair of vars in THIS SAME Pages project. The vars take
+   multiple definitions - one pair per install:
+
+   ```ini
+   VANT_PROPERTY_LOCAL_ORIGIN=https://home-pod.example.com   # install 1
+   VANT_PROPERTY_LOCAL_NAME=home pod
+   VANT_PROPERTY_WORK_ORIGIN=https://work-pod.example.com    # install 2
+   VANT_PROPERTY_WORK_NAME=work pod
+   VANT_PROPERTY_STAFF_ORIGIN=https://crew.example.com       # install 3
+   VANT_PROPERTY_STAFF_NAME=crew pod
+   VANT_PROPERTY_LAB_ORIGIN=https://lab-pod.example.com      # install 4
+   VANT_PROPERTY_LAB_NAME=lab test pod
+   ```
+
+   Each new pair appears in the dashboard's property switcher (4 above,
+   4 entries) without redeploying app code. Switching keeps your route,
+   module, and filters; everything data-side re-keys to the chosen pod
+   and the SSE stream reconnects (prd-web.md 3.4).
+4. **Make the pod reachable from the edge** - pick ONE:
+   - **Tunnel (recommended for home/VPS pods):** `cloudflared tunnel
+     create vant-pod`, route a hostname like
+     `pod-<murmur>.<your-domain>.com` to `http://localhost:3457`, run
+     the connector on the pod host. Stable egress identity, no ports
+     opened, no allowlist churn - this is the prd-web.md 8.3 fallback
+     path and it dodges the IP-allowlist refresh problem entirely.
+   - **IP allowlist path:** let pages origin fetches hit the door
+     (fetch egress comes from Cloudflare IP ranges,
+     https://www.cloudflare.com/ips/) and allowlist those ranges at the
+     pod's firewall with a scheduled refresh - broad by nature, and
+     refreshes are the owner-posture requirement (prd-web.md 8.3).
+5. **Mint an identity** on the pod:
+   `vant guest issue --name <seat>` and copy the `vguest_` token.
+6. **Log in**: open the dashboard's subdomain, paste the token at the
+   gate. The status page will name anything still missing (functions,
+   origin var, bridge), exactly as built.
+7. **Point the lander's "Dashboard" link** at the new subdomain when
+   satisfied.
+
+### 12.2 Mode B — pod same-origin (the local-ops fallback, OFF by default)
+
+When a Pages deployment is not answering (or a workstation cannot reach
+the tunnel), the pod can serve a frontend bundle itself: the browser
+calls `/mcp/*` directly, same origin, zero CORS, zero Worker hop.
+
+```bash
+vant config set mcp.serveWeb web/dashboard   # or env VANT_MCP_SERVE_WEB
+```
+
+Honest mechanics (pins: `test/pod-serve-web.test.js`):
+
+- The value is a frontend DIRECTORY (e.g. `web/dashboard`) whose `dist/`
+  build must exist. Missing `dist/index.html` = serving stays OFF with a
+  loud warning - the door serves nothing it did not build.
+- The MCP door keeps every owned route: `/mcp/exec`, `/mcp/events`,
+  `/mcp/tools`, `/health`, and tool routes all answer first. Static GETs
+  only; POSTs unknown to the door keep the same 404 JSON as before.
+- Static GETs ride the door's OWN deny chain: the DNS-rebinding Host
+  guard, the cross-origin POST/origin guard, and the EW4 per-client rate
+  budget all apply - serving is not a second, weaker surface. Auth on
+  `/mcp/exec` is UNCHANGED: requireKey and guest tokens gate exec exactly
+  as they do in Mode A.
+- Path guards: dot-led segments (`.env`, `.git`) and anything that would
+  resolve outside the bundle are refused 403; client-side routes fall
+  back to `index.html` (the dashboard router owns its own 404 pages).
+- One door serves one frontend bundle. A second attached install goes
+  through Pages vars per the main table above.
+
+### 12.3 The contract (unchanged)
+
+| Aspect | Rule |
+|--------|------|
+| Location | `web/<app>/` - fully self-contained; nothing it needs lives at repo root |
+| Build | Vite build producing `dist/`; the build exits (serving is Pages' job) |
+| Functions | `web/<app>/functions/` = the `/api/*` Worker proxy (auth forwarded, never logged) |
+| Cloudflare config | PAGES SETTINGS ONLY: vars/bindings. Zero wrangler strings in code |
+| Pod posture | pod stays loopback/private; the Worker is the single bridge |
+| Auth | MVP: paste a guest token (HttpOnly session cookie set by the bridge drives the SSE stream); P2: email-OTP accounts + server-side session binding |
+| Multi-install | the `VANT_PROPERTY_<ID>_*` env registry = one deployment, N installs, view state preserved on switch |
+
+Everything in sections 1-11 remains the POD guide; frontends never
+change the pod's deployment face.
+
+### 12.4 The relay postures (prd-relay.md; the two sides never blur)
+
+Four honest postures, each fully supported, off by default:
+
+| Posture | Where it is set | What it does |
+|---------|-----------------|--------------|
+| OFF (default) | nothing to set | no /api/r surface exists anywhere; a browser that probes it gets the same 404 a pod's unmounted mode gives |
+| POD-ONLY relay (headless flavor) | the pod: `vant config set relay.enabled true` + `vant relay gate` | the REST server mounts the gated `/api/r/*` Mode R surface on its EXISTING posture (loopback/private; widening for WAN hops is YOUR deliberate edge - TLS + auth posture per section 4) |
+| DASHBOARD PIGGYBACK (dashboard-relay flavor) | Pages settings: `VANT_RELAY_ENABLED=1` + `VANT_RELAY_GATE_KEY=<256-bit hex, mint with `vant relay gate`>` | the dashboard's OWN functions serve the same gated Mode R contract (vendored kit, parity-pinned - no separate Pages project; it rides this deploy) |
+| SOLO relay (solo-relay flavor) | its OWN Pages project rooted at `web/relay/` (same two env keys, read at request time) | the PURE live endpoint: chain hops only, no admin surfaces by construction, no default profile pin; exec + the R1 SSE stream-through (`GET /api/r/events`) |
+
+Fail-closed in every posture: enabled without a gate key serves NOTHING
+(hops answer `E_RELAY_GATE_REQUIRED`); hop bodies are encrypted
+envelopes ONLY (plaintext refuses, no downgrade); the gate header is
+spent at the gate, never forwarded.
+
+**Using relays is the USER'S side** and never env-side: dashboard
+Settings #4 carries a **Use relays** toggle (reach pod through relay
+hops / direct, persisted) plus the operator's run-a-relay posture card
+that reads `/api/r/capabilities` and states the truth. Under the
+corrected arc (pass 233) the dashboard also RUNS WITH a relay as a
+setting: **Run with a relay (web/relay endpoint)** takes the relay's
+origin and verifies it live against that relay's public caps page. The full
+operational walkthrough lives in the [relay playbook](/vant/operations/relay-playbook)
+(serving, hosting the solo flavor, piggybacking, using, verifying); the mechanism spec is
+[labs/prd-relay.md](labs/prd-relay.md) and the operations page is
+[docs/operations/relay.md](docs/operations/relay.md).
 
 ---
 

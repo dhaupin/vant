@@ -269,6 +269,42 @@ async function main() {
         assert(configSnapshot() === before, 'bare org must not create or modify any brain config.json');
     });
 
+    // ---------- issue #119: persisted grant is REAL end-to-end ----------
+    console.log('\n  issue #119: the persisted grant answers the teams write path:');
+
+    await test('exactly `vant org grant` then a SEPARATE-process teams write succeeds (#119 repro) + org status shows hydrated truth', () => {
+        // Step 1: the reporter's exact grant command (fresh process).
+        const g = spawnSync('node', [path.join(ROOT, 'bin', 'org.js'), 'grant', '--capabilities', 'canWrite,canAdmin,canDelete'], {
+            cwd: ROOT, encoding: 'utf8', env: { ...process.env, VANT_BRAIN: SCRATCH_BRAIN }
+        });
+        assert(g.status === 0, 'grant exit ' + g.status + ': ' + (g.stderr || g.stdout).slice(0, 300));
+        assert(/persisted to brain config/.test(g.stdout), 'grant must persist (no --session-only): ' + g.stdout.slice(0, 300));
+
+        // Step 2: `vant org status` in a fresh process now reports the HYDRATED
+        // authority (boots read-scope exactly like the write path), not a
+        // pre-boot denial next to a persisted config (the reporter's step-2
+        // complaint that the two contradicted each other).
+        const s = spawnSync('node', [path.join(ROOT, 'bin', 'org.js'), 'status'], {
+            cwd: ROOT, encoding: 'utf8', env: { ...process.env, VANT_BRAIN: SCRATCH_BRAIN }
+        });
+        assert(s.status === 0, 'status exit ' + s.status);
+        assert(/canWrite: true/.test(s.stdout), 'status must show the hydrated canWrite (issue #119 step-2): ' + s.stdout.slice(0, 300));
+
+        // Step 3: the reported step-3 DENIED write, in a fresh process via the
+        // real CLI: `vant teams create` boots read-scope, hydrates, writes.
+        const orgName = 'issue119-org-' + Date.now().toString(36);
+        const w = spawnSync('node', [path.join(ROOT, 'bin', 'teams.js'), 'create', orgName], {
+            cwd: ROOT, encoding: 'utf8', env: { ...process.env, VANT_BRAIN: SCRATCH_BRAIN }
+        });
+        assert(w.status === 0, 'teams create exit ' + w.status + ': ' + (w.stderr || w.stdout).slice(0, 300));
+        assert(new RegExp('Org created: ' + orgName).test(w.stdout), 'write must succeed with the persisted grant: ' + w.stdout.slice(0, 300));
+    });
+
+    // ---------- bare `vant org` must not grant... but still AFTER the #119
+    // test the read-only guarantee must hold (guarded in the bare test
+    // above by byte-equality; a plus-up below keeps the grant path itself
+    // from leaking into `org status`).
+
     // ---------- #110: audit healthCheck contract ----------
     console.log('\n  #110 audit.healthCheck contract:');
 

@@ -6,7 +6,7 @@
  * Run: node test/sandbox.test.js
  */
 
-const fs = require('fs');
+const _fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -44,7 +44,7 @@ function skip(name, reason) {
     console.log(`  ⊘ ${name}: ${reason}`);
 }
 
-async function asyncTest(name, fn) {
+async function _asyncTest(name, fn) {
     try {
         const result = await fn();
         if (result === true || (result && result.success)) {
@@ -142,7 +142,7 @@ test('registerBrainHandler accepts read handler', () => {
     }
     
     try {
-        sandbox.registerBrainHandler('read', (filePath) => {
+        sandbox.registerBrainHandler('read', (_filePath) => {
             return 'test content';
         });
         return { success: true };
@@ -159,7 +159,7 @@ test('registerBrainHandler accepts exists handler', () => {
     }
     
     try {
-        sandbox.registerBrainHandler('exists', (filePath) => {
+        sandbox.registerBrainHandler('exists', (_filePath) => {
             return true;
         });
         return { success: true };
@@ -176,7 +176,7 @@ test('registerBrainHandler accepts list handler', () => {
     }
     
     try {
-        sandbox.registerBrainHandler('list', (dirPath) => {
+        sandbox.registerBrainHandler('list', (_dirPath) => {
             return ['file1.md', 'file2.md'];
         });
         return { success: true };
@@ -217,7 +217,7 @@ test('setCapabilities is callable', () => {
 // ============================================
 
 test('sandbox integrates with vaf', () => {
-    const sandbox = require(path.join(ROOT, 'lib', 'sandbox'));
+    const _sandbox = require(path.join(ROOT, 'lib', 'sandbox'));
     // Just verify it loads without error
     return { success: true };
 });

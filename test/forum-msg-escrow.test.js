@@ -21,16 +21,16 @@
  */
 
 const assert = require('assert');
-const path = require('path');
+require('path');
 
 let passed = 0, failed = 0;
-function ok(name, fn) { /* set by runner below */ }
+function _ok(_name, _fn) { /* set by runner below */ }
 
 async function main() {
     const forumMod = require('../lib/forum');
     const escrowMod = require('../lib/escrow');
     const msgMod = require('../lib/msg');
-    const event = require('../lib/event');
+        require('../lib/event');
 
     // ---- Pin 1: default-open escrow (no budgets configured) ----
     {

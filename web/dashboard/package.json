@@ -1,0 +1,39 @@
+{
+  "name": "vant-dashboard",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "description": "Vant dashboard (codename Bolete) - a guest identity with a browser. See labs/prd-web.md.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b --noEmit && vite build",
+    "typecheck": "tsc -b --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@base-ui/react": "1.9.0",
+    "@tanstack/react-query": "5.104.2",
+    "@tanstack/react-router": "1.170.44",
+    "lucide-react": "1.56.0",
+    "qrcode.react": "4.2.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "tailwindcss": "4.3.3",
+    "typescript": "7.0.2",
+    "vite": "8.3.4",
+    "vitest": "5.0.4"
+  },
+  "__supplyChainPolicy": {
+    "pins": "every dep is EXACT-PINNED (no ^/~ ranges): an auto-release cannot drift under us",
+    "lockfile": "package-lock.json is committed; CI/installs must run npm ci, never npm install",
+    "qr": "qrcode.react@4.2.0 chosen by audited evidence: 0 runtime deps, ISC, signed release tag, no CVEs, OSSF scorecard 5.1 (best of candidates)",
+    "provenance": "integrity hashes come from package-lock.json; upgrading = deliberate bump + review, never implicit"
+  }
+}

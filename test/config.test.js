@@ -25,7 +25,7 @@ function test(name, fn) {
     }
 }
 
-async function asyncTest(name, fn) {
+async function _asyncTest(name, fn) {
     _asyncTests.push({ name, fn });
 }
 
@@ -162,10 +162,33 @@ test('config getLayerStatus is callable', () => {
 });
 
 // ============================================
-// MULTIBRAIN STACK TESTS
+// EW5 TRANSPORT-AUTH HONESTY PINS (#190)
 // ============================================
 
-console.log('\n📚 STACK SUPPORT TESTS\n');
+console.log('\nEW5 HASAPIKEY HONESTY TESTS\n');
+
+test('hasApiKey() ignores ANTHROPIC_API_KEY (EW5, #190)', () => {
+    delete process.env.VANT_API_KEY;
+    process.env.ANTHROPIC_API_KEY = 'sk-ant-ew5-probe';
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    const withProvider = config.hasApiKey();
+    delete process.env.ANTHROPIC_API_KEY;
+    process.env.VANT_API_KEY = 'ew5-probe-key';
+    const withTransport = config.hasApiKey();
+    delete process.env.VANT_API_KEY;
+    // provider key alone must NOT authenticate; transport key alone MUST
+    return { success: withProvider === false && withTransport === true };
+});
+
+test('apiKey() resolver reads VANT_API_KEY only (EW5 canonical seam)', () => {
+    process.env.VANT_API_KEY = 'ew5-resolver-probe';
+    process.env.ANTHROPIC_API_KEY = 'sk-ant-never';
+    const config = require(path.join(ROOT, 'lib', 'config'));
+    const v = config.apiKey();
+    delete process.env.VANT_API_KEY;
+    delete process.env.ANTHROPIC_API_KEY;
+    return { success: v === 'ew5-resolver-probe' };
+});
 
 test('config has getStackConfig function', () => {
     const config = require(path.join(ROOT, 'lib', 'config'));

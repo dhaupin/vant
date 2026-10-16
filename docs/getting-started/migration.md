@@ -9,11 +9,13 @@ description: Moving an old single-brain install to the multi-brain layout. What 
 
 # Migration Guide
 
-> One import, zero hand-moving of files: how a pre-0.9 install becomes a multi-brain install.
+> One import, zero hand-moving of files: how a legacy (single-brain) install
+> becomes a multi-brain install. The multi-brain layout is the defining
+> data shape of the axolotl line you are now running (v0.8.6).
 
-## What changed in v0.9
+## What changed (the axolotl line, first shipped in v0.8.6-axolotl)
 
-Vant 0.9 stores brains in per-brain directories with a persisted stack,
+Current Vant stores brains in per-brain directories with a persisted stack,
 instead of one flat brain:
 
 ```text

@@ -73,7 +73,7 @@ function fail(name, detail) { failed++; console.log('  ✗ ' + name + (detail ? 
 function test(name, fn) {
     try { fn(); ok(name); } catch (e) { fail(name, e.message); }
 }
-async function testAsync(name, fn) {
+async function _testAsync(name, fn) {
     try { await fn(); ok(name); } catch (e) { fail(name, e.message); }
 }
 
@@ -752,7 +752,7 @@ async function main() {
         const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-bv-health-'));
         fs.writeFileSync(path.join(dir, 'identity.md'), '# Me\nMODEL: pin');
         const { checkBrainIntegrity } = require('../bin/health');
-        const bvMod = require('../lib/state/brain-verify');
+                require('../lib/state/brain-verify');
         // fresh brain: health anchors a baseline (warn path), then verifies
         const logs1 = [];
         const origLog = console.log;

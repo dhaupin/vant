@@ -88,7 +88,7 @@ test('security has checkBrainHealth function', () => {
 console.log('\n🧠 MULTIBRAIN TESTS\n');
 
 test('security integrates with brain module', () => {
-    const security = require(path.join(ROOT, 'lib', 'security'));
+    const _security = require(path.join(ROOT, 'lib', 'security'));
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     
     const currentBrain = brain.currentBrain();
@@ -98,7 +98,7 @@ test('security integrates with brain module', () => {
 });
 
 test('security uses getBrainPath', () => {
-    const security = require(path.join(ROOT, 'lib', 'security'));
+    const _security = require(path.join(ROOT, 'lib', 'security'));
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     
     // Security internally uses brain.getBrainPath()
@@ -108,7 +108,7 @@ test('security uses getBrainPath', () => {
 });
 
 test('security uses getBrainStorage', () => {
-    const security = require(path.join(ROOT, 'lib', 'security'));
+    const _security = require(path.join(ROOT, 'lib', 'security'));
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     
     // Security has getBrainStorage function

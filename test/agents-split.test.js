@@ -346,7 +346,7 @@ test('horcrux: gatherState carries full agent records; restoreState roundtrips',
 
 test('horcrux: restoreState with empty array wipes (documented O-8 semantics)', () => {
     const agents = require(path.join(ROOT, 'lib', 'agents.js'));
-    const agentsMod = require(path.join(ROOT, 'lib', 'agents', 'core.js'));
+    const _agentsMod = require(path.join(ROOT, 'lib', 'agents', 'core.js'));
     return Promise.resolve(agents.restoreState({ agents: [] })).then(res => {
         if (!res.wiped) return { success: false, error: `wipe: ${JSON.stringify(res)}` };
         if (agents.get('split-probe-gather') !== undefined) return { success: false, error: 'registry not wiped' };

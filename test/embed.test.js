@@ -137,7 +137,7 @@ test('embedBatch accepts brain option', () => {
 
 // Test 13: embed integrates with brain module
 test('embed integrates with brain module', () => {
-    const embed = require(path.join(ROOT, 'lib', 'embed'));
+    const _embed = require(path.join(ROOT, 'lib', 'embed'));
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     
     const currentBrain = brain.currentBrain();
@@ -148,7 +148,7 @@ test('embed integrates with brain module', () => {
 
 // Test 14: embed uses currentBrain when no brain option
 test('embed uses currentBrain when no brain option', () => {
-    const embed = require(path.join(ROOT, 'lib', 'embed'));
+    const _embed = require(path.join(ROOT, 'lib', 'embed'));
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     
     const currentBrain = brain.currentBrain();

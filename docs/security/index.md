@@ -41,9 +41,11 @@ Hardening a self-hosted or multi-agent deployment: [Best
 Practices](/vant/security/best-practices) first, then [Environment &
 Limits](/vant/security/environment) for the env vars that tune each layer.
 Understanding a specific refusal or block: find the layer above and read
-its page.
+its page. Issuing scoped door credentials to a second dashboard, an
+operator's browser, or a working peer agent: [Multi-Guest
+Auth](/vant/security/multi-guest-auth) (H1 of #185).
 
 ## Related
 
 - [Configuration](/vant/reference/config) - Config keys including MCP auth
-- [CLI Reference](/vant/reference/cli) - `secret`, `sandbox`, `sudo`, `encrypt`
+- [CLI Reference](/vant/reference/cli) - `secret`, `sandbox`, `sudo`, `encrypt`, `guest`

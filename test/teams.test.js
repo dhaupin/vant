@@ -97,6 +97,62 @@ test('createRole creates role', () => {
 });
 
 // ============================================
+// ISSUE #120: PARENT-FIRST POSITIONAL CALLS
+// ============================================
+// A caller using createDept(orgId, 'engineering') / createTeam(deptId,
+// 'name') had the PARENT ID silently stored as the name and the chosen
+// name thrown away (options object position). The lib now reorders when
+// arg0 resolves to an existing parent record and arg1 is a string.
+
+console.log('\n🔀 ISSUE #120 PARENT-FIRST POSITIONAL TESTS\n');
+
+// Test 10a: grant write capability up front (same test-harness grant
+// teams-crossprocess.test.js uses) so the #120 setup calls can run.
+{
+    try { require(path.join(ROOT, 'lib', 'sandbox')).defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canSpawn: true, canExecute: true }); } catch (e) { /* env without defaultSandbox: proceeds under allow-default */ }
+}
+// Unique-per-run org name: the orgchart store persists across runs, so
+// fixed fixture names re-collide as E_DUPLICATE on the second run.
+const I120_ORG = 'Issue120Org-' + Date.now().toString(36);
+const I120_DEPT = 'engineering-' + Date.now().toString(36); // unique per run: the orgchart store persists
+test('createDept(orgId, name) stores the chosen name (issue #120)', () => {
+    const teams = require(path.join(ROOT, 'lib', 'teams'));
+    const org = teams.createOrg(I120_ORG);
+    if (!org || org.error || !org.id) return { success: false, error: 'org setup: ' + JSON.stringify(org || null) };
+    const dept = teams.createDept(org.id, I120_DEPT);
+    if (!dept || dept.error) return { success: false, error: 'createDept: ' + JSON.stringify(dept) };
+    return { success: dept.name === I120_DEPT && dept.org === org.id,
+        error: 'name=' + JSON.stringify(dept.name) + ' org=' + JSON.stringify(dept.org) };
+});
+
+test('createTeam(deptId, name) stores the chosen name (issue #120)', () => {
+    const teams = require(path.join(ROOT, 'lib', 'teams'));
+    const dept = Array.from(teams.listDepts()).find(d => d.name === I120_DEPT);
+    if (!dept) return { success: false, error: 'setup dept missing: ' + I120_DEPT };
+    const teamName = 'gistory-core-' + Date.now().toString(36); // unique per run: the orgchart store persists
+    const team = teams.createTeam(dept.id, teamName);
+    if (!team || team.error) return { success: false, error: 'createTeam: ' + JSON.stringify(team) };
+    return { success: team.name === teamName && team.dept === dept.id,
+        error: 'name=' + JSON.stringify(team.name) + ' dept=' + JSON.stringify(team.dept) };
+});
+
+test('documented signature (name, {org}) unchanged after reorder fix', () => {
+    const teams = require(path.join(ROOT, 'lib', 'teams'));
+    const deptName = 'I120 Doc Sig Dept-' + Date.now().toString(36);
+    const dept = teams.createDept(deptName, { org: I120_ORG });
+    if (!dept || dept.error) return { success: false, error: JSON.stringify(dept) };
+    return { success: dept.name === deptName, error: JSON.stringify(dept) };
+});
+
+test('plain-name createDept not affected (name never impersonates a parent)', () => {
+    const teams = require(path.join(ROOT, 'lib', 'teams'));
+    const deptName = 'I120 Plain Dept-' + Date.now().toString(36);
+    const dept = teams.createDept(deptName, { org: I120_ORG });
+    if (!dept || dept.error) return { success: false, error: JSON.stringify(dept) };
+    return { success: dept.name === deptName, error: JSON.stringify(dept) };
+});
+
+// ============================================
 // MULTIBRAIN TESTS
 // ============================================
 
@@ -136,7 +192,7 @@ test('listAssignments accepts brain filter', () => {
 
 // Test 15: Brain module integration
 test('teams integrates with brain module', () => {
-    const teams = require(path.join(ROOT, 'lib', 'teams'));
+    const _teams = require(path.join(ROOT, 'lib', 'teams'));
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     
     const currentBrain = brain.currentBrain();

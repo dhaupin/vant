@@ -25,7 +25,7 @@ function test(name, fn) {
     }
 }
 
-async function asyncTest(name, fn) {
+async function _asyncTest(name, fn) {
     _asyncTests.push({ name, fn });
 }
 

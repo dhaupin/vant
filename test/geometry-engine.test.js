@@ -25,7 +25,7 @@ try {
     juliaBin = execFileSync('which', ['julia'], { encoding: 'utf8' }).trim();
 } catch (e) { /* not installed */ }
 
-const assert = require('assert');
+const _assert = require('assert');
 const engine = require('../lib/geometry/engine');
 
 let passed = 0, failed = 0;

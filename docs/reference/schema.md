@@ -8,8 +8,8 @@ nav_order: 130
 # Brain Schema
 
 > **Note:** Brain content lives per-brain under `models/public/<brain>/`
-> and `models/private/<brain>/` (multibrain layout); `MODEL_PATH` is a
-> `config.ini` key for the models root. See [Configuration](/vant/reference/config).
+> and `models/private/<brain>/` (multibrain layout); `MODEL_PATH` (env var)
+> points at the models root. See [Configuration](/vant/reference/config).
 
 Files in your brain folder (default: the `vant` brain):
 

@@ -83,6 +83,24 @@ vant boot --image=https://raw.githubusercontent.com/user/repo/main/brain.png
 - Image must be PNG format
 - Large brains need chunked images
 
+## Amnesia mode (all boot sources fail)
+
+When `vant boot` cannot find any usable boot source (no `--image`, every
+source in the auto-boot order fails), it enters **Amnesia Mode**: an
+explicit on-screen banner ("VANT AMNESIA MODE") that records an amnesia
+state marker and keeps going WITHOUT the booted brain.
+
+Important, verified against the code (`bin/boot.js enterAmnesiaMode`):
+**the brain tree is NOT modified - nothing is wiped.** An older build
+printed "Cleaning brain and starting fresh" but never deleted anything;
+the current wording says exactly what happens. Recovery is manual:
+
+```bash
+vant horcrux restore <svg> <password>
+# or
+vant backup restore backups/<file>.tar.gz
+```
+
 ## Related
 
 - [Steganography](/vant/memory/stego) - Image encoding

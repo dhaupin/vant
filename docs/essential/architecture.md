@@ -75,7 +75,7 @@ Start → Sync from GitHub → Load brain → Think/Learn → Commit → Push to
 
 ### Models Structure
 
-The multi-brain layout (v0.9): per-brain directories plus the active
+The multi-brain layout (the axolotl line, v0.8.6): per-brain directories plus the active
 stack in `models/state.json`. Legacy flat trees are imported by
 `vant migrate` (see the [Migration Guide](/vant/getting-started/migration)).
 

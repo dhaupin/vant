@@ -13,13 +13,24 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 > Cloudflare headless mode for agent canvas. MCP→API unified abstraction.
 
 ### Config Documentation
-- [ ] Update config.example.ini with all new config.js settings
-  - VANT_BRAIN_PASSWORD_TIMEOUT
-  - server.insecure, server.authRequired
-  - storage.path
-  - And other missing env vars from lib/config.js
-- [ ] Audit settings.ini / settings.example.ini - these are separate from config.js (user personality/preferences vs system config)
-  - Determine if they should migrate to config system or stay separate
+- [x] Update config.example.ini with all new config.js settings (pass 225)
+  - VANT_BRAIN_PASSWORD_TIMEOUT - documented (brain.passwordTimeout, 15min default)
+  - server.insecure, server.authRequired - documented (listener TLS/auth block)
+  - storage.path - documented (VANT_STORAGE_PATH, sits beside MODEL_PATH)
+  - Full coverage: a new ENV REGISTRY section lists the complete
+    lib/config.js ENV_REGISTRY (58 entries incl. the #189-R1 canon
+    VANT_AUTH_KEY) with fallbacks; `vant config list env` is the live
+    view. Pins in test/config-registry.test.js extract every env-name
+    assignment from config.example.ini and refuse fabricated names; the
+    non-secret registry must be covered in the file (secrets + provider
+    connector tokens stay env-pointer-only by disposition).
+- [x] Audit settings.ini / settings.example.ini - these are separate from config.js (user personality/preferences vs system config)
+  - Disposition (pass 225, in both ROADMAP and the file header): they
+    STAY separate - personality/identity/output styling is user
+    preference, not system configuration; migrating would couple mood
+    to tenant config for zero reuse. The historical RAG block already
+    migrated to VANT_RAG_* envs (pass 194); bare names remain accepted
+    aliases.
 
 ### Prompt Caching / Context Engine (lib/context.js)
 > See also: [Parallel Brain Stacking](#parallel-brain-stacking) - graph mode integrates with context assembly

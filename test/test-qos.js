@@ -8,7 +8,7 @@
 
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..');
+const _ROOT = path.resolve(__dirname, '..');
 const qos = require('../lib/qos');
 const { RateLimiter } = qos;
 
@@ -53,7 +53,7 @@ function test(name, fn) {
     }
 }
 
-function skip(name, reason) {
+function _skip(name, reason) {
     results.skipped++;
     results.tests.push({ name, status: 'skipped', reason });
     console.log(`  ⊘ ${name}: ${reason}`);

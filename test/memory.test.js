@@ -68,6 +68,25 @@ test('getStats works', () => {
     return true;
 });
 
+// (R3-F6, #193) `memory list` reported `state:0 categories:{}` even right
+// after a successful learn: getStats() only counted the in-process caches and
+// never the learn store. getStats() now reports the actual learn-store doc
+// count (category .md files under the ACTIVE brain root), so the CLI stat is
+// truthful. Pin: learn two UNIQUE docs (unique per run - a repeated key would
+// overwrite and show no delta) and assert the count moves by exactly +2.
+asyncTest('getStats reports the learn store (#193 R3-F6)', async () => {
+    const m = require('../lib/memory');
+    const before = m.getStats().learn;
+    const stamp = Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+    await m.learn('r3f6-pin-' + stamp + '/doc-one', 'pin body one', { ttl: 600000 });
+    await m.learn('r3f6-pin-' + stamp + '/doc-two', 'pin body two', { ttl: 600000 });
+    const stats = m.getStats();
+    assert(typeof stats.learn === 'number', 'learn count missing from getStats');
+    assert(stats.learn === before + 2,
+        'learn count did not include the two new docs: ' + (before) + ' -> ' + stats.learn);
+    return true;
+});
+
 asyncTest('state stores value', async () => {
     const m = require('../lib/memory');
     const r = await m.state('test-key', 'test-value', { ttl: 60000 });
@@ -112,6 +131,25 @@ asyncTest('query retrieves document from DISK with a cold cache (cross-process s
     m._cache.delete(cacheKey);
     const c = await m.query('cold-cache-doc');
     assert(c && c.startsWith('disk body'), 'cold query missed the disk path: ' + JSON.stringify(c));
+    return true;
+});
+
+// (Issue #174 QC pin) learn('key', body) writes the LEARN layout —
+// <category-or-key>/default.md on disk, NOT state/. The pass-203 fix mirrors
+// that layout in recall()'s fallback, so a learn→recall round-trip must now
+// succeed COLD (fresh process semantics): drop the state memo entries, then
+// recall must find the learn-layout row through brain.load and unwrap it.
+asyncTest('recall retrieves a LEARN-layout write with a cold cache (learn→recall round-trip, #174)', async () => {
+    const m = require('../lib/memory').memory;
+    const body = 'learn-body-' + Date.now();
+    await m.learn('pin-174-roundtrip', body, { ttl: 600000 });
+    // Cold cache: drop BOTH layout memo entries so recall must hit disk.
+    const brain = (m._getBrainName ? m._getBrainName() : 'default');
+    m._cache.delete(brain + ':state:pin-174-roundtrip');
+    m._cache.delete(brain + ':learn:pin-174-roundtrip');
+    const v = await m.recall('pin-174-roundtrip');
+    assert(typeof v === 'string' && v.startsWith('learn-body-'),
+        'cold recall missed the learn layout (#174 fallback): ' + JSON.stringify(v));
     return true;
 });
 

@@ -437,7 +437,7 @@ test('brainNeurons has synapses, attention, predictions', () => {
 
 test('brainNeurons has attention for brains in stack', () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const stack = brain.getStack();
+    const _stack = brain.getStack();
     const neurons = brain.brainNeurons();
     // Should have attention for at least current brain
     return { success: typeof neurons.attention === 'object' };

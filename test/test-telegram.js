@@ -7,7 +7,7 @@
 
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..');
+const _ROOT = path.resolve(__dirname, '..');
 const telegram = require('../lib/telegram');
 
 // Test results

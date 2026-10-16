@@ -116,7 +116,7 @@ define('status() reports target and marker', async () => {
 // ---------- 2. real migration against live tree (this repo is a fixture itself) ----------
 
 define('migrate() is idempotent (second run applies nothing)', async () => {
-    const r1 = await migrations.migrate();
+    const _r1 = await migrations.migrate();
     const r2 = await migrations.migrate();
     const ok = r2.applied.length === 0 && r2.skipped.length === migrations.STEPS.length;
     return { success: ok, error: `second run applied: ${r2.applied.map(a => a.id).join(',')}` };
@@ -817,7 +817,7 @@ define('legacy-main: migrate.js --status prints loud legacy notice; apply-failur
             encoding: 'utf8', timeout: 60000, cwd: dir,
             env: { ...process.env, NODE_OPTIONS: '--require ' + JSON.stringify(preload) }
         });
-        const out = (s.stdout || '') + (probe.stdout || '');
+        const _out = (s.stdout || '') + (probe.stdout || '');
         return { success: /OLD-STYLE BRAIN/.test(s.stdout || '') && s.status === 0 &&
                         fail.status === 1 && /could not verify/.test(fail.stdout || ''),
                  error: `statusOut=${(s.stdout || '').slice(0, 200)} failCode=${fail.status} failOut=${(fail.stdout || '').slice(0, 200)} failErr=${(fail.stderr || '').slice(0, 150)}` };

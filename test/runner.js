@@ -8,7 +8,7 @@
  *        node test/runner.js --bin vant
  */
 
-const fs = require('fs');
+const _fs = require('fs');
 const path = require('path');
 
 // Get vant root directory
@@ -21,7 +21,7 @@ const results = {
   errors: []
 };
 
-function pass(name, details = '') {
+function pass(name, _details = '') {
   results.passed++;
   console.log(`✓ ${name}`);
 }
@@ -53,7 +53,7 @@ function testLib(name, modPath, tests = {}) {
     
     // Function tests
     if (tests.functions) {
-      for (const [fn, expected] of Object.entries(tests.functions)) {
+      for (const [fn, _expected] of Object.entries(tests.functions)) {
         if (typeof mod[fn] === 'function') {
           pass(`${name}.${fn} is function`);
         } else {
@@ -296,6 +296,25 @@ async function main() {
   
   if (!binFilter || binFilter === 'help') {
     await testBin('help', './bin/help.js');
+  }
+  
+  // ============================================
+  // DOOR PINS (issue #181: contract pin per CLI door)
+  // ============================================
+  
+  // The output-shape half `testBin` lacked: each door's DOCUMENTED argv
+  // contract (exit code + stdout), sourced from the door's own help. A
+  // pin failing is a bug, never a pin-weakening (see test/door-pin.js).
+  if (!binFilter || binFilter === 'doors') {
+    try {
+      const { runDoorPins } = require('./door-pin');
+      const { PINS } = require('./door-pins');
+      const r = runDoorPins(PINS);
+      if (r.failed > 0) throw new Error(r.failed + ' door pin(s) failed');
+      pass('door pins batch (' + (r.passed + r.failed) + ' doors, ' + r.passed + ' held)');
+    } catch (e) {
+      fail('door pins batch', e.message);
+    }
   }
   
   // ============================================

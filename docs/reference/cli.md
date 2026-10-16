@@ -107,16 +107,17 @@ addressing. See [Memory](/vant/memory/brain) and [Brain Search](/vant/memory/sea
 
 ```bash
 vant memory state <key> <value>    # Store state (TTL cache)
-vant memory recall <key>           # Get state
+vant memory recall <key>           # Get state (state first, then LEARN-LAYOUT fallback)
 vant memory learn <key> <content>  # Learn document (persists)
-vant memory query <key>            # Query document
+vant memory query <key>            # Query document (learn-store reader)
 vant memory address <data>         # Store at geometric address
 vant memory locate <barcode>       # Locate by barcode
 vant memory list                   # Show stats
 vant memory clear                  # Clear all
 
 vant memory learn goals "Ship the T2 sweep."  # Store a document (persists)
-vant memory recall goals                      # Recall state by key
+vant memory recall goals                      # Recall it (learn-layout fallback reads what learn wrote)
+vant memory query goals                       # Read the learned doc directly (same layout, query path)
 
 vant search <query>                # Default: hybrid
 vant search <query> --mode basic   # Text search
@@ -128,8 +129,11 @@ vant search --stats                # Index stats
 vant rerank <query>                # Rerank for context
 vant rerank compress <file>        # Compress a results file
 
-vant embed list                    # Providers: hash, local, openai
-vant embed set openai              # Set provider
+vant embed list                    # List AVAILABLE providers (always: hash;
+                                    # openai only with OPENAI_API_KEY set,
+                                    # local only with @xenova/transformers)
+vant embed set openai              # Set provider for THIS process (does not
+                                    # persist; if unavailable nothing switches)
 vant embed info                    # Show provider info
 vant embed generate "text"         # Generate an embedding
 vant embed batch "one" "two"       # Batch embeddings
@@ -152,11 +156,12 @@ lib API (`memory.state(key, value, { ttl })`) - there is no `--ttl` CLI flag.
 
 | Command | Description |
 |---------|-------------|
-| `vant run` | Stub - prints runtime quickstart guidance (use `vant start` or `vant node`) |
+| `vant run` | Banner + quickstart pointing to `vant start`/`vant node` (a stub by design; `-p`/`-m` in the usage line are accepted but not wired) |
 | `vant node` | Persistent node (continuous run with brain loaded) |
 | `vant agents` | Multi-agent management (list, spawn, kill, info, status, prune - real, persisted) |
 | `vant islands` | Island component boot |
 | `vant mcp` | MCP server for AI tools |
+| `vant headless` | Serving pod front door (#187): MCP door as THE API, REST health-only, node registration, pairing code, one honest auth posture |
 | `vant api` | API utilities (status, routes, call) |
 | `vant org` | Operator grant utility (default `status`; `grant` persists unless `--session-only`; boot widens fresh processes) |
 | `vant trust` | Reputation and trust scores |
@@ -169,6 +174,7 @@ lib API (`memory.state(key, value, { ttl })`) - there is no `--ttl` CLI flag.
 
 ```bash
 vant run                    # Stub: prints quickstart guidance and exits
+                            # (use vant start or vant node for the real runtime)
 
 vant node --mcp             # Node plus MCP server
 vant node --mcp-port 4000   # Custom MCP port
@@ -205,9 +211,9 @@ vant resolution status
 vant resolution resolve          # Mark resolved
 vant resolution reject           # Mark rejected
 
-vant succession                  # Show current trust level
-vant succession get
-vant succession set <level>
+vant succession                  # Show current trust level (status)
+vant succession set <level>      # high | medium | low | none
+                                 # (there is no `get` verb - bare is the reader)
 
 vant snapshot                    # Default output: <brain>/boot/<agent>-p_<pw>.svg
 vant snapshot --agent nova       # Snapshot under a specific agent name
@@ -342,6 +348,7 @@ vant brain mode dual            # dual | public | private | remote
 | Command | Description |
 |---------|-------------|
 | `vant server` | HTTP/HTTPS server with security chain |
+| `vant relay` | Headless relay posture (Mode R status + gate key; prd-relay.md R0) |
 | `vant network` | Peer network operations |
 | `vant nodes` | Peer discovery |
 | `vant remote` | Remote add/remove/list |
@@ -381,6 +388,18 @@ vant telegram
 | `vant escrow` | Escrow service for operations ([reference](/reference/escrow)) |
 | `vant audit` | Generate an audit report |
 | `vant audit-ledger` | Inspect rotated audit-ledger archives in models/audit-rotate/ (pass 118) |
+| `vant guest` | Per-identity multi-guest auth (issue/list/revoke + pairing redemption; H1 of #185 - [reference](/security/multi-guest-auth)) |
+
+```bash
+vant guest issue --name <name> [--role human|agent|observer] [--scope team:backend] [--expires 7d]
+vant guest list
+vant guest revoke <id>
+vant guest pair --code <code-from-vant-headless>
+```
+
+Guest tokens are `vguest_<id>_<secret>` randoms, hashed at rest; roles ride
+the sandbox capability vocabulary (observer read-only, human +write+spawn,
+agent +exec), never a fourth permission system.
 
 ```bash
 vant sandbox status
@@ -434,19 +453,32 @@ vant audit-ledger --all --action fatal --limit 20  # filter + newest N
 | `vant system` | System diagnostics and layer status |
 | `vant shell` | Shell operations |
 | `vant boot` | Ghost boot from a stego image |
+| `vant headless` | The serving pod: MCP door as THE headless API + health-only REST sidecar + node registration + pairing code (#187) |
+| `vant tempo` | Time-dilation keeper: wall-clock budget samples exploration slices spread ACROSS the interval (`begin/status/stop/end/receipts/pace`; #197) |
+| `vant leisure` | Want-list keeper: play persistence (`want/list/pursued/forget/suggest/pursue/status`; #196) |
+| `vant zen` | The breathing/idle seam |
+| `vant consciousness` | The idle/state consults engine |
+| `vant era` | Era sessions: work sessions with rollups |
+| `vant trace` | Event-trail tracing |
+| `vant init` | The First Five Minutes wizard (interactive first-boot setup; #182) |
+| `vant qc` | First-user self-check battery (reality, brain, membrane, doors; #181 Part B) |
 
 ```bash
 vant metrics                    # Registry summary
 vant metrics --prom             # Prometheus exposition format
 vant metrics storage            # Per-store aggregation
 
-vant cron list
-vant cron add <spec> <cmd>
-vant cron remove <id>
+# Cron: interval specs only ("30s", "10m", "2h", ms). Jobs are scheduler
+# slots in the running process - not persisted across restarts. For fixed
+# system-time schedules drive this from a real crontab entry.
+vant cron list                 # Scheduled slots in THIS process
+vant cron add <spec> <cmd>     # Prints the job id to paste into remove
+vant cron remove <id>          # Removes a slot added in this process
 vant cron run <id>
 vant cron status
 
-vant clean --dry-run            # Preview without changes
+vant clean --dry-run            # Preview without changes (self-grants write
+                                # on a fresh sandbox, like vant snapshot)
 vant clean logs                 # Clean logs only
 vant clean tmp
 vant clean cache
@@ -626,7 +658,7 @@ These commands support development and CI. Most users will not need them.
 ```bash
 vant test          # Smoke tests (default)
 vant test core     # Brain, storage, core modules
-vant test full     # All tests (500+)
+vant test full     # All tests (~1,800 declared cases across 200+ /test suites)
 
 vant test-all      # 17 self-checks across health/search/islands/lib exports
                    # (routes bin/test-all.js; cwd-independent: runs from any directory)

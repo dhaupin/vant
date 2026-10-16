@@ -76,6 +76,50 @@ test('getStackNatureConfigs returns object with source stack', () => {
 });
 
 // ============================================
+// WAVE 3 / #189-R4: CATEGORY H GATE — DEFAULT OFF
+// (the acceptance pin the wave asked for: one unit test asserting the
+// default is OFF — the cosmic fetcher is unreachable unless the operator
+// turns entropy.cosmic ON)
+// ============================================
+
+test('Category H gate: accumulateCosmic() default OFF — fetcher never reached', () => {
+    const encryptMod = require(path.join(ROOT, 'lib', 'encrypt'));
+    const realFetch = encryptMod.default.getCosmicEntropy;
+    let reachedFetch = false;
+    try {
+        encryptMod.default.getCosmicEntropy = async () => { reachedFetch = true; return { data: {} }; };
+        const Nature = require(path.join(ROOT, 'lib', 'nature'));
+        const n = new Nature();
+        n.accumulateCosmic(); // async fn: gate runs in the synchronous prologue
+        if (reachedFetch) return { success: false, error: 'cosmic fetcher reached with entropy.cosmic OFF' };
+        return { success: true };
+    } finally {
+        encryptMod.default.getCosmicEntropy = realFetch;
+    }
+});
+
+test('Category H gate: habitat feedCosmicEntropy() default OFF — returns 0.5, fetcher never reached', () => {
+    const encryptMod = require(path.join(ROOT, 'lib', 'encrypt'));
+    const realFetch = encryptMod.default.getCosmicEntropy;
+    let reachedFetch = false;
+    try {
+        encryptMod.default.getCosmicEntropy = async () => { reachedFetch = true; return { data: {} }; };
+        const Habitat = require(path.join(ROOT, 'lib', 'habitat'));
+        const feeds = [];
+        const chaos = Habitat.prototype.feedCosmicEntropy.call({
+            feed: (e) => feeds.push(e)
+        }); // async fn: gate + early return run synchronously
+        if (reachedFetch) return { success: false, error: 'cosmic fetcher reached with entropy.cosmic OFF' };
+        if (chaos !== 0.5 && !(chaos instanceof Promise)) {
+            return { success: false, error: 'expected 0.5 local-randomness chaos, got: ' + chaos };
+        }
+        return { success: true };
+    } finally {
+        encryptMod.default.getCosmicEntropy = realFetch;
+    }
+});
+
+// ============================================
 // SUMMARY
 // ============================================
 

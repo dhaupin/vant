@@ -116,7 +116,7 @@ test('#100 horcrux create auto-appends its stone dir to .ignore; rg skips it', (
     fs.writeFileSync(IGNORE, sanitized);
     try {
         fs.mkdirSync(path.join(ROOT, 'p89-stones'), { recursive: true });
-        const r = runNode(['bin/horcrux.js', 'create', 'p89-stones/p89-rg-p_x.svg', 'x']);
+        const r = runNode(['bin/horcrux.js', 'create', 'p89-stones/p89-rg-p_x.svg', 'x', '--add-to-ignore']);
         const out = (r.stdout || '') + (r.stderr || '');
         if (r.status !== 0) return { error: `create exited ${r.status}: ${out.slice(-400)}` };
         if (!out.includes('Search hygiene: added p89-stones/*.svg')) {

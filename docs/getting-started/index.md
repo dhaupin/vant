@@ -19,7 +19,7 @@ description: Install Vant, run setup, and get an agent wake-sleep loop working i
 | [Setup](/vant/getting-started/setup) | Configuration and first-run wizard |
 | [Deploy](/vant/getting-started/deploy) | Local, Docker, VPS, and the port map (canonical guide: repo DEPLOY.md) |
 | [Agent Onboarding](/vant/getting-started/agent-onboarding) | The wake-work-sleep loop for agents |
-| [Migration Guide](/vant/getting-started/migration) | Upgrading a pre-0.9 single-brain install |
+| [Migration Guide](/vant/getting-started/migration) | Upgrading a legacy single-brain install |
 | [Examples](/vant/getting-started/examples) | Copy-paste usage examples |
 | [FAQ](/vant/getting-started/faq) | Common questions |
 | [Contributing](/vant/getting-started/contributing) | PRs, style, and repo conventions |

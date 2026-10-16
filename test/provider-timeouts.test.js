@@ -28,7 +28,7 @@
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 
-const errors = require(path.join(ROOT, 'lib', 'error'));
+const _errors = require(path.join(ROOT, 'lib', 'error'));
 const network = require(path.join(ROOT, 'lib', 'network'));
 const { GitProvider } = require(path.join(ROOT, 'lib', 'remote'));
 const sync = require(path.join(ROOT, 'lib', 'sync'));

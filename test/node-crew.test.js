@@ -26,7 +26,7 @@ function test(name, ok, detail) {
 const consensus = require(path.join(ROOT, 'lib', 'consensus'));
 const registry = require(path.join(ROOT, 'lib', 'node-registry'));
 const market = require(path.join(ROOT, 'lib', 'market'));
-const trust = require(path.join(ROOT, 'lib', 'trust'));
+const _trust = require(path.join(ROOT, 'lib', 'trust'));
 const stego = require(path.join(ROOT, 'lib', 'stego'));
 const sandbox = require(path.join(ROOT, 'lib', 'sandbox'));
 

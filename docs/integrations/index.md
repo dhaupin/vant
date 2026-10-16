@@ -4,7 +4,7 @@ permalink: /integrations/
 layout: default
 title: Integrations
 nav_order: 80
-description: Connecting Vant to external services - GitHub, Telegram, Linear, Docker, LLM providers, and skills.
+description: Connecting Vant to external services - GitHub, Telegram, Docker, LLM providers, and skills.
 ---
 
 # Integrations
@@ -15,7 +15,7 @@ description: Connecting Vant to external services - GitHub, Telegram, Linear, Do
 |------|-----|
 | [GitHub](/vant/integrations/github) | Brain storage, sync, and the GitHub API |
 | [Agent Skills](/vant/integrations/agent-skills) | Skill packages agents can load |
-| [Linear](/vant/integrations/linear) | Issue tracking island |
+| [Linear](/vant/integrations/linear) | Not integrated (manifest stub only) |
 | [Docker](/vant/integrations/docker) | Running Vant in containers |
 | [Telegram Bot](/vant/integrations/telegram-bot) | Control and query Vant over Telegram |
 | [Providers](/vant/integrations/providers) | LLM provider configuration |

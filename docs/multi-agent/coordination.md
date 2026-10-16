@@ -33,10 +33,11 @@ main branch (production)
 Configure for your environment.
 
 ```bash
-# Each agent gets own branch (repo branches - `vant branch` is the
-# brain-branch manager: status/auto/commit/push/pr/diff)
-vant git-branch create agent-1
-vant git-branch create agent-2
+# Each agent gets own repo branch via plain git (or let the
+# brain-branch manager drive it: `vant branch auto` creates a
+# branch from dirty brain changes; `vant branch status/push/pr`)
+git checkout -b agent-1
+git checkout -b agent-2
 ```
 
 ## Agent Code

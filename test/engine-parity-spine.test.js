@@ -169,7 +169,7 @@ async function storage() {
     const { HotSet } = require('../lib/state/hotset');
     const { StateAnchor } = require('../lib/state/anchor');
     const { SnapshottedLog } = require('../lib/state/checkpoint');
-    const { StateTree } = require('../lib/state/tree');
+    const { StateTree: _StateTree } = require('../lib/state/tree');
 
     test('#149 ring offset + closed-form depth agree at every ring boundary', () => {
         assert.strictEqual(fold.capacityLawHolds(), true);
@@ -216,8 +216,8 @@ async function storage() {
         assert.ok(Math.abs(m.savings_ratio - 0.5) < 1e-12);
     });
 
-    const ckDir = tmpdir('ck');
-    let ckLog;
+        tmpdir('ck');
+    
 
     function makeCk(dir, everyN) {
         const state = { items: {} };
@@ -459,7 +459,7 @@ async function geometry() {
         const raid = require('../lib/geometry/raid');
         const { CellStore } = require('../lib/state/cellstore');
         const cs = new CellStore();
-        const { shards, manifest, cells } = raid.fragment('parity payload', { k: 4, docId: 'doc-A', cellStore: cs });
+        const { shards: _shards, manifest, cells } = raid.fragment('parity payload', { k: 4, docId: 'doc-A', cellStore: cs });
         assert.strictEqual(cells.length, k = manifest.k + 1, 'every shard claimed (data + parity)');
         assert.ok(cells.every(c => /^[0-9a-f]{64}$/.test(c.cell)), 'cell addresses are spine-PRF hex');
         const same = raid.fragment('parity payload', { k: 4, docId: 'doc-B', cellStore: cs });
@@ -546,7 +546,7 @@ async function worldClock() {
 
     test('#160 circular coplanar pair: favorability OSCILLATES with synodic period', () => {
         // THE regression: distance-based implementations return a constant here
-        const pivot = { radius: 100, period: 100000 };
+        // (pass 227) the `pivot` literal was never consumed — removed as dead code.
         const moon = { radius: 1, period: 10000 };
         const earth = { radius: 1, period: 6000 };
         const opts = { bodyA: moon, bodyB: earth, ideal: 0, maxSpan: Math.PI / 2 };

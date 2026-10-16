@@ -45,7 +45,7 @@ Inside the container the image binds all interfaces (`VANT_SERVER_BIND=0.0.0.0` 
 
 ## Reading Order
 
-- [Setup](/vant/getting-started/setup) - config.ini and tokens
+- [Setup](/vant/getting-started/setup) - config.ini (sync target) and tokens
 - [Docker](/vant/integrations/docker) - container specifics
 - [Security](/vant/security/sandbox) - the deny-by-default chain
 - Repo [DEPLOY.md](https://github.com/dhaupin/vant/blob/main/DEPLOY.md) - everything above, in depth

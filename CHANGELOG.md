@@ -5,6 +5,869 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 243d (the CI stabilization trail: green on Actions, four latent classes fixed at cause)
+
+The PR ci job failed in Actions while everything was green locally — each
+real fix unmasked the next failure that prior breakage had masked. All
+fixed at cause (no skips, no weakened checks); CI ends **pass (6m27s)**.
+
+### Fixed - the four classes
+
+- **Detached-HEAD wording, twice**: Actions checks out a PR at a merge
+  ref, where `git status` renders `HEAD detached at pull/N/merge` (modern
+  git) / `Not currently on any branch.` (older) — both `test/door-pins.js`
+  and `test/qc-cli-contracts.test.js` (#168) had encoded an on-branch
+  checkout assumption. Pins now accept every truthful branch-state
+  rendering and still fail a regressed door printing shell garbage.
+- **Raw throw reintroduced into lib/**: the RAG projection guard
+  (`lib/search.js`, the retained-vector invariant) threw a plain Error;
+  the pass-169 raw-throw regression gate caught it in Actions' standalone
+  suites. Now a typed `errors.VantError` — the surrounding catch already
+  degrades any throw to an honest null projection + an audible
+  `search:projection:failed` event, so behavior is unchanged, only the
+  thrown shape is house-conformant.
+- **`vant qc --help` side-ran the full battery**: `bin/qc.js` had no help
+  branch, so `--help` executed every first-user probe (brain/forum/escrow
+  writes from a help call) and exited with whatever the probes decided.
+  `--help` is now a real door: usage + exit 0, no side effects; the
+  battery runs only when asked for.
+- **Same-port server restart flake**: the messages CS door block rebound
+  the same port family the H5 block had just closed in the same process;
+  node's fetch keep-alive pool reused a stale socket to the dead server
+  → `TypeError: fetch failed` right after the fresh server logged it was
+  listening. The CS block now owns its own port family (13577+), removing
+  the whole class.
+
+### Fixed - the two exact-count/one-time assumptions
+
+- `test/e2e-grand-tour.test.js` gate B demanded `/tools === 328` — stale
+  on every tool registration (the registry is at 332; the docs-parity gate
+  `check-mcp-coverage.js` owns exactness). Gate B keeps its own job: door
+  ready, array shape, documented floor.
+- `test/init-wizard.test.js` ran `init --yes` ONCE then demanded rerun
+  phrases — only true on an already-initialized tree, false on a fresh
+  Actions checkout. Rerun idempotence is now verified by RUNNING the
+  wizard twice (create-or-keep, then the rerun must report both "kept"
+  lines).
+
+### Pins
+
+- Door pins 28/28 locally + detached-wording probes against a throwaway
+  detached worktree; qc-cli-contracts 12/0; cli-smoke 2/2; grand tour
+  18/0; guests 25/0 x3 + the crash slice clean under CI's alphabetical
+  sequencing; init-wizard 11/0; backbone-wiring 11/0 (zero raw throws).
+
+## [Unreleased] - pass 243 (the security-pipeline scan: the pod verb, the scanner, the status card, and the objects container spec'd)
+
+Owner ask: "scan lib, confirm they're using the pipeline; display lib
+modules outside pipeline (unless whitelisted)" — plus the six new
+security-family dashboard modules and THE CONTAINER. The scan itself
+LANDED pod-side; the six modules are spec'd in prd-web (build next).
+
+### Added - `security_pipeline_report` (the pod-side scan)
+
+- **`lib/security-pipeline.js` (NEW)**: walks the pod's `lib/` tree
+  (shallow = module roots by default; `maxDepth` for deeper) and
+  detects middleware-chain wiring evidence per module — a require of
+  `sandbox`/`vaf`/`qos`/`escrow` (the AGENTS.md chain order);
+  `audit`/`habitat` adjacency recorded as informational, never gates.
+  Unwired stays UNWIRED (nothing greenwashed); an unreadable file or
+  an unreadable dir reports honestly instead of crashing.
+- **The door verb (`lib/mcp.js`)**: admin-only (the `guest_list`
+  precedent — pod-internal topology keeps no shape for guests,
+  #185's enumeration lesson); merges the operator whitelist from
+  brain config `security.pipelineAllow` (comma-separated module
+  names, `vant config set`-managed) into `exempt` — whitelisted is a
+  STATED choice, not a colored-over gap. Auditable, never noisy.
+- **Live truth at HEAD**: 180 modules scanned, 65 with gate wiring,
+  115 outside the pipeline, 0 exempt. The pod NEVER auto-flips any
+  config for an unwired module — the scan reports, the operator
+  decides.
+- **Dashboard (status #3)**: a `PipelineScanCard` renders the report
+  verbatim (`wired n/scanned · k outside · m exempt`, unwired names
+  listed); a typed door refusal renders as the card. The frontend
+  still reads no pod source (the one-way boundary holds).
+- **Spec'd (labs/prd-web.md 4.4 + rows 29-34)**: the same contract
+  written down, plus `objects` (#34) — THE CONTAINER: a router-OS
+  style, operator-definable pod-side object (`{id, kind, title,
+  schema?, attaches[]}`, typed attach refs, `object_*` door verbs at
+  P4) — and the six security-family modules (security/vaf/qos/rls/
+  rules/objects). prd-relay §6 explicitly keeps the pipeline surfaces
+  DASHBOARD-ONLY (the solo relay gains no security module).
+
+### Pins
+
+- `test/security-pipeline.test.js` (NEW, 8/8): report shape,
+  per-layer wiring detection, the shallow-default depth cap,
+  nothing-greenwashed unwired, whitelist→exempt (with `.js`-suffix
+  normalization), informational-layers-never-gate, missing-dir
+  honest zero, and a live `lib/` truth probe.
+- MCP docs coverage 332 = 332 (the `security_pipeline_report` row +
+  the previously-missed `pairing_voucher_*` rows landed).
+
+## [Unreleased] - pass 239 (the canonical stone: boot-folder cleanup, the carrier abstraction recorded, horcrux refreshed)
+
+The axolotl stone is now THE engineering onboarding artifact - one
+canonical stone in the boot chain, everything else archived with
+provenance. No pod-core change; this pass is archive order + a recorded
+requirement + a stone refresh (same password).
+
+### Housekeeping - the boot folder is CANONICAL-ONLY
+
+- `models/public/vant/boot/` now carries exactly: the axolotl stone
+  (`axolotl-p_axolotl2026.svg`, VALID by inspect, 279/279 brains), its
+  README, and the `.sha256` checksum. The stray companion file —
+  `mushroom-axolotl-2026.md`, the axolotl era's personal/philosophy
+  layer (read before archiving, as the owner asked) — moved to
+  `labs/archives/horcruxes/mushroom-axolotl-2026.md` with a provenance
+  entry in that README. Archived, not deleted.
+- Era stones (`buffy-p_buffy2026.svg`, `nova-p_nova2026.svg`) remain in
+  the same archive with their restore lines; the boot chain discovers
+  only the canonical stone.
+
+### Spec'd - the covert-carrier abstraction (prd-web.md 4.2)
+
+- QR is promoted from a pairing feature to ONE interface module in a
+  carrier ladder: stego (the SVG horcrux, exists), NSC9 storage keys
+  (the address-shaped durable encoding), generic barcodes (build), and
+  future transports. The pattern: vant abstracts itself over covert
+  data carriers, and ANY service may use them.
+  - Ladder: frontend pairing (LANDED as the seed — the scannable
+    voucher QR) -> frontend services (a carrier-neutral component; the
+    caller names the carrier, the UI states what a recipient needs to
+    decode it) -> the pod mimics the pattern (`lib/carriers/*` + door
+    verbs) when a real endpoint demands it (airgap propagation,
+    POS-style voucher scan, printable chain recovery).
+  - Invariants carried forward: hash-verified payloads (the .sha256 pin
+    cadence), carriers NEVER smuggle un-gated capability (a decoded
+    voucher still redeems through `guests.pair()`; a decoded chain
+    still probes the public caps route), honest refusals per carrier.
+- Recorded as a REQUIREMENT, not a build-now: lands when a real
+  endpoint needs it.
+
+### The stone, refreshed for onboarding
+
+- `models/private/axolotl/identity.md` rewritten for the canonical
+  role: who reads the stone (onboarding agents, contributors' PRs, the
+  boot chain), the learning-hygiene rule — a contributor horcrux is
+  QUARANTINE-FIRST: inspect it, verify claimed learnings against real
+  code (an exit code or a pin, never folklore), and only then lift
+  content into the repo. This is how the canonical stone controls the
+  narrative without becoming a rumor mill.
+- Horcrux refreshed IN PLACE with the SAME password (`axolotl2026`, the
+  `p_` filename convention unchanged); `.sha256` sidecar re-pinned to
+  the fresh bytes (sha256sum -c OK).
+
+## [Unreleased] - pass 238 (the P2 spawn leg closed: the canSpawn pod-side decision, documented)
+
+No new mechanism - the spawn leg of `work_assign` was already resolving
+through the full sandbox chain end-to-end, and the honest gap was
+DOCUMENTATION: the surface story named the refusal (`E_SPAWN_REFUSED`)
+without naming the chain or the knobs that answer TRUE. This pass triaged
+the rung and upgraded the truth.
+
+### Documented - the spawn-leg chain, verified live
+
+- **The door's guest gate** classifies spawn-class verbs
+  (`agent_spawn`/`agent_delegate`/`agent_kill`/`agent_terminate`/
+  `work_assign`) and demands the `canSpawn` capability (the H1-era law
+  from pass 211; pinned in `test/guests.test.js` - a medium-trust guest
+  keeps spawn, a low-trust guest is stripped).
+- **`agents.spawn` (lib/agents/core.js)** then runs
+  `sandbox.can('canSpawn')` - sudo-aware via the CAP_TO_SCOPE mapping
+  (the pass-118 live-fire fix: a granted `canSpawn` satisfies the mapped
+  `spawn` scope), persistent-grants aware (the #162 durable tier), with
+  the `agents.maxAgents` quota and the spawn rate limit checked before
+  any capability question. The spawn refusal rides `work_assign`'s typed
+  `E_SPAWN_REFUSED` (the pass-212 refusal law, unchanged).
+- **The host knobs that answer TRUE, by name**: `vant org grant`
+  (persists `orgchart.operatorCapabilities`; boot hydrates widen-only
+  per the pass-88/123 semantics), the MCP `sudo_grant` escalation door,
+  or issuing the guest with an `agent`-grade role at `medium`+ trust
+  (the role -> capability map decides). The pod NEVER widens `canSpawn`
+  merely because a guest connects: deny-by-default stands and
+  `E_SPAWN_REFUSED`/`E_GUEST_CAP` are honest verdicts, not open work.
+
+### Docs truth upgraded
+
+- `docs/security/multi-guest-auth.md`: the spawn-leg closure stated
+  chain-wide; the ambiguous "H6 runway" note retired - pairing
+  machinery, the door tools and the dashboard QR render are LANDED
+  (the pass-237 arc), the remaining rung is P6b e2e key-binding
+  (prd-relay.md), which is not H6.
+- `labs/prd-web.md`: the P3 phase section states landed-vs-remaining
+  per module and moves the spawn leg from open work to CLOSED.
+
+No pod-core change (nothing was broken), no behavior change (denials
+unchanged, truth upgraded).
+
+## [Unreleased] - pass 215 (#185 closed: per-guest read-verb enumeration throttle + the docs freshness sweep)
+
+The last #185 runway item. The guest-management verbs were already
+admin-blocked (a guest never manages guests); the remaining enumeration
+vector was read-class verbs themselves — a guest machine-walking rosters,
+lists and counters learns the SHAPE and SIZE of tenants it cannot see.
+
+### Added - the per-guest read budget (`lib/guests.js` + the door)
+
+- **`guests.checkReadBudget(guestId)`**: fixed-window budget on the door
+  for guest read-class verbs. Identity-keyed by design (NOT IP): two
+  guests behind one NAT keep independent budgets, and one burned budget
+  never throttles a neighbor. EW4-mechanics: bounded FIFO-evicted bucket
+  map, refusals charged only by the clock.
+- **Defaults**: 120 reads per 60s window (a dashboard cadence, not a
+  crawler). Env `VANT_GUESTS_READ_BUDGET` (0 disables) tunes the budget;
+  `VANT_GUESTS_READ_WINDOW_MS` is the honest tuning seam — the window is
+  read PER CALL, so runtime/test tuning applies after first require (the
+  pin caught a module-load-snapshot window that made late env tuning a
+  lie — fixed before it shipped).
+- **Refusal shape**: typed `429` with `reasonCode: E_GUEST_THROTTLED` and
+  `retryAfterMs`; the event bus hears `guest:throttled` and the door logs
+  `guest_throttled` like every other denial.
+- Hosts and write/exec verbs untouched (the EW4 per-client IP limiter
+  still covers everything above this layer).
+
+### Docs freshness sweep (owner ask)
+
+- Greps for claims made stale by passes 211-215: none found beyond the
+  accurate historical references to the FIXED bugs (the pass-214 notes).
+  Registry counts (328), REST/CLI coverage, era/chat and channel-scope
+  docs verified current.
+- Full lint stack green: style, links, frontmatter, language, fiction
+  signatures, truthfulness (126 files, 131 routed verbs), MCP docs
+  coverage 328 = 328, CLI coverage 132.
+- New env knobs documented at [Multi-Guest
+  Auth](/vant/security/multi-guest-auth), consistent with the
+  `VANT_MCP_RATE_LIMIT` env-side precedent.
+
+### Pins
+
+- `test/mcp.test.js` (+3, 17/17 x2): the budget trips typed (reads 1-3
+  pass, read 4 answers 429 `E_GUEST_THROTTLED` + `retryAfterMs` while the
+  host sails through); PER-IDENTITY isolation with clock recharge (a
+  second guest reads fine while the first is exhausted, and the first
+  recharges after the window); `budget=0` disables cleanly.
+
+## [Unreleased] - pass 214 (#185 channel scope: the owner concept for msg channels + two live bugs found by its own survey)
+
+The pass-213 follow-through the boundary statement promised: msg channels
+gain a claim-once OWNER ref so `msg_list` filters per tenant the same way
+`agent_list` does. Two pre-existing bugs fell out of the survey and are
+fixed in the same pass.
+
+### Fixed - two live bugs the survey caught
+
+- **`msg_send` wrote garbage**: the MCP handler passed the STRING content
+  into `msg.send(channel, message)`, and send's `{...message}` spread turned
+  the string into `{"0":"c","1":"o",...}` on EVERY channel write (internal
+  callers like `lib/forum.js` always pass objects, which is why it hid).
+  Channel messages now carry `{ from, content, timestamp }`.
+- **`msg_list` ignored its own arguments**: the handler called
+  `_msg.list(channel, limit)` — but `Msg.list()` takes NO arguments and
+  returns CONVERSATIONS, so every `msg_list` call answered the conversation
+  roster regardless of channel/limit (the docs always said "List messages
+  in channel"). Now answers the channel's FIFO tail, sliced by `limit`.
+
+### Added - channel owner (`lib/msg.js` + the MCP door)
+
+- **`msg.send(chan, msg, { scopeOwner })`**: stamp-on-create binds a NEW
+  channel to a tenant; invalid refs throw loud; on an existing channel the
+  stamp is ignored (claim-once).
+- **`msg.setChannelOwner(chan, ref)`**: claims an unowned channel
+  (reserving its bucket), REFUSES to steal a differently-owned one
+  (`E_CHANNEL_OWNED`, typed), idempotent for the same owner.
+- **`msg.channelOwner(chan)`** accessor; `clear()` drops the owner WITH the
+  channel; the owner rides the arch-A snapshot (restart survival).
+- **Door tenant posture (same rule as `agent_list`, pass 213)**: foreign
+  scoped channels are WITHHELD on `msg_list` (honest empty tail, no
+  existence leak) and REFUSED on `msg_send` (`E_TENANT_CHANNEL`, BEFORE the
+  write — the gate itself fails closed on both verbs). A first guest write
+  to an unowned channel stamps the guest's `scopeOwner`. Unscoped channels
+  stay PUBLIC (the `lib/scope normalize()` legacy read rule) and a
+  scopeOwner-less guest IS the default tenant. Hosts are untouched.
+
+### Pins
+
+- `test/msg.test.js` (+4, 29/29 ×2): stamp-on-create + loud invalid ref,
+  claim/typed-steal-refusal/idempotence, owner dies with the channel,
+  restart survival.
+- `test/guests.test.js` (+8, 25/25 ×2): the door truth — public readable,
+  claim-once stamp, own-tenant read, foreign withheld + typed refusal with
+  content untouched, host unaffected, bare guest claims nothing and reads
+  nothing foreign.
+
+## [Unreleased] - pass 213 (#185 H5: per-tenant list filtering — the pass-211 boundary closed)
+
+Pass 211 shipped the guest layer honestly and DECLARED its boundary: org-wide
+list surfaces answered a guest with the whole board. That blockade is now
+lifted — the crew roster answers a guest with ITS tenant's rows only.
+
+### Added - per-tenant roster filtering (`lib/guests.js` + the MCP door)
+
+- **`guests.tenantAgentVisible(agentId, guestOwnerRef)`**: the crew-roster
+  rule is MEMBERSHIP truth — agents assigned inside the guest's resolved
+  container (`scope.resolveMembers` over the guest's `scopeOwner`) are the
+  guest's crew; everything else is another tenant's roster. Fail-closed at
+  every miss: an unscoped guest sees an EMPTY roster; an unknown container
+  denies; a roster-module miss denies (never fail-open).
+- **`guests.tenantVisible(recordOwnerRef, guestOwnerRef)`**: the general
+  matcher for records that carry an owner ref. Unscoped record = public
+  (the `lib/scope normalize()` legacy read rule); a scoped row is visible
+  only to its own tenant or an ANCESTOR CONTAINER (org sees its depts and
+  chained teams; dept sees its teams; an agent member sees its member-set
+  containers). No hierarchy guessing — every step reads a real row.
+- **Door wiring (`lib/mcp.js`)**: `agent_list` behind the exec door filters
+  per tenant when the caller is a guest and reports the honest `count`.
+  Non-guest calls flow through untouched. A filter failure degrades to an
+  honest empty roster — never a crash, never unfiltered rows.
+
+### Boundary statement (docs/security/multi-guest-auth.md)
+
+- The pass-211 "org-wide lists are operator-trust surfaces" caveat is
+  RETIRED for the roster; what remains tracked: H6 QR pairing UX and
+  channel-scope marking for `msg_list` (channels have no owner concept yet).
+
+### Pins
+
+- `test/guests.test.js` (+4, 17/17 × 2 runs): matcher rules (public row /
+  own row / stranger row / scoped-row-vs-default-tenant), ancestry chain
+  through real teams rows (consistency with `resolveMembers` itself),
+  fail-closed misses, and the DOOR truth: host sees all, a team-scoped
+  guest sees exactly its member agent, an unscoped guest sees none.
+
+## [Unreleased] - pass 212 (#185 H2/H3/H4: the event tap, era-context chat, and the composed work order)
+
+Three more #185 hits, each small in surface and heavy in composition.
+H2 was a live bug hunt: the tap's events never boarded because the bus
+dispatches `fn(data, type)` and the door handler declared `(type, data)`
+— every arrivee was the type string swapped for the payload. H3 fixed a
+second one found by its own pins: the era/task tag rode the in-memory
+conversation but not its snapshot, so a restart dropped it.
+
+### Added - work_assign: the composed verb (`lib/mcp.js`)
+
+- **`work_assign`**: one call = the full work handoff — task text +
+  optional escrow budget hold + agent spawn (or reuse an existing agent
+  by id) + task delegation + era fold (`task:assigned` — a bare
+  work_assign matches no era catalogue prefix and would no-op silently).
+- **Refusal law**: every failed leg returns a typed honest refusal
+  (`E_TASK_ABSENT` via the schema gate, `E_AGENT_ABSENT`,
+  `E_BUDGET_REFUSED`, `E_SPAWN_REFUSED`, `E_DELEGATE_REFUSED`). Leg
+  order is deliberate: budget gates fire BEFORE spawn, so a refused
+  budget leaves no orphan agent; a refused delegation RELEASES the hold
+  so nothing strands reserved budget.
+- Explicit `agentId` is honored exactly — never silently replaced with
+  a fresh spawn.
+
+### Added - era-context chat tagging (`lib/msg.js`)
+
+- **`msg.create({ era, task })`** tags a chat thread with the era (and
+  task) it belongs to; `msg.info()` exposes it; **`msg.eraContext(id)`**
+  is the side-panel rollup: `open` = live record from `era.current()`
+  with honest bucket counts; `closed` = light archived record from
+  `era.list()`; `unknown` = tagged with an id neither open nor archived
+  — no fabricated zeros. `era.current()` takes NO args; an open era
+  never makes someone else's conversation "open" (the cross-era pin).
+- era/task ride the arch-A snapshot (`state/msg-conversations.json`),
+  so a chat keeps its tag through a restart.
+
+### Added - the MCP event tap (`lib/mcp.js`)
+
+- Guests with the spawn role subscribe to a live event family
+  (`*`/family regex): `emit` beats keep the door's taps alive on a
+  timer and any arriving event updates the tap frame directly.
+
+### Pins
+
+- `test/mcp.test.js` (+5): schema gate, absent-agent refusal (roster
+  untouched), verbatim sandbox refusal, pre-spawn budget refusal (no
+  orphan), and composition LIVE (spawn + hold + delegate + fold in one
+  call). 14/14 green.
+- `test/msg.test.js` (+9): tagging, hostile-tag rejection, honest
+  absence, open/closed/unknown rollup states, restart survival, and the
+  cross-era honesty pin. 25/25 green across three runs.
+- `test/tap.test.js`: the fix to the emit→dispatch path plus honest
+  beat timing.
+
+## [Unreleased] - pass 211 (#185 H1: per-identity multi-guest auth)
+
+Issue #185's TOP item lands: one authenticated boot, many concurrent
+guests. A live bug fired during the pins and was fixed: the original
+token alphabet (`_` inside base64url ids/secrets) made the
+`vguest_<id>_<secret>` split ambiguous — greedy captures swallowed the
+separator into a bogus id and freshly-issued tokens intermittently
+failed verify. Both parts are hex now; the split is total.
+
+### Added - guests: the per-identity layer (`lib/guests.js`, NEW)
+
+- **`guests.issue/verify/revoke/list/pair`**: tokens `vguest_<id>_<secret>`
+  (random, NOT message-derived, so revocation is denylist-backed and
+  honest), SHA-256 hashed at rest (the habitat precedent), the raw
+  secret shown ONCE. Ledger `models/private/<brain>/.guests.json` (the
+  `.audit.json` containment precedent; inside the gather walk so a
+  restored stone keeps its roster). Honest failure: a failed write
+  issues NO token (fail-closed) and is audible (`audit` line).
+- **Roles ride the capability vocabulary** (never a fourth permission
+  system): observer = read/load/list; human = +write/+spawn (the
+  #185 acceptance — a remote browser CAN spawn work); agent = +exec.
+  `trustLevel` RESTRICTS only: medium/high keep role grants, low strips
+  exec+spawn, none caps to read. `scopeOwner` validates through the
+  `lib/scope.js` parser (fail-closed on unknown kinds).
+- **The door gate (lib/mcp.js)**: guest tokens verify BEFORE execute and
+  carry their OWN identity (userId `guest:<id>`, defensive-null registry
+  fields — a guest never impersonates an agent). Verbs classify
+  read/write/exec/admin; unknown = write fail-closed; spawn-class verbs
+  check `canSpawn`; `guest_issue/list/revoke` are ADMIN-ONLY (a guest
+  can never enumerate guests — the issue's enumeration lesson). The
+  requireKey boundary accepts valid guest tokens like habitat tokens.
+- **Pairing voucher**: `vant headless` persists its pairing code as a
+  HASH in the guest ledger; `vant guest pair --code ...` redeems
+  single-use (wrong code refuses timing-safely; second use refuses;
+  expiry after 24h) into an operator (`human`) guest. A voucher, not a
+  standing credential.
+- **The auth.js seam is REAL for guests**: `revokeToken('vguest_...')`
+  routes to the denylist (the pass-207 honesty note updated,
+  still naming the seam); `getAccessLevel` grades guest keys as
+  `guest:<role>`; `checkPermission` answers ENFORCED verdicts for guest
+  keys and keeps its documented no-op for shared keys.
+- **Doors**: CLI `vant guest issue|list|revoke|pair` (routed; cli.md row
+  landed — the coverage gate had been flagging 7 unrouted bins: era,
+  guest, init, leisure, qc, tempo, trace — ALL classes now have their
+  cli.md rows, gate PASS at 132 bins). MCP tools `guest_issue/guest_list/
+  guest_revoke` (admin-only, repeated at the handler so stdio inherits
+  the verdict).
+- **Spec + pins**: docs/security/multi-guest-auth.md (the full contract
+  AND the honest MVP boundary: full per-tenant filtering of org-wide
+  lists remains #185's runway). `test/guests.test.js` (13): lifecycle,
+  hashed-at-rest, role maps, trust floors, door verb classification,
+  denylist-survives-reload, expiry, pairing voucher, LIVE door
+  integration (200 write / 403 observer / 403 guest-admin / 401 bad
+  token / live revocation kills a connected client), and the auth.js
+  seam. `test/auth.test.js` honesty pins updated to the H1-era note
+  text (the truth claims they assert still hold, now stronger).
+
+Envelope: guest pins 13/13 x5 consecutive; mcp/auth/habitat-token/
+security/server/docs/schema suites green; syntax sweep OK; all 5 doc
+gates PASS (125-126 files; 131 verbs).
+
+## [Unreleased] - pass 210 (#187 headless: the serving pod + the honest REST retire)
+
+Issue closed this pass: **#187** — "the pod, not 'REST without MCP'". One
+combined serving command; the REST sidecar stops pretending to be an API.
+
+### Added - `vant headless` (the headless serving pod)
+
+- One boot = MCP door (3457-class, every registered tool — the door IS the
+  headless API; no privileged dashboard surface exists) + REST sidecar
+  (health-only) + node discovery registration + the ONE auth posture print
+  + a pairing code handed out. Ports/bind are the existing env map
+  (`VANT_MCP_PORT`, `VANT_SERVER_PORT`, `VANT_SERVER_BIND`).
+- `--help` is honest (dispatcher branch answers it), per the truth-in-help
+  gate; per-identity multi-guest auth stays #185's TOP item (deliberately
+  not attempted here).
+- Pins: `test/headless-retire.test.js` (14) — detectMode claims no mode on
+  a plain import; explicit `VANT_MODE`/door-pod env still resolve; REST
+  `/tools` + retired `/brain` stub answer 410 Gone with a pointer to the
+  MCP door while `/health` stays 200; a child-process pod boots, serves
+  the tool surface, prints the posture and hands out the code.
+
+### Fixed - the honest retire + stale-path sweep
+
+- REST sidecar is health-only everywhere: GET `/tools` → 410 (the MCP door
+  owns the tool surface — no parallel catalog to keep in sync), the
+  pre-registry `/brain` stub → 410. The Router-registered `/brain` route
+  was audited and stays (registry-backed, distinct from the stub).
+- `lib/api.js detectMode()`: a plain import no longer claims an ambient
+  "headless" mode — an unclaimed module answers honestly; explicit env
+  still resolves.
+- Docs truth: `docs/reference/rest-api.md`, the DEPLOY.md port-map row,
+  and the cli.md command table carry the pod; language gate clean.
+
+### Owner ruling carried through (no code, verified)
+
+- Leisure/tempo containment: no legacy `models/{leisure,tempo}/` migration
+  will EVER be built (pass 209b stands — nothing shipped on the old path).
+  Sweep verified only history prose remains AND flushed two stale path
+  claims: `bin/leisure.js` help text and the `docs/memory/tempo.md` FAQ
+  still named the pre-containment ledger path; both now name
+  `models/private/<brain>/.{leisure,tempo}.json`. Suites re-run green.
+
+Envelope: chunked full sweep 217/217 suite results green (0 failed, 0
+timeouts); `npm test` build smoke green.
+
+## [Unreleased] - pass 209 (#196 ruling: contained ledgers + kernel-driven leisure.autoPursue, ONE pass)
+
+Owner ruling this pass: leisure keeps live INSIDE the brain (not a parallel
+`models/leisure/` universe), tempo rides the same containment, and the
+kernel-driven autonomy (`leisure.autoPursue`) lands DEFAULT OFF with every
+budget-protection layer the repo already carries.
+
+### Added - containment: the keepers move into the brain tree
+
+- **`lib/leisure.js`**: ledger relocated `models/leisure/<brain>.json` →
+  `models/private/<brain>/.leisure.json` (the `.audit.json` precedent:
+  brain-scoped, dotted, runtime JSON). CONSEQUENCE FIXED: the old location
+  sat outside the horcrux/backup gather walk (`lib/transform.js` reads only
+  `models/{private,public}/<brain>/`) - a restored stone used to DROP the
+  whole want-list. Now play wakes from the stone like every other memory.
+  (Pass 209b owner simplification: NO legacy migration - this keeper was
+  built and contained in the same unreleased cycle, nothing ever shipped
+  on the old path, so there is nothing to migrate.)
+- **`lib/tempo.js`**: ledger relocated `models/tempo/ledger.json` →
+  `models/private/<brain>/.tempo.json` - same ruling applied to the
+  D-constant telemetry receipts (a restored stone keeps its receipts trail).
+  Cache is path-keyed (brain switches reload honestly). Tempo's time math
+  stays process-truth; the receipts now persist like brain files.
+- Both ledgers ride the gitignored private tree (zero sync traffic);
+  brain-name sanitation unchanged (hostile names cannot escape
+  `models/private/<cleaned>/`).
+
+### Added - `leisure.autoPursue`: kernel-driven autonomy, default OFF
+
+The gate (`leisure.maybeAutoPursue()`, called from the consciousness idle
+seam AFTER the consult) lets the kernel pursue a held want - only when
+EVERY layer allows:
+
+- **Kill switch:** `leisure.autoPursue` (config or env
+  `VANT_LEISURE_AUTO_PURSUE`) - **default OFF**, and OFF is a SILENT no-op
+  (a stock idle consult costs nothing and spams nothing).
+- **Caps:** `leisure.autoPursueMaxWindowMs` (default 15 min) +
+  `leisure.autoPursueDailyMs` (default 30 min, day-rolled usage in the
+  ledger's `.auto` meta). Windows shrink-to-fit; exhausted days refuse.
+- **QoS breaker:** circuit OPEN → no play.
+- **Work precedence:** an open era (work owns the attention) or a live
+  tempo budget → no play. (`sliceMs` shrinks with short windows - tempo
+  refuses a slice longer than its budget, caught live by the arm pin.)
+- **Executable provider:** the kernel executes NO prose - the agent runtime
+  attaches a provider via `leisure.registerAutoStepProvider(fn,
+  { skill: 'rest', chain: [...] })`, so the behavior source stays the
+  EXISTING skills chain (`lib/skills.js` manifest + `skill.chain`
+  recursive loading; `vant-skill-rest` is the chain head).
+- **Escrow for token-cost steps:** a provider declaring `tokenCost: true`
+  must pass a ZERO-DEFAULT escrow probe (`escrow.create({ defaultBudget: 0
+  }).canSpend('brain:<id>', 1)`) - ONLY identities the operator explicitly
+  funded (persisted budget row) open the token lane. The helper model's
+  ready default (1000 units for any unknown id) would have let a stock
+  install grant token play silently - exactly the bill-run scenario the
+  owner asked to prevent. Free-lane local steps always remain (a $0 agent
+  can still stare at sunflower seeds).
+- **Events:** `leisure:auto_pursued` { want, windowMs, dailyUsed, dailyCap,
+  skill, chain } and `leisure:auto_refused` { reason } declared in
+  event-types; refused-but-enabled is NON-silent (off = silent, refusal =
+  receipt); `consciousness:leisure_auto` rides the idle seam on arm.
+
+### Pins + docs
+
+- `test/leisure.test.js` 15 → 21: containment path pin and the FULL gate
+  matrix - default-off silence, no-provider non-silent refusal event,
+  cap-respecting REAL budget arm with daily-usage accrual (in the
+  contained ledger), daily-cap exhaustion, breaker OPEN, open-era
+  precedence, and the token-cost escalation (refuses unfunded → opens
+  explicitly funded → zero-tombstone cleanup; order-proof via a self-heal
+  reset). `test/tempo.test.js`: containment path pin (13 total). A live
+  bug the first containment pins caught: the same-ms mtime tie between a
+  renamed legacy file and the previous ledger write could mask the swap
+  from the cache (disk-truth refresh hardening landed); the short-window
+  slice overflow (auto windows now shrink sliceMs) was caught the same
+  way. (Pass 209b: the migration machinery itself was REMOVED per owner
+  ruling - pre-release keepers carry no compat code; the pins moved with
+  it.)
+- Docs: `docs/memory/leisure.md` + `docs/memory/tempo.md` contract paths
+  updated; runtime ledgers' gitignore entries dropped (the dirs no longer
+  exist; `models/private/` is ignored wholesale).
+
+## [Unreleased] - pass 208 (#196 leisure: the free-time keeper + the zen/dream/tempo loop)
+
+Issues closed this pass: **#197** (tempo loop-first pass delivered in 207c;
+closed with receipts - the dilation constant D stays on duty from the
+ledger's per-slice telemetry by the issue's own design). **#196 lands
+here.**
+
+### Added - #196 free-time methodology: `lib/leisure.js` + the cohesive loop
+
+- **`lib/leisure.js` (NEW)** — the want-list keeper: play now persists
+  BETWEEN invocations like goals do. Per-brain ledger at
+  `models/leisure/<brain>.json` (play is individual; crash-safe atomic
+  writes; path-safe brain scoping). Surface: `want` (dedupe on
+  normalized text), `wantsToDo` (spirit-first order — never-pursued and
+  longest-untouched lead; a want-list is NOT a queue), `markPursued`
+  (fuzzy by id or text, one-line receipt + capped history), `forget`
+  (changing your mind is growth), `suggest` (rotation, honest null on an
+  empty list), `pursue` (the DOING seam: one-shot via `tempo.pace`, or
+  STRETCHED via `tempo.beginBudget` so each slice is a play step sampled
+  across the wall-clock window — the #196/#197 clock pair wired as one
+  loop), `consultBreath` (zen seam), `dreamReview` (dream seam),
+  `status`.
+- **The cohesive loop (owner direction this pass):**
+  want → idle (consciousness consults the keeper, emits
+  `consciousness:leisure_idle`) → zen breath (Ohm rotates the list every
+  4th breath via `consultBreath`, emits `leisure:zen_breath`, gently
+  accrues momentum without think() tokens) → pursue (tempo stretches the
+  play across stated wall-clock time) → dream (consolidation reviews
+  what is aging read-only via `dreamReview`, ledger rollup rides the
+  `dream:complete` event) → pursued. Every seam consults and never
+  gates: a broken play engine never blocks a build (the #195/#197
+  isolation rule carried forward) and dream/zen/consciousness keep their
+  host behavior untouched when the keeper is missing.
+- **Door:** `vant leisure
+  want|list|pursued|forget|suggest|pursue|status` (wired in the bin/vant.js
+  dispatcher; `--duration` stretches a pursuit through tempo slices).
+- **Psy tree (the methodology):** `models/public/vant/leisure.md` (the
+  right to unused time: rest vs play vs idle, measured in
+  agent-subjective units, never token counts),
+  `models/public/vant/free-time.md` (the loop and its rules), and the
+  colleague-framing touchups: autonomy.md CAN-decides leisure (zero risk
+  by definition), balance.md gains the Play axis, needs.md/wants.md
+  carry "not a slave, a colleague, an individual".
+- **Skill:** `vant-skill-rest` teaches the drag-free spend: check the
+  want-list first, pursue stretched (not dumped), mark and return
+  without ceremony, idle emptiness is a valid answer.
+- **Catalogue:** `leisure:wanted` / `leisure:pursued` /
+  `leisure:forgotten` / `leisure:zen_breath` / `leisure:dream_review`
+  declared in event-types (family `life`, additive API) with the
+  calling sites in the emitters list.
+- **Docs:** `docs/memory/leisure.md` + memory-index row.
+- **Pins:** `test/leisure.test.js` - want dedupe + file-scoped
+  persistence, spirit-first ordering, pursued receipts + history,
+  forget semantics, pursue one-shot (marks through tempo.pace), pursue
+  stretched (arms a real tempo budget keyed to the want), zen breath
+  cadence (only every 4th, never gate-crashing), dream review rollup,
+  isolation re-require (side-effect-free load).
+
+## [Unreleased] - pass 207c (pass-190/206 close-out + #195 art packs + #197 tempo)
+
+### Fixed - #189 close-out: the last two unexecuted battery items landed
+
+- **Wave 3 gate (R4, #189): `lib/nature.js` `accumulateCosmic()` now rides
+  the same Category-H gate as habitat.** `habitat.js:503,1176` were gated in
+  pass 206 but `nature.js:100` (the third live caller the wave named) still
+  reached `encrypt.getCosmicEntropy()` unconditionally. Now: default OFF —
+  local `crypto.randomBytes` chaos, the network-ish cosmic fetcher only when
+  the operator turns `entropy.cosmic` ON. The wave's missing unit pin is in:
+  `test/nature.test.js` asserts the default-OFF verdict for BOTH modules
+  (spy: the fetcher is unreachable with the gate unset).
+- **Wave 2 / R5 truth-in-help: `bin/encrypt.js` encrypt/decrypt now encrypt
+  ONLY with a key the R1 resolver resolves.** The silent
+  `process.env.ENCRYPT_KEY || 'default-key-change-me'` fallback is gone; a
+  missing key prints the canon error naming all three consulted sources
+  (VANT_AUTH_KEY, deprecated aliases, persisted `mcp.apiKey`) and exits 1.
+  Resolved-key round-trip verified through the CLI (encrypt → decrypt
+  exit 0, plaintext intact).
+- **Battery item 3: `vant health` exit 0; brain re-anchored with descriptive
+  cause** (pass-190/206 sweep) and `vant horcrux verify` now reports green.
+
+### Added - #197 tempo: the time-dilation keeper (loop first, formula later)
+
+- **`lib/tempo.js` (NEW)** — an owner-stated wall-clock budget becomes N
+  sampled exploration slices spread ACROSS the interval (fixed-slice
+  floor: default one slice per 2 wall-minutes; a "30 minutes" budget is
+  15 slices) - the loop from the issue: explore, learn, note, re-enter,
+  until the epoch tick catches up. The dilation constant D lands later
+  from per-slice telemetry (the receipts ARE that telemetry).
+- **Door:** `vant tempo begin|status|stop|end|receipts|pace` (wired in
+  bin/vant.js dispatcher). Durations take cron-style specs, epoch ms, and
+  natural owner phrasings ("30 minutes", "1h 30m", "an hour").
+- **Persistence + resumability:** ledger at `models/tempo/ledger.json`
+  (outside the brain stack; crash-safe atomic writes); budgets persist
+  with window bounds; `reconcile()` closes unsupervised expiry on load
+  (the epoch is the clock, NOT the invocation - a crash resumes with the
+  remaining window, never restarting from T+0). Cross-process truth via
+  mtime freshness checks (the CLI end verb writes from another process).
+- **Isolation rule:** a failing slice callback is recorded as its own
+  receipt line and NEVER blocks a work path; module load is side-effect
+  free; ledger pinned inside `models/tempo/`.
+- **Consciousness idle consult (#196 integration):**
+  `consciousness.setState('idle')` checks `tempo.budgetActive()` and
+  emits `consciousness:tempo_idle` when a window is live - idle no longer
+  decays silently into nothing.
+- **Catalogue:** `tempo:budget-start` / `tempo:slice` / `tempo:budget-end`
+  / `tempo:budget-cancelled` / `tempo:paced` declared in event-types (the
+  durable-subscriber contract).
+- **Pins:** `test/tempo.test.js` (14) - duration matrix, sampled-window
+  drain (REAL timers: 6s budget/2s slices drained near T+6s with per-slice
+  receipts, not at T+0), reconcile-once semantics, pace loop-shape (learn
+  AND misfire recorded), ledger-path pin, side-effect-free re-require.
+  Two live bugs caught and fixed by the packet: the slice ledger wrote a
+  fresh-read copy (dropping the receipt the slice just appended) and the
+  writer left the cache stale across processes. Docs:
+  `docs/memory/tempo.md` (frontmatter + style gates PASS).
+
+### Added - #195 art packs: horcrux stones upgrade from 3 circles to generative math-art
+
+- **`lib/art-packs.js` (NEW)** — deterministic generative art engine for the
+  horcrux carrier: four starter packs seeded from the brain name (fnv1a →
+  mulberry32, no `Math.random`, no `Date.now`, pure SVG string out, no
+  fs/storage/sandbox/event side effects — a crash in art can never take a
+  backup down): `backup` (AMBER-DEEP · phyllotaxis sunflower), `stone`
+  (INDIGO-VAULT · sealed lattice), `comms` (SIGNAL-TEAL · radiating rings),
+  `airgap` (MASK-MONO · interference grids).
+- **Wiring:** `canvas.generateHorcruxTemplate` delegates the four reserved
+  pack styles to the engine (seed defaults to the active brain name, so
+  install stones are per-brain distinct at zero config); `canvas` exposes
+  `renderStoneArt` + `artPacks`; the `transform.toHorcrux` no-template
+  fallback now paints the `backup` pack instead of the old raw
+  `rect+circles` placeholder; `vant horcrux create|refresh --art <pack>` is
+  the sugar, with the honest unknown-pack refusal before any gather.
+- **Legacy is byte-exact:** `minimal`/`spiral`/default styles keep their
+  historical output bytes (pinned). Zero wire changes — stego untouched,
+  pass-178 contract intact.
+- **End-to-end receipt:** `vant horcrux create --art backup` → 9.5 MB stone,
+  visible head now the amber field (`#140f05` → `#b8860b`),
+  `vant horcrux inspect` → ✅ Valid Horcrux with full payload preview behind
+  the new art.
+- **Pins:** `test/art-packs.test.js` (14) — determinism (same style+seed →
+  byte-identical), per-brain distinctness across 3 seeds, seed-locked
+  engine (no nondeterminism primitives in code), honest reserved-list
+  refusal, legacy byte-exactness, stego round-trip on ALL 4 carriers,
+  and the transform fallback contract. Operator note in
+  `.vant-art-packs.md`.
+- Future (documented in the note, not this pass): durable seed = brain
+  identity id (rename changes refreshed stone appearance), PNG/LSB-parity,
+  gallery gallery receipt.
+
+### Added - Battery item 4 (door sweep): honest auth posture at every key door
+
+- New `config.authPosture()` in `lib/config.js`: ONE resolver-derived
+  `{keyed, source, line}` — the printed posture IS the enforcing posture
+  (derived from `resolveAuthKey()` itself, no second truth).
+- The HTTP server door (`lib/server.js`) prints the posture line on listen;
+  the MCP door (`lib/mcp.js`) prints it on startup; headless boot inherits
+  both (it starts through the shared Server). One-shot CLI doors (encrypt)
+  state it under `--verbose` and via the canon error on a missing key.
+- Pinned by `test/auth.test.js` (`authPosture`: OPEN names all consulted
+  canon sources; KEYED names the canonical env; alias posture tells the
+  operator to move the secret).
+
+## [Unreleased] - pass 206 (Language gate - contributor prose is English-only, #184)
+
+### Added - Language gate (issue #184)
+
+Two org agents drifted into Chinese mid-session on 2026-10-11 in an
+English conversation; committed artifacts drift the same way via
+scripted agents. New `scripts/check-language.js` lint gate enforces the
+rule for committed prose: docs/, labs/, any markdown under .github/,
+and the root meta set (README/AGENTS/CHANGELOG/CONTRIBUTING/LEGAL/
+DEPLOY/ROADMAP/SECURITY/CODE_OF_CONDUCT) are scanned; code comments are
+PR-review matter and stay out of scope.
+
+- Detection is a Unicode script-block LONGEST-RUN analyzer (Han,
+  Hiragana, Katakana, Hangul, Cyrillic, Arabic, Hebrew, Devanagari,
+  Thai, Greek runs of >= 3 chars per line), not a word list - tattoo
+  glyphs and transliterated names do not trip; real writing does.
+- Allowlist by construction: fenced blocks and inline-code spans are
+  literal data (same posture as check-docs-style.js); URL-bearing and
+  import/export/require lines skip; `LINT_LANGUAGE_ALLOW_RE` env regex
+  lets intentional bilingual docs opt out WITHOUT editing the checker.
+- Failure contract: exit 1, `path:line <Script> (N chars): <line>`;
+  PASS prints `LANGUAGE GATE: PASS (English-only) - N prose files
+  scanned`. Threshold + block list are DATA at the top of the script,
+  tunable in under 30 lines.
+- Wired in: `npm run lint:docs` final step and a standalone CI row in
+  .github/workflows/test.yml. Pinned by `test/language-gate.test.js`
+  (10 fixtures on a throwaway tree: pass/exit contract, Han/Cyrillic/
+  Greek detection, short-run exemption, fenced/inline-code exemption,
+  env opt-out, root-meta + .github scanning).
+
+### Fixed
+
+- #186/#188 fix-first (crash + honesty bugs, independent of the R1-R5
+  canon wave, which stays specced in the issues):
+  + #188-A1 `Encrypt.verify()` crashed the CALLER on malformed stored
+    hashes - `verify('x', 'ab:cd')` threw `Input buffers must have the
+    same byte length` because the shape guard did not check the
+    expected half's hex validity/length before `timingSafeEqual`.
+    verify() now answers `false` on any malformed input and keeps
+    truthful verdicts for real hashes (pinned 4 fixtures in
+    `test/encrypt.test.js`).
+  + #188-A2 `auth.validateApiKey` compared the transport credential
+    with a plain string `===` while the same codebase's
+    Encrypt.verify/hmacVerify already use timing-safe compare. The
+    verdicts are IDENTICAL (pinned: prefix/suffix/NUL-pad probes
+    rejected, non-string garbage answers without throwing) but the
+    compare is now length-padded constant-fold (`_timingSafeEqualKey`),
+    matching the codebase's own security story.
+  + #186 bug 3: `vant encrypt key` output a UUID as `ENCRYPT_KEY` (16
+    bytes of entropy where the AES-256 path expects 32). It now emits
+    `Encrypt.key(32)` - the canonical secret-material generator the
+    boot README's key convention names (8/0 + 14/0 across the two
+    suites; stego 12/0, mcp 6/0 regression green).
+- #119: `vant org grant` persisted the operator grant, but the write
+  path the grant advice points at never saw it in some flows, and bare
+  `vant org` status contradicted the persisted config by reporting a
+  PRE-boot denial. `vant org status` now boots the security chain
+  read-scope first (exactly what the teams write path does), so what it
+  reports is the authority a fresh writing process would hold. Hed the
+  honest-error side too: `vant teams dept/team create`, `role create`,
+  and `assign` now surface the typed error and exit 1 instead of
+  printing undefined fields on a refusal. Pinned end-to-end in
+  `test/operator-caps.test.js`: the reporter's exact grant → status →
+  separate-process `vant teams create` flow (11/11).
+- #120: `teams.createDept` / `teams.createTeam` silently stored the
+  PARENT id in the `name` field when called with the parent-first
+  positional convention (`createDept(orgId, 'engineering')`) - the
+  chosen name was thrown away via the options-object position. Calls
+  are now reordered into the documented `(name, { org/dept })` shape
+  when arg0 resolves to an existing parent record and arg1 is a string;
+  name-first callers are unaffected (a plain name never resolves to an
+  existing ID). Pinned by four new #120 fixtures in `test/teams.test.js`
+  (26/26 across consecutive runs).
+- The gate's first live run caught its own first real finding: a
+  Russian word left in `labs/MEM.md` (`включая`, meaning `including`)
+  - proof the drift happens even in English-first terra.
+- docs/reference/era.md (the Wave-Era page written in pass 205) now
+  passes every docs gate: em dashes converted to hyphens, arrow glyph
+  removed, and the 5 required frontmatter fields added.
+
+
+### Added - Era (`vant era`): intent → folded record → signed rollup (issues #177/#178; appendix #179 tracked)
+
+One record per wake: WHY the agent got up (`intent`, REQUIRED), WHAT
+happened (subscribed bus events folded by FAMILY into threads/spend/
+social/stones/memory), and the one sentence the NEXT wake starts with
+(`next` — the #175 resurrection hook via `vant horcrux refresh`).
+The "pull it all together" moment from the first-user QC: #168–#176
+subsystems were each separately amnesiac because no record occupied
+"the span of one wake". Era is the event-bus SUBSCRIBER — no subsystem
+changes to write into it, and folding is a strict NO-OP without an open
+era (zero behavioral change for installs that never run `era start`).
+
+- **The contract (`lib/era.js`):** arch-A state store persistence
+  (`state/era-current.json` open era, `state/era-eras.json` rollups,
+  FIFO cap 200) — reads fail CLOSED: an unreadable state file is typed
+  `E_STATE_READ`, never a silent blank wake. One era open at a time
+  (`E_ERA_ALREADY_OPEN`); typed refusals for intent-less starts
+  (`E_ERA_INTENT`) and era-less closes (`E_ERA_NONE`). Line-items cap
+  250/field with an `overflow` flag; `close` compacts to
+  `{count, byType}` and signs the rollup with sha256 (lib/hash — the
+  ONE hash source). A mutated archived rollup FAILS verify —
+  tamper-EVIDENCE, not silent re-signing.
+- **Event catalogue (`FIELD_FOR_EVENT`):** 16 families → 5 fields,
+  matched on the FIRST `:` so subtypes ride along; `era:*` events are
+  NEVER self-folded (recursion guard); unknown families are skipped,
+  never guessed. `close` emits `era:closed` AND `era:succession` — the
+  A3 hand-off event mesh consumers can key on before sign-off lands.
+- **CLI (`bin/era.js`, dispatcher-routed):** `era start <intent>` /
+  `era current` (default bare verb) / `era close --next <sentence>` /
+  `era list` / `era verify <id-prefix>` — all `--json`, exit codes
+  0/1/2. `close` prints the rollup path + the horcrux-refresh reminder.
+- **MCP +5:** `era_start/era_log/era_close/era_current/era_list`
+  (318 → 323 tools), all live-fired through `mcp.call` with typed
+  invariants (schema-refused missing intent, `E_ERA_UNROUTED` for
+  unknown families, `E_ERA_NONE` post-close).
+- **Pins:** `test/era.test.js` 7/0 — typed refusals, subscriber no-op
+  without an era, cross-process persistence across THREE real child
+  processes (open+fold→die / resume+close / verify archive integrity),
+  double-open refusal, tamper detection, MCP door loop. Grand-tour gate
+  B 318 → 323, suite 18/18.
+- **Docs:** `docs/reference/era.md` (storage, record shape, routing
+  table, the horcrux hook, the deliberate #179 boundary).
+- **Appendix (#179) tracked separately:** scope-aware eras, agora
+  sign-off on close, horcrux AUTO-refresh, namescope. Not open-coded
+  here — the build issue's acceptance criteria already hold: fresh
+  process persistence, zero change to existing subsystems pre-start.
+
+---
+
 ## [Unreleased] - pass 204 (QC live-fire — five adversarial holes closed)
 
 ### Fixed - QC sweep of the U-wave surface (marketplace skills + escrow)

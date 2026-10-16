@@ -191,7 +191,7 @@ test('escrow store: foreign-cwd writes contained + land in designed location', (
     const cwd = fs.mkdtempSync(path.join(sandbox, 'cwd-escrow-'));
     try {
         let out = '';
-        let code = 0;
+                0;
         try {
             const r = execFileSync('node', [path.join(sandbox, 'bin', 'vant.js'), 'rate'], {
                 cwd,
@@ -202,7 +202,7 @@ test('escrow store: foreign-cwd writes contained + land in designed location', (
             out = r || '';
         } catch (e) {
             out = (e.stdout || '') + (e.stderr || '');
-            code = e.status === undefined ? -1 : e.status;
+            _code = e.status === undefined ? -1 : e.status;
         }
         if (/Path escape detected|SECURITY_PATH_ESCAPE/.test(out)) {
             throw new Error('containment rejected a DESIGNED store write (two-anchor bug is back)');

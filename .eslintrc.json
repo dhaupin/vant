@@ -3,7 +3,7 @@
   "extends": "eslint:recommended",
   "parserOptions": {"ecmaVersion": "latest"},
   "rules": {
-    "no-unused-vars": "warn",
+    "no-unused-vars": ["warn", {"argsIgnorePattern": "^_", "varsIgnorePattern": "^_"}],
     "no-console": "off",
     "no-empty": "off",
     "no-case-declarations": "off",

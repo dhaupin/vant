@@ -8,7 +8,7 @@
 
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..');
+const _ROOT = path.resolve(__dirname, '..');
 const { Escrow } = require('../lib/escrow');
 
 // Test results
@@ -57,7 +57,7 @@ async function asyncTest(name, fn) {
     }
 }
 
-function skip(name, reason) {
+function _skip(name, reason) {
     results.skipped++;
     results.tests.push({ name, status: 'skipped', reason });
     console.log(`  ⊘ ${name}: ${reason}`);

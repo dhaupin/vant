@@ -16,7 +16,7 @@
  */
 
 const http = require('http');
-const assert = require('assert');
+const _assert = require('assert');
 const sidecar = require('../lib/sidecar');
 const { SidecarConnector } = require('../lib/connectors/sidecar');
 
