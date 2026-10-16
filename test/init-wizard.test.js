@@ -32,11 +32,21 @@ function cli(args) {
 
 console.log('\n🧙 INIT WIZARD PINS (issue #182)\n');
 
-// ---------- contract: --yes end state on THIS (already-init) tree ----------
+// ---------- contract: --yes end state, INCLUDING an explicit rerun ----------
 {
-    const r = cli(['--yes']);
-    if (r.status === 0) ok('init --yes exits 0 on an initialized tree (idempotent)');
-    else bad('init --yes exits 0 on an initialized tree', r.status + ': ' + (r.stderr || r.stdout).slice(-140));
+    // (ci fix, pass 243d) the old single --yes call only passed where the
+    // tree ALREADY carried the wizard's artifacts (the local workspace);
+    // on a fresh checkout (what Actions sees) run #1 CREATES config.ini
+    // + the grant, so nothing reports "kept"/"already persisted" and two
+    // idempotence pins failed. Rerun idempotence is verified by
+    // RUNNING it twice — environment-agnostic on any tree.
+    const r1 = cli(['--yes']);
+    if (r1.status === 0) ok('init --yes exits 0 (pass 1: create-or-keep)');
+    else bad('init --yes exits 0 (pass 1)', r1.status + ': ' + (r1.stderr || r1.stdout).slice(-140));
+
+    const r = cli(['--yes']); // THE RERUN — this is where idempotence lives
+    if (r.status === 0) ok('init --yes exits 0 on the rerun');
+    else bad('init --yes exits 0 on the rerun', r.status + ': ' + (r.stderr || r.stdout).slice(-140));
 
     const out = (r.stdout || '') + (r.stderr || '');
     if (/config\.ini exists — kept/.test(out)) ok('rerun keeps existing config.ini (idempotent)');
