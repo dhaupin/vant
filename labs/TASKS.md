@@ -35,6 +35,123 @@ long-history half; this file is the working half. When this file
 grows past ~2k lines again, split at session boundary INTO the
 archive (newest-first append there) - never delete history.
 
+## Pass 251 (2026-10-16) - THE DOOR FIX BATCH: #203 + #204 fixed at cause with regression pins, issues closing on the security PR
+
+**Owner: "let's fix these issues, and your findings/next, push to
+Github, and update the security pr. If we are fin passing and staged,
+we can close those issues we solved on main."**
+
+- #203 FIXED (P2): the server CORS class is now strict allowlist
+  semantics — the caller's Origin is echoed only on an EXACT
+  (normalized) allowlist match, fail-closed otherwise; credentials
+  default flipped FALSE and never emitted together with the '*'
+  wildcard; the honest '*' + no-credentials default posture stays.
+  3 regression pins in server.test.js (suite 15/15).
+- #204 FIXED (P3): the approval lane is wired + hardened —
+  needsApproval matches EXACTLY or via anchored family globs
+  (`write:*` covers the family; no substring over-match), approvals
+  die at consume time (TTL `escrow.approvalTtlMs`, default 300000, 0
+  disables), `consumeApproval` is the single-use burn with op bind,
+  and the pipeline escrow stage now denies approval-required ops
+  without a matching unexpired approvalId (typed
+  `E_ESCROW_APPROVAL_REQUIRED`). Plus the real root find: the module
+  used a BARE `crypto` (resolved to Node's webcrypto global —
+  `requestApproval` crashed standalone); bound honestly now. 5
+  regression pins in escrow.test.js (suite 24/24).
+- SWEEP: 12/12 green — escrow, forum-msg-escrow, governance,
+  operator-caps, live-fresh-boot, second-boot, server + the brains
+  and boot from the earlier fix batch.
+- DISCLOSURE BOTH WAYS: docs/reference/escrow.md rewritten to the
+  truthful semantics (single-use/TTL/family/wired), the issues get
+  PoC-evidence close comments on the security PR.
+
+## Pass 250 (2026-10-16) - RED TEAM ROUND 4: the storage/escrow lanes — approval gate unwired (#204 filed), WAL + YAML hold
+
+**Owner: "go absolutely apeshit… if we don't find it first, someone
+else will exploit it."**
+
+- FINDING (P3, issue #204): the escrow APPROVAL layer is advertised
+  (docs reference/escrow.md: "gate for sensitive operations") but has
+  ZERO runtime consumers (grep-verified lib/ + bin/) — the pipeline
+  escrow stage enforces budgets/holds only. And the lane is
+  defective once wired: approvals not single-use, no TTL, substring
+  over-match in needsApproval. Defined fix filed: wire the lane into
+  the write path (typed E_ESCROW_APPROVAL_REQUIRED), single-use
+  consume, TTL, exact op-family match, truth-updated docs.
+- HOLDS (verified, no finding): WAL replay re-validates rel-path
+  containment (a crafted journal cannot escape basePath) + bare
+  sha256 blob allowlist + torn-write digest checks + DENIED-not-empty
+  (#163) semantics — the crash-recovery layer does not double as an
+  attacker write primitive. YAML parse is safe-by-default (yaml v2;
+  js-yaml not required anywhere in lib) — no object-injection RCE
+  lane through brain files.
+- CARRIED (round 5, noted honestly): agent_spawn check-then-act
+  window between quota-check and roster-append (cap 200 default;
+  low impact), escrow quota/hold races under concurrent spawns,
+  postMerge race deep-sweep in escrow helper model.
+
+## Pass 249 (2026-10-16) - RED TEAM ROUND 3: the door lanes — one P2 landed (#203), the limiter holds, two lanes carried
+
+**Owner: "full on assault of vant like a nation state. Post security
+findings as vant main issues for transparency, and we fix them in
+axolotl."**
+
+- FINDING (P2, issue #203): lib/server.js CORS.handle() reflects the
+  CALLER's Origin verbatim once an operator configures an origin
+  allowlist, AND defaults Allow-Credentials to TRUE — verified live:
+  the "locked" config answers https:// evil.example with ACAO-echo +
+  Allow-Credentials true (a credentialed cross-origin read of the
+  door, one operator config away). Defined fix filed: strict
+  allowlist-equality emission + credentials default false + regression
+  matrix. Raw listener path (ACAO '*', no credentials header) inspected
+  and left honest.
+- HOLDS (verified, no finding): QoS global cap beats client-id
+  rotation — 100 requests across 4 rotating ids → 60 allowed / 40
+  denied, the old rotation-bypass class is closed at the limiter.
+- INSPECTED-OK: guest issue scopeOwner is fail-closed via
+  scope.parseOwner (typed refusal by kind); msg channel scoping
+  documents "unscoped = public" honestly (design, not a leak); the raw
+  door path's authRequired default-false posture prints its honest
+  authPosture line at boot — carried as a P3 candidate review (less
+  permissive default when binding non-loopback), not filed as an
+  exploit.
+- CARRIED LANES (round 4): WAL torn-write/replay injection,
+  escrow race/bypass, MCP agent_spawn quota racing, deep WAL/cellstore
+  corruption timelines.
+
+## Pass 248 (2026-10-16) - THE INDUSTRIAL ROUTER OBJECT: the horcrux is the router — prd-automation seeded (docs-only)
+
+**Owner: "the UPC is the addressing and schema, workflow assimilation,
+but what is the actual router object? Horcrux. Multimodal — as laid out
+in web-prd, but on an industrial scale. Tiny PLCs and stuff can
+ingest, without using any resources, and pass it on. Router object,
+airgapped… make it real in code at some point after we finish
+destroying, not now."**
+
+- THE SEED: NSC-9 gains the router-object section — the missing thing
+  in the industrial playbook was the THING THAT ROUTES: the horcrux
+  pointed outward, encrypted/self-contained/multimodal, as the object
+  every PLC + edge node persists and forwards.
+- labs/prd-automation.md CREATED (v0.1 draft): direction log (owner
+  rulings verbatim), the router-object definition (identity slot =
+  NSC-9 → lattice point; payload = horcrux-format state; deterministic
+  re-addressing = identity by content; proof = the .sha256 pin
+  discipline), the zero-resource ingest contract (scan → shape-validate
+  → persist → forward; no key/db/runtime/network on the node; a
+  compromised node can only refuse — liveness gaps, never tampering),
+  the industrial carrier ladder (Lane A GIAI barcode / Lane B raw /
+  QR NSC9-key / stego stone for airgap / JSON-EPCIS), airgap
+  discipline inheritance from the boot-stone flows, phase gates
+  P0(done: this record) P1 schema P2 sim PoC P3 pilot line P4
+  ERP/EPCIS, the full truth-state table, and the red-team law riding
+  in (pattern-validation only at nodes; typed E_ROUTER_* refusals;
+  keys env/store/prompt; adversarial suite required in the P2 PoC).
+- nsc9-spec.md: router-object seed section + Future Considerations #4
+  extended to name the router object + the PRD link.
+- ORDER PRESERVED (owner ruling): NOTHING BUILT — the build waits for
+  the security wave to close; docs-only work, uncommitted in the
+  workspace pending the owner's save.
+
 ## Pass 247 (2026-10-16) - RED TEAM ROUND 2: nation-state-lane probes — defenses held, no new P1/P2
 
 **Owner: round 2 "absolutely destroy vant... like you're a nation

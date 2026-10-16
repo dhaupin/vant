@@ -5,6 +5,74 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 251 (the door fix batch: #203 + #204 fixed at cause, closed on the security PR)
+
+### Fixed - security (closes #203, #204)
+
+- **door (#203):** the CORS class now emits `Access-Control-Allow-Origin`
+  only on an exact (normalized) allowlist match — fail-closed, no
+  reflection; `Allow-Credentials` defaults FALSE and is never emitted
+  together with the `*` wildcard; the honest wildcard + no-credentials
+  default posture stays. 3 regression pins (server suite 15/15).
+- **escrow (#204):** the approval lane is wired and hardened — exact/
+  anchored-glob op-family matching (no substring over-match), consume-
+  time TTL (`escrow.approvalTtlMs`, default 300000, 0 disables),
+  single-use `consumeApproval` with op bind, and the pipeline escrow
+  stage denies approval-required ops lacking a matching unexpired
+  `approvalId` (typed `E_ESCROW_APPROVAL_REQUIRED`). Root cause fixed:
+  the module's bare `crypto` (webcrypto collision crashed
+  `requestApproval` standalone) is now properly bound. 5 regression
+  pins (escrow suite 24/24).
+- Disclosure: docs/reference/escrow.md rewritten to the truthful
+  semantics; sweep 12/12 green.
+
+## [Unreleased] - pass 250 (red team round 4: storage/escrow lanes — approval gate unwired, #204 filed)
+
+### Security
+
+- **P3 (#204, transparency):** the escrow APPROVAL layer (docs: "gate
+  for sensitive operations") has zero runtime consumers — the pipeline
+  escrow stage enforces budgets/holds only — and the lane is defective
+  once wired (not single-use, no TTL, substring over-match). Defined
+  fix: wire it into the write path (typed
+  `E_ESCROW_APPROVAL_REQUIRED`), single-use consume, TTL, exact
+  op-family match.
+- **Holds:** WAL replay containment + blob allowlist + DENIED-not-empty
+  make the crash journal non-exploitable; YAML parsing safe-by-default
+  (no object-injection RCE through brain files).
+- Carried to round 5: agent_spawn check-then-act window, escrow
+  quota/hold concurrency, helper-model race deep sweep.
+
+## [Unreleased] - pass 249 (red team round 3: the door lanes — #203 filed, QoS holds)
+
+### Security
+
+- **P2 (#203, transparency):** `lib/server.js` CORS class reflects any
+  caller Origin with `Allow-Credentials:true` once an origin allowlist
+  is configured (verified live PoC); latent today, one operator config
+  from live. Defined fix: strict allowlist emission + credentials
+  default false. To fix in axolotl per the owner ruling.
+- **Holds:** QoS global cap beats client-id rotation (60/40 burst
+  verified); guest scopeOwner fail-closed; msg unscoped-public is
+  honest documented design.
+- Lanes carried to round 4: WAL torn-write/replay, escrow race,
+  agent_spawn quota.
+
+## [Unreleased] - pass 248 (docs: the industrial router object — the horcrux is the router; prd-automation seeded)
+
+### Added - automation arc (docs-only; nothing built per the owner's build order)
+
+- **labs/prd-automation.md** (v0.1 draft): the automation/industrial
+  PRD seeded with the router object — the horcrux pointed outward:
+  encrypted, self-contained, multimodal state packets that tiny PLCs
+  and edge nodes ingest with zero resources (scan → shape-validate →
+  persist → forward) and pass on airgapped. Contains the direction
+  log, router-object definition, zero-resource ingest contract,
+  industrial carrier ladder (Lane A/B, QR, stone, EPCIS), phase gates
+  P0–P4, truth-state table, and the red-team law riding in.
+- **docs/advanced/nsc9-spec.md**: router-object seed section added to
+  the industrial playbook; Future Considerations #4 extended.
+
 ## [Unreleased] - pass 247 (red team round 2: nation-state-lane re-attack — defenses held)
 
 - `npm audit --omit=dev`: 0 vulnerabilities.

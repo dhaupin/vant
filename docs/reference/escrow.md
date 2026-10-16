@@ -83,7 +83,12 @@ if (gate.allowed) {
 pipeline: same checks, but a denial **throws** `Escrow denied`
 (`ESCROW_DENIED`) instead of returning `allowed: false`.
 
-Sensitive operations can require a human-style approval:
+Sensitive operations can require a human-style approval. (pass 251,
+issue #204) The lane is NOW ENFORCED and SINGLE-USE: the brain
+pipeline's escrow stage denies (typed `E_ESCROW_APPROVAL_REQUIRED`)
+any op whose name sits in `approvalRequired` unless the ctx carries a
+matching, unexpired `approvalId`, which the stage then CONSUMES. One
+approve authorizes exactly one execution, never a repeat.
 
 ```javascript
 const req = escrow.requestApproval('delete', 'wiping stale topics');
@@ -92,7 +97,16 @@ if (!req.approved) {
     escrow.approve(req.approvalId, 'owner');
 }
 escrow.checkApproval(req.approvalId);  // { approved: true, operation: 'delete' }
+// execution side:
+escrow.consumeApproval(req.approvalId, 'delete');  // burned on success; reuse -> not_found
 ```
+
+Enforcement semantics: `approvalRequired` entries match EXACTLY, or as
+anchored family globs (`write:*` covers `write` and `write:critical`; a
+plain substring `delete` no longer over-matches `note_delete_typo`).
+Approvals expire at consume time, so the TTL
+(`escrow.approvalTtlMs`, default 300000; `0` disables) turns a stale
+green light into an honest `expired` refusal.
 
 ## Workspace budgets (org pools)
 

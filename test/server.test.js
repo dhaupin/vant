@@ -95,6 +95,50 @@ test('module use/listen/stop share one instance (throwaway-instance regression p
     return { success: shared !== null && shared._router === server._sharedServer()._router && typeof shared._router === 'function' };
 });
 
+// (pass 251, issue #203 regression) the CORS class must be strict
+// allowlist semantics, fail-closed, credentials default FALSE.
+test('CORS #203: default constructor answers the honest wildcard — ACAO * and NEVER a credentials header', () => {
+    const server = require(path.join(ROOT, 'lib', 'server'));
+    const cors = new server.CORS();
+    const seq = [];
+    cors.handle({ headers: { origin: 'https://evil.example' }, setHeader: (k, v) => seq.push(k + '=' + v) });
+    const acao = seq.find(s => s.startsWith('Access-Control-Allow-Origin='));
+    const creds = seq.find(s => s.startsWith('Access-Control-Allow-Credentials='));
+    // '*' + no credentials is the legacy posture and stays (browsers treat
+    // it as non-credentialed); the credentials default flipped to false.
+    return { success: acao === 'Access-Control-Allow-Origin=*' && creds === undefined, got: seq.join(',') };
+});
+
+test('CORS #203: locked (allowlist) constructor reflects ONLY the exact match and never credentials by default', () => {
+    const server = require(path.join(ROOT, 'lib', 'server'));
+    const cors = new server.CORS({ origin: 'https://dash.example.com' });
+    const seq = [];
+    // hostile Origin must NOT be echoed
+    cors.handle({ headers: { origin: 'https://evil.example' }, setHeader: (k, v) => seq.push(k + '=' + v) });
+    const hostileEcho = seq.filter(s => s.startsWith('Access-Control-Allow-Origin='));
+    if (hostileEcho.length > 0) return { error: 'hostile origin echoed under locked mode' };
+    // exact match IS echoed, credentials header ABSENT (default false)
+    seq.length = 0;
+    cors.handle({ headers: { origin: 'https://dash.example.com' }, setHeader: (k, v) => seq.push(k + '=' + v) });
+    const echoed = seq.find(s => s.startsWith('Access-Control-Allow-Origin='));
+    const creds = seq.find(s => s.startsWith('Access-Control-Allow-Credentials='));
+    return { success: echoed === 'Access-Control-Allow-Origin=https://dash.example.com' && creds === undefined, echoed };
+});
+
+test('CORS #203: credentials must be explicit AND never ride the * wildcard', () => {
+    const server = require(path.join(ROOT, 'lib', 'server'));
+    // default credentials false:
+    const dflt = new server.CORS();
+    const a = [];
+    dflt.handle({ headers: { origin: 'https://anywhere.dev' }, setHeader: (k, v) => a.push(k + '=' + v) });
+    if (a.find(s => s.startsWith('Access-Control-Allow-Credentials='))) return { error: 'credentials emitted by default' };
+    // '*' + explicit credentials -> the class refuses to emit ACAO at all:
+    const wildcardCreds = new server.CORS({ credentials: true });
+    const b = [];
+    wildcardCreds.handle({ headers: { origin: 'https://anywhere.dev' }, setHeader: (k, v) => b.push(k + '=' + v) });
+    return { success: !b.some(s => s.startsWith('Access-Control-Allow-Origin=')), got: b.join(',') };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);
