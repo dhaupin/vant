@@ -5,6 +5,39 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 244 (the OSS face: post-merge brain refresh, the stone re-carved, the NSC-9 industrial playbook seed)
+
+Workflow: pass 243d merged to main (PR #198); axolotl continues as the
+staging line.
+
+### Brains + the boot horcrux
+
+- The axolotl brain files updated for the merge state (identity gains
+  the where-we-are block, lessons gains the pass-243d masking-chain
+  lessons, goals marks the milestone + the next wave). models/private/
+  stays workspace-local by the transport contract; the boot stone is the
+  carrier.
+- The boot horcrux refreshed IN PLACE (same `p_` password) so the stone
+  carries today's brain updates: inspect VALID, `.sha256` re-pinned,
+  `sha256sum -c` OK in the boot dir; boot dir remains canonical-only.
+
+### Spec'd - the NSC-9 industrial playbook seed (owner sidebank)
+
+- `docs/advanced/nsc9-spec.md` gains the industrial/MFG playbook seed:
+  NSC-9 as a part's identity through manufacturing steps, generated
+  per vant instance/brain, read by the scan fleets manufacturers
+  already run. Feasibility recorded honestly: the symbology lane is
+  real today; the 12-digit frame carries ~10⁹ routeable points (the
+  10-billion-class space is the quasicrystal lattice the address
+  projects INTO); retail GTIN backends reject by design while MES/ERP
+  unit-serial ingestion reads through. The playbook's decision: LANE A
+  (GS1 GIAI / Application Identifier 8004 — legitimate end-to-end in
+  existing fleets) vs LANE B (raw NSC-9 — vant-native,
+  self-authenticating). PLC/EPCIS follow-on named. Playbook candidate,
+  not a phase trick.
+
+Docs gates re-verified green for the touched pages.
+
 ## [Unreleased] - pass 243d (the CI stabilization trail: green on Actions, four latent classes fixed at cause)
 
 The PR ci job failed in Actions while everything was green locally — each

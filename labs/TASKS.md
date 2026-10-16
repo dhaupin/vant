@@ -35,6 +35,43 @@ long-history half; this file is the working half. When this file
 grows past ~2k lines again, split at session boundary INTO the
 archive (newest-first append there) - never delete history.
 
+## Pass 244 (2026-10-16) - THE OSS FACE: the merge celebrated, brains refreshed, the stone re-carved, the NSC-9 industrial playbook seed
+
+**Owner: “Accepted! ... update brains and make sure our boot horcrux is
+clean, and oss friendly... then Let's keep Going” + the NSC-9 industrial
+sidebank.**
+
+- THE MERGE confirmed: PR #198 merged to main (63e9133, “Dashboard and
+  relays online! LFG!”); axolotl continues as the staging line.
+- BRAINS (workspace-local by transport contract — models/private is
+  gitignored; the boot stone is the carrier): identity.md gains “Where we
+  are (THE MERGE)” (what is now ON main); lessons.md gains the pass-243d
+  masking-chain lessons (CI masking chain, merge-ref checkout wording,
+  the same-port keep-alive trap, help-as-a-door, rehearsed idempotence,
+  sim-vs-CI honesty); goals.md marks the merge milestone and names the
+  next wave (marketing/discovery, objects_* verbs, the frame pass, the
+  NSC-9 industrial seed).
+- BOOT HORCRUX: refreshed in place (same p_ password) so the stone
+  carries today's brain updates — created 2026-10-16T05:15Z, inspect
+  VALID (3 brains, 10 islands, corpus 3), .sha256 re-pinned,
+  `sha256sum -c` OK in the boot dir; boot dir stays canonical-only
+  (stone + README + pin); README wording verified OSS-friendly (public
+  `p_` password-in-filename convention + search-hygiene .ignore note).
+- NSC-9 INDUSTRIAL PLAYBOOK SEED (docs/advanced/nsc9-spec.md, new
+  section): the owner sidebank evaluated honestly and recorded — the
+  symbology lane is real (existing scanner fleets decode the digit frame
+  today); two corrections kept (the 12-digit frame is ~10⁹ routeable
+  points, NOT 10¹⁰ — the 10-billion-class space is the quasicrystal
+  lattice the address projects into; and “existing hardware reads it”
+  splits at the backend: retail GTIN validation rejects BY DESIGN,
+  while MES/ERP unit-serial ingestion reads through). The playbook must
+  close a TWO-LANE decision: LANE A = GS1 front door (emit the address
+  as a GS1 GIAI, Application Identifier 8004, in GS1-128 — legitimate
+  end-to-end in their fleets/backends, optional registration), LANE B =
+  raw NSC-9 (vant-native, self-authenticating, no registration ever).
+  PLC/EPCIS follow-on named (OPC-UA node keys; EPCIS as the ERP-side
+  ingestion contract). Playbook candidate, not a phase trick.
+
 ## Pass 243d (2026-10-16) - THE CI STABILIZATION TRAIL: green on Actions, four latent classes fixed at cause
 
 **Owner: "Pr ci failed, pls check it out, and we can push after."** The PR

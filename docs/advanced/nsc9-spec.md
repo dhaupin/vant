@@ -114,11 +114,73 @@ function generateAutomationBarcode(content) {
 - This is INTENTIONAL, marks as automation-only
 - Can still be scanned as raw numeric strings
 
+## Industrial / MFG playbook seed (owner sidebank, 2026-10-16)
+
+Owner direction: the ultimate proving ground for a memory system is
+industry itself - process/manufacturing/ERP/PLC. NSC-9 as the identity of
+a PART passing through manufacturing steps: one identifier riding the
+part's router, generated per vant instance/brain instead of drawn from a
+shared UPC registry, with the scan fleets manufacturers already run as
+the reader layer. Record the seed; the build is a playbook candidate,
+not a phase trick.
+
+**Why the shape holds up (feasibility read):**
+
+- The 12-digit NSC-9 frame rides barcode symbologies (Code128/EAN13
+  family) that every existing scanner fleet already decodes - at the
+  SYMBOLOGY level, existing hardware reads it today, no new fleet.
+- Per-instance generation is the honest innovation: no GS1 prefix lease,
+  no registry round-trip, self-authenticating (re-hash the payload and
+  the same address re-appears - spec'd above), and the quasicrystal
+  store gives scalable retrieval without a lookup index.
+- It composes with the carrier ladder (prd-web.md 4.2): barcode is one
+  carrier, NSC-9 is the ADDRESS, geometric storage is the MEMORY. This
+  industrial play is that abstraction pointed at a real domain.
+
+**Two corrections to the sidebank framing (recorded honestly):**
+
+1. **Address-space size.** The 12-digit UPC-A frame has ~10⁹ routeable
+   points (facility + sequence + check), not 10¹⁰. The 10-billion-class
+   space is the quasicrystal LATTICE the NSC-9 address projects INTO -
+   the barcode is the human/scanner doorway to that space, not the cell
+   space itself. Lattice-scale identity arrives with a carrier that
+   carries more bits (QR/NSC9-key form, or the planned extended frame).
+2. **"Existing hardware reads it" splits at the backend.** Symbology:
+   yes, everywhere. System behavior: a RETAIL GTIN-validating backend
+   rejects an NSC-9 code (an invalid UPC-A by design - never a real
+   product), while an MES/ERP/WMS that ingests numeric serials as
+   unit-tracked identity reads it through. Manufacturing lines do the
+   latter; choose lanes accordingly.
+
+**The two-lane integration decision (what the playbook must close):**
+
+- **LANE A - the GS1 front door (coexistence lane).** Emit the NSC-9
+  address value as a GS1 GIAI (Global Individual Asset Identifier,
+  Application Identifier `8004`) in a GS1-128 barcode. Their scan
+  fleets and back ends ingest a LEGITIMATE GS1 asset id end-to-end;
+  vant derives/validates the address from the carried value. This is
+  the zero-friction enterprise lane: no fleet change, no backend
+  rejection, spec's Future Considerations #1 (GS1 registration)
+  becomes optional rather than blocking.
+- **LANE B - the raw NSC-9 lane (vant-native).** Plain Code128 raw
+  12-digit strings, self-authenticating, no registration ever. For
+  vant-side shops, pilot lines, and any integration point where the
+  unit identity is ONLY vant's address.
+
+**PLC/ERP follow-on (not the near playbook):** NSC-9 addresses as node
+keys over OPC-UA/industrial protocols, and EPCIS event streams as the
+ERP-side ingestion contract (the spec's Future Considerations #3, now
+with a named lane). Structure it, gate it through sandbox/vaf like
+every other identity surface, and keep the honest-refusal law
+(a malformed NSC-9 address is a typed error, never a silent rehash).
+
 ## Future Considerations
 
 1. Registration with GS1 for formal namespace
 2. Sub-divisions (e.g., 90-94 for different automation types)
 3. Integration with EPCIS (Electronic Product Code Information Services)
+4. The industrial playbook (the two-lane decision + a real pilot line,
+   owner sidebank 2026-10-16 - see the seed section above)
 
 ## Authors
 
