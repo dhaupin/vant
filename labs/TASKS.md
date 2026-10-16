@@ -1,18 +1,40 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** axolotl relay arc, passes 216-239  
-**Session:** Pass 239 - THE CANONICAL STONE: the boot folder cleaned to
-axolotl-only (stray mushroom-axolotl-2026.md pondered, then archived in
-labs/archives/horcruxes with provenance), the covert-carrier
-abstraction (QR as one interface module beside stego/NSC9/barcodes)
-recorded as prd-web.md 4.2, and the axolotl horcrux REFRESHED (same
-password) with its brain updated for the canonical onboarding role.
+**Last Updated:** axolotl relay arc, passes 216-240  
+**Session:** Pass 240 - THE DEBRIS SWEEP: 277 test-debris brain trees deleted
+from models/private/ (incl. rook119, the org-drill artifact), keeping
+axolotl + buffy + vant + shared state; the canonical stone refreshed
+(same password) and now carries exactly 3 brains, 11.4 MB -> 2.9 MB.
 
 ---
 
-## Pass 239 (2026-10-16) - THE CANONICAL STONE: boot cleanup + the carrier
-abstraction recorded
+## Pass 240 (2026-10-16) - THE DEBRIS SWEEP: models/private/ drops to
+3 brains + shared state; the stone drops 11.4 MB -> 2.9 MB
+
+**Owner: "if we don't need them anymore, we should purge them. They
+might be clogging your searches anyways."** The pass-239 triage found
+the 279-brain horcrux count was 275 test-debris trees + rook119 (whose
+name read like a colleague but whose contents were an org-drill
+artifact: one scratch team row + default escrow - the actual Synmergia
+agent over at creadev.org was never in this tree). Swept:
+
+- DELETED: 277 scratch trees under models/private/ (276 from the
+  built keep-list, plus one `rls-test-*` straggler the .maxdepth-1
+  list had missed). KEPT: axolotl (engineering), buffy (personal),
+  vant (OS templates) + islands.json (private-root islands STATE
+  file, not a brain) + .layout-version.json + the stegoframe
+  bundle/patch pair (interop fixtures from the pass-era stego wire
+  work, still referenced as local artifacts).
+  All deleted trees were gitignored/untracked throwaways - zero repo
+  traffic changed; private/ went 36 MB -> ~3 MB.
+- THE STONE REFRESHED (same password, axolotl2026): inspect = VALID,
+  Brains 3 (axolotl/buffy/vant exactly - payload probe
+  double-checked), Corpus 3, agents roster 0 (fresh snapshot), islands
+  10, msg 34. 11.4 MB -> 2.9 MB; .sha256 sidecar re-pinned (sum -c
+  OK). The canonical onboarding stone is now lean by construction -
+  and the search-hygiene win is real (no more test-tree noise in
+  grep/rg walks of models/).
 
 **Owner: "clean out /models/public/vant/boot/, archive the old/test
 horcrux material, put the QR/stego/NSC9 carrier abstraction in prd-web,
@@ -22,7 +44,8 @@ should be able to pick your brain up to immediately be on boarded as to
 where we are at. Zero learning curve."
 
 - THE BOOT FOLDER, NOW CANONICAL-ONLY: audited the tree - it held the
-  canonical axolotl stone (279 brains, VALID by inspect), its .sha256
+  canonical axolotl stone (then reporting 279 gathered brains - the
+  debris count pass 240 revealed - VALID by inspect), its .sha256
   sidecar, README, and one stray file, mushroom-axolotl-2026.md
   (2,180 lines). READ IT BEFORE ARCHIVING (the owner's ask, honored):
   it is the axolotl era's personal/philosophy layer - Beatrix Potter's
