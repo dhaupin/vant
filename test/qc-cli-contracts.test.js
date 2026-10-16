@@ -114,7 +114,11 @@ test('#170 channels persist — fresh process sees a sent channel message', () =
 test('#168 sync --status prints real git status (was "status: not found")', () => {
     const out = cli('sync.js', ['--status']);
     if (/not found|Command failed/.test(out)) throw new Error('status output still shell-garbage: ' + out.slice(0, 120));
-    if (!out.includes('On branch') && !out.includes('nothing to commit')) {
+    // (ci fix, pass 243d) Actions checks out a PR at a MERGE ref — git says
+    // "HEAD detached at pull/198/merge", not "On branch". Accept every
+    // truthful branch-state rendering; shell garbage still fails.
+    if (!out.includes('On branch') && !out.includes('nothing to commit')
+        && !out.includes('HEAD detached at') && !out.includes('Not currently on any branch')) {
         throw new Error('status did not print git output: ' + out.slice(0, 120));
     }
 });
