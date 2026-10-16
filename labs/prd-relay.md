@@ -363,6 +363,7 @@ every time. The steady state is e2e-by-default for ALL clients
 | mgmt server surfaces (work/chat/forum/market/brains/...) | UNCHANGED - they speak /api/* as shipped; only the hop changes under them |
 | users (#13) + email-OTP | RIGHT WHERE THEY WERE SURFACING BEFORE: per-RELAY operator layer (that relay's own deploy); a sovereign-scope user needs none of it |
 | pairing (#14) | the voucher moment grows into the e2e key-binding moment (same UI, one more step in the modal) |
+| security posture surfaces (prd-web 4.4 pipeline scan + #29-34) | DASHBOARD-ONLY by the minimal-always ruling (above): the relay gains NO security/sandbox/vaf/qos/rls/rules module of its own - it runs, it forwards, it holds nothing. The dashboard's `security_pipeline_report` card travels THROUGH the relay like any other tool result when the user runs relayed. If a relay deploy ever wants a self-posture line, it is ONE read-only cap on the public capabilities page, never a module |
 
 ### 6.1 The two-sided settings contract (owner direction, recorded: "users can run a relay on or off in their settings of dashboard - the separation is very important to the web ecosystem")
 

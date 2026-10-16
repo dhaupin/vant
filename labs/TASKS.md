@@ -35,6 +35,47 @@ long-history half; this file is the working half. When this file
 grows past ~2k lines again, split at session boundary INTO the
 archive (newest-first append there) - never delete history.
 
+## Pass 243 (2026-10-16) - THE SECURITY-PIPELINE SCAN LANDS: `security_pipeline_report` (pod verb + scanner + status card) + the 4.4/objects spec
+
+**Owner: "scan lib, confirm they're using the pipeline; display lib modules
+outside pipeline (unless whitelisted)... add these to prd-web and relay too**
+Landed, not just spec'd:
+
+- POD SCAN (lib/security-pipeline.js, NEW): walks the pod's lib/ tree
+  (shallow by default = the 180 module roots; maxDepth for deeper), detects
+  middleware-chain wiring evidence per file — a require of `sandbox`/`vaf`/
+  `qos`/`escrow` (the AGENTS.md chain order); audit/habitat adjacency recorded
+  INFORMATIONAL, never gates. Live truth at HEAD: 180 scanned, 65 wired,
+  115 unwired, 0 exempt. Report: `{ v, generatedAt, scanned, modules:
+  [{name, wired, layers}], unwired, exempt }`.
+- DOOR VERB (`security_pipeline_report` in lib/mcp.js): merges the
+  operator whitelist — config key `security.pipelineAllow` (comma-separated,
+  `vant config set`-managed) — into the scan: whitelisted modules land in
+  `exempt` (a stated choice, not a colored-over gap) and drop off `unwired`.
+  Admin-only (guest_list's precedent): pod-internal topology stays shapeless
+  to guests (#185's enumeration lesson). Audit line rides each call; the pod
+  NEVER auto-flips config for an unwired module — the scan reports, the
+  operator decides. mcp-tools.md row landed (coverage gate 332 = 332).
+- DASHBOARD (status #3 card): `PipelineScanCard` renders the door's report
+  verbatim — `wired n/scanned · k outside · m exempt` + the unwired names
+  listed verbatim; a guest-refused verb renders its typed refusal as the
+  card (nothing greenwashed). The frontend still reads NO pod source.
+- SPEC'D (prd-web 4.4 NEW): the full contract above + `objects` (#34, THE
+  CONTAINER — router-OS-style definable pod-side object: `{id, kind, title,
+  schema?, attaches[]}` with typed attach refs (agent/tool/file/service/
+  connector/relay/node/object/link/note), brain-backed registry,
+  object_define/attach/detach/delete verbs at P4 build time) + module rows
+  29-34 (security /vaf /qos /rls /rules /objects). prd-relay 6: pipeline
+  surfaces stay DASHBOARD-ONLY (the solo relay gains no security module).
+- PINS: test/security-pipeline.test.js (8): fixture-deterministic shape /
+  per-layer detection / shallow-default depth cap / nothing-greenwashed
+  unwired / whitelist→exempt (incl. `.js`-suffix normalization) /
+  informational-never-gates / missing-dir honest zero / live lib/ truth.
+  8/8 green.
+
+Next rung: the objects door verbs (object_*), or the Frame pass (sidebar
+5c + ui-state memory + cache breaker) — owner calls the order.
+
 ## Pass 242 (2026-10-16) - THE NAV + MISSIONS SPEC: eight new modules, the
 hierarchical sidebar, ui-state memory, and the cache-busting framework
 

@@ -1683,6 +1683,33 @@ Revoke a guest by id or name. Denylist-backed: the hold of that token
 is locked out at once, in every future process. **Params:** `id`
 (string, required). Admin-only.
 
+### pairing_voucher_generate / pairing_voucher_redeem
+
+The H6/P3 voucher on the door: `pairing_voucher_generate` mints a
+24h, single-use code (SHOWN ONCE; the ledger keeps only its hash) -
+generate is admin-only because a guest minting vouchers would be an
+escalation. `pairing_voucher_redeem` turns a correct code into the
+default `human` guest identity - redeem is UNAUTHED-class by design
+(the code itself is the credential); wrong/expired/reused codes answer
+a typed `{ ok: false, reason }`, never a crash. **Params:**
+generate none; redeem `code` (string, required).
+
+### security_pipeline_report
+
+The pod-side pipeline scan (prd-web 4.4): walks the pod's `lib/` tree
+and reports middleware-chain wiring evidence per module -
+`sandbox`/`vaf`/`qos`/`escrow` requires detected, `audit`/`habitat`
+adjoining recorded as informational, never gates. Returns
+`{ v, generatedAt, scanned, modules: [{ name, wired, layers }],
+unwired, exempt }`; modules whitelisted via the brain config key
+`security.pipelineAllow` (operator-managed, comma-separated) land in
+`exempt` - a stated choice, not a colored-over gap. Admin-only (same
+enumeration defense as `guest_list`: the report is pod-internal
+topology, so guests keep no shape of it). The dashboard's status and
+security modules render this report verbatim; the pod NEVER
+auto-flips config for an unwired module - the scan reports, the
+operator decides.
+
 ### era_start / era_log / era_close / era_current / era_list
 
 The era-session ledger twins (#177-#179): `era_start` opens a work era,

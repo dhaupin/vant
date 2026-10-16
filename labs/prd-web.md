@@ -460,6 +460,12 @@ build starts:
 | 26 | cron | `/cron` | S | P3 | IN-BUILT cron manager (owner): the pod's cron_/schedule_ surfaces + advisories; jobs as cards (id, schedule, next-run, last result typed), create/enable/disable through the door's real verbs (no invented scheduler when the pod's cron module answers); if the door exposes no write verbs yet, the view renders the read truth + the CLI pointer, honestly |
 | 27 | settlements | `/settlements` | O A S | P4 | escrow ledger + settlement records (settle_, escrow_ surfaces): holds/spends/releases timelines per agent, settlement history with citations anchors |
 | 28 | origins | `/origins` | O A S | P4 | the origin/existence surfaces - genesis ceremony records, entry_wills, backup snapshots (the who-we-are + where-we-came-from view); read-only, hash-anchored, the OSS-safe rendering of lineage |
+| 29 | security | `/security` | O A S | P4 | the pod's security POSTURE in one place: sandbox layer status (the layer's own status truth), operator scopes/capabilities, the sudo + persistent-grant ladder, guest posture (the keyed posture line), escrow floors - every card renders the door's own layer status, nothing invented, plus the PIPELINE SCAN card from status (4.4) |
+| 30 | vaf-view | `/vaf` | O S | P4 | the input-validation face: vaf's per-surface validation status, config rows (max length, path-traversal blocks) read-only, recent typed validation refusals from the audit ledger - so operators SEE what the gate blocks |
+| 31 | qos-view | `/qos` | S | P4 | rate limiters, breakers, bulkheads: the QoS module's own layer status, live refusal counters from audit, per-client budget truth, circuit states with cooldown timers |
+| 32 | rls-view | `/rls` | O A S | P4 | row-level-security truth: workspace registry, agent provisioning rows, the RLS identity proviso stated on-page (agents register via provisionAgent, humans via grant), grant/verifier lineage; the door's fail-closed posture rendered verbatim |
+| 33 | rules | `/rules` | O A S | P4 | the rule engine surface: active rules list, evaluation posture (lib/rules reality), governance wiring status - read-only MVP, writes stay the pod CLI's |
+| 34 | objects | `/objects` | O A H S | P4 | THE CONTAINER (see 4.4): router-OS-style definable object that appends anything - agents, tools, files, services, relays, other objects; the definable spine of an enterprise deployment |
 
 - Extras rationale (owner asked for anything else worth adding):
   settlements (27) gives escrow's WRITE history its own surface beyond
@@ -524,6 +530,63 @@ never capability-smuggling. The dashboard's future carrier-neutral
 component (rung 2 above) is also the DOWNLOAD/SHARE face of the
 stone: one component, any carrier, user's pick by need (scan /
 airgap / print / paste).
+
+### 4.4 The pipeline scan + the objects container (owner additions, 2026-10-16; the robust-frontend arc)
+
+**A. The security-pipeline scan widget (status #3 grows; full table at #29).**
+The ask: "scan lib, confirm modules use the middleware pipeline, display lib
+modules outside the pipeline (unless whitelisted)". Compliance first: the
+frontend NEVER reads the pod's source (2.1, one-way boundary) - so the scan is
+POD-SIDE truth the door exposes, and the dashboard renders the report.
+
+- Door verb `security_pipeline_report` (pod lib: `lib/security-pipeline.js`):
+  walks the pod's lib/ tree (top-level module files), and for each detects
+  middleware wiring evidence - a require of `sandbox` / `vaf` / `qos` / `escrow`
+  (the docker-chain order the AGENTS.md names) - plus audit/habitat adjacency
+  recorded as informational, never a gate.
+- The whitelist is OPERATOR-STATE, not hidden: brain config key
+  `security.pipelineAllow` (comma-separated module names, managed through the
+  config CLI/surfaces). Whitelisted modules are excluded from the "outside the
+  pipeline" list and tagged `exempt` in the report - a stated choice, not a
+  colored-over gap.
+- Report shape: `{ v: 1, generatedAt, scanned, modules: [{ name, wired:
+  [layers], layers: {sandbox, vaf, qos, escrow} }], unwired: [names], exempt:
+  [names] }`. Nothing greenwashed: an unwired module shows as unwired.
+- Frontend rendering: status (#3) gains ONE card (wired n/m + unwired names
+  verbatim, honest refusal cards if the verb is absent); #29 security renders
+  the full table. The pod NEVER auto-flips anything for an unwired module -
+  the scan reports, the operator decides.
+- Relay note (prd-relay 6.2 stands): the solo relay app stays MINIMAL by
+  ruling - the report travels through relay like any tool result; the relay
+  grows no security module of its own.
+
+**B. `objects` (#34) - the container.** The owner's words: "the physical
+router-OS design style of a container that appends lots of stuff... a container
+of ... everything, kinda. Definable." This is the enterprise back-pocket; spec:
+
+- An object is a POD-SIDE, operator-definable container:
+  `{ id, kind, title, schema?, attaches: [] }`. Definitions live in the pod
+  (brain-backed, rule 7 - like forum genders), NOT in the frontend. The
+  dashboard renders them; it never owns them.
+- Attaches are TYPED references defined at definition time, each resolving
+  through an EXISTING pod surface: `agent:<id>` (crew roster), `tool:<name>`
+  (the door registry), `file:<rel-path>` (sandbox-gated reads),
+  `service:<key>` + `connector:<*>` (connectors), `relay:<endpoint>`,
+  `node:<id>` (mesh), `object:<id>` (nesting - containers in containers),
+  `link:<url>`, `note:<text>`. Unknown prefixes and unresolvable targets are
+  REFUSED TYPED (`E_OBJECT_UNKNOWN_TYPE`, `E_OBJECT_UNRESOLVED`) - a container
+  never holds a dangling pointer silently.
+- Door verbs (the P4 build): `object_list`, `object_get`, `object_define`,
+  `object_attach`, `object_detach`, `object_delete` - registry
+  brain-backed like the guests ledger, escrow/audit-gated writes, tenant
+  rules identical to the roster filter (a guest sees only objects visible to
+  its scopeOwner).
+- Frontend render: router-OS style - a tree of chassis rows (the object) with
+  its attached ports as sub-rows (the attaches), tier-gated actions; a
+  `schema?` field lets an operator pin a display hint (name for the dashboard,
+  never enforced pod-side). Enterprise framing: this is how a deployment names
+  ITS OWN topology - "the dispatch backbone", "the exhibit container" - and
+  the dashboard shows it as built, not as an invented diagram.
 
 ### 4.1 The workbench (P5 - vibe coding, deliberately LAST)
 

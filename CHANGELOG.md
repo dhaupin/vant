@@ -5,6 +5,54 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 243 (the security-pipeline scan: the pod verb, the scanner, the status card, and the objects container spec'd)
+
+Owner ask: "scan lib, confirm they're using the pipeline; display lib
+modules outside pipeline (unless whitelisted)" — plus the six new
+security-family dashboard modules and THE CONTAINER. The scan itself
+LANDED pod-side; the six modules are spec'd in prd-web (build next).
+
+### Added - `security_pipeline_report` (the pod-side scan)
+
+- **`lib/security-pipeline.js` (NEW)**: walks the pod's `lib/` tree
+  (shallow = module roots by default; `maxDepth` for deeper) and
+  detects middleware-chain wiring evidence per module — a require of
+  `sandbox`/`vaf`/`qos`/`escrow` (the AGENTS.md chain order);
+  `audit`/`habitat` adjacency recorded as informational, never gates.
+  Unwired stays UNWIRED (nothing greenwashed); an unreadable file or
+  an unreadable dir reports honestly instead of crashing.
+- **The door verb (`lib/mcp.js`)**: admin-only (the `guest_list`
+  precedent — pod-internal topology keeps no shape for guests,
+  #185's enumeration lesson); merges the operator whitelist from
+  brain config `security.pipelineAllow` (comma-separated module
+  names, `vant config set`-managed) into `exempt` — whitelisted is a
+  STATED choice, not a colored-over gap. Auditable, never noisy.
+- **Live truth at HEAD**: 180 modules scanned, 65 with gate wiring,
+  115 outside the pipeline, 0 exempt. The pod NEVER auto-flips any
+  config for an unwired module — the scan reports, the operator
+  decides.
+- **Dashboard (status #3)**: a `PipelineScanCard` renders the report
+  verbatim (`wired n/scanned · k outside · m exempt`, unwired names
+  listed); a typed door refusal renders as the card. The frontend
+  still reads no pod source (the one-way boundary holds).
+- **Spec'd (labs/prd-web.md 4.4 + rows 29-34)**: the same contract
+  written down, plus `objects` (#34) — THE CONTAINER: a router-OS
+  style, operator-definable pod-side object (`{id, kind, title,
+  schema?, attaches[]}`, typed attach refs, `object_*` door verbs at
+  P4) — and the six security-family modules (security/vaf/qos/rls/
+  rules/objects). prd-relay §6 explicitly keeps the pipeline surfaces
+  DASHBOARD-ONLY (the solo relay gains no security module).
+
+### Pins
+
+- `test/security-pipeline.test.js` (NEW, 8/8): report shape,
+  per-layer wiring detection, the shallow-default depth cap,
+  nothing-greenwashed unwired, whitelist→exempt (with `.js`-suffix
+  normalization), informational-layers-never-gate, missing-dir
+  honest zero, and a live `lib/` truth probe.
+- MCP docs coverage 332 = 332 (the `security_pipeline_report` row +
+  the previously-missed `pairing_voucher_*` rows landed).
+
 ## [Unreleased] - pass 239 (the canonical stone: boot-folder cleanup, the carrier abstraction recorded, horcrux refreshed)
 
 The axolotl stone is now THE engineering onboarding artifact - one
