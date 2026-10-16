@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { exec, ApiError } from "../../api";
 import { NotConnected, useToolsQuery, toolsByPrefix } from "../../frame/conn";
 import { useApp } from "../../state";
@@ -35,56 +36,14 @@ function deepLink(code: string): string {
   return u.toString();
 }
 
-/** Dependency-free QR: renders the deep link as a scannable matrix using
- *  the "visual grid" fallback — an honest picture of the link, NOT a
- *  fake scannable barcode. Camera-scan lands via the URL, the grid is
- *  the human-readable companion (a real QR encoder is a dep decision
- *  parked for the P3 owner; the deep link already works). */
-function CodeGrid({ link }: { link: string }) {
-  const cells = useMemo(() => {
-    const size = 21;
-    let h = 2166136261;
-    for (const ch of link) {
-      h ^= ch.charCodeAt(0);
-      h = Math.imul(h, 16777619) >>> 0;
-    }
-    const out: boolean[] = [];
-    for (let i = 0; i < size * size; i++) {
-      h ^= i * 2654435761;
-      h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0;
-      out.push(((h >>> 15) & 1) === 1);
-    }
-    // corner finder squares keep the grid STRONGLY visually distinct from
-    // the data area (so nobody mistakes it for a scannable QR)
-    const finder = (r: number, c: number) => {
-      const inTopLeft = r < 5 && c < 5;
-      const inTopRight = r < 5 && c >= size - 5;
-      const inBottom = r >= size - 5 && c < 5;
-      if (!(inTopLeft || inTopRight || inBottom)) return null;
-      const rr = r % (r >= size - 5 ? size - 5 : 0) || (r >= size - 5 ? r - (size - 5) : r);
-      const cc = c % (c >= size - 5 ? 0 : 5) || (c >= size - 5 ? c : c - (size - 5));
-      const pr = inBottom ? rr : r;
-      const pc = inTopRight ? c - (size - 5) : cc % 5;
-      const edge = pr === 0 || pr === 4 || pc === 0 || pc === 4;
-      const center = pr === 2 && pc === 2;
-      return edge || center;
-    };
-    return out.map((v, i) => {
-      const r = Math.floor(i / size), c = i % size;
-      const f = finder(r, c);
-      return f === null ? v : f;
-    });
-  }, [link]);
-
+/** The REAL scannable QR (qrcode.react@4.2.0 — zero runtime deps,
+ *  ISC, exact-pinned + integrity-locked; see package.json supply-chain
+ *  policy). The deep link rides the QR: scanning it opens /pairing?code=…
+ *  on the pairing device and pre-fills the redeem panel. */
+function PairingQR({ link }: { link: string }) {
   return (
-    <div
-      className="inline-grid gap-px rounded-lg border border-line bg-surface p-2"
-      style={{ gridTemplateColumns: `repeat(21, 8px)` }}
-      aria-label="pairing deep link grid (not a scannable QR)"
-    >
-      {cells.map((on, i) => (
-        <span key={i} className={on ? "h-2 w-2 bg-ink" : "h-2 w-2 bg-transparent"} />
-      ))}
+    <div className="rounded-lg border border-line bg-white p-3" aria-label="pairing deep link QR code">
+      <QRCodeSVG value={link} size={168} level="M" includeMargin />
     </div>
   );
 }
@@ -207,19 +166,21 @@ function IssuePanel({ admin }: { admin?: boolean }) {
             >
               Open redeem deep link
             </a>
-            <CodeGrid link={deepLink(code)} />
+            <PairingQR link={deepLink(code)} />
             <button
               type="button"
               onClick={() => setCode(null)}
-              className="row-span-full rounded border border-line px-2 py-1 text-xs hover:bg-ink/5"
+              className="rounded border border-line px-2 py-1 text-xs hover:bg-ink/5"
             >
               I saved it — hide forever
             </button>
           </div>
           <p className="mt-2 text-[10px] text-ink-soft">
-            The grid is the deep link's deterministic fingerprint (a human
-            check), not a scannable QR — camera pairing rides the printed
-            URL/label until a QR encoder dep is picked. Honest, stated.
+            Scanning this QR on another device opens this property's
+            <span className="font-mono"> /pairing </span>page with the code
+            pre-filled. The QR encoder (qrcode.react 4.2.0) is exact-pinned
+            with a lockfile integrity hash — see the manifest's
+            supply-chain policy.
           </p>
         </div>
       ) : null}
