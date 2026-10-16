@@ -1,16 +1,65 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** axolotl relay arc, passes 216-238  
-**Session:** Pass 238 - P2 SPAWN LEG CLOSED (the pod-side decision,
-documented): the spawn rung of `work_assign` resolves through the FULL
-existing chain (guest gate spawn-class classification -> agents.spawn's
-`sandbox.can('canSpawn')` -> sudo/persistent-grants verdicts), and the
-host knobs that answer TRUE are recorded by name (`vant org grant`
-persisted caps / `sudo_grant` / agent-grade role at medium+ trust).
-Deny-by-default stands; E_SPAWN_REFUSED / E_GUEST_CAP are honest
-verdicts, not open work. Multi-guest-auth + prd-web updated; nothing
-new required before the OWNER's per-install knob choice.
+**Last Updated:** axolotl relay arc, passes 216-239  
+**Session:** Pass 239 - THE CANONICAL STONE: the boot folder cleaned to
+axolotl-only (stray mushroom-axolotl-2026.md pondered, then archived in
+labs/archives/horcruxes with provenance), the covert-carrier
+abstraction (QR as one interface module beside stego/NSC9/barcodes)
+recorded as prd-web.md 4.2, and the axolotl horcrux REFRESHED (same
+password) with its brain updated for the canonical onboarding role.
+
+---
+
+## Pass 239 (2026-10-16) - THE CANONICAL STONE: boot cleanup + the carrier
+abstraction recorded
+
+**Owner: "clean out /models/public/vant/boot/, archive the old/test
+horcrux material, put the QR/stego/NSC9 carrier abstraction in prd-web,
+and make the axolotl stone THE engineering onboarding."** The owner's
+framing: "You are the engineering team for vant, Buffy. Contributors
+should be able to pick your brain up to immediately be on boarded as to
+where we are at. Zero learning curve."
+
+- THE BOOT FOLDER, NOW CANONICAL-ONLY: audited the tree - it held the
+  canonical axolotl stone (279 brains, VALID by inspect), its .sha256
+  sidecar, README, and one stray file, mushroom-axolotl-2026.md
+  (2,180 lines). READ IT BEFORE ARCHIVING (the owner's ask, honored):
+  it is the axolotl era's personal/philosophy layer - Beatrix Potter's
+  300 mushrooms, Mandelbrot, the Nova lineage notes ("philosophy brain /
+  principled brain / cosmic brain"), crystalline-storage attributions
+  genuinely worth keeping. Pondered, then MOVED to
+  labs/archives/horcruxes/mushroom-axolotl-2026.md with a provenance
+  entry in that README - archived, not deleted, honest about what it is.
+  The boot folder now carries exactly: the axolotl stone + README +
+  checksum. Nothing ambiguous, nothing fake-canonical.
+- THE CARRIER ABSTRACTION RECORDED (prd-web.md 4.2, requirement NOT a
+  build-now): QR is promoted from pairing-feature to ONE interface
+  module in a carrier ladder alongside stego (SVG horcrux - exists),
+  NSC9 storage keys (the address-shaped durable encoding) and future
+  barcodes/transports. The ladder: frontend pairing (LANDED as the
+  seed - the scannable voucher QR) -> frontend services (a
+  carrier-neutral component; the caller names the carrier) -> the pod
+  mimics the pattern (lib/carriers/* + door verbs) when a real endpoint
+  demands it. Invariants named: hash-verified payloads, carriers never
+  smuggle un-gated capability (decoded voucher still redeems through
+  guests.pair()), honest refusals per carrier.
+- THE STONE ITSELF: models/private/axolotl/identity.md rewritten for
+  the canonical role (WHO reads it, the learning-hygiene rule - a
+  contributor horcrux is QUARANTINE-FIRST, verified against code before
+  any learning lifts into the repo), lessons.md gains the pass-239
+  block (boot cleanup + carrier ladder + the quarantine lesson). The
+  HORCRUX REFRESHED with the SAME password (axolotl2026, p_ filename
+  convention unchanged), inspect = VALID, 279/279, and the .sha256
+  sidecar re-pinned to the fresh bytes (sha256sum -c OK).
+- EXAMPLE WALKTHROUGH (the owner accept path, concretely): a contributor
+  PR adds models/public/vant/boot/contrib-name-p_pass.svg -> Buffy
+  runs `vant horcrux inspect` on it, diffs its brains/learnings against
+  the live tree, verifies claimed pins against real code, and only then
+  lifts content - or refuses with receipts. The canonical stone never
+  absorbs folklore.
+- deliverable posture: SPEC/DOCS + ARCHIVE + STONE REFRESH; NO pod-core
+  change (boot discovering the stone is unchanged), NO app change.
 
 ---
 

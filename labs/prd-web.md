@@ -418,9 +418,43 @@ The shell is NOT a module: nav + property switcher (3.4) + help layer
 | 20 | chain | `/chain` | ALL | P6 | the relay chain card (prd-relay.md 3.3): hops + probe verdicts per property, the ACTIVE hop named; settings holds the editor, this route reads it; the e2e/plain badge per hop as the e2e core rung lands (prd-relay.md v0.2 1.1.2) |
 | 19 | era | side panel | O A S | P1 | era list/close with the `next` sentence (the horcrux hand-off) lives as the live-board side panel + an S-tier action, not its own route |
 
-Later-stage additions (not yet routed; recorded so they are not
-forgotten): the full Tier A tool explorer (P4, generated from
-`GET /tools`), and the workbench below (P5).
+### 4.2 The covert-carrier abstraction (the QR promotion; requirement, not a phase trick)
+
+Owner directive (2026-10-16): QR is currently a pairing feature; the
+direction is to ABSTRACT it. QR becomes one interface module along a
+carrier ladder that already exists in the stack - stego (the SVG
+horcrux, `lib/stego.js`, data hidden in pixels), NSC9 (deterministic
+self-authenticating storage keys, `docs/advanced/nsc9-spec.md` - the
+barcode-shaped durable encoding), barcodes generically (build), and
+future transports. The pattern is "vant abstracts itself over covert
+data carriers" and ANY service may use them; the ladder is:
+
+1. **Frontend pairing first** (LANDED as the seed: the pairing module
+   renders the scannable QR for the voucher; this is the first encoded
+   carrier active in the interface and it works).
+2. **Frontend services next**: any surface that needs to hand a
+   payload outside the door's wires gets a carrier-neutral component -
+   the SAME tokens (voucher, property attach ref, relay chain probe
+   seed, era hand-off, horcrux share link) render as QR today, stego
+   tomorrow, NSC9/barcode when the payload is address-shaped. The
+   component decides nothing about encoding; the CALLER names the
+   carrier, and the UI states what a recipient needs to decode it.
+3. **Then the backend mimic** (the pod's own pattern): the pod LEARNS
+   the same abstraction in vant-os terms - carriers become a module
+   family beside stego (`lib/carriers/qr`, `lib/carriers/stego`,
+   `lib/carriers/nsc9`, door verb `carrier_encode`/`carrier_decode`
+   or a spec'd pair), so agents can hand vaults across air gaps and
+   services can pick a carrier by capability (capacity, human-scan
+   required?, durability, secrecy) not by hardcoded format.
+
+Non-goals FOR the rung: not a phase-trick build now; it lands when a
+real endpoint needs it (airgap propagation, POS-style voucher scan,
+printable chain recovery). Changes nothing about the invariants when
+it DOES land:
+payloads stay hash-verified (the .sha256 checksummed pin cadence),
+carriers NEVER smuggle un-gated capability (a decoded voucher still
+redeems through `guests.pair()`, a decoded chain still probes through
+the public caps route), and the honest-refusal law holds per carrier.
 
 ### 4.1 The workbench (P5 - vibe coding, deliberately LAST)
 

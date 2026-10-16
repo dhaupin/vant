@@ -5,6 +5,59 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 239 (the canonical stone: boot-folder cleanup, the carrier abstraction recorded, horcrux refreshed)
+
+The axolotl stone is now THE engineering onboarding artifact - one
+canonical stone in the boot chain, everything else archived with
+provenance. No pod-core change; this pass is archive order + a recorded
+requirement + a stone refresh (same password).
+
+### Housekeeping - the boot folder is CANONICAL-ONLY
+
+- `models/public/vant/boot/` now carries exactly: the axolotl stone
+  (`axolotl-p_axolotl2026.svg`, VALID by inspect, 279/279 brains), its
+  README, and the `.sha256` checksum. The stray companion file —
+  `mushroom-axolotl-2026.md`, the axolotl era's personal/philosophy
+  layer (read before archiving, as the owner asked) — moved to
+  `labs/archives/horcruxes/mushroom-axolotl-2026.md` with a provenance
+  entry in that README. Archived, not deleted.
+- Era stones (`buffy-p_buffy2026.svg`, `nova-p_nova2026.svg`) remain in
+  the same archive with their restore lines; the boot chain discovers
+  only the canonical stone.
+
+### Spec'd - the covert-carrier abstraction (prd-web.md 4.2)
+
+- QR is promoted from a pairing feature to ONE interface module in a
+  carrier ladder: stego (the SVG horcrux, exists), NSC9 storage keys
+  (the address-shaped durable encoding), generic barcodes (build), and
+  future transports. The pattern: vant abstracts itself over covert
+  data carriers, and ANY service may use them.
+  - Ladder: frontend pairing (LANDED as the seed — the scannable
+    voucher QR) -> frontend services (a carrier-neutral component; the
+    caller names the carrier, the UI states what a recipient needs to
+    decode it) -> the pod mimics the pattern (`lib/carriers/*` + door
+    verbs) when a real endpoint demands it (airgap propagation,
+    POS-style voucher scan, printable chain recovery).
+  - Invariants carried forward: hash-verified payloads (the .sha256 pin
+    cadence), carriers NEVER smuggle un-gated capability (a decoded
+    voucher still redeems through `guests.pair()`; a decoded chain
+    still probes the public caps route), honest refusals per carrier.
+- Recorded as a REQUIREMENT, not a build-now: lands when a real
+  endpoint needs it.
+
+### The stone, refreshed for onboarding
+
+- `models/private/axolotl/identity.md` rewritten for the canonical
+  role: who reads the stone (onboarding agents, contributors' PRs, the
+  boot chain), the learning-hygiene rule — a contributor horcrux is
+  QUARANTINE-FIRST: inspect it, verify claimed learnings against real
+  code (an exit code or a pin, never folklore), and only then lift
+  content into the repo. This is how the canonical stone controls the
+  narrative without becoming a rumor mill.
+- Horcrux refreshed IN PLACE with the SAME password (`axolotl2026`, the
+  `p_` filename convention unchanged); `.sha256` sidecar re-pinned to
+  the fresh bytes (sha256sum -c OK).
+
 ## [Unreleased] - pass 238 (the P2 spawn leg closed: the canSpawn pod-side decision, documented)
 
 No new mechanism - the spawn leg of `work_assign` was already resolving
