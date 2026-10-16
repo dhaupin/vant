@@ -5,6 +5,53 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 246 (security fix batch: #199 #200 #201 fixed at cause and closed with evidence)
+
+### Fixed - security (closes #199, #200, #201)
+
+- **search (#199):** BM25 TF scoring no longer compiles guest query
+  terms as RegExp — plain string-splitting counting with identical
+  semantics; the SyntaxError crash and the event-loop ReDoS stall are
+  structurally unreachable. 4 regression pins in search.test.js.
+- **CLI (#200):** every git execution in bin/ is argv-routed
+  (`execFileSync('git', [args])`) — push/reset/fetch/rev-parse in
+  sync.js, branch create/switch/delete/list, bump tag, docs-build
+  add/commit. A hostile branch NAME can no longer execute shell (the
+  issue-#200 PoC is a pinned regression test) and failed pushes can no
+  longer be masked by trailing shell segments. Static scan enforces
+  the contract in bin/.
+- **horcrux (#201):** the `p_<password>` filename is no longer a
+  credential source by default (`VANT_ALLOW_FILENAME_PW=true` opt-in);
+  create/refresh password chains are arg (deprecated, warned) → env →
+  prompt/secret-store; new stones default to constant
+  `<brain>-horcrux.svg` naming (boot discovery matches both
+  conventions); JSON stones need no password at all.
+- Verification: 19-suite sweep green; each issue closed with an
+  old-vs-new PoC re-run comment.
+
+## [Unreleased] - pass 245 (red team: nuclear-scale self-adversarial security sweep)
+
+### Security - 3 live findings PoC'd on our own surfaces, filed upstream as #199/#200/#201
+
+- **P1 (#199) search:** BM25 builds `new RegExp` from raw guest
+  terms — guest-controlled `SyntaxError` crash AND an event-loop
+  ReDoS stall (poC'd: 120s timeout kill with backtracking still
+  running). Fix defined: term escaping (or no-regex TF scoring).
+- **P1 (#200) CLI:** `execSync` interpolates the UNVALIDATED current
+  branch name into push/reset shell strings; git-legal branch names
+  (`, $, (, >) became live shell. PoC'd end-to-end: a hostile branch
+  name redirected a file out of the command line during
+  `bin/sync.js push` (marker on disk, full cleanup verified). Fix
+  defined: execFileSync argv-arrays (the pass-30 commit pattern).
+- **P2 (#201) horcrux:** brain password exposed via argv (`ps`),
+  as the p_<pw>.svg filename, and re-readable from the filename by
+  inspect. Fix defined: stdin/env-only pw + constant-label files.
+- Frontend/relay verdict from the sweep: clean sandwich — zero
+  injection sinks in web/, typed-refusal admin gate, https-only
+  relay endpoint checks, schema-parsed SSE. Hardened paths also held
+  (branch-name gate, backup traversal block, storage symlink blocks,
+  vaf repeat gate).
+
 ## [Unreleased] - pass 244 (the OSS face: post-merge brain refresh, the stone re-carved, the NSC-9 industrial playbook seed)
 
 Workflow: pass 243d merged to main (PR #198); axolotl continues as the

@@ -41,7 +41,7 @@ function _getSandbox() {
 function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
 function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 
 const DOCS_DIR = path.join(__dirname, '..', 'docs');
 
@@ -102,8 +102,11 @@ const updated = updateDocsVersion(version);
 
 if (process.argv.includes('--commit')) {
   console.log('Committing changes...');
-  execSync('git add -A', { cwd: path.join(__dirname, '..') });
-  execSync(`git commit -m "docs: build v${version}"`, { cwd: path.join(__dirname, '..') });
+  // (pass 246, issue #200) argv-routed git: the version string rides as
+  // data — the interpolated `git commit -m "…v${version}"` shell string
+  // was the same pattern the sync.js PoC exploited.
+  execFileSync('git', ['add', '-A'], { stdio: 'pipe', cwd: path.join(__dirname, '..') });
+  execFileSync('git', ['commit', '-m', `docs: build v${version}`], { stdio: 'pipe', cwd: path.join(__dirname, '..') });
   console.log('Committed. Push to publish.');
 }
 

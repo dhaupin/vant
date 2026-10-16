@@ -35,6 +35,88 @@ long-history half; this file is the working half. When this file
 grows past ~2k lines again, split at session boundary INTO the
 archive (newest-first append there) - never delete history.
 
+## Pass 246 (2026-10-16) - THE FIX BATCH: #199/#200/#201 fixed at cause, closed with evidence — then the security PR
+
+**Owner: "We should fix it all, while fully disclosing the security
+concerns through Github issues… fix this batch of issues and close
+them with evidence."**
+
+- #199 FIXED: BM25 TF scoring is plain `String.split` counting — zero
+  regex compilation of guest terms (crash + ReDoS both structurally
+  unreachable; identical TF semantics). 4 regression pins in
+  search.test.js (throw-free metachar, identical scoring, wildcards
+  do NOT widen, quantifier shape <3ms). PoC re-run: score=1 / 0ms.
+- #200 FIXED: the whole bin/ git surface is argv-routed
+  (`execFileSync('git', [args])`): sync push/reset/fetch/rev-parse/add/
+  status, branch create/switch/delete/list, bump tag, docs-build
+  add/commit. The masked-exit-code half is fixed by the same change.
+  Two new git-injection pins: the hostile-branch PoC ran as a test,
+  and a static scan enforces no interpolated `git …${}` templates in
+  bin/. PoC re-run inside the test: marker never written.
+- #201 FIXED: the p_<pw> FILENAME is not a credential source by
+  default (VANT_ALLOW_FILENAME_PW opt-in gate in transform fromHorcrux
+  + inspectHorcrux and boot restore); create/refresh chains are
+  arg(deprecated, warned) → env → prompt/secret-store; new stones
+  default to constant `<brain>-horcrux.svg`; boot discovery matches
+  both conventions; JSON stones need no password at all (pre-existing
+  wart exposed by the gate, fixed). Regression pin: a stone encrypted
+  with y but NAMED p_x refuses by default and only attempts the
+  name-sourced credential under the gate. PoC re-run: PASS.
+- EVIDENCE CLOSURES: #199/#200/#201 each closed with a PoC-re-run
+  comment (old-vs-new outputs inline).
+- SWEEPS GREEN: baseline 12/12 before; consolidated sweep 19/19
+  after (search, git-injection, horcrux, boot, sync family, encrypt,
+  backup, memory).
+
+## Pass 245 (2026-10-16) - THE RED TEAM: nuclear-scale self-adversarial pen test — 3 live exploits PoC'd, 3 issues filed (#199/#200/#201)
+
+**Owner: "Let's hit what we have built looking for bugs, edges,
+security, exploits, vulns… at nuclear blackhat red team pen test scale,
+break it. Then report issues on vant main repo. Don't stop to fix,
+but define the fix in issue."**
+
+- SURFACES SWEPT: the headless/CLI door surface (bin/*, lib/mcp.js,
+  lib/guests.js, lib/auth.js, lib/sandbox.js, lib/vaf.js), web/
+  dashboard api.ts + the full frontend (13 frame modules), relay
+  functions (instake/exec/events), and the storage/backup/horcrux
+  plumbing.
+- FRONTEND VERDICT: CLEAN — zero injection sinks (no
+  dangerouslySetInnerHTML/innerHTML/eval), relay endpoint is
+  https-only with r/2 envelope-required cap check, tokens ride
+  httpOnly function-door paths, SSE frames schema-parsed.
+- FINDING #1 (P1, issue #199): BM25 search builds `new RegExp(term,
+  'gi')` from RAW guest query terms (lib/search.js BM25Inner
+  scoreOne); the crash PoC (unbalanced metachar) throws SyntaxError
+  out of guest search, the stall PoC (valid backtracking shape that
+  dodges the vaf repetition gate) hangs the event loop — killed by
+  the 120s process timeout with the regex still spinning. Defined
+  fix: escape terms (or indexOf TF), regression-budgeted test.
+- FINDING #2 (P1, issue #200): bin/sync.js interpolates the branch
+  name UNVALIDATED into execSync() push/reset shell strings; branch
+  resolve validation only guards --branch, the default path is the
+  raw getCurrentBranch() string; git-legal names carry ;, $, (, > —
+  LIVE PoC: hostile branch ``poc;>.agent_tmp/pwn-marker;`` ran the
+  marker-creating redirect during `node bin/sync.js push` (marker
+  verified on disk, `[Sync] Pushed … successfully`, then full
+  lab-cleanup: branch deleted, remote restored, no residue). Same
+  bug also masks push failures (last-command exit code only).
+  Defined fix: execFileSync git argv-arrays everywhere (the pass-30
+  commit pattern) + git-injection.test.js extension.
+- FINDING #3 (P2, issue #201): horcrux brain password exposed via
+  argv (ps/cmdline for the process lifetime), embedded in the
+  p_<pw>.svg FILENAME, and read back off the filename by inspect —
+  same-host `ls`/`ps` open the encrypted brain. Defined fix: stdin/
+  env-only pw, constant-label filenames, no filename fallback.
+- HARDENED-OK in the sweep (defense holding): bin/branch.js strict
+  ref-name gate on interpolated git calls (style risk only),
+  lib/backup.js path-traversal block, storage symlink/… escape
+  blocks, waf's-repeat gate (caught the naive ReDoS shape), the
+  dashboard's one admin gate (ensureAdmin) chained typed refusals,
+  webhook filter execution is config-trusted (not guest).
+- Discipline kept: no repo-state mutation left behind, PoCs ran
+  against the defanged remote at file:///tmp/net-dead, no real push,
+  UT-4/UT-2 untouched.
+
 ## Pass 244 (2026-10-16) - THE OSS FACE: the merge celebrated, brains refreshed, the stone re-carved, the NSC-9 industrial playbook seed
 
 **Owner: “Accepted! ... update brains and make sure our boot horcrux is

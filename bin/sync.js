@@ -67,14 +67,14 @@ const DEFAULT_BRANCH = 'main';
 const PROTECTED_BRANCHES = ['main', 'master'];
 function getCurrentBranch() {
     try {
-        return execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
+        return execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { encoding: 'utf8' }).trim();
     } catch (e) {
         return null;
     }
 }
 function hasUpstream() {
     try {
-        execSync('git rev-parse --abbrev-ref --symbolic-full-name @{u}', { encoding: 'utf8', stdio: 'pipe' });
+        execFileSync('git', ['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{u}'], { encoding: 'utf8', stdio: 'pipe' });
         return true;
     } catch (e) {
         return false;
@@ -123,7 +123,9 @@ function git(args) {
     // status: not found"), the catch returned the error MESSAGE as the
     // output string, and main() printed it and exited 0. Program name now
     // lives here; callers pass git subcommands only.
-    return execSync(['git', ...args].join(' '), { encoding: 'utf8', stdio: 'pipe' });
+    // (pass 246, issue #200) argv-routed: the shell string form let any
+    // arg fragment the command. Callers pass fixed subcommand arrays here.
+    return execFileSync('git', args, { encoding: 'utf8', stdio: 'pipe' });
 }
 
 /**
@@ -174,14 +176,18 @@ function pull() {
             return { success: false, error: 'protected branch requires --branch' };
         }
 
-        execSync('git fetch origin', { stdio: 'pipe' });
+        execFileSync('git', ['fetch', 'origin'], { stdio: 'pipe' });
+        // (pass 246, issue #200) reset --hard is argv-routed: the shell
+        // string form executed any hostile LOCAL branch NAME (git-legal
+        // names carry `;` `$` `(` `>`) as a live shell payload — verified
+        // PoC in the issue. Branch names are now data, never code.
         if (current && branch === current) {
             // Fast-forward-ish reset against the tracked upstream of THIS branch
-            const upstream = hasUpstream() ? `origin/${branch}` : null;
-            execSync(`git reset --hard ${upstream || ('origin/' + branch)}`, { stdio: 'pipe' });
+            const target = hasUpstream() ? `origin/${branch}` : `origin/${branch}`;
+            execFileSync('git', ['reset', '--hard', target], { stdio: 'pipe' });
         } else {
             // Explicit cross-branch pull: still reset --hard, but at least it is opt-in
-            execSync(`git reset --hard origin/${branch}`, { stdio: 'pipe' });
+            execFileSync('git', ['reset', '--hard', `origin/${branch}`], { stdio: 'pipe' });
         }
         console.log(`[Sync] Pulled ${branch} successfully`);
         return { success: true, branch };
@@ -205,8 +211,8 @@ function push(message = 'Vant update') {
     console.log('[Sync] Pushing to GitHub...');
     
     try {
-        execSync('git add -A', { stdio: 'pipe' });
-        const status = execSync('git status --porcelain', { encoding: 'utf8' });
+        execFileSync('git', ['add', '-A'], { stdio: 'pipe' });
+        const status = execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' });
 
         if (!status.trim()) {
             console.log('[Sync] No changes to push');
@@ -232,7 +238,10 @@ function push(message = 'Vant update') {
             console.log(`[Sync] REFUSED: cannot push '${branch}' (protected) unless you are ON it.`);
             return { success: false, error: 'protected branch push refused' };
         }
-        execSync(`git push origin ${branch}`, { stdio: 'pipe' });
+        // (pass 246, issue #200) argv-routed push: branch is a data string,
+        // never shell-interpolated (the PoC branch name injected a redirect
+        // out of `git push origin poc;>.agent_tmp/pwn-marker;`).
+        execFileSync('git', ['push', 'origin', branch], { stdio: 'pipe' });
         console.log(`[Sync] Pushed ${branch} successfully`);
         return { success: true, changes: true, branch };
     } catch (e) {

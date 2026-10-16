@@ -22,7 +22,7 @@ if (args[0] === '-h' || args[0] === '--help') {
  * Usage: vant bump [-h|--help] [-p|--patch|-m|--minor|-M|--major]
  */
 
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 const fs = require('fs');
 
 // Lazy-load sandbox
@@ -97,7 +97,9 @@ function updatePackageJson(version) {
  */
 function tag(version) {
     try {
-        execSync(`git tag -a v${version} -m "Release v${version}"`, { stdio: 'pipe' });
+        // (pass 246, issue #200) argv-routed tag: the version string rides
+        // as data, never shell interpolation.
+        execFileSync('git', ['tag', '-a', `v${version}`, '-m', `Release v${version}`], { stdio: 'pipe' });
         console.log(`[Bump] Created tag v${version}`);
         return true;
     } catch (e) {

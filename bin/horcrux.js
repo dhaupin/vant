@@ -202,19 +202,30 @@ async function run() {
             return stack[0] || 'vant';
         })();
         // (pass 71, issue #93) Resolve the password BEFORE the default-path
-        // template (which embeds it) and before the guard below. The create
-        // branch never assigned `password`, so every documented path -
-        // positional arg, env var, p_ filename - died on
-        // 'Error: password is not defined'. Chain mirrors the refresh
-        // branch: arg -> env -> p_ filename.
+        // template and before the guard below. (pass 246, issue #201) The
+        // chain is arg -> env ONLY: the old p_-filename guess was a secret
+        // disclosure (a filename is world-readable metadata). A non-TTY
+        // run with no password now REFUSES with guidance instead of
+        // guessing; interactive runs get a terminal-hidden prompt.
         const positionalPw = args[2];
         let password = positionalPw || process.env.VANT_BRAIN_PASSWORD || null;
-        if (!password) {
-            const guessed = args[1] || path.join(REPO_ROOT, 'models', 'public', currentBrain, 'boot', `${currentBrain}-p_.svg`);
-            const m = path.basename(guessed).match(/-p_([^.]+)\.svg$/);
-            if (m) password = m[1];
+        if (positionalPw) {
+            console.error('⚠️  Passing the brain password as a CLI argument is DEPRECATED (it is readable in ps/cmdline).');
+            console.error('    Preferred: VANT_BRAIN_PASSWORD env var, or omit it to be prompted.');
         }
-        const outputPath = args[1] || path.join(REPO_ROOT, 'models', 'public', currentBrain, 'boot', `${currentBrain}-p_${password}.svg`);
+        if (!password && process.stdin.isTTY) {
+            const readline = require('readline');
+            const rl = readline.createInterface({ input: process.stdin, output: process.stderr, terminal: true });
+            process.stderr.write('Brain password: ');
+            password = await new Promise((resolve) => {
+                rl.question('', (answer) => {
+                    rl.close();
+                    process.stderr.write('\n');
+                    resolve(String(answer || '').trim() || null);
+                });
+            });
+        }
+        const outputPath = args[1] || path.join(REPO_ROOT, 'models', 'public', currentBrain, 'boot', `${currentBrain}-horcrux.svg`);
         if (!password) {
             console.log('❌ Password required');
             console.log('Usage: vant horcrux create <path> <password>');
@@ -321,17 +332,26 @@ async function run() {
             process.exit(1);
         }
 
-        // Resolve password by the SAME chain as restore: arg → env → filename.
+        // (pass 246, issue #201) Resolve password by the chain arg → env →
+        // secret store → prompt. The filename is NOT a password source: the
+        // old `p_<password>` guess handed the brain password to anyone who
+        // could list the boot dir. Legacy p_-filename lookups stay available
+        // ONLY via VANT_ALLOW_FILENAME_PW=true (parity with lib/transform).
         let password = positionalPw || process.env.VANT_BRAIN_PASSWORD || null;
+        if (positionalPw) {
+            console.error('⚠️  Passing the brain password as a CLI argument is DEPRECATED (it is readable in ps/cmdline).');
+            console.error('    Preferred: VANT_BRAIN_PASSWORD env var.');
+        }
         if (!password) {
-            const m = path.basename(target).match(/-p_([^.]+)\.svg$/);
-            if (m) password = m[1];
+            try {
+                const secret = require('../lib/secret');
+                password = await secret.get('brain');
+            } catch (e) { /* fall through to refusal below */ }
         }
         if (!password) {
             console.error('❌ Password required (refresh must re-encrypt with the same key):');
-            console.error('     • positional arg: vant horcrux refresh <password>');
             console.error('     • env var:        VANT_BRAIN_PASSWORD=...');
-            console.error('     • p_<password> in the target filename (the convention)');
+            console.error('     • legacy p_-filename lookup: VANT_ALLOW_FILENAME_PW=true');
             process.exit(1);
         }
 

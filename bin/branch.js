@@ -31,7 +31,7 @@ EXAMPLES:
     process.exit(0);
 }
 
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 
 /** Git ref-name hygiene: refs are interpolated into shell strings below, so
  * restrict to characters git itself allows in branch names. Blocks injection
@@ -48,7 +48,7 @@ function main() {
             case 'ls':
                 console.log('Branches:');
                 try {
-                    const branches = execSync('git branch --list', { encoding: 'utf8' });
+                    const branches = execFileSync('git', ['branch', '--list'], { encoding: 'utf8' });
                     console.log(branches);
                 } catch(e) {
                     console.log('  main (default)');
@@ -67,7 +67,10 @@ function main() {
                 }
                 console.log('Creating branch:', createName);
                 try {
-                    execSync(`git checkout -b ${createName}`, { encoding: 'utf8' });
+                    // (pass 246, issue #200) argv-routed even though the
+                    // isValidRefName gate blocks shell metachars — the
+                    // interpolated-string style must not survive anywhere.
+                    execFileSync('git', ['checkout', '-b', createName], { encoding: 'utf8' });
                     console.log('✅ Branch created');
                 } catch(e) {
                     console.log('Branch may already exist');
@@ -87,7 +90,7 @@ function main() {
                 }
                 console.log('Switching to branch:', switchName);
                 try {
-                    execSync(`git checkout ${switchName}`, { encoding: 'utf8' });
+                    execFileSync('git', ['checkout', switchName], { encoding: 'utf8' });
                     console.log('✅ Switched');
                 } catch(e) {
                     console.log('Error switching branch');
@@ -107,7 +110,7 @@ function main() {
                 }
                 console.log('Deleting branch:', deleteName);
                 try {
-                    execSync(`git branch -D ${deleteName}`, { encoding: 'utf8' });
+                    execFileSync('git', ['branch', '-D', deleteName], { encoding: 'utf8' });
                     console.log('✅ Branch deleted');
                 } catch(e) {
                     console.log('Error deleting branch');
