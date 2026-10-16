@@ -97,9 +97,16 @@ function Roster({ readGuard }: { readGuard?: string }) {
   const revoke = async (id: string, label: string) => {
     setBusyId(id);
     try {
-      await callGuests("guest_revoke", { id });
-      setRevokedName(label);
-      await load();
+      const r = await callGuests<{ revoked?: boolean }>("guest_revoke", { id });
+      // The door answers { revoked: false } for an unknown id — honor the
+      // typed verdict instead of a blanket success (no fake confirmations).
+      if (r?.revoked === false) {
+        setRefusal(`the door did not revoke ${id} (unknown or already-gone id — the roster is the truth)`);
+        setState("refused");
+      } else {
+        setRevokedName(label);
+        await load();
+      }
     } catch (err) {
       setRefusal(err instanceof ApiError ? err.message : "the revoke did not reach the door");
       setState("refused");
