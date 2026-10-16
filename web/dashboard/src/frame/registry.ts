@@ -96,7 +96,7 @@ export const MODULES = [
     route: "/work",
     tiers: ["H", "S"],
     section: "work",
-    families: ["tasks"],
+    families: ["task"], // door SSE tap ROOT: task:assigned folds under "task" (see frame/events.ts familyOf)
     icon: Briefcase,
     load: () => import("../modules/work"),
   },
