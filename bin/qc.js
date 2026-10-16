@@ -72,6 +72,24 @@ function assert(cond, msg) { if (!cond) throw new Error(msg || 'assertion failed
 const results = [];
 
 function main() {
+    // (ci fix, pass 243d) a real help door: previously ANY invocation ran
+    // the whole battery — including `--help`, which side-ran every probe
+    // (brain/forum/escrow/config writes from a 'help' call) and exited 1
+    // whenever a probe was environment-sensitive (what Actions caught).
+    // The cli-smoke contract (test/cli-smoke.test.js: '--help exits 0
+    // with usage') holds under ANY env now; the battery runs only when
+    // actually asked for.
+    if (process.argv.slice(2).some(a => a === '-h' || a === '--help')) {
+        console.log(`\n\uD83E\uDDED VANt QC — first-user battery (issue #181)\n
+Usage: vant qc [--json] [-h|--help]\n
+  (no args)  run the full first-user battery (memory/governance/forum/
+             encrypt/horcrux/universe/escrow/config probes, fresh CLI
+             subprocesses, cleanup janitor on exit)
+  --json     machine-readable results
+  -h,--help  this usage text (battery does NOT run)
+`);
+        process.exit(0);
+    }
     if (!asJson) {
         console.log('\n\uD83E\uDDED VANt QC — first-user battery (issue #181)\n');
     }
