@@ -5,6 +5,19 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 247 (red team round 2: nation-state-lane re-attack — defenses held)
+
+- `npm audit --omit=dev`: 0 vulnerabilities.
+- Proto-pollution lane still closed (`__proto__`/`constructor`/
+  `prototype` key guards); auth keys timing-safe with persisted
+  lockout frames; guest tokens crypto-random one-time secrets.
+- Relay edge verified live: freshness window → 401, constant-time
+  compares, BAD_ORIGIN hop refusal (private/loopback/metadata),
+  per-session budgets + breakers; the stateless-edge replay tradeoff
+  is documented rather than silent.
+- Result: no new findings cleared the P2 bar — the pass-246 fixes and
+  prior hardening held against round 2.
+
 ## [Unreleased] - pass 246 (security fix batch: #199 #200 #201 fixed at cause and closed with evidence)
 
 ### Fixed - security (closes #199, #200, #201)

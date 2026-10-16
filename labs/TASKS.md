@@ -35,6 +35,31 @@ long-history half; this file is the working half. When this file
 grows past ~2k lines again, split at session boundary INTO the
 archive (newest-first append there) - never delete history.
 
+## Pass 247 (2026-10-16) - RED TEAM ROUND 2: nation-state-lane probes — defenses held, no new P1/P2
+
+**Owner: round 2 "absolutely destroy vant... like you're a nation
+state (careful)." Post-fix re-attack on the same surfaces:**
+
+- TOOLING: official `npm audit --omit=dev` — **0 vulnerabilities**
+  (the pod dep tree is small and clean).
+- CONFIG/CONTEXT: proto-pollution lane remains CLOSED
+  (`__proto__`/`constructor`/`prototype` key guards in config.js —
+  comment records the live-fire incident that fixed it).
+- MDOOR/AUTH KEYS: timing-safe compares + persisted lockout frames
+  (pass 111 chain still in place); guest tokens are 32-byte
+  crypto.randomBytes hex secrets shown once (NOT HMACs of claims).
+- RELAY EDGE: freshness window enforced (stale ts → 401),
+  constant-time digest compares, private/loopback/link-local/metadata
+  hop targets REFUSED on the edge (BAD_ORIGIN), per-session rate
+  budget + per-property breakers. The edge is stateless by design and
+  DOCUMENTS the tradeoff (no cross-request replay cache at the edge;
+  byte-identical replay gate is the pod transport's job) — verified
+  the doc honestly names this, not a silent gap.
+- NOT-SO-FUN RESULT: no new P1/P2 landed in round 2; the pass-246 fix
+  batch + prior hardening coincide. Round-2 probes carried in the
+  red-team narrative (filed nothing — zero live findings is the
+  finding).
+
 ## Pass 246 (2026-10-16) - THE FIX BATCH: #199/#200/#201 fixed at cause, closed with evidence — then the security PR
 
 **Owner: "We should fix it all, while fully disclosing the security
