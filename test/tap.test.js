@@ -124,7 +124,11 @@ async function run() {
         const res3 = await fetch(base + '/mcp/events?beat=400', { headers: { Authorization: 'Bearer ' + guestIssue.token }, signal: revAbort.signal });
         assert.strictEqual(res3.status, 200);
         let revBuf = '';
-        const revDone = new Promise(async (resolve) => {
+        // deferred promise split out of the executor (no async executor):
+        // the reader loop is kicked off as its own IIFE and completes revDone.
+        let revResolve;
+        const revDone = new Promise((resolve) => { revResolve = resolve; });
+        void (async () => {
             try {
                 const reader = res3.body.getReader(); const dec = new TextDecoder();
                 for (;;) {
@@ -134,8 +138,8 @@ async function run() {
                     if (revBuf.includes('tap.revoked')) { try { await reader.cancel(); } catch (e) {} break; }
                 }
             } catch (e) { /* aborted */ }
-            resolve(revBuf);
-        });
+            revResolve(revBuf);
+        })();
         await new Promise(r => setTimeout(r, 250));
         guests.revoke(guestIssue.guest.id, DOPT);
         // the next beat (<=400ms + margins) must carry tap.revoked
@@ -146,21 +150,26 @@ async function run() {
         requireKeyEnv('true');
         const g2 = guests.issue('beat-probe-' + Date.now().toString(36), { ...DOPT, role: 'observer' });
         const beatStarted = Date.now();
-        const beatResult = await new Promise(async (resolve) => {
+        // deferred promise split out of the executor (no async executor):
+        // resolve lands from the pump, the 3s loan, or a reader error.
+        let beatResolve;
+        const beatDone = new Promise((resolve) => { beatResolve = resolve; });
+        void (async () => {
             let acc = '';
             let landed = 0;
-            const loan = setTimeout(async () => { resolve({ acc, landed }); }, 3000);
+            const loan = setTimeout(() => { beatResolve({ acc, landed }); }, 3000);
             const r = await fetch(base + '/mcp/events?beat=500', { headers: { Authorization: 'Bearer ' + g2.token } });
             const reader = r.body.getReader(); const dec = new TextDecoder();
             (function pump() {
                 reader.read().then(async ({ done, value }) => {
-                    if (done) return resolve({ acc, landed });
+                    if (done) return beatResolve({ acc, landed });
                     acc += dec.decode(value, { stream: true });
-                    if (!landed && acc.includes(': beat')) { landed = Date.now() - beatStarted; clearTimeout(loan); try { await reader.cancel(); } catch (e) {} resolve({ acc, landed }); return; }
+                    if (!landed && acc.includes(': beat')) { landed = Date.now() - beatStarted; clearTimeout(loan); try { await reader.cancel(); } catch (e) {} beatResolve({ acc, landed }); return; }
                     pump();
-                }).catch(() => resolve({ acc, landed }));
+                }).catch(() => beatResolve({ acc, landed }));
             })();
-        });
+        })();
+        const beatResult = await beatDone;
         assert.ok(beatResult.acc.includes(': beat'), 'heartbeat comment lands on an adjusted ?beat');
         assert.ok(beatResult.landed > 0 && beatResult.landed < 5000, 'first beat rides the ?beat interval (' + beatResult.landed + 'ms), not the 15s default');
         requireKeyEnv(prevRequireKey === undefined ? '' : prevRequireKey || null);

@@ -207,14 +207,15 @@ async function asyncIntegrations() {
 
     await (async () => {
         await mcp.start({ port: net, bind: '127.0.0.1' });
-        const post = (token, tool) => new Promise(async (resolve, reject) => {
+        // plain async fn: same behavior, no async promise executor
+        const post = async (token, tool) => {
             const res = await fetch('http://127.0.0.1:' + net + '/mcp/exec', {
                 method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
                 body: JSON.stringify({ tool })
             });
             const body = await res.json().catch(() => ({}));
-            resolve({ status: res.status, body });
-        });
+            return { status: res.status, body };
+        };
 
         const { status: okWrite, body: wb } = await post(hum, 'brain_save');
         assert.strictEqual(okWrite, 200, 'human guest passes the door for a write verb');
