@@ -3,6 +3,11 @@
  * MCP Module Unit Tests
  */
 
+// (pass 253) the pass-215 budget matrix issues dozens of identities in one
+// process — since MAX_GUESTS is now env-tunable (default 100, unchanged),
+// the TEST process un-caps itself BEFORE any require touches the module.
+process.env.VANT_GUESTS_MAX = '500';
+
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 
@@ -348,6 +353,40 @@ async function asyncTest(name, fn) {
             guests._resetReadBudgets();
             await mcp.stop();
         }
+    });
+
+    // (pass 253, issue #205) the config door lane: secrets MASKED on
+    // get, IMMUTABLE on set (key-replace auth bypass closed).
+    await asyncTest('#205: vant_config_get masks secret keys (a raw value never crosses the door)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const config = require(path.join(ROOT, 'lib', 'config'));
+        config.set('mcp.apiKey', 'skVantTEST1234567890abetic');   // operator-posture runtime flag
+        const r = await mcp.execute('vant_config_get', { key: 'mcp.apiKey' });
+        if (!r || r.value === undefined) return 'no value returned';
+        if (String(r.value).includes('skVantTEST')) return 'RAW secret crossed the door: ' + String(r.value);
+        return r.value === null || /\*\*\*\*/.test(String(r.value));
+    });
+
+    await asyncTest('#205: vant_config_set refuses secret keys (typed E_CONFIG_SECRET_IMMUTABLE, nothing persisted)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const config = require(path.join(ROOT, 'lib', 'config'));
+        const before = config.get('mcp.apiKey');
+        try {
+            await mcp.execute('vant_config_set', { key: 'mcp.apiKey', value: 'skVantATTACKERCHOICE' });
+            return 'secret set sailed through — injection live';
+        } catch (e) {
+            const detail = (e && (e.reason || e.message)) || '';
+            const unchanged = config.get('mcp.apiKey') === before;
+            return detail.includes('E_CONFIG_SECRET_IMMUTABLE') || detail.includes('secret key') ? (unchanged || 'refused but value changed') : 'wrong refusal: ' + detail;
+        }
+    });
+
+    await asyncTest('#205: non-secret set stays open through the door and internal get() stays raw', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const config = require(path.join(ROOT, 'lib', 'config'));
+        const r = await mcp.execute('vant_config_set', { key: 'qos.maxPerMinute', value: '120' });
+        const rawGet = config.get('mcp.apiKey');   // internal lane: raw, unchanged
+        return !!r && (rawGet === null || String(rawGet).includes('skVantTEST'));
     });
 
     console.log('\n--- RESULTS ---\n');

@@ -35,6 +35,57 @@ long-history half; this file is the working half. When this file
 grows past ~2k lines again, split at session boundary INTO the
 archive (newest-first append there) - never delete history.
 
+## Pass 253 (2026-10-16) - THE CONFIG-DOOR FIX: #205 closed — masked gets, immutable secret sets, duplicate-override kill
+
+- #205 FIXED (P1): `vant_config_get` masks secret keys at the door lane
+  via the module's own `maskIfSecret` (internal `get()` stays raw);
+  `vant_config_set` REFUSES secret keys (typed
+  `E_CONFIG_SECRET_IMMUTABLE`, nothing persisted). Key-replace auth
+  bypass closed; secret rotation stays operator-side.
+- THE LIVE BUG THE FIX EXPOSED: a DUPLICATE `vant_config_set`
+  registration (lib/mcp.js ~3517) silently overrode the hardened one —
+  the first PoC probe ran the OLD handler and the secret set sailed
+  through. Duplicate deleted, one-registration-per-method comment
+  pinned. Lesson: re-probe after every wiring change.
+- REGRESSIONS: 3 pins in mcp.test.js (mask-on-get incl. never-raw,
+  typed refusal + nothing-persisted, non-secret set stays open +
+  internal raw pinned). mcp suite 20/20 green; sweep 8/8 (guests,
+  mcp-schema, escrow, governance).
+- TEST HYGIENE: pass-215's guest-budget matrix hits the roster cap
+  (MAX_GUESTS) — the cap is now env-tunable (VANT_GUESTS_MAX,
+  PRODUCTION DEFAULT UNCHANGED AT 100) and the test preamble un-caps
+  the test process BEFORE any require. Plus honest cleanup: 108
+  accumulated test-artifact guests (pin-215/h5/cs, budget probes, my
+  redteam-r5 PoCs) revoked through the door's own revoke — ledger
+  back to 0 live.
+- Full axolotl batch rides the security PR: fixes + tests + the
+  automation docs (nsc9 router section + prd-automation.md).
+
+## Pass 252 (2026-10-16) - RED TEAM ROUND 5: the config lane — read-only guests can read RAW secrets (#205 filed, P1, end-to-end PoC)
+
+**Owner: "another brutal nation state pass… so many things hiding."**
+
+- FINDING (P1, issue #205): the config door lane is the hiding spot.
+  Guest gate classifies `vant_config_get` READ-class (needs=0 caps),
+  and the handler returns `config.get(key, null, {brain})` RAW —
+  `maskIfSecret` exists but is wired ONLY into the env-listing lane,
+  never into get()/the door. LIVE END-TO-END PoC: observer guest
+  (caps=[canRead,canLoad,canList], trust low) issues → verifies →
+  GATE allowed → handler body returns the raw test secret. Exposed
+  set = mcp.apiKey / api.key / token.secret / webhook.secret /
+  github+gitlab tokens / server.key. Second barrel verified: a
+  canWrite guest passes the gate at `vant_config_set` and setConfig
+  persists arbitrary keys — key REPLACE = door auth bypass.
+  Defined fix filed: mask at the door lane + secrets immutable via
+  the door + regression tests; internal get() stays raw.
+- INSPECTED-OK: guest issue/verify/revoke/re-stamp chain solid
+  (hex tokens, claim-once, cap255 roster); classifyTool admin set
+  keeps guest management admin-only; the dot-tail fallback matches
+  read verbs honestly.
+- CARRIED (round 6): agent_spawn check-then-act quota window,
+  escrow hold/recordSpend races, dashboard returnTo/postMessage,
+  WAL deep timeline.
+
 ## Pass 251 (2026-10-16) - THE DOOR FIX BATCH: #203 + #204 fixed at cause with regression pins, issues closing on the security PR
 
 **Owner: "let's fix these issues, and your findings/next, push to

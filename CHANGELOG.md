@@ -5,6 +5,44 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 253 (the config-door fix: #205 closed — masked gets, immutable secret sets)
+
+### Fixed - security (closes #205)
+
+- **config door (#205):** `vant_config_get` masks secret keys at the
+  door lane (the module's own `maskIfSecret`; internal `get()` stays
+  raw for runtime callers); `vant_config_set` refuses secret keys
+  (typed `E_CONFIG_SECRET_IMMUTABLE`) — the key-replace auth-bypass
+  lane is closed; secret rotation stays operator-side.
+- **duplicate-registration bug:** a second `vant_config_set`
+  registration silently overrode the hardened handler (caught by the
+  red team probing live); deleted — one registration per method.
+- **test hygiene:** guest roster cap is env-tunable for test harnesses
+  (VANT_GUESTS_MAX; production default 100 unchanged); pass-215's
+  budget matrix un-caps its own process; 108 accumulated test-artifact
+  guests revoked through the door's own `revoke`.
+- Regression pins: 3 new in mcp.test.js (mask, typed refusal +
+  nothing-persisted, non-secret lane + internal raw pinned); MCP suite
+  20/20 green; sweep 8/8 (guests, mcp-schema, escrow, governance).
+
+## [Unreleased] - pass 252 (red team round 5: the config lane — raw-secret read by read-only guests, #205 filed)
+
+### Security
+
+- **P1 (#205, transparency):** `vant_config_get` is guest-gated as
+  read-class (capless observers allowed) and returns RAW secret values
+  (`mcp.apiKey`, `webhook.secret`, `github.token`, …) — `maskIfSecret`
+  is wired only into the env-listing lane, never into the door lane;
+  end-to-end PoC live-verified. Second barrel: `vant_config_set`
+  accepts canWrite guests → arbitrary key persistence — key
+  replacement is a door auth-bypass. Defined fix: mask at the door,
+  secrets immutable through the door, internal `get()` unchanged,
+  regression tests both directions.
+- Guest issue/verify/gate chain inspected: solid (claim-once hex
+  tokens, admin-set isolation, honest classification).
+- Carried to round 6: agent_spawn quota window, escrow concurrency,
+  dashboard returnTo/postMessage, WAL deep timeline.
+
 ## [Unreleased] - pass 251 (the door fix batch: #203 + #204 fixed at cause, closed on the security PR)
 
 ### Fixed - security (closes #203, #204)

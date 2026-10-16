@@ -174,13 +174,53 @@ with a named lane). Structure it, gate it through sandbox/vaf like
 every other identity surface, and keep the honest-refusal law
 (a malformed NSC-9 address is a typed error, never a silent rehash).
 
+### The router object (owner ruling, 2026-10-16 - recorded in [prd-automation.md](../../labs/prd-automation.md))
+
+The NSC-9 frame is the ADDRESSING and the schema; workflow assimilation
+rides it. What was missing from this playbook is the actual ROUTER
+OBJECT - the thing a manufacturing floor holds in its hand.
+
+**The answer: the horcrux.** The boot-stone moves out of `models/` and
+becomes the node-level router, the encrypted, self-contained,
+multimodal state packet that tiny PLCs and edge nodes INGEST, HOLD, and
+PASS ON without spending any resources:
+
+- **Zero-resource transit.** A node without a key, without a database,
+  without a runtime just persists the carrier and forwards it. The
+  horcrux is ciphertext end-to-end: routing is the delivery of opaque
+  bytes, not their understanding. Total node cost = one file write and
+  one scan cycle.
+- **Multimodal, by the carrier ladder (prd-web.md 4.2).** Same NSC-9
+  address, same envelope, different carriers per hop: barcode (Lane A
+  GS1-128 / Lane B raw), QR (NSC9-key frame), stego SVG stone (the
+  boot/airgap form), JSON (the ERP/EPCIS form). The router OBJECT is
+  the invariant; the carrier is a local interface.
+- **Airgapped by design.** The payload crosses air gaps the way the
+  boot stone already does: on physical media, offline, no network
+  path, no credential reach. The encryption-at-rest story (the stone)
+  IS the industrial-transport story; docs/security/airgap-propagation
+  is the discipline doc.
+- **Identity-bearing.** Every router object carries its part's identity
+  (the NSC-9 address -> quasicrystal lattice point) plus the workflow
+  state it accumulated. Each edit is a NEW address generation (the
+  deterministic re-hash contract above) - identity by content.
+
+Full product requirements, honest truth-states, and the phase gates
+(P0 record-only -> P1 schema -> P2 sim PoC -> P3 pilot-line) live in
+**[labs/prd-automation.md](../../labs/prd-automation.md)** - this
+section is the seed it begins with. NOTHING IS BUILT YET per the
+owner's ruling; the red team's "destroy vant first, then make it real"
+order stands.
+
 ## Future Considerations
 
 1. Registration with GS1 for formal namespace
 2. Sub-divisions (e.g., 90-94 for different automation types)
 3. Integration with EPCIS (Electronic Product Code Information Services)
-4. The industrial playbook (the two-lane decision + a real pilot line,
-   owner sidebank 2026-10-16 - see the seed section above)
+4. The industrial playbook (the two-lane decision + the router object +
+   a real pilot line, owner sidebank 2026-10-16 - see the seed section
+   above; the router object is recorded there and seeded as
+   [prd-automation.md](../../labs/prd-automation.md))
 
 ## Authors
 
