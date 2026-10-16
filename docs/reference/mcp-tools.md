@@ -1781,3 +1781,97 @@ relay_status()
 ```
 
 ---
+
+### traveler_open
+
+The Traveler (prd-web.md §11, pass 254-255): the job envelope that rides
+station-to-station across nodes/mesh/pods - content-addressed (sha256
+over canonical slots + the append-only ledger), ISO 9001 8.5.2
+traceability pin. `traveler_open` mints a fresh packet and persists it in
+the brain-scoped pin ledger (`state/traveler-ledger.json` + the packet
+body). Write-class (default gate).
+
+**Params:**
+
+| Param | Type | What |
+|-------|------|------|
+| title | string | Required; the job's human name (lands as the `title` slot) |
+| from | string | Optional origin station (default: the current brain) |
+| slots | object | Optional extra job-schema slots |
+
+**Example:**
+```text
+traveler_open({ title: "batch-42 release" })
+```
+
+**Returns:**
+```json
+{ "opened": true, "id": "<hex address>", "tr": "tr/1", "seq": 0, "ledger": "persisted" }
+```
+
+---
+
+### traveler_hop
+
+Record a station-landing on a traveler (append-only ledger step). Any
+edit re-addresses the packet: the next id is derived from the new
+content, and `readdressed: true` says so. The landing tail is verified
+at every hop - a tampered packet refuses typed `E_TRAVELER_ADDRESS`.
+Resolves `id` explicitly, or the LATEST packet in the pin ledger when
+omitted. Write-class (default gate).
+
+**Params:**
+
+| Param | Type | What |
+|-------|------|------|
+| op | string | Required; the landing verb (e.g. "inspect", "deploy") |
+| id | string | Optional traveler id (default: the working/latest traveler) |
+| by | string | Optional station name (default: "mcp-door") |
+| detail | object | Optional free-form landing payload |
+
+**Returns:**
+```json
+{ "hopped": true, "id": "<hex address>", "fromId": "<prior address>", "seq": 1, "readdressed": true }
+```
+
+---
+
+### traveler_status
+
+Where has this job been? The pin-through stations of a traveler, newest
+last. Resolves by id or the latest packet. Read-class (the `status`
+tail).
+
+**Params:**
+
+| Param | Type | What |
+|-------|------|------|
+| id | string | Optional traveler id (default: the working/latest traveler) |
+| last | number | Optional; return only the final N stations |
+
+**Returns:**
+```json
+{ "id": "<hex address>", "seen": true, "seq": 2, "stations": ["..."], "ledgerRows": 3 }
+```
+
+---
+
+### traveler_audit
+
+The auditor's copy: the verbatim ISO 9001 clause 8.5.2 traceability
+record for a traveler - clause-named stations verbatim, lead time, and
+the integrity verdict from a full content-address re-derivation.
+Resolves by id or the latest packet. Read-class (the `audit` tail).
+
+**Params:**
+
+| Param | Type | What |
+|-------|------|------|
+| id | string | Optional traveler id (default: the working/latest traveler) |
+
+**Returns:**
+```json
+{ "id": "<hex address>", "report": { "clause": "8.5.2", "stations": ["..."], "verdict": "intact" } }
+```
+
+---

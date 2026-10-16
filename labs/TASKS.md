@@ -35,6 +35,130 @@ long-history half; this file is the working half. When this file
 grows past ~2k lines again, split at session boundary INTO the
 archive (newest-first append there) - never delete history.
 
+## Pass 256 (2026-10-16) - THE TRAVELER JOINS THE OS: pipeline-wired, evented, audited, crew-attributed — the same abstraction, the whole machine
+
+**Owner's frame:** one abstractable mechanism (a traced, auditable
+object riding the system) repurposed across every scope — surface flows
+today; backend rulesets/canonicalization/namespacing/allow-lists next.
+Before any frontend, the traveler had to play nice with the OS.
+
+- PIPELINE WIRED (lib/traveler.js): reads/writes through the sandbox
+  capability gate via lib/gate (the house untouched-stub-ALLOWS
+  posture — an explicitly configured refuser stays a refuser), caller
+  strings vaf-validated (a centered helper that throws, never
+  silently passes), module-level QoS lane (RateLimiter; the door verbs
+  await `gateCheck`), persistence audible: audit trail
+  (`[Traveler] persisted …`) + shared bus (`traveler:persisted`,
+  `traveler:refused`). All refusals are typed lib/error.js VantErrors —
+  the pass-169 zero-raw-throw law holds; the E_TRAVELER_* taxonomy is
+  unchanged.
+- CREW ATTRIBUTION: steps carry `by` (explicit > VANT_AGENT env > the
+  current brain) and an informational `team` lane — a traveler hop
+  knows WHICH agent/crew landed it.
+- DETERMINISM LAW SHARPENED: mint accepts `now` — same payload + same
+  ledger + same ts = the SAME address; the A1 pin is a law now, not a
+  millisecond race on the wall clock.
+- DOOR (lib/mcp.js): traveler_open/hop await the gateCheck lane before
+  touching the pin ledger.
+- SUITE: 31/31 — the H-block pins the integration mechanically:
+  H1/H2 the security-pipeline scanner classifies traveler as WIRED
+  (sandbox+vaf+qos gate layers, audit informational — run against the
+  scanner's own `scan()`); H3 typed refusals; H4 event-bus audibility
+  (listener-off via the bus's real `off`); H5 the QoS burst refusal
+  (typed E_TRAVELER_RATE); H6 the by/team attribution lanes. Kit suite
+  26/26, relay-parity green, stateful-helpers/bin-truthfulness gates
+  pass.
+- NEXT: the same object repurposed for backend scoping (rulesets/
+  canonicalization namespaces, allow/deny pin-through), then the r/2
+  wire across pods, then the frontend lane.
+
+## Pass 255 (2026-10-16) - THE TRAVELER WORKS: backend lib + CLI + MCP door — the auditable pin rides live; ISO 9001 8.5.2 adopted
+
+**Owner's clarified image (recorded verbatim, built):** "the traveler is
+like the object that holds data throughout a process across nodes/mesh/
+pods. It's like a holder of job schema/info, that goes from one station
+(or step, or stage) to the next. It's the auditable and traceable pin
+through the environment. This reflects easily on things like ISO 9001
+compliance, which we should embrace in vant... key piece to vant as a
+toy and vant as a runtime."
+
+- BACKEND LIB (lib/traveler.js, IN CODE): contentAddress (sha256 over
+  canonical slots+ledger — the address PROVES the payload, the ledger
+  PROVES the process), mint/advance (any edit = a NEW address, station
+  step append + trace-span linkage), verify (re-derive at every
+  landing — tamper/corruption refuses LOUDLY typed E_TRAVELER_ADDRESS,
+  never rewritten), schemaRize (legacy migrates forward, future refuses
+  typed — never guesses), persist (brain-scoped pin ledger
+  state/traveler-ledger.json + .sha256 pin; append-only — same-id
+  re-persist refuses; per-id BODY files state/travelers/<id>.json,
+  address-named, duplicate-refused), status, auditReport (the ISO
+  8.5.2 auditor's copy: clause-named, verbatim stations, lead time,
+  integrity verdict).
+- CLI FACE (bin/traveler.js, IN CODE): open/hop/status/audit/finger
+  (current-file pin + --file handoff carries verified packets between
+  real nodes). THE LAW BIT AT THE BOUNDARY: a tampered landing refuses
+  (pin F4 grounded it — verify-at-every-landing rides the tool, not
+  just the file lane).
+- DOOR VERBS (lib/mcp.js, IN CODE + verified end-to-end through
+  mcp.execute): traveler_open/hop/status/audit — the write-class verbs
+  gate by the default (unknown = write), status/audit route read-class
+  (status/audit tails) per the guest gate.
+- MIRROR TO THE INDUSTRIAL LANE: prd-web §11 gains the clarified
+  framing verbatim + the ISO 9001 8.5.2 embrace table (identification /
+  traceability / retention / nonconforming control / auditor's
+  evidence — the Traveler answers each); prd-automation.md gains the
+  enterprise-twin crosslink. Same application, different carriers.
+- SUITES: traveler-lib 25/25 fresh; traveler (wire kit) 26/26, relay
+  parity/relay untouched green; docs style + frontmatter PASS.
+- NEXT SEGMENT (truth-stated): frontends emit (dashboard api.ts + solo
+  renderer), mesh/pod-boundary travelers via the r/2 wire, and the
+  dashboard UI frame for the pin-through ledger.
+
+## Pass 254 (2026-10-16) - THE TRAVELER: the enterprise router object named, built, and pinned — the schema-rizer is real
+
+**Owner: PR #202 accepted, security run done. "Circle back to
+web/dashboard and relay/kit... embrace the enterprise router object,
+alongside the industrial route object. Totally different scopes, yet
+totally the same application in many ways. Does vant have such a
+traveler/schema-rizer? Framing and abstracting this across frontend
+and backend opens massive wins... frontlining this prd-web aspect."**
+
+- THE HONEST ANSWER: vant did NOT have a traveler/schema-rizer — the
+  r/2 envelope family was the seed (a wire schema with no state
+  semantics). Now it does, IN CODE.
+- THE KIT (web/kit/relay/traveler-contract.js, tr/1): the builder
+  (schema-stamped, ledger-birth step), the SHAPE LAW (structural, no
+  crypto — identity by content stays sender-side, the id validated as
+  an opaque hex ADDRESS), the LEDGER LAW (append-only, ascending seq,
+  seq == ledger length; re-open/rewrite/gap refuse typed
+  E_TRAVELER_STEP), and THE SCHEMA-RIZER (legacy tr/0 migrates with
+  one truthful rize step + stamp; unknown FUTURE versions refuse typed
+  E_TRAVELER_SCHEMA — the rizer never guesses forward).
+- VENDOR UPLIFT: scripts/vendor-relay-kit.js generalized to TWO kit
+  sources × FOUR renderer targets, each hash-pinned at kit head
+  (traveler-contract.cjs/.d.cts × dashboard + relay). --check green.
+- THE POD FACE: lib/api.js gains the relay.travel bridge family —
+  guard = the plain-copy structural law (the pod never requires web/),
+  toDoor = one brain_write record, id-named, schema-stamped (the
+  door's own auth applies at landing). Face exports the event +
+  version + known set + law for parity pinning.
+- THE SUITE (test/traveler.test.js, 26/26): builder/ledger/address
+  laws, rizer migration + future-refusal, runtime-agnostic scan law
+  (same as r/2), vendored-byte identity + pins at head, face
+  plain-copy parity (constants + law agreement). Parity untouched
+  green (19/19), relay 31/31. Sweep 6/6.
+- PRD FRONTLINED: prd-web.md §11 — the enterprise router object:
+  definition, the schema-rizer, the enterprise wire (rides r/2), the
+  INDUSTRIAL MIRROR table (horcrux ↔ Traveler, NSC-9 ↔ content
+  digest, barcode ↔ envelope — the same application, different
+  carriers, the carrier is a local interface of the hop), and the
+  truth-state table (kit + pod face IN CODE; frontend emitters + UI
+  frame DEFINED for the next web passes).
+- NEXT SEGMENT (truth-stated, not claimed): the frontends emit —
+  dashboard api.ts `travelerSend()` helper (bridge lane) + the solo
+  renderer's travel hop, then a dashboard UI frame for reading
+  pushing a traveler's ledger.
+
 ## Pass 253 (2026-10-16) - THE CONFIG-DOOR FIX: #205 closed — masked gets, immutable secret sets, duplicate-override kill
 
 - #205 FIXED (P1): `vant_config_get` masks secret keys at the door lane

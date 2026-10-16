@@ -891,3 +891,114 @@ frame owns each one once):
   first-class section: how to set up and run the frontend on Cloudflare
   Pages - env vars in Pages settings, functions contract, zero
   wrangler strings).
+
+---
+
+## 11. The Traveler - the enterprise router object (pass 254)
+
+**Owner direction (2026-10-16):** embrace the ENTERPRISE router object
+alongside the industrial route object (prd-automation.md). "Totally
+different scopes, yet totally the same application in many ways... does
+vant have such a traveler/schema-rizer?" - the honest answer the build
+recorded: it did NOT; the r/2 envelope family was the seed (a wire
+schema with no state semantics). The Traveler is now that named, real,
+pinned abstraction.
+
+### 11.1 Definition
+
+The **Traveler** is a schema-versioned, content-addressed STATE PACKET
+(tr/1) that travels browser URL relay FROM pod:
+
+| Slot | Content | Law |
+|---|---|---|
+| `tr` | schema generation | known set only (`tr/1`, legacy `tr/0` via the rizer); FUTURE versions refuse typed `E_TRAVELER_SCHEMA` - never guessed forward |
+| `id` | content digest | opaque hex address (16-64); identity by content - any edit is a NEW address, re-addressed sender-side (the kit never hashes) |
+| `steps` | workflow ledger | append-only, ascending `seq`, `seq == steps.length`; re-open/rewrite/gap refuse typed `E_TRAVELER_STEP` |
+| `slots` | state payload | opaque to every hop; 512 KiB ceiling (r/2 face-aligned) |
+| `rized` | migration stamp | only present when the rizer migrated a legacy packet - truth in the ledger, never a rewrite |
+
+### 11.2 The schema-rizer (the abstraction the owner asked about)
+
+`schemaRize()` re-emits a packet of any KNOWN past version at the
+current generation, migrating the ledger with ONE truthful `rize`
+step and stamping the migration. Unknown future FROM typed refusal.
+The rizer is structural + truth-bearing; identity-by-content stays
+sender-side (the kit's runtime-agnostic law - the parity suite
+scan-checks the file).
+
+### 11.3 The enterprise wire
+
+Rides the r/2 envelope family: event `relay.travel`, HMAC-gated lane
+or browser lane - the dashboard functions bridge it exactly like
+sync/lost/call. The pod face translates the packet onto the door's
+EXISTING verbs (bridge family: one `brain_write` record,
+id-named, schema-stamped - the door's own auth applies at landing).
+
+### 11.4 The clarified framing (the owner's image, recorded verbatim + built)
+
+"The traveler is like the object that holds data throughout a process
+across nodes/mesh/pods. It's like a holder of job schema/info, that
+goes from one station (or step, or stage, or whatever in a workflow) to
+the next. It's the auditable and traceable pin through the
+environment."
+
+That image is now the contract's own words, realized in the working lib:
+
+- **The holder:** `slots` = the job schema/info, opaque to every hop.
+- **Station-to-station:** every landing is an append-only ledger step
+  (`op`, `by`, `ts`, station detail) — the hop NEVER reopens history.
+- **The pin:** the content address re-derives from the payload at every
+  landing — tamper or corruption refuses LOUDLY (typed
+  `E_TRAVELER_ADDRESS`), the ledger keeps the last good address.
+- **Through the environment:** every node/mesh/pod surface has a door:
+  the web kit (wire), the pod bridge (`relay.travel`), the backend lib
+  (`lib/traveler.js`), the CLI (`vendor bin/traveler.js:
+  open/hop/status/audit/finger`), and the MCP door
+  (`traveler_open/hop/status/audit`).
+
+### 11.5 ISO 9001 embrace (the traceability spine we adopt on purpose)
+
+The traveler maps straight onto ISO 9001:2015 **clause 8.5.2
+(Identification and traceability)** — vant embraces it as a first-class
+product property, not a bolt-on:
+
+| 8.5.2 requirement | The Traveler answer |
+|---|---|
+| identification of outputs | content-derived address (`sha256` of slots + ledger) — the id IS the identity, provable by rehash |
+| traceability of processing | append-only station ledger (`seq/op/by/ts/detail`) with a frozen `seq` stamp |
+| retention of documented information | brain-scoped pin ledger (`state/traveler-ledger.json` + `.sha256` pin) + per-id body files (address-named, duplicate-refused) |
+| nonconforming-output control | the tampered envelope refuses LOUDLY at landing (`E_TRAVELER_ADDRESS`), never silently rewritten |
+| the auditor's evidence | `traveler_audit` / `traveler audit`: verbatim clause-named station-by-station record incl. lead time + integrity verdict |
+
+The lib ships `auditReport()` for exactly this copy; the door verb
+`traveler_audit` returns it to any agent; the installer prints it.
+Later phases: node-level travelers (mesh) carry the same ledger across
+pods via the r/2 wire, so traceability survives the pod boundary too.
+
+### 11.6 The mirror with the industrial lane
+
+| | Industrial (prd-automation.md) | Enterprise (this section) |
+|---|---|---|
+| router object | the horcrux (stego stone) | the Traveler (schema packet) |
+| addressing | NSC-9 FROM quasicrystal lattice | the id: content digest (re-hash per edit) |
+| carriers | barcode / QR / stone / EPCIS | r/2 envelope (HMAC + browser lanes) |
+| zero-resource transit | PLC persists + forwards ciphertext hops validate | relay edge + pod bridge validate shape, never the payload semantics |
+| ledger | step ledger = workflow state | `steps` append-only, frozen `seq` stamp |
+
+The same application, different carriers - the carrier is a local
+interface of the hop (both PRDs say this in one law).
+
+### 11.7 Truth-state + phases
+
+| Row | Truth |
+|---|---|
+| kit contract (builder/shape law/rizer) | **IN CODE** (web/kit/relay/traveler-contract.js, tr/1), vendored + pinned (4 copies), suite green (traveler 26/26, parity untouched 19/19) |
+| pod bridge family `relay.travel` | **IN CODE** (lib/api.js bridge family, plain-copy law parity-pinned) |
+| BACKEND working lib | **IN CODE** (`lib/traveler.js`: contentAddress/mint/advance/verify/schemaRize/persist/status/auditReport; brain-scoped pin ledger + per-id body files) — pinned by test/traveler-lib.test.js 25/25 |
+| CLI face | **IN CODE** (vendor bin/traveler.js: open/hop/status/audit/finger; the VERIFIED-at-every-landing law rides the tool boundary — the tamper-landing pin F4 grounds it) |
+| MCP door verbs | **IN CODE** (traveler_open/hop/status/audit — verified end-to-end through mcp.execute) |
+| ISO 9001 (8.5.2) mapping | **IN CODE** (auditReport clause-named record; tamper-refuse-never-rewrite; retention via pin+body files) — frontlined in §11.5 |
+| frontends emitting travelers | DEFINED, next phase (dashboard api.ts helper + the relay solo renderer land with the next web pass) |
+| UI surface for travelers | DEFINED, later phase (a dashboard frame reading/pushing a traveler's ledger) |
+| future schema generations | the rizer contract accepts them by ADDING to TRAVEL_KNOWN truthfully, never by guessing |
+
