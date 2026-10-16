@@ -411,7 +411,14 @@ async function run() {
             const gtok = guests2.issue('pin-cs-guest', { role: 'human', scopeOwner: 'team:T1_' + u }).token;
             const btok = guests2.issue('pin-cs-bare', { role: 'human' }).token;
 
-            const port = 13477 + (process.pid % 40);
+            // (ci fix, pass 243d) OWN port family — this is the SECOND
+            // mcp.start in this file (the H5 block above binds the same
+            // 13477 family). Same-process close → rebind → fetch on the
+            // SAME port kills the fetch when node's keep-alive pool hands
+            // back a stale socket to the closed server (undici: 'fetch
+            // failed' — the flake Actions caught). A distinct family keeps
+            // the two door legs from ever sharing a port across a restart.
+            const port = 13577 + (process.pid % 40);
             const call = async (tool, args, hdrs) => {
                 const res = await fetch('http://127.0.0.1:' + port + '/mcp/exec', {
                     method: 'POST',
