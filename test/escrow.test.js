@@ -189,8 +189,51 @@ test('release removes the persisted hold (pass 101 union-merge leak fix)', () =>
 });
 
 // ============================================
-// SUMMARY
+// (pass 251, issue #204) APPROVAL LANE — exact-family, TTL, single-use
 // ============================================
+
+test('#204 exact/family matching: `delete` no longer over-matches `note_delete_typo`', () => {
+    const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    const e = new escrow.Escrow({ approvalRequired: ['delete'] });
+    return { success: e.needsApproval('delete') && !e.needsApproval('note_delete_typo') && !e.needsApproval('read') };
+});
+
+test('#204 family globs: `write:*` matches `write:critical` but not `brainwrite`', () => {
+    const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    const e = new escrow.Escrow({ approvalRequired: ['write:*'] });
+    return { success: e.needsApproval('write') && e.needsApproval('write:critical') && !e.needsApproval('brainwrite') };
+});
+
+test('#204 single-use: consumeApproval burns the row — reuse denied', () => {
+    const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    const e = new escrow.Escrow({ approvalRequired: ['destructive:*'], approvalTtlMs: 60000 });
+    const req = e.requestApproval('destructive:wipe', 'test');
+    e.approve(req.approvalId, 'owner');
+    const first = e.consumeApproval(req.approvalId, 'destructive:wipe');
+    const second = e.consumeApproval(req.approvalId, 'destructive:wipe');
+    return { success: first.approved === true && second.approved === false && second.reason === 'not_found' };
+});
+
+test('#204 approval bind: an approval for one op cannot be spent on another', () => {
+    const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    const e = new escrow.Escrow({ approvalRequired: ['delete'], approvalTtlMs: 60000 });
+    const req = e.requestApproval('delete', 'test');
+    e.approve(req.approvalId, 'owner');
+    const mis = e.consumeApproval(req.approvalId, 'admin');
+    return { success: mis.approved === false && mis.reason === 'operation_mismatch' };
+});
+
+test('#204 TTL: an expired approval fails consumption and reports expired', () => {
+    const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    // ttl -1 = already past its window at any later Date.now() tick (the
+    // consume-time TTL contract: approval time is checked, not wall-clock magic)
+    const e = new escrow.Escrow({ approvalRequired: ['admin'], approvalTtlMs: -1 });
+    const req = e.requestApproval('admin', 'test');
+    e.approve(req.approvalId, 'owner');
+    const stale = e.checkApproval(req.approvalId);
+    const spent = e.consumeApproval(req.approvalId, 'admin');
+    return { success: stale.approved === false && stale.reason === 'expired' && spent.approved === false && spent.reason === 'expired' };
+});
 
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);

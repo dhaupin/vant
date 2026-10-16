@@ -170,6 +170,44 @@ test('getStackSearchStats returns object with source stack', () => {
     return { success: stats && stats.source === 'stack' };
 });
 
+// (pass 246, issue #199 regression) guest-controlled query terms must
+// NEVER be compiled as RegExp and must never take minutes through
+// backtracking: BM25 TF scoring is plain string splitting.
+// (pass 246, issue #199 regression) guest-controlled query terms must
+// NEVER be compiled as RegExp and must never take minutes through
+// backtracking: BM25 TF scoring is plain string splitting.
+test('BM25 #199: malformed metachar query does not throw', () => {
+    const search = require(path.join(ROOT, 'lib', 'search'));
+    const bm = new search.BM25();
+    const score = bm.scoreOne({ content: 'cake factory wood' }, 'cake (factory test');
+    return { success: score === 1, score };
+});
+
+test('BM25 #199: plain matching survives with identical scoring', () => {
+    const search = require(path.join(ROOT, 'lib', 'search'));
+    const bm = new search.BM25();
+    const s1 = bm.scoreOne({ content: 'cake cake cake' }, 'cake');
+    const s2 = bm.scoreOne({ content: 'cake cake cake' }, 'CAKE   x');
+    return { success: s1 === 3 && s2 === 3, s1, s2 };
+});
+
+test('BM25 #199: regex wildcards do not widen to pattern semantics', () => {
+    const search = require(path.join(ROOT, 'lib', 'search'));
+    const bm = new search.BM25();
+    // Old code compiled '(factory' as a group opener and THREW; a
+    // regex-literal fallback would also wrongly treat .* as a wildcard.
+    const score = bm.scoreOne({ content: 'factory wood' }, '.*factory.*');
+    return { success: score === 0, score };
+});
+
+test('BM25 #199: quantifier-shaped term returns fast (no event-loop stall)', () => {
+    const search = require(path.join(ROOT, 'lib', 'search'));
+    const bm = new search.BM25();
+    const t0 = Date.now();
+    bm.scoreOne({ content: 'x'.repeat(400) }, 'a{1000}(pissing|missing)');
+    return { success: (Date.now() - t0) < 3000, ms: Date.now() - t0 };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

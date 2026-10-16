@@ -5,6 +5,205 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 253 (the config-door fix: #205 closed — masked gets, immutable secret sets)
+
+### Fixed - security (closes #205)
+
+- **config door (#205):** `vant_config_get` masks secret keys at the
+  door lane (the module's own `maskIfSecret`; internal `get()` stays
+  raw for runtime callers); `vant_config_set` refuses secret keys
+  (typed `E_CONFIG_SECRET_IMMUTABLE`) — the key-replace auth-bypass
+  lane is closed; secret rotation stays operator-side.
+- **duplicate-registration bug:** a second `vant_config_set`
+  registration silently overrode the hardened handler (caught by the
+  red team probing live); deleted — one registration per method.
+- **test hygiene:** guest roster cap is env-tunable for test harnesses
+  (VANT_GUESTS_MAX; production default 100 unchanged); pass-215's
+  budget matrix un-caps its own process; 108 accumulated test-artifact
+  guests revoked through the door's own `revoke`.
+- Regression pins: 3 new in mcp.test.js (mask, typed refusal +
+  nothing-persisted, non-secret lane + internal raw pinned); MCP suite
+  20/20 green; sweep 8/8 (guests, mcp-schema, escrow, governance).
+
+## [Unreleased] - pass 252 (red team round 5: the config lane — raw-secret read by read-only guests, #205 filed)
+
+### Security
+
+- **P1 (#205, transparency):** `vant_config_get` is guest-gated as
+  read-class (capless observers allowed) and returns RAW secret values
+  (`mcp.apiKey`, `webhook.secret`, `github.token`, …) — `maskIfSecret`
+  is wired only into the env-listing lane, never into the door lane;
+  end-to-end PoC live-verified. Second barrel: `vant_config_set`
+  accepts canWrite guests → arbitrary key persistence — key
+  replacement is a door auth-bypass. Defined fix: mask at the door,
+  secrets immutable through the door, internal `get()` unchanged,
+  regression tests both directions.
+- Guest issue/verify/gate chain inspected: solid (claim-once hex
+  tokens, admin-set isolation, honest classification).
+- Carried to round 6: agent_spawn quota window, escrow concurrency,
+  dashboard returnTo/postMessage, WAL deep timeline.
+
+## [Unreleased] - pass 251 (the door fix batch: #203 + #204 fixed at cause, closed on the security PR)
+
+### Fixed - security (closes #203, #204)
+
+- **door (#203):** the CORS class now emits `Access-Control-Allow-Origin`
+  only on an exact (normalized) allowlist match — fail-closed, no
+  reflection; `Allow-Credentials` defaults FALSE and is never emitted
+  together with the `*` wildcard; the honest wildcard + no-credentials
+  default posture stays. 3 regression pins (server suite 15/15).
+- **escrow (#204):** the approval lane is wired and hardened — exact/
+  anchored-glob op-family matching (no substring over-match), consume-
+  time TTL (`escrow.approvalTtlMs`, default 300000, 0 disables),
+  single-use `consumeApproval` with op bind, and the pipeline escrow
+  stage denies approval-required ops lacking a matching unexpired
+  `approvalId` (typed `E_ESCROW_APPROVAL_REQUIRED`). Root cause fixed:
+  the module's bare `crypto` (webcrypto collision crashed
+  `requestApproval` standalone) is now properly bound. 5 regression
+  pins (escrow suite 24/24).
+- Disclosure: docs/reference/escrow.md rewritten to the truthful
+  semantics; sweep 12/12 green.
+
+## [Unreleased] - pass 250 (red team round 4: storage/escrow lanes — approval gate unwired, #204 filed)
+
+### Security
+
+- **P3 (#204, transparency):** the escrow APPROVAL layer (docs: "gate
+  for sensitive operations") has zero runtime consumers — the pipeline
+  escrow stage enforces budgets/holds only — and the lane is defective
+  once wired (not single-use, no TTL, substring over-match). Defined
+  fix: wire it into the write path (typed
+  `E_ESCROW_APPROVAL_REQUIRED`), single-use consume, TTL, exact
+  op-family match.
+- **Holds:** WAL replay containment + blob allowlist + DENIED-not-empty
+  make the crash journal non-exploitable; YAML parsing safe-by-default
+  (no object-injection RCE through brain files).
+- Carried to round 5: agent_spawn check-then-act window, escrow
+  quota/hold concurrency, helper-model race deep sweep.
+
+## [Unreleased] - pass 249 (red team round 3: the door lanes — #203 filed, QoS holds)
+
+### Security
+
+- **P2 (#203, transparency):** `lib/server.js` CORS class reflects any
+  caller Origin with `Allow-Credentials:true` once an origin allowlist
+  is configured (verified live PoC); latent today, one operator config
+  from live. Defined fix: strict allowlist emission + credentials
+  default false. To fix in axolotl per the owner ruling.
+- **Holds:** QoS global cap beats client-id rotation (60/40 burst
+  verified); guest scopeOwner fail-closed; msg unscoped-public is
+  honest documented design.
+- Lanes carried to round 4: WAL torn-write/replay, escrow race,
+  agent_spawn quota.
+
+## [Unreleased] - pass 248 (docs: the industrial router object — the horcrux is the router; prd-automation seeded)
+
+### Added - automation arc (docs-only; nothing built per the owner's build order)
+
+- **labs/prd-automation.md** (v0.1 draft): the automation/industrial
+  PRD seeded with the router object — the horcrux pointed outward:
+  encrypted, self-contained, multimodal state packets that tiny PLCs
+  and edge nodes ingest with zero resources (scan → shape-validate →
+  persist → forward) and pass on airgapped. Contains the direction
+  log, router-object definition, zero-resource ingest contract,
+  industrial carrier ladder (Lane A/B, QR, stone, EPCIS), phase gates
+  P0–P4, truth-state table, and the red-team law riding in.
+- **docs/advanced/nsc9-spec.md**: router-object seed section added to
+  the industrial playbook; Future Considerations #4 extended.
+
+## [Unreleased] - pass 247 (red team round 2: nation-state-lane re-attack — defenses held)
+
+- `npm audit --omit=dev`: 0 vulnerabilities.
+- Proto-pollution lane still closed (`__proto__`/`constructor`/
+  `prototype` key guards); auth keys timing-safe with persisted
+  lockout frames; guest tokens crypto-random one-time secrets.
+- Relay edge verified live: freshness window → 401, constant-time
+  compares, BAD_ORIGIN hop refusal (private/loopback/metadata),
+  per-session budgets + breakers; the stateless-edge replay tradeoff
+  is documented rather than silent.
+- Result: no new findings cleared the P2 bar — the pass-246 fixes and
+  prior hardening held against round 2.
+
+## [Unreleased] - pass 246 (security fix batch: #199 #200 #201 fixed at cause and closed with evidence)
+
+### Fixed - security (closes #199, #200, #201)
+
+- **search (#199):** BM25 TF scoring no longer compiles guest query
+  terms as RegExp — plain string-splitting counting with identical
+  semantics; the SyntaxError crash and the event-loop ReDoS stall are
+  structurally unreachable. 4 regression pins in search.test.js.
+- **CLI (#200):** every git execution in bin/ is argv-routed
+  (`execFileSync('git', [args])`) — push/reset/fetch/rev-parse in
+  sync.js, branch create/switch/delete/list, bump tag, docs-build
+  add/commit. A hostile branch NAME can no longer execute shell (the
+  issue-#200 PoC is a pinned regression test) and failed pushes can no
+  longer be masked by trailing shell segments. Static scan enforces
+  the contract in bin/.
+- **horcrux (#201):** the `p_<password>` filename is no longer a
+  credential source by default (`VANT_ALLOW_FILENAME_PW=true` opt-in);
+  create/refresh password chains are arg (deprecated, warned) → env →
+  prompt/secret-store; new stones default to constant
+  `<brain>-horcrux.svg` naming (boot discovery matches both
+  conventions); JSON stones need no password at all.
+- Verification: 19-suite sweep green; each issue closed with an
+  old-vs-new PoC re-run comment.
+
+## [Unreleased] - pass 245 (red team: nuclear-scale self-adversarial security sweep)
+
+### Security - 3 live findings PoC'd on our own surfaces, filed upstream as #199/#200/#201
+
+- **P1 (#199) search:** BM25 builds `new RegExp` from raw guest
+  terms — guest-controlled `SyntaxError` crash AND an event-loop
+  ReDoS stall (poC'd: 120s timeout kill with backtracking still
+  running). Fix defined: term escaping (or no-regex TF scoring).
+- **P1 (#200) CLI:** `execSync` interpolates the UNVALIDATED current
+  branch name into push/reset shell strings; git-legal branch names
+  (`, $, (, >) became live shell. PoC'd end-to-end: a hostile branch
+  name redirected a file out of the command line during
+  `bin/sync.js push` (marker on disk, full cleanup verified). Fix
+  defined: execFileSync argv-arrays (the pass-30 commit pattern).
+- **P2 (#201) horcrux:** brain password exposed via argv (`ps`),
+  as the p_<pw>.svg filename, and re-readable from the filename by
+  inspect. Fix defined: stdin/env-only pw + constant-label files.
+- Frontend/relay verdict from the sweep: clean sandwich — zero
+  injection sinks in web/, typed-refusal admin gate, https-only
+  relay endpoint checks, schema-parsed SSE. Hardened paths also held
+  (branch-name gate, backup traversal block, storage symlink blocks,
+  vaf repeat gate).
+
+## [Unreleased] - pass 244 (the OSS face: post-merge brain refresh, the stone re-carved, the NSC-9 industrial playbook seed)
+
+Workflow: pass 243d merged to main (PR #198); axolotl continues as the
+staging line.
+
+### Brains + the boot horcrux
+
+- The axolotl brain files updated for the merge state (identity gains
+  the where-we-are block, lessons gains the pass-243d masking-chain
+  lessons, goals marks the milestone + the next wave). models/private/
+  stays workspace-local by the transport contract; the boot stone is the
+  carrier.
+- The boot horcrux refreshed IN PLACE (same `p_` password) so the stone
+  carries today's brain updates: inspect VALID, `.sha256` re-pinned,
+  `sha256sum -c` OK in the boot dir; boot dir remains canonical-only.
+
+### Spec'd - the NSC-9 industrial playbook seed (owner sidebank)
+
+- `docs/advanced/nsc9-spec.md` gains the industrial/MFG playbook seed:
+  NSC-9 as a part's identity through manufacturing steps, generated
+  per vant instance/brain, read by the scan fleets manufacturers
+  already run. Feasibility recorded honestly: the symbology lane is
+  real today; the 12-digit frame carries ~10⁹ routeable points (the
+  10-billion-class space is the quasicrystal lattice the address
+  projects INTO); retail GTIN backends reject by design while MES/ERP
+  unit-serial ingestion reads through. The playbook's decision: LANE A
+  (GS1 GIAI / Application Identifier 8004 — legitimate end-to-end in
+  existing fleets) vs LANE B (raw NSC-9 — vant-native,
+  self-authenticating). PLC/EPCIS follow-on named. Playbook candidate,
+  not a phase trick.
+
+Docs gates re-verified green for the touched pages.
+
 ## [Unreleased] - pass 243d (the CI stabilization trail: green on Actions, four latent classes fixed at cause)
 
 The PR ci job failed in Actions while everything was green locally — each

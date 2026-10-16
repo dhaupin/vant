@@ -174,6 +174,47 @@ function makeInspectStone(file) {
     return file;
 }
 
+// (pass 246, issue #201 regression) the p_<password> FILENAME is not a
+// credential source: a stone whose name lies must not decrypt, whatever
+// name it carries, unless the operator opts in explicitly.
+test('#201 filename passwords are gate-closed (name never decrypts by default)', () => {
+    const fs2 = require('fs');
+    const stego = require(path.join(ROOT, 'lib', 'stego'));
+    const transform = require(path.join(ROOT, 'lib', 'transform'));
+    const dir = path.join(PRIV, 'p89-stone');
+    fs2.mkdirSync(dir, { recursive: true });
+    // Encrypted with pw 'y' but NAMED as if it carried 'x' — the old code
+    // read the filename and tried 'x' as a live credential source.
+    const carrier = '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><rect width="8" height="8" fill="#000000"/></svg>';
+    const stone = path.join(dir, 'gauntlet-201-p_x.svg');
+    fs2.writeFileSync(stone, stego.encodeSvg(JSON.stringify({ type: 'vant-horcrux', timestamp: 1, version: '0.8.6', payload: { ok: true } }), carrier, 'y'));
+    const hadGate = process.env.VANT_ALLOW_FILENAME_PW;
+    delete process.env.VANT_ALLOW_FILENAME_PW;
+    return transform.inspectHorcrux(stone, {}).then((closed) => {
+        try {
+            if (!closed || closed.passwordRequired !== true) {
+                return { error: 'default inspect must refuse (passwordRequired), got: ' + JSON.stringify(closed && closed.error) };
+            }
+            process.env.VANT_ALLOW_FILENAME_PW = 'true';
+            return transform.inspectHorcrux(stone, {}).then((open) => {
+                if (open && open.valid) return { error: 'filename-sourced pw decrypted a stone it must not' };
+                if (!open || !open.error || !/Invalid password|garbage|did not match/i.test(open.error)) {
+                    return { error: 'gated-open run did not look name-sourced: ' + JSON.stringify(open && open.error) };
+                }
+                return { success: true };
+            }).finally(() => {
+                if (hadGate === undefined) delete process.env.VANT_ALLOW_FILENAME_PW;
+                else process.env.VANT_ALLOW_FILENAME_PW = hadGate;
+                fs2.rmSync(stone, { force: true });
+            });
+        } catch (e) {
+            if (hadGate === undefined) delete process.env.VANT_ALLOW_FILENAME_PW;
+            else process.env.VANT_ALLOW_FILENAME_PW = hadGate;
+            throw e;
+        }
+    });
+});
+
 test('#102 inspect preview counts agents2 roster + delegation records + orgs', () => {
     const transform = require(path.join(ROOT, 'lib', 'transform'));
     const stone = makeInspectStone(path.join(PRIV, 'p89-stone', 'inspect-p_x.json'));

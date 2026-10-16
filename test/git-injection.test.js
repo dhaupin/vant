@@ -168,6 +168,54 @@ define('dynamic: connector checkout/push reject hostile branch names via _gitRef
     return { success: checked >= 4, error: `only ${checked} providers checked` };
 });
 
+// (pass 246, issue #200 regression) bin/ must obey the same argv-array
+// git contract — the PoC branch name `poc;>.agent_tmp/pwn-marker;`
+// executed a shell redirect out of bin/sync.js push.
+define('static: no shell-interpolated `git ...` execSync templates remain in bin/', () => {
+    const offenders = [];
+    for (const f of fs.readdirSync(path.join(ROOT, 'bin'))) {
+        if (!f.endsWith('.js')) continue;
+        const p = path.join(ROOT, 'bin', f);
+        const src = stripComments(fs.readFileSync(p, 'utf8'));
+        const re = /exec(?:Sync)?\(\s*`[^`]*git\s[^`]*\$\{/g;
+        while (re.exec(src) !== null) offenders.push('bin/' + f);
+    }
+    return { success: offenders.length === 0, error: 'interpolated git templates: ' + offenders.join(', ') };
+});
+
+define('dynamic: bin/sync.js push with a hostile branch NAME cannot execute shell (issue #200 PoC)', () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-syncinj-'));
+    try {
+        const { execFileSync } = require('child_process');
+        execFileSync('git', ['init', '-q'], { cwd: tmp });
+        execFileSync('git', ['config', 'user.email', 't@t'], { cwd: tmp });
+        execFileSync('git', ['config', 'user.name', 't'], { cwd: tmp });
+        execFileSync('git', ['commit', '-q', '--allow-empty', '-m', 'init'], { cwd: tmp });
+        // git-legal name, transparently a shell payload when interpolated
+        const hostile = 'poc;>.agent_tmp/pwn-marker;';
+        execFileSync('git', ['checkout', '-q', '-b', hostile], { cwd: tmp });
+        fs.writeFileSync(path.join(tmp, 'work.txt'), 'x');
+        execFileSync('git', ['add', '-A'], { cwd: tmp });
+        execFileSync('git', ['commit', '-q', '-m', 'work'], { cwd: tmp });
+        execFileSync('git', ['checkout', '-q', hostile], { cwd: tmp });
+
+        const scratchCfg = path.join(tmp, 'scratch.ini');
+        fs.writeFileSync(scratchCfg, 'GITHUB_REPO=example/nope\n');
+        // origin points into the SAME tmp tree — if the push shell-string
+        // is still injectable the branch name redirects a file next to it.
+        execFileSync('git', ['remote', 'add', 'origin', tmp + '/.git'], { cwd: tmp });
+        execFileSync('node', [path.join(ROOT, 'bin', 'sync.js'), 'push'], {
+            cwd: tmp,
+            env: Object.assign({}, process.env, { CONFIG_PATH: scratchCfg, GITHUB_TOKEN: 'dummy' }),
+            encoding: 'utf8'
+        });
+        const marker = fs.existsSync(path.join(tmp, '.agent_tmp', 'pwn-marker'));
+        return { success: !marker, error: 'the hostile branch name executed as shell (marker file written)' };
+    } finally {
+        fs.rmSync(tmp, { recursive: true, force: true });
+    }
+});
+
 define('dynamic: lib/branch.js commit() stores hostile message as text end-to-end', () => {
     // End-to-end through branch.js's public API in a scratch repo. branch.js
     // resolves git against process.cwd(), so run the probe as a child with
