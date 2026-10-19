@@ -58,7 +58,7 @@ Application refusals ride typed replies INSIDE the 200 ack:
 | Reply code | Meaning |
 |------------|---------|
 | `E_RELAY_UNKNOWN_EVENT` | not `relay.hop` / `relay.ride` |
-| `E_RELAY_BAD_ORIGIN` | http / private / metadata hop target |
+| `E_RELAY_BAD_ORIGIN` | the origin fails the posture's scheme/scope rule |
 | `E_RELAY_BAD_PATH` | unrooted/unsane path |
 | `E_RELAY_NEEDS_ENVELOPE` | `ct` is not an AES-256-GCM envelope |
 | `E_RELAY_UPST` | upstream unreachable |
@@ -69,7 +69,7 @@ Application refusals ride typed replies INSIDE the 200 ack:
 
 ## The kit: one contract, checksummed copies
 
-The contract lives ONCE, in `web/kit/relay/relay-contract.js` (+ `.d.ts`
+The contract lives ONCE, in `web/kit/contracts/relay-contract.js` (+ `.d.ts`
 twin) at version **r/2**: the wire, the signature header, typed reply
 codes, the envelope rule, flavors, and the honest caps shape. Renderers
 hold their own checksummed copies - vendored by
@@ -83,6 +83,24 @@ parity pins (`test/relay-parity.test.js`) FAIL on any drift from kit head:
 | solo-relay flavor (`web/relay/functions/api/r/*`) | same vendoring | same |
 
 Change the kit, then re-run the vendoring - the pins fail closed.
+
+## The origin policy (pass 270)
+
+One resolver (`lib/api.js _relayOriginPolicy`) answers every hop origin;
+the postures widen in this order:
+
+| Posture | Config | Plain-http hop origins | Outbound fetch dial |
+|---------|--------|------------------------|---------------------|
+| PUBLIC (default) | - | none (https only) | the standing SSRF wall (private IPs, DNS rebinding, cloud metadata all refused) |
+| INTRANET (LAN-scope) | `relay.intranetOrigins true` | ONLY private-LAN scopes: loopback (127/8, ::1), RFC1918 (10/8, 172.16/12, 192.168/16), IPv6 ULA (fc::/7) | `network.fetch internalPolicy: 'privateLan'` - LAN carve-out, but link-local (169.254 cloud metadata!), multicast and 0.0.0.0 STILL refused |
+| LAB ESCAPE | `relay.allowPrivateOrigins true` | any scheme anywhere | `skipDomainCheck` (the pre-270 escape, unchanged) |
+
+The intranet posture is the mesh-on-a-LAN default recommendation: pods
+relay to their neighbors without becoming LAN probers, and the
+metadata-hostile wall survives every posture. Pilot pinned:
+`scripts/pilot-two-relays.js` runs the WHOLE lane under the intranet
+posture (no lab escape armed) and the H6 pin holds the posture line on
+real sockets.
 
 ## Bring-up (the pod IS the relay + the endpoint)
 

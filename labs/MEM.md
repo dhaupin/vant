@@ -13,7 +13,7 @@ written into models/private/axolotl/lessons.md, the same turn):
 
 - THE RELAY IS CORE NOW: mechanism record in prd-relay.md v0.2 (a
   connection layer, not an app); pod core lib/relay.js (pinned 31,
-  real-socket hops); ONE vendor-checked contract (web/kit/relay/
+  real-socket hops); ONE vendor-checked contract (web/kit/contracts/
   relay-contract.js + .d.ts, .sha256 pins, check: script
   scripts/vendor-relay-kit.js --check + pins in
   test/relay-parity.test.js 19 - the pod never imports web/); the

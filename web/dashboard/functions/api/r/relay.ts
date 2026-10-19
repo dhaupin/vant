@@ -18,7 +18,7 @@ import {
  * Dashboard-relay flavor, r/2 (pass 236 ruling): the dashboard PIGGYBACKS
  * a relay on its own Pages deploy when the operator flips the posture env.
  * The wire is WEBHOOK-NATIVE - the same crew-shaped envelope the pod's
- * webhook transport serves (web/kit/relay/relay-contract.js r/2, vendored
+ * webhook transport serves (web/kit/contracts/relay-contract.js r/2, vendored
  * + pinned). The retired r/1 REST hop face (/api/r/exec + x-relay-gate)
  * is gone; this intake is POST /api/r/relay.
  *

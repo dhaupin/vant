@@ -27,8 +27,8 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const KIT = path.join(ROOT, 'web', 'kit', 'relay', 'relay-contract.js');
-const KIT_TYPES = path.join(ROOT, 'web', 'kit', 'relay', 'relay-contract.d.ts');
+const KIT = path.join(ROOT, 'web', 'kit', 'contracts', 'relay-contract.js');
+const KIT_TYPES = path.join(ROOT, 'web', 'kit', 'contracts', 'relay-contract.d.ts');
 const vendoredRelayJs = fs.readFileSync(path.join(ROOT, 'web/relay/functions/lib/relay-contract.cjs'));
 const vendoredRelayTypes = fs.readFileSync(path.join(ROOT, 'web/relay/functions/lib/relay-contract.d.cts'));
 

@@ -87,6 +87,14 @@ test('msg has isOperationAllowed function', () => {
 });
 
 // ============================================
+// (pass 271) HERMETIC POSTURE: this suite mutates the era + conversation
+// state (openEra's teardown only guarantees closure when the suite RUNS TO
+// COMPLETION — a killed run used to leave an OPEN era on the default brain
+// and leak "an era is open - work owns this attention" into the next
+// era-sensitive suite; leisure.test felt that). Scoped to a throwaway
+// brain (the ag-test-* pattern) so the operator state is never touched.
+process.env.VANT_BRAIN = process.env.VANT_BRAIN || 'msg-suite-local';
+
 // MULTIBRAIN STACK TESTS
 // ============================================
 
@@ -137,7 +145,7 @@ function openEra(intent) {
     return (async () => {
         const cur = era.current();
         if (cur.open) await era.close({ next: 'test teardown' });
-        const opened = await era.start(intent);
+        await era.start(intent);
         const after = era.current();
         return after.open ? after.era.id : null;
     })();
@@ -161,7 +169,7 @@ function openEra(intent) {
         }
     }
 
-    const era = loadEra();
+    loadEra();
 
     await testA('H3: create({era}) tags the conversation; info() shows era + task', async () => {
         const msg = require(path.join(ROOT, 'lib', 'msg'));
@@ -233,7 +241,7 @@ function openEra(intent) {
         // Fresh module context per RESTART simulation: evict msg AND era,
         // re-require, then read the conversation back from the state file.
         const msg = loadMsg();
-        const era2 = loadEra();
+        loadEra();
         const c = msg.create({ era: eraId, task: 'task-h3-restart' });
         const again = loadMsg();
         const i = again.info(c.id);

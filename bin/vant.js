@@ -138,6 +138,11 @@ const COMMANDS = {
     
     // Relay (the headless Mode R posture - prd-relay.md v0.2 §1.1)
     relay: 'relay.js',
+    // The Traveler + its certified letter (passes 255-261; cli.md §table)
+    traveler: 'traveler.js',
+    // The carrier lanes (roster/plates/encode/decode — the ops surface for
+    // the certified letter's transport lanes)
+    carrier: 'carrier.js',
     
     // Brain lock management
     lock: 'lock.js',

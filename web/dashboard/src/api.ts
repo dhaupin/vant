@@ -7,7 +7,7 @@ import { getState } from "./state";
  * routes. The pod door remains the authority; this client renders what
  * comes back and maps typed refusals.
  *
- * (pass 237 rung) The BRIDGE FAMILIES (web/kit/relay/relay-contract.js
+ * (pass 237 rung) The BRIDGE FAMILIES (web/kit/contracts/relay-contract.js
  * r/2: relay.sync | relay.lost | relay.call) land here as the browser
  * consumer: the dashboard pastes INTENT into POST /api/r/relay (the
  * dashboard-relay intake; HMAC-signed SERVER-SIDE — the browser holds
@@ -102,6 +102,48 @@ export async function exec(tool: string, args: Record<string, unknown> = {}): Pr
 /** GET /api/mcp/tools through the Worker proxy. */
 export async function tools() {
   return readJson("/api/mcp/tools", ToolsOut);
+}
+
+// (pass 261) THE TRAVELER door surface (typed): the dashboard talks to the
+// SAME door verbs the CLI/headless lanes use — carry (the certified letter
+// through its bill of stations), replay (the continuity walk), roster
+// (the honesty carrier list). No frontend-local logic: the door's own
+// gates (guest class, QoS, escrow) apply to every call, per the one-way
+// boundary (prd-web.md 3.2). Shapes mirror the door returns loosely
+// (passthrough) — the door's typed refusal codes survive intact.
+export const CarryStageIn = z
+  .object({
+    by: z.string().optional(),
+    op: z.string().optional(),
+    part: z.union([z.string(), z.record(z.string(), z.unknown())]).optional(),
+    carrier: z.string().optional(),
+    privileged: z.boolean().optional(),
+    approvalId: z.string().optional(),
+    team: z.string().optional(),
+  })
+  .passthrough();
+
+export const CarryArgs = z
+  .object({
+    id: z.string().optional(),
+    stations: z.array(CarryStageIn),
+    template: z.array(CarryStageIn).optional(),
+  })
+  .passthrough();
+
+export async function travelerCarry(args: z.infer<typeof CarryArgs>): Promise<unknown> {
+  CarryArgs.parse(args);
+  return exec("traveler_carry", args);
+}
+
+export async function travelerReplay(
+  arrivals: Array<Record<string, unknown>> = [],
+): Promise<unknown> {
+  return exec("traveler_replay", { arrivals });
+}
+
+export async function carriersList(): Promise<unknown> {
+  return exec("carriers_list", {});
 }
 
 /** GET /api/health through the Worker proxy. */
@@ -207,7 +249,7 @@ function shortRefusal(status: number, detail: string): string {
 // ==================== the bridge families (pass 237 rung) ====================
 
 /**
- * The r/2 ack (web/kit/relay/relay-contract.js): every bridge POST answers
+ * The r/2 ack (web/kit/contracts/relay-contract.js): every bridge POST answers
  * { received, event, handlers, dispatched, reply } — application refusals
  * ride TYPED codes inside the 200 ack (E_RELAY_* / E_RIDE_*), transport
  * refusals ride HTTP statuses (401/409/404/413). Typed, never silent.

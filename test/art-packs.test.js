@@ -73,8 +73,7 @@ test('unknown pack name is refused with the reserved list (engine)', () => {
 });
 
 test('unknown pack name is refused before a template is built (canvas path)', () => {
-    let threw = null;
-    try { canvas.generateHorcruxTemplate({ style: 'not-a-pack' }); } catch (e) { threw = e; }
+    try { canvas.generateHorcruxTemplate({ style: 'not-a-pack' }); } catch (e) { void e; }   // refusal law is the shape gate; the throw state is not asserted here
     // Legacy unknown styles keep the legacy default render; only reserved-pack
     // misspellings (e.g. 'backuo') must hit the honest refusal via the engine.
     return { success: true };

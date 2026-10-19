@@ -40,7 +40,6 @@ async function asyncTest(name, fn) {
 function assert(cond, msg) { if (!cond) throw new Error(msg); return true; }
 
 const embed = require(path.join(ROOT, 'lib', 'embed'));
-const search = require(path.join(ROOT, 'lib', 'search')).Search ? require(path.join(ROOT, 'lib', 'search')) : require(path.join(ROOT, 'lib', 'search'));
 const searchMod = require(path.join(ROOT, 'lib', 'search'));
 
 // project2d exports as a named fn (repair pass keeps the exports list).

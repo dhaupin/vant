@@ -349,6 +349,7 @@ vant brain mode dual            # dual | public | private | remote
 |---------|-------------|
 | `vant server` | HTTP/HTTPS server with security chain |
 | `vant relay` | Headless relay posture (Mode R status + gate key; prd-relay.md R0) |
+| `vant carrier` | The carrier lanes (roster/plates/encode/decode - the ops surface for the certified letter's transport lanes; passes 262-270) |
 | `vant network` | Peer network operations |
 | `vant nodes` | Peer discovery |
 | `vant remote` | Remote add/remove/list |
@@ -388,6 +389,7 @@ vant telegram
 | `vant escrow` | Escrow service for operations ([reference](/reference/escrow)) |
 | `vant audit` | Generate an audit report |
 | `vant audit-ledger` | Inspect rotated audit-ledger archives in models/audit-rotate/ (pass 118) |
+| `vant traveler` | The Traveler pin + certified letter (passes 255-261): open/hop/attach/carry/replay/status/audit/verify/finger the content-addressed job packet (prd-web §11, ISO 8.5.2) |
 | `vant guest` | Per-identity multi-guest auth (issue/list/revoke + pairing redemption; H1 of #185 - [reference](/security/multi-guest-auth)) |
 
 ```bash

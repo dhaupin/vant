@@ -40,7 +40,6 @@ const config = require(path.join(ROOT, 'lib', 'config'));
 const api = require(path.join(ROOT, 'lib', 'api'));
 const relay = api.relay;
 const Encrypt = require(path.join(ROOT, 'lib', 'encrypt')).default;
-const webhooks = require(path.join(ROOT, 'lib', 'webhooks'));
 
 let passNum = 0, failNum = 0;
 function ok(name, cond, extra) {
@@ -350,12 +349,39 @@ async function run() {
         bhAns.status === 200 && bhAns.json.reply && bhAns.json.reply.ok === false
         && bhAns.json.reply.code === 'E_RIDE_DECODE',
         JSON.stringify(bhAns.json).slice(0, 160));
-    const bu = bridgeEnvelope('relay.nothing', { x: 1 });
-    const buAns = await postRelay(relayPort, bu.raw, { 'x-signature-256': bu.sig });
+    const bu2 = bridgeEnvelope('relay.nothing', { x: 1 });
+    const bu2Ans = await postRelay(relayPort, bu2.raw, { 'x-signature-256': bu2.sig });
     ok('15e. an unknown family -> typed E_RELAY_UNKNOWN_EVENT (the schema answers, not silence)',
-        buAns.status === 200 && buAns.json.reply && buAns.json.reply.ok === false
-        && buAns.json.reply.code === 'E_RELAY_UNKNOWN_EVENT',
-        JSON.stringify(buAns.json).slice(0, 160));
+        bu2Ans.status === 200 && bu2Ans.json.reply && bu2Ans.json.reply.ok === false
+        && bu2Ans.json.reply.code === 'E_RELAY_UNKNOWN_EVENT',
+        JSON.stringify(bu2Ans.json).slice(0, 160));
+
+    // ---- 16. THE ORIGIN POLICY (pass 270): the resolver, all postures ----
+    const policy = require(__dirname + '/../lib/api')._relayOriginPolicy;
+    const policyP = (origin, cfg) => policy(origin, { allowPrivate: false, intranet: false, ...cfg });
+    const r = policyP('https://pod.example.com', {});
+    ok('16a. PUBLIC posture: https anywhere rides the standing SSRF wall',
+        r.ok === true && r.policy === 'refuse');
+    const pubHttp = policyP('http://example.com', {});
+    ok('16b. PUBLIC posture: plain http origin refuses TYPED (the standing law)',
+        pubHttp.ok === false && pubHttp.code === 'E_RELAY_BAD_ORIGIN');
+    const intr = policyP('http://127.0.0.1:7717', { intranet: true });
+    const lan10 = policyP('http://10.40.2.7:7717', { intranet: true });
+    ok('16c. INTRANET posture: loopback + RFC1918 plain http admitted (privateLan policy, SSRF wall STAYS scoped)',
+        intr.ok === true && intr.policy === 'privateLan' && lan10.ok === true && lan10.policy === 'privateLan');
+    const meta = policyP('http://169.254.169.254/latest', { intranet: true });
+    const mcst = policyP('http://224.0.0.1/', { intranet: true });
+    ok('16d. INTRANET posture NEVER admits cloud metadata / multicast (the wall that survives every posture)',
+        meta.ok === false && meta.code === 'E_RELAY_BAD_ORIGIN' && mcst.ok === false);
+    const intrPub = policyP('http://example.com', { intranet: true });
+    ok('16e. INTRANET posture: a public plain-http origin still refuses typed (LAN-scope admission only)',
+        intrPub.ok === false && intrPub.code === 'E_RELAY_BAD_ORIGIN');
+    const lab = policyP('http://example.com', { allowPrivate: true });
+    ok('16f. the LAB escape is unchanged and widens last (http anywhere, skipDomainCheck)',
+        lab.ok === true && lab.policy === 'off');
+    const garbage = policyP('not-an-origin', {});
+    ok('16g. an unparseable origin refuses typed through the SAME language (E_RELAY_BAD_ORIGIN)',
+        garbage.ok === false && garbage.code === 'E_RELAY_BAD_ORIGIN');
 }
 
 run()

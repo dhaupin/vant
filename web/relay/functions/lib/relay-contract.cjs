@@ -135,6 +135,9 @@ const POD_CONFIG_KEYS = Object.freeze({
     enabled: 'relay.enabled',
     gateKey: 'relay.gateKey',                          // = the HMAC secret
     channelKey: 'relay.channelKey',
+    intranetOrigins: 'relay.intranetOrigins',          // LAN-scope posture (pass 270): plain http ONLY for
+                                                       // loopback/RFC1918 hops; the SSRF wall stays scoped to
+                                                       // privateLan (cloud metadata still refused). OFF default.
     allowPrivateOrigins: 'relay.allowPrivateOrigins'   // lab escape, OFF default
 });
 

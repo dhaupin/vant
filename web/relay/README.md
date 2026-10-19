@@ -63,7 +63,7 @@ Pins: `test/relay-parity.test.js` block 12 (12a–12e).
 
 ## The contract
 
-The kit contract lives ONCE (`web/kit/relay/relay-contract.js`); this
+The kit contract lives ONCE (`web/kit/contracts/relay-contract.js`); this
 app vendors a byte-identical, `.sha256`-pinned copy (run
 `node scripts/vendor-relay-kit.js` after any kit change — the parity
 pins fail closed on drift). The relay holds **no channel keys and no

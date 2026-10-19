@@ -24,6 +24,12 @@ const path = require('path');
 const fs = require('fs');
 const ROOT = path.resolve(__dirname, '..');
 
+// (pass 271) the pass-253 rule applies here too — the suite issues through
+// the roster cap and need NOT depend on a sibling suite's env bump in the
+// same parent (run-all spawns suites with fresh envs). Un-cap BEFORE the
+// lib require, in THIS suite's own process.
+process.env.VANT_GUESTS_MAX = '500';
+
 let passed = 0, failed = 0;
 function test(name, fn) {
     try { fn(); passed++; console.log('  ✓ ' + name); }
@@ -37,7 +43,7 @@ function test(name, fn) {
 console.log('\n🎟️  GUESTS TESTS (H1 of #185 — per-identity multi-guest auth)\n');
 
 const BRAIN = 'gstest';
-const OPT = { brain: BRAIN };
+const OPT = { brain: BRAIN };   // the throwaway-brain opts every pin below rides
 
 const GUESTS_PATH = path.join(ROOT, 'lib', 'guests.js');
 function load() {
@@ -271,7 +277,7 @@ async function run() {
         assert.strictEqual(a.checkPermission(out.token, 'brain_save').reasonCode, 'E_GUEST_CAP');
         assert.strictEqual(a.checkPermission(out.token, 'brain_load').allowed, true);
         assert.strictEqual(a.checkPermission(out.token, 'guest_list').reasonCode, 'E_GUEST_ADMIN');
-        const id = guests.list(SOPT).find(g => g.name === 'pin-seam').id;
+        void guests.list(SOPT).find(g => g.name === 'pin-seam').id;   // presence probe
         const revoked = a.revokeToken(out.token);
         assert.strictEqual(revoked.denylist, true, 'vguest_ revocation routes to the denylist');
         assert.strictEqual(guests.verify(out.token, OPT), null, 'the auth-layer revoke KILLS the token');

@@ -3,6 +3,8 @@
  * Escrow Module Unit Tests
  */
 
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 
@@ -233,6 +235,50 @@ test('#204 TTL: an expired approval fails consumption and reports expired', () =
     const stale = e.checkApproval(req.approvalId);
     const spent = e.consumeApproval(req.approvalId, 'admin');
     return { success: stale.approved === false && stale.reason === 'expired' && spent.approved === false && spent.reason === 'expired' };
+});
+
+// (pass 257) The disk-coherent burn: a consumed approval can NEVER be
+// resurrected from disk. Found through the traveler escalation lane: the
+// _saveEscrow merge-union re-added a consumed approval's disk row on the
+// next save from ANY instance, so a "single-use" approval authorized a
+// second execution forever AFTER a restart (the fresh instance happily
+// hydrated the ghost row and consumed it again). The fix rides the pass-101
+// hold-tombstone contract over to approvals (deletedApprovals).
+test('#204/#257 disk-coherent burn: consumed approval never resurrects from disk', () => {
+    const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-escrow-i5b-'));
+    try {
+        const dir = path.join(tmp, 'models', 'private');
+        fs.mkdirSync(dir, { recursive: true });
+        process.chdir(tmp);
+
+        // 1) mint + persist on one instance — the disk row EXISTS before the burn
+        // (the door/road flow: request/save, a different instance approves+consumes)
+        const e1 = new escrow.Escrow({ approvalRequired: ['delete'] });
+        const req = e1.requestApproval('delete', 'i5b');
+        e1.save();
+
+        // 2) a fresh instance hydrates the row from disk, approves, and burns
+        const e2 = new escrow.Escrow({ approvalRequired: ['delete'] });
+        e2.approve(req.approvalId, 'owner');
+        const spent = e2.consumeApproval(req.approvalId, 'delete');
+        e2.save();
+
+        // the disk row itself must be gone (the tombstone applied to the union)
+        const disk = JSON.parse(fs.readFileSync(path.join(dir, 'vant', 'orgchart', 'escrow.json'), 'utf8'));
+        if (disk.approvals && disk.approvals[req.approvalId]) {
+            return { success: false, error: 'consumed approval still on disk (union resurrected it)' };
+        }
+
+        // 3) a THIRD instance hydrated from that disk must refuse to re-spend
+        const e3 = new escrow.Escrow({ approvalRequired: ['delete'] });
+        const reSpend = e3.consumeApproval(req.approvalId, 'delete');
+        return { success: spent.approved === true
+            && reSpend.approved === false && reSpend.reason === 'not_found' };
+    } finally {
+        process.chdir(ROOT);
+        fs.rmSync(tmp, { recursive: true, force: true });
+    }
 });
 
 console.log('\n--- RESULTS ---\n');

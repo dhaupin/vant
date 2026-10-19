@@ -151,6 +151,15 @@ whole:
 
 ## 8. Security gates (the red-team lessons ride in)
 
+> **(pass 255) The enterprise twin is IN CODE now:** the industrial
+> router object (this PRD) and the enterprise router object
+> ([prd-web.md §11](prd-web.md) — the **Traveler**, tr/1) are the same
+> application, different carriers: an auditable, traceable pin through a
+> distributed workflow (ISO 9001 clause 8.5.2 adopted in both lanes).
+> The Traveler ships as a working backend lib + CLI + MCP door AND the
+> web-kit contract — cross-reference, not duplicate: the carrier is a
+> local interface of the hop.
+
 The pass-245/246 red team set the house law this PRD inherits: guest- and
 edge-controlled inputs never become code (no guest terms compiled as
 regex; no branch names shell-interpolated), secrets never ride argv or

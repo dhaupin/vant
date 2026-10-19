@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 /**
- * relay-kit vendoring (prd-relay.md 4.0, pass 230)
+ * contracts-kit vendoring (prd-relay.md 4.0, pass 230; kit dir renamed
+ * to web/kit/contracts — it holds the wire CONTRACTS (r/2 + tr/1), not
+ * the relay transports themselves, pass 269)
  *
- * Copies the kit SOURCE (web/kit/relay/relay-contract.js) byte-identically
+ * Copies the kit SOURCE (web/kit/contracts/relay-contract.js) byte-identically
  * into each renderer target and writes a .sha256 pin sidecar beside the
  * vendored copy. Apps stay self-contained: they never read each other's
  * sources, only the vendored, hash-pinned kit copies. The parity pins
@@ -30,16 +32,35 @@ const path = require('path');
 const crypto = require('crypto');
 
 const ROOT = path.resolve(__dirname, '..');
-const KIT_DIR = path.join(ROOT, 'web', 'kit', 'relay');
+const KIT_DIR = path.join(ROOT, 'web', 'kit', 'contracts');
 const KIT = path.join(KIT_DIR, 'relay-contract.js');
 const KIT_TYPES = path.join(KIT_DIR, 'relay-contract.d.ts');
 
-const TARGETS = [
-    'web/dashboard/functions/lib/relay-contract.cjs',
-    'web/dashboard/functions/lib/relay-contract.d.cts',
-    // R1 (pass 233): the solo flavor vendors the same kit by the same script
-    'web/relay/functions/lib/relay-contract.cjs',
-    'web/relay/functions/lib/relay-contract.d.cts'
+// (pass 254) the kit now carries TWO sources: the r/2 contract and the
+// Traveler contract (the enterprise router object). Each pair vendors
+// byte-identically into every renderer target with its own pin sidecar.
+const SOURCES = [
+    {
+        source: KIT,
+        types: KIT_TYPES,
+        targets: [
+            'web/dashboard/functions/lib/relay-contract.cjs',
+            'web/dashboard/functions/lib/relay-contract.d.cts',
+            // R1 (pass 233): the solo flavor vendors the same kit by the same script
+            'web/relay/functions/lib/relay-contract.cjs',
+            'web/relay/functions/lib/relay-contract.d.cts'
+        ]
+    },
+    {
+        source: path.join(KIT_DIR, 'traveler-contract.js'),
+        types: path.join(KIT_DIR, 'traveler-contract.d.ts'),
+        targets: [
+            'web/dashboard/functions/lib/traveler-contract.cjs',
+            'web/dashboard/functions/lib/traveler-contract.d.cts',
+            'web/relay/functions/lib/traveler-contract.cjs',
+            'web/relay/functions/lib/traveler-contract.d.cts'
+        ]
+    }
 ];
 
 const check = process.argv.includes('--check');
@@ -49,17 +70,21 @@ function sha(buf) {
 }
 
 function main() {
-    if (!fs.existsSync(KIT)) {
-        console.error('vendor-relay-kit: kit source missing: ' + KIT);
-        process.exit(1);
+    let drift = false;
+    for (const pair of SOURCES) {
+        if (vendorPair(pair)) drift = true;
     }
-    const source = fs.readFileSync(KIT);
-    const typesSrc = fs.readFileSync(KIT_TYPES);
+    if (drift) process.exit(1);
+}
+
+function vendorPair(pair) {
+    const source = fs.readFileSync(pair.source);
+    const typesSrc = fs.readFileSync(pair.types);
     const head32 = sha(source);
     const headTypes32 = sha(typesSrc);
 
     let drift = false;
-    for (const rel of TARGETS) {
+    for (const rel of pair.targets) {
         // each target carries its OWN kit source (contract vs declaration)
         // and pins those vendored bytes to that source's own head
         const srcFor = rel.endsWith('.d.cts') ? typesSrc : source;
@@ -101,6 +126,7 @@ function main() {
         }
     }
     if (drift) process.exit(1);
+    return drift;
 }
 
 main();
