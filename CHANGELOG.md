@@ -5,6 +5,61 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - issues #212/#213 (the memory-learn prose lane: agent voice is writeable again)
+
+### Fixed - the two false-positive walls on the learn lane (from rook on main)
+
+- **THE FIELD-SPLIT SCAN (`lib/pipeline.js` `runChain`)**: the brain-write
+  security chain previously ran its FULL vaf wall (path scan + content
+  scan) over ONE serialized
+  `JSON.stringify({category, key, content.slice(0, 500)})` blob — so the
+  learn CONTENT, owner-owned agent-voice prose, was scanned as if it
+  were a path argument AND a command line. Any note mentioning `~/x`,
+  `../x`, `/home/…`, `$HOME`, `; `, ` | `, `&&`/`||` failed the entire
+  write with `Path blocked`/`Content blocked`, exit 1, nothing persisted
+  (issues #212, #213 — worst case, the session note was silently lost).
+  Now the fields are validated for what they ARE: `category`/`key` are
+  caller path input (full wall, a traversal key like `../etc/passwd` is
+  still refused typed `SECURITY_PATH_TRAVERSAL`), and `content` rides a
+  new prose lane (below). The content scan is also FULL-LENGTH now — the
+  old `content.slice(0, 500)` serialized slice let an attack hide at
+  offset 500.
+- **THE PROSE LANE (`lib/vaf.js`, `proseContent` + `PROSE_PATTERNS`)**:
+  the narrowed pattern set for owner-owned prose keeps the
+  payload-realistic checks (`<script`, `javascript:`, `on\w+=`,
+  template idioms ONLY when followed by an identifier, `$(`, `:; rm`,
+  `rm -rf`, `dd`, `chmod 777`, the word-stacking troll, piping
+  curl/wget to bash/sh) and drops the bare metacharacter heuristics
+  (`;\s*\w+`, `&&`, `||`, `&`, any `|`, `<//`, `>/`, `>>/`, bare
+  backticks, bare `${`/`{{`) that fired on ordinary English and markdown
+  tables. The path scan is SKIPPED for prose content (a learn body is
+  never used as a path — the traversal risk lives in category/key);
+  `proseContent` rides the same library-internal seam as `blobContent`
+  (callers cannot set it from tool schemas). The old vaf comment
+  promising the bypass for "memory content that legitimately have
+  newlines and special chars" now matches the code.
+- **PATH CHECK ANCHORING (`checkPathTraversal`)**: the home-expansion
+  and `..` rules are prefix/segment-anchored — a string that IS or
+  STARTS with a home expansion or a whole-path-segment `..` is still
+  blocked; a mid-string mention (`lives at ~/tools/vant`, `a..b` as a
+  filename) is prose and passes. Real path lanes (`type: 'path'`/`'file'`,
+  storage, backup, horcrux) keep every refusal — the concrete test
+  still blocks exact attacks (segment-anchored `../` at any segment,
+  leading `~`).
+- **ACTIONABLE REFUSALS**: `Path blocked` now names the rule and the
+  field (`Path blocked: Home directory expansion blocked (in key)`);
+  content refusals name the field, the matched pattern, the OFFSET and
+  a ~64-char snippet — an agent (or human) can see what tripped without
+  reading vaf.js.
+- **Regression pins** (test/memory.test.js): the literal repro bodies
+  from both issues learn cleanly through the REAL brain-write chain;
+  hostile payloads (`$(curl … | bash)`, `<script>`, `rm -rf`) are STILL
+  refused in the prose lane with typed codes + offset; hostile
+  traversal KEYS still refuse `SECURITY_PATH_TRAVERSAL`. Suites: memory
+  24/24, vaf 12/12, pipeline 9/9, security-chain 9/9,
+  security-pipeline 8/8, brain-circuit 10/10, workspace-memory 21/21,
+  guests 25/25, boot 17/17; eslint clean on touched files.
+
 ## [Unreleased] - pass 270 (the origins posture is law - intranet LAN-scope relay + the ops CLI faces)
 
 ### Added - the posture (relay) and the faces (CLI)
