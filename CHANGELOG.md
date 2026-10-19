@@ -5,6 +5,66 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 270 (the origins posture is law - intranet LAN-scope relay + the ops CLI faces)
+
+### Added - the posture (relay) and the faces (CLI)
+
+- **THE ORIGIN POLICY (`lib/api.js` `_relayOriginPolicy`, one resolver,
+  typed `E_RELAY_BAD_ORIGIN` in every refusal branch)**: hops now answer
+  to a three-rung widening instead of the single https/escape pair -
+  (1) PUBLIC (default): https-only origins, outbound rides the standing
+  SSRF wall; (2) INTRANET (`relay.intranetOrigins true`, the LAN-scope
+  posture, the new default recommendation): plain http admitted ONLY for
+  private-LAN scopes (loopback/RFC1918/IPv6-ULA, `network.isPrivateLanIP`
+  is the law), and the outbound fetch keeps a SCOPED wall -
+  `internalPolicy: 'privateLan'` still refuses cloud metadata
+  (169.254/16), multicast and 0.0.0.0 in EVERY posture - a pod on a LAN
+  relays to its neighbors without becoming a LAN prober; (3) LAB ESCAPE
+  (`relay.allowPrivateOrigins true`): the pre-270 escape unchanged
+  (http anywhere + `skipDomainCheck`), host posture, never a default.
+- **THE LAN CARVE-OUT IN THE WALL (`lib/network.js`)**: new
+  `isPrivateLanIP` + an `internalPolicy` fetch option ('refuse' default /
+  'privateLan' / legacy `skipDomainCheck` for 'off'); `isDomainAllowed`
+  and the DNS-rebinding IP check both honor the policy - a genuine LAN
+  hostname resolving to LAN IPs is LEGIT under privateLan, a resolution
+  to metadata/multicast still refuses. The standing wall behavior is
+  byte-identical at default policy (provider-network pins untouched
+  green 10/10).
+- **THE KIT DOUBLES THE POSTURE KEYS** (`web/kit/contracts
+  relay-contract.js POD_CONFIG_KEYS` gains `intranetOrigins`), vendored
+  copies re-pinned to kit head (`vendor --check` 8/8; parity 19/19).
+  `relayStatus()` reports the `intranet` flag alongside `allowPrivate`.
+- **THE PILOT SWITCHES POSTURE**: `scripts/pilot-two-relays.js` now arms
+  `relay.intranetOrigins` (NOT the lab escape) and still rides the whole
+  lane on real pods - 17/17 pins including the new **H6**: a PUBLIC
+  plain-http origin refuses typed `E_RELAY_BAD_ORIGIN` while the loopback
+  device lane (H1-H3) rides untouched. The lane is proven WITHOUT the
+  SSRF escape for the first time.
+- **`vant traveler` IS ROUTED** (`bin/vant.js` COMMANDS): cli.md has
+  promised it since pass 255-261 - the map entry was missing, a bare
+  `vant traveler` hit unknown-command. Now routed to bin/traveler.js
+  (open/hop/attach/carry/replay/status/audit/verify/finger).
+- **`vant carrier` CLI (bin/carrier.js, the ops face)**: `list` (the
+  roster), `plates` (persisted lanes), `plate <id> <carries>
+  --prefix/--suffix/--note` (author a plate WITHOUT the MCP door - the
+  sandbox canWrite gate rides), and structured `encode`/`decode` verbs
+  (packet/frame as STDIN JSON; the encode artifact is
+  pipe-clean stdout - the lib audit logger is rerouted to stderr for
+  this CLI only). Round trip pinned by an operator smoke: mint ->
+  plc-press plate encode -> decode back, the same letter out.
+- **Docs truth-up**: docs/operations/relay.md gains THE ORIGIN POLICY
+  table; docs/reference/config.md's relay block was still teaching the
+  RETIRED r/1 face (`lib/relay.js`, `x-relay-gate`) - rewritten to the
+  r/2 reality (composed face, 5 posture keys, webhook 3467, bring-up
+  order); `vant carrier` joins cli.md (CLI coverage 130+5 PASS); DEPLOY.md
+  gets the deps truth (jsqr + qrcode-generator since pass 264), the relay
+  lane section, the pilot scripts and the ops verbs in guid/Debug
+  Commands.
+- **Suite**: relay 38/38 (new block 16 pins all postures incl.
+  metadata/multicast never admitted), parity 19/19, provider-network
+  10/10 (the standing wall byte-identical), pilot:relay 17/17 (intranet
+  posture), carriers 111/111, travelers 26+43 green, docs gates all PASS.
+
 ## [Unreleased] - pass 269 (P3: the r/2 webhook relay lane rides REAL pods — pilot:relay, the sealed corridor)
 
 ### Added - the lane the mesh speaks (relays on real pods, no new lib laws)

@@ -28,7 +28,9 @@ Vant is a Node.js process whose entire state is your repository: markdown brain 
 | Git | 2.20+ | Brain sync works through git; branch awareness built in |
 | GitHub PAT | - | `repo` scope, set as `GITHUB_TOKEN` (env var, never in config) |
 
-Dependencies are deliberately tiny: `chalk`, `js-yaml`, `yaml`. No database driver, no Redis client.
+Dependencies are deliberately tiny: `chalk`, `js-yaml`, `yaml`, plus the
+QR symbology lane's two pure-JS MIT packages (`qrcode-generator`, `jsqr`).
+No database driver, no Redis client.
 
 ---
 
@@ -144,7 +146,7 @@ The Vant port map (pass 127 audit). Four listeners, all loopback-bound by defaul
 |---------|---------|------|--------------|----------|
 | REST server | `vant server` | 3456 | `VANT_SERVER_PORT` | `VANT_SERVER_BIND` |
 | MCP server | `vant mcp` (or `node bin/mcp.js`) | 3457 | `VANT_MCP_PORT` | `VANT_MCP_BIND` |
-| Webhook receiver | `lib/webhooks.js` | 3467 | `VANT_WEBHOOK_PORT` | `VANT_WEBHOOK_BIND` |
+| Webhook receiver (+ the r/2 relay face at `POST /relay` when `relay.enabled`) | `lib/webhooks.js` | 3467 | `VANT_WEBHOOK_PORT` | `VANT_WEBHOOK_BIND` |
 | Metrics/health HTTP | `lib/health.js start()` | 3468 | `VANT_HEALTH_PORT` | `VANT_HEALTH_BIND` |
 | Mesh crew bus | `lib/genesis.js` | 4890-4892 | per-call `port` opt | - |
 | Headless pod | `vant headless` (`vant.startHeadless()`) | MCP 3457 + REST 3456 | `VANT_MCP_PORT` / `VANT_SERVER_PORT` | `VANT_SERVER_BIND` |
@@ -169,7 +171,22 @@ Every listener binds to `127.0.0.1` by default on bare installs (the Docker imag
 
 `vant all` starts both in one process (`vant.startFull()`).
 
----
+### The webhook relay lane (r/2, optional)
+
+With a posture armed (`vant config set relay.enabled true`, then
+`vant relay gate` + `vant relay channel`), every server boot mounts the
+relay face onto the webhook transport: the pod serves the HMAC-gated
+`POST /relay` route (sealed `relay.ride` inside e2e envelopes + blind
+`relay.hop` ciphertext forwarding), and `vant relay status` prints the
+posture truth. The origin policy (docs/operations/relay.md): https-only
+by default; `relay.intranetOrigins true` — the recommended LAN-scope
+posture — admits plain http ONLY for loopback/RFC1918 hop targets while
+cloud metadata (169.254/16) stays refused in EVERY posture;
+`relay.allowPrivateOrigins` is the full lab escape, never a default.
+Group-track runs prove the lane on real pods:
+`npm run pilot:relay` (16 P3 lane pins + the intranet posture pin),
+`npm run pilot:pods` (raster across keyed doors) and
+`npm run pilot:mfg` (the carrier line).
 
 ## 5. Brain Sync (Git Providers)
 
@@ -342,6 +359,9 @@ vant system status               # JSON layer status
 vant org status                  # Current scopes + capabilities
 vant rate status                 # Rate limiter state (reset: vant rate reset <clientId>)
 vant config get <key>            # Effective brain-scoped config
+vant relay status                # r/2 relay posture truth (mounted/gate/channel/counters)
+vant carrier list                # carrier roster (built-ins + this brain's plates)
+vant carrier plates              # persisted plate lanes (ops authoring, no door needed)
 node -e "console.log(require('./lib/sandbox').canRead())"   # Direct sandbox probe
 ```
 

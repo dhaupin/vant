@@ -129,18 +129,25 @@ Configuration via environment.
 
 ### Relay posture (Mode R - brain config keys, NOT env vars)
 
-The headless relay core (lib/relay.js, prd-relay.md R0) reads three
-brain-config keys (layer 2 - set with `vant config set`, per brain):
+The r/2 relay face (COMPOSED of webhook transport + MCP door + lib/api
+face; there is NO lib/relay module, the no-legacy-bloat guard pins
+that) reads these brain-config keys (layer 2 - set with
+`vant config set`, per brain):
 
 | Key | Required | Description |
 |-----|----------|-------------|
-| `relay.enabled` | No | Enable the gated Mode R hop surface on the REST server (`true`/`false`, default `false`) |
-| `relay.gateKey` | No | The hop gate credential; hops MUST present it as `x-relay-gate` (timing-safe). No key set = fail-closed (hops refuse until `vant relay gate` generates one) |
-| `relay.allowPrivateOrigins` | No | LAB ESCAPE ONLY: allow http/private-range hop targets (loopback targets for tests/labs). Cloud-metadata ranges (169.254/16, 0.0.0.0) refuse in EVERY posture |
+| `relay.enabled` | No | Mount the relay face at `POST /relay` on the webhook transport when a gate secret is set (`true`/`false`, default `false`) |
+| `relay.gateKey` | No | The HMAC secret over the raw body bytes (`X-Signature-256`). No key set = fail-closed (`vant relay gate` generates one, shown ONCE) |
+| `relay.channelKey` | No | The e2e (AES-256-GCM) pair key the ride face opens envelopes with (`vant relay channel` generates one, shown ONCE). Absent = rides refuse typed, hops unaffected |
+| `relay.intranetOrigins` | No | RECOMMENDED LAN-scope posture: plain-http hop origins admitted ONLY for loopback/RFC1918/IPv6-ULA scopes; the outbound fetch keeps a scoped SSRF wall (cloud metadata 169.254/16, multicast, 0.0.0.0 refuse in EVERY posture - see docs/operations/relay.md) |
+| `relay.allowPrivateOrigins` | No | LAB ESCAPE ONLY: http anywhere + the private fetch wall lifted (`skipDomainCheck`). Host posture, never a default |
 
-Recommended order: `vant config set relay.enabled true` then
-`vant relay gate` (shows the key once). The posture mounts on the SAME
-REST server security chain - the pod exposes nothing new.
+Recommended order: `vant config set relay.enabled true`, `vant relay
+gate`, `vant relay channel`, then start the pod (`vant server` / `all` /
+`headless`) - the boot mounts the face onto the webhook transport (port
+3467 default, loopback-bound like every listener; widen deliberately
+with `VANT_WEBHOOK_*`). OFF is first-class: no register, no server, no
+route. ON without a gate secret binds NOTHING (fail-closed).
 
 ### Notifications
 

@@ -6,8 +6,10 @@
  * door calls (pod-to-pod fetch/stamp). This pass boots the FULL lane the
  * mesh actually speaks: TWO full vant pod processes (startFull: MCP door +
  * REST + the r/2 relay face mounted at POST /relay) each with its own
- * HMAC relay gate, and a shared pair channelKey — the r/2 contract at
- * work on the wire:
+ * HMAC relay gate, a shared pair channelKey — and (pass 270) the posture
+ * the pilot arms is the INTRANET LAN-scope one, NOT the full lab escape:
+ * a compromised pod can never widen this lane into a LAN prober.
+ * The r/2 contract at work on the wire:
  *
  *   1. THE RIDE CORRIDOR (relay.ride — a pod as the sealed ENDPOINT):
  *      a paired client seals a REAL door call inside an AES-256-GCM
@@ -175,7 +177,7 @@ const cfg = require('./lib/config');
 cfg.set('relay.enabled', true);
 cfg.set('relay.gateKey', process.env.VANT_RELAY_GATE);
 cfg.set('relay.channelKey', process.env.VANT_RELAY_CHANNEL);
-cfg.set('relay.allowPrivateOrigins', true);
+cfg.set('relay.intranetOrigins', true);
 require('./lib/vant').startFull({ mode: 'all' })
     .then(function () { console.log('[POD] spine up'); })
     .catch(function (e) { console.error('[POD] boot failed: ' + e.message); process.exit(1); });
@@ -409,6 +411,18 @@ process.on('SIGINT', () => { cleanup(); process.exit(1); });
         hop3.status === 200 && hop3.json && hop3.json.reply && hop3.json.reply.ok === false
         && hop3.json.reply.code === 'E_RELAY_UPST',
         JSON.stringify((hop3.json && hop3.json.reply) || {}).slice(0, 140));
+
+    // (pass 270) THE POSTURE PIN: the lane above runs with the INTRANET
+    // LAN-scope posture (no lab escape armed). A public plain-http origin
+    // must still refuse typed — the lane proofs LAN neighbors WITHOUT
+    // becoming a general http prober.
+    const hop4 = await corridorSend(podA.opts.webhook, podA.opts.gate, {
+        origin: 'http://example.com', path: '/', ct: hopCt
+    }, 'relay.hop');
+    ok('H6. INTRANET posture holds WITHOUT the SSRF escape: a PUBLIC http origin refuses typed E_RELAY_BAD_ORIGIN (LAN neighbors yes, the open wire no)',
+        hop4.status === 200 && hop4.json && hop4.json.reply && hop4.json.reply.ok === false
+        && hop4.json.reply.code === 'E_RELAY_BAD_ORIGIN',
+        JSON.stringify((hop4.json && hop4.json.reply) || {}).slice(0, 140));
 
     // ==================== VERDICT ====================
     console.log('\n--- RESULTS ---');
