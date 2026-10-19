@@ -1920,6 +1920,97 @@ record: a miss, never an error and never a fabricated body. Read-class
 
 ---
 
+### traveler_list
+
+The ledger's browse face (prd-carrier-share.md §2): names the traveler
+addresses this node's pin ledger holds, 64-hex ids, newest first,
+capped 200 (a `limit` rides). ONE LAW the spec pins: **the list NAMES,
+the status VERIFIES** - per-id truth stays in `traveler_status` /
+`traveler_fetch`, this verb never augments a row with unverified
+detail. An absent/corrupt ledger is an honest empty roster
+(`{ ids: [], count: 0 }`), never a fabricated one. Read-class (the
+`list` tail).
+
+**Params:**
+
+| Param | Type | What |
+|-------|------|------|
+| limit | number | Optional; max ids returned (cap 200, default 200) |
+
+**Returns:** `{ "ids": ["<64-hex address>", ...], "count": <total in ledger> }`
+
+---
+
+### carrier_lane_list
+
+The roster face (prd-carrier-share.md §2): the carrier lanes THIS pod
+speaks - built-ins (json/nsc9/png/qr/stone/svg, each with its honest
+`available` flag: `png` is the declared-absent lane with its named
+blocker) plus this brain's custom plates (id, carries, frame,
+note). A UI renders this verbatim; a lane not on the list is not on
+this pod, and the door never pretends otherwise. Read-class (the
+`list` tail).
+
+**Params:** none
+
+**Returns:**
+```json
+{ "lanes": [{ "id": "qr", "kind": "builtin", "carries": "full-object", "available": true, "family": "packet", "note": "..." }],
+  "plates": [{ "id": "plc-press", "kind": "plate", "carries": "full-object", "frame": { "prefix": "...", "suffix": "..." }, "note": "" }] }
+```
+
+---
+
+### carrier_encode
+
+Encode an EXISTING packet on a NAMED lane (prd-carrier-share.md §2):
+the packet `id` (64-hex) must re-verify at this node under the SAME
+serving wall as `traveler_fetch` - encode carries what exists, mints
+nothing, and refuses absent bodies typed (`STORAGE_NOT_FOUND`). Lane
+choice is the CALLER's, never sniffed: unknown lanes refuse typed
+`E_CARRIER_CARRIER`; over-capacity payloads (e.g. `QR_CAP`) refuse
+typed pointing at the stone lane. `opts` rides as the lib's third arg
+(e.g. `{ "pointer": true }` for the extended vant frame on the qr
+lane). WRITE-class by the pass-267 law (the door wraps the packet
+gate; a caller encoding a hostile packet must not look read-safe).
+
+**Params:**
+
+| Param | Type | What |
+|-------|------|------|
+| id | string | Required; the FULL 64-hex content address of an existing packet |
+| lane | string | Required; the carrier lane id (`qr`, `stone`, `svg`, `json`, `nsc9`, or a plate id) |
+| opts | object | Optional; lib encode opts (e.g. `{ pointer: true }`) |
+
+**Returns:** `{ "carrier": "qr", "address": "<64-hex>", "artifact": { "frame": "..." }, "png": "<base64>", "moduleCount": 29 }` (png/moduleCount ride only when the lane produces a raster)
+
+---
+
+### carrier_decode
+
+Decode an artifact on a NAMED lane WITHOUT writing anything
+(prd-carrier-share.md §2): the resolved packet, or the honest
+unresolved record per the lib's own law (a legal frame whose body is
+not on this node answers `{ "resolved": false, "record": { ... } }`
+- a record, never an error, never a fabricated body). A decoded body
+STILL re-enters the FULL packet wall (shape + address + verify)
+before it is handed back. WRITE-class by the pass-267 law (a pointer
+decode may ride the node's `setPointerFetch` wire hook - a verb that
+can touch the network is never observer read-safe).
+
+**Params:**
+
+| Param | Type | What |
+|-------|------|------|
+| lane | string | Required; the lane to decode on |
+| artifact | string | Required; the artifact text/raster payload |
+| opts | object | Optional; lib decode opts (e.g. `{ pointerOnly: true }`) |
+
+**Returns (resolved):** `{ "resolved": true, "traveler": { ... } }`
+**Returns (unresolved):** `{ "resolved": false, "record": { "reason": "no-body" } }`
+
+---
+
 ### traveler_stamp
 
 The artifact door (pass 268) - the OTHER half of the qr lane crosses the
