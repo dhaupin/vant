@@ -31,7 +31,11 @@ function parseCookies(request: Request): Record<string, string> {
   for (const part of (request.headers.get("Cookie") ?? "").split(/;\s*/)) {
     if (!part.includes("=")) continue;
     const name = part.slice(0, part.indexOf("="));
-    out[name] = decodeURIComponent(part.slice(part.indexOf("=") + 1));
+    try {
+      out[name] = decodeURIComponent(part.slice(part.indexOf("=") + 1));
+    } catch {
+      continue; // malformed escape: skip the pair, never crash the bridge
+    }
   }
   return out;
 }
@@ -44,7 +48,12 @@ export function sessionCookieHeader(): string {
  *  the SERVER-SIDE bound session token (P2 session binding, prd-web.md
  *  3.5), then the MVP raw-token cookie (unbound fallback, e.g. local
  *  installs with no account store). The token value never leaves this
- *  process except as the upstream Authorization header. */
+ *  process except as the upstream Authorization header.
+ *
+ *  (audit TC-scan) A cookie value with a malformed escape (`vg_session_local=a%`)
+ *  used to throw URIError INSIDE podTokenFor — every bridged route calls this
+ *  first, so one junk header 500'd the whole bridge. The header is untrusted
+ *  request data: a pair that does not decode is simply not counted. */
 export async function podTokenFor(
   context: PagesContext,
   request: Request,
@@ -147,6 +156,10 @@ export function rateGate(context: PagesContext, scope: string, ip: string): Resp
   const limit =
     typeof limitSetting === "string" && limitSetting !== "" ? Number(limitSetting) || RATE_PER_MIN_DEFAULT : RATE_PER_MIN_DEFAULT;
   const now = Math.floor(Date.now() / 60000);
+  // (audit) The bucket map is isolate-scoped but never cleaned: a scanner
+  // spraying spoofed CF-Connecting-IP values grows it without bound.
+  // Cap it hard — the budget is a best-effort mirror, the pod door stays boss.
+  if (buckets.size > 5_000) buckets.clear();
   const key = `${scope}:${ip}`;
   const bucket = buckets.get(key);
   if (!bucket || bucket.window !== now) {
@@ -244,15 +257,20 @@ export async function bridgeOptions(context: PagesContext, request: Request): Pr
     // NOT its Content-Type — every exec upstream answered typed 415.
     headers.set("Content-Type", "application/json");
   }
+  // teleport the body only for POSTs; never re-stream GET bodies.
+  // (audit) The fixed abort budget must NOT ride the SSE hop: it killed every
+  // /mcp/events connection 10s in (a live stream IS over-budget by design).
+  // The pod owns its own keepalives; a dead upstream ends the response by itself.
   const timeoutSetting = context.env["VANT_BRIDGE_TIMEOUT_MS"];
-  // teleport the body only for POSTs; never re-stream GET bodies
   const init: RequestInit = {
     method: request.method,
     headers,
-    signal: AbortSignal.timeout(
-      (typeof timeoutSetting === "string" ? Number(timeoutSetting) : 0) || 10_000,
-    ),
   };
+  if (!isStream) {
+    init.signal = AbortSignal.timeout(
+      (typeof timeoutSetting === "string" ? Number(timeoutSetting) : 0) || 10_000,
+    );
+  }
   if (request.method === "POST") {
     init.body = request.body;
   }

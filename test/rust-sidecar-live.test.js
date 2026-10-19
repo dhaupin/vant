@@ -74,7 +74,13 @@ const { SidecarConnector } = require('../lib/connectors/sidecar');
     console.log('  ✓ amortization: warm per-call average ' + perCall.toFixed(0) + 'ms (< 2000ms)');
 
     await stop(spec);
-    await new Promise(r => setTimeout(r, 500));
+    // (CI parity with the julia-sidecar fix, run 39316186493) poll up to
+    // 15s for the real exit instead of trusting a fixed 500ms — a heavy
+    // runtime teardown on a slow runner is not a dirty stop.
+    const stopDeadline = Date.now() + 15000;
+    while (proc.exitCode === null && Date.now() < stopDeadline) {
+        await new Promise(r => setTimeout(r, 200));
+    }
     if (proc.exitCode !== 0) {
         console.error('  ✗ clean stop: exitCode ' + proc.exitCode);
         process.exit(1);
