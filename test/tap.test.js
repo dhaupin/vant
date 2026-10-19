@@ -12,17 +12,17 @@
 
 const assert = require('assert');
 const path = require('path');
-const http = require('http');
 const fs = require('fs');
 const ROOT = path.resolve(__dirname, '..');
 
+// (pass 271) same rule as guests.test: this suite issues A LOT through the
+// roster quota and must not depend on a sibling suite's env bump (run-all
+// spawns suites with fresh envs). Un-cap BEFORE the lib require.
+process.env.VANT_GUESTS_MAX = '500';
+
 let passed = 0, failed = 0;
-function check(cond) { if (!cond) throw new Error('assert failed: ' + cond); }
 
 console.log('\n📡 EVENT TAP TESTS (H2 of #185 — the stream is the dashboard)\n');
-
-const BRAIN = 'taptest';
-const OPT = { brain: BRAIN };
 
 const mcp = require(path.join(ROOT, 'lib', 'mcp'));
 const eventBus = require(path.join(ROOT, 'lib', 'event'));
@@ -40,10 +40,6 @@ function configFreshRequireKey() {
 
 // The dashboard board expects the FAMILY tuples to be honest: guest_* events
 // are internal (never on the board) even for shared-key taps.
-async function drainOnce(streamBody, msec) {
-    return new Promise((resolve) => setTimeout(resolve, msec));
-}
-
 function sseFrames(buffer) {
     return buffer.split('\n\n').filter(f => f.trim() && !f.startsWith(':'))
         .map(f => {
@@ -100,7 +96,6 @@ async function run() {
         assert.strictEqual((res2.headers.get('content-type') || '').includes('text/event-stream'), true, 'SSE content-type');
         // let the tap renderer settle BEFORE emitting (the frames must all land)
         await new Promise(r => setTimeout(r, 350));
-        const emitTimes = [0, 40, 40, 40, 40];
         eventBus.emit('agent:spawned', { name: 'dashboard-agent', secretInternalBlob: 'SHOULD-NOT-LEAK' });
         setTimeout(() => eventBus.emit('guest:issued', { id: 'nope', name: 'should-not-board' }), 40);
         setTimeout(() => eventBus.emit('mcp:auth:failed', { n: 1 }), 80);

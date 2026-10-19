@@ -8,6 +8,16 @@
 // the TEST process un-caps itself BEFORE any require touches the module.
 process.env.VANT_GUESTS_MAX = '500';
 
+// (pass 271) BUDGET-MATRIX HYGIENE: this suite exercises the REAL config
+// door, and `vant_config_set` persists brain-scoped state. Unscoped, a
+// legacy run wrote `mcp.apiKey` into the DEFAULT brain's config and the
+// LATER suites in the sweep (auth.test, config.test) then read operator
+// state ("persisted brain config mcp.apiKey") and failed their
+// honest-posture matrix — cross-suite contamination through merged
+// persisted state. Scoped to a throwaway brain (the ag-test-* pattern):
+// the door's own behavior is what's pinned, not which drawer it lands in.
+process.env.VANT_BRAIN = process.env.VANT_BRAIN || 'mcp-suite-local';
+
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 

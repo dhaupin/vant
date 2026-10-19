@@ -40,7 +40,6 @@ const config = require(path.join(ROOT, 'lib', 'config'));
 const api = require(path.join(ROOT, 'lib', 'api'));
 const relay = api.relay;
 const Encrypt = require(path.join(ROOT, 'lib', 'encrypt')).default;
-const webhooks = require(path.join(ROOT, 'lib', 'webhooks'));
 
 let passNum = 0, failNum = 0;
 function ok(name, cond, extra) {

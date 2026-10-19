@@ -14,7 +14,6 @@
  *    MCP door /tools alias stays 200 (it IS the tool surface).
  */
 
-const assert = require('assert');
 const http = require('http');
 const path = require('path');
 const { spawn } = require('child_process');

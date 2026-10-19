@@ -74,6 +74,9 @@ The full agent loop, written to be executed without a human, is [Agent Onboardin
 | **Horcrux** | Whole brain embedded in an image, encrypted, restorable anywhere |
 | **Security chain** | Sandbox capabilities, input validation, rate limiting, escrow approval on every op |
 | **Guest auth** | Per-identity tokens for the MCP door (`vant guest issue/list/revoke`): observer/human/agent roles on the sandbox capability vocabulary, denylist revocation, single-use pairing voucher for the headless pod |
+| **The Traveler** | The auditable, content-addressed job packet (`vant traveler open|hop|attach|status|audit|verify` + MCP door verbs): append-only station ledger, schema-rizer, ISO 8.5.2 traceability |
+| **Carrier lanes** | Route the packet through stations (`vant carrier list|plates|plate|encode|decode`): the stone envelope, the NSC-9 doorway, the pointer-QR (`VANT:1:`) with mesh local-store or cross-node resolve, and operator-defined PLATE lanes — framed lane data, zero crypto written by the definer |
+| **Webhook relay (r/2)** | One HMAC-gated webhook route for the mesh: `relay.ride` turns a pod into a sealed message-call endpoint for its MCP door, `relay.hop` turns it into a blind ciphertext forwarder; plain http is refused by the origin policy, and a LAN-scope posture (`relay.intranetOrigins`) admits loopback/RFC1918 hops while clouds metadata stays refused in every posture |
 | **Crash safety** | Write-ahead journal plus atomic writes: a crash never leaves torn memory |
 
 ## Headless Mode

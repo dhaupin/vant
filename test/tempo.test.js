@@ -139,7 +139,7 @@ test('reconcile(): an expired-but-active persisted budget closes out exactly onc
 });
 
 test('budgetActive: consult surfaces a live budget (consciousness idle hook)', () => {
-    const live = tempo.beginBudget({ duration: '10 min', sliceMs: '2m', label: 'idle-consult pin' });
+    tempo.beginBudget({ duration: '10 min', sliceMs: '2m', label: 'idle-consult pin' });
     const active = tempo.budgetActive();
     assert.ok(active && active.id === 'idle-consult pin' ? true : true); // consult returns label-bearing live object
     assert.ok(active && active.remaining > 0);

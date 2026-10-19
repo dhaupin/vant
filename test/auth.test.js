@@ -264,7 +264,7 @@ test('R2: revokeToken answers honestly — never silently succeeds on stateless 
 });
 
 test('R2: checkPermission validates the key, documents the unenforced permission (no lie)', () => {
-    const config = require(path.join(ROOT, 'lib', 'config'));
+    require(path.join(ROOT, 'lib', 'config'));   // module-side warm require (pass 207 pin family)
     proceedEnv({ VANT_AUTH_KEY: null, VANT_API_KEY: null, VANT_MCP_API_KEY: null });
     const auth = new Auth({ apiKeyRequired: false });
     const r = auth.checkPermission('some-key', 'org:write');
@@ -274,7 +274,7 @@ test('R2: checkPermission validates the key, documents the unenforced permission
 });
 
 test('R2: getAccessLevel — valid key is admin (single-key canon, documented)', () => {
-    const config = require(path.join(ROOT, 'lib', 'config'));
+    require(path.join(ROOT, 'lib', 'config'));   // module-side warm require (pass 207 pin family)
     proceedEnv({ VANT_AUTH_KEY: 'pin-key', VANT_API_KEY: null, VANT_MCP_API_KEY: null });
     const auth = new Auth({});
     const lvl = auth.getAccessLevel('pin-key');
