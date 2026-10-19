@@ -128,3 +128,6 @@ web/*/dist/
 web/*/.vite/
 
 web/*/tsconfig.tsbuildinfo
+
+# bun text lockfiles are poison here: npm ci owns installs (see __supplyChainPolicy in web/*/package.json)
+web/*/bun.lock
