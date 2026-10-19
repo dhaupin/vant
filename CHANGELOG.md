@@ -5,6 +5,318 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 269 (P3: the r/2 webhook relay lane rides REAL pods — pilot:relay, the sealed corridor)
+
+### Added - the lane the mesh speaks (relays on real pods, no new lib laws)
+
+- **`scripts/pilot-two-relays.js` (`npm run pilot:relay`)**: the r/2
+  webhook corridor on TWO FULL vant pod processes — boots each pod with
+  `startFull` (MCP door + REST + the relay face mounted at `POST /relay`)
+  after arming the posture through the REAL in-process flag lane (the
+  same lane `vant config set` arms): per-pod HMAC relay gate, a shared
+  pair channelKey, and the lab escape for the loopback upstreams. No lib
+  changes: everything rode the OS as-is (L1–L2, F1–F2, R1–R7, H1–H5
+  pins, exit 1 on any wall miss).
+- **THE RIDE CORRIDOR (relay.ride, a pod as the sealed ENDPOINT)**: a
+  paired client seals a REAL door call (`traveler_status` on the pod's
+  own letter) inside the AES-256-GCM envelope (the pair channelKey),
+  HMAC-signs the outer envelope with the pod's relay gate, and POSTs to
+  the pod's own webhook port; the pod opens it, checks the anti-replay
+  nonce, dispatches through its REAL MCP door, and re-seals the answer.
+  The paired client re-opens the reply with its own channel key (R1–R3).
+- **THE HOP CORRIDOR (relay.hop, a pod as the FORWARDER)**: a signed hop
+  carries a sealed envelope through pod A's relay to a real device
+  intake at the corridor's far end — the intake's body log pins (H3)
+  that ONLY the ciphertext crossed: no plaintext, no gate, no channel
+  key, no envelope interior; the device unseals with the pair key,
+  answers a SEALED RECEIPT, and the corridor client re-opens it (H1–H2).
+- **THE LANE RED TEAM (5 attacks, every one REFUSED or typed, 16/16
+  pins held)**: unsigned intake at the route (the HMAC gate IS the lane);
+  transport replay of identical signed bytes → 409; inner-nonce replay
+  on fresh bytes → typed `E_RIDE_REPLAY` (the rung-2 guard); wrong/
+  stale channel key → typed `E_RIDE_DECODE` (fail-closed); wrong relay
+  gate → the HMAC intake refuses; plaintext hop body → typed
+  `E_RELAY_NEEDS_ENVELOPE` (no downgrade); a dead origin → typed
+  `E_RELAY_UPST` honest refusal. The door call itself rode the e2e
+  envelope, and the lane secrets never crossed it in either direction.
+- **Suite**: pilot:relay 16/16 (L/F/R/H blocks), relay suite untouched
+  green 31/31, carriers/mcp untouched by this pass (pilot-only).
+
+## [Unreleased] - pass 268 (P2.5: the artifact rides the wire too — traveler_stamp, both qr halves cross real HTTP)
+
+### Added - the raster crosses the wire (the in-memory dock is gone)
+
+- **`traveler_stamp` door verb (lib/mcp.js)**: the OTHER half of the qr
+  lane crosses the mesh now. For a served-by-address packet, the verb
+  derives the pointer mark — the extended vant frame
+  (`VANT:1:<64-hex>`) as a REAL scannable QR raster — and serves it as
+  base64 (`{ found: true, kind, frame, png, moduleCount }`), so the
+  receiving station decodes the bytes IT was handed over the wire
+  (the lib's own law: jsqr never trusts a local render). An absent
+  packet is an honest `{ found: false }` record; default-class
+  fail-closed (keyed access).
+- **THE SERVING WALL, ONE LAW (refactor)**: `traveler_fetch` and
+  `traveler_stamp` now share one helper (`_travelerServed`) — the same
+  64-hex gate, the same body file, the same address law, the same
+  re-verify — so the two faces of the mesh door can never drift apart.
+  A swapped or non-verifying store refuses typed THROUGH the door on
+  both faces; behavior byte-identical (the pass-267 fetch pins all
+  held untouched through the refactor).
+- **`scripts/pilot-two-pods.js` Act III rewired**: pod B's station no
+  longer encodes anything locally — it PULLS the stamp across the wire
+  from pod A's keyed door and takes possession of the received bytes;
+  the jsqr decode then runs on what actually arrived. BOTH halves of
+  the qr lane now cross real HTTP: the mark (traveler_stamp) and the
+  body (traveler_fetch through the wire hook). Pins D9–D11 updated to
+  pin *received*-bytes semantics (PNG sig verified on arrival).
+- **THE IN-TRANSIT RED TEAM (4 attacks, every one REFUSED, 18/18 pins
+  held)**: (W1) swapped wire answer → typed E_CARRIER_TAMPER; (W2)
+  forged wire body (same id, edited content) → typed E_CARRIER_TAMPER;
+  (W3) tampered artifact IN TRANSIT (an IDAT flip on the received
+  bytes, between the keyed fetch and the scan) → typed E_CARRIER_TAMPER;
+  (W4) a FOREIGN-MARK artifact — a clean, real QR of something else —
+  refuses typed E_CARRIER_SHAPE (grammar routing, the lane never
+  guesses).
+- **Suite**: pilot:pods 18/18 (14 door/boundary + 4 red-team), mcp
+  28/28 (+4 traveler_stamp pins incl. a served-bytes wire round trip
+  through the real jsqr), refactored fetch pins untouched green.
+
+## [Unreleased] - pass 267 (P2 two-pod: the raster alone crosses the boundary — traveler_fetch + the wire hook)
+
+### Added - the cross-node packet leg (the door, the seam, the demo)
+
+- **`traveler_fetch` door verb (read-class, lib/mcp.js)**: a node serves
+  a traveler BODY by its FULL 64-hex content address from its own
+  append-only store (`state/travelers/<id>.json`) — the door a pointer
+  resolve rides across the mesh. THE WALL AT THE SERVING NODE: the stored
+  body must BE the address (swapped stores refuse typed) and must
+  RE-VERIFY (the address derives) before any byte crosses — verify at
+  BOTH ends of the wire; an absent packet is an honest
+  `{ found: false }` record (a miss, never an error, never a fabricated
+  body). Idempotent by construction (the store is append-only; a fetch
+  mutates nothing).
+- **THE WIRE HOOK (lib/carriers.js)**: `carriers.setPointerFetch(hook)`
+  wires the cross-node pointer fetch into `_qPointerDecode` — the local
+  store keeps priority, and a local miss gets ONE hook chance. The hook
+  is SYNCHRONOUS BY CONTRACT: carriers stays a pure sync lib and never
+  touches the network; the resolving node's own fetch layer decides the
+  wire (the honest order of a real station: scan → pointerOnly read →
+  fetch over the door → resolve). Fail-closed everywhere: `found:false`
+  or a hook error is an honest unresolved record (`reason:'unreachable'`);
+  a wire body that does not answer to the mark's address refuses typed
+  E_CARRIER_TAMPER; a fetched body re-enters the FULL packet wall
+  (shape + verify) before it is ever handed back. Hookless behavior is
+  byte-for-byte pass 265 (the local 'no-store'/'no-body' reasons
+  preserved), and `pointerOnly` still skips the resolve entirely.
+- **`scripts/pilot-two-pods.js` (`npm run pilot:pods`)**: the P2 demo —
+  TWO REAL vant pod child processes on ephemeral loopback ports, each
+  with its own brain and its own mcp.requireKey'd door. The line rides
+  pod A's OWN keyed door: `traveler_open` mints (the pod files its own
+  ledger), `traveler_carry` routes the certified letter (parts
+  assimilate, the built letter lands append-only), `traveler_fetch`
+  serves it by address. Pod B's scan station holds ONLY the pointer
+  raster — no body, no ledger, no store ever crosses but the mark — and
+  pod B's door honestly answers found:false for the same address
+  (isolated stores, not a shared database). 17 pins, exit 1 on any miss.
+- **THE REQUIREKEY POSTURE (demo doors)**: keyless POSTs answer 401 on
+  BOTH pods and pod B's key answers NOTHING on pod A's door (keys are
+  per-pod, not global) — the wrong-key wire is fail-closed at the
+  resolving node (unresolved, never fabricated).
+- **THE BOUNDARY RED TEAM (3 attacks, every one REFUSED, 17/17 pins
+  held)**: (W) a swapped wire answer (a different packet under the
+  mark) → typed E_CARRIER_TAMPER — the address law rides the wire;
+  (X) a forged wire body (same id, edited content — the address no
+  longer derives) → typed E_CARRIER_TAMPER at the packet wall; (Y) a
+  damaged raster crossing the dock (IDAT data flip) → typed refusal on
+  the seal wall — the lane never repairs.
+- **Read-class canon grows by one (+2 honest re-pins)**: `fetch` joins
+  the read suffix law in lib/guests.js for `traveler_fetch`; the network
+  proxy verbs (`vant_network_fetch`/`fetchJson`) are explicitly pinned
+  WRITE-CLASS back (the +fetch regex would have flipped them read — a
+  proxy that fires outbound HTTP is never observer read-safe).
+- **The one change that stays simulation**: the pods are real child
+  processes on real loopback doors, but the raster crosses in-memory
+  (the demo's "dock") rather than over a replicated transport; a mesh
+  transport that faithfully carries the mark's bytes unchanged is the
+  next leg. The walls exercised are the real ones end to end.
+- **Suite**: pilot:pods 17/17 (14 door/boundary + 3 red-team), carriers
+  111/111 (+8 wire-hook wall pins), mcp 24/24 (+4 traveler_fetch door
+  pins), guests read-canon still green. traveler-lib untouched.
+
+## [Unreleased] - pass 266 (the pilot rides BOTH halves of the qr lane: pointer bridge leg added to P1)
+
+### Added - the second bridge leg (scan → resolve → walk certifies, one run)
+
+- **`npm run pilot:mfg` grows a leg (B5–B10)**: after the PLC plate ships
+  the packet (Act II), the line's pointer half rides in the same run —
+  the station emits the extended vant frame (`VANT:1:<64-hex address>`,
+  genuine lattice-scale identity) as a real scannable QR; the receiving
+  station scans and (a) BEFORE the body files, the resolve is an honest
+  unresolved pointer ({ resolved: false } — a station can scan ahead of
+  the packet, a record not an error), (b) persist() files the body and
+  the same mark RESOLVES to the persisted packet (same lineage, seq
+  matched), (c) a forwarding-only node takes the pure pointer
+  ({ pointerOnly: true } — the mark alone rides, no fetch), and the
+  auditor's walk certifies the RESOLVED letter (no gaps, no rewrites —
+  the lineage crossed the gap intact).
+- **Idempotent re-run law**: a second pilot run hits persist()'s
+  append-only 'already in the ledger' refusal — the honest handling is
+  the resolve path itself (the body exists; the mark still resolves),
+  not a silent overwrite. The pilot's B7 pin accepts both first-run
+  (persist ok) and re-run (body_exists) outcomes and never fabricates a
+  state the lib did not record.
+- **Suite**: pilot 19/19 (13 prior + 6 pointer-leg pins), carriers
+  103/103, traveler-lib 43/43 untouched-green.
+
+## [Unreleased] - pass 265 (pointer-QR: the extended vant frame — lattice-scale identity rides the mark)
+
+### Added - the pointer half of the qr lane (one lane, two grammars, auto-detect)
+
+- **THE POINTER QR (owner rulings, 2026-10-18):** encode(t, 'qr',
+  { pointer: true }) now emits the extended vant frame
+  `VANT:1:<64-hex content address>` as a real scannable QR — the FULL
+  sha256 address, the lattice-scale identity the 12-digit NSC-9 doorway
+  cannot carry (the nsc9-spec's own correction: the barcode is the
+  doorway, the lattice is the space). The mark self-authenticates the
+  ns9-way: it derives from the packet's own id, never abbreviated.
+- **ONE QR LANE, AUTO-DETECT (scan ruling):** decode reads any mark and
+  routes BY GRAMMAR — a `VSTN:` mark rides the stone/packet path (the
+  full-object lane, untouched), a `VANT:1:` mark rides the pointer path,
+  anything else refuses typed E_CARRIER_SHAPE (foreign QR traffic — the
+  lane never guesses).
+- **RESOLVE-TO-PACKET (scan ruling), fail-closed by law:** a pointer
+  resolves through the traveler's own appendix-only body store
+  (state/travelers/<id>.json, written by persist()): the resolved body
+  must BE the address (id match refuses typed first), then re-enters the
+  FULL packet wall (shape + verify) before it is handed back. A legal
+  frame whose body is not on this node is an HONEST UNRESOLVED pointer
+  ({ resolved: false, reason: 'no-body' }) — a record, not an error.
+- **THE PURE-POINTER OPTION (scan ruling):** decode(png, { pointerOnly:
+  true }) skips the resolve read entirely — the mark alone rides home
+  (mesh/edge nodes that only forward, never fetch).
+- **Suite**: carriers 103/103 (the P-block pins: frame grammar, honest
+  unresolved, resolve-to-packet round-trip, pure-pointer option, forged
+  body refuses E_CARRIER_TAMPER through the address law, one-lane
+  auto-detect intact). traveler-lib 43/43, mcp 20/20, live pilot 13/13,
+  eslint clean.
+
+### Corrected - the address-space honesty (the 10-billion claim, already fixed in-docs)
+
+- The routeable NSC-9 barcode doorway is 9,000,000,000 addresses
+  (facility 90,000 x sequence 100,000; the check digit derives from the
+  hash and adds none). The earlier doc note was owner-corrected before
+  this pass: the LATTICE space is the unbounded one; the 12-digit mark
+  is its doorway. The pointer QR is the first lane that carries
+  lattice-scale identity directly.
+
+## [Unreleased] - pass 264 (the QR lane is real; the blank becomes the plate)
+
+### Added - the symbology lane (a real reader, not a self-confirmation loop)
+
+- **`qr` carrier is REAL (lib/carriers.js)**: the declared-absent lane
+  came in through the owner's ruling — the dependency contract grows by
+  exactly two pure-JS packages (`qrcode-generator` (render) and `jsqr`
+  (read)), both MIT, both scannable by a REAL handheld camera. The packet
+  rides as the STONE ENVELOPE (the invariant frame) encoded as a QR
+  matrix, rendered to a 8-bit grayscale PNG by the lib ITSELF (Node zlib,
+  no canvas), and — the law the pin exists for — the raster is re-read on
+  decode by `jsqr` FROM THE BYTES IT WAS HANDED: render-then-read is
+  never a self-confirmation loop. The stone walls (seal + packet address)
+  re-apply inside stone.decode. QR byte-mode ceiling kept honest as
+  `QR_CAP` (2500 chars of stone envelope at level L); a bigger packet
+  refuses typed, pointing at the stone lane instead of silently failing.
+- **THE QR/PLATE MIX, DECIDED (owner's answers, 2026-10-18):** full QR
+  now (not later), one of the few dependencies; the object carrier blank
+  renamed to the PLATE everywhere — `blankDefine → plateDefine`,
+  `blankList → plateList`, `_hydrateBlanks → _hydratePlates`,
+  `carrier_blank_define → carrier_plate_define`,
+  `carrier-blanks.json → carrier-plates.json` (the alias name was agreed
+  provisional; plate is the interim term). Open question recorded:
+  whether `pointer` QR (the NSC-9 address QR-lane) should ALSO be real
+  deferred to a later pass — the full-object lane is what this pass pins.
+- **Suite**: carriers 95/95 (the three 1b/8a/8a-qr pins rotated: png
+  stays declared-absent with its named blocker, qr is REAL, hostile
+  rasters refuse typed). traveler-lib 43/43 (G7 rotated: the roster
+  serves nsc9/stone/svg/json/qr up; png named-absent), mcp 20/20,
+  live pilot 13/13 (npm run pilot:mfg), eslint clean on touched files,
+  MCP docs coverage 340/340, docs truthfulness + surface green.
+
+### Changed - naming (pass 262 era renamed in-package)
+
+- **THE PLATE RENAME**: `blankDefine/blankList/_hydrateBlanks` are now
+  `plateDefine/plateList/_hydratePlates` with the same signatures and
+  the same refusal laws; the brain-scoped store file is
+  `models/private/<brain>/state/carrier-plates.json` (the .sha256 pin
+  contract unchanged); the MCP door verb is `carrier_plate_define`
+  (write-class, same gates). Old `blank*` names are NOT kept as aliases
+  — the rename is instant and the roster/docs/tests all moved with it.
+
+## [Unreleased] - pass 263 (P1 fleet pilot: the line runs, the record refuses — std passive MIS)
+
+### Added - the simulated manufacturing line pilot (no new lib laws; the OS held the whole red team)
+
+- **`scripts/pilot-mfg-line.js`** (npm script `pilot:mfg`): the P1 pilot
+  of labs/prd-automation.md — a simulated 4-station line (mold → cure →
+  barcode → ship) ridden by ONE certified packet through
+  `carriers.carry()` with a template bill of stations; parts (rim, hub)
+  assimilate into the assembly slots inside the content address. The RLS
+  lineage gate (a real org model org→dept→team→station), the escrow risk
+  lane, and the audit trail ride per stage — the certified-letter
+  principle at work. The ISO 8.5.2 auditor's copy prints at the end
+  (traveler.auditReport) per the prd-automation ISO adoption table.
+- **THE PLC-DIALECT PLATE, DISCOVERED THROUGH A PILOT (not a demo):**
+  `plc-line` — a carrier lane defined as pure DATA via
+  `carriers.plateDefine` (frame prefix `+JOB ` suffix ` END`), framing
+  the sealed stone envelope in the plant controller's own syntax. ONE
+  line of user data, zero crypto written by the definer, both tamper
+  walls ride by construction (the seal catches carrier damage, the packet
+  address law catches content tamper). It persists in the pilot brain
+  (defined in `models/private/pilot` — the pilot resets ONLY its own
+  pilot brain, never another brain, per the multi-brain layout laws).
+- **THE RED TEAM (7 attacks, every one REFUSED or EXPOSED, 13/13 pins
+  held):** (A1) carrier damage via byte-flip — typed E_CARRIER_TAMPER on
+  the seal wall; (A2) resealed forge (attacker knows the public seal
+  algorithm) — typed E_CARRIER_TAMPER on the packet wall (address no
+  longer derives); (A3) foreign-marker traffic — typed E_CARRIER_SHAPE on
+  the frame wall; (A4) sender-side genesis tamper — the lane refuses to
+  assimilate (verify at both ends); (A5) ledger rewrite — REWRITE
+  finding on the walk (evidence pair named); (A6) dropped landing — GAP
+  named [missing: 3] on the walk; (A7) reserved-name plate — typed
+  refusal, the roster cannot be shadowed.
+- **Suite**: the pilot is a script, not a unit test — exit 1 on any wall
+  breach, declaration "a wall breach is a REAL bug, never a flake". No
+  lib changes: everything rode the OS as-is (cr/1 socket, tr/1 packet).
+## [Unreleased] - passes 257-262 (entries reconstituted from code after an in-workspace file loss)
+
+> The verbatim entries for these six passes were lost on 2026-10-18 when
+> the workspace CHANGELOG was truncated to its newest six entries during
+> the P2.5 editing session (a stale-base rewrite through the editing
+> layer). Nothing below the cut existed in git. What follows is one line
+> per pass, taken from the durable in-repo record (code and test
+> comments, docs) - not the original entries. Diffs for the passes live
+> in the working tree against the pass-256 baseline.
+
+- pass 257: with the pin ledger, the packet BODY lands beside the index
+  (`state/travelers/<id>.json`, append-only, idempotent refusal on
+  duplicates) and the ledger/index/body write goes atomic through
+  `lib/primitives.atomicWriteFile` (the .sha256 pin stays the verifier's
+  independent crosscheck) - see lib/traveler.js.
+- pass 258: the carrier pack (assimilator lanes) is law - packet
+  invariant, verify at every landing, continuity as a typed report,
+  typed refusals - test/carriers.test.js pins the header law.
+- pass 259: the certified letter - each routed stage CHECKS (RLS
+  lineage), RISKS (escrow for privileged hops) and AUDITS (bus + trail)
+  inside lib/traveler.advance(); a refused stage DROPS the packet and
+  carriers.replay certifies where continuity stopped.
+- pass 260: the template law on carriers.carry() - a declared bill of
+  stations is followed whole, in order (reorder/skip/extra refuse typed
+  E_CARRIER_TEMPLATE; wildcard rows admit stage identity).
+- pass 261: the carrier roster and the continuity walk arrive at the
+  MCP door (carriers_list, traveler_replay read-class) plus the
+  attendance of route/audit tooling at the door surface.
+- pass 262: the object carrier rename to the PLATE era in-package
+  (plateDefine/plateList, carrier_plate_define door verb,
+  carrier-plates.json store) and the first pilot-discovered lane.
 ## [Unreleased] - pass 256 (the Traveler joins the OS: pipeline-wired, evented, audited, crew-attributed)
 
 ### Added - OS integration (the backend-lane completion, before any frontend)
@@ -68,7 +380,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Traveler kit (tr/1)** in `web/kit/relay/traveler-contract.js`: the
+- **Traveler kit (tr/1)** in `web/kit/contracts/traveler-contract.js`: the
   schema-versioned, content-addressed enterprise router object —
   builder, structural shape law (opaque hex address; identity by
   content stays sender-side), append-only ledger law (ascending seq,

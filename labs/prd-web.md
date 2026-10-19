@@ -992,7 +992,7 @@ interface of the hop (both PRDs say this in one law).
 
 | Row | Truth |
 |---|---|
-| kit contract (builder/shape law/rizer) | **IN CODE** (web/kit/relay/traveler-contract.js, tr/1), vendored + pinned (4 copies), suite green (traveler 26/26, parity untouched 19/19) |
+| kit contract (builder/shape law/rizer) | **IN CODE** (web/kit/contracts/traveler-contract.js, tr/1), vendored + pinned (4 copies), suite green (traveler 26/26, parity untouched 19/19) |
 | pod bridge family `relay.travel` | **IN CODE** (lib/api.js bridge family, plain-copy law parity-pinned) |
 | BACKEND working lib | **IN CODE** (`lib/traveler.js`: contentAddress/mint/advance/verify/schemaRize/persist/status/auditReport; brain-scoped pin ledger + per-id body files) — pinned by test/traveler-lib.test.js 25/25 |
 | CLI face | **IN CODE** (vendor bin/traveler.js: open/hop/status/audit/finger; the VERIFIED-at-every-landing law rides the tool boundary — the tamper-landing pin F4 grounds it) |

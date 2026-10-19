@@ -17,7 +17,7 @@ import {
  * SOLO-relay flavor, r/2 (pass 236 ruling): a PURE relay anyone hosts
  * SOLO - chain hops ONLY, no admin surfaces BY CONSTRUCTION. The wire is
  * WEBHOOK-NATIVE: the same crew-shaped envelope the pod's webhook
- * transport serves (web/kit/relay/relay-contract.js r/2, vendored +
+ * transport serves (web/kit/contracts/relay-contract.js r/2, vendored +
  * pinned). The retired r/1 REST hop face (/api/r/exec + x-relay-gate) is
  * gone; this intake is POST /api/r/relay.
  *

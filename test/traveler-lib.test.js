@@ -116,6 +116,32 @@ function ok(name, cond, extra) {
     const aud = await mcp.execute('traveler_audit', {});
     ok('G4. traveler_audit returns the verbatim record', aud && typeof aud.report === 'string' && aud.report.includes('8.5.2'));
 
+    // ---------- G+. the carry/replay/carriers door verbs (pass 261) ----------
+    const g2id = hopped.id;
+    const carried = await mcp.execute('traveler_carry', { id: g2id, stations: [
+        { by: 'suite-mold', op: 'mold', part: { name: 'rim', alloy: 'al' } },
+        { by: 'suite-qa', op: 'inspect' }
+    ], template: [
+        { op: 'mold', part: 'rim' },
+        { op: 'inspect', by: '*', op: '*' }
+    ] });
+    ok('G5. traveler_carry routes the template at the door (built + walk)',
+        carried && carried.ok === true && carried.built === true
+        && carried.letter && carried.letter.assembly && carried.letter.assembly.rim
+        && carried.walk && carried.walk.ok === true, JSON.stringify(carried && carried.refused));
+    const reordered = await mcp.execute('traveler_carry', { id: carried.letter.id, stations: [
+        { by: 'a', op: 'inspect' }, { by: 'b', op: 'mold' }
+    ], template: [{ op: 'mold' }, { op: 'inspect' }] }).catch((e) => ({ error: e.message || String(e), code: e.code }));
+    ok('G6. a template reorder refuses typed at the door',
+        reordered && (reordered.code === 'E_CARRIER_TEMPLATE' || /bill of stations/.test(reordered.error || '')), JSON.stringify(reordered).slice(0, 90));
+    const roster = await mcp.execute('carriers_list', {});
+    ok('G7. carriers_list serves the honesty roster (nsc9/stone/svg/json/qr up; png named-absent)',
+        roster && roster.carriers && roster.carriers.some((x) => x.id === 'nsc9' && x.available)
+        && roster.carriers.some((x) => x.id === 'qr' && x.available === true)
+        && roster.carriers.some((x) => x.id === 'png' && x.available === false && x.blocker));
+    const repWalk = await mcp.execute('traveler_replay', { arrivals: [{ seq: 1 }, { seq: 2 }] });
+    ok('G8. traveler_replay walks landing rows at the door (read-class)',
+        repWalk && repWalk.ok === true && repWalk.stations === 2);
     // ---------- H. OS integration (pass 256: pipeline, events, audit, typed errors) ----------
     const pipeline = require(path.join(ROOT, 'lib', 'security-pipeline'));
     const report = pipeline.scan(path.join(ROOT, 'lib'));
@@ -151,6 +177,59 @@ function ok(name, cond, extra) {
     ok('H6. agent/crew attribution: the step carries by + team lanes',
         (() => { const t = T.advance(tH, { op: 'crew-qa', by: 'agent-zeta', team: 'qa-crew' });
             return t.steps[t.steps.length - 1].team === 'qa-crew'; })());
+
+    // ---------- I. OS IDENTITY + DURABILITY (pass 257: scope, escrow, atomic, catalog) ----------
+    // I1/I2. RLS lineage: scoped mint stamps canon; every station inherits it.
+    const scoped = T.mintScoped({ from: 'qa-station', slots: { job: 'rls-job' }, scope: { owner: 'agent:aria', visibility: 'private' } });
+    ok('I1. scoped mint stamps the canonical RLS lineage (canAccess honors it)',
+        scoped.scope && scoped.scope.owner === 'agent:aria' && scoped.scope.visibility === 'private'
+        && require(path.join(ROOT, 'lib', 'scope')).canAccess(scoped, 'aria') === true
+        && require(path.join(ROOT, 'lib', 'scope')).canAccess(scoped, 'bod') === false);
+    let rlsRefused = null;
+    try { T.advance(scoped, { op: 'land', by: 'bod' }); } catch (e) { rlsRefused = e; }
+    ok('I2. an outside actor refuses the landing (typed, RLS, never appended)',
+        rlsRefused && /RLS:/.test(rlsRefused.message) && /^E_TRAVELER_/.test(rlsRefused.code || ''));
+    ok('I3. an in-scope actor still rides (aria lands on its own traveler)',
+        (() => { const t = T.advance(scoped, { op: 'land', by: 'aria' }); return t.seq === 2; })());
+
+    // I4/I5. the escrow approval lane: privileged hops demand a live approval.
+    const escrow = require(path.join(ROOT, 'lib', 'escrow'));
+    let escal = null;
+    try { T.advance(tH, { op: 'deploy', by: 'op-station', privileged: true }); } catch (e) { escal = e; }
+    ok('I4. a privileged hop with NO approval id refuses typed (E_TRAVELER_STEP)',
+        escal && escal.code === 'E_TRAVELER_STEP' && /privileged/.test(escal.message));
+    const escrowLane = escrow.create({ approvalRequired: ['traveler deploy'] });
+    const req = escrowLane.requestApproval('traveler deploy', 'suite-257');
+    escrowLane.approve(req.approvalId, 'operator-lane');
+    escrowLane.save();   // disk-coherent: approvalFor consumes through a FRESH escrow instance
+    const burn = tH.seq;
+    let escalRide = null;
+    try { escalRide = T.advance(tH, { op: 'deploy', by: 'op-station', privileged: true, approvalId: req.approvalId }); }
+    catch (e) { escalRide = e; }
+    ok('I5. a privileged hop with a MINTED approval id CONSUMES it (disk-coherent, then appended)',
+        escalRide && typeof escalRide.seq === 'number' && escalRide.seq === burn + 1,
+        escalRide && escalRide.message);
+    let escalReused = null;
+    try { T.advance(tH, { op: 'deploy', by: 'op-station', privileged: true, approvalId: req.approvalId }); }
+    catch (e) { escalReused = e; }
+    ok('I5b. the same approval can NEVER authorize a second hop (single-use, #204 law)',
+        escalReused && escalReused.code === 'E_TRAVELER_STEP' && /privileged/.test(escalReused.message),
+        escalReused && escalReused.message.slice(0, 60));
+
+    // I6. durability: index, body, and the .sha256 pin all verify after persist.
+    const tI = T.mint({ from: 'I-station', slots: { job: 'durable' } });
+    T.persist(tI);
+    const pI = T._ledgerPath();
+    const pinHash = fs.readFileSync(pI + '.sha256', 'utf8').trim().split(/\s+/)[0];
+    ok('I6. atomic persistence: the .sha256 pin still verifies the on-disk index',
+        require('crypto').createHash('sha256').update(fs.readFileSync(pI)).digest('hex') === pinHash);
+
+    // I7. event-types catalogue carries the traveler channels.
+    const et = require(path.join(ROOT, 'lib', 'event-types'));
+    ok('I7. traveler:* channels declared (family routed to work, emitters named)',
+        et.familyFor('traveler:persisted') === 'work'
+        && et.describe('traveler:persisted').emitters.includes('lib/traveler.js')
+        && !!et.describe('traveler:refused'));
 
     console.log('\n--- RESULTS ---');
     console.log('  Passed:  ' + pass);

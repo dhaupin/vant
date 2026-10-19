@@ -167,6 +167,17 @@ not a phase trick.
   vant-side shops, pilot lines, and any integration point where the
   unit identity is ONLY vant's address.
 
+**Carrier surface (built, pass 258):** both lanes are LIVE in
+`lib/carriers.js` (the assimilator carrier pack, socket cr/1):
+`nsc9.encode/decode` (Lane B), `nsc9.giai()`/`nsc9.fromGiai()`
+(Lane A read-through), and `nsc9.matches()` - the self-authenticating
+hand that proves a scanned mark against the held router packet
+(lib/traveler.js). The pack also carries the continuity/backtracking
+walk (`replay()`): gaps and rewrites surface as the auditor's backtrack
+map, never repaired. Honest absence: `qr`/`png` lanes are declared
+absent with named blockers until a symbology renderer joins the
+dependency contract; `list()` prints the roster without overstating.
+
 **PLC/ERP follow-on (not the near playbook):** NSC-9 addresses as node
 keys over OPC-UA/industrial protocols, and EPCIS event streams as the
 ERP-side ingestion contract (the spec's Future Considerations #3, now

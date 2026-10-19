@@ -1836,6 +1836,164 @@ omitted. Write-class (default gate).
 
 ---
 
+### traveler_carry
+
+Route a traveler through its bill of stations: the certified letter (pass
+259/260/261). Each stage CHECKS (RLS lineage), RISKS (escrow for
+privileged hops), ASSIMILATES (an optional `part` per station, landing in
+`slots.assembly` inside the content address), signs off, and AUDITS. A
+declared `template` is enforced IN ORDER against the route: reordering a
+stage, truncating/padding the bill, or an unplanned extra station refuses
+typed `E_CARRIER_TEMPLATE`; wildcard rows (`by:"*"`, `op:"*"`) leave
+stage identity to the caller. A refused stage DROPS the packet (the
+report names the stage and code) and the walk certifies where continuity
+stops. Write-class (default gate).
+
+**Params:**
+
+| Param | Type | What |
+|-------|------|------|
+| id | string | Optional traveler id (default: the working/latest traveler) |
+| stations | array | Required; ordered route stages `{ by, op?, part?, carrier?, privileged?, approvalId?, team? }` |
+| template | array | Optional bill of stations `{ by?, op?, part? }[]` followed whole |
+
+**Example:**
+```text
+traveler_carry({ stations: [
+  { by: "mold-station", op: "mold", part: { name: "rim", alloy: "al-6061" } },
+  { by: "qa-1", op: "inspect" }
+], template: [
+  { op: "mold", part: "rim" },
+  { op: "inspect", by: "*", op: "*" }
+] })
+```
+
+**Returns:** `{ ok, built, landed, stages, route[], unfilled?, refused?, walk: { ok, stations, gaps, rewrites }, letter: { id, seq, assembly } }`
+
+---
+
+### traveler_replay
+
+The continuity/backtracking walk (ISO 8.5.2): replay carried landings of
+one traveler lineage and get the auditor's backtrack map - gaps named
+(missing seqs), rewrites evidenced (canon-vs-arrived pairs). The walk
+never repairs history; an agreement rewind is reported as re-delivery,
+not an event. Read-class (the `_replay` tail rides the read-suffix canon).
+
+**Params:**
+
+| Param | Type | What |
+|-------|------|------|
+| arrivals | array | Optional; carried landings in arrival order (packets `{ id, steps }` or thin rows `{ seq }`). Default: the working traveler alone |
+
+**Returns:** `{ ver, ok, arrivals, stations, walkedTo, gaps[], rewrites[], firstSeq, lastSeq }`
+
+---
+
+### traveler_fetch
+
+The packet door (pass 267): serve a traveler BODY by its FULL 64-hex
+content address from this node's append-only store
+(`state/travelers/<id>.json`) - the door a pointer resolve rides across
+the mesh (the pass-265 pointer marks say a packet exists somewhere; this
+verb is a node saying "it exists HERE, and here it is"). Idempotent by
+construction: the store is append-only, so a fetch never mutates
+anything. THE WALL AT THE SERVING NODE: the stored body must BE the
+address asked for (a swapped store refuses typed) and must RE-VERIFY
+(the content address derives) before any byte crosses - verify at both
+ends of the wire. An absent packet is an honest `{ found: false }`
+record: a miss, never an error and never a fabricated body. Read-class
+(the `fetch` tail).
+
+**Params:**
+
+| Param | Type | What |
+|-------|------|------|
+| id | string | Required; the FULL 64-hex content address (never abbreviated) |
+
+**Returns (present):**
+```json
+{ "found": true, "id": "<64-hex address>", "traveler": { "tr": "tr/1", "id": "...", "seq": 1, "slots": {} } }
+```
+
+**Returns (absent):** `{ "found": false, "id": "<64-hex address>" }`
+
+---
+
+### traveler_stamp
+
+The artifact door (pass 268) - the OTHER half of the qr lane crosses the
+mesh too. For a served-by-address packet this verb derives the pointer
+mark - the extended vant frame (`VANT:1:<64-hex>`) as a REAL scannable
+QR raster - and serves it as base64, so the receiving station decodes
+the bytes IT was handed over the wire (jsqr never trusts a local
+render). A pure derivation of a re-verified body: it mutates nothing,
+and it rides the SAME serving wall as `traveler_fetch` (one law, two
+door faces - the helper `_travelerServed` keeps them from ever drifting).
+An absent packet is an honest `{ found: false }` record. Default-class
+fail-closed (keyed access).
+
+**Params:**
+
+| Param | Type | What |
+|-------|------|------|
+| id | string | Required; the FULL 64-hex content address (never abbreviated) |
+
+**Returns (present):**
+```json
+{ "found": true, "id": "<64-hex address>", "kind": "pointer", "frame": "VANT:1:<64-hex>", "png": "<base64 PNG raster>", "moduleCount": 33 }
+```
+
+**Returns (absent):** `{ "found": false, "id": "<64-hex address>" }`
+
+---
+
+### carriers_list
+
+The assimilator carrier roster (pass 258/261): which lanes can carry a
+traveler - `nsc9` (the Lane B 12-digit address frame + the Lane A GIAI
+read-through, `stone` (the sealed text packet), `svg` (the encrypted
+stone through the airgap), `json` (the ERP/EPCIS verbatim form) - and
+which are declared-absent with named blockers (`qr`, `png`: no symbology
+renderer in the dependency contract yet). Read-class (the `_list` tail).
+
+**Params:** none.
+
+**Returns:** `{ carriers: [{ id, generation, family, carries, available, note, hint?, blocker? }], version }`
+
+---
+
+### carrier_plate_define
+
+Define a carrier plate (pass 262, the mycelium touch): YOUR OWN carrier
+lane as pure data. The built-in stone seal and packet-address walls ride
+your frame by construction - the definer owns the marker, the lib owns
+the crypto. Persisted brain-scoped and hydrated in every later process
+(define once, everywhere). Write-class (a persistent brain mutation).
+
+**Params:**
+
+| Param | Type | What |
+|-------|------|------|
+| id | string | Required; lowercase kebab id (2-32 chars; built-in roster names and `VSTN:` grammar reserved) |
+| carries | string | Required; `full-object` (the sealed packet) or `id-pointer` (the NSC-9 12-digit frame) |
+| frame | object | Required; literal `prefix`/`suffix` strings that separate your lane (at least one) |
+| family | string | Optional label (roster display) |
+| note | string | Optional human note (roster display) |
+
+**Example:**
+```text
+carrier_plate_define({ id: "mfg-tag", carries: "full-object",
+  frame: { prefix: "MTG/", suffix: "/END" }, note: "the plant floor tag lane" })
+```
+
+**Returns:**
+```json
+{ "defined": true, "id": "mfg-tag", "carries": "full-object", "frame": { "prefix": "MTG/", "suffix": "/END" }, "persisted": true }
+```
+
+---
+
 ### traveler_status
 
 Where has this job been? The pin-through stations of a traveler, newest

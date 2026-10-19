@@ -2,7 +2,7 @@
 /**
  * TRAVELER SUITE - the enterprise router object (pass 254, prd-web.md)
  *
- * Pins the traveler-contract kit (web/kit/relay/traveler-contract.js):
+ * Pins the traveler-contract kit (web/kit/contracts/traveler-contract.js):
  *   1. the builder composes the schema-stamped packet, shape law null
  *   2. the LEDGER law: append-only, ascending seq, seq == ledger length
  *      (re-open / rewrite / gap refusals are typed E_TRAVELER_STEP)
@@ -21,7 +21,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const kitPath = path.join(ROOT, 'web', 'kit', 'relay', 'traveler-contract.js');
+const kitPath = path.join(ROOT, 'web', 'kit', 'contracts', 'traveler-contract.js');
 const T = require(kitPath);
 
 let pass = 0, fail = 0;
@@ -78,7 +78,7 @@ const vendoredTargets = [
 ];
 const crypto = require('crypto');
 const kitHead = crypto.createHash('sha256').update(kitSource).digest('hex');
-const typesSource = fs.readFileSync(path.join(ROOT, 'web', 'kit', 'relay', 'traveler-contract.d.ts'));
+const typesSource = fs.readFileSync(path.join(ROOT, 'web', 'kit', 'contracts', 'traveler-contract.d.ts'));
 const typesHead = crypto.createHash('sha256').update(typesSource).digest('hex');
 for (const rel of vendoredTargets) {
     const abs = path.join(ROOT, rel);

@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 /**
- * relay-kit vendoring (prd-relay.md 4.0, pass 230)
+ * contracts-kit vendoring (prd-relay.md 4.0, pass 230; kit dir renamed
+ * to web/kit/contracts — it holds the wire CONTRACTS (r/2 + tr/1), not
+ * the relay transports themselves, pass 269)
  *
- * Copies the kit SOURCE (web/kit/relay/relay-contract.js) byte-identically
+ * Copies the kit SOURCE (web/kit/contracts/relay-contract.js) byte-identically
  * into each renderer target and writes a .sha256 pin sidecar beside the
  * vendored copy. Apps stay self-contained: they never read each other's
  * sources, only the vendored, hash-pinned kit copies. The parity pins
@@ -30,7 +32,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const ROOT = path.resolve(__dirname, '..');
-const KIT_DIR = path.join(ROOT, 'web', 'kit', 'relay');
+const KIT_DIR = path.join(ROOT, 'web', 'kit', 'contracts');
 const KIT = path.join(KIT_DIR, 'relay-contract.js');
 const KIT_TYPES = path.join(KIT_DIR, 'relay-contract.d.ts');
 

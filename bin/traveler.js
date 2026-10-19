@@ -122,14 +122,131 @@ function main() {
         console.log(T.auditReport(t));
         return;
     }
-    if (sub === 'finger') {
-        const t = loadCurrent();
-        if (!t) { console.log('no current traveler'); return; }
+    if (sub === 'verify') {
+        let t = loadCurrent();
+        const file = flag('file', null);
+        if (file) t = JSON.parse(fs.readFileSync(file, 'utf8'));
+        if (!t) { console.error('❌ no current traveler (or pass --file).'); process.exit(1); }
         const v = T.verify(t);
-        console.log(t.id.slice(0, 16) + '… seq=' + t.seq + ' ' + (v.ok ? 'verified' : 'TAMPERED'));
+        if (v.ok) { console.log('✅ verified: the address derives from the payload (' + t.id.slice(0, 16) + '…, seq=' + t.seq + ')'); }
+        else { console.error('❌ TAMPERED or corrupt: ' + v.error); process.exit(1); }
         return;
     }
-    console.log('usage: node bin/traveler.js open|hop|status|audit|finger  (the auditable pin, ISO 8.5.2)');
+    if (sub === 'attach') {
+        // (pass 260) THE PART at the tool boundary: a station attaches its
+        // part AND signs off, in one landing. --part name k=v k=v ...
+        let t = loadCurrent();
+        const file = flag('file', null);
+        if (file) {
+            const raw = JSON.parse(fs.readFileSync(file, 'utf8'));
+            const lv = T.verify(raw);
+            if (!lv.ok) { console.error('❌ refused at landing: ' + lv.error); process.exit(1); }
+            t = raw;
+        }
+        if (!t) { console.error('❌ no current traveler (or pass --file).'); process.exit(1); }
+        const name = flag('part', null);
+        if (!name) { console.error('usage: traveler attach --part <name> [--k=v ...] [--op <op>] [--by <station>] [--file <path>]'); process.exit(1); }
+        const body = keyvals('partdata');
+        for (const [k, v] of Object.entries(keyvals('data'))) body[k] = v;   // --data doubles as part body (the operator's habit)
+        if (!Object.keys(body).length) body.attachedBy = flag('by', process.env.VANT_STATION || this_station());
+        try {
+            const next = T.advance(t, { op: flag('op', 'attach'), by: flag('by', process.env.VANT_STATION || this_station()), part: { name, ...body } });
+            T.persist(next);
+            saveCurrent(next);
+            console.log('✅ part attached + signed off: ' + name + ' (assembly: ' + Object.keys(next.slots.assembly || {}).join(', ') + ')');
+            console.log('   new id: ' + next.id + '  (seq=' + next.seq + ')');
+        } catch (e) {
+            console.error('❌ attach refused: ' + e.message + ' (' + (e.code || 'E_LOCAL') + ')');
+            process.exit(1);
+        }
+        return;
+    }
+    if (sub === 'carry') {
+        // (pass 261) THE ROUTE at the tool boundary: --template <jsonfile>
+        // declares the bill of stations (in order); --stations <jsonfile> or
+        // repeated --stage fills it. Super strict order, super flex parts.
+        let t = loadCurrent();
+        const file = flag('file', null);
+        if (file) {
+            const raw = JSON.parse(fs.readFileSync(file, 'utf8'));
+            const lv = T.verify(raw);
+            if (!lv.ok) { console.error('❌ refused at landing: ' + lv.error); process.exit(1); }
+            t = raw;
+        }
+        if (!t) { console.error('❌ no current traveler (or pass --file).'); process.exit(1); }
+        const C = require(path.join(__dirname, '..', 'lib', 'carriers'));
+        let stations = [];
+        const stationsFile = flag('stations', null);
+        if (stationsFile) stations = JSON.parse(fs.readFileSync(stationsFile, 'utf8'));
+        const templateFile = flag('template', null);
+        const template = templateFile ? JSON.parse(fs.readFileSync(templateFile, 'utf8')) : undefined;
+        // --stage by=..,op=..,part=.. (repeated); part may be a bare slot name
+        for (let i = 0; i < args.length - 1; i++) {
+            if (args[i] === '--stage') {
+                const parts = String(args[i + 1]).split(',');
+                const st = {};
+                for (const kv of parts) {
+                    const [k, ...rest] = kv.split('=');
+                    const v = rest.join('=');
+                    if (k === 'part') st.part = v;
+                    else if (k === 'privileged') st.privileged = v === 'true';
+                    else st[k] = v;
+                }
+                stations.push(st);
+            }
+        }
+        if (!stations.length) { console.error('usage: traveler carry [--template <bill.json>] --stage by=<station>,op=<op>[,part=<name>][,privileged=true] ...  (or --stations <route.json>)'); process.exit(1); }
+        try {
+            const rep = C.carry(t, { stations, template });
+            if (rep.letter && rep.letter.id !== t.id) T.persist(rep.letter);
+            saveCurrent(rep.letter);
+            console.log((rep.ok ? '✅' : '⚠️ ') + ' letter routed: ' + rep.landed + '/' + rep.stations + ' stages' + (template ? ', built=' + rep.built : ''));
+            for (const r of rep.route) {
+                console.log('   ' + String(r.stage).padStart(2) + '. ' + r.verdict.toUpperCase() + (r.verdict === 'landed' ? ' seq ' + r.seq + ' ' + r.op + ' @ ' + r.by + (r.part ? ' +part:' + r.part : '') : ' (' + r.code + ')'));
+            }
+            if (rep.refused) console.log('   REFUSED at stage ' + rep.refused.stage + ': ' + rep.refused.code + ' — the letter DROPS there (fail-closed).');
+            if (rep.unfilled) console.log('   unfilled slots: ' + rep.unfilled.join(', '));
+            if (rep.letter && rep.letter.slots.assembly) console.log('   assembly: ' + Object.keys(rep.letter.slots.assembly).join(', '));
+            console.log('   walk: ok=' + rep.walk.ok + ' stations=' + rep.walk.stations + ' gaps=' + rep.walk.gaps.length + ' rewrites=' + rep.walk.rewrites.length);
+            if (!rep.ok) process.exit(1);
+        } catch (e) {
+            console.error('❌ carry refused: ' + e.message + ' (' + (e.code || 'E_LOCAL') + ')');
+            process.exit(1);
+        }
+        return;
+    }
+    if (sub === 'replay') {
+        // (pass 261) THE CONTINUITY WALK at the tool boundary: the auditor's
+        // backtrack map over carried landings. --file handoff composes.
+        const C = require(path.join(__dirname, '..', 'lib', 'carriers'));
+        const arrivals = [];
+        for (let i = 0; i < args.length - 1; i++) {
+            if (args[i] === '--landing') {
+                const [k, v] = String(args[i + 1]).split('=');
+                if (k === 'seq') arrivals.push({ seq: parseInt(v, 10) });
+            }
+            if (args[i] === '--file') {
+                arrivals.push(JSON.parse(fs.readFileSync(args[i + 1], 'utf8')));
+            }
+        }
+        if (!arrivals.length) {
+            const t = loadCurrent();
+            if (!t) { console.error('usage: traveler replay [--file <packet.json>]... [--landing seq=N]...  (or walk the current letter alone)'); process.exit(1); }
+            arrivals.push(t);
+        }
+        try {
+            const rep = C.replay(arrivals);
+            console.log((rep.ok ? '✅' : '⚠️ ') + ' continuity walk: ' + rep.stations + ' stations, walkedTo=' + rep.walkedTo + ', ok=' + rep.ok);
+            for (const gp of rep.gaps) console.log('   GAP: missing ' + JSON.stringify(gp.missing) + ' (after seq ' + gp.afterSeq + ', next seen ' + gp.arrivedAt + ')');
+            for (const rw of rep.rewrites) console.log('   REWRITE at seq ' + rw.seq + ': canon ' + JSON.stringify(rw.canon) + ' vs arrived ' + JSON.stringify(rw.arrived));
+            if (!rep.ok) process.exit(1);
+        } catch (e) {
+            console.error('❌ replay refused: ' + e.message + ' (' + (e.code || 'E_LOCAL') + ')');
+            process.exit(1);
+        }
+        return;
+    }
+    console.log('usage: node bin/traveler.js open|hop|attach|carry|replay|status|audit|verify|finger  (the auditable pin + certified letter, ISO 8.5.2)');
 }
 
 function this_station() {

@@ -69,7 +69,7 @@ Application refusals ride typed replies INSIDE the 200 ack:
 
 ## The kit: one contract, checksummed copies
 
-The contract lives ONCE, in `web/kit/relay/relay-contract.js` (+ `.d.ts`
+The contract lives ONCE, in `web/kit/contracts/relay-contract.js` (+ `.d.ts`
 twin) at version **r/2**: the wire, the signature header, typed reply
 codes, the envelope rule, flavors, and the honest caps shape. Renderers
 hold their own checksummed copies - vendored by

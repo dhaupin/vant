@@ -126,7 +126,7 @@ and backend opens massive wins... frontlining this prd-web aspect."**
 - THE HONEST ANSWER: vant did NOT have a traveler/schema-rizer — the
   r/2 envelope family was the seed (a wire schema with no state
   semantics). Now it does, IN CODE.
-- THE KIT (web/kit/relay/traveler-contract.js, tr/1): the builder
+- THE KIT (web/kit/contracts/traveler-contract.js, tr/1): the builder
   (schema-stamped, ledger-birth step), the SHAPE LAW (structural, no
   crypto — identity by content stays sender-side, the id validated as
   an opaque hex ADDRESS), the LEDGER LAW (append-only, ascending seq,
@@ -1336,7 +1336,7 @@ dashboard uses the pipes and auths the gates. Landed as real code:
 piggyback: "baseline works with parity between relay and full
 dashboard; a setting to run a relay; the important relay services
 WORK"):** the owner ruled the next relay rung. Landed as code:
-- web/kit/relay/relay-contract.js (+ .d.ts twin): THE UPLIFT SOURCE of
+- web/kit/contracts/relay-contract.js (+ .d.ts twin): THE UPLIFT SOURCE of
   one Mode R contract - routes, gate header, typed codes AND their
   statuses (parity law: same situation = same code+status on every
   renderer), the envelope rule, the three-flavor registry (pod /
@@ -1551,7 +1551,7 @@ extension of the webhook transport: the live-fire lesson was
 dispatch hook now). Transport statuses keep 401/409/404/413;
 application refusals ride typed E_RELAY_*/E_RIDE_* replies INSIDE the
 200 ack (reasons survive any chain).
-- KIT r/2: web/kit/relay/relay-contract.js (+ d.ts) rewritten (routes,
+- KIT r/2: web/kit/contracts/relay-contract.js (+ d.ts) rewritten (routes,
 EVENTS, TRANSPORT_STATUS, reply codes, wireEnvelope, capsShape,
 private-IP helpers kept pure); vendoring re-run, all four copies pin
 to the kit head (--check 0). BOTH web flavors rewired to r/2

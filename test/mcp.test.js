@@ -357,6 +357,105 @@ async function asyncTest(name, fn) {
 
     // (pass 253, issue #205) the config door lane: secrets MASKED on
     // get, IMMUTABLE on set (key-replace auth bypass closed).
+    // (pass 267) THE PACKET DOOR (traveler_fetch): the cross-node read the
+    // pointer resolve rides. The wall stays at the SERVING node: a body is
+    // served only when it answers to the address asked for AND re-verifies;
+    // an absent packet is an honest { found: false } record.
+    await asyncTest('traveler_fetch: honest found:false for an absent address (a miss, never an error)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const r = await mcp.execute('traveler_fetch', { id: 'a'.repeat(64) });
+        const ok = r && r.found === false && r.id === 'a'.repeat(64) && !r.traveler;
+        return { success: ok, error: JSON.stringify(r).slice(0, 140) };
+    });
+
+    await asyncTest('traveler_fetch: abbreviated/exotic id refuses typed (never abbreviate)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        try {
+            await mcp.execute('traveler_fetch', { id: '12abc' });
+            return 'abbreviated id sailed through';
+        } catch (e) {
+            const ok = /64-hex/.test(e.message);
+            return { success: ok, error: 'wrong refusal: ' + (e.message || '').slice(0, 100) };
+        }
+    });
+
+    await asyncTest('traveler_fetch: serves a persisted packet BY ADDRESS (wall re-verified at the door)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const traveler = require(path.join(ROOT, 'lib', 'traveler'));
+        const t = traveler.mint({ from: 'door-pin', slots: { title: 'traveler_fetch pin' } });
+        traveler.persist(t);
+        const r = await mcp.execute('traveler_fetch', { id: t.id });
+        const ok = r && r.found === true && r.traveler && r.traveler.id === t.id && r.traveler.seq === t.seq;
+        return { success: ok, error: JSON.stringify(r).slice(0, 140) };
+    });
+
+    await asyncTest('traveler_fetch: a swapped body in the store refuses THROUGH the door (never crosses)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const traveler = require(path.join(ROOT, 'lib', 'traveler'));
+        // take a fresh address, then put a DIFFERENT packet's body where its
+        // body file would live — the door must refuse instead of serving
+        const forgedMark = 'b'.repeat(64);
+        const other = traveler.mint({ from: 'door-pin-evil', slots: { title: 'not-the-asked-one' } });
+        const pathMod = require('path');
+        const bodyDir = pathMod.join(pathMod.dirname(traveler._ledgerPath()), 'travelers');
+        require('fs').mkdirSync(bodyDir, { recursive: true });
+        require('fs').writeFileSync(pathMod.join(bodyDir, forgedMark + '.json'), JSON.stringify(other));
+        try {
+            await mcp.execute('traveler_fetch', { id: forgedMark });
+            return { success: false, error: 'swapped body crossed the door' };
+        } catch (e) {
+            const ok = /does not answer to its address/.test(e.message || '');
+            return { success: ok, error: 'wrong refusal: ' + (e.message || '').slice(0, 100) };
+        }
+    });
+
+    // (pass 268) THE ARTIFACT DOOR (traveler_stamp): the OTHER half of the
+    // qr lane crosses the mesh too — the pointer mark served as base64 off
+    // the SAME serving wall as traveler_fetch (one law, two faces), so the
+    // receiving node decodes the bytes IT was handed, never a local render.
+    await asyncTest('traveler_stamp: honest found:false for an absent address (a miss, never an error)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const r = await mcp.execute('traveler_stamp', { id: 'c'.repeat(64) });
+        const ok = r && r.found === false && r.id === 'c'.repeat(64) && !r.frame;
+        return { success: ok, error: JSON.stringify(r).slice(0, 140) };
+    });
+
+    await asyncTest('traveler_stamp: abbreviated id refuses typed (never abbreviate)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        try {
+            await mcp.execute('traveler_stamp', { id: '7' });
+            return 'abbreviated id sailed through';
+        } catch (e) {
+            const ok = /64-hex/.test(e.message);
+            return { success: ok, error: 'wrong refusal: ' + (e.message || '').slice(0, 100) };
+        }
+    });
+
+    await asyncTest('traveler_stamp: serves the pointer artifact under the SAME wall (frame grammar + base64 raster)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const traveler = require(path.join(ROOT, 'lib', 'traveler'));
+        const t = traveler.mint({ from: 'stamp-pin', slots: { title: 'traveler_stamp pin' } });
+        traveler.persist(t);
+        const r = await mcp.execute('traveler_stamp', { id: t.id });
+        const pngOk = r && r.found === true && r.kind === 'pointer'
+            && /^VANT:1:[0-9a-f]{64}$/.test(r.frame || '') && r.frame.slice(7) === t.id
+            && (Buffer.from(r.png, 'base64').slice(0, 8).toString('hex')) === '89504e470d0a1a0a';
+        return { success: pngOk, error: JSON.stringify(r || {}).slice(0, 140) };
+    });
+
+    await asyncTest('traveler_stamp: the SERVED bytes decode at a receiver (jsqr reads what crossed, not a local render)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const carriers = require(path.join(ROOT, 'lib', 'carriers'));
+        const traveler = require(path.join(ROOT, 'lib', 'traveler'));
+        const t = traveler.mint({ from: 'stamp-pin-2', slots: { title: 'stamp wire round trip' } });
+        traveler.persist(t);
+        const r = await mcp.execute('traveler_stamp', { id: t.id });
+        const received = Buffer.from(r.png, 'base64');   // THE bytes that crossed the door
+        const back = carriers.decode('qr', received);
+        const ok = back.resolved === true && back.traveler && back.traveler.id === t.id && back.traveler.seq === t.seq;
+        return { success: ok, error: 'decoded ' + JSON.stringify(back || {}).slice(0, 140) };
+    });
+
     await asyncTest('#205: vant_config_get masks secret keys (a raw value never crosses the door)', async () => {
         const mcp = require(path.join(ROOT, 'lib', 'mcp'));
         const config = require(path.join(ROOT, 'lib', 'config'));

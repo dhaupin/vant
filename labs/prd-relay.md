@@ -122,7 +122,7 @@ flavor may pin a default; the SOLO flavor pins nothing ([§4](#4-who-can-be-a-re
 > r/2 truth follows, then the pass-237 interface-handler doctrine.
 
 Every renderer below (§4) serves these EXACT surfaces. The single
-uplift source is `web/kit/relay/relay-contract.js` (+ `.d.ts` twin);
+uplift source is `web/kit/contracts/relay-contract.js` (+ `.d.ts` twin);
 the vendoring script is `scripts/vendor-relay-kit.js` with `.sha256`
 pin sidecars; parity is CHECKED, never imported
 (`test/relay-parity.test.js` — the pod never requires `web/`).
@@ -185,7 +185,7 @@ was already authorized there), the solo deploys gain nothing new to
 hold.
 
 Every renderer below (§4) serves these EXACT surfaces. The single
-uplift source is `web/kit/relay/relay-contract.js` (+ `.d.ts` twin);
+uplift source is `web/kit/contracts/relay-contract.js` (+ `.d.ts` twin);
 the vendoring script is `scripts/vendor-relay-kit.js` with `.sha256`
 pin sidecars; parity is CHECKED, never imported
 (`test/relay-parity.test.js` — the pod never requires `web/`).
@@ -448,7 +448,7 @@ where this paragraph gates them.
 
 | Element | Truth-state | Where |
 |---------|-------------|-------|
-| The contract (**r/2**, pass 236): the webhook-native wire (HMAC-signed crew envelope, POST /relay, ack-with-reply, typed reply codes), envelope law, caps shape, config seams | **BUILT + PINNED** | `web/kit/relay/relay-contract.js` (+`.d.ts`), vendored copies in both flavors, pins in `test/relay-parity.test.js` (16). **r/1's REST hop face (/api/r/exec + x-relay-gate) is RETIRED.** |
+| The contract (**r/2**, pass 236): the webhook-native wire (HMAC-signed crew envelope, POST /relay, ack-with-reply, typed reply codes), envelope law, caps shape, config seams | **BUILT + PINNED** | `web/kit/contracts/relay-contract.js` (+`.d.ts`), vendored copies in both flavors, pins in `test/relay-parity.test.js` (16). **r/1's REST hop face (/api/r/exec + x-relay-gate) is RETIRED.** |
 | Pod face (r/2): NO lib/relay module (the owner ruling - banned by the no-legacy guard); intake = the webhook transport (HMAC gate + replay + 1 MiB cap); outbound = lib/network.fetch's own SSRF/DNS walls; envelope = lib/encrypt.js; ride dispatch = the pod's OWN MCP door; boot wiring in startFull/startHeadless; bin/relay.js = the CLI over the face; MCP `relay_status` | **BUILT + PINNED** | `lib/api.js` relay, `lib/webhooks.js` reply/dispatch-hook extension, `bin/relay.js`; `test/relay.test.js` (26, real-socket loops) + `test/no-legacy-bloat.test.js` |
 | Dashboard-relay flavor (piggyback, env posture, HMAC edge intake POST /api/r/relay) | **BUILT** (live behavior pinned by parity; edge runtime E2E lands with the LIVE deploy walk) | `web/dashboard/functions/api/r/relay.ts` + `capabilities.ts` |
 | UI: operator posture card (re-read) + user reach toggle (honest intent) | **BUILT** | `web/dashboard/src/modules/settings/index.tsx`, `src/state.ts` |

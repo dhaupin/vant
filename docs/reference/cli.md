@@ -388,7 +388,7 @@ vant telegram
 | `vant escrow` | Escrow service for operations ([reference](/reference/escrow)) |
 | `vant audit` | Generate an audit report |
 | `vant audit-ledger` | Inspect rotated audit-ledger archives in models/audit-rotate/ (pass 118) |
-| `vant traveler` | The Traveler pin (pass 255): open/hop/status/audit/finger the content-addressed job packet (prd-web §11, ISO 8.5.2) |
+| `vant traveler` | The Traveler pin + certified letter (passes 255-261): open/hop/attach/carry/replay/status/audit/verify/finger the content-addressed job packet (prd-web §11, ISO 8.5.2) |
 | `vant guest` | Per-identity multi-guest auth (issue/list/revoke + pairing redemption; H1 of #185 - [reference](/security/multi-guest-auth)) |
 
 ```bash
