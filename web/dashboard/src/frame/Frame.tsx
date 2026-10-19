@@ -107,8 +107,6 @@ function TopBar({ property, navOpen, onToggleNav }: { property: string; navOpen:
           Bolete
         </Link>
         <PropertySwitcher active={property} />
-        <span className="ml-auto" />
-        <HelpToggle />
       </div>
     </header>
   );
@@ -162,18 +160,6 @@ function PropertySwitcher({ active }: { active: string }) {
         ))}
       </select>
     </Help>
-  );
-}
-
-function HelpToggle() {
-  const help = useApp((s) => s.help);
-  return (
-    <button
-      onClick={() => actions.toggleHelp(!help)}
-      className="rounded-md border border-line px-2 py-1 text-xs text-ink-soft hover:bg-ink/5"
-    >
-      {help ? "Hide help" : "Show help"}
-    </button>
   );
 }
 

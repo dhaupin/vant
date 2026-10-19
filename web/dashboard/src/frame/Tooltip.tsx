@@ -12,11 +12,26 @@ export function Help({ text, children }: { text: string; children: React.ReactNo
   if (!help) {
     return children;
   }
+  // touch parity (mobile report, brain.creadev.org): hover-only tooltips are
+  // invisible on a phone. touch pointer type opens/closes on TAP like a
+  // click-anchor: desktop hover stays hover; phones get a real open/close.
   return (
     <Tooltip.Root>
       <Tooltip.Trigger
         render={(props: React.ComponentProps<"span">) => (
-          <span {...props} className="inline-flex cursor-help items-baseline gap-1 align-baseline">
+          <span
+            {...props}
+            role={"button"}
+            tabIndex={0}
+            aria-label={`Help: ${text.slice(0, 60)}`}
+            className="inline-flex cursor-help touch-manipulation select-none items-baseline gap-1 align-baseline"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                props.onClick?.(e as unknown as React.MouseEvent<HTMLSpanElement>);
+              }
+            }}
+          >
             {children}
             <span
               aria-hidden
