@@ -70,9 +70,16 @@ const { SidecarConnector } = require('../lib/connectors/sidecar');
     console.log('  ✓ JIT amortization: warm per-call average ' + perCall.toFixed(1) + 'ms (< 500ms)');
 
     await stop(spec);
-    await new Promise(r => setTimeout(r, 500));
+    // (CI run 39316186493) Julia's JIT teardown on a cold 2-core runner
+    // can ride past a fixed 500ms wait — the pin then read a RUNNING julia
+    // (exitCode null) as a dirty stop. Poll up to 15s for the real exit;
+    // a process that refuses to die in that budget is a genuine failure.
+    const stopDeadline = Date.now() + 15000;
+    while (proc.exitCode === null && Date.now() < stopDeadline) {
+        await new Promise(r => setTimeout(r, 200));
+    }
     if (proc.exitCode !== 0) {
-        console.error('  ✗ clean stop: exitCode ' + proc.exitCode);
+        console.error('  ✗ clean stop: exitCode ' + proc.exitCode + ' (waited up to 15s)');
         process.exit(1);
     }
     console.log('  ✓ clean /stop shutdown (exit 0)');
