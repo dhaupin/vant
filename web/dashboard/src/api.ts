@@ -146,6 +146,46 @@ export async function carriersList(): Promise<unknown> {
   return exec("carriers_list", {});
 }
 
+// (prd-carrier-share.md §2 P5a) THE CARRIER FAMILY at the typed client: the
+// SAME verbs the agents use, no frontend-local logic (the one-way
+// boundary). Shapes mirror the door returns loosely — passthrough casts
+// live in the module, typed refusals survive intact through exec.
+export async function carrierLaneList(): Promise<unknown> {
+  return exec("carrier_lane_list", {});
+}
+
+export async function carrierEncode(
+  id: string,
+  lane: string,
+  opts?: { pointer?: boolean },
+): Promise<unknown> {
+  return exec("carrier_encode", opts ? { id, lane, opts } : { id, lane });
+}
+
+export async function carrierDecode(
+  lane: string,
+  artifact: string,
+  opts?: { pointerOnly?: boolean },
+): Promise<unknown> {
+  return exec("carrier_decode", opts ? { lane, artifact, opts } : { lane, artifact });
+}
+
+export async function travelersList(limit = 200): Promise<unknown> {
+  return exec("traveler_list", { limit });
+}
+
+export async function travelerStamp(id: string): Promise<unknown> {
+  return exec("traveler_stamp", { id });
+}
+
+export async function travelerStatusOf(id: string): Promise<unknown> {
+  return exec("traveler_status", { id });
+}
+
+export async function travelerAuditOf(id: string): Promise<unknown> {
+  return exec("traveler_audit", { id });
+}
+
 /** GET /api/health through the Worker proxy. */
 export async function health() {
   return readJson("/api/health", HealthOut);

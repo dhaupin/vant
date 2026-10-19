@@ -13,6 +13,7 @@ import {
   Settings,
   ShoppingBag,
   SlidersHorizontal,
+  Package,
   UserCog,
   UsersRound,
   Wallet,
@@ -220,6 +221,21 @@ export const MODULES = [
     families: [],
     icon: Waypoints,
     load: () => import("../modules/nodes"),
+  },
+  {
+    // (prd-carrier-share.md 3.2 P5a) the carriers module: lane roster,
+    // letter ledger, stamp gallery, share panel, plates roster. Every
+    // surface renders what the door really answers; the share panel's
+    // lane choice is a USER pick per need — the component decides nothing.
+    id: "carriers",
+    title: "Carriers",
+    blurb: "Carrier lanes: ledger, stamps, share, plates.",
+    route: "/carriers",
+    tiers: ["O", "A", "S"],
+    section: "ops",
+    families: [],
+    icon: Package,
+    load: () => import("../modules/carriers"),
   },
 ] as const satisfies readonly ModuleManifest[];
 

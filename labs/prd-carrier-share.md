@@ -1,6 +1,12 @@
 # PRD — The Carrier Share / Lane UI (front + back, one spec)
 
-> Status: DRAFT for owner review · Phase target: P5 (platform surfaces stable first)
+> What landed (P5a, this tree): door verbs §2 (`carrier_lane_list`,
+> `carrier_encode`, `carrier_decode`, `traveler_list`, + the standing
+> `traveler_stamp`/`traveler_fetch` faces), kit member 3.1
+> (`web/kit/components/carrier-share.tsx`, vendored byte-identical into
+> `web/dashboard/src/frame/CarrierShare.tsx` with a hash pin by
+> `scripts/vendor-relay-kit.js`), and module 3.2 `carriers` (`/carriers`,
+> registered in frame/registry). The `chain` module stays P5b per §6.
 > Spec family: extends [prd-web.md](prd-web.md) §4.2 (the covert-carrier
 > abstraction, owner directive 2026-10-16) and [prd-relay.md](prd-relay.md).
 > Every surface named here is a REAL existing surface (verified against the
