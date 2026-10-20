@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import type { SovereignProfile } from "./lib/profile";
 
 /**
  * The frontend's own state, keyed per attached property (prd-web.md 3.4).
@@ -31,6 +32,17 @@ export interface AppState {
    *  persisted like theme; the SERVING posture is the operator's and
    *  lives in Pages/pod env - the two sides never blur (6.1). */
   relayUsage: boolean;
+  /** (pass 274, §2.2 storage rung) the DEVICE STORE state: what the
+   *  IndexedDB device lane reports (an honest read — tokens/keys/hops
+   *  counts, or null when nothing is stored / the store is unavailable). */
+  deviceProfile: { sealed: boolean; tokens: number; keys: number; hops: number } | null;
+  /** (r/2 §2.2 SEALED lane) the pod's own webhook transport base (e.g.
+   *  http://127.0.0.1:3467 on the pod's LAN). Non-sensitive route pref,
+   *  persisted like the other reach prefs: the SEARED CRUISE lane posts
+   *  the seal-In-the-payload crew envelope straight at <base>/relay — the
+   *  channel key (bound at pairwise redeem) is the whole credential, the
+   *  browser rider never holds a gate key. */
+  podWebhook: string;
   /** the web/relay endpoint the user runs the dashboard WITH (the owner's
    *  corrected arc: dashboard USES /web/relay as a setting, pass-233).
    *  A plain origin URL the user enters + verifies live against that
@@ -73,6 +85,8 @@ let state: AppState = {
   relayEndpoint: readRawPref("bolete-relay-endpoint") ?? "",
   chain: readChain("bolete-chain"),
   channelKeys: {},
+  deviceProfile: null,
+  podWebhook: readRawPref("bolete-pod-webhook") ?? "",
   lastRoute: null,
 };
 
@@ -131,6 +145,27 @@ export function useAppRaw(): AppState {
 }
 
 export const getState = () => state;
+
+/**
+ * The shared HONEST MERGE LAW of every profile restore (device lane and
+ * PRF lane alike): tokens/channel keys bind only EMPTY seats (a restore
+ * never overwrites a live surface of this tab), hops dedupe by origin,
+ * and a reach upgrade is one-way. Returns whether anything landed.
+ */
+function mergeProfileBack(p: SovereignProfile): number {
+  const tokens = { ...state.tokens };
+  let tok = 0;
+  for (const [prop, tk] of Object.entries(p.tokens ?? {})) {
+    if (!tokens[prop] && typeof tk === "string") { tokens[prop] = tk; actions.setToken(prop, tk); tok++; }
+  }
+  let keys = 0;
+  for (const [prop, ck] of Object.entries(p.channelKeys ?? {})) {
+    if (!state.channelKeys[prop] && typeof ck === "string") { actions.bindChannelKey(prop, ck); keys++; }
+  }
+  for (const h of p.chain ?? []) actions.addHop({ origin: h.origin, flavor: h.flavor, e2e: h.e2e });
+  if (p.relayUsage && !state.relayUsage) actions.setRelayUsage(true);
+  return tok + keys;
+}
 
 export const actions = {
   setToken(property: string, token: string | null) {
@@ -192,6 +227,117 @@ export const actions = {
       sessionStorage.removeItem("bolete-ck-" + property);
     } catch { /* private mode: nothing to wipe */ }
   },
+  /** (pass 274, §2.2 storage rung) THE DEVICE PROFILE: seal the whole
+   *  current profile into IndexedDB under the NON-EXTRACTABLE device key
+   *  (possession = unlock), then refresh the honest device read. */
+  async storeDeviceProfile() {
+    const { storeProfileOnDevice, indexeddbKV, loadProfileFromDevice } = await import("./lib/profile-store");
+    const profile = {
+      v: 1 as const,
+      kind: "bolete-profile" as const,
+      exported: Date.now(),
+      chain: state.chain,
+      channelKeys: state.channelKeys,
+      tokens: state.tokens,
+      relayUsage: state.relayUsage,
+    };
+    try {
+      await storeProfileOnDevice(indexeddbKV(), profile);
+      const back = await loadProfileFromDevice(indexeddbKV());
+      set({ deviceProfile: {
+        sealed: !!back,
+        tokens: Object.keys(back?.tokens ?? {}).length,
+        keys: Object.keys(back?.channelKeys ?? {}).length,
+        hops: (back?.chain ?? []).length,
+      } });
+      return back;
+    } catch (e) {
+      set({ deviceProfile: null });
+      throw e;
+    }
+  },
+  /** restore: open the device profile and merge with the honest law
+   *  (binds only empty seats; hop dedupe; reach upgrades only). */
+  async restoreDeviceProfile(): Promise<boolean> {
+    try {
+      const { loadProfileFromDevice, indexeddbKV } = await import("./lib/profile-store");
+      const p = await loadProfileFromDevice(indexeddbKV());
+      if (!p) {
+        set({ deviceProfile: null });
+        return false;
+      }
+      const landed = mergeProfileBack(p);
+      set({ deviceProfile: {
+        sealed: true,
+        tokens: Object.keys(p.tokens ?? {}).length,
+        keys: Object.keys(p.channelKeys ?? {}).length,
+        hops: (p.chain ?? []).length,
+      } });
+      return landed > 0;
+    } catch {
+      set({ deviceProfile: null });
+      return false;
+    }
+  },
+  /** (§2.2, PRF rung) THE BIND HALF: create a PRF-capable passkey and
+   *  seal the CURRENT profile into the binding record — the unlock lane
+   *  (b) becomes usable end-to-end. Honest read after; the device lane
+   *  stays armed beside the PRF seal. */
+  async bindPrfKey(): Promise<void> {
+    const profile = {
+      v: 1 as const,
+      kind: "bolete-profile" as const,
+      exported: Date.now(),
+      chain: state.chain,
+      channelKeys: state.channelKeys,
+      tokens: state.tokens,
+      relayUsage: state.relayUsage,
+    };
+    const { bindPrfProfile, indexeddbKV } = await import("./lib/profile-store");
+    try {
+      await bindPrfProfile(indexeddbKV(), profile);
+      set({ deviceProfile: {
+        sealed: true,
+        tokens: Object.keys(state.tokens).length,
+        keys: Object.keys(state.channelKeys).length,
+        hops: state.chain.length,
+      } });
+    } catch (e) {
+      throw e;
+    }
+  },
+  /** (§2.2, PRF rung) UNLOCK LANE (b) FOR REAL: assert the stored passkey,
+   *  derive the SAME KEK from the stored salt, and merge with the honest
+   *  law (binds only empty seats; hop dedupe — identical to the device
+   *  lane's restore). Refuses untuned when no binding exists. */
+  async restorePrfProfile(): Promise<boolean> {
+    try {
+      const { loadProfileFromPrfDevice, indexeddbKV } = await import("./lib/profile-store");
+      const p = await loadProfileFromPrfDevice(indexeddbKV());
+      if (!p) {
+        set({ deviceProfile: null });
+        return false;
+      }
+      const landed = mergeProfileBack(p);
+      set({ deviceProfile: {
+        sealed: true,
+        tokens: Object.keys(p.tokens ?? {}).length,
+        keys: Object.keys(p.channelKeys ?? {}).length,
+        hops: (p.chain ?? []).length,
+      } });
+      return landed > 0;
+    } catch (e) {
+      throw e;
+    }
+  },
+  /** forget THIS device's stored profile entirely (explicit housekeeping). */
+  async forgetDeviceProfile() {
+    try {
+      const { wipeDeviceProfile, indexeddbKV } = await import("./lib/profile-store");
+      await wipeDeviceProfile(indexeddbKV());
+    } catch { /* no store available: the honest read below still runs */ }
+    set({ deviceProfile: null });
+  },
   /** the honest ROUTE RECORD from the last door call (memory-only). */
   markRoute(route: string | null) {
     set({ lastRoute: route });
@@ -251,6 +397,15 @@ export const actions = {
     set({ relayEndpoint: url });
     try {
       localStorage.setItem("bolete-relay-endpoint", url);
+    } catch { /* private mode: session-only preference */ }
+  },
+  /** (r/2 §2.2 SEALED lane) the pod's webhook transport base — a
+   *  non-sensitive route pref, verified live by the cruise verdict (no
+   *  caps read: the webhook transport has no public caps surface). */
+  setPodWebhook(url: string) {
+    set({ podWebhook: url });
+    try {
+      localStorage.setItem("bolete-pod-webhook", url);
     } catch { /* private mode: session-only preference */ }
   },
   /** the user's reach-my-pod-through-relays choice (persisted non-sensitive

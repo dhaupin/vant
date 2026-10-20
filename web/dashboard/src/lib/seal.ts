@@ -36,7 +36,31 @@ function fromHex(hex: string): Uint8Array {
 }
 
 /**
- * The floor is the CALLER's law: an e2e channel key is 32+ chars (the
+ * THE SEALED LANE (r/2 §2.2, prd-relay.md) — the RIDER half: HMAC-SHA256 hex
+ * over the ct string EXACTLY (SIG_BYTES 'ct', not the wire envelope), keyed
+ * by the paired rider's channel key. A complete seal { sig, ts } sent with
+ * the payload and NO signature header IS the credential: the pod's
+ * sealMode webhook route (and the relay edges) verify it and skip the
+ * header law — the browser rider never holds a gate key, yet the
+ * credential binds freshness + replay defense to the ct bytes.
+ */
+export async function sealSignature(ct: string, key: string, opts: SealOpts = {}): Promise<string> {
+  const minLen = opts.minLen ?? 32;
+  const what = opts.what ?? "channel key";
+  if (!crypto?.subtle) throw new Error("WebCrypto subtle is unavailable in this context");
+  const enc = new TextEncoder();
+  const macKey = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(assertKey(key, minLen, what)),
+    { name: "HMAC", hash: { name: "SHA-256" } },
+    false,
+    ["sign"],
+  );
+  const mac = await crypto.subtle.sign("HMAC", macKey, enc.encode(ct));
+  return toHex(new Uint8Array(mac));
+}
+
+/** The floor is the CALLER's law: an e2e channel key is 32+ chars (the
  * binding moment's rule), while the sovereign profile's passphrase KEK
  * (prd-relay.md §2.2 unlock path (a)) is allowed from 8 — both derive
  * through the SAME PBKDF2/AES-GCM canon.

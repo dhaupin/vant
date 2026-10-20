@@ -76,6 +76,33 @@ const EVENTS = Object.freeze({
     call: 'relay.call'
 });
 
+// ---------------- the SEALED lane (r/2 §2.2, prd-relay.md) ----------------
+// The seal INSIDE the payload is its own credential: HMAC-SHA256 hex over
+// the ct string (NOT the wire envelope) keyed by the gate secret plus a
+// freshness ts. A complete, VERIFYING seal { sig, ts } lets a sealMode
+// receiver skip the header law — the KEYLESS last mile where a blind
+// middlebox relay forwards { ct } verbatim and cannot header-sign for the
+// pod it reaches (the seal IS the credential). A present-but-invalid seal
+// refuses exactly like a missigned header; no seal falls back to the
+// header law unchanged. Receiver-side freshness + replay reuse the
+// transport's pass-42 window; the pod replay-gates on 'seal:<sig>' so a
+// sealed send never collides with a header-signed one.
+const SEALED = Object.freeze({
+    FIELD: 'seal',                 // payload field: { ct, seal: { sig, ts } }
+    SIG_BYTES: 'ct',               // the sig covers the ct string EXACTLY
+    SIG_ALG: 'HMAC-SHA256',        // hex output (64 chars)
+    HEADERLESS: true,              // the header lane is skipped on a valid seal
+    REFUSES: { BAD: 401, STALE: 401, REPLAY: 409 },
+    // (the hop-LAST-MILE) a blind middlebox relay forwards the sealed hop
+    // beside the ct — { ct, seal } with NO event envelope is the BARE-RIDE
+    // body a receiving POD opens through the ONE seal law (the same sig,
+    // verify set, freshness window and dedupe pool as a crew-shaped seal).
+    // A malformed seal does NOT hoist: the body falls to the header lane
+    // and refuses like any unsigned body. The gate secret still never
+    // crosses a hop: the rider's seal IS the credential end to end.
+    LAST_MILE: 'bare-ride { ct, seal } — no event field, hoisted by the receiving sealMode route'
+});
+
 // ---------------- the flavor registry ----------------
 // Any deploy of the two frontend bundles is relay-shaped by construction;
 // the pod core is the third flavor. A solo relay pins NO default profile.
@@ -261,7 +288,7 @@ function isHardPrivateIp(ip) {
 
 module.exports = {
     CONTRACT_VERSION, CAPS_VERSION, WIRE_MAJOR,
-    SIGNATURE_HEADER, ROUTES, EVENTS, FLAVORS,
+    SIGNATURE_HEADER, SEALED, ROUTES, EVENTS, FLAVORS,
     CODES, TRANSPORT_STATUS,
     ENVELOPE_RE_SOURCE, ENVELOPE_MIN_LEN,
     MAX_CTEXT, HOP_TIMEOUT_MS,

@@ -3,7 +3,7 @@ import {
   getState,
   actions as stateActions,
 } from "./state";
-import { sealEnvelope, openEnvelope } from "./lib/seal";
+import { sealEnvelope, openEnvelope, sealSignature } from "./lib/seal";
 
 /**
  * The ONE typed client every module uses (prd-web.md 3.3 resp. 4). It
@@ -513,12 +513,22 @@ async function sealedExec(tool: string, args: Record<string, unknown>): Promise<
       reply.ms,
     );
   }
-  if (typeof reply.ct !== "string" || !reply.ct) {
+  return openSealedAnswer(reply.ct ?? "", key, nonce);
+}
+
+/** (pass 272 + r/2 §2.2) the SHARED answer-open core of both sealed lanes:
+ *  open the pod's re-sealed answer envelope, verify the answer's
+ *  context-nonce binding (the pass-268 W1 attack shape refuses), parse the
+ *  inner door answer, surface typed door refusals, return the door result
+ *  verbatim. Used by the edge sealed ride AND the direct pod-webhook
+ *  cruise — one honesty half, never drifted between lanes. */
+async function openSealedAnswer(replyCt: string, key: string, nonce: string): Promise<unknown> {
+  if (typeof replyCt !== "string" || !replyCt) {
     throw new ApiError("the ride ack carried no sealed answer envelope", "shape");
   }
   let opened: string;
   try {
-    opened = await openEnvelope(reply.ct, key);
+    opened = await openEnvelope(replyCt, key);
   } catch (e) {
     throw new ApiError(e instanceof Error ? e.message : "the sealed answer would not open", "shape");
   }
@@ -554,6 +564,88 @@ async function sealedExec(tool: string, args: Record<string, unknown>): Promise<
   }
   const result = (parsed as { result?: unknown }).result;
   return result === undefined ? parsed : result;
+}
+
+/**
+ * (r/2 §2.2, THE SEALED LANE) THE UPSTREAM CRUISE: the paired rider posts
+ * a SEALED crew envelope straight at the pod's webhook transport
+ * (<base>/relay) — the seal rides INSIDE the payload
+ * { ct, seal: { sig, ts } }, sig = HMAC-SHA256(channelKey, ct) hex, and
+ * NO signature header rides (the seal IS the credential: the paired
+ * rider holds the binding-moment channel key, never a gate key; the
+ * pod's sealMode route verifies it and skips the header law). Only
+ * https or the pod's LAN http reach it as the user configures; the
+ * transport refusals (401 seal/stale, 409 replay, 413) surface honestly.
+ * The door call rides the SAME ride core the edge sealed ride uses — the
+ * answer opens re-sealed with the channel key, nonce-bound.
+ */
+export async function cruisePodWebhook(
+  tool: string,
+  args: Record<string, unknown> = {},
+  webhookBase: string,
+): Promise<unknown> {
+  const s = getState();
+  const key = s.channelKeys[s.property];
+  if (!key) throw new ApiError("no e2e channel key is bound (bind at /pairing)", "refused");
+  const base = String(webhookBase || "").trim().replace(/\/+$/, "");
+  let uri: URL;
+  try {
+    uri = new URL(/^https?:\/\//.test(base) ? base + "/relay" : "");
+  } catch {
+    throw new ApiError("the pod webhook base must be an absolute http(s) URL", "shape");
+  }
+  if (uri.protocol === "http:" && !/^(127\.0\.0\.1|localhost|\[::1\]|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.|0\.0\.0\.0)/.test(uri.hostname)) {
+    throw new ApiError("plaintext http only reaches the pod's LAN posture — use https for everything else", "refused");
+  }
+  const nonce = crypto.randomUUID();
+  const inner = JSON.stringify({
+    nonce,
+    ctx: { origin: uri.origin, path: uri.pathname || "/relay", nonce },
+    bearer: token() ?? null,
+    body: { tool, args },
+  });
+  const ct = await sealEnvelope(inner, key);
+  const sig = await sealSignature(ct, key);
+  const envelope = {
+    event: "relay.ride",
+    from: "bolete-client",
+    ts: Date.now(),
+    nonce,
+    payload: { ct, seal: { sig, ts: Date.now() } },
+    v: { major: 2 },
+  };
+  stateActions.markRoute("sealed-cruise-pod-webhook (direct — the seal is the credential)");
+  let res: Response;
+  try {
+    res = await fetch(uri, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(envelope),
+    });
+  } catch {
+    throw new ApiError("the pod webhook is unreachable", "network");
+  }
+  if (res.status === 401) {
+    const d = await res.text().catch(() => "");
+    throw new ApiError(shortRefusal(401, d) || "the pod refused the seal (stale ts, wrong key, or a header-law pod)", "refused", 401);
+  }
+  if (res.status === 409) {
+    throw new ApiError("replay refused at the pod (identical seal already served)", "refused", 409);
+  }
+  if (!res.ok) {
+    const d = await res.text().catch(() => "");
+    throw new ApiError(shortRefusal(res.status, d), "refused", res.status);
+  }
+  const ack = await res.json().catch(() => null) as { reply?: { ok?: boolean; code?: string; error?: string; ct?: string; ms?: number } } | null;
+  const reply = ack && typeof ack === "object" ? ack.reply : null;
+  if (!reply || typeof reply !== "object") {
+    throw new ApiError("the pod ack carried no ride reply", "shape");
+  }
+  if (!reply.ok) {
+    throw new ApiError(reply.code ? `${reply.code}: ${reply.error ?? "refused"}` : (reply.error ?? "the sealed cruise refused"), "refused", reply.ms);
+  }
+  stateActions.markRoute("sealed-cruise-pod-webhook — rode the pod's own webhook transport (seal = credential)");
+  return openSealedAnswer(reply.ct ?? "", key, nonce);
 }
 
 /** The typed bridge refusal, shaped for UI surfaces (the code first). */

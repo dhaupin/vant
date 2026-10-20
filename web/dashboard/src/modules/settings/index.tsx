@@ -395,6 +395,119 @@ function SovereignProfileCard() {
         </label>
       </div>
       {note ? <p className="mt-2 text-xs text-ink-soft">{note}</p> : null}
+      <DeviceProfileLane onNote={(m) => setNote(m)} />
+    </div>
+  );
+}
+
+/**
+ * (pass 274, §2.2 STORAGE RUNG) the DEVICE lane: seal the whole profile
+ * into IndexedDB under the NON-EXTRACTABLE device key (possession =
+ * unlock; survives tab resets), restore it on any mount (the AuthGate
+ * wires the auto-restore; this card surfaces an explicit one + forget),
+ * and the WebAuthn PRF attempt (path (b)) which refuses TYPED when the
+ * platform cannot serve it — never a fake unlock.
+ */
+function DeviceProfileLane({ onNote }: { onNote: (m: string) => void }) {
+  const device = useApp((s) => s.deviceProfile);
+  const [busy, setBusy] = useState(false);
+  return (
+    <div className="mt-3 rounded-md border border-line bg-surface p-2">
+      <p className="text-xs font-semibold uppercase tracking-wider text-ink-soft">this device (IndexedDB, non-extractable key)</p>
+      <p className="mt-1 text-xs text-ink-soft">
+        {device?.sealed ? (
+          <span>
+            stored: {device.tokens} identit{device.tokens === 1 ? "y" : "ies"}, {device.keys} key(s), {device.hops} hop(s) — sealed to this device's own key (a page can use it, never export it)
+          </span>
+        ) : (
+          <span>nothing stored on this device yet</span>
+        )}
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <button
+          onClick={async () => {
+            setBusy(true);
+            try {
+              await actions.storeDeviceProfile();
+              onNote("stored on this device — the profile now survives tab resets (possession is the unlock, §2.2)");
+            } catch (e) {
+              onNote(e instanceof Error ? e.message : "the device store refused");
+            } finally { setBusy(false); }
+          }}
+          disabled={busy}
+          className="rounded border border-line px-2 py-1 text-xs hover:bg-ink/5 disabled:opacity-50"
+        >
+          store on this device
+        </button>
+        <button
+          onClick={async () => {
+            setBusy(true);
+            try {
+              const landed = await actions.restoreDeviceProfile();
+              onNote(landed ? "restored from this device (bound only empty seats)" : "nothing new to bind — the device copy is already held here");
+            } catch (e) {
+              onNote(e instanceof Error ? e.message : "the device read refused");
+            } finally { setBusy(false); }
+          }}
+          disabled={busy}
+          className="rounded border border-line px-2 py-1 text-xs hover:bg-ink/5 disabled:opacity-50"
+        >
+          restore now
+        </button>
+        <button
+          onClick={async () => {
+            setBusy(true);
+            try {
+              await actions.forgetDeviceProfile();
+              onNote("forgotten: this device's stored copy (and its key) wiped");
+            } catch (e) {
+              onNote(e instanceof Error ? e.message : "the wipe refused");
+            } finally { setBusy(false); }
+          }}
+          disabled={busy}
+          className="rounded border border-err/30 px-2 py-1 text-xs text-err hover:bg-err/5 disabled:opacity-50"
+        >
+          forget this device
+        </button>
+        <button
+          onClick={async () => {
+            setBusy(true);
+            try {
+              await actions.bindPrfKey();
+              onNote("bound: a PRF-capable passkey now seals this profile — the unlock lane (b) is live (assert it to open)");
+            } catch (e) {
+              onNote(e instanceof Error ? e.message : "the passkey binding refused");
+            } finally { setBusy(false); }
+          }}
+          disabled={busy}
+          className="rounded border border-line px-2 py-1 text-xs hover:bg-ink/5 disabled:opacity-50"
+        >
+          bind a passkey (PRF seal)
+        </button>
+        <button
+          onClick={async () => {
+            setBusy(true);
+            try {
+              const landed = await actions.restorePrfProfile();
+              onNote(landed
+                ? "unlocked with the passkey's PRF (bound only empty seats)"
+                : "no PRF binding is stored on this device yet — bind one first");
+            } catch (e) {
+              onNote(e instanceof Error ? e.message : "the PRF attempt refused");
+            } finally { setBusy(false); }
+          }}
+          disabled={busy}
+          className="rounded border border-line px-2 py-1 text-xs text-ink-soft hover:bg-ink/5 disabled:opacity-50"
+        >
+          try passkey unlock (PRF)
+        </button>
+      </div>
+      <p className="mt-1 text-[10px] text-ink-soft">
+        unlock lanes: (a) the passphrase file (export above), (b) passkey PRF
+        (bind here, then assert — the KEK derives from the passkey's PRF
+        output deterministically; nothing unlockable lives without the
+        authenticator's key material).
+      </p>
     </div>
   );
 }

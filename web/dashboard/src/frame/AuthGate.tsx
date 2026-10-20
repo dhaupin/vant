@@ -27,6 +27,11 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     // silently downgrade every door call to the direct bridge with a key
     // sitting unrestored in sessionStorage.
     actions.restoreChannelKey(getProperty());
+    // (pass 274, §2.2 storage rung) then the DEVICE PROFILE: the sovereign
+    // profile sealed in IndexedDB under the non-extractable device key
+    // survives tab resets — possession IS the unlock, so this runs on
+    // every mount and binds only what this tab is missing.
+    void actions.restoreDeviceProfile();
   }, []);
 
   useEffect(() => {

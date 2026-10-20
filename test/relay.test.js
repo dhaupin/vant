@@ -473,6 +473,172 @@ async function run() {
             relay.setDoorTransport(null); // back to the loopback door seam
         }
     })();
+
+    // ---- 18. THE SEALED LANE (r/2 §2.2): the seal INSIDE the payload is
+    // the credential — HMAC over the ct bytes, NO signature header. The
+    // paired rider seals with the CHANNEL key (never a gate key); the pod
+    // verify set is [gateKey, channelKey].
+    // (the mount snapshot law) sealKeys arm at MOUNT: the channel key was
+    // bound in section 9, so the route re-mounts to carry the full verify
+    // set — the SAME law a posture flip follows (a flip is a restart).
+    await relay.unmount();
+    config.set('relay.channelKey', CHANNEL_KEY);
+    const m18 = relay.mount({ port: 0 });
+    const srv18 = relay._getMountedState() && relay._getMountedState().server;
+    await new Promise((res) => { if (srv18.listening) return res(); srv18.on('listening', res); });
+    relayPort = srv18.address().port;
+    ok('18.0 the remount carried the dual verify set [gate, channel] (armed posture)',
+        m18.mounted === true && relayPort > 0,
+        JSON.stringify(m18).slice(0, 140));
+    const pinnedDoor = async ({ body }) => {
+        return { ok: true, status: 200, body: JSON.stringify({ jsonrpc: '2.0', id: 1, result: { echoed: body.tool } }) };
+    };
+    relay.setDoorTransport(pinnedDoor);
+    const cruiseCt = (n) => relay.envelope(JSON.stringify({
+        nonce: n,
+        ctx: { origin: 'cruise-intake', path: '/relay', nonce: n },
+        bearer: 'vguest_cruise-test-0123456789abcdef',
+        body: { tool: 'echo_test', args: { q: 'cruise-keyless' } }
+    }), CHANNEL_KEY);
+    const sealedEnvelope = (ct, key, ts) => JSON.stringify({
+        event: 'relay.ride', from: 'cruise-suite', ts: Date.now(),
+        nonce: crypto.randomBytes(16).toString('hex'),
+        payload: { ct, seal: { sig: Encrypt.hmacSign(ct, key), ts: ts === undefined ? Date.now() : ts } },
+        v: { major: 2 }
+    });
+    // 18a. the KEYLESS lane: channel-key seal, NO header, rides 
+    const nA = 'cruise-r2-18a-0000000001';
+    const ctA = cruiseCt(nA);
+    const sealedA = sealedEnvelope(ctA, CHANNEL_KEY);
+    const keyless = await postRelay(relayPort, sealedA, {});
+    let keylessOpen = null;
+    try { keylessOpen = JSON.parse(relay.openEnvelope(keyless.json.reply.ct, CHANNEL_KEY)); } catch (e) {}
+    ok('18a. SEALED lane live: seal-in-payload with NO header rides the pod (channel-key seal, the rider holds no gate key)',
+        keyless.status === 200 && keyless.json.reply && keyless.json.reply.ok === true
+        && keyless.json.reply.rode === true
+        && keylessOpen && keylessOpen.nonce === nA,
+        JSON.stringify(keyless.json || null).slice(0, 200));
+    // 18b. the gate-key seal (pod/crew lane) verifies too.
+    const nB = 'cruise-r2-18b-0000000001';
+    const ctB = cruiseCt(nB);
+    const sealedB = sealedEnvelope(ctB, GATE);
+    const gateSeal = await postRelay(relayPort, sealedB, {});
+    ok('18b. the gate-key seal verifies on the same route (the verify set is [gate, channel])',
+        gateSeal.status === 200 && gateSeal.json.reply && gateSeal.json.reply.ok === true,
+        JSON.stringify(gateSeal.json || null).slice(0, 140));
+    // 18c. a PRESENT-but-wrong seal refuses 401 (never salvaged to the
+    // header lane; nothing smuggles through).
+    const nC = 'cruise-r2-18c-0000000001';
+    const wrongSeal = JSON.stringify({
+        event: 'relay.ride', from: 'cruise-suite', ts: Date.now(),
+        nonce: crypto.randomBytes(16).toString('hex'),
+        payload: { ct: cruiseCt(nC), seal: { sig: Encrypt.hmacSign('not-the-ct', CHANNEL_KEY), ts: Date.now() } },
+        v: { major: 2 }
+    });
+    const wrongSealAns = await postRelay(relayPort, wrongSeal, {});
+    ok('18c. a wrong seal refuses 401 fail-closed (present-but-invalid is worse than absent)',
+        wrongSealAns.status === 401, wrongSealAns.status + ' ' + String(wrongSealAns.raw).slice(0, 80));
+    // 18d. a STALE seal ts refuses (the freshness half of the pass-42 window).
+    const nD = 'cruise-r2-18d-0000000001';
+    const staleSeal = sealedEnvelope(cruiseCt(nD), CHANNEL_KEY, Date.now() - (6 * 60 * 1000));
+    const staleAns = await postRelay(relayPort, staleSeal, {});
+    ok('18d. a stale seal settles 401 outside the freshness window',
+        staleAns.status === 401, staleAns.status);
+    // 18e. identical seal bytes replay -> 409 (the seal sig is the dedupe
+    // key on its ':seal' namespace).
+    const nE = 'cruise-r2-18e-0000000001';
+    const ctE = cruiseCt(nE);
+    const sealE = { sig: Encrypt.hmacSign(ctE, CHANNEL_KEY), ts: Date.now() };
+    const envE = (delay) => JSON.stringify({ event: 'relay.ride', from: 'cruise-suite', ts: Date.now(),
+        nonce: crypto.randomBytes(16).toString('hex'), payload: { ct: ctE, seal: delay ? sealE : sealE }, v: { major: 2 } });
+    const first = await postRelay(relayPort, envE(false), {});
+    const second = await postRelay(relayPort, envE(true), {});
+    ok('18e. identical sealed bytes replay -> 409 (freshness ts + seal-sig dedupe pool)',
+        second.status === 409, first.status + ' then ' + second.status);
+    // 18f. the HEADER lane still works on the sealMode route (the crew
+    // sends keep their baseline - one law, two lanes).
+    const headerRide = signedBody({ event: 'relay.ride', payload: { ct: cruiseCt('cruise-r2-18f-0000000001') } }, GATE);
+    const headerAns = await postRelay(relayPort, headerRide.raw, { 'x-signature-256': headerRide.sig });
+    ok('18f. the header lane still rides on a sealMode route (backward compat)',
+        headerAns.status === 200 && headerAns.json.reply && headerAns.json.reply.ok === true,
+        JSON.stringify(headerAns.json || null).slice(0, 140));
+    // 18g. the SENDER seam composes the seal itself: relay.send(opts.seal)
+    // ships seal-in-payload without a header, end-to-end over real sockets.
+    const seamNonce = 'cruise-seam-18g-0000000001';
+    const seamInner = JSON.stringify({
+        nonce: seamNonce,
+        ctx: { origin: 'pod-webhook-intake', path: '/relay', nonce: seamNonce },
+        bearer: null,
+        body: { tool: 'echo_test', args: { q: 'seam-sealed' } }
+    });
+    const seamCt = relay.envelope(seamInner, CHANNEL_KEY);
+    const seamSent = await relay.send('http://127.0.0.1:' + relayPort, GATE,
+        { ct: seamCt }, { event: 'relay.ride', seal: true, insecure: true });
+    let seamOpen = null;
+    try { seamOpen = JSON.parse(relay.openEnvelope(seamSent.reply.ct, CHANNEL_KEY)); } catch (e) {}
+    ok('18g. relaySend opts.seal composes the sealed ride itself (keyless send end-to-end, nonce-bound answer)',
+        seamSent.ok === true && seamSent.reply && seamSent.reply.ok === true && seamSent.reply.rode === true
+        && seamOpen && seamOpen.nonce === seamNonce,
+        JSON.stringify(seamSent).slice(0, 200));
+    // 18h. THE CRASH-LIKE PIN (pre-crashtest adversarial pass): replay the
+    // SAME valid seal on FRESH top-level bytes (new nonce + ts). The
+    // envelope-level dedupe cannot catch it (different bytes); the seal
+    // namespace must — the sig IS the dedupe key there.
+    const nH = 'cruise-r2-18h-0000000001';
+    const ctH = cruiseCt(nH);
+    const sealH = { sig: Encrypt.hmacSign(ctH, CHANNEL_KEY), ts: Date.now() };
+    const envFresh = () => JSON.stringify({ event: 'relay.ride', from: 'crash-probe', ts: Date.now(),
+        nonce: crypto.randomBytes(16).toString('hex'), payload: { ct: ctH, seal: sealH }, v: { major: 2 } });
+    const rideA = await postRelay(relayPort, envFresh(), {});
+    const rideB = await postRelay(relayPort, envFresh(), {});
+    ok('18h. the same VALID seal replayed on fresh top-level bytes still refuses (the seal sig is the dedupe key, not the envelope bytes)',
+        rideA.status === 200 && rideB.status === 409,
+        rideA.status + ' then ' + rideB.status);
+    // 18i. THE SEALED HOP FORWARD (the hop-LAST-MILE): a crew-shaped
+    // sealed HOP with NO header rides the verify set, and the FORWARD
+    // carries the seal beside the ct — the upstream sees the credential,
+    // a middlebox never needed its own.
+    const hopCt = relay.envelope('hop-cargo-p275', CHANNEL_KEY);
+    const hopSealed = JSON.stringify({
+        event: 'relay.hop', from: 'hop-seal-suite', ts: Date.now(),
+        nonce: crypto.randomBytes(16).toString('hex'),
+        payload: { origin: 'http://127.0.0.1:' + upstreamPort, path: '/api/mcp/exec', ct: hopCt, seal: { sig: Encrypt.hmacSign(hopCt, CHANNEL_KEY), ts: Date.now() } },
+        v: { major: 2 }
+    });
+    const hopSealedAns = await postRelay(relayPort, hopSealed, {});
+    const lastSeen = upstreamSeen.length ? String(upstreamSeen[upstreamSeen.length - 1].body) : '';
+    ok('18i. a SEALED hop with no header forwards the seal beside the ct (the last mile rides credentialed)',
+        hopSealedAns.status === 200 && hopSealedAns.json.reply && hopSealedAns.json.reply.ok === true
+        && lastSeen.includes('"seal"') && lastSeen.includes(hopCt.slice(0, 40)),
+        JSON.stringify(hopSealedAns.json || null).slice(0, 120) + ' | lastSeen: ' + lastSeen.slice(0, 220) + ' | entries: ' + upstreamSeen.length);
+    // 18j. THE BARE-RIDE LAST MILE: { ct, seal } alone (no event envelope)
+    // hoists into the ride core through the ONE seal law — the middlebox
+    // never held a gate key, and the door still answers.
+    const nJ = 'cruise-r2-18j-0000000001';
+    const rideCtJ = cruiseCt(nJ);
+    const bareJ = JSON.stringify({ ct: rideCtJ, seal: { sig: Encrypt.hmacSign(rideCtJ, CHANNEL_KEY), ts: Date.now() } });
+    const bareJAns = await postRelay(relayPort, bareJ, {});
+    let bareJOpen = null;
+    try { bareJOpen = JSON.parse(relay.openEnvelope(bareJAns.json.reply.ct, CHANNEL_KEY)); } catch (e) {}
+    ok('18j. the BARE-RIDE last mile: blind-forwarded { ct, seal } hoists and rides the pod (no envelope, no gate key, one seal law)',
+        bareJAns.status === 200 && bareJAns.json.reply && bareJAns.json.reply.ok === true
+        && bareJAns.json.reply.rode === true && bareJOpen && bareJOpen.nonce === nJ,
+        JSON.stringify(bareJAns.json || null).slice(0, 200));
+    // 18k. bare-ride with a WRONG seal refuses 401 (the hoist never keys
+    // an unsigned corridor — pass 42 stands).
+    const nK = 'cruise-r2-18k-0000000001';
+    const rideCtK = cruiseCt(nK);
+    const bareK = JSON.stringify({ ct: rideCtK, seal: { sig: Encrypt.hmacSign('not-this-ct', CHANNEL_KEY), ts: Date.now() } });
+    const bareKAns = await postRelay(relayPort, bareK, {});
+    ok('18k. bare-ride with a wrong seal refuses 401 (the hoist is law-sibling, never a side door)',
+        bareKAns.status === 401, bareKAns.status);
+    // 18l. bare-ride WITHOUT any seal refuses 401 (the bare shape grants
+    // nothing — only a verified seal rides).
+    const bareL = JSON.stringify({ ct: cruiseCt('cruise-r2-18l-0000000001') });
+    const bareLAns = await postRelay(relayPort, bareL, {});
+    ok('18l. bare { ct } with NO seal refuses 401 (pass 42 untouched by the last mile)',
+        bareLAns.status === 401, bareLAns.status);
+    relay.setDoorTransport(null);
 }
 
 run()

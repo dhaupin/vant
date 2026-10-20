@@ -157,25 +157,69 @@ export const onRequestPost: Handler = async (context) => {
         return plain(TRANSPORT_STATUS.TOO_LARGE, { error: "Body too large (1 MiB cap)" });
     }
 
-    // 3. THE GATE: HMAC-SHA256 over the raw body bytes (RELAY LANE only).
+    // 3. THE GATE (RELAY LANE only; the browser lane is intent-borne):
+    // two credential lanes - the header law AND (r/2 SEALED lane) the seal
+    // inside the payload. A COMPLETE seal ({ sig, ts } over the ct bytes)
+    // that verifies skips the header law — the KEYLESS last mile where a
+    // middlebox relay blind-forwards { ct }
+    // verbatim and cannot header-sign for the pod it reaches (the seal IS
+    // the credential, prd-relay.md §2.2). A PRESENT seal that fails verify
+    // refuses like a missigned header; NO seal falls to the header law
+    // unchanged. The edge is stateless: the seal's OWN ts window is the
+    // honest edge-side memory; the byte-identical replay gate lives at the
+    // pod's transport.
+    let crew: CrewEnvelope | null = null;
     if (!browserLane) {
-        const presented = context.request.headers.get(SIGNATURE_HEADER);
-        if (presented === null || presented.length === 0) {
-            return plain(TRANSPORT_STATUS.UNAUTHENTICATED, {
-                error: `A r/2 relay envelope requires the ${SIGNATURE_HEADER} header: HMAC-SHA256 hex over the raw body bytes.`,
-            });
+        try {
+            crew = JSON.parse(raw) as CrewEnvelope;
+        } catch (_e) {
+            crew = null;
         }
-        if (!(await signatureVerdictOk(raw, presented, secret as string))) {
-            return plain(TRANSPORT_STATUS.UNAUTHENTICATED, { error: "Invalid signature" });
+        if (!crew || typeof crew !== "object" || Array.isArray(crew)) {
+            return plain(400, { error: "The relay intake expects a JSON envelope: { event, from, ts, nonce, payload, v }." });
+        }
+        let authenticated = false;
+        let sealedPayload: { ct: string; seal: { sig: string; ts: number } } | null = null;
+        if (crew.payload && typeof crew.payload === "object" && !Array.isArray(crew.payload)) {
+            const p = crew.payload as { ct?: unknown; seal?: unknown };
+            if (typeof p.ct === "string" && p.seal && typeof p.seal === "object") {
+                const s = p.seal as { sig?: unknown; ts?: unknown };
+                if (typeof s.sig === "string" && typeof s.ts === "number") {
+                    sealedPayload = { ct: p.ct, seal: { sig: s.sig, ts: s.ts } };
+                }
+            }
+        }
+        if (sealedPayload !== null) {
+            if (!(await signatureVerdictOk(sealedPayload.ct, sealedPayload.seal.sig, secret as string))) {
+                return plain(TRANSPORT_STATUS.UNAUTHENTICATED, { error: "Invalid seal signature" });
+            }
+            if (Math.abs(Date.now() - sealedPayload.seal.ts) > FRESHNESS_WINDOW_MS) {
+                return plain(TRANSPORT_STATUS.UNAUTHENTICATED, { error: "Stale seal: ts outside the replay window" });
+            }
+            authenticated = true;
+        }
+        if (!authenticated) {
+            const presented = context.request.headers.get(SIGNATURE_HEADER);
+            if (presented === null || presented.length === 0) {
+                return plain(TRANSPORT_STATUS.UNAUTHENTICATED, {
+                    error: `A r/2 relay envelope requires the ${SIGNATURE_HEADER} header (or a sealed payload): HMAC-SHA256 hex over the raw body bytes.`,
+                });
+            }
+            if (!(await signatureVerdictOk(raw, presented, secret as string))) {
+                return plain(TRANSPORT_STATUS.UNAUTHENTICATED, { error: "Invalid signature" });
+            }
         }
     }
 
-    // 4. parse the crew envelope; malformed = plain transport 400.
-    let crew: CrewEnvelope | null = null;
-    try {
-        crew = JSON.parse(raw) as CrewEnvelope;
-    } catch (_e) {
-        crew = null;
+    // 4. parse the crew envelope (browser lane) or reuse the gate's parse.
+    if (browserLane) {
+        let parsedCrew: CrewEnvelope | null = null;
+        try {
+            parsedCrew = JSON.parse(raw) as CrewEnvelope;
+        } catch (_e) {
+            parsedCrew = null;
+        }
+        crew = parsedCrew;
     }
     if (!crew || typeof crew !== "object" || Array.isArray(crew)) {
         return plain(400, { error: "The relay intake expects a JSON envelope: { event, from, ts, nonce, payload, v }." });
@@ -330,13 +374,24 @@ export const onRequestPost: Handler = async (context) => {
     // 6. forward VERBATIM: { ct } rides origin+path; the gate secret
     //    NEVER rides upstream (spent at verification). Typed failures ride
     //    the ack reply honestly instead of errors.
+    //    (r/2 SEALED hop-LAST-MILE) a payload that SHIPPED a seal forwards
+    //    it beside the ct: the last mile into a pod's own webhook route
+    //    stays credentialed even though this edge holds no rider keys —
+    //    the seal IS the credential the rider sealed with its key, and
+    //    the receiving pod's verify set honors it. No seal, no change.
+    const frameCast = frame as { seal?: unknown };
+    const forwardSeal = frameCast.seal && typeof frameCast.seal === "object"
+        && (frameCast.seal as { sig?: unknown }).sig
+        && (frameCast.seal as { ts?: unknown }).ts
+        ? { sig: String((frameCast.seal as { sig: unknown }).sig), ts: Number((frameCast.seal as { ts: unknown }).ts) }
+        : null;
     const t0 = Date.now();
     let text: string;
     try {
         const up = await fetch(new URL(path, target), {
             method: "POST",
             headers: { "content-type": "application/json", "x-vant-relay": CAPS_VERSION },
-            body: JSON.stringify({ ct }),
+            body: JSON.stringify(forwardSeal ? { ct, seal: forwardSeal } : { ct }),
             signal: AbortSignal.timeout(HOP_TIMEOUT_MS),
         });
         text = await up.text();

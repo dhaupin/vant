@@ -4,11 +4,12 @@ import {
   E2E_LAW,
   bridgeLost,
   type BridgeReply,
+  cruisePodWebhook,
   properties,
   relayCaps,
   type RelayCaps,
 } from "../../api";
-import { useApp } from "../../state";
+import { actions, useApp } from "../../state";
 import { Refusal } from "../../frame/Refusal";
 
 /**
@@ -154,11 +155,65 @@ export function ProbeCard() {
   );
 }
 
+/**
+ * (r/2 §2.2 SEALED lane) THE UPSTREAM CRUISE CARD. The paired rider's
+ * direct lane through the pod's OWN webhook transport: the seal rides
+ * INSIDE the payload (channel-key HMAC over the ct bytes) and NO
+ * signature header — the seal IS the credential (the rider holds the
+ * binding-moment channel key, never a gate key). The base URL is the
+ * user's non-sensitive route pref; the verdict renders the transport
+ * truth verbatim (401 seal/stale · 409 replay · typed E_RIDE_* · the
+ * opened door answer). Honest either way — refusals are records.
+ */
+export function CruiseCard({ base }: { base: string }) {
+  const boundKey = useApp((s) => s.channelKeys[s.property] ?? null);
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<unknown>(null);
+  const [why, setWhy] = useState<string | null>(null);
+
+  const cruise = useCallback(() => {
+    setBusy(true);
+    setWhy(null);
+    setResult(null);
+    cruisePodWebhook("context_heartbeat", { action: "status" }, base)
+      .then((r) => setResult(r))
+      .catch((e: ApiError) => setWhy(e.message))
+      .finally(() => setBusy(false));
+  }, [base]);
+
+  return (
+    <div className="rounded-lg border border-line bg-surface p-3 text-sm">
+      {!boundKey ? (
+        <p className="text-xs text-ink-soft">
+          no e2e channel key is bound — bind once at <span className="font-mono">/pairing</span>; the ride lane refuses without it.
+        </p>
+      ) : (
+        <button
+          onClick={cruise}
+          disabled={busy || !base}
+          className="rounded border border-line px-2 py-0.5 text-xs hover:bg-ink/5 disabled:opacity-40"
+        >
+          cruise the lane (relay.ride, the seal IS the credential)
+        </button>
+      )}
+      {busy ? <p className="mt-1 text-xs text-ink-soft">sealing with the binding key, riding the pod's webhook transport…</p> : null}
+      {why ? <Refusal error={{ message: why }} /> : null}
+      {result !== null ? (
+        <pre className="mt-2 overflow-x-auto rounded border border-line bg-ink/5 p-2 text-[11px]">
+          ok:true — the pod's ride core answered through its own webhook transport:
+          {"\n"}{JSON.stringify(result, null, 2)}
+        </pre>
+      ) : null}
+    </div>
+  );
+}
+
 export default function Chain() {
   const usage = useApp((s) => s.relayUsage);
   const endpoint = useApp((s) => s.relayEndpoint);
   const route = useApp((s) => s.lastRoute);
   const boundKey = useApp((s) => s.channelKeys[s.property] ?? null);
+  const podWebhook = useApp((s) => s.podWebhook);
   const chain = useApp((s) => s.chain);
   const [self, setSelf] = useState<CapsState>({ s: "stub" });
   const [peer, setPeer] = useState<CapsState>({ s: "stub" });
@@ -281,6 +336,29 @@ export default function Chain() {
         >
           re-read posture
         </button>
+      </section>
+
+      <section className="mt-6">
+        <h2 className="text-base font-semibold">Upstream cruise (the pod's own webhook lane)</h2>
+        <p className="mt-0.5 text-xs text-ink-soft">
+          The paired rider posts a SEALED crew envelope straight at the pod's
+          webhook transport — the seal rides inside the payload (the channel
+          key from the binding moment signs the ct; NO signature header —
+          the seal IS the credential, the rider never holds a gate key).
+          Same ride core, same nonce binding, honest transport refusals.
+        </p>
+        <div className="mt-2 max-w-md">
+          <input
+            value={podWebhook}
+            onChange={(e) => actions.setPodWebhook(e.target.value)}
+            placeholder="http://127.0.0.1:3467 (the pod's webhook transport)"
+            spellCheck={false}
+            className="w-full rounded border border-line bg-surface px-2 py-1 font-mono text-xs"
+          />
+        </div>
+        <div className="mt-2">
+          <CruiseCard base={podWebhook} />
+        </div>
       </section>
 
       <section className="mt-6">
