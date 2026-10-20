@@ -4,6 +4,11 @@ import {
   actions as stateActions,
 } from "./state";
 import { sealEnvelope, openEnvelope, sealSignature } from "./lib/seal";
+import {
+  TRAVEL_WIRE_EVENT,
+  localShape,
+  type Traveler,
+} from "./lib/travel";
 
 /**
  * The ONE typed client every module uses (prd-web.md 3.3 resp. 4). It
@@ -652,4 +657,30 @@ export async function cruisePodWebhook(
 export function bridgeRefusal(reply: BridgeReply): string | null {
   if (reply.ok) return null;
   return reply.code ? `${reply.code}: ${reply.error ?? "refused"}` : (reply.error ?? "refused");
+}
+
+/**
+ * (the traveler carrier, tr/1 — the pass-254 frontend lane) travelerSend:
+ * the browser EMITS a traveler through the bridge lane. The packet is a
+ * STRUCTURAL tr/1 traveler minted client-side (src/lib/travel.ts — id =
+ * sha-256 over the canonical {from, slots, steps} body, identity by
+ * content, the kit stays crypto-free); the shape law runs HERE from the
+ * vendored kit so a bent packet refuses before any wire, and the edge's
+ * translate → the door's brain_write lands the record. Typed
+ * E_TRAVELER_* refusals surface as ApiError verbatim.
+ */
+export async function travelerSend(traveler: Traveler): Promise<unknown> {
+  const law = localShape(traveler);
+  if (law) {
+    throw new ApiError(`${law.code}: ${law.error}`, "refused");
+  }
+  const reply = await bridgeSend(TRAVEL_WIRE_EVENT, traveler as unknown as Record<string, unknown>);
+  if (!reply.ok) {
+    throw new ApiError(
+      reply.code ? `${reply.code}: ${reply.error ?? "refused"}` : (reply.error ?? "the travel refused"),
+      "refused",
+      reply.ms,
+    );
+  }
+  return reply; // the ack rides verbatim: family, answer (the door record), ms
 }

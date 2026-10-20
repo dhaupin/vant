@@ -1,12 +1,20 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** pass 273 (§2.2 the sovereign-profile transport: one
+**Last Updated:** pass 283 (the traveler frontend lane: the enterprise
+router object's front end — EVENTS.travel in the kit; the pod webhook face
+routes relay.travel through the bridge family; the dashboard edge accepts
+it on both lanes with the vendored shape law and translates to the door's
+brain_write slot; a browser minter (content-addressed tr/1, WebCrypto)
++ travelerSend() preflight the law before any wire; the Traveler module
+(route /traveler) mints, sends, and reads the door's real traveler verbs;
+the solo posture page gains the sealed-hops-only carrier truth)
 passphrase-sealed bolete-profile.enc file carries chain + keys + guest
 identities + reach; the pairing redeem can adopt the identity outright;
 rungs now landed: P6b binding/key card/door ride (271), rung-2 binding
-(272), §2.2 transport (273) — the multi-hop browser traversal still waits
-on the transport's upstream credential story, named honestly)  
+(272), §2.2 transport (273), pass 283: the traveler frontend lane —
+the multi-hop browser traversal still waits on the transport's upstream
+credential story, named honestly)  
 **Session:** Pass 242 - THE NAV + MISSIONS SPEC: eight new modules queued
 (consensus, resolution/citations, era/succession, nature flywheel,
 habitats, cron manager, settlements, origins), the hierarchical
@@ -14,6 +22,19 @@ Cloudflare-sidebar model adopted (3.3-5c), and the two frame
 requirements: ui-state memory (return to your page after the 15-min
 window) and the vetted cache-busting framework (?hash= breaker,
 3 layers). Next: the FRAME pass lands 5c + memory + breaker at once.  
+**Prior:** Pass 283 - THE TRAVELER FRONTEND LANE: the enterprise router
+object's front end landed end to end — kit gains EVENTS.travel; the pod's
+webhook face routes relay.travel through the bridge family (19a-d pins);
+the dashboard edge accepts the family on BOTH lanes, shape-law from the
+vendored traveler contract, translated to the door's brain_write slot via
+a shared forwardDoorCalls helper; the browser minter (src/lib/travel.ts)
+mints content-addressed tr/1 packets (WebCrypto sha-256) and travelerSend()
+preflights the law BEFORE any wire; the Traveler module (route /traveler,
+tiers O A S) mints+sends and reads the door's real traveler_list/status/
+audit verbs verbatim; the solo posture page states the carrier truth
+(sealed hops only, the traveler is never decoded by a blind middlebox).
+Suites: relay 61/61, traveler 26/26, parity 0-exit, vendor --check 0,
+lint:web 0, pilot:relay 0, dashboard tsc+vitest 103/103, relay tsc 0.
 **Prior:** Pass 240 - THE DEBRIS SWEEP: 277 test-debris brain trees
 deleted from models/private/ (incl. rook119, the org-drill artifact),
 keeping axolotl + buffy + vant + shared state; the canonical stone

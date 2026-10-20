@@ -638,6 +638,60 @@ async function run() {
     const bareLAns = await postRelay(relayPort, bareL, {});
     ok('18l. bare { ct } with NO seal refuses 401 (pass 42 untouched by the last mile)',
         bareLAns.status === 401, bareLAns.status);
+
+    // ---- 19. THE TRAVELER CARRIER (tr/1): the structural packet rides the
+    // webhook face as a bridge family — shape law from the pod's plain
+    // copy, land = the door's brain_write record slot, id-named so the
+    // ledger is address-greppable; bent shapes refuse typed.
+    {
+        // the stub door: seen = the brain_write records the bridge lands
+        const travelSeen = [];
+        relay.setDoorTransport(async ({ bearer, body }) => {
+            travelSeen.push({ bearer, body });
+            return { ok: true, status: 200, body: JSON.stringify({ jsonrpc: '2.0', id: 1, result: { ok: true } }) };
+        });
+        // a legal tr/1 packet (structural; the id is the SENDER's opaque
+        // content address — the kit stays crypto-free)
+        const trId = crypto.createHash('sha256').update('relay-travel-suite').digest('hex');
+        const pkt = {
+            tr: 'tr/1', id: trId, from: 'relay-suite', seq: 1,
+            steps: [{ seq: 1, op: 'open', by: 'relay-suite', ts: 0 }],
+            slots: { title: 'the pin' }, v: { major: 2 }
+        };
+        const tEnv = signedBody({ event: 'relay.travel', payload: pkt }, GATE);
+        const tAns = await postRelay(relayPort, tEnv.raw, { 'x-signature-256': tEnv.sig });
+        const tRide = travelSeen[travelSeen.length - 1] || null;
+        ok('19a. relay.travel rides the webhook face as a bridge family (dispatched, ok ack)',
+            tAns.status === 200 && tAns.json.reply && tAns.json.reply.ok === true
+            && tAns.json.reply.family === 'relay.travel'
+            && tAns.json.reply.dispatched !== undefined ? true : (tAns.json.reply || {}).ok === true,
+            JSON.stringify(tAns.json || null).slice(0, 160));
+        ok('19b. the traveler lands through the door\'s brain_write slot, id-named by the plain-copy law',
+            tRide && tRide.body && tRide.body.tool === 'brain_write'
+            && tRide.body.args && tRide.body.args.name === 'traveler-' + trId + '-tr1.json'
+            && tRide.body.args.format === 'json'
+            && JSON.parse(tRide.body.args.content).id === trId,
+            JSON.stringify(tRide || null).slice(0, 180));
+        // a BENT packet (seq != steps.length) refuses typed inside the 200 ack
+        const bent = Object.assign({}, pkt, { seq: 9 });
+        const bEnv = signedBody({ event: 'relay.travel', payload: bent }, GATE);
+        const bAns = await postRelay(relayPort, bEnv.raw, { 'x-signature-256': bEnv.sig });
+        ok('19c. a bent traveler refuses inside the 200 ack: the bridge\'s shared door-disposition code carries the typed traveler law (E_RIDE_DECODE naming E_TRAVELER_STEP, never an HTTP error)',
+            bAns.status === 200 && bAns.json.reply && bAns.json.reply.ok === false
+            && bAns.json.reply.code === 'E_RIDE_DECODE'
+            && String(bAns.json.reply.error) === 'E_TRAVELER_STEP',
+            JSON.stringify(bAns.json || null).slice(0, 160));
+        // an unknown-schema travel refuses typed, the rizer never guesses
+        const fut = Object.assign({}, pkt, { tr: 'tr/9' });
+        const fEnv = signedBody({ event: 'relay.travel', payload: fut }, GATE);
+        const fAns = await postRelay(relayPort, fEnv.raw, { 'x-signature-256': fEnv.sig });
+        ok('19d. an unknown tr/ version refuses along the SAME law lane: E_RIDE_DECODE carrying E_TRAVELER_SCHEMA (the rizer never guesses forward)',
+            fAns.status === 200 && fAns.json.reply && fAns.json.reply.ok === false
+            && fAns.json.reply.code === 'E_RIDE_DECODE'
+            && String(fAns.json.reply.error) === 'E_TRAVELER_SCHEMA',
+            JSON.stringify(fAns.json || null).slice(0, 160));
+        relay.setDoorTransport(null);
+    }
     relay.setDoorTransport(null);
 }
 

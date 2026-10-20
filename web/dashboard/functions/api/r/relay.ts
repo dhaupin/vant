@@ -1,4 +1,4 @@
-import type { Handler } from "../../types";
+import type { Handler, PagesContext } from "../../types";
 import { forward as podBridgeForward } from "../../lib/bridge";
 import {
     CAPS_VERSION,
@@ -13,6 +13,10 @@ import {
     isPrivateIp,
     isHardPrivateIp,
 } from "../../lib/relay-contract.cjs";
+// (the traveler carrier, tr/1) the bridge's newest family rides the vendored
+// traveler contract — the SAME shape law the pod's plain copy pins to kit
+// head. Typed E_TRAVELER_* refusals ride the 200 ack exactly like the pod.
+import { TRAVEL_WIRE_EVENT, travelerShape } from "../../lib/traveler-contract.cjs";
 
 /**
  * Dashboard-relay flavor, r/2 (pass 236 ruling): the dashboard PIGGYBACKS
@@ -118,6 +122,46 @@ interface CrewEnvelope {
     nonce?: unknown;
     payload?: unknown;
     v?: { major?: unknown };
+}
+
+/** The bridge forward (shared by every translate-to-door family): each
+ *  translated door call crosses to the pod's /api/mcp/exec with the
+ *  SERVER-side delegated bearer — the browser never holds a credential
+ *  (pass-237 doctrine). The LAST forward's body is the answer: ok rides
+ *  2xx + no error object; anything else is typed UPST. */
+async function forwardDoorCalls(
+    context: PagesContext,
+    doorCalls: Array<{ tool: string; args: unknown }>,
+): Promise<{ ok: boolean; parsed: unknown; ms: number; err: string }> {
+    const tBridge = Date.now();
+    let lastUp: Response | null = null;
+    let lastErr = "";
+    for (const dc of doorCalls) {
+        try {
+            const doorUrl = new URL(context.request.url);
+            doorUrl.pathname = "/api/mcp/exec";
+            doorUrl.search = "";
+            lastUp = await podBridgeForward(context, new Request(doorUrl, {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify(dc),
+            }));
+        } catch (e) {
+            lastErr = e instanceof Error ? e.message : "bridge forward threw";
+            lastUp = null;
+        }
+    }
+    const text = lastUp ? await lastUp.text() : "";
+    let parsed: unknown = null;
+    try { parsed = text ? JSON.parse(text) : null; } catch (_e) { parsed = null; }
+    const doorOk = !!lastUp && lastUp.status >= 200 && lastUp.status < 300
+        && !(parsed && typeof parsed === "object" && (parsed as { error?: unknown }).error);
+    return {
+        ok: doorOk,
+        parsed,
+        ms: Date.now() - tBridge,
+        err: doorOk ? "" : (lastErr || "the pod bridge refused the bridge call."),
+    };
 }
 
 export const onRequestPost: Handler = async (context) => {
@@ -232,13 +276,13 @@ export const onRequestPost: Handler = async (context) => {
     }
     if (incomingEvent !== EVENTS.hop
         && incomingEvent !== EVENTS.sync && incomingEvent !== EVENTS.lost && incomingEvent !== EVENTS.call
-        && incomingEvent !== EVENTS.ride) {
+        && incomingEvent !== EVENTS.travel && incomingEvent !== EVENTS.ride) {
         return ack({
             received: true,
             event: incomingEvent || "(none)",
             handlers: 0,
             dispatched: 0,
-            reply: { ok: false, code: CODES.UNKNOWN_EVENT, error: "this edge carries relay.hop, the bridge families (relay.sync | relay.lost | relay.call) and the browser-lane sealed ride (relay.ride)." },
+            reply: { ok: false, code: CODES.UNKNOWN_EVENT, error: "this edge carries relay.hop, the bridge families (relay.sync | relay.lost | relay.call | relay.travel) and the browser-lane sealed ride (relay.ride)." },
         });
     }
 
@@ -262,6 +306,35 @@ export const onRequestPost: Handler = async (context) => {
             dispatched: 0,
             reply: { ok: false, code: CODES.UNKNOWN_EVENT, error: "rides decode at the pod (the channel key lives there) - this edge carries sealed browser-lane rides only; sign the envelope against the pod's own webhook instead." },
         });
+    }
+    // (the traveler carrier, tr/1) THE TRAVEL FAMILY: the enterprise router
+    // object crosses the bridge as a STRUCTURAL packet. guard = the vendored
+    // kit's shape law (opaque hex id, append-only ledger, seq == length —
+    // the same law the pod's plain copy pins); translate = the door's
+    // EXISTING brain_write record slot, id-named so the ledger is
+    // address-greppable (the pod face's _travelerToDoor law, mirrored).
+    if (incomingEvent === TRAVEL_WIRE_EVENT) {
+        const law = travelerShape(crew.payload);
+        if (law) {
+            return ack({ received: true, event: incomingEvent, handlers: 0, dispatched: 0,
+                reply: { ok: false, code: law.code, error: law.error } });
+        }
+        const traveler = crew.payload as { id: string; tr: string };
+        const fwd = await forwardDoorCalls(context, [{
+            tool: "brain_write",
+            args: {
+                name: "traveler-" + traveler.id + "-tr"
+                    + (String(traveler.tr).endsWith("1") ? "1" : String(traveler.tr).slice(3)) + ".json",
+                content: JSON.stringify(crew.payload),
+                format: "json",
+            },
+        }]);
+        if (!fwd.ok) {
+            return ack({ received: true, event: incomingEvent, handlers: 0, dispatched: 0,
+                reply: { ok: false, code: CODES.UPST, error: fwd.err, ms: fwd.ms } });
+        }
+        return ack({ received: true, event: incomingEvent, handlers: 0, dispatched: 1,
+            reply: { ok: true, family: incomingEvent, answer: fwd.parsed, ms: fwd.ms } });
     }
     if (incomingEvent === EVENTS.sync || incomingEvent === EVENTS.lost || incomingEvent === EVENTS.call || incomingEvent === EVENTS.ride) {
         const bp = (crew.payload && typeof crew.payload === "object" && !Array.isArray(crew.payload))
@@ -293,35 +366,13 @@ export const onRequestPost: Handler = async (context) => {
             return ack({ received: true, event: incomingEvent, handlers: 0, dispatched: 0,
                 reply: { ok: false, code: CODES.NEEDS_ENVELOPE, error: "bridge call needs { tool | method, args? } - the door verifies the rest." } });
         }
-        const tBridge = Date.now();
-        let lastUp: Response | null = null;
-        let lastErr = "";
-        for (const dc of doorCalls) {
-            try {
-                const doorUrl = new URL(context.request.url);
-                doorUrl.pathname = "/api/mcp/exec";
-                doorUrl.search = "";
-                lastUp = await podBridgeForward(context, new Request(doorUrl, {
-                    method: "POST",
-                    headers: { "content-type": "application/json" },
-                    body: JSON.stringify(dc),
-                }));
-            } catch (e) {
-                lastErr = e instanceof Error ? e.message : "bridge forward threw";
-                lastUp = null;
-            }
-        }
-        const text = lastUp ? await lastUp.text() : "";
-        let parsed: unknown = null;
-        try { parsed = text ? JSON.parse(text) : null; } catch (_e) { parsed = null; }
-        const doorOk = !!lastUp && lastUp.status >= 200 && lastUp.status < 300
-            && !(parsed && typeof parsed === "object" && (parsed as { error?: unknown }).error);
-        if (!doorOk) {
+        const fwd = await forwardDoorCalls(context, doorCalls);
+        if (!fwd.ok) {
             return ack({ received: true, event: incomingEvent, handlers: 0, dispatched: 0,
-                reply: { ok: false, code: CODES.UPST, error: lastErr || "the pod bridge refused the bridge call.", ms: Date.now() - tBridge } });
+                reply: { ok: false, code: CODES.UPST, error: fwd.err, ms: fwd.ms } });
         }
         return ack({ received: true, event: incomingEvent, handlers: 0, dispatched: 1,
-            reply: { ok: true, family: incomingEvent, answer: parsed, ms: Date.now() - tBridge } });
+            reply: { ok: true, family: incomingEvent, answer: fwd.parsed, ms: fwd.ms } });
     }
 
     // 5. the hop frame { origin, path, ct }.

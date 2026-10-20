@@ -19,6 +19,8 @@ export declare const EVENTS: {
     readonly sync: string;
     readonly lost: string;
     readonly call: string;
+    /** the traveler carrier, tr/1 (kit: traveler-contract.js TRAVEL_WIRE_EVENT) */
+    readonly travel: string;
 };
 export declare const FLAVORS: {
     readonly POD: string;

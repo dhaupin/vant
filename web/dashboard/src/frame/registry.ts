@@ -18,6 +18,7 @@ import {
   UserCog,
   UsersRound,
   Wallet,
+  Map,
 } from "lucide-react";
 import type { Tier } from "../state";
 
@@ -252,6 +253,21 @@ export const MODULES = [
     families: [],
     icon: Network,
     load: () => import("../modules/chain"),
+  },
+  {
+    // (the traveler carrier, tr/1; pass 254/256 frontend lane) the
+    // enterprise router object's front end: mint + send through the bridge
+    // lane (relay.travel), read the pin ledger through the door's real
+    // traveler_* verbs, verbatim.
+    id: "traveler",
+    title: "Traveler",
+    blurb: "Mint a traveler (content-addressed tr/1) and emit it as a pin; read the ledger.",
+    route: "/traveler",
+    tiers: ["O", "A", "S"],
+    section: "work",
+    families: [],
+    icon: Map,
+    load: () => import("../modules/traveler"),
   },
 ] as const satisfies readonly ModuleManifest[];
 
