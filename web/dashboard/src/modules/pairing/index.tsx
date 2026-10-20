@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { exec, ApiError } from "../../api";
 import { NotConnected, useToolsQuery, toolsByPrefix } from "../../frame/conn";
-import { useApp } from "../../state";
+import { useApp, actions as stateActions } from "../../state";
 
 /**
  * Module: pairing (catalog #14, Tier S) — P3 rung two (H6 un-holds here).
@@ -27,6 +27,11 @@ interface RedeemResult {
   guest?: { id?: string; name?: string; role?: string };
   reason?: string;
   error?: string;
+  /** (P6b, the binding moment) the RAW e2e channel key, delivered ONCE
+   *  beside the token when the pod's ride face is armed; never again
+   *  readable from any door or caps surface. */
+  channelKey?: string;
+  e2e?: "bound" | "unbound";
 }
 
 function deepLink(code: string): string {
@@ -195,6 +200,7 @@ function RedeemPanel({ prefill }: { prefill: string }) {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<RedeemResult | null>(null);
   const [refusal, setRefusal] = useState("");
+  const property = useApp((s) => s.property);
 
   const redeem = async () => {
     const clean = code.trim();
@@ -206,6 +212,13 @@ function RedeemPanel({ prefill }: { prefill: string }) {
       const r = (await exec("pairing_voucher_redeem", { code: clean })) as unknown as RedeemResult;
       const v = (r && typeof r === "object" && "result" in r ? (r as { result: RedeemResult }).result : r);
       setResult(v ?? null);
+      // (P6b, prd-relay.md §5) THE BINDING MOMENT'S CLIENT HALF: the reply
+      // carried the RAW e2e channelKey — bind it into the sovereign
+      // profile HERE, this tab, this scope (the same one-tab law as the
+      // pasted token). It will never be delivered again by any surface.
+      if (v && typeof v === "object" && v.ok && typeof v.channelKey === "string") {
+        stateActions.bindChannelKey(property, v.channelKey);
+      }
     } catch (err) {
       setRefusal(err instanceof ApiError ? err.message : "the door did not answer");
     } finally {
@@ -256,6 +269,19 @@ function RedeemPanel({ prefill }: { prefill: string }) {
               {result.guest?.role ? ` · role ${result.guest.role}` : ""}
               {" · single-use: this code can never redeem again"}
             </p>
+            {result.channelKey ? (
+              <p className="mt-2 rounded-md border border-moss/40 bg-moss/10 px-2 py-1.5 text-xs text-moss">
+                e2e channel bound — the pairing key rides THIS one-time reply
+                only; it is now held in this profile and this tab (cleared on
+                sign-out), never again handed out by any door or caps surface.
+              </p>
+            ) : result.e2e === "unbound" ? (
+              <p className="mt-2 rounded-md border border-line bg-surface px-2 py-1.5 text-xs text-ink-soft">
+                e2e honestly unbound: this pod's ride face is not armed
+                (relay.enabled + relay.channelKey) — no e2e key was
+                delivered; the ride corridor refuses until it is.
+              </p>
+            ) : null}
           </div>
         ) : (
           <p className="mt-3 rounded-md border border-err/40 bg-err/5 px-3 py-2 text-xs text-err">

@@ -187,15 +187,14 @@ export const onRequestPost: Handler = async (context) => {
         return plain(TRANSPORT_STATUS.UNAUTHENTICATED, { error: "Stale envelope: ts outside the freshness window" });
     }
     if (incomingEvent !== EVENTS.hop
-        && incomingEvent !== EVENTS.sync && incomingEvent !== EVENTS.lost && incomingEvent !== EVENTS.call) {
-        // relay.ride is a POD-face event (the channel key lives with the
-        // pod; the edge holds no keys to open rides and never fakes it).
+        && incomingEvent !== EVENTS.sync && incomingEvent !== EVENTS.lost && incomingEvent !== EVENTS.call
+        && incomingEvent !== EVENTS.ride) {
         return ack({
             received: true,
             event: incomingEvent || "(none)",
             handlers: 0,
             dispatched: 0,
-            reply: { ok: false, code: CODES.UNKNOWN_EVENT, error: "this edge carries relay.hop and the bridge families (relay.sync | relay.lost | relay.call) - rides decode at the pod." },
+            reply: { ok: false, code: CODES.UNKNOWN_EVENT, error: "this edge carries relay.hop, the bridge families (relay.sync | relay.lost | relay.call) and the browser-lane sealed ride (relay.ride)." },
         });
     }
 
@@ -204,10 +203,30 @@ export const onRequestPost: Handler = async (context) => {
     // access server-side (the existing pod bridge lib - the browser JS
     // never sees a credential). Bridge families translate to the door's
     // existing verbs; hop propagates untouched below.
-    if (incomingEvent === EVENTS.sync || incomingEvent === EVENTS.lost || incomingEvent === EVENTS.call) {
+    // (pass 271 e2e rung, prd-relay.md §5) THE SEALED RIDE LANE: the paired
+    // sovereign browser hands the SEALED envelope { ct } — the edge CANNOT
+    // open it (the channel key lives at the pod and with the client; the
+    // edge is relay-blind BY LAW) and forwards the door verb relay_ride,
+    // whose shared ride core opens, rides, and re-seals. Only the paired
+    // browser lane (vguest_ bearer, no signature) reaches this; a relay
+    // lane ride still refuses (rides decode at the pod, never here).
+    if (incomingEvent === EVENTS.ride && !browserLane) {
+        return ack({
+            received: true,
+            event: incomingEvent,
+            handlers: 0,
+            dispatched: 0,
+            reply: { ok: false, code: CODES.UNKNOWN_EVENT, error: "rides decode at the pod (the channel key lives there) - this edge carries sealed browser-lane rides only; sign the envelope against the pod's own webhook instead." },
+        });
+    }
+    if (incomingEvent === EVENTS.sync || incomingEvent === EVENTS.lost || incomingEvent === EVENTS.call || incomingEvent === EVENTS.ride) {
         const bp = (crew.payload && typeof crew.payload === "object" && !Array.isArray(crew.payload))
-            ? (crew.payload as { entries?: unknown[]; name?: unknown; content?: unknown; format?: unknown; tool?: unknown; method?: unknown; args?: unknown })
+            ? (crew.payload as { entries?: unknown[]; name?: unknown; content?: unknown; format?: unknown; tool?: unknown; method?: unknown; args?: unknown; ct?: unknown })
             : null;
+        if (bp === null || (incomingEvent === EVENTS.ride && typeof bp.ct !== "string")) {
+            return ack({ received: true, event: incomingEvent, handlers: 0, dispatched: 0,
+                reply: { ok: false, code: CODES.NEEDS_ENVELOPE, error: "bridge payload shape refused: sync {name,content} or {entries:[..]}, lost {}, call {tool|method, args?}, ride { ct } (the sealed envelope)." } });
+        }
         if (bp === null || (incomingEvent === EVENTS.sync && typeof bp.name !== "string" && !(Array.isArray(bp.entries) && bp.entries.length))) {
             return ack({ received: true, event: incomingEvent, handlers: 0, dispatched: 0,
                 reply: { ok: false, code: CODES.NEEDS_ENVELOPE, error: "bridge payload shape refused: sync {name,content} or {entries:[..]}, lost {}, call {tool|method, args?}." } });
@@ -216,14 +235,16 @@ export const onRequestPost: Handler = async (context) => {
             incomingEvent === EVENTS.sync && Array.isArray(bp.entries) && bp.entries.length
                 ? (bp.entries.slice(0, 64) as Array<{ name?: unknown; content?: unknown; format?: unknown }>)
                 : [{ name: bp.name, content: bp.content, format: bp.format }];
-        const doorCalls: Array<{ tool: string; args: unknown }> = incomingEvent === EVENTS.sync
-            ? entries.map((en) => ({
+        const doorCalls: Array<{ tool: string; args: unknown }> = incomingEvent === EVENTS.ride
+            ? [{ tool: "relay_ride", args: { ct: bp.ct } }]
+            : incomingEvent === EVENTS.sync
+              ? entries.map((en) => ({
                 tool: "brain_write",
                 args: { name: en.name, content: en.content, format: en.format },
-            }))
-            : incomingEvent === EVENTS.lost
-              ? [{ tool: "context_heartbeat", args: { action: "status" } }, { tool: "brain_current", args: {} }]
-              : [{ tool: String(bp?.tool ?? bp?.method ?? ""), args: bp?.args }];
+              }))
+              : incomingEvent === EVENTS.lost
+                ? [{ tool: "context_heartbeat", args: { action: "status" } }, { tool: "brain_current", args: {} }]
+                : [{ tool: String(bp?.tool ?? bp?.method ?? ""), args: bp?.args }];
         if (incomingEvent === EVENTS.call && !String(doorCalls[0].tool).trim()) {
             return ack({ received: true, event: incomingEvent, handlers: 0, dispatched: 0,
                 reply: { ok: false, code: CODES.NEEDS_ENVELOPE, error: "bridge call needs { tool | method, args? } - the door verifies the rest." } });

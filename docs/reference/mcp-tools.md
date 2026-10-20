@@ -1683,6 +1683,23 @@ Revoke a guest by id or name. Denylist-backed: the hold of that token
 is locked out at once, in every future process. **Params:** `id`
 (string, required). Admin-only.
 
+### relay_ride
+
+The e2e ride corridor AT THE DOOR (prd-relay.md §5, P6b rung): the
+paired client seals a door call as an AES-256-GCM envelope (Encrypt
+canon `salt:iv:tag:cipher`, keyed by the pod's `relay.channelKey`) and
+the door opens it, rides the inner call through its REAL door gates,
+and re-seals the answer into `ct` — `{ ok:true, rode:true, ct }`, typed
+`E_RIDE_*` refusals otherwise (`E_RIDE_OFFLINE` when the ride face is
+not bound; `E_RIDE_DECODE` for a wrong/stale key; `E_RIDE_REPLAY` when
+the inner nonce was already spent in the TTL window). Shares ONE answer
+core with the webhook `relay.ride` face (lib/api.js `rideAnswer`) so the
+ride law can never drift between faces. Unauthed-class by the same law
+as redeem — THE ENVELOPE IS THE CREDENTIAL: a stranger's ciphertext
+decodes to nothing and the inner bearer inside the seal is the actual
+door authority. **Params:** `ct` (string, required — the sealed
+envelope holding `{ nonce, bearer?, body:{ tool|method, args } }`).
+
 ### pairing_voucher_generate / pairing_voucher_redeem
 
 The H6/P3 voucher on the door: `pairing_voucher_generate` mints a

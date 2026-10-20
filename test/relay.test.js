@@ -382,6 +382,74 @@ async function run() {
     const garbage = policyP('not-an-origin', {});
     ok('16g. an unparseable origin refuses typed through the SAME language (E_RELAY_BAD_ORIGIN)',
         garbage.ok === false && garbage.code === 'E_RELAY_BAD_ORIGIN');
+
+    // ---- 17. THE DOOR-FACE RIDE CORRIDOR (pass 271 e2e rung): the same
+    // ride core answers the relay_ride DOOR verb — one law, both faces.
+    await (async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const preEnabled = config.get('relay.enabled');
+        const preKey = config.get('relay.channelKey');
+        const inner = (n) => JSON.stringify({ nonce: n, bearer: null, body: { tool: 'bridge_echo', args: { q: 'door-face' } } });
+        const fakeDoor = async ({ bearer, body }) => {
+            return { ok: true, status: 200, body: JSON.stringify({ jsonrpc: '2.0', id: 1, result: { echoed: body.tool, rode: 'door-faked' } }) };
+        };
+        let sawDoor = null;
+        try {
+            // 17a: UNBOUND posture — typed E_RIDE_OFFLINE, never a fake ride.
+            config.set('relay.enabled', 'false');
+            const offCt = Encrypt.encrypt(inner('door-unbound-0000000001'), CHANNEL_KEY);
+            const off = await mcp.execute('relay_ride', { ct: offCt });
+            ok('17a. relay_ride at the DOOR: an unbound pod answers typed E_RIDE_OFFLINE (honest, never a fake ride)',
+                off && off.ok === false && off.code === 'E_RIDE_OFFLINE');
+
+            // 17b: the happy corridor rides the REAL core (decode → nonce →
+            // inner door call → re-seal) and opens back to the same letter.
+            config.set('relay.enabled', 'true');
+            config.set('relay.channelKey', CHANNEL_KEY);
+            relay.setDoorTransport(async ({ bearer, body }) => {
+                sawDoor = { bearer, body };
+                return { ok: true, status: 200, body: JSON.stringify({ jsonrpc: '2.0', id: 1, result: { echoed: body.tool } }) };
+            });
+            const goodNonce = 'door-ride-17b-0000000001';
+            const goodCt = Encrypt.encrypt(inner(goodNonce), CHANNEL_KEY);
+            const good = await mcp.execute('relay_ride', { ct: goodCt });
+            let opened = null;
+            try { opened = JSON.parse(Encrypt.decrypt(good.ct, CHANNEL_KEY)); } catch (e) {}
+            ok('17b. the DOOR face rides the real core: sealed in → inner door call → answer re-sealed → opens to the same letter',
+                good && good.ok === true && good.rode === true && typeof good.ct === 'string'
+                && opened && opened.result && opened.result.echoed === 'bridge_echo'
+                && sawDoor && sawDoor.body.tool === 'bridge_echo',
+                JSON.stringify(good || null).slice(0, 160));
+
+            // 17c: inner-nonce replay at the DOOR refuses (rung 2-lite).
+            const rp = await mcp.execute('relay_ride', { ct: goodCt });
+            ok('17c. the DOOR face refuses the inner-nonce replay (E_RIDE_REPLAY, the binding holds at every face)',
+                rp && rp.ok === false && rp.code === 'E_RIDE_REPLAY');
+
+            // 17e: ONE LAW — the door spend strikes the SHARED nonce store:
+            // the same ct through the WEBHOOK face now replays too.
+            if (relayPort) {
+                const rideEnv = { event: 'relay.ride', from: 'one-law-probe', ts: Date.now(),
+                    nonce: crypto.randomBytes(16).toString('hex'), payload: { ct: goodCt }, v: { major: 2 } };
+                const raw = JSON.stringify(rideEnv);
+                const wh = await postRelay(relayPort, raw, { 'x-signature-256': Encrypt.hmacSign(raw, GATE) });
+                ok('17e. ONE RIDE LAW, TWO FACES: a door-spent nonce replays at the webhook face too (the shared core strike-through)',
+                    wh.status === 200 && wh.json && wh.json.reply && wh.json.reply.ok === false
+                    && wh.json.reply.code === 'E_RIDE_REPLAY',
+                    JSON.stringify(wh.json || null).slice(0, 160));
+            }
+
+            // 17d: a wrong-key seal decodes to nothing (fail-closed, E_RIDE_DECODE).
+            const badCt = Encrypt.encrypt(inner('door-ride-17d-0000000001'), 'the-dWrong-key-0123456789abcdef');
+            const bad = await mcp.execute('relay_ride', { ct: badCt });
+            ok('17d. a wrong-key seal decodes to NOTHING at the door (typed E_RIDE_DECODE, fail-closed)',
+                bad && bad.ok === false && bad.code === 'E_RIDE_DECODE');
+        } finally {
+            config.set('relay.enabled', preEnabled);
+            config.set('relay.channelKey', preKey);
+            relay.setDoorTransport(null); // back to the loopback door seam
+        }
+    })();
 }
 
 run()

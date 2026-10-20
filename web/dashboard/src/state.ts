@@ -37,6 +37,28 @@ export interface AppState {
    *  relay's public capabilities page; non-sensitive (caps are public,
    *  secrets-free by contract), persisted like the other reach prefs. */
   relayEndpoint: string;
+  /** (P6b rung, prd-relay.md 3.3/6.1) THE USER'S chain, order matters:
+   *  the hops added by decision in Settings, each badged from its OWN
+   *  verified caps read (never a guess). Non-sensitive entries only:
+   *  origins + caps metadata, persisted like the other reach prefs. */
+  chain: ChainHop[];
+  /** the e2e channel key BOUND at pairwise redeem (per property; the binding
+   *  moment's one-time delivery). Held like the pasted tokens: memory AND a
+   *  sessionStorage copy — never localStorage, never any server surface. */
+  channelKeys: Record<string, string>;
+  /** the honest ROUTE RECORD from the last door call: which lane actually
+   *  answered, named plainly ('sealed-ride-e2e' | 'own-edge-bridge' |
+   *  'direct' | a fail-over story). Memory-only, read by /chain. */
+  lastRoute: string | null;
+}
+
+/** a chain hop: the user's verified read of one origin's caps (P6b). */
+export interface ChainHop {
+  id: string;
+  origin: string;
+  flavor: string;
+  e2e: string;
+  added: number;
 }
 
 const listeners = new Set<() => void>();
@@ -49,7 +71,28 @@ let state: AppState = {
   help: readRawPref("bolete-help") !== "0",
   relayUsage: readRawPref("bolete-relay-usage") === "1",
   relayEndpoint: readRawPref("bolete-relay-endpoint") ?? "",
+  chain: readChain("bolete-chain"),
+  channelKeys: {},
+  lastRoute: null,
 };
+
+/** the persisted chain read (non-sensitive: origins + caps metadata only). */
+function readChain(key: string): ChainHop[] {
+  try {
+    const raw = JSON.parse(localStorage.getItem(key) || "[]") as unknown;
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .filter(
+        (h): h is ChainHop =>
+          !!h && typeof (h as ChainHop).origin === "string"
+          && typeof (h as ChainHop).id === "string"
+          && /^https:\/\//.test((h as ChainHop).origin),
+      )
+      .slice(0, 16);
+  } catch {
+    return [];
+  }
+}
 
 function readRawPref(key: string): string | null {
   try {
@@ -121,6 +164,74 @@ export const actions = {
       }
     } catch { /* private mode: memory-only */ }
   },
+  /** (P6b) restore the pairwise-bound e2e channel key for THIS tab — the
+   *  same one-tab scope as the pasted token, wiped with it on sign-out. */
+  restoreChannelKey(property: string) {
+    try {
+      const saved = sessionStorage.getItem("bolete-ck-" + property);
+      if (saved && saved.length >= 32 && !state.channelKeys[property]) {
+        set({ channelKeys: { ...state.channelKeys, [property]: saved } });
+      }
+    } catch { /* private mode: memory-only */ }
+  },
+  /** (P6b, the binding moment's client half) the redeem reply delivered
+   *  the RAW e2e channelKey exactly once — bind it into the sovereign
+   *  profile HERE, the only surface that ever holds it client-side. */
+  bindChannelKey(property: string, key: string) {
+    if (!key || key.length < 32) return;
+    set({ channelKeys: { ...state.channelKeys, [property]: key } });
+    try {
+      sessionStorage.setItem("bolete-ck-" + property, key);
+    } catch { /* private mode: memory-only */ }
+  },
+  unbindChannelKey(property: string) {
+    const keys = { ...state.channelKeys };
+    delete keys[property];
+    set({ channelKeys: keys });
+    try {
+      sessionStorage.removeItem("bolete-ck-" + property);
+    } catch { /* private mode: nothing to wipe */ }
+  },
+  /** the honest ROUTE RECORD from the last door call (memory-only). */
+  markRoute(route: string | null) {
+    set({ lastRoute: route });
+  },
+  /** add a verified hop (its caps verdict arrived from the origin's own
+   *  PUBLIC capabilities page in api.relayCaps — a record, not a guess). */
+  addHop(caps: { origin: string; flavor: string; e2e: string }): void {
+    if (!/^https:\/\//.test(caps.origin) || state.chain.some((h) => h.origin === caps.origin)) return;
+    const hop: ChainHop = {
+      id: "hop-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8),
+      origin: caps.origin,
+      flavor: caps.flavor,
+      e2e: caps.e2e,
+      added: Date.now(),
+    };
+    const chain = [...state.chain, hop];
+    set({ chain });
+    try {
+      localStorage.setItem("bolete-chain", JSON.stringify(chain));
+    } catch { /* private mode: session-only chain */ }
+  },
+  removeHop(id: string) {
+    const chain = state.chain.filter((h) => h.id !== id);
+    set({ chain });
+    try {
+      localStorage.setItem("bolete-chain", JSON.stringify(chain));
+    } catch { /* private mode: session-only chain */ }
+  },
+  moveHop(id: string, dir: -1 | 1) {
+    const i = state.chain.findIndex((h) => h.id === id);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= state.chain.length) return;
+    const chain = [...state.chain];
+    const [moved] = chain.splice(i, 1);
+    chain.splice(j, 0, moved);
+    set({ chain });
+    try {
+      localStorage.setItem("bolete-chain", JSON.stringify(chain));
+    } catch { /* private mode: session-only chain */ }
+  },
   setTheme(theme: AppState["theme"]) {
     set({ theme });
     try {
@@ -173,12 +284,13 @@ export const actions = {
     *  resurrect a signed-out tab: the rehydrate would beat the empty
     *  probe). Keys are wiped by suffix so every property clears. */
   clearAccount() {
-    set({ account: null, boundFor: [], tokens: {} });
+    set({ account: null, boundFor: [], tokens: {}, channelKeys: {} });
     try {
       const kill: string[] = [];
       for (let i = 0; i < sessionStorage.length; i++) {
         const k = sessionStorage.key(i);
-        if (k && k.startsWith("bolete-token-")) kill.push(k);
+        // the e2e channel keys share the token's scope: signed out = gone
+        if (k && (k.startsWith("bolete-token-") || k.startsWith("bolete-ck-"))) kill.push(k);
       }
       for (const k of kill) sessionStorage.removeItem(k);
     } catch { /* private mode: nothing to wipe */ }

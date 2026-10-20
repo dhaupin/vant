@@ -5,6 +5,52 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 271 (P6b: the pairing-time e2e channel rides — key binding + the live chain)
+
+### Added - the binding moment, the sealed ride, and the chain editor
+
+- **THE KEY BINDING AT PAIRING (pod, §5 rung 1)**: `pairing_voucher_redeem`
+  now carries the RAW e2e `relay.channelKey` in the SAME one-time reply as
+  the guest token — delivered ONLY when the pod's ride face is really armed
+  (relay.enabled + relay.channelKey, lib/api.js's own law); an unbound pod
+  answers honestly `e2e:"unbound"`, never a fake key. The key never lands in
+  any other door or caps surface; the binding pins ride the guest door suite
+  (armed → bound; disarmed → unbound, 25/25).
+- **`relay_ride` DOOR VERB (lib/mcp.js) + THE SHARED RIDE CORE
+  (lib/api.js `rideAnswer`)**: the ride corridor answers at the DOOR too —
+  `_dispatchRide` and the verb share ONE answer core, so the ride law
+  (decode → nonce → inner door call → re-seal) can never drift between the
+  webhook face and the door face (17e pins it: a door-spent nonce replays
+  typed `E_RIDE_REPLAY` at the webhook too). Unauthed-class by the same law
+  as redeem — THE ENVELOPE IS THE CREDENTIAL. Relay suite 43/43; docs row
+  added (mcp coverage 347/347).
+- **THE CLIENT CRYPTO (`web/dashboard/src/lib/seal.ts`)**: WebCrypto
+  PBKDF2-SHA256(100k) → AES-256-GCM seals/opens in the pod's Encrypt canon
+  EXACTLY — salt:iv:tag:cipher hex, 12-byte modern IV, byte-compatible in
+  BOTH directions, cross-pinned with node crypto re-stating the pod's
+  decrypt law (no pod lib import; the one-way boundary stays clean).
+- **THE LIVE ROUTE (src/api.ts `exec`)**: usage ON + a bound key ⇒ door
+  calls ride SEALED (inner `{nonce, bearer, body}` inside the canon
+  envelope; the edge sees ciphertext only — §5's honest boundary) through
+  the dashboard edge's NEW browser-lane `relay.ride` family
+  (functions/api/r/relay.ts → the door verb `relay_ride`). ANY sealed-lane
+  refusal ADVANCES to the direct pod bridge, recorded; the lane that
+  actually answered is named in the `/chain` route record.
+- **THE SOVEREIGN PROFILE STATE (src/state.ts)**: chain hops
+  (non-sensitive, localStorage), the pairwise-bound channel key per
+  property (token-class: memory + sessionStorage, wiped on sign-out), and
+  the honest route record.
+- **THE CHAIN EDITOR (Settings, prd-relay.md 3.3)**: add = a live read of
+  the origin's PUBLIC caps (the one contract-defined cross-origin fetch,
+  and only there), remove, reorder, and an e2e badge per hop from its OWN
+  verified read; `/chain` states the P6b truth (E2E_LANE) + saved hops +
+  the route record; the pairing redeem panel binds the delivered key with
+  the one-time-honesty text.
+- **Suite**: dashboard tsc clean, web/relay tsc clean, vitest 59/59 (10
+  new: 4 seal-canon pins, 3 route pins, 3 render pins), lint:web 0
+  problems, vendor --check green, parity 19/19, relay 43/43, guests 25/25,
+  mcp 34/34.
+
 ## [Unreleased] - lint gate for the web trees (the TS/TSX parse gap is closed)
 
 ### Added - the web trees lint for real (`npm run lint:web`)

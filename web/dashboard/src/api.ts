@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { getState } from "./state";
+import {
+  getState,
+  actions as stateActions,
+} from "./state";
+import { sealEnvelope, openEnvelope } from "./lib/seal";
 
 /**
  * The ONE typed client every module uses (prd-web.md 3.3 resp. 4). It
@@ -75,8 +79,37 @@ function headers(json: boolean): HeadersInit {
   return h;
 }
 
-/** POST /api/mcp/exec through the Worker proxy (auth forwarded, never logged). */
+/**
+ * (P6b rung, prd-relay.md §5 + 6.1) THE LIVE CHAIN ROUTING for every door
+ * call. When the user turned usage ON and an e2e channel key is bound
+ * (the pairwise redeem's one-time delivery), the call rides SEALED: the
+ * browser seals `{ nonce, bearer, body }` with the binding key (Encrypt
+ * canon), hands the ciphertext to the dashboard edge's relay.ride family,
+ * and the pod's shared ride core answers re-sealed. The edge sees
+ * ciphertext only (§5's honest boundary); the inner bearer inside the
+ * seal is the door authority. On ANY sealed-lane failure (transport or
+ * typed E_RIDE_*) the route ADVANCES to the direct own-edge pod bridge —
+ * recorded, never silent — so the dashboard still works. The lane that
+ * actually answered is named in state.lastRoute (the /chain badge). */
 export async function exec(tool: string, args: Record<string, unknown> = {}): Promise<unknown> {
+  const s = getState();
+  if (s.relayUsage && s.channelKeys[s.property]) {
+    try {
+      const out = await sealedExec(tool, args);
+      stateActions.markRoute("sealed-ride-e2e");
+      return out;
+    } catch (e) {
+      const why = e instanceof ApiError ? e.message : "the sealed lane answered nothing";
+      stateActions.markRoute("failover → direct pod bridge (sealed ride refused: " + why + ")");
+    }
+  } else {
+    stateActions.markRoute(s.relayUsage ? "own-edge-bridge (no e2e key bound yet)" : "direct");
+  }
+  return execDirect(tool, args);
+}
+
+/** POST /api/mcp/exec through the Worker proxy (auth forwarded, never logged). */
+async function execDirect(tool: string, args: Record<string, unknown> = {}): Promise<unknown> {
   let res: Response;
   try {
     res = await fetch("/api/mcp/exec", {
@@ -365,6 +398,8 @@ export const BridgeAck = z
         family: z.string().optional(),   // ok replies name the family
         answer: z.unknown().optional(),  // the door's answer (families)
         raw: z.string().optional(),      // hop's verbatim upstream body
+        rode: z.boolean().optional(),    // ride's ok flag (relay.ride)
+        ct: z.string().optional(),       // ride's re-sealed answer envelope
         ms: z.number().optional(),
       })
       .passthrough()
@@ -423,6 +458,54 @@ export function bridgeLost(): Promise<BridgeReply> {
  *  the rest; typed refusals surface as reply.code). */
 export function bridgeCall(tool: string, args: Record<string, unknown> = {}): Promise<BridgeReply> {
   return bridgeSend("relay.call", { tool, args });
+}
+
+/**
+ * (P6b) THE SEALED RIDE: craft the e2e envelope right here — inner body
+ * { nonce, bearer, body:{tool,args} } (the EXACT shape the pod's ride
+ * core opens, pass 269's corridor law), seal with the binding key, ride
+ * the edge's relay.ride family, open the re-sealed answer. Typed E_RIDE_*
+ * refusals surface as ApiError("refused").
+ */
+async function sealedExec(tool: string, args: Record<string, unknown>): Promise<unknown> {
+  const s = getState();
+  const key = s.channelKeys[s.property];
+  if (!key) throw new ApiError("no e2e channel key is bound (bind at /pairing)", "refused");
+  const inner = JSON.stringify({
+    nonce: crypto.randomUUID(),
+    bearer: token() ?? null,
+    body: { tool, args },
+  });
+  const ct = await sealEnvelope(inner, key);
+  const reply = await bridgeSend("relay.ride", { ct });
+  if (!reply.ok) {
+    throw new ApiError(
+      reply.code ? `${reply.code}: ${reply.error ?? "refused"}` : (reply.error ?? "the sealed ride refused"),
+      "refused",
+      reply.ms,
+    );
+  }
+  if (typeof reply.ct !== "string" || !reply.ct) {
+    throw new ApiError("the ride ack carried no sealed answer envelope", "shape");
+  }
+  let opened: string;
+  try {
+    opened = await openEnvelope(reply.ct, key);
+  } catch (e) {
+    throw new ApiError(e instanceof Error ? e.message : "the sealed answer would not open", "shape");
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(opened);
+  } catch {
+    throw new ApiError("the sealed answer was not parseable", "shape");
+  }
+  const asObj = parsed as { error?: { message?: string } };
+  if (asObj && typeof asObj === "object" && asObj.error) {
+    throw new ApiError(`door: ${asObj.error.message ?? "refused"}`, "refused");
+  }
+  const result = (parsed as { result?: unknown }).result;
+  return result === undefined ? parsed : result;
 }
 
 /** The typed bridge refusal, shaped for UI surfaces (the code first). */

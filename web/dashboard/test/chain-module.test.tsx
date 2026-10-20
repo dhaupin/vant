@@ -1,6 +1,6 @@
 import { renderToString } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import Chain, { CORE_RUNG, HopRow, ProbeCard } from "../src/modules/chain";
+import Chain, { HopRow, ProbeCard } from "../src/modules/chain";
 import { relayCaps, ApiError } from "../src/api";
 
 /**
@@ -18,15 +18,17 @@ const CAPS = {
 };
 
 describe("HopRow — honest chain badges", () => {
-  it("renders caps verdict verbatim + the core-rung status (no greenwashed e2e badge)", () => {
+  it("renders caps verdict verbatim + the landed P6b core-rung status (the e2e lane rides SEALED, stated verbatim)", () => {
     const html = renderToString(
       <HopRow label="relay hop" state={{ s: "on", caps: CAPS }} />,
     );
     expect(html).toContain("r/2");
     expect(html).toContain("solo-relay");
     expect(html).toContain("envelope-required");
-    expect(html).toContain(CORE_RUNG);
-    expect(html).toContain("P6b rung");
+    // entity-safe substring (renderToString escapes the apostrophe in
+    // “profile's”): pin the load-bearing clause, not the whole sentence
+    expect(html).toContain("rides SEALED through the dashboard edge");
+    expect(html).toContain("binding at /pairing");
   });
 
   it("names the ACTIVE hop with a real badge, inactive hops with 'not routed yet'", () => {

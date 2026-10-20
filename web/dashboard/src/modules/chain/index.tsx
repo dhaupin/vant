@@ -21,12 +21,23 @@ import { Refusal } from "../../frame/Refusal";
  * browser-side (prd-relay.md 3.1's probe seam, one-way boundary).
  */
 
-/** The honest core-rung line, stated once — never a greenwashed badge. */
+/** The honest core-rung line, stated once — never a greenwashed badge.
+ *  (P6b landed) the e2e pairing-time channel is now REAL: a paired
+ *  profile rides SEALED through the dashboard edge's relay.ride family
+ *  (edge relay-blind by law, pod opens with the channel key); upstream
+ *  hops stay ciphertext-forward (hop caps), exec routes live in Settings. */
 export const CORE_RUNG =
   "core rung — the hop pipe is ciphertext-only (r/2 " + E2E_LAW + " caps, " +
-  "stated verbatim); the pairing-time e2e channel (relay-blind body, " +
-  "prd-relay.md 5) lands at the P6b rung. Nothing routes through this " +
-  "hop until then.";
+  "stated verbatim); a paired profile's e2e channel (binding at /pairing, " +
+  "prd-relay.md §5) rides SEALED through the dashboard edge — upstream " +
+  "hops carry ciphertext but never hold this channel's key.";
+
+/** The honest e2e-lane line for a profile with a bound channel key. */
+export const E2E_LANE =
+  "e2e lane LIVE (P6b): door calls seal to the pod's channel key at the " +
+  "binding moment, ride the edge's relay.ride family, and fail over to " +
+  "the direct pod bridge when the sealed lane refuses — the route record " +
+  "below names the lane that actually answered.";
 
 export type CapsState =
   | { s: "stub" }
@@ -146,6 +157,9 @@ export function ProbeCard() {
 export default function Chain() {
   const usage = useApp((s) => s.relayUsage);
   const endpoint = useApp((s) => s.relayEndpoint);
+  const route = useApp((s) => s.lastRoute);
+  const boundKey = useApp((s) => s.channelKeys[s.property] ?? null);
+  const chain = useApp((s) => s.chain);
   const [self, setSelf] = useState<CapsState>({ s: "stub" });
   const [peer, setPeer] = useState<CapsState>({ s: "stub" });
   const [propCount, setPropCount] = useState<number | null>(null);
@@ -193,7 +207,7 @@ export default function Chain() {
       <section className="mt-6">
         <h2 className="text-base font-semibold">Reach (your choice — read here, edited in Settings)</h2>
         <p className="mt-2 text-sm">
-          usage: <span className="text-ink">{usage ? "reach this pod through relay hops" : "direct (Mode A/B)"}</span>
+          usage: <span className="text-ink">{usage ? "reach this pod through the chain" : "direct (Mode A/B)"}</span>
         </p>
         <p className="mt-1 text-sm">
           chain endpoint:{" "}
@@ -204,10 +218,35 @@ export default function Chain() {
           )}
         </p>
         <p className="mt-1 text-xs text-ink-soft">
-          Today's truth: usage ON adds INTENT ONLY (prd-relay.md 6.1). Traffic
-          stays direct until the chain editor + pairing-time e2e rungs make it
-          live; this card never pretends otherwise.
+          e2e tie: {boundKey ? (
+            <span className="text-moss">a channel key is bound to this profile — door calls ride SEALED (prd-relay.md §5, P6b)</span>
+          ) :(
+            <span>no key bound yet — bind once at <span className="font-mono">/pairing</span> (the redeem's one-time reply)</span>
+          )}
         </p>
+        <p className="mt-1 text-xs text-ink-soft">{E2E_LANE}</p>
+        <div className="mt-2 rounded-lg border border-line bg-surface px-3 py-2">
+          <p className="text-xs font-semibold uppercase tracking-wider text-ink-soft">route record</p>
+          <p className="mt-1 font-mono text-xs text-ink">{route ?? "no door call yet this session"}</p>
+        </div>
+      </section>
+
+      <section className="mt-6">
+        <h2 className="text-base font-semibold">Saved hops ({chain.length})</h2>
+        {chain.length === 0 ? (
+          <p className="mt-1 text-xs text-ink-soft">none yet — add an https origin in Settings → the chain editor (caps-verified, e2e-badged).</p>
+        ) : (
+          <div className="mt-2 space-y-2">
+            {chain.map((hop, i) => (
+              <HopRow
+                key={hop.id}
+                label={String(i + 1) + ". " + hop.origin}
+                note={"added from its own caps read · " + hop.flavor + " · " + hop.e2e}
+                state={{ s: "on", caps: { relay: "r/2", flavor: hop.flavor, e2e: hop.e2e } }}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="mt-6">

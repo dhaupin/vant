@@ -1,7 +1,10 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** axolotl relay arc, passes 216-242  
+**Last Updated:** pass 271 (the P6b pairing-time e2e rung: key binding at
+redeem + the relay_ride door verb + the sealed browser lane + the chain
+editor; the P6b 'lands next' notes in the pass-237 arc prose below are now
+historical — the rung is landed, suites in CHANGELOG pass 271)  
 **Session:** Pass 242 - THE NAV + MISSIONS SPEC: eight new modules queued
 (consensus, resolution/citations, era/succession, nature flywheel,
 habitats, cron manager, settlements, origins), the hierarchical

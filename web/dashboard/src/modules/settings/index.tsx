@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { actions, useApp, useAppRaw } from "../../state";
 import { Help } from "../../frame/Tooltip";
 import { ConfirmationModal } from "./confirm";
+import { relayCaps, E2E_LAW, ApiError, type RelayCaps as ApiRelayCaps } from "../../api";
 
 /**
  * Relay posture (prd-relay.md 4.0 - "participate as a relay" lives in
@@ -20,11 +21,13 @@ type Caps = {
 };
 
 /** the usage side (prd-relay.md 6.1): the USER'S own reach choice -
- *  persisted, theirs alone; drives chain routing once the chain editor
- *  and the pairing-time e2e keys land (stated in plain text, never
- *  fake-routed before). */
+ *  persisted, theirs alone. LIVE since the P6b rung: with an e2e key
+ *  bound (the /pairing redeem's one-time delivery) door calls ride the
+ *  SEALED lane; without one, ON names intent and traffic stays on the
+ *  direct pod bridge (stated plainly, never fake-routed). */
 function RelayUsage() {
   const on = useApp((s) => s.relayUsage);
+  const boundKey = useApp((s) => s.channelKeys[s.property] ?? null);
   return (
     <div className="text-sm">
       <label className="flex items-start gap-2">
@@ -35,14 +38,17 @@ function RelayUsage() {
           className="mt-0.5"
         />
         <span>
-          reach this pod <span className="font-medium text-ink">through relay hops</span> when
+          reach this pod <span className="font-medium text-ink">through the chain</span> when
           available (off = direct Mode A/B)
         </span>
       </label>
       <p className="mt-2 text-ink-soft">
         {on
-          ? "Saved to your profile. What it does TODAY: nothing routes differently yet - the chain editor and the pairing-time e2e keys (prd-relay.md 5/6.1) are what make it live, and those land next. Until then traffic stays direct; this page never pretends otherwise."
-          : "Direct reach (Mode A/B). Turn on when you want your traffic to ride relay hops instead."}
+          ? "Saved to your profile. LIVE lane: " +
+            (boundKey
+              ? "an e2e key is bound — door calls seal to the pod's channel key and ride the edge's relay.ride family; any sealed-lane refusal fails over to the direct pod bridge, recorded in /chain's route record."
+              : "no e2e key bound yet — bind once at /pairing (the redeem's one-time reply) and door calls will ride SEALED; without it traffic stays on the direct pod bridge, honestly.")
+          : "Direct reach (Mode A/B). Turn on when you want your door calls to ride the sealed e2e lane instead."}
       </p>
     </div>
   );
@@ -151,11 +157,125 @@ function RelayEndpoint() {
         )}
       </p>
       <p className="mt-2 text-ink-soft">
-        Today's truth, stated plainly: the endpoint is verified live (the
-        relay proves its own posture); execution <span className="font-medium text-ink">through</span> it
-        routes with the pairing-time e2e rung (prd-relay.md 5) - until then
-        this card verifies and remembers, and nothing fake-routes.
+        Today's truth, stated plainly: the endpoint is verified live
+        (caps r/2, envelope-required). Upstream relays carry ciphertext only
+        (envelope-required caps); a paired profile's e2e channel binds at
+        /pairing and rides through the dashboard edge — this endpoint is a
+        hop partner, never a key holder (prd-relay.md §5).
       </p>
+    </div>
+  );
+}
+
+/**
+ * (P6b) THE CHAIN EDITOR (prd-relay.md 3.3): the user's ordered hop list,
+ * hand-curated by decision. Add = verify the origin's LIVE PUBLIC caps
+ * (the one cross-origin fetch the chain contract allows, and only there),
+ * badge each hop from its OWN read, remove/reorder freely. Non-sensitive
+ * entries only (origins + caps metadata), persisted like the reach prefs.
+ */
+function ChainEditor() {
+  const chain = useApp((s) => s.chain);
+  const [draft, setDraft] = useState("");
+  const [state, setState] = useState<
+    | { kind: "idle" }
+    | { kind: "checking" }
+    | { kind: "added"; origin: string; flavor: string; e2e: string }
+    | { kind: "bad"; why: string }
+  >({ kind: "idle" });
+
+  const add = async () => {
+    const origin = draft.trim().replace(/\/+$/, "");
+    setState({ kind: "checking" });
+    try {
+      const caps: ApiRelayCaps = await relayCaps(origin);
+      actions.addHop({ origin: origin.replace(/\/+$/, ""), flavor: caps.flavor, e2e: caps.e2e ?? E2E_LAW });
+      setState({ kind: "added", origin: origin.replace(/\/+$/, ""), flavor: caps.flavor, e2e: caps.e2e ?? E2E_LAW });
+      setDraft("");
+    } catch (e) {
+      const why = e instanceof ApiError ? e.message : "the origin answered nothing";
+      setState({ kind: "bad", why });
+    }
+  };
+
+  return (
+    <div className="text-sm">
+      <label className="block">
+        <span className="text-ink-soft">add a hop (an https origin serving r/2 envelope-required caps):</span>
+        <div className="mt-1 flex gap-2">
+          <input
+            type="url"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") void add(); }}
+            placeholder="https://relay.example.com"
+            className="w-full rounded-md border border-line bg-surface px-2 py-1 font-mono text-xs"
+          />
+          <button
+            onClick={() => void add()}
+            disabled={state.kind === "checking" || !draft.trim()}
+            className="shrink-0 rounded-md border border-line px-2 py-1 text-xs hover:bg-ink/5 disabled:opacity-50"
+          >
+            {state.kind === "checking" ? "probing…" : "probe & add"}
+          </button>
+        </div>
+      </label>
+      <p className="mt-2 text-xs text-ink-soft">
+        {state.kind === "added" && (
+          <span className="text-moss">
+            ✓ added from its own caps read: {state.flavor}, e2e {state.e2e}
+            {state.e2e !== E2E_LAW ? " — NOT envelope-required: refused at exec time" : ""}
+          </span>
+        )}
+        {state.kind === "bad" && <span className="text-accent">✗ {state.why}</span>}
+        {state.kind === "checking" && <span>Reading the origin's public capabilities…</span>}
+        {state.kind === "idle" && <span>Order matters: the exec lane rides the chain in the order below (the dashboard edge is always the dead-last fallback).</span>}
+      </p>
+      <div className="mt-3 space-y-2">
+        {chain.length === 0 ? (
+          <p className="text-xs text-ink-soft">No hops yet — the chain is the direct pod bridge alone.</p>
+        ) : (
+          chain.map((hop, i) => (
+            <div key={hop.id} className="flex flex-wrap items-center gap-2 rounded border border-line bg-paper px-2 py-1">
+              <span className="font-mono text-xs text-ink">{i + 1}.</span>
+              <span className="min-w-0 flex-1 truncate font-mono text-xs">{hop.origin}</span>
+              <span className="text-[10px] text-ink-soft">{hop.flavor}</span>
+              <span
+                className={
+                  "rounded border px-1.5 py-0.5 text-[10px] " +
+                  (hop.e2e === E2E_LAW
+                    ? "border-moss/40 bg-moss/10 text-moss"
+                    : "border-err/40 bg-err/5 text-err")
+                }
+              >
+                e2e {hop.e2e}
+              </span>
+              <button
+                onClick={() => actions.moveHop(hop.id, -1)}
+                disabled={i === 0}
+                className="rounded border border-line px-1.5 py-0.5 text-[10px] hover:bg-ink/5 disabled:opacity-30"
+                aria-label="move hop earlier"
+              >
+                ↑
+              </button>
+              <button
+                onClick={() => actions.moveHop(hop.id, 1)}
+                disabled={i === chain.length - 1}
+                className="rounded border border-line px-1.5 py-0.5 text-[10px] hover:bg-ink/5 disabled:opacity-30"
+                aria-label="move hop later"
+              >
+                ↓
+              </button>
+              <button
+                onClick={() => actions.removeHop(hop.id)}
+                className="rounded border border-err/30 px-1.5 py-0.5 text-[10px] text-err hover:bg-err/5"
+              >
+                remove
+              </button>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
@@ -282,6 +402,12 @@ export default function Settings() {
 
       <Section title="Use relays (your reach)">
         <RelayUsage />
+      </Section>
+
+      <Section title="The chain (your hops, in order)">
+        <Help text="prd-relay.md 3.3: chains are hand-curated. Every hop lands only after its own live caps read verifies; the e2e badge comes from that same read.">
+          <ChainEditor />
+        </Help>
       </Section>
 
       <Section title="Run with a relay (web/relay endpoint)">
