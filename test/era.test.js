@@ -17,6 +17,7 @@
  */
 
 const path = require('path');
+const fs = require('fs');
 const ROOT = path.resolve(__dirname, '..');
 
 const results = { passed: 0, failed: 0 };
@@ -33,6 +34,23 @@ async function runAll(tests) {
 }
 
 const tests = [];
+
+// (pass 282) The suite runs under the INSTALL'S ACTIVE brain — the children
+// use the default brain resolution (VANT_BRAIN env → models/state.json stack
+// → 'vant') — so the tamper pin must target the SAME era state the ceremony
+// wrote, never a hardcoded brain name (the old 'vant' path ENOENTed on any
+// install whose currentBrain differs and crashed the tamper child at fs:440).
+const ACTIVE_BRAIN = (() => {
+    if (process.env.VANT_BRAIN) return process.env.VANT_BRAIN;
+    try {
+        const state = JSON.parse(fs.readFileSync(path.join(ROOT, 'models', 'state.json'), 'utf8'));
+        const pick = typeof state.currentBrain === 'string' && state.currentBrain
+            ? state.currentBrain
+            : (Array.isArray(state.stack) && state.stack[0] ? state.stack[0] : null);
+        if (pick && /^[a-zA-Z0-9._-]+$/.test(pick)) return pick;
+    } catch (_e) { /* fall through: no state.json yet */ }
+    return 'vant';
+})();
 const script = (_mode) =>
     '(async () => {' +
     'const era = require(' + JSON.stringify(path.join(ROOT, 'lib', 'era')) + ');' +
@@ -149,7 +167,7 @@ tests.push(asyncTest('checksum tamper-EVIDENCE: a mutated archived rollup FAILS 
     const r = spawnSync(process.execPath, ['-e',
         '(async () => {' +
         'const fs = require("fs");' +
-        'const p = ' + JSON.stringify(path.join(ROOT, 'models', 'private', 'vant', 'state', 'era-eras.json')) + ';' +
+        'const p = ' + JSON.stringify(path.join(ROOT, 'models', 'private', ACTIVE_BRAIN, 'state', 'era-eras.json')) + ';' +
         'const disk = JSON.parse(fs.readFileSync(p, "utf8"));' +
         'const last = disk.eras.length - 1;' +
         'disk.eras[last].intent = "TAMPERED BY THE PIN";' +
