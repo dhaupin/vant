@@ -191,5 +191,53 @@ test('cleanupScratch removes only sweep-MINTED brain dirs; pre-existing ones are
     } finally { fs.rmSync(cwd, { recursive: true, force: true }); }
 });
 
+test('state.json seat: a baseline SYMLINK is replanted, never followed into a write', () => {
+    const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'slate-t9-'));
+    try {
+        makeTree(cwd);
+        // Baseline seat: models/state.json is a symlink to a file OUTSIDE
+        // models/ (a real workspace shape: pointed state). The captured
+        // truth is the LINK, not the pointed content.
+        const realState = path.join(os.tmpdir(), 'slate-t9-target-' + process.pid + '.json');
+        fs.writeFileSync(realState, JSON.stringify({ stack: ['vant'], currentBrain: 'vant', via: 'linked-target' }));
+        fs.rmSync(path.join(cwd, 'models', 'state.json'));
+        fs.symlinkSync(realState, path.join(cwd, 'models', 'state.json'));
+        const s = slate.captureSlate(cwd);
+
+        // The suite REPLACES the link with a modified PLAIN file (the
+        // hostile shape): the pointed file must stay untouched.
+        fs.rmSync(path.join(cwd, 'models', 'state.json'));
+        fs.writeFileSync(path.join(cwd, 'models', 'state.json'), JSON.stringify({ currentBrain: 'hijacked' }));
+
+        slate.restoreSlate(null, s);
+        const st = fs.lstatSync(path.join(cwd, 'models', 'state.json'));
+        assert(st.isSymbolicLink(), 'restore materialized a FILE where the baseline had a symlink');
+        assert(fs.readlinkSync(path.join(cwd, 'models', 'state.json')) === realState, 'replanted link points at the wrong target');
+        assert(JSON.parse(fs.readFileSync(realState, 'utf8')).via === 'linked-target', 'the pointed file was clobbered through the seat');
+        fs.rmSync(realState, { force: true });
+    } finally { fs.rmSync(cwd, { recursive: true, force: true }); }
+});
+
+test('cleanupScratch leaves hostile brain-dir names alone (removal never guesses)', () => {
+    const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'slate-t10-'));
+    try {
+        makeTree(cwd);
+        const s = slate.captureSlate(cwd);
+        // A sweep-minted dir whose NAME fails the safe-charset law: the
+        // janitor skips it (leaving it for the operator) instead of
+        // rmSync'ing an unvalidated path it cannot reason about.
+        const hostile = path.join(cwd, 'models', 'private', 'bad name (needs review)');
+        fs.mkdirSync(hostile, { recursive: true });
+        fs.writeFileSync(path.join(hostile, 'keep.md'), 'x');
+        // ...and a well-formed mint in the same sweep still gets swept.
+        fs.mkdirSync(path.join(cwd, 'models', 'private', 'mint-293'), { recursive: true });
+
+        const r = slate.cleanupScratch(null, s);
+        assert(fs.existsSync(path.join(hostile, 'keep.md')), 'the janitor removed a dir whose name it could not validate');
+        assert(!fs.existsSync(path.join(cwd, 'models', 'private', 'mint-293')), 'well-formed mint survived while the hostile name skipped');
+        assert(r.removed.includes('private/mint-293') && !r.removed.some((n) => n.includes(' ')), 'cleanup bill includes an unvalidatable dir: ' + JSON.stringify(r.removed));
+    } finally { fs.rmSync(cwd, { recursive: true, force: true }); }
+});
+
 console.log(`\n=== Test-slate isolation: ${passed} passed, ${failed} failed ===\n`);
 process.exit(failed > 0 ? 1 : 0);

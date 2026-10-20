@@ -63,12 +63,25 @@ function captureSlate(rootDir) {
         publicManifest: _listBrainDirs(path.join(root, 'models', 'public'))
     };
 
-    // models/state.json — the shared current-brain pointer.
+    // models/state.json — the shared current-brain pointer. A SYMLINK in
+    // this seat (the storage-layer replant law) is never followed into a
+    // write: capture records the LINK TARGET, restore recreates the link —
+    // capture follows content only for a plain file seat.
     const stateFile = path.join(root, 'models', 'state.json');
     const stateSt = _statSafe(stateFile);
-    if (stateSt && !stateSt.isDirectory()) {
+    if (stateSt && stateSt.isSymbolicLink()) {
+        slate.stateIsSymlink = true;
+        slate.statePresent = false;
+        slate.stateLinkTarget = fs.readlinkSync(stateFile);
+    } else if (stateSt && !stateSt.isDirectory()) {
+        slate.stateIsSymlink = false;
+        slate.stateLinkTarget = null;
         slate.statePresent = true;
         fs.copyFileSync(stateFile, path.join(base, 'state.json'));
+    } else {
+        slate.stateIsSymlink = false;
+        slate.stateLinkTarget = null;
+        slate.statePresent = false;
     }
 
     // Active brain trees (private first, then public — a brain can live in
@@ -100,15 +113,22 @@ function restoreSlate(rootArg, slate) {
     // (the storage-layer law: never follow a planted symlink into a write).
     const stateFile = path.join(root, 'models', 'state.json');
     const stateSt0 = _statSafe(stateFile);
-    if (slate.statePresent) {
-        if (stateSt0 && (stateSt0.isSymbolicLink() || stateSt0.isDirectory())) {
-            try { fs.rmSync(stateFile, { force: true }); } catch (_e) { /* best effort; copy below decides */ }
-        }
+    // Whatever the baseline shape, the target seat is cleared first — a
+    // suite that planted a symlink (or a file) where a link/file lived
+    // never survives restore.
+    if (stateSt0) {
+        try { fs.rmSync(stateFile, { force: true }); } catch (_e) { /* best effort; shape reinstalled below */ }
+    }
+    if (slate.stateIsSymlink && slate.stateLinkTarget) {
+        fs.mkdirSync(path.dirname(stateFile), { recursive: true });
+        fs.symlinkSync(slate.stateLinkTarget, stateFile);
+        restored++;
+    } else if (slate.statePresent) {
         fs.mkdirSync(path.dirname(stateFile), { recursive: true });
         fs.copyFileSync(path.join(slate.base, 'state.json'), stateFile);
         restored++;
     } else if (stateSt0) {
-        try { fs.rmSync(stateFile, { force: true }); removed++; } catch (_e) { /* nothing to do */ }
+        removed++; // baseline had none: a suite-created pointer can't stay
     }
 
     // Active brain trees — full reinstall: the baseline tree replaces
