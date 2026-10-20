@@ -183,6 +183,35 @@ const mcp = require('./lib/mcp');
     }
 
     // ============================================
+    // GATE E — empty-segment keys refused (pass 295, deep pass)
+    // 'a..b' / '.x' / 'x.' walk to empty-string OBJECT keys in the brain
+    // config ("a": {"": …}) that no reader convention understands. They
+    // now refuse typed at the same gate as the prototype keys.
+    // ============================================
+    try {
+        const emptyScript = `
+const mcp = require('./lib/mcp');
+(async () => {
+    const cases = ['a..b', '.x', 'x.', 'a.....b'];
+    for (const k of cases) {
+        const r = await mcp.execute('vant_config_set', { key: k, value: 'yes' });
+        console.log(k + '=' + (r && r.error ? 'REFUSED:' + (r.code || 'no-code') : 'ACCEPTED:' + JSON.stringify(r)));
+    }
+    process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });
+`;
+        const out = await runNode(emptyScript);
+        report('config_set refuses empty-segment keys typed E_KEY_SEGMENT (a..b / .x / x. / a.....b)',
+            (out.match(/REFUSED:E_KEY_SEGMENT/g) || []).length === 4, out.trim());
+        let raw = '';
+        try { raw = fs.readFileSync(CFG, 'utf8'); } catch (e) {}
+        report('no empty-string key reached the brain config file',
+            !/""\s*:/.test(raw), raw.trim());
+    } catch (e) {
+        report('gate E (empty-segment key guard)', false, e.message);
+    }
+
+    // ============================================
     // Summary
     // ============================================
     console.log(`\n${results.passed} passed, ${results.failed} failed`);
