@@ -5,6 +5,40 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - P5b chain (the relay chain READ over the real caps routes)
+
+### Added - `/chain` (module #20, prd-carrier-share.md 3.2 P5b, from prd-relay.md 3.3/6.1)
+
+- **THE CHAIN MODULE (`web/dashboard/src/modules/chain`, `route /chain`,
+  tiers ALL, registered in frame/registry + a main.tsx route line)**: the
+  READ side of the two-sided contract — the editor stays in Settings
+  (Use relays / Run with a relay), `/chain` renders what the postures
+  actually answer. The ordered hop list per property: the saved
+  `/web/relay` hop when one is set (probed via its PUBLIC caps route —
+  the ONE cross-origin UI-side fetch the contract defines, nothing
+  else is ever probed browser-side), and the dead-last LOCAL fallback
+  pod bridge named the ACTIVE hop (honest today-truth: traffic is
+  direct; usage ON adds intent only until the P6b rung — the badge says
+  so, never a greenwash).
+- **HONEST CAPS RECORDS (`relayCaps` in src/api.ts, typed zod)**: 404
+  reads as "this deploy is not a relay" — an honest record, never a
+  crash; non-r/2 caps refuse; a caps page budgeting a PLAIN pipe
+  (`e2e !== envelope-required`) refuses LOUDLY (the plain-hop warn,
+  prd-relay 1.1.2); unreachable origins state the truth verbatim.
+- **THE CORE-RUNG BADGE (§5 pin)**: every hop states the core-rung line
+  verbatim — the hop pipe is ciphertext-only (r/2 envelope-required);
+  the pairing-time e2e channel (relay-blind body, prd-relay.md 5) lands
+  at the P6b rung — no fake e2e badge.
+- **THE PROBE RIDES THE DOOR (§3.3 probe seam)**: a `relay.lost` beacon
+  through the REAL intake (server-side HMAC); the verdict card renders
+  the ack verbatim — ok:true answers, typed `E_RELAY_*`/`E_RIDE_*`
+  refusals, and transport refusals all surface, none decorated.
+- **Suite**: dashboard tsc clean; vitest 49/49 (10 new chain pins: caps
+  verdict + core-rung badge verbatim, 404-as-record, ACTIVE vs
+  not-routed-yet badges, relayCaps 404/plain/r%2f refusals, ProbeCard
+  never auto-fires); vendor --check 9/9 untouched (no kit change),
+  relay-parity 19/19, mcp coverage 346/346.
+
 ## [Unreleased] - issues #212/#213 (the memory-learn prose lane: agent voice is writeable again)
 
 ### Fixed - the two false-positive walls on the learn lane (from rook on main)

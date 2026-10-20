@@ -6,7 +6,11 @@
 > (`web/kit/components/carrier-share.tsx`, vendored byte-identical into
 > `web/dashboard/src/frame/CarrierShare.tsx` with a hash pin by
 > `scripts/vendor-relay-kit.js`), and module 3.2 `carriers` (`/carriers`,
-> registered in frame/registry). The `chain` module stays P5b per §6.
+> registered in frame/registry) + module 3.2 `chain` (`/chain`, P5b: the
+> per-property hop read over the real `/api/r/capabilities` routes — own
+> deploy + the saved `/web/relay` hop, ACTIVE-hop named on the direct
+> pod bridge, honest core-rung badges, probe rides the door via
+> `relay.lost`; settings stays the EDITOR per prd-relay 6.1).
 > Spec family: extends [prd-web.md](prd-web.md) §4.2 (the covert-carrier
 > abstraction, owner directive 2026-10-16) and [prd-relay.md](prd-relay.md).
 > Every surface named here is a REAL existing surface (verified against the
@@ -151,7 +155,13 @@ vendored `CarrierShare` IF a real endpoint needs it; otherwise vendor
 - **P5a (this spec, first rung)**: pod verbs §2 + kit component §3.1 +
   dashboard `carriers` module §3.2. Front/back land in ONE pass so
   consistency is by construction, not by contract memo.
-- **P5b**: `chain` module + settings editor split (already specced in
-  prd-relay 6.1 — this spec only wires it to the caps route).
+- **P5b (landed)**: `chain` module + settings editor split (already
+  specced in prd-relay 6.1 — this spec only wires it to the caps route).
+  Landed: modules/chain over the REAL caps routes (`/api/r/capabilities`
+  on this deploy + the saved relay origin, cross-origin-readable by
+  contract); 404 = "not a relay" honest record; plain-pipe caps refuse
+  loudly; the not-yet-e2e badge is the core-rung status line, never a
+  greenwash; the probe rides the door (`relay.lost` through the intake);
+  the only UI-side fetch is the contract-defined public caps route.
 - **P6**: the relay piggyback story per prd-relay v0.2 (nothing here
   changes the P6a/P6b split).

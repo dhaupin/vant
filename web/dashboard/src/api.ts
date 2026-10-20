@@ -263,6 +263,63 @@ export async function setUserStatus(emailHash: string, status: "active" | "disab
   return parsed.data.result;
 }
 
+/**
+ * (prd-carrier-share.md 3.2 P5b) THE CAPS ROUTE CLIENT — the ONE
+ * cross-origin fetch the chain module may make, and ONLY to a relay's
+ * PUBLIC capabilities page (caps are secrets-free + wildcard-CORS by
+ * contract, prd-relay.md 4.0's solo admission note). Honest outcomes only:
+ * 404 means "this deploy is not a relay" — a RECORD, not a crash — and
+ * non-r/2 / non-envelope-required caps refuse loudly (the plain-hop warn,
+ * prd-relay 1.1.2). No other UI-side probe is ever allowed beyond this
+ * contract-defined surface.
+ */
+export const RelayCapsOut = z
+  .object({
+    relay: z.string(),
+    flavor: z.string(),
+    gated: z.boolean().optional(),
+    gateReady: z.boolean().optional(),
+    e2e: z.string().optional(),
+    surface: z.union([z.array(z.string()), z.string()]).optional(),
+    events: z.string().optional(),
+    posture: z.string().optional(),
+  })
+  .passthrough();
+
+export type RelayCaps = z.infer<typeof RelayCapsOut>;
+
+export const E2E_LAW = "envelope-required";
+
+export async function relayCaps(origin: string): Promise<RelayCaps> {
+  let res: Response;
+  try {
+    res = await fetch(origin.replace(/\/+$/, "") + "/api/r/capabilities");
+  } catch {
+    throw new ApiError("the origin answered nothing (down, or the URL is wrong)", "network");
+  }
+  if (res.status === 404) {
+    // an unmounted relay route answers the raw 404 shape on ALL flavors —
+    // that is "not a relay", stated honestly (a record, not a crash)
+    throw new ApiError("this deploy is not a relay (no /api/r surface is mounted)", "refused", 404);
+  }
+  if (!res.ok) {
+    throw new ApiError(`answered outside posture (HTTP ${res.status})`, "refused", res.status);
+  }
+  const parsed = RelayCapsOut.safeParse(await res.json().catch(() => null));
+  if (!parsed.success) throw new ApiError("unparseable caps page", "shape");
+  if (parsed.data.relay !== "r/2") {
+    throw new ApiError(`caps are not contract r/2 (answered ${parsed.data.relay})`, "refused", res.status);
+  }
+  if (parsed.data.e2e !== undefined && parsed.data.e2e !== E2E_LAW) {
+    throw new ApiError(
+      `caps budget a plain pipe (e2e=${parsed.data.e2e}) — this chain speaks ${E2E_LAW} only`,
+      "refused",
+      res.status,
+    );
+  }
+  return parsed.data;
+}
+
 async function readJson<S extends z.ZodTypeAny>(path: string, schema: S): Promise<z.infer<S>> {
   let res: Response;
   try {

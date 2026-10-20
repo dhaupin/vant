@@ -9,6 +9,7 @@ import {
   Gauge,
   KeyRound,
   MessagesSquare,
+  Network,
   QrCode,
   Settings,
   ShoppingBag,
@@ -236,6 +237,21 @@ export const MODULES = [
     families: [],
     icon: Package,
     load: () => import("../modules/carriers"),
+  },
+  {
+    // (prd-carrier-share.md 3.2 P5b) the chain module: the per-property
+    // ordered hop list, the ACTIVE hop named, honest core-rung badges,
+    // and a door-ridden probe (relay.lost). The two-sided contract 6.1
+    // holds: this page is the READ — the editor stays in Settings.
+    id: "chain",
+    title: "Chain",
+    blurb: "The relay chain read: hops, active hop, probe verdicts.",
+    route: "/chain",
+    tiers: ["O", "H", "A", "S"],
+    section: "observe",
+    families: [],
+    icon: Network,
+    load: () => import("../modules/chain"),
   },
 ] as const satisfies readonly ModuleManifest[];
 
