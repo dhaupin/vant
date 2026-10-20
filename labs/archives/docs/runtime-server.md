@@ -1,11 +1,18 @@
 ---
 version: 0.8.6
-permalink: /runtime/server
+permalink: /archived/runtime-server
 layout: default
-title: Server
-nav_order: 34
-
+title: Server (ARCHIVED)
+original: docs/runtime/server.md
+superseded_by: docs/reference/rest-api.md
 ---
+# ARCHIVED: Server Guide
+
+> Archived in the docs polish pass (axolotl): merged into
+> [Headless Server & REST API](/vant/reference/rest-api). This copy also
+> carried stale claims (GET /tools listed as live instead of retired by
+> issue #187, and the deprecated VANT_API_KEY auth recipe).
+
 # Server Guide
 
 > AI-first documentation for Vant server

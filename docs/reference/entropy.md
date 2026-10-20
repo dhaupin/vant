@@ -90,7 +90,7 @@ Compress a brain file (or a directory of them) for storage as
 
 ```bash
 # Compress one file into models/latent/
-vant compress models/private/goals.md -o models/latent
+vant compress models/private/vant/goals.md -o models/latent
 
 # Compress a directory of files
 vant compress models/private/ -o models/latent
@@ -112,7 +112,7 @@ Ask lightweight questions without full hydration:
 
 ```bash
 # Get stats on any file
-vant compress models/private/goals.md --stats
+vant compress models/private/vant/goals.md --stats
 ```
 
 ## CLI Commands

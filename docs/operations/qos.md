@@ -286,4 +286,4 @@ See [Sandbox](/vant/security/sandbox) for details.
 
 - [Sandbox](/vant/security/sandbox) - Execution isolation
 - [Security](/vant/security/) - VAF and encryption
-- [Network](/vant/runtime/server) - HTTP server with QoS
+- [REST API](/vant/reference/rest-api) - HTTP server with QoS

@@ -146,5 +146,5 @@ See [Security](/vant/security/) for details.
 ## Related
 
 - [Sandbox](/vant/security/sandbox) - Execution isolation
-- [Server](/vant/runtime/server) - HTTP server
+- [REST API](/vant/reference/rest-api) - HTTP server
 - [Security](/vant/security/) - VAF and encryption

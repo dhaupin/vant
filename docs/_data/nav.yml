@@ -65,8 +65,8 @@
     url: /vant/runtime/runtime
   - title: MCP Server
     url: /vant/runtime/mcp
-  - title: Server
-    url: /vant/runtime/server
+  - title: REST API
+    url: /vant/reference/rest-api
 
 - title: Multi-Agent
   items:

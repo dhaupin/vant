@@ -22,21 +22,22 @@ When loading, Vant checks **private first** -> falls back to **public**.
 
 ## Agents
 
-Pre-built agents live in `models/public/agents/`:
+Pre-built agents live per-brain in `models/public/<brain>/agents/` (26 in
+the default `vant` brain):
 
 ```bash
 # 26 agents
-ls models/public/agents/
+ls models/public/vant/agents/
 ```
 
 To customize an agent:
 
 ```bash
 # 1. Copy to your private brain
-cp -r models/public/agents/vant-agent-assistant models/private/agents/my-assistant
+cp -r models/public/vant/agents/vant-agent-assistant models/private/vant/agents/my-assistant
 
 # 2. Edit the definitions
-edit models/private/agents/my-assistant/AGENT.md
+edit models/private/vant/agents/my-assistant/AGENT.md
 ```
 
 ### Included Agents
@@ -52,31 +53,32 @@ edit models/private/agents/my-assistant/AGENT.md
 | vant-agent-tester | Test writing |
 | vant-agent-docs | Documentation |
 
-And more: backend, frontend, content, designer, emergency, grep, help, integrate, iterate, ops, reliability, sed, seo
+And more: api, backend, content, designer, emergency, frontend, general, grep, help, integration, iterate, ops, qos, reliability, security, sed, seo, wut
 
 ## Skills
 
-Pre-built skills live in `models/public/skills/`:
+Pre-built skills live per-brain in `models/public/<brain>/skills/` (71 in
+the default `vant` brain):
 
 ```bash
-# 70 skills
-ls models/public/skills/
+# 71 skills
+ls models/public/vant/skills/
 ```
 
 To customize a skill:
 
 ```bash
 # 1. Copy to your private brain
-cp -r models/public/skills/vant-skill-git models/private/skills/my-git
+cp -r models/public/vant/skills/vant-skill-git models/private/vant/skills/my-git
 
 # 2. Edit the definitions
-edit models/private/skills/my-git/SKILL.md
+edit models/private/vant/skills/my-git/SKILL.md
 ```
 
 ### Included Skills
 
 **Core:**
-- api, git, github, shell, docker, npm, python
+- api, git, github, shell, docker, npm, python, debugger
 
 **Auditing:**
 - audit-ci, audit-deploy, audit-general, audit-ops, audit-qc, audit-qos, audit-reliability, audit-security, audit-seo
@@ -112,9 +114,9 @@ Use them to build multi-step workflows.
 
 ## Override Priority
 
-When you create `models/private/agents/my-agent/`, it takes precedence over `models/public/agents/vant-agent-*`.
+When you create `models/private/vant/agents/my-agent/`, it takes precedence over `models/public/vant/agents/vant-agent-*`.
 
-Same for skills: `models/private/skills/my-skill/` -> `models/public/skills/vant-skill-*`
+Same for skills: `models/private/vant/skills/my-skill/` -> `models/public/vant/skills/vant-skill-*`
 
 This lets you:
 - Extend Vant without forking
