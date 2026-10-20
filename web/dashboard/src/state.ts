@@ -294,41 +294,33 @@ export const actions = {
       relayUsage: state.relayUsage,
     };
     const { bindPrfProfile, indexeddbKV } = await import("./lib/profile-store");
-    try {
-      await bindPrfProfile(indexeddbKV(), profile);
-      set({ deviceProfile: {
-        sealed: true,
-        tokens: Object.keys(state.tokens).length,
-        keys: Object.keys(state.channelKeys).length,
-        hops: state.chain.length,
-      } });
-    } catch (e) {
-      throw e;
-    }
+    await bindPrfProfile(indexeddbKV(), profile);
+    set({ deviceProfile: {
+      sealed: true,
+      tokens: Object.keys(state.tokens).length,
+      keys: Object.keys(state.channelKeys).length,
+      hops: state.chain.length,
+    } });
   },
   /** (§2.2, PRF rung) UNLOCK LANE (b) FOR REAL: assert the stored passkey,
    *  derive the SAME KEK from the stored salt, and merge with the honest
    *  law (binds only empty seats; hop dedupe — identical to the device
    *  lane's restore). Refuses untuned when no binding exists. */
   async restorePrfProfile(): Promise<boolean> {
-    try {
-      const { loadProfileFromPrfDevice, indexeddbKV } = await import("./lib/profile-store");
-      const p = await loadProfileFromPrfDevice(indexeddbKV());
-      if (!p) {
-        set({ deviceProfile: null });
-        return false;
-      }
-      const landed = mergeProfileBack(p);
-      set({ deviceProfile: {
-        sealed: true,
-        tokens: Object.keys(p.tokens ?? {}).length,
-        keys: Object.keys(p.channelKeys ?? {}).length,
-        hops: (p.chain ?? []).length,
-      } });
-      return landed > 0;
-    } catch (e) {
-      throw e;
+    const { loadProfileFromPrfDevice, indexeddbKV } = await import("./lib/profile-store");
+    const p = await loadProfileFromPrfDevice(indexeddbKV());
+    if (!p) {
+      set({ deviceProfile: null });
+      return false;
     }
+    const landed = mergeProfileBack(p);
+    set({ deviceProfile: {
+      sealed: true,
+      tokens: Object.keys(p.tokens ?? {}).length,
+      keys: Object.keys(p.channelKeys ?? {}).length,
+      hops: (p.chain ?? []).length,
+    } });
+    return landed > 0;
   },
   /** forget THIS device's stored profile entirely (explicit housekeeping). */
   async forgetDeviceProfile() {

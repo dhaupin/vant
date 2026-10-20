@@ -206,6 +206,113 @@ describe("edge relay lane — (r/2 §2.2) the SEALED intake law", () => {
 
 /* R3b continues below at top level: a VALIDLY-signed relay-lane ride still
    refuses typed — rides decode at the pod, never at this edge. */
+
+/* ---- (the traveler carrier, tr/1) the travel family ---------------------
+   T1–T4, pinned at the function boundary like the ride lane above:
+   T1 — a browser-lane travel forwards the door's brain_write slot, the
+        record named by the pod face's own id law (traveler-<id>-tr1.json)
+        and the packet verbatim as its content.
+   T2 — a BENT traveler refuses typed from the vendored kit's law
+        (E_TRAVELER_* inside the 200 ack, never an HTTP error) and never
+        forwards.
+   T3 — a relay-lane (HMAC-signed) travel rides the SAME family law.
+   T4 — the unknown-event clause now names relay.travel (the acceptance
+        list regression pin).
+   mint test packets with the KIT's own builder (wireTraveler) — the one
+   law source; the id is any opaque hex (content-addressing is the
+   sender's hash layer, the kit never re-derives it). */
+import { createHash, createHmac } from "crypto";
+import { wireTraveler, travelerShape } from "../functions/lib/traveler-contract.cjs";
+
+type KitPacket = ReturnType<typeof wireTraveler>;
+
+function mintTestTraveler(from: string, slots: Record<string, unknown>, ts = 0): KitPacket {
+  const id = createHash("sha256").update(JSON.stringify({ from, slots })).digest("hex");
+  return wireTraveler({ id, from, slots, steps: [{ seq: 1, op: "open", by: from, ts }] });
+}
+
+describe("edge relay.travel — the traveler carrier (tr/1)", () => {
+  it("T1: a browser-lane travel forwards brain_write, id-named by the pod face's law, packet verbatim", async () => {
+    forwardMock.mockClear();
+    vi.resetModules();
+    const mod = await import("../functions/api/r/relay");
+    const h = mod.onRequestPost as RelayHandler;
+    const pkt = mintTestTraveler("bolete-client", { title: "the pin" });
+    const res = await h(ctx(
+      { event: "relay.travel", ts: Date.now(), nonce: "t1", payload: pkt, v: { major: 2 } },
+      { Authorization: "Bearer vguest_test" },
+      { VANT_RELAY_ENABLED: "1", VANT_RELAY_GATE_KEY: "k".repeat(32) },
+    ));
+    const ack = (await res.json()) as { dispatched?: number; reply?: { ok?: boolean; family?: string } };
+    expect(forwardMock).toHaveBeenCalledTimes(1);
+    const fwd = forwardMock.mock.calls[0][1] as Request;
+    const fwdBody = (await fwd.json()) as { tool?: string; args?: { name?: string; content?: string; format?: string } };
+    expect(fwdBody.tool).toBe("brain_write");
+    expect(fwdBody.args?.name).toBe("traveler-" + pkt.id + "-tr1.json");
+    // the packet crosses VERBATIM: any edge mangling would break the ledger law
+    expect(JSON.parse(fwdBody.args?.content ?? "{}")).toEqual(pkt);
+    expect(fwdBody.args?.format).toBe("json");
+    expect(travelerShape(pkt)).toBeNull();
+    expect(ack.dispatched).toBe(1);
+    expect(ack.reply?.ok).toBe(true);
+    expect(ack.reply?.family).toBe("relay.travel");
+  });
+
+  it("T2: a bent traveler refuses typed from the kit's law (never forwarded, never an HTTP error)", async () => {
+    forwardMock.mockClear();
+    vi.resetModules();
+    const mod = await import("../functions/api/r/relay");
+    const h = mod.onRequestPost as RelayHandler;
+    const pkt = mintTestTraveler("bolete-client", { title: "bent" });
+    const res = await h(ctx(
+      { event: "relay.travel", ts: Date.now(), nonce: "t2", payload: { ...pkt, seq: 9 }, v: { major: 2 } },
+      { Authorization: "Bearer vguest_test" },
+      { VANT_RELAY_ENABLED: "1", VANT_RELAY_GATE_KEY: "k".repeat(32) },
+    ));
+    const ack = (await res.json()) as { reply?: { ok?: boolean; code?: string; error?: string } };
+    expect(res.status).toBe(200);
+    expect(ack.reply?.ok).toBe(false);
+    expect(ack.reply?.code).toBe("E_TRAVELER_STEP");
+    expect(ack.reply?.error).toMatch(/seq must equal the ledger length/i);
+    expect(forwardMock).not.toHaveBeenCalled();
+  });
+
+  it("T3: a relay-lane travel rides the SAME family law (HMAC-signed crew sender)", async () => {
+    forwardMock.mockClear();
+    vi.resetModules();
+    const mod = await import("../functions/api/r/relay");
+    const h = mod.onRequestPost as RelayHandler;
+    const pkt = mintTestTraveler("vant-crew", { part: "plate" });
+    const raw = JSON.stringify({ event: "relay.travel", ts: Date.now(), nonce: "t3", payload: pkt, v: { major: 2 } });
+    const sig = createHmac("sha256", "k".repeat(32)).update(raw).digest("hex");
+    const res = await h({
+      env: { VANT_RELAY_ENABLED: "1", VANT_RELAY_GATE_KEY: "k".repeat(32) },
+      request: new Request("https://dash.example.com/api/r/relay", {
+        method: "POST", headers: { "Content-Type": "application/json", "X-Signature-256": sig }, body: raw,
+      }),
+    });
+    const ack = (await res.json()) as { dispatched?: number; reply?: { ok?: boolean; family?: string } };
+    expect(forwardMock).toHaveBeenCalledTimes(1);
+    const fwd = forwardMock.mock.calls[0][1] as Request;
+    const fwdBody = (await fwd.json()) as { tool?: string; args?: { name?: string } };
+    expect(fwdBody.args?.name).toBe("traveler-" + pkt.id + "-tr1.json");
+    expect(ack.reply?.ok).toBe(true);
+  });
+
+  it("T4: an unknown event's typed clause NAMES relay.travel (the acceptance list regression pin)", async () => {
+    vi.resetModules();
+    const mod = await import("../functions/api/r/relay");
+    const h = mod.onRequestPost as RelayHandler;
+    const res = await h(ctx(
+      { event: "relay.unknown", ts: Date.now(), nonce: "t4", payload: {}, v: { major: 2 } },
+      { Authorization: "Bearer vguest_test" },
+      { VANT_RELAY_ENABLED: "1", VANT_RELAY_GATE_KEY: "k".repeat(32) },
+    ));
+    const ack = (await res.json()) as { reply?: { code?: string; error?: string } };
+    expect(ack.reply?.code).toBe("E_RELAY_UNKNOWN_EVENT");
+    expect(ack.reply?.error).toContain("relay.travel");
+  });
+});
 it("R3b: a VALIDLY-signed relay-lane ride still refuses typed — rides decode at the pod, never at this edge", async () => {
     forwardMock.mockClear();
     vi.resetModules();

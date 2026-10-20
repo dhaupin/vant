@@ -332,9 +332,15 @@ vant horcrux restore [path] [password]
 vant horcrux create [path] [password] [--brains <a,b>]   # issue #219 payload scope
 vant horcrux refresh [password] [--brains <a,b>]         # regenerate boot horcrux in place
 
-vant transform gather
-vant transform to-horcrux
-vant transform inspect-horcrux <file>
+vant transform gather [--brains <a,b>]   # issue #219 payload scope — captures ONLY those brains
+vant transform full [--brains <a,b>]     # everything, same filter
+vant transform horcrux <svg> <pass> [--brains <a,b>]  # full gather + stego embed, same filter
+vant transform backup [--brains <a,b>]   # JSON backup, same filter
+                                         # without --brains, ALL brains in the install ride the
+                                         # artifact (file bodies included) — not just state.json's
+vant transform extract <file> [pass]     # Decode horcrux, print data
+vant transform restore <file> [pass]     # Decode + full restore
+vant transform status
 
 vant compress <file_or_folder>         # Create .vpatch
 vant compress <file> --output <dir>

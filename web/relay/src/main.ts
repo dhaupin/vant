@@ -73,6 +73,28 @@ function render(state: State, recheck: () => void): void {
         root.appendChild(what);
         root.appendChild(el("p", "soft", c.posture));
 
+        // (the traveler carrier, tr/1) the honest ride CARAVE law, stated
+        // from the plain posture: every pod-bound family (ride, sync, lost,
+        // call AND the traveler packet) crosses a solo relay only as
+        // ciphertext inside a sealed hop — the edge forwards { ct }
+        // byte-verbatim and never decodes it; the door of arrival opens the seal
+        // and lands the ledger. Plaintext never hops, no downgrade, ever.
+        const travelTitle = el("h2", null, "What travels through this relay");
+        const travel = document.createElement("p");
+        travel.className = "soft";
+        travel.style.whiteSpace = "pre-line";
+        travel.textContent =
+            "One carrier law: SEALED HOPS ONLY. Every pod-bound event — the ride,\n" +
+            "the bridge families (sync | lost | call) and the traveler pin\n" +
+            "(relay.travel, tr/1) — crosses this relay as an AES-256-GCM\n" +
+            "envelope inside relay.hop { origin, path, ct }. This relay forwards\n" +
+            "the ciphertext byte-verbatim and CANNOT read, mint, or decode a\n" +
+            "traveler: the content address and ledger live at the sender and the\n" +
+            "door of arrival. Plaintext never hops; an unsealed hop refuses typed\n" +
+            "E_RELAY_NEEDS_ENVELOPE — no downgrade, ever.";
+        root.appendChild(travelTitle);
+        root.appendChild(travel);
+
         const notTitle = el("h2", null, "What this relay does NOT have");
         const not = document.createElement("ul");
         not.appendChild(li("default profile pin", "NONE - a solo relay brings no instance config and refuses to inherit one", false));

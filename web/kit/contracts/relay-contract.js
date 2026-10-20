@@ -73,7 +73,15 @@ const EVENTS = Object.freeze({
     // server-side); SOLO edge = hop only (minimal always, holds nothing).
     sync: 'relay.sync',
     lost: 'relay.lost',
-    call: 'relay.call'
+    call: 'relay.call',
+    // (the traveler carrier, tr/1) the enterprise router object crosses the
+    // wire as a STRUCTURAL packet: tr/1 shape, ledger law, and opaque hex
+    // address (content-addressing stays SENDER-side, kit/crypto-free). The
+    // POD face and the DASHBOARD edge translate it onto the door's existing
+    // brain_write record slot (id-named, address-greppable); the SOLO edge
+    // carries it only as ciphertext inside a sealed hop — encrypted pipes
+    // only, the traveler is never decoded by a blind middlebox.
+    travel: 'relay.travel'
 });
 
 // ---------------- the SEALED lane (r/2 §2.2, prd-relay.md) ----------------
