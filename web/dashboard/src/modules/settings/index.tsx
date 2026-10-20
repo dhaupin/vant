@@ -3,6 +3,7 @@ import { actions, useApp, useAppRaw } from "../../state";
 import { Help } from "../../frame/Tooltip";
 import { ConfirmationModal } from "./confirm";
 import { relayCaps, E2E_LAW, ApiError, type RelayCaps as ApiRelayCaps } from "../../api";
+import { exportProfile, importProfile, PROFILE_FILENAME } from "../../lib/profile";
 
 /**
  * Relay posture (prd-relay.md 4.0 - "participate as a relay" lives in
@@ -289,6 +290,116 @@ function ChainEditor() {
 }
 
 /**
+ * (pass 273, prd-relay.md §2.2) THE SOVEREIGN PROFILE TRANSPORT: the
+ * instance profile rides ONE passphrase-sealed file (bolete-profile.enc,
+ * the horcrux pattern, web scale) — chain, channel keys, pod guest
+ * identities (inside the seal only), reach choice. Export = a download;
+ * import = typed-open + merge (never clobbering what this tab holds).
+ * No passphrase ever crosses the wire; a wrong one opens to nothing.
+ */
+function SovereignProfileCard() {
+  const app = useAppRaw();
+  const [expPass, setExpPass] = useState("");
+  const [impPass, setImpPass] = useState("");
+  const [note, setNote] = useState<string | null>(null);
+  const carrying = Object.keys(app.tokens).filter((p) => app.tokens[p]);
+
+  const doExport = async () => {
+    try {
+      const assets = {
+        chain: app.chain,
+        channelKeys: app.channelKeys,
+        tokens: app.tokens,
+        relayUsage: app.relayUsage,
+      };
+      const out = await exportProfile(assets, expPass);
+      const blob = new Blob([out.text], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = out.filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      setNote(`exported ${out.filename} — ${carrying.length} identit${carrying.length === 1 ? "y" : "ies"}, ${Object.keys(app.channelKeys).length} key(s), ${app.chain.length} hop(s). The file opens with THIS passphrase only; nothing plaintext ever left this tab.`);
+      setExpPass("");
+    } catch (e) {
+      setNote(e instanceof Error ? e.message : "the export refused");
+    }
+  };
+
+  const doImport = async (data: string) => {
+    try {
+      const p = await importProfile(data, impPass);
+      let tok = 0, key = 0, hop = 0;
+      for (const [prop, tk] of Object.entries(p.tokens)) {
+        if (!app.tokens[prop]) { actions.setToken(prop, tk); tok++; }
+      }
+      for (const [prop, ck] of Object.entries(p.channelKeys)) {
+        if (!app.channelKeys[prop]) { actions.bindChannelKey(prop, ck); key++; }
+      }
+      for (const h of p.chain) {
+        if (!app.chain.some((x) => x.origin === h.origin)) { actions.addHop({ origin: h.origin, flavor: h.flavor, e2e: h.e2e }); hop++; }
+      }
+      if (p.relayUsage && !app.relayUsage) actions.setRelayUsage(true);
+      setNote(`imported: ${tok} identit${tok === 1 ? "y" : "ies"} bound, ${key} key(s) bound, ${hop} hop(s) added — held where it already existed, untouched. The profile is yours from here on (§2.2).`);
+      setImpPass("");
+    } catch (e) {
+      setNote(e instanceof Error ? e.message : "the import refused");
+    }
+  };
+
+  return (
+    <div className="text-sm">
+      <p className="text-xs text-ink-soft">
+        carries: {carrying.length || 0} pod identit{carrying.length === 1 ? "y" : "ies"}{" "}
+        {carrying.length ? <span className="font-mono text-ink">({carrying.join(", ")})</span> : null}, {" "}
+        {Object.keys(app.channelKeys).length} e2e key(s), {app.chain.length} chain hop(s), reach {app.relayUsage ? "on" : "direct"}.
+      </p>
+      <div className="mt-2 flex flex-wrap items-end gap-2">
+        <label className="block">
+          <span className="text-[10px] uppercase tracking-wider text-ink-soft">passphrase (8+)</span>
+          <input
+            type="password"
+            value={expPass}
+            onChange={(e) => setExpPass(e.target.value)}
+            className="block w-40 rounded-md border border-line bg-surface px-2 py-1 text-xs"
+          />
+        </label>
+        <button
+          onClick={() => void doExport()}
+          disabled={expPass.length < 8}
+          className="rounded-md border border-line px-2 py-1 text-xs hover:bg-ink/5 disabled:opacity-50"
+        >
+          export {PROFILE_FILENAME}
+        </button>
+      </div>
+      <div className="mt-2 flex flex-wrap items-end gap-2">
+        <input
+          type="file"
+          accept=".enc,.txt"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (!f) return;
+            f.text().then((data) => void doImport(data));
+          }}
+          className="w-40 text-xs"
+        />
+        <label className="block">
+          <span className="text-[10px] uppercase tracking-wider text-ink-soft">passphrase</span>
+          <input
+            type="password"
+            value={impPass}
+            onChange={(e) => setImpPass(e.target.value)}
+            className="block w-40 rounded-md border border-line bg-surface px-2 py-1 text-xs"
+          />
+        </label>
+      </div>
+      {note ? <p className="mt-2 text-xs text-ink-soft">{note}</p> : null}
+    </div>
+  );
+}
+
+/**
  * (P6b, pass 272) THE E2E KEY CARD: the sovereign profile's honest key
  * manager. The raw key NEVER re-displays (the binding moment showed it
  * once); the card states its hold, unbinds explicitly (profile + tab
@@ -481,6 +592,12 @@ export default function Settings() {
       <Section title="e2e channel key (this profile)">
         <Help text="prd-relay.md §5: the pairing-time key binding. The key was shown exactly once at the redeem; this card never re-shows it.">
           <E2eKeyCard />
+        </Help>
+      </Section>
+
+      <Section title="Sovereign profile (export / import)">
+        <Help text="prd-relay.md §2.2: the whole profile rides one passphrase-sealed file. The passphrase is never sent anywhere; a wrong one refuses typed.">
+          <SovereignProfileCard />
         </Help>
       </Section>
 

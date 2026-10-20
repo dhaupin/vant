@@ -5,6 +5,38 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 273 (§2.2: the sovereign-profile transport — one sealed file, the pairing loop closes)
+
+### Added - the profile rides one encrypted file
+
+- **THE SOVEREIGN PROFILE TRANSPORT (`web/dashboard/src/lib/profile.ts`,
+  prd-relay.md §2.2)**: the instance profile — chain (order preserved),
+  the bound e2e channel keys, the pod guest identities, the reach
+  choice — moves between devices as ONE passphrase-sealed file
+  (`bolete-profile.enc`, the horcux pattern web-scale). Unlock path (a)
+  is the documented KEK: a 8+ passphrase through the SAME Encrypt canon
+  (PBKDF2-SHA256 100k → AES-256-GCM; the ride seal's length floor became
+  a caller law `minLen` so the channel-key 32+ rule and the passphrase
+  8+ rule share one module, never two). The `vprof-1:` prefix types the
+  fragment; the payload shape (kind/version/tokens-as-vguest_/keys-32+/https-chain)
+  verifies UNDER the kek (§5's downgrade refusal, wider: a v2 payload
+  refuses, never salvaged). No passphrase, token, or key ever rides
+  outside the seal.
+- **THE SETTINGS FACES**: a "Sovereign profile (export / import)" card —
+  export builds the download from the TAB's live state (identities,
+  keys, hops, reach) and states exactly what it carried; import opens a
+  chosen file, merges with the honest law (tokens/keys bind ONLY where
+  the tab holds none; hops dedupe; reach upgrades only — the profile is
+  the user's from the first import on, §2.2) and reports what landed.
+- **THE PAIRING LOOP CLOSES (modules/pairing)**: the redeem result now
+  offers "adopt this identity for this property" — the pasted-token
+  step is done from the very screen the QR/deep-link redeem lands on; an
+  occupied seat refuses the adopt (never a silent clobber) and says so.
+- **Suite**: dashboard tsc clean, vitest 77/77 (10 profile pins: canon
+  three-faces byte-compat, typed E_PROFILE_KEY/E_PROFILE_SHAPE refusals,
+  the v2/no-downgrade refusal, the caller-owns-the-merge fact, and no
+  plaintext outside the seal), lint:web exit 0.
+
 ## [Unreleased] - pass 272 (§5 rung 2: the context-nonce binding — the key card, and the ride rides LIVE)
 
 ### Added - rung 2 + the honest key manager + the live corridor

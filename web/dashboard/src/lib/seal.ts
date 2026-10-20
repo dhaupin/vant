@@ -35,16 +35,22 @@ function fromHex(hex: string): Uint8Array {
   return out;
 }
 
-function assertKey(key: string): string {
-  if (typeof key !== "string" || key.length < 32) {
-    throw new Error("the channel key must be 32+ chars (the binding moment's law)");
+/**
+ * The floor is the CALLER's law: an e2e channel key is 32+ chars (the
+ * binding moment's rule), while the sovereign profile's passphrase KEK
+ * (prd-relay.md §2.2 unlock path (a)) is allowed from 8 — both derive
+ * through the SAME PBKDF2/AES-GCM canon.
+ */
+function assertKey(key: string, minLen: number, what: string): string {
+  if (typeof key !== "string" || key.length < minLen) {
+    throw new Error(`the ${what} must be ${minLen}+ chars`);
   }
   return key;
 }
 
-async function deriveKey(key: string, salt: Uint8Array, usages: KeyUsage[]): Promise<CryptoKey> {
+async function deriveKey(key: string, salt: Uint8Array, usages: KeyUsage[], minLen: number, what: string): Promise<CryptoKey> {
   const enc = new TextEncoder();
-  const base = await crypto.subtle.importKey("raw", enc.encode(assertKey(key)), "PBKDF2", false, ["deriveKey"]);
+  const base = await crypto.subtle.importKey("raw", enc.encode(assertKey(key, minLen, what)), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(
     { name: "PBKDF2", salt: salt as unknown as BufferSource, iterations: PBKDF2_ITERATIONS, hash: "SHA-256" },
     base,
@@ -59,12 +65,21 @@ async function deriveKey(key: string, salt: Uint8Array, usages: KeyUsage[]): Pro
  * result is cipher||tag concatenated, so the last 16 bytes are split off
  * as the tag field — the pod's canon keeps them separate.
  */
-export async function sealEnvelope(plaintext: string, key: string): Promise<string> {
+export interface SealOpts {
+  /** minimum length for the key material (32 = the channel-key law) */
+  minLen?: number;
+  /** what the key is called in refusals */
+  what?: string;
+}
+
+export async function sealEnvelope(plaintext: string, key: string, opts: SealOpts = {}): Promise<string> {
+  const minLen = opts.minLen ?? 32;
+  const what = opts.what ?? "channel key";
   if (!crypto?.subtle) throw new Error("WebCrypto subtle is unavailable in this context");
   const enc = new TextEncoder();
   const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES));
   const iv = crypto.getRandomValues(new Uint8Array(IV_BYTES));
-  const der = await deriveKey(key, salt, ["encrypt"]);
+  const der = await deriveKey(key, salt, ["encrypt"], minLen, what);
   const sealed = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv as unknown as BufferSource, tagLength: 128 }, der, enc.encode(plaintext)));
   const tagStart = sealed.length - TAG_BYTES;
   const cipher = sealed.slice(0, tagStart);
@@ -78,7 +93,7 @@ export async function sealEnvelope(plaintext: string, key: string): Promise<stri
  * the pod's decrypt() law; anything else is not a Vant record and refuses
  * instead of guessing.
  */
-export async function openEnvelope(ct: string, key: string): Promise<string> {
+export async function openEnvelope(ct: string, key: string, opts: SealOpts = {}): Promise<string> {
   if (!crypto?.subtle) throw new Error("WebCrypto subtle is unavailable in this context");
   const parts = (typeof ct === "string" ? ct : "").split(":");
   if (parts.length !== 4) throw new Error("invalid cipher format (expected salt:iv:authTag:encrypted)");
@@ -92,7 +107,7 @@ export async function openEnvelope(ct: string, key: string): Promise<string> {
   const body = new Uint8Array([...fromHex(parts[3]), ...fromHex(parts[2])]);
   let der: CryptoKey;
   try {
-    der = await deriveKey(key, salt, ["decrypt"]);
+    der = await deriveKey(key, salt, ["decrypt"], opts.minLen ?? 32, opts.what ?? "channel key");
   } catch {
     throw new Error("decryption failed - wrong key or corrupted data");
   }

@@ -1,10 +1,12 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** pass 271 (the P6b pairing-time e2e rung: key binding at
-redeem + the relay_ride door verb + the sealed browser lane + the chain
-editor; the P6b 'lands next' notes in the pass-237 arc prose below are now
-historical — the rung is landed, suites in CHANGELOG pass 271)  
+**Last Updated:** pass 273 (§2.2 the sovereign-profile transport: one
+passphrase-sealed bolete-profile.enc file carries chain + keys + guest
+identities + reach; the pairing redeem can adopt the identity outright;
+rungs now landed: P6b binding/key card/door ride (271), rung-2 binding
+(272), §2.2 transport (273) — the multi-hop browser traversal still waits
+on the transport's upstream credential story, named honestly)  
 **Session:** Pass 242 - THE NAV + MISSIONS SPEC: eight new modules queued
 (consensus, resolution/citations, era/succession, nature flywheel,
 habitats, cron manager, settlements, origins), the hierarchical
