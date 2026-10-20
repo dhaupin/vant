@@ -18,7 +18,6 @@
 
 'use strict';
 
-const errors = require('../lib/error');
 const { Server } = require('../lib/server');
 
 const pass = [];
