@@ -20,6 +20,15 @@
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
+// (pass 292) The order-independence seam: suites leak into the surfaces the
+// whole sweep shares — models/state.json (the active-brain pointer) and the
+// active brain's private/public trees. Suite N became suite N+1's
+// environment (guests tripped agents.maxAgents on a roster the prior run
+// left; teams-refresh ENOENTed on a state.json a pilot left pointing at
+// another brain). restoreSlate before EVERY suite pins every suite to the
+// same baseline whatever the order; the final restore leaves the workspace
+// exactly as the sweep found it.
+const slate = require('./slate');
 
 const ROOT = path.resolve(__dirname, '..');
 const TEST_DIR = path.join(__dirname);
@@ -49,6 +58,19 @@ if (listOnly) {
 
 const results = [];
 console.log(`\n🧪 VANT FULL-SUITE SWEEP — ${suites.length} suites\n`);
+
+// Pristine baseline BEFORE the first suite runs — never inside the loop, so
+// a suite's own pre-loop mutations are captured, not discarded.
+let sweepSlate = null;
+try { sweepSlate = slate.captureSlate(ROOT); } catch (e) {
+    console.error(`⚠  slate capture failed (${e.message}) — sweeping UNGUARDED (order may matter)`);
+}
+function _guardRestore(via) {
+    if (!sweepSlate) return;
+    try { slate.restoreSlate(null, sweepSlate); } catch (e) {
+        console.error(`⚠  slate restore (${via}) failed: ${e.message}`);
+    }
+}
 
 for (const suite of suites) {
     const started = Date.now();
@@ -90,7 +112,16 @@ for (const suite of suites) {
     results.push({ suite, status, ms, detail });
     const icon = status === 'PASS' ? '✓' : status === 'TIMEOUT' ? '⏱' : '✗';
     console.log(`  ${icon} ${suite.padEnd(36)} ${(ms / 1000).toFixed(1)}s${detail ? '  ' + detail : ''}`);
+    // NEXT SUITE STARTS FROM THE BASELINE — the suite's leak (especially a
+    // failed/timeouted one) can never become the next suite's environment.
+    _guardRestore(suite);
 }
+
+// Leave the workspace exactly as the sweep found it: brain pointer,
+// active-brain trees reinstalled byte-exact, suite-created residue gone.
+_guardRestore('sweep-exit');
+slate.freeSlate(sweepSlate);
+sweepSlate = null;
 
 const passed = results.filter((r) => r.status === 'PASS');
 const failed = results.filter((r) => r.status === 'FAIL');
