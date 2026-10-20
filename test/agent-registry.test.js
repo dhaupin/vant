@@ -34,9 +34,25 @@ const trust = require('../lib/trust');
     const r = await reg.register({ name: 'PinAgent', type: 'Tester' });
     ok('register works', r.registered === true, JSON.stringify(r));
 
-    const brain = require('../lib/brain');
-    const brainName = brain.getCurrentBrain ? brain.getCurrentBrain() : 'vant';
-    const stateFile = path.resolve('models/private', brainName, 'state/agent-registry.json');
+    // (pass 287 de-coupling, same seam as era/genesis pass 282/281) The
+    // spine writes through state-store's PATH-ACTIVE resolver (VANT_BRAIN
+    // env > models/state.json currentBrain/stack head > 'vant') — the bare
+    // brain.getCurrentBrain() here was the exact stale resolver pass 88
+    // documented as ignoring VANT_BRAIN, so on any env-scoped run (tests,
+    // multi-runtime hosts) the test looked at the WRONG brain dir while
+    // the lib wrote the right one.
+    const ACTIVE_BRAIN = (() => {
+        if (process.env.VANT_BRAIN) return process.env.VANT_BRAIN;
+        try {
+            const state = JSON.parse(fs.readFileSync(path.resolve('models', 'state.json'), 'utf8'));
+            const pick = typeof state.currentBrain === 'string' && state.currentBrain
+                ? state.currentBrain
+                : (Array.isArray(state.stack) && state.stack[0] ? state.stack[0] : null);
+            if (pick && /^[a-zA-Z0-9._-]+$/.test(pick)) return pick;
+        } catch (_e) { /* fall through: no state.json yet */ }
+        return 'vant';
+    })();
+    const stateFile = path.resolve('models/private', ACTIVE_BRAIN, 'state/agent-registry.json');
     ok('state file written through the state spine', fs.existsSync(stateFile), stateFile);
     if (fs.existsSync(stateFile)) {
         const snap = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
