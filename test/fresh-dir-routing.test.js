@@ -185,13 +185,20 @@ test('test-all --help: usage without running checks', () => {
 // store's two-anchor bug (cwd-anchored store path joined against the install
 // root) producing escape-shaped paths — which the hardened FileStorage.write
 // containment check now rejects, crashing every foreign-cwd invocation.
-// Pin: routed command succeeds from a foreign dir, no 'Path escape' error,
-// and the store lands INSIDE the caller's designed models tree.
-test('escrow store: foreign-cwd writes contained + land in designed location', () => {
+//
+// (pass 291 update, reconciles with test/cwd-hygiene #225) Since issue #225
+// the default-sandbox budget seed is MEMORY-ONLY, so a READ-ONLY routed
+// command (like `vant rate`) writes NO escrow store — the old pin here
+// demanded one and contradicted the cwd-hygiene #225 pins directly (the
+// same invocation cannot both create the store and leave no models tree).
+// Pin BOTH halves of the real contract now:
+//   a) a read-only foreign-cwd run leaves NO models tree and no escape errors;
+//   b) a REAL escrow op from a foreign cwd persists INTO the caller's
+//      designed cwd-anchored models tree (contained, no escape-shaped refusal).
+test('escrow store: read-only foreign-cwd run writes nothing; real op lands contained in designed location', () => {
     const cwd = fs.mkdtempSync(path.join(sandbox, 'cwd-escrow-'));
     try {
         let out = '';
-                0;
         try {
             const r = execFileSync('node', [path.join(sandbox, 'bin', 'vant.js'), 'rate'], {
                 cwd,
@@ -202,23 +209,37 @@ test('escrow store: foreign-cwd writes contained + land in designed location', (
             out = r || '';
         } catch (e) {
             out = (e.stdout || '') + (e.stderr || '');
-            _code = e.status === undefined ? -1 : e.status;
         }
         if (/Path escape detected|SECURITY_PATH_ESCAPE/.test(out)) {
-            throw new Error('containment rejected a DESIGNED store write (two-anchor bug is back)');
+            throw new Error('containment rejected a READ-ONLY invocation (two-anchor bug is back)');
         }
         if (/Cannot find module|MODULE_NOT_FOUND/.test(out)) {
             throw new Error('module resolution broke outside repo cwd');
         }
-        // The designed store location (caller-cwd-anchored, brain-scoped).
-        // (pass 287) the escrow lib resolves the brain through state-store's
-        // PATH-ACTIVE seam (VANT_BRAIN env first, and the spawned child
-        // inherits this process's env) — the hardcoded 'vant' ENOENTed on
-        // any env-scoped run while the store landed in the env-scoped
-        // brain dir, which IS the designed cwd-anchored location.
+        // (a) #225 contract: a read-only op must NOT seed a models/ tree.
+        if (fs.existsSync(path.join(cwd, 'models'))) {
+            throw new Error('read-only `vant rate` created a models/ tree (the #225 pollution is back)');
+        }
+
+        // (b) Real escrow op from the SAME foreign cwd: must persist into
+        // the caller's designed cwd-anchored store, brain-scoped through the
+        // PATH-ACTIVE seam (the pass-287 fix), with no escape-shaped refusal.
+        const driver = `
+const e = new (require('${(sandbox + '/lib/escrow.js')}').Escrow)();
+e.setBudget('fresh-dir-agent', 500);
+console.log('persisted');
+`;
+        fs.writeFileSync(path.join(cwd, 'escrow-driver.js'), driver);
+        const r2 = execFileSync('node', [path.join(cwd, 'escrow-driver.js')], {
+            cwd,
+            encoding: 'utf8',
+            timeout: 60000,
+            env: { ...process.env, VANT_FRESH_DIR_TEST: '1' }
+          }).toString();
+        if (!/persisted/.test(r2)) throw new Error('real escrow op refused from foreign cwd: ' + r2);
         const designed = path.join(cwd, 'models', 'private', require('./active-brain').resolveActiveBrain(cwd), 'orgchart', 'escrow.json');
         if (!fs.existsSync(designed)) {
-            throw new Error('escrow store not written to the designed cwd-anchored location');
+            throw new Error('real escrow op did NOT land in the designed cwd-anchored location');
         }
         return true;
     } finally {
