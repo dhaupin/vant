@@ -52,6 +52,14 @@ interface RelayAck {
     reply?: unknown;
 }
 
+// (repo lint gate) built from char codes to avoid the no-control-regex
+// rule — the same convention lib/vaf.js uses for its control-char scan;
+// semantics identical to the literal /[\x00-\x1f]/ it replaces.
+const _HAS_CONTROL_CHARS = new RegExp(
+    '[' + String.fromCharCode(0) + '-' + String.fromCharCode(31) + ']',
+    'u',
+);
+
 function ack(payload: RelayAck, status = 200): Response {
     return new Response(JSON.stringify(payload), {
         status,
@@ -136,28 +144,60 @@ export const onRequestPost: Handler = async (context) => {
         return plain(TRANSPORT_STATUS.TOO_LARGE, { error: "Body too large (1 MiB cap)" });
     }
 
-    // 3. THE GATE: HMAC-SHA256 over the raw body bytes.
-    const presented = context.request.headers.get(SIGNATURE_HEADER);
-    if (presented === null || presented.length === 0) {
-        return plain(TRANSPORT_STATUS.UNAUTHENTICATED, {
-            error: `A r/2 relay envelope requires the ${SIGNATURE_HEADER} header: HMAC-SHA256 hex over the raw body bytes.`,
-        });
-    }
-    if (!(await signatureVerdictOk(raw, presented, secret))) {
-        return plain(TRANSPORT_STATUS.UNAUTHENTICATED, { error: "Invalid signature" });
-    }
-
-    // 4. parse the crew envelope; malformed = plain transport 400.
+    // 3. THE GATE: two credential lanes, the header law AND the SEALED lane.
+    // (r/2 SEALED lane) A COMPLETE seal inside the payload ({ sig, ts } over
+    // the ct bytes) is its own credential: a valid seal skips the header
+    // law — the KEYLESS last mile where the middlebox relay blind-forwards
+    // { ct }
+    // verbatim and cannot header-sign for the pod it reaches (the seal IS
+    // the credential, prd-relay.md §2.2). A PRESENT seal that fails verify
+    // refuses like a missigned header; NO seal falls to the header law
+    // unchanged (the pod's own crew sends). The edge is stateless: no
+    // cross-request replay cache — the seal's OWN ts window is the honest
+    // edge-side memory; the byte-identical replay gate lives at the pod.
     let crew: CrewEnvelope | null = null;
     try {
         crew = JSON.parse(raw) as CrewEnvelope;
-    } catch (e) {
+    } catch (_e) {
         crew = null;
     }
     if (!crew || typeof crew !== "object" || Array.isArray(crew)) {
         return plain(400, { error: "The relay intake expects a JSON envelope: { event, from, ts, nonce, payload, v }." });
     }
 
+    let authenticated = false;
+    let sealedPayload: { ct: string; seal: { sig: string; ts: number } } | null = null;
+    if (crew.payload && typeof crew.payload === "object" && !Array.isArray(crew.payload)) {
+        const p = crew.payload as { ct?: unknown; seal?: unknown };
+        if (typeof p.ct === "string" && p.seal && typeof p.seal === "object") {
+            const s = p.seal as { sig?: unknown; ts?: unknown };
+            if (typeof s.sig === "string" && typeof s.ts === "number") {
+                sealedPayload = { ct: p.ct, seal: { sig: s.sig, ts: s.ts } };
+            }
+        }
+    }
+    if (sealedPayload !== null) {
+        if (!(await signatureVerdictOk(sealedPayload.ct, sealedPayload.seal.sig, secret))) {
+            return plain(TRANSPORT_STATUS.UNAUTHENTICATED, { error: "Invalid seal signature" });
+        }
+        if (Math.abs(Date.now() - sealedPayload.seal.ts) > FRESHNESS_WINDOW_MS) {
+            return plain(TRANSPORT_STATUS.UNAUTHENTICATED, { error: "Stale seal: ts outside the replay window" });
+        }
+        authenticated = true;
+    }
+    if (!authenticated) {
+        const presented = context.request.headers.get(SIGNATURE_HEADER);
+        if (presented === null || presented.length === 0) {
+            return plain(TRANSPORT_STATUS.UNAUTHENTICATED, {
+                error: `A r/2 relay envelope requires the ${SIGNATURE_HEADER} header (or a sealed payload): HMAC-SHA256 hex over the raw body bytes.`,
+            });
+        }
+        if (!(await signatureVerdictOk(raw, presented, secret))) {
+            return plain(TRANSPORT_STATUS.UNAUTHENTICATED, { error: "Invalid signature" });
+        }
+    }
+
+    // 4. event + freshness already parsed above;
     const incomingEvent = typeof crew.event === "string" ? crew.event : "";
     const ts = typeof crew.ts === "number" ? crew.ts : NaN;
     if (!Number.isFinite(ts) || Math.abs(Date.now() - ts) > FRESHNESS_WINDOW_MS) {
@@ -186,7 +226,7 @@ export const onRequestPost: Handler = async (context) => {
     let target: URL;
     try {
         target = new URL(origin);
-    } catch (e) {
+    } catch (_e) {
         return ack({ received: true, event: incomingEvent, handlers: 0, dispatched: 0,
             reply: { ok: false, code: CODES.BAD_ORIGIN, error: "Hop origin unparseable - explicit client-declared origins only." } });
     }
@@ -208,7 +248,7 @@ export const onRequestPost: Handler = async (context) => {
 
     // path guard: rooted, sane.
     const path = typeof frame.path === "string" ? frame.path : "";
-    if (!path.startsWith("/") || path.length > 512 || path.includes("..") || /[\x00-\x1f]/.test(path)) {
+    if (!path.startsWith("/") || path.length > 512 || path.includes("..") || _HAS_CONTROL_CHARS.test(path)) {
         return ack({ received: true, event: incomingEvent, handlers: 0, dispatched: 0,
             reply: { ok: false, code: CODES.BAD_PATH, error: "Hop path must be a rooted, sane URL path." } });
     }
@@ -225,13 +265,25 @@ export const onRequestPost: Handler = async (context) => {
     // 6. forward VERBATIM: { ct } rides origin+path; the gate secret
     //    NEVER rides upstream (spent at verification). Typed failures ride
     //    the ack reply honestly instead of errors.
+    //    (r/2 SEALED hop-LAST-MILE) a payload that SHIPPED a seal forwards
+    //    it beside the ct: the last mile into a pod's own webhook route
+    //    stays credentialed even though this relay holds no gate key of
+    //    its own — the seal IS the credential the rider sealed with its
+    //    key, and the receiving pod's verify set honors it. No seal, no
+    //    change: the bare { ct } forward stays byte-exact.
+    const frameCast = frame as { seal?: unknown };
+    const forwardSeal = frameCast.seal && typeof frameCast.seal === "object"
+        && (frameCast.seal as { sig?: unknown }).sig
+        && (frameCast.seal as { ts?: unknown }).ts
+        ? { sig: String((frameCast.seal as { sig: unknown }).sig), ts: Number((frameCast.seal as { ts: unknown }).ts) }
+        : null;
     const t0 = Date.now();
     let text: string;
     try {
         const up = await fetch(new URL(path, target), {
             method: "POST",
             headers: { "content-type": "application/json", "x-vant-relay": CAPS_VERSION },
-            body: JSON.stringify({ ct }),
+            body: JSON.stringify(forwardSeal ? { ct, seal: forwardSeal } : { ct }),
             signal: AbortSignal.timeout(HOP_TIMEOUT_MS),
         });
         text = await up.text();

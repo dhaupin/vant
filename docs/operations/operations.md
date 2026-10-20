@@ -2,10 +2,11 @@
 version: 0.8.6
 permalink: /operations/operations
 layout: default
-title: Operations
+title: Day-to-day CLI
 nav_order: 61
+description: The commands you type most - health, sync, load, rate.
 ---
-# Operations
+# Day-to-day CLI
 
 CLI commands for day-to-day work.
 

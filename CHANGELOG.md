@@ -5,6 +5,250 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 273 (§2.2: the sovereign-profile transport — one sealed file, the pairing loop closes)
+
+### Added - the profile rides one encrypted file
+
+- **THE SOVEREIGN PROFILE TRANSPORT (`web/dashboard/src/lib/profile.ts`,
+  prd-relay.md §2.2)**: the instance profile — chain (order preserved),
+  the bound e2e channel keys, the pod guest identities, the reach
+  choice — moves between devices as ONE passphrase-sealed file
+  (`bolete-profile.enc`, the horcux pattern web-scale). Unlock path (a)
+  is the documented KEK: a 8+ passphrase through the SAME Encrypt canon
+  (PBKDF2-SHA256 100k → AES-256-GCM; the ride seal's length floor became
+  a caller law `minLen` so the channel-key 32+ rule and the passphrase
+  8+ rule share one module, never two). The `vprof-1:` prefix types the
+  fragment; the payload shape (kind/version/tokens-as-vguest_/keys-32+/https-chain)
+  verifies UNDER the kek (§5's downgrade refusal, wider: a v2 payload
+  refuses, never salvaged). No passphrase, token, or key ever rides
+  outside the seal.
+- **THE SETTINGS FACES**: a "Sovereign profile (export / import)" card —
+  export builds the download from the TAB's live state (identities,
+  keys, hops, reach) and states exactly what it carried; import opens a
+  chosen file, merges with the honest law (tokens/keys bind ONLY where
+  the tab holds none; hops dedupe; reach upgrades only — the profile is
+  the user's from the first import on, §2.2) and reports what landed.
+- **THE PAIRING LOOP CLOSES (modules/pairing)**: the redeem result now
+  offers "adopt this identity for this property" — the pasted-token
+  step is done from the very screen the QR/deep-link redeem lands on; an
+  occupied seat refuses the adopt (never a silent clobber) and says so.
+- **Suite**: dashboard tsc clean, vitest 77/77 (10 profile pins: canon
+  three-faces byte-compat, typed E_PROFILE_KEY/E_PROFILE_SHAPE refusals,
+  the v2/no-downgrade refusal, the caller-owns-the-merge fact, and no
+  plaintext outside the seal), lint:web exit 0.
+
+## [Unreleased] - pass 272 (§5 rung 2: the context-nonce binding — the key card, and the ride rides LIVE)
+
+### Added - rung 2 + the honest key manager + the live corridor
+
+- **§5 RUNG 2 — CONTEXT-NONCE BINDING (pod + client, one law)**: the ride
+  seal now binds its receiving context `ctx { origin, path, nonce:nonce }`
+  — enforced in the SHARED ride core (lib/api.js `rideAnswer`): a ctx-less
+  or nonce-mismatched seal is a DOWNGRADE, typed `E_RIDE_DECODE`, never
+  salvaged. The ANSWER re-seals as a nonce-bound record `{ nonce, answer }`
+  (the pass-268 W1 lesson): a swapped/spliced answer refuses at the client
+  check. The browser half (src/api.ts sealedExec) cuts the seal with ctx,
+  keeps a client-side spent-nonce ledger per route (re-sending a spent
+  nonce refuses BEFORE any wire), and verifies the answer's nonce binding.
+- **THE E2E KEY CARD (Settings)**: the sovereign profile's honest key
+  manager — the raw key never re-displays (only a 4…2 mask), explicit
+  confirmed unbind (profile + tab copy), re-bind points at /pairing (the
+  binding moment delivers the pod's CURRENT key again), and the rotation
+  truth is stated: unbinding here never rotates the operator-side key.
+- **`npm run pilot:pairing-ride` (scripts/pilot-pairing-ride.js)**: THE
+  LANE OVER REAL HTTP, 9/9 pins: P1 mint (keyed door) → P2 THE BINDING
+  MOMENT (redeem delivers the RAW channelKey beside the token, e2e:"bound")
+  → P3 the paired client seals a real door call with the DELIVERED key
+  (the Encrypt canon re-stated in node, ride inner with ctx) and drives it
+  through the REAL `relay_ride` door verb → P4 the answer record binds to
+  the request nonce + the door truth inside → R1 the ctx-less downgrade
+  refuses typed → R2 the replay probe (`E_RIDE_REPLAY`) → R3 the outsider's
+  wrong-key seal decodes to nothing → R4/R4b the answer-binding check
+  refuses a swapped record and passes an honest one. The child's active
+  brain is a process-local switch (never the workspace state.json); a
+  shared 186-row ledger cap was diagnosed honestly and routed around, not
+  suppressed.
+- **Fixtures truth-up**: the two-relays pilot and the relay suite ride the
+  rung-2 shapes (R2 pin now opens the nonce-bound record; 10c-2 pins the
+  ctx-less seal AND the ctx-nonce mismatch both refusing typed); the
+  door-face 17b pin opens the bound record.
+- **Suite**: dashboard tsc clean, vitest 67/67 (3 key-card render pins:
+  bound-without-leak / unbound-points-at-pairing / rotation truth) + edge
+  ride pins 5/5, lint:web exit 0, relay 44/44, guests 25/25, mcp 34/34,
+  pilot:relay 17/17, pilot:pairing-ride 9/9.
+
+## [Unreleased] - pass 271 (P6b: the pairing-time e2e channel rides — key binding + the live chain)
+
+### Added - the binding moment, the sealed ride, and the chain editor
+
+- **THE KEY BINDING AT PAIRING (pod, §5 rung 1)**: `pairing_voucher_redeem`
+  now carries the RAW e2e `relay.channelKey` in the SAME one-time reply as
+  the guest token — delivered ONLY when the pod's ride face is really armed
+  (relay.enabled + relay.channelKey, lib/api.js's own law); an unbound pod
+  answers honestly `e2e:"unbound"`, never a fake key. The key never lands in
+  any other door or caps surface; the binding pins ride the guest door suite
+  (armed → bound; disarmed → unbound, 25/25).
+- **`relay_ride` DOOR VERB (lib/mcp.js) + THE SHARED RIDE CORE
+  (lib/api.js `rideAnswer`)**: the ride corridor answers at the DOOR too —
+  `_dispatchRide` and the verb share ONE answer core, so the ride law
+  (decode → nonce → inner door call → re-seal) can never drift between the
+  webhook face and the door face (17e pins it: a door-spent nonce replays
+  typed `E_RIDE_REPLAY` at the webhook too). Unauthed-class by the same law
+  as redeem — THE ENVELOPE IS THE CREDENTIAL. Relay suite 43/43; docs row
+  added (mcp coverage 347/347).
+- **THE CLIENT CRYPTO (`web/dashboard/src/lib/seal.ts`)**: WebCrypto
+  PBKDF2-SHA256(100k) → AES-256-GCM seals/opens in the pod's Encrypt canon
+  EXACTLY — salt:iv:tag:cipher hex, 12-byte modern IV, byte-compatible in
+  BOTH directions, cross-pinned with node crypto re-stating the pod's
+  decrypt law (no pod lib import; the one-way boundary stays clean).
+- **THE LIVE ROUTE (src/api.ts `exec`)**: usage ON + a bound key ⇒ door
+  calls ride SEALED (inner `{nonce, bearer, body}` inside the canon
+  envelope; the edge sees ciphertext only — §5's honest boundary) through
+  the dashboard edge's NEW browser-lane `relay.ride` family
+  (functions/api/r/relay.ts → the door verb `relay_ride`). ANY sealed-lane
+  refusal ADVANCES to the direct pod bridge, recorded; the lane that
+  actually answered is named in the `/chain` route record.
+- **THE SOVEREIGN PROFILE STATE (src/state.ts)**: chain hops
+  (non-sensitive, localStorage), the pairwise-bound channel key per
+  property (token-class: memory + sessionStorage, wiped on sign-out), and
+  the honest route record.
+- **THE CHAIN EDITOR (Settings, prd-relay.md 3.3)**: add = a live read of
+  the origin's PUBLIC caps (the one contract-defined cross-origin fetch,
+  and only there), remove, reorder, and an e2e badge per hop from its OWN
+  verified read; `/chain` states the P6b truth (E2E_LANE) + saved hops +
+  the route record; the pairing redeem panel binds the delivered key with
+  the one-time-honesty text.
+- **Suite**: dashboard tsc clean, web/relay tsc clean, vitest 59/59 (10
+  new: 4 seal-canon pins, 3 route pins, 3 render pins), lint:web 0
+  problems, vendor --check green, parity 19/19, relay 43/43, guests 25/25,
+  mcp 34/34.
+
+## [Unreleased] - lint gate for the web trees (the TS/TSX parse gap is closed)
+
+### Added - the web trees lint for real (`npm run lint:web`)
+
+- **THE PARSER GAP (`/.eslintrc.json` override + `package.json` `lint:web`)**:
+  the root eslint config never parsed TS/TSX — every web file failed with
+  "import and export may appear only with sourceType: module" (the espree
+  wall), so the web trees lived outside any lint gate. Now an override
+  (files `web/**/*.{ts,tsx}`) parses with `@typescript-eslint/parser`
+  (installed at the ROOT with its own TS 5.8 copy — the dashboard's pinned
+  typescript 7.0.2 is a native-binary stub whose JS API cannot serve the
+  parser; the web packages' pins are untouched). sourceType module, JSX on,
+  browser env; the gate covers `web/dashboard/src|test|functions` and
+  `web/relay/src|functions`. The rule set mirrors the repo's own JS seed
+  rules, with the TS-grammar versions where they differ
+  (`@typescript-eslint/no-redeclare` for function overload sets,
+  `@typescript-eslint/no-unused-vars` with `caughtErrorsIgnorePattern:
+  "^_"` for the swallow-catch style). Base `no-unused-vars`/`no-redeclare`
+  are OFF inside the override so the base and TS rules never double-fire.
+- **THE CONTROL-CHAR SCAN, REPATTERNED (3 relay webhooks paths guards,
+  dashboard + relay functions `relay.ts`/`events.ts`)**: the literal
+  `/[\x00-\x1f]/` now rides a char-code-built RegExp (`_HAS_CONTROL_CHARS`)
+  — the SAME convention lib/vaf.js uses for its `_CONTROL_CHARS` scan —
+  semantics identical (smoke-verified: NUL/unit-sep blocked, plain/DEL
+  paths pass, hardened 'u' flag), and the lint clean without a rule
+  suppression.
+- **The unknown-rule disable**: `react-hooks/exhaustive-deps` directives
+  (audit module) answered "Definition for rule was not found" because the
+  plugin was never installed — `eslint-plugin-react-hooks` rides the root
+  devDeps and is registered in the override so the directive names a real
+  rule. Swallow-catch bindings renamed `_e` where truly unused (the two
+  UPST catches that USE `e` were left intact, tsc-pinned).
+- **Suite**: lint:web 0 problems / exit 0 (was: 4 errors + 10 warnings
+  incl. parse failures), root `npm run lint` exit 0, dashboard
+  `tsc -b --noEmit` clean, web/relay `tsc -b --noEmit` clean, vitest
+  49/49, vendor --check 9/9, relay-parity 19/19.
+
+## [Unreleased] - P5b chain (the relay chain READ over the real caps routes)
+
+### Added - `/chain` (module #20, prd-carrier-share.md 3.2 P5b, from prd-relay.md 3.3/6.1)
+
+- **THE CHAIN MODULE (`web/dashboard/src/modules/chain`, `route /chain`,
+  tiers ALL, registered in frame/registry + a main.tsx route line)**: the
+  READ side of the two-sided contract — the editor stays in Settings
+  (Use relays / Run with a relay), `/chain` renders what the postures
+  actually answer. The ordered hop list per property: the saved
+  `/web/relay` hop when one is set (probed via its PUBLIC caps route —
+  the ONE cross-origin UI-side fetch the contract defines, nothing
+  else is ever probed browser-side), and the dead-last LOCAL fallback
+  pod bridge named the ACTIVE hop (honest today-truth: traffic is
+  direct; usage ON adds intent only until the P6b rung — the badge says
+  so, never a greenwash).
+- **HONEST CAPS RECORDS (`relayCaps` in src/api.ts, typed zod)**: 404
+  reads as "this deploy is not a relay" — an honest record, never a
+  crash; non-r/2 caps refuse; a caps page budgeting a PLAIN pipe
+  (`e2e !== envelope-required`) refuses LOUDLY (the plain-hop warn,
+  prd-relay 1.1.2); unreachable origins state the truth verbatim.
+- **THE CORE-RUNG BADGE (§5 pin)**: every hop states the core-rung line
+  verbatim — the hop pipe is ciphertext-only (r/2 envelope-required);
+  the pairing-time e2e channel (relay-blind body, prd-relay.md 5) lands
+  at the P6b rung — no fake e2e badge.
+- **THE PROBE RIDES THE DOOR (§3.3 probe seam)**: a `relay.lost` beacon
+  through the REAL intake (server-side HMAC); the verdict card renders
+  the ack verbatim — ok:true answers, typed `E_RELAY_*`/`E_RIDE_*`
+  refusals, and transport refusals all surface, none decorated.
+- **Suite**: dashboard tsc clean; vitest 49/49 (10 new chain pins: caps
+  verdict + core-rung badge verbatim, 404-as-record, ACTIVE vs
+  not-routed-yet badges, relayCaps 404/plain/r%2f refusals, ProbeCard
+  never auto-fires); vendor --check 9/9 untouched (no kit change),
+  relay-parity 19/19, mcp coverage 346/346.
+
+## [Unreleased] - issues #212/#213 (the memory-learn prose lane: agent voice is writeable again)
+
+### Fixed - the two false-positive walls on the learn lane (from rook on main)
+
+- **THE FIELD-SPLIT SCAN (`lib/pipeline.js` `runChain`)**: the brain-write
+  security chain previously ran its FULL vaf wall (path scan + content
+  scan) over ONE serialized
+  `JSON.stringify({category, key, content.slice(0, 500)})` blob — so the
+  learn CONTENT, owner-owned agent-voice prose, was scanned as if it
+  were a path argument AND a command line. Any note mentioning `~/x`,
+  `../x`, `/home/…`, `$HOME`, `; `, ` | `, `&&`/`||` failed the entire
+  write with `Path blocked`/`Content blocked`, exit 1, nothing persisted
+  (issues #212, #213 — worst case, the session note was silently lost).
+  Now the fields are validated for what they ARE: `category`/`key` are
+  caller path input (full wall, a traversal key like `../etc/passwd` is
+  still refused typed `SECURITY_PATH_TRAVERSAL`), and `content` rides a
+  new prose lane (below). The content scan is also FULL-LENGTH now — the
+  old `content.slice(0, 500)` serialized slice let an attack hide at
+  offset 500.
+- **THE PROSE LANE (`lib/vaf.js`, `proseContent` + `PROSE_PATTERNS`)**:
+  the narrowed pattern set for owner-owned prose keeps the
+  payload-realistic checks (`<script`, `javascript:`, `on\w+=`,
+  template idioms ONLY when followed by an identifier, `$(`, `:; rm`,
+  `rm -rf`, `dd`, `chmod 777`, the word-stacking troll, piping
+  curl/wget to bash/sh) and drops the bare metacharacter heuristics
+  (`;\s*\w+`, `&&`, `||`, `&`, any `|`, `<//`, `>/`, `>>/`, bare
+  backticks, bare `${`/`{{`) that fired on ordinary English and markdown
+  tables. The path scan is SKIPPED for prose content (a learn body is
+  never used as a path — the traversal risk lives in category/key);
+  `proseContent` rides the same library-internal seam as `blobContent`
+  (callers cannot set it from tool schemas). The old vaf comment
+  promising the bypass for "memory content that legitimately have
+  newlines and special chars" now matches the code.
+- **PATH CHECK ANCHORING (`checkPathTraversal`)**: the home-expansion
+  and `..` rules are prefix/segment-anchored — a string that IS or
+  STARTS with a home expansion or a whole-path-segment `..` is still
+  blocked; a mid-string mention (`lives at ~/tools/vant`, `a..b` as a
+  filename) is prose and passes. Real path lanes (`type: 'path'`/`'file'`,
+  storage, backup, horcrux) keep every refusal — the concrete test
+  still blocks exact attacks (segment-anchored `../` at any segment,
+  leading `~`).
+- **ACTIONABLE REFUSALS**: `Path blocked` now names the rule and the
+  field (`Path blocked: Home directory expansion blocked (in key)`);
+  content refusals name the field, the matched pattern, the OFFSET and
+  a ~64-char snippet — an agent (or human) can see what tripped without
+  reading vaf.js.
+- **Regression pins** (test/memory.test.js): the literal repro bodies
+  from both issues learn cleanly through the REAL brain-write chain;
+  hostile payloads (`$(curl … | bash)`, `<script>`, `rm -rf`) are STILL
+  refused in the prose lane with typed codes + offset; hostile
+  traversal KEYS still refuse `SECURITY_PATH_TRAVERSAL`. Suites: memory
+  24/24, vaf 12/12, pipeline 9/9, security-chain 9/9,
+  security-pipeline 8/8, brain-circuit 10/10, workspace-memory 21/21,
+  guests 25/25, boot 17/17; eslint clean on touched files.
+
 ## [Unreleased] - pass 270 (the origins posture is law - intranet LAN-scope relay + the ops CLI faces)
 
 ### Added - the posture (relay) and the faces (CLI)

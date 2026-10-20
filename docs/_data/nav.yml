@@ -127,7 +127,7 @@
   items:
   - title: Overview
     url: /vant/operations/
-  - title: Operations
+  - title: Day-to-day CLI
     url: /vant/operations/operations
   - title: Storage
     url: /vant/operations/storage

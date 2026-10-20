@@ -40,10 +40,28 @@ require(path.join(ROOT, 'lib', 'sandbox')).defaultSandbox.setCapabilities({
     canRead: true, canWrite: true, canNetwork: true, canTrade: true, canSpawn: true
 });
 
-fs.rmSync(path.join(ROOT, 'models', 'private', 'vant', 'state'), { recursive: true, force: true });
-fs.rmSync(path.join(ROOT, 'models', 'private', 'vant', 'orgchart'), { recursive: true, force: true });
+// (pass 281) The ceremony runs as the INSTALL'S ACTIVE brain: the children
+// spawn with the default brain resolution (VANT_BRAIN env → models/state.json
+// stack → 'vant'), so teardown and the hygiene assertion must target the SAME
+// brain the runtime resolves to, never a hardcoded name. A workspace whose
+// state.json pins a non-'vant' currentBrain (e.g. pairing-ride-pilot) used to
+// fail "genesis.json not persisted" here while the ceremony itself worked —
+// the suite was coupled to the brain NAME of whatever desk authored it.
+const ACTIVE_BRAIN = (() => {
+    if (process.env.VANT_BRAIN) return process.env.VANT_BRAIN;
+    try {
+        const state = JSON.parse(fs.readFileSync(path.join(ROOT, 'models', 'state.json'), 'utf8'));
+        const pick = typeof state.currentBrain === 'string' && state.currentBrain
+            ? state.currentBrain
+            : (Array.isArray(state.stack) && state.stack[0] ? state.stack[0] : null);
+        if (pick && /^[a-zA-Z0-9._-]+$/.test(pick)) return pick;
+    } catch (_e) { /* fall through: no state.json yet */ }
+    return 'vant';
+})();
+fs.rmSync(path.join(ROOT, 'models', 'private', ACTIVE_BRAIN, 'state'), { recursive: true, force: true });
+fs.rmSync(path.join(ROOT, 'models', 'private', ACTIVE_BRAIN, 'orgchart'), { recursive: true, force: true });
 
-const GENESIS_FILE = path.join(ROOT, 'models', 'private', 'vant', 'state', 'genesis.json');
+const GENESIS_FILE = path.join(ROOT, 'models', 'private', ACTIVE_BRAIN, 'state', 'genesis.json');
 
 // Ports + topic BEFORE the child templates are built (interpolation order).
 const pidSuffix = process.pid.toString(36);

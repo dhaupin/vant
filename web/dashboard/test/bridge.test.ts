@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { bridgeOptions, podTokenFor, rateGate, type PagesContext } from "../functions/lib/bridge";
-import type { KVStore } from "../functions/lib/kv";
 
 /**
  * Pins for the bridge audit scan (the three picked edges):

@@ -251,8 +251,19 @@ async function run() {
             }
             console.log('Art pack:', templateStyle);
         }
-        // Gather full corpus (now default)
-        const result = await transform.toHorcrux(outputPath, { password, templateStyle });
+        // Gather full corpus (now default; issue #219: --brains <names> scopes
+        // the payload — a multi-brain stone is a full-install backup, say so)
+        let brainsFilter = null;
+        const _brainsIdx = args.indexOf('--brains');
+        if (_brainsIdx >= 0) {
+            brainsFilter = String(args[_brainsIdx + 1] || '').split(',').map((s) => s.trim()).filter(Boolean);
+            if (brainsFilter.length === 0) {
+                console.error('❌ --brains resolved to zero names');
+                process.exit(1);
+            }
+            console.log('Payload scope: only ' + brainsFilter.join(', '));
+        }
+        const result = await transform.toHorcrux(outputPath, { password, templateStyle, brains: brainsFilter });
         
         console.log('\n✅ Created!');
         console.log('Path:', result.path);
@@ -370,6 +381,19 @@ async function run() {
         }
 
         const transform = require('../lib/transform');
+        // (issue #219) optional payload scope for refresh: refresh normally
+        // re-gathers ALL brains (same contract as create); a --brains filter
+        // scopes this stone the same way create does.
+        let brainsFilter = null;
+        const _brainsIdx2 = args.indexOf('--brains');
+        if (_brainsIdx2 >= 0) {
+            brainsFilter = String(args[_brainsIdx2 + 1] || '').split(',').map((s) => s.trim()).filter(Boolean);
+            if (brainsFilter.length === 0) {
+                console.error('❌ --brains resolved to zero names');
+                process.exit(1);
+            }
+            console.log('Payload scope: only ' + brainsFilter.join(', '));
+        }
         // (pass 23) Shared safe-write flow via lib/horcrux-safe.js:
         // tmp → round-trip validate → rename. Also cwd-safe: the helper
         // resolves every path against VANT_REPO_ROOT/install root, so a
@@ -387,8 +411,9 @@ async function run() {
             log: (m) => console.log(m.replace(/^ {3}/, '  ')),
             password,
             templateStyle: _artPack,
+            brains: brainsFilter,
             // (#195) Optional art pack carried through for the encode step.
-            encode: (rel, o) => transform.toHorcrux(rel, { password: o.password, templateStyle: o.templateStyle || null }),
+            encode: (rel, o) => transform.toHorcrux(rel, { password: o.password, templateStyle: o.templateStyle || null, brains: o.brains }),
             decode: (rel, o) => transform.validateHorcruxFile(rel, { password: o.password }),
             validate: (check) => (check && check.valid !== false)
                 ? true

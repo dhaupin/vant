@@ -419,6 +419,88 @@ async function asyncTest(name, fn) {
         }
     });
 
+    // (prd-carrier-share.md §2, P5a) THE CARRIER VERB FAMILY: the UI-side
+    // data plane. The roster (lane_list) is rendered verbatim, encode wraps
+    // the packet gate (WRITE-class, mints nothing), decode resolves without
+    // writing (honest unresolved records), traveler_list NAMES while
+    // traveler_status VERIFIES (the spec's one law between the two).
+    await asyncTest('carrier_lane_list: the roster is the pod truth verbatim (built-ins + plates, honest availability)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const r = await mcp.execute('carrier_lane_list', {});
+        const ids = (r.lanes || []).map((l) => l.id);
+        const png = (r.lanes || []).find((l) => l.id === 'png');
+        const hasPlates = Array.isArray(r.plates);
+        const ok = ['json', 'nsc9', 'qr', 'stone', 'svg'].every((lane) => ids.includes(lane))
+            && png && png.available === false  // the declared-absent lane NEVER turns green
+            && hasPlates;
+        return { success: ok, error: JSON.stringify({ lanes: ids, plates: (r.plates || []).length }).slice(0, 140) };
+    });
+
+    await asyncTest('carrier_encode: an absent re-verify refuses typed STORAGE_NOT_FOUND (encode carries what exists)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        try {
+            await mcp.execute('carrier_encode', { id: 'a'.repeat(64), lane: 'qr' });
+            return 'absent body sailed through encode';
+        } catch (e) {
+            const ok = e.code === 'STORAGE_NOT_FOUND';
+            return { success: ok, error: 'wrong refusal: ' + (e.message || '').slice(0, 100) };
+        }
+    });
+
+    await asyncTest('carrier_encode: an unknown lane refuses typed E_CARRIER_CARRIER (the caller names the lane, the door never sniffs)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const traveler = require(path.join(ROOT, 'lib', 'traveler'));
+        const t = traveler.mint({ from: 'door-pin', slots: { title: 'encode pin' } });
+        traveler.persist(t);
+        try {
+            await mcp.execute('carrier_encode', { id: t.id, lane: 'zodiac' });
+            return 'unknown lane sailed through encode';
+        } catch (e) {
+            const ok = e.code === 'E_CARRIER_CARRIER';
+            return { success: ok, error: 'wrong refusal: ' + (e.message || '').slice(0, 100) };
+        }
+    });
+
+    await asyncTest('carrier_encode: a real packet encodes on a named lane with the address carried (qr pointer opts ride)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const traveler = require(path.join(ROOT, 'lib', 'traveler'));
+        const t = traveler.mint({ from: 'door-pin', slots: { title: 'encode shape pin' } });
+        traveler.persist(t);
+        const r = await mcp.execute('carrier_encode', { id: t.id, lane: 'qr', opts: { pointer: true } });
+        // (pin-caught) the lib's honest kind for a pointer mark IS 'pointer'
+        // — same face traveler_stamp serves; the artifact is the frame, the
+        // address IS the packet's own content address (never abbreviated).
+        const ok = r && r.carrier === 'pointer' && r.address === t.id
+            && r.artifact === 'VANT:1:' + t.id
+            && Buffer.from(r.png, 'base64').length > 0 && r.moduleCount > 0;
+        return { success: ok, error: JSON.stringify(r).slice(0, 140) };
+    });
+
+    await asyncTest('carrier_decode: garbage on the stone lane refuses typed E_CARRIER_SHAPE (decode never fabricates)', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        try {
+            await mcp.execute('carrier_decode', { lane: 'stone', artifact: 'not-a-frame' });
+            return 'garbage decoded on stone';
+        } catch (e) {
+            const ok = e.code === 'E_CARRIER_SHAPE';
+            return { success: ok, error: 'wrong refusal: ' + (e.message || '').slice(0, 100) };
+        }
+    });
+
+    await asyncTest('traveler_list: NAMES only, never verifies — ids match the pin ledger and status still owns per-id truth', async () => {
+        const mcp = require(path.join(ROOT, 'lib', 'mcp'));
+        const traveler = require(path.join(ROOT, 'lib', 'traveler'));
+        const t = traveler.mint({ from: 'door-pin', slots: { title: 'traveler_list pin' } });
+        traveler.persist(t);
+        const r = await mcp.execute('traveler_list', {});
+        const names = Array.isArray(r.ids) && r.ids.includes(t.id);
+        const hexy = r.ids.every((id) => /^[0-9a-f]{64}$/.test(id));
+        // the law: per-id truth answers through status, not through the list
+        const st = await mcp.execute('traveler_status', { id: r.ids[0] });
+        const ok = names && hexy && st && typeof st.seen === 'boolean';
+        return { success: ok, error: JSON.stringify(r).slice(0, 140) };
+    });
+
     // (pass 268) THE ARTIFACT DOOR (traveler_stamp): the OTHER half of the
     // qr lane crosses the mesh too — the pointer mark served as base64 off
     // the SAME serving wall as traveler_fetch (one law, two faces), so the

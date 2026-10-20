@@ -22,6 +22,16 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   // live-caught on the preview). One-shot, not part of the probe loop.
   useEffect(() => {
     actions.restoreToken(getProperty());
+    // (P6b gap fix) the pairwise-bound e2e channel key shares the token's
+    // one-tab scope: rehydrate it alongside the token or a reload would
+    // silently downgrade every door call to the direct bridge with a key
+    // sitting unrestored in sessionStorage.
+    actions.restoreChannelKey(getProperty());
+    // (pass 274, §2.2 storage rung) then the DEVICE PROFILE: the sovereign
+    // profile sealed in IndexedDB under the non-extractable device key
+    // survives tab resets — possession IS the unlock, so this runs on
+    // every mount and binds only what this tab is missing.
+    void actions.restoreDeviceProfile();
   }, []);
 
   useEffect(() => {

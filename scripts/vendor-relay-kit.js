@@ -60,6 +60,18 @@ const SOURCES = [
             'web/relay/functions/lib/traveler-contract.cjs',
             'web/relay/functions/lib/traveler-contract.d.cts'
         ]
+    },
+    // (prd-carrier-share.md 3.1, P5a) the KIT SIDE member: the pure
+    // CarrierShare renderer. types: null — the source is itself TypeScript
+    // (TSX), so no .d twin exists and none is written; the target keeps the
+    // .tsx extension and the bundler reads its own declarations. Same law:
+    // byte-identical + hash-pinned to kit head.
+    {
+        source: path.join(ROOT, 'web', 'kit', 'components', 'carrier-share.tsx'),
+        types: null,
+        targets: [
+            'web/dashboard/src/frame/CarrierShare.tsx'
+        ]
     }
 ];
 
@@ -79,9 +91,9 @@ function main() {
 
 function vendorPair(pair) {
     const source = fs.readFileSync(pair.source);
-    const typesSrc = fs.readFileSync(pair.types);
+    const typesSrc = pair.types ? fs.readFileSync(pair.types) : null;
     const head32 = sha(source);
-    const headTypes32 = sha(typesSrc);
+    const headTypes32 = typesSrc ? sha(typesSrc) : null;
 
     let drift = false;
     for (const rel of pair.targets) {

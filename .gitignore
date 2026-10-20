@@ -66,6 +66,10 @@ models/tmp-space/
 # QC drill scratch (real-tree migration drills)
 .drill-*/
 
+# test/tmp: external-tool QC targets (e.g. a throwaway vant install for
+# crashtest.creadev.org to attack) - scratch, never tracked.
+test/tmp/
+
 # Agent capability-probe scratch (sandbox gate tests, never tracked)
 /private/
 

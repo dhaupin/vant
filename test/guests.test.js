@@ -244,6 +244,53 @@ async function asyncIntegrations() {
         assert.strictEqual(dead.status, 401, 'revoked token = locked out at once');
     })();
 
+    // ---------- pass 271 (prd-relay §5, rung P6b): the redeem IS the key
+    // binding moment — the e2e relay channelKey rides the SAME one-time
+    // redeem reply as the raw token, delivered ONLY when the pod's ride
+    // face is really armed (relay.enabled + relay.channelKey). The door
+    // pins here: an armed pod hands the RAW key exactly once; an unbound
+    // pod answers honestly (e2e:'unbound', no fake key ever).
+    await (async () => {
+        const config = require(path.join(ROOT, 'lib', 'config'));
+        const pre = { enabled: config.get('relay.enabled'), key: config.get('relay.channelKey') };
+        const CK = ('e2etest').padEnd(8, 't').split('').join('') + require('crypto').randomBytes(24).toString('hex'); // len 64
+        const voucher = (n) => {
+            const nm = 'vhpair-kbind-' + n + '-' + Date.now().toString(36);
+            const gopt = { brain: active };
+            guests.offerPairing(nm, gopt);
+            return nm;
+        };
+        const redeemDoor = async (code) => {
+            const res = await fetch('http://127.0.0.1:' + net + '/mcp/exec', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },   // redeem: UNAUTHED-class by design
+                body: JSON.stringify({ tool: 'pairing_voucher_redeem', args: { code } })
+            });
+            const body = await res.json().catch(() => ({}));
+            return (body && typeof body === 'object' && body.result ? body.result : body);
+        };
+        try {
+            // K1: the ARMED posture — the key binds into the one-time reply
+            config.set('relay.enabled', 'true');
+            config.set('relay.channelKey', CK);
+            const armed = await redeemDoor(voucher('armed'));
+            assert.ok(armed && armed.ok && /^vguest_/.test(armed.token || ''), 'armed redeem still issues the guest identity');
+            assert.strictEqual(armed.e2e, 'bound', 'armed pod states e2e:bound');
+            assert.strictEqual(armed.channelKey, CK, 'the RAW channel key rides the one-time reply (binding moment)');
+
+            // K2: the UNBOUND pod — honest e2e:'unbound', no fabricated key
+            config.set('relay.enabled', 'false');
+            config.set('relay.channelKey', null);
+            const unbound = await redeemDoor(voucher('disarmed'));
+            assert.ok(unbound && unbound.ok && unbound.token, 'unbound redeem still pairs');
+            assert.strictEqual(unbound.e2e, 'unbound', 'unbound pod answers honestly');
+            assert.ok(!('channelKey' in unbound), 'no fake key on an unbound pod');
+        } finally {
+            config.set('relay.enabled', pre.enabled);
+            config.set('relay.channelKey', pre.key);
+        }
+    })();
+
     try { await mcp.stop();
     } catch (e) { /* best effort */ }
     guests._resetForTest();

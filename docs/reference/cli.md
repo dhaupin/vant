@@ -219,6 +219,11 @@ vant snapshot                    # Default output: <brain>/boot/<agent>-p_<pw>.s
 vant snapshot --agent nova       # Snapshot under a specific agent name
 vant snapshot --brain nova       # Snapshot into a specific brain's boot dir
 vant snapshot --password <pw>    # Explicit password
+vant snapshot --brains <a,b>     # Scope the STONE payload to those brains
+                                 # (issue #219; --brain moves the output file,
+                                 #  --brains filters what gets gathered. No
+                                 #  filter = full-install capture, and a
+                                 #  multi-brain stone says so at create time)
 vant snapshot --output <path>    # Custom output path (inside the repo)
 vant snapshot --no-verify        # Skip the round-trip verification
                                  # (REFUSED when overwriting an existing
@@ -324,8 +329,8 @@ vant backup schedule         # not implemented - prints a cron recipe
 
 vant horcrux inspect [path] [password]
 vant horcrux restore [path] [password]
-vant horcrux create [path] [password]
-vant horcrux refresh [password]      # regenerate boot horcrux in place
+vant horcrux create [path] [password] [--brains <a,b>]   # issue #219 payload scope
+vant horcrux refresh [password] [--brains <a,b>]         # regenerate boot horcrux in place
 
 vant transform gather
 vant transform to-horcrux

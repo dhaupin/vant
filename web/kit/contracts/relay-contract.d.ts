@@ -4,6 +4,14 @@ export declare const CONTRACT_VERSION: string;
 export declare const CAPS_VERSION: string;
 export declare const WIRE_MAJOR: number;
 export declare const SIGNATURE_HEADER: string;
+export declare const SEALED: {
+    readonly FIELD: "seal";
+    readonly SIG_BYTES: "ct";
+    readonly SIG_ALG: "HMAC-SHA256";
+    readonly HEADERLESS: true;
+    readonly REFUSES: { readonly BAD: 401; readonly STALE: 401; readonly REPLAY: 409 };
+    readonly LAST_MILE: string;
+};
 export declare const ROUTES: { readonly relay: string };
 export declare const EVENTS: {
     readonly hop: string;

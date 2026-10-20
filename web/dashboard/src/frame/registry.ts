@@ -9,10 +9,12 @@ import {
   Gauge,
   KeyRound,
   MessagesSquare,
+  Network,
   QrCode,
   Settings,
   ShoppingBag,
   SlidersHorizontal,
+  Package,
   UserCog,
   UsersRound,
   Wallet,
@@ -220,6 +222,36 @@ export const MODULES = [
     families: [],
     icon: Waypoints,
     load: () => import("../modules/nodes"),
+  },
+  {
+    // (prd-carrier-share.md 3.2 P5a) the carriers module: lane roster,
+    // letter ledger, stamp gallery, share panel, plates roster. Every
+    // surface renders what the door really answers; the share panel's
+    // lane choice is a USER pick per need — the component decides nothing.
+    id: "carriers",
+    title: "Carriers",
+    blurb: "Carrier lanes: ledger, stamps, share, plates.",
+    route: "/carriers",
+    tiers: ["O", "A", "S"],
+    section: "ops",
+    families: [],
+    icon: Package,
+    load: () => import("../modules/carriers"),
+  },
+  {
+    // (prd-carrier-share.md 3.2 P5b) the chain module: the per-property
+    // ordered hop list, the ACTIVE hop named, honest core-rung badges,
+    // and a door-ridden probe (relay.lost). The two-sided contract 6.1
+    // holds: this page is the READ — the editor stays in Settings.
+    id: "chain",
+    title: "Chain",
+    blurb: "The relay chain read: hops, active hop, probe verdicts.",
+    route: "/chain",
+    tiers: ["O", "H", "A", "S"],
+    section: "observe",
+    families: [],
+    icon: Network,
+    load: () => import("../modules/chain"),
   },
 ] as const satisfies readonly ModuleManifest[];
 
