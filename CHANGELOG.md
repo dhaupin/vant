@@ -5,6 +5,40 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 286 (② CLOSED on main: the live corridor over brain.creadev.org + the Pages deploy-log warns swept)
+
+### Added - the live solve + the build hygiene
+
+- **THE MERGED DEPLOY TESTED (PR #221 accepted, main = 8feb448)**:
+  `brain.creadev.org` answers the r/2 caps page with the dashboard-relay
+  flavor still standing (`gated:true`, `gateReady:true`,
+  `e2e:envelope-required`), the pass-283 `traveler` bundle serves for
+  real (200 application/javascript), and the LIVE corridor re-proved on
+  the merged build: correctly-shaped `relay.hop` forwarded byte-exact
+  (`dispatched:1`, upstream echoes `json.ct == ct`), and the gate law
+  probes still answer typed inside 200 (`E_RELAY_BAD_ORIGIN` for the
+  metadata target). Item ② of the queue is live and stamped.
+- **THE NODE PIN, TRUTH-UP (.nvmrc 20 → 22)**: the Pages builder took
+  the root pin literally and built an EOL node 20.20.0 (deploy log:
+  "past its end of life and now unsupported"), which also tripped npm's
+  EBADENGINE for `vitest@5.0.4` (engines require ^22.12 || ^24 ||
+  >=26). 22 is active LTS and matches the local sandbox (v22) — both
+  WARNs die with the pin.
+- **THE ENTRY CHUNK, REALLY SPLIT (web/dashboard/vite.config.ts)**: the
+  build log warned the entry chunk crossed 500 kB (index 581.97 kB
+  minified — framework + app shell in one). Real code-split, not a
+  `chunkSizeWarningLimit` raise — the versioned framework families lift
+  out via rolldown's forward `output.codeSplitting` API
+  (`advancedChunks` is its deprecated alias; `buildChunkHeightLimit`
+  would only hide the message): `framework-react` (react/react-dom/
+  scheduler), `framework-tanstack`, `framework-zod`. Local build: max
+  chunk 218.76 kB (framework-react), index 166.28 kB, zod 89.18,
+  tanstack 106.88 — every chunk under the warn line, cache-stable
+  filenames, `tsc -b --noEmit` + vite build exit 0, no warning
+  emitted.
+- **Suite**: dashboard build clean (tsc + vite, exit 0, no chunk warn);
+  standing green unchanged elsewhere (no src touched by this pass).
+
 ## [Unreleased] - pass 284 (the Cairn pitstop: issue #219's `--brains` filter finally reaches the `vant transform` face)
 
 ### Fixed - the gather-all-brains gap (pin by Cairn on dhaupin/prestruct)
