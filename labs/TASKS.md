@@ -1,20 +1,21 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** pass 283 (the traveler frontend lane: the enterprise
-router object's front end — EVENTS.travel in the kit; the pod webhook face
-routes relay.travel through the bridge family; the dashboard edge accepts
-it on both lanes with the vendored shape law and translates to the door's
-brain_write slot; a browser minter (content-addressed tr/1, WebCrypto)
-+ travelerSend() preflight the law before any wire; the Traveler module
-(route /traveler) mints, sends, and reads the door's real traveler verbs;
-the solo posture page gains the sealed-hops-only carrier truth)
-passphrase-sealed bolete-profile.enc file carries chain + keys + guest
-identities + reach; the pairing redeem can adopt the identity outright;
-rungs now landed: P6b binding/key card/door ride (271), rung-2 binding
-(272), §2.2 transport (273), pass 283: the traveler frontend lane —
-the multi-hop browser traversal still waits on the transport's upstream
-credential story, named honestly)  
+**Last Updated:** pass 284 (the Cairn/pass-over pitstop — the gather-all-brains
+CLI gap closed: prestruct-side pin by Cairn was right; the --brains allowlist
+existed at the lib and on snapshot/horcrux but the `vant transform` face passed
+nothing through — gather/full/horcrux/backup now honor the filter end to end,
+`gatherMode` scopes the mode INVENTORY too (a filtered stone no longer lists
+or mkdir's brain dirs it never captured), the transform test suite's
+top-of-file fire-and-forget async harness is fixed so the six silently
+skipped pins actually drain, and the stale cli.md transform rows
+(to-horcrux/inspect-horcrux are not verb names) are rewritten to the
+six real verbs; the §2.2 passphrase-sealed bolete-profile.enc file
+carries chain + keys + guest identities + reach; the pairing redeem can
+adopt the identity outright; rungs now landed: P6b binding/key card/door
+ride (271), rung-2 binding (272), §2.2 transport (273), and the pass-283
+traveler frontend lane — the multi-hop browser traversal still waits on
+the transport's upstream credential story, named honestly)  
 **Session:** Pass 242 - THE NAV + MISSIONS SPEC: eight new modules queued
 (consensus, resolution/citations, era/succession, nature flywheel,
 habitats, cron manager, settlements, origins), the hierarchical
@@ -22,6 +23,13 @@ Cloudflare-sidebar model adopted (3.3-5c), and the two frame
 requirements: ui-state memory (return to your page after the 15-min
 window) and the vetted cache-busting framework (?hash= breaker,
 3 layers). Next: the FRAME pass lands 5c + memory + breaker at once.  
+**Prior:** Pass 284 - THE CAIRN/PRESTRUCT PITSTOP (issue #219 CLI closure:
+bin/transform.js --brains <a,b> on gather/full/horcrux/backup; lib gatherMode
+scopes the mode inventory stack by the SAME allowlist with byte-identical
+unfiltered behavior; test/transform.test.js harness async pins actually drain
+before results, filter pins added; cli.md transform rows updated; suites:
+transform 16/16, brain-storage-strict 14/14, cli-smoke 2/2, coverage PASS,
+truthfulness PASS, lint 0).
 **Prior:** Pass 283 - THE TRAVELER FRONTEND LANE: the enterprise router
 object's front end landed end to end — kit gains EVENTS.travel; the pod's
 webhook face routes relay.travel through the bridge family (19a-d pins);

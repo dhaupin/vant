@@ -5,6 +5,48 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 284 (the Cairn pitstop: issue #219's `--brains` filter finally reaches the `vant transform` face)
+
+### Fixed - the gather-all-brains gap (pin by Cairn on dhaupin/prestruct)
+
+- **`--brains <a,b>` ON `vant transform` (bin/transform.js)**: the issue #219
+  payload filter existed at the lib level and on `vant snapshot` /
+  `vant horcrux create|refresh`, but this CLI passed NOTHING through —
+  `vant transform gather`, `full`, `horcrux`, and `backup` deliberately
+  captured ALL brains in the install ("snapshot captures all brains, not
+  just those in state.json", the lib/transform.js comment itself) with no
+  CLI filter. On this very workspace the unfiltered inventory carried ~80
+  brain trees — every gather/horcrux/backup artifact bundled them ALL,
+  file bodies included. All four verbs now parse `--brains`, thread the
+  allowlist to `transform.gather`/`toHorcrux`/`toBackup`, print the scope
+  line, and refuse an empty value (exit 1, "--brains resolved to zero
+  names") — the same output contract as snapshot.js. Help text documents
+  it.
+- **THE INVENTORY HONORS THE SAME LAW (lib/transform.js `gatherMode`)**:
+  the #219 comment promised the allowlist "scopes the INVENTORY too", but
+  the live-stack entries survived the union untouched — a filtered stone
+  listed (and the restore path mkdir'd) brain dirs it never captured, and
+  legacy-payload fallback `loadStack` could adopt them. When `opts.brains`
+  is set, `mode.stack` is now strictly the FILTERED union (live-stack names
+  outside the filter drop off; on-disk brains outside the filter stay out);
+  unfiltered behavior is byte-identical, and `activeStack`/`currentBrain`
+  remain the unfiltered live identity truth per the pass-72/issue #97
+  contract.
+- **THE SILENTLY-SKIPPED PINS (test/transform.test.js)**: the suite's
+  `testAsync` was fire-and-forget — the module fell through to
+  `process.exit` before ANY async pin resolved, so the gather/toHorcrux/
+  restore pins printed nothing and the suite claimed a count it never
+  ran. The harness now queues and drains the async pool before the
+  RESULTS block, and new pins cover: the scoped brainStorage walk, the
+  scoped inventory + unfiltered identity truth, the typed empty-filter
+  refusal, and the CLI refuser + help rows. Suite 16/16 (was 5 real).
+- **Docs truth-up**: cli.md's transform rows were stale verbs
+  (`to-horcrux`/`inspect-horcrux` are not entry names) — rewritten to the
+  six real verbs with the `--brains` scope on the four gather verbs.
+- **Suite**: transform 16/16, brain-storage-strict 14/14, cli-smoke 2/2
+  (all 135 CLIs parse + --help), CLI coverage 130+5 PASS,
+  bin-truthfulness PASS, eslint 0 on touched files.
+
 ## [Unreleased] - pass 273 (§2.2: the sovereign-profile transport — one sealed file, the pairing loop closes)
 
 ### Added - the profile rides one encrypted file
