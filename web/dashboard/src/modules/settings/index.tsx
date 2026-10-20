@@ -186,6 +186,14 @@ function ChainEditor() {
 
   const add = async () => {
     const origin = draft.trim().replace(/\/+$/, "");
+    if (!origin) {
+      setState({ kind: "bad", why: "Empty origin — nothing to probe." });
+      return;
+    }
+    if (!/^https:\/\//.test(origin)) {
+      setState({ kind: "bad", why: "https only — a hop is never plain http in the public posture." });
+      return;
+    }
     setState({ kind: "checking" });
     try {
       const caps: ApiRelayCaps = await relayCaps(origin);
@@ -229,7 +237,7 @@ function ChainEditor() {
         )}
         {state.kind === "bad" && <span className="text-accent">✗ {state.why}</span>}
         {state.kind === "checking" && <span>Reading the origin's public capabilities…</span>}
-        {state.kind === "idle" && <span>Order matters: the exec lane rides the chain in the order below (the dashboard edge is always the dead-last fallback).</span>}
+        {state.kind === "idle" && <span>Order matters for the riders that hold each hop's gate (CLI/agent lanes). YOUR browser lane rides this deploy's own edge: sealed calls go browser → dashboard edge → pod with the edge relay-blind (§5); the saved hops stay upstream partners — carried ciphertext, never holders of your e2e key.</span>}
       </p>
       <div className="mt-3 space-y-2">
         {chain.length === 0 ? (

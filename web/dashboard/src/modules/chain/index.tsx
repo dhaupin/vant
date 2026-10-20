@@ -263,7 +263,7 @@ export default function Chain() {
           ) : null}
           <HopRow
             label="pod bridge (direct Mode A/B)"
-            note="the dead-last local fallback (prd-relay.md 3.1) — ACTIVE today: traffic is direct; it becomes the fallback rung when hops route."
+            note="the dead-last local fallback (prd-relay.md 3.1) — the fail-over lane: every door call lands here when a sealed ride refuses (and always, with no key bound)."
             state={{ s: "on", caps: { relay: "r/2", flavor: "direct pod bridge", e2e: E2E_LAW } }}
             active
           />
