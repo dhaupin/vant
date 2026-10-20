@@ -5,6 +5,46 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 272 (§5 rung 2: the context-nonce binding — the key card, and the ride rides LIVE)
+
+### Added - rung 2 + the honest key manager + the live corridor
+
+- **§5 RUNG 2 — CONTEXT-NONCE BINDING (pod + client, one law)**: the ride
+  seal now binds its receiving context `ctx { origin, path, nonce:nonce }`
+  — enforced in the SHARED ride core (lib/api.js `rideAnswer`): a ctx-less
+  or nonce-mismatched seal is a DOWNGRADE, typed `E_RIDE_DECODE`, never
+  salvaged. The ANSWER re-seals as a nonce-bound record `{ nonce, answer }`
+  (the pass-268 W1 lesson): a swapped/spliced answer refuses at the client
+  check. The browser half (src/api.ts sealedExec) cuts the seal with ctx,
+  keeps a client-side spent-nonce ledger per route (re-sending a spent
+  nonce refuses BEFORE any wire), and verifies the answer's nonce binding.
+- **THE E2E KEY CARD (Settings)**: the sovereign profile's honest key
+  manager — the raw key never re-displays (only a 4…2 mask), explicit
+  confirmed unbind (profile + tab copy), re-bind points at /pairing (the
+  binding moment delivers the pod's CURRENT key again), and the rotation
+  truth is stated: unbinding here never rotates the operator-side key.
+- **`npm run pilot:pairing-ride` (scripts/pilot-pairing-ride.js)**: THE
+  LANE OVER REAL HTTP, 9/9 pins: P1 mint (keyed door) → P2 THE BINDING
+  MOMENT (redeem delivers the RAW channelKey beside the token, e2e:"bound")
+  → P3 the paired client seals a real door call with the DELIVERED key
+  (the Encrypt canon re-stated in node, ride inner with ctx) and drives it
+  through the REAL `relay_ride` door verb → P4 the answer record binds to
+  the request nonce + the door truth inside → R1 the ctx-less downgrade
+  refuses typed → R2 the replay probe (`E_RIDE_REPLAY`) → R3 the outsider's
+  wrong-key seal decodes to nothing → R4/R4b the answer-binding check
+  refuses a swapped record and passes an honest one. The child's active
+  brain is a process-local switch (never the workspace state.json); a
+  shared 186-row ledger cap was diagnosed honestly and routed around, not
+  suppressed.
+- **Fixtures truth-up**: the two-relays pilot and the relay suite ride the
+  rung-2 shapes (R2 pin now opens the nonce-bound record; 10c-2 pins the
+  ctx-less seal AND the ctx-nonce mismatch both refusing typed); the
+  door-face 17b pin opens the bound record.
+- **Suite**: dashboard tsc clean, vitest 67/67 (3 key-card render pins:
+  bound-without-leak / unbound-points-at-pairing / rotation truth) + edge
+  ride pins 5/5, lint:web exit 0, relay 44/44, guests 25/25, mcp 34/34,
+  pilot:relay 17/17, pilot:pairing-ride 9/9.
+
 ## [Unreleased] - pass 271 (P6b: the pairing-time e2e channel rides — key binding + the live chain)
 
 ### Added - the binding moment, the sealed ride, and the chain editor

@@ -288,6 +288,72 @@ function ChainEditor() {
   );
 }
 
+/**
+ * (P6b, pass 272) THE E2E KEY CARD: the sovereign profile's honest key
+ * manager. The raw key NEVER re-displays (the binding moment showed it
+ * once); the card states its hold, unbinds explicitly (profile + tab
+ * copy, gone at sign-out too), and points re-bind at /pairing — the only
+ * surface that ever delivers the key again is a fresh voucher redeem
+ * against the CURRENT pod posture. Rotation is operator-side; unbinding
+ * here never rotates the pod's channel key (stated, not implied).
+ */
+function E2eKeyCard() {
+  const property = useApp((s) => s.property);
+  const bound = useApp((s) => s.channelKeys[s.property] ?? null);
+  const [confirming, setConfirming] = useState(false);
+  if (!bound) {
+    return (
+      <p className="text-sm text-ink-soft">
+        No e2e channel key is bound to this property yet — bind once at{" "}
+        <a href="/pairing" className="font-mono text-accent underline">
+          /pairing
+        </a>{" "}
+        (the redeem reply carries it exactly once). Until then door calls ride the direct pod bridge, honestly.
+      </p>
+    );
+  }
+  return (
+    <div className="text-sm">
+      <p>
+        bound: <span className="font-mono text-ink">{bound.slice(0, 4)}…{bound.slice(-2)}</span>{" "}
+        <span className="text-ink-soft">({bound.length} chars, held in this tab only — never re-displayed, never handed out by any door or caps surface)</span>
+      </p>
+      <p className="mt-2 text-xs text-ink-soft">
+        unbind clears this profile's copy (memory + the tab's sessionStorage).
+        It does <span className="font-medium text-ink">not</span> rotate the pod's
+        channel key — rotation stays operator-side. To re-bind, redeem a fresh
+        voucher at <span className="font-mono">/pairing</span>: the redeem is
+        the binding moment and delivers the pod's CURRENT key again.
+      </p>
+      <div className="mt-2 flex gap-2">
+        {confirming ? (
+          <>
+            <button
+              onClick={() => { actions.unbindChannelKey(property); setConfirming(false); }}
+              className="rounded border border-err/50 bg-err/10 px-2 py-1 text-xs text-err hover:bg-err/20"
+            >
+              unbind for real
+            </button>
+            <button
+              onClick={() => setConfirming(false)}
+              className="rounded border border-line px-2 py-1 text-xs hover:bg-ink/5"
+            >
+              keep it
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => setConfirming(true)}
+            className="rounded border border-line px-2 py-1 text-xs text-ink-soft hover:bg-ink/5"
+          >
+            unbind this key
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function RelayPosture() {
   const [state, setState] = useState<
     { kind: "loading" } | { kind: "on"; caps: Caps } | { kind: "off" } | { kind: "down" }
@@ -410,6 +476,12 @@ export default function Settings() {
 
       <Section title="Use relays (your reach)">
         <RelayUsage />
+      </Section>
+
+      <Section title="e2e channel key (this profile)">
+        <Help text="prd-relay.md §5: the pairing-time key binding. The key was shown exactly once at the redeem; this card never re-shows it.">
+          <E2eKeyCard />
+        </Help>
       </Section>
 
       <Section title="The chain (your hops, in order)">

@@ -96,8 +96,10 @@ describe("P6b exec routing: sealed ride + fail-over (§2)", () => {
       const iv = crypto.randomBytes(12);
       const derived = crypto.pbkdf2Sync(KEY, salt, 100000, 32, "sha256");
       const c = crypto.createCipheriv("aes-256-gcm", derived, iv);
-      const routeBody = init?.body ?? "";
-      const answer = Buffer.concat([c.update(JSON.stringify({ jsonrpc: "2.0", id: 1, result: { ok: true, echoed: inner.body.tool, rodebodies: routeBody.length } }), "utf8"), c.final()]);
+      // the pod's ride core answers a NONCE-BOUND record (pass 272, rung 2):
+      // { nonce: <the request's>, answer: <the raw door body> }
+      const doorBody = JSON.stringify({ jsonrpc: "2.0", id: 1, result: { ok: true, echoed: inner.body.tool } });
+      const answer = Buffer.concat([c.update(JSON.stringify({ nonce: inner.nonce, answer: doorBody }), "utf8"), c.final()]);
       const replyCt = salt.toString("hex") + ":" + iv.toString("hex") + ":" + c.getAuthTag().toString("hex") + ":" + answer.toString("hex");
       return Promise.resolve(new Response(JSON.stringify({
         received: true, event: "relay.ride", handlers: 0, dispatched: 1,

@@ -1692,13 +1692,19 @@ the door opens it, rides the inner call through its REAL door gates,
 and re-seals the answer into `ct` — `{ ok:true, rode:true, ct }`, typed
 `E_RIDE_*` refusals otherwise (`E_RIDE_OFFLINE` when the ride face is
 not bound; `E_RIDE_DECODE` for a wrong/stale key; `E_RIDE_REPLAY` when
-the inner nonce was already spent in the TTL window). Shares ONE answer
+the inner nonce was already spent in the TTL window). Rung 2
+(context-nonce binding) is enforced: the seal must bind its receiving
+context `ctx { origin, path, nonce:nonce }` — a ctx-less or
+nonce-mismatched ride is a DOWNGRADE, refused typed, never salvaged —
+and the answer re-seal binds to the request nonce (`{ nonce, answer }`
+across the envelope), so a swapped answer cannot be spliced into a
+different request. Shares ONE answer
 core with the webhook `relay.ride` face (lib/api.js `rideAnswer`) so the
 ride law can never drift between faces. Unauthed-class by the same law
 as redeem — THE ENVELOPE IS THE CREDENTIAL: a stranger's ciphertext
 decodes to nothing and the inner bearer inside the seal is the actual
 door authority. **Params:** `ct` (string, required — the sealed
-envelope holding `{ nonce, bearer?, body:{ tool|method, args } }`).
+envelope holding `{ nonce, ctx{origin,path,nonce}, bearer?, body:{ tool|method, args } }`).
 
 ### pairing_voucher_generate / pairing_voucher_redeem
 

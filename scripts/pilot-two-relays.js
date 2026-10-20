@@ -131,10 +131,12 @@ function corridorSend(port, gate, envelopePayload, event) {
     return postRaw(port, raw, sig).then((ans) => Object.assign(ans, { raw, sig }));
 }
 
-/** An envelope-sealed ride body: { nonce, bearer, body { tool, args } }. */
+/** An envelope-sealed ride body: { nonce, ctx, bearer, body { tool, args } }
+ *  (pass 272, §5 rung 2 — the seal binds its receiving context). */
 function sealedRide(channelKey, opts) {
     const inner = JSON.stringify({
         nonce: opts.nonce,
+        ctx: { origin: opts.ctxOrigin || 'pod-a-webhook', path: opts.ctxPath || '/relay', nonce: opts.nonce },
         bearer: opts.bearer,
         body: { tool: opts.tool, args: opts.args || {} }
     });
@@ -327,10 +329,13 @@ process.on('SIGINT', () => { cleanup(); process.exit(1); });
     let ride1Open = null;
     try { ride1Open = jsonParse(relay.openEnvelope(ride1Reply.ct, channel)); }
     catch (e) { ride1Open = { error: e.message }; }
-    // the door answer rides inside its own { result } wrapper — open one more
-    const r1t = (ride1Open && ride1Open.result && typeof ride1Open.result === 'object') ? ride1Open.result : ride1Open;
-    ok('R2. the paired client OPENS the ride reply with its own channel key: a real traveler answer rode back',
-        r1t && r1t.seen === true && r1t.id === letterId && Array.isArray(r1t.stations),
+    // (pass 272, rung 2) the answer is a nonce-bound record { nonce, answer }:
+    // open it, verify the binding, then unwrap the door body's result
+    const r1Rec = (ride1Open && ride1Open.nonce === nonce1) ? ride1Open : null;
+    const r1Door = r1Rec ? jsonParse(r1Rec.answer) : null;
+    const r1t = (r1Door && r1Door.result && typeof r1Door.result === 'object') ? r1Door.result : r1Door;
+    ok('R2. the paired client OPENS the ride reply with its own channel key: nonce-bound record, a real traveler answer rode back',
+        r1Rec && r1t && r1t.seen === true && r1t.id === letterId && Array.isArray(r1t.stations),
         JSON.stringify(r1t || ride1Open || {}).slice(0, 160));
     ok('R3. the door NEVER saw the lane secrets (gate absent both directions)',
         ride1Reply && !JSON.stringify(ride1.json).includes(podA.opts.gate) && !JSON.stringify(ride1.json).includes(channel),

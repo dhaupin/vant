@@ -209,13 +209,15 @@ async function run() {
         return { ok: true, status: 200, body: JSON.stringify({ jsonrpc: '2.0', id: 1, result: { echo: 'ride-pong', gotAuth: bearer || null } }) };
     });
     const RIDE_NONCE = 'ride-nonce-00000000-0001';
+    // (pass 272, §5 rung 2) the seal binds its context: { origin, path, nonce:nonce }
+    const innerRide = (n, withCtx = true) => JSON.stringify({
+        nonce: n,
+        ...(withCtx ? { ctx: { origin: 'pod-webhook-intake', path: '/relay', nonce: n } } : {}),
+        bearer: 'vguest_rideipin-test-0123456789abcdef',
+        body: { tool: 'echo_test', args: { q: 'ping-through-the-pipe' } }
+    });
     const makeRide = () => {
-        const inner = JSON.stringify({
-            nonce: RIDE_NONCE,
-            bearer: 'vguest_rideipin-test-0123456789abcdef',
-            body: { tool: 'echo_test', args: { q: 'ping-through-the-pipe' } }
-        });
-        return signedBody({ event: 'relay.ride', payload: { ct: relay.envelope(inner, CHANNEL_KEY) } }, GATE);
+        return signedBody({ event: 'relay.ride', payload: { ct: relay.envelope(innerRide(RIDE_NONCE), CHANNEL_KEY) } }, GATE);
     };
     const ride1 = makeRide();
     const rideAns = await postRelay(relayPort, ride1.raw, { 'x-signature-256': ride1.sig });
@@ -226,8 +228,13 @@ async function run() {
     let rideOpen = null;
     try { rideOpen = JSON.parse(relay.openEnvelope(rideAns.json.reply.ct, CHANNEL_KEY)); }
     catch (e) { rideOpen = { error: e.message }; }
-    ok('9b. the opener opens the ride reply (JSON-RPC rides back as an envelope)',
-        rideOpen.jsonrpc === '2.0' && rideOpen.result && rideOpen.result.echo === 'ride-pong',
+    // (pass 272) the answer is a nonce-bound record now: { nonce, answer }
+    const rideDoorBody = rideOpen && typeof rideOpen === 'object' && rideOpen.nonce === RIDE_NONCE
+        ? (typeof rideOpen.answer === 'string' ? JSON.parse(rideOpen.answer) : rideOpen.answer)
+        : null;
+    ok('9b. the opener opens the ride reply (nonce-bound record; the JSON-RPC rides inside answer)',
+        rideOpen && !rideOpen.error && rideOpen.nonce === RIDE_NONCE
+        && rideDoorBody && rideDoorBody.jsonrpc === '2.0' && rideDoorBody.result && rideDoorBody.result.echo === 'ride-pong',
         JSON.stringify(rideOpen).slice(0, 160));
     ok('9c. the bearer TELEPORTED inside the envelope (pod-realm credential tunnel)',
         doorSeen.length === 1 && doorSeen[0].body instanceof Object
@@ -248,6 +255,21 @@ async function run() {
         rideAns2.status === 200 && rideAns2.json.reply
         && rideAns2.json.reply.ok === false && rideAns2.json.reply.code === 'E_RIDE_REPLAY',
         JSON.stringify(rideAns2.json || null).slice(0, 160));
+
+    // 10c-2 (pass 272, rung 2): a ctx-less (or nonce-mismatched) seal is a
+    // DOWNGRADE — refused typed even with a fresh nonce.
+    const ctxless = signedBody({ event: 'relay.ride', payload: {
+        ct: relay.envelope(innerRide('ride-nonce-00000000-0003', false), CHANNEL_KEY) } }, GATE);
+    const ctxlessAns = await postRelay(relayPort, ctxless.raw, { 'x-signature-256': ctxless.sig });
+    // the splice: a FRESH nonce whose ctx names a DIFFERENT one (the
+    // mismatch shape, the saving of the request-nonce binding law)
+    const spliceCt = relay.envelope(innerRide('ride-nonce-00000000-0005').replace('"path":"/relay","nonce":"ride-nonce-00000000-0005"', '"path":"/relay","nonce":"ride-nonce-00000000-000X"'), CHANNEL_KEY);
+    const spliced = signedBody({ event: 'relay.ride', payload: { ct: spliceCt } }, GATE);
+    const splicedAns = await postRelay(relayPort, spliced.raw, { 'x-signature-256': spliced.sig });
+    ok('10c-2. rung 2: a ctx-less seal AND a ctx-nonce mismatch both refuse typed E_RIDE_DECODE (the downgrade never salvages)',
+        ctxlessAns.status === 200 && ctxlessAns.json.reply && ctxlessAns.json.reply.ok === false && ctxlessAns.json.reply.code === 'E_RIDE_DECODE'
+        && splicedAns.status === 200 && splicedAns.json.reply && splicedAns.json.reply.ok === false && splicedAns.json.reply.code === 'E_RIDE_DECODE',
+        JSON.stringify({ ctxless: ctxlessAns.json, spliced: splicedAns.json }).slice(0, 260));
 
     // 10d. WRONG channel key -> E_RIDE_DECODE through the pipe
     const ride3 = signedBody({ event: 'relay.ride', payload: {
@@ -389,7 +411,7 @@ async function run() {
         const mcp = require(path.join(ROOT, 'lib', 'mcp'));
         const preEnabled = config.get('relay.enabled');
         const preKey = config.get('relay.channelKey');
-        const inner = (n) => JSON.stringify({ nonce: n, bearer: null, body: { tool: 'bridge_echo', args: { q: 'door-face' } } });
+        const inner = (n) => JSON.stringify({ nonce: n, ctx: { origin: 'door-verb-intake', path: '/mcp/relay_ride', nonce: n }, bearer: null, body: { tool: 'bridge_echo', args: { q: 'door-face' } } });
         const fakeDoor = async ({ bearer, body }) => {
             return { ok: true, status: 200, body: JSON.stringify({ jsonrpc: '2.0', id: 1, result: { echoed: body.tool, rode: 'door-faked' } }) };
         };
@@ -415,9 +437,10 @@ async function run() {
             const good = await mcp.execute('relay_ride', { ct: goodCt });
             let opened = null;
             try { opened = JSON.parse(Encrypt.decrypt(good.ct, CHANNEL_KEY)); } catch (e) {}
-            ok('17b. the DOOR face rides the real core: sealed in → inner door call → answer re-sealed → opens to the same letter',
+            ok('17b. the DOOR face rides the real core: sealed in → inner door call → answer re-sealed + nonce-bound',
                 good && good.ok === true && good.rode === true && typeof good.ct === 'string'
-                && opened && opened.result && opened.result.echoed === 'bridge_echo'
+                && opened && opened.nonce === goodNonce
+                && JSON.parse(opened.answer).result.echoed === 'bridge_echo'
                 && sawDoor && sawDoor.body.tool === 'bridge_echo',
                 JSON.stringify(good || null).slice(0, 160));
 

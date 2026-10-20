@@ -462,17 +462,45 @@ export function bridgeCall(tool: string, args: Record<string, unknown> = {}): Pr
 
 /**
  * (P6b) THE SEALED RIDE: craft the e2e envelope right here — inner body
- * { nonce, bearer, body:{tool,args} } (the EXACT shape the pod's ride
- * core opens, pass 269's corridor law), seal with the binding key, ride
- * the edge's relay.ride family, open the re-sealed answer. Typed E_RIDE_*
- * refusals surface as ApiError("refused").
+ * { nonce, ctx, bearer, body:{tool,args} } (the EXACT shape the pod's
+ * ride core opens, pass 269's corridor law + pass 272's rung-2 binding),
+ * seal with the binding key, ride the edge's relay.ride family, open the
+ * re-sealed answer. Typed E_RIDE_* refusals surface as ApiError.
  */
+const _RIDE_LEDGER_CAP = 256;
+const spentRides = new Set<string>(); // keyed route:nonce — the rung-2 tripwire
+
+function rideRouteKey(): { key: string; origin: string; path: string } {
+  try {
+    const origin = window.location.origin || "bolete-client";
+    return { key: origin + "/api/r/relay", origin, path: "/api/r/relay" };
+  } catch {
+    // non-window context (tests, workers): the lane name is still the truth
+    return { key: "bolete-client/api/r/relay", origin: "bolete-client", path: "/api/r/relay" };
+  }
+}
+
 async function sealedExec(tool: string, args: Record<string, unknown>): Promise<unknown> {
   const s = getState();
   const key = s.channelKeys[s.property];
   if (!key) throw new ApiError("no e2e channel key is bound (bind at /pairing)", "refused");
+  // (pass 272, prd-relay.md §5 rung 2) CONTEXT-NONCE BINDING, client half:
+  // the seal binds { origin, path, nonce } of the lane it travels, and the
+  // client keeps a spent-nonce ledger per route — re-sending a spent nonce
+  // refuses HERE before any wire (a retry/replay bug can never resurface).
+  const route = rideRouteKey();
+  const nonce = crypto.randomUUID();
+  if (spentRides.has(route.key + ":" + nonce)) {
+    throw new ApiError(
+      `E_RIDE_REPLAY (client-side, rung 2): nonce already spent on ${route.path} — refusing to re-send`,
+      "refused",
+    );
+  }
+  spentRides.add(route.key + ":" + nonce);
+  if (spentRides.size > _RIDE_LEDGER_CAP) spentRides.clear(); // fresh nonces make collisions impossible; this is the tripwire only
   const inner = JSON.stringify({
-    nonce: crypto.randomUUID(),
+    nonce,
+    ctx: { origin: route.origin, path: route.path, nonce },
     bearer: token() ?? null,
     body: { tool, args },
   });
@@ -494,11 +522,31 @@ async function sealedExec(tool: string, args: Record<string, unknown>): Promise<
   } catch (e) {
     throw new ApiError(e instanceof Error ? e.message : "the sealed answer would not open", "shape");
   }
-  let parsed: unknown;
+  let record: unknown;
   try {
-    parsed = JSON.parse(opened);
+    record = JSON.parse(opened);
   } catch {
     throw new ApiError("the sealed answer was not parseable", "shape");
+  }
+  // (pass 272) THE ANSWER'S CONTEXT-NONCE BINDING: the pod seals the
+  // answer TO the request nonce — a record naming a different nonce is a
+  // swapped/spliced answer (the pass-268 W1 attack shape) and refuses.
+  const rec = record as { nonce?: string; answer?: string };
+  if (rec?.nonce !== nonce) {
+    throw new ApiError("E_RIDE_CTX: the sealed answer is not bound to this ride's nonce (swapped/spliced answer refused, rung 2)", "shape");
+  }
+  let doorAnswer: string;
+  try {
+    doorAnswer = String(rec.answer ?? "");
+    if (!doorAnswer) throw new Error("empty");
+  } catch {
+    throw new ApiError("the sealed answer carried no door answer", "shape");
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(doorAnswer);
+  } catch {
+    throw new ApiError("the sealed door answer was not parseable", "shape");
   }
   const asObj = parsed as { error?: { message?: string } };
   if (asObj && typeof asObj === "object" && asObj.error) {
