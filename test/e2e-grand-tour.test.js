@@ -74,7 +74,13 @@ console.log('\n🚌 E2E GRAND TOUR (pass 119)\n');
 
         // TRUE fresh install: no VANT_BRAIN override — the default brain
         // resolves to the shipped template (models/public/vant).
+        // (pass 287) the comment was already the contract, but the env
+        // spread BELOW never actually stripped VANT_BRAIN — a parent run
+        // with a scratch brain set (env-scoped sweeps, multi-runtime hosts)
+        // leaked it into the fresh clone, the health child resolved the
+        // nonexistent env brain, and gate A failed on "0 content file(s)".
         const env = { ...process.env, NODE_PATH: path.join(ROOT, 'node_modules') };
+        delete env.VANT_BRAIN; // the documented fresh-install intent, now enforced
         const health = execFileSync('node', ['bin/health.js'], { cwd: tmpClone, env, timeout: 60000 }).toString();
         report('gate A: fresh `vant health` passes (template brain found)',
             health.includes('✓ Brain exists at models/public/vant'),

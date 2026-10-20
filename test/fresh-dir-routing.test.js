@@ -211,7 +211,12 @@ test('escrow store: foreign-cwd writes contained + land in designed location', (
             throw new Error('module resolution broke outside repo cwd');
         }
         // The designed store location (caller-cwd-anchored, brain-scoped).
-        const designed = path.join(cwd, 'models', 'private', 'vant', 'orgchart', 'escrow.json');
+        // (pass 287) the escrow lib resolves the brain through state-store's
+        // PATH-ACTIVE seam (VANT_BRAIN env first, and the spawned child
+        // inherits this process's env) — the hardcoded 'vant' ENOENTed on
+        // any env-scoped run while the store landed in the env-scoped
+        // brain dir, which IS the designed cwd-anchored location.
+        const designed = path.join(cwd, 'models', 'private', require('./active-brain').resolveActiveBrain(cwd), 'orgchart', 'escrow.json');
         if (!fs.existsSync(designed)) {
             throw new Error('escrow store not written to the designed cwd-anchored location');
         }

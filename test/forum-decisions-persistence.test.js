@@ -24,6 +24,14 @@ const path = require('path');
 const fs = require('fs');
 
 const ROOT = path.resolve(__dirname, '..');
+// (pass 287) every forum store pin here targets the ACTIVE brain via the
+// shared seam (VANT_BRAIN env > state.json > 'vant') — the forum lib rides
+// state-store's path-active resolver, so the hardcoded 'vant' pins
+// ENOENTed on any install whose active brain differs. Capturing also
+// redirects the setup rmSync to the SCRATCH env brain (never a real
+// workspace brain) instead of vacuuming a hardcoded one.
+const { resolveActiveBrain } = require('./active-brain');
+const ACTIVE_BRAIN = resolveActiveBrain(ROOT);
 const results = { passed: 0, failed: 0 };
 
 function test(name, fn) {
@@ -46,12 +54,12 @@ require(path.join(ROOT, 'lib', 'sandbox')).defaultSandbox.setCapabilities({
 });
 
 // Clean brain state BEFORE requiring modules (load-on-init races rm).
-fs.rmSync(path.join(ROOT, 'models', 'private', 'vant', 'state'), { recursive: true, force: true });
-fs.rmSync(path.join(ROOT, 'models', 'private', 'vant', 'orgchart'), { recursive: true, force: true });
+fs.rmSync(path.join(ROOT, 'models', 'private', ACTIVE_BRAIN, 'state'), { recursive: true, force: true });
+fs.rmSync(path.join(ROOT, 'models', 'private', ACTIVE_BRAIN, 'orgchart'), { recursive: true, force: true });
 
 const consensus = require(path.join(ROOT, 'lib', 'consensus'));
 
-const STATE_FILE = path.join(ROOT, 'models', 'private', 'vant', 'state', 'forum.json');
+const STATE_FILE = path.join(ROOT, 'models', 'private', ACTIVE_BRAIN, 'state', 'forum.json');
 
 // Fresh-process simulation: drop the cached forum + event modules so the
 // re-require rebuilds the singleton and re-runs module-load hydration.
@@ -144,7 +152,7 @@ async function main() {
         const row = links.find(l => l.thread === u4Thread);
         assert(row, 'thread link not listed');
         assert(row.topic === u4Topic, 'link points at the wrong topic');
-        const trailFile = path.join(ROOT, 'models', 'private', 'vant', 'state', 'forum-threads.json');
+        const trailFile = path.join(ROOT, 'models', 'private', ACTIVE_BRAIN, 'state', 'forum-threads.json');
         assert(fs.existsSync(trailFile), 'links file not persisted');
         const disk = JSON.parse(fs.readFileSync(trailFile, 'utf8'));
         assert(disk.links && disk.links[u4Thread] && disk.links[u4Thread].topic === u4Topic, 'link not on disk');
@@ -203,7 +211,7 @@ async function main() {
         const barcode = r.publication.id;
         assert(barcode && barcode.startsWith('PUB-'), 'no barcode: ' + barcode);
 
-        const PUB_FILE = path.join(ROOT, 'models', 'private', 'vant', 'state', 'forum-publications.json');
+        const PUB_FILE = path.join(ROOT, 'models', 'private', ACTIVE_BRAIN, 'state', 'forum-publications.json');
         assert(fs.existsSync(PUB_FILE), 'forum-publications.json not written');
         const onDisk = JSON.parse(fs.readFileSync(PUB_FILE, 'utf8'));
         assert(onDisk.pubs && onDisk.pubs[barcode], 'file missing the publication');
@@ -243,7 +251,7 @@ async function main() {
         assert(listed.publications.length === 500, 'pub cap not enforced: ' + listed.publications.length);
         assert(!listed.publications.find(p => p.title === 'cap-0000'), 'FIFO dropped the wrong end');
         assert(listed.publications.find(p => p.title === 'cap-0519'), 'newest publication evicted');
-        const onDisk = JSON.parse(fs.readFileSync(path.join(ROOT, 'models', 'private', 'vant', 'state', 'forum-publications.json'), 'utf8'));
+        const onDisk = JSON.parse(fs.readFileSync(path.join(ROOT, 'models', 'private', ACTIVE_BRAIN, 'state', 'forum-publications.json'), 'utf8'));
         assert(Object.keys(onDisk.pubs).length === 500, 'persisted board unbounded: ' + Object.keys(onDisk.pubs).length);
     });
 
