@@ -13,7 +13,7 @@ description: The Vant runtime - programmatic API, MCP server, and headless REST 
 
 | Page | Job |
 |------|-----|
-| [Runtime](/vant/runtime/runtime) | Programmatic API: init, learn, remember, agents, sync |
+| [Runtime API](/vant/runtime/runtime) | Programmatic API: init, learn, remember, agents, sync |
 | [MCP](/vant/runtime/mcp) | JSON-RPC tools for any MCP client, auto-wired from modules |
 | [Server](/vant/runtime/server) | Headless REST mode and the health endpoint |
 

@@ -105,6 +105,10 @@ function parseArgs(argv) {
         else if (argv[i] === '--agent' || argv[i] === '-a') args.agent = argv[++i];
         else if (argv[i] === '--no-verify') args.verify = false;
         else if (argv[i] === '--brain') args.brain = argv[++i];
+        // (issue #219) THE PAYLOAD FILTER: --brains <a,b> scopes the stone to
+        // those brains (the output --brain only moves the file). No filter =
+        // full-install capture today's behavior; a multi-brain capture warns.
+        else if (argv[i] === '--brains') args.brains = String(argv[++i] || '').split(',').map((s) => s.trim()).filter(Boolean);
         else if (argv[i] === '-h' || argv[i] === '--help') {
             console.log(fs.readFileSync(__filename, 'utf8').split('\n').slice(0, 30).join('\n'));
             process.exit(0);
@@ -216,6 +220,16 @@ async function run() {
     // summary/sidecar code knows which file is the backup.
     plan = safeWritePlan(output);
 
+    // (issue #219) the filter rides into the gather via safeWriteHorcrux's
+    // opts — the encode closure below must forward it.
+    if (args.brains) {
+        if (args.brains.length === 0) {
+            console.error('❌ --brains resolved to zero names');
+            process.exit(1);
+        }
+        console.log('Payload scope:', 'only ' + args.brains.join(', '));
+    }
+
     // Make sure the target directory exists (resolved from REPO_ROOT, not cwd)
     fs.mkdirSync(path.dirname(fromRoot(output)), { recursive: true });
 
@@ -238,8 +252,9 @@ async function run() {
     const outcome = await safeWriteHorcrux(output, {
         label: 'snapshot',
         log: (m) => console.log(m),
-        password,
-        encode: (rel, o) => transform.toHorcrux(rel, { password: o.password }),
+        password: password,
+        brains: args.brains && args.brains.length ? args.brains : null,
+        encode: (rel, o) => transform.toHorcrux(rel, { password: o.password, brains: o.brains }),
         decode: (rel, o) => transform.fromHorcrux(rel, { password: o.password }),
         validate: (data) => transform.validateHorcruxData(data)
     });
@@ -307,6 +322,14 @@ async function run() {
     };
     console.log('\n3. Snapshot contents:');
     for (const [k, v] of Object.entries(stats)) console.log(`   ${k}: ${v}`);
+
+    // (issue #219) the honest create-time flag: a stone that bundles
+    // multiple brains is a FULL-INSTALL backup, not a brain backup — say so
+    // when no explicit filter was given, so 'why is my stone giant / why is
+    // the template brain inside' is answerable at create time.
+    if (stats.brainCount > 1 && !(args.brains && args.brains.length)) {
+        console.log(`   ⚠ full-install capture: ${stats.brainCount} brains in this stone (no --brains filter was given)`);
+    }
 
     // Hash for the sidecar (to detect later changes) — hash the file that is
     // now the backup.

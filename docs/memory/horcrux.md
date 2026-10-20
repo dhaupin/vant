@@ -39,11 +39,10 @@ session. Regenerate the discovered boot horcrux IN PLACE with fresh state:
 vant horcrux refresh
 ```
 
-The password resolves the same way as restore (arg, then `VANT_BRAIN_PASSWORD`
-env, then `p_<password>` in the filename). The fresh snapshot is written to a
-temp file and round-trip validated before it replaces the original, so a
-failed refresh never destroys your only backup; after the swap the final
-file is re-verified and the previous bytes restored if verification fails.
+The password resolves the same way as restore: arg (deprecated on the
+CLI), then `VANT_BRAIN_PASSWORD` env, then the secret store; the legacy
+`p_<password>` in the filename is NOT a default source (it is
+world-readable metadata) and fires only with `VANT_ALLOW_FILENAME_PW=true`.
 Run this after meaningful
 brain changes if you rely on horcrux restore for disaster recovery.
 
@@ -59,6 +58,22 @@ Without a path it scans the brain stack's boot dirs for `<agent>-p_*.svg`.
 Prompts for the password if not given, extracts the payload, and restores
 the brain state. Validation runs before anything is written; a corrupt or
 wrong-password carrier refuses cleanly.
+
+### Password resolution order (v0.8.6)
+
+1. positional arg (deprecated on the CLI - it is readable in `ps`)
+2. `VANT_BRAIN_PASSWORD` env var
+3. the secret store (`lib/secret.js`)
+4. **`p_<password>` in the filename - GATED**: only when
+   `VANT_ALLOW_FILENAME_PW=true` is set. The filename convention is
+   world-readable metadata: anyone who can list the boot dir once gets the
+   brain password for free, so the lookup is an explicit opt-in for
+   legacy/interactive flows, never a default (pass 246, issue #201).
+   Without the flag, every "restore without a password" example refuses
+   with the help text naming the gate. When it IS enabled,
+   separator-containing passwords round-trip fine: the parser treats
+   everything after `p_` up to the reserved `-b_` token as the password
+   (issue #218).
 
 ## Inspect
 

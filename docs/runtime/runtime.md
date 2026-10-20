@@ -2,8 +2,9 @@
 version: 0.8.6
 permalink: /runtime/runtime
 layout: default
-title: Runtime
+title: Runtime API
 nav_order: 32
+description: The programmatic API - init, learn, remember, think, agents, sync.
 ---
 
 # Runtime API
