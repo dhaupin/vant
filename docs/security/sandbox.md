@@ -164,7 +164,7 @@ await s.write(() => doWork());
 ```
 
 Budget exceeding throws `SANDBOX_BUDGET_EXCEEDED`. See
-[Escrow](/vant/security/escrow) for the spending API.
+[Escrow API](/vant/reference/escrow) for the spending API.
 
 ## Multi-Agent
 

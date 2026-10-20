@@ -331,3 +331,10 @@ const b = entropy.getEntropyStats(newContent);
 // |b.overall - a.overall| small = stable evolution; large = review
 ```
 - [schema.md](/vant/reference/schema) - brain file schema
+
+---
+
+## Related
+
+- [Prune](/vant/memory/prune) - where entropy thresholds decide aging
+- [Storage](/vant/operations/storage) - the write path entropy monitors

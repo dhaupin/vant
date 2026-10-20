@@ -227,7 +227,11 @@ If you have concerns:
 3. Escalate if needed
 
 ---
-## SEE ALSO
+---
+
+## Related
+
 - [GitHub Privacy](https://docs.github.com/en/github/site-policy/github-privacy-statement) - GitHub's policy
 - [Terms](/vant/reference/legal) - Our legal terms
 - [Security](/vant/security/) - Security practices
+- [Sudo](/vant/essential/sudo) - how agents can permission themselves

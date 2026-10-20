@@ -115,3 +115,12 @@ Deployment details, ports, and the image env contract are in the
   choose the name during the first import: `vant migrate --brain-name <name>`.
 - **Something looks stale.** `vant migrate --dry-run` is always safe and
   shows exactly what the detection sees, with per-step evidence.
+
+---
+
+## Related
+
+- [The Brain](/vant/memory/brain) - the brain volumes migration arranges
+- [State Spine](/vant/memory/state-spine) - the spine the layout registry reads
+- [CLI](/vant/reference/cli) - the full `vant migrate` reference
+- [Quick Start](/vant/getting-started/quick-start) - the setup path that runs migration automatically

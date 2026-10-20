@@ -150,3 +150,9 @@ is the cargo.
 The underlying hide-in-plain-sight mechanism is [stego](/vant/memory/stego),
 which covers the standalone PNG recovery path; the boot-time stones above
 are the SVG side of the same idea.
+
+## Related
+
+- [Stego](/vant/memory/stego) - the standmedia mechanism under the stones
+- [Boot](/vant/essential/boot) - how a restored stone wakes and reads itself
+- [Memory](/vant/memory/) - the section overview

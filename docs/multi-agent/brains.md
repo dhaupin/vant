@@ -63,3 +63,11 @@ the [Migration Guide](/vant/getting-started/migration) has the full contract.
 
 Agent rosters and configs scope per brain, with stack traversal for shared
 config. The agent crew workflow is in [Agents](/vant/multi-agent/agents).
+
+---
+
+## Related
+
+- [Agents](/vant/multi-agent/agents) - the crew runtime and roster config
+- [Succession](/vant/multi-agent/succession) - how brains pass work between agent runs
+- [The Brain](/vant/memory/brain) - the memory layout multi-brain stacks on

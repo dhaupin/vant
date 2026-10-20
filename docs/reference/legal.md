@@ -91,3 +91,10 @@ Read these in order:
 These documents may change. Your continued use = acceptance.
 
 Check dates on each document.
+
+---
+
+## Related
+
+- [Best Practices](/vant/security/best-practices) - data handling obligations
+- [Audit](/vant/advanced/audit) - where legal events land

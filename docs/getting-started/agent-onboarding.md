@@ -180,3 +180,12 @@ read-only `status`; granting is always an explicit subcommand.
 - Write lessons while they are fresh, not at the deadline.
 - Never hand-move brain files. Use `vant migrate` for layout changes.
 - Keep identity.md short and put the most important facts at the top.
+
+---
+
+## Related
+
+- [Agent Contributors](/vant/advanced/agent-contributors) - the full-value contributor workflow this page operationalizes
+- [Migration](/vant/getting-started/migration) - the layout migration you must check every wake
+- [The Brain](/vant/memory/brain) - what "load your brain" actually loads
+- [Unlocking Vant](/vant/integrations/hybrid) - escalate your trust level by contributing

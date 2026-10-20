@@ -2147,3 +2147,9 @@ Resolves by id or the latest packet. Read-class (the `audit` tail).
 ```
 
 ---
+
+## Related
+
+- [MCP Server](/vant/runtime/mcp) - running and securing the MCP door
+- [CLI](/vant/reference/cli) - `vant mcp` startup commands
+- [Agent Crews](/vant/multi-agent/agents) - spawning crew agents over MCP

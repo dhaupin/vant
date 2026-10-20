@@ -83,3 +83,9 @@ vant cron list
 Shows scheduled jobs; add a prune job through `vant cron`. Keep the interval
 honest: a monthly prune of an active brain is usually enough, and the
 dry-run result makes each pass reviewable before it is destructive.
+
+## Related
+
+- [Cron](/vant/operations/cron) - scheduling the prune pass
+- [Tempo](/vant/memory/tempo) - the attention ledger prune respects
+- [Memory](/vant/memory/) - the section overview

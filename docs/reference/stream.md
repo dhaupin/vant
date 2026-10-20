@@ -65,3 +65,10 @@ Also exported: `create`/`deleteStream` (stream lifecycle), `peek`,
 | `processing` | Currently leased |
 | `completed` | Done successfully |
 | `failed` | Error occurred |
+
+---
+
+## Related
+
+- [Events](/vant/operations/events) - posting and subscribing agent messages
+- [Multi-Agent Crews](/vant/multi-agent/agents) - agents and task sharing

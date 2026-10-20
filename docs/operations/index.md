@@ -23,7 +23,6 @@ description: Running Vant day to day - storage, sync, cron, CI, events, networki
 | [Events](/vant/operations/events) | The event system and handlers |
 | [QoS](/vant/operations/qos) | Rate limiting and request budgets |
 | [Network](/vant/operations/network) | Peer networking and the headless server |
-| [Day-to-day CLI](/vant/operations/operations) | The commands you type most |
 | [Relay](/vant/operations/relay) | The headless relay: gated Mode R, encrypted pipes, liveness |
 | [Relay Playbook](/vant/operations/relay-playbook) | Serve / piggyback / use / verify: step-by-step relay recipes |
 | [CI](/vant/operations/ci) | The GitHub Actions pipeline and local equivalents |

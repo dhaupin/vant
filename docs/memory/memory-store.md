@@ -97,3 +97,9 @@ The addressing scheme itself is documented in [Geometry](/vant/memory/geometry).
 Store operations run through the sandbox capability gate. A denied session
 gets coded refusals instead of silent failures, and every write is atomic:
 a crash mid-write never leaves a torn document.
+
+## Related
+
+- [The Brain](/vant/memory/brain) - the markdown files this store backs
+- [State Spine](/vant/memory/state-spine) - the content-addressed state tree
+- [Memory](/vant/memory/) - the section overview

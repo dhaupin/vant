@@ -94,6 +94,6 @@ vaf.check(input, { name: 'input', type: 'string', maxLength: 50000 });
 
 ---
 
-## More
+## Related
 
 See [Security](/vant/security/) and [VAF](/vant/security/vaf).

@@ -242,3 +242,10 @@ order stands.
 - GS1 GTIN specification: https://www.gs1.org/standards/gtin
 - UPC-A format: 12 digits
 - EAN-13 format: 13 digits
+
+---
+
+## Related
+
+- [Encryption](/vant/security/encryption) - data-at-rest protection nsc9 composes with
+- [Storage](/vant/reference/storage) - where sealed archives persist

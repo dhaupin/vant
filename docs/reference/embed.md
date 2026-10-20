@@ -52,3 +52,10 @@ Providers (`hash`, `local`, `openai`) are managed with `setProvider` /
 | `embed:generated` | After completion |
 | `embed:batch:starting` | Before batch |
 | `embed:batch:complete` | After batch |
+
+---
+
+## Related
+
+- [Search Architecture](/vant/advanced/search-architecture) - where embeddings feed
+- [CLI](/vant/reference/cli) - the `vant embed` commands

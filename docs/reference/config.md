@@ -260,3 +260,11 @@ export AUDIT_FILE=.audit.log
 | **Audit** |||
 | AUDIT_LOG | true | Enable logging |
 | AUDIT_FILE | .audit.log | Log file |
+
+---
+
+## Related
+
+- [CLI](/vant/reference/cli) - the `vant config get/set` commands
+- [Security Environment](/vant/security/environment) - the env vars config reads
+- [Multi-Agent Crews](/vant/multi-agent/agents) - roles config drives

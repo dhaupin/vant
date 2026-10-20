@@ -257,7 +257,7 @@ Last Sync: ${health.lastSync}
 
 There is no built-in Slack/Discord/email notifier. The real outbound
 surfaces are the in-process event bus, outbound webhooks, and the
-Telegram bot (see [Operations](/vant/operations/operations)):
+Telegram bot (see [Telegram Bot](/vant/integrations/telegram-bot)):
 
 ```javascript
 // 1. React to brain events in-process (lib/event.js exports the Event

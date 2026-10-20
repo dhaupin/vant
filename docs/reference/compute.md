@@ -57,3 +57,10 @@ const s = compute.status();
 |-------|------|
 | `compute:invoking` | Before exec |
 | `compute:invoked` | After completion |
+
+---
+
+## Related
+
+- [CLI](/vant/reference/cli) - the `vant compute` commands
+- [Cron](/vant/operations/cron) - scheduling recur compute intervals

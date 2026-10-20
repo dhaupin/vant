@@ -84,3 +84,9 @@ Events (catalogue-declared in `lib/event-types.js`): `tempo:budget-start`,
 | Where does the budget live? | Ledger at `models/private/<brain>/.tempo.json` (contained in the brain tree; process truth, per-invocation via CLI) |
 | End early allowed? | Only explicitly (`end(reason)`); default drains the window |
 | Name | `tempo` (pace, not physics) |
+
+## Related
+
+- [Leisure](/vant/memory/leisure) - the want-list its budget gates
+- [Era](/vant/reference/era) - the wake ledger the budget rides
+- [Memory](/vant/memory/) - the section overview

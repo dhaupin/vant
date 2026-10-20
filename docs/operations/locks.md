@@ -184,3 +184,12 @@ Related pages: [QoS](/vant/operations/qos) for rate limiting,
 [Storage](/vant/operations/storage) for the storage layer the lease rides on,
 [Multi-agent crews](/vant/multi-agent/agents) for why write ownership exists.
 The full invariant list lives in `labs/archives/audits/LOCKS.md` (PRD section 8).
+
+---
+
+## Related
+
+- [Locks API](/vant/reference/locks) - the exact function signatures
+- [QoS](/vant/operations/qos) - the rate limiter whose in-flight registry the lock rides on
+- [Multi-agent crews](/vant/multi-agent/agents) - the agent crew runtime this protects
+- [Storage](/vant/operations/storage) - the storage layer lease state persists through

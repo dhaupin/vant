@@ -226,3 +226,11 @@ keeps its accounting history.
 > threw `TypeError`. Use `setBudgetLimit(agentId, limit)` (keeps
 > spent metrics) or `setBudget(agentId, budget)` (resets spent to
 > zero). Fixed in pass 77; the export now delegates to `setBudget`.
+
+---
+
+## Related
+
+- [Escrow Concepts](/vant/security/escrow) - concepts, guarantees, and market integration
+- [Sudo](/vant/reference/sudo) - the fontsize used to gate spend
+- [Settlement](/vant/operations/settlement) - federation pool settlement built on escrow

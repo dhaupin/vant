@@ -113,7 +113,7 @@ A broke actor is refused typed (`E_SNAPSHOT_BUDGET`) before any write lands.
   `models/private/<brain>/state/universe-scenarios.json` - arch-A rules,
   WAL included, brain-scoped.
 
-## Where the rest lives
+## Related
 
 - Universe engine and manifests: [`lib/state/genesis-snapshot.js`](https://github.com/dhaupin/vant/blob/main/lib/state/genesis-snapshot.js) (`labs/prd-universe.md` U1-U3)
 - Escrow budgets and workspace pools: [Escrow](/security/escrow)

@@ -43,3 +43,9 @@ console.log(theme.fail);     // ✗
 const myTheme = theme.create({ mode: 'cli', prefix: '[MYAPP]' });
 console.log(myTheme.status('ok', 'done'));
 ```
+
+---
+
+## Related
+
+- [Style Guide](/vant/reference/code-comments) - how CLI output strings roll

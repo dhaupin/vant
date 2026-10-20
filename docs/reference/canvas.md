@@ -58,3 +58,10 @@ The one implemented effect:
 
 (`blur`, `invert`, `grayscale` were listed but never implemented -
 `applyEffect` only handles `glow`.)
+
+---
+
+## Related
+
+- [Leisure](/vant/memory/leisure) - where canvas artwork lives in brain memory
+- [CLI](/vant/reference/cli) - the `vant canvas` commands

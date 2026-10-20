@@ -313,3 +313,10 @@ Before using Vant with GitHub:
 - [Privacy](/vant/security/privacy) - Privacy policy
 - [GitHub API Docs](https://docs.github.com/en/rest) - Full API reference
 - [GitHub ToS](https://docs.github.com/en/github/site-policy) - All policies
+
+---
+
+## Related
+
+- [Config](/vant/reference/config) - config system architecture
+- [Sandbox](/vant/security/sandbox) - accessing env inside sandbox

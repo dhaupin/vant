@@ -83,4 +83,12 @@ vant hybrid --set github private  # Set a repo's privacy
 | decisions | private | Strategy |
 | logs | public | Sharing |
 | summaries | public | Team sync |
+
+---
+
+## Related
+
+- [Sandbox](/vant/security/sandbox) - what each trust level permits
+- [Remote Push/Pull](/vant/operations/sync) - how hybrid pushes store git history clones
+- [Untrusted Remote](/vant/advanced/nsc9-spec) - the colocation transport this trust model wraps
 |------|----------|

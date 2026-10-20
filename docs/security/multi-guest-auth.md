@@ -203,3 +203,10 @@ dashboard renders the typed refusal verbatim when a guest's trust
 *Transport-level security (loopback binds, TLS, requireKey) is unchanged and
 removes nothing: [MCP Server](/vant/runtime/mcp) covers running and
 tightening the door itself.*
+
+---
+
+## Related
+
+- [MCP Server](/vant/runtime/mcp) - the door the guest auth rides on
+- [VAF](/vant/security/vaf) - input validation at the door

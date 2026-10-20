@@ -62,3 +62,11 @@ const result = consensus.tally('q3-call');
 | `vote:cast` | New vote |
 | `proposal:created` | Proposal created |
 | `proposal:resolved` | Resolved |
+
+---
+
+## Related
+
+- [Federation](/vant/multi-agent/federation) - how multi-vant consensus extends
+- [Agora](/vant/operations/agora) - the local vote layer consensus rides on
+- [Resolution](/vant/reference/resolution) - the dispute-resolution module consensus feeds

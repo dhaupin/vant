@@ -122,3 +122,10 @@ if (error.retryable) {
 | `LOCK_TIMEOUT` | Another agent holds the lock |
 
 See also: [Troubleshooting](/vant/advanced/troubleshooting), [CLI Reference](/vant/reference/cli)
+
+---
+
+## Related
+
+- [Troubleshooting](/vant/advanced/troubleshooting) - diagnosing and fixing errors
+- [CLI](/vant/reference/cli) - commands can throw these too

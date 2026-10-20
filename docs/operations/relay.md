@@ -160,3 +160,11 @@ nonce -> door -> re-envelope, bearer inside), typed ride refusals through
 the pipe, the OFF posture, the body cap, the counters, and the sender
 seam. `test/relay-parity.test.js` pins face-to-kit constants, vendored
 byte-identity, shape agreement, and the retired-wire lies.
+
+---
+
+## Related
+
+- [Relay Playbook](/vant/operations/relay-playbook) - operating knowledge for walkers on the relay
+- [Untrusted Remote](/vant/advanced/nsc9-spec) - the remote transport this relay powers
+- [Remote Push/Pull](/vant/operations/sync) - the push/pull API the sender seam wraps

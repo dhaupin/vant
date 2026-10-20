@@ -2,11 +2,11 @@
 version: 0.8.6
 permalink: /multi-agent/coordination
 layout: default
-title: Multi-Agent System
+title: Multi-Agent Coordination
 nav_order: 50
 ---
 
-# Tutorial: Multi-Agent Coordination
+# Multi-Agent Coordination
 
 > Build a team of AI agents that work together without conflicts
 

@@ -1,11 +1,18 @@
 ---
 version: 0.8.6
-permalink: /operations/operations
+permalink: /archived/operations-operations
 layout: default
-title: Day-to-day CLI
-nav_order: 61
-description: The commands you type most - health, sync, load, rate.
+title: Day-to-day CLI (ARCHIVED)
+original: docs/operations/operations.md
+superseded_by: docs/reference/cli.md
 ---
+# ARCHIVED: Day-to-day CLI
+
+> Archived in the docs pass (axolotl): a duplicate - the command tables
+> live in [CLI Reference](/vant/reference/cli), health in
+> [Operations](/vant/operations/), and Telegram in
+> [Telegram Bot](/vant/integrations/telegram-bot).
+
 # Day-to-day CLI
 
 CLI commands for day-to-day work.

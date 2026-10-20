@@ -71,3 +71,9 @@ Reads it back.
 The projection math, address space, and collision properties are specified
 in [NSC9-SPEC](/vant/advanced/nsc9-spec). Treat the spec as the source of
 truth for the format; this page only covers use.
+
+## Related
+
+- [NSC9 Spec](/vant/advanced/nsc9-spec) - the addressing format of record
+- [Stego](/vant/memory/stego) - the hide-in-plain-sight layer geometry rides
+- [Memory](/vant/memory/) - the section overview
