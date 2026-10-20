@@ -41,6 +41,7 @@
     "health": "node bin/health.js",
     "lint": "eslint lib/ test/",
     "lint:fix": "eslint lib/ test/ --fix",
+    "lint:web": "eslint web/dashboard/src web/dashboard/test web/dashboard/functions web/relay/src web/relay/functions",
     "lint:docs": "node scripts/check-docs-style.js && node scripts/check-docs-links.js && node scripts/check-docs-frontmatter.js && node scripts/check-language.js && node scripts/check-docs-truthfulness.js",
     "lint:coverage": "node scripts/check-mcp-coverage.js && node scripts/check-cli-coverage.js",
     "lint:claims": "node scripts/check-fiction-signatures.js",
@@ -56,7 +57,11 @@
     "dev:dashboard-build": "npm --prefix web/dashboard run build"
   },
   "devDependencies": {
-    "eslint": "^8.57.1"
+    "@typescript-eslint/eslint-plugin": "8.46.0",
+    "@typescript-eslint/parser": "8.46.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react-hooks": "4.6.2",
+    "typescript": "5.8.3"
   },
   "main": "index.js",
   "directories": {

@@ -19,5 +19,32 @@
     "no-prototype-builtins": "error",
     "no-dupe-class-members": "error",
     "no-control-regex": "error"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["web/**/*.{ts,tsx}"],
+      "plugins": ["@typescript-eslint", "react-hooks"],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "sourceType": "module",
+        "ecmaVersion": "latest",
+        "ecmaFeatures": {"jsx": true}
+      },
+      "env": {"browser": true, "node": true, "es2021": true},
+      "rules": {
+        "@typescript-eslint/no-unused-vars": ["warn", {"argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrors": "all", "caughtErrorsIgnorePattern": "^_"}],
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-redeclare": "warn",
+        "no-redeclare": "off",
+        "no-unreachable": "error",
+        "no-prototype-builtins": "error",
+        "no-shadow-restricted-names": "error",
+        "no-case-declarations": "off",
+        "no-undef": "off",
+        "no-dupe-keys": "off",
+        "no-empty": "off",
+        "no-control-regex": "error"
+      }
+    }
+  ]
 }

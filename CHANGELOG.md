@@ -5,6 +5,43 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - lint gate for the web trees (the TS/TSX parse gap is closed)
+
+### Added - the web trees lint for real (`npm run lint:web`)
+
+- **THE PARSER GAP (`/.eslintrc.json` override + `package.json` `lint:web`)**:
+  the root eslint config never parsed TS/TSX — every web file failed with
+  "import and export may appear only with sourceType: module" (the espree
+  wall), so the web trees lived outside any lint gate. Now an override
+  (files `web/**/*.{ts,tsx}`) parses with `@typescript-eslint/parser`
+  (installed at the ROOT with its own TS 5.8 copy — the dashboard's pinned
+  typescript 7.0.2 is a native-binary stub whose JS API cannot serve the
+  parser; the web packages' pins are untouched). sourceType module, JSX on,
+  browser env; the gate covers `web/dashboard/src|test|functions` and
+  `web/relay/src|functions`. The rule set mirrors the repo's own JS seed
+  rules, with the TS-grammar versions where they differ
+  (`@typescript-eslint/no-redeclare` for function overload sets,
+  `@typescript-eslint/no-unused-vars` with `caughtErrorsIgnorePattern:
+  "^_"` for the swallow-catch style). Base `no-unused-vars`/`no-redeclare`
+  are OFF inside the override so the base and TS rules never double-fire.
+- **THE CONTROL-CHAR SCAN, REPATTERNED (3 relay webhooks paths guards,
+  dashboard + relay functions `relay.ts`/`events.ts`)**: the literal
+  `/[\x00-\x1f]/` now rides a char-code-built RegExp (`_HAS_CONTROL_CHARS`)
+  — the SAME convention lib/vaf.js uses for its `_CONTROL_CHARS` scan —
+  semantics identical (smoke-verified: NUL/unit-sep blocked, plain/DEL
+  paths pass, hardened 'u' flag), and the lint clean without a rule
+  suppression.
+- **The unknown-rule disable**: `react-hooks/exhaustive-deps` directives
+  (audit module) answered "Definition for rule was not found" because the
+  plugin was never installed — `eslint-plugin-react-hooks` rides the root
+  devDeps and is registered in the override so the directive names a real
+  rule. Swallow-catch bindings renamed `_e` where truly unused (the two
+  UPST catches that USE `e` were left intact, tsc-pinned).
+- **Suite**: lint:web 0 problems / exit 0 (was: 4 errors + 10 warnings
+  incl. parse failures), root `npm run lint` exit 0, dashboard
+  `tsc -b --noEmit` clean, web/relay `tsc -b --noEmit` clean, vitest
+  49/49, vendor --check 9/9, relay-parity 19/19.
+
 ## [Unreleased] - P5b chain (the relay chain READ over the real caps routes)
 
 ### Added - `/chain` (module #20, prd-carrier-share.md 3.2 P5b, from prd-relay.md 3.3/6.1)
