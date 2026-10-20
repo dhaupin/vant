@@ -41,6 +41,14 @@ const getOpt = (name) => {
 };
 const only = getOpt('only') ? getOpt('only').split(',') : null;
 const skip = getOpt('skip') ? getOpt('skip').split(',') : [];
+// (pass 293) Alphabetical range chunking: --from/--to bounds on the SORTED
+// suite list (lexicographic on filenames, inclusive both ends). The
+// substring --only filter classification is coarse for full-sweep runs
+// (one-letter chunks fan out to almost every suite), and host command
+// budgets need the 217-suite wall split; ranges keep every suite still
+// running through the SAME harness (baseline restore before and after).
+const fromOpt = getOpt('from');
+const toOpt = getOpt('to');
 const asJson = args.includes('--json');
 const listOnly = args.includes('--list');
 
@@ -48,6 +56,7 @@ const suites = fs.readdirSync(TEST_DIR)
     .filter((f) => f.endsWith('.test.js'))
     .filter((f) => !only || only.some((s) => f.includes(s)))
     .filter((f) => !skip.some((s) => f.includes(s)))
+    .filter((f) => (!fromOpt || f >= fromOpt) && (!toOpt || f <= toOpt))
     .sort();
 
 if (listOnly) {
@@ -118,10 +127,19 @@ for (const suite of suites) {
 }
 
 // Leave the workspace exactly as the sweep found it: brain pointer,
-// active-brain trees reinstalled byte-exact, suite-created residue gone.
+// active-brain trees reinstalled byte-exact, suite-created residue gone —
+// and (pass 293) throwaway scratch brains the sweep minted swept too.
+// Pre-existing brain dirs are never touched (scratch-manifest law).
 _guardRestore('sweep-exit');
+let swept = { removed: [] };
+try { swept = slate.cleanupScratch(null, sweepSlate); } catch (e) {
+    console.error(`⚠  scratch cleanup failed: ${e.message}`);
+}
 slate.freeSlate(sweepSlate);
 sweepSlate = null;
+if (swept.removed.length > 0) {
+    console.log(`\n  🧹 scratch cleanup: ${swept.removed.length} sweep-minted brain dir(s) removed:\n    ` + swept.removed.join('\n    '));
+}
 
 const passed = results.filter((r) => r.status === 'PASS');
 const failed = results.filter((r) => r.status === 'FAIL');

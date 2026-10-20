@@ -53,7 +53,14 @@ function captureSlate(rootDir) {
         active: resolveActiveBrain(root),
         statePresent: false,
         activePrivatePresent: false,
-        activePublicPresent: false
+        activePublicPresent: false,
+        // (pass 293) Sweep-exit scratch-brain janitor input: the brain-dir
+        // manifests BEFORE any suite runs. Cleanup removes only dirs that
+        // appeared DURING the sweep; anything that existed pre-sweep
+        // (gstest, livefire reruns the user kept, real brains) is never
+        // touched by a test run.
+        privateManifest: _listBrainDirs(path.join(root, 'models', 'private')),
+        publicManifest: _listBrainDirs(path.join(root, 'models', 'public'))
     };
 
     // models/state.json — the shared current-brain pointer.
@@ -126,10 +133,49 @@ function restoreSlate(rootArg, slate) {
     return { restored, removed, active: slate.active };
 }
 
+function _listBrainDirs(modelsSide) {
+    try {
+        return fs.readdirSync(modelsSide, { withFileTypes: true })
+            .filter((d) => d.isDirectory())
+            .map((d) => d.name)
+            .sort();
+    } catch (_e) { return []; }
+}
+
+/**
+ * (pass 293) Sweep-exit scratch-brain cleanup. Removes ONLY brain dirs that
+ * appeared under models/private|public DURING the sweep (absent from the
+ * capture-time manifest) — sweep-created throwaway scratch (livefire-*,
+ * p9x-*, one-shot temp brains suites mint). Never touches a dir that
+ * existed pre-sweep, and never touches the active brain (it is baseline-
+ * restored above regardless — cleanup runs AFTER restoreSlate at exit).
+ * Returns what it removed so the runner can print the janitor's bill.
+ */
+function cleanupScratch(rootArg, slate) {
+    if (!slate || !slate.root) {
+        throw new Error('cleanupScratch: a captured slate from captureSlate(root) is required');
+    }
+    const root = slate.root;
+    const keptPre = new Set(slate.privateManifest);
+    const keptPub = new Set(slate.publicManifest);
+    const removed = [];
+    const sweep = (side, kept) => {
+        const dir = path.join(root, 'models', side);
+        for (const name of _listBrainDirs(dir)) {
+            if (kept.has(name)) continue;
+            if (!/^[A-Za-z0-9._-]+$/.test(name)) continue; // weird names: never guess
+            try { fs.rmSync(path.join(dir, name), { recursive: true, force: true }); removed.push(side + '/' + name); } catch (_e) { /* leave it */ }
+        }
+    };
+    sweep('private', keptPre);
+    sweep('public', keptPub);
+    return { removed };
+}
+
 function freeSlate(slate) {
     if (slate && slate.base) {
         try { fs.rmSync(slate.base, { recursive: true, force: true }); } catch (_e) { /* best effort */ }
     }
 }
 
-module.exports = { captureSlate, restoreSlate, freeSlate };
+module.exports = { captureSlate, restoreSlate, cleanupScratch, freeSlate };

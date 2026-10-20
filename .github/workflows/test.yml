@@ -19,7 +19,10 @@ concurrency:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    # (pass 293) 8 → 12: the same suite wall as the old bare loop PLUS the
+    # per-suite baseline restore (~0.2s × 217) and live-fire timer suites
+    # (lock/lease ~15-20s each) must survive a slow runner's worst shuffle.
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
 
@@ -61,4 +64,12 @@ jobs:
         run: node scripts/check-docs-truthfulness.js
 
       - name: Run standalone suites
-        run: for f in test/*.test.js; do node "$f" || exit 1; done
+        # (pass 293) THE HARNESS, not a bare loop: the old `for f in …`
+        # chain ran 217 suites in ONE shared environment, so suite N's
+        # brain-pointer/roster residue became suite N+1's environment and
+        # sweep results depended on ordering (live-fire repro: guests
+        # tripped agents.maxAgents on a roster the prior suite left;
+        # teams-refresh ENOENTed on a mutated state.json). run-all gives
+        # every suite the same baseline (per-suite slate restore, see
+        # test/slate.js) and exits 1 on failures / 2 on timeouts.
+        run: node test/run-all.js

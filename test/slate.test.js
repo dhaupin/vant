@@ -161,5 +161,35 @@ test('capture honors VANT_BRAIN env (the path-active seam, not hardcoded vant)',
     }
 });
 
+test('cleanupScratch removes only sweep-MINTED brain dirs; pre-existing ones are never touched', () => {
+    const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'slate-t8-'));
+    try {
+        makeTree(cwd);
+        // Pre-existing throwaway brain (the gstest shape) + a real extra brain.
+        fs.mkdirSync(path.join(cwd, 'models', 'private', 'gstest'), { recursive: true });
+        fs.writeFileSync(path.join(cwd, 'models', 'private', 'gstest', '.guests.json'), '{}');
+        fs.mkdirSync(path.join(cwd, 'models', 'private', 'axolotl'), { recursive: true });
+        fs.writeFileSync(path.join(cwd, 'models', 'private', 'axolotl', 'identity.md'), 'REAL\n');
+        const s = slate.captureSlate(cwd);
+        // The sweep mints two new scratch brains and corrupts a pre-existing one.
+        fs.mkdirSync(path.join(cwd, 'models', 'private', 'livefire-293x'), { recursive: true });
+        fs.writeFileSync(path.join(cwd, 'models', 'private', 'livefire-293x', 'junk.md'), 'scratch');
+        fs.mkdirSync(path.join(cwd, 'models', 'private', 'p293-one-shot'), { recursive: true });
+        fs.writeFileSync(path.join(cwd, 'models', 'private', 'axolotl', 'identity.md'), 'SUITE-JUNK\n');
+
+        slate.restoreSlate(null, s); // baseline restore first (the runner's order) — active brain + pointer only
+        const r = slate.cleanupScratch(cwd, s);
+
+        assert(!fs.existsSync(path.join(cwd, 'models', 'private', 'livefire-293x')), 'sweep-minted scratch brain survived cleanup: ' + JSON.stringify(r.removed));
+        assert(!fs.existsSync(path.join(cwd, 'models', 'private', 'p293-one-shot')), 'sweep-minted one-shot brain survived cleanup');
+        assert(r.removed.includes('private/livefire-293x') && r.removed.includes('private/p293-one-shot'), 'cleanup bill mismatch: ' + JSON.stringify(r.removed));
+        // Pre-existing dirs are NEVER removed — not even a corrupted one: the
+        // janitor is removal-of-NEW only; content restoration for PRE-EXISTING
+        // non-active brains is the suite's own duty (pass-287 scratch law).
+        assert(fs.existsSync(path.join(cwd, 'models', 'private', 'gstest', '.guests.json')), 'PRE-EXISTING scratch brain was swept (the janitor overreached)');
+        assert(!r.removed.includes('private/axolotl') && fs.existsSync(path.join(cwd, 'models', 'private', 'axolotl')), 'the janitor swept a pre-existing brain dir');
+    } finally { fs.rmSync(cwd, { recursive: true, force: true }); }
+});
+
 console.log(`\n=== Test-slate isolation: ${passed} passed, ${failed} failed ===\n`);
 process.exit(failed > 0 ? 1 : 0);
