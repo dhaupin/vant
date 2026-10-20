@@ -80,6 +80,15 @@ async function main() {
     ok('3b. the crashtest first-offender shape {"id":2147483648} answers 4xx honest (never a 500)',
         hostileRes.status >= 400 && hostileRes.status < 500,
         hostileRes.status + ' ' + hostileRes.body.slice(0, 110));
+    // (crashtest pass-2, the storage-fill class) a 64 KiB body passes the
+    // 1 MiB transport limit but trips vaf's MAX_PATH_LENGTH scan on the RAW
+    // body — SECURITY_PATH_TRAVERSAL was the one guard family the catch map
+    // missed (crashtest volume/storage-fill broke kvwrite 30/30× as 500s).
+    const fillBody = JSON.stringify({ tool: 'memory_store', args: { key: 'fill0', content: 'A'.repeat(64 * 1024) } });
+    const fillRes = await drive(server, fakePair({ url: '/call', method: 'POST' }), fillBody);
+    ok('3c. a fill-sized body (64KiB, under the transport limit) answers 400 honest (the storage-fill class never 500s)',
+        fillRes.status === 400 && fillRes.body.includes('Path blocked'),
+        fillRes.status + ' ' + fillRes.body.slice(0, 110));
 
     // ---- 4. CREDENTIAL STUFFING: varied keys answer 401, distinctly ----
     const authServer = new Server({ port: 0, authRequired: true, requestTimeout: 60000 });
