@@ -48,10 +48,10 @@
 //   validated against a vant sandbox (test/crashtest-packs.test.js):
 //     private-first-fallback, paths-cannot-escape-models,
 //     state-tamper-is-loud, state-json-schema-strictness,
-//     migration-idempotency, guest-capability-gates
+//     migration-idempotency, guest-capability-gates,
+//     boot-stone-integrity (armed via stone-restore-tamper, 2026-10-24)
 //   design oracles pending a run-root run (honest-skipped until armed):
-//     succession-trust-inheritance, boot-stone-integrity,
-//     knowledge-links-cycle-safety
+//     succession-trust-inheritance, knowledge-links-cycle-safety
 // Two oracles EXPLOIT against vant v0.8.6/axolotl TODAY - those are findings
 // (the #227/#232 brain-pointer class), documented for the fix, with the fix
 // flipping their verdict rows to REFUSED.

@@ -1,22 +1,20 @@
 // packs/public/vant-rest/index.mjs - REST-door discipline for vant pods.
 //
-// Third candidate from the packs/README survey (2026-10-22). vant's REST
-// door (lib/server.js) exports an Edge-shaped stack: Server.Request,
-// Server.Response, Router, BodyParser, CORS, Helmet, Session, SessionStore —
-// the same shape crashtest's `crashtest-site` pack drives in-process. The
-// shim arms that stack WITHOUT a listener (construct Request objects, hand
-// them to the Router, read Responses) so the door is attacked on the wire
-// contract with zero sockets.
+// Third candidate from the packs/README survey (2026-10-22), VALIDATED
+// 2026-10-24 against a vant run root: the shim arms lib/server.js's REAL
+// Edge chain - Server._handleRequest's vaf → QoS → auth → escrow sequence
+// driven in-process with the fake req/res shapes it consumes (no listener,
+// zero sockets; same shape crashtest's `crashtest-site` pack drives in-
+// process). Two postures exist on the run root: open (default install) and
+// privileged (authRequired arm), the latter also lighting crashtest's
+// library authz rows.
 //
-// ROUTE CONTRACT (PENDING VALIDATION - the routes below are 501 until a run
-// root wires lib/server's stack; the attacks are written against the v1.0.0
-// session/protohygiene/taxonomy row shapes and honestly skipped until then):
+// ROUTE CONTRACT (armed):
 //
-// * rest-request  POST, JSON body { method, path, headers?, body? }
-//                 -> { status, headers?, bodyText } - one round-trip through
-//                 the Router/Stack in-process.
-//                 PENDING: wire to a Server/Router fixture (temps brain
-//                 state), then flip this pack's rows to validated.
+// * rest-request  POST, JSON body { method, path, headers?, body?,
+//                 authRequired? } -> { status, headers, bodyText } - one
+//                 honest round trip through the chain; status/headers/body
+//                 are the chain's own answer, untouched.
 //
 // Verdict vocabulary and absence-tolerance match the other vant packs:
 // exactly one decision per attack, `skipped: true` marks honest absence,

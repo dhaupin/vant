@@ -6,21 +6,29 @@
 // the in-process seal/restore APIs (lib/horcrux-safe safeWriteHorcrux,
 // lib/transform fromHorcrux/restore) - no sockets, no sealed-network act.
 //
-// ROUTE CONTRACT (PENDING VALIDATION - 501 until a run root wires the
-// seal/restore fixture; the crashtest repo's horcrux/
-// crashtest-p_quillstone-9fold.svg stone is the ready-made documented
-// fixture for oracle 3):
+// ROUTE CONTRACT (armed 2026-10-24 against a vant run root):
 //
-// * stone-scope   POST, JSON body { brains: [a,b] } after minting a scoped
-//                 stone through safeWriteHorcrux over a fresh fixture tree
-//                 -> { scopedBrains: [...decoded from the stone], stateJson:
-//                 { currentBrain, stack } decoded from the stone }
-//                 PENDING: needs a decode arm (transform.fromHorcrux with a
-//                 fixture password) in the run root.
-// * stone-tamper  POST {} -> tamper a sealed fixture stone (byte flip /
-//                 truncation), run the restore, report
-//                 { restoreStatus, restoredFiles } - tamper-restore,
+// * stone-scope   POST, JSON body { brains: [a,b] } seals a stone at that
+//                 exact allowlist through safeWriteHorcrux over a fresh
+//                 fixture tree (the fixture brains exist so the #219 filter
+//                 has real material) -> { scopedBrains, stateJson:
+//                 { currentBrain, stack } } decoded back. An absent body
+//                 ('{}') asks for the MINIMAL single-brain capture - the
+//                 lineage trap: scope ONE brain while the runtime pointer
+//                 sits OUTSIDE it.
+// * stone-tamper  POST {} -> tamper a sealed fixture stone byte-by-byte
+//                 through the <brn:secret> payload region until decode
+//                 refuses, then run the REAL restore only when tamper
+//                 SURVIVES -> { restoreStatus, restoredFiles }, the
 //                 refuse-loudly contract per #233 expansion 4.
+//
+// VALIDATION STATUS: stone-scope-honesty and restore-torn-refusal REFUSE
+// (held). state-pointer-lineage EXPLOITS against vant v0.8.6/axolotl
+// TODAY - that is a pinned FINDING, not a glitch: lib/transform.gather
+// scopes the brain INVENTORY but leaves the live currentBrain/activeStack
+// unfiltered by design, so a single-brain stone carries a pointer outside
+// its scope (#226 mint-side silence, measured from the sealed-payload
+// side). Fix => flip the row to REFUSED.
 //
 // Verdict vocabulary and absence-tolerance match the other vant packs:
 // exactly one decision per attack, `skipped: true` marks honest absence.

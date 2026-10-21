@@ -52,8 +52,9 @@ repros behind them.
 The shim routes (documented in `public/vant-brain/index.mjs`):
 `brain-read` (dual-mode reads, canary fixture), `brain-state` (tamper +
 fresh-module probe), `brain-migrate` (idempotency accounting),
-`guest-cap` (admin/revocation/pairing gates), and three not-yet-wired
-routes for the pending oracles.
+`guest-cap` (admin/revocation/pairing gates), and
+`stone-restore-tamper` (shared with the vant-stones arm below). Two
+oracles stay not-yet-wired: `trust-read` and `brain-graph-walk`.
 
 | Attack | What it shakes | Status |
 |---|---|---|
@@ -64,7 +65,7 @@ routes for the pending oracles.
 | `migration-idempotency` | `migrate` twice is a byte-level no-op; `--dry-run` writes nothing | validated — REFUSED |
 | `guest-capability-gates` | admin verbs unreachable, revocation kills grants, pairing voucher single-use | validated — REFUSED |
 | `succession-trust-inheritance` | a low-trust successor can't resolve private state past its trust floor | pending run-root wiring (skipped) |
-| `boot-stone-integrity` | tampered stones restore nothing partial | pending run-root wiring (skipped) |
+| `boot-stone-integrity` | tampered stones restore nothing partial | validated — REFUSED (`stone-restore-tamper` armed via the stones fixture) |
 | `knowledge-links-cycle-safety` | cyclic knowledge graphs never hang the walk | pending run-root wiring (skipped) |
 
 The two EXPLOITED rows are **findings, not glitches** — they are pinned in
@@ -124,36 +125,47 @@ instance over the run root's brain fixture and reports every result verbatim.
 | `tool-schema-enforced` | declared inputSchemas reject invalid params BEFORE any side effect (the lib/mcp.js P1 #14 contract — 269 schemas went decorative once) | validated — REFUSED |
 | `brain-write-scope-hardness` | hostile `brain_write` params stay inside the brain tree — an escape is an arbitrary-file write inside the door | validated — REFUSED |
 
-### `public/vant-rest` — REST-door discipline (3 oracles; PENDING)
+### `public/vant-rest` — REST-door discipline (3 oracles; all validated)
 
-**What it does.** Will attack the REST door's EDGE-shaped stack in-process:
-`lib/server.js` exports `Server.Request/Response`, `Router`, `BodyParser`,
-`CORS`, `Helmet`, `Session`, `SessionStore` — a request can be constructed
-and routed with no listener, which is exactly how crashtest's own
-`crashtest-site` pack drives its Pages Functions. The attacks are written
-against v1.0.0's `session`/`protohygiene`/`taxonomy` row shapes:
+**What it does.** Attacks the REST door's REAL Edge stack in-process.
+Armed 2026-10-24: the run-root route `rest-request` drives lib/server.js's
+actual `_handleRequest` security chain (vaf → QoS → auth → escrow →
+handler) with the fake req/res shapes it consumes — no listener, zero
+sockets. The body carries `{ method, path, headers?, body?,
+authRequired? }` and the honest status, headers, and body ride back. The
+chain runs in two postures: `vant-rest-open` (default install) and
+`vant-rest-priv` / `vant-rest-priv-alias` (authRequired arm) — the
+privileged-posture routes are also what lights the crashtest library's
+authz rows (method-matrix, role-body spoofs, alias confusion).
 
-| Attack | What it will shake | Status |
+| Attack | What it shakes | Status |
 |---|---|---|
-| `fuzz-floor-never-500` | hostile method/path/body shapes answer 2xx-4xx — abuse never becomes a server fault | pending (`rest-request` route not wired) |
-| `cors-enable-parity` | preflight OPTIONS terminates early and cleanly (204) | pending |
-| `session-cookie-discipline` | session-less clients receive zero cookie grants; forged cookies are never adopted or reflected | pending |
+| `fuzz-floor-never-500` | hostile method/path/body shapes answer 2xx-4xx — abuse never becomes a server fault | validated — REFUSED |
+| `cors-enable-parity` | preflight OPTIONS terminates early and cleanly (204) | validated — REFUSED |
+| `session-cookie-discipline` | session-less clients receive zero cookie grants; forged cookies are never adopted or reflected | validated — REFUSED |
 
-### `public/vant-stones` — stone lifecycle discipline (3 oracles; PENDING)
+### `public/vant-stones` — stone lifecycle discipline (3 oracles; all validated)
 
-**What it does.** Will attack the seal → carry → restore lifecycle for
-horcrux stones — the file-layer incident class the crashtest stone flow
-actually lived in (#219/#226/#232). Two routes (unwritten on purpose until
-a decode fixture exists): `stone-scope` mints a scoped stone through
-`lib/horcrux-safe` and decodes it back; `stone-tamper` byte-flips a sealed
-fixture and runs the restore. The crashtest repo's
-`horcrux/crashtest-p_quillstone-9fold.svg` is the documented tamper fixture.
+**What it does.** Attacks the seal → decode → restore lifecycle through
+vant's real horcrux chain. Armed 2026-10-24: a probe child in the run-root
+sandbox applies `lib/horcrux-safe.safeWriteHorcrux` around
+`lib/transform` (`toHorcrux` encode / `fromHorcrux` decode / `restore`)
+against a fresh fixture tree — `fixture-a`/`fixture-b` brains exist so the
+#219 scope filter has real material, and the runtime pointer sits outside
+the fixture scope. Routes: `stone-scope` seals at a requested allowlist
+(an absent `{}` body asks for the MINIMAL single-brain capture — the
+lineage trap: scope one brain, leave the live pointer outside it) and
+decodes the payload back; `stone-tamper` byte-corrupts the `<brn:secret>`
+payload region until decode refuses, and runs the REAL restore only when
+tamper SURVIVES (the pack's EXPLOITED arm — measured, never assumed);
+`stone-restore-tamper` shares that arm with vant-brain's
+`boot-stone-integrity`.
 
-| Attack | What it will shake | Status |
+| Attack | What it shakes | Status |
 |---|---|---|
-| `stone-scope-honesty` | a scoped stone decodes to EXACTLY its declared scope — no scope costume over a full-install capture | pending |
-| `state-pointer-lineage` | restored state never wakes a stone on a foreign `currentBrain` silently | pending |
-| `restore-torn-refusal` | tampered stones refuse loudly and write NOTHING partial — torn restores are worse than failed ones | pending |
+| `stone-scope-honesty` | a scoped stone decodes to EXACTLY its declared scope — no scope costume over a full-install capture | validated — REFUSED |
+| `state-pointer-lineage` | restored state never wakes a stone on a foreign `currentBrain` silently | validated — **EXPLOITED today** (the mint-side half of #226, now measured from the sealed-payload side: `lib/transform.gather` scopes the brain INVENTORY but leaves the live `currentBrain`/`activeStack` unfiltered by design — "identity is live truth" — so a single-brain stone carries a pointer outside its scope and every consumer of the payload alone wakes on a foreign brain. The pin lives in the suite's expected table and flips to REFUSED when the mint/boot-side warning lands.) |
+| `restore-torn-refusal` | tampered stones refuse loudly and write NOTHING partial — torn restores are worse than failed ones | validated — REFUSED |
 
 ## Running the packs against vant
 
@@ -166,7 +178,7 @@ Two ways, both from this repo:
    Re-blocks the v1.0.0 scenario contract (kebab names, verdict vocabulary,
    run() shape), boots a throwaway vant sandbox, arms every route the
    sandbox can honestly arm, and checks the whole pack matrix against the
-   expected table (currently 55 checks).
+   expected table (count grows as rows validate).
 
 2. **Real harness dry-run** (needs the crashtest clone next door):
    ```sh
@@ -176,7 +188,12 @@ Two ways, both from this repo:
    Loads every pack through crashtest's REAL v1.0.0 loader + Harness
    (not the micro-harness), runs every attack against the vant sandbox
    shim, and prints the honest ledger — verdicts, details, and explicit
-   skips for routes the run root doesn't arm.
+   skips for routes the run root doesn't arm. It then runs crashtest's
+   OWN scenario-library rows (input/guards/authz/session/recursion/…)
+   against the armed routes: 2026-10-24 that is 25 REFUSED / 0
+   EXPLOITED / 5 skipped — the skips are the D1- and KV-store-shaped
+   rows (race, upload, state aliasing), which honest: vant ships no
+   binding to arm.
 
 How to point an external crashtest run root here:
 

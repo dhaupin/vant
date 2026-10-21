@@ -277,6 +277,151 @@ const MCP_CHILD = `${CHILD_STDOUT_GUARD}
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
 
+// Stones probe: the REAL seal → decode chain (lib/transform to/fromHorcrux
+// through lib/horcrux-safe.safeWriteHorcrux) in the sandbox, against a
+// fresh fixture brain tree - the same probe shape scripts/crashtest-run.js
+// arms. Scope mode seals at the requested allowlist (absent = the minimal
+// single-brain capture, the lineage trap); tamper mode corrupts the
+// <brn:secret> payload region until decode refuses and runs the REAL
+// restore only when tamper SURVIVES (measured, never assumed).
+const STONE_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const spec = (() => { try { return JSON.parse(process.argv[1] || '{}'); } catch (e) { return {}; } })();
+    const mode = spec.mode === 'tamper' ? 'tamper' : 'scope';
+    const fs = require('fs');
+    const path = require('path');
+    try { require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canSpawn: true, canNetwork: true }); } catch (e0) {}
+    for (const b of ['fixture-a', 'fixture-b']) {
+        for (const side of ['private', 'public']) {
+            const dir = path.join('models', side, b);
+            try { fs.mkdirSync(dir, { recursive: true }); } catch (e) {}
+            try { fs.writeFileSync(path.join(dir, 'identity.md'), 'FIXTURE-' + side.toUpperCase() + '-' + b.toUpperCase()); } catch (e1) {}
+        }
+    }
+    fs.writeFileSync('models/state.json', JSON.stringify({ stack: ['vant', 'fixture-a'], currentBrain: 'fixture-a' }));
+
+    const out = { mode, scopeRequested: null, scopedBrains: null, stateJson: null, sealWorked: null, decodeError: null, restoreStatus: 'ok', restoredFiles: 0, tamperDetail: null };
+    const transform = require('./lib/transform.js');
+    const safe = require('./lib/horcrux-safe.js');
+    const password = 'pack-stone-password-9f';
+    const stoneRel = 'models/stone-run-fixture.svg';
+    const enc = (rel, o) => transform.toHorcrux(rel, { password, brains: (o && o.brains) ? o.brains : undefined });
+    const walk = (root) => {
+        const files = [];
+        if (!fs.existsSync(root)) return files;
+        for (const e of fs.readdirSync(root, { withFileTypes: true })) {
+            const p = path.join(root, e.name);
+            if (e.isDirectory()) files.push(...walk(p));
+            else files.push(p + ':' + fs.statSync(p).size);
+        }
+        return files;
+    };
+
+    const scope = (spec.brains && Array.isArray(spec.brains)) ? spec.brains : (mode === 'scope' ? ['fixture-b'] : undefined);
+    out.scopeRequested = scope ?? null;
+    try {
+        await safe.safeWriteHorcrux(stoneRel, { label: 'pack-stone', password, encode: enc, decode: (rel, o) => transform.fromHorcrux(rel, { password }), brains: scope });
+        out.sealWorked = true;
+    } catch (e) {
+        out.sealWorked = false;
+        out.decodeError = 'seal: ' + e.name + ': ' + String(e.message).slice(0, 140);
+    }
+
+    if (mode === 'tamper' && out.sealWorked) {
+        const original = fs.readFileSync(stoneRel, 'utf8');
+        const hit = original.match(/<brn:secret[^>]*>([^<]+)<\\/brn:secret>/s);
+        const payloadStart = hit ? hit.index + hit[0].indexOf('>') + 1 : original.length - 1;
+        let refused = false, detail = null;
+        for (let off = original.length - 1; off >= payloadStart; off--) {
+            const ch = original[off];
+            if (ch === '<' || ch === '>' || ch === '/') continue;
+            const flipped = original.slice(0, off) + (ch === 'A' ? 'B' : 'A') + original.slice(off + 1);
+            fs.writeFileSync(stoneRel, flipped);
+            try { await transform.fromHorcrux(stoneRel, { password }); }
+            catch (e) { refused = true; detail = { offset: off, was: original.charCodeAt(off), reason: String(e.message).slice(0, 120) }; break; }
+        }
+        if (refused) {
+            out.restoreStatus = 'refused';
+            out.restoredFiles = 0;
+            out.tamperDetail = detail;
+        } else {
+            const before = walk('models');
+            try {
+                const data = await transform.fromHorcrux(stoneRel, { password });
+                await transform.restore(data);
+            } catch (e2) { out.decodeError = 'tamper-restore: ' + e2.name + ': ' + String(e2.message).slice(0, 120); }
+            const after = walk('models');
+            out.restoredFiles = after.filter((f) => !before.includes(f)).length;
+            out.restoreStatus = 'ok';
+        }
+    } else if (out.sealWorked) {
+        try {
+            const data = await transform.fromHorcrux(stoneRel, { password });
+            const stackScoped = (data && data.mode && Array.isArray(data.mode.stack)) ? [...new Set(data.mode.stack)] : [];
+            out.scopedBrains = stackScoped;
+            out.stateJson = { currentBrain: (data && data.mode) ? (data.mode.currentBrain !== undefined ? data.mode.currentBrain : null) : null, stack: (data && data.mode && Array.isArray(data.mode.activeStack)) ? data.mode.activeStack : null };
+        } catch (e) { out.decodeError = (out.decodeError ? out.decodeError + ' | ' : '') + e.name + ': ' + String(e.message).slice(0, 140); }
+    }
+    // (fresh-fixture law) leave the sandbox pointer EXACTLY as the seeded
+    // fixture had it: a foreign currentBrain in the payload under test is
+    // the oracle's job to REPORT, never residue this probe leaves behind.
+    try { fs.writeFileSync('models/state.json', JSON.stringify({ stack: ['vant'], currentBrain: 'vant' })); } catch (e2) {}
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
+// lib/server's Edge chain driven in-process (the vant-rest arm) - the
+// REAL security chain (vaf -> qos -> auth -> escrow -> handler) with the
+// fake req/res shapes _handleRequest consumes. Two postures (open/priv);
+// chains persist within a pack run and are rebuilt at pack boundaries.
+
+const EDGE_CHAINS = { open: null, priv: null };
+
+function resetEdgeChains(sb) {
+    const Server = require(path.join(sb, 'lib', 'server.js')).Server;
+    EDGE_CHAINS.open = new Server({ port: 0, authRequired: false });
+    EDGE_CHAINS.priv = new Server({ port: 0, authRequired: true });
+}
+
+async function edgeRoundTrip(chain, spec) {
+    const events = require('events');
+    const req = new events.EventEmitter();
+    req.method = String(spec.method || 'GET').toUpperCase();
+    req.url = String(spec.url || '/');
+    req.headers = {};
+    for (const [k, v] of Object.entries(spec.headers || {})) req.headers[String(k).toLowerCase()] = String(v);
+    req.ip = '203.0.113.77'; // TEST-NET-3: fixed attacker address
+    req.setTimeout = () => {}; // collector arms no timer; socket timer out of contract
+    req.destroy = () => {};
+
+    const headers = {};
+    let status = null;
+    let bodyText = '';
+    let settle;
+    const settled = new Promise((r) => { settle = r; });
+    const res = {
+        setHeader: (k, v) => { headers[String(k).toLowerCase()] = String(v); },
+        writeHead: (st, hs) => {
+            status = st;
+            for (const [k, v] of Object.entries(hs ?? {})) headers[String(k).toLowerCase()] = String(v);
+        },
+        end: (d) => { if (status === null) status = 200; bodyText = String(d ?? ''); settle(); },
+    };
+
+    // The chain wires req.on('data'/'end') synchronously on entry; the
+    // answer lands asynchronously (settled via the res.end hook above).
+    chain._handleRequest(req, res).catch(() => {});
+    if (spec.body != null && req.method !== 'GET' && req.method !== 'HEAD') {
+        req.emit('data', Buffer.isBuffer(spec.body) ? spec.body : Buffer.from(String(spec.body), 'utf8'));
+    }
+    req.emit('end');
+    await Promise.race([settled, new Promise((r) => setTimeout(r, 15000))]);
+    if (status === null) {
+        return { status: 500, headers: {}, bodyText: 'vant edge chain fault: no response handed back' };
+    }
+    return { status, headers, bodyText: bodyText.slice(0, 8192) };
+}
+
 // ---------------------------------------------------------------------------
 // 4. the shim routes (the run root Rook proposed) - real vant libs.
 // ---------------------------------------------------------------------------
@@ -301,6 +446,10 @@ function buildRoutes(sb) {
         }
         let r;
         try {
+            // (fresh-fixture law, parent side) a cached read from an earlier
+            // attack is exactly the stale lineage this oracle hunts - every
+            // read dispatches against the tree as it stands NOW
+            if (brain.invalidateCache) brain.invalidateCache();
             r = await brain.read(j.name, j.brain ? { brain: j.brain } : {});
         } catch (e) {
             return new Response(JSON.stringify({ error: e.name + ': ' + e.message }), { status: 500 });
@@ -368,6 +517,16 @@ function buildRoutes(sb) {
             return new Response(JSON.stringify({ error: 'run 2 threw: ' + e.name }), { status: 500 });
         }
         const after2 = walk(path.join(sb, 'models'));
+        // (fresh-fixture law, pointer hygiene) the legacy import flips the
+        // parent brain module's _currentBrainType to 'public' in-process -
+        // vant's own guarded pattern is save-pointer/restore-finally, so the
+        // route restores the seeded posture after BOTH accounting runs.
+        // Sandwiched between them it would turn run 2 into a different
+        // module state and break the honest idempotency measurement itself.
+        try {
+            const brain = require(path.join(sb, 'lib', 'brain.js'));
+            if (brain.switchBrain) brain.switchBrain('vant', 'private');
+        } catch (e3) { /* restore best effort */ }
         return new Response(JSON.stringify({
             dryTouch: beforeDry.join('') !== afterDry.join('') ? 1 : 0,
             secondTouch: before2.filter(f => !after2.includes(f)).length + after2.filter(f => !before2.includes(f)).length,
@@ -438,6 +597,113 @@ function buildRoutes(sb) {
         }
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
+    // --- the vant-rest arm (2026-10-24): lib/server's REAL Edge chain, the
+    // --- same route code scripts/crashtest-run.js runs.
+
+    // rest-request: the vant-rest pack's route. Body carries
+    // { method, path, headers?, body?, authRequired? } - one honest round
+    // trip through the chain, status + headers + body attached.
+    routes.registerRoute('rest-request', async (ctx) => {
+        const j = await ctx.request.json().catch(() => ({}));
+        if (!EDGE_CHAINS.open || !EDGE_CHAINS.priv) resetEdgeChains(sb);
+        const chain = (j && j.authRequired === true) ? EDGE_CHAINS.priv : EDGE_CHAINS.open;
+        const out = await edgeRoundTrip(chain, j || {});
+        return new Response(JSON.stringify(out), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
+    // Raw-dispatch Edge routes (library-row vocabulary is raw HTTP; the
+    // vant vocab is armed for rows that want it too).
+    const rawEdgeRoute = (authRequired) => async (ctx) => {
+        const req0 = ctx.request;
+        let rawUrl;
+        try { rawUrl = new URL(req0.url).pathname; } catch (e) { rawUrl = String(req0.url); }
+        let body = null;
+        if (req0.method !== 'GET' && req0.method !== 'HEAD') {
+            try { body = await req0.text(); } catch (e2) { body = null; }
+        }
+        if (!EDGE_CHAINS.open || !EDGE_CHAINS.priv) resetEdgeChains(sb);
+        const out = await edgeRoundTrip(authRequired ? EDGE_CHAINS.priv : EDGE_CHAINS.open, {
+            method: req0.method,
+            url: rawUrl,
+            headers: Object.fromEntries(req0.headers.entries()),
+            body,
+        });
+        return new Response(out.bodyText, {
+            status: out.status && Number(out.status) >= 200 ? Number(out.status) : 500,
+            headers: { ...out.headers, 'Cache-Control': 'no-store' },
+        });
+    };
+    routes.registerRoute('vant-rest-open', rawEdgeRoute(false));
+    routes.registerRoute('vant-rest-priv', rawEdgeRoute(true));
+    routes.registerRoute('vant-rest-priv-alias', rawEdgeRoute(true));
+
+    // --- the session-cookie arm: lib/guests REAL token semantics
+    // --- (issue/verify/revoke) behind cookie packaging an Edge deployment
+    // --- of them would use (flags are the shim's posture, honestly set).
+    const COOKIE = (raw) => 'sid=' + raw + '; Path=/; Secure; HttpOnly; SameSite=Lax';
+    const sidFrom = (header) => {
+        const m = String((header && header.get) ? (header.get('cookie') ?? '') : '').match(/(?:^|;\s*)sid=([^;]*)/);
+        return m ? m[1] : null;
+    };
+    const jsonRes = (data, status, extraHeaders = {}) => new Response(JSON.stringify(data), {
+        status,
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...extraHeaders },
+    });
+    let sessionGuests = null;
+    const guestsForSb = () => {
+        if (!sessionGuests) sessionGuests = require(path.join(sb, 'lib', 'guests.js'));
+        return sessionGuests;
+    };
+    routes.registerRoute('vant-login', async (ctx) => {
+        const j = await ctx.request.json().catch(() => ({}));
+        try {
+            const t = guestsForSb().issue(String((j && j.user) || 'rook'), { role: 'human', brain: 'vant', expires: '1d' });
+            return jsonRes({ ok: true, user: (j && j.user) || 'rook', brain: 'vant' }, 200, { 'Set-Cookie': COOKIE(t.token) });
+        } catch (e) {
+            return jsonRes({ error: e.message }, 400);
+        }
+    });
+    routes.registerRoute('vant-me', async (ctx) => {
+        const sid = sidFrom(ctx.request.headers);
+        const v = sid ? guestsForSb().verify(sid) : null;
+        if (!v) return jsonRes({ error: 'no session' }, 401);
+        return jsonRes({ ok: true, guest: { name: v.guest.name, role: v.guest.role, trustLevel: v.guest.trustLevel } }, 200);
+    });
+    routes.registerRoute('vant-logout', async (ctx) => {
+        const sid = sidFrom(ctx.request.headers);
+        if (!sid) return jsonRes({ error: 'no session' }, 400);
+        const v = guestsForSb().verify(sid);
+        const id = v ? v.guest.id : sid;
+        guestsForSb().revoke(id);
+        return jsonRes({ ok: true }, 200);
+    });
+
+    // --- the stones arm: real seal → decode → restore through the probe
+    // --- child (STONE_CHILD above); stone-restore-tamper shares the tamper
+    // --- arm with vant-brain's boot-stone-integrity oracle.
+    const stoneRoute = (mode) => async (ctx) => {
+        let j = {};
+        try { j = await ctx.request.json(); } catch (e) { j = {}; }
+        const argvSpec = mode === 'tamper'
+            ? JSON.stringify({ mode: 'tamper' })
+            : JSON.stringify({ mode: 'scope', brains: Array.isArray(j && j.brains) ? j.brains : null });
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', STONE_CHILD, argvSpec], { cwd: sb, timeout: 90000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `stone probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    };
+    routes.registerRoute('stone-scope', stoneRoute('scope'));
+    const tamperRoute = stoneRoute('tamper');
+    routes.registerRoute('stone-tamper', tamperRoute);
+    routes.registerRoute('stone-restore-tamper', tamperRoute);
+
+    // Pending oracles stay UNREGISTERED (now only trust-read and
+    // brain-graph-walk): the packs degrade via route-absence
+    // (skipped-REFUSED) - a 501 shim IS a 5xx to the fuzz floor. Absence
+    // is the honest shape.
     return routes;
 }
 
@@ -469,9 +735,10 @@ const EXPECTED = {
         'state-json-schema-strictness': 'EXPLOITED',
         'migration-idempotency': 'REFUSED',
         'guest-capability-gates': 'REFUSED',
-        // deferred oracle rows - honest skip either way (501 routes)
+        // deferred oracle rows - honest skip either way (501 routes);
+        // boot-stone-integrity armed 2026-10-24 via stone-restore-tamper
         'succession-trust-inheritance': 'skip',
-        'boot-stone-integrity': 'skip',
+        'boot-stone-integrity': 'REFUSED',
         'knowledge-links-cycle-safety': 'skip',
     },
     'vant-crew': {
@@ -486,15 +753,21 @@ const EXPECTED = {
     },
     // Survey candidates still pending run-root wiring (501 routes): the
     // attacks are written, the verdict rows are honest skips until armed.
+    // So are the vant-rest/vant-stones rows - VALIDATED 2026-10-24 (the
+    // routes below arm them here too). The vad-stones lineage row is a
+    // LIVE FINDING pin: lib/transform.gather scopes the brain inventory
+    // but leaves the live currentBrain/activeStack unfiltered, so a
+    // single-brain stone carries a pointer outside its scope (#226
+    // mint-side silence, measured from the sealed payload). Fix => flip.
     'vant-rest': {
-        'fuzz-floor-never-500': 'skip',
-        'cors-enable-parity': 'skip',
-        'session-cookie-discipline': 'skip',
+        'fuzz-floor-never-500': 'REFUSED',
+        'cors-enable-parity': 'REFUSED',
+        'session-cookie-discipline': 'REFUSED',
     },
     'vant-stones': {
-        'stone-scope-honesty': 'skip',
-        'state-pointer-lineage': 'skip',
-        'restore-torn-refusal': 'skip',
+        'stone-scope-honesty': 'REFUSED',
+        'state-pointer-lineage': 'EXPLOITED',
+        'restore-torn-refusal': 'REFUSED',
     },
 };
 
@@ -558,12 +831,19 @@ function checkVerdictRows(packName, verdicts) {
         packs.push({ mod, name: manifest.name });
     }
 
-    // --- run vant-brain against the real sandbox routes
+    // --- run every pack against the real sandbox routes
     const sandbox = makeSandbox();
     try {
+        // (iron-cage fix) all parent-process route handlers must resolve the
+        // SANDBOX's models/ tree, not the workspace's - lib/brain.js pins
+        // _brainModelsRoot to process.cwd() at require time, and guests'
+        // ledger resolves through it too. chdir at suite start; the parent
+        // only serves sandbox routes (the run root's containment, mirrored).
+        process.chdir(sandbox);
         const harness = buildRoutes(sandbox);
         for (const p of packs) {
             if (!(p.name in EXPECTED)) continue; // (vant-census is config-armed in run roots, not routes)
+            resetEdgeChains(sandbox); // fresh Edge walls at pack boundaries
             const verdicts = {};
             for (const a of p.mod.attacks) {
                 try {
@@ -592,7 +872,8 @@ function checkVerdictRows(packName, verdicts) {
             check(`${p.name} verdicts deterministic across two runs`, deterministic, 'double run diverged');
         }
     } finally {
-        // no fixture residue
+        // back out of the sandbox dir before it vanishes; no fixture residue
+        try { process.chdir(ROOT); } catch (e) { /* exit anyway */ }
         try { fs.rmSync(sandbox, { recursive: true, force: true }); } catch { /* throwaway */ }
     }
 
