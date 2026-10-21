@@ -202,6 +202,49 @@ function SideNav({ open, onClose }: { open: boolean; onClose: () => void }) {
           </div>
         );
       })}
+      {/* Frame-owned crosslinks (passes 296/313): one of three crosslinked
+          sites - the Brain dashboard is THIS surface; out-links ride
+          target=_blank so a click never nukes an in-flight session. */}
+      <div>
+        <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-ink-soft">
+          Sites
+        </p>
+        <ul className="space-y-0.5">
+          <li>
+            <a
+              href="https://vant.creadev.org"
+              rel="noopener"
+              target="_blank"
+              onClick={onClose}
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-ink-soft hover:bg-ink/5"
+            >
+              Lander
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://docs.creadev.org/vant"
+              rel="noopener"
+              target="_blank"
+              onClick={onClose}
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-ink-soft hover:bg-ink/5"
+            >
+              Docs
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://github.com/dhaupin/vant/issues"
+              rel="noopener"
+              target="_blank"
+              onClick={onClose}
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-ink-soft hover:bg-ink/5"
+            >
+              Contact
+            </a>
+          </li>
+        </ul>
+      </div>
     </nav>
   );
   return (

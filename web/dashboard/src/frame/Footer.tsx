@@ -9,7 +9,8 @@ export function Footer() {
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-2">
         <a
           href="https://creadev.org"
-          rel="dofollow"
+          rel="dofollow noopener"
+          target="_blank"
           className="font-medium text-accent hover:underline"
         >
           creadev.org
@@ -33,6 +34,13 @@ export function Footer() {
           className="hover:underline"
         >
           Docs
+        </a>
+        <a
+          href="https://vant.creadev.org"
+          rel="noopener"
+          className="hover:underline"
+        >
+          Lander
         </a>
         <span className="ml-auto">
           Open-source, no warranty. The agents act; you approve. Use at your own risk.

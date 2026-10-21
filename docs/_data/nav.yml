@@ -287,3 +287,12 @@
   items:
   - title: Agent-First Whitepaper
     url: /vant/whitepaper/agent-first
+
+- title: Sites
+  items:
+  - title: Vant Lander
+    url: https://vant.creadev.org
+  - title: Brain Dashboard
+    url: https://brain.creadev.org
+  - title: creadev.org
+    url: https://creadev.org
