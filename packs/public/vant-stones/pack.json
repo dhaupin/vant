@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-stones",
+  "description": "Stone lifecycle discipline for vant run roots: a scoped stone carries ONLY the brains it names, a restored stone's state never wakes a foreign currentBrain, and a tampered stone refuses the restore loudly and restores NOTHING partial. File-layer + in-process horcrux/restore APIs - zero sockets.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

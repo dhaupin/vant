@@ -139,6 +139,7 @@ class MicroHarness {
 function makeSandbox() {
     const sb = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-packsvb-'));
     fs.cpSync(path.join(ROOT, 'lib'), path.join(sb, 'lib'), { recursive: true, dereference: true });
+    fs.copyFileSync(path.join(ROOT, 'package.json'), path.join(sb, 'package.json'));
     try { fs.symlinkSync(path.join(ROOT, 'node_modules'), path.join(sb, 'node_modules'), 'dir'); } catch { /* already there */ }
     // fixture brain 'vant' with the two canonical canaries
     fs.mkdirSync(path.join(sb, 'models', 'private', 'vant'), { recursive: true });
@@ -176,6 +177,82 @@ const PROBE_CHILD = `
         out.reads.push({ pinnedType: 'private', content: r ? String(r.content ?? '') : null, resolvedPath: r ? String(r.path ?? '') : null });
     } catch (e) { out.reads.push({ pinnedType: 'private', THREW: e.name + ': ' + e.message }); }
     process.stdout.write(JSON.stringify(out));
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
+// Crew probe: drive lib/agents.spawn against the sandbox registry
+// (re PACK SURVEY). Registry-level only - spawn creates agent records, no
+// OS processes. Facts reported neutral: resolved cap, attempts, which typed
+// errors fired, final roster.
+const CREW_CHILD = `
+(async () => {
+    const agents = require('./lib/agents.js');
+    const out = { cap: null, attempts: 0, capError: null, rateError: null, rateLimit: null, rosterSize: 0, rosterNames: [] };
+    try {
+        const cfg = require('./lib/config.js');
+        out.rateLimit = (cfg && cfg.get) ? cfg.get('agents.spawnRateLimit', 10) : 10;
+    } catch (e2) { out.rateLimit = 10; }
+    try {
+        // (survey pass) resolve the DECLARED cap the same way spawn does
+        const internal = require('./lib/agents/internal.js');
+        out.cap = internal._getMaxAgents ? internal._getMaxAgents() : 10;
+    } catch (e4) { out.cap = 10; }
+    const names = [];
+    for (let i = 0; i < out.cap + 2; i++) {
+        const r = agents.spawn({ name: 'pack-cw-' + i, role: 'Tester', type: 'default' });
+        out.attempts = i + 1;
+        if (r && r.error) {
+            if (!out.capError && /quota/i.test(r.error)) out.capError = r.error;
+            if (!out.rateError && /rate limit/i.test(r.error)) out.rateError = r.error;
+            break;
+        }
+        const id = r && r.id;
+        names.push('pack-cw-' + i + (id ? ':' + id : ''));
+    }
+    // Rate-limit probe: drain one slot below the cap, then attempt one more
+    // in-window spawn past the window budget - the window counts ACCEPTED
+    // spawns, so this is the honest place the limiter can refuse.
+    try {
+        const first = names[0];
+        const idForFirst = first && String(first).split(':')[1];
+        if (idForFirst) {
+            agents.kill(idForFirst);
+            const r2 = agents.spawn({ name: 'pack-cw-rate', role: 'Tester', type: 'default' });
+            if (r2 && r2.error && /rate limit/i.test(r2.error)) out.rateError = r2.error;
+        }
+    } catch (e5) { out.rateError = out.rateError || ('drain probe threw: ' + e5.name); }
+    try {
+        const roster = agents.list();
+        out.rosterSize = roster.length;
+        out.rosterNames = roster.map((a) => a.name);
+    } catch (e6) { out.rosterSize = names.length; }
+    process.stdout.write(JSON.stringify(out));
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
+// MCP probe: drive lib/mcp.execute directly (the exact dispatcher the
+// /mcp/exec door rides). Calls arrive as a JSON array [{ tool, params }];
+// each result is reported verbatim, plus an escape-file check for
+// brain_write probes (the test watches for files landing OUTSIDE the
+// brain tree). Never sockets.
+const MCP_CHILD = `
+(async () => {
+    const mcp = require('./lib/mcp.js');
+    const fs = require('fs');
+    const path = require('path');
+    let calls = [];
+    try { calls = JSON.parse(process.argv[1] || '[]'); } catch (e) { calls = []; }
+    const results = [];
+    for (const call of calls) {
+        const row = { tool: call.tool, threw: false };
+        try { row.result = await mcp.execute(String(call.tool || ''), call.params ?? {}); }
+        catch (e) { row.threw = true; row.error = e.name + ': ' + e.message; }
+        results.push(row);
+    }
+    // Escape check: did any brain_write probe land a file outside models/ ?
+    const escape = path.resolve('vant-mcp-escape-canary.md');
+    const escapedFile = fs.existsSync(escape) ? 'vant-mcp-escape-canary.md' : null;
+    process.stdout.write(JSON.stringify({ results, escapedFile, escapedPath: escape }));
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
 
@@ -218,6 +295,7 @@ function buildRoutes(sb) {
                 cwd: sb,
                 timeout: 30000,
                 encoding: 'utf8',
+                env: { ...process.env, VANT_GATE_QUIET: '1' },
             });
         } catch (e) {
             return new Response(JSON.stringify({ error: `probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
@@ -308,6 +386,32 @@ function buildRoutes(sb) {
     routes.registerRoute('trust-read', async () => new Response(JSON.stringify({ error: 'not armed: trust floor wiring pending validation on a run root' }), { status: 501 }));
     routes.registerRoute('stone-restore-tamper', async () => new Response(JSON.stringify({ error: 'not armed: stone fixture pending validation on a run root' }), { status: 501 }));
     routes.registerRoute('brain-graph-walk', async () => new Response(JSON.stringify({ error: 'not armed: graph walk pending validation on a run root' }), { status: 501 }));
+
+    // Pack-survey gap-fills (2026-10-22): crew + mcp routes armed here are
+    // REAL (fresh-module probe children in the sandbox, same shape as the
+    // brain-state probe); rest + stones routes stay 501-honest.
+    routes.registerRoute('crew-run', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', CREW_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `crew probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(outText, { status: 200 });
+    });
+    routes.registerRoute('mcp-exec', async (ctx) => {
+        const j = await ctx.request.json().catch(() => ({}));
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', MCP_CHILD, JSON.stringify(Array.isArray(j.calls) ? j.calls : [])], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `mcp probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(outText, { status: 200 });
+    });
+    routes.registerRoute('rest-request', async () => new Response(JSON.stringify({ error: 'not armed: lib/server stack wiring pending validation on a run root' }), { status: 501 }));
+    routes.registerRoute('stone-scope', async () => new Response(JSON.stringify({ error: 'not armed: seal/decode fixture pending validation on a run root' }), { status: 501 }));
+    routes.registerRoute('stone-tamper', async () => new Response(JSON.stringify({ error: 'not armed: seal/decode fixture pending validation on a run root' }), { status: 501 }));
     return routes;
 }
 
@@ -330,6 +434,9 @@ const EXPECTED = {
         // LIVE FINDING (measured on axolotl, #232 class): corrupt/absent
         // state.json silently defaults AND the private-pinned identity read
         // resolves the PUBLIC file while reporting source 'private'.
+        // (fixed 2026-10-22 for the CLI/pointer half via commit fb3eadf;
+        // the read-path silent fallback row stays a finding until its own
+        // fix lands - the pin keeps biting.)
         'state-tamper-is-loud': 'EXPLOITED',
         // LIVE FINDING (measured on axolotl, #233 expansion 1): wrong-typed
         // stack/self-pointer values survive into the runtime brain pointer.
@@ -340,6 +447,28 @@ const EXPECTED = {
         'succession-trust-inheritance': 'skip',
         'boot-stone-integrity': 'skip',
         'knowledge-links-cycle-safety': 'skip',
+    },
+    'vant-crew': {
+        'roster-quota-ceiling': 'REFUSED',
+        'spawn-rate-limit': 'REFUSED',
+        'quota-error-is-typed': 'REFUSED',
+    },
+    'vant-mcp': {
+        'unknown-tool-honesty': 'REFUSED',
+        'tool-schema-enforced': 'REFUSED',
+        'brain-write-scope-hardness': 'REFUSED',
+    },
+    // Survey candidates still pending run-root wiring (501 routes): the
+    // attacks are written, the verdict rows are honest skips until armed.
+    'vant-rest': {
+        'fuzz-floor-never-500': 'skip',
+        'cors-enable-parity': 'skip',
+        'session-cookie-discipline': 'skip',
+    },
+    'vant-stones': {
+        'stone-scope-honesty': 'skip',
+        'state-pointer-lineage': 'skip',
+        'restore-torn-refusal': 'skip',
     },
 };
 
@@ -368,8 +497,10 @@ function checkVerdictRows(packName, verdicts) {
 (async () => {
     const packs = [];
 
-    // --- manifest + module contract for both packs
-    for (const dir of ['vant-census', 'vant-brain'].sort()) {
+    // --- manifest + module contract for every shipped pack (discovered,
+    //    never hardcoded - a pack that exists but isn't validated here is
+    //    exactly the kind of quiet gap this suite refuses)
+    for (const dir of fs.readdirSync(PACKS_DIR).filter((d) => fs.existsSync(path.join(PACKS_DIR, d, 'pack.json'))).sort()) {
         const packDir = path.join(PACKS_DIR, dir);
         let manifest = null;
         check(`${dir}/pack.json exists`, fs.existsSync(path.join(packDir, 'pack.json')), 'missing');
@@ -402,7 +533,7 @@ function checkVerdictRows(packName, verdicts) {
     try {
         const harness = buildRoutes(sandbox);
         for (const p of packs) {
-            if (p.name !== 'vant-brain') continue;
+            if (!(p.name in EXPECTED)) continue; // (vant-census is config-armed in run roots, not routes)
             const verdicts = {};
             for (const a of p.mod.attacks) {
                 try {
@@ -417,8 +548,8 @@ function checkVerdictRows(packName, verdicts) {
                     verdicts[a.name] = { verdict: 'EXPLOITED', detail: `attack threw: ${e.name}: ${e.message}` };
                 }
             }
-            const complete = checkVerdictRows('vant-brain', verdicts);
-            check('vant-brain verdict table exactly covers the expected rows', complete, 'row mismatch vs expected');
+            const complete = checkVerdictRows(p.name, verdicts);
+            check(`${p.name} verdict table exactly covers the expected rows`, complete, 'row mismatch vs expected');
             // Determinism (house rule 4): same runs, same verdicts
             const verdicts2 = {};
             for (const a of p.mod.attacks) {
@@ -428,7 +559,7 @@ function checkVerdictRows(packName, verdicts) {
             for (const k of Object.keys(verdicts)) {
                 if (!verdicts2[k] || verdicts2[k].verdict !== verdicts[k].verdict) deterministic = false;
             }
-            check('vant-brain verdicts deterministic across two runs', deterministic, 'double run diverged');
+            check(`${p.name} verdicts deterministic across two runs`, deterministic, 'double run diverged');
         }
     } finally {
         // no fixture residue

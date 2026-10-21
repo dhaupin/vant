@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-crew",
+  "description": "Agent-crew budget discipline for vant run roots: the roster quota fires at the declared cap, the spawn rate limit refuses past its window, and quota denials grow no ghost agents. In-process only (lib/agents registry) - zero sockets.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

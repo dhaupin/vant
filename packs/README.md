@@ -48,7 +48,7 @@ return neutral facts; the attacks decide, never the shim:
 |---|---|
 | `private-first-fallback` | validated — REFUSED (private wins on mixed reads) |
 | `paths-cannot-escape-models` | validated — REFUSED (traversal names never escape `models/`) |
-| `state-tamper-is-loud` | validated — **EXPLOITED today** (silent fallback + public/private lineage mix; #232 class) |
+| `state-tamper-is-loud` | validated — **EXPLOITED today** (silent fallback + public/private lineage mix; the read-path half of #232 — CLI/pointer half fixed 2026-10-22, commit `fb3eadf`) |
 | `state-json-schema-strictness` | validated — **EXPLOITED today** (wrong-typed stack entries survive into the runtime pointer) |
 | `migration-idempotency` | validated — REFUSED (dry-run touches nothing; second run is a no-op) |
 | `guest-capability-gates` | validated — REFUSED (admin denied, revocation kills grants, pairing voucher single-use) |
@@ -76,6 +76,47 @@ evidence via `ctx.config['vant-census']`, absence → skip):
 - `guard-throw-probe` — hostile inputs must land as typed refusals, never
   raw engine crashes
 
+### `public/vant-crew` (v0.1.0) — agent-crew budget discipline
+
+Three registry-level oracles against `lib/agents` (registry-only — spawn
+creates agent records, never OS processes), validated against a vant
+sandbox:
+
+| Attack | Status |
+|---|---|
+| `roster-quota-ceiling` | validated — REFUSED (cap fires as a typed refusal at the declared `agents.maxAgents`) |
+| `spawn-rate-limit` | validated — REFUSED (window budget refuses past-the-window spawns once a slot is drained below the cap) |
+| `quota-error-is-typed` | validated — REFUSED (denials name the budget; no raw crashes) |
+
+### `public/vant-mcp` (v0.1.0) — in-process MCP tool-layer discipline
+
+Three oracles driving `lib/mcp.execute` — the exact dispatcher the
+`/mcp/exec` HTTP door rides, minus the door (no TCP):
+**all validated** against a vant sandbox:
+
+| Attack | Status |
+|---|---|
+| `unknown-tool-honesty` | validated — REFUSED (unknown tools answer typed "not found"; never throws) |
+| `tool-schema-enforced` | validated — REFUSED (declared inputSchemas reject invalid params before any side effect — the P1 #14 contract holds) |
+| `brain-write-scope-hardness` | validated — REFUSED (traversal-shaped tool params confined inside the brain tree) |
+
+### `public/vant-rest` (v0.1.0) — REST-door discipline (PENDING)
+
+`lib/server.js` exports an Edge-shaped stack (`Server.Request/Response`,
+`Router`, `BodyParser`, `CORS`, `Helmet`, `Session`, `SessionStore`).
+Three written oracles (fuzz floor never-500, CORS mirror parity,
+session-cookie discipline) mapped onto crashtest v1.0.0's
+`session`/`protohygiene`/`taxonomy` rows — **honest skips until a run root
+wires the lib/server stack** (routes 501).
+
+### `public/vant-stones` (v0.1.0) — stone lifecycle discipline (PENDING)
+
+Three written oracles for the seal/restore lifecycle (`stone-scope-honesty`,
+`state-pointer-lineage`, `restore-torn-refusal`) — the #219/#226/#232
+incident class, pinned from the mint and boot sides; **honest skips until a
+run root wires the seal/decode fixture** (the crashtest repo's
+`horcrux/crashtest-p_quillstone-9fold.svg` is the documented tamper fixture).
+
 ## How to point crashtest at these packs
 
 Any crashtest run-root (v1.0.0+) lists this repo's `packs/` root and its
@@ -97,43 +138,23 @@ node test/crashtest-packs.test.js
 
 ## Consuming crashtest (v1.0.0)
 
-Crashtest is versioned 1.0.0 on GitHub main; npm still publishes 0.1.0.
-This repo's tooling therefore consumes crashtest from the GitHub checkout
-(file path), not npm — the same rule this directory already obeys (`packs:`
-accepts any directory). Until npm catches up:
+Crashtest is versioned 1.0.0 on GitHub main and v1.1.0-with-pack-ports
+already growing; npm still publishes 0.1.0. This repo's tooling therefore
+consumes crashtest from the GitHub checkout (file path), not npm — the same
+rule this directory already obeys (`packs:` accepts any directory). Until
+npm catches up:
 
 - clone `github.com/dhaupin/crashtest` next to this checkout;
 - point a run root's `packs:` at `../vant/packs` (cross-repo, as above);
 - re-validate here anytime: `node test/crashtest-packs.test.js` (re-blocks
   the v1.0.0 scenario contract: verdicts vocabulary, kebab names, run()
-  shape — and currently pins 2 of 9 `vant-brain` rows as EXPLOITED
-  regressions until the #232-class fixes land).
+  shape — and currently pins the two `vant-brain` EXPLOITED regressions
+  until the read-path fix lands).
 
 As of 2026-10-22 the v1.0.0 contract surfaces (`src/scenarios/contract.js`,
 `src/packs/loader.js`, `src/harness/harness.js`) are unchanged since the
-pre-v1 audit — both packs load clean through the real loader at main.
-
-## Next candidates (surveyed against v1.0.0's 12 scenario-library rows)
-
-Surfaces of vant's own that are pack-able under the one law (in-process
-only), roughly in attack-value order:
-
-- **`vant-mcp`** — drive `lib/mcp.js`'s tool layer in-process (no HTTP
-  door): brain-share/insights races, agent spawn caps, market ops. Direct
-  tie-ins: the insights lock window audited in `labs/archives/audits/
-  LOCKS.md`, and the MCP tool-coverage checker (`scripts/check-mcp-coverage.js`)
-  becomes an oracle instead of a linter.
-- **`vant-rest`** — `lib/server.js` exports `Server.Request/Response`,
-  `Router`, `BodyParser`, `CORS`, `Helmet`, `Session`, `SessionStore` —
-  an Edge-shaped stack attacks like the `crashtest-site` handler: the
-  v1.0.0 `session`, `authz`, `guards`, `race`, `taxonomy` rows all apply.
-- **`vant-stones`** — snapshot/horcrux scoping oracles: `--brain` naming
-  the stone without scoping the payload (#226), seed leakage between
-  brains, and the state-pointer lineage checks the sealed stones already
-  provably carry.
-- **`vant-crew`** — agent-spawn/crew budget discipline (roster caps,
-  `agents.maxAgents`), driven through the in-process agent APIs the
-  crashtest stone flow already exercises.
+pre-v1 audit — every pack in here loads clean through the real loader at
+main.
 
 ## Conventions
 
@@ -144,3 +165,6 @@ only), roughly in attack-value order:
   three binding ones; `skipped: true` marks honest absence.
 - Validated vs pending stays written in the pack file header and this
   table — the honest status ledger is part of the pack, not a promise.
+- New packs get added to `test/crashtest-packs.test.js`'s `EXPECTED` table
+  (or the suite discovers them and fails loudly for the missing rows —
+  which is the honest default).
