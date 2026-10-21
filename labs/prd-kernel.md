@@ -107,6 +107,51 @@ vant) can adopt it without adopting a whole engine. Same discovery
 Godot made once: the substrate was latent in the usage all along; we
 are just the first to name it and give it a door.
 
+**Owner scoping, 2026-10-21 (the last word on the example):** Godot
+stays an EXAMPLE, spoken once and not opened again. No engine-source
+study of Godot — or any third-party engine — is done, on purpose
+(owner: "I'd prefer you don't dig into godot, it'll make it too easy
+to copy. I don't dig in either."). The kernel is not a clone built
+from somebody's docs; it is vant's OWN vocabulary (census, attest,
+retire, succeed, FOEC, zone, honest mass) observed functioning in the
+wild and written down. Where a worked case is ever needed, the
+evidence base is the SIBLING'S OWN frame (§5b — their source, their
+bugs, their laws, already cited at architecture level); Godot-the-
+engine itself remains a black box over our shoulder.
+
+And the sizing the owner fixed the same hour: the four-verb substrate
+plus FOEC and the zone is ONE PART of what the word KERNEL will
+eventually mean for vant — call it a fifth. It is the part this
+document currently knows how to say precisely. The rest — the other
+four-fifths — is deliberately UNFILLED, and stays that way until the
+owner fills it, one area at a time, in no fixed order. Reserved
+areas, named so future agents do not design them in the owner's
+absence:
+
+- **The zone's own design** — §6b stays named-not-designed; the
+  verdict-maker is judged-peer, not kernel property, and its build
+  out is owner territory.
+- **The rhythm/momentum law as native kernel ground** — §5a is the
+  seam (nature.js the existing wheel); what kernel compaction, audit
+  pulses, and census cadence BECOME is unfilled.
+- **Consensus formation before flow** — §1's second nature said how
+  decisions become sequenced, attested, census-backed; WHO forms
+  them and under what conditions remains open (open q10 rides here).
+- **Reality-to-reality portability as treaty, not import** — the
+  §5b crew clause points at an install-mesh reality; the treaty shape is
+  unfilled.
+- **The cognition lifecycle** — what genesis, dreaming, and
+  succession ARE to the kernel when the kernel's consumers are
+  themselves cognitive (brains waking, resting, succeeding).
+- **FOEC beyond genesis** — how everything-at-once stays everything-
+  at-once WITHOUT becoming sequenced-corporate; companion E7 is the
+  known first seam, the lane law the second.
+
+None of those are designed here, none scheduled. The rule for the
+four-fifths is the rule this whole document obeys: areas fill with
+OBSERVATIONS from the running system first, at design pace, never
+from borrowed blueprints.
+
 **FOEC, Flash Of Everything Content** (owner framing, corrected same
 day): NOT a failure mode. A MODE — and not merely a tolerated one: a
 REQUIRED one. The opposite of FOUC one layer deeper. FOUC is unstyled
@@ -666,6 +711,29 @@ retires an open lesson the same pass it lands. K5+ is opportunistic.
   instead of claimed circularity. Layout fix: the §1 diagram now
   draws the kernel BENEATH its consumers with the bedrock under it,
   and the verb arrow-list is labeled a vocabulary, not a pipeline.
+- 2026-10-21: **SCOPE SIZING + ANTI-DERIVATIVE LAW (owner, end of
+  the distillation-night walk): Godot is an EXAMPLE, not a study
+  subject — no Godot dig, "I don't dig in either" — because the
+  kernel is exactly the thing you cannot build by copying.** The
+  engine substrate (four verbs, FOEC, zone) is one part (~a fifth)
+  of what KERNEL will mean when the project is whole; the other
+  four-fifths is reserved owner territory (areas listed in §1).
+  Locked as a non-goal in §10: no engine-source study of any
+  third-party engine, ever; evidence shapes come from vant's own
+  running tree and the sibling's own frame, and "repair" in this
+  repo never means "recreate a copy".
+- 2026-10-21: **NAMING, IF EVER EXTRACTED — the owner's instinct
+  name for a standalone engine substrate, "mycelium", is SPOKEN
+  FOR.** Mycelium BTC wallet (mycelium.com, since 2013) and
+  ThreeFold's Mycelium IPv6 overlay mesh already carry the name, and
+  the standing owner directive (prd-web §2.4) reserves "mycelium"
+  for the MESH layer it actually describes. If the substrate ever
+  becomes its own engine product, it takes a fresh name at
+  extraction time (legal/trademark check rides that future pass, not
+  this document). Inside vant the working name stays **the kernel**
+  for the whole life of this document — and inside vant is where the
+  cool lives anyway (per owner, same hour: "we don't have to do
+  that; we can just make it cool asf in vant").
 
 ## 10. Non-goals (locked)
 
@@ -685,3 +753,9 @@ construction plan so this constitution stays clean.
   kernel; adoption is registration + verb wiring, verbatim observable.
 - No kernel-owned storage format; each consumer keeps its own store,
   the kernel journals events and enforces gates only.
+- **No engine-source study of Godot — or any third-party engine
+  (locked 2026-10-21, owner).** The example stays an example. The
+  kernel's evidence comes from vant's own runtime and the sibling's
+  own frame (§5b) only; studying somebody else's engine internals is
+  exactly how a design stops being original, and the whole point of
+  this document is that ours was never copyable in the first place.
