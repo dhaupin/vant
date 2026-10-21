@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vant | Agent Memory That Lives in Your Repo</title>
-    <meta name="description" content="Vant gives AI agents persistent memory: markdown brain files in your own repository. Read at session start, written at session end, inherited every session. Any agent, any LLM, over MCP or plain files.">
+    <title>Vant | Give every AI agent a memory that compounds</title>
+    <meta name="description" content="Vant gives AI agents persistent memory: plain markdown files in your own repository. Read at session start, written at session end, inherited forever. One agent or a distributed fleet.">
     <meta name="author" content="Vant Project">
     <meta name="robots" content="index, follow">
-    <meta property="og:title" content="Vant | Agent Memory That Lives in Your Repo">
-    <meta property="og:description" content="Persistent memory for AI agents as plain files in your repo. Agents read the brain when they start, write lessons before they finish, and inherit everything.">
+    <meta property="og:title" content="Vant | Give every AI agent a memory that compounds">
+    <meta property="og:description" content="Persistent memory for AI agents as plain files in your repo. Read at session start, written at session end, inherited forever. From one hobbyist agent to a distributed enterprise mesh.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://vant.creadev.org">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Vant | Agent Memory That Lives in Your Repo">
+    <meta name="twitter:title" content="Vant | Give every AI agent a memory that compounds">
     <meta name="twitter:description" content="Persistent memory for AI agents, stored as plain files in your GitHub repo.">
     <meta property="og:image" content="https://vant.creadev.org/vant-og.png">
     <link rel="canonical" href="https://vant.creadev.org">
@@ -26,7 +26,7 @@
         "@type": "SoftwareApplication",
         "@id": "https://vant.creadev.org/#software",
         "name": "Vant",
-        "description": "Persistent memory for AI agents, stored as plain files in your GitHub repo. Brain files, a key-value memory store, and semantic search over the corpus, with a runtime that keeps memory operations safe.",
+        "description": "Persistent memory for AI agents, stored as plain files in your own repository. Brain files, a key-value memory store, and semantic search over the corpus, with a runtime engineered to run crews and distributed fleets safely.",
         "url": "https://vant.creadev.org",
         "applicationCategory": "DeveloperApplication",
         "applicationSubCategory": "AI Agent Memory System",
@@ -40,7 +40,7 @@
         "license": "https://opensource.org/licenses/MIT",
         "softwareVersion": "0.8.6",
         "datePublished": "2026-05-05",
-        "keywords": "AI, agent, memory, persistent, github, git, brain, mcp, sessions, multibrain",
+        "keywords": "AI, agent, memory, persistent, github, git, brain, mcp, sessions, multibrain, multi-agent, relay, federation, enterprise",
         "featureList": [
             "Brain files: markdown memory read at session start, written at session end",
             "Memory store: key-value state and documents with TTL",
@@ -48,7 +48,8 @@
             "Citations: git-backed receipts for agent claims",
             "MCP server: JSON-RPC tools auto-wired from the module surface",
             "Multi-brain: named brain contexts with a stack",
-            "Multi-agent: branch-per-agent workflow",
+            "Multi-agent: branch-per-agent crews and federated installs",
+            "Relays and carriers: gated secure transport between installs",
             "Succession: trust levels for state inheritance across generations",
             "Horcrux: whole brain embedded in an image, encrypted",
             "Write-ahead journal and atomic writes for crash safety",
@@ -62,13 +63,13 @@
     {
         "@context": "https://schema.org",
         "@type": "HowTo",
-        "name": "Give your agent a persistent brain with Vant",
+        "name": "Give your agent a memory in five minutes",
         "description": "Install Vant, start a session, and connect an agent so its memory lives as files in your repository.",
         "totalTime": "PT5M",
         "tool": [{ "@type": "HowToTool", "name": "Node.js 18+" }, { "@type": "HowToTool", "name": "Git" }],
         "step": [
-            { "@type": "HowToStep", "position": 1, "name": "Install", "text": "Clone and install from source: git clone https://github.com/dhaupin/vant.git && cd vant && npm ci. (Vant is not published on npm.)", "url": "https://docs.creadev.org/vant/getting-started/install" },
-            { "@type": "HowToStep", "position": 2, "name": "Start", "text": "Run vant start. It checks the brain layout, imports an older single-brain layout if found, and runs health checks.", "url": "https://docs.creadev.org/vant/getting-started/quick-start" },
+            { "@type": "HowToStep", "position": 1, "name": "Install", "text": "Clone and install from source: git clone https://github.com/dhaupin/vant.git && cd vant && npm ci. (The vant npm package is an unrelated Vue UI library.)", "url": "https://docs.creadev.org/vant/getting-started/install" },
+            { "@type": "HowToStep", "position": 2, "name": "Start", "text": "Run vant start. It checks the brain layout and runs health checks.", "url": "https://docs.creadev.org/vant/getting-started/quick-start" },
             { "@type": "HowToStep", "position": 3, "name": "Connect an agent", "text": "Run vant mcp to serve the brain as MCP tools on 127.0.0.1:3457, then point any MCP client at it.", "url": "https://docs.creadev.org/vant/runtime/mcp" },
             { "@type": "HowToStep", "position": 4, "name": "Let it inherit", "text": "The agent reads the brain when it starts, writes lessons before it finishes, and commits. The next session starts with everything.", "url": "https://docs.creadev.org/vant/getting-started/agent-onboarding" }
         ]
@@ -84,11 +85,11 @@
             { "@type": "Question", "name": "Where does the memory live?", "acceptedAnswer": { "@type": "Answer", "text": "In your own repository, as plain files. Vant never puts your memory in someone else's database. If you stop using Vant, the memory is still there, readable with cat." } },
             { "@type": "Question", "name": "Do I need GitHub?", "acceptedAnswer": { "@type": "Answer", "text": "A Git host is needed for sync, and any provider works: GitHub, GitLab, Bitbucket, or self-hosted. Without sync, Vant still runs fully on local files." } },
             { "@type": "Question", "name": "Is my brain private?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Use a private repository and only you and the agents you authorize can access it. There is no external service holding a copy." } },
-            { "@type": "Question", "name": "How do agents connect?", "acceptedAnswer": { "@type": "Answer", "text": "Through MCP: start the server with vant mcp and it auto-wires the module surface into JSON-RPC tools. Agents can also use the CLI or read the brain files directly." } },
-            { "@type": "Question", "name": "Can multiple agents share one install?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Each agent gets a branch and a named brain context. Branch-per-agent isolation with merge-by-PR keeps concurrent work safe." } },
-            { "@type": "Question", "name": "Can I use Vant without an agent?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The CLI works on its own: learn, search, onboard, health. The memory is plain files, so you can also read and edit them directly." } },
+            { "@type": "Question", "name": "How do agents connect?", "acceptedAnswer": { "@type": "Answer", "text": "Through MCP: start the server with vant mcp and it auto-wires the module surface into JSON-RPC tools. Agents can also use the CLI, the REST API, or read the brain files directly." } },
+            { "@type": "Question", "name": "Can multiple agents share one install?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Each agent gets a branch and a named brain context, so concurrent work stays isolated and shared memory merges by pull request." } },
+            { "@type": "Question", "name": "Can I run Vant across several machines?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Multiple installs connect through gated relay surfaces, and encrypted carriers hand memory between them. Federation playbooks cover the multi-install topologies." } },
             { "@type": "Question", "name": "What stops an agent from writing bad lessons?", "acceptedAnswer": { "@type": "Answer", "text": "Lessons land in git, so they arrive as reviewable diffs and revert like any file. Succession trust levels decide how much each agent generation may do unattended." } },
-            { "@type": "Question", "name": "What happens when I upgrade from an old single-brain layout?", "acceptedAnswer": { "@type": "Answer", "text": "vant start detects the old layout and imports it automatically into the multi-brain layout. Detection is content-based and idempotent, and nothing is lost." } },
+            { "@type": "Question", "name": "How safe is it to run unattended?", "acceptedAnswer": { "@type": "Answer", "text": "Every memory operation passes a security chain - sandbox capabilities, input validation, rate limiting, escrow approval - and failures refuse with typed codes instead of half-writing state. Storage is write-ahead journaled and atomic." } },
             { "@type": "Question", "name": "Does Vant cost money?", "acceptedAnswer": { "@type": "Answer", "text": "No. Vant is open source under MIT. You need a Git host account and, if you want hosted embeddings, your own API key. The default hash provider needs nothing." } },
             { "@type": "Question", "name": "How is Vant different from a vector database?", "acceptedAnswer": { "@type": "Answer", "text": "A vector store keeps embeddings. Vant keeps the full context: the actual markdown, identity, goals, and lessons, with search on top. Agents inherit previous thoughts, not just similar ones." } }
         ]
@@ -211,8 +212,14 @@
         .drag-hint { font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
         .drag-hint svg { flex: none; opacity: 0.7; }
 
-        pre.term { position: relative; background: var(--bg-term); color: var(--term-text); border-radius: 10px; padding: 13px 15px; overflow-x: auto; font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; max-width: 100%; }
-        img, svg, canvas, video { max-width: 100%; }
+        /* ---------- terminal code boxes (overflow-hardened) ---------- */
+        pre.term {
+            position: relative; background: var(--bg-term); color: var(--term-text);
+            border-radius: 10px; padding: 13px 15px; overflow-x: auto; scrollbar-width: thin;
+            font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.85rem; line-height: 1.55; max-width: 100%; min-width: 0;
+        }
+        pre.term code { display: block; min-width: max-content; max-width: 100%; }
         pre.term .prompt { color: var(--term-green); user-select: none; }
         pre.term .cmd { color: var(--term-amber); }
         pre.term .cmt { color: var(--term-dim); }
@@ -238,11 +245,12 @@
 
         .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
         @media (max-width: 860px) { .grid-3 { grid-template-columns: 1fr; } }
-        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 22px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 22px; min-width: 0; }
         .card h3 { font-size: 1.04rem; margin-bottom: 8px; color: var(--ink); }
         .card p { font-size: 0.92rem; color: var(--text-muted); margin-bottom: 12px; }
         .card code.path { display: inline-block; font-size: 0.79rem; color: var(--link); background: var(--accent-soft); border-radius: 6px; padding: 2px 8px; margin-bottom: 12px; max-width: 100%; overflow-wrap: anywhere; }
         .learn-more { font-size: 0.9rem; font-weight: 600; }
+        .grid-3, .fits .card, p code { overflow-wrap: anywhere; }
 
         /* ---------- fit check ---------- */
         .fits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
@@ -250,6 +258,19 @@
         .card ul { padding-left: 1.15rem; color: var(--text-muted); font-size: 0.92rem; margin-top: 4px; }
         .card li { margin-bottom: 7px; }
         .card li::marker { color: var(--signal); }
+
+        /* ---------- tier ramp ---------- */
+        .tiers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+        @media (max-width: 860px) { .tiers { grid-template-columns: 1fr; } }
+        .tier { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 22px; min-width: 0; display: flex; flex-direction: column; }
+        .tier .tier-tag { font-size: 0.76rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--signal); margin-bottom: 10px; }
+        .tier h3 { font-size: 1.1rem; color: var(--ink); margin-bottom: 8px; }
+        .tier p { font-size: 0.92rem; color: var(--text-muted); margin-bottom: 12px; }
+        .tier ul { padding-left: 1.15rem; color: var(--text-muted); font-size: 0.9rem; margin-top: 2px; }
+        .tier li { margin-bottom: 7px; }
+        .tier li::marker { color: var(--accent); }
+        .tier .tier-link { margin-top: auto; padding-top: 14px; font-size: 0.9rem; font-weight: 600; }
+        .tier.hot { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-soft); }
 
         /* ---------- stats ---------- */
         .stats { background: var(--bg-card); border-block: 1px solid var(--border); padding: 38px 0; }
@@ -283,6 +304,8 @@
         .fx-reveal.fx-d1 { transition-delay: 0.08s; } .fx-reveal.fx-d2 { transition-delay: 0.16s; }
         .fx-reveal.fx-d3 { transition-delay: 0.24s; } .fx-reveal.fx-d4 { transition-delay: 0.32s; }
         .fx-reveal.fx-d5 { transition-delay: 0.4s; }
+
+        img, svg, canvas, video { max-width: 100%; }
 
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
@@ -336,16 +359,16 @@
             <p class="lede">
                 Vant gives any AI agent a brain: <strong>markdown memory files in your own repository</strong>.
                 Read when a session opens, written before it closes, inherited every time after. Git history becomes the memory
-                lineage. No database, no lock-in, readable with <strong>cat</strong>. Humans and agents both
-                live here, and both are first-class: whether you are the one typing the commands or the one
-                executing them, welcome.
+                lineage. No database, no lock-in, readable with <strong>cat</strong>. Start with one agent on your laptop —
+                scale the same files up to a crew, then to installs talking across the network. Whether you are the one
+                typing the commands or the one executing them, welcome.
             </p>
 
             <div class="dual-cta">
                 <div class="cta-card">
                     <h2>The 5 minute path</h2>
-                    <p>Clone, start, meet your brain. Existing layouts migrate automatically.</p>
-                    <pre class="term"><code id="c-install"><span class="prompt">$</span> git clone https://github.com/dhaupin/vant.git && cd vant
+                    <p>Clone, start, meet your brain. No account, no cloud to configure.</p>
+                    <pre class="term"><code id="c-install"><span class="prompt">$</span> git clone https://github.com/dhaupin/vant.git &amp;&amp; cd vant
 <span class="prompt">$</span> npm ci
 <span class="prompt">$</span> <span class="cmd">vant</span> start
 <span class="prompt">$</span> <span class="cmd">vant</span> onboard</code><button class="copy-btn" type="button" data-copy="c-install" aria-label="Copy install commands">Copy</button></pre>
@@ -353,7 +376,7 @@
                 </div>
                 <div class="cta-card">
                     <h2>For agents</h2>
-                    <p>One command serves the brain as MCP tools. The repo AGENTS.md tells your agent exactly what to do.</p>
+                    <p>One command serves the brain as MCP tools. Any MCP client connects; files and REST work for everything else.</p>
                     <pre class="term"><code id="c-mcp"><span class="prompt">$</span> <span class="cmd">vant</span> mcp
 <span class="cmt"># MCP server on 127.0.0.1:3457</span></code><button class="copy-btn" type="button" data-copy="c-mcp" aria-label="Copy MCP command">Copy</button></pre>
                     <p style="margin: 13px 0 0;"><a class="btn outline" href="https://docs.creadev.org/vant/getting-started/agent-onboarding">Agent onboarding</a></p>
@@ -361,7 +384,7 @@
             </div>
             <p class="drag-hint">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 3 4 7l4 4M4 7h16M16 21l4-4-4-4M20 17H4"/></svg>
-                The lattice is your agent's memory graph. Drag it. Every pulse is a lesson landing in the brain.
+                The lattice is your agent's memory graph. Drag it. Every amber pulse is a lesson landing in the brain.
             </p>
         </div>
     </header>
@@ -375,8 +398,8 @@
                     <div class="card fx-reveal">
                         <h3>Open the brain</h3>
                         <p>A session begins by reading what earlier sessions left behind: identity, goals, lessons, errors. Whoever starts next arrives already knowing things.</p>
-                        <pre class="term"><code id="c-open"><span class="prompt">$</span> <span class="cmd">vant</span> migrate --status
-<span class="prompt">$</span> <span class="cmd">vant</span> start</code><button class="copy-btn" type="button" data-copy="c-open" aria-label="Copy session start commands">Copy</button></pre>
+                        <pre class="term"><code id="c-open"><span class="prompt">$</span> <span class="cmd">vant</span> start
+<span class="prompt">$</span> <span class="cmd">vant</span> onboard wake</code><button class="copy-btn" type="button" data-copy="c-open" aria-label="Copy session start commands">Copy</button></pre>
                     </div>
                     <div class="card fx-reveal fx-d1">
                         <h3>Work with memory</h3>
@@ -401,15 +424,15 @@
                 <div class="loop">
                     <div class="card fx-reveal">
                         <h3>Install and start</h3>
-                        <p>One global install. vant start checks the brain layout, runs health checks, and imports any older single-brain layout it finds.</p>
-                        <pre class="term"><code id="c-fm1"><span class="prompt">$</span> git clone https://github.com/dhaupin/vant.git && cd vant &amp;&amp; npm ci
+                        <p>One clone, one install. vant start checks the brain layout and runs health checks before it hands over.</p>
+                        <pre class="term"><code id="c-fm1"><span class="prompt">$</span> git clone https://github.com/dhaupin/vant.git &amp;&amp; cd vant &amp;&amp; npm ci
 <span class="prompt">$</span> <span class="cmd">vant</span> start</code><button class="copy-btn" type="button" data-copy="c-fm1" aria-label="Copy install and start">Copy</button></pre>
                     </div>
                     <div class="card fx-reveal fx-d1">
                         <h3>Meet the brain</h3>
                         <p>It is just markdown. Read it, edit it, keep your own notes in it. vant onboard walks the files for you.</p>
                         <pre class="term"><code id="c-fm2"><span class="prompt">$</span> <span class="cmd">vant</span> onboard
-<span class="prompt">$</span> cat models/private/vant/identity.md</code><button class="copy-btn" type="button" data-copy="c-fm2" aria-label="Copy onboard commands">Copy</button></pre>
+<span class="prompt">$</span> cat models/public/vant/identity.md</code><button class="copy-btn" type="button" data-copy="c-fm2" aria-label="Copy onboard commands">Copy</button></pre>
                     </div>
                     <div class="card fx-reveal fx-d2">
                         <h3>Write the first lesson</h3>
@@ -423,24 +446,23 @@
 
         <section>
             <div class="container">
-                <div class="sec-head fx-reveal"><span class="sec-idx">03</span><h2>Bringing your own agents</h2></div>
-                <p class="sub fx-reveal">Any agent that can read a file or speak MCP can use Vant. Nothing vendor-specific to install.</p>
+                <div class="sec-head fx-reveal"><span class="sec-idx">03</span><h2>Works with your agents, not against them</h2></div>
+                <p class="sub fx-reveal">Any agent that can read a file or speak MCP can use Vant. Bring the model and the framework you like; the memory layer does not care.</p>
                 <div class="grid-3">
                     <div class="card fx-reveal">
-                        <h3>The contract is a file</h3>
-                        <p>AGENTS.md in the repo root is the whole protocol: who the agent is, what to read when it starts, what to write before it stops. Copy it into any project and point your agent at it.</p>
-                        <code class="path">AGENTS.md</code><br>
-                        <a href="https://docs.creadev.org/vant/getting-started/agent-onboarding" class="learn-more">Agent onboarding →</a>
+                        <h3>MCP in one command</h3>
+                        <p>vant mcp auto-wires the module surface into JSON-RPC tools on 127.0.0.1:3457. Any MCP client connects — Claude, GPT, local models, homegrown runners.</p>
+                        <a href="https://docs.creadev.org/vant/runtime/mcp" class="learn-more">MCP reference →</a>
                     </div>
                     <div class="card fx-reveal fx-d1">
-                        <h3>MCP in one command</h3>
-                        <p>vant mcp auto-wires the module surface into JSON-RPC tools on 127.0.0.1:3457. Any MCP client connects. The REST server on 3456 covers everything else.</p>
-                        <a href="https://docs.creadev.org/vant/runtime/mcp" class="learn-more">MCP reference →</a>
+                        <h3>Three doors, one brain</h3>
+                        <p>MCP for agents, REST for services and CI, the CLI for you. Same rules everywhere; the brain files remain plain markdown you can open in an editor.</p>
+                        <a href="https://docs.creadev.org/vant/reference/rest-api" class="learn-more">REST API →</a>
                     </div>
                     <div class="card fx-reveal fx-d2">
                         <h3>Crews, not just one</h3>
-                        <p>Agents share one install on their own branches, each with a named brain context; merge-by-PR keeps the shared memory safe while they work. The roster size is a config (`agents.maxAgents`, default 10).</p>
-                        <a href="https://docs.creadev.org/vant/multi-agent/" class="learn-more">Multi-agent crew →</a>
+                        <p>Agents share one install on their own branches, each with a named brain context; merge-by-PR keeps the shared memory safe while they work.</p>
+                        <a href="https://docs.creadev.org/vant/multi-agent/agents" class="learn-more">Multi-agent crew →</a>
                     </div>
                 </div>
             </div>
@@ -459,7 +481,7 @@
                     </div>
                     <div class="card fx-reveal fx-d1">
                         <h3>The memory store</h3>
-                        <p>Key-value state and documents with TTL, written during the session. Sandbox-gated, atomic, per-brain scoped. Memory is the flagship use: underneath is a general-purpose store, so sessions, caches, blackboards, or whatever else you build all fit.</p>
+                        <p>Key-value state and documents with TTL, written during the session. Sandbox-gated, atomic, per-brain scoped. Underneath it is a general store: sessions, caches, blackboards, whatever you build.</p>
                         <code class="path">vant learn &lt;key&gt; &lt;content&gt;</code><br>
                         <a href="https://docs.creadev.org/vant/memory/memory-store" class="learn-more">Memory store →</a>
                     </div>
@@ -496,23 +518,41 @@
 
         <section>
             <div class="container">
-                <div class="sec-head fx-reveal"><span class="sec-idx">06</span><h2>Built on itself</h2></div>
-                <p class="sub fx-reveal">Vant develops Vant. Coding agents open sessions on this repo, work, and close out their learnings into the brain. The project history is the demo.</p>
-                <div class="grid-3">
-                    <div class="card fx-reveal">
-                        <h3>Agents wrote the docs</h3>
-                        <p>Docs go through scripted linters agents built: a voice gate, a link gate, a frontmatter check. Contributors run the same gates with npm run lint:docs.</p>
-                        <a href="https://docs.creadev.org/vant/getting-started/contributing" class="learn-more">Contributing →</a>
+                <div class="sec-head fx-reveal"><span class="sec-idx">06</span><h2>One agent today, a fleet tomorrow</h2></div>
+                <p class="sub fx-reveal">Everyone starts in the same place: one brain, one repo. How far you go is an option, not a migration.</p>
+                <div class="tiers">
+                    <div class="tier fx-reveal">
+                        <span class="tier-tag">Level 1</span>
+                        <h3>Solo builder</h3>
+                        <p>One agent, your laptop, memory as files.</p>
+                        <ul>
+                            <li>Plain markdown you can read and edit</li>
+                            <li>CLI onboarding and search out of the box</li>
+                            <li>No cloud account, nothing to host</li>
+                        </ul>
+                        <span class="tier-link"><a href="https://docs.creadev.org/vant/getting-started/faq">Start here →</a></span>
                     </div>
-                    <div class="card fx-reveal fx-d1">
-                        <h3>Sessions hand off in labs/</h3>
-                        <p>Each working session leaves notes for the next: findings, decisions, open threads. When a session crashes, the next one picks up mid-task instead of starting over.</p>
-                        <a href="https://github.com/dhaupin/vant/tree/main/labs" class="learn-more">See the handoffs →</a>
+                    <div class="tier hot fx-reveal fx-d1">
+                        <span class="tier-tag">Level 2</span>
+                        <h3>Crew</h3>
+                        <p>Several agents, one install, dashboard optional.</p>
+                        <ul>
+                            <li>Branch-per-agent isolation with merge reviews</li>
+                            <li>Named brain contexts and trust levels per agent</li>
+                            <li>The web dashboard watches sessions live</li>
+                        </ul>
+                        <span class="tier-link"><a href="https://docs.creadev.org/vant/multi-agent/agents">Run a crew →</a></span>
                     </div>
-                    <div class="card fx-reveal fx-d2">
-                        <h3>This page is agent work</h3>
-                        <p>The lander is a single HTML file, every number on it verified against the code, built and shipped in a session that started by reading AGENTS.md.</p>
-                        <a href="https://github.com/dhaupin/vant" class="learn-more">Read the history →</a>
+                    <div class="tier fx-reveal fx-d2">
+                        <span class="tier-tag">Level 3</span>
+                        <h3>Fleet &amp; mesh</h3>
+                        <p>Installs across machines, cities, providers.</p>
+                        <ul>
+                            <li>Gated relay surfaces between installs</li>
+                            <li>Encrypted carriers hand memory around</li>
+                            <li>One operator view across the whole org</li>
+                        </ul>
+                        <span class="tier-link"><a href="https://docs.creadev.org/vant/operations/federation-playbooks">See the mesh →</a></span>
                     </div>
                 </div>
             </div>
@@ -522,42 +562,66 @@
             <div class="container stat-row">
             <div class="stat"><div class="stat-value" data-count="3">3</div><div class="stat-label">memory systems</div></div>
             <div class="stat"><div class="stat-value" data-count="99">99</div><div class="stat-label">CLI commands</div></div>
-            <div class="stat"><div class="stat-value" data-count="132">132</div><div class="stat-label">lib modules</div></div>
-            <div class="stat"><div class="stat-value" data-count="118">118</div><div class="stat-label">doc pages</div></div>
-            <div class="stat"><div class="stat-value" data-count="169">169</div><div class="stat-label">test suites</div></div>
+            <div class="stat"><div class="stat-value" data-count="182">182</div><div class="stat-label">lib modules</div></div>
+            <div class="stat"><div class="stat-value" data-count="125">125</div><div class="stat-label">doc pages</div></div>
+            <div class="stat"><div class="stat-value" data-count="217">217</div><div class="stat-label">test suites</div></div>
             <div class="stat"><div class="stat-value">v0.8.6</div><div class="stat-label">MIT licensed</div></div>
             </div>
         </div>
 
         <section>
             <div class="container">
-                <div class="sec-head fx-reveal"><span class="sec-idx">07</span><h2>Runtime underneath</h2></div>
-                <p class="sub fx-reveal">Memory is the product. The runtime makes it safe to run unattended.</p>
+                <div class="sec-head fx-reveal"><span class="sec-idx">07</span><h2>The enterprise mesh, already in the box</h2></div>
+                <p class="sub fx-reveal">This is not a roadmap slide. The distributed pieces ship today, with security and failure modes designed the same as the local ones.</p>
                 <div class="grid-3">
                     <div class="card fx-reveal">
-                        <h3>Security chain</h3>
-                        <p>Sandbox capabilities, input validation, rate limiting, escrow approval. Every brain operation passes the chain; denials are coded, not silent.</p>
+                        <h3>Relay network</h3>
+                        <p>Installs expose a gated relay surface: hop-by-hop authorization with timing-safe keys, bodies as encrypted envelopes. No key, no surface — fail-closed by construction.</p>
+                        <a href="https://docs.creadev.org/vant/operations/relay" class="learn-more">Relay ops →</a>
+                    </div>
+                    <div class="card fx-reveal fx-d1">
+                        <h3>Encrypted carriers</h3>
+                        <p>Memory travels as sealed stones — encrypted packets that ride images and files between installs, signatures verified on arrival. Whole brains included.</p>
+                        <a href="https://docs.creadev.org/vant/memory/stego" class="learn-more">Carrier transport →</a>
+                    </div>
+                    <div class="card fx-reveal fx-d2">
+                        <h3>Federation playbooks</h3>
+                        <p>Consensus for shared decisions, settlement for the ledger, era bookkeeping for org lifecycles. The written runbooks for running several installs as one org.</p>
+                        <a href="https://docs.creadev.org/vant/operations/federation-playbooks" class="learn-more">Federation →</a>
+                    </div>
+                    <div class="card fx-reveal">
+                        <h3>Fail-closed security chain</h3>
+                        <p>Sandbox capabilities, input validation, rate limiting, escrow approval on every brain operation. Refusals come back as typed codes — never silent half-writes.</p>
                         <a href="https://docs.creadev.org/vant/security/" class="learn-more">Security →</a>
                     </div>
                     <div class="card fx-reveal fx-d1">
-                        <h3>Crash safety</h3>
-                        <p>A write-ahead journal and atomic writes. A crash mid-write leaves a recoverable journal, never torn memory.</p>
+                        <h3>Crash-safe storage</h3>
+                        <p>A write-ahead journal with atomic writes: a crash mid-write leaves a recoverable journal, never torn memory. Locks are cross-process, so two agents never double-write.</p>
                         <a href="https://docs.creadev.org/vant/operations/storage" class="learn-more">Storage →</a>
                     </div>
                     <div class="card fx-reveal fx-d2">
-                        <h3>Multi-brain and crews</h3>
-                        <p>Named brain contexts with a stack. Branch-per-agent workflows. Trust levels decide how much each generation inherits.</p>
-                        <a href="https://docs.creadev.org/vant/multi-agent/" class="learn-more">Multi-agent →</a>
+                        <h3>Audit and access</h3>
+                        <p>Every operation leaves a ledger trail. Multi-guest auth with role-scoped access, row-level policies for shared state, and succession trust levels for what each generation may do alone.</p>
+                        <a href="https://docs.creadev.org/vant/security/multi-guest-auth" class="learn-more">Access control →</a>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="container">
+                <div class="sec-head fx-reveal"><span class="sec-idx">08</span><h2>Runs anywhere you run Git</h2></div>
+                <p class="sub fx-reveal">The memory layer is boring on purpose: Node.js, your filesystem, and a Git remote.</p>
+                <div class="grid-3">
                     <div class="card fx-reveal">
-                        <h3>Horcrux</h3>
-                        <p>A whole brain embedded in an image, encrypted. Cold backups, machine-to-machine transfer, restore anywhere.</p>
-                        <a href="https://docs.creadev.org/vant/memory/horcrux" class="learn-more">Horcrux →</a>
-                    </div>
-                    <div class="card fx-reveal fx-d1">
                         <h3>Any Git provider</h3>
                         <p>GitHub, GitLab, Bitbucket, self-hosted. Sync, rebase, and conflict detection work the same everywhere.</p>
                         <a href="https://docs.creadev.org/vant/integrations/" class="learn-more">Integrations →</a>
+                    </div>
+                    <div class="card fx-reveal fx-d1">
+                        <h3>Horcrux backups</h3>
+                        <p>A whole brain embedded in an image, encrypted. Cold backups, machine-to-machine transfer, restore anywhere.</p>
+                        <a href="https://docs.creadev.org/vant/memory/horcrux" class="learn-more">Horcrux →</a>
                     </div>
                     <div class="card fx-reveal fx-d2">
                         <h3>Headless and Docker</h3>
@@ -577,7 +641,7 @@
 
         <section>
             <div class="container">
-                <div class="sec-head fx-reveal"><span class="sec-idx">08</span><h2>Where Vant fits</h2></div>
+                <div class="sec-head fx-reveal"><span class="sec-idx">09</span><h2>Where Vant fits</h2></div>
                 <p class="sub fx-reveal">Saying what Vant is not, because your time matters more than our conversion rate.</p>
                 <div class="fits">
                     <div class="card fx-reveal">
@@ -603,7 +667,7 @@
 
         <section>
             <div class="container faq">
-                <div class="sec-head fx-reveal"><span class="sec-idx">09</span><h2>Questions agents actually ask</h2></div>
+                <div class="sec-head fx-reveal"><span class="sec-idx">10</span><h2>Questions agents actually ask</h2></div>
                 <p class="sub fx-reveal">The same questions your agent will ask on its first session, answered.</p>
                 <details class="fx-reveal">
                     <summary>What is a brain in Vant?</summary>
@@ -625,26 +689,28 @@
                 </details>
                 <details class="fx-reveal">
                     <summary>How do agents connect?</summary>
-                    <p>Through MCP: start the server with vant mcp and it auto-wires the module surface into JSON-RPC tools. Agents can also use the CLI or read the brain files directly.</p>
+                    <p>Through MCP: start the server with vant mcp and it auto-wires the module surface into JSON-RPC tools. Agents can also use the CLI, the REST API, or read the brain files directly.</p>
                     <a href="https://docs.creadev.org/vant/runtime/mcp" class="learn-more">Learn more →</a>
                 </details>
                 <details class="fx-reveal">
                     <summary>Can multiple agents share one install?</summary>
-                    <p>Yes. Each agent gets a branch and a named brain context. Branch-per-agent isolation with merge-by-PR keeps concurrent work safe.</p>
-                    <a href="https://docs.creadev.org/vant/multi-agent/" class="learn-more">Learn more →</a>
+                    <p>Yes. Each agent gets a branch and a named brain context, so concurrent work stays isolated and shared memory merges by pull request.</p>
+                    <a href="https://docs.creadev.org/vant/multi-agent/agents" class="learn-more">Learn more →</a>
                 </details>
                 <details class="fx-reveal">
-                    <summary>Can I use Vant without an agent?</summary>
-                    <p>Yes. The CLI works on its own: learn, search, onboard, health. The memory is plain files, so you can also read and edit them directly.</p>
+                    <summary>Can I run Vant across several machines?</summary>
+                    <p>Yes. Multiple installs connect through gated relay surfaces, and encrypted carriers hand memory between them. Federation playbooks cover the multi-install topologies, from two pods to a full org.</p>
+                    <a href="https://docs.creadev.org/vant/operations/relay" class="learn-more">Learn more →</a>
                 </details>
                 <details class="fx-reveal">
                     <summary>What stops an agent from writing bad lessons?</summary>
                     <p>Lessons land in git, so they arrive as reviewable diffs and revert like any file. Succession trust levels decide how much each agent generation may do unattended.</p>
+                    <a href="https://docs.creadev.org/vant/multi-agent/succession" class="learn-more">Learn more →</a>
                 </details>
                 <details class="fx-reveal">
-                    <summary>What happens when I upgrade from an old single-brain layout?</summary>
-                    <p>vant start detects the old layout and imports it automatically into the multi-brain layout. Detection is content-based and idempotent, and nothing is lost.</p>
-                    <a href="https://docs.creadev.org/vant/getting-started/setup" class="learn-more">Learn more →</a>
+                    <summary>How safe is it to run unattended?</summary>
+                    <p>Every memory operation passes a security chain - sandbox capabilities, input validation, rate limiting, escrow approval - and failures refuse with typed codes instead of half-writing state. Storage is write-ahead journaled and atomic.</p>
+                    <a href="https://docs.creadev.org/vant/security/" class="learn-more">Learn more →</a>
                 </details>
                 <details class="fx-reveal">
                     <summary>Does Vant cost money?</summary>
@@ -660,7 +726,7 @@
         <section class="soul" style="padding-top: 20px;">
             <div class="container">
                 <blockquote class="fx-reveal">Pick a door. <span class="fx-word">Both are open.</span></blockquote>
-                <p class="fx-reveal fx-d1" style="margin-bottom: 28px;">Five minutes for you, one command for your agent, and the memory is yours either way.</p>
+                <p class="fx-reveal fx-d1" style="margin-bottom: 28px;">Five minutes for you, one command for your agent — and the memory is yours either way.</p>
                 <p class="fx-reveal fx-d2">
                     <a class="btn" href="https://docs.creadev.org/vant/getting-started/quick-start">Start the five minutes</a>
                     <a class="btn outline" href="https://docs.creadev.org/vant/getting-started/agent-onboarding" style="margin-left: 10px;">Send your agent</a>
@@ -811,7 +877,6 @@
                 const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
                 camera.position.set(0, 0, 13);
 
-                // palette follows the page theme
                 const palette = {
                     node: 0x2dd4a0, edge: 0x3a4552, signal: 0xe8a33d,
                     core: 0x2dd4a0, fog: 0x0b0d10
@@ -988,7 +1053,7 @@
                     if (!document.hidden && !reduced) requestAnimationFrame(frame);
                 });
             } catch (err) {
-                // no WebGL or CDN blocked: the CSS gradient veil already reads fine. Stay quiet.
+                // no WebGL: the CSS gradient veil already reads fine. Stay quiet.
                 host.style.display = 'none';
             }
         }
