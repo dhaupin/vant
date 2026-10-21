@@ -71,7 +71,7 @@ escape `models/private/<cleaned>/`).
 | Role | Capabilities (sandbox vocabulary) | Meant for |
 |---|---|---|
 | `observer` | read, load, list | read-only watcher; a malicious client cannot mutate |
-| `human` | read, load, list, write | the operator's dashboard UI |
+| `human` | read, load, list, write, spawn | the operator's dashboard UI (the #185 acceptance: the dashboard assigns and SPAWNS work) |
 | `agent` | read, load, list, write, exec, spawn | a working peer agent |
 
 - `scopeOwner` is a `lib/scope.js` owner ref (`org:`/`dept:`/`team:`/`agent:`,
