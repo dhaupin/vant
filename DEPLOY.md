@@ -386,7 +386,10 @@ node -e "console.log(require('./lib/sandbox').canRead())"   # Direct sandbox pro
 ## 12. Frontends on Cloudflare Pages (set up YOUR dashboard now)
 
 The web frontends (see `labs/prd-web.md`) deploy to Cloudflare Pages.
-Each frontend is its OWN Pages project with its OWN subdomain.
+Each frontend is its OWN Pages project with its OWN subdomain. Three of
+them exist: the static **home page** (`vant.creadev.org`, served from
+`web/home/`, checked in as-is - no build step), the dashboard
+(`brain.creadev.org`, this section), and the relay (its own P6 project).
 
 ### 12.1 Setup walkthrough (dashboard, do this while code lands)
 
@@ -486,8 +489,11 @@ vant config set mcp.serveWeb web/dashboard   # or env VANT_MCP_SERVE_WEB
 Honest mechanics (pins: `test/pod-serve-web.test.js`):
 
 - The value is a frontend DIRECTORY (e.g. `web/dashboard`) whose `dist/`
-  build must exist. Missing `dist/index.html` = serving stays OFF with a
-  loud warning - the door serves nothing it did not build.
+  build stays OFF with a loud warning - the door serves nothing it did
+  not build. (Example: `VANT_MCP_SERVE_WEB=web/dashboard` serves the
+  dashboard build. The home frontend ships its static index.html
+  checked in with no build, so the door never serves it - point
+  serveWeb at a built frontend.)
 - The MCP door keeps every owned route: `/mcp/exec`, `/mcp/events`,
   `/mcp/tools`, `/health`, and tool routes all answer first. Static GETs
   only; POSTs unknown to the door keep the same 404 JSON as before.

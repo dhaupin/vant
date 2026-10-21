@@ -19,8 +19,13 @@ budgets. **The React dashboard is "a guest identity with a browser."**
 This PRD defines WHERE frontends live, HOW they reach the pod, WHAT each
 tier of the app does, and the phase plan. Owner directives recorded:
 
-- `/dist` stays the **Cloudflare Pages lander** (it currently deploys as
-  the single marketing page on `vant.creadev.org`; it "isn't doing much").
+- (pass 321, owner override recorded 2026-10-21) The home page that lived
+  at `/dist` now lives at **`web/home`**, still the **Cloudflare Pages
+  home page** deploying the marketing surface on `vant.creadev.org`.
+  Same owner directive, new path: it was never right that the public
+  site sat OUTSIDE the `web/` contract while the PRD told everyone
+  frontends live ONLY in `web/<app>`. It grows into a React system for
+  users, living with relay/kit/dashboard under this same module frame.
 - Frontends live in a dedicated top-level directory (`/web` recommended;
   `/app`, `/src` rejected - see 2.2), and every frontend MUST sit in its
   own SUBDIRECTORY within that folder, so an install base can run several
@@ -35,7 +40,8 @@ web/                    <- the frontends ONLY; the Node pod never requires it
   dashboard/            <- app 1: the admin/observer dashboard (this PRD)
     src/                <- app source (React + Vite + TS)
     package.json        <- app-local dependencies and scripts
-    dist/               <- build OUTPUT (deploy artifact, gitignored)
+    dist/               <- build OUTPUT, gitignored (web/home ships its
+                         static index.html checked in; no build today)
   relay/                <- app 2 (P6, prd-relay.md 4.0): the PURE relay,
                            hostable SOLO without the full dashboard
   kit/                  <- the shared-kit SOURCE + vendoring pins (P6;
@@ -87,11 +93,18 @@ individually.
 
 ### 2.5 Relationship to `/dist`
 
-- `/dist/index.html` remains the LANDER artifact checked into the repo
-  for the Cloudflare Pages project. The dashboard is a DIFFERENT app
-  with its own artifact; `/dist` does not become a dumping ground for
-  frontend builds. The relay (app 2, P6) deploys as its OWN Pages
-  project (relay.creadev.org per the owner subdomain pattern).
+- (pass 321) `web/home/index.html` is the HOME artifact checked into
+  the repo for the Cloudflare Pages project - the pre-321 site checked
+  in as `/dist/index.html` git-mv'd here, history-preserving. The
+  hardcoded gate moved with it: `scripts/check-home.js` (same six
+  checks, walks web/home/*.html), packaging as `npm run lint:home`,
+  wired into test.yml as the `web/home gate` step. The dashboard is a
+  DIFFERENT app with its own artifact; `web/home` does not become a
+  dumping ground for frontend builds (when it grows a Vite pipeline,
+  its build lands in `web/home/dist/` - gitignored by the standing
+  `web/*/dist/` rule - and the Pages project gains a build command).
+  The relay (app 2, P6) deploys as its OWN Pages project
+  (relay.creadev.org per the owner subdomain pattern).
 - The lander gains ONE new link "Dashboard" that points at whatever
   deploy URL the dashboard project gets (static link only; no build
   coupling).

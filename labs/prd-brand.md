@@ -37,7 +37,7 @@ purposes only**. It is remembered internally; it does not appear in code,
 docs, the lander, or the README.
 
 - Remove existing instances from: docs/index.md, README.md tagline,
-  dist/index.html (title/meta/hero), any docs body text.
+  web/home/index.html (title/meta/hero), any docs body text.
 - The name is simply **Vant**. Where an expansion is legally required in
   the future (trademark filing, licensing), it gets pulled from this PRD,
   not re-derived.
@@ -96,7 +96,7 @@ means the thing reading the brain; "you" means whoever operates it.
 
 | Surface | Voice intensity |
 |---------|-----------------|
-| dist/index.html lander | Tightest. Hero under 30 words. Every section scannable. |
+| web/home/index.html (home page) | Tightest. Hero under 30 words. Every section scannable. |
 | docs/index.md | Same claims as lander, one notch more detail. |
 | README.md | GitHub-native. Feature table, quick start, upgrade path. |
 | docs/getting-started/* | Most procedural. Zero marketing. |

@@ -19,7 +19,7 @@ audiences throughout.
 **Channels (both deploy automatically on push to main):**
 - docs site: Jekyll + custom menu/search layer, frontmatter-driven.
   https://docs.creadev.org/vant/ (GitHub Pages)
-- lander: single dist/index.html. https://vant.creadev.org (Cloudflare Pages)
+- home: single web/home/index.html. https://vant.creadev.org (Cloudflare Pages)
 
 ## 2. Positioning hierarchy (locked)
 

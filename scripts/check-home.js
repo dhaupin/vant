@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 /**
- * dist/ lander gate (pass 150).
+ * web/ home gate (pass 150, moved pass 321).
  *
- * dist/index.html is the public lander (vant.creadev.org) and sits OUTSIDE
- * the docs lint scope (check-docs-style/check-docs-links walk docs/*.md
- * only). That gap let real fiction ship twice: the `npm install -g vant`
- * wrong-package trap re-seeded in the hero terminal + HowTo JSON-LD
- * (uprooted again in pass 149), and a stale stat row (93 CLI commands etc.)
- * survived four passes. This gate closes the blind spot.
+ * web/home/index.html is the public home page (vant.creadev.org) and sits
+ * OUTSIDE the docs lint scope (check-docs-style/check-docs-links walk
+ * docs/*.md only). That gap let real fiction ship twice: the `npm install
+ * -g vant` wrong-package trap re-seeded in the hero terminal + HowTo
+ * JSON-LD (uprooted again in pass 149), and a stale stat row survived four
+ * passes. This gate closes the blind spot.
  *
- * Checks, on every *.html under dist/:
+ * Checks, on every *.html under web/home/:
  *   1. Local fragments     href="#x" must match an id="x" in the same file
  *   2. Local assets        href/src not http(s)# must exist on disk (vendor/, images, /-rooted)
  *   3. Docs links          https://docs.creadev.org/vant/<p> must match a real
@@ -26,7 +26,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const DIST = path.join(ROOT, 'dist');
+const HOME = path.join(ROOT, 'web', 'home');
 const DOCS = path.join(ROOT, 'docs');
 
 const problems = [];
@@ -48,17 +48,17 @@ const permalinks = new Set();
     }
 })(DOCS);
 
-// ---- walk dist/*.html ----
+// ---- walk web/home/*.html ----
 const landing = [];
-(function walkDist(d) {
+(function walkHome(d) {
     for (const f of fs.readdirSync(d, { withFileTypes: true })) {
         const p = d + '/' + f.name;
-        if (f.isDirectory()) walkDist(p);
+        if (f.isDirectory()) walkHome(p);
         else if (f.name.endsWith('.html')) landing.push(p);
     }
-})(DIST);
+})(HOME);
 if (landing.length === 0) {
-    console.log('DIST LANDER: no .html files under dist/ — nothing to check. PASS (empty).');
+    console.log('HOME PAGE: no .html files under web/home/ — nothing to check. PASS (empty).');
     process.exit(0);
 }
 
@@ -114,8 +114,8 @@ for (const file of landing) {
 }
 
 if (problems.length) {
-    console.error(`DIST LANDER: FAIL (${problems.length} issue${problems.length === 1 ? '' : 's'})`);
+    console.error(`HOME PAGE: FAIL (${problems.length} issue${problems.length === 1 ? '' : 's'})`);
     for (const p of problems) console.error('  ' + p);
     process.exit(1);
 }
-console.log(`DIST LANDER: PASS (${landing.length} file${landing.length === 1 ? '' : 's'}, ${permalinks.size} docs permalinks)`);
+console.log(`HOME PAGE: PASS (${landing.length} file${landing.length === 1 ? '' : 's'}, ${permalinks.size} docs permalinks)`);

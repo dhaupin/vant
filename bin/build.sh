@@ -7,7 +7,11 @@
 # package.json and absent files are skipped. The output dir is wiped first
 # so repeat builds don't accumulate stale files.
 
-OUTPUT="dist/vant-bundle"
+# (pass 321) The release bundle used to write to dist/vant-bundle/ - the
+# top-level dist/ folder did double duty as public home artifact AND
+# distribution sink until the home page moved to web/home. The bundle now
+# lands in build/ (gitignored) so the two jobs never share a folder again.
+OUTPUT="build/vant-bundle"
 rm -rf "$OUTPUT"
 mkdir -p "$OUTPUT"
 
