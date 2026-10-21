@@ -27,6 +27,7 @@ Topics are identified by a topic name (e.g. `forum-q3-call-abc123`):
 | `getStats()` | sync | Voting stats |
 | `hasVoted(topic, agentId)` / `verify(...)` / `checksum(topic)` | integrity |
 | `peerVerify(...)` | cross-node vote verification |
+| `on(event, cb)` / `emit(event, data)` | listener seam for connect events |
 | `exportTopic(topic)` / `mergeTopic(topic, data)` / `reapSynced()` | agora-sync seams |
 
 ## Topic States

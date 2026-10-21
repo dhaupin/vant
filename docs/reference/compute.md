@@ -58,6 +58,10 @@ const s = compute.status();
 | `compute:invoking` | Before exec |
 | `compute:invoked` | After completion |
 
+Also exported: `stopSidecars()` (tear the language sidecars down), the
+`Compute` class, and the multibrain config seams
+`getBrainComputeConfig`/`setBrainComputeConfig`/`getStackComputeConfigs`.
+
 ---
 
 ## Related

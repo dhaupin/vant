@@ -23,7 +23,7 @@ Styling utility for CLI/UI output.
 | `ok` | `✓` green check |
 | `fail` | `✗` red X |
 | `warn` | `⚠` yellow |
-| `info` | ℹ blue info |
+| `info(text)` | Blue info shortcut - shares its name with the `ℹ` icon and shadows it in the export list (JS last-key-wins) |
 
 ## Modes
 

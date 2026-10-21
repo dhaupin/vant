@@ -34,7 +34,7 @@ Stream functions are stream-scoped - the stream name comes first:
 ```javascript
 const stream = require('vant/lib/stream');
 
-// Enqueue a task on a named stream
+// Enqueue a task on a named stream (auto-creates it if new)
 await stream.enqueue('tasks', { type: 'task', data: { x: 1 } });
 
 // Poll the next job from that stream
@@ -51,7 +51,10 @@ const s = await stream.stats();
 // → { pending: 5, processing: 2, completed: 100 }
 ```
 
-Call `stream.init()` first (the module gates ops until initialized).
+There is no hard `init()` gate: `enqueue` auto-creates a stream by an
+unknown name, and the optional `stream.init()` just rehydrates
+previously persisted streams from the brain corpus into memory (call it
+if you need pre-existing streams before your own enqueues).
 Also exported: `create`/`deleteStream` (stream lifecycle), `peek`,
 `checkLease`, `load`, `info`, `watch(event, callback)`/`unwatch`
 (subscribe to stream events), and the multibrain `listStack`/`getStackStreamInfo`/

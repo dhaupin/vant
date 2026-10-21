@@ -146,5 +146,5 @@ Coordination patterns for multi-agent.
 ## Related
 
 - [Multi-Agent Guide](/vant/multi-agent/agents) - Full guide
-- [Lock API](/vant/reference/cli) - Lock module
-- [Branch API](/vant/reference/cli) - Branch module
+- [Locking](/vant/operations/locks) - the lock module deep-dive
+- [Branches](/vant/multi-agent/branches) - the branch API deep-dive
