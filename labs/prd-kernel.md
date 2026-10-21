@@ -51,14 +51,26 @@ The relationship, stated exactly:
    The gates above decide; the kernel decides HOW decisions become
    flow: sequenced, attested, census-backed, coherent.
 
-The designation the owner gave the failure mode it prevents: **FOEC,
-Flash Of Everything Content** — the opposite of FOUC one layer deeper.
-FOUC is unstyled content flashing on the way to style; FOEC is
-unmitigated everything flashing on the way to coherence: layers, state,
-carriers, all dumped at once, none of it sequenced or formed. The
-kernel's job is that no FOEC ever occurs: nothing spooky arrives
-unformed; consensus forms first, chain-reaction style, and only then
-does content flow.
+Design-language note (locked): the kernel deliberately reuses the
+PROJECT'S OWN vocabulary — neurons, consensus, zone, flow — not
+imported abstractions. No philosophy imported for garnish: concepts
+enter only when the libs already speak them. state.json already has
+neurons; consensus/ has ledgers; meditate-in-flow is an existing ritual
+verb. The kernel is where that vocabulary unifies, not where it begins.
+(The zone-based verdict concept referenced below descends from the
+existing meditate-in-flow/zen lineage, not from yoga.)
+
+**FOEC, Flash Of Everything Content** (owner framing, corrected same
+day): NOT a failure mode. A MODE — the opposite of FOUC one layer
+deeper. FOUC is unstyled content flashing on the way to style; FOEC is
+everything surfacing at once on the way to coherence — all layers, all
+state, all carriers up together, none of it sequenced *yet*. Whether a
+FOEC moment is good or bad is NOT the label's job: that judgment
+belongs to the kernel zone at runtime (the zone/license concept the
+kernel subsumes). Genesis hydration, stone restore, a heavy wake —
+those are legitimately FOEC-shaped moments. Failure is a runtime
+verdict, not a taxonomy entry: the kernel exhibits the mode, the zone
+attests whether it passed.
 
 ```
         kernel  (issues the invariants: census -> attest -> retire -> succeed)
