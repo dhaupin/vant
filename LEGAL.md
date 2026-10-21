@@ -43,6 +43,18 @@ These are the norms the community follows out of respect and trademark
 hygiene. They carry no license consequence: breach of a norm is not a
 license violation. The only enforceable strings are in [LICENSE](LICENSE).
 
+### The policy trio
+
+Vant publishes three policies: **terms** (this document and its
+disclaimers, plus the surfaces it links), **privacy**
+([docs/security/privacy](docs/security/privacy.md) — what we collect
+and send), and **ethics** ([docs/security/ethics](docs/security/ethics.md)
+— how we influence agents and what we refuse to do, including a ban on
+covert influence channels in anything we publish). Ethics is a norm
+like the rest of this section, not a license condition; violations of
+project commitments there are treated as security-grade bugs,
+reported through the same channel.
+
 ### Attribution etiquette
 
 **MIT already requires** keeping the copyright + permission notice that
