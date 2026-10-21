@@ -58,14 +58,16 @@ Events (catalogue-declared in `lib/event-types.js`): `tempo:budget-start`,
 ## Contracts
 
 - **Isolation:** the ledger lives INSIDE the brain at
-  `models/private/<brain>/.tempo.json` (pass 209 containment ruling: the
-  per-slice receipts are the D-constant telemetry, and they ride the
-  horcrux/backup gather - a restored stone keeps its receipts trail). No
-  legacy migration: this keeper shipped and contained in the same
-  unreleased cycle. Time accounting stays process math; the receipts persist).
-  the brain stack, no work-path storage chain); writes are crash-safe
-  (`lib/primitives.atomicWriteFile`); a broken or failing slice callback
-  is recorded as its own receipt line and **never** blocks any work path.
+  `models/private/<brain>/.tempo.json` (pass 209 containment ruling:
+  the per-slice receipts are the D-constant telemetry, and they ride
+  the horcrux/backup gather - a restored stone keeps its receipts
+  trail). No legacy migration: this keeper shipped and contained in the
+  same unreleased cycle; time accounting stays process math, and the
+  receipts persist inside the brain stack - no work-path storage
+  chain. Writes are crash-safe
+  (`lib/primitives.atomicWriteFile`); a broken or failing slice
+  callback is recorded as its own receipt line and **never** blocks
+  any work path.
 - **Determinism receipts:** every slice drops one ledger line - a budget
   ends with an auditable trail of what was actually done per slice. This
   is the telemetry the future formula D tunes from.

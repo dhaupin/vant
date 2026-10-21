@@ -28,6 +28,10 @@ Creative output engine - generates geometry art for sharing.
 | `vote/voteSecured/getVote` | Canvas vote records |
 | `listStack/loadStack` | Multibrain stack access |
 
+Also exported: `getCanvasPath(name)`, `getState()`,
+`generateHorcruxTemplate(options)` (horcrux template art), and the art
+pack door `renderStoneArt(options)` / `artPacks()` (pack names).
+
 ## Usage
 
 ```javascript
