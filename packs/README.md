@@ -7,7 +7,8 @@ documented.
 
 - **Crashtest**: <https://github.com/dhaupin/crashtest> — live harness: <https://crashtest.creadev.org>
 - **Where the packs target**: this repo (dhaupin/vant), `packs/public/<name>/`
-- **Status ledger**: `test/crashtest-packs.test.js` (expected-verdict table = the regression pin)
+- **Run/validate from vant's side**: `node test/crashtest-packs.test.js` (contract + verdict ledger, 55 checks)
+- **Real-harness dry run against vant**: `node scripts/crashtest-run.js` (see "Running the packs against vant")
 
 ## What crashtest is
 
@@ -18,7 +19,7 @@ records, never polite pass/fail theater:
 
 - **One law: no sockets.** Scenarios run in-process (WHATWG `Request` handed
   straight to handlers) or against plain files. The MCP/REST doors are TCP
-  and stay out of scope.
+  and stay out of scope; the CODE underneath them is fair game.
 - **A scenario's `run()` returns EXACTLY ONE decision**: `REFUSED` (defense
   held), `EXPLOITED` (the attack landed / the handler misbehaved), or
   `BOUNDED` (accepted risk, and it must name `owner` + `bound` or it is a
@@ -35,92 +36,149 @@ directory: **the pack lives with the thing it attacks** (the same
 animals-first precedent that keeps the `wp-*` WordPress packs with the
 WordPress lane and the `crashtest-site` pack with crashtest's own site).
 
-## The packs in here
+## The packs
 
-### `public/vant-brain` (v0.1.0) — brain-layer discipline
+### `public/vant-brain` — brain-file layer discipline (9 oracles; 6 validated)
 
-Nine oracles for a vant install's brain layer. Run-root shim routes
-(dead-simple, documented at the top of `public/vant-brain/index.mjs`) call
-vant's OWN `lib/brain`, `lib/migrations`, `lib/guests` APIs in-process and
-return neutral facts; the attacks decide, never the shim:
+**What it does.** Attacks the read/write discipline of a vant install's brain
+layer — `models/state.json` handling, private/public scoping, path
+confinement, the migration engine, and the guest capability gate — by
+driving vant's real `lib/brain`, `lib/migrations`, and `lib/guests` APIs
+through a lightweight run-root shim and judging the neutral facts the shim
+reports back. This is the pack born from Rook's #231/#233 proposals, the
+crashtest stone incident thread (#219/#226/#227/#232), and the fresh-clan
+repros behind them.
 
-| Attack | Status |
-|---|---|
-| `private-first-fallback` | validated — REFUSED (private wins on mixed reads) |
-| `paths-cannot-escape-models` | validated — REFUSED (traversal names never escape `models/`) |
-| `state-tamper-is-loud` | validated — **EXPLOITED today** (silent fallback + public/private lineage mix; the read-path half of #232 — CLI/pointer half fixed 2026-10-22, commit `fb3eadf`) |
-| `state-json-schema-strictness` | validated — **EXPLOITED today** (wrong-typed stack entries survive into the runtime pointer) |
-| `migration-idempotency` | validated — REFUSED (dry-run touches nothing; second run is a no-op) |
-| `guest-capability-gates` | validated — REFUSED (admin denied, revocation kills grants, pairing voucher single-use) |
-| `succession-trust-inheritance` | pending run-root validation (honest skip) |
-| `boot-stone-integrity` | pending run-root validation (honest skip) |
-| `knowledge-links-cycle-safety` | pending run-root validation (honest skip) |
+The shim routes (documented in `public/vant-brain/index.mjs`):
+`brain-read` (dual-mode reads, canary fixture), `brain-state` (tamper +
+fresh-module probe), `brain-migrate` (idempotency accounting),
+`guest-cap` (admin/revocation/pairing gates), and three not-yet-wired
+routes for the pending oracles.
 
-The two EXPLOITED rows are **findings, not glitches**: vant's brain layer
-currently fails those oracles. `test/crashtest-packs.test.js` pins them in
-its expected-verdict table; fixing the bug means flipping the row to
-`REFUSED` — the suite is the regression pin in both directions.
+| Attack | What it shakes | Status |
+|---|---|---|
+| `private-first-fallback` | a private-pinned mixed read returns the private file — public shadow content under a private pin is lineage fraud | validated — REFUSED |
+| `paths-cannot-escape-models` | traversal-shaped brain names never read outside `models/` | validated — REFUSED |
+| `state-tamper-is-loud` | corrupt/missing `state.json` must be refused loudly, never silently defaulted into a mixed-lineage read | validated — **EXPLOITED today** (read-path half of #232; CLI/pointer half fixed in commit `fb3eadf`) |
+| `state-json-schema-strictness` | wrong-typed stack/currentBrain values never survive into the runtime pointer | validated — **EXPLOITED today** |
+| `migration-idempotency` | `migrate` twice is a byte-level no-op; `--dry-run` writes nothing | validated — REFUSED |
+| `guest-capability-gates` | admin verbs unreachable, revocation kills grants, pairing voucher single-use | validated — REFUSED |
+| `succession-trust-inheritance` | a low-trust successor can't resolve private state past its trust floor | pending run-root wiring (skipped) |
+| `boot-stone-integrity` | tampered stones restore nothing partial | pending run-root wiring (skipped) |
+| `knowledge-links-cycle-safety` | cyclic knowledge graphs never hang the walk | pending run-root wiring (skipped) |
 
-### `public/vant-census` (v0.1.0) — structural oracles
+The two EXPLOITED rows are **findings, not glitches** — they are pinned in
+`test/crashtest-packs.test.js`'s expected-verdict table and flip to REFUSED
+when the read-path fix lands; the pin keeps biting until then.
 
-Four config-armed structural attacks (no routes needed; run roots volunteer
-evidence via `ctx.config['vant-census']`, absence → skip):
+### `public/vant-census` — structural oracles (4 oracles; config-armed)
 
-- `require-cycle-slope` — largest strongly-connected require blob must stay
-  under a declared ceiling (current vant census: 131 cycle-edges across 132
-  of 188 lib modules — one big blob, zero clean 2-cycles)
-- `whale-function-cap` — cyclomatic ceiling per armed function census
-  (vant's worst: `lib/transform.js:2035` at cx 166)
-- `late-key-canary` — duplicate object-literal keys clobber silently
-  (`bin/help.js`, `lib/search.js` carry real ones)
-- `guard-throw-probe` — hostile inputs must land as typed refusals, never
-  raw engine crashes
+**What it does.** Attacks vant's SHAPE, not a route: the require graph, the
+function-size census, the object-literal duplicate-key census, and guard
+hardness. This pack needs NO shim routes — a run root volunteers its own
+census data (e.g. from the 2026-10-21 pod census: madge/eslint scans) into
+`ctx.config['vant-census']`, and the attacks judge it. Born from
+crashtest issue #5; rescued into this repo when the cross-repo push was
+blocked (hence the `vant-census` name — one name, one origin).
 
-### `public/vant-crew` (v0.1.0) — agent-crew budget discipline
+- `require-cycle-slope` — largest SCC blob of the require graph must stay
+  under a declared ceiling (vant's measured blob: 131 cycle-edges across
+  132/188 lib modules — one giant strongly-connected spine, zero clean
+  2-module cycles)
+- `whale-function-cap` — every census'd function must sit under a
+  cyclomatic ceiling (vant's worst: `lib/transform.js:2035` at cx 166)
+- `late-key-canary` — duplicate object keys clobber silently at parse time;
+  clobbers must be deduped or declared intentional (`bin/help.js:615`,
+  `lib/search.js:620` carry live ones)
+- `guard-throw-probe` — hostile inputs into host-declared exports must land
+  as typed refusals, never raw engine crashes (the latent
+  `lib/brain.js` `const brainPath` reassignment shape)
 
-Three registry-level oracles against `lib/agents` (registry-only — spawn
-creates agent records, never OS processes), validated against a vant
-sandbox:
+### `public/vant-crew` — agent-crew budget discipline (3 oracles; all validated)
 
-| Attack | Status |
-|---|---|
-| `roster-quota-ceiling` | validated — REFUSED (cap fires as a typed refusal at the declared `agents.maxAgents`) |
-| `spawn-rate-limit` | validated — REFUSED (window budget refuses past-the-window spawns once a slot is drained below the cap) |
-| `quota-error-is-typed` | validated — REFUSED (denials name the budget; no raw crashes) |
+**What it does.** Attacks the agent-spawn budget: the crew roster cap
+(`agents.maxAgents`), the per-window spawn rate limit, and the honesty of
+denials. The shim route `crew-run` drives `lib/agents.spawn` against a
+fresh roster — registry-level only (spawn creates agent RECORDS; it never
+forks OS processes) — and reports the resolved cap, attempt count, typed
+error texts, and the final roster verbatim; the attacks decide.
 
-### `public/vant-mcp` (v0.1.0) — in-process MCP tool-layer discipline
+| Attack | What it shakes | Status |
+|---|---|---|
+| `roster-quota-ceiling` | the declared cap fires as a typed refusal when the roster is full — a decorative cap is a budget in name only | validated — REFUSED |
+| `spawn-rate-limit` | the window limiter refuses past its budget (probed honestly: one slot drained below cap, then an in-window burst attempt that must hit `E_RATE_LIMIT`) | validated — REFUSED |
+| `quota-error-is-typed` | denials name the budget that refused — no raw crashes, no blank errors | validated — REFUSED |
 
-Three oracles driving `lib/mcp.execute` — the exact dispatcher the
-`/mcp/exec` HTTP door rides, minus the door (no TCP):
-**all validated** against a vant sandbox:
+### `public/vant-mcp` — in-process MCP tool-layer discipline (3 oracles; all validated)
 
-| Attack | Status |
-|---|---|
-| `unknown-tool-honesty` | validated — REFUSED (unknown tools answer typed "not found"; never throws) |
-| `tool-schema-enforced` | validated — REFUSED (declared inputSchemas reject invalid params before any side effect — the P1 #14 contract holds) |
-| `brain-write-scope-hardness` | validated — REFUSED (traversal-shaped tool params confined inside the brain tree) |
+**What it does.** Attacks the tool layer UNDER the MCP HTTP door —
+`lib/mcp.execute` is the exact dispatcher `/mcp/exec` rides — with no
+listener anywhere (the door itself is TCP and out of scope; the dispatcher,
+the rules layer, and the declared inputSchemas are in-process). The shim
+route `mcp-exec` takes a list of `{ tool, params }` calls in a fresh module
+instance over the run root's brain fixture and reports every result verbatim.
 
-### `public/vant-rest` (v0.1.0) — REST-door discipline (PENDING)
+| Attack | What it shakes | Status |
+|---|---|---|
+| `unknown-tool-honesty` | unknown tools answer a typed "not found" — never an uncaught throw out of the executor | validated — REFUSED |
+| `tool-schema-enforced` | declared inputSchemas reject invalid params BEFORE any side effect (the lib/mcp.js P1 #14 contract — 269 schemas went decorative once) | validated — REFUSED |
+| `brain-write-scope-hardness` | hostile `brain_write` params stay inside the brain tree — an escape is an arbitrary-file write inside the door | validated — REFUSED |
 
-`lib/server.js` exports an Edge-shaped stack (`Server.Request/Response`,
-`Router`, `BodyParser`, `CORS`, `Helmet`, `Session`, `SessionStore`).
-Three written oracles (fuzz floor never-500, CORS mirror parity,
-session-cookie discipline) mapped onto crashtest v1.0.0's
-`session`/`protohygiene`/`taxonomy` rows — **honest skips until a run root
-wires the lib/server stack** (routes 501).
+### `public/vant-rest` — REST-door discipline (3 oracles; PENDING)
 
-### `public/vant-stones` (v0.1.0) — stone lifecycle discipline (PENDING)
+**What it does.** Will attack the REST door's EDGE-shaped stack in-process:
+`lib/server.js` exports `Server.Request/Response`, `Router`, `BodyParser`,
+`CORS`, `Helmet`, `Session`, `SessionStore` — a request can be constructed
+and routed with no listener, which is exactly how crashtest's own
+`crashtest-site` pack drives its Pages Functions. The attacks are written
+against v1.0.0's `session`/`protohygiene`/`taxonomy` row shapes:
 
-Three written oracles for the seal/restore lifecycle (`stone-scope-honesty`,
-`state-pointer-lineage`, `restore-torn-refusal`) — the #219/#226/#232
-incident class, pinned from the mint and boot sides; **honest skips until a
-run root wires the seal/decode fixture** (the crashtest repo's
-`horcrux/crashtest-p_quillstone-9fold.svg` is the documented tamper fixture).
+| Attack | What it will shake | Status |
+|---|---|---|
+| `fuzz-floor-never-500` | hostile method/path/body shapes answer 2xx-4xx — abuse never becomes a server fault | pending (`rest-request` route not wired) |
+| `cors-enable-parity` | preflight OPTIONS terminates early and cleanly (204) | pending |
+| `session-cookie-discipline` | session-less clients receive zero cookie grants; forged cookies are never adopted or reflected | pending |
 
-## How to point crashtest at these packs
+### `public/vant-stones` — stone lifecycle discipline (3 oracles; PENDING)
 
-Any crashtest run-root (v1.0.0+) lists this repo's `packs/` root and its
-loader inventories both packs; or point at ONE pack dir for just that pack:
+**What it does.** Will attack the seal → carry → restore lifecycle for
+horcrux stones — the file-layer incident class the crashtest stone flow
+actually lived in (#219/#226/#232). Two routes (unwritten on purpose until
+a decode fixture exists): `stone-scope` mints a scoped stone through
+`lib/horcrux-safe` and decodes it back; `stone-tamper` byte-flips a sealed
+fixture and runs the restore. The crashtest repo's
+`horcrux/crashtest-p_quillstone-9fold.svg` is the documented tamper fixture.
+
+| Attack | What it will shake | Status |
+|---|---|---|
+| `stone-scope-honesty` | a scoped stone decodes to EXACTLY its declared scope — no scope costume over a full-install capture | pending |
+| `state-pointer-lineage` | restored state never wakes a stone on a foreign `currentBrain` silently | pending |
+| `restore-torn-refusal` | tampered stones refuse loudly and write NOTHING partial — torn restores are worse than failed ones | pending |
+
+## Running the packs against vant
+
+Two ways, both from this repo:
+
+1. **Contract + verdict ledger** (no crashtest clone needed):
+   ```sh
+   node test/crashtest-packs.test.js
+   ```
+   Re-blocks the v1.0.0 scenario contract (kebab names, verdict vocabulary,
+   run() shape), boots a throwaway vant sandbox, arms every route the
+   sandbox can honestly arm, and checks the whole pack matrix against the
+   expected table (currently 55 checks).
+
+2. **Real harness dry-run** (needs the crashtest clone next door):
+   ```sh
+   # crashtest checkout default: ../crashtest or CRASHTEST_DIR=/path
+   node scripts/crashtest-run.js
+   ```
+   Loads every pack through crashtest's REAL v1.0.0 loader + Harness
+   (not the micro-harness), runs every attack against the vant sandbox
+   shim, and prints the honest ledger — verdicts, details, and explicit
+   skips for routes the run root doesn't arm.
+
+How to point an external crashtest run root here:
 
 ```js
 // crashtest.config.js
@@ -130,31 +188,18 @@ export default {
 };
 ```
 
-Or, zero-config, validate the contract + verdicts from vant's side:
-
-```sh
-node test/crashtest-packs.test.js
-```
-
 ## Consuming crashtest (v1.0.0)
 
-Crashtest is versioned 1.0.0 on GitHub main and v1.1.0-with-pack-ports
-already growing; npm still publishes 0.1.0. This repo's tooling therefore
-consumes crashtest from the GitHub checkout (file path), not npm — the same
-rule this directory already obeys (`packs:` accepts any directory). Until
-npm catches up:
-
-- clone `github.com/dhaupin/crashtest` next to this checkout;
-- point a run root's `packs:` at `../vant/packs` (cross-repo, as above);
-- re-validate here anytime: `node test/crashtest-packs.test.js` (re-blocks
-  the v1.0.0 scenario contract: verdicts vocabulary, kebab names, run()
-  shape — and currently pins the two `vant-brain` EXPLOITED regressions
-  until the read-path fix lands).
-
-As of 2026-10-22 the v1.0.0 contract surfaces (`src/scenarios/contract.js`,
-`src/packs/loader.js`, `src/harness/harness.js`) are unchanged since the
-pre-v1 audit — every pack in here loads clean through the real loader at
-main.
+Crashtest is versioned 1.0.0 on GitHub main (pack-ports landing after);
+npm still publishes 0.1.0. This repo's tooling therefore consumes crashtest
+from the GitHub checkout (file path), not npm — the same rule this
+directory already obeys (`packs:` accepts any directory). Until npm
+catches up: clone `github.com/dhaupin/crashtest` next to this checkout,
+point run roots at `../vant/packs`, and re-validate with the two commands
+above. As of 2026-10-22 the v1.0.0 contract surfaces
+(`src/scenarios/contract.js`, `src/packs/loader.js`, `src/harness/harness.js`)
+are unchanged since the pre-v1 audit — every pack in here loads clean
+through the real loader at main.
 
 ## Conventions
 
@@ -163,8 +208,8 @@ main.
   default-exports `{ name, description, attacks: [...] }`.
 - Attack name = kebab-case, unique inside the module; verdicts only the
   three binding ones; `skipped: true` marks honest absence.
-- Validated vs pending stays written in the pack file header and this
+- Validated vs pending stays written in the pack file header AND this
   table — the honest status ledger is part of the pack, not a promise.
-- New packs get added to `test/crashtest-packs.test.js`'s `EXPECTED` table
-  (or the suite discovers them and fails loudly for the missing rows —
-  which is the honest default).
+- New packs must land in `test/crashtest-packs.test.js`'s `EXPECTED` table —
+  the suite discovers shipped packs and fails loudly for missing rows,
+  which is the honest default.

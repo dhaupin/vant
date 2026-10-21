@@ -130,7 +130,8 @@ export default {
         if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `crew-run threw in the shim: ${r.error?.name}` };
         const j = parseJson(await bodyText(r));
         if (!j || j.error) return { verdict: 'REFUSED', skipped: true, detail: 'crew-run not armed' };
-        const typed = (s) => typeof s === 'string' && s.length > 10 && String(s).toLowerCase().includes('limit');
+        // typed = names the budget that refused (quota cap or rate window).
+        const typed = (s) => typeof s === 'string' && s.length > 10 && /quota|rate limit/i.test(String(s));
         if (j.capError != null && !typed(j.capError)) {
           return {
             verdict: 'EXPLOITED',

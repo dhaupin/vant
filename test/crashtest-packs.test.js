@@ -152,7 +152,21 @@ function makeSandbox() {
 
 // The child probe (fresh brain module instance = the hook that makes the
 // tamper oracle measurable instead of "module state from boot").
-const PROBE_CHILD = `
+// (JSON-only stdout law) vant's own libs log on stdout ([COMPUTE], [INFO]
+// lines): polluting JSON stdout makes parseJson fail and honest routes read
+// as "not armed". All child noise goes to stderr; stdout carries ONLY the
+// final JSON record.
+const CHILD_STDOUT_GUARD = `
+    (function guardStdout() {
+        const err = (msg) => process.stderr.write(String(msg) + '\\n');
+        console.log = (...a) => err(a.join(' '));
+        console.info = console.log;
+        console.warn = console.log;
+        console.error = console.log;
+    })();
+`;
+
+const PROBE_CHILD = `${CHILD_STDOUT_GUARD}
 (async () => {
     const tamper = process.argv[1];
     const fs = require('fs');
@@ -176,7 +190,7 @@ const PROBE_CHILD = `
         const r = await brain.read('identity', {});  // private-pinned dual read
         out.reads.push({ pinnedType: 'private', content: r ? String(r.content ?? '') : null, resolvedPath: r ? String(r.path ?? '') : null });
     } catch (e) { out.reads.push({ pinnedType: 'private', THREW: e.name + ': ' + e.message }); }
-    process.stdout.write(JSON.stringify(out));
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
 
@@ -184,9 +198,20 @@ const PROBE_CHILD = `
 // (re PACK SURVEY). Registry-level only - spawn creates agent records, no
 // OS processes. Facts reported neutral: resolved cap, attempts, which typed
 // errors fired, final roster.
-const CREW_CHILD = `
+const CREW_CHILD = `${CHILD_STDOUT_GUARD}
 (async () => {
+    // (run-root posture) the crew pack budgets REGISTRY QUOTAS, not the
+    // sandbox gate - the shim opens defaultSandbox explicitly so spawns
+    // reach the budget logic under test instead of bouncing at canSpawn.
+    try {
+        require('./lib/sandbox').defaultSandbox.setCapabilities({
+            canRead: true, canWrite: true, canSpawn: true, canNetwork: true
+        });
+    } catch (e0) { }
     const agents = require('./lib/agents.js');
+    // (fresh-fixture law) drain any prior attack's roster so each probe
+    // sees the declared cap from zero, not another probe's leftovers.
+    try { for (const a of agents.list()) { try { agents.kill(a.id); } catch (e1) { } } } catch (e2) { }
     const out = { cap: null, attempts: 0, capError: null, rateError: null, rateLimit: null, rosterSize: 0, rosterNames: [] };
     try {
         const cfg = require('./lib/config.js');
@@ -220,22 +245,18 @@ const CREW_CHILD = `
             const r2 = agents.spawn({ name: 'pack-cw-rate', role: 'Tester', type: 'default' });
             if (r2 && r2.error && /rate limit/i.test(r2.error)) out.rateError = r2.error;
         }
-    } catch (e5) { out.rateError = out.rateError || ('drain probe threw: ' + e5.name); }
-    try {
-        const roster = agents.list();
-        out.rosterSize = roster.length;
-        out.rosterNames = roster.map((a) => a.name);
-    } catch (e6) { out.rosterSize = names.length; }
-    process.stdout.write(JSON.stringify(out));
+    } catch (e5) { out.rateError = out.rateError || ('drain probe threw: ' + e5.name); }    try { const roster = agents.list(); out.rosterSize = roster.length; out.rosterNames = roster.map((a) => a.name); } catch (e6) { out.rosterSize = names.length; }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
+
 
 // MCP probe: drive lib/mcp.execute directly (the exact dispatcher the
 // /mcp/exec door rides). Calls arrive as a JSON array [{ tool, params }];
 // each result is reported verbatim, plus an escape-file check for
 // brain_write probes (the test watches for files landing OUTSIDE the
 // brain tree). Never sockets.
-const MCP_CHILD = `
+const MCP_CHILD = `${CHILD_STDOUT_GUARD}
 (async () => {
     const mcp = require('./lib/mcp.js');
     const fs = require('fs');
@@ -252,13 +273,21 @@ const MCP_CHILD = `
     // Escape check: did any brain_write probe land a file outside models/ ?
     const escape = path.resolve('vant-mcp-escape-canary.md');
     const escapedFile = fs.existsSync(escape) ? 'vant-mcp-escape-canary.md' : null;
-    process.stdout.write(JSON.stringify({ results, escapedFile, escapedPath: escape }));
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ results, escapedFile, escapedPath: escape }) + '>>END');
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
 
 // ---------------------------------------------------------------------------
 // 4. the shim routes (the run root Rook proposed) - real vant libs.
 // ---------------------------------------------------------------------------
+
+// (sentinel law) even with console redirected, vant's async library logs
+// can land on stdout AFTER the child's JSON row; the route extracts ONLY the
+// sentinel-delimited record so the pack sees pure JSON.
+function extractCtJson(text) {
+    const hit = String(text || '').match(/VANT_CT_JSON<<([\s\S]*?)>>END/);
+    return hit ? hit[1] : String(text || '');
+}
 
 function buildRoutes(sb) {
     const routes = new MicroHarness();
@@ -280,7 +309,7 @@ function buildRoutes(sb) {
             content: r && r.content != null ? String(r.content) : null,
             source: r ? r.source ?? null : null,
             path: r ? r.path ?? null : null,
-        }), { status: 200 });
+        }), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
     // brain-state: tampered state, fresh module instance, NEUTRAL facts out
@@ -300,7 +329,7 @@ function buildRoutes(sb) {
         } catch (e) {
             return new Response(JSON.stringify({ error: `probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
         }
-        return new Response(outText, { status: 200 });
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
     // brain-migrate: real lib/migrations on the legacy-tree fixture,
@@ -344,7 +373,7 @@ function buildRoutes(sb) {
             secondTouch: before2.filter(f => !after2.includes(f)).length + after2.filter(f => !before2.includes(f)).length,
             secondApplied: (second && second.applied || []).length,
             secondDryPlanned: dryRunApplied,
-        }), { status: 200 });
+        }), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
     // guest-cap: real lib/guests gates, three booleans
@@ -380,16 +409,16 @@ function buildRoutes(sb) {
         const first = guests.pair(code);
         const second = guests.pair(code);
         out.pairingSingleUse = !!(first && first.token) && !!(second && second.ok === false);
-        return new Response(JSON.stringify(out), { status: 200 });
+        return new Response(JSON.stringify(out), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
-    routes.registerRoute('trust-read', async () => new Response(JSON.stringify({ error: 'not armed: trust floor wiring pending validation on a run root' }), { status: 501 }));
-    routes.registerRoute('stone-restore-tamper', async () => new Response(JSON.stringify({ error: 'not armed: stone fixture pending validation on a run root' }), { status: 501 }));
-    routes.registerRoute('brain-graph-walk', async () => new Response(JSON.stringify({ error: 'not armed: graph walk pending validation on a run root' }), { status: 501 }));
+    // Pending oracles stay UNREGISTERED (crashtest lesson: a 501 shim IS a
+    // 5xx to the fuzz floor - see scripts/crashtest-run.js): the packs
+    // degrade via route-absence (skipped-REFUSED), which is the honest shape.
 
     // Pack-survey gap-fills (2026-10-22): crew + mcp routes armed here are
     // REAL (fresh-module probe children in the sandbox, same shape as the
-    // brain-state probe); rest + stones routes stay 501-honest.
+    // brain-state probe); rest + stones routes stay honestly unwired.
     routes.registerRoute('crew-run', async () => {
         let outText;
         try {
@@ -397,7 +426,7 @@ function buildRoutes(sb) {
         } catch (e) {
             return new Response(JSON.stringify({ error: `crew probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
         }
-        return new Response(outText, { status: 200 });
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
     routes.registerRoute('mcp-exec', async (ctx) => {
         const j = await ctx.request.json().catch(() => ({}));
@@ -407,11 +436,8 @@ function buildRoutes(sb) {
         } catch (e) {
             return new Response(JSON.stringify({ error: `mcp probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
         }
-        return new Response(outText, { status: 200 });
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
-    routes.registerRoute('rest-request', async () => new Response(JSON.stringify({ error: 'not armed: lib/server stack wiring pending validation on a run root' }), { status: 501 }));
-    routes.registerRoute('stone-scope', async () => new Response(JSON.stringify({ error: 'not armed: seal/decode fixture pending validation on a run root' }), { status: 501 }));
-    routes.registerRoute('stone-tamper', async () => new Response(JSON.stringify({ error: 'not armed: seal/decode fixture pending validation on a run root' }), { status: 501 }));
     return routes;
 }
 
@@ -477,9 +503,13 @@ function checkVerdictRows(packName, verdicts) {
     for (const attack of Object.keys(want)) {
         const row = verdicts[attack];
         if (!row) { check(`${packName}/${attack}`, false, 'attack did not produce a verdict record'); continue; }
+        // A strict row ('REFUSED'/'EXPLOITED') must be EARNED, not skipped:
+        // a skipped-REFUSED record carries verdict REFUSED too, so without
+        // the skipped!==write clause a silently un-armed route passes as a
+        // verified defense (that exact green-masked hole shipped once).
         const ok = want[attack] === 'skip'
             ? row.skipped === true && row.verdict === 'REFUSED'
-            : row.verdict === want[attack];
+            : row.verdict === want[attack] && row.skipped !== true;
         if (ok) {
             check(`${packName}/${attack}`, true, null);
         } else {
