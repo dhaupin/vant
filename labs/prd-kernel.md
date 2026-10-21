@@ -1,9 +1,16 @@
 # Vant Kernel (the Lifecycle Substrate) — Product Requirements Document
 
-**Version:** 1.0
+**Version:** 0.1 (first sketch, NOT implementation-sequenced)
 **Branch:** axolotl
 **Date:** 2026-10-21
-**Status:** Drafted from the pass-317..328 arc, pending owner approval
+**Status:** Emergent design, slow-distillation phase. Captured tonight
+because months of passes finally made the verbs FINDABLE — escrow taught
+fail-closed, pass 169 taught gate teeth, the stone taught honest mass,
+LEGAL.md taught norms-vs-conditions, pass 328 handed over the negative
+proof. This document is the fossil record of that convergence, not a
+starting gun. There is a reason there was no kernel PRD until now, and
+the reason is that it may not have been designed yet. NO K-STEP GETS
+RUN UNTIL THIS DOC HAS BEEN SLOWLY ITERATED BY THE OWNER.
 **Powered-by lineage:** distilled from the census/attest/retire/succeed
 pattern observed across pipeline, sudo, rls, escrow, horcrux, prune,
 docs gates, the pass ledger, and the marketing channel tables.
@@ -140,7 +147,45 @@ With the kernel, "no more scatter adhoc" is literal: one substrate
 issues the verbs, every consumer declares itself, `kernel.census()` is
 the single place to see who has what verb and what it has minted.
 
-## 6. Sequencing
+## 6. Open questions for the slow-distillation phase (the real design work)
+
+These are the questions that deserve months if they need months.
+None are settled by this sketch; each is written to be argued with, not
+implemented from:
+
+1. **Is the verb set right?** census/attest/retire/succeed is what
+   tonight's arc surfaced. Is there a fifth (mint? grant?) that the
+   harness leak actually implies — the thing that mints without census
+   is also unpunished-without-census? Or is mint just census's
+   responsibility to catch?
+2. **What is the gate authority model?** Who may retire on whose
+   census — the consumer itself, or only the owner surface above it?
+   The escrow/sudo/trust ladder suggests an answer; the answer should
+   fall out of that lineage, not be invented fresh.
+3. **How does the journal relate to the existing spine?**
+   state/anchor/WAL/events each already journal something. The kernel
+   journal must find its exact relationship to that alread-existing
+   stack (piggyback? sibling? beneath?), or it becomes another scatter.
+4. **Recursion semantics:** how deep do nested kernels actually go
+   before the guarantee erodes? Where is the split-horizon line for a
+   consumer acting as issuer to its own children?
+5. **Portability boundary:** zero-import core is the instinct, but
+   what must the protocol pin (event shapes, gate vocabulary) for an
+   external layer to interoperate — and what must it leave free so the
+   contract stays small enough to adopt?
+6. **Naming:** census/attest/retire/succeed is descriptive, not
+   canonical. The pyramid-top deserves names that carry once spoken
+   aloud in a design review.
+7. **What does the kernel say NO to?** The hardest design input: every
+   guarantee added on top is a surface that can lie. What is the
+   minimum the substrate can promise and still be the pyramid-top?
+
+## 7. Sequencing (DELIBERATELY NOT SCHEDULED)
+
+The K-steps below are a shape, not a schedule. They stay here because
+deleting them would orphan the mapping table; they are deferred until
+the open-questions phase above has been worked through with the slow
+attention of the months it took to surface this document.
 
 | Step | Scope | Depends on |
 |------|-------|-----------|
@@ -154,7 +199,7 @@ the single place to see who has what verb and what it has minted.
 K1+K2+K3 is the sellable core; K4 is the highest-payoff consumer and
 retires an open lesson the same pass it lands. K5+ is opportunistic.
 
-## 7. Verification (per pass implementing this)
+## 8. Verification (per pass implementing this — IF DESIGN MATURES TO PASSES)
 
 - `test/kernel.test.js` green: all four invariants pin.
 - Any adopting consumer's own suite green (the harness suites green
@@ -165,8 +210,13 @@ retires an open lesson the same pass it lands. K5+ is opportunistic.
   tests first; a docs page only arrives when a consumer PRD_names it).
 - Labs handoff per convention.
 
-## 8. Decision log (append-only)
+## 9. Decision log (append-only)
 
+- 2026-10-21: **VERSION RESET to 0.1, status moved to slow-distillation**
+  per owner pushback: months of work surfaced this; it will not be
+  one-shotted. The K-steps are unscheduled. Design questions are
+  enumerated in §6 precisely so they can be LIVED WITH, not resolved in
+  one conversation.
 - 2026-10-21: named census/attest/retire/succeed; pyramid-top position
   locked per owner ("more than the layer/tracking/carrier; it powers
   it; the top of the pyramid; no more scatter adhoc").
@@ -179,7 +229,7 @@ retires an open lesson the same pass it lands. K5+ is opportunistic.
   visible verb gaps) hold for ALL consumers including vant's own
   surfaces — kernel law is self-hosting, the repo eats it first.
 
-## 9. Non-goals (locked)
+## 10. Non-goals (locked)
 
 - No runtime daemon; the kernel is invoked, passive substrate.
 - No UI, no MCP door until at least three consumers live (door when the
