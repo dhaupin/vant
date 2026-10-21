@@ -1,7 +1,17 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** pass 322 (the MOBILE BLEED FIX: the pass-321 home
+**Last Updated:** pass 326 (the BRAIN REFRESH: horcrux stone
+regenerated 2026-10-21 after the 317-325 arc; Buffy sleep write into
+models/private/axolotl/lessons.md -- the marketing-ethics arc entry
++ goals next-wave update; public brain start.md/bootstrap.md gained
+the pick-up-the-project pointers (TASKS.md, PRDs, ethics page, MEM
+handoff); prune scan came back clean (0 prunable, the heap is in the
+private storage layer where the pruner rightly refuses to reach).
+Unmerged on axolotl: SIX commits vs main (322 mobile fix, 323/324
+marketing PRD + dept, 325/325b ethics trio, 326 this). PR on owner
+word).
+**Prior -- pass 322** (the MOBILE BLEED FIX: the pass-321 home
 page rendered but its terminal code blocks bled off-viewport on phones
 — `pre.term code { min-width: max-content }` propagated the longest
 line's width up as min-content, and the ancestors refused to shrink:
