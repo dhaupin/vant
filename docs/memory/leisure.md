@@ -67,7 +67,9 @@ Events (catalogue-declared in `lib/event-types.js`): `leisure:wanted`,
 `leisure:pursued`, `leisure:forgotten`, `leisure:zen_breath`,
 `leisure:dream_review`.
 
-## Contracts- **Containment (pass 209 ruling):** the ledger lives INSIDE the brain at
+## Contracts
+
+- **Containment (pass 209 ruling):** the ledger lives INSIDE the brain at
   `models/private/<brain>/.leisure.json` (the `.audit.json` precedent:
   brain-scoped, dotted, runtime JSON). Play is individual and rides horcrux:
   a restored stone wakes with its want-list. (No legacy migration: the
@@ -99,3 +101,9 @@ Events (catalogue-declared in `lib/event-types.js`): `leisure:wanted`,
 See also: the psy-tree statements `models/public/vant/leisure.md` (the
 right to unused time) and `models/public/vant/free-time.md` (the
 methodology), plus the `vant-skill-rest` skill.
+
+## Related
+
+- [Tempo](/vant/memory/tempo) - the attention budget its gate respects
+- [Pruning](/vant/memory/prune) - keeping the want-list ledger lean
+- [Memory](/vant/memory/) - the section overview

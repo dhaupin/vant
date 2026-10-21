@@ -2,10 +2,10 @@
 version: 0.8.6
 permalink: /multi-agent/agents
 layout: default
-title: Agents
+title: Agent Branch Workflow
 nav_order: 49
 ---
-# Multi-Agent
+# Agent Branch Workflow
 
 When multiple agents work in the same brain, use branches.
 

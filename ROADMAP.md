@@ -566,9 +566,9 @@ Each lib module will be updated to support multi-brain stack. Methodical approac
 | Module | Status | Brain-Specific State |
 |--------|--------|---------------------|
 | **lock.js** | DONE | Lock files + token cache (lease: `models/private/.locks/.lock-<brain>.json`; mutex: `models/private/<brain>/.locks/`, `models/.locks-global/`). The rate limit was removed in pass 105 - rate limiting is QoS's concern. See [docs/operations/locks.md](docs/operations/locks.md) |
-| **network.js** | TODO | Online status, latency, circuit breaker, domains |
-| **escrow.js** | TODO | Budgets, approvals, holds |
-| **qos.js** | TODO | Rate limits, circuit state, timeouts |
+| **network.js** | DONE | Status/latency per brain, plus the `getStackNetworkStatus()` aggregate over every brain in the stack |
+| **escrow.js** | DONE | Brain-scoped store is THE default (pass 28/O-7): budgets land in the same brain as the protocol state (VANT_BRAIN > currentBrain via state-store) |
+| **qos.js** | DONE | Rate limits, circuit state, timeouts per brain, plus `getStackQoSStatus()` over the stack |
 
 **Integration Pattern:**
 ```js
@@ -608,9 +608,9 @@ async function acquire(agentId, timeout) {
 
 **Current Status:**
 - [x] lock.js - DONE (2026-10: passes 105-112: lease truth-up, separation of concern, wire-up, withLock migration, unguarded-writer triage, docs)
-- [ ] network.js - TODO
-- [ ] escrow.js - TODO
-- [ ] qos.js - TODO
+- [x] network.js - DONE (getStackNetworkStatus() aggregates the stack)
+- [x] escrow.js - DONE (brain-scoped store is the default; state-store drives name resolution)
+- [x] qos.js - DONE (getStackQoSStatus() aggregates the stack)
 
 **Progress:**
 - 2026-07-22: Reverted stub work, verified clean state at 37b0549

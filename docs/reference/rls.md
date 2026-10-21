@@ -248,3 +248,10 @@ narrow a host's authority. Mutating CLI flows
 `vant org grant/demo`) drain the serialized save chain before exit, so
 a fire-and-forget write can no longer race the process and silently
 drop the mutation.
+
+---
+
+## Related
+
+- [Habitat](/vant/memory/geometry) - multi-replica brain RLS semantics
+- [Escrow](/vant/reference/escrow) - workspace-RQS on escrow draws

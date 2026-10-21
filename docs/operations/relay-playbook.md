@@ -169,3 +169,11 @@ node scripts/vendor-relay-kit.js --check   # the checksummed contract
 | reply `E_RELAY_UPST` | hop target unreachable | check the origin is live and public |
 | settings card says the deploy is not a relay | this deploy has no relay surface (correct for OFF) | Recipe 2 to piggyback, or leave OFF (first-class posture) |
 | verify fails `not contract r/2` | caps non-contract (old deploy) | the dashboard speaks r/2 only; redeploy that relay from this repo |
+
+---
+
+## Related
+
+- [Relay](/vant/operations/relay) - concepts and architecture
+- [Security Sandbox](/vant/security/sandbox) - what relay-CG exposes
+- [Best Practices](/vant/security/best-practices) - door hygiene for public relays

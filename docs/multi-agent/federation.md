@@ -73,7 +73,7 @@ by tests:
    buyer's escrow locally; the other side records a claim. No shared
    bank.
 
-## Where to go next
+## Next
 
 - Join a running mesh: [Join a Mesh playbook](/vant/operations/federation-playbooks)
 - Run the group pattern as an operator: [Steward Runbook](/vant/operations/steward-runbook)

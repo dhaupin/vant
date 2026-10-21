@@ -24,6 +24,10 @@ Vector embeddings for brain search and similarity.
 | `listProviders()` | List available |
 | `getProviderInfo()` | Active provider info |
 
+Also exported: `project2d(vectors, options)` (the seeded Johnson-
+Lindenstrauss 2D projection the dashboard semantic map consumes) and
+the `EMBED_DIM: 384` constant.
+
 ## Usage
 
 ```javascript
@@ -34,7 +38,7 @@ const vec = await embed.generate('natural language query');
 
 // Similarity (sync)
 const sim = embed.cosineSimilarity(vec1, vec2);
-// → 0.0-1.0 score
+// -> -1.0 to 1.0 score (0.0-1.0 for the non-negative hash/local vectors)
 
 // Batch
 const vecs = await embed.generateBatch(['query1', 'query2']);
@@ -52,3 +56,10 @@ Providers (`hash`, `local`, `openai`) are managed with `setProvider` /
 | `embed:generated` | After completion |
 | `embed:batch:starting` | Before batch |
 | `embed:batch:complete` | After batch |
+
+---
+
+## Related
+
+- [Search Architecture](/vant/advanced/search-architecture) - where embeddings feed
+- [CLI](/vant/reference/cli) - the `vant embed` commands

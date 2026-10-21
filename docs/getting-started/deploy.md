@@ -43,7 +43,7 @@ docker run -d --name vant \
 
 Inside the container the image binds all interfaces (`VANT_SERVER_BIND=0.0.0.0` - docker `-p` forwards to the container IP, so a loopback bind would be unreachable); exposure is controlled at the host edge, e.g. publish on host loopback with `-p 127.0.0.1:3456:3456` or front the server with a TLS reverse proxy.
 
-## Reading Order
+## Related
 
 - [Setup](/vant/getting-started/setup) - config.ini (sync target) and tokens
 - [Docker](/vant/integrations/docker) - container specifics

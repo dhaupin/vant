@@ -164,7 +164,7 @@ await s.write(() => doWork());
 ```
 
 Budget exceeding throws `SANDBOX_BUDGET_EXCEEDED`. See
-[Escrow](/vant/security/escrow) for the spending API.
+[Escrow API](/vant/reference/escrow) for the spending API.
 
 ## Multi-Agent
 
@@ -187,8 +187,8 @@ const agentB = sandbox.create({
 agentA.write(() => doWork());
 agentB.write(() => doWork());
 
-console.log(agentA.getBudget()); // separate
-console.log(agentB.getBudget()); // separate
+console.log(agentA.getBudgetStatus()); // separate (getBudget(); the class
+console.log(agentB.getBudgetStatus()); // method is getBudgetStatus())
 ```
 
 ## Lock Requirement

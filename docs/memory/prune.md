@@ -23,10 +23,11 @@ Preview what would go:
 vant prune --dry-run
 ```
 
-Apply it:
+Apply it (bare `vant prune` is itself a dry run - deletion needs the
+force flag):
 
 ```bash
-vant prune
+vant prune --force
 ```
 
 More ways to look before you delete:
@@ -48,15 +49,21 @@ vant prune --daemon
 vant prune --daemon --interval=21600000   # interval in ms (default: 24h)
 ```
 
+Each daemon tick runs a real prune pass under an internal admin context
+(`prune-daemon`), so `--stale-days=<n>` can override the age threshold
+there too.
+
 ## Tuning
 
 ```bash
-vant prune --dry-run --stale-days=30   # threshold in days (default: 90)
-vant prune --dry-run --no-fluff        # stale entries only, skip fluff detection
+vant prune --list --stale-days=30   # age threshold override (default: 90)
+vant prune --list --no-fluff        # stale files only, skip fluff detection
 ```
 
-The stale-days default comes from the `prune.staleDays` config key
-(`lib/prune.js` exports it as `DEFAULT_STALE_DAYS`).
+(`--no-fluff` is honored on the `--list` pass; the main prune pass always
+runs with fluff detection on.) The stale-days default comes from the
+`prune.staleDays` config key (`lib/prune.js` exports it as
+`DEFAULT_STALE_DAYS`).
 
 ## Programmatic
 
@@ -83,3 +90,9 @@ vant cron list
 Shows scheduled jobs; add a prune job through `vant cron`. Keep the interval
 honest: a monthly prune of an active brain is usually enough, and the
 dry-run result makes each pass reviewable before it is destructive.
+
+## Related
+
+- [Cron](/vant/operations/cron) - scheduling the prune pass
+- [Tempo](/vant/memory/tempo) - the attention ledger prune respects
+- [Memory](/vant/memory/) - the section overview

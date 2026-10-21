@@ -355,6 +355,35 @@ test('horcrux: restoreState with empty array wipes (documented O-8 semantics)', 
     });
 });
 
+test('horcrux: PARTIAL restore REPLACES the roster — unrelated disk rows tombstoned, not resurrected (pass 289)', () => {
+    const agents = require(path.join(ROOT, 'lib', 'agents.js'));
+    const internal = require(path.join(ROOT, 'lib', 'agents', 'internal.js'));
+    const foreignId = 'agent_qcforeign' + Date.now().toString(36);
+    const keepRow = { id: 'agent_qckeeper' + Date.now().toString(36), name: 'split-probe-keeper', role: 'Keep', state: 'idle', mcp: false, created: Date.now() };
+    // Simulate the cross-process world the pass-95/116 merge law worries
+    // about: a peer wrote a row our process has never SEEN; our own roster
+    // is then restored with only ONE agent. The restore must come out
+    // EXACTLY that one — the foreign row may not ride along.
+    return Promise.resolve(agents.restoreState({ agents: [] })).then((wipe) => {
+        if (!wipe.wiped) return { success: false, error: `wipe: ${JSON.stringify(wipe)}` };
+        internal._getAgentStore().write(internal._getAgentStoreFile(), JSON.stringify([
+            [foreignId, { id: foreignId, name: 'ForeignPeer', role: 'Stranger', state: 'idle', mcp: false, created: Date.now() }]
+        ]));
+        return Promise.resolve(agents.restoreState({ agents: [keepRow] })).then((res) => {
+            if (res.restored !== 1 || res.persisted === false) return { success: false, error: `restore: ${JSON.stringify(res)}` };
+            if (!agents.get(keepRow.id)) return { success: false, error: 'kept agent missing from roster' };
+            if (agents.get(foreignId) !== undefined) return { success: false, error: 'foreign disk row ADOPTED into the restored roster' };
+            let diskRows = [];
+            try { diskRows = JSON.parse(internal._getAgentStore().read(internal._getAgentStoreFile())); } catch (e) {
+                return { success: false, error: 'store unreadable post-restore: ' + e.message };
+            }
+            const ids = diskRows.map((pair) => (Array.isArray(pair) ? pair[0] : (pair && pair.id) ? pair.id : null)).filter(Boolean);
+            if (ids.length !== 1 || ids[0] !== keepRow.id) return { success: false, error: `disk roster after partial restore: ${JSON.stringify(ids)}` };
+            return true;
+        });
+    });
+});
+
 // ---------- 7. Structural: the split stayed honest ----------
 
 test('structural: work.js owns _messages; core.js owns _agents; protos.js owns _protoCache', () => {

@@ -112,7 +112,7 @@ the same loop with more structure:
 - The wake/work/sleep loop: [Agent Onboarding](/vant/getting-started/agent-onboarding)
 - One install, many agents: [Multi-agent](/vant/multi-agent/)
 
-## Where the deep docs live
+## Related
 
 | When you want... | Go to |
 |------------------|-------|
@@ -126,3 +126,11 @@ One honest note: `vant health` will mention setup and GitHub sync as
 "not initialized" when you skipped them. That is fine - the memory
 commands on this page work without any of it. The health check is
 guarding the full enterprise setup, not the one-liners.
+
+---
+
+## Related
+
+- [The Brain](/vant/memory/brain) - what lies beneath the memory commands
+- [The Brain](/vant/memory/brain) - brain fundamentals for agents
+- [Sync](/vant/operations/sync) - pushing the public volume to GitHub

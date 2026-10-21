@@ -122,4 +122,9 @@ Recommended files transported between instances:
 | `qc.md` | Quality standards |
 | `gratitude.md` | Appreciation |
 
-See also: [API](/vant/reference/cli), [Multi-Agent](/vant/multi-agent/agents)
+---
+
+## Related
+
+- [Storage](/vant/reference/storage) - where archived boxes are stored
+- [Multi-Agent Crews](/vant/multi-agent/agents) - who shares a schema

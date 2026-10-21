@@ -1,68 +1,87 @@
 ---
-
 version: 0.8.6
 permalink: /advanced/efficiency
 layout: default
 title: Efficiency
-
 nav_order: 100
+description: The real efficiency levers - rate budgets, caching, batch embedding, compression, and what startup does and does not do.
 ---
 
+# Efficiency
 
-# Efficiency & Performance
+Vant's state IS your files, so most efficiency work is about not doing
+needless work: budgeting calls, caching, batching, and compressing what
+lives in the brain. Every lever below is verified against the code.
 
-> Guide to optimizing Vant for minimal API usage, fast execution, and token conservation.
+## Rate budgets
 
-## Overview
+- `vant rate` shows your GitHub API rate limit (it is what sync draws on)
+- The server layer rate limits per client: 60 requests/minute by default,
+  tunable via `lib/qos.js` (`maxPerMinute`) - see
+  [QoS](/vant/operations/qos)
+- The MCP door has its own budget path: config `qos.maxPerMinute` (see
+  [Configuration](/vant/reference/config))
 
-Vant is designed to be lightweight and efficient. This guide covers optimization strategies.
+## Cache, don't refetch
 
-## Token Optimization
+`lib/cache.js` is the process-local cache with TTL semantics, and
+`lib/tmp.js` fronts it for scratch values:
 
-### Prompt Shortening
+```javascript
+tmp.cacheSet('session', data, 3600000);  // 1 hour TTL
+const val = tmp.cacheGet('session');     // null when expired
+```
 
-- Use concise prompts
-- Avoid repetition
-- Use brain files for context
+There is no automatic HTTP conditional-get layer in the connectors today:
+if a GitHub call is hot in your loop, cache its result yourself with the
+helper above rather than waiting on the rate budget.
 
-### Context Window
+## Batch the embedding work
 
-- Load only needed brain files
-- Use succession to manage context growth
-- Archive old learnings
+`lib/embed.js` batches vectorization instead of one call per item, and
+stack-wide reindexing is a single call:
 
-## API Efficiency
+```javascript
+const embed = require('vant/lib/embed');
 
-### Rate Limiting
+await embed.generateBatch([textA, textB, textC]);  // one batch, embed:batch events
+await embed.generateBatchStack(texts);            // batch across the whole brain stack
+```
 
-- Check rate limit: `vant rate`
-- Batch requests when possible
-- Use caching
+## Compress what you keep
 
-### Batching
+- `vant compress <file_or_folder>` emits entropy-patched `.vpatch` files
+  (see [Entropy Patching](/vant/reference/entropy))
+- `vant rerank compress <file>` squeezes a results file down before it
+  feeds an LLM context (see [Rerank](/vant/advanced/rerank))
+- `vant prune` drops old or stale brain files entirely (see
+  [Pruning](/vant/memory/prune))
 
-- Group related operations
-- Reduce round trips
-- Use bulk operations
+## Trim the context, not the data
 
-## Execution Speed
+- [Succession](/vant/multi-agent/succession) is the designed mechanism for
+  handing only what the next run needs forward
+- [Memory Store](/vant/memory/memory-store) keeps facts short-lived unless
+  they are written into brain files
 
-### Startup
+## Startup: what actually happens
 
-- Skip sync if not needed: `vant start --no-sync`
-- Use local mode: `vant start --local`
-- Pre-load brain
+`vant start` runs migrate, then health, then ready - and by design it does
+NOT sync automatically (pass 121 ruling):
 
-### Caching
+- `--no-migrate` skips the layout migration check
+- `--sync` opts INTO pulling/pushing (otherwise use `vant sync` when you
+  want it)
 
-- Cache GitHub responses
-- Use etag headers
-- Avoid redundant fetches
+So the cheapest startup is already the default: `vant start` and skip
+both migration and sync explicitly only when you know why.
+
+---
 
 ## Related
 
-- [Operations](/vant/operations/operations) - CLI commands
-- [Configuration](/vant/reference/config) - Config options
-- [Architecture](/vant/essential/architecture) - System design
-- [Testing](/vant/operations/testing) - Quality assurance
-- [Troubleshooting](/vant/advanced/troubleshooting) - Problem solving
+- [QoS](/vant/operations/qos) - the per-client rate limiter and breaker
+- [Entropy Patching](/vant/reference/entropy) - compression for brain files
+- [Rerank](/vant/advanced/rerank) - context-result compression
+- [Pruning](/vant/memory/prune) - retention and aging out
+- [CLI](/vant/reference/cli) - the commands referenced above

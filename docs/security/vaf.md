@@ -66,9 +66,11 @@ vaf.CONFIG.BLOCK_PATH_TRAVERSAL;   // default true
 
 `MAX_STRING_LENGTH` and `BLOCK_PATH_TRAVERSAL` can be set in config
 (`vant config set`) and are read at load time. Other exposed validators:
-`validateString`, `validateObject`, `validateSafePath`, `checkContent`,
-`sanitizeContent`, `checkFileExtension`, `checkWordStacking`,
-`checkCommandStacking`, `sanitize`, `middleware`, `getStatus`.
+`validateString`, `validateObject`, `validateSafePath`,
+`checkPathTraversal`, `checkContent`, `sanitizeContent`,
+`checkFileExtension`, `checkWordStacking`, `checkCommandStacking`,
+`sanitize`, `middleware`, `getStatus`, plus the rate-limit seam
+`checkRateLimit`/`recordFailedAttempt`/`isBlocked` and `reset`.
 
 ## Integration
 

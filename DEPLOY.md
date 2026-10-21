@@ -59,7 +59,7 @@ That produces a `config.ini` from `config.example.ini` with keys:
 | Key | Purpose |
 |-----|---------|
 | `VANT_VERSION` | Version marker |
-| `MODEL_PATH` | Private brain root (default `models/private`) |
+| `MODEL_PATH` | Models root path (the setup wizard writes `models/private`; `config.example.ini` ships `models/public`) |
 | `STEGOFRAME_URL/ROOM/PASSPHRASE/MODE` | Transport for the stegoframe channel |
 | `GITHUB_REPO` / `GITHUB_BRANCH` | Sync target (`owner/repo`, branch) |
 | `GITHUB_TOKEN` | Placeholder reference - use the env var |

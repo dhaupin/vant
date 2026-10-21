@@ -86,6 +86,13 @@ function allowListed(rel) {
     if (rel === 'CHANGELOG.md') return true;
     if (rel === 'package-lock.json') return true;
     if (rel.startsWith('node_modules/') || rel.startsWith('.git/')) return true;
+    // (pass 296) THROWAWAY COPY TREES: test/tmp/ is the gitignored scratch
+    // for external-tool QC installs — a snapshot COPY of this very repo.
+    // Scanning a copy against the repo's own fiction ledger means the copy
+    // drags the gate red with signatures the REAL tree no longer contains,
+    // and it teaches no one anything about shipped docs. Same law for the
+    // agent scratch dir (.agent_tmp). Their truth is the source tree's.
+    if (rel.startsWith('test/tmp/') || rel.startsWith('.agent_tmp/')) return true;
     return false;
 }
 

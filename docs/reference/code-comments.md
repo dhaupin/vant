@@ -139,3 +139,10 @@ function getUser(name) {
 - [ ] No stale TODO/FIXME
 - [ ] No AI clichés
 - [ ] Short dashes (- not ,)
+
+---
+
+## Related
+
+- [Style Guide](/vant/advanced/style) - agent doxology level standards
+- [Agent Contributors](/vant/advanced/agent-contributors) - contributor rules for comments on shared code

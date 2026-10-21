@@ -57,3 +57,14 @@ const s = compute.status();
 |-------|------|
 | `compute:invoking` | Before exec |
 | `compute:invoked` | After completion |
+
+Also exported: `stopSidecars()` (tear the language sidecars down), the
+`Compute` class, and the multibrain config seams
+`getBrainComputeConfig`/`setBrainComputeConfig`/`getStackComputeConfigs`.
+
+---
+
+## Related
+
+- [CLI](/vant/reference/cli) - the `vant compute` commands
+- [Cron](/vant/operations/cron) - scheduling recur compute intervals

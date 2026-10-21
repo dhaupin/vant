@@ -4,7 +4,9 @@ permalink: /operations/storage
 layout: default
 title: Storage
 nav_order: 52
----# Storage
+---
+
+# Storage
 
 The storage module (lib/storage.js) - Vant's brain storage abstraction
 and the operations surface around it (statuses, stats, WAL, mirrors).

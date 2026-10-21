@@ -184,4 +184,12 @@ const result = await vant.think('How do I use Docker?');
 // → auto-loads python island when "Docker" detected
 ```
 
+---
+
+## Related
+
+- [Runtime](/vant/runtime/runtime) - where islands are loaded from brain modules
+- [The Brain](/vant/memory/brain) - how corpus parking and lazy islands are stored
+- [Multi-agent crews](/vant/multi-agent/agents) - the agent crew runtime that island loading neighbors
+
 See [Tutorial: Custom Islands](/vant/essential/custom-island) for full guide.

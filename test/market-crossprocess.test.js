@@ -195,6 +195,11 @@ const market = require("./lib/market");
     // ============================================
     try {
         wipe();
+        // (pass 290's #225) The sandbox budget seed no longer auto-persists,
+        // so boot no longer creates models/private/<brain>/ as a side effect.
+        // The gate-D child breaks the lock root explicitly — give it the
+        // parent brain dir so the write targets a real takeover, not ENOENT.
+        fs.mkdirSync(DIR, { recursive: true });
         const out = await runChild(`
 const boot = require("./lib/boot");
 boot.init({ taskId: "market-d", scopes: ["read", "write", "spawn", "execute"], debug: false });

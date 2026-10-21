@@ -45,34 +45,20 @@ jobs:
         env:
           JEKYLL_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download Pagefind
+      # (debloat pass) This used to be the 20-line curl-scrape-tar dance hand-
+      # copied from prestruct's docs workflow (fix: align pagefind steps with
+      # prestruct workflow). Pagefind ships an official npm distribution now
+      # (binary behind os-arch optional deps), so the block is one install:
+      # no GitHub-API scrape to rate-limit, no hand-fetched tarball, no arch
+      # guess. Pinned mutable-latest = the version the npm registry serves,
+      # same posture as the prestruct docs site it came from.
+      - name: Install Pagefind (npm)
         working-directory: docs
-        run: |
-          # Unauthenticated api.github.com calls from shared runner IPs get
-          # rate-limited; an empty VERSION then yields a malformed asset URL
-          # whose 404 HTML body makes tar fail with "not in gzip format".
-          # Send the workflow token on the scrape and REFUSE to continue on
-          # an unparseable tag instead of downloading garbage.
-          VERSION=$(curl -sL \
-            -H "Authorization: Bearer ${{ github.token }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/Pagefind/pagefind/releases/latest" \
-            | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
-          case "$VERSION" in
-            [0-9]*.[0-9]*.[0-9]*) ;;
-            *) echo "::error::Could not resolve the latest pagefind tag (got '$VERSION') — likely an API failure."; exit 1 ;;
-          esac
-          echo "pagefind version: v${VERSION}"
-          curl -sL --retry 3 --retry-delay 5 \
-            "https://github.com/pagefind/pagefind/releases/download/v${VERSION}/pagefind-v${VERSION}-x86_64-unknown-linux-musl.tar.gz" \
-            -o pagefind.tar.gz
-          tar -xzf pagefind.tar.gz
-          rm pagefind.tar.gz
-          chmod +x pagefind
+        run: npm i --no-save --no-audit --no-fund pagefind
 
       - name: Create search index
         working-directory: docs
-        run: ./pagefind --site _site
+        run: npx pagefind --site _site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

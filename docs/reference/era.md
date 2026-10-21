@@ -1,9 +1,8 @@
 ---
-title: "Era"
-description: "The resumable incarnation ledger - one record per wake (issues #177 to #179)"
-nav: 12
+title: Era
+description: The resumable incarnation ledger - one record per wake (issues #177 to #179)
 version: "0.8.6"
-permalink: /reference/era/
+permalink: /reference/era
 layout: default
 nav_order: 12
 ---
@@ -131,3 +130,11 @@ cross-process persistence across THREE real child processes (open, fold, die;
 resume+close, verify archive integrity), double-open refusal, tamper
 detection on a mutated rollup, and the MCP door loop. `test/e2e-grand-tour`
 gates the registry count.
+
+---
+
+## Related
+
+- [CLI](/vant/reference/cli) - the `vant era` commands
+- [Settlement](/vant/operations/settlement) - the rollup flow era archives
+- [Horcrux](/vant/memory/horcrux) - brain snapshots era wraps

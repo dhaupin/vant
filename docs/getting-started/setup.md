@@ -156,3 +156,11 @@ Check server is running: `vant health`
 
 Set up TLS certificates (see [TLS Setup](#tls-setup) above); the dev server
 also accepts `VANT_SERVER_INSECURE=1` for plain HTTP.
+
+---
+
+## Related
+
+- [Install](/vant/getting-started/install) - installation methods and requirements
+- [Quick Start](/vant/getting-started/quick-start) - the fastest path from install to a working brain
+- [Troubleshooting](/vant/advanced/troubleshooting) - the deeper error playbook

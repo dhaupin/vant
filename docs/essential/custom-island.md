@@ -23,24 +23,28 @@ Islands let you lazy-load brain components:
 
 ## Default Islands
 
-Vant comes with built-in islands:
+Vant comes with built-in islands (`DEFAULT_ISLANDS` in `lib/islands.js`):
 
-| Island | Triggers |
-|--------|---------|
-| identity | always |
-| learnings | always |
-| decisions | always |
-| github | "github", "pr", "issue" |
-| gitlab | "gitlab", "merge" |
-| bitbucket | "bitbucket" |
-| linear | "linear", "project" |
-| automation | "cron", "schedule" |
+| Island | Type | Triggers |
+|--------|------|---------|
+| identity | static (always) | - |
+| learnings | static (always) | - |
+| decisions | static (always) | - |
+| github | lazy | "github", "pr", "issue", "push", "repo", "commit", "branch" |
+| gitlab | lazy | "gitlab", "merge", "mr" |
+| bitbucket | lazy | "bitbucket" |
+| linear | lazy | "linear", "project", "issue", "tracker" |
+| trust | lazy | "trust", "reputation", "score" |
+| market | lazy | "market", "trade", "listing", "bid" |
+| evolution | lazy | "evolution", "session", "insight", "learning" |
 
 ## Create Custom Island
 
 ### Step 1: Extend Islands
 
-Add new islands by editing `DEFAULT_ISLANDS` in `lib/islands.js`:
+The no-fork path is `vant.islands.createIsland(name, { type, triggers })`
+(shown under [Island Manifest](#island-manifest) below); editing
+`DEFAULT_ISLANDS` in `lib/islands.js` is the fork-and-ship alternative:
 
 ```javascript
 const DEFAULT_ISLANDS = {
@@ -116,37 +120,26 @@ const all = vant.islands.getAvailable();
 
 ## Island Manifest
 
-Save island configuration to `islands.json`:
+Islands live in a manifest (`islands.json` under the brain root) merged
+over `DEFAULT_ISLANDS` at load time. The public way to add one is
+`createIsland` - it validates, registers the definition, and stamps a
+brain file for static islands:
 
 ```javascript
 const vant = require('vant');
 
-vant.islands.saveManifest({
-    version: '1.0',
-    islands: {
-        herbalism: {
-            name: 'Herbalism',
-            triggers: ['herb', 'plant'],
-            autoLoad: false
-        }
-    }
+vant.islands.createIsland('herbalism', {
+    type: 'lazy',
+    triggers: ['herb', 'plant']
 });
+// → { name: 'herbalism', type: 'lazy', triggers: ['herb', 'plant'] }
+
+// Triggers are adjustable later
+vant.islands.updateTriggers('herbalism', ['herb', 'plant', 'medicine']);
 ```
 
-## Multi-Trigger Islands
-
-Add more triggers in `DEFAULT_ISLANDS`:
-
-```javascript
-const DEFAULT_ISLANDS = {
-    // ... existing islands ...
-    database: { 
-        name: 'Database', 
-        type: 'lazy', 
-        triggers: ['sql', 'postgres', 'mysql', 'database', 'db'] 
-    },
-};
-```
+(There is no exported `saveManifest` - `save(name, data)` persists
+island DATA into the registered island's storage slot.)
 
 ## Use Cases
 

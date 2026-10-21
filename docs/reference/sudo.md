@@ -58,3 +58,11 @@ The mapping matters because sandbox verdicts consult scopes:
 this was mapped at the grant site, a granted `canSpawn` could never
 satisfy a `canSpawn` check (the escalation path was disconnected;
 fixed in pass 119 and pinned by the E2E grand tour gate).
+
+---
+
+## Related
+
+- [Sudo Concepts](/vant/essential/sudo) - levels, grants, and approval flows
+- [Audit](/vant/advanced/audit) - where sudo captures its decisions
+- [Best Practices](/vant/security/best-practices) - the request-approval pattern this implements

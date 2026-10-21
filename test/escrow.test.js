@@ -7,6 +7,12 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
+// (pass 287) the escrow lib writes through state-store's PATH-ACTIVE
+// resolver (VANT_BRAIN env > models/state.json > 'vant'); the disk pin
+// below hardcoded 'vant', so an env-scoped run level-failed with ENOENT
+// while the lib wrote the right file. Capture BEFORE any chdir.
+const { resolveActiveBrain } = require('./active-brain');
+const ACTIVE_BRAIN = resolveActiveBrain(ROOT);
 
 const results = { passed: 0, failed: 0, skipped: 0, tests: [] };
 
@@ -249,7 +255,7 @@ test('#204/#257 disk-coherent burn: consumed approval never resurrects from disk
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-escrow-i5b-'));
     try {
         const dir = path.join(tmp, 'models', 'private');
-        fs.mkdirSync(dir, { recursive: true });
+        fs.mkdirSync(path.join(dir, ACTIVE_BRAIN), { recursive: true });
         process.chdir(tmp);
 
         // 1) mint + persist on one instance — the disk row EXISTS before the burn
@@ -265,7 +271,7 @@ test('#204/#257 disk-coherent burn: consumed approval never resurrects from disk
         e2.save();
 
         // the disk row itself must be gone (the tombstone applied to the union)
-        const disk = JSON.parse(fs.readFileSync(path.join(dir, 'vant', 'orgchart', 'escrow.json'), 'utf8'));
+        const disk = JSON.parse(fs.readFileSync(path.join(dir, ACTIVE_BRAIN, 'orgchart', 'escrow.json'), 'utf8'));
         if (disk.approvals && disk.approvals[req.approvalId]) {
             return { success: false, error: 'consumed approval still on disk (union resurrected it)' };
         }

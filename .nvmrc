@@ -1,4 +1,9 @@
 # Node.js version for Vant
 # Use with nvm: nvm use
 # Or in CI: nvm install && nvm use
-20
+# (pass 286) was 20 - the Pages builder took this to heart and
+# installed an EOL node (deploy log: 'WARNING: node-v20.20.0 is past
+# its end of life'), which also tripped npm EBADENGINE for vitest@5
+# (engines require ^22 || ^24 || >=26). 22 is active LTS; 24 is
+# accepted too. Sandbox runs v22 already.
+22

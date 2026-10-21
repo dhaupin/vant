@@ -126,6 +126,8 @@ function listPrunable(args) {
 async function runDaemon(args) {
     const intervalOption = args.find(a => a.startsWith('--interval='));
     const interval = intervalOption ? parseInt(intervalOption.slice(11)) : 24 * 60 * 60 * 1000; // 24h default
+    const staleDaysOption = args.find(a => a.startsWith('--stale-days='));
+    const staleDays = staleDaysOption ? parseInt(staleDaysOption.slice(13)) : 90;
     
     const verbose = args.includes('--verbose');
     
@@ -133,7 +135,13 @@ async function runDaemon(args) {
     
     async function tick() {
         try {
-            const stats = await prune.prune({ staleDays: 90, removeFluff: true });
+            const stats = await prune.prune({
+                staleDays,
+                removeFluff: true,
+                // lib/prune fail-closes without a userCtx; the daemon runs
+                // under its own admin identity, same as a CLI operator
+                userCtx: { role: 'admin', id: 'prune-daemon' }
+            });
             
             if (verbose || stats.staleRemoved > 0 || stats.fluffRemoved > 0) {
                 console.log(`[Prune] ${new Date().toISOString()}`);
@@ -170,7 +178,7 @@ Options:
   --stale-days=<n>   Age threshold (default: 90)
   --interval=<ms>     Daemon interval in ms (default: 24h)
   --verbose          Verbose output
-  --force           Force non-dry-run (requires --daemon)
+  --force           Force non-dry-run (a plain run is a dry run without it)
 
 Examples:
   # Preview what would be pruned

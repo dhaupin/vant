@@ -20,6 +20,15 @@
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
+// (pass 292) The order-independence seam: suites leak into the surfaces the
+// whole sweep shares — models/state.json (the active-brain pointer) and the
+// active brain's private/public trees. Suite N became suite N+1's
+// environment (guests tripped agents.maxAgents on a roster the prior run
+// left; teams-refresh ENOENTed on a state.json a pilot left pointing at
+// another brain). restoreSlate before EVERY suite pins every suite to the
+// same baseline whatever the order; the final restore leaves the workspace
+// exactly as the sweep found it.
+const slate = require('./slate');
 
 const ROOT = path.resolve(__dirname, '..');
 const TEST_DIR = path.join(__dirname);
@@ -32,6 +41,14 @@ const getOpt = (name) => {
 };
 const only = getOpt('only') ? getOpt('only').split(',') : null;
 const skip = getOpt('skip') ? getOpt('skip').split(',') : [];
+// (pass 293) Alphabetical range chunking: --from/--to bounds on the SORTED
+// suite list (lexicographic on filenames, inclusive both ends). The
+// substring --only filter classification is coarse for full-sweep runs
+// (one-letter chunks fan out to almost every suite), and host command
+// budgets need the 217-suite wall split; ranges keep every suite still
+// running through the SAME harness (baseline restore before and after).
+const fromOpt = getOpt('from');
+const toOpt = getOpt('to');
 const asJson = args.includes('--json');
 const listOnly = args.includes('--list');
 
@@ -39,6 +56,7 @@ const suites = fs.readdirSync(TEST_DIR)
     .filter((f) => f.endsWith('.test.js'))
     .filter((f) => !only || only.some((s) => f.includes(s)))
     .filter((f) => !skip.some((s) => f.includes(s)))
+    .filter((f) => (!fromOpt || f >= fromOpt) && (!toOpt || f <= toOpt))
     .sort();
 
 if (listOnly) {
@@ -49,6 +67,19 @@ if (listOnly) {
 
 const results = [];
 console.log(`\n🧪 VANT FULL-SUITE SWEEP — ${suites.length} suites\n`);
+
+// Pristine baseline BEFORE the first suite runs — never inside the loop, so
+// a suite's own pre-loop mutations are captured, not discarded.
+let sweepSlate = null;
+try { sweepSlate = slate.captureSlate(ROOT); } catch (e) {
+    console.error(`⚠  slate capture failed (${e.message}) — sweeping UNGUARDED (order may matter)`);
+}
+function _guardRestore(via) {
+    if (!sweepSlate) return;
+    try { slate.restoreSlate(null, sweepSlate); } catch (e) {
+        console.error(`⚠  slate restore (${via}) failed: ${e.message}`);
+    }
+}
 
 for (const suite of suites) {
     const started = Date.now();
@@ -90,6 +121,24 @@ for (const suite of suites) {
     results.push({ suite, status, ms, detail });
     const icon = status === 'PASS' ? '✓' : status === 'TIMEOUT' ? '⏱' : '✗';
     console.log(`  ${icon} ${suite.padEnd(36)} ${(ms / 1000).toFixed(1)}s${detail ? '  ' + detail : ''}`);
+    // NEXT SUITE STARTS FROM THE BASELINE — the suite's leak (especially a
+    // failed/timeouted one) can never become the next suite's environment.
+    _guardRestore(suite);
+}
+
+// Leave the workspace exactly as the sweep found it: brain pointer,
+// active-brain trees reinstalled byte-exact, suite-created residue gone —
+// and (pass 293) throwaway scratch brains the sweep minted swept too.
+// Pre-existing brain dirs are never touched (scratch-manifest law).
+_guardRestore('sweep-exit');
+let swept = { removed: [] };
+try { swept = slate.cleanupScratch(null, sweepSlate); } catch (e) {
+    console.error(`⚠  scratch cleanup failed: ${e.message}`);
+}
+slate.freeSlate(sweepSlate);
+sweepSlate = null;
+if (swept.removed.length > 0) {
+    console.log(`\n  🧹 scratch cleanup: ${swept.removed.length} sweep-minted brain dir(s) removed:\n    ` + swept.removed.join('\n    '));
 }
 
 const passed = results.filter((r) => r.status === 'PASS');

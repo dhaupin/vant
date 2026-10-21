@@ -188,3 +188,11 @@ vant.VERSION      // Version string
 | LOCKED | Brain is locked |
 | ERROR | Operation error |
 | RETRY_EXHAUSTED | No more retries |
+
+---
+
+## Related
+
+- [Runtime](/vant/runtime/runtime) - the conceptual API overview
+- [CLI](/vant/reference/cli) - the command surface over the same core
+- [Errors](/vant/reference/errors) - interpreting thrown codes in code

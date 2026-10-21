@@ -52,9 +52,10 @@ The essentials you need to know.
 
 ### GitHub Terms
 
-- No automated polling
-- No using as database
-- Rate limits apply
+- Automate politely - polling is fine but rate-limited (`vant watch`
+respects the API limits)
+- Don't use a repo as an unlimited raw database
+- API limits apply
 - Token can be revoked
 
 ---
@@ -72,7 +73,8 @@ Read these in order:
 ## Quick Links
 
 - [MIT License](https://github.com/dhaupin/vant/blob/main/LICENSE) - Code license
-- [README](/vant/reference/) - Project overview
+- [Docs Home](/vant/) - Project overview
+- [API Reference](/vant/reference/) - the module surface
 - [Security](/vant/security/) - Security practices
 - [GitHub Terms](https://docs.github.com/en/github/site-policy) - Full policies
 
@@ -91,3 +93,10 @@ Read these in order:
 These documents may change. Your continued use = acceptance.
 
 Check dates on each document.
+
+---
+
+## Related
+
+- [Best Practices](/vant/security/best-practices) - data handling obligations
+- [Audit](/vant/advanced/audit) - where legal events land

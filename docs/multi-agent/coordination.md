@@ -2,11 +2,11 @@
 version: 0.8.6
 permalink: /multi-agent/coordination
 layout: default
-title: Multi-Agent System
+title: Multi-Agent Coordination
 nav_order: 50
 ---
 
-# Tutorial: Multi-Agent Coordination
+# Multi-Agent Coordination
 
 > Build a team of AI agents that work together without conflicts
 
@@ -146,5 +146,5 @@ Coordination patterns for multi-agent.
 ## Related
 
 - [Multi-Agent Guide](/vant/multi-agent/agents) - Full guide
-- [Lock API](/vant/reference/cli) - Lock module
-- [Branch API](/vant/reference/cli) - Branch module
+- [Locking](/vant/operations/locks) - the lock module deep-dive
+- [Branches](/vant/multi-agent/branches) - the branch API deep-dive

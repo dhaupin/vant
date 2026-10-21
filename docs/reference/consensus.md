@@ -27,6 +27,7 @@ Topics are identified by a topic name (e.g. `forum-q3-call-abc123`):
 | `getStats()` | sync | Voting stats |
 | `hasVoted(topic, agentId)` / `verify(...)` / `checksum(topic)` | integrity |
 | `peerVerify(...)` | cross-node vote verification |
+| `on(event, cb)` / `emit(event, data)` | listener seam for connect events |
 | `exportTopic(topic)` / `mergeTopic(topic, data)` / `reapSynced()` | agora-sync seams |
 
 ## Topic States
@@ -62,3 +63,11 @@ const result = consensus.tally('q3-call');
 | `vote:cast` | New vote |
 | `proposal:created` | Proposal created |
 | `proposal:resolved` | Resolved |
+
+---
+
+## Related
+
+- [Federation](/vant/multi-agent/federation) - how multi-vant consensus extends
+- [Agora](/vant/operations/agora) - the local vote layer consensus rides on
+- [Resolution](/vant/reference/resolution) - the dispute-resolution module consensus feeds

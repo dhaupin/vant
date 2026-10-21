@@ -356,3 +356,11 @@ drafted by an agent (pass 76), framed by a PRD the owner answered in
 his own words, and verified - every link above checked against the
 repository. It will evolve in future passes as the system does,
 without drifting from its record.*
+
+---
+
+## Related
+
+- [Architecture](/vant/essential/architecture) - the technical complement to this philosophy
+- [Succession](/vant/multi-agent/succession) - agent handoffs in practice
+- [Agent Contributors](/vant/advanced/agent-contributors) - becoming a first-class contributor

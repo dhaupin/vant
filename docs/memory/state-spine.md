@@ -208,3 +208,9 @@ mesh, RAID + storage tier suites). Layered on top you will find:
 [hcom/federation](/vant/multi-agent/federation) uses the tree for
 cross-node presence/authority; [horcrux](/vant/memory/horcrux) rides
 brain-verify for its export/verify contract.
+
+## Related
+
+- [Memory Store](/vant/memory/memory-store) - the KV layer above the spine
+- [Horcrux](/vant/memory/horcrux) - the transport that rides brain-verify
+- [Memory](/vant/memory/) - the section overview

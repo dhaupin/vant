@@ -45,3 +45,10 @@ registry.heartbeat('acme-1');
 // List all
 const all = registry.list();
 ```
+
+---
+
+## Related
+
+- [Buses](/vant/reference/stream) - the striped bus the node registry sizes
+- [Multi-Agent Crews](/vant/multi-agent/agents) - agent process topology

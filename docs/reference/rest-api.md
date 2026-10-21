@@ -2,21 +2,34 @@
 version: 0.8.6
 permalink: /reference/rest-api
 layout: default
-title: REST API Reference
+title: Headless Server & REST API
 nav_order: 115
-description: The embedder HTTP surface - brain, stream, trust, and market routes over lib/server.js.
+description: The headless server - booting, security chain, and every built-in plus registered route, all verified against lib/server.js.
 ---
 
-# REST API Reference
+# Headless Server & REST API
 
-The REST surface is the embedder door: plain HTTP routes on `lib/server.js`,
-registered by `lib/api.js`. Every route is a thin proxy to an MCP tool, so a
-response is simply that tool's result JSON. The bind is loopback by default.
+The headless server is the embedder door: plain HTTP routes on
+`lib/server.js`, registered by `lib/api.js`. It is how CI, containers, and
+any non-Node client drive Vant. Every registered route is a thin proxy to
+an MCP tool, so a response is simply that tool's result JSON - the MCP door
+(port 3457) stays the tool catalog; the REST sidecar's own `/tools` is
+retired (`410 Gone`, issue #187).
 
-For the protocol view of all Vant wires (including the MCP tool door and the
-crew bus), see [RPC](/vant/advanced/rpc).
+For the protocol view of all Vant wires (MCP tool door, REST, crew bus),
+see [RPC](/vant/advanced/rpc).
 
 ## Booting it
+
+```bash
+# Start the server (CLI)
+vant server
+
+# With TLS (production)
+vant server --cert /path/to/cert.pem --key /path/to/key.pem
+```
+
+Or programmatically:
 
 ```javascript
 const api = require('vant/lib/api');
@@ -28,22 +41,84 @@ await api.startREST({ port: 3456 });
 await api.startAll();
 ```
 
-Ports come from `VANT_SERVER_PORT` (default 3456) and `VANT_MCP_PORT`
-(default 3457). TLS turns on automatically when `VANT_SERVER_CERT` and
-`VANT_SERVER_KEY` are set; `VANT_SERVER_BIND` widens the bind off loopback
-deliberately.
+The `lib/server.js` class is also directly constructable:
+
+```javascript
+const { Server } = require('vant/lib/server');
+
+const server = new Server({
+  port: 3456,
+  host: '0.0.0.0',
+  cert: '/path/to/cert.pem',
+  key: '/path/to/key.pem',
+  authRequired: true,
+});
+
+server.on('listening', (addr) => {
+  console.log(`Server on ${addr.host}:${addr.port}`);
+});
+
+await server.listen();
+```
+
+## Environment variables
+
+| Variable | Description | Default |
+|----------|------------|---------|
+| `VANT_SERVER_PORT` | REST port | 3456 |
+| `VANT_MCP_PORT` | MCP door port | 3457 |
+| `VANT_SERVER_BIND` | Bind address | 127.0.0.1 |
+| `VANT_SERVER_CERT` | TLS certificate path | unset |
+| `VANT_SERVER_KEY` | TLS key path | unset |
+| `VANT_SERVER_INSECURE` | Set to `1` to allow plain HTTP | unset |
+| `VANT_SERVER_AUTH_REQUIRED` | Set to `1` to require auth | unset |
+| `VANT_AUTH_KEY` | The API key callers must present | unset |
+
+TLS turns on automatically when `VANT_SERVER_CERT` and `VANT_SERVER_KEY`
+are both set; `VANT_SERVER_BIND` widens the bind off loopback deliberately.
 
 ## Request pipeline
 
 Every request passes the server's security chain before a route runs:
 
-1. VAF input validation on the URL and the body
-2. QoS rate limiting per client; responses carry `X-RateLimit-Limit` and
-   `X-RateLimit-Remaining` headers (remaining is a static placeholder today)
-3. API key check when `VANT_SERVER_AUTH_REQUIRED=1` (or the
-   `server.authRequired` config): the `x-api-key` header must carry a valid
-   key
-4. Every response carries an `X-Request-Id` header for tracing
+1. **VAF** - input validation on the URL and the body (path traversal,
+   injection, size guards)
+2. **QoS** - rate limiting plus concurrency: per-client rate limit
+   (60/min default), a circuit breaker that opens after 5 consecutive
+   failures and retries after 60s, and a bulkhead capping concurrent
+   requests at 10. Responses carry `X-RateLimit-Limit` and
+   `X-RateLimit-Remaining` headers (remaining is a static placeholder
+   today)
+3. **API key check** - when `VANT_SERVER_AUTH_REQUIRED=1` (or the
+   `server.authRequired` config), the `x-api-key` header must carry a
+   valid key. `VANT_AUTH_KEY` is the canonical source;
+   `VANT_API_KEY` still works as a deprecated alias (warn-once)
+4. **Escrow** - per-request budget tracking; each request costs 10 and
+   is blocked when the budget is exhausted
+5. Every response carries an `X-Request-Id` header for tracing, plus
+   the security headers
+
+Security headers on every response: `Content-Security-Policy: default-src
+'self'`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
+`X-XSS-Protection: 1; mode=block`, `Strict-Transport-Security` (on TLS),
+`Referrer-Policy: strict-origin-when-cross-origin`.
+
+The QoS knobs are administrable in-process:
+
+```javascript
+const { QoS } = require('vant/lib/qos');
+
+const qos = new QoS({
+  maxPerMinute: 120,   // rate limit
+  threshold: 5,        // circuit breaker: failures before open
+  timeout: 60000,      // ms before the breaker retries
+  concurrency: 10,     // bulkhead max concurrent
+});
+
+await qos.check('client-id', 'read');
+await qos.execute(async () => someOperation());
+qos.getLayerStatus();
+```
 
 ---
 
@@ -137,3 +212,4 @@ characters); a save returns `{ saved: true, name: "..." }`.
 - [RPC](/vant/advanced/rpc) - the wire map: MCP door, REST, crew bus
 - [MCP Server](/vant/runtime/mcp) - running and securing the tool door
 - [CLI Reference](/vant/reference/cli) - the `vant api` utility CLI
+- [Docker](/vant/integrations/docker) - containerized deployment of the server

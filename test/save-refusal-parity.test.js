@@ -48,6 +48,12 @@ const BRAIN = path.join(ROOT, 'models', 'private', 'qc-parity');
 const GLOBAL_ROOT = path.join(ROOT, 'models', '.locks-global');
 const BRAIN_ROOT = path.join(BRAIN, '.locks');
 fs.rmSync(BRAIN, { recursive: true, force: true });
+// (pass 290's #225) The default-sandbox budget seed no longer auto-persists,
+// so nothing at boot creates models/private/<brain>/ for us. The broken-
+// root technique below needs the PARENT brain dir to exist (a file at a
+// missing parent is ENOENT, not a lock-root takeover) — create it here,
+// then breakRoot/fixRoot do lock-root surgery as before.
+fs.mkdirSync(BRAIN, { recursive: true });
 
 require(path.join(ROOT, 'lib', 'sandbox')).defaultSandbox.setCapabilities({
     canRead: true, canWrite: true, canNetwork: true, canTrade: true, canSpawn: true

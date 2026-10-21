@@ -73,8 +73,15 @@ function lastLine(out) {
     return lines[lines.length - 1] || '';
 }
 
-const trustPath = path.join(ROOT, 'models/private/vant/state/trust.json');
-const msgPath = path.join(ROOT, 'models/private/vant/state/msg-conversations.json');
+// (pass 290) the archive-A stores are BRAIN-SCOPED and the libs resolve
+// through the path-active resolver (VANT_BRAIN env > state.json currentBrain
+// field > stack head > 'vant') — hardcoding 'vant' here made every env/different-field-scoped run write to one brain while this suite asserted
+// another (the exact stale seam the earlier QC rounds stripped elsewhere;
+// this file just never got the share). Use the shared active-brain seam.
+const ACTIVE_BRAIN = require('./active-brain').resolveActiveBrain(ROOT);
+function statePath(file) { return path.join(ROOT, 'models', 'private', ACTIVE_BRAIN, file); }
+const trustPath = statePath(path.join('state', 'trust.json'));
+const msgPath = statePath(path.join('state', 'msg-conversations.json'));
 
 const CHILD_TRUST_WRITE = `
 const trust = require(${JSON.stringify(path.join(ROOT, 'lib/trust.js'))});
@@ -168,7 +175,7 @@ async function main() {
     console.log('\n🧠 PROTOCOL STATE PERSISTENCE TESTS (Wave 2)\n');
 
     // Clean slate
-    fs.rmSync(path.join(ROOT, 'models/private/vant/state'), { recursive: true, force: true });
+    fs.rmSync(path.join(ROOT, 'models', 'private', ACTIVE_BRAIN, 'state'), { recursive: true, force: true });
 
     // ---------- trust ----------
     await test('trust: round-trip across a real process death', async () => {
@@ -226,7 +233,7 @@ try {
     });
 
     await test('trust: corrupt file = warn + fresh, never crash', async () => {
-        fs.mkdirSync(path.join(ROOT, 'models/private/vant/state'), { recursive: true });
+        fs.mkdirSync(path.join(ROOT, 'models', 'private', ACTIVE_BRAIN, 'state'), { recursive: true });
         fs.writeFileSync(trustPath, '{corrupt!!');
         const r = await run(CHILD_TRUST_CORRUPT);
         const d = parseJsonOut(r.out);
@@ -291,8 +298,61 @@ console.log(JSON.stringify({ channelMsgs: msg.channelMessages('wave2-channel').l
         assert(leakLine && leakLine.endsWith('false'), 'peer secret must never leak through gather');
     });
 
+    // ---------- #224: ONE source of truth for the current brain ----------
+    // The field in models/state.json is the AUTHORITY on load; the stack head
+    // is only the fallback. Before pass 290 a fresh process booted on
+    // stack[0] even when the field said otherwise, so brain-registry status
+    // (lib getter) and state.json (the field operators read) disagreed.
+    const BRAIN_STATE_SWAP = `
+const fs = require('fs');
+const path = require('path');
+const ROOT = process.cwd();
+const STATE = path.join(ROOT, 'models', 'state.json');
+const orig = fs.readFileSync(STATE, 'utf8');
+fs.writeFileSync(STATE, JSON.stringify({ stack: ['qc224-stackhead', 'vant'], currentBrain: 'vant' }));
+try {
+    const { spawnSync } = require('child_process');
+    delete require.cache[require.resolve(path.join(ROOT, 'lib', 'brain.js'))];
+    const brain = require(path.join(ROOT, 'lib', 'brain.js'));
+    const libCurrent = brain.getCurrentBrain ? brain.getCurrentBrain() : brain.currentBrain();
+    const cli = spawnSync(process.execPath, [path.join(ROOT, 'bin', 'brain-registry.js'), 'status'], {
+        cwd: ROOT, encoding: 'utf8',
+        env: Object.assign({}, process.env, { VANT_BRAIN: '' }) // do not let the env seam mask the on-disk disagreement
+    });
+    const cliCurrent = (cli.stdout.match(/Current:\\s*(\\S+)/) || [])[1];
+    console.log(JSON.stringify({ libCurrent, cliCurrent }));
+} finally { fs.writeFileSync(STATE, orig); }
+`;
+    await test('#224: state.json currentBrain field is the ONE truth (stack head demoted to fallback)', async () => {
+        const r = await run(BRAIN_STATE_SWAP);
+        assert(r.code === 0, 'swap child exited ' + r.code + ': ' + r.err.slice(0, 200));
+        const d = JSON.parse(lastLine(r.out));
+        assert(d.libCurrent === 'vant', 'lib loaded stack head instead of the field: ' + d.libCurrent);
+        assert(d.cliCurrent === 'vant', 'brain-registry status disagreed with the field: ' + d.cliCurrent);
+    });
+
+    const BRAIN_STATE_FALLBACK = `
+const fs = require('fs');
+const path = require('path');
+const ROOT = process.cwd();
+const STATE = path.join(ROOT, 'models', 'state.json');
+const orig = fs.readFileSync(STATE, 'utf8');
+fs.writeFileSync(STATE, JSON.stringify({ stack: ['qc224-stackhead', 'vant'] }));
+try {
+    delete require.cache[require.resolve(path.join(ROOT, 'lib', 'brain.js'))];
+    const brain = require(path.join(ROOT, 'lib', 'brain.js'));
+    const libCurrent = brain.getCurrentBrain ? brain.getCurrentBrain() : brain.currentBrain();
+    console.log(JSON.stringify({ libCurrent }));
+} finally { fs.writeFileSync(STATE, orig); }
+`;
+    await test('#224: no currentBrain field -> the stack head keeps working as the fallback', async () => {
+        const r = await run(BRAIN_STATE_FALLBACK);
+        assert(r.code === 0, 'fallback child exited ' + r.code + ': ' + r.err.slice(0, 200));
+        assert(JSON.parse(lastLine(r.out)).libCurrent === 'qc224-stackhead', 'stack-head fallback broke: ' + r.out.slice(0, 200) + ' ' + r.err.slice(0, 200));
+    });
+
     // Cleanup
-    fs.rmSync(path.join(ROOT, 'models/private/vant/state'), { recursive: true, force: true });
+    fs.rmSync(path.join(ROOT, 'models', 'private', ACTIVE_BRAIN, 'state'), { recursive: true, force: true });
 
     console.log(`\n${'='.repeat(50)}`);
     console.log(`Protocol state persistence: ${results.passed} passed, ${results.failed} failed`);

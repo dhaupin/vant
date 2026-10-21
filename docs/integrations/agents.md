@@ -30,7 +30,8 @@ const agents = require('vant').agents;
 
 ## Spawn Agent
 
-Spawn a new agent (the crew limit applies, default 4: you plus three coworkers):
+Spawn a new agent (the roster cap applies - `agents.maxAgents`, default 10,
+configurable per install via `VANT_AGENTS_MAX`):
 
 ```javascript
 const agent = agents.spawn({

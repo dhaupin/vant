@@ -28,6 +28,10 @@ Creative output engine - generates geometry art for sharing.
 | `vote/voteSecured/getVote` | Canvas vote records |
 | `listStack/loadStack` | Multibrain stack access |
 
+Also exported: `getCanvasPath(name)`, `getState()`,
+`generateHorcruxTemplate(options)` (horcrux template art), and the art
+pack door `renderStoneArt(options)` / `artPacks()` (pack names).
+
 ## Usage
 
 ```javascript
@@ -58,3 +62,10 @@ The one implemented effect:
 
 (`blur`, `invert`, `grayscale` were listed but never implemented -
 `applyEffect` only handles `glow`.)
+
+---
+
+## Related
+
+- [Leisure](/vant/memory/leisure) - where canvas artwork lives in brain memory
+- [CLI](/vant/reference/cli) - the `vant canvas` commands

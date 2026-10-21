@@ -71,7 +71,7 @@ escape `models/private/<cleaned>/`).
 | Role | Capabilities (sandbox vocabulary) | Meant for |
 |---|---|---|
 | `observer` | read, load, list | read-only watcher; a malicious client cannot mutate |
-| `human` | read, load, list, write | the operator's dashboard UI |
+| `human` | read, load, list, write, spawn | the operator's dashboard UI (the #185 acceptance: the dashboard assigns and SPAWNS work) |
 | `agent` | read, load, list, write, exec, spawn | a working peer agent |
 
 - `scopeOwner` is a `lib/scope.js` owner ref (`org:`/`dept:`/`team:`/`agent:`,
@@ -203,3 +203,10 @@ dashboard renders the typed refusal verbatim when a guest's trust
 *Transport-level security (loopback binds, TLS, requireKey) is unchanged and
 removes nothing: [MCP Server](/vant/runtime/mcp) covers running and
 tightening the door itself.*
+
+---
+
+## Related
+
+- [MCP Server](/vant/runtime/mcp) - the door the guest auth rides on
+- [VAF](/vant/security/vaf) - input validation at the door

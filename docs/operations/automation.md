@@ -98,6 +98,6 @@ console.log(queue.get(job.id).state);  // track completion
 
 ---
 
-## More
+## Related
 
 See [Cron](/vant/operations/cron) and [Events](/vant/operations/events) for details.

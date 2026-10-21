@@ -368,3 +368,11 @@ Two different things share the word "state":
 ## Version
 
 - v0.8.6
+
+---
+
+## Related
+
+- [Storage Operations](/vant/operations/storage) - statuses, stats, WAL, mirrors
+- [Prune](/vant/memory/prune) - retention over the brain storage
+- [Remote Push/Pull](/vant/operations/sync) - how storage snapshots travel

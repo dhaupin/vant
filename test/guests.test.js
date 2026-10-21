@@ -42,6 +42,18 @@ function test(name, fn) {
 
 console.log('\n🎟️  GUESTS TESTS (H1 of #185 — per-identity multi-guest auth)\n');
 
+// (pass 287 QC) Async-aware pin helper for the door-integration section: the
+// sync `test()` above counts a pass BEFORE the promise it holds settles, so
+// an async assert rejection surfaced as an unhandled rejection while the
+// tally said pass (the H5 ancestry pin hid its quota failure exactly this
+// way.) An async pin AWAITS in place: callers `await testA(...)` so the
+// tally can never claim a pin the promise hasn't honored.
+function testA(name, fn) {
+    return Promise.resolve().then(fn)
+        .then(() => { passed++; console.log('  ✓ ' + name); })
+        .catch((e) => { failed++; console.log('  ✗ ' + name + ' — ' + (e.message || e)); });
+}
+
 const BRAIN = 'gstest';
 const OPT = { brain: BRAIN };   // the throwaway-brain opts every pin below rides
 
@@ -199,7 +211,13 @@ async function asyncIntegrations() {
     // The DOOR resolves guests against the ACTIVE brain (it has no brain
     // override — in production there is exactly one). So this test uses the
     // active brain's ledger (guests.issue default), not a scratch brain.
-    const active = (() => { try { return require(path.join(ROOT, 'lib', 'brain')).getCurrentBrain(); } catch (e) { return 'vant'; } })();
+    // (pass 287) the ACTIVE name is the path-active seam (VANT_BRAIN env >
+    // state.json > 'vant') — the bare getCurrentBrain() here was the same
+    // stale resolver the lib just moved OFF (see the pass-287 note in
+    // lib/guests.js _brainName), so env-scoped runs issued guests into the
+    // env brain while this read looked at the stack-head brain.
+    const { resolveActiveBrain } = require('./active-brain');
+    const active = resolveActiveBrain(ROOT);
     const DOPT = { brain: active };
     try { guests._resetForTest(); } catch (e) {}
     const prevLedger = (() => { try { return fs.readFileSync(guests._ledgerPath(active), 'utf8'); } catch (e) { return null; } })();
@@ -312,7 +330,9 @@ async function run() {
     } catch (e) { failed++; console.log('  ✗ door integration — ' + e.message); }
 
     test('auth.js seam: access level, real checkPermission verdicts, revoke routing', () => {
-        const active = (() => { try { return require(path.join(ROOT, 'lib', 'brain')).getCurrentBrain(); } catch (e) { return 'vant'; } })();
+        // (pass 287) the seam env (lib/guests._brainName) resolves
+        // VANT_BRAIN-first now; the helper lives in test/active-brain.js.
+        const active = require('./active-brain').resolveActiveBrain(ROOT);
         const SOPT = { brain: active }; // same contract: checkPermission has no brain override
         const prevLedger = (() => { try { return fs.readFileSync(guests._ledgerPath(active), 'utf8'); } catch (e) { return null; } })();
         resetLedger();
@@ -340,6 +360,9 @@ async function run() {
     // ---------- pass 213 H5: per-tenant LIST filtering ----------
     // Closes the pass-211 declared runway: org-wide roster surfaces filter an
     // unscoped guest view nothing. The tenant rule is MEMBER truth through
+
+    // (pass 287 QC) The auth-seam pin runs at run() scope: resolve the
+    // ACTIVE brain name here too (the helper lives in test/active-brain.js
     // scope.resolveMembers + the teams rows; fail-closed at every miss.
     async function h5TenantPins() {
         const prevBrain = process.env.VANT_BRAIN;
@@ -353,6 +376,27 @@ async function run() {
             const scope = require(path.join(ROOT, 'lib', 'scope'));
             const uniq = Date.now().toString(36);
 
+            // (pass 287 QC) Fresh org-model slate: the throwaway brain's
+            // orgchart store is shared across runs, and residue past teams'
+            // dept quota (max 50) made every later org write fail E_QUOTA —
+            // the H5 matcher then compared against half-built hierarchies
+            // (and the async assert rejection was swallowed as an unhandled
+            // rejection while the tally said pass). Empty the store + drop
+            // hydration so this run's rows are the only rows.
+            try {
+                fs.writeFileSync(path.join(ROOT, 'models', 'private', BRAIN, 'orgchart', 'teams.json'),
+                    JSON.stringify({ orgs: [], depts: [], teams: [], roles: [], assignments: [] }));
+                teams._resetHydration();
+            } catch (e) { /* store absent/unwritable: run on what's there */ }
+            // (pass 287 QC) Same residue law for the crew roster: the agents
+            // store accumulates across runs and agents.maxAgents (default 10)
+            // tripped the door pin's spawn. The public full-wipe contract
+            // (restoreState with an empty roster) clears memory AND persists —
+            // its empty path tombstones the disk ids so the save's
+            // newcomer-merge cannot resurrect them (a silent wipe failure
+            // fails loudly right below, on the spawn's quota refusal).
+            try { await agents.restoreState({ agents: [] }); } catch (e) { /* store absent: run on what's there */ }
+
             test('H5 matcher: tenantVisible — public row / own row / stranger row / scoped row vs default tenant', () => {
                 const teamRef = 'team:pin_' + uniq;
                 assert.strictEqual(guests.tenantVisible(null, teamRef), true, 'unscoped record = public');
@@ -361,7 +405,7 @@ async function run() {
                 assert.strictEqual(guests.tenantVisible(teamRef, null), false, 'scoped row vs the default tenant withheld');
             });
 
-            test('H5 matcher: ancestry — org sees its dept + chained team; dept sees its team; unrelated denies', async () => {
+            await testA('H5 matcher: ancestry — org sees its dept + chained team; dept sees its team; unrelated denies', async () => {
                 const org = teams.createOrg('H5org_' + uniq);
                 assert.ok(!org.error && org.id, 'org created: ' + JSON.stringify(org).slice(0, 80));
                 const dept = teams.createDept(org.id, 'H5dept_' + uniq);
@@ -379,7 +423,7 @@ async function run() {
                 assert.strictEqual(guests.tenantVisible('team:' + memberTeam.id, guestRef), memberOfTeam, 'agent member truth honored (consistency with resolveMembers)');
             });
 
-            test('H5 matcher: tenantAgentVisible — exact agent scope; container membership; fail-closed misses', async () => {
+            await testA('H5 matcher: tenantAgentVisible — exact agent scope; container membership; fail-closed misses', async () => {
                 assert.strictEqual(guests.tenantAgentVisible('agent_1', 'agent:agent_1'), true, 'agent-scoped guest sees itself');
                 assert.strictEqual(guests.tenantAgentVisible('agent_1', 'agent:agent_2'), false, 'another agent withheld');
                 assert.strictEqual(guests.tenantAgentVisible('agent_1', null), false, 'unscoped guest = no roster');
@@ -403,6 +447,7 @@ async function run() {
                 const org = teams.createOrg('H5doororg_' + uniq);
                 const dept = teams.createDept(org.id, 'H5doordept_' + uniq);
                 const team = teams.createTeam('H5doorteam_' + uniq, { dept: dept.id });
+                if (org.error || dept.error || team.error) { failed++; console.log('  ✗ H5 door: org build refused — ' + JSON.stringify(org) + ' ' + JSON.stringify(dept) + ' ' + JSON.stringify(team)); return; }
                 const a1 = agents.spawn({ name: 'H5TenantBot_' + uniq });
                 const a2 = agents.spawn({ name: 'H5StrangerBot_' + uniq });
                 if (a1.error || a2.error) { failed++; console.log('  ✗ H5 door: agent spawn refused — ' + (a1.error || a2.error)); return; }

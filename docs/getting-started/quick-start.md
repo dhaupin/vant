@@ -49,7 +49,7 @@ vant load      # Load brain from previous session
 vant sync      # Push brain changes to GitHub
 ```
 
-## What's Next?
+## Next
 
 - [Agent Onboarding](/vant/getting-started/agent-onboarding) - the wake, work, sleep loop for agents
 - [The Brain](/vant/memory/brain) - what the memory files are and where they live

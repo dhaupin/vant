@@ -40,6 +40,9 @@ const cache = new Cache({
     maxSize: 1000,       // max entries (default 1000)
     defaultTTL: 3600000  // default TTL in ms (default 1 hour)
 });
+
+// Tweaks are also possible mid-life:
+// cache.configure({ enableCompression: true })
 ```
 
 ## Set
@@ -62,7 +65,10 @@ const value = cache.get('key');
 // Returns value or undefined (expired/missing entries return undefined)
 ```
 
-Reading a key refreshes its TTL countdown.
+Reading a key does NOT extend its TTL: expiry is checked against the
+deadline stored at `set()` time (the in-module refresh line is a no-op -
+`now + (expiry - now)` equals `expiry`). Re-`set()` the key to move the
+deadline.
 
 ## Remove
 

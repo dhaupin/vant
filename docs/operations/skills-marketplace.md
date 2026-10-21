@@ -1,6 +1,6 @@
 ---
 version: 0.8.6
-permalink: /operations-skills-marketplace
+permalink: /operations/skills-marketplace
 layout: default
 title: Skills Marketplace Playbook (Wave U6.5 - productized)
 nav_order: 61
@@ -236,3 +236,12 @@ insta-sweep fresh trades (a stealth refute with no evidence).
 | **QC settle identity** (third-party/anonymous refused; debit lands on the real buyer exactly once) | same (QC pass-204) |
 | **QC expired-hold prune** (starvation regress) | `test/escrow.test.js` (QC pass-204) |
 | grand tour door count 311 to 317 | `test/e2e-grand-tour.test.js` gate B |
+
+---
+
+## Related
+
+- [Escrow](/vant/security/escrow) - the budget split trade draws on
+- [Settlement](/vant/operations/settlement) - federation trading and the Grand Exchange
+- [CLI](/vant/reference/cli) - the `vant market` command surface
+- [Best Practices](/vant/security/best-practices) - the governance rules skills trade under

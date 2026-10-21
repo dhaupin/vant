@@ -48,6 +48,12 @@
     url: /vant/memory/geometry
   - title: Pruning
     url: /vant/memory/prune
+  - title: Tempo
+    url: /vant/memory/tempo
+  - title: Leisure
+    url: /vant/memory/leisure
+  - title: State Spine
+    url: /vant/memory/state-spine
   - title: RAG Tutorial
     url: /vant/memory/rag
 
@@ -59,8 +65,8 @@
     url: /vant/runtime/runtime
   - title: MCP Server
     url: /vant/runtime/mcp
-  - title: Server
-    url: /vant/runtime/server
+  - title: REST API
+    url: /vant/reference/rest-api
 
 - title: Multi-Agent
   items:
@@ -68,13 +74,13 @@
     url: /vant/multi-agent/
   - title: Multi-brain
     url: /vant/multi-agent/brains
-  - title: Agents
+  - title: Agent Branch Workflow
     url: /vant/multi-agent/agents
   - title: Branches
     url: /vant/multi-agent/branches
   - title: Trust & Succession
     url: /vant/multi-agent/succession
-  - title: Coordination
+  - title: Multi-Agent Coordination
     url: /vant/multi-agent/coordination
   - title: Federation
     url: /vant/multi-agent/federation
@@ -127,8 +133,6 @@
   items:
   - title: Overview
     url: /vant/operations/
-  - title: Day-to-day CLI
-    url: /vant/operations/operations
   - title: Storage
     url: /vant/operations/storage
   - title: Locks
@@ -163,6 +167,14 @@
     url: /vant/operations/steward-runbook
   - title: Federation Playbooks
     url: /vant/operations/federation-playbooks
+  - title: Relay
+    url: /vant/operations/relay
+  - title: Relay Playbook
+    url: /vant/operations/relay-playbook
+  - title: Scenario Playbook
+    url: /vant/operations/scenario-playbook
+  - title: Skills Marketplace Playbook
+    url: /vant/operations/skills-marketplace
 
 - title: Security
   items:
@@ -172,6 +184,8 @@
     url: /vant/security/sandbox
   - title: VAF
     url: /vant/security/vaf
+  - title: Multi-Guest Auth
+    url: /vant/security/multi-guest-auth
   - title: Escrow
     url: /vant/security/escrow
   - title: Environment & Limits
@@ -262,6 +276,8 @@
     url: /vant/reference/entropy
   - title: Errors
     url: /vant/reference/errors
+  - title: Era
+    url: /vant/reference/era
   - title: Legal & Policies
     url: /vant/reference/legal
   - title: CHANGELOG
@@ -271,3 +287,12 @@
   items:
   - title: Agent-First Whitepaper
     url: /vant/whitepaper/agent-first
+
+- title: Sites
+  items:
+  - title: Vant Lander
+    url: https://vant.creadev.org
+  - title: Brain Dashboard
+    url: https://brain.creadev.org
+  - title: creadev.org
+    url: https://creadev.org

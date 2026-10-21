@@ -215,6 +215,41 @@ test('#201 filename passwords are gate-closed (name never decrypts by default)',
     });
 });
 
+// (pass 290, issue #223 regression) the BOOT CONVENTION resolves its
+// filename password BY DEFAULT now (the README restore chain tells the
+// truth end to end), an explicit opt-out turns it off, and non-convention
+// p_-names still refuse (the #201 pin above keeps vouching for that).
+test('#223 boot-convention filename password resolves by default; opt-out refuses; non-convention still gated', () => {
+    const fs2 = require('fs');
+    const stego = require(path.join(ROOT, 'lib', 'stego'));
+    const transform = require(path.join(ROOT, 'lib', 'transform'));
+    const dir = path.join(PRIV, 'p290-boot-convention', 'boot');
+    fs2.mkdirSync(dir, { recursive: true });
+    const carrier = '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><rect width="8" height="8" fill="#000000"/></svg>';
+    const stone = path.join(dir, 'gauntlet-290-p_pass290.svg');
+    fs2.writeFileSync(stone, stego.encodeSvg(JSON.stringify({ type: 'vant-horcrux', timestamp: 1, version: '0.8.6', payload: { ok: 290 } }), carrier, 'pass290'));
+    const bootGone = !!process.env.VANT_ALLOW_FILENAME_PW;
+    delete process.env.VANT_ALLOW_FILENAME_PW;
+    return transform.inspectHorcrux(stone, {}).then((byDefault) => {
+        try {
+            if (!byDefault || byDefault.valid !== true) return { error: 'boot convention did not resolve its filename pw by default: ' + JSON.stringify(byDefault && byDefault.error) };
+            process.env.VANT_ALLOW_FILENAME_PW = 'false';
+            return transform.inspectHorcrux(stone, {}).then((optedOut) => {
+                try {
+                    if (!optedOut || optedOut.passwordRequired !== true) return { error: 'explicit opt-out still used the filename: ' + JSON.stringify(optedOut) };
+                    return { success: true };
+                } finally {
+                    delete process.env.VANT_ALLOW_FILENAME_PW;
+                    fs2.rmSync(path.join(PRIV, 'p290-boot-convention'), { recursive: true, force: true });
+                }
+            });
+        } catch (e) {
+            fs2.rmSync(path.join(PRIV, 'p290-boot-convention'), { recursive: true, force: true });
+            throw e;
+        }
+    });
+});
+
 test('#102 inspect preview counts agents2 roster + delegation records + orgs', () => {
     const transform = require(path.join(ROOT, 'lib', 'transform'));
     const stone = makeInspectStone(path.join(PRIV, 'p89-stone', 'inspect-p_x.json'));

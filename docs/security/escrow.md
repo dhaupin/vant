@@ -4,242 +4,90 @@ permalink: /security/escrow
 layout: default
 title: Escrow
 nav_order: 69
+description: "Escrow in the security chain: the accountability layer that answers 'may this agent afford this operation?' before anything runs - budgets, holds, approvals, quotas, circuit breakers, and the fail-closed workspace RLS."
 ---
 
 # Escrow
 
-Budget tracking, condition holds, approvals, and circuit breakers for Vant.
-
-## What
-
-Escrow is Vant's "final validation gate" before execution:
-
-- Budget tracking - Monitor spending per agent
-- Condition holds - Wait for conditions before proceeding
-- Approval gates - Require approval for sensitive operations
-- Circuit breakers - Fail fast on failing services
-
-## Quick Start
-
-Import escrow:
-
-```javascript
-const { Escrow } = require('./lib/escrow');
-const escrow = new Escrow();
-```
-
-## Budget
-
-Track agent spending.
-
-Set budget for an agent:
-
-```javascript
-escrow.setBudget('agent-1', 10000);
-console.log(escrow.getBudget('agent-1'));
-// { limit: 10000, spent: 0, available: 10000 }
-```
-
-### Check Spending
-
-Check if operation is allowed:
-
-```javascript
-const { allowed, reason, available } = escrow.canSpend('agent-1', 100);
-console.log(allowed);   // true
-console.log(reason);    // "budget_available"
-```
-
-### Record Spending
-
-Record a transaction:
-
-```javascript
-escrow.recordSpend('agent-1', 50);
-console.log(escrow.getBudget('agent-1').spent); // 50
-```
-
-### Refund
-
-Refund a transaction:
-
-```javascript
-escrow.refund('agent-1', 25);
-console.log(escrow.getBudget('agent-1').spent); // 25
-```
-
-## Cost Configuration
-
-Configure operation costs:
-
-```javascript
-escrow.setCost('read', 1);
-escrow.setCost('write', 5);
-escrow.setCost('delete', 10);
-escrow.setCost('admin', 50);
-```
-
-Get cost for an operation (falls back to `_costs.default`):
-
-```javascript
-console.log(escrow.getCost('write')); // 5
-```
-
-Budget methods: `setBudget(agentId, budget)` / `setBudgetLimit(agentId,
-limit)` / `canSpend` / `recordSpend` / `refund` / `getBudget`.
-
-## Holds
-
-Hold execution until conditions are met.
-
-Create a hold:
-
-```javascript
-const r = escrow.hold('task-1', 'user_confirmation');
-// { held: true, holdId } - or { held: false, reason: 'max_holds_exceeded' }
-```
-
-The hold carries the CONDITION (a string tag) and expires after
-`options.holdTimeout` (default 300000 ms) - there is no per-hold timeout
-option.
-
-Check a hold:
-
-```javascript
-escrow.checkHold('task-1');
-```
-
-Release hold:
-
-```javascript
-escrow.release('task-1');
-```
-
-## Approvals
-
-Require approval for sensitive operations.
-
-Request approval (sig: `(operation, reason)`; no options object):
-
-```javascript
-const approval = escrow.requestApproval('delete', 'Delete all user data');
-// auto-approved immediately when the op needs none:
-//   { approved: true, reason: 'auto_approved' }
-// otherwise:
-//   { approvalId: '<hex>', approved: false }
-```
-
-### Approve
-
-Approve an operation:
-
-```javascript
-escrow.approve(approval.approvalId, 'admin');
-```
-
-### Check
-
-```javascript
-escrow.checkApproval(approval.approvalId);
-```
-
-(There is no `reject` method - deny by simply not approving; the
-approval stays `approved: false`.)
-
-### Default Required
-
-Operations that require approval by default:
-
-```javascript
-// Default: ['delete', 'admin', 'write:critical']
-console.log(escrow.options.approvalRequired);
-```
-
-## Circuit Breaker
-
-Integrate with service circuit breakers (crew-bus aware):
-
-Check service:
-
-```javascript
-const isOpen = escrow.isOpen('payment-svc');
-console.log(isOpen); // false (closed = OK)
-```
-
-Open circuit on repeated failures:
-
-```javascript
-for (let i = 0; i < 5; i++) {
-    escrow.recordFailure('payment-svc');
-}
-
-console.log(escrow.isOpen('payment-svc')); // true
-```
-
-Record successes and reset:
-
-```javascript
-escrow.recordSuccess('payment-svc');
-escrow.resetCircuit('payment-svc');   // via getBreaker().reset(service)
-```
-
-## Before Execute
-
-Validate operation before execution:
-
-```javascript
-const result = await escrow.beforeExecute({
-    agentId: 'agent-1',
-    operation: 'read',
-    cost: 5,
-    service: 'db'
-});
-
-console.log(result.allowed); // true | false
-console.log(result.reason);  // reason string on refusal
-```
-
-This is the main entry point - sandbox operations go through this
-(async; `isOperationAllowed(op, ctx)` delegates to it).
-
-## Quotas
-
-Track quota usage per agent+operation pair. Quotas come from
-`options.defaultQuota` + `options.quotaWindow` (defaults in the
-constructor); there is no `setQuota()` method:
-
-```javascript
-// checkQuota(agentId, operation = 'default')
-const { allowed, used, limit } = escrow.checkQuota('agent-1', 'api');
-
-// record usage yourself
-escrow.incrementQuota('agent-1', 'api');
-```
-
-The window resets automatically when `quotaWindow` elapses.
-
----
-## Integration
-Escrow integrates with sandbox:
-```javascript
-const sandbox = require('./lib/sandbox');
-const s = sandbox.create({
-    agentId: 'agent-1',
-    budget: 10000
-});
-```
-When sandbox runs operations:
-```javascript
-const result = s.write(() => doWork());
-if (result.error) {
-    console.log(result.code); // "BUDGET_EXCEEDED" | "APPROVAL_REQUIRED"
-}
-```
-See [Sandbox](/vant/security/sandbox) for details.
----
+Escrow is Vant's **accountability layer** - the last gate in the
+middleware chain before anything executes (sandbox, then vaf, then qos,
+then escrow). It answers one security question: **may this agent afford
+this operation?**
+where "afford" covers budget, quota, and circuit state - and the verdict
+is recorded as events either way. It is claims-not-cash: auditable
+authority between agents, not money movement.
+
+> Every spend of authority here is checkable and reversible. The API
+> reference with exact signatures is
+> [Escrow API](/vant/reference/escrow) - this page is the security model.
+
+## Why an accountability layer
+
+The rest of the chain answers *input shape* (vaf), *static capability*
+(sandbox), and *request rate* (qos). Escrow closes the gap those cannot:
+**accumulated** authority use. An agent can pass input validation and
+still burn the install down with a hundred budgeted writes; escrow makes
+that spend visible, bounded, and reversible per agent, per workspace,
+per brain.
+
+## What each primitive guards
+
+| Primitive | The question it guards | Refusal posture |
+|-----------|------------------------|-----------------|
+| **Budget** | Has this agent already used the authority it was given? (`canSpend` vs `limit`) | Refused with `budget_available`-class reason; recorded as an event |
+| **Quota** | Is this agent beating the rolling window? (per agent+operation, default 1000/hour) | Window resets automatically; no per-window knob |
+| **Hold** | Is a shared task still pending? (a reservation with a timeout, then release/check) | Holds expire at the constructor's `holdTimeout` (default 5 min) - a hold is NOT a debit; budget only moves on `recordSpend` |
+| **Approval** | Is a sensitive operation (default `delete`, `admin`, `write:critical`) human-approved? | Enforced and SINGLE-USE: the brain pipeline burns a matching, unexpired `approvalId` on success - one approve authorizes exactly one execution |
+| **Circuit** | Is a failing service being hammered? (breaker per service, threshold 5) | Opens on repeated failures, resets on success or manually |
+
+Two approval nuances that trip people up:
+
+- There is **no `reject` method** - deny by simply not approving; the
+  request stays `approved: false`.
+- An operation that needs no approval is **auto-approved immediately**
+  (`{ approved: true, reason: 'auto_approved' }`), so callers do not
+  branch on operation type.
+
+## Fail-closed workspace pools
+
+Budgets can scope to a habitat workspace: an org pool with per-member
+caps, so a 500-credit org cannot fund 600 of member spends no matter how
+many agents share it. The RLS rules are fail-closed:
+
+- Draws scoped to a workspace the habitat has never heard of are refused
+  (`unknown_workspace` / `E_UNKNOWN_WORKSPACE`).
+- Setting a pool or member cap is an **admin act** - the habitat registry
+  verifies the admin role for that workspace, never self-declaration;
+  denial throws `RLS_DENIED`. A live habitat always enforces; bare
+  library use passes unless `enforceWorkspaceRLS: false` opts out.
+
+Market trades ride the same split (`market.trade` draws the buyer's
+workspace pool); plain agent budgets are unchanged when no workspace is
+named.
+
+## State that survives crashes and jumps
+
+The ledger (budgets, holds, approvals, quotas) persists to the brain
+store on every spend and restores on construction. Horcrux transport
+serializes it (`gatherState` / `restoreState`), so a restored brain
+keeps its accounting history - accountability does not reset between
+incarnations.
+
+## Where it shows up
+
+- [Settlement](/vant/operations/settlement) builds its cross-node billing
+  on this guard.
+- Governance [scenario crews](/vant/operations/scenario-playbook) share
+  one escrow pool.
+- [Sandbox](/vant/security/sandbox) consults the same gate on every
+  capability-smelling operation.
 
 ## Related
 
-- [Sandbox](/vant/security/sandbox) - Execution isolation
-- [QoS](/vant/operations/qos) - Rate limiting and circuit breaking
-- [Security](/vant/security/) - VAF and encryption
+- [Escrow API](/vant/reference/escrow) - signatures, the hold/debit split, workspace pools, CLI, events
+- [QoS](/vant/operations/qos) - request-rate layer (the gate before escrow in the chain)
+- [Sandbox](/vant/security/sandbox) - capability floor (the gate before that)
+
+## Next
+
+- [Settlement](/vant/operations/settlement) - what escrow's budget guard feeds downstream

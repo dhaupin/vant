@@ -80,3 +80,9 @@ want a point-in-time record:
 ```javascript
 citations.generateReceipts();
 ```
+
+## Related
+
+- [Brain Search](/vant/memory/search) - the retrieval layer receipts answer for
+- [The Brain](/vant/memory/brain) - what receipts ground their claims in
+- [Memory](/vant/memory/) - the section overview

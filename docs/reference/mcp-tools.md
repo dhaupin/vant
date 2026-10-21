@@ -119,16 +119,18 @@ vant_commit(message="Updated learnings")
 
 ### vant_sync
 
-Sync with GitHub.
+Read the real sync status across providers (same call
+`vant_sync_status` makes - verified against lib/mcp.js). It takes NO
+params and does not itself sync.
 
-**Params:**
-| Param | Type | What |
-|-------|------|------|
-| direction | string | "push" or "pull" |
+**Params:** None
 
 **Example:**
 ```bash
-vant_sync(direction="push")
+vant_sync()   # -> { status: 'ok', providers: [...], ... }
+
+# The real sync verbs:
+vant_sync_pushAll(); vant_sync_pullAny(); vant_sync_rebase(provider="github")
 ```
 
 ---
@@ -233,7 +235,7 @@ hold, so nothing strands reserved budget. The era fold records the work
 under `task:` -> threads (the era catalogue) only when an era is OPEN
 (the era subscriber's no-op contract); `eraFolded:false` says so.
 
-### Brain family (46 tools - cor member-related core)
+### Brain family (28 brain_* tools - file core, stack, geometry, and graph)
 
 Reading and writing the brain, multibrain stack hops, geometry memory,
 brain evolution and link/graph side: every brain_* tool is a thin call
@@ -318,9 +320,18 @@ vant_config_set(key="mcp.requireKey", value="false")    # persists to the CURREN
 ### Connector
 
 ```bash
-vant_connector_list()          # getConnector factory surface: pinecone|qdrant|weaviate
-vant_connector_connect(service="qdrant")   # real async connect()
+vant_connector_list()          # registry/factory surface names (see lib/connectors)
+vant_connector_connect(service="pinecone")   # real async connect()
 ```
+
+The shipped vector/storage connectors are `pinecone` and `s3`. The
+`qdrant` and `weaviate` factory NAMES still exist in
+`lib/connectors/index.js`, but their connector modules are not shipped:
+connecting refuses with a typed error instead of a fabricated ack.
+`vant_connector_connect` answers `{service, connected: false, error}`
+for unknown services and a real `{service, connected: true, connector}`
+only after an actual `connect()` (fixed in pass 306; it used to ack fake
+connected for any string).
 
 ### Context (prompt cache engine)
 
@@ -897,12 +908,15 @@ vant_rerank(query="authentication", topK=5)
 
 ---
 
-## Agora and Mesh Tools (11)
+## Agora and Mesh Tools (13)
 
 The cross-org decision surface: remote voting and ledger sync over the
 signed crew-bus. Every gate stays owner-side; these tools carry ballots
 and ledgers, never authority. Requires a configured bus (the node's
 name, port, secret, and agentId) with agora-sync installed.
+(The agora/consensus/forum family overall holds more members -
+`forum_castVote`, `forum_enter`, `forum_status`, ... - listed in the
+A-Z tables.)
 
 ### agora_vote
 
@@ -1016,9 +1030,11 @@ rejected fail-closed).
 **Params:**
 | Param | Type | What |
 |-------|------|------|
-| topic | string | Charset [a-zA-Z0-9_-], 1-100 chars |
-| options | string[] | At least two choices |
+| topic | string | Charset [a-zA-Z0-9_-], 1-100 chars (required) |
+| ballot | string[] | At least two choices, e.g. `["yes","no"]` (required) |
 | minQuorum | number | Optional quorum |
+| useTrustWeight | boolean | Optional trust-weighted voting |
+| deadline | number | Optional deadline |
 | scope | object | Optional: `{ owner: "team:id", visibility: "scope" }` |
 
 ### consensus_vote
@@ -1051,8 +1067,10 @@ List knowledge for trade.
 **Params:**
 | Param | Type | What |
 |-------|------|------|
-| type | string | knowledge, insight, memory, or favor |
-| title | string | Listing title |
+| type | string | knowledge, insight, memory, or favor (required) |
+| title | string | Listing title (required) |
+| summary | string | Optional listing summary |
+| tags | string[] | Optional tags |
 | price | string | Optional price |
 | context | object | Optional; carries consentGiven |
 
@@ -2147,3 +2165,9 @@ Resolves by id or the latest packet. Read-class (the `audit` tail).
 ```
 
 ---
+
+## Related
+
+- [MCP Server](/vant/runtime/mcp) - running and securing the MCP door
+- [CLI](/vant/reference/cli) - `vant mcp` startup commands
+- [Agent Crews](/vant/multi-agent/agents) - spawning crew agents over MCP

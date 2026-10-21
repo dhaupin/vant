@@ -60,3 +60,11 @@ await tmp.delete('session-cache');
 tmp.cacheSet('session', data, 3600000);
 const val = tmp.cacheGet('session');
 ```
+
+---
+
+## Related
+
+- [Cache](/vant/operations/cache) - the persistent cache tmp.js wraps
+- [Storage](/vant/operations/storage) - durable alternatives to tmp paths
+- [CLI](/vant/reference/cli) - the `vant tmp` commands

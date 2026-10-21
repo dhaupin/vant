@@ -498,8 +498,25 @@ console.log('\n--- CARRIER PLATES (pass 262, the mycelium touch) ---\n');
 
 // The plate store must not pollute the repo tree: plate tests run in a
 // scratch cwd whose brain path resolves there.
+// (pass 287 de-coupling, same seam as era/genesis pass 282/281): the
+// plate store pins below must target the ACTIVE brain (VANT_BRAIN env >
+// state.json stack head > 'vant') resolved BEFORE the chdir — the
+// hardcoded 'vant' ENOENTed on any install whose active brain differs
+// (this workspace's stack head is 'pairing-ride-pilot'), level-failing
+// M1/M16 while everything else passed.
+const ROOT2 = process.cwd(); // repo root captured before the scratch chdir
+const PLATE_ACTIVE_BRAIN = (() => {
+    if (process.env.VANT_BRAIN) return process.env.VANT_BRAIN;
+    try {
+        const state = JSON.parse(fs.readFileSync(path.join(ROOT2, 'models', 'state.json'), 'utf8'));
+        const pick = typeof state.currentBrain === 'string' && state.currentBrain
+            ? state.currentBrain
+            : (Array.isArray(state.stack) && state.stack[0] ? state.stack[0] : null);
+        if (pick && /^[a-zA-Z0-9._-]+$/.test(pick)) return pick;
+    } catch (_e) { /* fall through: no state.json yet */ }
+    return 'vant';
+})();
 const plateCwd = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-plates-'));
-const ROOT2 = process.cwd();
 process.chdir(plateCwd);
 
 // ---- the declarative plate (data, not code) ----
@@ -514,8 +531,8 @@ const persisted = carriers.plateDefine({
     note: 'the plant floor tag lane'
 });
 ok('M1. plateDefine persists the plate (brain store, sha256-pinned)',
-    persisted.id === 'mfg-tag' && fs.existsSync(path.join('models', 'private', 'vant', 'state', 'carrier-plates.json'))
-    && fs.existsSync(path.join('models', 'private', 'vant', 'state', 'carrier-plates.json.sha256')));
+    persisted.id === 'mfg-tag' && fs.existsSync(path.join('models', 'private', PLATE_ACTIVE_BRAIN, 'state', 'carrier-plates.json'))
+    && fs.existsSync(path.join('models', 'private', PLATE_ACTIVE_BRAIN, 'state', 'carrier-plates.json.sha256')));
 ok('M2. the plate rides the roster immediately (available, plate:true)',
     carriers.get('mfg-tag').plate === true && carriers.list().some((c) => c.id === 'mfg-tag' && c.available));
 
@@ -594,7 +611,7 @@ ok('M15. a code carrier returning a PACKET gets verify re-applied on decode',
         try { custom2.decode({}); return false; } catch (e) { return e.code === 'E_CARRIER_TAMPER'; }
     })());
 ok('M16. code carriers NEVER persist (code is not data)',
-    !JSON.stringify(fs.readFileSync(path.join('models', 'private', 'vant', 'state', 'carrier-plates.json'), 'utf8')).includes('edi-lane'));
+    !JSON.stringify(fs.readFileSync(path.join('models', 'private', PLATE_ACTIVE_BRAIN, 'state', 'carrier-plates.json'), 'utf8')).includes('edi-lane'));
 
 // teardown the scratch (the plate store lives in the tmp brain)
 process.chdir(ROOT2);

@@ -73,24 +73,27 @@ Working examples for common tasks.
 
 ### Basic Memory Operations
 
+`lib/storage`'s BrainStorage store is the raw file layer under the brain
+(`get` / `write` / `append` / `has` / `list` / `query` - there is no
+`load`/`set`/`save`; every write persists as an atomic write, and the
+GitHub push is `vant sync --push`):
+
 ```javascript
 const brain = require('./lib/storage').get('brain');
 
 async function basicExample() {
-  // Load brain from GitHub
-  await brain.load();
-  
-  // Read from brain
-  const identity = brain.get('identity');
-  const goals = brain.get('goals', []);
-  const lessons = brain.get('lessons');
-  
-  // Write to brain
-  goals.push({ text: 'Learn more about Vant', done: false });
-  brain.set('goals', goals);
-  
-  // Save to disk (push with vant sync)
-  await brain.save();
+  // Read a brain file (category/key, plain text)
+  const lessons = brain.get('vant', 'lessons.md');
+
+  // Write a brain file (category/key; format option sets the extension)
+  brain.write('vant', 'goals', '# goals\n- Learn more about Vant\n');
+
+  // Append to an existing file (get + write under one call)
+  brain.append('vant', 'lessons.md', '\n- Learned atomic writes\n');
+
+  // Existence check + category listing (key-less get lists subdirs)
+  brain.has('vant', 'lessons.md');
+  brain.get('');
 }
 ```
 
@@ -98,27 +101,23 @@ async function basicExample() {
 
 ```javascript
 const brain = require('./lib/storage').get('brain');
-const config = require('./lib/config');
+const execSync = require('child_process').execSync;
 
 async function agentLoop() {
-  await brain.load();
-  
   while (true) {
-    // Load previous context
-    const history = brain.get('history', []);
-    const lastTask = history[history.length - 1];
-    
+    // Read previous context from the brain store (plain text)
+    const history = brain.get('vant', 'history.md') || '';
+    const lastTask = history.split('\n').filter(Boolean).pop();
+
     // Process task
     const task = await getNextTask();
     const result = await processTask(task);
-    
-    // Save results
-    history.push({ task, result, time: Date.now() });
-    brain.set('history', history);
-    await brain.save();
-    
-    // Sync to GitHub
-    await syncWithGitHub();
+
+    // Persist results (atomic write)
+    brain.append('vant', 'history.md', `\n- [${Date.now()}] ${task}: ${result}`);
+
+    // Sync to GitHub (the real CLI verb; pull is the default direction)
+    execSync('node bin/vant.js sync --push "agent loop checkpoint"', { stdio: 'inherit' });
   }
 }
 ```
@@ -140,10 +139,12 @@ async function safeWrite(agentId, content) {
     // 2. Switch to your branch
     await branch.checkout(agentId);
     
-    // 3. Do work
-    const lessons = readFile('models/private/<brain>/lessons');
-    lessons += `\n${content}`;
-    writeFile('models/private/<brain>/lessons', lessons);
+    // 3. Do work (plain fs under your agent's brain dir)
+    const fs = require('fs');
+    const lessonsPath = `models/private/${agentId}/lessons.md`;
+    let lessons = fs.existsSync(lessonsPath) ? fs.readFileSync(lessonsPath, 'utf8') : '';
+    lessons += `\n${content}\n`;
+    fs.writeFileSync(lessonsPath, lessons);
     
     // 4. Commit
     await branch.commit(agentId, `Agent ${agentId}: ${content}`);
@@ -160,43 +161,38 @@ async function safeWrite(agentId, content) {
 ```javascript
 const brain = require('./lib/storage').get('brain');
 
-async function queryBrain() {
-  // Get specific files
-  const identity = brain.get('identity');
-  const goals = brain.get('goals');
-  const fears = brain.get('fears');
-  const joy = brain.get('joy');
-  
-  // Get all of one category
-  const learnings = brain.get('learnings');
-  
-  // Check if file exists
-  if (brain.has('custom-file')) {
-    const custom = brain.get('custom-file');
+function queryBrain() {
+  // get(category, key) returns file CONTENT (or null when missing)
+  const lessons = brain.get('vant', 'lessons.md');
+  const goals = brain.get('vant', 'goals.md');
+
+  // has(category, key) - existence check
+  if (brain.has('vant', 'custom-file.md')) {
+    const custom = brain.get('vant', 'custom-file.md');
   }
-  
-  return { identity, goals, fears, joy, learnings };
+
+  return { lessons, goals };
 }
 ```
+
+(For the higher-level read with private-first fallback, use
+`brain.read('lessons')` from `lib/brain.js` - see
+[The Brain](/vant/memory/brain).)
 
 ### Appending to Lessons
 
 ```javascript
 const brain = require('./lib/storage').get('brain');
 
-async function addLesson(lesson) {
+function addLesson(lesson) {
   const timestamp = new Date().toISOString();
   const entry = `## ${timestamp}\n\n${lesson}\n`;
-  
-  // Append to existing or create new
-  const existing = brain.get('lessons') || '';
-  brain.set('lessons', existing + '\n---\n' + entry);
-  
-  await brain.save();
+
+  // append(category, key, content) reads the existing file first
+  brain.append('vant', 'lessons.md', '\n---\n' + entry);
 }
 
-// Usage
-await addLesson('Remember to always test edge cases');
+addLesson('Remember to always test edge cases');
 ```
 
 ### MCP Server Integration
@@ -212,7 +208,7 @@ async function mcpExample() {
       method: 'tools/call',
       params: {
         name: 'vant_get_memory',
-        arguments: { files: ['goals', 'lessons'] }
+        arguments: { category: 'goals', filename: 'goals.md' }
       },
       id: 1
     })
@@ -257,7 +253,7 @@ Last Sync: ${health.lastSync}
 
 There is no built-in Slack/Discord/email notifier. The real outbound
 surfaces are the in-process event bus, outbound webhooks, and the
-Telegram bot (see [Operations](/vant/operations/operations)):
+Telegram bot (see [Telegram Bot](/vant/integrations/telegram-bot)):
 
 ```javascript
 // 1. React to brain events in-process (lib/event.js exports the Event
@@ -277,23 +273,20 @@ defaultEvent.on('sync:push:complete', (info) => {
 
 ```javascript
 const succession = require('./lib/succession');
-const version = require('./lib/version');
+const vantVersion = require('./lib/version');
 
-async function versionExample() {
-  // Get current brain version
-  const current = await succession.get();
-  console.log(`Brain version: ${current.version}`);
-  
-  // Mark as trusted
-  await succession.trust();
-  
-  // Compare to previous
-  const diff = await succession.diff();
-  console.log('Changes:', diff);
-  
-  // Check Vant version
-  const vantVersion = version.get();
+function versionExample() {
+  // Where the brain hands over between generations
+  const cfg = succession.getConfig();
+  const trustLevel = succession.getTrustLevel();   // high | medium | low | none
+  const prev = succession.getPreviousBrain();      // prior generation summary
+  const current = succession.getCurrentVersion();  // current brain version
+  const ledger = succession.getLedger();           // succession history
+
+  // Inspect Vant's own version (lib/version.js is the raw version string)
   console.log(`Vant v${vantVersion}`);
+
+  // Setting a trust level is a separate surface: succession.setTrustLevel(lvl)
 }
 ```
 
@@ -317,18 +310,17 @@ async function saveOnExit() {
 
 ```javascript
 const brain = require('./lib/storage').get('brain');
-const fs = require('fs');
 
-async function customBrainExample() {
-  // Create custom JSON file
-  brain.write('decisions', 'project-x', JSON.stringify({
+function customBrainExample() {
+  // Create a custom JSON file (opts object: format sets the extension)
+  brain.write('decisions', 'project-x', {
     decision: 'Use microservices',
     rationale: 'Scalability requirements',
     date: '2024-01-15'
-  }), 'json');
-  
-  // Read custom file
-  const projectX = brain.get('decisions', 'project-x');
+  }, { format: 'json' });
+
+  // Read it back - get() returns the raw file STRING; parse JSON yourself
+  const projectX = JSON.parse(brain.get('decisions', 'project-x.json'));
   console.log(projectX.decision);
 }
 ```

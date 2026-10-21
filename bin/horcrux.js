@@ -137,7 +137,7 @@ async function run() {
                 console.log('   Password required — supply one of:');
                 console.log('     • positional arg:    vant horcrux inspect <path> <password>');
                 console.log('     • env var:            VANT_BRAIN_PASSWORD=...');
-                console.log('     • p_<password> in the filename (the convention)');
+                console.log('     • p_<password> in the filename (boot-convention paths resolve by default; others: VANT_ALLOW_FILENAME_PW=true)');
             }
             process.exit(1);
         }
@@ -343,11 +343,12 @@ async function run() {
             process.exit(1);
         }
 
-        // (pass 246, issue #201) Resolve password by the chain arg → env →
-        // secret store → prompt. The filename is NOT a password source: the
-        // old `p_<password>` guess handed the brain password to anyone who
-        // could list the boot dir. Legacy p_-filename lookups stay available
-        // ONLY via VANT_ALLOW_FILENAME_PW=true (parity with lib/transform).
+        // (pass 246, issue #201 / pass 290, issue #223) Resolve password by
+        // the chain arg → env → secret store → boot-convention filename →
+        // prompt. The boot convention (<agent>-p_<pw>.svg inside a boot dir,
+        // and refresh's target IS one) resolvess by default now; any other
+        // p_-filename needs VANT_ALLOW_FILENAME_PW=true, and explicit
+        // VANT_ALLOW_FILENAME_PW=false turns the filename off entirely.
         let password = positionalPw || process.env.VANT_BRAIN_PASSWORD || null;
         if (positionalPw) {
             console.error('⚠️  Passing the brain password as a CLI argument is DEPRECATED (it is readable in ps/cmdline).');
@@ -357,12 +358,16 @@ async function run() {
             try {
                 const secret = require('../lib/secret');
                 password = await secret.get('brain');
-            } catch (e) { /* fall through to refusal below */ }
+            } catch (e) { /* fall through to filename below */ }
+        }
+        if (!password) {
+            const secret = require('../lib/secret');
+            password = secret.resolveFilenamePassword ? secret.resolveFilenamePassword(target) : null;
         }
         if (!password) {
             console.error('❌ Password required (refresh must re-encrypt with the same key):');
             console.error('     • env var:        VANT_BRAIN_PASSWORD=...');
-            console.error('     • legacy p_-filename lookup: VANT_ALLOW_FILENAME_PW=true');
+            console.error('     • boot-convention <agent>-p_<pw>.svg filenames resolve by default; others: VANT_ALLOW_FILENAME_PW=true');
             process.exit(1);
         }
 

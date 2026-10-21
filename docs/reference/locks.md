@@ -136,3 +136,9 @@ Leaked lockfiles are scanned by `npm run lint:locks`
 (`scripts/audit-locks.js`), which also asserts the two roots, the no
 cross-require rule between the modules, and the fail-closed wiring of the
 guarded writers.
+
+---
+
+## Related
+
+- [Locks Concepts](/vant/operations/locks) - the operating guidance behind both modules

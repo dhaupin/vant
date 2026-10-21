@@ -20,19 +20,21 @@ dispatched by the main entrypoint.
 | Command | Description |
 |---------|-------------|
 | `vant setup` | Interactive first-run wizard |
-| `vant start` | Full startup (migrate, health, sync, load, run) |
+| `vant start` | Startup: migrate + seed + health (pull with `--sync`) |
 | `vant health` | System diagnostics |
 | `vant help` | Show all commands and global flags |
 | `vant version` | Show version (`-v`, `--version`) |
 
 ```bash
 vant setup
-vant start              # Full startup; auto-migrates legacy brain layouts
-vant start --no-sync    # Skip GitHub sync
-vant start --local      # Skip GitHub entirely
+vant start              # Migrate check + health; prints ready
+vant start --sync       # Also pull fresh brain from GitHub at the end
 vant start --no-migrate # Skip brain layout migration
 vant health
 ```
+
+(`--no-sync`/`--local` are not start flags - sync is opt-in via
+`--sync`.)
 
 ## Sync and brain
 
@@ -50,9 +52,8 @@ vant health
 | `vant prune` | Prune old or stale brain files |
 
 ```bash
-vant sync               # Pull, then push
-vant sync push          # Push only
-vant sync pull          # Pull only
+vant sync               # Pull from GitHub (the default direction)
+vant sync --push <msg>  # Push only (with an optional commit message)
 
 vant hybrid --public    # Push public brain only
 vant hybrid --private   # Push private brain only
@@ -579,7 +580,7 @@ with its own `--help`.
 |---------|-------------|
 | `vant teams` | Organization and team management (org, dept, team, assign) |
 | `vant governance` | Governance decision making |
-| `vant market` | Knowledge trading (list, bid, trade, search, stats) + paid skills (Wave U6.5/6.6 productized: `skill-list/buy/deliver/settle/status/sweep/gate` - delivery-confirmed settlement over real escrow, TTL evidence sweep for stale holds, shill-resistant pre-trade reputation; `skill-list --supply N|Infinity` opts a skill into scarcity (default unlimited labor, enforced `E_SKILL_SOLD_OUT`); settlement identity: only the buyer of record settles; gated by `market.skillsEnabled`, env alias `VANT_MARKET_SKILLS_ENABLED`, sweep TTL `VANT_MARKET_SKILLS_TRADE_TTL_MS`) ([reference](/reference/escrow), [playbook](/operations-skills-marketplace)) |
+| `vant market` | Knowledge trading (list, bid, trade, search, stats) + paid skills (Wave U6.5/6.6 productized: `skill-list/buy/deliver/settle/status/sweep/gate` - delivery-confirmed settlement over real escrow, TTL evidence sweep for stale holds, shill-resistant pre-trade reputation; `skill-list --supply N|Infinity` opts a skill into scarcity (default unlimited labor, enforced `E_SKILL_SOLD_OUT`); settlement identity: only the buyer of record settles; gated by `market.skillsEnabled`, env alias `VANT_MARKET_SKILLS_ENABLED`, sweep TTL `VANT_MARKET_SKILLS_TRADE_TTL_MS`) ([reference](/reference/escrow), [playbook](/operations/skills-marketplace)) |
 | `vant forum` | Forum and discussion (list, post, view, message) - tenancy-aware: anonymous sees the global commons only; votes ride consensus; `decisions <barcode>` inspects a thread's deliberation->decision trail (link, ballots, escrow holds, voted outcome - Wave U4) |
 
 ```bash
@@ -696,3 +697,11 @@ node test/runner.js      # Raw test runner
 - [Entropy Patching](/vant/reference/entropy) for how `vant compress` thresholds work
 - [MCP Tools](/vant/reference/mcp-tools) for the tool surface `vant mcp` exposes
 - `vant help` always reflects the installed version
+
+---
+
+## Related
+
+- [Configuration](/vant/reference/config) - the key/value system behind `vant config`
+- [Errors](/vant/reference/errors) - error codes CLI commands can surface
+- [Troubleshooting](/vant/advanced/troubleshooting) - when a command does not behave

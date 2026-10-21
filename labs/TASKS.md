@@ -1,21 +1,15 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** pass 284 (the Cairn/pass-over pitstop — the gather-all-brains
-CLI gap closed: prestruct-side pin by Cairn was right; the --brains allowlist
-existed at the lib and on snapshot/horcrux but the `vant transform` face passed
-nothing through — gather/full/horcrux/backup now honor the filter end to end,
-`gatherMode` scopes the mode INVENTORY too (a filtered stone no longer lists
-or mkdir's brain dirs it never captured), the transform test suite's
-top-of-file fire-and-forget async harness is fixed so the six silently
-skipped pins actually drain, and the stale cli.md transform rows
-(to-horcrux/inspect-horcrux are not verb names) are rewritten to the
-six real verbs; the §2.2 passphrase-sealed bolete-profile.enc file
-carries chain + keys + guest identities + reach; the pairing redeem can
-adopt the identity outright; rungs now landed: P6b binding/key card/door
-ride (271), rung-2 binding (272), §2.2 transport (273), and the pass-283
-traveler frontend lane — the multi-hop browser traversal still waits on
-the transport's upstream credential story, named honestly)  
+**Last Updated:** pass 286 (the ② CLOSE: PR #221 accepted, main merged
+(8feb448) and LIVE on brain.creadev.org — post-merge corridor re-proved
+byte-exact verbatim forward + typed gate law, the pass-283 traveler
+bundle served (200); then the Pages deploy log sweep — root .nvmrc
+20→22 (the EOL node + vitest EBADENGINE warns die with it) and the
+582 kB entry chunk is really code-split into framework-react/
+framework-tanstack/framework-zod (rolldown output.codeSplitting, NOT a
+chunkSizeWarningLimit raise), local build shows 218 max / 166 index,
+no warning)    
 **Session:** Pass 242 - THE NAV + MISSIONS SPEC: eight new modules queued
 (consensus, resolution/citations, era/succession, nature flywheel,
 habitats, cron manager, settlements, origins), the hierarchical

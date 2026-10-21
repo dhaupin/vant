@@ -128,6 +128,6 @@ node test/brain.test.js
 
 ---
 
-## More
+## Related
 
 See [CI](/vant/operations/ci) for CI setup.

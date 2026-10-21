@@ -90,3 +90,11 @@ Escalations emit events on the shared bus:
 
 See [Audit](/vant/advanced/audit) for event capture, and the sudo PRD
 (`labs/prd-sudo.md`) for the full policy design.
+
+---
+
+## Related
+
+- [Sudo API](/vant/reference/sudo) - the exact function signatures
+- [Audit](/vant/advanced/audit) - how sudo captures its decisions
+- [Best Practices](/vant/security/best-practices) - the request-approval pattern this rides on
