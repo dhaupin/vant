@@ -292,6 +292,94 @@ a pass ports a shape and pins a test for it — the first candidate
 being the per-rule gate semantics mapping, choreographed with the
 owner.)
 
+### Deep-crawl follow-up (2026-10-21, hands on the source): resolutions, refinements, bug sightings
+
+A full source read of the frame substrate (t3.gd 525 lines,
+folded_shell.gd 267, rules engine 213, scope stack 250, seed chain 89,
+state tree 92, flywheel 106, cosmic entropy/rng 356) verified and
+REFINED the table above. Findings, in register voice:
+
+**Verified sound (invariants held under hand-check):**
+
+- The folding math: complete 4-ary heap addressing (children = 4p+1..
+  4p+4, ring offsets (4^d-1)/3) verified collision-free across the
+  full 11-depth budget — 5,592,405 cells (4^12-1)/3, no two fold paths
+  meet. The MAX_FOLD_DEPTH refusals and the 24-bit NSC-9 packing bound
+  hold exactly.
+- The rebate law is symmetric: release_space() removes a space's
+  CLAIMS, never facts another space still claims (removal is
+  intersection-aware, with the audit-round-17 leak fix in place),
+  clear() releases only cells the tree uniquely claimed.
+- The honest-mass counters are real: fact_count() vs per-space sizes
+  reveal the shell's true footprint, and T3::savings_ratio()
+  MEASURES the dedup (stores attempted vs distinct cells) — honest
+  mass as a published number, not a discipline. The kernel journal's
+  §5a dedup row should adopt both the counter and the published ratio.
+- Canonical hashing is restart-stable: schema identity comes from
+  script resource paths (never object instance ids, which would fork
+  identical trees across restarts), dictionary payloads hash the
+  schema's canonical encoder output when present (key order cannot
+  fork identical facts), while transport bytes stay raw. Hashing and
+  serialization are explicitly different jobs.
+
+**Bug sightings (candidates for the sibling's own graveyard, handle
+via the issue-first mesh law — NOT fixed here, this repo does not own
+the frame):**
+
+1. **Silent no-change on evicted diff bases** (t3.gd diff/apply_diff):
+   snapshots are retained for a bounded window (64 roots); diff()
+   against a root OLDER than the window returns [] — a SILENT
+   EMPTY-CHANGE that reads as "no difference" instead of "I cannot
+   know." A client resyncing from a pre-eviction root carries its
+   stale tree while everything looks green. This is exactly §6a's
+   inert-census signature in diff form: the honest answer is a typed
+   "base out of window" refusal (client then requests a full scope
+   snapshot — the machinery already exists), not an empty array.
+2. **Predicate bypass in the ALL_WINS_WITH_EFFECT path**
+   (rules_engine.gd): the override marker maps PREDICATE_GATED to
+   hard-deny WITHOUT invoking the rule's predicate (the tests pin the
+   deny behavior, so it is designed-not-accidental, but the DESIGN is
+   suspect per the arch doc's own 5.1: predicate-gated means the
+   predicate decides). A scope flipping a rule to PREDICATE_GATED
+   silently converts "predicate decides, maybe allow" into
+   "unconditional deny under all-wins" — a gate whose veto strength
+   depends on which OTHER resolution the stack carries. Worth an
+   upstream discussion, not a unilateral verdict.
+3. **Single-depth equivalence in hash_subtree**: a subtree that has
+   exactly one node hashes to that node's hash (shortcut), and an
+   ABSENT subtree hashes to sha256(empty) — the same value an
+   emptied-then-deleted subtree now carries. Absent and momentarily-
+   empty are distinguishable only by history, not by hash. Minor, and
+   likely harmless in the frame's usage, but a kernel journal that
+   hashed BOUNDARIES the same way would conflate "nothing there yet"
+   with "everything that was there is gone" — the succeed verb needs
+   the fuller framing (hash of membership, not of emptiness) if it
+   borrows the shape.
+
+**Design notes worth keeping (no action, add to the growing census):**
+
+- Predicates live OUTSIDE the content tree (runtime behavior is not
+  content-addressable data; storing Callable descriptors in payloads
+  broke round-trips) — the kernel journal should apply the same
+  split: verdicts and receipts journal as content; executable logic
+  (gate handlers, listeners) stays in the registry layer.
+- One-wheel-one-law on the flywheel is enforced by SNAPSHOT/RESTORE
+  pairs per wheel (cosmic, shard-level, per-player), leftover momentum
+  never carries over a spark, and caps are per-wheel overrides of the
+  same law — the §5a organelle table's "spin through nature, not new
+  wheels" is confirmed as a shipped discipline, not just an instinct.
+- CosmicRng derives per-consumer STREAMS from one audited pool
+  (scope-salted, replayable in deterministic mode): correlation by
+  construction is impossible between consumers. If the kernel ever
+  needs unpredictable-but-auditable spark timing (the §5a entropy
+  row), the stream-derivation law is a better reference than raw
+  cosmic mixing alone.
+
+(These hands-on findings supersede the caveat above where they clash:
+the table's cleaner rows were read from arch docs; this section read
+the code. Where they agree — most rows — both sources point the same
+way, which is exactly what independent evidence means.)
+
 ### What the sibling gets back, already factual
 
 Not hypothetical: the first return shipment (#92-#95) closed the loop
