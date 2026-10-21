@@ -20,8 +20,7 @@ authTag, so tampering is detected on decrypt.
 | Method | Algorithm | Auth |
 |--------|-----------|------|
 | `Encrypt.encrypt/decrypt` | AES-256-GCM | Yes (authTag) |
-| `Encrypt.aesGcmEncrypt/decrypt` | AES-256-GCM | Yes |
-| `Encrypt.hmac` | HMAC-SHA256 | - |
+| `Encrypt.hmacSign/hmacVerify` | HMAC-SHA256 | - |
 
 ## Token signing
 

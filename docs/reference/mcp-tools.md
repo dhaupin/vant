@@ -320,9 +320,18 @@ vant_config_set(key="mcp.requireKey", value="false")    # persists to the CURREN
 ### Connector
 
 ```bash
-vant_connector_list()          # getConnector factory surface: pinecone|qdrant|weaviate
-vant_connector_connect(service="qdrant")   # real async connect()
+vant_connector_list()          # registry/factory surface names (see lib/connectors)
+vant_connector_connect(service="pinecone")   # real async connect()
 ```
+
+The shipped vector/storage connectors are `pinecone` and `s3`. The
+`qdrant` and `weaviate` factory NAMES still exist in
+`lib/connectors/index.js`, but their connector modules are not shipped:
+connecting refuses with a typed error instead of a fabricated ack.
+`vant_connector_connect` answers `{service, connected: false, error}`
+for unknown services and a real `{service, connected: true, connector}`
+only after an actual `connect()` (fixed in pass 306; it used to ack fake
+connected for any string).
 
 ### Context (prompt cache engine)
 
