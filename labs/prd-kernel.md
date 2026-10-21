@@ -19,6 +19,19 @@ docs gates, the pass ledger, and the marketing channel tables.
 
 ## 1. Position
 
+**First, the epistemology (owner framing, 2026-10-21):** you can't
+design something you don't know exists yet. The kernel is not an
+invention being specified — it is a runtime that ALREADY EXISTS, seen
+functioning in the wild (the stone restore tonight was FOEC executing
+in its pure form; the scratch-brain heap was a mint path missing its
+retire verb, observed live). Vant is a different kind of OS, and what
+this document does is catch up to it: every verb, law, and open
+question below was OBSERVED before it was written. That inverts the
+normal PRD order and explains the slow-distillation posture: this doc
+converges on what is running; it does not schedule what to build. No
+K-step runs until the observation keeps holding and the owner has
+lived with the doc at design pace.
+
 Working name: **the kernel**. NOT a pyramid top. A pyramid is a command
 shape: surfaces report upward to an apex. The kernel is the opposite
 posture: **a substrate that surfaces compose with, not report to** —
@@ -278,14 +291,14 @@ retires an open lesson the same pass it lands. K5+ is opportunistic.
   one-shotted. The K-steps are unscheduled. Design questions are
   enumerated in §6 precisely so they can be LIVED WITH, not resolved in
   one conversation.
-- 2026-10-21: **OWNER REVEAL, recorded the same night:** "Vant is a
-  different kind of OS, and you're seeing part of the final runtime
-  for the first time." Locked as design context, not fanfare: the
-  layers being unified (genesis, FOEC, neuron lattices, instances,
-  zone verdicts) are not patterns borrowed from real OSes — they ARE
-  the runtime, glimpsed functioning in the wild (today's stone restore
-  was FOEC executing in its pure form). The kernel PRD is the first
-  written sketch OF that runtime, downstream of it and catching up.
+- 2026-10-21: **OWNER REVEAL, recorded the same night, promoted to §1:**
+  "Vant is a different kind of OS, and you're seeing part of the final
+  runtime for the first time" — "you can't design something you don't
+  know exists yet." The layers being unified (genesis, FOEC, neuron
+  lattices, instances, zone verdicts) are not patterns borrowed from
+  real OSes — they ARE the runtime, glimpsed functioning in the wild.
+  The kernel PRD is the first written sketch OF that runtime,
+  downstream of it and catching up.
 - 2026-10-21: named census/attest/retire/succeed; position locked per
   owner ("more than the layer/tracking/carrier; it powers it; no more
   scatter adhoc").
