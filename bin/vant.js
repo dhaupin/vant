@@ -787,7 +787,11 @@ const child = spawn('node', [scriptPath, ...process.argv.slice(3)], {
     stdio: 'inherit',
     env: {
         ...process.env,
-// Spawned subcommand (start/health/sync/migrate...) read and wrote the
+        // (issue #230) children inherit the invocation's ONE advisory —
+        // see lib/gate.js _warn: the per-process latch alone printed it
+        // twice per invocation (parent dispatch read + child route read).
+        VANT_GATE_QUIET: '1',
+        // Spawned subcommand (start/health/sync/migrate...) read and wrote the
         // cwd stays the user's project (see below); libs that need the
         // install tree (horcrux targets, templates, boot dirs) resolve it
         // via lib/anchor.js getRepoRoot() instead of guessing from cwd or
