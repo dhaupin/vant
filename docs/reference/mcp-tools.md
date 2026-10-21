@@ -119,16 +119,18 @@ vant_commit(message="Updated learnings")
 
 ### vant_sync
 
-Sync with GitHub.
+Read the real sync status across providers (same call
+`vant_sync_status` makes - verified against lib/mcp.js). It takes NO
+params and does not itself sync.
 
-**Params:**
-| Param | Type | What |
-|-------|------|------|
-| direction | string | "push" or "pull" |
+**Params:** None
 
 **Example:**
 ```bash
-vant_sync(direction="push")
+vant_sync()   # -> { status: 'ok', providers: [...], ... }
+
+# The real sync verbs:
+vant_sync_pushAll(); vant_sync_pullAny(); vant_sync_rebase(provider="github")
 ```
 
 ---
@@ -233,7 +235,7 @@ hold, so nothing strands reserved budget. The era fold records the work
 under `task:` -> threads (the era catalogue) only when an era is OPEN
 (the era subscriber's no-op contract); `eraFolded:false` says so.
 
-### Brain family (46 tools - cor member-related core)
+### Brain family (28 brain_* tools - file core, stack, geometry, and graph)
 
 Reading and writing the brain, multibrain stack hops, geometry memory,
 brain evolution and link/graph side: every brain_* tool is a thin call
