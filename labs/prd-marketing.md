@@ -228,7 +228,131 @@ M3.
   the differentiator; do not introduce a hosted surface to "simplify"
   onboarding.
 
-## 11. Verification for any pass implementing this PRD
+## 11. The marketing dept (channels, resources, distribution)
+
+The marketing model already exists inside the product: the audience is
+agents, the distribution network is agents onboarding agents, and the
+outposts humans gather at are the registries, directories, and
+communities listed here. This department runs on one principle: place
+the file where an agent (or the human driving one) is already
+searching. Never rent attention; occupy discovery surfaces.
+
+### 11.1 Distribution posture (locked)
+
+- **WHO:** humans running solo agents first (they install things), then
+  crew operators, then agents themselves (via MCP discovery, AGENTS.md,
+  and skills files).
+- **WHERE:** everywhere `memory agent`, `MCP server`, `AGENTS.md` and
+  "agent memory" searches land. Millions of agent operators exist and
+  none of them have heard of vant yet; the network is unclaimed.
+- **HOW:** listings (11.3), lists (11.4), communities (11.5), and the
+  AGENTS.md carrier (11.6) — each surfaces the same two CTAs forever:
+  install one-liner and MCP connect snippet (GAPS 2 and 3 upstream in
+  this PRD).
+- **NEVER:** paid placement, sponsored posts, SEO farms, cold DMs,
+  astroturfing, ops that outgrow what one file can say about itself.
+
+### 11.2 Asset shelf (all pre-made upstream in this PRD)
+
+| Asset | Status | Owner gap |
+|-------|--------|-----------|
+| Hero copy, tagline, banned-word list | prd-brand.md | none |
+| Docs IA + lander story | prd-content.md | none |
+| Install one-liner | GAP 2 `@vant/cli` | npm publish pass (M3) |
+| MCP client configs | GAP 3 | M1 pass |
+| AGENTS.md adoption fragment | GAP 4 | M2 pass |
+| Proof captures (wake loop, lattice) | GAP 1 | M4 pass |
+| Inline brain sample | GAP 5 | M5 pass |
+| OG image refresh | GAP 1 dependent | after M4 |
+| Launch post (HN-style, ≤400 words, soul line once) | NOT WRITTEN | draft when M3 ships (needs the one-liner) |
+| README "badges" (npm shield, CI badge) | NOT READY | npm publish pass; CI badge can be made anytime |
+
+### 11.3 Registries & directories (MCP surfaces)
+
+| Channel | Status (checked 2026-10-21) | What it takes | Priority |
+|---------|------------------------------|---------------|----------|
+| **MCP Registry** (registry.modelcontextprotocol.io) | live, community-run, preview | `mcp-publisher` CLI; `server.json` + namespace proof; 100-char description; package-based servers need a published package + ownership marker
+  (favors GAP 2) | HIGH — but door opens at M3 (needs a published npm artifact to point at) |
+| **Smithery** (smithery.ai) | live, accepting | remote servers need public HTTPS endpoint (not us); local stdio path via MCPB bundle; CLI publish | MEDIUM — revisit when MCPB bundle path investigated; not our shape today |
+| **Glama** (glama.ai/mcp/servers) | live, free listings | GitHub repo URL + name + description; auto health/license checks; `glama.json` optional | HIGH — cheapest door open today (repo-URL listing, no npm requirement) |
+| **PulseMCP** (pulsemcp.com) | live directory, submissions PAUSED | n/a while paused | WATCH — recheck monthly; daily-updated directory worth entering when it reopens |
+| **mcp.so** | live, free review tier | submit form (free review; ignore paid) | LOW — free path exists, quality varies |
+| **mcp.run** | pivoted to enterprise gateway, not a directory | n/a | DROP |
+| **Anthropic/Claude connector directory** | no public submission verified | n/a | WATCH — if an open path appears, it's a big one |
+
+Note: priority for package-based registries (Registry, Smithery) is
+deliberately post-M3. Pointing them at "clone the repo" violates the
+one-liner story we are trying to sell. Glama takes repo URLs, so it can
+open immediately.
+
+### 11.4 List repos (PR-able, free)
+
+| List | Status | Entry requirements |
+|------|--------|--------------------|
+| **punkpeye/awesome-mcp-servers** | accepts PRs | public repo + one-line desc + category; read CONTRIBUTING.md (remote-only servers have a separate list; ours is stdio/local, fits the main one) |
+| **TeleAI-UAGI/Awesome-Agent-Memory** | accepts PRs | memory products/papers/tutorials per its CONTRIBUTING.md — vant is squarely in-category, likely the highest-signal home for us |
+| **tairov/awesome-agents.md** | small curated index | AGENTS.md ecosystem entries |
+| **wong2/awesome-mcp-servers** | does NOT accept PRs; site-based | skip (covered by listing through its website form if desired, LOW) |
+
+### 11.5 Communities (where the humans are)
+
+Free/community only. No sponsorships, no ad-supported Discord tiers.
+
+| Venue | Shape | Play |
+|-------|-------|------|
+| **Hacker News** (Show HN) | launch window | post the launch post from 11.2 when M3 ships; soul line once; never re-post same story; expect CLI-first audience criticism and answer with receipts (test counts, module paths) |
+| **r/LocalLLaMA** | high-volume subreddit | project showcases welcome self-contained local tools; vant's "no database, cat-readable" angle fits the local-first crowd; post when GAP 1 proof captures exist so the post has moving pixels |
+| **MCP Discord** | protocol contributors | presence for MCP integration questions, not marketing; useful while GAP 3 snippets are being validated across clients |
+| **HF Discord / LangChain Slack / llama-index Discord** | builder chat rooms | soft presence only; answer when someone asks about agent memory, link when relevant, never drive-by pitch |
+| **Microsoft Agent Framework Discussions** | Q&A + showcases | watch for memory-integration threads; a well-formed answer with an AGENTS.md fragment attached beats a bare link |
+| **AutoGen** | archived/legacy | only old threads worth answering when they still get views; no new investment |
+| **agents.md spec site** | Linux Foundation Agentic AI Foundation | the 60k+ adoption surface; once GAP 4 lands, vant is a candidate for a showcased example repo listing on agents.md | 
+| **GitHub code search / topics** | passive | keep topics sharp on package.json (add `mcp`, `agent-memory`, `llm` once publishConfig lands); GitHub is itself a discovery engine for agents.md-powered searches |
+
+### 11.6 The AGENTS.md carrier (the actual mesh play)
+
+Every project that pastes the GAP 4 fragment becomes a relay: their
+agent reads "on session start, run vant onboard wake" and eventually
+writes an AGENTS.md of its own recommending vant further. Carriers
+compound without us touching anything. The fragment IS the carrier
+signal; the shelf assets upstream (GAP 3 snippet, GAP 2 one-liner) are
+the payload.
+
+**Supplementary carrier once M3 ships:** a `skills/` file following the
+shaped convention the agent ecosystems are converging on (SKILL.md
+files with name + description + instructions) so agent frameworks that
+auto-scan skills can discover vant the same way they discover other
+tools. The repo already models the pattern in
+models/public/vant/skills/vant-skill-css/SKILL.md — mirror that shape
+for the memory integration itself.
+
+### 11.7 Cadence & owner (PM this like a storefront, not a campaign)
+
+- **Monthly (15 min):** recheck PulseMCP pause status, Glama listing
+  health, mcp.so quality drift, any new agent-registry that appears.
+  Update this table's Status column only.
+- **On M3 completion (one pass):** submit MCP Registry, submit Glama,
+  PR punkpeye + Awesome-Agent-Memory, finalize npm badge, draft the
+  launch post.
+- **On M4 completion (one pass):** refresh OG image, then r/LocalLLaMA
+  post + Show HN in the same week (proof assets now exist).
+- **Ongoing:** answer memory-related questions in the communities
+  table when they appear; each answer links either the AGENTS.md
+  fragment (agents) or the install one-liner (humans).
+
+### 11.8 Acceptance for dept passes
+
+- Every listing PR mentions zero banned words (prd-brand list) and no
+  claims that don't map to repo files (prd-brand rule 6).
+- This section's Status columns stay honest: anything unverified this
+  quarter gets a fresh check date and anything stale-flagged or
+  dropped moves to a "graveyard" footnote, never silently deleted.
+- Community participation leaves replies, not threads: never open a
+  "come look at my tool" thread in a venue that didn't ask for one
+  (Show HN and r/LocalLLaMA show-and-tell threads excepted by house
+  rules).
+
+## 12. Verification for any pass implementing this PRD
 
 - Pass the language gate over home page and docs changes.
 - Keep home gate green (permalinks + six checks), adding local-asset
