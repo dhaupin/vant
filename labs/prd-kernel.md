@@ -210,6 +210,30 @@ it has minted. Hierarchy survives intact, gates still gate, sudo still
 refuses on the side of the operator. It is just no longer seven
 private hierarchies that each reinvent the same lifecycle verbs badly.
 
+## 5a. Staying alive: the momentum line (kernel x nature, flywheel,
+encrypt, engine)
+
+The kernel is not built once and done; it is a substrate that must be
+ALIVE between sessions — and the repo already owns a complete, working
+aliveness mechanism. Mapping it in (observation-first, per §1):
+
+| Organelle | Existing lib | What it already does | What it offers the kernel |
+|-----------|--------------|----------------------|---------------------------|
+| **The flywheel** | lib/nature.js (persists momentum between sessions) | momentum accumulates, persists, decays by threshold | the kernel's inter-session CONTINUITY of attention: census freshness, attest staleness alarms, the "who has not been checked in ages" feeling — momentum that outlives a session is exactly census-with-a-clock |
+| **The hit-and-miss spark** | lib/nature.js | fires only when momentum drops to threshold — organic rhythm, no wasted sparks | the kernel's AUDIT CADENCE: no fixed cron ringing every hour; the kernel gets impolled exactly when staleness crosses threshold. (The marketing dept's monthly 15-min recheck is a hand-cranked spark — the kernel makes it organic.) |
+| **Cosmic entropy** | lib/encrypt.js getCosmicEntropy() | real-world entropy feeding the chaos weight | UNPREDICTABLE spark timing: the kernel does not become a metronome; audits and censuses fire at moments that cannot be gamed by a surface that learned the schedule. (Encryption's role here is not secrecy but HONEST arbitrary timing — entropy as disincentive to prepare-for-inspection.) |
+| **The engine** | lib/geometry/engine.js (julia/node sidecar) | picks the best available compute engine, fail-safe fallback | the kernel should NOT compute its own verdicts on a bespoke stack: census counts, attest checks, retirement candidate selection are plain math — run them through the existing engine abstraction (or plain node) so the kernel stays thin; the SELECTION law (best available, graceful fallback) is already solved and is exactly the kernel's portability instinct in miniature |
+| **Wire/bus laws** | nature's shared bus (nature:spark rides the shared bus), encrypt's event emissions | everything announces through the bus, never private EventEmitters | the kernel's census/retire/attest events MUST ride the same shared bus law — one broadcast spine, no private channels; the kernel is a consumer of the event law, not an exception to it |
+
+Working synthesis: **nature gives the kernel a pulse; encrypt gives the
+pulse unpredictability; the engine keeps pulse-keeping cheap; the fly
+wheel keeps the pulse remembering.** A kernel with a pulse can census
+itself; a kernel that censuses itself cannot rot silently. The failure
+register (§6a) is the list of what rot looks like — the momentum line
+is what notices it. (NOTE: none of this is scheduled; it is the
+growth medium question — what keeps the substrate alive — answered
+from organelles that already work.)
+
 ## 6. Open questions for the slow-distillation phase (the real design work)
 
 These are the questions that deserve months if they need months.
@@ -253,6 +277,73 @@ implemented from:
    "neurons forming" maps onto existing structure (the state.json
    neurons lattice is already named that for a reason — is the kernel
    the thing that finally gives THAT lattice a job?).
+9. **Verb granularity and ordering.** The verbs are named but their
+   UNIT OF WORK is not pinned. Is census always full enumeration, or
+   incremental deltas? Can retire be mass (the pass-328 sweep
+   genuinely retired ~180 entries — and its ledger entry named them
+   all BY CATEGORY, an accidental data point that retirement
+   granularity may be category-shaped, census listing members)? Is
+   succeed one ceremony or can it partially succeed across a
+   boundary? ALSO: ordering between verbs — tonight's Cloudflare race
+   (a Pages deploy pointed at new paths before the merge that created
+   them existed) was exactly a succeed-ordering bug: two ceremonies
+   firing in the wrong order. What orderings BETWEEN verbs does the
+   kernel enforce (or witness), and who holds the sequence?
+10. **What is the zone, exactly?** The FOEC doctrine leans on it:
+    "the kernel exhibits the mode, the zone attests whether it
+    passed." But the zone has no section of its own yet. The open
+    shape: is the zone a PROPERTY of the kernel (verdicts issued from
+    within), or a PEER the kernel reports to (the kernel mitigates,
+    something else judges)? The owner's enforcer/mitigator split hints
+    strongly at the peer shape — the substrate grading its own
+    coherence exams is exactly the kind of self-attestation the rest
+    of the system refuses. If peer: what is the zone's own ceremony,
+    and who attest it FROM the outside (the existing zen/
+    meditate-in-flow lineage is the likely ancestor)?
+11. **The kernel's posture during UNINVITED FOEC.** Genesis, stone
+    restore, and heavy wake are INVITED surges. The runtime also
+    takes month-level uninvited ones: CI flake storms, a host dying
+    mid-pass, a session dying at an arbitrary point (the MEM.md
+    discipline exists precisely because sessions die whenever they
+    die). Suspected honest answer: same mode, different zone context —
+    and the existing crash-safety suite (WAL, atomic writes, fail-
+    closed gates) is already the observed answer for the storage
+    layer. If so this is a MAPPING question (which crash-safety
+    behavior is already kernel-shaped?), not a design vacuum. It
+    still belongs on the list: connecting the kernel to the layer
+    that currently holds these guarantees alone.
+
+## 6a. The failure register (observed signatures of lying surfaces)
+
+The epistemology cuts both ways: if the doc converges on a runtime seen
+in the wild, the NEGATIVE sightings deserve the same rigor as the
+positive ones. These are the violation shapes we have caught,
+described as what they look like to an observer standing in one:
+
+| Signature | What it looks like | Verified sighting |
+|-----------|--------------------|-------------------|
+| **Inert-mass census** | a count that hides kinds: "78 brains" — the number is true, the composition is a lie (66 were test carcasses) | pass 328, horcrux inspect |
+| **Undated attest** | a claim pinned to no moment: status columns with no check date rot into lies-in-waiting | marketing PRD tables (pre-dating), PulseMCP pause row as the honest counter-example |
+| **Mint without retire** | unbounded growth nobody owns: scratch brains minted per run, never swept; the archetypal leak | pass 328, models/private 199 dirs |
+| **Succeed without inheritance** | continuity that loads but does not check: a restore that hydrates alive state carrying dead assumptions; a deploy that assumes what it did not merge | tonight's Cloudflare race; the succession contract's attest chain |
+
+Rule of the register: entries are OBSERVATION patterns, not rule
+violations — the invariants in §2 remain the law; this section is what
+the law looks like when broken, on the outside. Future agents do not
+need a rulebook to know they are standing in a heap; they need the
+smell. (Add entries as sightings occur; never delete — stale entries
+get a dated "not seen since" note instead.)
+
+## 6b. The zone (named, not yet designed)
+
+The zone entered the vocabulary through FOEC and stayed: it is the
+RUNTIME VERDICT-MAKER — the thing that distinguishes legitimate surge
+(genesis, stone restore) from failure inside the SAME observable
+shape. It exists already in lineage (zen / meditate-in-flow); the
+kernel does not create it, the kernel is judged BY it, or reports TO
+it (open question 10). Working statement: **the kernel exhibits, the
+zone attests.** Nothing in this document schedules zone design; it
+fixes only the relationship claim so the FOEC doctrine stays coherent.
 
 ## 7. Sequencing (DELIBERATELY NOT SCHEDULED)
 
