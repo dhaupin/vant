@@ -1,7 +1,23 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** pass 321 (the DIST→WEB/HOME move, owner call: “/web/home
+**Last Updated:** pass 322 (the MOBILE BLEED FIX: the pass-321 home
+page rendered but its terminal code blocks bled off-viewport on phones
+— `pre.term code { min-width: max-content }` propagated the longest
+line's width up as min-content, and the ancestors refused to shrink:
+`.dual-cta` used `1fr` in the ≤780px query (grid tracks default to
+minmax(auto,1fr) and grow to fit unbreakable min-content) and
+`.cta-card` had the default `min-width:auto`. Diagonal fix — every link
+in the chain gets a shrink key: `.cta-card` gets `min-width:0`, the
+mobile query changes to `minmax(0,1fr)`, and on mobile the code drops
+max-content (`min-width:0; white-space:pre-wrap; overflow-wrap:
+anywhere`) so the pre's width wins and the long git-clone line
+soft-wraps instead of scrolling/bleeding; copy button moves to the
+bottom on mobile so it doesn't sit over wrapped text. Desktop keeps
+the max-content + overflow-x:auto behavior (no inner scrollbar on
+phones where it's hard to scroll). VERIFIED: home gate PASS (125
+permalinks). 
+**Prior — pass 321** (the DIST→WEB/HOME move, owner call: “/web/home
 it is”. git mv dist web/home history-preserving; the pass-150 gate
 rewritten as scripts/check-home.js walking web/home/*.html (same 6
 checks), packaging lint:home + test.yml “web/home gate”; PRD override
