@@ -84,17 +84,26 @@ graph coming up together. You do not defeat FOEC, you NEED it — a
 kernel that never flashes everything never hydrates; a genesis without
 FOEC is a genesis that did not happen. Whether a FOEC moment is good
 or bad is NOT the label's job: that judgment belongs to the kernel
-zone at runtime (the zone concept the kernel subsumes). Genesis
+zone at runtime. The kernel is EXHIBITED TO the zone, never the other
+way around (the zone's peer status is fixed in §6b; the kernel does
+not absorb or subsume its judge — an earlier "subsumes" phrasing was
+retired in the pass-335 nitpick for contradicting the enforcer/
+mitigator split). Genesis
 hydration, stone restore, a heavy wake — those are the mode in its
 pure form. Failure is a runtime verdict, not a taxonomy entry: the
 kernel exhibits the mode, the zone attests whether it passed.
 
 ```
-        kernel  (issues the invariants: census -> attest -> retire -> succeed)
-       /   |   \
-  pipeline sudo rls ... escrow, market, horcrux, harness, ledger ...
-       \       /
-        consumers of the verbs
+     vant surfaces (pipeline, sudo, rls, escrow, ... )
+         |  composed as consumers
+   +------------------------------------------------+
+   |            kernel substrate                    |
+   |   four verbs as guarantees: census, attest,    |
+   |   retire, succeed  (an open vocabulary, not    |
+   |   a pipeline - orderings are law, not arrows)  |
+   +------------------------------------------------+
+          bedrock: git history + tests + owner authority
+          (the unattested root that attests everything)
 ```
 
 A consumer like the pass-328 sweep is not the kernel; it is what becomes
@@ -428,14 +437,19 @@ implemented from:
 8. **Enforcement through whom?** PARTIALLY ANSWERED by the two-natures
    framing (2026-10-21): enforcement stays top-down (the pyramid of
    roles, gates, rules is real and flows through); the kernel is the
-   MITIGATOR under it — it does not command, it prevents FOEC by
-   forming consensus/sequencing before flow. OPEN remains: the exact
-   mitigator mechanics — does the kernel decline-to-journal illegal
-   verbs (passive), form consensus pre-flow (active chain), or ripple
-   refusal up through neurons it has formed (chain reaction) — and how
-   "neurons forming" maps onto existing structure (the state.json
-   neurons lattice is already named that for a reason — is the kernel
-   the thing that finally gives THAT lattice a job?).
+   MITIGATOR under it — it does not command, it forms consensus and
+   sequences BEFORE flow. PASS-335 REFINEMENT (the contract example
+   contradicted this): `kernel.gate()` as drawn implied the consumer
+   gates ITSELF through the kernel, which re-creates the command shape
+   the kernel retired. The mitigator's only enforcement is
+   REFUSAL-TO-JOURNAL: the kernel declines to record an illegal verb
+   (fail-closed, the escrow lesson); the DECISION itself comes from
+   the rules layer above (per-rule semantics, E1's answer shape).
+   Kernel = clerk of the record with refusal teeth, never the judge.
+   OPEN remains: the exact refusal mechanics (decline-to-journal
+   passive vs active pre-flow consensus) and how "neurons forming"
+   maps onto the state.json lattice (is the kernel what finally gives
+   THAT lattice a job?).
 9. **Verb granularity and ordering.** The verbs are named but their
    UNIT OF WORK is not pinned. Is census always full enumeration, or
    incremental deltas? Can retire be mass (the pass-328 sweep
@@ -461,16 +475,44 @@ implemented from:
     meditate-in-flow lineage is the likely ancestor)?
 11. **The kernel's posture during UNINVITED FOEC.** Genesis, stone
     restore, and heavy wake are INVITED surges. The runtime also
-    takes month-level uninvited ones: CI flake storms, a host dying
-    mid-pass, a session dying at an arbitrary point (the MEM.md
-    discipline exists precisely because sessions die whenever they
-    die). Suspected honest answer: same mode, different zone context —
-    and the existing crash-safety suite (WAL, atomic writes, fail-
-    closed gates) is already the observed answer for the storage
-    layer. If so this is a MAPPING question (which crash-safety
-    behavior is already kernel-shaped?), not a design vacuum. It
-    still belongs on the list: connecting the kernel to the layer
-    that currently holds these guarantees alone.
+    takes uninvited ones: CI flake storms, a host dying mid-pass, a
+    session dying at an arbitrary point (the MEM.md discipline exists
+    precisely because sessions die whenever they die). Suspected
+    honest answer: same mode, different zone context — the crash-
+    safety lineage (WAL, atomic writes, fail-closed) is already the
+    observed answer for the storage layer, making this a MAPPING
+    question, not a design vacuum.
+12. **Who winds the kernel? (the pulse contradiction, pass 335)**
+    §10 locks "invoked, passive substrate" while §5a requires the
+    kernel ALIVE between sessions — a pulse fired at staleness
+    thresholds. A passive substrate cannot fire its own sparks; SOME
+    running surface must impoll it. Candidates: the wake ceremony
+    (every onboard wake tickles the kernel censuses), harness exits
+    (post-suite sweep fires retire), the MCP door (door opens =
+    census check), or a boot tick in bin/vant.js. The honest framing:
+    the kernel has no daemon (non-goal intact), it borrows OTHER
+    surfaces' already-running moments as its heartbeat. Which
+    moments, and what happens when none of them run for a long time
+    (the kernel asleep on a dormant install — does a stale stone
+    restore count as a wind?), is open.
+13. **The bedrock (the attestation chain-bottom, pass 335).** The
+    cross-verb laws form a chain: retire needs census, attest needs
+    dated census, succeed needs attestation. Who attests the CENSUS?
+    Recursive self-attestation is unresolved and slightly circular.
+    The sly-kernel answer (owner instinct, industry-confirmed:
+    self-hosting is real but always bounded — compiler bootstraps
+    need an external root toolchain, cluster managers need a
+    management-cluster root): the kernel's own maintenance (its
+    census refreshes, journal compaction, audit pulses) should be
+    implemented as THE KERNEL'S FIRST REGISTERED CONSUMER — the
+    kernel eats first, its law self-hosts — BUT it stands on an
+    explicitly named, UNATTESTED bedrock that attests everything
+    else and is attested by nothing inside the system: **git
+    history + the test suites + the owner's authority.** Naming the
+    bedrock is what makes the self-hosting honest instead of
+    circular. Open: is that the complete bedrock list, and what is
+    the ceremony when bedrock and kernel disagree (the owner's
+    answer wins, by definition — record it as law, not incident).
 
 ## 6a. The failure register (observed signatures of lying surfaces)
 
@@ -566,6 +608,30 @@ retires an open lesson the same pass it lands. K5+ is opportunistic.
 - 2026-10-21: three invariants (no unlisted retire, no undated attest,
   visible verb gaps) hold for ALL consumers including vant's own
   surfaces — kernel law is self-hosting, the repo eats it first.
+- 2026-10-21: pass-335 nitpick wave (owner: proofread, hunt gaps,
+  test the sly-kernel instinct against industry patterns). Findings
+  locked into the doc: (1) passive-vs-alive contradiction named and
+  turned into open question 12 (who winds the kernel — candidates:
+  wake ceremony, harness exits, MCP door, boot tick); (2) the gate()
+  contract example contradicted the two-natures law and was restated
+  as refusal-to-journal semantics (kernel = clerk of the record with
+  refusal teeth, never the judge) — Q8 refined accordingly; (3) the
+  "kernel subsumes the zone" phrasing retired (contradicted §6b's
+  peer-with-teeth); (4) the attestation chain-bottom named as open
+  question 13 — the bedrock: git history + test suites + owner
+  authority, unattested by anything inside the system, attesting
+  everything. Industry pattern check (Cloudflare McpAgent/agents SDK,
+  Google ADK + Agent Engine): the substrate shape is confirmed —
+  lifecycle, state, persistence owned by the platform; consumers
+  register in; app keeps only its logic. Cloudflare's move from
+  stateful McpAgent to a stateless handler confirms kernels converge
+  on THINNER, more portable cores over time (the portability clause
+  rides the current, not against it). Self-hosting confirmed real
+  but always bounded (compiler bootstrap needs an external root;
+  Cluster API needs a management cluster) — hence the named bedrock
+  instead of claimed circularity. Layout fix: the §1 diagram now
+  draws the kernel BENEATH its consumers with the bedrock under it,
+  and the verb arrow-list is labeled a vocabulary, not a pipeline.
 
 ## 10. Non-goals (locked)
 
