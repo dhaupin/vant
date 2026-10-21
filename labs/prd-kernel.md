@@ -40,6 +40,26 @@ Revised shape:
 
 The relationship, stated exactly:
 
+**Two natures, both true (owner framing, locked 2026-10-21):**
+
+1. **Enforcement stays top-down.** Vant IS pyramid-shaped for roles,
+   gates, rules — everything flows through. That does not change. The
+   kernel does not flatten the command structure above it.
+2. **The kernel itself is the MITIGATOR**, not the enforcer: a logic
+   pattern, a chain reaction, neurons forming — the everything-handler
+   that lets consensus form BEFORE anything flows through the pyramid.
+   The gates above decide; the kernel decides HOW decisions become
+   flow: sequenced, attested, census-backed, coherent.
+
+The designation the owner gave the failure mode it prevents: **FOEC,
+Flash Of Everything Content** — the opposite of FOUC one layer deeper.
+FOUC is unstyled content flashing on the way to style; FOEC is
+unmitigated everything flashing on the way to coherence: layers, state,
+carriers, all dumped at once, none of it sequenced or formed. The
+kernel's job is that no FOEC ever occurs: nothing spooky arrives
+unformed; consensus forms first, chain-reaction style, and only then
+does content flow.
+
 ```
         kernel  (issues the invariants: census -> attest -> retire -> succeed)
        /   |   \
@@ -193,11 +213,17 @@ implemented from:
 7. **What does the kernel say NO to?** The hardest design input: every
    guarantee added on top is a surface that can lie. What is the
    minimum the substrate can promise and still be load-bearing?
-8. **Enforcement through whom?** If the kernel is beneath (not an
-   apex), enforcement cannot be top-down command. Is it refuse-at-the-
-   verb (the kernel simply declines to journal an illegal retire),
-   refuse-at-the-consumer (surfaces inherit the refusal and act on
-   it), or both — and what does each cost the composition model?
+8. **Enforcement through whom?** PARTIALLY ANSWERED by the two-natures
+   framing (2026-10-21): enforcement stays top-down (the pyramid of
+   roles, gates, rules is real and flows through); the kernel is the
+   MITIGATOR under it — it does not command, it prevents FOEC by
+   forming consensus/sequencing before flow. OPEN remains: the exact
+   mitigator mechanics — does the kernel decline-to-journal illegal
+   verbs (passive), form consensus pre-flow (active chain), or ripple
+   refusal up through neurons it has formed (chain reaction) — and how
+   "neurons forming" maps onto existing structure (the state.json
+   neurons lattice is already named that for a reason — is the kernel
+   the thing that finally gives THAT lattice a job?).
 
 ## 7. Sequencing (DELIBERATELY NOT SCHEDULED)
 
