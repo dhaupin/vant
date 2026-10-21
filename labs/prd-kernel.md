@@ -61,16 +61,20 @@ verb. The kernel is where that vocabulary unifies, not where it begins.
 existing meditate-in-flow/zen lineage, not from yoga.)
 
 **FOEC, Flash Of Everything Content** (owner framing, corrected same
-day): NOT a failure mode. A MODE — the opposite of FOUC one layer
-deeper. FOUC is unstyled content flashing on the way to style; FOEC is
-everything surfacing at once on the way to coherence — all layers, all
-state, all carriers up together, none of it sequenced *yet*. Whether a
-FOEC moment is good or bad is NOT the label's job: that judgment
-belongs to the kernel zone at runtime (the zone/license concept the
-kernel subsumes). Genesis hydration, stone restore, a heavy wake —
-those are legitimately FOEC-shaped moments. Failure is a runtime
-verdict, not a taxonomy entry: the kernel exhibits the mode, the zone
-attests whether it passed.
+day): NOT a failure mode. A MODE — and not merely a tolerated one: a
+REQUIRED one. The opposite of FOUC one layer deeper. FOUC is unstyled
+content flashing on the way to style; FOEC is everything surfacing at
+once on the way to coherence — all layers, all state, all carriers up
+together, none of it sequenced *yet*. GENESIS IS FOEC. The neuron
+lattice lighting up IS FOEC. In JS runtime terms: the whole instance
+graph coming up together. You do not defeat FOEC, you NEED it — a
+kernel that never flashes everything never hydrates; a genesis without
+FOEC is a genesis that did not happen. Whether a FOEC moment is good
+or bad is NOT the label's job: that judgment belongs to the kernel
+zone at runtime (the zone concept the kernel subsumes). Genesis
+hydration, stone restore, a heavy wake — those are the mode in its
+pure form. Failure is a runtime verdict, not a taxonomy entry: the
+kernel exhibits the mode, the zone attests whether it passed.
 
 ```
         kernel  (issues the invariants: census -> attest -> retire -> succeed)
