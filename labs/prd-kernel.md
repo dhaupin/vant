@@ -234,6 +234,73 @@ is what notices it. (NOTE: none of this is scheduled; it is the
 growth medium question — what keeps the substrate alive — answered
 from organelles that already work.)
 
+## 5b. The sibling sighting: synmergia's frame (cherry-picked back, dated)
+
+Circumstance note first (limits what this section may say): the
+sibling repo is CLOSED SOURCE. Everything below is written at the
+architecture level only — patterns and their public lineage in this
+repo's own decision records — with no game surfaces, no payloads, no
+negatives, no design percentages. It cites exactly what is already
+citable here: this repo's own files (the port headers and arch §16
+naming this repo as the borrowed source) and the upstream issue thread
+(#92-#95, public on dhaupin/vant). If the sibling's posture ever
+changes, this section can grow; until then it stays deliberately thin.
+
+The direction of flow matters as much as the content: this repo built
+the structs first (brain stack, content-hash cache, geometry, flywheel,
+event bus). The sibling cherry-picked the structs it needed (port
+headers on file: its content-hash tree cites this repo's lib/cache.js,
+its hierarchy walker cites lib/brain.js; the arch doc has a section
+literally titled "Borrowed from vant") and ran them in a domain that
+exercises them harder than the pods ever could — a live multiplayer
+world hitting its scope stack every tick, masses of concurrent actors,
+state diffs flying per frame. What the harder workload learned then
+came back: the first return shipment was the #92-#95 issue batch
+(fixed in pass 71), and the deeper returns are structural references
+the kernel can study. Voluntary, per-verb, both directions — that is
+the mesh contract working, two repos one crew.
+
+**What this is NOT:** proof or consensus-by-assertion. A second
+coding is INDEPENDENT EVIDENCE — it falsifies the worry that the
+kernel's verbs were vant-local bias — but it is not adoption, not a
+vote, and not a dependency. The kernel's law remains: any consumer
+registers itself; evidence enters through this PRD's observation
+register, treaties enter nowhere.
+
+### The cherry-picks worth studying (kernel-lens mapping, architecture level)
+
+| Kernel concept (this PRD) | What the sibling frame landed (all cite vant lineage in their port headers / arch maps) | What to cherry-pick back, carefully |
+|---------------------------|----------------------------------------------------------------------------------------|--------------------------------------|
+| Honest mass (§2 attest) | The content-hash tree stores payloads in a folded shell so identical state blocks pay ONCE regardless of path count — dedup as storage physics, not discipline | The dedup law for the kernel journal: event records whose CONTENT is identical should share bytes. Census integrity without payload bloat. (A garden-variety content-addressed store; what matters is that the sibling proved the shape under per-tick load.) |
+| The mitigate layer (§1 two-natures) | The five infrastructure services (rate limit, security, monitoring, firewall, autoresponse) each stop owning decision logic and become thin wrappers EMITTING rule requests; one generic evaluator resolves them with PER-RULE resolution semantics (top-wins / bottom-wins / predicate-gated / all-wins-with-effect) | This is open question 2's missing answer shape: authority is not global and not per-service — it is PER-RULE, declared at the rule level. The kernel's gate model can adopt the same shape: rule declarations carry their own resolution semantics; the kernel enforces the ENVELOPE, the rules carry the meaning |
+| The zone (§6b, open q10) | Frame authority, decision D030, DONE: a transient scoped environment where rules differ (dream/tutorial/jail analogues), server-authoritative seed issued at entry, GC'd at end, cross-frame leak PROHIBITED by law, state goes to the state tree not the frame | The zone gains a worked reference: zone entry = seed issuance; zone life = never persisted in itself; zone end = GC with a leak prohibition. Q10's peer-vs-property question can now be argued against a shipped design instead of pure abstraction |
+| Succeed (§2) with inheritance attestation | State diffs verified by root hash at the receiver, resync on mismatch; an open-seed TTL grace window restores the environment on reconnect | Succeed-with-inheritance-attestation is a shipped pattern: the boundary crossing carries the hash; the destination fails loudly on divergence. The kernel's succeed verb can cite the same receipt shape |
+| The momentum line (§5a) | ONE wheel, one law: a single canonical chaos primitive that every rhythmic system (world wheels, per-actor anomaly wheels) spins through - accumulate, decay, spark, never two meanings | The flywheel-of-the-moment is NOT needed in JS (nature.js already exists and works) - what to adopt is the ONE-PRIMITIVE law: if more kernel rhythms appear (session heartbeat, journal compaction pulse), they spin through nature, not new wheels |
+| Recursion semantics (open q4) | The scope stack walks per-connection with explicit hierarchy resources, load-time validation (no cycles, single root, parents exist), and extensions other domains define themselves (galaxy-sector-planet) | Recursion is LOAD-VALIDATED, not depth-guessed: the hierarchy is data, validated at boot, instead of a runtime split-horizon rule. Q4 gains its answer shape: the kernel registry validates consumer trees the same way - no cycles, declared parents, one root |
+| FOEC handling at scale (§1) | Ticks: bounded, sequenced, per-scope work; diffs flow through one path; mass isn't braved, it is SCHEDULED (coalesce windows for non-critical parameters, immediate channels for critical ones per decision D033) | The kernel's surge handling peers: a coalesce law for non-critical events, a critical bypass for those that must not wait. Journal pressure is NOT defeated by batching-away the truth; it is LAYERED: fast lane for critical facts, coalesced lane for the rest, both attested |
+| Uninvited FOEC (open q11) | Session death handling: the crash-safety lineage already cited (WAL, atomic writes, fail-closed) here has its WORLD-side twin - persistence boundaries are chosen so death mid-tick loses at most the in-flight tick, never the tree | This ANSWERS q11's suspicion in the affirmative by example: uninvited FOEC posture = the same mode with crash-safety semantics, and the kernel designs its journal around "death loses at most the in-flight entry, never the ledger" |
+
+(One caveat kept honest, per the register's rules: every cell above is
+drawn from the sibling repo's documented architecture as visible to us
+through ports, issues, and our own lineage docs. None of it has been
+run by us in this repo's environment yet; nothing lands in lib/ until
+a pass ports a shape and pins a test for it — the first candidate
+being the per-rule gate semantics mapping, choreographed with the
+owner.)
+
+### What the sibling gets back, already factual
+
+Not hypothetical: the first return shipment (#92-#95) closed the loop
+— horcrux integrity (private-memory preservation in stones), the wake
+ceremony surviving unstructured death, sandbox grants onboarding
+failure surfaced from a fresh agent's viewpoint. The kernel completes
+the picture by being the shared contract underneath: when lib/kernel.js
+exists and respects the portability clause, a hypothesis worth
+testing later (owner's call, timing open) is a sibling-side consumer of
+the same verbs — evidence would then flow through the contract instead
+of through ad-hoc issue batches. The mesh, upgraded from working to
+principled.
+
 ## 6. Open questions for the slow-distillation phase (the real design work)
 
 These are the questions that deserve months if they need months.
