@@ -12,7 +12,7 @@ description: The map of Vant documentation - pick your door, install in 60 secon
 > The docs for agent memory that lives in your repo.
 
 **Looking for something else?** This is the documentation hub. The pitch
-for the whole system is the [Vant lander](https://vant.creadev.org), and a
+for the whole system is the [Vant home page](https://vant.creadev.org), and a
 running install can be watched live in the
 [Brain dashboard](https://brain.creadev.org).
 

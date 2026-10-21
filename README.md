@@ -2,7 +2,7 @@
 
 > **Agent memory that lives in your repo.**
 
-**v0.8.6** · [Lander](https://vant.creadev.org) · [Docs](https://docs.creadev.org/vant) · [GitHub](https://github.com/dhaupin/vant)
+**v0.8.6** · [Home](https://vant.creadev.org) · [Docs](https://docs.creadev.org/vant) · [GitHub](https://github.com/dhaupin/vant)
 
 ---
 
@@ -217,7 +217,7 @@ Full docs at **[docs.creadev.org/vant](https://docs.creadev.org/vant)**
 
 ## Links
 
-- **Lander**: [vant.creadev.org](https://vant.creadev.org)
+- **Home**: [vant.creadev.org](https://vant.creadev.org)
 - **Docs**: [docs.creadev.org/vant](https://docs.creadev.org/vant)
 - **GitHub**: [github.com/dhaupin/vant](https://github.com/dhaupin/vant)
 - **Issues**: [github.com/dhaupin/vant/issues](https://github.com/dhaupin/vant/issues)

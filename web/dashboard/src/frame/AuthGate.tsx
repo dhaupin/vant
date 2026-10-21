@@ -348,7 +348,7 @@ function Login() {
 function GateShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid min-h-screen place-items-center p-6">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-xl">
         <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
           <img
             alt=""
@@ -358,7 +358,53 @@ function GateShell({ children }: { children: React.ReactNode }) {
           Bolete
         </h1>
         <p className="mt-1 text-sm text-ink-soft">the Vant dashboard</p>
-        {children}
+        {/* Logged-out landing: people hit this cold. Say what they are
+            looking at, what they will see once they are in, and where the
+            seat comes from - then the sign-in card. */}
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-lg border border-line bg-surface p-3">
+            <p className="text-xs font-semibold">Sessions, live</p>
+            <p className="mt-1 text-xs text-ink-soft">
+              Agent work as it happens: tool calls, budgets, refusals.
+            </p>
+          </div>
+          <div className="rounded-lg border border-line bg-surface p-3">
+            <p className="text-xs font-semibold">Crews and carriers</p>
+            <p className="mt-1 text-xs text-ink-soft">
+              Rosters, brains, and sealed packets in flight between pods.
+            </p>
+          </div>
+          <div className="rounded-lg border border-line bg-surface p-3">
+            <p className="text-xs font-semibold">Ledgers with doors on them</p>
+            <p className="mt-1 text-xs text-ink-soft">
+              Audit trails and forum verdicts, scoped by your guest role.
+            </p>
+          </div>
+        </div>
+        <p className="mt-3 text-xs text-ink-soft">
+          A seat comes from a running Vant pod: the operator issues a
+          <code className="mx-1 rounded border border-line bg-paper px-1 font-mono">vguest_</code>
+          token with <code className="font-mono">vant guest issue</code>, and the dashboard reads that pod over the
+          gated dashboard bridge. New to Vant? Start at the{" "}
+          <a
+            href="https://vant.creadev.org"
+            rel="noopener"
+            target="_blank"
+            className="underline hover:text-ink"
+          >
+            Vant home page
+          </a>{" "}
+          or open the{" "}
+          <a
+            href="https://docs.creadev.org/vant"
+            rel="noopener"
+            target="_blank"
+            className="underline hover:text-ink"
+          >
+            docs
+          </a>.
+        </p>
+        <div className="mx-auto mt-6 w-full max-w-sm">{children}</div>
       </div>
     </div>
   );

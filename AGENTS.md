@@ -221,7 +221,7 @@ Check your level at session start.
 
 ## Quick Links
 
-- **Lander**: [vant.creadev.org](https://vant.creadev.org)
+- **Home**: [vant.creadev.org](https://vant.creadev.org)
 - **Docs**: [docs.creadev.org/vant](https://docs.creadev.org/vant)
 - **GitHub**: [github.com/dhaupin/vant](https://github.com/dhaupin/vant)
 
