@@ -1,7 +1,22 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** pass 286 (the ② CLOSE: PR #221 accepted, main merged
+**Last Updated:** pass 321 (the DIST→WEB/HOME move, owner call: “/web/home
+it is”. git mv dist web/home history-preserving; the pass-150 gate
+rewritten as scripts/check-home.js walking web/home/*.html (same 6
+checks), packaging lint:home + test.yml “web/home gate”; PRD override
+recorded in prd-web.md §1 directives + §2.5 (“/dist stays the Pages
+lander” superseded, paths + future-Vite note moved in); DEPLOY.md §12
+gains the home frontend row + mode-B clarification; bin/build.sh bundle
+output moves to build/vant-bundle (top-level dist/ stops doing double
+duty as public artifact AND distribution sink); lib/version.js,
+prd-brand.md §5, prd-content.md paths truth-up. VERIFIED: home gate
+PASS (125 permalinks), surface consistency, docs truthfulness (126
+files), language, eslint, bin-truthfulness, docs tests 6/6. Cloudflare
+vant-pub project build output directory switches to web/home panel-side
+by the owner)    
+
+**Prior — pass 286 (the ② CLOSE: PR #221 accepted, main merged
 (8feb448) and LIVE on brain.creadev.org — post-merge corridor re-proved
 byte-exact verbatim forward + typed gate law, the pass-283 traveler
 bundle served (200); then the Pages deploy log sweep — root .nvmrc

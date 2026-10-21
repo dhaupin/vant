@@ -44,8 +44,8 @@ web/*/.wrangler/
 # Build
 build/
 
-# Dist is NOT ignored - it's part of the public release
-# dist/
+# web/home is NOT ignored - the static home page is part of the public
+# release. Its future Vite build output IS covered by web/*/dist/ below.
 
 # Temp
 *.tmp

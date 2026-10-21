@@ -218,7 +218,7 @@ function SideNav({ open, onClose }: { open: boolean; onClose: () => void }) {
               onClick={onClose}
               className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-ink-soft hover:bg-ink/5"
             >
-              Lander
+              Vant Home
             </a>
           </li>
           <li>

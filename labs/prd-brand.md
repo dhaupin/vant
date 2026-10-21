@@ -37,7 +37,7 @@ purposes only**. It is remembered internally; it does not appear in code,
 docs, the lander, or the README.
 
 - Remove existing instances from: docs/index.md, README.md tagline,
-  dist/index.html (title/meta/hero), any docs body text.
+  web/home/index.html (title/meta/hero), any docs body text.
 - The name is simply **Vant**. Where an expansion is legally required in
   the future (trademark filing, licensing), it gets pulled from this PRD,
   not re-derived.
@@ -96,7 +96,7 @@ means the thing reading the brain; "you" means whoever operates it.
 
 | Surface | Voice intensity |
 |---------|-----------------|
-| dist/index.html lander | Tightest. Hero under 30 words. Every section scannable. |
+| web/home/index.html (home page) | Tightest. Hero under 30 words. Every section scannable. |
 | docs/index.md | Same claims as lander, one notch more detail. |
 | README.md | GitHub-native. Feature table, quick start, upgrade path. |
 | docs/getting-started/* | Most procedural. Zero marketing. |
@@ -120,3 +120,31 @@ SEO descriptions, candidate 3 reserved for git-focused pages.
 - Every command in docs/ appears in a tagged fence with an explainer.
 - All memory-system references use the canonical names in section 2.
 - The soul line appears exactly once on lander, docs index, and README.
+
+## 8. Lander architecture v2 (pass 318)
+
+The pass 316 rebuild fixed the story; the pass 318 audit maps the FULL
+feature set onto it so no capability goes unclaimed on the public face.
+Order on the page, with the why:
+
+1. Hero: one hook, "Every session starts over. Except yours."
+2. 01 The session loop: the product in three moves.
+3. 02 Five minutes: the fastest win.
+4. 06 The whole surface, one screen (NEW): an 8-card capability matrix
+   over memory / search / crews / interfaces / mesh / compute /
+   governance / dashboard. Breadth ONCE, then out-loud reassurance that
+   nobody needs all of it.
+5. 07 The tier ramp: solo builder, crew, fleet and mesh. Scale is a
+   choice, not a migration.
+6. 08 The enterprise mesh: the distributed depth run.
+7. 09 Watch it live (NEW): the Brain dashboard as proof, placed BEFORE
+   the trust copy so the mesh claim lands with something visible.
+8. 10 Runs anywhere: deployment posture.
+9. 11 Fit check and 12 FAQ: the honesty half, GUI question added.
+
+Rationale: believe fast (1-3), see everything (4), choose scale (5-7),
+prove it is real (7-9), then trust (8, 11, 12). The matrix is the
+catch-all contract: every feature family carries a claim AND its docs
+door, so copy and docs cannot drift apart unnoticed. The same six doors
+land in the docs home via the "Looking for something else" line, so
+both gateways tell one story.

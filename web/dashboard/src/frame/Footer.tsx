@@ -40,7 +40,7 @@ export function Footer() {
           rel="noopener"
           className="hover:underline"
         >
-          Lander
+          Vant Home
         </a>
         <span className="ml-auto">
           Open-source, no warranty. The agents act; you approve. Use at your own risk.

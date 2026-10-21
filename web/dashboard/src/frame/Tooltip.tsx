@@ -1,5 +1,6 @@
 import { Tooltip } from "@base-ui/react/tooltip";
 import { Dialog } from "@base-ui/react/dialog";
+import { useState } from "react";
 import { useApp } from "../state";
 
 /**
@@ -9,22 +10,42 @@ import { useApp } from "../state";
  */
 export function Help({ text, children }: { text: string; children: React.ReactNode }) {
   const help = useApp((s) => s.help);
+  // touch parity, take two (mobile report, brain.creadev.org): the original
+  // fix relied on Base UI's own touch handling inside the trigger, which on
+  // real phones opened AND instantly collapsed the tooltip (the vguest_ tab
+  // report). A coarse pointer now OWNS the open state: controlled Root + a
+  // click toggle that swallows Base UI's competing tap handling. Desktop
+  // hover stays fully uncontrolled; tap-outside still closes via
+  // onOpenChange(false). Hook stays above the help-state early return so
+  // the call order never changes between renders.
+  const [tapOpen, setTapOpen] = useState(false);
   if (!help) {
     return children;
   }
-  // touch parity (mobile report, brain.creadev.org): hover-only tooltips are
-  // invisible on a phone. touch pointer type opens/closes on TAP like a
-  // click-anchor: desktop hover stays hover; phones get a real open/close.
+  const touch = typeof window !== "undefined" && window.matchMedia("(hover: none)").matches;
   return (
-    <Tooltip.Root>
+    <Tooltip.Root
+      open={touch ? tapOpen : undefined}
+      onOpenChange={touch ? (open: boolean) => setTapOpen(open) : undefined}
+    >
       <Tooltip.Trigger
         render={(props: React.ComponentProps<"span">) => (
           <span
             {...props}
             role={"button"}
             tabIndex={0}
+            aria-expanded={touch && tapOpen ? true : undefined}
             aria-label={`Help: ${text.slice(0, 60)}`}
             className="inline-flex cursor-help touch-manipulation select-none items-baseline gap-1 align-baseline"
+            onClick={
+              touch
+                ? (e: React.MouseEvent<HTMLSpanElement>) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setTapOpen((open) => !open);
+                  }
+                : props.onClick
+            }
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
