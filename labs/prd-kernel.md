@@ -569,6 +569,15 @@ retires an open lesson the same pass it lands. K5+ is opportunistic.
 
 ## 10. Non-goals (locked)
 
+**Companion doc:** the port-level extension plan lives in
+[labs/prd-kernel-extensions.md](labs/prd-kernel-extensions.md) (v0.1,
+2026-10-21): E1-E9 mapping the sibling-sighting evidence (pass 333
+deep crawl) onto concrete vant surfaces (lib/ modules, pins,
+watch-for-the-reference's-own-bugs). Sequenced by evidence, not
+scheduled. When an open question settles beneath an E-row, that
+row's port pass becomes well-defined — the companion grows the
+construction plan so this constitution stays clean.
+
 - No runtime daemon; the kernel is invoked, passive substrate.
 - No UI, no MCP door until at least three consumers live (door when the
   pattern is proven, not before).
