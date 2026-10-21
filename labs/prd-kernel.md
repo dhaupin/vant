@@ -157,8 +157,8 @@ guarantees**:
 With the kernel, "no more scatter adhoc" is literal: one substrate
 issues the verbs' guarantees, every consumer declares itself,
 `kernel.census()` is the single place to see who has what verb and what
-it has minted. Hierarchy survives intact — gates still gate, sudo Still
-refuses on the side of the operator — it is just no longer seven
+it has minted. Hierarchy survives intact, gates still gate, sudo still
+refuses on the side of the operator. It is just no longer seven
 private hierarchies that each reinvent the same lifecycle verbs badly.
 
 ## 6. Open questions for the slow-distillation phase (the real design work)
