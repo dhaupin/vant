@@ -17,17 +17,26 @@ docs gates, the pass ledger, and the marketing channel tables.
 
 ---
 
-## 1. Position (locked)
+## 1. Position
 
-This is **the top of the pyramid**, not another subsystem in it.
+Working name: **the kernel**. NOT a pyramid top. A pyramid is a command
+shape: surfaces report upward to an apex. The kernel is the opposite
+posture: **a substrate that surfaces compose with, not report to** —
+the OS sense of the word. Bash does not obey above POSIX; bash runs ON
+POSIX. Vant has real hierarchy and layers, and they will remain; the
+kernel is not one more layer above them, it is what their layering
+stands on.
 
-Working name: **the kernel**. It is the small substrate that issues the
-four lifecycle verbs to every layer that persists, gates, carries, or
-remembers anything: pipeline, sudo, rls, escrow, horcrux, prune, the
-pass ledger, the test harness, the docs gates, channel tables. Today
-those seven-plus surfaces each half-implement the same protocol ad hoc,
-uncoordinated, and occasionally wrong (the pass-328 heap existed because
-the test harness could mint without ever being forced to retire).
+Revised shape:
+
+```
+  vant surfaces (pipeline, sudo, rls, escrow, market, horcrux,
+                 ledger, docs gates, harness, channels ...)
+     |            |           |          composed ON the kernel
+     +------------+-----------+
+          kernel substrate (issues the four verbs as guarantees:
+                  census -> attest -> retire -> succeed)
+```
 
 The relationship, stated exactly:
 
@@ -42,7 +51,8 @@ The relationship, stated exactly:
 A consumer like the pass-328 sweep is not the kernel; it is what becomes
 *possible cheaply* once the kernel exists. The kernel powers the
 example, per the owner's framing: **a friend in the pipeline, that is
-the pipeline.**
+the pipeline.** And per the owner's correction: it has hierarchy and
+layers, but those are composition layers, not command rungs.
 
 **Non-goals up front:** no runtime daemon, no new storage engine, no
 rewrite of the seven subsystems. The kernel starts as a contract +
@@ -130,10 +140,11 @@ per surface, verb by verb, with the escrow row first (smallest lift),
 the harness row second (highest pain retired), and everything else
 following the cadence of whoever opens that surface next.
 
-## 5. Why pyramid-top (the owner's framing, stated back)
+## 5. Why substrate (the owner's corrections, stated back)
 
-The layer/tracking/carrier trio (memory, ledger, stone) remains the
-product. The kernel does not compete with them; it **powers their
+Not a pyramid: the kernel sits beneath, not above. The layer/tracking/
+carrier trio (memory, ledger, stone) remains the product. The kernel
+does not compete with them and does not command them; it **powers their
 guarantees**:
 
 - The ledger's "passes and pins only" is kernel-attest discipline.
@@ -144,8 +155,11 @@ guarantees**:
   power and no retire waste got the whole layer filthy.
 
 With the kernel, "no more scatter adhoc" is literal: one substrate
-issues the verbs, every consumer declares itself, `kernel.census()` is
-the single place to see who has what verb and what it has minted.
+issues the verbs' guarantees, every consumer declares itself,
+`kernel.census()` is the single place to see who has what verb and what
+it has minted. Hierarchy survives intact — gates still gate, sudo Still
+refuses on the side of the operator — it is just no longer seven
+private hierarchies that each reinvent the same lifecycle verbs badly.
 
 ## 6. Open questions for the slow-distillation phase (the real design work)
 
@@ -174,11 +188,16 @@ implemented from:
    external layer to interoperate — and what must it leave free so the
    contract stays small enough to adopt?
 6. **Naming:** census/attest/retire/succeed is descriptive, not
-   canonical. The pyramid-top deserves names that carry once spoken
+   canonical. The substrate deserves names that carry once spoken
    aloud in a design review.
 7. **What does the kernel say NO to?** The hardest design input: every
    guarantee added on top is a surface that can lie. What is the
-   minimum the substrate can promise and still be the pyramid-top?
+   minimum the substrate can promise and still be load-bearing?
+8. **Enforcement through whom?** If the kernel is beneath (not an
+   apex), enforcement cannot be top-down command. Is it refuse-at-the-
+   verb (the kernel simply declines to journal an illegal retire),
+   refuse-at-the-consumer (surfaces inherit the refusal and act on
+   it), or both — and what does each cost the composition model?
 
 ## 7. Sequencing (DELIBERATELY NOT SCHEDULED)
 
@@ -217,9 +236,15 @@ retires an open lesson the same pass it lands. K5+ is opportunistic.
   one-shotted. The K-steps are unscheduled. Design questions are
   enumerated in §6 precisely so they can be LIVED WITH, not resolved in
   one conversation.
-- 2026-10-21: named census/attest/retire/succeed; pyramid-top position
-  locked per owner ("more than the layer/tracking/carrier; it powers
-  it; the top of the pyramid; no more scatter adhoc").
+- 2026-10-21: named census/attest/retire/succeed; position locked per
+  owner ("more than the layer/tracking/carrier; it powers it; no more
+  scatter adhoc").
+- 2026-10-21: **PYRAMID ANALOGY RETIRED per owner** ("it won't be a
+  pyramid, yet it will have a hierarchy and layers"). The kernel is a
+  substrate that surfaces compose with, not an apex they report to.
+  Command semantics cut; composition semantics locked. Gateway question
+  added to §6 in its honor: if the kernel is beneath, what exactly does
+  it still get to enforce, and through whom?
 - 2026-10-21: portability locked (zero vant-import core) per the
   friend-in-the-pipeline framing: other layers/projects adopt the
   contract in full, not by importing vant.
