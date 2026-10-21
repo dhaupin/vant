@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-census",
+  "description": "Structural-oracle attacks for vant-adopting run roots: require-cycle SCC ceiling, whale-function cap, late-key clobber canary, and a guard-throw probe (typed refusal required, never a raw crash). In-process, deterministic, zero sockets - every attack degrades to skipped-REFUSED until the host arms it via ctx.config['vant-census']. Seeded by the 2026-10-21 vant pod census (dhaupin/crashtest issue #5).",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}
