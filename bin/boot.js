@@ -205,6 +205,24 @@ async function boot(imageInput, decryptPassword) {
         console.log('  - Mode:', horcruxData.mode.mode);
         console.log('  - Stack:', horcruxData.mode.stack?.join(' → '));
     }
+
+    // (issues #227/#232) The diagnostic the boot summary owed: WHICH brain
+    // is now current. state.json is the single truth (lib/brain pass-290
+    // law) and the restore can carry ANY currentBrain that was live on the
+    // sealing machine — so read it fresh off disk here, print it, and name
+    // a boot-convention mismatch loudly instead of letting `vant health`
+    // surprise the operator with the wrong brain later.
+    const bootBrain = (() => {
+        try {
+            return JSON.parse(fs.readFileSync(path.join(process.cwd(), 'models', 'state.json'), 'utf8')).currentBrain || null;
+        } catch { return null; }
+    })();
+    console.log('  - Current brain:', bootBrain || '(none — no currentBrain in models/state.json after restore)');
+    const stoneAgent = (path.basename(imagePath || '').match(/^([A-Za-z0-9][A-Za-z0-9-]*)-p_[A-Za-z0-9._-]+\.svg$/) || [])[1];
+    if (bootBrain && stoneAgent && stoneAgent !== bootBrain) {
+        console.log(`  ⚠ Booted the ${stoneAgent} stone, but shared state wakes currentBrain=${bootBrain} —`);
+        console.log(`    run \`vant brain set currentBrain ${stoneAgent}\` if that's not intended.`);
+    }
     
     console.log('\n[Boot] Ghost in the Machine: ✓');
     console.log('[Boot] Next: vant sync to sync with remote, or vant run to start');

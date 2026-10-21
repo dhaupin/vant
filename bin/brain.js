@@ -120,7 +120,7 @@ async function runMultiBrain() {
     }
 }
 
-function run() {
+async function run() {
     // Check for multi-brain commands
 const multiBrainCmds = ['list', 'ls', 'stack', 'push', 'pop', 'switch', 'load', 'merge', 'geo', 'geometry'];
 if (multiBrainCmds.includes(subcmd)) {
@@ -157,15 +157,74 @@ if (multiBrainCmds.includes(subcmd)) {
             console.error('Usage: vant brain set <key> <value>');
             process.exit(1);
         }
-        // Brain config setter
-        console.log('Set brain config:', key, '=', val);
+        // (issues #227/#228) REAL setter — the old code stopped at
+        // console.log and wrote nothing (a fabricated success). Only the
+        // keys with an honest write path are accepted; anything else is an
+        // explicit non-zero refusal, never a silent no-op success.
+        if (key === 'currentBrain') {
+            try {
+                // switchBrain validates the segment, auto-detects
+                // private/public existence, refuses a missing brain, and
+                // schedules the state.json save (async). Await the save,
+                // then VERIFY the file before printing success — a no-write
+                // exit is an honest non-zero refusal, never a fake "Set".
+                const res = brain.switchBrain(val); // { brain, type, mode, stack }
+                await brain.flushStateSave();
+                const saved = (() => {
+                    try { return JSON.parse(require('fs').readFileSync(require('path').join(process.cwd(), 'models', 'state.json'), 'utf8')); }
+                    catch { return null; }
+                })();
+                if (!saved || saved.currentBrain !== val) {
+                    console.error('Refused: state.json did not take currentBrain = "' + val + '" (write failed or raced). Score this a bug: nothing was switched.');
+                    process.exit(1);
+                }
+                console.log('Current brain set to:', val, '(' + res.type + ' scope, verified in models/state.json)');
+            } catch (e) {
+                console.error('Refused: brain "' + val + '" could not become current —', e.message);
+                console.error('  (the brain must exist under models/private/<name> or models/public/<name>)');
+                process.exit(1);
+            }
+        } else if (key === 'mode') {
+            const valid = ['dual', 'public', 'private', 'remote'];
+            if (!valid.includes(val)) {
+                console.error('Invalid mode. Use:', valid.join(', '));
+                process.exit(1);
+            }
+            brain.setMode(val);
+            console.log('Mode set to:', val);
+        } else {
+            console.error('Refused: "' + key + '" has no write path through vant brain set.');
+            console.error('  Supported keys: currentBrain (points state.json at an existing brain), mode (dual|public|private|remote).');
+            process.exit(1);
+        }
     } else if (subcmd === 'get') {
         const key = args[1];
         if (!key) {
             console.error('Usage: vant brain get <key>');
             process.exit(1);
         }
-        console.log('Get brain config:', key);
+        // (issue #227) REAL getter — reads live state, never fabricates
+        // success for arbitrary keys.
+        const state = (() => {
+            try { return JSON.parse(require('fs').readFileSync(require('path').join(process.cwd(), 'models', 'state.json'), 'utf8')); }
+            catch { return null; }
+        })();
+        if (key === 'currentBrain') {
+            const cur = (state && state.currentBrain) || (state && state.stack && state.stack[0]) || null;
+            if (cur == null) {
+                console.error('No currentBrain in models/state.json (no state file or absent pointer).');
+                process.exit(1);
+            }
+            console.log(cur);
+        } else if (key === 'mode') {
+            console.log(brain.getMode());
+        } else if (key === 'stack') {
+            console.log(JSON.stringify((state && state.stack) || brain.getStack()));
+        } else {
+            console.error('Refused: "' + key + '" has no read path through vant brain get.');
+            console.error('  Supported keys: currentBrain, mode, stack.');
+            process.exit(1);
+        }
     } else {
         console.log('Usage: vant brain mode [dual|public|private|remote]');
         process.exit(1);

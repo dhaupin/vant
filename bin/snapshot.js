@@ -220,6 +220,20 @@ async function run() {
     // summary/sidecar code knows which file is the backup.
     plan = safeWritePlan(output);
 
+    // (issue #226) `--brain <name>` names the STONE — but an operator
+    // reasonably assumes it also scopes the payload. From now on it DOES:
+    // --brain X implies --brains X unless an explicit --brains was given.
+    // Escape hatch stays explicit: --brains all = unscoped full capture.
+    // The effective scope is printed on EVERY snapshot either way, and a
+    // single-brain stone whose embedded shared state points elsewhere
+    // gets a loud currentBrain mismatch notice instead of a later
+    // "vant health shows the wrong brain" surprise.
+    if (args.brains && args.brains.length === 1 && String(args.brains[0]).toLowerCase() === 'all') {
+        args.brains = null;
+    } else if (args.brain && !args.brains) {
+        args.brains = [args.brain];
+    }
+
     // (issue #219) the filter rides into the gather via safeWriteHorcrux's
     // opts — the encode closure below must forward it.
     if (args.brains) {
@@ -227,7 +241,20 @@ async function run() {
             console.error('❌ --brains resolved to zero names');
             process.exit(1);
         }
-        console.log('Payload scope:', 'only ' + args.brains.join(', '));
+        console.log('Payload scope:', 'only ' + args.brains.join(', '),
+            args.brain && args.brains.length === 1 && args.brains[0] === args.brain ? '(implied by --brain; --brains all escapes)' : '');
+    } else {
+        console.log('Payload scope:', 'ALL minds + shared state (no filter)');
+    }
+    if (args.brains && args.brains.length === 1) {
+        try {
+            const state = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'models', 'state.json'), 'utf8'));
+            const liveCurrent = state.currentBrain || (state.stack && state.stack[0]) || null;
+            if (liveCurrent && liveCurrent !== args.brains[0]) {
+                console.log(`   ⚠ embedded shared state wakes currentBrain=${liveCurrent} on this ${args.brains[0]}-scoped stone;`);
+                console.log(`     point the sealing install at the target brain first (\`vant brain set currentBrain ${args.brains[0]}\`) or destine the operator for that brain.`);
+            }
+        } catch (e) { /* no state file → nothing to warn about */ }
     }
 
     // Make sure the target directory exists (resolved from REPO_ROOT, not cwd)
