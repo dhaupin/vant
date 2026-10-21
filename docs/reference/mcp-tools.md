@@ -908,12 +908,15 @@ vant_rerank(query="authentication", topK=5)
 
 ---
 
-## Agora and Mesh Tools (11)
+## Agora and Mesh Tools (13)
 
 The cross-org decision surface: remote voting and ledger sync over the
 signed crew-bus. Every gate stays owner-side; these tools carry ballots
 and ledgers, never authority. Requires a configured bus (the node's
 name, port, secret, and agentId) with agora-sync installed.
+(The agora/consensus/forum family overall holds more members -
+`forum_castVote`, `forum_enter`, `forum_status`, ... - listed in the
+A-Z tables.)
 
 ### agora_vote
 
@@ -1027,9 +1030,11 @@ rejected fail-closed).
 **Params:**
 | Param | Type | What |
 |-------|------|------|
-| topic | string | Charset [a-zA-Z0-9_-], 1-100 chars |
-| options | string[] | At least two choices |
+| topic | string | Charset [a-zA-Z0-9_-], 1-100 chars (required) |
+| ballot | string[] | At least two choices, e.g. `["yes","no"]` (required) |
 | minQuorum | number | Optional quorum |
+| useTrustWeight | boolean | Optional trust-weighted voting |
+| deadline | number | Optional deadline |
 | scope | object | Optional: `{ owner: "team:id", visibility: "scope" }` |
 
 ### consensus_vote
@@ -1062,8 +1067,10 @@ List knowledge for trade.
 **Params:**
 | Param | Type | What |
 |-------|------|------|
-| type | string | knowledge, insight, memory, or favor |
-| title | string | Listing title |
+| type | string | knowledge, insight, memory, or favor (required) |
+| title | string | Listing title (required) |
+| summary | string | Optional listing summary |
+| tags | string[] | Optional tags |
 | price | string | Optional price |
 | context | object | Optional; carries consentGiven |
 

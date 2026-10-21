@@ -63,7 +63,8 @@ const status = await sync.getStatus();
 `pullAny` returns the pulled corpus plus per-provider results; a
 provider that fails is skipped and the next is tried. Also exported:
 `rebase(provider)`, `diffCorpus()`, `scanConflictMarkers()`,
-`getConfiguredProviders()`.
+`getConfiguredProviders()`, plus the round-trip verify seams
+`verifyProvider(name)` / `verifyAllProviders()`.
 
 ## Configuration
 
