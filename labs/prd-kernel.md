@@ -73,6 +73,22 @@ verb. The kernel is where that vocabulary unifies, not where it begins.
 (The zone-based verdict concept referenced below descends from the
 existing meditate-in-flow/zen lineage, not from yoga.)
 
+**The two-realities framing (owner, 2026-10-21, closing the arc):**
+vant and its sibling are both REALITIES — persistent worlds with
+masses of actors, events, rhythms. Every reality needs both a master
+controller (the pyramid: roles, gates, rules — enforcement) AND the
+opportunities that allow existence (the substrate: momentum, nature,
+consensus, the conditions a world persist UNDER). The kernel is the
+second half: not the controller but the OPPORTUNITY STRUCTURE — the
+part of reality that makes persistence possible at all. Neither
+runtime is exotic in this: both need orchestration, nature, consensus.
+That is why one substrate can serve both: it is not a vant feature
+borrowed by a game, it is the shared shape of reality-keeping itself.
+The verbs read differently under this framing: census is not
+policing, it is what a reality does to KNOW itself; succeed is not
+backup, it is what allows a reality to continue across its boundaries.
+Opportunity, not control — that is the kernel's half of existence.
+
 **FOEC, Flash Of Everything Content** (owner framing, corrected same
 day): NOT a failure mode. A MODE — and not merely a tolerated one: a
 REQUIRED one. The opposite of FOUC one layer deeper. FOUC is unstyled
