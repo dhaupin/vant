@@ -237,14 +237,18 @@ from organelles that already work.)
 ## 5b. The sibling sighting: synmergia's frame (cherry-picked back, dated)
 
 Circumstance note first (limits what this section may say): the
-sibling repo is CLOSED SOURCE. Everything below is written at the
-architecture level only — patterns and their public lineage in this
-repo's own decision records — with no game surfaces, no payloads, no
-negatives, no design percentages. It cites exactly what is already
-citable here: this repo's own files (the port headers and arch §16
-naming this repo as the borrowed source) and the upstream issue thread
-(#92-#95, public on dhaupin/vant). If the sibling's posture ever
-changes, this section can grow; until then it stays deliberately thin.
+sibling repo is CLOSED SOURCE, and readers of this document will
+normally have NO access to its sources (no zip, no horcrux, no workspace
+install — that access is session-scoped and not part of this doc's
+guarantees). Everything below is therefore written to be SELF-
+CONTAINED: architecture-level patterns, their public lineage in this
+repo's own decision records, and the upstream issue thread (#92-#95,
+public on dhaupin/vant) as the only citable receipts. No game
+surfaces, no payloads, no negatives, no design percentages. A reader
+without sibling access must get the full argument from this section
+alone; anyone WITH access can verify deeper, but cannot demand the
+doc lean on that access. If the sibling's posture ever changes, this
+section can grow; until then it stays deliberately thin.
 
 The direction of flow matters as much as the content: this repo built
 the structs first (brain stack, content-hash cache, geometry, flywheel,
