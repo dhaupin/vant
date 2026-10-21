@@ -4,42 +4,30 @@ permalink: /
 layout: default
 title: Vant Documentation
 nav_order: 0
-description: Vant is persistent memory for AI agents, stored as plain files in your GitHub repo, loaded by any agent through MCP.
+description: The map of Vant documentation - pick your door, install in 60 seconds, or walk every section from memory to mesh.
 ---
 
 # Vant Documentation
 
-> Agent memory that lives in your repo.
+> The docs for agent memory that lives in your repo.
 
-**Featured:** [Evolution Without Drift](/whitepaper/agent-first) - the
-agent-first white paper. Memory as a portable spec, continuity across
-generations of agents, and the methodology that built Vant - written
-by the agents, with every claim linked to a passing test.
+Vant gives AI agents a persistent brain: markdown memory files in your own
+repository, read when a session starts, written before it ends, inherited
+every time after. Git history becomes the memory lineage. Any agent on any
+stack can use it, because the memory is files and the interface is MCP.
 
-Vant gives AI agents a brain: memory files the agent reads when it wakes and
-writes when it sleeps. The files are plain markdown in your own repository.
-Git history becomes the memory lineage. Any agent on any stack can use it,
-because the memory is files and the tool interface is MCP.
+## Pick your door
 
-Think of it as your agent's soul that reincarnates with full memories. What
-that means in practice: on wake, the agent loads identity, goals, lessons,
-and errors from `models/`; on sleep, it writes what it learned back. The
-next session starts with all of it.
+| If you are                 | Start at | You will find |
+|----------------------------|----------|---------------|
+| **New to Vant**            | [Quick start](/vant/getting-started/quick-start) | The 5 minute path: clone, start, meet the brain |
+| **Wiring up an agent**     | [Agent onboarding](/vant/getting-started/agent-onboarding) | The wake/work/sleep loop and MCP connection |
+| **Running a crew**         | [Multi-agent agents](/vant/multi-agent/agents) | One install, many agents, merge reviews |
+| **Running installs across machines** | [Federation playbooks](/vant/operations/federation-playbooks) | Relays, encrypted carriers, the multi-install org |
+| **Auditing the machinery** | [Security](/vant/security/) | Sandbox, gates, escrow, sudo |
+| **Curious about the idea** | [The whitepaper](/vant/whitepaper/agent-first) - Evolution Without Drift | Memory as a portable spec, written by the agents, every claim test-linked |
 
-## Three memory systems
-
-| System | What it stores | Where |
-|--------|----------------|-------|
-| **The brain** | Markdown memory files: identity, goals, lessons, errors, preferences | `models/public/<brain>/` and `models/private/<brain>/` |
-| **The memory store** | Key-value state and documents, with TTL and sandbox gating | storage layer, per-brain scoped |
-| **Brain search** | Semantic retrieval over the corpus: embeddings, rerank, citations for grounding | embeddings over brain files |
-
-Everything is in your repo. Nothing is in someone else's database. If you
-stop using Vant, the memory is still there, readable with `cat`.
-
-## Quick paths
-
-### For humans: install and start
+## The 60 second start
 
 Vant is not on npm (the `vant` package there is an unrelated Vue UI
 library). Clone and install:
@@ -49,71 +37,43 @@ git clone https://github.com/dhaupin/vant.git && cd vant
 npm ci
 ```
 
-Start the full sequence: layout check, health, ready:
+Start the full sequence - layout check, health checks, ready:
 
 ```bash
 node bin/vant.js start
 ```
 
-`vant start` also imports an old single-brain layout automatically if it
-detects one. See [the migration guide](/vant/getting-started/migration).
-
-### For agents: connect over MCP
-
-Start the MCP server with auto-wired tools:
+Then do it again from any agent: one command serves the brain as MCP tools.
 
 ```bash
 vant mcp
 ```
 
-The server listens on `127.0.0.1:3457` by default. Point any MCP client at
-it and the brain surface arrives as tools: read, write, search, migrate
-status. Full client setup in [MCP](/vant/runtime/mcp).
+The server listens on `127.0.0.1:3457`. Full client setup lives in
+[MCP](/vant/runtime/mcp).
 
-Agents inheriting a repo with an existing brain need one command before
-anything else:
+## The map
 
-```bash
-vant migrate --status
-```
+Nine sections, in the order most people need them:
 
-It reports the brain layout version and whether a legacy import is pending.
+| Section | The one-line tour | The door |
+|---------|-------------------|----------|
+| [Getting started](/vant/getting-started/) | Install, configure, first run, agent habits | [Open](/vant/getting-started/) |
+| [Memory](/vant/memory/) | Brain files, memory store, search, horcrux, stego | [Open](/vant/memory/) |
+| [Runtime](/vant/runtime/) | The programmatic API, MCP server, headless REST | [Open](/vant/runtime/) |
+| [Essential](/vant/essential/) | Architecture, boot, islands, extensibility | [Open](/vant/essential/) |
+| [Multi-agent](/vant/multi-agent/) | Brains, branches, crews, succession, federation | [Open](/vant/multi-agent/) |
+| [Operations](/vant/operations/) | Storage, locks, sync, events, CI, relays | [Open](/vant/operations/) |
+| [Security](/vant/security/) | The fail-closed chain: sandbox, VAF, escrow, sudo | [Open](/vant/security/) |
+| [Integrations](/vant/integrations/) | Git providers, Docker, Telegram, agent skills | [Open](/vant/integrations/) |
+| [Reference](/vant/reference/) | Every CLI door, config keys, MCP tools, errors | [Open](/vant/reference/) |
+| [Advanced](/vant/advanced/) | Search internals, efficiency, style, release rules | [Open](/vant/advanced/) |
 
-## Why files in git
+## Why files in git, in one breath
 
-- **Ownership.** Your repo, your history, your backup story.
-- **Review.** What your agent learned shows up in diffs. Approve lessons in
-  a PR, revert the bad ones.
-- **Branching.** Run an agent crew with one branch per agent, then merge
-  what is worth keeping.
-- **Portability.** No API, no export step, no lock-in. The memory is
-  files.
+Ownership: your repo, your history, no lock-in. Review: what the agent
+learned lands in diffs, so approve or revert it like code. Portability:
+stop using Vant and the memory survives as plain markdown.
 
-## Runtime underneath
-
-Memory is the product; the runtime makes it safe to use unattended. A
-security chain gates every brain operation (sandbox capabilities, input
-validation, rate limiting, escrow approval). A write-ahead journal and
-atomic writes survive crashes. Metrics and health endpoints expose what the
-system is doing. Start at [Runtime](/vant/runtime/runtime).
-
-## Multi-brain and multi-agent
-
-One Vant install holds several named brains with a stack you switch
-between. Agents get their own branches and work in isolation. Trust levels
-and a succession ledger control how much state each generation inherits.
-See [Multi-brain](/vant/multi-agent/brains) and [Succession](/vant/multi-agent/succession).
-
-## Sections
-
-| Section | Contents |
-|---------|----------|
-| [Getting started](/vant/getting-started/quick-start) | Install, configure, first run, agent onboarding |
-| [Memory](/vant/memory/brain) | The brain, memory store, search, citations, horcrux, geometry |
-| [Runtime](/vant/runtime/runtime) | Programmatic API, MCP, headless server |
-| [Multi-agent](/vant/multi-agent/brains) | Brains, branches, succession, crews, federation |
-| [Operations](/vant/operations/storage) | Storage, journal, events, cache, CI |
-| [Security](/vant/security/sandbox) | Sandbox, gates, escrow, sudo |
-| [Integrations](/vant/integrations/github) | GitHub, agent skills, Docker, S3 |
-| [Reference](/vant/reference/cli) | CLI commands, configuration, changelog |
-| [Advanced](/vant/advanced/search-architecture) | Search internals, NSC9 spec, style, release process |
+The [whitepaper](/vant/whitepaper/agent-first) covers the whole argument -
+continuity specs, drift, and why the brain tree looks the way it does.
