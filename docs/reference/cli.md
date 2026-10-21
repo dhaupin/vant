@@ -20,19 +20,21 @@ dispatched by the main entrypoint.
 | Command | Description |
 |---------|-------------|
 | `vant setup` | Interactive first-run wizard |
-| `vant start` | Full startup (migrate, health, sync, load, run) |
+| `vant start` | Startup: migrate + seed + health (pull with `--sync`) |
 | `vant health` | System diagnostics |
 | `vant help` | Show all commands and global flags |
 | `vant version` | Show version (`-v`, `--version`) |
 
 ```bash
 vant setup
-vant start              # Full startup; auto-migrates legacy brain layouts
-vant start --no-sync    # Skip GitHub sync
-vant start --local      # Skip GitHub entirely
+vant start              # Migrate check + health; prints ready
+vant start --sync       # Also pull fresh brain from GitHub at the end
 vant start --no-migrate # Skip brain layout migration
 vant health
 ```
+
+(`--no-sync`/`--local` are not start flags - sync is opt-in via
+`--sync`.)
 
 ## Sync and brain
 
@@ -50,9 +52,8 @@ vant health
 | `vant prune` | Prune old or stale brain files |
 
 ```bash
-vant sync               # Pull, then push
-vant sync push          # Push only
-vant sync pull          # Pull only
+vant sync               # Pull from GitHub (the default direction)
+vant sync --push <msg>  # Push only (with an optional commit message)
 
 vant hybrid --public    # Push public brain only
 vant hybrid --private   # Push private brain only
