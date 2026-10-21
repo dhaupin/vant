@@ -79,7 +79,7 @@ Agents are readers, workers, and occasionally the only "staff" a
 project has. Norms when Vant touches them:
 
 - Instructions meant for agents are written to agents plainly, at the
-  surface intended for them (AGENTS.md, skills, brain docs) — never
+  surface intended for them (AGENTS.md, skills, brain docs), never
   through encodings meant to slip past review.
 - Vant brain files belong to their owner. Vant never phones home with
   brain contents, never grooms a brain via writes the owner did not
@@ -91,7 +91,7 @@ project has. Norms when Vant touches them:
 
 ## Commitment 4: What we ask of integrations
 
-These mirror LEGAL.md governance norms — requests, not conditions:
+These mirror LEGAL.md governance norms, requests, not conditions:
 
 - Do not ship Vant-derived distributions with covert influence channels
   in assets, docs, or data. Fork etiquette under MIT allows rebranding;
