@@ -89,6 +89,24 @@ policing, it is what a reality does to KNOW itself; succeed is not
 backup, it is what allows a reality to continue across its boundaries.
 Opportunity, not control — that is the kernel's half of existence.
 
+**The Godot realization (owner, same night, the analogy that lands
+the whole project):** the two realities sit in the same PLACE — same
+problems, different scopes and methods — but the sibling's world runs
+ON an existing engine kernel (Godot); vant's reality runs on nothing
+of the sort. The pods stand directly on node and raw lib/. So the
+kernel project is, stated plainly: **making the Godot of vant.** The
+engine kernel vant never had — lifecycle, state, rhythm, boundaries,
+the things a world needs beneath its content — so that brains, crews,
+stones, and pipelines become what schemas and scenes are to Godot:
+the game-grade payload, riding an engine-grade substrate. The
+portability clause (§3) is the difference that matters: Godot is a
+full engine with opinions about rendering and physics; ours stays a
+THIN kernel — only the four verbs and their laws — so other
+realities (the sibling's frame, the org installs already running
+vant) can adopt it without adopting a whole engine. Same discovery
+Godot made once: the substrate was latent in the usage all along; we
+are just the first to name it and give it a door.
+
 **FOEC, Flash Of Everything Content** (owner framing, corrected same
 day): NOT a failure mode. A MODE — and not merely a tolerated one: a
 REQUIRED one. The opposite of FOUC one layer deeper. FOUC is unstyled
