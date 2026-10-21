@@ -6,7 +6,10 @@ name: VANT CI
 on:
   workflow_dispatch:
   push:
-    branches: [main, develop, 'agent-*']
+    # axolotl is the working batch branch: batch passes land there BEFORE
+    # any PR opens (post-merge, no PR event exists) - so push-trigger CI
+    # must cover it or batch passes ship ungated.
+    branches: [main, develop, 'agent-*', axolotl]
   pull_request:
     branches: [main, develop]
   schedule:
