@@ -13,64 +13,35 @@ nav_order: 101
 Logging and compliance for Vant.
 
 ## Audit Logging
-Track changes to your brain for compliance.
+Audit logging for compliance - two real surfaces, both always on.
 
 ### Enable Audit
 
-VAF logs to `.audit.log`:
+Nothing to flip: logging is on by default (verified against
+`lib/audit.js`).
 
-```bash
-# View audit log
-cat .audit.log
+- **Logger** (`lib/audit.js`) writes `[LEVEL] message {details}` lines
+to stdout and mirrors them into the event system as `audit:info`,
+`audit:warn`, and `audit:error`. Want a file? Route it yourself:
+
+```javascript
+const audit = require('./lib/audit');
+audit.setOutput(fs.createWriteStream('.log/my-audit.log'));
 ```
 
-### Log Format
-
-Each entry:
-
-```text
-[TIMESTAMP] [LEVEL] [EVENT] [DETAILS]
-2024-01-15T10:30:00Z INFO BLOCKED Path traversal ../etc
-```
-
-### Log Levels
-
-| Level | Description |
-|-------|-------------|
-| INFO | Normal operations |
-| WARN | Warnings |
-| BLOCKED | Blocked requests |
-| ERROR | Errors |
+- **Audit ledger** - the append-only, hash-chained `.audit.json` under
+the models path (see [Audit Ledger](#audit-ledger-v086) below). All
+service actions log there via `audit.log()`.
 
 ## Events Logged
 
-Track system events for debugging and compliance.
+What you can actually hook (verified signatures on both surfaces):
 
-### Security Events
-
-| Event Description |
-|-------|-------------|
-| `BLOCKED` Malicious input blocked |
-| `RATE_LIMIT` Rate limit exceeded |
-| `INVALID_INPUT` Invalid input detected |
-| `PATH_TRAVERSAL` Path traversal attempt |
-
-### Operational Events
-
-| Event | Description |
-|-------|-------------|
-| `START` | Vant started |
-| `STOP` | Vant stopped |
-| `SYNC` | GitHub sync |
-| `LOAD` | Brain loaded |
-
-### Authentication Events
-
-| Event | Description |
-|-------|-------------|
-| `LOGIN` | Login attempt |
-| `LOGIN_SUCCESS` | Successful login |
-| `LOGIN_FAIL` | Failed login |
+| Event | Where |
+|-------|-------|
+| `audit:info` / `audit:warn` / `audit:error` | event system, every logger line |
+| `island:hydrate` / `stego:snapshot` / `raid:sync` | ledger actions (`logHydrate`/`logStego`/`logSync`) |
+| `webhook:registered` / `webhook:<eventType>` | inbound webhook intake (`lib/webhooks.js`) |
 
 ## Compliance
 Meet compliance requirements with audit logs.
@@ -79,19 +50,17 @@ Meet compliance requirements with audit logs.
 
 | Data | Retention | Location |
 |------|-----------|----------|
-| Audit logs | 90 days | `.audit.json` in the current brain path |
+| Audit ledger | 10,000 entries cap - newest kept, overflow archived | `.audit.json` under the models path |
 | Brain history | Indefinite | GitHub |
-| Rate limits | Reset hourly | In-memory counters |
+| Rate limits | Reset per window | In-memory counters |
 
 ### Access Control
 
-Role-based access:
-
-| Role | Permissions |
-|------|-------------|
-| Admin | Full access |
-| User | Read brain |
-| Agent | Sync only |
+Who may approve what is governed by the succession trust levels
+(`high` / `medium` / `low` / `none` - see
+[Trust & Succession](/vant/multi-agent/succession)), not by a
+role table. Agent autonomy scales with trust; `none` waits for
+instructions before anything acts.
 
 ### Audit Trail
 

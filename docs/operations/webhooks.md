@@ -13,11 +13,13 @@ nav_order: 55
 ## What You'll Build
 
 Two real automation surfaces:
-- **Outbound webhooks** - Vant registers and sends hooks (`vant webhooks`)
+- **Webhook server** - `lib/webhooks.js`: an inbound HTTP receiver for
+  HMAC-signed custom routes (`vant webhooks`)
 - **Scheduled jobs** - interval timers via `vant.cron` (brain prune, sync)
 
-There is no inbound webhook receiver for GitHub push events; to sync on
-GitHub activity, use `vant watch` (GitHub polling) or the scheduler below.
+No prebuilt GitHub-push route ships - the server takes routes YOU
+register. To sync on GitHub activity, use `vant watch` (polling) or
+the scheduler below.
 
 ## Why Webhooks?
 
@@ -25,16 +27,22 @@ GitHub activity, use `vant watch` (GitHub polling) or the scheduler below.
 - Schedule brain cleanup on a timer
 - Keep GitHub in sync without manual pushes
 
-## Outbound Webhooks (Vant's)
+## Webhook Server (Vant's)
 
 Vant ships its own webhook system (`bin/webhooks.js` + `lib/webhooks.js`),
-serving on port 3467 by default:
+serving on port 3467 by default. It is an INTAKE: custom routes register
+via the library (`register({ name, source, secret, dispatch, ... })`),
+requests POST to `<url>/<source>` with an HMAC signature header, and the
+ack honestly reports `{ received, event, source, handlers, dispatched }`
+- identical signed bytes replay as 409, stale envelopes refuse 401.
+
+The CLI manages the outbound/side list:
 
 ```bash
 vant webhooks list                 # registered hooks
-vant webhooks add <name> <url>     # register a target URL
-vant webhooks remove <name>        # unregister
-vant webhooks test <name>          # fire a test payload
+vant webhooks add <url> <event>    # register a target URL + event
+vant webhooks remove <id>          # unregister by hook id
+vant webhooks test <id>            # fire a test payload
 ```
 
 Required env:
@@ -73,8 +81,11 @@ For pruning, use the real prune CLI on a schedule outside the process
 
 ```bash
 # Daily prune at 2am (system crontab)
-0 2 * * * cd /path/to/vant && vant prune --stale-days 14 --no-fluff
+0 2 * * * cd /path/to/vant && vant prune --stale-days=14 --force
 ```
+
+(flags are `=`-joined, and `--force` is what takes it out of the default
+dry run)
 
 ## Custom Webhooks
 
@@ -190,7 +201,7 @@ app.post('/webhook/linear', async (req, res) => {
 
 ```bash
 # Daily brain cleanup (system crontab)
-0 2 * * * cd /path/to/vant && vant prune
+0 2 * * * cd /path/to/vant && vant prune --force
 ```
 
 ---
