@@ -1,8 +1,24 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 76,
+  "_headingCount": 77,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 347 (the external-link affordance: one rule, every door marked)",
+      "sections": [
+        {
+          "name": "Added: off-site links wear the arrow-up-right glyph",
+          "items": [
+            "**THE SYSTEM** (owner direction: \"an icon for external links\"): every",
+            "**HOW IT MARKS WITHOUT TOUCHING MARKUP**: the glyph is a masked",
+            "Verified: build:home 9/9, lint:home PASS (truth + style gates),"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

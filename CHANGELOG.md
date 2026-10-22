@@ -5,6 +5,27 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 347 (the external-link affordance: one rule, every door marked)
+
+### Added: off-site links wear the arrow-up-right glyph
+
+- **THE SYSTEM** (owner direction: "an icon for external links"): every
+  anchor that leads off vant.creadev.org renders a small arrow-up-right
+  glyph after its label. One attribute selector is the whole mechanism:
+  internal links are all relative (`href="/..."`) while off-site links
+  are all absolute, so `a[href^="http"]::after` marks every external
+  surface at once (nav, drawer, footer columns, cards, learn-mores,
+  buttons, the status board's live-rendered links) with zero per-link
+  bookkeeping that could drift.
+- **HOW IT MARKS WITHOUT TOUCHING MARKUP**: the glyph is a masked
+  currentColor pseudoelement, 10px at 0.72 opacity, so it inherits each
+  link's color in light and dark theme; the prerendered HTML is unchanged,
+  which keeps the link-truth gates, JSON-LD, and changelog parity exactly
+  as they were.
+- Verified: build:home 9/9, lint:home PASS (truth + style gates),
+  changelog parity PASS, home suite 6/6 (the compiled stylesheet carries
+  the rule on every route).
+
 ## [Unreleased] - pass 346 (the final footer sentence: one credit line, dofollow door)
 
 ### Changed: the meta row speaks the closing credit
