@@ -5,6 +5,39 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 343 (the Brain stop gets a page, the menu gets a bolete sidebar)
+
+### Added — the /brain marketing page + the walk stop went internal; the drawer went structural
+
+- **A REAL BRAIN PAGE** (`/brain`, the walk's fourth stop is internal
+  now): the marketing page for the dashboard side of Vant — sessions as
+  they happen, agents and work, memory in transit (three cards), then
+  "Open the door" (accent button to **brain.creadev.org** + docs hub)
+  and "Run your own" (web/dashboard, codename Bolete, MIT,
+  self-hostable). Claims are lifted from the FAQ/truth, not invented.
+  New route in AppLayout (item + META) and ssr.config.js (title/desc
+  mirror the META — one sentence, two places), so the page prerenders
+  with full telemetry. The walk order is UNCHANGED:  Home → Quick start →
+  Install → **Brain** → Security — prev/next now works ON the Brain
+  page (prev Install, next Security).
+- **THE MENU ITEM**: "Brain (dashboard)" → "**Brain**" → `/brain` — the
+  label drops the parenthetical and the hop is internal. brain.creadev.org
+  stays a first-class door in the page content + footer family column.
+- **THE BOLETE SIDEBAR** (.menu-drawer, mirrors web/dashboard's SideNav
+  structure): the expanding dropdown panel is retired for the mobile
+  menu icon (which stays on the right); the tap now slides in a
+  full-height right drawer over a scrim — sections as tiny uppercase
+  heads like the dashboard nav's observe/work/ops: **Get going** (Home,
+  Quick start, Install), **The install** (Brain, Security, Status,
+  Contact), **The family** (Releases, GitHub, Docs), **More** (Changelog,
+  Terms, Privacy — the footer-only stops now reachable in the drawer).
+  Sections are presentational grouping: the walk order stays WALK's
+  order, untouched. Scrim click, Escape, and link taps all close it;
+  body scroll locks while open; reduced-motion rides the --fx dial.
+- Verified: build:home 9/9 (the /brain route prerenders with the walk
+  widget at the right hops), lint:home PASS, changelog parity PASS,
+  home suite 6/6.
+
 ## [Unreleased] - pass 342 (the site tour: the menu order IS the walk, prev/next on every stop)
 
 ### Added — the page-walk widget (owner direction: "users can walk through the site")

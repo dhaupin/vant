@@ -2,18 +2,25 @@
  * src/components/Nav.jsx (vant-home)
  * ==================================
  * Top nav ported from the checked-in lander. Client-only bits (theme toggle,
- * mobile menu) are React state; theme parity with the backup is exact:
- * toggling flips data-theme on <html> and persists to localStorage (restoring
- * on load was never a lander behavior - toggle only, same as the backup).
+ * drawer) are React state; theme parity with the backup is exact: toggling
+ * flips data-theme on <html> and persists to localStorage.
  *
- * THE WALK (pass 342): the menu IS the walk — this ordered list is the owner-
- * directed site tour (Home → Quick start → Install → Brain → Security →
- * Releases → GitHub → Docs → Status → Contact). The menu renders it in order
- * and AppLayout's PageWalk reads neighbors from it, so the widget and the
- * menu can never disagree about the site's page order. External stops ride
- * in the walk too (their "pages" live on other sites); Changelog stays out
- * of the walk/nav (footer-only reach: owner's list has ten stops, it is
- * not one).
+ * THE WALK (pass 342): the owner-directed tour lives here as ONE ordered
+ * list (Home → Quick start → Install → Brain → Security → Releases →
+ * GitHub → Docs → Status → Contact) that BOTH the menu and AppLayout's
+ * PageWalk read — the menu order and the walk order cannot drift. Since
+ * pass 343 the Brain stop is INTERNAL (/brain, the marketing page whose
+ * content links brain.creadev.org — see pages/Brain.jsx), so prev/next
+ * works on the Brain page itself.
+ *
+ * THE SIDEBAR (pass 343, the bolete structure): the mobile menu drawer is
+ * orgANIZED IN SECTIONS like the dashboard's own nav (web/dashboard SideNav
+ * — a registry with a section per item, tiny uppercase heads, items under
+ * them, plus a drawer head and a close button; scrim click/Escape/link tap
+ * close it). Bolete sections its 19 modules as "observe/work/ops";
+ * vant.creadev.org sections its 13 destinations as
+ * "Get going / The install / The family / More". Sections are
+ * PRESENTATIONAL grouping only — the walk order stays WALK's order.
  */
 
 import React, { useEffect, useState } from 'react'
@@ -23,13 +30,42 @@ export const WALK = [
     { label: 'Home', href: '/' },
     { label: 'Quick start', href: 'https://docs.creadev.org/vant/getting-started/quick-start' },
     { label: 'Install', href: '/install' },
-    { label: 'Brain (dashboard)', href: 'https://brain.creadev.org', noopener: true },
+    { label: 'Brain', href: '/brain' },
     { label: 'Security', href: '/security' },
     { label: 'Releases', href: 'https://github.com/dhaupin/vant/releases' },
     { label: 'GitHub', href: 'https://github.com/dhaupin/vant' },
     { label: 'Docs', href: 'https://docs.creadev.org/vant/' },
     { label: 'Status', href: '/status' },
     { label: 'Contact', href: '/contact' },
+]
+
+// Stops outside the walk (footer-only by owner direction) join the sidebar's
+// "More" section, so the drawer is the one place the full route set lives.
+const MORE = [
+    { label: 'Changelog', href: '/changelog' },
+    { label: 'Terms', href: '/terms' },
+    { label: 'Privacy', href: '/privacy' },
+]
+
+// The drawer sections (bolete structure): [{ head, items }, ...]. WALK items
+// are referenced by their walk object so label changes stay single-source.
+const MENU_SECTIONS = [
+    {
+        head: 'Get going',
+        items: [WALK[0], WALK[1], WALK[2]],
+    },
+    {
+        head: 'The install',
+        items: [WALK[3], WALK[4], WALK[8], WALK[9]],
+    },
+    {
+        head: 'The family',
+        items: [WALK[5], WALK[6], WALK[7]],
+    },
+    {
+        head: 'More',
+        items: MORE,
+    },
 ]
 
 export default function Nav() {
@@ -43,7 +79,13 @@ export default function Nav() {
         if (!open) return
         const onKey = (e) => { if (e.key === 'Escape') setOpen(false) }
         document.addEventListener('keydown', onKey)
-        return () => document.removeEventListener('keydown', onKey)
+        // scroll lock while the drawer is open (the bolete drawer behavior)
+        const prev = document.body.style.overflow
+        document.body.style.overflow = 'hidden'
+        return () => {
+            document.removeEventListener('keydown', onKey)
+            document.body.style.overflow = prev
+        }
     }, [open])
 
     function toggleTheme() {
@@ -58,6 +100,10 @@ export default function Nav() {
     const renderItem = (l, className) => l.href.startsWith('/')
         ? <Link key={l.label} to={l.href}>{l.label}</Link>
         : <a key={l.label} href={l.href} rel={l.noopener ? 'noopener' : undefined}>{l.label}</a>
+
+    const drawItem = (l) => l.href.startsWith('/')
+        ? <Link key={l.label} to={l.href} onClick={() => setOpen(false)}>{l.label}</Link>
+        : <a key={l.label} href={l.href} rel={l.noopener ? 'noopener' : undefined} onClick={() => setOpen(false)}>{l.label}</a>
 
     return (
         <nav className="top" aria-label="Site">
@@ -80,9 +126,39 @@ export default function Nav() {
                     <svg className="ico-close" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
                 </button>
             </div>
-            <div className={'mobile-menu' + (open ? ' open' : '')} id="mobileMenu">
-                {WALK.map((l) => renderItem(l, 'mobile'))}
-            </div>
+            {/* the bolete sidebar: full-height right drawer, sectioned like the
+                dashboard nav. Icon stays on the right; the drawer slides over. */}
+            <div
+                className={'menu-scrim' + (open ? ' open' : '')}
+                onClick={() => setOpen(false)}
+                aria-hidden={!open ? 'true' : undefined}
+            />
+            <aside
+                className={'menu-drawer' + (open ? ' open' : '')}
+                id="mobileMenu"
+                aria-label="Site menu"
+                aria-hidden={!open ? 'true' : undefined}
+            >
+                <div className="menu-drawer-head">
+                    <span className="menu-drawer-brand"><span className="brand-mark" aria-hidden="true">V</span>VANT</span>
+                    <button
+                        className="menu-btn drawer-close"
+                        type="button"
+                        onClick={() => setOpen(false)}
+                        aria-label="Close menu"
+                    >
+                        <svg className="ico-close" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
+                </div>
+                {MENU_SECTIONS.map((sec) => (
+                    <div className="menu-sec" key={sec.head}>
+                        <p className="menu-sec-head">{sec.head}</p>
+                        <div className="menu-sec-links">
+                            {sec.items.map((l) => drawItem(l))}
+                        </div>
+                    </div>
+                ))}
+            </aside>
         </nav>
     )
 }

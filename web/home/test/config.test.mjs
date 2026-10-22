@@ -65,12 +65,12 @@ describe('ssr.config.js — the owner-face JSON-LD contract', () => {
 describe('ssr.config.js — the route table the site ships', () => {
     const paths = config.routes.map((r) => r.path);
 
-    it('is the pinned eight routes', () => {
+    it('is the pinned nine routes (pass 343 adds /brain)', () => {
         expect(config.siteUrl).toBe('https://vant.creadev.org');
-        expect(paths).toHaveLength(8);
+        expect(paths).toHaveLength(9);
         expect(paths).toEqual(
             expect.arrayContaining([
-                '/', '/install', '/security', '/changelog', '/terms', '/privacy', '/status', '/contact',
+                '/', '/install', '/security', '/brain', '/changelog', '/terms', '/privacy', '/status', '/contact',
             ]),
         );
     });

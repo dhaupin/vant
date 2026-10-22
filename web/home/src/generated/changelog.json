@@ -1,8 +1,25 @@
 {
   "_source": "CHANGELOG.md (root) — parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 72,
+  "_headingCount": 73,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 343 (the Brain stop gets a page, the menu gets a bolete sidebar)",
+      "sections": [
+        {
+          "name": "Added — the /brain marketing page + the walk stop went internal; the drawer went structural",
+          "items": [
+            "**A REAL BRAIN PAGE** (`/brain`, the walk's fourth stop is internal",
+            "**THE MENU ITEM**: \"Brain (dashboard)\" → \"**Brain**\" → `/brain` — the",
+            "**THE BOLETE SIDEBAR** (.menu-drawer, mirrors web/dashboard's SideNav",
+            "Verified: build:home 9/9 (the /brain route prerenders with the walk"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

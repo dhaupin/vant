@@ -74,6 +74,16 @@ export default {
             },
         },
         {
+            path: '/brain',
+            priority: '0.7',
+            changefreq: 'monthly',
+            meta: {
+                title: 'Brain — Vant',
+                description:
+                    'The Brain is the dashboard side of Vant: a browser window into a running install — sessions live, agent rosters, carrier packets, budgets, ledgers, decisions.',
+            },
+        },
+        {
             path: '/changelog',
             priority: '0.6',
             changefreq: 'weekly',
