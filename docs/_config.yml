@@ -11,7 +11,7 @@ highlighter: rouge
 # :title = /path (clean, no ext or slash)
 # But individual page frontmatter overrides this
 permalink: :title
-exclude: ['README.md', 'Gemfile', 'Gemfile.lock', 'tmp', 'pagefind*']
+exclude: ['README.md', 'Gemfile', 'Gemfile.lock', 'tmp', 'pagefind*', 'package.json', 'package-lock.json', 'node_modules', 'freestruct.config.yml']
 
 # Kramdown settings
 kramdown:

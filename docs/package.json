@@ -1,0 +1,9 @@
+{
+    "name": "vant-docs-pipeline",
+    "private": true,
+    "description": "Post-render pipeline for the Vant docs site: npm freestruct over the Jekyll build output, then Pagefind. See .github/workflows/docs.yml.",
+    "devDependencies": {
+        "freestruct": "1.0.0",
+        "pagefind": "^1.5.0"
+    }
+}

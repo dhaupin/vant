@@ -1,0 +1,31 @@
+# Vant docs post-render layer (npm freestruct).
+# Jekyll renders; freestruct runs over the build output afterwards: per-page
+# canonical/OG metas (missing-only - the hand-written tags in
+# _layouts/default.html are never touched), sitemap.xml with real lastmod,
+# robots.txt with a basePath-aware sitemap pointer, feed.xml, 404.html
+# (noindex), and broken-link detection (CI runs --strict).
+#
+# Search stays with Pagefind - searchIndex stays off (same owner call as the
+# freestruct docs site itself). The Jekyll nav plugin and redirects plugin are
+# render-time and untouched by this layer.
+site:
+  name: Vant Docs
+  url: https://docs.creadev.org
+  description: AI memory for agents
+
+# URL path prefix the output tree is served under. Jekyll writes the tree
+# nested under /vant/ (baseurl), so the engine trusts the nested tree and
+# never doubles the prefix (canonicals = site.url + /vant/<page>).
+basePath: /vant
+
+# Generated artifacts (all on by default; listed for intent):
+generateSitemap: true
+generateRobots: true
+generate404: true
+generateFeed: true
+
+# Opt-in search.json stays OFF: Pagefind owns search (see docs.yml pipeline).
+searchIndex: false
+
+# Broken internal links print by default and FAIL when CI passes --strict.
+linkCheck: true
