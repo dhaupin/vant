@@ -28,12 +28,16 @@ import Terms            from './pages/Terms.jsx'
 import Privacy          from './pages/Privacy.jsx'
 import Status           from './pages/Status.jsx'
 import Contact          from './pages/Contact.jsx'
+import Install          from './pages/Install.jsx'
+import Security         from './pages/Security.jsx'
 
 // Client-navigation meta sync. The prerender bakes correct tags per route at
 // build time; this keeps title/og/canonical in step when the user navigates in
 // the SPA (template hook usePageMeta contract, minimized for five routes).
 const META = {
     '/':        { title: 'Vant — Persistent memory for AI agents', description: 'Vant gives any AI agent a brain: markdown memory files in your own repository. Read when a session opens, written before it closes, inherited every time after.' },
+    '/install': { title: 'Install — Vant', description: 'Install Vant: clone and npm ci (the canon path), or docker pull dhaupin/vant for production. Node 18+, git, nothing else.' },
+    '/security':{ title: 'Security — Vant', description: 'Report a vulnerability through a private GitHub advisory. The fail-closed chain: sandbox capabilities, input validation, rate budgets, escrow.' },
     '/terms':   { title: 'Terms of Use — Vant', description: 'Terms of use for the Vant project and this site.' },
     '/privacy': { title: 'Privacy — Vant', description: 'Vant privacy: your brain is your repo. This site collects nothing.' },
     '/status':  { title: 'Status — Vant', description: 'Vant surfaces status, checked from your browser with honest limits.' },
@@ -132,6 +136,8 @@ export default function AppLayout() {
             <main id="main">
                 <Routes>
                     <Route path="/"        element={<Home />} />
+                    <Route path="/install"  element={<Install />} />
+                    <Route path="/security" element={<Security />} />
                     <Route path="/terms"   element={<Terms />} />
                     <Route path="/privacy" element={<Privacy />} />
                     <Route path="/status"  element={<Status />} />

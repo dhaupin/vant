@@ -5,6 +5,27 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 336 (the site gains /install and /security)
+
+### Added - the two OSS routes the project was missing
+
+- **/install** — the money page for clone-shipped OSS, previously buried in
+  the docs hub only: canon `git clone` + `npm ci` terminal (with the same
+  fiction law as the rest of the site — the npm `vant` name is an unrelated
+  Vue UI library, stated plainly as "no npm package, and by name"), Docker
+  quick start via the pipeline-pushed `dhaupin/vant` image with the
+  volume-mount brain note, requirements cards, links to the full docs
+  guide. Structured so one row lands when a scoped npm package ever ships.
+- **/security** — private-disclosure route (GitHub private security
+  advisory), the fail-closed chain enumerated from real lib behavior
+  (sandbox -> VAF -> QoS -> escrow), hardening reading into docs/security,
+  and the honest no-bounty/no-SLA posture. Crosslinks /privacy + /terms.
+- Wired everywhere: ssr.config.js (7 routes), client-nav META map, nav
+  (Install first — it is the action link), footer links, per-route
+  canonicals/OG baked by inject-brand; sitemap gains both locs.
+- Verified: `prestruct build` renders 7/7 routes + artifacts; `npm run
+  lint:home` passes all 11 built pages + the backup.
+
 ## [Unreleased] - pass 335 (the home site becomes a real React/prestruct multi-route site)
 
 ### Changed - web/home grows its Vite pipeline (the prd-web §2.5 predicted shape)

@@ -6,9 +6,11 @@
  * so the route table has to exist in the repo (it is not environment-specific
  * here - every URL below is fixed).
  *
- * The five routes replace the single hand-written index.html lander
+ * The seven routes replace the single hand-written index.html lander
  * (web/home/index.bak.html, kept as the design reference):
  *   /          the lander
+ *   /install   install paths (clone canon, Docker Hub image, npm posture)
+ *   /security  disclosure path + the fail-closed chain
  *   /terms     terms of use
  *   /privacy   privacy policy
  *   /status    public surfacing status (island-backed)
@@ -41,6 +43,26 @@ export default {
                 title: 'Vant — Persistent memory for AI agents',
                 description:
                     'Vant gives any AI agent a brain: markdown memory files in your own repository. Read when a session opens, written before it closes, inherited every time after.',
+            },
+        },
+        {
+            path: '/install',
+            priority: '0.9',
+            changefreq: 'monthly',
+            meta: {
+                title: 'Install — Vant',
+                description:
+                    'Install Vant: clone and npm ci (the canon path), or docker pull dhaupin/vant for production. Node 18+, git, nothing else.',
+            },
+        },
+        {
+            path: '/security',
+            priority: '0.7',
+            changefreq: 'monthly',
+            meta: {
+                title: 'Security — Vant',
+                description:
+                    'Report a vulnerability through a private GitHub advisory. The fail-closed chain: sandbox capabilities, input validation, rate budgets, escrow.',
             },
         },
         {

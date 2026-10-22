@@ -11,11 +11,13 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 const links = [
+    { label: 'Install', href: '/install' },
     { label: 'Quick start', href: 'https://docs.creadev.org/vant/getting-started/quick-start' },
     { label: 'Docs', href: 'https://docs.creadev.org/vant/' },
     { label: 'Brain (dashboard)', href: 'https://brain.creadev.org', noopener: true },
     { label: 'GitHub', href: 'https://github.com/dhaupin/vant' },
     { label: 'Releases', href: 'https://github.com/dhaupin/vant/releases' },
+    { label: 'Security', href: '/security' },
     { label: 'Status', href: '/status' },
     { label: 'Contact', href: '/contact' },
 ]
