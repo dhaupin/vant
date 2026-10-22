@@ -7,7 +7,7 @@
  * What is actually checked:
  *   - GitHub REST API (CORS-writable for browsers): repo metadata + latest
  *     release for dhaupin/vant.
- *   - docs.creadev.org and prestruct/freestruct family sites: fetched with
+ *   - docs.creadev.org and the Brain dashboard: fetched with
  *     mode:'no-cors'. The response body is opaque by CORS design, so the
  *     honest result is binary: the network request completed at all or not.
  *     A healthy-looking "reachable" from a captive portal is possible in
@@ -61,7 +61,6 @@ export default function StatusBoard() {
                 probeJson(REPO_API),
                 probeJson(RELEASE_API).then(() => probeJson(RELEASE_API)), // release follows repo health
                 probe('https://docs.creadev.org/vant/'),
-                probe('https://prestruct.creadev.org/'),
                 probe('https://brain.creadev.org'),
             ])
             if (!alive) return
@@ -69,8 +68,7 @@ export default function StatusBoard() {
                 repo: results[0],
                 release: results[1],
                 docs: results[2],
-                family: results[3],
-                brain: results[4],
+                brain: results[3],
             })
             setRunning(false)
         }
@@ -120,7 +118,6 @@ export default function StatusBoard() {
 
                 {[
                     ['Docs hub', 'docs', 'https://docs.creadev.org/vant/'],
-                    ['Creadev doc family (prestruct / freestruct sites)', 'family', 'https://freestruct.creadev.org'],
                     ['Brain dashboard', 'brain', 'https://brain.creadev.org'],
                 ].map(([name, key, url]) => {
                     const c = checks[key] || {}

@@ -5,6 +5,38 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 345 (the footer is two columns: Vant and Learn; the engine mentions leave)
+
+### Changed + Fixed: the footer reorganizes around the menu; /status stops listing sister engines
+
+- **PRESTRUCT AND FREESTRUCT ARE OFF THE SITE** (owner direction): the
+  footer's "Freestruct docs" link AND the "built from the docs system
+  this site prototyped" parenthetical are gone (retired with the whole
+  column rewrite below), and /status's live board no longer probes or
+  lists prestruct.creadev.org or freestruct.creadev.org (the status
+  surface list is Docs hub + Brain dashboard now). Engineering comments
+  that name prestruct as the BUILD ENGINE of this very site stay - they
+  are not site copy, they are the build contract.
+- **THE FOOTER IS TWO COLUMNS AT EVERY WIDTH**: the phone-stacking bug
+  (owner SS: the link columns collapsed to one column) dies with the old
+  1.35fr/1fr/1fr grid. New structure, per owner spec:
+  - **Col 1 "Vant"** loads THE SAME menu as the main site menu (one WALK
+    list from Nav.jsx drives both surfaces, so menu and footer cannot
+    drift): Home, Install, Brain, Security, Releases, GitHub, Docs,
+    Status, Contact.
+  - **Col 2 "Learn"** is wiped and rebuilt: nine external links to
+    specific docs areas (quick start, agent onboarding, install guide,
+    the brain, brain search, MCP, REST API, CLI reference, security) -
+    the same count as the menu.
+  - The page-agnostic closer statement stays, spanning on top; below the
+    columns a new meta row (bordered) keeps the footer-only routes
+    reachable: "Vant, open source under MIT" + Changelog / Terms /
+    Privacy (version text stays version-free to respect the package.json
+    truth pin).
+- Verified: build:home 9/9 (the two-up footer baked on every route: two
+  columns on desktop AND phone widths), lint:home PASS (truth + style),
+  changelog parity PASS, home suite 6/6.
+
 ## [Unreleased] - pass 344 (quick start folded into /install, and the site went hyphen-voiced)
 
 ### Changed + Added: the five-minute setup lives at /install; the voice rules ship as a gate

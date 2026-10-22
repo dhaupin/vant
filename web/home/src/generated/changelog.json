@@ -1,8 +1,24 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 74,
+  "_headingCount": 75,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 345 (the footer is two columns: Vant and Learn; the engine mentions leave)",
+      "sections": [
+        {
+          "name": "Changed + Fixed: the footer reorganizes around the menu; /status stops listing sister engines",
+          "items": [
+            "**PRESTRUCT AND FREESTRUCT ARE OFF THE SITE** (owner direction): the",
+            "**THE FOOTER IS TWO COLUMNS AT EVERY WIDTH**: the phone-stacking bug",
+            "Verified: build:home 9/9 (the two-up footer baked on every route: two"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
