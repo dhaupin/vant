@@ -311,7 +311,29 @@ const args = process.argv.slice(2);
 // instead of 'Unknown command' + exit 1 — every other vant CLI treats
 // -h as first-class, the dispatcher was the odd one out.
 let cmd = (!args[0] || args[0] === '-h' || args[0] === '--help') ? 'help' : args[0];
-if (cmd) vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
+// (live-walk fix) An UNKNOWN verb longer than 20 chars used to crash with
+// an uncaught `VantError: cmd too long: max 20` — the length rail is for
+// ROUTED nouns, never an excuse to die unhandled. Route the refusal
+// honestly instead: same shape as the dispatcher's unknown-command block
+// (echo + edit-distance suggestions + help pointer), exit 1.
+if (cmd) {
+    try {
+        vaf.check(cmd, {type: "string", name: "cmd", maxLength: 20});
+    } catch (e) {
+        console.error('Unknown command:', cmd.length > 60 ? cmd.slice(0, 60) + '…' : cmd);
+        const candidates = Object.keys(COMMANDS)
+            .filter(k => k !== cmd)
+            .map(k => ({ k, d: _editDistance(cmd, k) }))
+            .filter(x => x.d <= Math.max(2, Math.floor(cmd.length / 3)))
+            .sort((a, b) => a.d - b.d)
+            .slice(0, 3);
+        if (candidates.length) {
+            console.error('Did you mean: ' + candidates.map(x => x.k).join(', ') + '?');
+        }
+        console.error('Run `vant help` to see all commands.');
+        process.exit(1);
+    }
+}
 
 // Handle: vant help <cmd>
 if (cmd === 'help' && args[1]) {
