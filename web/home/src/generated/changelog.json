@@ -1,8 +1,23 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 78,
+  "_headingCount": 79,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 349 (the footer says © 2026)",
+      "sections": [
+        {
+          "name": "Added: the copyright year joins the meta row",
+          "items": [
+            "**© 2026 AT THE FRONT of the footer's final sentence** (owner",
+            "Verified: build:home 9/9, lint:home PASS (truth + style), changelog"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

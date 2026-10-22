@@ -5,6 +5,18 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 349 (the footer says © 2026)
+
+### Added: the copyright year joins the meta row
+
+- **© 2026 AT THE FRONT of the footer's final sentence** (owner
+  direction): "© 2026 Vant, open source agent memory under MIT |
+  Made by Creadev.org" now sits in the bordered meta row on every route,
+  with the dofollow Creadev.org link unchanged.
+- Verified: build:home 9/9, lint:home PASS (truth + style), changelog
+  parity PASS, home suite 6/6 (the © line grep-confirmed baked into the
+  dist meta row).
+
 ## [Unreleased] - pass 348 (the walk finds /brain/, and the white pages get their observers)
 
 ### Fixed: two navigation bugs in one shell file

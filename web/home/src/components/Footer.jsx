@@ -67,6 +67,7 @@ export default function Footer() {
                 </div>
                 <div className="f-meta">
                     <span>
+                        © 2026{' '}
                         Vant, open source agent memory under MIT | Made by{' '}
                         <a href="https://creadev.org" target="_blank" rel="dofollow noopener">Creadev.org</a>
                     </span>
