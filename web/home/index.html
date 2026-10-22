@@ -97,10 +97,6 @@
     }
     </script>
 
-    <script type="importmap">
-    { "imports": { "three": "./vendor/three.module.js" } }
-    </script>
-
     <style>
         :root {
             --bg: #f7f6f3;
@@ -183,13 +179,9 @@
         /* ---------- hero ---------- */
         .hero { position: relative; padding: 54px 0 0; }
         #lattice { position: absolute; inset: 0; z-index: 0; opacity: calc(0.9 * var(--fx)); }
-        #lattice canvas { display: block; }
-        /* no-WebGL / no-module fallback: a hand-set static constellation
-           (inline SVG) + soft glow, so the drag hint never points at an
-           empty wall. SVG is DOM-inline, so it works with or without JS
-           beyond the class flip. */
-        #lattice svg { display: none; }
-        #lattice.lattice-flat svg {
+        /* static constellation: a hand-set inline SVG + soft glow, DOM-inline
+           so it works with or without JS. */
+        #lattice svg {
             display: block;
             position: absolute;
             inset: 0;
@@ -197,7 +189,6 @@
             height: 100%;
             opacity: calc(0.7 * var(--fx));
         }
-        .drag-note-static { color: var(--text-muted); font-weight: 500; white-space: nowrap; }
         .hero-veil {
             position: absolute; inset: 0; z-index: 1; pointer-events: none;
             background: radial-gradient(120% 90% at 18% 20%, var(--bg) 32%, transparent 72%);
@@ -406,8 +397,7 @@
                 </div>
             </div>
             <p class="drag-hint">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 3 4 7l4 4M4 7h16M16 21l4-4-4-4M20 17H4"/></svg>
-                The moving constellation behind this text is your agent's memory graph — drag it to turn it. Every amber pulse is a lesson landing in the brain.
+                The constellation behind this text is your agent's memory graph — every amber pulse is a lesson landing in the brain.
             </p>
         </div>
     </header>
@@ -882,7 +872,7 @@
     <script>
         // ============================== VantFX ==============================
         // Single-file animation frame for the home page. No dependencies.
-        // Modules: theme, copy, reveal (scroll), counters, lattice (three.js).
+        // Modules: theme, copy, reveal (scroll), counters.
         var VantFX = (function () {
             'use strict';
             var reduced = false;
@@ -982,240 +972,6 @@
         })();
 
         VantFX.theme(); VantFX.nav(); VantFX.copy(); VantFX.reveal(); VantFX.counters();
-    </script>
-
-    <script type="module">
-        // ============================== Memory Lattice ==============================
-        // The hero visual: Vant's memory as a living graph. Nodes are memories,
-        // lines are citations, amber pulses are lessons landing in the brain.
-        // Pointer-draggable, breathes on a session cadence. three.js is
-        // vendored at vendor/three.module.js (no CDN dependency). Gracefully
-        // static (gradient only) if WebGL is unavailable.
-        const host = document.getElementById('lattice');
-        function flatFallback() {
-            host.classList.add('lattice-flat');
-            const canvas = host.querySelector('canvas');
-            if (canvas) canvas.remove();
-            const hint = document.querySelector('.drag-hint');
-            if (hint && !hint.dataset.fallnoted) {
-                hint.dataset.fallnoted = '1';
-                const note = document.createElement('span');
-                note.className = 'drag-note-static';
-                note.textContent = ' (static preview on this device)';
-                hint.appendChild(note);
-            }
-        }
-        (async function () {
-            if (!host) return;
-            let THREE;
-            try {
-                // Dynamic import on purpose: if the vendored module fails to
-                // load (bad deploy, blocked MIME), the rest of the page must
-                // not silently lose its hero. Same shape as the WebGL catch:
-                // fall back to the flat glow, never hide the layer.
-                THREE = await import('three');
-            } catch (e) {
-                flatFallback();
-                return;
-            }
-            try {
-                let renderer;
-                try {
-                    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' });
-                } catch (e) { throw new Error('nogl'); }
-
-                const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-                const scene = new THREE.Scene();
-                const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-                camera.position.set(0, 0, 13);
-
-                const palette = {
-                    node: 0x2dd4a0, edge: 0x3a4552, signal: 0xe8a33d,
-                    core: 0x2dd4a0, fog: 0x0b0d10
-                };
-                function themeHex() {
-                    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-                    return dark
-                        ? { node: 0x2dd4a0, edge: 0x39424e, signal: 0xe8a33d, core: 0x2dd4a0 }
-                        : { node: 0x0b8a5c, edge: 0xc9c4b8, signal: 0xd98d2b, core: 0x0b8a5c };
-                }
-                let colors = themeHex();
-
-                // ---- memory nodes: a constellation around a brain core ----
-                const N = 150;
-                const positions = new Float32Array(N * 3);
-                const seeds = [];
-                for (let i = 0; i < N; i++) {
-                    // clusters: 3 lobes = session open / work / close
-                    const lobe = i % 3;
-                    const cx = [ -4.6, 0.4, 4.9 ][lobe];
-                    const cy = [ 1.6, -1.2, 1.2 ][lobe];
-                    const r = 2.6 + Math.random() * 2.4;
-                    const th = Math.random() * Math.PI * 2;
-                    const ph = Math.acos(2 * Math.random() - 1);
-                    const x = cx + r * Math.sin(ph) * Math.cos(th);
-                    const y = cy + r * Math.cos(ph) * 0.62;
-                    const z = (Math.random() - 0.5) * 4.4;
-                    positions.set([x, y, z], i * 3);
-                    seeds.push({ x, y, z, lobe, phase: Math.random() * Math.PI * 2, speed: 0.3 + Math.random() * 0.7 });
-                }
-                const nodeGeo = new THREE.BufferGeometry();
-                nodeGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-                const nodeMat = new THREE.PointsMaterial({
-                    color: colors.node, size: 0.075, transparent: true, opacity: 0.85,
-                    sizeAttenuation: true, depthWrite: false
-                });
-                const nodes = new THREE.Points(nodeGeo, nodeMat);
-                scene.add(nodes);
-
-                // ---- citation edges: connect neighbors within a lobe ----
-                const edgePts = [];
-                const MAXD2 = 3.1 * 3.1;
-                for (let i = 0; i < N; i++) {
-                    for (let j = i + 1; j < N; j++) {
-                        if (seeds[i].lobe !== seeds[j].lobe) continue;
-                        const dx = positions[i*3]-positions[j*3], dy = positions[i*3+1]-positions[j*3+1], dz = positions[i*3+2]-positions[j*3+2];
-                        if (dx*dx + dy*dy + dz*dz < MAXD2) edgePts.push(positions[i*3],positions[i*3+1],positions[i*3+2],positions[j*3],positions[j*3+1],positions[j*3+2]);
-                    }
-                }
-                const edgeGeo = new THREE.BufferGeometry();
-                edgeGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(edgePts), 3));
-                const edgeMat = new THREE.LineBasicMaterial({ color: colors.edge, transparent: true, opacity: 0.34 });
-                const edges = new THREE.LineSegments(edgeGeo, edgeMat);
-                scene.add(edges);
-
-                // ---- brain core ----
-                const coreGeo = new THREE.IcosahedronGeometry(1.15, 2);
-                const coreMat = new THREE.MeshBasicMaterial({ color: colors.core, wireframe: true, transparent: true, opacity: 0.5 });
-                const core = new THREE.Mesh(coreGeo, coreMat);
-                scene.add(core);
-                const haloMat = new THREE.MeshBasicMaterial({ color: colors.core, transparent: true, opacity: 0.05 });
-                const halo = new THREE.Mesh(new THREE.IcosahedronGeometry(1.5, 2), haloMat);
-                scene.add(halo);
-
-                // ---- signal pulses: lessons traveling to the brain ----
-                const P = 26;
-                const pGeo = new THREE.BufferGeometry();
-                pGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(P * 3), 3));
-                const pMat = new THREE.PointsMaterial({ color: colors.signal, size: 0.14, transparent: true, opacity: 0.95, sizeAttenuation: true, depthWrite: false });
-                const pulses = new THREE.Points(pGeo, pMat);
-                scene.add(pulses);
-                const pulseState = [];
-                for (let i = 0; i < P; i++) {
-                    pulseState.push({ from: seeds[Math.floor(Math.random()*N)], t: Math.random(), speed: 0.08 + Math.random() * 0.2 });
-                }
-                function lerp3(a, b, t, out) {
-                    out[0] = a.x + (b.x - a.x) * t;
-                    out[1] = a.y + (b.y - a.y) * t;
-                    out[2] = a.z + (b.z - a.z) * t;
-                }
-
-                // ---- drag + parallax ----
-                let targetRX = 0, targetRY = 0, curRX = 0, curRY = 0, dragging = false, lastX = 0, lastY = 0;
-                // narrow viewports: squash the group so the three lobes fit
-                // horizontally instead of running off-frame
-                let geoScaleX = 1, geoScaleZ = 1;
-                const group = new THREE.Group();
-                group.add(nodes); group.add(edges); group.add(core); group.add(halo); group.add(pulses);
-                scene.add(group);
-
-                host.addEventListener('pointerdown', (e) => { dragging = true; lastX = e.clientX; lastY = e.clientY; host.setPointerCapture(e.pointerId); });
-                host.addEventListener('pointermove', (e) => {
-                    if (dragging) {
-                        targetRY += (e.clientX - lastX) * 0.004;
-                        targetRX += (e.clientY - lastY) * 0.003;
-                        lastX = e.clientX; lastY = e.clientY;
-                    } else {
-                        // idle parallax follows the cursor
-                        const r = host.getBoundingClientRect();
-                        targetRY = ((e.clientX - r.left) / r.width - 0.5) * 0.5;
-                        targetRX = ((e.clientY - r.top) / r.height - 0.5) * 0.3;
-                    }
-                });
-                ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => host.addEventListener(ev, () => { dragging = false; }));
-
-                // ---- sizing ----
-                function size() {
-                    const w = host.clientWidth || 1, h = host.clientHeight || 1;
-                    renderer.setSize(w, h); // updateStyle defaults true: canvas CSS size tracks container, no hi-dpi overflow
-                    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-                    camera.aspect = w / h;
-                    const tx = THREE.MathUtils.degToRad(camera.fov / 2);
-                    camera.position.z = camera.aspect < 0.9 ? 17.5 : 13;
-                    const halfW = Math.tan(tx) * camera.position.z * camera.aspect;
-                    geoScaleX = Math.min(1, Math.max(0.4, (halfW - 1.4) / 10));
-                    geoScaleZ = Math.min(1, Math.max(0.7, (halfW - 1.4) / 8));
-                    camera.updateProjectionMatrix();
-                }
-                size();
-                window.addEventListener('resize', size);
-
-                // ---- theme sync ----
-                function retint() {
-                    colors = themeHex();
-                    nodeMat.color.setHex(colors.node);
-                    edgeMat.color.setHex(colors.edge);
-                    coreMat.color.setHex(colors.core);
-                    haloMat.color.setHex(colors.core);
-                    pMat.color.setHex(colors.signal);
-                }
-                retint();
-                document.addEventListener('vantfx:theme', retint);
-
-                // ---- session breathing ----
-                const clock = new THREE.Clock();
-                function frame() {
-                    const t = clock.getElapsedTime();
-                    // cadence: 12s cycle - open swell, work shimmer, close settle
-                    const cycle = (t % 12) / 12;
-                    const breathe = 1 + Math.sin(t * 0.9) * 0.03 + (cycle < 0.25 ? (0.25 - cycle) * 0.24 : 0);
-                    group.scale.set(geoScaleX * breathe, breathe, geoScaleZ * breathe);
-                    core.rotation.y = t * 0.18; core.rotation.x = Math.sin(t * 0.31) * 0.22;
-                    halo.rotation.y = -t * 0.12;
-                    haloMat.opacity = 0.04 + Math.abs(Math.sin(t * 0.9)) * 0.05;
-
-                    // gentle per-node drift
-                    const pos = nodeGeo.attributes.position.array;
-                    for (let i = 0; i < N; i++) {
-                        const s = seeds[i];
-                        pos[i*3]   = s.x + Math.sin(t * s.speed + s.phase) * 0.16;
-                        pos[i*3+1] = s.y + Math.cos(t * s.speed * 0.8 + s.phase) * 0.13;
-                    }
-                    nodeGeo.attributes.position.needsUpdate = true;
-
-                    // pulses toward the core
-                    const pp = pGeo.attributes.position.array;
-                    const out = [0, 0, 0];
-                    for (let i = 0; i < P; i++) {
-                        const p = pulseState[i];
-                        p.t += p.speed * 0.016;
-                        if (p.t >= 1) { p.t = 0; p.from = seeds[Math.floor(Math.random()*N)]; }
-                        lerp3(p.from, { x: 0, y: 0, z: 0 }, p.t < 0.85 ? p.t / 0.85 : 1, out);
-                        pp[i*3] = out[0]; pp[i*3+1] = out[1]; pp[i*3+2] = out[2];
-                    }
-                    pGeo.attributes.position.needsUpdate = true;
-                    pMat.opacity = 0.9 - Math.sin(t * 2.1) * 0.25;
-
-                    // camera drifts with drag/parallax (eased)
-                    curRX += (targetRX - curRX) * 0.06;
-                    curRY += (targetRY - curRY) * 0.06;
-                    group.rotation.x = curRX; group.rotation.y = curRY;
-
-                    renderer.render(scene, camera);
-                    if (!reduced) requestAnimationFrame(frame);
-                }
-                frame();
-
-                // pause when the tab is hidden (battery respect)
-                document.addEventListener('visibilitychange', () => {
-                    if (!document.hidden && !reduced) requestAnimationFrame(frame);
-                });
-            } catch (err) {
-                // no WebGL: swap in the static constellation so the drag
-                // hint never points at nothing.
-                flatFallback();
-            }
-        })();
     </script>
 </body>
 </html>
