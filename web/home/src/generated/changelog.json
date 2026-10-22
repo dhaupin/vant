@@ -1,8 +1,24 @@
 {
   "_source": "CHANGELOG.md (root) — parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 70,
+  "_headingCount": 71,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 341 (the footer closer: an every-page statement, no site tourism)",
+      "sections": [
+        {
+          "name": "Changed — the footer blurb is rewritten (owner direction via mobile SS)",
+          "items": [
+            "**THE CROSSLINK SENTENCE IS GONE** — \"One of four crosslinked sites:",
+            "**THE CLOSER IS A REAL VANT SUMMARY** (owner direction: \"applicable to",
+            "Verified: build:home 8/8 (the new closer baked into every route),"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

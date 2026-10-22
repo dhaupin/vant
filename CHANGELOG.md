@@ -5,6 +5,29 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 341 (the footer closer: an every-page statement, no site tourism)
+
+### Changed — the footer blurb is rewritten (owner direction via mobile SS)
+
+- **THE CROSSLINK SENTENCE IS GONE** — "One of four crosslinked sites:
+  this home page, the docs hub, the Brain dashboard, and the Freestruct
+  docs (built from the docs system this site prototyped)" no longer
+  introduces the footer; the links it named already live in the "The
+  family" column one glance away, so the paragraph repeated them.
+- **THE CLOSER IS A REAL VANT SUMMARY** (owner direction: "applicable to
+  footer on every page"): "Vant. Persistent memory for AI agents: plain
+  markdown brain files in your own repository, read when a session
+  opens, written before it closes, inherited every time after. Free and
+  open source under MIT — made by Creadev.org." The session-cadence
+  clause is the house phrasing (home meta description, verbatim); MIT is
+  plain text like every other license mention on the site (no LICENSE
+  file URL exists to link — package.json carries the truth);
+  Creadev.org links with the same noopener treatment the family column
+  uses. No hard line break (the mobile SS break came from the old
+  backup lander's <br>, already absent from source).
+- Verified: build:home 8/8 (the new closer baked into every route),
+  lint:home PASS, changelog parity PASS, home suite 6/6.
+
 ## [Unreleased] - pass 340 (the counters round: numbers that count, an MCP neighbor, a shorter door)
 
 ### Fixed — counters stuck at 0 + the CTA copy/wrap

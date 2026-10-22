@@ -1,11 +1,11 @@
 /**
  * src/components/Footer.jsx (vant-home)
  * =====================================
- * Shared footer for every route. Copy matches the checked-in lander backup
- * (four-site crosslink family). Three-column grid (styles.css .footer-grid):
- * the project blurb, the site's OWN routes, and the crosslink family -
- * collapsing to one column on mobile. Terms/Privacy are footer-only by
- * owner direction (pass 338 post-merge round).
+ * Shared footer for every route. Three-column grid (styles.css .footer-grid):
+ * the project's closer statement (one page-agnostic Vant summary — open
+ * source under MIT, made by Creadev.org), the site's OWN routes, and the
+ * crosslink family - collapsing to one column on mobile. Terms/Privacy
+ * are footer-only by owner direction (pass 338 post-merge round).
  */
 
 import React from 'react'
@@ -17,14 +17,12 @@ export default function Footer() {
             <div className="container footer-grid">
                 <div className="f-about">
                     <p>
-                        <strong>Vant.</strong> Agent memory that lives in your repo.
-                        Open source under MIT. One of four crosslinked sites: this
-                        home page, the <a href="https://docs.creadev.org/vant/">docs
-                        hub</a>, the{' '}
-                        <a href="https://brain.creadev.org" rel="noopener">Brain
-                        dashboard</a>, and the{' '}
-                        <a href="https://freestruct.creadev.org" rel="noopener">Freestruct
-                        docs</a> (built from the docs system this site prototyped).
+                        <strong>Vant.</strong> Persistent memory for AI agents:
+                        plain markdown brain files in your own repository, read
+                        when a session opens, written before it closes,
+                        inherited every time after. Free and open source under
+                        MIT — made by{' '}
+                        <a href="https://creadev.org" target="_blank" rel="noopener">Creadev.org</a>.
                     </p>
                 </div>
                 <nav className="f-col" aria-label="Footer - this site">
