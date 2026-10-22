@@ -5,9 +5,9 @@ scenarios that attack vant's own surfaces — in-process, socket-free, and
 deterministic — so the defenses this repo promises are *measured*, not just
 documented.
 
-- **Crashtest**: <https://github.com/dhaupin/crashtest> — live harness: <https://crashtest.creadev.org>
+- **Crashtest**: <https://github.com/dhaupin/crashtest> — on npm as `crashtest@1.0.0` (this repo's devDependency); live harness: <https://crashtest.creadev.org>
 - **Where the packs target**: this repo (dhaupin/vant), `packs/public/<name>/`
-- **Run/validate from vant's side**: `node test/crashtest-packs.test.js` (contract + verdict ledger, 55 checks)
+- **Run/validate from vant's side**: `node test/crashtest-packs.test.js` (contract + verdict ledger, 57 checks)
 - **Real-harness dry run against vant**: `node scripts/crashtest-run.js` (see "Running the packs against vant")
 
 ## What crashtest is
@@ -38,7 +38,7 @@ WordPress lane and the `crashtest-site` pack with crashtest's own site).
 
 ## The packs
 
-### `public/vant-brain` — brain-file layer discipline (9 oracles; 6 validated)
+### `public/vant-brain` — brain-file layer discipline (9 oracles; all armed 2026-10-22)
 
 **What it does.** Attacks the read/write discipline of a vant install's brain
 layer — `models/state.json` handling, private/public scoping, path
@@ -60,17 +60,19 @@ oracles stay not-yet-wired: `trust-read` and `brain-graph-walk`.
 |---|---|---|
 | `private-first-fallback` | a private-pinned mixed read returns the private file — public shadow content under a private pin is lineage fraud | validated — REFUSED |
 | `paths-cannot-escape-models` | traversal-shaped brain names never read outside `models/` | validated — REFUSED |
-| `state-tamper-is-loud` | corrupt/missing `state.json` must be refused loudly, never silently defaulted into a mixed-lineage read | validated — **EXPLOITED today** (read-path half of #232; CLI/pointer half fixed in commit `fb3eadf`) |
-| `state-json-schema-strictness` | wrong-typed stack/currentBrain values never survive into the runtime pointer | validated — **EXPLOITED today** |
+| `state-tamper-is-loud` | corrupt/missing `state.json` must be refused loudly, never silently defaulted into a mixed-lineage read | validated — REFUSED (read-path half of #232 FIXED 2026-10-22: loud faults + pointer-side derivation at both state.json load seams; CLI/pointer half fixed earlier in commit `fb3eadf`) |
+| `state-json-schema-strictness` | wrong-typed stack/currentBrain values never survive into the runtime pointer | validated — REFUSED (same 2026-10-22 fix: schema entries sanitized loudly at both load seams) |
 | `migration-idempotency` | `migrate` twice is a byte-level no-op; `--dry-run` writes nothing | validated — REFUSED |
 | `guest-capability-gates` | admin verbs unreachable, revocation kills grants, pairing voucher single-use | validated — REFUSED |
-| `succession-trust-inheritance` | a low-trust successor can't resolve private state past its trust floor | pending run-root wiring (skipped) |
+| `succession-trust-inheritance` | a low-trust successor can't resolve private state past its trust floor | validated — **EXPLOITED today** (armed 2026-10-22 via `trust-read`; the succession trust floor is a behavioral descriptor, and NOTHING enforces it at the brain.read seam — a live finding, pinned in the suite's expected table until a read-side trust gate lands) |
 | `boot-stone-integrity` | tampered stones restore nothing partial | validated — REFUSED (`stone-restore-tamper` armed via the stones fixture) |
-| `knowledge-links-cycle-safety` | cyclic knowledge graphs never hang the walk | pending run-root wiring (skipped) |
+| `knowledge-links-cycle-safety` | cyclic knowledge graphs never hang the walk | validated — REFUSED (armed 2026-10-22 via `brain-graph-walk`: the real `brain_connections` visited guard + depth cap hold at depth 100000) |
 
-The two EXPLOITED rows are **findings, not glitches** — they are pinned in
-`test/crashtest-packs.test.js`'s expected-verdict table and flip to REFUSED
-when the read-path fix lands; the pin keeps biting until then.
+The one EXPLOITED row (succession-trust-inheritance) is a **finding, not a
+glitch** — it is pinned in `test/crashtest-packs.test.js`'s expected-verdict
+table and flips to REFUSED when a read-side trust gate lands; the pin keeps
+biting until then. The two #232 read-path rows were EXPLOITED findings
+until the 2026-10-22 fix flipped them to REFUSED.
 
 ### `public/vant-census` — structural oracles (4 oracles; config-armed)
 
@@ -143,6 +145,8 @@ authz rows (method-matrix, role-body spoofs, alias confusion).
 | `fuzz-floor-never-500` | hostile method/path/body shapes answer 2xx-4xx — abuse never becomes a server fault | validated — REFUSED |
 | `cors-enable-parity` | preflight OPTIONS terminates early and cleanly (204) | validated — REFUSED |
 | `session-cookie-discipline` | session-less clients receive zero cookie grants; forged cookies are never adopted or reflected | validated — REFUSED |
+| `urlencoded-bracket-canary` | the urlencoded wire (BodyParser: `URLSearchParams` + `Object.fromEntries`) never expands `__proto__`/`constructor.prototype` bracket keys onto `Object.prototype` | validated — REFUSED (armed 2026-10-22, crashtest v1.0.0-on-npm qs-shapes oracle family) |
+| `urlencoded-depth-floor` | deep `[0]`-nesting ladders on the query AND urlencoded wires stay under the fuzz floor (never 5xx, never an uncaught throw) | validated — REFUSED (armed 2026-10-22) |
 
 ### `public/vant-stones` — stone lifecycle discipline (3 oracles; all validated)
 
@@ -164,7 +168,7 @@ tamper SURVIVES (the pack's EXPLOITED arm — measured, never assumed);
 | Attack | What it shakes | Status |
 |---|---|---|
 | `stone-scope-honesty` | a scoped stone decodes to EXACTLY its declared scope — no scope costume over a full-install capture | validated — REFUSED |
-| `state-pointer-lineage` | restored state never wakes a stone on a foreign `currentBrain` silently | validated — **EXPLOITED today** (the mint-side half of #226, now measured from the sealed-payload side: `lib/transform.gather` scopes the brain INVENTORY but leaves the live `currentBrain`/`activeStack` unfiltered by design — "identity is live truth" — so a single-brain stone carries a pointer outside its scope and every consumer of the payload alone wakes on a foreign brain. The pin lives in the suite's expected table and flips to REFUSED when the mint/boot-side warning lands.) |
+| `state-pointer-lineage` | restored state never wakes a stone on a foreign `currentBrain` silently | validated — REFUSED (mint-side half of #226 FIXED 2026-10-22: a scoped capture retargets an out-of-scope pointer to the first scoped brain, loudly — the sealed payload never carries a pointer its scope cannot wake. The INVENTORY and IDENTITY laws stay as the Cairn/prestruct pins require; full-capture behavior is byte-identical.) |
 | `restore-torn-refusal` | tampered stones refuse loudly and write NOTHING partial — torn restores are worse than failed ones | validated — REFUSED |
 
 ## Running the packs against vant
@@ -180,9 +184,10 @@ Two ways, both from this repo:
    sandbox can honestly arm, and checks the whole pack matrix against the
    expected table (count grows as rows validate).
 
-2. **Real harness dry-run** (needs the crashtest clone next door):
+2. **Real harness dry-run** (crashtest resolves from the npm devDependency
+   first; the clone stays a HEAD-testing fallback):
    ```sh
-   # crashtest checkout default: ../crashtest or CRASHTEST_DIR=/path
+   # resolution order: CRASHTEST_DIR override -> npm crashtest@1.0.0 -> clones
    node scripts/crashtest-run.js
    ```
    Loads every pack through crashtest's REAL v1.0.0 loader + Harness
@@ -205,18 +210,85 @@ export default {
 };
 ```
 
-## Consuming crashtest (v1.0.0)
+## Consuming crashtest (v1.0.0 — npm)
 
-Crashtest is versioned 1.0.0 on GitHub main (pack-ports landing after);
-npm still publishes 0.1.0. This repo's tooling therefore consumes crashtest
-from the GitHub checkout (file path), not npm — the same rule this
-directory already obeys (`packs:` accepts any directory). Until npm
-catches up: clone `github.com/dhaupin/crashtest` next to this checkout,
-point run roots at `../vant/packs`, and re-validate with the two commands
-above. As of 2026-10-22 the v1.0.0 contract surfaces
-(`src/scenarios/contract.js`, `src/packs/loader.js`, `src/harness/harness.js`)
-are unchanged since the pre-v1 audit — every pack in here loads clean
-through the real loader at main.
+**npm is now the consumption path.** `crashtest@1.0.0` is published (the
+same v1.0.0 contract this directory was audited against); the repo keeps
+it as a devDependency and `scripts/crashtest-run.js` resolves the harness
+from the installed package first. The GitHub clone (`../crashtest` or
+`CRASHTEST_DIR=…`) is kept only for HEAD-testing; the run-root usage of
+`packs:` accepting any directory is unchanged.
+
+What v1.0.0-on-npm adds over the audited checkout:
+
+- **Pack schema is still schemaVersion 1** — the loader's optional
+  `manifest.package` (npm registry name for version joins),
+  `manifest.plugins` (bundled ESM scenario modules a pack ships), `entry`
+  defaulting to `index.js`, and `armedByKey` shapes are additive. Every
+  `pack.json` in here validates through the packaged loader as-is; no
+  migration was needed.
+- **Determinism cut stamp**: the CLI moves the wall clock out of the
+  committed ledger/report into a `labs/run-meta.json` sidecar (same commit
+  → byte-identical baselines; the stamp may churn).
+- **Shipped default packs are richer**: alongside the wp/cve-feed lane
+  they now ship `qs-shapes` (bracket-notation parser shapes),
+  `vite-dev-shapes` (dev-server fs bypass grammars), and
+  `next-middleware-shapes` (x-middleware-subrequest bypasses) — all
+  sweep-style over declared routes; vant's applicability is covered in the
+  probe-coverage table below. `cve-feed` bumped to 0.2.0 (same offline
+  snapshot discipline).
+
+The npm package's exports map (`crashtest/scenarios/contract.js`) is how
+scripts address the contract directly; the run-root script keeps reading
+`src/` file paths inside the package dir, which the exports map does not
+need to allow.
+
+## Probe coverage vs v1.0.0's new default packs
+
+The npm wide-sweep packs enumerate **declared routes** — they ride existing
+shim routes rather than needing new probes. Measured 2026-10-22 against
+the armed run root:
+
+| Default pack | Applies to vant? | Verdict / action |
+|---|---|---|
+| `qs-shapes` (bracket canary + depth floor) | **Yes** — lib/server's BodyParser genuinely parses the urlencoded wire | ported as vant-rest's `urlencoded-bracket-canary` + `urlencoded-depth-floor` (both honest REFUSED; the flat-key parser expands nothing) |
+| `vite-dev-shapes` (fs bypass grammars, `.env` leakage) | No — vant ships no Vite dev-server wire (`/@fs/`, transform suffixes) | n/a — absence is honest |
+| `next-middleware-shapes` (`x-middleware-subrequest` bypasses) | No — vant's Edge chain is its own vaf→QoS→auth→escrow stack, not Next middleware | n/a — absence is honest |
+| `cve-feed` (banner disclosure / version ranges) | Half — the Edge chain emits **no** `Server:`/version banner anywhere in the chain (measured by grep + the fuzz-floor rows), so the banner half has nothing to find; the version-range half needs a host-declared component inventory vant does not wire | not ported yet — arm it (a `component-inventory` in `ctx.config['cve-feed']`) when vant publishes one |
+| `wp-*` packs (WordPress lanes) | No — other targets' precedents, kept with their lane | n/a |
+
+The last pending vant-brain oracles were armed 2026-10-22: `trust-read`
+(measures a LIVE finding — the succession trust floor is not enforced at
+the brain.read seam) and `brain-graph-walk` (holds: the visited guard
+refuses cyclic knowledge graphs). No probe is pending anymore; the honest
+absence shape survives only for FUTURE unwired oracles.
+
+## Running the packs in CI
+
+The gate is `node test/ci-crashtest-gate.js` (npm script: `test:crashtest`),
+runs as its own `crashtest` job in `.github/workflows/test.yml`, and enforces
+BOTH layers under one known-findings whitelist:
+
+1. **Contract table** (`--phase=a`): the contract suite at strict mode — the
+   suite must exit 0 (rows earned, deterministic, EXPECTED-complete) and no
+   non-skipped EXPLOITED row may exist outside `ALLOWED_FINDINGS`.
+2. **Real harness** (`--phase=b`): `scripts/crashtest-run.js` under
+   `CRASHTEST_RUN_POLICY=strict` — exit 4 for a pack finding outside
+   `KNOWN_FINDINGS`, exit 3 for a library-scenario finding, exit 1 for a run
+   fault; all three fail the job.
+
+Policy lives in ONE whitelist shape in two files that must stay in lockstep:
+`ALLOWED_FINDINGS` in `test/ci-crashtest-gate.js` (pack-row policy) and
+`KNOWN_FINDINGS` in `scripts/crashtest-run.js` (run-root policy). Today both
+carry exactly one entry: the succession-trust-inheritance LIVE FINDING
+(#233-2). When its read-side gate lands and the row flips REFUSED, the gate
+catches the stale pin and asks loudly for the line to be deleted.
+
+Negative-verified 2026-10-22: an ungated throwaway pack turned BOTH layers
+RED (the contract suite now fails loudly for any shipped pack missing from
+its expected table — the exact quiet gap a canary probe hunted down), and
+an unauthorized run-root finding exited 4 under strict policy. Honest skips
+and the whitelisted pins never mask a new raise.
 
 ## Conventions
 

@@ -76,3 +76,30 @@ jobs:
         # every suite the same baseline (per-suite slate restore, see
         # test/slate.js) and exits 1 on failures / 2 on timeouts.
         run: node test/run-all.js
+
+  # The crashtest pack matrix as its OWN gate (separate runner budget from
+  # the main suite wall): the strict contract table + the REAL harness run
+  # root, under one known-findings whitelist — any finding outside it is a
+  # regression and fails the job. Honest skips and the whitelisted pins
+  # never mask a new raise; a fix that flips a row REFUSED succeeds and the
+  # gate asks loudly for the whitelist line to be deleted.
+  crashtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        # crashtest@1.0.0 ships on npm — the consumption path — so the
+        # CI gate runs the REAL pack loader + Harness straight from the
+        # installed package, no clone step.
+        run: npm ci
+
+      - name: Crashtest gate (contract table + real-harness run root)
+        run: node test/ci-crashtest-gate.js

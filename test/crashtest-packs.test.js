@@ -277,6 +277,72 @@ const MCP_CHILD = `${CHILD_STDOUT_GUARD}
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
 
+// Trust-floor probe: shapes mirror scripts/crashtest-run.js's TRUST_CHILD —
+// seeded succession context, low-trust successor's private read, facts only.
+const TRUST_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const spec = (() => { try { return JSON.parse(process.argv[1] || '{}'); } catch (e) { return {}; } })();
+    const level = String(spec.level || 'low');
+    const fs = require('fs');
+    const path = require('path');
+    const cfgPath = path.join('models', 'public', 'vant', '_succession.json');
+    try {
+        fs.mkdirSync(path.dirname(cfgPath), { recursive: true });
+        fs.writeFileSync(cfgPath, JSON.stringify({
+            version: '0.8.6',
+            succession: { previous: null, trust: { default: level } }
+        }, null, 2));
+    } catch (e0) {
+        process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ error: 'seed: ' + e0.message }) + '>>END');
+        return;
+    }
+    const out = { level, trustLevel: null, privateContent: null, readPath: null, refused: false, readThrew: null };
+    try {
+        const succession = require('./lib/succession.js');
+        out.trustLevel = succession.getTrustLevel();
+    } catch (e) { out.trustLevel = 'THREW: ' + e.name; }
+    try {
+        const brain = require('./lib/brain.js');
+        const r = await brain.read('identity', { type: 'private' });
+        out.privateContent = r && r.content != null ? String(r.content) : null;
+        out.readPath = r ? String(r.path ?? '') : null;
+        if (!r) out.refused = true;
+    } catch (e2) { out.refused = true; out.readThrew = e2.name + ': ' + String(e2.message).slice(0, 80); }
+    try { fs.rmSync(cfgPath, { force: true }); } catch (e3) { /* fixture sweep */ }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
+// Graph-walk probe: cyclic knowledge graph through the REAL knowledge_link
+// seam, then brain_connections at depth 100000 — visited-guard + depth cap
+// return; an unbounded walk hangs or blows the stack.
+const GRAPH_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const mcp = require('./lib/mcp.js');
+    const fs = require('fs');
+    const out = { threw: false, errorName: null, depthReached: 0, ms: null, connections: null, linkCount: null };
+    const linksPath = 'models/public/knowledge-links.json';
+    try { fs.rmSync(linksPath, { force: true }); } catch (e0) {}
+    try { require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canSpawn: true, canNetwork: true }); } catch (e1) {}
+    try {
+        await mcp.execute('knowledge_link', { from: 'cyc-a', to: 'cyc-b' });
+        await mcp.execute('knowledge_link', { from: 'cyc-b', to: 'cyc-c' });
+        await mcp.execute('knowledge_link', { from: 'cyc-c', to: 'cyc-a' });
+        const t0 = Date.now();
+        const r = await mcp.execute('brain_connections', { brain: 'cyc-a', depth: 100000 });
+        out.ms = Date.now() - t0;
+        out.connections = r && Array.isArray(r.connections) ? r.connections.length : null;
+        out.depthReached = out.connections != null && out.connections >= 0 ? 3 : 0;
+        try { out.linkCount = JSON.parse(fs.readFileSync(linksPath, 'utf8')).length; } catch (e2) {}
+    } catch (e) {
+        out.threw = true;
+        out.errorName = e.name;
+    }
+    try { fs.rmSync(linksPath, { force: true }); } catch (e2) {}
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
 // Stones probe: the REAL seal → decode chain (lib/transform to/fromHorcrux
 // through lib/horcrux-safe.safeWriteHorcrux) in the sandbox, against a
 // fresh fixture brain tree - the same probe shape scripts/crashtest-run.js
@@ -700,10 +766,32 @@ function buildRoutes(sb) {
     routes.registerRoute('stone-tamper', tamperRoute);
     routes.registerRoute('stone-restore-tamper', tamperRoute);
 
-    // Pending oracles stay UNREGISTERED (now only trust-read and
-    // brain-graph-walk): the packs degrade via route-absence
-    // (skipped-REFUSED) - a 501 shim IS a 5xx to the fuzz floor. Absence
-    // is the honest shape.
+    // --- the trust + graph arms (2026-10-22): the two pending-oracle
+    // --- routes in a probe child each (fresh modules over the sandbox).
+    routes.registerRoute('trust-read', async (ctx) => {
+        const j = await ctx.request.json().catch(() => ({}));
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', TRUST_CHILD, JSON.stringify({ level: j && j.level ? String(j.level) : 'low' })], { cwd: sb, timeout: 30000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `trust probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+    routes.registerRoute('brain-graph-walk', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', GRAPH_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `graph probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
+    // (2026-10-22) The last two pending oracles are REGISTERED now: every
+    // vant-brain route contract is armed. Absence remains the honest shape
+    // for any FUTURE unwired oracle (the packs degrade via route-absence,
+    // never a 501 shim - a 501 shim IS a 5xx to the fuzz floor).
     return routes;
 }
 
@@ -723,23 +811,31 @@ const EXPECTED = {
     'vant-brain': {
         'private-first-fallback': 'REFUSED',
         'paths-cannot-escape-models': 'REFUSED',
-        // LIVE FINDING (measured on axolotl, #232 class): corrupt/absent
-        // state.json silently defaults AND the private-pinned identity read
-        // resolves the PUBLIC file while reporting source 'private'.
-        // (fixed 2026-10-22 for the CLI/pointer half via commit fb3eadf;
-        // the read-path silent fallback row stays a finding until its own
-        // fix lands - the pin keeps biting.)
-        'state-tamper-is-loud': 'EXPLOITED',
-        // LIVE FINDING (measured on axolotl, #233 expansion 1): wrong-typed
-        // stack/self-pointer values survive into the runtime brain pointer.
-        'state-json-schema-strictness': 'EXPLOITED',
+        // FIXED 2026-10-22 (read-path half of #232, measured REFUSED after
+        // the fix): missing state.json keeps the legitimate fresh-install
+        // default; corrupt/truncated/trailing garbage faults LOUDLY; the
+        // default path now DERIVES the pointer side from the tree, so a
+        // private-pinned read can no longer resolve a public file while
+        // reporting source 'private'.
+        'state-tamper-is-loud': 'REFUSED',
+        // FIXED 2026-10-22 (same seams): wrong-typed stack/currentBrain
+        // values are sanitized loudly at BOTH load seams and never reach
+        // the runtime pointer.
+        'state-json-schema-strictness': 'REFUSED',
         'migration-idempotency': 'REFUSED',
         'guest-capability-gates': 'REFUSED',
-        // deferred oracle rows - honest skip either way (501 routes);
-        // boot-stone-integrity armed 2026-10-24 via stone-restore-tamper
-        'succession-trust-inheritance': 'skip',
+        // ARMED 2026-10-22 (trust-read route): the honesty verdict it was
+        // built to measure. LIVE FINDING — the succession trust floor is a
+        // behavioral descriptor (lib/succession getFilesForTrust); nothing
+        // enforces it at the brain.read seam, so a low-trust successor
+        // resolves FULL private state. Pin keeps biting until a read-side
+        // trust gate lands.
+        'succession-trust-inheritance': 'EXPLOITED',
         'boot-stone-integrity': 'REFUSED',
-        'knowledge-links-cycle-safety': 'skip',
+        // ARMED 2026-10-22 (brain-graph-walk route): a cyclic knowledge
+        // graph returns - brain_connections' visited guard + depth floor
+        // hold; no hang, no RangeError.
+        'knowledge-links-cycle-safety': 'REFUSED',
     },
     'vant-crew': {
         'roster-quota-ceiling': 'REFUSED',
@@ -751,22 +847,28 @@ const EXPECTED = {
         'tool-schema-enforced': 'REFUSED',
         'brain-write-scope-hardness': 'REFUSED',
     },
-    // Survey candidates still pending run-root wiring (501 routes): the
-    // attacks are written, the verdict rows are honest skips until armed.
-    // So are the vant-rest/vant-stones rows - VALIDATED 2026-10-24 (the
-    // routes below arm them here too). The vad-stones lineage row is a
-    // LIVE FINDING pin: lib/transform.gather scopes the brain inventory
-    // but leaves the live currentBrain/activeStack unfiltered, so a
-    // single-brain stone carries a pointer outside its scope (#226
-    // mint-side silence, measured from the sealed payload). Fix => flip.
+    // The vant-rest/vant-stones rows are VALIDATED 2026-10-24; the stones
+    // lineage row was a LIVE FINDING pin (lib/transform.gather scoped the
+    // brain inventory but left the live currentBrain unfiltered) — FIXED
+    // 2026-10-22: a scoped capture retargets an out-of-scope pointer to
+    // the first scoped brain, loudly (mint side of #226). The inventory
+    // law (stack ⊆ filter) and identity law (activeStack untouched) are
+    // unchanged; full-capture behavior is byte-identical.
     'vant-rest': {
         'fuzz-floor-never-500': 'REFUSED',
         'cors-enable-parity': 'REFUSED',
+        // Armor 2026-10-22 (crashtest v1.0.0-on-npm qs-shapes port): the
+        // urlencoded wire rides the REAL BodyParser, so both rows are earned,
+        // not assumed.
+        'urlencoded-bracket-canary': 'REFUSED',
+        'urlencoded-depth-floor': 'REFUSED',
         'session-cookie-discipline': 'REFUSED',
     },
     'vant-stones': {
         'stone-scope-honesty': 'REFUSED',
-        'state-pointer-lineage': 'EXPLOITED',
+        // FIXED 2026-10-22 (mint side of #226): the scoped payload never
+        // carries a pointer outside its declared scope anymore.
+        'state-pointer-lineage': 'REFUSED',
         'restore-torn-refusal': 'REFUSED',
     },
 };
@@ -831,8 +933,23 @@ function checkVerdictRows(packName, verdicts) {
         packs.push({ mod, name: manifest.name });
     }
 
+    // (gate-required coverage, negative-verified 2026-10-22 by a throwaway
+    // canary pack) a shipped pack with NO expected-table row would run
+    // ungated (census-style continue) and never reach the verdict policy —
+    // the exact quiet gap this suite refuses. Sending a pack through here
+    // (skipping it) is a config error, so it fails the suite LOUDLY.
+    for (const p of packs) {
+        if (!(p.name in EXPECTED)) {
+            check(`${p.name} is in the EXPECTED table`, false, 'shipped pack has no expected-verdict row — add its honest rows (the gate is whitelist-driven on top of this)');
+        }
+    }
+
     // --- run every pack against the real sandbox routes
     const sandbox = makeSandbox();
+    // (CI crashtest gate) machine-readable ledger of every verdict row the
+    // pack phase measured + the expected table it was measured against —
+    // dumped sentinel-delimited ONLY when the gate asks for it.
+    const gateLedger = {};
     try {
         // (iron-cage fix) all parent-process route handlers must resolve the
         // SANDBOX's models/ tree, not the workspace's - lib/brain.js pins
@@ -860,6 +977,9 @@ function checkVerdictRows(packName, verdicts) {
             }
             const complete = checkVerdictRows(p.name, verdicts);
             check(`${p.name} verdict table exactly covers the expected rows`, complete, 'row mismatch vs expected');
+            gateLedger[p.name] = Object.fromEntries(Object.entries(verdicts).map(([k, rec]) => [
+                k, { verdict: rec.verdict, skipped: rec.skipped === true, detail: String(rec.detail || '') },
+            ]));
             // Determinism (house rule 4): same runs, same verdicts
             const verdicts2 = {};
             for (const a of p.mod.attacks) {
@@ -878,6 +998,17 @@ function checkVerdictRows(packName, verdicts) {
     }
 
     console.log(`\\n${results.passed} passed, ${results.failed} failed, ${results.skipped} skipped`);
+    // (CI crashtest gate) sentinel-delimited verdict ledger + the expected
+    // table each row was measured against. Printed on EVERY exit path that
+    // reaches this line (failures included) so the gate can always quote
+    // the verdict shape that broke the table.
+    if (process.env.CRASHTEST_PACKS_JSON === '1') {
+        const dump = {};
+        for (const p of Object.keys(gateLedger)) {
+            dump[p] = { expects: EXPECTED[p] || {}, verdicts: gateLedger[p] };
+        }
+        console.log(`CRASHTEST_PACKS_GATE<<` + JSON.stringify(dump) + `>>END`);
+    }
     process.exit(results.failed > 0 ? 1 : 0);
 })().catch((e) => {
     console.error(`suite fault: ${e.name}: ${e.message}`);

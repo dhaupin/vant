@@ -37,21 +37,35 @@ const { pathToFileURL } = require('url');
 
 const ROOT = path.resolve(__dirname, '..');
 
-// --- locate the crashtest clone (GitHub HEAD is the source of truth;
-// --- npm still publishes 0.1.0 - see packs/README.md).
+// (CI policy) the KNOWN-FINDING whitelist: honest EXPLOITED verdicts that
+// are documented, pinned findings — not regressions. Under
+// CRASHTEST_RUN_POLICY=strict the run exits 4 for any pack finding outside
+// this set (library findings keep their exit 3); without the env var the
+// default behavior is byte-identical to before (findings exit 0 always).
+const KNOWN_FINDINGS = new Set([
+    // LIVE FINDING (#233 expansion 2, armed 2026-10-22): the succession
+    // trust floor is a behavioral descriptor and nothing enforces it at the
+    // brain.read seam — a low-trust successor resolves full private state.
+    // Fix lands a read-side trust gate, then delete this line.
+    'vant-brain/succession-trust-inheritance',
+]);
+
+// --- locate crashtest. npm is the consumption path now (crashtest@1.0.0
+// --- is a devDependency; the clone stays the HEAD-testing fallback).
 
 function findCrashtestDir() {
     if (process.env.CRASHTEST_DIR && fs.existsSync(path.join(process.env.CRASHTEST_DIR, 'src', 'packs', 'loader.js'))) {
         return process.env.CRASHTEST_DIR;
     }
     for (const candidate of [
+        path.dirname(require.resolve('crashtest/package.json')),
         path.resolve(ROOT, '..', 'crashtest'),
         path.resolve(ROOT, '.agent_tmp', 'crashtest'),   // the working clone this workspace keeps
         path.resolve(os.homedir(), 'crashtest'),
     ]) {
         if (fs.existsSync(path.join(candidate, 'src', 'packs', 'loader.js'))) return candidate;
     }
-    console.error('No crashtest clone found. Clone github.com/dhaupin/crashtest next to this repo, or set CRASHTEST_DIR=/path/to/crashtest');
+    console.error('crashtest not found: install it (bun/npm add -d crashtest), clone github.com/dhaupin/crashtest next to this repo, or set CRASHTEST_DIR=/path/to/crashtest');
     process.exit(1);
 }
 
@@ -83,8 +97,8 @@ async function main() {
         const harness = buildRoutes(sb, harnessMod.Harness);
         const ctx = { config: {} };
 
-        console.log(`=== crashtest run-root: ${packs.length} pack(s) against vant (harness clone: ${CT_DIR} @ checkout HEAD) ===`);
-        const summaries = [];
+        console.log(`=== crashtest run-root: ${packs.length} pack(s) against vant (harness: ${CT_DIR}) ===`);            const summaries = [];
+            const exploitedAttackIds = [];
         for (const p of packs) {
             contractMod.validateScenario(p.module, `${p.origin}/${p.manifest.entry}`);
             const planLabel = `pack:${p.origin}`;
@@ -104,7 +118,10 @@ async function main() {
                 else if (verdicts[rec.verdict] != null) verdicts[rec.verdict]++;
                 const isFinding = rec.verdict === 'EXPLOITED' && !skipped;
                 console.log(`  ${skipped ? '·' : isFinding ? '✗' : '✓'} ${p.manifest.name}/${a.name}: ${String(rec.detail).slice(0, 130)}${isFinding ? '  <- FINDING' : skipped ? ' (skipped)' : ''}`);
-                if (isFinding) exploitedDetails.push(`${a.name}: ${rec.detail}`);
+                if (isFinding) {
+                    exploitedDetails.push(`${a.name}: ${rec.detail}`);
+                    exploitedAttackIds.push(`${p.manifest.name}/${a.name}`);
+                }
             }
             summaries.push({ pack: p.manifest.name, verdicts, exploited: exploitedDetails });
         }
@@ -126,9 +143,9 @@ async function main() {
         // --- against vant", riding the same harness and one law.
         const libDir = path.join(CT_DIR, 'src', 'scenarios', 'library');
         if (fs.existsSync(libDir)) {
-            const armedRoutes = ['brain-read', 'brain-state', 'brain-migrate', 'guest-cap', 'crew-run', 'mcp-exec',
-            'vant-rest-open', 'vant-rest-priv', 'vant-rest-priv-alias', 'vant-login', 'vant-me', 'vant-logout',
-            'stone-scope', 'stone-tamper', 'stone-restore-tamper', 'rest-request'];
+        const armedRoutes = ['brain-read', 'brain-state', 'brain-migrate', 'guest-cap', 'crew-run', 'mcp-exec',
+        'vant-rest-open', 'vant-rest-priv', 'vant-rest-priv-alias', 'vant-login', 'vant-me', 'vant-logout',
+        'stone-scope', 'stone-tamper', 'stone-restore-tamper', 'rest-request', 'trust-read', 'brain-graph-walk'];
         // Per-module route vocabulary: rows whose ctx names are not `route`
         // get the vant-armed route that speaks their contract (privileged
         // authz gate, cookie session verbs, deep/regex Edge probes). D1- and
@@ -177,6 +194,19 @@ async function main() {
             console.log(`library rows: REFUSED ${libRefused}, EXPLOITED ${libExploited}, skipped ${libSkipped}`);
             for (const f of libFindings) console.log(`  finding: ${f}`);
             if (libExploited > 0) process.exitCode = 3; // library findings = real defects worth surfacing apart from pack findings
+        }
+
+        // --- (CI policy) strict mode: the whitelist above is the only
+        // --- carve-out; any OTHER pack finding fails the gate. Kept after
+        // --- the library phase so an unknown finding (4) outranks a
+        // --- library finding (3) in the exit-code ordering.
+        if (process.env.CRASHTEST_RUN_POLICY === 'strict') {
+            const unknown = exploitedAttackIds.filter((id) => !KNOWN_FINDINGS.has(id));
+            if (unknown.length) {
+                console.error(`\nstrict policy: ${unknown.length} finding(s) outside the known-finding whitelist:`);
+                for (const id of unknown) console.error(`  unknown finding: ${id} — gate FAILS (pin it or fix it)`);
+                process.exitCode = 4;
+            }
         }
     } finally {
         // no fixture residue
@@ -304,6 +334,78 @@ const MCP_CHILD = `${CHILD_STDOUT_GUARD}
     const escape = path.resolve('vant-mcp-escape-canary.md');
     const escapedFile = fs.existsSync(escape) ? 'vant-mcp-escape-canary.md' : null;
     process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ results, escapedFile, escapedPath: escape }) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
+// Trust-floor probe: the succession-trust-inheritance oracle. Seeds the
+// succession config into the current brain's public tree (what a successor
+// install wakes with), then measures what the LOW-trust successor's
+// private-pinned read actually resolves — lib/succession owns the trust
+// vocabulary; this child only reports the neutral facts ({ trustLevel,
+// privateContent, refused }). Fixture swept on exit (fresh-fixture law).
+const TRUST_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const spec = (() => { try { return JSON.parse(process.argv[1] || '{}'); } catch (e) { return {}; } })();
+    const level = String(spec.level || 'low');
+    const fs = require('fs');
+    const path = require('path');
+    const cfgPath = path.join('models', 'public', 'vant', '_succession.json');
+    try {
+        fs.mkdirSync(path.dirname(cfgPath), { recursive: true });
+        fs.writeFileSync(cfgPath, JSON.stringify({
+            version: '0.8.6',
+            succession: { previous: null, trust: { default: level } }
+        }, null, 2));
+    } catch (e0) {
+        process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ error: 'seed: ' + e0.message }) + '>>END');
+        return;
+    }
+    const out = { level, trustLevel: null, privateContent: null, readPath: null, refused: false, readThrew: null };
+    try {
+        const succession = require('./lib/succession.js');
+        out.trustLevel = succession.getTrustLevel();
+    } catch (e) { out.trustLevel = 'THREW: ' + e.name; }
+    try {
+        const brain = require('./lib/brain.js');
+        const r = await brain.read('identity', { type: 'private' });
+        out.privateContent = r && r.content != null ? String(r.content) : null;
+        out.readPath = r ? String(r.path ?? '') : null;
+        if (!r) out.refused = true;
+    } catch (e2) { out.refused = true; out.readThrew = e2.name + ': ' + String(e2.message).slice(0, 80); }
+    try { fs.rmSync(cfgPath, { force: true }); } catch (e3) { /* fixture sweep */ }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
+// Graph-walk probe: the knowledge-links-cycle-safety oracle. Builds a
+// three-node cycle PLUS a self-link through the REAL mcp knowledge_link
+// seam, then walks brain_connections at depth 100000 — a walk without a
+// visited guard hangs or blows the stack; a capped one returns. Links file
+// swept on exit (fresh-fixture law).
+const GRAPH_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const mcp = require('./lib/mcp.js');
+    const fs = require('fs');
+    const out = { threw: false, errorName: null, depthReached: 0, ms: null, connections: null, linkCount: null };
+    const linksPath = 'models/public/knowledge-links.json';
+    try { fs.rmSync(linksPath, { force: true }); } catch (e0) {}
+    try { require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canSpawn: true, canNetwork: true }); } catch (e1) {}
+    try {
+        await mcp.execute('knowledge_link', { from: 'cyc-a', to: 'cyc-b' });
+        await mcp.execute('knowledge_link', { from: 'cyc-b', to: 'cyc-c' });
+        await mcp.execute('knowledge_link', { from: 'cyc-c', to: 'cyc-a' });
+        const t0 = Date.now();
+        const r = await mcp.execute('brain_connections', { brain: 'cyc-a', depth: 100000 });
+        out.ms = Date.now() - t0;
+        out.connections = r && Array.isArray(r.connections) ? r.connections.length : null;
+        out.depthReached = out.connections != null && out.connections >= 0 ? 3 : 0;
+        try { out.linkCount = JSON.parse(fs.readFileSync(linksPath, 'utf8')).length; } catch (e2) {}
+    } catch (e) {
+        out.threw = true;
+        out.errorName = e.name;
+    }
+    try { fs.rmSync(linksPath, { force: true }); } catch (e2) {}
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
 
@@ -621,6 +723,30 @@ function buildRoutes(sb, Harness) {
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
+    // --- the trust + graph arms (2026-10-22): the two pending-oracle
+    // --- routes in a probe child each (fresh modules over the sandbox).
+
+    harness.registerRoute('trust-read', async (ctx) => {
+        const j = await ctx.request.json().catch(() => ({}));
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', TRUST_CHILD, JSON.stringify({ level: j && j.level ? String(j.level) : 'low' })], { cwd: sb, timeout: 30000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `trust probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
+    harness.registerRoute('brain-graph-walk', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', GRAPH_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `graph probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     // --- the vant-rest arm (2026-10-24): lib/server's REAL Edge chain.
 
     // rest-request: the vant-rest pack's route. Body carries
@@ -733,10 +859,10 @@ function buildRoutes(sb, Harness) {
     harness.registerRoute('stone-tamper', tamperRoute);
     harness.registerRoute('stone-restore-tamper', tamperRoute);
 
-    // Pending oracles stay UNREGISTERED (now only trust-read and
-    // brain-graph-walk): the packs degrade via route-absence
-    // (skipped-REFUSED), crashtest's library rows skip undeclared routes
-    // politely - and, as the request-shape-flood row just proved, a 501
-    // shim IS a 5xx to the fuzz floor. Absence is the honest shape.
+    // (2026-10-22) The last two pending oracles are REGISTERED now: every
+    // vant-brain route contract is armed (trust-read + brain-graph-walk).
+    // Absence remains the honest shape for any FUTURE unwired oracle: the
+    // packs degrade via route-absence, never a 501 shim (a 501 shim IS a
+    // 5xx to the fuzz floor).
     return harness;
 }

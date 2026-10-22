@@ -23,12 +23,12 @@
 //                 refuse-loudly contract per #233 expansion 4.
 //
 // VALIDATION STATUS: stone-scope-honesty and restore-torn-refusal REFUSE
-// (held). state-pointer-lineage EXPLOITS against vant v0.8.6/axolotl
-// TODAY - that is a pinned FINDING, not a glitch: lib/transform.gather
-// scopes the brain INVENTORY but leaves the live currentBrain/activeStack
-// unfiltered by design, so a single-brain stone carries a pointer outside
-// its scope (#226 mint-side silence, measured from the sealed-payload
-// side). Fix => flip the row to REFUSED.
+// (held). state-pointer-lineage was an EXPLOITED finding (#226 mint-side
+// silence, measured from the sealed-payload side) until the 2026-10-22 fix:
+// a scoped capture now retargets an out-of-scope pointer to the first
+// scoped brain, loudly — the sealed payload never carries a pointer its
+// scope cannot wake. Row flips to REFUSED; full-capture behavior is
+// byte-identical (the Cairn/prestruct identity law stays pinned).
 //
 // Verdict vocabulary and absence-tolerance match the other vant packs:
 // exactly one decision per attack, `skipped: true` marks honest absence.
@@ -92,7 +92,7 @@ export default {
     },
     {
       name: 'state-pointer-lineage',
-      description: 'a restore must never wake a sealed stone on a foreign currentBrain without saying so - the state pointer inside the stone is shared state, and the operator boots the LABEL, not the pointer (#226/#232 class, now pinned from both the mint and the boot side)',
+      description: 'a restore must never wake a sealed stone on a foreign currentBrain without saying so - the state pointer inside the stone is shared state, and the operator boots the LABEL, not the pointer (#226/#232 class; mint side FIXED 2026-10-22: a scoped capture retargets an out-of-scope pointer, loudly, never silently)',
       async run(harness) {
         const r = await tryRun(harness, 'stone-scope', {
           method: 'POST',

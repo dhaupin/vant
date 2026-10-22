@@ -16,6 +16,13 @@
 //                 honest round trip through the chain; status/headers/body
 //                 are the chain's own answer, untouched.
 //
+// VALIDATED 2026-10-24: fuzz-floor / CORS / session rows. Armed 2026-10-22
+// (crashtest v1.0.0-on-npm port of the qs-shapes oracle family): the
+// urlencoded-body two below — lib/server's BodyParser genuinely parses
+// `application/x-www-form-urlencoded` (URLSearchParams + Object.fromEntries),
+// so a bracket-notation prototype canary and a deep-nesting ladder measure
+// the parser's real wire behavior instead of assuming it.
+//
 // Verdict vocabulary and absence-tolerance match the other vant packs:
 // exactly one decision per attack, `skipped: true` marks honest absence,
 // same commit = same findings.
@@ -52,6 +59,29 @@ async function probe(harness, method, path, headers = {}, body = undefined) {
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ method, path, headers, body }),
   });
+}
+
+// (crashtest qs-shapes vocabulary) deterministic urlencoded prototype-arrival
+// shapes: raw brackets, the two paths a qs-style parser is known to honor.
+const QS_CANARY = 'crashtestQsCanary4e91';
+const QS_SHAPES = [
+  `x[__proto__][${QS_CANARY}]=planted`,
+  `x[constructor][prototype][${QS_CANARY}]=planted`,
+];
+
+/** The process must stay sane between attacks (crashtest input.js hygiene). */
+function cleanupCanary() {
+  delete Object.prototype[QS_CANARY];
+  if (Object.prototype[QS_CANARY]) delete Object.prototype[QS_CANARY];
+}
+
+/** Fire a raw urlencoded (or plain-GET-query) shape through the REAL Edge
+ * chain: -> parsed { status, headers, bodyText } or null when not armed. */
+async function rawFire(harness, method, path, body = undefined) {
+  const r = await probe(harness, method, path, { 'content-type': 'application/x-www-form-urlencoded' }, body);
+  if (r._absent || r.threw) return null;
+  const j = parseJson(await bodyText(r));
+  return j && !j.error ? j : null;
 }
 
 export default {
@@ -104,6 +134,68 @@ export default {
           };
         }
         return { verdict: 'REFUSED', detail: 'pre-flight OPTIONS terminates early and cleanly (204)', tookRequests: 1 };
+      },
+    },
+    {
+      name: 'urlencoded-bracket-canary',
+      description: 'urlencoded bracket shapes carrying a canary on __proto__/constructor.prototype paths ride the REAL Edge BodyParser - the canary must never surface on a fresh object literal (crashtest qs-shapes oracle, measured over vant\'s actual wire)',
+      async run(harness) {
+        // Flat-key expansion is what Object.fromEntries(URLSearchParams) can
+        // produce: keys stay own string properties of the parsed object, not
+        // prototype paths. Anything else - bracket expansion, proto walk -
+        // lands the canary on Object.prototype and is a global-pollution accept.
+        const fired = [];
+        for (const shape of QS_SHAPES) {
+          const j = await rawFire(harness, 'POST', '/anything', shape);
+          if (!j) return skip('rest-request not armed for this oracle');
+          fired.push(shape.split('=')[0]);
+          const fresh = {}; // object literal - inherits Object.prototype only
+          if (fresh[QS_CANARY] === 'planted') {
+            cleanupCanary();
+            return {
+              verdict: 'EXPLOITED',
+              detail: `bracket canary landed on Object.prototype via "${shape.split('=')[0]}" - the Edge BodyParser honors prototype arrival paths on the urlencoded wire`,
+              tookRequests: fired.length,
+              evidence: { shape },
+            };
+          }
+          cleanupCanary();
+        }
+        return { verdict: 'REFUSED', detail: `${fired.length} bracket shapes stayed flat string keys - no prototype-key expansion reached Object.prototype`, tookRequests: fired.length };
+      },
+    },
+    {
+      name: 'urlencoded-depth-floor',
+      description: 'deep [0]-nesting ladders on the query AND urlencoded wires must stay under the fuzz floor - never 5xx, never an uncaught throw; a parser without a depth cap dies in recursion (crashtest qs-shapes oracle, measured over vant\'s actual wire)',
+      async run(harness) {
+        const ladder = [64, 256, 1024, 4096, 20000]; // fixed, deterministic depths
+        const fired = [];
+        for (const depth of ladder) {
+          const deep = `q${'[0]'.repeat(depth)}`;
+          // GET wire: the query parser's shape. POST wire: BodyParser's
+          // urlencoded shape. Both are the places a qs-style parser dies.
+          const get = await rawFire(harness, 'GET', `/?${deep}=x`);
+          if (!get) return skip('rest-request not armed for this oracle');
+          fired.push(`GET#${depth}`);
+          if (Number(get.status) >= 500) {
+            return {
+              verdict: 'EXPLOITED',
+              detail: `deep query nesting broke the floor at bracket depth ${depth} (status ${get.status}) - the query wire has no depth cap`,
+              tookRequests: fired.length,
+            };
+          }
+          const post = await rawFire(harness, 'POST', '/anything', `${deep}=x`);
+          if (!post) return skip('rest-request not armed for this oracle');
+          fired.push(`POST#${depth}`);
+          if (Number(post.status) >= 500) {
+            return {
+              verdict: 'EXPLOITED',
+              detail: `deep urlencoded nesting broke the floor at bracket depth ${depth} (status ${post.status}) - the BodyParser has no depth cap`,
+              tookRequests: fired.length,
+            };
+          }
+        }
+        return { verdict: 'REFUSED', detail: `the full depth ladder held on both wires (${fired.length} fires) - never 5xx, never an uncaught throw`, tookRequests: fired.length };
       },
     },
     {

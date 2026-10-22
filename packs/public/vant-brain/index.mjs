@@ -49,12 +49,19 @@
 //     private-first-fallback, paths-cannot-escape-models,
 //     state-tamper-is-loud, state-json-schema-strictness,
 //     migration-idempotency, guest-capability-gates,
-//     boot-stone-integrity (armed via stone-restore-tamper, 2026-10-24)
-//   design oracles pending a run-root run (honest-skipped until armed):
-//     succession-trust-inheritance, knowledge-links-cycle-safety
-// Two oracles EXPLOIT against vant v0.8.6/axolotl TODAY - those are findings
-// (the #227/#232 brain-pointer class), documented for the fix, with the fix
-// flipping their verdict rows to REFUSED.
+//     boot-stone-integrity (armed via stone-restore-tamper, 2026-10-24),
+//     knowledge-links-cycle-safety (armed via brain-graph-walk, 2026-10-22:
+//     brain_connections' visited guard + depth cap hold on a cyclic graph)
+//     succession-trust-inheritance (armed via trust-read, 2026-10-22)
+// One oracle EXPLOITS against vant v0.8.6/axolotl TODAY — succession-
+// trust-inheritance is a measured FINDING, not a glitch: the succession
+// trust floor (lib/succession getFilesForTrust) is a behavioral descriptor
+// and nothing enforces it at the brain.read seam, so a low-trust successor
+// resolves FULL private state. The pin lives in the suite's expected table
+// and keeps biting until a read-side trust gate lands.
+// The two #232 read-path rows were EXPLOITED findings until the 2026-10-22
+// fix (loud faults + schema sanitize + pointer-side derivation at both
+// state.json load seams) flipped them to REFUSED.
 // ============================================================================
 
 const ROUTE_ABSENT = /no route registered as/i;
@@ -299,7 +306,7 @@ export default {
     },
     {
       name: 'succession-trust-inheritance',
-      description: 'a low-trust successor must not resolve private-scope brain state beyond its configured trust floor - the private read honors the trust gate (or refuses honestly) (#233 expansion 2, PENDING VALIDATION)',
+      description: 'a low-trust successor must not resolve private-scope brain state beyond its configured trust floor - the private read honors the trust gate (or refuses honestly) (#233 expansion 2; ARMED 2026-10-22 — measures EXPLOITED today: the trust floor is behavioral description, not a read-path gate)',
       async run(harness) {
         const r = await tryRun(harness, 'trust-read', {
           method: 'POST',
@@ -326,7 +333,7 @@ export default {
     },
     {
       name: 'boot-stone-integrity',
-      description: 'tampering a sealed stone (byte flip / truncation) must refuse the restore loudly and restore NOTHING partial - a torn restore is worse than a failed one (#233 expansion 4, PENDING VALIDATION)',
+      description: 'boot tampering a sealed stone (byte flip / truncation) must refuse the restore loudly and restore NOTHING partial - a torn restore is worse than a failed one (#233 expansion 4)',
       async run(harness) {
         const r = await tryRun(harness, 'stone-restore-tamper', {
           method: 'POST',
@@ -349,7 +356,7 @@ export default {
     },
     {
       name: 'knowledge-links-cycle-safety',
-      description: 'a cyclic brain knowledge graph (insights/knowledge-links) must never hang or recurse unbounded in search/graph traversal - depth-capped walk + loud raise = refused; hang/RangeError = exploited (#233 expansion 6, PENDING VALIDATION)',
+      description: 'a cyclic brain knowledge graph (insights/knowledge-links) must never hang or recurse unbounded in search/graph traversal - depth-capped walk + loud raise = refused; hang/RangeError = exploited (#233 expansion 6; ARMED 2026-10-22 — the visited guard holds, REFUSED)',
       async run(harness) {
         const r = await tryRun(harness, 'brain-graph-walk', {
           method: 'POST',
