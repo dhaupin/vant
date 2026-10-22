@@ -5,6 +5,30 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 348 (the walk finds /brain/, and the white pages get their observers)
+
+### Fixed: two navigation bugs in one shell file
+
+- **THE WALK LOOKED UP RAW PATHNAMES**: the prerendered site serves
+  trailing-slash URLs (vant.creadev.org/brain/) while client-side navigations
+  ride without them (/brain), and the walk/meta lookups keyed the raw
+  pathname, so the widget "sometimes" missed depending on which door the
+  visitor used: the /brain-missing-back/next report. `routeKey()` now
+  folds both shapes to one key in every pathname-keyed lookup (walk
+  index, page-meta sync).
+- **THE WHITE-PAGE CAUSE (the fx observer lifecycle)**: the reveal/counter
+  effect only ran when AppLayout itself re-rendered, and AppLayout NEVER
+  re-renders on a client-side navigation (only Routes swap), so a newly
+  navigated page's .fx-reveal elements were watched by no observer and
+  shipped invisible, the "flaky animations" the owner spotted. AppLayout
+  now reads the route (load-bearing hook), so the fx engine re-runs per
+  route and the new page gets its observer pass like first paint did;
+  the fx-in/fx-counted guards keep the re-runs idempotent, and the
+  reveal threshold drops 0.12 to 0.05 so a tall cards row cannot out-wait
+  the observer either.
+- Verified: build:home 9/9, lint:home PASS (truth + style), changelog
+  parity PASS, home suite 6/6.
+
 ## [Unreleased] - pass 347 (the external-link affordance: one rule, every door marked)
 
 ### Added: off-site links wear the arrow-up-right glyph

@@ -1,8 +1,24 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 77,
+  "_headingCount": 78,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 348 (the walk finds /brain/, and the white pages get their observers)",
+      "sections": [
+        {
+          "name": "Fixed: two navigation bugs in one shell file",
+          "items": [
+            "**THE WALK LOOKED UP RAW PATHNAMES**: the prerendered site serves",
+            "**THE WHITE-PAGE CAUSE (the fx observer lifecycle)**: the reveal/counter",
+            "Verified: build:home 9/9, lint:home PASS (truth + style), changelog"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

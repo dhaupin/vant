@@ -67,6 +67,15 @@ function SyncPageMeta({ pathname }) {
     return null
 }
 
+// Route keys are normalized: the prerendered site serves directory URLs
+// WITH trailing slashes (vant.creadev.org/brain/), client-side navigations
+// ride without them (/brain). Every pathname-keyed lookup must fold both
+// into one shape or the widget/meta/behavior "sometimes" miss, depending on
+// which door the visitor used. (pass 348, the /brain-missing-walk diagnosis)
+function routeKey(pathname) {
+    return typeof pathname === 'string' ? (pathname.replace(/\/+$/, '') || '/') : pathname
+}
+
 function ScrollToTop() {
     const { pathname } = useLocation()
     useEffect(() => {
@@ -75,13 +84,21 @@ function ScrollToTop() {
         const t = setTimeout(() => mountIslands(islands), 0)
         return () => clearTimeout(t)
     }, [pathname])
-    SyncPageMeta({ pathname })
+    SyncPageMeta({ pathname: routeKey(pathname) })
     return null
 }
 
 // The old lander's reveal + counter engines, merged into one observer pass.
-// Runs once per mounted page tree; matches the VantFX selectors exactly.
-function useVantFxEffects() {
+// THE RE-RUN LAW (pass 348): the effect re-runs PER ROUTE. Before this fix it
+// ran only when AppLayout itself re-rendered, and AppLayout never does on a
+// client-side navigation (only Routes swap), so a freshly navigated page's
+// fx-reveal elements were watched by NO observer and shipped invisible: the
+// "page loads white" reports. Now AppLayout re-renders with the route and
+// the new page's elements get their observer pass like first paint did.
+// The .fx-in/.fx-counted guards make re-runs idempotent for already-visible
+// content; threshold drops 0.12 to 0.05 so a tall cards row cannot out-wait
+// the observer either.
+function useVantFxEffects(pathname) {
     useEffect(() => {
         if (typeof window === 'undefined') return
         const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -122,13 +139,13 @@ function useVantFxEffects() {
                 }
             })
         }, {
-            threshold: 0.12,
+            threshold: 0.05,
             rootMargin: '0px 0px -40px 0px',
         })
         els.forEach(el => io.observe(el))
         counters.forEach(el => io.observe(el))
         return () => io.disconnect()
-    })
+    }, [pathname])
 }
 
 // The page walk (pass 342): every page that is a stop on the owner-directed
@@ -142,7 +159,7 @@ const WALK_INDEX = new Map(WALK.map((stop, i) => [stop.href, i]))
 
 function PageWalk() {
     const { pathname } = useLocation()
-    const i = WALK_INDEX.get(pathname)
+    const i = WALK_INDEX.get(routeKey(pathname))
     if (typeof i !== 'number' || i === 0) return null
     const prev = WALK[i - 1]
     const next = WALK[(i + 1) % WALK.length]
@@ -158,7 +175,11 @@ function PageWalk() {
 }
 
 export default function AppLayout() {
-    useVantFxEffects()
+    // Reading the route here is LOAD-BEARING (pass 348): it makes AppLayout
+    // re-render on every navigation, which is what gives the fx engine its
+    // fresh observer pass over the new page (see the re-run law above).
+    const { pathname } = useLocation()
+    useVantFxEffects(pathname)
     return (
         <>
             <a className="skip-link" href="#main">Skip to content</a>
