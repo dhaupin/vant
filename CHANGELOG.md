@@ -5,6 +5,293 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 338 (the dependency sweep: everything in range moves up)
+
+### Changed — the schema/OG pimp (the owner face now reads like the software it is)
+
+- **BIGGER GRAPH (three nodes → four)**: the every-page JSON-LD gains the
+  **SoftwareApplication** node between WebSite and the maintainer Person:
+  applicationCategory DeveloperApplication, operatingSystem "Node.js 18+
+  (Linux, macOS, Windows)", `softwareVersion` read from package.json AT
+  BUILD TIME (one version truth, never a hardcoded copy — the parity gate
+  already pins package.json), MIT license url, codeRepository,
+  downloadUrl → /install (the CLONE path — never the npm-package fiction),
+  softwareHelp → the docs hub, isAccessibleForFree, the maintainer Person
+  as author, and a five-line featureList of lander-truth only. The
+  maintainer Person node stays appended LAST (the pass's owner-ruling
+  order preserved), and the home config pin suite now enforces all four
+  nodes + the version-drift pin (5 pins → 6 pins, ssr-config focused).
+- **OG CARD STATICS (web/home/index.html)**: og:image:width 1200,
+  og:image:height 630, og:image:alt + twitter:image:alt — the true
+  dimensions of vant-og.png, placed in the shell ABOVE the inject-brand
+  insertion point so the rebuild removal regex can never eat them.
+  Before this pass OG carried NO owner identity at all — no og:creator-like
+  face, just the legacy <meta name="author"> = dhaupin — the creadev.org
+  founder / dhaupin maintainer relationship stayed JSON-LD-only, which is
+  where schema wants entity relationships anyway.
+- **freestruct ADOPTION, SETTLED**: npm freestruct@1.0.0 is now live on
+  the registry holding the `latest` dist-tag (resolved in a real install:
+  docs/node_modules/freestruct@1.0.0, CLI answers), so docs.yml's old
+  "publish gate: don't merge before npm freestruct@1.0.0 exists" comment
+  now reads the settled posture — the exact pin stays. Adjective honesty:
+  web/home stays on `prestruct build` for its prerender/inject pipeline;
+  freestruct remains the docs-site engine (running a second SEO engine
+  over the same dist would double-cache-bust and double-body the head).
+
+### Changed - the registry-checked bump pass (2026-10-22)
+
+- **In-range/patch round**: root `yaml ^2.9.0 → ^2.9.1`; docs pipeline
+  `pagefind ^1.5.0 → ^1.5.2`; docs `jekyll ~> 4.3 → ~> 4.4` (4.4.1 latest,
+  ruby 3.2 compatible); web/home `@vitejs/plugin-react ^4.3.1 → ^4.7.0` +
+  `react-router-dom ^6.30.1 → ^6.30.6` (react/react-dom/vite 6 already at
+  range top); dashboard exact pins `vite 8.3.4 → 8.3.5`,
+  `vitest 5.0.4 → 5.0.5` (deliberate bumps + suite per the supply-chain
+  policy); web/relay `vite ^8.3.4 → ^8.3.5` (package-lock re-synced, its
+  8.3.5 resolutions land with it; bun.lock same story on the dashboard).
+- **gh-actions refresh**: docs.yml/test.yml gain `actions/checkout@v5`
+  (docker.yml's proven-in-repo checkout) and `setup-node@v5`; the docs.yml
+  pages chain moves to `configure-pages@v5`, `upload-pages-artifact@v4`,
+  `deploy-pages@v5` (one-notch majors on the deploy-critical path rather
+  than a same-commit leap to registry-top); both jobs' `node-version
+  20 → 22` — the pass-286 EOL-20 truth applies to the docs/crash pipelines
+  the same way it hit the Pages builder.
+- **Owner-face JSON-LD (ssr.config.js gains `buildJsonLd()`)**: every page
+  now ships three ordered graph nodes in one head script — the
+  `Organization` (founder typed as a Person for creadev.org: name
+  "Creadev.org", url https://creadev.org — the owner relationship canon;
+  sameAs points at the GitHub repo), the built-in `WebSite`, and a third
+  `Person` node for the maintainer appended after the two built-ins
+  (dhaupin, https://github.com/dhaupin, jobTitle "Vant maintainer") —
+  and check-home.js learns the ONE truthful github URL outside the repo
+  universe as its rule-4 exception (the maintainer's bare profile), so the
+  gate still holds dhaupin/vant strict for everything else.
+- **Registry truth, resolved and UNCHANGED where it stayed**: jsqr 1.4.0,
+  qrcode-generator 2.0.4, prestruct 1.1.0, freestruct 1.0.0 (exact pin),
+  typescript 7.0.2, react 18.3.1, vite 6.4.5 are all newest-in-range
+  already. The two PARKED majors of the sweep (chalk v5/v6 ESM-only,
+  js-yaml 5.x breaking) did NOT get a manifest bump — both left the
+  dependency list by REMOVAL instead (see Removed below); the manifest
+  touch that would have been next-major never needed to happen.
+
+### Removed - the two elimination fixes (no majors, no ESM cliff)
+
+- **`chalk` OUT (dependency eliminated, API preserved)**: chalk 5/6 are
+  ESM-only majors and the runtime tree is CommonJS on engines node >= 18
+  (require() of an ESM-only package = hard MODULE_NOT_FOUND), so the bump
+  was a migration pass, not a manifest touch — and the migration turns out
+  to be removal. lib/theme.js's only import (verified: one require site in
+  the whole tree) is replaced by an internal ANSI face that reproduces the
+  ONLY chalk surface the module used (green/red/yellow/blue/cyan/gray/
+  white/dim/bold + chaining like chalk.cyan.bold(s) + a callable base +
+  `.level`), gated the chalk way: NO_COLOR / CI / TERM=dumb / non-TTY
+  stdout renders plain, FORCE_COLOR forces (chalk's own precedence —
+  NO_COLOR yields when FORCE_COLOR is set). The old "chalk missing" noop
+  path died with the dependency (it was a latent bug by the way: the noop
+  list never had `white`, so the failure path would have thrown on
+  chalk.white). bin/theme.js's print line states the truth ("ANSI face on
+  (grade 3)" / "plain (...)"); integration suite 60/60, ballast pinned by
+  character-level probes.
+- **`js-yaml` OUT (never imported anywhere)**: the ^4.1.1 range sat in
+  dependencies while lib/bin have required it ZERO times since it shipped
+  (the labs/TASKS.md security note recorded the fact; docs/security/
+  environment.md still TAUGHT it as "YAML parsing" — now corrected to
+  `yaml` + the two QR-lane packages). The honest fix for an unused major
+  is elimination, not a risky 5.x surface migration. DEPLOY.md, environment.md
+  and the Dockerfile manifest note moved with it; remaining chalk/js-yaml
+  entries in the lockfiles are transitive devDeps of eslint only — they
+  never ride a production `npm ci --omit=dev`.
+
+### Fixed - web/home can run its tests again (and finally has them)
+
+- **THE PRE-EXISTING GAP closed**: web/home's `test`/`test:run` scripts
+  called vitest while NEVER declaring it a dependency — the suite could
+  not run anywhere by construction. `vitest ^5.0.5` joins the devDeps and
+  the package FINALLY has a suite: `test/config.test.mjs` pins the
+  owner-face JSON-LD contract at the SOURCE level (three nodes in pinned
+  order, the creadev.org founder Person on the Organization, the
+  maintainer Person appended last, the WebSite node, and the 8-route
+  table) so a config edit breaks in the tree before it ships. Suite:
+  5/5 → 6/6 after the schema pimp above.
+- **SECOND PASS (same Unreleased block)**: the pin suite now rides CI —
+  test.yml's main job gains a "web/home config pin suite" step
+  (`npm ci --prefix web/home && npm --prefix web/home run test:run`),
+  proven with the EXACT command shape locally (6/6; the old path never
+  installed web/home in CI, so the new pins only ever ran on a dev
+  machine). And the never-wired `web/home` lint finally parses its own
+  files: the root eslint config gains a `web/home/**/*.js|mjs` override
+  (sourceType module — the lint error'd on every import spelling since the
+  script existed), and .eslintignore learns two laws: `test/tmp/` (the
+  throwaway vant QC copies were failing the whole-repo lint with STALE-code
+  errors that belonged to older snapshots of these files) and
+  `web/home/dist/` (build artifacts are HTML-swept by lint:home, never JS
+  lint targets).  Root lint: 0 errors exit 0; web/home lint: 0 problems
+  exit 0 — both gates pass for the first time.
+- **THE HOME PAGES SETUP, ON PAPER (DEPLOY.md §12.0)**: the section the
+  panel walkthrough rides next — root directory `web/home`, install
+  `npm ci` (committed lockfile = pinned resolution), build command
+  `node scripts/parse-changelog.mjs && npx prestruct build` (the parity
+  law, build:home minus the cd — changelog parse BEFORE the build, then
+  the full vite → inject-brand → prerender pipeline, exiting clean),
+  output `dist`, NODE_VERSION 20+. Env-var surface: none (ssr.config.js
+  is committed with fixed URLs); no functions/ — pure static. The shipped
+  pre-gates are named: the 6-pin config suite (rides test.yml) and
+  lint:home.
+- **THE GATE-WALKER LAW (one blind spot, five walkers)**: the docs gates
+  walked dependency payloads — when `npm install` made `docs/node_modules/`
+  real (the npm freestruct adoption), the first lint:docs run after it
+  failed on SIX style violations in dependency READMEs (argparse/js-yaml
+  fence + heading-skip issues) that were never doc targets. style, links,
+  frontmatter, language, AND check-home.js's permalink walk all gain the
+  same `node_modules` skip; the whole lint:docs chain is PASS (126
+  style/links/frontmatter files, 209 prose, 133 truthfulness) with
+  docs/node_modules present.
+- **THE CF PAGES BUILD FIX (first home deploy failed at install)**: the
+  project's first Pages build crashed in `npm clean-install` with
+  "Cannot read properties of null (reading 'edgesOut')" — the npm 10.x
+  arborist optional-peer-set bug (npm/cli#9787, `#loadPeerSet`), and the
+  builder also logged node 20.20.0 (EOL; the pass-286 drama again). Three
+  changes, all grounded in the issue thread: (1) `.nvmrc` moves `22` to
+  the FIRST line (the comments-first file was not honored by the CF v2
+  parser — same EOL-20 install repeated); (2) `legacy-peer-deps=true`
+  lands in root `.npmrc` and `web/home/.npmrc` — the issue-confirmed
+  workaround for exactly this crash under hosted npm 10.x builders, and
+  a no-op for `npm ci` against complete lockfiles (verified 0-error under
+  the CF stack locally); (3) DEPLOY.md §12.0 already names the panel
+  truth the log implies was missed: Root directory = `web/home`,
+  `NODE_VERSION=22`. Repro honesty: all four committed lockfiles install
+  clean under CF's exact stack (node 20.20.0 + npm 10.9.2, cold cache,
+  even in `--package-lock-only` ideal-tree mode) on today's registry —
+  the crash is registry-  drift-shaped, which is why the issue-confirmed
+  flag rides rather than a lock rewrite.
+- **THE SECOND CRASH REPRODUCED (vant-brain, the dashboard's Pages
+  check)**: the PR's `Cloudflare Pages: vant-brain` check failed while
+  the home project passed — and this one reproduced locally verbatim,
+  edgesOut and all, on the builder's exact stack (node 20.20.0 + npm
+  10.9.2) via the dashboard's `npm install` path. TWO legs, both fixed:
+  (1) the pass-338 dashboard bump had updated package.json + bun.lock but
+  left `web/dashboard/package-lock.json` STALE at 8.3.4/5.0.4 — the
+  manifest-vs-lock mismatch forces npm's ideal-tree rebuild, which is
+  what walks into the arborist bug; the lock is re-synced to the exact
+  pins now (182-line diff: the two manifest rows plus vite 8.3.5's true
+  rolldown/oxc transitive graph, suite 103/103 + tsc/vite build green on
+  the npm-reinstalled tree, clean-install 0-error under BOTH stacks);
+  (2) `web/dashboard/.npmrc` mirrors the legacy-peer-deps law so future
+  drift degrades to a clean install instead of the crash; DEPLOY.md
+  §12.1's Node row now says 22 (EOL 20 + the buggy npm 10.9.2 are the
+  same builder stack the home fix already addresses).
+
+## [Unreleased] - pass 337 (/changelog with a hard parity law + npm-compat pins - and the hidden client-bundle fix)
+
+### Added - the changelog that cannot lie
+
+- **/changelog renders ONLY from CHANGELOG.md**: `web/home/scripts/parse-changelog.mjs`
+  parses the canonical file (its house grammar: stacked `[Unreleased] - pass`
+  blocks AND version releases, multiple 0.8.6 blocks by design) into
+  `src/generated/changelog.json`, and `pages/Changelog.jsx` renders exactly
+  that — 66 entries, inline md (code/bold/links) escaped-then-reapplied.
+- **The parity gate (`npm run lint:changelog`, stepped into test.yml)**:
+  byte-compares the committed generated json against a fresh parse (first
+  drift line reported), pins package.json "version" against a `## [x.y.z]`
+  release heading (npm version truth in one place), and requires the Keep a
+  Changelog 1.1.0 + SemVer header statements that npm-adjacent tooling
+  greps for. Drift is NEVER silent: regen is one `npm run build:home`,
+  which always parses before the prestruct build.
+- **THE REAL CATCH this pass**: the site has been shipping with NO client
+  bundle at all — the app shell (web/home/index.html) lacked the
+  `<script type="module" src="/src/main.jsx">` entry tag, so vite emitted
+  zero assets and every route served static-only: no hydration, no islands,
+  no SPA nav, and the prerendered pages were the whole story. Caught while
+  verifying /changelog's entry rendering against dist. The init template's
+  own index.html omits the tag; the example/ site (the reference impl) has
+  it. Added with a comment; verified: dist/assets now emits (289kB js /
+  13.8kB css), every route carries the module script + 
+  `data-server-rendered="true"`, so hydration AND the status-board /
+  contact-form islands actually run client-side now.
+- Verified: 8/8 routes prerendered, `npm run lint:changelog` PASS, `npm run
+  lint:home` PASS (12 files), sitemap gains /changelog.
+
+## [Unreleased] - pass 336 (the site gains /install and /security)
+
+### Added - the two OSS routes the project was missing
+
+- **/install** — the money page for clone-shipped OSS, previously buried in
+  the docs hub only: canon `git clone` + `npm ci` terminal (with the same
+  fiction law as the rest of the site — the npm `vant` name is an unrelated
+  Vue UI library, stated plainly as "no npm package, and by name"), Docker
+  quick start via the pipeline-pushed `dhaupin/vant` image with the
+  volume-mount brain note, requirements cards, links to the full docs
+  guide. Structured so one row lands when a scoped npm package ever ships.
+- **/security** — private-disclosure route (GitHub private security
+  advisory), the fail-closed chain enumerated from real lib behavior
+  (sandbox -> VAF -> QoS -> escrow), hardening reading into docs/security,
+  and the honest no-bounty/no-SLA posture. Crosslinks /privacy + /terms.
+- Wired everywhere: ssr.config.js (7 routes), client-nav META map, nav
+  (Install first — it is the action link), footer links, per-route
+  canonicals/OG baked by inject-brand; sitemap gains both locs.
+- Verified: `prestruct build` renders 7/7 routes + artifacts; `npm run
+  lint:home` passes all 11 built pages + the backup.
+
+## [Unreleased] - pass 335 (the home site becomes a real React/prestruct multi-route site)
+
+### Changed - web/home grows its Vite pipeline (the prd-web §2.5 predicted shape)
+
+- **The hand-written lander retires into `web/home/index.bak.html`** (design
+  reference, byte-faithful copy) and `web/home` becomes a self-contained
+  React + prestruct app: own `package.json` (pin prestruct@1.1.0 off npm,
+  react 18 + vite 6 + react-router-dom 6), `vite.config.js`, and a committed
+  `ssr.config.js` with FIVE routes: `/` (lander), `/terms`, `/privacy`,
+  `/status`, `/contact`.
+- **`/` is the lander ported section-for-section** — hero with the static
+  constellation SVG as a component, rhythm/first-win/git/tiers/mesh/faq
+  sections, FAQPage JSON-LD in the home body, counters + reveal ported as
+  the VantFx effects with identical class names. Copy stays gate-verified
+  truth (smashed the three.js fiction-rollback into the same canon).
+- **Islands where they earn their keep**: `status-board` (live surfacing
+  checks from the browser — GitHub repo + release API, opaque-reachability
+  probes for the docs/family/dashboard, with the honest CORS limits spelled
+  out in page copy) and `contact-form` (composes a GitHub issue URL
+  client-side; nothing is POSTed from the site; honeypot + human-check math;
+  GitHub's own composer remains a first-class button).
+- **`/terms` + `/privacy`** summarize the canon (LEGAL.md, docs security
+  privacy) with links to the full text; **`/status`** ships static surface
+  cards + the live island; the SPA-shell fallback trap is avoided because
+  every route is prerendered (prestruct's redirect-rules posture).
+- **`scripts/check-home.js` learned dist**: walks `web/home/dist/**.html`
+  when a build exists (route-shaped root-relative refs resolve against
+  `dist/<route>/index.html`) and keeps sweeping the backup otherwise;
+  node_modules and vendor dirs skipped. Root gains `npm run build:home`;
+  `lint:home` unchanged in CI.
+- **Verified**: `prestruct build` renders 5/5 routes + sitemap + robots +
+  404 (noindex), inject-brand bakes OG/Twitter/canonical/keywords per route,
+  `data-server-rendered` hydration marker present, deploy-id meta live;
+  `npm run lint:home` passes 9 pages. DEPLOY.md §12 posture updated from
+  "checked in as-is" to the build-command truth.
+
+## [Unreleased] - pass 334 (the docs post-render layer converts to npm freestruct)
+
+### Changed - the prototype meets its child
+
+- **docs/ now consumes npm `freestruct` 1.0.0 as the post-render SEO layer**:
+  new `docs/freestruct.config.yml` (site name/url, basePath `/vant`,
+  `searchIndex: false` - Pagefind owns search, same owner call as the
+  freestruct docs site itself) and `docs/package.json` pinning
+  `freestruct 1.0.0` + `pagefind`. `.github/workflows/docs.yml` runs the
+  proven order: Jekyll build -> freestruct `--strict` -> pagefind.
+- Retired the hand-rolled `docs/sitemap.xml` (a stale 2-entry file against
+  the 126 real permalinks) and `docs/robots.txt`. The engine generates the
+  full sitemap with per-page lastmod, a basePath-aware robots pointer, a
+  noindex `404.html`, and an RSS `feed.xml`; the doc-site layout gains the
+  feed autodiscovery link and both footers list the four-site crosslink
+  family (docs hub, Vant home, Brain dashboard, Freestruct docs).
+- Verified against the 0.9.0 engine source with a synthetic `/vant`-nested
+  `_site`: config validates, strict build exits 0 clean / exits 1 on a
+  broken `.html` internal link, and the basePath contract yields
+  `docs.creadev.org/vant/...` canonicals with no doubled prefix. Render-time
+  Jekyll plugins (nav_generator, redirects) and the hand-written head tags
+  are untouched (missing-only injection). MERGE GATE: npm
+  `freestruct@1.0.0` must exist on the registry before this reaches main,
+  or the docs build install fails loudly by design.
+
 ## [Unreleased] - pass 286 (② CLOSED on main: the live corridor over brain.creadev.org + the Pages deploy-log warns swept)
 
 ### Added - the live solve + the build hygiene

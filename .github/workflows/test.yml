@@ -27,12 +27,12 @@ jobs:
     # (lock/lease ~15-20s each) must survive a slow runner's worst shuffle.
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
 
       - name: Install dependencies
@@ -56,6 +56,12 @@ jobs:
 
       - name: web/home gate (links, fiction, stat truth)
         run: npm run lint:home
+
+      - name: web/home config pin suite (vitest, pass 338 — the pins never ride CI until now)
+        run: npm ci --prefix web/home && npm --prefix web/home run test:run
+
+      - name: changelog parity gate (site json vs CHANGELOG.md byte-compare, version truth)
+        run: npm run lint:changelog
 
       - name: Fiction signatures (repo-wide, wrong-claims regression gate)
         run: npm run lint:claims
@@ -87,12 +93,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
 
       - name: Install dependencies

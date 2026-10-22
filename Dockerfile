@@ -41,7 +41,9 @@ WORKDIR /app
 
 # Copy manifests first so dependency install layers cache independently of
 # source changes. (Pass 127: the image previously shipped NO node_modules -
-# every command died with MODULE_NOT_FOUND for chalk/js-yaml/yaml.)
+# every command died with MODULE_NOT_FOUND for chalk/js-yaml/yaml. Pass 338:
+# chalk and the never-imported js-yaml left the runtime deps - the manifest
+# is yaml + the two QR-lane packages.)
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 

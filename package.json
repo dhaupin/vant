@@ -27,11 +27,9 @@
   "author": "vant Project <vant@example.com>",
   "license": "MIT",
   "dependencies": {
-    "chalk": "^4.1.2",
-    "js-yaml": "^4.1.1",
     "jsqr": "^1.4.0",
     "qrcode-generator": "^2.0.4",
-    "yaml": "^2.9.0"
+    "yaml": "^2.9.1"
   },
   "scripts": {
     "test": "node bin/build-test.js",
@@ -47,6 +45,8 @@
     "lint:coverage": "node scripts/check-mcp-coverage.js && node scripts/check-cli-coverage.js",
     "lint:claims": "node scripts/check-fiction-signatures.js",
     "lint:home": "node scripts/check-home.js",
+    "build:home": "cd web/home && node scripts/parse-changelog.mjs && npx prestruct build",
+    "lint:changelog": "node scripts/check-changelog-parity.js",
     "lint:surface": "node scripts/check-surface-consistency.js",
     "lint:helpers": "node scripts/check-stateful-helpers.js && node scripts/check-bin-truthfulness.js",
     "lint:locks": "node scripts/audit-locks.js",

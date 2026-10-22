@@ -25,7 +25,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -36,7 +36,7 @@ jobs:
 
       - name: Setup Pages
         id: pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
 
       - name: Build Jekyll
         run: |
@@ -45,23 +45,40 @@ jobs:
         env:
           JEKYLL_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # (debloat pass) This used to be the 20-line curl-scrape-tar dance hand-
-      # copied from prestruct's docs workflow (fix: align pagefind steps with
-      # prestruct workflow). Pagefind ships an official npm distribution now
-      # (binary behind os-arch optional deps), so the block is one install:
-      # no GitHub-API scrape to rate-limit, no hand-fetched tarball, no arch
-      # guess. Pinned mutable-latest = the version the npm registry serves,
-      # same posture as the prestruct docs site it came from.
-      - name: Install Pagefind (npm)
-        working-directory: docs
-        run: npm i --no-save --no-audit --no-fund pagefind
+      # Post-render SEO layer (the freestruct conversion): the hand-rolled
+      # sitemap.xml / robots.txt pages are retired - the engine generates a
+      # full sitemap with real lastmod, a basePath-aware robots pointer, a
+      # noindex 404.html and an RSS feed over the build output. The Vant
+      # docs were freestruct's prototype; docs/package.json consumes the
+      # npm v1.0.0 package (ADOPTED: freestruct@1.0.0 is confirmed live on
+      # the registry holding the `latest` dist-tag as of the pass-338
+      # sweep, so the old publish gate has settled; the exact pin stays).
+      # Config discovery walks upward from cwd and finds
+      # docs/freestruct.config.yml; the output dir resolves config-relative
+      # to docs/_site; render-time Jekyll nav/redirects plugins are
+      # untouched. --strict: broken internal links fail the build (--strict
+      # is what catches production 404s on the freestruct docs site).
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
 
+      - name: Install docs pipeline deps
+        working-directory: docs
+        run: npm install --no-audit --no-fund
+
+      - name: Run freestruct (post-render SEO layer, strict)
+        run: npx freestruct --strict
+
+      # Pagefind indexes AFTER freestruct: the engine rewrites the HTML
+      # (metas, cache-busting, lazy loading) and the index must match what
+      # ships. Same posture as the freestruct docs site itself.
       - name: Create search index
         working-directory: docs
         run: npx pagefind --site _site
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: './docs/_site'
 
@@ -74,4 +91,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

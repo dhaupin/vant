@@ -1,0 +1,8 @@
+# Local lint target law (web/home):
+# - dist/: the prestruct build artifact (gitignored like web/*/dist/). It is
+#   swept for HTML truth by scripts/check-home.js (lint:home), not a JS lint
+#   target — the emitted minified assets will always trip style rules.
+# - node_modules/: dependency payloads (auto-ignored by eslint, stated here
+#   for humans reading the tree).
+dist/
+node_modules/

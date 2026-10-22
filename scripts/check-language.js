@@ -120,7 +120,9 @@ for (const dir of SCAN_DIRS) {
     (function walk(d) {
         for (const f of fs.readdirSync(d, { withFileTypes: true })) {
             const p = path.join(d, f.name);
-            if (f.isDirectory()) walk(p);
+            // Dependency payloads are never prose targets (docs/node_modules
+            // is real when the docs pipeline deps are installed locally).
+            if (f.isDirectory() && f.name !== 'node_modules') walk(p);
             else if (f.name.endsWith('.md')) files.push(p);
         }
     })(base);

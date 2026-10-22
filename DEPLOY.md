@@ -28,9 +28,12 @@ Vant is a Node.js process whose entire state is your repository: markdown brain 
 | Git | 2.20+ | Brain sync works through git; branch awareness built in |
 | GitHub PAT | - | `repo` scope, set as `GITHUB_TOKEN` (env var, never in config) |
 
-Dependencies are deliberately tiny: `chalk`, `js-yaml`, `yaml`, plus the
-QR symbology lane's two pure-JS MIT packages (`qrcode-generator`, `jsqr`).
-No database driver, no Redis client.
+Dependencies are deliberately tiny: `yaml`, plus the QR
+symbology lane's two pure-JS MIT packages (`qrcode-generator`, `jsqr`).
+CLI color is a zero-dependency internal ANSI face in `lib/theme.js`
+(NO_COLOR/CI/TERM=dumb/piped output renders plain); `chalk` and the
+never-imported `js-yaml` left the dependency list in pass 338. No database
+driver, no Redis client.
 
 ---
 
@@ -387,9 +390,33 @@ node -e "console.log(require('./lib/sandbox').canRead())"   # Direct sandbox pro
 
 The web frontends (see `labs/prd-web.md`) deploy to Cloudflare Pages.
 Each frontend is its OWN Pages project with its OWN subdomain. Three of
-them exist: the static **home page** (`vant.creadev.org`, served from
-`web/home/`, checked in as-is - no build step), the dashboard
+them exist: the home site (`vant.creadev.org`, source in `web/home/` as a
+React + prestruct app — build with `npm run build:home`, artifact
+`web/home/dist/` (gitignored by the `web/*/dist/` rule); the old checked-in
+lander survives as the design reference `web/home/index.bak.html`), the dashboard
 (`brain.creadev.org`, this section), and the relay (its own P6 project).
+
+### 12.0 The home site setup (vant.creadev.org — the self-contained easy one)
+
+The project to create in the CF dashboard: connect this repo, production
+branch `axolotl` (or `main` after merge), then point the build at the
+frontend dir — no framework guessing, no env vars, no functions:
+
+| Setting | Value | Why |
+|---------|-------|-----|
+| Framework preset | Vite | sensible defaults only — the command below owns the real pipeline |
+| Root directory | `web/home` | the frontend is fully self-contained (own package.json + committed package-lock.json) |
+| Install command | `npm ci` | lockfile-pinned resolution — `^` ranges never drift on the builder |
+| Build command | `node scripts/parse-changelog.mjs && npx prestruct build` | mirrors `npm run build:home` minus the `cd`: regenerate `src/generated/changelog.json` from CHANGELOG.md BEFORE the prestruct build (the parity law), then the full pipeline runs — vite build → inject-brand (OG/Twitter/canonical/keywords + the four-node `{ @context, @graph }` JSON-LD per page) → prerender 8/8 routes + sitemap + robots + noindex 404. The build EXITS (serving is Pages' job) |
+| Build output directory | `dist` | `web/home/dist/`, gitignored by the standing `web/*/dist/` rule — nothing to commit |
+| Node version | 20+ (`NODE_VERSION=20` if the panel asks) | matches the `web/home` engines; the build is plain node tooling |
+
+Shipped env-var surface: **none**. `ssr.config.js` is committed with the
+fixed URLs, so unlike the dashboard project below there is no `VANT_*`
+variable to define. There is no `functions/` here either — the home site
+is pure static. Whatever lands ships pre-gated: `web/home/test/config.test.mjs`
+(6/6, rides test.yml) pins the JSON-LD/route contract at source level, and
+`npm run lint:home` sweeps every built page for link/fiction/stat truth.
 
 ### 12.1 Setup walkthrough (dashboard, do this while code lands)
 
@@ -409,7 +436,7 @@ them exist: the static **home page** (`vant.creadev.org`, served from
    | Root directory | `web/dashboard` |
    | Build command | `npm run build` |
    | Build output directory | `dist` |
-   | Node version | 20+ (environment var `NODE_VERSION=20` if the panel asks) |
+   | Node version | 22 (env var `NODE_VERSION=22` if the panel asks; repo root `.nvmrc` says 22 — pass 338: 20.20.0 is EOL in the CF log and npm 10.9.2 on node 20 carries the npm/cli#9787 arborist crash, reproduced verbatim on this graph) |
 
    Functions under `web/dashboard/functions/` deploy AUTOMATICALLY with
    the project - no wrangler config anywhere (prd-web.md 3.7).

@@ -1,7 +1,0 @@
----
-permalink: /robots.txt
----
-User-agent: *
-Allow: /
-
-Sitemap: https://docs.creadev.org/sitemap.xml
