@@ -82,23 +82,16 @@ The server uses `VANT_MCP_PORT` from environment, falls back to 3457 if unset.
 By default, MCP binds to `127.0.0.1` (localhost only) for security. To expose to network:
 
 ```bash
-# Bind to all interfaces (REMOTE - but UNENCRYPTED!)
-export MCP_BIND_ADDRESS=0.0.0.0
+# Bind to all interfaces (REMOTE - put TLS in front, see next section)
+export VANT_MCP_BIND=0.0.0.0
 vant mcp --server
 ```
 
 ### TLS / HTTPS
 
-For production remote access, use TLS certificates:
-
-```bash
-# With Let's Encrypt or Cloudflare certificates
-export VANT_SERVER_CERT=/path/to/cert.pem
-export VANT_SERVER_KEY=/path/to/key.pem
-vant mcp --server
-```
-
-Or use **Caddy** for automatic HTTPS:
+The MCP door itself has no built-in TLS. For production remote access,
+front it with a reverse proxy. Caddy provisions certificates
+automatically:
 
 ```bash
 # Caddyfile (place next to Caddyfile in project root)
@@ -112,7 +105,10 @@ Then run Caddy:
 caddy run
 ```
 
-Caddy automatically provisions free TLS certificates!
+If you would rather serve TLS natively on a Vant door, the REST sidecar
+does it: `vant server --cert /path/to/cert.pem --key /path/to/key.pem`
+(port 3456; VANT_SERVER_CERT/VANT_SERVER_KEY, see the REST API
+reference).
 
 ### Environment Variables
 
@@ -121,10 +117,10 @@ Caddy automatically provisions free TLS certificates!
 | `VANT_MCP_PORT` | 3457 | Server port |
 | `VANT_MCP_BIND` | 127.0.0.1 | Bind address |
 | `VANT_MCP_REQUIRE_KEY` | false | Require auth on POSTs |
-| `VANT_MCP_API_KEY` | - | The API key itself |
-| `VANT_SERVER_CERT` | - | TLS certificate path |
-| `VANT_SERVER_KEY` | - | TLS key path |
-| `VANT_SERVER_INSECURE` | false | Allow HTTP (dev only) |
+| `VANT_MCP_API_KEY` | - | The API key (deprecated alias of VANT_AUTH_KEY) |
+| `VANT_SERVER_CERT` | - | TLS cert path (REST sidecar, `vant server`) |
+| `VANT_SERVER_KEY` | - | TLS key path (REST sidecar, `vant server`) |
+| `VANT_SERVER_INSECURE` | false | Allow HTTP off loopback (explicit opt-in) |
 
 ---
 

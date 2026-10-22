@@ -42,7 +42,8 @@ separate guide:
 | Hermes connector | `require('./connectors').hermes(config)` | Read/write brain format for hermes-agent installs |
 | CrewAI connector | `require('./connectors').crewai(config)` | Multi-agent brain format interop |
 
-The `qdrant` and `weaviate` connector factories exist in `lib/connectors/index.js`but their backing modules are not shipped yet (same stub situation as
+The `qdrant` and `weaviate` connector factories exist in `lib/connectors/index.js` but
+their backing modules are not shipped yet (same stub situation as
 Linear).
 
 ## Deployment, not integration

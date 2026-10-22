@@ -1,8 +1,82 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 80,
+  "_headingCount": 84,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 354 (the whole-page read: every surface read end to end, four drifts caught)",
+      "sections": [
+        {
+          "name": "Fixed: what survived the gates was a raw DOM property, a wrong API-limits claim, a missing space, and a leaked lock",
+          "items": [
+            "**THE WHOLE-PAGE READ (owner ask: read all of web/home for sense,",
+            "**THE PRE-ISLAND PLACEHOLDERS USED RAW `class=` PROPS** (Status.jsx",
+            "**THE /terms API-LIMITS CLAIM** pointed at the wrong machinery:",
+            "**A MISSING SPACE in docs/integrations/index.md** (`index.js`but)",
+            "**A LEAKED LOCKFILE** (models/private/vant/.locks/",
+            "Verified: the full gate train - build:home 9/9 (zero DOM-property"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 353 (one green for the whole brand; the docs palette rides web/home)",
+      "sections": [
+        {
+          "name": "Changed: owner picked web/home's green (#0b8a5c); docs now wear the home palette",
+          "items": [
+            "**THE CANONICAL GREEN IS WEB/HOME'S (#0b8a5c)** (owner direction:",
+            "**DOCS TAKE THE HOME PALETTE, NAME FOR NAME** (docs/_layouts/",
+            "**CODE BLOCKS JOIN THE TERM TILE**: the VitePress-era #1e1e1e hard-",
+            "**THE VITEPRESS RESIDUE (the freestruct cleanup sweep)**: bin/",
+            "Verified: build:home 9/9 (favicon baked into dist, changelog json"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 352 (the fiction sweep, round two: the pages that shipped dead APIs)",
+      "sections": [
+        {
+          "name": "Fixed: copy pointing at code that does not exist, now pointing at code that does",
+          "items": [
+            "**THE EMBEDCONFIG FICTION (docs/essential/boot.md)**: the \"Embedded",
+            "**THE WRONGLY-NAMED DOOR (docs/runtime/mcp.md)**: Remote Access told",
+            "**THE BOOT THAT WASN'T (docs/essential/islands.md + cli.md)**: the",
+            "**THE UNROUTED PROGRAMMATIC SURFACE (index.js)**: `require('vant')`",
+            "**THE AGENTS.md SUCCESSION PATH LIE**: the guide said trust levels",
+            "Verified: exports smoke PASS, docs gates PASS (style/links/frontmatter/"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 351 (the fiction sweep: every live-page error found, fixed)",
+      "sections": [
+        {
+          "name": "Fixed: copy that lied about the install path, the clocks, and the page count",
+          "items": [
+            "**THE NPM LINK HOLE (homepage hero, the first-win card, and the",
+            "**THE DOCS HUB PROMISED 60 SECONDS TWICE (docs/index.md)**:",
+            "**THE HOME SECTION NUMBERS SKIPPED 09/10**: after 01-08 the walk",
+            "**AGENTS.md TIMED THE QUICK START AT 2 MINUTES**: the repo guidance",
+            "**NOTED NOT FICTION** (verified, left alone): docs pages served with"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

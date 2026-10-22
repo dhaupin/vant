@@ -4,7 +4,7 @@ permalink: /
 layout: default
 title: Vant Documentation
 nav_order: 0
-description: The map of Vant documentation - pick your door, install in 60 seconds, or walk every section from memory to mesh.
+description: The map of Vant documentation - pick your door, install in about five minutes, or walk every section from memory to mesh.
 ---
 
 # Vant Documentation
@@ -32,7 +32,7 @@ stack can use it, because the memory is files and the interface is MCP.
 | **Auditing the machinery** | [Security](/vant/security/) | Sandbox, gates, escrow, sudo |
 | **Curious about the idea** | [The whitepaper](/vant/whitepaper/agent-first) - Evolution Without Drift | Memory as a portable spec, written by the agents, every claim test-linked |
 
-## The 60 second start
+## The 5 minute start
 
 Vant is not on npm (the `vant` package there is an unrelated Vue UI
 library). Clone and install:
@@ -51,7 +51,7 @@ node bin/vant.js start
 Then do it again from any agent: one command serves the brain as MCP tools.
 
 ```bash
-vant mcp
+node bin/vant.js mcp
 ```
 
 The server listens on `127.0.0.1:3457`. Full client setup lives in

@@ -33,7 +33,7 @@ export default function Status() {
                 </div>
 
                 <pre-island data-pre-island="status-board" data-pre-load="eager">
-                    <p class="island-loading">Running browser-side checks…</p>
+                    <p className="island-loading">Running browser-side checks…</p>
                 </pre-island>
 
                 <p className="contact-note" style={{ marginTop: 26 }}>

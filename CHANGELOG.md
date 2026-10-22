@@ -5,6 +5,177 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 354 (the whole-page read: every surface read end to end, four drifts caught)
+
+### Fixed: what survived the gates was a raw DOM property, a wrong API-limits claim, a missing space, and a leaked lock
+
+- **THE WHOLE-PAGE READ (owner ask: read all of web/home for sense,
+  tone, verbosity, information; then the docs for residue/fiction)**:
+  every page source, AppLayout, Nav/Footer/walk contracts, the islands,
+  and ssr.config read end to end; then all ten docs section-index
+  pages plus migration/setup/integrations prose. Verdict: the voice is
+  consistent and honest across both surfaces (the "honest posture"
+  paragraphs on /security, /status, and /contact read the same hand),
+  verbosity is right, and every information path points at a shipped
+  docs page. Four defects were all that survived:
+- **THE PRE-ISLAND PLACEHOLDERS USED RAW `class=` PROPS** (Status.jsx
+  and Contact.jsx): the same `<p class="island-loading">` in both
+  made every prerender print React's Invalid DOM property warning;
+  both are className now and the rebuilt dist is warning-free
+  (build:home 9/9 with zero warnings).
+- **THE /terms API-LIMITS CLAIM** pointed at the wrong machinery:
+  "vant watch respects the API limits" described a rate limiter watch
+  does not have - bin/watch.js polls with plain `git fetch origin` +
+  `git rev-parse`, so it draws no REST quota at all. Rewritten to the
+  verifiable story: watch avoids the API because it uses git plumbing;
+  GitHub API limits apply to automation that calls the API itself.
+- **A MISSING SPACE in docs/integrations/index.md** (`index.js`but)
+  from line-wrapping damage.
+- **A LEAKED LOCKFILE** (models/private/vant/.locks/
+  state__state_market.json.lock) had lint:locks failing; swept, audit
+  green again. Also this pass: the axolotl brain refreshed and the
+  canonical stone resealed (safe-write, round-trip verified,
+  sha256-matched), with labs/TASKS.md's ledger top block carrying the
+  real pass hashes.
+- Verified: the full gate train - build:home 9/9 (zero DOM-property
+  warnings), lint:home, lint:docs (all five), lint:changelog,
+  lint:surface, lint:claims, lint:coverage (MCP 347/347, CLI 135 bins),
+  lint:helpers, lint:locks, web/home suite 15/15, battery 15/0.
+
+## [Unreleased] - pass 353 (one green for the whole brand; the docs palette rides web/home)
+
+### Changed: owner picked web/home's green (#0b8a5c); docs now wear the home palette
+
+- **THE CANONICAL GREEN IS WEB/HOME'S (#0b8a5c)** (owner direction:
+  "I like that shade better"). Both favicons retint: web/home index.html
+  and the docs layout's inline SVG bookmark (the two favicons were the
+  last #059669 holdouts; the home brand tile already sat on #0b8a5c,
+  which is exactly why the mismatch was visible).
+- **DOCS TAKE THE HOME PALETTE, NAME FOR NAME** (docs/_layouts/
+  default.html): every :root/[data-theme] token now carries web/home's
+  value - warm paper bg (#f7f6f3), ink/text/muted from the home ramp,
+  home's border (#e3e0d8) and link (#0b7a52), accent #0b8a5c with hover
+  #0b7a52 (home's own darker family member), and the dark mode rides
+  the same ladder (bg #0b0d10, card #12151a, accent #2dd4a0, link
+  #34d399). Docs-only tokens got home-family derivatives (bg-sidebar
+  warm paper / dark step, text-light), everything else follows by
+  token so sidebar, header, buttons, and callouts recolor as one.
+- **CODE BLOCKS JOIN THE TERM TILE**: the VitePress-era #1e1e1e hard-
+  coded pre/Prism backgrounds became --bg-term tokens (#16181d light /
+  #06070a dark - exactly what a home Term renders), the language label
+  wears --term-dim, and the copied clipboard state switched its hard-
+  coded emerald to --accent-bright (#10b981 light / #5eead4 dark).
+- **THE VITEPRESS RESIDUE (the freestruct cleanup sweep)**: bin/
+  docs-build.js's help advertised `--out DIR (default: docs/.vitepress/`
+  `dist)` and a --version flag - a CLI shape from the old home-brew
+  docs system; the script never implemented either (it only stamps
+  frontmatter + optional --commit), and no VitePress tree has shipped
+  for many passes. Help rewritten to what the door truly does (stamp,
+  optional commit, site build is CI's Jekyll + freestruct + Pagefind
+  pipeline), the unused vaf/sandbox/execSync imports dropped;
+  --help/--h exits remain side-effect-free. Repo-wide grep confirms no
+  vitepress references left outside the throwaway copies (test/tmp/
+  vant-qc junk clone, .agent_tmp reference stash). The docs tree
+  itself held no residue: hand-rolled sitemap/robots pages are gone,
+  the two render-time Jekyll plugins are the live nav/redirects pair,
+  the freestruct config and Package pipeline step are current canon.
+- Verified: build:home 9/9 (favicon baked into dist, changelog json
+  regenerated + parity PASS), lint:home PASS, lint:docs PASS, no stray
+  brand hexes in the docs layout (grep clean).
+
+## [Unreleased] - pass 352 (the fiction sweep, round two: the pages that shipped dead APIs)
+
+### Fixed: copy pointing at code that does not exist, now pointing at code that does
+
+- **THE EMBEDCONFIG FICTION (docs/essential/boot.md)**: the "Embedded
+  Config" section taught `require('vant').storage.get('brain')` then
+  `brain.embedConfig({...})` + "extracted automatically" - embedConfig
+  exists NOWHERE in lib (grep: zero hits), and the whole flow underneath
+  it used the legacy PNG stone path that pass 178 in lib/stego.js itself
+  records as "never successfully encoded anything" (bin/stego.js snapshot
+  crashes today: empirically reproduced, `brain.compress is not a
+  function` BrainStorage has no such method, and even without that,
+  encodeBrain(message, input, output) is called as (input, output) so the
+  image PATH would land in the PNG as the payload). The section now
+  teaches the working stone: `vant config set` for brain persisting
+  config, `vant snapshot --password` for the stego-SVG horcrux (the
+  gather DOES carry config - lib/transform.js gather-config), and the
+  Full Example now boots `vant boot --image=<svg-url> --decrypt <pw>`
+  against a `vant snapshot` output, with the caveats updated (SVG stones,
+  the PNG stone path retired, chunking replaced by --brains scoping).
+- **THE WRONGLY-NAMED DOOR (docs/runtime/mcp.md)**: Remote Access told
+  people to `export MCP_BIND_ADDRESS=0.0.0.0` - no such env var exists;
+  the real one is VANT_MCP_BIND (lib/config.js mcpBindAddress). And the
+  TLS section claimed `vant mcp --server` takes VANT_SERVER_CERT/KEY -
+  those live on the REST sidecar (`vant server`, bin/server.js, port
+  3456). TLS section retargeted honestly (reverse proxy for the MCP
+  door, Caddy example kept, native-TLS pointer moved to `vant server
+  --cert/--key`), and the env table now labels the VANT_SERVER_* rows as
+  sidecar vars and VANT_MCP_API_KEY as the deprecated alias of
+  VANT_AUTH_KEY (lib/config.js says so).
+- **THE BOOT THAT WASN'T (docs/essential/islands.md + cli.md)**: the
+  flag block (`vant islands --list / --prompt / --island`) and cli.md's
+  `vant islands boot` both point at a verb coupling that does not exist:
+  bin/islands.js has NO boot subcommand (its verbs: list/create/trigger/
+  load/boundaries/mcp - empirically confirmed: `vant islands boot`
+  falls through to raw usage help). The flags live on bin/islands-boot.js
+  under `vant islands-boot`. The docs now write that verb where the
+  flags/boot behavior actually is.
+- **THE UNROUTED PROGRAMMATIC SURFACE (index.js)**: `require('vant')`
+  (the root package import four docs pages teach: RAG tutorial,
+  runtime.md, api-runtime.md, custom-island.md, islands.md) exports the
+  lazy gotter modules but NOT init/think/learn/remember - every snippet
+  that called `vant.think(...)` or `await vant.init(...)` on it would
+  throw. The root entry now re-exports the documented memory surface
+  (all four are real on lib/vant.js's own exports), and `storage` joins
+  the export map so `require('vant').storage.get('state')` resolves like
+  islands.md says it does. Export smoke now passes end to end:
+  storage.get('state') returns the StateStorage with setStatic/
+  setCurrent/setTemp, islands expose findTriggers/autoHydrate/hydrate,
+  search exposes query/hybrid ({memories, results, context} and {fused}
+  both checked true in lib/search.js).
+- **THE AGENTS.md SUCCESSION PATH LIE**: the guide said trust levels
+  live at models/private/_succession.json - lib/succession.js resolves
+  the file via brain.getPublicPath() (models/public/<brain>/); AGENTS.md
+  now names the per-brain public path, matching the FAQ page.
+- Verified: exports smoke PASS, docs gates PASS (style/links/frontmatter/
+  language/truthfulness), changelog parity PASS, lint:home PASS, build:home
+  9/9 (json regenerated), battery green.
+
+## [Unreleased] - pass 351 (the fiction sweep: every live-page error found, fixed)
+
+### Fixed: copy that lied about the install path, the clocks, and the page count
+
+- **THE NPM LINK HOLE (homepage hero, the first-win card, and the
+  /install clone card)**: all three Term blocks ran bare `vant start`
+  / `vant onboard` straight after `npm ci` - but npm ci only fills
+  node_modules/.bin, so with no npm link the PATH has no `vant`
+  command and the promised copy-paste first session died at exactly
+  the step the five-minute claim hangs on. All three now carry the
+  `npm link` line, the canon from docs/getting-started/install.md
+  (the docs quick-start page already taught it); Install.jsx's header
+  comment records the reason so the next editor keeps it honest.
+- **THE DOCS HUB PROMISED 60 SECONDS TWICE (docs/index.md)**:
+  "install in 60 seconds" in the description and "The 60 second start"
+  as the heading, while the same page's door table and the whole
+  marketing site say five minutes. Retitled "The 5 minute start" and
+  the description aligned. The hub's MCP command came right after
+  `npm ci` with no link of its own, so it now ships as
+  `node bin/vant.js mcp`, consistent with its already-correct
+  `node bin/vant.js start` sibling.
+- **THE HOME SECTION NUMBERS SKIPPED 09/10**: after 01-08 the walk
+  jumped to 11 (Where Vant fits) and 12 (FAQ). Renumbered to 09/10.
+- **AGENTS.md TIMED THE QUICK START AT 2 MINUTES**: the repo guidance
+  promised 2 min, the quick-start page itself says about five minutes
+  twice; the TOC line now says the 5 minute setup.
+- **NOTED NOT FICTION** (verified, left alone): docs pages served with
+  a trailing slash (docs.creadev.org/vant/memory/brain/) 404, but the
+  shipped permalink shape is extensionless-without-slash (the
+  sitemap.xml URLs are the canon form) and every same-shape link in
+  the repo already writes it; and the quick-start `vant load`/
+  `vant watch`/`vant learn`/`vant onboard wake` verbs all checked real
+  against docs/reference/cli.md and the bin sources.
+
 ## [Unreleased] - pass 350 (docs credit, generated stats, walk pins, and the small sweep)
 
 ### Added + Changed: the /docs footer carries the credit; the stats strip is generated truth; the walk contracts get pins

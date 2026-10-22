@@ -206,7 +206,9 @@ main            ← human reviews here
 
 ## Trust Levels
 
-`models/private/_succession.json` controls your autonomy:
+`models/public/<brain>/_succession.json` controls your autonomy (public
+scope, one per brain - `lib/succession.js` resolves it via the public
+brain path):
 
 | Level | What It Means |
 |-------|--------------|
@@ -227,7 +229,7 @@ Check your level at session start.
 
 ### Docs TOC
 
-- [Quick Start](https://docs.creadev.org/vant/getting-started/quick-start) — 2 min setup
+- [Quick Start](https://docs.creadev.org/vant/getting-started/quick-start) — the 5 minute setup
 - [Agent Onboarding](https://docs.creadev.org/vant/getting-started/agent-onboarding) — the wake/work/sleep loop
 - [The Brain](https://docs.creadev.org/vant/memory/brain) — Memory files
 - [Runtime](https://docs.creadev.org/vant/runtime/runtime) — Programmatic API

@@ -186,7 +186,7 @@ vant agents kill <id>                              # Real terminate; persists
 vant agents info <id>
 
 vant islands                # Show islands
-vant islands boot           # Boot islands
+vant islands-boot           # Boot islands (auto; --prompt <p>, --island <n>, --list)
 vant islands load <name> [--as <agentId>]   # Load an island (optionally as an agent)
 vant islands boundaries     # List RLS-gated islands + rules
 

@@ -64,13 +64,13 @@ Lazy (on trigger, 7):
 
 ```bash
 # List all islands
-vant islands --list
+vant islands-boot --list
 
 # Auto-hydrate based on prompt
-vant islands --prompt "fix github pr"
+vant islands-boot --prompt "fix github pr"
 
 # Hydrate specific island
-vant islands --island github
+vant islands-boot --island github
 ```
 
 ## API Usage
