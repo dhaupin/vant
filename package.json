@@ -27,11 +27,9 @@
   "author": "vant Project <vant@example.com>",
   "license": "MIT",
   "dependencies": {
-    "chalk": "^4.1.2",
-    "js-yaml": "^4.1.1",
     "jsqr": "^1.4.0",
     "qrcode-generator": "^2.0.4",
-    "yaml": "^2.9.0"
+    "yaml": "^2.9.1"
   },
   "scripts": {
     "test": "node bin/build-test.js",

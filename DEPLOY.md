@@ -28,9 +28,12 @@ Vant is a Node.js process whose entire state is your repository: markdown brain 
 | Git | 2.20+ | Brain sync works through git; branch awareness built in |
 | GitHub PAT | - | `repo` scope, set as `GITHUB_TOKEN` (env var, never in config) |
 
-Dependencies are deliberately tiny: `chalk`, `js-yaml`, `yaml`, plus the
-QR symbology lane's two pure-JS MIT packages (`qrcode-generator`, `jsqr`).
-No database driver, no Redis client.
+Dependencies are deliberately tiny: `yaml`, plus the QR
+symbology lane's two pure-JS MIT packages (`qrcode-generator`, `jsqr`).
+CLI color is a zero-dependency internal ANSI face in `lib/theme.js`
+(NO_COLOR/CI/TERM=dumb/piped output renders plain); `chalk` and the
+never-imported `js-yaml` left the dependency list in pass 338. No database
+driver, no Redis client.
 
 ---
 

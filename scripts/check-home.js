@@ -117,8 +117,13 @@ for (const file of landing) {
         }
     }
 
-    // 4. github link shape (typos in owner/repo are the observed failure mode)
+    // 4. github link shape (typos in owner/repo are the observed failure mode).
+    //    ONE truth outside the repo universe: the maintainer's bare profile
+    //    URL github.com/dhaupin — it ships inside the owner-face JSON-LD
+    //    (maintainer Person node, ssr.config.js buildJsonLd) on every page.
+    const GH_MAINTAINER_PROFILE = 'https://github.com/dhaupin';
     for (const m of html.matchAll(/https:\/\/github\.com\/[^"<\s)]+/g)) {
+        if (m[0] === GH_MAINTAINER_PROFILE) continue;
         if (!/^https:\/\/github\.com\/dhaupin\/vant(\.git(\/|$|#)?|\/|$|[#?)])/.test(m[0])) {
             problems.push(`${rel}: github link "${m[0]}" is not under dhaupin/vant`);
         }

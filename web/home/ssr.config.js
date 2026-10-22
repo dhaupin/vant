@@ -18,6 +18,13 @@
  *   /changelog rendered at build time from CHANGELOG.md (parity-gated)
  */
 
+import { readFileSync } from 'fs'
+
+// Version truth rides ONE place: package.json (the changelog parity gate
+// pins it against the [x.y.z] release heading). The SoftwareApplication
+// JSON-LD reads it at build time so the graph can never drift from it.
+const _pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'))
+
 export default {
     platform: 'cloudflare',
 
@@ -117,6 +124,71 @@ export default {
             },
         },
     ],
+
+    // JSON-LD structured data (prestruct contract): FOUR graph nodes on
+    // EVERY page, in this order — Organization (the owner relationship:
+    // founder is a Person typed for creadev.org), the WebSite, the
+    // SoftwareApplication (the AI/open-source software face: version truth
+    // read from package.json at build time, MIT license, repo, install and
+    // docs doors), then the maintainer Person appended last (jobTitle is
+    // the truth the /contact page states). Each value below is repo-truth:
+    // no npm-install fiction, no invented handles, no support-desk claims.
+    // inject-brand wraps the array into one { @context, @graph } script in
+    // the head of every route.
+    buildJsonLd() {
+        return [
+            {
+                '@type': 'Organization',
+                name: this.siteName,
+                url: this.siteUrl,
+                sameAs: ['https://github.com/dhaupin/vant'],
+                founder: [
+                    {
+                        '@type': 'Person',
+                        name: 'Creadev.org',
+                        url: 'https://creadev.org',
+                    },
+                ],
+            },
+            {
+                '@type': 'WebSite',
+                name: this.siteName,
+                url: this.siteUrl,
+            },
+            {
+                '@type': 'SoftwareApplication',
+                name: this.siteName,
+                url: this.siteUrl,
+                softwareVersion: _pkg.version,
+                applicationCategory: 'DeveloperApplication',
+                operatingSystem: 'Node.js 18+ (Linux, macOS, Windows)',
+                keywords: this.keywords,
+                license: 'https://github.com/dhaupin/vant/blob/main/LICENSE',
+                codeRepository: 'https://github.com/dhaupin/vant',
+                downloadUrl: this.siteUrl + '/install',
+                softwareHelp: 'https://docs.creadev.org/vant/',
+                isAccessibleForFree: true,
+                author: {
+                    '@type': 'Person',
+                    name: 'dhaupin',
+                    url: 'https://github.com/dhaupin',
+                },
+                featureList: [
+                    'Markdown brain files in your own repository (no database)',
+                    'One-command MCP door for agents',
+                    'REST server for services and CI',
+                    'Multi-brain layouts and per-agent branches',
+                    'Gated relay surfaces between installs',
+                ],
+            },
+            {
+                '@type': 'Person',
+                name: 'dhaupin',
+                url: 'https://github.com/dhaupin',
+                jobTitle: 'Vant maintainer',
+            },
+        ]
+    },
 
     // 404.html is generated with the full pipeline + noindex.
     notFound: {

@@ -21,11 +21,12 @@
         "vite": ">=5"
     },
     "devDependencies": {
-        "@vitejs/plugin-react": "^4.3.1",
+        "@vitejs/plugin-react": "^4.7.0",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
-        "react-router-dom": "^6.30.1",
+        "react-router-dom": "^6.30.6",
         "vite": "^6.4.5",
-        "prestruct": "1.1.0"
+        "prestruct": "1.1.0",
+        "vitest": "^5.0.5"
     }
 }

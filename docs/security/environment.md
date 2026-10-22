@@ -174,12 +174,12 @@ What you need to run Vant.
 ### Dependencies
 
 Vant's runtime dependencies (package.json):
-- `chalk` - Terminal colors
-- `js-yaml` - YAML parsing
 - `yaml` - YAML parsing
+- `jsqr` + `qrcode-generator` - the QR carrier lane
 
-(The HTTP/MCP servers are plain Node `http` - there is no express,
-cli-progress, or inquirer.)
+(CLI color is a zero-dependency ANSI face in `lib/theme.js` - there is no
+`chalk` package and no `js-yaml`. The HTTP/MCP servers are plain Node `http`
+- there is no express, cli-progress, or inquirer.)
 ---
 
 ## NETWORK CONSIDERATIONS

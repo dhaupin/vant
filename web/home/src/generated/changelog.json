@@ -1,8 +1,46 @@
 {
   "_source": "CHANGELOG.md (root) — parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 67,
+  "_headingCount": 68,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 338 (the dependency sweep: everything in range moves up)",
+      "sections": [
+        {
+          "name": "Changed — the schema/OG pimp (the owner face now reads like the software it is)",
+          "items": [
+            "**BIGGER GRAPH (three nodes → four)**: the every-page JSON-LD gains the",
+            "**OG CARD STATICS (web/home/index.html)**: og:image:width 1200,",
+            "**freestruct ADOPTION, SETTLED**: npm freestruct@1.0.0 is now live on"
+          ]
+        },
+        {
+          "name": "Changed - the registry-checked bump pass (2026-10-22)",
+          "items": [
+            "**In-range/patch round**: root `yaml ^2.9.0 → ^2.9.1`; docs pipeline",
+            "**gh-actions refresh**: docs.yml/test.yml gain `actions/checkout@v5`",
+            "**Owner-face JSON-LD (ssr.config.js gains `buildJsonLd()`)**: every page",
+            "**Registry truth, resolved and UNCHANGED where it stayed**: jsqr 1.4.0,"
+          ]
+        },
+        {
+          "name": "Removed - the two elimination fixes (no majors, no ESM cliff)",
+          "items": [
+            "**`chalk` OUT (dependency eliminated, API preserved)**: chalk 5/6 are",
+            "**`js-yaml` OUT (never imported anywhere)**: the ^4.1.1 range sat in"
+          ]
+        },
+        {
+          "name": "Fixed - web/home can run its tests again (and finally has them)",
+          "items": [
+            "**THE PRE-EXISTING GAP closed**: web/home's `test`/`test:run` scripts"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

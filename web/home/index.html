@@ -22,6 +22,17 @@
   <meta name="robots"      content="index, follow" />
   <link rel="canonical"    href="https://vant.creadev.org/" />
 
+  <!-- Open Graph card statics. inject-brand.js writes og:image itself
+       (from ssr.config.js); these lines are the page-independent truth for
+       that card: the 1200x630 dimensions and the alt text. Placement is
+       deliberate: ABOVE the injection point (before the head close tag) so
+       inject-brand's rebuild removal - its Open Graph through script regex -
+       can never eat them. -->
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt"    content="Vant - Persistent memory for AI agents" />
+  <meta name="twitter:image:alt"   content="Vant - Persistent memory for AI agents" />
+
   <!-- Favicon: same inline data-URI mark the old lander shipped -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23059669'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' fill='white' font-family='system-ui' font-weight='bold' font-size='20'%3EV%3C/text%3E%3C/svg%3E" />
 </head>

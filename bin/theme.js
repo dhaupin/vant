@@ -46,7 +46,7 @@ function run() {
         console.log('  ' + theme.status.warn('warning renders like this'));
         console.log('  ' + theme.status.info('info renders like this'));
         console.log('  ' + theme.section('sections') + ' ' + theme.label('labels') + ' ' + theme.value('values'));
-        console.log('  chalk available: ' + (theme.chalk && theme.chalk.level !== undefined ? 'level ' + theme.chalk.level : 'fallback (no chaining)'));
+        console.log('  color: ' + (theme.chalk && typeof theme.chalk.level === 'number' && theme.chalk.level > 0 ? 'ANSI face on (grade ' + theme.chalk.level + ')' : 'plain (no ANSI face; piped output / NO_COLOR / CI / TERM=dumb renders unstyled)'));
     } else if (subcmd === 'status' || subcmd === 'stack') {
         const configs = theme.getStackThemeConfigs();
         console.log('Theme configs (source: ' + configs.source + ', ' + configs.brains.length + ' brains):');
