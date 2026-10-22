@@ -824,13 +824,13 @@ const EXPECTED = {
         'state-json-schema-strictness': 'REFUSED',
         'migration-idempotency': 'REFUSED',
         'guest-capability-gates': 'REFUSED',
-        // ARMED 2026-10-22 (trust-read route): the honesty verdict it was
-        // built to measure. LIVE FINDING — the succession trust floor is a
-        // behavioral descriptor (lib/succession getFilesForTrust); nothing
-        // enforces it at the brain.read seam, so a low-trust successor
-        // resolves FULL private state. Pin keeps biting until a read-side
-        // trust gate lands.
-        'succession-trust-inheritance': 'EXPLOITED',
+        // FIXED 2026-10-22 (#233-2, same turn it was pinned): the trust
+        // floor is now ENFORCED at the brain.read seam (lib/succession
+        // privateReadVerdict -> lib/brain read gate). high/medium default
+        // installs are unchanged; low refuses private state (public trees
+        // stay open for reference, operator config may declare a minimal
+        // core); none keeps only identity. No code-side bypass.
+        'succession-trust-inheritance': 'REFUSED',
         'boot-stone-integrity': 'REFUSED',
         // ARMED 2026-10-22 (brain-graph-walk route): a cyclic knowledge
         // graph returns - brain_connections' visited guard + depth floor

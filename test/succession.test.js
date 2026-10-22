@@ -71,6 +71,51 @@ test('succession has logSuccession function', () => {
     return { success: typeof succession.logSuccession === 'function' };
 });
 
+// (read-side trust floor, #233-2 fix) the floor predicate's letter, unit-
+// pinned: high/medium open (default installs unchanged), none identity-
+// only, low refuses private state unless the config's succession.trust.core
+// declares it, and an unknown/absent level degrades to the medium default.
+test('trust floor: high and medium resolve private state unrestricted', () => {
+    const succession = require(path.join(ROOT, 'lib', 'succession'));
+    const v = (name, level) => succession._trustFloorVerdict(name, level, null);
+    return v('anything', 'high').allowed === true && v('anything', 'medium').allowed === true
+        ? { success: true }
+        : { success: false, error: `high/medium must stay open: ${JSON.stringify([v('anything', 'high'), v('anything', 'medium')])}` };
+});
+
+test('trust floor: none resolves only identity', () => {
+    const succession = require(path.join(ROOT, 'lib', 'succession'));
+    const v = (name) => succession._trustFloorVerdict(name, 'none', null);
+    return v('identity').allowed === true && v('goals').allowed === false
+        ? { success: true }
+        : { success: false, error: `none must keep only identity: ${JSON.stringify([v('identity'), v('goals')])}` };
+});
+
+test('trust floor: low refuses private state unless the declared core names it', () => {
+    const succession = require(path.join(ROOT, 'lib', 'succession'));
+    const deny = succession._trustFloorVerdict('identity', 'low', null);
+    const allow = succession._trustFloorVerdict('goals', 'low', ['goals']);
+    return deny.allowed === false && allow.allowed === true
+        ? { success: true }
+        : { success: false, error: `low must refuse undeclared and allow declared core: ${JSON.stringify([deny, allow])}` };
+});
+
+test('trust floor: absent/unknown level degrades to the medium default (never a fake refusal)', () => {
+    const succession = require(path.join(ROOT, 'lib', 'succession'));
+    const v = succession._trustFloorVerdict('identity', undefined, null);
+    return v.allowed === true && v.level === 'medium'
+        ? { success: true }
+        : { success: false, error: `degraded level must behave like medium: ${JSON.stringify(v)}` };
+});
+
+test('trust floor: privateReadVerdict exists and never throws on hostile names', () => {
+    const succession = require(path.join(ROOT, 'lib', 'succession'));
+    if (typeof succession.privateReadVerdict !== 'function') return { success: false, error: 'privateReadVerdict missing' };
+    let out = null;
+    try { out = succession.privateReadVerdict('../etc/passwd'); } catch (e) { return { success: false, error: `threw on hostile name: ${e.name}` }; }
+    return out && typeof out.allowed === 'boolean' ? { success: true } : { success: false, error: `no verdict shape: ${JSON.stringify(out)}` };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

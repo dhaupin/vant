@@ -64,15 +64,17 @@ oracles stay not-yet-wired: `trust-read` and `brain-graph-walk`.
 | `state-json-schema-strictness` | wrong-typed stack/currentBrain values never survive into the runtime pointer | validated — REFUSED (same 2026-10-22 fix: schema entries sanitized loudly at both load seams) |
 | `migration-idempotency` | `migrate` twice is a byte-level no-op; `--dry-run` writes nothing | validated — REFUSED |
 | `guest-capability-gates` | admin verbs unreachable, revocation kills grants, pairing voucher single-use | validated — REFUSED |
-| `succession-trust-inheritance` | a low-trust successor can't resolve private state past its trust floor | validated — **EXPLOITED today** (armed 2026-10-22 via `trust-read`; the succession trust floor is a behavioral descriptor, and NOTHING enforces it at the brain.read seam — a live finding, pinned in the suite's expected table until a read-side trust gate lands) |
+| `succession-trust-inheritance` | a low-trust successor can't resolve private state past its trust floor | validated — REFUSED (armed 2026-10-22 via `trust-read`, measured **EXPLOITED** the same turn, FIXED the same turn: the read-side trust gate enforces the floor at the brain.read seam — low refuses private state unless the config declares `succession.trust.core`, none keeps only identity, public trees stay open for reference, high/medium unchanged, NO code-side bypass) |
 | `boot-stone-integrity` | tampered stones restore nothing partial | validated — REFUSED (`stone-restore-tamper` armed via the stones fixture) |
 | `knowledge-links-cycle-safety` | cyclic knowledge graphs never hang the walk | validated — REFUSED (armed 2026-10-22 via `brain-graph-walk`: the real `brain_connections` visited guard + depth cap hold at depth 100000) |
 
-The one EXPLOITED row (succession-trust-inheritance) is a **finding, not a
-glitch** — it is pinned in `test/crashtest-packs.test.js`'s expected-verdict
-table and flips to REFUSED when a read-side trust gate lands; the pin keeps
-biting until then. The two #232 read-path rows were EXPLOITED findings
-until the 2026-10-22 fix flipped them to REFUSED.
+The EXPLOITED ledger for this pack is EMPTY as of 2026-10-22: the trust
+row measured a real finding the same turn it was armed (a low-trust
+successor resolved full private state — #233-2), and the read-side trust
+gate landed the same turn and flipped it REFUSED. The two #232 read-path
+rows flipped earlier the same day. Both CI whitelists
+(`ALLOWED_FINDINGS` / `KNOWN_FINDINGS`) are now EMPTY — any future finding
+is a regression the gate fails loudly, not whitelistable silently.
 
 ### `public/vant-census` — structural oracles (4 oracles; config-armed)
 
@@ -258,10 +260,11 @@ the armed run root:
 | `wp-*` packs (WordPress lanes) | No — other targets' precedents, kept with their lane | n/a |
 
 The last pending vant-brain oracles were armed 2026-10-22: `trust-read`
-(measures a LIVE finding — the succession trust floor is not enforced at
-the brain.read seam) and `brain-graph-walk` (holds: the visited guard
-refuses cyclic knowledge graphs). No probe is pending anymore; the honest
-absence shape survives only for FUTURE unwired oracles.
+(measured the #233-2 finding — the trust floor was not enforced at the
+brain.read seam — and the read-side gate landing the same turn flipped it
+REFUSED) and `brain-graph-walk` (holds: the visited guard refuses cyclic
+knowledge graphs). No probe is pending anymore; the honest absence shape
+survives only for FUTURE unwired oracles.
 
 ## Running the packs in CI
 
@@ -280,9 +283,10 @@ BOTH layers under one known-findings whitelist:
 Policy lives in ONE whitelist shape in two files that must stay in lockstep:
 `ALLOWED_FINDINGS` in `test/ci-crashtest-gate.js` (pack-row policy) and
 `KNOWN_FINDINGS` in `scripts/crashtest-run.js` (run-root policy). Today both
-carry exactly one entry: the succession-trust-inheritance LIVE FINDING
-(#233-2). When its read-side gate lands and the row flips REFUSED, the gate
-catches the stale pin and asks loudly for the line to be deleted.
+are EMPTY — the succession-trust pin was deleted in the same commit as its
+read-side trust gate fix (#233-2), exactly the lockstep rule. If a future
+finding gets measured and pinned, its whitelist lines land in BOTH files in
+that commit, and are deleted in the commit that fixes it.
 
 Negative-verified 2026-10-22: an ungated throwaway pack turned BOTH layers
 RED (the contract suite now fails loudly for any shipped pack missing from

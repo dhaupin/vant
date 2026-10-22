@@ -43,11 +43,11 @@ const ROOT = path.resolve(__dirname, '..');
 // this set (library findings keep their exit 3); without the env var the
 // default behavior is byte-identical to before (findings exit 0 always).
 const KNOWN_FINDINGS = new Set([
-    // LIVE FINDING (#233 expansion 2, armed 2026-10-22): the succession
-    // trust floor is a behavioral descriptor and nothing enforces it at the
-    // brain.read seam — a low-trust successor resolves full private state.
-    // Fix lands a read-side trust gate, then delete this line.
-    'vant-brain/succession-trust-inheritance',
+    // Whitelist is EMPTY as of the 2026-10-22 read-side trust gate: every
+    // oracle measures REFUSED (or an honest bounded skip). If a new genuine
+    // finding gets measured and pinned, its line belongs here and in
+    // test/ci-crashtest-gate.js ALLOWED_FINDINGS — both in the same commit,
+    // and deleted together when its fix lands.
 ]);
 
 // --- locate crashtest. npm is the consumption path now (crashtest@1.0.0

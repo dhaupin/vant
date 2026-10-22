@@ -48,12 +48,12 @@ const ROOT = path.resolve(__dirname, '..');
 // scripts/crashtest-run.js. A pinned finding is HONEST, verified research:
 // it stays EXPLOITED until the fix lands, and the pin keeps biting.
 const ALLOWED_FINDINGS = {
-    // LIVE FINDING (#233 expansion 2, armed 2026-10-22): the succession
-    // trust floor is a behavioral descriptor and NOTHING enforces it at
-    // the brain.read seam — a low-trust successor resolves full private
-    // state. Fix lands a read-side trust gate, then delete this line.
-    'vant-brain/succession-trust-inheritance':
-        'LIVE FINDING (#233-2): succession trust floor is not enforced at the brain.read seam',
+    // Whitelist is EMPTY as of the 2026-10-22 read-side trust gate: the
+    // succession trust floor is enforced at the brain.read seam now, so
+    // every oracle measures REFUSED (or an honest bounded skip). If a new
+    // genuine finding gets measured and pinned, its line belongs here and
+    // in scripts/crashtest-run.js KNOWN_FINDINGS — added in the SAME commit
+    // as the pin, and deleted in the same commit as its fix.
 };
 
 const args = process.argv.slice(2);
