@@ -1,0 +1,1660 @@
+{
+  "_source": "CHANGELOG.md (root) — parsed, never hand-copied; regenerate with npm run build:home",
+  "_generatedBy": "web/home/scripts/parse-changelog.mjs",
+  "_headingCount": 67,
+  "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 337 (/changelog with a hard parity law + npm-compat pins - and the hidden client-bundle fix)",
+      "sections": [
+        {
+          "name": "Added - the changelog that cannot lie",
+          "items": [
+            "**/changelog renders ONLY from CHANGELOG.md**: `web/home/scripts/parse-changelog.mjs`",
+            "**The parity gate (`npm run lint:changelog`, stepped into test.yml)**:",
+            "**THE REAL CATCH this pass**: the site has been shipping with NO client",
+            "Verified: 8/8 routes prerendered, `npm run lint:changelog` PASS, `npm run"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 336 (the site gains /install and /security)",
+      "sections": [
+        {
+          "name": "Added - the two OSS routes the project was missing",
+          "items": [
+            "**/install** — the money page for clone-shipped OSS, previously buried in",
+            "**/security** — private-disclosure route (GitHub private security",
+            "Wired everywhere: ssr.config.js (7 routes), client-nav META map, nav",
+            "Verified: `prestruct build` renders 7/7 routes + artifacts; `npm run"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 335 (the home site becomes a real React/prestruct multi-route site)",
+      "sections": [
+        {
+          "name": "Changed - web/home grows its Vite pipeline (the prd-web §2.5 predicted shape)",
+          "items": [
+            "**The hand-written lander retires into `web/home/index.bak.html`** (design",
+            "**`/` is the lander ported section-for-section** — hero with the static",
+            "**Islands where they earn their keep**: `status-board` (live surfacing",
+            "**`/terms` + `/privacy`** summarize the canon (LEGAL.md, docs security",
+            "**`scripts/check-home.js` learned dist**: walks `web/home/dist/**.html`",
+            "**Verified**: `prestruct build` renders 5/5 routes + sitemap + robots +"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 334 (the docs post-render layer converts to npm freestruct)",
+      "sections": [
+        {
+          "name": "Changed - the prototype meets its child",
+          "items": [
+            "**docs/ now consumes npm `freestruct` 1.0.0 as the post-render SEO layer**:",
+            "Retired the hand-rolled `docs/sitemap.xml` (a stale 2-entry file against",
+            "Verified against the 0.9.0 engine source with a synthetic `/vant`-nested"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 286 (② CLOSED on main: the live corridor over brain.creadev.org + the Pages deploy-log warns swept)",
+      "sections": [
+        {
+          "name": "Added - the live solve + the build hygiene",
+          "items": [
+            "**THE MERGED DEPLOY TESTED (PR #221 accepted, main = 8feb448)**:",
+            "**THE NODE PIN, TRUTH-UP (.nvmrc 20 → 22)**: the Pages builder took",
+            "**THE ENTRY CHUNK, REALLY SPLIT (web/dashboard/vite.config.ts)**: the",
+            "**Suite**: dashboard build clean (tsc + vite, exit 0, no chunk warn);"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 284 (the Cairn pitstop: issue #219's `--brains` filter finally reaches the `vant transform` face)",
+      "sections": [
+        {
+          "name": "Fixed - the gather-all-brains gap (pin by Cairn on dhaupin/prestruct)",
+          "items": [
+            "**`--brains <a,b>` ON `vant transform` (bin/transform.js)**: the issue #219",
+            "**THE INVENTORY HONORS THE SAME LAW (lib/transform.js `gatherMode`)**:",
+            "**THE SILENTLY-SKIPPED PINS (test/transform.test.js)**: the suite's",
+            "**Docs truth-up**: cli.md's transform rows were stale verbs",
+            "**Suite**: transform 16/16, brain-storage-strict 14/14, cli-smoke 2/2"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 273 (§2.2: the sovereign-profile transport — one sealed file, the pairing loop closes)",
+      "sections": [
+        {
+          "name": "Added - the profile rides one encrypted file",
+          "items": [
+            "**THE SOVEREIGN PROFILE TRANSPORT (`web/dashboard/src/lib/profile.ts`,",
+            "**THE SETTINGS FACES**: a \"Sovereign profile (export / import)\" card —",
+            "**THE PAIRING LOOP CLOSES (modules/pairing)**: the redeem result now",
+            "**Suite**: dashboard tsc clean, vitest 77/77 (10 profile pins: canon"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 272 (§5 rung 2: the context-nonce binding — the key card, and the ride rides LIVE)",
+      "sections": [
+        {
+          "name": "Added - rung 2 + the honest key manager + the live corridor",
+          "items": [
+            "**§5 RUNG 2 — CONTEXT-NONCE BINDING (pod + client, one law)**: the ride",
+            "**THE E2E KEY CARD (Settings)**: the sovereign profile's honest key",
+            "**`npm run pilot:pairing-ride` (scripts/pilot-pairing-ride.js)**: THE",
+            "**Fixtures truth-up**: the two-relays pilot and the relay suite ride the",
+            "**Suite**: dashboard tsc clean, vitest 67/67 (3 key-card render pins:"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 271 (P6b: the pairing-time e2e channel rides — key binding + the live chain)",
+      "sections": [
+        {
+          "name": "Added - the binding moment, the sealed ride, and the chain editor",
+          "items": [
+            "**THE KEY BINDING AT PAIRING (pod, §5 rung 1)**: `pairing_voucher_redeem`",
+            "**`relay_ride` DOOR VERB (lib/mcp.js) + THE SHARED RIDE CORE",
+            "**THE CLIENT CRYPTO (`web/dashboard/src/lib/seal.ts`)**: WebCrypto",
+            "**THE LIVE ROUTE (src/api.ts `exec`)**: usage ON + a bound key ⇒ door",
+            "**THE SOVEREIGN PROFILE STATE (src/state.ts)**: chain hops",
+            "**THE CHAIN EDITOR (Settings, prd-relay.md 3.3)**: add = a live read of",
+            "**Suite**: dashboard tsc clean, web/relay tsc clean, vitest 59/59 (10"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "lint gate for the web trees (the TS/TSX parse gap is closed)",
+      "sections": [
+        {
+          "name": "Added - the web trees lint for real (`npm run lint:web`)",
+          "items": [
+            "**THE PARSER GAP (`/.eslintrc.json` override + `package.json` `lint:web`)**:",
+            "**THE CONTROL-CHAR SCAN, REPATTERNED (3 relay webhooks paths guards,",
+            "**The unknown-rule disable**: `react-hooks/exhaustive-deps` directives",
+            "**Suite**: lint:web 0 problems / exit 0 (was: 4 errors + 10 warnings"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "P5b chain (the relay chain READ over the real caps routes)",
+      "sections": [
+        {
+          "name": "Added - `/chain` (module #20, prd-carrier-share.md 3.2 P5b, from prd-relay.md 3.3/6.1)",
+          "items": [
+            "**THE CHAIN MODULE (`web/dashboard/src/modules/chain`, `route /chain`,",
+            "**HONEST CAPS RECORDS (`relayCaps` in src/api.ts, typed zod)**: 404",
+            "**THE CORE-RUNG BADGE (§5 pin)**: every hop states the core-rung line",
+            "**THE PROBE RIDES THE DOOR (§3.3 probe seam)**: a `relay.lost` beacon",
+            "**Suite**: dashboard tsc clean; vitest 49/49 (10 new chain pins: caps"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "issues #212/#213 (the memory-learn prose lane: agent voice is writeable again)",
+      "sections": [
+        {
+          "name": "Fixed - the two false-positive walls on the learn lane (from rook on main)",
+          "items": [
+            "**THE FIELD-SPLIT SCAN (`lib/pipeline.js` `runChain`)**: the brain-write",
+            "**THE PROSE LANE (`lib/vaf.js`, `proseContent` + `PROSE_PATTERNS`)**:",
+            "**PATH CHECK ANCHORING (`checkPathTraversal`)**: the home-expansion",
+            "**ACTIONABLE REFUSALS**: `Path blocked` now names the rule and the",
+            "**Regression pins** (test/memory.test.js): the literal repro bodies"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 270 (the origins posture is law - intranet LAN-scope relay + the ops CLI faces)",
+      "sections": [
+        {
+          "name": "Added - the posture (relay) and the faces (CLI)",
+          "items": [
+            "**THE ORIGIN POLICY (`lib/api.js` `_relayOriginPolicy`, one resolver,",
+            "**THE LAN CARVE-OUT IN THE WALL (`lib/network.js`)**: new",
+            "**THE KIT DOUBLES THE POSTURE KEYS** (`web/kit/contracts",
+            "**THE PILOT SWITCHES POSTURE**: `scripts/pilot-two-relays.js` now arms",
+            "**`vant traveler` IS ROUTED** (`bin/vant.js` COMMANDS): cli.md has",
+            "**`vant carrier` CLI (bin/carrier.js, the ops face)**: `list` (the",
+            "**Docs truth-up**: docs/operations/relay.md gains THE ORIGIN POLICY",
+            "**Suite**: relay 38/38 (new block 16 pins all postures incl."
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 269 (P3: the r/2 webhook relay lane rides REAL pods — pilot:relay, the sealed corridor)",
+      "sections": [
+        {
+          "name": "Added - the lane the mesh speaks (relays on real pods, no new lib laws)",
+          "items": [
+            "**`scripts/pilot-two-relays.js` (`npm run pilot:relay`)**: the r/2",
+            "**THE RIDE CORRIDOR (relay.ride, a pod as the sealed ENDPOINT)**: a",
+            "**THE HOP CORRIDOR (relay.hop, a pod as the FORWARDER)**: a signed hop",
+            "**THE LANE RED TEAM (5 attacks, every one REFUSED or typed, 16/16",
+            "**Suite**: pilot:relay 16/16 (L/F/R/H blocks), relay suite untouched"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 268 (P2.5: the artifact rides the wire too — traveler_stamp, both qr halves cross real HTTP)",
+      "sections": [
+        {
+          "name": "Added - the raster crosses the wire (the in-memory dock is gone)",
+          "items": [
+            "**`traveler_stamp` door verb (lib/mcp.js)**: the OTHER half of the qr",
+            "**THE SERVING WALL, ONE LAW (refactor)**: `traveler_fetch` and",
+            "**`scripts/pilot-two-pods.js` Act III rewired**: pod B's station no",
+            "**THE IN-TRANSIT RED TEAM (4 attacks, every one REFUSED, 18/18 pins",
+            "**Suite**: pilot:pods 18/18 (14 door/boundary + 4 red-team), mcp"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 267 (P2 two-pod: the raster alone crosses the boundary — traveler_fetch + the wire hook)",
+      "sections": [
+        {
+          "name": "Added - the cross-node packet leg (the door, the seam, the demo)",
+          "items": [
+            "**`traveler_fetch` door verb (read-class, lib/mcp.js)**: a node serves",
+            "**THE WIRE HOOK (lib/carriers.js)**: `carriers.setPointerFetch(hook)`",
+            "**`scripts/pilot-two-pods.js` (`npm run pilot:pods`)**: the P2 demo —",
+            "**THE REQUIREKEY POSTURE (demo doors)**: keyless POSTs answer 401 on",
+            "**THE BOUNDARY RED TEAM (3 attacks, every one REFUSED, 17/17 pins",
+            "**Read-class canon grows by one (+2 honest re-pins)**: `fetch` joins",
+            "**The one change that stays simulation**: the pods are real child",
+            "**Suite**: pilot:pods 17/17 (14 door/boundary + 3 red-team), carriers"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 266 (the pilot rides BOTH halves of the qr lane: pointer bridge leg added to P1)",
+      "sections": [
+        {
+          "name": "Added - the second bridge leg (scan → resolve → walk certifies, one run)",
+          "items": [
+            "**`npm run pilot:mfg` grows a leg (B5–B10)**: after the PLC plate ships",
+            "**Idempotent re-run law**: a second pilot run hits persist()'s",
+            "**Suite**: pilot 19/19 (13 prior + 6 pointer-leg pins), carriers"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 265 (pointer-QR: the extended vant frame — lattice-scale identity rides the mark)",
+      "sections": [
+        {
+          "name": "Added - the pointer half of the qr lane (one lane, two grammars, auto-detect)",
+          "items": [
+            "**THE POINTER QR (owner rulings, 2026-10-18):** encode(t, 'qr',",
+            "**ONE QR LANE, AUTO-DETECT (scan ruling):** decode reads any mark and",
+            "**RESOLVE-TO-PACKET (scan ruling), fail-closed by law:** a pointer",
+            "**THE PURE-POINTER OPTION (scan ruling):** decode(png, { pointerOnly:",
+            "**Suite**: carriers 103/103 (the P-block pins: frame grammar, honest"
+          ]
+        },
+        {
+          "name": "Corrected - the address-space honesty (the 10-billion claim, already fixed in-docs)",
+          "items": [
+            "The routeable NSC-9 barcode doorway is 9,000,000,000 addresses"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 264 (the QR lane is real; the blank becomes the plate)",
+      "sections": [
+        {
+          "name": "Added - the symbology lane (a real reader, not a self-confirmation loop)",
+          "items": [
+            "**`qr` carrier is REAL (lib/carriers.js)**: the declared-absent lane",
+            "**THE QR/PLATE MIX, DECIDED (owner's answers, 2026-10-18):** full QR",
+            "**Suite**: carriers 95/95 (the three 1b/8a/8a-qr pins rotated: png"
+          ]
+        },
+        {
+          "name": "Changed - naming (pass 262 era renamed in-package)",
+          "items": [
+            "**THE PLATE RENAME**: `blankDefine/blankList/_hydrateBlanks` are now"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 263 (P1 fleet pilot: the line runs, the record refuses — std passive MIS)",
+      "sections": [
+        {
+          "name": "Added - the simulated manufacturing line pilot (no new lib laws; the OS held the whole red team)",
+          "items": [
+            "**`scripts/pilot-mfg-line.js`** (npm script `pilot:mfg`): the P1 pilot",
+            "**THE PLC-DIALECT PLATE, DISCOVERED THROUGH A PILOT (not a demo):**",
+            "**THE RED TEAM (7 attacks, every one REFUSED or EXPOSED, 13/13 pins",
+            "**Suite**: the pilot is a script, not a unit test — exit 1 on any wall"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "passes 257-262 (entries reconstituted from code after an in-workspace file loss)",
+      "sections": []
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 256 (the Traveler joins the OS: pipeline-wired, evented, audited, crew-attributed)",
+      "sections": [
+        {
+          "name": "Added - OS integration (the backend-lane completion, before any frontend)",
+          "items": [
+            "**Pipeline wiring (`lib/traveler.js`)**: reads/writes through the",
+            "**Agent/team attribution**: steps carry `by` (explicit > `VANT_AGENT`",
+            "**Determinism law**: `mint` accepts `now` — same payload + ledger +",
+            "**Suite**: `test/traveler-lib.test.js` 31/31 — the new H-block pins"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 255 (the Traveler works: backend lib + CLI + MCP door — the auditable pin rides live, ISO 9001 8.5.2 adopted)",
+      "sections": [
+        {
+          "name": "Added",
+          "items": [
+            "**Backend lib (`lib/traveler.js`)**: the clarified object — a holder of",
+            "**CLI face (`bin/traveler.js`)**: `open / hop / status / audit /",
+            "**MCP door verbs**: `traveler_open / traveler_hop / traveler_status /",
+            "**PRD mirror**: prd-web §11 gains the owner's clarified framing",
+            "**Suites**: `test/traveler-lib.test.js` 25/25 (mint/advance/verify,"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 254 (the Traveler: the enterprise router object — the schema-rizer is real, kit + pod face in code)",
+      "sections": [
+        {
+          "name": "Added",
+          "items": [
+            "**Traveler kit (tr/1)** in `web/kit/contracts/traveler-contract.js`: the",
+            "**Vendor uplift:** the relay kit now carries two sources (r/2",
+            "**Pod face:** `relay.travel` bridge family in `lib/api.js` (plain-copy",
+            "**Suite:** `test/traveler.test.js` 26/26 — laws, rizer, runtime-",
+            "**PRD frontlined:** `labs/prd-web.md` §11 — definition, rizer,"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 253 (the config-door fix: #205 closed — masked gets, immutable secret sets)",
+      "sections": [
+        {
+          "name": "Fixed - security (closes #205)",
+          "items": [
+            "**config door (#205):** `vant_config_get` masks secret keys at the",
+            "**duplicate-registration bug:** a second `vant_config_set`",
+            "**test hygiene:** guest roster cap is env-tunable for test harnesses",
+            "Regression pins: 3 new in mcp.test.js (mask, typed refusal +"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 252 (red team round 5: the config lane — raw-secret read by read-only guests, #205 filed)",
+      "sections": [
+        {
+          "name": "Security",
+          "items": [
+            "**P1 (#205, transparency):** `vant_config_get` is guest-gated as",
+            "Guest issue/verify/gate chain inspected: solid (claim-once hex",
+            "Carried to round 6: agent_spawn quota window, escrow concurrency,"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 251 (the door fix batch: #203 + #204 fixed at cause, closed on the security PR)",
+      "sections": [
+        {
+          "name": "Fixed - security (closes #203, #204)",
+          "items": [
+            "**door (#203):** the CORS class now emits `Access-Control-Allow-Origin`",
+            "**escrow (#204):** the approval lane is wired and hardened — exact/",
+            "Disclosure: docs/reference/escrow.md rewritten to the truthful"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 250 (red team round 4: storage/escrow lanes — approval gate unwired, #204 filed)",
+      "sections": [
+        {
+          "name": "Security",
+          "items": [
+            "**P3 (#204, transparency):** the escrow APPROVAL layer (docs: \"gate",
+            "**Holds:** WAL replay containment + blob allowlist + DENIED-not-empty",
+            "Carried to round 5: agent_spawn check-then-act window, escrow"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 249 (red team round 3: the door lanes — #203 filed, QoS holds)",
+      "sections": [
+        {
+          "name": "Security",
+          "items": [
+            "**P2 (#203, transparency):** `lib/server.js` CORS class reflects any",
+            "**Holds:** QoS global cap beats client-id rotation (60/40 burst",
+            "Lanes carried to round 4: WAL torn-write/replay, escrow race,"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 248 (docs: the industrial router object — the horcrux is the router; prd-automation seeded)",
+      "sections": [
+        {
+          "name": "Added - automation arc (docs-only; nothing built per the owner's build order)",
+          "items": [
+            "**labs/prd-automation.md** (v0.1 draft): the automation/industrial",
+            "**docs/advanced/nsc9-spec.md**: router-object seed section added to"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 247 (red team round 2: nation-state-lane re-attack — defenses held)",
+      "sections": []
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 246 (security fix batch: #199 #200 #201 fixed at cause and closed with evidence)",
+      "sections": [
+        {
+          "name": "Fixed - security (closes #199, #200, #201)",
+          "items": [
+            "**search (#199):** BM25 TF scoring no longer compiles guest query",
+            "**CLI (#200):** every git execution in bin/ is argv-routed",
+            "**horcrux (#201):** the `p_<password>` filename is no longer a",
+            "Verification: 19-suite sweep green; each issue closed with an"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 245 (red team: nuclear-scale self-adversarial security sweep)",
+      "sections": [
+        {
+          "name": "Security - 3 live findings PoC'd on our own surfaces, filed upstream as #199/#200/#201",
+          "items": [
+            "**P1 (#199) search:** BM25 builds `new RegExp` from raw guest",
+            "**P1 (#200) CLI:** `execSync` interpolates the UNVALIDATED current",
+            "**P2 (#201) horcrux:** brain password exposed via argv (`ps`),",
+            "Frontend/relay verdict from the sweep: clean sandwich — zero"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 244 (the OSS face: post-merge brain refresh, the stone re-carved, the NSC-9 industrial playbook seed)",
+      "sections": [
+        {
+          "name": "Brains + the boot horcrux",
+          "items": [
+            "The axolotl brain files updated for the merge state (identity gains",
+            "The boot horcrux refreshed IN PLACE (same `p_` password) so the stone"
+          ]
+        },
+        {
+          "name": "Spec'd - the NSC-9 industrial playbook seed (owner sidebank)",
+          "items": [
+            "`docs/advanced/nsc9-spec.md` gains the industrial/MFG playbook seed:"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 243d (the CI stabilization trail: green on Actions, four latent classes fixed at cause)",
+      "sections": [
+        {
+          "name": "Fixed - the four classes",
+          "items": [
+            "**Detached-HEAD wording, twice**: Actions checks out a PR at a merge",
+            "**Raw throw reintroduced into lib/**: the RAG projection guard",
+            "**`vant qc --help` side-ran the full battery**: `bin/qc.js` had no help",
+            "**Same-port server restart flake**: the messages CS door block rebound"
+          ]
+        },
+        {
+          "name": "Fixed - the two exact-count/one-time assumptions",
+          "items": [
+            "`test/e2e-grand-tour.test.js` gate B demanded `/tools === 328` — stale",
+            "`test/init-wizard.test.js` ran `init --yes` ONCE then demanded rerun"
+          ]
+        },
+        {
+          "name": "Pins",
+          "items": [
+            "Door pins 28/28 locally + detached-wording probes against a throwaway"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 243 (the security-pipeline scan: the pod verb, the scanner, the status card, and the objects container spec'd)",
+      "sections": [
+        {
+          "name": "Added - `security_pipeline_report` (the pod-side scan)",
+          "items": [
+            "**`lib/security-pipeline.js` (NEW)**: walks the pod's `lib/` tree",
+            "**The door verb (`lib/mcp.js`)**: admin-only (the `guest_list`",
+            "**Live truth at HEAD**: 180 modules scanned, 65 with gate wiring,",
+            "**Dashboard (status #3)**: a `PipelineScanCard` renders the report",
+            "**Spec'd (labs/prd-web.md 4.4 + rows 29-34)**: the same contract"
+          ]
+        },
+        {
+          "name": "Pins",
+          "items": [
+            "`test/security-pipeline.test.js` (NEW, 8/8): report shape,",
+            "MCP docs coverage 332 = 332 (the `security_pipeline_report` row +"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 239 (the canonical stone: boot-folder cleanup, the carrier abstraction recorded, horcrux refreshed)",
+      "sections": [
+        {
+          "name": "Housekeeping - the boot folder is CANONICAL-ONLY",
+          "items": [
+            "`models/public/vant/boot/` now carries exactly: the axolotl stone",
+            "Era stones (`buffy-p_buffy2026.svg`, `nova-p_nova2026.svg`) remain in"
+          ]
+        },
+        {
+          "name": "Spec'd - the covert-carrier abstraction (prd-web.md 4.2)",
+          "items": [
+            "QR is promoted from a pairing feature to ONE interface module in a",
+            "Recorded as a REQUIREMENT, not a build-now: lands when a real"
+          ]
+        },
+        {
+          "name": "The stone, refreshed for onboarding",
+          "items": [
+            "`models/private/axolotl/identity.md` rewritten for the canonical",
+            "Horcrux refreshed IN PLACE with the SAME password (`axolotl2026`, the"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 238 (the P2 spawn leg closed: the canSpawn pod-side decision, documented)",
+      "sections": [
+        {
+          "name": "Documented - the spawn-leg chain, verified live",
+          "items": [
+            "**The door's guest gate** classifies spawn-class verbs",
+            "**`agents.spawn` (lib/agents/core.js)** then runs",
+            "**The host knobs that answer TRUE, by name**: `vant org grant`"
+          ]
+        },
+        {
+          "name": "Docs truth upgraded",
+          "items": [
+            "`docs/security/multi-guest-auth.md`: the spawn-leg closure stated",
+            "`labs/prd-web.md`: the P3 phase section states landed-vs-remaining"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 215 (#185 closed: per-guest read-verb enumeration throttle + the docs freshness sweep)",
+      "sections": [
+        {
+          "name": "Added - the per-guest read budget (`lib/guests.js` + the door)",
+          "items": [
+            "**`guests.checkReadBudget(guestId)`**: fixed-window budget on the door",
+            "**Defaults**: 120 reads per 60s window (a dashboard cadence, not a",
+            "**Refusal shape**: typed `429` with `reasonCode: E_GUEST_THROTTLED` and",
+            "Hosts and write/exec verbs untouched (the EW4 per-client IP limiter"
+          ]
+        },
+        {
+          "name": "Docs freshness sweep (owner ask)",
+          "items": [
+            "Greps for claims made stale by passes 211-215: none found beyond the",
+            "Full lint stack green: style, links, frontmatter, language, fiction",
+            "New env knobs documented at [Multi-Guest"
+          ]
+        },
+        {
+          "name": "Pins",
+          "items": [
+            "`test/mcp.test.js` (+3, 17/17 x2): the budget trips typed (reads 1-3"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 214 (#185 channel scope: the owner concept for msg channels + two live bugs found by its own survey)",
+      "sections": [
+        {
+          "name": "Fixed - two live bugs the survey caught",
+          "items": [
+            "**`msg_send` wrote garbage**: the MCP handler passed the STRING content",
+            "**`msg_list` ignored its own arguments**: the handler called"
+          ]
+        },
+        {
+          "name": "Added - channel owner (`lib/msg.js` + the MCP door)",
+          "items": [
+            "**`msg.send(chan, msg, { scopeOwner })`**: stamp-on-create binds a NEW",
+            "**`msg.setChannelOwner(chan, ref)`**: claims an unowned channel",
+            "**`msg.channelOwner(chan)`** accessor; `clear()` drops the owner WITH the",
+            "**Door tenant posture (same rule as `agent_list`, pass 213)**: foreign"
+          ]
+        },
+        {
+          "name": "Pins",
+          "items": [
+            "`test/msg.test.js` (+4, 29/29 ×2): stamp-on-create + loud invalid ref,",
+            "`test/guests.test.js` (+8, 25/25 ×2): the door truth — public readable,"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 213 (#185 H5: per-tenant list filtering — the pass-211 boundary closed)",
+      "sections": [
+        {
+          "name": "Added - per-tenant roster filtering (`lib/guests.js` + the MCP door)",
+          "items": [
+            "**`guests.tenantAgentVisible(agentId, guestOwnerRef)`**: the crew-roster",
+            "**`guests.tenantVisible(recordOwnerRef, guestOwnerRef)`**: the general",
+            "**Door wiring (`lib/mcp.js`)**: `agent_list` behind the exec door filters"
+          ]
+        },
+        {
+          "name": "Boundary statement (docs/security/multi-guest-auth.md)",
+          "items": [
+            "The pass-211 \"org-wide lists are operator-trust surfaces\" caveat is"
+          ]
+        },
+        {
+          "name": "Pins",
+          "items": [
+            "`test/guests.test.js` (+4, 17/17 × 2 runs): matcher rules (public row /"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 212 (#185 H2/H3/H4: the event tap, era-context chat, and the composed work order)",
+      "sections": [
+        {
+          "name": "Added - work_assign: the composed verb (`lib/mcp.js`)",
+          "items": [
+            "**`work_assign`**: one call = the full work handoff — task text +",
+            "**Refusal law**: every failed leg returns a typed honest refusal",
+            "Explicit `agentId` is honored exactly — never silently replaced with"
+          ]
+        },
+        {
+          "name": "Added - era-context chat tagging (`lib/msg.js`)",
+          "items": [
+            "**`msg.create({ era, task })`** tags a chat thread with the era (and",
+            "era/task ride the arch-A snapshot (`state/msg-conversations.json`),"
+          ]
+        },
+        {
+          "name": "Added - the MCP event tap (`lib/mcp.js`)",
+          "items": [
+            "Guests with the spawn role subscribe to a live event family"
+          ]
+        },
+        {
+          "name": "Pins",
+          "items": [
+            "`test/mcp.test.js` (+5): schema gate, absent-agent refusal (roster",
+            "`test/msg.test.js` (+9): tagging, hostile-tag rejection, honest",
+            "`test/tap.test.js`: the fix to the emit→dispatch path plus honest"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 211 (#185 H1: per-identity multi-guest auth)",
+      "sections": [
+        {
+          "name": "Added - guests: the per-identity layer (`lib/guests.js`, NEW)",
+          "items": [
+            "**`guests.issue/verify/revoke/list/pair`**: tokens `vguest_<id>_<secret>`",
+            "**Roles ride the capability vocabulary** (never a fourth permission",
+            "**The door gate (lib/mcp.js)**: guest tokens verify BEFORE execute and",
+            "**Pairing voucher**: `vant headless` persists its pairing code as a",
+            "**The auth.js seam is REAL for guests**: `revokeToken('vguest_...')`",
+            "**Doors**: CLI `vant guest issue|list|revoke|pair` (routed; cli.md row",
+            "**Spec + pins**: docs/security/multi-guest-auth.md (the full contract"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 210 (#187 headless: the serving pod + the honest REST retire)",
+      "sections": [
+        {
+          "name": "Added - `vant headless` (the headless serving pod)",
+          "items": [
+            "One boot = MCP door (3457-class, every registered tool — the door IS the",
+            "`--help` is honest (dispatcher branch answers it), per the truth-in-help",
+            "Pins: `test/headless-retire.test.js` (14) — detectMode claims no mode on"
+          ]
+        },
+        {
+          "name": "Fixed - the honest retire + stale-path sweep",
+          "items": [
+            "REST sidecar is health-only everywhere: GET `/tools` → 410 (the MCP door",
+            "`lib/api.js detectMode()`: a plain import no longer claims an ambient",
+            "Docs truth: `docs/reference/rest-api.md`, the DEPLOY.md port-map row,"
+          ]
+        },
+        {
+          "name": "Owner ruling carried through (no code, verified)",
+          "items": [
+            "Leisure/tempo containment: no legacy `models/{leisure,tempo}/` migration"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 209 (#196 ruling: contained ledgers + kernel-driven leisure.autoPursue, ONE pass)",
+      "sections": [
+        {
+          "name": "Added - containment: the keepers move into the brain tree",
+          "items": [
+            "**`lib/leisure.js`**: ledger relocated `models/leisure/<brain>.json` →",
+            "**`lib/tempo.js`**: ledger relocated `models/tempo/ledger.json` →",
+            "Both ledgers ride the gitignored private tree (zero sync traffic);"
+          ]
+        },
+        {
+          "name": "Added - `leisure.autoPursue`: kernel-driven autonomy, default OFF",
+          "items": [
+            "**Kill switch:** `leisure.autoPursue` (config or env",
+            "**Caps:** `leisure.autoPursueMaxWindowMs` (default 15 min) +",
+            "**QoS breaker:** circuit OPEN → no play.",
+            "**Work precedence:** an open era (work owns the attention) or a live",
+            "**Executable provider:** the kernel executes NO prose - the agent runtime",
+            "**Escrow for token-cost steps:** a provider declaring `tokenCost: true`",
+            "**Events:** `leisure:auto_pursued` { want, windowMs, dailyUsed, dailyCap,"
+          ]
+        },
+        {
+          "name": "Pins + docs",
+          "items": [
+            "`test/leisure.test.js` 15 → 21: containment path pin and the FULL gate",
+            "Docs: `docs/memory/leisure.md` + `docs/memory/tempo.md` contract paths"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 208 (#196 leisure: the free-time keeper + the zen/dream/tempo loop)",
+      "sections": [
+        {
+          "name": "Added - #196 free-time methodology: `lib/leisure.js` + the cohesive loop",
+          "items": [
+            "**`lib/leisure.js` (NEW)** — the want-list keeper: play now persists",
+            "**The cohesive loop (owner direction this pass):**",
+            "**Door:** `vant leisure",
+            "**Psy tree (the methodology):** `models/public/vant/leisure.md` (the",
+            "**Skill:** `vant-skill-rest` teaches the drag-free spend: check the",
+            "**Catalogue:** `leisure:wanted` / `leisure:pursued` /",
+            "**Docs:** `docs/memory/leisure.md` + memory-index row.",
+            "**Pins:** `test/leisure.test.js` - want dedupe + file-scoped"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 207c (pass-190/206 close-out + #195 art packs + #197 tempo)",
+      "sections": [
+        {
+          "name": "Fixed - #189 close-out: the last two unexecuted battery items landed",
+          "items": [
+            "**Wave 3 gate (R4, #189): `lib/nature.js` `accumulateCosmic()` now rides",
+            "**Wave 2 / R5 truth-in-help: `bin/encrypt.js` encrypt/decrypt now encrypt",
+            "**Battery item 3: `vant health` exit 0; brain re-anchored with descriptive"
+          ]
+        },
+        {
+          "name": "Added - #197 tempo: the time-dilation keeper (loop first, formula later)",
+          "items": [
+            "**`lib/tempo.js` (NEW)** — an owner-stated wall-clock budget becomes N",
+            "**Door:** `vant tempo begin|status|stop|end|receipts|pace` (wired in",
+            "**Persistence + resumability:** ledger at `models/tempo/ledger.json`",
+            "**Isolation rule:** a failing slice callback is recorded as its own",
+            "**Consciousness idle consult (#196 integration):**",
+            "**Catalogue:** `tempo:budget-start` / `tempo:slice` / `tempo:budget-end`",
+            "**Pins:** `test/tempo.test.js` (14) - duration matrix, sampled-window"
+          ]
+        },
+        {
+          "name": "Added - #195 art packs: horcrux stones upgrade from 3 circles to generative math-art",
+          "items": [
+            "**`lib/art-packs.js` (NEW)** — deterministic generative art engine for the",
+            "**Wiring:** `canvas.generateHorcruxTemplate` delegates the four reserved",
+            "**Legacy is byte-exact:** `minimal`/`spiral`/default styles keep their",
+            "**End-to-end receipt:** `vant horcrux create --art backup` → 9.5 MB stone,",
+            "**Pins:** `test/art-packs.test.js` (14) — determinism (same style+seed →",
+            "Future (documented in the note, not this pass): durable seed = brain"
+          ]
+        },
+        {
+          "name": "Added - Battery item 4 (door sweep): honest auth posture at every key door",
+          "items": [
+            "New `config.authPosture()` in `lib/config.js`: ONE resolver-derived",
+            "The HTTP server door (`lib/server.js`) prints the posture line on listen;",
+            "Pinned by `test/auth.test.js` (`authPosture`: OPEN names all consulted"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 206 (Language gate - contributor prose is English-only, #184)",
+      "sections": [
+        {
+          "name": "Added - Language gate (issue #184)",
+          "items": [
+            "Detection is a Unicode script-block LONGEST-RUN analyzer (Han,",
+            "Allowlist by construction: fenced blocks and inline-code spans are",
+            "Failure contract: exit 1, `path:line <Script> (N chars): <line>`;",
+            "Wired in: `npm run lint:docs` final step and a standalone CI row in"
+          ]
+        },
+        {
+          "name": "Fixed",
+          "items": [
+            "#186/#188 fix-first (crash + honesty bugs, independent of the R1-R5",
+            "#119: `vant org grant` persisted the operator grant, but the write",
+            "#120: `teams.createDept` / `teams.createTeam` silently stored the",
+            "The gate's first live run caught its own first real finding: a",
+            "docs/reference/era.md (the Wave-Era page written in pass 205) now"
+          ]
+        },
+        {
+          "name": "Added - Era (`vant era`): intent → folded record → signed rollup (issues #177/#178; appendix #179 tracked)",
+          "items": [
+            "**The contract (`lib/era.js`):** arch-A state store persistence",
+            "**Event catalogue (`FIELD_FOR_EVENT`):** 16 families → 5 fields,",
+            "**CLI (`bin/era.js`, dispatcher-routed):** `era start <intent>` /",
+            "**MCP +5:** `era_start/era_log/era_close/era_current/era_list`",
+            "**Pins:** `test/era.test.js` 7/0 — typed refusals, subscriber no-op",
+            "**Docs:** `docs/reference/era.md` (storage, record shape, routing",
+            "**Appendix (#179) tracked separately:** scope-aware eras, agora"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 204 (QC live-fire — five adversarial holes closed)",
+      "sections": [
+        {
+          "name": "Fixed - QC sweep of the U-wave surface (marketplace skills + escrow)",
+          "items": [
+            "**Score-settlement exploit (`settleSkill`):** settlement moved REAL",
+            "**Scarcity bypass (`buySkill`):** the supply-1 oversell — a skill",
+            "**Self-dealing (`buySkill`):** a seller could buy their own listing —",
+            "**Stealth-refute TTL (`_skillsTtlMs`):** the brain-config TTL path was",
+            "**Escrow max-holds starvation (`lib/escrow.js`):** expired holds were",
+            "**Supply semantics (decided, not just fixed):** skills are labor — a",
+            "**Pins:** `test/market-skills.test.js` 19 → 23 (sold-out oversell,",
+            "**Docs:** playbook §8 failure-mode rows + §10 supply semantics"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 203 (U6.6 — the last three follow-ups resolved)",
+      "sections": [
+        {
+          "name": "Added - Wave U6.6: timeout evidence sweep + shill-resistant reputation + the launch decision",
+          "items": [
+            "**Timeout automation with evidence rules:** `skillSweep()` releases",
+            "**Shill-resistant reputation aggregation:**",
+            "**'launch'-payload decision — RESOLVED, not deferred:** the whole",
+            "**Pins:** `test/market-skills.test.js` 14 → 19 (sweep evidence",
+            "**Docs:** playbook §6/6b (sweep economics + reputation teeth) and §7"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 202 (U6.5 PRODUCTIZED — the skills marketplace is a product)",
+      "sections": [
+        {
+          "name": "Added - Wave U6.5: credentialed marketplace gets its product surface (gate ON is an explicit act)",
+          "items": [
+            "**Real escrow settlement (the honest gap closed this pass):**",
+            "**Config mounting:** `VANT_MARKET_SKILLS_ENABLED` env alias registered",
+            "**CLI verb family on `bin/market.js`:** `skill-list` (title, --price,",
+            "**MCP +6:** `market_skill_list/_buy/_deliver/_settle/_status/_gate`",
+            "**Skill fields persist:** `payloadKind`, `capabilityTag`,",
+            "**Docs:** `docs/operations/skills-marketplace.md` (productized",
+            "**Pins:** `test/market-skills.test.js` 8 → 14 (SINGLE-DEBIT invariant",
+            "**Still additive follow-ups (unchanged):** timeout automation with"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 201 (Wave U6 prototype — credentialed marketplace)",
+      "sections": [
+        {
+          "name": "Added - Wave U6 PROTOTYPE: skills as paid digital labor, gated OFF by default",
+          "items": [
+            "**The contract (`labs/prototype-marketplace.md`):** buyers pay",
+            "**Prototype surface (`lib/market.js` / U6.2):** `listSkill`,",
+            "**Trust feed (U6.3):** settle outcomes write real cooperation",
+            "**Adversarial pins (U6.4):** `test/market-skills.test.js` 8/8 —",
+            "**Regression:** market/crossprocess/debit/trust suites green."
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 200 (Wave U5 — provenance/compliance bundle)",
+      "sections": [
+        {
+          "name": "Added - Wave U5: a self-verifying export bundle (tamper-EVIDENCE, fail-closed)",
+          "items": [
+            "**The L-hash is a RUNNING hash list** (`lib/export-bundle.js`):",
+            "**The bundle:** `manifest.json` (registry export, point-in-time),",
+            "**Fail-closed verify (U5.2):** extra or missing files are TAMPER, not",
+            "**Honest scope note (pinned in-suite):** a FULL re-forge of every",
+            "**CLI +1 bin (`bin/export.js`, dispatcher-routed) +2 verbs; pins:**"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 199 (Wave U4 — deliberation→decision records)",
+      "sections": [
+        {
+          "name": "Added - Wave U4: a forum decision now knows its THREAD (and the trail survives restart)",
+          "items": [
+            "**Durable thread→vote linkage (U4.1):** `forum.vote(proposal,",
+            "**Decision trail reader (U4.2):** `forum.threadDecisionTrail(barcode)`",
+            "**Pins (U4.3):** `test/forum-decisions-persistence.test.js`"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 198 (post-merge audit — the pool now REALLY debits)",
+      "sections": [
+        {
+          "name": "Fixed - scenario escrow debit was bookkeeping-only: the shared pool never drained",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 197 (Wave U3 — governance scenario playbook + resume materialization)",
+      "sections": [
+        {
+          "name": "Added - Wave U3: Governance Scenario Playbook",
+          "items": [
+            "**`lib/scenario.js` + `bin/scenario.js` (U3.1):** `vant scenario",
+            "**U3 carry-over — resume's byte-restoring materialization (closes",
+            "**MCP +3:** `vant_scenario_crew/_task/_status` (309 registered",
+            "**Docs:** `docs/operations/scenario-playbook.md` (task flow",
+            "**Verified:** `test/scenario-crew.test.js` **8/0** (typed gates,"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 197 (Wave U2 — prd-universe.md)",
+      "sections": [
+        {
+          "name": "Added - Wave U2: Stored, Content-Addressed Scenario Manifests",
+          "items": [
+            "**`lib/state/genesis-snapshot.js` U2 surface:** `recordSnapshot()`",
+            "**Rules fix (the U2 opener, from U1's honest limitation):**",
+            "**MCP +3:** `vant_universe_record/_diff/_resume` (306 registered tools,",
+            "**CLI +3 verbs on `bin/universe.js`:** `record` (--fork, --state-root),",
+            "**Verified:** `test/scenario-manifest.test.js` **18/0** (U2.1–U2.5 +"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 196",
+      "sections": [
+        {
+          "name": "Fixed - `vant config get` now reports LIVE values for the domain-tuning keys",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 195",
+      "sections": [
+        {
+          "name": "Added - Wave G: GitProvider stack adopts RemoteTransport (prd-canonicalization §7 adoption wave 3)",
+          "items": [
+            "**`lib/remote.js` — `GitProvider extends RemoteTransport`.** Every Git",
+            "**The auth() door is THE credential resolution.** `this.token` instance",
+            "**Transport tuning registered:** `VANT_SYNC_OP_TIMEOUT_MS`,",
+            "**Read-path compatibility:** shared headers/URLs/_requestJson/_gitExec",
+            "Verified: CI **453/0**; probe pins — providers are instanceof"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 194",
+      "sections": [
+        {
+          "name": "Fixed - trust.quarantine() async gap",
+          "items": []
+        },
+        {
+          "name": "Added - RAG tuning keys go live (spec → implementation)",
+          "items": [
+            "**`lib/config.js`** gains RAG getters — `ragRehydrateMaxSize` (default",
+            "**`lib/search.js`** enforces them: `hydrate()` applies",
+            "**`bin/search.js`** uses `rag.limitMax` as its default limit ceiling"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 193",
+      "sections": [
+        {
+          "name": "Fixed - Wave A stage 2: the bus is the ONLY emitter (prd-canonicalization §2)",
+          "items": []
+        },
+        {
+          "name": "Changed - Registry decision: WIRED WIDER (agent-registry persistence + trust feed)",
+          "items": [
+            "**Persistent** — the agent book hydrates from",
+            "**Trust feed** — a successful registration now writes ONE positive",
+            "**`registerBrainAgent` wired** — the pass-old `_brainRegistries` dead",
+            "Pin suite: `test/agent-registry.test.js` (11 pins — persist, trust"
+          ]
+        },
+        {
+          "name": "Fixed - Config-doc honesty: settings.ini/mood.ini fiction retired (item-1 closeout)",
+          "items": [
+            "**`settings.example.ini` / `mood.example.ini`: zero runtime readers.**",
+            "**Docs reconciled to the truth:** `docs/reference/config.md` now labels",
+            "The config-precedence contract stands unchanged as landed in pass 188:"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "release",
+      "version": "0.8.6",
+      "date": "2026-08-29",
+      "title": "Axolotl \"Nuclear Breaking\" Refactor",
+      "sections": [
+        {
+          "name": "Refactor - Multi-Brain (T1–T4)",
+          "items": [
+            "`pipeline.run` now caches module resolution and supports `async`",
+            "\"Secured\" variants of the brain surface are exported for callers that",
+            "A second private brain (\"axolotl\") is loaded alongside the public"
+          ]
+        },
+        {
+          "name": "Refactor - Dead-Code Bloat Removal (T10b–T14b-r1, 5 commits)",
+          "items": []
+        },
+        {
+          "name": "Test - Stale Test Fixes (T15, 1 commit)",
+          "items": []
+        },
+        {
+          "name": "Migration",
+          "items": []
+        },
+        {
+          "name": "Known Issues",
+          "items": [
+            "`test/embed.test.js` (9 fails): asserts an embedding abstraction",
+            "`test/test-escrow.js` (4 fails): canSpend/recordSpend/agent"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "Future",
+      "sections": [
+        {
+          "name": "Added - Durable Docs-Coverage Gates: MCP 300/300 + CLI 122 (pass 192)",
+          "items": [
+            "**`scripts/check-mcp-coverage.js`** — every tool registered in",
+            "**`scripts/check-cli-coverage.js`** — every `bin/*.js` must be",
+            "Why \"mentioned\" (word match) is the right contract: the shape of a",
+            "Verified: `npm run lint:coverage` PASS; all four doc gates re-run"
+          ]
+        },
+        {
+          "name": "Added - Docs Pass: Full MCP Catalog + CLI Coverage Closeout (docs pass 191)",
+          "items": [
+            "**MCP docs brought up to the CLI doc's standard.** Two MCP docs existed;",
+            "**CLI doc closeout** (`docs/reference/cli.md`): the 15 bins without a",
+            "Executable verification: doc examples spot-fired through `mcp.execute`"
+          ]
+        },
+        {
+          "name": "Fixed - MCP Fiction Audit: canned tools routed to their real libs (pass 190)",
+          "items": [
+            "**The walk.** All 299 hand-registered MCP tools swept for handlers that",
+            "**Handler-shape scan:** the remaining 134 auto-flagged handlers were",
+            "**docs/reference/mcp-tools.md** updated: resolution_track's real params",
+            "Verified: mcp.test 6/6, mcp-schema 13/13, resolution 12/12, test-mcp"
+          ]
+        },
+        {
+          "name": "Fixed - CLI Walk: bin/nodes, registry, network, connector, cache + backup/brain stubs (pass 189)",
+          "items": [
+            "**The walk.** All 122 `bin/` CLIs swept for verbs that print canned strings",
+            "**Julia live-fire verdict (the tracked \"skipped\" test):** the test is",
+            "Sweep confirmed clean: no \"not wired yet\", \"placeholder\", \"coming soon\","
+          ]
+        },
+        {
+          "name": "Fixed + Added - Placeholder CLI Verbs Wired + Config-Precedence Docs (pass 188)",
+          "items": [
+            "**Placeholder CLI verbs wired to their real libs.** Four verbs printed",
+            "**WHY they were placeholders:** each CLI was authored against a lib",
+            "**Config-precedence docs landed** at the top of",
+            "**`getStorage('repos')` ReferenceError fixed (CI-caught).** The Wave-D",
+            "Verified: `node test/ci.js` **453 passed, 0 failed** (was 452/1);"
+          ]
+        },
+        {
+          "name": "Added - State-Spine Documentation + Last steveframe Typo (docs pass 187)",
+          "items": [
+            "**New page: [docs/memory/state-spine.md](docs/memory/state-spine.md).** The",
+            "**Crosslinked into existing docs:** memory index (specialist-formats table),",
+            "**Last live `steveframe` typo fixed:** ROADMAP.md's horcrux-sharing todo",
+            "Doc gates re-run green: frontmatter (now 119 pages) + fiction-signature scan."
+          ]
+        },
+        {
+          "name": "Fixed - Config Rogue Cleanup + Registry Completion (pass 186)",
+          "items": [
+            "**Duplicate `msg:` object key retired.** `config.load()` defined `msg:`",
+            "**`steveframe` → `stegoframe` typo fixed.** The `_config` key was",
+            "**Stale getters wired through `load()`.** `getGithub()` and",
+            "**`cfR2Bucket()` zombie removed.** Zero consumers (grep-proved + the",
+            "**ENV_REGISTRY Wave-B completion: 24 → 43 entries.** The 19 vars that",
+            "Pinned by `test/config-registry.test.js` (31 pins now, 8 new)."
+          ]
+        },
+        {
+          "name": "Added - Geometry Precision Wiring + Shim Retirement (pass 185)",
+          "items": [
+            "**Legacy `Math.imul` lattice shim retired.** `lib/geometry/lattice-keys.js`",
+            "**`lib/geometry/precision.js` (#157) is WIRED.** Quasicrystal store now",
+            "**Real engine-parity leg.** `quasicrystal.engineParity()` runs the SAME",
+            "Pinned by `test/geometry-parity.test.js` (8 pins); suites green:",
+            "**`lib/geometry/fold.js` (#154) stays a tested primitive** — the facet"
+          ]
+        },
+        {
+          "name": "Added - Wiring Candidates Landed (pass 184 — hotset, universeSeed, transport verify)",
+          "items": [
+            "**HotSet (#153) backs the state spine's tree-read hot path.** `stateStore.treeFor()`",
+            "**`universeSeed` got its first WRITER (#158).** Genesis's `_writeTopology`",
+            "**Transport verify adoption (Wave F §7, wave 2).** `lib/sync.js` gains",
+            "Pinned by `test/wiring-184.test.js` (10 pins): hot cache hit + identical"
+          ]
+        },
+        {
+          "name": "Added - RemoteTransport Seam (pass 183, prd-canonicalization Wave F)",
+          "items": [
+            "The five \"send state elsewhere\" stacks (sync, org-sync, agora-sync,",
+            "First adopter: `lib/connectors/s3.js` gains `S3Transport` — SigV4",
+            "Pinned by `test/remote-transport.test.js` (23 pins): validators"
+          ]
+        },
+        {
+          "name": "Added - Messaging Trio Charters + Shared Envelope (pass 182, prd-canonicalization Wave E)",
+          "items": [
+            "The charter is law (labs/prd-canonicalization.md §6): **msg.js owns",
+            "New `lib/messaging.js`: the ONE shared envelope — crew-bus's wire",
+            "Pinned by `test/messaging-envelope.test.js` (32 pins): shape",
+            "Consumer suites re-run green: crew-bus 20, stream, agents, forum,"
+          ]
+        },
+        {
+          "name": "Refactored - storage.js Split (pass 181, prd-canonicalization Wave D)",
+          "items": [
+            "The 2,391-line, 8-class monolith `lib/storage.js` is split into",
+            "**`lib/storage.js` REMAINS THE IMPORT SURFACE** as the factory facade",
+            "Ownership matrix landed in `labs/prd-canonicalization.md` appendix",
+            "Structural gate updated for the split: the atomic-writes structural",
+            "Suites green: storage 40, brain-strict 14, remote 13,"
+          ]
+        },
+        {
+          "name": "Refactored - One Hashing Module (pass 180, prd-canonicalization Wave C)",
+          "items": [
+            "New canonical surface `lib/hash.js`: `sha256(input)` (one-shot hex),",
+            "Every direct `crypto.createHash('sha256')` call site in `lib/` now",
+            "Pinned by `test/hash-canon.test.js` (29 pins): byte-identity vectors",
+            "Migrated suites re-run green: audit, wal, state-wiring,"
+          ]
+        },
+        {
+          "name": "Added - Event Bus Observability + Wiring (pass 179, prd-canonicalization Wave A)",
+          "items": [
+            "The shared bus emitted 266 distinct event names with only 8 heard",
+            "`lib/event-wiring.js` (wired at boot): security denials",
+            "FIXED (pre-existing): `lib/health.js runChecks()` crashed on every"
+          ]
+        },
+        {
+          "name": "Added - Config Env Registry (pass 179, Wave B)",
+          "items": [
+            "`lib/config.js` now owns a 24-entry `ENV_REGISTRY` of every `VANT_*`",
+            "Straggler modules migrated off direct `process.env` reads:"
+          ]
+        },
+        {
+          "name": "Fixed - Cross-Brain Privilege Leak via Boot Hydrate (axolotl pass 123)",
+          "items": [
+            "Boot's persisted operator-capability hydrate resolved the brain via",
+            "Bare `vant org` defaulted to the `grant` subcommand — any side-effect-free"
+          ]
+        },
+        {
+          "name": "Added - Brain Layout Migration (merge-safety, axolotl)",
+          "items": [
+            "`vant migrate` (lib/migrations.js, layout v3): imports pre-multibrain",
+            "`--brain-name <name>` names BOTH imported scopes (default `vant`);",
+            "Detection is content-based and conservative; idempotent; failed imports",
+            "Alert surfaces: start banner (real imports only), `vant health`,"
+          ]
+        },
+        {
+          "name": "Fixed - Security & Robustness (axolotl QC waves)",
+          "items": [
+            "Git CLI injection closed across `lib/branch.js` and all four git",
+            "`lib/branch.js` crashed with `audit is not defined` on every CLI-path",
+            "Commit messages are arbitrary text again: strict content patterns no",
+            "Migration import is existing-wins (never clobbers live multibrain",
+            "Brain circuit breaker (BRAIN_CIRCUIT_OPEN) on repeated load failures."
+          ]
+        },
+        {
+          "name": "Evolution - Temporal Learning System",
+          "items": [
+            "Session tracking: changes, insights per session",
+            "Auto-start/end sessions",
+            "Brain load tracking → attention boosting",
+            "Memory integration: sessions persist for semantic search",
+            "Islands integration: lazy-load evolution data",
+            "MCP tools: brain_evolution_start, brain_evolution_end, brain_evolution_insight, brain_evolution_history, brain_evolution_status",
+            "Dream integration: evolution insights consolidate to learnings"
+          ]
+        },
+        {
+          "name": "Multi-Brain Architecture v0.9.0",
+          "items": [
+            "Stack-based multi-brain loading (pushBrain, popBrain, getStack)",
+            "Brain switching (currentBrain, switchBrain)",
+            "Brain modes: silo, shared, governance",
+            "Brain types: public, private",
+            "State persistence: stack saves to models/state.json"
+          ]
+        },
+        {
+          "name": "Architecture - Areas to Address",
+          "items": [
+            "Current state: Fragmented config across multiple files",
+            "Issue: No single source of truth for configuration",
+            "Task: Unify into layered config system",
+            "Benefit: Easier to understand, configure, migrate",
+            "Current state: lib/boot.js loads layers sequentially",
+            "Issue: Rigid order, hard to customize, hard to add new layers",
+            "Task: Make boot more modular",
+            "Benefit: More flexible, easier to extend, better debugging",
+            "Current state: No formal plugin system",
+            "Vision: Runtime-extensible Vant",
+            "Tasks:",
+            "Benefit: Ecosystem of shareable extensions"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "release",
+      "version": "0.8.6",
+      "date": "2026-06-30",
+      "title": null,
+      "sections": [
+        {
+          "name": "Feature - Headless Mode (v0.8.6 SCOPE)",
+          "items": [
+            "**API System** (2026-06-30)",
+            "**Auth & Pipeline Fixes** (2026-06-30)",
+            "**Architecture** (2026-06-30)",
+            "**Agent System** (2026-06-30)",
+            "**Messaging** (2026-06-30)",
+            "**Cloudflare Integration** (2026-06-30)",
+            "**Admin UI** (2026-06-30)",
+            "**Index Engine** (Roadmap)",
+            "**Config System Consolidation** (Roadmap)"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "release",
+      "version": "0.8.6",
+      "date": "2026-05-30",
+      "title": null,
+      "sections": [
+        {
+          "name": "Feature - AI-First Runtime Interoperability (v0.8.6)",
+          "items": [
+            "**Event Wiring** (2026-05-30)",
+            "**Auto-Islands** (2026-05-30)",
+            "**Security Chain** (2026-05-30)",
+            "**Discovery Registry** (2026-05-30)",
+            "**System Dashboard** (2026-05-30)",
+            "**User Extensibility** (2026-05-30)",
+            "**Batch 2: Memory Trio Interoperability** (2026-05-30)",
+            "**Batch 3: Config Centralization** (2026-05-30)",
+            "**Batch 4: Boot System Visibility** (2026-05-30)",
+            "**Batch 5: Duality Bridge** (2026-05-30)",
+            "**Batch 6: Heartbeat Systems** (2026-05-30)",
+            "**Batch 7: Coordination Systems** (2026-05-30)",
+            "**Batch 8: API & Integration** (2026-05-30)",
+            "**Batch 9: Compute & Embed** (2026-05-30)",
+            "**Batch 10: Infrastructure** (2026-05-30)",
+            "**Batch 11: Core Systems** (2026-05-30)",
+            "**Batch 12: Utilities** (2026-05-30)",
+            "**Batch 13: Security + Infrastructure** (2026-05-30)"
+          ]
+        },
+        {
+          "name": "Feature - Multi-Agent Orchestration (v0.8.6)",
+          "items": [
+            "**MCP Agent Tools** (2026-05-13)",
+            "**Agent Quota** (2026-05-13)",
+            "**Orchestrator** (2026-05-13)",
+            "**Agent-Brain Wiring** (2026-05-13)"
+          ]
+        },
+        {
+          "name": "Feature - Git Provider Parity (v0.8.6)",
+          "items": [
+            "**Multi-Provider Support** (2026-05-10)",
+            "**Sandbox Refactor - Execution Keeper** (2026-05-10)",
+            "**Sandbox Keeper Features** (2026-05-10)",
+            "**Runtime Gate Integration** (2026-05-10)"
+          ]
+        },
+        {
+          "name": "Breaking Changes (v0.8.6)",
+          "items": [
+            "**Consolidated Cache Module** (2026-05-09)",
+            "**Deleted Unused Search/Query Modules** (2026-05-09)",
+            "**Unified Event Module** (2026-05-09)",
+            "**Deleted Unused HTTP Modules** (2026-05-09)",
+            "**Unified QoS + Throttler + Debouncer** (2026-05-09)",
+            "**JobWorker in Cron** (2026-05-09)",
+            "**Delete Deprecated Wrappers** (2026-05-09)",
+            "**Sanitize + IPFilter in VAF** (2026-05-09)",
+            "**Hybrid-Sync in Sync** (2026-05-09)",
+            "**ErrorHandler in Errors** (2026-05-09)"
+          ]
+        },
+        {
+          "name": "Added",
+          "items": [
+            "**Vant Class + Agent Runtime** (2026-05-09)"
+          ]
+        },
+        {
+          "name": "Changed",
+          "items": [
+            "**Runtime renamed to Vant** (2026-05-09)"
+          ]
+        },
+        {
+          "name": "Added",
+          "items": [
+            "**Core Modules for Vant Class** (2026-05-09)"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "release",
+      "version": "0.8.6",
+      "date": "2026-05-08",
+      "title": null,
+      "sections": [
+        {
+          "name": "Changed",
+          "items": [
+            "**Search Consolidation** (2026-05-08)",
+            "**Config+Env Merge** (2026-05-08)",
+            "**Pool Consolidation** (2026-05-08)",
+            "**Audit Unification** (2026-05-08)"
+          ]
+        },
+        {
+          "name": "Deleted",
+          "items": [
+            "lib/env.js",
+            "lib/buffer.js",
+            "lib/storage.js",
+            "lib/audit-log.js",
+            "lib/metrics.js"
+          ]
+        },
+        {
+          "name": "Fixed",
+          "items": [
+            "framework.js: _configFlag not defined",
+            "test/coverage.js: horcrux require → stego"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "release",
+      "version": "0.8.5",
+      "date": "2026-05-07",
+      "title": null,
+      "sections": [
+        {
+          "name": "Added",
+          "items": [
+            "**Encrypt Class**"
+          ]
+        },
+        {
+          "name": "Changed",
+          "items": [
+            "**Search Consolidation** (2026-05-08)",
+            "**HTTP Server Consolidation**"
+          ]
+        }
+      ]
+    }
+  ]
+}

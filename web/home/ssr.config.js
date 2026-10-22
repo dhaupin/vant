@@ -15,6 +15,7 @@
  *   /privacy   privacy policy
  *   /status    public surfacing status (island-backed)
  *   /contact   contact (form composes a GitHub issue; nothing is POSTed)
+ *   /changelog rendered at build time from CHANGELOG.md (parity-gated)
  */
 
 export default {
@@ -63,6 +64,16 @@ export default {
                 title: 'Security — Vant',
                 description:
                     'Report a vulnerability through a private GitHub advisory. The fail-closed chain: sandbox capabilities, input validation, rate budgets, escrow.',
+            },
+        },
+        {
+            path: '/changelog',
+            priority: '0.6',
+            changefreq: 'weekly',
+            meta: {
+                title: 'Changelog — Vant',
+                description:
+                    'The Vant changelog, rendered straight from the canonical CHANGELOG.md at build time and byte-gated against it — version truth stays in one place.',
             },
         },
         {

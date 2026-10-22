@@ -253,6 +253,24 @@ img, svg, canvas, video { max-width: 100%; }
 .status-meta code { background: var(--accent-soft); border-radius: 5px; padding: 1px 6px; color: var(--link); font-size: 0.76rem; }
 .island-loading { color: var(--text-muted); font-size: 0.85rem; }
 
+/* ---------- changelog page ---------- */
+.cl-entry { margin-bottom: 34px; }
+.cl-ver { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.cl-badge {
+    font-family: ui-monospace, Menlo, monospace; font-size: 0.8rem; font-weight: 700;
+    color: var(--signal); border: 1px solid var(--border); border-radius: 6px; padding: 2px 9px;
+    letter-spacing: 0.06em;
+}
+.cl-badge-rel { color: var(--accent); border-color: var(--accent); }
+.cl-date { font-family: ui-monospace, Menlo, monospace; font-size: 0.8rem; color: var(--text-muted); }
+.cl-title { font-size: 0.95rem; color: var(--text-muted); }
+.cl-sec { margin-bottom: 14px; max-width: 60rem; }
+.cl-sec-name { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+.cl-sec ul { padding-left: 1.2rem; color: var(--text-muted); font-size: 0.9rem; }
+.cl-sec li { margin-bottom: 7px; }
+.cl-sec li::marker { color: var(--signal); }
+.cl-sec code { background: var(--accent-soft); border-radius: 5px; padding: 1px 6px; font-size: 0.8rem; color: var(--link); }
+
 /* ---------- contact page ---------- */
 .contact-note { color: var(--text-muted); font-size: 0.9rem; margin: 22px 0 10px; max-width: 44rem; }
 .contact-channels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }

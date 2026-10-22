@@ -57,6 +57,9 @@ jobs:
       - name: web/home gate (links, fiction, stat truth)
         run: npm run lint:home
 
+      - name: changelog parity gate (site json vs CHANGELOG.md byte-compare, version truth)
+        run: npm run lint:changelog
+
       - name: Fiction signatures (repo-wide, wrong-claims regression gate)
         run: npm run lint:claims
 

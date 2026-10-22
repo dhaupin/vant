@@ -30,6 +30,7 @@ import Status           from './pages/Status.jsx'
 import Contact          from './pages/Contact.jsx'
 import Install          from './pages/Install.jsx'
 import Security         from './pages/Security.jsx'
+import Changelog        from './pages/Changelog.jsx'
 
 // Client-navigation meta sync. The prerender bakes correct tags per route at
 // build time; this keeps title/og/canonical in step when the user navigates in
@@ -42,6 +43,7 @@ const META = {
     '/privacy': { title: 'Privacy — Vant', description: 'Vant privacy: your brain is your repo. This site collects nothing.' },
     '/status':  { title: 'Status — Vant', description: 'Vant surfaces status, checked from your browser with honest limits.' },
     '/contact': { title: 'Contact — Vant', description: 'Reach the Vant project: compose a GitHub issue from the browser.' },
+    '/changelog': { title: 'Changelog — Vant', description: 'The Vant changelog, rendered straight from the canonical CHANGELOG.md at build time and byte-gated against it.' },
 }
 
 function SyncPageMeta({ pathname }) {
@@ -142,6 +144,7 @@ export default function AppLayout() {
                     <Route path="/privacy" element={<Privacy />} />
                     <Route path="/status"  element={<Status />} />
                     <Route path="/contact" element={<Contact />} />
+                    <Route path="/changelog" element={<Changelog />} />
                     <Route path="*"        element={<NotFound />} />
                 </Routes>
             </main>

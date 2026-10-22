@@ -95,6 +95,10 @@ for (const file of landing) {
         // shapes first, then the raw path; outside dist the raw path rule
         // applies unchanged.
         const cands = [ref.startsWith('/') ? path.join(ROOT, ref.slice(1)) : path.resolve(path.dirname(file), ref.split('#')[0].split('?')[0])];
+        // The vite app shell references its own source tree (/src/main.jsx is
+        // the module entry vite resolves at build time) - try a web/home-
+        // relative resolution before flagging it.
+        if (ref.startsWith('/')) cands.push(path.join(HOME, ref.slice(1)));
         if (ref.startsWith('/') && distIndexExists) {
             const rel = ref.slice(1).replace(/\?.*$/, '');
             cands.push(path.join(HOME, 'dist', rel, 'index.html'));

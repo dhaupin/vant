@@ -27,6 +27,7 @@ export default function Footer() {
                     <a href="https://docs.creadev.org/vant/getting-started/agent-onboarding">Agent Onboarding</a>
                     <a href="https://brain.creadev.org" rel="noopener">Brain (dashboard)</a>
                     <a href="https://github.com/dhaupin/vant">GitHub</a>
+                    <Link to="/changelog">Changelog</Link>
                     <Link to="/security">Security</Link>
                     <Link to="/contact">Contact</Link>
                     <a href="https://creadev.org" target="_blank" rel="dofollow noopener">creadev.org</a>

@@ -5,6 +5,36 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 337 (/changelog with a hard parity law + npm-compat pins - and the hidden client-bundle fix)
+
+### Added - the changelog that cannot lie
+
+- **/changelog renders ONLY from CHANGELOG.md**: `web/home/scripts/parse-changelog.mjs`
+  parses the canonical file (its house grammar: stacked `[Unreleased] - pass`
+  blocks AND version releases, multiple 0.8.6 blocks by design) into
+  `src/generated/changelog.json`, and `pages/Changelog.jsx` renders exactly
+  that — 66 entries, inline md (code/bold/links) escaped-then-reapplied.
+- **The parity gate (`npm run lint:changelog`, stepped into test.yml)**:
+  byte-compares the committed generated json against a fresh parse (first
+  drift line reported), pins package.json "version" against a `## [x.y.z]`
+  release heading (npm version truth in one place), and requires the Keep a
+  Changelog 1.1.0 + SemVer header statements that npm-adjacent tooling
+  greps for. Drift is NEVER silent: regen is one `npm run build:home`,
+  which always parses before the prestruct build.
+- **THE REAL CATCH this pass**: the site has been shipping with NO client
+  bundle at all — the app shell (web/home/index.html) lacked the
+  `<script type="module" src="/src/main.jsx">` entry tag, so vite emitted
+  zero assets and every route served static-only: no hydration, no islands,
+  no SPA nav, and the prerendered pages were the whole story. Caught while
+  verifying /changelog's entry rendering against dist. The init template's
+  own index.html omits the tag; the example/ site (the reference impl) has
+  it. Added with a comment; verified: dist/assets now emits (289kB js /
+  13.8kB css), every route carries the module script + 
+  `data-server-rendered="true"`, so hydration AND the status-board /
+  contact-form islands actually run client-side now.
+- Verified: 8/8 routes prerendered, `npm run lint:changelog` PASS, `npm run
+  lint:home` PASS (12 files), sitemap gains /changelog.
+
 ## [Unreleased] - pass 336 (the site gains /install and /security)
 
 ### Added - the two OSS routes the project was missing

@@ -27,5 +27,10 @@
 </head>
 <body>
   <div id="root"></div>
+  <!-- The Vite entry: without this module script, vite emits ZERO assets
+       and every route ships static-only (no hydration, no islands, no SPA
+       nav). The template's init/index.html misses this tag; the example/
+       site (the reference implementation) has it. -->
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
