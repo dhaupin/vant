@@ -48,10 +48,19 @@ const permalinks = new Set();
     }
 })(DOCS);
 
-// ---- walk web/home/*.html ----
+// ---- walk web/home/*.html (the reference backup) + the built artifact ----
+// The v-home site is now React + prestruct: the checked-in web/home/index.html
+// moved to index.bak.html (design reference), and the deploy artifact is the
+// generated web/home/dist/index.html (gitignored, npm run build:home). When a
+// build exists locally, gate BOTH so the shipped HTML keeps every fiction
+// check; without a build the backup still gets swept.
 const landing = [];
+const distIndex = path.join(HOME, 'dist', 'index.html');
+const distIndexExists = fs.existsSync(distIndex);
+if (distIndexExists) landing.push(distIndex);
 (function walkHome(d) {
     for (const f of fs.readdirSync(d, { withFileTypes: true })) {
+        if (f.name === 'node_modules' || f.name === 'vendor') continue; // dependency payloads, not site HTML
         const p = d + '/' + f.name;
         if (f.isDirectory()) walkHome(p);
         else if (f.name.endsWith('.html')) landing.push(p);
@@ -80,8 +89,19 @@ for (const file of landing) {
         if (ref.startsWith('#')) continue;              // fragment — rule 1
         if (/^data:/.test(ref)) continue;               // inline data URI
         if (/^mailto:/.test(ref)) continue;
-        const local = ref.startsWith('/') ? path.join(ROOT, ref.slice(1)) : path.resolve(path.dirname(file), ref.split('#')[0].split('?')[0]);
-        if (!fs.existsSync(local)) problems.push(`${rel}: local ref "${ref}" does not exist on disk`);
+        // In the built multi-route site (web/home/dist), a root-relative ref
+        // is either a prerendered ROUTE (/status -> dist/status/index.html)
+        // or a copied asset (/vant-og.png -> dist/vant-og.png). Try the route
+        // shapes first, then the raw path; outside dist the raw path rule
+        // applies unchanged.
+        const cands = [ref.startsWith('/') ? path.join(ROOT, ref.slice(1)) : path.resolve(path.dirname(file), ref.split('#')[0].split('?')[0])];
+        if (ref.startsWith('/') && distIndexExists) {
+            const rel = ref.slice(1).replace(/\?.*$/, '');
+            cands.push(path.join(HOME, 'dist', rel, 'index.html'));
+            cands.push(path.join(HOME, 'dist', rel + '.html'));
+            cands.push(path.join(HOME, 'dist', rel));
+        }
+        if (!cands.some(c => fs.existsSync(c))) problems.push(`${rel}: local ref "${ref}" does not exist on disk (or as a built route)`);
     }
 
     // 3. docs.creadev.org/vant/<permalink> must resolve to a real page

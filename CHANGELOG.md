@@ -5,6 +5,42 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 335 (the home site becomes a real React/prestruct multi-route site)
+
+### Changed - web/home grows its Vite pipeline (the prd-web §2.5 predicted shape)
+
+- **The hand-written lander retires into `web/home/index.bak.html`** (design
+  reference, byte-faithful copy) and `web/home` becomes a self-contained
+  React + prestruct app: own `package.json` (pin prestruct@1.1.0 off npm,
+  react 18 + vite 6 + react-router-dom 6), `vite.config.js`, and a committed
+  `ssr.config.js` with FIVE routes: `/` (lander), `/terms`, `/privacy`,
+  `/status`, `/contact`.
+- **`/` is the lander ported section-for-section** — hero with the static
+  constellation SVG as a component, rhythm/first-win/git/tiers/mesh/faq
+  sections, FAQPage JSON-LD in the home body, counters + reveal ported as
+  the VantFx effects with identical class names. Copy stays gate-verified
+  truth (smashed the three.js fiction-rollback into the same canon).
+- **Islands where they earn their keep**: `status-board` (live surfacing
+  checks from the browser — GitHub repo + release API, opaque-reachability
+  probes for the docs/family/dashboard, with the honest CORS limits spelled
+  out in page copy) and `contact-form` (composes a GitHub issue URL
+  client-side; nothing is POSTed from the site; honeypot + human-check math;
+  GitHub's own composer remains a first-class button).
+- **`/terms` + `/privacy`** summarize the canon (LEGAL.md, docs security
+  privacy) with links to the full text; **`/status`** ships static surface
+  cards + the live island; the SPA-shell fallback trap is avoided because
+  every route is prerendered (prestruct's redirect-rules posture).
+- **`scripts/check-home.js` learned dist**: walks `web/home/dist/**.html`
+  when a build exists (route-shaped root-relative refs resolve against
+  `dist/<route>/index.html`) and keeps sweeping the backup otherwise;
+  node_modules and vendor dirs skipped. Root gains `npm run build:home`;
+  `lint:home` unchanged in CI.
+- **Verified**: `prestruct build` renders 5/5 routes + sitemap + robots +
+  404 (noindex), inject-brand bakes OG/Twitter/canonical/keywords per route,
+  `data-server-rendered` hydration marker present, deploy-id meta live;
+  `npm run lint:home` passes 9 pages. DEPLOY.md §12 posture updated from
+  "checked in as-is" to the build-command truth.
+
 ## [Unreleased] - pass 334 (the docs post-render layer converts to npm freestruct)
 
 ### Changed - the prototype meets its child

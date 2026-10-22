@@ -387,8 +387,10 @@ node -e "console.log(require('./lib/sandbox').canRead())"   # Direct sandbox pro
 
 The web frontends (see `labs/prd-web.md`) deploy to Cloudflare Pages.
 Each frontend is its OWN Pages project with its OWN subdomain. Three of
-them exist: the static **home page** (`vant.creadev.org`, served from
-`web/home/`, checked in as-is - no build step), the dashboard
+them exist: the home site (`vant.creadev.org`, source in `web/home/` as a
+React + prestruct app — build with `npm run build:home`, artifact
+`web/home/dist/` (gitignored by the `web/*/dist/` rule); the old checked-in
+lander survives as the design reference `web/home/index.bak.html`), the dashboard
 (`brain.creadev.org`, this section), and the relay (its own P6 project).
 
 ### 12.1 Setup walkthrough (dashboard, do this while code lands)

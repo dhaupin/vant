@@ -41,6 +41,9 @@ npm-debug.log*
 # Wrangler local state (run-time KV/D1/cache from pages dev — never a repo artifact)
 web/*/.wrangler/
 
+# prestruct incremental route cache (build-time only, never a repo artifact)
+web/*/.prestruct/
+
 # Build
 build/
 
