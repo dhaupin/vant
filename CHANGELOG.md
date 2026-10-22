@@ -124,8 +124,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   throwaway vant QC copies were failing the whole-repo lint with STALE-code
   errors that belonged to older snapshots of these files) and
   `web/home/dist/` (build artifacts are HTML-swept by lint:home, never JS
-  lint targets). Root lint: 0 errors exit 0; web/home lint: 0 problems
+  lint targets).  Root lint: 0 errors exit 0; web/home lint: 0 problems
   exit 0 — both gates pass for the first time.
+- **THE HOME PAGES SETUP, ON PAPER (DEPLOY.md §12.0)**: the section the
+  panel walkthrough rides next — root directory `web/home`, install
+  `npm ci` (committed lockfile = pinned resolution), build command
+  `node scripts/parse-changelog.mjs && npx prestruct build` (the parity
+  law, build:home minus the cd — changelog parse BEFORE the build, then
+  the full vite → inject-brand → prerender pipeline, exiting clean),
+  output `dist`, NODE_VERSION 20+. Env-var surface: none (ssr.config.js
+  is committed with fixed URLs); no functions/ — pure static. The shipped
+  pre-gates are named: the 6-pin config suite (rides test.yml) and
+  lint:home.
+- **THE GATE-WALKER LAW (one blind spot, five walkers)**: the docs gates
+  walked dependency payloads — when `npm install` made `docs/node_modules/`
+  real (the npm freestruct adoption), the first lint:docs run after it
+  failed on SIX style violations in dependency READMEs (argparse/js-yaml
+  fence + heading-skip issues) that were never doc targets. style, links,
+  frontmatter, language, AND check-home.js's permalink walk all gain the
+  same `node_modules` skip; the whole lint:docs chain is PASS (126
+  style/links/frontmatter files, 209 prose, 133 truthfulness) with
+  docs/node_modules present.
 
 ## [Unreleased] - pass 337 (/changelog with a hard parity law + npm-compat pins - and the hidden client-bundle fix)
 

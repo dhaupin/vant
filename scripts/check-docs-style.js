@@ -22,7 +22,7 @@ const files = [];
 (function walk(d) {
     for (const f of fs.readdirSync(d, { withFileTypes: true })) {
         const p = d + '/' + f.name;
-        if (f.isDirectory() && f.name !== '_data' && f.name !== '_layouts' && f.name !== '_plugins') walk(p);
+        if (f.isDirectory() && f.name !== '_data' && f.name !== '_layouts' && f.name !== '_plugins' && f.name !== 'node_modules') walk(p);
         else if (f.name.endsWith('.md')) files.push(p);
     }
 })(DOCS);

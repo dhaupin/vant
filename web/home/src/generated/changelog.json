@@ -37,7 +37,9 @@
           "name": "Fixed - web/home can run its tests again (and finally has them)",
           "items": [
             "**THE PRE-EXISTING GAP closed**: web/home's `test`/`test:run` scripts",
-            "**SECOND PASS (same Unreleased block)**: the pin suite now rides CI —"
+            "**SECOND PASS (same Unreleased block)**: the pin suite now rides CI —",
+            "**THE HOME PAGES SETUP, ON PAPER (DEPLOY.md §12.0)**: the section the",
+            "**THE GATE-WALKER LAW (one blind spot, five walkers)**: the docs gates"
           ]
         }
       ]

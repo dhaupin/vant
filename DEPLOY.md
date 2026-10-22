@@ -396,6 +396,28 @@ React + prestruct app — build with `npm run build:home`, artifact
 lander survives as the design reference `web/home/index.bak.html`), the dashboard
 (`brain.creadev.org`, this section), and the relay (its own P6 project).
 
+### 12.0 The home site setup (vant.creadev.org — the self-contained easy one)
+
+The project to create in the CF dashboard: connect this repo, production
+branch `axolotl` (or `main` after merge), then point the build at the
+frontend dir — no framework guessing, no env vars, no functions:
+
+| Setting | Value | Why |
+|---------|-------|-----|
+| Framework preset | Vite | sensible defaults only — the command below owns the real pipeline |
+| Root directory | `web/home` | the frontend is fully self-contained (own package.json + committed package-lock.json) |
+| Install command | `npm ci` | lockfile-pinned resolution — `^` ranges never drift on the builder |
+| Build command | `node scripts/parse-changelog.mjs && npx prestruct build` | mirrors `npm run build:home` minus the `cd`: regenerate `src/generated/changelog.json` from CHANGELOG.md BEFORE the prestruct build (the parity law), then the full pipeline runs — vite build → inject-brand (OG/Twitter/canonical/keywords + the four-node `{ @context, @graph }` JSON-LD per page) → prerender 8/8 routes + sitemap + robots + noindex 404. The build EXITS (serving is Pages' job) |
+| Build output directory | `dist` | `web/home/dist/`, gitignored by the standing `web/*/dist/` rule — nothing to commit |
+| Node version | 20+ (`NODE_VERSION=20` if the panel asks) | matches the `web/home` engines; the build is plain node tooling |
+
+Shipped env-var surface: **none**. `ssr.config.js` is committed with the
+fixed URLs, so unlike the dashboard project below there is no `VANT_*`
+variable to define. There is no `functions/` here either — the home site
+is pure static. Whatever lands ships pre-gated: `web/home/test/config.test.mjs`
+(6/6, rides test.yml) pins the JSON-LD/route contract at source level, and
+`npm run lint:home` sweeps every built page for link/fiction/stat truth.
+
 ### 12.1 Setup walkthrough (dashboard, do this while code lands)
 
 0. **Run the local half first:** `npm run pilot:pages`

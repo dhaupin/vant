@@ -40,7 +40,7 @@ const permalinks = new Set();
 (function walkDocs(d) {
     for (const f of fs.readdirSync(d, { withFileTypes: true })) {
         const p = d + '/' + f.name;
-        if (f.isDirectory() && f.name !== '_data' && f.name !== '_layouts' && f.name !== '_plugins') walkDocs(p);
+        if (f.isDirectory() && f.name !== '_data' && f.name !== '_layouts' && f.name !== '_plugins' && f.name !== 'node_modules') walkDocs(p);
         else if (f.name.endsWith('.md')) {
             const m = fs.readFileSync(p, 'utf8').match(/^permalink: (\S+)/m);
             if (m) permalinks.add(norm(m[1]));
