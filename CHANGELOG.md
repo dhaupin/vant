@@ -5,6 +5,31 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 334 (the docs post-render layer converts to npm freestruct)
+
+### Changed - the prototype meets its child
+
+- **docs/ now consumes npm `freestruct` 1.0.0 as the post-render SEO layer**:
+  new `docs/freestruct.config.yml` (site name/url, basePath `/vant`,
+  `searchIndex: false` - Pagefind owns search, same owner call as the
+  freestruct docs site itself) and `docs/package.json` pinning
+  `freestruct 1.0.0` + `pagefind`. `.github/workflows/docs.yml` runs the
+  proven order: Jekyll build -> freestruct `--strict` -> pagefind.
+- Retired the hand-rolled `docs/sitemap.xml` (a stale 2-entry file against
+  the 126 real permalinks) and `docs/robots.txt`. The engine generates the
+  full sitemap with per-page lastmod, a basePath-aware robots pointer, a
+  noindex `404.html`, and an RSS `feed.xml`; the doc-site layout gains the
+  feed autodiscovery link and both footers list the four-site crosslink
+  family (docs hub, Vant home, Brain dashboard, Freestruct docs).
+- Verified against the 0.9.0 engine source with a synthetic `/vant`-nested
+  `_site`: config validates, strict build exits 0 clean / exits 1 on a
+  broken `.html` internal link, and the basePath contract yields
+  `docs.creadev.org/vant/...` canonicals with no doubled prefix. Render-time
+  Jekyll plugins (nav_generator, redirects) and the hand-written head tags
+  are untouched (missing-only injection). MERGE GATE: npm
+  `freestruct@1.0.0` must exist on the registry before this reaches main,
+  or the docs build install fails loudly by design.
+
 ## [Unreleased] - pass 286 (② CLOSED on main: the live corridor over brain.creadev.org + the Pages deploy-log warns swept)
 
 ### Added - the live solve + the build hygiene
