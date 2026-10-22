@@ -1,8 +1,45 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 82,
+  "_headingCount": 84,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 354 (the whole-page read: every surface read end to end, four drifts caught)",
+      "sections": [
+        {
+          "name": "Fixed: what survived the gates was a raw DOM property, a wrong API-limits claim, a missing space, and a leaked lock",
+          "items": [
+            "**THE WHOLE-PAGE READ (owner ask: read all of web/home for sense,",
+            "**THE PRE-ISLAND PLACEHOLDERS USED RAW `class=` PROPS** (Status.jsx",
+            "**THE /terms API-LIMITS CLAIM** pointed at the wrong machinery:",
+            "**A MISSING SPACE in docs/integrations/index.md** (`index.js`but)",
+            "**A LEAKED LOCKFILE** (models/private/vant/.locks/",
+            "Verified: the full gate train - build:home 9/9 (zero DOM-property"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 353 (one green for the whole brand; the docs palette rides web/home)",
+      "sections": [
+        {
+          "name": "Changed: owner picked web/home's green (#0b8a5c); docs now wear the home palette",
+          "items": [
+            "**THE CANONICAL GREEN IS WEB/HOME'S (#0b8a5c)** (owner direction:",
+            "**DOCS TAKE THE HOME PALETTE, NAME FOR NAME** (docs/_layouts/",
+            "**CODE BLOCKS JOIN THE TERM TILE**: the VitePress-era #1e1e1e hard-",
+            "**THE VITEPRESS RESIDUE (the freestruct cleanup sweep)**: bin/",
+            "Verified: build:home 9/9 (favicon baked into dist, changelog json"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

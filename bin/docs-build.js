@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-const vaf = require("../lib/vaf");
 const args = process.argv.slice(2);
 
 // Show help
@@ -8,19 +7,18 @@ if (args.includes('--help') || args.includes('-h')) {
 Vant Docs Builder
 
 USAGE:
-  vant docs-build         # Build docs
+  vant docs-build              # Stamp package.json's version into docs frontmatter
+  vant docs-build --commit     # ...then git add -A + commit the stamp
 
-OPTIONS:
-  --out DIR              # Output directory (default: docs/.vitepress/dist)
-  --version VERSION      # Set version manually
-
-EXAMPLES:
-  vant docs-build
+NOTES:
+  Version stamping covers the 8 frontmatter'd docs pages. The docs
+  SITE build itself is CI's pipeline: Jekyll renders, npm freestruct
+  runs over the output (docs/freestruct.config.yml), Pagefind indexes
+  (.github/workflows/docs.yml). This door does not build the site.
 `);
     process.exit(0);
 }
 
-// VAF: No user input - from package.json
 /**
  * docs-build.js - Build docs for release
  * 
@@ -31,17 +29,8 @@ EXAMPLES:
  */
 
 const fs = require('fs');
-
-// Lazy-load sandbox
-let _sandbox = null;
-function _getSandbox() {
-    if (!_sandbox) { try { _sandbox = require("../lib/sandbox"); } catch (e) {} }
-    return _sandbox;
-}
-function _checkRead() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canRead()) throw new Error("Read required"); }
-function _checkWrite() { const sandbox = _getSandbox(); if (sandbox && !sandbox.canWrite()) throw new Error("Write required"); }
 const path = require('path');
-const { execSync, execFileSync } = require('child_process');
+const { execFileSync } = require('child_process');
 
 const DOCS_DIR = path.join(__dirname, '..', 'docs');
 

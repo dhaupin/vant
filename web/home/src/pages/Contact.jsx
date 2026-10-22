@@ -42,8 +42,8 @@ export default function Contact() {
                     the issue link locally; nothing is POSTed from this site, and this page stores nothing.
                 </p>
                 <pre-island data-pre-island="contact-form" data-pre-load="eager">
-                    <p class="island-loading">Loading the issue composer…</p>
-                    <p class="contact-note">Browser needs JavaScript for the composer. Or open{' '}
+                    <p className="island-loading">Loading the issue composer…</p>
+                    <p className="contact-note">Browser needs JavaScript for the composer. Or open{' '}
                         <a href="https://github.com/dhaupin/vant/issues/new">github.com/dhaupin/vant/issues/new</a> directly.
                     </p>
                 </pre-island>

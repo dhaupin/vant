@@ -1,14 +1,22 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** pass 331-333 arc (the SIBLING REVEAL: synmergia's
+**Last Updated:** pass 351-352 arc (the FICTION SWEEP: the home site
+and docs hub audited claim-by-claim against the code; commits
+74185ec7 (pass 351: npm-link install truth, five-minute copy, section
+numbering, AGENTS.md succession path) and 623794d2 (pass 352: embedConfig
++ dead PNG stone path retired from boot.md, VANT_MCP_BIND / vant server
+cert truth in mcp.md, islands boot verb split, root require('vant')
+re-exports init/think/learn/remember + storage — both pushed, gates+
+battery green. Brain refreshed and the canonical stone resealed)
+**Prior — pass 331-333** (the SIBLING REVEAL: synmergia's
 closed-source frame cherry-picked vant structs first and now flows
 learnings back — full arc on record: prd-kernel.md §5b TWO correction
 waves + the pass-333 hands-on deep crawl; prd-kernel-extensions.md
 E1-E9 port plan; direction law recorded in goals/lessons (one crew,
 two runtimes, issue-first return lane). Kernel constitution gates
-self-contained canon (no sibling access needed). Twenty commits now
-parked on axolotl, 322-333, all pushed, all green.
+self-contained canon (no sibling access needed). The parked-commits
+line grew past this note: 322-333, then 348-352, all pushed, all green.)
 **Prior — pass 328** (the HEAP SWEEP: the private-layer census
 found ~180 test-brain carcasses inflating the stone — ~110 timestamped
 scratch brains (ag/ht/ib/rls/op/wm/wsb-test-* minted per test run and
