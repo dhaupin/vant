@@ -36,7 +36,8 @@
         {
           "name": "Fixed - web/home can run its tests again (and finally has them)",
           "items": [
-            "**THE PRE-EXISTING GAP closed**: web/home's `test`/`test:run` scripts"
+            "**THE PRE-EXISTING GAP closed**: web/home's `test`/`test:run` scripts",
+            "**SECOND PASS (same Unreleased block)**: the pin suite now rides CI —"
           ]
         }
       ]

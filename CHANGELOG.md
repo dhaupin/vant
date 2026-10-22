@@ -110,7 +110,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   owner-face JSON-LD contract at the SOURCE level (three nodes in pinned
   order, the creadev.org founder Person on the Organization, the
   maintainer Person appended last, the WebSite node, and the 8-route
-  table) so a config edit breaks in the tree before it ships. Suite: 5/5.
+  table) so a config edit breaks in the tree before it ships. Suite:
+  5/5 → 6/6 after the schema pimp above.
+- **SECOND PASS (same Unreleased block)**: the pin suite now rides CI —
+  test.yml's main job gains a "web/home config pin suite" step
+  (`npm ci --prefix web/home && npm --prefix web/home run test:run`),
+  proven with the EXACT command shape locally (6/6; the old path never
+  installed web/home in CI, so the new pins only ever ran on a dev
+  machine). And the never-wired `web/home` lint finally parses its own
+  files: the root eslint config gains a `web/home/**/*.js|mjs` override
+  (sourceType module — the lint error'd on every import spelling since the
+  script existed), and .eslintignore learns two laws: `test/tmp/` (the
+  throwaway vant QC copies were failing the whole-repo lint with STALE-code
+  errors that belonged to older snapshots of these files) and
+  `web/home/dist/` (build artifacts are HTML-swept by lint:home, never JS
+  lint targets). Root lint: 0 errors exit 0; web/home lint: 0 problems
+  exit 0 — both gates pass for the first time.
 
 ## [Unreleased] - pass 337 (/changelog with a hard parity law + npm-compat pins - and the hidden client-bundle fix)
 

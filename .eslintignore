@@ -1,2 +1,11 @@
 # Shell scripts misnamed as .js
 bin/webhook.js
+
+# test/tmp: throwaway vant installations used as QC targets by external
+# tools. They are COPIES of the repo (some older), so they fail every
+# rule a fresh tree would someday fix — lint the real tree, not the junk.
+test/tmp/vant-qc
+
+# web/home/dist: the prestruct build artifact (gitignored like web/*/dist/,
+# swept by lint:home for HTML truth but not a JS lint target)
+web/home/dist

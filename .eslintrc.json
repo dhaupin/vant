@@ -30,6 +30,14 @@
       }
     },
     {
+      "files": ["web/home/**/*.js", "web/home/**/*.mjs"],
+      "parserOptions": {"sourceType": "module", "ecmaVersion": "latest"},
+      "env": {"node": true, "es2021": true},
+      "rules": {
+        "no-unused-vars": ["warn", {"argsIgnorePattern": "^_", "varsIgnorePattern": "^_"}]
+      }
+    },
+    {
       "files": ["web/**/*.{ts,tsx}"],
       "plugins": ["@typescript-eslint", "react-hooks"],
       "parser": "@typescript-eslint/parser",

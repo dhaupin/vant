@@ -57,6 +57,9 @@ jobs:
       - name: web/home gate (links, fiction, stat truth)
         run: npm run lint:home
 
+      - name: web/home config pin suite (vitest, pass 338 — the pins never ride CI until now)
+        run: npm ci --prefix web/home && npm --prefix web/home run test:run
+
       - name: changelog parity gate (site json vs CHANGELOG.md byte-compare, version truth)
         run: npm run lint:changelog
 
