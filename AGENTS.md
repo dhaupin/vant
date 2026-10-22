@@ -206,7 +206,9 @@ main            ← human reviews here
 
 ## Trust Levels
 
-`models/private/_succession.json` controls your autonomy:
+`models/public/<brain>/_succession.json` controls your autonomy (public
+scope, one per brain - `lib/succession.js` resolves it via the public
+brain path):
 
 | Level | What It Means |
 |-------|--------------|

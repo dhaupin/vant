@@ -41,18 +41,19 @@ vant boot --image=./brain.png --decrypt=secret123
 
 ## Embedded Config
 
-Save non-sensitive config in brain:
+The stone gathers its own config; there is no separate embed API. Non-sensitive
+configuration lives in the brain (write it with `vant config set`), and a
+stego-SVG horcrux packs the brain tree plus shared state and the gathered
+config, so a restored stone comes back up configured:
 
-```javascript
-const brain = require('vant').storage.get('brain');
-
-brain.embedConfig({
-    GITHUB_REPO: 'owner/repo',
-    GITHUB_BRANCH: 'main'
-});
+```bash
+vant config set GITHUB_REPO owner/repo
+vant config set GITHUB_BRANCH main
+vant snapshot --password mypass
 ```
 
-Then encode as stego image. On boot, config is extracted automatically.
+On boot the stone is decoded and restored whole; config is included,
+tokens are not - set credentials by hand after boot (see Caveats).
 
 ## Use Cases
 
@@ -64,24 +65,27 @@ Then encode as stego image. On boot, config is extracted automatically.
 ## Full Example
 
 ```bash
-# 1. Create brain image (with embedded config)
-node bin/stego.js snapshot --input=avatar.png --output=brain.png
+# 1. Seal the current brain into a stego-SVG horcrux
+vant snapshot --password mypass
+#    writes models/public/<brain>/boot/<agent>-p_<pw>.svg
 
-# 2. Upload brain.png to GitHub/GitLab/etc
-# 3. Share raw URL
+# 2. Push the SVG somewhere a new machine can reach
+#    (the raw GitHub URL of the boot file is typical)
 
-# 4. On new machine (zero local state):
-vant boot --image=https://raw.githubusercontent.com/user/repo/main/brain.png
+# 3. On a new machine (zero local state):
+vant boot --image=https://raw.githubusercontent.com/user/repo/main/<agent>-p_<pw>.svg --decrypt mypass
 
-# Vant resumes with full brain state!
+# The stone restores the systems it carries (brain, state, config)!
 ```
 
 ## Caveats
 
 - No tokens embedded (security by design)
 - Must set tokens separately after boot
-- Image must be PNG format
-- Large brains need chunked images
+- The sealing image is an SVG (the legacy PNG stone path is retired;
+  `vant snapshot` is the encoder)
+- A brain too big for one stone can be scoped with
+  `vant snapshot --brains <a,b>`
 
 ## Amnesia mode (all boot sources fail)
 

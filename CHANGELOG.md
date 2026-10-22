@@ -5,6 +5,65 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 352 (the fiction sweep, round two: the pages that shipped dead APIs)
+
+### Fixed: copy pointing at code that does not exist, now pointing at code that does
+
+- **THE EMBEDCONFIG FICTION (docs/essential/boot.md)**: the "Embedded
+  Config" section taught `require('vant').storage.get('brain')` then
+  `brain.embedConfig({...})` + "extracted automatically" - embedConfig
+  exists NOWHERE in lib (grep: zero hits), and the whole flow underneath
+  it used the legacy PNG stone path that pass 178 in lib/stego.js itself
+  records as "never successfully encoded anything" (bin/stego.js snapshot
+  crashes today: empirically reproduced, `brain.compress is not a
+  function` BrainStorage has no such method, and even without that,
+  encodeBrain(message, input, output) is called as (input, output) so the
+  image PATH would land in the PNG as the payload). The section now
+  teaches the working stone: `vant config set` for brain persisting
+  config, `vant snapshot --password` for the stego-SVG horcrux (the
+  gather DOES carry config - lib/transform.js gather-config), and the
+  Full Example now boots `vant boot --image=<svg-url> --decrypt <pw>`
+  against a `vant snapshot` output, with the caveats updated (SVG stones,
+  the PNG stone path retired, chunking replaced by --brains scoping).
+- **THE WRONGLY-NAMED DOOR (docs/runtime/mcp.md)**: Remote Access told
+  people to `export MCP_BIND_ADDRESS=0.0.0.0` - no such env var exists;
+  the real one is VANT_MCP_BIND (lib/config.js mcpBindAddress). And the
+  TLS section claimed `vant mcp --server` takes VANT_SERVER_CERT/KEY -
+  those live on the REST sidecar (`vant server`, bin/server.js, port
+  3456). TLS section retargeted honestly (reverse proxy for the MCP
+  door, Caddy example kept, native-TLS pointer moved to `vant server
+  --cert/--key`), and the env table now labels the VANT_SERVER_* rows as
+  sidecar vars and VANT_MCP_API_KEY as the deprecated alias of
+  VANT_AUTH_KEY (lib/config.js says so).
+- **THE BOOT THAT WASN'T (docs/essential/islands.md + cli.md)**: the
+  flag block (`vant islands --list / --prompt / --island`) and cli.md's
+  `vant islands boot` both point at a verb coupling that does not exist:
+  bin/islands.js has NO boot subcommand (its verbs: list/create/trigger/
+  load/boundaries/mcp - empirically confirmed: `vant islands boot`
+  falls through to raw usage help). The flags live on bin/islands-boot.js
+  under `vant islands-boot`. The docs now write that verb where the
+  flags/boot behavior actually is.
+- **THE UNROUTED PROGRAMMATIC SURFACE (index.js)**: `require('vant')`
+  (the root package import four docs pages teach: RAG tutorial,
+  runtime.md, api-runtime.md, custom-island.md, islands.md) exports the
+  lazy gotter modules but NOT init/think/learn/remember - every snippet
+  that called `vant.think(...)` or `await vant.init(...)` on it would
+  throw. The root entry now re-exports the documented memory surface
+  (all four are real on lib/vant.js's own exports), and `storage` joins
+  the export map so `require('vant').storage.get('state')` resolves like
+  islands.md says it does. Export smoke now passes end to end:
+  storage.get('state') returns the StateStorage with setStatic/
+  setCurrent/setTemp, islands expose findTriggers/autoHydrate/hydrate,
+  search exposes query/hybrid ({memories, results, context} and {fused}
+  both checked true in lib/search.js).
+- **THE AGENTS.md SUCCESSION PATH LIE**: the guide said trust levels
+  live at models/private/_succession.json - lib/succession.js resolves
+  the file via brain.getPublicPath() (models/public/<brain>/); AGENTS.md
+  now names the per-brain public path, matching the FAQ page.
+- Verified: exports smoke PASS, docs gates PASS (style/links/frontmatter/
+  language/truthfulness), changelog parity PASS, lint:home PASS, build:home
+  9/9 (json regenerated), battery green.
+
 ## [Unreleased] - pass 351 (the fiction sweep: every live-page error found, fixed)
 
 ### Fixed: copy that lied about the install path, the clocks, and the page count

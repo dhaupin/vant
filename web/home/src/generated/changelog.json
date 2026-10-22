@@ -1,8 +1,27 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 81,
+  "_headingCount": 82,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 352 (the fiction sweep, round two: the pages that shipped dead APIs)",
+      "sections": [
+        {
+          "name": "Fixed: copy pointing at code that does not exist, now pointing at code that does",
+          "items": [
+            "**THE EMBEDCONFIG FICTION (docs/essential/boot.md)**: the \"Embedded",
+            "**THE WRONGLY-NAMED DOOR (docs/runtime/mcp.md)**: Remote Access told",
+            "**THE BOOT THAT WASN'T (docs/essential/islands.md + cli.md)**: the",
+            "**THE UNROUTED PROGRAMMATIC SURFACE (index.js)**: `require('vant')`",
+            "**THE AGENTS.md SUCCESSION PATH LIE**: the guide said trust levels",
+            "Verified: exports smoke PASS, docs gates PASS (style/links/frontmatter/"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

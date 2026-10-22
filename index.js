@@ -23,6 +23,7 @@ const pipeline = require('./lib/pipeline');
 const format = require('./lib/format');
 const legal = require('./lib/legal');  // Emergency red button
 const memory = require('./lib/memory');  // Memory system
+const storage = require('./lib/storage');  // Storage facade (mind layers: brain/state/file/...)
 
 
 module.exports = {
@@ -45,6 +46,7 @@ module.exports = {
 
     // Memory system
     memory,
+    storage,
 
     
     // Communication
@@ -75,6 +77,14 @@ module.exports = {
     
     // Get status
     getStatus: vant.getStatus,
+    
+    // The documented programmatic memory surface (runtime.md, api-runtime.md,
+    // custom-island.md, and the RAG tutorial all write require('vant').think
+    // / .init / .learn on the package import):
+    init: vant.init,
+    think: vant.think,
+    learn: vant.learn,
+    remember: vant.remember,
     
     // Individual starts
     startMCP: (port) => mcp.start({ port }),
