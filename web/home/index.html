@@ -184,6 +184,16 @@
         .hero { position: relative; padding: 54px 0 0; }
         #lattice { position: absolute; inset: 0; z-index: 0; opacity: calc(0.9 * var(--fx)); }
         #lattice canvas { display: block; }
+        /* no-WebGL / no-module fallback: a soft accent glow so the drag hint
+           never points at an empty wall */
+        #lattice.lattice-flat::after {
+            content: '';
+            position: absolute;
+            inset: 12% 10%;
+            background: radial-gradient(55% 55% at 50% 42%,
+                color-mix(in srgb, var(--accent) 30%, transparent), transparent 72%);
+            opacity: calc(0.85 * var(--fx));
+        }
         .hero-veil {
             position: absolute; inset: 0; z-index: 1; pointer-events: none;
             background: radial-gradient(120% 90% at 18% 20%, var(--bg) 32%, transparent 72%);
@@ -977,10 +987,20 @@
         // Pointer-draggable, breathes on a session cadence. three.js is
         // vendored at vendor/three.module.js (no CDN dependency). Gracefully
         // static (gradient only) if WebGL is unavailable.
-        import * as THREE from 'three';
-
         const host = document.getElementById('lattice');
-        if (host) {
+        (async function () {
+            if (!host) return;
+            let THREE;
+            try {
+                // Dynamic import on purpose: if the vendored module fails to
+                // load (bad deploy, blocked MIME), the rest of the page must
+                // not silently lose its hero. Same shape as the WebGL catch:
+                // fall back to the flat glow, never hide the layer.
+                THREE = await import('three');
+            } catch (e) {
+                host.classList.add('lattice-flat');
+                return;
+            }
             try {
                 let renderer;
                 try {
@@ -1075,6 +1095,9 @@
 
                 // ---- drag + parallax ----
                 let targetRX = 0, targetRY = 0, curRX = 0, curRY = 0, dragging = false, lastX = 0, lastY = 0;
+                // narrow viewports: squash the group so the three lobes fit
+                // horizontally instead of running off-frame
+                let geoScaleX = 1, geoScaleZ = 1;
                 const group = new THREE.Group();
                 group.add(nodes); group.add(edges); group.add(core); group.add(halo); group.add(pulses);
                 scene.add(group);
@@ -1100,8 +1123,11 @@
                     renderer.setSize(w, h); // updateStyle defaults true: canvas CSS size tracks container, no hi-dpi overflow
                     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                     camera.aspect = w / h;
-                    // portrait viewports: pull back so the full lattice stays in frame
+                    const tx = THREE.MathUtils.degToRad(camera.fov / 2);
                     camera.position.z = camera.aspect < 0.9 ? 17.5 : 13;
+                    const halfW = Math.tan(tx) * camera.position.z * camera.aspect;
+                    geoScaleX = Math.min(1, Math.max(0.4, (halfW - 1.4) / 10));
+                    geoScaleZ = Math.min(1, Math.max(0.7, (halfW - 1.4) / 8));
                     camera.updateProjectionMatrix();
                 }
                 size();
@@ -1126,7 +1152,7 @@
                     // cadence: 12s cycle - open swell, work shimmer, close settle
                     const cycle = (t % 12) / 12;
                     const breathe = 1 + Math.sin(t * 0.9) * 0.03 + (cycle < 0.25 ? (0.25 - cycle) * 0.24 : 0);
-                    group.scale.setScalar(breathe);
+                    group.scale.set(geoScaleX * breathe, breathe, geoScaleZ * breathe);
                     core.rotation.y = t * 0.18; core.rotation.x = Math.sin(t * 0.31) * 0.22;
                     halo.rotation.y = -t * 0.12;
                     haloMat.opacity = 0.04 + Math.abs(Math.sin(t * 0.9)) * 0.05;
@@ -1168,10 +1194,12 @@
                     if (!document.hidden && !reduced) requestAnimationFrame(frame);
                 });
             } catch (err) {
-                // no WebGL: the CSS gradient veil already reads fine. Stay quiet.
-                host.style.display = 'none';
+                // no WebGL: keep the hero layer with a flat soft glow so the
+                // drag hint never points at nothing.
+                host.classList.add('lattice-flat');
+                host.querySelector('canvas')?.remove();
             }
-        }
+        })();
     </script>
 </body>
 </html>

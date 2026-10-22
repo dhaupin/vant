@@ -26,6 +26,7 @@ semantics in depth: [Escrow API](/reference/escrow). Task-first usage:
 Read from brain.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | category | string | Brain category |
@@ -43,6 +44,7 @@ vant_get_memory(category="learnings", filename="python")
 Write to brain.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | category | string | Brain category |
@@ -74,6 +76,7 @@ vant_list_branches
 Create branch.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | name | string | Branch name |
@@ -90,6 +93,7 @@ vant_create_branch(name="agent-1")
 Switch branch.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | name | string | Branch name |
@@ -106,6 +110,7 @@ vant_switch_branch(name="agent-1")
 Commit changes.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | message | string | Commit message |
@@ -141,6 +146,7 @@ Acquire, release, or inspect the brain authorization lease. Full API:
 [Locks API](/vant/reference/locks).
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | action | string | "acquire", "release", "status", "stack", "force", or "stats" |
@@ -451,6 +457,7 @@ agent's habitat identity is used otherwise. Row-level filter/mask
 applies to island data.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | name | string | Island name |
@@ -472,6 +479,7 @@ identity -> anonymous) against the island's boundary policy. Policy-less
 islands report `gated: false` and `allowed: true`.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | name | string | Island name |
@@ -488,6 +496,7 @@ Record a decision delta in the resolution ledger (persisted - rides
 `lib/resolution.logDelta`, survives restarts).
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | file | string | Brain file the decision concerns |
@@ -514,6 +523,7 @@ byte-identical snapshot. Failures return typed
 `{ ok:false, code: 'E_SNAPSHOT_NAME' | 'E_SNAPSHOT_UNIVERSE' }`.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | name | string | World name (spine `/world/` grammar, required) |
@@ -539,6 +549,7 @@ through the parent's SeedChain seed (leak-containment: identical path
 string, different bytes).
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | parent | string | Parent world name (required) |
@@ -559,6 +570,7 @@ Report which universe constant source is active
 default-world (`vant`) fingerprint for the resolved constant.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | universe | string | Universe constant override (optional) |
@@ -583,6 +595,7 @@ Persisted through the brain-scoped arch-A state store
 dotted name with `fork: true` (see `vant_universe_fork`).
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | name | string | World name; for a fork the full dotted name `parent.child` (required) |
@@ -611,6 +624,7 @@ universe-canary identity tag at record time) or address DIFFERENT
 worlds (`E_SNAPSHOT_WORLD_MISMATCH` - a rename, not a delta).
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | a | string | Manifest id (or unambiguous id prefix) of manifest A (required) |
@@ -642,6 +656,7 @@ U2 shipped the lock-gated VERIFIED MARKER path; Wave U3 added the
 escrow-backed byte-restoring executor (below).
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | id | string | Manifest id (or unambiguous prefix) (required) |
@@ -674,6 +689,7 @@ gate. Ledger rides the arch-A state store
 (`state/universe-scenarios.json`, WAL included).
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | name | string | Crew name (alnum + `._-`, ≤64) (required) |
@@ -700,6 +716,7 @@ CONSENSUS voted closeout (quorum ballot; no single-agent bless) logged
 via `resolution.logDelta`.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | crew | string | Crew name (must be assembled first) (required) |
@@ -726,6 +743,7 @@ ledger row (phase, roster, workspace) plus the live escrow pool
 headroom, null-safe when escrow is absent.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | crew | string | Crew name (required) |
@@ -745,6 +763,7 @@ Typed refusals: `E_SCENARIO_ABSENT`, `E_SCENARIO_NAME`. CLI:
 Encode a message into a PNG via the real stego engine (LSB wire).
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | image | string | Input PNG path |
@@ -767,6 +786,7 @@ path or missing image - errors are surfaced, never a silent bless.
 Decode a hidden message from a PNG via the real stego engine.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | image | string | PNG path |
@@ -801,6 +821,7 @@ cited before formatting it.
 Get config.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | key | string | Config key |
@@ -817,6 +838,7 @@ vant_config_get(key="vant.repo")
 Set config.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | key | string | Config key |
@@ -834,6 +856,7 @@ vant_config_set(key="agent.name", value="MyAgent")
 Log audit entry.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | type | string | Event type |
@@ -851,6 +874,7 @@ vant_audit_log(type="learn", data="New learning")
 List audit log.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | limit | number | Max entries |
@@ -880,6 +904,7 @@ vant_succession_info
 Search brain.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | query | string | Search query |
@@ -896,6 +921,7 @@ vant_search(query="python")
 RAG rerank + compress.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | query | string | Search query |
@@ -925,6 +951,7 @@ its full local gate stack (scope, registry vetting, quarantine,
 one-vote) and acks the verdict.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | node | string | Peer node name (registered crew-bus peer) |
@@ -1001,6 +1028,7 @@ a registry role there (else `workspace_denied`); invalid names fail
 closed (`invalid_workspace`).
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | title | string | Publication title (required) |
@@ -1018,6 +1046,7 @@ leaked). Returns `tenancy` metadata (`workspace`, `anonymous`,
 `visible`, `total`).
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | userCtx | object | Legacy self-declared subject (loses to a verified token) |
@@ -1028,6 +1057,7 @@ Create a consensus vote topic (scope-aware; malformed scope is
 rejected fail-closed).
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | topic | string | Charset [a-zA-Z0-9_-], 1-100 chars (required) |
@@ -1065,6 +1095,7 @@ entirely.
 List knowledge for trade.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | type | string | knowledge, insight, memory, or favor (required) |
@@ -1504,6 +1535,7 @@ of them were broken (see the [Escrow API export note](/reference/escrow)).
 Create an escrow budget for an agent or org.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | org | string | Agent or org id that owns the budget |
@@ -1523,6 +1555,7 @@ Place a hold: a reservation with a timeout (default 5 minutes). **A
 hold does not debit budget** - it records a condition entry.
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | holdId | string | Unique hold id |

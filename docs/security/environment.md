@@ -15,6 +15,7 @@ nav_order: 70
 How Vant interacts with GitHub APIs.
 ### What Vant Uses
 When configured with GitHub sync, Vant interacts with:
+
 | API | Purpose | Method |
 |-----|---------|--------|
 | Repositories | Brain storage | GET, POST, PUT |
@@ -31,6 +32,7 @@ Vant does NOT use:
 - Projects (as database)
 ### Rate Limits
 **GitHub API has rate limits:**
+
 | Plan | Requests/Hour | Burst |
 |------|--------------|-------|
 | Unauthenticated | 60 | 60 |

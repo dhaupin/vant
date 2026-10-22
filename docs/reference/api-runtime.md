@@ -27,6 +27,7 @@ await vant.init({ name, role, id })
 ```
 
 **Options:**
+
 | Param | Type | Default | What |
 |-------|------|---------|------|
 | name | string | 'Vant' | Agent name |
@@ -46,6 +47,7 @@ await vant.think(query, { topK, maxTokens })
 ```
 
 **Options:**
+
 | Param | Type | Default | What |
 |-------|------|---------|------|
 | query | string | required | Search query |
@@ -65,6 +67,7 @@ await vant.learn(key, content)
 ```
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | key | string | category/filename |
@@ -87,6 +90,7 @@ await vant.remember(key)
 ```
 
 **Params:**
+
 | Param | Type | What |
 |-------|------|------|
 | key | string | Memory key |
@@ -105,6 +109,7 @@ await vant.act(operation, { timeout, retries })
 ```
 
 **Options:**
+
 | Param | Type | Default | What |
 |-------|------|---------|------|
 | operation | function | required | Operation to execute |
@@ -124,6 +129,7 @@ await vant.actWithRetry(operation, { retries, backoff })
 ```
 
 **Options:**
+
 | Param | Type | Default | What |
 |-------|------|---------|------|
 | retries | number | 3 | Retry count |
