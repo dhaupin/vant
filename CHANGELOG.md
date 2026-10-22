@@ -5,6 +5,40 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 351 (the fiction sweep: every live-page error found, fixed)
+
+### Fixed: copy that lied about the install path, the clocks, and the page count
+
+- **THE NPM LINK HOLE (homepage hero, the first-win card, and the
+  /install clone card)**: all three Term blocks ran bare `vant start`
+  / `vant onboard` straight after `npm ci` - but npm ci only fills
+  node_modules/.bin, so with no npm link the PATH has no `vant`
+  command and the promised copy-paste first session died at exactly
+  the step the five-minute claim hangs on. All three now carry the
+  `npm link` line, the canon from docs/getting-started/install.md
+  (the docs quick-start page already taught it); Install.jsx's header
+  comment records the reason so the next editor keeps it honest.
+- **THE DOCS HUB PROMISED 60 SECONDS TWICE (docs/index.md)**:
+  "install in 60 seconds" in the description and "The 60 second start"
+  as the heading, while the same page's door table and the whole
+  marketing site say five minutes. Retitled "The 5 minute start" and
+  the description aligned. The hub's MCP command came right after
+  `npm ci` with no link of its own, so it now ships as
+  `node bin/vant.js mcp`, consistent with its already-correct
+  `node bin/vant.js start` sibling.
+- **THE HOME SECTION NUMBERS SKIPPED 09/10**: after 01-08 the walk
+  jumped to 11 (Where Vant fits) and 12 (FAQ). Renumbered to 09/10.
+- **AGENTS.md TIMED THE QUICK START AT 2 MINUTES**: the repo guidance
+  promised 2 min, the quick-start page itself says about five minutes
+  twice; the TOC line now says the 5 minute setup.
+- **NOTED NOT FICTION** (verified, left alone): docs pages served with
+  a trailing slash (docs.creadev.org/vant/memory/brain/) 404, but the
+  shipped permalink shape is extensionless-without-slash (the
+  sitemap.xml URLs are the canon form) and every same-shape link in
+  the repo already writes it; and the quick-start `vant load`/
+  `vant watch`/`vant learn`/`vant onboard wake` verbs all checked real
+  against docs/reference/cli.md and the bin sources.
+
 ## [Unreleased] - pass 350 (docs credit, generated stats, walk pins, and the small sweep)
 
 ### Added + Changed: the /docs footer carries the credit; the stats strip is generated truth; the walk contracts get pins

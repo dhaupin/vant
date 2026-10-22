@@ -227,7 +227,7 @@ Check your level at session start.
 
 ### Docs TOC
 
-- [Quick Start](https://docs.creadev.org/vant/getting-started/quick-start) — 2 min setup
+- [Quick Start](https://docs.creadev.org/vant/getting-started/quick-start) — the 5 minute setup
 - [Agent Onboarding](https://docs.creadev.org/vant/getting-started/agent-onboarding) — the wake/work/sleep loop
 - [The Brain](https://docs.creadev.org/vant/memory/brain) — Memory files
 - [Runtime](https://docs.creadev.org/vant/runtime/runtime) — Programmatic API

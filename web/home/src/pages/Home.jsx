@@ -62,10 +62,10 @@ export default function Home() {
                         <h2>The 5 minute path</h2>
                         <p>Clone, start, meet your brain. No account, no cloud to configure.</p>
                         <Term copyLabel="Copy install commands">
-                            <span className="prompt">$ </span>git clone https://github.com/dhaupin/vant.git &amp;&amp; cd vant{'\n'}
-                            <span className="prompt">$ </span>npm ci{'\n'}
-                            <span className="prompt">$ </span><span className="cmd">vant</span> start{'\n'}
-                            <span className="prompt">$ </span><span className="cmd">vant</span> onboard
+                            <span className="prompt">$ </span>git clone https://github.com/dhaupin/vant.git &amp;&amp; cd vant{'\n'}<span className="prompt">$ </span>npm ci{'\n'}
+<span className="prompt">$ </span>npm link <span className="cmt"># puts the vant command on your PATH</span>{'\n'}
+<span className="prompt">$ </span><span className="cmd">vant</span> start{'\n'}
+<span className="prompt">$ </span><span className="cmd">vant</span> onboard
                         </Term>
                         <p style={{ margin: '13px 0 0' }}><Link className="btn" to="/install">Get started</Link></p>
                     </div>
@@ -126,9 +126,8 @@ export default function Home() {
                         <div className="card fx-reveal">
                             <h3>Install and start</h3>
                             <p>One clone, one install. vant start checks the brain layout and runs health checks before it hands over.</p>
-                            <Term copyLabel="Copy install and start" >
-                                <span className="prompt">$ </span>git clone https://github.com/dhaupin/vant.git &amp;&amp; cd vant &amp;&amp; npm ci{'\n'}
-                                <span className="prompt">$ </span><span className="cmd">vant</span> start
+                            <Term copyLabel="Copy install and start" ><span className="prompt">$ </span>git clone https://github.com/dhaupin/vant.git &amp;&amp; cd vant &amp;&amp; npm ci &amp;&amp; npm link{'\n'}
+<span className="prompt">$ </span><span className="cmd">vant</span> start
                             </Term>
                         </div>
                         <div className="card fx-reveal fx-d1">
@@ -413,7 +412,7 @@ export default function Home() {
 
             <section>
                 <div className="container">
-                    <div className="sec-head fx-reveal"><span className="sec-idx">11</span><h2>Where Vant fits</h2></div>
+                    <div className="sec-head fx-reveal"><span className="sec-idx">09</span><h2>Where Vant fits</h2></div>
                     <p className="sub fx-reveal">Saying what Vant is not, because your time matters more than our conversion rate.</p>
                     <div className="fits">
                         <div className="card fx-reveal">
@@ -439,7 +438,7 @@ export default function Home() {
 
             <section>
                 <div className="container faq">
-                    <div className="sec-head fx-reveal"><span className="sec-idx">12</span><h2>Questions agents actually ask</h2></div>
+                    <div className="sec-head fx-reveal"><span className="sec-idx">10</span><h2>Questions agents actually ask</h2></div>
                     <p className="sub fx-reveal">The same questions your agent will ask on its first session, answered.</p>
                     {FAQ.map(([q, a, href, noopener]) => (
                         <details key={q} className="fx-reveal">

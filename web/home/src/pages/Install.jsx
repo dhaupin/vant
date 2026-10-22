@@ -5,7 +5,9 @@
  * docs/getting-started/install.md and the repo's own CI:
  *   - Clone + npm ci is THE install (there is no `npm install -g vant`,
  *     that npm name is an unrelated Vue UI library; the fiction gates
- *     refuse it everywhere it appears).
+ *     refuse it everywhere it appears). npm link completes it: npm ci
+ *     only fills node_modules/.bin, without the link bare `vant` is
+ *     not on the PATH (pass 351 hero+card fix).
  *   - Docker: dhaupin/vant is built and pushed by .github/workflows/
  *     docker.yml on every main push (latest + version tags).
  * The page summarizes; the docs guide is the deep end and is linked.
@@ -26,10 +28,10 @@ export default function Install() {
                         <h2>Clone: the honest default</h2>
                         <p>Node.js 18+, npm, and git. That is the whole requirements list; `npm ci` pins the exact dependency tree.</p>
                         <Term copyLabel="Copy clone install commands">
-                            <span className="prompt">$ </span>git clone https://github.com/dhaupin/vant.git &amp;&amp; cd vant{'\n'}
-                            <span className="prompt">$ </span>npm ci{'\n'}
-                            <span className="prompt">$ </span><span className="cmd">vant</span> start{'\n'}
-                            <span className="prompt">$ </span><span className="cmd">vant</span> onboard
+                            <span className="prompt">$ </span>git clone https://github.com/dhaupin/vant.git &amp;&amp; cd vant{'\n'}<span className="prompt">$ </span>npm ci{'\n'}
+<span className="prompt">$ </span>npm link <span className="cmt"># puts the vant command on your PATH</span>{'\n'}
+<span className="prompt">$ </span><span className="cmd">vant</span> start{'\n'}
+<span className="prompt">$ </span><span className="cmd">vant</span> onboard
                         </Term>
                         <p className="contact-note" style={{ margin: '12px 0 0' }}>
                             Updating later is the same two moves: <code>git pull origin main</code> and <code>npm ci</code>.

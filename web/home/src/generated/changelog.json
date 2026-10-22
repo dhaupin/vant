@@ -1,8 +1,26 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 80,
+  "_headingCount": 81,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 351 (the fiction sweep: every live-page error found, fixed)",
+      "sections": [
+        {
+          "name": "Fixed: copy that lied about the install path, the clocks, and the page count",
+          "items": [
+            "**THE NPM LINK HOLE (homepage hero, the first-win card, and the",
+            "**THE DOCS HUB PROMISED 60 SECONDS TWICE (docs/index.md)**:",
+            "**THE HOME SECTION NUMBERS SKIPPED 09/10**: after 01-08 the walk",
+            "**AGENTS.md TIMED THE QUICK START AT 2 MINUTES**: the repo guidance",
+            "**NOTED NOT FICTION** (verified, left alone): docs pages served with"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
