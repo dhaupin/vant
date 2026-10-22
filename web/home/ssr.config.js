@@ -6,8 +6,8 @@
  * so the route table has to exist in the repo (it is not environment-specific
  * here - every URL below is fixed).
  *
- * The seven routes replace the single hand-written index.html lander
- * (web/home/index.bak.html, kept as the design reference):
+ * The routes replace the single hand-written index.html lander (retired
+ * to git history in pass 350, was the design reference):
  *   /          the lander
  *   /install   install paths (clone canon, Docker Hub image, npm posture)
  *   /security  disclosure path + the fail-closed chain

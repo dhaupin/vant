@@ -16,20 +16,7 @@
 
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { WALK } from './Nav.jsx'
-
-// The Learn column: nine external docs doors (the same count as the menu).
-const LEARN = [
-    { label: 'Quick start', href: 'https://docs.creadev.org/vant/getting-started/quick-start' },
-    { label: 'Agent onboarding', href: 'https://docs.creadev.org/vant/getting-started/agent-onboarding' },
-    { label: 'Install guide', href: 'https://docs.creadev.org/vant/getting-started/install' },
-    { label: 'The brain', href: 'https://docs.creadev.org/vant/memory/brain' },
-    { label: 'Brain search', href: 'https://docs.creadev.org/vant/memory/search' },
-    { label: 'MCP', href: 'https://docs.creadev.org/vant/runtime/mcp' },
-    { label: 'REST API', href: 'https://docs.creadev.org/vant/reference/rest-api' },
-    { label: 'CLI reference', href: 'https://docs.creadev.org/vant/reference/cli' },
-    { label: 'Security', href: 'https://docs.creadev.org/vant/security/' },
-]
+import { WALK, LEARN } from '../walk.mjs'
 
 const META = [
     { label: 'Changelog', href: '/changelog' },

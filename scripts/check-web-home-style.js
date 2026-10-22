@@ -8,11 +8,9 @@
  *
  * Contract (mirrors check-docs-style.js):
  *   - no em/en dashes in prose or comments (voice rule: use commas, colons,
- *     periods, or the plain hyphen). CHANGELOG.md stays exempt in the docs
- *     gate, and src/generated/ (its JSON artifact) plus the frozen design
- *     reference index.bak.html stay exempt here.
+ *     periods, or the plain hyphen). CHANGELOG.md stays exempt in the docs * gate, and src/generated/ (its JSON artifact) stays exempt here.
  *   - no tab characters, no trailing whitespace.
- *   - the site's arrowGlyph affordances (learn-more arrows, walk buttons)
+ *   - the site's arrow glyph affordances (learn-more arrows, walk buttons)
  *     are DESIGN, not prose decoration, so the docs emoji/glyph rule does
  *     not apply to the site (arrows are load-bearing UI here).
  *
@@ -23,7 +21,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', 'web', 'home');
 const EXCLUDE_DIRS = new Set(['node_modules', 'dist', 'generated']);
-const EXCLUDE_FILES = new Set(['index.bak.html']);
+const EXCLUDE_FILES = new Set([]);
 const SCAN_EXT = /\.(jsx|js|mjs|css|html)$/;
 
 const files = [];

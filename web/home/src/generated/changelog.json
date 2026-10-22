@@ -1,8 +1,26 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 79,
+  "_headingCount": 80,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 350 (docs credit, generated stats, walk pins, and the small sweep)",
+      "sections": [
+        {
+          "name": "Added + Changed: the /docs footer carries the credit; the stats strip is generated truth; the walk contracts get pins",
+          "items": [
+            "**DOCS FOOTER CREDIT** (docs/_layouts/default.html): the docs hub now",
+            "**THE STATS STRIP IS BUILD-TIME TRUTH (the #2 fix)**: hand-pinned",
+            "**THE WALK CONTRACTS GET PINS (the #3 fix)**: `src/walk.mjs` is now",
+            "**THE #4 SWEEP**: nav brand and drawer brand are Links now (no full",
+            "Verified: build:home 9/9 (stats baked: cli 130, mcp 347, lib 182,"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

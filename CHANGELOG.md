@@ -5,6 +5,42 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 350 (docs credit, generated stats, walk pins, and the small sweep)
+
+### Added + Changed: the /docs footer carries the credit; the stats strip is generated truth; the walk contracts get pins
+
+- **DOCS FOOTER CREDIT** (docs/_layouts/default.html): the docs hub now
+  ends its footer with the same closing line as the home site: "© 2026
+  Vant, open source agent memory under MIT | Made by Creadev.org"
+  (dofollow, target=_blank), replacing the bare trailing creadev.org
+  list item it folded in.
+- **THE STATS STRIP IS BUILD-TIME TRUTH (the #2 fix)**: hand-pinned
+  numbers retired. `web/home/scripts/gen-stats.mjs` runs FIRST in
+  build:home and writes src/generated/stats.json: CLI + MCP from the
+  coverage gates' own output (a no-PASS run fails the build), lib
+  modules / doc pages / test suites from a repo census (git-truth: all
+  182/126/218 re-measured), version from package.json. Home.jsx renders
+  data-count from the JSON, so the page can never claim a number the
+  repo does not have; the JSON is committed like its changelog sibling.
+- **THE WALK CONTRACTS GET PINS (the #3 fix)**: `src/walk.mjs` is now
+  the pure-data single source (WALK, LEARN, routeKey) imported by Nav,
+  Footer, and AppLayout; test/walk.test.mjs locks the contracts at
+  source level: unique labels/hrefs, internal stops must exist as
+  shipped routes, one Home origin, Learn count == menu count with all
+  unique docs.creadev.org deep links, and the routeKey
+  trailing-slash/fold cases (the /brain-walk bug stays dead).
+- **THE #4 SWEEP**: nav brand and drawer brand are Links now (no full
+  reload on every brand tap); the canonical/OG URLs ride the normalized
+  route key (they match the slashless sitemap paths); drawer focus
+  moves in on open and returns to the opener on close (a11y);
+  `renderItem`'s unused parameter is gone; and the retired hand-written
+  lander `index.bak.html` is deleted (git history keeps it: the design
+  reference served its purpose, and the style gate no longer needs the
+  exemption). Four bak mentions in comments updated.
+- Verified: build:home 9/9 (stats baked: cli 130, mcp 347, lib 182,
+  docs 126, tests 218, v0.8.6), lint:home PASS (truth + style),
+  changelog parity PASS, home suite 11/11 (config 6 + walk 5).
+
 ## [Unreleased] - pass 349 (the footer says © 2026)
 
 ### Added: the copyright year joins the meta row

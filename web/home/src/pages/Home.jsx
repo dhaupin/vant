@@ -1,9 +1,10 @@
 /**
  * src/pages/Home.jsx (vant-home)
  * ==============================
- * The lander, ported section-for-section from the checked-in backup
- * (web/home/index.bak.html). Copy is byte-faithful on purpose: the fiction
- * gates in scripts/check-home.js treat the shipped copy as the canon.
+ * The lander, ported section-for-section from the hand-written lander
+ * (retired to git history in pass 350). Copy is byte-faithful on purpose:
+ * the fiction gates in scripts/check-home.js treat the shipped copy as
+ * the canon.
  *
  * The FAQPage JSON-LD lives here in the body (valid JSON-LD placement) so
  * crawlers reading the prerendered HTML of '/' get it and only '/' does.
@@ -13,6 +14,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import Term from '../components/Term.jsx'
 import Constellation from '../components/Constellation.jsx'
+import stats from '../generated/stats.json'
 
 const FAQ = [
     ['What is a brain in Vant?', 'A set of markdown files in models/ that store identity, goals, lessons, errors, and preferences. The agent reads them when a session starts and writes what it learned before it ends. The next session inherits everything.', 'https://docs.creadev.org/vant/memory/brain'],
@@ -354,13 +356,17 @@ export default function Home() {
 
             <div className="stats" role="presentation">
                 <div className="container stat-row">
-                    <div className="stat"><div className="stat-value" data-count="3">3</div><div className="stat-label">memory systems</div></div>
-                    <div className="stat"><div className="stat-value" data-count="130">130</div><div className="stat-label">CLI commands</div></div>
-                    <div className="stat"><div className="stat-value" data-count="347">347</div><div className="stat-label">MCP commands</div></div>
-                    <div className="stat"><div className="stat-value" data-count="182">182</div><div className="stat-label">lib modules</div></div>
-                    <div className="stat"><div className="stat-value" data-count="126">126</div><div className="stat-label">doc pages</div></div>
-                    <div className="stat"><div className="stat-value" data-count="218">218</div><div className="stat-label">test suites</div></div>
-                    <div className="stat"><div className="stat-value">v0.8.6</div><div className="stat-label">MIT licensed</div></div>
+                    {/* EVERY number is generated truth (src/generated/stats.json,
+                        pass 350): coverage gates for cli/mcp, a repo file census for
+                        lib/docs/tests, package.json for version. No hand-pinned
+                        counts left to rot. */}
+                    <div className="stat"><div className="stat-value" data-count={stats.memorySystems}>{stats.memorySystems}</div><div className="stat-label">memory systems</div></div>
+                    <div className="stat"><div className="stat-value" data-count={stats.cli}>{stats.cli}</div><div className="stat-label">CLI commands</div></div>
+                    <div className="stat"><div className="stat-value" data-count={stats.mcp}>{stats.mcp}</div><div className="stat-label">MCP commands</div></div>
+                    <div className="stat"><div className="stat-value" data-count={stats.libModules}>{stats.libModules}</div><div className="stat-label">lib modules</div></div>
+                    <div className="stat"><div className="stat-value" data-count={stats.docPages}>{stats.docPages}</div><div className="stat-label">doc pages</div></div>
+                    <div className="stat"><div className="stat-value" data-count={stats.testSuites}>{stats.testSuites}</div><div className="stat-label">test suites</div></div>
+                    <div className="stat"><div className="stat-value">v{stats.version}</div><div className="stat-label">MIT licensed</div></div>
                 </div>
             </div>
 

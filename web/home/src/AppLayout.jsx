@@ -21,7 +21,8 @@ const { Routes, Route, useLocation, Link } = rrd
 
 import { mountIslands } from './islands.js'
 import { islands }      from './AppIslands.jsx'
-import Nav, { WALK }       from './components/Nav.jsx'
+import Nav                 from './components/Nav.jsx'
+import { WALK, routeKey }  from './walk.mjs'
 import Footer           from './components/Footer.jsx'
 import Home             from './pages/Home.jsx'
 import Terms            from './pages/Terms.jsx'
@@ -61,20 +62,17 @@ function SyncPageMeta({ pathname }) {
         set('meta[property="og:title"]', 'content', m.title)
         set('meta[property="og:description"]', 'content', m.description)
         const base = document.querySelector('meta[name="prestruct-site-url"]')?.content || window.location.origin
-        set('link[rel="canonical"]', 'href', base + pathname)
-        set('meta[property="og:url"]', 'content', base + pathname)
+        // canonical/OG ride the NORMALIZED route key (pass 350): the sitemap
+        // lists slashless paths, so the canonical should match, not /brain/
+        const key = routeKey(pathname)
+        set('link[rel="canonical"]', 'href', base + key)
+        set('meta[property="og:url"]', 'content', base + key)
     }, [pathname])
     return null
 }
 
-// Route keys are normalized: the prerendered site serves directory URLs
-// WITH trailing slashes (vant.creadev.org/brain/), client-side navigations
-// ride without them (/brain). Every pathname-keyed lookup must fold both
-// into one shape or the widget/meta/behavior "sometimes" miss, depending on
-// which door the visitor used. (pass 348, the /brain-missing-walk diagnosis)
-function routeKey(pathname) {
-    return typeof pathname === 'string' ? (pathname.replace(/\/+$/, '') || '/') : pathname
-}
+// Route keys normalize in walk.mjs (shared with the vitest pins), so the
+// widget/meta/behavior lookups never miss on the two visit shapes.
 
 function ScrollToTop() {
     const { pathname } = useLocation()
@@ -149,7 +147,7 @@ function useVantFxEffects(pathname) {
 }
 
 // The page walk (pass 342): every page that is a stop on the owner-directed
-// walk (Nav.jsx's WALK: the menu order IS the walk) gets a prev/next widget
+// walk (walk.mjs's WALK: the menu order IS the walk) gets a prev/next widget
 // between its content and the footer, so visitors can walk the site like a
 // tour. Home is the origin (no widget); pages not on the walk (terms,
 // privacy, changelog, 404) get none: the exclusions fall out of the list

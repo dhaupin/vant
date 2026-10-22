@@ -1,7 +1,7 @@
-/* vant-home design system (ported 1:1 from the checked-in lander
-   (web/home/index.bak.html). The new /status and /contact routes reuse the
-   same tokens, cards, buttons and terminals; their page-specific styles are
-   appended at the bottom of this file. */
+/* vant-home design system (ported 1:1 from the hand-written lander, now
+   retired to git history; see pass 335/350). The new /status and /contact
+   routes reuse the same tokens, cards, buttons and terminals; their
+   page-specific styles are appended at the bottom of this file. */
 
 :root {
     --bg: #f7f6f3;
