@@ -5,6 +5,217 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 350 (docs credit, generated stats, walk pins, and the small sweep)
+
+### Added + Changed: the /docs footer carries the credit; the stats strip is generated truth; the walk contracts get pins
+
+- **DOCS FOOTER CREDIT** (docs/_layouts/default.html): the docs hub now
+  ends its footer with the same closing line as the home site: "© 2026
+  Vant, open source agent memory under MIT | Made by Creadev.org"
+  (dofollow, target=_blank), replacing the bare trailing creadev.org
+  list item it folded in.
+- **THE STATS STRIP IS BUILD-TIME TRUTH (the #2 fix)**: hand-pinned
+  numbers retired. `web/home/scripts/gen-stats.mjs` runs FIRST in
+  build:home and writes src/generated/stats.json: CLI + MCP from the
+  coverage gates' own output (a no-PASS run fails the build), lib
+  modules / doc pages / test suites from a repo census (git-truth: all
+  182/126/218 re-measured), version from package.json. Home.jsx renders
+  data-count from the JSON, so the page can never claim a number the
+  repo does not have; the JSON is committed like its changelog sibling.
+- **THE WALK CONTRACTS GET PINS (the #3 fix)**: `src/walk.mjs` is now
+  the pure-data single source (WALK, LEARN, routeKey) imported by Nav,
+  Footer, and AppLayout; test/walk.test.mjs locks the contracts at
+  source level: unique labels/hrefs, internal stops must exist as
+  shipped routes, one Home origin, Learn count == menu count with all
+  unique docs.creadev.org deep links, and the routeKey
+  trailing-slash/fold cases (the /brain-walk bug stays dead).
+- **THE #4 SWEEP**: nav brand and drawer brand are Links now (no full
+  reload on every brand tap); the canonical/OG URLs ride the normalized
+  route key (they match the slashless sitemap paths); drawer focus
+  moves in on open and returns to the opener on close (a11y);
+  `renderItem`'s unused parameter is gone; and the retired hand-written
+  lander `index.bak.html` is deleted (git history keeps it: the design
+  reference served its purpose, and the style gate no longer needs the
+  exemption). Four bak mentions in comments updated.
+- Verified: build:home 9/9 (stats baked: cli 130, mcp 347, lib 182,
+  docs 126, tests 218, v0.8.6), lint:home PASS (truth + style),
+  changelog parity PASS, home suite 11/11 (config 6 + walk 5).
+
+## [Unreleased] - pass 349 (the footer says © 2026)
+
+### Added: the copyright year joins the meta row
+
+- **© 2026 AT THE FRONT of the footer's final sentence** (owner
+  direction): "© 2026 Vant, open source agent memory under MIT |
+  Made by Creadev.org" now sits in the bordered meta row on every route,
+  with the dofollow Creadev.org link unchanged.
+- Verified: build:home 9/9, lint:home PASS (truth + style), changelog
+  parity PASS, home suite 6/6 (the © line grep-confirmed baked into the
+  dist meta row).
+
+## [Unreleased] - pass 348 (the walk finds /brain/, and the white pages get their observers)
+
+### Fixed: two navigation bugs in one shell file
+
+- **THE WALK LOOKED UP RAW PATHNAMES**: the prerendered site serves
+  trailing-slash URLs (vant.creadev.org/brain/) while client-side navigations
+  ride without them (/brain), and the walk/meta lookups keyed the raw
+  pathname, so the widget "sometimes" missed depending on which door the
+  visitor used: the /brain-missing-back/next report. `routeKey()` now
+  folds both shapes to one key in every pathname-keyed lookup (walk
+  index, page-meta sync).
+- **THE WHITE-PAGE CAUSE (the fx observer lifecycle)**: the reveal/counter
+  effect only ran when AppLayout itself re-rendered, and AppLayout NEVER
+  re-renders on a client-side navigation (only Routes swap), so a newly
+  navigated page's .fx-reveal elements were watched by no observer and
+  shipped invisible, the "flaky animations" the owner spotted. AppLayout
+  now reads the route (load-bearing hook), so the fx engine re-runs per
+  route and the new page gets its observer pass like first paint did;
+  the fx-in/fx-counted guards keep the re-runs idempotent, and the
+  reveal threshold drops 0.12 to 0.05 so a tall cards row cannot out-wait
+  the observer either.
+- Verified: build:home 9/9, lint:home PASS (truth + style), changelog
+  parity PASS, home suite 6/6.
+
+## [Unreleased] - pass 347 (the external-link affordance: one rule, every door marked)
+
+### Added: off-site links wear the arrow-up-right glyph
+
+- **THE SYSTEM** (owner direction: "an icon for external links"): every
+  anchor that leads off vant.creadev.org renders a small arrow-up-right
+  glyph after its label. One attribute selector is the whole mechanism:
+  internal links are all relative (`href="/..."`) while off-site links
+  are all absolute, so `a[href^="http"]::after` marks every external
+  surface at once (nav, drawer, footer columns, cards, learn-mores,
+  buttons, the status board's live-rendered links) with zero per-link
+  bookkeeping that could drift.
+- **HOW IT MARKS WITHOUT TOUCHING MARKUP**: the glyph is a masked
+  currentColor pseudoelement, 10px at 0.72 opacity, so it inherits each
+  link's color in light and dark theme; the prerendered HTML is unchanged,
+  which keeps the link-truth gates, JSON-LD, and changelog parity exactly
+  as they were.
+- Verified: build:home 9/9, lint:home PASS (truth + style gates),
+  changelog parity PASS, home suite 6/6 (the compiled stylesheet carries
+  the rule on every route).
+
+## [Unreleased] - pass 346 (the final footer sentence: one credit line, dofollow door)
+
+### Changed: the meta row speaks the closing credit
+
+- **THE FINAL FOOTER SENTENCE** (owner direction, verbatim): the bottom
+  meta row now reads "Vant, open source agent memory under MIT | Made by
+  Creadev.org" with Creadev.org as a **dofollow target=_blank** link to
+  https://creadev.org (the same rel treatment the old family column's
+  creadev.org door carried).
+- **NO DUPLICATE CREDIT**: the closer statement's trailing "Free and
+  open source under MIT, made by Creadev.org." is retired so the exact
+  requested sentence stands once, at the very bottom. The closer keeps
+  its page-agnostic summary; the meta row is the only credit line.
+- Verified: build:home 9/9, lint:home PASS (truth + style gates),
+  changelog parity PASS, home suite 6/6 (the dist meta row carries the
+  sentence + link on every route).
+
+## [Unreleased] - pass 345 (the footer is two columns: Vant and Learn; the engine mentions leave)
+
+### Changed + Fixed: the footer reorganizes around the menu; /status stops listing sister engines
+
+- **PRESTRUCT AND FREESTRUCT ARE OFF THE SITE** (owner direction): the
+  footer's "Freestruct docs" link AND the "built from the docs system
+  this site prototyped" parenthetical are gone (retired with the whole
+  column rewrite below), and /status's live board no longer probes or
+  lists prestruct.creadev.org or freestruct.creadev.org (the status
+  surface list is Docs hub + Brain dashboard now). Engineering comments
+  that name prestruct as the BUILD ENGINE of this very site stay - they
+  are not site copy, they are the build contract.
+- **THE FOOTER IS TWO COLUMNS AT EVERY WIDTH**: the phone-stacking bug
+  (owner SS: the link columns collapsed to one column) dies with the old
+  1.35fr/1fr/1fr grid. New structure, per owner spec:
+  - **Col 1 "Vant"** loads THE SAME menu as the main site menu (one WALK
+    list from Nav.jsx drives both surfaces, so menu and footer cannot
+    drift): Home, Install, Brain, Security, Releases, GitHub, Docs,
+    Status, Contact.
+  - **Col 2 "Learn"** is wiped and rebuilt: nine external links to
+    specific docs areas (quick start, agent onboarding, install guide,
+    the brain, brain search, MCP, REST API, CLI reference, security) -
+    the same count as the menu.
+  - The page-agnostic closer statement stays, spanning on top; below the
+    columns a new meta row (bordered) keeps the footer-only routes
+    reachable: "Vant, open source under MIT" + Changelog / Terms /
+    Privacy (version text stays version-free to respect the package.json
+    truth pin).
+- Verified: build:home 9/9 (the two-up footer baked on every route: two
+  columns on desktop AND phone widths), lint:home PASS (truth + style),
+  changelog parity PASS, home suite 6/6.
+
+## [Unreleased] - pass 344 (quick start folded into /install, and the site went hyphen-voiced)
+
+### Changed + Added: the five-minute setup lives at /install; the voice rules ship as a gate
+
+- **QUICK START LEFT THE MENU** (owner direction): the docs quick-start
+  stop is gone from WALK (now nine stops: Home, Install, Brain,
+  Security, Releases, GitHub, Docs, Status, Contact), and **/install
+  absorbed the job** - a new "The five-minute setup" section whose three
+  cards carry the deep docs links (quick start walkthrough, the full
+  install guide, agent onboarding), replacing the orphan note that used
+  to dangle at the page bottom. Page walk remaps automatically:
+  /install prev is Home next is Brain; /brain prev Install next
+  Security, unchanged.
+- **EVERY START/INSTALL BUTTON POINTS AT /install NOW**: the home hero
+  "Quick start guide" is "Get started" to /install (an internal Link
+  now, no hard reload), the closing "Start in 5 minutes" links /install,
+  and "Send your agent"/"Watch it live" stay on their own doors. The
+  drawer's "Get going" is Home + Install (indices remapped; the walk
+  order stays WALK's order).
+- **THE LANGUAGE AUDIT, DONE AS A GATE**: scripts/check-web-home-style.js
+  is check-docs-style's voice set for the site (em/en dashes banned,
+  tabs, trailing whitespace; arrows stay - the learn-more arrows are
+  load-bearing UI design, not prose decoration), wired into
+  `npm run lint:home` so it runs on every pass. The sweep fixed every
+  dash in the live copy AND the code comments (the census was 70+ hits:
+  hero, security chain list, privacy, install headings, status board
+  strings, error messages, META/OG titles - "Install - Vant" everywhere
+  now - footer closer, Brain page, the new bolete comments; converted to
+  commas, colons, and periods, not blind hyphens, so the sentences read
+  like house copy). src/generated (the changelog JSON artifact) and the
+  frozen index.bak.html reference are exempt, same as CHANGELOG.md is in
+  the docs gate.
+- Verified: build:home 9/9, lint:home PASS (13 files + the style gate),
+  changelog parity PASS (regenerated with the reworded _source line),
+  home suite 6/6.
+
+## [Unreleased] - pass 343 (the Brain stop gets a page, the menu gets a bolete sidebar)
+
+### Added — the /brain marketing page + the walk stop went internal; the drawer went structural
+
+- **A REAL BRAIN PAGE** (`/brain`, the walk's fourth stop is internal
+  now): the marketing page for the dashboard side of Vant — sessions as
+  they happen, agents and work, memory in transit (three cards), then
+  "Open the door" (accent button to **brain.creadev.org** + docs hub)
+  and "Run your own" (web/dashboard, codename Bolete, MIT,
+  self-hostable). Claims are lifted from the FAQ/truth, not invented.
+  New route in AppLayout (item + META) and ssr.config.js (title/desc
+  mirror the META — one sentence, two places), so the page prerenders
+  with full telemetry. The walk order is UNCHANGED:  Home → Quick start →
+  Install → **Brain** → Security — prev/next now works ON the Brain
+  page (prev Install, next Security).
+- **THE MENU ITEM**: "Brain (dashboard)" → "**Brain**" → `/brain` — the
+  label drops the parenthetical and the hop is internal. brain.creadev.org
+  stays a first-class door in the page content + footer family column.
+- **THE BOLETE SIDEBAR** (.menu-drawer, mirrors web/dashboard's SideNav
+  structure): the expanding dropdown panel is retired for the mobile
+  menu icon (which stays on the right); the tap now slides in a
+  full-height right drawer over a scrim — sections as tiny uppercase
+  heads like the dashboard nav's observe/work/ops: **Get going** (Home,
+  Quick start, Install), **The install** (Brain, Security, Status,
+  Contact), **The family** (Releases, GitHub, Docs), **More** (Changelog,
+  Terms, Privacy — the footer-only stops now reachable in the drawer).
+  Sections are presentational grouping: the walk order stays WALK's
+  order, untouched. Scrim click, Escape, and link taps all close it;
+  body scroll locks while open; reduced-motion rides the --fx dial.
+- Verified: build:home 9/9 (the /brain route prerenders with the walk
+  widget at the right hops), lint:home PASS, changelog parity PASS,
+  home suite 6/6.
+
 ## [Unreleased] - pass 342 (the site tour: the menu order IS the walk, prev/next on every stop)
 
 ### Added — the page-walk widget (owner direction: "users can walk through the site")

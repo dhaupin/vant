@@ -7,8 +7,8 @@
  * <pre-island> element.
  *
  * vant-home islands:
- *   status-board   — live surfacing checks for /status (browser-side fetch)
- *   contact-form   — the /contact form; composes a GitHub issue URL client-side
+ *   status-board:  live surfacing checks for /status (browser-side fetch)
+ *   contact-form:  the /contact form; composes a GitHub issue URL client-side
  */
 
 import StatusBoard  from './islands/StatusBoard.jsx'

@@ -1,7 +1,7 @@
 /**
  * src/pages/Changelog.jsx (vant-home)
  * ===================================
- * Renders the parsed changelog data (src/generated/changelog.json) — no
+ * Renders the parsed changelog data (src/generated/changelog.json); no
  * hand-written content ships here. The data is a build-time artifact of
  * web/home/scripts/parse-changelog.mjs reading the repo's canonical
  * CHANGELOG.md, and scripts/check-changelog-parity.js (repo root) byte-gates
@@ -21,7 +21,7 @@ export default function Changelog() {
                 <div className="sec-head"><span className="sec-idx">01</span><h2>Changelog</h2></div>
                 <p className="sub">
                     Rendered at build time from the repository's canonical{' '}
-                    <a href="https://github.com/dhaupin/vant/blob/main/CHANGELOG.md">CHANGELOG.md</a> — the parser copies it
+                    <a href="https://github.com/dhaupin/vant/blob/main/CHANGELOG.md">CHANGELOG.md</a>: the parser copies it
                     {' '}out and a parity gate byte-compares the result on every CI run, so what you read here is exactly
                     {' '}what is committed there (version truth pinned against package.json). For tagged releases with
                     {' '}patch notes, the <a href="https://github.com/dhaupin/vant/releases">GitHub releases</a> page is one click away.

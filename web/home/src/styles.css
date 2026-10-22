@@ -1,7 +1,7 @@
-/* vant-home design system — ported 1:1 from the checked-in lander
-   (web/home/index.bak.html). The new /status and /contact routes reuse the
-   same tokens, cards, buttons and terminals; their page-specific styles are
-   appended at the bottom of this file. */
+/* vant-home design system (ported 1:1 from the hand-written lander, now
+   retired to git history; see pass 335/350). The new /status and /contact
+   routes reuse the same tokens, cards, buttons and terminals; their
+   page-specific styles are appended at the bottom of this file. */
 
 :root {
     --bg: #f7f6f3;
@@ -50,6 +50,27 @@ a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; }
 .skip-link { position: absolute; left: -9999px; top: 0; background: var(--accent); color: #fff; padding: 8px 16px; z-index: 200; }
 .skip-link:focus { left: 0; }
+
+/* ---------- external-link affordance (pass 347) ---------- */
+/* Every anchor that leads OFF vant.creadev.org carries a small arrow-up-right
+   glyph after its label. One attribute rule does the routing: internal links
+   are all relative (href="/..."), off-site links are all absolute, so
+  [href^="http"] is the whole system, no per-link bookkeeping to drift.
+   currentColor + mask means the glyph inherits the link's color in both
+   themes; the prerendered markup never changes, so the truth gates and JSON-LD
+   are untouched. */
+a[href^="http"]::after {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-left: 4px;
+    margin-bottom: 1px;
+    opacity: 0.72;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17L17 7M9 7h8v8'/%3E%3C/svg%3E") no-repeat center / contain;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17L17 7M9 7h8v8'/%3E%3C/svg%3E") no-repeat center / contain;
+}
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 
 /* ---------- top nav ---------- */
@@ -74,11 +95,26 @@ nav.top { display: flex; align-items: center; justify-content: space-between; pa
 .menu-btn .ico-close { display: none; }
 .menu-btn[aria-expanded="true"] .ico-menu { display: none; }
 .menu-btn[aria-expanded="true"] .ico-close { display: block; }
-.mobile-menu { display: none; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); padding: 6px; margin-bottom: 6px; }
-.mobile-menu a { display: block; padding: 10px 14px; color: var(--text); border-radius: 8px; font-weight: 600; }
-.mobile-menu a:hover { background: var(--accent-soft); text-decoration: none; }
-.mobile-menu.open { display: block; }
-@media (min-width: 781px) { .mobile-menu { display: none !important; } }
+/* ---------- the bolete sidebar (pass 343) ---------- */
+/* The mobile menu is a full-height RIGHT drawer, structured in sections like
+   the dashboard nav (bolete: observe/work/ops + Sites; here: Get going /
+   The install / The family / More). The menu icon stays on the right of
+   the top bar; the drawer slides over the page with a scrim behind it.
+   Scrim click, Escape, and link taps close it; body scroll locks while
+   open. Sections are presentational; the walk order lives in Nav.jsx. */
+.menu-scrim { position: fixed; inset: 0; background: color-mix(in srgb, var(--ink) 32%, transparent); opacity: 0; pointer-events: none; transition: opacity var(--fx, 1) 0.28s ease; z-index: 90; }
+.menu-scrim.open { opacity: 1; pointer-events: auto; }
+.menu-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(320px, 86vw); background: var(--bg-card); border-left: 1px solid var(--border); box-shadow: -12px 0 32px color-mix(in srgb, var(--ink) 12%, transparent); padding: 18px 20px 30px; overflow-y: auto; transform: translateX(calc(100% + 20px)); transition: transform var(--fx, 1) 0.32s ease; z-index: 100; }
+.menu-drawer.open { transform: none; }
+.menu-drawer-head { display: flex; align-items: center; justify-content: space-between; margin: 0 -6px 14px; }
+.menu-drawer-brand { display: inline-flex; align-items: center; gap: 9px; font-weight: 800; font-size: 1.02rem; color: var(--ink); letter-spacing: .22em; }
+.menu-sec { margin-bottom: 16px; }
+.menu-sec-head { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); padding: 0 8px 5px; }
+.menu-sec-links a { display: block; padding: 9px 10px; color: var(--text); border-radius: 8px; font-weight: 600; font-size: 0.95rem; }
+.menu-sec-links a:hover { background: var(--accent-soft); color: var(--ink); text-decoration: none; }
+.drawer-close .ico-menu { display: none; }
+.drawer-close .ico-close { display: block !important; }
+@media (min-width: 781px) { .menu-scrim, .menu-drawer { display: none !important; } }
 @media (max-width: 780px) {
     .top-links a { display: none; }
     .menu-btn { display: inline-flex; align-items: center; justify-content: center; }
@@ -217,15 +253,25 @@ p.sub { color: var(--text-muted); margin-bottom: 30px; max-width: 44rem; }
 .faq details p { color: var(--text-muted); padding-bottom: 12px; font-size: 0.95rem; }
 
 footer { border-top: 1px solid var(--border); padding: 34px 0 44px; color: var(--text-muted); font-size: 0.9rem; }
-/* three-column footer: about / this site / the family (pass 338) */
-.footer-grid { display: grid; grid-template-columns: 1.35fr 1fr 1fr; gap: 36px 40px; align-items: start; }
-footer .f-about p { margin: 0; max-width: 34rem; line-height: 1.65; }
+/* three-column footer: about / this site / the family (pass 338) *//* Two columns at EVERY width (pass 345): the closer statement spans on
+   top, the "Vant" menu and "Learn" docs columns sit side by side on phone
+   widths just like desktop, and the footer-meta row carries the version
+   line + the footer-only routes. */
+.f-closer { max-width: 40rem; }
+.f-closer p { margin: 0 0 30px; line-height: 1.65; }
+.footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px 40px; align-items: start; }
 .f-head { font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink); margin: 0 0 12px; font-weight: 800; }
 .f-links { display: flex; flex-direction: column; gap: 8px; }
 .f-links a { color: var(--text-muted); display: inline-block; }
 .f-links a:hover { color: var(--ink); text-decoration: none; }
+.f-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; justify-content: space-between; margin-top: 30px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-muted); }
+.f-meta-links { display: inline-flex; gap: 16px; }
+.f-meta-links a { color: var(--text-muted); }
+.f-meta-links a:hover { color: var(--ink); text-decoration: none; }
+
 @media (max-width: 780px) {
-    .footer-grid { grid-template-columns: 1fr; gap: 26px; }
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: 22px 18px; }
+    .f-meta { flex-direction: column; align-items: flex-start; gap: 8px; }
 }
 
 /* ---------- page walk (prev/next tour widget) ---------- */

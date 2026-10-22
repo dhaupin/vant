@@ -5,7 +5,7 @@
  * Imported by App.jsx (client, BrowserRouter) and by prestruct's prerender
  * (StaticRouter via ssrLoadModule).
  *
- * SSR SAFETY: every window/document/localStorage touch is guarded — the
+ * SSR SAFETY: every window/document/localStorage touch is guarded; the
  * prerender runs in Node.
  *
  * The VantFX behaviors from the reliable-golden-backup lander are ported as
@@ -21,7 +21,8 @@ const { Routes, Route, useLocation, Link } = rrd
 
 import { mountIslands } from './islands.js'
 import { islands }      from './AppIslands.jsx'
-import Nav, { WALK }       from './components/Nav.jsx'
+import Nav                 from './components/Nav.jsx'
+import { WALK, routeKey }  from './walk.mjs'
 import Footer           from './components/Footer.jsx'
 import Home             from './pages/Home.jsx'
 import Terms            from './pages/Terms.jsx'
@@ -29,27 +30,29 @@ import Privacy          from './pages/Privacy.jsx'
 import Status           from './pages/Status.jsx'
 import Contact          from './pages/Contact.jsx'
 import Install          from './pages/Install.jsx'
-import Security         from './pages/Security.jsx'
+import Security        from './pages/Security.jsx'
+import Brain           from './pages/Brain.jsx'
 import Changelog        from './pages/Changelog.jsx'
 
 // Client-navigation meta sync. The prerender bakes correct tags per route at
 // build time; this keeps title/og/canonical in step when the user navigates in
 // the SPA (template hook usePageMeta contract, minimized for five routes).
 const META = {
-    '/':        { title: 'Vant — Persistent memory for AI agents', description: 'Vant gives any AI agent a brain: markdown memory files in your own repository. Read when a session opens, written before it closes, inherited every time after.' },
-    '/install': { title: 'Install — Vant', description: 'Install Vant: clone and npm ci (the canon path), or docker pull dhaupin/vant for production. Node 18+, git, nothing else.' },
-    '/security':{ title: 'Security — Vant', description: 'Report a vulnerability through a private GitHub advisory. The fail-closed chain: sandbox capabilities, input validation, rate budgets, escrow.' },
-    '/terms':   { title: 'Terms of Use — Vant', description: 'Terms of use for the Vant project and this site.' },
-    '/privacy': { title: 'Privacy — Vant', description: 'Vant privacy: your brain is your repo. This site collects nothing.' },
-    '/status':  { title: 'Status — Vant', description: 'Vant surfaces status, checked from your browser with honest limits.' },
-    '/contact': { title: 'Contact — Vant', description: 'Reach the Vant project: compose a GitHub issue from the browser.' },
-    '/changelog': { title: 'Changelog — Vant', description: 'The Vant changelog, rendered straight from the canonical CHANGELOG.md at build time and byte-gated against it.' },
+    '/':        { title: 'Vant - Persistent memory for AI agents', description: 'Vant gives any AI agent a brain: markdown memory files in your own repository. Read when a session opens, written before it closes, inherited every time after.' },
+    '/install': { title: 'Install - Vant', description: 'Install Vant: clone and npm ci (the canon path), or docker pull dhaupin/vant for production. Node 18+, git, nothing else.' },
+    '/security':{ title: 'Security - Vant', description: 'Report a vulnerability through a private GitHub advisory. The fail-closed chain: sandbox capabilities, input validation, rate budgets, escrow.' },
+    '/brain':   { title: 'Brain - Vant', description: 'The Brain is the dashboard side of Vant: a browser window into a running install. Sessions live, agent rosters, carrier packets, budgets, ledgers, decisions.' },
+    '/terms':   { title: 'Terms of Use - Vant', description: 'Terms of use for the Vant project and this site.' },
+    '/privacy': { title: 'Privacy - Vant', description: 'Vant privacy: your brain is your repo. This site collects nothing.' },
+    '/status':  { title: 'Status - Vant', description: 'Vant surfaces status, checked from your browser with honest limits.' },
+    '/contact': { title: 'Contact - Vant', description: 'Reach the Vant project: compose a GitHub issue from the browser.' },
+    '/changelog': { title: 'Changelog - Vant', description: 'The Vant changelog, rendered straight from the canonical CHANGELOG.md at build time and byte-gated against it.' },
 }
 
 function SyncPageMeta({ pathname }) {
     useEffect(() => {
         if (typeof document === 'undefined') return
-        const m = META[pathname] || { title: 'Page not found — Vant', description: 'Page not found on vant.creadev.org.' }
+        const m = META[pathname] || { title: 'Page not found - Vant', description: 'Page not found on vant.creadev.org.' }
         document.title = m.title
         const set = (sel, attr, v) => {
             const el = document.head.querySelector(sel)
@@ -59,11 +62,17 @@ function SyncPageMeta({ pathname }) {
         set('meta[property="og:title"]', 'content', m.title)
         set('meta[property="og:description"]', 'content', m.description)
         const base = document.querySelector('meta[name="prestruct-site-url"]')?.content || window.location.origin
-        set('link[rel="canonical"]', 'href', base + pathname)
-        set('meta[property="og:url"]', 'content', base + pathname)
+        // canonical/OG ride the NORMALIZED route key (pass 350): the sitemap
+        // lists slashless paths, so the canonical should match, not /brain/
+        const key = routeKey(pathname)
+        set('link[rel="canonical"]', 'href', base + key)
+        set('meta[property="og:url"]', 'content', base + key)
     }, [pathname])
     return null
 }
+
+// Route keys normalize in walk.mjs (shared with the vitest pins), so the
+// widget/meta/behavior lookups never miss on the two visit shapes.
 
 function ScrollToTop() {
     const { pathname } = useLocation()
@@ -73,13 +82,21 @@ function ScrollToTop() {
         const t = setTimeout(() => mountIslands(islands), 0)
         return () => clearTimeout(t)
     }, [pathname])
-    SyncPageMeta({ pathname })
+    SyncPageMeta({ pathname: routeKey(pathname) })
     return null
 }
 
 // The old lander's reveal + counter engines, merged into one observer pass.
-// Runs once per mounted page tree; matches the VantFX selectors exactly.
-function useVantFxEffects() {
+// THE RE-RUN LAW (pass 348): the effect re-runs PER ROUTE. Before this fix it
+// ran only when AppLayout itself re-rendered, and AppLayout never does on a
+// client-side navigation (only Routes swap), so a freshly navigated page's
+// fx-reveal elements were watched by NO observer and shipped invisible: the
+// "page loads white" reports. Now AppLayout re-renders with the route and
+// the new page's elements get their observer pass like first paint did.
+// The .fx-in/.fx-counted guards make re-runs idempotent for already-visible
+// content; threshold drops 0.12 to 0.05 so a tall cards row cannot out-wait
+// the observer either.
+function useVantFxEffects(pathname) {
     useEffect(() => {
         if (typeof window === 'undefined') return
         const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -120,27 +137,27 @@ function useVantFxEffects() {
                 }
             })
         }, {
-            threshold: 0.12,
+            threshold: 0.05,
             rootMargin: '0px 0px -40px 0px',
         })
         els.forEach(el => io.observe(el))
         counters.forEach(el => io.observe(el))
         return () => io.disconnect()
-    })
+    }, [pathname])
 }
 
 // The page walk (pass 342): every page that is a stop on the owner-directed
-// walk (Nav.jsx's WALK — the menu order IS the walk) gets a prev/next widget
+// walk (walk.mjs's WALK: the menu order IS the walk) gets a prev/next widget
 // between its content and the footer, so visitors can walk the site like a
 // tour. Home is the origin (no widget); pages not on the walk (terms,
-// privacy, changelog, 404) get none — the exclusions fall out of the list
+// privacy, changelog, 404) get none: the exclusions fall out of the list
 // membership automatically. The next hop wraps Contact back to Home, so the
 // tour is a loop.
 const WALK_INDEX = new Map(WALK.map((stop, i) => [stop.href, i]))
 
 function PageWalk() {
     const { pathname } = useLocation()
-    const i = WALK_INDEX.get(pathname)
+    const i = WALK_INDEX.get(routeKey(pathname))
     if (typeof i !== 'number' || i === 0) return null
     const prev = WALK[i - 1]
     const next = WALK[(i + 1) % WALK.length]
@@ -156,7 +173,11 @@ function PageWalk() {
 }
 
 export default function AppLayout() {
-    useVantFxEffects()
+    // Reading the route here is LOAD-BEARING (pass 348): it makes AppLayout
+    // re-render on every navigation, which is what gives the fx engine its
+    // fresh observer pass over the new page (see the re-run law above).
+    const { pathname } = useLocation()
+    useVantFxEffects(pathname)
     return (
         <>
             <a className="skip-link" href="#main">Skip to content</a>
@@ -167,6 +188,7 @@ export default function AppLayout() {
                     <Route path="/"        element={<Home />} />
                     <Route path="/install"  element={<Install />} />
                     <Route path="/security" element={<Security />} />
+                    <Route path="/brain"    element={<Brain />} />
                     <Route path="/terms"   element={<Terms />} />
                     <Route path="/privacy" element={<Privacy />} />
                     <Route path="/status"  element={<Status />} />

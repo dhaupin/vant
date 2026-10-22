@@ -1,8 +1,139 @@
 {
-  "_source": "CHANGELOG.md (root) — parsed, never hand-copied; regenerate with npm run build:home",
+  "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 72,
+  "_headingCount": 80,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 350 (docs credit, generated stats, walk pins, and the small sweep)",
+      "sections": [
+        {
+          "name": "Added + Changed: the /docs footer carries the credit; the stats strip is generated truth; the walk contracts get pins",
+          "items": [
+            "**DOCS FOOTER CREDIT** (docs/_layouts/default.html): the docs hub now",
+            "**THE STATS STRIP IS BUILD-TIME TRUTH (the #2 fix)**: hand-pinned",
+            "**THE WALK CONTRACTS GET PINS (the #3 fix)**: `src/walk.mjs` is now",
+            "**THE #4 SWEEP**: nav brand and drawer brand are Links now (no full",
+            "Verified: build:home 9/9 (stats baked: cli 130, mcp 347, lib 182,"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 349 (the footer says © 2026)",
+      "sections": [
+        {
+          "name": "Added: the copyright year joins the meta row",
+          "items": [
+            "**© 2026 AT THE FRONT of the footer's final sentence** (owner",
+            "Verified: build:home 9/9, lint:home PASS (truth + style), changelog"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 348 (the walk finds /brain/, and the white pages get their observers)",
+      "sections": [
+        {
+          "name": "Fixed: two navigation bugs in one shell file",
+          "items": [
+            "**THE WALK LOOKED UP RAW PATHNAMES**: the prerendered site serves",
+            "**THE WHITE-PAGE CAUSE (the fx observer lifecycle)**: the reveal/counter",
+            "Verified: build:home 9/9, lint:home PASS (truth + style), changelog"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 347 (the external-link affordance: one rule, every door marked)",
+      "sections": [
+        {
+          "name": "Added: off-site links wear the arrow-up-right glyph",
+          "items": [
+            "**THE SYSTEM** (owner direction: \"an icon for external links\"): every",
+            "**HOW IT MARKS WITHOUT TOUCHING MARKUP**: the glyph is a masked",
+            "Verified: build:home 9/9, lint:home PASS (truth + style gates),"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 346 (the final footer sentence: one credit line, dofollow door)",
+      "sections": [
+        {
+          "name": "Changed: the meta row speaks the closing credit",
+          "items": [
+            "**THE FINAL FOOTER SENTENCE** (owner direction, verbatim): the bottom",
+            "**NO DUPLICATE CREDIT**: the closer statement's trailing \"Free and",
+            "Verified: build:home 9/9, lint:home PASS (truth + style gates),"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 345 (the footer is two columns: Vant and Learn; the engine mentions leave)",
+      "sections": [
+        {
+          "name": "Changed + Fixed: the footer reorganizes around the menu; /status stops listing sister engines",
+          "items": [
+            "**PRESTRUCT AND FREESTRUCT ARE OFF THE SITE** (owner direction): the",
+            "**THE FOOTER IS TWO COLUMNS AT EVERY WIDTH**: the phone-stacking bug",
+            "Verified: build:home 9/9 (the two-up footer baked on every route: two"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 344 (quick start folded into /install, and the site went hyphen-voiced)",
+      "sections": [
+        {
+          "name": "Changed + Added: the five-minute setup lives at /install; the voice rules ship as a gate",
+          "items": [
+            "**QUICK START LEFT THE MENU** (owner direction): the docs quick-start",
+            "**EVERY START/INSTALL BUTTON POINTS AT /install NOW**: the home hero",
+            "**THE LANGUAGE AUDIT, DONE AS A GATE**: scripts/check-web-home-style.js",
+            "Verified: build:home 9/9, lint:home PASS (13 files + the style gate),"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 343 (the Brain stop gets a page, the menu gets a bolete sidebar)",
+      "sections": [
+        {
+          "name": "Added — the /brain marketing page + the walk stop went internal; the drawer went structural",
+          "items": [
+            "**A REAL BRAIN PAGE** (`/brain`, the walk's fourth stop is internal",
+            "**THE MENU ITEM**: \"Brain (dashboard)\" → \"**Brain**\" → `/brain` — the",
+            "**THE BOLETE SIDEBAR** (.menu-drawer, mirrors web/dashboard's SideNav",
+            "Verified: build:home 9/9 (the /brain route prerenders with the walk"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

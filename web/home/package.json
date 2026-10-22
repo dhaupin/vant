@@ -2,7 +2,7 @@
     "name": "vant-home",
     "version": "1.0.0",
     "private": true,
-    "description": "The Vant home site (vant.creadev.org): React + prestruct build-time SEO prerender. Static artifact lands in dist/; the old checked-in lander lives on as index.bak.html.",
+    "description": "The Vant home site (vant.creadev.org): React + prestruct build-time SEO prerender. Static artifact lands in dist/; the retired hand-written lander lives on in git history.",
     "type": "module",
     "scripts": {
         "build": "prestruct build",

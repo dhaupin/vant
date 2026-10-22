@@ -7,7 +7,7 @@
  * What is actually checked:
  *   - GitHub REST API (CORS-writable for browsers): repo metadata + latest
  *     release for dhaupin/vant.
- *   - docs.creadev.org and prestruct/freestruct family sites: fetched with
+ *   - docs.creadev.org and the Brain dashboard: fetched with
  *     mode:'no-cors'. The response body is opaque by CORS design, so the
  *     honest result is binary: the network request completed at all or not.
  *     A healthy-looking "reachable" from a captive portal is possible in
@@ -61,7 +61,6 @@ export default function StatusBoard() {
                 probeJson(REPO_API),
                 probeJson(RELEASE_API).then(() => probeJson(RELEASE_API)), // release follows repo health
                 probe('https://docs.creadev.org/vant/'),
-                probe('https://prestruct.creadev.org/'),
                 probe('https://brain.creadev.org'),
             ])
             if (!alive) return
@@ -69,8 +68,7 @@ export default function StatusBoard() {
                 repo: results[0],
                 release: results[1],
                 docs: results[2],
-                family: results[3],
-                brain: results[4],
+                brain: results[3],
             })
             setRunning(false)
         }
@@ -88,7 +86,7 @@ export default function StatusBoard() {
                     <p>
                         {repo.state === 'ok' && repo.data ? (
                             <>
-                                {repo.data.description || 'dhaupin/vant'} — {repo.data.stargazers_count ?? '?'} stars,
+                                {repo.data.description || 'dhaupin/vant'}: {repo.data.stargazers_count ?? '?'} stars,
                                 {' '}{repo.data.open_issues_count ?? '?'} open issues, last push {new Date(repo.data.pushed_at).toLocaleDateString()}.
                             </>
                         ) : repo.state === 'error' ? (
@@ -106,7 +104,7 @@ export default function StatusBoard() {
                     <h3><Dot state={(checks.release || {}).state || 'checking'} />Latest release (API check)</h3>
                     <p>
                         {checks.release && checks.release.state === 'ok' && checks.release.data ? (
-                            <>{checks.release.data.tag_name} — "{(checks.release.data.name || '').slice(0, 80)}"</>
+                            <>{checks.release.data.tag_name}: "{(checks.release.data.name || '').slice(0, 80)}"</>
                         ) : checks.release && checks.release.state === 'error' ? (
                             <>API answered, release fetch errored{' '}{checks.release.detail} (no releases yet is healthy).</>
                         ) : checks.release && checks.release.state === 'unreachable' ? (
@@ -120,7 +118,6 @@ export default function StatusBoard() {
 
                 {[
                     ['Docs hub', 'docs', 'https://docs.creadev.org/vant/'],
-                    ['Creadev doc family (prestruct / freestruct sites)', 'family', 'https://freestruct.creadev.org'],
                     ['Brain dashboard', 'brain', 'https://brain.creadev.org'],
                 ].map(([name, key, url]) => {
                     const c = checks[key] || {}
@@ -128,7 +125,7 @@ export default function StatusBoard() {
                         <div className="card" key={name}>
                             <h3><Dot state={c.state || 'checking'} />{name} (network reachability)</h3>
                             <p>
-                                {c.state === 'reachable' ? 'Network response received (content not readable from the browser by CORS design — this is not an operational guarantee).' :
+                                {c.state === 'reachable' ? 'Network response received (the content is not readable from the browser by CORS design, so this is not an operational guarantee).' :
                                  c.state === 'unreachable' ? 'Unreachable from this browser right now.' : 'Checking…'}
                             </p>
                             <p className="status-meta">surface <a href={url} rel="noopener">{url.replace('https://', '')}</a> · {c.time ? 'checked ' + c.time : ''}</p>
@@ -140,7 +137,7 @@ export default function StatusBoard() {
             <p className="status-meta" style={{ marginTop: 14 }}>
                 {running
                     ? 'Checks running from your browser against public endpoints only; nothing is sent or stored by this site.'
-                    : 'Checks completed ' + new Date().toLocaleTimeString() + ' — browser-side only, never stored, never relayed.'}
+                    : 'Checks completed ' + new Date().toLocaleTimeString() + ', browser-side only, never stored, never relayed.'}
             </p>
         </div>
     )

@@ -1,17 +1,20 @@
 /**
  * src/pages/Home.jsx (vant-home)
  * ==============================
- * The lander, ported section-for-section from the checked-in backup
- * (web/home/index.bak.html). Copy is byte-faithful on purpose: the fiction
- * gates in scripts/check-home.js treat the shipped copy as the canon.
+ * The lander, ported section-for-section from the hand-written lander
+ * (retired to git history in pass 350). Copy is byte-faithful on purpose:
+ * the fiction gates in scripts/check-home.js treat the shipped copy as
+ * the canon.
  *
  * The FAQPage JSON-LD lives here in the body (valid JSON-LD placement) so
  * crawlers reading the prerendered HTML of '/' get it and only '/' does.
  */
 
 import React from 'react'
+import { Link } from 'react-router-dom'
 import Term from '../components/Term.jsx'
 import Constellation from '../components/Constellation.jsx'
+import stats from '../generated/stats.json'
 
 const FAQ = [
     ['What is a brain in Vant?', 'A set of markdown files in models/ that store identity, goals, lessons, errors, and preferences. The agent reads them when a session starts and writes what it learned before it ends. The next session inherits everything.', 'https://docs.creadev.org/vant/memory/brain'],
@@ -49,7 +52,7 @@ export default function Home() {
                 <p className="lede fx-reveal">
                     Vant gives any AI agent a brain: <strong>markdown memory files in your own repository</strong>.
                     {' '}Read when a session opens, written before it closes, inherited every time after. Git history becomes the memory
-                    {' '}lineage. No database, no lock-in, readable with <strong>cat</strong>. Start with one agent on your laptop —
+                    {' '}lineage. No database, no lock-in, readable with <strong>cat</strong>. Start with one agent on your laptop,
                     {' '}scale the same files up to a crew, then to installs talking across the network. Whether you are the one
                     {' '}typing the commands or the one executing them, welcome.
                 </p>
@@ -64,7 +67,7 @@ export default function Home() {
                             <span className="prompt">$ </span><span className="cmd">vant</span> start{'\n'}
                             <span className="prompt">$ </span><span className="cmd">vant</span> onboard
                         </Term>
-                        <p style={{ margin: '13px 0 0' }}><a className="btn" href="https://docs.creadev.org/vant/getting-started/quick-start">Quick start guide</a></p>
+                        <p style={{ margin: '13px 0 0' }}><Link className="btn" to="/install">Get started</Link></p>
                     </div>
                     <div className="cta-card">
                         <h2>For agents</h2>
@@ -77,7 +80,7 @@ export default function Home() {
                     </div>
                 </div>
                 <p className="drag-hint">
-                    The constellation behind this text is your agent's memory graph — every amber pulse is a lesson landing in the brain.
+                    The constellation behind this text is your agent's memory graph: every amber pulse is a lesson landing in the brain.
                 </p>
             </div>
         </header>
@@ -155,7 +158,7 @@ export default function Home() {
                     <div className="grid-3">
                         <div className="card fx-reveal">
                             <h3>MCP in one command</h3>
-                            <p>vant mcp auto-wires the module surface into JSON-RPC tools on 127.0.0.1:3457. Any MCP client connects — Claude, GPT, local models, homegrown runners.</p>
+                            <p>vant mcp auto-wires the module surface into JSON-RPC tools on 127.0.0.1:3457. Any MCP client connects: Claude, GPT, local models, homegrown runners.</p>
                             <a href="https://docs.creadev.org/vant/runtime/mcp" className="learn-more">MCP reference →</a>
                         </div>
                         <div className="card fx-reveal fx-d1">
@@ -353,13 +356,17 @@ export default function Home() {
 
             <div className="stats" role="presentation">
                 <div className="container stat-row">
-                    <div className="stat"><div className="stat-value" data-count="3">3</div><div className="stat-label">memory systems</div></div>
-                    <div className="stat"><div className="stat-value" data-count="130">130</div><div className="stat-label">CLI commands</div></div>
-                    <div className="stat"><div className="stat-value" data-count="347">347</div><div className="stat-label">MCP commands</div></div>
-                    <div className="stat"><div className="stat-value" data-count="182">182</div><div className="stat-label">lib modules</div></div>
-                    <div className="stat"><div className="stat-value" data-count="126">126</div><div className="stat-label">doc pages</div></div>
-                    <div className="stat"><div className="stat-value" data-count="218">218</div><div className="stat-label">test suites</div></div>
-                    <div className="stat"><div className="stat-value">v0.8.6</div><div className="stat-label">MIT licensed</div></div>
+                    {/* EVERY number is generated truth (src/generated/stats.json,
+                        pass 350): coverage gates for cli/mcp, a repo file census for
+                        lib/docs/tests, package.json for version. No hand-pinned
+                        counts left to rot. */}
+                    <div className="stat"><div className="stat-value" data-count={stats.memorySystems}>{stats.memorySystems}</div><div className="stat-label">memory systems</div></div>
+                    <div className="stat"><div className="stat-value" data-count={stats.cli}>{stats.cli}</div><div className="stat-label">CLI commands</div></div>
+                    <div className="stat"><div className="stat-value" data-count={stats.mcp}>{stats.mcp}</div><div className="stat-label">MCP commands</div></div>
+                    <div className="stat"><div className="stat-value" data-count={stats.libModules}>{stats.libModules}</div><div className="stat-label">lib modules</div></div>
+                    <div className="stat"><div className="stat-value" data-count={stats.docPages}>{stats.docPages}</div><div className="stat-label">doc pages</div></div>
+                    <div className="stat"><div className="stat-value" data-count={stats.testSuites}>{stats.testSuites}</div><div className="stat-label">test suites</div></div>
+                    <div className="stat"><div className="stat-value">v{stats.version}</div><div className="stat-label">MIT licensed</div></div>
                 </div>
             </div>
 
@@ -370,12 +377,12 @@ export default function Home() {
                     <div className="grid-3">
                         <div className="card fx-reveal">
                             <h3>Relay network</h3>
-                            <p>Installs expose a gated relay surface: hop-by-hop authorization with timing-safe keys, bodies as encrypted envelopes. No key, no surface — fail-closed by construction.</p>
+                            <p>Installs expose a gated relay surface: hop-by-hop authorization with timing-safe keys, bodies as encrypted envelopes. No key, no surface, fail-closed by construction.</p>
                             <a href="https://docs.creadev.org/vant/operations/relay" className="learn-more">Relay ops →</a>
                         </div>
                         <div className="card fx-reveal fx-d1">
                             <h3>Encrypted carriers</h3>
-                            <p>Memory travels as sealed stones — encrypted packets that ride images and files between installs, signatures verified on arrival. Whole brains included.</p>
+                            <p>Memory travels as sealed stones, encrypted packets that ride images and files between installs, signatures verified on arrival. Whole brains included.</p>
                             <a href="https://docs.creadev.org/vant/memory/stego" className="learn-more">Carrier transport →</a>
                         </div>
                         <div className="card fx-reveal fx-d2">
@@ -385,7 +392,7 @@ export default function Home() {
                         </div>
                         <div className="card fx-reveal">
                             <h3>Fail-closed security chain</h3>
-                            <p>Sandbox capabilities, input validation, rate limiting, escrow approval on every brain operation. Refusals come back as typed codes — never silent half-writes.</p>
+                            <p>Sandbox capabilities, input validation, rate limiting, escrow approval on every brain operation. Refusals come back as typed codes, never silent half-writes.</p>
                             <a href="https://docs.creadev.org/vant/security/" className="learn-more">Security →</a>
                         </div>
                         <div className="card fx-reveal fx-d1">
@@ -447,9 +454,9 @@ export default function Home() {
             <section className="soul" style={{ paddingTop: 20 }}>
                 <div className="container">
                     <blockquote className="fx-reveal">Pick a door. <span className="fx-word">Both are open.</span></blockquote>
-                    <p className="fx-reveal fx-d1" style={{ marginBottom: 28 }}>Five minutes for you, one command for your agent — and the memory is yours either way.</p>
+                    <p className="fx-reveal fx-d1" style={{ marginBottom: 28 }}>Five minutes for you, one command for your agent, and the memory is yours either way.</p>
                     <p className="fx-reveal fx-d2" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center' }}>
-                        <a className="btn" href="https://docs.creadev.org/vant/getting-started/quick-start">Start in 5 minutes</a>
+                        <Link className="btn" to="/install">Start in 5 minutes</Link>
                         <a className="btn outline" href="https://docs.creadev.org/vant/getting-started/agent-onboarding">Send your agent</a>
                         <a className="btn outline" href="https://brain.creadev.org" rel="noopener">Watch it live</a>
                     </p>

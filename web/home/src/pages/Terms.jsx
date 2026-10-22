@@ -2,8 +2,8 @@
  * src/pages/Terms.jsx (vant-home)
  * ===============================
  * Terms of use for the Vant project and this site. Source of truth: LEGAL.md
- * at the repo root and docs/reference/legal.md — the canon is linked, the
- * page is the human-readable summary, not a rewrite.
+ * at the repo root and docs/reference/legal.md (the canon is linked there;
+ * the page is the human-readable summary, not a rewrite.
  */
 
 import React from 'react'

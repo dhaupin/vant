@@ -6,8 +6,8 @@
  * so the route table has to exist in the repo (it is not environment-specific
  * here - every URL below is fixed).
  *
- * The seven routes replace the single hand-written index.html lander
- * (web/home/index.bak.html, kept as the design reference):
+ * The routes replace the single hand-written index.html lander (retired
+ * to git history in pass 350, was the design reference):
  *   /          the lander
  *   /install   install paths (clone canon, Docker Hub image, npm posture)
  *   /security  disclosure path + the fail-closed chain
@@ -48,7 +48,7 @@ export default {
             priority: '1.0',
             changefreq: 'weekly',
             meta: {
-                title: 'Vant — Persistent memory for AI agents',
+                title: 'Vant - Persistent memory for AI agents',
                 description:
                     'Vant gives any AI agent a brain: markdown memory files in your own repository. Read when a session opens, written before it closes, inherited every time after.',
             },
@@ -58,7 +58,7 @@ export default {
             priority: '0.9',
             changefreq: 'monthly',
             meta: {
-                title: 'Install — Vant',
+                title: 'Install - Vant',
                 description:
                     'Install Vant: clone and npm ci (the canon path), or docker pull dhaupin/vant for production. Node 18+, git, nothing else.',
             },
@@ -68,9 +68,19 @@ export default {
             priority: '0.7',
             changefreq: 'monthly',
             meta: {
-                title: 'Security — Vant',
+                title: 'Security - Vant',
                 description:
                     'Report a vulnerability through a private GitHub advisory. The fail-closed chain: sandbox capabilities, input validation, rate budgets, escrow.',
+            },
+        },
+        {
+            path: '/brain',
+            priority: '0.7',
+            changefreq: 'monthly',
+            meta: {
+                title: 'Brain - Vant',
+                description:
+                    'The Brain is the dashboard side of Vant: a browser window into a running install. Sessions live, agent rosters, carrier packets, budgets, ledgers, decisions.',
             },
         },
         {
@@ -78,9 +88,9 @@ export default {
             priority: '0.6',
             changefreq: 'weekly',
             meta: {
-                title: 'Changelog — Vant',
+                title: 'Changelog - Vant',
                 description:
-                    'The Vant changelog, rendered straight from the canonical CHANGELOG.md at build time and byte-gated against it — version truth stays in one place.',
+                    'The Vant changelog, rendered straight from the canonical CHANGELOG.md at build time and byte-gated against it; version truth stays in one place.',
             },
         },
         {
@@ -88,7 +98,7 @@ export default {
             priority: '0.5',
             changefreq: 'yearly',
             meta: {
-                title: 'Terms of Use — Vant',
+                title: 'Terms of Use - Vant',
                 description:
                     'Terms of use for the Vant project and this site: open source software provided without warranty; you are responsible for everything your AI does.',
             },
@@ -98,9 +108,9 @@ export default {
             priority: '0.5',
             changefreq: 'yearly',
             meta: {
-                title: 'Privacy — Vant',
+                title: 'Privacy - Vant',
                 description:
-                    'Vant privacy: your brain is your repo. This site collects nothing — plain static files, no accounts, no tracking, no cookies.',
+                    'Vant privacy: your brain is your repo. This site collects nothing: plain static files, no accounts, no tracking, no cookies.',
             },
         },
         {
@@ -108,7 +118,7 @@ export default {
             priority: '0.6',
             changefreq: 'daily',
             meta: {
-                title: 'Status — Vant',
+                title: 'Status - Vant',
                 description:
                     'Vant surfaces status: the home site, docs hub, brain dashboard, and the GitHub project, checked from your browser with honest limits.',
             },
@@ -118,7 +128,7 @@ export default {
             priority: '0.6',
             changefreq: 'yearly',
             meta: {
-                title: 'Contact — Vant',
+                title: 'Contact - Vant',
                 description:
                     'Reach the Vant project: compose a GitHub issue from the browser, or use the docs and dashboard doors.',
             },
@@ -126,7 +136,7 @@ export default {
     ],
 
     // JSON-LD structured data (prestruct contract): FOUR graph nodes on
-    // EVERY page, in this order — Organization (the owner relationship:
+    // EVERY page, in this order: Organization (the owner relationship:
     // founder is a Person typed for creadev.org), the WebSite, the
     // SoftwareApplication (the AI/open-source software face: version truth
     // read from package.json at build time, MIT license, repo, install and

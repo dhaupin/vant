@@ -1,0 +1,11 @@
+{
+  "_generatedBy": "web/home/scripts/gen-stats.mjs",
+  "_source": "the repo at build time: coverage gates for cli/mcp, file census for lib/docs/tests, package.json for version",
+  "memorySystems": 3,
+  "cli": 130,
+  "mcp": 347,
+  "libModules": 182,
+  "docPages": 126,
+  "testSuites": 218,
+  "version": "0.8.6"
+}

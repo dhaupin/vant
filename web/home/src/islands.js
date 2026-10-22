@@ -1,14 +1,14 @@
 /**
  * src/islands.js
  * ==============
- * Engine file — vendored COPY from prestruct@1.1.0 (init/src/islands.js),
+ * Engine file: vendored COPY from prestruct@1.1.0 (init/src/islands.js),
  * never edited locally; upgrades come from the package's init template.
  *
  * Mounts dynamic React components into <pre-island> placeholders after
  * the main app hydrates. Each island is a hole punched through the
  * prerendered HTML: invisible to crawlers, filled for human visitors.
  *
- * Usage — call mountIslands() in AppLayout's route-change effect after each
+ * Usage: call mountIslands() in AppLayout's route-change effect after each
  * navigation. This ensures islands mount on both hard loads and SPA transitions.
  * The WeakSet prevents double-mounting if the same element is scanned twice.
  *
@@ -66,7 +66,7 @@ function whenIdle(el, Component) {
  * Scans the DOM for <pre-island> elements and mounts the matching
  * React component from the registry into each one.
  * Unregistered island names are skipped with a console warning.
- * Safe to call with an empty registry — nothing happens.
+ * Safe to call with an empty registry; nothing happens.
  */
 export function mountIslands(registry = {}) {
     if (typeof window === 'undefined') return
