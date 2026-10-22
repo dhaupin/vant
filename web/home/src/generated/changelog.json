@@ -1,8 +1,24 @@
 {
   "_source": "CHANGELOG.md (root) — parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 68,
+  "_headingCount": 69,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 339 (the live-site round: footer in three columns, the route set in the main menu)",
+      "sections": [
+        {
+          "name": "Changed — nav + footer after the Pages deploy went live",
+          "items": [
+            "**THE MAIN MENU CARRIES THE ROUTES**: `/changelog` joins the top nav",
+            "**FOOTER IN THREE COLUMNS** (`.footer-grid`): the full-width link soup",
+            "Verified: build:home 8/8, lint:home PASS (12 files), home suite 6/6"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

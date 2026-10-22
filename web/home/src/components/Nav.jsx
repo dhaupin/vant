@@ -18,6 +18,7 @@ const links = [
     { label: 'GitHub', href: 'https://github.com/dhaupin/vant' },
     { label: 'Releases', href: 'https://github.com/dhaupin/vant/releases' },
     { label: 'Security', href: '/security' },
+    { label: 'Changelog', href: '/changelog' },
     { label: 'Status', href: '/status' },
     { label: 'Contact', href: '/contact' },
 ]

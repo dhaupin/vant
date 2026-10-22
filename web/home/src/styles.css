@@ -58,6 +58,9 @@ nav.top { display: flex; align-items: center; justify-content: space-between; pa
 .brand:hover { text-decoration: none; }
 .brand-mark { width: 30px; height: 30px; border-radius: 8px; flex: none; background: var(--accent); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.05rem; letter-spacing: 0; }
 .top-links { display: flex; align-items: center; gap: 22px; font-size: 0.92rem; }
+/* the route set gained /changelog (pass 338): 10 links ride one line at
+   full desktop width, tightened further before the 780px mobile fold */
+@media (max-width: 1040px) { .top-links { gap: 14px; font-size: 0.88rem; } }
 .top-links a { color: var(--text-muted); }
 .top-links a:hover { color: var(--ink); text-decoration: none; }
 .theme-btn { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); cursor: pointer; padding: 7px 8px; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; }
@@ -214,8 +217,16 @@ p.sub { color: var(--text-muted); margin-bottom: 30px; max-width: 44rem; }
 .faq details p { color: var(--text-muted); padding-bottom: 12px; font-size: 0.95rem; }
 
 footer { border-top: 1px solid var(--border); padding: 34px 0 44px; color: var(--text-muted); font-size: 0.9rem; }
-footer .container { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
-footer nav { display: flex; gap: 18px; }
+/* three-column footer: about / this site / the family (pass 338) */
+.footer-grid { display: grid; grid-template-columns: 1.35fr 1fr 1fr; gap: 36px 40px; align-items: start; }
+footer .f-about p { margin: 0; max-width: 34rem; line-height: 1.65; }
+.f-head { font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink); margin: 0 0 12px; font-weight: 800; }
+.f-links { display: flex; flex-direction: column; gap: 8px; }
+.f-links a { color: var(--text-muted); display: inline-block; }
+.f-links a:hover { color: var(--ink); text-decoration: none; }
+@media (max-width: 780px) {
+    .footer-grid { grid-template-columns: 1fr; gap: 26px; }
+}
 
 /* ---------- VantFX: scroll reveal ---------- */
 .fx-reveal { opacity: calc(var(--fx) * 0); transform: translateY(18px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }

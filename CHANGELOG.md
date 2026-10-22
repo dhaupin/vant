@@ -5,6 +5,28 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 339 (the live-site round: footer in three columns, the route set in the main menu)
+
+### Changed — nav + footer after the Pages deploy went live
+
+- **THE MAIN MENU CARRIES THE ROUTES**: `/changelog` joins the top nav
+  (Install, Quick start, Docs, Brain, GitHub, Releases, Security,
+  Changelog, Status, Contact) — the one site route that was missing from
+  the owner-directed route set; /terms + /privacy stay footer-only by
+  owner direction. A 10-link desktop nav is sized honestly: gap and type
+  tighten between 781-1040px before the 780px mobile menu fold.
+- **FOOTER IN THREE COLUMNS** (`.footer-grid`): the full-width link soup
+  is now (1) the project blurb (four-site crosslink sentence, intact),
+  (2) "This site" — the seven owner routes incl. footer-only Terms +
+  Privacy, (3) "The family" — docs hub, Getting Started, Agent
+  Onboarding, Brain dashboard, Freestruct docs, GitHub, Releases,
+  creadev.org. One column collapses at 780px; the two link columns are
+  separate labeled navs. Dist check: footer-grid + f-heads on the content
+  routes (the prestruct 404 ships its own minimal notFound shell without
+  the footer — pre-existing pipeline shape, not a regression).
+- Verified: build:home 8/8, lint:home PASS (12 files), home suite 6/6
+  (config pins untouched by the UI round).
+
 ## [Unreleased] - pass 338 (the dependency sweep: everything in range moves up)
 
 ### Changed — the schema/OG pimp (the owner face now reads like the software it is)
