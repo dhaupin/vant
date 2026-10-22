@@ -145,6 +145,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   same `node_modules` skip; the whole lint:docs chain is PASS (126
   style/links/frontmatter files, 209 prose, 133 truthfulness) with
   docs/node_modules present.
+- **THE CF PAGES BUILD FIX (first home deploy failed at install)**: the
+  project's first Pages build crashed in `npm clean-install` with
+  "Cannot read properties of null (reading 'edgesOut')" — the npm 10.x
+  arborist optional-peer-set bug (npm/cli#9787, `#loadPeerSet`), and the
+  builder also logged node 20.20.0 (EOL; the pass-286 drama again). Three
+  changes, all grounded in the issue thread: (1) `.nvmrc` moves `22` to
+  the FIRST line (the comments-first file was not honored by the CF v2
+  parser — same EOL-20 install repeated); (2) `legacy-peer-deps=true`
+  lands in root `.npmrc` and `web/home/.npmrc` — the issue-confirmed
+  workaround for exactly this crash under hosted npm 10.x builders, and
+  a no-op for `npm ci` against complete lockfiles (verified 0-error under
+  the CF stack locally); (3) DEPLOY.md §12.0 already names the panel
+  truth the log implies was missed: Root directory = `web/home`,
+  `NODE_VERSION=22`. Repro honesty: all four committed lockfiles install
+  clean under CF's exact stack (node 20.20.0 + npm 10.9.2, cold cache,
+  even in `--package-lock-only` ideal-tree mode) on today's registry —
+  the crash is registry-drift-shaped, which is why the issue-confirmed
+  flag rides rather than a lock rewrite.
 
 ## [Unreleased] - pass 337 (/changelog with a hard parity law + npm-compat pins - and the hidden client-bundle fix)
 

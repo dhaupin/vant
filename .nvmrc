@@ -1,9 +1,9 @@
-# Node.js version for Vant
-# Use with nvm: nvm use
-# Or in CI: nvm install && nvm use
-# (pass 286) was 20 - the Pages builder took this to heart and
-# installed an EOL node (deploy log: 'WARNING: node-v20.20.0 is past
-# its end of life'), which also tripped npm EBADENGINE for vitest@5
-# (engines require ^22 || ^24 || >=26). 22 is active LTS; 24 is
-# accepted too. Sandbox runs v22 already.
 22
+# Node.js version for Vant
+# (pass 286) was 20 - a Pages builder installed an EOL node (deploy log:
+# 'WARNING: node-v20.20.0 is past its end of life'), tripping npm
+# EBADENGINE for vitest@5 (engines require ^22 || ^24 || >=26). 22 is
+# active LTS; 24 is accepted too. Sandbox runs v22 already.
+# (pass 338) The version line moved to the top: CF Pages' v2 builder
+# read this file for a home-site deploy and still installed 20.20.0 -
+# a comments-first file is not something every parser survives.
