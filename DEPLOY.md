@@ -436,7 +436,7 @@ is pure static. Whatever lands ships pre-gated: `web/home/test/config.test.mjs`
    | Root directory | `web/dashboard` |
    | Build command | `npm run build` |
    | Build output directory | `dist` |
-   | Node version | 20+ (environment var `NODE_VERSION=20` if the panel asks) |
+   | Node version | 22 (env var `NODE_VERSION=22` if the panel asks; repo root `.nvmrc` says 22 — pass 338: 20.20.0 is EOL in the CF log and npm 10.9.2 on node 20 carries the npm/cli#9787 arborist crash, reproduced verbatim on this graph) |
 
    Functions under `web/dashboard/functions/` deploy AUTOMATICALLY with
    the project - no wrangler config anywhere (prd-web.md 3.7).

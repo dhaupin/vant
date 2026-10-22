@@ -40,7 +40,8 @@
             "**SECOND PASS (same Unreleased block)**: the pin suite now rides CI —",
             "**THE HOME PAGES SETUP, ON PAPER (DEPLOY.md §12.0)**: the section the",
             "**THE GATE-WALKER LAW (one blind spot, five walkers)**: the docs gates",
-            "**THE CF PAGES BUILD FIX (first home deploy failed at install)**: the"
+            "**THE CF PAGES BUILD FIX (first home deploy failed at install)**: the",
+            "**THE SECOND CRASH REPRODUCED (vant-brain, the dashboard's Pages"
           ]
         }
       ]

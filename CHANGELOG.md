@@ -161,8 +161,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `NODE_VERSION=22`. Repro honesty: all four committed lockfiles install
   clean under CF's exact stack (node 20.20.0 + npm 10.9.2, cold cache,
   even in `--package-lock-only` ideal-tree mode) on today's registry —
-  the crash is registry-drift-shaped, which is why the issue-confirmed
+  the crash is registry-  drift-shaped, which is why the issue-confirmed
   flag rides rather than a lock rewrite.
+- **THE SECOND CRASH REPRODUCED (vant-brain, the dashboard's Pages
+  check)**: the PR's `Cloudflare Pages: vant-brain` check failed while
+  the home project passed — and this one reproduced locally verbatim,
+  edgesOut and all, on the builder's exact stack (node 20.20.0 + npm
+  10.9.2) via the dashboard's `npm install` path. TWO legs, both fixed:
+  (1) the pass-338 dashboard bump had updated package.json + bun.lock but
+  left `web/dashboard/package-lock.json` STALE at 8.3.4/5.0.4 — the
+  manifest-vs-lock mismatch forces npm's ideal-tree rebuild, which is
+  what walks into the arborist bug; the lock is re-synced to the exact
+  pins now (182-line diff: the two manifest rows plus vite 8.3.5's true
+  rolldown/oxc transitive graph, suite 103/103 + tsc/vite build green on
+  the npm-reinstalled tree, clean-install 0-error under BOTH stacks);
+  (2) `web/dashboard/.npmrc` mirrors the legacy-peer-deps law so future
+  drift degrades to a clean install instead of the crash; DEPLOY.md
+  §12.1's Node row now says 22 (EOL 20 + the buggy npm 10.9.2 are the
+  same builder stack the home fix already addresses).
 
 ## [Unreleased] - pass 337 (/changelog with a hard parity law + npm-compat pins - and the hidden client-bundle fix)
 
