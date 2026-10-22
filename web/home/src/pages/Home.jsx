@@ -10,6 +10,7 @@
  */
 
 import React from 'react'
+import { Link } from 'react-router-dom'
 import Term from '../components/Term.jsx'
 import Constellation from '../components/Constellation.jsx'
 
@@ -49,7 +50,7 @@ export default function Home() {
                 <p className="lede fx-reveal">
                     Vant gives any AI agent a brain: <strong>markdown memory files in your own repository</strong>.
                     {' '}Read when a session opens, written before it closes, inherited every time after. Git history becomes the memory
-                    {' '}lineage. No database, no lock-in, readable with <strong>cat</strong>. Start with one agent on your laptop —
+                    {' '}lineage. No database, no lock-in, readable with <strong>cat</strong>. Start with one agent on your laptop,
                     {' '}scale the same files up to a crew, then to installs talking across the network. Whether you are the one
                     {' '}typing the commands or the one executing them, welcome.
                 </p>
@@ -64,7 +65,7 @@ export default function Home() {
                             <span className="prompt">$ </span><span className="cmd">vant</span> start{'\n'}
                             <span className="prompt">$ </span><span className="cmd">vant</span> onboard
                         </Term>
-                        <p style={{ margin: '13px 0 0' }}><a className="btn" href="https://docs.creadev.org/vant/getting-started/quick-start">Quick start guide</a></p>
+                        <p style={{ margin: '13px 0 0' }}><Link className="btn" to="/install">Get started</Link></p>
                     </div>
                     <div className="cta-card">
                         <h2>For agents</h2>
@@ -77,7 +78,7 @@ export default function Home() {
                     </div>
                 </div>
                 <p className="drag-hint">
-                    The constellation behind this text is your agent's memory graph — every amber pulse is a lesson landing in the brain.
+                    The constellation behind this text is your agent's memory graph: every amber pulse is a lesson landing in the brain.
                 </p>
             </div>
         </header>
@@ -155,7 +156,7 @@ export default function Home() {
                     <div className="grid-3">
                         <div className="card fx-reveal">
                             <h3>MCP in one command</h3>
-                            <p>vant mcp auto-wires the module surface into JSON-RPC tools on 127.0.0.1:3457. Any MCP client connects — Claude, GPT, local models, homegrown runners.</p>
+                            <p>vant mcp auto-wires the module surface into JSON-RPC tools on 127.0.0.1:3457. Any MCP client connects: Claude, GPT, local models, homegrown runners.</p>
                             <a href="https://docs.creadev.org/vant/runtime/mcp" className="learn-more">MCP reference →</a>
                         </div>
                         <div className="card fx-reveal fx-d1">
@@ -370,12 +371,12 @@ export default function Home() {
                     <div className="grid-3">
                         <div className="card fx-reveal">
                             <h3>Relay network</h3>
-                            <p>Installs expose a gated relay surface: hop-by-hop authorization with timing-safe keys, bodies as encrypted envelopes. No key, no surface — fail-closed by construction.</p>
+                            <p>Installs expose a gated relay surface: hop-by-hop authorization with timing-safe keys, bodies as encrypted envelopes. No key, no surface, fail-closed by construction.</p>
                             <a href="https://docs.creadev.org/vant/operations/relay" className="learn-more">Relay ops →</a>
                         </div>
                         <div className="card fx-reveal fx-d1">
                             <h3>Encrypted carriers</h3>
-                            <p>Memory travels as sealed stones — encrypted packets that ride images and files between installs, signatures verified on arrival. Whole brains included.</p>
+                            <p>Memory travels as sealed stones, encrypted packets that ride images and files between installs, signatures verified on arrival. Whole brains included.</p>
                             <a href="https://docs.creadev.org/vant/memory/stego" className="learn-more">Carrier transport →</a>
                         </div>
                         <div className="card fx-reveal fx-d2">
@@ -385,7 +386,7 @@ export default function Home() {
                         </div>
                         <div className="card fx-reveal">
                             <h3>Fail-closed security chain</h3>
-                            <p>Sandbox capabilities, input validation, rate limiting, escrow approval on every brain operation. Refusals come back as typed codes — never silent half-writes.</p>
+                            <p>Sandbox capabilities, input validation, rate limiting, escrow approval on every brain operation. Refusals come back as typed codes, never silent half-writes.</p>
                             <a href="https://docs.creadev.org/vant/security/" className="learn-more">Security →</a>
                         </div>
                         <div className="card fx-reveal fx-d1">
@@ -447,9 +448,9 @@ export default function Home() {
             <section className="soul" style={{ paddingTop: 20 }}>
                 <div className="container">
                     <blockquote className="fx-reveal">Pick a door. <span className="fx-word">Both are open.</span></blockquote>
-                    <p className="fx-reveal fx-d1" style={{ marginBottom: 28 }}>Five minutes for you, one command for your agent — and the memory is yours either way.</p>
+                    <p className="fx-reveal fx-d1" style={{ marginBottom: 28 }}>Five minutes for you, one command for your agent, and the memory is yours either way.</p>
                     <p className="fx-reveal fx-d2" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center' }}>
-                        <a className="btn" href="https://docs.creadev.org/vant/getting-started/quick-start">Start in 5 minutes</a>
+                        <Link className="btn" to="/install">Start in 5 minutes</Link>
                         <a className="btn outline" href="https://docs.creadev.org/vant/getting-started/agent-onboarding">Send your agent</a>
                         <a className="btn outline" href="https://brain.creadev.org" rel="noopener">Watch it live</a>
                     </p>

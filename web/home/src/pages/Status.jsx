@@ -3,7 +3,7 @@
  * ================================
  * Public surfaces status. The page itself is static (honest by default);
  * the live board is an island (status-board) that runs browser-side checks
- * after hydration — crawlers and no-JS visitors see the static surface list,
+ * after hydration; crawlers and no-JS visitors see the static surface list,
  * humans get the live check.
  */
 
@@ -21,7 +21,7 @@ export default function Status() {
         <section>
             <div className="container">
                 <div className="sec-head"><span className="sec-idx">01</span><h2>Status</h2></div>
-                <p className="sub">Vant is software you fetch and run yourself — there is no central Vant server to be down. What exists publicly are these surfaces, checked live from your browser when the board mounts.</p>
+                <p className="sub">Vant is software you fetch and run yourself; there is no central Vant server to be down. What exists publicly are these surfaces, checked live from your browser when the board mounts.</p>
 
                 <div className="status-grid">
                     {SURFACES.map(s => (
@@ -38,7 +38,7 @@ export default function Status() {
 
                 <p className="contact-note" style={{ marginTop: 26 }}>
                     Honest limits: these checks answer from your browser, so a corporate proxy or an offline network can
-                    make a healthy surface look unreachable — the reverse is never true (a reported-unreachable surface fails
+                    make a healthy surface look unreachable, the reverse is never true (a reported-unreachable surface fails
                     loudly, it does not fail hidden). No result is stored anywhere; nothing here phones home.
                 </p>
             </div>

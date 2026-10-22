@@ -5,6 +5,42 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 344 (quick start folded into /install, and the site went hyphen-voiced)
+
+### Changed + Added: the five-minute setup lives at /install; the voice rules ship as a gate
+
+- **QUICK START LEFT THE MENU** (owner direction): the docs quick-start
+  stop is gone from WALK (now nine stops: Home, Install, Brain,
+  Security, Releases, GitHub, Docs, Status, Contact), and **/install
+  absorbed the job** - a new "The five-minute setup" section whose three
+  cards carry the deep docs links (quick start walkthrough, the full
+  install guide, agent onboarding), replacing the orphan note that used
+  to dangle at the page bottom. Page walk remaps automatically:
+  /install prev is Home next is Brain; /brain prev Install next
+  Security, unchanged.
+- **EVERY START/INSTALL BUTTON POINTS AT /install NOW**: the home hero
+  "Quick start guide" is "Get started" to /install (an internal Link
+  now, no hard reload), the closing "Start in 5 minutes" links /install,
+  and "Send your agent"/"Watch it live" stay on their own doors. The
+  drawer's "Get going" is Home + Install (indices remapped; the walk
+  order stays WALK's order).
+- **THE LANGUAGE AUDIT, DONE AS A GATE**: scripts/check-web-home-style.js
+  is check-docs-style's voice set for the site (em/en dashes banned,
+  tabs, trailing whitespace; arrows stay - the learn-more arrows are
+  load-bearing UI design, not prose decoration), wired into
+  `npm run lint:home` so it runs on every pass. The sweep fixed every
+  dash in the live copy AND the code comments (the census was 70+ hits:
+  hero, security chain list, privacy, install headings, status board
+  strings, error messages, META/OG titles - "Install - Vant" everywhere
+  now - footer closer, Brain page, the new bolete comments; converted to
+  commas, colons, and periods, not blind hyphens, so the sentences read
+  like house copy). src/generated (the changelog JSON artifact) and the
+  frozen index.bak.html reference are exempt, same as CHANGELOG.md is in
+  the docs gate.
+- Verified: build:home 9/9, lint:home PASS (13 files + the style gate),
+  changelog parity PASS (regenerated with the reworded _source line),
+  home suite 6/6.
+
 ## [Unreleased] - pass 343 (the Brain stop gets a page, the menu gets a bolete sidebar)
 
 ### Added — the /brain marketing page + the walk stop went internal; the drawer went structural

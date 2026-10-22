@@ -5,22 +5,24 @@
  * drawer) are React state; theme parity with the backup is exact: toggling
  * flips data-theme on <html> and persists to localStorage.
  *
- * THE WALK (pass 342): the owner-directed tour lives here as ONE ordered
- * list (Home → Quick start → Install → Brain → Security → Releases →
+ * THE WALK (pass 342, trimmed in pass 344): the owner-directed tour lives
+ * here as ONE ordered list (Home → Install → Brain → Security → Releases →
  * GitHub → Docs → Status → Contact) that BOTH the menu and AppLayout's
- * PageWalk read — the menu order and the walk order cannot drift. Since
+ * PageWalk read: the menu order and the walk order cannot drift. Since
  * pass 343 the Brain stop is INTERNAL (/brain, the marketing page whose
- * content links brain.creadev.org — see pages/Brain.jsx), so prev/next
- * works on the Brain page itself.
+ * content links brain.creadev.org; see pages/Brain.jsx), so prev/next
+ * works on the Brain page itself. Quick start left the menu in pass 344:
+ * /install now carries the five-minute setup, so the docs quick-start
+ * stop became the internal Install stop's deeper-link, not a menu item.
  *
  * THE SIDEBAR (pass 343, the bolete structure): the mobile menu drawer is
- * orgANIZED IN SECTIONS like the dashboard's own nav (web/dashboard SideNav
- * — a registry with a section per item, tiny uppercase heads, items under
- * them, plus a drawer head and a close button; scrim click/Escape/link tap
- * close it). Bolete sections its 19 modules as "observe/work/ops";
- * vant.creadev.org sections its 13 destinations as
+ * organized IN SECTIONS like the dashboard's own nav (web/dashboard
+ * SideNav: a registry with a section per item, tiny uppercase heads, items
+ * under them, plus a drawer head and a close button; scrim click/Escape/
+ * link tap close it). Bolete sections its 19 modules as observe/work/ops;
+ * vant.creadev.org sections its destinations as
  * "Get going / The install / The family / More". Sections are
- * PRESENTATIONAL grouping only — the walk order stays WALK's order.
+ * PRESENTATIONAL grouping only; the walk order stays WALK's order.
  */
 
 import React, { useEffect, useState } from 'react'
@@ -28,7 +30,6 @@ import { Link } from 'react-router-dom'
 
 export const WALK = [
     { label: 'Home', href: '/' },
-    { label: 'Quick start', href: 'https://docs.creadev.org/vant/getting-started/quick-start' },
     { label: 'Install', href: '/install' },
     { label: 'Brain', href: '/brain' },
     { label: 'Security', href: '/security' },
@@ -52,15 +53,15 @@ const MORE = [
 const MENU_SECTIONS = [
     {
         head: 'Get going',
-        items: [WALK[0], WALK[1], WALK[2]],
+        items: [WALK[0], WALK[1]],
     },
     {
         head: 'The install',
-        items: [WALK[3], WALK[4], WALK[8], WALK[9]],
+        items: [WALK[2], WALK[3], WALK[7], WALK[8]],
     },
     {
         head: 'The family',
-        items: [WALK[5], WALK[6], WALK[7]],
+        items: [WALK[4], WALK[5], WALK[6]],
     },
     {
         head: 'More',

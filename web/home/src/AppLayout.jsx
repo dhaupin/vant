@@ -5,7 +5,7 @@
  * Imported by App.jsx (client, BrowserRouter) and by prestruct's prerender
  * (StaticRouter via ssrLoadModule).
  *
- * SSR SAFETY: every window/document/localStorage touch is guarded — the
+ * SSR SAFETY: every window/document/localStorage touch is guarded; the
  * prerender runs in Node.
  *
  * The VantFX behaviors from the reliable-golden-backup lander are ported as
@@ -37,21 +37,21 @@ import Changelog        from './pages/Changelog.jsx'
 // build time; this keeps title/og/canonical in step when the user navigates in
 // the SPA (template hook usePageMeta contract, minimized for five routes).
 const META = {
-    '/':        { title: 'Vant — Persistent memory for AI agents', description: 'Vant gives any AI agent a brain: markdown memory files in your own repository. Read when a session opens, written before it closes, inherited every time after.' },
-    '/install': { title: 'Install — Vant', description: 'Install Vant: clone and npm ci (the canon path), or docker pull dhaupin/vant for production. Node 18+, git, nothing else.' },
-    '/security':{ title: 'Security — Vant', description: 'Report a vulnerability through a private GitHub advisory. The fail-closed chain: sandbox capabilities, input validation, rate budgets, escrow.' },
-    '/brain':   { title: 'Brain — Vant', description: 'The Brain is the dashboard side of Vant: a browser window into a running install — sessions live, agent rosters, carrier packets, budgets, ledgers, decisions.' },
-    '/terms':   { title: 'Terms of Use — Vant', description: 'Terms of use for the Vant project and this site.' },
-    '/privacy': { title: 'Privacy — Vant', description: 'Vant privacy: your brain is your repo. This site collects nothing.' },
-    '/status':  { title: 'Status — Vant', description: 'Vant surfaces status, checked from your browser with honest limits.' },
-    '/contact': { title: 'Contact — Vant', description: 'Reach the Vant project: compose a GitHub issue from the browser.' },
-    '/changelog': { title: 'Changelog — Vant', description: 'The Vant changelog, rendered straight from the canonical CHANGELOG.md at build time and byte-gated against it.' },
+    '/':        { title: 'Vant - Persistent memory for AI agents', description: 'Vant gives any AI agent a brain: markdown memory files in your own repository. Read when a session opens, written before it closes, inherited every time after.' },
+    '/install': { title: 'Install - Vant', description: 'Install Vant: clone and npm ci (the canon path), or docker pull dhaupin/vant for production. Node 18+, git, nothing else.' },
+    '/security':{ title: 'Security - Vant', description: 'Report a vulnerability through a private GitHub advisory. The fail-closed chain: sandbox capabilities, input validation, rate budgets, escrow.' },
+    '/brain':   { title: 'Brain - Vant', description: 'The Brain is the dashboard side of Vant: a browser window into a running install. Sessions live, agent rosters, carrier packets, budgets, ledgers, decisions.' },
+    '/terms':   { title: 'Terms of Use - Vant', description: 'Terms of use for the Vant project and this site.' },
+    '/privacy': { title: 'Privacy - Vant', description: 'Vant privacy: your brain is your repo. This site collects nothing.' },
+    '/status':  { title: 'Status - Vant', description: 'Vant surfaces status, checked from your browser with honest limits.' },
+    '/contact': { title: 'Contact - Vant', description: 'Reach the Vant project: compose a GitHub issue from the browser.' },
+    '/changelog': { title: 'Changelog - Vant', description: 'The Vant changelog, rendered straight from the canonical CHANGELOG.md at build time and byte-gated against it.' },
 }
 
 function SyncPageMeta({ pathname }) {
     useEffect(() => {
         if (typeof document === 'undefined') return
-        const m = META[pathname] || { title: 'Page not found — Vant', description: 'Page not found on vant.creadev.org.' }
+        const m = META[pathname] || { title: 'Page not found - Vant', description: 'Page not found on vant.creadev.org.' }
         document.title = m.title
         const set = (sel, attr, v) => {
             const el = document.head.querySelector(sel)
@@ -132,10 +132,10 @@ function useVantFxEffects() {
 }
 
 // The page walk (pass 342): every page that is a stop on the owner-directed
-// walk (Nav.jsx's WALK — the menu order IS the walk) gets a prev/next widget
+// walk (Nav.jsx's WALK: the menu order IS the walk) gets a prev/next widget
 // between its content and the footer, so visitors can walk the site like a
 // tour. Home is the origin (no widget); pages not on the walk (terms,
-// privacy, changelog, 404) get none — the exclusions fall out of the list
+// privacy, changelog, 404) get none: the exclusions fall out of the list
 // membership automatically. The next hop wraps Contact back to Home, so the
 // tour is a loop.
 const WALK_INDEX = new Map(WALK.map((stop, i) => [stop.href, i]))

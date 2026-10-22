@@ -2,7 +2,7 @@
  * src/components/Footer.jsx (vant-home)
  * =====================================
  * Shared footer for every route. Three-column grid (styles.css .footer-grid):
- * the project's closer statement (one page-agnostic Vant summary — open
+ * the project's closer statement (one page-agnostic Vant summary: open
  * source under MIT, made by Creadev.org), the site's OWN routes, and the
  * crosslink family - collapsing to one column on mobile. Terms/Privacy
  * are footer-only by owner direction (pass 338 post-merge round).
@@ -21,7 +21,7 @@ export default function Footer() {
                         plain markdown brain files in your own repository, read
                         when a session opens, written before it closes,
                         inherited every time after. Free and open source under
-                        MIT — made by{' '}
+                        MIT, made by{' '}
                         <a href="https://creadev.org" target="_blank" rel="noopener">Creadev.org</a>.
                     </p>
                 </div>

@@ -1,4 +1,4 @@
-/* vant-home design system — ported 1:1 from the checked-in lander
+/* vant-home design system (ported 1:1 from the checked-in lander
    (web/home/index.bak.html). The new /status and /contact routes reuse the
    same tokens, cards, buttons and terminals; their page-specific styles are
    appended at the bottom of this file. */
@@ -80,7 +80,7 @@ nav.top { display: flex; align-items: center; justify-content: space-between; pa
    The install / The family / More). The menu icon stays on the right of
    the top bar; the drawer slides over the page with a scrim behind it.
    Scrim click, Escape, and link taps close it; body scroll locks while
-   open. Sections are presentational — the walk order lives in Nav.jsx. */
+   open. Sections are presentational; the walk order lives in Nav.jsx. */
 .menu-scrim { position: fixed; inset: 0; background: color-mix(in srgb, var(--ink) 32%, transparent); opacity: 0; pointer-events: none; transition: opacity var(--fx, 1) 0.28s ease; z-index: 90; }
 .menu-scrim.open { opacity: 1; pointer-events: auto; }
 .menu-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(320px, 86vw); background: var(--bg-card); border-left: 1px solid var(--border); box-shadow: -12px 0 32px color-mix(in srgb, var(--ink) 12%, transparent); padding: 18px 20px 30px; overflow-y: auto; transform: translateX(calc(100% + 20px)); transition: transform var(--fx, 1) 0.32s ease; z-index: 100; }

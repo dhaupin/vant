@@ -1,8 +1,25 @@
 {
-  "_source": "CHANGELOG.md (root) — parsed, never hand-copied; regenerate with npm run build:home",
+  "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 73,
+  "_headingCount": 74,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 344 (quick start folded into /install, and the site went hyphen-voiced)",
+      "sections": [
+        {
+          "name": "Changed + Added: the five-minute setup lives at /install; the voice rules ship as a gate",
+          "items": [
+            "**QUICK START LEFT THE MENU** (owner direction): the docs quick-start",
+            "**EVERY START/INSTALL BUTTON POINTS AT /install NOW**: the home hero",
+            "**THE LANGUAGE AUDIT, DONE AS A GATE**: scripts/check-web-home-style.js",
+            "Verified: build:home 9/9, lint:home PASS (13 files + the style gate),"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

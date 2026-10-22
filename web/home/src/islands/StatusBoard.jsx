@@ -88,7 +88,7 @@ export default function StatusBoard() {
                     <p>
                         {repo.state === 'ok' && repo.data ? (
                             <>
-                                {repo.data.description || 'dhaupin/vant'} — {repo.data.stargazers_count ?? '?'} stars,
+                                {repo.data.description || 'dhaupin/vant'}: {repo.data.stargazers_count ?? '?'} stars,
                                 {' '}{repo.data.open_issues_count ?? '?'} open issues, last push {new Date(repo.data.pushed_at).toLocaleDateString()}.
                             </>
                         ) : repo.state === 'error' ? (
@@ -106,7 +106,7 @@ export default function StatusBoard() {
                     <h3><Dot state={(checks.release || {}).state || 'checking'} />Latest release (API check)</h3>
                     <p>
                         {checks.release && checks.release.state === 'ok' && checks.release.data ? (
-                            <>{checks.release.data.tag_name} — "{(checks.release.data.name || '').slice(0, 80)}"</>
+                            <>{checks.release.data.tag_name}: "{(checks.release.data.name || '').slice(0, 80)}"</>
                         ) : checks.release && checks.release.state === 'error' ? (
                             <>API answered, release fetch errored{' '}{checks.release.detail} (no releases yet is healthy).</>
                         ) : checks.release && checks.release.state === 'unreachable' ? (
@@ -128,7 +128,7 @@ export default function StatusBoard() {
                         <div className="card" key={name}>
                             <h3><Dot state={c.state || 'checking'} />{name} (network reachability)</h3>
                             <p>
-                                {c.state === 'reachable' ? 'Network response received (content not readable from the browser by CORS design — this is not an operational guarantee).' :
+                                {c.state === 'reachable' ? 'Network response received (the content is not readable from the browser by CORS design, so this is not an operational guarantee).' :
                                  c.state === 'unreachable' ? 'Unreachable from this browser right now.' : 'Checking…'}
                             </p>
                             <p className="status-meta">surface <a href={url} rel="noopener">{url.replace('https://', '')}</a> · {c.time ? 'checked ' + c.time : ''}</p>
@@ -140,7 +140,7 @@ export default function StatusBoard() {
             <p className="status-meta" style={{ marginTop: 14 }}>
                 {running
                     ? 'Checks running from your browser against public endpoints only; nothing is sent or stored by this site.'
-                    : 'Checks completed ' + new Date().toLocaleTimeString() + ' — browser-side only, never stored, never relayed.'}
+                    : 'Checks completed ' + new Date().toLocaleTimeString() + ', browser-side only, never stored, never relayed.'}
             </p>
         </div>
     )

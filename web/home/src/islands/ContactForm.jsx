@@ -5,7 +5,7 @@
  * a GitHub issue URL from the fields and opens it in a new tab for the real
  * submit on github.com. Human check: a simple two-integer sum (the composer
  * does not publish anything; the gate exists to keep link-spam by script
- * from prefilling 50 tabs in one click — honest about what it is), plus a
+ * from prefilling 50 tabs in one click, which is honest about what it is), plus a
  * classic honeypot field.
  */
 
@@ -53,11 +53,11 @@ export default function ContactForm() {
         e.preventDefault()
         if (honey) return // honeypot filled: bot-shaped, silently ignore
         if (parseInt(sum, 10) !== a + b) {
-            setError('The human check sum is off — try again (' + a + ' + ' + b + ').')
+            setError('The human check sum is off, try again (' + a + ' + ' + b + ').')
             return
         }
         if (!values.message.trim()) {
-            setError('Say something in the message field — GitHub will need it too.')
+            setError('Say something in the message field, GitHub will need it too.')
             return
         }
         setError('')
@@ -112,7 +112,7 @@ export default function ContactForm() {
 
             {composed && (
                 <p className="status-meta">
-                    The issue composer opened in a new tab — review the title and body there, then press GitHub's
+                    The issue composer opened in a new tab: review the title and body there, then press GitHub's
                     submit button. Nothing was sent from this site.
                 </p>
             )}

@@ -16,23 +16,23 @@ export default function Security() {
         <section>
             <div className="container">
                 <div className="sec-head"><span className="sec-idx">01</span><h2>Security</h2></div>
-                <p className="sub">The design law everywhere in Vant is <strong>fail-closed</strong>: a missing key, a hostile input, or a dead dependency refuses loudly — it never half-writes state.</p>
+                <p className="sub">The design law everywhere in Vant is <strong>fail-closed</strong>: a missing key, a hostile input, or a dead dependency refuses loudly, it never half-writes state.</p>
 
                 <div className="dual-cta" style={{ maxWidth: 'none' }}>
                     <div className="cta-card">
                         <h2>Report a vulnerability</h2>
-                        <p>Privately, via a <a href="https://github.com/dhaupin/vant/security/advisories/new" rel="noopener">GitHub private security advisory</a> — that reaches the maintainer without broadcasting a working exploit.</p>
+                        <p>Privately, via a <a href="https://github.com/dhaupin/vant/security/advisories/new" rel="noopener">GitHub private security advisory</a>, which reaches the maintainer without broadcasting a working exploit.</p>
                         <p style={{ margin: '10px 0 0' }}>Only use the public issue tracker for things that are not actually sensitive (config mistakes, docs gaps, hardening ideas).</p>
-                        <p className="contact-note" style={{ margin: '12px 0 0' }}>Honest posture: this is a self-host open source project — there is no bug bounty or SLA. Reports get read and fixed in the open, with credit where wanted.</p>
+                        <p className="contact-note" style={{ margin: '12px 0 0' }}>Honest posture: this is a self-host open source project, there is no bug bounty or SLA. Reports get read and fixed in the open, with credit where wanted.</p>
                     </div>
                     <div className="cta-card">
                         <h2>The security chain, in order</h2>
-                        <p>Every memory operation passes four gates before touching state, and refusals come back as typed codes — never silent.</p>
+                        <p>Every memory operation passes four gates before touching state, and refusals come back as typed codes, never silent.</p>
                         <ol className="legal" style={{ paddingLeft: '1.3rem', color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: 10 }}>
-                            <li>Sandbox capabilities — canRead/canWrite gates</li>
-                            <li>Input validation — the VAF wall (path traversal, prototype injection)</li>
-                            <li>QoS budgets — rate limiting and concurrency</li>
-                            <li>Escrow approval — sensitive operations need the hold released</li>
+                            <li>Sandbox capabilities: canRead/canWrite gates</li>
+                            <li>Input validation: the VAF wall (path traversal, prototype injection)</li>
+                            <li>QoS budgets: rate limiting and concurrency</li>
+                            <li>Escrow approval: sensitive operations need the hold released</li>
                         </ol>
                         <a href="https://docs.creadev.org/vant/security/" className="learn-more" style={{ marginTop: 10 }}>Security docs →</a>
                     </div>

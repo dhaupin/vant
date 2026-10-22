@@ -4,7 +4,7 @@
  * Contact channels + the form island. The form does NOT POST anywhere: it
  * composes a GitHub issue URL client-side (issues.new with title/body
  * prefilled), opens it in a new tab, and you press the real submit on
- * GitHub. Nothing leaves this site's trust boundary — stated plainly on
+ * GitHub. Nothing leaves this site's trust boundary, stated plainly on
  * the page.
  */
 
@@ -15,7 +15,7 @@ export default function Contact() {
         <section>
             <div className="container">
                 <div className="sec-head"><span className="sec-idx">01</span><h2>Contact</h2></div>
-                <p className="sub">There is no support desk behind this site — the doors below go straight at the project and its maintainers.</p>
+                <p className="sub">There is no support desk behind this site: the doors below go straight at the project and its maintainers.</p>
 
                 <div className="contact-channels">
                     <div className="card">
@@ -38,7 +38,7 @@ export default function Contact() {
 
                 <h3 style={{ margin: '40px 0 6px', color: 'var(--ink)', fontSize: '1.15rem' }}>Compose an issue without an account in the repo UI first</h3>
                 <p className="contact-note">
-                    Fill this in, review it, then press submit on GitHub. The form runs entirely in your browser — it builds
+                    Fill this in, review it, then press submit on GitHub. The form runs entirely in your browser; it builds
                     the issue link locally; nothing is POSTed from this site, and this page stores nothing.
                 </p>
                 <pre-island data-pre-island="contact-form" data-pre-load="eager">

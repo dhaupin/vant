@@ -7,7 +7,7 @@
  * is hand-written: if it is not in CHANGELOG.md, it cannot appear on /changelog.
  *
  * Contract with scripts/check-changelog-parity.js (repo root): the emitted
- * JSON is COMMITTED, and the gate re-parses and byte-compares it — a stale
+ * JSON is COMMITTED, and the gate re-parses and byte-compares it; a stale
  * generated file fails the gate. `npm run build:home` regenerates before the
  * prestruct build, so the artifact can never drift from the canon.
  *
@@ -77,7 +77,7 @@ for (const line of lines) {
 pushCurrent()
 
 const data = {
-    _source: 'CHANGELOG.md (root) — parsed, never hand-copied; regenerate with npm run build:home',
+    _source: 'CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home',
     _generatedBy: 'web/home/scripts/parse-changelog.mjs',
     _headingCount: entries.length,
     entries,
