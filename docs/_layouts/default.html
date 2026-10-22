@@ -474,12 +474,16 @@
             width: 100%;
             border-collapse: collapse;
             margin: 16px 0;
+            display: block;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         .main th, .main td {
             padding: 10px 12px;
             text-align: left;
             border-bottom: 1px solid var(--border);
+            overflow-wrap: anywhere;
         }
         
         .main th {

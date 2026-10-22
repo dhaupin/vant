@@ -45,11 +45,20 @@ contract, naming rules, and troubleshooting are in the
 
 ## Environment Variables
 
+This page lists the vars most installs touch. The full registry (every
+`VANT_*` var mapped to its config key, ~100 entries including RAG, prune,
+marking, webhook, and QoS knobs) lives in the
+[Config Reference](/vant/reference/config): `config.get`, the ini dialect,
+and the env registry are the same source of truth.
+
 ### Required
 
 | Variable | Description | How to Get |
 |----------|------------|------------|
-| `GITHUB_TOKEN` | GitHub API token | [Create token](https://github.com/settings/tokens) |
+| `GITHUB_TOKEN` | GitHub API token (or `VANT_GITHUB_TOKEN`) | [Create token](https://github.com/settings/tokens) |
+
+`GITHUB_TOKEN` is only required when you use sync / the GitHub API. A local,
+sync-less install runs fine with no token at all.
 
 ### Optional - Server
 
@@ -61,29 +70,45 @@ contract, naming rules, and troubleshooting are in the
 | `VANT_SERVER_KEY` | TLS key | - |
 | `VANT_SERVER_INSECURE` | Allow HTTP | false |
 | `VANT_SERVER_AUTH_REQUIRED` | Require auth | false |
+| `VANT_HEALTH_PORT` / `VANT_HEALTH_BIND` | Health check endpoint | 3468 / 127.0.0.1 |
+| `VANT_WEBHOOK_PORT` / `VANT_WEBHOOK_BIND` | Webhook surface | 3467 / 127.0.0.1 |
+| `VANT_WEBHOOK_SECRET` | Webhook signing secret | - |
 
 ### Optional - Authentication
 
 | Variable | Description |
 |----------|------------|
-| `VANT_API_KEY` | Server API key |
-| `VANT_MCP_API_KEY` | MCP API key |
+| `VANT_AUTH_KEY` | API key for the REST/MCP doors (the canonical secret; `VANT_API_KEY` and `VANT_MCP_API_KEY` still work as deprecated aliases) |
 | `VANT_TOKEN_SECRET` | Secret for signing auth tokens (required for multi-instance) |
+| `VANT_MCP_REQUIRE_KEY` | `true` forces key auth on MCP POSTs |
+| `VANT_MODE` / `VANT_API_KEY` | headless/api mode + door key for server runs |
 
 ### Optional - AI
 
 | Variable | Description | Default |
 |----------|------------|---------|
-| `OPENAI_API_KEY` | OpenAI API key (embeddings, rerank) | - |
+| `OPENAI_API_KEY` | OpenAI embeddings/rerank key | - |
 | `ANTHROPIC_API_KEY` | Anthropic API key | - |
+| `PINECONE_API_KEY` / `_ENV` / `_INDEX` | Optional remote vector index | - |
 
-### Optional - Storage
+### Optional - Storage & Brain
 
 | Variable | Description | Default |
 |----------|------------|---------|
-| `MODEL_PATH` | Primary brain path | models/private |
-| `VANT_BRAIN_PATH` | Brain path override (checked after `MODEL_PATH`) | - |
-| `VANT_MCP_PORT` | MCP server port | 3457 |
+| `MODEL_PATH` / `VANT_BRAIN_PATH` | Brain root / override (multibrain sits under `models/<type>/<brain>/` inside it) | models/private |
+| `VANT_BRAIN` | Active brain name (also the `vant migrate` import fallback) | `vant` |
+| `VANT_STORAGE_PATH` | State-store path | models/private |
+| `VANT_STORAGE_ENCRYPT` / `VANT_STORAGE_KEY` | At-rest encryption for the file store | off / - |
+| `VANT_MCP_PORT` / `VANT_MCP_BIND` | MCP server port / bind | 3457 / 127.0.0.1 |
+
+### Optional - Git Providers & Mesh
+
+| Variable | Description | Default |
+|----------|------------|---------|
+| `VANT_GITHUB_REPO` | GitHub repo for storage/sync | dhaupin/vant |
+| `GITLAB_TOKEN` + `_URL` / `GITEA_TOKEN` + `_URL` / `BITBUCKET_TOKEN` | Sync credentials per non-GitHub host (provider auto-detected from the remote URL) | - |
+| `VANT_REMOTE_PROVIDER` (+ `VANT_REMOTE_*` family) | S3-compatible remote store (S3, R2, MinIO, B2); CLI `vant s3` | - |
+| `VANT_MESH_SECRET` | Sealed-carrier mesh secret for distributed installs | - |
 
 ## TLS Setup
 
