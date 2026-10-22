@@ -56,6 +56,7 @@
     "pilot:pods": "node scripts/pilot-two-pods.js",
     "pilot:relay": "node scripts/pilot-two-relays.js",
     "pilot:pairing-ride": "node scripts/pilot-pairing-ride.js",
+    "pilot:pages": "node scripts/pilot-pages-deploy.js",
     "pilot:keyless-ride": "node scripts/pilot-keyless-ride.js",
     "dev:dashboard-build": "npm --prefix web/dashboard run build"
   },

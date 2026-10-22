@@ -393,6 +393,12 @@ them exist: the static **home page** (`vant.creadev.org`, served from
 
 ### 12.1 Setup walkthrough (dashboard, do this while code lands)
 
+0. **Run the local half first:** `npm run pilot:pages`
+   (`scripts/pilot-pages-deploy.js`) proves everything certifiable from
+   this repo - both flavor builds, the checksummed kit, and the env-var
+   surface you are about to set reconciled against the vars the functions
+   actually read - and prints the checklist fresh. It exits 1 on any
+   drift; fix before touching the panel.
 1. **Create the Pages project** in the CF dashboard: connect this git
    repo, production branch `axolotl` (or `main` after merge).
 2. **Configure the build** in project settings:
@@ -417,6 +423,7 @@ them exist: the static **home page** (`vant.creadev.org`, served from
    | `VANT_EDGE_RATE_PER_MIN` | `120` | optional; per-session edge budget |
    | `VANT_RELAY_ENABLED` | `1` | optional; PIGGYBACK THE RELAY on THIS deploy (dashboard-relay flavor, prd-relay.md 4.0): mounts the gated `/api/r/*` Mode R surface on your Pages functions. Off = the routes do not exist (404), same as the pod's unmounted posture |
    | `VANT_RELAY_GATE_KEY` | 256-bit hex (mint with `vant relay gate`) | REQUIRED when the relay posture is on; hops MUST present it as `x-relay-gate` (timing-safe). No key set = the surface serves NOTHING (fail-closed). Hop bodies are encrypted envelopes only - plaintext refuses; the edge holds no channel keys |
+   | `VANT_RELAY_POD_ORIGIN` | (declared, unread today) | Contract-declared reserve key: the vendored kit's `EDGE_ENV_KEYS` names it, and NO edge face reads it - the solo relay forwards to the hop frame's client-declared origin, and the piggyback face resolves pods through the `VANT_PROPERTY_<ID>_ORIGIN` pairs above. Documented for surface completeness; removing it is kit surgery, not a settings tweak |
 
    **Email-OTP accounts (P2) - the KV binding:** create a KV namespace
    (Workers & Pages -> KV -> create, any name; then the Pages project
