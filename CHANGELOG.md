@@ -5,6 +5,41 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 342 (the site tour: the menu order IS the walk, prev/next on every stop)
+
+### Added — the page-walk widget (owner direction: "users can walk through the site")
+
+- **ONE ORDER, TWO SURFACES**: the owner-directed tour (Home → Quick
+  start → Install → Brain → Security → Releases → GitHub → Docs →
+  Status → Contact) now lives as ONE ordered list (`WALK` in Nav.jsx,
+  exported) that both the main menu and the new prev/next widget read —
+  the menu order and the walk order cannot drift. The menu is reordered
+  to it exactly (Releases ahead of GitHub, Docs after, "Home" joins the
+  nav as the origin; **Changelog leaves the nav** — the owner's list has
+  ten stops and it is not one; it stays reachable in the footer's
+  "This site" column). Same 10-link count, so the pass-339 desktop
+  tightening still holds.
+- **THE WALK WIDGET** (`AppLayout.jsx PageWalk`, one `<nav class="page-walk">`
+  between page content and footer on every walk stop except Home):
+  `← Prev: <page>` (outline) and `Next: <page> →` (accent) buttons whose
+  hops are the walk's neighbors — /install's next is Brain, /security's
+  next is Releases, /status's next is Contact. Next wraps Contact back
+  to Home, so the tour is a loop. External stops are honest first-class
+  hops (their pages live on the other sites). Exclusions fall out of the
+  list membership automatically: no widget on Home (the origin), terms,
+  privacy, changelog (not a stop), or the 404.
+- **THE CHEESY ROW RETIRED**: Security's "Related pages: privacy (what
+  leaves your machine), terms (...)" paragraph is gone — the only
+  related-links row on the site; the walk replaces the pattern.
+- **CONTACT-FORM OVERFLOW GUARD**: the SS overflow was the previous
+  deploy's island layout (the current form already fits: one
+  auto-fit minmax(200px, 1fr) row = one column at 393px); a
+  `.form-grid > * { min-width: 0 }` guard is added so no child can ever
+  force the grid wider than the container again.
+- Verified: build:home 8/8 (walk widget + new nav order baked into every
+  dist route in the directed order), lint:home PASS, changelog parity
+  PASS, home suite 6/6.
+
 ## [Unreleased] - pass 341 (the footer closer: an every-page statement, no site tourism)
 
 ### Changed — the footer blurb is rewritten (owner direction via mobile SS)

@@ -58,10 +58,6 @@ export default function Security() {
                         </div>
                     </div>
                 </section>
-
-                <p className="contact-note">
-                    Related pages: <a href="/privacy">privacy</a> (what leaves your machine), <a href="/terms">terms</a> (you are responsible for what your AI does).
-                </p>
             </div>
         </section>
     )

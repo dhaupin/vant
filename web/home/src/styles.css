@@ -228,6 +228,18 @@ footer .f-about p { margin: 0; max-width: 34rem; line-height: 1.65; }
     .footer-grid { grid-template-columns: 1fr; gap: 26px; }
 }
 
+/* ---------- page walk (prev/next tour widget) ---------- */
+/* Order comes from Nav.jsx's WALK (the menu order IS the walk). Between the
+   page content and the footer on every walk stop except Home; next wraps
+   Contact back to Home so the tour loops. Two hops shrink to labels on
+   the narrowest phones; gap wraps naturally in the flex row. */
+.page-walk { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding-top: 10px; padding-bottom: 34px; }
+.page-walk .btn { min-width: 0; padding: 9px 16px; font-size: 0.9rem; }
+.page-walk .walk-prev, .page-walk .walk-next { max-width: 46%; }
+@media (max-width: 420px) {
+    .page-walk .btn { padding: 8px 12px; }
+}
+
 /* ---------- VantFX: scroll reveal ---------- */
 .fx-reveal { opacity: calc(var(--fx) * 0); transform: translateY(18px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
 .fx-reveal.fx-in { opacity: calc(var(--fx) * 1); transform: none; }
@@ -287,6 +299,7 @@ img, svg, canvas, video { max-width: 100%; }
 .contact-channels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
 @media (max-width: 860px) { .contact-channels { grid-template-columns: 1fr; } }
 .form-grid { display: grid; gap: 14px; max-width: 47rem; }
+.form-grid > * { min-width: 0; }
 .form-grid label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--ink); margin-bottom: 5px; }
 .form-grid input, .form-grid select, .form-grid textarea {
     width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px;
