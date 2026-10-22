@@ -5,6 +5,23 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 346 (the final footer sentence: one credit line, dofollow door)
+
+### Changed: the meta row speaks the closing credit
+
+- **THE FINAL FOOTER SENTENCE** (owner direction, verbatim): the bottom
+  meta row now reads "Vant, open source agent memory under MIT | Made by
+  Creadev.org" with Creadev.org as a **dofollow target=_blank** link to
+  https://creadev.org (the same rel treatment the old family column's
+  creadev.org door carried).
+- **NO DUPLICATE CREDIT**: the closer statement's trailing "Free and
+  open source under MIT, made by Creadev.org." is retired so the exact
+  requested sentence stands once, at the very bottom. The closer keeps
+  its page-agnostic summary; the meta row is the only credit line.
+- Verified: build:home 9/9, lint:home PASS (truth + style gates),
+  changelog parity PASS, home suite 6/6 (the dist meta row carries the
+  sentence + link on every route).
+
 ## [Unreleased] - pass 345 (the footer is two columns: Vant and Learn; the engine mentions leave)
 
 ### Changed + Fixed: the footer reorganizes around the menu; /status stops listing sister engines

@@ -1,8 +1,24 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 75,
+  "_headingCount": 76,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 346 (the final footer sentence: one credit line, dofollow door)",
+      "sections": [
+        {
+          "name": "Changed: the meta row speaks the closing credit",
+          "items": [
+            "**THE FINAL FOOTER SENTENCE** (owner direction, verbatim): the bottom",
+            "**NO DUPLICATE CREDIT**: the closer statement's trailing \"Free and",
+            "Verified: build:home 9/9, lint:home PASS (truth + style gates),"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

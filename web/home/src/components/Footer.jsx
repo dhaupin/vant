@@ -7,10 +7,11 @@
  *   col 2 "Learn"  = nine external links to specific docs areas (the same
  *                    count as the menu) for everything beyond the five
  *                    minutes on /install.
- * Above the columns sits the page-agnostic closer statement (open source
- * under MIT, made by Creadev.org), and below them a meta row keeps the
- * footer-only routes reachable (Changelog, Terms, Privacy). Both desktop
- * and phone widths render the columns two-up; the closer spans.
+ * Above the columns sits the page-agnostic closer statement, and below
+ * them the meta row carries the final footer sentence (open source agent
+ * memory under MIT, made by Creadev.org with a dofollow target=_blank
+ * link) plus the footer-only routes (Changelog, Terms, Privacy). Both
+ * desktop and phone widths render the columns two-up; the closer spans.
  */
 
 import React from 'react'
@@ -51,9 +52,7 @@ export default function Footer() {
                         <strong>Vant.</strong> Persistent memory for AI agents:
                         plain markdown brain files in your own repository, read
                         when a session opens, written before it closes,
-                        inherited every time after. Free and open source under
-                        MIT, made by{' '}
-                        <a href="https://creadev.org" target="_blank" rel="noopener">Creadev.org</a>.
+                        inherited every time after.
                     </p>
                 </div>
                 <div className="footer-grid">
@@ -67,7 +66,10 @@ export default function Footer() {
                     </nav>
                 </div>
                 <div className="f-meta">
-                    <span>Vant, open source under MIT</span>
+                    <span>
+                        Vant, open source agent memory under MIT | Made by{' '}
+                        <a href="https://creadev.org" target="_blank" rel="dofollow noopener">Creadev.org</a>
+                    </span>
                     <span className="f-meta-links">{META.map((l) => footLink(l))}</span>
                 </div>
             </div>
