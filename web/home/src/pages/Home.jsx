@@ -355,6 +355,7 @@ export default function Home() {
                 <div className="container stat-row">
                     <div className="stat"><div className="stat-value" data-count="3">3</div><div className="stat-label">memory systems</div></div>
                     <div className="stat"><div className="stat-value" data-count="130">130</div><div className="stat-label">CLI commands</div></div>
+                    <div className="stat"><div className="stat-value" data-count="347">347</div><div className="stat-label">MCP commands</div></div>
                     <div className="stat"><div className="stat-value" data-count="182">182</div><div className="stat-label">lib modules</div></div>
                     <div className="stat"><div className="stat-value" data-count="126">126</div><div className="stat-label">doc pages</div></div>
                     <div className="stat"><div className="stat-value" data-count="218">218</div><div className="stat-label">test suites</div></div>
@@ -447,10 +448,10 @@ export default function Home() {
                 <div className="container">
                     <blockquote className="fx-reveal">Pick a door. <span className="fx-word">Both are open.</span></blockquote>
                     <p className="fx-reveal fx-d1" style={{ marginBottom: 28 }}>Five minutes for you, one command for your agent — and the memory is yours either way.</p>
-                    <p className="fx-reveal fx-d2">
-                        <a className="btn" href="https://docs.creadev.org/vant/getting-started/quick-start">Start the five minutes</a>
-                        <a className="btn outline" href="https://docs.creadev.org/vant/getting-started/agent-onboarding" style={{ marginLeft: 10 }}>Send your agent</a>
-                        <a className="btn outline" href="https://brain.creadev.org" rel="noopener" style={{ marginLeft: 10 }}>Watch it live</a>
+                    <p className="fx-reveal fx-d2" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center' }}>
+                        <a className="btn" href="https://docs.creadev.org/vant/getting-started/quick-start">Start in 5 minutes</a>
+                        <a className="btn outline" href="https://docs.creadev.org/vant/getting-started/agent-onboarding">Send your agent</a>
+                        <a className="btn outline" href="https://brain.creadev.org" rel="noopener">Watch it live</a>
                     </p>
                 </div>
             </section>

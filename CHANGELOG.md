@@ -5,6 +5,112 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 342 (the site tour: the menu order IS the walk, prev/next on every stop)
+
+### Added — the page-walk widget (owner direction: "users can walk through the site")
+
+- **ONE ORDER, TWO SURFACES**: the owner-directed tour (Home → Quick
+  start → Install → Brain → Security → Releases → GitHub → Docs →
+  Status → Contact) now lives as ONE ordered list (`WALK` in Nav.jsx,
+  exported) that both the main menu and the new prev/next widget read —
+  the menu order and the walk order cannot drift. The menu is reordered
+  to it exactly (Releases ahead of GitHub, Docs after, "Home" joins the
+  nav as the origin; **Changelog leaves the nav** — the owner's list has
+  ten stops and it is not one; it stays reachable in the footer's
+  "This site" column). Same 10-link count, so the pass-339 desktop
+  tightening still holds.
+- **THE WALK WIDGET** (`AppLayout.jsx PageWalk`, one `<nav class="page-walk">`
+  between page content and footer on every walk stop except Home):
+  `← Prev: <page>` (outline) and `Next: <page> →` (accent) buttons whose
+  hops are the walk's neighbors — /install's next is Brain, /security's
+  next is Releases, /status's next is Contact. Next wraps Contact back
+  to Home, so the tour is a loop. External stops are honest first-class
+  hops (their pages live on the other sites). Exclusions fall out of the
+  list membership automatically: no widget on Home (the origin), terms,
+  privacy, changelog (not a stop), or the 404.
+- **THE CHEESY ROW RETIRED**: Security's "Related pages: privacy (what
+  leaves your machine), terms (...)" paragraph is gone — the only
+  related-links row on the site; the walk replaces the pattern.
+- **CONTACT-FORM OVERFLOW GUARD**: the SS overflow was the previous
+  deploy's island layout (the current form already fits: one
+  auto-fit minmax(200px, 1fr) row = one column at 393px); a
+  `.form-grid > * { min-width: 0 }` guard is added so no child can ever
+  force the grid wider than the container again.
+- Verified: build:home 8/8 (walk widget + new nav order baked into every
+  dist route in the directed order), lint:home PASS, changelog parity
+  PASS, home suite 6/6.
+
+## [Unreleased] - pass 341 (the footer closer: an every-page statement, no site tourism)
+
+### Changed — the footer blurb is rewritten (owner direction via mobile SS)
+
+- **THE CROSSLINK SENTENCE IS GONE** — "One of four crosslinked sites:
+  this home page, the docs hub, the Brain dashboard, and the Freestruct
+  docs (built from the docs system this site prototyped)" no longer
+  introduces the footer; the links it named already live in the "The
+  family" column one glance away, so the paragraph repeated them.
+- **THE CLOSER IS A REAL VANT SUMMARY** (owner direction: "applicable to
+  footer on every page"): "Vant. Persistent memory for AI agents: plain
+  markdown brain files in your own repository, read when a session
+  opens, written before it closes, inherited every time after. Free and
+  open source under MIT — made by Creadev.org." The session-cadence
+  clause is the house phrasing (home meta description, verbatim); MIT is
+  plain text like every other license mention on the site (no LICENSE
+  file URL exists to link — package.json carries the truth);
+  Creadev.org links with the same noopener treatment the family column
+  uses. No hard line break (the mobile SS break came from the old
+  backup lander's <br>, already absent from source).
+- Verified: build:home 8/8 (the new closer baked into every route),
+  lint:home PASS, changelog parity PASS, home suite 6/6.
+
+## [Unreleased] - pass 340 (the counters round: numbers that count, an MCP neighbor, a shorter door)
+
+### Fixed — counters stuck at 0 + the CTA copy/wrap
+
+- **COUNTERS NEVER OBSERVED (the "190 zeroing bug", found on mobile)**:
+  the AppLayout port of the lander's VantFX merged reveal + count-up into
+  ONE IntersectionObserver pass but only `observe()`d the `.fx-reveal`
+  set — the `[data-count]` stat values were zeroed pre-paint and then
+  watched by nothing, so every counter in the stats strip stayed at
+  **0 forever** (the pre-JS/HMR/real-dev-shapes truth values could only
+  come back via the reduced-motion path). Both sets are observed now;
+  count-up plays on scroll like the checked-in backup lander did.
+- **STAT ROW GAINS "MCP COMMANDS"** next to CLI commands: `data-count={347}`
+  **347 MCP commands** — the number is the check-mcp-coverage.js truth
+  (347 registered tools, matching the MCP docs catalog), same accounting
+  rule as CLI's 130 (check-cli-coverage.js). Seven stats now (six counters
+  + version), still one flex-wrap row.
+- **CTA COPY: "START IN 5 MINUTES"** — owner direction via mobile SS; the
+  "Start the five minutes" primary drops to 19 characters so the door
+  row wraps properly on phones, and the three-button row is a real
+  flex-wrap with `gap: 12 / justify-content: center` instead of three
+  `marginLeft: 10` inline styles (the old wrap left orphan buttons
+  ragged — text-align center carried the rest).
+- Verified: build:home 8/8 (counters + 347 + copy baked into dist),
+  lint:home PASS, changelog parity PASS.
+
+## [Unreleased] - pass 339 (the live-site round: footer in three columns, the route set in the main menu)
+
+### Changed — nav + footer after the Pages deploy went live
+
+- **THE MAIN MENU CARRIES THE ROUTES**: `/changelog` joins the top nav
+  (Install, Quick start, Docs, Brain, GitHub, Releases, Security,
+  Changelog, Status, Contact) — the one site route that was missing from
+  the owner-directed route set; /terms + /privacy stay footer-only by
+  owner direction. A 10-link desktop nav is sized honestly: gap and type
+  tighten between 781-1040px before the 780px mobile menu fold.
+- **FOOTER IN THREE COLUMNS** (`.footer-grid`): the full-width link soup
+  is now (1) the project blurb (four-site crosslink sentence, intact),
+  (2) "This site" — the seven owner routes incl. footer-only Terms +
+  Privacy, (3) "The family" — docs hub, Getting Started, Agent
+  Onboarding, Brain dashboard, Freestruct docs, GitHub, Releases,
+  creadev.org. One column collapses at 780px; the two link columns are
+  separate labeled navs. Dist check: footer-grid + f-heads on the content
+  routes (the prestruct 404 ships its own minimal notFound shell without
+  the footer — pre-existing pipeline shape, not a regression).
+- Verified: build:home 8/8, lint:home PASS (12 files), home suite 6/6
+  (config pins untouched by the UI round).
+
 ## [Unreleased] - pass 338 (the dependency sweep: everything in range moves up)
 
 ### Changed — the schema/OG pimp (the owner face now reads like the software it is)

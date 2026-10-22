@@ -17,11 +17,11 @@
 import React, { useEffect } from 'react'
 import * as rrdNS from 'react-router-dom'
 const rrd = rrdNS.default ?? rrdNS
-const { Routes, Route, useLocation } = rrd
+const { Routes, Route, useLocation, Link } = rrd
 
 import { mountIslands } from './islands.js'
 import { islands }      from './AppIslands.jsx'
-import Nav              from './components/Nav.jsx'
+import Nav, { WALK }       from './components/Nav.jsx'
 import Footer           from './components/Footer.jsx'
 import Home             from './pages/Home.jsx'
 import Terms            from './pages/Terms.jsx'
@@ -124,8 +124,35 @@ function useVantFxEffects() {
             rootMargin: '0px 0px -40px 0px',
         })
         els.forEach(el => io.observe(el))
+        counters.forEach(el => io.observe(el))
         return () => io.disconnect()
     })
+}
+
+// The page walk (pass 342): every page that is a stop on the owner-directed
+// walk (Nav.jsx's WALK — the menu order IS the walk) gets a prev/next widget
+// between its content and the footer, so visitors can walk the site like a
+// tour. Home is the origin (no widget); pages not on the walk (terms,
+// privacy, changelog, 404) get none — the exclusions fall out of the list
+// membership automatically. The next hop wraps Contact back to Home, so the
+// tour is a loop.
+const WALK_INDEX = new Map(WALK.map((stop, i) => [stop.href, i]))
+
+function PageWalk() {
+    const { pathname } = useLocation()
+    const i = WALK_INDEX.get(pathname)
+    if (typeof i !== 'number' || i === 0) return null
+    const prev = WALK[i - 1]
+    const next = WALK[(i + 1) % WALK.length]
+    const hop = (stop, cls, text) => stop.href.startsWith('/')
+        ? <Link key={cls} className={cls} to={stop.href}>{text}: {stop.label}</Link>
+        : <a key={cls} className={cls} href={stop.href} rel={stop.noopener ? 'noopener' : undefined}>{text}: {stop.label}</a>
+    return (
+        <nav className="container page-walk" aria-label="Site tour">
+            {hop(prev, 'btn outline walk-prev', '← Prev')}
+            {hop(next, 'btn walk-next', 'Next')}
+        </nav>
+    )
 }
 
 export default function AppLayout() {
@@ -147,6 +174,7 @@ export default function AppLayout() {
                     <Route path="/changelog" element={<Changelog />} />
                     <Route path="*"        element={<NotFound />} />
                 </Routes>
+                <PageWalk />
             </main>
             <Footer />
         </>

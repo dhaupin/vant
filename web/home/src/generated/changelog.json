@@ -1,8 +1,75 @@
 {
   "_source": "CHANGELOG.md (root) — parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 68,
+  "_headingCount": 72,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 342 (the site tour: the menu order IS the walk, prev/next on every stop)",
+      "sections": [
+        {
+          "name": "Added — the page-walk widget (owner direction: \"users can walk through the site\")",
+          "items": [
+            "**ONE ORDER, TWO SURFACES**: the owner-directed tour (Home → Quick",
+            "**THE WALK WIDGET** (`AppLayout.jsx PageWalk`, one `<nav class=\"page-walk\">`",
+            "**THE CHEESY ROW RETIRED**: Security's \"Related pages: privacy (what",
+            "**CONTACT-FORM OVERFLOW GUARD**: the SS overflow was the previous",
+            "Verified: build:home 8/8 (walk widget + new nav order baked into every"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 341 (the footer closer: an every-page statement, no site tourism)",
+      "sections": [
+        {
+          "name": "Changed — the footer blurb is rewritten (owner direction via mobile SS)",
+          "items": [
+            "**THE CROSSLINK SENTENCE IS GONE** — \"One of four crosslinked sites:",
+            "**THE CLOSER IS A REAL VANT SUMMARY** (owner direction: \"applicable to",
+            "Verified: build:home 8/8 (the new closer baked into every route),"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 340 (the counters round: numbers that count, an MCP neighbor, a shorter door)",
+      "sections": [
+        {
+          "name": "Fixed — counters stuck at 0 + the CTA copy/wrap",
+          "items": [
+            "**COUNTERS NEVER OBSERVED (the \"190 zeroing bug\", found on mobile)**:",
+            "**STAT ROW GAINS \"MCP COMMANDS\"** next to CLI commands: `data-count={347}`",
+            "**CTA COPY: \"START IN 5 MINUTES\"** — owner direction via mobile SS; the",
+            "Verified: build:home 8/8 (counters + 347 + copy baked into dist),"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 339 (the live-site round: footer in three columns, the route set in the main menu)",
+      "sections": [
+        {
+          "name": "Changed — nav + footer after the Pages deploy went live",
+          "items": [
+            "**THE MAIN MENU CARRIES THE ROUTES**: `/changelog` joins the top nav",
+            "**FOOTER IN THREE COLUMNS** (`.footer-grid`): the full-width link soup",
+            "Verified: build:home 8/8, lint:home PASS (12 files), home suite 6/6"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
