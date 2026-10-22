@@ -477,8 +477,10 @@ where this paragraph gates them.
   **Status (pass 233): BUILT.** The app + functions + posture page exist
   and typecheck/build clean; the vendored kit passes `--check` across
   BOTH flavors; the R1 source pins run in the parity suite (35 pins).
-  The live-subdomain walk (real deploy, real reach through its caps +
-  exec) remains the deploy-walk acceptance, stated honestly.
+  The local half of the deploy walk is now scripted
+  (`npm run pilot:pages` - builds, kit checksums, env-surface truth vs
+  DEPLOY.md): the live-subdomain walk (real deploy, real reach through
+  its caps + exec) remains the deploy-walk acceptance, stated honestly.
 - **R2 — the dashboard is BUILT ON the pipes.** The chain editor +
   chain card exist; the usage toggle GOVERNS live routing (intent →
   live): with usage ON and a chain of verified hops, the exec path

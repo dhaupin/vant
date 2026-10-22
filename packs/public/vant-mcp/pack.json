@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-mcp",
+  "description": "In-process MCP tool-layer discipline for vant run roots: unknown tools answer honestly, declared inputSchemas are enforced before side effects, and hostile tool params cannot write out of the brain tree. Drives lib/mcp.execute directly - no HTTP door, zero sockets.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

@@ -202,8 +202,8 @@
         .hero p.lede { font-size: 1.16rem; color: var(--text-muted); max-width: 44rem; margin-bottom: 30px; }
         .hero p.lede strong { color: var(--text); }
         .dual-cta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; max-width: 47rem; margin-bottom: 26px; }
-        @media (max-width: 780px) { .dual-cta { grid-template-columns: 1fr; } }
-        .cta-card { background: color-mix(in srgb, var(--bg-card) 88%, transparent); border: 1px solid var(--border); border-radius: 14px; padding: 18px; backdrop-filter: blur(6px); }
+        @media (max-width: 780px) { .dual-cta { grid-template-columns: minmax(0, 1fr); } }
+        .cta-card { background: color-mix(in srgb, var(--bg-card) 88%, transparent); border: 1px solid var(--border); border-radius: 14px; padding: 18px; backdrop-filter: blur(6px); min-width: 0; }
         .cta-card h2 { font-size: 0.98rem; margin-bottom: 2px; color: var(--ink); }
         .cta-card p { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 12px; }
         .btn { display: inline-block; background: var(--accent); color: #fff; font-weight: 600; padding: 10px 18px; border-radius: 10px; border: none; font-size: 0.93rem; cursor: pointer; }
@@ -221,6 +221,14 @@
             font-size: 0.85rem; line-height: 1.55; max-width: 100%; min-width: 0;
         }
         pre.term code { display: block; min-width: max-content; max-width: 100%; }
+        @media (max-width: 780px) {
+            /* mobile: squeeze the chain and soft-wrap instead of inner-scroll.
+               cta-card/dual-cta let the track shrink (min-width: 0 / minmax(0,1fr));
+               here the code drops max-content so the pre's width wins and text wraps. */
+            pre.term code { min-width: 0; max-width: none; white-space: pre-wrap; overflow-wrap: anywhere; }
+            pre.term { padding-right: 52px; } /* clear the copy button that sits over wrapped text */
+            pre.term .copy-btn { top: auto; bottom: 8px; }
+        }
         pre.term .prompt { color: var(--term-green); user-select: none; }
         pre.term .cmd { color: var(--term-amber); }
         pre.term .cmt { color: var(--term-dim); }

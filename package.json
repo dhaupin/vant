@@ -35,6 +35,7 @@
   },
   "scripts": {
     "test": "node bin/build-test.js",
+    "test:crashtest": "node test/ci-crashtest-gate.js",
     "sweep": "node test/run-all.js",
     "setup": "node bin/setup.js",
     "start": "node bin/start.js",
@@ -55,12 +56,14 @@
     "pilot:pods": "node scripts/pilot-two-pods.js",
     "pilot:relay": "node scripts/pilot-two-relays.js",
     "pilot:pairing-ride": "node scripts/pilot-pairing-ride.js",
+    "pilot:pages": "node scripts/pilot-pages-deploy.js",
     "pilot:keyless-ride": "node scripts/pilot-keyless-ride.js",
     "dev:dashboard-build": "npm --prefix web/dashboard run build"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "8.72.0",
     "@typescript-eslint/parser": "8.72.0",
+    "crashtest": "^1.0.0",
     "eslint": "^8.57.1",
     "eslint-plugin-react-hooks": "4.6.2",
     "typescript": "5.8.3"

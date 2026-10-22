@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-rest",
+  "description": "REST-door discipline for vant run roots: hostile fuzz traffic never lands as 5xx or an uncaught throw (the fuzz floor), the urlencoded wire never expands prototype keys or dies on nesting depth (BodyParser discipline), CORS mirrors whatever the method sends, and session responses mint zero cookies they refuse to own. Edges at lib/server.js's Stack (Server.Request/Response/Router + BodyParser/CORS/Helmet/Session) driven in-process - no listener, zero sockets.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

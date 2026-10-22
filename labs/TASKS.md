@@ -1,7 +1,52 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** pass 321 (the DIST→WEB/HOME move, owner call: “/web/home
+**Last Updated:** pass 331-333 arc (the SIBLING REVEAL: synmergia's
+closed-source frame cherry-picked vant structs first and now flows
+learnings back — full arc on record: prd-kernel.md §5b TWO correction
+waves + the pass-333 hands-on deep crawl; prd-kernel-extensions.md
+E1-E9 port plan; direction law recorded in goals/lessons (one crew,
+two runtimes, issue-first return lane). Kernel constitution gates
+self-contained canon (no sibling access needed). Twenty commits now
+parked on axolotl, 322-333, all pushed, all green.
+**Prior — pass 328** (the HEAP SWEEP: the private-layer census
+found ~180 test-brain carcasses inflating the stone — ~110 timestamped
+scratch brains (ag/ht/ib/rls/op/wm/wsb-test-* minted per test run and
+never cleaned, a classic leak pattern) plus ~60 named remnants
+(livefire-290*, qc-sweep/r2/r3/r4/trace*, lf-ind-*, gstest, lwtest,
+mcp/msg-suite-local, q292, p292-cli-smoke, pin-probe, up-def-pin,
+sudo), all self-healing (tests recreate scratch brains + named dirs at
+runtime; verified post-sweep: brain 77/77, guests 25/25, leisure
+21/21). models/private 199 -> 19 dirs; stone refreshed to honest
+mass: 78 -> 12 brains/corpus (kept: stack vant/axolotl/
+pairing-ride-pilot, predecessor buffy, pilot family, islands.json,
+stegoframe lab bundle). LEAK LESSON filed in axolotl lessons.md: scratch
+brains need a kill switch in the test harness (future pass: post-run
+cleanup or VANT_TEST_SCRATCH tmpdir routing).
+**Prior — pass 326/327** (the BRAIN REFRESH + the succession pass:
+stone regenerated twice 2026-10-21 after the 317-325 arc; Buffy sleep
+write into models/private/axolotl/lessons.md + goals next-wave update;
+public brain start.md/bootstrap.md gained the pick-up-the-project
+pointers (TASKS.md, PRDs, ethics page, MEM handoff); prune CLI scan
+came back clean earlier (heap lives in private storage, pruner rightly
+refuses).
+**Prior — pass 322** (the MOBILE BLEED FIX: the pass-321 home
+page rendered but its terminal code blocks bled off-viewport on phones
+— `pre.term code { min-width: max-content }` propagated the longest
+line's width up as min-content, and the ancestors refused to shrink:
+`.dual-cta` used `1fr` in the ≤780px query (grid tracks default to
+minmax(auto,1fr) and grow to fit unbreakable min-content) and
+`.cta-card` had the default `min-width:auto`. Diagonal fix — every link
+in the chain gets a shrink key: `.cta-card` gets `min-width:0`, the
+mobile query changes to `minmax(0,1fr)`, and on mobile the code drops
+max-content (`min-width:0; white-space:pre-wrap; overflow-wrap:
+anywhere`) so the pre's width wins and the long git-clone line
+soft-wraps instead of scrolling/bleeding; copy button moves to the
+bottom on mobile so it doesn't sit over wrapped text. Desktop keeps
+the max-content + overflow-x:auto behavior (no inner scrollbar on
+phones where it's hard to scroll). VERIFIED: home gate PASS (125
+permalinks). 
+**Prior — pass 321** (the DIST→WEB/HOME move, owner call: “/web/home
 it is”. git mv dist web/home history-preserving; the pass-150 gate
 rewritten as scripts/check-home.js walking web/home/*.html (same 6
 checks), packaging lint:home + test.yml “web/home gate”; PRD override

@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-brain",
+  "description": "Vant brain-layer discipline for in-process run roots: private-first reads win, hostile brain names cannot escape models/, tampered models/state.json is handled loudly (never silently defaulted with a mixed lineage), migration is idempotent, and guest capability denial half-opens nothing. Every oracle stays on the FILE layer + in-process APIs (one law: zero sockets). Lives in vant's repo per the #231 proposal; expansion oracles per #233.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

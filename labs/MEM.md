@@ -7,22 +7,16 @@
 
 ## Handoff
 
-**Current handoff (pass 285, 2026-10-20):** the LIVE relay deploy walk
-(queued item ②) is IN FLIGHT: operator armed the `vant-brain` Pages env
-(Production + Preview: `VANT_RELAY_ENABLED=1` + `VANT_RELAY_GATE_KEY`
-secret) and redeployed — production (`brain.creadev.org`) ANSWERS
-(`/api/r/capabilities` 200: dashboard-relay, gated, gateReady,
-envelope-required), the branch alias (`axolotl.vant-brain.pages.dev`)
-still 404s (env not picked up by the branch d&&; a MEM.md line landed
-on axolotl to FORCE a fresh branch deployment). Next steps: (1) re-probe
-branch alias until caps answer; (2) fire the full signed corridor over
-LIVE — HMAC relay.hop (fresh ts+nonce, X-Signature-256 over raw body,
-secret = the axolotl brain config relay.gateKey), forward-verbatim
-{ct} lane AND a typed-refusal probe (bad origin / missing envelope),
-ack-with-reply read-back; (3) stamp the walk result in labs/TASKS.md
-(closing ②) + CHANGELOG pass 285. NOTE: the gate key rides the axolotl
-brain config (models/private/axolotl/config.json relay.gateKey,)
-hash-logged only; the ORIGINAL mint was burned to chat/console —
+**Current handoff (pass 326, 2026-10-21):** sessions 317-326 wrapped
+clean and all work is pushed to axolotl (tip 955c54e, SIX unmerged
+commits vs main: pass 322 mobile bleed fix, 323-324 prd-marketing.md
++ dept, 325 the ethics trio docs/security/ethics.md, 326 boot stone
+refresh + Buffy brain sleep write). NEXT QUEUE: (1) open the PR for
+the six on owner word; (2) marketing PRD M1+M2 (MCP client config
+docs + AGENTS.md fragment page, docs-only afternoon passes); (3) M3
+npm scoped publish @vant/cli needs OWNER confirm of name + npm token
+in CI before surface rewrites fire. Live relay walk (old 285 item) is
+DONE and stamped in TASKS history - do not re-litigate.
 consider one rotation after the corridor proof to a fresh mint whose
 key never leaves the config file (paste-into-Cloudflare step remains).
 Suites standing green from pass 284; no code changed this pass yet.

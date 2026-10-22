@@ -22,6 +22,7 @@ description: The Vant security chain - VAF input validation, sandbox capabilitie
 | [Airgap Propagation](/vant/security/airgap-propagation) | Moving brains across air gaps via images |
 | [Best Practices](/vant/security/best-practices) | Safe setup guide for agent workflows |
 | [Privacy](/vant/security/privacy) | What Vant stores, sends, and never sends |
+| [Ethics](/vant/security/ethics) | How Vant influences, and what it refuses to do |
 
 ## The chain in one example
 

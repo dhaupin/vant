@@ -86,6 +86,37 @@ async function main() {
     await test(`--help exits 0 with usage for all ${checked} runnable CLIs`,
         () => { if (failures.length) throw new Error(failures.slice(0, 6).join(' | ')); return true; });
 
+    // 3. (live-walk pin) Unknown verbs answer the HONEST refusal — typed
+    // 'Unknown command' + exit 1, never an uncaught stack. The dispatcher
+    // vaf.check maxLength is a rail for routed nouns; an unknown verb (any
+    // length) must fall into the refusal, not crash. Regression was real:
+    // a >20-char verb crashed with uncaught `VantError: cmd too long: max 20`.
+    const unknownVerbs = [
+        // A plausible typo must get the edit-distance suggestion.
+        { verb: 'helth', expectSuggest: true },
+        // Nonsense verbs (incl. >20 chars) get the refusal; a suggestion is
+        // NOT owed when nothing is within edit range (verified: 'helth' vs
+        // 'health' is d=2, but far longer nonsense is far from everything).
+        { verb: 'definitely-not-a-command', expectSuggest: false },
+        { verb: 'this-verb-is-far-longer-than-the-twenty-char-rail-allows', expectSuggest: false }
+    ];
+    const unknownFails = [];
+    for (const { verb, expectSuggest } of unknownVerbs) {
+        const r = spawnSync(process.execPath, [path.join(BIN, 'vant.js'), verb], {
+            encoding: 'utf8',
+            timeout: PER_FILE_TIMEOUT_MS,
+            env: Object.assign({}, process.env, { VANT_BRAIN: SCRATCH_BRAIN })
+        });
+        const out = (r.stderr || '') + (r.stdout || '');
+        if (r.status !== 1) unknownFails.push(verb + ': exited ' + r.status + ' (want 1)');
+        if (!out.includes('Unknown command')) unknownFails.push(verb + ': no Unknown command refusal');
+        if (out.includes('cmd too long')) unknownFails.push(verb + ': leaked the internal length guard');
+        if (/uncaught|VantError:/i.test(out)) unknownFails.push(verb + ': crashed instead of refusing');
+        if (expectSuggest && !out.includes('Did you mean')) unknownFails.push(verb + ': no typo suggestion');
+    }
+    await test('unknown verbs (short + >20 chars) answer the honest typed refusal with exit 1',
+        () => { if (unknownFails.length) throw new Error(unknownFails.join(' | ')); return true; });
+
     console.log(`\n  ${results.passed} passed, ${results.failed} failed`);
     process.exit(results.failed > 0 ? 1 : 0);
 }
