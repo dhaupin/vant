@@ -1,8 +1,25 @@
 {
   "_source": "CHANGELOG.md (root) — parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 69,
+  "_headingCount": 70,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 340 (the counters round: numbers that count, an MCP neighbor, a shorter door)",
+      "sections": [
+        {
+          "name": "Fixed — counters stuck at 0 + the CTA copy/wrap",
+          "items": [
+            "**COUNTERS NEVER OBSERVED (the \"190 zeroing bug\", found on mobile)**:",
+            "**STAT ROW GAINS \"MCP COMMANDS\"** next to CLI commands: `data-count={347}`",
+            "**CTA COPY: \"START IN 5 MINUTES\"** — owner direction via mobile SS; the",
+            "Verified: build:home 8/8 (counters + 347 + copy baked into dist),"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

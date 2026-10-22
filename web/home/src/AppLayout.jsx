@@ -124,6 +124,7 @@ function useVantFxEffects() {
             rootMargin: '0px 0px -40px 0px',
         })
         els.forEach(el => io.observe(el))
+        counters.forEach(el => io.observe(el))
         return () => io.disconnect()
     })
 }

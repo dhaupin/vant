@@ -5,6 +5,32 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 340 (the counters round: numbers that count, an MCP neighbor, a shorter door)
+
+### Fixed — counters stuck at 0 + the CTA copy/wrap
+
+- **COUNTERS NEVER OBSERVED (the "190 zeroing bug", found on mobile)**:
+  the AppLayout port of the lander's VantFX merged reveal + count-up into
+  ONE IntersectionObserver pass but only `observe()`d the `.fx-reveal`
+  set — the `[data-count]` stat values were zeroed pre-paint and then
+  watched by nothing, so every counter in the stats strip stayed at
+  **0 forever** (the pre-JS/HMR/real-dev-shapes truth values could only
+  come back via the reduced-motion path). Both sets are observed now;
+  count-up plays on scroll like the checked-in backup lander did.
+- **STAT ROW GAINS "MCP COMMANDS"** next to CLI commands: `data-count={347}`
+  **347 MCP commands** — the number is the check-mcp-coverage.js truth
+  (347 registered tools, matching the MCP docs catalog), same accounting
+  rule as CLI's 130 (check-cli-coverage.js). Seven stats now (six counters
+  + version), still one flex-wrap row.
+- **CTA COPY: "START IN 5 MINUTES"** — owner direction via mobile SS; the
+  "Start the five minutes" primary drops to 19 characters so the door
+  row wraps properly on phones, and the three-button row is a real
+  flex-wrap with `gap: 12 / justify-content: center` instead of three
+  `marginLeft: 10` inline styles (the old wrap left orphan buttons
+  ragged — text-align center carried the rest).
+- Verified: build:home 8/8 (counters + 347 + copy baked into dist),
+  lint:home PASS, changelog parity PASS.
+
 ## [Unreleased] - pass 339 (the live-site round: footer in three columns, the route set in the main menu)
 
 ### Changed — nav + footer after the Pages deploy went live
