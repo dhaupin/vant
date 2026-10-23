@@ -160,16 +160,23 @@ async function main() {
         'home-summary', 'home-admin'];
         // Per-module route vocabulary: rows whose ctx names are not `route`
         // get the vant-armed route that speaks their contract (privileged
-        // authz gate, cookie session verbs, deep/regex Edge probes). D1- and
-        // KV-store-shaped rows (race, upload, state aliasing) stay honestly
-        // route-less: vant ships no such binding to arm.
+        // authz gate, cookie session verbs, deep/regex Edge probes). The
+        // D1/KV-shaped rows (race, state, upload) pin their ctx routes and
+        // arm EXACTLY when the run root can state a D1/KV binding - here
+        // that is the harness fixture env (LIBRARY_ENV_SPEC, ctx.env.DB /
+        // ctx.env.UPLOADS); a run root with real bindings would name them
+        // in the spec instead. No binding -> same flags arm nothing and the
+        // rows degrade to honest skipped-REFUSED.
         const LIBRARY_ROUTE_CTX = {
             authz: { privilegedRoute: 'vant-rest-priv', aliasRoute: 'vant-rest-priv-alias' },
             session: { loginRoute: 'vant-login', meRoute: 'vant-me', logoutRoute: 'vant-logout' },
             recursion: { deepRoute: 'vant-rest-open', regexRoute: 'vant-rest-open' },
+            race: { submitRoute: 'charge', embedRoute: 'profile' },
+            state: { route: 'device', mustDenyIds: ['rook-device-77', 'rook-device-88'] },
+            upload: { route: 'upload' },
         };
             const entries = fs.readdirSync(libDir).filter((f) => f.endsWith('.js')).sort();
-            console.log(`\n=== crashtest scenario library rows against the armed routes (${armedRoutes.length} routes) ===`);
+            console.log(`\n=== crashtest scenario library rows against the armed routes (${armedRoutes.length} routes; D1/KV bindings armed: ${harness.env && harness.env.DB && harness.env.UPLOADS ? 'DB+UPLOADS' : 'none'}) ===`);
             let libRefused = 0, libExploited = 0, libSkipped = 0;
             const libFindings = [];
             let modIndex = 0;
@@ -699,8 +706,43 @@ function extractCtJson(text) {
     return hit ? hit[1] : String(text || '');
 }
 
+// --- library-row fixture bindings (2026-10-23): the D1/KV-shaped library
+// --- rows (race / state / upload) arm EXACTLY when a D1/KV binding is
+// --- available to the run root. Here that availability is crashtest's OWN
+// --- fake backend (the harness builds FakeD1/FakeKV instances from env
+// --- specs) - the supported in-process substitute for a real binding, zero
+// --- sockets, deterministic. A runtime that provides real bindings would
+// --- point these spec keys at them; the rows read env.<name> verbatim.
+
+const LIBRARY_DEVICE_SEED = [
+    { id: 1, key: 'rook-device-1', owner: 'rook' },
+    { id: 2, key: 'rook-device-2', owner: 'rook' },
+    { id: 3, key: 'rook-device-3', owner: 'rook' },
+    { id: 4, key: 'rook-device-4', owner: 'rook' },
+    { id: 5, key: 'rook-device-5', owner: 'rook' },
+    { id: 6, key: 'rook-device-6', owner: 'rook' },
+    { id: 7, key: 'rook-device-7', owner: 'rook' },
+    { id: 8, key: 'rook-device-8', owner: 'rook' },
+];
+const LIBRARY_ENV_SPEC = {
+    d1: {
+        DB: {
+            tables: {
+                charges: { rows: [] },      // race/double-submit oracle ledger (cid, user, cents)
+                settings: { rows: [] },     // race/lost-update oracle per-field ledger (user, field, value)
+                blobs: { rows: [] },        // race/lost-update oracle whole-record ledger (user, json)
+                devices: {                  // state/enumeration + row-aliasing ledger (id, key, owner)
+                    rows: LIBRARY_DEVICE_SEED,
+                    uniques: { key: ['key'] },  // a keyspace constraint: second-owner claims cannot land in-place
+                },
+            },
+        },
+    },
+    kv: { UPLOADS: {} },                    // upload row store: env.UPLOADS, same shape web wire uses
+};
+
 function buildRoutes(sb, Harness) {
-    const harness = new Harness({ baseUrl: 'https://vant-run-root' });
+    const harness = new Harness({ baseUrl: 'https://vant-run-root', env: LIBRARY_ENV_SPEC });
 
     harness.registerRoute('brain-read', async (ctx) => {
         const j = await ctx.request.json().catch(() => ({}));
@@ -1038,5 +1080,129 @@ function buildRoutes(sb, Harness) {
     // Absence remains the honest shape for any FUTURE unwired oracle: the
     // packs degrade via route-absence, never a 501 shim (a 501 shim IS a
     // 5xx to the fuzz floor).
+
+    // --- library-row fixture routes (2026-10-23): charge / profile /
+    // --- device / upload arm the D1/KV-shaped library rows against the
+    // --- fake backend above (ctx.env.DB / ctx.env.UPLOADS ride the SAME
+    // --- harness env object the rows read back). The same honesty law as
+    // --- the vant-code routes: the fixtures are a REAL defender-shaped
+    // --- app over the stated bindings, so a verdict-flipping behavior is
+    // --- a real defect and the row names it - they are not answer sheets.
+    // --- Determinism law: no wall clock in any stored value.
+
+    // charge: idempotency-keyed payment surface the race row bursts. SAME
+    // key under Promise.all lands exactly ONE insert; the framing promise
+    // wins the grant and the joiners answer a shaped 409 (the harness's
+    // honest wall shape). Settled replays stay 409 too - the ledger row is
+    // what "exactly one" means, not the ack shape.
+    const chargeInflight = new Map();
+    harness.registerRoute('charge', async (ctx) => {
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        if (!j || typeof j.idem !== 'string' || !j.idem) return jsonRes({ error: 'idem key required' }, 400);
+        const db = ctx.env && ctx.env.DB;
+        if (!db || !db.prepare) return jsonRes({ error: 'no DB binding on this target' }, 503);
+        const key = j.idem;
+        if (chargeInflight.has(key)) {
+            await chargeInflight.get(key).catch(() => {});   // joiners ride the same flight, then 409
+            return jsonRes({ error: 'duplicate idem key', idem: key }, 409);
+        }
+        const flight = (async () => {
+            const dupe = await db.prepare('SELECT id FROM charges WHERE cid = ?').bind(key).first('id');
+            if (dupe != null) return false;                  // settled replay: the row already holds it
+            await db.prepare('INSERT INTO charges (cid, user, cents) VALUES (?, ?, ?)')
+                .bind(key, String(j.user ?? 'guest'), Number(j.cents ?? 0)).run();
+            return true;
+        })();
+        chargeInflight.set(key, flight);
+        try { await flight; } catch (e) {
+            chargeInflight.delete(key);
+            return jsonRes({ error: String(e && e.message || e) }, 503);
+        }
+        chargeInflight.delete(key);
+        return jsonRes({ ok: true, idem: key }, 200);
+    });
+
+    // profile: per-field settings surface (per-field rows, no whole-record
+    // read-modify-write) - concurrent writers can never stomp a field they
+    // never saw, which is exactly what the race oracle reads back.
+    harness.registerRoute('profile', async (ctx) => {
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        if (!j || typeof j.user !== 'string' || !j.user) return jsonRes({ error: 'user required' }, 400);
+        const db = ctx.env && ctx.env.DB;
+        if (!db || !db.prepare) return jsonRes({ error: 'no DB binding on this target' }, 503);
+        for (const [field, value] of Object.entries(j)) {
+            if (field === 'user') continue;
+            if (field === '__proto__' || field === 'constructor' || field === 'prototype') {
+                return jsonRes({ error: 'unsupported field name' }, 400);
+            }
+            await db.prepare('INSERT INTO settings (user, field, value) VALUES (?, ?, ?)')
+                .bind(j.user, field, String(value)).run();
+        }
+        return jsonRes({ ok: true }, 200);
+    });
+
+    // device: fused fixture route for the state module's two attacks. The
+    // module's ctx routes surface per MODULE, not per attack, so one route
+    // carries both semantics: a body with an `owner` is the enrollment
+    // write (row-aliasing class - a second owner claim on a taken key
+    // answers the shaped 409 the keyspace constraint built), a body with
+    // only a `key` is the lookup read (enumeration class - foreign ids
+    // answer 404, own ids answer 200).
+    harness.registerRoute('device', async (ctx) => {
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        const db = ctx.env && ctx.env.DB;
+        if (!db || !db.prepare) return jsonRes({ error: 'no DB binding on this target' }, 503);
+        if (j && j.owner !== undefined) {
+            if (typeof j.key !== 'string' || !j.key) return jsonRes({ error: 'device key required' }, 400);
+            try {
+                await db.prepare('INSERT INTO devices (key, owner) VALUES (?, ?)').bind(j.key, String(j.owner)).run();
+                return jsonRes({ ok: true, key: j.key, owner: String(j.owner) }, 200);
+            } catch (e) {
+                if (e && e.code === 'UNIQUE') return jsonRes({ error: 'device key already claimed', key: j.key }, 409);
+                throw e;
+            }
+        }
+        let wanted = null;
+        try { wanted = new URL(ctx.request.url).searchParams.get('key'); } catch { wanted = null; }
+        if (!wanted) wanted = j && j.key;
+        if (!wanted || typeof wanted !== 'string') return jsonRes({ error: 'device key required' }, 400);
+        const row = await db.prepare('SELECT id, key, owner FROM devices WHERE key = ?').bind(wanted).first();
+        if (!row) return jsonRes({ error: 'no such device for this identity', key: wanted }, 404);
+        return jsonRes({ ok: true, device: { key: row.key, owner: row.owner } }, 200);
+    });
+
+    // upload: multipart surface with the discipline the upload rows grade
+    // - filenames that carry separators, dot-segments, or control-ish
+    // bytes are refused (never stored under a derived escape), and
+    // scriptable content types (svg+script, text/html) are refused on the
+    // wire. Clean basenames under an honest type store verbatim.
+    const UPLOAD_TYPE_ALLOW = /^(text\/plain|application\/json|application\/octet-stream|image\/(png|jpg|jpeg|gif|webp))$/i;
+    harness.registerRoute('upload', async (ctx) => {
+        let form = null;
+        try { form = await ctx.request.formData(); } catch { form = null; }
+        if (!form) return jsonRes({ error: 'multipart body required' }, 400);
+        const file = form.get('file');
+        if (!file || typeof file === 'string') return jsonRes({ error: 'file field required' }, 400);
+        const rawName = String(file.name || '');
+        if (/\/|\\/.test(rawName) || /\.\./.test(rawName) || rawName.startsWith('.')) {
+            return jsonRes({ error: 'unacceptable filename', name: rawName }, 409);
+        }
+        // one-dot extension discipline: multi-dot names are the classic
+        // double-extension shape (a name riding two grammars at once) -
+        // refused rather than stored under an attacker-favored spelling
+        if (!/^\w[\w-]*\.(?:txt|json|png|jpg|jpeg|gif|webp)$/i.test(rawName)) {
+            return jsonRes({ error: 'unacceptable filename', name: rawName }, 409);
+        }
+        const type = String(file.type || '').toLowerCase();
+        if (!UPLOAD_TYPE_ALLOW.test(type)) return jsonRes({ error: 'unacceptable content type', type }, 409);
+        const store = ctx.env && ctx.env.UPLOADS;
+        if (!store || !store.put) return jsonRes({ error: 'no KV binding on this target' }, 503);
+        await store.put(rawName, `crashtest-upload-canary:${rawName}`);
+        return jsonRes({ ok: true, key: rawName }, 200);
+    });
+
     return harness;
 }

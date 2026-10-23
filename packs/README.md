@@ -220,10 +220,21 @@ Two ways, both from this repo:
    shim, and prints the honest ledger — verdicts, details, and explicit
    skips for routes the run root doesn't arm. It then runs crashtest's
    OWN scenario-library rows (input/guards/authz/session/recursion/…)
-   against the armed routes: 2026-10-23 (20 routes, the site wire
-   added) that is 25 REFUSED / 0 EXPLOITED / 5 skipped — the skips are
-   the D1- and KV-store-shaped rows (race, upload, state aliasing),
-   which is honest: vant ships no binding to arm.
+   against the armed routes. 2026-10-23, second stamp of the day: the
+   D1- and KV-store-shaped rows ARMED — the run root now states a
+   D1/KV binding (crashtest's own fake backend, `LIBRARY_ENV_SPEC` in
+   `scripts/crashtest-run.js`: tables charges/settings/blobs/devices +
+   a fake-KV `env.UPLOADS`) behind four fixture routes (charge /
+   profile / device / upload), so race, state (enumeration + row
+   aliasing), and the upload rows are all graded for real: that is
+   **30 REFUSED / 0 EXPLOITED / 0 skipped** (was 25 / 0 / 5 honest
+   skips). Arming stays conditional BY DESIGN: a run root that cannot
+   state a binding arms nothing and the rows degrade to honest
+   skipped-REFUSED again. The keyspace fixture measured one real
+   finding the hour it armed (the upload fixture accepted a
+   double-extension name verbatim — oracle EXPLOITED) and the
+   single-dot-extension permit landed the same pass, so the ledger is
+   clean again.
 
    To additionally sweep the crate's own default packs against the full
    run root (the probe-coverage re-measure above):
@@ -324,6 +335,44 @@ RED (the contract suite now fails loudly for any shipped pack missing from
 its expected table — the exact quiet gap a canary probe hunted down), and
 an unauthorized run-root finding exited 4 under strict policy. Honest skips
 and the whitelisted pins never mask a new raise.
+
+## Next surfaces survey (2026-10-23): packs vs issues
+
+Where the remaining repo parts land:
+
+- **`web/relay` → PACK (next, highest value).** The r/2 webhook wire
+  (`web/relay/functions/api/r/relay.ts`: posture gate → key gate → HMAC
+  X-Signature-256 over raw body bytes → freshness window → AES-256-GCM
+  envelope shapes → https-only origin guard) is a real runtime surface
+  exported as a Page handler, drivable in-process exactly like the
+  vant-home arm (WHATWG Request, no sockets). A `vant-relay` pack grades
+  the gate + replay window + envelope + origin guard rows for real.
+- **`web/dashboard` auth/OTP doors → PACK after relay.**
+  `functions/api/auth/{request,verify}-otp.ts` + `auth_guard` + accounts
+  are the same handler-shape as the vant-home wire; drive them
+  in-process (OTP codes, session seals `src/lib/seal.ts`, profile store).
+  The UI modules keep their own native tests — packs attack the WIRE,
+  not React mounts.
+- **`web/kit` contracts → no pack of its own.** It is contract SOURCE
+  (checksummed vendoring + parity pins in `test/relay-parity.test.js`),
+  not a runtime; the parity pin tests already do the honest job. The
+  CONTRACT shapes ride as rows inside the relay pack (r/2 ack/refusal
+  vocabulary, envelope shape).
+- **`docs/`, `bin/` help text, `scripts/check-*` gates → stay lint, not
+  packs.** They are repo-shape checks with no runtime to attack;
+  crashtest's honest verdict vocabulary adds nothing over fail-loud
+  scripts.
+
+Cross-repo asks filed on dhaupin/crashtest (build there, release,
+then the vant packs consume them): **#9** fakeD1/FakeKV breadth
+(supplements Rook's #8 — partial-apply batch, TTL honesty, join/aggregate
+coverage), **#10** memory-drift / hallucination / resolution library
+families (model-free), **#11** governance library families (succession
+floors, escrow two-key release, lock TTL honesty, grant precedence),
+**#12** pack.json `env:` binding-claim prerequisites (manifest-driven
+armed/absent), **#13** vant test-to-crashtest census (258 suites / ~54k
+lines; ~70-80% in-process rectangle-shaped and pack-shaped, the blocker
+is the two-pod fixture broker + snapshot-diff helper, not conversion).
 
 ## Conventions
 
