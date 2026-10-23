@@ -1,13 +1,15 @@
 /**
  * web/home/src/islands/StatusBoard.jsx (vant-home)
  * ================================================
- * StatusBoard (pass 355): the D1-backed status monitor island.
- * The board reads GET /api/status/summary (Pages Function + `DB` D1
- * binding: uptime history over 35 days, the freshest check per endpoint,
- * the active maintenance alert, and the monitor's own freshness). When
- * Functions or the D1 binding are not wired yet, it falls back to direct
- * browser checks (and says exactly what is missing), so a local build or
- * a not-yet-bound deploy never shows fake status.
+ * StatusBoard (pass 355, fallback REMOVED by owner direction): the
+ * D1-backed status monitor island. The board reads GET /api/status/summary
+ * (Pages Function + `DB` D1 binding: uptime history over 35 days, the
+ * freshest check per endpoint, the active maintenance alert, and the
+ * monitor's own freshness). When the API is not live on this deploy (no D1
+ * binding, Functions down, network hiccup), the island renders NOTHING -
+ * no fallback text, no browser probes, no half-board. A deploy that has
+ * not wired the monitor simply does not show a status board; the walk and
+ * the menu never point here in that state (walk.mjs STATUS_LIVE gate).
  *
  * The operator panel speaks POST /api/status/admin with the
  * STATUS_ADMIN_KEY from the Pages settings (typed per session, kept in
@@ -18,36 +20,6 @@ import React, { useEffect, useState } from 'react'
 
 const SUMMARY_URL = '/api/status/summary'
 const ADMIN_URL = '/api/status/admin'
-
-/* ---------- fallback probes (Functions not wired / D1 unbound) ---------- */
-
-const FALLBACK_PROBES = [
-    { key: 'home', name: 'Vant Home (this site)', kind: 'opaque', url: 'https://vant.creadev.org' },
-    { key: 'brain', name: 'Vant Brain', kind: 'opaque', url: 'https://brain.creadev.org' },
-    { key: 'docs', name: 'Vant Docs', kind: 'opaque', url: 'https://docs.creadev.org/vant/' },
-    { key: 'gh', name: 'GitHub repo (API + releases)', kind: 'json', url: 'https://api.github.com/repos/dhaupin/vant/releases/latest' },
-]
-
-async function probeJson(url) {
-    try {
-        const r = await fetch(url, { cache: 'no-store' })
-        if (!r.ok) return { state: 'error', detail: 'HTTP ' + r.status, time: new Date().toLocaleTimeString() }
-        const data = await r.json()
-        return { state: data && data.error ? 'degraded' : 'ok', detail: '', time: new Date().toLocaleTimeString() }
-    } catch (e) {
-        return { state: 'unreachable', detail: '', time: new Date().toLocaleTimeString() }
-    }
-}
-
-async function probeOpaque(url) {
-    const time = new Date().toLocaleTimeString()
-    try {
-        await fetch(url, { mode: 'no-cors', cache: 'no-store' })
-        return { state: 'reachable', detail: 'network-level only (opaque cross-origin fetch)', time }
-    } catch (e) {
-        return { state: 'unreachable', detail: '', time }
-    }
-}
 
 /* ------------------------------- render bits ------------------------------ */
 
@@ -110,9 +82,6 @@ const OVERALL_LEVEL = { up: 'ok', degraded: 'degraded', down: 'outage', unknown:
 
 export default function StatusBoard() {
     const [board, setBoard] = useState(null)
-    const [boardError, setBoardError] = useState('')
-    const [boardFix, setBoardFix] = useState('')
-    const [fallback, setFallback] = useState(null)
     const [opMessage, setOpMessage] = useState('')
     const [adminKey, setAdminKey] = useState('')
     const [alertText, setAlertText] = useState('')
@@ -128,25 +97,16 @@ export default function StatusBoard() {
                 const r = await fetch(SUMMARY_URL, { cache: 'no-store' })
                 if (!alive) return
                 if (r.ok) {
-                    const data = await r.json()
-                    setBoard(data)
-                    setBoardError('')
-                    setBoardFix('')
-                    setFallback(null)
+                    setBoard(await r.json())
                     return
                 }
-                const body = await r.json().catch(() => null)
-                setBoardError((body && body.error) || 'HTTP ' + r.status)
-                setBoardFix((body && body.fix) || '')
+                // Not wired on this deploy (503) or the API hiccuped: render
+                // nothing. The 60s interval keeps retrying, so a later deploy
+                // that attaches the bindings lights the board up on its own.
+                setBoard(null)
             } catch (e) {
-                if (alive) setBoardError('the status API answers nothing from this browser')
+                if (alive) setBoard(null)
             }
-            // API path failed: the honest fallback is direct browser checks.
-            const pairs = await Promise.all(FALLBACK_PROBES.map(async (p) => {
-                const res = p.kind === 'json' ? await probeJson(p.url) : await probeOpaque(p.url)
-                return [p.key, res]
-            }))
-            if (alive) setFallback(Object.fromEntries(pairs))
         }
         load()
         const t = setInterval(load, 60000)
@@ -175,36 +135,7 @@ export default function StatusBoard() {
         }
     }
 
-    if (fallback) {
-        return (
-            <div>
-                <p className="contact-note" style={{ marginBottom: 6 }}>
-                    The server-side monitor is not wired yet on this deploy <strong>({boardError || 'no D1 binding'})</strong>,
-                    so this is the honest fallback: direct checks from your own browser, with no history and no alert spot.
-                    Nothing below is stored anywhere; it all lives and dies in this tab.
-                </p>
-                {boardFix && <p className="status-meta" style={{ marginBottom: 14 }}>{boardFix}</p>}
-                <p className="status-meta" style={{ marginBottom: 14 }}>
-                    Full setup: <a href="https://github.com/dhaupin/vant/blob/main/web/home/functions/README.md" rel="noopener">the functions README on GitHub</a>.
-                </p>
-                <div className="status-grid">
-                    {FALLBACK_PROBES.map((p) => {
-                        const res = fallback[p.key] || null
-                        return (
-                            <div className="card" key={p.key}>
-                                <h3><Dot state={res ? res.state : 'unknown'} /> {p.name}</h3>
-                                <p>{res ? res.state + (res.detail ? ' · ' + res.detail : '') + ' · ' + res.time : 'checking…'}</p>
-                            </div>
-                        )
-                    })}
-                </div>
-            </div>
-        )
-    }
-
-    if (!board) {
-        return <p className="island-loading">Loading the status monitor…</p>
-    }
+    if (!board) return null
 
     const endpoints = board.endpoints || []
     return (

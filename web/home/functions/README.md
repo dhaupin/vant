@@ -90,9 +90,10 @@ Consequences, all by design:
 
 ## Honest postures (on purpose)
 
-- **No `DB` binding**: every route answers `503` with the exact fix; the
-  board on `/status` falls back to direct browser checks and says it is
-  the fallback. Missing data is never faked as downtime.
+- **No `DB` binding**: every route answers `503` with the exact fix, and
+  the site shows NO status surface at all (the build gates the page, menu,
+  and walk on `VITE_STATUS_LIVE=1` which is set only after the bindings
+  are live). Missing data is never faked as downtime.
 - **No/short `STATUS_ADMIN_KEY`**: the admin door stays closed (`503`),
   and the operator panel explains itself.
 - Schema statements are `CREATE TABLE IF NOT EXISTS`; adding a column

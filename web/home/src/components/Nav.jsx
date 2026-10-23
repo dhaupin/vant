@@ -29,7 +29,11 @@
 
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { WALK } from '../walk.mjs'
+import { WALK, WALK_LIVE, STATUS_LIVE } from '../walk.mjs'
+
+// The deploy gate: while STATUS_LIVE is off, the Status stop stays out of
+// every surface this file renders (top menu here, drawer sections below);
+// WALK_LIVE is the filtered tour the menu orders by.
 
 // Stops outside the walk (footer-only by owner direction) join the sidebar's
 // "More" section, so the drawer is the one place the full route set lives.
@@ -106,7 +110,7 @@ export default function Nav() {
         <nav className="top" aria-label="Site">
             <Link className="brand" to="/"><span className="brand-mark" aria-hidden="true">V</span>VANT</Link>
             <div className="top-links">
-                {WALK.map((l) => renderItem(l))}
+                {WALK_LIVE.map((l) => renderItem(l))}
                 <button className="theme-btn" type="button" onClick={toggleTheme} aria-label="Toggle color theme" title="Toggle theme">
                     <svg className="ico-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
                     <svg className="ico-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>
@@ -151,7 +155,7 @@ export default function Nav() {
                     <div className="menu-sec" key={sec.head}>
                         <p className="menu-sec-head">{sec.head}</p>
                         <div className="menu-sec-links">
-                            {sec.items.map((l) => drawItem(l))}
+                            {sec.items.filter((l) => STATUS_LIVE || l.href !== '/status').map((l) => drawItem(l))}
                         </div>
                     </div>
                 ))}

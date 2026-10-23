@@ -426,10 +426,12 @@ are owned by the /status monitor (full route map + honest postures:
 | `STATUS_ADMIN_KEY` | Settings → Environment variables (Production AND Preview) | random secret ≥ 8 chars (`openssl rand -hex 24`) | guards POST `/api/status/admin` (alert set/clear, endpoints add/remove/reset, forced sweeps). Missing/short = the door answers 503 with the fix, fail-closed |
 | `STATUS_SWEEP_SECONDS` | Settings → Environment variables | optional, default `600` | minimum age of a sweep before a public GET triggers a fresh one - the anti-hammer throttle |
 | Sweep cadence | external (optional) | point any scheduler at `GET /api/status/summary` | Pages projects have NO cron triggers (Cloudflare ships them on Workers only; the current Pages dashboard has no such section). History stays honest anyway: every public GET runs the throttled sweep on cold data, and unswept days render "no data", never downtime |
+| `VITE_STATUS_LIVE` | Settings → Build variables (Production) | set to `1` ONLY after `DB` + `STATUS_ADMIN_KEY` above are live and `/api/status/summary` answers 200 | the deploy gate: until it is set, the built site hides the whole status surface (no nav entry, no walk hops, the board mounts nothing). No fallback fiction |
 
-Until `DB` is bound every status route answers 503 with the exact fix and
-the /status board shows its direct-browser checks as the clearly-labeled
-fallback — missing data is never faked as downtime.
+Until the bindings are on and `VITE_STATUS_LIVE=1` is set in the build,
+every status route answers 503 with the exact fix and the site simply
+does not advertise status (owner direction: the surface stays out of the
+menu, the walk, and the page until the monitor is real).
 
 Whatever lands ships pre-gated: `web/home/test/config.test.mjs`
 (rides test.yml) pins the JSON-LD/route contract at source level,

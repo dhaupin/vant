@@ -12,6 +12,13 @@
  *             the same list. One list, four surfaces, zero drift.
  *   LEARN   = the footer "Learn" column: exactly WALK.length external
  *             docs links (the owner's same-count rule).
+ *   STATUS_LIVE = the deploy gate for the status surface (false until the
+ *                 monitor is wired: the D1 binding AND STATUS_ADMIN_KEY exist
+ *                 on the Pages project - the owner flips VITE_STATUS_LIVE=1
+ *                 in the PAGES BUILD settings at the same time). While it is
+ *                 off, WALK_LIVE drops the Status stop, so the menu, the
+ *                 drawer, the footer, and the walk hops never advertise a
+ *                 page that cannot answer. No fallback fiction anywhere.
  *   hopChain = the prev/next engine: menu-derived, externals-aware
  *   routeKey = the trailing-slash normalizer (pass 348): the prerendered
  *             site serves /brain/ while SPA navigations ride /brain; every
@@ -46,6 +53,18 @@ export const LEARN = [
     { label: 'Operations', href: 'https://docs.creadev.org/vant/operations/' },
 ]
 
+// The deploy gate (owner direction): the status surface stays OUT of the
+// site until the monitor is wired for real. WALK remains the PINNED full
+// tour truth (the tests hold it); WALK_LIVE is what the menu, the footer,
+// the drawer, and the hop engine actually render.
+export const STATUS_LIVE = String(
+    (typeof import.meta !== 'undefined' && import.meta.env)
+        ? import.meta.env.VITE_STATUS_LIVE
+        : undefined
+) === '1'
+
+export const WALK_LIVE = STATUS_LIVE ? WALK : WALK.filter((s) => s.href !== '/status')
+
 export function routeKey(pathname) {
     if (typeof pathname !== 'string') return pathname
     return pathname.replace(/\/+$/, '') || '/'
@@ -59,16 +78,16 @@ export function routeKey(pathname) {
 // them, skipping the externals. The rendered sequence is the choose-your-
 // own-adventure chain: [external button(s)] "or" [Prev/Next: internal stop].
 // Returns { externals, internal } for the vitest pins.
-export function hopChain(i, dir) {
+export function hopChain(stops, i, dir) {
     const externals = []
-    let j = dir === 1 ? (i + 1) % WALK.length : i - 1
+    let j = dir === 1 ? (i + 1) % stops.length : i - 1
     let n = 0
-    while (n < WALK.length && j >= 0 && !WALK[j].href.startsWith('/')) {
-        externals.push(WALK[j])
+    while (n < stops.length && j >= 0 && !stops[j].href.startsWith('/')) {
+        externals.push(stops[j])
         n++
         j += dir
-        if (dir === 1) j = j % WALK.length
+        if (dir === 1) j = j % stops.length
     }
-    const internal = (j >= 0 && WALK[j] && WALK[j].href.startsWith('/')) ? WALK[j] : null
+    const internal = (j >= 0 && j < stops.length && stops[j].href.startsWith('/')) ? stops[j] : null
     return { externals, internal }
 }

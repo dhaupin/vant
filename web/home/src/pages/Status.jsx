@@ -33,14 +33,12 @@ export default function Status() {
                 </div>
 
                 <pre-island data-pre-island="status-board" data-pre-load="eager">
-                    <p className="island-loading">Running browser-side checks…</p>
+                    <p className="island-loading">Loading the status monitor…</p>
                 </pre-island>
 
                 <p className="contact-note" style={{ marginTop: 26 }}>
                     Honest limits: the monitor probes the public URLs from the edge and stores what it sees in this site's
-                    own D1 database - nothing about you or your browser is recorded, and nothing phones home. If the
-                    monitor itself is down, or the database is not yet bound, the board says so and runs direct browser
-                    checks as a clearly-labeled fallback that never merges into the stored history.
+                    own D1 database - nothing about you or your browser is recorded, and nothing phones home.
                 </p>
             </div>
         </section>

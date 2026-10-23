@@ -16,7 +16,7 @@
 
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { WALK, LEARN } from '../walk.mjs'
+import { WALK_LIVE, LEARN } from '../walk.mjs'
 
 const META = [
     { label: 'Changelog', href: '/changelog' },
@@ -45,7 +45,7 @@ export default function Footer() {
                 <div className="footer-grid">
                     <nav className="f-col" aria-label="Footer - Vant">
                         <h3 className="f-head">Vant</h3>
-                        <div className="f-links">{WALK.map((l) => footLink(l))}</div>
+                        <div className="f-links">{WALK_LIVE.map((l) => footLink(l))}</div>
                     </nav>
                     <nav className="f-col" aria-label="Footer - Learn">
                         <h3 className="f-head">Learn</h3>

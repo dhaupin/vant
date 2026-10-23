@@ -5,7 +5,7 @@
  * without a React transform (same shape as test/config.test.mjs).
  */
 import { describe, expect, it } from 'vitest'
-import { WALK, LEARN, routeKey, hopChain } from '../src/walk.mjs'
+import { WALK, WALK_LIVE, STATUS_LIVE, LEARN, routeKey, hopChain } from '../src/walk.mjs'
 import config from '../ssr.config.js'
 
 const routes = config.routes.map((r) => r.path)
@@ -65,8 +65,8 @@ describe('hopChain - the menu-derived prev/next contract (externals ride along)'
     const ix = (href) => WALK.findIndex((s) => s.href === href)
 
     it('walks internal stops directly (Showcase: Security <-> Status)', () => {
-        const back = hopChain(ix('/showcase'), -1)
-        const fwd = hopChain(ix('/showcase'), 1)
+        const back = hopChain(WALK, ix('/showcase'), -1)
+        const fwd = hopChain(WALK, ix('/showcase'), 1)
         expect(back.externals).toEqual([])
         expect(back.internal.label).toBe('Security')
         expect(fwd.externals).toEqual([])
@@ -74,27 +74,36 @@ describe('hopChain - the menu-derived prev/next contract (externals ride along)'
     })
 
     it('renders the externals, then the tour hop that skips them (Status next)', () => {
-        const fwd = hopChain(ix('/status'), 1)
+        const fwd = hopChain(WALK, ix('/status'), 1)
         expect(fwd.externals.map((s) => s.label)).toEqual(['Releases', 'GitHub', 'Docs'])
         expect(fwd.internal.href).toBe('/contact')
     })
 
     it('collects the externals behind a prev hop too (Contact prev)', () => {
-        const back = hopChain(ix('/contact'), -1)
+        const back = hopChain(WALK, ix('/contact'), -1)
         expect(back.externals.map((s) => s.label)).toEqual(['Docs', 'GitHub', 'Releases'])
         expect(back.internal.href).toBe('/status')
     })
 
     it('wraps the tour back to Home after the last stop (Contact next)', () => {
-        const fwd = hopChain(ix('/contact'), 1)
+        const fwd = hopChain(WALK, ix('/contact'), 1)
         expect(fwd.externals).toEqual([])
         expect(fwd.internal.href).toBe('/')
+    })
+
+    it('holds the deploy gate: STATUS_LIVE off hides only the Status stop', () => {
+        // The test environment sets no VITE_* vars, so the gate is OFF here:
+        // the not-yet-wired posture is the default. WALK stays the pinned
+        // full tour; WALK_LIVE is the same tour minus the unwired stop.
+        expect(STATUS_LIVE).toBe(false)
+        expect(WALK_LIVE).toEqual(WALK.filter((s) => s.href !== '/status'))
+        expect(WALK_LIVE.length).toBe(9)
     })
 
     it('never returns an external as the internal hop and never loops forever', () => {
         for (let i = 0; i < WALK.length; i++) {
             for (const dir of [-1, 1]) {
-                const { externals, internal } = hopChain(i, dir)
+                const { externals, internal } = hopChain(WALK, i, dir)
                 expect(externals.length).toBeLessThan(WALK.length)
                 for (const s of externals) { expect(s.href.startsWith('/')).toBe(false) }
                 if (internal) { expect(internal.href.startsWith('/')).toBe(true) }

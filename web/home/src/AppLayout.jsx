@@ -22,7 +22,7 @@ const { Routes, Route, useLocation, Link } = rrd
 import { mountIslands } from './islands.js'
 import { islands }      from './AppIslands.jsx'
 import Nav                 from './components/Nav.jsx'
-import { WALK, routeKey, hopChain } from './walk.mjs'
+import { WALK_LIVE, routeKey, hopChain, STATUS_LIVE } from './walk.mjs'
 import Footer           from './components/Footer.jsx'
 import Home             from './pages/Home.jsx'
 import Terms            from './pages/Terms.jsx'
@@ -157,7 +157,10 @@ function useVantFxEffects(pathname) {
 // membership automatically. The hop logic is walk.mjs's hopChain: external
 // stops render as their own buttons (the visitor may want them), then "or",
 // then the real tour hop skipping them. Contact wraps back to Home: a loop.
-const WALK_INDEX = new Map(WALK.map((stop, i) => [stop.href, i]))
+// The index + hops ride WALK_LIVE (the tour filtered by the deploy gate): a
+// not-yet-wired status stop is invisible to the walk the same way it is to
+// the menu, so no hop ever points at a page that cannot answer.
+const WALK_INDEX = new Map(WALK_LIVE.map((stop, i) => [stop.href, i]))
 
 function PageWalk() {
     const { pathname } = useLocation()
@@ -165,7 +168,7 @@ function PageWalk() {
     if (typeof i !== 'number' || i === 0) return null
 
     const side = (dir) => {
-        const { externals, internal } = hopChain(i, dir)
+        const { externals, internal } = hopChain(WALK_LIVE, i, dir)
         if (!internal) return null
         const cls = dir === 1 ? 'btn walk-next' : 'btn outline walk-prev'
         const text = dir === 1 ? 'Next' : '← Prev'
@@ -213,7 +216,7 @@ export default function AppLayout() {
                     <Route path="/brain"    element={<Brain />} />
                     <Route path="/terms"   element={<Terms />} />
                     <Route path="/privacy" element={<Privacy />} />
-                    <Route path="/status"  element={<Status />} />
+                    <Route path="/status"  element={STATUS_LIVE ? <Status /> : null} />
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/changelog" element={<Changelog />} />
                     <Route path="*"        element={<NotFound />} />
