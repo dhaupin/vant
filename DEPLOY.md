@@ -431,7 +431,19 @@ are owned by the /status monitor (full route map + honest postures:
 Until the bindings are on and `VITE_STATUS_LIVE=1` is set in the build,
 every status route answers 503 with the exact fix and the site simply
 does not advertise status (owner direction: the surface stays out of the
-menu, the walk, and the page until the monitor is real).
+menu, the walk, and the page until the monitor is real, and /status reads
+the maintenance line instead).
+
+The full flip, in order:
+
+1. Settings → Bindings: bind the D1 database as `DB`; Settings →
+   Environment variables: set production `STATUS_ADMIN_KEY`. Redeploy.
+2. Confirm the monitor answers for real: `GET /api/status/summary`
+   returns 200 (not the 503 fix line).
+3. Settings → Build → Build environment variables: set
+   `VITE_STATUS_LIVE=1`. Redeploy again: the status stop joins the menu,
+   the walk hops include it, and the D1 board replaces the maintenance
+   line on /status.
 
 Whatever lands ships pre-gated: `web/home/test/config.test.mjs`
 (rides test.yml) pins the JSON-LD/route contract at source level,

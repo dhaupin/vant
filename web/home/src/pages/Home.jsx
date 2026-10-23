@@ -85,6 +85,23 @@ export default function Home() {
             </div>
         </header>
             <main id="main">
+            {/* THE STATS STRIP rides the generated truth (src/generated/stats.json,
+                pass 350): coverage gates for cli/mcp, a repo file census for
+                lib/docs/tests, package.json for version. No hand-pinned
+                counts left to rot. Owner-directed position: directly above
+                the tour's first numbered section. */}
+            <div className="stats" role="presentation">
+                <div className="container stat-row">
+                    <div className="stat"><div className="stat-value" data-count={stats.memorySystems}>{stats.memorySystems}</div><div className="stat-label">memory systems</div></div>
+                    <div className="stat"><div className="stat-value" data-count={stats.cli}>{stats.cli}</div><div className="stat-label">CLI commands</div></div>
+                    <div className="stat"><div className="stat-value" data-count={stats.mcp}>{stats.mcp}</div><div className="stat-label">MCP commands</div></div>
+                    <div className="stat"><div className="stat-value" data-count={stats.libModules}>{stats.libModules}</div><div className="stat-label">lib modules</div></div>
+                    <div className="stat"><div className="stat-value" data-count={stats.docPages}>{stats.docPages}</div><div className="stat-label">doc pages</div></div>
+                    <div className="stat"><div className="stat-value" data-count={stats.testSuites}>{stats.testSuites}</div><div className="stat-label">test suites</div></div>
+                    <div className="stat"><div className="stat-value">v{stats.version}</div><div className="stat-label">MIT licensed</div></div>
+                </div>
+            </div>
+
             <section>
                 <div className="container">
                     <div className="sec-head fx-reveal"><span className="sec-idx">01</span><h2>The rhythm is yours</h2></div>
@@ -352,22 +369,6 @@ export default function Home() {
                     </div>
                 </div>
             </section>
-
-            <div className="stats" role="presentation">
-                <div className="container stat-row">
-                    {/* EVERY number is generated truth (src/generated/stats.json,
-                        pass 350): coverage gates for cli/mcp, a repo file census for
-                        lib/docs/tests, package.json for version. No hand-pinned
-                        counts left to rot. */}
-                    <div className="stat"><div className="stat-value" data-count={stats.memorySystems}>{stats.memorySystems}</div><div className="stat-label">memory systems</div></div>
-                    <div className="stat"><div className="stat-value" data-count={stats.cli}>{stats.cli}</div><div className="stat-label">CLI commands</div></div>
-                    <div className="stat"><div className="stat-value" data-count={stats.mcp}>{stats.mcp}</div><div className="stat-label">MCP commands</div></div>
-                    <div className="stat"><div className="stat-value" data-count={stats.libModules}>{stats.libModules}</div><div className="stat-label">lib modules</div></div>
-                    <div className="stat"><div className="stat-value" data-count={stats.docPages}>{stats.docPages}</div><div className="stat-label">doc pages</div></div>
-                    <div className="stat"><div className="stat-value" data-count={stats.testSuites}>{stats.testSuites}</div><div className="stat-label">test suites</div></div>
-                    <div className="stat"><div className="stat-value">v{stats.version}</div><div className="stat-label">MIT licensed</div></div>
-                </div>
-            </div>
 
             <section>
                 <div className="container">

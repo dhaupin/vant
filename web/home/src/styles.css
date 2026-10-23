@@ -92,6 +92,9 @@ nav.top { display: flex; align-items: center; justify-content: space-between; pa
 .theme-btn { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); cursor: pointer; padding: 7px 8px; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; }
 .theme-btn:hover { color: var(--ink); border-color: var(--text-muted); }
 .theme-btn svg { display: block; }
+.gh-btn { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center; padding: 7px 8px; }
+.gh-btn:hover { color: var(--ink); border-color: var(--text-muted); }
+.gh-btn svg { display: block; }
 .theme-btn .ico-sun { display: none; }
 [data-theme="dark"] .theme-btn .ico-sun { display: block; }
 [data-theme="dark"] .theme-btn .ico-moon { display: none; }
