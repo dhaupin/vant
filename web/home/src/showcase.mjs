@@ -45,10 +45,9 @@ export const SHOWCASE = [
             'then commits lessons to its own agent branch and pushes. The pass ledger ' +
             'that produced this very site is public on the changelog page: three ' +
             'hundred fifty numbered passes and counting, each one a reviewed commit.\n\n' +
-            'Creadev.org runs a small fleet around it: the core Vant brain, agent ' +
-            'brain-side work on its own branches, and the four public sites (this ' +
-            'home, the docs hub, the Brain dashboard, and the Freestruct docs) all ' +
-            'swept by the same status monitor. One install of Vant runs the sites; ' +
-            'the sites in turn run on nothing but static files and honest gates.',
+            'Creadev.org runs a fleet of Vant agents around it: the core Axolotl (' +
+            'Buffy) brain, and colleague Vant agents Rook, Cairn, and Prime. ' +
+            'Together with the Creadev.org maintainers, they orchestrate all ' +
+            'architecture, engineering, operations and development pipelines.',
     },
 ]
