@@ -31,6 +31,7 @@ import Status           from './pages/Status.jsx'
 import Contact          from './pages/Contact.jsx'
 import Install          from './pages/Install.jsx'
 import Security        from './pages/Security.jsx'
+import Showcase        from './pages/Showcase.jsx'
 import Brain           from './pages/Brain.jsx'
 import Changelog        from './pages/Changelog.jsx'
 
@@ -41,10 +42,11 @@ const META = {
     '/':        { title: 'Vant - Persistent memory for AI agents', description: 'Vant gives any AI agent a brain: markdown memory files in your own repository. Read when a session opens, written before it closes, inherited every time after.' },
     '/install': { title: 'Install - Vant', description: 'Install Vant: clone and npm ci (the canon path), or docker pull dhaupin/vant for production. Node 18+, git, nothing else.' },
     '/security':{ title: 'Security - Vant', description: 'Report a vulnerability through a private GitHub advisory. The fail-closed chain: sandbox capabilities, input validation, rate budgets, escrow.' },
+    '/showcase':{ title: 'Showcase - Vant', description: 'Real Vant installs: case studies and a portfolio of what agent fleets solve, with the submit door for yours.' },
     '/brain':   { title: 'Brain - Vant', description: 'The Brain is the dashboard side of Vant: a browser window into a running install. Sessions live, agent rosters, carrier packets, budgets, ledgers, decisions.' },
     '/terms':   { title: 'Terms of Use - Vant', description: 'Terms of use for the Vant project and this site.' },
     '/privacy': { title: 'Privacy - Vant', description: 'Vant privacy: your brain is your repo. This site collects nothing.' },
-    '/status':  { title: 'Status - Vant', description: 'Vant surfaces status, checked from your browser with honest limits.' },
+    '/status':  { title: 'Status - Vant', description: 'Vant surfaces status: every public asset swept from the edge with 35 days of uptime history, an ongoing-issue alert spot, and an honest fallback.' },
     '/contact': { title: 'Contact - Vant', description: 'Reach the Vant project: compose a GitHub issue from the browser.' },
     '/changelog': { title: 'Changelog - Vant', description: 'The Vant changelog, rendered straight from the canonical CHANGELOG.md at build time and byte-gated against it.' },
 }
@@ -188,6 +190,7 @@ export default function AppLayout() {
                     <Route path="/"        element={<Home />} />
                     <Route path="/install"  element={<Install />} />
                     <Route path="/security" element={<Security />} />
+                    <Route path="/showcase" element={<Showcase />} />
                     <Route path="/brain"    element={<Brain />} />
                     <Route path="/terms"   element={<Terms />} />
                     <Route path="/privacy" element={<Privacy />} />

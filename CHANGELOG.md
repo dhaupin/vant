@@ -5,6 +5,45 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 357 (the /showcase page: the fleet's portfolio, the self entry, and the submit door)
+
+### Added: route ten, the portfolio of real Vant installs
+
+- **/showcase SHIPS** (the site route table is now ten): case-study
+  cards, each with a picture, a title, an industry tag (small pill),
+  one short purpose paragraph, an expandable "read more..." (plain
+  `<details>`, works with no JavaScript), and the outbound dofollow
+  `target=_blank` link. Cards prerender at build time from
+  `src/showcase.mjs`, the same pure-data law as walk.mjs, so crawlers
+  and no-JS visitors read the whole story; the data module is the
+  documented D1 swap point for when the web/home admin dash lands
+  (test/showcase.test.mjs pins the card shape so the swap keeps it).
+- **THE FIRST CARD IS OURS, AS DIRECTED**: "Axolotl at Creadev.org"
+  (industry: agent infrastructure): the maintainer's headless Vant pod
+  with an MCP door, the pass ledger behind this very site, and the
+  Creadev.org fleet (core brain, agent work, the four public sites)
+  under one status monitor. Link: creadev.org, dofollow.
+- **THE SUBMIT DOOR**: a static prefilled GitHub issue-composer link
+  (the same honest pattern as /contact: the site composes nothing,
+  GitHub holds the submit button). Pre-fill carries project, production
+  URL, industry, one-line purpose, longer description, and a picture
+  URL, with the review-before-you-press note; no JS required because
+  the whole URL is built at build time.
+- **NAV + FOOTER, ONE LIST**: WALK gains "Showcase" after Security
+  (between Security and Status across the menu, the footer Vant column,
+  and the drawer's "The install" section), so the tour grows a stop;
+  grid/prev-next widgets follow automatically. LEARN gains a tenth docs
+  link (Operations) to hold the footer columns at equal height via the
+  owner's same-count rule (LEARN.length === WALK.length, pinned).
+- Pins moved with the contracts: config.test.mjs nine -> ten routes;
+  new showcase pins (full card shape, outbound links, picture files
+  resolve under public/); the ram route pin, walk pins, and home gate
+  all re-verified after the build.
+- Verified: build:home 10/10 (zero warnings), vitest 40/40 (config 6,
+  walk 9, status-math 20, showcase 5), lint:home, web-home style
+  (no em dashes in the new copy), lint:changelog parity, pilot:pages
+  GREEN.
+
 ## [Unreleased] - pass 356 (docs quality sweep: SEO descriptions everywhere, bottom crosslinks everywhere, and issue #239's HTML residue out)
 
 ### Fixed: the docs layout's dead script tag and dead CSS (issue #239)

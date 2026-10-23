@@ -11,6 +11,7 @@
  *   /          the lander
  *   /install   install paths (clone canon, Docker Hub image, npm posture)
  *   /security  disclosure path + the fail-closed chain
+ *   /showcase  the portfolio of real Vant installs (case-study cards)
  *   /terms     terms of use
  *   /privacy   privacy policy
  *   /status    public surfacing status (island-backed)
@@ -71,6 +72,16 @@ export default {
                 title: 'Security - Vant',
                 description:
                     'Report a vulnerability through a private GitHub advisory. The fail-closed chain: sandbox capabilities, input validation, rate budgets, escrow.',
+            },
+        },
+        {
+            path: '/showcase',
+            priority: '0.7',
+            changefreq: 'monthly',
+            meta: {
+                title: 'Showcase - Vant',
+                description:
+                    'Real Vant installs: case studies and a portfolio of what agent fleets solve, with the submit door for yours.',
             },
         },
         {

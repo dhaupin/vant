@@ -1,8 +1,27 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 86,
+  "_headingCount": 87,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 357 (the /showcase page: the fleet's portfolio, the self entry, and the submit door)",
+      "sections": [
+        {
+          "name": "Added: route ten, the portfolio of real Vant installs",
+          "items": [
+            "**/showcase SHIPS** (the site route table is now ten): case-study",
+            "**THE FIRST CARD IS OURS, AS DIRECTED**: \"Axolotl at Creadev.org\"",
+            "**THE SUBMIT DOOR**: a static prefilled GitHub issue-composer link",
+            "**NAV + FOOTER, ONE LIST**: WALK gains \"Showcase\" after Security",
+            "Pins moved with the contracts: config.test.mjs nine -> ten routes;",
+            "Verified: build:home 10/10 (zero warnings), vitest 40/40 (config 6,"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
