@@ -40,7 +40,9 @@ forced sweeps) — treat it like a password.
 
 Env var, default `600`: how stale a sweep may be before a public GET of
 `/api/status/summary` triggers a fresh one. Public GETs can never hammer
-the monitors — the throttle is the guarantee.### 4. Sweep cadence (the honest truth: Pages has NO cron triggers)
+the monitors — the throttle is the guarantee.
+
+### 4. Sweep cadence (the honest truth: Pages has NO cron triggers)
 
 There is no "Functions → Cron triggers" section in the Pages dashboard
 because Cloudflare ships cron triggers on WORKERS projects, not Pages
@@ -63,7 +65,20 @@ Consequences, all by design:
   pinger, a one-file Worker with a cron trigger, a GitHub Actions
   schedule) at `GET https://<your-project>.pages.dev/api/status/summary`
   every 10+ minutes: each call refreshes the cold data through the same
-  throttle path.
+  throttle path. Ready-to-paste GitHub Actions recipe (anonymous GET,
+  no secrets to configure):
+
+    ```yaml
+    name: status sweep ping
+    on:
+      schedule:
+        - cron: '*/15 * * * *'
+    jobs:
+      ping:
+        runs-on: ubuntu-latest
+        steps:
+          - run: curl -fsS https://<your-project>.pages.dev/api/status/summary > /dev/null
+    ```
 
 ## Route map
 
