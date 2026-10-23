@@ -27,7 +27,7 @@ Vant is a Node.js process whose entire state is your repository: markdown brain 
 | Node.js | 18+ | `engines.node >= 18` in package.json; LTS recommended |
 | npm | 9+ | Ships with Node |
 | Git | 2.20+ | Brain sync works through git; branch awareness built in |
-| GitHub PAT | - | `repo` scope, set as `GITHUB_TOKEN` (env var, never in config) |
+| GitHub PAT | - | `repo` scope, set as `GITHUB_TOKEN` (env var, never in config). PRIVATE: treat it like a password - it lives only in `.env` (gitignored) or your shell exports, never a config file, a commit, or a public panel field |
 
 Dependencies are deliberately tiny: `yaml`, plus the QR
 symbology lane's two pure-JS MIT packages (`qrcode-generator`, `jsqr`).
@@ -418,15 +418,23 @@ are the only other panel work:
 `ssr.config.js` is committed with the fixed URLs, so unlike the dashboard
 project below there is no `VANT_*` variable to define. The bindings below
 are owned by the /status monitor (full route map + honest postures:
-`web/home/functions/README.md`) — all in Pages settings, never code:
+`web/home/functions/README.md`) — all in Pages settings, never code.
+
+**The type rule, so the panel question always has one answer:** if you
+could not happily print the value in a README or a support ticket, add it
+as type **Secret** (encrypted, write-once: the panel never shows the
+value again). Knobs, flags, and URLs are plain **Text**. One more trap:
+Vite bakes every `VITE_*` BUILD variable straight into the shipped
+JavaScript bundle that every visitor downloads, so a `VITE_` name must
+never carry a private value anywhere in this repo's projects.
 
 | Binding / var | Where | Value | Notes |
 |----------|-------|-------|-------|
 | D1 database bound as `DB` | Settings → Bindings → Add → D1 database bindings | database **`vant-pub`** | the history store. Tables self-create on first read and the six owner-named endpoints self-seed; `npx wrangler d1 migrations apply vant-pub --remote` (source: `web/home/migrations/0001_status_monitor.sql`) applies the schema deliberately instead. Both paths land on the same truth |
-| `STATUS_ADMIN_KEY` | Settings → Environment variables (Production AND Preview) | random secret ≥ 8 chars (`openssl rand -hex 24`) | guards POST `/api/status/admin` (alert set/clear, endpoints add/remove/reset, forced sweeps). Missing/short = the door answers 503 with the fix, fail-closed |
-| `STATUS_SWEEP_SECONDS` | Settings → Environment variables | optional, default `600` | minimum age of a sweep before a public GET triggers a fresh one - the anti-hammer throttle |
+| `STATUS_ADMIN_KEY` | Settings → Variables and Secrets (Production AND Preview), added as type **Secret** | random secret ≥ 8 chars (`openssl rand -hex 24`) | guards POST `/api/status/admin` (alert set/clear, endpoints add/remove/reset, forced sweeps). PRIVATE: write-once, the panel never shows it again. Missing/short = the door answers 503 with the fix, fail-closed |
+| `STATUS_SWEEP_SECONDS` | Settings → Variables and Secrets, type **Text** (plain, not a secret) | optional, default `600` | minimum age of a sweep before a public GET triggers a fresh one - the anti-hammer throttle |
 | Sweep cadence | external (optional) | point any scheduler at `GET /api/status/summary` | Pages projects have NO cron triggers (Cloudflare ships them on Workers only; the current Pages dashboard has no such section). History stays honest anyway: every public GET runs the throttled sweep on cold data, and unswept days render "no data", never downtime |
-| `VITE_STATUS_LIVE` | Settings → Build variables (Production) | set to `1` ONLY after `DB` + `STATUS_ADMIN_KEY` above are live and `/api/status/summary` answers 200 | the deploy gate: until it is set, the built site hides the whole status surface (no nav entry, no walk hops, the board mounts nothing). No fallback fiction |
+| `VITE_STATUS_LIVE` | Settings → Build variables (Production), PLAIN TEXT by design | set to `1` ONLY after `DB` + `STATUS_ADMIN_KEY` above are live and `/api/status/summary` answers 200 | the deploy gate: until it is set, the built site hides the whole status surface (no nav entry, no walk hops, the board mounts nothing). No fallback fiction. Vite bakes it into the public bundle, so this name is permanent public surface - even after the flip |
 
 Until the bindings are on and `VITE_STATUS_LIVE=1` is set in the build,
 every status route answers 503 with the exact fix and the site simply
@@ -437,7 +445,8 @@ the maintenance line instead).
 The full flip, in order:
 
 1. Settings → Bindings: bind the D1 database as `DB`; Settings →
-   Environment variables: set production `STATUS_ADMIN_KEY`. Redeploy.
+   Variables and Secrets: set production `STATUS_ADMIN_KEY` **as a
+   Secret** (encrypted, write-once). Redeploy.
 2. Confirm the monitor answers for real: `GET /api/status/summary`
    returns 200 (not the 503 fix line).
 3. Settings → Build → Build environment variables: set
@@ -476,16 +485,17 @@ link/fiction/stat truth.
 
    Functions under `web/dashboard/functions/` deploy AUTOMATICALLY with
    the project - no wrangler config anywhere (prd-web.md 3.7).
-3. **Set the Pages variables** (Settings - Environment variables, both
-   Production and Preview):
+3. **Set the Pages variables** (Settings → Variables and Secrets, both
+   Production and Preview; the type rule below the vant-home table applies
+   here too - plain Text unless the row says **Secret**):
 
    | Variable | Value | Notes |
    |----------|-------|-------|
    | `VANT_PROPERTY_LOCAL_ORIGIN` | your pod's MCP door, e.g. `https://pod.example.com` or the tunnel URL below | REQUIRED. Make it HTTPS (Works' runtime upgrades it otherwise) |
    | `VANT_PROPERTY_LOCAL_NAME` | `home pod` (any label) | optional; shown in the switcher |
    | `VANT_EDGE_RATE_PER_MIN` | `120` | optional; per-session edge budget |
-   | `VANT_RELAY_ENABLED` | `1` | optional; PIGGYBACK THE RELAY on THIS deploy (dashboard-relay flavor, prd-relay.md 4.0): mounts the gated `/api/r/*` Mode R surface on your Pages functions. Off = the routes do not exist (404), same as the pod's unmounted posture |
-   | `VANT_RELAY_GATE_KEY` | 256-bit hex (mint with `vant relay gate`) | REQUIRED when the relay posture is on; hops MUST present it as `x-relay-gate` (timing-safe). No key set = the surface serves NOTHING (fail-closed). Hop bodies are encrypted envelopes only - plaintext refuses; the edge holds no channel keys |
+   | `VANT_RELAY_ENABLED` | `1` | Text, optional; PIGGYBACK THE RELAY on THIS deploy (dashboard-relay flavor, prd-relay.md 4.0): mounts the gated `/api/r/*` Mode R surface on your Pages functions. Off = the routes do not exist (404), same as the pod's unmounted posture |
+   | `VANT_RELAY_GATE_KEY` | 256-bit hex (mint with `vant relay gate`) | **PRIVATE: add as type Secret.** REQUIRED when the relay posture is on; hops MUST present it as `x-relay-gate` (timing-safe). No key set = the surface serves NOTHING (fail-closed). Hop bodies are encrypted envelopes only - plaintext refuses; the edge holds no channel keys |
    | `VANT_RELAY_POD_ORIGIN` | (declared, unread today) | Contract-declared reserve key: the vendored kit's `EDGE_ENV_KEYS` names it, and NO edge face reads it - the solo relay forwards to the hop frame's client-declared origin, and the piggyback face resolves pods through the `VANT_PROPERTY_<ID>_ORIGIN` pairs above. Documented for surface completeness; removing it is kit surgery, not a settings tweak |
 
    **Email-OTP accounts (P2) - the KV binding:** create a KV namespace
@@ -499,11 +509,11 @@ link/fiction/stat truth.
 
    | Variable | Value | Notes |
    |----------|-------|-------|
-   | `RESEND_API_KEY` | your resend.com API key | first-party sender path (no SDK; plain fetch) |
-   | `EMAIL_FROM` | `Bolete <signin@your-domain.com>` | a verified sender domain |
-   | `EMAIL_WEBHOOK_URL` | any provider's send endpoint | optional generic fallback (JSON: `{to, subject, text}`) |
-   | `EMAIL_WEBHOOK_TOKEN` | Bearer secret for the webhook | optional |
-   | `VANT_EMAIL_SALT` | a long random string | RECOMMENDED: hashes the email (and codes' key hashing); unset = unsalted hash |
+   | `RESEND_API_KEY` | your resend.com API key | **PRIVATE: add as type Secret.** first-party sender path (no SDK; plain fetch) |
+   | `EMAIL_FROM` | `Bolete <signin@your-domain.com>` | Text; a verified sender domain |
+   | `EMAIL_WEBHOOK_URL` | any provider's send endpoint | Text, optional; generic fallback (JSON: `{to, subject, text}`) |
+   | `EMAIL_WEBHOOK_TOKEN` | Bearer secret for the webhook | **PRIVATE: add as type Secret**, optional |
+   | `VANT_EMAIL_SALT` | a long random string | **PRIVATE: add as type Secret.** RECOMMENDED either way: hashes the email (and codes' key hashing); unset = unsalted hash |
 
    The property ID for this first install is **`local`** (the URL its
    views ride is `?p=local`;   the resolver reads `VANT_PROPERTY_<ID>_ORIGIN` upper-cased). This

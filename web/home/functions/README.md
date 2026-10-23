@@ -30,17 +30,19 @@ Both paths end at the same schema; neither is required for the other.
 
 ### 2. `STATUS_ADMIN_KEY` (the operator door)
 
-**Settings → Environment variables** (both production and preview):
-name **`STATUS_ADMIN_KEY`**, value a random secret ≥ 8 chars
-(`openssl rand -hex 24` is a good source). It is the only thing guarding
-POST `/api/status/admin` (alert set/clear, endpoints add/remove/reset,
-forced sweeps) — treat it like a password.
+**Settings → Variables and Secrets** (both production and preview),
+added as type **Secret** (encrypted, write-once: the panel never shows
+the value again): name **`STATUS_ADMIN_KEY`**, value a random secret
+≥ 8 chars (`openssl rand -hex 24` is a good source). It is the only
+thing guarding POST `/api/status/admin` (alert set/clear,
+endpoints add/remove/reset, forced sweeps) — treat it like a password.
 
 ### 3. `STATUS_SWEEP_SECONDS` (optional)
 
-Env var, default `600`: how stale a sweep may be before a public GET of
-`/api/status/summary` triggers a fresh one. Public GETs can never hammer
-the monitors — the throttle is the guarantee.
+A plain **Text** var, not a secret (it only tunes public-surface
+behavior), default `600`: how stale a sweep may be before a public GET
+of `/api/status/summary` triggers a fresh one. Public GETs can never
+hammer the monitors — the throttle is the guarantee.
 
 ### 4. Sweep cadence (the honest truth: Pages has NO cron triggers)
 
@@ -94,7 +96,22 @@ Consequences, all by design:
   the site shows NO status surface at all (the build gates the page, menu,
   and walk on `VITE_STATUS_LIVE=1` which is set only after the bindings
   are live). Missing data is never faked as downtime.
+
+The type split, so the panel question has one answer: `STATUS_ADMIN_KEY`
+is the only **Secret** in this checklist; `STATUS_SWEEP_SECONDS` and the
+`VITE_STATUS_LIVE` build variable are plain **Text** (safe to inspect).
+One hard trap: Vite inlines every `VITE_*` build variable into the
+shipped JavaScript bundle every visitor downloads, so a `VITE_` name
+must never carry a private value in this or any other repo project.
 - **No/short `STATUS_ADMIN_KEY`**: the admin door stays closed (`503`),
   and the operator panel explains itself.
+
+The type split, so the panel question always has one answer:
+`STATUS_ADMIN_KEY` is the only **Secret** in this checklist;
+`STATUS_SWEEP_SECONDS` and the `VITE_STATUS_LIVE` build variable are
+plain **Text** (safe to inspect). One hard trap: Vite inlines every
+`VITE_*` build variable into the shipped JavaScript bundle every
+visitor downloads, so a `VITE_` name must never carry a private value
+in this or any other repo project.
 - Schema statements are `CREATE TABLE IF NOT EXISTS`; adding a column
   later is a new `migrations/000N_*.sql` file, not an edit to 0001.
