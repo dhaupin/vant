@@ -31,8 +31,8 @@ export const SHOWCASE = [
         title: 'Axolotl at Creadev.org',
         industry: 'Agent infrastructure',
         url: 'https://creadev.org',
-        img: '/showcase-axolotl.svg',
-        imgAlt: 'Stylized axolotl fronds mark on a Vant green tile',
+        img: '/showcase-axolotl-logo-full-800.jpg',
+        imgAlt: 'Generated axolotl fronds logo: smiling axolotl head with radiating fronds on a deep green tile',
         blurb:
             'The maintainer\'s own install: a headless Vant pod with an MCP door, ' +
             'acting as the live agent of record for the whole Creadev.org stack.',
