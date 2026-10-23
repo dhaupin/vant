@@ -287,6 +287,9 @@ footer { border-top: 1px solid var(--border); padding: 34px 0 44px; color: var(-
 .page-walk { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding-top: 10px; padding-bottom: 34px; }
 .page-walk .btn { min-width: 0; padding: 9px 16px; font-size: 0.9rem; }
 .page-walk .walk-prev, .page-walk .walk-next { max-width: 46%; }
+.walk-group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.page-walk .walk-group .walk-prev, .page-walk .walk-group .walk-next { max-width: none; }
+.walk-or { color: var(--text-muted); font-size: 0.85rem; }
 @media (max-width: 420px) {
     .page-walk .btn { padding: 8px 12px; }
 }

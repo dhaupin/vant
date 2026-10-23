@@ -22,7 +22,7 @@ const { Routes, Route, useLocation, Link } = rrd
 import { mountIslands } from './islands.js'
 import { islands }      from './AppIslands.jsx'
 import Nav                 from './components/Nav.jsx'
-import { WALK, routeKey }  from './walk.mjs'
+import { WALK, routeKey, hopChain } from './walk.mjs'
 import Footer           from './components/Footer.jsx'
 import Home             from './pages/Home.jsx'
 import Terms            from './pages/Terms.jsx'
@@ -148,28 +148,47 @@ function useVantFxEffects(pathname) {
     }, [pathname])
 }
 
-// The page walk (pass 342): every page that is a stop on the owner-directed
+// The page walk (pass 342, hopChain engine added when the owner asked for
+// the menu-derived walk): every page that is a stop on the owner-directed
 // walk (walk.mjs's WALK: the menu order IS the walk) gets a prev/next widget
 // between its content and the footer, so visitors can walk the site like a
 // tour. Home is the origin (no widget); pages not on the walk (terms,
 // privacy, changelog, 404) get none: the exclusions fall out of the list
-// membership automatically. The next hop wraps Contact back to Home, so the
-// tour is a loop.
+// membership automatically. The hop logic is walk.mjs's hopChain: external
+// stops render as their own buttons (the visitor may want them), then "or",
+// then the real tour hop skipping them. Contact wraps back to Home: a loop.
 const WALK_INDEX = new Map(WALK.map((stop, i) => [stop.href, i]))
 
 function PageWalk() {
     const { pathname } = useLocation()
     const i = WALK_INDEX.get(routeKey(pathname))
     if (typeof i !== 'number' || i === 0) return null
-    const prev = WALK[i - 1]
-    const next = WALK[(i + 1) % WALK.length]
-    const hop = (stop, cls, text) => stop.href.startsWith('/')
-        ? <Link key={cls} className={cls} to={stop.href}>{text}: {stop.label}</Link>
-        : <a key={cls} className={cls} href={stop.href} rel={stop.noopener ? 'noopener' : undefined}>{text}: {stop.label}</a>
+
+    const side = (dir) => {
+        const { externals, internal } = hopChain(i, dir)
+        if (!internal) return null
+        const cls = dir === 1 ? 'btn walk-next' : 'btn outline walk-prev'
+        const text = dir === 1 ? 'Next' : '← Prev'
+        const row = externals.map((s) =>
+            <a key={s.href} className={cls + ' walk-ext'} href={s.href}
+                rel={s.noopener ? 'noopener' : undefined}>{s.label}</a>
+        )
+        if (externals.length > 0) row.push(<span key="walk-or" className="walk-or">or</span>)
+        row.push(
+            <Link key={'hop'} className={cls} to={internal.href}>
+                {text}: {internal.label}
+            </Link>
+        )
+        return <div className={dir === 1 ? 'walk-group walk-group-next' : 'walk-group walk-group-prev'}>{row}</div>
+    }
+
+    const prevSide = side(-1)
+    const nextSide = side(1)
+    if (!prevSide && !nextSide) return null
     return (
         <nav className="container page-walk" aria-label="Site tour">
-            {hop(prev, 'btn outline walk-prev', '← Prev')}
-            {hop(next, 'btn walk-next', 'Next')}
+            {prevSide}
+            {nextSide}
         </nav>
     )
 }

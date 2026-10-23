@@ -5,7 +5,7 @@
  * without a React transform (same shape as test/config.test.mjs).
  */
 import { describe, expect, it } from 'vitest'
-import { WALK, LEARN, routeKey } from '../src/walk.mjs'
+import { WALK, LEARN, routeKey, hopChain } from '../src/walk.mjs'
 import config from '../ssr.config.js'
 
 const routes = config.routes.map((r) => r.path)
@@ -57,6 +57,48 @@ describe('src/walk.mjs - the footer Learn contract (nine docs doors)', () => {
         expect(new Set(hrefs).size).toBe(hrefs.length)
         for (const l of LEARN) {
             expect(l.href.startsWith('https://docs.creadev.org/vant/')).toBe(true)
+        }
+    })
+})
+
+describe('hopChain - the menu-derived prev/next contract (externals ride along)', () => {
+    const ix = (href) => WALK.findIndex((s) => s.href === href)
+
+    it('walks internal stops directly (Showcase: Security <-> Status)', () => {
+        const back = hopChain(ix('/showcase'), -1)
+        const fwd = hopChain(ix('/showcase'), 1)
+        expect(back.externals).toEqual([])
+        expect(back.internal.label).toBe('Security')
+        expect(fwd.externals).toEqual([])
+        expect(fwd.internal.label).toBe('Status')
+    })
+
+    it('renders the externals, then the tour hop that skips them (Status next)', () => {
+        const fwd = hopChain(ix('/status'), 1)
+        expect(fwd.externals.map((s) => s.label)).toEqual(['Releases', 'GitHub', 'Docs'])
+        expect(fwd.internal.href).toBe('/contact')
+    })
+
+    it('collects the externals behind a prev hop too (Contact prev)', () => {
+        const back = hopChain(ix('/contact'), -1)
+        expect(back.externals.map((s) => s.label)).toEqual(['Docs', 'GitHub', 'Releases'])
+        expect(back.internal.href).toBe('/status')
+    })
+
+    it('wraps the tour back to Home after the last stop (Contact next)', () => {
+        const fwd = hopChain(ix('/contact'), 1)
+        expect(fwd.externals).toEqual([])
+        expect(fwd.internal.href).toBe('/')
+    })
+
+    it('never returns an external as the internal hop and never loops forever', () => {
+        for (let i = 0; i < WALK.length; i++) {
+            for (const dir of [-1, 1]) {
+                const { externals, internal } = hopChain(i, dir)
+                expect(externals.length).toBeLessThan(WALK.length)
+                for (const s of externals) { expect(s.href.startsWith('/')).toBe(false) }
+                if (internal) { expect(internal.href.startsWith('/')).toBe(true) }
+            }
         }
     })
 })
