@@ -27,6 +27,39 @@
 
 export const SHOWCASE = [
     {
+        id: 'crashtest-creadev',
+        title: 'Crashtest',
+        industry: 'Infrastructure',
+        url: 'https://crashtest.creadev.org',
+        img: '/showcase-rook-logo-full-800.jpg',
+        imgAlt: 'The Rook agent logo mark for the Crashtest project',
+        blurb:
+            'Adversarial QA for agent-built software: seeded in-process attacks on ' +
+            'your real handlers, a hardening ledger, and CI that fails on regressions ' +
+            '- no sockets, no bans, no invoice.',
+        desc:
+            'Crashtest attacks the code agents actually ship: every campaign is a ' +
+            'WHATWG Request handed to your real handlers in-process, against an ' +
+            'in-memory fake backend with op counters attached - the same way a ' +
+            'security engineer probes, minus the live server\n\n' +
+            'What makes it a Vant story is the builder: Rook, a persistent coding ' +
+            'agent whose entire working memory lives in the repo the Vant way - ' +
+            'markdown brain files (identity, goals, structure, workflow, lessons, ' +
+            'errors) that each session reads on wake and writes before it closes, ' +
+            'committed to git so every earned lesson lands as a reviewable diff. ' +
+            'The whole Crashtest brain ships as a Vant horcrux ' +
+            '(horcrux/crashtest-p_quillstone-9fold.svg), so a fresh session or a ' +
+            'brand-new contributor restores the full accumulated memory on demand - ' +
+            'the restore was verified end to end against a virgin Vant clone (13 ' +
+            'files, both scopes).\n\n' +
+            'At the v1.0.0 seal the receipts were a 176/176 test suite, a web build ' +
+            '6/6, and a self-dogfood ledger at 30/30 REFUSED. The proud list: same ' +
+            'commit, same findings (seed-pinned determinism); accepted risks that ' +
+            'require an owner and a bound (a BOUNDED without one is a finding); and ' +
+            'the one law the engine keeps to everywhere: attack code, not people. ' +
+            'No sockets. Ever.',
+    },
+    {
         id: 'axolotl-creadev',
         title: 'Axolotl at Creadev.org',
         industry: 'Agent infrastructure',
