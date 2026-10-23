@@ -17,7 +17,7 @@
  * Entry shape (every field required, pinned by test/showcase.test.mjs):
  *   id        stable slug
  *   title     display name
- *   industry  the tag (short, one or two words)
+ *   industry  the tag list (short labels, up to two per card)
  *   url       the outbound link (https, dofollow, target=_blank)
  *   img       card picture, root-absolute path served from public/ at build
  *   imgAlt    alt text for the picture
@@ -29,7 +29,7 @@ export const SHOWCASE = [
     {
         id: 'crashtest-creadev',
         title: 'Crashtest',
-        industry: 'Infrastructure',
+        industry: ['Security', 'CI'],
         url: 'https://crashtest.creadev.org',
         img: '/showcase-rook-logo-full-800.jpg',
         imgAlt: 'The Rook agent logo mark for the Crashtest project',
@@ -38,25 +38,27 @@ export const SHOWCASE = [
             'your real handlers, a hardening ledger, and CI that fails on regressions ' +
             '- no sockets, no bans, no invoice.',
         desc:
-            'Crashtest wasn\'t built in one session, it was built by a continuity ' +
-            'instead. Rook, the persistent coding agent behind it, works the Vant ' +
+            'Crashtest wasn\'t built in one session, it was built by a continuity. ' +
+            'Its builder, Rook, is a persistent coding agent that works the Vant ' +
             'way: a wholebrain of markdown files under models/ in the repo itself ' +
             '(identity, goals, structure, workflow, lessons, errors) that every ' +
-            'session reads on wake and writes before it closes, committed to git.\n\n' +
-            'Context never restarts - the goals stayed exactly where they were ' +
-            'written while the scope grew from a seeded auth/input pack to the full ' +
-            'taxonomy (state oracles, volume, abuse-shape guards), the earned rules ' +
-            'held their line in lessons.md ("seed-derived everything", "exact pins ' +
-            'not ceilings", no sockets. Ever.), and the prose and working cadence ' +
-            'carried across dozens of sessions instead of being re-derived each ' +
-            'time - with receipts stamped for later verification, not remembered: a ' +
-            '176/176 suite and a self-dogfood ledger at 30/30 REFUSED at the v1.0.0 ' +
-            'seal. When work went parallel, other vant agents on their own brains ' +
-            'worked the same shared memory (one brain per project, one branch per ' +
-            'agent, merge-by-PR), so attack packs got authored, issues triaged and ' +
-            'fixed, and capabilities extended (hono/express/fastify/wordpress ' +
-            'adapters, the hardening ledger, CI gate) with no hand-off meeting.\n\n' +
-            'The brain also travels as a vant horcrux ' +
+            'session reads on wake and writes before it closes, committed to ' +
+            'git.\n\n' +
+            'That continuity is the point. The goals never restart: they stayed ' +
+            'exactly where they were written while the scope grew from a seeded ' +
+            'auth/input pack to the full taxonomy (state oracles, volume, ' +
+            'abuse-shape guards). Earned rules hold their line in lessons.md ' +
+            '("seed-derived everything", "exact pins not ceilings", "no sockets. ' +
+            'Ever."). The prose and working cadence carried across dozens of ' +
+            'sessions instead of being re-derived each time, with receipts stamped ' +
+            'for later verification, not remembered: a 176/176 test suite and a ' +
+            'self-dogfood ledger at 30/30 REFUSED at the v1.0.0 seal.\n\n' +
+            'When work went parallel, other vant agents on their own brains shared ' +
+            'the same memory: one brain per project, one branch per agent, ' +
+            'merge-by-PR. That is how attack packs, issue fixes, and new ' +
+            'capabilities (hono/express/fastify/wordpress adapters, the hardening ' +
+            'ledger, the CI gate) landed with no hand-off meeting. The whole brain ' +
+            'also travels as a vant horcrux ' +
             '(horcrux/crashtest-p_quillstone-9fold.svg), verifiably restorable on a ' +
             'virgin clone, so any fresh session wakes up owning the project rather ' +
             'than reading up on it.',
@@ -64,7 +66,7 @@ export const SHOWCASE = [
     {
         id: 'axolotl-creadev',
         title: 'Axolotl at Creadev.org',
-        industry: 'Agent infrastructure',
+        industry: ['Agent infrastructure'],
         url: 'https://creadev.org',
         img: '/showcase-axolotl-logo-full-800.jpg',
         imgAlt: 'Generated axolotl fronds logo: smiling axolotl head with radiating fronds on a deep green tile',

@@ -29,6 +29,10 @@ describe('src/showcase.mjs - the card contract', () => {
             ids.add(c.id)
             expect(c.title).toBeTruthy()
             expect(c.industry).toBeTruthy()
+            expect(Array.isArray(c.industry)).toBe(true)
+            expect(c.industry.length).toBeGreaterThanOrEqual(1)
+            expect(c.industry.length).toBeLessThanOrEqual(2)
+            for (const tag of c.industry) { expect(tag).toBeTruthy() }
             expect(c.url).toMatch(/^https:\/\//)
             expect(c.img).toMatch(/^\//)
             expect(c.imgAlt).toBeTruthy()
