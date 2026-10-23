@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /operations/webhooks
 layout: default
 title: Webhooks
+description: Webhooks - outbound and inbound hooks, transports, and retry behavior.
 nav_order: 55
 ---
 

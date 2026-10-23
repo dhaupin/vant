@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /advanced/style
 layout: default
 title: Voice & Style
+description: Voice and style - the writing rules docs and agents follow, with examples the gates enforce.
 nav_order: 98
 
 ---

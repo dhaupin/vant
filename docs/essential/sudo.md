@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /essential/sudo
 layout: default
 title: Sudo & Escalation
+description: Sudo - privilege elevation inside Vant, its policies, and how escalation is audited.
 nav_order: 44
 ---
 

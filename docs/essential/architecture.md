@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /essential/architecture
 layout: default
 title: Architecture
+description: The architecture map - how lib modules, brain files, and the CLI dispatcher fit together.
 nav_order: 37
 ---
 

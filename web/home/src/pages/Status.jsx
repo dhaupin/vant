@@ -21,7 +21,7 @@ export default function Status() {
         <section>
             <div className="container">
                 <div className="sec-head"><span className="sec-idx">01</span><h2>Status</h2></div>
-                <p className="sub">Vant is software you fetch and run yourself; there is no central Vant server to be down. What exists publicly are these surfaces, checked live from your browser when the board mounts.</p>
+                <p className="sub">Vant is software you fetch and run yourself; there is no central Vant server to be down. The board below sweeps each public surface from the edge and keeps 35 days of history - the stat cards are the static posture; the live monitor mounts right under them.</p>
 
                 <div className="status-grid">
                     {SURFACES.map(s => (
@@ -37,9 +37,10 @@ export default function Status() {
                 </pre-island>
 
                 <p className="contact-note" style={{ marginTop: 26 }}>
-                    Honest limits: these checks answer from your browser, so a corporate proxy or an offline network can
-                    make a healthy surface look unreachable, the reverse is never true (a reported-unreachable surface fails
-                    loudly, it does not fail hidden). No result is stored anywhere; nothing here phones home.
+                    Honest limits: the monitor probes the public URLs from the edge and stores what it sees in this site's
+                    own D1 database - nothing about you or your browser is recorded, and nothing phones home. If the
+                    monitor itself is down, or the database is not yet bound, the board says so and runs direct browser
+                    checks as a clearly-labeled fallback that never merges into the stored history.
                 </p>
             </div>
         </section>

@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /operations/testing
 layout: default
 title: Testing
+description: Testing - the suites, the runner, and what CI runs on every push.
 nav_order: 63
 ---
 

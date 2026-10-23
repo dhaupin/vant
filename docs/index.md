@@ -82,3 +82,9 @@ stop using Vant and the memory survives as plain markdown.
 
 The [whitepaper](/vant/whitepaper/agent-first) covers the whole argument -
 continuity specs, drift, and why the brain tree looks the way it does.
+
+## Related
+
+- [Quick start](/vant/getting-started/quick-start) - the five-minute setup
+- [Agent onboarding](/vant/getting-started/agent-onboarding) - the wake/work/sleep loop your agent learns from
+- [CLI reference](/vant/reference/cli) - every routed command

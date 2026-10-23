@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /getting-started/faq
 layout: default
 title: FAQ
+description: The Vant FAQ - tokens, brain size, sync limits, and the questions every install asks first.
 nav_order: 18
 ---
 

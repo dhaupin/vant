@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /essential/onboard
 layout: default
 title: Knowledge Base Browser
+description: vant onboard - interactively browse every brain file an island can load.
 nav_order: 39
 ---
 # Knowledge Base Browser

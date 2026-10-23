@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /operations/network
 layout: default
 title: Network
+description: Network - the headless server face, peer transport, and the bind defaults.
 nav_order: 60
 ---
 

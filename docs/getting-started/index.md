@@ -39,3 +39,9 @@ is involved.
 ```bash
 vant setup   # Interactive wizard; creates config and .env scaffolding
 ```
+
+## Related
+
+- [Quick start](/vant/getting-started/quick-start) - the five-minute path
+- [Install guide](/vant/getting-started/install) - every install posture in depth
+- [FAQ](/vant/getting-started/faq) - the answers most installs need first

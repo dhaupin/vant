@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /essential/islands
 layout: default
 title: Islands - Lazy-loading
+description: Islands - lazy-loaded brain modules keyed off triggers, corpus- and storage-backed.
 nav_order: 36
 ---
 

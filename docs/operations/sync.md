@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /operations/sync
 layout: default
 title: Multi-Provider RAID Sync
+description: Multi-provider RAID sync - git as the transport, providers pluggable, mirrors verifiable.
 nav_order: 53
 ---
 

@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /advanced/release
 layout: default
 title: Release Process
+description: The release process - gates, stones, and the ordered steps a version rides.
 nav_order: 106
 
 ---

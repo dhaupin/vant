@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /security/sandbox
 layout: default
 title: Sandbox
+description: The sandbox - deny-by-default capabilities over every brain read and write.
 nav_order: 67
 ---
 

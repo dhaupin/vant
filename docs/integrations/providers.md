@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /integrations/providers
 layout: default
 title: Multi-Git Provider Support
+description: Multi-git provider support - GitHub, GitLab, Gitea, Bitbucket, and self-hosted doors.
 nav_order: 86
 ---
 

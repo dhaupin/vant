@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /operations/qos
 layout: default
 title: QoS
+description: QoS - rate budgets, circuit breakers, and request costs across every door.
 nav_order: 59
 ---
 

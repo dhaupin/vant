@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/cli
 layout: default
 title: CLI Reference
+description: Every routed Vant command - verbs, flags, and exits, checked against the dispatcher truth.
 nav_order: 111
 ---
 

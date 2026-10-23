@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /operations/ci
 layout: default
 title: CI
+description: The CI pipeline - what every PR runs, and how to reproduce it locally.
 nav_order: 62
 ---
 # CI

@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /operations/storage
 layout: default
 title: Storage
+description: Storage - statuses, stats, WAL, mirrors, and debris sweeping for the brain.
 nav_order: 52
 ---
 

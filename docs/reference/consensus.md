@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/consensus
 layout: default
 title: Consensus API
+description: The consensus API - create proposals, cast votes, tally outcomes, and fetch results across a mesh.
 nav_order: 123
 ---
 

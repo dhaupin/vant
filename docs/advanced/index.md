@@ -36,3 +36,9 @@ explain: [Troubleshooting](/vant/advanced/troubleshooting).
 ```bash
 vant search "quasicrystal addressing" --mode rag -r
 ```
+
+## Related
+
+- [Troubleshooting](/vant/advanced/troubleshooting) - when a deep cut breaks
+- [RPC](/vant/advanced/rpc) - the transport layer under the tools
+- [Audit](/vant/advanced/audit) - the ledger deep services publish to

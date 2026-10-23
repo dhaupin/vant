@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/code-comments
 layout: default
 title: Code Comments
+description: The code-comment contract - what Vant comments mean in the lib sources and how agents should treat them.
 nav_order: 121
 ---
 # Code Comments

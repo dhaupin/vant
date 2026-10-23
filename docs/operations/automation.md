@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /operations/automation
 layout: default
 title: Automation
+description: Automation - triggers and schedules you can hang brain work on, no cron daemon required.
 nav_order: 54
 ---
 

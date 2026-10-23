@@ -120,7 +120,7 @@ export default {
             meta: {
                 title: 'Status - Vant',
                 description:
-                    'Vant surfaces status: the home site, docs hub, brain dashboard, and the GitHub project, checked from your browser with honest limits.',
+                    'Vant surfaces status: every public asset swept from the edge with 35 days of uptime history, an ongoing-issue alert spot, and an honest fallback.',
             },
         },
         {

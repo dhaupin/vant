@@ -14,6 +14,7 @@ Every claim in this guide is checked against the code on `axolotl` (v0.8.6). Whe
 | **Docker** | Containerized, reproducible | Medium |
 | **Cloud** | Scalable, managed | Medium |
 | **Edge/IoT** | ARM, Raspberry Pi, resource-constrained | Low |
+| **Docs site** | docs.creadev.org — Jekyll + freestruct + Pagefind, published by CI on push to `main` | None (zero manual steps — see §13) |
 
 Vant is a Node.js process whose entire state is your repository: markdown brain files, a config file, and git. There is no external database to provision. Sizing is driven by the brain size and how many agents you run.
 
@@ -400,7 +401,9 @@ lander survives as the design reference `web/home/index.bak.html`), the dashboar
 
 The project to create in the CF dashboard: connect this repo, production
 branch `axolotl` (or `main` after merge), then point the build at the
-frontend dir — no framework guessing, no env vars, no functions:
+frontend dir — no framework guessing. The static artifact ships itself;
+the bindings in step 2 below (the /status monitor's D1 + env surface)
+are the only other panel work:
 
 | Setting | Value | Why |
 |---------|-------|-----|
@@ -410,13 +413,32 @@ frontend dir — no framework guessing, no env vars, no functions:
 | Build command | `node scripts/parse-changelog.mjs && npx prestruct build` | mirrors `npm run build:home` minus the `cd`: regenerate `src/generated/changelog.json` from CHANGELOG.md BEFORE the prestruct build (the parity law), then the full pipeline runs — vite build → inject-brand (OG/Twitter/canonical/keywords + the four-node `{ @context, @graph }` JSON-LD per page) → prerender 8/8 routes + sitemap + robots + noindex 404. The build EXITS (serving is Pages' job) |
 | Build output directory | `dist` | `web/home/dist/`, gitignored by the standing `web/*/dist/` rule — nothing to commit |
 | Node version | 20+ (`NODE_VERSION=20` if the panel asks) | matches the `web/home` engines; the build is plain node tooling |
+| Functions | deploy automatically with the project | `web/home/functions/` = the `/status` monitor API (`GET /api/status/summary`, the x-admin-key admin door, the `onScheduled` cron sweep). Zero wrangler strings — same law as the dashboard project |
 
-Shipped env-var surface: **none**. `ssr.config.js` is committed with the
-fixed URLs, so unlike the dashboard project below there is no `VANT_*`
-variable to define. There is no `functions/` here either — the home site
-is pure static. Whatever lands ships pre-gated: `web/home/test/config.test.mjs`
-(6/6, rides test.yml) pins the JSON-LD/route contract at source level, and
-`npm run lint:home` sweeps every built page for link/fiction/stat truth.
+`ssr.config.js` is committed with the fixed URLs, so unlike the dashboard
+project below there is no `VANT_*` variable to define. The bindings below
+are owned by the /status monitor (full route map + honest postures:
+`web/home/functions/README.md`) — all in Pages settings, never code:
+
+| Binding / var | Where | Value | Notes |
+|----------|-------|-------|-------|
+| D1 database bound as `DB` | Settings → Bindings → Add → D1 database bindings | database **`vant-pub`** | the history store. Tables self-create on first read and the six owner-named endpoints self-seed; `npx wrangler d1 migrations apply vant-pub --remote` (source: `web/home/migrations/0001_status_monitor.sql`) applies the schema deliberately instead. Both paths land on the same truth |
+| `STATUS_ADMIN_KEY` | Settings → Environment variables (Production AND Preview) | random secret ≥ 8 chars (`openssl rand -hex 24`) | guards POST `/api/status/admin` (alert set/clear, endpoints add/remove/reset, forced sweeps). Missing/short = the door answers 503 with the fix, fail-closed |
+| `STATUS_SWEEP_SECONDS` | Settings → Environment variables | optional, default `600` | minimum age of a sweep before a public GET triggers a fresh one - the anti-hammer throttle |
+| Cron trigger | Settings → Functions → Cron triggers | optional, e.g. `*/30 * * * *` | keeps history honest on quiet days (the cron sweep skips the throttle). There is NO migration that sets this: a D1 migration only moves database schema, and the cron trigger is a Pages project setting — dashboard or your own Pages-API automation (`PATCH .../pages/projects/...`, Pages Write scope) |
+
+Until `DB` is bound every status route answers 503 with the exact fix and
+the /status board shows its direct-browser checks as the clearly-labeled
+fallback — missing data is never faked as downtime.
+
+Whatever lands ships pre-gated: `web/home/test/config.test.mjs`
+(rides test.yml) pins the JSON-LD/route contract at source level,
+`src/walk.mjs`'s tour/footer contract stays pinned by `test/walk.test.mjs`
+(every walk stop must exist as a shipped route), and
+`test/status-math.test.mjs` pins the monitor's pure core (defaults, day
+buckets, uptime math, alert pick, admin-key compare - 35 tests total
+across the three suites). `npm run lint:home` sweeps every built page for
+link/fiction/stat truth.
 
 ### 12.1 Setup walkthrough (dashboard, do this while code lands)
 
@@ -584,6 +606,63 @@ operational walkthrough lives in the [relay playbook](/vant/operations/relay-pla
 (serving, hosting the solo flavor, piggybacking, using, verifying); the mechanism spec is
 [labs/prd-relay.md](labs/prd-relay.md) and the operations page is
 [docs/operations/relay.md](docs/operations/relay.md).
+
+---
+
+## 13. The Docs Site (docs.creadev.org — CI-owned, zero panel work)
+
+The docs hub is the one Vant surface you never deploy by hand: every
+push to `main` runs `.github/workflows/docs.yml`, and the artifact
+publishes to GitHub Pages (which serves the docs.creadev.org domain).
+`workflow_dispatch` re-runs it on demand. Nothing to bind, no secrets to
+mint, no dashboard walk.
+
+### The pipeline (the proven order — order matters)
+
+| Step | What it does | Note |
+|------|--------------|------|
+| 1. `bundle exec jekyll build` (Ruby 3.2, `bundler-cache: true`) | Jekyll renders every page into `docs/_site`, nested under `/vant/` (`baseurl`) | render-time nav and redirects plugins run HERE, inside Jekyll |
+| 2. `npx freestruct --strict` | the post-render SEO layer over the Jekyll output | config discovery finds `docs/freestruct.config.yml`; `--strict` FAILS CI on any broken internal link |
+| 3. `npx pagefind --site _site` | the search index is built AFTER freestruct | the engine rewrites the HTML, so the index must match what actually ships |
+| 4. upload artifact + deploy-pages | `docs/_site` goes live | the whole site lands as one GitHub Pages deployment |
+
+What the freestruct layer generates over the Jekyll output (config:
+`docs/freestruct.config.yml`, engine pinned `freestruct@1.0.0` exact in
+`docs/package.json` alongside `pagefind@^1.5.2`): per-page canonical/OG
+metas (missing-only — the hand-written tags in `_layouts/default.html`
+are never touched), a full `sitemap.xml` with real lastmod, a
+basePath-aware `robots.txt` pointer, `feed.xml`, a noindex `404.html`,
+and the broken-link check. Search stays with Pagefind (`searchIndex:
+false` — same owner call as the freestruct docs site itself);
+`basePath: /vant` is trusted, never doubled.
+
+### Release stamping + local preview
+
+```bash
+# Version truth: stamps package.json's version into the docs frontmatter
+# (8 files). This does NOT build the site - the build is CI's.
+vant docs-build
+vant docs-build --commit      # ...then git add -A + commit the stamp
+
+# Local docs preview (render layer):
+cd docs && bundle install && bundle exec jekyll serve
+
+# Replicate the CI order + its strict gate locally (cwd matters: the
+# engine's config discovery walks upward FROM your cwd, and glob the
+# output dir exactly like the workflow does):
+cd docs
+npm install --no-audit --no-fund
+npx freestruct --strict
+npx pagefind --site _site
+cd ..
+
+# The five docs gates (style, links, frontmatter, language, truthfulness):
+npm run lint:docs
+```
+
+The **Freestruct docs site itself** (freestruct.creadev.org, crosslinked
+from the docs footer) is its own project — the flagship site of the same
+engine that post-renders this repo's docs. Nothing in this repo builds it.
 
 ---
 

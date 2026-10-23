@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/tmp
 layout: default
 title: Tmp API
+description: The tmp API - scratch-space reads and writes that never touch the brain tree.
 nav_order: 135
 ---
 

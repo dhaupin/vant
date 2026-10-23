@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /integrations/hybrid
 layout: default
 title: Hybrid Sync
+description: Hybrid Sync - split public/private brain sync between repos with one push.
 nav_order: 87
 ---
 

@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/api-runtime
 layout: default
 title: Runtime API Reference
+description: The runtime API reference - init, learn, remember, agents, and sync, with signatures and returns.
 nav_order: 119
 ---
 

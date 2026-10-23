@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/node-registry
 layout: default
 title: Node Registry API
+description: The node registry API - register, list, and ping mesh peers from your install.
 nav_order: 127
 ---
 

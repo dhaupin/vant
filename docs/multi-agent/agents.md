@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /multi-agent/agents
 layout: default
 title: Agent Branch Workflow
+description: The agent branch workflow - create your branch, commit with your prefix, and push your brain's history.
 nav_order: 49
 ---
 # Agent Branch Workflow

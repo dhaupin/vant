@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/legal
 layout: default
 title: Legal & Policies
+description: The legal stack - terms, privacy, ethics, and where each policy lives and binds.
 nav_order: 126
 ---
 

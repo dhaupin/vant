@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /getting-started/contributing
 layout: default
 title: Contributing
+description: The canonical contributing guide - what the project accepts, how PRs and issues work, and the rules reviews enforce.
 nav_order: 19
 ---
 

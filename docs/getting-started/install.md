@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /getting-started/install
 layout: default
 title: Installation
+description: Install Vant every way it ships - the canon source path, the Docker posture, and the honest limits of each.
 nav_order: 13
 ---
 # Installation

@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /runtime/mcp
 layout: default
 title: MCP Server
+description: Connect any MCP client to a running Vant install - JSON-RPC tools auto-wired from modules, the /tools browser, and the auth posture.
 nav_order: 33
 ---
 # MCP Server

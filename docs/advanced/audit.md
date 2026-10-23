@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /advanced/audit
 layout: default
 title: Audit & Compliance
+description: Audit and compliance - the JSON ledger, rotation, and the AUDIT.md report the CLI renders.
 nav_order: 101
 
 ---

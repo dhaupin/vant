@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /operations/cache
 layout: default
 title: Cache
+description: Cache - what Vant caches, the TTLs, and how to clear each layer.
 nav_order: 65
 ---
 

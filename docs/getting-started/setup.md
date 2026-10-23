@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /getting-started/setup
 layout: default
 title: Setup Guide
+description: Run the interactive setup wizard to write Vant's config and environment scaffolding.
 nav_order: 14
 ---
 # Setup Guide

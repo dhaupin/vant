@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/canvas
 layout: default
 title: Canvas API
+description: The canvas API - render UI surfaces into brain files for agents that read them.
 nav_order: 120
 ---
 

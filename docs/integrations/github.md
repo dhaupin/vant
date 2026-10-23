@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /integrations/github
 layout: default
 title: GitHub Integration
+description: The GitHub integration - sync, releases, Actions status, and the gates each pull rides.
 nav_order: 81
 ---
 # GitHub Integration

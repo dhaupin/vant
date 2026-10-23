@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/config
 layout: default
 title: Configuration
+description: Configuration reference - every config key, its default, and where it takes effect.
 nav_order: 112
 ---
 # Configuration

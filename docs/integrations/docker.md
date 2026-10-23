@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /integrations/docker
 layout: default
 title: Docker
+description: Vant in Docker - the image, the compose file, the volumes, and the loopback/bind posture.
 nav_order: 84
 ---
 # Docker

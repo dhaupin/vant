@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /multi-agent/branches
 layout: default
 title: Branches
+description: Branches - agent worktree isolation, where each agent's branch lives and commits.
 nav_order: 47
 ---
 

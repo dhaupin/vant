@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /getting-started/examples
 layout: default
 title: Examples & Showcase
+description: Examples and showcase - real brain layouts, skill packs, and templates you can copy into your own repo.
 nav_order: 17
 ---
 

@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /security/environment
 layout: default
 title: Environment & Limits
+description: Environment and limits - every env var, its scope, and the tunables it overrides.
 nav_order: 70
 ---
 

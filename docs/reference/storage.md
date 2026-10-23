@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/storage
 layout: default
 title: Storage
+description: The storage reference - statuses, stats, WAL, mirrors, and the math that keeps the brain honest.
 nav_order: 131
 ---
 # Storage (v0.8.6)
