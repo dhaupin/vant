@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /integrations/telegram-bot
 layout: default
 title: Telegram Bot Integration
+description: The Telegram bot - command your install's brain from any chat, with persistent-mounted state.
 nav_order: 85
 ---
 # Tutorial: Telegram Bot with Vant

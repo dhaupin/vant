@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/theme
 layout: default
 title: Theme API
+description: The theme API - palette faces, the zero-dependency ANSI renderer, and NO_COLOR/piped-output behavior.
 nav_order: 134
 ---
 

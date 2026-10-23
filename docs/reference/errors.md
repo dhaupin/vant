@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/errors
 layout: default
 title: Error Codes
+description: Every Vant error code - the stable strings, what triggers them, and the fix the message points to.
 nav_order: 116
 ---
 # Error Codes

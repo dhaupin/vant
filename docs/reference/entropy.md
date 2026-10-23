@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/entropy
 layout: default
 title: Entropy Patching Protocol
+description: The entropy patching protocol - how geometry-engine slips are patched without rewriting sealed stores.
 nav_order: 125
 ---
 

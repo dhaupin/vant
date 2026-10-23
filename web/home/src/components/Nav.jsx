@@ -6,14 +6,16 @@
  * flips data-theme on <html> and persists to localStorage.
  *
  * THE WALK (pass 342, trimmed in pass 344): the owner-directed tour lives
- * here as ONE ordered list (Home → Install → Brain → Security → Releases →
- * GitHub → Docs → Status → Contact) that BOTH the menu and AppLayout's
- * PageWalk read: the menu order and the walk order cannot drift. Since
- * pass 343 the Brain stop is INTERNAL (/brain, the marketing page whose
- * content links brain.creadev.org; see pages/Brain.jsx), so prev/next
- * works on the Brain page itself. Quick start left the menu in pass 344:
- * /install now carries the five-minute setup, so the docs quick-start
- * stop became the internal Install stop's deeper-link, not a menu item.
+ * here as ONE ordered list (Home → Install → Brain → Security → Showcase →
+ * Releases → GitHub → Docs → Status → Contact) that BOTH the menu and
+ * AppLayout's PageWalk read: the menu order and the walk order cannot
+ * drift. Since pass 343 the Brain stop is INTERNAL (/brain, the marketing
+ * page whose content links brain.creadev.org; see pages/Brain.jsx), so
+ * prev/next works on the Brain page itself. Quick start left the menu in
+ * pass 344: /install now carries the five-minute setup, so the docs
+ * quick-start stop became the internal Install stop's deeper-link, not a
+ * menu item. Showcase joined after Security in pass 357 (owner direction:
+ * between Security and Status among the internal stops).
  *
  * THE SIDEBAR (pass 343, the bolete structure): the mobile menu drawer is
  * organized IN SECTIONS like the dashboard's own nav (web/dashboard
@@ -46,11 +48,11 @@ const MENU_SECTIONS = [
     },
     {
         head: 'The install',
-        items: [WALK[2], WALK[3], WALK[7], WALK[8]],
+        items: [WALK[2], WALK[3], WALK[4], WALK[8], WALK[9]],
     },
     {
         head: 'The family',
-        items: [WALK[4], WALK[5], WALK[6]],
+        items: [WALK[5], WALK[6], WALK[7]],
     },
     {
         head: 'More',

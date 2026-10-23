@@ -1,8 +1,71 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 84,
+  "_headingCount": 87,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 357 (the /showcase page: the fleet's portfolio, the self entry, and the submit door)",
+      "sections": [
+        {
+          "name": "Added: route ten, the portfolio of real Vant installs",
+          "items": [
+            "**/showcase SHIPS** (the site route table is now ten): case-study",
+            "**THE FIRST CARD IS OURS, AS DIRECTED**: \"Axolotl at Creadev.org\"",
+            "**THE SUBMIT DOOR**: a static prefilled GitHub issue-composer link",
+            "**NAV + FOOTER, ONE LIST**: WALK gains \"Showcase\" after Security",
+            "Pins moved with the contracts: config.test.mjs nine -> ten routes;",
+            "Verified: build:home 10/10 (zero warnings), vitest 40/40 (config 6,"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 356 (docs quality sweep: SEO descriptions everywhere, bottom crosslinks everywhere, and issue #239's HTML residue out)",
+      "sections": [
+        {
+          "name": "Fixed: the docs layout's dead script tag and dead CSS (issue #239)",
+          "items": [
+            "**THE DEAD CLASSIC PAGEFIND TAG** (docs/_layouts/default.html):",
+            "**THE DEAD LINE-NUMBERS CSS** (same file): the",
+            "Issue dhaupin/vant#239 closed on trunk."
+          ]
+        },
+        {
+          "name": "Added: page-specific SEO descriptions and bottom crosslinks on every docs page",
+          "items": [
+            "**DESCRIPTION FRONTMATTER IS NOW ON EVERY PAGE**: 71 pages were",
+            "**BOTTOM CROSSLINKS ARE NOW ON EVERY SURFACE**: the 9 section-index",
+            "**THE /status STATIC COPY CAUGHT UP TO THE MONITOR** (web/home",
+            "Verified: lint:docs five gates, check-language (`PASS, 209 prose"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 355 (the /status monitor goes server-side: D1 history, edge sweeps, and the deploy half fully documented)",
+      "sections": [
+        {
+          "name": "Added: the D1-backed status monitor (web/home Pages Functions + island)",
+          "items": [
+            "**THE MODEL**: Pages Functions sweep each public asset (six",
+            "**THE FILES**: `web/home/functions/_lib/status-math.js` (pure core,",
+            "**THE DATABASE IS `vant-pub`** (named for the site's public-surface",
+            "**BINDINGS LIVE IN PAGES SETTINGS, NEVER CODE** (owner law, no",
+            "**DEPLOY.md ROMAN SWEEP**: new section 13 (the docs site is",
+            "Verified: lint:home, pilot:pages (GREEN incl. the no-wrangler law),"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

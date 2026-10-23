@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /multi-agent/coordination
 layout: default
 title: Multi-Agent Coordination
+description: Multi-agent coordination - channels, delegation, and the crew bus between sibling agents.
 nav_order: 50
 ---
 

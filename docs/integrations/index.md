@@ -75,3 +75,9 @@ chat: [Telegram Bot](/vant/integrations/telegram-bot). Tool-calling agents:
 vant repos add my-notes https://github.com/you/notes.git
 vant repos sync my-notes
 ```
+
+## Related
+
+- [Agents API](/vant/integrations/agents) - the programmatic crew surface other stacks call
+- [Telegram bot](/vant/integrations/telegram-bot) - command your install's brain from any chat
+- [Hybrid Sync](/vant/integrations/hybrid) - split public/private brain between repos

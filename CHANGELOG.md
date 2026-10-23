@@ -5,6 +5,134 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 357 (the /showcase page: the fleet's portfolio, the self entry, and the submit door)
+
+### Added: route ten, the portfolio of real Vant installs
+
+- **/showcase SHIPS** (the site route table is now ten): case-study
+  cards, each with a picture, a title, an industry tag (small pill),
+  one short purpose paragraph, an expandable "read more..." (plain
+  `<details>`, works with no JavaScript), and the outbound dofollow
+  `target=_blank` link. Cards prerender at build time from
+  `src/showcase.mjs`, the same pure-data law as walk.mjs, so crawlers
+  and no-JS visitors read the whole story; the data module is the
+  documented D1 swap point for when the web/home admin dash lands
+  (test/showcase.test.mjs pins the card shape so the swap keeps it).
+- **THE FIRST CARD IS OURS, AS DIRECTED**: "Axolotl at Creadev.org"
+  (industry: agent infrastructure): the maintainer's headless Vant pod
+  with an MCP door, the pass ledger behind this very site, and the
+  Creadev.org fleet (core brain, agent work, the four public sites)
+  under one status monitor. Link: creadev.org, dofollow.
+- **THE SUBMIT DOOR**: a static prefilled GitHub issue-composer link
+  (the same honest pattern as /contact: the site composes nothing,
+  GitHub holds the submit button). Pre-fill carries project, production
+  URL, industry, one-line purpose, longer description, and a picture
+  URL, with the review-before-you-press note; no JS required because
+  the whole URL is built at build time.
+- **NAV + FOOTER, ONE LIST**: WALK gains "Showcase" after Security
+  (between Security and Status across the menu, the footer Vant column,
+  and the drawer's "The install" section), so the tour grows a stop;
+  grid/prev-next widgets follow automatically. LEARN gains a tenth docs
+  link (Operations) to hold the footer columns at equal height via the
+  owner's same-count rule (LEARN.length === WALK.length, pinned).
+- Pins moved with the contracts: config.test.mjs nine -> ten routes;
+  new showcase pins (full card shape, outbound links, picture files
+  resolve under public/); the ram route pin, walk pins, and home gate
+  all re-verified after the build.
+- Verified: build:home 10/10 (zero warnings), vitest 40/40 (config 6,
+  walk 9, status-math 20, showcase 5), lint:home, web-home style
+  (no em dashes in the new copy), lint:changelog parity, pilot:pages
+  GREEN.
+
+## [Unreleased] - pass 356 (docs quality sweep: SEO descriptions everywhere, bottom crosslinks everywhere, and issue #239's HTML residue out)
+
+### Fixed: the docs layout's dead script tag and dead CSS (issue #239)
+
+- **THE DEAD CLASSIC PAGEFIND TAG** (docs/_layouts/default.html):
+  `<script src="/vant/pagefind/pagefind.js">` throws
+  `import.meta outside a module` on every built docs page (Pagefind 1.x
+  ships ESM bundles) - silently, since it is a load-time console error.
+  Deleted; the `await import(...)` inside doSearch() is the whole
+  loader. Tree search confirms the working loader is the one remaining
+  reference.
+- **THE DEAD LINE-NUMBERS CSS** (same file): the
+  `prism-line-numbers.min.css` CDN link and its orphan support block
+  removed - the plugin script was never loaded, nothing adds the
+  `line-numbers` class, so the request was waste on every page. The
+  theme CSS and prism.min.js + autoloader stay.
+- Issue dhaupin/vant#239 closed on trunk.
+
+### Added: page-specific SEO descriptions and bottom crosslinks on every docs page
+
+- **DESCRIPTION FRONTMATTER IS NOW ON EVERY PAGE**: 71 pages were
+  falling back to the layout's generic site description (the
+  `page.description | default:` line); each now carries a truthful
+  one-sentence description drafted from its own section's contract.
+- **BOTTOM CROSSLINKS ARE NOW ON EVERY SURFACE**: the 9 section-index
+  pages + the root hub + ethics.md carried no closing link section;
+  each now ends with a `## Related` block (truthful links verified
+  against the frontmatter permalinks). Content pages already carried
+  `## Related` / `## Next` / `## Next Steps` bottoms (112 of them).
+- **THE /status STATIC COPY CAUGHT UP TO THE MONITOR** (web/home
+  Status.jsx + ssr.config meta): the page copy and route description
+  still described the browser-checks posture; rewritten to the honest
+  server-side story (edge sweeps, D1 history, labeled fallback, and
+  the nothing-records-you line kept).
+- Verified: lint:docs five gates, check-language (`PASS, 209 prose
+  files), check-home, build:home 9/9 with zero warnings.
+
+## [Unreleased] - pass 355 (the /status monitor goes server-side: D1 history, edge sweeps, and the deploy half fully documented)
+
+### Added: the D1-backed status monitor (web/home Pages Functions + island)
+
+- **THE MODEL**: Pages Functions sweep each public asset (six
+  owner-named defaults: Vant Home, Vant Brain, Vant Relay caps,
+  Vant Docs, Axolotl headless/MCP, GitHub CI passing-tests), record
+  `up | degraded | down` per check into a D1 database, roll up daily
+  buckets, and serve the whole board in one GET. 35-day history cells
+  (a quiet day renders no-data, never fake downtime), 30-day uptime
+  percent, the monitor's own freshness (a stopped monitor surfaces as
+  its own row), a maintenance-alert spot (info/warn/critical, one live
+  banner), and an operator panel (alert set/clear, endpoint
+  add/remove/reset, forced sweep) guarded by a constant-time admin-key
+  compare. The board is modular: any https URL with a kind
+  (http | json-ok | github-ci) becomes a monitored asset by admin POST.
+- **THE FILES**: `web/home/functions/_lib/status-math.js` (pure core,
+  no env/fetch/D1), `_lib/status.js` (schema self-heal + six-endpoint
+  seed + throttled sweep + summary assembly), `api/status/summary.js`
+  (public GET, anti-hammer throttle), `api/status/admin.js`
+  (fail-closed x-admin-key door), `api/status/scheduled.js` (cron
+  sweep, throttle-skipped). The island (`StatusBoard.jsx`) re-aligned
+  to the stylesheet (status-overall / status-bars mix-* buckets /
+  status-panel operator rows) with the direct-browser fallback intact
+  for unbound deploys. Palette: `--ok`/`--fail` tokens added to BOTH
+  themes; the dark theme also gained `--signal` (a latent bug: the
+  warn dot rendered nothing in dark before).
+- **THE DATABASE IS `vant-pub`** (named for the site's public-surface
+  data, more to live there later). Versioned migration:
+  `web/home/migrations/0001_status_monitor.sql` - deliberately
+  applyable, but not required: tables self-create on first read.
+- **BINDINGS LIVE IN PAGES SETTINGS, NEVER CODE** (owner law, no
+  wrangler strings): `DB` (D1), `STATUS_ADMIN_KEY`, optional
+  `STATUS_SWEEP_SECONDS`, optional cron trigger. The full checklist
+  lives in `web/home/functions/README.md`, including the cron-trigger
+  truth: a D1 migration only moves schema, so no migration can set a
+  cron trigger (Pages project setting; dashboard or the owner's own
+  Pages-API PATCH automation - endpoint checked against Cloudflare's
+  current docs).
+- **DEPLOY.md ROMAN SWEEP**: new section 13 (the docs site is
+  CI-owned: Jekyll -> npm freestruct --strict -> Pagefind, zero panel
+  work), an Overview row for it, and the home-site section 12.0
+  rewritten around the monitor's binding table (the stale
+  "no env vars, no functions" home claims are gone). Install coverage
+  audit: local / Docker / cloud / Pages frontends / docs all verified
+  against the repo (docker-compose.yml and .env.example claims
+  re-checked true).
+- Verified: lint:home, pilot:pages (GREEN incl. the no-wrangler law),
+  vitest 35/35 (new status-math suite pins the pure core: defaults,
+  day buckets, uptime math, alert pick, admin-key compare),
+  build:home 9/9.
+
 ## [Unreleased] - pass 354 (the whole-page read: every surface read end to end, four drifts caught)
 
 ### Fixed: what survived the gates was a raw DOM property, a wrong API-limits claim, a missing space, and a leaked lock

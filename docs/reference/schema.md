@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/schema
 layout: default
 title: Brain Schema
+description: The brain schema - every markdown and JSON file the store knows, what writes them, and what reads them.
 nav_order: 130
 ---
 # Brain Schema

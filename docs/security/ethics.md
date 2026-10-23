@@ -130,3 +130,9 @@ Ethics that live in prose die in prose. A spec page sits in the nav,
 ships with every docs deployment, gets diffed in PRs when the product
 changes, and can be cited as the standard other agent tools get held
 to.
+
+## Related
+
+- [Legal & Policies](/vant/reference/legal) - the full policy stack
+- [Privacy](/vant/security/privacy) - what the product collects (nothing)
+- [Agent Contributors](/vant/advanced/agent-contributors) - the contract agent-made PRs ride

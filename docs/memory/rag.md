@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /memory/rag
 layout: default
 title: RAG with Vant
+description: The retrieval lane - index, embed, and rerank brain files for RAG answers.
 nav_order: 28
 ---
 

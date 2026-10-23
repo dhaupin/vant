@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/sudo
 layout: default
 title: Sudo API
+description: The sudo API - scoped privilege elevation with audited, code-defined policies.
 nav_order: 133
 ---
 

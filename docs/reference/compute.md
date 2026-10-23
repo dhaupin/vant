@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/compute
 layout: default
 title: Compute API
+description: The compute API - sidecar runtimes and language connectors behind one surface.
 nav_order: 122
 ---
 

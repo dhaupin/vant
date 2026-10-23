@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /multi-agent/succession
 layout: default
 title: Trust & Succession
+description: Trust and succession - what each new agent generation inherits, and how trust is pinned.
 nav_order: 48
 ---
 # Trust & Succession

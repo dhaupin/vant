@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /essential/manual-brain
 layout: default
 title: Brain File Templates
+description: Brain file templates - copy a manual-brain scaffold and drive the memory by hand, no runtime needed.
 nav_order: 43
 ---
 # Brain File Templates

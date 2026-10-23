@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /operations/events
 layout: default
 title: Events
+description: The event system - emit, subscribe, and bridge events across surfaces.
 nav_order: 57
 ---
 

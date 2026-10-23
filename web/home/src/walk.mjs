@@ -22,6 +22,7 @@ export const WALK = [
     { label: 'Install', href: '/install' },
     { label: 'Brain', href: '/brain' },
     { label: 'Security', href: '/security' },
+    { label: 'Showcase', href: '/showcase' },
     { label: 'Releases', href: 'https://github.com/dhaupin/vant/releases' },
     { label: 'GitHub', href: 'https://github.com/dhaupin/vant' },
     { label: 'Docs', href: 'https://docs.creadev.org/vant/' },
@@ -29,6 +30,8 @@ export const WALK = [
     { label: 'Contact', href: '/contact' },
 ]
 
+// Ten entries, one per WALK stop (the owner's same-count rule): the footer
+// columns render the same height on every route.
 export const LEARN = [
     { label: 'Quick start', href: 'https://docs.creadev.org/vant/getting-started/quick-start' },
     { label: 'Agent onboarding', href: 'https://docs.creadev.org/vant/getting-started/agent-onboarding' },
@@ -39,6 +42,7 @@ export const LEARN = [
     { label: 'REST API', href: 'https://docs.creadev.org/vant/reference/rest-api' },
     { label: 'CLI reference', href: 'https://docs.creadev.org/vant/reference/cli' },
     { label: 'Security', href: 'https://docs.creadev.org/vant/security/' },
+    { label: 'Operations', href: 'https://docs.creadev.org/vant/operations/' },
 ]
 
 export function routeKey(pathname) {

@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /security/airgap-propagation
 layout: default
 title: Airgap Propagation
+description: Airgap propagation - move a sealed brain across an airgap via horcrux images, safely.
 nav_order: 71
 ---
 # Airgap Propagation

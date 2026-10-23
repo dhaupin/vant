@@ -37,3 +37,9 @@ built-ins. Debugging privilege errors: [Sudo](/vant/essential/sudo).
 ```bash
 vant onboard files    # See every brain file an island can load
 ```
+
+## Related
+
+- [Islands](/vant/essential/islands) - the lazy-loaded brain modules
+- [Boot](/vant/essential/boot) - the startup sequence
+- [Architecture](/vant/essential/architecture) - the source-of-truth map

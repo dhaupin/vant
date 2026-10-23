@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /advanced/troubleshooting
 layout: default
 title: Troubleshooting
+description: The troubleshooting map - symptom, diagnosis, and fix for the most common failures.
 nav_order: 99
 
 ---

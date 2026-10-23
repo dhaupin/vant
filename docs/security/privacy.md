@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /security/privacy
 layout: default
 title: Privacy Policy
+description: The privacy policy - what Vant collects (nothing), where brains live (your repo), and why that settles it.
 nav_order: 73
 ---
 

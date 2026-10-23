@@ -41,3 +41,9 @@ memory store as they happen, search the corpus when context is missing.
 Sleep: write lessons into brain files, commit, push. Git history is the
 lineage; every generation of the agent inherits what the last one wrote.
 The full loop for agents is in [Agent Onboarding](/vant/getting-started/agent-onboarding).
+
+## Related
+
+- [The Brain](/vant/memory/brain) - the memory files and where they live
+- [Memory store](/vant/memory/memory-store) - facts as they happen
+- [Search](/vant/memory/search) - the RAG lane over the corpus

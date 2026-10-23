@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /security/best-practices
 layout: default
 title: Security Best Practices
+description: Security best practices - the hardening checklist for a public-facing or multi-guest install.
 nav_order: 72
 ---
 

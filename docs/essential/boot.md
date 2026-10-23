@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /essential/boot
 layout: default
 title: Ghost in the Machine
+description: The startup sequence - what boots in what order, and the brain bootstrap window.
 nav_order: 38
 ---
 

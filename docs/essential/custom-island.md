@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /essential/custom-island
 layout: default
 title: Custom Islands
+description: Write your own island - the load-trigger contract for lazily-loaded brain modules.
 nav_order: 41
 ---
 

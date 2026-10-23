@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /operations/relay
 layout: default
 title: The Relay - the r/2 webhook-native face
+description: The relay - Mode R, the gated webhook-native hop surface, and its operation postures.
 nav_order: 67
 ---
 

@@ -4,6 +4,7 @@ version: 0.8.6
 permalink: /advanced/search-architecture
 layout: default
 title: Search Architecture
+description: The search architecture - indexers, embeddings, and the hybrid ranking stack.
 
 nav_order: 91
 ---

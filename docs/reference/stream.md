@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/stream
 layout: default
 title: Stream API
+description: The stream API - live event streaming surfaces for browsers and tools.
 nav_order: 132
 ---
 

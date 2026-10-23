@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /integrations/repos
 layout: default
 title: Multi-Repo Skills
+description: Multi-repo skills - attach git repos as skill sources and sync them on demand.
 nav_order: 89
 ---
 

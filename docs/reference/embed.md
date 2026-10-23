@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /reference/embed
 layout: default
 title: Embed API
+description: The embed API - turn brain files into vectors for the retrieval lane.
 nav_order: 124
 ---
 

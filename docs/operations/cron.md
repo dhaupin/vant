@@ -3,6 +3,7 @@ version: 0.8.6
 permalink: /operations/cron
 layout: default
 title: Cron
+description: Cron - scheduled jobs inside Vant, their state, and how the scheduler degrades.
 nav_order: 56
 ---
 

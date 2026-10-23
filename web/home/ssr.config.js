@@ -11,6 +11,7 @@
  *   /          the lander
  *   /install   install paths (clone canon, Docker Hub image, npm posture)
  *   /security  disclosure path + the fail-closed chain
+ *   /showcase  the portfolio of real Vant installs (case-study cards)
  *   /terms     terms of use
  *   /privacy   privacy policy
  *   /status    public surfacing status (island-backed)
@@ -74,6 +75,16 @@ export default {
             },
         },
         {
+            path: '/showcase',
+            priority: '0.7',
+            changefreq: 'monthly',
+            meta: {
+                title: 'Showcase - Vant',
+                description:
+                    'Real Vant installs: case studies and a portfolio of what agent fleets solve, with the submit door for yours.',
+            },
+        },
+        {
             path: '/brain',
             priority: '0.7',
             changefreq: 'monthly',
@@ -120,7 +131,7 @@ export default {
             meta: {
                 title: 'Status - Vant',
                 description:
-                    'Vant surfaces status: the home site, docs hub, brain dashboard, and the GitHub project, checked from your browser with honest limits.',
+                    'Vant surfaces status: every public asset swept from the edge with 35 days of uptime history, an ongoing-issue alert spot, and an honest fallback.',
             },
         },
         {
