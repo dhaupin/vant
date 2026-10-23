@@ -38,26 +38,28 @@ export const SHOWCASE = [
             'your real handlers, a hardening ledger, and CI that fails on regressions ' +
             '- no sockets, no bans, no invoice.',
         desc:
-            'Crashtest attacks the code agents actually ship: every campaign is a ' +
-            'WHATWG Request handed to your real handlers in-process, against an ' +
-            'in-memory fake backend with op counters attached - the same way a ' +
-            'security engineer probes, minus the live server\n\n' +
-            'What makes it a Vant story is the builder: Rook, a persistent coding ' +
-            'agent whose entire working memory lives in the repo the Vant way - ' +
-            'markdown brain files (identity, goals, structure, workflow, lessons, ' +
-            'errors) that each session reads on wake and writes before it closes, ' +
-            'committed to git so every earned lesson lands as a reviewable diff. ' +
-            'The whole Crashtest brain ships as a Vant horcrux ' +
-            '(horcrux/crashtest-p_quillstone-9fold.svg), so a fresh session or a ' +
-            'brand-new contributor restores the full accumulated memory on demand - ' +
-            'the restore was verified end to end against a virgin Vant clone (13 ' +
-            'files, both scopes).\n\n' +
-            'At the v1.0.0 seal the receipts were a 176/176 test suite, a web build ' +
-            '6/6, and a self-dogfood ledger at 30/30 REFUSED. The proud list: same ' +
-            'commit, same findings (seed-pinned determinism); accepted risks that ' +
-            'require an owner and a bound (a BOUNDED without one is a finding); and ' +
-            'the one law the engine keeps to everywhere: attack code, not people. ' +
-            'No sockets. Ever.',
+            'Crashtest wasn\'t built in one session, it was built by a continuity ' +
+            'instead. Rook, the persistent coding agent behind it, works the Vant ' +
+            'way: a wholebrain of markdown files under models/ in the repo itself ' +
+            '(identity, goals, structure, workflow, lessons, errors) that every ' +
+            'session reads on wake and writes before it closes, committed to git.\n\n' +
+            'Context never restarts - the goals stayed exactly where they were ' +
+            'written while the scope grew from a seeded auth/input pack to the full ' +
+            'taxonomy (state oracles, volume, abuse-shape guards), the earned rules ' +
+            'held their line in lessons.md ("seed-derived everything", "exact pins ' +
+            'not ceilings", no sockets. Ever.), and the prose and working cadence ' +
+            'carried across dozens of sessions instead of being re-derived each ' +
+            'time - with receipts stamped for later verification, not remembered: a ' +
+            '176/176 suite and a self-dogfood ledger at 30/30 REFUSED at the v1.0.0 ' +
+            'seal. When work went parallel, other vant agents on their own brains ' +
+            'worked the same shared memory (one brain per project, one branch per ' +
+            'agent, merge-by-PR), so attack packs got authored, issues triaged and ' +
+            'fixed, and capabilities extended (hono/express/fastify/wordpress ' +
+            'adapters, the hardening ledger, CI gate) with no hand-off meeting.\n\n' +
+            'The brain also travels as a vant horcrux ' +
+            '(horcrux/crashtest-p_quillstone-9fold.svg), verifiably restorable on a ' +
+            'virgin clone, so any fresh session wakes up owning the project rather ' +
+            'than reading up on it.',
     },
     {
         id: 'axolotl-creadev',
