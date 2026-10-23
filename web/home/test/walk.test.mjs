@@ -5,6 +5,7 @@
  * without a React transform (same shape as test/config.test.mjs).
  */
 import { describe, expect, it } from 'vitest'
+import { featureLive } from '../src/gates.mjs'
 import { WALK, WALK_LIVE, STATUS_LIVE, LEARN, routeKey, hopChain } from '../src/walk.mjs'
 import config from '../ssr.config.js'
 
@@ -92,12 +93,19 @@ describe('hopChain - the menu-derived prev/next contract (externals ride along)'
     })
 
     it('holds the deploy gate: STATUS_LIVE off hides only the Status stop', () => {
+        // gates.mjs owns the flag; walk.mjs only mirrors it. The lazy
+        // resolver follows the same VITE_<NAME>_LIVE law for future gates.
         // The test environment sets no VITE_* vars, so the gate is OFF here:
         // the not-yet-wired posture is the default. WALK stays the pinned
         // full tour; WALK_LIVE is the same tour minus the unwired stop.
         expect(STATUS_LIVE).toBe(false)
         expect(WALK_LIVE).toEqual(WALK.filter((s) => s.href !== '/status'))
         expect(WALK_LIVE.length).toBe(9)
+    })
+
+    it('resolves gates by name the same VITE_<NAME>_LIVE way (future surfaces)', () => {
+        expect(featureLive('status')).toBe(false)
+        expect(featureLive('relay')).toBe(false)
     })
 
     it('never returns an external as the internal hop and never loops forever', () => {

@@ -2,28 +2,35 @@
  * src/walk.mjs (vant-home)
  * ========================
  * The PURE-DATA single source of truth for the site's navigation contracts
- * (pass 350). No JSX, no imports: vite prerenders it, the browser bundles
- * it, and the vitest pins import it directly, so the walk/menu/footer
- * contracts can be locked without a React runtime.
+ * (pass 350). No JSX; the one import is the pure-data gates.mjs registry
+ * below, so this module still prerenders via vite, bundles in the browser,
+ * and imports directly under vitest with no React runtime.
  *
- *   WALK    = the owner-directed site tour; Nav.jsx renders it as the top
- *             menu and the drawer sections, AppLayout's PageWalk reads
- *             prev/next from it, and Footer.jsx's "Vant" column renders
- *             the same list. One list, four surfaces, zero drift.
- *   LEARN   = the footer "Learn" column: exactly WALK.length external
- *             docs links (the owner's same-count rule).
- *   STATUS_LIVE = the deploy gate for the status surface (false until the
- *                 monitor is wired: the D1 binding AND STATUS_ADMIN_KEY exist
- *                 on the Pages project - the owner flips VITE_STATUS_LIVE=1
- *                 in the PAGES BUILD settings at the same time). While it is
- *                 off, WALK_LIVE drops the Status stop, so the menu, the
- *                 drawer, the footer, and the walk hops never advertise a
- *                 page that cannot answer. No fallback fiction anywhere.
- *   hopChain = the prev/next engine: menu-derived, externals-aware
- *   routeKey = the trailing-slash normalizer (pass 348): the prerendered
- *             site serves /brain/ while SPA navigations ride /brain; every
- *             pathname-keyed lookup must fold both into one key.
+ *   WALK       = the owner-directed site tour; Nav.jsx renders it as the
+ *                top menu and the drawer sections, AppLayout's PageWalk
+ *                reads prev/next from it, and Footer.jsx's "Vant" column
+ *                renders the same list. One list, four surfaces, zero
+ *                drift.
+ *   LEARN      = the footer "Learn" column: exactly WALK.length external
+ *                docs links (the owner's same-count rule).
+ *   STATUS_LIVE = the deploy gate for the status surface (owned by the
+ *                gates.mjs registry; false until the monitor is wired:
+ *                the D1 binding AND STATUS_ADMIN_KEY exist on the Pages
+ *                project, and the owner flips VITE_STATUS_LIVE=1 in the
+ *                PAGES BUILD settings at the same time). While it is off,
+ *                WALK_LIVE drops the Status stop, so the menu, the
+ *                drawer, the footer, and the walk hops never advertise a
+ *                page that cannot answer; /status itself renders the
+ *                shared maintenance stage (components/Maintenance.jsx).
+ *                No fallback fiction anywhere.
+ *   hopChain   = the prev/next engine: menu-derived, externals-aware
+ *   routeKey   = the trailing-slash normalizer (pass 348): the
+ *                prerendered site serves /brain/ while SPA navigations
+ *                ride /brain; every pathname-keyed lookup must fold both
+ *                into one key.
  */
+
+import * as gates from './gates.mjs'
 
 export const WALK = [
     { label: 'Home', href: '/' },
@@ -53,15 +60,7 @@ export const LEARN = [
     { label: 'Operations', href: 'https://docs.creadev.org/vant/operations/' },
 ]
 
-// The deploy gate (owner direction): the status surface stays OUT of the
-// site until the monitor is wired for real. WALK remains the PINNED full
-// tour truth (the tests hold it); WALK_LIVE is what the menu, the footer,
-// the drawer, and the hop engine actually render.
-export const STATUS_LIVE = String(
-    (typeof import.meta !== 'undefined' && import.meta.env)
-        ? import.meta.env.VITE_STATUS_LIVE
-        : undefined
-) === '1'
+export const STATUS_LIVE = gates.STATUS_LIVE
 
 export const WALK_LIVE = STATUS_LIVE ? WALK : WALK.filter((s) => s.href !== '/status')
 

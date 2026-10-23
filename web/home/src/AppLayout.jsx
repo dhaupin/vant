@@ -22,6 +22,7 @@ const { Routes, Route, useLocation, Link } = rrd
 import { mountIslands } from './islands.js'
 import { islands }      from './AppIslands.jsx'
 import Nav                 from './components/Nav.jsx'
+import Maintenance         from './components/Maintenance.jsx'
 import { WALK_LIVE, routeKey, hopChain, STATUS_LIVE } from './walk.mjs'
 import Footer           from './components/Footer.jsx'
 import Home             from './pages/Home.jsx'
@@ -216,7 +217,7 @@ export default function AppLayout() {
                     <Route path="/brain"    element={<Brain />} />
                     <Route path="/terms"   element={<Terms />} />
                     <Route path="/privacy" element={<Privacy />} />
-                    <Route path="/status"  element={STATUS_LIVE ? <Status /> : <StatusMaintenance />} />
+                    <Route path="/status"  element={STATUS_LIVE ? <Status /> : <Maintenance section="01" title="Status" />} />
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/changelog" element={<Changelog />} />
                     <Route path="*"        element={<NotFound />} />
@@ -240,16 +241,7 @@ function NotFound() {
     )
 }
 
-// The maintenance stage for /status (owner direction): while the deploy gate
-// is off (VITE_STATUS_LIVE unset), direct visitors read one plain line
-// instead of an empty shell. Nothing here promises a live board.
-function StatusMaintenance() {
-    return (
-        <section>
-            <div className="container">
-                <div className="sec-head"><span className="sec-idx">01</span><h2>Status</h2></div>
-                <p className="sub">Vant is under maintenance, please check back soon.</p>
-            </div>
-        </section>
-    )
-}
+// The maintenance stage for /status is components/Maintenance.jsx, the
+// SHARED stage for every deploy-gated surface (gates.mjs): while
+// VITE_STATUS_LIVE is unset, direct visitors read one plain line instead
+// of an empty shell. Future gated surfaces reuse the same component.
