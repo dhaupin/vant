@@ -216,7 +216,7 @@ export default function AppLayout() {
                     <Route path="/brain"    element={<Brain />} />
                     <Route path="/terms"   element={<Terms />} />
                     <Route path="/privacy" element={<Privacy />} />
-                    <Route path="/status"  element={STATUS_LIVE ? <Status /> : null} />
+                    <Route path="/status"  element={STATUS_LIVE ? <Status /> : <StatusMaintenance />} />
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/changelog" element={<Changelog />} />
                     <Route path="*"        element={<NotFound />} />
@@ -235,6 +235,20 @@ function NotFound() {
                 <div className="sec-head"><span className="sec-idx">404</span><h2>Page not found</h2></div>
                 <p className="sub">That page does not exist on vant.creadev.org.</p>
                 <a className="btn" href="/">Go home</a>
+            </div>
+        </section>
+    )
+}
+
+// The maintenance stage for /status (owner direction): while the deploy gate
+// is off (VITE_STATUS_LIVE unset), direct visitors read one plain line
+// instead of an empty shell. Nothing here promises a live board.
+function StatusMaintenance() {
+    return (
+        <section>
+            <div className="container">
+                <div className="sec-head"><span className="sec-idx">01</span><h2>Status</h2></div>
+                <p className="sub">Vant is under maintenance, please check back soon.</p>
             </div>
         </section>
     )
