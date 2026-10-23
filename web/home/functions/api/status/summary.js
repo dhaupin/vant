@@ -21,8 +21,11 @@ import { json, ensureSchema, seedDefaults, maybeSweep, getSummary } from '../../
 export async function onRequestGet(context) {
     const env = context.env
     if (!env || !env.DB) {
+        // error rides the BOARD in one short clause; fix is the operator
+        // sentence (the island renders them separately, no prose soup).
         return json(503, {
-            error: 'Status history is not wired yet: bind the D1 database as `DB` in this Pages project\'s settings (Bindings > Add > D1 database bindings), then redeploy. No D1 binding is not the same as downtime - the board still renders its fallback.',
+            error: 'no D1 binding on this deploy',
+            fix: 'Bind the vant-pub database as `DB` in this Pages project settings: Settings > Bindings > Add > D1 database bindings, then redeploy.',
         })
     }
     try {

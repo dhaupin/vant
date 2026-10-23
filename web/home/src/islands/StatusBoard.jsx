@@ -111,6 +111,7 @@ const OVERALL_LEVEL = { up: 'ok', degraded: 'degraded', down: 'outage', unknown:
 export default function StatusBoard() {
     const [board, setBoard] = useState(null)
     const [boardError, setBoardError] = useState('')
+    const [boardFix, setBoardFix] = useState('')
     const [fallback, setFallback] = useState(null)
     const [opMessage, setOpMessage] = useState('')
     const [adminKey, setAdminKey] = useState('')
@@ -130,11 +131,13 @@ export default function StatusBoard() {
                     const data = await r.json()
                     setBoard(data)
                     setBoardError('')
+                    setBoardFix('')
                     setFallback(null)
                     return
                 }
                 const body = await r.json().catch(() => null)
                 setBoardError((body && body.error) || 'HTTP ' + r.status)
+                setBoardFix((body && body.fix) || '')
             } catch (e) {
                 if (alive) setBoardError('the status API answers nothing from this browser')
             }
@@ -175,10 +178,14 @@ export default function StatusBoard() {
     if (fallback) {
         return (
             <div>
-                <p className="contact-note" style={{ marginBottom: 14 }}>
-                    The server-side monitor is not wired yet ({boardError || 'no D1 binding on this deploy'}), so this
-                    is the honest fallback: direct checks from your own browser, no history, no alert spot.
-                    Setup lives in web/home/functions/README.md.
+                <p className="contact-note" style={{ marginBottom: 6 }}>
+                    The server-side monitor is not wired yet on this deploy <strong>({boardError || 'no D1 binding'})</strong>,
+                    so this is the honest fallback: direct checks from your own browser, with no history and no alert spot.
+                    Nothing below is stored anywhere; it all lives and dies in this tab.
+                </p>
+                {boardFix && <p className="status-meta" style={{ marginBottom: 14 }}>{boardFix}</p>}
+                <p className="status-meta" style={{ marginBottom: 14 }}>
+                    Full setup: <a href="https://github.com/dhaupin/vant/blob/main/web/home/functions/README.md" rel="noopener">the functions README on GitHub</a>.
                 </p>
                 <div className="status-grid">
                     {FALLBACK_PROBES.map((p) => {
