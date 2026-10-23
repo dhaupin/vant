@@ -34,6 +34,13 @@ describe('src/walk.mjs - the walk contract (one list, four surfaces)', () => {
         }
     })
 
+    it('reads the tour in the owner order (Status rides right after Showcase)', () => {
+        expect(WALK.map((s) => s.label)).toEqual([
+            'Home', 'Install', 'Brain', 'Security', 'Showcase',
+            'Status', 'Releases', 'GitHub', 'Docs', 'Contact',
+        ])
+    })
+
     it('carries only ONE Home origin (footer renders the same list)', () => {
         // PageWalk skips index 0; anything else would double-render Home
         expect(WALK.filter((s) => s.href === '/')).toHaveLength(1)

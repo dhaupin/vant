@@ -7,7 +7,7 @@
  *
  * THE WALK (pass 342, trimmed in pass 344): the owner-directed tour lives
  * here as ONE ordered list (Home → Install → Brain → Security → Showcase →
- * Releases → GitHub → Docs → Status → Contact) that BOTH the menu and
+ * Status → Releases → GitHub → Docs → Contact) that BOTH the menu and
  * AppLayout's PageWalk read: the menu order and the walk order cannot
  * drift. Since pass 343 the Brain stop is INTERNAL (/brain, the marketing
  * page whose content links brain.creadev.org; see pages/Brain.jsx), so
@@ -48,11 +48,11 @@ const MENU_SECTIONS = [
     },
     {
         head: 'The install',
-        items: [WALK[2], WALK[3], WALK[4], WALK[8], WALK[9]],
+        items: [WALK[2], WALK[3], WALK[4], WALK[5], WALK[9]],
     },
     {
         head: 'The family',
-        items: [WALK[5], WALK[6], WALK[7]],
+        items: [WALK[6], WALK[7], WALK[8]],
     },
     {
         head: 'More',

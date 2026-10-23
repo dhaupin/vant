@@ -23,10 +23,10 @@ export const WALK = [
     { label: 'Brain', href: '/brain' },
     { label: 'Security', href: '/security' },
     { label: 'Showcase', href: '/showcase' },
+    { label: 'Status', href: '/status' },
     { label: 'Releases', href: 'https://github.com/dhaupin/vant/releases' },
     { label: 'GitHub', href: 'https://github.com/dhaupin/vant' },
     { label: 'Docs', href: 'https://docs.creadev.org/vant/' },
-    { label: 'Status', href: '/status' },
     { label: 'Contact', href: '/contact' },
 ]
 
