@@ -5,6 +5,27 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 358 (the cron truth: Pages has no cron triggers, and the docs stop pretending it does)
+
+### Fixed: the setup docs taught a dashboard section that does not exist
+
+- The owner could not find "Settings → Functions → Cron triggers" on
+  the vant-pub Pages project - correctly, because that section does
+  not exist: Cloudflare ships cron triggers on WORKERS projects only
+  (their own Pages→Workers migration guide lists Cron Triggers under
+  the features Workers has that Pages does not; verified against
+  developers.cloudflare.com, October 2026). functions/README.md and
+  DEPLOY.md now teach the honest posture: no schedule is possible on
+  Pages, history stays honest through the visitor-driven throttled
+  sweep, and a fixed cadence rides any external scheduler pointed at
+  `GET /api/status/summary`. The onScheduled handler stays in the tree
+  (it fires if the project ever moves to Workers, where the same DB
+  binding and cron triggers exist).
+- Verified live: the vant-pub deploy serves the fresh 503 shape
+  (short error clause + separate fix line), confirming the current
+  build is deployed; with the DB/admin key bindings applied the next
+  deploy flips it to the full board.
+
 ## [Unreleased] - pass 357 (the /showcase page: the fleet's portfolio, the self entry, and the submit door)
 
 ### Added: route ten, the portfolio of real Vant installs

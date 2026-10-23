@@ -40,25 +40,30 @@ forced sweeps) — treat it like a password.
 
 Env var, default `600`: how stale a sweep may be before a public GET of
 `/api/status/summary` triggers a fresh one. Public GETs can never hammer
-the monitors — the throttle is the guarantee.
+the monitors — the throttle is the guarantee.### 4. Sweep cadence (the honest truth: Pages has NO cron triggers)
 
-### 4. Cron trigger (optional, keeps history honest)
+There is no "Functions → Cron triggers" section in the Pages dashboard
+because Cloudflare ships cron triggers on WORKERS projects, not Pages
+projects — their own Pages→Workers migration guide lists Cron Triggers
+under the features Workers has "and Pages does not" (verified against
+developers.cloudflare.com, October 2026). Nothing is misconfigured on
+your project; the section simply does not exist.
 
-**Settings → Functions → Cron triggers**: e.g. `*/30 * * * *`.The scheduled handler (`functions/api/status/scheduled.js`, `onScheduled`)
-runs the same probe sweep with the throttle skipped, so quiet days still
-get samples. No trigger configured? Nothing breaks: every summary
-visitor drives the throttled sweep, and days with no samples render as
-"no data" — never as downtime.
+Consequences, all by design:
 
-**Why no migration sets this for you:** a D1 migration only moves
-DATABASE schema — a Pages cron trigger is a PROJECT setting (it lives
-next to the build config, not in any database), so there is no SQL
-migration that can create it. Under this repo's no-wrangler-strings law
-the two supported paths are: the dashboard step above, or (automation
-you own) the Pages REST API — a `PATCH /accounts/{account_id}/pages/
-projects/{project_name}` call with Pages Write scope, the same endpoint
-canonical for project config updates — the panel path is the
-checklist default.
+- The scheduled handler (`functions/api/status/scheduled.js`,
+  `onScheduled`) stays in the tree, harmless: it fires if this project
+  is ever moved to Workers (where cron triggers exist and the handler
+  finds the same `DB` binding).
+- History does not depend on a schedule: every public GET of
+  `/api/status/summary` runs the throttled sweep whenever the data is
+  cold (`STATUS_SWEEP_SECONDS`, default 600s), and days with no samples
+  render as "no data" — never as downtime.
+- Want a fixed cadence anyway? Point ANY external scheduler (uptime
+  pinger, a one-file Worker with a cron trigger, a GitHub Actions
+  schedule) at `GET https://<your-project>.pages.dev/api/status/summary`
+  every 10+ minutes: each call refreshes the cold data through the same
+  throttle path.
 
 ## Route map
 
