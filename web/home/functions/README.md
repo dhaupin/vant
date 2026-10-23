@@ -44,6 +44,14 @@ behavior), default `600`: how stale a sweep may be before a public GET
 of `/api/status/summary` triggers a fresh one. Public GETs can never
 hammer the monitors — the throttle is the guarantee.
 
+### 3.5 `STATUS_MAX_ENDPOINTS` (optional)
+
+Also plain **Text**, default `24`: the endpoint cost wall — every cold
+public GET probes every endpoint, so an unbounded table would turn one
+compromised admin key into an edge-egress hammer. The crashtest pack
+`vant-home/flood-cost-cap` measured the missing cap as a real finding
+and the cap landed the same turn (2026-10-23).
+
 ### 4. Sweep cadence (the honest truth: Pages has NO cron triggers)
 
 There is no "Functions → Cron triggers" section in the Pages dashboard

@@ -87,7 +87,18 @@ async function main() {
     process.chdir(sb);
     try {
         const seen = new Map();
-        const loaded = await packsMod.loadPacks([path.join(ROOT, 'packs')], seen);
+        // (owner ask, 2026-10-23) CRASHTEST_SWEEP_DEFAULTS=1 re-measures the
+        // npm wide-sweep packs (qs-shapes / vite-dev-shapes /
+        // next-middleware-shapes / cve-feed / wp lanes) against the FULL
+        // armed run root - cve-feed's banner halfrides declared routes, so
+        // arming IS declaring. Opt-in so the standing CI ledger keeps its
+        // sampled shape; the probe-coverage table in packs/README.md cites
+        // the env var.
+        const loadDirs = [path.join(ROOT, 'packs')];
+        // the loader scans public/ + local/ UNDER each root, so the crate's
+        // default packs ride ITS packs root
+        if (process.env.CRASHTEST_SWEEP_DEFAULTS === '1') loadDirs.push(path.join(CT_DIR, 'packs'));
+        const loaded = await packsMod.loadPacks(loadDirs, seen);
         const onlyPack = (process.argv.find((a) => a.startsWith('--pack=')) || '').replace('--pack=', '') || null;
         const packs = onlyPack ? loaded.filter((p) => p.manifest.name === onlyPack) : loaded;
         if (!packs.length) {
@@ -145,7 +156,8 @@ async function main() {
         if (fs.existsSync(libDir)) {
         const armedRoutes = ['brain-read', 'brain-state', 'brain-migrate', 'guest-cap', 'crew-run', 'mcp-exec',
         'vant-rest-open', 'vant-rest-priv', 'vant-rest-priv-alias', 'vant-login', 'vant-me', 'vant-logout',
-        'stone-scope', 'stone-tamper', 'stone-restore-tamper', 'rest-request', 'trust-read', 'brain-graph-walk'];
+        'stone-scope', 'stone-tamper', 'stone-restore-tamper', 'rest-request', 'trust-read', 'brain-graph-walk',
+        'home-summary', 'home-admin'];
         // Per-module route vocabulary: rows whose ctx names are not `route`
         // get the vant-armed route that speaks their contract (privileged
         // authz gate, cookie session verbs, deep/regex Edge probes). D1- and
@@ -528,6 +540,109 @@ const STONE_CHILD = `${CHILD_STDOUT_GUARD}
 
 const EDGE_CHAINS = { open: null, priv: null };
 
+// --- the site wire (the vant-home arm): web/home's Pages Functions,
+// --- driven in-process over a statement-mapped in-memory fake D1. The SQL
+// --- statements come from web/home/functions/_lib/status.js verbatim, so
+// --- the dispatch matches them exactly; an unknown statement REFUSES
+// --- LOUDLY (a silently-guessed D1 would make honest rows read as armed).
+function makeFakeD1() {
+    const db = { endpoints: [], checks: [], daily: new Map(), alerts: [], meta: new Map(), _ids: { e: 0, c: 0, a: 0 } };
+    function stmt(sql) {
+        const s = String(sql);
+        const low = s.toLowerCase();
+        let args = [];
+        function exec() {
+            if (/^create table/i.test(low)) return { changes: 0 };
+            if (low.includes('select count(*) as n from status_endpoints')) return { first: { n: db.endpoints.length } };
+            if (low.includes('insert or ignore into status_endpoints')) {
+                const [name, url, kind, kindOptions, createdAt] = args;
+                if (db.endpoints.some((e) => e.name === name)) return { changes: 0 };
+                db._ids.e++;
+                db.endpoints.push({ id: db._ids.e, name, url, kind, kind_options: kindOptions, created_at: createdAt });
+                return { changes: 1 };
+            }
+            if (low.startsWith('insert into status_checks')) {
+                const [endpointId, day, ts, ok, state, latencyMs, detail] = args;
+                db._ids.c++;
+                db.checks.push({ id: db._ids.c, endpoint_id: endpointId, day, ts, ok, state, latency_ms: latencyMs, detail });
+                return { changes: 1 };
+            }
+            if (low.includes('insert into status_daily')) {
+                const [endpointId, day, upCount, checkCount] = args;
+                const key = endpointId + '|' + day;
+                const prior = db.daily.get(key) || { up_count: 0, check_count: 0 };
+                db.daily.set(key, { up_count: prior.up_count + upCount, check_count: prior.check_count + checkCount });
+                return { changes: 1 };
+            }
+            if (low.includes('from status_daily where day >= ?')) {
+                const since = args[0];
+                const results = [...db.daily.entries()]
+                    .map(([key, row]) => { const i = key.indexOf('|'); return { endpoint_id: Number(key.slice(0, i)), day: key.slice(i + 1), up_count: row.up_count, check_count: row.check_count }; })
+                    .filter((r) => r.day >= since)
+                    .sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : a.endpoint_id - b.endpoint_id));
+                return { results };
+            }
+            if (low.includes('from status_checks order by id desc limit 300')) {
+                const results = [...db.checks].sort((a, b) => b.id - a.id).slice(0, 300)
+                    .map(({ endpoint_id, ts, ok, state, latency_ms, detail }) => ({ endpoint_id, ts, ok, state, latency_ms, detail }));
+                return { results };
+            }
+            if (low.includes('select * from status_endpoints order by id')) return { results: db.endpoints.map((e) => ({ ...e })) };
+            if (low.startsWith('delete from status_endpoints')) {
+                const before = db.endpoints.length;
+                const field = /where id = \?/i.test(low) ? 'id' : 'name';
+                db.endpoints = db.endpoints.filter((e) => String(e[field]) !== String(args[0]));
+                return { changes: before - db.endpoints.length };
+            }
+            if (low.includes('select value from status_meta')) return { first: db.meta.has(args[0]) ? { value: db.meta.get(args[0]) } : null };
+            if (low.includes('into status_meta')) {
+                const [key, value] = args;
+                db.meta.set(key, value);
+                return { changes: db.meta.has(key) ? 1 : 1 };
+            }
+            if (low.includes('update status_alerts set active = 0')) {
+                let ch = 0;
+                for (const a of db.alerts) { if (a.active === 1) { a.active = 0; a.cleared_at = args[0]; ch++; } }
+                return { changes: ch };
+            }
+            if (low.includes('insert into status_alerts')) {
+                const [message, level, createdAt] = args;
+                db._ids.a++;
+                db.alerts.push({ id: db._ids.a, message, level, active: 1, created_at: createdAt, cleared_at: null });
+                return { changes: 1 };
+            }
+            if (low.includes('from status_alerts where active = 1')) {
+                return { results: [...db.alerts].filter((a) => a.active === 1).sort((a, b) => b.id - a.id).slice(0, 10) };
+            }
+            throw new Error('fake d1: unknown statement: ' + s.slice(0, 90));
+        }
+        return {
+            bind: (...a) => { args = a; return { run, first, all }; },
+            run, first, all,
+        };
+        function run() { return { success: true, meta: { changes: exec().changes ?? 0 } }; }
+        async function first() { return exec().first ?? null; }
+        async function all() { const { results } = exec(); return { results: results ?? [] }; }
+    }
+    return {
+        prepare: (sql) => stmt(sql),
+        batch: async (stmts) => { const out = []; for (const st of stmts) { await st.run(); out.push(true); } return out; },
+    };
+}
+
+let homeApi = null;
+let homeSharedDb = null;
+async function homeHandlers() {
+    if (!homeApi) {
+        const dir = path.join(ROOT, 'web', 'home', 'functions', 'api', 'status');
+        homeApi = {
+            summary: (await import(pathToFileURL(path.join(dir, 'summary.js')).href)).onRequestGet,
+            admin: (await import(pathToFileURL(path.join(dir, 'admin.js')).href)).onRequestPost,
+        };
+    }
+    return homeApi;
+}
+
 function resetEdgeChains(sb) {
     const Server = require(path.join(sb, 'lib', 'server.js')).Server;
     EDGE_CHAINS.open = new Server({ port: 0, authRequired: false });
@@ -858,6 +973,65 @@ function buildRoutes(sb, Harness) {
     const tamperRoute = stoneRoute('tamper');
     harness.registerRoute('stone-tamper', tamperRoute);
     harness.registerRoute('stone-restore-tamper', tamperRoute);
+
+    // --- the site wire routes (the vant-home arm, 2026-10-23): the REAL
+    // --- web/home Pages Functions over the fresh per-call fake D1. The
+    // --- posture envelope lets the pack pick the environment it attacks
+    // --- (db absent, env key short, sweep hot) - the wire answers through
+    // --- the handlers verbatim.
+    harness.registerRoute('home-summary', async (ctx) => {
+        const j = await ctx.request.json().catch(() => ({}));
+        const { summary } = await homeHandlers();
+        const env = {
+            STATUS_ADMIN_KEY: typeof j.envKey === 'string' ? j.envKey : 'home-run-root-admin-key',
+            STATUS_SWEEP_SECONDS: String(j.sweepSeconds ?? 600),
+        };
+        if (j.db !== false) {
+            env.DB = makeFakeD1();
+            if (j.hotSweep !== false) {
+                // force the sweep window HOT: no wall clock is reachable from
+                // the wire, so the row stays deterministic
+                await env.DB.prepare('INSERT INTO status_meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
+                    .bind('last_sweep', new Date().toISOString()).run();
+            }
+        }
+        const method = String(j.method || 'GET').toUpperCase();
+        let res;
+        if (method !== 'GET') {
+            // the platform contract: summary.js exports GET only
+            res = new Response(JSON.stringify({ error: 'method not allowed on this route' }), {
+                status: 405,
+                headers: { 'content-type': 'application/json; charset=utf-8', 'x-content-type-options': 'nosniff' },
+            });
+        } else {
+            const req = new Request('https://home-run-root.pages.dev/api/status/summary' + String(j.url ?? ''), { method: 'GET', headers: (j.headers || {}) });
+            res = await summary({ request: req, env, data: {} });
+        }
+        const text = await res.text();
+        return new Response(text, { status: res.status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
+    });
+    harness.registerRoute('home-admin', async (ctx) => {
+        const j = await ctx.request.json().catch(() => ({}));
+        const { admin } = await homeHandlers();
+        const env = { STATUS_ADMIN_KEY: typeof j.envKey === 'string' ? j.envKey : 'home-run-root-admin-key' };
+        // (flood-oracle posture) sharedDb keeps ONE fake D1 across a burst
+        // of calls; resetSharedDb forces it fresh on the burst opener.
+        if (j.sharedDb) {
+            if (!homeSharedDb || j.resetSharedDb) homeSharedDb = makeFakeD1();
+            env.DB = homeSharedDb;
+        } else {
+            homeSharedDb = null;
+            if (j.db !== false) env.DB = makeFakeD1();
+        }
+        const inner = (j.inner && typeof j.inner === 'object') ? j.inner : {};
+        const rawBody = typeof j.rawBody === 'string' ? j.rawBody : JSON.stringify(inner);
+        const headers = { 'content-type': 'application/json' };
+        if (j.adminKey !== undefined) headers['x-admin-key'] = String(j.adminKey);
+        const req = new Request('https://home-run-root.pages.dev/api/status/admin', { method: 'POST', headers, body: String(rawBody) });
+        const res = await admin({ request: req, env, data: {} });
+        const text = await res.text();
+        return new Response(text, { status: res.status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
+    });
 
     // (2026-10-22) The last two pending oracles are REGISTERED now: every
     // vant-brain route contract is armed (trust-read + brain-graph-walk).

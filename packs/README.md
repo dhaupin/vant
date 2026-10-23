@@ -173,6 +173,29 @@ tamper SURVIVES (the pack's EXPLOITED arm — measured, never assumed);
 | `state-pointer-lineage` | restored state never wakes a stone on a foreign `currentBrain` silently | validated — REFUSED (mint-side half of #226 FIXED 2026-10-22: a scoped capture retargets an out-of-scope pointer to the first scoped brain, loudly — the sealed payload never carries a pointer its scope cannot wake. The INVENTORY and IDENTITY laws stay as the Cairn/prestruct pins require; full-capture behavior is byte-identical.) |
 | `restore-torn-refusal` | tampered stones refuse loudly and write NOTHING partial — torn restores are worse than failed ones | validated — REFUSED |
 
+### `public/vant-home` - the SITE wire (5 oracles; all validated 2026-10-23)
+
+**What it does.** Attacks the ONE runtime surface the site itself ships: the
+`web/home` Pages Functions (today the `/api/status` monitor API). The REAL
+handlers (`onRequestGet` / `onRequestPost`) are driven in-process with
+WHATWG Requests over a statement-mapped in-memory fake D1 (per-call fresh
+state; unknown statements refuse loudly), so every verdict measures the
+true production wire. Routes: `home-summary` and `home-admin` (a posture
+envelope picks the environment: reserved DB, short env key, sweep-window
+hot, or a shared DB for one flood burst).
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `unwired-refusal-typed` | a not-yet-bound deploy answers TYPED 503 + fix on both doors (never a stack trace, never a fabricated board) | validated - REFUSED |
+| `summary-fuzz-floor` | query pollution, oversized URLs, spoofed methods, junk headers stay on the 2xx-4xx floor | validated - REFUSED |
+| `admin-key-discipline` | missing/wrong/junk keys = typed 403; short env key = typed 503 fail-closed | validated - REFUSED |
+| `admin-body-discipline` | non-JSON wire, no action, unknown action, message-less alert = typed 4xx; oversized alert clamps to 500 chars | validated - REFUSED |
+| `flood-cost-cap` | the endpoint table carries a COST WALL: past the cap every add is refused typed - one compromised key cannot become a per-GET probe-per-row egress hammer | validated - REFUSED (ARMED AS A REAL FINDING the same turn: the table accepted unbounded rows - FIXED the same turn with the STATUS_MAX_ENDPOINTS cap, default 24, plain Text) |
+
+The EXPLOITED ledger for this pack is EMPTY as of 2026-10-23: the flood row
+measured a real finding the hour it was armed and the cap landed the same
+pass. Both CI whitelists stay EMPTY.
+
 ## Running the packs against vant
 
 Two ways, both from this repo:
@@ -197,10 +220,14 @@ Two ways, both from this repo:
    shim, and prints the honest ledger — verdicts, details, and explicit
    skips for routes the run root doesn't arm. It then runs crashtest's
    OWN scenario-library rows (input/guards/authz/session/recursion/…)
-   against the armed routes: 2026-10-24 that is 25 REFUSED / 0
-   EXPLOITED / 5 skipped — the skips are the D1- and KV-store-shaped
-   rows (race, upload, state aliasing), which honest: vant ships no
-   binding to arm.
+   against the armed routes: 2026-10-23 (20 routes, the site wire
+   added) that is 25 REFUSED / 0 EXPLOITED / 5 skipped — the skips are
+   the D1- and KV-store-shaped rows (race, upload, state aliasing),
+   which is honest: vant ships no binding to arm.
+
+   To additionally sweep the crate's own default packs against the full
+   run root (the probe-coverage re-measure above):
+   `CRASHTEST_SWEEP_DEFAULTS=1 node scripts/crashtest-run.js`.
 
 How to point an external crashtest run root here:
 
@@ -245,19 +272,23 @@ scripts address the contract directly; the run-root script keeps reading
 `src/` file paths inside the package dir, which the exports map does not
 need to allow.
 
-## Probe coverage vs v1.0.0's new default packs
+## Probe coverage vs v1.0.0's new default packs (RE-MEASURED 2026-10-23)
 
 The npm wide-sweep packs enumerate **declared routes** — they ride existing
-shim routes rather than needing new probes. Measured 2026-10-22 against
-the armed run root:
+shim routes rather than needing new probes. Re-measured 2026-10-23 against
+the full armed run root (now 20 routes incl. the site wire) with the opt-in
+env `CRASHTEST_SWEEP_DEFAULTS=1`, which loads the crate's own default packs
+alongside vant's (the loader scans `public/` + `local/` under each root, so
+the crate rides its own `packs` root; opt-in so the standing CI ledger
+keeps its sampled shape):
 
-| Default pack | Applies to vant? | Verdict / action |
+| Default pack | Applies to vant? | Verdict / action (2026-10-23 sweep) |
 |---|---|---|
-| `qs-shapes` (bracket canary + depth floor) | **Yes** — lib/server's BodyParser genuinely parses the urlencoded wire | ported as vant-rest's `urlencoded-bracket-canary` + `urlencoded-depth-floor` (both honest REFUSED; the flat-key parser expands nothing) |
-| `vite-dev-shapes` (fs bypass grammars, `.env` leakage) | No — vant ships no Vite dev-server wire (`/@fs/`, transform suffixes) | n/a — absence is honest |
-| `next-middleware-shapes` (`x-middleware-subrequest` bypasses) | No — vant's Edge chain is its own vaf→QoS→auth→escrow stack, not Next middleware | n/a — absence is honest |
-| `cve-feed` (banner disclosure / version ranges) | Half — the Edge chain emits **no** `Server:`/version banner anywhere in the chain (measured by grep + the fuzz-floor rows), so the banner half has nothing to find; the version-range half needs a host-declared component inventory vant does not wire | not ported yet — arm it (a `component-inventory` in `ctx.config['cve-feed']`) when vant publishes one |
-| `wp-*` packs (WordPress lanes) | No — other targets' precedents, kept with their lane | n/a |
+| `qs-shapes` (bracket canary + depth floor) | **Yes** — lib/server's BodyParser genuinely parses the urlencoded wire | ported as vant-rest's `urlencoded-bracket-canary` + `urlencoded-depth-floor` (both honest REFUSED; the flat-key parser expands nothing). Sweep row: REFUSED 2 |
+| `vite-dev-shapes` (fs bypass grammars, `.env` leakage) | No for what vant DEPLOYS — production Pages serves static `dist/`, no dev-server wire, and `web/home` ships no `.env`. The vite dev lane belongs to prestruct/freestruct, which carry their own packs (animals-first) | Re-measured: REFUSED 2 (rows sweep declared routes, land honest refusals) — absence stays honest |
+| `next-middleware-shapes` (`x-middleware-subrequest` bypasses) | No — vant's Edge chain is its own vaf→QoS→auth→escrow stack, not Next middleware | Re-measured: REFUSED 2 (honest refusals) — absence is honest |
+| `cve-feed` (banner disclosure / version ranges) | **Yes, since the site wire joined the run root**: the banner audit sweeps EVERY declared route, and both the real Edge chain and the site's handlers emit no `Server:`/product banner | Re-measured: REFUSED 2 (banner + version rows quiet: zero product identifiers reachable on the wire) — no host inventory needed while nothing discloses |
+| `wp-*` packs (WordPress lanes) | No — other targets' precedents, kept with their lane | Re-measured: honest skips (7) — absence is honest |
 
 The last pending vant-brain oracles were armed 2026-10-22: `trust-read`
 (measured the #233-2 finding — the trust floor was not enforced at the
