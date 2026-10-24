@@ -39,7 +39,8 @@ export default function Footer() {
                         <strong>Vant.</strong> Persistent memory for AI agents:
                         plain markdown brain files in your own repository, read
                         when a session opens, written before it closes,
-                        inherited every time after.
+                        inherited every time after. Trusting the universe,
+                        but with receipts.
                     </p>
                 </div>
                 <div className="footer-grid">

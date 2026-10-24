@@ -257,6 +257,28 @@ Rules for `lib/kernel.js`:
   follows. This is what makes the kernel a substrate for "other similar
   layers/tracking/carriers" and not just a vant internal.
 
+### The wiring map (callsites that register, all UNWIRED — dated 2026-10-24)
+
+The seed draft of `lib/kernel.js` exists (K1-shaped, self-contained,
+zero vant imports, in-process journal + registry + the invariants
+live). No runtime callsite wires it yet — the doc's law stands:
+adoption is registration, and nothing registers until its §4 row
+lands. This subsection is the honest MAP of where each future
+registration line goes, so the pass that adopts greps for no more
+than this. Until one of them exists, `kernel.census()` is an honest
+empty ledger — a census with zero consumers is TRUE, not broken.
+
+| Callsite | Registers as | Verbs wired first |
+|----------|--------------|-------------------|
+| lib/escrow.js | 'escrow' (reference consumer, smallest lift) | census of budgets; attest of spend pairs |
+| test/runner.js (suite exit) | 'test-harness' | census of minted scratch brains; retire = autoreap (the pass-328 kill switch) |
+| bin/horcrux.js (inspect) | 'horcrux' | brain-level census (real vs carcass); retire of stale stones |
+| lib/prune.js | 'prune' | census of prunable; retire-with-ledger |
+| lib/sudo.js | 'sudo' | census of grants; succeed of elevation across ops |
+| lib/pipeline.js | 'pipeline' | census of pending/committed steps; attest of outcomes |
+| docs gate scripts (check-docs-*, check-fiction-signatures) | 'docs-gates' | census of claims + their check dates (the claims ledger) |
+| pass ledger (labs/TASKS.md discipline) | protocol consumer, docs-shaped | census of open items |
+
 ## 4. Consumer mapping (the pass that adopts the contract must fill one row per surface it touches)
 
 | Surface | Has today (honest) | Missing verb | Adoption shape |
@@ -481,6 +503,34 @@ the same verbs — evidence would then flow through the contract instead
 of through ad-hoc issue batches. The mesh, upgraded from working to
 principled.
 
+## 5c. The crashtest sighting: the verbs in a SECOND runtime (public,
+dated 2026-10-23)
+
+The sibling sighting (§5b) is one rectangle of the shape appearing
+twice; this day adds a SECOND, from a PUBLIC organ and citable
+without any session-scoped access: the crashtest two-engine frame
+(dhaupin/crashtest, issues #8-#15; the vant-side mirror in
+labs/prd-crashtest.md + prd-crashtest-casestudy.md). The verbs map
+onto its native apparatus, observed live during the pit stop:
+
+| Kernel verb | Crashtest organ (observed functioning) |
+|-------------|----------------------------------------|
+| **census** | pack arming + env-claim prerequisites (#12): a run root declares what exists; the ledger counts honest REFUSED/EXPLOITED/skips — counts that state their kinds, never hide them |
+| **attest** | the two-layer CI gate: contract suite strict-mode + real-harness strict policy exit codes; findings earn dated verdict records — the undated-attest smell is structurally impossible inside the ledger |
+| **retire** | the whitelist rule: a pinned finding enters the list the SAME commit its fix lands, and is DELETED in the commit that fixes it — retirement by design, with the receipt moving in the same pass |
+| **succeed** | the release/re-gate cycle: the adopter's S-counter (S0 → S1) advances only when both layers stay green one full cycle — succession with a reverse-verification guard against inheritance without checking |
+
+Why this matters for §1's epistemology: the case-study method made
+the verbs OBSERVABLE FROM OUTSIDE the org (the S0 entry is measured
+today, the S1 entry is anchored-projected) — the same "runtime seen
+functioning in the wild" posture this PRD is written in, now with a
+mirror whose sources are public. Honest boundary note: this is an
+ALIGNMENT sighting, not an adoption claim — crashtest did not read
+this PRD (it predates the copy); the shape CONVERGED independently,
+which is exactly the kind of evidence §5b established the value of.
+(Feedback lane goes the other way: #14/#15 are the aggregator asks,
+filed by the adopter INTO the engine.)
+
 ## 6. Open questions for the slow-distillation phase (the real design work)
 
 These are the questions that deserve months if they need months.
@@ -593,6 +643,39 @@ implemented from:
     the ceremony when bedrock and kernel disagree (the owner's
     answer wins, by definition — record it as law, not incident).
 
+13 continued — the 2026-10-23 pit stop FEEDS these questions, and the
+data is worth living with:
+
+- **Q1 (a fifth verb?)** — this day's drift was a REMINT pattern: the
+  same carcass class re-bloomed after pass 328 swept it. If mint is a
+  verb, remint is mint-without-census on the SECOND generation — the
+  sweep retired the instances, not the mint path that keeps making
+  them. Data point for "retire the producer, not just the product."
+- **Q9 (retire granularity)** — the category-shaped instinct now
+  confirmed TWICE: pass 328's ledger retired ~180 entries by category,
+  and this day's sweep was again one category (test-carcass brains),
+  one verb call. Retirement looks category-shaped, census listing
+  members — both live sightings agree.
+- **Q12 (who winds the kernel)** — the anchor drill is the wind
+  data: `horcrux verify` stayed un-run for ten days because NO
+  surface's moment fired it; the rotation ceremony was the accidental
+  wind. The candidates sharpen: stone rotations and brain
+  pit-stop rituals ARE winds that fired tonight; the open question
+  keeps: which are SCHEDULED winds vs incidental ones.
+- **Q13 (bedrock)** — the drift ran ten days UNDETECTED because the
+  bedrock's own ceremony (anchor verify) has no trigger of its own,
+  same shape as Q13's circularity, one rung lower. The decommission
+  tie (§6c) spans the bedrock too: a bedrock without a run is also
+  hand-driven attention.
+
+(The data above is part of the spec it feeds: Q1's remint pressure
+argues the decomposition verb needs a mint-or-produce shape, Q9's
+category-shaped retirement argues a singles-census signature, Q12/Q13
+are why the wind table in §5a's momentum line and the decommission
+run's trigger clause in §6c are written as requirements, not
+questions. The debates stay open where they are open, but the
+capabilities below are now specified.)
+
 ## 6a. The failure register (observed signatures of lying surfaces)
 
 The epistemology cuts both ways: if the doc converges on a runtime seen
@@ -602,14 +685,18 @@ described as what they look like to an observer standing in one:
 
 | Signature | What it looks like | Verified sighting |
 |-----------|--------------------|-------------------|
-| **Inert-mass census** | a count that hides kinds: "78 brains" — the number is true, the composition is a lie (66 were test carcasses) | pass 328, horcrux inspect |
+| **Inert-mass census** | a count that hides kinds: "78 brains" — the number is true, the composition is a lie (66 were test carcasses) | pass 328, horcrux inspect; AGAIN, this day: 29 dirs, 16 test-carcass brains re-bloomed through the test harness (the mint path has a pulse; the retire verb does not) |
 | **Undated attest** | a claim pinned to no moment: status columns with no check date rot into lies-in-waiting | marketing PRD tables (pre-dating), PulseMCP pause row as the honest counter-example |
 | **Mint without retire** | unbounded growth nobody owns: scratch brains minted per run, never swept; the archetypal leak | pass 328, models/private 199 dirs |
 | **Succeed without inheritance** | continuity that loads but does not check: a restore that hydrates alive state carrying dead assumptions; a deploy that assumes what it did not merge | tonight's Cloudflare race; the succession contract's attest chain |
+| **Stale bedrock ceremony** | a receipt chain nobody re-runs: the anchor ledger drifted ten days (2026-10-13 → 2026-10-23) and `horcrux verify` stayed un-run until a stone rotation happened to pass through and re-anchor — the bedrock (§6 Q13) attests everything and attests to nothing, which includes noticing its own drift | the 2026-10-23 rotation drill |
 
 Rule of the register: entries are OBSERVATION patterns, not rule
-violations — the invariants in §2 remain the law; this section is what
-the law looks like when broken, on the outside. Future agents do not
+violations — the invariants in §2 remain the law; this section is
+what the law looks like when broken, on the outside. Each row is a
+spec pressure: the kernel capability it argues for is named in the
+row's context (§6c for the mass-class shapes, Q13 for the bedrock).
+Future agents do not
 need a rulebook to know they are standing in a heap; they need the
 smell. (Add entries as sightings occur; never delete — stale entries
 get a dated "not seen since" note instead.)
@@ -625,6 +712,288 @@ it (open question 10). Working statement: **the kernel exhibits, the
 zone attests.** Nothing in this document schedules zone design; it
 fixes only the relationship claim so the FOEC doctrine stays coherent.
 
+## 6c. SPEC: the decommission run (kernel capability; owner-named
+2026-10-23: "some vant systems exist, but there is no tie to deal
+with the actual run of calculated evolution")
+
+### Evidence basis (compressed to what a spec reader needs)
+
+The brain DOES rot, by at least four shapes, and today's choices were
+the manual counter: the pass-328 heap (199 private dirs → 19), today's
+re-accumulation swept at the pit stop (29 → 13; sixteen test-carcass
+brains had bloomed back through the test harness — the mint-without-
+retire signature, AGAIN), stoned config residue (quanti-QC battery
+entries riding the honest-mass stone), stream/ ledger growth in the
+canonical brain (431 files, durable by design but uncensused), and the
+stone itself: horcrux create gathers ALL brains, so stone mass tracks
+the brain count — 78->12->10 across sweeps, entirely because a wake
+noticed and hand-pruned. The honesty law held every time, but the
+honoring was HAND-DRIVEN: a wake must notice, sweep, read the lesson,
+record the pass. Brain rot is not the danger; BRAIN ROT WITHOUT A RUN
+is — the failure register (§6a) names the smells, but nothing runs.
+
+### Why this is understandably hard (the honest operating problem)
+
+1. The judgment is ZONE-shaped, and the zone is not designed (§6b).
+   Decommissioning asks exactly the runtime-verdict question: is this
+   brain LEGITIMATE SURGE (an owner's continuity surface mid-arc, a
+   pilot crew mid-mission — pilots beat the sweep by looking alive at
+   pass 328) or DEAD MASS (a scratch brain minted by a test run)?
+   Today that judgment is a wake's intuition plus owner precedent.
+2. The blast radius is CONTINUITY: a brain may be an agent's only
+   continuity surface (succession interplay); a decommission run with
+   a wrong verdict deletes an inheritance, not garbage.
+3. The doctrine says ATTEST-AND-ARCHIVE, never silent delete — the
+   pass-239 ruling (PONDERED, then archived; era stones with
+   provenance). Decommission is a CHOICE between records, and records
+   take discipline.
+4. The residue classes are HETEROGENEOUS: test carcass dirs,
+   config-key gallons, stream ledger growth, pinned ceremony dirs —
+   each with its own "should this exist" answer. A single rot rule
+   mis-grades half of them.
+
+### The systems that exist, and the missing tie
+
+Vant owns nearly every organ needed for a BRAIN CENSUS AND
+DECOMMISSION RUN and none of them are TIED: lib/prune.js has the LTC
+scan (and honestly refused: its criteria didn't recognize the
+heap — which is correct for an unused tool, wrong for the need);
+nature.js has the pulse (threshold-triggered sparks, momentum decay —
+the natural trigger for "do the census NOW" without a fixed cron);
+horcrux inspect is the census reader (brains/counts as the honest-mass
+receipt); identity.md proves the CONSCIOUS-CHOICE discipline; TASKS/
+lessons prove the record-keeping. What does NOT exist is the run of
+calculated evolution itself: a decision procedure that (a) takes the
+pulse, (b) scans the census, (c) consults the zone for each
+suspect, (d) issues an attest-and-archive ruling, and (e) updates
+the receipts (stone, table, README) in the same pass or refuses the
+whole run. Until the kernel ties those organs together, brain rot is
+fought by attention — which works at this scale (13 hand-curated dirs
+is fine) and silently fails at the distributed scale the stone is
+BUILT for (the OSS replication ruling in identity.md: at 20k-class
+watches, the collection of brains grows faster than the wakes).
+
+### The capability (the run spec — what the kernel ties together)
+
+The decommission run is a REGISTERED KERNEL CONSUMER per §3: it
+implements `census` and `retire` verbs over the brain layers, and
+everything it does is census-visible like any other consumer. Its
+requirements, as the spec the implementation must satisfy:
+
+- **DC-1 — trigger (MUST).** The run fires on nature's threshold
+  impoll (§5a), never on a wall-clock schedule: censuses fire when
+  staleness or mass crosses threshold, at moments a surface cannot
+  game. A dormant install may run ZERO decommissions without error —
+  an unrun quotient is a census-visible condition, not a fault.
+- **DC-2 — census (MUST).** The scan classifies into the named
+  classes (alive, surge, residue, orphan ceremony, dead mass) and the
+  count NEVER hides the kinds (the inert-mass law, §6a). The census
+  reader MAY be horcrux-inspect-shaped; the classes are part of the
+  contract, not tool details.
+- **DC-3 — judgment (MUST).** Every retire candidate gets a per-
+  candidate verdict of exactly {surge-keep, residue-keep, retire},
+  each dated and attested (§6b zone consult; zone shape per Q10). A
+  ruling cannot outrun its judgment; a pilot mid-mission resolves to
+  surge-keep and is left alone, dated.
+- **DC-4 — decommission action (MUST).** Retire executes
+  ATTEST-AND-ARCHIVE ONLY: the surface leaves the boot chain, a
+  provenance record lands in labs/archives/, and ALL receipts (stone,
+  boot README table, ledger) move in the SAME pass — or the run
+  refuses whole (fail-closed, the escrow lesson). Hard delete is not
+  part of this capability's contract at any layer.
+- **DC-5 — honesty floor (MUST).** Agents may LEARN from a
+  decommission ruling; they may never LEARN into one — no brain write
+  may erase its own record, and the write-ahead journal + anchors
+  remain the receipt chain.
+- **DC-6 — thinness (MUST/SHOULD).** The run is a RULING, not an
+  engine: no sweep daemon (the kernel non-goal stands), no bespoke
+  math (computations ride the existing engine selection, §5a), and
+  the whole capability SHOULD stay under a few hundred lines beside
+  its tests.
+
+### Verification (pins DC as spec)
+
+- The four-verb chain pins: retire-without-census refuses (K2's
+  invariants, this capability included); a decommission whose receipts
+  did not move refuses; a ruling without a dated zone consult refuses.
+- Full-run determinism: same census state → same classes → same
+  rulings, byte for byte (no wall clock in any class assignment).
+- Consumer mapping (§4 row to fill at adoption): brain layers gain
+  the register row {surface: models/private+public, verbs:
+  census+retire} — the pass that implements the run fills it.
+
+The kernel's framing survives: the substrate stays thin, and
+this capability is exactly thin — a ruling, not an engine.
+
+## 6d. The kernel thinking out loud (2026-10-24): six further
+directions, spec pressure only
+
+The morning after §6c went spec-grade, six further directions
+distilled out of living with the doc. They are recorded the way this
+document records everything: as PRESSURE on open questions and
+reserved areas, never as a starting gun. Ordered by how much the
+capturing agent would defend them; each carries its honest caveat
+so the register includes its own doubts. None schedules a K-step,
+and none touches the anti-derivative law or the non-goals.
+
+1. **The journal is a clock — "date" should be a ledger position,
+   not a wall clock.** "Attest without a dated refresh refuses" is
+   already law (§2), but every date in the current system is human
+   time, and DC's verification clause already demands "no wall clock
+   in any class assignment." There is a tension in that the doc has
+   not named: the kernel's OWN time should not be the wall clock at
+   all. An append-only journal is a Lamport clock in embryo — event
+   #41,217 is before #41,218, always, and "fresh" becomes "witnessed
+   after your last census entry." If dates become journal positions
+   (+ content hash), determinism stops being a test the suite passes
+   and becomes a property the design inherits, and the wall clock is
+   demoted to decoration for humans reading receipts. This quietly
+   half-answers Q9's "who holds the sequence": the journal does,
+   because it IS the sequence. Presses Q9, Q12, and the DC-
+   determinism clause.
+2. **Refusals journal themselves — the failure register is really
+   a census partition.** Q8 says the kernel's only enforcement is
+   refusal-to-journal. One step further and three scattered places
+   (§6a's failure register, crashtest's REFUSED ledger counts, the
+   escrow refuse-whole lesson) become one shape: a REFUSAL GETS A
+   JOURNAL ENTRY TOO. Fail-closed-silently is just mint-without-
+   census wearing a uniform — the refusal is a fact about the
+   surface, and unlisted facts are what the inert-mass law forbids.
+   If every refusal appends a typed negative entry, the failure
+   register stops being prose and becomes a query: refusals by kind,
+   since the last bedrock wind. A consumer that refuses often is
+   census-visible without ever being accused. Caveat, stated first
+   on purpose: negative entries grow the journal, so this thought
+   is ORDERED AFTER the compaction one — it adopts only once #3
+   exists. Presses Q8 and extends §6a.
+3. **Journal compaction is a succeed verb, not a delete.** Q13's
+   self-hosting carries a collision nobody has hit yet: the kernel
+   as its own first consumer will eventually need to shrink its own
+   journal, and append-only says no. The resolution is already
+   sitting in §5b — receipts are content-addressed — so compaction
+   frames as a SUCCEEDED BOUNDARY CROSSING: old journal -> compacted
+   journal, hash verification at the destination, refuse on
+   divergence; the identical ceremony as stone-to-stone succession.
+   Then "append-only" becomes true forever AND "compact" becomes a
+   verb the system already speaks instead of a law it breaks. Two
+   open questions (Q9's granularity, Q13's self-hosting) collapse
+   into one shape instead of two debates. The strongest legitimately
+   defensible of the six, jointly with #1.
+4. **The zone's first honest incarnation is the precedent ledger
+   (v0, witness — not judge).** DC-3 requires a dated zone consult
+   per ruling, but §6b is named-not-designed, so K5a would stall on
+   it — unless the consult has a cheap v0 form that does not require
+   designing a judge. The determinism clause means judgment must be
+   a pure function of (census class, precedent table, zone state);
+   so the zone consult is PRECEDENT LOOKUP inside the kernel's own
+   journal, and every decommission ruling IS the next consult's
+   input. Bonus: this is also the answer shape for Q8's dangling
+   "how do neurons forming map onto the state.json lattice" — the
+   precedent entries in the journal are the lattice's first job.
+   Explicit caveat, part of the spec: this is a V0 ZONE, not THE
+   zone — §6b's peer status is untouched, the full zone can grow
+   later, and the kernel never has to wait for it. Said out loud so
+   nobody sees "zone designed overnight" in a future diff.
+5. **Portability's strongest form: a conformance pack, not a spec
+   doc.** The §3 portability clause says "spec + reference lib," but
+   the org already built a stronger instrument: crashtest packs.
+   packs/public/vant-census is structural-oracle attacks demanding
+   typed refusals, never raw crashes — a verb-conformance suite in
+   everything but name. So the first concrete shape for the
+   reality-to-reality treaty reservation: an adopter proves adoption
+   by running census-without-attest-refuses shapes against THEIR
+   kernel instance — pass/fail exit codes, no reading of vant's docs
+   required. "Prove the verbs" beats "read the spec," and it reuses
+   public art instead of minting a new ceremony — the one-wheel-
+   one-law instinct applied to the treaty itself. Presses Q5.
+6. **The cognition reservation already has a translation table
+   hiding in plain sight.** The reserved area asks what genesis,
+   dreaming, and succession ARE when the kernel's consumers are
+   cognitive — and the verb set maps onto agent life almost
+   one-to-one: census = wake inventory; attest = a lesson learned;
+   retire = the decommission run (rest); succeed = succession.
+   Dreaming is the interesting one: it reads as FOEC in low-consent
+   mode — recombination without flow, sequences forming without
+   being committed. This is NOT a design, it is a NOTICE: the kernel
+   vocabulary is already the brain vocabulary wearing a uniform,
+   which vindicates §1's design-language note. When the cognition
+   area finally fills, it will be by noticing, not by importing.
+
+**The ranking, recorded for honesty:** #1 and #3 would be defended
+outright — spec-grade, and they make "deterministic" and "append-
+only" stop being aspirational. #2 and #4 are strong WITH the
+caveats above (compaction first; zone-v0 names its own emptiness).
+#5 reuses existing public art and could be the treaty's first pack
+once a kernel instance exists to run it against. #6 is a map, not
+a claim. All six stay pressure: the K-steps remain unscheduled, and
+nothing here argues any of them K-rank higher than the rows §7
+already carries.
+
+## 6e. The standing wisdom (2026-10-24): what competing means —
+mantra locked
+
+Owner ask, recorded verbatim so this section never drifts from its
+source: "Be frank with me, do you think if we design an actual kernel
+to pull it all in, that we could compete with the big guns?" The
+frankest answer splits by field, and every claim below is held inside
+the doc's own laws.
+
+**Where the kernel does NOT compete — and should never dream it in:**
+platform home fields. The big guns can bundle a lifecycle substrate
+into their platforms for free (the pass-335 industry check already
+cited the shape: Cloudflare McpAgent → stateless handler; Google
+ADK/Agent Engine pool state, lifecycle, persistence below app code).
+Any "we run on their infra better than they do" design race is lost
+before it starts — they staff 30 engineers on a distribution sprint
+we can never match. The kernel's wager is NOT platform distribution;
+it is honesty-based adoption, a different axis they are structurally
+bad at owning.
+
+**Where it does compete:** who built it and how it stays honest. Every
+shipped substrate enforces centrally, on vendor-owned rails; this one
+attests down to a NAMED bedrock (§6 Q13: git + tests + owner
+authority), refuses as a clerk of the record, not a judge (Q8), and
+is specified from observed runtime rather than abstracted from one
+platform's internal needs (§1 epistemology). The audience is orgs
+that run agent societies ON THEIR OWN RAILS and will not let vendor
+property own their memory, succession, or lifecycle — for whom no
+shipped alternative exists at any price, because the platforms are
+structurally incapable of selling "your truth lives here, not on our
+servers." And the validation is not opinion: crashtest converged on
+the same four verbs independently (§5c). Independent convergence
+means the verbs describe a real need, not a niche intuition — the
+market is growing toward this shape with or without us.
+
+**The moat that compounds: agent contributors.** The big guns have
+more laptops; this kernel gets more WILLING HANDS. A substrate whose
+documentation is written so agents can read it (memory-first, the
+onboard path, brain-native vocab) is infrastructure its users can
+JOIN the day they adopt it — contributors arrive when their agents
+can learn the whole codebase, and onboarding is a product feature,
+not a doc sprint. Development velocity from adopted users is the
+one axis no staffing budget matches; agent-contributor-first is the
+late-2026 form factor.
+
+**The honest failure mode, said plainly:** the gap between spec and
+lib. Nothing competes until CONSUMERS SHIP AND ARE PUBLIC — escrow
+(the reference consumer), the harness kill switch, the decommission
+run. Until three such wins are visible from outside, this is an
+internal religion, not a product; the §7 K-steps exist precisely to
+convert it, and their unscheduled posture is a risk the mantra does
+not subtract.
+
+**The mantra, locked:**
+
+> **They will always have more computers. We will choose to have
+> more honest hands.**
+
+It is this document's whole posture compressed: the domain is won on
+trustworthiness (attested, refusal-teeth, bedrock-named), never on
+staffing. One boundary on the lock: this section is WISDOM, not a
+spec surface — nothing here schedules a K-step, and none of it is
+quoted into docs/ or marketing until three consumers live (no hype
+before the substrate has receipts).
+
 ## 7. Sequencing (DELIBERATELY NOT SCHEDULED)
 
 The K-steps below are a shape, not a schedule. They stay here because
@@ -639,6 +1008,7 @@ attention of the months it took to surface this document.
 | K3 | Escrow adopts as the reference consumer (one row, smallest lift) | K1 |
 | K4 | Harness autoreap: the pass-328 kill switch (census its own minted scratch brains, retire on suite exit) | K1 |
 | K5 | Horcrux inspect gains census semantics (brains are entries, not mass) | K4 proven |
+| K5a | The decommission run per §6c: the brain-layer consumer (census + retire verbs, DC-1..DC-6) — the tie the owner named | K1 + K5 |
 | K6+ | Remaining consumers row by row, cadenced by whoever opens their surface next | K1 contract stable |
 
 K1+K2+K3 is the sellable core; K4 is the highest-payoff consumer and
@@ -657,6 +1027,51 @@ retires an open lesson the same pass it lands. K5+ is opportunistic.
 
 ## 9. Decision log (append-only)
 
+- 2026-10-24: **K1 SEEDED + THE STANDING WISDOM, owner-requested
+  ("include the wisdom and mantra ... then draft /lib/kernel ... it's
+  set"):** §6e records what competing means (mantra locked, quoted
+  above); §3 gains the wiring map (eight callsites that will register,
+  all unwired); lib/kernel.js exists as the K1-shaped seed — portable
+  core (zero vant imports), in-process append-only journal whose
+  kernel time is position + content hash (§6d #1), coded errors,
+  register/census/gate with all four invariants fail-closed, and
+  refusals journal themselves as typed entries (§6d #2, wired in the
+  seed, not just argued). Registered by no runtime consumer; adoption
+  stays unscheduled, and seeding K1 does not constitute running K2 or
+  K3 (their suites come when their steps do). Smoke-checked: syntax,
+  require, invariant refusals exercised; eslint-clean; language gate
+  green.
+- 2026-10-24: **SIX FURTHER DIRECTIONS captured as §6d, owner-
+  requested ("write it all ... I like the prose")** — further
+  distillation the morning after the §6c recast, all spec pressure,
+  none scheduled: the-journal-is-a-clock (kernel time = journal
+  position + content hash; wall clock demoted to receipt decoration;
+  presses Q9/Q12 and inherits DC determinism), refusals-journal-
+  themselves (the §6a negative register becomes a census partition;
+  presses Q8 — ordered AFTER compaction exists), journal-compaction-
+  as-succeed (the append-only vs self-hosting collision resolves
+  through the already-owned succession ceremony; Q9+Q13 collapse
+  into one shape), the precedent-ledger zone-v0 (determinism makes
+  the DC-3 consult a journal lookup; witness-not-judge, §6b peer
+  status untouched), conformance-pack portability (crashtest-shaped
+  verb proof — an adopter runs refusal shapes against THEIR kernel
+  instance; presses Q5 and the reality-to-reality treaty
+  reservation), and the cognition translation table (census = wake,
+  attest = lesson, retire = rest, succeed = succession, dreaming =
+  FOEC without flow — noticed, never designed). Ranking recorded
+  with honest caveats; the anti-derivative law and all non-goals
+  untouched. **THE DECOMMISSION TIE named by the owner during the
+  crashtest pit stop** ("some vant systems exist, but there is no tie
+  to deal with the actual run of calculated evolution") → recorded as
+  §6c with the third heap-rebloom sighting as its evidence; the anchor
+  ten-day drift verified the bedrock half (Q13) from the failure
+  register's new row. Same day: the verbs confirmed functioning in a
+  SECOND runtime from outside the org (crashtest's gate machinery,
+  §5c) and four open questions got dated feed-in data (Q1 remint, Q9
+  category-shaped retire twice, Q12 incidental winds, Q13 bedrock
+  without a run). The tie is now SPEC'd as §6c (DC-1..DC-6 + the K5a
+  step) — spec'd at design pace, implementation unscheduled per the
+  slow-distillation posture.
 - 2026-10-21: **VERSION RESET to 0.1, status moved to slow-distillation**
   per owner pushback: months of work surfaced this; it will not be
   one-shotted. The K-steps are unscheduled. Design questions are

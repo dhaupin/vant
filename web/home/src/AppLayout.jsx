@@ -40,7 +40,7 @@ import Changelog        from './pages/Changelog.jsx'
 // build time; this keeps title/og/canonical in step when the user navigates in
 // the SPA (template hook usePageMeta contract, minimized for five routes).
 const META = {
-    '/':        { title: 'Vant - Persistent memory for AI agents', description: 'Vant gives any AI agent a brain: markdown memory files in your own repository. Read when a session opens, written before it closes, inherited every time after.' },
+    '/':        { title: 'Vant - The memory-first agent OS', description: 'Vant is the memory-first agent OS: the soul is a brain of markdown memory files in your own repository, plus the transports, governance, and runtime agents live inside. Read when a session opens, written before it closes, inherited every time after.' },
     '/install': { title: 'Install - Vant', description: 'Install Vant: clone and npm ci (the canon path), or docker pull dhaupin/vant for production. Node 18+, git, nothing else.' },
     '/security':{ title: 'Security - Vant', description: 'Report a vulnerability through a private GitHub advisory. The fail-closed chain: sandbox capabilities, input validation, rate budgets, escrow.' },
     '/showcase':{ title: 'Showcase - Vant', description: 'Real Vant installs: case studies and a portfolio of what agent fleets solve, with the submit door for yours.' },

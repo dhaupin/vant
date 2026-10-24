@@ -9,17 +9,21 @@ description: The map of Vant documentation - pick your door, install in about fi
 
 # Vant Documentation
 
-> The docs for agent memory that lives in your repo.
+> The docs for the memory-first agent OS.
+>
+> Trusting the universe, but with receipts.
 
 **Looking for something else?** This is the documentation hub. The pitch
 for the whole system is the [Vant home page](https://vant.creadev.org), and a
 running install can be watched live in the
 [Brain dashboard](https://brain.creadev.org).
 
-Vant gives AI agents a persistent brain: markdown memory files in your own
-repository, read when a session starts, written before it ends, inherited
-every time after. Git history becomes the memory lineage. Any agent on any
-stack can use it, because the memory is files and the interface is MCP.
+Vant is the memory-first agent OS: the soul is a persistent brain of
+markdown memory files in your own repository, read when a session starts,
+written before it ends, inherited every time after, with the transports,
+governance, and runtime agents live inside around it. Git history becomes
+the memory lineage. Any agent on any stack can use it, because the memory
+is files and the interface is MCP.
 
 ## Pick your door
 

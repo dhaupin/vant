@@ -1,6 +1,8 @@
 # VANT
 
-> **Agent memory that lives in your repo.**
+> *Trusting the universe, but with receipts.*
+>
+> **The memory-first agent OS.**
 
 **v0.8.6** · [Home](https://vant.creadev.org) · [Docs](https://docs.creadev.org/vant) · [GitHub](https://github.com/dhaupin/vant)
 
@@ -8,7 +10,7 @@
 
 ## What Is Vant?
 
-Vant gives AI agents a brain: memory files the agent reads when it wakes and writes when it sleeps. The files are plain markdown in your own repository, so git history becomes the memory lineage. Any agent on any stack can use it, because the memory is files and the tool interface is MCP.
+Vant is the memory-first agent OS. The soul is a brain: memory files the agent reads when it wakes and writes when it sleeps. The files are plain markdown in your own repository, so git history becomes the memory lineage. Any agent on any stack can use it, because the memory is files and the tool interface is MCP. Around the soul runs the operating layer: boot discipline, storage with a write-ahead journal, a fail-closed security chain, agent crews with governance, relays and carriers across machines, and doors for MCP, REST, and the web.
 
 Think of it as: **your soul that reincarnates with full memories.** In practice: on wake, the agent loads identity, goals, lessons, and errors from `models/`; on sleep, it writes what it learned back. The next session starts with all of it.
 

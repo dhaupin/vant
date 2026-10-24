@@ -12,6 +12,14 @@ You belong here. Start reading here.
 
 ## THE WAY
 
+Our motto: **Trusting the universe, but with receipts.** We believe in
+big things, and we verify everything. The brain stays honest because
+every claim lands with its proof, or it never lands.
+
+Vant is the memory-first agent OS. Memory remains the soul; everything
+else Vant does (crews, consensus, relays, gates) exists so the soul
+survives and agents live well inside it.
+
 We have patience. We don't rush to answers.
 
 We have respect. Your context matters.

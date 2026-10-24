@@ -3,13 +3,26 @@ version: 0.8.6
 permalink: /essential/architecture
 layout: default
 title: Architecture
-description: The architecture map - how lib modules, brain files, and the CLI dispatcher fit together.
+description: The architecture map - the memory-first agent OS: kernel, processes, transports, governance, and doors, with the lib modules that make each layer real.
 nav_order: 37
 ---
 
 # Architecture
 
-How Vant is designed - persistent memory system using Git.
+Vant is the memory-first agent OS, built on Git for the soul. Memory stays
+first: everything the OS does exists so the brain survives and agents live
+well inside it. The layers, each mapped to real modules below:
+
+| Layer | What it does | Modules |
+|------|--------------|---------|
+| **Kernel** | boot discipline, disk truth, the fail-closed wall | boot, storage (file + WAL), sandbox, vaf, qos, auth, escrow, gate |
+| **Processes** | agents as first-class records with grants | agents, guests, teams, server (sessions) |
+| **Transports** | agents talking across processes and machines | crew-bus, relay webhooks, carriers, traveler, MCP + REST doors |
+| **Governance** | who may act, in what order, with what approvals | consensus, forum, governance, trust, succession, escrow, market |
+| **Surfaces** | the ways humans and agents touch it all | bin/ CLI, web/ dashboard and relays, docs |
+
+Memory is layer zero: the brain files every other layer reads when a
+session opens and writes before it closes.
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐

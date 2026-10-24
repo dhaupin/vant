@@ -40,6 +40,44 @@ this PRD only removes friction from it.
 Rule: a fix narrows exactly one tier. Nothing upstream gets rewritten to
 fix something downstream.
 
+**Brand line (owner directive 2026-10-23):** the funnel speaks the adopted
+tagline **"Trusting the universe, but with receipts"** (prd-brand.md §6).
+The motto rides fixed surfaces only (hero kicker, footer closer, README
+epigraph, docs hub quote, brain "THE WAY"); tier copy stays verifiable
+and descriptor-led. "Receipts" is a literal test claim: the gates and
+packs are the receipts, so the line survives the claims-are-checkable
+rule (prd-brand §3.6) by pointing at them.
+
+**The brand forms ladder (owner directive 2026-10-23).** Every brand has
+its forms: a slogan, a prose form, a short form, and a long form. Vant's
+ladder, top to bottom:
+
+| Form | What it is | Where it rides |
+|---|---|---|
+| **Slogan** | "Trusting the universe, but with receipts" (prd-brand §6) | hero kicker, footer closer, README epigraph, docs hub, brain "THE WAY" |
+| **Prose** | "Versatile Autonomous Networked Tool" — the bizarre luck of this brand: the long PROSE form IS the acronym | LEGAL.md license notice + ROADMAP.md identity line (prd-brand §2 KEEP-forever); never quoted on tier copy |
+| **Short** | Vant in prose, `vant` in code | EVERY funnel surface; the only form a tier is allowed to carry |
+| **Long** | the descriptive claim family: "Agent memory that lives in your repo." (prd-brand §6 candidate 1) + the SEO descriptions | hero/H1 adjacents, meta descriptions, feature-table intro |
+
+The prose form is WHY the brand never outgrows its name (the broad
+wording is the claim), and it doubles as the legal record: LEGAL.md's
+license notice and ROADMAP.md's identity line are the sanctioned
+appearances, and any future trademark or licensing filing pulls the
+expansion from that record rather than re-deriving it. Funnel copy
+never spells it out — the name is simply Vant — but the record lives
+above us and nothing in this funnel may shorten, re-spell, or retcon it
+(exact spelling "Versatile"; the misspelling guard in prd-brand §2
+applies).
+
+**The graduation (owner directive 2026-10-23, "everywhere").** The funnel
+is positioned as **the memory-first agent OS** (prd-brand §1 graduated).
+Rules unchanged beneath the graduation: tier 1 still leads with the
+brain (memory is the door), depth tiers speak the layer (transports,
+governance, runtime) and every layer claim maps to modules via the
+architecture page's layer map. The forms ladder above is untouched: the
+short form remains simply Vant, no command or code ever spells "OS",
+and the motto keeps its fixed surfaces.
+
 ## 3. GAP 2 — Installability (the structural unlock, ship first)
 
 **Situation:** the npm name `vant` is owned by an unrelated Vue UI

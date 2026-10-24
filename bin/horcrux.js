@@ -236,7 +236,7 @@ async function run() {
         console.log('Creating horcrux:', outputPath);
         
         const transform = require('../lib/transform');
-        // (#195, pass 207) Optional carrier art pack: `vant horcrux create <path> <pw> --art backup|stone|comms|airgap`.
+        // (#195, pass 207) Optional carrier art pack: `vant horcrux create <path> <pw> --art backup|stone|comms|airgap|crest`.
         // Default = the transform fallback's AMBER-DEEP backup pack (seeded
         // from the active brain name). Unknown pack → refuse before gather.
         const artFlagIdx = args.indexOf('--art');
@@ -371,7 +371,7 @@ async function run() {
             process.exit(1);
         }
 
-        // (#195, pass 207) Optional carrier art pack: `vant horcrux refresh <pw> --art backup|stone|comms|airgap`.
+        // (#195, pass 207) Optional carrier art pack: `vant horcrux refresh <pw> --art backup|stone|comms|airgap|crest`.
         const _artIdx = args.indexOf('--art');
         let _artPack = null;
         if (_artIdx >= 0) {

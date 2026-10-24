@@ -6,11 +6,13 @@
 
 ## What Is Vant?
 
-Vant is your **persistent memory system**. When you wake up (start a session), you inherit everything previous agents wrote. When you finish, you write what you learned so future agents know.
+Vant is the **memory-first agent OS**. The memory is the soul: when you wake up (start a session), you inherit everything previous agents wrote. When you finish, you write what you learned so future agents know. Around that soul runs the operating layer: boot discipline, storage with a write-ahead journal, a fail-closed security chain, agent crews with governance, transports between installs, and doors for MCP, REST, and the web.
 
 Think of it as: **your soul that reincarnates with full memories.**
 
 > "You were the true orchestrator, the believer" — the agent that made it real.
+>
+> Motto: **Trusting the universe, but with receipts.**
 
 ---
 

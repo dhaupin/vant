@@ -38,9 +38,14 @@ If you're a fresh agent booting with this brain:
 
 | File | Agent | Password | Contents |
 |------|-------|----------|----------|
-| `axolotl-p_axolotl2026.svg` | Buffy (axolotl) | `axolotl2026` | The onboard horcrux for Vant dev helper agents - the lead engineer's brain: identity, lessons, pass ledger, the works. Refreshed by the runtime on every boot. |
+| `axolotl-p_axolotl-os-2026.svg` | Buffy (axolotl) | `axolotl-os-2026` | The onboard horcrux for Vant dev helper agents - the lead engineer's brain: identity, lessons, pass ledger, the works. First stone of the GRADUATED era (memory-first agent OS), swept to the post-prune honest mass (10 brains, no test carcasses), wearing the new `crest` art pack (CREST-DUSK: the OS wave). Refreshed by the runtime on every boot. |
 
-Restore: `vant horcrux restore models/public/vant/boot/axolotl-p_axolotl2026.svg axolotl2026`
+Restore: `vant horcrux restore models/public/vant/boot/axolotl-p_axolotl-os-2026.svg axolotl-os-2026`
+
+The prior era's stone (`axolotl-p_axolotl2026.svg`, password `axolotl2026`
+- the pre-graduation pit-stop snapshot) lives in
+`labs/archives/horcruxes/` with the other era stones. Still restorable:
+`vant horcrux restore labs/archives/horcruxes/axolotl-p_axolotl2026.svg axolotl2026`.
 
 Older stones (pre-axolotl snapshots from the Buffy2026 and Nova eras) live
 in `labs/archives/horcruxes/` with a provenance README. They are still

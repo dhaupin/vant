@@ -47,12 +47,14 @@ export default function Home() {
             <div id="lattice" aria-hidden="true"><Constellation /></div>
             <div className="hero-veil"></div>
             <div className="container">
-                <span className="kicker fx-reveal"><span className="dot" aria-hidden="true"></span>Persistent memory for AI agents</span>
+                <span className="kicker fx-reveal"><span className="dot" aria-hidden="true"></span>Trusting the universe, but with receipts</span>
                 <h1 className="fx-reveal">Every session starts over. <em>Except yours.</em></h1>
                 <p className="lede fx-reveal">
-                    Vant gives any AI agent a brain: <strong>markdown memory files in your own repository</strong>.
-                    {' '}Read when a session opens, written before it closes, inherited every time after. Git history becomes the memory
-                    {' '}lineage. No database, no lock-in, readable with <strong>cat</strong>. Start with one agent on your laptop,
+                    Vant is the <strong>memory-first agent OS</strong>: the soul is a brain of{' '}
+                    <strong>markdown memory files in your own repository</strong>, and the layer around it carries
+                    {' '}transports, governance, and runtime. Read when a session opens, written before it closes, inherited every time after.
+                    {' '}Git history becomes the memory lineage. No database, no lock-in, readable with <strong>cat</strong>.
+                    {' '}Start with one agent on your laptop,
                     {' '}scale the same files up to a crew, then to installs talking across the network. Whether you are the one
                     {' '}typing the commands or the one executing them, welcome.
                 </p>

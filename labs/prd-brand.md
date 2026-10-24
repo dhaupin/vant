@@ -8,9 +8,26 @@
 
 ---
 
-## 1. Positioning (locked)
+## 1. Positioning (GRADUATED — owner directive 2026-10-23)
 
-**Category order:** Agent memory first, agentic runtime second.
+**The graduation.** Vant graduates from "agent memory tool" to **the
+memory-first agent OS**. Two rules hold the move honest:
+
+1. **Memory stays the wedge.** It is still the door buyers walk through
+   and the head noun of engagement-tier copy. "Agent OS" is the
+   depth descriptor: README's what-is paragraph, docs hub, the
+   architecture page, the whitepaper tier. Tier copy never leads with
+   "OS"; it leads with the brain and lets the layer carry it.
+2. **Every OS claim maps to modules.** "Operating layer" is only
+   speakable because the layer exists as code: boot discipline, storage
+   with WAL, the fail-closed security chain, crews, governance,
+   transports, doors. The layer map lives in
+   docs/essential/architecture.md and is the receipts file for every
+   "OS" sentence. Claims-are-checkable (§3.6) is what makes the
+   graduation true instead of aspirational.
+
+The original ordering below still stands, now inside the graduated
+category:**Category order:** Agent memory first, agent OS layer second.
 
 1. Memory: the brain, its three storage systems, ownership.
 2. Universality: any agent, any LLM, via MCP or plain files.
@@ -33,16 +50,27 @@ concrete explanation of what actually happens on disk.
 ### The backronym
 
 "Versatile Autonomous Networked Tool" is retained **for legal/uniqueness
-purposes only**. It is remembered internally; it does not appear in code,
-docs, the lander, or the README.
+purposes only**. It does not appear in code, marketing surfaces, the
+lander, or the README.
 
-- Remove existing instances from: docs/index.md, README.md tagline,
-  web/home/index.html (title/meta/hero), any docs body text.
-- The name is simply **Vant**. Where an expansion is legally required in
-  the future (trademark filing, licensing), it gets pulled from this PRD,
-  not re-derived.
-- Add a comment in this PRD only: legal expansion on file, not for
-  marketing surfaces.
+**KEEP-forever (owner directive 2026-10-23):** the expansion is part of
+Vant's identity record and is intentionally broad. It is never deleted,
+shortened, or rewritten, and its spelling is EXACTLY "Versatile" — the
+word is load-bearing (wrong-spelling variants are a banned word class,
+see the guard below). The two sanctioned appearances stay:
+
+- `LEGAL.md` license notice — the expansion as the formal name record
+- `ROADMAP.md` header — the repo's own identity line
+
+Where an expansion is legally required in the future (trademark filing,
+licensing), it gets pulled from this PRD, not re-derived.
+
+**Misspelling guard:** variants ("versitile", "versitle", "versitile",
+"versatil") are named-boxed in this PRD because the broad expansion is
+part of the brand's standing and a typo'd version anywhere is a brand
+fingerprint. Swept 2026-10-23: zero instances across README, ROADMAP,
+LEGAL, docs/, labs/, lib/, bin/, models/, web/. Correct spellings:
+LEGAL.md:85, ROADMAP.md:3, this line.
 
 ### Memory system names (canonical, use everywhere)
 
@@ -103,14 +131,23 @@ means the thing reading the brain; "you" means whoever operates it.
 | docs/essential/*, memory/*, runtime/* | Explain + reference. Claims with code receipts. |
 | labs/* | Unchanged. Labs is internal voice, not brand voice. |
 
-## 6. Tagline candidates (pick one in prd-content review)
+## 6. Tagline (ADOPTED — owner directive 2026-10-23)
 
-1. "Agent memory that lives in your repo."
-2. "Persistent memory for AI agents, stored as plain files in GitHub."
-3. "Your agent's brain, versioned in git."
+**The Vant tagline:**
 
-Default on implementation: candidate 1 for hero surfaces, candidate 2 for
-SEO descriptions, candidate 3 reserved for git-focused pages.
+> **Trusting the universe, but with receipts.**
+
+Adopted verbatim from the migration case-study thread (one sentence, no
+em dash, no banned word, dry and rare per rule 8). It is the BRAND line;
+it never tries to describe the product (that is the descriptors' job
+below). Surfaces it rides: home hero kicker, site footer closer, README
+epigraph, docs hub quote, AGENTS.md intro, and the public brain's
+"THE WAY". Voice rules apply everywhere it lands.
+
+The descriptive lines keep their roles (they are claims, not the
+motto): candidate 1 "Agent memory that lives in your repo." stays the
+README/docs hero descriptor, candidate 2 stays the SEO description
+family, candidate 3 stays reserved for git-focused pages.
 
 ## 7. Acceptance criteria
 
