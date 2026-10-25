@@ -251,13 +251,23 @@ call, per the clerk-not-judge law. Host arms via
 
 | Attack (ID) | What it claims | Status |
 |---|---|---|
-| `open-item-census-real` | census reads real docs, leads with the pass-count header, queues open items as kernel-dated entries | validated — REFUSED |
-| `marker-dialect-only` | the marker dialect is the ledger's own (Next/NEXT/NEXT-UP/Owner queue); ids carry true file:line | validated — REFUSED |
+| `open-item-census-real` | census reads real docs, leads with the pass-count header, queues open items as kernel-dated entries | validated — REFUSED (repo root); honest skip when no labs/ at the run root |
+| `marker-dialect-only` | the marker dialect is the ledger's own (Next/NEXT/NEXT-UP/Owner queue); ids carry true file:line | validated — REFUSED (repo root); honest skip when no labs/ at the run root |
 | `ceremony-never-writes` | the ceremony emits the dialect as a string, refuses unnamed passes typed, and never writes the doc | validated — REFUSED |
 | `reset-self-heal` | after a registry reset the pass-log consumer re-arms within the census call | validated — REFUSED |
 
 Isolation is the same two honest paths as vant-kernel; records never carry
 absolute seq numbers; rows are double-run deterministic.
+
+**Run-root posture (2026-10-25):** the two doc-leg rows read the REAL
+ledger docs, so under any runner whose attack cwd is a sandbox without
+`labs/` (the contract harness and scripts/crashtest-run.js both chdir into
+their throwaway sandbox) they degrade to EXPLICIT `skipped-REFUSED` — a
+zero-item census is indistinguishable from unread docs, so the rows refuse
+to ride that ambiguity. `lib/pass-ledger.js#ledgersReadable()` is the
+visibility seam; at the repo root the test/pass-ledger.test.js pins attack
+the legs against the real docs (12/12). The ceremony/reset legs carry no
+docs and earn their REFUSED everywhere the harness runs.
 
 ## Running the packs against vant
 

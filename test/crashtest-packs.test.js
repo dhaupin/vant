@@ -1060,9 +1060,15 @@ const EXPECTED = {
     // docs-shaped consumer reads the REAL docs, queues open items as
     // kernel-dated census entries, formats the ceremony purely (no fs
     // write), and self-heals across registry resets.
+    // The two doc-legs run as HONEST SKIPS here and under the real
+    // harness (both harnesses run attacks from a sandbox cwd where
+    // labs/ is not visible — a zero-item census is indistinguishable
+    // from unread docs, so the rows degrade to explicit skips per house
+    // rule 5 instead of riding that ambiguity). The doc-vs-census legs
+    // stay fully verified at the repo root by test/pass-ledger.test.js.
     'vant-pass-ledger': {
-        'open-item-census-real': 'REFUSED',
-        'marker-dialect-only': 'REFUSED',
+        'open-item-census-real': 'skip',
+        'marker-dialect-only': 'skip',
         'ceremony-never-writes': 'REFUSED',
         'reset-self-heal': 'REFUSED',
     },

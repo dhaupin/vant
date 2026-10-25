@@ -67,6 +67,16 @@ const attacks = [
             if (typeof mod.ledgerCensus !== 'function') {
                 return skipRecord('not armed: module exports no ledgerCensus door (adopter differs - census-visible absence)');
             }
+            // Honest absence first: a foreign run root ships no labs/ - the
+            // census of ZERO items is indistinguishable from UNREAD docs, so
+            // the rows degrade to explicit skips rather than riding that
+            // ambiguity (house rule 5: honest absence, never a false pass).
+            if (typeof mod.ledgersReadable === 'function') {
+                const vis = mod.ledgersReadable();
+                if (!vis || (!vis.tasks && !vis.mem)) {
+                    return skipRecord('not armed: ledger docs not readable at the run root (foreign sandbox - the docs-shaped surface attacks real bytes only)');
+                }
+            }
             let kernelSeam = null;
             try { kernelSeam = await import('node:path').then(async (p) => { const { pathToFileURL } = await import('node:url'); return import(pathToFileURL(p.default.resolve('lib/kernel.js')).href); }); } catch (_e) { /* delta path */ }
             const kernel = kernelSeam && kernelSeam.default ? kernelSeam.default : kernelSeam;
@@ -101,6 +111,14 @@ const attacks = [
             const misses = speaks.filter((s) => !re.test(s));
             if (falsePositives.length || misses.length) {
                 return exploitedRecord(`marker dialect drifted: misses=${JSON.stringify(misses)} false-positives=${JSON.stringify(falsePositives)} - the census would count invented items or skip real ones`, { misses, falsePositives });
+            }
+            // Same honest-absence gate as the census row: no readable docs at
+            // the run root = explicit skip, never a silent 0-item pass.
+            if (typeof mod.ledgersReadable === 'function') {
+                const vis = mod.ledgersReadable();
+                if (!vis || (!vis.tasks && !vis.mem)) {
+                    return skipRecord('not armed: ledger docs not readable at the run root (foreign sandbox - the dialect leg reads real bytes only)');
+                }
             }
             const items = mod.openItems();
             if (!Array.isArray(items) || !items.every((i) => typeof i.id === 'string' && i.id.includes(':') && (i.source === 'tasks' || i.source === 'mem') && Number.isInteger(i.at))) {

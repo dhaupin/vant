@@ -36,6 +36,9 @@ kernel._unwind();
         check(`ledger file exists on disk: ${key}`, fs.existsSync(file), file);
     }
 
+    const vis = ledger.ledgersReadable();
+    check('ledgersReadable sees both docs at the repo root', vis.tasks === true && vis.mem === true, JSON.stringify(vis));
+
     const ps = ledger.passes();
     check('passes parsed newest-first (pass id, date, title, line)',
         ps.length > 0 && typeof ps[0].pass === 'string' && typeof ps[0].date === 'string' &&
