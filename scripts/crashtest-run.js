@@ -4,7 +4,7 @@
  *
  * A real crashtest run root, zero install steps:
  *
- *   - packs load through crashtest v1.0.0's REAL pack loader + Harness
+ *   - packs load through crashtest v1.1.0's REAL pack loader + Harness
  *     (not the micro-harness in test/crashtest-packs.test.js);
  *   - the target is vant's own lib graph, exercised in a throwaway sandbox
  *     (same fixture shape as the contract suite - the workspace never
@@ -50,8 +50,12 @@ const KNOWN_FINDINGS = new Set([
     // and deleted together when its fix lands.
 ]);
 
-// --- locate crashtest. npm is the consumption path now (crashtest@1.0.0
-// --- is a devDependency; the clone stays the HEAD-testing fallback).
+// --- locate crashtest. npm is the consumption path now (crashtest@1.1.0
+// --- is the devDependency - the v1.0.x→v1.1.0 adoption step of the
+// --- S0→S1 campaign, #249: the two-pod broker, expectation tables,
+// --- lint-determinism preflight, and the memory/governance module
+// --- families are all in this line); the clone stays the
+// --- HEAD-testing fallback.
 
 function findCrashtestDir() {
     if (process.env.CRASHTEST_DIR && fs.existsSync(path.join(process.env.CRASHTEST_DIR, 'src', 'packs', 'loader.js'))) {

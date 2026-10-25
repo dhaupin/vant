@@ -5,7 +5,7 @@ scenarios that attack vant's own surfaces — in-process, socket-free, and
 deterministic — so the defenses this repo promises are *measured*, not just
 documented.
 
-- **Crashtest**: <https://github.com/dhaupin/crashtest> — on npm as `crashtest@1.0.0` (this repo's devDependency); live harness: <https://crashtest.creadev.org>
+- **Crashtest**: <https://github.com/dhaupin/crashtest> — on npm as `crashtest@1.1.0` (this repo's devDependency; the v1.1.0 adoption of the S0→S1 campaign, vant#249); live harness: <https://crashtest.creadev.org>
 - **Where the packs target**: this repo (dhaupin/vant), `packs/public/<name>/`
 - **Run/validate from vant's side**: `node test/crashtest-packs.test.js` (contract + verdict ledger, 57 checks)
 - **Real-harness dry run against vant**: `node scripts/crashtest-run.js` (see "Running the packs against vant")
@@ -285,7 +285,7 @@ Two ways, both from this repo:
 2. **Real harness dry-run** (crashtest resolves from the npm devDependency
    first; the clone stays a HEAD-testing fallback):
    ```sh
-   # resolution order: CRASHTEST_DIR override -> npm crashtest@1.0.0 -> clones
+   # resolution order: CRASHTEST_DIR override -> npm crashtest@1.1.0 -> clones
    node scripts/crashtest-run.js
    ```
    Loads every pack through crashtest's REAL v1.0.0 loader + Harness

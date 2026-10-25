@@ -128,10 +128,17 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        # crashtest@1.0.0 ships on npm — the consumption path — so the
-        # CI gate runs the REAL pack loader + Harness straight from the
-        # installed package, no clone step.
+        # crashtest@1.1.0 ships on npm — the consumption path (the S0→S1
+        # v1.0.x→v1.1.0 adoption, vant#249) — so the CI gate runs the
+        # REAL pack loader + two-pod Harness + expectation tables straight
+        # from the installed package, no clone step.
         run: npm ci
+
+      - name: Determinism preflight (crashtest #13 blocker 3, adopted with the 1.1.0 run root)
+        # The no-wall-clock law enforced for free: flat-greps the declared
+        # pack sources for Date.now / new Date( / Math.random and exits 2
+        # naming file:line. Wire-once, every pack's determinism law holds.
+        run: npx crashtest lint-determinism
 
       - name: Crashtest gate (contract table + real-harness run root)
         run: node test/ci-crashtest-gate.js
