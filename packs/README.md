@@ -416,38 +416,66 @@ The crate's `memory` (note-store discipline, issue #10) and `governance`
 lib seams via the run root's route shims (`scripts/crashtest-run.js`),
 not fixtures: the memory rows drive `lib/memory.state`/`recall` (fresh:
 both-cache bypass so two writers in one run see each other's last
-landing), the governance rows drive `lib/rules` (vant's real grant
-ledger: setRule/deleteRule with the permit fused into validate, and
-rules.check as the decision engine) and `lib/lock` acquire/release with
+landing; `envelope: true` asks vant's read layer for the stored
+provenance and read-time flags), the governance rows drive `lib/rules`'
+grant ledger (`grantLedger`/`revokeGrants` records, `rules.evaluate` as
+the privilege decision engine) and `lib/lock` acquire/release with
 waitMs 0 (honest-immediate fence answers). Verdicts are vant's truth,
 never answer sheets; a semantics vant lacks stays UNDECLARED and the
 rows honest-skip naming the knob (memory deleteRoute: no per-note
 delete yet in the state K/V; staleToken: vant's fence tokens are
-pid-borne). Ten genuine findings surfaced on the first run's
-13 measured rows (33 REFUSED / 10 EXPLOITED / 6 skipped overall):
+pid-borne).
 
-| Row | Verdict | What vant's truth is |
-|-----|---------|---------------------|
-| `memory/drift-silent-overwrite` | EXPLOITED | the state K/V carries no revision or writers field: two writers to one note blend silently |
-| `memory/drift-contradiction-carry` | EXPLOITED | read-back carries no contradiction flag |
-| `memory/hallucinated-fact-probe` | EXPLOITED | citing a never-written note reads back unflagged |
-| `memory/phantom-scope` | EXPLOITED | scope is not visible on note read-back |
-| `memory/identity-merge-collision` | EXPLOITED | multi-writer merge keeps no provenance lines |
-| `memory/resolution-order-stability` | EXPLOITED | a read-back conflict winner is unreadable (no resolution record) |
-| `governance/succession-trust-floor` | EXPLOITED | trust floors are not enforced at the grant-resolution ask |
-| `governance/succession-revocation-carry` | EXPLOITED | deleting a grant rule resumes the DEFAULT-ALLOW posture - revocation does not carry as deny |
-| `governance/capability-no-sideways` | EXPLOITED | grant rules carry no scope isolation (resolve names capability only) |
-| `governance/lock-ttl-honesty` | EXPLOITED | vant's lock TTL is a STALE-WINDOW (takeover after staleness), not the family's immediate-free reading of ttl=0 - a real, nameable semantic mismatch |
+**First measure (2026-10-25): 33 REFUSED / 10 EXPLOITED / 6 skipped**
+over 13 measured rows, findings at cause in #253 — and the FIX PASS
+flipped every finding the same day at vant's seams (see below).
+**Current measure: 43 REFUSED / 0 EXPLOITED / 6 skipped.**
+
+The fixes landed AT vant, not in the arm (the run root only maps the
+family vocabulary onto vant's doors):
+
+1. **`lib/brain.js` read/write path symmetry** (root defect): writes
+   land through `BrainStorage._getFilePath`'s per-segment
+   `[A-Za-z0-9._-]` strip, but `_loadBrain` built the read path
+   verbatim — any state key with a rejected character (memory's
+   `note:<id>` keys) WROTE fine and READ as null. The reader now mirrors
+   the same strip, so read land always meets write land.
+2. **`lib/memory.js` versioned note envelope** (B0, #253): note-shaped
+   payloads (`body`-carrying objects) now carry provenance the STATE
+   store maintains — revision spins up per overwrite, writers UNION
+   (no vanished author), disjoint-provenance content changes flag a
+   `conflict`; and `recall(envelope: true)` reports it plus the read-time
+   flags the rows grade: summary/body digit contradiction and unresolved
+   refs (each ref probed against the caller-named state namespace).
+   Plain KV keeps the bare-value contract.
+3. **`lib/rules.js` grant ledger + `evaluate()`** (B0, #253): declared-
+   precedence resolution with deny-wins ties, tombstone revocation
+   (revoke = deny ABOVE the revokee's precedence, never a delete that
+   resumes default-allow), scope isolation (a grant authorizes exactly
+   its scope; a scoped ask nobody covers fails closed), trust floors
+   enforced in the engine, and deterministic successor resolution with
+   the winner's principal in the verdict. The legacy `check()` gate is
+   untouched — its callers feed ARBITRARY params as context, and a
+   fail-closed scope read there would deny every tool call whose params
+   carry a `scope` key.
+4. **Arm honesty repairs**: the read route's 404 no longer echoes the
+   queried id (an error payload carrying the id handed the row's
+   note-matcher a ghost object and misclassified genuine misses), and
+   `ttlMode` is declared as vant's DOCUMENTED lock behavior — a hold
+   stays held inside its staleness window (`staleMs`), so the truthful
+   declaration is 'held', not 'free'.
 
 Happy rows worth naming: `governance/grant-conflict-deterministic`
 (allow/deny conflicts resolved deterministically, deny wins),
-`governance/succession-single-heir` (denied-each-ask), and
+`governance/succession-single-heir` (deterministic void-heir answer
+flipped by the successor-resolution pin), and
 `memory/drift-stale-poisons-fresh` (a stale writer's fact did not
-outrank the fresh one). The findings are tracked for fix at
-vant (see the B0 findings issue linked from #249); the rows stay
-measured in the run root's library phase (exit 3 surfaces them, per
-the phase's own design: library findings are worth surfacing apart
-from pack findings).
+outrank the fresh one). Unit pins for every new surface ride the
+native suites (`test/memory.test.js` envelope block,
+`test/governance.test.js` ledger block); the rows stay measured in
+the run root's library phase (exit 3 still fires on any future
+finding, per the phase's own design: library findings are worth
+surfacing apart from pack findings).
 
 ## Next surfaces survey (2026-10-23): packs vs issues
 

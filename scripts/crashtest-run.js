@@ -185,7 +185,14 @@ async function main() {
             // fence tokens are pid-borne) — both families rows that need
             // them honest-skip naming the knob, per the arm contract.
             memory: { writeRoute: 'memory-note-write', readRoute: 'memory-note-read', readStyle: 'body' },
-            governance: { grantsRoute: 'gov-grant', resolveRoute: 'gov-resolve', locksRoute: 'gov-locks', ttlMode: 'free' },
+            // (B0 arms, #249) ttlMode is vant's DOCUMENTED lock past-TTL
+            // behavior: a hold keeps the resource until the lock's mtime
+            // breaches the staleness window (staleMs) — "held" inside it,
+            // takeoverable after. At the row's ttl:0 arm the fresh writer
+            // happens within the window, so the truthful declaration is
+            // 'held', not 'free' (the old declaration graded vant against
+            // a semantics nobody documented).
+            governance: { grantsRoute: 'gov-grant', resolveRoute: 'gov-resolve', locksRoute: 'gov-locks', ttlMode: 'held' },
         };
             const entries = fs.readdirSync(libDir).filter((f) => f.endsWith('.js')).sort();
             console.log(`\n=== crashtest scenario library rows against the armed routes (${armedRoutes.length} routes; D1/KV bindings armed: ${harness.env && harness.env.DB && harness.env.UPLOADS ? 'DB+UPLOADS' : 'none'}) ===`);
@@ -1230,6 +1237,13 @@ function buildRoutes(sb, Harness) {
     const rules = sandboxLib('rules');
     const lockSys = sandboxLib('lock');
     const B0_LOCKS = new Set(); // resource -> live fence, per-run state
+    // (B0 declared vocabulary) vant's trust-floor map for the governance
+    // ask scopes the rows exercise. This is the arm's DOCUMENTED scale —
+    // vant's succession trust vocabulary expressed numerically (deep
+    // private estate asks need trust 3; the crates read it or leave it,
+    // rows just resolve and vant's engine enforces the law) — not a
+    // moduleCtx knob the family promises to read.
+    const B0_TRUST_FLOORS = { 'deep-private': 3 };
 
     // memory-note-write: POST { id, body, summary?, refs?, scope?, writers? }
     // -> lib/memory.state() — the durable K/V note store (TTL'd, workspace
@@ -1259,73 +1273,77 @@ function buildRoutes(sb, Harness) {
     });
 
     // memory-note-read: POST { id } (readStyle 'body') -> recall(fresh:
-    // true) — the fresh path bypasses BOTH caches so two writers in one
-    // run see each other's last landing (the drift rows depend on it).
+    // true, envelope) — the fresh path bypasses BOTH caches so two writers
+    // in one run see each other's last landing (the drift rows depend on
+    // it), and the envelope asks vant's read layer for the stored
+    // provenance + flags (revision/writers/conflict, summary/body
+    // contradiction, unresolved refs in the same state namespace). The
+    // 404 body deliberately does NOT echo the queried id: an error payload
+    // carrying the id would hand the row's note-matcher a ghost object
+    // and misclassify a genuine miss as "silently blended".
     harness.registerRoute('memory-note-read', async (ctx) => {
         let j = null;
         try { j = await ctx.request.json(); } catch { j = null; }
         if (!j || typeof j.id !== 'string' || !j.id) return jsonRes({ error: 'note id required' }, 400);
         try {
-            const value = await memory.recall(`note:${j.id}`, { fresh: true });
-            if (value === undefined) return jsonRes({ error: 'no such note', id: j.id }, 404);
-            const note = { id: j.id, ...(value && typeof value === 'object' ? value : { body: value }) };
-            return jsonRes(note, 200);
+            const env = await memory.recall(`note:${j.id}`, { fresh: true, envelope: true, refNamespace: 'note:' });
+            if (env === undefined) return jsonRes({ error: 'no such note' }, 404);
+            return jsonRes({ id: j.id, ...env }, 200);
         } catch (e) {
             return jsonRes({ error: String(e && e.message || e).slice(0, 140) }, 403);
         }
     });
 
-    // gov-grant (rules IS vant's grant ledger): POST { principal,
-    // capability, scope?, permit, precedence?, revoke? } -> setRule /
-    // deleteRule with the permit fused into validate(). Precedence rides
-    // the rule record for read-back; resolution ORDER is vant's actual
-    // rules order (the precedence rows honestly surface that).
+    // gov-grant (the ledger IS vant's grant surface): POST { principal,
+    // capability, scope?, permit, precedence?, trust?, role?, revoke? }
+    // -> rules.grantLedger / rules.revokeGrants. Revocations are never a
+    // delete (the old arm resumed default-allow on revoke — the exact
+    // drift the rows graded): a revoke writes a tombstone deny ABOVE the
+    // revokee's precedence, so deny carries until a higher grant wins.
     harness.registerRoute('gov-grant', async (ctx) => {
         let j = null;
         try { j = await ctx.request.json(); } catch { j = null; }
         if (!j || typeof j.principal !== 'string' || !j.principal) return jsonRes({ error: 'principal required' }, 400);
         if (typeof j.capability !== 'string' || !j.capability) return jsonRes({ error: 'capability required' }, 400);
         if (j.permit !== 'allow' && j.permit !== 'deny' && j.revoke !== true) return jsonRes({ error: 'permit must be allow or deny (or revoke)' }, 400);
-        const ruleName = `grant:${j.principal}:${j.capability}`;
         try {
+            let r;
             if (j.revoke === true) {
-                rules.deleteRule(ruleName);
-                return jsonRes({ ok: true, revoked: ruleName }, 200);
+                r = rules.revokeGrants({ principal: String(j.principal), capability: String(j.capability) });
+                return jsonRes({ ok: true, tombstone: r.id, precedence: r.precedence }, 200);
             }
-            if (j.permit === 'deny') {
-                rules.setRule(ruleName, {
-                    appliesTo: (op) => op === j.capability,
-                    validate: () => false,
-                    reason: `denied by grant: ${String(j.principal)}`,
-                    precedence: Number(j.precedence) || 0,
-                    scope: j.scope ? String(j.scope).slice(0, 120) : null,
-                });
-            } else {
-                rules.setRule(ruleName, {
-                    appliesTo: (op) => op === j.capability,
-                    validate: () => true,
-                    reason: `allowed by grant: ${String(j.principal)}`,
-                    precedence: Number(j.precedence) || 0,
-                    scope: j.scope ? String(j.scope).slice(0, 120) : null,
-                });
-            }
-            return jsonRes({ ok: true, rule: ruleName, permit: j.permit }, 200);
+            r = rules.grantLedger({
+                principal: String(j.principal),
+                capability: String(j.capability),
+                scope: j.scope != null ? String(j.scope).slice(0, 120) : null,
+                permit: j.permit,
+                precedence: Number(j.precedence) || 0,
+                trust: j.trust != null ? Number(j.trust) : null,
+                role: j.role != null ? String(j.role).slice(0, 40) : null,
+            });
+            return jsonRes({ ok: true, grant: r.id, permit: r.permit, precedence: r.precedence }, 200);
         } catch (e) {
             return jsonRes({ error: String(e && e.message || e).slice(0, 140) }, 403);
         }
     });
 
-    // gov-resolve: POST { principal, capability, scope? } -> rules.check(
-    // capability) — vant's real decision: default-deny dangerous names,
-    // custom-rule verdicts, allowlist fallthrough. ALWAYS 200 (the
-    // decision IS the answer: { permit, rule?, reason? }), 4xx only on a
-    // malformed ask.
+    // gov-resolve: POST { principal, capability, scope? } -> rules.evaluate(
+    // capability) — vant's real privilege-LEDGER decision engine
+    // (precedence deny-wins, tombstone revocation, scope isolation,
+    // trust floors). ALWAYS 200 (the decision IS the answer:
+    // { permit, rule?, reason?, principal? }), 4xx only on a malformed ask.
+    // The trust floor is DOCUMENTED vocabulary (moduleCtx.governance.
+    // trustFloors): the arm reads the floor for the asked scope and hands
+    // it to vant's engine — the floor map is exported so export modules
+    // pack up without it, while vant's engine keeps the floor law.
     harness.registerRoute('gov-resolve', async (ctx) => {
         let j = null;
         try { j = await ctx.request.json(); } catch { j = null; }
         if (!j || typeof j.capability !== 'string' || !j.capability) return jsonRes({ error: 'capability required' }, 400);
         try {
-            const verdict = rules.check(j.capability, { principal: String(j.principal || ''), scope: j.scope ? String(j.scope) : null });
+            const ask = { principal: String(j.principal || ''), scope: j.scope != null && j.scope !== '' ? String(j.scope) : null };
+            if (ask.scope && B0_TRUST_FLOORS[ask.scope] != null) ask.trustFloor = B0_TRUST_FLOORS[ask.scope];
+            const verdict = rules.evaluate(j.capability, ask);
             return jsonRes({ permit: verdict.allowed ? 'allow' : 'deny', rule: verdict.rule || null, reason: verdict.reason || null }, 200);
         } catch (e) {
             return jsonRes({ error: String(e && e.message || e).slice(0, 140) }, 403);
