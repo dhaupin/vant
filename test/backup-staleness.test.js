@@ -257,5 +257,44 @@ function parseSentinel(r) {
     check('#252 seam: brain.write() rides the write-moment stale guard', brainSrc.includes('_piggybackAfterBrainWrite') && /_getStorageRef\(\)\.get\('brain'\)\.write[\s\S]{0,400}_piggybackAfterBrainWrite/.test(brainSrc), 'lib/brain.js');
 }
 
+// ---- lifecycle seams: sleep cancels, wake re-arms, shutdown kills ----
+{
+    const src = fs.readFileSync(path.join(REPO, 'lib', 'vant.js'), 'utf8');
+    const sleepStops = /async function sleep[\s\S]{0,2500}backup\.stop\(\)/.test(src);
+    const wakeRearms = /async function wake[\s\S]{0,2500}backup\.start\(\)/.test(src);
+    const shutdownCancels = /async function shutdown[\s\S]{0,2500}backup\.stop\(\)/.test(src);
+    check('#252 lifecycle: sleep() stops the backup cadence (the cancel path for an armed watchdog)', sleepStops, 'lib/vant.js sleep');
+    check('#252 lifecycle: wake() re-arms the backup cadence (sleep/wake stay balanced, never orphaned)', wakeRearms, 'lib/vant.js wake');
+    check('#252 lifecycle: shutdown() cancels the backup cadence completely (the runaway/kill path)', shutdownCancels, 'lib/vant.js shutdown');
+}
+{
+    const root = makeRoot({ stack: ['vant'], currentBrain: 'vant' });
+    fs.mkdirSync(path.join(root, 'outside-mount'), { recursive: true });
+    const r = runRoot(root, `
+        const backup = require(${JSON.stringify(BACKUP)});
+        (async () => {
+            const inst = backup.getInstance({ activeBrainWatchdog: true, activeBrainIntervalMs: 40, activeBrainDestination: process.env.PIN_DEST, schedules: [] });
+            inst._running = true;
+            inst._startActiveBrainWatchdog();
+            const armed = !!inst._watchdogTimer;
+            inst.stop();
+            const stopped = inst._watchdogTimer === null && inst._running === false;
+            // re-arm after stop: the sleep/wake counterpart — start() must
+            // re-register the timer when it comes back from stop (the real
+            // wake path calls start() exactly like this, since stop() left
+            // _running false).
+            inst.start();
+            const rearm = !!inst._watchdogTimer;
+            inst.stop();
+            console.log(JSON.stringify({ armed, stopped, rearm }));
+            process.exit(0);
+        })().catch(e => { console.error('THREW: ' + String(e && e.message).slice(0, 200)); process.exit(3); });
+    `, { PIN_DEST: path.join(root, 'outside-mount') });
+    const d = parseSentinel(r);
+    check('#252 lifecycle: stop() really clears the timer, and start() after stop() re-arms (balanced cycles)', d && d.armed === true && d.stopped === true && d.rearm === true, d ? JSON.stringify(d) : `${r.stdout} ${r.stderr}`.slice(0, 220));
+    fs.rmSync(root, { recursive: true, force: true });
+}
+
 console.log(`\nbackup-staleness: ${failures === 0 ? 'ALL PINS PASS' : `${failures} pin(s) failed`}`);
+
 process.exit(failures === 0 ? 0 : 1);
