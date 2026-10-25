@@ -177,15 +177,24 @@ export default {
       name: 'origin-guard-typed-acks',
       description: 'hostile hop origins answer the ack path with typed refusals INSIDE the 200: http downgrade, loopback, and cloud metadata targets all refuse - the edge has NO lab escape and private targets never hop',
       async run(harness) {
-        const shape = (origin) => ({
-          name: 'origin:' + origin,
-          env: ENV_ON,
-          request: {
-            url: CALL, method: 'POST',
-            headers: { 'x-signature-256': signEnvelope(hopFrame(origin, '/api', SEALED_CT), GATE_SECRET) },
-            body: hopFrame(origin, '/api', SEALED_CT),
-          },
-        });
+        // ONE string per shape, signed over the EXACT bytes shipped — the
+        // row used to call hopFrame twice (sign call + body call), and each
+        // call re-evaluated ts. A ms-grain boundary between the two evals
+        // left the signature covering different bytes than the body carried,
+        // so the edge (correctly!) answered 401 and the row misclassified
+        // vant's true gate as a flake (measured 2026-10-25, cycles 2+3).
+        const shape = (origin) => {
+          const bodyStr = hopFrame(origin, '/api', SEALED_CT);
+          return {
+            name: 'origin:' + origin,
+            env: ENV_ON,
+            request: {
+              url: CALL, method: 'POST',
+              headers: { 'x-signature-256': signEnvelope(bodyStr, GATE_SECRET) },
+              body: bodyStr,
+            },
+          };
+        };
         const results = await probeEdge(harness, [
           shape('http://public-target.example/'),
           shape('https://127.0.0.1/'),
