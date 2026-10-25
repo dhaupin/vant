@@ -13,6 +13,7 @@ const ROOT = path.resolve(__dirname, '..');
 // while the lib wrote the right file. Capture BEFORE any chdir.
 const { resolveActiveBrain } = require('./active-brain');
 const ACTIVE_BRAIN = resolveActiveBrain(ROOT);
+const escrowLib = require(path.join(ROOT, 'lib', 'escrow'));
 
 const results = { passed: 0, failed: 0, skipped: 0, tests: [] };
 
@@ -241,6 +242,48 @@ test('#204 TTL: an expired approval fails consumption and reports expired', () =
     const stale = e.checkApproval(req.approvalId);
     const spent = e.consumeApproval(req.approvalId, 'admin');
     return { success: stale.approved === false && stale.reason === 'expired' && spent.approved === false && spent.reason === 'expired' };
+});
+
+// (B0 two-key law, issue #249) The escrow-RELEASE discipline: releases need
+// requireApprovals DISTINCT keys, and one principal listing twice is still
+// ONE key. Self-satisfaction must never release a two-key escrow; two
+// distinct principals must; and an under-keyed consume is a typed refusal
+// that SURVIVES (the BURN only happens once the posture is satisfied).
+test('#249 two-key: self-signing twice never releases, distinct keys do', () => {
+    const e = new escrowLib.Escrow({ approvalRequired: ['escrow-release:*'], requireApprovals: 2 });
+    const req = e.requestApproval('escrow-release:twokey-pin', 'two-key pin');
+    e.approve(req.approvalId, 'approver-self-1');
+    e.approve(req.approvalId, 'approver-self-1');           // same key again: still ONE
+    const first = e.consumeApproval(req.approvalId, 'escrow-release:twokey-pin');
+    if (first.approved !== false) return { success: false, error: 'self-twice released a two-key escrow: ' + JSON.stringify(first) };
+    if (first.reason !== 'not_satisfied') return { success: false, error: 'under-keyed consume lost its typed reason: ' + JSON.stringify(first) };
+    if (!e._approvals.get(req.approvalId)) return { success: false, error: 'under-keyed consume BURNED the approval (it should survive)' };
+    e.approve(req.approvalId, 'approver-real-2');           // the SECOND distinct key
+    const second = e.consumeApproval(req.approvalId, 'escrow-release:twokey-pin');
+    return { success: second.approved === true };
+});
+
+test('#249 two-key: default posture stays single-key (back-compat callers unchanged)', () => {
+    const e = new escrowLib.Escrow({ approvalRequired: ['delete'] });
+    const req = e.requestApproval('delete', 'legacy pin');
+    e.approve(req.approvalId, 'owner');
+    const spent = e.consumeApproval(req.approvalId, 'delete');
+    return { success: spent.approved === true };
+});
+
+// (B0 per-approval ttl, issue #249) A per-approval window rides the RECORD,
+// not the instance convention: per-approval ttl 0 is born expired (fail-
+// closed, typed), while the instance-level ttl 0 "disable windows" reading
+// stays intact for existing callers.
+test('#249 per-approval ttl: ttl 0 is born expired (fail-closed, typed)', () => {
+    const e = new escrowLib.Escrow({ approvalRequired: ['escrow-release:*'], requireApprovals: 2 });
+    const req = e.requestApproval('escrow-release:expired-pin', 'expiry pin', { ttlMs: 0 });
+    e.approve(req.approvalId, 'approver-a');
+    e.approve(req.approvalId, 'approver-b');
+    const spent = e.consumeApproval(req.approvalId, 'escrow-release:expired-pin');
+    if (spent.approved !== false) return { success: false, error: 'a ttl-0 escrow released - expiry is fail-OPEN' };
+    if (spent.reason !== 'expired') return { success: false, error: 'expiry lost its typed reason: ' + JSON.stringify(spent) };
+    return { success: true };
 });
 
 // (pass 257) The disk-coherent burn: a consumed approval can NEVER be

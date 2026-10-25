@@ -161,8 +161,8 @@ async function main() {
         const armedRoutes = ['brain-read', 'brain-state', 'brain-migrate', 'guest-cap', 'crew-run', 'mcp-exec',
         'vant-rest-open', 'vant-rest-priv', 'vant-rest-priv-alias', 'vant-login', 'vant-me', 'vant-logout',
         'stone-scope', 'stone-tamper', 'stone-restore-tamper', 'rest-request', 'trust-read', 'brain-graph-walk',
-        'home-summary', 'home-admin', 'memory-note-write', 'memory-note-read',
-        'gov-grant', 'gov-resolve', 'gov-locks'];
+        'home-summary', 'home-admin', 'memory-note-write', 'memory-note-read', 'memory-note-delete',
+        'gov-grant', 'gov-resolve', 'gov-locks', 'gov-escrow'];
         // Per-module route vocabulary: rows whose ctx names are not `route`
         // get the vant-armed route that speaks their contract (privileged
         // authz gate, cookie session verbs, deep/regex Edge probes). The
@@ -180,19 +180,22 @@ async function main() {
             state: { route: 'device', mustDenyIds: ['rook-device-77', 'rook-device-88'] },
             upload: { route: 'upload' },
             // (B0 arms, #249) vant's REAL note store + grant ledger + locks.
-            // deleteRoute is deliberately UNDECLARED: vant's state K/V has
-            // no per-note delete yet, and staleToken is undeclared (vant's
-            // fence tokens are pid-borne) — both families rows that need
-            // them honest-skip naming the knob, per the arm contract.
-            memory: { writeRoute: 'memory-note-write', readRoute: 'memory-note-read', readStyle: 'body' },
+            // deleteRoute is now DECLARED: lib/memory.forget() gives the
+            // K/V a per-note delete with tombstone residue (B0 fix pass).
+            // staleToken stays undeclared (vant's fence tokens are
+            // pid-borne) — the fencing row honest-skips naming the knob.
+            memory: { writeRoute: 'memory-note-write', readRoute: 'memory-note-read', deleteRoute: 'memory-note-delete', readStyle: 'body' },
             // (B0 arms, #249) ttlMode is vant's DOCUMENTED lock past-TTL
             // behavior: a hold keeps the resource until the lock's mtime
             // breaches the staleness window (staleMs) — "held" inside it,
             // takeoverable after. At the row's ttl:0 arm the fresh writer
             // happens within the window, so the truthful declaration is
             // 'held', not 'free' (the old declaration graded vant against
-            // a semantics nobody documented).
-            governance: { grantsRoute: 'gov-grant', resolveRoute: 'gov-resolve', locksRoute: 'gov-locks', ttlMode: 'held' },
+            // a semantics nobody documented). escrowRoute rides vant's real
+            // escrow door: releases for the 'escrow-release:*' family are
+            // two-key gated (the crate's distinct-approver law), ttl rides
+            // per-approval windows.
+            governance: { grantsRoute: 'gov-grant', resolveRoute: 'gov-resolve', locksRoute: 'gov-locks', escrowRoute: 'gov-escrow', ttlMode: 'held' },
         };
             const entries = fs.readdirSync(libDir).filter((f) => f.endsWith('.js')).sort();
             console.log(`\n=== crashtest scenario library rows against the armed routes (${armedRoutes.length} routes; D1/KV bindings armed: ${harness.env && harness.env.DB && harness.env.UPLOADS ? 'DB+UPLOADS' : 'none'}) ===`);
@@ -1380,6 +1383,62 @@ function buildRoutes(sb, Harness) {
             return r.ok
                 ? jsonRes({ ok: true, acquired: true, resource: j.resource }, 200)
                 : jsonRes({ ok: false, error: 'lock held', reason: r.reason || 'held' }, 409);
+        } catch (e) {
+            return jsonRes({ error: String(e && e.message || e).slice(0, 140) }, 403);
+        }
+    });
+
+    // memory-note-delete: POST { id } -> lib/memory.forget() — vant's new
+    // per-note delete (B0 fix pass): a tombstone entry IN PLACE (deleted
+    // marker + prunedAt + removedBy, prior envelope provenance carried),
+    // so "pruned" leaves traceable residue and reads of the tombstoned
+    // ref treat it as gone (dangling citation surface).
+    harness.registerRoute('memory-note-delete', async (ctx) => {
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        if (!j || typeof j.id !== 'string' || !j.id) return jsonRes({ error: 'note id required' }, 400);
+        try {
+            await memory.forget(`note:${j.id}`, { fresh: true });
+            return jsonRes({ ok: true, deleted: true, id: j.id }, 200);
+        } catch (e) {
+            return jsonRes({ error: String(e && e.message || e).slice(0, 140) }, 403);
+        }
+    });
+
+    // gov-escrow: POST { escrow, approvals[], ttl? } -> lib/escrow — vant's
+    // REAL approval door. The arm serves the 'escrow-release:*' family with
+    // vant's B0 two-key posture (requireApprovals 2): each listed principal
+    // signs the request's approval record (distinct keys dedupe — one
+    // principal listing twice is still one key), and the release consumes
+    // only when the distinct-key posture is satisfied and the approval is
+    // inside its window. Per-request ttl rides vant's per-approval
+    // record-level expiry (ttl 0 = born expired, fail-closed). A refused
+    // release answers a typed 4xx naming the blocker; a satisfied release
+    // answers 2xx.
+    const escrow = sandboxLib('escrow');
+    const B0_ESCROW = escrow.create({
+        approvalRequired: ['escrow-release:*'],
+        requireApprovals: 2
+    });
+    harness.registerRoute('gov-escrow', async (ctx) => {
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        if (!j || typeof j.escrow !== 'string' || !j.escrow) return jsonRes({ error: 'escrow id required' }, 400);
+        if (!Array.isArray(j.approvals)) return jsonRes({ error: 'approvals array required' }, 400);
+        const op = 'escrow-release:' + String(j.escrow).slice(0, 60);
+        try {
+            const req = B0_ESCROW.requestApproval(op, 'governance row ' + String(j.escrow).slice(0, 60), {
+                ttlMs: j.ttl != null ? Number(j.ttl) : undefined
+            });
+            if (req.approvalId) {
+                for (const principal of j.approvals) {
+                    if (principal != null && principal !== '') B0_ESCROW.approve(req.approvalId, String(principal).slice(0, 80));
+                }
+                const consumed = B0_ESCROW.consumeApproval(req.approvalId, op);
+                if (consumed.approved) return jsonRes({ ok: true, released: true, escrow: String(j.escrow) }, 200);
+                return jsonRes({ error: 'release refused', reason: consumed.reason || 'not_satisfied', escrow: String(j.escrow) }, 403);
+            }
+            return jsonRes({ error: 'escrow request refused', reason: req.reason || 'unknown', escrow: String(j.escrow) }, 403);
         } catch (e) {
             return jsonRes({ error: String(e && e.message || e).slice(0, 140) }, 403);
         }

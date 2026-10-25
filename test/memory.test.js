@@ -409,6 +409,40 @@ asyncTest('plain KV untouched + colon keys survive the round trip (B0 #253)', as
     return true;
 });
 
+// (B0, issue #249) DELETE-IS-LOUD: forget() leaves traceable tombstone
+// residue — the deleted marker + prunedAt + removedBy on envelope read-back,
+// prior provenance carried — while plain recall() reads the note as gone.
+// A deleted anchor is a DANGLING claim for anything citing it (the ref
+// probe treats a tombstone row as GONE).
+asyncTest('forget: tombstone residue survives read-back, plain recall reads gone (B0 #249)', async () => {
+    const m = require('../lib/memory');
+    const id = 'b0-tomb-pin-' + Date.now();
+    await m.state('note:' + id, { body: 'anchor fact: pinned', writers: ['anchor-writer'] }, { fresh: true, ttl: 600000 });
+    const f = await m.forget('note:' + id, { by: 'steward-7', ttl: 600000 });
+    assert(f.deleted === true, 'forget returned no delete marker: ' + JSON.stringify(f));
+    const gone = await m.recall('note:' + id, { fresh: true });
+    assert(gone === undefined, 'plain recall served a deleted row: ' + JSON.stringify(gone));
+    const tomb = await m.recall('note:' + id, { fresh: true, envelope: true });
+    assert(tomb.deleted === true, 'envelope read-back lost the tombstone: ' + JSON.stringify(tomb));
+    assert(typeof tomb.prunedAt === 'number' && tomb.removedBy === 'steward-7',
+        'tombstone lost its residue fields: ' + JSON.stringify(tomb));
+    assert(Array.isArray(tomb.writers) && tomb.writers.includes('anchor-writer'),
+        'tombstone dropped the prior provenance: ' + JSON.stringify(tomb.writers));
+    return true;
+});
+
+asyncTest('forget: a deleted anchor is a dangling claim (delete-is-loud at the ref probe, B0 #249)', async () => {
+    const m = require('../lib/memory');
+    const stamp = 'b0-cite-pin-' + Date.now();
+    await m.state('note:' + stamp, { body: 'anchor fact' }, { fresh: true, ttl: 600000 });
+    await m.forget('note:' + stamp, { by: 'steward-7', ttl: 600000 });
+    await m.state('note:' + stamp + '-cites', { body: 'derived from anchor', refs: [stamp] }, { fresh: true, ttl: 600000 });
+    const citing = await m.recall('note:' + stamp + '-cites', { fresh: true, envelope: true, refNamespace: 'note:' });
+    assert(Array.isArray(citing.unresolvedRefs) && citing.unresolvedRefs.includes(stamp),
+        'citing a deleted anchor did not flag unresolved: ' + JSON.stringify(citing.unresolvedRefs));
+    return true;
+});
+
 (async () => {
     await _runAsyncTests();
     console.log(`\nPassed:  ${results.passed}`);

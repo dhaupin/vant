@@ -429,7 +429,10 @@ pid-borne).
 **First measure (2026-10-25): 33 REFUSED / 10 EXPLOITED / 6 skipped**
 over 13 measured rows, findings at cause in #253 — and the FIX PASS
 flipped every finding the same day at vant's seams (see below).
-**Current measure: 43 REFUSED / 0 EXPLOITED / 6 skipped.**
+**Current measure (after B0 completion, same day): 48 REFUSED /
+0 EXPLOITED / 1 skipped** — the escrow + delete coverage below took
+the skipped count from 6 to 1; the only honest skip left is
+`lock-owner-fencing` (staleToken: vant's fence tokens are pid-borne).
 
 The fixes landed AT vant, not in the arm (the run root only maps the
 family vocabulary onto vant's doors):
@@ -464,6 +467,26 @@ family vocabulary onto vant's doors):
    `ttlMode` is declared as vant's DOCUMENTED lock behavior — a hold
    stays held inside its staleness window (`staleMs`), so the truthful
    declaration is 'held', not 'free'.
+5. **Escrow discipline (lib/escrow.js, B0 completion)**: the family's
+   two-key law is now vant's release-class posture — `requireApprovals`
+   counts DISTINCT approvedBy keys (one principal listing twice is one
+   key), under-keyed consumes refuse typed AND survive (the burn happens
+   only on a satisfied consume), and per-approval windows ride the
+   record (`ttlMs`, where ttl 0 is born expired **deterministically** —
+   no clock race, pin-caught) while the instance-level ttl-0
+   "disable windows" convention stays intact for existing callers.
+6. **Per-note delete with tombstone residue (lib/memory.forget)**: the
+   K/V gained a real delete — a tombstone entry IN PLACE (`deleted`,
+   `prunedAt`, `removedBy`, prior envelope provenance carried forward,
+   revision spun), so deletes leave traceable residue (delete-is-loud)
+   and a deleted anchor reads as GONE to the ref probe (dangling
+   citations). Plain recall reads the row as gone; envelope reads
+   surface the tombstone.
+7. **Coverage completion**: `escrowRoute` and `deleteRoute` are
+   DECLARED in the library ctx — the three escrow rows
+   (two-key-release, expiry-is-fail-closed, refusal-is-typed) and the
+   two delete rows (delete-is-loud, citation-drift) now GRADE vant's
+   real doors instead of honest-skipping.
 
 Happy rows worth naming: `governance/grant-conflict-deterministic`
 (allow/deny conflicts resolved deterministically, deny wins),
