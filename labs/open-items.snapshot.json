@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "note": "Machine-visible open-item baseline for labs/TASKS.md + labs/MEM.md (pass-ledger lib/pass-ledger.js). ANY change to the census must update this file in the SAME commit as the ledger edit - a conscious act, never silent drift. Regenerate: npm run ledger:snapshot",
+  "stamped": "2026-10-25",
+  "count": 14,
+  "items": [
+    {
+      "id": "TASKS.md:1587",
+      "marker": "**NEXT-UP:**",
+      "source": "tasks",
+      "at": 1587
+    },
+    {
+      "id": "TASKS.md:1872",
+      "marker": "**NEXT-UP:**",
+      "source": "tasks",
+      "at": 1872
+    },
+    {
+      "id": "TASKS.md:1911",
+      "marker": "**NEXT-UP:**",
+      "source": "tasks",
+      "at": 1911
+    },
+    {
+      "id": "TASKS.md:1948",
+      "marker": "**NEXT-UP:**",
+      "source": "tasks",
+      "at": 1948
+    },
+    {
+      "id": "TASKS.md:1983",
+      "marker": "**NEXT-UP:**",
+      "source": "tasks",
+      "at": 1983
+    },
+    {
+      "id": "TASKS.md:2034",
+      "marker": "**NEXT-UP:**",
+      "source": "tasks",
+      "at": 2034
+    },
+    {
+      "id": "TASKS.md:2066",
+      "marker": "**NEXT-UP:**",
+      "source": "tasks",
+      "at": 2066
+    },
+    {
+      "id": "TASKS.md:2397",
+      "marker": "**Next:**",
+      "source": "tasks",
+      "at": 2397
+    },
+    {
+      "id": "TASKS.md:2454",
+      "marker": "**Next:**",
+      "source": "tasks",
+      "at": 2454
+    },
+    {
+      "id": "TASKS.md:2515",
+      "marker": "**Next:**",
+      "source": "tasks",
+      "at": 2515
+    },
+    {
+      "id": "TASKS.md:2550",
+      "marker": "**Next:**",
+      "source": "tasks",
+      "at": 2550
+    },
+    {
+      "id": "TASKS.md:2581",
+      "marker": "**Next:**",
+      "source": "tasks",
+      "at": 2581
+    },
+    {
+      "id": "TASKS.md:2622",
+      "marker": "**Next:**",
+      "source": "tasks",
+      "at": 2622
+    },
+    {
+      "id": "TASKS.md:2665",
+      "marker": "**Next:**",
+      "source": "tasks",
+      "at": 2665
+    }
+  ]
+}

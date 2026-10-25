@@ -89,6 +89,15 @@ jobs:
       - name: Docs truthfulness gate (doc promises resolve to real tree, R3-F9)
         run: node scripts/check-docs-truthfulness.js
 
+      - name: Pass-ledger open-items gate (drift is machine-visible, pass-354 arc)
+        # The pass-ledger census reads the REAL ledger docs and pins them
+        # to a committed snapshot: any open-item open/close/line-move must
+        # update labs/open-items.snapshot.json in the SAME commit as the
+        # ledger edit - a conscious act, never background churn. The
+        # weekly cron re-runs this job, so drift is re-measured weekly
+        # even when the week's commits never touched a ledger.
+        run: npm run ledger:gate
+
       - name: Run standalone suites
         # (pass 293) THE HARNESS, not a bare loop: the old `for f in …`
         # chain ran 217 suites in ONE shared environment, so suite N's
