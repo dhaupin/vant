@@ -64,6 +64,39 @@ export const SHOWCASE = [
             'than reading up on it.',
     },
     {
+        id: 'gistory-creadev',
+        title: 'Gistory',
+        industry: ['Privacy', 'AI'],
+        url: 'https://gistory.creadev.org',
+        img: '/showcase-gistory-og.png',
+        imgAlt: 'Gistory product tile: the privacy-first prompt keeper for AI workflows',
+        blurb:
+            'A prompt keeper that trusts you with the keys: end-to-end encrypted ' +
+            'prompt history for AI workflows, synced across your own machines, ' +
+            'with the sync engine shipped as an npm package you can reuse.',
+        desc:
+            'Gistory keeps AI prompt history the way a vault should: encrypted on ' +
+            'your devices, verified by the family gates, and synced end-to-end. ' +
+            'The sync relay is blind by construction: it carries opaque blobs and ' +
+            'never holds a readable byte, because your AES-GCM key derives on ' +
+            'device from passphrase plus chainId (PBKDF2) before anything leaves. ' +
+            'Pairing a new device is a GS1 pairing token, verified, not a QR ' +
+            'ritual you have to trust on faith.\n\n' +
+            'The merge story is engineering, not vibes: pure last-write-wins with ' +
+            'a deterministic deviceId tiebreaker, tombstones for safe deletes, ' +
+            'and a QoS scheduler that debounces, coalesces, backs off on the ' +
+            'relay\'s own Retry-After, and never silently drops a failed push. ' +
+            'That exact engine ships as gistory-sync on npm (v1.0.0): the storage ' +
+            'seam reads IndexedDB or localStorage at call time, so the same ' +
+            'bundle runs in a browser, a web worker, or plain Node.\n\n' +
+            'Gistory is a family member of the struct fleet, built the Vant way: ' +
+            'a markdown brain lives under models/ in the repo itself, every ' +
+            'session reads on wake and closes by committing what it learned, and ' +
+            'the crashtest adversary rides in-tree (crashtest.config.js + its own ' +
+            'workflows) so the sync surface is adversarially graded, not only ' +
+            'unit-tested. Docs at docs.creadev.org/gistory.',
+    },
+    {
         id: 'axolotl-creadev',
         title: 'Creadev.org',
         industry: ['Agent infrastructure'],
