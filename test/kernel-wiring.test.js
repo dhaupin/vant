@@ -37,6 +37,9 @@ const {
     registerDocsGates,
     docsGatesCensus,
     GATE_SCRIPTS,
+    registerMarketingTables,
+    marketingTablesCensus,
+    MARKETING_TABLE_VERBS,
 } = require(path.join(ROOT, 'lib', 'kernel-ledger.js'));
 
 let run = 0, failures = 0;
@@ -115,6 +118,27 @@ function typedCensus(census, label) {
     kernel._unwind();
     const after = docsGatesCensus();
     check('kernel-ledger: re-registers after kernel reset', after.ok !== false && Array.isArray(after.entries) && after.entries.length === GATE_SCRIPTS.length, JSON.stringify(after || {}));
+}
+
+// ---- marketing-tables (template consumer, register-only) ----
+{
+    check('marketing-tables: register-only by the row\'s own law (census verb, nothing structural)',
+        JSON.stringify(MARKETING_TABLE_VERBS) === JSON.stringify(['census']), JSON.stringify(MARKETING_TABLE_VERBS));
+
+    registerMarketingTables();
+    const c = marketingTablesCensus();
+    typedCensus(c, 'kernel-ledger (marketing-tables)');
+    const kinds = new Set(c.entries.map((e) => e.section || ''));
+    check('marketing-tables: the three REAL channel tables enumerated (§11.3/§11.4/§11.5)',
+        c.entries.length >= 15 && kinds.has('11.3 Registries & directories (MCP surfaces)') &&
+        kinds.has('11.4 List repos (PR-able, free)') && kinds.has('11.5 Communities (where the humans are)'),
+        JSON.stringify([...kinds].slice(0, 3)));
+    check('marketing-tables: rows are genuine table rows (ids carry kind/name, no invented entries)',
+        c.entries.every((e) => e.id.startsWith('marketing-tables/')), JSON.stringify(c.entries.find((e) => !e.id.startsWith('marketing-tables/'))));
+
+    kernel._unwind();
+    const after = marketingTablesCensus();
+    check('marketing-tables: self-heals after kernel reset within the call', after.ok !== false && Array.isArray(after.entries) && after.entries.length >= 15, JSON.stringify(after || {}));
 }
 
 // ---- typed refusals ----

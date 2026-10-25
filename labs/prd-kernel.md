@@ -337,7 +337,7 @@ empty ledger — a census with zero consumers is TRUE, not broken.
 | test harness | mints scratch brains per run, NEVER retires (the pass-328 leak) | retire + autoreap | the kill switch becomes `harness.autoreap` — census its own mints, retire them on suite exit |
 | docs gates | attest of copy-to-code | census of claims and their check dates | claims ledger |
 | pass ledger (TASKS/MEM) | succeed ceremony (well-practiced) | formal census of open items | queue as census entries |
-| marketing tables | dated status columns (already right shape) | nothing structurally; just register | template consumer |
+| marketing tables | dated status columns (already right shape) | nothing structurally; just register | template consumer | **REGISTERED** (labs/kernel-ledger.js — the §3 map's last row, exactly the row's own law: register-only, census verb, nothing structural. The census enumerates the REAL §-11 channel tables (11.3 registries / 11.4 list repos / 11.5 communities, 19 rows) from labs/prd-marketing.md on disk; ids carry kind/name, never invented entries. Pins: test/kernel-wiring.test.js, 24/24) |
 
 The point of the table: **adoption is never a rewrite.** It is one row
 per surface, verb by verb, with the escrow row first (smallest lift),
