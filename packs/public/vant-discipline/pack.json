@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-discipline",
+  "description": "In-process module discipline converted from vant's native unit pins (the B0 memory-envelope block and escrow two-key block, test/memory.test.js + test/escrow.test.js) into pack rows riding the run root's REAL lib arms - the memory note store, the grant ledger, and the escrow door. Phase A of the S0->S1 campaign (#249); the native suite blocks stay green alongside until one full run cycle is green on both.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

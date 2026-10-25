@@ -162,7 +162,7 @@ async function main() {
         'vant-rest-open', 'vant-rest-priv', 'vant-rest-priv-alias', 'vant-login', 'vant-me', 'vant-logout',
         'stone-scope', 'stone-tamper', 'stone-restore-tamper', 'rest-request', 'trust-read', 'brain-graph-walk',
         'home-summary', 'home-admin', 'memory-note-write', 'memory-note-read', 'memory-note-delete',
-        'gov-grant', 'gov-resolve', 'gov-locks', 'gov-escrow', 'mcp-server-wall'];
+        'gov-grant', 'gov-resolve', 'gov-locks', 'gov-escrow', 'mcp-server-wall', 'relay-edge'];
         // Per-module route vocabulary: rows whose ctx names are not `route`
         // get the vant-armed route that speaks their contract (privileged
         // authz gate, cookie session verbs, deep/regex Edge probes). The
@@ -375,6 +375,77 @@ const MCP_CHILD = `${CHILD_STDOUT_GUARD}
     const escape = path.resolve('vant-mcp-escape-canary.md');
     const escapedFile = fs.existsSync(escape) ? 'vant-mcp-escape-canary.md' : null;
     process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ results, escapedFile, escapedPath: escape }) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
+// (Phase A wire-surface slice, #249) The r/2 EDGE FACE probe: drives
+// web/relay/functions/api/r/relay.ts's REAL onRequestPost in-process
+// (WHATWG Request/Response, WebCrypto HMAC - no sockets, no deploy). The
+// handler is TypeScript, so this child runs under Node's
+// --experimental-strip-types and speaks the row's SHAPE table:
+// { shapes: [{ name, env, request: { url, method, headers, body } }] }
+// -> { results: [{ name, status, bodyText }] }. The patient is vant's
+// actual edge posture gate/key gate/HMAC lane/freshness window/origin
+// guard - the same needles the native relay lanes pin.
+const RELAY_CHILD = `
+(async () => {
+    // (NOTE argv[2]/stdin) this child is a FILE invocation — node child.mjs
+    // <spec> — so the spec rides argv[2]; but a 1 MiB shape body crosses
+    // Linux's 128 KiB single-argv limit (E2BIG), so the DOWNSIDE-safe spec
+    // is read from STDIN when the argv is absent (execFileSync input option).
+    const spec = await (async () => {
+        let raw = process.argv[2] || '';
+        if (!raw && !process.stdin.isTTY) {
+            raw = await new Promise((resolve) => {
+                let s = '';
+                process.stdin.setEncoding('utf8');
+                process.stdin.on('data', (d) => { s += d; });
+                process.stdin.on('end', () => resolve(s));
+            });
+        }
+        try { return JSON.parse(raw || '{}'); } catch (e) { return {}; }
+    })();
+    const shapes = Array.isArray(spec.shapes) ? spec.shapes : [];
+    const results = [];
+    let mod = null;
+    try {
+        // the handler path rides the SPEC argv: heredoc children stay
+        // interpolation-free (this child is plain JS written verbatim)
+        const handlerPath = String(spec.handlerPath || '').slice(0, 400);
+        if (!handlerPath) throw new Error('relay spec missing handlerPath');
+        mod = await import('file:///' + handlerPath.split(String.fromCharCode(92)).join('/'));
+    } catch (e0) {
+        process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ error: 'relay handler import failed: ' + e0.name + ': ' + e0.message }) + '>>END');
+        return;
+    }
+    const h = mod.onRequestPost;
+    for (const shape of shapes) {
+        const row = { name: String(shape.name || '').slice(0, 60), status: null, bodyText: '' };
+        try {
+            const url = String(shape.request.url || 'https://relay-edge.local/api/r/relay');
+            const init = {
+                method: String(shape.request.method || 'POST'),
+                headers: shape.request.headers || {},
+            };
+            if (shape.request.body != null) init.body = String(shape.request.body);
+            const context = {
+                request: new Request(url, init),
+                env: shape.env || {},
+                params: {},
+                data: {},
+                next: async () => new Response('no next route', { status: 404 }),
+                waitUntil: () => {},
+            };
+            const res = await h(context);
+            row.status = res.status;
+            row.bodyText = String(await res.text()).slice(0, 500);
+        } catch (e1) {
+            row.status = 'THREW';
+            row.bodyText = String(e1.name + ': ' + e1.message).slice(0, 200);
+        }
+        results.push(row);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ results }) + '>>END');
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
 
@@ -1481,6 +1552,38 @@ function buildRoutes(sb, Harness) {
         } catch (e) {
             if (canSpendRestore) wall._escrow.canSpend = canSpendRestore;
             return jsonRes({ error: 'wall drive threw: ' + String(e && e.message || e).slice(0, 120) }, 500);
+        }
+    });
+
+    // relay-edge: POST { shapes: [{ name, env, request }] } -> the r/2 edge
+    // face (web/relay/functions/api/r/relay.ts) driven in-process by the
+    // RELAY_CHILD probe (Node --experimental-strip-types, WHATWG Request,
+    // WebCrypto HMAC). Pack rows arm vant's real edge posture/gate/fresh/
+    // origin lanes here; absence or a throw degrades to typed refusals.
+    const RELAY_EDGE_CHILD_FILE = path.join(os.tmpdir(), 'vant-ct-relay-probe-' + process.pid + '.mjs');
+    fs.writeFileSync(RELAY_EDGE_CHILD_FILE, RELAY_CHILD);
+    const { execFileSync } = require('child_process');
+    harness.registerRoute('relay-edge', async (ctx) => {
+        if (process.env.CRASHTEST_B0_DEBUG) process.stderr.write('[b0-relay] route entered\n');
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        const shapes = (j && Array.isArray(j.shapes) && j.shapes.length) ? j.shapes.slice(0, 40) : null;
+        if (process.env.CRASHTEST_B0_DEBUG) process.stderr.write('[b0-relay] shapes=' + (shapes ? shapes.length : 'none') + ' j=' + (j ? 'obj' : 'null') + '\n');
+        if (!shapes) return jsonRes({ error: 'shapes array required' }, 400);
+        try {
+            const out = execFileSync(process.execPath, ['--experimental-strip-types', RELAY_EDGE_CHILD_FILE], {
+                input: JSON.stringify({ shapes, handlerPath: path.join(ROOT, 'web', 'relay', 'functions', 'api', 'r', 'relay.ts') }),
+                encoding: 'utf8', timeout: 120000,
+            });
+            const m = out.match(/VANT_CT_JSON<<([\s\S]*?)>>END/);
+            if (process.env.CRASHTEST_B0_DEBUG) process.stderr.write('[b0-relay] child out len=' + out.length + ' marker=' + !!m + '\n');
+            if (!m) return jsonRes({ error: 'relay probe produced no marker', raw: String(out).slice(0, 200) }, 500);
+            return jsonRes(JSON.parse(m[1]), 200);
+        } catch (e) {
+            if (process.env.CRASHTEST_B0_DEBUG) process.stderr.write('[b0-relay] execFileSync threw: ' + (e && e.stack || e) + '\n');
+            const tail = (e && e.stdout ? String(e.stdout).slice(-400) : String(e && e.message || e).slice(0, 200));
+            const m = tail.match(/VANT_CT_JSON<<([\s\S]*?)>>END/);
+            return jsonRes(m ? JSON.parse(m[1]) : { error: 'relay probe failed: ' + tail.slice(0, 160) }, 500);
         }
     });
 

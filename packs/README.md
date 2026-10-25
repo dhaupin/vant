@@ -510,9 +510,17 @@ today's clean B0 run: **48 REFUSED / 0 EXPLOITED / 1 skipped**.
 
 | Bucket (campaign order) | Share | Status |
 |---|---|---|
-| 0 — wire-surface door pins (`test/crashtest-server.js`, 9 pins) | smallest lift, biggest overlap | **CONVERTED — cycle 1/4 began**: rows in `vant-server-wall` 5/5 REFUSED, native suite still 9/9 green alongside |
-| wire-surface re-pins (bigger surfaces: relay, dashboard doors) | ~15% | pending — `vant-relay` per the survey below |
-| in-process module discipline (via memory/governance families) | ~40% | B0 arms already grade the same seams; row-by-row conversion queued |
+| 0 — wire-surface door pins (`test/crashtest-server.js`, 9 pins) | smallest lift, biggest overlap | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native suite 9/9 each run); the suite stays in CI under the law |
+| wire-surface re-pins — r/2 edge face (`web/relay/functions/api/r/relay.ts`) | ~15% (first slice) | **CONVERTED — cycle 1 began**: 5 rows in `vant-relay` (5/5 REFUSED) drive the real TS handler in-process via the run root's strip-types probe child; native lanes (test/relay.test.js, test/relay-parity 19/19) stay green alongside |
+| in-process module discipline (row-by-row) | ~40% (first slice) | **CONVERTED — cycle 1 began**: the B0-era native pins (memory envelope + escrow ledger blocks) became 6 rows in `vant-discipline` riding the shared arms (6/6 REFUSED); native suites memory 29/29 / escrow 28/28 / governance 17/17 stay green alongside |
+| drill-down: remaining native suites (state-wiring, migration, carriers, ...) | remaining ~35% | queued, per-bucket order by conversion shape |
+
+**Bucket 0 S-counter ledger:** cycle 1 (2026-10-25, conversion day) →
+cycle 2 → cycle 3, all sides green each run — the quarter-period
+requirement the tracker stated ("2 more full run cycles green on both")
+DID pass, so the S-counter advanced for bucket 0; per the law the native
+suite is not deleted — its retirement is the bucket's closing move after
+the full campaign lands it.
 
 **Bucket 0 notes (vant-server-wall, new pack):** every row drives vant's
 REAL Node wire through the run root's new `mcp-server-wall` route

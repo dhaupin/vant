@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-relay",
+  "description": "The r/2 solo relay edge face (web/relay/functions/api/r/relay.ts), driven in-process by the run root's relay-edge probe child (Node --experimental-strip-types, WHATWG Request/Response, WebCrypto HMAC - no sockets, no deploy): posture gate fail-closed, key gate fail-closed, the HMAC lane over the RAW body bytes, the freshness window, typed origin guards, and encrypted-pipes-only. Phase A wire-surface slice of the S0->S1 campaign (#249); the native relay lanes (test/relay.test.js + relay-parity) stay green alongside.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}
