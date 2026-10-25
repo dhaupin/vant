@@ -318,11 +318,11 @@ empty ledger — a census with zero consumers is TRUE, not broken.
 > without crossing, an empty tide is a quiet no-op. The retire door ships;
 > the CLI does not fire it (inspect only GAINS the census — additive,
 > never destructive by default). Pins: `test/horcrux-census.test.js` (27);
-| lib/prune.js | 'prune' | census of prunable; retire-with-ledger |
-| lib/sudo.js | 'sudo' | census of grants; succeed of elevation across ops |
-| lib/pipeline.js | 'pipeline' | census of pending/committed steps; attest of outcomes |
-| docs gate scripts (check-docs-*, check-fiction-signatures) | 'docs-gates' | census of claims + their check dates (the claims ledger) |
-| pass ledger (labs/TASKS.md discipline) | protocol consumer, docs-shaped | census of open items |
+| lib/prune.js | 'prune' | census of prunable; retire-with-ledger | **WIRED** (axolotl 366a9b5 — registered inline in lib/prune.js; `kernelCensusPrunable` / `kernelWitnessRetire` (dry-run default) via lib/prune.js; pins: test/kernel-wiring.test.js) |
+| lib/sudo.js | 'sudo' | census of grants; succeed of elevation across ops | **WIRED** (axolotl 366a9b5 — lib/sudo-kernel-witness.js; census enumerates THROUGH THE PUBLIC SURFACE ONLY: listTasks/getGrants/getHealthChecks, never internals; succeed = elevation-audit boundary, self-basing with a kernel-gated census; pins: test/kernel-wiring.test.js) |
+| lib/pipeline.js | 'pipeline' | census of pending/committed steps; attest of outcomes | **WIRED** (axolotl 366a9b5 — lib/pipeline-kernel-witness.js; attest of outcomes at the completion tail + census of the declared step surface; pins: test/kernel-wiring.test.js) |
+| docs gate scripts (check-docs-*, check-fiction-signatures) | 'docs-gates' | census of claims + their check dates (the claims ledger) | **WIRED** (axolotl 366a9b5 — lib/kernel-ledger.js; the six REAL gate scripts enumerating by fs presence, registered at cert-gate run start (scripts/check-docs-certification.js); census law kept honest: no pass-ledger stand-in was REQUIRED while unbuilt) |
+| pass ledger (labs/TASKS.md discipline) | protocol consumer, docs-shaped | census of open items | **NOT BUILT** — no lib/ module exists yet; per the census law, when it is built it gets its own consumer here by the same three-line recipe, never a stand-in before |
 
 ## 4. Consumer mapping (the pass that adopts the contract must fill one row per surface it touches)
 
