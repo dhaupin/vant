@@ -1,7 +1,35 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** pass 353 arc (2026-10-23, THE CRASHTEST PIT STOP +
+**Last Updated:** pass 354 arc (2026-10-25, THE KERNEL WIRING ARC +
+THE PACK BATCH + THE ROUND-TRIP: the §3 kernel wiring map FULLY
+RECEIPTED — rows 4-7 registered in one batch (K6-K9: pipeline
+attest-of-outcomes + step census; prune census-of-prunable + retire-
+with-ledger door (dry-run default) + the namespace-overwrite kill;
+sudo census through the PUBLIC surface only (listTasks/getGrants/
+getHealthChecks) + elevation-audit succeed; docs-gates census of the
+six real gate scripts, registered at cert-gate run start). Pass-ledger
+surface BUILT (lib/pass-ledger.js — real-docs open-item census in the
+ledger's own marker dialect, pure ceremony formatter — THIS ENTRY WAS
+STAMPED THROUGH IT, ledgersReadable() visibility seam). Crashtest pack
+batch: vant-kernel v0.3.0 roster rows (10 attacks, 10/10 REFUSED),
+vant-pass-ledger v0.1.0 (4 rows), packs/README fleet ledger rows. The
+ROUND-TRIP: full real-harness sweep — 9 packs / 0 EXPLOITED, library
+rows 30 REFUSED / 0 / 19 honest skips; honest-absence hardening for
+the pass-ledger doc legs (ledgersReadable() + explicit skipped-REFUSED
+when labs/ is not visible at a sandbox run root). The WIDE SWEEP
+re-arm CRASHTEST_SWEEP_DEFAULTS=1: 16 packs, 7 wide-sweep rows
+measured (cve-feed 2/0, next-middleware-shapes 2/0, qs-shapes 2/0,
+vite-dev-shapes 2/0, wp-money-shapes 3/0; wp-roles + wp-stock-smoke
+honest skips — targets not declared on this run root), ZERO findings,
+KNOWN-FINDINGS whitelist still EMPTY. The marketing-tables template
+consumer REGISTERED (register-only) — the §3 map's last row, so the
+map is FULLY RECEIPTED: every row that can be registered is. Pins:
+kernel-wiring 24/24, pass-ledger 13/13, crashtest pack contract
+91/0/0 double-run deterministic, kernel seed 69/0. Receipts on
+vant#250 throughout. Next: nothing structural left on the §3 map —
+future rows open only with new surfaces.)
+**Prior — pass 353 arc (2026-10-23, THE CRASHTEST PIT STOP +
 THE GRADUATION: the D1/KV-shaped library rows armed over the
 harness fake backend — fixture routes charge/profile/device/upload in
 scripts/crashtest-run.js; library rows 25/0/5-skips → 30 REFUSED / 0
