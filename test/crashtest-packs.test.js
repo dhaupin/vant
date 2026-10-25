@@ -1085,6 +1085,40 @@ const EXPECTED = {
         'admin-body-discipline': 'REFUSED',
         'flood-cost-cap': 'REFUSED',
     },
+    // ARMED 2026-10-25 (Phase A of the S0→S1 conversion campaign, #249) —
+    // three packs whose run-root arms live in scripts/crashtest-run.js
+    // (the mcp-server-wall / relay-edge routes + the shared library arms
+    // gov-grant/gov-resolve/gov-locks/gov-escrow and the memory/escrow
+    // library ctx). This suite's sandbox routes (buildRoutes) don't carry
+    // those run-root-only routes, so each row degrades to an HONEST SKIP
+    // here (the packs' skip helper: verdict REFUSED, skipped true) per
+    // house rule 5 instead of riding an un-armed silence. The real
+    // verification rides the run root in gate phase B, where every row is
+    // fully EARNED (vant-server-wall 5/5, vant-relay 5/5, vant-discipline
+    // 6/6 REFUSED with the native suites green alongside) — the gate's
+    // phase is where the strict legality lives for this slice.
+    'vant-discipline': { // in-process module discipline (memory envelope + grant ledger + escrow)
+        'note-envelope-versioned-provenance': 'skip',
+        'note-read-flags-contradiction-and-ghosts': 'skip',
+        'note-delete-tombstone-and-dangling-cite': 'skip',
+        'grant-ledger-precedence-and-revocation': 'skip',
+        'grant-scope-isolation-and-trust-floor': 'skip',
+        'escrow-two-key-and-expired-ttl': 'skip',
+    },
+    'vant-relay': { // the r/2 webhook edge face (web/relay/functions/api/r/relay.ts)
+        'posture-and-key-gates-fail-closed': 'skip',
+        'hmac-lane-over-raw-bytes': 'skip',
+        'freshness-window-typed': 'skip',
+        'origin-guard-typed-acks': 'skip',
+        'encrypted-pipes-only-and-body-cap': 'skip',
+    },
+    'vant-server-wall': { // the MCP server wall via lib/server._handleRequest
+        'escrow-wall-429-never-5xx': 'skip',
+        'hostile-body-floor': 'skip',
+        'credential-stuffing-distinct-401': 'skip',
+        'write-honesty-no-store': 'skip',
+        'flood-wall-429-retry-after': 'skip',
+    },
 };
 
 function checkVerdictRows(packName, verdicts) {
