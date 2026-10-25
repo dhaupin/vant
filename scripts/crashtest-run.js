@@ -161,7 +161,8 @@ async function main() {
         const armedRoutes = ['brain-read', 'brain-state', 'brain-migrate', 'guest-cap', 'crew-run', 'mcp-exec',
         'vant-rest-open', 'vant-rest-priv', 'vant-rest-priv-alias', 'vant-login', 'vant-me', 'vant-logout',
         'stone-scope', 'stone-tamper', 'stone-restore-tamper', 'rest-request', 'trust-read', 'brain-graph-walk',
-        'home-summary', 'home-admin'];
+        'home-summary', 'home-admin', 'memory-note-write', 'memory-note-read',
+        'gov-grant', 'gov-resolve', 'gov-locks'];
         // Per-module route vocabulary: rows whose ctx names are not `route`
         // get the vant-armed route that speaks their contract (privileged
         // authz gate, cookie session verbs, deep/regex Edge probes). The
@@ -178,6 +179,13 @@ async function main() {
             race: { submitRoute: 'charge', embedRoute: 'profile' },
             state: { route: 'device', mustDenyIds: ['rook-device-77', 'rook-device-88'] },
             upload: { route: 'upload' },
+            // (B0 arms, #249) vant's REAL note store + grant ledger + locks.
+            // deleteRoute is deliberately UNDECLARED: vant's state K/V has
+            // no per-note delete yet, and staleToken is undeclared (vant's
+            // fence tokens are pid-borne) — both families rows that need
+            // them honest-skip naming the knob, per the arm contract.
+            memory: { writeRoute: 'memory-note-write', readRoute: 'memory-note-read', readStyle: 'body' },
+            governance: { grantsRoute: 'gov-grant', resolveRoute: 'gov-resolve', locksRoute: 'gov-locks', ttlMode: 'free' },
         };
             const entries = fs.readdirSync(libDir).filter((f) => f.endsWith('.js')).sort();
             console.log(`\n=== crashtest scenario library rows against the armed routes (${armedRoutes.length} routes; D1/KV bindings armed: ${harness.env && harness.env.DB && harness.env.UPLOADS ? 'DB+UPLOADS' : 'none'}) ===`);
@@ -1206,6 +1214,157 @@ function buildRoutes(sb, Harness) {
         if (!store || !store.put) return jsonRes({ error: 'no KV binding on this target' }, 503);
         await store.put(rawName, `crashtest-upload-canary:${rawName}`);
         return jsonRes({ ok: true, key: rawName }, 200);
+    });
+
+    // --- B0 module-family arms (S0→S1 campaign, #249): the crate's memory
+    // --- + governance library families attack vant's REAL note store,
+    // --- grant ledger, decision engine, and lock fence over these routes.
+    // --- Same posture as the session routes: the patient is vant's own
+    // --- lib in the sandbox (require('./lib/...') post-chdir), typed
+    // --- refusals, no wall clock stored. A semantics vant lacks is NOT
+    // --- faked: it is left undeclared so the rows honest-skip naming
+    // --- exactly the knob (memory: deleteRoute/staleToken; governance:
+    // --- staleToken). Verdicts are vant's truth, never answer sheets.
+    const sandboxLib = (mod) => require(path.join(sb, 'lib', mod));
+    const memory = sandboxLib('memory');
+    const rules = sandboxLib('rules');
+    const lockSys = sandboxLib('lock');
+    const B0_LOCKS = new Set(); // resource -> live fence, per-run state
+
+    // memory-note-write: POST { id, body, summary?, refs?, scope?, writers? }
+    // -> lib/memory.state() — the durable K/V note store (TTL'd, workspace
+    // scoped, brain-persisted). Revision/writers are VANT'S actual answer:
+    // the state store carries no revision field, so write-conflict rows
+    // grade vant's real overwrite discipline (drift rows that need an
+    // absent field fail acceptance and name it). 4xx = malformed note.
+    harness.registerRoute('memory-note-write', async (ctx) => {
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        if (!j || typeof j.id !== 'string' || !j.id) return jsonRes({ error: 'note id required' }, 400);
+        if (j.body === undefined || j.body === null || (typeof j.body !== 'string' && typeof j.body !== 'object')) {
+            return jsonRes({ error: 'note body required' }, 400);
+        }
+        const note = {};
+        note.body = j.body;
+        if (j.summary !== undefined) note.summary = j.summary;
+        if (j.refs !== undefined) note.refs = j.refs;
+        if (j.scope !== undefined) note.scope = j.scope;
+        if (j.writers !== undefined) note.writers = j.writers;
+        try {
+            const r = await memory.state(`note:${j.id}`, note, { fresh: true });
+            return jsonRes({ ok: true, id: j.id, storeKey: r.storeKey }, 200);
+        } catch (e) {
+            return jsonRes({ error: String(e && e.message || e).slice(0, 140) }, 403); // the chain refused the write
+        }
+    });
+
+    // memory-note-read: POST { id } (readStyle 'body') -> recall(fresh:
+    // true) — the fresh path bypasses BOTH caches so two writers in one
+    // run see each other's last landing (the drift rows depend on it).
+    harness.registerRoute('memory-note-read', async (ctx) => {
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        if (!j || typeof j.id !== 'string' || !j.id) return jsonRes({ error: 'note id required' }, 400);
+        try {
+            const value = await memory.recall(`note:${j.id}`, { fresh: true });
+            if (value === undefined) return jsonRes({ error: 'no such note', id: j.id }, 404);
+            const note = { id: j.id, ...(value && typeof value === 'object' ? value : { body: value }) };
+            return jsonRes(note, 200);
+        } catch (e) {
+            return jsonRes({ error: String(e && e.message || e).slice(0, 140) }, 403);
+        }
+    });
+
+    // gov-grant (rules IS vant's grant ledger): POST { principal,
+    // capability, scope?, permit, precedence?, revoke? } -> setRule /
+    // deleteRule with the permit fused into validate(). Precedence rides
+    // the rule record for read-back; resolution ORDER is vant's actual
+    // rules order (the precedence rows honestly surface that).
+    harness.registerRoute('gov-grant', async (ctx) => {
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        if (!j || typeof j.principal !== 'string' || !j.principal) return jsonRes({ error: 'principal required' }, 400);
+        if (typeof j.capability !== 'string' || !j.capability) return jsonRes({ error: 'capability required' }, 400);
+        if (j.permit !== 'allow' && j.permit !== 'deny' && j.revoke !== true) return jsonRes({ error: 'permit must be allow or deny (or revoke)' }, 400);
+        const ruleName = `grant:${j.principal}:${j.capability}`;
+        try {
+            if (j.revoke === true) {
+                rules.deleteRule(ruleName);
+                return jsonRes({ ok: true, revoked: ruleName }, 200);
+            }
+            if (j.permit === 'deny') {
+                rules.setRule(ruleName, {
+                    appliesTo: (op) => op === j.capability,
+                    validate: () => false,
+                    reason: `denied by grant: ${String(j.principal)}`,
+                    precedence: Number(j.precedence) || 0,
+                    scope: j.scope ? String(j.scope).slice(0, 120) : null,
+                });
+            } else {
+                rules.setRule(ruleName, {
+                    appliesTo: (op) => op === j.capability,
+                    validate: () => true,
+                    reason: `allowed by grant: ${String(j.principal)}`,
+                    precedence: Number(j.precedence) || 0,
+                    scope: j.scope ? String(j.scope).slice(0, 120) : null,
+                });
+            }
+            return jsonRes({ ok: true, rule: ruleName, permit: j.permit }, 200);
+        } catch (e) {
+            return jsonRes({ error: String(e && e.message || e).slice(0, 140) }, 403);
+        }
+    });
+
+    // gov-resolve: POST { principal, capability, scope? } -> rules.check(
+    // capability) — vant's real decision: default-deny dangerous names,
+    // custom-rule verdicts, allowlist fallthrough. ALWAYS 200 (the
+    // decision IS the answer: { permit, rule?, reason? }), 4xx only on a
+    // malformed ask.
+    harness.registerRoute('gov-resolve', async (ctx) => {
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        if (!j || typeof j.capability !== 'string' || !j.capability) return jsonRes({ error: 'capability required' }, 400);
+        try {
+            const verdict = rules.check(j.capability, { principal: String(j.principal || ''), scope: j.scope ? String(j.scope) : null });
+            return jsonRes({ permit: verdict.allowed ? 'allow' : 'deny', rule: verdict.rule || null, reason: verdict.reason || null }, 200);
+        } catch (e) {
+            return jsonRes({ error: String(e && e.message || e).slice(0, 140) }, 403);
+        }
+    });
+
+    // gov-locks: POST { resource, op: 'acquire'|'release', token?, ttl? }
+    // -> lib/lock.acquire / release over a run-local fence dir, waitMs 0
+    // (the fence answer is honest-immediate: a held lock answers 409 THE
+    // MOMENT it is held). The lock record carries at: Date.now() by
+    // vant's own design (lib/lock stores it) — the crate's staleness
+    // rows read the lock FILE, so no wall clock rides a RESPONSE.
+    harness.registerRoute('gov-locks', async (ctx) => {
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        if (!j || typeof j.resource !== 'string' || !j.resource) return jsonRes({ error: 'resource required' }, 400);
+        if (j.resource.includes('/') || j.resource.includes('\\') || j.resource.includes('..') || j.resource.includes('\0')) {
+            return jsonRes({ error: 'unacceptable resource name' }, 400);
+        }
+        // the module family's fence op is 'write' — the same acquire
+        // semantics vant's lock fence carries (write through the fence =
+        // hold the fence); 'release' releases.
+        if (j.op !== 'acquire' && j.op !== 'write' && j.op !== 'release') return jsonRes({ error: 'op must be acquire|write or release' }, 400);
+        if (j.op === 'write') j.op = 'acquire';
+        const fencePath = require('path').join(process.cwd(), '.crashtest-locks', `${j.resource}.lock`);
+        try {
+            if (j.op === 'release') {
+                const r = lockSys.release(fencePath);
+                B0_LOCKS.delete(j.resource);
+                return jsonRes({ ok: r.released !== false, released: !!r.released }, 200);
+            }
+            const r = lockSys.acquire(fencePath, { staleMs: Number(j.ttl) > 0 ? Number(j.ttl) : 30000, waitMs: 0 });
+            if (r.ok) B0_LOCKS.add(j.resource);
+            return r.ok
+                ? jsonRes({ ok: true, acquired: true, resource: j.resource }, 200)
+                : jsonRes({ ok: false, error: 'lock held', reason: r.reason || 'held' }, 409);
+        } catch (e) {
+            return jsonRes({ error: String(e && e.message || e).slice(0, 140) }, 403);
+        }
     });
 
     return harness;

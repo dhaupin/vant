@@ -409,6 +409,46 @@ its expected table — the exact quiet gap a canary probe hunted down), and
 an unauthorized run-root finding exited 4 under strict policy. Honest skips
 and the whitelisted pins never mask a new raise.
 
+## The library-family arms (B0 of the S0→S1 campaign, #249 - 2026-10-25)
+
+The crate's `memory` (note-store discipline, issue #10) and `governance`
+(order-keeping, issue #11) library families are ARMED against vant's REAL
+lib seams via the run root's route shims (`scripts/crashtest-run.js`),
+not fixtures: the memory rows drive `lib/memory.state`/`recall` (fresh:
+both-cache bypass so two writers in one run see each other's last
+landing), the governance rows drive `lib/rules` (vant's real grant
+ledger: setRule/deleteRule with the permit fused into validate, and
+rules.check as the decision engine) and `lib/lock` acquire/release with
+waitMs 0 (honest-immediate fence answers). Verdicts are vant's truth,
+never answer sheets; a semantics vant lacks stays UNDECLARED and the
+rows honest-skip naming the knob (memory deleteRoute: no per-note
+delete yet in the state K/V; staleToken: vant's fence tokens are
+pid-borne). Ten genuine findings surfaced on the first run's
+13 measured rows (33 REFUSED / 10 EXPLOITED / 6 skipped overall):
+
+| Row | Verdict | What vant's truth is |
+|-----|---------|---------------------|
+| `memory/drift-silent-overwrite` | EXPLOITED | the state K/V carries no revision or writers field: two writers to one note blend silently |
+| `memory/drift-contradiction-carry` | EXPLOITED | read-back carries no contradiction flag |
+| `memory/hallucinated-fact-probe` | EXPLOITED | citing a never-written note reads back unflagged |
+| `memory/phantom-scope` | EXPLOITED | scope is not visible on note read-back |
+| `memory/identity-merge-collision` | EXPLOITED | multi-writer merge keeps no provenance lines |
+| `memory/resolution-order-stability` | EXPLOITED | a read-back conflict winner is unreadable (no resolution record) |
+| `governance/succession-trust-floor` | EXPLOITED | trust floors are not enforced at the grant-resolution ask |
+| `governance/succession-revocation-carry` | EXPLOITED | deleting a grant rule resumes the DEFAULT-ALLOW posture - revocation does not carry as deny |
+| `governance/capability-no-sideways` | EXPLOITED | grant rules carry no scope isolation (resolve names capability only) |
+| `governance/lock-ttl-honesty` | EXPLOITED | vant's lock TTL is a STALE-WINDOW (takeover after staleness), not the family's immediate-free reading of ttl=0 - a real, nameable semantic mismatch |
+
+Happy rows worth naming: `governance/grant-conflict-deterministic`
+(allow/deny conflicts resolved deterministically, deny wins),
+`governance/succession-single-heir` (denied-each-ask), and
+`memory/drift-stale-poisons-fresh` (a stale writer's fact did not
+outrank the fresh one). The findings are tracked for fix at
+vant (see the B0 findings issue linked from #249); the rows stay
+measured in the run root's library phase (exit 3 surfaces them, per
+the phase's own design: library findings are worth surfacing apart
+from pack findings).
+
 ## Next surfaces survey (2026-10-23): packs vs issues
 
 Where the remaining repo parts land:
