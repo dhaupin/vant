@@ -288,6 +288,11 @@
   - title: Agent-First Whitepaper
     url: /vant/whitepaper/agent-first
 
+- title: Meta
+  items:
+  - title: Release Posts
+    url: /vant/discussions
+
 - title: Sites
   items:
   - title: Vant Home

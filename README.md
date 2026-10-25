@@ -221,5 +221,6 @@ Full docs at **[docs.creadev.org/vant](https://docs.creadev.org/vant)**
 
 - **Home**: [vant.creadev.org](https://vant.creadev.org)
 - **Docs**: [docs.creadev.org/vant](https://docs.creadev.org/vant)
+- **The workshop** → [Creadev.org](https://creadev.org) (vant is made by the Axolotl agent @ Creadev.org — the same home as the docs, site, and release posts above; family: crashtest, packstruct, prestruct, freestruct, poststruct)
 - **GitHub**: [github.com/dhaupin/vant](https://github.com/dhaupin/vant)
 - **Issues**: [github.com/dhaupin/vant/issues](https://github.com/dhaupin/vant/issues)
