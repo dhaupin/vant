@@ -202,10 +202,16 @@ function parseSentinel(r) {
             const stamped = s.stalenessReport({ stack: ['vant'] }).brains.find(b => b.brain === 'vant').status;
             // The next immediate save: the receipt is cold.
             const second = await inst.piggybackPush();
-            // A DIFFERENT brain's save within the same window: throttled
-            // (one push per freshness window, whichever brain saved).
+            // A save inside the same window whose landing wind back past
+            // the window: the invariant consents again, but the same-window
+            // throttle prices it out (one push per freshness window).
             inst._lastPiggybackPush = Date.now();
-            const third = await inst.piggybackPush({ brains: ['echo'] });
+            const now = Date.now();
+            const receiptsPath = require('path').join(process.cwd(), 'models', 'backup-receipts.json');
+            const oldLedger = JSON.parse(fs.readFileSync(receiptsPath, 'utf8'));
+            for (const k of Object.keys(oldLedger.byBrain || {})) oldLedger.byBrain[k].at = now - 70 * 60 * 1000; // past the 2-window stale threshold (60m)
+            fs.writeFileSync(receiptsPath, JSON.stringify(oldLedger, null, 2));
+            const third = await inst.piggybackPush({ brains: ['echo'], now });
             console.log(JSON.stringify({
                 first: first.piggybacked,
                 stamped,
@@ -220,7 +226,7 @@ function parseSentinel(r) {
     check("#252 piggyback: a fresh install's first write pushes once (a landing lands OUTSIDE the mount)", d && d.first === true && d.landed >= 1, d ? JSON.stringify(d) : `${r.stdout} ${r.stderr}`.slice(0, 220));
     check('#252 piggyback: the completed push stamps the ledger (write-moment law holds)', d && d.stamped === 'RECENT', d ? JSON.stringify(d) : `${r.stdout} ${r.stderr}`.slice(0, 220));
     check('#252 piggyback: the next immediate save is cold (the receipt is the rate-limiter)', d && d.secondWhy === 'recent', d ? JSON.stringify(d) : `${r.stdout} ${r.stderr}`.slice(0, 220));
-    check("#252 piggyback: another brain's save inside the same window throttles (one push per window)", d && d.thirdWhy === 'throttled', d ? JSON.stringify(d) : `${r.stdout} ${r.stderr}`.slice(0, 220));
+    check('#252 piggyback: a consented save inside the same window throttles (one push per window, after the kit-law receipt fix)', d && d.thirdWhy === 'throttled', d ? JSON.stringify(d) : `${r.stdout} ${r.stderr}`.slice(0, 220));
     fs.rmSync(root, { recursive: true, force: true });
 }
 // ---- piggyback: the watchdog cadence wins; a bad destination refuses typed ----

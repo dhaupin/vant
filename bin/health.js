@@ -265,11 +265,13 @@ function checkDebris(sweep) {
 
 // (issues #252) THE INVARIANT, first-class: "using brain must imply
 // recent backup." A first-class 'Last backup' line per brain in the
-// stack, NEVER reported as a FINDING (not an absence-of-data), STALE
-// past the freshness window as a finding too. Ask 3 rides here: an
-// ephemeral-zone warning when the models root resolves inside a git
-// mount (the wipe killed untracked in-mount files). Never fails health
-// over a probe error (same posture as checkLock).
+// stack: RECENT is green, and both NEVER (an absence-of-data — the
+// exactly-the-brain-that-dies-tonight-shape) and STALE (past the
+// freshness window) report as FINDINGS, never a silent green light.
+// Ask 3 rides here: an ephemeral-zone warning when the models root
+// resolves inside a git mount (the wipe killed untracked in-mount
+// files). Never fails health over a probe error (same posture as
+// checkLock).
 function checkBackupStaleness() {
     console.log('\n' + theme.label('💾 Backup staleness:'));
     try {
