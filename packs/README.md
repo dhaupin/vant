@@ -196,7 +196,7 @@ The EXPLOITED ledger for this pack is EMPTY as of 2026-10-23: the flood row
 measured a real finding the hour it was armed and the cap landed the same
 pass. Both CI whitelists stay EMPTY.
 
-### `public/vant-kernel` — prove-the-verbs conformance for the kernel seed + its adoption (8 rows; all validated 2026-10-25)
+### `public/vant-kernel` — prove-the-verbs conformance for the kernel seed + its adoption (10 rows; all validated 2026-10-25)
 
 Per vant#250 (labs/prd-kernel.md sec 6d #5): portability's strongest form is
 a conformance pack, not a spec doc. Rows attack `lib/kernel.js`'s gate()
@@ -224,12 +224,40 @@ absence, never a false positive).
 | `missing-verb-gap-visible` | census lists the gap AND the gate refuses it typed (`E_UNREGISTERED_VERB`) | validated — REFUSED |
 | `gate-happy-path` | the full census → attest → retire → succeed chain passes in order with kernel time; four verb entries journaled | validated — REFUSED |
 | `reference-consumer-witness` | K3: escrow registers (census+attest, gap self-named), spend pairs attest dated + journaled, self-heal holds after reset | validated — REFUSED (armed) |
+| `roster-adoption-witness` | K6-K9: adoption GENERALIZES — pipeline/prune/docs-gates/pass-log carry kernel-dated census entries, stay census-visible, self-heal across resets | validated — REFUSED (armed) |
+| `sudo-public-surface-census` | sudo witness enumerates through the PUBLIC surface only; succeed lands across ops (elevation-audit boundary); unknown consumers refuse typed | validated — REFUSED (armed) |
 
 Isolation runs two honest paths: the seed's TEST-ONLY `_unwind()` seam
 (reset per row when present — all positions identical every run) or, for a
 foreign kernel without the seam, unique consumer names + duplicate-safe
 registration + journal-delta scans. Records never carry absolute seq
 numbers; rows are double-run deterministic.
+
+### `public/vant-pass-ledger` — conformance for the pass-ledger surface (4 rows; all validated 2026-10-25)
+
+Per vant#250 (labs/prd-kernel.md Sec 3 wiring map row 9, "pass ledger:
+formal census of open items | queue as census entries"): the rows attack
+`lib/pass-ledger.js` in-process, zero sockets, zero wall clocks. The census
+reads the REAL docs (`labs/TASKS.md` + `labs/MEM.md`) in the ledger's own
+marker dialect (`**Next:**` / `**NEXT-UP:**` / `Owner queue:` lines) — an
+invented vocabulary or a wall-clock carry is an EXPLOITED. The succeed
+ceremony is a pure FORMATTER in the `## Pass NNN (date) - TITLE` dialect:
+an unnamed pass refuses `E_NAMING` typed, and a byte-identity proof shows
+the ledger doc unchanged through the whole probe (the real doc when it
+resolves; a synthesized probe ledger under the OS tmpdir in foreign run
+roots — the proof degrades for neither). Reset self-heal holds within the
+call, per the clerk-not-judge law. Host arms via
+`ctx.config['vant-pass-ledger']`; module: null or absent = honest skip.
+
+| Attack (ID) | What it claims | Status |
+|---|---|---|
+| `open-item-census-real` | census reads real docs, leads with the pass-count header, queues open items as kernel-dated entries | validated — REFUSED |
+| `marker-dialect-only` | the marker dialect is the ledger's own (Next/NEXT/NEXT-UP/Owner queue); ids carry true file:line | validated — REFUSED |
+| `ceremony-never-writes` | the ceremony emits the dialect as a string, refuses unnamed passes typed, and never writes the doc | validated — REFUSED |
+| `reset-self-heal` | after a registry reset the pass-log consumer re-arms within the census call | validated — REFUSED |
+
+Isolation is the same two honest paths as vant-kernel; records never carry
+absolute seq numbers; rows are double-run deterministic.
 
 ## Running the packs against vant
 

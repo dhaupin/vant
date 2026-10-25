@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-pass-ledger",
+  "description": "Conformance rows for the pass-ledger surface (lib/pass-ledger.js, labs/prd-kernel.md Sec 3 wiring map row 9): the formal census of open items reads the REAL docs (labs/TASKS.md + labs/MEM.md) using the ledger's own marker dialect (Next/NEXT-UP/Owner queue), the succeed ceremony is a pure FORMATTER that never writes the ledger doc, the kernel census carries dated entries per the three-line recipe, and reset self-heal holds within the call. Deterministic by structure - assertions read marker shapes and journal positions, never wall clocks. Host arms via ctx.config['vant-pass-ledger'] (module, default lib/pass-ledger.js from the run root; module: null = foreign kernel, honest skip). Filed per vant#250.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

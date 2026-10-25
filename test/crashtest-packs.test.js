@@ -1047,6 +1047,24 @@ const EXPECTED = {
         // pack flipped from proving the seed to proving adoption.
         'reference-consumer-witness': 'REFUSED',
         'gate-happy-path': 'REFUSED',
+        // ARMED 2026-10-25 batch (the K6-K9 roster receipts): the roster
+        // rows attack adoption GENERALIZING - pipeline/prune/docs-gates/
+        // pass-log census carries, kernel visibility, reset self-heal
+        // (roster row); the sudo witness's public-surface-only census law
+        // + elevation-audit succeed + typed unknown-consumer refusal
+        // (sudo row).
+        'roster-adoption-witness': 'REFUSED',
+        'sudo-public-surface-census': 'REFUSED',
+    },
+    // ARMED 2026-10-25 (the pass-ledger surface, wiring map row 9): the
+    // docs-shaped consumer reads the REAL docs, queues open items as
+    // kernel-dated census entries, formats the ceremony purely (no fs
+    // write), and self-heals across registry resets.
+    'vant-pass-ledger': {
+        'open-item-census-real': 'REFUSED',
+        'marker-dialect-only': 'REFUSED',
+        'ceremony-never-writes': 'REFUSED',
+        'reset-self-heal': 'REFUSED',
     },
     // ARMED 2026-10-23 (the site wire): flood-cost-cap was armed as a REAL
     // FINDING the same turn (the endpoint table accepted unbounded rows;

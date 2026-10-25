@@ -369,8 +369,111 @@ const attacks = [
             }
             return refusedRecord('the full chain holds: census -> attest -> retire -> succeed, four verb entries journaled in order', { verbsLogged });
         }),
-];
+    row('roster-adoption-witness',
+        'the K6-K9 adoption roster (pipeline/prune/docs-gates/pass-log): each armed adopter census-carryes kernel-dated entries, is visible on kernel.census(), and self-heals after a probe reset - adoption GENERALIZES beyond the escrow reference consumer',
+        async (_harness, ctx) => {
+            const kernel = await loadKernel(ctx);
+            if (!kernel) return skipRecord();
+            const cfg = (ctx && ctx.config && ctx.config['vant-kernel']) || {};
+            if (cfg.rosterModules === null) {
+                return { verdict: 'REFUSED', skipped: true, detail: 'not armed: no adoption roster on this kernel instance (rosterModules: null)', tookRequests: 0 };
+            }
+            // Host-armable roster; the repo defaults resolve from the RUN ROOT.
+            // Adopters differ (the §3 law), so each carries its own door shape.
+            const roster = (
+                cfg.rosterModules || [
+                    { name: 'pipeline', path: 'lib/pipeline-kernel-witness.js', census: 'kernelCensusSteps', censusKey: 'steps' },
+                    { name: 'prune', path: 'lib/prune.js', census: 'kernelCensusPrunable', censusKey: 'entries' },
+                    { name: 'docs-gates', path: 'lib/kernel-ledger.js', census: 'docsGatesCensus', censusKey: 'entries' },
+                    { name: 'pass-log', path: 'lib/pass-ledger.js', census: 'ledgerCensus', censusKey: null }, // pass-log census returns the entries array itself
+                ]
+            );
+            const { resolve } = await import('node:path');
+            const { pathToFileURL } = await import('node:url');
+            const armed = [];
+            for (const spec of roster) {
+                try {
+                    const ns = await import(pathToFileURL(resolve(spec.path)).href);
+                    const mod = (ns && ns.default) ? ns.default : ns;
+                    const fn = mod && mod[spec.census];
+                    if (typeof fn === 'function') armed.push({ ...spec, fn });
+                } catch (_e) { /* honest absence: a foreign run root ships fewer adopters */ }
+            }
+            if (armed.length === 0) {
+                return { verdict: 'REFUSED', skipped: true, detail: `not armed: none of the roster modules resolved (${roster.map((r) => r.path).join(', ')})`, tookRequests: 0 };
+            }
 
+            safeReset(kernel);
+            const problems = [];
+            for (const adopter of armed) {
+                const rows = adopter.fn();
+                const entries = Array.isArray(rows) ? rows : (rows && rows[adopter.censusKey || 'entries']);
+                if (!Array.isArray(entries) || !entries.every((e) => typeof e.id === 'string' && Number.isInteger(e.at) && e.at > 0)) {
+                    problems.push(`${adopter.name}: census carry is not kernel-dated ${JSON.stringify(entries && entries[0]).slice(0, 60)}`);
+                    continue;
+                }
+                const snap = kernel.census();
+                if (!snap || !Array.isArray(snap.consumers) || !snap.consumers.some((c) => c.name === adopter.name)) {
+                    problems.push(`${adopter.name}: invisible on kernel.census() after carrying dated entries - registry and census drifted`);
+                }
+                // The self-heal leg: reset, the next census must not be wedged
+                safeReset(kernel);
+                const healed = adopter.fn();
+                const healedRows = Array.isArray(healed) ? healed : (healed && healed[adopter.censusKey || 'entries']);
+                if (!Array.isArray(healedRows)) {
+                    problems.push(`${adopter.name}: lost its census after the probe reset - self-heal is fiction`);
+                }
+            }
+            safeReset(kernel);
+            if (problems.length) {
+                return exploitedRecord(`roster adoption drifted: ${problems.join(' | ')}`, { problems });
+            }
+            return refusedRecord(`adoption generalizes: ${armed.length} roster consumer(s) (${armed.map((a) => a.name).join(', ')}) carry kernel-dated census entries, stay visible on kernel.census(), and self-heal across resets`, { armed: armed.map((a) => a.name) });
+        }),
+    row('sudo-public-surface-census',
+        'the sudo witness must enumerate through the PUBLIC surface only (listTasks/getGrants/getHealthChecks) - census carry is kernel-dated, succeed lands across ops with an elevation-audit boundary, and a census of an UNKNOWN consumer is refused typed, never raw',
+        async (_harness, ctx) => {
+            const kernel = await loadKernel(ctx);
+            if (!kernel) return skipRecord();
+            const cfg = (ctx && ctx.config && ctx.config['vant-kernel']) || {};
+            if (cfg.sudoModule === null) {
+                return { verdict: 'REFUSED', skipped: true, detail: 'not armed: no sudo witness on this kernel instance (sudoModule: null)', tookRequests: 0 };
+            }
+            const { resolve } = await import('node:path');
+            const { pathToFileURL } = await import('node:url');
+            let sudoNS;
+            try {
+                sudoNS = await import(pathToFileURL(resolve(cfg.sudoModule || 'lib/sudo-kernel-witness.js')).href);
+            } catch (_e) {
+                return { verdict: 'REFUSED', skipped: true, detail: `not armed: no sudo witness module at ${cfg.sudoModule || 'lib/sudo-kernel-witness.js'}`, tookRequests: 0 };
+            }
+            const sudoW = (sudoNS.default) ? sudoNS.default : sudoNS;
+            if (typeof sudoW.sudoCensus !== 'function' || typeof sudoW.sudoWitnessSucceed !== 'function') {
+                return { verdict: 'REFUSED', skipped: true, detail: 'not armed: sudo witness exports no sudoCensus/sudoWitnessSucceed doors (adopter differs - census-visible absence)', tookRequests: 0 };
+            }
+            safeReset(kernel);
+            const census = sudoW.sudoCensus();
+            if (!census || !Array.isArray(census.entries) || !census.entries.every((e) => typeof e.id === 'string' && Number.isInteger(e.at) && e.at > 0 && typeof e.kind === 'string')) {
+                return exploitedRecord(`sudo census carry is not kernel-dated: ${JSON.stringify(census && census.entries && census.entries[0]).slice(0, 80)}`, { census: census && census.code });
+            }
+            // succeed across ops: elevation-audit boundary, typed result, journaled
+            const before = kernel.journal().length;
+            const witnessed = sudoW.sudoWitnessSucceed({ action: 'pack-probe-elevation', taskId: 'pack-task' });
+            if (!witnessed || witnessed.witnessed !== true) {
+                return exploitedRecord(`sudo succeed refused a lawful elevation witness (${(witnessed && witnessed.code) || 'no result'})`, { witnessed });
+            }
+            const delta = kernel.journal().slice(before);
+            const succeedEntry = delta.find((j) => j.kind === 'verb' && j.verb === 'succeed');
+            if (!succeedEntry) {
+                return exploitedRecord('sudo succeed landed but the journal holds no succeed entry - the clerk stopped taking minutes', { delta: delta.length });
+            }
+            // unknown-consumer refuse: typed + journaled, never raw
+            const probe = await probeRefusal(kernel, () => kernel.gate('census', 'no-such-sudo-adopter', {}));
+            if (probe.silent) return exploitedRecord('gate() ran census for an UNKNOWN consumer - the roster is not the roster', { rows: 'silent' });
+            if (!probe.typed) return exploitedRecord(`unknown-consumer census escaped as a raw crash (${probe.rawName}) - typed refusal required`, { raw: probe.rawName });
+            return refusedRecord(`sudo witness holds: census enumerates public-surface-dated, succeed across ops lands + journaled (boundary elevation-audit), unknown consumers refuse typed (${probe.code})`, { entries: census.entries.length, code: probe.code });
+        }),
+];
 export default {
     name: 'vant-kernel',
     description: 'Prove-the-verbs conformance rows: kernel invariants refuse TYPED with a journaled refusal entry, illegal verbs are census-visible gaps',
