@@ -500,6 +500,35 @@ the run root's library phase (exit 3 still fires on any future
 finding, per the phase's own design: library findings are worth
 surfacing apart from pack findings).
 
+## Phase A — the per-bucket flip begins (S0→S1, #249 - 2026-10-25)
+
+The campaign's conversion phase: native suites become pack rows under
+the REVERSE-VERIFICATION LAW — the old suite stays green ALONGSIDE its
+pack conversion until one full run cycle is green on both, and only
+then does the S-counter advance for that bucket. The before-picture is
+today's clean B0 run: **48 REFUSED / 0 EXPLOITED / 1 skipped**.
+
+| Bucket (campaign order) | Share | Status |
+|---|---|---|
+| 0 — wire-surface door pins (`test/crashtest-server.js`, 9 pins) | smallest lift, biggest overlap | **CONVERTED — cycle 1/4 began**: rows in `vant-server-wall` 5/5 REFUSED, native suite still 9/9 green alongside |
+| wire-surface re-pins (bigger surfaces: relay, dashboard doors) | ~15% | pending — `vant-relay` per the survey below |
+| in-process module discipline (via memory/governance families) | ~40% | B0 arms already grade the same seams; row-by-row conversion queued |
+
+**Bucket 0 notes (vant-server-wall, new pack):** every row drives vant's
+REAL Node wire through the run root's new `mcp-server-wall` route
+(`lib/server._handleRequest` with the same fake req/res pairs the native
+pins use — no sockets, no wall clock). The escrow-wall row grades the
+exhausted-budget 429 + Retry-After, the hostile-body floor grades bent
+JSON / the first-offender id shape / a 64KiB fill body as 4xx-class,
+stuffing grades both missing-key and wrong-key 401 distinctly, and the
+flood row (LAST, by the native ordering law) grades the 429's PRECISE
+numeric Retry-After plus the no-store on even the refusal (#214). One
+drive-mechanics detail worth keeping: the wall's inner `end` listener
+resolves on its own promise chain, so the shim awaits actual completion
+(bounded setImmediate spin) instead of trusting the outer
+`_handleRequest` promise — answer-vs-drive determinism, not verdict
+timing.
+
 ## Next surfaces survey (2026-10-23): packs vs issues
 
 Where the remaining repo parts land:

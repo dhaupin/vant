@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-server-wall",
+  "description": "The MCP server wall's HTTP discipline, graded over vant's REAL Node wire (lib/server._handleRequest, fake req/res pairs, no sockets, no wall clock) - Phase A bucket 0 of the S0->S1 conversion campaign (#249), converted from the native door-pin suite test/crashtest-server.js under the reverse-verification law: the suite stays green alongside until one full cycle is green on both.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

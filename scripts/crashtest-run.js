@@ -162,7 +162,7 @@ async function main() {
         'vant-rest-open', 'vant-rest-priv', 'vant-rest-priv-alias', 'vant-login', 'vant-me', 'vant-logout',
         'stone-scope', 'stone-tamper', 'stone-restore-tamper', 'rest-request', 'trust-read', 'brain-graph-walk',
         'home-summary', 'home-admin', 'memory-note-write', 'memory-note-read', 'memory-note-delete',
-        'gov-grant', 'gov-resolve', 'gov-locks', 'gov-escrow'];
+        'gov-grant', 'gov-resolve', 'gov-locks', 'gov-escrow', 'mcp-server-wall'];
         // Per-module route vocabulary: rows whose ctx names are not `route`
         // get the vant-armed route that speaks their contract (privileged
         // authz gate, cookie session verbs, deep/regex Edge probes). The
@@ -1402,6 +1402,85 @@ function buildRoutes(sb, Harness) {
             return jsonRes({ ok: true, deleted: true, id: j.id }, 200);
         } catch (e) {
             return jsonRes({ error: String(e && e.message || e).slice(0, 140) }, 403);
+        }
+    });
+
+    // mcp-server-wall: POST { url, method?, headers?, body?, pin? }
+    // -> the REAL Node wire, lib/server.js _handleRequest, driven with the
+    // same fake req/res pairs the native door-pin suite uses (no sockets,
+    // no wall clock). (Phase A bucket 0, #249) The native suite
+    // test/crashtest-server.js converts into pack rows graded against THIS
+    // route; the suite itself stays green alongside until the run is one
+    // full cycle green on both (the reverse-verification law).
+    // `pin` is the row's arming need: 'escrow-dry' pins the budget spent
+    // down for ONE probe only (restored after), like the native floor pin;
+    // 'auth' fires the wall WITH authRequired on (credential stuffing); the
+    // default is the plain wall. Every call runs on a FRESH wall instance
+    // except the stuffing/flood lanes' dedicated ones, so one row's QoS
+    // budget never starves another row's (fresh-fixture law).
+    const serverWall = sandboxLib('server');
+    const WALL_FLOORS = new Map(); // lane -> lazy Server instance
+    function _wall(lane) {
+        if (!WALL_FLOORS.has(lane)) {
+            WALL_FLOORS.set(lane, new serverWall.Server(lane === 'auth'
+                ? { port: 0, authRequired: true, requestTimeout: 60000 }
+                : { port: 0, requestTimeout: 60000 }));
+        }
+        return WALL_FLOORS.get(lane);
+    }
+    function _fakeReq(opts) {
+        const req = new (require('events').EventEmitter)();
+        req.url = opts.url;
+        req.method = opts.method || 'POST';
+        req.headers = opts.headers || {};
+        req.socket = { remoteAddress: '127.0.0.1' };
+        req.setTimeout = function () { /* pack rows never run the clock */ };
+        return req;
+    }
+    function _fakeRes() {
+        return {
+            headers: {}, status: null, body: '', headersSent: false,
+            setHeader(k, v) { this.headers[k] = v; },
+            writeHead(status, headers) { this.status = status; this.headersSent = true; Object.assign(this.headers, headers || {}); },
+            end(data) { this.body = String(data); }
+        };
+    }
+    harness.registerRoute('mcp-server-wall', async (ctx) => {
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        if (!j || typeof j.url !== 'string' || !j.url) return jsonRes({ error: 'url required' }, 400);
+        if (j.pin != null && !['escrow-dry', 'auth'].includes(String(j.pin))) return jsonRes({ error: 'unknown pin' }, 400);
+        const lane = j.pin === 'auth' ? 'auth' : 'plain';
+        const wall = _wall(lane);
+        const req = _fakeReq({ url: String(j.url).slice(0, 200), method: j.method ? String(j.method).slice(0, 10) : 'POST', headers: j.headers && typeof j.headers === 'object' ? j.headers : {} });
+        const res = _fakeRes();
+        const bodyChunks = j.body != null ? String(j.body) : undefined;
+        let canSpendRestore = null;
+        try {
+            if (j.pin === 'escrow-dry') {
+                canSpendRestore = wall._escrow.canSpend.bind(wall._escrow);
+                wall._escrow.canSpend = () => false; // the budget ran dry (native floor pin)
+            }
+            const p = wall._handleRequest(req, res);
+            if (bodyChunks !== undefined) req.emit('data', Buffer.from(bodyChunks));
+            req.emit('end');
+            // (drive determinism) the wall's inner 'end' listener resolves on
+            // its own promise chain — the OUTER _handleRequest promise can
+            // settle before the router writes. Await actual completion, not
+            // the outer promise: a bounded setImmediate spin is drive
+            // mechanics, not verdict timing (no clock in the ANSWER).
+            if (p && typeof p.then === 'function') await p;
+            for (let spins = 0; spins < 500 && !res.headersSent; spins++) {
+                await new Promise((resolve) => setImmediate(resolve));
+            }
+            if (canSpendRestore) wall._escrow.canSpend = canSpendRestore; // restored for the wall's other rows
+            if (res.status || res.body) {
+                return jsonRes({ status: res.status, headers: res.headers, bodyText: String(res.body).slice(0, 400) }, 200);
+            }
+            return jsonRes({ error: 'wall answered unsent (stream held open?)' }, 409);
+        } catch (e) {
+            if (canSpendRestore) wall._escrow.canSpend = canSpendRestore;
+            return jsonRes({ error: 'wall drive threw: ' + String(e && e.message || e).slice(0, 120) }, 500);
         }
     });
 
