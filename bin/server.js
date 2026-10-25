@@ -103,6 +103,16 @@ async function main() {
         process.exit(1);
     });
     
+    // (issues #252 follow-up) A long-lived process owns the backup
+    // cadence: arm the scheduler (cron schedules + the #252 active-brain
+    // watchdog riding it). Idempotent; a refused arming voices itself.
+    try {
+        require('../lib/backup').start();
+        console.log('[Backup] Cadence armed with the server (active-brain watchdog rides it).');
+    } catch (e) {
+        console.warn('[Backup] Cadence not armed:', e.message);
+    }
+    
     await server.listen();
 }
 

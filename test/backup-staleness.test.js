@@ -185,5 +185,77 @@ function parseSentinel(r) {
     fs.rmSync(plain, { recursive: true, force: true });
 }
 
+// ---- piggyback (write-moment half of the #252 law): NEVER pushes once, ----
+// the receipt rate-limits, another brain's save inside the window throttles ----
+{
+    const root = makeRoot({ stack: ['vant', 'echo'], currentBrain: 'vant' });
+    const dest = path.join(root, 'outside-mount');
+    fs.mkdirSync(dest, { recursive: true });
+    const r = runRoot(root, `
+        const fs = require('fs');
+        const backup = require(${JSON.stringify(BACKUP)});
+        const s = require(${JSON.stringify(STALE)});
+        (async () => {
+            const inst = backup.getInstance({ activeBrainWatchdog: true, activeBrainDestination: process.env.PIN_DEST, schedules: [] });
+            // A fresh install's first write: NEVER consents to one push.
+            const first = await inst.piggybackPush();
+            const stamped = s.stalenessReport({ stack: ['vant'] }).brains.find(b => b.brain === 'vant').status;
+            // The next immediate save: the receipt is cold.
+            const second = await inst.piggybackPush();
+            // A DIFFERENT brain's save within the same window: throttled
+            // (one push per freshness window, whichever brain saved).
+            inst._lastPiggybackPush = Date.now();
+            const third = await inst.piggybackPush({ brains: ['echo'] });
+            console.log(JSON.stringify({
+                first: first.piggybacked,
+                stamped,
+                secondWhy: second.why,
+                thirdWhy: third.why,
+                landed: fs.readdirSync(process.env.PIN_DEST).length,
+            }));
+            process.exit(0);
+        })().catch(e => { console.error('THREW: ' + String(e && e.message).slice(0, 200)); process.exit(3); });
+    `, { PIN_DEST: dest });
+    const d = parseSentinel(r);
+    check("#252 piggyback: a fresh install's first write pushes once (a landing lands OUTSIDE the mount)", d && d.first === true && d.landed >= 1, d ? JSON.stringify(d) : `${r.stdout} ${r.stderr}`.slice(0, 220));
+    check('#252 piggyback: the completed push stamps the ledger (write-moment law holds)', d && d.stamped === 'RECENT', d ? JSON.stringify(d) : `${r.stdout} ${r.stderr}`.slice(0, 220));
+    check('#252 piggyback: the next immediate save is cold (the receipt is the rate-limiter)', d && d.secondWhy === 'recent', d ? JSON.stringify(d) : `${r.stdout} ${r.stderr}`.slice(0, 220));
+    check("#252 piggyback: another brain's save inside the same window throttles (one push per window)", d && d.thirdWhy === 'throttled', d ? JSON.stringify(d) : `${r.stdout} ${r.stderr}`.slice(0, 220));
+    fs.rmSync(root, { recursive: true, force: true });
+}
+// ---- piggyback: the watchdog cadence wins; a bad destination refuses typed ----
+{
+    const root = makeRoot({ stack: ['vant'], currentBrain: 'vant' });
+    const dest = path.join(root, 'outside-mount');
+    fs.mkdirSync(dest, { recursive: true });
+    const r = runRoot(root, `
+        const backup = require(${JSON.stringify(BACKUP)});
+        (async () => {
+            const inst = backup.getInstance({ activeBrainWatchdog: true, activeBrainDestination: process.env.PIN_DEST, schedules: [] });
+            inst._watchdogTimer = setInterval(() => {}, 1e9); // a long-lived runtime: the cadence is armed
+            const cadenced = await inst.piggybackPush();
+            clearInterval(inst._watchdogTimer); inst._watchdogTimer = null;
+            // A refused destination: typed refusal, never a throw into the save.
+            const C = Object.getPrototypeOf(inst).constructor;
+            const bad = new C({ activeBrainDestination: '/etc/vant-pin-refused', schedules: [] });
+            const refused = await bad.piggybackPush();
+            console.log(JSON.stringify({ cadencedWhy: cadenced.why, refusedWhy: refused.why }));
+        })().catch(e => { console.error('THREW: ' + String(e && e.message).slice(0, 200)); process.exit(3); });
+    `, { PIN_DEST: dest });
+    const d = parseSentinel(r);
+    check('#252 piggyback: an armed watchdog cadence refuses the piggyback (never a double-push)', d && d.cadencedWhy === 'watchdog-cadence', d ? JSON.stringify(d) : `${r.stdout} ${r.stderr}`.slice(0, 220));
+    check('#252 piggyback: a sensitive destination refuses typed, never throwing into the save', d && d.refusedWhy === 'destination-rejected', d ? JSON.stringify(d) : `${r.stdout} ${r.stderr}`.slice(0, 220));
+    fs.rmSync(root, { recursive: true, force: true });
+}
+// ---- seams: the long-lived surfaces own the cadence; the write path owns the stale-guard ----
+{
+    const vantSrc = fs.readFileSync(path.join(REPO, 'lib', 'vant.js'), 'utf8');
+    const serverSrc = fs.readFileSync(path.join(REPO, 'bin', 'server.js'), 'utf8');
+    const brainSrc = fs.readFileSync(path.join(REPO, 'lib', 'brain.js'), 'utf8');
+    check('#252 seam: startFull arms the backup cadence with the runtime', vantSrc.includes('Step 6: Own the backup cadence') && vantSrc.includes('backup.start()'), 'lib/vant.js');
+    check('#252 seam: the standalone server arms the backup cadence with its process', serverSrc.includes("require('../lib/backup').start()"), 'bin/server.js');
+    check('#252 seam: brain.write() rides the write-moment stale guard', brainSrc.includes('_piggybackAfterBrainWrite') && /_getStorageRef\(\)\.get\('brain'\)\.write[\s\S]{0,400}_piggybackAfterBrainWrite/.test(brainSrc), 'lib/brain.js');
+}
+
 console.log(`\nbackup-staleness: ${failures === 0 ? 'ALL PINS PASS' : `${failures} pin(s) failed`}`);
 process.exit(failures === 0 ? 0 : 1);
