@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-kernel",
+  "description": "Prove-the-verbs conformance rows for the vant kernel lifecycle substrate (lib/kernel.js seed): every refusal norm must land as a TYPED refusal with a journaled refusal entry, never a raw crash; illegal verbs are census-visible gaps; the full lawful verb chain must carry kernel time. K3 (2026-10-25): the adoption half landed - a reference-consumer-witness row proves escrow registers and attests spend pairs through the gate, and the pack now flips from proving the seed to proving adoption. Deterministic by structure - assertions read journal shapes, never wall clocks. Filed per vant#250 (labs/prd-kernel.md sec 6d #5); landed in the same pass as K2 (test/kernel.test.js) per the same-pass law. Host arms via ctx.config['vant-kernel'] (kernelModule, default lib/kernel.js; adoptionModule, default lib/escrow.js); un-armed degrades to skipped-REFUSED.",
+  "version": "0.2.0",
+  "entry": "index.mjs"
+}

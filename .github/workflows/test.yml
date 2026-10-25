@@ -51,6 +51,23 @@ jobs:
           node test/evals/vibe.js
           node test/coverage.js
 
+      - name: Packs deep lint (packstruct@1 author-time gate, vant#247)
+        # The live-corpus receipt + CI lane, same commit: every pack
+        # manifest is checked against the real SPEC v1 (fields, name==dir,
+        # entry-exists, version shape) and --deep probes each entry's
+        # import + default export + id census. Zero sockets, in-process,
+        # runs in seconds; a violation fails the job at author time
+        # instead of failing a pack load somewhere downstream.
+        run: npm run packs:lint
+
+      - name: Packs conformance audit (packstruct §7 harness, ALLOWED-pinned)
+        # The host-loader face (crashtest's real loader) runs against
+        # packstruct's bundled conformance corpus. Regressions outside the
+        # allowlist fail the job; the pinned "clean" row is the documented
+        # engine finding, deleted when its fix lands (see
+        # scripts/audit-packs-gate.js for the honest pin).
+        run: npm run packs:audit
+
       - name: Surface consistency (no phantom endpoints, links, community doors)
         run: npm run lint:surface
 

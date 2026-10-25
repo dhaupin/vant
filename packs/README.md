@@ -196,6 +196,41 @@ The EXPLOITED ledger for this pack is EMPTY as of 2026-10-23: the flood row
 measured a real finding the hour it was armed and the cap landed the same
 pass. Both CI whitelists stay EMPTY.
 
+### `public/vant-kernel` — prove-the-verbs conformance for the kernel seed + its adoption (8 rows; all validated 2026-10-25)
+
+Per vant#250 (labs/prd-kernel.md sec 6d #5): portability's strongest form is
+a conformance pack, not a spec doc. Rows attack `lib/kernel.js`'s gate()
+invariants in-process, zero sockets, zero wall clocks — typed refusals +
+journaled refusal entries are the defense holding; a raw crash, a silent
+illegal success, or an unjournaled refusal is an EXPLOITED. Lands in the
+SAME PASS as K2 (`test/kernel.test.js`, 69 pins) per the same-pass law.
+**K3 LANDED the same day (2026-10-25):** escrow adopted as the reference
+consumer (`lib/escrow.js`, census of budgets + attest of spend pairs, one
+row, smallest lift; pins in `test/escrow-kernel.test.js`, 21) — the pack
+flipped from *proving the seed* to *proving adoption*: the
+`reference-consumer-witness` row proves the consumer registers through the
+gate, attests dated spend pairs, and self-heals after the probe's registry
+resets. A foreign kernel with no reference consumer still runs every other
+row; the adoption row degrades to an HONEST skip there (census-visible
+absence, never a false positive).
+
+| Attack (ID) | What it claims | Status |
+|---|---|---|
+| `retire-without-census` | retire without a census entry: `E_NO_CENSUS` typed + journaled, never raw | validated — REFUSED |
+| `unlisted-retire` | an id outside the census receipt is a finding: `E_UNLISTED_RETIRE` typed + journaled | validated — REFUSED |
+| `attest-without-dated-basis` | a zero-dated basis can't attest: `E_NO_DATE` typed + journaled | validated — REFUSED |
+| `succeed-without-attest-chain` | an empty chain crosses nothing: `E_NO_ATTEST_CHAIN` typed + journaled | validated — REFUSED |
+| `refusals-journal-themselves` | refusal entries carry kind/verb/consumer/code — fail-closed never fail-silent | validated — REFUSED |
+| `missing-verb-gap-visible` | census lists the gap AND the gate refuses it typed (`E_UNREGISTERED_VERB`) | validated — REFUSED |
+| `gate-happy-path` | the full census → attest → retire → succeed chain passes in order with kernel time; four verb entries journaled | validated — REFUSED |
+| `reference-consumer-witness` | K3: escrow registers (census+attest, gap self-named), spend pairs attest dated + journaled, self-heal holds after reset | validated — REFUSED (armed) |
+
+Isolation runs two honest paths: the seed's TEST-ONLY `_unwind()` seam
+(reset per row when present — all positions identical every run) or, for a
+foreign kernel without the seam, unique consumer names + duplicate-safe
+registration + journal-delta scans. Records never carry absolute seq
+numbers; rows are double-run deterministic.
+
 ## Running the packs against vant
 
 Two ways, both from this repo:
@@ -386,3 +421,40 @@ is the two-pod fixture broker + snapshot-diff helper, not conversion).
 - New packs must land in `test/crashtest-packs.test.js`'s `EXPECTED` table —
   the suite discovers shipped packs and fails loudly for missing rows,
   which is the honest default.
+
+## The packstruct@1 gate (2026-10-25)
+
+`npm run packs:lint` runs `packstruct lint packs/ --deep` — the zero-dep
+spec linter from [packstruct@1.0.0](https://www.npmjs.com/package/packstruct)
+(pinned as an exact devDependency, author-time only; the runtime graph
+stays untouched). Step runs in CI (`test.yml`, right after install) and
+locally after a manifest edit.
+
+**Live-corpus receipts** (vant#247 items 1–3, same-commit batch as the wiring):
+
+```
+$ npm run packs:lint
+packstruct lint --deep: 8 pack(s) checked in packs/ - 8 module(s) probed, 48 id(s) censused
+
+$ npm run packs:audit
+packstruct audit-conformance: 7/8 case(s) honored by the loader
+  AUDIT clean [audit-accept]: loader exit 1 on case "clean" - the spec verdict is accept
+audit gate: ALLOWED (8 case(s), 1 pinned known finding(s): clean, rest honored)  # exit 0
+```
+
+Elle spec neuva:
+
+- `packs:lint` runs `packstruct lint packs/ --deep` (author-time gate, CI step in test.yml).
+- `packs:audit` runs packstruct's SPEC §7 conformance harness: the host-loader face (`scripts/audit-host-loader.js`, a 30-line wrapper over crashtest's REAL loader — no second validation added) runs packstruct's bundled fixture corpus. Exit 0 today with one ALLOWED-pinned row: the **"clean" case refuses because crashtest@1.1.0's loadPacks applies the scenario contract to manifest-level loading, so a profile-minimal conformant entry (the SPEC clean fixture: default export `{ name }`) cannot exist** — the engine finding lives at dhaupin/crashtest#33 and the allowlist row is deleted the pass its fix lands (scripts/audit-packs-gate.js, same pattern as KNOWN_FINDINGS). CI: both `packs:lint` and `packs:audit` run in the main ci job.
+
+specKey verification story: the `specKey` token was session-side
+shorthand for the manifest placeholder the spec landing was expected to
+produce. The delivered SPEC v1 (§2) defines `armedByKey` as OPTIONAL with
+absence semantics — *"Absent: the host's own default lifecycle governs"* —
+and vant's packs all arm via config enumeration
+(`ctx.config['<pack-name>']`), which is exactly the absent path. No pack
+manifest gains a new key; the placeholder never existed in any tree
+(checked dhaupin/vant, the packstruct scaffold, the crashtest packs,
+2026-10-24) and the delivered spec confirms none was owed. Verified, not
+skipped: the gate above now enforces the field set every future manifest
+must carry.

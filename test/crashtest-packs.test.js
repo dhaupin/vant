@@ -1029,6 +1029,25 @@ const EXPECTED = {
         'state-pointer-lineage': 'REFUSED',
         'restore-torn-refusal': 'REFUSED',
     },
+    // ARMED 2026-10-25 (the prove-the-verbs conformance pack, vant#250):
+    // rows attack the kernel seed's gate() invariants directly - typed
+    // refusals + journaled refusal entries are the defense holding. Lands
+    // in the SAME PASS as K2 (test/kernel.test.js) per the same-pass law;
+    // K3 (first real consumer) stays pending per the PRD's law.
+    'vant-kernel': {
+        'retire-without-census': 'REFUSED',
+        'unlisted-retire': 'REFUSED',
+        'attest-without-dated-basis': 'REFUSED',
+        'succeed-without-attest-chain': 'REFUSED',
+        'refusals-journal-themselves': 'REFUSED',
+        'missing-verb-gap-visible': 'REFUSED',
+        // ARMED 2026-10-25 (K3, the adoption half): escrow registers as the
+        // reference consumer through the gate, attests spend pairs dated +
+        // journaled, and self-heals after the probe's registry resets. The
+        // pack flipped from proving the seed to proving adoption.
+        'reference-consumer-witness': 'REFUSED',
+        'gate-happy-path': 'REFUSED',
+    },
     // ARMED 2026-10-23 (the site wire): flood-cost-cap was armed as a REAL
     // FINDING the same turn (the endpoint table accepted unbounded rows;
     // every cold public GET would probe per row) and FIXED the same turn:

@@ -270,7 +270,19 @@ empty ledger — a census with zero consumers is TRUE, not broken.
 
 | Callsite | Registers as | Verbs wired first |
 |----------|--------------|-------------------|
-| lib/escrow.js | 'escrow' (reference consumer, smallest lift) | census of budgets; attest of spend pairs |
+| lib/escrow.js | 'escrow' (reference consumer, smallest lift) | census of budgets; attest of spend pairs |  
+
+> **2026-10-25 — escrow row WIRED (K3 landed):** `lib/escrow.js` registers as
+> 'escrow' with census of budgets + attest of spend pairs exactly as this
+> row named (registration + verb wiring only, zero surface rewrite; the diff
+> proves it). Spend pairs witness on the lawful path, dated through a
+> kernel-gated census basis (invariant 2 live), self-healing after external
+> probe resets, and a kernel refusal steps aside onto escrow's event bus
+> without ever mutating a spend verdict (clerk-not-judge, §2 Q8). The
+> retire/succeed gap self-names in every census (invariant 3 works ON the
+> adopter). Pins: `test/escrow-kernel.test.js` (21). Plugin readers: the
+> remaining map rows above stay unwired — each lands the pass its surface
+> opens.
 | test/runner.js (suite exit) | 'test-harness' | census of minted scratch brains; retire = autoreap (the pass-328 kill switch) |
 | bin/horcrux.js (inspect) | 'horcrux' | brain-level census (real vs carcass); retire of stale stones |
 | lib/prune.js | 'prune' | census of prunable; retire-with-ledger |
@@ -1027,6 +1039,21 @@ retires an open lesson the same pass it lands. K5+ is opportunistic.
 
 ## 9. Decision log (append-only)
 
+- 2026-10-25: **K2 + K3 LANDED (the same pass, the same-pass law held),
+  owner-approved:** K1's invariants got their regression-facing pin suite
+  (`test/kernel.test.js`, 69 pins: every invariant, the coded refusal
+  vocabulary, journal entry shapes, the gate return shape, kernel-time
+  honesty) AND their adversarial-facing proof surface
+  (`packs/public/vant-kernel/`, prove-the-verbs, 8 rows, double-run
+  deterministic, honest skips, zero sockets/clock — filed per §6d #5 and
+  vant#250, which required pack + K2 same pass). K3 followed the same-day
+  batch: escrow adopted as the REFERENCE CONSUMER (one row, smallest lift,
+  census of budgets + attest of spend pairs; `test/escrow-kernel.test.js`
+  21 pins; escrow/kernel/market-debit suites byte-green after the wiring —
+  adoption is registration, never a rewrite). K4 (harness autoreap) and
+  beyond stay deferred per §7. The pack flipped from proving the seed to
+  proving adoption; a foreign kernel still gets every seed row honestly
+  and the adoption row degrades to an honest skip.
 - 2026-10-24: **K1 SEEDED + THE STANDING WISDOM, owner-requested
   ("include the wisdom and mantra ... then draft /lib/kernel ... it's
   set"):** §6e records what competing means (mantra locked, quoted

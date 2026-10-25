@@ -34,6 +34,8 @@
   "scripts": {
     "test": "node bin/build-test.js",
     "test:crashtest": "node test/ci-crashtest-gate.js",
+    "packs:lint": "packstruct lint packs/ --deep",
+    "packs:audit": "node scripts/audit-packs-gate.js",
     "sweep": "node test/run-all.js",
     "setup": "node bin/setup.js",
     "start": "node bin/start.js",
@@ -65,6 +67,7 @@
     "@typescript-eslint/parser": "8.72.0",
     "crashtest": "^1.0.0",
     "eslint": "^8.57.1",
+    "packstruct": "1.0.0",
     "eslint-plugin-react-hooks": "4.6.2",
     "typescript": "5.8.3"
   },
