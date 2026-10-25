@@ -511,8 +511,8 @@ today's clean B0 run: **48 REFUSED / 0 EXPLOITED / 1 skipped**.
 | Bucket (campaign order) | Share | Status |
 |---|---|---|
 | 0 — wire-surface door pins (`test/crashtest-server.js`, 9 pins) | smallest lift, biggest overlap | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native suite 9/9 each run); the suite stays in CI under the law |
-| wire-surface re-pins — r/2 edge face (`web/relay/functions/api/r/relay.ts`) | ~15% (first slice) | **CONVERTED — cycle 1 began**: 5 rows in `vant-relay` (5/5 REFUSED) drive the real TS handler in-process via the run root's strip-types probe child; native lanes (test/relay.test.js, test/relay-parity 19/19) stay green alongside |
-| in-process module discipline (row-by-row) | ~40% (first slice) | **CONVERTED — cycle 1 began**: the B0-era native pins (memory envelope + escrow ledger blocks) became 6 rows in `vant-discipline` riding the shared arms (6/6 REFUSED); native suites memory 29/29 / escrow 28/28 / governance 17/17 stay green alongside |
+| wire-surface re-pins — r/2 edge face (`web/relay/functions/api/r/relay.ts`) | ~15% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native lanes green each run: relay, relay-parity, memory, escrow, escrow-kernel, forum-msg-escrow, governance, workspace-memory via the sweep filter); the native lanes stay in CI under the law. Cycle 2's catch: the origin row's drive called hopFrame twice (sign + body) and each call re-evaluated ts — a ms-grain boundary left the signature covering different bytes than the body, and the edge (correctly) 401'd; one eval per shape since, signature === body bytes |
+| in-process module discipline (row-by-row) | ~40% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 6/6 REFUSED + native suites memory / escrow / governance green each run via the same sweep filter); the native blocks stay in CI under the law |
 | drill-down: remaining native suites (state-wiring, migration, carriers, ...) | remaining ~35% | queued, per-bucket order by conversion shape |
 
 **Bucket 0 S-counter ledger:** cycle 1 (2026-10-25, conversion day) →
@@ -521,6 +521,18 @@ requirement the tracker stated ("2 more full run cycles green on both")
 DID pass, so the S-counter advanced for bucket 0; per the law the native
 suite is not deleted — its retirement is the bucket's closing move after
 the full campaign lands it.
+
+**Phase A S-counter ledger (2026-10-25, cycle 2-3 runs):** vant-server-wall
+had already advanced (bucket 0 cycle 1-3, same law); this day's cycles 2
+and 3 ran GREEN on both sides for the two remaining started slices —
+`vant-relay` (pack 5/5 REFUSED + the native relay/parity lanes and the
+shared library suites green via `run-all --only`) and `vant-discipline`
+(pack 6/6 REFUSED + memory/escrow/governance green). The gate is now
+RED-tolerant of exactly nothing: the strict run also caught the origin
+row's own sign/body ts drift (pack-side drive mechanics, NOT an edge
+finding) — fixed same commit-stream, strict runs deterministically green
+back-to-back after. Relay + discipline S-counters advanced on the same
+quarter-period law.
 
 **Bucket 0 notes (vant-server-wall, new pack):** every row drives vant's
 REAL Node wire through the run root's new `mcp-server-wall` route
