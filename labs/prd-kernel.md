@@ -283,8 +283,41 @@ empty ledger — a census with zero consumers is TRUE, not broken.
 > adopter). Pins: `test/escrow-kernel.test.js` (21). Plugin readers: the
 > remaining map rows above stay unwired — each lands the pass its surface
 > opens.
-| test/runner.js (suite exit) | 'test-harness' | census of minted scratch brains; retire = autoreap (the pass-328 kill switch) |
-| bin/horcrux.js (inspect) | 'horcrux' | brain-level census (real vs carcass); retire of stale stones |
+| test/runner.js (suite exit) | 'test-harness' | census of minted scratch brains; retire = autoreap (the pass-328 kill switch) |  
+
+> **2026-10-25 — harness row WIRED (K4 landed):** the actual suite-exit
+> surface is `test/run-all.js` (the sweep loop — `test/runner.js` is the
+> component runner under it; wiring the row where suite exit really happens
+> keeps map and truth from forking). `test/harness-autoreap.js` registers
+> as 'test-harness' with census of minted scratch brains + retire = the
+> kill switch, both verbs running THROUGH the gate: the janitor's bill and
+> the kernel census are one truth (the manifest-diff law lives once, in
+> `slate.listScratchMints`), every retired id arrives LISTED in the census
+> receipt (invariant 1 structurally — the harness cannot delete what it
+> never named), attest/succeed stay the census-visible gap, zero-mint
+> sweeps exit quietly, and a faulting kernel degrades to the bare janitor
+> law with the refusal VISIBLE — bookkeeping never holds the sweep hostage.
+> Pins: `test/autoreap-kernel.test.js` (21).
+| bin/horcrux.js (inspect) | 'horcrux' | brain-level census (real vs carcass); retire of stale stones |  
+
+> **2026-10-25 — horcrux row WIRED (K5 landed):** `lib/horcrux-census.js`
+> registers as 'horcrux' (census of brains + the retire door), and `vant
+> horcrux inspect` GAINS the census: every brain dir becomes a named,
+> kernel-dated entry — real ('brain') versus hollow ('brain-carcass'), with
+> the state-roster guard (a state.json-named dir is a mid-write lineage
+> member: alive, never debris) and the unverifiable-roster guard (a
+> present-but-unreadable state.json strips retirement eligibility — the
+> census still lists, the tide never fires on an unverifiable tree).
+> Discoveries the pins forced before they passed: (1) a STONE-BEARING dir
+> is NEVER a carcass — a horcrux stone is the one disaster-recovery
+> artifact, so the disaster-recovery law reclassifies it real and surfaces
+> its stones as STALE-STONE CANDIDATES for the decommission run (§6c/K5a)
+> to retire through the same door with the receipt; a stone-tide is an
+> owner ceremony, never an automatic one; (2) the tide removes ONLY the
+> census-named carcass dirs (invariant 1 structurally), dryRun bills
+> without crossing, an empty tide is a quiet no-op. The retire door ships;
+> the CLI does not fire it (inspect only GAINS the census — additive,
+> never destructive by default). Pins: `test/horcrux-census.test.js` (27);
 | lib/prune.js | 'prune' | census of prunable; retire-with-ledger |
 | lib/sudo.js | 'sudo' | census of grants; succeed of elevation across ops |
 | lib/pipeline.js | 'pipeline' | census of pending/committed steps; attest of outcomes |
@@ -1039,6 +1072,34 @@ retires an open lesson the same pass it lands. K5+ is opportunistic.
 
 ## 9. Decision log (append-only)
 
+- 2026-10-25 (later still): **K5 LANDED (horcrux inspect gains census
+  semantics, "brains are entries, not mass") — gated on K4, which had
+  just proven:** 'horcrux' registers as the map's row-3 consumer; `vant
+  horcrux inspect` prints the kernel-dated brain census after its horcrux
+  preview (additive display, the confirm path unchanged); the retire door
+  (stale stones via carcass dirs, receipt-attached, dryRun-first, quiet on
+  an empty tide, roster-guarded) is wired and PINNED but its callsite is
+  deliberately NOT the CLI — it belongs to the decommission run (§6c,
+  K5a), and a stone-tide is an owner ceremony. Pins:
+  `test/horcrux-census.test.js` 27/27; `test/horcrux-orgchart.test.js`
+  14/14 byte-green after the wiring (no consumer rewritten).
+- 2026-10-25 (later): **K4 LANDED (the harness autoreap, the pass-328
+  kill switch becoming a contract — the “highest-payoff consumer” row):**
+  `test/harness-autoreap.js` registers as 'test-harness' (§3 wiring map row
+  2; the suite-exit surface is `test/run-all.js` — noted honestly above).
+  The pass-293 janitor's manifest-diff law became the shared
+  `slate.listScratchMints` census law, so the sweep's janitor bill and the
+  kernel census cannot fork; the retire gate takes the census receipt with
+  it (invariant 1 structurally), mints are dated with kernel time, dryRun
+  bills the tide without crossing it, pre-sweep brains and hostile names
+  are guarded, zero-mint sweeps exit quietly, and the witness-down path
+  falls back to the bare janitor law VISIBLY (bookkeeping never blocks
+  cleanup). Pins: `test/autoreap-kernel.test.js` 21/21, `slate.test.js`
+  10/10 byte-green after the refactor, sweep slice
+  `run-all --only=slate,autoreap` green with the contracted exit. K1-K4
+  now all shipped; K5+ stays opportunistic per §7. The §4 table's “test
+  harness | mints scratch brains per run, NEVER retires” row is HISTORY —
+  the harness now retires what it names.
 - 2026-10-25: **K2 + K3 LANDED (the same pass, the same-pass law held),
   owner-approved:** K1's invariants got their regression-facing pin suite
   (`test/kernel.test.js`, 69 pins: every invariant, the coded refusal
