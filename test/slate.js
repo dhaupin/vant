@@ -163,6 +163,36 @@ function _listBrainDirs(modelsSide) {
 }
 
 /**
+ * (K4, 2026-10-25) The census-only view of the scratch-manifest law: which
+ * brain dirs appeared DURING the sweep (absent from the capture-time
+ * manifest) and are therefore the harness's own mints. One truth for two
+ * consumers — the bare janitor (cleanupScratch) and the kernel-contracted
+ * kill switch (test/harness-autoreap.js) — so the sweep's janitor bill and
+ * its kernel-census never fork. Returns [{ side, name }] in the same shape
+ * both consumers use.
+ */
+function listScratchMints(slate) {
+    if (!slate || !slate.root) {
+        throw new Error('listScratchMints: a captured slate from captureSlate(root) is required');
+    }
+    const root = slate.root;
+    const keptPre = new Set(slate.privateManifest);
+    const keptPub = new Set(slate.publicManifest);
+    const mints = [];
+    const survey = (side, kept) => {
+        const dir = path.join(root, 'models', side);
+        for (const name of _listBrainDirs(dir)) {
+            if (kept.has(name)) continue;   // pre-sweep: never a mint
+            if (!/^[A-Za-z0-9._-]+$/.test(name)) continue; // weird names: never guess
+            mints.push({ side, name });
+        }
+    };
+    survey('private', keptPre);
+    survey('public', keptPub);
+    return mints;
+}
+
+/**
  * (pass 293) Sweep-exit scratch-brain cleanup. Removes ONLY brain dirs that
  * appeared under models/private|public DURING the sweep (absent from the
  * capture-time manifest) — sweep-created throwaway scratch (livefire-*,
@@ -170,25 +200,20 @@ function _listBrainDirs(modelsSide) {
  * existed pre-sweep, and never touches the active brain (it is baseline-
  * restored above regardless — cleanup runs AFTER restoreSlate at exit).
  * Returns what it removed so the runner can print the janitor's bill.
+ * (K4) The removal law itself lives in listScratchMints now — this wrapper
+ * deletes exactly what the census names (same truth, shared with the
+ * kernel-contracted autoreap door).
  */
 function cleanupScratch(rootArg, slate) {
     if (!slate || !slate.root) {
         throw new Error('cleanupScratch: a captured slate from captureSlate(root) is required');
     }
     const root = slate.root;
-    const keptPre = new Set(slate.privateManifest);
-    const keptPub = new Set(slate.publicManifest);
     const removed = [];
-    const sweep = (side, kept) => {
-        const dir = path.join(root, 'models', side);
-        for (const name of _listBrainDirs(dir)) {
-            if (kept.has(name)) continue;
-            if (!/^[A-Za-z0-9._-]+$/.test(name)) continue; // weird names: never guess
-            try { fs.rmSync(path.join(dir, name), { recursive: true, force: true }); removed.push(side + '/' + name); } catch (_e) { /* leave it */ }
-        }
-    };
-    sweep('private', keptPre);
-    sweep('public', keptPub);
+    for (const m of listScratchMints(slate)) {
+        const dir = path.join(root, 'models', m.side);
+        try { fs.rmSync(path.join(dir, m.name), { recursive: true, force: true }); removed.push(m.side + '/' + m.name); } catch (_e) { /* leave it */ }
+    }
     return { removed };
 }
 
@@ -198,4 +223,4 @@ function freeSlate(slate) {
     }
 }
 
-module.exports = { captureSlate, restoreSlate, cleanupScratch, freeSlate };
+module.exports = { captureSlate, restoreSlate, listScratchMints, cleanupScratch, freeSlate };

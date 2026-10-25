@@ -131,9 +131,22 @@ for (const suite of suites) {
 // and (pass 293) throwaway scratch brains the sweep minted swept too.
 // Pre-existing brain dirs are never touched (scratch-manifest law).
 _guardRestore('sweep-exit');
+// (K4, 2026-10-25) The kill switch goes kernel-contracted: 'test-harness'
+// registers (census of minted scratch brains + retire = autoreap), the
+// census and the retire both journal through the kernel gate, and every
+// retired id arrives LISTED in the census receipt (invariant 1 enforced
+// structurally — the harness cannot delete what it never named). The bare
+// janitor law stays one truth behind both doors (slate.listScratchMints).
 let swept = { removed: [] };
-try { swept = slate.cleanupScratch(null, sweepSlate); } catch (e) {
-    console.error(`⚠  scratch cleanup failed: ${e.message}`);
+try {
+    const autoreap = require('./harness-autoreap');
+    swept = autoreap.autoreap(sweepSlate);
+} catch (e) {
+    // Harness-autoreap import fault masks nothing: the janitor duty still runs.
+    console.error(`⚠  kernel-contracted autoreap faulted (${e.message}) — bare janitor law runs unjournaled`);
+    try { swept = slate.cleanupScratch(null, sweepSlate); } catch (e2) {
+        console.error(`⚠  scratch cleanup failed: ${e2.message}`);
+    }
 }
 slate.freeSlate(sweepSlate);
 sweepSlate = null;
