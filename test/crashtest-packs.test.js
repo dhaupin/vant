@@ -1133,6 +1133,17 @@ const EXPECTED = {
         'lib-face-origin-policy-wall': 'REFUSED',
         'lib-face-dispatch-guards-typed': 'REFUSED',
         'lib-face-sender-gate-refusal-typed': 'REFUSED',
+        // (relay battery slice 2, 2026-10-26) the REAL wire: each row
+        // mounts the actual relay route on loopback (port 0) in-process
+        // and drives it over HTTP — sockets yes, arms no. Loopback binds
+        // work in BOTH phases, so these EARN strict REFUSED everywhere.
+        'wire-hmac-lane-and-replay-gate': 'REFUSED',
+        'wire-hop-roundtrip-and-no-body-leak': 'REFUSED',
+        'wire-ride-core-loop-and-refusals': 'REFUSED',
+        'wire-body-cap-and-liveness-counters': 'REFUSED',
+        'wire-sender-seam-and-bridge-families': 'REFUSED',
+        'wire-sealed-lane-freshness-and-dedupe': 'REFUSED',
+        'wire-traveler-carrier-id-named': 'REFUSED',
     },
     'vant-server-wall': { // the MCP server wall via lib/server._handleRequest
         'escrow-wall-429-never-5xx': 'skip',

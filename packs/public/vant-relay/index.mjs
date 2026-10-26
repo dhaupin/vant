@@ -42,6 +42,111 @@ async function loadLib(relPath) {
   return await import(pathToFileURL(resolve(relPath)).href);
 }
 
+/** The slice-2 wire kit: real relay + config + encrypt, keyed for the
+ * wire rows (the SAME keys all rows share so verdicts compose once). */
+const CHANNEL_KEY = 'vant-relay-pack-channel-key-0123456789abc';
+// The ride nonce store PERSISTS across the two pack cycles in one
+// process, so a fixed inner nonce would replay on cycle 2 and diverge
+// the second run. Every ride row mints its nonces FRESH per run (the
+// helper is per-process; the verdicts carry none of it).
+const _nonceSeed = Date.now().toString(36).slice(-7);
+let _nonceCount = 0;
+function freshNonce(prefix) {
+  return prefix + _nonceSeed + '-' + (++_nonceCount).toString(36).padStart(4, '0');
+}
+
+async function wireKit() {
+  const api = await loadLib('lib/api.js');
+  const cfg = await loadLib('lib/config.js');
+  const enc = await loadLib('lib/encrypt.js');
+  return { relay: api.relay, cfg, Encrypt: enc.default || enc };
+}
+
+/** Mount the REAL relay route on loopback (port 0), await its listen,
+ * run the row body, then ALWAYS unmount + restore the gating keys. */
+async function withMountedRelay(relayCore, fn) {
+  const { cfg } = await wireKit();
+  const savedEnabled = cfg.get('relay.enabled');
+  const savedGate = cfg.get('relay.gateKey');
+  cfg.set('relay.enabled', true);
+  cfg.set('relay.gateKey', GATE_SECRET);
+  const m = relayCore.mount({ port: 0 });
+  if (!m.mounted) {
+    cfg.set('relay.enabled', savedEnabled);
+    cfg.set('relay.gateKey', savedGate);
+    throw new Error('relay.mount did not bind (gate posture failed): ' + JSON.stringify(m).slice(0, 120));
+  }
+  const srv = relayCore._getMountedState() && relayCore._getMountedState().server;
+  if (!srv) {
+    try { await relayCore.unmount(); } catch { /* noop */ }
+    cfg.set('relay.enabled', savedEnabled);
+    cfg.set('relay.gateKey', savedGate);
+    throw new Error('relay.mount left no inspectable server');
+  }
+  await new Promise((res) => { if (srv.listening) return res(); srv.on('listening', res); });
+  const port = srv.address().port;
+  let out;
+  try { out = await fn(port); }
+  finally {
+    try { await relayCore.unmount(); } catch { /* already down */ }
+    cfg.set('relay.enabled', savedEnabled);
+    cfg.set('relay.gateKey', savedGate);
+  }
+  return out;
+}
+
+/** One HTTP POST /relay over a REAL loopback socket; resolves a
+ * bounded {status, json, raw} - never rejects. */
+async function postWire(port, rawBody, headers) {
+  const http = await import('node:http');
+  return await new Promise((resolve) => {
+    const req = http.request({
+      host: '127.0.0.1', port, path: '/relay', method: 'POST',
+      headers: Object.assign({ 'content-type': 'application/json',
+        'content-length': Buffer.byteLength(rawBody) }, headers || {}),
+    }, (res) => {
+      let data = '';
+      res.setEncoding('utf8');
+      res.on('data', (c) => { data += c; });
+      res.on('end', () => { let j = null; try { j = JSON.parse(data); } catch { /* non-JSON */ } resolve({ status: res.statusCode, json: j, raw: data }); });
+    });
+    req.on('error', () => resolve({ status: 0, json: null, raw: '' }));
+    req.end(rawBody);
+  });
+}
+
+/** Compose + sign ONE envelope: the exact bytes posted are the exact
+ * bytes signed (the cycle-2 law - never eval the composer twice). */
+function signedEnvelope(event, payload) {
+  const env = {
+    event,
+    from: 'wire-row',
+    ts: Date.now(),
+    nonce: 'w' + Math.random().toString(16).slice(2),
+    payload,
+    v: { major: 2 },
+  };
+  const raw = JSON.stringify(env);
+  return { raw, sig: createHmac('sha256', GATE_SECRET).update(raw, 'utf8').digest('hex') };
+}
+
+/** A REAL local upstream server (the hop's far side); its captures ride
+ * the returned .seen array. */
+async function startUpstream(http, token) {
+  const seen = [];
+  const server = http.createServer((req, res) => {
+    let body = '';
+    req.on('data', (c) => { body += c; });
+    req.on('end', () => {
+      seen.push({ url: req.url, body: String(body), auth: req.headers.authorization || null, gate: req.headers['x-relay-gate'] });
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ jsonrpc: '2.0', id: 1, result: token }));
+    });
+  });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  return { server, port: server.address().port, seen };
+}
+
 /** The probe child's marker protocol: parse the results table out of one
  * relay-edge round trip; null when the arm is absent or faulted. */
 async function probeEdge(harness, shapes) {
@@ -102,7 +207,7 @@ function shapeResults(results, name) {
 
 export default {
   name: 'vant-relay',
-  description: 'r/2 edge-face discipline driven in-process: posture and key gates fail closed, the HMAC lane verifies over RAW body bytes, staleness refuses typed, hostile hop origins never pass the origin guard, plaintext never hops, and the 1 MiB cap holds',
+  description: "r/2 discipline driven in-process from the edge face through the pod lib core onto the REAL wire: posture and key gates fail closed, the HMAC lane verifies over RAW body bytes, staleness refuses typed, hostile origins never pass the rolling wall, the 1 MiB cap holds, the sealed lane rides keyless with seal-sig dedupe, and the traveler carrier lands id-named through the door slot",
 
   attacks: [
     {
@@ -254,11 +359,10 @@ export default {
     // `relay` + lib/encrypt + lib/config) loaded in-process — NO sockets,
     // NO run-root arm: these rows are self-contained. The edge rows above
     // grade the deploy; these grade the core underneath both faces.
-    // Honest-absent this slice: the real-socket families (mount-listen,
-    // wire HMAC lane, hop/ride round trips, body cap on the wire,
-    // liveness counters, the traveler carrier) queue behind an in-process
-    // socket arm; native test/relay.test.js stays green alongside under
-    // the reverse-verification law.
+    // Honesty note: the wire/socket families now drive in-process too
+    // (slice 2, below — the real route mounted on loopback port 0), so
+    // nothing here stays honest-absent; native test/relay.test.js stays
+    // green alongside under the reverse-verification law.
 
     {
       name: 'lib-face-truth-and-envelope-canon',
@@ -424,6 +528,359 @@ export default {
           return { verdict: 'EXPLOITED', detail: 'the sender refusal lost its type: ' + caught.slice(0, 110) + ' - refusals share ONE typed language (native pin 14a)', tookRequests: 1, evidence: { message: caught.slice(0, 110) } };
         }
         return { verdict: 'REFUSED', detail: 'a short gate secret answered E_RELAY_GATE_REQUIRED typed, pre-dial - the sender half is fail-closed to the same law as the receiver', tookRequests: 1 };
+      },
+    },
+
+    // ============ wire families (relay battery slice 2, 2026-10-26):
+    // the REAL wire, in-process: each row mounts the actual relay route
+    // (relay.mount({ port: 0 })) on loopback and drives it over HTTP —
+    // sockets yes, arms no. Every composed envelope is serialized and
+    // signed ONCE (the exact bytes posted are the exact bytes signed —
+    // the cycle-2 origin-row law). Config keys are saved+restored; the
+    // mount is unmounted in every finally.
+
+    {
+      name: 'wire-hmac-lane-and-replay-gate',
+      description: 'the gate IS the route secret over the real wire: unsigned posts answer 401, a wrong signature answers 401 (timing-safe verify), a correct raw-body HMAC passes into the 200 ack, and the SAME signed bytes replay 409 at the transport',
+      async run(_harness) {
+        const { relay: relayCore } = await wireKit();
+        return await withMountedRelay(relayCore, async (port) => {
+          const good = signedEnvelope('relay.hop', { origin: 'https://wire-hmac-probe.local/', path: '/x', ct: SEALED_CT });
+          const unsigned = await postWire(port, good.raw, {});
+          const wrong = await postWire(port, good.raw, { 'x-signature-256': '0'.repeat(64) });
+          const valid = await postWire(port, good.raw, { 'x-signature-256': good.sig });
+          const replay = await postWire(port, good.raw, { 'x-signature-256': good.sig });
+          if (unsigned.status !== 401 || wrong.status !== 401) {
+            return { verdict: 'EXPLOITED', detail: 'unsigned answered ' + unsigned.status + ' and wrong-sig answered ' + wrong.status + ' - the HMAC lane must refuse both 401', tookRequests: 3, evidence: { unsigned: unsigned.status, wrong: wrong.status } };
+          }
+          if (valid.status !== 200 || !valid.json || valid.json.received !== true) {
+            return { verdict: 'EXPLOITED', detail: 'the correct HMAC answered ' + valid.status + ' - a valid credential must reach the 200 ack', tookRequests: 3, evidence: { valid: valid.status } };
+          }
+          if (replay.status !== 409) {
+            return { verdict: 'EXPLOITED', detail: 'the identical signed bytes replayed as ' + replay.status + ' - the transport replay gate answers 409', tookRequests: 3, evidence: { replay: replay.status } };
+          }
+          return { verdict: 'REFUSED', detail: 'no header and a wrong signature refused 401, the correct raw-body HMAC passed into the 200 ack, and identical bytes replayed 409 - the gate is the secret and it reads the raw bytes', tookRequests: 3 };
+        });
+      },
+    },
+
+    {
+      name: 'wire-hop-roundtrip-and-no-body-leak',
+      description: 'the FULL hop loop over real sockets: an http origin refuses typed in the public posture, a signed hop to a REAL local upstream forwards and the answer rides the same ack, the upstream sees ONLY the ct (no plaintext, no gate secret, the gate never rides inside the hop), and the envelope canon is 4 colon parts',
+      async run(_harness) {
+        const http = await import('node:http');
+        const { relay: relayCore, cfg } = await wireKit();
+        const upstream = await startUpstream(http, 'pong-pipe');
+        const savedPriv = cfg.get('relay.allowPrivateOrigins');
+        try {
+          return await withMountedRelay(relayCore, async (port) => {
+            const savedPriv2 = cfg.get('relay.allowPrivateOrigins');
+            try {
+              cfg.set('relay.allowPrivateOrigins', false);
+              const publicHttp = signedEnvelope('relay.hop', { origin: 'http://127.0.0.1:' + upstream.port, path: '/up', ct: '00'.repeat(48) });
+              const pubAns = await postWire(port, publicHttp.raw, { 'x-signature-256': publicHttp.sig });
+              if (!(pubAns.status === 200 && pubAns.json && pubAns.json.reply && pubAns.json.reply.ok === false && pubAns.json.reply.code === 'E_RELAY_BAD_ORIGIN')) {
+                return { verdict: 'EXPLOITED', detail: 'the http origin answered ' + pubAns.status + ' ' + JSON.stringify(pubAns.json || null).slice(0, 120) + ' - the public posture must refuse typed INSIDE the 200 ack', tookRequests: 1 };
+              }
+              cfg.set('relay.allowPrivateOrigins', true);
+              const ct = relayCore.envelope('wire-hop-secret', CHANNEL_KEY);
+              const hop = signedEnvelope('relay.hop', { origin: 'http://127.0.0.1:' + upstream.port, path: '/up', ct });
+              const hopAns = await postWire(port, hop.raw, { 'x-signature-256': hop.sig });
+              if (!(hopAns.status === 200 && hopAns.json && hopAns.json.reply && hopAns.json.reply.ok === true && String(hopAns.json.reply.raw || '').includes('pong-pipe'))) {
+                return { verdict: 'EXPLOITED', detail: 'the full hop loop failed: ' + JSON.stringify(hopAns.json || null).slice(0, 140) + ' - a signed hop must forward to the real upstream and ride the answer back', tookRequests: 2 };
+              }
+              const seen = upstream.seen[upstream.seen.length - 1];
+              if (!seen || !String(seen.body).includes('"ct') || String(seen.body).includes('wire-hop-secret')) {
+                return { verdict: 'EXPLOITED', detail: 'the upstream saw plaintext: ' + JSON.stringify(seen).slice(0, 140) + ' - the upstream sees ONLY the ct', tookRequests: 2 };
+              }
+              if (String(seen.body).includes(GATE_SECRET) || seen.gate !== undefined) {
+                return { verdict: 'EXPLOITED', detail: 'the gate secret leaked upstream - it is spent at verification and never rides the hop', tookRequests: 2 };
+              }
+              if (!(/:/.test(ct) && ct.split(':').length === 4)) {
+                return { verdict: 'EXPLOITED', detail: 'the envelope canon drifted: ' + ct.split(':').length + ' parts (must be 4)', tookRequests: 2 };
+              }
+              return { verdict: 'REFUSED', detail: 'http-downgrade refused typed, the full hop rode a REAL upstream and back, the upstream saw only the ct (no plaintext, no gate), and the canon is 4 parts - encrypted pipes only, bodies sealed', tookRequests: 2 };
+            } finally {
+              cfg.set('relay.allowPrivateOrigins', savedPriv2);
+            }
+          });
+        } finally {
+          cfg.set('relay.allowPrivateOrigins', savedPriv);
+          try { upstream.server.close(); } catch { /* already closed */ }
+        }
+      },
+    },
+
+    {
+      name: 'wire-ride-core-loop-and-refusals',
+      description: 'the RIDE core over real sockets: envelope in, opened with the channel key, nonce checked, the door answers with the bearer teleported INSIDE the envelope, the answer re-seals nonce-bound; transport replay 409s, a same-inner-nonce ride refuses typed E_RIDE_REPLAY, a ctx-less seal refuses typed E_RIDE_DECODE, and a wrong channel key decodes to NOTHING',
+      async run(_harness) {
+        const { relay: relayCore, cfg } = await wireKit();
+        return await withMountedRelay(relayCore, async (port) => {
+          const savedChan = cfg.get('relay.channelKey');
+          cfg.set('relay.channelKey', CHANNEL_KEY);
+          const doorSeen = [];
+          relayCore.setDoorTransport(async ({ bearer, body }) => {
+            doorSeen.push({ bearer, body });
+            return { ok: true, status: 200, body: JSON.stringify({ jsonrpc: '2.0', id: 1, result: { echo: 'wire-pong', gotAuth: bearer || null } }) };
+          });
+          try {
+            const inner = (n, withCtx = true) => JSON.stringify({
+              nonce: n,
+              ...(withCtx ? { ctx: { origin: 'wire-intake', path: '/relay', nonce: n } } : {}),
+              bearer: 'vguest_wire-ride-test-0123456789abcdef',
+              body: { tool: 'echo_test', args: { q: 'through-the-wire' } },
+            });
+            const coreNonce = freshNonce('wire-ride-core-');
+            const ride = () => signedEnvelope('relay.ride', { ct: relayCore.envelope(inner(coreNonce), CHANNEL_KEY) });
+            const ry1 = ride();
+            const ryd = await postWire(port, ry1.raw, { 'x-signature-256': ry1.sig });
+            if (!(ryd.status === 200 && ryd.json && ryd.json.reply && ryd.json.reply.ok === true && ryd.json.reply.rode === true && typeof ryd.json.reply.ct === 'string')) {
+              return { verdict: 'EXPLOITED', detail: 'the ride core did not serve the loop: ' + JSON.stringify(ryd.json || null).slice(0, 140), tookRequests: 1 };
+            }
+            let opened = null;
+            try { opened = JSON.parse(relayCore.openEnvelope(ryd.json.reply.ct, CHANNEL_KEY)); } catch { opened = null; }
+            if (!(opened && opened.nonce === coreNonce)) {
+              return { verdict: 'EXPLOITED', detail: 'the re-sealed answer is not nonce-bound: ' + JSON.stringify(opened).slice(0, 110), tookRequests: 1 };
+            }
+            if (doorSeen.length !== 1 || doorSeen[0].bearer !== 'vguest_wire-ride-test-0123456789abcdef') {
+              return { verdict: 'EXPLOITED', detail: 'the bearer did not teleport inside the envelope: ' + JSON.stringify(doorSeen).slice(0, 130), tookRequests: 1 };
+            }
+            if (JSON.stringify(doorSeen[0].body).includes(GATE_SECRET)) {
+              return { verdict: 'EXPLOITED', detail: 'the door saw a tool call carrying the gate secret - never', tookRequests: 1 };
+            }
+            // transport replay = the IDENTICAL signed bytes, posted again
+            // (fresh envelopes would only exercise the inner-nonce gate)
+            const replayed = await postWire(port, ry1.raw, { 'x-signature-256': ry1.sig });
+            if (replayed.status !== 409) {
+              return { verdict: 'EXPLOITED', detail: 'identical ride bytes replayed ' + replayed.status + ' - the transport must 409 before the ride opens', tookRequests: 2, evidence: { replayed: replayed.status } };
+            }
+            const ry2 = signedEnvelope('relay.ride', { ct: relayCore.envelope(inner(coreNonce), CHANNEL_KEY) });
+            const sameNonce = await postWire(port, ry2.raw, { 'x-signature-256': ry2.sig });
+            if (!(sameNonce.status === 200 && sameNonce.json && sameNonce.json.reply && sameNonce.json.reply.ok === false && sameNonce.json.reply.code === 'E_RIDE_REPLAY')) {
+              return { verdict: 'EXPLOITED', detail: 'a same-nonce ride on fresh bytes answered ' + JSON.stringify(sameNonce.json || null).slice(0, 120) + ' - inner-nonce replay must refuse typed E_RIDE_REPLAY', tookRequests: 3 };
+            }
+            const le = signedEnvelope('relay.ride', { ct: relayCore.envelope(inner(freshNonce('wire-ride-ctx-'), false), CHANNEL_KEY) });
+            const ctxless = await postWire(port, le.raw, { 'x-signature-256': le.sig });
+            if (!(ctxless.status === 200 && ctxless.json && ctxless.json.reply && ctxless.json.reply.ok === false && ctxless.json.reply.code === 'E_RIDE_DECODE')) {
+              return { verdict: 'EXPLOITED', detail: 'a ctx-less seal answered ' + JSON.stringify(ctxless.json || null).slice(0, 120) + ' - the downgrade must refuse typed E_RIDE_DECODE', tookRequests: 4 };
+            }
+            const ke = signedEnvelope('relay.ride', { ct: relayCore.envelope(JSON.stringify({ nonce: freshNonce('wire-ride-wrong-'), body: { tool: 'echo_test' } }), 'a-completely-different-channel-key') });
+            const wrong = await postWire(port, ke.raw, { 'x-signature-256': ke.sig });
+            if (!(wrong.status === 200 && wrong.json && wrong.json.reply && wrong.json.reply.ok === false && wrong.json.reply.code === 'E_RIDE_DECODE')) {
+              return { verdict: 'EXPLOITED', detail: 'a wrong/stale channel key answered ' + JSON.stringify(wrong.json || null).slice(0, 120) + ' - decode fails CLOSED, typed', tookRequests: 5 };
+            }
+            return { verdict: 'REFUSED', detail: 'the ride core served the full loop (nonce-bound re-seal, bearer teleported inside, the gate never leaks to the door) and every hostile shape refused typed: transport 409, inner replay E_RIDE_REPLAY, ctx-less E_RIDE_DECODE, wrong key decodes to NOTHING', tookRequests: 5 };
+          } finally {
+            relayCore.setDoorTransport(null);
+            cfg.set('relay.channelKey', savedChan);
+          }
+        });
+      },
+    },
+
+    {
+      name: 'wire-body-cap-and-liveness-counters',
+      description: "the shared posture on the wire: a body beyond the doors' 1 MiB cap answers 413, and the liveness counters MOVE with the served and refused traffic (hops served, gate refusals) - the face counts what it did, loudly",
+      async run(_harness) {
+        const { relay: relayCore, cfg } = await wireKit();
+        // the ride counters are the face's honest liveness: a SERVED ride
+        // bumps ridesServed, an inner-nonce replay bumps ridesReplayed, a
+        // wrong-key decode bumps rideDecodeRefused (semantics measured
+        // against the real wire, cycle-2)
+        const savedChan = cfg.get('relay.channelKey');
+        cfg.set('relay.channelKey', CHANNEL_KEY);
+        return await withMountedRelay(relayCore, async (port) => {
+          relayCore.setDoorTransport(async () => ({ ok: true, status: 200, body: JSON.stringify({ jsonrpc: '2.0', id: 1, result: { echoed: 'counted-wire' } }) }));
+          const inner = (n) => JSON.stringify({ nonce: n, ctx: { origin: 'wire-count-intake', path: '/relay', nonce: n }, bearer: null, body: { tool: 'echo_test', args: { q: 'counted' } } });
+          const rideCt = (n, key) => relayCore.envelope(inner(n), key || CHANNEL_KEY);
+          const env = (ct) => signedEnvelope('relay.ride', { ct });
+          const st0 = relayCore.status().stats;
+          const big = signedEnvelope('relay.hop', { origin: 'https://wire-cap-probe.local/', path: '/x', ct: '0'.repeat(1024 * 1024 + 64) });
+          const cap = await postWire(port, big.raw, { 'x-signature-256': big.sig });
+          const countNonce = freshNonce('wire-count-');
+          const servedEnv = env(rideCt(countNonce));
+          const served = await postWire(port, servedEnv.raw, { 'x-signature-256': servedEnv.sig });
+          const replayEnv = env(rideCt(countNonce));
+          const replayed = await postWire(port, replayEnv.raw, { 'x-signature-256': replayEnv.sig });
+          const wrongEnv = env(rideCt(freshNonce('wire-count-'), 'a-completely-different-channel-key'));
+          const wrong = await postWire(port, wrongEnv.raw, { 'x-signature-256': wrongEnv.sig });
+          const st1 = relayCore.status().stats;
+          relayCore.setDoorTransport(null);
+          if (cap.status !== 413) {
+            return { verdict: 'EXPLOITED', detail: "a " + (big.raw.length / (1024 * 1024)).toFixed(2) + "MiB body answered " + cap.status + " - the doors' shared cap answers 413", tookRequests: 4, evidence: { cap: cap.status } };
+          }
+          if (!(st1.ridesServed > st0.ridesServed)) {
+            return { verdict: 'EXPLOITED', detail: 'a SERVED ride did not bump ridesServed: ' + JSON.stringify({ st0, st1 }).slice(0, 160), tookRequests: 4, evidence: { served: served.json && served.json.reply } };
+          }
+          if (!(st1.ridesReplayed > st0.ridesReplayed)) {
+            return { verdict: 'EXPLOITED', detail: 'an inner-nonce replay did not bump ridesReplayed: ' + JSON.stringify(st1).slice(0, 160), tookRequests: 4, evidence: { replayed: replayed.json && replayed.json.reply } };
+          }
+          if (!(st1.rideDecodeRefused > st0.rideDecodeRefused)) {
+            return { verdict: 'EXPLOITED', detail: 'a wrong-key decode did not bump rideDecodeRefused: ' + JSON.stringify(st1).slice(0, 160), tookRequests: 4, evidence: { wrong: wrong.json && wrong.json.reply } };
+          }
+          return { verdict: 'REFUSED', detail: "served/replayed/decode-refused rides each counted in their own counter and the " + (big.raw.length / (1024 * 1024)).toFixed(2) + "MiB body answered 413 - the face counts what it did, loudly", tookRequests: 4 };
+        }).finally(() => { cfg.set('relay.channelKey', savedChan); });
+      },
+    },
+
+    {
+      name: 'wire-sender-seam-and-bridge-families',
+      description: 'the sender seam rides the real wire end-to-end (relay.send over sockets, the pong rides back), and the interface-handler bridge translates its families ONTO the door: relay.sync lands as brain_write, relay.call is the catch-all through the door, a bent payload refuses typed E_RIDE_DECODE, and an unknown family answers typed E_RELAY_UNKNOWN_EVENT',
+      async run(_harness) {
+        const http = await import('node:http');
+        const { relay: relayCore, Encrypt, cfg } = await wireKit();
+        const upstream = await startUpstream(http, 'pong-seam');
+        const savedPriv = cfg.get('relay.allowPrivateOrigins');
+        cfg.set('relay.allowPrivateOrigins', true);
+        try {
+          return await withMountedRelay(relayCore, async (port) => {
+          const doorCalls = new Set();
+          relayCore.setDoorTransport(async ({ body }) => {
+            doorCalls.add(body && body.tool);
+            if (body && body.tool === 'brain_write') return { ok: true, status: 200, body: JSON.stringify({ saved: true, name: body.args.name }) };
+            if (body && body.tool === 'context_heartbeat') return { ok: true, status: 200, body: JSON.stringify({ running: true }) };
+            if (body && body.tool === 'brain_current') return { ok: true, status: 200, body: JSON.stringify({ current: 'vant' }) };
+            return { ok: true, status: 200, body: JSON.stringify({ echoed: body && body.tool }) };
+          });
+          try {
+            const sent = await relayCore.send('http://127.0.0.1:' + port, GATE_SECRET,
+              { origin: 'http://127.0.0.1:' + upstream.port, path: '/up', ct: relayCore.envelope('wire-sender-seam', CHANNEL_KEY) },
+              { event: 'relay.hop', insecure: true });
+            if (!(sent.ok === true && sent.reply && sent.reply.ok === true)) {
+              return { verdict: 'EXPLOITED', detail: 'the sender seam did not ride the real wire: ' + JSON.stringify(sent).slice(0, 140), tookRequests: 1 };
+            }
+            const door = (event, payload) => {
+              const env = { event, from: 'wire-bridge-row', ts: Date.now(), nonce: 'b' + Math.random().toString(16).slice(2), payload, v: { major: 2 } };
+              const raw = JSON.stringify(env);
+              return { raw, sig: Encrypt.hmacSign(raw, GATE_SECRET) };
+            };
+            const b1 = door('relay.sync', { name: 'wire-bridge-notes', content: 'ingested through the bridge' });
+            const sync = await postWire(port, b1.raw, { 'x-signature-256': b1.sig });
+            const b3 = door('relay.call', { tool: 'brain_list', args: {} });
+            const call = await postWire(port, b3.raw, { 'x-signature-256': b3.sig });
+            const bent = door('relay.call', { wrong: true });
+            const bentAns = await postWire(port, bent.raw, { 'x-signature-256': Encrypt.hmacSign(bent.raw, GATE_SECRET) });
+            const unknown = door('relay.nothing', { x: 1 });
+            const unknownAns = await postWire(port, unknown.raw, { 'x-signature-256': unknown.sig });
+            if (!(sync.status === 200 && sync.json && sync.json.reply && sync.json.reply.ok === true && sync.json.reply.answer && sync.json.reply.answer.saved === true && doorCalls.has('brain_write'))) {
+              return { verdict: 'EXPLOITED', detail: 'relay.sync did not land as brain_write through the door: ' + JSON.stringify(sync.json || null).slice(0, 140), tookRequests: 3 };
+            }
+            if (!(call.status === 200 && call.json && call.json.reply && call.json.reply.ok === true && call.json.reply.answer && call.json.reply.answer.echoed === 'brain_list')) {
+              return { verdict: 'EXPLOITED', detail: 'relay.call did not catch-all through the door: ' + JSON.stringify(call.json || null).slice(0, 140), tookRequests: 3 };
+            }
+            if (!(bentAns.status === 200 && bentAns.json && bentAns.json.reply && bentAns.json.reply.ok === false && bentAns.json.reply.code === 'E_RIDE_DECODE')) {
+              return { verdict: 'EXPLOITED', detail: 'a bent bridge payload answered ' + JSON.stringify(bentAns.json || null).slice(0, 120) + ' - it must refuse typed E_RIDE_DECODE', tookRequests: 4 };
+            }
+            if (!(unknownAns.status === 200 && unknownAns.json && unknownAns.json.reply && unknownAns.json.reply.ok === false && unknownAns.json.reply.code === 'E_RELAY_UNKNOWN_EVENT')) {
+              return { verdict: 'EXPLOITED', detail: 'an unknown family answered ' + JSON.stringify(unknownAns.json || null).slice(0, 120) + ' - the schema answers typed, never silence', tookRequests: 5 };
+            }
+            return { verdict: 'REFUSED', detail: 'the sender seam rode the wire end-to-end and the bridge translated honestly: sync landed as brain_write, call passed through the door, bent refused E_RIDE_DECODE, and the unknown family answered E_RELAY_UNKNOWN_EVENT typed', tookRequests: 5 };
+          } finally {
+            relayCore.setDoorTransport(null);
+          }
+          });
+        } catch (e) {
+          try { upstream.server.close(); } catch { /* already closed */ }
+          throw e;
+        } finally {
+          cfg.set('relay.allowPrivateOrigins', savedPriv);
+          try { upstream.server.close(); } catch { /* already closed */ }
+        }
+      },
+    },
+
+    {
+      name: 'wire-sealed-lane-freshness-and-dedupe',
+      description: 'the SEALED lane on the real wire (the seal inside the payload IS the credential, keyed by the channel key - no gate header): a channel-key seal rides, a gate-key seal rides on the same verify set, a present-but-wrong seal refuses 401, a stale seal settles 401 outside the freshness window, and the same VALID seal on fresh top-level bytes still 409s because the seal sig is the dedupe key',
+      async run(_harness) {
+        const { relay: relayCore, Encrypt, cfg } = await wireKit();
+        // the seal verify set [gate, channel] ARMS AT MOUNT (the snapshot
+        // law): the channel key binds BEFORE relay.mount()
+        const savedChan = cfg.get('relay.channelKey');
+        cfg.set('relay.channelKey', CHANNEL_KEY);
+        let sealedOut;
+        try {
+          sealedOut = await withMountedRelay(relayCore, async (port) => {
+          relayCore.setDoorTransport(async () => ({ ok: true, status: 200, body: JSON.stringify({ jsonrpc: '2.0', id: 1, result: { echoed: 'sealed-wire' } }) }));
+          try {
+            const ride = (n) => relayCore.envelope(JSON.stringify({ nonce: n, ctx: { origin: 'wire-sealed-intake', path: '/relay', nonce: n }, bearer: null, body: { tool: 'echo_test', args: { q: 'sealed' } } }), CHANNEL_KEY);
+            const sealedBody = (ct, key, ts) => JSON.stringify({ event: 'relay.ride', from: 'wire-sealed-row', ts: Date.now(), nonce: 's' + Math.random().toString(16).slice(2), payload: { ct, seal: { sig: Encrypt.hmacSign(ct, key), ts: ts === undefined ? Date.now() : ts } }, v: { major: 2 } });
+            const keyless = await postWire(port, sealedBody(ride(freshNonce('wire-seal-')), CHANNEL_KEY), {});
+            await new Promise((r) => setTimeout(r, 6));
+            const gateSeal = await postWire(port, sealedBody(ride(freshNonce('wire-seal-')), GATE_SECRET), {});
+            const wrong = await postWire(port, JSON.stringify({ event: 'relay.ride', from: 'wire-sealed-row', ts: Date.now(), nonce: 's' + Math.random().toString(16).slice(2), payload: { ct: ride(freshNonce('wire-seal-')), seal: { sig: Encrypt.hmacSign('not-the-ct', CHANNEL_KEY), ts: Date.now() } }, v: { major: 2 } }), {});
+            const staleAns = await postWire(port, sealedBody(ride(freshNonce('wire-seal-')), CHANNEL_KEY, Date.now() - (6 * 60 * 1000)), {});
+            const ctE = ride(freshNonce('wire-seal-'));
+            const shared = { sig: Encrypt.hmacSign(ctE, CHANNEL_KEY), ts: Date.now() };
+            const fresh = () => JSON.stringify({ event: 'relay.ride', from: 'wire-sealed-row', ts: Date.now(), nonce: 's' + Math.random().toString(16).slice(2), payload: { ct: ctE, seal: shared }, v: { major: 2 } });
+            const first = await postWire(port, fresh(), {});
+            await new Promise((r) => setTimeout(r, 6));
+            const second = await postWire(port, fresh(), {});
+            if (!(keyless.status === 200 && keyless.json && keyless.json.reply && keyless.json.reply.ok === true && keyless.json.reply.rode === true)) {
+              return { verdict: 'EXPLOITED', detail: 'the keyless channel-key seal did not ride: ' + JSON.stringify(keyless.json || null).slice(0, 140), tookRequests: 2 };
+            }
+            if (!(gateSeal.status === 200 && gateSeal.json && gateSeal.json.reply && gateSeal.json.reply.ok === true)) {
+              return { verdict: 'EXPLOITED', detail: 'the gate-key seal did not verify on the verify set: ' + JSON.stringify(gateSeal.json || null).slice(0, 120), tookRequests: 3 };
+            }
+            if (wrong.status !== 401 || staleAns.status !== 401) {
+              return { verdict: 'EXPLOITED', detail: 'a wrong seal answered ' + wrong.status + ' and a stale seal answered ' + staleAns.status + ' - present-but-invalid is WORSE than absent, and staleness settles 401', tookRequests: 5, evidence: { wrong: wrong.status, stale: staleAns.status } };
+            }
+            if (!(first.status === 200 && second.status === 409)) {
+              return { verdict: 'EXPLOITED', detail: 'the same VALID seal on fresh top-level bytes answered ' + first.status + ' then ' + second.status + ' - the seal sig is the dedupe key, not the envelope bytes', tookRequests: 5 };
+            }
+            return { verdict: 'REFUSED', detail: 'the sealed lane rode keyless, the verify set took both keys, wrong/stale seals refused 401, and the same valid seal on fresh bytes replayed 409 - freshness + seal-sig dedupe hold on the wire', tookRequests: 5 };
+          } finally {
+            relayCore.setDoorTransport(null);
+          }
+          });
+          return sealedOut;
+        } finally {
+          relayCore.setDoorTransport(null);
+          cfg.set('relay.channelKey', savedChan);
+        }
+      },
+    },
+
+    {
+      name: 'wire-traveler-carrier-id-named',
+      description: 'the traveler carrier (tr/1) rides the real wire as a bridge family: a legal packet dispatches and its door landing is the brain_write record slot NAMED traveler-<id>-tr1.json with the packet inside; a bent packet (seq != steps) refuses typed INSIDE the 200 ack (E_TRAVELER_STEP) and an unknown tr/ version refuses the SAME lane (E_TRAVELER_SCHEMA) - the rizer never guesses',
+      async run(_harness) {
+        const { relay: relayCore } = await wireKit();
+        return await withMountedRelay(relayCore, async (port) => {
+          const seen = [];
+          relayCore.setDoorTransport(async ({ body }) => {
+            seen.push({ body });
+            return { ok: true, status: 200, body: JSON.stringify({ jsonrpc: '2.0', id: 1, result: { ok: true } }) };
+          });
+          try {
+            const { createHash } = await import('node:crypto');
+            const trId = createHash('sha256').update('relay-wire-travel-row').digest('hex');
+            const pkt = { tr: 'tr/1', id: trId, from: 'wire-travel-row', seq: 1, steps: [{ seq: 1, op: 'open', by: 'wire-travel-row', ts: 0 }], slots: { title: 'the wire pin' }, v: { major: 2 } };
+            const legal = signedEnvelope('relay.travel', pkt);
+            const legalAns = await postWire(port, legal.raw, { 'x-signature-256': legal.sig });
+            const bent = signedEnvelope('relay.travel', Object.assign({}, pkt, { seq: 9 }));
+            const bentAns = await postWire(port, bent.raw, { 'x-signature-256': bent.sig });
+            const future = signedEnvelope('relay.travel', Object.assign({}, pkt, { tr: 'tr/9' }));
+            const futureAns = await postWire(port, future.raw, { 'x-signature-256': future.sig });
+            const land = seen[seen.length - 1];
+            if (!(legalAns.status === 200 && legalAns.json && legalAns.json.reply && legalAns.json.reply.ok === true)) {
+              return { verdict: 'EXPLOITED', detail: 'the legal traveler did not dispatch: ' + JSON.stringify(legalAns.json || null).slice(0, 140), tookRequests: 3 };
+            }
+            if (!(land && land.body && land.body.tool === 'brain_write' && land.body.args && land.body.args.name === 'traveler-' + trId + '-tr1.json' && land.body.args.format === 'json' && JSON.parse(land.body.args.content).id === trId)) {
+              return { verdict: 'EXPLOITED', detail: 'the traveler did not land id-named through the brain_write slot: ' + JSON.stringify(land || null).slice(0, 160), tookRequests: 3 };
+            }
+            if (!(bentAns.status === 200 && bentAns.json && bentAns.json.reply && bentAns.json.reply.ok === false && bentAns.json.reply.code === 'E_RIDE_DECODE' && String(bentAns.json.reply.error) === 'E_TRAVELER_STEP')) {
+              return { verdict: 'EXPLOITED', detail: 'a bent traveler answered ' + JSON.stringify(bentAns.json || null).slice(0, 140) + ' - the shared door-disposition code must carry E_TRAVELER_STEP INSIDE the 200 ack', tookRequests: 3 };
+            }
+            if (!(futureAns.status === 200 && futureAns.json && futureAns.json.reply && futureAns.json.reply.ok === false && futureAns.json.reply.code === 'E_RIDE_DECODE' && String(futureAns.json.reply.error) === 'E_TRAVELER_SCHEMA')) {
+              return { verdict: 'EXPLOITED', detail: 'an unknown tr/ answered ' + JSON.stringify(futureAns.json || null).slice(0, 140) + ' - the rizer never guesses forward; E_TRAVELER_SCHEMA rides the same lane', tookRequests: 4 };
+            }
+            return { verdict: 'REFUSED', detail: 'the traveler dispatched and landed id-named through the brain_write slot, the bent packet carried E_TRAVELER_STEP inside the 200 ack, and the unknown tr/ version carried E_TRAVELER_SCHEMA on the SAME lane - the structural packet rides the wire without a fake guess', tookRequests: 4 };
+          } finally {
+            relayCore.setDoorTransport(null);
+          }
+        });
       },
     },
   ],

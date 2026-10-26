@@ -941,6 +941,40 @@ in-process — no sockets, no run-root arm.
 All 3 rows EARNED `REFUSED` ×2 deterministic at the run root on landing
 (2026-10-26); packs:lint censused 179 ids across 17 packs same-pass.
 
+## Relay battery slice 2 — the REAL wire lands (v0.8.6, #249 - 2026-10-26)
+
+`public/vant-relay` reaches **17 rows** (5 edge + 5 lib + 7 wire). The
+wire rows mount the ACTUAL relay route in-process (`relay.mount({port:
+0})`) and grade it over real loopback HTTP — sockets yes, run-root arms
+no. Every native relay wire family is graded now:
+
+- **HMAC lane + transport replay** (unsigned 401 / wrong-sig 401 /
+  correct raw-body HMAC into the 200 ack / identical bytes 409)
+- **the full hop** over a REAL local upstream — http-downgrade refused
+  typed in public posture, upstream sees ONLY the ct (no plaintext, no
+  gate secret), the canon is 4 parts
+- **the ride core** — nonce-bound re-seal, bearer teleported inside the
+  envelope, gate never leaks to the door; transport 409, inner replay
+  `E_RIDE_REPLAY`, ctx-less `E_RIDE_DECODE`, wrong key decodes to NOTHING
+- **body cap + liveness counters** — the 1 MiB cap 413s on the wire and
+  the ride counters count what the face did (served/replayed/decode-
+  refused measured against the real wire)
+- **sender seam + bridge families** — relay.send end-to-end over sockets,
+  relay.sync lands as brain_write, bent payloads `E_RIDE_DECODE`, unknown
+  families `E_RELAY_UNKNOWN_EVENT`
+- **the sealed lane** — keyless ride, both-key verify set (armed at
+  MOUNT — the snapshot law), wrong/stale seals 401, seal-sig dedupe 409
+- **the traveler carrier** — tr/1 rides, lands id-named through the
+  door's brain_write slot, bent packets `E_TRAVELER_STEP`, unknown
+  versions `E_TRAVELER_SCHEMA` on the SAME lane
+
+17/17 `REFUSED` ×2 deterministic at the run root; native
+`test/relay.test.js` 61/61 green alongside under the
+reverse-verification law. Drive-mechanics lessons kept in the rows: the
+envelope is composed and signed ONCE (identical-bytes replay), the seal
+verify set arms at MOUNT, `hopsServed` counts a real forwarded hop only,
+and the sender's loopback dial rides the native `insecure` opt.
+
 ## Next surfaces survey (2026-10-23): packs vs issues
 
 Where the remaining repo parts land:
