@@ -1140,6 +1140,22 @@ const EXPECTED = {
         'raw-cookie-fallback-hygiene': 'skip',
         'admin-gate-typed-ladder': 'skip',
     },
+    // ARMED 2026-10-25 (drill-down slice 1, Phase A of the S0→S1 campaign,
+    // #249): the trust→tree consumer family converted from the native
+    // state-wiring pins onto the run root's wiring-trust arm. This suite's
+    // sandbox routes don't carry the run-root-only arm, so the rows
+    // degrade to HONEST SKIPS here; strict EARNED verification rides the
+    // run root (5/5 REFUSED), native suite green alongside under the
+    // reverse-verification law. The remaining state-wiring families
+    // (registry/consensus/market/WAL/geometry/brain-verify/anchor) queue
+    // behind per-bucket conversion shape.
+    'vant-state-wiring': {
+        'trust-mirror-under-tree': 'skip',
+        'trust-mutate-moves-root': 'skip',
+        'trust-disk-view-live': 'skip',
+        'trust-event-carries-root': 'skip',
+        'trust-clear-resets': 'skip',
+    },
 };
 
 function checkVerdictRows(packName, verdicts) {

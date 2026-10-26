@@ -1882,5 +1882,81 @@ function buildRoutes(sb, Harness) {
         }
     });
 
+    // wiring-trust: POST { ops: [{ op, agent?, kind?, meta? }] } — the
+    // SCOPED TRUST arm (Phase A drill-down slice 1, #249): drives the
+    // sandbox's lib/trust.js + lib/state-store tree tier through the trust
+    // consumer family's real seams (_treeRoot/_stateTree/treeFor/
+    // state:saved events), op by op in-process; neutral facts only
+    // (root hashes, presence, event payloads).
+    harness.registerRoute('wiring-trust', async (ctx) => {
+        const trust = sandboxLib('trust');
+        const stateStore = sandboxLib('state-store');
+        const bus = sandboxLib('event');
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        const ops = (j && Array.isArray(j.ops) && j.ops.length) ? j.ops.slice(0, 40) : null;
+        if (!ops) return jsonRes({ error: 'ops array required' }, 400);
+        const out = [];
+        let watched = null; // last state:saved fired while a watch op was armed
+        const armedWatchers = []; // this call's listeners, off-ed on unwatch (no cross-call listener pile-up)
+        for (const op of ops) {
+            const o = op || {};
+            try {
+                if (o.op === 'clear') { trust.clearState(); out.push({ op: 'clear', ok: true }); continue; }
+                if (o.op === 'record') {
+                    trust.record(String(o.agent || 'wiring-agent'), String(o.kind || 'help'), Object.assign({}, o.meta || {}));
+                    out.push({ op: 'record', ok: true, rootHash: trust._treeRoot() });
+                    continue;
+                }
+                if (o.op === 'tree') {
+                    const tree = trust._stateTree();
+                    const mirrored = stateStore.fromTree('trust', tree);
+                    const agent = String(o.agent || '');
+                    out.push({
+                        op: 'tree', ok: true,
+                        rootHash: trust._treeRoot(),
+                        pathsUnderTrust: tree.paths().filter((p) => p.startsWith('/trust/')).length > 0,
+                        scorePresent: agent ? !!(mirrored.scores && agent in mirrored.scores) : false,
+                        historyPresent: agent ? !!(mirrored.histories && Array.isArray(mirrored.histories[agent])) : false,
+                    });
+                    continue;
+                }
+                if (o.op === 'disk') {
+                    const disk = stateStore.treeFor('state/trust.json');
+                    out.push({ op: 'disk', ok: true, state: disk.state, diskRootHash: disk.rootHash, liveRootHash: trust._treeRoot() });
+                    continue;
+                }
+                if (o.op === 'peek') {
+                    // the RAW _treeRoot leg: no StateTree materialization -
+                    // the exact null-or-hash contract the native pins grade
+                    out.push({ op: 'peek', ok: true, rootHash: trust._treeRoot() });
+                    continue;
+                }
+                if (o.op === 'watch') {
+                    const fn = (d) => { if (d && d.moduleName === 'trust') watched = { rootHash: d.rootHash, liveRootHash: trust._treeRoot() }; };
+                    bus.on('state:saved', fn);
+                    armedWatchers.push(fn);
+                    out.push({ op: 'watch', ok: true, armed: true });
+                    continue;
+                }
+                if (o.op === 'unwatch') {
+                    for (const fn of armedWatchers) { try { bus.off('state:saved', fn); } catch (eu) {} }
+                    armedWatchers.length = 0;
+                    out.push({ op: 'unwatch', ok: true });
+                    continue;
+                }
+                if (o.op === 'report') {
+                    out.push({ op: 'report', ok: true, event: watched });
+                    watched = null;
+                    continue;
+                }
+                out.push({ op: String(o.op), error: 'unknown op' });
+            } catch (e) {
+                out.push({ op: String((o && o.op) || '?'), error: String(e && e.message || e).slice(0, 140) });
+            }
+        }
+        return jsonRes({ results: out }, 200);
+    });
+
     return harness;
 }

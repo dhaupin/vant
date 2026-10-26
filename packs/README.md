@@ -240,6 +240,31 @@ Cookie header.
 | `raw-cookie-fallback-hygiene` | the unbound intake answers bound:false and ships vg_session_<p> with FULL hygiene (HttpOnly+Secure+SameSite=Strict); the probe resolves it; a malformed escape answers typed null | validated - REFUSED |
 | `admin-gate-typed-ladder` | anon 401 E_NO_SESSION / forged sid 401 / viewer 403 E_FORBIDDEN / admin passes (ok, role) / no store 503 — the typed ladder at every rung | validated - REFUSED |
 
+### `public/vant-state-wiring` — the state-spine wiring consumers (5 rows, slice 1: TRUST→TREE; all validated 2026-10-25)
+
+**What it does.** Drill-down slice 1 of the campaign: the state-wiring
+native suite's first live consumer family (TRUST→TREE, labs/WIRING.md step
+①) converts to pack rows on the run root's `wiring-trust` arm — the
+sandbox's REAL `lib/trust.js` + `lib/state-store.js` seams driven in-process
+(mirror, root hash, disk view, shared-bus event, clear), op by op, neutral
+facts only. Determinism note: `peek` reads the RAW `_treeRoot()` without
+materializing a tree — the contract the native pins grade; a materialized
+fresh tree would fabricate a hash for state that no longer exists (pin-caught
+on the slice's first run).
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `trust-mirror-under-tree` | record mints a 64-hex root, tree paths live under /trust/, and the mirrored state carries BOTH the score and the history | validated - REFUSED |
+| `trust-mutate-moves-root` | a second persist MOVES the root hash — each persist re-mirrors and re-hashes | validated - REFUSED |
+| `trust-disk-view-live` | treeFor('state/trust.json') === live mirror: one string comparison certifies cross-process same-state | validated - REFUSED |
+| `trust-event-carries-root` | state:saved carries the root hash and it matches the live mirror at fire time | validated - REFUSED |
+| `trust-clear-resets` | a live root existed, then clearState drops the mirror to null — no hash blesses state the deployment no longer holds | validated - REFUSED |
+
+Slice 1 verdict: the five pins measure REFUSED on the real seams with
+`test/state-wiring.test.js` (51 pins) staying green alongside per the
+reverse-verification law — the suite never retires until the whole family
+closes.
+
 ### `public/vant-kernel` — prove-the-verbs conformance for the kernel seed + its adoption (10 rows; all validated 2026-10-25)
 
 Per vant#250 (labs/prd-kernel.md sec 6d #5): portability's strongest form is
@@ -557,7 +582,7 @@ today's clean B0 run: **48 REFUSED / 0 EXPLOITED / 1 skipped**.
 | 0 — wire-surface door pins (`test/crashtest-server.js`, 9 pins) | smallest lift, biggest overlap | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native suite 9/9 each run); the suite stays in CI under the law |
 | wire-surface re-pins — r/2 edge face (`web/relay/functions/api/r/relay.ts`) | ~15% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native lanes green each run: relay, relay-parity, memory, escrow, escrow-kernel, forum-msg-escrow, governance, workspace-memory via the sweep filter); the native lanes stay in CI under the law. Cycle 2's catch: the origin row's drive called hopFrame twice (sign + body) and each call re-evaluated ts — a ms-grain boundary left the signature covering different bytes than the body, and the edge (correctly) 401'd; one eval per shape since, signature === body bytes |
 | in-process module discipline (row-by-row) | ~40% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 6/6 REFUSED + native suites memory / escrow / governance green each run via the same sweep filter); the native blocks stay in CI under the law |
-| drill-down: remaining native suites (state-wiring, migration, carriers, ...) | remaining ~35% | queued, per-bucket order by conversion shape |
+| drill-down: remaining native suites (state-wiring, migration, carriers, ...) | remaining ~35% | **CONVERTED — slice 1 began (2026-10-25)**: the TRUST→TREE consumer family (state-wiring's 5 trust pins) became `vant-state-wiring` on the run root's `wiring-trust` arm (5/5 REFUSED x2); the remaining families (registry/consensus/market/WAL/geometry/brain-verify/anchor) queue behind per-bucket conversion shape |
 
 **Bucket 0 S-counter ledger:** cycle 1 (2026-10-25, conversion day) →
 cycle 2 → cycle 3, all sides green each run — the quarter-period
