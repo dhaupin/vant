@@ -349,10 +349,27 @@ never a packet body.
 
 Slice 1 verdict: the lane laws measure REFUSED on the real seams with
 `test/carriers.test.js` (111 pins) staying green alongside per the
-reverse-verification law. Queued behind: the pointer/wire-hook family
-(pass 265/267), the route/certified-letter family (R0-R12), the
-plate/armament family (M1-M16), and the assembly/template/mfg-line family
-(A/B/C rows).
+reverse-verification law.
+
+**Slice 2 (same day): the pointer/wire-hook family (pass 265 + 267).** The
+arm grew an honest QR leg: `qrPointer` rides the png in-ride (Buffer never
+on the wire), decode/pointerOnly/foreignPng shapes, a wall-time `tamperBody`
+op (patched body → decode → byte-restore in one op), and one-transaction
+`wireCase` cases whose hooks never linger past their case (finally cleared).
+A determinism catch the pine caught: every row re-mints the SAME
+content-admitted id from identical slots, so the sandboxed ledger from one
+row's persist leaked into the next ride's decode - each row carries its own
+slot title now (ids never collide across rows).
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `carriers-pointer-address-law` | VANT:1:<64hex> frame (71 chars, id-suffixed), no-body is an HONEST unresolved record, persisted body answers, the pure-pointer scan ruling skips resolve, full-object qr roundtrip intact | validated - REFUSED |
+| `carriers-pointer-body-wall` | a tampered on-disk body refuses typed E_CARRIER_TAMPER at resolve, restored byte-identical after | validated - REFUSED |
+| `carriers-wire-hook-failclosed` | non-function hook refuses the setter typed, found:false and a THROWING door are both honest unreachable records | validated - REFUSED |
+| `carriers-wire-hook-walls` | a good hook brings the body home (fetched, id match); SWAPPED and FORGED bodies hit the packet wall typed E_CARRIER_TAMPER; a cleared hook restores the classic no-body; the hook never short-circuits a LOCAL body | validated - REFUSED |
+
+Queued behind: the route/certified-letter family (R0-R12), the plate
+family (M1-M16), and the assembly/template/mfg-line family (A/B/C rows).
 
 ### `public/vant-migrations` — the brain-layout migrations battery (4 rows, slice 1: the fixture family; all validated 2026-10-26)
 
@@ -382,11 +399,27 @@ trusts — the native suite went 25/28 RED to 28/28 GREEN in the same pass.
 | `migrations-apply-security-chain` | escrow lands in models/private/<brain>/orgchart/, legacy state drains, .agent_tmp gone, storage/myStuff lands byte-for-byte in tmp-space, marker >=2 written, second run applies nothing | validated - REFUSED |
 | `migrations-dropfile-no-clobber` | a CURRENT dropfile reads unchanged after the full apply — the present wins over history, never clobbered | validated - REFUSED |
 
+**Slice 2 (same day): the legacy-main multibrain import family — THE
+merge-safety migration.** The arm grew a `legacy` op with per-task probes
+(detect / nofalse / dryrun / apply) seeding and sweeping the PRE-multibrain
+main-style fixture (flat public brain, neurons-only state.json) the way
+the native pins do; the apply leg runs the SECOND fresh-process read probe
+(the user experience: the migrated brain reads in a new node process).
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `migrations-legacy-detect-fires` | detection fires legacy.multibrain-import ONLY on the true flat layout | validated - REFUSED |
+| `migrations-legacy-no-false-positive` | a clean multibrain install never reads the import pending (no re-fire on an already-nested install) | validated - REFUSED |
+| `migrations-legacy-dryrun-plans` | >=5 planned moves into <name>, the flat tree still byte-present after (a plan is not an apply) | validated - REFUSED |
+| `migrations-legacy-apply-nests` | flat content nests under models/{public,<name>}/vant, boot + succession nest, stack synthesized pointing currentBrain at the chosen name with neurons carried, v3 marker, self-verified through the real loader, idempotent, and a FRESH process reads the migrated brain with a non-empty corpus | validated - REFUSED |
+
+Queued behind in migrations: the CLI + start auto-migrate banner family
+(481-530) and the MCP door row; carriers' route/plate/assembly/template
+families.
+
 Slice 1 verdict: the fixture family measures REFUSED on the real seams with
 `test/migrations.test.js` (28 pins) staying green alongside — GREEN after
-the finding's fix landed the same pass. Queued behind: the legacy-main
-multibrain import family (detection/lints/flag/import), the CLI + start
-auto-migrate banner family, and the MCP door row.
+the finding's fix landed the same pass.
 
 ### `public/vant-kernel` — prove-the-verbs conformance for the kernel seed + its adoption (10 rows; all validated 2026-10-25)
 
@@ -705,7 +738,7 @@ today's clean B0 run: **48 REFUSED / 0 EXPLOITED / 1 skipped**.
 | 0 — wire-surface door pins (`test/crashtest-server.js`, 9 pins) | smallest lift, biggest overlap | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native suite 9/9 each run); the suite stays in CI under the law |
 | wire-surface re-pins — r/2 edge face (`web/relay/functions/api/r/relay.ts`) | ~15% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native lanes green each run: relay, relay-parity, memory, escrow, escrow-kernel, forum-msg-escrow, governance, workspace-memory via the sweep filter); the native lanes stay in CI under the law. Cycle 2's catch: the origin row's drive called hopFrame twice (sign + body) and each call re-evaluated ts — a ms-grain boundary left the signature covering different bytes than the body, and the edge (correctly) 401'd; one eval per shape since, signature === body bytes |
 | in-process module discipline (row-by-row) | ~40% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 6/6 REFUSED + native suites memory / escrow / governance green each run via the same sweep filter); the native blocks stay in CI under the law |
-| drill-down: remaining native suites (migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-5 landed (2026-10-25/26)**: state-wiring fully converted (30/30 REFUSED x2 — trust→tree 5, merge-path 10, mesh WAL/events 8, surfaces 5 on `wiring-trust` + `wiring-module` + `wiring-mesh` + `wiring-surfaces`), the carriers battery's lane-laws family landed (8/8 REFUSED x2 on `carriers-lane`), AND the migrations battery's fixture family landed (4/4 REFUSED x2 on `migration-fixture`) — with a REAL FINDING armed+fixed same-pass (the dropfile migration ate live protocol state / crashed EISDIR on the state-store's .wal dir; native suite 25/28 RED → 28/28 GREEN); the migrations legacy-main/CLI/MCP families and carriers' pointer/wire-hook, route, plate, and assembly/template families queue behind |
+| drill-down: remaining native suites (migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-6 landed (2026-10-25/26)**: state-wiring fully converted (30/30 REFUSED x2), the carriers battery's lane-laws + pointer/wire-hook families landed (12/12 REFUSED x2 on `carriers-lane`), AND the migrations battery's fixture + legacy-main import families landed (8/8 REFUSED x2 on `migration-fixture`) — with a REAL FINDING armed+fixed same-pass (the dropfile migration ate live protocol state / crashed EISDIR on the state-store's .wal dir; native suite 25/28 → 28/28 GREEN); migrations' CLI/MCP rows and carriers' route/plate/assembly/template families queue behind |
 
 **Bucket 0 S-counter ledger:** cycle 1 (2026-10-25, conversion day) →
 cycle 2 → cycle 3, all sides green each run — the quarter-period

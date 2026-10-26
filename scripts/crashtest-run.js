@@ -2283,6 +2283,98 @@ function buildRoutes(sb, Harness) {
                         });
                         continue;
                     }
+                    if (o.op === 'legacy') {
+                        // --- seed the pre-multibrain (main-style) layout ---
+                        const legacyMain = () => {
+                            fs.mkdirSync(path.join(dir, 'models', 'public'), { recursive: true });
+                            fs.writeFileSync(path.join(dir, 'models', 'public', 'identity.md'), '# identity — legacy user');
+                            fs.writeFileSync(path.join(dir, 'models', 'public', 'lessons.md'), '# lessons — legacy user');
+                            fs.writeFileSync(path.join(dir, 'models', 'public', 'goals.md'), '# goals — legacy user');
+                            fs.writeFileSync(path.join(dir, 'models', 'public', '_succession.json'), '{"trust":"high"}');
+                            fs.mkdirSync(path.join(dir, 'models', 'public', 'boot'), { recursive: true });
+                            fs.writeFileSync(path.join(dir, 'models', 'public', 'boot', 'start.md'), '# start');
+                            fs.mkdirSync(path.join(dir, 'models', 'public', 'agents'), { recursive: true });
+                            fs.writeFileSync(path.join(dir, 'models', 'public', 'agents', 'claude.json'), '{"name":"claude"}');
+                            fs.writeFileSync(path.join(dir, 'models', 'state.json'), JSON.stringify({ neurons: { attention: { identity: 0.2 } } }));
+                        };
+                        if (o.task !== 'nofalse') legacyMain();
+                        if (o.task === 'detect' || o.task === 'dryrun') {
+                            const p = probe(`
+                                const m = require(${MIG});
+                                ${o.task === 'detect' ? "console.log('PENDING:' + m.status().pending.map(x => x.id).join(','));" : `
+                                const dry = await m.migrate({ dryRun: true });
+                                const step = dry.applied.find(a => a.id === 'legacy.multibrain-import');
+                                console.log('PLAN-FILES:' + (step ? step.plan.filter(p2 => p2.to.includes('/vant/')).length : 0));
+                                console.log('STILL-FLAT:' + require('fs').existsSync('models/public/identity.md'));`}
+                            `);
+                            const o2 = p.stdout || '';
+                            out.push(o.task === 'detect'
+                                ? { op: 'legacy', task: 'detect', ok: !p.error, fires: /PENDING:[^\n]*legacy\.multibrain-import/.test(o2) }
+                                : { op: 'legacy', task: 'dryrun', ok: !p.error,
+                                    planFiles: parseInt((o2.match(/PLAN-FILES:(\d+)/) || [])[1] || '0', 10),
+                                    stillFlat: o2.includes('STILL-FLAT:true') });
+                            continue;
+                        }
+                        if (o.task === 'nofalse') {
+                            // the CLEAN multibrain fixture rides the same law: a
+                            // tree that already nests brains never fires the import
+                            const p = probe(`
+                                const m = require(${MIG});
+                                console.log('PENDING:' + m.status().pending.map(x => x.id).join(','));
+                            `);
+                            out.push({ op: 'legacy', task: 'nofalse', ok: !p.error,
+                                falsePositive: /PENDING:[^\n]*legacy\.multibrain-import/.test(p.stdout || '') });
+                            continue;
+                        }
+                        if (o.task === 'apply') {
+                            const p = probe(`
+                                const m = require(${MIG});
+                                const r = await m.migrate();
+                                const fsmod = require('fs');
+                                console.log('APPLIED:' + r.applied.map(a => a.id).join(','));
+                                console.log('FLAT-GONE:' + (!fsmod.existsSync('models/public/identity.md') && !fsmod.existsSync('models/public/lessons.md')));
+                                console.log('NESTED:' + fsmod.readFileSync('models/public/vant/identity.md', 'utf8').includes('legacy user'));
+                                console.log('BOOT-NESTED:' + fsmod.existsSync('models/public/vant/boot/start.md'));
+                                console.log('SUCCESSION-NESTED:' + fsmod.existsSync('models/public/vant/_succession.json'));
+                                const state = JSON.parse(fsmod.readFileSync('models/state.json', 'utf8'));
+                                console.log('STACK:' + JSON.stringify({ s: state.stack, c: state.currentBrain, n: !!(state.neurons && state.neurons.attention) }));
+                                console.log('MARKER-V3:' + (m._readMarker() || {}).version);
+                                const r2 = await m.migrate();
+                                console.log('IDEMPOTENT:' + (r2.applied.filter(a => a.id === 'legacy.multibrain-import').length === 0));
+                                const stepResult = r.applied.find(a => a.id === 'legacy.multibrain-import');
+                                console.log('VERIFIED:' + (stepResult && stepResult.result && stepResult.result.verified === true));
+                            `);
+                            const o2 = p.stdout || '';
+                            const p2 = probe(`
+                                const brain = require(${JSON.stringify(path.join(dir, 'lib', 'brain.js'))});
+                                brain.setMode('dual');
+                                const id = await brain.read('identity');
+                                console.log('BRAIN-READS:' + (id && (id.content || '').includes('legacy user')));
+                                const c = brain.loadCorpus({ sync: true });
+                                console.log('CORPUS-N:' + c.length);
+                            `, dir);
+                            const r2o = p2.stdout || '';
+                            out.push({
+                                op: 'legacy', task: 'apply', ok: !p.error && !p2.error,
+                                appliedHasImport: /APPLIED:[^\n]*legacy\.multibrain-import/.test(o2),
+                                flatGone: o2.includes('FLAT-GONE:true'),
+                                nested: o2.includes('NESTED:true'),
+                                bootNested: o2.includes('BOOT-NESTED:true'),
+                                successionNested: o2.includes('SUCCESSION-NESTED:true'),
+                                stackHasVant: /STACK:.{0,24}"s":\["vant"\]/.test(o2),
+                                neuronsCarried: o2.includes('"n":true'),
+                                currentBrain: (o2.match(/STACK:.*"c":"([^"]+)"/) || [])[1] || '',
+                                markerV3: o2.includes('MARKER-V3:3'),
+                                idempotent: o2.includes('IDEMPOTENT:true'),
+                                selfVerified: o2.includes('VERIFIED:true'),
+                                brainReads: r2o.includes('BRAIN-READS:true'),
+                                corpusNonZero: /CORPUS-N:[1-9]/.test(r2o),
+                            });
+                            continue;
+                        }
+                        out.push({ op: 'legacy', fault: 'unknown task' });
+                        continue;
+                    }
                     if (o.op === 'noClobber') {
                         const p = probe(`
                             const m = require(${MIG});
@@ -2547,7 +2639,7 @@ function buildRoutes(sb, Harness) {
                         let arg, pw;
                         if (o.from === 'artifact') {
                             const a = art(o.artifactToken);
-                            arg = lane === 'stone' ? a.envelope : lane === 'svg' ? a.svg : a.json;
+                            arg = lane === 'stone' ? a.envelope : lane === 'svg' ? a.svg : lane === 'qr' ? a.png : a.json;
                             if (a.pw !== undefined) pw = a.pw;
                         } else if (o.shape === 'carrierDamage') {
                             const a = art(o.artifactToken); const parts = a.envelope.split(':');
@@ -2559,6 +2651,39 @@ function buildRoutes(sb, Harness) {
                         } else if (o.shape === 'nonsense') { arg = 'VSTN:1:notahexseal:ctext'; }
                         else if (o.shape === 'rawString') { arg = String(o.payload || '9-abcde-12345-99'); }
                         else if (o.shape === 'wrongPw') { const a = art(o.artifactToken); arg = a.svg; pw = String(o.pw || 'wrong-pass'); }
+                        else if (o.shape === 'pointerOnly') {
+                            const a = art(o.artifactToken); arg = a.png;
+                            pw = { pointerOnly: true }; // the qr lane's third-arg options
+                        }
+                        else if (o.shape === 'foreignPng') {
+                            const qrcode = require('qrcode-generator');
+                            const zlib = require('zlib');
+                            const qr = qrcode(0, 'L');
+                            qr.addData('hello plain url qr', 'Byte');
+                            qr.make();
+                            const n = qr.getModuleCount();
+                            const scale = 4, margin = 4;
+                            const size = (n + margin * 2) * scale;
+                            const px = Buffer.alloc(size * size, 255);
+                            for (let row = 0; row < n; row++) for (let col = 0; col < n; col++) {
+                                if (!qr.isDark(row, col)) continue;
+                                for (let dy = 0; dy < scale; dy++) px.fill(0, ((row + margin) * scale + dy) * size + (col + margin) * scale, ((row + margin) * scale + dy) * size + (col + margin) * scale + scale);
+                            }
+                            const raw = Buffer.alloc(size * (size + 1));
+                            for (let y = 0; y < size; y++) px.copy(raw, y * (size + 1) + 1, y * size, (y + 1) * size);
+                            const deflated = zlib.deflateSync(raw);
+                            const ihdr = Buffer.alloc(13);
+                            ihdr.writeUInt32BE(size, 0); ihdr.writeUInt32BE(size, 4); ihdr[8] = 8; ihdr[9] = 0;
+                            const lenBuf = Buffer.alloc(4); lenBuf.writeUInt32BE(deflated.length);
+                            arg = Buffer.concat([
+                                Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
+                                Buffer.concat([Buffer.from([0, 0, 0, 13]), Buffer.from('IHDR'), ihdr, Buffer.from('CRC!')]),
+                                Buffer.concat([lenBuf, Buffer.from('IDAT'), deflated, Buffer.from('CRC!')]),
+                                Buffer.concat([Buffer.from([0, 0, 0, 0]), Buffer.from('IEND'), Buffer.from('CRC!')]),
+                            ]);
+                        }
+                        else if (o.shape === 'notPng') { arg = Buffer.from('not a png at all'); }
+                        else if (o.shape === 'nonSquare') { const b = cryptoMod.randomBytes(64); b.writeUInt32BE(10, 16); b.write('PNG', 1, 'ascii'); arg = b; }
                         else if (o.shape === 'tamperPacket') { arg = amt(o.token); }
                         else return { fault: 'unhandled decode shape' };
                         const res = pw === undefined ? carriers.decode(lane, arg) : carriers.decode(lane, arg, pw);
@@ -2568,6 +2693,12 @@ function buildRoutes(sb, Harness) {
                             back.idMatch = res.traveler.id === t.id; back.seqMatch = res.traveler.seq === t.seq;
                             back.stepsMatch = JSON.stringify(res.traveler.steps) === JSON.stringify(t.steps);
                         }
+                        if (res && res.kind !== undefined) back.kind = res.kind;
+                        if (res && res.resolved !== undefined) back.resolved = res.resolved;
+                        if (res && res.reason !== undefined) back.reason = res.reason;
+                        if (res && res.fetched !== undefined) back.fetched = res.fetched;
+                        if (res && res.frame !== undefined) back.frameSame = String(res.frame) === String((art(o.artifactToken) || {}).frame || '');
+                        if (res && res.id) back.decodedId = res.id;
                         return back;
                     });
                     out.push(Object.assign({ op: 'decode', lane, shape: o.shape || o.from || '' }, r));
@@ -2614,6 +2745,78 @@ function buildRoutes(sb, Harness) {
                     const big = traveler.mint({ from: 'big', slots: { title: 'big', blob: 'X'.repeat(Number(o.blobLen || 400000)) } });
                     const r = attempt(() => { carriers.encode(big, 'stone'); return {}; });
                     out.push(Object.assign({ op: 'capacity' }, r));
+                    continue;
+                }
+                if (o.op === 'persist') {
+                    let r;
+                    try { traveler.persist(amt(o.token)); r = { ok: true }; }
+                    catch (e) { r = { ok: false, caught: (e && e.code) || 'UNCAUGHT' }; }
+                    out.push(Object.assign({ op: 'persist' }, r));
+                    continue;
+                }
+                if (o.op === 'qrPointer') {
+                    const t = amt(o.token);
+                    const r = attempt(() => {
+                        const a = carriers.encode(t, 'qr', { pointer: true });
+                        artifacts.set(String(o.storeKey || ('qrp:' + o.token)), { png: a.png, frame: a.frame });
+                        const plain = carriers.encode(t, 'qr', {});
+                        artifacts.set('qrf:' + o.token, { png: plain.png, frame: plain.frame });
+                        return {
+                            kind: a.kind,
+                            frameGrammar: typeof a.frame === 'string' && /^VANT:1:[0-9a-f]{64}$/.test(a.frame),
+                            frameLen71: typeof a.frame === 'string' && a.frame.length === 71,
+                            idSuffix: typeof a.frame === 'string' && a.frame.slice(7) === t.id,
+                        };
+                    });
+                    out.push(Object.assign({ op: 'qrPointer' }, r));
+                    continue;
+                }
+                if (o.op === 'wireCase') {
+                    const t = amt(o.token);
+                    const a = art(o.artifactToken);
+                    const cases = {
+                        missing: (id) => ({ found: false }),
+                        throwing: () => { throw new Error('door died'); },
+                        good: (id) => (id === t.id ? { found: true, traveler: t } : { found: false }),
+                        swapped: () => ({ found: true, traveler: JSON.parse(JSON.stringify(amt(o.otherToken || o.token))) }),
+                        forged: () => { const ev = JSON.parse(JSON.stringify(t)); ev.slots.title = 'wire-counterfeit'; return { found: true, traveler: ev }; },
+                        badLocal: (id) => (id === t.id ? { found: true, traveler: { id: 'bad' } } : { found: false }),
+                    };
+                    let r;
+                    try {
+                        if (o.kind === 'badType') {
+                            try { carriers.setPointerFetch('fake'); r = { ok: false, setupCaught: 'NONE' }; }
+                            catch (e) { r = { ok: false, setupCaught: e && e.code }; }
+                        } else {
+                            const kind = o.kind;
+                            if (kind !== 'reset') carriers.setPointerFetch(cases[kind] || (() => ({ found: false })));
+                            else carriers.setPointerFetch(null);
+                            const wireR = attempt(() => {
+                                const res = carriers.decode('qr', a.png);
+                                return { resolved: res && res.resolved, reason: res && res.reason,
+                                    fetched: res && res.fetched,
+                                    idMatch: !!(res && t && res.id === t.id), localBodyWins: !!(res && res.traveler && res.fetched === undefined) };
+                            });
+                            r = wireR.ok ? wireR : { caught: wireR.caught };
+                        }
+                    } finally { carriers.setPointerFetch(null); }   // a hook never lingers past its case
+                    out.push(Object.assign({ op: 'wireCase' }, r));
+                    continue;
+                }
+                if (o.op === 'tamperBody') {
+                    const t = amt(o.token);
+                    const pathMod = require('path');
+                    const brain = traveler._ledgerPath();
+                    const bodyFile = pathMod.join(pathMod.dirname(brain), 'travelers', t.id + '.json');
+                    const real = JSON.parse(fs.readFileSync(bodyFile, 'utf8'));
+                    const evil = JSON.parse(JSON.stringify(real));
+                    evil.slots.title = 'forged-on-resolve';
+                    fs.writeFileSync(bodyFile, JSON.stringify(evil));
+                    let r;
+                    try { carriers.decode('qr', art(o.artifactToken).png); r = { ok: true, refused: false }; }
+                    catch (e) { r = { ok: true, refused: true, caught: e && e.code }; }
+                    finally { fs.writeFileSync(bodyFile, JSON.stringify(real)); }
+                    out.push(Object.assign({ op: 'tamperBody' }, r));
                     continue;
                 }
                 if (o.op === 'codes') {

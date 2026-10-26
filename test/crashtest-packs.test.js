@@ -1193,6 +1193,11 @@ const EXPECTED = {
         'carriers-json-erp': 'skip',
         'carriers-sender-side-verify': 'skip',
         'carriers-capacity-and-codes': 'skip',
+        // (slice 2) pointer/wire-hook family
+        'carriers-pointer-address-law': 'skip',
+        'carriers-pointer-body-wall': 'skip',
+        'carriers-wire-hook-failclosed': 'skip',
+        'carriers-wire-hook-walls': 'skip',
     },
     // migrations battery slice 1 (fixture family): run-root-only arm
     'vant-migrations': {
@@ -1200,6 +1205,11 @@ const EXPECTED = {
         'migrations-detect-dryrun-no-mutation': 'skip',
         'migrations-apply-security-chain': 'skip',
         'migrations-dropfile-no-clobber': 'skip',
+        // (slice 2) legacy-main multibrain import family
+        'migrations-legacy-detect-fires': 'skip',
+        'migrations-legacy-no-false-positive': 'skip',
+        'migrations-legacy-dryrun-plans': 'skip',
+        'migrations-legacy-apply-nests': 'skip',
     },
 };
 

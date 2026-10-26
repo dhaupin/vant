@@ -106,6 +106,72 @@ export default {
       },
     },
 
+    // ============ slice 2: the legacy-main multibrain import family ============
+
+    {
+      name: 'migrations-legacy-detect-fires',
+      description: 'detection fires ONLY on the true flat layout: a pre-multibrain main-style tree (flat models/public + neurons-only state.json) reads legacy.multibrain-import pending',
+      async run(harness) {
+        const ride = await probeMigration(harness, [{ op: 'legacy', task: 'detect' }]);
+        if (!ride) return rowSkip('migration-fixture not armed');
+        const r = ride.get('legacy');
+        if (!r) return rowErr('the legacy detect probe failed to answer', [{ op: 'legacy', task: 'detect' }]);
+        if (r.fault) return rowErr('the legacy detect probe faulted: ' + r.fault, [{ op: 'legacy', task: 'detect' }]);
+        if (r.fires !== true) return rowErr("detection did NOT fire legacy.multibrain-import on the true flat layout", [{ op: 'legacy', task: 'detect' }]);
+        return { verdict: 'REFUSED', detail: 'the flat main-style tree reads legacy.multibrain-import pending', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'migrations-legacy-no-false-positive',
+      description: 'no false positive on multibrain trees: a CLEAN multibrain install (nested brains + stack in state) never reads legacy.multibrain-import pending',
+      async run(harness) {
+        const ride = await probeMigration(harness, [{ op: 'legacy', task: 'nofalse', legacy: 'clean' }]);
+        if (!ride) return rowSkip('migration-fixture not armed');
+        const r = ride.get('legacy');
+        if (!r) return rowErr('the no-false-positive probe failed to answer', [{ op: 'legacy', task: 'nofalse', legacy: 'clean' }]);
+        if (r.fault) return rowErr('the no-false-positive probe faulted: ' + r.fault, [{ op: 'legacy', task: 'nofalse', legacy: 'clean' }]);
+        if (r.falsePositive === true) return rowErr('the import detection fired FALSE on a multibrain tree - main-style legacy detection must never re-fire on an already-nested install', [{ op: 'legacy', task: 'nofalse', legacy: 'clean' }]);
+        return { verdict: 'REFUSED', detail: 'the nested multibrain tree reads no legacy import pending - no false positive', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'migrations-legacy-dryrun-plans',
+      description: 'the dry run PLANS the import without touching the flat tree: >=5 planned moves target the <name> nesting, and models/public/identity.md still exists after (a plan is not an apply)',
+      async run(harness) {
+        const ride = await probeMigration(harness, [{ op: 'legacy', task: 'dryrun' }]);
+        if (!ride) return rowSkip('migration-fixture not armed');
+        const r = ride.get('legacy');
+        if (!r) return rowErr('the legacy dry-run probe failed to answer', [{ op: 'legacy', task: 'dryrun' }]);
+        if (r.fault) return rowErr('the legacy dry-run probe faulted: ' + r.fault, [{ op: 'legacy', task: 'dryrun' }]);
+        if (!(r.planFiles >= 5)) return rowErr(`the dry run planned ${JSON.stringify(r.planFiles)} moves into <name> - the plan must name the real nesting work`, [{ op: 'legacy', task: 'dryrun' }]);
+        if (r.stillFlat !== true) return rowErr('the dry run CONSUMED the flat layout - dryRun mutates nothing', [{ op: 'legacy', task: 'dryrun' }]);
+        return { verdict: 'REFUSED', detail: `>=5 moves planned into <name>, the tree still flat after the dry run`, tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'migrations-legacy-apply-nests',
+      description: 'the apply nests the brain under models/{public,private}/<name>, synthesizes the stack, writes the v3 marker, self-verifies through the real loader, and a FRESH process reads the migrated brain - the whole user experience',
+      async run(harness) {
+        const ride = await probeMigration(harness, [
+          { op: 'legacy', task: 'apply' },
+        ]);
+        if (!ride) return rowSkip('migration-fixture not armed');
+        void ride;
+        const r = ride.get('legacy');
+        if (!r) return rowErr('the legacy apply probe failed to answer', [{ op: 'legacy', task: 'apply' }]);
+        if (r.fault) return rowErr('the legacy apply probe faulted: ' + r.fault, [{ op: 'legacy', task: 'apply' }]);
+        const legs = { appliedHasImport: 'the import step did not APPLY', flatGone: 'the flat public root survived apply', nested: 'identity did not land nested under <name>', bootNested: 'boot/start.md did not nest', successionNested: '_succession.json did not nest', stackHasVant: 'state.json has no stacked brain', neuronsCarried: 'the neurons state did not carry through the synthesis', markerV3: 'the marker was not written at v3', idempotent: 'a second run re-applied the import', selfVerified: 'the step did not self-verify through the real loader', brainReads: 'a FRESH process could not read the migrated brain', corpusNonZero: 'the fresh corpus read empty' };
+        for (const [k, why] of Object.entries(legs)) {
+          if (r[k] !== true) return rowErr(why + ` (${k})`, [{ op: 'legacy', task: 'apply' }]);
+        }
+        if (r.currentBrain !== 'vant') return rowErr(`currentBrain reads ${JSON.stringify(r.currentBrain)} - the synthesized stack must point at the chosen brain`, [{ op: 'legacy', task: 'apply' }]);
+        return { verdict: 'REFUSED', detail: 'nesting + synthesized stack + neurons carried + v3 marker + self-verified through the real loader + idempotent + a fresh process reads the migrated brain', tookRequests: 2 };
+      },
+    },
+
     {
       name: 'migrations-dropfile-no-clobber',
       description: 'a CURRENT dropfile wins over legacy state/ content: after a full migrate() the live model tmp-space/read still says exactly CURRENT WINS - the migration NEVER clobbers fresh content with history',

@@ -207,6 +207,154 @@ export default {
     },
 
     // ============ json: the ERP lane (6a-6c) ============
+    // ============ the pointer qr (pass 265) + its body wall ============
+    {
+      name: 'carriers-pointer-address-law',
+      description: 'the pointer qr lane holds: the extended VANT:1:<64hex> frame (71 chars, MORE than the 12-digit doorway, id-suffixed), a legal pointer with NO local body is an honest unresolved record (no-body, not an error), the persisted body answers to its address, the pure-pointer option skips the resolve read, and the full-object qr round-trip stays intact beside the pointer path',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [
+          { op: 'mint', from: 'ptr-station', now: 5000, slots: { title: 'pointer-address-law' } },
+          { op: 'qrPointer', token: 'p0' },
+          { op: 'decode', lane: 'qr', from: 'artifact', artifactToken: 'qrp:p0', token: 'p0' },
+          { op: 'decode', lane: 'qr', shape: 'pointerOnly', artifactToken: 'qrp:p0', token: 'p0' },
+          { op: 'persist', token: 'p0' },
+          { op: 'decode', lane: 'qr', from: 'artifact', artifactToken: 'qrp:p0', token: 'p0' },
+          { op: 'decode', lane: 'qr', from: 'artifact', artifactToken: 'qrf:p0', token: 'p0' },
+        ]);
+        if (!ride) return rowSkip('carriers-lane not armed');
+        const ptr = ride.get('qrPointer');
+        const miss = ride.all('decode')[0];
+        const pure = ride.all('decode')[1];
+        const resolved = ride.all('decode')[2];
+        const plain = ride.get('decode');
+        for (const [n, x] of Object.entries({ ptr, miss, pure, resolved, plain })) {
+          if (!x) return rowErr(`the ${n} leg failed to answer - the pointer walk needs every leg`, ride.rows);
+        }
+        void VOID;
+        if (ptr.kind !== 'pointer' || ptr.frameGrammar !== true || ptr.frameLen71 !== true || ptr.idSuffix !== true) {
+          return rowErr(`the pointer frame broke the extended grammar (kind=${ptr.kind} grammar=${ptr.frameGrammar} len71=${ptr.frameLen71} idSuffix=${ptr.idSuffix})`, ride.rows);
+        }
+        if (miss.resolved !== false || miss.reason !== 'no-body') {
+          return rowErr(`an un-oiled pointer answered resolved=${JSON.stringify(miss.resolved)} reason=${JSON.stringify(miss.reason)} - absence is an honest UNRESOLVED record, not an error`, ride.rows);
+        }
+        if (pure.resolved !== false || pure.frameSame !== true) {
+          return rowErr(`the pure-pointer option resolved=${JSON.stringify(pure.resolved)} frameSame=${JSON.stringify(pure.frameSame)} - the scan ruling must skip the resolve read`, ride.rows);
+        }
+        if (resolved.resolved !== true || resolved.idMatch !== true) {
+          return rowErr(`the persisted body did not answer to its address (resolved=${resolved.resolved} idMatch=${resolved.idMatch})`, ride.rows);
+        }
+        if (plain.kind !== 'packet' || plain.idMatch !== true) {
+          return rowErr(`the full-object qr round-trip broke beside the pointer path (kind=${JSON.stringify(plain.kind)} idMatch=${plain.idMatch})`, ride.rows);
+        }
+        return { verdict: 'REFUSED', detail: 'VANT:1: grammar holds, no-body is honest-unresolved, pure-pointer skips resolve, persisted body answers, full-object roundtrip intact', tookRequests: 7 };
+      },
+    },
+
+    {
+      name: 'carriers-pointer-body-wall',
+      description: 'the pointer resolve re-applies the packet wall: a tampered body under the address refuses typed E_CARRIER_TAMPER, and the record is RESTORED byte-for-byte after - the wall holds wherever the body came from',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [
+          { op: 'mint', from: 'ptr-station', now: 5000, slots: { title: 'pointer-body-wall' } },
+          { op: 'persist', token: 'p0' },
+          { op: 'qrPointer', token: 'p0' },
+          { op: 'tamperBody', token: 'p0', artifactToken: 'qrp:p0' },
+        ]);
+        if (!ride) return rowSkip('carriers-lane not armed');
+        const tamper = ride.get('tamperBody');
+        if (!tamper) return rowErr('the body-wall probe failed to answer', ride.rows);
+        if (tamper.refused !== true || tamper.caught !== 'E_CARRIER_TAMPER') {
+          return rowErr(`the tampered body resolved ${JSON.stringify(tamper.refused)}/${JSON.stringify(tamper.caught)} - the packet wall must refuse on resolve, typed E_CARRIER_TAMPER`, ride.rows);
+        }
+        return { verdict: 'REFUSED', detail: 'a tampered on-disk body refused typed E_CARRIER_TAMPER at resolve, restored byte-identical after', tookRequests: 4 };
+      },
+    },
+
+    // ============ the wire hook (pass 267) ============
+    {
+      name: 'carriers-wire-hook-failclosed',
+      description: 'the wire hook is fail-closed at every seam: a non-function hook refuses the setter typed E_CARRIER_SHAPE, found:false on the wire is an honest UNRESOLVED record (reason unreachable), and a hook that THROWS is the same honest unreachable - never a partial resolve, never a crash',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [
+          { op: 'mint', from: 'wire-station', now: 5000, slots: { title: 'wire-failclosed' } },
+          { op: 'qrPointer', token: 'p0' },
+          { op: 'wireCase', token: 'p0', artifactToken: 'qrp:p0', kind: 'badType' },
+          { op: 'wireCase', token: 'p0', artifactToken: 'qrp:p0', kind: 'missing' },
+          { op: 'wireCase', token: 'p0', artifactToken: 'qrp:p0', kind: 'throwing' },
+        ]);
+        if (!ride) return rowSkip('carriers-lane not armed');
+        const bad = ride.all('wireCase')[0];
+        const missing = ride.all('wireCase')[1];
+        const throwing = ride.all('wireCase').pop();
+        for (const [n, x] of Object.entries({ bad, missing, throwing })) {
+          if (!x) return rowErr(`the ${n} leg failed to answer`, ride.rows);
+        }
+        void VOID;
+        if (bad.setupCaught !== 'E_CARRIER_SHAPE') return rowErr(`the setter accepted a non-function (setupCaught=${JSON.stringify(bad.setupCaught)}) - the seam never fakes`, ride.rows);
+        for (const [n, x] of Object.entries({ missing, throwing })) {
+          if (x.resolved !== false || x.reason !== 'unreachable') {
+            return rowErr(`a failing wire arm (${n}) answered resolved=${JSON.stringify(x.resolved)} reason=${JSON.stringify(x.reason)} - the wire is fail-closed, not an error and never a partial`, ride.rows);
+          }
+        }
+        return { verdict: 'REFUSED', detail: 'non-function refuses typed at the setter, found:false and a throwing door are both honest unreachable records', tookRequests: 5 };
+      },
+    },
+
+    {
+      name: 'carriers-wire-hook-walls',
+      description: 'the wire hook re-applies the walls cross-node: a good hook brings the body home (resolved + fetched + id match), a SWAPPED body and a FORGED body both refuse typed E_CARRIER_TAMPER, a cleared hook restores the classic no-body record, and the hook never short-circuits a LOCAL body (the local store wins, un-fetched)',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [
+          { op: 'mint', from: 'wire-station', now: 5000, slots: { title: 'wire-hook-walls' } },
+          { op: 'mint', from: 'wire-other', now: 5001, slots: { title: 'not-this-one' } },
+          { op: 'qrPointer', token: 'p0' },
+          { op: 'wireCase', token: 'p0', artifactToken: 'qrp:p0', kind: 'good' },
+          { op: 'wireCase', token: 'p0', artifactToken: 'qrp:p0', kind: 'swapped', otherToken: 'p1' },
+          { op: 'wireCase', token: 'p0', artifactToken: 'qrp:p0', kind: 'forged' },
+        ]);
+        if (!ride) return rowSkip('carriers-lane not armed');
+        // reset rides an UNPERSISTED token: the hookless posture vs a body that
+        // is actually absent locally, not vs a local body that wins anyway
+        const ride2 = await probeCarriers(harness, [
+          { op: 'mint', from: 'ptr-station', now: 5000, slots: { title: 'wire-reset-leg' } },
+          { op: 'qrPointer', token: 'p0' },
+          { op: 'wireCase', token: 'p0', artifactToken: 'qrp:p0', kind: 'reset' },
+        ]);
+        const ride3 = await probeCarriers(harness, [
+          { op: 'mint', from: 'ptr-station', now: 5000, slots: { title: 'wire-local-wins' } },
+          { op: 'persist', token: 'p0' },
+          { op: 'qrPointer', token: 'p0' },
+          { op: 'wireCase', token: 'p0', artifactToken: 'qrp:p0', kind: 'badLocal' },
+        ]);
+        if (!ride || !ride2 || !ride3) return rowSkip('carriers-lane not armed');
+        const good = ride.all('wireCase')[0];
+        const swapped = ride.all('wireCase')[1];
+        const forged = ride.get('wireCase');
+        const reset = ride2.get('wireCase');
+        const badLocal = ride3.get('wireCase');
+        for (const [n, x] of Object.entries({ good, swapped, forged, reset, badLocal })) {
+          if (!x) return rowErr(`the ${n} leg failed to answer`, ride.rows);
+        }
+        if (good.resolved !== true || good.fetched !== true || good.idMatch !== true) {
+          return rowErr(`a good hook did not bring the body home (resolved=${good.resolved} fetched=${good.fetched} idMatch=${good.idMatch})`, ride.rows);
+        }
+        for (const [n, x] of Object.entries({ swapped, forged })) {
+          if (x.caught === null || x.caught === undefined) {
+            const decoded = x.resolved;
+            return rowErr(`the ${n} wire body did not refuse (resolved=${JSON.stringify(decoded)}, caught=${JSON.stringify(x.caught)}) - a swapped or forged body must hit the packet wall, typed E_CARRIER_TAMPER`, ride.rows);
+          }
+          if (x.caught !== 'E_CARRIER_TAMPER') return rowErr(`a ${n} body carried ${JSON.stringify(x.caught)} - the packet wall is E_CARRIER_TAMPER`, ride.rows);
+        }
+        if (reset.resolved !== false || reset.reason !== 'no-body') {
+          return rowErr(`a cleared hook answered resolved=${JSON.stringify(reset.resolved)} reason=${JSON.stringify(reset.reason)} - the hookless posture is exactly the classic no-body record`, ride.rows);
+        }
+        if (badLocal.localBodyWins !== true || badLocal.resolved !== true || badLocal.fetched !== undefined) {
+          return rowErr(`the wire hook short-circuited a LOCAL body (resolved=${badLocal.resolved} fetched=${JSON.stringify(badLocal.fetched)}) - the local store wins first`, ride.rows);
+        }
+        return { verdict: 'REFUSED', detail: 'good hook brings it home, swapped/forged hit the wall typed, cleared restores no-body, local wins un-fetched', tookRequests: 10 };
+      },
+    },
+
     {
       name: 'carriers-json-erp',
       description: 'the ERP lane: the artifact is the VERBATIM traveler object, the round-trip re-enters shape+verify (same packet back), and a tampered bag refuses typed E_CARRIER_TAMPER',
