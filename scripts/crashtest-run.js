@@ -2194,8 +2194,14 @@ function buildRoutes(sb, Harness) {
                     fs.copyFileSync(path.join(ROOT, 'package.json'), path.join(dir, 'package.json'));
                     fs.cpSync(path.join(ROOT, 'lib'), path.join(dir, 'lib'), { recursive: true });
                     fs.copyFileSync(path.join(ROOT, 'bin', 'migrate.js'), path.join(dir, 'bin', 'migrate.js'));
-                    // legacy artifacts (the axolotl-era layout)
-                    if (o.legacy !== 'clean') {
+                    // legacy artifacts (the axolotl-era layout). The two
+                    // sabotage-shape probes (failed-verify withhold + CLI
+                    // exit truth) need the NATIVE fixture shape — models/
+                    // private ABSENT: a private-vant dropfile keeps the
+                    // loader non-empty after the public wipe, so the
+                    // corrupted verify would read TRUE and the withheld
+                    // contract would look satisfied-by-lie.
+                    if (o.legacy !== 'clean' && !(o.task === 'clifail') && !(o.task === 'apply' && o.variant === 'sabotage')) {
                         fs.mkdirSync(path.join(dir, '.agent_tmp'), { recursive: true });
                         fs.writeFileSync(path.join(dir, '.agent_tmp', 'escrow.json'), JSON.stringify({ budgets: { fixture: 5 } }));
                         fs.mkdirSync(path.join(dir, 'storage', 'myStuff'), { recursive: true });
@@ -2315,6 +2321,231 @@ function buildRoutes(sb, Harness) {
                                     stillFlat: o2.includes('STILL-FLAT:true') });
                             continue;
                         }
+                        // ---- slice 3 tasks (CLI banners, MCP door, adversarial edges) ----
+                        if (o.task === 'banner' || o.task === 'banner2' || o.task === 'bannernomove') {
+                            fs.copyFileSync(path.join(ROOT, 'bin', 'start.js'), path.join(dir, 'bin', 'start.js'));
+                            fs.copyFileSync(path.join(ROOT, 'bin', 'health.js'), path.join(dir, 'bin', 'health.js'));
+                            fs.writeFileSync(path.join(dir, 'models', 'public', 'lessons2.md'), 'x');
+                            fs.writeFileSync(path.join(dir, 'models', 'public', 'goals2.md'), 'x');
+                            if (o.task === 'bannernomove') {
+                                // legacy evidence fires, but EVERY flat file already
+                                // exists inside models/public/vant/ -> import moves 0 files
+                                fs.mkdirSync(path.join(dir, 'models', 'public', 'vant'), { recursive: true });
+                                for (const f of ['identity.md', 'lessons.md', 'goals.md']) {
+                                    fs.writeFileSync(path.join(dir, 'models', 'public', 'vant', f), 'LIVE');
+                                }
+                            }
+                            const p = probe(
+`(async () => {
+    const { spawn } = require('child_process');
+    const run = () => new Promise((resolve) => {
+        const pr = spawn(process.execPath, ['bin/start.js'], { stdio: ['ignore', 'pipe', 'ignore'] });
+        let buf = '';
+        pr.stdout.on('data', (d) => { buf += d; });
+        pr.on('close', () => resolve(buf));
+    });
+    const out1 = await run();
+    console.log('BANNER:' + /BRAIN MIGRATED/.test(out1));
+${o.task === 'banner' ? '' : `    const out2 = await run();
+    console.log('BANNER2:' + /BRAIN MIGRATED/.test(out2));
+    console.log('OK2:' + /Brain layout OK/.test(out2));`}
+})()`);
+                            const o2 = p.stdout || '';
+                            out.push(o.task === 'banner'
+                                ? { op: 'legacy', task: 'banner', ok: !p.error, banner: o2.includes('BANNER:true') }
+                                : { op: 'legacy', task: o.task, ok: !p.error,
+                                    banner2: o2.includes('BANNER2:'), // task banner2/bannernomove
+                                    quietSecond: o2.includes('BANNER2:false'),
+                                    layoutOk: o2.includes('OK2:true') });
+                            continue;
+                        }
+                        if (o.task === 'mcplegacy' || o.task === 'mcuptodate') {
+                            const pre = o.task === 'mcuptodate' ? `await m.migrate();\n` : '';
+                            const p = probe(`
+                                const m = require(${MIG});
+                                const mcp = require(${JSON.stringify(path.join(dir, 'lib', 'mcp.js'))});
+                                ${pre}const r = await mcp.execute('brain_migration_status', {});
+                                console.log('LEGACY:' + r.legacy);
+                                ${o.task === 'mcplegacy' ? `console.log('HAS-MIGRATE:' + /vant migrate/.test(r.guidance || ''));
+                                console.log('HAS-NAME:' + /--brain-name/.test(r.guidance || ''));` : "console.log('UPTODATE:' + r.upToDate);"}
+                            `);
+                            const o2 = p.stdout || '';
+                            out.push({ op: 'legacy', task: o.task, ok: !p.error,
+                                legacy: o2.includes('LEGACY:true'), notLegacy: o2.includes('LEGACY:false'),
+                                guidanceMigrate: o2.includes('HAS-MIGRATE:true'), guidanceName: o2.includes('HAS-NAME:true'),
+                                uptodate: o2.includes('UPTODATE:true') });
+                            continue;
+                        }
+                        if (o.task === 'readfallback') {
+                            const p = probe(`
+                                const m = require(${MIG});
+                                await m.migrate();
+                                const brain = require(${JSON.stringify(path.join(dir, 'lib', 'brain.js'))});
+                                brain.setMode('dual');
+                                const id = await brain.read('identity');
+                                console.log('FALLBACK:' + (id && /legacy user/.test(id.content || '')));
+                                const pub = await brain.read('identity', { type: 'public' });
+                                console.log('EXPLICIT-PUBLIC:' + (pub && /legacy user/.test(pub.content || '')));
+                            `);
+                            const o2 = p.stdout || '';
+                            out.push({ op: 'legacy', task: 'readfallback', ok: !p.error,
+                                fallback: o2.includes('FALLBACK:true'), explicitPublic: o2.includes('EXPLICIT-PUBLIC:true') });
+                            continue;
+                        }
+                        if (o.task === 'apply' && o.variant && o.variant !== 'plain') {
+                            if (o.variant === 'selfnest') {
+                                fs.mkdirSync(path.join(dir, 'models', 'public', 'vant'), { recursive: true });
+                                fs.writeFileSync(path.join(dir, 'models', 'public', 'vant', 'runtime-note.md'), 'boot artifact');
+                                fs.writeFileSync(path.join(dir, 'models', 'public', 'lessons2.md'), 'x');
+                                fs.writeFileSync(path.join(dir, 'models', 'public', 'goals2.md'), 'x');
+                            } else if (o.variant === 'stackrewrite') {
+                                fs.writeFileSync(path.join(dir, 'models', 'state.json'), JSON.stringify({ stack: ['vant'], currentBrain: 'vant', mode: 'dual', neurons: { attention: { identity: 0.2 } } }));
+                            } else if (o.variant === 'mbwin') {
+                                fs.mkdirSync(path.join(dir, 'models', 'public', 'vant'), { recursive: true });
+                                fs.writeFileSync(path.join(dir, 'models', 'public', 'vant', 'identity.md'), '# LIVE MULTIBRAIN IDENTITY');
+                                fs.writeFileSync(path.join(dir, 'models', 'public', 'lessons2.md'), 'x');
+                                fs.writeFileSync(path.join(dir, 'models', 'public', 'goals2.md'), 'x');
+                            } else if (o.variant === 'symlink') {
+                                fs.writeFileSync(path.join(dir, 'models', 'public', 'lessons2.md'), 'x');
+                                fs.writeFileSync(path.join(dir, 'models', 'public', 'goals2.md'), 'x');
+                                const outside = path.join(dir, 'outside-canary');
+                                fs.mkdirSync(outside, { recursive: true });
+                                fs.writeFileSync(path.join(outside, 'canary.md'), 'DO NOT TOUCH');
+                                fs.symlinkSync(outside, path.join(dir, 'models', 'public', 'linked-dir'), 'dir');
+                                fs.symlinkSync(path.join(outside, 'canary.md'), path.join(dir, 'models', 'public', 'linked-file.md'), 'file');
+                            }
+                        }
+
+                        if (o.task === 'apply' && o.probe === 'variant') {
+                            const HOOK = JSON.stringify(path.join(dir, 'lib', 'brain.js'));
+                            let body2 = '';
+                            if (o.variant === 'selfnest') {
+                                body2 = `
+                                const m = require(${MIG});
+                                const r = await m.migrate();
+                                const f = require('fs');
+                                console.log('NO-SELF-NEST:' + !f.existsSync('models/public/vant/vant'));
+                                console.log('ARTIFACT-OK:' + f.readFileSync('models/public/vant/runtime-note.md', 'utf8'));
+                                console.log('IMPORT-OK:' + f.readFileSync('models/public/vant/identity.md', 'utf8').includes('legacy user'));
+                                const step = r.applied.find(a => a.id === 'legacy.multibrain-import');
+                                console.log('VERIFIED:' + (step && step.result && step.result.verified === true));`;
+                            } else if (o.variant === 'stackrewrite') {
+                                body2 = `
+                                const m = require(${MIG});
+                                const r = await m.migrate({ brainName: 'mybrain' });
+                                const st = JSON.parse(require('fs').readFileSync('models/state.json', 'utf8'));
+                                console.log('STACK:' + JSON.stringify(st.stack));
+                                console.log('NEURONS:' + !!(st.neurons && st.neurons.attention));
+                                const step = r.applied.find(a => a.id === 'legacy.multibrain-import');
+                                console.log('REPORTED:' + JSON.stringify(step.result.stack));`;
+                            } else if (o.variant === 'mbwin') {
+                                body2 = `
+                                const m = require(${MIG});
+                                const r = await m.migrate();
+                                const f = require('fs');
+                                console.log('NO-CLOBBER:' + f.readFileSync('models/public/vant/identity.md', 'utf8').includes('LIVE MULTIBRAIN'));
+                                const step = r.applied.find(a => a.id === 'legacy.multibrain-import');
+                                console.log('SKIPPED-N:' + (step && step.result ? String(step.result.skippedExisting).length >= 0 : 'no-step'));
+                                console.log('SKIPPED-VAL:' + (step && step.result ? step.result.skippedExisting : 'no-step'));`;
+                            } else if (o.variant === 'symlink') {
+                                body2 = `
+                                const m = require(${MIG});
+                                const r = await m.migrate();
+                                const f = require('fs');
+                                console.log('CANARY-INTACT:' + f.readFileSync('outside-canary/canary.md', 'utf8'));
+                                console.log('IMPORT-OK:' + f.readFileSync('models/public/vant/identity.md', 'utf8').includes('legacy user'));
+                                const step = r.applied.find(a => a.id === 'legacy.multibrain-import');
+                                console.log('VERIFIED:' + (step && step.result && step.result.verified === true));`;
+                            } else if (o.variant === 'sabotage') {
+                                body2 = `
+                                const m = require(${MIG});
+                                const Module = require('module');
+                                const origLoad = Module._load;
+                                let sabotaged = false;
+                                Module._load = function (request, parent, isMain) {
+                                    const mod = origLoad.apply(this, arguments);
+                                    if (!sabotaged && request.endsWith('brain') && mod && mod.loadCorpus) {
+                                        sabotaged = true;
+                                        const orig = mod.loadCorpus.bind(mod);
+                                        mod.loadCorpus = function (opts) {
+                                            require('fs').rmSync('models/public/vant', { recursive: true, force: true });
+                                            return orig(opts);
+                                        };
+                                    }
+                                    return mod;
+                                };
+                                const r = await m.migrate();
+                                console.log('OK:' + r.ok);
+                                console.log('FAILED-VERIFY:' + (r.failedVerify === true));
+                                console.log('MARKER:' + JSON.stringify(m._readMarker()));`;
+                            }
+                            const p = probe(body2);
+                            const o2 = p.stdout || '';
+                            const flags = {
+                                selfnest: ['NO-SELF-NEST:true', 'ARTIFACT-OK:boot artifact', 'IMPORT-OK:true', 'VERIFIED:true'],
+                                stackrewrite: ['STACK:["mybrain"]', 'NEURONS:true', 'REPORTED:["mybrain"]'],
+                                mbwin: ['NO-CLOBBER:true', 'SKIPPED-VAL:'],
+                                symlink: ['CANARY-INTACT:DO NOT TOUCH', 'IMPORT-OK:true', 'VERIFIED:true'],
+                                sabotage: ['OK:false', 'FAILED-VERIFY:true', 'MARKER:null'],
+                            }[o.variant] || [];
+                            const missed = flags.filter((c) => !o2.includes(c));
+                            if (o.variant === 'mbwin') {
+                                const sv = (o2.match(/SKIPPED-VAL:(.*)/) || [])[1] || '';
+                                if (sv === '' || /^-/.test(sv)) missed.push('SKIPPED-VAL:<number>');
+                            }
+                            out.push({ op: 'legacy', task: 'apply', probe: 'variant', variant: o.variant, ok: !p.error && missed.length === 0, missed: missed.join(',') || null,
+                                fault: p.error ? String(p.error.message || p.error).slice(0, 120) : (p.stderr || '').includes('PROBE-ERR') ? (p.stderr || '').split('\n').filter(l => l.includes('PROBE-ERR')).join(' | ').slice(0, 160) : null,
+                                stack: (o2.match(/STACK:(\[[^\n]*\])/) || [])[1] || null,
+                                importOk: o2.includes('IMPORT-OK:true'), verified: o2.includes('VERIFIED:true'),
+                                noClobber: o2.includes('NO-CLOBBER:true'), canaryIntact: o2.includes('CANARY-INTACT:DO NOT TOUCH'),
+                                failedVerify: o2.includes('FAILED-VERIFY:true'), markerNull: o2.includes('MARKER:null') });
+                            continue;
+                        }
+                        if (o.task === 'clifail') {
+                            fs.writeFileSync(path.join(dir, 'sabotage.js'), `
+                                                                const fsmod = require('fs');
+                                const Module = require('module');
+                                const origLoad = Module._load;
+                                let sabotaged = false;
+                                Module._load = function (request, parent, isMain) {
+                                    const mod = origLoad.apply(this, arguments);
+                                    if (!sabotaged && request.endsWith('brain') && mod && mod.loadCorpus) {
+                                        sabotaged = true;
+                                                                                const orig = mod.loadCorpus.bind(mod);
+                                        mod.loadCorpus = function (opts) {
+                                            fsmod.rmSync('models/public/vant', { recursive: true, force: true });
+                                            return orig(opts);
+                                        };
+                                    }
+                                    return mod;
+                                };
+                            `);
+                            const s = spawnSync(process.execPath, [path.join(dir, 'bin', 'migrate.js'), '--status'], { encoding: 'utf8', timeout: 30000, cwd: dir });
+                            const fail = spawnSync(process.execPath, [path.join(dir, 'bin', 'migrate.js')], { encoding: 'utf8', timeout: 60000, cwd: dir,
+                                env: Object.assign({}, process.env, { NODE_OPTIONS: '--require ' + path.join(dir, 'sabotage.js') }) });
+                            out.push({ op: 'legacy', task: 'clifail', ok: true,
+                                statusNotice: /OLD-STYLE BRAIN/.test(s.stdout || ''), statusExit0: s.status === 0,
+                                failExit1: fail.status === 1, failSaysVerify: /could not verify/.test(fail.stdout || ''),
+                                failCode: fail.status === null ? 'timeout' : fail.status,
+                                failFault: fail.error ? String(fail.error.message || fail.error).slice(0, 120) : null,
+                                failHead: ((fail.stdout || '') + '|' + (fail.stderr || '')).split('\n').filter(l => l.trim()).slice(0, 3).join(' | ').slice(0, 220),
+                                failMid: (((fail.stdout || '').match(/legacy\.multibrain-import \{[^}]*\}/) || [''])[0]).slice(0, 200),
+                                failTail: ((fail.stdout || '') + '|' + (fail.stderr || '')).split('\n').filter(l => l.trim()).slice(-3).join(' | ').slice(0, 220) });
+                            continue;
+                        }
+                        if (o.task === 'healthmig') {
+                            fs.copyFileSync(path.join(ROOT, 'bin', 'health.js'), path.join(dir, 'bin', 'health.js'));
+                            fs.writeFileSync(path.join(dir, 'models', 'public', 'lessons2.md'), 'x');
+                            fs.writeFileSync(path.join(dir, 'models', 'public', 'goals2.md'), 'x');
+                            const before = spawnSync(process.execPath, [path.join(dir, 'bin', 'health.js')], { encoding: 'utf8', timeout: 60000, cwd: dir });
+                            probe(`const m = require(${MIG}); await m.migrate();`);
+                            const after = spawnSync(process.execPath, [path.join(dir, 'bin', 'health.js')], { encoding: 'utf8', timeout: 60000, cwd: dir });
+                            out.push({ op: 'legacy', task: 'healthmig', ok: !before.error && !after.error,
+                                warnBefore: /OLD-STYLE BRAIN/.test(before.stdout || ''), warnAfter: /OLD-STYLE BRAIN/.test(after.stdout || ''),
+                                bothExit0: before.status === 0 && after.status === 0 });
+                            continue;
+                        }
+
                         if (o.task === 'nofalse') {
                             // the CLEAN multibrain fixture rides the same law: a
                             // tree that already nests brains never fires the import

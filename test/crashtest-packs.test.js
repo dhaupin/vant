@@ -1210,6 +1210,20 @@ const EXPECTED = {
         'migrations-legacy-no-false-positive': 'skip',
         'migrations-legacy-dryrun-plans': 'skip',
         'migrations-legacy-apply-nests': 'skip',
+        // (slice 3) CLI banners, MCP door, adversarial edges
+        'migrations-cli-legacy-banner': 'skip',
+        'migrations-cli-second-start-quiet': 'skip',
+        'migrations-cli-existing-wins-quiet': 'skip',
+        'migrations-mcp-door-legacy': 'skip',
+        'migrations-mcp-door-uptodate': 'skip',
+        'migrations-read-fallback': 'skip',
+        'migrations-no-self-nest': 'skip',
+        'migrations-stack-rewrite': 'skip',
+        'migrations-multibrain-files-win': 'skip',
+        'migrations-symlink-wall': 'skip',
+        'migrations-unverified-withholds': 'skip',
+        'migrations-cli-status-and-fail-exit': 'skip',
+        'migrations-health-checkmigration': 'skip',
     },
 };
 

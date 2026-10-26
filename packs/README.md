@@ -371,7 +371,7 @@ slot title now (ids never collide across rows).
 Queued behind: the route/certified-letter family (R0-R12), the plate
 family (M1-M16), and the assembly/template/mfg-line family (A/B/C rows).
 
-### `public/vant-migrations` — the brain-layout migrations battery (4 rows, slice 1: the fixture family; all validated 2026-10-26)
+### `public/vant-migrations` — the brain-layout migrations battery (21 rows across 3 slices: fixture, legacy-main import, CLI/MCP/edges; all validated 2026-10-26)
 
 **What it does.** The migrations battery's first conversion slice (#249
 drill-down): the native suite's fixture family converts to pack rows on the
@@ -413,9 +413,49 @@ the native pins do; the apply leg runs the SECOND fresh-process read probe
 | `migrations-legacy-dryrun-plans` | >=5 planned moves into <name>, the flat tree still byte-present after (a plan is not an apply) | validated - REFUSED |
 | `migrations-legacy-apply-nests` | flat content nests under models/{public,<name>}/vant, boot + succession nest, stack synthesized pointing currentBrain at the chosen name with neurons carried, v3 marker, self-verified through the real loader, idempotent, and a FRESH process reads the migrated brain with a non-empty corpus | validated - REFUSED |
 
-Queued behind in migrations: the CLI + start auto-migrate banner family
-(481-530) and the MCP door row; carriers' route/plate/assembly/template
-families.
+**Slice 3 (same day): the CLI banner family, the MCP door, and the
+adversarial edges (4+2+7 rows; 21/21 REFUSED x2).** The `legacy` op grew
+the banner probes (real `bin/start.js` runs, the BRAIN MIGRATED banner and
+its silent second start), the MCP door probes (`brain_migration_status`
+truthfully loud on legacy with actionable guidance, truthful
+up-to-date after a sealed migration), a dual-mode read-fallback probe
+(the USER's migrated content is readable plain + explicit-public), the
+anvil probes — self-nest prevention, stack rewrite (a default-only stack
+never strands a --brain-name import behind a dead default), multibrain
+files win over flat same-names, the walker's symlink wall (an outside
+canary stays byte-intact), failed-verify withholds the marker
+(retryable, never sealed), the CLI exit truth (`migrate --status` loud
+exit 0, a sabotaged apply exits 1 naming `could not verify`), and the
+health tripwire (warns on legacy, silent after, both exits 0).
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `migrations-cli-legacy-banner` | the first start on a flat tree auto-migrates with the BRAIN MIGRATED banner | validated - REFUSED |
+| `migrations-cli-second-start-quiet` | the second start re-reads the same law quietly: no re-banner, layout OK | validated - REFUSED |
+| `migrations-cli-existing-wins-quiet` | a zero-move import is a no-op: no celebration banner, layout reads OK | validated - REFUSED |
+| `migrations-mcp-door-legacy` | the door reports legacy:true with guidance that names both `vant migrate` and `--brain-name` | validated - REFUSED |
+| `migrations-mcp-door-uptodate` | after a real migrate the same door reports upToDate truthfully | validated - REFUSED |
+| `migrations-read-fallback` | plain + explicit-public reads both reach the migrated content on a migrated tree | validated - REFUSED |
+| `migrations-no-self-nest` | a pre-created destination dir never self-nests; boot artifact intact, import beside it | validated - REFUSED |
+| `migrations-stack-rewrite` | a default-only stack is REPLACED by the chosen name (never stranded), neurons carried | validated - REFUSED |
+| `migrations-multibrain-files-win` | existing multibrain files win over same-named flat files (no clobber), skippedExisting counted | validated - REFUSED |
+| `migrations-symlink-wall` | the walker does not follow symlinks out of models/: outside canary intact, legit import still lands | validated - REFUSED |
+| `migrations-unverified-withholds` | sabotaged verify: ok=false, failedVerify=true, marker null — retryable, never sealed | validated - REFUSED |
+| `migrations-cli-status-and-fail-exit` | status announces the old-style brain exit 0; sabotaged apply exits 1 naming could-not-verify | validated - REFUSED |
+| `migrations-health-checkmigration` | health warns on legacy, goes silent after, both exits 0 | validated - REFUSED |
+
+Slice-3 determinism note (armed, read, fixed in-ride): the two
+sabotage-shape rows refused twice gone — the ride's fixture seeded a
+private-vant dropfile; AFTER the public wipe the loader still counted
+private-brain files as a living corpus, so the corrupted verify read TRUE
+and the withheld-marker contract looked satisfied-by-lie. The two rows
+now seed the native fixture shape (models/private ABSENT — what the pins
+test) and the ride got fault/head/mid/tail capture so future walk misses
+report WHY. Deterministic across two rides; native suite 28/28 green
+alongside.
+
+Queued behind: (this battery is DONE — 21 rows across 3 slices) and
+carriers' route/plate/assembly/template families.
 
 Slice 1 verdict: the fixture family measures REFUSED on the real seams with
 `test/migrations.test.js` (28 pins) staying green alongside — GREEN after
@@ -738,7 +778,7 @@ today's clean B0 run: **48 REFUSED / 0 EXPLOITED / 1 skipped**.
 | 0 — wire-surface door pins (`test/crashtest-server.js`, 9 pins) | smallest lift, biggest overlap | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native suite 9/9 each run); the suite stays in CI under the law |
 | wire-surface re-pins — r/2 edge face (`web/relay/functions/api/r/relay.ts`) | ~15% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native lanes green each run: relay, relay-parity, memory, escrow, escrow-kernel, forum-msg-escrow, governance, workspace-memory via the sweep filter); the native lanes stay in CI under the law. Cycle 2's catch: the origin row's drive called hopFrame twice (sign + body) and each call re-evaluated ts — a ms-grain boundary left the signature covering different bytes than the body, and the edge (correctly) 401'd; one eval per shape since, signature === body bytes |
 | in-process module discipline (row-by-row) | ~40% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 6/6 REFUSED + native suites memory / escrow / governance green each run via the same sweep filter); the native blocks stay in CI under the law |
-| drill-down: remaining native suites (migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-6 landed (2026-10-25/26)**: state-wiring fully converted (30/30 REFUSED x2), the carriers battery's lane-laws + pointer/wire-hook families landed (12/12 REFUSED x2 on `carriers-lane`), AND the migrations battery's fixture + legacy-main import families landed (8/8 REFUSED x2 on `migration-fixture`) — with a REAL FINDING armed+fixed same-pass (the dropfile migration ate live protocol state / crashed EISDIR on the state-store's .wal dir; native suite 25/28 → 28/28 GREEN); migrations' CLI/MCP rows and carriers' route/plate/assembly/template families queue behind |
+| drill-down: remaining native suites (migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-6 landed (2026-10-25/26)**: state-wiring fully converted (30/30 REFUSED x2), the carriers battery's lane-laws + pointer/wire-hook families landed (12/12 REFUSED x2 on `carriers-lane`), AND the migrations battery's fixture + legacy-main import + CLI-banner/MCP-door/edge families landed (21/21 REFUSED x2 on `migration-fixture`) — with the REAL FINDING armed+fixed same-pass (the dropfile migration ate live protocol state / crashed EISDIR on the state-store's .wal dir; native suite 25/28 → 28/28 GREEN) and a deterministic-ride fixture shape caught in slice 3 (a private-vant dropfile kept the loader non-empty after the public wipe — the sabotage-shape rows now seed the native shape); carriers' route/plate/assembly/template families queue behind |
 
 **Bucket 0 S-counter ledger:** cycle 1 (2026-10-25, conversion day) →
 cycle 2 → cycle 3, all sides green each run — the quarter-period
