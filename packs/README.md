@@ -912,6 +912,35 @@ resolves on its own promise chain, so the shim awaits actual completion
 `_handleRequest` promise — answer-vs-drive determinism, not verdict
 timing.
 
+## The no-DB-recursion battery (v0.8.6, #249 - 2026-10-26)
+
+The reveal-shaped battery: **nothing in the addressing/tracking surface
+may resolve by unbounded recursive descent.** A cross-cutting law, one
+pack (`public/vant-recursion-wall`, 3 rows) driving the real modules
+in-process — no sockets, no run-root arm.
+
+- **The wall fix landed same-pass:** `lib/trace.js`'s waterfall renderer
+  recursed once per generation with NO depth bound — `render(spansIn)`
+  accepts arbitrary arrays, so a 10k-deep parent chain RangeError'd the
+  stack from INSIDE the tracker's own reader (a crash-shaped hole; no
+  native trace suite existed, so the pack rows are primary coverage).
+  The renderer is now depth-capped (small bounded constant, cap
+  declared in the marker) and cycle-marked: loud, fail-closed, honest
+  trees byte-compatible.
+- **The unified guard's contract is pinned** on the same battery:
+  in-budget nests open cleanly, the past-budget nest refuses typed
+  (`max_depth_exceeded`) with exactly the loud `recursion:depthExceeded`
+  receipt, and `release()` hands the budget back — typed, receipted,
+  re-openable, never sticky.
+- **Cited walls kept, not duplicated:** the knowledge-links BFS cycle
+  cap lives in vant-brain (`knowledge-links-cycle-safety`), the canvas
+  bootstrap chain is loop-bounded by maxDepth 10, and every loader
+  guard (sync/mcp/islands/compute/search/event/agents-delegate) carries
+  its typed refusal natively under the unified guard.
+
+All 3 rows EARNED `REFUSED` ×2 deterministic at the run root on landing
+(2026-10-26); packs:lint censused 179 ids across 17 packs same-pass.
+
 ## Next surfaces survey (2026-10-23): packs vs issues
 
 Where the remaining repo parts land:

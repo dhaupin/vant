@@ -1105,6 +1105,17 @@ const EXPECTED = {
         'grant-scope-isolation-and-trust-floor': 'skip',
         'escrow-two-key-and-expired-ttl': 'skip',
     },
+    // ARMED 2026-10-26 (the no-DB-recursion battery, v0.8.6): a cross-
+    // cutting law pack over the addressing/tracking surface. Rows drive
+    // lib/trace + lib/recursion directly in-process — self-contained, no
+    // run-root arm, so they EARN strict REFUSED in BOTH phases. The wall
+    // fix this battery introduces (lib/trace.js bounded render) is graded
+    // here as primary coverage (no native trace suite exists).
+    'vant-recursion-wall': {
+        'trace-tree-depth-bomb-bounded': 'REFUSED',
+        'trace-tree-cycle-marked-and-honest-waterfall': 'REFUSED',
+        'recursion-guard-depth-typed-and-releasable': 'REFUSED',
+    },
     'vant-relay': { // the r/2 webhook edge face (web/relay/functions/api/r/relay.ts)
         'posture-and-key-gates-fail-closed': 'skip',
         'hmac-lane-over-raw-bytes': 'skip',

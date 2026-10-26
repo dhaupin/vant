@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-recursion-wall",
+  "description": "The no-DB-recursion wall for addressing and tracking: a bounded, loud renderer can never be crashed through its own reader (trace waterfall depth-cap + cycle-marker), the honest waterfall contract holds on real spans, and the unified recursion guard refuses past depth with typed receipts that release cleanly.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

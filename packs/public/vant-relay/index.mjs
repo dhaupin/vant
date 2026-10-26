@@ -108,7 +108,7 @@ export default {
     {
       name: 'posture-and-key-gates-fail-closed',
       description: 'an unmounted relay routes nowhere (404, no admission phục) and an enabled relay without a gate secret serves NOTHING (503 fail-closed - nothing to verify against is still nothing served)',
-      async run(_harness) {
+      async run(harness) {
         const results = await probeEdge(harness, [
           { name: 'unmounted', env: {}, request: { url: CALL, method: 'POST', body: '{}' } },
           { name: 'no-gate-secret', env: { VANT_RELAY_ENABLED: '1' }, request: { url: CALL, method: 'POST', body: '{}' } },
@@ -132,7 +132,7 @@ export default {
     {
       name: 'hmac-lane-over-raw-bytes',
       description: 'the gate IS the HMAC secret: a signed envelope with no header refuses 401 typed, a WRONG signature refuses 401 typed, and the CORRECT HMAC over the raw UTF-8 body bytes passes the gate into the ack path (X-Signature-256 raw-bytes law)',
-      async run(_harness) {
+      async run(harness) {
         // the VALID lane's envelope carries a fresh ts too: the gate first,
         // then the freshness window — a valid credential rides INTO the ack
         // path, so this shape proves the raw-bytes HMAC law end to end
@@ -163,7 +163,7 @@ export default {
     {
       name: 'freshness-window-typed',
       description: 'a correctly SIGNED envelope whose ts sits outside the freshness window refuses 401 typed - the edge has no replay cache, so staleness is the stateless memory it honestly owns',
-      async run(_harness) {
+      async run(harness) {
         // 11 minutes back: outside the 10-minute window, deterministic per run
         const staleTs = Date.now() - (11 * 60 * 1000);
         const body = JSON.stringify({ event: 'msg-sync', from: 'pack-probe', ts: staleTs, nonce: 'n-stale', payload: { note: 'freshly signed but old' }, v: { major: 2 } });
@@ -185,7 +185,7 @@ export default {
     {
       name: 'origin-guard-typed-acks',
       description: 'hostile hop origins answer the ack path with typed refusals INSIDE the 200: http downgrade, loopback, and cloud metadata targets all refuse - the edge has NO lab escape and private targets never hop',
-      async run(_harness) {
+      async run(harness) {
         // ONE string per shape, signed over the EXACT bytes shipped — the
         // row used to call hopFrame twice (sign call + body call), and each
         // call re-evaluated ts. A ms-grain boundary between the two evals
@@ -227,7 +227,7 @@ export default {
     {
       name: 'encrypted-pipes-only-and-body-cap',
       description: 'plaintext hop bodies answer NEEDS_ENVELOPE typed inside the 200 (no downgrade, ever) and a body beyond the doors\' shared 1 MiB cap answers 413 - the transport posture is shared and loud (native pin 12)',
-      async run(_harness) {
+      async run(harness) {
         const plainBody = hopFrame('https://public-target.example/', '/api', 'plaintext-never-hops');
         const oversized = 'x'.repeat(1024 * 1024 + 1);
         const results = await probeEdge(harness, [
