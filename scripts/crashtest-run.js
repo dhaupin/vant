@@ -2078,5 +2078,231 @@ function buildRoutes(sb, Harness) {
         return jsonRes({ results: out }, 200);
     });
 
+    // wiring-mesh: POST { ops: [{ op, ... }] } — the SCOPED MESH arm
+    // (drill-down slice 3, #249): drives the REAL lib/state/mesh MeshTree
+    // with per-ride instances over throwaway WAL dirs and FIXED step/fixed
+    // clocks (no wall clock in any verdict), plus shared-bus watchers for
+    // the mesh:* event family. Every ride sweeps its dirs.
+    harness.registerRoute('wiring-mesh', async (ctx) => {
+        const MeshTree = require(path.join(sb, 'lib', 'state', 'mesh')).MeshTree;
+        const bus = sandboxLib('event');
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        const ops = (j && Array.isArray(j.ops) && j.ops.length) ? j.ops.slice(0, 60) : null;
+        if (!ops) return jsonRes({ error: 'ops array required' }, 400);
+        const instances = new Map(); // id -> { mt, dir, step | fixedT }
+        let current = null; // most recently opened instance (ops without id ride it)
+        const rideDirs = new Set();
+        const watched = [];
+        const armedWatchers = [];
+        const jsonResInner = jsonRes;
+        const out = [];
+        try {
+            for (const op of ops) {
+                const o = op || {};
+                try {
+                    if (o.op === 'open') {
+                        const dir = o.dirToken ? path.join(os.tmpdir(), 'vant-ct-mesh-dir-' + String(o.dirToken).slice(0, 40))
+                            : fs.mkdtempSync(path.join(os.tmpdir(), 'vant-ct-mesh-'));
+                        rideDirs.add(dir);
+                        const stepMode = o.nowMode === 'step';
+                        const inst = { mt: null, dir, step: stepMode ? { t: Number(o.t), step: Number(o.step || 10), n: 0 } : null, fixedT: Number(o.t) };
+                        const now = stepMode ? () => inst.step.t + (inst.step.n++) * inst.step.step : () => inst.fixedT;
+                        inst.mt = new MeshTree({ universe: String(o.universe || 'wiring-universe'), dir: o.wal === false ? undefined : dir, now, everyN: Number(o.everyN || 16), keepK: Number(o.keepK || 2), silent: o.silent === true });
+                        instances.set(String(o.id), inst);
+                        current = inst;
+                        out.push({ op: 'open', ok: true, id: String(o.id), dir: 'set', info: inst.mt.persistenceInfo ? inst.mt.persistenceInfo() : null });
+                        continue;
+                    }
+                    const inst = (o.id !== undefined && String(o.id) !== '' ? instances.get(String(o.id)) : current) || null;
+                    if (!inst && o.op !== 'watch' && o.op !== 'report' && o.op !== 'unwatch') { out.push({ op: String(o.op), fault: 'no instance: ' + String(o.id) }); continue; }
+                    if (o.op === 'register') { inst.mt.register(String(o.r), String(o.n), Object.assign({}, o.meta || {})); out.push({ op: 'register', ok: true }); continue; }
+                    if (o.op === 'heartbeat') { inst.mt.heartbeat(String(o.r), String(o.n)); out.push({ op: 'heartbeat', ok: true }); continue; }
+                    if (o.op === 'subscribe') { const res = inst.mt.subscribe(String(o.r), String(o.n), String(o.scope || '/mesh/' + o.r + '/' + o.n)); out.push({ op: 'subscribe', ok: true, ack: res }); continue; }
+                    if (o.op === 'write') { const res = inst.mt.write(String(o.r), String(o.n), String(o.path), o.value == null ? {} : o.value); out.push({ op: 'write', ok: true, accepted: !!(res && res.accepted) }); continue; }
+                    if (o.op === 'root') { out.push({ op: 'root', ok: true, rootHash: inst.mt.tree.rootHash() }); continue; }
+                    if (o.op === 'alive') { const res = inst.mt.isAlive(String(o.r), String(o.n), Number(o.at)); out.push({ op: 'alive', ok: true, alive: res }); continue; }
+                    if (o.op === 'get') { const res = inst.mt.tree.get(String(o.path)); out.push({ op: 'get', ok: true, state: res && res.state, value: res && res.value ? res.value.value : null, raw: res && res.value || null, meta: res && res.value || null }); continue; }
+                    if (o.op === 'treeGet') { const res = inst.mt.tree.get('/mesh/' + String(o.r) + '/' + String(o.n) + String(o.path)); out.push({ op: 'treeGet', ok: true, state: res && res.state, value: res && res.value ? res.value.value : null, raw: res && res.value || null, meta: res && res.value || null }); continue; }
+                    if (o.op === 'clock') { if (inst.step) inst.step.t = Number(o.now); else inst.fixedT = Number(o.now); out.push({ op: 'clock', ok: true, t: inst.step ? inst.step.t : inst.fixedT }); continue; }
+                    if (o.op === 'rejected') { const rej = inst.mt.rejectedWrites().map((e) => ({ winner: !!e.winner, path: !!e.path })); out.push({ op: 'rejected', ok: true, count: rej.length, shapes: rej }); continue; }
+                    if (o.op === 'ledger') { const l = inst.mt.deltaLedger(); out.push({ op: 'ledger', ok: true, sequenceLength: l.sequenceLength, ledgerHash: l.ledgerHash(), since: l.since(Number(o.since || 0)).map((rec) => ({ actor: rec.actor, epoch: typeof rec.epoch === 'number' })) }); continue; }
+                    if (o.op === 'wal') {
+                        const exists = fs.existsSync(path.join(inst.dir, 'wal.log'));
+                        const snaps = fs.existsSync(path.join(inst.dir, 'snapshots')) && fs.readdirSync(path.join(inst.dir, 'snapshots')).filter((f) => f.endsWith('.snap')).length;
+                        out.push({ op: 'wal', ok: true, walLog: exists, snapshotCount: snaps });
+                        continue;
+                    }
+                    if (o.op === 'recovery-info') { const info = inst.mt.persistenceInfo(); out.push({ op: 'recovery-info', ok: true, info }); continue; }
+                    if (o.op === 'watch') {
+                        for (const name of (Array.isArray(o.names) ? o.names : ['mesh:register'])) {
+                            const fn = (d) => { watched.push({ name, actor: d && d.actor, epoch: d && Number.isFinite(d.epoch) ? true : false, rootHash: d && d.rootHash, replayed: d && d.replayed }); };
+                            bus.on(name, fn);
+                            armedWatchers.push([name, fn]);
+                        }
+                        out.push({ op: 'watch', ok: true, armed: (Array.isArray(o.names) ? o.names : ['mesh:register']).length });
+                        continue;
+                    }
+                    if (o.op === 'report') { out.push({ op: 'report', ok: true, fired: watched.slice(), names: watched.map((w) => w.name) }); watched.length = 0; continue; }
+                    if (o.op === 'unwatch') {
+                        for (const [name, fn] of armedWatchers) { try { bus.off(name, fn); } catch (eu) {} }
+                        armedWatchers.length = 0;
+                        out.push({ op: 'unwatch', ok: true });
+                        continue;
+                    }
+                    out.push({ op: String(o.op), fault: 'unknown op' });
+                } catch (e2) {
+                    out.push({ op: String((o && o.op) || '?'), ok: false, fault: String(e2 && e2.name || 'Error') + ': ' + String(e2 && e2.message || e2).slice(0, 140) });
+                }
+            }
+        } finally {
+            for (const [name, fn] of armedWatchers) { try { bus.off(name, fn); } catch (eu) {} }
+            for (const d of rideDirs) { try { fs.rmSync(d, { recursive: true, force: true }); } catch (er) {} }
+        }
+        void jsonResInner;
+        return jsonRes({ results: out }, 200);
+    });
+
+    // wiring-surfaces: POST { ops: [{op,...}] } — the SCOPED SURFACES arm
+    // (drill-down slice 3, #249): geometry's canonical barcodes, the
+    // brain-verify surfaces (bin/health's section + bin/horcrux's exit
+    // contract over a THROWAWAY brain dir), and mesh-status's report
+    // (pure seed derivation, env flow, JSON roundtrip, degraded render).
+    // Neutral facts + full env/console restore per op.
+    harness.registerRoute('wiring-surfaces', async (ctx) => {
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        const ops = (j && Array.isArray(j.ops) && j.ops.length) ? j.ops.slice(0, 40) : null;
+        if (!ops) return jsonRes({ error: 'ops array required' }, 400);
+        const canonical = require(path.join(sb, 'lib', 'state', 'canonical'));
+        const meshStatus = sandboxLib('mesh-status');
+        const out = [];
+        for (const op of ops) {
+            const o = op || {};
+            try {
+                if (o.op === 'barcode') {
+                    const qc = require(path.join(sb, 'lib', 'geometry', 'quasicrystal'));
+                    const a = qc.generateBarcodeFromContent({ beta: 2, alpha: 1 });
+                    const b = qc.generateBarcodeFromContent({ alpha: 1, beta: 2 });
+                    const again = qc.generateBarcodeFromContent({ alpha: 1, beta: 2 });
+                    const h = canonical.hash({ alpha: 1, beta: 2 });
+                    const expected = '9-' + String(10000 + (parseInt(h.slice(0, 5), 16) % 90000)).padStart(5, '0')
+                        + '-' + String(parseInt(h.slice(5, 10), 16) % 100000).padStart(5, '0')
+                        + '-' + (parseInt(h.slice(-1), 16) % 10);
+                    const other = qc.generateBarcodeFromContent({ alpha: 1, beta: 3 });
+                    out.push({ op: 'barcode', ok: true, orderIndependent: a === b, deterministic: a === again, formatOk: /^9-\d{5}-\d{5}-\d$/.test(a), matchesCanonical: a === expected, distinct: a !== other, samplePrefix: String(a).slice(0, 7) });
+                    continue;
+                }
+                if (o.op === 'barcode-roundtrip') {
+                    const qc = require(path.join(sb, 'lib', 'geometry', 'quasicrystal'));
+                    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-ct-qc-'));
+                    try {
+                        const barcode = qc.generateBarcodeFromContent({ note: 'wiring pack' });
+                        const stored = await qc.store(barcode, { note: 'wiring pack' }, dir);
+                        const back = await qc.retrieve(barcode, dir);
+                        const rederived = qc.generateBarcodeFromContent({ note: 'wiring pack' });
+                        const has = await qc.has(rederived, dir);
+                        out.push({ op: 'barcode-roundtrip', ok: true, stored: stored.stored === true, retrieved: !!(back && back.data && back.data.note === 'wiring pack'), rederivedSame: rederived === barcode, hasAgain: has === true });
+                    } finally { try { fs.rmSync(dir, { recursive: true, force: true }); } catch (er) {} }
+                    continue;
+                }
+                if (o.op === 'brainverify-health') {
+                    const brainDir = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-ct-bv-'));
+                    try {
+                        fs.writeFileSync(path.join(brainDir, 'identity.md'), '# Me\nMODEL: pin');
+                        const { checkBrainIntegrity } = require(path.join(ROOT, 'bin', 'health.js'));
+                        const prevEnv = process.env.MODEL_PATH;
+                        const origLog = console.log;
+                        const logs = [];
+                        try {
+                            process.env.MODEL_PATH = brainDir;
+                            console.log = (...a) => logs.push(a.join(' '));
+                            checkBrainIntegrity();
+                            logs.push('<SECOND-RUN>'); // SAME content: a clean brain verifies
+                            checkBrainIntegrity();
+                            fs.writeFileSync(path.join(brainDir, 'identity.md'), '# Me\nMODEL: TAMPERED');
+                            logs.push('<TAMPERED-RUN>');
+                            checkBrainIntegrity();
+                        } finally {
+                            console.log = origLog;
+                            if (prevEnv === undefined) delete process.env.MODEL_PATH;
+                            else process.env.MODEL_PATH = prevEnv;
+                        }
+                        const text = logs.join('|');
+                        out.push({ op: 'brainverify-health', ok: true, baselineAnchored: /baseline anchored/.test(text), cleanVerified: /verified against last anchor/.test(text), diverged: /DIVERGED/.test(text), pipelineOrdered: text.indexOf('baseline anchored') < text.indexOf('<SECOND-RUN>') && text.indexOf('<SECOND-RUN>') < text.indexOf('<TAMPERED-RUN>') });
+                    } finally { try { fs.rmSync(brainDir, { recursive: true, force: true }); } catch (er) {} }
+                    continue;
+                }
+                if (o.op === 'brainverify-horcrux') {
+                    const brainDir = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-ct-hx-'));
+                    try {
+                        fs.writeFileSync(path.join(brainDir, 'identity.md'), 'MODEL: pin');
+                        const { spawnSync } = require('child_process');
+                        const run = (args) => {
+                            const r = spawnSync(process.execPath, [path.join(ROOT, 'bin', 'horcrux.js'), ...args], { env: { ...process.env, MODEL_PATH: brainDir }, encoding: 'utf8' });
+                            return { code: r.status, text: ((r.stdout || '') + (r.stderr || '')).slice(0, 400) };
+                        };
+                        const noAnchor = run(['verify']);
+                        const anchored = run(['anchor', 'wiring pack baseline']);
+                        const clean = run(['verify']);
+                        fs.writeFileSync(path.join(brainDir, 'identity.md'), 'MODEL: TAMPERED');
+                        const diverged = run(['verify']);
+                        const reanchor = run(['anchor', 'intentional change']);
+                        const reclean = run(['verify']);
+                        out.push({
+                            op: 'brainverify-horcrux', ok: true,
+                            noAnchorCode: noAnchor.code,
+                            anchoredCode: anchored.code, anchoredText: anchored.text.includes('Anchored'),
+                            cleanCode: clean.code,
+                            divergedCode: diverged.code, divergedText: diverged.text.includes('DIVERGED'),
+                            reanchorCode: reanchor.code, recleanCode: reclean.code,
+                        });
+                    } finally { try { fs.rmSync(brainDir, { recursive: true, force: true }); } catch (er) {} }
+                    continue;
+                }
+                if (o.op === 'meshstatus-report') {
+                    const report = meshStatus.status().report;
+                    const m = report && report.mesh;
+                    const round = m ? JSON.parse(JSON.stringify(m)) : null;
+                    out.push({
+                        op: 'meshstatus-report', ok: true,
+                        present: !!m && !m.error,
+                        seedHex64: !!(m && m.seedScope && typeof m.seedScope.seedHex === 'string' && m.seedScope.seedHex.length === 64),
+                        scopePath: m && m.seedScope ? m.seedScope.scopePath : null,
+                        ttlPositive: !!(m && Number(m.presenceTtlMs) > 0),
+                        peersArray: !!(m && Array.isArray(m.peers)),
+                        jsonCountStable: !!(round && m && round.count === m.count),
+                    });
+                    continue;
+                }
+                if (o.op === 'meshstatus-envflow') {
+                    const prev = process.env.VANT_UNIVERSE_SEED;
+                    try {
+                        const base = meshStatus.status().report.mesh.seedScope.seedHex;
+                        const pure = meshStatus.status().report.mesh.seedScope.seedHex; // unseed: same answer twice
+                        process.env.VANT_UNIVERSE_SEED = 'wiring-pack-universe';
+                        const envd = meshStatus.status().report.mesh.seedScope.seedHex;
+                        out.push({ op: 'meshstatus-envflow', ok: true, pureTwice: base === pure, envMoved: base !== envd });
+                    } finally {
+                        if (prev === undefined) delete process.env.VANT_UNIVERSE_SEED;
+                        else process.env.VANT_UNIVERSE_SEED = prev;
+                    }
+                    continue;
+                }
+                if (o.op === 'meshstatus-render') {
+                    const text = meshStatus.renderReport({ ...meshStatus.status().report, mesh: { error: 'wiring-pack poisoned leg' } });
+                    const line = text.split('\n').find((l) => l.startsWith('mesh')) || '';
+                    out.push({ op: 'meshstatus-render', ok: true, errorRendered: /\(error: wiring-pack poisoned leg\)/.test(line), labelKept: /mesh\s+\(unavailable\)/.test(line) });
+                    continue;
+                }
+                out.push({ op: String(o.op), fault: 'unknown op' });
+            } catch (e) {
+                out.push({ op: String((o && o.op) || '?'), ok: false, fault: String(e && e.name || 'Error') + ': ' + String(e && e.message || e).slice(0, 140) });
+            }
+        }
+        return jsonRes({ results: out }, 200);
+    });
+
     return harness;
 }
+

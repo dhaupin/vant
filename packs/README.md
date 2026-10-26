@@ -240,7 +240,7 @@ Cookie header.
 | `raw-cookie-fallback-hygiene` | the unbound intake answers bound:false and ships vg_session_<p> with FULL hygiene (HttpOnly+Secure+SameSite=Strict); the probe resolves it; a malformed escape answers typed null | validated - REFUSED |
 | `admin-gate-typed-ladder` | anon 401 E_NO_SESSION / forged sid 401 / viewer 403 E_FORBIDDEN / admin passes (ok, role) / no store 503 — the typed ladder at every rung | validated - REFUSED |
 
-### `public/vant-state-wiring` — the state-spine wiring consumers (5 rows, slice 1: TRUST→TREE; all validated 2026-10-25)
+### `public/vant-state-wiring` — the state-spine wiring consumers (30 rows in three slices: trust→tree, merge-path, mesh + surfaces; all validated 2026-10-26)
 
 **What it does.** Drill-down slice 1 of the campaign: the state-wiring
 native suite's first live consumer family (TRUST→TREE, labs/WIRING.md step
@@ -289,6 +289,40 @@ the pin measures the mirror, not the consent door.
 | `market-list-mirrors` | list re-mirrors the market state through the merge path; state:saved rides the same hash | validated - REFUSED |
 | `market-disk-view-live` | after the fixed settle, treeFor('state/market.json') === live mirror | validated - REFUSED |
 | `market-clear-resets` | the mirror drops to null and the search index resets; re-listing works cleanly | validated - REFUSED |
+
+**Slice 3 (same day): the MESH consumers (steps ④-⑦) + the SURFACES
+consumers.** Two more arms: `wiring-mesh` (in-ride MeshTree instances over
+throwaway WAL dirs with FIXED step clocks — `t + n*step`, the dir-token law
+lets two instances in one ride share a dir for recovery rides — and shared
+bus watchers) and `wiring-surfaces` (geometry, brain-verify, mesh-status,
+neutral facts + full env/console restore). Ride shapes: the WAL rows read
+the REAL SnapshottedLog layout (`wal.log` + content-addressed `*.snap`),
+the events rows ride the pass-176 shared bus, the brain-verify rows walk
+`checkBrainIntegrity` and `bin/horcrux.js`'s exit contract, and the
+mesh-status rows honor the report's pure-derivation + env-flow + degraded
+laws. Two pin-caught arm bugs worth keeping in the ledger: a health walk
+must NOT change content between its baseline and clean runs (the fresh
+brain gets a baseline, then a SAME-content second run verifies — the arm
+had mutated between and read a false divergence), and the pure-derivation
+probe must measure purity BEFORE moving the env it proves flows.
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `mesh-wal-deltas-ride-log` | `wal.log` + the snapshots dir exist after register→heartbeat→subscribe; exactly one `.snap` fires at the everyN=3 boundary — deltas ride the file, not the memory | validated - REFUSED |
+| `mesh-wal-recovery-reconstructs` | a FRESH MeshTree over the SAME dir reconstructs root + alive + write + aoi byte-for-byte and reports the replay count | validated - REFUSED |
+| `mesh-wal-rejected-durable` | a lower-epoch challenger loses deterministically (recorded with winner/provenance shape); the RECOVERED tree keeps the loser record AND the restored authority (a second challenger refused cold) | validated - REFUSED |
+| `mesh-wal-ledger-provenance` | every delta carries actor+numeric-epoch; two trees that saw the same events agree on ONE ledgerHash | validated - REFUSED |
+| `mesh-wal-interval-fastforward` | bounded (keepK=2) recovery reproduces the exact root and the LAST delta holds the contested presence path | validated - REFUSED |
+| `mesh-events-bus-provenance` | register/heartbeat/aoi/write/write:rejected all emit on the shared bus with actor+epoch; an older-epoch challenger's rejection rides | validated - REFUSED |
+| `mesh-events-silent-side-effect-free` | register+heartbeat+write on a silent tree fire ZERO events — a status probe is never a side effect | validated - REFUSED |
+| `mesh-events-recovery-emits` | `mesh:recovered` fires EXACTLY ONCE carrying the live root hash and replayed=1 | validated - REFUSED |
+| `geometry-canonical-barcodes` | same logical content hashes identically in ANY key order (the #146 disease dead at the generator), NSC-9 12-digit contract intact, canonically derived, distinct-content-distinct | validated - REFUSED |
+| `geometry-barcode-roundtrip` | store→retrieve roundtrips, re-deriving the barcode reaches the SAME record, and has() answers | validated - REFUSED |
+| `brainverify-health-lifecycle` | fresh brain anchors a baseline (warn path), SAME-content brain verifies, tamper DIVERGES — in one process walk | validated - REFUSED |
+| `brainverify-horcrux-exit-contract` | no anchor → 2 / anchor → 0 / clean → 0 / tamper → 1 + DIVERGED / re-anchor → 0 again | validated - REFUSED |
+| `meshstatus-mesh-section-shape` | the mesh section carries 64-hex scope, mesh:local path, positive TTL, a peers array, and a stable JSON roundtrip | validated - REFUSED |
+| `meshstatus-seed-pure-and-envflow` | the seed derivation answers identically twice unperturbed and MOVES under the universe seed (restored after) | validated - REFUSED |
+| `meshstatus-render-degraded` | the degraded mesh line still renders its label with (unavailable) and prints the error itself — degraded-not-dead | validated - REFUSED |
 
 ### `public/vant-kernel` — prove-the-verbs conformance for the kernel seed + its adoption (10 rows; all validated 2026-10-25)
 
@@ -607,7 +641,7 @@ today's clean B0 run: **48 REFUSED / 0 EXPLOITED / 1 skipped**.
 | 0 — wire-surface door pins (`test/crashtest-server.js`, 9 pins) | smallest lift, biggest overlap | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native suite 9/9 each run); the suite stays in CI under the law |
 | wire-surface re-pins — r/2 edge face (`web/relay/functions/api/r/relay.ts`) | ~15% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native lanes green each run: relay, relay-parity, memory, escrow, escrow-kernel, forum-msg-escrow, governance, workspace-memory via the sweep filter); the native lanes stay in CI under the law. Cycle 2's catch: the origin row's drive called hopFrame twice (sign + body) and each call re-evaluated ts — a ms-grain boundary left the signature covering different bytes than the body, and the edge (correctly) 401'd; one eval per shape since, signature === body bytes |
 | in-process module discipline (row-by-row) | ~40% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 6/6 REFUSED + native suites memory / escrow / governance green each run via the same sweep filter); the native blocks stay in CI under the law |
-| drill-down: remaining native suites (state-wiring, migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-2 began (2026-10-25)**: the TRUST→TREE family (5 pins) AND the MERGE-PATH consumers — node-registry (steps ②), consensus + market (③) — became `vant-state-wiring` rows on the run root's `wiring-trust` + `wiring-module` arms (10/10 slice-2 REFUSED x2); the remaining families (WAL/geometry/brain-verify/anchor) queue behind per-bucket conversion shape |
+| drill-down: remaining native suites (state-wiring, migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-3 landed (2026-10-25/26)**: the TRUST→TREE family (5 pins), the MERGE-PATH consumers — node-registry (step ②), consensus + market (③) — AND the remaining state-wiring families — mesh WAL (5) + mesh events (3), geometry→spine (2), brain-verify→surfaces (2), mesh-status (3) — became `vant-state-wiring` rows on the run root's `wiring-trust` + `wiring-module` + `wiring-mesh` + `wiring-surfaces` arms (30/30 REFUSED x2); the native suite stays green alongside (51/51) per the reverse-verification law |
 
 **Bucket 0 S-counter ledger:** cycle 1 (2026-10-25, conversion day) →
 cycle 2 → cycle 3, all sides green each run — the quarter-period

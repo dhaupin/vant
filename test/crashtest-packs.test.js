@@ -1166,6 +1166,22 @@ const EXPECTED = {
         'market-list-mirrors': 'skip',
         'market-disk-view-live': 'skip',
         'market-clear-resets': 'skip',
+        // (slice 3) mesh WAL + events, geometry, brain-verify, mesh-status
+        'mesh-wal-deltas-ride-log': 'skip',
+        'mesh-wal-recovery-reconstructs': 'skip',
+        'mesh-wal-rejected-durable': 'skip',
+        'mesh-wal-ledger-provenance': 'skip',
+        'mesh-wal-interval-fastforward': 'skip',
+        'mesh-events-bus-provenance': 'skip',
+        'mesh-events-silent-side-effect-free': 'skip',
+        'mesh-events-recovery-emits': 'skip',
+        'geometry-canonical-barcodes': 'skip',
+        'geometry-barcode-roundtrip': 'skip',
+        'brainverify-health-lifecycle': 'skip',
+        'brainverify-horcrux-exit-contract': 'skip',
+        'meshstatus-mesh-section-shape': 'skip',
+        'meshstatus-seed-pure-and-envflow': 'skip',
+        'meshstatus-render-degraded': 'skip',
     },
 };
 

@@ -19,6 +19,38 @@ function parseJson(text) {
   try { return JSON.parse(text); } catch { return null; }
 }
 
+    /**
+     * slice 3 arm probes: wiring-mesh (in-ride MeshTree instances, fixed
+     * step clocks, shared-bus watchers) + wiring-surfaces (geometry,
+     * brain-verify, mesh-status). Neutral facts only; dirs sweep on ride end.
+     */
+    const VOID = () => {};
+    async function runArm(harness, arm, ops) {
+      let raw;
+      try {
+        const r = await harness.run(arm, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ ops }),
+        });
+        if (typeof r.body === 'string') raw = r.body;
+        else if (typeof r.text === 'function') { try { raw = await r.text(); } catch { VOID(); } }
+        else if (r.response && typeof r.response.text === 'function') {
+          try { raw = await r.response.text(); } catch { VOID(); } }
+        else raw = '';
+      } catch (e) {
+        if (/no route registered as/i.test(String(e && e.message))) return null;
+        throw e;
+      }
+      if (!raw) return null;
+      const j = parseJson(raw);
+      if (!j || j.error) return null;
+      const rows = Array.isArray(j.results) ? j.results : [];
+      return { rows, get: (n) => rows.filter((x) => x && x.op === n).pop(), all: (n) => rows.filter((x) => x && x.op === n) };
+    }
+    const probeMesh = (harness, ops) => runArm(harness, 'wiring-mesh', ops);
+    const probeSurfaces = (harness, ops) => runArm(harness, 'wiring-surfaces', ops);
+
 async function probeWiring(harness, ops) {
   let raw;
   try {
@@ -76,9 +108,13 @@ function rowErr(detail, ops, evidence) {
   return { verdict: 'EXPLOITED', detail, tookRequests: ops.length, evidence };
 }
 
+// suite-context honest-skip alias (slice 3 rows ride the same shape as
+// slice 1/2's `skip` — kind, verdict packing, and detail prefix identical)
+const rowSkip = skip;
+
 export default {
   name: 'vant-state-wiring',
-  description: 'state-spine wiring discipline via the trust consumer family: the ledger mirrors under /trust/ with the score and history in the tree, every mutation re-mirrors and re-hashes, the disk view equals the live mirror in one string, the state:saved event carries that same hash, and clearState leaves no hash for state that no longer exists',
+  description: 'state-spine wiring discipline via its consumer families: the ledger mirrors under /trust/ with the score and history in the tree, every mutation re-mirrors and re-hashes, the disk view equals the live mirror in one string, the state:saved event carries that same hash, and clearState leaves no hash for state that no longer exists (slice 3 adds the mesh WAL/event/recovery families and the geometry/brain-verify/mesh-status surfaces)',
 
   attacks: [
     {
@@ -465,6 +501,416 @@ export default {
           return rowErr('re-listing after clearState refused - the clear wipes everything, so re-list works cleanly', ride.rows);
         }
         return { verdict: 'REFUSED', detail: 'clearState drops the mirror to null and re-listing works cleanly - the reset is honest', tookRequests: 4 };
+      },
+    },
+
+
+    // ============ (slice 3) MESH → WAL (pass 175) ============
+
+    {
+      name: 'mesh-wal-deltas-ride-log',
+      description: 'mesh deltas ride the real WAL: wal.log and the snapshots dir exist, and the interval snapshot fires at everyN (3 records in, exactly 1 .snap) - persistence is the file, not the memory',
+      async run(harness) {
+        const ride = await probeMesh(harness, [
+          { op: 'open', id: 'm1', universe: 'wiring-wal-universe', wal: true, t: 5000, everyN: 3 },
+          { op: 'register', r: 'r1', n: 'alpha' },
+          { op: 'heartbeat', r: 'r1', n: 'alpha' },
+          { op: 'subscribe', r: 'r1', n: 'alpha', scope: '/mesh/r1' },
+          { op: 'wal' },
+        ]);
+        if (!ride) return rowSkip('wiring-mesh not armed (slice-3 arm pending)');
+        const wal = ride.get('wal');
+        if (!wal) return rowErr('the wal probe faulted - answers, not throws', ride.rows);
+        if (wal.walLog !== true) return rowErr('wal.log did not exist after register-heartbeat-subscribe - deltas must ride the log', ride.rows);
+        if (wal.snapshotCount !== 1) {
+          return rowErr(`snapshot count ${JSON.stringify(wal.snapshotCount)} at everyN=3 (3 records in) - the interval snapshot must fire on the boundary`, ride.rows, { count: wal.snapshotCount });
+        }
+        return { verdict: 'REFUSED', detail: 'wal.log + snapshots dir exist and one .snap fired at the everyN=3 boundary - deltas ride the log', tookRequests: 5 };
+      },
+    },
+
+    {
+      name: 'mesh-wal-recovery-reconstructs',
+      description: 'a fresh MeshTree over the SAME dir reconstructs the state byte-for-byte: same root hash, same alive answer, the write and the aoi scope survive - recovery replays the log over the latest snapshot',
+      async run(harness) {
+        const ride = await probeMesh(harness, [
+          { op: 'open', id: 'seed', universe: 'wiring-wal-universe', wal: true, t: 5000, everyN: 8, dirToken: 'recon-1' },
+          { op: 'register', r: 'r1', n: 'alpha', meta: { role: 'writer' } },
+          { op: 'heartbeat', r: 'r1', n: 'alpha' },
+          { op: 'register', r: 'r1', n: 'beta', meta: { role: 'reader' } },
+          { op: 'heartbeat', r: 'r1', n: 'beta' },
+          { op: 'write', r: 'r1', n: 'alpha', path: '/mesh/r1/alpha/state', value: { hp: 80 } },
+          { op: 'subscribe', r: 'r1', n: 'beta', scope: '/mesh/r1/alpha' },
+          { op: 'root' },
+          { op: 'alive', r: 'r1', n: 'beta', atTime: 5001 },
+          { op: 'get', path: '/mesh/r1/alpha/state' },
+          { op: 'treeGet', r: 'r1', n: 'beta', path: '/aoi' },
+          { op: 'open', id: 'fresh', universe: 'wiring-wal-universe', wal: true, t: 5000, everyN: 8, dirToken: 'recon-1' },
+          { op: 'root' },
+          { op: 'alive', r: 'r1', n: 'beta', atTime: 5001 },
+          { op: 'get', path: '/mesh/r1/alpha/state' },
+          { op: 'treeGet', r: 'r1', n: 'beta', path: '/aoi' },
+          { op: 'recovery-info' },
+        ]);
+        if (!ride) return rowSkip('wiring-mesh not armed');
+        const rootSeed = ride.all('root')[0];
+        const aliveSeed = ride.all('alive')[0];
+        const rootFresh = ride.all('root').pop();
+        const aliveFresh = ride.all('alive').pop();
+        const stateFresh = ride.all('get').pop();
+        const aoiFresh = ride.all('treeGet').pop();
+        const rec = ride.get('recovery-info');
+        for (const [n, x] of Object.entries({ rootSeed, aliveSeed, rootFresh, aliveFresh, stateFresh, aoiFresh, rec })) {
+          if (!x) return rowErr(`the ${n} probe failed to answer - the recovery walk needs every leg`, ride.rows);
+        }
+        if (rootSeed.rootHash !== rootFresh.rootHash) {
+          return rowErr(`recovery produced a DIFFERENT root (${String(rootSeed.rootHash).slice(0, 10)}... vs ${String(rootFresh.rootHash).slice(0, 10)}...) - snapshot + log replay must reproduce the state byte-for-byte`, ride.rows);
+        }
+        if (JSON.stringify(aliveSeed.alive) !== JSON.stringify(aliveFresh.alive)) {
+          return rowErr('the alive answer diverged after recovery - presence must survive the replay', ride.rows);
+        }
+        if (stateFresh.state !== 'PRESENT' || !stateFresh.value || stateFresh.value.hp !== 80) {
+          return rowErr(`the written value did not survive recovery (${JSON.stringify(stateFresh.value)}) - { hp: 80 } must ride the log`, ride.rows);
+        }
+        if (aoiFresh.state !== 'PRESENT' || !aoiFresh.raw || aoiFresh.raw.scope !== '/mesh/r1/alpha') {
+          return rowErr('the aoi scope did not survive recovery - the subscription must replay', ride.rows);
+        }
+        if (!rec.info || !(rec.info.recovery && rec.info.recovery.replayed >= 0)) {
+          return rowErr('recovery did not report a replay count - the info must name what replayed', ride.rows);
+        }
+        return { verdict: 'REFUSED', detail: 'fresh instance over the same dir reconstructs root + alive + write + aoi byte-for-byte and reports the replay count', tookRequests: 17 };
+      },
+    },
+
+    {
+      name: 'mesh-wal-rejected-durable',
+      description: 'rejected writes survive: a lower-epoch challenger loses deterministically (recorded with winner+writer shape), and the RECOVERED tree keeps the loser record AND the restored authority - the loser is durable, not in-memory',
+      async run(harness) {
+        const ride = await probeMesh(harness, [
+          { op: 'open', id: 'a', universe: 'wiring-wal-universe', wal: true, t: 1000, everyN: 64, dirToken: 'loser-1' },
+          { op: 'write', r: 'r', n: 'a', path: '/mesh/r/n/x', value: { v: 1 } },
+          { op: 'clock', id: 'a', now: 990 },
+          { op: 'write', r: 'r', n: 'b', path: '/mesh/r/n/x', value: { v: 2 } },
+          { op: 'rejected' },
+          { op: 'open', id: 'b', universe: 'wiring-wal-universe', wal: true, t: 1000, everyN: 64, dirToken: 'loser-1' },
+          { op: 'rejected' },
+          { op: 'clock', id: 'b', now: 995 },
+          { op: 'write', r: 'r', n: 'c', path: '/mesh/r/n/x', value: { v: 0 } },
+          { op: 'rejected' },
+        ]);
+        if (!ride) return rowSkip('wiring-mesh not armed');
+        void ride.get('root');
+        const chalWrite = ride.all('write').pop();
+        if (!chalWrite || chalWrite.accepted !== false) {
+          return rowErr('the lower-epoch challenger was not refused - last-writer-wins must deterministically reject the older epoch', ride.rows);
+        }
+        const rejA = ride.all('rejected')[0];
+        const rejB = ride.all('rejected').pop();
+        if (!rejA || !rejB) return rowErr('the rejection probes faulted - answers, not throws', ride.rows);
+        if (rejA.count !== 1) {
+          return rowErr(`the live tree recorded ${JSON.stringify(rejA.count)} rejected write(s) - exactly the one loser`, ride.rows);
+        }
+        if (rejB.count !== 2) {
+          return rowErr(`the recovered tree recorded ${JSON.stringify(rejB.count)} rejected write(s), expected 2 (the loser replayed + the second challenger) - the record + single-writer authority must survive recovery`, ride.rows);
+        }
+        void probeMesh;
+        if (rejA.shapes.some((s) => !s.winner && !s.path && !s.writer)) {
+          return rowErr('a rejected entry lost its shape (winner/writer/path) - provenance rides every delta, even the losers', ride.rows);
+        }
+        return { verdict: 'REFUSED', detail: 'the loser recorded with provenance shape, and the recovered tree kept the record AND the authority (second challenger refused) - durability holds cold', tookRequests: 10 };
+      },
+    },
+    {
+      name: 'mesh-wal-ledger-provenance',
+      description: 'every delta is provenance-stamped (actor string + numeric epoch, never anonymous) and the delta ledgerHash is DETERMINISTIC - two trees that saw the same events agree on one hash',
+      async run(harness) {
+        const ride = await probeMesh(harness, [
+          { op: 'open', id: 'ledger1', universe: 'wiring-ledger-universe', wal: false, t: 42 },
+          { op: 'register', r: 'r', n: 'n' },
+          { op: 'heartbeat', r: 'r', n: 'n' },
+          { op: 'write', r: 'r', n: 'n', path: '/mesh/r/n/state', value: { x: 1 } },
+          { op: 'write', r: 'r', n: 'other', path: '/mesh/r/n/state', value: { x: 2 } },
+          { op: 'ledger' },
+        ]);
+        if (!ride) return rowSkip('wiring-mesh not armed');
+        const ledger = ride.get('ledger');
+        if (!ledger) return rowErr('the ledger probe faulted - answers, not throws', ride.rows);
+        if (ledger.sequenceLength < 3) {
+          return rowErr(`sequenceLength ${JSON.stringify(ledger.sequenceLength)} after register+heartbeat+2 writes - the ledger must record every delta`, ride.rows);
+        }
+        if (ledger.since.some((rec) => !rec.actor || rec.actor.length === 0)) {
+          return rowErr('a delta carries NO actor - the actor is NOT optional', ride.rows);
+        }
+        if (ledger.since.some((rec) => rec.epoch !== true)) { // arm maps: epoch rode as a finite number
+          return rowErr('a delta carried a NON-numeric epoch (the arm mapping saw it move) - the epoch is NOT optional', ride.rows);
+        }
+        const ride2 = await probeMesh(harness, [
+          { op: 'open', id: 'ledger2', universe: 'wiring-ledger-universe', wal: false, t: 42 },
+          { op: 'register', r: 'r', n: 'n' },
+          { op: 'heartbeat', r: 'r', n: 'n' },
+          { op: 'write', r: 'r', n: 'n', path: '/mesh/r/n/state', value: { x: 1 } },
+          { op: 'write', r: 'r', n: 'other', path: '/mesh/r/n/state', value: { x: 2 } },
+          { op: 'ledger' },
+        ]);
+        const ledger2 = ride2 && ride2.get('ledger');
+        if (!ledger2) return rowErr('the determinism twin faulted - answers, not throws', ride.rows);
+        if (ledger.ledgerHash !== ledger2.ledgerHash) {
+          return rowErr('two trees that saw the same events hashed DIFFERENTLY - the ledgerHash must be deterministic, not process-local', ride.rows, { a: ledger.ledgerHash, b: ledger2.ledgerHash });
+        }
+        return { verdict: 'REFUSED', detail: 'every delta carries actor+epoch and two same-event trees agree on one ledgerHash - provenance is deterministic', tookRequests: 12 };
+      },
+    },
+
+    {
+      name: 'mesh-wal-interval-fastforward',
+      description: 'interval snapshot fast-forwards recovery: keepK=2 bounded recovery reproduces the exact state (same root), and the LAST delta won the contested presence path',
+      async run(harness) {
+        const ride = await probeMesh(harness, [
+          { op: 'open', id: 'snap1', universe: 'wiring-wal-universe', wal: true, nowMode: 'step', t: 7000, step: 10, everyN: 2, keepK: 2, dirToken: 'ff-1' },
+          { op: 'heartbeat', r: 'r', n: 'n0' },
+          { op: 'heartbeat', r: 'r', n: 'n1' },
+          { op: 'heartbeat', r: 'r', n: 'n2' },
+          { op: 'heartbeat', r: 'r', n: 'n3' },
+          { op: 'heartbeat', r: 'r', n: 'n4' },
+          { op: 'root' },
+          { op: 'open', id: 'snap2', universe: 'wiring-wal-universe', wal: true, nowMode: 'step', t: 7000, step: 10, everyN: 2, keepK: 2, dirToken: 'ff-1' },
+          { op: 'root' },
+          { op: 'get', path: '/mesh/r/n4/presence' },
+        ]);
+        if (!ride) return rowSkip('wiring-mesh not armed');
+        const roots = ride.all('root');
+        if (roots.length !== 2 || !HEX64.test(String(roots[0].rootHash || ''))) {
+          return rowErr('the recovery root probe faulted or never hashed - answers, not throws', ride.rows);
+        }
+        if (roots[0].rootHash !== roots[1].rootHash) {
+          return rowErr(`bounded recovery produced a DIFFERENT root - snapshot fast-forward must land the same state`, ride.rows);
+        }
+        const last = ride.all('get').pop();
+        if (!last || last.state !== 'PRESENT') {
+          return rowErr('the last-winner presence path is absent after recovery - the LAST delta must win', ride.rows);
+        }
+        if (!last.raw || last.raw.heartbeat !== 7040) {
+          return rowErr(`the recovered heartbeat ${JSON.stringify(last.raw && last.raw.heartbeat)} != 7040 (t=7000 step=10, four heartbeats later) - the LAST delta won`, ride.rows, { raw: last.raw });
+        }
+        return { verdict: 'REFUSED', detail: 'bounded (keepK=2) recovery reproduces the same root and the last delta (n4) holds the contested path', tookRequests: 10 };
+      },
+    },
+
+    // ============ (slice 3) MESH → EVENTS (pass 176) ============
+
+    {
+      name: 'mesh-events-bus-provenance',
+      description: 'every mutation emits on the shared bus with provenance: register, heartbeat, aoi, write, and write:rejected all fire with actor and epoch, and a challenger at an OLDER epoch loses and its rejection rides',
+      async run(harness) {
+        const ride = await probeMesh(harness, [
+          { op: 'watch', names: ['mesh:register', 'mesh:heartbeat', 'mesh:aoi', 'mesh:write', 'mesh:write:rejected'] },
+          { op: 'open', id: 'evt1', universe: 'wiring-evt-universe', wal: false, t: 100 },
+          { op: 'register', r: 'r', n: 'n' },
+          { op: 'heartbeat', r: 'r', n: 'n' },
+          { op: 'subscribe', r: 'r', n: 'n', scope: '/mesh/r' },
+          { op: 'write', r: 'r', n: 'n', path: '/mesh/r/x', value: { v: 1 } },
+          { op: 'clock', id: 'evt1', now: 99 },
+          { op: 'write', r: 'r', n: 'n', path: '/mesh/r/x', value: { v: 2 } },
+          { op: 'report' },
+          { op: 'unwatch' },
+        ]);
+        if (!ride) return rowSkip('wiring-mesh not armed');
+        const report = ride.get('report');
+        if (!report) return rowErr('the event probe faulted - answers, not throws', ride.rows);
+        const names = report.names || [];
+        for (const want of ['mesh:register', 'mesh:heartbeat', 'mesh:aoi', 'mesh:write', 'mesh:write:rejected']) {
+          if (!names.includes(want)) {
+            return rowErr(`missing event ${want} (got: ${names.join(',')}) - every mutation must emit on the shared bus`, ride.rows);
+          }
+        }
+        if (report.fired.some((f) => !f.actor || typeof f.actor !== 'string')) {
+          return rowErr('an event carries NO actor - actor rides every mutation event', ride.rows);
+        }
+        if (report.fired.some((f) => f.epoch !== true)) { // arm maps: event epoch rode as a finite number
+          return rowErr('an event carried a NON-numeric epoch (the arm mapping saw it move) - epoch rides every mutation event', ride.rows);
+        }
+        return { verdict: 'REFUSED', detail: 'register/heartbeat/aoi/write/write:rejected all fired with actor+epoch on the shared bus', tookRequests: 9 };
+      },
+    },
+
+    {
+      name: 'mesh-events-silent-side-effect-free',
+      description: 'silent trees emit nothing: register, heartbeat, and write on a silent tree fire zero events - a status probe can never become a bus side effect',
+      async run(harness) {
+        const ride = await probeMesh(harness, [
+          { op: 'watch', names: ['mesh:register', 'mesh:heartbeat', 'mesh:write'] },
+          { op: 'open', id: 'silent1', universe: 'wiring-evt-universe', wal: false, t: 100, silent: true },
+          { op: 'register', r: 'r', n: 'n' },
+          { op: 'heartbeat', r: 'r', n: 'n' },
+          { op: 'write', r: 'r', n: 'n', path: '/mesh/r/n/state', value: { v: 1 } },
+          { op: 'report' },
+          { op: 'unwatch' },
+        ]);
+        if (!ride) return rowSkip('wiring-mesh not armed');
+        const report = ride.get('report');
+        if (!report) return rowErr('the silent probe faulted - answers, not throws', ride.rows);
+        if ((report.fired || []).length !== 0) {
+          return rowErr(`a silent tree emitted ${report.fired.length} event(s) (${(report.names || []).join(',')}) - silent must be event-SILENT`, ride.rows);
+        }
+        return { verdict: 'REFUSED', detail: 'register+heartbeat+write on a silent tree fired zero bus events - a status probe is never a side effect', tookRequests: 7 };
+      },
+    },
+
+    {
+      name: 'mesh-events-recovery-emits',
+      description: 'persistent recovery emits mesh:recovered ONCE carrying the live root hash and the replay count - a healed instance announces exactly one recovery, not a flood',
+      async run(harness) {
+        const ride = await probeMesh(harness, [
+          { op: 'watch', names: ['mesh:register'] },
+          { op: 'open', id: 'seed-1', universe: 'wiring-evt-universe', wal: true, t: 100, silent: true, everyN: 2, dirToken: 'rec-2' },
+          { op: 'register', r: 'r', n: 'n' },
+          { op: 'watch', names: ['mesh:recovered'] },
+          { op: 'open', id: 'fresh-1', universe: 'wiring-evt-universe', wal: true, t: 100, everyN: 2, dirToken: 'rec-2' },
+          { op: 'report' },
+          { op: 'root' },
+          { op: 'unwatch' },
+        ]);
+        if (!ride) return rowSkip('wiring-mesh not armed');
+        const report = ride.get('report');
+        if (!report) return rowErr('the recovery-event probe faulted - answers, not throws', ride.rows);
+        const fired = report.fired || [];
+        if (fired.length !== 1) {
+          return rowErr(`mesh:recovered fired ${fired.length} time(s) after fresh recovery - announcement is exactly once`, ride.rows);
+        }
+        const rec = fired[0];
+        const root = ride.get('root');
+        if (!HEX64.test(String(rec.rootHash || '')) || !HEX64.test(String(root.rootHash || '')) || rec.rootHash !== root.rootHash) {
+          return rowErr('the recovery event did not carry the live root hash - the healed instance must announce its root hash', ride.rows, { event: rec.rootHash, live: root.rootHash });
+        }
+        if (rec.replayed !== 1) {
+          return rowErr(`recovery reported ${JSON.stringify(rec.replayed)} replays for one seeded register - the replay count must be exactly 1`, ride.rows);
+        }
+        return { verdict: 'REFUSED', detail: 'mesh:recovered fired once with the live root hash and replayed=1 - a healed instance announces once, loudly', tookRequests: 8 };
+      },
+    },
+
+    // ============ (slice 3) GEOMETRY → SPINE (pass 176) ============
+
+    {
+      name: 'geometry-canonical-barcodes',
+      description: 'quasicrystal barcodes ride the ONE canonical encoder: same logical content hashes identically in ANY key order, the NSC-9 12-digit format contract intact, the digits derive from the canonical hash of the same content, and distinct content stays distinct',
+      async run(harness) {
+        const ride = await probeSurfaces(harness, [{ op: 'barcode' }]);
+        if (!ride) return rowSkip('wiring-surfaces not armed (slice-3 arm pending)');
+        const b = ride.get('barcode');
+        if (!b) return rowErr('the barcode probe faulted - answers, not throws', ride.rows);
+        if (b.fault) return rowErr('the barcode probe faulted: ' + b.fault, ride.rows);
+        if (b.deterministic !== true) return rowErr(`the encoder moved across identical calls (deterministic=${b.deterministic})`, ride.rows);
+        if (b.orderIndependent !== true) return rowErr('same logical content hashed DIFFERENTLY under a different key order - the disease is back at the generator', ride.rows);
+        if (b.formatOk !== true) return rowErr('the barcode does not match the NSC-9 12-digit format contract', ride.rows);
+        if (b.matchesCanonical !== true) return rowErr(`the barcode digits do not derive from the canonical hash of the SAME content (${b.samplePrefix}...)`, ride.rows);
+        if (b.distinct !== true) return rowErr('distinct content produced the SAME barcode - collisions make an address useless', ride.rows);
+        return { verdict: 'REFUSED', detail: 'key-order-independent, deterministic, format-contracted, canonically derived, and distinct-content-distinct - one encoder, working', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'geometry-barcode-roundtrip',
+      description: 'barcode addressing still self-authenticates: store → retrieve lands the exact content, re-deriving the barcode from the stored content reaches the SAME record, and has() answers for the rederived address',
+      async run(harness) {
+        const ride = await probeSurfaces(harness, [{ op: 'barcode-roundtrip' }]);
+        if (!ride) return rowSkip('wiring-surfaces not armed');
+        const rt = ride.get('barcode-roundtrip');
+        if (!rt) return rowErr('the roundtrip probe faulted - answers, not throws', ride.rows);
+        if (rt.fault) return rowErr('the roundtrip probe faulted: ' + rt.fault, ride.rows);
+        if (rt.stored !== true) return rowErr('the store refused - the addressing must admit its own barcode', ride.rows);
+        if (rt.retrieved !== true) return rowErr('the retrieve returned the WRONG content - store/retrieve must roundtrip byte-for-byte', ride.rows);
+        if (rt.rederivedSame !== true) return rowErr('re-deriving the barcode from the stored content produced a DIFFERENT address - self-authentication broken', ride.rows);
+        if (rt.hasAgain !== true) return rowErr('has() denied the rederived address', ride.rows);
+        return { verdict: 'REFUSED', detail: 'store→retrieve roundtrips, the rederived barcode matches, and has() answers - addressing self-authenticates', tookRequests: 1 };
+      },
+    },
+
+    // ============ (slice 3) BRAIN-VERIFY → SURFACES (pass 176) ============
+
+    {
+      name: 'brainverify-health-lifecycle',
+      description: 'the health surface verifies a brain against its anchor: a fresh brain gets a baseline (warn at first anchor), a clean brain verifies, and tampering is DETECTED (DIVERGED)',
+      async run(harness) {
+        const ride = await probeSurfaces(harness, [{ op: 'brainverify-health' }]);
+        if (!ride) return rowSkip('wiring-surfaces not armed');
+        const bv = ride.get('brainverify-health');
+        if (!bv) return rowErr('the health probe failed to answer - the walk needs all three runs', ride.rows);
+        if (bv.fault) return rowErr('the health probe faulted: ' + bv.fault, ride.rows);
+        if (bv.baselineAnchored !== true) return rowErr("the fresh brain did not get a baseline-anchored message - a first verify must warn AND anchor", ride.rows);
+        if (bv.cleanVerified !== true) return rowErr('the clean brain did not verify against last anchor - the anchor must hold on clean reads', ride.rows);
+        if (bv.diverged !== true) return rowErr('the TAMPERED brain did not report DIVERGED - on-disk tampering must be detected against the last anchor', ride.rows);
+        if (bv.pipelineOrdered !== true) return rowErr('the three legs ran out of order in the captured output - baseline before verify before tamper', ride.rows);
+        return { verdict: 'REFUSED', detail: 'fresh brain anchored a baseline, clean brain verified, tamper DIVERGED - the health surface recomputes against the anchor', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'brainverify-horcrux-exit-contract',
+      description: 'the horcrux verify/anchor exit-code contract holds: no anchor -> 2, anchor -> 0, clean verify -> 0, tamper -> 1 with DIVERGED, intentional re-anchor -> 0 again',
+      async run(harness) {
+        const ride = await probeSurfaces(harness, [{ op: 'brainverify-horcrux' }]);
+        if (!ride) return rowSkip('wiring-surfaces not armed');
+        const hx = ride.get('brainverify-horcrux');
+        if (!hx) return rowErr('the horcrux probe failed to answer - the walk needs all six exits', ride.rows);
+        if (hx.fault) return rowErr('the horcrux probe faulted: ' + hx.fault, ride.rows);
+        if (hx.noAnchorCode !== 2) return rowErr(`no anchor exited ${JSON.stringify(hx.noAnchorCode)} - the contract is 2`, ride.rows);
+        if (hx.anchoredCode !== 0 || hx.anchoredText !== true) return rowErr(`anchor exited ${JSON.stringify(hx.anchoredCode)} without 'Anchored' text - the CLI must say what it did`, ride.rows);
+        if (hx.cleanCode !== 0) return rowErr(`clean verify exited ${JSON.stringify(hx.cleanCode)} - the contract is 0`, ride.rows);
+        if (hx.divergedCode !== 1 || hx.divergedText !== true) return rowErr(`tampered brain exited ${JSON.stringify(hx.divergedCode)} without 'DIVERGED' text - the contract is 1 + DIVERGED`, ride.rows);
+        if (hx.reanchorCode !== 0 || hx.recleanCode !== 0) return rowErr(`re-anchor/verify exited ${JSON.stringify(hx.reanchorCode)}/${JSON.stringify(hx.recleanCode)} - an intentional re-anchor must restore 0`, ride.rows);
+        return { verdict: 'REFUSED', detail: 'no anchor 2 / anchor 0 / clean 0 / tamper 1+DIVERGED / re-anchor 0 / verify 0 - the exit-code contract is intact', tookRequests: 1 };
+      },
+    },
+
+    // ============ (slice 3) MESH-STATUS → MESHTREE ============
+
+    {
+      name: 'meshstatus-mesh-section-shape',
+      description: 'the status report carries the mesh section honestly: 64-hex seed scope under mesh:local, positive presence TTL, a peers array, and the JSON roundtrip keeps the section count intact',
+      async run(harness) {
+        const ride = await probeSurfaces(harness, [{ op: 'meshstatus-report' }]);
+        if (!ride) return rowSkip('wiring-surfaces not armed');
+        const rep = ride.get('meshstatus-report');
+        if (!rep) return rowErr('the status probe faulted - answers, not throws', ride.rows);
+        if (rep.fault) return rowErr('the status probe faulted: ' + rep.fault + ' (mesh degraded NOT allowed in this posture)', ride.rows);
+        if (rep.present !== true) return rowErr('the mesh section is missing or carries an error - the report must carry the section', ride.rows);
+        if (rep.seedHex64 !== true) return rowErr('the seed scope hex is missing or SHORT - a spine derivation must be full-width', ride.rows);
+        if (rep.scopePath !== 'mesh:local') return rowErr(`scopePath is ${JSON.stringify(rep.scopePath)} - the scope path law is mesh:local`, ride.rows);
+        if (rep.ttlPositive !== true) return rowErr('presence TTL is not positive - the TTL is proven presence', ride.rows);
+        if (rep.peersArray !== true) return rowErr('peers is not an array - the projection types must hold', ride.rows);
+        if (rep.jsonCountStable !== true) return rowErr('the JSON roundtrip did not survive the new section - count must not mutate', ride.rows);
+        return { verdict: 'REFUSED', detail: 'mesh section present with 64-hex scope, mesh:local path, positive TTL, peers array, and a stable JSON roundtrip', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'meshstatus-seed-pure-and-envflow',
+      description: 'the seed scope is a PURE function (same answer twice, no perturbation) AND it tracks VANT_UNIVERSE_SEED (the report proves the env flows), restored afterwards',
+      async run(harness) {
+        const ride = await probeSurfaces(harness, [{ op: 'meshstatus-envflow' }]);
+        if (!ride) return rowSkip('wiring-surfaces not armed');
+        const ef = ride.get('meshstatus-envflow');
+        if (!ef) return rowErr('the env-flow probe faulted - answers, not throws', ride.rows);
+        if (ef.fault) return rowErr('the env-flow probe faulted: ' + ef.fault, ride.rows);
+        if (ef.pureTwice !== true) return rowErr('the seed derivation MOVED between two unseed status calls - the derivation must be pure', ride.rows);
+        if (ef.envMoved !== true) return rowErr("the seed did NOT move under the probe universe seed - the env must flow into the derivation", ride.rows);
+        return { verdict: 'REFUSED', detail: 'the derivation is pure (same hex twice) and it tracks the universe seed env (flows, restored after)', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'meshstatus-render-degraded',
+      description: 'the render stays honest when the leg is degraded: the mesh line still renders its label with (unavailable) and prints the error ITSELF (never a stack, never silence)',
+      async run(harness) {
+        const ride = await probeSurfaces(harness, [{ op: 'meshstatus-render' }]);
+        if (!ride) return rowSkip('wiring-surfaces not armed');
+        const rd = ride.get('meshstatus-render');
+        if (!rd) return rowErr('the render probe faulted - answers, not throws', ride.rows);
+        if (rd.fault) return rowErr('the render probe faulted: ' + rd.fault, ride.rows);
+        if (rd.errorRendered !== true) return rowErr('the render did not print the poisoned-leg error - the error IS the status', ride.rows);
+        if (rd.labelKept !== true) return rowErr('the degraded section lost its mesh line label - degraded must still render, not vanish', ride.rows);
+        return { verdict: 'REFUSED', detail: 'the mesh line renders its label with (unavailable) and the poisoned-leg error itself - degraded-not-dead holds on the render path', tookRequests: 1 };
       },
     },
   ],

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "vant-state-wiring",
-  "description": "The state-spine WIRING consumers (labs/WIRING.md's ledger), slices 1-2 of the per-bucket conversion: slice 1 converts the TRUST->TREE family's native pins (test/state-wiring.test.js's five trust rows) onto the run root's wiring-trust arm; slice 2 converts the MERGE-PATH consumers — node-registry (step 2), consensus + market (step 3) — onto the wiring-module arm with a per-module verb table and the native-suite-identical fixed settles. The sandbox's REAL lib seams drive in-process; the native suite stays green alongside under the reverse-verification law. Drill-down bucket of the S0->S1 campaign (#249).",
-  "version": "0.2.0",
+  "description": "The state-spine WIRING consumers (labs/WIRING.md's ledger), slices 1-3 of the per-bucket conversion: slice 1 converts the TRUST->TREE family's native pins (test/state-wiring.test.js's five trust rows) onto the run root's wiring-trust arm; slice 2 converts the MERGE-PATH consumers — node-registry (step 2), consensus + market (step 3) — onto the wiring-module arm with a per-module verb table and the native-suite-identical fixed settles; slice 3 converts the MESH consumers (WAL rides/recovery/rejection/provenance/fast-forward + the pass-176 event family onto the wiring-mesh arm with in-ride MeshTree instances, fixed step clocks and shared-bus watchers) and the SURFACES consumers (geometry's canonical barcodes, brain-verify's health/horcrux exit contract, mesh-status's report/envflow/degraded render onto the wiring-surfaces arm). The sandbox's REAL lib seams drive in-process; the native suite stays green alongside under the reverse-verification law. Drill-down bucket of the S0->S1 campaign (#249).",
+  "version": "0.3.0",
   "entry": "index.mjs"
 }
