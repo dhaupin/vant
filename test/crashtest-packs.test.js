@@ -1275,6 +1275,21 @@ const EXPECTED = {
         'carriers-template-digital-line': 'skip',
         'carriers-template-unfilled-honest': 'skip',
         'carriers-template-enterprise-line': 'skip',
+        // (slice 6, ARMED 2026-10-26) the traveler-lib working layer: rows
+        // drive lib/traveler (+ event/scope/escrow/mcp/qos/event-types/
+        // security-pipeline) DIRECTLY in-process against the real
+        // brain-scoped pin store wiped per row; REFUSED everywhere (no
+        // route arming needed). The REAL-PROCESS CLI family
+        // (bin/traveler.js via spawnSync) stays native under the
+        // reverse-verification law — like the guests' socket door families.
+        'traveler-content-address-law': 'REFUSED',
+        'traveler-ledger-law-and-ceiling': 'REFUSED',
+        'traveler-persistence-append-only': 'REFUSED',
+        'traveler-schema-rizer-law': 'REFUSED',
+        'traveler-audit-verbatim': 'REFUSED',
+        'traveler-door-verbs-carried': 'REFUSED',
+        'traveler-os-integration': 'REFUSED',
+        'traveler-scope-escrow-durability': 'REFUSED',
     },
     // migrations battery slice 1 (fixture family): run-root-only arm
     'vant-migrations': {

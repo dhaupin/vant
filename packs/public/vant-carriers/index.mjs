@@ -71,6 +71,53 @@ function rowErr(detail, ops, evidence) {
 const rowSkip = skip;
 const VOID = () => {};
 
+// ---------------------------------------------------------------------------
+// Slice 6 — the traveler-lib battery (pass 255-257 conversion). Rows drive
+// lib/traveler (+ its real collaborators: event, scope, escrow, mcp, qos,
+// event-types, security-pipeline) DIRECTLY in-process; the pin ledger is the
+// brain-scoped real one and every row wipes the store (index + .sha256 pin +
+// travelers/ + current file) before and after - per-row disk truth, no
+// sockets (mcp.execute is the in-process registry call, not the TCP door).
+// The REAL-PROCESS CLI family (bin/traveler.js open/hop/audit via spawnSync)
+// stays native under the reverse-verification law - like the guests' socket
+// door-integration families, it rides a separate process, not this battery.
+// ---------------------------------------------------------------------------
+
+const { default: t_fsMod } = await import('node:fs');
+const { createRequire: t_createRequire } = await import('node:module');
+const resolve = (await import('node:path')).resolve;
+const _tReq = t_createRequire(import.meta.url);
+const T = _tReq(resolve('lib/traveler.js'));
+
+function tStore() {
+  return {
+    ledger: T._ledgerPath(),
+    dir: resolve(T._ledgerPath(), '..'),
+  };
+}
+
+async function tWipe() {
+  const s = tStore();
+  try { t_fsMod.rmSync(s.ledger, { force: true }); } catch { /* fresh */ }
+  try { t_fsMod.rmSync(s.ledger + '.sha256', { force: true }); } catch { /* fresh */ }
+  try { t_fsMod.rmSync(resolve(s.dir, 'travelers'), { recursive: true, force: true }); } catch { /* fresh */ }
+  try { t_fsMod.rmSync(resolve(s.dir, 'traveler-current.json'), { force: true }); } catch { /* fresh */ }
+}
+
+// the mcp registry calls lib-level in-process once per module (auto-wired)
+let _mcp = null;
+function tMcp() {
+  if (!_mcp) _mcp = _tReq(resolve('lib/mcp.js'));
+  return _mcp;
+}
+
+function throwsTraveler(fn, test) {
+  try { fn(); return false; } catch (e) { return test(e); }
+}
+async function throwsTravelerAsync(fn, test) {
+  try { await fn(); return false; } catch (e) { return test(e); }
+}
+
 export default {
   name: 'vant-carriers',
   description: 'carrier lane discipline: the roster overstates nothing, the NSC-9 frame self-authenticates and reads through GS1, the stone lane owns two DISTINCT walls (carrier seal vs packet address), the svg lane keeps the airgap law minting once, the json ERP form rides verbatim, a tampered packet cannot assimilate into ANY lane, capacity names itself instead of truncating, and the wall codes never share a name',
@@ -764,6 +811,358 @@ export default {
         }
         if (codes.distinct !== true) return rowErr('two wall codes collided - carrier damage and shape damage must never share a name', ride.rows);
         return { verdict: 'REFUSED', detail: 'STONE_CAP named on the 400KB refusal, and TAMPER/SHAPE/GAP stay distinct typed names', tookRequests: 2 };
+      },
+    },
+    {
+      name: 'traveler-content-address-law',
+      description: '(pass 256 slice 6) the auditable pin law, backend: same content + same ts mints the SAME id, ANY edit re-addresses (a new id is born, seq rides), the honest packet verifies, a slot tamper refuses typed E_TRAVELER_ADDRESS (never re-written, ISO 8.5.2), and a forged ledger step breaks the address loudly',
+      async run(_harness) {
+        try {
+          const FIXED_NOW = 1700000000001;
+          const t1 = T.mint({ from: 'pack-A-station', slots: { job: 'x1' }, now: FIXED_NOW });
+          const t1b = T.mint({ from: 'pack-A-station', slots: { job: 'x1' }, now: FIXED_NOW });
+          if (t1.id !== t1b.id) {
+            return { verdict: 'EXPLOITED', detail: 'same content with the same canonical ts minted DIFFERENT addresses (determinism is the whole law)', tookRequests: 1 };
+          }
+          const t2 = T.advance(t1, { op: 'pick', by: 'pack-B-station', detail: { bin: 'B7' } });
+          if (!(t2.id !== t1.id && t2.seq === 2)) {
+            return { verdict: 'EXPLOITED', detail: 'an edit did NOT re-address (id stayed or seq drifted)', tookRequests: 2 };
+          }
+          if (T.verify(t2).ok !== true) {
+            return { verdict: 'EXPLOITED', detail: 'the honest packet failed to verify', tookRequests: 3 };
+          }
+          const tampered = JSON.parse(JSON.stringify(t2));
+          tampered.slots.job = 'x999';
+          const vt = T.verify(tampered);
+          if (!(vt.ok === false && vt.code === 'E_TRAVELER_ADDRESS')) {
+            return { verdict: 'EXPLOITED', detail: 'a tampered packet verified or refused without its typed name: ' + JSON.stringify(vt).slice(0, 120), tookRequests: 4 };
+          }
+          const forged = JSON.parse(JSON.stringify(t2));
+          forged.steps.push({ seq: 3, op: 'forge', by: 'typosquat', ts: Date.now() });
+          if (T.verify(forged).ok !== false) {
+            return { verdict: 'EXPLOITED', detail: 'a forged step injection verified - the ledger is the content', tookRequests: 5 };
+          }
+          return { verdict: 'REFUSED', detail: 'the address law holds: same content = same id, every edit re-addresses, honest packets verify, tamper refuses typed E_TRAVELER_ADDRESS (ISO 8.5.2: refuse, never rewrite), and a forged ledger step breaks the address loudly', tookRequests: 5 };
+        } finally {
+          await tWipe();
+        }
+      },
+    },
+
+    {
+      name: 'traveler-ledger-law-and-ceiling',
+      description: '(pass 256 slice 6) the ledger law: a frozen-stamp mismatch refuses STEP, a gapped ledger refuses STEP, and the 512-step ceiling refuses STEP - shape refusals name their clause, they are never silent re-writes',
+      async run(_harness) {
+        try {
+          const FIXED_NOW = 1700000000002;
+          const t2 = T.advance(T.mint({ from: 'pack-B-station', slots: { job: 'x2' }, now: FIXED_NOW }), { op: 'pick', by: 'pack-B2', detail: {} });
+          const bad = Object.assign({}, t2, { seq: 99 });
+          if (!((T.shapeRefusalFor(bad) || {}).code === 'E_TRAVELER_STEP')) {
+            return { verdict: 'EXPLOITED', detail: 'a frozen-stamp mismatch did not refuse STEP: ' + JSON.stringify(T.shapeRefusalFor(bad)).slice(0, 90), tookRequests: 1 };
+          }
+          const gapped = Object.assign({}, t2, { steps: [{ seq: 9, op: 'x', by: 'y', ts: 1 }] });
+          if (!((T.shapeRefusalFor(gapped) || {}).code === 'E_TRAVELER_STEP')) {
+            return { verdict: 'EXPLOITED', detail: 'a gapped ledger did not refuse STEP', tookRequests: 2 };
+          }
+          const big = { tr: 'tr/1', id: 'a'.repeat(64), from: 'x', seq: 513, slots: {}, steps: Array.from({ length: 513 }, (_, i) => ({ seq: i + 1, op: 's', by: 'b', ts: 0 })) };
+          if (!((T.shapeRefusalFor(big) || {}).code === 'E_TRAVELER_STEP')) {
+            return { verdict: 'EXPLOITED', detail: 'the 512-step ceiling did not refuse STEP (a 513-step ledger walked through)', tookRequests: 3 };
+          }
+          return { verdict: 'REFUSED', detail: 'the ledger law holds: frozen-stamp mismatch, gap-jump and the 512-step ceiling all refuse typed E_TRAVELER_STEP - shape damage names its clause', tookRequests: 3 };
+        } finally {
+          await tWipe();
+        }
+      },
+    },
+
+    {
+      name: 'traveler-persistence-append-only',
+      description: '(pass 255 slice 6) the pin ledger: persist lands the packet body BY ADDRESS under the brain-scoped store, a same-id re-persist refuses typed E_TRAVELER_STEP (append-only, never re-written), and the body verifies at re-load (the station handoff law)',
+      async run(_harness) {
+        try {
+          const t3 = T.mint({ from: 'pack-C-station', slots: { job: 'persist-me' } });
+          T.persist(t3);
+          const bodyFile = (await import('node:path')).join(tStore().dir, 'travelers', t3.id + '.json');
+          if (!t_fsMod.existsSync(bodyFile)) {
+            return { verdict: 'EXPLOITED', detail: 'the packet body never landed by address at ' + bodyFile, tookRequests: 1 };
+          }
+          const readBack = JSON.parse(t_fsMod.readFileSync(bodyFile, 'utf8'));
+          if (T.verify(readBack).ok !== true) {
+            return { verdict: 'EXPLOITED', detail: 'the persisted body failed its re-load verification (the handoff would be blind)', tookRequests: 2 };
+          }
+          const dup = throwsTraveler(() => { T.persist(t3); }, (e) => e.code === 'E_TRAVELER_STEP');
+          if (!dup) {
+            return { verdict: 'EXPLOITED', detail: 'a same-id re-persist overwrote or was not refused typed - append-only is the ledger law', tookRequests: 3 };
+          }
+          return { verdict: 'REFUSED', detail: 'persistence is honest: the body lands by address and verifies at re-load, and the ledger refuses a same-id re-persist typed (append-only)', tookRequests: 3 };
+        } finally {
+          await tWipe();
+        }
+      },
+    },
+
+    {
+      name: 'traveler-schema-rizer-law',
+      description: '(pass 255 slice 6) the schema-rizer: tr/0 migrates forward WITH the stamp and the migration RIDES the ledger (an appended rize step, never a rewrite), and an unknown FUTURE version refuses typed E_TRAVELER_SCHEMA (never guesses)',
+      async run(_harness) {
+        try {
+          const legacy = { tr: 'tr/0', id: 'a'.repeat(32), from: 'old', slots: { k: 1 }, steps: [{ seq: 1, op: 'open', by: 'old', ts: 0 }], seq: 1 };
+          const rized = T.schemaRize(legacy);
+          if (!(rized.tr === 'tr/1' && rized.rized && rized.rized.from === 'tr/0')) {
+            return { verdict: 'EXPLOITED', detail: 'the legacy packet lost its stamp or its provenance: ' + JSON.stringify({ tr: rized.tr, rized: rized.rized }).slice(0, 110), tookRequests: 1 };
+          }
+          if (!(rized.steps.length === 2 && rized.steps[1].op === 'rize')) {
+            return { verdict: 'EXPLOITED', detail: 'the migration rewrote instead of appending the rize step', tookRequests: 2 };
+          }
+          const futureOk = throwsTraveler(
+            () => { T.schemaRize({ tr: 'tr/7', id: 'a'.repeat(32), slots: {}, steps: [], seq: 0 }); },
+            (e) => e.code === 'E_TRAVELER_SCHEMA'
+          );
+          if (!futureOk) {
+            return { verdict: 'EXPLOITED', detail: 'an unknown future version did not refuse typed - a guesser would stamp WRONG truth forever', tookRequests: 3 };
+          }
+          return { verdict: 'REFUSED', detail: 'the rizer migrates tr/0 forward with the stamp riding an appended rize step, and a future tr/7 refuses typed E_TRAVELER_SCHEMA (never guesses)', tookRequests: 3 };
+        } finally {
+          await tWipe();
+        }
+      },
+    },
+
+    {
+      name: 'traveler-audit-verbatim',
+      description: '(pass 255 slice 6) the auditor copy: the report names clause 8.5.2, EVERY station line rides (one numbered line per step, verbatim), and the integrity line states VERIFIED',
+      async run(_harness) {
+        try {
+          const FIXED_NOW = 1700000000003;
+          const t2 = T.advance(T.mint({ from: 'pack-E-station', slots: { job: 'x3' }, now: FIXED_NOW }), { op: 'pick', by: 'pack-E2', detail: {} });
+          const rep = T.auditReport(t2);
+          if (!rep.includes('8.5.2')) {
+            return { verdict: 'EXPLOITED', detail: 'the audit record did not name its ISO clause', tookRequests: 1 };
+          }
+          const stationLines = rep.split('\n').filter((l) => /^\s*\d+\./.test(l)).length;
+          if (stationLines !== t2.steps.length) {
+            return { verdict: 'EXPLOITED', detail: 'the station lines drifted from the ledger (had ' + stationLines + ' of ' + t2.steps.length + ') - the copy must be verbatim', tookRequests: 2 };
+          }
+          if (!rep.includes('VERIFIED')) {
+            return { verdict: 'EXPLOITED', detail: 'the integrity line did not state VERIFIED', tookRequests: 3 };
+          }
+          return { verdict: 'REFUSED', detail: 'the auditor copy is verbatim and integrity-labelled: clause named, every station line rode, VERIFIED stated', tookRequests: 3 };
+        } finally {
+          await tWipe();
+        }
+      },
+    },
+
+    {
+      name: 'traveler-door-verbs-carried',
+      description: '(pass 255-261 slice 6) the door verbs in-process: traveler_open opens + persists, traveler_hop advances + re-addresses, traveler_status answers the stations, traveler_audit returns the verbatim record, traveler_carry routes the template (built + walk ok) and a template REORDER refuses typed E_CARRIER_TEMPLATE (the bill of stations is the boulder), traveler_replay walks landing rows read-class, and carriers_list serves the honesty roster (nsc9/stone/svg/json/qr up; png named-absent)',
+      async run(_harness) {
+        try {
+          const mcp = tMcp();
+          const opened = await mcp.execute('traveler_open', { title: 'pack door job', slots: { lane: 'pack-slice' } });
+          if (!(opened && opened.opened === true && /^[0-9a-f]{64}$/.test(opened.id || ''))) {
+            return { verdict: 'EXPLOITED', detail: 'traveler_open did not open + persist: ' + JSON.stringify(opened).slice(0, 110), tookRequests: 1 };
+          }
+          const hopped = await mcp.execute('traveler_hop', { op: 'qa', by: 'pack-agent', detail: { ok: 1 } });
+          if (!(hopped && hopped.hopped === true && hopped.readdressed === true)) {
+            return { verdict: 'EXPLOITED', detail: 'traveler_hop did not advance + re-address: ' + JSON.stringify(hopped).slice(0, 110), tookRequests: 2 };
+          }
+          const stat = await mcp.execute('traveler_status', { last: 10 });
+          if (!(stat && stat.seen === true && Array.isArray(stat.stations) && stat.stations.length >= 2)) {
+            return { verdict: 'EXPLOITED', detail: 'traveler_status answered short: ' + JSON.stringify(stat && { seen: stat.seen, n: stat.stations && stat.stations.length }).slice(0, 110), tookRequests: 3 };
+          }
+          const aud = await mcp.execute('traveler_audit', {});
+          if (!(aud && typeof aud.report === 'string' && aud.report.includes('8.5.2'))) {
+            return { verdict: 'EXPLOITED', detail: 'traveler_audit did not return the verbatim record', tookRequests: 4 };
+          }
+          const carried = await mcp.execute('traveler_carry', { id: hopped.id, stations: [
+            { by: 'pack-mold', op: 'mold', part: { name: 'rim', alloy: 'al' } },
+            { by: 'pack-qa', op: 'inspect' },
+          ], template: [
+            { op: 'mold', part: 'rim' },
+            { op: 'inspect', by: '*', op: '*' },
+          ] });
+          if (!(carried && carried.ok === true && carried.built === true && carried.letter && carried.letter.assembly && carried.letter.assembly.rim && carried.walk && carried.walk.ok === true)) {
+            return { verdict: 'EXPLOITED', detail: 'traveler_carry did not build + walk the letter: ' + JSON.stringify(carried && carried.refused).slice(0, 130), tookRequests: 5 };
+          }
+          const reordered = await throwsTravelerAsync(
+            () => mcp.execute('traveler_carry', { id: carried.letter.id, stations: [
+              { by: 'a', op: 'inspect' }, { by: 'b', op: 'mold' },
+            ], template: [{ op: 'mold' }, { op: 'inspect' }] }).catch((e) => { throw Object.assign(new Error(e.message || String(e)), { code: e.code }); }),
+            (e) => e.code === 'E_CARRIER_TEMPLATE' || /bill of stations/.test(e.message)
+          );
+          if (!reordered) {
+            return { verdict: 'EXPLOITED', detail: 'a template reorder did NOT refuse typed E_CARRIER_TEMPLATE', tookRequests: 6 };
+          }
+          const roster = await mcp.execute('carriers_list', {});
+          if (!(roster && roster.carriers && roster.carriers.some((x) => x.id === 'nsc9' && x.available)
+            && roster.carriers.some((x) => x.id === 'qr' && x.available === true)
+            && roster.carriers.some((x) => x.id === 'png' && x.available === false && x.blocker))) {
+            return { verdict: 'EXPLOITED', detail: 'the honesty roster drifted: ' + JSON.stringify(roster && roster.carriers && roster.carriers.map((x) => [x.id, x.available])).slice(0, 130), tookRequests: 7 };
+          }
+          const repWalk = await mcp.execute('traveler_replay', { arrivals: [{ seq: 1 }, { seq: 2 }] });
+          if (!(repWalk && repWalk.ok === true && repWalk.stations === 2)) {
+            return { verdict: 'EXPLOITED', detail: 'traveler_replay did not walk the landing rows: ' + JSON.stringify(repWalk && { ok: repWalk.ok, stations: repWalk.stations }).slice(0, 110), tookRequests: 8 };
+          }
+          return { verdict: 'REFUSED', detail: 'the door verbs carried: open/hop/status/audit hold their contracts built on the ledger, carry routes the template and a reorder refuses typed E_CARRIER_TEMPLATE, replay walks read-class, carriers_list serves the honesty roster', tookRequests: 8 };
+        } finally {
+          await tWipe();
+        }
+      },
+    },
+    {
+      name: 'traveler-os-integration',
+      description: '(pass 256 slice 6) the OS seams surface: the security-pipeline scanner sees traveler WIRED through the wall layers (sandbox/vaf/qos) with audit adjacency informational, refusals are typed VantErrors (zero raw throws), persistence is audible on the shared event bus, the QoS lane rate-limits the door surface typed (E_TRAVELER_RATE past the window), and a step carries its crew/team attribution lanes',
+      async run(_harness) {
+        let _busLegs = [];
+        try {
+          const pipeline = _tReq(resolve('lib/security-pipeline.js'));
+          const report = pipeline.scan(resolve('lib'));
+          const classified = report.modules.find((m) => m.name === 'traveler') || { layers: {}, wired: [] };
+          if (!(classified.wired.includes('sandbox') && classified.wired.includes('vaf') && classified.wired.includes('qos'))) {
+            return { verdict: 'EXPLOITED', detail: 'the pipeline scanner did NOT travel through the wall layers: ' + JSON.stringify(classified.layers).slice(0, 120), tookRequests: 1 };
+          }
+          if (classified.layers.audit !== true) {
+            return { verdict: 'EXPLOITED', detail: 'the audit adjacency never recorded (informational layer missing)', tookRequests: 2 };
+          }
+          const errores = _tReq(resolve('lib/error.js'));
+          // identity by NAME, not instanceof: the sandbox may load lib/error.js
+          // through two require paths (two classes, one name) — the law being
+          // graded is 'typed, not a raw throw', not cross-instance identity
+          const isVantErr = (e) => e instanceof errores.VantError || (e && (e.name === 'VantError' || e.constructor && e.constructor.name === 'VantError'));
+          const refuseErr = throwsTraveler(
+            () => T.advance({ tr: 'tr/99', id: '00', slots: {}, steps: [{ seq: 1, op: 'x', by: 'y', ts: 1 }], seq: 1 }),
+            (e) => isVantErr(e) && /^E_TRAVELER_/.test(e.code || '')
+          );
+          if (!refuseErr) {
+            return { verdict: 'EXPLOITED', detail: 'a refusal escaped as a RAW throw (or lost its VantError identity)', tookRequests: 3 };
+          }
+          // subscribe on the singularity the EMIT lands on: a foreign
+          // sandbox may materialize lib/event.js at TWO paths (that exact
+          // census was taken in-pack), so the listener rides both and the
+          // law stays 'persistence is audible', not 'one path instance'
+          const busRepo = _tReq(resolve('lib/event.js'));
+          const reqTravelerTree = t_createRequire(_tReq.resolve(resolve('lib/traveler.js')));
+          const busTree = reqTravelerTree('./event.js');
+          // the REPO-root copy: the harness's pre-arming phase requires the
+          // shared libs from the IMPORT TREE (the pack file's own root),
+          // while cwd is the tmp sandbox - that instance emits there and
+          // still writes the cwd-relative store (the same files) - third yes
+          // (file -> vant-carriers -> public -> packs -> ROOT: four ups)
+          const { fileURLToPath: _t_f2p } = await import('node:url');
+          const tRepoRoot = resolve(_t_f2p(import.meta.url), '..', '..', '..', '..');
+          let busRoot3 = null;
+          try { busRoot3 = _tReq(resolve(tRepoRoot, 'lib/event.js')); } catch { busRoot3 = null; }
+          // bus audibility is graded via the shared SINK (the bounded
+          // observability contract of the same bus - foreign-sandbox layouts
+          // materialize lib/event.js at multiple require paths, so a direct
+          // module-instance listener cannot know WHICH one travels the emit;
+          // the sink catches every leg). Enable on each instance, persist,
+          // then find the traveler:persisted record carrying the id.
+          const busInstances = [busRepo, busTree, busRoot3].filter(Boolean);
+          _busLegs = busInstances;
+          for (const inst of busInstances) { try { inst.sinkEnable(); } catch { /* best effort */ } }
+          const tH = T.mint({ from: 'pack-H-station', slots: { job: 'bus' } });
+          T.persist(tH);
+          let audible = null;
+          for (const inst of busInstances) {
+            try {
+              const tail = inst.sinkTail({ max: 50, nameFilter: 'traveler:persisted' }) || {};
+              const hit = (tail.events || []).find((r) => r.type === 'traveler:persisted' && r.data && r.data.id === tH.id);
+              if (hit) audible = hit;
+            } catch { /* race */ }
+            try { inst.sinkDisable(); } catch { /* best effort */ }
+          }
+          if (!audible) {
+            return { verdict: 'EXPLOITED', detail: 'persistence was NOT audible through the shared event bus sink across ' + busInstances.length + ' bus instance(s) (id ' + String(tH && tH.id).slice(0, 16) + ' did not ride)', tookRequests: 4 };
+          }
+          // the rate lane: burst past the door ceiling (bounded, 6200 checks)
+          let limited = 0;
+          for (let i = 0; i < 6200; i++) {
+            try { await T.gateCheck('pack-rate-pin', 'hop'); } catch (e) { if (e.code === 'E_TRAVELER_RATE') limited++; }
+          }
+          if (limited <= 0) {
+            return { verdict: 'EXPLOITED', detail: 'the door lane absorbed the whole burst untyped (rate ceiling never bit)', tookRequests: 5 };
+          }
+          const t6 = T.advance(tH, { op: 'crew-qa', by: 'agent-zeta', team: 'qa-crew' });
+          if (t6.steps[t6.steps.length - 1].team !== 'qa-crew') {
+            return { verdict: 'EXPLOITED', detail: 'the step did not carry its team attribution lane', tookRequests: 6 };
+          }
+          return { verdict: 'REFUSED', detail: 'the OS seams all surface typed: pipeline-wired wall layers, VantError refusals, bus-audible persistence, a rate-limited door lane, and crew attribution riding the ledger', tookRequests: 6 };
+        } finally {
+          for (const _inst of _busLegs) { try { _inst.sinkDisable(); } catch { /* raced */ } }
+          await tWipe();
+        }
+      },
+    },
+
+    {
+      name: 'traveler-scope-escrow-durability',
+      description: '(pass 257 slice 6) identity + durability in-process: a scoped mint stamps the canonical RLS lineage (canAccess inside true / outside false, outside landing refused typed), a PRIVILEGED hop refuses without a live approval, a MINTED approval id authorizes exactly ONE hop (single-use, disk-coherent), the .sha256 pin verifies the on-disk index, and the event-types catalogue declares the traveler channels',
+      async run(_harness) {
+        try {
+          const scope = _tReq(resolve('lib/scope.js'));
+          const escrow = _tReq(resolve('lib/escrow.js'));
+          // --- RLS lineage
+          const scoped = T.mintScoped({ from: 'pack-qa-station', slots: { job: 'rls-job' }, scope: { owner: 'agent:aria', visibility: 'private' } });
+          if (!(scoped.scope && scoped.scope.owner === 'agent:aria' && scoped.scope.visibility === 'private' && scope.canAccess(scoped, 'aria') === true && scope.canAccess(scoped, 'bod') === false)) {
+            return { verdict: 'EXPLOITED', detail: 'the scoped mint lost its canonical lineage: ' + JSON.stringify({ scope: scoped.scope, aria: scope.canAccess(scoped, 'aria'), bod: scope.canAccess(scoped, 'bod') }).slice(0, 140), tookRequests: 1 };
+          }
+          const rlsRefused = throwsTraveler(
+            () => T.advance(scoped, { op: 'land', by: 'bod' }),
+            (e) => /RLS:/.test(e.message) && /^E_TRAVELER_/.test(e.code || '')
+          );
+          if (!rlsRefused) {
+            return { verdict: 'EXPLOITED', detail: 'an OUTSIDE actor landed (or the refusal lost its RLS/typed identity)', tookRequests: 2 };
+          }
+          const owned = T.advance(scoped, { op: 'land', by: 'aria' });
+          if (owned.seq !== 2) {
+            return { verdict: 'EXPLOITED', detail: 'the in-scope actor could not ride its own traveler', tookRequests: 3 };
+          }
+          // --- the escrow approval lane
+          const escrowLane = escrow.create({ approvalRequired: ['traveler deploy'] });
+          const req = escrowLane.requestApproval('traveler deploy', 'pack-257');
+          escrowLane.approve(req.approvalId, 'operator-lane');
+          escrowLane.save();
+          const tH = T.mint({ from: 'pack-I-station', slots: { job: 'approvals' } });
+          const noApproval = throwsTraveler(
+            () => T.advance(tH, { op: 'deploy', by: 'op-station', privileged: true }),
+            (e) => e.code === 'E_TRAVELER_STEP' && /privileged/.test(e.message)
+          );
+          if (!noApproval) {
+            return { verdict: 'EXPLOITED', detail: 'a privileged hop rode WITHOUT a live approval', tookRequests: 4 };
+          }
+          const burn = tH.seq;
+          const ride = (() => { try { return T.advance(tH, { op: 'deploy', by: 'op-station', privileged: true, approvalId: req.approvalId }); } catch (e) { return e; } })();
+          if (!ride || typeof ride.seq !== 'number' || ride.seq !== burn + 1) {
+            return { verdict: 'EXPLOITED', detail: 'a minted approval id failed to authorize its planned hop: ' + String(ride && ride.message).slice(0, 120), tookRequests: 5 };
+          }
+          const reused = throwsTraveler(
+            () => T.advance(tH, { op: 'deploy', by: 'op-station', privileged: true, approvalId: req.approvalId }),
+            (e) => e.code === 'E_TRAVELER_STEP' && /privileged/.test(e.message)
+          );
+          if (!reused) {
+            return { verdict: 'EXPLOITED', detail: 'the SAME approval id authorized a second hop (single-use broken, #204)', tookRequests: 6 };
+          }
+          // --- durability: sha pin
+          const tI = T.mint({ from: 'pack-I-station', slots: { job: 'durable' } });
+          T.persist(tI);
+          const crypto = (await import('node:crypto')).default;
+          const pinHash = t_fsMod.readFileSync(T._ledgerPath() + '.sha256', 'utf8').trim().split(/\s+/)[0];
+          if (crypto.createHash('sha256').update(t_fsMod.readFileSync(T._ledgerPath())).digest('hex') !== pinHash) {
+            return { verdict: 'EXPLOITED', detail: 'the .sha256 pin did NOT verify the on-disk index (atomic contract torn)', tookRequests: 7 };
+          }
+          // --- event-types catalogue
+          const et = _tReq(resolve('lib/event-types.js'));
+          if (!(et.familyFor('traveler:persisted') === 'work'
+            && et.describe('traveler:persisted').emitters.includes('lib/traveler.js')
+            && !!et.describe('traveler:refused'))) {
+            return { verdict: 'EXPLOITED', detail: 'the traveler channels never landed in the event-types catalogue', tookRequests: 8 };
+          }
+          return { verdict: 'REFUSED', detail: 'identity + durability hold in-process: RLS refuses outside actors and rides the owned, privileged hops refuse un-approved, a minted approval authorizes exactly one hop then dies, the .sha256 pin verifies the durable index, and the traveler channels are catalogued', tookRequests: 8 };
+        } finally {
+          await tWipe();
+        }
       },
     },
   ],

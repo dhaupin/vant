@@ -1142,6 +1142,59 @@ depended on it.
 Remaining native suites from the survey: traveler-lib (~44 pins)
 converts onto vant-carriers/vant-stones next.
 
+## Traveler-lib battery — the working layer lands on vant-carriers (v0.8.6, #249 - 2026-10-26)
+
+`public/vant-carriers` reaches **39 rows** (31 lane families + 8
+traveler-lib rows, slice 6). The rows drive lib/traveler DIRECTLY
+in-process (+ its real collaborators: event, scope, escrow, mcp, qos,
+event-types, security-pipeline) against the REAL brain-scoped pin
+store, wiped per row (index + .sha256 pin + travelers/ + current file)
+for determinism. `mcp.execute` is the in-process registry call, not
+the TCP door (one law: zero sockets). The REAL-PROCESS CLI family
+(`bin/traveler.js` open/hop/audit via spawnSync) stays native under
+the reverse-verification law — like the guests' socket door families,
+it rides a separate process. Native `test/traveler-lib.test.js` (43
+pins) and `test/traveler.test.js` (26 wire-law pins) stay green
+alongside:
+
+- **content address law** — same content + same ts = SAME id, ANY edit
+  re-addresses with the seq riding, honest packets verify, slot tamper
+  refuses typed E_TRAVELER_ADDRESS (ISO 8.5.2: refuse, never rewrite),
+  and a forged ledger step breaks the address loudly
+- **ledger law + ceiling** — frozen-stamp mismatch, gap-jump and the
+  512-step ceiling all refuse typed E_TRAVELER_STEP (shape damage names
+  its clause)
+- **persistence append-only** — the packet body lands BY ADDRESS under
+  the brain-scoped store and verifies at re-load, and a same-id
+  re-persist refuses typed (the ledger never re-writes)
+- **schema rizer** — tr/0 migrates forward WITH its stamp and the
+  migration rides the ledger (an appended rize step); a future tr/7
+  refuses typed E_TRAVELER_SCHEMA (never guesses)
+- **audit verbatim** — the auditor copy names clause 8.5.2, carries one
+  numbered line per station, and states VERIFIED
+- **door verbs carried** — traveler_open/hop/status/audit hold their
+  contracts, traveler_carry routes the template (built + walk ok) and
+  a template REORDER refuses typed E_CARRIER_TEMPLATE (the bill of
+  stations is the boulder), traveler_replay walks landing rows
+  read-class, and carriers_list serves the honesty roster (nsc9/stone/
+  svg/json/qr up; png named-absent with its blocker)
+- **OS integration** — the security-pipeline scanner sees traveler
+  WIRED through the wall layers with audit adjacency informational,
+  refusals are typed VantErrors (zero raw throws), persistence is
+  audible on the shared event bus, the QoS door lane rate-limits typed
+  (E_TRAVELER_RATE past the bounded 6200-burst), and crew/team
+  attribution rides the ledger
+- **identity + durability** — a scoped mint stamps the canonical RLS
+  lineage (outside landing refuses typed, owned rides), privileged
+  hops demand a live approval, a minted approval id authorizes exactly
+  ONE hop (single-use, #204, disk-coherent), the .sha256 pin verifies
+  the on-disk index (atomic contract), and the traveler:* channels are
+  catalogued with their family + emitters
+
+8/8 `REFUSED` ×2 deterministic; EXPECTED armed strict. One herd lesson
+kept: the helpers live at module top-level (the splice initially landed
+them inside the attacks array — a parse error, found same-pass).
+
 ## Next surfaces survey (2026-10-23): packs vs issues
 
 Where the remaining repo parts land:
