@@ -261,7 +261,7 @@ on the slice's first run).
 | `trust-clear-resets` | a live root existed, then clearState drops the mirror to null — no hash blesses state the deployment no longer holds | validated - REFUSED |
 
 Slice 1 verdict: the five pins measure REFUSED on the real seams with
-`test/state-wiring.test.js` (51 pins) staying green alongside per the
+`test/state-wiring.test.js` drove the way (read before write, per the campaign's law) and the suite's run stayed green through every conversion — then the retirement step (see the retirement note in the carriers section below) trimmed it to the families the pack rows don't measure: 20 pins remain (seeds, authority, tree tier, anchor, mesh in-memory default, mesh-status JSON roundtrip); the 31 converted pins retired to the pack rows 2026-10-26
 reverse-verification law — the suite never retires until the whole family
 closes.
 
@@ -348,8 +348,12 @@ never a packet body.
 | `carriers-capacity-and-codes` | a 400KB blob refuses typed E_CARRIER_SHAPE naming STONE_CAP (never truncates); TAMPER/SHAPE/GAP stay distinct typed names | validated - REFUSED |
 
 Slice 1 verdict: the lane laws measure REFUSED on the real seams with
-`test/carriers.test.js` (111 pins) staying green alongside per the
-reverse-verification law.
+`test/carriers.test.js` (111 pins) drove the same laws per the
+reverse-verification law — and RETIRED whole to these pack rows on
+2026-10-26: every family in the file converted (lane laws, pointer/wire
+hooks, route, plates, assembly/template), so the coverage now lives in
+the pack rows and the file is deleted (the retirement step, done last
+in the bucket).
 
 **Slice 2 (same day): the pointer/wire-hook family (pass 265 + 267).** The
 arm grew an honest QR leg: `qrPointer` rides the png in-ride (Buffer never
@@ -457,7 +461,9 @@ case attempt.
 
 The carriers battery is DONE: 31 rows across 5 slices; native
 `test/carriers.test.js` (111 pins) green throughout under the
-reverse-verification law.
+reverse-verification law UNTIL the retirement step: the file retired
+whole to the pack rows on 2026-10-26 (every family converted — the
+coverage lives in the 31 pack rows now).
 
 ### `public/vant-migrations` — the brain-layout migrations battery (21 rows across 3 slices: fixture, legacy-main import, CLI/MCP/edges; all validated 2026-10-26)
 
@@ -547,7 +553,11 @@ carriers' route/plate/assembly/template families.
 
 Slice 1 verdict: the fixture family measures REFUSED on the real seams with
 `test/migrations.test.js` (28 pins) staying green alongside — GREEN after
-the finding's fix landed the same pass.
+the finding's fix landed the same pass. Retirement step (2026-10-26):
+24 of the 28 pins retired to the 21 pack rows; the 4 the rows don't
+measure stayed native (the clean-layout --dry-run CLI shape, the
+private-scope import + both-scope fresh reads, and the --brain-name
+naming law); the trimmed suite runs 4/4.
 
 ### `public/vant-kernel` — prove-the-verbs conformance for the kernel seed + its adoption (10 rows; all validated 2026-10-25)
 
@@ -866,7 +876,7 @@ today's clean B0 run: **48 REFUSED / 0 EXPLOITED / 1 skipped**.
 | 0 — wire-surface door pins (`test/crashtest-server.js`, 9 pins) | smallest lift, biggest overlap | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native suite 9/9 each run); the suite stays in CI under the law |
 | wire-surface re-pins — r/2 edge face (`web/relay/functions/api/r/relay.ts`) | ~15% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native lanes green each run: relay, relay-parity, memory, escrow, escrow-kernel, forum-msg-escrow, governance, workspace-memory via the sweep filter); the native lanes stay in CI under the law. Cycle 2's catch: the origin row's drive called hopFrame twice (sign + body) and each call re-evaluated ts — a ms-grain boundary left the signature covering different bytes than the body, and the edge (correctly) 401'd; one eval per shape since, signature === body bytes |
 | in-process module discipline (row-by-row) | ~40% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 6/6 REFUSED + native suites memory / escrow / governance green each run via the same sweep filter); the native blocks stay in CI under the law |
-| drill-down: remaining native suites (migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-6 landed (2026-10-25/26)**: state-wiring fully converted (30/30 REFUSED x2), the carriers battery converted in full (31/31 REFUSED x2: lane laws, pointer/wire-hook, route/certified-letter, plates, assembly/template), AND the migrations battery's fixture + legacy-main import + CLI-banner/MCP-door/edge families landed (21/21 REFUSED x2 on `migration-fixture`) — with the REAL FINDING armed+fixed same-pass (the dropfile migration ate live protocol state / crashed EISDIR on the state-store's .wal dir; native suite 25/28 → 28/28 GREEN) and a deterministic-ride fixture shape caught in slice 3 (a private-vant dropfile kept the loader non-empty after the public wipe — the sabotage-shape rows now seed the native shape); the carriers battery finished the same day (slices 3-5 above). Remaining native-suite buckets: none named in this drill-down — the S-counters hold their claims per bucket as converted |
+| drill-down: remaining native suites (migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-6 landed (2026-10-25/26)**: state-wiring fully converted (30/30 REFUSED x2), the carriers battery converted in full (31/31 REFUSED x2: lane laws, pointer/wire-hook, route/certified-letter, plates, assembly/template), AND the migrations battery's fixture + legacy-main import + CLI-banner/MCP-door/edge families landed (21/21 REFUSED x2 on `migration-fixture`) — with the REAL FINDING armed+fixed same-pass (the dropfile migration ate live protocol state / crashed EISDIR on the state-store's .wal dir; native suite 25/28 → 28/28 GREEN) and a deterministic-ride fixture shape caught in slice 3 (a private-vant dropfile kept the loader non-empty after the public wipe — the sabotage-shape rows now seed the native shape); the carriers battery finished the same day (slices 3-5 above), AND the retirement step ran the same pass: test/carriers.test.js retired whole to the pack rows, test/migrations.test.js trimmed to its 4 uncovered pins (4/4 green), test/state-wiring.test.js trimmed to its 20 uncovered pins (20/20 green) — the converted families' coverage lives in the pack rows now. Remaining native-suite buckets: none named in this drill-down — the S-counters hold their claims per bucket as converted |
 
 **Bucket 0 S-counter ledger:** cycle 1 (2026-10-25, conversion day) →
 cycle 2 → cycle 3, all sides green each run — the quarter-period
