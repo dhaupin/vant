@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-leisure",
+  "version": "0.1.0",
+  "description": "The want-list keeper (#196) + its autonomy gate (#209/#209b) driven lib-level in-process: want recording/dedupe/refusal law, the spirit-first rotation (never-pursued leads, NOT a queue), pursue one-shot AND stretched with REAL tempo budgets, breath/dream read-only seams, ledger containment inside the private brain tree, and the gate ladder (default OFF silent, honest refusals, caps, breaker, era precedence, token-cost escrow). Zero sockets - the ledger is a file, the budget is a module.",
+  "entry": "index.mjs"
+}

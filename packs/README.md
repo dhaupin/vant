@@ -1086,6 +1086,62 @@ Remaining spine families (mesh/brains #164-#166: AOI filter, stale
 purity, deterministic write winners, spine PRF addressing, brain
 verify + horcrux) queue for slice 2.
 
+## Leisure battery — the want-list keeper lands (v0.8.6, #249 - 2026-10-26)
+
+New pack `public/vant-leisure` — **6 rows** on the same battery law:
+rows drive the REAL lib modules (leisure + tempo + escrow + qos + era +
+event) in-process against a THROWAWAY brain's ledger in
+`models/private/<brain>/.leisure.json` — the containment contract IS
+the graded surface. No route arming needed; every row holds REFUSED in
+every sandbox. Native `test/leisure.test.js` (21 pins) green alongside
+under the reverse-verification law:
+
+- **want ledger lifecycle** — recording shape (lw- id, zero pursued
+  count, honest nulls, the scratch brain named), dedupe keeps ONE
+  normalized entry (re-statement = SAME id, preserved pursued-count,
+  refreshed note), empty text refuses typed `VAF_INPUT_INVALID` with no
+  soiled row, and the ledger file agrees with the status
+- **rotation + receipts + forget** — the list is a want-list NOT a
+  queue (never-pursued leads the once-pursued; suggest reads the same
+  rotation head), fuzzy markPursued receipts land in the history,
+  unknown refuses honest, forget works by id AND fuzzy and refuses the
+  absent
+- **pursue seams + tempo budget** — empty ledger nulls suggest
+  honestly; one-shot pursue runs a REAL step through tempo.pace, marks
+  the pursuit and reads the rotation top; stretched pursue arms a REAL
+  tempo budget keyed to the want (tempo- id, leisure label,
+  ledger-budget present) and releases at .end; both paradox pursuits
+  (no step fn, empty list) refuse typed with nothing armed
+- **breath + dream read-only** — consultBreath is exact 4th-breath
+  cadence (off-cadence, breath-0 and empty ledger all honest nulls),
+  dreamReview carries the open/aging/oldest/suggestion rollup and nulls
+  on an empty ledger, and NEITHER SEAM writes the ledger
+- **containment + disk truth** — the ledger never leaves
+  `models/private/<brain>/.leisure.json` (hostile brain names cannot
+  traverse out), re-require is path-stable and reads persisted disk
+  truth (the reload-survival leg)
+- **auto-pursue gate ladder (#209)** — seven graded legs onto cap
+  truth: default OFF is a SILENT no-op (no budget, no noise);
+  enabled-but-providerless refuses LOUDLY via the auto_refused event
+  (exactly once); the funded provider arms a REAL budget within the
+  window cap with daily usage accruing in the contained ledger; the
+  exhausted daily cap, the OPEN breaker and the OPEN era (work
+  precedence) all refuse with their honest names; and the token-cost
+  step refuses UNFUNDED (before any budget arms), opens explicitly
+  funded, and zero-leaks its escrow cleanup
+
+6/6 `REFUSED` ×2 deterministic. Herd repair kept in the pack comments:
+the cache-drop is scoped to the STATE-CARRYING modules only (leisure's
+mtime ledger + tempo's budgets) — dropping the singleton modules forked
+their instances and broke the recursion-wall pack's event receipt (that
+exact cross-pack bug, found and closed same-pass). The gate legs pin
+the daily cap explicitly: the pack runtime leaked the exhausted leg's
+env residue, and the fixed-under-pack residual order-dependence
+depended on it.
+
+Remaining native suites from the survey: traveler-lib (~44 pins)
+converts onto vant-carriers/vant-stones next.
+
 ## Next surfaces survey (2026-10-23): packs vs issues
 
 Where the remaining repo parts land:

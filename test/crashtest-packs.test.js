@@ -1312,6 +1312,25 @@ const EXPECTED = {
     // brain-space tmpdir; no route arming needed, so these hold REFUSED in
     // every sandbox. Native engine-parity-spine stays green alongside (70
     // pins) under the reverse-verification law.
+    // ARMED 2026-10-26 (leisure battery, Phase A of the S0→S1 campaign,
+    // #196 + #209): the want-list keeper converts onto its own pack —
+    // recording/dedupe law, spirit-first rotation + receipts/forget, the
+    // pursue seams with REAL tempo budgets, read-only breath/dream,
+    // ledger containment + disk-truth reload, and the full autonomy-gate
+    // ladder (7 graded legs onto cap truth). Every row drives the real
+    // lib/leisure (+ tempo/escrow/qos/era/event) module-level against a
+    // THROWAWAY brain's ledger (containment IS the graded surface); no
+    // route arming needed, so these hold REFUSED in every sandbox.
+    // Native test/leisure.test.js stays green alongside (21 pins) under
+    // the reverse-verification law.
+    'vant-leisure': {
+        'want-ledger-lifecycle': 'REFUSED',
+        'rotation-receipts-and-forget': 'REFUSED',
+        'pursue-seams-and-tempo-budget': 'REFUSED',
+        'breath-and-dream-read-only': 'REFUSED',
+        'ledger-containment-and-disk-truth': 'REFUSED',
+        'auto-pursue-gate-ladder': 'REFUSED',
+    },
     'vant-spine': {
         'canonical-bytes-law': 'REFUSED',
         'tree-put-diff-snapshot-laws': 'REFUSED',
