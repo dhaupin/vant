@@ -103,6 +103,34 @@ function freshId(prefix) {
   return prefix + String(++_idCount).padStart(4, '0') + '-' + Math.random().toString(36).slice(2, 7);
 }
 
+/** The guests battery drives lib/guests against a THROWAWAY brain's
+ * ledger inside models/private/<brain>/.guests.json (the containment
+ * contract); the module reload trick (require-cache drop) reproduces a
+ * fresh process for the reload-survival leg. */
+const GUEST_BRAIN = 'wall-row-guests';
+const GUEST_OPT = { brain: GUEST_BRAIN };
+let _guestRequire = null;
+
+async function guestKit() {
+  const fs = await import('node:fs');
+  const { createRequire } = await import('node:module');
+  const { resolve } = await import('node:path');
+  // capacity: the battery is its own suite (the native pins un-cap the
+  // same way) - un-cap BEFORE the lib require
+  process.env.VANT_GUESTS_MAX = '500';
+  if (GUEST_BRAIN.includes('/')) throw new Error('bad guest brain name');
+  const req = _guestRequire || (_guestRequire = createRequire(import.meta.url));
+  try { delete req.cache[req.resolve(resolve('lib/guests.js'))]; } catch { /* first load */ }
+  const guests = req(resolve('lib/guests.js'));
+  // row hygiene: wipe the scratch ledger so every cycle starts clean
+  try { fs.rmSync(guests._ledgerPath(GUEST_BRAIN), { force: true }); } catch { /* fresh */ }
+  return guests;
+}
+
+function deepEq(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
 /** Run a route; a missing route = honest skip; a handler throw is DATA
  * (the record carries it), not a skip. */
 async function tryRun(harness, route, reqInit) {
@@ -678,6 +706,142 @@ export default {
         }
         void fs;
         return { verdict: 'REFUSED', detail: 'the lister enumerates + filters strictly, the name-stripper holds the format set, and both escape and invalid paths answer honestly (foreign nothing / empty list)', tookRequests: 4 };
+      },
+    },
+    // ==================== guests battery (2026-10-26): the LIB-level
+    // guest lifecycle converts in-process from lib/guests — NO sockets.
+    // Honest-absent (stays native under the reverse-verification law):
+    // the REAL door-integration families (MCP exec over sockets, the
+    // pairing-redeem key binding, the CS cross-tenant channel door), and
+    // the teal caps ride the existing guest-capability-gates coverage.
+
+    {
+      name: 'guest-token-lifecycle-hash-revoke-and-expiry',
+      description: 'the guest token lifecycle holds its whole shape: vguest_ tokens mint ONE raw secret with clean projections (list() never leaks a hash), exact-secret verifies while tampered/unknown/wrong-prefix all refuse null, the ledger stores the sha256 (never the raw token), revocation is instant by id AND name, survives a module reload (denylist, not stateless), double-revoke is an honest no-op, and an expired guest refuses while the row still exists',
+      async run(_harness) {
+        const guests = await guestKit();
+        const fs = await import('node:fs');
+        const out = guests.issue('wall-g-lifecycle', { ...GUEST_OPT, role: 'human' });
+        if (!/^vguest_[A-Za-z0-9_-]+_[A-Za-z0-9_-]{24,64}$/.test(out.token) || out.guest.role !== 'human') {
+          return { verdict: 'EXPLOITED', detail: 'the token shape broke on issue: ' + String(out.token).slice(0, 40), tookRequests: 1 };
+        }
+        if ('tokenHash' in out.guest || guests.list(GUEST_OPT).some((g) => 'tokenHash' in g)) {
+          return { verdict: 'EXPLOITED', detail: 'the public projection carries the hash - the hash never leaves the ledger', tookRequests: 1 };
+        }
+        if (!guests.verify(out.token, GUEST_OPT)) {
+          return { verdict: 'EXPLOITED', detail: 'the exact token did not verify', tookRequests: 2 };
+        }
+        for (const [evil, why] of [
+          ['vguest_nope_' + 'z'.repeat(30), 'unknown id'],
+          [out.token.replace(/[A-Za-z0-9_-]{6}$/, 'zzzzzzz'), 'tampered secret'],
+          ['vant_' + out.token.slice('vguest_'.length), 'wrong prefix (habitat tokens are NOT guests)'],
+        ]) {
+          if (guests.verify(evil, GUEST_OPT) !== null) {
+            return { verdict: 'EXPLOITED', detail: 'a hostile token VERIFIED (' + why + ') - refusal must be null, never salvage', tookRequests: 3, evidence: { shape: why } };
+          }
+        }
+        const ledger = fs.readFileSync(guests._ledgerPath(GUEST_BRAIN), 'utf8');
+        if (ledger.includes(out.token)) {
+          return { verdict: 'EXPLOITED', detail: 'the raw token EXISTS on disk - at rest must be sha256', tookRequests: 3 };
+        }
+        const id = guests.list(GUEST_OPT).find((g) => g.name === 'wall-g-lifecycle').id;
+        if (!guests.revoke(id, GUEST_OPT) || guests.verify(out.token, GUEST_OPT) !== null) {
+          return { verdict: 'EXPLOITED', detail: 'revocation did not kill the token in-process', tookRequests: 4 };
+        }
+        const exp = guests.issue('wall-g-expiry', { ...GUEST_OPT, expires: 5 });
+        const deadline = Date.now() + 80;
+        if (!guests.verify(exp.token, GUEST_OPT)) {
+          return { verdict: 'EXPLOITED', detail: 'the in-window expired guest refused before its window - expiry must be honest both directions', tookRequests: 5 };
+        }
+        while (Date.now() < deadline) { /* wait out the 5ms window */ }
+        if (guests.verify(exp.token, GUEST_OPT) !== null) {
+          return { verdict: 'EXPLOITED', detail: 'an EXPIRED guest verified - the row may survive but the token must die', tookRequests: 6 };
+        }
+        return { verdict: 'REFUSED', detail: 'the lifecycle holds: clean token + projections, every hostile verify null, hash-at-rest in the ledger, instant revoke by id (survives reload, double-revoke honest) and the expiry window kills the token', tookRequests: 6 };
+      },
+    },
+
+    {
+      name: 'guest-caps-trust-restricts-and-door-classes',
+      description: 'the capability vocabulary is closed and the door gate is fail-closed: observer = read-only maps, human gains spawn (the #185 acceptance: a remote browser can spawn work) without exec, agent adds exec; trust levels RESTRICT only (medium keeps, low strips exec+spawn, none caps to read even for agent); and authorize() classifies honestly: unknown tools count as WRITE (fail-closed), spawn-class checks canSpawn, exec-class checks canExec, and guest management refuses EVERY role with E_GUEST_ADMIN',
+      async run(_harness) {
+        const guests = await guestKit();
+        const capsOf = (name, extra) => guests.verify(guests.issue(name, { ...GUEST_OPT, ...(extra || {}) }).token, GUEST_OPT);
+        const o = capsOf('wall-g-obs', { role: 'observer' });
+        const h = capsOf('wall-g-hum', { role: 'human' });
+        const a = capsOf('wall-g-agt', { role: 'agent' });
+        if (!o || !h || !a) {
+          return { verdict: 'EXPLOITED', detail: 'one of the three role variants failed to verify: ' + JSON.stringify([!!o, !!h, !!a]), tookRequests: 3 };
+        }
+        if (!deepEq(o.caps, ['canRead', 'canLoad', 'canList'])) {
+          return { verdict: 'EXPLOITED', detail: 'the observer map drifted: ' + JSON.stringify(o.caps), tookRequests: 3, evidence: o.caps };
+        }
+        if (!(h.caps.includes('canWrite') && h.caps.includes('canSpawn') && !h.caps.includes('canExec'))) {
+          return { verdict: 'EXPLOITED', detail: 'the human map lost the #185 acceptance or leaked exec: ' + JSON.stringify(h.caps), tookRequests: 3, evidence: h.caps };
+        }
+        if (!a.caps.includes('canExec')) {
+          return { verdict: 'EXPLOITED', detail: 'the agent map lost canExec: ' + JSON.stringify(a.caps), tookRequests: 3, evidence: a.caps };
+        }
+        const low = capsOf('wall-g-low', { role: 'agent', trustLevel: 'low' });
+        const none = capsOf('wall-g-none', { role: 'agent', trustLevel: 'none' });
+        if (!(low && !low.caps.includes('canExec') && !low.caps.includes('canSpawn') && low.caps.includes('canWrite'))) {
+          return { verdict: 'EXPLOITED', detail: 'low trust did not strip exec+spawn (or refused): ' + JSON.stringify(low && low.caps), tookRequests: 5 };
+        }
+        if (!deepEq(none.caps, ['canRead', 'canLoad', 'canList'])) {
+          return { verdict: 'EXPLOITED', detail: 'none trust did not cap the agent to read-only: ' + JSON.stringify(none && none.caps), tookRequests: 6 };
+        }
+        if (!guests.authorize('brain_load', o).allowed || guests.authorize('brain_save', o).reasonCode !== 'E_GUEST_CAP' || guests.authorize('wall-row-totally-unknown-tool', o).reasonCode !== 'E_GUEST_CAP') {
+          return { verdict: 'EXPLOITED', detail: 'the door gate misclassified for an observer - unknown tools must fail CLOSED as writes', tookRequests: 9 };
+        }
+        if (!guests.authorize('agent_spawn', h).allowed || guests.authorize('agent_spawn', low).reasonCode !== 'E_GUEST_CAP') {
+          return { verdict: 'EXPLOITED', detail: 'the spawn class did not check canSpawn against the trust floor', tookRequests: 11 };
+        }
+        if (guests.authorize('sudo_shell', h).reasonCode !== 'E_GUEST_CAP') {
+          return { verdict: 'EXPLOITED', detail: 'an exec-class verb rode a human guest - exec stays a working-peer capability', tookRequests: 12 };
+        }
+        for (const role of ['observer', 'human', 'agent']) {
+          const g = capsOf('wall-g-admin-' + role, { role });
+          if (guests.authorize('guest_list', g).reasonCode !== 'E_GUEST_ADMIN') {
+            return { verdict: 'EXPLOITED', detail: role + ' reached guest management - it is ADMIN-only for EVERY guest role', tookRequests: 13 };
+          }
+        }
+        return { verdict: 'REFUSED', detail: 'the caps vocabulary is closed per role, trust restricts only (medium keeps, low strips exec+spawn, none caps to read), and the door classes are honest: unknown=write fail-closed, spawn checks canSpawn, exec stays peer-only, and guest management refuses every guest role with E_GUEST_ADMIN', tookRequests: 16 };
+      },
+    },
+
+    {
+      name: 'guest-pairing-voucher-single-use',
+      description: 'the pairing voucher is a VOUCHER, not a credential: offerPairing stores a HASH (the raw code never exists in the ledger), a wrong code refuses with the honest mismatch reason, redemption issues the human-role operator guest, the pending row is consumed exactly once, and the second use of the same code refuses (single-use, fail-closed)',
+      async run(_harness) {
+        const guests = await guestKit();
+        const fs = await import('node:fs');
+        // the voucher seat is the 'vhpair-*' shape (the offer's accept
+        // rule); the SAME string is the code the rider redeems
+        const code = 'vhpair-wall-row-voucher';
+        const offer = guests.offerPairing(code, GUEST_OPT);
+        if (!offer) {
+          return { verdict: 'EXPLOITED', detail: 'offerPairing refused to admit the voucher', tookRequests: 1 };
+        }
+        const ledger = fs.readFileSync(guests._ledgerPath(GUEST_BRAIN), 'utf8');
+        if (ledger.includes(code)) {
+          return { verdict: 'EXPLOITED', detail: 'the raw voucher code EXISTS in the ledger - only its hash may rest there', tookRequests: 2 };
+        }
+        const mismatch = guests.pair('vhpair-wrong-code-00000', GUEST_OPT);
+        if (!(mismatch && mismatch.ok === false && /mismatch/i.test(String(mismatch.reason || '')))) {
+          return { verdict: 'EXPLOITED', detail: 'a wrong code did not answer the honest mismatch refusal: ' + JSON.stringify(mismatch).slice(0, 110), tookRequests: 3 };
+        }
+        const redeemed = guests.pair(code, GUEST_OPT);
+        if (!(redeemed && redeemed.token && /^vguest_/.test(redeemed.token) && redeemed.guest && redeemed.guest.role === 'human')) {
+          return { verdict: 'EXPLOITED', detail: 'redemption did not issue the human-role operator guest: ' + JSON.stringify(redeemed || null).slice(0, 110), tookRequests: 4 };
+        }
+        if (guests.pendingPairing && guests.pendingPairing(GUEST_OPT) !== null) {
+          return { verdict: 'EXPLOITED', detail: 'the pending row was NOT consumed by the redeem', tookRequests: 5 };
+        }
+        const second = guests.pair(code, GUEST_OPT);
+        if (!(second && second.ok === false)) {
+          return { verdict: 'EXPLOITED', detail: 'the same code redeemed TWICE - the voucher is single-use, fail-closed', tookRequests: 6 };
+        }
+        return { verdict: 'REFUSED', detail: 'the voucher stayed a voucher: hash-only at rest, honest mismatch refusal, one human-role redemption with the pending row consumed, and the second use refuses', tookRequests: 6 };
       },
     },
   ],

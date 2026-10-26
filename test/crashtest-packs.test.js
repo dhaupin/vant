@@ -1006,6 +1006,16 @@ const EXPECTED = {
         'brain-stack-push-switch-and-mode-enum': 'REFUSED',
         'brain-multiformat-read-save-laws': 'REFUSED',
         'format-module-listing-and-confinement': 'REFUSED',
+        // (guests battery, 2026-10-26) the LIB-level guest lifecycle
+        // converts in-process from lib/guests — self-contained rows, no
+        // run-root arm, EARN strict REFUSED in BOTH phases. The socket
+        // door-integration families stay in the trimmed native suite
+        // (test/guests.test.js, 14 pins) under the reverse-verification
+        // law; the run-root guest-cap route row still arms vant-brain's
+        // guest-capability-gates.
+        'guest-token-lifecycle-hash-revoke-and-expiry': 'REFUSED',
+        'guest-caps-trust-restricts-and-door-classes': 'REFUSED',
+        'guest-pairing-voucher-single-use': 'REFUSED',
     },
     'vant-crew': {
         'roster-quota-ceiling': 'REFUSED',

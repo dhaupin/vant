@@ -1005,6 +1005,35 @@ pattern, no routes, no arm) and grade the module's OWN surface:
 16/16 `REFUSED` ×2 deterministic; native `test/brain.test.js` 77/77
 green alongside under the reverse-verification law.
 
+### Guests battery (same pass) — the lib lifecycle converts + the trim
+
+`public/vant-brain` reaches **19 rows** (9 security + 7 brain-unit + 3
+guest-lib rows). The guests rows drive lib/guests against a THROWAWAY
+brain's ledger in-process (containment contract graded; module-reload
+trick for the reload-survival leg):
+
+- **token lifecycle** — vguest_ shape + ONE raw secret, clean
+  projections (no hash ever leaves the ledger), exact-vs-tampered /
+  unknown / wrong-prefix verifications, sha256-at-rest, instant revoke
+  by id (denylist, survives reload), honest double-revoke no-op, and
+  the expiry window kills the token while its row remains
+- **caps + trust + door classes** — the closed role vocabulary
+  (observer read-only / human +spawn −exec / agent +exec), trust
+  RESTRICTS only (medium keeps, low strips exec+spawn, none caps agent
+  to read), and authorize() classifies honestly: unknown = write
+  fail-closed, spawn-class checks canSpawn against the trust floor,
+  exec stays peer-only, guest management = E_GUEST_ADMIN for EVERY role
+- **pairing voucher** — 'vhpair-*' voucher seats, hash-only at rest,
+  honest mismatch refusal, one human-role redemption with the pending
+  row consumed, second use refuses (voucher, not credential)
+
+19/19 `REFUSED` ×2 deterministic. THE TRIM (same pass): the native
+`test/guests.test.js` retired its 11 covered sync-lifecycle pins
+(40 total → the door-integration socket families' 14 pins remain:
+real-MCP exec, the pairing-redeem channel-key binding, the CS
+cross-tenant channel door — those ride REAL sockets and stay native
+under the reverse-verification law, 14/14 green).
+
 ## Next surfaces survey (2026-10-23): packs vs issues
 
 Where the remaining repo parts land:
