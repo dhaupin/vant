@@ -1034,6 +1034,58 @@ real-MCP exec, the pairing-redeem channel-key binding, the CS
 cross-tenant channel door — those ride REAL sockets and stay native
 under the reverse-verification law, 14/14 green).
 
+## Engine-parity-spine battery slice 1 — the state core lands (v0.8.6, #249 - 2026-10-26)
+
+New pack `public/vant-spine` — **7 rows**, each driving the real lib
+modules (state core, storage spine, capability posture) directly
+in-process against throwaway tmpdir brain-spaces. No route arming
+needed; every row holds REFUSED in every sandbox. Native
+`test/engine-parity-spine.test.js` (70 pins, 7 families) green
+alongside under the reverse-verification law:
+
+- **canonical bytes** (#149) — the keys-order law (identical values,
+  different key order = identical canonical bytes), 17 corpus cases
+  roundtrip byte-exactly, forbidden values (undefined / function /
+  bigint-in-the-wrong-lane) refuse typed, and the schema/path-prefix
+  separation holds
+- **tree laws** — put identity, LWW over equal-ts calls, two-entry
+  diff, verified stale-apply, truncated-refusal, and the bounded
+  deterministic snapshot
+- **scope grammar** — coarse defaults to main, world scope splits,
+  sibling scopes isolated at read AND snapshot, stamping rides the
+  payload (the #226 mint-side retarget leg rides the same row shape)
+- **fold + cellstore** (#150) — ring-offset/depth laws closed-form at
+  every boundary, deep cells refuse to overrun typed, 1000 writes of 10
+  distinct facts collapse to exactly 10 cells, and the rebate claims
+  without storing bytes (`stored=false`, `firstSpace` named,
+  `savings_ratio` MEASURED at the honest 0.5 — on a FRESH store; the
+  collapse store's ledger is a different budget)
+- **checkpoint recovery** (#151) — a kill mid-stream reproduces the
+  pre-kill checkpoint id, snapshot boundaries are deterministic across
+  identical logs with the log truncated past the oldest retained
+  snapshot, and an UNREADABLE log DENIES recovery typed (never an
+  empty-log fresh start)
+- **anchor + hotset** (#152) — the anchor ledger stays append-only
+  across instance churn; verify compares against the LAST anchor (a
+  stale rooted fact honestly diverges typed), a foreign hash diverges,
+  an empty ledger refuses ok; the hot set falls through evictions to
+  durable store truth past its exact counted eviction cap
+- **capability posture** (#162 #163) — a grant persisted in one
+  process is honored by a FRESH instance, no-ledger denies reason
+  'none', expiry is honest, revocation enforced, the grantor is
+  mandatory, unreadable ledgers (grants AND WAL) DENY typed, ABSENT
+  stays a typed API value (never null), and sandbox can() degrades to
+  a boolean with no grant ledger around
+
+7/7 `REFUSED` ×2 deterministic; EXPECTED armed strict. Two honest
+repairs in-pass: the rebate legs now grade their own fresh store (the
+1000-write collapse ledger poisoned the first attempt), and the anchor
+verify row speaks the real semantics — verify compares to the LAST
+anchor, so a stale rooted fact is the divergence case, not a hack.
+Remaining spine families (mesh/brains #164-#166: AOI filter, stale
+purity, deterministic write winners, spine PRF addressing, brain
+verify + horcrux) queue for slice 2.
+
 ## Next surfaces survey (2026-10-23): packs vs issues
 
 Where the remaining repo parts land:

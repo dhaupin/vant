@@ -1302,6 +1302,25 @@ const EXPECTED = {
         'migrations-cli-status-and-fail-exit': 'skip',
         'migrations-health-checkmigration': 'skip',
     },
+    // ARMED 2026-10-26 (engine-parity-spine battery slice 1, Phase A of the
+    // S0→S1 campaign): the spine families converted onto their own pack —
+    // canonical bytes (#149), tree put/diff/snapshot (#150-adjacent state
+    // core), scope grammar + stamping, fold laws + cellstore rebates
+    // (#150), checkpoint recovery bounds (#151), anchor ledger + hotset
+    // durability (#152), and the fail-closed capability posture (#162
+    // #163). Every row drives the real lib modules against a throwaway
+    // brain-space tmpdir; no route arming needed, so these hold REFUSED in
+    // every sandbox. Native engine-parity-spine stays green alongside (70
+    // pins) under the reverse-verification law.
+    'vant-spine': {
+        'canonical-bytes-law': 'REFUSED',
+        'tree-put-diff-snapshot-laws': 'REFUSED',
+        'scope-grammar-isolation-and-stamping': 'REFUSED',
+        'fold-laws-and-cellstore-rebates': 'REFUSED',
+        'checkpoint-recovery-bounded-and-deny': 'REFUSED',
+        'anchor-ledger-and-hotset-durability': 'REFUSED',
+        'persistent-grants-and-wal-deny-posture': 'REFUSED',
+    },
 };
 
 function checkVerdictRows(packName, verdicts) {
