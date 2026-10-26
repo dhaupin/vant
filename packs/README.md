@@ -324,6 +324,36 @@ probe must measure purity BEFORE moving the env it proves flows.
 | `meshstatus-seed-pure-and-envflow` | the seed derivation answers identically twice unperturbed and MOVES under the universe seed (restored after) | validated - REFUSED |
 | `meshstatus-render-degraded` | the degraded mesh line still renders its label with (unavailable) and prints the error itself — degraded-not-dead | validated - REFUSED |
 
+### `public/vant-carriers` — the carrier/assimilator lanes (8 rows, slice 1: lane laws; all validated 2026-10-26)
+
+**What it does.** The carriers battery's first conversion slice (#249
+drill-down, per-bucket shape): the native suite's lane laws family (pass
+258 + successors) converts to pack rows on the run root's `carriers-lane`
+arm — the REAL `lib/carriers.js` + `lib/traveler.js` seams driven
+in-process with FIXED-NOW mints (the traveler's own determinism law: same
+payload + same ts = the SAME address, so the fleet rides rangefree).
+Artifacts and pair passwords stay in-ride — the wire carries neutral facts
+only (booleans + caught typed codes), never a frame, never a password,
+never a packet body.
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `carriers-roster-honesty` | nsc9/stone/svg/json available, png DECLARED-ABSENT with a named blocker, qr real, the roster overstates nothing | validated - REFUSED |
+| `carriers-nsc9-frame-law` | the 12-digit Lane B shape, deterministic marks, matches() self-authenticates (wrong mark false, malformed facility typed E_CARRIER_SHAPE, malformed decode typed) | validated - REFUSED |
+| `carriers-nsc9-giai-readthrough` | giai() yields the AI-8004 form, fromGiai() strips back to the SAME frame, hostile GIAI typed | validated - REFUSED |
+| `carriers-stone-two-walls` | VSTN:1: grammar, byte-for-byte round-trip, seal damage refuses E_CARRIER_TAMPER with the CARRIER wording (not the packet wall's), resealed forgery typed TAMPER too, nonsense grammar SHAPE — two DISTINCT walls | validated - REFUSED |
+| `carriers-svg-airgap` | encrypted body (no plaintext markers), minted-once long pair password, honest id fragment, clean round-trip, explicit password mints nothing, wrong password typed E_CARRIER_TAMPER | validated - REFUSED |
+| `carriers-json-erp` | verbatim traveler form, verify re-applied on the way back, tampered bag typed E_CARRIER_TAMPER | validated - REFUSED |
+| `carriers-sender-side-verify` | a tampered packet cannot ASSIMILATE into any lane (all four refuse the sender typed E_CARRIER_TAMPER) | validated - REFUSED |
+| `carriers-capacity-and-codes` | a 400KB blob refuses typed E_CARRIER_SHAPE naming STONE_CAP (never truncates); TAMPER/SHAPE/GAP stay distinct typed names | validated - REFUSED |
+
+Slice 1 verdict: the lane laws measure REFUSED on the real seams with
+`test/carriers.test.js` (111 pins) staying green alongside per the
+reverse-verification law. Queued behind: the pointer/wire-hook family
+(pass 265/267), the route/certified-letter family (R0-R12), the
+plate/armament family (M1-M16), and the assembly/template/mfg-line family
+(A/B/C rows).
+
 ### `public/vant-kernel` — prove-the-verbs conformance for the kernel seed + its adoption (10 rows; all validated 2026-10-25)
 
 Per vant#250 (labs/prd-kernel.md sec 6d #5): portability's strongest form is
@@ -641,7 +671,7 @@ today's clean B0 run: **48 REFUSED / 0 EXPLOITED / 1 skipped**.
 | 0 — wire-surface door pins (`test/crashtest-server.js`, 9 pins) | smallest lift, biggest overlap | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native suite 9/9 each run); the suite stays in CI under the law |
 | wire-surface re-pins — r/2 edge face (`web/relay/functions/api/r/relay.ts`) | ~15% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native lanes green each run: relay, relay-parity, memory, escrow, escrow-kernel, forum-msg-escrow, governance, workspace-memory via the sweep filter); the native lanes stay in CI under the law. Cycle 2's catch: the origin row's drive called hopFrame twice (sign + body) and each call re-evaluated ts — a ms-grain boundary left the signature covering different bytes than the body, and the edge (correctly) 401'd; one eval per shape since, signature === body bytes |
 | in-process module discipline (row-by-row) | ~40% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 6/6 REFUSED + native suites memory / escrow / governance green each run via the same sweep filter); the native blocks stay in CI under the law |
-| drill-down: remaining native suites (state-wiring, migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-3 landed (2026-10-25/26)**: the TRUST→TREE family (5 pins), the MERGE-PATH consumers — node-registry (step ②), consensus + market (③) — AND the remaining state-wiring families — mesh WAL (5) + mesh events (3), geometry→spine (2), brain-verify→surfaces (2), mesh-status (3) — became `vant-state-wiring` rows on the run root's `wiring-trust` + `wiring-module` + `wiring-mesh` + `wiring-surfaces` arms (30/30 REFUSED x2); the native suite stays green alongside (51/51) per the reverse-verification law |
+| drill-down: remaining native suites (migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-4 landed (2026-10-25/26)**: state-wiring fully converted (30/30 REFUSED x2 — trust→tree 5, merge-path 10, mesh WAL/events 8, surfaces 5 on `wiring-trust` + `wiring-module` + `wiring-mesh` + `wiring-surfaces`) AND the carriers battery's lane-laws family landed (8/8 REFUSED x2 on `carriers-lane`); the migration battery and carriers' pointer/wire-hook, route, plate, and assembly/template families queue behind per-bucket conversion shape |
 
 **Bucket 0 S-counter ledger:** cycle 1 (2026-10-25, conversion day) →
 cycle 2 → cycle 3, all sides green each run — the quarter-period

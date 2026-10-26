@@ -2302,6 +2302,170 @@ function buildRoutes(sb, Harness) {
         }
         return jsonRes({ results: out }, 200);
     });
+    // carriers-lane: POST { ops: [{ op, ... }] } — the CARRIER LANES arm
+    // (carriers battery slice 1, per-bucket conversion): drives the REAL
+    // lib/carriers.js + lib/traveler.js seams in-process — the roster's
+    // roster honesty, the NSC-9 address lane, the stone packet lane and
+    // its two named walls (seal vs address), the svg encrypted lane, the
+    // json ERP lane, sender-side verify, the capacity law. Fixed `now`
+    // mints ride the traveler's own determinism law (same payload + same
+    // ts = the SAME address). Artifacts/passwords stay in-ride; the wire
+    // carries neutral facts only (booleans + caught codes).
+    harness.registerRoute('carriers-lane', async (ctx) => {
+        const carriers = sandboxLib('carriers');
+        const traveler = sandboxLib('traveler');
+        const cryptoMod = require('crypto');
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        const ops = (j && Array.isArray(j.ops) && j.ops.length) ? j.ops.slice(0, 80) : null;
+        if (!ops) return jsonRes({ error: 'ops array required' }, 400);
+        const packets = new Map();   // token -> traveler object
+        const artifacts = new Map(); // token -> { envelope?, frame?, svg?, pw?, json? }
+        const out = [];
+        const amt = (token) => packets.get(String(token));
+        const art = (token) => artifacts.get(String(token)) || {};
+        const attempt = (fn) => {
+            try { return Object.assign({ ok: true }, fn()); }
+            catch (e) {
+                const msg = String((e && e.message) || e);
+                return { ok: false, caught: (e && e.code) || 'UNCAUGHT', msgHas: {
+                    known: /known:/.test(msg), stoneCap: /STONE_CAP/.test(msg),
+                    neitherLane: /neither lane grammar/.test(msg), addressDerive: /address does not derive/.test(msg) } };
+            }
+        };
+        for (const op of ops) {
+            const o = op || {};
+            try {
+                if (o.op === 'mint') {
+                    const t = traveler.mint({ from: String(o.from || 'floor-1'), slots: Object.assign({ title: 'wheel' }, o.slots || {}), now: Number(o.now || 5000) });
+                    const token = 'p' + packets.size; packets.set(token, t);
+                    out.push({ op: 'mint', ok: true, token });
+                    continue;
+                }
+                if (o.op === 'roster') {
+                    const list = carriers.list();
+                    const real = {};
+                    for (const c of list) real[c.id] = c.available === true;
+                    const png = list.find((c) => c.id === 'png');
+                    out.push({ op: 'roster', ok: true, real,
+                        pngAvailable: png ? png.available === true : null,
+                        pngNamed: !!(png && png.available === false && png.blocker && png.blocker.length > 10),
+                        qrReal: !!(list.find((c) => c.id === 'qr') || {}).available,
+                        noOverstatements: list.every((c) => c.available === true || (c.available === false && c.blocker)) });
+                    continue;
+                }
+                if (o.op === 'tamper') {
+                    const evil = JSON.parse(JSON.stringify(amt(o.token)));
+                    evil.slots.title = String(o.title || 'forged');
+                    const token = 'p' + packets.size; packets.set(token, evil);
+                    out.push({ op: 'tamper', ok: true, token });
+                    continue;
+                }
+                if (o.op === 'encode') {
+                    const lane = String(o.lane);
+                    const t = amt(o.token);
+                    const r = attempt(() => {
+                        const opts = {};
+                        if (o.pw !== undefined) opts.password = String(o.pw);
+                        if (o.pointer === true) opts.pointer = true;
+                        const a = Object.keys(opts).length ? carriers.encode(t, lane, opts) : carriers.encode(t, lane);
+                        const token = String(o.storeKey || (lane + ':' + o.token));
+                        const facts = {};
+                        if (lane === 'nsc9') { artifacts.set(token, { frame: a.frame }); facts.frame12 = typeof a.frame === 'string' && /^9-[0-9]{5}-[0-9]{5}-[0-9]$/.test(a.frame); }
+                        else if (lane === 'stone') { artifacts.set(token, { envelope: a.envelope }); facts.vstnGrammar = a.envelope.startsWith('VSTN:1:') && /^[0-9a-f]{64}$/.test(a.envelope.split(':')[2]); }
+                        else if (lane === 'svg') { artifacts.set(token, { svg: a.svg, pw: a.stonePassword !== undefined ? a.stonePassword : (o.pw !== undefined ? String(o.pw) : undefined) }); facts.encrypted = a.encrypted === true; facts.minted24 = typeof a.stonePassword === 'string' && a.stonePassword.length >= 24; facts.namesId = a.svg.includes(t.id.slice(0, 12)); facts.noPlainText = !a.svg.includes('BRN:') && !a.svg.includes('VSTN:'); facts.explicitPwNoMint = !('stonePassword' in a); }
+                        else if (lane === 'json') { artifacts.set(token, { json: a.json }); facts.verbatim = JSON.stringify(a.json) === JSON.stringify(t); }
+                        return facts;
+                    });
+                    out.push(Object.assign({ op: 'encode', lane }, r));
+                    continue;
+                }
+                if (o.op === 'decode') {
+                    const lane = String(o.lane);
+                    const r = attempt(() => {
+                        let arg, pw;
+                        if (o.from === 'artifact') {
+                            const a = art(o.artifactToken);
+                            arg = lane === 'stone' ? a.envelope : lane === 'svg' ? a.svg : a.json;
+                            if (a.pw !== undefined) pw = a.pw;
+                        } else if (o.shape === 'carrierDamage') {
+                            const a = art(o.artifactToken); const parts = a.envelope.split(':');
+                            const bit = parts[3][10] === 'A' ? 'B' : 'A';
+                            arg = 'VSTN:1:' + parts[2] + ':' + parts[3].slice(0, 10) + bit + parts[3].slice(11);
+                        } else if (o.shape === 'resealForged') {
+                            const ct = Buffer.from(JSON.stringify(amt(o.token))).toString('base64');
+                            arg = 'VSTN:1:' + cryptoMod.createHash('sha256').update('stone|' + ct).digest('hex') + ':' + ct;
+                        } else if (o.shape === 'nonsense') { arg = 'VSTN:1:notahexseal:ctext'; }
+                        else if (o.shape === 'rawString') { arg = String(o.payload || '9-abcde-12345-99'); }
+                        else if (o.shape === 'wrongPw') { const a = art(o.artifactToken); arg = a.svg; pw = String(o.pw || 'wrong-pass'); }
+                        else if (o.shape === 'tamperPacket') { arg = amt(o.token); }
+                        else return { fault: 'unhandled decode shape' };
+                        const res = pw === undefined ? carriers.decode(lane, arg) : carriers.decode(lane, arg, pw);
+                        const back = {};
+                        if (res && res.traveler && o.token) {
+                            const t = amt(o.token);
+                            back.idMatch = res.traveler.id === t.id; back.seqMatch = res.traveler.seq === t.seq;
+                            back.stepsMatch = JSON.stringify(res.traveler.steps) === JSON.stringify(t.steps);
+                        }
+                        return back;
+                    });
+                    out.push(Object.assign({ op: 'decode', lane, shape: o.shape || o.from || '' }, r));
+                    continue;
+                }
+                if (o.op === 'giai') {
+                    const t = amt(o.token);
+                    const a = art(o.artifactToken);
+                    const r = attempt(() => {
+                        const g = carriers.nsc9.giai(t);
+                        return { formAi8004: /^\(8004\)9?[0-9]+$/.test(g) && g.startsWith('(8004)'), stripBack: carriers.nsc9.fromGiai(g) === a.frame };
+                    });
+                    out.push(Object.assign({ op: 'giai' }, r));
+                    continue;
+                }
+                if (o.op === 'matches') {
+                    const t = amt(o.token);
+                    const a = art(o.artifactToken);
+                    const r = attempt(() => {
+                        if (o.variant === 'wrong') return { answer: carriers.nsc9.matches('9-00000-00000-0', t) };
+                        if (o.variant === 'badFacility') { carriers.nsc9.matches('9-1234-12345-1', t); return { threw: false }; }
+                        return { answer: carriers.nsc9.matches(a.frame, t) };
+                    });
+                    out.push(Object.assign({ op: 'matches', variant: o.variant || 'right' }, r));
+                    continue;
+                }
+                if (o.op === 'fromGiai') {
+                    const r = attempt(() => { return { stripped: carriers.nsc9.fromGiai(String(o.payload || "(8004)9123")) }; });
+                    out.push(Object.assign({ op: 'fromGiai' }, r));
+                    continue;
+                }
+                if (o.op === 'senderVerify') {
+                    const evil = amt(o.token);
+                    const lanes = Array.isArray(o.lanes) ? o.lanes : ['nsc9', 'stone', 'svg', 'json'];
+                    const assymilated = {};
+                    for (const lane of lanes) {
+                        const r = attempt(() => { carriers.encode(evil, lane); return {}; });
+                        assymilated[lane] = { caught: r.ok ? null : r.caught, tamper: r.ok ? false : r.caught === 'E_CARRIER_TAMPER' };
+                    }
+                    out.push({ op: 'senderVerify', ok: true, lanes: assymilated });
+                    continue;
+                }
+                if (o.op === 'capacity') {
+                    const big = traveler.mint({ from: 'big', slots: { title: 'big', blob: 'X'.repeat(Number(o.blobLen || 400000)) } });
+                    const r = attempt(() => { carriers.encode(big, 'stone'); return {}; });
+                    out.push(Object.assign({ op: 'capacity' }, r));
+                    continue;
+                }
+                if (o.op === 'codes') {
+                    out.push({ op: 'codes', ok: true, tamper: carriers.CODES.TAMPER, shape: carriers.CODES.SHAPE, gap: carriers.CODES.GAP, distinct: carriers.CODES.TAMPER !== carriers.CODES.SHAPE });
+                    continue;
+                }
+                out.push({ op: String(o.op), ok: false, caught: 'unknown op' });
+            } catch (e) {
+                out.push({ op: String((o && o.op) || '?'), ok: false, caught: 'fault:' + String((e && e.message) || e).slice(0, 120) });
+            }
+        }
+        return jsonRes({ results: out }, 200);
+    });
 
     return harness;
 }

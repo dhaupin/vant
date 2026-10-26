@@ -1183,6 +1183,17 @@ const EXPECTED = {
         'meshstatus-seed-pure-and-envflow': 'skip',
         'meshstatus-render-degraded': 'skip',
     },
+    // carriers battery slice 1 (lane laws): run-root-only arm; honest skips here
+    'vant-carriers': {
+        'carriers-roster-honesty': 'skip',
+        'carriers-nsc9-frame-law': 'skip',
+        'carriers-nsc9-giai-readthrough': 'skip',
+        'carriers-stone-two-walls': 'skip',
+        'carriers-svg-airgap': 'skip',
+        'carriers-json-erp': 'skip',
+        'carriers-sender-side-verify': 'skip',
+        'carriers-capacity-and-codes': 'skip',
+    },
 };
 
 function checkVerdictRows(packName, verdicts) {
