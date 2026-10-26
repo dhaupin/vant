@@ -1155,6 +1155,17 @@ const EXPECTED = {
         'trust-disk-view-live': 'skip',
         'trust-event-carries-root': 'skip',
         'trust-clear-resets': 'skip',
+        // (slice 2) the merge-path consumers: registry / consensus / market
+        'registry-register-mirrors': 'skip',
+        'registry-heartbeat-moves-root': 'skip',
+        'registry-disk-view-live': 'skip',
+        'registry-clear-reset-reuse': 'skip',
+        'consensus-create-mirrors': 'skip',
+        'consensus-disk-view-live': 'skip',
+        'consensus-clear-resets': 'skip',
+        'market-list-mirrors': 'skip',
+        'market-disk-view-live': 'skip',
+        'market-clear-resets': 'skip',
     },
 };
 

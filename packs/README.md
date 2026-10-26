@@ -265,6 +265,31 @@ Slice 1 verdict: the five pins measure REFUSED on the real seams with
 reverse-verification law — the suite never retires until the whole family
 closes.
 
+**Slice 2 (same day): the merge-path consumers — REGISTRY → TREE (step ② §
+and CONSENSUS + MARKET → TREE (step ③).** The arm grew a second route
+(`wiring-module`) with a per-module verb table: a real consumer library
+per key, an `act` verb per family (register / heartbeat; create; list
+with a caller context that consents), tree/disk/peek/settle/watch ops,
+neutral facts only. The native pins' timing drives rides the SAME way as
+the suite does: a FIXED settle (6ms after register so heartbeat stamps
+differ; 20ms to flush the merge-path lock handshake before a disk read)
+— drive, never a verdict. The consent gate is NOT graded by this slice:
+`market.list` runs under a caller context with requiresConsent:false so
+the pin measures the mirror, not the consent door.
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `registry-register-mirrors` | register re-mirrors the peer table on the MERGE path: 64-hex root, peer in the mirrored tree, state:saved rides the same hash | validated - REFUSED |
+| `registry-heartbeat-moves-root` | a heartbeat is a merge-path mutation and the root MOVES (the stamps cannot certify the same tree) | validated - REFUSED |
+| `registry-disk-view-live` | treeFor('state/node-registry.json') === live mirror in one string | validated - REFUSED |
+| `registry-clear-reset-reuse` | clearState wipes everything (tombstones included); re-registering the same id works cleanly after | validated - REFUSED |
+| `consensus-create-mirrors` | create re-mirrors the vote ledgers through the merge path; state:saved rides the same hash | validated - REFUSED |
+| `consensus-disk-view-live` | after the fixed settle, treeFor('state/consensus.json') === live mirror | validated - REFUSED |
+| `consensus-clear-resets` | the mirror drops to null and the topic re-creates cleanly | validated - REFUSED |
+| `market-list-mirrors` | list re-mirrors the market state through the merge path; state:saved rides the same hash | validated - REFUSED |
+| `market-disk-view-live` | after the fixed settle, treeFor('state/market.json') === live mirror | validated - REFUSED |
+| `market-clear-resets` | the mirror drops to null and the search index resets; re-listing works cleanly | validated - REFUSED |
+
 ### `public/vant-kernel` — prove-the-verbs conformance for the kernel seed + its adoption (10 rows; all validated 2026-10-25)
 
 Per vant#250 (labs/prd-kernel.md sec 6d #5): portability's strongest form is
@@ -582,7 +607,7 @@ today's clean B0 run: **48 REFUSED / 0 EXPLOITED / 1 skipped**.
 | 0 — wire-surface door pins (`test/crashtest-server.js`, 9 pins) | smallest lift, biggest overlap | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native suite 9/9 each run); the suite stays in CI under the law |
 | wire-surface re-pins — r/2 edge face (`web/relay/functions/api/r/relay.ts`) | ~15% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native lanes green each run: relay, relay-parity, memory, escrow, escrow-kernel, forum-msg-escrow, governance, workspace-memory via the sweep filter); the native lanes stay in CI under the law. Cycle 2's catch: the origin row's drive called hopFrame twice (sign + body) and each call re-evaluated ts — a ms-grain boundary left the signature covering different bytes than the body, and the edge (correctly) 401'd; one eval per shape since, signature === body bytes |
 | in-process module discipline (row-by-row) | ~40% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 6/6 REFUSED + native suites memory / escrow / governance green each run via the same sweep filter); the native blocks stay in CI under the law |
-| drill-down: remaining native suites (state-wiring, migration, carriers, ...) | remaining ~35% | **CONVERTED — slice 1 began (2026-10-25)**: the TRUST→TREE consumer family (state-wiring's 5 trust pins) became `vant-state-wiring` on the run root's `wiring-trust` arm (5/5 REFUSED x2); the remaining families (registry/consensus/market/WAL/geometry/brain-verify/anchor) queue behind per-bucket conversion shape |
+| drill-down: remaining native suites (state-wiring, migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-2 began (2026-10-25)**: the TRUST→TREE family (5 pins) AND the MERGE-PATH consumers — node-registry (steps ②), consensus + market (③) — became `vant-state-wiring` rows on the run root's `wiring-trust` + `wiring-module` arms (10/10 slice-2 REFUSED x2); the remaining families (WAL/geometry/brain-verify/anchor) queue behind per-bucket conversion shape |
 
 **Bucket 0 S-counter ledger:** cycle 1 (2026-10-25, conversion day) →
 cycle 2 → cycle 3, all sides green each run — the quarter-period

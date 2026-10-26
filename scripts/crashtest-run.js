@@ -1958,5 +1958,125 @@ function buildRoutes(sb, Harness) {
         return jsonRes({ results: out }, 200);
     });
 
+    // wiring-module: POST { module, ops: [{ op, ... }] } — the SCOPED STATE
+    // arm's second car (drill-down slice 2, #249): a per-module verb table
+    // (real lib consumers only: node-registry / consensus / market) driving
+    // the merge-path tree tier in-process through the sandbox's real seams.
+    // Verdicts are vant's truth; the arm reports neutral facts and never
+    // loanpre-digested answers.
+    const WIRING_MODULES = {
+        'node-registry': {
+            file: 'state/node-registry.json',
+            prefix: '/node-registry/',
+            load: (lib) => lib,
+            act: {
+                register: async (m, o) => { const r = m.register({ id: String(o.id), host: String(o.host || 'localhost'), port: Number(o.port || 3457) }); if (o.settleMs) await new Promise((rz) => setTimeout(rz, Number(o.settleMs))); return r; },
+                heartbeat: async (m, o) => { const r = m.heartbeat(String(o.id)); if (o.settleMs) await new Promise((rz) => setTimeout(rz, Number(o.settleMs))); return r; },
+            },
+            contains: (mirrored, o) => Array.isArray(mirrored.nodes) && mirrored.nodes.some((n) => n && n[String(o.key || 'id')] === o.value),
+        },
+        'consensus': {
+            file: 'state/consensus.json',
+            prefix: '/consensus/',
+            load: (lib) => lib,
+            act: {
+                create: async (m, o) => { const r = m.create(String(o.topic), { ballot: Array.isArray(o.ballot) ? o.ballot : ['y', 'n'] }); if (o.settleMs) await new Promise((rz) => setTimeout(rz, Number(o.settleMs))); return r; },
+            },
+            contains: (mirrored, o) => Array.isArray(mirrored.ledgers) && mirrored.ledgers.some((l) => l && l.topic === o.value),
+        },
+        'market': {
+            file: 'state/market.json',
+            prefix: '/market/',
+            load: (lib) => lib,
+            act: {
+                // the caller context: a deployment-consented list (the pin
+                // grades the MIRROR, not the consent gate)
+                list: async (m, o) => { const r = m.list(String(o.kind || 'knowledge'), {
+                    title: String(o.title || 'wiring pack pin'),
+                    description: String(o.description || 'tree-tier mirror pin'),
+                    seller: String(o.seller || 'wiring-pack-seller'),
+                    price: Number(o.price == null ? 5 : o.price),
+                    supply: Number(o.supply == null ? 1 : o.supply),
+                }, { agentId: 'wiring-pack-agent', requiresConsent: false }); if (o.settleMs) await new Promise((rz) => setTimeout(rz, Number(o.settleMs))); return r; },
+            },
+            contains: (mirrored, o) => Array.isArray(mirrored.listings) && mirrored.listings.length >= Number(o.min == null ? 1 : o.min),
+        },
+    };
+    harness.registerRoute('wiring-module', async (ctx) => {
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        const specModule = j && WIRING_MODULES[String(j.module || '')];
+        const ops = (j && Array.isArray(j.ops) && j.ops.length) ? j.ops.slice(0, 40) : null;
+        if (!specModule || !ops) return jsonRes({ error: 'module + ops array required (module keys: node-registry|consensus|market)' }, 400);
+        const mod = specModule.load(sandboxLib(String(j.module)));
+        const stateStore = sandboxLib('state-store');
+        const bus = sandboxLib('event');
+        const out = [];
+        let watched = null;
+        const armedWatchers = [];
+        for (const op of ops) {
+            const o = op || {};
+            try {
+                if (o.op === 'clear') { out.push({ op: 'clear', ok: mod.clearState() === true }); continue; }
+                if (o.op === 'act') {
+                    const verb = specModule.act[String(o.name || '')];
+                    if (!verb) { out.push({ op: 'act', error: 'unknown act: ' + String(o.name) }); continue; }
+                    const res = await verb(mod, o);
+                    const verdictRefusal = (res && res.error) ? String(res.error).slice(0, 140) : null;
+                    out.push({ op: 'act', name: String(o.name || ''), ok: !verdictRefusal, answer: verdictRefusal, rootHash: mod._treeRoot() });
+                    continue;
+                }
+                if (o.op === 'tree') {
+                    const tree = mod._stateTree();
+                    const mirrored = stateStore.fromTree(String(j.module), tree);
+                    out.push({
+                        op: 'tree', ok: true,
+                        rootHash: mod._treeRoot(),
+                        pathsUnder: tree.paths().filter((p) => p.startsWith(specModule.prefix)).length > 0,
+                        contains: specModule.contains(mirrored, o),
+                    });
+                    continue;
+                }
+                if (o.op === 'disk') {
+                    const disk = stateStore.treeFor(specModule.file);
+                    out.push({ op: 'disk', ok: true, state: disk.state, reason: disk.reason, diskRootHash: disk.rootHash, liveRootHash: mod._treeRoot() });
+                    continue;
+                }
+                if (o.op === 'peek') {
+                    out.push({ op: 'peek', ok: true, rootHash: mod._treeRoot() });
+                    continue;
+                }
+                if (o.op === 'settle') {
+                    await new Promise((r) => setTimeout(r, Number(o.ms || 20)));
+                    out.push({ op: 'settle', ok: true, ms: Number(o.ms || 20) });
+                    continue;
+                }
+                if (o.op === 'watch') {
+                    const modName = String(j.module);
+                    const fn = (d) => { if (d && d.moduleName === modName && d.rootHash) watched = { rootHash: d.rootHash, liveRootHash: mod._treeRoot() }; };
+                    bus.on('state:saved', fn);
+                    armedWatchers.push(fn);
+                    out.push({ op: 'watch', ok: true, armed: true });
+                    continue;
+                }
+                if (o.op === 'report') {
+                    out.push({ op: 'report', ok: true, event: watched });
+                    watched = null;
+                    continue;
+                }
+                if (o.op === 'unwatch') {
+                    for (const fn of armedWatchers) { try { bus.off('state:saved', fn); } catch (eu) {} }
+                    armedWatchers.length = 0;
+                    out.push({ op: 'unwatch', ok: true });
+                    continue;
+                }
+                out.push({ op: String(o.op), error: 'unknown op' });
+            } catch (e) {
+                out.push({ op: String((o && o.op) || '?'), ok: false, fault: String(e && e.name || 'Error') + ': ' + String(e && e.message || e).slice(0, 140) });
+            }
+        }
+        return jsonRes({ results: out }, 200);
+    });
+
     return harness;
 }
