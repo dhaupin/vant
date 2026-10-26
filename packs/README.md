@@ -196,7 +196,7 @@ The EXPLOITED ledger for this pack is EMPTY as of 2026-10-23: the flood row
 measured a real finding the hour it was armed and the cap landed the same
 pass. Both CI whitelists stay EMPTY.
 
-### `public/vant-dashboard` — the dashboard auth/OTP doors (5 rows; all validated 2026-10-25)
+### `public/vant-dashboard` — the dashboard auth/OTP doors + the bridge knee (10 rows in two batches; all validated 2026-10-25)
 
 **What it does.** Phase A wire-surface slice (#249): anvils the REAL dashboard
 auth doors — `web/dashboard/functions/api/auth/{request,verify}-otp.ts` +
@@ -222,6 +222,23 @@ rows above (codeless verify 401, the burn schedule) are EXPLICITLY graded
 against what the handlers DO, not a spec's guess — the row descriptions name
 the measured schedule. The dashboard's UI modules keep their own native
 tests (the pack attacks the wire, not React mounts).
+
+**Batch 2 (same day): the bridge knee + the admin gate.** The arm child grew
+three shape kinds: `bridge-pod-token` (podTokenFor serialized to neutral
+facts — present + sha256, NEVER the token; three token lanes planted with
+distinct vguest_ strings so the resolution order is provable by hash
+equality), `bridge-establish` (the real intake), and `auth-gate`
+(ensureAdmin). The ride cookie law also gained composing: `useCookie` rides
+a NAMED mint (ok-admin vs ok-viewer) and raw + minted cookies COMBINE in one
+Cookie header.
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `token-source-order` | Authorization header wins over a live server-bound token AND the raw MVP cookie; header gone, the BOUND token outranks the raw cookie | validated - REFUSED |
+| `bound-token-property-scoped` | pod-alpha resolves exactly its bound token; pod-beta (never bound) resolves nothing — no cross-property leak | validated - REFUSED |
+| `token-intake-binding-law` | malformed property / non-vguest / over-512 token all 400 typed; the legit intake binds SERVER-SIDE (bound:true) and never mints a token-carrying cookie | validated - REFUSED |
+| `raw-cookie-fallback-hygiene` | the unbound intake answers bound:false and ships vg_session_<p> with FULL hygiene (HttpOnly+Secure+SameSite=Strict); the probe resolves it; a malformed escape answers typed null | validated - REFUSED |
+| `admin-gate-typed-ladder` | anon 401 E_NO_SESSION / forged sid 401 / viewer 403 E_FORBIDDEN / admin passes (ok, role) / no store 503 — the typed ladder at every rung | validated - REFUSED |
 
 ### `public/vant-kernel` — prove-the-verbs conformance for the kernel seed + its adoption (10 rows; all validated 2026-10-25)
 

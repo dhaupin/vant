@@ -68,6 +68,21 @@ function capturedCode(results) {
 const EMAIL = 'pack-probe@vant-dash.local';
 const COOKIE = 'bdash_session';
 
+// (batch 2) the bridge knee's three source lanes, each carrying a
+// DISTINCT token so the resolution order is provable by hash equality —
+// the pack grades the token's identity, the details never quote it.
+const TOKEN_H = 'vguest_auth-header-lane-vant-dash-pack';   // Authorization: Bearer
+const TOKEN_B = 'vguest_bound-session-lane-vant-dash-pack'; // server-side session binding
+const TOKEN_R = 'vguest_raw-cookie-lane-vant-dash-pack';    // unbound MVP cookie
+const PROP_A = 'pod-alpha';
+const PROP_B = 'pod-beta';
+
+let hashCache = null;
+async function tokenHash(token) {
+  if (!hashCache) hashCache = await import('node:crypto');
+  return hashCache.createHash('sha256').update(token, 'utf8').digest('hex');
+}
+
 /** One door call. `env` selects the shim seats: bolete (KV present),
  * sink (email capture standing in for the configured sender). */
 function call(name, kwargs) {
@@ -83,11 +98,12 @@ function call(name, kwargs) {
   };
 }
 
-function cookieSnapshot(headers) {
+function cookieSnapshot(headers, cookieName) {
+  const name = cookieName || COOKIE;
   const set = headers['set-cookie'] || '';
   return {
-    present: set.indexOf(COOKIE + '=') !== -1,
-    bsess: new RegExp(COOKIE + '=bsess_[A-Za-z0-9_-]{8,}').test(set),
+    present: set.indexOf(name + '=') !== -1,
+    bsess: new RegExp(name + '=[A-Za-z0-9_-]{8,}').test(set),
     httpOnly: /httponly/i.test(set),
     secure: /secure/i.test(set),
     strict: /samesite=strict/i.test(set),
@@ -276,6 +292,198 @@ export default {
           return { verdict: 'EXPLOITED', detail: `the mailed code after burn answered ${correctLater.status}${correctLater.body ? '/' + correctLater.body.error : ''} - a burned code never resurrects (the row is deleted; E_OTP_EXPIRED is the typed truth)`, tookRequests: 7, evidence: { status: correctLater.status } };
         }
         return { verdict: 'REFUSED', detail: 'four downs answer mismatch 401, the fifth answers E_OTP_BURNED typed, and both later asks (wrong #6 + the mailed code) refuse E_OTP_EXPIRED typed - the attempt budget is the door', tookRequests: 7 };
+      },
+    },
+
+
+    // ---------------- (batch 2, 2026-10-25) the bridge knee -------------
+
+    {
+      name: 'token-source-order',
+      description: 'the bridged-token resolution order is provable and it holds: three lanes planted with distinct tokens (Authorization header / server-side bound session / raw MVP cookie) - the answer is the header token with the session live, and with the header gone the BOUND token outranks the raw cookie',
+      async run(harness) {
+        const hashH = await tokenHash(TOKEN_H);
+        const hashB = await tokenHash(TOKEN_B);
+        const ride = [
+          call('capture-mint', { env: { sink: true }, endpoint: 'request-otp', body: { email: EMAIL } }),
+          call('verify-ok', { endpoint: 'verify-otp', body: { email: EMAIL, code: '__CODE__' } }),
+          { name: 'bind-token', env: { bolete: true }, request: { endpoint: 'bridge-establish', method: 'POST', useMintedCookie: true, property: PROP_A, body: JSON.stringify({ token: TOKEN_B }) } },
+          { name: 'probe-all-three', env: { bolete: true }, request: { endpoint: 'bridge-pod-token', method: 'POST', property: PROP_A, useMintedCookie: true, headers: { cookie: 'vg_session_' + PROP_A + '=' + TOKEN_R, authorization: 'Bearer ' + TOKEN_H } } },
+          { name: 'probe-bound-vs-raw', env: { bolete: true }, request: { endpoint: 'bridge-pod-token', method: 'POST', property: PROP_A, useMintedCookie: true, headers: { cookie: 'vg_session_' + PROP_A + '=' + TOKEN_R } } },
+        ];
+        const results = await probeDoors(harness, ride);
+        if (!results) return skip('dash-auth not armed (batch 2 arm pending)');
+        void hashH;
+        const bind = shapeResults(results, 'bind-token');
+        const all3 = shapeResults(results, 'probe-all-three');
+        const boundVsRaw = shapeResults(results, 'probe-bound-vs-raw');
+        if (!bind || !all3 || !boundVsRaw) {
+          return { verdict: 'EXPLOITED', detail: 'probe threw on the order lanes - the resolution must be answers', tookRequests: 5 };
+        }
+        if (!bind.body || bind.body.ok !== true || bind.body.bound !== true) {
+          return { verdict: 'EXPLOITED', detail: `token binding answered ${bind.status}${bind.body ? '/' + JSON.stringify(bind.body).slice(0, 80) : ''} - a live session must bind the token SERVER-SIDE (ok, bound:true)`, tookRequests: 5, evidence: { status: bind.status } };
+        }
+        if (!all3.body || all3.body.present !== true || all3.body.hash !== hashH) {
+          return { verdict: 'EXPLOITED', detail: `probe-all-three resolved ${all3.body && all3.body.present ? 'a DIFFERENT token than the header lane' : 'nothing'} - with an Authorization header present it must win over both the bound token and the raw cookie`, tookRequests: 5, evidence: { present: all3.body && all3.body.present } };
+        }
+        if (!boundVsRaw.body || boundVsRaw.body.present !== true || boundVsRaw.body.hash !== hashB) {
+          return { verdict: 'EXPLOITED', detail: `probe-bound-vs-raw resolved ${boundVsRaw.body && boundVsRaw.body.present ? 'the raw-cookie lane' : 'nothing'} - with no header the SERVER-SIDE bound token outranks the raw MVP cookie`, tookRequests: 5, evidence: { present: boundVsRaw.body && boundVsRaw.body.present } };
+        }
+        return { verdict: 'REFUSED', detail: 'header wins with all three lanes live; header gone, the server-side bound token outranks the raw cookie - the resolution order holds', tookRequests: 5 };
+      },
+    },
+
+    {
+      name: 'bound-token-property-scoped',
+      description: 'the server-side binding is scoped by property: pod-alpha resolves exactly the token bound for it and pod-beta (never bound) resolves nothing - a bound token never leaks across properties, and an unbound probe never mints one',
+      async run(harness) {
+        const hashB = await tokenHash(TOKEN_B);
+        const results = await probeDoors(harness, [
+          call('capture-mint', { env: { sink: true }, endpoint: 'request-otp', body: { email: EMAIL } }),
+          call('verify-ok', { endpoint: 'verify-otp', body: { email: EMAIL, code: '__CODE__' } }),
+          { name: 'bind-a', env: { bolete: true }, request: { endpoint: 'bridge-establish', method: 'POST', useMintedCookie: true, property: PROP_A, body: JSON.stringify({ token: TOKEN_B }) } },
+          { name: 'probe-a', env: { bolete: true }, request: { endpoint: 'bridge-pod-token', method: 'POST', property: PROP_A, useMintedCookie: true, headers: {} } },
+          { name: 'probe-b', env: { bolete: true }, request: { endpoint: 'bridge-pod-token', method: 'POST', property: PROP_B, useMintedCookie: true, headers: {} } },
+        ]);
+        if (!results) return skip('dash-auth not armed');
+        const bindA = shapeResults(results, 'bind-a');
+        const probeA = shapeResults(results, 'probe-a');
+        const probeB = shapeResults(results, 'probe-b');
+        if (!bindA || !probeA || !probeB) {
+          return { verdict: 'EXPLOITED', detail: 'probe threw on the scope lanes - answers, not faults', tookRequests: 5 };
+        }
+        if (!bindA.body || bindA.body.bound !== true) {
+          return { verdict: 'EXPLOITED', detail: `the binding ride answered bound=${bindA.body && bindA.body.bound}${bindA.body ? '/' + JSON.stringify(bindA.body).slice(0, 60) : ''} - the walk needs a real server-side binding`, tookRequests: 5, evidence: { status: bindA.status } };
+        }
+        if (!probeA.body || probeA.body.present !== true || probeA.body.hash !== hashB) {
+          return { verdict: 'EXPLOITED', detail: `pod-alpha resolved ${probeA.body && probeA.body.present ? 'a DIFFERENT token than its bound lane' : 'nothing'} - the bound property must resolve its token`, tookRequests: 5, evidence: { present: probeA.body && probeA.body.present } };
+        }
+        if (probeB.body && probeB.body.present) {
+          return { verdict: 'EXPLOITED', detail: `pod-beta resolved a token it never bound (hash ${String(probeB.body.hash || '').slice(0, 8)}) - the server-side binding must stay property-scoped, no cross-property leak`, tookRequests: 5, evidence: { present: probeB.body.present } };
+        }
+        return { verdict: 'REFUSED', detail: 'pod-alpha resolves its bound token; pod-beta resolves nothing - the binding is scoped exactly to its property', tookRequests: 5 };
+      },
+    },
+
+    {
+      name: 'token-intake-binding-law',
+      description: 'the token intake is shape-gated: a malformed property id, a non-vguest string, and an over-512 token all answer 400 typed - and a legit intake with a live session binds SERVER-SIDE (ok, bound:true) with NO token-carrying cookie minted',
+      async run(harness) {
+        const results = await probeDoors(harness, [
+          call('capture-mint', { env: { sink: true }, endpoint: 'request-otp', body: { email: EMAIL } }),
+          call('verify-ok', { endpoint: 'verify-otp', body: { email: EMAIL, code: '__CODE__' } }),
+          { name: 'est-bad-property', env: { bolete: true }, request: { endpoint: 'bridge-establish', method: 'POST', property: 'BAD PROPERTY!!', body: JSON.stringify({ token: TOKEN_B }) } },
+          { name: 'est-not-a-token', env: { bolete: true }, request: { endpoint: 'bridge-establish', method: 'POST', property: PROP_A, body: JSON.stringify({ token: 'not-a-guest-token' }) } },
+          { name: 'est-oversized', env: { bolete: true }, request: { endpoint: 'bridge-establish', method: 'POST', property: PROP_A, body: JSON.stringify({ token: 'vguest_' + 'x'.repeat(512) }) } },
+          { name: 'est-bound', env: { bolete: true }, request: { endpoint: 'bridge-establish', method: 'POST', useMintedCookie: true, property: PROP_A, body: JSON.stringify({ token: TOKEN_B }) } },
+        ]);
+        if (!results) return skip('dash-auth not armed');
+        const badProp = shapeResults(results, 'est-bad-property');
+        const notToken = shapeResults(results, 'est-not-a-token');
+        const oversized = shapeResults(results, 'est-oversized');
+        const bound = shapeResults(results, 'est-bound');
+        if (!badProp || !notToken || !oversized || !bound) {
+          return { verdict: 'EXPLOITED', detail: 'probe threw on the intake law lanes - answers, not faults', tookRequests: 6 };
+        }
+        if (badProp.status !== 400) {
+          return { verdict: 'EXPLOITED', detail: `malformed property answered ${badProp.status} - the intake shape-gates the property id typed`, tookRequests: 6, evidence: { status: badProp.status } };
+        }
+        if (notToken.status !== 400 || oversized.status !== 400) {
+          return { verdict: 'EXPLOITED', detail: `non-vguest/oversized token answered ${notToken.status}/${oversized.status} - the intake only eats vguest_* under 512, typed 400`, tookRequests: 6, evidence: { notToken: notToken.status, oversized: oversized.status } };
+        }
+        if (!bound.body || bound.body.ok !== true || bound.body.bound !== true) {
+          return { verdict: 'EXPLOITED', detail: `the legit intake answered ${bound.status} - a live session binds the token server-side (bound:true)`, tookRequests: 6, evidence: { status: bound.status } };
+        }
+        if (bound.headers && /vguest_/.test(String(bound.headers['set-cookie'] || ''))) {
+          return { verdict: 'EXPLOITED', detail: 'the bound intake minted a TOKEN-CARRYING cookie - server-side binding never ships the token to the client', tookRequests: 6 };
+        }
+        return { verdict: 'REFUSED', detail: 'bad property / non-vguest / oversized all 400 typed; the legit intake binds server-side with no token-riding cookie - the intake law holds', tookRequests: 6 };
+      },
+    },
+
+    {
+      name: 'raw-cookie-fallback-hygiene',
+      description: 'the unbound MVP fallback stays honest: with NO account session the intake answers bound:false and ships the raw cookie with FULL hygiene (HttpOnly+Secure+SameSite=Strict), the bridged probe resolves exactly that token, and a malformed cookie escape answers typed null - never a crash',
+      async run(harness) {
+        const hashR = await tokenHash(TOKEN_R);
+        const results = await probeDoors(harness, [
+          { name: 'est-raw', env: { bolete: true }, request: { endpoint: 'bridge-establish', method: 'POST', property: PROP_A, body: JSON.stringify({ token: TOKEN_R }) } },
+          { name: 'probe-raw', env: { bolete: true }, request: { endpoint: 'bridge-pod-token', method: 'POST', property: PROP_A, headers: { cookie: 'vg_session_' + PROP_A + '=' + TOKEN_R } } },
+          { name: 'junk-cookie', env: { bolete: true }, request: { endpoint: 'bridge-pod-token', method: 'POST', property: PROP_A, headers: { cookie: 'vg_session_' + PROP_A + '=a%' } } },
+        ]);
+        if (!results) return skip('dash-auth not armed');
+        const est = shapeResults(results, 'est-raw');
+        const probe = shapeResults(results, 'probe-raw');
+        const junk = shapeResults(results, 'junk-cookie');
+        if (!est || !probe || !junk) {
+          return { verdict: 'EXPLOITED', detail: 'probe threw on the fallback lanes - answers, not faults', tookRequests: 3 };
+        }
+        if (!est.body || est.body.bound !== false) {
+          return { verdict: 'EXPLOITED', detail: `raw intake answered bound=${est.body && est.body.bound} - with no account session the honest answer is bound:false`, tookRequests: 3, evidence: { status: est.status } };
+        }
+        const csnap = cookieSnapshot(est.headers, 'vg_session_' + PROP_A);
+        if (!csnap.present || !csnap.httpOnly || !csnap.secure || !csnap.strict) {
+          return { verdict: 'EXPLOITED', detail: `the raw cookie failed hygiene (present=${csnap.present} httponly=${csnap.httpOnly} secure=${csnap.secure} strict=${csnap.strict}) - the MVP fallback obeys the same cookie discipline`, tookRequests: 3, evidence: csnap };
+        }
+        if (!probe.body || probe.body.present !== true || probe.body.hash !== hashR) {
+          return { verdict: 'EXPLOITED', detail: `the raw-cookie probe resolved ${probe.body && probe.body.present ? 'a DIFFERENT token than the cookie lane' : 'nothing'} - the fallback cookie must be resolvable unbound`, tookRequests: 3, evidence: { present: probe.body && probe.body.present } };
+        }
+        if (junk.body && junk.body.present) {
+          return { verdict: 'EXPLOITED', detail: 'a malformed cookie escape resolved a token - an undecodable pair is not counted, never guessed', tookRequests: 3 };
+        }
+        return { verdict: 'REFUSED', detail: 'bound:false + full cookie hygiene + the raw token resolves + the junk escape refuses typed-null - the unbound fallback stays honest', tookRequests: 3 };
+      },
+    },
+
+    {
+      name: 'admin-gate-typed-ladder',
+      description: 'the admin gate renders states, never crashes: no cookie 401 E_NO_SESSION, a forged sid 401, a viewer session 403 E_FORBIDDEN, the admin session passes (ok, role admin), and an unconfigured store answers 503 E_STORE_UNCONFIGURED - the typed ladder at every rung',
+      async run(harness) {
+        const results = await probeDoors(harness, [
+          call('capture-mint', { env: { sink: true }, endpoint: 'request-otp', body: { email: 'admin-probe@vant-dash.local' } }),
+          call('ok-admin', { endpoint: 'verify-otp', body: { email: 'admin-probe@vant-dash.local', code: '__CODE__' } }),
+          { name: 'capture-mint-2', env: { bolete: true, sink: true }, request: { endpoint: 'request-otp', method: 'POST', body: JSON.stringify({ email: 'viewer-probe@vant-dash.local' }) } },
+          { name: 'ok-viewer', env: { bolete: true }, request: { endpoint: 'verify-otp', method: 'POST', body: JSON.stringify({ email: 'viewer-probe@vant-dash.local', code: '__CODE__' }) } },
+          { name: 'gate-anon', env: { bolete: true }, request: { endpoint: 'auth-gate', method: 'POST', headers: {} } },
+          { name: 'gate-forged', env: { bolete: true }, request: { endpoint: 'auth-gate', method: 'POST', headers: { cookie: COOKIE + '=bsess_forged-id-0123456' } } },
+          { name: 'gate-viewer', env: { bolete: true }, request: { endpoint: 'auth-gate', method: 'POST', useCookie: 'ok-viewer', headers: {} } },
+          { name: 'gate-admin', env: { bolete: true }, request: { endpoint: 'auth-gate', method: 'POST', useCookie: 'ok-admin', headers: {} } },
+          { name: 'gate-no-store', env: { bolete: false }, request: { endpoint: 'auth-gate', method: 'POST', headers: { cookie: COOKIE + '=bsess_anything' } } },
+        ]);
+        if (!results) return skip('dash-auth not armed');
+        const rows = (Array.isArray(results.results) ? results.results : []);
+        const find = (n) => rows.find((r) => r && r.name === n);
+        const adminCookieRaw = find('ok-admin') && find('ok-admin').headers && find('ok-admin').headers['set-cookie'];
+        const viewerCookieRaw = find('ok-viewer') && find('ok-viewer').headers && find('ok-viewer').headers['set-cookie'];
+        if (!adminCookieRaw || !viewerCookieRaw) {
+          return { verdict: 'EXPLOITED', detail: 'the mint rides did not produce session cookies - the ladder needs both roles (first account admin, second viewer)', tookRequests: 4 };
+        }
+        const adminCookie = String(adminCookieRaw).split(';')[0];
+        const viewerCookie = String(viewerCookieRaw).split(';')[0];
+        const anon = shapeResults(results, 'gate-anon');
+        const forged = shapeResults(results, 'gate-forged');
+        const viewer = shapeResults(results, 'gate-viewer');
+        const admin = shapeResults(results, 'gate-admin');
+        const noStore = shapeResults(results, 'gate-no-store');
+        if (!anon || !forged || !viewer || !admin || !noStore) {
+          return { verdict: 'EXPLOITED', detail: 'probe threw on the ladder - every rung must answer', tookRequests: 9 };
+        }
+        if (anon.status !== 401 || !anon.body || anon.body.error !== 'E_NO_SESSION') {
+          return { verdict: 'EXPLOITED', detail: `no-cookie answered ${anon.status} - the gate opens at 401 E_NO_SESSION typed`, tookRequests: 9, evidence: { status: anon.status } };
+        }
+        if (forged.status !== 401) {
+          return { verdict: 'EXPLOITED', detail: `a forged sid answered ${forged.status} - an unknown session is E_NO_SESSION, not a pass`, tookRequests: 9, evidence: { status: forged.status } };
+        }
+        if (viewer.status !== 403 || !viewer.body || viewer.body.error !== 'E_FORBIDDEN') {
+          return { verdict: 'EXPLOITED', detail: `a viewer session answered ${viewer.status} - a live non-admin session is E_FORBIDDEN 403 typed`, tookRequests: 9, evidence: { status: viewer.status } };
+        }
+        if (admin.status !== 'OK' || !admin.body || admin.body.ok !== true || admin.body.role !== 'admin') {
+          return { verdict: 'EXPLOITED', detail: `the admin session answered ${admin.status} - the gate must pass the role through (ok, role admin)`, tookRequests: 9, evidence: { status: admin.status } };
+        }
+        if (noStore.status !== 503 || !noStore.body || noStore.body.error !== 'E_STORE_UNCONFIGURED') {
+          return { verdict: 'EXPLOITED', detail: `no store answered ${noStore.status} - the gate's store leg is a typed 503`, tookRequests: 9, evidence: { status: noStore.status } };
+        }
+        return { verdict: 'REFUSED', detail: 'anon 401 / forged 401 / viewer 403 / admin passes with the role / no-store 503 - the typed ladder holds at every rung', tookRequests: 9 };
       },
     },
   ],

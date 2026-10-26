@@ -480,12 +480,19 @@ const DASH_CHILD = `
     const dir = String(spec.handlerDir || '').slice(0, 400);
     const results = [];
     let handlers = null;
+    let libBridge = null;
+    let libGuard = null;
     try {
         const urls = ['request-otp', 'verify-otp', 'session'].map((n) =>
             'file:///' + (dir + '/' + n + '.ts').split(String.fromCharCode(92)).join('/'));
+        // (batch 2) the bridge knee + the admin gate live in functions/lib/
+        const libDir = dir.replace('/api/auth', '').replace(/\\+$/, '');
+        const url = (base, seg) => 'file:///' + (base + '/' + seg).split(String.fromCharCode(92)).join('/');
         const mReq = await import(urls[0]);
         const mVer = await import(urls[1]);
         const mSes = await import(urls[2]);
+        libBridge = await import(url(libDir, 'lib/bridge.ts'));
+        libGuard = await import(url(libDir, 'lib/auth_guard.ts'));
         handlers = {
             'request-otp': ({ method }) => (method === 'GET' ? mReq.onRequestGet : mReq.onRequestPost),
             'verify-otp': ({ method }) => (method === 'GET' ? mVer.onRequestGet : mVer.onRequestPost),
@@ -518,6 +525,7 @@ const DASH_CHILD = `
     }
     let captured = null;   // the code the sink saw in THIS ride
     let mintedCookie = ''; // the ride's last session Set-Cookie ("name=value")
+    const seatCookies = {}; // named per verify shape ("ok-admin" etc) so a later gate shape can ride ONE minted session by name
     const rideStore = makeStore(); // ONE store per ride: the walk shapes (mint -> verify -> session) mutate the SAME rows, like one browser session against the deployment. Attacks spawn fresh children, so rides stay isolated.
     for (const shape of shapes) {
         const row = { name: String(shape.name || '').slice(0, 60), status: null, bodyText: 'none', headers: {}, capture: null };
@@ -532,14 +540,73 @@ const DASH_CHILD = `
             const meta = shape.request || {};
             const endpoint = String(meta.endpoint || 'request-otp');
             const method = String(meta.method || 'POST').toUpperCase();
+            const headers = Object.assign({}, meta.headers || {});
+            // cookie riding (batch 1 + batch 2): useMintedCookie = the ride's
+            // LAST minted session; useCookie: '<shape name>' = a NAMED mint
+            // (e.g. ok-admin vs ok-viewer) - existing cookie strings COMBINE
+            // (a raw-cookie lane rides beside the minted one).
+            const rideCookie = String(meta.useMintedCookie || '') === 'true'
+                ? mintedCookie
+                : (meta.useCookie && seatCookies[String(meta.useCookie)] ? seatCookies[String(meta.useCookie)] : null);
+            if (rideCookie) {
+                headers['cookie'] = headers['cookie'] ? headers['cookie'] + '; ' + rideCookie : rideCookie;
+            }
+            // (batch 2 arms) the bridge knee + the admin gate are LIBRARY
+            // functions, not Pages handlers: they run with an explicit
+            // ctx/request the pack composes, and serialize neutral facts
+            // (present/hash prefix, never the token itself).
+            if (endpoint === 'bridge-pod-token' || endpoint === 'bridge-establish' || endpoint === 'auth-gate') {
+                const buildCtx = (req) => ({ request: req, env, params: {}, data: {}, next: async () => new Response('no next route', { status: 404 }), waitUntil: () => {} });
+                if (endpoint === 'bridge-pod-token') {
+                    if (typeof libBridge.podTokenFor !== 'function') { row.status = 'THREW'; row.bodyText = 'podTokenFor missing'; results.push(row); continue; }
+                    const req = new Request('https://dash-run-root.pages.dev/bridge/' + String(meta.path || ''), { method: 'GET', headers });
+                    const token = await libBridge.podTokenFor(buildCtx(req), req, String(meta.property || 'pod-alpha'));
+                    const digest = token == null ? null : await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(token)));
+                    row.status = 'OK';
+                    row.bodyText = JSON.stringify({
+                        present: token != null,
+                        isVguest: token != null ? String(token).startsWith('vguest_') : false,
+                        hash: digest ? Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('') : null,
+                    });
+                    results.push(row);
+                    continue;
+                }
+                if (endpoint === 'bridge-establish') {
+                    if (typeof libBridge.establishSession !== 'function') { row.status = 'THREW'; row.bodyText = 'establishSession missing'; results.push(row); continue; }
+                    const init = { method: 'POST', headers };
+                    if (typeof meta.body === 'string') init.body = meta.body;
+                    const req = new Request('https://dash-run-root.pages.dev/api/establish', init);
+                    const res = await libBridge.establishSession(req, env, String(meta.property || 'pod-alpha'));
+                    row.status = res.status;
+                    const setc = res.headers.get('set-cookie');
+                    if (setc) {
+                        row.headers['set-cookie'] = String(setc).slice(0, 600);
+                        if (String(setc).indexOf('bdash_session=') !== -1 && String(setc).indexOf('Max-Age=0') === -1) mintedCookie = String(setc).split(';')[0];
+                    }
+                    row.bodyText = String(await res.text()).slice(0, 400);
+                    results.push(row);
+                    continue;
+                }
+                // auth-gate
+                if (typeof libGuard.ensureAdmin !== 'function') { row.status = 'THREW'; row.bodyText = 'ensureAdmin missing'; results.push(row); continue; }
+                const req = new Request('https://dash-run-root.pages.dev/api/users/list', { method: 'GET', headers });
+                const gate = await libGuard.ensureAdmin(buildCtx(req));
+                if (!gate.ok) {
+                    row.status = gate.response.status;
+                    row.bodyText = String(await gate.response.text()).slice(0, 300);
+                } else {
+                    row.status = 'OK';
+                    row.bodyText = JSON.stringify({ ok: true, role: gate.role, emailHash: String(gate.emailHash).slice(0, 6) });
+                }
+                results.push(row);
+                continue;
+            }
             const handler = handlers[endpoint] && handlers[endpoint]({ method });
             if (!handler) { row.status = 'THREW'; row.bodyText = 'unknown endpoint: ' + endpoint; results.push(row); continue; }
             let body = meta.body;
             if (typeof body === 'string' && body.indexOf('__CODE__') !== -1 && captured != null) {
                 body = body.split('__CODE__').join(String(captured));
             }
-            const headers = Object.assign({}, meta.headers || {});
-            if (String(meta.useMintedCookie || '') === 'true' && mintedCookie) headers['cookie'] = mintedCookie;
             const init = { method, headers };
             if (typeof body === 'string') init.body = body;
             const url = 'https://dash-run-root.pages.dev/api/auth/' + endpoint;
@@ -564,6 +631,7 @@ const DASH_CHILD = `
                     row.headers['set-cookie'] = String(setc).slice(0, 600);
                     if (String(setc).indexOf('bdash_session=') !== -1 && String(setc).indexOf('Max-Age=0') === -1) {
                         mintedCookie = String(setc).split(';')[0];
+                        seatCookies[shape.name] = mintedCookie;
                     }
                 }
                 row.bodyText = String(await res.text()).slice(0, 800);

@@ -1133,6 +1133,12 @@ const EXPECTED = {
         'mint-lane-typed-and-cooldown': 'skip',
         'session-mint-and-cookie-discipline': 'skip',
         'attempt-budget-burn': 'skip',
+        // (batch 2) the bridge knee + the admin gate
+        'token-source-order': 'skip',
+        'bound-token-property-scoped': 'skip',
+        'token-intake-binding-law': 'skip',
+        'raw-cookie-fallback-hygiene': 'skip',
+        'admin-gate-typed-ladder': 'skip',
     },
 };
 
