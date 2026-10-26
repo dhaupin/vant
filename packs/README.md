@@ -196,6 +196,33 @@ The EXPLOITED ledger for this pack is EMPTY as of 2026-10-23: the flood row
 measured a real finding the hour it was armed and the cap landed the same
 pass. Both CI whitelists stay EMPTY.
 
+### `public/vant-dashboard` — the dashboard auth/OTP doors (5 rows; all validated 2026-10-25)
+
+**What it does.** Phase A wire-surface slice (#249): anvils the REAL dashboard
+auth doors — `web/dashboard/functions/api/auth/{request,verify}-otp.ts` +
+`session.ts` — driven in-process by the run root's `dash-auth` strip-types
+probe child (same architecture as `vant-relay`), with an in-child KVStore
+shim for the `BOLETE_KV` binding (record-level TTL fields honored, one store
+per ride so a walk bends the SAME rows a real browser would) and a capture
+sink standing in the configured email sender's webhook seat. The ride law:
+the code exists EXACTLY ONCE — in the mail (the pack never reads the store);
+a shape body's code of "__CODE__" gets the captured code substituted, and
+`useMintedCookie` forwards the ride's own last session `Set-Cookie`.
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `store-absence-fail-closed` | no `BOLETE_KV` binding: request-otp, verify-otp, session all answer E_STORE_UNCONFIGURED typed 503 — absence is a loud state, not a crash | validated - REFUSED |
+| `bad-body-floor` | bent JSON / missing address / malformed addresses answer 400 typed; a codeless verify never mints (typed 401 per vant's measured verdict-vs-400 law) | validated - REFUSED |
+| `mint-lane-typed-and-cooldown` | no sender configured: the mint answers E_EMAIL_UNCONFIGURED typed 503 and the repeat request rides the LIVE per-email cooldown 429 — an undelivered mint still budgets, the wire never fakes a "sent" | validated - REFUSED |
+| `session-mint-and-cookie-discipline` | full hammer in one ride: wrong code 401 E_OTP_MISMATCH, right code 200 + `bsess_*` HttpOnly+Secure+SameSite=Strict cookie, same-cookie session read serves the role server-side, cookieless probe 401 E_NO_SESSION | validated - REFUSED |
+| `attempt-budget-burn` | the budget DECREMENTS then burns (vant's real schedule): wrong #1-4 mismatch 401, wrong #5 answers E_OTP_BURNED and the row is deleted, wrong #6 and the mailed code both refuse E_OTP_EXPIRED — a burned code never resurrects | validated - REFUSED |
+
+DESIGN NOTE (2026-10-25, cycle 2-3 of the campaign): the two "vant's truth"
+rows above (codeless verify 401, the burn schedule) are EXPLICITLY graded
+against what the handlers DO, not a spec's guess — the row descriptions name
+the measured schedule. The dashboard's UI modules keep their own native
+tests (the pack attacks the wire, not React mounts).
+
 ### `public/vant-kernel` — prove-the-verbs conformance for the kernel seed + its adoption (10 rows; all validated 2026-10-25)
 
 Per vant#250 (labs/prd-kernel.md sec 6d #5): portability's strongest form is
@@ -560,12 +587,15 @@ Where the remaining repo parts land:
   exported as a Page handler, drivable in-process exactly like the
   vant-home arm (WHATWG Request, no sockets). A `vant-relay` pack grades
   the gate + replay window + envelope + origin guard rows for real.
-- **`web/dashboard` auth/OTP doors → PACK after relay.**
-  `functions/api/auth/{request,verify}-otp.ts` + `auth_guard` + accounts
-  are the same handler-shape as the vant-home wire; drive them
-  in-process (OTP codes, session seals `src/lib/seal.ts`, profile store).
-  The UI modules keep their own native tests — packs attack the WIRE,
-  not React mounts.
+- **`web/dashboard` auth/OTP doors → PACK landed 2026-10-25 (`vant-dashboard`,
+  first slice).** `functions/api/auth/{request,verify}-otp.ts` + `session.ts`
+  + accounts drive in-process via the `dash-auth` strip-types probe child
+  (KVStore shim for `BOLETE_KV` + capture sink in the sender's webhook seat);
+  5 rows, all REFUSED. Follow-ups if the slice deepens: the bridge's
+  forwarded-token knee (`lib/bridge.ts` `podTokenFor`) and auth_guard as a
+  second batch; the session seals (`src/lib/seal.ts`) live on the UI's own
+  native tests per the surfaces rule. The UI modules keep their own native
+  tests — packs attack the WIRE, not React mounts.
 - **`web/kit` contracts → no pack of its own.** It is contract SOURCE
   (checksummed vendoring + parity pins in `test/relay-parity.test.js`),
   not a runtime; the parity pin tests already do the honest job. The

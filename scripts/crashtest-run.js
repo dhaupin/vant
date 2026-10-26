@@ -449,6 +449,138 @@ const RELAY_CHILD = `
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
 
+// (Phase A wire-surface slice, #249) The dashboard AUTH-door probe:
+// drives web/dashboard/functions/api/auth/{request,verify}-otp.ts +
+// session.ts's REAL handlers in-process (WHATWG Request/Response,
+// WebCrypto — strip types like the relay child). Two shim seats ride
+// every shape's env:
+//   Bolete_KV  – an in-child KVStore shim (Map rows + the record-level
+//                expiry fields the accounts layer reads; put()'s ttl is
+//                remembered so the get() leg stays time-honest)
+//   sink       – a capture fetch standing in the CONFIGURED sender's
+//                webhook seat: it answers ok and records the code it
+//                saw. The pack's marker law: a body code of "__CODE__"
+//                gets that captured code substituted in the SAME ride,
+//                and useMintedCookie forwards the ride's last
+//                Set-Cookie as Cookie.
+const DASH_CHILD = `
+(async () => {
+    let raw = process.argv[2] || '';
+    if (!raw && !process.stdin.isTTY) {
+        raw = await new Promise((resolve) => {
+            let s = '';
+            process.stdin.setEncoding('utf8');
+            process.stdin.on('data', (d) => { s += d; });
+            process.stdin.on('end', () => resolve(s));
+        });
+    }
+    let spec = {};
+    try { spec = JSON.parse(raw || '{}'); } catch (e) { spec = {}; }
+    const shapes = Array.isArray(spec.shapes) ? spec.shapes : [];
+    const dir = String(spec.handlerDir || '').slice(0, 400);
+    const results = [];
+    let handlers = null;
+    try {
+        const urls = ['request-otp', 'verify-otp', 'session'].map((n) =>
+            'file:///' + (dir + '/' + n + '.ts').split(String.fromCharCode(92)).join('/'));
+        const mReq = await import(urls[0]);
+        const mVer = await import(urls[1]);
+        const mSes = await import(urls[2]);
+        handlers = {
+            'request-otp': ({ method }) => (method === 'GET' ? mReq.onRequestGet : mReq.onRequestPost),
+            'verify-otp': ({ method }) => (method === 'GET' ? mVer.onRequestGet : mVer.onRequestPost),
+            'session': ({ method }) => (method === 'DELETE' ? mSes.onRequestDelete : mSes.onRequestGet),
+        };
+    } catch (e0) {
+        process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ error: 'dashboard handler import failed: ' + e0.name + ': ' + e0.message }) + '>>END');
+        return;
+    }
+    function makeStore() {
+        const rows = new Map();
+        return {
+            async get(k) {
+                const r = rows.get(k);
+                if (!r) return null;
+                if (r.expiresAt != null && Date.now() > r.expiresAt) { rows.delete(k); return null; }
+                return r.value;
+            },
+            async put(k, v, o) {
+                const ttl = o && o.expirationTtl != null ? Number(o.expirationTtl) : null;
+                rows.set(String(k), { value: String(v), expiresAt: ttl != null && Number.isFinite(ttl) ? Date.now() + ttl * 1000 : null });
+            },
+            async delete(k) { rows.delete(String(k)); },
+            async list(prefix) {
+                const out = [];
+                for (const k of rows.keys()) if (String(k).startsWith(String(prefix))) out.push({ name: k });
+                return out;
+            },
+        };
+    }
+    let captured = null;   // the code the sink saw in THIS ride
+    let mintedCookie = ''; // the ride's last session Set-Cookie ("name=value")
+    const rideStore = makeStore(); // ONE store per ride: the walk shapes (mint -> verify -> session) mutate the SAME rows, like one browser session against the deployment. Attacks spawn fresh children, so rides stay isolated.
+    for (const shape of shapes) {
+        const row = { name: String(shape.name || '').slice(0, 60), status: null, bodyText: 'none', headers: {}, capture: null };
+        try {
+            const env = Object.assign({}, shape.env || {});
+            if (env.bolete !== false) env.BOLETE_KV = rideStore;
+            if (env.bolete === false) delete env.bolete;
+            const wantSink = env.sink === true;
+            if (wantSink) env.EMAIL_WEBHOOK_URL = 'https://dash-sink.local/otp';
+            else delete env.EMAIL_WEBHOOK_URL;
+            delete env.sink;
+            const meta = shape.request || {};
+            const endpoint = String(meta.endpoint || 'request-otp');
+            const method = String(meta.method || 'POST').toUpperCase();
+            const handler = handlers[endpoint] && handlers[endpoint]({ method });
+            if (!handler) { row.status = 'THREW'; row.bodyText = 'unknown endpoint: ' + endpoint; results.push(row); continue; }
+            let body = meta.body;
+            if (typeof body === 'string' && body.indexOf('__CODE__') !== -1 && captured != null) {
+                body = body.split('__CODE__').join(String(captured));
+            }
+            const headers = Object.assign({}, meta.headers || {});
+            if (String(meta.useMintedCookie || '') === 'true' && mintedCookie) headers['cookie'] = mintedCookie;
+            const init = { method, headers };
+            if (typeof body === 'string') init.body = body;
+            const url = 'https://dash-run-root.pages.dev/api/auth/' + endpoint;
+            const h = handler;
+            const realFetch = globalThis.fetch;
+            if (wantSink) {
+                globalThis.fetch = async (u, i) => {
+                    try {
+                        const txt = String((i && i.body) || '');
+                        const m = txt.match(/\\b\\d{6}\\b/);
+                        if (m) captured = m[0];
+                    } catch (e2) {}
+                    return new Response(JSON.stringify({ id: 'captured' }), { status: 200, headers: { 'content-type': 'application/json' } });
+                };
+            }
+            const context = { request: new Request(url, init), env, params: {}, data: {}, next: async () => new Response('no next route', { status: 404 }), waitUntil: () => {} };
+            try {
+                const res = await h(context);
+                row.status = res.status;
+                const setc = res.headers.get('set-cookie');
+                if (setc) {
+                    row.headers['set-cookie'] = String(setc).slice(0, 600);
+                    if (String(setc).indexOf('bdash_session=') !== -1 && String(setc).indexOf('Max-Age=0') === -1) {
+                        mintedCookie = String(setc).split(';')[0];
+                    }
+                }
+                row.bodyText = String(await res.text()).slice(0, 800);
+            } finally {
+                globalThis.fetch = realFetch;
+            }
+            if (wantSink) row.capture = captured ? { code: captured } : null;
+        } catch (e1) {
+            row.status = 'THREW';
+            row.bodyText = String(e1.name + ': ' + e1.message).slice(0, 200);
+        }
+        results.push(row);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ results }) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
 // Trust-floor probe: the succession-trust-inheritance oracle. Seeds the
 // succession config into the current brain's public tree (what a successor
 // install wakes with), then measures what the LOW-trust successor's
@@ -1584,6 +1716,62 @@ function buildRoutes(sb, Harness) {
             const tail = (e && e.stdout ? String(e.stdout).slice(-400) : String(e && e.message || e).slice(0, 200));
             const m = tail.match(/VANT_CT_JSON<<([\s\S]*?)>>END/);
             return jsonRes(m ? JSON.parse(m[1]) : { error: 'relay probe failed: ' + tail.slice(0, 160) }, 500);
+        }
+    });
+
+    // dash-auth: POST { shapes: [{ name, env, request }] } -> the REAL
+    // dashboard auth doors (request-otp.ts / verify-otp.ts / session.ts)
+    // driven in-process by the DASH_CHILD probe (strip types, WHATWG
+    // Request/Response, WebCrypto). The env seats per shape: Bolete_KV
+    // (in-child KVStore shim) + sink (the capture fetch in the sender's
+    // webhook seat, plus the __CODE__/useMintedCookie marker law).
+    const DASH_CHILD_FILE = path.join(os.tmpdir(), 'vant-ct-dash-probe-' + process.pid + '.mjs');
+    const DASH_HOOKS_FILE = path.join(os.tmpdir(), 'vant-ct-dash-hooks-' + process.pid + '.mjs');
+    const DASH_REGISTER_FILE = path.join(os.tmpdir(), 'vant-ct-dash-register-' + process.pid + '.mjs');
+    // The dashboard lib graph imports EXTENSIONLESS (.ts sources) - fine
+    // for Pages' bundler, unresolvable for plain Node ESM even under
+    // strip-types. A minimal resolve hook appends ".ts" to extensionless
+    // relative specifiers only (the vendored .cjs contracts already carry
+    // their extensions and resolve normally).
+    const DASH_HOOKS_SOURCE = [
+        'export async function resolve(specifier, context, nextResolve) {',
+        '    try { return await nextResolve(specifier, context); }',
+        '    catch (e) {',
+        '        if (specifier.startsWith(".") && /[.]ts$/.test(specifier) === false) {',
+        '            return nextResolve(specifier + ".ts", context);',
+        '        }',
+        '        throw e;',
+        '    }',
+        '}',
+    ].join('\n');
+    const DASH_REGISTER_SOURCE = [
+        "import { register } from 'node:module';",
+        "register('./" + path.basename(DASH_HOOKS_FILE) + "', import.meta.url);",
+    ].join('\n');
+    const fs2 = require('fs');
+    fs2.writeFileSync(DASH_CHILD_FILE, DASH_CHILD);
+    fs2.writeFileSync(DASH_HOOKS_FILE, DASH_HOOKS_SOURCE);
+    fs2.writeFileSync(DASH_REGISTER_FILE, DASH_REGISTER_SOURCE);
+    if (process.env.CRASHTEST_B0_DEBUG) process.stderr.write('[b0-dash] arm files written\n');
+    const { pathToFileURL } = require('url');
+    harness.registerRoute('dash-auth', async (ctx) => {
+        if (process.env.CRASHTEST_B0_DEBUG) process.stderr.write('[b0-dash] route entered\n');
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        const shapes = (j && Array.isArray(j.shapes) && j.shapes.length) ? j.shapes.slice(0, 40) : null;
+        if (!shapes) return jsonRes({ error: 'shapes array required' }, 400);
+        try {
+            const out = execFileSync(process.execPath, ['--experimental-strip-types', '--import', pathToFileURL(DASH_REGISTER_FILE).href, DASH_CHILD_FILE], {
+                input: JSON.stringify({ shapes, handlerDir: path.join(ROOT, 'web', 'dashboard', 'functions', 'api', 'auth') }),
+                encoding: 'utf8', timeout: 120000,
+            });
+            const m = out.match(/VANT_CT_JSON<<([\s\S]*?)>>END/);
+            if (!m) return jsonRes({ error: 'dash probe produced no marker', raw: String(out).slice(0, 200) }, 500);
+            return jsonRes(JSON.parse(m[1]), 200);
+        } catch (e) {
+            const tail = (e && e.stdout ? String(e.stdout).slice(-400) : String(e && e.message || e).slice(0, 200));
+            const m = tail.match(/VANT_CT_JSON<<([\s\S]*?)>>END/);
+            return jsonRes(m ? JSON.parse(m[1]) : { error: 'dash probe failed: ' + tail.slice(0, 160) }, 500);
         }
     });
 

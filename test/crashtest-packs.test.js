@@ -1119,6 +1119,21 @@ const EXPECTED = {
         'write-honesty-no-store': 'skip',
         'flood-wall-429-retry-after': 'skip',
     },
+    // ARMED 2026-10-25 (Phase A, the dashboard auth/OTP doors pack): the
+    // run-root arm (dash-auth) drives web/dashboard's REAL request-otp /
+    // verify-otp / session handlers in-process via the strip-types probe
+    // child with an in-child KVStore shim (BOLETE_KV) and a capture sink in
+    // the sender's webhook seat. Like the other Phase A packs, this
+    // suite's sandbox routes don't carry the run-root-only arm, so each
+    // row degrades to an HONEST SKIP here; the strict EARNED verification
+    // rides the run root (gate phase B: 5/5 REFUSED).
+    'vant-dashboard': {
+        'store-absence-fail-closed': 'skip',
+        'bad-body-floor': 'skip',
+        'mint-lane-typed-and-cooldown': 'skip',
+        'session-mint-and-cookie-discipline': 'skip',
+        'attempt-budget-burn': 'skip',
+    },
 };
 
 function checkVerdictRows(packName, verdicts) {

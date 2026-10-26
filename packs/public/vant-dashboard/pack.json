@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-dashboard",
+  "description": "The dashboard auth/OTP doors (web/dashboard/functions/api/auth/{request,verify}-otp.ts + session.ts), driven in-process by the run root's dash-auth probe child (Node strip-types, WHATWG Request/Response, WebCrypto; an in-child KVStore shim for the Bolete_KV binding and a capture sink standing in for the configured email sender - no sockets, no deploy): the store-absence state answers typed, hostile bodies never fault, the mint lane is typed and budgeted, the session mints server-side with the cookie discipline law (HttpOnly + Secure + SameSite, nothing of the account inside), and the verify attempt budget burns single-use. Phase A wire-surface slice of the S0->S1 campaign (#249); the dashboard's native UI suites stay green alongside.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}
