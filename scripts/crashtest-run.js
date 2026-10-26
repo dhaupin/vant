@@ -2162,6 +2162,167 @@ function buildRoutes(sb, Harness) {
         void jsonResInner;
         return jsonRes({ results: out }, 200);
     });
+    // migration-fixture: POST { ops: [{ op }] } — the MIGRATION arm
+    // (migrations battery slice 1, per-bucket conversion): seeds a
+    // throwaway fixture install (throwaway tmpdir: lib copy + package.json
+    // + bin/migrate.js + the axolotl-era legacy artifacts) and drives the
+    // migrations' own subprocess probes against it (spawnSync node -e,
+    // 30s bound, fixture swept on ride end) — detection, dryRun
+    // no-mutation, apply through the security chain, dropfile no-clobber,
+    // registry shape + idempotence. The wire carries the flags as neutral
+    // booleans; the fixture lives and dies in one ride.
+    harness.registerRoute('migration-fixture', async (ctx) => {
+        const { spawnSync } = require('child_process');
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        const ops = (j && Array.isArray(j.ops) && j.ops.length) ? j.ops.slice(0, 20) : null;
+        if (!ops) return jsonRes({ error: 'ops array required' }, 400);
+        const cleanups = [];
+        const out = [];
+        try {
+            for (const op of ops) {
+                const o = op || {};
+                try {
+                    if (o.op === 'nd') { out.push({ op: 'nd', fault: 'unknown op' }); continue; }
+                    const dir = '/tmp/vant-ct-mig-' + require('crypto').randomBytes(4).toString('hex');
+                    out && 0;
+                    // seed the fixture install (makeFixture body, tmpdir-rooted)
+                    fs.mkdirSync(path.join(dir, 'lib'), { recursive: true });
+                    fs.mkdirSync(path.join(dir, 'bin'), { recursive: true });
+                    fs.mkdirSync(path.join(dir, 'models', 'private'), { recursive: true });
+                    fs.mkdirSync(path.join(dir, 'models', 'public'), { recursive: true });
+                    fs.copyFileSync(path.join(ROOT, 'package.json'), path.join(dir, 'package.json'));
+                    fs.cpSync(path.join(ROOT, 'lib'), path.join(dir, 'lib'), { recursive: true });
+                    fs.copyFileSync(path.join(ROOT, 'bin', 'migrate.js'), path.join(dir, 'bin', 'migrate.js'));
+                    // legacy artifacts (the axolotl-era layout)
+                    if (o.legacy !== 'clean') {
+                        fs.mkdirSync(path.join(dir, '.agent_tmp'), { recursive: true });
+                        fs.writeFileSync(path.join(dir, '.agent_tmp', 'escrow.json'), JSON.stringify({ budgets: { fixture: 5 } }));
+                        fs.mkdirSync(path.join(dir, 'storage', 'myStuff'), { recursive: true });
+                        fs.writeFileSync(path.join(dir, 'storage', 'myStuff', 'legacy-drop.md'), 'legacy drop content');
+                        fs.mkdirSync(path.join(dir, 'models', 'private', 'vant', 'state'), { recursive: true });
+                        fs.writeFileSync(path.join(dir, 'models', 'private', 'vant', 'state', 'old-drop.md'), 'old drop content');
+                        fs.writeFileSync(path.join(dir, 'models', 'state.json'), JSON.stringify({ stack: ['vant'], mode: 'dual', currentBrain: 'vant' }));
+                        if (o.op === 'noClobber') {
+                            fs.mkdirSync(path.join(dir, 'models', 'tmp-space', 'myStuff'), { recursive: true });
+                            fs.writeFileSync(path.join(dir, 'models', 'tmp-space', 'myStuff', 'old-drop.md'), 'CURRENT WINS');
+                        }
+                    } else {
+                        fs.writeFileSync(path.join(dir, 'models', 'state.json'), JSON.stringify({ stack: ['vant'], mode: 'dual', currentBrain: 'vant' }));
+                    }
+                    cleanups.push(dir);
+                    const probeBody = (body) => `process.chdir(${JSON.stringify(dir)});\n(async () => {\n${body}\n})().catch(e => { console.error('PROBE-ERR:', e.message); process.exit(1); });`;
+                    const probe = (body, cwd) => spawnSync(process.execPath, ['-e', probeBody(body)], { encoding: 'utf8', timeout: 30000, cwd: cwd || dir });
+                    const MIG = `${JSON.stringify(path.join(dir, 'lib', 'migrations'))}`;
+                    if (o.op === 'detect') {
+                        const p = probe(`
+                            const m = require(${MIG});
+                            const status = m.status();
+                            const dry = await m.migrate({ dryRun: true });
+                            const afterStatus = m.status();
+                            console.log('PENDING:' + status.pending.map(p2 => p2.id).join(','));
+                            console.log('DRYPLAN:' + dry.applied.map(a => a.id).join(','));
+                            console.log('STILL-PENDING:' + (afterStatus.pending.length > 0));
+                            console.log('ARTIFACTS-INTACT:' + (require('fs').existsSync('.agent_tmp/escrow.json') &&
+                                require('fs').existsSync('storage/myStuff/legacy-drop.md') &&
+                                require('fs').existsSync('models/private/vant/state/old-drop.md')));
+                        `);
+                        const o2 = p.stdout || '';
+                        const m2 = (rx) => (o2.match(rx) || [])[1] || '';
+                        out.push({
+                            op: 'detect', ok: !p.error,
+                            pendingOrgchart: /orgchart\.brain-scope/.test(m2(/PENDING:(.*)/)),
+                            pendingTmpspace: /tmpspace\.models-anchor/.test(m2(/PENDING:(.*)/)),
+                            pendingDropfiles: /dropfiles\.tmp-space/.test(m2(/PENDING:(.*)/)),
+                            dryPlanned: o2.includes('DRYPLAN:') && /orgchart\.brain-scope/.test(m2(/DRYPLAN:(.*)/)),
+                            stillPending: o2.includes('STILL-PENDING:true'),
+                            artifactsIntact: o2.includes('ARTIFACTS-INTACT:true'),
+                        });
+                        continue;
+                    }
+                    if (o.op === 'apply') {
+                        const p = probe(`
+                            const m = require(${MIG});
+                            const r = await m.migrate();
+                            console.log('APPLIED:' + r.applied.map(a => a.id).join(','));
+                            const fsmod = require('fs');
+                            const pathmod = require('path');
+                            console.log('OLD-GONE:' + !fsmod.existsSync('.agent_tmp/escrow.json'));
+                            const brains = fsmod.readdirSync('models/private').filter(f => !f.startsWith('.'));
+                            let escrowOk = false, dropOk = false;
+                            for (const b of brains) {
+                                if (fsmod.existsSync(pathmod.join('models', 'private', b, 'orgchart', 'escrow.json'))) escrowOk = true;
+                                const st = pathmod.join('models', 'private', b, 'state');
+                                if (!fsmod.existsSync(st) || fsmod.readdirSync(st).length === 0) dropOk = true;
+                            }
+                            const ms = pathmod.join('models', 'tmp-space', 'myStuff');
+                            let myStuffOk = false;
+                            if (fsmod.existsSync(ms)) {
+                                const files = fsmod.readdirSync(ms);
+                                myStuffOk = files.includes('old-drop.md') && files.includes('legacy-drop.md') &&
+                                    fsmod.readFileSync(pathmod.join(ms, 'old-drop.md'), 'utf8') === 'old drop content' &&
+                                    fsmod.readFileSync(pathmod.join(ms, 'legacy-drop.md'), 'utf8') === 'legacy drop content';
+                            }
+                            console.log('ESCROW-MOVED:' + escrowOk);
+                            console.log('DROP-MOVED:' + dropOk);
+                            console.log('MYSTUFF-MOVED:' + myStuffOk);
+                            console.log('MARKER:' + !!(m._readMarker() && m._readMarker().version >= 2));
+                            const r2 = await m.migrate();
+                            console.log('IDEMPOTENT:' + (r2.applied.length === 0));
+                        `);
+                        const o2 = p.stdout || '';
+                        out.push({
+                            op: 'apply', ok: !p.error,
+                            appliedOrgchart: /APPLIED:[^\n]*orgchart\.brain-scope/.test(o2),
+                            oldGone: o2.includes('OLD-GONE:true'),
+                            escrowMoved: o2.includes('ESCROW-MOVED:true'),
+                            dropMoved: o2.includes('DROP-MOVED:true'),
+                            myStuffMoved: o2.includes('MYSTUFF-MOVED:true'),
+                            marker: o2.includes('MARKER:true'),
+                            idempotent: o2.includes('IDEMPOTENT:true'),
+                        });
+                        continue;
+                    }
+                    if (o.op === 'noClobber') {
+                        const p = probe(`
+                            const m = require(${MIG});
+                            await m.migrate();
+                            const c = require('fs').readFileSync('models/tmp-space/myStuff/old-drop.md', 'utf8');
+                            console.log('NO-CLOBBER:' + (c === 'CURRENT WINS'));
+                        `);
+                        out.push({ op: 'noClobber', ok: !p.error, noClobber: (p.stdout || '').includes('NO-CLOBBER:true') });
+                        continue;
+                    }
+                    if (o.op === 'registry') {
+                        const p = probe(`
+                            const m = require(${MIG});
+                            const okSteps = m.STEPS.length >= 3 && m.STEPS.every(s => typeof s.detect === 'function' && typeof s.apply === 'function' && s.id);
+                            console.log('STEPS:' + okSteps + ':' + m.STEPS.length);
+                            const s = m.status();
+                            console.log('STATUS:' + (s.targetVersion === m.LAYOUT_VERSION) + ':' + (typeof s.upToDate === 'boolean'));
+                            const r = await m.migrate();
+                            const r2 = await m.migrate();
+                            console.log('IDEMPOTENT:' + (r2.applied.length === 0 && r2.skipped.length === m.STEPS.length));
+                        `);
+                        const o2 = p.stdout || '';
+                        out.push({
+                            op: 'registry', ok: !p.error,
+                            stepsOk: (o2.match(/STEPS:(true|false):(\d+)/) || [])[1] === 'true',
+                            statusOk: (o2.match(/STATUS:(true|false):(true|false)/) || [])[1] === 'true',
+                            idempotent: o2.includes('IDEMPOTENT:true'),
+                        });
+                        continue;
+                    }
+                    out.push({ op: String(o.op), fault: 'unknown op' });
+                } catch (e) {
+                    out.push({ op: String((o && o.op) || '?'), fault: String((e && e.message) || e).slice(0, 140) });
+                }
+            }
+        } finally {
+            for (const d of cleanups) { try { fs.rmSync(d, { recursive: true, force: true }); } catch (er) {} }
+        }
+        return jsonRes({ results: out }, 200);
+    });
 
     // wiring-surfaces: POST { ops: [{op,...}] } — the SCOPED SURFACES arm
     // (drill-down slice 3, #249): geometry's canonical barcodes, the

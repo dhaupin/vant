@@ -354,6 +354,40 @@ reverse-verification law. Queued behind: the pointer/wire-hook family
 plate/armament family (M1-M16), and the assembly/template/mfg-line family
 (A/B/C rows).
 
+### `public/vant-migrations` — the brain-layout migrations battery (4 rows, slice 1: the fixture family; all validated 2026-10-26)
+
+**What it does.** The migrations battery's first conversion slice (#249
+drill-down): the native suite's fixture family converts to pack rows on the
+run root's `migration-fixture` arm — the REAL migrations lib +
+bin/migrate.js driven the way the native suite drives them: a THROWAWAY
+fixture install (lib copy + the axolotl-era legacy artifacts in
+.agent_tmp/, storage/myStuff/ and models/private/<brain>/state/) probed by
+subprocess with the fixture swept per ride; neutral booleans on the wire.
+
+AND THE SLICE ARMed A REAL FINDING the same hour: with the live protocol
+state the native suites write, the dropfile migration classified the live
+traveler ledger as legacy drop content and CRASHED every migrate() (and
+every auto-migrating boot) with EISDIR once the state-store wrote a
+`.wal/` DIRECTORY into the same dir — a directory is never a dropfile, and
+the crash class was the catch-misread ("not JSON → legacy"). Fixed the
+same turn (lib/migrations.js: dirs stat-skipped in detect + plan; the
+.sha256 pin contract skipped as LIVE structure) and lib/traveler.js now
+stamps its ledger with the ONE `vant-protocol-state` marker the classifier
+trusts — the native suite went 25/28 RED to 28/28 GREEN in the same pass.
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `migrations-registry-shape` | ordered steps (id + detect + apply on >=3 statuses), honest status (LAYOUT_VERSION target + boolean upToDate), and clean-install idempotence | validated - REFUSED |
+| `migrations-detect-dryrun-no-mutation` | ALL THREE legacy artifacts detected, the dry run PLANS the moves without consuming the pending state, artifacts byte-intact after (a plan is not an apply) | validated - REFUSED |
+| `migrations-apply-security-chain` | escrow lands in models/private/<brain>/orgchart/, legacy state drains, .agent_tmp gone, storage/myStuff lands byte-for-byte in tmp-space, marker >=2 written, second run applies nothing | validated - REFUSED |
+| `migrations-dropfile-no-clobber` | a CURRENT dropfile reads unchanged after the full apply — the present wins over history, never clobbered | validated - REFUSED |
+
+Slice 1 verdict: the fixture family measures REFUSED on the real seams with
+`test/migrations.test.js` (28 pins) staying green alongside — GREEN after
+the finding's fix landed the same pass. Queued behind: the legacy-main
+multibrain import family (detection/lints/flag/import), the CLI + start
+auto-migrate banner family, and the MCP door row.
+
 ### `public/vant-kernel` — prove-the-verbs conformance for the kernel seed + its adoption (10 rows; all validated 2026-10-25)
 
 Per vant#250 (labs/prd-kernel.md sec 6d #5): portability's strongest form is
@@ -671,7 +705,7 @@ today's clean B0 run: **48 REFUSED / 0 EXPLOITED / 1 skipped**.
 | 0 — wire-surface door pins (`test/crashtest-server.js`, 9 pins) | smallest lift, biggest overlap | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native suite 9/9 each run); the suite stays in CI under the law |
 | wire-surface re-pins — r/2 edge face (`web/relay/functions/api/r/relay.ts`) | ~15% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native lanes green each run: relay, relay-parity, memory, escrow, escrow-kernel, forum-msg-escrow, governance, workspace-memory via the sweep filter); the native lanes stay in CI under the law. Cycle 2's catch: the origin row's drive called hopFrame twice (sign + body) and each call re-evaluated ts — a ms-grain boundary left the signature covering different bytes than the body, and the edge (correctly) 401'd; one eval per shape since, signature === body bytes |
 | in-process module discipline (row-by-row) | ~40% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 6/6 REFUSED + native suites memory / escrow / governance green each run via the same sweep filter); the native blocks stay in CI under the law |
-| drill-down: remaining native suites (migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-4 landed (2026-10-25/26)**: state-wiring fully converted (30/30 REFUSED x2 — trust→tree 5, merge-path 10, mesh WAL/events 8, surfaces 5 on `wiring-trust` + `wiring-module` + `wiring-mesh` + `wiring-surfaces`) AND the carriers battery's lane-laws family landed (8/8 REFUSED x2 on `carriers-lane`); the migration battery and carriers' pointer/wire-hook, route, plate, and assembly/template families queue behind per-bucket conversion shape |
+| drill-down: remaining native suites (migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-5 landed (2026-10-25/26)**: state-wiring fully converted (30/30 REFUSED x2 — trust→tree 5, merge-path 10, mesh WAL/events 8, surfaces 5 on `wiring-trust` + `wiring-module` + `wiring-mesh` + `wiring-surfaces`), the carriers battery's lane-laws family landed (8/8 REFUSED x2 on `carriers-lane`), AND the migrations battery's fixture family landed (4/4 REFUSED x2 on `migration-fixture`) — with a REAL FINDING armed+fixed same-pass (the dropfile migration ate live protocol state / crashed EISDIR on the state-store's .wal dir; native suite 25/28 RED → 28/28 GREEN); the migrations legacy-main/CLI/MCP families and carriers' pointer/wire-hook, route, plate, and assembly/template families queue behind |
 
 **Bucket 0 S-counter ledger:** cycle 1 (2026-10-25, conversion day) →
 cycle 2 → cycle 3, all sides green each run — the quarter-period

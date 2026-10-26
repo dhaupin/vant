@@ -1194,6 +1194,13 @@ const EXPECTED = {
         'carriers-sender-side-verify': 'skip',
         'carriers-capacity-and-codes': 'skip',
     },
+    // migrations battery slice 1 (fixture family): run-root-only arm
+    'vant-migrations': {
+        'migrations-registry-shape': 'skip',
+        'migrations-detect-dryrun-no-mutation': 'skip',
+        'migrations-apply-security-chain': 'skip',
+        'migrations-dropfile-no-clobber': 'skip',
+    },
 };
 
 function checkVerdictRows(packName, verdicts) {

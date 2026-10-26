@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-migrations",
+  "description": "The brain-layout migrations battery (test/migrations.test.js per-bucket conversion): slice 1 converts the FIXTURE family onto the run root's migration-fixture arm — the registry shape (ordered steps, honest status, clean-install idempotence), the axolotl-era legacy detection (all three artifacts found, dryRun plans without mutating), the apply through the security chain (escrow/drops/user storage byte-for-byte, marker written, second run idempotent), and the dropfile no-clobber law (the present wins over history). Drives the REAL migrations lib + bin/migrate.js the way the native suite does: a throwaway fixture install probed by subprocess with the fixture swept per ride, neutral booleans on the wire. The native suite stays green alongside under the reverse-verification law.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}
