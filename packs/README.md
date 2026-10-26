@@ -975,6 +975,36 @@ envelope is composed and signed ONCE (identical-bytes replay), the seal
 verify set arms at MOUNT, `hopsServed` counts a real forwarded hop only,
 and the sender's loopback dial rides the native `insecure` opt.
 
+## Brain battery batch 2 — the unit families land (v0.8.6, #249 - 2026-10-26)
+
+`public/vant-brain` reaches **16 rows** (9 security + 7 unit). The unit
+rows drive lib/brain + lib/format directly in-process (loadLib house
+pattern, no routes, no arm) and grade the module's OWN surface:
+
+- **module surface + paths** — load/loadCorpus/getPipeline + both
+  model-path resolutions + the corpus list
+- **mode switch + the pipeline chain** — setMode flips for real; the
+  chain is MODE-SCOPED and holds HANDLER NAMES (addMiddleware(mode,
+  name[, pos]) / removeMiddleware pair, no ghosts — the real API, not
+  the native pin's function-shape guess)
+- **alias law** — create → resolve-to-target, non-alias passthrough,
+  enumerable surface
+- **neurons** — brainNeurons' shape, fireSynapse counting, predictNext
+  along the traveled edge, attend() exact score, UNKNOWN brains score
+  exactly 0 (no phantom attention)
+- **stack laws** — getStack includes the ACTIVE brain, pushBrain takes
+  the top, switchBrain moves top + currentBrain TOGETHER, brainMode is a
+  closed enum (silo/shared/governance; bogus refuses) — all mutations
+  restored, fixture self-seeded create-if-missing
+- **multi-format read/save** — absence is null (never fabricated),
+  saveFile roundtrips through loadFile (relative paths, security-checked)
+- **format module** — strict extension filtering, getBrainName
+  stripping, DEFAULT_EXTENSIONS set, listing confinement (no /etc
+  escape), invalid path → EMPTY list
+
+16/16 `REFUSED` ×2 deterministic; native `test/brain.test.js` 77/77
+green alongside under the reverse-verification law.
+
 ## Next surfaces survey (2026-10-23): packs vs issues
 
 Where the remaining repo parts land:

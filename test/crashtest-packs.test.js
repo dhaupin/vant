@@ -994,6 +994,18 @@ const EXPECTED = {
         // graph returns - brain_connections' visited guard + depth floor
         // hold; no hang, no RangeError.
         'knowledge-links-cycle-safety': 'REFUSED',
+        // (brain battery batch 2, 2026-10-26) the UNIT families convert
+        // in-process from lib/brain + lib/format — self-contained rows, no
+        // run-root arm, EARN strict REFUSED in BOTH phases; native
+        // test/brain.test.js (77 pins) stays green alongside under the
+        // reverse-verification law.
+        'brain-module-surface-and-paths': 'REFUSED',
+        'brain-mode-switch-and-pipeline-chain': 'REFUSED',
+        'brain-alias-mapping-law': 'REFUSED',
+        'brain-neurons-synapse-attention-law': 'REFUSED',
+        'brain-stack-push-switch-and-mode-enum': 'REFUSED',
+        'brain-multiformat-read-save-laws': 'REFUSED',
+        'format-module-listing-and-confinement': 'REFUSED',
     },
     'vant-crew': {
         'roster-quota-ceiling': 'REFUSED',

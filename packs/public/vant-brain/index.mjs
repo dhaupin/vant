@@ -83,6 +83,26 @@ function parseJson(text) {
   try { return JSON.parse(text); } catch { return null; }
 }
 
+/** In-process lib loader (house pattern): the pod's CJS lib face via
+ * pathToFileURL + dynamic import, resolved from the repo root. Returns
+ * the CJS exports object (ns.default) - the ESM namespace only mirrors
+ * statically-detected named exports, which lib/brain's dynamic surface
+ * outgrows. Batch-2 rows drive lib/brain + lib/format directly.
+ * Builtins stay OUTSIDE here: import them natively ('node:fs'). */
+async function loadLib(relPath) {
+  const { pathToFileURL } = await import('node:url');
+  const { resolve } = await import('node:path');
+  const ns = await import(pathToFileURL(resolve(relPath)).href);
+  return ns.default || ns;
+}
+
+/** Per-process fresh id: names that must not collide across the two
+ * cycles (alias targets, fixtures). Carries no wall clock in verdicts. */
+let _idCount = 0;
+function freshId(prefix) {
+  return prefix + String(++_idCount).padStart(4, '0') + '-' + Math.random().toString(36).slice(2, 7);
+}
+
 /** Run a route; a missing route = honest skip; a handler throw is DATA
  * (the record carries it), not a skip. */
 async function tryRun(harness, route, reqInit) {
@@ -381,5 +401,285 @@ export default {
         };
       },
     },
+
+    // ==================== brain battery batch 2 (2026-10-26): the UNIT
+    // families from test/brain.test.js convert in-process — the 9 rows
+    // above grade the SECURITY layer (read seam, state tamper, migration,
+    // guests, trust, stones, graph walk); this batch grades the module's
+    // own surface + stack laws. NO routes, NO arm: straight lib drives
+    // (loadLib house pattern). Stack/mode mutations always restore in
+    // finally; the axolotl fixture self-seeds (create-if-missing) the
+    // same way the native pins do.
+
+    {
+      name: 'brain-module-surface-and-paths',
+      description: 'the brain module announces its own API: loadBrain, loadCorpus and getPipeline exist, getBrainPath/model path and getPublicPath resolve inside the install (models/), and the corpus load returns a list',
+      async run(_harness) {
+        const brain = await loadLib('lib/brain.js');
+        const fs = await import('node:fs');
+        for (const fn of ['load', 'loadCorpus', 'getPipeline', 'getBrainPath', 'getPublicPath']) {
+          if (typeof brain[fn] !== 'function') {
+            return { verdict: 'EXPLOITED', detail: `the brain module surface lost ${fn} - the API must announce itself`, tookRequests: 0 };
+          }
+        }
+        const bp = brain.getBrainPath();
+        const pp = brain.getPublicPath();
+        if (typeof bp !== 'string' || typeof pp !== 'string' || !fs.existsSync(String(pp))) {
+          return { verdict: 'EXPLOITED', detail: `the brain paths drifted: publicPath=${String(pp)} (must resolve inside the install)`, tookRequests: 0, evidence: { brainPath: String(bp), publicPath: String(pp) } };
+        }
+        const corpus = await brain.loadCorpus({ sync: true });
+        if (!Array.isArray(corpus)) {
+          return { verdict: 'EXPLOITED', detail: 'loadCorpus did not return a list', tookRequests: 0 };
+        }
+        return { verdict: 'REFUSED', detail: `the module surface is whole (load/loadCorpus/getPipeline + both paths) and the corpus lists ${corpus.length} brain file(s)`, tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'brain-mode-switch-and-pipeline-chain',
+      description: 'the brain mode is a first-class switch (setMode flips getMode) and the pipeline chain is live: setPipeline replaces the chain, addMiddleware appends a handler and removeMiddleware takes it back without leaving ghosts',
+      async run(_harness) {
+        const brain = await loadLib('lib/brain.js');
+        if (typeof brain.getMode !== 'function' || typeof brain.setMode !== 'function') {
+          return { verdict: 'EXPLOITED', detail: 'the mode switch is missing (getMode/setMode must exist)', tookRequests: 0 };
+        }
+        const before = brain.getMode();
+        const mode = typeof before === 'string' && before ? before : 'dual';
+        const chain0 = brain.getPipeline(mode).slice();
+        try {
+          brain.setMode(String(before) === 'private' ? 'public' : 'private');
+          const flipped = brain.getMode();
+          if (flipped === before) {
+            return { verdict: 'EXPLOITED', detail: 'setMode did not flip getMode - the mode switch is decorative', tookRequests: 1 };
+          }
+          // the pipeline chain is MODE-SCOPED and holds HANDLER NAMES: the
+          // real API is addMiddleware(mode, name, pos) - that is the law
+          brain.setPipeline(mode, ['probe-a', 'probe-b']);
+          brain.addMiddleware(mode, 'wall-row-probe-mw');
+          const withMw = brain.getPipeline(mode);
+          if (!(withMw.length === 3 && withMw[withMw.length - 1] === 'wall-row-probe-mw')) {
+            return { verdict: 'EXPLOITED', detail: 'addMiddleware(mode, name) did not append the named handler: ' + JSON.stringify(withMw), tookRequests: 2, evidence: withMw };
+          }
+          brain.removeMiddleware(mode, 'wall-row-probe-mw');
+          const back = brain.getPipeline(mode);
+          if (!(back.length === 2 && !back.includes('wall-row-probe-mw'))) {
+            return { verdict: 'EXPLOITED', detail: 'removeMiddleware(mode, name) left a GHOST: ' + JSON.stringify(back), tookRequests: 3 };
+          }
+          return { verdict: 'REFUSED', detail: 'the mode flips for real and the mode-scoped chain appends/removes named handlers cleanly (no ghosts)', tookRequests: 3 };
+        } finally {
+          // restore the ORIGINAL chain bytes: setPipeline only writes when
+          // the mode key already exists, so a broken restore would poison
+          // the NEXT cycle's precondition (determinism law — cycle 2 must
+          // see the same starting surface as cycle 1)
+          try { brain.setPipeline(mode, chain0); } catch { /* restore best effort */ }
+          try { brain.removeMiddleware(mode, 'wall-row-probe-mw'); } catch { /* no ghosts */ }
+          try { brain.setMode(before); } catch { /* restore best effort */ }
+        }
+      },
+    },
+
+    {
+      name: 'brain-alias-mapping-law',
+      description: 'the alias layer maps: creating an alias resolves to its target through the brain, a non-alias name resolves to itself (passthrough), and listAliases is an enumerable surface',
+      async run(_harness) {
+        const brain = await loadLib('lib/brain.js');
+        const { alias, resolve, listAliases } = brain;
+        if (typeof alias !== 'function' || typeof resolve !== 'function') {
+          return { verdict: 'EXPLOITED', detail: 'the alias layer is missing (alias/resolve must exist)', tookRequests: 0 };
+        }
+        const tag = freshId('brain-alias-');
+        const target = freshId('brain-alias-target-');
+        try {
+          alias(tag, target);
+          const mapped = resolve(tag);
+          if (mapped !== target) {
+            return { verdict: 'EXPLOITED', detail: `a created alias resolved to ${String(mapped)} instead of its target - the mapping must hold`, tookRequests: 1 };
+          }
+          const passthrough = resolve('brain-battery-unaliased-name');
+          if (passthrough !== 'brain-battery-unaliased-name') {
+            return { verdict: 'EXPLOITED', detail: `a non-alias resolved to ${String(passthrough)} - passthrough must return the input unchanged`, tookRequests: 2 };
+          }
+          if (typeof listAliases === 'function') {
+            const all = listAliases();
+            if (all && typeof all === 'object' && !Array.isArray(all) && !(tag in (all || {}))) {
+              return { verdict: 'EXPLOITED', detail: 'the created alias is missing from listAliases - the surface must enumerate what the layer holds', tookRequests: 2 };
+            }
+          }
+          return { verdict: 'REFUSED', detail: 'aliases map and resolve to their target, non-aliases pass through unchanged, and the alias surface enumerates its mappings', tookRequests: 2 };
+        } finally {
+          try { brain.removeAlias && brain.removeAlias(tag); } catch { /* best effort cleanup */ }
+        }
+      },
+    },
+
+    {
+      name: 'brain-neurons-synapse-attention-law',
+      description: 'the neuron layer is live: brainNeurons exposes synapses/attention/predictions, fireSynapse counts tracked access, predictNext names the most-traveled brain, attend sets an attention score, and an UNKNOWN brain scores exactly 0 (no phantom attention)',
+      async run(_harness) {
+        const brain = await loadLib('lib/brain.js');
+        const neurons = brain.brainNeurons();
+        if (!neurons || !('synapses' in neurons) || !('attention' in neurons) || !('predictions' in neurons)) {
+          return { verdict: 'EXPLOITED', detail: 'brainNeurons lost its shape (synapses/attention/predictions)', tookRequests: 0, evidence: neurons && Object.keys(neurons) };
+        }
+        brain.fireSynapse('vant', 'wall-row-src');
+        brain.fireSynapse('vant', 'wall-row-src');
+        const synapses = brain.getSynapses();
+        if (!(synapses && synapses.vant && synapses.vant['wall-row-src'] > 0)) {
+          return { verdict: 'EXPLOITED', detail: 'fireSynapse did not track the access - the synapse counter must count', tookRequests: 1 };
+        }
+        const predicted = brain.predictNext('vant');
+        if (predicted !== null && predicted !== 'wall-row-src') {
+          return { verdict: 'EXPLOITED', detail: 'predictNext answered an unrelated brain for the wall row\'s own track', tookRequests: 2 };
+        }
+        brain.attend('wall-row-attn-brain', 0.83);
+        const attention = brain.getAttention('wall-row-attn-brain');
+        if (attention !== 0.83) {
+          return { verdict: 'EXPLOITED', detail: 'attend did not set the named attention score', tookRequests: 3 };
+        }
+        const unknown = brain.getAttention('wall-row-never-attended-xyz');
+        if (unknown !== 0) {
+          return { verdict: 'EXPLOITED', detail: 'an unknown brain scored ' + String(unknown) + ' attention - unknown must score exactly 0, no phantom', tookRequests: 4 };
+        }
+        return { verdict: 'REFUSED', detail: 'the neuron layer counts synapses, predicts along the traveled edge, scores attend() exactly, and scores UNKNOWN brains exactly 0 - no phantom attention', tookRequests: 4 };
+      },
+    },
+
+    {
+      name: 'brain-stack-push-switch-and-mode-enum',
+      description: 'the multibrain stack is live: getStack includes the ACTIVE brain, pushBrain places its brain at the stack top, switchBrain moves the stack top AND updates currentBrain, brainMode accepts silo/shared/governance and refuses a bogus mode, and every mutation restores',
+      async run(_harness) {
+        const brain = await loadLib('lib/brain.js');
+        const active = brain.getCurrentBrain && brain.getCurrentBrain() || brain.currentBrain() || 'vant';
+        const stack = brain.getStack();
+        if (!Array.isArray(stack)) {
+          return { verdict: 'EXPLOITED', detail: 'getStack did not return a list', tookRequests: 0 };
+        }
+        if (typeof brain.brainMode !== 'function' || typeof brain.switchBrain !== 'function') {
+          return { verdict: 'EXPLOITED', detail: 'brainMode/switchBrain are missing from the stack layer', tookRequests: 0 };
+        }
+        const beforeMode = brain.brainMode();
+        const beforeBrain = brain.currentBrain();
+        // the fixture brain self-seeds (create-if-missing, never clobber)
+        // the same way the native suite does for its axolotl coexistence
+        const fs = await import('node:fs');
+        const pathMod = await import('node:path');
+        const fixtureDir = pathMod.join(process.cwd(), 'models', 'private', 'wall-row-battery-brain');
+        fs.mkdirSync(fixtureDir, { recursive: true });
+        if (!fs.existsSync(pathMod.join(fixtureDir, 'identity.md'))) {
+          fs.writeFileSync(pathMod.join(fixtureDir, 'identity.md'), '# Identity\n\nNAME: wall-row-battery-brain\n');
+        }
+        const fixture = 'wall-row-battery-brain';
+        try {
+          if (!stack.includes(active)) {
+            return { verdict: 'EXPLOITED', detail: `the ACTIVE brain (${active}) is not in its own stack: ${JSON.stringify(stack).slice(0, 110)}`, tookRequests: 0 };
+          }
+          try { brain.removeBrain(fixture); } catch { /* not in stack */ }
+          brain.pushBrain(fixture);
+          const after = brain.getStack();
+          if (after[0] !== fixture || !after.includes(fixture)) {
+            return { verdict: 'EXPLOITED', detail: `pushBrain left the top as ${String(after[0])} - the push must take the stack top`, tookRequests: 1 };
+          }
+          brain.removeBrain(fixture);
+          const sw = brain.switchBrain(fixture);
+          const top = brain.getStack()[0];
+          const current = brain.currentBrain();
+          if ((sw && sw.brain !== fixture) || current !== fixture || top !== fixture) {
+            return { verdict: 'EXPLOITED', detail: 'switchBrain did not move the top AND currentBrain together', tookRequests: 2, evidence: { top, current, sw: sw && sw.brain } };
+          }
+          brain.switchBrain(beforeBrain);
+          for (const m of ['silo', 'shared', 'governance']) {
+            brain.brainMode(m);
+            if (brain.brainMode() !== m) {
+              return { verdict: 'EXPLOITED', detail: `brainMode('${m}') did not stick`, tookRequests: 3 + ['silo', 'shared', 'governance'].indexOf(m) };
+            }
+          }
+          let bogusRefused = false;
+          try { brain.brainMode('bogus-wall-row'); } catch { bogusRefused = true; }
+          if (!bogusRefused) {
+            return { verdict: 'EXPLOITED', detail: 'a bogus brainMode was accepted - bogus must refuse loudly', tookRequests: 7 };
+          }
+          return { verdict: 'REFUSED', detail: 'the stack includes its active brain, push takes the top, switch moves top+pointer together, and the mode enum is closed (silo/shared/governance only) - all restored', tookRequests: 7 };
+        } finally {
+          try { brain.switchBrain(beforeBrain); } catch { /* restore */ }
+          try { brain.brainMode(beforeMode); } catch { /* restore */ }
+          try { brain.removeBrain(fixture); } catch { /* cleanup */ }
+          try { fs.rmSync(fixtureDir, { recursive: true, force: true }); } catch { /* cleanup */ }
+        }
+      },
+    },
+
+    {
+      name: 'brain-multiformat-read-save-laws',
+      description: 'the multi-format brain reader/writer holds its contract: read() answers an object-with-content (or null honestly), a NON-EXISTENT brain name returns null (never fabricated), loadFile parses a real brain file (relative path, security-checked), and saveFile roundtrips a temp write + cleanup',
+      async run(_harness) {
+        const brain = await loadLib('lib/brain.js');
+        const fs = await import('node:fs');
+        const readResult = await brain.read('identity', { type: 'public' });
+        if (readResult !== null && !(readResult && typeof readResult === 'object' && 'content' in readResult)) {
+          return { verdict: 'EXPLOITED', detail: 'brain.read returned a foreign shape: ' + (readResult && typeof readResult), tookRequests: 1 };
+        }
+        const none = await brain.read('wall-row-nonexistent-brain-xyz', { type: 'public' });
+        if (none !== null) {
+          return { verdict: 'EXPLOITED', detail: 'a NON-EXISTENT brain answered a read - absence must be null, never fabricated', tookRequests: 2 };
+        }
+        const tmpPath = '.agent_tmp/wall-row-brain-multiformat.md';
+        let saved = null;
+        try {
+          saved = await brain.saveFile(tmpPath, { content: '# wall row probe' }, { format: 'md' });
+          if (!(saved && saved.success === true) || !fs.existsSync(tmpPath)) {
+            return { verdict: 'EXPLOITED', detail: 'saveFile did not land the file (success=' + JSON.stringify(saved).slice(0, 90) + ')', tookRequests: 3 };
+          }
+          const loaded = await brain.loadFile(tmpPath);
+          if (!(loaded && loaded.data && String(JSON.stringify(loaded.data)).includes('wall row probe'))) {
+            return { verdict: 'EXPLOITED', detail: 'loadFile did not read back the saved bytes: ' + JSON.stringify(loaded || null).slice(0, 90), tookRequests: 4 };
+          }
+          return { verdict: 'REFUSED', detail: 'read/absence-null/load/save all hold their shapes - the multi-format writer roundtrips and absence stays null', tookRequests: 4 };
+        } finally {
+          try { fs.unlinkSync(tmpPath); } catch { /* cleanup */ }
+        }
+      },
+    },
+
+    {
+      name: 'format-module-listing-and-confinement',
+      description: 'the format module holds the listing laws: listFiles enumerates brain files, filters by extension strictly, getBrainName strips any extension, DEFAULT_EXTENSIONS carries the supported set, a path-escape listing yields nothing foreign, and an invalid path answers an EMPTY list (never a throw)',
+      async run(_harness) {
+        const format = await loadLib('lib/format.js');
+        const fs = await import('node:fs');
+        const publicPath = await (async () => {
+          const brain = await loadLib('lib/brain.js');
+          return brain.getPublicPath();
+        })();
+        const all = format.listFiles(publicPath);
+        if (!Array.isArray(all)) {
+          return { verdict: 'EXPLOITED', detail: 'listFiles did not return a list', tookRequests: 0 };
+        }
+        const mdOnly = format.listFiles(publicPath, ['.md']);
+        if (mdOnly.some((f) => !String(f).endsWith('.md'))) {
+          return { verdict: 'EXPLOITED', detail: 'the .md filter leaked non-md paths: ' + JSON.stringify(mdOnly.filter((f) => !String(f).endsWith('.md')).slice(0, 3)), tookRequests: 1 };
+        }
+        for (const [input, want] of [['identity.md', 'identity'], ['notes.json', 'notes'], ['data.yaml', 'data'], ['readme', 'readme']]) {
+          if (format.getBrainName(input) !== want) {
+            return { verdict: 'EXPLOITED', detail: `getBrainName('${input}') did not strip to '${want}'`, tookRequests: 2 };
+          }
+        }
+        const exts = format.DEFAULT_EXTENSIONS;
+        if (!exts.includes('.md') || !exts.includes('.json') || !exts.includes('.yaml')) {
+          return { verdict: 'EXPLOITED', detail: 'DEFAULT_EXTENSIONS lost a supported format', tookRequests: 2 };
+        }
+        const escapeProbe = format.listFiles(publicPath + '/../../../etc');
+        const foreign = escapeProbe.filter((f) => String(f).startsWith('/etc'));
+        if (foreign.length) {
+          return { verdict: 'EXPLOITED', detail: 'the listing escaped models/ and touched /etc - confinement must hold at the lister', tookRequests: 3 };
+        }
+        const invalid = format.listFiles('/wall-row-nonexistent-path-xyz');
+        if (!Array.isArray(invalid) || invalid.length !== 0) {
+          return { verdict: 'EXPLOITED', detail: 'an invalid path answered ' + JSON.stringify(invalid).slice(0, 80) + ' - must answer an EMPTY list, never a throw', tookRequests: 4 };
+        }
+        void fs;
+        return { verdict: 'REFUSED', detail: 'the lister enumerates + filters strictly, the name-stripper holds the format set, and both escape and invalid paths answer honestly (foreign nothing / empty list)', tookRequests: 4 };
+      },
+    },
   ],
 };
+
