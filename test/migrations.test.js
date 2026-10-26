@@ -10,7 +10,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const { spawnSync, spawn } = require('child_process');
+const { spawnSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 
 const results = { passed: 0, failed: 0, tests: [] };
@@ -37,8 +37,6 @@ async function runSuite() {
 }
 
 console.log('\n🧬 BRAIN LAYOUT MIGRATION TESTS\n');
-
-const migrations = require(path.join(ROOT, 'lib', 'migrations'));
 
 // ---------- fixture helper: build a PRE-MULTIBRAIN (main-style) layout ----------
 // Mirrors origin/main's tree: flat models/public/*.md + dirs, empty/absent
