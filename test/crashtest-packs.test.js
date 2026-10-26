@@ -1111,6 +1111,17 @@ const EXPECTED = {
         'freshness-window-typed': 'skip',
         'origin-guard-typed-acks': 'skip',
         'encrypted-pipes-only-and-body-cap': 'skip',
+        // (relay battery slice 1, 2026-10-26) the pod lib face graded
+        // in-process from lib/api + lib/config — self-contained rows, no
+        // run-root arm needed, so they EARN strict REFUSED in BOTH phases
+        // (bare suite included). Real-socket families queue behind an
+        // in-process socket arm; native test/relay.test.js stays green
+        // alongside under the reverse-verification law.
+        'lib-face-truth-and-envelope-canon': 'REFUSED',
+        'lib-face-mount-gates-fail-closed': 'REFUSED',
+        'lib-face-origin-policy-wall': 'REFUSED',
+        'lib-face-dispatch-guards-typed': 'REFUSED',
+        'lib-face-sender-gate-refusal-typed': 'REFUSED',
     },
     'vant-server-wall': { // the MCP server wall via lib/server._handleRequest
         'escrow-wall-429-never-5xx': 'skip',
