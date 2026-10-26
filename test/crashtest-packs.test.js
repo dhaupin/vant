@@ -1198,6 +1198,28 @@ const EXPECTED = {
         'carriers-pointer-body-wall': 'skip',
         'carriers-wire-hook-failclosed': 'skip',
         'carriers-wire-hook-walls': 'skip',
+        // (slice 3) route / certified-letter family
+        'carriers-route-org-fixture': 'skip',
+        'carriers-route-letter-routes': 'skip',
+        'carriers-route-outsider-drop': 'skip',
+        'carriers-route-risk-gate': 'skip',
+        'carriers-route-stageless-forged': 'skip',
+        // (slice 4) plates family
+        'carriers-plate-persist-roster': 'skip',
+        'carriers-plate-framed-walls': 'skip',
+        'carriers-plate-pointer-lite': 'skip',
+        'carriers-plate-definition-gates': 'skip',
+        'carriers-plate-hydrate-restart': 'skip',
+        'carriers-plate-code-carrier': 'skip',
+        // (slice 5) assembly + template family
+        'carriers-assembly-parts-accumulate': 'skip',
+        'carriers-assembly-append-only': 'skip',
+        'carriers-assembly-address-law': 'skip',
+        'carriers-template-line-builds': 'skip',
+        'carriers-template-bill-walls': 'skip',
+        'carriers-template-digital-line': 'skip',
+        'carriers-template-unfilled-honest': 'skip',
+        'carriers-template-enterprise-line': 'skip',
     },
     // migrations battery slice 1 (fixture family): run-root-only arm
     'vant-migrations': {

@@ -324,7 +324,7 @@ probe must measure purity BEFORE moving the env it proves flows.
 | `meshstatus-seed-pure-and-envflow` | the seed derivation answers identically twice unperturbed and MOVES under the universe seed (restored after) | validated - REFUSED |
 | `meshstatus-render-degraded` | the degraded mesh line still renders its label with (unavailable) and prints the error itself — degraded-not-dead | validated - REFUSED |
 
-### `public/vant-carriers` — the carrier/assimilator lanes (8 rows, slice 1: lane laws; all validated 2026-10-26)
+### `public/vant-carriers` — the carrier/assimilator lanes (31 rows across 5 slices: lane laws, pointer/wire-hook, route, plates, assembly/template; all validated 2026-10-26)
 
 **What it does.** The carriers battery's first conversion slice (#249
 drill-down, per-bucket shape): the native suite's lane laws family (pass
@@ -368,8 +368,96 @@ slot title now (ids never collide across rows).
 | `carriers-wire-hook-failclosed` | non-function hook refuses the setter typed, found:false and a THROWING door are both honest unreachable records | validated - REFUSED |
 | `carriers-wire-hook-walls` | a good hook brings the body home (fetched, id match); SWAPPED and FORGED bodies hit the packet wall typed E_CARRIER_TAMPER; a cleared hook restores the classic no-body; the hook never short-circuits a LOCAL body | validated - REFUSED |
 
-Queued behind: the route/certified-letter family (R0-R12), the plate
-family (M1-M16), and the assembly/template/mfg-line family (A/B/C rows).
+**Slice 3 (same day): the certified-letter route family (R0-R12; 6 rows,
+23/23 REFUSED x2).** The `carriers-lane` arm grew a `route` op with
+self-seeding np-unique org fixtures (org -> dept -> team, real `lib/teams`,
+the in-process grant lane granted exactly before use): a real team member
+station SCOPE-MINTS (scoped packet, verified), Three stages route with
+per-stage evidence, the nsc9 lane rides its stage, the walk certifies
+continuity with zero gaps/rewrites; an OUTSIDER station drops the letter
+fail-closed (typed stage+code, birth-only walk, strictly shorter); the
+RISK gate needs a live single-use escrow approval (no-approval refuses,
+live approval rides, the approval is BURNED after its ride - law #204 on
+the route); a stageless route refuses typed SHAPE; a tampered start
+refuses typed TAMPER; the enterprise line composes template + RLS lineage
+(row in slice 5, case reused).
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `carriers-route-org-fixture` | org -> dept -> team assemble; the station is a REAL team member (scope lineage admits only known members) | validated - REFUSED |
+| `carriers-route-letter-routes` | 3 stages landed with evidence, nsc9 rode stage 2, the walk certifies continuity (no gaps, no rewrites) | validated - REFUSED |
+| `carriers-route-outsider-drop` | outsider dropped fail-closed (typed stage+code), birth-only walk, strictly shorter than the certified walk | validated - REFUSED |
+| `carriers-route-risk-gate` | no-approval refused, live approval allowed, approval burned single-use | validated - REFUSED |
+| `carriers-route-stageless-forged` | stageless route -> E_CARRIER_SHAPE; tampered start -> E_CARRIER_TAMPER | validated - REFUSED |
+
+Slice-3 determinism note: the fixtures seed per case with Date.now+random
+names so ids/names never collide across rows (the same content-addressing
+lesson as slice 2, org side).
+
+**Slice 4 (same day): the carrier plates family (M1-M16; 6 rows,
+23/23 REFUSED x2).** The arm grew a `carriers-plates` route with
+SUBPROCESS case probes chdir'ing into a scratch cwd (plate stores must
+never pollute the repo tree) — requires the REAL repo lib by absolute
+path FIRST (the store path resolves through the ACTIVE brain, decided at
+module load; the chdir lands after, exactly the native suite's shape):
+persist (store + .sha256 sidecar + roster ride), the FRAMED artifact
+(definer owns the marker, lib owns the crypto — round-trips BOTH walls,
+seal damage refuses on the SEAL, foreign marker refuses the frame law),
+pointer plates (NSC-9 under the maker marker, read-back through the
+built-in law), the definition gates (reserved ids, malformed
+ids/frames/carries, VSTN: is sacred), the hydrate restart (define once,
+everywhere), and code carriers (the packet gate wraps customer code in
+and out; code never persists).
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `carriers-plate-persist-roster` | registered plate = persisted data + sidecar + immediate roster ride | validated - REFUSED |
+| `carriers-plate-framed-walls` | framed stone envelope round-trips; seal wall and frame law both ride the plate | validated - REFUSED |
+| `carriers-plate-pointer-lite` | the lite lane is the REAL frame under a maker marker, not a fake of it | validated - REFUSED |
+| `carriers-plate-definition-gates` | reserved ids, malformed shapes, and the VSTN: grammar wall all refuse typed | validated - REFUSED |
+| `carriers-plate-hydrate-restart` | plate hydrates from the store and decodes identically after the restart | validated - REFUSED |
+| `carriers-plate-code-carrier` | customer code is gated in and out, and never becomes data | validated - REFUSED |
+
+Slice-4 arm finding (armed, read, fixed in-ride): the scratch children
+must require the lib BEFORE chdir so the brain's active-private check
+reads the repo state at load — otherwise a fresh scratch resolves the
+plate store to the PUBLIC root and the pinned private path model truth
+is missed; the arm now mirrors the native exact order and each case
+sweeps its scratch. The pointer shape check uses plain arithmetic (no
+regex escapes riding template layers).
+
+**Slice 5 (same day): assembly + template (pass 260; A1-A6 B1-B7 C3 and
+the C4 compose; 8 rows, 31/31 REFUSED x2).** The `carriers-lane` arm grew
+a `template` op: parts ACCUMULATE into slots.assembly (inside the content
+address) with sign-offs naming their part; append-only assembly (redo and
+empty parts refuse typed E_TRAVELER_STEP); the address law (editing an
+attached part breaks verify, part-less sign-offs still ride); the mfg
+line builds under its template (built flag + assembly, part evidence per
+route row, walk certifies, wildcard rows admit the caller identity); the
+bill walls (reorder/truncate/extra all refuse typed E_CARRIER_TEMPLATE);
+the digital line builds the same way and the built letter verifies; an
+unfilled part-slot reports built:false NAMING the hole; the enterprise
+line composes template + RLS lineage with the team owner kept.
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `carriers-assembly-parts-accumulate` | assembly accumulates (rim + hub) and each step names its part | validated - REFUSED |
+| `carriers-assembly-append-only` | redo refuses; empty part refuses; both typed E_TRAVELER_STEP | validated - REFUSED |
+| `carriers-assembly-address-law` | tampered assembly refuses verify; part-less sign-off rides and verifies | validated - REFUSED |
+| `carriers-template-line-builds` | template rides, builds, evidences parts, walk certifies, wildcard admits by | validated - REFUSED |
+| `carriers-template-bill-walls` | reorder, truncation, and extra stations all refuse typed E_CARRIER_TEMPLATE | validated - REFUSED |
+| `carriers-template-digital-line` | four parts in order; the built letter verifies | validated - REFUSED |
+| `carriers-template-unfilled-honest` | built:false verdict with the unfilled slot named (hub) | validated - REFUSED |
+| `carriers-template-enterprise-line` | enterprise line builds inside scope with the owner kept | validated - REFUSED |
+
+Slice-5 arm catch: the template cases must grant the in-process write
+lane exactly like the native suite (the ROUTE fixture arm already did);
+without it the part-attach no-ops silently. The arm grants before the
+case attempt.
+
+The carriers battery is DONE: 31 rows across 5 slices; native
+`test/carriers.test.js` (111 pins) green throughout under the
+reverse-verification law.
 
 ### `public/vant-migrations` — the brain-layout migrations battery (21 rows across 3 slices: fixture, legacy-main import, CLI/MCP/edges; all validated 2026-10-26)
 
@@ -778,7 +866,7 @@ today's clean B0 run: **48 REFUSED / 0 EXPLOITED / 1 skipped**.
 | 0 — wire-surface door pins (`test/crashtest-server.js`, 9 pins) | smallest lift, biggest overlap | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native suite 9/9 each run); the suite stays in CI under the law |
 | wire-surface re-pins — r/2 edge face (`web/relay/functions/api/r/relay.ts`) | ~15% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native lanes green each run: relay, relay-parity, memory, escrow, escrow-kernel, forum-msg-escrow, governance, workspace-memory via the sweep filter); the native lanes stay in CI under the law. Cycle 2's catch: the origin row's drive called hopFrame twice (sign + body) and each call re-evaluated ts — a ms-grain boundary left the signature covering different bytes than the body, and the edge (correctly) 401'd; one eval per shape since, signature === body bytes |
 | in-process module discipline (row-by-row) | ~40% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 6/6 REFUSED + native suites memory / escrow / governance green each run via the same sweep filter); the native blocks stay in CI under the law |
-| drill-down: remaining native suites (migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-6 landed (2026-10-25/26)**: state-wiring fully converted (30/30 REFUSED x2), the carriers battery's lane-laws + pointer/wire-hook families landed (12/12 REFUSED x2 on `carriers-lane`), AND the migrations battery's fixture + legacy-main import + CLI-banner/MCP-door/edge families landed (21/21 REFUSED x2 on `migration-fixture`) — with the REAL FINDING armed+fixed same-pass (the dropfile migration ate live protocol state / crashed EISDIR on the state-store's .wal dir; native suite 25/28 → 28/28 GREEN) and a deterministic-ride fixture shape caught in slice 3 (a private-vant dropfile kept the loader non-empty after the public wipe — the sabotage-shape rows now seed the native shape); carriers' route/plate/assembly/template families queue behind |
+| drill-down: remaining native suites (migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-6 landed (2026-10-25/26)**: state-wiring fully converted (30/30 REFUSED x2), the carriers battery converted in full (31/31 REFUSED x2: lane laws, pointer/wire-hook, route/certified-letter, plates, assembly/template), AND the migrations battery's fixture + legacy-main import + CLI-banner/MCP-door/edge families landed (21/21 REFUSED x2 on `migration-fixture`) — with the REAL FINDING armed+fixed same-pass (the dropfile migration ate live protocol state / crashed EISDIR on the state-store's .wal dir; native suite 25/28 → 28/28 GREEN) and a deterministic-ride fixture shape caught in slice 3 (a private-vant dropfile kept the loader non-empty after the public wipe — the sabotage-shape rows now seed the native shape); the carriers battery finished the same day (slices 3-5 above). Remaining native-suite buckets: none named in this drill-down — the S-counters hold their claims per bucket as converted |
 
 **Bucket 0 S-counter ledger:** cycle 1 (2026-10-25, conversion day) →
 cycle 2 → cycle 3, all sides green each run — the quarter-period

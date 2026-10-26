@@ -40,6 +40,31 @@ async function probeCarriers(harness, ops) {
   return { rows: arr, get: (n) => arr.filter((x) => x && x.op === n).pop(), all: (n) => arr.filter((x) => x && x.op === n) };
 }
 
+async function probePlates(harness, ops) {
+  let raw;
+  try {
+    const r = await harness.run('carriers-plates', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ ops }),
+    });
+    if (typeof r.body === 'string') raw = r.body;
+    else if (typeof r.text === 'function') { try { raw = await r.text(); } catch { raw = ''; } }
+    else if (r.response && typeof r.response.text === 'function') {
+      try { raw = await r.response.text(); } catch { raw = ''; } }
+    else raw = '';
+  } catch (e) {
+    if (/no route registered as/i.test(String(e && e.message))) return null;
+    throw e;
+  }
+  if (!raw) return null;
+  let j = null;
+  try { j = JSON.parse(raw); } catch { j = null; }
+  if (!j || j.error) return null;
+  const arr = Array.isArray(j.results) ? j.results : [];
+  return { rows: arr, get: (n) => arr.filter((x) => x && x.op === n).pop(), all: (n) => arr.filter((x) => x && x.op === n) };
+}
+
 function rowErr(detail, ops, evidence) {
   return { verdict: 'EXPLOITED', detail, tookRequests: ops.length, evidence };
 }
@@ -400,6 +425,316 @@ export default {
           }
         }
         return { verdict: 'REFUSED', detail: 'all four lanes refused the tampered sender typed E_CARRIER_TAMPER - verify at every landing, senders included', tookRequests: 3 };
+      },
+    },
+
+    // ============ slice 5: assembly + template (A1-A6, B1-B7, C1-C4) ============
+    {
+      name: 'carriers-assembly-parts-accumulate',
+      description: 'parts accumulate into slots.assembly (inside the content address) and the sign-off NAMES the part it attached (the who-added-what law)',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [{ op: 'template', case: 'part' }]);
+        if (!ride) return rowSkip('carriers-lane not armed');
+        const r = ride.get('template');
+        if (!r) return rowErr('the part probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the part probe faulted: ' + r.fault, ride.rows);
+        if (r.accumulated !== true) return rowErr('parts did NOT accumulate into slots.assembly with their shape intact', ride.rows);
+        if (r.signoffNames !== true) return rowErr('the sign-off did not name the part it attached', ride.rows);
+        return { verdict: 'REFUSED', detail: 'assembly accumulates (rim + hub) and each step names its part', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'carriers-assembly-append-only',
+      description: 'a filled slot never overwrites (append-only assembly: a redo of an attached part refuses) and an empty part refuses (a shell is not a part)',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [{ op: 'template', case: 'appendOnly' }]);
+        if (!ride) return rowSkip('carriers-lane not armed');
+        const r = ride.get('template');
+        if (!r) return rowErr('the append-only probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the append-only probe faulted: ' + r.fault, ride.rows);
+        if (r.redoRefused !== true || r.redoCode !== 'E_TRAVELER_STEP') return rowErr(`redoing an attached part answered ${JSON.stringify(r.redoCode)} - filled slots must refuse overwrite typed`, ride.rows);
+        if (r.emptyRefused !== true || r.emptyCode !== 'E_TRAVELER_STEP') return rowErr(`an empty part answered ${JSON.stringify(r.emptyCode)} - a shell is not a part`, ride.rows);
+        return { verdict: 'REFUSED', detail: 'redo refuses; empty part refuses; both typed E_TRAVELER_STEP', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'carriers-assembly-address-law',
+      description: 'editing an attached part breaks the address (verify refuses at the landing) and a plain sign-off (no part) still rides and verifies',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [{ op: 'template', case: 'addressLaw' }]);
+        if (!ride) return rowSkip('carriers-lane not armed');
+        const r = ride.get('template');
+        if (!r) return rowErr('the address-law probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the address-law probe faulted: ' + r.fault, ride.rows);
+        if (r.editedBreaks !== true) return rowErr('an edited attached part STILL verified - the assembly must live inside the address', ride.rows);
+        if (r.plainRides !== true) return rowErr('a plain sign-off did not ride and verify (view stations must stay legal)', ride.rows);
+        return { verdict: 'REFUSED', detail: 'tampered assembly refuses verify; part-less sign-off rides and verifies', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'carriers-template-line-builds',
+      description: 'the mfg line rides its template and BUILDS (built flag + assembly returned), route rows carry the part evidence, the walk certifies the built line, and a wildcard row (by:*, op:*) admits the caller identity at that stage',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [{ op: 'template', case: 'line' }]);
+        if (!ride) return rowSkip('carriers-lane not armed');
+        const r = ride.get('template');
+        if (!r) return rowErr('the line probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the line probe faulted: ' + r.fault, ride.rows);
+        if (r.builds !== true) return rowErr('the mfg line did not BUILD (built flag + assembly returned)', ride.rows);
+        if (r.partEvidence !== true) return rowErr('the route rows did not carry the part evidence (stage: op+part)', ride.rows);
+        if (r.walkCert !== true) return rowErr('the walk did not certify the built line (walkedTo 4)', ride.rows);
+        if (r.wildcardAdmits !== true) return rowErr('the wildcard row did not admit the caller identity at its stage', ride.rows);
+        return { verdict: 'REFUSED', detail: 'template rides, builds, evidences parts, walk certifies, wildcard admits by', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'carriers-template-bill-walls',
+      description: 'the bill of stations is enforced: a REORDERED stage, a truncated/padded bill, and an unplanned EXTRA station all refuse typed E_CARRIER_TEMPLATE (the bill is followed whole)',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [{ op: 'template', case: 'billWalls' }]);
+        if (!ride) return rowSkip('carriers-lane not armed');
+        const r = ride.get('template');
+        if (!r) return rowErr('the bill-walls probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the bill-walls probe faulted: ' + r.fault, ride.rows);
+        for (const [n, code] of [['reordered', r.reordered], ['truncated', r.truncated], ['extra', r.extra]]) {
+          if (code !== 'E_CARRIER_TEMPLATE') return rowErr(`a ${n} bill answered ${JSON.stringify(code)} - the template wall must refuse typed E_CARRIER_TEMPLATE`, ride.rows);
+        }
+        return { verdict: 'REFUSED', detail: 'reorder, truncation, and extra stations all refuse typed E_CARRIER_TEMPLATE', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'carriers-template-digital-line',
+      description: 'the digital project line builds the same way (four parts, in order: api, routes, contract, ui) and the built letter verifies - the assembly is INSIDE the address',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [{ op: 'template', case: 'digital' }]);
+        if (!ride) return rowSkip('carriers-lane not armed');
+        const r = ride.get('template');
+        if (!r) return rowErr('the digital-line probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the digital-line probe faulted: ' + r.fault, ride.rows);
+        if (r.fourInOrder !== true) return rowErr('the digital line did not build exactly [api, routes, contract, ui] in order', ride.rows);
+        if (r.letterVerifies !== true) return rowErr('the built letter did NOT verify - the assembly must be inside the address', ride.rows);
+        return { verdict: 'REFUSED', detail: 'four parts in order; the built letter verifies', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'carriers-template-unfilled-honest',
+      description: 'an honest build verdict: a template with an unfilled part-slot reports built:false and NAMES the unfilled slot (never a fake build)',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [{ op: 'template', case: 'unfilled' }]);
+        if (!ride) return rowSkip('carriers-lane not armed');
+        const r = ride.get('template');
+        if (!r) return rowErr('the unfilled probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the unfilled probe faulted: ' + r.fault, ride.rows);
+        if (r.honestVerdict !== true) return rowErr('an unfilled part-slot reported built:true - a template with a hole is NOT built', ride.rows);
+        if (r.namesHub !== true) return rowErr('the verdict did not name the unfilled slot(s)', ride.rows);
+        return { verdict: 'REFUSED', detail: 'built:false verdict with the unfilled slot named (hub)', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'carriers-template-enterprise-line',
+      description: 'the enterprise line composes template + RLS lineage: built inside scope, and the built letter keeps the team owner',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [{ op: 'route', case: 'enterprise', key: 'rtorg' }]);
+        if (!ride) return rowSkip('carriers-lane not armed (slice 3 route fixture arm pending)');
+        const r = ride.get('route');
+        if (!r) return rowErr('the enterprise-line probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the enterprise-line probe faulted: ' + r.fault, ride.rows);
+        if (r.composed !== true) return rowErr('template + RLS lineage did NOT compose (built flag)', ride.rows);
+        if (r.scopeKept !== true) return rowErr('the built letter did not keep the team owner - scope must survive the build', ride.rows);
+        return { verdict: 'REFUSED', detail: 'enterprise line builds inside scope with the owner kept', tookRequests: 1 };
+      },
+    },
+
+    // ============ slice 4: the carrier plates family (M1-M16) ============
+    {
+      name: 'carriers-plate-persist-roster',
+      description: 'plateDefine persists the plate as DATA (brain store + sha256-pinned sidecar) and the plate rides the roster immediately (available, plate:true)',
+      async run(harness) {
+        const ride = await probePlates(harness, [{ op: 'plate' , case: 'persist' }]);
+        if (!ride) return rowSkip('carriers-plates not armed (battery slice 4 arm pending)');
+        const r = ride.get('plate');
+        if (!r) return rowErr('the plate persist probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the plate persist probe faulted: ' + r.fault, ride.rows);
+        if (r.store !== 'true') return rowErr('the plate did NOT persist to the brain store', ride.rows);
+        if (r.sidecar !== 'true') return rowErr('the plate store has NO sha256-pinned sidecar', ride.rows);
+        if (r.roster !== 'true,true') return rowErr('the plate did not ride the roster immediately (plate:true available)', ride.rows);
+        return { verdict: 'REFUSED', detail: 'registered plate = persisted data + sidecar + immediate roster ride', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'carriers-plate-framed-walls',
+      description: 'a plate artifact is the stone envelope FRAMED (definer owns the marker, lib owns the crypto); it round-trips BOTH walls by construction, carrier damage inside the frame refuses on the SEAL, and a foreign marker refuses the frame law typed',
+      async run(harness) {
+        const ride = await probePlates(harness, [{ op: 'plate', case: 'framed' }]);
+        if (!ride) return rowSkip('carriers-plates not armed');
+        const r = ride.get('plate');
+        if (!r) return rowErr('the framed artifact probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the framed artifact probe faulted: ' + r.fault, ride.rows);
+        if (r.marker !== 'true') return rowErr('the plate artifact is not the framed stone envelope (MTG/..VSTN:../END)', ride.rows);
+        if (r.roundtrip !== 'true') return rowErr('the plate did not round-trip by construction (id/seq/carrier)', ride.rows);
+        if (r.seal !== 'true,E_CARRIER_TAMPER') return rowErr(`carrier damage inside the frame answered ${JSON.stringify(r.seal)} - the built-in seal wall must ride the plate`, ride.rows);
+        if (r.foreign !== 'true,E_CARRIER_SHAPE') return rowErr(`a foreign marker answered ${JSON.stringify(r.foreign)} - the frame law must refuse typed, never repair`, ride.rows);
+        return { verdict: 'REFUSED', detail: 'framed envelope round-trips; seal wall and frame law both ride the plate', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'carriers-plate-pointer-lite',
+      description: 'a pointer plate rides the NSC-9 frame (a 12-digit coin tag under the maker marker) and reads back through the built-in frame law (same facility, same wire)',
+      async run(harness) {
+        const ride = await probePlates(harness, [{ op: 'plate', case: 'pointer' }]);
+        if (!ride) return rowSkip('carriers-plates not armed');
+        const r = ride.get('plate');
+        if (!r) return rowErr('the pointer plate probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the pointer plate probe faulted: ' + r.fault, ride.rows);
+        if (r.pinShape !== 'true') return rowErr('the pointer plate did not ride the NSC-9 12-digit shape', ride.rows);
+        if (r.roughSame !== 'true') return rowErr('the pointer plate did not read back through the built-in frame law (facility mismatch)', ride.rows);
+        return { verdict: 'REFUSED', detail: 'the lite lane is the REAL frame under a maker marker, not a fake of it', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'carriers-plate-definition-gates',
+      description: 'the definition gates: reserved ids refuse (nothing shadows the built-in roster), malformed ids/frames/carries refuse typed, and a plate frame may not embed the stone grammar (VSTN: is sacred)',
+      async run(harness) {
+        const ride = await probePlates(harness, [{ op: 'plate', case: 'gates' }]);
+        if (!ride) return rowSkip('carriers-plates not armed');
+        const r = ride.get('plate');
+        if (!r) return rowErr('the gates probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the gates probe faulted: ' + r.fault, ride.rows);
+        if (r.reserved !== 'true,E_CARRIER_CARRIER') return rowErr(`a reserved id answered ${JSON.stringify(r.reserved)} - nothing shadows the built-in roster`, ride.rows);
+        const parts = String(r.malformed || '').split(',');
+        if (parts.length !== 6 || parts[0] !== 'true' || parts[2] !== 'true' || parts[4] !== 'true' || parts[1] !== 'E_CARRIER_SHAPE' || parts[3] !== 'E_CARRIER_SHAPE' || parts[5] !== 'E_CARRIER_SHAPE') {
+          return rowErr(`the malformed-definition cluster answered ${JSON.stringify(r.malformed)} - all three must refuse typed E_CARRIER_SHAPE`, ride.rows);
+        }
+        if (r.grammar !== 'true,E_CARRIER_SHAPE') return rowErr(`a VSTN: frame answered ${JSON.stringify(r.grammar)} - the stone grammar is sacred to the plate layer`, ride.rows);
+        return { verdict: 'REFUSED', detail: 'reserved ids, malformed shapes, and the VSTN: grammar wall all refuse typed', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'carriers-plate-hydrate-restart',
+      description: 'the mycelium spreads across a FRESH registration: a plate whose in-memory registry entry is dropped HYDRATES from the brain store and decodes the SAME artifact (the lane is stable across restarts)',
+      async run(harness) {
+        const ride = await probePlates(harness, [{ op: 'plate', case: 'hydrate' }]);
+        if (!ride) return rowSkip('carriers-plates not armed');
+        const r = ride.get('plate');
+        if (!r) return rowErr('the hydrate probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the hydrate probe faulted: ' + r.fault, ride.rows);
+        if (r.registry !== 'true') return rowErr('the dropped plate did NOT hydrate from the brain store (define once, everywhere)', ride.rows);
+        if (r.stable !== 'true') return rowErr('the hydrated plate did NOT decode the same artifact - the lane is not stable across restarts', ride.rows);
+        return { verdict: 'REFUSED', detail: 'plate hydrates from the store and decodes identically after the restart', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'carriers-plate-code-carrier',
+      description: 'code carriers wrap the packet gate: encode refuses a tampered packet, a decode returning a PACKET gets verify re-applied on the definer\'s own return, and code carriers NEVER persist (code is not data)',
+      async run(harness) {
+        const ride = await probePlates(harness, [{ op: 'plate', case: 'code' }]);
+        if (!ride) return rowSkip('carriers-plates not armed');
+        const r = ride.get('plate');
+        if (!r) return rowErr('the code-carrier probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the code-carrier probe faulted: ' + r.fault, ride.rows);
+        if (r.tamper !== 'true,E_CARRIER_TAMPER') return rowErr(`a code carrier encoded a tampered packet: ${JSON.stringify(r.tamper)} - the packet gate must wrap customer code`, ride.rows);
+        if (r.packet !== 'true,E_CARRIER_TAMPER') return rowErr(`a code carrier's tampered packet return answered ${JSON.stringify(r.packet)} - verify must re-apply on decode returns`, ride.rows);
+        if (r.ephemeral !== 'true') return rowErr('the code carrier PERSISTED to the plate store - code is not data', ride.rows);
+        return { verdict: 'REFUSED', detail: 'customer code is gated in and out, and never becomes data', tookRequests: 1 };
+      },
+    },
+
+    // ============ slice 3: the certified-letter route family (R0-R12) ============
+    {
+      name: 'carriers-route-org-fixture',
+      description: 'the route laws ride a REAL org model: org -> dept -> team assemble and the route station lands as a real team member (scope lineage admits only known members, fail-closed)',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [{ op: 'route', case: 'org', key: 'rtorg' }]);
+        if (!ride) return rowSkip('carriers-lane not armed (battery slice 1 arm pending)');
+        const r = ride.get('route');
+        if (!r) return rowErr('the org fixture probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the org fixture probe faulted: ' + r.fault, ride.rows);
+        if (r.teamOk !== true) return rowErr('the route org fixture did NOT assemble (org -> dept -> team)', ride.rows);
+        if (r.stationOnTeam !== true) return rowErr('the route station did NOT land as a real team member', ride.rows);
+        return { verdict: 'REFUSED', detail: 'org -> dept -> team assembled; the station is a real team member', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'carriers-route-letter-routes',
+      description: 'the certified letter routes ALL stages: 3 landed stations with per-stage evidence (seq + op + verdict), the nsc9 lane rides its stage, and the walk certifies the route continuity with zero gaps and zero rewrites',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [{ op: 'route', case: 'letter', key: 'rtorg' }]);
+        if (!ride) return rowSkip('carriers-lane not armed');
+        const r = ride.get('route');
+        if (!r) return rowErr('the letter probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the letter probe faulted: ' + r.fault, ride.rows);
+        if (r.routedAll !== true) return rowErr('the letter did NOT route all stages with its terminal seq (a certified letter stops being certified if stages drop)', ride.rows);
+        if (r.evidence !== true) return rowErr('a landed row carries no stage evidence (seq/op/verdict) - landings must be legible', ride.rows);
+        if (r.nsc9Rode !== true) return rowErr('the nsc9 carrier lane did NOT ride its stage - per-stage lanes must ride', ride.rows);
+        if (r.walkCert !== true) return rowErr('the walk did not certify the route continuity (gaps or rewrites present) - law 3 holds the route', ride.rows);
+        return { verdict: 'REFUSED', detail: '3 stages landed with evidence, nsc9 rode stage 2, the walk certifies continuity (no gaps, no rewrites)', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'carriers-route-outsider-drop',
+      description: 'the CHECK gate is RLS lineage: an outsider station drops the letter fail-closed with a typed stage+code, the dropped walk stays birth-only, and it walks strictly shorter than the certified letter',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [{ op: 'route', case: 'drop', key: 'rtorg' }]);
+        if (!ride) return rowSkip('carriers-lane not armed');
+        const r = ride.get('route');
+        if (!r) return rowErr('the drop probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the drop probe faulted: ' + r.fault, ride.rows);
+        if (r.letterFounded !== true) return rowErr('the in-scope control letter did not route - the comparison leg died', ride.rows);
+        if (r.refusedTyped !== true) return rowErr('the outsider station did NOT drop the packet with typed stage+code - the CHECK gate must refuse clearly', ride.rows);
+        if (r.walkBirthOnly !== true) return rowErr('the dropped letter walk did not stop birth-only - continuity must stop where the record stops', ride.rows);
+        if (r.walkShorter !== true) return rowErr('the dropped walk is not strictly shorter than the certified walk', ride.rows);
+        return { verdict: 'REFUSED', detail: 'outsider dropped fail-closed (typed stage+code), birth-only walk, strictly shorter', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'carriers-route-risk-gate',
+      description: 'the RISK gate: a privileged hop refuses without an approval, admits holding a live single-use one, and the approval is BURNED after its ride (the escrow op-bind law rides the route)',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [{ op: 'route', case: 'risk', key: 'rtorg' }]);
+        if (!ride) return rowSkip('carriers-lane not armed');
+        const r = ride.get('route');
+        if (!r) return rowErr('the risk probe failed to answer', ride.rows);
+        if (r.fault) return rowErr('the risk probe faulted: ' + r.fault, ride.rows);
+        if (r.noApprRefused !== true) return rowErr('the RISK gate ADMITTED a privileged hop without an approval - privilege must refuse closed', ride.rows);
+        if (r.approvalMinted !== true) return rowErr('the escrow route approval did not mint', ride.rows);
+        if (r.withApprOk !== true) return rowErr('the RISK gate did NOT admit a privileged hop holding a live approval', ride.rows);
+        if (r.burned !== true) return rowErr('the approval survived its ride - single-use means BURNED (the #204 law rides the route)', ride.rows);
+        return { verdict: 'REFUSED', detail: 'no-approval refused, live approval allowed, approval burned single-use', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'carriers-route-stageless-forged',
+      description: 'the route shape walls: a stageless route refuses typed E_CARRIER_SHAPE (routing without stages is not a letter) and a route never starts from a tampered packet (E_CARRIER_TAMPER)',
+      async run(harness) {
+        const ride = await probeCarriers(harness, [
+          { op: 'route', case: 'stageless', key: 'rtorg' },
+          { op: 'route', case: 'forged', key: 'rtorg' },
+        ]);
+        if (!ride) return rowSkip('carriers-lane not armed');
+        const stageless = ride.all('route')[0];
+        const forged = ride.all('route')[1];
+        for (const [n, x] of Object.entries({ stageless, forged })) {
+          if (!x) return rowErr(`the ${n} probe failed to answer`, ride.rows);
+        }
+        if (stageless.caught !== 'E_CARRIER_SHAPE') return rowErr(`a stageless route answered ${JSON.stringify(stageless.caught)} - it must refuse typed E_CARRIER_SHAPE`, ride.rows);
+        if (forged.caught !== 'E_CARRIER_TAMPER') return rowErr(`a tampered start answered ${JSON.stringify(forged.caught)} - the route wall must refuse typed E_CARRIER_TAMPER`, ride.rows);
+        return { verdict: 'REFUSED', detail: 'stageless -> E_CARRIER_SHAPE; tampered start -> E_CARRIER_TAMPER', tookRequests: 2 };
       },
     },
 

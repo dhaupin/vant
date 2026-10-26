@@ -2795,7 +2795,144 @@ ${o.task === 'banner' ? '' : `    const out2 = await run();
     // mints ride the traveler's own determinism law (same payload + same
     // ts = the SAME address). Artifacts/passwords stay in-ride; the wire
     // carries neutral facts only (booleans + caught codes).
-    harness.registerRoute('carriers-lane', async (ctx) => {
+        // carriers-plates: POST { ops: [{ op: 'plate', case }] } — carriers
+    // slice 4, the PLATES family (pass 262). The plate store must not
+    // pollute the repo tree: each case runs in a SCRATCH cwd via a
+    // subprocess (spawnSync node -e, 45s bound, scratch swept per op) —
+    // require the REAL repo lib by absolute path, chdir into the scratch
+    // BEFORE any store write, mirror the native suite's exact laws
+    // (brain-state-pinned plate path, sha256 sidecar, hydrate restart,
+    // code-carrier never persisted). Telegram: neutral booleans only.
+    harness.registerRoute('carriers-plates', async (ctx) => {
+        const { spawnSync } = require('child_process');
+        const carriersPath = JSON.stringify(path.join(ROOT, 'lib', 'carriers.js'));
+        const travelerPath = JSON.stringify(path.join(ROOT, 'lib', 'traveler.js'));
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        const ops = (j && Array.isArray(j.ops) && j.ops.length) ? j.ops.slice(0, 20) : null;
+        if (!ops) return jsonRes({ error: 'ops array required' }, 400);
+        const out = [];
+        const scratches = [];
+        for (const op of ops) {
+            const o = op || {};
+            const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-ct-plates-'));
+            scratches.push(scratch);
+            const bodyFor = () => {
+                const header = `(async () => {\nconst carriers = require(${carriersPath});\nconst traveler = require(${travelerPath});\nprocess.chdir(${JSON.stringify(scratch)});\nconst fs = require('fs');\nconst path = require('path');`;
+                const seal = `\n})().catch(e => { console.error('PROBE-ERR:', e.message); process.exit(1); });`;
+                const mk = (core) => header + core + seal;
+                const mintPacket = `const t = traveler.mint({ from: 'floor-1', slots: { title: 'wheel' }, now: 5000 });`;
+                if (o.case === 'persist') {
+                    return mk(`carriers.plateDefine({ id: 'mfg-tag', carries: 'full-object', frame: { prefix: 'MTG/', suffix: '/END' }, family: 'tag', note: 'the plant floor tag lane' });
+                    const store = 'models/private/vant/state/carrier-plates.json';
+${mintPacket}
+                    console.log('STORE:' + fs.existsSync(store));
+                    console.log('SIDECAR:' + fs.existsSync(store + '.sha256'));
+                    console.log('ROSTER:' + (carriers.get('mfg-tag') && carriers.get('mfg-tag').plate === true) + ',' + carriers.list().some((c) => c.id === 'mfg-tag' && c.available));`);
+                }
+                if (o.case === 'framed') {
+                    return mk(`${mintPacket}
+                    carriers.plateDefine({ id: 'mfg-tag', carries: 'full-object', frame: { prefix: 'MTG/', suffix: '/END' }, family: 'tag', note: 'the plant floor tag lane' });
+                    const tagArt = carriers.encode(t, 'mfg-tag');
+                    console.log('FRAMED_MARKER:' + (typeof tagArt.frame === 'string' && tagArt.frame.startsWith('MTG/') && tagArt.frame.endsWith('/END') && tagArt.frame.includes('VSTN:')));
+                    const tagBack = carriers.decode('mfg-tag', tagArt.frame);
+                    console.log('ROUNDTRIP:' + (tagBack.traveler.id === t.id && tagBack.traveler.seq === t.seq && tagBack.carrier === 'mfg-tag'));
+                    const damagedTag = tagArt.frame.slice(0, -5) + (tagArt.frame.slice(-5, -4) === 'X' ? 'Y' : 'X') + tagArt.frame.slice(-4);
+                    let sealRefused = false; let sealCode = 'NONE';
+                    try { carriers.decode('mfg-tag', damagedTag); } catch (e) { sealRefused = true; sealCode = e && e.code; }
+                    console.log('SEAL:' + sealRefused + ',' + sealCode);
+                    const wrongFrame = 'WRONG/' + tagArt.frame.slice(5);
+                    let shapeRefused = false; let shapeCode = 'NONE';
+                    try { carriers.decode('mfg-tag', wrongFrame); } catch (e) { shapeRefused = true; shapeCode = e && e.code; }
+                    console.log('FOREIGN:' + shapeRefused + ',' + shapeCode);`);
+                }
+                if (o.case === 'pointer') {
+                    return mk(`${mintPacket}
+                    carriers.plateDefine({ id: 'hobby-coin', carries: 'id-pointer', frame: { prefix: 'HC~' }, family: 'coin', note: 'a 12-digit coin tag on a keyring' });
+                    const coin = carriers.encode(t, 'hobby-coin');
+                    const cp = coin.frame.slice(5).split('-');   // 'HC~9-' is 5 chars: parts are 5-digit facility, 5-digit serial, 1-digit check
+const shapeOk = cp.length === 3
+    && cp[0].length === 5 && Number.isFinite(Number(cp[0]))
+    && cp[1].length === 5 && Number.isFinite(Number(cp[1]))
+    && cp[2].length === 1 && Number.isFinite(Number(cp[2]));
+console.log('PIN_SHAPE:' + shapeOk);
+                    const through = carriers.decode('hobby-coin', coin.frame);
+                    const direct = carriers.decode('nsc9', coin.frame.slice(3));
+                    console.log('ROUGH_SAME:' + (direct && through && through.pointer && through.pointer.facility === direct.facility));`);
+                }
+                if (o.case === 'gates') {
+                    return mk(`let reserved = false; let reservedCode = 'NONE';
+try { carriers.plateDefine({ id: 'stone', carries: 'full-object', frame: { prefix: 'X/' } }); } catch (e) { reserved = true; reservedCode = e && e.code; }
+console.log('RESERVED:' + reserved + ',' + reservedCode);
+let badDef = false; let badCode = 'NONE';
+try { carriers.plateDefine({ id: 'Bad_Id', carries: 'full-object', frame: { prefix: 'X/' } }); } catch (e) { badDef = true; badCode = e && e.code; }
+let missingFrame = false; let missingCode = 'NONE';
+try { carriers.plateDefine({ id: 'ok-id', carries: 'full-object' }); } catch (e) { missingFrame = true; missingCode = e && e.code; }
+let badCarries = false; let badCarriesCode = 'NONE';
+try { carriers.plateDefine({ id: 'ok-id2', carries: 'carrier-less', frame: { prefix: 'X/' } }); } catch (e) { badCarries = true; badCarriesCode = e && e.code; }
+console.log('MALFORMED:' + badDef + ',' + badCode + ',' + missingFrame + ',' + missingCode + ',' + badCarries + ',' + badCarriesCode);
+let imposter = false; let imposterCode = 'NONE';
+try { carriers.plateDefine({ id: 'imposter', carries: 'full-object', frame: { prefix: 'VSTN:' } }); } catch (e) { imposter = true; imposterCode = e && e.code; }
+console.log('GRAMMAR:' + imposter + ',' + imposterCode);`);
+                }
+                if (o.case === 'hydrate') {
+                    return mk(`${mintPacket}
+                    carriers.plateDefine({ id: 'mfg-tag', carries: 'full-object', frame: { prefix: 'MTG/', suffix: '/END' }, family: 'tag', note: 'the plant floor tag lane' });
+                    const tagArt = carriers.encode(t, 'mfg-tag');
+                    delete carriers._registry['mfg-tag'];
+                    carriers._hydratePlates();
+                    console.log('REGISTRY:' + (carriers.get('mfg-tag') && carriers.get('mfg-tag').plate === true));
+                    const back = carriers.decode('mfg-tag', tagArt.frame);
+                    console.log('STABLE:' + (back.traveler.id === t.id));`);
+                }
+                if (o.case === 'code') {
+                    return mk(`${mintPacket}
+                    carriers.plateDefine({ id: 'mfg-tag', carries: 'full-object', frame: { prefix: 'MTG/', suffix: '/END' }, family: 'tag', note: 'the plant floor tag lane' });
+                    const tampered = JSON.parse(JSON.stringify(t)); tampered.slots.title = 'forged';
+                    const fullPacket = t;
+                    const custom = carriers.define({
+                        id: 'edi-lane', family: 'integration', note: 'the EDI lane a plant already speaks',
+                        encode(t2) { return { carrier: 'edi-lane', body: 'EDI*830*0*' + t2.id }; },
+                        decode() { const goodPacket = JSON.parse(JSON.stringify(fullPacket)); return { carrier: 'edi-lane', traveler: goodPacket }; },
+                    });
+                    let encodedRefused = false; let encodedCode = 'NONE';
+                    try { custom.encode(tampered); } catch (e) { encodedRefused = true; encodedCode = e && e.code; }
+                    console.log('TAMPER:' + encodedRefused + ',' + encodedCode);
+                    const custom2 = carriers.define({
+                        id: 'edi-bad',
+                        encode() { return { carrier: 'edi-bad', body: 'X' }; },
+                        decode() { return { carrier: 'edi-bad', traveler: tampered }; },
+                    });
+                    let packetReturn = false; let packetCode = 'NONE';
+                    try { custom2.decode({}); } catch (e) { packetReturn = true; packetCode = e && e.code; }
+                    console.log('PACKET:' + packetReturn + ',' + packetCode);
+                    const storeTxt = fs.readFileSync('models/private/vant/state/carrier-plates.json', 'utf8');
+                    console.log('EPHEMERAL:' + !storeTxt.includes('edi-lane'));`);
+                }
+                return null;
+            }
+            const body = bodyFor();
+            if (!body) { out.push({ op: 'plate', case: String(o.case), fault: 'unhandled plate case' }); continue; }
+            const p = spawnSync(process.execPath, ['-e', body], { encoding: 'utf8', timeout: 45000, cwd: ROOT });
+            const o2 = p.stdout || '';
+            const kv = (k) => { const m = o2.match(new RegExp(k + ':(.*)')); return m ? m[1].trim() : null; };
+            const fault = p.error ? String(p.error.message || p.error).slice(0, 120)
+                : (p.stderr || '').includes('PROBE-ERR') ? (p.stderr || '').split('\n').filter(l => l.includes('PROBE-ERR')).join(' | ').slice(0, 160) : null;
+            out.push(Object.assign({ op: 'plate', case: String(o.case), fault }, (() => {
+                if (o.case === 'persist') return { store: kv('STORE'), sidecar: kv('SIDECAR'), roster: kv('ROSTER') };
+                if (o.case === 'framed') return { marker: kv('FRAMED_MARKER'), roundtrip: kv('ROUNDTRIP'), seal: kv('SEAL'), foreign: kv('FOREIGN') };
+                if (o.case === 'pointer') return { pinShape: kv('PIN_SHAPE'), roughSame: kv('ROUGH_SAME'), roughFrame: kv('COIN_FRAME') };
+                if (o.case === 'gates') return { reserved: kv('RESERVED'), malformed: kv('MALFORMED'), grammar: kv('GRAMMAR') };
+                if (o.case === 'hydrate') return { registry: kv('REGISTRY'), stable: kv('STABLE') };
+                if (o.case === 'code') return { tamper: kv('TAMPER'), packet: kv('PACKET'), ephemeral: kv('EPHEMERAL') };
+                return {};
+            })()));
+        }
+        for (const s of scratches) { try { fs.rmSync(s, { recursive: true, force: true }); } catch (er) {} }
+        return jsonRes({ results: out }, 200);
+    });
+
+harness.registerRoute('carriers-lane', async (ctx) => {
         const carriers = sandboxLib('carriers');
         const traveler = sandboxLib('traveler');
         const cryptoMod = require('crypto');
@@ -2805,6 +2942,7 @@ ${o.task === 'banner' ? '' : `    const out2 = await run();
         if (!ops) return jsonRes({ error: 'ops array required' }, 400);
         const packets = new Map();   // token -> traveler object
         const artifacts = new Map(); // token -> { envelope?, frame?, svg?, pw?, json? }
+        const routeFixtures = new Map(); // route key -> org fixture (slice 3: the route laws)
         const out = [];
         const amt = (token) => packets.get(String(token));
         const art = (token) => artifacts.get(String(token)) || {};
@@ -3048,6 +3186,214 @@ ${o.task === 'banner' ? '' : `    const out2 = await run();
                     catch (e) { r = { ok: true, refused: true, caught: e && e.code }; }
                     finally { fs.writeFileSync(bodyFile, JSON.stringify(real)); }
                     out.push(Object.assign({ op: 'tamperBody' }, r));
+                    continue;
+                }
+                if (o.op === 'route') {
+                    // (carriers slice 3; the R0-R12 family) The route laws
+                    // need a REAL org model: scope lineage admits only known
+                    // members fail-closed. Grants are per-process; the ride
+                    // grants exactly what it needs and the fixture is
+                    // np-unique (Date.now + a random suffix — org names
+                    // never collide across rides). Self-seeding: every case
+                    // lazily builds its org fixture under `key`.
+                    const teams = sandboxLib('teams');
+                    const sudo = sandboxLib('sudo');
+                    const escrow = sandboxLib('escrow');
+                    const routeFx = routeFixtures.get(String(o.key || 'rt'));
+                    const fx = (() => {
+                        if (routeFx) return routeFx;
+                        try { sudo.grant('default', 'write'); } catch (e2) { /* in-process grant lane, idempotent */ }
+                        const np = 'rt' + Date.now().toString(36) + Math.floor(Math.random() * 1e9).toString(36);
+                        const org = teams.createOrg('o-' + np);
+                        const dep = teams.createDept('d-' + np, { org: org.id });
+                        const tm = teams.createTeam('t-' + np, { dept: dep.id });
+                        const assigned = teams.assign('st-' + np, { team: tm.id });
+                        const fixture = { np, tm, station: 'st-' + np,
+                            teamOk: !!(org.id && dep.id && tm && tm.id),
+                            stationOnTeam: !!(assigned && !assigned.error) };
+                        routeFixtures.set(String(o.key || 'rt'), fixture);
+                        return fixture;
+                    })();
+                    const caseFn = String(o.case);
+                    const r2 = attempt(() => {
+                        if (caseFn === 'org') return { teamOk: fx.teamOk, stationOnTeam: fx.stationOnTeam };
+                        if (caseFn === 'letter') {
+                            const tR = traveler.mintScoped({ from: 'origin', slots: { title: 'warrant' }, scope: { owner: 'team:' + fx.tm.id, visibility: 'scope' } });
+                            const rep = carriers.carry(tR, { stations: [
+                                { by: fx.station, op: 'inspect' },
+                                { by: fx.station, op: 'test', carrier: 'nsc9' },
+                                { by: fx.station, op: 'release' },
+                            ] });
+                            return {
+                                routedAll: !!(rep.ok && rep.landed === 3 && rep.stations === 3 && rep.letter && rep.letter.seq === 4),
+                                evidence: Array.isArray(rep.route) && rep.route.every((w) => w.verdict === 'landed' && typeof w.seq === 'number' && typeof w.op === 'string'),
+                                nsc9Rode: !!(rep.route && rep.route[1] && rep.route[1].carrier === 'nsc9'),
+                                walkCert: !!(rep.walk && rep.walk.ok === true && rep.walk.stations === 4 && Array.isArray(rep.walk.gaps) && rep.walk.gaps.length === 0 && Array.isArray(rep.walk.rewrites) && rep.walk.rewrites.length === 0),
+                            };
+                        }
+                        if (caseFn === 'drop') {
+                            const tR = traveler.mintScoped({ from: 'origin', slots: { title: 'warrant' }, scope: { owner: 'team:' + fx.tm.id, visibility: 'scope' } });
+                            const rep = carriers.carry(tR, { stations: [{ by: fx.station, op: 'inspect' }, { by: fx.station, op: 'test' }, { by: fx.station, op: 'release' }] });
+                            const repO = carriers.carry(tR, { stations: [{ by: 'outsider-' + fx.np, op: 'poke' }] });
+                            return {
+                                letterFounded: !!rep.ok,
+                                refusedTyped: !!(repO && !repO.ok && repO.refused && typeof repO.refused.stage === 'number' && typeof repO.refused.code === 'string'),
+                                walkBirthOnly: !!(repO && repO.walk && repO.walk.ok === true && repO.walk.walkedTo === 1),
+                                walkShorter: !!(rep && rep.walk && repO && repO.walk && rep.walk.stations > repO.walk.stations),
+                            };
+                        }
+                        if (caseFn === 'risk') {
+                            const eR = escrow.create({ approvalRequired: ['traveler carry'] });
+                            const noAppr = carriers.carry(traveler.mintScoped({ from: 'origin', slots: { title: 'x' }, scope: { owner: 'team:' + fx.tm.id } }), { stations: [{ by: fx.station, privileged: true }] });
+                            const appr = traveler.approvalForRoute(eR, 'traveler carry', 'route payload');
+                            const withAppr = carriers.carry(traveler.mintScoped({ from: 'origin', slots: { title: 'y' }, scope: { owner: 'team:' + fx.tm.id } }), { stations: [{ by: fx.station, privileged: true, approvalId: appr.approvalId }] });
+                            const reburn = escrow.consumeApproval(appr.approvalId, 'traveler carry');
+                            return {
+                                noApprRefused: noAppr && noAppr.ok === false,
+                                approvalMinted: !!(appr && appr.approvalId),
+                                withApprOk: !!(withAppr && withAppr.ok === true),
+                                burned: !!(reburn && reburn.approved === false),
+                            };
+                        }
+                        if (caseFn === 'stageless') {
+                            const tR = traveler.mintScoped({ from: 'origin', slots: { title: 'x' }, scope: { owner: 'team:' + fx.tm.id } });
+                            try { carriers.carry(tR, {}); return { caught: 'NONE' }; }
+                            catch (e2) { return { caught: e2 && e2.code }; }
+                        }
+                        if (caseFn === 'forged') {
+                            const bad = JSON.parse(JSON.stringify(traveler.mintScoped({ from: 'origin', slots: { title: 'warrant' }, scope: { owner: 'team:' + fx.tm.id } })));
+                            bad.slots.title = 'forged';
+                            try { carriers.carry(bad, { stations: [{ by: fx.station }] }); return { caught: 'NONE' }; }
+                            catch (e2) { return { caught: e2 && e2.code }; }
+                        }
+                        if (caseFn === 'enterprise') {
+                            const tE = traveler.mintScoped({ from: fx.station, slots: { title: 'enterprise-line' }, scope: { owner: 'team:' + fx.tm.id } });
+                            const repE = carriers.carry(tE, {
+                                template: [{ op: 'mold', part: 'rim' }, { op: 'publish', by: fx.station }],
+                                stations: [
+                                    { by: fx.station, op: 'mold', part: { name: 'rim', alloy: 'al' } },
+                                    { by: fx.station, op: 'publish' },
+                                ],
+                            });
+                            return {
+                                composed: !!(repE && repE.ok && repE.built === true),
+                                scopeKept: !!(repE && repE.letter && repE.letter.scope && repE.letter.scope.owner === 'team:' + fx.tm.id),
+                            };
+                        }
+                        return { fault: 'unhandled route case' };
+                    });
+                    out.push(Object.assign({ op: 'route', caseFn }, r2));
+                    continue;
+                }
+                if (o.op === 'template') {
+                    // (carriers slice 5; the assembly + template family, pass
+                    // 260) The part/sign-off laws on the REAL traveler, the
+                    // bill-of-stations on the REAL carry. Fixed now mints;
+                    // in-process; the wire carries neutral booleans + caught
+                    // codes only.
+                    const templateCase = String(o.case);
+                    // the native suite grants the in-process write lane BEFORE
+                    // the assembly laws (CAP_TO_SCOPE coercion lane without it?)
+                    try { sandboxLib('sudo').grant('default', 'write'); } catch (e0) { /* idempotent grant lane */ }
+                    const rr = attempt(() => {
+                        if (templateCase === 'part') {
+                            let tp = traveler.mint({ from: 'frame', slots: { title: 'wheel' } });
+                            tp = traveler.advance(tp, { op: 'mold', by: 'st-1', part: { name: 'rim', alloy: 'al-6061' } });
+                            tp = traveler.advance(tp, { op: 'cure', by: 'st-2', part: { name: 'hub', bearing: 'sealed' } });
+                            return {
+                                accumulated: !!(tp.slots.assembly && tp.slots.assembly.rim && tp.slots.assembly.rim.alloy === 'al-6061' && tp.slots.assembly.hub && tp.slots.assembly.hub.bearing === 'sealed'),
+                                signoffNames: !!(tp.steps[1] && tp.steps[1].part === 'rim' && tp.steps[2] && tp.steps[2].part === 'hub'),
+                            };
+                        }
+                        if (templateCase === 'appendOnly') {
+                            let tp = traveler.mint({ from: 'frame', slots: { title: 'wheel' } });
+                            tp = traveler.advance(tp, { op: 'mold', by: 'st-1', part: { name: 'rim', alloy: 'al-6061' } });
+                            tp = traveler.advance(tp, { op: 'cure', by: 'st-2', part: { name: 'hub', bearing: 'sealed' } });
+                            let redoRefused = false; let redoCode = 'NONE';
+                            try { traveler.advance(tp, { op: 'redo', by: 'st-1', part: { name: 'hub', spoil: true } }); } catch (e2) { redoRefused = true; redoCode = e2 && e2.code; }
+                            let emptyRefused = false; let emptyCode = 'NONE';
+                            try { traveler.advance(tp, { op: 'x', by: 's', part: { name: 'void' } }); } catch (e2) { emptyRefused = true; emptyCode = e2 && e2.code; }
+                            return { redoRefused, redoCode, emptyRefused, emptyCode };
+                        }
+                        if (templateCase === 'addressLaw') {
+                            let tp = traveler.mint({ from: 'frame', slots: { title: 'wheel' } });
+                            tp = traveler.advance(tp, { op: 'mold', by: 'st-1', part: { name: 'rim', alloy: 'al-6061' } });
+                            tp = traveler.advance(tp, { op: 'cure', by: 'st-2', part: { name: 'hub', bearing: 'sealed' } });
+                            const evil = JSON.parse(JSON.stringify(tp));
+                            evil.slots.assembly.rim.alloy = 'tin';
+                            const editedBreaks = traveler.verify(evil).ok === false;
+                            const v = traveler.advance(tp, { op: 'inspect', by: 'qa' });
+                            let vVerifyOk = null;
+                            try { vVerifyOk = traveler.verify(v).ok === true; } catch (e2) { vVerifyOk = 'THREW:' + String(e2 && e2.code); }
+                            const plainRides = v.seq === 4 && v.steps[3] && v.steps[3].part === undefined && vVerifyOk === true;
+                            return { editedBreaks, plainRides };
+                        }
+                        if (templateCase === 'line') {
+                            const tLine = traveler.mint({ from: 'line-start', slots: { title: 'wheel-0042' } });
+                            const repT = carriers.carry(tLine, {
+                                template: [
+                                    { op: 'mold', part: 'rim' },
+                                    { op: 'cure', part: 'hub' },
+                                    { op: 'inspect', by: '*', op: '*' },
+                                ],
+                                stations: [
+                                    { by: 'mold-station', op: 'mold', part: { name: 'rim', alloy: 'al-6061' } },
+                                    { by: 'cure-station', op: 'cure', part: { name: 'hub', bearing: 'sealed' } },
+                                    { by: 'qa-1', op: 'inspect' },
+                                ],
+                            });
+                            return {
+                                builds: !!(repT.ok && repT.built === true && repT.assembly && repT.assembly.rim && repT.assembly.hub),
+                                partEvidence: !!(repT.route && repT.route[0] && repT.route[0].part === 'rim' && repT.route[1] && repT.route[1].part === 'hub' && repT.route[2] && repT.route[2].part === undefined),
+                                walkCert: !!(repT.walk && repT.walk.ok && repT.walk.walkedTo === 4),
+                                wildcardAdmits: !!(repT.route && repT.route[2] && repT.route[2].by === 'qa-1'),
+                            };
+                        }
+                        if (templateCase === 'billWalls') {
+                            const mc = (mark) => {
+                                try { carriers.carry(traveler.mint({ from: 'x', slots: { title: 'y' } }), mark); return 'NONE'; }
+                                catch (e2) { return (e2 && e2.code) || 'UNCAUGHT'; }
+                            };
+                            return {
+                                reordered: mc({ template: [{ op: 'mold' }, { op: 'cure' }], stations: [{ by: 'a', op: 'cure' }, { by: 'b', op: 'mold' }] }),
+                                truncated: mc({ template: [{ op: 'mold' }], stations: [{ by: 'a', op: 'mold' }, { by: 'b', op: 'cure' }] }),
+                                extra: mc({ template: [{ op: 'mold' }, { op: 'cure' }], stations: [{ by: 'a', op: 'mold' }, { by: 'b', op: 'cure' }, { by: 'c', op: 'ship' }] }),
+                            };
+                        }
+                        if (templateCase === 'digital') {
+                            const tProj = traveler.mint({ from: 'pm-1', slots: { title: 'project-x' } });
+                            const repP = carriers.carry(tProj, {
+                                template: [
+                                    { op: 'backend', part: 'api' },
+                                    { op: 'api', part: 'routes' },
+                                    { op: 'framing', part: 'contract' },
+                                    { op: 'frontend', part: 'ui' },
+                                ],
+                                stations: [
+                                    { by: 'be-1', op: 'backend', part: { name: 'api', endpoints: 4 } },
+                                    { by: 'be-1', op: 'api', part: { name: 'routes', shell: 'express' } },
+                                    { by: 'fe-1', op: 'framing', part: { name: 'contract', types: 'ts' } },
+                                    { by: 'fe-1', op: 'frontend', part: { name: 'ui', pages: 3 } },
+                                ],
+                            });
+                            return {
+                                fourInOrder: !!(repP.ok && repP.built === true && repP.assembly && JSON.stringify(Object.keys(repP.assembly)) === JSON.stringify(['api', 'routes', 'contract', 'ui'])),
+                                letterVerifies: !!(repP.letter && traveler.verify(repP.letter).ok),
+                            };
+                        }
+                        if (templateCase === 'unfilled') {
+                            const repU = carriers.carry(traveler.mint({ from: 'x', slots: { title: 'y' } }), {
+                                template: [{ op: 'mold', part: 'rim' }, { op: 'cure', part: 'hub' }],
+                                stations: [{ by: 'a', op: 'mold', part: { name: 'rim', alloy: 'x' } }, { by: 'b', op: 'cure' }],
+                            });
+                            return {
+                                honestVerdict: !!(repU && repU.ok && repU.built === false),
+                                namesHub: !!(repU && JSON.stringify(repU.unfilled) === JSON.stringify(['hub'])),
+                            };
+                        }
+                        return { fault: 'unhandled template case' };
+                    });
+                    out.push(Object.assign({ op: 'template', templateCase }, rr));
                     continue;
                 }
                 if (o.op === 'codes') {
