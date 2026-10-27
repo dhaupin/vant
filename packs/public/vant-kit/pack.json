@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-kit",
+  "description": "web/kit contract discipline for vant run roots: the runtime-agnostic r/2 relay contract and tr/1 traveler contract graded from their kit sources - frozen vocabularies, the two-tier private-IP wall, the envelope shape laws, the traveler shape/ledger laws, and the schema-rizer's never-guess lift. In-process only (pure contract modules) - zero sockets.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

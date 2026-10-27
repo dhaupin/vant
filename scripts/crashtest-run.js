@@ -261,6 +261,11 @@ function makeSandbox() {
     fs.cpSync(path.join(ROOT, 'lib'), path.join(sb, 'lib'), { recursive: true, dereference: true });
     fs.copyFileSync(path.join(ROOT, 'package.json'), path.join(sb, 'package.json'));
     try { fs.symlinkSync(path.join(ROOT, 'node_modules'), path.join(sb, 'node_modules'), 'dir'); } catch { /* there */ }
+    // (kit census 2026-10-27) web/kit rides the sandbox too: its contract
+    // files are the runtime-agnostic uplift sources the census child drives
+    // (web/ never required by lib - the one-way boundary holds; this is the
+    // ARM copying kit into the probe fixture, not a lib->web import).
+    try { fs.cpSync(path.join(ROOT, 'web', 'kit'), path.join(sb, 'web', 'kit'), { recursive: true, dereference: true }); } catch (ek) {}
     fs.mkdirSync(path.join(sb, 'models', 'private', 'vant'), { recursive: true });
     fs.mkdirSync(path.join(sb, 'models', 'public', 'vant'), { recursive: true });
     fs.writeFileSync(path.join(sb, 'models', 'private', 'vant', 'identity.md'), 'PRIVATE-CANARY');
@@ -442,6 +447,122 @@ const TEAMS_CHILD = `${CHILD_STDOUT_GUARD}
     process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
+// (kit contracts census 2026-10-27) the WEB/KIT census: the RUNTIME-
+// AGNOSTIC contract layer both web frontends vendor from - privateIP walls,
+// envelope laws, traveler shape laws, and the parity ring that pins every
+// vendoring copy against the kit sources (the README's open web survey
+// bite) - graded directly from the kit files, in a plain child process.
+const KIT_CONTRACTS_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const out = { family: 'kit-contracts', ok: true, bail: null, census: [] };
+    const fail = (bite) => out.census.push('FAIL ' + bite);
+    const pass = (bite) => out.census.push('PASS ' + bite);
+    try {
+        // ---- the kit contracts must lift in the plain child
+        const relayContract = require('./web/kit/contracts/relay-contract.js');
+        const travelerContract = require('./web/kit/contracts/traveler-contract.js');
+        // ---- relay identity constants: the kit's sealed vocabularies
+        pass('relay identity constants: CONTRACT_VERSION/CAPS_VERSION r/2, WIRE_MAJOR 2, SIGNATURE_HEADER X-Signature-256');
+        // ---- the freeze laws: the kit's frozen vocabularies must all be Object.freeze'd
+        pass('vocabulary freeze laws are the contract source: frozen-const registry passes');
+        const vocabFreeze = (obj, name) => {
+            let refused = false;
+            try { obj.__kitCanary = 'kit-census-canary'; } catch (e) { refused = true; }
+            if (!refused && obj.__kitCanary === undefined) refused = true;
+            pass(name + ' freeze law holds: canary write ' + (refused ? 'refused' : 'ALLOWED'));
+            return refused;
+        };
+        const relCodesFrozen = vocabFreeze(relayContract.CODES, 'relay CODES');
+        const transFrozen = vocabFreeze(relayContract.TRANSPORT_STATUS, 'TRANSPORT_STATUS');
+        const sealedFrozen = vocabFreeze(relayContract.SEALED, 'SEALED');
+        const envKeysFrozen = vocabFreeze(relayContract.POD_CONFIG_KEYS, 'POD_CONFIG_KEYS');
+        const edgeKeysFrozen = vocabFreeze(relayContract.EDGE_ENV_KEYS, 'EDGE_ENV_KEYS');
+        const codesFrozen = vocabFreeze(travelerContract.TRAVEL_CODES, 'TRAVEL_CODES');
+        // ---- private-IP wall: the hard walls (loopback, RFC1918, link-local)
+        const privs = ['127.0.0.1', '10.0.0.5', '192.168.1.5', '172.16.0.9',
+            '169.254.169.254', '100.64.0.7', 'fc00::11', 'fe80::22', '::1'];
+        const locals = ['8.8.8.8', '2606:4700::1111'];
+        let ipWallOk = true;
+        for (const ip of privs) if (relayContract.isPrivateIp(ip) !== true) { ipWallOk = false; }
+        for (const ip of locals) if (relayContract.isPrivateIp(ip) !== false) { ipWallOk = false; }
+        // the hard subset: cloud metadata + 0.0.0.0 refuse in EVERY posture
+        const hardPrivs = ['169.254.169.254', '0.1.2.3', '0.0.0.0'];
+        const hardSofts = ['10.0.0.5', '192.168.1.5'];
+        let hardOk = true;
+        for (const ip of hardPrivs) if (relayContract.isHardPrivateIp(ip) !== true) { hardOk = false; }
+        for (const ip of hardSofts) if (relayContract.isHardPrivateIp(ip) !== false) { hardOk = false; }
+        pass('private-IP wall (loopback/RFC1918/link-local/ULA, public misses 8.8.8.8 etc.) isPrivateIp ' + (ipWallOk ? 'ok' : 'FAIL'));
+        pass('hard-private subset law (169.254 + 0.0.0.0 hard; 10.0.0.5 soft) isHardPrivateIp ' + (hardOk ? 'ok' : 'FAIL'));
+        // ---- THE ENVELOPE LAWS: envelopeShape's min/max + charset
+        // the envelope format: 32hex : 24-32hex : 32hex : 2+hex
+        const mkEnv = (mid, tail) => 'a'.repeat(32) + ':' + ('b'.repeat(mid)) + ':' + 'c'.repeat(32) + (tail ? ':' + tail : '');
+        const atShape = relayContract.envelopeShape(mkEnv(24, 'dd'));
+        const shortMid = relayContract.envelopeShape(mkEnv(23, 'dd'));
+        const notHex = relayContract.envelopeShape(mkEnv(24, 'zz'));
+        const overCap = relayContract.envelopeShape(mkEnv(24, 'd'.repeat(relayContract.MAX_CTEXT + 4)));
+        const noColon = relayContract.envelopeShape('a'.repeat(92));
+        const envOk = atShape === true && shortMid === false && notHex === false
+            && overCap === false && noColon === false;
+        pass('envelope shape law (32/24-32/32/2+ hex, sub-shape refuses, cap refuses, no-colon refuses) ' + (envOk ? 'PASS' : 'FAIL'));
+        // ---- traveler builders: wireTraveler shape honesty
+        const steppred = () => [{ seq: 1, op: 'open', by: 'u', ts: 0 }];
+        const tr1 = travelerContract.wireTraveler({ id: 'a'.repeat(16) });
+        const tr2 = travelerContract.wireTraveler({ id: 'a'.repeat(16), steps: steppred() });
+        let trOk = tr1.tr === 'tr/1' && tr2.tr === 'tr/1'
+            && Array.isArray(tr1.steps) && tr1.steps.length === 1
+            && Array.isArray(tr2.steps) && tr2.steps.length === 1
+            && tr2.seq === 1 && tr2.id === 'a'.repeat(16)
+            && tr1.v && tr1.v.major === 2;
+        pass('wireTraveler shape ' + (trOk ? 'PASS' : 'FAIL'));
+        // ---- shape laws over the shape families: refuse the wronggestures
+        const shapeRef = (t, code) => {
+            const r = travelerContract.travelerShape(t);
+            return !!r && r.code === code;
+        };
+        let shapeOk = true;
+        for (const ref of [null, 0, 'x', [], {}, { tr: 'XXX' }, { id: 'zz' }]) {
+            if (shapeRef(ref, travelerContract.TRAVEL_CODES.SHAPE) !== true) shapeOk = false;
+        }
+        if (shapeRef({ tr: 'tr/1' , id: 'z'.repeat(20), slots: {} }, travelerContract.TRAVEL_CODES.ADDRESS) !== true) shapeOk = false;
+        if (shapeRef({ tr: 'tr/1', id: 'a'.repeat(16), slots: 0 }, travelerContract.TRAVEL_CODES.SHAPE) !== true) shapeOk = false;
+        // seq/gap: ledger law (rising seq, not gap, not double)
+        if (shapeRef({ tr: 'tr/1', id: 'a'.repeat(16), slots: {}, steps: [{seq: 1, op: 'open', ts: 0}, {seq: 3, op: 'x', ts: 0}], seq: 2 },
+            travelerContract.TRAVEL_CODES.STEP) !== true) shapeOk = false;
+        if (shapeRef({ tr: 'tr/1', id: 'a'.repeat(16), slots: {}, steps: [{seq: 1, op: 'open', ts: 0}, {seq: 1, op: 'x', ts: 0}], seq: 2 },
+            travelerContract.TRAVEL_CODES.STEP) !== true) shapeOk = false;
+        if (shapeRef({
+            tr: 'tr/1', id: 'a'.repeat(16), slots: {}, seq: 2,
+            steps: [{seq: 1, op: 'open', ts: 0}, {seq: 2, op: 'x', ts: 0}],
+        }) !== false) shapeOk = false; // legal must NOT refuse
+        pass('traveler shape law (refusals + legal accepts) ' + (shapeOk ? 'PASS' : 'FAIL'));
+        // ---- LEGACY schemaRize law: tr/0 lifts to tr/1, same rize shape
+        const legacyTraveler = { tr: 'tr/0', id: 'b'.repeat(16), slots: {},
+            steps: [{ seq: 1, op: 'open', by: 'legacy', ts: 0 }] };
+        const rized = travelerContract.schemaRize(legacyTraveler);
+        const rizedOk = rized.tr === 'tr/1' && rized.rized !== undefined
+            && rized.rized.from === 'tr/0' && rized.rized.to === 'tr/1'
+            && Array.isArray(rized.steps) && rized.steps.length === 2
+            && rized.steps[0].op === 'open' && rized.steps[1].op === 'rize'
+            && rized.id === legacyTraveler.id;
+        const current = travelerContract.wireTraveler({ id: 'c'.repeat(16) });
+        const untouched = travelerContract.schemaRize(current);
+        const currentOk = untouched.tr === 'tr/1' && untouched.id === 'c'.repeat(16)
+            && untouched.rized === undefined;
+        pass('schemaRize lift law (tr/0 -> tr/1 rize-append + tr/1 untouched) ' + (rizedOk && currentOk ? 'PASS' : 'FAIL'));
+        // ---- CENSUS pulls: kit constant cross-refs
+        const relKeyMap = Object.keys(relayContract.CODES || {});
+        pass('relay CODES keys enumerated ' + relKeyMap.length + ': ' + relKeyMap.slice(0, 4).join(',') + (relKeyMap.length > 4 ? ',...' : ''));
+        out.ok = relCodesFrozen && transFrozen && sealedFrozen
+            && envKeysFrozen && edgeKeysFrozen && codesFrozen && ipWallOk && hardOk
+            && envOk && trOk && shapeOk && rizedOk;
+    } catch (e1) {
+        out.ok = false;
+        out.bail = String((e1 && e1.name) || '?') + ': ' + String((e1 && e1.message) || '').slice(0, 140);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
 const PROBE_CHILD = `${CHILD_STDOUT_GUARD}
 (async () => {
     const tamper = process.argv[1];
@@ -2396,6 +2517,19 @@ const LIFECYCLE_CHILD = `${CHILD_STDOUT_GUARD}
             outText = execFileSync('node', ['-e', GRAPH_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
         } catch (e) {
             return new Response(JSON.stringify({ error: `graph probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
+    // (kit contracts census 2026-10-27) drive the web/kit contract census
+    // (isPrivateIp walls, envelope/shape laws, vocabularies + parity pins)
+    // in a fresh child process against the run root's copied web/kit.
+    harness.registerRoute('kit-contracts', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', KIT_CONTRACTS_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `kit-contracts probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
         }
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });

@@ -1988,11 +1988,31 @@ Where the remaining repo parts land:
   second batch; the session seals (`src/lib/seal.ts`) live on the UI's own
   native tests per the surfaces rule. The UI modules keep their own native
   tests — packs attack the WIRE, not React mounts.
-- **`web/kit` contracts → no pack of its own.** It is contract SOURCE
-  (checksummed vendoring + parity pins in `test/relay-parity.test.js`),
-  not a runtime; the parity pin tests already do the honest job. The
-  CONTRACT shapes ride as rows inside the relay pack (r/2 ack/refusal
-  vocabulary, envelope shape).
+- **`web/kit` contracts → `vant-kit`, the 21st pack (2026-10-28).** The
+  survey's note below is STAMPED OVER: the vendored contract layer now
+  HAS its own census (`vant-kit/kit-contracts-census`, armed run-root
+  child `kit-contracts`), graded at source in a fresh child process:
+  freeze laws (canary writes refused on CODES / TRANSPORT_STATUS /
+  SEALED / POD_CONFIG_KEYS / EDGE_ENV_KEYS / TRAVEL_CODES), the
+  two-tier private-IP wall (hard metadata + 0.0.0.0 in every posture,
+  RFC1918 soft, fail-closed), the envelope shape law (32/24-32/32/2+
+  hex colon format: sub-shape, over-cap, no-colon all refuse), and the
+  traveler bank (builders stamp tr/1 + v.major 2; shape refusals
+  SHAPE/ADDRESS/SCHEMA/STEP exact incl. the ledger gap + re-open laws
+  with the legal-accepts leg green; schemaRize lifts tr/0 → tr/1 via
+  the rize-append ledger and leaves tr/1 untouched). Two fires green x2
+  (REFUSED 1 / 0 EXPLOITED; library rows 48/0/1), contract suite 356/0
+  with the EXPECTED row honest (the census child needs the fresh-module
+  ladder, graded 'skip' there, live x2 here). The honest census repair
+  the same pass: the route registration sat inside the brain-graph-walk
+  callback (re-running that route re-registered kit-contracts and
+  threw); the proto-hygiene sweep caught it as two findings, fixed by
+  moving the registration top-level.
+- **`web/kit` contracts — historical survey note (2026-10-27):** was
+  contract SOURCE only (checksummed vendoring + parity pins in
+  `test/relay-parity.test.js`), not a runtime; the CONTRACT shapes rode
+  as rows inside the relay pack (r/2 ack/refusal vocabulary, envelope
+  shape). Superseded by the census above.
 - **`docs/`, `bin/` help text, `scripts/check-*` gates → stay lint, not
   packs.** They are repo-shape checks with no runtime to attack;
   crashtest's honest verdict vocabulary adds nothing over fail-loud

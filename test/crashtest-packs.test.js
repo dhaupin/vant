@@ -1222,6 +1222,16 @@ const EXPECTED = {
     'vant-teams': {
         'teams-orgchart-census': 'skip',
     },
+    // (web/kit contracts census, ARMED 2026-10-28) both web frontends
+    // vendor the kit's contracts; the CONTRACT layer itself is graded at
+    // its source (frozen vocabularies, the two-tier private-IP wall, the
+    // envelope + traveler shape laws, the rizer's never-guess lift). The
+    // run-root census child needs the fresh-module ladder, so the contract
+    // grades it as an honest skip (the run fires grade it live x2, the
+    // README ledger pins the verdicts).
+    'vant-kit': {
+        'kit-contracts-census': 'skip',
+    },
     'vant-mcp': {
                 'tools-registry-census': 'skip',
 'unknown-tool-honesty': 'REFUSED',
