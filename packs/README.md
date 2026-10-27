@@ -1151,10 +1151,37 @@ families (surface/paths, mode+pipeline chain, aliases, neurons, stack
 laws incl. the axolotl fixture seeds, multi-format read/save, the
 format module) retired whole to these rows.
 
+### The evolution census (2026-10-27) — the lib inventory, largest cluster converted
+
+The lib inventory census (126 exported keys crossed against every row)
+named the brain's largest unmeasured cluster: the EVOLUTION-CONTEXT
+family (startEvolutionSession / recordChange / recordInsight /
+getEvolutionSession / getEvolutionChanges / getEvolutionInsights /
+endEvolutionSession / getEvolutionHistory — 8 keys, zero rows). The
+slice lands `brain-evolution-session-lifecycle` over a FIXED lifecycle
+census child (`brain-evolution` route, fresh module, sandbox tree):
+
+- a start seals the layer stack + EMPTY ledgers with the caller id
+- records land on BOTH the session and the side lists (2 changes + 1
+  insight verbatim, never dropped, never re-counted)
+- the list getters hand COPIES (a mutated return never touches the
+  lib's own state)
+- end seals endTime + a non-negative duration and ANSWERS the summary
+- the session lens resets to null after end; the history reads the
+  landed session back (lastSession + the last insights), with the
+  honest EMPTY history before the first ever session
+
+1/1 `REFUSED` ×2 deterministic (vant-brain live verdict 22/22 the same
+day). Remaining unmeasured clusters from the same census: geometry
+(geo*/resolveBrainPath, 6 keys), crate/dropbox (~15), backup images
+(3), the load-circuit breaker (5), remote/watch/cache (9),
+bootstrap/shutdown + framework config (7).
+
 ### Guests battery (same pass) — the lib lifecycle converts + the trim
 
 `public/vant-brain` reaches **19 rows** (9 security + 7 brain-unit + 3
-guest-lib rows). The guests rows drive lib/guests against a THROWAWAY
+guest-lib rows; the live 2026-10-27 verdict is 22/22 with the listing
+family row and the evolution census below). The guests rows drive lib/guests against a THROWAWAY
 brain's ledger in-process (containment contract graded; module-reload
 trick for the reload-survival leg):
 

@@ -784,6 +784,46 @@ const GRAPH_CHILD = `${CHILD_STDOUT_GUARD}
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
 
+// (brain battery, evolution slice 2026-10-27) the EVOLUTION-CONTEXT
+// probe: a FIXED lifecycle census over a fresh brain module in the
+// sandbox (start → record → auto-lists → copy law → end → history).
+// The evolution family was the brain's largest unmeasured cluster
+// (the lib inventory census): this child reports the neutral facts;
+// the pack row grades the laws.
+const EVOLUTION_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    delete require.cache[require.resolve('./lib/brain.js')];
+    try { require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canSpawn: true, canNetwork: true }); } catch (e0) {}
+    const brain = require('./lib/brain.js');
+    const out = { family: 'evolution', historyBefore: null, started: null, startedBrains: null,
+        changesListed: null, insightsListed: null, sessionCounted: null, copyLaw: null,
+        ended: null, sessionNullAfter: null, historyAfter: null, ok: true };
+    try {
+        out.historyBefore = await brain.getEvolutionHistory();
+        const s = brain.startEvolutionSession('fixture-session-9');
+        out.started = { id: (s && s.id) || null, changes: s && s.changes ? s.changes.length : null, insights: s && s.insights ? s.insights.length : null };
+        out.startedBrains = s && Array.isArray(s.brains) ? s.brains.slice(0, 6) : null;
+        brain.recordChange('write', { file: 'identity.md' });
+        brain.recordChange('append', { file: 'goals.md' });
+        brain.recordInsight('cycle reads config before writing', { tag: 'census' });
+        out.changesListed = brain.getEvolutionChanges().length;
+        out.insightsListed = brain.getEvolutionInsights().length;
+        out.sessionCounted = brain.getEvolutionSession() && brain.getEvolutionSession().changes ? brain.getEvolutionSession().changes.length : null;
+        const list = brain.getEvolutionChanges();
+        try { list.push('evil-row'); } catch (e2) {}
+        out.copyLaw = brain.getEvolutionChanges().length === 2;
+        const summary = await brain.endEvolutionSession();
+        out.ended = { id: (summary && summary.id) || null, hasEndTime: !!(summary && summary.endTime), durationOk: !!(summary && typeof summary.duration === 'number' && summary.duration >= 0) };
+        out.sessionNullAfter = brain.getEvolutionSession() === null;
+        out.historyAfter = await brain.getEvolutionHistory();
+    } catch (e1) {
+        out.ok = false;
+        out.err = String((e1 && e1.name) || '?') + ': ' + String(e1 && e1.message || '').slice(0, 140);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
 // Stones probe: the REAL seal → decode chain (lib/transform to/fromHorcrux
 // through lib/horcrux-safe.safeWriteHorcrux) in the sandbox, against a fresh
 // fixture brain tree. Scope mode seals a stone at the requested allowlist
@@ -1344,6 +1384,19 @@ function buildRoutes(sb, Harness) {
             outText = execFileSync('node', ['-e', TRUST_CHILD, JSON.stringify({ level: j && j.level ? String(j.level) : 'low' })], { cwd: sb, timeout: 30000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
         } catch (e) {
             return new Response(JSON.stringify({ error: `trust probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
+    // (brain battery, evolution slice 2026-10-27) the evolution-context
+    // census child: the family the lib inventory census flagged as the
+    // brain's largest unmeasured cluster.
+    harness.registerRoute('brain-evolution', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', EVOLUTION_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `evolution probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
         }
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });

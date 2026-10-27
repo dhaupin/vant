@@ -1158,6 +1158,11 @@ const EXPECTED = {
         // and the persisted state.json lives inside the sandbox's models/
         // tree (multi-brain layout included).
         'brain-neuron-state-seam': 'REFUSED',
+        // (evolution census, ARMED 2026-10-27) the evolution-context
+        // lifecycle: start/records/copies/end/history graded in a fresh
+        // module child; the family was the inventory census's largest
+        // unmeasured cluster.
+        'brain-evolution-session-lifecycle': 'skip',
     },
     'vant-crew': {
         'roster-quota-ceiling': 'REFUSED',

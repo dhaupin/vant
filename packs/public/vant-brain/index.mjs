@@ -951,6 +951,55 @@ export default {
         return { verdict: 'REFUSED', detail: 'the neuron state seam round-trips both saves (probe and probe-2 + n:2 read back through the state\'s own .neurons vocabulary), the write IS the ack (bare, never thrown), and the state file resolves under models/ (the roots pin already certifies the storage root\'s confinement)', tookRequests: 1 };
       },
     },
+
+    // ============ the evolution census (2026-10-27) ============
+    {
+      name: 'brain-evolution-session-lifecycle',
+      description: "the evolution-context family (the lib inventory census's largest unmeasured cluster): a start seals the stack + empty ledgers, records land on the session AND the own lists, the lists hand out COPIES (a mutated return never touches the lib's), end seals endTime + a non-negative duration and ANSWERS the summary, the session lens is honestly null after end, and the history reads the landed session back (honest empty before the first ever session)",
+      async run(harness) {
+        const r = await tryRun(harness, 'brain-evolution', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        if (r._absent) return skip('no brain-evolution route');
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return { verdict: 'REFUSED', skipped: true, detail: ('evolution probe unavailable: ' + (j && j.error || 'no payload')) };
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the census child faulted mid-lifecycle: ' + (j.err || 'unknown'), tookRequests: 1 };
+        const facts = [j.started, j.changesListed, j.insightsListed, j.sessionCounted, j.copyLaw, j.ended, j.sessionNullAfter, j.historyAfter];
+        if (facts.some((x) => x == null)) return { verdict: 'EXPLOITED', detail: 'the census answered short (a lifecycle leg is unservable): ' + JSON.stringify(j).slice(0, 140), tookRequests: 1 };
+        if (!j.started || j.started.id !== 'fixture-session-9' || j.started.changes !== 0 || j.started.insights !== 0) {
+          return { verdict: 'EXPLOITED', detail: 'start answered ' + JSON.stringify(j.started).slice(0, 120) + ' - a session opens with the caller id and EMPTY ledgers', tookRequests: 1 };
+        }
+        if (!Array.isArray(j.startedBrains) || !j.startedBrains.length) {
+          return { verdict: 'EXPLOITED', detail: 'start answered without the stack seal (brains) - the session records WHICH layered brains it spans', tookRequests: 1 };
+        }
+        if (j.changesListed !== 2 || j.insightsListed !== 1) {
+          return { verdict: 'EXPLOITED', detail: 'the lists answered ' + j.changesListed + '/' + j.insightsListed + ' - records land verbatim (2 changes, 1 insight), never dropped, never re-counted', tookRequests: 1 };
+        }
+        if (j.sessionCounted !== 2) {
+          return { verdict: 'EXPLOITED', detail: 'the session lens counted ' + j.sessionCounted + ' - records land ON THE SESSION too, not just the side lists', tookRequests: 1 };
+        }
+        if (j.copyLaw !== true) {
+          return { verdict: 'EXPLOITED', detail: 'mutating a returned list re-counted in the lib - the getters hand COPIES, never live state', tookRequests: 1 };
+        }
+        if (!j.ended || j.ended.id !== 'fixture-session-9' || j.ended.hasEndTime !== true || j.ended.durationOk !== true) {
+          return { verdict: 'EXPLOITED', detail: 'end answered ' + JSON.stringify(j.ended).slice(0, 120) + ' - the summary seals endTime and a non-negative duration', tookRequests: 1 };
+        }
+        if (j.sessionNullAfter !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the session lens stayed live after end - the lifecycle RESETS, a new session starts empty', tookRequests: 1 };
+        }
+        const before = j.historyBefore || {};
+        const after = j.historyAfter || {};
+        if (before.lastSession != null || (Array.isArray(before.recentInsights) && before.recentInsights.length)) {
+          return { verdict: 'EXPLOITED', detail: 'historyBefore was ' + JSON.stringify(before).slice(0, 110) + ' - a fresh fixture answers the honest EMPTY history', tookRequests: 1 };
+        }
+        if (!after.lastSession || after.lastSession.id !== 'fixture-session-9' || !Array.isArray(after.recentInsights) || after.recentInsights.length !== 1) {
+          return { verdict: 'EXPLOITED', detail: 'historyAfter read ' + JSON.stringify(after).slice(0, 130) + ' - the Landed session must be the history (lastSession + the last insights)', tookRequests: 1 };
+        }
+        return { verdict: 'REFUSED', detail: 'the evolution lifecycle holds end-to-end: start seals stack + empty, records land on both the session and the side lists, the list getters hand copies, end seals endTime + duration and answers the summary, the lens is null after, the history reads the landed session (honest empty before) - the largest unmeasured cluster is now measured', tookRequests: 1 };
+      },
+    },
   ],
 };
 
