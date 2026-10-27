@@ -997,8 +997,11 @@ const EXPECTED = {
         // (brain battery batch 2, 2026-10-26) the UNIT families convert
         // in-process from lib/brain + lib/format — self-contained rows, no
         // run-root arm, EARN strict REFUSED in BOTH phases; native
-        // test/brain.test.js (77 pins) stays green alongside under the
-        // reverse-verification law.
+        // test/brain.test.js stayed green through the landing cycles and
+        // then TRIMMED to its unmeasured seams on 2026-10-27 (29 pins: the
+        // state seam, registry, metrics, version, module integrations,
+        // pipeline-state shape, listing/dirs/saveNeurons — the pack rows
+        // don't grade those; the covered families retired to these rows).
         'brain-module-surface-and-paths': 'REFUSED',
         'brain-mode-switch-and-pipeline-chain': 'REFUSED',
         'brain-alias-mapping-law': 'REFUSED',

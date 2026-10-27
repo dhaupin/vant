@@ -1,8 +1,35 @@
 #!/usr/bin/env node
 /**
- * Brain Module Unit Tests
- * Real tests for brain.js core functionality
- * 
+ * Brain Module Unit Tests — TRIMMED (2026-10-27 retirement audit).
+ *
+ * The families now measured by the vant-brain pack rows RETIRE WHOLE to
+ * the pack (22 rows: 9 security + 7 brain-unit + 3 guests + 3 guests'
+ * unit; `scripts/crashtest-run.js --pack vant-brain`):
+ *   - module surface + paths (loadBrain/loadCorpus/getPipeline exist,
+ *     getBrainPath/getPublicPath, the corpus list)
+ *   - mode switch + the live pipeline chain (setMode, setPipeline,
+ *     add/remove middleware)
+ *   - alias law (alias/resolution/passthrough/listAliases)
+ *   - the neuron layer (brainNeurons shape, fireSynapse, predictNext,
+ *     attend, unknown-brain 0)
+ *   - stack laws (getStack includes the ACTIVE brain, pushBrain top,
+ *     switchBrain top+pointer, brainMode closed enum; the axolotl
+ *     fixture seeds retire with them)
+ *   - multi-format read/save + the format module (read/null-absence/
+ *     loadFile/saveFile; listFiles filtering + confinement)
+ *
+ * What stays native here per the reverse-verification law (the pack
+ * rows do not measure it):
+ *   - the neuron STATE seam (getNeuronState/saveNeuronState, sync +
+ *     async shapes)
+ *   - the handler registry (register/getHandler/listHandlers)
+ *   - metrics (getMetrics/resetMetrics) + version
+ *   - module-integrations (getModule for brain/storage/network/config,
+ *     brain.get through the public surface)
+ *   - getPipelineState's shape (object + chain)
+ *   - brain listing/hasBrain, brainDirs, loadStackCorpus,
+ *     brainSaveNeurons
+ *
  * Run: node test/brain.test.js
  */
 
@@ -11,7 +38,6 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const MODELS_PRIVATE = path.join(ROOT, 'models', 'private');
-const MODELS_PUBLIC = path.join(ROOT, 'models', 'public');
 
 // Test results
 const results = {
@@ -75,160 +101,7 @@ async function _runAsyncTests() {
     }
 }
 
-console.log('\n🧠 BRAIN MODULE TESTS\n');
-
-// ============================================
-// LOAD & BASIC
-// ============================================
-
-test('brain module loads', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    return { success: !!brain };
-});
-
-test('brain has loadBrain function', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    return { success: typeof brain.load === 'function' };
-});
-
-test('brain has loadCorpus function', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    return { success: typeof brain.loadCorpus === 'function' };
-});
-
-test('brain has getPipeline function', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    return { success: typeof brain.getPipeline === 'function' };
-});
-
-// ============================================
-// PATH GETTERS
-// ============================================
-
-test('getBrainPath returns valid path', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const bp = brain.getBrainPath();
-    return { success: typeof bp === 'string' && bp.length > 0 };
-});
-
-test('getPublicPath returns valid path', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const pp = brain.getPublicPath();
-    return { success: typeof pp === 'string' && pp.length > 0 };
-});
-
-// ============================================
-// MODE SWITCHING
-// ============================================
-
-test('getMode returns string', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const mode = brain.getMode();
-    return { success: typeof mode === 'string' };
-});
-
-test('setMode changes mode', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    brain.setMode('private');
-    const mode = brain.getMode();
-    brain.setMode('dual'); // reset
-    return { success: mode === 'private' };
-});
-
-// ============================================
-// PIPELINE
-// ============================================
-
-test('getPipeline returns array', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const pipeline = brain.getPipeline('dual');
-    return { success: Array.isArray(pipeline) };
-});
-
-test('setPipeline modifies chain', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    brain.setPipeline('test', ['sandbox', 'vaf']);
-    const pipeline = brain.getPipeline('test');
-    return { success: pipeline[0] === 'sandbox' && pipeline[1] === 'vaf' };
-});
-
-test('addMiddleware adds handler', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    brain.addMiddleware('dual', 'testHandler');
-    const pipeline = brain.getPipeline('dual');
-    return { success: pipeline.includes('testHandler') };
-});
-
-test('removeMiddleware removes handler', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    // Add then remove
-    brain.addMiddleware('dual', 'tempHandler');
-    brain.removeMiddleware('dual', 'tempHandler');
-    const pipeline = brain.getPipeline('dual');
-    return { success: !pipeline.includes('tempHandler') };
-});
-
-test('getPipelineState returns object', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const state = brain.getPipelineState();
-    return { success: typeof state === 'object' && state !== null };
-});
-
-// ============================================
-// BRAIN LOADING
-// ============================================
-
-asyncTest('loadCorpus returns array', async () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    // Async loadCorpus now properly awaits readDir promise
-    const corpus = await brain.loadCorpus();
-    return { success: Array.isArray(corpus) || corpus?.length > 0 };
-});
-
-asyncTest('hasBrain returns source or null', async () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const result = await brain.hasBrain('identity');
-    return { success: result === null || ['public', 'private'].includes(result) };
-});
-
-asyncTest('listBrains returns array', async () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const brains = await brain.listBrains();
-    return { success: Array.isArray(brains) };
-});
-
-// ============================================
-// ALIASES
-// ============================================
-
-test('alias creates mapping', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    // Check if alias function exists (some versions may not have removeAlias)
-    if (typeof brain.alias !== 'function') {
-        skip('alias function not available', 'may not exist in this version');
-        return;
-    }
-    brain.alias('test_alias', 'identity');
-    const resolved = brain.resolve('test_alias');
-    // Try to clean up if removeAlias exists
-    if (typeof brain.removeAlias === 'function') {
-        brain.removeAlias('test_alias');
-    }
-    return { success: resolved === 'identity' };
-});
-
-test('resolve handles non-alias', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const resolved = brain.resolve('nonexistent');
-    return { success: resolved === 'nonexistent' };
-});
-
-test('listAliases returns array or object', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const aliases = brain.listAliases();
-    // Returns array in some versions, object in others
-    return { success: Array.isArray(aliases) || typeof aliases === 'object' };
-});
+console.log('\n🧠 BRAIN MODULE TESTS (retired to packs; the unmeasured seams stay native)\n');
 
 // ============================================
 // STATE (sync)
@@ -400,7 +273,7 @@ asyncTest('saveNeuronState does not throw', async () => {
 });
 
 // ============================================
-// PIPELINE
+// PIPELINE STATE
 // ============================================
 
 test('getPipelineState returns object', () => {
@@ -416,200 +289,28 @@ test('getPipelineState has chain', () => {
 });
 
 // ============================================
-// MULTIBRAIN NEURONS (v0.8.6)
+// BRAIN LISTING / HAS-BRAIN / DIRS (unmeasured by the pack rows)
 // ============================================
 
-test('brainNeurons returns object', () => {
+asyncTest('hasBrain returns source or null', async () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const neurons = brain.brainNeurons();
-    return { success: typeof neurons === 'object' && neurons !== null };
+    const result = await brain.hasBrain('identity');
+    return { success: result === null || ['public', 'private'].includes(result) };
 });
 
-test('brainNeurons has synapses, attention, predictions', () => {
+asyncTest('listBrains returns array', async () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const neurons = brain.brainNeurons();
-    return { 
-        success: 'synapses' in neurons && 
-                 'attention' in neurons && 
-                 'predictions' in neurons 
-    };
-});
-
-test('brainNeurons has attention for brains in stack', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const _stack = brain.getStack();
-    const neurons = brain.brainNeurons();
-    // Should have attention for at least current brain
-    return { success: typeof neurons.attention === 'object' };
-});
-
-test('fireSynapse tracks brain access', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    // Fire some synapses
-    brain.fireSynapse('vant', 'nova');
-    brain.fireSynapse('vant', 'nova');
-    const synapses = brain.getSynapses();
-    return { success: synapses.vant && synapses.vant.nova > 0 };
-});
-
-test('predictNext returns brain name', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    // Fire synapse first
-    brain.fireSynapse('vant', 'nova');
-    const predicted = brain.predictNext('vant');
-    return { success: predicted === 'nova' || predicted === null };
-});
-
-test('attend sets attention score', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    brain.attend('test-brain', 0.85);
-    const attention = brain.getAttention('test-brain');
-    return { success: attention === 0.85 };
-});
-
-test('getAttention returns 0 for unknown brain', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const attention = brain.getAttention('nonexistent-brain-xyz');
-    return { success: attention === 0 };
-});
-
-test('brainSaveNeurons returns saving status', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const result = brain.brainSaveNeurons({ attention: { vant: 0.5 } });
-    return { success: 'saving' in result || 'error' in result };
-});
-
-// ============================================
-// MULTIBRAIN STACK
-// ============================================
-
-test('getStack returns array', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const stack = brain.getStack();
-    return { success: Array.isArray(stack) };
-});
-
-// (pass 89 — prime #112) Assert against the ACTIVE brain, never the
-// default name: deployments name brains anything (cairn, axolotl, …) and
-// this hardcoded 'vant' failed 1/77 on every non-default install.
-test('getStack includes the active brain', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const stack = brain.getStack();
-    const active = brain.getCurrentBrain() || brain.currentBrain() || 'vant';
-    return {
-        success: Array.isArray(stack) && stack.length > 0 && stack.includes(active),
-        error: `stack=${JSON.stringify(stack)} active=${active}`
-    };
-});
-
-test('currentBrain returns brain name', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const current = brain.currentBrain();
-    return { success: typeof current === 'string' };
-});
-
-// Axolotl coexistence: a second private brain sitting alongside vant.
-// models/private/ is gitignored (per-user runtime state), so these tests
-// self-seed the fixture: create-if-missing, never clobber existing content.
-const AXOLOTL_DIR = path.join(MODELS_PRIVATE, 'axolotl');
-
-function _seedAxolotlBrain() {
-    fs.mkdirSync(AXOLOTL_DIR, { recursive: true });
-    const seeds = {
-        'identity.md': '# Identity\n\nNAME: axolotl\nPURPOSE: Second brain coexisting with vant\n',
-        'goals.md': '# Goals\n\n- Coexist with the vant brain\n',
-        'lessons.md': '# Lessons\n',
-        'preferences.md': '# Preferences\n'
-    };
-    for (const [file, content] of Object.entries(seeds)) {
-        const p = path.join(AXOLOTL_DIR, file);
-        if (!fs.existsSync(p)) fs.writeFileSync(p, content);
-    }
-}
-
-test('axolotl brain directory exists', () => {
-    _seedAxolotlBrain();
-    return { success: fs.existsSync(AXOLOTL_DIR) };
-});
-
-test('axolotl brain has identity.md', () => {
-    _seedAxolotlBrain();
-    const id = path.join(AXOLOTL_DIR, 'identity.md');
-    return { success: fs.existsSync(id) };
-});
-
-test('axolotl brain has goals.md, lessons.md, preferences.md', () => {
-    _seedAxolotlBrain();
-    for (const f of ['goals.md', 'lessons.md', 'preferences.md']) {
-        if (!fs.existsSync(path.join(AXOLOTL_DIR, f))) {
-            return { success: false, error: `missing ${f}` };
-        }
-    }
-    return { success: true };
-});
-
-test('pushBrain(axolotl) succeeds and places axolotl at top of stack', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    try {
-        // Self-contained precondition: pushBrain() is a no-op for brains already
-        // in the stack, and the stack may be seeded from models/state.json.
-        // Remove first so this test controls its own starting position.
-        brain.removeBrain('axolotl');
-        brain.pushBrain('axolotl');
-        const after = brain.getStack();
-        if (after[0] !== 'axolotl') {
-            return { success: false, error: `top is ${after[0]}, not axolotl` };
-        }
-        if (!after.includes('axolotl')) {
-            return { success: false, error: 'axolotl not in stack' };
-        }
-        return { success: true };
-    } finally {
-        try { brain.removeBrain('axolotl'); } catch (e) {}
-    }
-});
-
-test('brain.brainMode accepts silo/shared/governance and rejects bogus', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const before = brain.brainMode();
-    try {
-        for (const m of ['silo', 'shared', 'governance']) {
-            brain.brainMode(m);
-            if (brain.brainMode() !== m) return { success: false, error: `${m} not set` };
-        }
-        try {
-            brain.brainMode('bogus');
-            return { success: false, error: 'expected throw for invalid mode' };
-        } catch (e) {
-            // expected
-        }
-        return { success: true };
-    } finally {
-        brain.brainMode(before);
-    }
-});
-
-test('switchBrain(axolotl) moves axolotl to top and updates currentBrain', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const before = brain.currentBrain();
-    try {
-        const result = brain.switchBrain('axolotl');
-        if (result.brain !== 'axolotl') return { success: false, error: 'switchBrain did not return axolotl' };
-        if (brain.currentBrain() !== 'axolotl') return { success: false, error: 'currentBrain not axolotl' };
-        if (brain.getStack()[0] !== 'axolotl') return { success: false, error: 'stack top not axolotl' };
-        return { success: true };
-    } finally {
-        brain.switchBrain(before);
-    }
+    const brains = await brain.listBrains();
+    return { success: Array.isArray(brains) };
 });
 
 test('brainDirs returns object with public/private', () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
     const dirs = brain.brainDirs();
-    return { 
-        success: typeof dirs === 'object' && 
-                 'public' in dirs && 
-                 'private' in dirs 
+    return {
+        success: typeof dirs === 'object' &&
+                 'public' in dirs &&
+                 'private' in dirs
     };
 });
 
@@ -625,144 +326,10 @@ test('brainList returns array', () => {
     return { success: Array.isArray(list) };
 });
 
-// ============================================
-// MULTI-FORMAT BRAIN TESTS (v0.8.6)
-// ============================================
-
-test('brain.read function exists', () => {
+test('brainSaveNeurons returns saving status', () => {
     const brain = require(path.join(ROOT, 'lib', 'brain'));
-    return { success: typeof brain.read === 'function' };
-});
-
-test('brain.loadFile function exists', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    return { success: typeof brain.loadFile === 'function' };
-});
-
-test('brain.saveFile function exists', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    return { success: typeof brain.saveFile === 'function' };
-});
-
-asyncTest('brain.read returns object or null', async () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const result = await brain.read('identity', { type: 'public' });
-    // Should return { data, content, format, source } or null
-    return { 
-        success: result === null || 
-                 (typeof result === 'object' && 'content' in result) 
-    };
-});
-
-asyncTest('brain.read handles non-existent brain', async () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const result = await brain.read('nonexistent-brain-xyz', { type: 'public' });
-    return { success: result === null };
-});
-
-asyncTest('brain.loadFile works with valid path', async () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    // Try to load from a valid brain file - use relative path to pass security check
-    const testPath = 'models/public/vant/identity.md';
-    if (!fs.existsSync(testPath)) {
-        skip('test brain file not found', 'fixture missing');
-        return;
-    }
-    const result = await brain.loadFile(testPath);
-    // Result has { data, format, error } structure
-    return result && result.data ? true : { error: result?.error || 'no data' };
-});
-
-asyncTest('brain.saveFile creates file', async () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    // Use relative path to pass security check
-    const testPath = '.agent_tmp/test-brain-file.md';
-    const testDir = path.dirname(testPath);
-    if (!fs.existsSync(testDir)) {
-        fs.mkdirSync(testDir, { recursive: true });
-    }
-    const result = await brain.saveFile(testPath, { content: '# Test' }, { format: 'md' });
-    // Clean up
-    if (fs.existsSync(testPath)) {
-        fs.unlinkSync(testPath);
-    }
-    // Result has { success: true } or { error: '...' }
-    return result && result.success === true ? true : { error: result?.error || 'save failed' };
-});
-
-// ============================================
-// FORMAT MODULE TESTS
-// ============================================
-
-test('format.listFiles function exists', () => {
-    const format = require(path.join(ROOT, 'lib', 'format'));
-    return { success: typeof format.listFiles === 'function' };
-});
-
-test('format.getBrainName function exists', () => {
-    const format = require(path.join(ROOT, 'lib', 'format'));
-    return { success: typeof format.getBrainName === 'function' };
-});
-
-test('format.listFiles returns array', () => {
-    const format = require(path.join(ROOT, 'lib', 'format'));
-    const result = format.listFiles(MODELS_PUBLIC);
-    return { success: Array.isArray(result) };
-});
-
-test('format.listFiles filters by extension', () => {
-    const format = require(path.join(ROOT, 'lib', 'format'));
-    const result = format.listFiles(MODELS_PUBLIC, ['.md']);
-    // Should only include .md files
-    const allMd = result.every(f => f.endsWith('.md'));
-    return { success: allMd || result.length === 0 };
-});
-
-test('format.getBrainName strips extensions', () => {
-    const format = require(path.join(ROOT, 'lib', 'format'));
-    
-    const tests = [
-        { input: 'identity.md', expected: 'identity' },
-        { input: 'notes.json', expected: 'notes' },
-        { input: 'data.yaml', expected: 'data' },
-        { input: 'readme', expected: 'readme' }, // no ext
-    ];
-    
-    let passed = true;
-    for (const { input, expected } of tests) {
-        const result = format.getBrainName(input);
-        if (result !== expected) {
-            passed = false;
-            break;
-        }
-    }
-    return { success: passed };
-});
-
-test('format.DEFAULT_EXTENSIONS includes expected formats', () => {
-    const format = require(path.join(ROOT, 'lib', 'format'));
-    const exts = format.DEFAULT_EXTENSIONS;
-    return { 
-        success: exts.includes('.md') && 
-                 exts.includes('.json') &&
-                 exts.includes('.yaml') 
-    };
-});
-
-// SECURITY TESTS
-test('format.listFiles prevents path traversal', () => {
-    const format = require(path.join(ROOT, 'lib', 'format'));
-    // Try to escape with ..
-    const result = format.listFiles('/etc/../' + MODELS_PUBLIC);
-    // Should return empty or safe results, not /etc/passwd
-    const hasEtc = result.some(f => f.startsWith('/etc'));
-    return { success: !hasEtc };
-});
-
-test('format.listFiles handles invalid path', () => {
-    const format = require(path.join(ROOT, 'lib', 'format'));
-    const result = format.listFiles('/nonexistent/path/xyz');
-    return { success: Array.isArray(result) && result.length === 0 };
+    const result = brain.brainSaveNeurons({ attention: { vant: 0.5 } });
+    return { success: 'saving' in result || 'error' in result };
 });
 
 // ============================================
@@ -772,7 +339,7 @@ test('format.listFiles handles invalid path', () => {
 async function _printResults() {
     // Run async tests first
     await _runAsyncTests();
-    
+
     console.log('\n--- RESULTS ---\n');
     console.log(`  Passed:  ${results.passed}`);
     console.log(`  Failed:  ${results.failed}`);

@@ -1002,8 +1002,17 @@ pattern, no routes, no arm) and grade the module's OWN surface:
   stripping, DEFAULT_EXTENSIONS set, listing confinement (no /etc
   escape), invalid path → EMPTY list
 
-16/16 `REFUSED` ×2 deterministic; native `test/brain.test.js` 77/77
-green alongside under the reverse-verification law.
+16/16 `REFUSED` ×2 deterministic. RETIREMENT AUDIT (2026-10-27): with
+the brain battery's two batches plus the guests rows measuring the
+whole surface the unit suite pins, `test/brain.test.js` (77 pins)
+trimmed to its UNMEASURED seams — the state seam (getNeuronState/
+saveNeuronState sync+async), the handler registry, metrics, version,
+module integrations (`getModule`/`get`), `getPipelineState`'s shape,
+`hasBrain`/`listBrains`/`brainDirs`/`loadStackCorpus` and
+`brainSaveNeurons`: 29 native pins, 29/29 green — the covered
+families (surface/paths, mode+pipeline chain, aliases, neurons, stack
+laws incl. the axolotl fixture seeds, multi-format read/save, the
+format module) retired whole to these rows.
 
 ### Guests battery (same pass) — the lib lifecycle converts + the trim
 

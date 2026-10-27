@@ -437,7 +437,11 @@ export default {
     // own surface + stack laws. NO routes, NO arm: straight lib drives
     // (loadLib house pattern). Stack/mode mutations always restore in
     // finally; the axolotl fixture self-seeds (create-if-missing) the
-    // same way the native pins do.
+    // same way the native pins do. RETIREMENT (2026-10-27): the covered
+    // families retired whole to these rows and test/brain.test.js
+    // trimmed to its UNMEASURED seams (state, registry, metrics, version,
+    // module-integrations, pipeline-state, listing/dirs, brainSaveNeurons
+    // - 29 native pins, 29/29 green).
 
     {
       name: 'brain-module-surface-and-paths',
