@@ -202,7 +202,7 @@ function shapeResults(results, name) {
   const arr = (results && Array.isArray(results.results)) ? results.results : (Array.isArray(results) ? results : []);
   const hit = arr.find((r) => r && r.name === name);
   if (!hit || hit.status === 'THREW') return null;
-  return { status: hit.status, body: parseJson(hit.bodyText) };
+  return { status: hit.status, body: parseJson(hit.bodyText), headers: hit.headers || null };
 }
 
 export default {
@@ -883,5 +883,100 @@ export default {
         });
       },
     },
+  // ------------------------------------------------------------------
+  // Edge-family deepening (2026-10-27): the caps page + the SSE
+  // stream-through joined the edge face (web/relay/functions/api/r/
+  // {capabilities,events}.ts) after the edge slice landed - the packs go
+  // WITH the thing they attack. Both drive the REAL handlers through the
+  // same relay-edge probe child (strip types, WHATWG Request/Response,
+  // WebCrypto), no sockets, no wall clock in a verdict.
+  // ------------------------------------------------------------------
+
+    {
+      name: 'edge-caps-posture-page',
+      description: "the caps page is the PUBLIC posture proof: posture OFF answers the pod-parity raw 404 (error 'Not Found', no CORS inflation), posture ON answers 200 with the solo-relay flavor, the r/2 surface named (both doors), and CORS open WIDE only on this secrets-free route - the x-content-type-options no-sniff rides both, the gate secret arrives on NO wire shape",
+      async run(harness) {
+        const shapes = [
+          { name: 'caps-off', env: {}, edge: 'capabilities', request: { url: 'https://relay-edge.local/api/r/capabilities', method: 'GET', headers: {} } },
+          { name: 'caps-on', env: ENV_ON, edge: 'capabilities', request: { url: 'https://relay-edge.local/api/r/capabilities', method: 'GET', headers: { origin: 'https://some-dashboard.example' } } },
+        ];
+        const r = await probeEdge(harness, shapes);
+        if (!r) return skip('relay-edge not armed');
+        const off = shapeResults(r, 'caps-off');
+        const on = shapeResults(r, 'caps-on');
+        if (!off || !on) return { verdict: 'EXPLOITED', detail: 'the caps shapes did not answer: ' + JSON.stringify(r).slice(0, 140), tookRequests: 1 };
+        if (off.status === 'THREW') return { verdict: 'EXPLOITED', detail: 'the caps child threw: ' + (off.body && off.body.error || '').slice(0, 120), tookRequests: 1 };
+        if (!(off.status === 404 && off.body && off.body.error === 'Not Found')) {
+          return { verdict: 'EXPLOITED', detail: 'posture OFF answered ' + off.status + ' - the unmounted route must match the pod parity raw 404', tookRequests: 2 };
+        }
+        if (on.status === 'THREW') return { verdict: 'EXPLOITED', detail: 'the live caps child threw: ' + (on.body && on.body.error || '').slice(0, 120), tookRequests: 3 };
+        if (on.status !== 200 || !(on.body && on.body.flavor === 'solo-relay')) {
+          return { verdict: 'EXPLOITED', detail: 'a live posture answered ' + JSON.stringify({ status: on.status, flavor: on.body && on.body.flavor }) + ' probeRide=' + JSON.stringify(r).slice(0, 400), tookRequests: 3 };
+        }
+        const caps = JSON.stringify(on.body);
+        if (!caps.includes('/api/r/events') || !caps.includes('POST /relay')) {
+          return { verdict: 'EXPLOITED', detail: 'the caps page did not name the r/2 surface (both doors)', tookRequests: 4 };
+        }
+        if (caps.includes(GATE_SECRET)) {
+          return { verdict: 'EXPLOITED', detail: 'THE CAPS PAGE CARRIES THE GATE SECRET - secrets never ride a caps page', tookRequests: 4 };
+        }
+        if (!(on.headers && on.headers.cors === '*')) {
+          return { verdict: 'EXPLOITED', detail: 'the caps page did not open its wildcard CORS (the posture proof must be cross-origin readable): ' + JSON.stringify(on.headers), tookRequests: 4 };
+        }
+        if (!(on.headers && on.headers.nosniff === 'nosniff' && off.headers && off.headers.nosniff === 'nosniff')) {
+          return { verdict: 'EXPLOITED', detail: 'the no-sniff hardening dropped on a caps answer: ' + JSON.stringify({ on: on.headers, off: off.headers }), tookRequests: 4 };
+        }
+        return { verdict: 'REFUSED', detail: 'the caps page is a honest proof: raw-404 parity off posture, solo-relay 200 with both doors named and ZERO secrets, wildcard CORS only on the secrets-free route, no-sniff everywhere', tookRequests: 4 };
+      },
+    },
+
+    {
+      name: 'edge-events-gate-ladder',
+      description: "the SSE stream-through's GET gate is the FULL r/2 ladder re-run over DECLARATIONS: posture off = raw 404; enabled without a secret = typed 503 fail-closed; a missing signature, a WRONG signature and a STALE ts (signed but outside the freshness window) all answer 401 typed; and the declared target rides the same origin guard - a plaintext hop 403s, the metadata IP 403s, a traversal path 400s - the bytes never pipe through a refusal",
+      async run(harness) {
+        const now = Date.now();
+        const staleTs = now - (11 * 60 * 1000);
+        // the edge signs url.search VERBATIM - and url.search carries the
+        // LEADING '?'. The signed bytes are the full search string.
+        const q = (origin, path, ts) => '?origin=' + origin + '&path=' + path + '&ts=' + ts;
+        const sig = (s) => createHmac('sha256', GATE_SECRET).update(s, 'utf8').digest('hex');
+        const EV = 'https://relay-edge.local/api/r/events';
+        const mk = (name, env, search, headers) => ({ name, env, edge: 'events', request: { url: EV + search, method: 'GET', headers: headers || {} } });
+        const sigHeader = (val) => ({ 'x-signature-256': val });
+        const shapes = [
+          mk('ev-off', {}, q('https://stream.example', '/feed', now)),
+          mk('ev-nosecret', { VANT_RELAY_ENABLED: '1' }, q('https://stream.example', '/feed', now)),
+          mk('ev-nosig', ENV_ON, q('https://stream.example', '/feed', now)),
+          mk('ev-badsig', ENV_ON, q('https://stream.example', '/feed', now), sigHeader('f'.repeat(64))),
+          mk('ev-stale', ENV_ON, q('https://stream.example', '/feed', staleTs), sigHeader(sig(q('https://stream.example', '/feed', staleTs)))),
+          mk('ev-http', ENV_ON, q('http://stream.example', '/feed', now), sigHeader(sig(q('http://stream.example', '/feed', now)))),
+          mk('ev-metadata', ENV_ON, q('https://169.254.169.254', '/latest/meta-data', now), sigHeader(sig(q('https://169.254.169.254', '/latest/meta-data', now)))),
+          mk('ev-badpath', ENV_ON, q('https://stream.example', '/../etc/passwd', now), sigHeader(sig(q('https://stream.example', '/../etc/passwd', now)))),
+        ];
+        const r = await probeEdge(harness, shapes);
+        if (!r) return skip('relay-edge not armed');
+        const get = (n) => shapeResults(r, n);
+        const shot = (c, why, n) => ({ verdict: 'EXPLOITED', detail: why + ' [' + n + ']: ' + JSON.stringify(c).slice(0, 150), tookRequests: n === 'ev-stale' ? 5 : 8 });
+        const off = get('ev-off');
+        if (off.status === 'THREW') return shot(off, 'the events child threw', 'ev-off');
+        if (!(off.status === 404 && off.body && off.body.error === 'Not Found')) return shot(off, 'a disabled relay served its events door (raw-404 parity broken)', 'ev-off');
+        const nosec = get('ev-nosecret');
+        if (!(nosec.status === 503 && JSON.stringify(nosec.body || {}).includes('VANT_RELAY_GATE_KEY'))) return shot(nosec, 'a gated-but-secretless relay served/answered oddly (must be typed 503 fail-closed)', 'ev-nosecret');
+        const nosig = get('ev-nosig');
+        if (!(nosig.status === 401 && JSON.stringify(nosig.body || {}).includes('X-Signature-256'))) return shot(nosig, 'a signature-less declaration answered ' + JSON.stringify(nosig && nosig.status), 'ev-nosig');
+        const badsig = get('ev-badsig');
+        if (!(badsig.status === 401 && JSON.stringify(badsig.body || {}).includes('Invalid signature'))) return shot(badsig, 'a WRONG signature verified or answered oddly', 'ev-badsig');
+        const stale = get('ev-stale');
+        if (!(stale.status === 401 && JSON.stringify(stale.body || {}).includes('Stale declaration'))) return shot(stale, 'a stale declaration (outside the freshness window) verified or answered oddly', 'ev-stale');
+        const httpOrig = get('ev-http');
+        if (!(httpOrig.status === 403)) return shot(httpOrig, 'a PLAINTEXT declared origin passed the edge guard', 'ev-http');
+        const meta = get('ev-metadata');
+        if (!(meta.status === 403)) return shot(meta, 'the metadata IP passed the edge origin guard', 'ev-metadata');
+        const badp = get('ev-badpath');
+        if (!(badp.status === 400)) return shot(badp, 'a traversal path passed the declared-path guard', 'ev-badpath');
+        return { verdict: 'REFUSED', detail: 'the r/2 GET ladder holds over declarations: raw-404 parity, typed 503 secretless, missing/wrong/stale sigs all 401 typed, and the origin guards refuse the plaintext, metadata and traversal shapes - the bytes never pipe through a refusal', tookRequests: 8 };
+      },
+    },
   ],
 };
+

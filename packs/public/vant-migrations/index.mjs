@@ -10,8 +10,11 @@
  * booleans; the seed layout is deterministic.
  *
  * House laws: one decision per attack, `skipped: true` marks honest
- * absence; the native suite (test/migrations.test.js) stays green
- * alongside under the reverse-verification law.
+ * absence. RETIREMENT (2026-10-27, slice 4): with the last four native
+ * trim-survivor pins converted (both-scope import + fresh dual reads,
+ * the --brain-name naming law, the clean-layout CLI dry-run),
+ * test/migrations.test.js retired WHOLE to these rows - the coverage
+ * lives in the pack now.
  */
 
 const skip = (why) => ({ verdict: 'REFUSED', skipped: true, detail: `not armed: ${why}` });
@@ -259,6 +262,59 @@ export default {
           return rowErr(`migrated content read fallback=${JSON.stringify(r.fallback)} explicitPublic=${JSON.stringify(r.explicitPublic)} - the USER must see their old brain after import`, [{ op: 'legacy', task: 'readfallback' }]);
         }
         return { verdict: 'REFUSED', detail: 'plain and explicit-public reads both reach the migrated brain content on a legacy tree', tookRequests: 1 };
+      },
+    },
+
+    // ============ slice 4 (2026-10-27): the trim-survivor conversions ============
+    // The last four native pins of test/migrations.test.js convert onto
+    // the same arm (pure main-style shape for the import family, the
+    // clean single-stack layout for the CLI dry-run law) - with the
+    // whole suite covered, the file retires to these rows.
+
+    {
+      name: 'migrations-legacy-both-scopes-and-fresh-reads',
+      description: 'the main-style TWO-scope tree imports WHOLE: one user, public brain flat AND private brain flat with a private state/ subdir - both land under the SAME chosen name (private journal nested, private state carried, public identity nested, the state store synthesized to stack on the chosen name, NOT hijacked by the dropfiles step), and a FRESH process reads BOTH scopes through the dual-mode reader',
+      async run(harness) {
+        const ride = await probeMigration(harness, [{ op: 'legacy', task: 'bothscope' }]);
+        if (!ride) return rowSkip('migration-fixture not armed');
+        const r = ride.get('legacy');
+        if (!r) return rowErr('the both-scope probe failed to answer', [{ op: 'legacy', task: 'bothscope' }]);
+        if (r.fault) return rowErr('the both-scope probe faulted: ' + r.fault, [{ op: 'legacy', task: 'bothscope' }]);
+        const legs = { privJournal: 'the PRIVATE journal did not land nested under the chosen name', privState: 'the private state/ subdir did not carry (byte content lost)', pubId: 'the PUBLIC identity did not land in the same chosen name', stackRight: 'state.json did not synthesize stack on the chosen name (the dropfiles step must not hijack the store)', freshPriv: 'a FRESH process could not read the PRIVATE scope', freshPub: 'a FRESH process could not read the PUBLIC scope' };
+        for (const [k, why] of Object.entries(legs)) {
+          if (r[k] !== true) return rowErr(why + ` (${k})`, [{ op: 'legacy', task: 'bothscope' }]);
+        }
+        return { verdict: 'REFUSED', detail: 'both scopes import under ONE chosen name (journal + state subdir carried, public nested, stack synthesized), and a fresh process dual-reads BOTH scopes', tookRequests: 2 };
+      },
+    },
+
+    {
+      name: 'migrations-legacy-brain-name-naming-law',
+      description: 'the importer honors its naming parameter: a legacy tree migrated with a CHOSEN brain name nests the imported content under that name (identity lands in models/public/<chosen>/) and the synthesized stack points at it - never a default-named dir',
+      async run(harness) {
+        const ride = await probeMigration(harness, [{ op: 'legacy', task: 'naming' }]);
+        if (!ride) return rowSkip('migration-fixture not armed');
+        const r = ride.get('legacy');
+        if (!r) return rowErr('the naming probe failed to answer', [{ op: 'legacy', task: 'naming' }]);
+        if (r.fault) return rowErr('the naming probe faulted: ' + r.fault, [{ op: 'legacy', task: 'naming' }]);
+        if (r.novaNested !== true) return rowErr('the imported identity did NOT nest under the chosen name', [{ op: 'legacy', task: 'naming' }]);
+        if (r.stackRight !== true) return rowErr('the synthesized stack did not point at the chosen name', [{ op: 'legacy', task: 'naming' }]);
+        return { verdict: 'REFUSED', detail: 'the chosen name wins: content nests under it, stack points at it', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'migrations-cli-clean-dryrun',
+      description: 'the clean-layout CLI law: an UP-TO-DATE install answers the shipped `bin/migrate.js --dry-run` with NOTHING pending at exit 0 - the CLI tells the truth about a modern single-stack layout instead of inventing work',
+      async run(harness) {
+        const ride = await probeMigration(harness, [{ op: 'dryrunclean', legacy: 'clean' }]);
+        if (!ride) return rowSkip('migration-fixture not armed');
+        const r = ride.get('dryrunclean');
+        if (!r) return rowErr('the clean-dry-run probe failed to answer', [{ op: 'dryrunclean', legacy: 'clean' }]);
+        if (r.fault) return rowErr('the clean-dry-run probe faulted: ' + r.fault, [{ op: 'dryrunclean', legacy: 'clean' }]);
+        if (r.exitZero !== true) return rowErr('the CLI dry-run did NOT exit 0 on an up-to-date layout', [{ op: 'dryrunclean', legacy: 'clean' }]);
+        if (r.nothingPending !== true) return rowErr('the CLI dry-run invented work on a clean layout (or said nothing at all)', [{ op: 'dryrunclean', legacy: 'clean' }]);
+        return { verdict: 'REFUSED', detail: 'up-to-date layout: the shipped CLI dry-run answers nothing-pending at exit 0', tookRequests: 1 };
       },
     },
 

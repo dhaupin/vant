@@ -32,7 +32,6 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { execFileSync } = require('child_process');
 const { pathToFileURL } = require('url');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -407,24 +406,40 @@ const RELAY_CHILD = `
     })();
     const shapes = Array.isArray(spec.shapes) ? spec.shapes : [];
     const results = [];
-    let mod = null;
+    // (2026-10-27 Edge deepening) NAMED edge doors: spec.handlers carries
+    // { key: { path } } - each module's go functions are picked per SHAPE
+    // via shape.edge (default 'relay') and by method (GET -> onRequestGet,
+    // otherwise onRequestPost). The single spec.handlerPath keeps loading
+    // into hs.relay for back-compat.
+    const hs = { relay: null };
     try {
-        // the handler path rides the SPEC argv: heredoc children stay
-        // interpolation-free (this child is plain JS written verbatim)
-        const handlerPath = String(spec.handlerPath || '').slice(0, 400);
-        if (!handlerPath) throw new Error('relay spec missing handlerPath');
-        mod = await import('file:///' + handlerPath.split(String.fromCharCode(92)).join('/'));
+        const relPath = String(spec.handlerPath || '').slice(0, 400);
+        if (relPath) hs.relay = await import('file:///' + relPath.split(String.fromCharCode(92)).join('/'));
     } catch (e0) {
         process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ error: 'relay handler import failed: ' + e0.name + ': ' + e0.message }) + '>>END');
         return;
     }
-    const h = mod.onRequestPost;
+    const handlers = (spec.handlers && typeof spec.handlers === 'object') ? spec.handlers : null;
+    if (handlers) {
+        for (const key of Object.keys(handlers)) {
+            try { hs[key] = await import('file:///' + String(handlers[key].path || '').slice(0, 400).split(String.fromCharCode(92)).join('/')); }
+            catch (e2) { hs[key] = null; }
+        }
+    }
     for (const shape of shapes) {
-        const row = { name: String(shape.name || '').slice(0, 60), status: null, bodyText: '' };
+        const row = { name: String(shape.name || '').slice(0, 60), status: null, bodyText: '', headers: {} };
         try {
-            const url = String(shape.request.url || 'https://relay-edge.local/api/r/relay');
+            const edgeKey = (shape.edge && hs[shape.edge]) ? String(shape.edge) : 'relay';
+            const edgeMod = hs[edgeKey];
+            if (!edgeMod) throw new Error('relay spec missing handler for ' + edgeKey);
+            const method = String(shape.request.method || (edgeKey === 'relay' ? 'POST' : 'GET')).toUpperCase();
+            const h = method === 'GET'
+                ? (edgeMod.onRequestGet || edgeMod.onRequestPost)
+                : (edgeMod.onRequestPost || edgeMod.onRequestGet);
+            if (typeof h !== 'function') throw new Error(edgeKey + ' has no ' + method + ' handler');
+            const url = String(shape.request.url || (edgeKey === 'relay' ? 'https://relay-edge.local/api/r/relay' : 'https://relay-edge.local/api/r/' + edgeKey));
             const init = {
-                method: String(shape.request.method || 'POST'),
+                method,
                 headers: shape.request.headers || {},
             };
             if (shape.request.body != null) init.body = String(shape.request.body);
@@ -438,7 +453,16 @@ const RELAY_CHILD = `
             };
             const res = await h(context);
             row.status = res.status;
-            row.bodyText = String(await res.text()).slice(0, 500);
+            // (2026-10-27) the caps page's posture prose runs past 500 -
+            // a truncated bodyText parses as NOTHING (unterminated string),
+            // so the cap rides 1600 now.
+            row.bodyText = String(await res.text()).slice(0, 1600);
+            // small honest header facts (nothing sensitive lives here)
+            row.headers = {
+                nosniff: res.headers.get('x-content-type-options') || null,
+                cors: res.headers.get('access-control-allow-origin') || null,
+                ct: res.headers.get('content-type') || null,
+            };
         } catch (e1) {
             row.status = 'THREW';
             row.bodyText = String(e1.name + ': ' + e1.message).slice(0, 200);
@@ -938,6 +962,9 @@ async function homeHandlers() {
         homeApi = {
             summary: (await import(pathToFileURL(path.join(dir, 'summary.js')).href)).onRequestGet,
             admin: (await import(pathToFileURL(path.join(dir, 'admin.js')).href)).onRequestPost,
+            // (2026-10-27 Edge deepening) the third door: the daily-sweep
+            // cron (scheduled.js - onScheduled + the wire-404 onRequest).
+            scheduled: (await import(pathToFileURL(path.join(dir, 'scheduled.js')).href)),
         };
     }
     return homeApi;
@@ -1368,6 +1395,33 @@ function buildRoutes(sb, Harness) {
         return new Response(text, { status: res.status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
     });
 
+    // (2026-10-27 Edge deepening) home-scheduled: the daily sweep's cron
+    // door (web/home/functions/api/status/scheduled.js). The envelope lets
+    // the row pick the posture: no DB binding = a SILENT no-op (undefined,
+    // no throw, no invented alert), the direct wire stays cron-only (the
+    // module's own onRequest answers 404 typed "scheduled only" with
+    // no-sniff), and over the fake D1 the sweep runs through the SAME
+    // engine the GET visitors ride (defaults seeded; per-endpoint probes
+    // never ride the verdict - their outcomes are the board's own input).
+    harness.registerRoute('home-scheduled', async () => {
+        const scheduled = (await homeHandlers()).scheduled;
+        const facts = { silentNoDb: null, seeded: null, wire404: null, wire404Body: null, nosniff: null, faultedWithDb: false };
+        facts.silentNoDb = (await scheduled.onScheduled({ env: {} })) === undefined;
+        const db = makeFakeD1();
+        try { await scheduled.onScheduled({ env: { DB: db } }); } catch (e) { facts.faultedWithDb = true; }
+        // the fake's return value is only { prepare, batch } - the store is
+        // the closure; seeding truth rides a COUNT query, like the wire does
+        let seeded = false;
+        try { const row = await db.prepare('SELECT COUNT(*) AS n FROM status_endpoints').first(); seeded = !!(row && Number(row.first ? row.first.n : row.n) > 0); } catch { seeded = false; }
+        facts.seeded = seeded;
+        const res = scheduled.onRequest(new Request('https://home-run-root.pages.dev/api/status/scheduled', { method: 'GET' }));
+        facts.wire404 = res.status === 404;
+        const text = await res.text();
+        facts.wire404Body = typeof text === 'string' && text.includes('scheduled only');
+        facts.nosniff = res.headers.get('x-content-type-options') === 'nosniff';
+        return jsonRes(facts, 200);
+    });
+
     // (2026-10-22) The last two pending oracles are REGISTERED now: every
     // vant-brain route contract is armed (trust-read + brain-graph-walk).
     // Absence remains the honest shape for any FUTURE unwired oracle: the
@@ -1771,12 +1825,28 @@ function buildRoutes(sb, Harness) {
         if (process.env.CRASHTEST_B0_DEBUG) process.stderr.write('[b0-relay] shapes=' + (shapes ? shapes.length : 'none') + ' j=' + (j ? 'obj' : 'null') + '\n');
         if (!shapes) return jsonRes({ error: 'shapes array required' }, 400);
         try {
+            // (2026-10-27 Edge deepening) the arm now carries NAMED edge
+            // handlers: the original r/2 POST face plus the caps page and
+            // the SSE stream-through (both GET-only). Shapes pick their
+            // door via shape.edge ('relay' default) so one ride can walk
+            // multiple doors.
             const out = execFileSync(process.execPath, ['--experimental-strip-types', RELAY_EDGE_CHILD_FILE], {
-                input: JSON.stringify({ shapes, handlerPath: path.join(ROOT, 'web', 'relay', 'functions', 'api', 'r', 'relay.ts') }),
+                input: JSON.stringify({
+                    shapes,
+                    handlerPath: path.join(ROOT, 'web', 'relay', 'functions', 'api', 'r', 'relay.ts'),
+                    handlers: {
+                        relay: { path: path.join(ROOT, 'web', 'relay', 'functions', 'api', 'r', 'relay.ts') },
+                        capabilities: { path: path.join(ROOT, 'web', 'relay', 'functions', 'api', 'r', 'capabilities.ts') },
+                        events: { path: path.join(ROOT, 'web', 'relay', 'functions', 'api', 'r', 'events.ts') },
+                    },
+                }),
                 encoding: 'utf8', timeout: 120000,
             });
             const m = out.match(/VANT_CT_JSON<<([\s\S]*?)>>END/);
-            if (process.env.CRASHTEST_B0_DEBUG) process.stderr.write('[b0-relay] child out len=' + out.length + ' marker=' + !!m + '\n');
+            if (process.env.CRASHTEST_B0_DEBUG) {
+                process.stderr.write('[b0-relay] child out len=' + out.length + ' marker=' + !!m + '\n');
+                if (m) { try { process.stderr.write('[b0-relay] rows=' + JSON.stringify(JSON.parse(m[1]).results).slice(0, 600) + '\n'); } catch (e3) { process.stderr.write('[b0-relay] marker parse failed: ' + e3.message + '\n'); } }
+            }
             if (!m) return jsonRes({ error: 'relay probe produced no marker', raw: String(out).slice(0, 200) }, 500);
             return jsonRes(JSON.parse(m[1]), 200);
         } catch (e) {
@@ -2201,7 +2271,12 @@ function buildRoutes(sb, Harness) {
                     // loader non-empty after the public wipe, so the
                     // corrupted verify would read TRUE and the withheld
                     // contract would look satisfied-by-lie.
-                    if (o.legacy !== 'clean' && !(o.task === 'clifail') && !(o.task === 'apply' && o.variant === 'sabotage')) {
+                    // (2026-10-27 conversions) the both-scope import + naming-law tasks need
+                    // the PURE main-style shape (makeLegacyMainFixture): a
+                    // private-vant dropfile or the axolotl-era artifacts would
+                    // add pending steps (and a stacked state.json would stop
+                    // legacy.multibrain-import from firing at all).
+                    if (o.legacy !== 'clean' && !(o.task === 'clifail') && !(o.task === 'apply' && o.variant === 'sabotage') && !(o.task === 'bothscope' || o.task === 'naming')) {
                         fs.mkdirSync(path.join(dir, '.agent_tmp'), { recursive: true });
                         fs.writeFileSync(path.join(dir, '.agent_tmp', 'escrow.json'), JSON.stringify({ budgets: { fixture: 5 } }));
                         fs.mkdirSync(path.join(dir, 'storage', 'myStuff'), { recursive: true });
@@ -2287,6 +2362,19 @@ function buildRoutes(sb, Harness) {
                             marker: o2.includes('MARKER:true'),
                             idempotent: o2.includes('IDEMPOTENT:true'),
                         });
+                        continue;
+                    }
+                    if (o.op === 'dryrunclean') {
+                        // (2026-10-27 conversion of the trim-survivor CLI pin)
+                        // the clean-layout CLI law: an UP-TO-DATE install
+                        // answers "nothing pending" at exit 0. The clean
+                        // fixture branch (o.legacy === 'clean') seeds the
+                        // modern single-stack layout; the shipped CLI against
+                        // it must report exactly that, exit 0, convert nothing.
+                        const p2 = spawnSync(process.execPath, [path.join(dir, 'bin', 'migrate.js'), '--dry-run'], { encoding: 'utf8', timeout: 30000, cwd: dir });
+                        out.push({ op: 'dryrunclean', ok: p2.status === 0,
+                            exitZero: p2.status === 0,
+                            nothingPending: /Nothing to migrate|No changes made/.test((p2.stdout || '') + (p2.stderr || '')) });
                         continue;
                     }
                     if (o.op === 'legacy') {
@@ -2392,6 +2480,72 @@ ${o.task === 'banner' ? '' : `    const out2 = await run();
                                 fallback: o2.includes('FALLBACK:true'), explicitPublic: o2.includes('EXPLICIT-PUBLIC:true') });
                             continue;
                         }
+                        if (o.task === 'bothscope') {
+                            // (2026-10-27 conversion of the trim-survivor pin)
+                            // one user, TWO scopes: private brain flat + a
+                            // private state/ subdir; public brain flat. Both
+                            // must land under the SAME chosen name, the
+                            // state store NOT hijacked by the dropfiles step
+                            // (which is why the import runs LAST), and a
+                            // FRESH process reads BOTH scopes after import.
+                            fs.mkdirSync(path.join(dir, 'models', 'private'), { recursive: true });
+                            fs.writeFileSync(path.join(dir, 'models', 'private', 'journal.md'), '# private journal');
+                            fs.mkdirSync(path.join(dir, 'models', 'private', 'state'), { recursive: true });
+                            fs.writeFileSync(path.join(dir, 'models', 'private', 'state', 'session.json'), '{"k":1}');
+                            fs.writeFileSync(path.join(dir, 'models', 'public', 'lessons2.md'), 'x');
+                            fs.writeFileSync(path.join(dir, 'models', 'public', 'goals2.md'), 'x');
+                            const p = probe(`
+                                const m = require(${MIG});
+                                await m.migrate({ brainName: 'mybrain' });
+                                const f = require('fs');
+                                console.log('PRIV-JOURNAL:' + f.readFileSync('models/private/mybrain/journal.md', 'utf8').includes('private journal'));
+                                console.log('PRIV-STATE:' + f.readFileSync('models/private/mybrain/state/session.json', 'utf8'));
+                                console.log('PUB-ID:' + f.readFileSync('models/public/mybrain/identity.md', 'utf8').includes('legacy user'));
+                                const st = JSON.parse(f.readFileSync('models/state.json', 'utf8'));
+                                console.log('STACK:' + JSON.stringify(st.stack));
+                            `);
+                            let fresh = '';
+                            if ((p.stdout || '').includes('PRIV-JOURNAL:true')) {
+                                const p2 = probe(`
+                                    const brain = require(${JSON.stringify(path.join(dir, 'lib', 'brain.js'))});
+                                    brain.setMode('dual');
+                                    const j = await brain.read('journal');
+                                    console.log('READ-PRIV:' + (j && /private journal/.test(j.content || '')));
+                                    const id = await brain.read('identity');
+                                    console.log('READ-PUB:' + (id && /legacy user/.test(id.content || '')));
+                                `);
+                                fresh = p2.stdout || '';
+                            }
+                            const o2 = (p.stdout || '') + fresh;
+                            out.push({ op: 'legacy', task: 'bothscope', ok: !p.error && !/PROBE-ERR/.test(o2),
+                                privJournal: o2.includes('PRIV-JOURNAL:true'),
+                                privState: o2.includes('PRIV-STATE:{"k":1}'),
+                                pubId: o2.includes('PUB-ID:true'),
+                                stackRight: o2.includes('STACK:["mybrain"]'),
+                                freshPriv: o2.includes('READ-PRIV:true'),
+                                freshPub: o2.includes('READ-PUB:true') });
+                            continue;
+                        }
+                        if (o.task === 'naming') {
+                            // (2026-10-27 conversion) the --brain-name law: the
+                            // IMPORTER honors the naming parameter - the imported
+                            // content nests under the CHOSEN name and the
+                            // synthesized stack points at it (never a default dir).
+                            fs.writeFileSync(path.join(dir, 'models', 'public', 'lessons2.md'), 'x');
+                            fs.writeFileSync(path.join(dir, 'models', 'public', 'goals2.md'), 'x');
+                            const p = probe(`
+                                const m = require(${MIG});
+                                await m.migrate({ brainName: 'nova' });
+                                const fsmod = require('fs');
+                                console.log('NOVA-NESTED:' + fsmod.existsSync('models/public/nova/identity.md'));
+                                console.log('NOVA-STACK:' + JSON.stringify(JSON.parse(fsmod.readFileSync('models/state.json', 'utf8')).stack));
+                            `);
+                            const o2 = p.stdout || '';
+                            out.push({ op: 'legacy', task: 'naming', ok: !p.error && !/PROBE-ERR/.test(o2),
+                                novaNested: o2.includes('NOVA-NESTED:true'),
+                                stackRight: o2.includes('NOVA-STACK:["nova"]') });
+                            continue;
+                        }
                         if (o.task === 'apply' && o.variant && o.variant !== 'plain') {
                             if (o.variant === 'selfnest') {
                                 fs.mkdirSync(path.join(dir, 'models', 'public', 'vant'), { recursive: true });
@@ -2417,7 +2571,6 @@ ${o.task === 'banner' ? '' : `    const out2 = await run();
                         }
 
                         if (o.task === 'apply' && o.probe === 'variant') {
-                            const HOOK = JSON.stringify(path.join(dir, 'lib', 'brain.js'));
                             let body2 = '';
                             if (o.variant === 'selfnest') {
                                 body2 = `
@@ -3144,7 +3297,7 @@ harness.registerRoute('carriers-lane', async (ctx) => {
                     const t = amt(o.token);
                     const a = art(o.artifactToken);
                     const cases = {
-                        missing: (id) => ({ found: false }),
+                        missing: () => ({ found: false }),
                         throwing: () => { throw new Error('door died'); },
                         good: (id) => (id === t.id ? { found: true, traveler: t } : { found: false }),
                         swapped: () => ({ found: true, traveler: JSON.parse(JSON.stringify(amt(o.otherToken || o.token))) }),

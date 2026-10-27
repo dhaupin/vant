@@ -594,6 +594,9 @@ async function homeHandlers() {
         homeApi = {
             summary: (await import(String(require('url').pathToFileURL(path.join(dir, 'summary.js'))))).onRequestGet,
             admin: (await import(String(require('url').pathToFileURL(path.join(dir, 'admin.js'))))).onRequestPost,
+            // (2026-10-27 Edge deepening) the third door: the daily-sweep
+            // cron (scheduled.js - onScheduled + the wire-404 onRequest).
+            scheduled: (await import(String(require('url').pathToFileURL(path.join(dir, 'scheduled.js'))))),
         };
     }
     return homeApi;
@@ -949,6 +952,27 @@ function buildRoutes(sb) {
         const text = await res.text();
         return new Response(text, { status: res.status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
     });
+    // (2026-10-27 Edge deepening) home-scheduled: the cron door mirror -
+    // silent no-op without the binding, cron-only wire (404 typed), and
+    // over the fake D1 the sweep engine runs through the seeded defaults.
+    routes.registerRoute('home-scheduled', async () => {
+        const scheduled = (await homeHandlers()).scheduled;
+        const facts = { silentNoDb: null, seeded: null, wire404: null, wire404Body: null, nosniff: null, faultedWithDb: false };
+        facts.silentNoDb = (await scheduled.onScheduled({ env: {} })) === undefined;
+        const db = makeFakeD1();
+        try { await scheduled.onScheduled({ env: { DB: db } }); } catch (e) { facts.faultedWithDb = true; }
+        // the fake's return value is only { prepare, batch } - the store is
+        // the closure; seeding truth rides a COUNT query, like the wire does
+        let seeded = false;
+        try { const row = await db.prepare('SELECT COUNT(*) AS n FROM status_endpoints').first(); seeded = !!(row && Number(row.first ? row.first.n : row.n) > 0); } catch { seeded = false; }
+        facts.seeded = seeded;
+        const res = scheduled.onRequest(new Request('https://home-run-root.pages.dev/api/status/scheduled', { method: 'GET' }));
+        facts.wire404 = res.status === 404;
+        const text = await res.text();
+        facts.wire404Body = typeof text === 'string' && text.includes('scheduled only');
+        facts.nosniff = res.headers.get('x-content-type-options') === 'nosniff';
+        return new Response(JSON.stringify(facts), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
+    });
 
     return routes;
 }
@@ -1109,6 +1133,10 @@ const EXPECTED = {
         'admin-key-discipline': 'REFUSED',
         'admin-body-discipline': 'REFUSED',
         'flood-cost-cap': 'REFUSED',
+        // (2026-10-27 Edge deepening) the third door: the daily sweep's
+        // cron row (silent no-op without the DB, cron-only wire, sweep
+        // engine over the fake D1).
+        'scheduled-sweep-door': 'REFUSED',
     },
     // ARMED 2026-10-25 (Phase A of the S0→S1 conversion campaign, #249) —
     // three packs whose run-root arms live in scripts/crashtest-run.js
@@ -1142,6 +1170,11 @@ const EXPECTED = {
         'recursion-guard-depth-typed-and-releasable': 'REFUSED',
     },
     'vant-relay': { // the r/2 webhook edge face (web/relay/functions/api/r/relay.ts)
+        // (2026-10-27 Edge deepening) the caps page + the SSE stream-through
+        // joined the edge face; the rows drive them through the same
+        // relay-edge child (run-root-only, honest skips in this suite).
+        'edge-caps-posture-page': 'skip',
+        'edge-events-gate-ladder': 'skip',
         'posture-and-key-gates-fail-closed': 'skip',
         'hmac-lane-over-raw-bytes': 'skip',
         'freshness-window-typed': 'skip',
@@ -1319,6 +1352,13 @@ const EXPECTED = {
         'migrations-unverified-withholds': 'skip',
         'migrations-cli-status-and-fail-exit': 'skip',
         'migrations-health-checkmigration': 'skip',
+        // (slice 4, 2026-10-27) the trim-survivor conversions: the last
+        // four native pins of test/migrations.test.js land on the same
+        // arm (both-scope import + fresh dual reads, the --brain-name
+        // naming law, the clean-layout CLI dry-run) - file retired whole.
+        'migrations-legacy-both-scopes-and-fresh-reads': 'skip',
+        'migrations-legacy-brain-name-naming-law': 'skip',
+        'migrations-cli-clean-dryrun': 'skip',
     },
     // ARMED 2026-10-26 (engine-parity-spine battery slice 1, Phase A of the
     // S0→S1 campaign): the spine families converted onto their own pack —

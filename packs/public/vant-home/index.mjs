@@ -208,5 +208,22 @@ export default {
                 return refused(`the cost wall holds: ${added} adds accepted inside the cap, then the ${(added + 1)}th answered typed refuse (${refusal.slice(0, 60)})`, { accepted: added });
             },
         },
-    ],
+  
+    {
+        name: 'scheduled-sweep-door',
+        description: "the THIRD built-in door (2026-10-24 Edge deepening, the daily-sweep cron in scheduled.js) keeps its wire package: without a DB binding, onScheduled is a SILENT no-op (no throw, no invented board round trip), the direct wire stays cron-only (the route's onRequest answers 404 typed 'scheduled only' with its no-sniff headers), and over the fake D1 the cron ride runs the SAME sweep engine the GET visitors share (defaults seeded unconfined over the real fake store)",
+        async run(harness) {
+            const f = await spoke(harness, 'home-scheduled', {});
+            if (f.absent) return skip('home-scheduled unregistered');
+            if (f.fault) return exploited('scheduled route faulted: ' + f.fault);
+            const r = f.parsed || {};
+            if (!(r.silentNoDb === true)) return exploited('no-DB onScheduled answered ' + JSON.stringify(r).slice(0, 90) + ' - absence must be a silent no-op, never a throw or a fake alert');
+            if (r.faultedWithDb !== false) return exploited('the scheduled handler FAULTED over a bound store: ' + JSON.stringify(r).slice(0, 90));
+            if (!(r.seeded === true)) return exploited('the fake D1 ride did not land the sweep defaults (the cron skipped its seeding)');
+            if (!(r.wire404 === true && r.wire404Body === true)) return exploited('the direct wire answered ' + JSON.stringify(r).slice(0, 90) + ' - the cron door must STAY cron-only (404 typed scheduled-only)');
+            if (r.nosniff !== true) return exploited('the 404 wire shape lost its no-sniff header');
+            return refused('the cron door is honest on every seat: silent without the binding, cron-only 404 typed on the wire, and the bounded sweep engine runs over the real store', { tookRequests: 3 });
+        },
+    },
+  ],
 };

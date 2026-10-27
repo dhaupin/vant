@@ -17,6 +17,8 @@ models/public/repos/
 models/state.json
 models/**/.*.json
 models/**/.*.ini
+# backup receipts ledger (runtime; the lib backup/restore seam writes it)
+models/backup-receipts.json
 
 # IDE
 .vscode/
