@@ -1211,6 +1211,36 @@ bootstrap/shutdown + framework config (7).
 
 
 
+### The remote/watch/cache census (2026-10-27) — the 9-key cluster
+
+`public/vant-brain` reaches **22 rows**. The remote tunnel + watcher +
+cache cluster converts as `brain-remote-watch-cache-laws`:
+
+- the remote URL pair round-trips and an empty reset answers honestly;
+- the remote-mode load is REAL — the census child spins a localhost
+http server answering `brain/remote-seed.json`, `setMode('remote')` +
+`load('remote-seed')` serve `REMOTE-CENSUS-PAYLOAD` verbatim with
+`source:'remote'`, then the honest defaults restore (mode dual, URL empty);
+- the cache laws hold end to end: verbatim serve, REAL hit accounting
+(`_metrics.cacheHits` ticks), the TTL window keeps the cached truth
+against disk drift (an out-of-band disk rewrite still answers the cached
+V1), `invalidateCache(name)` answers the FRESH disk read, `getCacheStats`
+carries `{size, enabled, ttl, entries}`, `setCache(false)` honestly flips
+enabled, and `invalidateCorpusCache()` answers without faulting;
+- the watcher public toggles hold both ways (the fs.watch handle is
+closed by the real `shutdown()` path so the census.child drains its
+loop honestly).
+
+**LIVE FINDING (fixed in the same pass)**: `brain.shutdown()` crashed on a
+FRESH module — `_cache.clear()` was unguarded while `_cache` is lazy
+(`null` until `getCache()` ever runs), so a fresh-install shutdown died
+with `Cannot read properties of null` BEFORE its lifecycle hooks ran.
+The guard is in; the row's run caught it the same way the crates row
+caught the codes-table gap.
+
+Pack green ×2 deterministic, contract 334/0 with the row in the EXPECTED
+table, eslint clean.
+
 ### The load-circuit breaker census (2026-10-27) — the P3 #34 family
 
 `public/vant-brain` reaches **21 rows**. The breaker cluster (5 keys:

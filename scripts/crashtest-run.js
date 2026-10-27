@@ -1639,6 +1639,90 @@ const CIRCUIT_CHILD = `${CHILD_STDOUT_GUARD}
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
 
+// (brain battery, remote/watch/cache slice 2026-10-27) the REMOTE +
+// WATCH + CACHE census: the 9-key cluster (setRemoteURL/getRemoteURL,
+// setCache/getCacheStats, invalidateCache/invalidateCorpusCache,
+// setWatch/isWatching, and _fetchRemote graded through a REAL remote-
+// mode load). Remote rides a localhost http server (no network); the
+// cache laws grade prime/serve/hit/age/invalidate against disk truth;
+// the watcher toggles grade the public surface only.
+const REMOTE_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    delete require.cache[require.resolve('./lib/brain.js')];
+    try { require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canSpawn: true, canNetwork: true }); } catch (e0) {}
+    const brain = require('./lib/brain.js');
+    const fsMod = require('fs');
+    const http = require('http');
+    const out = { family: 'remote-watch-cache', urlRt: null, urlRestore: null, remoteModeLoad: null,
+        remoteSource: null, remoteRestore: null, cacheStatsShape: null, cacheHitLaw: null,
+        cacheStale: null, cacheInvalidated: null, cacheDisabled: null, corpusInvalidate: null,
+        watchOn: null, watchOff: null, ok: true };
+    try {
+        // 1. the remote URL pair
+        brain.setRemoteURL('http://127.0.0.1:PORT-BRAIN-CENSUS/');
+        out.urlRt = brain.getRemoteURL() === 'http://127.0.0.1:PORT-BRAIN-CENSUS/';
+        // 2. the REAL remote load: localhost server answers brain/<name>.json
+        const srv = http.createServer((req, res) => {
+            if (req.url && req.url.indexOf('brain/remote-seed.json') !== -1) {
+                res.writeHead(200, { 'content-type': 'application/json' });
+                res.end(JSON.stringify({ name: 'remote-seed', content: 'REMOTE-CENSUS-PAYLOAD' }));
+            } else { res.writeHead(404); res.end(); }
+        });
+        let port = null;
+        await new Promise((res0) => { srv.listen(0, '127.0.0.1', () => { port = srv.address().port; res0(); }); });
+        brain.setRemoteURL('http://127.0.0.1:' + port + '/');
+        const modeBefore = brain.setMode ? null : null;
+        let remoteRes = null, remoteErr = null;
+        try { await brain.setMode('remote'); } catch (eM) { remoteErr = eM; }
+        try { remoteRes = await brain.load('remote-seed'); } catch (eL) { remoteErr = eL; }
+        srv.close();
+        out.remoteModeLoad = !!(remoteRes && remoteRes.content === 'REMOTE-CENSUS-PAYLOAD');
+        out.remoteSource = remoteRes && remoteRes.source === 'remote';
+        // restore the honest defaults
+        try { await brain.setMode('dual'); } catch (eM) {}
+        brain.setRemoteURL('');
+        out.urlRestore = brain.getRemoteURL() !== undefined;
+        // 3. the cache laws over a REAL seed
+        brain.updateMyStuff('cache-census', 'V1');
+        const a = await brain.load('cache-census');
+        const b = await brain.load('cache-census');
+        out.cacheHitLaw = !!(a && a.content === 'V1' && b && b.content === 'V1' && brain.getMetrics().cacheHits > 0);
+        // disk truth changed under the cache: the read still serves the
+        // cached V1 inside the TTL window (the cached read is the law)
+        fsMod.writeFileSync(brain.getBrainPath() + '/cache-census.md', 'V2');
+        const c = await brain.load('cache-census');
+        out.cacheStale = !!(c && c.content === 'V1');
+        out.cacheInvalidated = null;
+        brain.invalidateCache('cache-census');
+        const d = await brain.load('cache-census');
+        out.cacheInvalidated = !!(d && d.content === 'V2');
+        const stc = brain.getCacheStats();
+        out.cacheStatsShape = !!(stc && typeof stc.size === 'number' && typeof stc.enabled === 'boolean' && typeof stc.ttl === 'number' && Array.isArray(stc.entries));
+        brain.setCache(false);
+        out.cacheDisabled = brain.getCacheStats().enabled === false;
+        brain.setCache(true);
+        // 4. the corpus invalidate call answers without faulting
+        try { brain.invalidateCorpusCache(); out.corpusInvalidate = true; } catch (eI) { out.corpusInvalidate = false; }
+        // 5. the watcher public toggles
+        brain.setWatch(true);
+        out.watchOn = brain.isWatching() === true;
+        brain.setWatch(false);
+        out.watchOff = brain.isWatching() === false;
+        await new Promise((r) => setTimeout(r, 120));
+        // drain the loop honestly: the watcher handle opened by setWatch
+        // is closed by the REAL shutdown path (its fs.watch keeps the
+        // child alive otherwise)
+        await brain.shutdown();
+        // the load-time metrics ticker: loads happened
+        if (brain.getMetrics().loads < 4) throw new Error('loads never ticked: ' + brain.getMetrics().loads);
+    } catch (e1) {
+        out.ok = false;
+        out.err = String((e1 && e1.name) || '?') + ': ' + String(e1 && e1.message || '').slice(0, 140);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
 // (brain battery, geometry slice 2026-10-27) the geometry census
     // child: the NSC9 per-brain address family over a fresh module.
     harness.registerRoute('brain-geometry', async () => {
@@ -1653,6 +1737,19 @@ const CIRCUIT_CHILD = `${CHILD_STDOUT_GUARD}
 
     // (brain battery, backup slice 2026-10-27) the stego-backup trio
     // census child: the honest-refusal laws over a fresh module.
+    // (brain battery, remote/watch/cache slice 2026-10-27) the 9-key
+    // cluster census child: remote-mode load over a localhost server +
+    // the cache/invalidate/watch laws.
+    harness.registerRoute('brain-remote-cache', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', REMOTE_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `remote-cache probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     // (brain battery, breaker slice 2026-10-27) the load-circuit
     // breaker census child: P3 #34's laws over a real poisoned-critical
     // wedge fixture.

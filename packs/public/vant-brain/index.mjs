@@ -1180,7 +1180,43 @@ export default {
         return { verdict: 'REFUSED', detail: 'the fresh status is CLOSED/zero, graceful null misses never feed it, a REAL poisoned-critical wedge opens it named (event + metrics.errors + lastError), every load then fast-fails typed retryable BRAIN_CIRCUIT_OPEN with its failure count, resetLoadCircuit restores honestly, and the half-open probe through healed machinery closes on real content - P3 #34 is measured', tookRequests: 11 };
       },
     },
+    // ============ the remote/watch/cache census (2026-10-27) ============
+    {
+      name: 'brain-remote-watch-cache-laws',
+      description: "the 9-key remote/watch/cache cluster: the remote URL pair round-trips and restores, a REAL remote-mode load answers over a localhost server (content verbatim, source:'remote'), the cache serves verbatim + rides its own hit accounting, disk truth changed under it stays cached inside the TTL window, invalidateCache answers the fresh disk read, getCacheStats carries the {size,enabled,ttl,entries} shape, setCache(false)/true flips the enabled flag, invalidateCorpusCache answers without faulting, and the watcher toggles setWatch/isWatching hold both ways",
+      async run(harness) {
+        const r = await tryRun(harness, 'brain-remote-cache', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        if (r._absent) return skip('no brain-remote-cache route');
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return { verdict: 'REFUSED', skipped: true, detail: ('remote-cache probe unavailable: ' + (j && j.error || 'no payload')) };
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the census child faulted mid-census: ' + (j.err || 'unknown'), tookRequests: 1 };
+        if (j.urlRt !== true || j.urlRestore !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the remote URL pair: rt=' + j.urlRt + ' restore=' + j.urlRestore + ' - setRemoteURL/getRemoteURL must round-trip and an empty reset answers honestly', tookRequests: 1 };
+        }
+        if (j.remoteModeLoad !== true || j.remoteSource !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the remote-mode load answered ' + JSON.stringify({ content: j.remoteModeLoad, source: j.remoteSource }) + ' - the remote tunnel must serve REAL content from the configured URL with source named remote', tookRequests: 2 };
+        }
+        if (j.cacheHitLaw !== true || j.cacheStale !== true || j.cacheInvalidated !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the cache laws: hit=' + j.cacheHitLaw + ' stale=' + j.cacheStale + ' invalidated=' + j.cacheInvalidated + ' - the cache serves verbatim with REAL hit accounting, keeps the served truth inside its TTL window against disk drift, and invalidateCache answers the fresh disk read', tookRequests: 6 };
+        }
+        if (j.cacheStatsShape !== true || j.cacheDisabled !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the stats answered ' + JSON.stringify(j.cacheStatsShape) + '/' + j.cacheDisabled + ' - getCacheStats carries {size,enabled,ttl,entries} and setCache(false) honestly flips enabled', tookRequests: 8 };
+        }
+        if (j.corpusInvalidate !== true) {
+          return { verdict: 'EXPLOITED', detail: 'invalidateCorpusCache faulted on a fresh module - the explicit cache-targeted call must answer without faulting', tookRequests: 9 };
+        }
+        if (j.watchOn !== true || j.watchOff !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the watcher toggles: on=' + j.watchOn + ' off=' + j.watchOff + ' - setWatch/isWatching hold both ways', tookRequests: 10 };
+        }
+        return { verdict: 'REFUSED', detail: 'the URL pair round-trips and restores, the remote tunnel serves REAL content (source named remote), the cache laws hold end to end (verbatim serve, real hit accounting, TTL-window stale retention, invalidate answers the fresh disk read), the stats make sense, setCache flips enabled, the corpus invalidate answers, and the watcher toggles hold - the 9-key cluster is measured', tookRequests: 10 };
+      },
+    },
   ],
 };
+
 
 

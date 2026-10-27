@@ -1189,6 +1189,13 @@ const EXPECTED = {
         // it, the half-open probe rides the healed machinery once and
         // closes on REAL content, and resetLoadCircuit restores honestly.
         'brain-load-circuit-laws': 'skip',
+        // (remote/watch/cache census, ARMED 2026-10-27) the 9-key cluster:
+        // the remote URL pair, a REAL remote-mode load over a localhost
+        // server (source named remote), the cache laws end to end
+        // (verbatim serve, real hit accounting, TTL stale retention,
+        // invalidate answers the fresh disk read), the stats shape +
+        // setCache flip, the corpus invalidate, and the watcher toggles.
+        'brain-remote-watch-cache-laws': 'skip',
     },
     'vant-crew': {
         'roster-quota-ceiling': 'REFUSED',
