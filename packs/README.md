@@ -1084,7 +1084,30 @@ verify row speaks the real semantics — verify compares to the LAST
 anchor, so a stale rooted fact is the divergence case, not a hack.
 Remaining spine families (mesh/brains #164-#166: AOI filter, stale
 purity, deterministic write winners, spine PRF addressing, brain
-verify + horcrux) queue for slice 2.
+verify + horcrux) charged for slice 2.
+
+**Slice 2 (2026-10-27): GEOMETRY, WORLD/CLOCK, MESH/BRAINS (#154-#166) —
+the rest of the spine converts.** Nine rows on the same house pattern
+(real lib modules directly in-process, tmpdir fixtures fresh per drive,
+no wall clock in a verdict):
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `geometry-subdivision-and-facet-laws` | the 1:4 fold law (four distinct children), lossless packed addresses, overflow refuses typed, facet divider holds at the cap | validated - REFUSED |
+| `geometry-prf-one-chain` | the shard PRF is deterministic + width-fixed + separation-clean on near seeds, shardUnpredictabilityHolds certified, and BOTH live consumers (fragmenter + GitHub adapter) derive through the ONE lattice-keys chain | validated - REFUSED |
+| `geometry-raid-carrier-and-precision` | k-of-k+1 survival (any one lost data OR parity shard recovers exact bytes), a forged shard reported by position AND parity-rebuilt, two lost refuses typed, the precision contract EXACT/APPROXIMATE + 1e-12, the quantizer absorbs last-ulp near-misses | validated - REFUSED |
+| `world-clock-seed-chain-and-orbits` | SeedChain deterministic + domain-separated + prefix-folding honest + 10K paths pairwise-distinct, orbits pure at t0 + k-period, degenerates refuse typed, favorability OSCILLATES in [0,1] (the pass-227 bug class dead), nextWindow repeats its answer | validated - REFUSED |
+| `state-delta-ledger-laws` | actorless deltas refuse typed, the cleared record keeps its clearing provenance in history, and the same event stream re-derives the SAME ledger hash | validated - REFUSED |
+| `spine-addressing-one-module` | addresses re-derive exactly per (space, index) and separate per index AND space, remove-one-consumer leaves the rest byte-compatible, and a shared fact claimed under two spaces stores ONE cell with identical hashes | validated - REFUSED |
+| `raid-cells-addressed-and-rebated-through-spine` | RAID claims k+1 cells at 64-hex spine addresses through the CellStore, identical payloads across docs are pure re-claims (measured savings, distinct = k+1), and shard seats ride the ONE spine PRF per (space, index) | validated - REFUSED |
+| `mesh-aoi-staleness-and-write-winners` | the AOI filter leaks nothing outside the region, staleness is provable from the injected clock alone (no timers, starve-free revive), the higher epoch wins deterministically and the stale-epoch challenger is RECORDED as rejected | validated - REFUSED |
+| `brain-verify-and-horcrux` | the anchored brain verifies, tamper diverges typed, the restored horcrux re-verifies to the SAME forged root, and a dangling file DENIES currentRoot while surfacing bad.md NOT-ok in the manifest | validated - REFUSED |
+
+16/16 `REFUSED` x2 deterministic on landing (#154-#166 fully covered
+across the two slices); native `test/engine-parity-spine.test.js`
+(70 pins) stayed green alongside through the landing — the whole-file
+retirement step follows in the same pass per the carriers precedent
+(every family converted; the coverage lives in the pack rows now).
 
 ## Leisure battery — the want-list keeper lands (v0.8.6, #249 - 2026-10-26)
 
@@ -1093,8 +1116,10 @@ rows drive the REAL lib modules (leisure + tempo + escrow + qos + era +
 event) in-process against a THROWAWAY brain's ledger in
 `models/private/<brain>/.leisure.json` — the containment contract IS
 the graded surface. No route arming needed; every row holds REFUSED in
-every sandbox. Native `test/leisure.test.js` (21 pins) green alongside
-under the reverse-verification law:
+every sandbox. Native `test/leisure.test.js` (21 pins) stayed green
+through the landing cycle and then RETIRED WHOLE to these 6 rows on
+2026-10-27 (the carriers precedent — every family the suite pins is
+converted; the coverage lives in the pack rows now):
 
 - **want ledger lifecycle** — recording shape (lw- id, zero pursued
   count, honest nulls, the scratch brain named), dedupe keeps ONE
@@ -1139,8 +1164,11 @@ the daily cap explicitly: the pack runtime leaked the exhausted leg's
 env residue, and the fixed-under-pack residual order-dependence
 depended on it.
 
-Remaining native suites from the survey: traveler-lib (~44 pins)
-converts onto vant-carriers/vant-stones next.
+Retirement note (2026-10-27): with all the day's batteries landed
+(spine slices 1-2, leisure, traveler-lib slice 6) the survey's native
+backlog is closed — `test/engine-parity-spine.test.js` and
+`test/leisure.test.js` retired WHOLE to their pack rows, and
+`test/traveler-lib.test.js` trimmed to its real-process CLI family.
 
 ## Traveler-lib battery — the working layer lands on vant-carriers (v0.8.6, #249 - 2026-10-26)
 
@@ -1153,9 +1181,11 @@ for determinism. `mcp.execute` is the in-process registry call, not
 the TCP door (one law: zero sockets). The REAL-PROCESS CLI family
 (`bin/traveler.js` open/hop/audit via spawnSync) stays native under
 the reverse-verification law — like the guests' socket door families,
-it rides a separate process. Native `test/traveler-lib.test.js` (43
-pins) and `test/traveler.test.js` (26 wire-law pins) stay green
-alongside:
+it rides a separate process. RETIREMENT: on 2026-10-27 the in-process
+families (A-E, G-I) retired whole to these 8 pack rows and the file
+trimmed to its 4 real-process CLI pins (F1-F4, green standalone);
+`test/traveler.test.js` (26 wire-law pins) keeps riding the wire-side
+follow-row for its next family. The pack rows measure:
 
 - **content address law** — same content + same ts = SAME id, ANY edit
   re-addresses with the seq riding, honest packets verify, slot tamper

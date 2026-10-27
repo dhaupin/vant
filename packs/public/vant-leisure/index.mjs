@@ -10,9 +10,11 @@
 // gates, monkeypatched module fns and event listeners are all restored
 // in finallys so every pack run is deterministic.
 //
-// NO SOCKETS (the one law). The native test/leisure.test.js stays green
-// alongside under the reverse-verification law; its pins retire per the
-// same family map this pack covers.
+// NO SOCKETS (the one law). The native test/leisure.test.js RETIRED WHOLE
+// to these rows (2026-10-27, the carriers precedent: every family the
+// suite pins — lifecycle, rotation/receipts, pursue/tempo, breath/dream,
+// containment, the gate ladder — is converted; the coverage lives in
+// this pack's 6 rows).
 
 async function loadAll(mods) {
   const { createRequire } = await import('node:module');

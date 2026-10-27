@@ -9,8 +9,9 @@
  * body.
  *
  * House laws: one decision per attack, `skipped: true` marks honest
- * absence; the native suite (test/carriers.test.js) stays green alongside
- * under the reverse-verification law.
+ * absence; the native test/carriers.test.js retired WHOLE to these rows
+ * (2026-10-26) and test/traveler-lib.test.js trimmed to its real-process
+ * CLI family (2026-10-27) per the reverse-verification law.
  */
 
 const skip = (why) => ({ verdict: 'REFUSED', skipped: true, detail: `not armed: ${why}` });

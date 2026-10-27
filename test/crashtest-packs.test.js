@@ -1325,8 +1325,9 @@ const EXPECTED = {
     // durability (#152), and the fail-closed capability posture (#162
     // #163). Every row drives the real lib modules against a throwaway
     // brain-space tmpdir; no route arming needed, so these hold REFUSED in
-    // every sandbox. Native engine-parity-spine stays green alongside (70
-    // pins) under the reverse-verification law.
+    // every sandbox. Native engine-parity-spine stayed green through the
+    // landing cycle and then retired WHOLE to these rows (2026-10-27, the
+    // carriers precedent).
     // ARMED 2026-10-26 (leisure battery, Phase A of the S0→S1 campaign,
     // #196 + #209): the want-list keeper converts onto its own pack —
     // recording/dedupe law, spirit-first rotation + receipts/forget, the
@@ -1336,8 +1337,9 @@ const EXPECTED = {
     // lib/leisure (+ tempo/escrow/qos/era/event) module-level against a
     // THROWAWAY brain's ledger (containment IS the graded surface); no
     // route arming needed, so these hold REFUSED in every sandbox.
-    // Native test/leisure.test.js stays green alongside (21 pins) under
-    // the reverse-verification law.
+    // Native test/leisure.test.js stayed green through the landing cycle
+    // and then RETIRED WHOLE to these rows (2026-10-27, the carriers
+    // precedent).
     'vant-leisure': {
         'want-ledger-lifecycle': 'REFUSED',
         'rotation-receipts-and-forget': 'REFUSED',
@@ -1354,6 +1356,23 @@ const EXPECTED = {
         'checkpoint-recovery-bounded-and-deny': 'REFUSED',
         'anchor-ledger-and-hotset-durability': 'REFUSED',
         'persistent-grants-and-wal-deny-posture': 'REFUSED',
+        // ARMED 2026-10-27 (spine slice 2): GEOMETRY, WORLD/CLOCK,
+        // MESH/BRAINS (#154-#166) convert - the 1:4 fold laws, the ONE PRF
+        // chain (fragmenter + GitHub adapter), the RAID carrier + precision
+        // contract, the addressing spine + RAID cell seats through CellStore,
+        // the seed chain / orbits world clock, the actor-mandatory delta
+        // ledger, the mesh AOI/staleness/write-winner laws, and the brain
+        // verify + horcrux chain. With slice 2 closed the whole native
+        // spine suite retired to these rows (2026-10-27, carriers precedent).
+        'geometry-subdivision-and-facet-laws': 'REFUSED',
+        'geometry-prf-one-chain': 'REFUSED',
+        'geometry-raid-carrier-and-precision': 'REFUSED',
+        'world-clock-seed-chain-and-orbits': 'REFUSED',
+        'state-delta-ledger-laws': 'REFUSED',
+        'spine-addressing-one-module': 'REFUSED',
+        'raid-cells-addressed-and-rebated-through-spine': 'REFUSED',
+        'mesh-aoi-staleness-and-write-winners': 'REFUSED',
+        'brain-verify-and-horcrux': 'REFUSED',
     },
 };
 
