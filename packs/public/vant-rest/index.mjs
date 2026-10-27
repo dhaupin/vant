@@ -230,5 +230,116 @@ export default {
         return { verdict: 'REFUSED', detail: 'session endpoints mint nothing unauthenticated and adopt nothing forged', tookRequests: 2 };
       },
     },
+    {
+      name: 'rest-mcp-door-args-parity',
+      description: "the REST surface's MCP-carrier doors (streams / brain / trust / market) forward their path and body pieces under the EXACT arg names their tool's declared inputSchema requires - a wrong-name door answers the tool's typed arg gate instead of running the tool, so every honest call turns into a shapes-only refusal (2026-10-27 parity audit)",
+      async run(harness) {
+        // The honest rounds: each door is called the way the surface intends,
+        // so the ANSWER must be the tool's real result - never MCP_INPUT_INVALID
+        // (the tool's arg gate), never 'not found' (the tool registry gate).
+        const rounds = [
+          ['GET', '/streams/alpha', null],                       // stream_info  { stream: 'alpha' }
+          ['POST', '/streams/alpha/poll', {}],                   // stream_poll  { stream: 'alpha' }
+          ['POST', '/streams/alpha/enqueue', { task: { kind: 'pack-canary', n: 1 } }], // stream_enqueue { stream, task }
+          ['GET', '/brain/identity', null],                      // brain_load   { name }
+          ['GET', '/trust/score/alpha', null],                   // trust_getScore { entityId }
+          ['GET', '/trust/leaderboard', null],
+          ['GET', '/market/stats', null],
+          ['GET', '/market/listings', null],                     // market_search (query passthrough)
+          ['GET', '/health', null],                              // vant_health
+        ];
+        const fired = [];
+        for (const [method, path, body] of rounds) {
+          const r = await probe(harness, method, path,
+            body == null ? {} : { 'content-type': 'application/json' },
+            body == null ? undefined : JSON.stringify(body));
+          if (r._absent) return skip('no rest-request route (pending run-root wiring)');
+          if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `rest-request threw in the shim: ${r.error?.name}` };
+          const outer = parseJson(await bodyText(r));
+          if (!outer || outer.error) return skip('rest-request not armed for this oracle');
+          // The Edge QoS floor is a SHARED per-chain budget, so a second pack
+          // cycle legitimately starts mid-budget; a 429 there is the fixture's
+          // budget, not a door behavior - skip, never grade it.
+          if (Number(outer.status) === 429) return { verdict: 'REFUSED', skipped: true, detail: `edge QoS budget spent by earlier cycles (${method} ${path}) - door shape not reachable on this fire` };
+          fired.push({ method, path, status: outer.status, inner: parseJson(outer.bodyText) });
+          const wrongArgName = outer.inner && (outer.inner.error === 'MCP_INPUT_INVALID' || outer.inner.error === 'not found');
+          const toolThrew = Number(outer.status) >= 500;
+          if (toolThrew || wrongArgName) {
+            return {
+              verdict: 'EXPLOITED',
+              detail: `door "${method} ${path}" answered ${toolThrew ? 'HTTP ' + outer.status : 'the tool arg gate (' + outer.inner.error + ')'} instead of running its tool - the REST carrier forwards the wrong arg name (or no tool)`,
+              tookRequests: fired.length,
+              evidence: { door: `${method} ${path}`, answer: outer.inner },
+            };
+          }
+        }
+        return { verdict: 'REFUSED', detail: `all ${fired.length} carrier-door rounds ran their REAL tool (no arg-gate answers, no 5xx) - the REST surface speaks its tools' own vocabulary`, tookRequests: fired.length };
+      },
+    },
+    {
+      name: 'rest-bent-body-fuzz-floor',
+      description: 'bent bodies across the REST door family (missing required tool params, garbage shapes) must answer 2xx-4xx with the tool\'s typed arg gate - never a 5xx, never an uncaught throw (the fuzz floor, now measured over the REST surface\'s MCP doors)',
+      async run(harness) {
+        const rounds = [
+          ['POST', '/market/list', {}],                 // market_list requires {type, title}
+          ['POST', '/market/bid', {}],                  // market_bid requires {title}
+          ['POST', '/market/trade', {}],                // market_trade requires {listingId, buyerId}
+          ['POST', '/streams', {}],                     // stream_create requires {stream}
+          ['POST', '/streams/alpha/enqueue', {}],       // stream_enqueue requires {stream, task}
+          ['POST', '/streams/alpha/enqueue', 'not-json'],
+          ['POST', '/brain/save-me', {}],               // brain_save requires {name, content}
+          ['POST', '/trust/record', {}],                // trust_record requires {entityId, type}
+          ['POST', '/trust/record', 'not-json'],
+          ['POST', '/market/list', 'garbage-not-json'],
+        ];
+        const fired = [];
+        for (const [method, path, body] of rounds) {
+          const r = await probe(harness, method, path,
+            typeof body === 'string' ? { 'content-type': 'application/json' } : { 'content-type': 'application/json' },
+            typeof body === 'string' ? body : JSON.stringify(body));
+          if (r._absent) return skip('no rest-request route (pending run-root wiring)');
+          if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `rest-request threw in the shim: ${r.error?.name}` };
+          const outer = parseJson(await bodyText(r));
+          if (!outer || outer.error) return skip('rest-request not armed for this oracle');
+          // Shared per-chain QoS budget: a mid-cycle 429 is the fixture's own
+          // limiter, never the door's degradation, so it skips rather than
+          // grading as either a half-pay or an exploit.
+          if (Number(outer.status) === 429) return { verdict: 'REFUSED', skipped: true, detail: `edge QoS budget spent by earlier cycles (${method} ${path}) - degradation floor not measurable on this fire` };
+          fired.push({ method, path, status: outer.status, threw: outer.threw });
+          if (outer.threw || Number(outer.status) >= 500) {
+            return {
+              verdict: 'EXPLOITED',
+              detail: `bent body broke the fuzz floor at "${method} ${path}" (status ${outer.status}${outer.threw ? ', uncaught throw' : ''}) - the REST door does not degrade to a typed refusal`,
+              tookRequests: fired.length,
+              evidence: { door: `${method} ${path}` },
+            };
+          }
+        }
+        return { verdict: 'REFUSED', detail: `all ${fired.length} bent-body shapes answered 2xx-4xx over the REST door family (no 5xx, no uncaught throw)`, tookRequests: fired.length };
+      },
+    },
+    {
+      name: 'rest-typed-gate-is-the-answer',
+      description: 'the REST door family must answer the tool arg gate VERBATIM on bent input inside a 200 - the typed refusal text is the interface (missing-param problems are listed, not redacted, and the tool name is named)',
+      async run(harness) {
+        const r = await probe(harness, 'POST', '/trust/record', { 'content-type': 'application/json' }, JSON.stringify({}));
+        if (r._absent) return skip('no rest-request route (pending run-root wiring)');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `rest-request threw in the shim: ${r.error?.name}` };
+        const outer = parseJson(await bodyText(r));
+        if (!outer || outer.error) return skip('rest-request not armed for this oracle');
+        if (Number(outer.status) === 429) return { verdict: 'REFUSED', skipped: true, detail: 'edge QoS budget spent by earlier cycles - the typed gate is the shared-budget answer here, not the bent-body answer, so this fire never grades' };
+        const inner = parseJson(outer.bodyText);
+        if (Number(outer.status) >= 500 || outer.threw) {
+          return { verdict: 'EXPLOITED', detail: `bent body answered ${outer.status} instead of the typed gate - a server fault is an escalation`, tookRequests: 1 };
+        }
+        if (!inner || inner.error !== 'MCP_INPUT_INVALID' || !inner.tool || !Array.isArray(inner.problems) || inner.problems.length === 0) {
+          return { verdict: 'EXPLOITED', detail: `bent body answered ${JSON.stringify(inner).slice(0, 120)} - no typed MCP_INPUT_INVALID with tool name and problem list`, tookRequests: 1 };
+        }
+        if (!inner.problems.some((p) => /entityId/.test(String(p)))) {
+          return { verdict: 'EXPLOITED', detail: 'the arg gate fired but did not name the missing param (entityId) - problems are redacted', tookRequests: 1, evidence: { problems: inner.problems } };
+        }
+        return { verdict: 'REFUSED', detail: 'the typed arg gate answers verbatim: MCP_INPUT_INVALID + tool name + the named missing params', tookRequests: 1, evidence: { problems: inner.problems } };
+      },
+    },
   ],
 };

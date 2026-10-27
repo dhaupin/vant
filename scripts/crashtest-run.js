@@ -1013,6 +1013,17 @@ function resetEdgeChains(sb) {
     const Server = require(path.join(sb, 'lib', 'server.js')).Server;
     EDGE_CHAINS.open = new Server({ port: 0, authRequired: false });
     EDGE_CHAINS.priv = new Server({ port: 0, authRequired: true });
+    // (2026-10-27 REST door-parity arm, same as test/crashtest-packs) the
+    // REST surface's tool-carrier doors register on the chains so the
+    // packs drive the REAL startREST handler code without a listener.
+    let restRoutes;
+    try { restRoutes = require(path.join(sb, 'lib', 'api.js')).REST_ROUTES; } catch (e) { restRoutes = null; }
+    if (Array.isArray(restRoutes)) {
+        for (const r of restRoutes) {
+            EDGE_CHAINS.open.route(r.path, r.handler, r.method);
+            EDGE_CHAINS.priv.route(r.path, r.handler, r.method);
+        }
+    }
 }
 
 async function edgeRoundTrip(chain, spec) {
@@ -1021,7 +1032,7 @@ async function edgeRoundTrip(chain, spec) {
     const events = require('events');
     const req = new events.EventEmitter();
     req.method = String(spec.method || 'GET').toUpperCase();
-    req.url = String(spec.url || '/');
+    req.url = String(spec.url || spec.path || '/');
     req.headers = {};
     for (const [k, v] of Object.entries(spec.headers || {})) req.headers[String(k).toLowerCase()] = String(v);
     req.ip = '203.0.113.77'; // TEST-NET-3: the run root's fixed attacker address

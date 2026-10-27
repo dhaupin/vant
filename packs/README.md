@@ -285,6 +285,40 @@ set-status routes):
 19/19 `REFUSED` x2 deterministic (strict cycles 2026-10-27); contract
 319/0 with the five rows in the EXPECTED table; lint id census 243.
 
+### `public/vant-rest` — the REST door-parity arm (8 rows; three landed 2026-10-27)
+
+**What it does.** The Edge-family deepening read turned to the pod's OWN
+REST surface: `lib/api.js`'s `startREST` door family (/streams, /brain,
+/trust, /market, /health) — MCP carriers the old edge rows never met. The
+fixture arm now carries `lib/api.REST_ROUTES` on the in-process Edge
+chains (`rest-request` + `vant-rest-open/priv`), which also closes an
+honest arming gap the parity rows caught: `edgeRoundTrip` keyed the URL
+off `spec.url` only, so `rest-request`'s documented `{path}` contract
+silently drove `/` for every prior shape (the fuzz/CORS rows still
+passed, but on the root's answer, not the named paths). Fixed same-pass.
+
+**The live findings the arm earned (all fixed in `lib/api.js` same-pass):**
+three doors forwarded the WRONG arg name to their tool — `stream_info` /
+`stream_enqueue` / `stream_poll` took `workId` (the tools' declared
+schema wants `stream`, so every honest call answered the tool's typed
+`MCP_INPUT_INVALID` arg gate instead of running the tool), and
+`trust_getScore` took `entity` (schema wants `entityId`); the programmatic
+`api.trustGetScore`/`api.trustRecord` doors had the same wrong names.
+The door's vocabulary must be the tool's vocabulary.
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `rest-mcp-door-args-parity` | 9 carrier-door honest rounds (streams info/poll/enqueue, brain load, trust score/leaderboard, market stats/listings, health) run the REAL tool — never the arg gate, never 5xx | landed - REFUSED |
+| `rest-bent-body-fuzz-floor` | 10 bent bodies (missing required params, garbage JSON) across the door family answer 2xx-4xx with the typed gate — never 5xx, never an uncaught throw | landed - REFUSED |
+| `rest-typed-gate-is-the-answer` | the arg gate answers VERBATIM in a 200: MCP_INPUT_INVALID + tool name + the named missing params, not redacted | landed - REFUSED |
+
+7/8 `REFUSED` x2 deterministic (2026-10-27; the five pre-existing rows
+unmoved); contract 322/0 with the three rows in the EXPECTED table.
+Shared QoS note: the Edge chains' per-instance rate floor is a REAL
+fixture budget, so a second cycle that starts mid-budget answers 429 —
+the rows skip a 429 fire (typed skip, never graded) instead of reading
+the limiter as door behavior.
+
 ### `public/vant-state-wiring` — the state-spine wiring consumers (30 rows in three slices: trust→tree, merge-path, mesh + surfaces; all validated 2026-10-26)
 
 **What it does.** Drill-down slice 1 of the campaign: the state-wiring

@@ -447,13 +447,22 @@ function resetEdgeChains(sb) {
     const Server = require(path.join(sb, 'lib', 'server.js')).Server;
     EDGE_CHAINS.open = new Server({ port: 0, authRequired: false });
     EDGE_CHAINS.priv = new Server({ port: 0, authRequired: true });
+    // The REST door table (lib/api.REST_ROUTES, 2026-10-27 door-parity arm):
+    // startREST registers exactly these onto a live Server; the fixture arms
+    // them on the in-process chains so the packs drive the REAL door code
+    // (handlers, arg names, params) with no listener bound.
+    const REST_ROUTES = require(path.join(sb, 'lib', 'api.js')).REST_ROUTES;
+    for (const r of REST_ROUTES) {
+        EDGE_CHAINS.open.route(r.path, r.handler, r.method);
+        EDGE_CHAINS.priv.route(r.path, r.handler, r.method);
+    }
 }
 
 async function edgeRoundTrip(chain, spec) {
     const events = require('events');
     const req = new events.EventEmitter();
     req.method = String(spec.method || 'GET').toUpperCase();
-    req.url = String(spec.url || '/');
+    req.url = String(spec.url || spec.path || '/');
     req.headers = {};
     for (const [k, v] of Object.entries(spec.headers || {})) req.headers[String(k).toLowerCase()] = String(v);
     req.ip = '203.0.113.77'; // TEST-NET-3: fixed attacker address
@@ -1070,6 +1079,15 @@ const EXPECTED = {
         'urlencoded-bracket-canary': 'REFUSED',
         'urlencoded-depth-floor': 'REFUSED',
         'session-cookie-discipline': 'REFUSED',
+        // ARMED 2026-10-27 (REST door-parity family): the rest-request arm
+        // now carries lib/api's REST_ROUTES table on the in-process Edge
+        // chains, so the pack grades the REAL REST doors - the arg-name
+        // parity rows were a LIVE FINDING (stream_info/enqueue/poll took
+        // `workId`, trust_getScore took `entity`; lib/api fixed in the same
+        // pass, the tool vocabulary is the door's vocabulary).
+        'rest-mcp-door-args-parity': 'REFUSED',
+        'rest-bent-body-fuzz-floor': 'REFUSED',
+        'rest-typed-gate-is-the-answer': 'REFUSED',
     },
     'vant-stones': {
         'stone-scope-honesty': 'REFUSED',
