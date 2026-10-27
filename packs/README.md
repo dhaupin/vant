@@ -1518,6 +1518,30 @@ Honest growth candidates, as they name themselves:
 - whichever provider-facing surface the campaign wires next (the two
   spine slices #164–#166 stay the standing drill-down pair).
 
+### Restamp 5 (2026-10-27) — the full floor re-swept after the five-tranche run
+
+Five tranches landed since restamp 4 (the api-object census + its two live
+fixes, the brain_load seam, the crew-doors census + the grounded-ack fix,
+the teams-orgchart pass, the survey read), so the whole campaign floor was
+re-swept on the final tree, x2 deterministic:
+
+- **full packs x2 green**: 244 pack rows REFUSED / 0 EXPLOITED / 0 BOUNDED
+  / 0 skipped (cycles 3+4), library rows 48/0/1 both cycles, **contract
+  350/0**, strict ci-gate GREEN (contract table + real harness clean);
+- **native floor: 203/203 suites green** (a–m 107 + n–z 96; 0 failed, 0
+  timeouts);
+- **one honest repair, surfaced by the sweep itself and fixed same-pass
+  (the fresh-fixture law)**: the teams census was not idempotent across
+  fires in a shared run-root sandbox — fire 1 persisted
+  `models/private/<brain>/orgchart/teams.json`, and fire 2 graded a dup
+  cascade (census-org pre-existing → every create-dependent law false).
+  The census child now DRAINS its persisted roster before loading the
+  module, so every fire grades the orgchart from zero — twice-in-one-
+  sandbox verified: 0 falses both fires, and the full-run cycles went
+  green on the re-run;
+- the debug tees that the diagnosis used are removed; the committed diff
+  carries only the drain fix + the restamp entry.
+
 
 ### The remote/watch/cache census (2026-10-27) — the 9-key cluster
 

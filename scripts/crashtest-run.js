@@ -368,6 +368,14 @@ const TEAMS_CHILD = `${CHILD_STDOUT_GUARD}
     const out = { family: 'teams-orgchart', ok: true, bail: null };
     try {
         require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true });
+        // (fresh-fixture law) the orgchart persists across fires in a
+        // shared run-root sandbox, so a SECOND fire sealed a dup cascade
+        // (fire 1's census-org blocked everything downstream). Drain the
+        // prior fire's roster instead: unlink the store, load a fresh
+        // module; the census grades the orgchart from zero EVERY time.
+        const fsMod = require('fs');
+        const pathMod = require('path');
+        try { fsMod.unlinkSync(pathMod.join('models', 'private', 'vant', 'orgchart', 'teams.json')); } catch (e2) { }
         const teams = require('./lib/teams.js');
         const isErrText = (v, frag) => !!(v && typeof v === 'object' && v.error && String(v.error).toLowerCase().indexOf(frag) !== -1);
         // ---- the org depth: create/dup/bad-name/ghost-update
@@ -2369,7 +2377,6 @@ const LIFECYCLE_CHILD = `${CHILD_STDOUT_GUARD}
         } catch (e) {
             return new Response(JSON.stringify({ error: `api-layer probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
         }
-        try { require('fs').writeFileSync('/tmp/api-census-last.json', outText); } catch (e9) {}
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
