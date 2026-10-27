@@ -1719,6 +1719,17 @@ const MCP_CENSUS_CHILD = `${CHILD_STDOUT_GUARD}
         const okWrite = await mcp.execute('vant_call', { name: 'brain_write', args: { name: 'census-okcensus', content: 'full content' } });
         out.handoffRealTool = !!(okWrite && okWrite.saved === true);
         out.diskFull = fsMod.existsSync(pathMod.join('models', 'private', 'vant', 'census-okcensus.md')) && fsMod.readFileSync(pathMod.join('models', 'private', 'vant', 'census-okcensus.md'), 'utf8') === 'full content';
+
+        // (api-object seam pass 2026-10-27) the brain_load pair: the
+        // string form rides the loader verbatim; the array form fans out
+        // per-name (misses answer null IN their own slot, never a silent
+        // whole-roster bail - the schema's second arm was honest-dead).
+        await mcp.execute('brain_write', { name: 'census-bl-a', content: 'alpha content' });
+        await mcp.execute('brain_write', { name: 'census-bl-b', content: 'beta content' });
+        const sLoad = await mcp.execute('brain_load', { brains: 'census-bl-a' });
+        out.brainLoadStringLoad = !!(sLoad && sLoad.name === 'census-bl-a' && sLoad.content === 'alpha content');
+        const arrLoad = await mcp.execute('brain_load', { brains: ['census-bl-a', 'census-bl-b', 'census-bl-miss'] });
+        out.brainLoadArrayFanout = !!(arrLoad && Array.isArray(arrLoad.brains) && arrLoad.brains.length === 3 && Array.isArray(arrLoad.items) && arrLoad.items.length === 3 && arrLoad.items[0] && arrLoad.items[0].content === 'alpha content' && arrLoad.items[1] && arrLoad.items[1].content === 'beta content' && arrLoad.items[2] === null);
     } catch (e1) {
         out.ok = false;
         out.bail = String((e1 && e1.name) || '?') + ': ' + String((e1 && e1.message) || '').slice(0, 140);

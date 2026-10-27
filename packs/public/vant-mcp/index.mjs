@@ -193,7 +193,10 @@ export default {
         if (j.handoffRealTool !== true || j.diskFull !== true) {
           return { verdict: 'EXPLOITED', detail: 'the honest call: realTool=' + j.handoffRealTool + ' disk=' + j.diskFull + ' - full params run the REAL tool, its bytes land on the disk verbatim', tookRequests: 3 };
         }
-        return { verdict: 'REFUSED', detail: 'the roster is 347 entries shaped and deterministic, vant_call refuses unknown + module identifiers typed with the roster named, the handoff rides the same schema gate (content-less brain_write typed-refused, nothing landed), and the honest call runs the real tool onto the disk verbatim - the registry is measured', tookRequests: 5 };
+        if (j.brainLoadStringLoad !== true || j.brainLoadArrayFanout !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the brain_load pair: string=' + JSON.stringify(j.brainLoadStringLoad) + ' array=' + JSON.stringify(j.brainLoadArrayFanout) + ' - the schema arms must both load honestly: the string form rides the loader, the array form fans out per-name (a miss answers null IN its slot, never a silent whole-roster null)', tookRequests: 4 };
+        }
+        return { verdict: 'REFUSED', detail: 'the roster is 347 entries shaped and deterministic, vant_call refuses unknown + module identifiers typed with the roster named, the handoff rides the same schema gate (content-less brain_write typed-refused, nothing landed), the honest call runs the real tool onto the disk verbatim, and brain_load loads honestly in both declared arms (string verbatim, array fan-out with per-slot nulls) - the registry is measured', tookRequests: 6 };
       },
     },
   ],

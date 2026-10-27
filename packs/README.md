@@ -1418,11 +1418,14 @@ green (all 17 rungs true both cycles, contract 343/0, lint clean):
 - **the family census**: memoryState/recall round-trip exact, learn/query
   exact + miss null, the shared dropbox closes its loop on a typed
   `not found`, the private myStuff dropbox lands inside `models/tmp-space`.
-- **live finding, filed not fixed** (out of slice): `lib/mcp.js` registers
-  `brain_load` TWICE (line ~276 `{name}`/line ~486 `brains`); the LIVE
-  schema accepts `brains` as string OR array but the handler feeds any
-  array straight to `brain.load(name...)` — an array of names answers
-  null. Honest-dead pair; a candidate for the next seam pass.
+- **the filed seam is LANDED (same-session seam pass):** the duplicate
+  `brain_load` registrations had the LIVE schema accepting `brains` as
+  string OR array while the handler fed any array straight to the
+  single-name loader — an array of names silently answered null. The
+  array arm now fans out per-name through the SAME loader (misses answer
+  null IN their own slot, never a silent whole-roster bail; the string
+  form rides the loader verbatim). The `vant-mcp/tools-registry-census`
+  row grades the pair-law live (vant-mcp 4/4 REFUSED x2, zero findings).
 - **(census-hardened from fire 1's honest fail)** the unknown-tool refusal
   law rides a normalized plain-string check: the roster fires through
   `error: 'not found'`, and template-literal cooked text is where regex
