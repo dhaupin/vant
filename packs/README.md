@@ -2001,13 +2001,30 @@ Where the remaining repo parts land:
   SHAPE/ADDRESS/SCHEMA/STEP exact incl. the ledger gap + re-open laws
   with the legal-accepts leg green; schemaRize lifts tr/0 → tr/1 via
   the rize-append ledger and leaves tr/1 untouched). Two fires green x2
-  (REFUSED 1 / 0 EXPLOITED; library rows 48/0/1), contract suite 356/0
-  with the EXPECTED row honest (the census child needs the fresh-module
-  ladder, graded 'skip' there, live x2 here). The honest census repair
-  the same pass: the route registration sat inside the brain-graph-walk
-  callback (re-running that route re-registered kit-contracts and
-  threw); the proto-hygiene sweep caught it as two findings, fixed by
-  moving the registration top-level.
+  (REFUSED 1 / 0 EXPLOITED; library rows 48/0/1), contract suite 357/0
+  with the EXPECTED rows honest (run-root-only children graded 'skip'
+  in-suite, live x2 in the fires). The honest census repairs the same
+  pass: the route registration sat inside the brain-graph-walk callback
+  (re-running that route re-registered kit-contracts and threw); the
+  proto-hygiene sweep caught it as two findings, fixed by moving the
+  registration top-level, and the ring leg's pin-split rode the
+  template-literal escape law (the outer template ate `\s`, so the
+  rendered child split the sha pin at the wrong place - the live fire
+  caught it as nine unpinned pairs, fixed with the escaped `\\s`).
+- **`vant-kit` second row — the VENDORING-RING census (2026-10-28).**
+  `kit-vendor-ring-census` (run-root route `kit-vendor-ring`): the
+  ring leg. The vendor script's own `--check` must answer exit 0 with
+  one `[ok]` per pin (9 sidecar pins: relay x4, traveler x4,
+  CarrierShare plate x1), AND an independent census child re-derives the
+  ring WITHOUT the script's bookkeeping — each pin must equal BOTH the
+  vendored copy's bytes and its kit source's head (a stale or swapped
+  copy fails either leg), every target stays inside `web/` (the one-way
+  boundary), a NEGATIVE control (one mutated byte changes the digest)
+  keeps sha() discriminating, and the two lenses must AGREE (script
+  `[ok]` count === census pair count; a pin one lens cannot see is a
+  finding). Two fires green x2 (REFUSED 2 / 0 EXPLOITED; library rows
+  48/0/1), contract 357/0 with the row graded 'skip' honestly (run-root
+  only census family).
 - **`web/kit` contracts — historical survey note (2026-10-27):** was
   contract SOURCE only (checksummed vendoring + parity pins in
   `test/relay-parity.test.js`), not a runtime; the CONTRACT shapes rode

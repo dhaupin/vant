@@ -452,6 +452,70 @@ const TEAMS_CHILD = `${CHILD_STDOUT_GUARD}
 // envelope laws, traveler shape laws, and the parity ring that pins every
 // vendoring copy against the kit sources (the README's open web survey
 // bite) - graded directly from the kit files, in a plain child process.
+// (kit vendoring-ring census 2026-10-28) the RING leg of the web/kit
+// census: the checksummed sidecar pins are the contract layer's deployment
+// guarantee - each vendored copy must hash to the pin, and the pin must be
+// the KIT HEAD'S hash, so a stale or swapped vendored copy fails both legs.
+// The census child derives the ring INDEPENDENTLY (walks the sidecars;
+// maps each target back to its kit source by name) so a vendoring-script
+// edit cannot hide behind the script's own bookkeeping, and grades a
+// NEGATIVE control (mutated bytes hash differently) to keep sha() honest.
+const VENDOR_RING_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const out = { family: 'kit-vendor-ring', ok: true, bail: null, pairs: [], negativeControl: false, containmentOk: false };
+    try {
+        const fs = require('fs');
+        const path = require('path');
+        const crypto = require('crypto');
+        const sha = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
+        const PINS = [
+            'web/dashboard/functions/lib/relay-contract.cjs.sha256',
+            'web/dashboard/functions/lib/relay-contract.d.cts.sha256',
+            'web/relay/functions/lib/relay-contract.cjs.sha256',
+            'web/relay/functions/lib/relay-contract.d.cts.sha256',
+            'web/dashboard/functions/lib/traveler-contract.cjs.sha256',
+            'web/dashboard/functions/lib/traveler-contract.d.cts.sha256',
+            'web/relay/functions/lib/traveler-contract.cjs.sha256',
+            'web/relay/functions/lib/traveler-contract.d.cts.sha256',
+            'web/dashboard/src/frame/CarrierShare.tsx.sha256',
+        ];
+        const sourceFor = (rel) => {
+            const base = path.basename(rel);
+            if (base.startsWith('relay-contract.')) return base.endsWith('.d.cts') ? 'web/kit/contracts/relay-contract.d.ts' : 'web/kit/contracts/relay-contract.js';
+            if (base.startsWith('traveler-contract.')) return base.endsWith('.d.cts') ? 'web/kit/contracts/traveler-contract.d.ts' : 'web/kit/contracts/traveler-contract.js';
+            if (base.startsWith('CarrierShare.')) return 'web/kit/components/carrier-share.tsx';
+            return null;
+        };
+        let allPinned = true, containmentOk = true;
+        for (const pinRel of PINS) {
+            const targetRel = pinRel.slice(0, -'.sha256'.length);
+            const srcRel = sourceFor(targetRel);
+            if (!srcRel) { allPinned = false; break; }
+            if (!targetRel.startsWith('web/')) containmentOk = false;
+            const pin = fs.readFileSync(pinRel, 'utf8').trim().split(/\\s+/)[0];
+            const targetSha = sha(fs.readFileSync(targetRel));
+            const headSha = sha(fs.readFileSync(srcRel));
+            const pinned = pin === targetSha && pin === headSha;
+            out.pairs.push({ rel: targetRel, pinned });
+            if (!pinned) allPinned = false;
+        }
+        out.containmentOk = containmentOk;
+        // negative control: the sha call must DISCRIMINATE - one mutated
+        // byte produces a different digest, so a pin can never pass by luck
+        const kitHead = fs.readFileSync('web/kit/contracts/relay-contract.js');
+        const mutated = Buffer.from(kitHead);
+        mutated[mutated.length - 1] = mutated[mutated.length - 1] ^ 0x01;
+        out.negativeControl = sha(kitHead) !== sha(mutated);
+        out.pairCount = out.pairs.length;
+        out.ok = allPinned && containmentOk && out.negativeControl && out.pairs.length === PINS.length;
+    } catch (e1) {
+        out.ok = false;
+        out.bail = String((e1 && e1.name) || '?') + ': ' + String((e1 && e1.message) || '').slice(0, 140);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
 const KIT_CONTRACTS_CHILD = `${CHILD_STDOUT_GUARD}
 (async () => {
     const out = { family: 'kit-contracts', ok: true, bail: null, census: [] };
@@ -2524,6 +2588,26 @@ const LIFECYCLE_CHILD = `${CHILD_STDOUT_GUARD}
     // (kit contracts census 2026-10-27) drive the web/kit contract census
     // (isPrivateIp walls, envelope/shape laws, vocabularies + parity pins)
     // in a fresh child process against the run root's copied web/kit.
+    // (kit vendoring-ring census 2026-10-28) the ring leg: the vendor
+    // script's --check (exit 0 + one [ok] per pin) AND the independent
+    // census child (pin === vendored bytes === kit head, negative control)
+    // must AGREE - two lenses on the same ring, one vivo answer.
+    harness.registerRoute('kit-vendor-ring', async () => {
+        let checkOut, censusOut;
+        try {
+            checkOut = execFileSync('node', ['scripts/vendor-relay-kit.js', '--check'], { cwd: ROOT, timeout: 60000, encoding: 'utf8' });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `vendor-ring --check failed: ${String(e.stdout || e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        try {
+            censusOut = execFileSync('node', ['-e', VENDOR_RING_CHILD], { cwd: ROOT, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `vendor-ring census child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        const okLines = String(checkOut).split('\n').filter((l) => l.startsWith('[ok]')).length;
+        return new Response(JSON.stringify({ script: { exit: 0, okLines }, census: JSON.parse(extractCtJson(censusOut)) }), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     harness.registerRoute('kit-contracts', async () => {
         let outText;
         try {

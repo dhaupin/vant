@@ -55,6 +55,35 @@ export default {
   description: 'web/kit contract discipline: frozen vocabularies refuse canary writes, the two-tier private-IP wall answers (hard metadata + 0.0.0.0 refuse in every posture), the envelope shape law holds at its 32/24-32/32/2+ hex shape, the traveler bank (shape/ledger/rizer) closes, and the schema-rizer never guesses forward',
   attacks: [
     {
+      name: 'kit-vendor-ring-census',
+      description: "the vendoring parity ring: the vendor script's --check answers exit 0 with one [ok] per pin (9 sidecar pins: relay relay x4, traveler x4, CarrierShare plate x1), AND an independent census child re-derives the ring WITHOUT the script's bookkeeping - each pin must equal BOTH the vendored copy's bytes and its kit source's head (a stale or swapped copy fails either leg), every target stays inside web/ (the one-way boundary), and a negative-control leg (one mutated byte changes the digest) keeps sha() discriminating",
+      async run(harness) {
+        const r = await tryRun(harness, 'kit-vendor-ring', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: '{}',
+        });
+        if (r._absent) return skip('no kit-vendor-ring route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `kit-vendor-ring threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return skip('kit-vendor-ring not armed');
+        const s = j.script || {};
+        const c = j.census || {};
+        const bad = (c.pairs || []).filter((p) => !p.pinned);
+        const broken = [];
+        if (s.exit !== 0) broken.push('the vendor --check exited non-zero');
+        if (!c.ok) broken.push('the independent census child failed: ' + (c.bail || 'unknown'));
+        if (bad.length) broken.push('unpinned copies: ' + bad.map((p) => p.rel).join(', '));
+        if (c.negativeControl !== true) broken.push('the negative control failed: sha() answers the same digest for mutated bytes');
+        if (c.containmentOk !== true) broken.push('a vendored target rode outside web/ (the one-way boundary)');
+        if (s.okLines !== c.pairCount) broken.push(`the two lenses disagree: script [ok] lines ${s.okLines} vs census pairs ${c.pairCount} - a pin exists one lens cannot see`);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: 'the vendoring ring broke at: ' + broken.join('; '), tookRequests: 2, evidence: { script: s, census: c } };
+        }
+        return { verdict: 'REFUSED', detail: `the vendoring parity ring holds end to end: the vendor --check answers exit 0 with [ok] on all ${c.pairCount} pins, the independent census child (no script bookkeeping) confirms every pin equals BOTH the vendored bytes and its kit source head, all targets stay inside web/ (the one-way boundary), and the negative control proves sha() discriminates - a drifted or swapped vendored copy cannot ship silently`, tookRequests: 2, evidence: { script: s, census: c } };
+      },
+    },
+    {
       name: 'kit-contracts-census',
       description: 'the web/kit contract census: freeze laws on every frozen vocabulary (canary writes refused), the two-tier private-IP wall (loopback/RFC1918/link-local/ULA true, 8.8.8.8-class misses false, fail-closed shape, and the HARD subset — cloud metadata + 0.0.0.0 — refusing in every posture while RFC1918 stays soft), the envelope shape law at its exact colon-separated hex shape (sub-shape, over-cap and no-colon bodies refuse), the traveler bank (wireTraveler stamps tr/1 + v.major 2, travelerShape refuses SHAPE/ADDRESS/SCHEMA/STEP with the legal-accepts leg green, ledger gap + re-open laws), and the schema-rizer lift (tr/0 -> tr/1 via the rize-append ledger, tr/1 untouched, unknown future refused)',
       async run(harness) {

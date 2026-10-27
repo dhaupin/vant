@@ -1231,6 +1231,14 @@ const EXPECTED = {
     // README ledger pins the verdicts).
     'vant-kit': {
         'kit-contracts-census': 'skip',
+        // (vendoring-ring census, ARMED 2026-10-28) the ring leg is another
+        // run-root-only child (the real-tree fs reads at cwd ROOT live in
+        // scripts/crashtest-run.js, not this suite's harness), so the
+        // contract grades it as an honest skip - the run fires grade it
+        // live x2 (exit-0 --check, pin === vendored bytes === kit head on
+        // all 9 sidecar pins, web/ containment, negative control,
+        // two-lens agreement), and the README ledger pins the verdicts.
+        'kit-vendor-ring-census': 'skip',
     },
     'vant-mcp': {
                 'tools-registry-census': 'skip',
