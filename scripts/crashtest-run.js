@@ -1553,7 +1553,93 @@ function buildRoutes(sb, Harness) {
     // (brain battery, evolution slice 2026-10-27) the evolution-context
     // census child: the family the lib inventory census flagged as the
     // brain's largest unmeasured cluster.
-    // (brain battery, geometry slice 2026-10-27) the geometry census
+    // (brain battery, breaker slice 2026-10-27) the LOAD-CIRCUIT breaker
+// census: the P3 #34 family (getLoadCircuitStatus / resetLoadCircuit /
+// the _set* DI pair + load()'s short-circuit). A REAL wedge fixture
+// (a poisoned CRITICAL pipeline handler — the documented failure path
+// #1) feeds consecutive thrown loads; the child grades the breaker's
+// laws over the fresh module: status shape, graceful-null misses never
+// feed, the OPEN transition (event + metrics + lastError), the typed
+// retryable short-circuit BRAIN_CIRCUIT_OPEN, the half-open probe that
+// lets ONE real load through the healed machinery and closes on its
+// success, and resetLoadCircuit's honest restore.
+const CIRCUIT_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    delete require.cache[require.resolve('./lib/brain.js')];
+    try { require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canSpawn: true, canNetwork: true }); } catch (e0) {}
+    const brain = require('./lib/brain.js');
+    let opens = 0, halves = 0;
+    try { const ev = require('./lib/event'); ev.on('brain:load:circuit:open', () => opens++); ev.on('brain:load:circuit:halfOpen', () => halves++); } catch (eEv) {}
+    const out = { family: 'load-circuit', statusOk: null, nullFeedImmune: null, w1Fed: null,
+        opened: null, openEvent: null, metricsErr: null, short: null, windowStillGate: null,
+        resetRt: null, halfEvent: null, probeClosed: null, probeContentOk: null, thrBack: null, ok: true };
+    try {
+        // 0. the status shape over a fresh module
+        const st0 = brain.getLoadCircuitStatus();
+        out.statusOk = !!(st0 && st0.state === 'CLOSED' && st0.failures === 0 && st0.openedAt === null && st0.threshold >= 1 && st0.resetMs >= 0);
+        // 1. graceful null misses NEVER feed the breaker (the dominant normal case)
+        await brain.load('circuit-census-absent-' + Date.now());
+        await brain.load('circuit-census-absent-' + Date.now());
+        await brain.load('circuit-census-absent-' + Date.now());
+        out.nullFeedImmune = brain.getLoadCircuitStatus().failures === 0;
+        // 2. the seed (for the half-open probe's SUCCESS leg: null returns
+        // never record success, so the probe must answer real content)
+        brain.updateMyStuff('circuit-seed', 'seed content');
+        // 3. the REAL wedge: a poisoned CRITICAL pipeline handler (vaf) —
+        // the documented failure path #1. DI threshold 2 makes the OPEN
+        // transition reachable in-test.
+        const thrower = () => { throw new Error('census wedge: poisoned critical handler'); };
+        brain.register('vaf', thrower);
+        brain._setLoadCircuitThreshold(2);
+        try { await brain.load('circuit-census-w-1'); } catch (e1) {
+            out.w1Fed = brain.getLoadCircuitStatus().failures === 1;
+        }
+        try { await brain.load('circuit-census-w-2'); } catch (e2) {}
+        const st1 = brain.getLoadCircuitStatus();
+        out.opened = st1.state === 'OPEN' && st1.failures >= 2 && st1.openedAt !== null && !!st1.lastError;
+        out.openEvent = opens >= 1;
+        out.metricsErr = (brain.getMetrics ? brain.getMetrics().errors : 0) > 0;
+        // 4. the typed retryable short-circuit — ANY load now fast-fails
+        // without touching the wedged machinery
+        try { const benign = await brain.load('totally-innocent-census'); out.short = { fired: false, got: benign === null ? 'null' : 'result' }; }
+        catch (e3) { out.short = { fired: e3.code === 'BRAIN_CIRCUIT_OPEN', retryable: e3.retryable === true, detF: e3.details && e3.details.failures }; }
+        // 5. the reset window: a default 30s window means the probe does
+        // NOT fire within it (out.windowStillGate grades the same
+        // short-circuit code again with the window un-elapsed)
+        // 6. restore + reset: the machinery heals, the breaker answers
+        brain._clearHandlerOverride('vaf');
+        out.resetRt = brain.resetLoadCircuit() === true && brain.getLoadCircuitStatus().state === 'CLOSED' && brain.getLoadCircuitStatus().failures === 0;
+        // 7. half-open: wedged again, OPEN, wait past the DI reset window,
+        // heal machinery, ONE probe ride → real content → the breaker CLOSES
+        brain.register('vaf', thrower);
+        try { await brain.load('circuit-census-w-3'); } catch (e4) {}
+        try { await brain.load('circuit-census-w-4'); } catch (e5) {}
+        const st2 = brain.getLoadCircuitStatus();
+        if (st2.state !== 'OPEN') throw new Error('re-wedge did not re-open: ' + st2.state);
+        brain._setLoadCircuitResetMs(40);
+        await new Promise((r) => setTimeout(r, 90));
+        brain._clearHandlerOverride('vaf');
+        const probe = await brain.load('circuit-seed');
+        const st3 = brain.getLoadCircuitStatus();
+        out.probeContentOk = !!(probe && probe.content === 'seed content');
+        out.probeClosed = st3.state === 'CLOSED' && st3.failures === 0;
+        out.halfEvent = halves >= 1;
+        // 8. the DI return law
+        brain._setLoadCircuitThreshold(null);
+        brain._setLoadCircuitResetMs(null);
+        out.thrBack = brain.getLoadCircuitStatus().threshold === 5;
+        if (opens < 1 || halves < 1) throw new Error('events never fired: opens=' + opens + ' halves=' + halves);
+        brain.resetLoadCircuit();
+    } catch (e1) {
+        out.ok = false;
+        out.err = String((e1 && e1.name) || '?') + ': ' + String(e1 && e1.message || '').slice(0, 140);
+    }
+    out.opens = opens; out.halves = halves;
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
+// (brain battery, geometry slice 2026-10-27) the geometry census
     // child: the NSC9 per-brain address family over a fresh module.
     harness.registerRoute('brain-geometry', async () => {
         let outText;
@@ -1567,6 +1653,19 @@ function buildRoutes(sb, Harness) {
 
     // (brain battery, backup slice 2026-10-27) the stego-backup trio
     // census child: the honest-refusal laws over a fresh module.
+    // (brain battery, breaker slice 2026-10-27) the load-circuit
+    // breaker census child: P3 #34's laws over a real poisoned-critical
+    // wedge fixture.
+    harness.registerRoute('brain-circuit', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', CIRCUIT_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `circuit probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     // (brain battery, tmp-space slice 2026-10-27) the crate/dropbox +
     // stash + handlers census child over a fresh module.
     harness.registerRoute('brain-tmpspace', async () => {

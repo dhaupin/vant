@@ -1211,6 +1211,39 @@ bootstrap/shutdown + framework config (7).
 
 
 
+### The load-circuit breaker census (2026-10-27) — the P3 #34 family
+
+`public/vant-brain` reaches **21 rows**. The breaker cluster (5 keys:
+getLoadCircuitStatus / resetLoadCircuit / the `_set*` DI pair + load()'s
+short-circuit) converts as `brain-load-circuit-laws`, graded over a REAL
+wedge fixture — a poisoned CRITICAL pipeline handler (the documented
+failure path #1) fed through `brain.register('vaf', thrower)`:
+
+- the fresh-module status shape is CLOSED/zero-failures with the env
+tunables visible; graceful null misses (3 consecutive absent loads)
+NEVER feed the breaker; consecutive THROWN loads open it at threshold —
+state OPEN, `openedAt` set, `lastError` named, the
+`brain:load:circuit:open` event fired, and `_metrics.errors` incremented
+(the dead-telemetry audit finding is what this family exists to keep
+alive); every subsequent load — including innocent names — fast-fails
+with the TYPED retryable `BRAIN_CIRCUIT_OPEN` carrying
+`details.failures`, the wedged machinery untouched; `resetLoadCircuit()`
+answers the honest `true` + CLOSED/zero restore; the half-open law rides
+the DI reset window: after it elapses ONE probe load passes through the
+healed machinery — its success (REAL content; a null miss never records
+success) closes the breaker, the `brain:load:circuit:halfOpen` event
+fired on the probe hand-off; and the `_setLoadCircuitThreshold(null)`
+return law restores the env/default threshold (5).
+
+The typed chain refusals (a hostile name's `SECURITY_PATH_TRAVERSAL`)
+throw BEFORE load()'s breaker-fed try block, so they never feed the
+breaker — that non-feeding is on the measured ledger too (the census
+read probed it and graded it honest: caller-input refusals are not
+machinery failures).
+
+Pack green ×2 deterministic (48 REFUSED / 0 EXPLOITED / 1 skipped each
+cycle), contract 333/0 with the row in the EXPECTED table, eslint clean.
+
 ### The tmp-space census (2026-10-27) — the crate/dropbox cluster
 
 `public/vant-brain` reaches **20 rows**. The biggest unmeasured cluster

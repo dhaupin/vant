@@ -1181,6 +1181,14 @@ const EXPECTED = {
         // the typed VAF_PATH_BLOCKED refusal (whose codes-table fix this
         // row's run caught live: the name was MISSING from lib/error.js).
         'brain-tmpspace-crate-stash-handlers': 'skip',
+        // (breaker census, ARMED 2026-10-27) the P3 #34 load-circuit
+        // family graded over a REAL poisoned-critical wedge fixture:
+        // consecutive thrown loads open the breaker named (event +
+        // metrics.errors + lastError), every load then fast-fails typed
+        // retryable BRAIN_CIRCUIT_OPEN, graceful null misses never feed
+        // it, the half-open probe rides the healed machinery once and
+        // closes on REAL content, and resetLoadCircuit restores honestly.
+        'brain-load-circuit-laws': 'skip',
     },
     'vant-crew': {
         'roster-quota-ceiling': 'REFUSED',

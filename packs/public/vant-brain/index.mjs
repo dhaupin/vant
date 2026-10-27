@@ -1135,6 +1135,52 @@ export default {
         return { verdict: 'REFUSED', detail: 'both crates hold their hostile-name records and full round-trips with honest absence, the stash stamps + clears honestly, the handler registry registers + delegates to null after, the dropbox enumerates nothing after clear, and the personal-file write stays CONFINED with the typed hostile refusal - the biggest census cluster is measured', tookRequests: 14 };
       },
     },
+    // ============ the load-circuit breaker census (2026-10-27) ============
+    {
+      name: 'brain-load-circuit-laws',
+      description: "the P3 #34 load-circuit breaker family (getLoadCircuitStatus / resetLoadCircuit / the _set* DI pair + load()'s short-circuit) graded over a REAL wedge fixture: a poisoned CRITICAL pipeline handler feeds consecutive thrown loads - the breaker opens typed with its event + metrics + lastError, any load then fast-fails with the typed retryable BRAIN_CIRCUIT_OPEN short-circuit, graceful null misses never feed it, the half-open probe lets ONE healed real load through and closes on its success, and resetLoadCircuit answers the honest restore",
+      async run(harness) {
+        const r = await tryRun(harness, 'brain-circuit', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        if (r._absent) return skip('no brain-circuit route');
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return { verdict: 'REFUSED', skipped: true, detail: ('circuit probe unavailable: ' + (j && j.error || 'no payload')) };
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the census child faulted mid-census: ' + (j.err || 'unknown'), tookRequests: 1 };
+        if (j.statusOk !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the fresh-module status answered ' + JSON.stringify(j.statusOk) + ' - CLOSED/zero-failures with its tunables is the documented fresh shape', tookRequests: 1 };
+        }
+        if (j.nullFeedImmune !== true) {
+          return { verdict: 'EXPLOITED', detail: 'graceful null misses fed the breaker (failures=' + JSON.stringify(j.nullFeedImmune) + ') - the dominant normal case must never feed the wedge breaker', tookRequests: 4 };
+        }
+        if (j.w1Fed !== true || j.opened !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the real wedge fed=' + JSON.stringify(j.w1Fed) + ' opened=' + JSON.stringify(j.opened) + ' - consecutive THROWN loads must open the breaker named (openedAt + lastError riding)', tookRequests: 2 };
+        }
+        if (j.openEvent !== true || j.metricsErr !== true) {
+          return { verdict: 'EXPLOITED', detail: 'open=' + JSON.stringify(j.openEvent) + ' metrics=' + j.metricsErr + ' - the OPEN transition must fire brain:load:circuit:open AND increment _metrics.errors (the dead-telemetry audit finding)', tookRequests: 2 };
+        }
+        const sh = j.short || {};
+        if (sh.fired !== true || sh.retryable !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the innocent-name load answered ' + JSON.stringify(sh) + ' - the OPEN breaker fast-fails typed retryable BRAIN_CIRCUIT_OPEN, the wedged machinery is never touched', tookRequests: 3 };
+        }
+        if (sh.detF !== 2 && sh.detF !== null && sh.detF !== undefined) {
+          return { verdict: 'EXPLOITED', detail: 'the short-circuit details ride failures=' + JSON.stringify(sh.detF) + ' - the coded answer names its failure count', tookRequests: 3 };
+        }
+        if (j.resetRt !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the reset leg answered ' + JSON.stringify(j.resetRt) + ' - resetLoadCircuit returns the honest true + CLOSED/zero restore', tookRequests: 6 };
+        }
+        if (j.probeContentOk !== true || j.probeClosed !== true || j.halfEvent !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the half-open probe: content=' + j.probeContentOk + ' closed=' + j.probeClosed + ' event=' + j.halfEvent + ' - after the reset window ONE probe rides the healed machinery; its SUCCESS (real content, never a null miss) closes the breaker', tookRequests: 10 };
+        }
+        if (j.thrBack !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the DI return law answered ' + j.thrBack + ' - null restores the env/default threshold (5)', tookRequests: 11 };
+        }
+        return { verdict: 'REFUSED', detail: 'the fresh status is CLOSED/zero, graceful null misses never feed it, a REAL poisoned-critical wedge opens it named (event + metrics.errors + lastError), every load then fast-fails typed retryable BRAIN_CIRCUIT_OPEN with its failure count, resetLoadCircuit restores honestly, and the half-open probe through healed machinery closes on real content - P3 #34 is measured', tookRequests: 11 };
+      },
+    },
   ],
 };
+
 
