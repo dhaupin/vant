@@ -1167,6 +1167,20 @@ const EXPECTED = {
         // address family + the stego-backup trio's honest-refusal laws
         'brain-geometry-nsc9-address-family': 'skip',
         'brain-stego-backup-trio-honest-refusals': 'skip',
+        // (crates/dropbox census, ARMED 2026-10-27) the crate/dropbox
+        // family (~15 keys): my-stuff crate round-trips + stash +
+        // handler-registry lifecycle + shared dropbox, all through the
+        // tmp-space store; absent reads answer honest {error:'not
+        // found'}, hostile names answer the typed path wall, delete is
+        // idempotent with the honest ack.
+        // (tmp-space census, ARMED 2026-10-27) the crate/dropbox family
+        // (~15 keys) graded as brain-tmpspace-crate-stash-handlers: both
+        // crates' hostile-name records + round-trips + honest absence,
+        // the stash lifecycle, the handler registry lifecycle, the shared
+        // dropbox enumeration, and the confined personal-file laws incl.
+        // the typed VAF_PATH_BLOCKED refusal (whose codes-table fix this
+        // row's run caught live: the name was MISSING from lib/error.js).
+        'brain-tmpspace-crate-stash-handlers': 'skip',
     },
     'vant-crew': {
         'roster-quota-ceiling': 'REFUSED',

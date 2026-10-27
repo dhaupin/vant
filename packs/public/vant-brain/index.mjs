@@ -1068,6 +1068,73 @@ export default {
         return { verdict: 'REFUSED', detail: 'backup demands refuse typed (VAF_REQUIRED_FIELD: the wrapper-only-arg law), foreign restores hit the path wall typed, absent local rasters answer typed absence, and the roster is honest-empty - NOTHING fake crosses the backup door; the trio stays a typed-refusing stub until it is properly wired (the stones/backup lane is the real surface, the census verdict is on the ledger)', tookRequests: 4 };
       },
     },
+
+    // ============ the tmp-space census (2026-10-27) ============
+    {
+      name: 'brain-tmpspace-crate-stash-handlers',
+      description: "the crate/dropbox + stash + handlers census (the biggest unmeasured cluster, ~15 keys): hostile names answer the honest error records in both crates (never a throw, never half-written), both crate round-trips hold (save/read/verbatim/list/delete + honest absence, never fabricated crates), the stash lifecycle stamps + reads + clears honestly, the handler registry registers/clears with its null-after shape, and the personal-file write lands CONFINED in the brain's own tree (the hostile key refuses typed VAF_PATH_BLOCKED)",
+      async run(harness) {
+        const r = await tryRun(harness, 'brain-tmpspace', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        if (r._absent) return skip('no brain-tmpspace route');
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return { verdict: 'REFUSED', skipped: true, detail: ('tmpspace probe unavailable: ' + (j && j.error || 'no payload')) };
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the census child faulted mid-census: ' + (j.err || 'unknown'), tookRequests: 1 };
+        // the MY crate
+        const hd = j.hostileMyDrop || {};
+        if (!hd.error || hd.name !== '..' + '/evil-x') {
+          return { verdict: 'EXPLOITED', detail: 'a hostile my-crate name answered ' + JSON.stringify(hd) + ' - the honest error record names itself, never a throw, never a half-write', tookRequests: 1 };
+        }
+        if (!j.myDrop || j.myDrop.saved !== 'notes-a' || !j.myGet || j.myGet.content !== 'pack content') {
+          return { verdict: 'EXPLOITED', detail: 'the my-crate round-trip answered ' + JSON.stringify(j.myDrop) + '/' + JSON.stringify(j.myGet) + ' - save/read must be verbatim', tookRequests: 2 };
+        }
+        if (!j.myGetMiss || j.myGetMiss.error !== 'not found') {
+          return { verdict: 'EXPLOITED', detail: 'an absent crate key answered ' + JSON.stringify(j.myGetMiss) + ' - the honest absence is a record, never fabricated content, never a throw', tookRequests: 3 };
+        }
+        if (!j.MyList || !Array.isArray(j.MyList.files) || j.MyList.files.length !== 1) {
+          return { verdict: 'EXPLOITED', detail: 'the crate roster served ' + JSON.stringify(j.MyList) + ' - the enumeration answers what was stored', tookRequests: 4 };
+        }
+        if (!j.myDelete || j.myDelete.deleted !== 'notes-a' || !j.myDeleted || j.myDeleted.error !== 'not found') {
+          return { verdict: 'EXPLOITED', detail: 'the delete leg answered ' + JSON.stringify(j.myDelete) + '/' + JSON.stringify(j.myDeleted) + ' - the crate delete is a real removal', tookRequests: 5 };
+        }
+        // the stash
+        if (j.stashWrite !== true || j.stashRead !== true || j.stashStashStamp !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the stash lifecycle: write=' + j.stashWrite + ' read=' + j.stashRead + ' stamp=' + j.stashStashStamp + ' - a stash must stamp, serve verbatim, and carry its timestamp', tookRequests: 6 };
+        }
+        if (!(j.stashCleared && j.stashCleared.cleared === true) || j.stashEmptyAfter !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the stash clear leg answered ' + j.stashCleared + '/' + JSON.stringify(j.stashEmptyAfter) + ' - the cleared stash is the honest EMPTY shape', tookRequests: 7 };
+        }
+        // the handlers
+        if (!(j.regStream && j.regStream.success === true) || !(j.regMessage && j.regMessage.success === true) || j.handlersRead !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the handler registry answered ' + JSON.stringify(j.regStream) + '/' + JSON.stringify(j.regMessage) + '/' + j.handlersRead + ' - stream + message must register and read back', tookRequests: 8 };
+        }
+        if (!(j.handlersCleared && j.handlersCleared.cleared === true) || j.handlersNullAfter !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the registry clear leg answered ' + j.handlersCleared + '/' + JSON.stringify(j.handlersNullAfter) + ' - the cleared registry is the honest null shape', tookRequests: 9 };
+        }
+        // the shared dropbox
+        if (!j.drop || !j.get || j.get.content !== 'drop content' || !j.getMiss || j.getMiss.error !== 'not found' || !j.fileDelete || j.fileDelete.deleted !== 'shared-a' || !(j.dropCleared && j.dropCleared.cleared === true)) {
+          return { verdict: 'EXPLOITED', detail: 'the shared dropbox ride failed one of its legs: ' + JSON.stringify(j.drop) + '/' + JSON.stringify(j.get) + '/' + JSON.stringify(j.getMiss) + '/' + JSON.stringify(j.fileDelete) + '/' + j.dropCleared, tookRequests: 10 };
+        }
+        if (!j.listAfterClear || !Array.isArray(j.listAfterClear.files) || j.listAfterClear.files.length !== 0) {
+          return { verdict: 'EXPLOITED', detail: 'the dropbox roster after clear served ' + JSON.stringify(j.listAfterClear) + ' - the cleared dropbox enumerates NOTHING', tookRequests: 11 };
+        }
+        // the personal-file laws
+        if (typeof j.myStuffShape !== 'number' || j.myStuffShape < 1) {
+          return { verdict: 'EXPLOITED', detail: 'myStuff answered count=' + j.myStuffShape + ' - the personal reader needs the loaded/count shape over the REAL brain files', tookRequests: 12 };
+        }
+        const hu = j.hostileUpdate || {};
+        if (hu.threw !== true || hu.code !== 'VAF_PATH_BLOCKED') {
+          return { verdict: 'EXPLOITED', detail: 'a hostile personal-file key answered ' + JSON.stringify(hu) + ' - the FileStore write must refuse typed (path validation before path use)', tookRequests: 13 };
+        }
+        if (j.updateAck !== true || j.updateConfined !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the confined write answered ack=' + j.updateAck + ' confined=' + j.updateConfined + ' - the personal file must ride the FileStore verbatim into the brain tree (no corpus escape)', tookRequests: 14 };
+        }
+        return { verdict: 'REFUSED', detail: 'both crates hold their hostile-name records and full round-trips with honest absence, the stash stamps + clears honestly, the handler registry registers + delegates to null after, the dropbox enumerates nothing after clear, and the personal-file write stays CONFINED with the typed hostile refusal - the biggest census cluster is measured', tookRequests: 14 };
+      },
+    },
   ],
 };
 

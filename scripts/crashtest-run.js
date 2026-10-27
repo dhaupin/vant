@@ -875,6 +875,77 @@ const BACKUP_CHILD = `${CHILD_STDOUT_GUARD}
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
 
+// (brain battery, tmp-space slice 2026-10-27) the CRATE/DROPBOX +
+// STASH + HANDLERS census: the family the lib inventory census named
+// as the biggest unmeasured cluster (~15 keys). A FIXED script over a
+// fresh brain module grades every law's neutral facts: the hostile-name
+// honest records, the save/read/list/delete round-trips in both crates,
+// the stash lifecycle, the handler registry lifecycle, and the personal
+// files reader.
+const TMPSPACE_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    delete require.cache[require.resolve('./lib/brain.js')];
+    try { require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canSpawn: true, canNetwork: true }); } catch (e0) {}
+    const brain = require('./lib/brain.js');
+    const fsMod = require('fs');
+    const out = { family: 'tmp-space', hostileMyDrop: null, myDrop: null, myGet: null, myGetMiss: null,
+        MyList: null, myDelete: null, myDeleted: null, stashWrite: null, stashRead: null, stashStashStamp: null,
+        stashCleared: null, stashEmptyAfter: null, regStream: null, regMessage: null, handlersRead: null,
+        handlersCleared: null, handlersNullAfter: null, drop: null, get: null, getMiss: null,
+        fileDelete: null, dropCleared: null, listAfterClear: null, myStuffShape: null,
+        hostileUpdate: null, updateAck: null, updateConfined: null, ok: true };
+    try {
+        // the MY crate
+        out.hostileMyDrop = brain.myDropFile('../evil-x', 'c'); // the honest error record, never a throw?
+        out.myDrop = brain.myDropFile('notes-a', 'pack content');
+        out.myGet = brain.myGetFile('notes-a');
+        out.myGetMiss = brain.myGetFile('never-stored');
+        out.MyList = brain.myListFiles();
+        out.myDelete = brain.myDeleteFile('notes-a');
+        out.myDeleted = brain.myGetFile('notes-a');
+        // the STASH
+        const sw = brain.stashYourStuff({ note: 'pack-stash' });
+        out.stashWrite = sw && sw.stashed === true;
+        const sr = brain.yourStuff();
+        out.stashRead = !!(sr && sr.note === 'pack-stash');
+        out.stashStashStamp = !!(sr && typeof sr.stashed === 'number');
+        out.stashCleared = brain.clearYourStuff();
+        const se = brain.yourStuff();
+        out.stashEmptyAfter = !!(se && se.empty === true);
+        // the HANDLERS registry
+        out.regStream = brain.onStream(function streamHandler() {});
+        out.regMessage = brain.onMessage(function messageHandler() {});
+        const h = brain.getHandlers();
+        out.handlersRead = !!(h && typeof h.stream === 'string' && typeof h.message === 'string');
+        out.handlersCleared = brain.clearHandlers();
+        const h2 = brain.getHandlers();
+        out.handlersNullAfter = !!(h2 && h2.stream === null && h2.message === null);
+        // the SHARED dropbox
+        out.drop = brain.dropFile('shared-a', 'drop content');
+        out.get = brain.getFile('shared-a');
+        out.getMiss = brain.getFile('never-dropped');
+        out.fileDelete = brain.deleteFile('shared-a');
+        out.dropCleared = brain.clearDropbox();
+        out.listAfterClear = brain.listFiles();
+        // the PERSONAL files reader + the filestore write law
+        const st = brain.myStuff();
+        out.myStuffShape = st && typeof st.count === 'number' && Array.isArray(st.loaded) ? st.count : null;
+        try { brain.updateMyStuff('../evil-y', 'c'); out.hostileUpdate = { threw: false }; }
+        catch (e5) { out.hostileUpdate = { threw: true, code: e5 && e5.code }; }
+        try {
+            const upd = brain.updateMyStuff('census-note-update', 'census fs content');
+            out.updateAck = !!(upd && upd.success === true && upd.updated === 'census-note-update');
+            const vd = 'models' + '/private/vant/census-note-update.md';
+            out.updateConfined = !fsMod.existsSync('models/private/vant/NOT-corpus/census-note-update.md') && fsMod.readFileSync(vd, 'utf8') === 'census fs content';
+        } catch (e6) { out.updateAck = out.updateAck || null; out.updateConfined = out.updateConfined || null; }
+    } catch (e1) {
+        out.ok = false;
+        out.err = String((e1 && e1.name) || '?') + ': ' + String(e1 && e1.message || '').slice(0, 140);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
 // Stones probe: the REAL seal → decode chain// (brain battery, evolution slice 2026-10-27) the EVOLUTION-CONTEXT
 // probe: a FIXED lifecycle census over a fresh brain module in the
 // sandbox (start → record → auto-lists → copy law → end → history).
@@ -1496,6 +1567,18 @@ function buildRoutes(sb, Harness) {
 
     // (brain battery, backup slice 2026-10-27) the stego-backup trio
     // census child: the honest-refusal laws over a fresh module.
+    // (brain battery, tmp-space slice 2026-10-27) the crate/dropbox +
+    // stash + handlers census child over a fresh module.
+    harness.registerRoute('brain-tmpspace', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', TMPSPACE_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `tmpspace probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     harness.registerRoute('brain-backup-image', async () => {
         let outText;
         try {

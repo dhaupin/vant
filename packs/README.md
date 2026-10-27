@@ -1210,6 +1210,29 @@ contract 331/0, lint clean). Remaining census clusters: crate/dropbox
 bootstrap/shutdown + framework config (7).
 
 
+
+### The tmp-space census (2026-10-27) — the crate/dropbox cluster
+
+`public/vant-brain` reaches **20 rows**. The biggest unmeasured cluster
+(~15 keys) converts as `brain-tmpspace-crate-stash-handlers`, graded in
+the EXPECTED table (skip arm): hostile names answer the honest error
+records in BOTH crates (`{error, name}` — never a throw, never a
+half-write), both crate round-trips hold verbatim (save/read/list/
+delete + honest `not found` absence), the stash lifecycle stamps +
+reads + clears honestly (`{cleared: true}` object shape), the handler
+registry registers stream+message, reads back, and clears to the null
+shape, the shared dropbox rides its own round-trip and enumerates
+NOTHING after clear, and the personal-file write lands CONFINED in the
+brain's own tree — the hostile key refusing typed.
+
+**LIVE FINDING (fixed in the same pass)**: the hostile-key row
+answered `{ code: 'UNKNOWN' }` — `errors.CODES.VAF_PATH_BLOCKED` was
+MISSING from the codes table in lib/error.js. Five call sites request it
+(brain `updateMyStuff`/`switchBrain`/`switchCurrent`, remote naming), so
+their typed refusals silently degraded to UNKNOWN while file.js and
+brain-lock.js (literal string) always worked. The table now carries the
+name; the row grades the typed wall `VAF_PATH_BLOCKED` and the two
+hostile-listing calls answer it typed as well.
 ### Guests battery (same pass) — the lib lifecycle converts + the trim
 
 `public/vant-brain` reaches **19 rows** (9 security + 7 brain-unit + 3
