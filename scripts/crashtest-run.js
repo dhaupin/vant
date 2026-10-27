@@ -1726,6 +1726,110 @@ const MCP_CENSUS_CHILD = `${CHILD_STDOUT_GUARD}
     process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
+// (api-object census 2026-10-27) the API object's OWN census: the doors
+// live behind NO port (execute/read/write + the memory and dropbox
+// families are in-process), so the child re-arms the whole ladder over
+// fresh modules: the auth LADDER (unconfigured = fail closed, the
+// configured ladder answers through the ONE validated executor,
+// getAuthStatus behind the same wall, the failure counter now faithful),
+// the generic execute door (function ops direct, tool ops through
+// lib/mcp with the schema gate), and the memory + dropbox families.
+const API_CENSUS_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const fsMod = require('fs');
+    const pathMod = require('path');
+    const out = { family: 'api-object', ok: true, bail: null };
+    try {
+        try { require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true }); } catch (e0) {}
+        const freshApi = () => {
+            delete require.cache[require.resolve('./lib/api.js')];
+            return require('./lib/api.js');
+        };
+        // ---- rung 1: the UNCONFIGURED, auth-REQUIRED door fails CLOSED
+        delete process.env.VANT_AUTH_KEY;
+        delete process.env.VANT_API_KEY;
+        delete process.env.VANT_MCP_API_KEY;
+        const a1 = freshApi();
+        let bareNo = null;
+        try { await a1.read('brain_load', { name: 'identity' }); bareNo = 'OPEN-BAD'; }
+        catch (e) { bareNo = e.code === 'AUTH_DENIED'; }
+        out.noKeyBareRefused = bareNo === true;
+        // the not-required rung keeps its honesty: the dev door OPENS and
+        // still answers typed through the ONE validated executor
+        const dev = a1.create({ requireAuth: false });
+        let fnOp = null;
+        try { fnOp = await dev.execute('read', () => 'op-ok', {}); } catch (e) { fnOp = 'THREW ' + e.code; }
+        out.devFunctionOpDirect = fnOp === 'op-ok';
+        let devGate = null;
+        try { devGate = await dev.read('brain_load', {}); } catch (e) { devGate = { threw: String(e.code || e.message).slice(0, 40) }; }
+        out.devToolGateTyped = !!(devGate && devGate.error === 'MCP_INPUT_INVALID');
+        // ---- rung 2: the CONFIGURED ladder
+        process.env.VANT_AUTH_KEY = 'census-api-key-42';
+        const a2 = freshApi();
+        const KEY = { secret: 'census-api-key-42' };
+        let bare2 = null;
+        try { await a2.read('brain_load', {}); bare2 = 'OPEN-BAD'; }
+        catch (e) { bare2 = e.code === 'AUTH_DENIED'; }
+        out.bareRefusedAfterConfig = bare2 === true;
+        let wrong2 = null;
+        try { await a2.read('brain_load', { secret: 'guessed-key' }); wrong2 = 'OPEN-BAD'; }
+        catch (e) { wrong2 = e.code === 'AUTH_DENIED'; }
+        out.wrongKeyRefusedTyped = wrong2 === true;
+        // the authed rung ANSWERS: write lands through the object-op door
+        // and reads back through the same door (one round trip, no drift)
+        let w2 = null;
+        try { w2 = await a2.write({ name: 'brain_write', params: { name: 'census-api-layer', content: 'layer canary' } }, KEY); } catch (e) { w2 = { threw: String(e.code || e.message).slice(0, 40) }; }
+        out.authedWriteLands = !!(w2 && w2.saved === true) && fsMod.existsSync(pathMod.join('models', 'private', 'vant', 'census-api-layer.md')) && fsMod.readFileSync(pathMod.join('models', 'private', 'vant', 'census-api-layer.md'), 'utf8') === 'layer canary';
+        // (the live brain_load registration accepts the brains key as
+        // string OR array; the string form loads one brain - array answers
+        // null, the live-fire finding the README census paragraph files)
+        let r2 = null;
+        try { r2 = await a2.read({ name: 'brain_load', params: { brains: 'census-api-layer' } }, KEY); } catch (e) { r2 = { threw: String(e.code || e.message).slice(0, 40) }; }
+        out.authedObjectRoundTrip = !!(r2 && r2.name === 'census-api-layer' && (r2.content === 'layer canary' || r2.contents === 'layer canary') && !r2.error);
+        let sGate = null;
+        try { sGate = await a2.read('brain_load', KEY); } catch (e) { sGate = { threw: String(e.code || e.message).slice(0, 40) }; }
+        out.arglessStringOpGateTyped = !!(sGate && sGate.error === 'MCP_INPUT_INVALID');
+        let unk2 = null;
+        try { unk2 = await a2.read('definitely_not_a_tool_xyz', KEY); } catch (e) { unk2 = { threw: String(e.code || e.message).slice(0, 40) }; }
+        // (template-literal escape law) the child body is a cooked template
+        // string, so backslash regexes do not survive the ride reliably -
+        // a normalized plain-string law is deterministic regardless of how
+        // the text reaches the executor.
+        const unkText = String((unk2 && unk2.error) || '').toLowerCase().replace(/[^a-z]/g, '');
+        out.unknownToolRefusedTyped = !!(unk2 && unk2.error && unkText.indexOf('notfound') !== -1);
+        out.unknownToolDump = JSON.stringify(unk2).slice(0, 140);
+        // getAuthStatus rides the same wall: secretless = typed refusal,
+        // authed = the honest shape with the FAITHFUL failure counter
+        let st1 = null;
+        try { a2.getAuthStatus(); st1 = 'OPEN-BAD'; } catch (e) { st1 = e.code === 'AUTH_DENIED'; }
+        out.statusWallSecretless = st1 === true;
+        let st2 = null;
+        try { st2 = a2.getAuthStatus(KEY); } catch (e) { st2 = { threw: String(e.code || e.message).slice(0, 40) }; }
+        out.statusShapeAuthed = !!(st2 && !st2.threw && st2.requireAuth === true && typeof st2.authFailures === 'number' && st2.authFailures >= 1);
+        // ---- rung 3: the memory + dropbox families (bare doors)
+        try { await a2.memoryState('census-api-mem', 'v2'); out.memStateRecall = (await a2.memoryRecall('census-api-mem')) === 'v2'; } catch (e) { out.memStateRecall = false; }
+        try { await a2.memoryLearn('census-api-learn', 'content api'); out.memLearnQuery = (await a2.memoryQuery('census-api-learn')) === 'content api'; } catch (e) { out.memLearnQuery = false; }
+        try { out.memQueryMiss = (await a2.memoryQuery('census-api-learn-miss')) === null; } catch (e) { out.memQueryMiss = false; }
+        try {
+            await a2.brainDropFile('census-api-drop', 'dropped payload');
+            const got = await a2.brainGetFile('census-api-drop');
+            const listed = await a2.brainListFiles();
+            await a2.brainDeleteFile('census-api-drop');
+            const gone = await a2.brainGetFile('census-api-drop');
+            out.dropSharedRoundTrip = !!(got && got.content === 'dropped payload' && Array.isArray(listed.files) && listed.files.some((f) => (typeof f === 'string' ? f.indexOf('census-api-drop') !== -1 : (f && f.name === 'census-api-drop'))) && gone && gone.error === 'not found');
+        } catch (e) { out.dropSharedRoundTrip = false; }
+        try {
+            await a2.brainMyDropFile('census-api-my', 'my payload');
+            const got = await a2.brainMyGetFile('census-api-my');
+            out.dropPrivateRoundTrip = !!(got && got.content === 'my payload' && got.type === 'myStuff');
+        } catch (e) { out.dropPrivateRoundTrip = false; }
+    } catch (e1) {
+        out.ok = false;
+        out.bail = String((e1 && e1.name) || '?') + ': ' + String((e1 && e1.message) || '').slice(0, 140);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
 const CIRCUIT_CHILD = `${CHILD_STDOUT_GUARD}
 (async () => {
     delete require.cache[require.resolve('./lib/brain.js')];
@@ -2064,6 +2168,20 @@ const LIFECYCLE_CHILD = `${CHILD_STDOUT_GUARD}
         } catch (e) {
             return new Response(JSON.stringify({ error: `mcp-tools-census probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
         }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
+
+    // (api-object census 2026-10-27) the API object's in-process census:
+    // execute/read/write + memory/dropbox answers, fresh-module ladder.
+    harness.registerRoute('api-layer', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', API_CENSUS_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `api-layer probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        try { require('fs').writeFileSync('/tmp/api-census-last.json', outText); } catch (e9) {}
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 

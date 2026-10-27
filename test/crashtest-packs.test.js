@@ -1242,6 +1242,21 @@ const EXPECTED = {
         'rest-mcp-door-args-parity': 'REFUSED',
         'rest-bent-body-fuzz-floor': 'REFUSED',
         'rest-typed-gate-is-the-answer': 'REFUSED',
+        // ARMED 2026-10-27 (the api-object census family): the api-layer
+        // child re-arms the API object's in-process surface. The auth
+        // ladder and the generic door are earned-backed by TWO live finds
+        // fixed in the same pass: the generic execute door rode a
+        // vant.execute that lib/vant never exports (a TypeError escaped even
+        // authenticated callers), and getAuthStatus's authFailures counter
+        // was dead state. The census also files the duplicate brain_load
+        // registration (array answers null) as a live finding.
+        // run-root census family: the api-layer child needs the fresh-module
+        // ladder, so the contract grades them as honest skips (the run fires
+        // grade them live x2, the README ledger pins the verdicts).
+        'api-object-auth-failclosed': 'skip',
+        'api-object-authed-answers': 'skip',
+        'api-object-generic-door-typed': 'skip',
+        'api-object-family-census': 'skip',
     },
     'vant-stones': {
         'stone-scope-honesty': 'REFUSED',

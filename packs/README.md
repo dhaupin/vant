@@ -1390,6 +1390,44 @@ growth surfaces, in census-cluster shape:
 reference anywhere) — that name was a chat-summary typo only, never a
 code defect.
 
+### The api-object census (2026-10-27) — the API object's own layer
+
+`public/vant-rest` reaches **13 rows** (9 + the four census rows): the survey's largest growth cluster
+(the `lib/api.js` execute/read/write object + the memory and dropbox
+families) converts as the `api-layer` census child, fresh module ladder ×2
+green (all 17 rungs true both cycles, contract 343/0, lint clean):
+
+- **two live finds, fixed in the same pass**:
+  1. the generic `execute` door rode a `getFramework().execute` that
+     `lib/vant` NEVER exports — even an AUTHENTICATED caller escaped a raw
+     TypeError. Function ops now run direct under the pipeline mode chain
+     (the documented shape); tool ops answer through the ONE validated
+     executor (`lib/mcp.execute`), so missing args and unknown names
+     answer the typed gate (`MCP_INPUT_INVALID` / `not found`), never a
+     crash.
+  2. `getAuthStatus`'s `authFailures` counter was dead state — `authenticate`
+     mapped the verdict but never counted. The failure counter is now
+     faithful (ticks on wrong attempts; `locked` has a signal again).
+- **the auth ladder law**: with NO key configured, an auth-REQUIRED door
+  fails closed (the #189 accept-all honesty holds on the API object too);
+  bare/wrong-key calls refuse typed `AUTH_DENIED` even with a key
+  configured, EVERY caller including the auth status reporter rides the
+  same wall; the not-required dev door still OPENS and answers typed;
+  the authed rung runs the REAL layer (write lands on disk, the same door
+  carries the read back verbatim).
+- **the family census**: memoryState/recall round-trip exact, learn/query
+  exact + miss null, the shared dropbox closes its loop on a typed
+  `not found`, the private myStuff dropbox lands inside `models/tmp-space`.
+- **live finding, filed not fixed** (out of slice): `lib/mcp.js` registers
+  `brain_load` TWICE (line ~276 `{name}`/line ~486 `brains`); the LIVE
+  schema accepts `brains` as string OR array but the handler feeds any
+  array straight to `brain.load(name...)` — an array of names answers
+  null. Honest-dead pair; a candidate for the next seam pass.
+- **(census-hardened from fire 1's honest fail)** the unknown-tool refusal
+  law rides a normalized plain-string check: the roster fires through
+  `error: 'not found'`, and template-literal cooked text is where regex
+  backslashes go to die — the child measures the ANSWER, never the spelling.
+
 ### The remote/watch/cache census (2026-10-27) — the 9-key cluster
 
 `public/vant-brain` reaches **22 rows**. The remote tunnel + watcher +

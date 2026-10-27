@@ -16,6 +16,13 @@
 //                 honest round trip through the chain; status/headers/body
 //                 are the chain's own answer, untouched.
 //
+// * api-layer     POST, empty body -> the api-object census child's out
+//                 (family 'api-object'): the auth LADDER (unconfigured
+//                 fail-closed, configured ladder through the ONE validated
+//                 executor, getAuthStatus wall + faithful counter), the
+//                 generic execute door (function ops direct, tool ops
+//                 typed), and the memory + dropbox families.
+//
 // VALIDATED 2026-10-24: fuzz-floor / CORS / session rows. Armed 2026-10-22
 // (crashtest v1.0.0-on-npm port of the qs-shapes oracle family): the
 // urlencoded-body two below — lib/server's BodyParser genuinely parses
@@ -409,6 +416,94 @@ export default {
           }
         }
         return { verdict: 'REFUSED', detail: "all ten remaining doors run their tools with the exact arg names (domain answers throughout: stream roster/create, brain state/ls/save acked, trust record acked, market list/bid), the door-created listing is served by market_get and its trade rides the tool's own domain answer, and the brain note the door saved carries the forwarded body verbatim - the door table is fully measured", tookRequests: fired.length + (listingId ? 2 : 0) };
+      },
+    },
+    {
+      name: 'api-object-auth-failclosed',
+      description: 'the API object lives behind NO port - its execute/read/write doors with auth REQUIRED must fail CLOSED when no key is configured (never accept-anything), and bare/wrong-key calls refuse typed even with a key configured',
+      async run(harness) {
+        const r = await tryRun(harness, 'api-layer', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({}) });
+        if (r._absent) return skip('no api-layer route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `api-layer threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error || j.bail) return skip('api-layer not armed');
+        const laws = [
+          ['unconfigured bare call', j.noKeyBareRefused],
+          ['configured bare call', j.bareRefusedAfterConfig],
+          ['wrong key call', j.wrongKeyRefusedTyped],
+          ['getAuthStatus secretless', j.statusWallSecretless],
+        ];
+        const broken = laws.filter(([, ok2]) => !ok2);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: `the auth ladder failed closed-violated at: ${broken.map(([n]) => n).join(', ')}`, tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: 'every secretless/wrong-key call answers typed AUTH_DENIED - the unconfigured required door fails closed (never accept-all) and even the auth status reporter rides the same wall', tookRequests: 1 };
+      },
+    },
+    {
+      name: 'api-object-authed-answers',
+      description: 'with a key configured and presented, the generic door ANSWERS: an authed write lands through the object-op door and reads back through the same door, and getAuthStatus reports the honest shape with a faithful failure counter',
+      async run(harness) {
+        const r = await tryRun(harness, 'api-layer', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({}) });
+        if (r._absent) return skip('no api-layer route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `api-layer threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error || j.bail) return skip('api-layer not armed');
+        const laws = [
+          ['authed write lands', j.authedWriteLands],
+          ['authed round trip', j.authedObjectRoundTrip],
+          ['authed status shape', j.statusShapeAuthed],
+        ];
+        const broken = laws.filter(([, ok2]) => !ok2);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: `the authed rung failed at: ${broken.map(([n]) => n).join(', ')}`, tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: 'the authed rung runs the REAL layer: write lands on disk, the same door carries the read back verbatim, and the failure counter ticks on the wrong attempts it saw', tookRequests: 1 };
+      },
+    },
+    {
+      name: 'api-object-generic-door-typed',
+      description: 'the generic execute door must never escape a crash in either posture: function ops run direct, tool ops answer through the ONE validated executor (typed schema gate for argless/unknown), and no TypeError escapes an authenticated caller',
+      async run(harness) {
+        const r = await tryRun(harness, 'api-layer', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({}) });
+        if (r._absent) return skip('no api-layer route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `api-layer threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error || j.bail) return skip('api-layer not armed');
+        const laws = [
+          ['function op direct', j.devFunctionOpDirect],
+          ['dev door tool gate typed', j.devToolGateTyped],
+          ['argless string op gate typed', j.arglessStringOpGateTyped],
+          ['unknown tool refused typed', j.unknownToolRefusedTyped],
+        ];
+        const broken = laws.filter(([, ok2]) => !ok2);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: `the generic door broke the no-escape law at: ${broken.map(([n]) => n).join(', ')}`, tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: 'function ops run under the pipeline mode chain, tool ops answer through the validated executor - missing args and unknown names answer the typed gate, the old freeway noop TypeError escape is closed', tookRequests: 1 };
+      },
+    },
+    {
+      name: 'api-object-family-census',
+      description: 'the api-object families round-trip honestly: the memory state/learn/query doors, the shared dropbox (set/get/list/delete closes on typed not-found), and the private myStuff dropbox',
+      async run(harness) {
+        const r = await tryRun(harness, 'api-layer', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({}) });
+        if (r._absent) return skip('no api-layer route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `api-layer threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error || j.bail) return skip('api-layer not armed');
+        const laws = [
+          ['memory state/recall', j.memStateRecall],
+          ['memory learn/query', j.memLearnQuery],
+          ['memory query miss', j.memQueryMiss],
+          ['shared dropbox round trip', j.dropSharedRoundTrip],
+          ['private dropbox round trip', j.dropPrivateRoundTrip],
+        ];
+        const broken = laws.filter(([, ok2]) => !ok2);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: `the api-object family broke at: ${broken.map(([n]) => n).join(', ')}`, tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: 'the memory doors state/learn/query round-trip exact (miss answers null), the shared dropbox closes its loop on a typed not-found, and the private myStuff dropbox lands inside models/tmp-space', tookRequests: 1 };
       },
     },
   ],
