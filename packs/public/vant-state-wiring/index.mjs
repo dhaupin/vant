@@ -979,5 +979,55 @@ export default {
         return { verdict: 'REFUSED', detail: 'the scope gate rejects both irrational shapes typed (nothing stored), the visibility triad holds at search/get/stats with the non-member id views stripped, the stranger trade rides E_SCOPE, the cancel matrix answers its three honest envelopes over a REAL debited trade, the consentless bid refuses governance-typed, and desc-less + reward-less bids persist - the earlier listings survive on disk', tookRequests: 14 };
       },
     },
+
+    // ============ the market skills-gate census (2026-10-27) ============
+    {
+      name: 'market-skills-gate-and-lifecycle-laws',
+      description: "the skills prototype's gate cluster: the OFF gate inerts all six ops (listSkill, buySkill, deliverSkill, settleSkill, skillStatus, skillSweep) typed E_SKILLS_DISABLED (inert, never absent), the ON gate carries the kind boundary (any non text|code payloadKind refuses E_SKILL_PAYLOAD_KIND with the declared why), the role walls (the buyer cannot deliver), the delivery hash law (64-hex, real sha256 of the bytes), the settle discipline (bad decision typed, identity-anchor demanded, buyer-only confirm settles with the trust feed written), the on-demand sweep answers, and the gate flips honestly both ways",
+      async run(harness) {
+        let raw = null, res = null, absent = false;
+        try {
+          res = await harness.run('wiring-market-census', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ section: 'skills' }),
+          });
+          if (typeof res.body === 'string') raw = res.body;
+          else if (typeof res.text === 'function') { try { raw = await res.text(); } catch { raw = ''; } }
+          else if (res.response && typeof res.response.text === 'function') { try { raw = await res.response.text(); } catch { raw = ''; } }
+          else raw = '';
+        } catch (e) {
+          if (/no route registered as/i.test(String(e && e.message))) { absent = true; }
+          else throw e;
+        }
+        if (absent) return skip('wiring-market-census not armed (pending run-root wiring)');
+        const j = parseJson(raw);
+        if (!j || j.error) return skip('market census probe unavailable: ' + (j && j.error || 'no payload'));
+        if (j.ok === false) return rowErr('the census child faulted mid-census: ' + (j.bail || 'unknown'), [], null);
+        const OFF = (j.skOff || []);
+        if (!Array.isArray(OFF) || OFF.length !== 6 || OFF.some((c) => c !== 'E_SKILLS_DISABLED')) {
+          return rowErr('the OFF gate answered ' + JSON.stringify(OFF) + ' - all six ops must be INERT typed E_SKILLS_DISABLED (never absent, never a throw, never a silent success)', [], { off: OFF });
+        }
+        if ((j.skOnInvalidKind && j.skOnInvalidKind.code) !== 'E_SKILL_PAYLOAD_KIND') {
+          return rowErr('the launch kind answered ' + JSON.stringify(j.skOnInvalidKind) + ' - the credentialed-execution boundary refuses at listing time with the declared why', [], {});
+        }
+        if (j.skOnListOk !== true || j.skOnBuy !== true) {
+          return rowErr('the honest skill flow: list=' + j.skOnListOk + ' buy=' + j.skOnBuy + ' - a gated-ON skill lists and the buyer opens the pending-delivery trade', [], {});
+        }
+        if (j.skOnDeliverByBuyerRefused !== 'E_SKILL_NOT_SELLER' || j.skOnDelivered !== true) {
+          return rowErr('delivery: buyerRefused=' + j.skOnDeliverByBuyerRefused + ' sellerOk=' + j.skOnDelivered + ' - the buyer cannot deliver; the seller of record delivers a 64-hex hashed payload', [], {});
+        }
+        if (j.skOnSettleBadDecision !== 'E_SKILL_DECISION' || j.skOnSettleNoIdentity !== 'E_SKILL_IDENTITY_REQUIRED') {
+          return rowErr('settle discipline: badDecision=' + j.skOnSettleBadDecision + ' anon=' + j.skOnSettleNoIdentity + ' - the settle decision must be confirm|refute and carry the buyer identity', [], {});
+        }
+        if (j.skOnSettleConfirm !== true || j.skOnSweep !== true) {
+          return rowErr('settle=' + j.skOnSettleConfirm + ' sweep=' + j.skOnSweep + ' - the buyer-only confirm settles with the trust feed written; the on-demand sweep answers', [], {});
+        }
+        if (j.skOffAgain !== 'E_SKILLS_DISABLED') {
+          return rowErr('the gate re-off answered ' + JSON.stringify(j.skOffAgain) + ' - the flag flips honestly both ways (never a stuck-ON prototype)', [], {});
+        }
+        return { verdict: 'REFUSED', detail: 'the OFF gate inerts all six ops typed (and re-offers the gate off again after the flip), the ON gate refuses the launch kind with the declared why, the role walls hold (buyer cannot deliver, seller delivers a 64-hex payload), the settle discipline is typed and identity-anchored (bad decision, no identity, buyer-only confirm with the trust feed), and the sweep answers - the gate cluster is measured', tookRequests: 10 };
+      },
+    },
   ],
 };

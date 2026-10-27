@@ -1211,7 +1211,8 @@ const EXPECTED = {
         'quota-error-is-typed': 'REFUSED',
     },
     'vant-mcp': {
-        'unknown-tool-honesty': 'REFUSED',
+                'tools-registry-census': 'skip',
+'unknown-tool-honesty': 'REFUSED',
         'tool-schema-enforced': 'REFUSED',
         'brain-write-scope-hardness': 'REFUSED',
     },
@@ -1455,6 +1456,7 @@ const EXPECTED = {
         // (market inventory census 2026-10-27) run-root-only child route;
         // honest skip here, strict earned verification rides the run root
         'market-scope-visibility-and-cancel-matrix': 'skip',
+        'market-skills-gate-and-lifecycle-laws': 'skip',
         // (slice 3) mesh WAL + events, geometry, brain-verify, mesh-status
         'mesh-wal-deltas-ride-log': 'skip',
         'mesh-wal-recovery-reconstructs': 'skip',

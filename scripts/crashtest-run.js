@@ -966,7 +966,10 @@ const MARKET_CENSUS_CHILD = `${CHILD_STDOUT_GUARD}
     try { require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canTrade: true, canSpawn: true }); } catch (e0) {}
     const market = require('./lib/market.js');
     const fsMod = require('fs');
-    const out = { family: 'market-census', bail: null, ok: true };
+    const out = { family: 'market-census', bail: null, ok: true, skOff: null, skOffAgain: null,
+        skOnInvalidKind: null, skOnListOk: null, skOnBuy: null, skOnDeliverByBuyerRefused: null,
+        skOnDelivered: null, skOnSettleBadDecision: null, skOnSettleNoIdentity: null,
+        skOnSettleConfirm: null, skOnSweep: null };
     try {
         market.clearState();
         const ctx = { agentId: 'market-alpha-seller', requiresConsent: false };
@@ -1017,6 +1020,46 @@ const MARKET_CENSUS_CHILD = `${CHILD_STDOUT_GUARD}
             out.diskKeeperSurvives = JSON.stringify(st.listings || []).includes('public-census-pin');
             out.diskBids = Array.isArray(st.bids) ? st.bids.length : 0;
         }
+        // 7. the SKILLS gate cluster: the OFF gate inerts ALL SIX ops typed
+        //    (never absent), the ON gate carries the kind boundary + the
+        //    buyer/seller role walls + the identity-anchored settle, and the
+        //    gate flips honestly both ways (the fresh module boots OFF).
+        const config = require('./lib/config.js');
+        const skb = { agentId: 'skills-seller-1', requiresConsent: false };
+        const buyerCtx = { agentId: 'skills-buyer-1', consentGiven: true };
+        const offCodes = [];
+        const offOps = [
+            market.listSkill({ title: 'g', payloadKind: 'text', price: 1 }, skb),
+            market.buySkill('listing_none', 'skills-buyer-1', buyerCtx),
+            market.deliverSkill('trade_none', 'p', skb),
+            market.settleSkill('trade_none', 'confirm', buyerCtx),
+            market.skillStatus('listing_none'),
+            market.skillSweep({}),
+        ];
+        for (const op of offOps) { const r = await op; offCodes.push(r && r.code); }
+        out.skOff = offCodes;
+        config.set('market.skillsEnabled', true);
+        out.skOnInvalidKind = await market.listSkill({ title: 'g', payloadKind: 'launch' }, skb);
+        const skListed = await market.listSkill({ title: 'gate-census-skill', payloadKind: 'text', price: 1 }, skb);
+        out.skOnListOk = !!(skListed && skListed.listed === true);
+        const skBought = skListed && skListed.listingId ? await market.buySkill(skListed.listingId, 'skills-buyer-1', buyerCtx) : null;
+        out.skOnBuy = !!(skBought && skBought.bought === true);
+        if (skBought && skBought.tradeId) {
+            const dRefused = await market.deliverSkill(skBought.tradeId, 'census payload', buyerCtx);
+            out.skOnDeliverByBuyerRefused = (dRefused && dRefused.code) || null;
+            const dOk = await market.deliverSkill(skBought.tradeId, 'census payload', skb);
+            out.skOnDelivered = !!(dOk && dOk.delivered === true && /^[0-9a-f]{64}$/.test(dOk.payloadHash || ''));
+            const sBad = await market.settleSkill(skBought.tradeId, 'refute!', buyerCtx);
+            out.skOnSettleBadDecision = (sBad && sBad.code) || null;
+            const sAnon = await market.settleSkill(skBought.tradeId, 'confirm', {});
+            out.skOnSettleNoIdentity = (sAnon && sAnon.code) || null;
+            const sOk = await market.settleSkill(skBought.tradeId, 'confirm', buyerCtx);
+            out.skOnSettleConfirm = !!(sOk && sOk.settled === true && sOk.trustWritten === true);
+        }
+        const sw = await market.skillSweep({});
+        out.skOnSweep = !!(sw && sw.swept === true);
+        config.set('market.skillsEnabled', false);
+        out.skOffAgain = (await market.listSkill({ title: 'g2', payloadKind: 'text' }, skb)).code;
     } catch (e1) {
         out.ok = false;
         out.bail = String((e1 && e1.name) || '?') + ': ' + String((e1 && e1.message) || '').slice(0, 140);
@@ -1641,6 +1684,48 @@ function buildRoutes(sb, Harness) {
 // retryable short-circuit BRAIN_CIRCUIT_OPEN, the half-open probe that
 // lets ONE real load through the healed machinery and closes on its
 // success, and resetLoadCircuit's honest restore.
+// (tools-registry census 2026-10-27) the MCP registry census: roster laws
+// (listTools deterministic + every entry shaped) and the vant_call by-name
+// door (unknown tool refuses WITH the roster named, a non-registry module
+// identifier refuses, the schema gate rides the handoff after the
+// live-fire fix, and an honest full-params call runs the REAL tool).
+const MCP_CENSUS_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    delete require.cache[require.resolve('./lib/mcp.js')];
+    try { require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canTrade: true }); } catch (e0) {}
+    const mcp = require('./lib/mcp.js');
+    const fsMod = require('fs');
+    const pathMod = require('path');
+    const out = { family: 'mcp-tools', ok: true, bail: null };
+    try {
+        const l1 = mcp.listTools();
+        const l2 = mcp.listTools();
+        out.rosterSize = l1.length;
+        out.rosterDeterministic = JSON.stringify(l1) === JSON.stringify(l2);
+        out.rosterShapeBad = l1.filter((t) => !t || typeof t.name !== 'string' || !t.description || !t.inputSchema || typeof t.inputSchema !== 'object').length;
+        const unknown = await mcp.execute('vant_call', { name: 'definitely_not_a_tool_xyz', args: {} });
+        out.vantCallUnknown = !!(unknown && /Tool not found/i.test(String(unknown.error || '')));
+        out.vantCallNamesRoster = !!(unknown && Array.isArray(unknown.available) && unknown.available.length > 0);
+        const sneaky = await mcp.execute('vant_call', { name: 'fs.readFileSync', args: {} });
+        out.vantCallSneaky = !!(sneaky && /Tool not found/i.test(String(sneaky.error || '')));
+        // the schema gate rides the handoff (the live-fire fix): a
+        // brain_write WITHOUT content must answer the typed gate and land
+        // NOTHING; a full call runs the real tool verbatim.
+        let bypass = null;
+        try { bypass = await mcp.execute('vant_call', { name: 'brain_write', args: { name: 'census-b' } }); }
+        catch (e) { bypass = { threw: e.name + ': ' + String(e.message || '').slice(0, 90) }; }
+        out.handoffSchemaGate = !!(bypass && bypass.error === 'MCP_INPUT_INVALID' && Array.isArray(bypass.problems) && bypass.problems.some((pg) => String(pg).includes('content')));
+        out.handoffNoCanary = !fsMod.existsSync(pathMod.join('models', 'private', 'vant', 'census-b.md'));
+        const okWrite = await mcp.execute('vant_call', { name: 'brain_write', args: { name: 'census-okcensus', content: 'full content' } });
+        out.handoffRealTool = !!(okWrite && okWrite.saved === true);
+        out.diskFull = fsMod.existsSync(pathMod.join('models', 'private', 'vant', 'census-okcensus.md')) && fsMod.readFileSync(pathMod.join('models', 'private', 'vant', 'census-okcensus.md'), 'utf8') === 'full content';
+    } catch (e1) {
+        out.ok = false;
+        out.bail = String((e1 && e1.name) || '?') + ': ' + String((e1 && e1.message) || '').slice(0, 140);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
 const CIRCUIT_CHILD = `${CHILD_STDOUT_GUARD}
 (async () => {
     delete require.cache[require.resolve('./lib/brain.js')];
@@ -1967,6 +2052,17 @@ const LIFECYCLE_CHILD = `${CHILD_STDOUT_GUARD}
             outText = execFileSync('node', ['-e', MARKET_CENSUS_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
         } catch (e) {
             return new Response(JSON.stringify({ error: `market-census probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
+    // (tools-registry census 2026-10-27) the MCP registry census child.
+    harness.registerRoute('mcp-tools-census', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', MCP_CENSUS_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `mcp-tools-census probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
         }
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });

@@ -1011,6 +1011,8 @@ finding) — fixed same commit-stream, strict runs deterministically green
 back-to-back after. Relay + discipline S-counters advanced on the same
 quarter-period law.
 
+**Phase A restamp 3 (2026-10-27, the census-tree restamp, two full cycles):** after the brain census closed (all eight inventory clusters converted), the breaker's last native family retired (`test/brain-circuit.test.js` whole, the probe-on-failure leg folded into `brain-load-circuit-laws`), the market census landed (scope/cancel/bid gates + skills gate, `lib/market.js` fixed same-pass x3), and the tools-registry census landed (the `vant_call` schema handoff fixed same-pass), the whole tree was re-stamped: packs x2 deterministic (297 green rows, zero EXPLOITED, library rows 48/0/1 each cycle), contract 338/0, strict ci-gate GREEN (whitelist empty), and the full native floor swept green post-retirement (203 suites; the one-suite delta is the retired brain-circuit file). The S-counters hold their claims on the current count.
+
 **Phase A S-counter restamp (2026-10-27, two full cycles, the post-retirement tree):** the retired batteries' claims pre-date their trims, so both sides were driven fresh on the tree they now live on — harness x2 (209 pack rows REFUSED / 0 EXPLOITED / 0 BOUNDED / 6 honest skips across 19 packs; deterministic pass-for-pass), library rows 48/0/1 each run, contract 310/0, and the strict ci-gate GREEN (whitelist still empty). The drill-down bucket's lands carried through this cycle: vant-migrations 24/24 (slice 4 retired test/migrations.test.js whole), vant-state-wiring 30/30, vant-carriers 39/39 (test/carriers.test.js retired whole), vant-spine 16/16 and vant-leisure 6/6 (both native suites retired whole), vant-brain 19/19 (unit+guests rows; native at its 29 unmeasured seams). Same-cycle edge deepening rode the same stamp: vant-relay extended to 19 rows (caps + events door rows over the relay-edge arm; x2 green) and vant-home's scheduled-door row landed (6/6 x2). Every Phase A bucket's S-counter HOLDS with the claims now stamped on the current count.
 
 **Phase A S-counter restamp 2 (2026-10-27, day-end, the dashboard surface closed):**
@@ -1299,6 +1301,47 @@ silent), and the restart-survival persist law.
 Pack green x2 deterministic (90 green rows both cycles), contract
 336/0 with the row in the EXPECTED table, native market suites unmoved
 (22+23+4 pins green), eslint clean.
+
+**The skills-gate census (same pass): `market-skills-gate-and-lifecycle-laws`
+lands as the cluster follow-up.** The gate OFF inerts ALL SIX skills ops
+(listSkill / buySkill / deliverSkill / settleSkill / skillStatus /
+skillSweep) typed `E_SKILLS_DISABLED` — inert, never absent, never a
+throw; the ON gate carries the kind boundary (any non `text|code`
+payloadKind refuses `E_SKILL_PAYLOAD_KIND` with the declared why), the
+role walls (the buyer cannot deliver), the delivery hash law (real
+sha256, 64-hex verbatim), the settle discipline (bad decision typed
+`E_SKILL_DECISION`, the identity anchor demanded `E_SKILL_IDENTITY_REQUIRED`,
+the buyer-only confirm settles with the trust feed written), the
+on-demand sweep answers, and the gate flips honestly both ways. The
+child rides the SAME census route; pack green x2, contract 337/0 with
+the row in the EXPECTED table, lint clean.
+
+### The tools-registry census (2026-10-27) — vant-mcp's inventory row
+
+`public/vant-mcp` reaches **4 rows**. The reverse-verification read
+named the registry itself as the unmeasured cluster (the three prior
+rows grade execute's refusals, schema, and scope — nobody graded the
+ROSTER). `tools-registry-census` lands on a dedicated
+`mcp-tools-census` child with a REAL find fixed same-pass in
+`lib/mcp.js`: **the `vant_call` by-name handoff called
+`tool.handler(args)` directly, re-opening the P1 #14 decorative-schemas
+bug class for every registered tool at once** — `brain_write` accepted
+a content-less call through it and LANDED an empty-content note. All
+three door faces (execute / call / the by-name handoff) now ride ONE
+hoisted validated executor (`_executeTool`): rules gate -> registry
+lookup -> declared inputSchema -> handler.
+
+Graded laws: the roster (347 entries, deterministic call-over-call,
+every entry carrying name + description + inputSchema), the safe-call
+door (unknown names AND non-registry module identifiers refuse typed
+with the roster named — no arbitrary require), the handoff schema gate
+(content-less `brain_write` answers `MCP_INPUT_INVALID` naming the
+missing param, nothing lands), and the honest call running the REAL
+tool onto the disk verbatim.
+
+Pack green x2, contract 338/0 with the row in the EXPECTED table,
+native mcp suites unmoved (test/mcp 34 + mcp-schema 13 green), lint
+clean.
 
 ### The remote/watch/cache census (2026-10-27) — the 9-key cluster
 
