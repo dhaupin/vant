@@ -1196,6 +1196,14 @@ const EXPECTED = {
         // invalidate answers the fresh disk read), the stats shape +
         // setCache flip, the corpus invalidate, and the watcher toggles.
         'brain-remote-watch-cache-laws': 'skip',
+        // (lifecycle census, ARMED 2026-10-27) the 7-key bootstrap/shutdown
+        // + framework-config cluster: hooks registered through onBootstrap/
+        // onShutdown RUN during the real lifecycle passes, the metabolism
+        // tick genuinely rides boot's timer registry (brain.metabolize,
+        // stoppable with an honest re-stop false), and the config trio
+        // holds (fresh dual default, verbatim set/get over the current
+        // brain, the stack-by-brain map over the roster).
+        'brain-lifecycle-framework-laws': 'skip',
     },
     'vant-crew': {
         'roster-quota-ceiling': 'REFUSED',

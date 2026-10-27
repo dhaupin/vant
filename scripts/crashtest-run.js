@@ -1723,6 +1723,61 @@ const REMOTE_CHILD = `${CHILD_STDOUT_GUARD}
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
 
+// (brain battery, lifecycle slice 2026-10-27) the BOOTSTRAP/SHUTDOWN +
+// FRAMEWORK-CONFIG census: the 7-key cluster (onBootstrap/bootstrap,
+// onShutdown/shutdown, and the framework-config trio). The child grades
+// the REAL lifecycle: a hook registered through onBootstrap RUNS during
+// bootstrap, the metabolism tick is registered with boot's timer
+// lifecycle (and stopped again), a shutdown hook runs during shutdown,
+// and the framework config trio answers default/set/current/stack laws.
+const LIFECYCLE_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    delete require.cache[require.resolve('./lib/brain.js')];
+    try { require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canSpawn: true, canNetwork: true }); } catch (e0) {}
+    const brain = require('./lib/brain.js');
+    const out = { family: 'lifecycle-framework', bootHookRan: null, metabolizeTimerOn: null,
+        metabolizeTimerOff: null, shutdownHookRan: null, fwDefault: null, fwSet: null,
+        fwStackDefault: null, ok: true };
+    try {
+        // 1. the bootstrap law: a NEW hook registered through onBootstrap
+        // runs once during bootstrap (the module-load hooks ride along)
+        let ran = false;
+        brain.onBootstrap(() => { ran = true; });
+        await brain.bootstrap();
+        out.bootHookRan = ran === true;
+        // the metabolism tick law: boot's timer lifecycle holds it
+        const bootMod = require('./lib/boot.js');
+        out.metabolizeTimerOn = bootMod.unregisterTimer('brain.metabolize') === true;
+        out.metabolizeTimerOff = bootMod.unregisterTimer('brain.metabolize') === false;
+        // 2. the framework-config trio over a fresh module
+        const fresh = brain.getBrainFrameworkConfig();
+        out.fwDefault = !!(fresh && fresh.mode === 'dual');
+        out.fwSet = brain.setBrainFrameworkConfig({ mode: 'private', census: 1 }) === true &&
+            brain.getBrainFrameworkConfig().mode === 'private' &&
+            brain.getBrainFrameworkConfig().census === 1;
+        // the stack law: the stack roster maps brain-by-brain, a brain
+        // without its own config answering the honest {mode:'dual'} default
+        const stackCfg = brain.getStackFrameworkConfigs();
+        const stackBrain = brain.currentBrain();
+        const mine = stackCfg && stackCfg.byBrain && stackCfg.byBrain[stackBrain];
+        out.fwStackDefault = !!(stackCfg && stackCfg.source === 'stack' &&
+            Array.isArray(stackCfg.brains) && stackCfg.brains.length >= 1 &&
+            stackCfg.brains.indexOf(stackBrain) !== -1 &&
+            mine && (mine.mode === 'dual' || mine.mode === 'private'));
+        // 3. the shutdown law: a NEW hook registered through onShutdown
+        // runs during the REAL shutdown (watcher close + hook loop)
+        let shutRan = false;
+        brain.onShutdown(() => { shutRan = true; });
+        await brain.shutdown();
+        out.shutdownHookRan = shutRan === true;
+    } catch (e1) {
+        out.ok = false;
+        out.err = String((e1 && e1.name) || '?') + ': ' + String(e1 && e1.message || '').slice(0, 140);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
 // (brain battery, geometry slice 2026-10-27) the geometry census
     // child: the NSC9 per-brain address family over a fresh module.
     harness.registerRoute('brain-geometry', async () => {
@@ -1737,6 +1792,18 @@ const REMOTE_CHILD = `${CHILD_STDOUT_GUARD}
 
     // (brain battery, backup slice 2026-10-27) the stego-backup trio
     // census child: the honest-refusal laws over a fresh module.
+    // (brain battery, lifecycle slice 2026-10-27) the bootstrap/shutdown
+    // + framework-config census child: the REAL lifecycle laws.
+    harness.registerRoute('brain-lifecycle', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', LIFECYCLE_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `lifecycle probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     // (brain battery, remote/watch/cache slice 2026-10-27) the 9-key
     // cluster census child: remote-mode load over a localhost server +
     // the cache/invalidate/watch laws.

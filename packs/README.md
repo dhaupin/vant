@@ -1211,6 +1211,36 @@ bootstrap/shutdown + framework config (7).
 
 
 
+### The lifecycle census (2026-10-27) — bootstrap/shutdown + framework config
+
+`public/vant-brain` reaches **23 rows**. The last unmeasured brain cluster
+(7 keys: onBootstrap/bootstrap, onShutdown/shutdown, and the framework
+config trio) converts as `brain-lifecycle-framework-laws`:
+
+- a hook registered through `onBootstrap` RUNS during the real bootstrap
+pass (the module-load hooks — neuron restore + lessons restore — ride
+along), and the metabolism tick legitimately rides boot's timer
+registry: `brain.metabolize` is registered by bootstrap
+(`unregisterTimer` answers true) and is stoppable (an honest false on
+re-stop) — no bare-interval timer leak holding the event loop;
+- a hook registered through `onShutdown` RUNS during the real shutdown
+(watcher close + hook loop, which the census slice before this one made
+crash-safe on a fresh module);
+- the framework-config trio holds: an unconfigured brain answers the honest
+`{mode:'dual'}` default, `setBrainFrameworkConfig` acks true and
+`getBrainFrameworkConfig` answers the config verbatim (extra keys
+riding) for the CURRENT brain, and `getStackFrameworkConfigs` maps
+brain-by-brain over the stack roster with `source:'stack'` and the
+honest `{mode:'dual'}` default for brains without their own config.
+
+With this cluster, the README's brain census list has no unmeasured
+cluster left — every inventory census cluster named on the battery's day
+(targeted surface, evolution, geometry, stego-backup, crates, breaker,
+remote/watch/cache, lifecycle) now carries a row.
+
+Pack green ×2 deterministic, contract 335/0 with the row in the EXPECTED
+table, eslint clean.
+
 ### The remote/watch/cache census (2026-10-27) — the 9-key cluster
 
 `public/vant-brain` reaches **22 rows**. The remote tunnel + watcher +

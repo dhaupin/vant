@@ -1215,8 +1215,44 @@ export default {
         return { verdict: 'REFUSED', detail: 'the URL pair round-trips and restores, the remote tunnel serves REAL content (source named remote), the cache laws hold end to end (verbatim serve, real hit accounting, TTL-window stale retention, invalidate answers the fresh disk read), the stats make sense, setCache flips enabled, the corpus invalidate answers, and the watcher toggles hold - the 9-key cluster is measured', tookRequests: 10 };
       },
     },
+    // ============ the lifecycle/framework census (2026-10-27) ============
+    {
+      name: 'brain-lifecycle-framework-laws',
+      description: "the 7-key bootstrap/shutdown + framework-config cluster over a fresh module: a hook registered through onBootstrap RUNS during the real bootstrap (the metabolism tick legitimately rides boot's timer lifecycle and stops again), a hook registered through onShutdown RUNS during the real shutdown, and the framework-config trio answers its laws (fresh {mode:'dual'} default, set/set-get over the CURRENT brain verbatim incl. extra keys, and the stack map riding the roster with the honest default for unconfigured brains)",
+      async run(harness) {
+        const r = await tryRun(harness, 'brain-lifecycle', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        if (r._absent) return skip('no brain-lifecycle route');
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return { verdict: 'REFUSED', skipped: true, detail: ('lifecycle probe unavailable: ' + (j && j.error || 'no payload')) };
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the census child faulted mid-census: ' + (j.err || 'unknown'), tookRequests: 1 };
+        if (j.bootHookRan !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the bootstrap hook did not run - onBootstrap registrations must execute during the real bootstrap pass', tookRequests: 1 };
+        }
+        if (j.metabolizeTimerOn !== true || j.metabolizeTimerOff !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the metabolism tick: registered=' + j.metabolizeTimerOn + ' stoppable=' + j.metabolizeTimerOff + ' - bootstrap must ride the metabolism tick through boot\'s timer lifecycle (brain.metabolize), stopping it both stops and honestly answers false on re-stop', tookRequests: 2 };
+        }
+        if (j.fwDefault !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the fresh config answered ' + JSON.stringify(j.fwDefault) + ' - an unconfigured brain answers the honest {mode:\'dual\'} default', tookRequests: 3 };
+        }
+        if (j.fwSet !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the set/did-not-respond law answered ' + j.fwSet + ' - setBrainFrameworkConfig must ack true and getBrainFrameworkConfig must answer the config verbatim (extra keys riding) for the CURRENT brain', tookRequests: 5 };
+        }
+        if (j.fwStackDefault !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the stack config map answered ' + JSON.stringify(j.fwStackDefault) + ' - getStackFrameworkConfigs must map brain-by-brain over the roster with the stack named as source and the honest default for brains without their own config', tookRequests: 6 };
+        }
+        if (j.shutdownHookRan !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the shutdown hook did not run - onShutdown registrations must execute during the real shutdown pass (watcher close + hook loop)', tookRequests: 7 };
+        }
+        return { verdict: 'REFUSED', detail: 'the bootstrap hook runs during the real bootstrap, the metabolism tick legitimately rides boot\'s timer registry (stoppable, honest re-stop false), the config trio holds (fresh dual default, verbatim set/get over the current brain, the stack-by-brain map riding the roster), and the shutdown hook runs during the real shutdown - the 7-key lifecycle cluster is measured', tookRequests: 7 };
+      },
+    },
   ],
 };
+
 
 
 
