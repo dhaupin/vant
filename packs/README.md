@@ -431,7 +431,7 @@ probe must measure purity BEFORE moving the env it proves flows.
 | `meshstatus-seed-pure-and-envflow` | the seed derivation answers identically twice unperturbed and MOVES under the universe seed (restored after) | validated - REFUSED |
 | `meshstatus-render-degraded` | the degraded mesh line still renders its label with (unavailable) and prints the error itself — degraded-not-dead | validated - REFUSED |
 
-### `public/vant-carriers` — the carrier/assimilator lanes (41 rows across 8 slices: lane laws, pointer/wire-hook, route, plates, assembly/template, the traveler working layer, the wire seam, the mesh serving wall; lanes 1-5 validated 2026-10-26, 6-8 2026-10-27)
+### `public/vant-carriers` — the carrier/assimilator lanes (42 rows across 9 slices: lane laws, pointer/wire-hook, route, plates, assembly/template, the traveler working layer, the wire seam, the mesh serving wall, the travelers census; lanes 1-5 validated 2026-10-26, 6-9 2026-10-27)
 
 **What it does.** The carriers battery's first conversion slice (#249
 drill-down, per-bucket shape): the native suite's lane laws family (pass
@@ -1318,9 +1318,9 @@ backlog is closed — `test/engine-parity-spine.test.js` and
 
 ## Traveler-lib battery — the working layer lands on vant-carriers (v0.8.6, #249 - 2026-10-26)
 
-`public/vant-carriers` reaches **41 rows** (31 lane families + 8
-traveler-lib rows (slice 6), the WIRE seam (slice 7) and the MESH
-serving wall (slice 8)). The rows drive lib/traveler DIRECTLY
+`public/vant-carriers` reaches **42 rows** (31 lane families + 8
+traveler-lib rows (slice 6), the WIRE seam (slice 7), the MESH
+serving wall (slice 8) and the TRAVELERS census (slice 9)). The rows drive lib/traveler DIRECTLY
 in-process (+ its real collaborators: event, scope, escrow, mcp, qos,
 event-types, security-pipeline) against the REAL brain-scoped pin
 store, wiped per row (index + .sha256 pin + travelers/ + current file)
@@ -1447,6 +1447,41 @@ measures the serving side over THAT body in the sandbox tree:
 - **zero serving growth** — the census isolates the SERVING legs (the
   landing IS the store hold the wire-seam row grades): the serving
   ride adds exactly zero files
+
+## The TRAVELERS census (slice 9, 2026-10-27): the inventory pass, one REAL seam closed
+
+`travelers-status-span-ceiling-census` — the lib inventory read, three
+unmeasured laws graded, one REAL find carried to a same-pass fix:
+
+- **the FIND: the 512KiB state ceiling had one face** — the kit's r/2
+  shape law (`traveler-contract.js`) refuses slots past
+  `TRAVEL_MAX_CTEXT` typed E_TRAVELER_SHAPE, but the working lib
+  exported the same constant with ZERO enforcement points: an
+  oversized pod-local packet minted, advanced, and persisted happily
+  and only hit the wall at the wire. FIXED same-pass:
+  `lib/traveler.js` `shapeRefusalFor` now enforces the slot ceiling
+  with the kit wording verbatim (`slots exceed the 524288 byte state
+  ceiling.`) — one law, two faces, every shape-checked path
+  (persisting included).
+- **T.status() graded** — the landed packet answers seen:true with its
+  single ledger row and the stations verbatim; a never-landed packet
+  answers seen:false with NO rows (the honest miss is a record, never
+  an error, never a fabricated row).
+- **the trace-span relation graded** — a station may carry a
+  lib/trace span id in `step.span`; advance() carries it THROUGH
+  verbatim and the packet still verifies (relation, not duplication,
+  inside the address law).
+
+1/1 `REFUSED` ×2 deterministic (carriers now 42 rows). Regression:
+test/traveler.test.js 26/0 (the tr/1 wire law unmoved by the ceiling),
+contract 328/0, lint clean.
+
+NOTE on the survey wording: a previous closing summary named
+"spotting/quantum-walls families" as a survey target — that phrase
+does not exist anywhere in the repo (grepped README + tests + lib);
+the honest correction is this entries' actual provenance (the census
+read found the ceiling seam). Remaining named candidate buckets: the
+brain pack's 29 unmeasured seams (restamp line), nothing else named.
 
 1/1 `REFUSED` ×2 deterministic (49 pack rows total: 41 carriers + the
 library phase 48/0/1). The dash sibling: the relay-edge deepening's

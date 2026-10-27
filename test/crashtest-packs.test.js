@@ -1458,6 +1458,10 @@ const EXPECTED = {
         // at both faces, restore re-arms, the pointer loop resolves the
         // REAL raster through the door-backed fetch, zero serving growth).
         'carriers-mesh-serving-wall-on-real-landings': 'skip',
+        // (slice 9, ARMED 2026-10-27) the TRAVELERS census: T.status() +
+        // the span relation + the 512KiB state ceiling now enforced in the
+        // working lib (kit parity; typed E_TRAVELER_SHAPE at persist).
+        'travelers-status-span-ceiling-census': 'REFUSED',
         // (slice 4) plates family
         'carriers-plate-persist-roster': 'skip',
         'carriers-plate-framed-walls': 'skip',

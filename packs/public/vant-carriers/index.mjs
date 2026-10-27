@@ -1214,5 +1214,63 @@ export default {
         return { verdict: 'REFUSED', detail: 'the wall at the serving node holds on a REAL landing: found + re-verified, the VANT:1 frame and a scannable raster from the verified body, honest found:false misses at both verbs, a swapped store refuses identically at both, restore re-arms, the pointer loop resolves the real raster through the door (zero growth throughout) - the wire and the mesh share one store', tookRequests: 9 };
       },
     },
+
+    // ============ slice 9 (2026-10-27): the TRAVELERS census ============
+    {
+      name: 'travelers-status-span-ceiling-census',
+      description: 'the travelers census pass closes the lib inventory: T.status() is the pin-through query (seen + ledgerRows for a landed packet, honest seen:false for a foreign one, stations verbatim), the trace-span RELATION rides advance (step.span carried through, not duplicated), and the 512KiB state ceiling is now ONE LAW TWO FACES - the working lib refuses oversized slots typed E_TRAVELER_SHAPE with the kit wording verbatim (the kit already did; the lib exported the constant and enforced nothing)',
+      async run(_harness) {
+        try {
+          const FIXED_NOW = 1700000000055;
+          await tWipe();
+          // (1) the span RELATION: a station may carry a trace span id
+          // (lib/trace execution moments) in step.span - advance() carries
+          // it through verbatim, relationally
+          const t1 = T.mint({ from: 'pack-census-station', slots: { job: 'census' }, now: FIXED_NOW });
+          const t2 = T.advance(t1, { op: 'engrave', by: 'pack-census-2', span: 'span-trace-42', detail: {} });
+          const spanRode = t2.steps[1] && t2.steps[1].span === 'span-trace-42';
+          if (!spanRode) {
+            return { verdict: 'EXPLOITED', detail: 'a station trace span did NOT ride advance (' + JSON.stringify(t2.steps[1]).slice(0, 100) + ') - the span relation is the documented ledger field', tookRequests: 1 };
+          }
+          if (T.verify(t2).ok !== true) {
+            return { verdict: 'EXPLOITED', detail: 'a span-carrying packet failed to verify - the span rides inside the address law, relationally, without breaking the address', tookRequests: 2 };
+          }
+          // (2) T.status(): the pin-through query
+          T.persist(t2);
+          const st = T.status(t2);
+          if (st.seen !== true || !Array.isArray(st.ledgerRows) || st.ledgerRows.length !== 1) {
+            return { verdict: 'EXPLOITED', detail: 'the landed packet answered seen=' + (st && st.seen) + ' rows=' + (st && st.ledgerRows && st.ledgerRows.length) + ' - status() is the pin-through query over the frozen ledger', tookRequests: 3 };
+          }
+          if (!Array.isArray(st.stations) || st.stations.length !== 2 || st.stations[0].op !== t2.steps[0].op || String(st.stations[1].by) !== 'pack-census-2') {
+            return { verdict: 'EXPLOITED', detail: 'status().stations drifted from the ledger steps - the query answers verbatim, not summarically', tookRequests: 3 };
+          }
+          const foreign = T.status(T.mint({ from: 'pack-census-station', slots: { job: 'never-landed' }, now: FIXED_NOW + 7 }));
+          if (foreign.seen !== false || (foreign.ledgerRows && foreign.ledgerRows.length)) {
+            return { verdict: 'EXPLOITED', detail: 'a never-landed packet answered seen=' + foreign.seen + ' - the honest miss is a record with no rows, never an error and never a fabricated row', tookRequests: 4 };
+          }
+          // (3) the state ceiling, one law two faces: the working lib NOW
+          // refuses what the kit's shape law refused all along (the kit
+          // wording verbatim), typed E_TRAVELER_SHAPE, at the shape-checked
+          // paths (persist; the kit at the r/2 face)
+          const big = 'x'.repeat(T.TRAVEL_MAX_CTEXT); // stringify length > ceiling by the wrapper bytes
+          const travBad = JSON.parse(JSON.stringify(t2));
+          travBad.slots = { job: 'flooded', context: big };
+          const shape = T.shapeRefusalFor(travBad);
+          if (!shape || shape.code !== 'E_TRAVELER_SHAPE' || String(shape.message).indexOf(String(T.TRAVEL_MAX_CTEXT)) === -1) {
+            return { verdict: 'EXPLOITED', detail: 'an oversized-slots packet answered ' + (shape ? shape.code : 'NO refusal') + ' - the 512KiB state ceiling must refuse typed with the ceiling NAMED', tookRequests: 5 };
+          }
+          const persistedRefused = throwsTraveler(() => { T.persist(travBad); }, (e) => e.code === 'E_TRAVELER_SHAPE');
+          if (!persistedRefused) {
+            return { verdict: 'EXPLOITED', detail: 'an oversized-slots packet PERSISTED - the capture path is a shape-checked path and must refuse with the shape law', tookRequests: 6 };
+          }
+          if (T.TRAVEL_KNOWN.join(',') !== 'tr/1,tr/0' || T.TRAVEL_STEP_MAX !== 512) {
+            return { verdict: 'EXPLOITED', detail: 'the exported constants drifted - the census pins the version vocabulary and step ceiling alongside the state ceiling', tookRequests: 6 };
+          }
+          return { verdict: 'REFUSED', detail: 'the span relation rides advance without breaking the address, status() answers seen + rows + verbatim stations with honest seen:false on a miss, and the 512KiB state ceiling refuses typed E_TRAVELER_SHAPE at persist (kit wording verbatim) - the lib and the r/2 face now speak the same ceiling', tookRequests: 6 };
+        } finally {
+          await tWipe();
+        }
+      },
+    },
   ],
 };
