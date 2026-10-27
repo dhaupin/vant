@@ -355,6 +355,85 @@ const CREW_DOORS_CHILD = `${CHILD_STDOUT_GUARD}
     process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
+// (teams-orgchart census 2026-10-27) the orgchart depth pass: the lib/teams
+// surface — the largest unmeasured lib facet by raw size — over the
+// DOCUMENTED call shapes (createOrg(name); parent-first createDept(orgId,
+// name) / createTeam(deptId, name); name-first createRole(name, { team,
+// permissions, chain }); assign(agentId, { role, brain })). The chain must
+// bind every link, the role-scoped permission + the agent-side can() law
+// (direct / chain-walk / trust floor) must close, and every ghost ref must
+// answer typed.
+const TEAMS_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const out = { family: 'teams-orgchart', ok: true, bail: null };
+    try {
+        require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true });
+        const teams = require('./lib/teams.js');
+        const isErrText = (v, frag) => !!(v && typeof v === 'object' && v.error && String(v.error).toLowerCase().indexOf(frag) !== -1);
+        // ---- the org depth: create/dup/bad-name/ghost-update
+        const org = await teams.createOrg('census-org');
+        out.orgCreated = !!(org && org.id && org.name === 'census-org');
+        out.dupOrgTyped = isErrText(await teams.createOrg('census-org'), 'already exists');
+        out.badNameTyped = !!(teams.createOrg('') && teams.createOrg('').code === 'E_INVALID_NAME');
+        out.getOrgGhostUndefined = (await teams.getOrg('org-ghost-xyz')) === undefined;
+        out.updateOrgGhostTyped = isErrText(await teams.updateOrg({ id: 'org-ghost-xyz', name: 'x' }), 'not found');
+        // ---- the parent-first convention binds every link
+        const dep = await teams.createDept(org.id, 'census-dept');
+        out.deptBindsOrg = !!(dep && dep.id && dep.org === org.id);
+        const team = await teams.createTeam(dep.id, 'census-team');
+        out.teamBindsDept = !!(team && team.id && team.dept === dep.id);
+        // ---- the role arm: name-first with options (mysig: name, options)
+        const roleA = await teams.createRole('census-proto', { team: team.id, permissions: ['census:chain-cap'] });
+        out.roleBindings = !!(roleA && roleA.id && roleA.team === team.id && Array.isArray(roleA.permissions) && roleA.permissions[0] === 'census:chain-cap');
+        const roleB = await teams.createRole('census-child', { team: team.id, chain: ['census-proto'] });
+        out.roleChainStored = !!(roleB && roleB.id && Array.isArray(roleB.chain) && roleB.chain[0] === 'census-proto');
+        // ---- the role-scoped permission law
+        out.hasPermissionGranted = (await teams.hasPermission(roleA.id, 'census:chain-cap')) === true;
+        out.hasPermissionMissing = (await teams.hasPermission(roleB.id, 'census:chain-cap')) === false;
+        out.hasPermissionGhost = (await teams.hasPermission('role-ghost-xyz', 'x')) === false;
+        // ---- the chain table answers its stored chain
+        const chain = await teams.getRoleChain(roleB.id);
+        out.roleChainListed = Array.isArray(chain) && chain.length === 1;
+        // ---- the agent-side can() law: direct + chain walk + trust floor
+        await teams.assign('agent-census-2', { role: roleA.id });
+        await teams.assign('agent-census-1', { role: roleB.id, brain: 'census-brain' });
+        const cd = await teams.createRole('deployer', { team: team.id, permissions: ['canDeploy'] });
+        await teams.assign('agent-census-3', { role: cd.id });
+        out.canDirect = (await teams.can('agent-census-2', 'census:chain-cap')) === true;
+        out.canChainWalk = (await teams.can('agent-census-1', 'census:chain-cap')) === true;
+        out.canMissingFalse = (await teams.can('agent-census-1', 'census:nope')) === false;
+        out.canUnknownAgentFalse = (await teams.can('no-such-agent-xyz', 'census:chain-cap')) === false;
+        // the CRITICAL-permission trust floor (v0.8.6): canDeploy needs 0.6,
+        // the fixture agent answers the 0.5 neutral default - the floor MUST
+        // refuse (the role grants, the trust guard withholds)
+        out.trustFloorHolds = (await teams.can('agent-census-3', 'canDeploy')) === false;
+        // ---- the assignment round trip
+        const a1 = await teams.getAssignment('agent-census-1');
+        out.assignmentVerbatim = !!(a1 && a1.agentId === 'agent-census-1' && a1.role === roleB.id && a1.brain === 'census-brain');
+        out.agentBrainRoundTrip = (await teams.getAgentBrain('agent-census-1')) === 'census-brain';
+        const un = await teams.unassign('agent-census-2');
+        out.unassignThenDrop = !!(un && un.removed === true) && (await teams.can('agent-census-2', 'census:chain-cap')) === false;
+        // ---- the listTeams shapes (dept ref only, per the doc's filter)
+        const tUnder = await teams.listTeams(dep.id);
+        const tAll = await teams.listTeams();
+        out.listTeamsDeptRef = Array.isArray(tUnder) && tUnder.length === 1 && tUnder[0].id === team.id;
+        out.listTeamsAll = Array.isArray(tAll) && tAll.length === 1;
+        out.listTeamsGhostEmpty = (await teams.listTeams('dept-ghost-xyz')).length === 0;
+        // ---- ghost refs answer typed
+        out.deleteDeptGhostTyped = isErrText(await teams.deleteDept('dept-ghost-xyz'), 'not found');
+        // (the documented exact-hit-only reorder) a ghost PARENT-first
+        // ref is reinterpreted as the name, and the dept still binds a
+        // real org; the typed refusal law lives at the explicit form
+        const reimp = await teams.createDept('org-ghost-named-dept', 'dept-z-extra-name');
+        out.ghostParentReinterpreted = !!(reimp && reimp.id && reimp.name === 'org-ghost-named-dept' && typeof reimp.org === 'string' && reimp.org.length > 0);
+        out.explicitGhostOrgTyped = isErrText(await teams.createDept('dept-y-explicit', { org: 'org-ghost-xyz' }), 'not found');
+    } catch (e1) {
+        out.ok = false;
+        out.bail = String((e1 && e1.name) || '?') + ': ' + String((e1 && e1.message) || '').slice(0, 140);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
 const PROBE_CHILD = `${CHILD_STDOUT_GUARD}
 (async () => {
     const tamper = process.argv[1];
@@ -1724,6 +1803,20 @@ function buildRoutes(sb, Harness) {
             outText = execFileSync('node', ['-e', CREW_DOORS_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
         } catch (e) {
             return new Response(JSON.stringify({ error: `crew-doors probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
+
+    // (teams-orgchart census 2026-10-27) the orgchart depth pass: the
+    // lib/teams chain closes over the documented call shapes - the
+    // largest unmeasured lib facet by raw size.
+    harness.registerRoute('teams-orgchart', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', TEAMS_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `teams-orgchart probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
         }
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });

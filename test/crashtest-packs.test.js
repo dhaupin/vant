@@ -1215,6 +1215,13 @@ const EXPECTED = {
         // live x2, the README ledger pins the verdicts).
         'crew-doors-census': 'skip',
     },
+    // (teams-orgchart census, ARMED 2026-10-27) the same run-root census
+    // contract: the orgchart depth child needs the fresh-module ladder, so
+    // the contract grades it as an honest skip (the run fires grade it
+    // live x2, the README ledger pins the verdicts).
+    'vant-teams': {
+        'teams-orgchart-census': 'skip',
+    },
     'vant-mcp': {
                 'tools-registry-census': 'skip',
 'unknown-tool-honesty': 'REFUSED',

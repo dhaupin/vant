@@ -1460,6 +1460,42 @@ ladder x2 green — **28 rungs true both cycles** (contract 343/0, lint clean):
   `removeNode` returns true-for-real then false-for-unknown, and the
   receiver version gate refuses a bogus version typed.
 
+### The teams-orgchart census (2026-10-27) — the orgchart depth pass
+
+`lib/teams` was the largest unmeasured lib facet by raw size. The orgchart
+depth pass converts as a NEW pack, `public/vant-teams` (20 packs now), with
+the `teams-orgchart` census child, documented-call-shape ladder x2 green —
+**27 rungs true both cycles** (contract 344/0 + the census contract entry,
+lint clean):
+
+- **no live repairs needed**: the orgchart is honest end-to-end over the
+  DOCUMENTED shapes — `createOrg(name)` (dup → `E_DUPLICATE`, bad name →
+  `E_INVALID_NAME`, ghost update → typed), the parent-first convention
+  binding dept→org and team→dept exactly, `createRole(name, { team,
+  permissions, chain })` storing both fields verbatim, role-scoped
+  `hasPermission` exact (granted true / missing false / ghost false), and
+  the chain table listing its stored chain;
+- **the agent-side `can()` law closes**: direct grant true, chain-walk true
+  through the stored chain, missing capability false, unknown agent false —
+  and the **CRITICAL-permission trust floor holds**: `canDeploy` needs 0.6
+  trust, the fixture agent answers the 0.5 neutral default, and the role's
+  grant is withheld by the trust guard (the role grants, trust withholds);
+- **the assignment round trip is verbatim**: the record carries
+  agentId/role/brain exactly, `getAgentBrain` round-trips the mapping, and
+  `unassign` removes it with the permission dropping false after;
+- **the ghost vocabulary is honest**: `listTeams` resolves dept refs (an org
+  ref answers the empty roster — its documented filter), ghost
+  delete/update refs answer typed, a ghost PARENT-first ref rides the
+  documented exact-hit-only reorder (reinterpreted as the name, the dept
+  still binds a real org), and the explicit ghost-org form refuses typed.
+- **census methodology note**: the first two probe passes refused to close
+  until the documented call shapes were respected — three distinct
+  signature conventions exist across `create*` verbs (name-only /
+  parent-first positional / name-first-with-options), and `assign` takes a
+  string agentId (the F-7 guard refuses object-shaped ids typed). The
+  census ladder now verifies the documented API exactly as its callers
+  should write it.
+
 
 ### The remote/watch/cache census (2026-10-27) — the 9-key cluster
 
