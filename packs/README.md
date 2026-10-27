@@ -1430,6 +1430,36 @@ green (all 17 rungs true both cycles, contract 343/0, lint clean):
   law rides a normalized plain-string check: the roster fires through
   `error: 'not found'`, and template-literal cooked text is where regex
   backslashes go to die — the child measures the ANSWER, never the spelling.
+### The crew-doors census (2026-10-27) — the door inventory beyond the quota trio
+
+`public/vant-crew` reaches **4 rows**: the survey's named growth surface
+(the `lib/agents.js` spawn/delegate/kill/protos inventory + `lib/crew-bus.js`
+beyond the quota trio) converts as the `crew-doors` census child, fresh-module
+ladder x2 green — **28 rungs true both cycles** (contract 343/0, lint clean):
+
+- **live find, fixed in the same pass**: the approval verbs acked work that
+  never existed — `approve`/`reject` (and `signOff` riding `approve`)
+  returned `approved:true`/`rejected:true` receipts for UNKNOWN work ids
+  while their siblings (`completeWork`/`retry`/`escalate`) refused the same
+  ids typed. Every ack is now GROUNDED in the stream's answer: unknown work
+  answers the stream's typed refusal (`Work not found: id`), never a
+  receipt.
+- the gate verbs keep their own honest shapes: unknown `get` answers
+  undefined, `pause`/`resume` typed `Agent not found`, `kill`/`terminate`
+  honest false no-ops, `prune` honest zero-count with the persisted flag;
+- the work verbs refuse unknown ids typed (`delegate` Agent not found,
+  `pollWork` E_NO_WORK, `completeWork`/`retry`/`escalate` Work not found);
+- the protos loader lists empty rosters honestly and `loadProto` of an
+  unknown answers null (no throw escaping);
+- the crew bus refuses typed in BOTH postures: unconfigured, every door
+  rides the `CONFIG_MISSING` wall (send/broadcast/registerNode); configured,
+  the URL/name validations answer `INPUT_VALIDATION_FAILED`, the roster +
+  status projections carry NO pair secret, unknown sends answer
+  `NOT_FOUND`, broadcast returns per-node attempt results (the sandbox
+  network gate reads as ok:false per attempt, honest, never a crash),
+  `removeNode` returns true-for-real then false-for-unknown, and the
+  receiver version gate refuses a bogus version typed.
+
 
 ### The remote/watch/cache census (2026-10-27) — the 9-key cluster
 

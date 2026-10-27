@@ -285,6 +285,76 @@ const CHILD_STDOUT_GUARD = `
     })();
 `;
 
+// (crew-doors census 2026-10-27) the crew door inventory: the agents gate
+// verbs, the work verbs (with the GROUNDED-ack law - approve/reject/signOff
+// used to ack work that never existed; the same census fixed them), the
+// protos loader, and the crew bus over BOTH postures (unconfigured typed
+// walls, configured invariants: typed validations, secret-free projections,
+// attempt-array broadcast, the version gate).
+const CREW_DOORS_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const out = { family: 'crew-doors', ok: true, bail: null };
+    try {
+        require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canSpawn: true, canNetwork: true });
+        const agents = require('./lib/agents.js');
+        const isErrText = (v, frag) => !!(v && typeof v === 'object' && v.error && String(v.error).toLowerCase().indexOf(frag) !== -1);
+        // ---- rung 1: the agents gate verbs over ids that do not exist
+        out.getUnknownUndefined = (await agents.get('no-such-agent-cd')) === undefined;
+        out.pauseUnknownTyped = isErrText(await agents.pause('no-such-agent-cd'), 'agent not found');
+        out.resumeUnknownTyped = isErrText(await agents.resume('no-such-agent-cd'), 'agent not found');
+        out.killTerminateHonestNoop = (await agents.kill('no-such-agent-cd')) === false && (await agents.terminate('no-such-agent-cd')) === false;
+        const pruned = await agents.prune();
+        out.pruneHonest = !!(pruned && pruned.pruned === 0 && pruned.persisted === true);
+        out.delegateUnknownTyped = isErrText(await agents.delegate('no-such-agent-cd', 'census task'), 'agent not found');
+        const polled = await agents.pollWork('no-such-agent-cd');
+        out.pollUnknownTyped = !!(polled && polled.error && polled.code === 'E_NO_WORK');
+        out.completeUnknownTyped = isErrText(await agents.completeWork('no-such-work-cd', { result: 'x' }), 'work not found');
+        out.retryUnknownTyped = isErrText(await agents.retry('no-such-work-cd'), 'work not found');
+        out.escalateUnknownTyped = isErrText(await agents.escalate('no-such-work-cd', 'why'), 'work not found');
+        // the GROUNDED-ack law (the census find, fixed in this pass)
+        out.approveUnknownGrounded = isErrText(await agents.approve('no-such-work-cd', { ok: true }), 'work not found');
+        out.rejectUnknownGrounded = isErrText(await agents.reject('no-such-work-cd', 'nope'), 'work not found');
+        out.signOffUnknownGrounded = isErrText(await agents.signOff('no-such-work-cd'), 'work not found');
+        // ---- rung 2: the protos loader
+        const protosList = await agents.listProtos();
+        const foldersList = await agents.listFolders();
+        out.protosListsHonest = Array.isArray(protosList) && Array.isArray(foldersList);
+        out.loadProtoUnknownNull = (await agents.loadProto('no-such-proto-cd')) === null;
+        // ---- rung 3: the crew bus, UNCONFIGURED posture
+        const crew = require('./lib/crew-bus.js');
+        const cfgErr = async (fn) => { try { await fn(); return null; } catch (e) { return e.code || String(e.message).slice(0, 40); } };
+        const cSend = await cfgErr(() => crew.send('no-such-peer-cd', {}));
+        const cCast = await cfgErr(() => crew.broadcast({}));
+        const cReg = await cfgErr(() => crew.registerNode({ name: 'x', url: 'http://127.0.0.1:5000', secret: 's' }));
+        out.unconfiguredTyped = cSend === 'CONFIG_MISSING' && cCast === 'CONFIG_MISSING' && cReg === 'CONFIG_MISSING';
+        // ---- rung 4: the configured bus invariants
+        crew.configure({ name: 'census-node-cd', port: 4891, secret: 'cd-pair-secret-77x', agentId: 'cd-1' });
+        const st = crew.status();
+        out.statusShapeConfigured = !!(st && st.configured === true && st.name === 'census-node-cd' && st.agentId === 'cd-1');
+        out.statusSecretFree = JSON.stringify(st).indexOf('cd-pair-secret-77x') === -1;
+        let regBad = null; try { await crew.registerNode({ name: 'bad-node', url: 'not a url', secret: 'cd-peer-secret-88z' }); regBad = 'OPEN-BAD'; } catch (e) { regBad = e.code; }
+        out.regBadUrlTyped = regBad === 'INPUT_VALIDATION_FAILED';
+        regBad = null; try { await crew.registerNode({ name: 'has space!', url: 'http://127.0.0.1:5000', secret: 'cd-peer-secret-88z' }); regBad = 'OPEN-BAD'; } catch (e) { regBad = e.code; }
+        out.regBadNameTyped = regBad === 'INPUT_VALIDATION_FAILED';
+        const regOk = await crew.registerNode({ name: 'peer-alpha', url: 'http://127.0.0.1:4892', secret: 'cd-peer-secret-88z' });
+        out.regOkNoSecret = !!(regOk && regOk.name === 'peer-alpha' && JSON.stringify(regOk).indexOf('cd-peer-secret') === -1);
+        const nodes = crew.nodes();
+        out.nodesShapeNoSecret = !!(Array.isArray(nodes) && nodes.length === 1 && nodes[0].name === 'peer-alpha' && typeof nodes[0].url === 'string' && JSON.stringify(nodes).indexOf('cd-peer-secret') === -1);
+        let snd = null; try { await crew.send('no-such-peer-cd', {}); snd = 'OPEN-BAD'; } catch (e) { snd = e.code; }
+        out.sendUnknownTyped = snd === 'NOT_FOUND';
+        const cast = await crew.broadcast({ hello: 'ring' });
+        out.broadcastAttemptArray = !!(Array.isArray(cast) && cast.length === 1 && cast[0] && cast[0].node === 'peer-alpha' && cast[0].ok === false && typeof cast[0].error === 'string');
+        out.removeRealTrueThenUnknownFalse = crew.removeNode('peer-alpha') === true && crew.removeNode('peer-alpha') === false;
+        let vb = null; try { crew._setReceiverVersion('9999-bogus'); vb = 'SET-BAD'; } catch (e) { vb = String(e.message).toLowerCase().indexOf('version') !== -1; }
+        out.versionGateTyped = vb === true;
+        out.stopHonest = !!(crew.stop());
+    } catch (e1) {
+        out.ok = false;
+        out.bail = String((e1 && e1.name) || '?') + ': ' + String((e1 && e1.message) || '').slice(0, 140);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
 const PROBE_CHILD = `${CHILD_STDOUT_GUARD}
 (async () => {
     const tamper = process.argv[1];
@@ -1641,6 +1711,20 @@ function buildRoutes(sb, Harness) {
             return new Response(JSON.stringify({ error: `crew probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
         }
         console.error(`[run-root] crew answer: ${String(outText).slice(0, 300)}`);
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
+
+    // (crew-doors census 2026-10-27) the crew door inventory: gate verbs,
+    // work verbs (grounded acks), protos loader, and the crew bus over
+    // both postures, all fresh-module.
+    harness.registerRoute('crew-doors', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', CREW_DOORS_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `crew-doors probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 

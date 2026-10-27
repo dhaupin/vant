@@ -1209,6 +1209,11 @@ const EXPECTED = {
         'roster-quota-ceiling': 'REFUSED',
         'spawn-rate-limit': 'REFUSED',
         'quota-error-is-typed': 'REFUSED',
+        // run-root census family (ARMED 2026-10-27): the crew-doors child
+        // grades the door inventory over a fresh-module ladder, so the
+        // contract grades it as an honest skip (the run fires grade it
+        // live x2, the README ledger pins the verdicts).
+        'crew-doors-census': 'skip',
     },
     'vant-mcp': {
                 'tools-registry-census': 'skip',
