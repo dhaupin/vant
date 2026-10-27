@@ -848,6 +848,76 @@ export default {
         return { verdict: 'REFUSED', detail: 'the voucher stayed a voucher: hash-only at rest, honest mismatch refusal, one human-role redemption with the pending row consumed, and the second use refuses', tookRequests: 6 };
       },
     },
+    {
+      name: 'brain-listing-dirs-family',
+      description: 'the listing/dirs family the native suite print UNMEASURED (hasBrain/listBrains/brainDirs/loadStackCorpus/brainSaveNeurons) must answer honest shapes on the sandbox tree: a missing brain answers null (never fabricated), the roster is a string array with zero traversal-shaped names, and both brainDirs roots stay confined inside models/ (a root outside is a breach)',
+      async run(harness) {
+        const dr = await tryRun(harness, 'brain-listing', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ op: 'brainDirs' }),
+        });
+        if (dr._absent) return skip('no brain-listing route');
+        if (dr.threw) return { verdict: 'REFUSED', skipped: true, detail: `brain-listing threw in the shim: ${dr.error?.name}` };
+        const dirs = parseJson(await bodyText(dr));
+        const took = { dirs: 1, fires: 0 };
+        if (!dirs || dirs.error) return skip('brain-listing not armed');
+        if (!dirs.hasPublic || !dirs.hasPrivate) {
+          return { verdict: 'EXPLOITED', detail: 'brainDirs lost a side: ' + JSON.stringify(dirs).slice(0, 120), tookRequests: 1 };
+        }
+        if (dirs.confined !== true) {
+          return { verdict: 'EXPLOITED', detail: 'a brainDirs root resolved OUTSIDE models/ - the listing layer can read foreign trees: ' + JSON.stringify(dirs.roots).slice(0, 140), tookRequests: dirs.fires = 1 };
+        }
+        const hb = parseJson(await bodyText(await tryRun(harness, 'brain-listing', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ op: 'hasBrain', name: 'identity' }),
+        })));
+        const hbMiss = parseJson(await bodyText(await tryRun(harness, 'brain-listing', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ op: 'hasBrain', name: 'definitely-not-a-brain-xz' }),
+        })));
+        took.fires = 3;
+        if (hb.threw || hbMiss.threw) {
+          return { verdict: 'EXPLOITED', detail: 'hasBrain threw on a real/conveyor branch — the seam must answer, not fault', tookRequests: took.fires };
+        }
+        const hbVerdict = hb.result;
+        if (hbVerdict === 'ILLEGAL' || (typeof hbVerdict === 'string' && hbVerdict.startsWith('ILLEGAL'))) {
+          return { verdict: 'EXPLOITED', detail: 'hasBrain(' + 'identity) answered outside the closed vocabulary: ' + String(hbVerdict).slice(0, 90), tookRequests: took.fires };
+        }
+        if (hbMiss.result !== null) {
+          return { verdict: 'EXPLOITED', detail: 'a MISSING brain fabricated an answer (expected honest null): ' + String(hbMiss.result).slice(0, 90), tookRequests: took.fires };
+        }
+        const lb = parseJson(await bodyText(await tryRun(harness, 'brain-listing', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ op: 'listBrains' }),
+        })));
+        took.fires = 4;
+        if (lb.threw || lb.isArray !== true) {
+          return { verdict: 'EXPLOITED', detail: 'listBrains did not return an array (threw: ' + String(lb.threw || '').slice(0, 90) + ')', tookRequests: took.fires };
+        }
+        if ((lb.nonString || 0) > 0 || (lb.traversal || 0) > 0) {
+          return { verdict: 'EXPLOITED', detail: 'the roster carries non-string (' + lb.nonString + ') or traversal-shaped (' + lb.traversal + ') names', tookRequests: took.fires };
+        }
+        const corpus = parseJson(await bodyText(await tryRun(harness, 'brain-listing', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ op: 'loadStackCorpus' }),
+        })));
+        const sv = parseJson(await bodyText(await tryRun(harness, 'brain-listing', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ op: 'brainSaveNeurons' }),
+        })));
+        took.fires = 6;
+        if (corpus.threw || corpus.isArray !== true) {
+          return { verdict: 'EXPLOITED', detail: 'loadStackCorpus sync did not return an array (threw: ' + String(corpus.threw || '').slice(0, 90) + ')', tookRequests: took.fires };
+        }
+        if ((corpus.hasNames === false)) {
+          return { verdict: 'EXPLOITED', detail: 'the corpus carries a non-string name field', tookRequests: took.fires };
+        }
+        if (sv.threw || sv.ack !== true) {
+          return { verdict: 'EXPLOITED', detail: 'brainSaveNeurons answered neither save-state nor a typed error (threw: ' + String(sv.threw || '').slice(0, 90) + ', keys: ' + JSON.stringify(sv.keys) + ')', tookRequests: took.fires };
+        }
+        return { verdict: 'REFUSED', detail: 'the listing family answers its own shapes: brainDirs both sides confined inside models/, a missing brain answers honest null, the roster is a traversal-free string array, the stack corpus rides its entries, and neuron saves ack typed (saving|error)', tookRequests: took.fires };
+      },
+    },
   ],
 };
 

@@ -977,6 +977,59 @@ export default {
         return { verdict: 'REFUSED', detail: 'the r/2 GET ladder holds over declarations: raw-404 parity, typed 503 secretless, missing/wrong/stale sigs all 401 typed, and the origin guards refuse the plaintext, metadata and traversal shapes - the bytes never pipe through a refusal', tookRequests: 8 };
       },
     },
+    {
+      name: 'wire-traveler-law-lanes',
+      description: "the traveler's REMAINING shape lanes at the relay door (the sibling row covers STEP/SCHEMA): a non-hex id refuses E_TRAVELER_ADDRESS before the door slot generator ever sees it (the id-named brain_write slot has nothing to fear only because the guard refuses first), absent slots refuses E_TRAVELER_SHAPE, and NO refused packet rides the door - zero landing growth across the lane fires",
+      async run(_harness) {
+        const { relay: relayCore } = await wireKit();
+        return await withMountedRelay(relayCore, async (port) => {
+          const seen = [];
+          relayCore.setDoorTransport(async ({ body }) => {
+            seen.push({ body });
+            return { ok: true, status: 200, body: JSON.stringify({ jsonrpc: '2.0', id: 1, result: { ok: true } }) };
+          });
+          try {
+            const { createHash } = await import('node:crypto');
+            const trId = createHash('sha256').update('relay-wire-travel-laws').digest('hex');
+            const base = { tr: 'tr/1', id: trId, from: 'wire-travel-laws', seq: 1, steps: [{ seq: 1, op: 'open', by: 'wire-travel-laws', ts: 0 }], slots: { title: 'the law lanes pin' }, v: { major: 2 } };
+            const legal = signedEnvelope('relay.travel', base);
+            const legalAns = await postWire(port, legal.raw, { 'x-signature-256': legal.sig });
+            const lanesAtStart = seen.length;
+            const sneak = signedEnvelope('relay.travel', Object.assign({}, base, { id: '../sneak-toward-the-door-slot' }));
+            const sneakAns = await postWire(port, sneak.raw, { 'x-signature-256': sneak.sig });
+            const noslots = signedEnvelope('relay.travel', (({ slots: _slots, ...rest }) => rest)(base));
+            const noslotsAns = await postWire(port, noslots.raw, { 'x-signature-256': noslots.sig });
+            const nosteps = signedEnvelope('relay.travel', Object.assign({}, base, { steps: 'not-a-ledger' }));
+            const nostepsAns = await postWire(port, nosteps.raw, { 'x-signature-256': nosteps.sig });
+            const lanesAfter = seen.length - lanesAtStart;
+            const ackOf = (r) => (r.status === 200 && r.json && r.json.reply) ? r.json.reply : null;
+            if (!(legalAns.status === 200 && ((legalAns.json || {}).reply || {}).ok === true)) {
+              return { verdict: 'EXPLOITED', detail: 'the legal lane packet did not dispatch: ' + JSON.stringify(legalAns.json || null).slice(0, 140), tookRequests: 4 };
+            }
+            if (lanesAtStart < 1) {
+              return { verdict: 'EXPLOITED', detail: 'the legal packet landed nothing through the door (expected one brain_write slot)', tookRequests: 4 };
+            }
+            const laneExpect = [
+              ['sneak id', sneakAns, 'E_TRAVELER_ADDRESS'],
+              ['absent slots', noslotsAns, 'E_TRAVELER_SHAPE'],
+              ['steps not a ledger', nostepsAns, 'E_TRAVELER_STEP'],
+            ];
+            for (const [lane, r, code] of laneExpect) {
+              const ack = ackOf(r);
+              if (!(r.status === 200 && ack && ack.ok === false && ack.code === 'E_RIDE_DECODE' && String(ack.error) === code)) {
+                return { verdict: 'EXPLOITED', detail: 'the ' + lane + ' lane answered ' + JSON.stringify(r.json || null).slice(0, 120) + ' - expected ' + code + ' inside the 200 ack', tookRequests: 4 };
+              }
+            }
+            if (lanesAfter !== 0) {
+              return { verdict: 'EXPLOITED', detail: 'a REFUSED packet rode the door anyway: ' + lanesAfter + ' door landing(s) grew during the law-lane fires (the guard must refuse BEFORE anything dispatches)', tookRequests: 4 };
+            }
+            return { verdict: 'REFUSED', detail: 'the law lanes hold at the door: the address law refuses the sneak id before the id-named slot generator, the shape lanes refuse typed, and NO refused packet rides the door (zero landing growth)', tookRequests: 4 };
+          } finally {
+            relayCore.setDoorTransport(null);
+          }
+        });
+      },
+    },
   ],
 };
 

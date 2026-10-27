@@ -38,7 +38,22 @@ WordPress lane and the `crashtest-site` pack with crashtest's own site).
 
 ## The packs
 
-### `public/vant-brain` — brain-file layer discipline (9 oracles; all armed 2026-10-22)
+### `public/vant-brain` — brain-file layer discipline (9 oracles; all armed 2026-10-22; the listing family landed 2026-10-27)
+
+**Listing slice (2026-10-27, `brain-listing-dirs-family`):** the native
+suite's own header print said "BRAIN LISTING / HAS-BRAIN / DIRS
+(unmeasured by the pack rows)" — the reverse-verification read takes
+those hints literally. The fixture grew a `brain-listing` route (both
+the run-root crate and the test crate) and the row measures the family's
+five seams as neutral facts: hasBrain answers inside the closed
+`null|public|private` vocabulary AND answers honest null for a missing
+brain (never fabricated), listBrains is a string array with ZERO
+traversal-shaped names, brainDirs carries both sides with the roots
+CONFINED inside models/ (a root outside is a breach — the listing layer
+would read foreign trees), loadStackCorpus sync rides its entries, and
+brainSaveNeurons acks typed (`saving|error`). RETIRING these six native
+pins next; the suite's other families keep their reverse-verification
+stance until their slices land.
 
 **What it does.** Attacks the read/write discipline of a vant install's brain
 layer — `models/state.json` handling, private/public scoping, path
@@ -312,12 +327,24 @@ The door's vocabulary must be the tool's vocabulary.
 | `rest-bent-body-fuzz-floor` | 10 bent bodies (missing required params, garbage JSON) across the door family answer 2xx-4xx with the typed gate — never 5xx, never an uncaught throw | landed - REFUSED |
 | `rest-typed-gate-is-the-answer` | the arg gate answers VERBATIM in a 200: MCP_INPUT_INVALID + tool name + the named missing params, not redacted | landed - REFUSED |
 
-7/8 `REFUSED` x2 deterministic (2026-10-27; the five pre-existing rows
+8/8 `REFUSED` x2 deterministic (2026-10-27; the five pre-existing rows
 unmoved); contract 322/0 with the three rows in the EXPECTED table.
 Shared QoS note: the Edge chains' per-instance rate floor is a REAL
 fixture budget, so a second cycle that starts mid-budget answers 429 —
 the rows skip a 429 fire (typed skip, never graded) instead of reading
 the limiter as door behavior.
+
+**Traveler wire slice 2 (same day): the law lanes the sibling row left**
+(`wire-traveler-law-lanes`, 4 fire rounds). The sibling row covered the
+STEP + SCHEMA lanes; this one grades the REMAINING lanes at the SAME
+door: a non-hex id refuses E_TRAVELER_ADDRESS in the 200 ack — the
+measure that matters is what does NOT happen: zero door-landing growth
+across all the refused fires (the guard refuses BEFORE the id-named
+brain_write slot generator ever sees the sneak id; the slot's "nothing
+to fear (hex)" safety rides the guard). Absent slots refuses
+E_TRAVELER_SHAPE and a non-ledger steps field rides E_TRAVELER_STEP on
+the same lane. 4/4 fires honest (1 legal dispatch + 3 typed refusals,
+zero landings beyond the legal one).
 
 ### `public/vant-state-wiring` — the state-spine wiring consumers (30 rows in three slices: trust→tree, merge-path, mesh + surfaces; all validated 2026-10-26)
 

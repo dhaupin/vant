@@ -27,17 +27,18 @@
  *   - module-integrations (getModule for brain/storage/network/config,
  *     brain.get through the public surface)
  *   - getPipelineState's shape (object + chain)
- *   - brain listing/hasBrain, brainDirs, loadStackCorpus,
- *     brainSaveNeurons
+ *   - (RETIRED 2026-10-27: the listing/hasBrain/brainDirs/
+ *     loadStackCorpus/brainSaveNeurons family -> vant-brain's
+ *     brain-listing-dirs-family row, which grades the same seams
+ *     harder - the dirs roots' confinement inside models/ is the
+ *     law these shape pins never checked)
  *
  * Run: node test/brain.test.js
  */
 
-const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const MODELS_PRIVATE = path.join(ROOT, 'models', 'private');
 
 // Test results
 const results = {
@@ -69,7 +70,7 @@ function test(name, fn) {
     }
 }
 
-function skip(name, reason) {
+function _skip(name, reason) {
     results.skipped++;
     results.tests.push({ name, status: 'skipped', reason });
     console.log(`  ⊘ ${name}: ${reason}`);
@@ -289,48 +290,20 @@ test('getPipelineState has chain', () => {
 });
 
 // ============================================
-// BRAIN LISTING / HAS-BRAIN / DIRS (unmeasured by the pack rows)
 // ============================================
-
-asyncTest('hasBrain returns source or null', async () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const result = await brain.hasBrain('identity');
-    return { success: result === null || ['public', 'private'].includes(result) };
-});
-
-asyncTest('listBrains returns array', async () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const brains = await brain.listBrains();
-    return { success: Array.isArray(brains) };
-});
-
-test('brainDirs returns object with public/private', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const dirs = brain.brainDirs();
-    return {
-        success: typeof dirs === 'object' &&
-                 'public' in dirs &&
-                 'private' in dirs
-    };
-});
-
-test('loadStackCorpus returns array', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const corpus = brain.loadStackCorpus({sync:true});
-    return { success: Array.isArray(corpus) };
-});
-
-test('brainList returns array', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const list = brain.listBrains();
-    return { success: Array.isArray(list) };
-});
-
-test('brainSaveNeurons returns saving status', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const result = brain.brainSaveNeurons({ attention: { vant: 0.5 } });
-    return { success: 'saving' in result || 'error' in result };
-});
+// BRAIN LISTING / HAS-BRAIN / DIRS — RETIRED 2026-10-27
+// ============================================
+//
+// The family the header print flagged "unmeasured by the pack rows" is
+// measured now: vant-brain's `brain-listing-dirs-family` row drives the
+// `brain-listing` fixture arm (run-root crate + test crate) and grades
+// the same five seams HARDER than these pins did — hasBrain answers
+// inside the closed null|public|private vocabulary AND honest-null for a
+// missing brain, the roster is a traversal-free string array, BOTH
+// brainDirs roots are verified CONFINED inside models/ (these shape pins
+// never checked confinement), the stack corpus rides its entries, and
+// neuron saves ack typed. The pack row is the coverage; the six shape
+// pins below its bar retired with it.
 
 // ============================================
 // SUMMARY

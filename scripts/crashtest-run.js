@@ -1197,6 +1197,58 @@ function buildRoutes(sb, Harness) {
         }), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
+    // brain-listing: the brain's listing/dirs family on the sandbox tree
+    // (the native suite's "BRAIN LISTING / HAS-BRAIN / DIRS (unmeasured by
+    // the pack rows)" family - the 2026-10-27 slice's target). Neutral
+    // facts only; the dirs law's roots are verified for CONFINEMENT.
+    harness.registerRoute('brain-listing', async (ctx) => {
+        const j = await ctx.request.json().catch(() => ({}));
+        let brain;
+        try { brain = require(path.join(sb, 'lib', 'brain.js')); } catch (e) {
+            return new Response(JSON.stringify({ error: e.name + ': ' + e.message }), { status: 500 });
+        }
+        const out = { op: null };
+        try {
+            if (j && j.op === 'hasBrain') {
+                out.op = 'hasBrain';
+                const r = await brain.hasBrain(String(j.name || 'identity'));
+                out.result = (r === null || r === 'public' || r === 'private') ? r : 'ILLEGAL:' + String(r);
+            } else if (j && j.op === 'listBrains') {
+                out.op = 'listBrains';
+                const r = await brain.listBrains();
+                out.isArray = Array.isArray(r);
+                out.count = Array.isArray(r) ? r.length : null;
+                out.nonString = Array.isArray(r) ? r.filter((x) => typeof x !== 'string').length : null;
+                out.traversal = Array.isArray(r) ? r.filter((x) => String(x).includes('..') || String(x).startsWith('/')).length : null;
+            } else if (j && j.op === 'brainDirs') {
+                out.op = 'brainDirs';
+                const r = brain.brainDirs();
+                out.hasPublic = !!r && Object.prototype.hasOwnProperty.call(r, 'public');
+                out.hasPrivate = !!r && Object.prototype.hasOwnProperty.call(r, 'private');
+                const root = path.join(sb, 'models');
+                out.confined = r ? Object.entries(r).every(([, d]) => String(path.resolve(String(d)) === root || String(path.resolve(String(d))).startsWith(root + path.sep))) : false;
+                out.roots = r ? Object.entries(r).map(([k, d]) => ({ side: k, inside: String(path.resolve(String(d))).startsWith(root + path.sep) })) : null;
+            } else if (j && j.op === 'loadStackCorpus') {
+                out.op = 'loadStackCorpus';
+                const r = brain.loadStackCorpus({ sync: true });
+                out.isArray = Array.isArray(r);
+                out.count = Array.isArray(r) ? r.length : null;
+                const entries = (Array.isArray(r) ? r : []).filter((x) => x && typeof x === 'object');
+                out.hasNames = entries.every((x) => x.name == null || typeof x.name === 'string');
+            } else if (j && j.op === 'brainSaveNeurons') {
+                out.op = 'brainSaveNeurons';
+                const r = brain.brainSaveNeurons({ attention: { vant: 0.5 } });
+                out.ack = !!r && ('saving' in r || 'error' in r);
+                out.keys = r && typeof r === 'object' ? Object.keys(r) : null;
+            } else {
+                return new Response(JSON.stringify({ error: 'op required (hasBrain|listBrains|brainDirs|loadStackCorpus|brainSaveNeurons)' }), { status: 400 });
+            }
+        } catch (e) {
+            out.threw = e.name + ': ' + e.message;
+        }
+        return new Response(JSON.stringify(out), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     harness.registerRoute('guest-cap', async () => {
         let guests, tok;
         try { guests = require(path.join(sb, 'lib', 'guests.js')); } catch (e) {
