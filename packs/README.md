@@ -1241,6 +1241,65 @@ remote/watch/cache, lifecycle) now carries a row.
 Pack green ×2 deterministic, contract 335/0 with the row in the EXPECTED
 table, eslint clean.
 
+**Retirement audit (same day): the breaker's last native family folded
+to the row.** `test/brain-circuit.test.js` (10 pins) pinned exactly one
+family the pack row had not yet graded - the half-open probe FAILURE
+reopen leg. The circuit census child grew that leg: a poisoned probe at
+threshold 1 executes the wedged machinery and its real failure
+RE-OPENS the breaker with a fresh `openedAt` and the probing flag
+consumed - the next call short-circuits typed again, window frozen at 0
+so CI jitter cannot burn it (grade fields
+`probeReopen`/`reopenShorted`). With the row covering every pin, the
+native suite retired WHOLE (the carriers precedent) - the
+probe-on-failure family lives in the pack row now. One herd note kept
+in the child: the failure probe rides a UNIQUE never-cached name -
+`circuit-seed` was already cached by the success probe's earlier leg,
+so a seeded name would "succeed" from the cache without touching the
+machinery and close on a lie. Pack green x2 (vant-brain and
+vant-state-wiring), contract 336/0, eslint clean.
+
+### The market inventory census (2026-10-27) - the scope/cancel/bid cluster
+
+`public/vant-state-wiring` reaches **31 rows**. The fresh wire-survey
+read first: every door this campaign ever named is ARMED (all ten packs
+green on the post-census tree, contract 335/0), so the growth axis is
+depth - and the next depth is the **market**'s unmeasured inventory
+cluster. `market-scope-visibility-and-cancel-matrix` lands as the
+module's first census row, riding a dedicated `wiring-market-census`
+census child (fresh module, cleared market), with THREE live fires the
+probe-first pass earned and fixed same-pass in `lib/market.js`:
+
+- **the scope create-gate silently widened** - `market.list` gated
+  scopes with normalize()+null-check only, but scope's documented rule
+  is "create paths REJECT" (lib/scope isValid): an owner-less object
+  (`{visibility:'private'}` with no owner) normalized to
+  `{owner:null, visibility:'public'}` - a private-intent listing
+  silently became public. The gate now rejects malformed AND owner-less
+  shapes typed `E_SCOPE` (nothing stored); every legit agent/org shape
+  stores exactly as before.
+- **the bid door carried the unfixed twin of list()'s known
+  undefined-persist bug, twice over** - `description` AND `reward`
+  rode `data.*` verbatim, so a description-less or reward-less bid made
+  the persisted state non-canonical-encode-able: _persist failed and
+  `state/market.json` never existed at all - the WHOLE market map lost
+  on restart. Both fields ride the same absent-key=nowhere law as
+  list()'s summary now; the restart-survival leg grades the disk tree
+  KEEPING the earlier listings after such bids report.
+
+The graded laws: the scope gate (both irrational shapes typed, zero
+rows stored), the scoped-membership visibility triad (search invisible
+to non-members, GET unseen-not-404, stats serves counts with the id
+views stripped from every non-member index while the member keeps the
+useful index view), the scope-refused trade (`E_SCOPE`), the
+cancelTrade authorization matrix over a REAL debited completed trade
+(unknown id / not-a-party / already-completed, each its honest
+envelope), the bid consent gate (governance refusal typed, never
+silent), and the restart-survival persist law.
+
+Pack green x2 deterministic (90 green rows both cycles), contract
+336/0 with the row in the EXPECTED table, native market suites unmoved
+(22+23+4 pins green), eslint clean.
+
 ### The remote/watch/cache census (2026-10-27) — the 9-key cluster
 
 `public/vant-brain` reaches **22 rows**. The remote tunnel + watcher +

@@ -1452,6 +1452,9 @@ const EXPECTED = {
         'market-list-mirrors': 'skip',
         'market-disk-view-live': 'skip',
         'market-clear-resets': 'skip',
+        // (market inventory census 2026-10-27) run-root-only child route;
+        // honest skip here, strict earned verification rides the run root
+        'market-scope-visibility-and-cancel-matrix': 'skip',
         // (slice 3) mesh WAL + events, geometry, brain-verify, mesh-status
         'mesh-wal-deltas-ride-log': 'skip',
         'mesh-wal-recovery-reconstructs': 'skip',

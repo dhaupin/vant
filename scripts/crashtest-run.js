@@ -946,6 +946,84 @@ const TMPSPACE_CHILD = `${CHILD_STDOUT_GUARD}
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
 
+// (market census 2026-10-27) the SCOPE-VISIBILITY + CANCEL-MATRIX + bid
+// gates census: the lib inventory's next unmeasured market cluster. A
+// fresh module over a cleared market grades: the create-path scope gate
+// (malformed AND owner-less scope objects refuse typed E_SCOPE after the
+// live-fire fix — the old normalize-only gate silently widened a
+// private-intent listing to public), the scoped-membership visibility
+// triad (search invisible, GET unseen-not-404, stats serves COUNTS with
+// the id views stripped from every non-member index), the scope-refused
+// trade, the cancelTrade authorization matrix (not-found / not-a-party /
+// already-completed), the bid consent gate, and the RESTART-SURVIVAL
+// persist law: description-less AND reward-less bids no longer kill
+// _persist (the canonical.encode undefined class), so the disk tree
+// keeps the earlier listings after those bids report.
+const MARKET_CENSUS_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    delete require.cache[require.resolve('./lib/market.js')];
+    delete require.cache[require.resolve('./lib/scope.js')];
+    try { require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canTrade: true, canSpawn: true }); } catch (e0) {}
+    const market = require('./lib/market.js');
+    const fsMod = require('fs');
+    const out = { family: 'market-census', bail: null, ok: true };
+    try {
+        market.clearState();
+        const ctx = { agentId: 'market-alpha-seller', requiresConsent: false };
+        // 1. the create-path scope gate (both irrational shapes refuse typed,
+        //    and NEITHER stores a listing)
+        out.listingsBefore = market.stats().listings;
+        out.badScope = await market.list('knowledge', { title: 'bad', tags: [], scope: { malformed: 1 } }, ctx);
+        out.ownerlessScope = await market.list('knowledge', { title: 'bad2', tags: [], scope: { visibility: 'private' } }, ctx);
+        out.listingsAfterBad = market.stats().listings;
+        // 2. the honest scoped listing (agent-kind scopes carry their member
+        //    set without any teams fixture) + the public contrast listing
+        const scoped = await market.list('knowledge', { title: 'scoped-census-pin', summary: 'h', tags: ['census'], price: 2, supply: 1, scope: { owner: 'agent:market-alpha-seller', visibility: 'private' } }, ctx);
+        out.scopedScope = scoped && scoped.scope ? { owner: scoped.scope.owner, visibility: scoped.scope.visibility } : null;
+        const scopedId = scoped && scoped.id;
+        await market.list('insight', { title: 'public-census-pin', summary: 'h', tags: ['census'], price: 2, supply: 1 }, ctx);
+        // 3. the visibility triad
+        out.anonSearchHasScopedId = scopedId ? (await market.search({ tags: ['census'] })).some((l) => l.id === scopedId) : null;
+        out.memberSearchHasScopedId = scopedId ? (await market.search({ tags: ['census'], agentId: 'market-alpha-seller' })).some((l) => l.id === scopedId) : null;
+        out.anonGetUnseen = scopedId ? (await market.get(scopedId)) === null : null;
+        out.memberGetSeen = scopedId ? (await market.get(scopedId, { agentId: 'market-alpha-seller' })) !== null : null;
+        const anonStats = market.stats();
+        const memberStats = market.stats('market-alpha-seller');
+        out.statsAnonStripped = scopedId ? !(JSON.stringify(anonStats.types || {}).includes(scopedId) || JSON.stringify(anonStats.tags || {}).includes(scopedId)) : null;
+        out.statsAnonCountsScoped = typeof anonStats.visible === 'number' && anonStats.visible < anonStats.listings;
+        out.statsMemberSees = scopedId ? !!(JSON.stringify(memberStats.types || {}).includes(scopedId)) : null;
+        // 4. the scope-refused trade
+        out.scopeTrade = scopedId ? await market.trade(scopedId, 'market-stranger', { agentId: 'market-stranger', consentGiven: true }) : null;
+        // 5. the cancelTrade authorization matrix over a REAL trade
+        const pub = Array.isArray(await market.search({ type: 'insight', tags: ['census'] })) && (await market.search({ type: 'insight', tags: ['census'] }))[0];
+        if (!pub) throw new Error('public contrast listing missing');
+        out.cancelUnknown = market.cancelTrade('trade_none', 'market-buyer-1');
+        const tr = await market.trade(pub.id, 'market-buyer-1', { agentId: 'market-buyer-1', consentGiven: true });
+        out.tradeDebit = tr && tr.debit ? { agent: tr.debit.agent, amount: tr.debit.amount } : null;
+        out.tradeCompleted = !!(tr && tr.completed === true);
+        out.cancelOther = tr && tr.id ? market.cancelTrade(tr.id, 'market-looker') : null;
+        out.cancelCompleted = tr && tr.id ? market.cancelTrade(tr.id, 'market-buyer-1') : null;
+        // 6. the bid consent gate + the restart-survival persist law
+        out.bidNoConsent = await market.bid('census-bid-no-consent', { tags: ['census'], reward: 'knowledge:x' }, { agentId: 'market-alpha-seller' });
+        const b1 = await market.bid('census-bid-descless', { tags: ['census'] }, { agentId: 'market-alpha-seller', consentGiven: true });
+        const b2 = await market.bid('census-bid-noreward', { description: 'd', tags: ['census'] }, { agentId: 'market-alpha-seller', consentGiven: true });
+        out.bidsOk = !!(b1 && b1.id && b2 && b2.id);
+        market._persistNow();
+        await new Promise((r) => setTimeout(r, 300));
+        const disk = 'models/private/vant/state/market.json';
+        out.diskExists = fsMod.existsSync(disk);
+        if (out.diskExists) {
+            const st = JSON.parse(fsMod.readFileSync(disk, 'utf8'));
+            out.diskKeeperSurvives = JSON.stringify(st.listings || []).includes('public-census-pin');
+            out.diskBids = Array.isArray(st.bids) ? st.bids.length : 0;
+        }
+    } catch (e1) {
+        out.ok = false;
+        out.bail = String((e1 && e1.name) || '?') + ': ' + String((e1 && e1.message) || '').slice(0, 140);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
 // Stones probe: the REAL seal → decode chain// (brain battery, evolution slice 2026-10-27) the EVOLUTION-CONTEXT
 // probe: a FIXED lifecycle census over a fresh brain module in the
 // sandbox (start → record → auto-lists → copy law → end → history).
@@ -1572,7 +1650,8 @@ const CIRCUIT_CHILD = `${CHILD_STDOUT_GUARD}
     try { const ev = require('./lib/event'); ev.on('brain:load:circuit:open', () => opens++); ev.on('brain:load:circuit:halfOpen', () => halves++); } catch (eEv) {}
     const out = { family: 'load-circuit', statusOk: null, nullFeedImmune: null, w1Fed: null,
         opened: null, openEvent: null, metricsErr: null, short: null, windowStillGate: null,
-        resetRt: null, halfEvent: null, probeClosed: null, probeContentOk: null, thrBack: null, ok: true };
+        resetRt: null, halfEvent: null, probeClosed: null, probeContentOk: null,
+        probeReopen: null, reopenShorted: null, thrBack: null, ok: true };
     try {
         // 0. the status shape over a fresh module
         const st0 = brain.getLoadCircuitStatus();
@@ -1624,6 +1703,34 @@ const CIRCUIT_CHILD = `${CHILD_STDOUT_GUARD}
         out.probeContentOk = !!(probe && probe.content === 'seed content');
         out.probeClosed = st3.state === 'CLOSED' && st3.failures === 0;
         out.halfEvent = halves >= 1;
+        // 7b. (retirement audit 2026-10-27) the half-open FAILURE reopen:
+        // wedged again at threshold 1, tiny reset window; the probe EXECUTES
+        // the poisoned machinery and its real failure re-OPENS the breaker
+        // (failures >= threshold while not OPEN); the probing flag is
+        // consumed, so the next call short-circuits again (window frozen
+        // at 0 so CI jitter cannot burn the fresh window mid-leg).
+        brain.resetLoadCircuit();
+        brain._setLoadCircuitThreshold(1);
+        brain.register('vaf', thrower);
+        try { await brain.load('circuit-census-w-5'); } catch (e6a) {}
+        if (brain.getLoadCircuitStatus().state !== 'OPEN') throw new Error('reopen wedgeload did not open');
+        brain._setLoadCircuitResetMs(40);
+        await new Promise((r) => setTimeout(r, 90));
+        let probeErr = null;
+        // a UNIQUE name: 'circuit-seed' was cached by leg 7's success probe,
+        // so a seeded name would "succeed" from the cache without touching
+        // the machinery (and the close-on-success would lie through it). The
+        // poisoned pipeline runs BEFORE any load result, so the throw here
+        // is real machinery work, never a cache serve.
+        try { await brain.load('circuit-census-poison-probe-' + Date.now()); } catch (e6b) { probeErr = e6b; }
+        const st4 = brain.getLoadCircuitStatus();
+        out.probeReopen = st4.state === 'OPEN' && probeErr !== null && probeErr.code !== 'BRAIN_CIRCUIT_OPEN';
+        brain._setLoadCircuitResetMs(0);
+        let shortErr = null;
+        try { await brain.load('circuit-census-poison-probe-B'); } catch (e6c) { shortErr = e6c; }
+        out.reopenShorted = !!(shortErr && shortErr.code === 'BRAIN_CIRCUIT_OPEN');
+        brain._clearHandlerOverride('vaf');
+        brain.resetLoadCircuit();
         // 8. the DI return law
         brain._setLoadCircuitThreshold(null);
         brain._setLoadCircuitResetMs(null);
@@ -1848,6 +1955,18 @@ const LIFECYCLE_CHILD = `${CHILD_STDOUT_GUARD}
             outText = execFileSync('node', ['-e', BACKUP_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
         } catch (e) {
             return new Response(JSON.stringify({ error: `backup probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
+    // (market census 2026-10-27) the scope-visibility + cancel-matrix +
+    // bid gates census child over a fresh market module.
+    harness.registerRoute('wiring-market-census', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', MARKET_CENSUS_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `market-census probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
         }
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });

@@ -1138,7 +1138,7 @@ export default {
     // ============ the load-circuit breaker census (2026-10-27) ============
     {
       name: 'brain-load-circuit-laws',
-      description: "the P3 #34 load-circuit breaker family (getLoadCircuitStatus / resetLoadCircuit / the _set* DI pair + load()'s short-circuit) graded over a REAL wedge fixture: a poisoned CRITICAL pipeline handler feeds consecutive thrown loads - the breaker opens typed with its event + metrics + lastError, any load then fast-fails with the typed retryable BRAIN_CIRCUIT_OPEN short-circuit, graceful null misses never feed it, the half-open probe lets ONE healed real load through and closes on its success, and resetLoadCircuit answers the honest restore",
+      description: "the P3 #34 load-circuit breaker family (getLoadCircuitStatus / resetLoadCircuit / the _set* DI pair + load()'s short-circuit) graded over a REAL wedge fixture: a poisoned CRITICAL pipeline handler feeds consecutive thrown loads - the breaker opens typed with its event + metrics + lastError, any load then fast-fails with the typed retryable BRAIN_CIRCUIT_OPEN short-circuit, graceful null misses never feed it, the half-open probe lets ONE healed real load through and closes on its success, a POISONED probe's real failure RE-OPENS the breaker and its consumed probing flag short-circuits the next call again, and resetLoadCircuit answers the honest restore",
       async run(harness) {
         const r = await tryRun(harness, 'brain-circuit', {
           method: 'POST',
@@ -1174,10 +1174,13 @@ export default {
         if (j.probeContentOk !== true || j.probeClosed !== true || j.halfEvent !== true) {
           return { verdict: 'EXPLOITED', detail: 'the half-open probe: content=' + j.probeContentOk + ' closed=' + j.probeClosed + ' event=' + j.halfEvent + ' - after the reset window ONE probe rides the healed machinery; its SUCCESS (real content, never a null miss) closes the breaker', tookRequests: 10 };
         }
+        if (j.probeReopen !== true || j.reopenShorted !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the poisoned probe: reopen=' + j.probeReopen + ' shorted=' + j.reopenShorted + ' - the probe must EXECUTE the wedged machinery and its REAL failure re-open the breaker (openedAt fresh, probing consumed); the next call short-circuits typed again', tookRequests: 12 };
+        }
         if (j.thrBack !== true) {
           return { verdict: 'EXPLOITED', detail: 'the DI return law answered ' + j.thrBack + ' - null restores the env/default threshold (5)', tookRequests: 11 };
         }
-        return { verdict: 'REFUSED', detail: 'the fresh status is CLOSED/zero, graceful null misses never feed it, a REAL poisoned-critical wedge opens it named (event + metrics.errors + lastError), every load then fast-fails typed retryable BRAIN_CIRCUIT_OPEN with its failure count, resetLoadCircuit restores honestly, and the half-open probe through healed machinery closes on real content - P3 #34 is measured', tookRequests: 11 };
+        return { verdict: 'REFUSED', detail: 'the fresh status is CLOSED/zero, graceful null misses never feed it, a REAL poisoned-critical wedge opens it named (event + metrics.errors + lastError), every load then fast-fails typed retryable BRAIN_CIRCUIT_OPEN with its failure count, resetLoadCircuit restores honestly, the half-open probe through healed machinery closes on real content, and a POISONED probe executes the wedge and RE-OPENS on its real failure with the probing flag consumed - P3 #34 is measured', tookRequests: 12 };
       },
     },
     // ============ the remote/watch/cache census (2026-10-27) ============

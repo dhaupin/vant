@@ -913,5 +913,71 @@ export default {
         return { verdict: 'REFUSED', detail: 'the mesh line renders its label with (unavailable) and the poisoned-leg error itself - degraded-not-dead holds on the render path', tookRequests: 1 };
       },
     },
+
+    // ============ the market inventory census (2026-10-27) ============
+    {
+      name: 'market-scope-visibility-and-cancel-matrix',
+      description: "the market's unmeasured inventory cluster: the create-path scope gate refuses malformed AND owner-less scope objects typed E_SCOPE (the live-fire fix - the old normalize-only gate silently widened a private-intent listing to public), the scoped-membership visibility triad holds (search invisible, GET unseen-not-404, stats serves counts with the id views stripped from every non-member index while the member sees them), a non-member trade rides E_SCOPE, the cancelTrade authorization matrix answers honest envelopes (not-found / not-a-party / already-completed) over a REAL settled trade, the bid consent gate refuses without consent, and description-less AND reward-less bids no longer kill _persist - the disk tree keeps the earlier listings after those bids report (the restart-survival law)",
+      async run(harness) {
+        // the census rides a dedicated child route, not the merge verb table
+        let raw = null, res = null, absent = false;
+        try {
+          res = await harness.run('wiring-market-census', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({}),
+          });
+          if (typeof res.body === 'string') raw = res.body;
+          else if (typeof res.text === 'function') { try { raw = await res.text(); } catch { raw = ''; } }
+          else if (res.response && typeof res.response.text === 'function') { try { raw = await res.response.text(); } catch { raw = ''; } }
+          else raw = '';
+        } catch (e) {
+          if (/no route registered as/i.test(String(e && e.message))) { absent = true; }
+          else throw e;
+        }
+        if (absent) return skip('wiring-market-census not armed (pending run-root wiring)');
+        if (!raw || !raw.trim()) return skip('wiring-market-census not armed: rType=' + (res && res.constructor && res.constructor.name) + ' status=' + (res && res.status) + ' rawType=' + typeof raw + ' rawHead=' + String(raw).slice(0, 120));
+        const j = parseJson(raw);
+        if (!j || j.error) return skip('market census probe unavailable: ' + (j && j.error || 'no payload'));
+        if (j.ok === false) return rowErr('the census child faulted mid-census: ' + (j.bail || 'unknown'), [], null);
+        if ((j.badScope && j.badScope.code) !== 'E_SCOPE' || (j.ownerlessScope && j.ownerlessScope.code) !== 'E_SCOPE') {
+          return rowErr('malformed/owner-less scope answered ' + JSON.stringify(j.badScope) + '/' + JSON.stringify(j.ownerlessScope) + ' - the create path must REJECT typed (the old gate silently widened a private-intent listing to public)', [], { bad: j.badScope, ownerless: j.ownerlessScope });
+        }
+        if (j.listingsAfterBad !== 0) {
+          return rowErr('a refused shape stored a listing (count=' + j.listingsAfterBad + ') - the typed refusal must mean nothing crossed', [], { after: j.listingsAfterBad });
+        }
+        if (!j.scopedScope || j.scopedScope.owner !== 'agent:market-alpha-seller' || j.scopedScope.visibility !== 'private') {
+          return rowErr('the honest scoped listing stored ' + JSON.stringify(j.scopedScope) + ' - the agent-kind scope must normalize verbatim', [], { scope: j.scopedScope });
+        }
+        if (j.anonSearchHasScopedId !== false || j.memberSearchHasScopedId !== true) {
+          return rowErr('search anon=' + j.anonSearchHasScopedId + ' member=' + j.memberSearchHasScopedId + ' - a scoped listing is invisible to non-members and visible to its member', [], {});
+        }
+        if (j.anonGetUnseen !== true || j.memberGetSeen !== true) {
+          return rowErr('get anon=' + j.anonGetUnseen + ' member=' + j.memberGetSeen + ' - scoped means UNSEEN (null), not 404-vs-403 noise', [], {});
+        }
+        if (j.statsAnonStripped !== true || j.statsAnonCountsScoped !== true || j.statsMemberSees !== true) {
+          return rowErr('stats stripped=' + j.statsAnonStripped + ' counts=' + j.statsAnonCountsScoped + ' member=' + j.statsMemberSees + ' - the non-member id views must NEVER contain the scoped id (counts only), the member keeps the useful index', [], {});
+        }
+        if ((j.scopeTrade && j.scopeTrade.code) !== 'E_SCOPE') {
+          return rowErr('the stranger trade answered ' + JSON.stringify(j.scopeTrade) + ' - a scoped listing is untradable by non-members typed', [], {});
+        }
+        if (j.tradeCompleted !== true || !j.tradeDebit || j.tradeDebit.amount !== 2) {
+          return rowErr('the real trade answered completed=' + j.tradeCompleted + ' debit=' + JSON.stringify(j.tradeDebit) + ' - the honest settlement carries the escrow debit', [], {});
+        }
+        if (!j.cancelUnknown || !j.cancelOther || !j.cancelCompleted ||
+            !/not found/i.test(String(j.cancelUnknown.error)) ||
+            !/not authorized/i.test(String(j.cancelOther.error)) ||
+            !/already completed/i.test(String(j.cancelCompleted.error))) {
+          return rowErr('the cancel matrix: ' + JSON.stringify([j.cancelUnknown, j.cancelOther, j.cancelCompleted]) + ' - unknown id / not-a-party / completed trade each need their honest envelope', [], {});
+        }
+        if (!j.bidNoConsent || !/not allowed/i.test(String(j.bidNoConsent.error))) {
+          return rowErr('the consentless bid answered ' + JSON.stringify(j.bidNoConsent) + ' - governance must refuse typed, never silently', [], {});
+        }
+        if (j.bidsOk !== true || j.diskExists !== true || j.diskKeeperSurvives !== true || !(j.diskBids >= 2)) {
+          return rowErr('the restart-survival law: bids=' + j.bidsOk + ' disk=' + j.diskExists + ' keeper=' + j.diskKeeperSurvives + ' bidsOnDisk=' + j.diskBids + ' - description-less AND reward-less bids must not kill _persist (the canonical.encode undefined class)', [], {});
+        }
+        return { verdict: 'REFUSED', detail: 'the scope gate rejects both irrational shapes typed (nothing stored), the visibility triad holds at search/get/stats with the non-member id views stripped, the stranger trade rides E_SCOPE, the cancel matrix answers its three honest envelopes over a REAL debited trade, the consentless bid refuses governance-typed, and desc-less + reward-less bids persist - the earlier listings survive on disk', tookRequests: 14 };
+      },
+    },
   ],
 };
