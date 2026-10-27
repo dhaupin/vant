@@ -1000,6 +1000,74 @@ export default {
         return { verdict: 'REFUSED', detail: 'the evolution lifecycle holds end-to-end: start seals stack + empty, records land on both the session and the side lists, the list getters hand copies, end seals endTime + duration and answers the summary, the lens is null after, the history reads the landed session (honest empty before) - the largest unmeasured cluster is now measured', tookRequests: 1 };
       },
     },
+
+    // ============ the geometry census (2026-10-27) ============
+    {
+      name: 'brain-geometry-nsc9-address-family',
+      description: "the geometry family (the census's second-named cluster): the per-brain path pin (models/private/vant/geometry), the NSC9 barcode is DETERMINISTIC (same brain + same key = same 9-facility-sequence-checksum address; a different key = a different address), the round-trip reads the stored bytes back through the quasicrystal addressing, an absent barcode answers the honest { error, barcode } MISS record (never a throw to the caller, never fabricated data), and geoList/geoBrains enumerate the store honestly",
+      async run(harness) {
+        const r = await tryRun(harness, 'brain-geometry', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        if (r._absent) return skip('no brain-geometry route');
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return { verdict: 'REFUSED', skipped: true, detail: ('geometry probe unavailable: ' + (j && j.error || 'no payload')) };
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the census child faulted mid-census: ' + (j.err || 'unknown'), tookRequests: 1 };
+        if (j.pathPin !== 'models/private/vant/geometry') {
+          return { verdict: 'EXPLOITED', detail: 'the geometry path resolved at ' + JSON.stringify(j.pathPin) + ' - the per-brain store pins to the brain\'s own tree', tookRequests: 1 };
+        }
+        const bc = /^9-\d{5}-\d{5}-\d$/.test(j.storeA && j.storeA.barcode || '');
+        if (!bc) return { verdict: 'EXPLOITED', detail: 'the NSC9 barcode answered ' + JSON.stringify(j.storeA && j.storeA.barcode) + ' - the 9-<facility>-<sequence>-<checksum> shape is the address grammar', tookRequests: 2 };
+        if (j.storeA2 !== true) return { verdict: 'EXPLOITED', detail: 'the same brain + same key minted a DIFFERENT address (' + JSON.stringify(j.storeA2) + ') - the NSC9 space is deterministic, not random', tookRequests: 3 };
+        if (!j.storeB || j.storeB === j.storeA.barcode) return { verdict: 'EXPLOITED', detail: 'a different key collides the address - two payloads cannot share the NSC9 space', tookRequests: 4 };
+        if (!j.load || !j.load.barcode) return { verdict: 'EXPLOITED', detail: 'the round-trip answered ' + JSON.stringify(j.load) + ' - geoLoad must serve the stored record by its address', tookRequests: 5 };
+        if (j.envelopeHasAddress !== true || j.dataRoundtrip !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the quasicrystal record rode without its address fields (' + JSON.stringify(j.envelopeHasAddress) + ') or the payload did not arrive verbatim at its recorded slot (' + j.dataRoundtrip + ') - the record IS the address + the bytes', tookRequests: 5 };
+        }
+        if (j.honestMiss !== true || j.missNoThrow !== true) {
+          return { verdict: 'EXPLOITED', detail: 'an absent barcode answered miss=' + JSON.stringify(j.honestMiss) + ' vocab=' + JSON.stringify(j.missVocab) + ' noThrow=' + j.missNoThrow + ' - the miss is the honest record with its error named (the wrapper passes the record verbatim, so the miss may ride inside the envelope), never a throw, never fabricated data', tookRequests: 6 };
+        }
+        if (typeof j.listCount !== 'number' || j.listCount < 1) return { verdict: 'EXPLOITED', detail: 'geoList served ' + JSON.stringify(j.listCount) + ' - the enumeration reflects the store layout under the pinned path, honestly non-empty', tookRequests: 7 };
+        if (j.loadB !== true) return { verdict: 'EXPLOITED', detail: 'the SECOND payload did not answer its own address (' + JSON.stringify(j.loadB) + ') - both stores stay retrievable, collision-free', tookRequests: 7 };
+        if (j.brainsInclude !== true) return { verdict: 'EXPLOITED', detail: 'geoBrains answered ' + JSON.stringify(j.brainsInclude) + ' - the brain that owns the store must carry geometry:true', tookRequests: 8 };
+        return { verdict: 'REFUSED', detail: 'the per-brain path is pinned, the NSC9 address is deterministic per brain+key (collision-free across keys), the round-trip serves the bytes verbatim, the absent barcode is the honest miss record, and the enumerations answer what was stored - the geometry family is measured', tookRequests: 8 };
+      },
+    },
+
+    // ============ the stego-backup census (2026-10-27) ============
+    {
+      name: 'brain-stego-backup-trio-honest-refusals',
+      description: "the stego-backup trio census (backupToImage / restoreFromImage / listBackups): the trio acts today as a TYPED-REFUSING STUB — a backup demand refuses typed VAF_REQUIRED_FIELD (the wrapper is one arg behind its stego delegate: no fake backup, no silent success), a foreign container path rides the path wall typed, a models-local absent raster answers typed absence, and listBackups answers the honest empty roster",
+      async run(harness) {
+        const r = await tryRun(harness, 'brain-backup-image', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        if (r._absent) return skip('no brain-backup-image route');
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return { verdict: 'REFUSED', skipped: true, detail: ('backup probe unavailable: ' + (j && j.error || 'no payload')) };
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the census child faulted mid-census: ' + (j.err || 'unknown'), tookRequests: 1 };
+        const b = j.backupLeg || {};
+        if (b.refused !== true || b.code !== 'VAF_REQUIRED_FIELD') {
+          return { verdict: 'EXPLOITED', detail: 'the backup demand answered ' + JSON.stringify(b) + ' - the arg-honesty law: the wrapper forwards and the stego gate refuses typed, never a fabricated backup record', tookRequests: 1 };
+        }
+        const f = j.foreignRestore || {};
+        if (f.refused !== true || f.code !== 'SECURITY_PATH_TRAVERSAL') {
+          return { verdict: 'EXPLOITED', detail: 'a foreign container path answered ' + JSON.stringify(f) + ' - the path wall must refuse the restore typed (confinement is the wall)', tookRequests: 2 };
+        }
+        const lm = j.localMissRestore || {};
+        if (lm.refused !== true || lm.code !== 'STORAGE_NOT_FOUND') {
+          return { verdict: 'EXPLOITED', detail: 'a models-local absent raster answered ' + JSON.stringify(lm) + ' - the honest absence is a typed miss, never fabricated brain content', tookRequests: 3 };
+        }
+        if (j.listEmpty !== true) {
+          return { verdict: 'EXPLOITED', detail: 'listBackups served ' + JSON.stringify(j.listEmpty) + ' - a fresh store answers the honest empty roster', tookRequests: 4 };
+        }
+        return { verdict: 'REFUSED', detail: 'backup demands refuse typed (VAF_REQUIRED_FIELD: the wrapper-only-arg law), foreign restores hit the path wall typed, absent local rasters answer typed absence, and the roster is honest-empty - NOTHING fake crosses the backup door; the trio stays a typed-refusing stub until it is properly wired (the stones/backup lane is the real surface, the census verdict is on the ledger)', tookRequests: 4 };
+      },
+    },
   ],
 };
 

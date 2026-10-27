@@ -1163,6 +1163,10 @@ const EXPECTED = {
         // module child; the family was the inventory census's largest
         // unmeasured cluster.
         'brain-evolution-session-lifecycle': 'skip',
+        // (geometry + backup census, ARMED 2026-10-27) the NSC9 per-brain
+        // address family + the stego-backup trio's honest-refusal laws
+        'brain-geometry-nsc9-address-family': 'skip',
+        'brain-stego-backup-trio-honest-refusals': 'skip',
     },
     'vant-crew': {
         'roster-quota-ceiling': 'REFUSED',

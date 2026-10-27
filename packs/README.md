@@ -1172,10 +1172,43 @@ census child (`brain-evolution` route, fresh module, sandbox tree):
   honest EMPTY history before the first ever session
 
 1/1 `REFUSED` ×2 deterministic (vant-brain live verdict 22/22 the same
-day). Remaining unmeasured clusters from the same census: geometry
-(geo*/resolveBrainPath, 6 keys), crate/dropbox (~15), backup images
-(3), the load-circuit breaker (5), remote/watch/cache (9),
+day).
+
+### The geometry + backup census (2026-10-27) — clusters 2 and 3 convert
+
+Two more census clusters landed the same day, on the same census-child
+pattern (`brain-geometry` / `brain-backup-image` routes, fresh modules,
+sandbox tree):
+
+- **`brain-geometry-nsc9-address-family`** (6 keys: geoLoad/geoStore/
+  geoList/geoBrains/getGeometryPath/resolveBrainPath) — the per-brain
+  path pins to `models/private/vant/geometry`, the NSC9 barcode is
+  DETERMINISTIC per brain+key (same key = the same 9-facility-
+  sequence-checksum address; different keys = different addresses,
+  collision-free), the round-trip reads the payload back THROUGH the
+  quasicrystal addressing (geoLoad serves the whole storage record —
+  address fields + the payload at its recorded slot; one envelope law,
+  graded as it actually rides), an absent barcode answers the honest
+  miss record (the wrapper passes the record verbatim, so the miss's
+  named error may ride inside the envelope — never a throw, never
+  fabricated data), and geoList/geoBrains enumerate honestly.
+- **`brain-stego-backup-trio-honest-refusals`** (3 keys:
+  backupToImage/restoreFromImage/listBackups) — the census verdict
+  landed as THE ROW: the trio acts today as a TYPED-REFUSING STUB.
+  backupToImage refuses typed VAF_REQUIRED_FIELD on every call (the
+  wrapper is one arg behind its stego delegate — no fake backup, no
+  silent success), a foreign container path rides the path wall typed
+  (SECURITY_PATH_TRAVERSAL), a models-local absent raster answers
+  typed absence (STORAGE_NOT_FOUND), and listBackups answers the
+  honest empty roster. NOTHING fake crosses the backup door; the
+  wiring gap is ON THE LEDGER (the stones/backup lane is the real
+  brain backup surface; the trio stays a stub until properly wired).
+
+Both rows `REFUSED` ×2 deterministic (vant-brain live verdict 24/24.
+contract 331/0, lint clean). Remaining census clusters: crate/dropbox
+(~15 keys), the load-circuit breaker (5), remote/watch/cache (9),
 bootstrap/shutdown + framework config (7).
+
 
 ### Guests battery (same pass) — the lib lifecycle converts + the trim
 

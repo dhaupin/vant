@@ -784,7 +784,98 @@ const GRAPH_CHILD = `${CHILD_STDOUT_GUARD}
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
 
-// (brain battery, evolution slice 2026-10-27) the EVOLUTION-CONTEXT
+// (brain battery, geometry slice 2026-10-27) the GEOMETRY-CONTEXT
+// probe: a FIXED census over a fresh brain module — the NSC9 per-brain
+// address law (deterministic barcode from brain hash + key hash),
+// round-trip by address, the honest miss record, geoList/geoBrains
+// enumeration, and the per-brain path containment.
+const GEO_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    delete require.cache[require.resolve('./lib/brain.js')];
+    try { require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canSpawn: true, canNetwork: true }); } catch (e0) {}
+    const brain = require('./lib/brain.js');
+    const out = { family: 'geometry', pathPin: null, storeA: null, storeA2: null, storeB: null,
+        load: null, dataRoundtrip: null, honestMiss: null, missNoThrow: null,
+        listCount: null, brainsInclude: null, ok: true };
+    try {
+        const pPath = brain.getGeometryPath('vant', 'private');
+        out.pathPin = String(pPath).indexOf('models/private') !== -1 && String(pPath).endsWith('geometry') ? 'models/private/vant/geometry' : String(pPath);
+        const s1 = await brain.geoStore('geo-a', { payload: 'geo-r1', n: 1 });
+        out.storeA = s1 && s1.stored === true ? { barcode: s1.barcode, brain: s1.brain } : null;
+        const s1b = await brain.geoStore('geo-a', { payload: 'geo-r1', n: 1 });
+        out.storeA2 = s1b && s1b.barcode === (out.storeA && out.storeA.barcode) ? true : (s1b && s1b.barcode);
+        const s2 = await brain.geoStore('geo-b', { payload: 'other', n: 2 });
+        out.storeB = s2 && s2.stored === true ? s2.barcode : null;
+        const l1 = await brain.geoLoad(out.storeA && out.storeA.barcode);
+        out.load = l1 && l1.source === 'geometry' ? { barcode: l1.barcode, brain: l1.brain } : null;
+        // (envelope law) geoLoad's data field IS the quasicrystal storage
+        // record (barcode/_key/fingerprint/position/... + the payload at
+        // its .data slot): the round-trip grade checks the record's
+        // address fidelity AND the payload verbatim at that slot.
+        const rec = l1 && l1.data;
+        out.envelopeHasAddress = !!(rec && rec.fingerprint && rec.position && rec.barcode === (out.storeA && out.storeA.barcode));
+        out.dataRoundtrip = !!(rec && rec.data && rec.data.payload === 'geo-r1' && rec.data.n === 1);
+        const miss = await brain.geoLoad('9-00000-99999-9');
+        // (miss vocabulary) the wrapper passes the storage record VERBATIM,
+        // so an absent address surfaces as the record's own error slot
+        // (top-level .error, or .data.error inside the envelope). The law
+        // is: a miss is a RECORD (with its error named), never a throw to
+        // the caller, never fabricated data.
+        const missErr = (miss && miss.error) || (miss && miss.data && miss.data.error);
+        out.honestMiss = !!(miss && missErr && (miss.barcode === '9-00000-99999-9' || (miss.data && miss.data.barcode === '9-00000-99999-9')));
+        out.missVocab = missErr;
+        out.missNoThrow = true; // reaching here means geoLoad threw nothing to the caller
+        out.listCount = Array.isArray(brain.geoList()) ? brain.geoList().length : -1;
+        // the B address stays retrievable too (collision-free storage:
+        // both payloads live, by address)
+        const l2 = await brain.geoLoad(out.storeB);
+        out.loadB = !!(l2 && l2.source === 'geometry' && l2.data && l2.data.data && l2.data.data.payload === 'other' && l2.data.data.n === 2);
+        const gb = brain.geoBrains();
+        out.brainsInclude = Array.isArray(gb) && gb.some((b) => b && b.geometry === true) ? true : JSON.stringify(gb).slice(0, 90);
+    } catch (e1) {
+        out.ok = false;
+        out.err = String((e1 && e1.name) || '?') + ': ' + String(e1 && e1.message || '').slice(0, 140);
+        out.missNoThrow = null;
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
+// (brain battery, backup slice 2026-10-27) the STEGO-BACKUP trio
+// census: backupToImage / restoreFromImage / listBackups — the probe
+// showed the trio acts today as a typed-refusing stub (the wrapper is
+// one arg behind its stego delegate, so backup can never fake a
+// success; restore rides the container path wall; list answers
+// honest absence). The child reports the neutral typed codes; the
+// pack row grades the refusal laws + the ledger carries the wiring
+// verdict.
+const BACKUP_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    delete require.cache[require.resolve('./lib/brain.js')];
+    try { require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canSpawn: true, canNetwork: true }); } catch (e0) {}
+    const brain = require('./lib/brain.js');
+    const out = { family: 'stego-backup', backupLeg: null, foreignRestore: null, localMissRestore: null, listEmpty: null, ok: true };
+    try {
+        // the backup demand: the arg-honesty leg (never a fake backup)
+        try { await brain.backupToImage('/tmp/vant-ct-foreign-container.png'); out.backupLeg = { refused: false }; }
+        catch (e2) { out.backupLeg = { refused: true, code: e2 && e2.code }; }
+        // the restore wall: a foreign absolute container path
+        try { await brain.restoreFromImage('/tmp/vant-ct-foreign-container.png'); out.foreignRestore = { refused: false }; }
+        catch (e3) { out.foreignRestore = { refused: true, code: e3 && e3.code }; }
+        // the restore miss: a models-local absent raster
+        try { await brain.restoreFromImage('models/private/vant/backup-census/raster.png'); out.localMissRestore = { refused: false }; }
+        catch (e4) { out.localMissRestore = { refused: true, code: e4 && e4.code }; }
+        // honest absence on the roster
+        out.listEmpty = Array.isArray(brain.listBackups()) && brain.listBackups().length === 0;
+    } catch (e1) {
+        out.ok = false;
+        out.err = String((e1 && e1.name) || '?') + ': ' + String(e1 && e1.message || '').slice(0, 140);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
+// Stones probe: the REAL seal → decode chain// (brain battery, evolution slice 2026-10-27) the EVOLUTION-CONTEXT
 // probe: a FIXED lifecycle census over a fresh brain module in the
 // sandbox (start → record → auto-lists → copy law → end → history).
 // The evolution family was the brain's largest unmeasured cluster
@@ -1391,6 +1482,30 @@ function buildRoutes(sb, Harness) {
     // (brain battery, evolution slice 2026-10-27) the evolution-context
     // census child: the family the lib inventory census flagged as the
     // brain's largest unmeasured cluster.
+    // (brain battery, geometry slice 2026-10-27) the geometry census
+    // child: the NSC9 per-brain address family over a fresh module.
+    harness.registerRoute('brain-geometry', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', GEO_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `geometry probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
+    // (brain battery, backup slice 2026-10-27) the stego-backup trio
+    // census child: the honest-refusal laws over a fresh module.
+    harness.registerRoute('brain-backup-image', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', BACKUP_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `backup probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     harness.registerRoute('brain-evolution', async () => {
         let outText;
         try {
