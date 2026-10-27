@@ -1240,6 +1240,15 @@ const EXPECTED = {
         'dash-relay-hmac-header-lane-laws': 'skip',
         'dash-relay-sealed-lane-laws': 'skip',
         'dash-relay-browser-lane-bridge': 'skip',
+        // (batch 4, 2026-10-27) the small doors: audit / users / properties /
+        // breakers + the MCP forward trio ride the SAME run-root-only
+        // dash-auth door arms, so each row degrades to an HONEST SKIP here;
+        // strict EARNED verification rides the run root.
+        'small-doors-properties-registry': 'skip',
+        'small-doors-breakers-edge-view': 'skip',
+        'small-doors-audit-ladder-and-cap': 'skip',
+        'small-doors-users-roster-lockout-and-gate-done': 'skip',
+        'small-doors-mcp-trio-typed-forward': 'skip',
     },
     // ARMED 2026-10-25 (drill-down slice 1, Phase A of the S0→S1 campaign,
     // #249): the trust→tree consumer family converted from the native

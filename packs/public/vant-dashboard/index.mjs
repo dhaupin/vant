@@ -21,7 +21,7 @@
  * a full walk runs in milliseconds — deep inside both windows.
  */
 
-import { createHmac } from 'node:crypto';
+import { createHmac, createHash } from 'node:crypto';
 
 const skip = (why) => ({ verdict: 'REFUSED', skipped: true, detail: `not armed: ${why}` });
 
@@ -81,6 +81,25 @@ const COOKIE = 'bdash_session';
 // brain_current / relay_ride / an arbitrary relay.call tool.
 const DASH_CALL = 'https://relay-edge.local/api/r/relay';
 const DASH_ROUTE = '/relay'; // the contract surface name the caps page carries (ROUTES.relay, dashboard kit)
+
+// --- (batch 4, 2026-10-27) the small doors ------------------------------
+// audit / users / properties / breakers + the MCP forward trio, through
+// the dash-auth child (now driving all seven module faces). The users
+// ride pins VANT_EMAIL_SALT so the rostered account hash is computable
+// client-side: sha256('<salt>:<trimmed lowercase email>').slice(0, 32) -
+// the same emailHashFor law accounts.ts pins; the roster ships the hash,
+// never the address.
+const UD_SALT = 'vant-dash-pack-ud-salt';
+function emailHashOf(email, salt) {
+  return createHash('sha256').update(String(salt) + ':' + String(email).trim().toLowerCase()).digest('hex').slice(0, 32);
+}
+const LEDGER_KINDS = [
+  'auth.otp.requested', 'auth.otp.cooldown', 'auth.otp.verified', 'auth.otp.failed', 'auth.otp.burned',
+  'auth.session.created', 'auth.session.destroyed', 'auth.account.disabled', 'auth.account.activated',
+  'bridge.refused', 'bridge.unreachable',
+];
+const AUDIT_URL = 'https://dash-run-root.pages.dev/api/audit';
+const USERS_URL = 'https://dash-run-root.pages.dev/api/users';
 const DASH_GATE_SECRET = 'vant-dash-pack-relay-gate-0123456789abcdef';
 const DASH_ENV_ON = { VANT_RELAY_ENABLED: '1', VANT_RELAY_GATE_KEY: DASH_GATE_SECRET };
 const DASH_CT_SHAPE = 'a'.repeat(32) + ':' + 'b'.repeat(24) + ':' + 'c'.repeat(32) + ':' + 'd'.repeat(2);
@@ -738,6 +757,199 @@ export default {
           return { verdict: 'EXPLOITED', detail: 'the forwarded sync ride lost the upstream answer (' + JSON.stringify(sync.body.reply).slice(0, 140) + ') - the last forward body IS the answer', tookRequests: 2 };
         }
         return { verdict: 'REFUSED', detail: 'no origin rides E_RELAY_UPST quoting the bridge; with an origin, relay.sync translates through the server-side bridge and the answer rides verbatim - the intent lane is intent-borne and honest at both rungs', tookRequests: 2 };
+      },
+    },
+    // ---------------- (batch 4, 2026-10-27) the small doors ----------------
+    // audit / users / properties / breakers + the MCP forward trio, all
+    // through the dash-auth child. The doors share ONE gate law (the
+    // batch-2 ladder's ensureAdmin) - these rows grade what the DOORS add
+    // on top: the capped zero-PII ledger read, the roster's hash-only
+    // law, the container-or-nothing registry shape, and the forward
+    // trio's typed origin refusal.
+
+    {
+      name: 'small-doors-properties-registry',
+      description: 'the property registry is container-or-nothing and secrets-free: shaped VANT_PROPERTY_*_ORIGIN vars serve id+label rows (the NAME var is the label, a missing label falls back to the id), an over-long id skips silently, and NO origin (or anything secret) rides the response body',
+      async run(harness) {
+        const badIdEnv = { bolete: true };
+        badIdEnv['VANT_PROPERTY_' + 'A'.repeat(45) + '_ORIGIN'] = 'https://pod-x.local';
+        const results = await probeDoors(harness, [
+          { name: 'p-valid', env: { bolete: true, VANT_PROPERTY_POD_ALPHA_ORIGIN: 'https://pod-alpha.local', VANT_PROPERTY_POD_ALPHA_NAME: 'Pod Alpha', VANT_PROPERTY_POD_BETA_ORIGIN: 'https://pod-beta.local' }, request: { endpoint: 'properties', method: 'GET', headers: {}, url: 'https://dash-run-root.pages.dev/api/properties' } },
+          { name: 'p-bad-id', env: badIdEnv, request: { endpoint: 'properties', method: 'GET', headers: {}, url: 'https://dash-run-root.pages.dev/api/properties' } },
+        ]);
+        if (!results) return skip('dash-auth not armed with the small doors (batch 4 arm pending)');
+        const valid = shapeResults(results, 'p-valid');
+        const badId = shapeResults(results, 'p-bad-id');
+        if (!valid || !valid.body || !Array.isArray(valid.body.properties)) {
+          return { verdict: 'EXPLOITED', detail: 'the registry answered without a properties array - the switcher needs the shaped row list', tookRequests: 2 };
+        }
+        const alpha = valid.body.properties.find((x) => x && x.id === 'pod-alpha');
+        const beta = valid.body.properties.find((x) => x && x.id === 'pod-beta');
+        if (!alpha || alpha.name !== 'Pod Alpha' || !beta || beta.name !== 'pod-beta') {
+          return { verdict: 'EXPLOITED', detail: 'registry rows wrong: ' + JSON.stringify(valid.body.properties).slice(0, 120) + ' - the NAME var is the label and the id is the fallback, per row', tookRequests: 2, evidence: { properties: valid.body.properties } };
+        }
+        if (valid.raw.indexOf('https://') !== -1 || valid.raw.indexOf('.local') !== -1) {
+          return { verdict: 'EXPLOITED', detail: 'the registry leaked an originating host - the bridge resolves origins SERVER-SIDE only, the wire carries ids + labels', tookRequests: 2 };
+        }
+        if (!badId || !badId.body || (badId.body.properties || []).length !== 0) {
+          return { verdict: 'EXPLOITED', detail: 'an over-long id surfaced as a row (' + JSON.stringify(badId && badId.body).slice(0, 100) + ') - malformed registry vars are container-refused, never half-served', tookRequests: 2 };
+        }
+        return { verdict: 'REFUSED', detail: 'shaped vars serve id+label rows with the id fallback, an oversized id serves nothing, and no origin ever rides the body - container-or-nothing secrets-free', tookRequests: 2 };
+      },
+    },
+
+    {
+      name: 'small-doors-breakers-edge-view',
+      description: 'the breaker door is the honest per-ISOLATE view: a plain GET answers 200 with the breaker map and the scoped note naming itself non-authoritative (the pod breaker is boss) - no store, no gate, and no pretending at cluster state',
+      async run(harness) {
+        const results = await probeDoors(harness, [
+          { name: 'breakers-view', env: { bolete: true }, request: { endpoint: 'breakers', method: 'GET', headers: {}, url: 'https://dash-run-root.pages.dev/api/breakers' } },
+        ]);
+        if (!results) return skip('dash-auth not armed with the small doors');
+        const view = shapeResults(results, 'breakers-view');
+        if (!view || view.status !== 200 || !view.body) {
+          return { verdict: 'EXPLOITED', detail: 'the breaker view answered ' + (view && view.status) + ' - an edge-scoped view must serve 200 without any store', tookRequests: 1 };
+        }
+        if (!view.body.breakers || typeof view.body.breakers !== 'object') {
+          return { verdict: 'EXPLOITED', detail: 'no breaker map rode - the UI needs the per-property states even when the map is empty', tookRequests: 1 };
+        }
+        if (String(view.body.note || '').indexOf('per-isolate edge view') === -1 || String(view.body.note || '').indexOf('authoritative') === -1) {
+          return { verdict: 'EXPLOITED', detail: 'the view did not name its own scope (' + String(view.body.note || '').slice(0, 80) + ') - pretending at cluster truth is the false-verdict class', tookRequests: 1, evidence: { note: view.body.note } };
+        }
+        return { verdict: 'REFUSED', detail: '200 + the map + the honest scope note naming the pod breaker authoritative - the edge view claims exactly what it is', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'small-doors-audit-ladder-and-cap',
+      description: 'the audit inbox: anon 401 E_NO_SESSION, the admin session reads the ride OWN ledger rows (kinds inside the closed vocabulary, newest-first), the limit param clamps hard (1 served, 99999 capped at 200), and a per-IP budget of 1 answers 429 E_EDGE_THROTTLED - and NOTHING email/token/session-id-shaped ever rides the wire (the zero-PII law)',
+      async run(harness) {
+        const results = await probeDoors(harness, [
+          call('capture-mint', { env: { sink: true }, endpoint: 'request-otp', body: { email: EMAIL } }),
+          call('verify-ok', { endpoint: 'verify-otp', body: { email: EMAIL, code: '__CODE__' } }),
+          { name: 'audit-anon', env: { bolete: true }, request: { endpoint: 'audit', method: 'GET', headers: {}, url: AUDIT_URL } },
+          { name: 'audit-admin', env: { bolete: true }, request: { endpoint: 'audit', method: 'GET', useCookie: 'verify-ok', headers: {}, url: AUDIT_URL } },
+          { name: 'audit-limit-1', env: { bolete: true }, request: { endpoint: 'audit', method: 'GET', useCookie: 'verify-ok', headers: {}, url: AUDIT_URL + '?limit=1' } },
+          { name: 'audit-limit-clamp', env: { bolete: true }, request: { endpoint: 'audit', method: 'GET', useCookie: 'verify-ok', headers: {}, url: AUDIT_URL + '?limit=99999' } },
+          { name: 'audit-throttle', env: { bolete: true, VANT_EDGE_RATE_PER_MIN: '1' }, request: { endpoint: 'audit', method: 'GET', useCookie: 'verify-ok', headers: {}, url: AUDIT_URL } },
+        ]);
+        if (!results) return skip('dash-auth not armed with the small doors');
+        const anon = shapeResults(results, 'audit-anon');
+        const admin = shapeResults(results, 'audit-admin');
+        const limit1 = shapeResults(results, 'audit-limit-1');
+        const clamp = shapeResults(results, 'audit-limit-clamp');
+        const throttle = shapeResults(results, 'audit-throttle');
+        if (!anon || !admin || !limit1 || !clamp || !throttle) {
+          return { verdict: 'EXPLOITED', detail: 'probe threw on the audit ladder - every rung must answer', tookRequests: 7 };
+        }
+        if (anon.status !== 401 || !anon.body || anon.body.error !== 'E_NO_SESSION') {
+          return { verdict: 'EXPLOITED', detail: 'audit-anon answered ' + anon.status + ' - the inbox opens at the gate ladder (401 E_NO_SESSION typed)', tookRequests: 7, evidence: { status: anon.status } };
+        }
+        if (!admin.body || admin.body.count == null || admin.body.count < 2 || admin.body.prefix !== 'aud:') {
+          return { verdict: 'EXPLOITED', detail: 'the admin read answered ' + (admin.body ? 'count=' + admin.body.count : 'nothing') + ' - the ride wrote its own audit rows (mint + verify) and the inbox must read them back', tookRequests: 7, evidence: { count: admin.body && admin.body.count } };
+        }
+        const events = Array.isArray(admin.body.events) ? admin.body.events : [];
+        const badKind = events.find((e) => !e || LEDGER_KINDS.indexOf(e.kind) === -1);
+        if (badKind !== undefined) {
+          return { verdict: 'EXPLOITED', detail: 'a ledger row rode with an out-of-vocabulary kind (' + JSON.stringify(badKind).slice(0, 80) + ') - the ledger is a closed vocabulary, never free-form', tookRequests: 7 };
+        }
+        if (events[0] && events[events.length - 1] && events[0].at < events[events.length - 1].at) {
+          return { verdict: 'EXPLOITED', detail: 'the events rode unsorted (newest not first) - the zero-padded key order is the newest-first law', tookRequests: 7 };
+        }
+        if (admin.raw.indexOf('@') !== -1 || admin.raw.indexOf('vguest_') !== -1 || admin.raw.indexOf('bsess_') !== -1) {
+          return { verdict: 'EXPLOITED', detail: 'the inbox leaked a PII-shaped value (email/token/session id) - the ledger is kind + outcome ONLY (prd-web.md 3.5 hygiene)', tookRequests: 7 };
+        }
+        if (!limit1.body || limit1.body.count !== 1) {
+          return { verdict: 'EXPLOITED', detail: 'limit=1 served ' + (limit1.body ? limit1.body.count : 'nothing') + ' rows - the limit reads are honest caps', tookRequests: 7 };
+        }
+        if (!clamp.body || clamp.body.count > 200 || clamp.body.count < 2) {
+          return { verdict: 'EXPLOITED', detail: 'limit=99999 served ' + (clamp.body ? clamp.body.count : 'nothing') + ' rows - the cap clamps at 200 by the door contract', tookRequests: 7 };
+        }
+        if (throttle.status !== 429 || !throttle.body || throttle.body.error !== 'E_EDGE_THROTTLED') {
+          return { verdict: 'EXPLOITED', detail: 'the budgeted ride answered ' + throttle.status + ' - the per-session edge budget is E_EDGE_THROTTLED 429 typed', tookRequests: 7, evidence: { status: throttle.status } };
+        }
+        return { verdict: 'REFUSED', detail: 'anon 401 / admin reads the ride own rows in-vocabulary and newest-first / limit 1 + clamp 200 / budget E_EDGE_THROTTLED - and zero PII on the wire the whole ladder down', tookRequests: 7 };
+      },
+    },
+
+    {
+      name: 'small-doors-users-roster-lockout-and-gate-done',
+      description: 'the users admin surface: the roster ships ONLY hashed emails (the pinned salt makes the row hash computable), the status law is typed (bad status 400, unknown hash 404), the admin cannot self-disable (typed E_SELF_DISABLE lockout guard), disabling a second account lands ok:true and that disabled account DIES AT THE GATE (401 E_ACCOUNT_DISABLED through the audit door it used to pass)',
+      async run(harness) {
+        const adminEmail = 'ud-admin@vant-dash.local';
+        const viewerEmail = 'ud-viewer@vant-dash.local';
+        const adminHash = emailHashOf(adminEmail, UD_SALT);
+        const viewerHash = emailHashOf(viewerEmail, UD_SALT);
+        const results = await probeDoors(harness, [
+          call('capture-mint', { env: { sink: true, VANT_EMAIL_SALT: UD_SALT }, endpoint: 'request-otp', body: { email: adminEmail } }),
+          call('ok-admin', { env: { VANT_EMAIL_SALT: UD_SALT }, endpoint: 'verify-otp', body: { email: adminEmail, code: '__CODE__' } }),
+          { name: 'capture-mint-2', env: { bolete: true, sink: true, VANT_EMAIL_SALT: UD_SALT }, request: { endpoint: 'request-otp', method: 'POST', body: JSON.stringify({ email: viewerEmail }) } },
+          { name: 'ok-viewer', env: { bolete: true, VANT_EMAIL_SALT: UD_SALT }, request: { endpoint: 'verify-otp', method: 'POST', body: JSON.stringify({ email: viewerEmail, code: '__CODE__' }) } },
+          { name: 'users-roster', env: { bolete: true, VANT_EMAIL_SALT: UD_SALT }, request: { endpoint: 'users', method: 'GET', useCookie: 'ok-admin', headers: {}, url: USERS_URL } },
+          { name: 'users-bad-status', env: { bolete: true, VANT_EMAIL_SALT: UD_SALT }, request: { endpoint: 'users', method: 'POST', useCookie: 'ok-admin', headers: { 'content-type': 'application/json' }, url: USERS_URL + '/set-status', body: JSON.stringify({ emailHash: adminHash, status: 'paused' }) } },
+          { name: 'users-no-account', env: { bolete: true, VANT_EMAIL_SALT: UD_SALT }, request: { endpoint: 'users', method: 'POST', useCookie: 'ok-admin', headers: { 'content-type': 'application/json' }, url: USERS_URL + '/set-status', body: JSON.stringify({ emailHash: 'f'.repeat(32), status: 'disabled' }) } },
+          { name: 'users-self-disable', env: { bolete: true, VANT_EMAIL_SALT: UD_SALT }, request: { endpoint: 'users', method: 'POST', useCookie: 'ok-admin', headers: { 'content-type': 'application/json' }, url: USERS_URL + '/set-status', body: JSON.stringify({ emailHash: adminHash, status: 'disabled' }) } },
+          { name: 'users-disable-viewer', env: { bolete: true, VANT_EMAIL_SALT: UD_SALT }, request: { endpoint: 'users', method: 'POST', useCookie: 'ok-admin', headers: { 'content-type': 'application/json' }, url: USERS_URL + '/set-status', body: JSON.stringify({ emailHash: viewerHash, status: 'disabled' }) } },
+          { name: 'gate-died', env: { bolete: true, VANT_EMAIL_SALT: UD_SALT }, request: { endpoint: 'audit', method: 'GET', useCookie: 'ok-viewer', headers: {}, url: AUDIT_URL } },
+        ]);
+        if (!results) return skip('dash-auth not armed with the small doors');
+        const roster = shapeResults(results, 'users-roster');
+        const badStatus = shapeResults(results, 'users-bad-status');
+        const noAccount = shapeResults(results, 'users-no-account');
+        const selfDisable = shapeResults(results, 'users-self-disable');
+        const disableViewer = shapeResults(results, 'users-disable-viewer');
+        const gateDied = shapeResults(results, 'gate-died');
+        if (!roster || !badStatus || !noAccount || !selfDisable || !disableViewer || !gateDied) {
+          return { verdict: 'EXPLOITED', detail: 'probe threw on the users ladder - every rung must answer', tookRequests: 10 };
+        }
+        if (!roster.body || !roster.body.count || roster.body.count < 2 || !Array.isArray(roster.body.users)) {
+          return { verdict: 'EXPLOITED', detail: 'the roster rode ' + JSON.stringify(roster.body).slice(0, 100) + ' - the admin surface needs the full account ladder', tookRequests: 10 };
+        }
+        if (roster.raw.indexOf('ud-admin@') !== -1 || roster.raw.indexOf('ud-viewer@') !== -1) {
+          return { verdict: 'EXPLOITED', detail: 'the roster shipped a RAW address - hashed emails are not reversible and that is the design', tookRequests: 10 };
+        }
+        if (roster.raw.indexOf(adminHash) === -1) {
+          return { verdict: 'EXPLOITED', detail: 'the pinned-salt account hash never rode - the full hash is the roster key and it must be there, hashed', tookRequests: 10 };
+        }
+        if (badStatus.status !== 400 || !badStatus.body || badStatus.body.error !== 'E_BAD_STATUS') {
+          return { verdict: 'EXPLOITED', detail: 'status "paused" answered ' + badStatus.status + ' - the closed vocabulary refuses typed', tookRequests: 10 };
+        }
+        if (noAccount.status !== 404 || !noAccount.body || noAccount.body.error !== 'E_NO_ACCOUNT') {
+          return { verdict: 'EXPLOITED', detail: 'an unknown hash answered ' + noAccount.status + ' - absent accounts refuse typed, never silently ok', tookRequests: 10 };
+        }
+        if (selfDisable.status !== 400 || !selfDisable.body || selfDisable.body.error !== 'E_SELF_DISABLE') {
+          return { verdict: 'EXPLOITED', detail: 'the admin self-disable answered ' + selfDisable.status + ' - typed lockout guard, the honest lockout note', tookRequests: 10, evidence: { status: selfDisable.status } };
+        }
+        if (!disableViewer.body || disableViewer.body.ok !== true) {
+          return { verdict: 'EXPLOITED', detail: 'disabling a second account answered ' + JSON.stringify(disableViewer.body).slice(0, 90) + ' - the admin may disable accounts that are not its own', tookRequests: 10 };
+        }
+        if (gateDied.status !== 401 || !gateDied.body || gateDied.body.error !== 'E_ACCOUNT_DISABLED') {
+          return { verdict: 'EXPLOITED', detail: 'the disabled account rode its old session into audit and got ' + gateDied.status + ' - a disabled account dies at EVERY gate (401 E_ACCOUNT_DISABLED)', tookRequests: 10, evidence: { status: gateDied.status } };
+        }
+        return { verdict: 'REFUSED', detail: 'hash-only roster with the pinned-salt row / bad-status 400 / unknown 404 / self-disable E_SELF_DISABLE / real disable ok:true / the disabled account dies at the gate it used to pass', tookRequests: 10 };
+      },
+    },
+
+    {
+      name: 'small-doors-mcp-trio-typed-forward',
+      description: 'the MCP forward trio (exec POST, tools GET, events GET) all cross ONE forward: with no pod origin configured each answers the typed 503 naming VANT_PROPERTY_LOCAL_ORIGIN and hinting at the fix (Pages settings) - a translate-to-door family that refuses honestly at every verb, never a fake success and never a crash',
+      async run(harness) {
+        const results = await probeDoors(harness, [
+          { name: 'trio-exec', env: { bolete: true }, request: { endpoint: 'mcp-exec', method: 'POST', headers: { 'content-type': 'application/json' }, url: 'https://dash-run-root.pages.dev/api/mcp/exec', body: JSON.stringify({ tool: 'brain_read', args: {} }) } },
+          { name: 'trio-tools', env: { bolete: true }, request: { endpoint: 'mcp-tools', method: 'GET', headers: {}, url: 'https://dash-run-root.pages.dev/api/mcp/tools' } },
+          { name: 'trio-events', env: { bolete: true }, request: { endpoint: 'mcp-events', method: 'GET', headers: {}, url: 'https://dash-run-root.pages.dev/api/mcp/events' } },
+        ]);
+        if (!results) return skip('dash-auth not armed with the small doors');
+        for (const leg of ['trio-exec', 'trio-tools', 'trio-events']) {
+          const row = shapeResults(results, leg);
+          if (!row || row.status !== 503 || !row.body || String(row.body.error || '').indexOf('VANT_PROPERTY_LOCAL_ORIGIN') === -1 || String(row.body.error || '').indexOf('is not configured') === -1) {
+            return { verdict: 'EXPLOITED', detail: leg + ' answered ' + (row && row.status) + ' - an unconfigured bridge must 503 typed NAMING the missing setting (the typed origin refusal), not fake a forward', tookRequests: 3, evidence: { status: row && row.status } };
+          }
+          if (row.raw.indexOf('hint') === -1 || row.raw.indexOf('pages.dev') !== -1) {
+            return { verdict: 'EXPLOITED', detail: leg + ' rode without the actionable hint - the refusal must point at the fix (Pages settings)', tookRequests: 3 };
+          }
+        }
+        return { verdict: 'REFUSED', detail: 'exec/tools/events all 503 typed on the missing origin naming VANT_PROPERTY_LOCAL_ORIGIN with the fix hint - the forward trio is honest at every verb', tookRequests: 3 };
       },
     },
   ],

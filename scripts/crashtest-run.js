@@ -536,10 +536,28 @@ const DASH_CHILD = `
         const mSes = await import(urls[2]);
         libBridge = await import(url(libDir, 'lib/bridge.ts'));
         libGuard = await import(url(libDir, 'lib/auth_guard.ts'));
+        // (batch 4, 2026-10-27) the small doors: audit / users / properties /
+        // breakers + the MCP forward trio. Same TDZ-safe optional imports -
+        // a module that refuses to load under strip-types degrades to the
+        // row's honest 'unknown endpoint' THREW, never a false verdict.
+        let mProps = null; try { mProps = await import(url(libDir, 'api/properties.ts')); } catch (eP) { mProps = null; }
+        let mBreakers = null; try { mBreakers = await import(url(libDir, 'api/breakers.ts')); } catch (eB) { mBreakers = null; }
+        let mAudit = null; try { mAudit = await import(url(libDir, 'api/audit.ts')); } catch (eAu) { mAudit = null; }
+        let mUsers = null; try { mUsers = await import(url(libDir, 'api/users/index.ts')); } catch (eU) { mUsers = null; }
+        let mMcpExec = null; try { mMcpExec = await import(url(libDir, 'api/mcp/exec.ts')); } catch (eMe) { mMcpExec = null; }
+        let mMcpTools = null; try { mMcpTools = await import(url(libDir, 'api/mcp/tools.ts')); } catch (eMt) { mMcpTools = null; }
+        let mMcpEvents = null; try { mMcpEvents = await import(url(libDir, 'api/mcp/events.ts')); } catch (eEv) { mMcpEvents = null; }
         handlers = {
             'request-otp': ({ method }) => (method === 'GET' ? mReq.onRequestGet : mReq.onRequestPost),
             'verify-otp': ({ method }) => (method === 'GET' ? mVer.onRequestGet : mVer.onRequestPost),
             'session': ({ method }) => (method === 'DELETE' ? mSes.onRequestDelete : mSes.onRequestGet),
+            'properties': () => (mProps && mProps.onRequestGet),
+            'breakers': () => (mBreakers && mBreakers.onRequestGet),
+            'audit': () => (mAudit && mAudit.onRequestGet),
+            'users': ({ method }) => (mUsers ? (method === 'POST' ? mUsers.onRequestPost : mUsers.onRequestGet) : null),
+            'mcp-exec': () => (mMcpExec && mMcpExec.onRequestPost),
+            'mcp-tools': () => (mMcpTools && mMcpTools.onRequestGet),
+            'mcp-events': () => (mMcpEvents && mMcpEvents.onRequestGet),
         };
     } catch (e0) {
         process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ error: 'dashboard handler import failed: ' + e0.name + ': ' + e0.message }) + '>>END');
@@ -652,7 +670,9 @@ const DASH_CHILD = `
             }
             const init = { method, headers };
             if (typeof body === 'string') init.body = body;
-            const url = 'https://dash-run-root.pages.dev/api/auth/' + endpoint;
+            // (batch 4) small doors can name an explicit path (query
+            // params, the users set-status route) via meta.url.
+            const url = (typeof meta.url === 'string' && meta.url) ? meta.url : 'https://dash-run-root.pages.dev/api/auth/' + endpoint;
             const h = handler;
             const realFetch = globalThis.fetch;
             if (wantSink) {

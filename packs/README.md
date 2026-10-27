@@ -196,7 +196,7 @@ The EXPLOITED ledger for this pack is EMPTY as of 2026-10-23: the flood row
 measured a real finding the hour it was armed and the cap landed the same
 pass. Both CI whitelists stay EMPTY.
 
-### `public/vant-dashboard` — the dashboard auth/OTP doors + the bridge knee + its relay flavor (14 rows in three batches; validated 2026-10-25/27)
+### `public/vant-dashboard` — the dashboard auth/OTP doors + the bridge knee + its relay flavor + the small doors (19 rows in four batches; validated 2026-10-25/27)
 
 **What it does.** Phase A wire-surface slice (#249): anvils the REAL dashboard
 auth doors — `web/dashboard/functions/api/auth/{request,verify}-otp.ts` +
@@ -267,6 +267,23 @@ import in plain Node at all.
 unarmed dashboard doors (audit.ts, breakers.ts, properties.ts,
 users/index.ts, the mcp proxy trio) queue behind a later small-doors
 batch — audit/breakers ride the admin gate the ladder already grades.
+
+**Batch 4 (2026-10-27): the small doors, all riders of the SAME
+`dash-auth` child.** audit / users / properties / breakers + the MCP
+forward trio converted as five rows (the child gained the seven module
+imports + a per-shape `meta.url` override for the query-string and
+set-status routes):
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `small-doors-properties-registry` | container-or-nothing registry: id+label rows (NAME var = label, id = fallback), an over-long id serves NOTHING, and no origin ever rides the body | validated - REFUSED |
+| `small-doors-breakers-edge-view` | the per-isolate view serves 200 + the map + the honest scope note naming the pod's breaker authoritative | validated - REFUSED |
+| `small-doors-audit-ladder-and-cap` | anon 401 / admin reads the ride's own ledger rows in the closed vocabulary newest-first / limit=1 + clamp=200 honest / budget E_EDGE_THROTTLED 429 — and ZERO PII on the wire | validated - REFUSED |
+| `small-doors-users-roster-lockout-and-gate-done` | hash-only roster (the pinned VANT_EMAIL_SALT makes the row hash computable), bad status 400, unknown hash 404, E_SELF_DISABLE typed, a real disable lands ok:true and the disabled account DIES AT THE GATE it used to pass (401 E_ACCOUNT_DISABLED) | validated - REFUSED |
+| `small-doors-mcp-trio-typed-forward` | exec/tools/events all cross ONE forward and each 503s typed on a missing origin naming VANT_PROPERTY_LOCAL_ORIGIN with the Pages-settings hint | validated - REFUSED |
+
+19/19 `REFUSED` x2 deterministic (strict cycles 2026-10-27); contract
+319/0 with the five rows in the EXPECTED table; lint id census 243.
 
 ### `public/vant-state-wiring` — the state-spine wiring consumers (30 rows in three slices: trust→tree, merge-path, mesh + surfaces; all validated 2026-10-26)
 
