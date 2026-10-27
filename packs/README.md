@@ -1496,6 +1496,28 @@ lint clean):
   census ladder now verifies the documented API exactly as its callers
   should write it.
 
+### The fresh wire-survey read (2026-10-27) — every door armed, honest verdicts
+
+Inventoried live: `web/dashboard/functions` (auth trio request-otp/
+verify-otp/session riding the armed vant-login/me/logout ladder; users,
+mcp exec/tools/events, r/relay, capabilities; the small-doors batch
+properties/breakers/audit/users), `web/home/functions` (summary, admin,
+scheduled — the Edge-trio rows), `web/relay/functions` (r/relay,
+capabilities, events — the relay-edge arm), `web/kit` (no functions yet —
+a future frontend placeholder). Verdict: **every wire door across the
+four web surfaces is ARMED and measured today** — the small-doors batch
+closed the dashboard gap, the home trio and relay-edge arms carry their
+apps, the session ladder grades the auth trio.
+
+Honest growth candidates, as they name themselves:
+- `web/kit` grows real doors first, its census slice follows the
+  first-doors law;
+- the Edge chains' shared QoS budget behaviors over REAL multi-cycle
+  conversations (the 429-skip law already lives; deeper W1/W2 windows if
+  any new door uses its own budget);
+- whichever provider-facing surface the campaign wires next (the two
+  spine slices #164–#166 stay the standing drill-down pair).
+
 
 ### The remote/watch/cache census (2026-10-27) — the 9-key cluster
 
