@@ -1230,6 +1230,16 @@ const EXPECTED = {
         'token-intake-binding-law': 'skip',
         'raw-cookie-fallback-hygiene': 'skip',
         'admin-gate-typed-ladder': 'skip',
+        // (batch 3, 2026-10-27) the DASHBOARD-relay flavor: web/dashboard's
+        // own r/2 intake + caps page through the relay-edge child (edges
+        // 'dashrelay'/'dashcaps' - same WHATWG/WebCrypto probe as the solo
+        // face). This suite's sandbox routes don't carry the run-root-only
+        // relay-edge door arms, so each row degrades to an HONEST SKIP
+        // here; strict EARNED verification rides the run root.
+        'dash-relay-gates-fail-closed': 'skip',
+        'dash-relay-hmac-header-lane-laws': 'skip',
+        'dash-relay-sealed-lane-laws': 'skip',
+        'dash-relay-browser-lane-bridge': 'skip',
     },
     // ARMED 2026-10-25 (drill-down slice 1, Phase A of the S0→S1 campaign,
     // #249): the trust→tree consumer family converted from the native

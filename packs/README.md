@@ -196,7 +196,7 @@ The EXPLOITED ledger for this pack is EMPTY as of 2026-10-23: the flood row
 measured a real finding the hour it was armed and the cap landed the same
 pass. Both CI whitelists stay EMPTY.
 
-### `public/vant-dashboard` — the dashboard auth/OTP doors + the bridge knee (10 rows in two batches; all validated 2026-10-25)
+### `public/vant-dashboard` — the dashboard auth/OTP doors + the bridge knee + its relay flavor (14 rows in three batches; validated 2026-10-25/27)
 
 **What it does.** Phase A wire-surface slice (#249): anvils the REAL dashboard
 auth doors — `web/dashboard/functions/api/auth/{request,verify}-otp.ts` +
@@ -239,6 +239,34 @@ Cookie header.
 | `token-intake-binding-law` | malformed property / non-vguest / over-512 token all 400 typed; the legit intake binds SERVER-SIDE (bound:true) and never mints a token-carrying cookie | validated - REFUSED |
 | `raw-cookie-fallback-hygiene` | the unbound intake answers bound:false and ships vg_session_<p> with FULL hygiene (HttpOnly+Secure+SameSite=Strict); the probe resolves it; a malformed escape answers typed null | validated - REFUSED |
 | `admin-gate-typed-ladder` | anon 401 E_NO_SESSION / forged sid 401 / viewer 403 E_FORBIDDEN / admin passes (ok, role) / no store 503 — the typed ladder at every rung | validated - REFUSED |
+
+**Batch 3 (2026-10-27): the dashboard's OWN relay flavor.** The survey's
+next Edge-family read named the unarmed wire face: web/dashboard piggybacks
+a r/2 relay of its own (pass-236 ruling) — `functions/api/r/relay.ts`
+(464 lines) + `functions/api/r/capabilities.ts` — with DIFFERENT lane
+semantics from the solo face: the BROWSER lane hands INTENT (a `vguest_`
+bearer, no signature) and forwards through the server-side pod bridge;
+the RELAY lane is the same HMAC header law; a COMPLETE payload seals the
+keyless last mile. The doors ride the run root's `relay-edge` child under
+new edge names (`dashrelay`/`dashcaps`) — one probe, four doors — plus a
+child `fetchStub` so the bridge forward's pod call answers offline
+deterministically (a stub-missed URL answers a typed 599, never a DNS
+walk). The dash arm's extensionless-import resolve hook rides the relay
+child too: it is inert for the solo face (the pod vendored contracts
+carry their `.cjs` extensions) and what makes the dashboard lib graph
+import in plain Node at all.
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `dash-relay-gates-fail-closed` | posture env off answers the pod-parity raw 404 on BOTH doors; the on caps page reads flavor dashboard-relay with its gate ready, secrets-free, POST surface named; the secretless relay lane 503s typed naming VANT_RELAY_GATE_KEY | validated - REFUSED |
+| `dash-relay-hmac-header-lane-laws` | unsigned 401 naming X-Signature-256 / wrong sig 401; http-origin, loopback, relative-path and plaintext hop guards all refuse INSIDE the 200 acks with E_RELAY_BAD_ORIGIN / BAD_PATH / NEEDS_ENVELOPE; unknown events ack handlers=0; a relay-lane relay.ride still refuses (rides decode at the pod) | validated - REFUSED |
+| `dash-relay-sealed-lane-laws` | a bad seal sig 401s named, a seal past its OWN freshness window 401s Stale-seal — the keyless last mile fail-closed | validated - REFUSED |
+| `dash-relay-browser-lane-bridge` | the intent lane with no pod origin rides E_RELAY_UPST quoting the bridge's typed refusal; with an origin stashed, a shaped relay.sync TRANSLATES to the door verb — dispatched=1, the upstream answer verbatim | validated - REFUSED |
+
+14/14 `REFUSED` x2 deterministic (strict cycles 2026-10-27). Remaining
+unarmed dashboard doors (audit.ts, breakers.ts, properties.ts,
+users/index.ts, the mcp proxy trio) queue behind a later small-doors
+batch — audit/breakers ride the admin gate the ladder already grades.
 
 ### `public/vant-state-wiring` — the state-spine wiring consumers (30 rows in three slices: trust→tree, merge-path, mesh + surfaces; all validated 2026-10-26)
 
@@ -1255,7 +1283,8 @@ Where the remaining repo parts land:
   vant-home arm (WHATWG Request, no sockets). A `vant-relay` pack grades
   the gate + replay window + envelope + origin guard rows for real.
 - **`web/dashboard` auth/OTP doors → PACK landed 2026-10-25 (`vant-dashboard`,
-  first slice).** `functions/api/auth/{request,verify}-otp.ts` + `session.ts`
+  first slice; batch 2 = bridge knee + auth gate same day; batch 3 = the
+  dashboard's OWN relay flavor landed 2026-10-27 — see the section above).** `functions/api/auth/{request,verify}-otp.ts` + `session.ts`
   + accounts drive in-process via the `dash-auth` strip-types probe child
   (KVStore shim for `BOLETE_KV` + capture sink in the sender's webhook seat);
   5 rows, all REFUSED. Follow-ups if the slice deepens: the bridge's

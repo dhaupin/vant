@@ -426,6 +426,25 @@ const RELAY_CHILD = `
             catch (e2) { hs[key] = null; }
         }
     }
+    // (2026-10-27 dash-relay slice) spec.fetchStub: { match, status, body }
+    // (or an array) - the DASHBOARD face's bridge forward reaches a REAL
+    // fetch for its pod calls; offline determinism stubs the global here.
+    // A stub-missed URL answers a typed 599 so a row NEVER hangs on DNS.
+    if (spec.fetchStub) {
+        const stubs = Array.isArray(spec.fetchStub) ? spec.fetchStub : [spec.fetchStub];
+        globalThis.fetch = (stubUrl) => {
+            const u = String(stubUrl);
+            for (const st of stubs) {
+                if (u.indexOf(String(st.match)) !== -1) {
+                    return Promise.resolve(new Response(String(st.body == null ? '' : st.body), {
+                        status: Number(st.status || 200),
+                        headers: { 'content-type': 'application/json' },
+                    }));
+                }
+            }
+            return Promise.resolve(new Response('{"error":"fetch-stub-missed"}', { status: 599, headers: { 'content-type': 'application/json' } }));
+        };
+    }
     for (const shape of shapes) {
         const row = { name: String(shape.name || '').slice(0, 60), status: null, bodyText: '', headers: {} };
         try {
@@ -1830,7 +1849,13 @@ function buildRoutes(sb, Harness) {
             // the SSE stream-through (both GET-only). Shapes pick their
             // door via shape.edge ('relay' default) so one ride can walk
             // multiple doors.
-            const out = execFileSync(process.execPath, ['--experimental-strip-types', RELAY_EDGE_CHILD_FILE], {
+            // (2026-10-27 dash-relay slice) the DASHBOARD doors ride the
+            // same child: their lib graph imports EXTENSIONLESS (.ts
+            // sources - fine for Pages' bundler, unresolvable for plain
+            // Node ESM), so the dash arm's resolve hook rides here too.
+            // It is inert for the solo face (its vendored contracts carry
+            // their .cjs extensions).
+            const out = execFileSync(process.execPath, ['--experimental-strip-types', '--import', pathToFileURL(DASH_REGISTER_FILE).href, RELAY_EDGE_CHILD_FILE], {
                 input: JSON.stringify({
                     shapes,
                     handlerPath: path.join(ROOT, 'web', 'relay', 'functions', 'api', 'r', 'relay.ts'),
@@ -1838,7 +1863,14 @@ function buildRoutes(sb, Harness) {
                         relay: { path: path.join(ROOT, 'web', 'relay', 'functions', 'api', 'r', 'relay.ts') },
                         capabilities: { path: path.join(ROOT, 'web', 'relay', 'functions', 'api', 'r', 'capabilities.ts') },
                         events: { path: path.join(ROOT, 'web', 'relay', 'functions', 'api', 'r', 'events.ts') },
+                        // (2026-10-27 dash-relay slice) the DASHBOARD-relay
+                        // flavor rides the same child: web/dashboard's own
+                        // r/2 face + caps page (bridge-lane semantics differ
+                        // from the solo face, so a separate door).
+                        dashrelay: { path: path.join(ROOT, 'web', 'dashboard', 'functions', 'api', 'r', 'relay.ts') },
+                        dashcaps: { path: path.join(ROOT, 'web', 'dashboard', 'functions', 'api', 'r', 'capabilities.ts') },
                     },
+                    fetchStub: (j && j.fetchStub !== undefined) ? j.fetchStub : null,
                 }),
                 encoding: 'utf8', timeout: 120000,
             });

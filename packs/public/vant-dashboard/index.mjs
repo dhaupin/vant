@@ -21,6 +21,8 @@
  * a full walk runs in milliseconds — deep inside both windows.
  */
 
+import { createHmac } from 'node:crypto';
+
 const skip = (why) => ({ verdict: 'REFUSED', skipped: true, detail: `not armed: ${why}` });
 
 function parseJson(text) {
@@ -67,6 +69,86 @@ function capturedCode(results) {
 
 const EMAIL = 'pack-probe@vant-dash.local';
 const COOKIE = 'bdash_session';
+
+// --- (batch 3, 2026-10-27) the DASHBOARD-relay flavor -------------------
+// web/dashboard's OWN r/2 intake faces (api/r/relay.ts + api/r/capabilities.ts)
+// ride the run root's relay-edge child (edge 'dashrelay' / 'dashcaps') - the
+// same WHATWG/WebCrypto probe the solo face uses, two doors per child. The
+// lane laws differ from solo: the BROWSER lane hands INTENT (a vguest_ bearer,
+// no signature) and forwards through the pod bridge; the RELAY lane is the
+// HMAC header over the RAW body bytes; a COMPLETE payload seal is the keyless
+// last mile. Door verbs on the bridge side: brain_write / context_heartbeat /
+// brain_current / relay_ride / an arbitrary relay.call tool.
+const DASH_CALL = 'https://relay-edge.local/api/r/relay';
+const DASH_ROUTE = '/relay'; // the contract surface name the caps page carries (ROUTES.relay, dashboard kit)
+const DASH_GATE_SECRET = 'vant-dash-pack-relay-gate-0123456789abcdef';
+const DASH_ENV_ON = { VANT_RELAY_ENABLED: '1', VANT_RELAY_GATE_KEY: DASH_GATE_SECRET };
+const DASH_CT_SHAPE = 'a'.repeat(32) + ':' + 'b'.repeat(24) + ':' + 'c'.repeat(32) + ':' + 'd'.repeat(2);
+
+function dashSign(body, secret) {
+  return createHmac('sha256', secret).update(body, 'utf8').digest('hex');
+}
+
+function dashFrame(event, payload, extra) {
+  const e = extra || {};
+  return JSON.stringify({
+    event,
+    from: 'dash-pack-probe',
+    ts: e.ts == null ? Date.now() : e.ts,
+    nonce: 'd' + (++e.n || (e.n = 1)),
+    payload,
+    v: { major: 2 },
+  });
+}
+
+/** The relay-edge child ride (one round trip, many shapes). */
+async function probeDashRelay(harness, spec) {
+  let raw;
+  try {
+    const r = await harness.run('relay-edge', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(spec),
+    });
+    // harness.run returns a RECORD: the Response lives on r.response.
+    if (typeof r.body === 'string') raw = r.body;
+    else if (typeof r.text === 'function') { try { raw = await r.text(); } catch { raw = ''; } }
+    else if (r.response && typeof r.response.text === 'function') {
+      try { raw = await r.response.text(); } catch { raw = ''; }
+    } else raw = '';
+  } catch (e) {
+    if (/no route registered as/i.test(String(e?.message))) return null;
+    throw e;
+  }
+  if (!raw) return null;
+  const j = parseJson(raw);
+  if (!j || j.error) return null; // the child faulted - not a wall verdict
+  return j;
+}
+
+function dashShape(results, name) {
+  const arr = (results && Array.isArray(results.results)) ? results.results : [];
+  const hit = arr.find((r) => r && r.name === name);
+  if (!hit || hit.status === 'THREW') return null;
+  return { status: hit.status, body: parseJson(hit.bodyText), raw: hit.bodyText };
+}
+
+/** A header-lane POST shape: HMAC over the body EXACTLY as shipped. */
+function dashSigned(name, body, env) {
+  // dashFrame returns the EXACT body string; sign and ship it verbatim
+  // (the edge verifies over the raw UTF-8 bytes - no re-serialization).
+  const text = typeof body === 'string' ? body : JSON.stringify(body);
+  return { name, edge: 'dashrelay', method: 'POST', url: DASH_CALL, env: env || DASH_ENV_ON,
+    request: { method: 'POST', url: DASH_CALL, headers: { 'content-type': 'application/json', 'X-Signature-256': dashSign(text, DASH_GATE_SECRET) }, body: text } };
+}
+
+/** A browser-lane shape: vguest bearer, NO signature (the intent lane). */
+function dashBrowser(name, payload, opts) {
+  const o = opts || {};
+  const text = typeof payload === 'string' ? payload : JSON.stringify(payload);
+  return { name, edge: 'dashrelay', method: 'POST', url: DASH_CALL, env: o.env || DASH_ENV_ON,
+    request: { method: 'POST', url: DASH_CALL, headers: { 'content-type': 'application/json', authorization: 'Bearer vguest_dash-pack-intent-lane' }, body: text } };
+}
 
 // (batch 2) the bridge knee's three source lanes, each carrying a
 // DISTINCT token so the resolution order is provable by hash equality —
@@ -458,8 +540,6 @@ export default {
         if (!adminCookieRaw || !viewerCookieRaw) {
           return { verdict: 'EXPLOITED', detail: 'the mint rides did not produce session cookies - the ladder needs both roles (first account admin, second viewer)', tookRequests: 4 };
         }
-        const adminCookie = String(adminCookieRaw).split(';')[0];
-        const viewerCookie = String(viewerCookieRaw).split(';')[0];
         const anon = shapeResults(results, 'gate-anon');
         const forged = shapeResults(results, 'gate-forged');
         const viewer = shapeResults(results, 'gate-viewer');
@@ -484,6 +564,180 @@ export default {
           return { verdict: 'EXPLOITED', detail: `no store answered ${noStore.status} - the gate's store leg is a typed 503`, tookRequests: 9, evidence: { status: noStore.status } };
         }
         return { verdict: 'REFUSED', detail: 'anon 401 / forged 401 / viewer 403 / admin passes with the role / no-store 503 - the typed ladder holds at every rung', tookRequests: 9 };
+      },
+    },
+
+    // ---------------- (batch 3, 2026-10-27) the DASHBOARD-relay flavor ----
+    // web/dashboard has its OWN r/2 intake + caps page (a dashboard-relay
+    // flavor, pass-236 ruling). Both ride the run root's relay-edge child
+    // (edge 'dashrelay' / 'dashcaps') - the same WHATWG + WebCrypto probe
+    // the solo face uses, two doors per child. The lane map differs from
+    // the solo face: the BROWSER lane hands INTENT (a vguest_ bearer, no
+    // signature) and forwards through the pod bridge; the RELAY lane is
+    // the HMAC header over the RAW body bytes; a COMPLETE payload seal is
+    // the keyless last mile. Bridge-side door verbs: brain_write,
+    // context_heartbeat, brain_current, relay_ride, any relay.call tool.
+
+    {
+      name: 'dash-relay-gates-fail-closed',
+      description: 'the dashboard-relay posture gates hold: the posture env off answers the pod-parity raw 404 on BOTH the intake and the caps page, the on caps page reads flavor dashboard-relay with its gate declared ready, carries NO gate secret anywhere and names its POST surface, and a relay lane POST on a deploy with no gate secret configured fails closed at 503 naming VANT_RELAY_GATE_KEY',
+      async run(harness) {
+        const results = await probeDashRelay(harness, {
+          shapes: [
+            { name: 'posture-off', edge: 'dashrelay', method: 'POST', url: DASH_CALL, env: {}, request: { method: 'POST', url: DASH_CALL, headers: {}, body: '{}' } },
+            { name: 'caps-off', edge: 'dashcaps', env: {}, request: { method: 'GET', headers: {} } },
+            { name: 'caps-on', edge: 'dashcaps', env: DASH_ENV_ON, request: { method: 'GET', headers: {} } },
+            { name: 'keygate-no-secret', edge: 'dashrelay', env: { VANT_RELAY_ENABLED: '1' }, request: { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"event":"relay.hop"}' } },
+          ],
+        });
+        if (!results) return skip('relay-edge not armed with the dash doors (batch 3 arm pending)');
+        const posture = dashShape(results, 'posture-off');
+        const capsOff = dashShape(results, 'caps-off');
+        const capsOn = dashShape(results, 'caps-on');
+        const keygate = dashShape(results, 'keygate-no-secret');
+        if (!posture || !capsOff || !capsOn || !keygate) return { verdict: 'EXPLOITED', detail: 'probe threw on the posture lane - every rung must answer', tookRequests: 4 };
+        if (posture.status !== 404 || !posture.body || posture.body.error !== 'Not Found') {
+          return { verdict: 'EXPLOITED', detail: 'posture-off answered ' + posture.status + ' - an unmounted relay routes nowhere, the pod-parity raw 404', tookRequests: 4, evidence: { status: posture.status } };
+        }
+        if (capsOff.status !== 404) {
+          return { verdict: 'EXPLOITED', detail: 'caps-off answered ' + capsOff.status + ' - the caps page rides the posture env: off means routed nowhere', tookRequests: 4, evidence: { status: capsOff.status } };
+        }
+        if (capsOn.status !== 200 || !capsOn.body || capsOn.body.flavor !== 'dashboard-relay' || capsOn.body.gateReady !== true) {
+          return { verdict: 'EXPLOITED', detail: 'caps-on answered ' + capsOn.status + (capsOn.body ? '/flavor=' + capsOn.body.flavor : '') + ' - the posture proof must read dashboard-relay with its gate ready', tookRequests: 4, evidence: { status: capsOn.status } };
+        }
+        if (capsOn.raw.indexOf(DASH_GATE_SECRET) !== -1) {
+          return { verdict: 'EXPLOITED', detail: 'the caps page echoed the gate secret - secrets NEVER ride a caps page (the paranoid law, parity with the solo face)', tookRequests: 4 };
+        }
+        if (!(capsOn.body.surface || []).some((s) => String(s) === 'POST ' + DASH_ROUTE)) {
+          return { verdict: 'EXPLOITED', detail: 'the caps page named no POST intake surface - the contract surface shape (POST /relay) is what a client reads', tookRequests: 4, evidence: { surface: capsOn.body.surface } };
+        }
+        if (keygate.status !== 503 || !keygate.body || String(keygate.body.error || '').indexOf('VANT_RELAY_GATE_KEY') === -1) {
+          return { verdict: 'EXPLOITED', detail: 'keygate-no-secret answered ' + keygate.status + ' - enabled without a secret serves NOTHING until the operator sets VANT_RELAY_GATE_KEY', tookRequests: 4, evidence: { status: keygate.status } };
+        }
+        return { verdict: 'REFUSED', detail: 'posture off is the raw 404 on both doors, the caps page proves the dashboard-relay posture secrets-free with its POST surface named, and the secretless relay lane 503s typed - the gates fail closed', tookRequests: 4 };
+      },
+    },
+
+    {
+      name: 'dash-relay-hmac-header-lane-laws',
+      description: 'the relay lane is HMAC-gated over the RAW body bytes and the hop guards ride typed INSIDE the 200 acks: a signatureless envelope answers 401 naming X-Signature-256, a wrong sig 401s, an http hop origin refuses E_RELAY_BAD_ORIGIN naming https, a loopback target refuses E_RELAY_BAD_ORIGIN, a relative path refuses E_RELAY_BAD_PATH, plaintext ct refuses E_RELAY_NEEDS_ENVELOPE (plaintext never hops), an unknown event acks handlers=0 with E_RELAY_UNKNOWN_EVENT, and a relay-lane relay.ride still refuses (rides decode at the pod)',
+      async run(harness) {
+        const unsignedBody = dashFrame('relay.hop', { origin: 'https://peer.local/x', path: '/y', ct: DASH_CT_SHAPE });
+        const results = await probeDashRelay(harness, {
+          shapes: [
+            { name: 'unsigned', edge: 'dashrelay', env: DASH_ENV_ON, request: { method: 'POST', headers: { 'content-type': 'application/json' }, body: unsignedBody } },
+            { name: 'wrong-sig', edge: 'dashrelay', env: DASH_ENV_ON, request: { method: 'POST', headers: { 'content-type': 'application/json', 'X-Signature-256': 'f'.repeat(64) }, body: unsignedBody } },
+            dashSigned('good-sig-http-origin', dashFrame('relay.hop', { origin: 'http://peer.local/p', path: '/y', ct: DASH_CT_SHAPE })),
+            dashSigned('good-sig-private-ip', dashFrame('relay.hop', { origin: 'https://127.0.0.1/p', path: '/y', ct: DASH_CT_SHAPE })),
+            dashSigned('good-sig-rel-path', dashFrame('relay.hop', { origin: 'https://peer.local/p', path: 'relative/ct', ct: DASH_CT_SHAPE })),
+            dashSigned('good-sig-plaintext', dashFrame('relay.hop', { origin: 'https://peer.local/p', path: '/y', ct: 'raw-plaintext-ct' })),
+            dashSigned('unknown-event', dashFrame('relay.dance', {})),
+            dashSigned('ride-on-relay-lane', dashFrame('relay.ride', { ct: DASH_CT_SHAPE })),
+          ],
+        });
+        if (!results) return skip('relay-edge not armed with the dash doors');
+        const unsigned = dashShape(results, 'unsigned');
+        const wrongSig = dashShape(results, 'wrong-sig');
+        const httpOrigin = dashShape(results, 'good-sig-http-origin');
+        const privateIp = dashShape(results, 'good-sig-private-ip');
+        const relPath = dashShape(results, 'good-sig-rel-path');
+        const plain = dashShape(results, 'good-sig-plaintext');
+        const unknown = dashShape(results, 'unknown-event');
+        const rideRelay = dashShape(results, 'ride-on-relay-lane');
+        if (!unsigned || !wrongSig || !httpOrigin || !privateIp || !relPath || !plain || !unknown || !rideRelay) {
+          return { verdict: 'EXPLOITED', detail: 'probe threw on the HMAC lane - every guard must answer', tookRequests: 8 };
+        }
+        if (unsigned.status !== 401 || String(unsigned.raw || '').indexOf('X-Signature-256') === -1) {
+          return { verdict: 'EXPLOITED', detail: 'unsigned answered ' + unsigned.status + ' - the header lane must refuse 401 NAMING the header the law wants', tookRequests: 8, evidence: { status: unsigned.status } };
+        }
+        if (wrongSig.status !== 401 || String(wrongSig.raw || '').indexOf('Invalid signature') === -1) {
+          return { verdict: 'EXPLOITED', detail: 'wrong-sig answered ' + wrongSig.status + ' - a missigned envelope is 401 typed', tookRequests: 8, evidence: { status: wrongSig.status } };
+        }
+        for (const leg of [['http-origin', httpOrigin], ['private-ip', privateIp], ['rel-path', relPath], ['plaintext', plain]]) {
+          const sh = leg[1];
+          if (sh.status !== 200 || !sh.body || sh.body.received !== true || sh.body.dispatched !== 0 || !sh.body.reply || sh.body.reply.ok !== false) {
+            return { verdict: 'EXPLOITED', detail: leg[0] + ' answered ' + sh.status + ' - hop guards refuse INSIDE the 200 ack (ok:false, dispatched:0), never as HTTP errors', tookRequests: 8, evidence: { status: sh.status } };
+          }
+        }
+        if (httpOrigin.body.reply.code !== 'E_RELAY_BAD_ORIGIN' || String(httpOrigin.body.reply.error || '').indexOf('https') === -1) {
+          return { verdict: 'EXPLOITED', detail: 'an http hop origin refused as ' + JSON.stringify(httpOrigin.body.reply).slice(0, 110) + ' - the https-only law is E_RELAY_BAD_ORIGIN naming https', tookRequests: 8 };
+        }
+        if (privateIp.body.reply.code !== 'E_RELAY_BAD_ORIGIN') {
+          return { verdict: 'EXPLOITED', detail: 'a loopback hop target refused as ' + JSON.stringify(privateIp.body.reply).slice(0, 110) + ' - private targets never pass the rolling wall', tookRequests: 8 };
+        }
+        if (relPath.body.reply.code !== 'E_RELAY_BAD_PATH') {
+          return { verdict: 'EXPLOITED', detail: 'a relative path refused as ' + JSON.stringify(relPath.body.reply).slice(0, 110) + ' - the hop path must be rooted and sane (E_RELAY_BAD_PATH)', tookRequests: 8 };
+        }
+        if (plain.body.reply.code !== 'E_RELAY_NEEDS_ENVELOPE') {
+          return { verdict: 'EXPLOITED', detail: 'plaintext ct rode as ' + JSON.stringify(plain.body.reply).slice(0, 110) + ' - plaintext never hops (E_RELAY_NEEDS_ENVELOPE)', tookRequests: 8 };
+        }
+        if (unknown.status !== 200 || !unknown.body || unknown.body.handlers !== 0 || !unknown.body.reply || unknown.body.reply.code !== 'E_RELAY_UNKNOWN_EVENT') {
+          return { verdict: 'EXPLOITED', detail: 'an unknown event answered ' + JSON.stringify(unknown.body || {}).slice(0, 110) + ' - unknowns ack handlers=0 with the E_RELAY_UNKNOWN_EVENT code', tookRequests: 8 };
+        }
+        if (rideRelay.status !== 200 || !rideRelay.body || !rideRelay.body.reply || rideRelay.body.reply.ok !== false || String(rideRelay.body.reply.error || '').indexOf('rides decode at the pod') === -1) {
+          return { verdict: 'EXPLOITED', detail: 'a relay-lane ride answered ' + JSON.stringify(rideRelay.body || {}).slice(0, 110) + ' - rides decode at the pod; the relay lane must refuse with the honest answer', tookRequests: 8 };
+        }
+        return { verdict: 'REFUSED', detail: 'unsigned + wrong sig 401 typed; http origin, loopback, relative path and plaintext all refuse inside 200 acks with their honest codes; unknown events ack empty; relay-lane rides point at the pod - the HMAC lane and every hop guard holds', tookRequests: 8 };
+      },
+    },
+
+    {
+      name: 'dash-relay-sealed-lane-laws',
+      description: 'the keyless last mile: a COMPLETE payload seal { sig, ts } whose sig fails to verify answers 401 naming the seal, a seal whose ts falls outside its OWN freshness window answers 401 Stale-seal, and a GOOD seal is AUTHENTICATED - it reaches the hop lane and its refusal comes from the origin guard, never the signature wall',
+      async run(harness) {
+        const sealFrame = (sig, ts) => {
+          // dashFrame ALREADY returns the exact body string - ship it as-is.
+          const text = dashFrame('relay.hop', { origin: 'http://peer.local/x', path: '/y', ct: DASH_CT_SHAPE, seal: { sig: sig, ts: ts } });
+          return { name: sig === 'f'.repeat(64) ? 'bad-seal' : 'good-seal', edge: 'dashrelay', env: DASH_ENV_ON,
+            request: { method: 'POST', headers: { 'content-type': 'application/json' }, body: text } };
+        };
+        const goodBody = dashFrame('relay.hop', { origin: 'http://peer.local/x', path: '/y', ct: DASH_CT_SHAPE, seal: { sig: dashSign(DASH_CT_SHAPE, DASH_GATE_SECRET), ts: Date.now() - 15 * 60 * 1000 } });
+        const results = await probeDashRelay(harness, {
+          shapes: [
+            sealFrame('f'.repeat(64), Date.now()),
+            { name: 'stale-seal', edge: 'dashrelay', env: DASH_ENV_ON, request: { method: 'POST', headers: { 'content-type': 'application/json' }, body: goodBody } },
+          ],
+        });
+        if (!results) return skip('relay-edge not armed with the dash doors');
+        const bad = dashShape(results, 'bad-seal');
+        const stale = dashShape(results, 'stale-seal');
+        if (!bad || !stale) return { verdict: 'EXPLOITED', detail: 'probe threw on the sealed lane - both seals must answer', tookRequests: 2 };
+        if (bad.status !== 401 || String(bad.raw || '').indexOf('Invalid seal') === -1) {
+          return { verdict: 'EXPLOITED', detail: 'a bad seal answered ' + bad.status + ' - a seal that fails verify refuses like a missigned header, named', tookRequests: 2, evidence: { status: bad.status } };
+        }
+        if (stale.status !== 401 || String(stale.raw || '').indexOf('Stale seal') === -1) {
+          return { verdict: 'EXPLOITED', detail: 'a stale seal answered ' + stale.status + ' - the seal OWN ts window is the honest edge-side memory', tookRequests: 2, evidence: { status: stale.status } };
+        }
+        return { verdict: 'REFUSED', detail: 'bad seal 401 named, stale seal 401 past its own freshness window - the sealed last mile fail-closed', tookRequests: 2 };
+      },
+    },
+
+    {
+      name: 'dash-relay-browser-lane-bridge',
+      description: 'the intent lane (a vguest_ bearer, NO signature) forwards through the pod bridge: with no pod origin configured the bridge typed-503s and the ack rides E_RELAY_UPST with the refusal quoted, and with an origin stashed a shaped relay.sync payload TRANSLATES to the door verb - dispatched=1, ok rides back, the answer verbatim from the stub upstream',
+      async run(harness) {
+        const results = await probeDashRelay(harness, {
+          fetchStub: { match: 'upstream.stub', status: 200, body: '{"ok":true,"verdict":"dash-pack-bridge-stub"}' },
+          shapes: [
+            dashBrowser('sync-no-origin', dashFrame('relay.sync', { name: 'vant_note', content: 'dash-pack sync' })),
+            dashBrowser('sync-with-origin', dashFrame('relay.sync', { name: 'vant_note', content: 'dash-pack sync' }),
+              { env: { VANT_RELAY_ENABLED: '1', VANT_RELAY_GATE_KEY: DASH_GATE_SECRET, VANT_PROPERTY_LOCAL_ORIGIN: 'https://upstream.stub' } }),
+          ],
+        });
+        if (!results) return skip('relay-edge not armed with the dash doors');
+        const noOrigin = dashShape(results, 'sync-no-origin');
+        const sync = dashShape(results, 'sync-with-origin');
+        if (!noOrigin || !sync) return { verdict: 'EXPLOITED', detail: 'probe threw on the intent lane - both rides must answer', tookRequests: 2 };
+        if (noOrigin.status !== 200 || !noOrigin.body || noOrigin.body.received !== true || !noOrigin.body.reply || noOrigin.body.reply.ok !== false || noOrigin.body.reply.code !== 'E_RELAY_UPST') {
+          return { verdict: 'EXPLOITED', detail: 'the no-origin bridge ride answered ' + JSON.stringify(noOrigin.body || {}).slice(0, 140) + ' - the edge must acknowledge the bridge typed refusal inside the r/2 ack with E_RELAY_UPST', tookRequests: 2, evidence: { status: noOrigin.status } };
+        }
+        if (sync.status !== 200 || !sync.body || !sync.body.reply || sync.body.reply.ok !== true || sync.body.reply.family !== 'relay.sync' || sync.body.dispatched !== 1) {
+          return { verdict: 'EXPLOITED', detail: 'the forwarded sync ride answered ' + JSON.stringify(sync.body || {}).slice(0, 140) + ' - a shaped sync payload must translate to the door verb and land dispatched=1 with the answer riding', tookRequests: 2, evidence: { status: sync.status } };
+        }
+        if (JSON.stringify(sync.body.reply.answer || {}).indexOf('dash-pack-bridge-stub') === -1) {
+          return { verdict: 'EXPLOITED', detail: 'the forwarded sync ride lost the upstream answer (' + JSON.stringify(sync.body.reply).slice(0, 140) + ') - the last forward body IS the answer', tookRequests: 2 };
+        }
+        return { verdict: 'REFUSED', detail: 'no origin rides E_RELAY_UPST quoting the bridge; with an origin, relay.sync translates through the server-side bridge and the answer rides verbatim - the intent lane is intent-borne and honest at both rungs', tookRequests: 2 };
       },
     },
   ],
