@@ -1191,5 +1191,28 @@ export default {
         return { verdict: 'REFUSED', detail: 'the certified letter crossed into the relay door: ' + r.letterSteps + ' steps landed id-named through the brain_write slot as ONE landing in the traveler append-only store (the slot re-verified at the door and the body landed beside the ledger index), the gapped tamper refused E_TRAVELER_STEP, the sneak id refused E_TRAVELER_ADDRESS, the re-land refused E_TRAVELER_STEP (append-only), and zero refused growth - carriers and the wire meet at one honest door', tookRequests: 4 };
       },
     },
+
+    // ============ slice 8 (2026-10-27): the MESH serving wall ============
+    {
+      name: 'carriers-mesh-serving-wall-on-real-landings',
+      description: "the mesh doors stop riding captured shims: ONE packet lands through the brain_write door slot law, then traveler_fetch serves found + re-verified, traveler_stamp derives the VANT:1 frame and a REAL scannable raster, an absent id answers found:false honestly at BOTH verbs, a swapped store refuses identically at both, an exact-byte restore re-arms the wall, the pointer loop decodes the REAL raster through an mcp-door-backed fetch, and the whole serving ride grows the store by ZERO",
+      async run(harness) {
+        const ride = await probeCarriers(harness, [{ op: 'route', case: 'meshServe', key: 'rtmesh' }]);
+        if (!ride) return skip('carriers-lane not armed (run-root arm)');
+        const r = ride.get('route');
+        if (!r) return rowErr('the mesh probe failed to answer', [{ op: 'route', case: 'meshServe' }]);
+        if (r.fault) return rowErr('the mesh probe faulted: ' + r.fault, [{ op: 'route', case: 'meshServe' }]);
+        if (r.meshCase !== true) return rowErr('the route arm answered a non-mesh case shape', [{ op: 'route', case: 'meshServe' }]);
+        if (r.landed !== true) return rowErr('the door slot did not land via the traveler store (' + (r.fault || 'unknown') + ')', [{ op: 'route', case: 'meshServe' }]);
+        if (r.found !== true || r.reverify !== true) return rowErr('traveler_fetch did not serve found + re-verified', [{ op: 'route', case: 'meshServe' }]);
+        if (r.frame !== true || r.png !== true) return rowErr('traveler_stamp did not derive the VANT:1 frame + a real raster', [{ op: 'route', case: 'meshServe' }]);
+        if (r.pointerLoop !== true) return rowErr('the pointer decode did not resolve the REAL raster through the door-backed fetch', [{ op: 'route', case: 'meshServe' }]);
+        if (r.honestMiss !== true || r.honestMissStamp !== true) return rowErr('an absent id was not answered found:false honestly at both door faces', [{ op: 'route', case: 'meshServe' }]);
+        if (r.swapRefused !== true) return rowErr('a swapped store did not refuse typed and identically at both door faces', [{ op: 'route', case: 'meshServe' }]);
+        if (r.restored !== true) return rowErr('the exact-byte restore did not re-arm the wall', [{ op: 'route', case: 'meshServe' }]);
+        if (r.zeroServingGrowth !== true) return rowErr('the serving ride grew the store (census moved)', [{ op: 'route', case: 'meshServe' }]);
+        return { verdict: 'REFUSED', detail: 'the wall at the serving node holds on a REAL landing: found + re-verified, the VANT:1 frame and a scannable raster from the verified body, honest found:false misses at both verbs, a swapped store refuses identically at both, restore re-arms, the pointer loop resolves the real raster through the door (zero growth throughout) - the wire and the mesh share one store', tookRequests: 9 };
+      },
+    },
   ],
 };

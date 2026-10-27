@@ -3596,7 +3596,6 @@ harness.registerRoute('carriers-lane', async (ctx) => {
                                 const legalAck = await post(envelope(letter));
                                 const census1 = listSlots();
                                 const landedName = letter.id + '.json';
-                                console.error('[run-root][wire-seam] legalAck: status=' + String(legalAck.status) + ' body=' + String(legalAck.json ? JSON.stringify(legalAck.json).slice(0, 160) : '(unparsed)'));
                                 out0.doorOk = !!(legalAck.status === 200 && legalAck.json && legalAck.json.reply && legalAck.json.reply.ok === true);
                                 out0.doorLandedIdNamed = census1.includes(landedName);
                                 out0.letterSteps = Array.isArray(letter.steps) ? letter.steps.length : null;
@@ -3632,6 +3631,108 @@ harness.registerRoute('carriers-lane', async (ctx) => {
                             return out0;
                         })();
                         out.push(Object.assign({ op: 'route', caseFn }, rWire));
+                        continue;
+                    }
+                    // (carriers slice 8, 2026-10-27: the MESH serving wall,
+                    // real landings) The wire seam's store landing made the
+                    // mesh door's operands REAL — so the serving side stops
+                    // riding captured shims too: ONE packet lands through
+                    // the brain_write door slot law (same chain the wire
+                    // rides, no mount needed), then the mesh doors are
+                    // driven over THAT body in the sandbox tree:
+                    // traveler_fetch serves found + re-verified (the wall at
+                    // the serving node re-derives the address),
+                    // traveler_stamp derives the VANT:1 frame + a REAL
+                    // scannable raster from the re-verified body, an absent
+                    // id answers found:false honestly at BOTH verbs, a
+                    // swapped store (simulated at-rest tamper of the body
+                    // file) refuses typed at BOTH verbs, restoring the exact
+                    // bytes re-arms the store, and the pointer loop decodes
+                    // the REAL stamp raster through an mcp-door-backed
+                    // pointer fetch (the browser lane, closure = the
+                    // serving door itself). Zero store growth across the
+                    // whole serving ride.
+                    if (caseFn === 'meshServe') {
+                        const rMesh = await (async () => {
+                            const tM = traveler.mintScoped({ from: 'origin', slots: { title: 'mesh-warrant' }, scope: { owner: 'team:' + fx.tm.id, visibility: 'scope' } });
+                            const repM = carriers.carry(tM, { stations: [
+                                { by: fx.station, op: 'inspect' },
+                                { by: fx.station, op: 'test', carrier: 'nsc9' },
+                                { by: fx.station, op: 'release' },
+                            ] });
+                            const outM = { carryOk: !!(repM && repM.ok && repM.letter), meshCase: true };
+                            if (!outM.carryOk) { outM.fault = 'carry refused before the mesh: ' + ((repM && repM.refused && repM.refused.code) || 'unknown'); return outM; }
+                            const letter = repM.letter;
+                            const travelersDir = path.join(path.dirname(traveler._ledgerPath()), 'travelers');
+                            const bodyFile = path.join(travelersDir, letter.id + '.json');
+                            const dirCount = () => { try { return fs.readdirSync(travelersDir).length; } catch (eD) { return -1; } };
+                            const mcpServ = sandboxLib('mcp');
+                            const landed = await mcpServ.execute('brain_write', {
+                                name: 'traveler-' + letter.id + '-tr' + (String(letter.tr).endsWith('1') ? '1' : String(letter.tr).slice(3)) + '.json',
+                                content: JSON.stringify(letter),
+                                format: 'json',
+                            });
+                            outM.landed = !!(landed && landed.saved === true && landed.via === 'traveler-store');
+                            if (!outM.landed) { outM.fault = 'the door slot did not land: ' + JSON.stringify(landed).slice(0, 120); return outM; }
+                            // the zero-growth law measures the SERVING legs
+                            // only: the landing IS the store hold the mesh
+                            // ride owns (the wire-seam row grades the wheel
+                            // into the store; this row grades the serving).
+                            const census0 = dirCount();
+                            try {
+                                const t = traveler; // the arm's binding IS the sandbox copy
+                                // (1) the serving wall: found + re-verified
+                                const served = await mcpServ.execute('traveler_fetch', { id: letter.id });
+                                outM.found = !!(served && served.found === true && served.traveler && served.traveler.id === letter.id);
+                                outM.reverify = !!(served && served.traveler && t.verify(served.traveler).ok === true);
+                                outM.steps = served && served.traveler && Array.isArray(served.traveler.steps) ? served.traveler.steps.length : null;
+                                // (2) the artifact door: frame + REAL raster
+                                const stamp = await mcpServ.execute('traveler_stamp', { id: letter.id });
+                                outM.frame = stamp && stamp.found === true && stamp.frame === 'VANT:1:' + letter.id;
+                                outM.png = !!(stamp && stamp.found === true && typeof stamp.png === 'string' && stamp.png.length > 100);
+                                // (3) the pointer loop on the REAL raster:
+                                // the browser decode rides a fetch closure
+                                // backed by the SAME serving door
+                                const missId = 'f'.repeat(64);
+                                carriers.setPointerFetch(async (wantId) => {
+                                    try { return await mcpServ.execute('traveler_fetch', { id: String(wantId) }); }
+                                    catch { return { found: false }; }
+                                });
+                                const decoded = carriers.decode('qr', Buffer.from(String(stamp.png), 'base64'));
+                                outM.pointerLoop = !!(decoded && decoded.resolved === true && decoded.traveler && decoded.traveler.id === letter.id);
+                                // (4) the ABSENT id answers honestly at both doors
+                                const missFetch = await mcpServ.execute('traveler_fetch', { id: missId });
+                                outM.honestMiss = !!(missFetch && missFetch.found === false && missFetch.traveler == null);
+                                const missStamp = await mcpServ.execute('traveler_stamp', { id: missId });
+                                outM.honestMissStamp = !!(missStamp && missStamp.found === false && missStamp.png == null);
+                                // (5) the swapped STORE refuses typed (at-rest
+                                // tamper simulation: the same filename, corrupted
+                                // slots), both door faces, then the exact-byte
+                                // restore re-arms the wall
+                                const original = fs.readFileSync(bodyFile, 'utf8');
+                                const real = JSON.parse(original);
+                                const evil = JSON.parse(JSON.stringify(real));
+                                evil.slots.title = 'swapped-on-the-server';
+                                fs.writeFileSync(bodyFile, JSON.stringify(evil));
+                                let swapFetch = null, swapStamp = null;
+                                try { await mcpServ.execute('traveler_fetch', { id: letter.id }); swapFetch = { passed: true }; }
+                                catch (e) { swapFetch = { code: e && e.code }; }
+                                try { await mcpServ.execute('traveler_stamp', { id: letter.id }); swapStamp = { passed: true }; }
+                                catch (e) { swapStamp = { code: e && e.code }; }
+                                outM.swapRefused = !!(swapFetch.code && swapStamp.code && swapFetch.code === swapStamp.code);
+                                fs.writeFileSync(bodyFile, original);
+                                const restored = await mcpServ.execute('traveler_fetch', { id: letter.id });
+                                outM.restored = !!(restored && restored.found === true && restored.traveler && restored.traveler.id === letter.id && t.verify(restored.traveler).ok === true);
+                            } catch (eS) {
+                                outM.fault = 'serving wall threw: ' + String((eS && eS.name) || '?') + ': ' + String((eS && eS.message) || '').slice(0, 100);
+                            } finally {
+                                try { carriers.setPointerFetch(null); } catch (eR) { /* reset */ }
+                            }
+                            const census1 = dirCount();
+                            outM.zeroServingGrowth = census1 === census0;
+                            return outM;
+                        })();
+                        out.push(Object.assign({ op: 'route', caseFn }, rMesh));
                         continue;
                     }
                     const r2 = attempt(() => {

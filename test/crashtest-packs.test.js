@@ -1447,9 +1447,17 @@ const EXPECTED = {
         // ARMED 2026-10-27 (slice 7, the WIRE seam): a REAL org-scoped
         // carry() output posts over a REAL loopback mount and lands THROUGH
         // the brain_write door slot id-named; the gapped tamper refuses
-        // E_TRAVELER_STEP, the sneak id refuses E_TRAVELER_ADDRESS, and the
-        // refused packets leave ZERO landing growth.
+        // E_TRAVELER_STEP, the sneak id refuses E_TRAVELER_ADDRESS, an
+        // already-ledgered packet refuses E_TRAVELER_STEP (append-only),
+        // and the refused packets leave ZERO landing growth.
         'carriers-wire-seam-letter-through-door': 'skip',
+        // (slice 8, ARMED 2026-10-27) the MESH serving wall on REAL
+        // landings: the door slot law lands, then the serving verbs
+        // measure over THAT body (found + re-verified, the VANT:1 stamp,
+        // honest found:false misses, a swapped store refusals identically
+        // at both faces, restore re-arms, the pointer loop resolves the
+        // REAL raster through the door-backed fetch, zero serving growth).
+        'carriers-mesh-serving-wall-on-real-landings': 'skip',
         // (slice 4) plates family
         'carriers-plate-persist-roster': 'skip',
         'carriers-plate-framed-walls': 'skip',

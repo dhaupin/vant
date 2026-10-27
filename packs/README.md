@@ -298,7 +298,8 @@ set-status routes):
 | `small-doors-mcp-trio-typed-forward` | exec/tools/events all cross ONE forward and each 503s typed on a missing origin naming VANT_PROPERTY_LOCAL_ORIGIN with the Pages-settings hint | validated - REFUSED |
 
 19/19 `REFUSED` x2 deterministic (strict cycles 2026-10-27); contract
-319/0 with the five rows in the EXPECTED table; lint id census 243.
+327/0 with the five rows + the carriers mesh row in the EXPECTED
+table; lint id census 243.
 
 ### `public/vant-rest` — the REST door-parity arm (8 rows; three landed 2026-10-27)
 
@@ -430,7 +431,7 @@ probe must measure purity BEFORE moving the env it proves flows.
 | `meshstatus-seed-pure-and-envflow` | the seed derivation answers identically twice unperturbed and MOVES under the universe seed (restored after) | validated - REFUSED |
 | `meshstatus-render-degraded` | the degraded mesh line still renders its label with (unavailable) and prints the error itself — degraded-not-dead | validated - REFUSED |
 
-### `public/vant-carriers` — the carrier/assimilator lanes (31 rows across 5 slices: lane laws, pointer/wire-hook, route, plates, assembly/template; all validated 2026-10-26)
+### `public/vant-carriers` — the carrier/assimilator lanes (41 rows across 8 slices: lane laws, pointer/wire-hook, route, plates, assembly/template, the traveler working layer, the wire seam, the mesh serving wall; lanes 1-5 validated 2026-10-26, 6-8 2026-10-27)
 
 **What it does.** The carriers battery's first conversion slice (#249
 drill-down, per-bucket shape): the native suite's lane laws family (pass
@@ -1317,8 +1318,9 @@ backlog is closed — `test/engine-parity-spine.test.js` and
 
 ## Traveler-lib battery — the working layer lands on vant-carriers (v0.8.6, #249 - 2026-10-26)
 
-`public/vant-carriers` reaches **39 rows** (31 lane families + 8
-traveler-lib rows, slice 6). The rows drive lib/traveler DIRECTLY
+`public/vant-carriers` reaches **41 rows** (31 lane families + 8
+traveler-lib rows (slice 6), the WIRE seam (slice 7) and the MESH
+serving wall (slice 8)). The rows drive lib/traveler DIRECTLY
 in-process (+ its real collaborators: event, scope, escrow, mcp, qos,
 event-types, security-pipeline) against the REAL brain-scoped pin
 store, wiped per row (index + .sha256 pin + travelers/ + current file)
@@ -1414,6 +1416,42 @@ test/relay.test.js 61/0 + test/traveler.test.js 26/0, lint clean.
 The vant-brain slice-7 rows landed in the same session (the brain
 listing family converts under the your-own-hint law);
 `test/brain.test.js` trimmed to the non-family pins that stay native.
+
+## The MESH serving wall (slice 8, 2026-10-27): the doors stop riding shims
+
+`carriers-mesh-serving-wall-on-real-landings` — the seam-to-serving
+half of the same coin: the wire seam's store landing made the mesh
+doors' operands REAL, so this row lands ONE packet through the
+brain_write door slot law (the same chain the wire rides) and then
+measures the serving side over THAT body in the sandbox tree:
+
+- **traveler_fetch serves found + re-verified** — the wall at the
+  serving node re-derives the address from the store body before any
+  byte crosses (the insert address law, `traveler_fetch` +
+  `traveler_stamp` ONE helper)
+- **traveler_stamp derives the VANT:1 frame + a REAL scannable
+  raster** ({ frame, png base64 }) from the re-verified body —
+  derivation, never fabrication
+- **an absent id answers `found:false` honestly at BOTH door faces**
+  (a miss is a record, never an error, never a fabricated body)
+- **a swapped store refuses typed and identically at both faces** —
+  the at-rest-tamper simulation corrupts the store body at the SAME
+  filename; both `_travelerServed` callers throw the same typed wall,
+  and restoring the exact original bytes re-arms the store (verified
+  found + re-verified again)
+- **the pointer loop closes on the REAL raster** — carriers.decode
+  resolves the stamp's actual png through a pointer-fetch closure
+  backed by the serving door itself (mcp.execute), the body wins over
+  the local copy, and the decoded packet re-enters the full address
+  law
+- **zero serving growth** — the census isolates the SERVING legs (the
+  landing IS the store hold the wire-seam row grades): the serving
+  ride adds exactly zero files
+
+1/1 `REFUSED` ×2 deterministic (49 pack rows total: 41 carriers + the
+library phase 48/0/1). The dash sibling: the relay-edge deepening's
+small-doors batch (batch 4) validated 19/19 the same day — see the
+dash section above.
 
 
 ## Next surfaces survey (2026-10-23): packs vs issues
