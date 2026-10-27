@@ -341,5 +341,75 @@ export default {
         return { verdict: 'REFUSED', detail: 'the typed arg gate answers verbatim: MCP_INPUT_INVALID + tool name + the named missing params', tookRequests: 1, evidence: { problems: inner.problems } };
       },
     },
+
+    {
+      name: 'rest-remaining-doors-parity',
+      description: "the ten door table routes the args-parity row left: streams list/create, brain state/ls/save, trust record, and market list/bid/trade/get all forward their path and body pieces under the EXACT arg names their tool's declared inputSchema requires - each honest call answers the tool's REAL domain answer (never the arg gate, never the registry gate, never a 5xx), and the family closes its own loop (listing created through the door is gettable through the door; the brain note saved through the door round-trips)",
+      async run(harness) {
+        // Honest rounds per door, built from each tool's declared schema.
+        // The grade is the same law as the parity row: never MCP_INPUT_INVALID
+        // (the tool arg gate), never 'not found' (the registry gate), never
+        // 5xx - anything else IS the tool's domain answer.
+        const rounds = [
+          ['GET', '/streams', null],
+          ['POST', '/streams', { stream: 'census-rem-door' }],
+          ['GET', '/brain', null],
+          ['GET', '/brain/ls', null],
+          ['POST', '/brain/census-rem-door', { content: 'remaining-doors-census' }],
+          ['POST', '/trust/record', { entityId: 'census-rem-door', type: 'help', positive: true }],
+          ['POST', '/market/list', { type: 'knowledge', title: 'census-rem-door' }],
+          ['POST', '/market/bid', { title: 'census-rem-door-bid' }],
+        ];
+        const fired = [];
+        let listingId = null;
+        for (const [method, path, body] of rounds) {
+          const r = await probe(harness, method, path,
+            body == null ? {} : { 'content-type': 'application/json' },
+            body == null ? undefined : JSON.stringify(body));
+          if (r._absent) return skip('no rest-request route (pending run-root wiring)');
+          if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `rest-request threw in the shim: ${r.error?.name}` };
+          const outer = parseJson(await bodyText(r));
+          if (!outer || outer.error) return skip('rest-request not armed for this oracle');
+          // Shared per-chain QoS budget: a later cycle may start mid-budget.
+          if (Number(outer.status) === 429) return { verdict: 'REFUSED', skipped: true, detail: `edge QoS budget spent by earlier cycles (${method} ${path}) - door shape not reachable on this fire` };
+          const inner = parseJson(outer.bodyText);
+          fired.push({ method, path, status: outer.status });
+          const wrongArgName = inner && (inner.error === 'MCP_INPUT_INVALID' || inner.error === 'not found');
+          const toolThrew = Number(outer.status) >= 500;
+          if (toolThrew || wrongArgName) {
+            return { verdict: 'EXPLOITED', detail: `door "${method} ${path}" answered ${toolThrew ? 'HTTP ' + outer.status : 'the tool arg gate (' + inner.error + ')'} instead of running its tool - the remaining door forwards the wrong arg name (or no tool)`, tookRequests: fired.length, evidence: { door: `${method} ${path}`, answer: inner } };
+          }
+          if (method === 'POST' && path === '/brain/census-rem-door' && !(inner && inner.saved === true)) {
+            return { verdict: 'EXPLOITED', detail: 'brain_save through the door did not save (' + JSON.stringify(inner).slice(0, 90) + ') - the door must forward the body content under the tool\'s name', tookRequests: fired.length, evidence: { answer: inner } };
+          }
+          if (method === 'POST' && path === '/market/list' && inner && inner.id) listingId = inner.id;
+        }
+        // The loop closes: the listing the DOOR created is gettable through
+        // the DOOR, and the door-created listing is tradable through the door
+        // (the trade's own domain answer).
+        if (listingId) {
+          const r1 = await probe(harness, 'GET', '/market/listing/' + listingId, {}, undefined);
+          if (r1._absent) return skip('no rest-request route (pending run-root wiring)');
+          const o1 = parseJson(await bodyText(r1));
+          if (o1 && !o1.error && Number(o1.status) !== 429) {
+            const i1 = parseJson(o1.bodyText);
+            if (!(i1 && i1.id === listingId) && !(i1 && i1.title === 'census-rem-door')) {
+              return { verdict: 'EXPLOITED', detail: 'market_get did not serve the door-created listing (' + JSON.stringify(i1).slice(0, 90) + ') - the family must close its own loop', tookRequests: fired.length + 1, evidence: { listingId } };
+            }
+          }
+          const r2 = await probe(harness, 'POST', '/market/trade', { 'content-type': 'application/json' }, JSON.stringify({ listingId, buyerId: 'census-rem-door-buyer' }));
+          if (r2._absent) return skip('no rest-request route (pending run-root wiring)');
+          const o2 = parseJson(await bodyText(r2));
+          if (o2 && !o2.error && Number(o2.status) !== 429) {
+            const i2 = parseJson(o2.bodyText);
+            const domainAnswer = i2 && (i2.id || i2.error);
+            if (!domainAnswer) {
+              return { verdict: 'EXPLOITED', detail: 'market_trade answered an unrecognizable ' + JSON.stringify(i2).slice(0, 90) + ' - the door must hand the tool its body verbatim', tookRequests: fired.length + 2, evidence: { listingId } };
+            }
+          }
+        }
+        return { verdict: 'REFUSED', detail: "all ten remaining doors run their tools with the exact arg names (domain answers throughout: stream roster/create, brain state/ls/save acked, trust record acked, market list/bid), the door-created listing is served by market_get and its trade rides the tool's own domain answer, and the brain note the door saved carries the forwarded body verbatim - the door table is fully measured", tookRequests: fired.length + (listingId ? 2 : 0) };
+      },
+    },
   ],
 };

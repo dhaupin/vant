@@ -1343,6 +1343,51 @@ Pack green x2, contract 338/0 with the row in the EXPECTED table,
 native mcp suites unmoved (test/mcp 34 + mcp-schema 13 green), lint
 clean.
 
+### The remaining REST doors + the market-skills audit verdict + the fresh survey (2026-10-27, the depth pass)
+
+`public/vant-rest` reaches **9 rows**. `rest-remaining-doors-parity`
+lands the TEN door-table routes the args-parity row left (streams
+list/create, brain state/ls/save, trust record, market list/bid/trade/
+get), grading the same law (domain answers throughout, never the arg
+gate, never the registry gate, never 5xx) with the loop closed both
+ways (the listing the DOOR creates is gettable through the door; its
+trade rides the tool's own domain answer). The probe-first pass earned
+a REAL find fixed same-pass in `lib/mcp.js`: **`brain_save` was dead on
+arrival** — its handler fed `brain.write('', key + '.md')` an EMPTY
+category, so VAF refused EVERY name typed `Invalid category/key` while
+the sibling `brain_write` landed the same body fine. The tool now rides
+the same single-segment seam (active-brain root, one validated path
+segment, the .md rule); a hostile `../evil` name refuses typed.
+
+Pack green x2, contract 339/0, lint clean.
+
+**The market-skills trim audit (reverse-verification, honest
+outcome: ZERO pins retire).** The skills-gate pack row measures the
+gate cluster it claimed (off-gate inertness, kind boundary, role walls,
+hash law, settle discipline, sweep); the native suite's other 22 pins
+cover the breadth the row does not — delivery-refusal shapes, sweep
+evidence rules, TTL clamps, shill-rep weighting, the MCP door verbs,
+config mounting, and the QC pass-204 guard family. The suite keeps its
+full 23 green native; the rows add coverage without replacing it.
+
+**The fresh wire-survey read (next surfaces, honestly named):** every
+door this campaign named stays ARMED and the door tables are now FULLY
+measured (REST 19/19 routes across the two parity rows; market
+list/bid/trade/state doors through the remain-doors row). The next
+growth surfaces, in census-cluster shape:
+- **the API object's own layer** (`lib/api.js` execute/read/write +
+  the memoryState/recall/learn/query doors + the dropbox pairs) — the
+  rows grade the MCP-carrier doors, not the API object's methods;
+- **the crew door inventory** (`lib/agents.js` spawn/delegate/kill/
+  protos + `lib/crew-bus.js` beyond the quota trio — mostly
+  native-covered today, the run-root arm can grade the door verbs' invariants);
+- **`lib/teams.js` orgchart depth** (largest unmeasured lib facet by
+  raw size, broadly native-covered).
+
+**lib/lib/crew does NOT exist in the repo** (checked: no such path, no
+reference anywhere) — that name was a chat-summary typo only, never a
+code defect.
+
 ### The remote/watch/cache census (2026-10-27) — the 9-key cluster
 
 `public/vant-brain` reaches **22 rows**. The remote tunnel + watcher +

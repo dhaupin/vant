@@ -1224,6 +1224,7 @@ const EXPECTED = {
     // law (stack ⊆ filter) and identity law (activeStack untouched) are
     // unchanged; full-capture behavior is byte-identical.
     'vant-rest': {
+        'rest-remaining-doors-parity': 'REFUSED',
         'fuzz-floor-never-500': 'REFUSED',
         'cors-enable-parity': 'REFUSED',
         // Armor 2026-10-22 (crashtest v1.0.0-on-npm qs-shapes port): the
