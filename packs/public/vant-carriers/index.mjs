@@ -1166,5 +1166,30 @@ export default {
         }
       },
     },
+
+    // ============ slice 7 (2026-10-27): the WIRE seam ============
+    {
+      name: 'carriers-wire-seam-letter-through-door',
+      description: "the certified letter crosses INTO the pod's own relay door: a REAL org-scoped carry() output posts over a REAL loopback mount (the r/2 bridge face's HMAC lane verifies the body bytes) and lands THROUGH the brain_write door slot id-named - the traveler slot law re-verifies the ADDRESS at the receiving node and lands through the traveler lib's OWN append-only store (ledger row + the body beside it, what the mesh door serves); a gapped mid-route tamper refuses E_TRAVELER_STEP, a sneak id refuses E_TRAVELER_ADDRESS, a RE-LAND of the same letter refuses E_TRAVELER_STEP (append-only), and NO refused packet rides the door (zero landing growth)",
+      async run(harness) {
+        const ride = await probeCarriers(harness, [{ op: 'route', case: 'letterWire', key: 'rtwire' }]);
+        if (!ride) return skip('carriers-lane not armed (run-root arm)');
+        const r = ride.get('route');
+        if (!r) return rowErr('the wire-seam probe failed to answer', [{ op: 'route', case: 'letterWire' }]);
+        if (r.fault) return rowErr('the wire-seam probe faulted: ' + r.fault, [{ op: 'route', case: 'letterWire' }]);
+        if (r.wireCase !== true) return rowErr('the route arm answered a non-wire case shape', [{ op: 'route', case: 'letterWire' }]);
+        if (r.carryOk !== true) return rowErr('the REAL carry did not route: ' + String(r.door || 'unknown'), [{ op: 'route', case: 'letterWire' }]);
+        if (r.walkCert !== true) return rowErr('the certified walk did not hold (stages/gaps)', [{ op: 'route', case: 'letterWire' }]);
+        if (r.doorOk !== true) return rowErr('the letter did not ack through the REAL relay door: ' + String(r.door || ''), [{ op: 'route', case: 'letterWire' }]);
+        if (r.doorLandedIdNamed !== true || r.oneLanding !== true || r.slotCarriesLetter !== true) {
+          return rowErr('the door landing was not exactly the letter, id-named in the traveler store (doorOk=' + (r.doorOk === true) + ' landed=' + (r.doorLandedIdNamed === true) + ' oneLanding=' + (r.oneLanding === true) + ' slotCarriesLetter=' + (r.slotCarriesLetter === true) + ')', [{ op: 'route', case: 'letterWire' }]);
+        }
+        if (r.gappedRefused !== true) return rowErr('a gapped mid-route tamper did not refuse E_TRAVELER_STEP at the door', [{ op: 'route', case: 'letterWire' }]);
+        if (r.sneakRefused !== true) return rowErr('a sneak id did not refuse E_TRAVELER_ADDRESS at the door', [{ op: 'route', case: 'letterWire' }]);
+        if (r.relandRefused !== true) return rowErr('a RE-LAND of the same letter did not refuse E_TRAVELER_STEP (append-only died at the door)', [{ op: 'route', case: 'letterWire' }]);
+        if (r.zeroRefusedGrowth !== true) return rowErr('a REFUSED packet rode the door anyway (landings grew)', [{ op: 'route', case: 'letterWire' }]);
+        return { verdict: 'REFUSED', detail: 'the certified letter crossed into the relay door: ' + r.letterSteps + ' steps landed id-named through the brain_write slot as ONE landing in the traveler append-only store (the slot re-verified at the door and the body landed beside the ledger index), the gapped tamper refused E_TRAVELER_STEP, the sneak id refused E_TRAVELER_ADDRESS, the re-land refused E_TRAVELER_STEP (append-only), and zero refused growth - carriers and the wire meet at one honest door', tookRequests: 4 };
+      },
+    },
   ],
 };

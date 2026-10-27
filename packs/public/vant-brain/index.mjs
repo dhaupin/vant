@@ -918,6 +918,39 @@ export default {
         return { verdict: 'REFUSED', detail: 'the listing family answers its own shapes: brainDirs both sides confined inside models/, a missing brain answers honest null, the roster is a traversal-free string array, the stack corpus rides its entries, and neuron saves ack typed (saving|error)', tookRequests: took.fires };
       },
     },
+    {
+      name: 'brain-neuron-state-seam',
+      description: "the neuron STATE seam (the native suite's remaining family: getNeuronState/saveNeuronState in BOTH verb postures) must round-trip and persist with its disk truth confined to models/ - the native pins only checked promise/object shapes (a promise IS an object, so a write-only state passes them); this row demands the data back through the state's own vocabulary; the disk root's confinement rides the brainDirs/paths pins",
+      async run(harness) {
+        const r = await tryRun(harness, 'brain-listing', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ op: 'neuron-state', probe: 'brain-neuron-state-row' }),
+        });
+        if (r._absent) return skip('no brain-listing route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `brain-listing threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return skip('brain-listing not armed');
+        if (j.gotThrew) {
+          return { verdict: 'EXPLOITED', detail: 'the neuron state seam threw: ' + String(j.gotThrew).slice(0, 90), tookRequests: 1 };
+        }
+        if (j.roundTrip !== true) {
+          return { verdict: 'EXPLOITED', detail: 'saveNeuronState({probe}) did not come back (round trip broken: ' + JSON.stringify(j).slice(0, 120) + ')', tookRequests: 1 };
+        }
+        if (j.secondPersisted !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the second save (probe-2 + n:2) did not persist (cross-save overwrite or write-only seam: ' + JSON.stringify(j).slice(0, 120) + ')', tookRequests: 1 };
+        }
+        if (j.saveNoThrow !== true) {
+          return { verdict: 'EXPLOITED', detail: 'saveNeuronState threw on a save: ' + String(j.gotThrew || '').slice(0, 90), tookRequests: 1 };
+        }
+        // (disposition note) the disk CONFINEMENT law rides the brainDirs
+        // roots pin + paths-cannot-escape (the same FileStorage root); the
+        // arm still reports its statePathRel as a neutral fact.
+        if (j.statePathRel != null && !String(j.statePathRel).startsWith('models/')) {
+          return { verdict: 'EXPLOITED', detail: 'the persisted state file resolved at ' + String(j.statePathRel).slice(0, 90) + ' - the neuron state wrote OUTSIDE the models/ tree', tookRequests: 1 };
+        }
+        return { verdict: 'REFUSED', detail: 'the neuron state seam round-trips both saves (probe and probe-2 + n:2 read back through the state\'s own .neurons vocabulary), the write IS the ack (bare, never thrown), and the state file resolves under models/ (the roots pin already certifies the storage root\'s confinement)', tookRequests: 1 };
+      },
+    },
   ],
 };
 

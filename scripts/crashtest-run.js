@@ -1235,6 +1235,38 @@ function buildRoutes(sb, Harness) {
                 out.count = Array.isArray(r) ? r.length : null;
                 const entries = (Array.isArray(r) ? r : []).filter((x) => x && typeof x === 'object');
                 out.hasNames = entries.every((x) => x.name == null || typeof x.name === 'string');
+                        } else if (j && j.op === 'neuron-state') {
+                out.op = 'neuron-state';
+                // (2026-10-27 brain slice 2) the neuron STATE seam: round trip
+                // + disk confinement, same law as the test crate arm.
+                const probe = j.probe || 'brain-neuron-state-row';
+                // (ground truth 2026-10-27) saveNeuronState answers BARE
+                // (undefined - the write IS the ack by design, a throw is
+                // the failure) and getNeuronState resolves to the state
+                // object whose .neurons carries what was saved. The facts
+                // below are the seam's own vocabulary.
+                let saveThrew = null;
+                try { await brain.saveNeuronState({ probe }); } catch (e0) { saveThrew = e0.name + ': ' + e0.message; }
+                let got = null, gotThrew = null;
+                try { got = await brain.getNeuronState(); } catch (e1) { gotThrew = e1.name + ': ' + e1.message; }
+                const neurons = (got && typeof got === 'object' && got.neurons) ? got.neurons : got;
+                out.roundTrip = !saveThrew && !gotThrew && !!neurons && typeof neurons === 'object' && neurons.probe === probe;
+                try { await brain.saveNeuronState({ probe: probe + '-2', n: 2 }); } catch (e2) { saveThrew = saveThrew || (e2.name + ': ' + e2.message); }
+                let back = null;
+                try { back = await brain.getNeuronState(); } catch (e3) { gotThrew = gotThrew || (e3.name + ': ' + e3.message); }
+                const neurons2 = (back && typeof back === 'object' && back.neurons) ? back.neurons : back;
+                out.saveNoThrow = !saveThrew;
+                out.secondPersisted = !!neurons2 && neurons2.probe === probe + '-2' && neurons2.n === 2;
+                out.gotThrew = gotThrew || saveThrew;
+                try {
+                    // (multi-brain layout law) state.json lives per-brain since
+                    // 0.9, legacy roots at the flat models/ root; BOTH belong
+                    // inside models/ - anything else is a confinement breach.
+                    const candidates = ['private/vant/state.json', 'state.json', 'private/fixture/state.json'];
+                    statePath = candidates.map((c) => path.join(sb, 'models', c)).find((cand) => require('fs').existsSync(cand)) || null;
+                } catch (e2) { statePath = 'probe-threw:' + e2.name; }
+                out.stateInModels = statePath !== null;
+                out.statePathRel = statePath ? String(path.relative(sb, statePath)).slice(0, 80) : null;
             } else if (j && j.op === 'brainSaveNeurons') {
                 out.op = 'brainSaveNeurons';
                 const r = brain.brainSaveNeurons({ attention: { vant: 0.5 } });
@@ -3483,6 +3515,125 @@ harness.registerRoute('carriers-lane', async (ctx) => {
                         return fixture;
                     })();
                     const caseFn = String(o.case);
+                    // (2026-10-27 the WIRE seam, vant-carriers x vant-relay)
+                    // the certified letter crosses INTO the pod's own relay
+                    // door: a REAL org-scoped carry() output posts over a REAL
+                    // loopback mount (lib/api's r/2 bridge face, HMAC lane
+                    // with the real body-bytes law) and lands THROUGH the
+                    // brain_write slot (the REAL door, not a capture shim).
+                    // Refused packets must never ride (zero landing growth).
+                    // This case is async and self-contained; it bypasses the
+                    // sync attempt() wrapper with its own try/catch.
+                    if (caseFn === 'letterWire') {
+                        const rWire = await (async () => {
+                            const tRW = traveler.mintScoped({ from: 'origin', slots: { title: 'wire-warrant' }, scope: { owner: 'team:' + fx.tm.id, visibility: 'scope' } });
+                            const repW = carriers.carry(tRW, { stations: [
+                                { by: fx.station, op: 'inspect' },
+                                { by: fx.station, op: 'test', carrier: 'nsc9' },
+                                { by: fx.station, op: 'release' },
+                            ] });
+                            const out0 = { carryOk: !!(repW && repW.ok), walkCert: !!(repW && repW.walk && repW.walk.ok === true && repW.walk.stations === 4 && Array.isArray(repW.walk.gaps) && repW.walk.gaps.length === 0), wireCase: true };
+                            if (!out0.carryOk) { out0.door = 'carry refused before the wire: ' + ((repW && repW.refused && repW.refused.code) || 'unknown'); return out0; }
+                            const cfg = sandboxLib('config');
+                            const savedE = cfg.get('relay.enabled');
+                            const savedG = cfg.get('relay.gateKey');
+                            cfg.set('relay.enabled', true);
+                            cfg.set('relay.gateKey', 'vant-carriers-wire-seam-gate-0123');
+                            const cryptoMod = require('crypto');
+                            const GK = String(cfg.get('relay.gateKey'));
+                            const sign = (raw) => cryptoMod.createHmac('sha256', GK).update(raw, 'utf8').digest('hex');
+                            const envelope = (payload) => JSON.stringify({ event: 'relay.travel', from: 'wire-seam', ts: Date.now(), nonce: 'w' + Math.random().toString(16).slice(2), payload, v: { major: 2 } });
+                            try {
+                                const relay = sandboxLib('api').relay;
+                                // (the door seam, documented in the relay lib)
+                                // the loopback transport posts to the pod's
+                                // MCP HTTP door; the run-root sandbox serves
+                                // the SAME door in-process (real mcp.execute
+                                // - the brain_write record lands in the
+                                // sandbox tree, which is the row's census).
+                                const sandboxMcp = sandboxLib('mcp');
+                                relay.setDoorTransport(async ({ body }) => {
+                                    const result = await sandboxMcp.execute(String((body && body.tool) || ''), (body && body.args) || {});
+                                    return { ok: true, status: 200, body: JSON.stringify({ jsonrpc: '2.0', id: 1, result }) };
+                                });
+                                const m = relay.mount({ port: 0 });
+                                if (!m || !m.mounted) { out0.door = 'mount failed: ' + JSON.stringify(m).slice(0, 120); return out0; }
+                                const st = relay._getMountedState();
+                                // (bind law) the webhook server binds ASYNC -
+                                // address() is null until 'listening'; vant-relay's
+                                // own helper waits the same way. Never read .port
+                                // off a null address.
+                                const port = await new Promise((res2) => {
+                                    if (!st || !st.server) return res2(null);
+                                    const srv2 = st.server;
+                                    if (srv2.listening) return res2(srv2.address() ? srv2.address().port : null);
+                                    srv2.once('listening', () => res2(srv2.address() ? srv2.address().port : null));
+                                    setTimeout(() => res2(null), 5000);
+                                });
+                                if (!port) { out0.door = 'the webhook server never bound a port within 5s'; return out0; }
+                                const http = require('http');
+                                const post = (raw) => new Promise((resolve) => {
+                                    const req = http.request({
+                                        host: '127.0.0.1', port, path: '/relay', method: 'POST',
+                                        headers: { 'content-type': 'application/json', 'content-length': Buffer.byteLength(raw), 'x-signature-256': sign(raw) },
+                                    }, (res) => {
+                                        let data = '';
+                                        res.setEncoding('utf8');
+                                        res.on('data', (c) => { data += c; });
+                                        res.on('end', () => { let j = null; try { j = JSON.parse(data); } catch { /* ack parse fail */ } resolve({ status: res.statusCode, json: j }); });
+                                    });
+                                    req.on('error', () => resolve({ status: 0, json: null }));
+                                    req.end(raw);
+                                });
+                                const letter = repW.letter;
+                                const listSlots = () => {
+                                    try {
+                                        const brain = traveler._ledgerPath();
+                                        return fs.readdirSync(path.join(path.dirname(brain), 'travelers')).filter((n) => /^[0-9a-f]{64}\.json$/.test(n)); // the traveler lib's OWN append-only store: the body beside the ledger index
+                                    } catch (e0) { return []; }
+                                };
+                                const census0 = listSlots();
+                                const legalAck = await post(envelope(letter));
+                                const census1 = listSlots();
+                                const landedName = letter.id + '.json';
+                                console.error('[run-root][wire-seam] legalAck: status=' + String(legalAck.status) + ' body=' + String(legalAck.json ? JSON.stringify(legalAck.json).slice(0, 160) : '(unparsed)'));
+                                out0.doorOk = !!(legalAck.status === 200 && legalAck.json && legalAck.json.reply && legalAck.json.reply.ok === true);
+                                out0.doorLandedIdNamed = census1.includes(landedName);
+                                out0.letterSteps = Array.isArray(letter.steps) ? letter.steps.length : null;
+                                out0.letterSeq = letter.seq;
+                                const fresh = census1.filter((n) => !census0.includes(n));
+                                out0.oneLanding = fresh.length === 1 && fresh[0] === landedName;
+                                let body = null;
+                                try { body = JSON.parse(fs.readFileSync(path.join(path.dirname(traveler._ledgerPath()), 'travelers', landedName), 'utf8')); } catch (e1) { body = null; }
+                                out0.slotCarriesLetter = !!(body && body.id === letter.id && Array.isArray(body.steps) && body.steps.length === letter.steps.length);
+                                // the gapped copy: a mid-route drop of one ledger
+                                // step answers E_TRAVELER_STEP inside the 200 ack
+                                const gapped = Object.assign(JSON.parse(JSON.stringify(letter)), { steps: letter.steps.slice(0, letter.steps.length - 1) });
+                                const gappedAck = await post(envelope(gapped));
+                                out0.gappedRefused = !!(gappedAck.status === 200 && gappedAck.json && gappedAck.json.reply && gappedAck.json.reply.ok === false && gappedAck.json.reply.code === 'E_RIDE_DECODE' && String(gappedAck.json.reply.error) === 'E_TRAVELER_STEP');
+                                // the sneak id: the address law at the same door
+                                const sneak = Object.assign(JSON.parse(JSON.stringify(letter)), { id: '../sneak-toward-the-slot' });
+                                const sneakAck = await post(envelope(sneak));
+                                out0.sneakRefused = !!(sneakAck.status === 200 && sneakAck.json && sneakAck.json.reply && sneakAck.json.reply.ok === false && sneakAck.json.reply.code === 'E_RIDE_DECODE' && String(sneakAck.json.reply.error) === 'E_TRAVELER_ADDRESS');
+                                // re-land the SAME legal letter: the append-only store refuses
+                                // the duplicate typed INSIDE the ack bridge
+                                const relandAck = await post(envelope(letter));
+                                out0.relandRefused = !!(relandAck.status === 200 && relandAck.json && relandAck.json.reply && relandAck.json.reply.ok === false && relandAck.json.reply.code === 'E_RIDE_DISPATCH' && String(relandAck.json.reply.error).includes('E_TRAVELER_STEP'));
+                                const census2 = listSlots();
+                                out0.zeroRefusedGrowth = census2.length === census1.length && census2.every((n) => census1.includes(n));
+                            } catch (eW) {
+                                out0.door = 'wire threw: ' + String((eW && eW.name) || '?') + ': ' + String((eW && eW.message) || '').slice(0, 100);
+                            } finally {
+                                try { sandboxLib('api').relay.unmount(); } catch (eU) { /* best effort */ }
+                                try { sandboxLib('api').relay.setDoorTransport(null); } catch (eT) { /* default */ }
+                                cfg.set('relay.enabled', savedE);
+                                cfg.set('relay.gateKey', savedG);
+                            }
+                            return out0;
+                        })();
+                        out.push(Object.assign({ op: 'route', caseFn }, rWire));
+                        continue;
+                    }
                     const r2 = attempt(() => {
                         if (caseFn === 'org') return { teamOk: fx.teamOk, stationOnTeam: fx.stationOnTeam };
                         if (caseFn === 'letter') {

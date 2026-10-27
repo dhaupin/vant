@@ -1370,6 +1370,52 @@ follow-row for its next family. The pack rows measure:
 kept: the helpers live at module top-level (the splice initially landed
 them inside the attacks array — a parse error, found same-pass).
 
+## The WIRE seam (slice 7, 2026-10-27): the letter crosses into the pod's relay door
+
+`carriers-wire-seam-letter-through-door` — the ONE row that stops
+simulating the hop: a REAL org-scoped `carriers.carry()` output posts
+over a REAL loopback relay mount (`lib/api` webhook face, HMAC lane,
+body-bytes law verified in-process by the parity harness) and the
+letter lands THROUGH the real door's `brain_write` slot (the run-root
+sandbox serves `mcp.execute` directly — no capture shim anywhere in
+the lane). Three fixes were needed to make the seam honest, each now
+part of the tree:
+
+- **the traveler slot law in `lib/mcp.js` brain_write** — the
+  relay.travel bridge translates onto a `brain_write` record slot
+  named `traveler-<64hex>-trN.json`; those slots no longer sink into
+  the brain-note namespace (the pre-fix landing was
+  `traveler-<id>-tr1.json.md`, invisible to the traveler's own store).
+  The door now parses the packet, re-verifies the ADDRESS at the
+  receiving node (the wall at both ends — `traveler_fetch` re-verifies
+  the same way), and lands it through the traveler lib's OWN
+  append-only store: the ledger row plus the body beside it at
+  `state/travelers/<id>.json`, the exact store the mesh door serves.
+  A forged slot (name matches, content does not answer to the
+  address) refuses typed E_TRAVELER_ADDRESS; an already-ledgered
+  packet (the RE-LAND leg — the same legal letter posted twice) is
+  refused by the store, append-only, typed E_TRAVELER_STEP.
+- **the bridge's in-band refusal band in `lib/api.js`** — the mcp
+  executor answers its refusals IN-BAND (inside the jsonrpc result),
+  not as a top-level transport error; `_dispatchBridge` now surfaces
+  either band typed as E_RIDE_DISPATCH. The pre-fix behavior hid the
+  append-only reversal behind a clean ok:true ack — the lie the row
+  exists to catch.
+- **the census on the real store** — the row's landing census reads
+  `state/travelers/<id>.json` (one landing, the slot IS the letter,
+  `letterSteps` re-counted from the landed body), and the refused
+  legs (gapped tamper E_TRAVELER_STEP, sneak id E_TRAVELER_ADDRESS,
+  re-land E_TRAVELER_STEP bridged) must ALL leave zero landing
+  growth.
+
+1/1 `REFUSED` ×2 deterministic. Regression rode the same stamps:
+vant-relay 20/0 and vant-brain 21/0, harness contract 326/0,
+test/relay.test.js 61/0 + test/traveler.test.js 26/0, lint clean.
+The vant-brain slice-7 rows landed in the same session (the brain
+listing family converts under the your-own-hint law);
+`test/brain.test.js` trimmed to the non-family pins that stay native.
+
+
 ## Next surfaces survey (2026-10-23): packs vs issues
 
 Where the remaining repo parts land:

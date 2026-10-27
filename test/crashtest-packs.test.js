@@ -753,6 +753,43 @@ function buildRoutes(sb) {
                 out.count = Array.isArray(r) ? r.length : null;
                 const entries = (Array.isArray(r) ? r : []).filter((x) => x && typeof x === 'object');
                 out.hasNames = entries.every((x) => x.name == null || typeof x.name === 'string');
+                        } else if (j && j.op === 'neuron-state') {
+                out.op = 'neuron-state';
+                // (2026-10-27 brain slice 2) the neuron STATE seam: both verbs
+                // are async (the native pins' typeof-object checks read
+                // promises); the row's neutral facts are the round trip and
+                // the disk confinement.
+                const probe = j.probe || 'brain-neuron-state-row';
+                // (ground truth 2026-10-27) saveNeuronState answers BARE
+                // (undefined - the write IS the ack by design, a throw is
+                // the failure) and getNeuronState resolves to the state
+                // object whose .neurons carries what was saved. The facts
+                // below are the seam's own vocabulary.
+                let saveThrew = null;
+                try { await brain.saveNeuronState({ probe }); } catch (e0) { saveThrew = e0.name + ': ' + e0.message; }
+                let got = null, gotThrew = null;
+                try { got = await brain.getNeuronState(); } catch (e1) { gotThrew = e1.name + ': ' + e1.message; }
+                const neurons = (got && typeof got === 'object' && got.neurons) ? got.neurons : got;
+                out.roundTrip = !saveThrew && !gotThrew && !!neurons && typeof neurons === 'object' && neurons.probe === probe;
+                try { await brain.saveNeuronState({ probe: probe + '-2', n: 2 }); } catch (e2) { saveThrew = saveThrew || (e2.name + ': ' + e2.message); }
+                let back = null;
+                try { back = await brain.getNeuronState(); } catch (e3) { gotThrew = gotThrew || (e3.name + ': ' + e3.message); }
+                const neurons2 = (back && typeof back === 'object' && back.neurons) ? back.neurons : back;
+                out.saveNoThrow = !saveThrew;
+                out.secondPersisted = !!neurons2 && neurons2.probe === probe + '-2' && neurons2.n === 2;
+                out.gotThrew = gotThrew || saveThrew;
+                // disk truth: the persisted state.json must stay inside the
+                // sandbox's models/ tree (never a foreign root).
+                let statePath = null;
+                try {
+                    // (multi-brain layout law) state.json lives per-brain since
+                    // 0.9, legacy roots at the flat models/ root; BOTH belong
+                    // inside models/ - anything else is a confinement breach.
+                    const candidates = ['private/vant/state.json', 'state.json', 'private/fixture/state.json'];
+                    statePath = candidates.map((c) => path.join(sb, 'models', c)).find((cand) => fs.existsSync(cand)) || null;
+                } catch (e2) { statePath = 'probe-threw:' + e2.name; }
+                out.stateInModels = statePath !== null;
+                out.statePathRel = statePath ? String(path.relative(sb, statePath)).slice(0, 80) : null;
             } else if (j && j.op === 'brainSaveNeurons') {
                 out.op = 'brainSaveNeurons';
                 const r = brain.brainSaveNeurons({ attention: { vant: 0.5 } });
@@ -1115,6 +1152,12 @@ const EXPECTED = {
         // traversal names, brainDirs both sides CONFINED inside models/,
         // stack-corpus entry names, neuron-save typed ack).
         'brain-listing-dirs-family': 'REFUSED',
+        // ARMED 2026-10-27 (brain-listing slice 2): the neuron STATE seam -
+        // both verb postures round-trip (the native pins only checked
+        // promise/object shapes, so a write-only state would pass them),
+        // and the persisted state.json lives inside the sandbox's models/
+        // tree (multi-brain layout included).
+        'brain-neuron-state-seam': 'REFUSED',
     },
     'vant-crew': {
         'roster-quota-ceiling': 'REFUSED',
@@ -1401,6 +1444,12 @@ const EXPECTED = {
         'carriers-route-outsider-drop': 'skip',
         'carriers-route-risk-gate': 'skip',
         'carriers-route-stageless-forged': 'skip',
+        // ARMED 2026-10-27 (slice 7, the WIRE seam): a REAL org-scoped
+        // carry() output posts over a REAL loopback mount and lands THROUGH
+        // the brain_write door slot id-named; the gapped tamper refuses
+        // E_TRAVELER_STEP, the sneak id refuses E_TRAVELER_ADDRESS, and the
+        // refused packets leave ZERO landing growth.
+        'carriers-wire-seam-letter-through-door': 'skip',
         // (slice 4) plates family
         'carriers-plate-persist-roster': 'skip',
         'carriers-plate-framed-walls': 'skip',

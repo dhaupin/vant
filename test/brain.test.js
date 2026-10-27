@@ -76,79 +76,10 @@ function _skip(name, reason) {
     console.log(`  ⊘ ${name}: ${reason}`);
 }
 
-async function asyncTest(name, fn) {
-    // Add to collection to run at end
-    _asyncTests.push({ name, fn });
-}
-
-async function _runAsyncTests() {
-    for (const { name, fn } of _asyncTests) {
-        try {
-            const result = await fn();
-            if (result === true || (result && result.success)) {
-                results.passed++;
-                results.tests.push({ name, status: 'passed' });
-                console.log(`  ✓ ${name}`);
-            } else {
-                results.failed++;
-                results.tests.push({ name, status: 'failed', error: result.error || 'assertion failed' });
-                console.log(`  ✗ ${name}: ${result.error || 'assertion failed'}`);
-            }
-        } catch (e) {
-            results.failed++;
-            results.tests.push({ name, status: 'failed', error: e.message });
-            console.log(`  ✗ ${name}: ${e.message}`);
-        }
-    }
-}
-
-console.log('\n🧠 BRAIN MODULE TESTS (retired to packs; the unmeasured seams stay native)\n');
-
-// ============================================
-// STATE (sync)
-// ============================================
-
-test('getNeuronState returns object', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const state = brain.getNeuronState();
-    return { success: typeof state === 'object' };
-});
-
-test('saveNeuronState does not throw', () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    try {
-        brain.saveNeuronState({ test: true });
-        return { success: true };
-    } catch (e) {
-        return { error: e.message };
-    }
-});
-
-// ============================================
-// STATE (async)
-// ============================================
-
-asyncTest('getNeuronState returns promise', async () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const result = brain.getNeuronState();
-    return { success: typeof result.then === 'function' };
-});
-
-asyncTest('getNeuronState resolves to object', async () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const state = await brain.getNeuronState();
-    return { success: typeof state === 'object' };
-});
-
-asyncTest('saveNeuronState does not throw', async () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    try {
-        await brain.saveNeuronState({ asyncTest: true });
-        return { success: true };
-    } catch (e) {
-        return { error: e.message };
-    }
-});
+// STATE families - RETIRED 2026-10-27 (brain slice 2): the sync/async
+// state shapes + the async duplicate family retired to vant-brain's
+// `brain-neuron-state-seam` row (round trip + models/ confinement, laws
+// these shape pins never checked).
 
 // ============================================
 // REGISTRY
@@ -242,38 +173,6 @@ test('brain get returns module', () => {
 });
 
 // ============================================
-// STATE PERSISTENCE (ASYNC)
-// ============================================
-
-asyncTest('getNeuronState returns promise', async () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const result = brain.getNeuronState();
-    return { success: result && typeof result.then === 'function' };
-});
-
-asyncTest('saveNeuronState returns promise', async () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const result = brain.saveNeuronState({ test: true });
-    return { success: result && typeof result.then === 'function' };
-});
-
-asyncTest('getNeuronState resolves to object', async () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    const state = await brain.getNeuronState();
-    return { success: typeof state === 'object' };
-});
-
-asyncTest('saveNeuronState does not throw', async () => {
-    const brain = require(path.join(ROOT, 'lib', 'brain'));
-    try {
-        await brain.saveNeuronState({ asyncTest: true });
-        return { success: true };
-    } catch (e) {
-        return { error: e.message };
-    }
-});
-
-// ============================================
 // PIPELINE STATE
 // ============================================
 
@@ -310,9 +209,6 @@ test('getPipelineState has chain', () => {
 // ============================================
 
 async function _printResults() {
-    // Run async tests first
-    await _runAsyncTests();
-
     console.log('\n--- RESULTS ---\n');
     console.log(`  Passed:  ${results.passed}`);
     console.log(`  Failed:  ${results.failed}`);
