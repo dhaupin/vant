@@ -610,7 +610,7 @@ export default {
         const r = ride.get('plate');
         if (!r) return rowErr('the plate persist probe failed to answer', ride.rows);
         if (r.fault) return rowErr('the plate persist probe faulted: ' + r.fault, ride.rows);
-        if (r.store !== 'true') return rowErr('the plate did NOT persist to the brain store', ride.rows);
+        if (r.store !== 'true') return rowErr(`the plate did NOT persist to the brain store (cwd=${r.cwd} brainpath=${r.brainpath} cfg=${r.cfg} walk=${r.walk || '(none)'})`, ride.rows);
         if (r.sidecar !== 'true') return rowErr('the plate store has NO sha256-pinned sidecar', ride.rows);
         if (r.roster !== 'true,true') return rowErr('the plate did not ride the roster immediately (plate:true available)', ride.rows);
         return { verdict: 'REFUSED', detail: 'registered plate = persisted data + sidecar + immediate roster ride', tookRequests: 1 };
@@ -691,7 +691,7 @@ export default {
         if (!ride) return rowSkip('carriers-plates not armed');
         const r = ride.get('plate');
         if (!r) return rowErr('the code-carrier probe failed to answer', ride.rows);
-        if (r.fault) return rowErr('the code-carrier probe faulted: ' + r.fault, ride.rows);
+        if (r.fault) return rowErr(`the code-carrier probe faulted: ${r.fault} (cwd=${r.cwd} brainpath=${r.brainpath} cfg=${r.cfg} walk=${r.walk || '(none)'})`, ride.rows);
         if (r.tamper !== 'true,E_CARRIER_TAMPER') return rowErr(`a code carrier encoded a tampered packet: ${JSON.stringify(r.tamper)} - the packet gate must wrap customer code`, ride.rows);
         if (r.packet !== 'true,E_CARRIER_TAMPER') return rowErr(`a code carrier's tampered packet return answered ${JSON.stringify(r.packet)} - verify must re-apply on decode returns`, ride.rows);
         if (r.ephemeral !== 'true') return rowErr('the code carrier PERSISTED to the plate store - code is not data', ride.rows);
