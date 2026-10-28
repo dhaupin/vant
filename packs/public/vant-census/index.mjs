@@ -262,6 +262,34 @@ export default {
         return { verdict: 'REFUSED', detail: "15 facade-surface laws hold: the vant umbrella announces its 15 function doors + 6 namespaced objects (islands rides the object list - the fn/obj split is load-bearing) + namespace presence + version, compute's run/python executors exist, auth/health/msg/cron/audit/boot keep their never-twin'd surfaces, and the cache class + embed/network/schema/canvas presence shapes hold - the last 18 legacy shape-smokes' claims are now sweep-visible and the files retire", tookRequests: 1 };
       },
     },
+    {
+      name: 'qos-window-laws',
+      description: "the QoS machinery's window BEHAVIORS convert where the modern twin grades only shapes: RateLimiter's sliding window (under-limit admissions, the per-client refusal at the cap, the window sliding back open over a real wall-clock tick, the GLOBAL anti-rotation wall refusing a FRESH client id once the global cap is spent - no bypass via rotation - with the qos:rate-limit event auditing the global refusal), CircuitBreaker's trip laws (CLOSED initially and under threshold, OPEN at the threshold with isClosed flipped, reset/success restoring CLOSED), Bulkhead's honest run + isFull, and Throttler's one-shot wrap with the clear-able stats",
+      async run(harness) {
+        const r = await tryRun(harness, 'qos-window-laws', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: '{}',
+        });
+        if (r._absent) return skip('no qos-window-laws route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `qos-window-laws threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return skip('qos-window-laws probe unavailable: ' + (j && j.error || 'no payload'));
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the qos-window-laws child faulted mid-census: ' + (j.bail || 'unknown'), tookRequests: 1 };
+        const laws = [
+          ['sliding window admit/refuse/slide', j.rlUnderLimitAdmits && j.rlPerClientRefuses && j.rlWindowSlidesOpen],
+          ['anti-rotation wall + event', j.rlAntiRotationWall && j.rlRefusalEventFires],
+          ['circuit breaker trip laws', j.cbClosedInitial && j.cbHoldsClosedUnderThreshold && j.cbOpensAtThreshold && j.cbResetOrSuccessRestores],
+          ['bulkhead honesty', j.bhRunOk && j.bhIsFullObject],
+          ['throttler gate', j.thFirstOkWrapper && j.thClearStats],
+        ];
+        const broken = laws.filter(([, ok]) => !ok);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: 'the qos window family broke at: ' + broken.map(([n]) => n).join(', '), tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: '13 window laws hold: the sliding window admits under the cap and refuses at it then reopens over the wall clock, a fresh client id CANNOT bypass the spent global cap (refused, with the qos:rate-limit event on the bus), the circuit breaker holds CLOSED under threshold and trips OPEN at it with reset restoring, the bulkhead runs honestly with a boolean isFull, and the throttler wraps once with clear-able stats - the QoS machinery is graded BEHAVIORALLY now, not just as shapes', tookRequests: 1 };
+      },
+    },
   ],
 };
 

@@ -57,9 +57,9 @@ jobs:
           node test/evals/vibe.js
           node test/coverage.js
 
-      - name: Eyes gate (eyestruct@0.9 visual ledger, browserless)
+      - name: Eyes gate (eyestruct@1.0 visual ledger, browserless)
         # The crashtest lane aimed at appearance instead of attackability.
-        # eyestruct@0.9 (npm, not the staging pin): `gate` is read-only over
+        # eyestruct@1.0 (npm v1.0.0): `gate` is read-only over
         # labs/.eyes/ - every committed visual artifact must be explained
         # by a ledger row and every row must reference a live artifact on
         # disk. Browserless by design: capture verbs (look/diff/walk) are

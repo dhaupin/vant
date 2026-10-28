@@ -1156,6 +1156,14 @@ const EXPECTED = {
         // README ledger pins the verdicts). THE LAST 18 legacy
         // shape-smokes' claims now ride this row and those files retire.
         'facade-surfaces': 'skip',
+        // (qos-window-laws, ARMED 2026-10-28) the QoS machinery's window
+        // BEHAVIORS (sliding-window admit/refuse/reopen, the global
+        // anti-rotation wall with its qos:rate-limit event, the circuit
+        // breaker trip laws, bulkhead/throttler honesty) graded over the
+        // run-root probe child (run-root-only arm, the sibling precedent;
+        // the run fires grade it live x2 and the README ledger pins the
+        // verdicts).
+        'qos-window-laws': 'skip',
     },
     'vant-brain': {
         'private-first-fallback': 'REFUSED',

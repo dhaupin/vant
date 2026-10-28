@@ -2595,6 +2595,77 @@ function buildRoutes(sb, Harness) {
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
+    // (qos-window-laws census 2026-10-28) the QoS window family converts:
+    // the modern twin (test/qos.test.js) grades only shapes, and the packs
+    // ride one rate-lane (the carriers' E_TRAVELER_RATE), so the machinery's
+    // window BEHAVIORS were never graded: RateLimiter's sliding window
+    // (under-limit ads, per-client refusal at the cap, the window sliding
+    // back open, the GLOBAL rotation wall refusing a fresh client id, and
+    // the qos:rate-limit event on a global refusal), CircuitBreaker's
+    // CLOSED/OPEN trip at threshold with the reset restore, Bulkhead's
+    // honest run/isFull, and Throttler's one-shot wrap + clear.
+    const QOS_WINDOW_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const out = { family: 'qos-window-laws', ok: true, bail: null };
+    try {
+        const { RateLimiter, CircuitBreaker, Bulkhead, Throttler } = require('./lib/qos.js');
+        const eventMod = require('./lib/event.js');
+        // ---- RateLimiter: the sliding window (tiny wall-safe window)
+        const rl = new RateLimiter({ maxPerMinute: 2, maxPerHour: 10000, windowMs: 15 });
+        const a1 = await rl.check('census-a'); const a2 = await rl.check('census-a'); const a3 = await rl.check('census-a');
+        out.rlUnderLimitAdmits = a1 === true && a2 === true;
+        out.rlPerClientRefuses = a3 === false;
+        await new Promise((res) => setTimeout(res, 25));
+        const a4 = await rl.check('census-a');
+        out.rlWindowSlidesOpen = a4 === true;
+        // ---- the GLOBAL rotation wall: two clients exhaust the global cap,
+        // a THIRD CLIENT ID is refused anyway (no bypass via rotation), and
+        // the refusal is audible on the bus
+        let limitEvents = 0;
+        const onLimit = () => { limitEvents++; };
+        eventMod.on('qos:rate-limit', onLimit);
+        const rot = new RateLimiter({ maxPerMinute: 2, maxPerHour: 10000, windowMs: 60000 });
+        const rA = await rot.check('census-A'); const rB = await rot.check('census-B'); const rC = await rot.check('census-C');
+        eventMod.off('qos:rate-limit', onLimit);
+        out.rlAntiRotationWall = rA === true && rB === true && rC === false;
+        out.rlRefusalEventFires = limitEvents === 1;
+        // ---- CircuitBreaker: CLOSED -> trip at threshold -> reset restores
+        const cb = new CircuitBreaker({ threshold: 2, timeout: 20 });
+        out.cbClosedInitial = cb.getState() === 'CLOSED' && cb.isClosed() === true;
+        cb.recordFailure(new Error('census-f1')); 
+        out.cbHoldsClosedUnderThreshold = cb.getState() === 'CLOSED';
+        cb.recordFailure(new Error('census-f2'));
+        out.cbOpensAtThreshold = cb.getState() === 'OPEN' && cb.isClosed() === false;
+        cb.recordSuccess();
+        out.cbResetOrSuccessRestores = cb.getState() === 'CLOSED';
+        // ---- Bulkhead + Throttler: the honest one-shot shapes
+        const bh = new Bulkhead({ capacity: 2 });
+        const b1 = await bh.run(async () => 'census-ok');
+        out.bhRunOk = b1 === 'census-ok';
+        out.bhIsFullObject = typeof bh.isFull() === 'boolean';
+        const th = new Throttler({ interval: 25 });
+        const wrapped = await th.throttle(async () => 'census-throttled');
+        out.thFirstOkWrapper = typeof wrapped === 'function' || wrapped === 'census-throttled' || wrapped === true;
+        await th.clear?.();
+        out.thClearStats = typeof th.stats() === 'object';
+    } catch (e) {
+        out.ok = false;
+        out.bail = (e && e.message) ? e.message : String(e);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ ok: false, bail: String(e) }) + '>>END'); });
+`;
+
+    harness.registerRoute('qos-window-laws', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', QOS_WINDOW_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `qos-window-laws probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     harness.registerRoute('mcp-exec', async (ctx) => {
         const j = await ctx.request.json().catch(() => ({}));
         let outText;

@@ -10,6 +10,24 @@ documented.
 - **Run/validate from vant's side**: `node test/crashtest-packs.test.js` (contract + verdict ledger, 57 checks)
 - **Real-harness dry run against vant**: `node scripts/crashtest-run.js` (see "Running the packs against vant")
 
+## The STRUCT toolchain (the four sisters)
+
+Vant's measurement discipline rides four sibling tools; each STRUCT is
+the same verdict-honesty idea pointed at a different artifact layer:
+
+| Tool | What it attacks/explains | Pin here | Links |
+|------|--------------------------|----------|-------|
+| **packstruct** | The PACKS themselves: author-time lint + conformance over `packs/*.json` manifests and their declared attack ids -- 21 packs / 295 ids censused green by `npm run packs:lint`, the conformance audit by `npm run packs:audit` (vant#247) | `packstruct@1.0.0` | [github.com/dhaupin/packstruct](https://github.com/dhaupin/packstruct#readme) · npm `packstruct` |
+| **crashtest** | The CODE: in-process, verdict-driven adversarial QA (REFUSED/EXPLOITED/BOUNDED; absence honest; deterministic). The packs in this directory ARE crashtest packs; `scripts/crashtest-run.js` is the run root that arms them over vant's real routes | `crashtest@1.1.0` | [crashtest.creadev.org](https://crashtest.creadev.org) · [github.com/dhaupin/crashtest](https://github.com/dhaupin/crashtest) · npm `crashtest` |
+| **eyestruct** | The APPEARANCE: a visual ledger whose `gate` is read-only over `labs/.eyes/` -- every committed visual artifact must be explained by a ledger row, every row must reference a live artifact. Capture verbs (look/diff/walk) are LAN-local to the pinned chrome; CI runs the meanings, not the pixels (`npm run test:eyes`) | `eyestruct@1.0.0` | [eyestruct.creadev.org](https://eyestruct.creadev.org) · [docs.creadev.org/eyestruct](https://docs.creadev.org/eyestruct) · npm `eyestruct` |
+| **poststruct** | The SHIPPED THING: post-release probes of the deployed frontends (`struct-audit` cards in web/home + web/dashboard already render the crashtest feed; poststruct's lane completes the STRUCT audit #264 board's steps (c)-(d)) | coming to npm tonight | [poststruct.creadev.org](https://poststruct.creadev.org) (landing tonight) · staging: [dhaupin/gistory, branch poststruct-staging](https://github.com/dhaupin/gistory/tree/poststruct-staging) |
+
+The chain in one sentence: **packstruct** approves what the packs DECLARE,
+**crashtest** grades what the code DOES, **eyestruct** explains what the
+pixels SHOW, and **poststruct** probes what actually SHIPPED. All four
+share the honesty contract: absence degrades to an explicit typed skip,
+never a silent pass, and same-commit same-findings is a law, not a hope.
+
 ## What crashtest is
 
 **Crashtest** is an in-process, verdict-driven adversarial QA harness for
@@ -52,7 +70,7 @@ that rides real OS processes or its own module plane stays native):
 |---|---|---|---|
 | `vant-brain` | 28 | `test/brain.test.js` (trim) + `test/brain-circuit.test.js` (retired whole 2026-10-27) |
 | `vant-carriers` | 42 | `test/carriers.test.js` (retired whole 2026-10-27) + `test/traveler-lib.test.js` (trimmed to the REAL-PROCESS CLI family) |
-| `vant-census` | 7 | config-armed censuses + naked-lib first-doors + legacy-orphan-laws + facade-surfaces rows (run-root ctx; no native suite) |
+| `vant-census` | 8 | config-armed censuses + naked-lib first-doors + legacy-orphan-laws + facade-surfaces + qos-window-laws rows (run-root ctx; no native suite) |
 | `vant-crew` | 4 | crew quota trio (lib surface; the doors census rides run roots) |
 | `vant-dashboard` | 22 | the dashboard webs faces (dash-auth arm; native Stayed for the module plane) |
 | `vant-discipline` | 6 | memory/governance/escrow faces (their suites keep the kernel-plane pins) |
@@ -2712,3 +2730,50 @@ The drift-off pass. The remaining 18 legacy shape-smokes were triaged
   lint flat (21 files). The graveyard is closed; the legacy-runner
   era is over in both directions (deleted files AND real coverage
   now riding pack rows + modern suites).
+
+
+## Wave 8 (2026-10-28) - the STRUCT toolchain explained, eyestruct bumps to npm v1.0.0, and the QoS windows go behavioral
+
+- **The STRUCT toolchain section landed** (top of this README, before
+  "What crashtest is"): an explainer table for the four sisters with
+  their real pins and links - **packstruct** (npm `packstruct@1.0.0`,
+  [github.com/dhaupin/packstruct](https://github.com/dhaupin/packstruct#readme),
+  what the packs DECLARE), **crashtest** (npm `crashtest@1.1.0`,
+  [crashtest.creadev.org](https://crashtest.creadev.org), what the code
+  DOES), **eyestruct** (now npm `eyestruct@1.0.0`,
+  [eyestruct.creadev.org](https://eyestruct.creadev.org), what the
+  pixels SHOW), and **poststruct** ([poststruct.creadev.org](https://poststruct.creadev.org),
+  landing tonight; staging at dhaupin/gistory poststruct-staging,
+  what actually SHIPPED). One-sentence summary: packstruct approves
+  the declaration, crashtest grades the code, eyestruct explains the
+  pixels, poststruct probes the deploy - all four sharing the
+  honesty contract (typed skips, no silent passes, deterministic).
+
+- **eyestruct + CI bumped to npm v1.0.0.** package.json devDependency
+  `^0.9.0 -> ^1.0.0` (npm v1.0.0 verified live), the CI gate lane
+  renamed eyestruct@0.9 -> eyestruct@1.0 in .github/workflows/test.yml,
+  the lockfile refreshed, and `npm run test:eyes` (the browserless
+  ledger gate) run green on the new version: "gate: 0 visual artifacts
+  all explained by 0 ledger row(s)". No behavior drift: `gate` stays
+  read-only over labs/.eyes/ and the capture verbs stay LAN-local.
+
+- **qos-window-laws (vant-census row 8) landed** - the QoS machinery's
+  window BEHAVIORS, grading the vacuum the shape-only twin left: the
+  RateLimiter sliding window (under-limit admits, the per-client
+  refusal at the cap, the window sliding back open over a real
+  wall-clock tick), the GLOBAL anti-rotation wall (two clients spend
+  the global cap, a THIRD fresh client id is refused anyway - no
+  bypass via rotation - with the qos:rate-limit event fired on the
+  refusal), CircuitBreaker's trip laws (CLOSED initially and under
+  threshold, OPEN at the threshold with isClosed flipped,
+  reset/success restoring), Bulkhead's honest run + boolean isFull,
+  and Throttler's one-shot wrap with clear-able stats. Green x2
+  deterministic over the run-root probe child. (The observation the
+  row converts from: test/qos.test.js grades shapes and the packs
+  rode exactly one rate-lane - carriers' E_TRAVELER_RATE.)
+
+- Stamps: `--pack=vant-census` x2 verdict-identical (REFUSED 4 /
+  0 EXPLOITED / 4 not-armed skips). Contract **380/0, exit 0** with
+  qos-window-laws graded honestly `skip` in-suite. `packs:lint`
+  21 packs / 296 ids; determinism lint flat. Docs lint PASS (links
+  verified) after the toolchain section edit.
