@@ -154,11 +154,18 @@ function runPhaseB() {
     const status = r.status === null ? -1 : r.status;
     if (status === 0) { return { ok: true, name: 'B: real harness', note: 'clean (only whitelisted findings if any)' }; }
     const EXIT = { 1: 'run fault', 3: 'library finding', 4: 'finding outside the whitelist' };
+    // (detail-through 2026-10-28) the run root already prints each finding
+    // row with its full detail; surfacing THE FINDING LINES verbatim next
+    // to the strict-policy verdict means a CI RED is diagnosable from the
+    // log alone (tail-25 was hiding the pack-phase ✗ rows the strict
+    // policy named).
+    const findingLines = String(r.stdout || '').split('\n').filter((l) =>
+        l.includes('✗') || l.trim().startsWith('finding:') || l.startsWith('===') || l.trim().startsWith('unknown finding'));
     return {
         ok: false,
         name: 'B: real harness',
         reason: `run root exited ${status} (${EXIT[status] || 'unknown code'})`,
-        output: tail((r.stdout || '') + '\n' + (r.stderr || ''), 25),
+        output: [...findingLines, '', tail((r.stdout || '') + '\n' + (r.stderr || ''), 25)].join('\n'),
     };
 }
 
