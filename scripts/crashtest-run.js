@@ -2666,6 +2666,81 @@ function buildRoutes(sb, Harness) {
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
+    // (circuit-full-mode census 2026-10-28) the CircuitBreaker's FULL mode
+    // converts: the per-provider tripped state is the OS-grade machinery
+    // (file persistence + doubling backoff + auto-retry) and NO twin or
+    // pack row grades it. Laws: per-provider isolation (key a's failures
+    // never open key b), the trip at threshold with isClosed flipped for
+    // the failed provider ONLY, the state persisting to the file so a
+    // RECONSTRUCTED breaker (fresh construction, same file) inherits the
+    // outage, the backoff ladder doubling below the threshold, the
+    // auto-retry half-open recovery answering closed again after the
+    // backoff window passes (and zeroing the provider), the honest
+    // recordSuccess reset, and the corrupt-file fail-open recovery (a
+    // garbage state file degrades to an empty provider map, never a
+    // crash, never an inherited trip).
+    const CIRCUIT_FULL_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const out = { family: 'circuit-full-mode', ok: true, bail: null };
+    try {
+        const fs = require('fs');
+        const { CircuitBreaker } = require('./lib/qos.js');
+        const breakerFile = 'census-breaker.json';
+        try { fs.unlinkSync(breakerFile); } catch (e2) { }
+        const cfg = { mode: 'full', threshold: 2, timeout: 20, file: breakerFile, basePath: '.', backoff: { base: 10, max: 100, multiplier: 2 }, autoRetry: true };
+        const cb = new CircuitBreaker(cfg);
+        out.getModeFull = cb.getMode() === 'full';
+        // ---- per-provider isolation: a fails below threshold, b untouched
+        cb.recordFailure('census-a');
+        out.isoBStillClosed = cb.isClosed('census-b') === true;
+        out.isoAAcceptingUnderThreshold = cb.isClosed('census-a') === true;
+        // ---- the backoff ladder doubles below the threshold (10 -> 20)
+        const raw = JSON.parse(fs.readFileSync(breakerFile, 'utf8'));
+        out.backoffLadderDoubles = !!(raw.providers && raw.providers['census-a'] && raw.providers['census-a'].backoff === 20);
+        // ---- the trip at threshold flips isClosed for the FAILED provider ONLY
+        cb.recordFailure('census-a');
+        out.tripOpensKey = cb.isClosed('census-a') === false;
+        out.tripLeavesOthers = cb.isClosed('census-b') === true;
+        out.openStateInFile = !!(JSON.parse(fs.readFileSync(breakerFile, 'utf8')).providers['census-a'].open === true);
+        // ---- PERSISTENCE: a reconstructed breaker inherits the outage
+        const cb2 = new CircuitBreaker(cfg);
+        out.reconstructedInheritsTrip = cb2.isClosed('census-a') === false;
+        out.reconstructedKeepsOthers = cb2.isClosed('census-b') === true;
+        // ---- the backoff window passes -> auto-retry half-open recovery
+        await new Promise((res) => setTimeout(res, 35));
+        out.halfOpenRecovers = cb2.isClosed('census-a') === true;
+        const healed = JSON.parse(fs.readFileSync(breakerFile, 'utf8')).providers['census-a'];
+        out.healZeroesProvider = !!(healed.failures === 0 && healed.open === false);
+        // ---- honest recordSuccess reset while closed
+        cb2.recordFailure('census-b'); cb2.recordFailure('census-b');
+        cb2.recordSuccess('census-b');
+        out.successResetRestores = cb2.isClosed('census-b') === true;
+        // ---- the corrupt-file recovery: garbage state degrades honest
+        fs.writeFileSync(breakerFile, '{"providers": NOT-JSON');
+        const cb3 = new CircuitBreaker(cfg);
+        const st3 = cb3.getState();
+        out.corruptFileDegradesEmpty = !!(st3 && st3.providers && Object.keys(st3.providers).length === 0 && cb3.isClosed('census-a') === true);
+        // ---- the default mode stays its own shape (getAllStates default form)
+        const cbD = new CircuitBreaker({ threshold: 2 });
+        out.defaultModeShape = cbD.getMode() === 'default' && !!cbD.getAllStates()['CLOSED'];
+    } catch (e) {
+        out.ok = false;
+        out.bail = (e && e.message) ? e.message : String(e);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ ok: false, bail: String(e) }) + '>>END'); });
+`;
+
+    harness.registerRoute('circuit-full-mode', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', CIRCUIT_FULL_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `circuit-full-mode probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     harness.registerRoute('mcp-exec', async (ctx) => {
         const j = await ctx.request.json().catch(() => ({}));
         let outText;

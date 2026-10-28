@@ -1164,6 +1164,14 @@ const EXPECTED = {
         // the run fires grade it live x2 and the README ledger pins the
         // verdicts).
         'qos-window-laws': 'skip',
+        // (circuit-full-mode, ARMED 2026-10-28) the CircuitBreaker's FULL
+        // mode - per-provider isolation, the persisted backoff ladder, the
+        // trip at threshold, the reconstructed-inherits-outage persistence
+        // law, the half-open auto-recovery, the corrupt-file fail-open
+        // recovery - graded over the run-root probe child (run-root-only
+        // arm, the sibling precedent; the run fires grade it live x2 and
+        // the README ledger pins the verdicts).
+        'circuit-full-mode': 'skip',
     },
     'vant-brain': {
         'private-first-fallback': 'REFUSED',

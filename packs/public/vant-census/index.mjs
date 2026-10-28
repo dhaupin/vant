@@ -290,6 +290,34 @@ export default {
         return { verdict: 'REFUSED', detail: '13 window laws hold: the sliding window admits under the cap and refuses at it then reopens over the wall clock, a fresh client id CANNOT bypass the spent global cap (refused, with the qos:rate-limit event on the bus), the circuit breaker holds CLOSED under threshold and trips OPEN at it with reset restoring, the bulkhead runs honestly with a boolean isFull, and the throttler wraps once with clear-able stats - the QoS machinery is graded BEHAVIORALLY now, not just as shapes', tookRequests: 1 };
       },
     },
+    {
+      name: 'circuit-full-mode',
+      description: "the CircuitBreaker's FULL mode converts - the OS-grade tripped state machinery no twin or pack row graded: per-provider isolation (key a's failures never open key b), the trip at threshold flipping isClosed for the FAILED provider only, the backoff ladder doubling below the threshold (persisted in the state file), the trip persisting so a RECONSTRUCTED breaker inherits the outage (and keeps the healthy providers), the auto-retry half-open recovery answering closed again after the backoff window passes with the provider zeroed, the honest recordSuccess reset, the corrupt-file fail-open recovery (garbage state file degrades to an empty provider map, never a crash, never an inherited trip), and the default mode keeping its own getAllStates shape",
+      async run(harness) {
+        const r = await tryRun(harness, 'circuit-full-mode', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: '{}',
+        });
+        if (r._absent) return skip('no circuit-full-mode route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `circuit-full-mode threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return skip('circuit-full-mode probe unavailable: ' + (j && j.error || 'no payload'));
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the circuit-full-mode child faulted mid-census: ' + (j.bail || 'unknown'), tookRequests: 1 };
+        const laws = [
+          ['full mode + per-provider isolation', j.getModeFull && j.isoBStillClosed && j.isoAAcceptingUnderThreshold],
+          ['backoff ladder + typed trip', j.backoffLadderDoubles && j.tripOpensKey && j.tripLeavesOthers && j.openStateInFile],
+          ['reconstruction inherits the outage', j.reconstructedInheritsTrip && j.reconstructedKeepsOthers],
+          ['half-open auto-recovery', j.halfOpenRecovers && j.healZeroesProvider],
+          ['success reset + corrupt recovery', j.successResetRestores && j.corruptFileDegradesEmpty && j.defaultModeShape],
+        ];
+        const broken = laws.filter(([, ok]) => !ok);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: 'the circuit breaker full mode broke at: ' + broken.map(([n]) => n).join(', '), tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: '11 full-mode laws hold: per-provider isolation, the backoff ladder doubling with every below-threshold failure and persisting, the trip at threshold flipping isClosed for the failed provider only, the outage surviving a fresh construction from the state file, the backoff window then answering the retry half-open with the provider zeroed, recordSuccess restoring honestly, a corrupt state file degrading to an EMPTY provider map (never a crash, never an inherited trip), and the default mode keeping its shape - the breaker machine is graded end to end', tookRequests: 1 };
+      },
+    },
   ],
 };
 

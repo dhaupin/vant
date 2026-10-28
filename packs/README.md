@@ -70,7 +70,7 @@ that rides real OS processes or its own module plane stays native):
 |---|---|---|---|
 | `vant-brain` | 28 | `test/brain.test.js` (trim) + `test/brain-circuit.test.js` (retired whole 2026-10-27) |
 | `vant-carriers` | 42 | `test/carriers.test.js` (retired whole 2026-10-27) + `test/traveler-lib.test.js` (trimmed to the REAL-PROCESS CLI family) |
-| `vant-census` | 8 | config-armed censuses + naked-lib first-doors + legacy-orphan-laws + facade-surfaces + qos-window-laws rows (run-root ctx; no native suite) |
+| `vant-census` | 9 | config-armed censuses + naked-lib first-doors + legacy-orphan-laws + facade-surfaces + qos-window-laws + circuit-full-mode rows (run-root ctx; no native suite) |
 | `vant-crew` | 4 | crew quota trio (lib surface; the doors census rides run roots) |
 | `vant-dashboard` | 22 | the dashboard webs faces (dash-auth arm; native Stayed for the module plane) |
 | `vant-discipline` | 6 | memory/governance/escrow faces (their suites keep the kernel-plane pins) |
@@ -2777,3 +2777,42 @@ The drift-off pass. The remaining 18 legacy shape-smokes were triaged
   qos-window-laws graded honestly `skip` in-suite. `packs:lint`
   21 packs / 296 ids; determinism lint flat. Docs lint PASS (links
   verified) after the toolchain section edit.
+
+
+## Wave 9 (2026-10-28) - the CircuitBreaker's full mode goes end-to-end graded
+
+`circuit-full-mode` (vant-census row 9) landed - the OS-grade half of
+ the QoS machinery no twin or pack row had graded: the FULL mode's
+ tripped state machinery with its PVC file. 11 laws green x2
+ deterministic over the run-root probe child:
+
+- **Per-provider isolation**: key a's failures never touch key b
+  (isClosed stays true for the healthy provider through the whole
+  trip cycle).
+- **The backoff ladder**: every below-threshold failure doubles the
+  provider's backoff (base x multiplier), persisted in the state
+  file - graded by reading the file bytes, not the object.
+- **The typed trip**: at threshold the provider flips open - and
+  isClosed flips for the FAILED provider only.
+- **Persistence**: a RECONSTRUCTED breaker (fresh construction, same
+  file) inherits the outage exactly (a stays refused under its
+  backoff window, b still closed) - the restart law.
+- **Half-open auto-recovery**: once the backoff window passes,
+  isClosed answers true again (the autoRetry lane) AND the provider
+  zeroes strictly in the file (failures 0, open false) - not a
+  display heal, a written heal.
+- **Honesty laws**: recordSuccess restores a tripped provider to
+  closed; a CORRUPT state file degrades to an EMPTY provider map
+  (fail-open recovery, never a crash, never an inherited trip); and
+  the default mode keeps its own getAllStates shape beside all of
+  it. (The observation the row converts from: the default-mode trip
+  laws landed wave 8 in qos-window-laws; the full mode's file +
+  backoff + retry lane was the unmeasured remainder.)
+
+- Stamps: `--pack=vant-census` x2 verdict-identical (REFUSED 5 /
+  0 EXPLOITED / 4 not-armed skips). Contract **381/0, exit 0** with
+  circuit-full-mode graded honestly `skip` in-suite. `packs:lint`
+  21 packs / 297 ids; `packs:audit` clean with the pinned known
+  finding; determinism lint flat. The med-family observation for
+  the next census pair: Throttler/Debouncer's deep window laws and
+  Bulkhead's rejection shape under load remain partial.
