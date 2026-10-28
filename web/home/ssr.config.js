@@ -135,6 +135,16 @@ export default {
             },
         },
         {
+            path: '/audit',
+            priority: '0.5',
+            changefreq: 'daily',
+            meta: {
+                title: 'Struct audit - Vant',
+                description:
+                    'The four STRUCT families combined on one page: packstruct conformance, the crashtest packs floor, the eyestruct vision battery, and the poststruct render audit. Skeleton epoch: mock-shaped cards until the live feeds wire in.',
+            },
+        },
+        {
             path: '/contact',
             priority: '0.6',
             changefreq: 'yearly',

@@ -29,6 +29,7 @@ import Home             from './pages/Home.jsx'
 import Terms            from './pages/Terms.jsx'
 import Privacy          from './pages/Privacy.jsx'
 import Status           from './pages/Status.jsx'
+import StructAudit      from './pages/StructAudit.jsx'
 import Contact          from './pages/Contact.jsx'
 import Install          from './pages/Install.jsx'
 import Security        from './pages/Security.jsx'
@@ -218,6 +219,7 @@ export default function AppLayout() {
                     <Route path="/terms"   element={<Terms />} />
                     <Route path="/privacy" element={<Privacy />} />
                     <Route path="/status"  element={STATUS_LIVE ? <Status /> : <Maintenance section="01" title="Status" />} />
+                    <Route path="/audit"   element={<StructAudit />} />
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/changelog" element={<Changelog />} />
                     <Route path="*"        element={<NotFound />} />

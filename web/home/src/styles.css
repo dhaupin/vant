@@ -474,3 +474,32 @@ img, svg, canvas, video { max-width: 100%; }
 .form-grid input:focus, .form-grid select:focus, .form-grid textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .form-hp { position: absolute; left: -9999px; }
 .form-error { color: #e2574c; font-size: 0.85rem; }
+
+/* ---------- struct audit page (/audit, issue #264) ---------- */
+.struct-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 860px) { .struct-grid { grid-template-columns: 1fr; } }
+.sa-chips { display: inline-flex; gap: 7px; align-items: center; margin-bottom: 9px; flex-wrap: wrap; }
+.sa-verdict {
+    font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.07em; border-radius: 999px; border: 1px solid; padding: 2px 9px;
+}
+.verdict-pass { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, transparent); background: color-mix(in srgb, var(--ok) 10%, transparent); }
+.verdict-findings { color: var(--signal); border-color: color-mix(in srgb, var(--signal) 45%, transparent); background: color-mix(in srgb, var(--signal) 10%, transparent); }
+.verdict-absent { color: var(--text-muted); border-color: var(--border); background: var(--bg); }
+.sa-mock {
+    font-family: ui-monospace, Menlo, monospace; font-size: 0.66rem; font-weight: 700;
+    letter-spacing: 0.06em; color: var(--signal); border: 1px dashed color-mix(in srgb, var(--signal) 55%, transparent);
+    border-radius: 999px; padding: 2px 8px;
+}
+.struct-head { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
+.struct-head h3 { font-size: 1.0rem; margin-bottom: 0; }
+.struct-meta { font-family: ui-monospace, Menlo, monospace; font-size: 0.76rem; color: var(--text-muted); margin-bottom: 10px; overflow-wrap: anywhere; }
+.struct-findings { display: grid; gap: 7px; }
+.struct-finding { font-size: 0.86rem; color: var(--text); }
+.struct-level { font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+.level-info .struct-level, .level-warn .struct-level { color: var(--signal); }
+.level-fail .struct-level { color: var(--fail); }
+.struct-page { font-family: ui-monospace, Menlo, monospace; font-size: 0.76rem; color: var(--link); background: var(--accent-soft); border-radius: 5px; padding: 1px 6px; }
+.struct-absent { font-size: 0.86rem; color: var(--text-muted); border: 1px dashed var(--border); border-radius: 10px; padding: 10px 12px; }
+.struct-href { font-size: 0.74rem; margin-bottom: 0; }
+.struct-href a { color: var(--link); overflow-wrap: anywhere; }
