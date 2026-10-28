@@ -1510,8 +1510,10 @@ closed the dashboard gap, the home trio and relay-edge arms carry their
 apps, the session ladder grades the auth trio.
 
 Honest growth candidates, as they name themselves:
-- `web/kit` grows real doors first, its census slice follows the
-  first-doors law;
+- [LANDED 2026-10-28] the `web/kit` CONTRACT law grew its census slice
+  BEFORE its doors (the 21st pack `vant-kit`, two rows: the contracts
+  census + the vendoring-ring census) - the first-doors law stays the
+  name for any DOOR-flavored rows when functions/ actually appears;
 - the Edge chains' shared QoS budget behaviors over REAL multi-cycle
   conversations (the 429-skip law already lives; deeper W1/W2 windows if
   any new door uses its own budget);
@@ -2025,6 +2027,33 @@ Where the remaining repo parts land:
   finding). Two fires green x2 (REFUSED 2 / 0 EXPLOITED; library rows
   48/0/1), contract 357/0 with the row graded 'skip' honestly (run-root
   only census family).
+### Restamp 6 (2026-10-28) — the post-kit-census full floor
+
+The full floor re-stamped on the tree that carries the 21st pack:
+
+- **Full packs x2 green**: two consecutive cycles, **246 pack rows
+  REFUSED** across all 21 packs (vant-census 4 honest config-skips,
+  vant-pass-ledger 2 session-skips), **0 EXPLOITED, zero findings
+  both**; library rows 48/0/1 each; contract **357/0** with the two new
+  `vant-kit` rows graded honestly (`skip` in-suite: run-root-only
+  census children; live x2 in the fires).
+- **Native floor swept clean**: 203/203 suites green across two
+  alphabetical chunks (a-m 107 + n-z 96, zero failures, zero timeouts).
+- **Vendor parity audited, verdict: KEEP (no retirement).**
+  `test/relay-parity.test.js` (19/19 green after `--check`) carries
+  law families the census structurally cannot: the pod-face structural
+  parity against `lib/api.js` (posture getters live against the module),
+  the FACE-side envelopeShape agreement, the runtime-agnostic
+  scan-check on the kit source, the retired-wire lie pins, and the
+  intake browser-lane source pins. The vendoring ring census carries
+  the BYTE-PARITY leg live in the fires (all 9 pins, two lenses,
+  negative control); the native suite carries it in plain `npm test`
+  plus everything above - the two reinforce, neither replaces.
+- No repair needed this restamp: zero findings across both packs
+  cycles and the whole native floor - the first restamp with nothing
+  to fix, which is itself the honest signal that the census slabs
+  landed true.
+
 - **`web/kit` contracts — historical survey note (2026-10-27):** was
   contract SOURCE only (checksummed vendoring + parity pins in
   `test/relay-parity.test.js`), not a runtime; the CONTRACT shapes rode
