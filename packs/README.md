@@ -2505,3 +2505,57 @@ exit 0, x2** with the new row graded live in-suite (batch-2 house law).
 ALLOWED-pinned known finding (engine finding at crashtest#33);
 `npx crashtest lint-determinism` flat (21 files). The full native floor
 sweep rides the next restamp.
+
+## Wave 5 (2026-10-28) - the floor IOU paid, the teams depth pass, and the rule-gate repair
+
+Three named candidates from the ledger, run as one tranche:
+
+- **The wave-4 floor IOU: paid.** The full native floor swept on the
+  post-retirement tree in three chronological chunks (a-governance 74,
+  guests-remote-storage 74, remote-transport-zen 71): **219/219 suites
+  green, 0 failures, 0 timeouts** - the retirement settled the floor
+  220 -> 219 exactly as enumerated.
+
+- **The teams orgchart depth pass (vant-teams row 2).** The module's
+  governance plumbing beyond the orgchart chain converts to
+  `teams-governance-depth` over the `teams-governance` probe child
+  (fresh modules, capabilities granted per-process, config-DI through
+  `config.setConfig` - hermetic because flags ride `get()`'s top
+  priority and the sandbox is throwaway): the org quota cap refuses the
+  third create typed at its LIVE max (hydration-aware: the census
+  child's own orgs persist in the shared sandbox store, so a fixed cap
+  fabricated a refusal the first create would have deserved), the
+  hierarchical per-team agent cap refuses the third seat ('Team agent
+  quota'), span-of-control refuses the second report ('Span of
+  control'), a deny rule on team:create refuses typed E_RULE and lifts
+  on removal, the global 10/60s create budget rides to its floor then
+  refuses E_RATE_LIMIT with the `team:rateLimited` event on the bus,
+  delegation answers role_hierarchy over the CROSS-TEAM lead->member
+  edge (same-team delegation is same_team by contract - its own graded
+  law), accountability chains resolve through role chains exactly,
+  rosters enumerate, the multibrain stack getter rides brain-tagged,
+  and the horcrux gather holds the org. `vant-teams: REFUSED 2 x2` on
+  the real harness (was 1).
+
+- **THE FIND (a real gate seam, fixed same-pass): `teams._checkRule`
+  leaked every denial.** `rules.check()` returns a VERDICT OBJECT
+  (`{ allowed, rule, reason }`), and `_checkRule` returned it verbatim
+  while all three create paths test `if (!_checkRule(...))` - a denial
+  object is truthy, so a registered deny rule could never block an org,
+  dept, or team create. The repair reads the verdict (false or
+  allowed:false denies); all five teams/crew native suites stayed green
+  against it (20 + 14 + 9 + 6 + the teams battery, 0 failed).
+
+- **Honest note: the crew door inventory census is already landed** -
+  `vant-crew`'s `crew-doors-census` rides the pack (28 rungs; the
+  ungrounded approval-ack find it caught was fixed same-pass then), so
+  the third named candidate was measured before this wave; the fire
+  confirms it rides green both cycles.
+
+- Stamps: run-root full-table fires x2 VERDICT-TABLE-IDENTICAL -
+  **265 pack rows REFUSED across 21 packs, 6 honest skips (vant-census
+  4 config + vant-pass-ledger 2 session), 0 EXPLOITED, 0 BOUNDED**;
+  library rows 48/0/1 per fire. Contract **376/0, exit 0, x2** with
+  `teams-governance-depth` graded honestly `skip` in-suite
+  (run-root-only arm, the sibling precedent). `packs:lint` 21/292;
+  `packs:audit` clean with its pinned finding; determinism lint flat.

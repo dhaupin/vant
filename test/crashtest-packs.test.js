@@ -1268,6 +1268,13 @@ const EXPECTED = {
     // live x2, the README ledger pins the verdicts).
     'vant-teams': {
         'teams-orgchart-census': 'skip',
+        // (teams governance depth, 2026-10-28) the second teams tranche:
+        // the config-DI caps, rule deny gate, global rate budget + event,
+        // delegation/accountability semantics, rosters, stack getters and
+        // the horcrux gather. The route is run-root-only (probe child);
+        // strict earned verification rides the run root, the sibling
+        // census precedent.
+        'teams-governance-depth': 'skip',
     },
     // (web/kit contracts census, ARMED 2026-10-28) both web frontends
     // vendor the kit's contracts; the CONTRACT layer itself is graded at

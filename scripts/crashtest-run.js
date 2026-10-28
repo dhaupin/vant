@@ -2184,6 +2184,182 @@ function buildRoutes(sb, Harness) {
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
+    // (teams governance depth 2026-10-28) the SECOND teams tranche: the
+    // module's governance plumbing beyond the orgchart chain - config-DI
+    // quota caps (org + per-team agents + span of control), the rule deny
+    // gate, the global create-rate budget with its typed E_RATE_LIMIT and
+    // its team:rateLimited event, delegation/accountability semantics,
+    // member enumerations, the multibrain stack getters, and the horcrux
+    // gather shape.
+    const TEAMS_GOV_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const out = { family: 'teams-governance', ok: true, bail: null };
+    try {
+        const teams = require('./lib/teams.js');
+        const config = require('./lib/config.js');
+        const rules = require('./lib/rules.js');
+        const event = require('./lib/event.js');
+        // grants are PER-PROCESS (canWrite warns: run the grant in the SAME
+        // process as the write) - the sibling census child arms the shared
+        // sandbox capabilities at start, and this child needs write legs too
+        require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true });
+
+        // the event wire: listen BEFORE anything can fire team:rateLimited
+        let rateEvent = null;
+        event.on('team:rateLimited', (d) => { if (!rateEvent) rateEvent = (d && d.identifier) || 'unknown'; });
+
+        // --- the ORG quota cap via the config flag DI (flags ride get()'s
+        // top priority; in-memory only, nothing persisted)
+        // (hydration-aware cap) the census child's orgs persist in the
+        // shared sandbox store, so the cap baseline is the LIVE size -
+        // fixing the flag at 2 would refuse the FIRST create, not the cap
+        const orgsNow = (teams.listOrgs() || []).length;
+        config.setConfig('teams.maxOrgs', orgsNow + 2);
+        const o1 = teams.createOrg('wall-g-org-one');
+        const o2 = teams.createOrg('wall-g-org-two');
+        const o3 = teams.createOrg('wall-g-org-three-over');
+        const orgId = (o1 && o1.id) || null;
+        out.orgQuota = {
+            first: !!(o1 && o1.id),
+            second: !!(o2 && o2.id),
+            thirdCode: (o3 && o3.code) || null,
+            thirdNamesMax: !!(o3 && o3.error && String(o3.error).indexOf('(max ' + (orgsNow + 2) + ')') > -1),
+        };
+        config.setConfig('teams.maxOrgs', orgsNow + 100);
+
+        // --- dept + team + the role pair for the chain legs (3 more slots
+        // off the shared 10/60s global create budget; roles are NOT
+        // rate-limited on create)
+        const d1 = teams.createDept('wall-g-dept', { org: orgId });
+        const t1 = teams.createTeam('wall-g-team', { dept: d1 ? d1.id : null });
+        out.deptMade = !!(d1 && d1.id);
+        out.teamMade = !!(t1 && t1.id);
+        const teamId = (t1 && t1.id) || null;
+        const leadRole = teams.createRole('wall-g-lead', { team: teamId, chain: [], permissions: [] });
+        const memberRole = teams.createRole('wall-g-member', { team: teamId, chain: ['wall-g-lead'], permissions: [] });
+        out.rolesMade = !!((leadRole && leadRole.id) && (memberRole && memberRole.id));
+
+        // --- the hierarchical TEAM agent cap via flag: 2 seats, the third
+        // assign refuses typed
+        config.setConfig('teams.maxAgentsPerTeam', 2);
+        const aA = teams.assign('wall-g-agent-A', { org: orgId, dept: d1 ? d1.id : null, team: teamId, role: memberRole && leadRole ? leadRole.id : null, brain: 'vant' });
+        const aB = teams.assign('wall-g-agent-B', { org: orgId, dept: d1 ? d1.id : null, team: teamId, role: memberRole ? memberRole.id : null, brain: 'vant' });
+        const aC = teams.assign('wall-g-agent-C', { org: orgId, dept: d1 ? d1.id : null, team: teamId, role: memberRole ? memberRole.id : null, brain: 'vant' });
+        out.teamCap = {
+            aAssigned: !!(aA && !aA.error),
+            bAssigned: !!(aB && !aB.error),
+            cCode: (aC && aC.code) || null,
+            cNamesTeam: !!(aC && aC.error && String(aC.error).indexOf('Team agent quota') > -1),
+        };
+
+        // restore the team cap; grade the SPAN-OF-CONTROL cap (1 report)
+        config.setConfig('teams.maxAgentsPerTeam', 50);
+        config.setConfig('teams.maxReportsPerAgent', 1);
+        const aCagain = teams.assign('wall-g-agent-C', { org: orgId, dept: d1 ? d1.id : null, team: teamId, role: memberRole ? memberRole.id : null, brain: 'vant' });
+        const aD = teams.assign('wall-g-agent-D', { org: orgId, dept: d1 ? d1.id : null, team: teamId, role: memberRole ? memberRole.id : null, brain: 'vant', reportsTo: 'wall-g-agent-A' });
+        const aE = teams.assign('wall-g-agent-E', { org: orgId, dept: d1 ? d1.id : null, team: teamId, role: memberRole ? memberRole.id : null, brain: 'vant', reportsTo: 'wall-g-agent-A' });
+        out.spanCap = {
+            cAfterRaise: !!(aCagain && !aCagain.error),
+            dAssigned: !!(aD && !aD.error),
+            eCode: (aE && aE.code) || null,
+            eNamesSpan: !!(aE && aE.error && String(aE.error).indexOf('Span of control') > -1),
+        };
+
+        // restore the span cap; F rides D for the members/hierarchy legs
+        config.setConfig('teams.maxReportsPerAgent', 5);
+        const aF = teams.assign('wall-g-agent-F', { org: orgId, dept: d1 ? d1.id : null, team: teamId, role: memberRole ? memberRole.id : null, brain: 'vant', reportsTo: 'wall-g-agent-D' });
+        out.fAssigned = !!(aF && !aF.error);
+
+        // --- the CROSS-TEAM delegation pair (before the rate hammer):
+        // same-team delegation answers same_team first BY CONTRACT, so the
+        // role_hierarchy edge needs two DIFFERENT teams - team two carries
+        // a role whose chain names team two's lead
+        const t2 = teams.createTeam('wall-g-team-two', { dept: d1 ? d1.id : null });
+        const lead2Role = teams.createRole('wall-g-lead2', { team: t2 ? t2.id : null, chain: [], permissions: [] });
+        const member2Role = teams.createRole('wall-g-member2', { team: t2 ? t2.id : null, chain: ['wall-g-lead2'], permissions: [] });
+        // X sits on TEAM ONE (carrying team two's lead role) so the delegation
+        // direction crosses a team boundary - same-team calls answer
+        // same_team first BY CONTRACT, which is its own graded law
+        const aX = teams.assign('wall-g-agent-X', { org: orgId, dept: d1 ? d1.id : null, team: teamId, role: lead2Role ? lead2Role.id : null, brain: 'vant' });
+        const aY = teams.assign('wall-g-agent-Y', { org: orgId, dept: d1 ? d1.id : null, team: t2 ? t2.id : null, role: member2Role ? member2Role.id : null, brain: 'vant' });
+        out.crossTeam = {
+            teamMade: !!(t2 && t2.id),
+            xAssigned: !!(aX && !aX.error),
+            yAssigned: !!(aY && !aY.error),
+        };
+
+        // --- the RULE gate: a deny rule on team:create refuses typed
+        // (E_RULE); removing the rule restores the create
+        rules.setRule('wall-g-deny-org-create', {
+            description: 'wall row deny',
+            appliesTo: (op) => op === 'team:create',
+            validate: () => false,
+            reason: 'wall-row denial',
+        });
+        const ruleDenied = teams.createOrg('wall-g-org-ruled');
+        rules.deleteRule('wall-g-deny-org-create');
+        const afterRule = teams.createOrg('wall-g-org-after-rule');
+        out.ruleGate = {
+            deniedCode: (ruleDenied && ruleDenied.code) || null,
+            afterCreated: !!(afterRule && afterRule.id),
+        };
+
+        // --- the global create-RATE budget: calls 8..10 ride, the 11th
+        // (here tries === 4 of the hammer) refuses E_RATE_LIMIT and the
+        // rateLimited event lands with its identifier
+        let tries = 0;
+        let rateCode = null;
+        for (let i = 0; i < 12; i++) {
+            const r = teams.createOrg('wall-g-rate-org-' + i);
+            tries++;
+            if (r && r.code === 'E_RATE_LIMIT') { rateCode = r.code; break; }
+        }
+        out.rateLaw = { tries, refused: rateCode, eventIdentifier: rateEvent };
+
+        // --- delegation + accountability semantics over the built chain
+        out.delegation = {
+            crossLeadOverMember: JSON.stringify(teams.getDelegationPath('wall-g-agent-X', 'wall-g-agent-Y')),
+            crossMemberToLead: JSON.stringify(teams.getDelegationPath('wall-g-agent-Y', 'wall-g-agent-X')),
+            leadOverMember: JSON.stringify(teams.getDelegationPath('wall-g-agent-A', 'wall-g-agent-B')),
+            memberToLead: JSON.stringify(teams.getDelegationPath('wall-g-agent-B', 'wall-g-agent-A')),
+            sameAgent: JSON.stringify(teams.getDelegationPath('wall-g-agent-A', 'wall-g-agent-A')),
+            unknownPair: JSON.stringify(teams.getDelegationPath('wall-g-agent-A', 'wall-g-agent-ghost')),
+            acctLead: JSON.stringify(teams.getAccountabilityChain('wall-g-agent-A')),
+            acctMember: JSON.stringify(teams.getAccountabilityChain('wall-g-agent-B')),
+        };
+
+        // --- members + stack getters + the horcrux gather shape
+        const membersTeam = (teams.getTeamMembers(teamId) || []).map((m) => m.agentId).sort();
+        const stackOrg = teams.getStackOrg(orgId);
+        const stackH = teams.getStackHierarchy();
+        const gather = teams.gatherState();
+        out.shapes = {
+            teamMembersCount: membersTeam.length,
+            teamMembersIncludeB: membersTeam.indexOf('wall-g-agent-B') > -1,
+            orgMembersCount: (teams.getOrgMembers(orgId) || []).length,
+            stackOrgBrainTagged: !!(stackOrg && typeof stackOrg.brain === 'string'),
+            hierarchyBrains: (stackH && Array.isArray(stackH.brains)) ? stackH.brains.length : -1,
+            gatherHasOrg: !!(gather && Array.isArray(gather.orgs) && gather.orgs.some((e2) => e2[0] === orgId)),
+        };
+        out.ok = true;
+    } catch (e1) {
+        out.ok = false;
+        out.bail = String((e1 && e1.name) || '?') + ': ' + String((e1 && e1.message) || '').slice(0, 160);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e2) => { process.stdout.write(JSON.stringify({ error: e2.name + ': ' + e2.message })); });
+`;
+
+    harness.registerRoute('teams-governance', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', TEAMS_GOV_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `teams-governance probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     harness.registerRoute('mcp-exec', async (ctx) => {
         const j = await ctx.request.json().catch(() => ({}));
         let outText;

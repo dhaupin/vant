@@ -81,5 +81,43 @@ export default {
         return { verdict: 'REFUSED', detail: "the full orgchart chain closes over the documented shapes: org depth laws typed, every link bound (dept->org, team->dept, role->team), permissions and chain stored verbatim, role-scoped hasPermission exact, can() direct AND chain-walk true with ghosts false, the CRITICAL-permission trust floor withholding canDeploy at neutral trust, the assignment round trip verbatim with the brain mapping and the unassign drop, the listTeams dept-ref shapes, and the ghost vocabulary held (documented parent-first reorder + explicit-form typed refusals) - the largest unmeasured facet is measured", tookRequests: 1 };
       },
     },
+
+    // ==================== the governance depth pass (2026-10-28): the
+    // SECOND teams tranche - the module's plumbing beyond the orgchart
+    // chain. The child arms its own fixture under config-flag DI (the
+    // hermetic seam: flags ride get()'s top priority, nothing persists)
+    // and grades the caps as REFUSALS, not shapes.
+    {
+      name: 'teams-governance-depth',
+      description: "the teams governance plumbing: the org quota cap refuses the third create typed naming its live max (config-DI over the hydrated store), the hierarchical per-team agent cap refuses the third seat with 'Team agent quota', the span-of-control cap refuses a second report with 'Span of control', a DENY rule on team:create refuses typed E_RULE and its removal restores the create (the verdict-object gate repair), the global 10/60s create budget hands out its floor then refuses E_RATE_LIMIT with the team:rateLimited event naming the identifier, delegation answers role_hierarchy over the CROSS-TEAM lead->member edge (same-team delegation is same_team by contract), same_dept backwards, same_team self, null for ghosts, accountability chains resolve [top] and [member, lead] exactly through the role chain, the rosters enumerate the assigned agents, the multibrain stack getter brain-tags the org and the stack hierarchy keys ride a brain list, and the horcrux gather holds the org",
+      async run(harness) {
+        const r = await tryRun(harness, 'teams-governance', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: '{}',
+        });
+        if (r._absent) return skip('no teams-governance route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `teams-governance threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return skip('teams-governance not armed');
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the governance census child faulted mid-census: ' + (j.bail || 'unknown'), tookRequests: 1 };
+        const laws = {
+          'org cap': j.deptMade && j.teamMade && j.rolesMade && j.orgQuota && j.orgQuota.first && j.orgQuota.second && j.orgQuota.thirdCode === 'E_QUOTA' && j.orgQuota.thirdNamesMax,
+          'team agent cap': j.teamCap && j.teamCap.aAssigned && j.teamCap.bAssigned && j.teamCap.cCode === 'E_QUOTA' && j.teamCap.cNamesTeam,
+          'span of control': j.fAssigned && j.spanCap && j.spanCap.cAfterRaise && j.spanCap.dAssigned && j.spanCap.eCode === 'E_QUOTA' && j.spanCap.eNamesSpan,
+          'rule gate': j.ruleGate && j.ruleGate.deniedCode === 'E_RULE' && j.ruleGate.afterCreated,
+          'rate budget': j.rateLaw && j.rateLaw.refused === 'E_RATE_LIMIT' && j.rateLaw.eventIdentifier === 'global' && j.rateLaw.tries > 1,
+          'delegation': j.crossTeam && j.crossTeam.teamMade && j.crossTeam.xAssigned && j.crossTeam.yAssigned && j.delegation && j.delegation.crossLeadOverMember === '["role_hierarchy"]' && j.delegation.crossMemberToLead === '["same_dept"]' && j.delegation.leadOverMember === '["same_team"]' && j.delegation.sameAgent === '["same_team"]' && j.delegation.unknownPair === 'null',
+          'accountability': j.delegation && j.delegation.acctLead === '["wall-g-agent-A"]' && j.delegation.acctMember === '["wall-g-agent-B","wall-g-agent-A"]',
+          'members': j.shapes && j.shapes.teamMembersCount === 6 && j.shapes.teamMembersIncludeB && j.shapes.orgMembersCount >= 6,
+          'stack + horcrux': j.shapes && j.shapes.stackOrgBrainTagged && j.shapes.hierarchyBrains >= 1 && j.shapes.gatherHasOrg,
+        };
+        const broken = Object.entries(laws).filter(([, ok2]) => !ok2);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: 'the governance depth broke at: ' + broken.map(([n]) => n).join(', '), tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: 'the governance plumbing closes: the org cap refuses the third create typed at its max, the third seat and the second report refuse with their named cap errors, the deny rule gates team:create typed E_RULE and lifts on removal, the global rate budget rides to its floor then refuses E_RATE_LIMIT with the team:rateLimited event on the bus, delegation answers role_hierarchy over the cross-team edge with same_team by contract on same-team calls and null for ghosts, accountability resolves through role chains exactly, the rosters enumerate the assigned agents, the stack getter rides brain-tagged and the hierarchy keys ride the brain list, and the horcrux gather holds the org - the teams depth pass is measured', tookRequests: 1 };
+      },
+    },
   ],
 };
