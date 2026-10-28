@@ -47,6 +47,25 @@
             width: 16px;
             height: 16px;
         }
+        /* Table guard (vant#263; eyestruct 138fda9 worked example): wide
+           kramdown tables scroll in their own box instead of pinning the
+           whole page to their min-content width. The content column cannot
+           inflate from a flex/grid ancestor either. */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 13.5px;
+            margin: 14px 0;
+            display: block;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        table td code {
+            white-space: nowrap;
+        }
+        .main {
+            min-width: 0;
+        }
         .search-modal {
             position: fixed;
             inset: 0;

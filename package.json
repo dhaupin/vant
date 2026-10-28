@@ -63,7 +63,9 @@
     "pilot:pairing-ride": "node scripts/pilot-pairing-ride.js",
     "pilot:pages": "node scripts/pilot-pages-deploy.js",
     "pilot:keyless-ride": "node scripts/pilot-keyless-ride.js",
-    "dev:dashboard-build": "npm --prefix web/dashboard run build"
+    "dev:dashboard-build": "npm --prefix web/dashboard run build",
+    "check:battery": "npm run test && npm run test:crashtest && npm run lint:claims && npm run lint:docs",
+    "prepublishOnly": "npm run check:battery"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "8.72.0",
