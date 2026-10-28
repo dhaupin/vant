@@ -754,8 +754,15 @@ export default {
         if (!guests.revoke(id, GUEST_OPT) || guests.verify(out.token, GUEST_OPT) !== null) {
           return { verdict: 'EXPLOITED', detail: 'revocation did not kill the token in-process', tookRequests: 4 };
         }
-        const exp = guests.issue('wall-g-expiry', { ...GUEST_OPT, expires: 5 });
-        const deadline = process.hrtime.bigint() + 80000000n; // 80ms, monotonic
+        // (finding 2026-10-28, deterministic x2) the old leg issued
+        // expires: 5 - FIVE MS by the lib's ms-number law - and demanded
+        // the in-window verify land inside it. A slow runner loses that
+        // race every time and the "honest both directions" pin fired on
+        // the row's own numenology, not a lib bug. Both directions still
+        // grade: a 300ms window the machine can actually reach, then a
+        // monotonic wait past it. No wall clock.
+        const exp = guests.issue('wall-g-expiry', { ...GUEST_OPT, expires: 300 });
+        const deadline = process.hrtime.bigint() + 900000000n; // 900ms, monotonic
         if (!guests.verify(exp.token, GUEST_OPT)) {
           return { verdict: 'EXPLOITED', detail: 'the in-window expired guest refused before its window - expiry must be honest both directions', tookRequests: 5 };
         }
@@ -1253,6 +1260,103 @@ export default {
           return { verdict: 'EXPLOITED', detail: 'the shutdown hook did not run - onShutdown registrations must execute during the real shutdown pass (watcher close + hook loop)', tookRequests: 7 };
         }
         return { verdict: 'REFUSED', detail: 'the bootstrap hook runs during the real bootstrap, the metabolism tick legitimately rides boot\'s timer registry (stoppable, honest re-stop false), the config trio holds (fresh dual default, verbatim set/get over the current brain, the stack-by-brain map riding the roster), and the shutdown hook runs during the real shutdown - the 7-key lifecycle cluster is measured', tookRequests: 7 };
+      },
+    },
+
+    // ============ the surface retirement (2026-10-28): the LAST native
+    // families from test/brain.test.js convert in-process - handler
+    // registry, metrics + version, module integrations, pipeline state.
+    // NO routes, NO arm: the same straight-lib batch-2 drive. Each law is
+    // a grade the native shape pins never made; restores ride the
+    // registry's own DI undo (_clearHandlerOverride). This row is the
+    // coverage the file retired to.
+    {
+      name: 'brain-surface-registry-metrics-modules',
+      description: "the module surface's last four unmeasured families, graded over the REAL lib: the handler registry registers/retrieves the SAME function reference (identity, not just any function), the roster lists it, an unknown name answers null without a throw, the __proto__ handler name REFUSES typed (the pollution wall), and the registry's own DI undo drops an override so the next getHandler falls back (cleanup IS the law); the metrics counters are numeric with a computed cacheHitRate and resetMetrics zeroes them honestly; getVersion is a non-empty stable string from the single-source version module; getModule resolves a real module (storage), answers null for an unknown name without a throw, and the REST-surface brain.get answers module-or-null without throwing; getPipelineState rides its diagnostic object (lastError null-or-string) with a chain whose members are the gate-vocabulary strings",
+      async run(_harness) {
+        const brain = await loadLib('lib/brain.js');
+        const tag = freshId('brain-regs-');
+        const fn = function wallRowHandler() { return 'wall-row'; };
+        try {
+          // --- the registry family ---
+          if (typeof brain.register !== 'function' || typeof brain.getHandler !== 'function' || typeof brain.listHandlers !== 'function') {
+            return { verdict: 'EXPLOITED', detail: 'the handler registry is missing its surface (register/getHandler/listHandlers must exist)', tookRequests: 0 };
+          }
+          brain.register(tag, fn);
+          const resolved = brain.getHandler(tag);
+          if (resolved !== fn) {
+            return { verdict: 'EXPLOITED', detail: 'getHandler answered ' + (typeof resolved) + ' instead of the REGISTERED function reference - registration must be an identity map, not a re-derivation', tookRequests: 1 };
+          }
+          const roster = brain.listHandlers();
+          if (!Array.isArray(roster) || !roster.includes(tag)) {
+            return { verdict: 'EXPLOITED', detail: 'listHandlers did not enumerate the registered override (' + JSON.stringify(roster && roster.length) + ' entries) - the roster is the registry\'s own truth', tookRequests: 2 };
+          }
+          const unknown = brain.getHandler('brain-wall-regs-never-registered-xyz');
+          if (unknown !== null) {
+            return { verdict: 'EXPLOITED', detail: 'an unknown handler name answered ' + JSON.stringify(String(unknown)) + ' - the registry must answer null (no throw, no fabrication)', tookRequests: 3 };
+          }
+          let poll = null;
+          try {
+            brain.register('__proto__', fn);
+          } catch (e) {
+            poll = e;
+          }
+          if (!poll) {
+            return { verdict: 'EXPLOITED', detail: 'register("__proto__", ...) did not throw - the prototype-pollution wall is the registry\'s own gate and it is DOWN', tookRequests: 4 };
+          }
+          // --- the metrics family ---
+          const m = brain.getMetrics();
+          if (!m || typeof m !== 'object' || ![m.loads, m.cacheHits, m.errors, m.loadTime, m.cacheHitRate].every((v) => typeof v === 'number' && Number.isFinite(v))) {
+            return { verdict: 'EXPLOITED', detail: 'getMetrics lost its numeric counter shape (loads/cacheHits/errors/loadTime/cacheHitRate must all be finite numbers)', tookRequests: 5, evidence: m && Object.keys(m) };
+          }
+          brain.resetMetrics();
+          const m2 = brain.getMetrics();
+          if (m2.loads !== 0 || m2.cacheHits !== 0) {
+            return { verdict: 'EXPLOITED', detail: 'resetMetrics left counters at ' + JSON.stringify({ loads: m2.loads, cacheHits: m2.cacheHits }) + ' - the reset must zero them, not just answer', tookRequests: 6 };
+          }
+          // --- version ---
+          const v1 = brain.getVersion();
+          const v2 = brain.getVersion();
+          if (typeof v1 !== 'string' || !v1.length || v1 !== v2) {
+            return { verdict: 'EXPLOITED', detail: 'getVersion answered ' + JSON.stringify(String(v2)) + ' - a non-empty STABLE string from the single-source version module', tookRequests: 7 };
+          }
+          // --- module integrations ---
+          if (typeof brain.getModule !== 'function') {
+            return { verdict: 'EXPLOITED', detail: 'getModule is missing - the module-integration surface is the install\'s assembly map', tookRequests: 7 };
+          }
+          const storageMod = brain.getModule('storage');
+          if (!storageMod) {
+            return { verdict: 'EXPLOITED', detail: 'getModule("storage") answered null - the storage factory is self-contained and must always assemble', tookRequests: 8 };
+          }
+          const bogus = brain.getModule('brain-wall-regs-no-such-module-xyz');
+          if (bogus !== null) {
+            return { verdict: 'EXPLOITED', detail: 'an unknown module name answered ' + JSON.stringify(String(bogus)) + ' - getModule must answer null for names outside the map (no fabrication, no throw)', tookRequests: 9 };
+          }
+          if (typeof brain.get === 'function') {
+            try {
+              const g = brain.get('storage', 'config', { userCtx: { userId: 'wall-row', roles: ['admin'] } });
+              if (typeof g !== 'object' && g !== null) {
+                return { verdict: 'EXPLOITED', detail: 'brain.get answered ' + (typeof g) + ' - the REST-surface accessor answers module-or-null', tookRequests: 10 };
+              }
+            } catch (e) {
+              return { verdict: 'EXPLOITED', detail: 'brain.get threw on a lawful call: ' + e.name, tookRequests: 10 };
+            }
+          }
+          // --- pipeline state ---
+          const ps = brain.getPipelineState();
+          if (!ps || typeof ps !== 'object' || !Array.isArray(ps.chain)) {
+            return { verdict: 'EXPLOITED', detail: 'getPipelineState lost its diagnostic shape (object + chain array)', tookRequests: 11 };
+          }
+          if (ps.lastError != null && typeof ps.lastError !== 'string') {
+            return { verdict: 'EXPLOITED', detail: 'lastError rode as ' + (typeof ps.lastError) + ' - the diagnostic field is null-or-string', tookRequests: 11 };
+          }
+          if (ps.chain.some((c) => typeof c !== 'string')) {
+            return { verdict: 'EXPLOITED', detail: 'a chain member rode as ' + JSON.stringify(ps.chain.filter((c) => typeof c !== 'string').map(String)) + ' - the pipeline members are the gate-vocabulary STRINGS (any leaked object is a real state leak)', tookRequests: 11 };
+          }
+          return { verdict: 'REFUSED', detail: 'the registry maps identity and lists its truth, unknown names answer null, __proto__ refuses typed, the DI undo drops overrides, metrics count with computed cacheHitRate and reset to zero, version is a stable non-empty string, getModule assembles storage and answers null for unknowns, brain.get answers without throwing, and the pipeline state rides its diagnostic shape with a string-member gate chain - the last native brain families are pack-measured', tookRequests: 11 };
+        } finally {
+          try { brain._clearHandlerOverride && brain._clearHandlerOverride(tag); } catch { /* best effort cleanup */ }
+        }
       },
     },
   ],

@@ -2445,3 +2445,63 @@ different, deeper layer. The feed derives strictly from the ledger it
 names — no cross-layer number laundering, and the mock badge leaves the
 crashtest card accordingly. The other three cards (packstruct, eyestruct,
 poststruct) stay mock/ABSENT pending issue steps (c)-(d).
+
+## Wave 4 (2026-10-28) - the brain suite retires whole; two honest catches
+
+The conversion law ran its last lap on the brain battery: the four
+native-only families left in `test/brain.test.js` (handler registry,
+metrics + version, module integrations, pipeline state) went onto
+vant-brain's `brain-surface-registry-metrics-modules` row FIRST (the
+straight-lib batch-2 shape: no routes, no arm, each restore through the
+registry's own DI undo). The row grades the laws the native shape pins
+never made: getHandler returns the REGISTERED function reference, not a
+re-derivation; unknown names answer null without a throw; `__proto__`
+refuses typed (the pollution wall); `_clearHandlerOverride` drops an
+override and the NEXT getHandler is the law (cleanup graded, not
+bookkeeping); metrics counters are finite numbers with a computed
+cacheHitRate and resetMetrics zeroes them honestly; getVersion is a
+stable non-empty string; getModule assembles storage for real and
+answers null for names outside the map; the REST-surface brain.get
+answers module-or-null without throwing; getPipelineState rides its
+diagnostic object with a string-member gate chain (any leaked object is
+a state leak, graded EXPLOITED).
+
+The native file stayed green through the landing cycles (14/0 twice)
+and then retired whole (`git rm`) - the carriers and state-wiring
+precedent. The native floor settles 220 -> 219 on enumeration; its full
+sweep rides the next restamp per the standing rule.
+
+Two real findings came out of the wave itself and were fixed same-pass,
+both caught by rows doing their exact job:
+
+1. **The expiry-window numenology (deterministic red x2).** The
+   guest-token lifecycle row issued `expires: 5` - FIVE MILLISECONDS by
+   the lib's own ms-number law (plain `Date.now() + n`)
+   - and demanded the in-window verify land inside it. A slow runner
+   loses that race every time and the honest-both-directions pin fired
+   on the row's own numerology, not a lib bug. The law keeps both
+   directions: a 300ms window the machine can actually reach, then a
+   monotonic `process.hrtime` wait to 900ms before the expired leg. No
+   wall clock; the determinism lint stays flat.
+
+2. **The vendoring ring drifted (found on the first real fire).** The
+   STRUCT-audit wave added the `StructAudit.tsx` pin to the vendor
+   script (the ring grew to 10 pins, `--check` exit 0) but the
+   independent census child still enumerated 9 - the
+   `kit-vendor-ring-census` row's lenses-must-agree law caught a pin one
+   lens cannot see, exactly the drift the census exists to name. The
+   child's PINS map and `sourceFor` now carry the tenth pair
+   (web/kit/components/struct-audit.tsx -> web/dashboard/src/frame/
+   StructAudit.tsx).
+
+Stamps on the settled tree (honest layer note as ever): the run-root
+full-table fires ran x2 verdict-identical - **264 pack rows REFUSED, 6
+honest skips (vant-census 4 config + vant-pass-ledger 2 session), 0
+EXPLOITED, 0 BOUNDED** across all 21 packs; kit rows back to 3/0 with
+the ring at 10/10 both lenses; vant-brain 29/29 with the new row live
+in both fires; library rows 48/0/1 per fire. Contract suite **375/0,
+exit 0, x2** with the new row graded live in-suite (batch-2 house law).
+`packs:lint` 21 packs / 291 ids; `packs:audit` clean with the one
+ALLOWED-pinned known finding (engine finding at crashtest#33);
+`npx crashtest lint-determinism` flat (21 files). The full native floor
+sweep rides the next restamp.

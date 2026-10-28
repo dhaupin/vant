@@ -1173,6 +1173,14 @@ const EXPECTED = {
         'brain-stack-push-switch-and-mode-enum': 'REFUSED',
         'brain-multiformat-read-save-laws': 'REFUSED',
         'format-module-listing-and-confinement': 'REFUSED',
+        // (brain surface retirement, 2026-10-28) the native suite's LAST
+        // families convert in-process: handler registry (identity + roster
+        // + null unknown + __proto__ wall + the DI undo), metrics
+        // (numeric counters + honest zeroed reset), version, module
+        // integrations (getModule + the REST get surface), pipeline state.
+        // No run-root arm; EARN strict REFUSED in BOTH phases; the
+        // covered file retires whole after the fires.
+        'brain-surface-registry-metrics-modules': 'REFUSED',
         // (guests battery, 2026-10-26) the LIB-level guest lifecycle
         // converts in-process from lib/guests — self-contained rows, no
         // run-root arm, EARN strict REFUSED in BOTH phases. The socket

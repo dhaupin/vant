@@ -484,12 +484,20 @@ const VENDOR_RING_CHILD = `${CHILD_STDOUT_GUARD}
             'web/relay/functions/lib/traveler-contract.cjs.sha256',
             'web/relay/functions/lib/traveler-contract.d.cts.sha256',
             'web/dashboard/src/frame/CarrierShare.tsx.sha256',
+            // (ring grew 2026-10-28) the STRUCT-audit wave vendored the kit
+            // struct-audit.tsx into the dashboard frame - the script lens
+            // carried the tenth pin but this child still saw nine, and the
+            // row's own lenses-must-agree law caught the drift. The pin set
+            // is ONE ring: adding it here is the census seeing the same
+            // truth the script answers, not optional bookkeeping.
+            'web/dashboard/src/frame/StructAudit.tsx.sha256',
         ];
         const sourceFor = (rel) => {
             const base = path.basename(rel);
             if (base.startsWith('relay-contract.')) return base.endsWith('.d.cts') ? 'web/kit/contracts/relay-contract.d.ts' : 'web/kit/contracts/relay-contract.js';
             if (base.startsWith('traveler-contract.')) return base.endsWith('.d.cts') ? 'web/kit/contracts/traveler-contract.d.ts' : 'web/kit/contracts/traveler-contract.js';
             if (base.startsWith('CarrierShare.')) return 'web/kit/components/carrier-share.tsx';
+            if (base.startsWith('StructAudit.')) return 'web/kit/components/struct-audit.tsx';
             return null;
         };
         let allPinned = true, containmentOk = true;
