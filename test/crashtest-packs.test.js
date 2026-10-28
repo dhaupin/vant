@@ -1572,6 +1572,24 @@ const EXPECTED = {
         'meshstatus-mesh-section-shape': 'skip',
         'meshstatus-seed-pure-and-envflow': 'skip',
         'meshstatus-render-degraded': 'skip',
+        // (wave 2, censused 2026-10-28) the mesh/store battery: the seeds
+        // family, the one-PRF cell-address law, the canonical authority, the
+        // honest in-memory default, the bare store tier, the persist/hydrate/
+        // typed-absence laws and the full anchor-chain family. Run-root-only
+        // arm (wiring-mesh/wiring-store); honest skip here, strict earned
+        // verification rides the run root (44 attacks total).
+        'mesh-authority-canonical-winner': 'skip',
+        'mesh-celladdr-one-prf': 'skip',
+        'mesh-persistence-inmemory-default': 'skip',
+        'mesh-seeds-family': 'skip',
+        'store-anchor-chain-event-laws': 'skip',
+        'store-anchor-merged-cause-law': 'skip',
+        'store-anchor-no-tree-never-bless-law': 'skip',
+        'store-anchor-tamper-detector': 'skip',
+        'store-hydrate-law': 'skip',
+        'store-persist-mirror-event': 'skip',
+        'store-tree-tier-laws': 'skip',
+        'store-treefor-typed-absence': 'skip',
     },
     // carriers battery slice 1 (lane laws): run-root-only arm; honest skips here
     'vant-carriers': {

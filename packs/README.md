@@ -347,7 +347,7 @@ E_TRAVELER_SHAPE and a non-ledger steps field rides E_TRAVELER_STEP on
 the same lane. 4/4 fires honest (1 legal dispatch + 3 typed refusals,
 zero landings beyond the legal one).
 
-### `public/vant-state-wiring` — the state-spine wiring consumers (30 rows in three slices: trust→tree, merge-path, mesh + surfaces; all validated 2026-10-26)
+### `public/vant-state-wiring` — the state-spine wiring consumers (44 rows in four tranches: trust→tree, merge-path, mesh + surfaces, wave-2 store/seeds; validated 2026-10-26, wave-2 2026-10-28)
 
 **What it does.** Drill-down slice 1 of the campaign: the state-wiring
 native suite's first live consumer family (TRUST→TREE, labs/WIRING.md step
@@ -367,10 +367,43 @@ on the slice's first run).
 | `trust-event-carries-root` | state:saved carries the root hash and it matches the live mirror at fire time | validated - REFUSED |
 | `trust-clear-resets` | a live root existed, then clearState drops the mirror to null — no hash blesses state the deployment no longer holds | validated - REFUSED |
 
+**Wave-2 attack table (2026-10-28):**
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `mesh-seeds-family` | two fresh trees over one universe derive ONE seed; universes shard; VANT_UNIVERSE_SEED moves the default-constructor seed; invalid/empty regions refused typed | validated - REFUSED |
+| `mesh-celladdr-one-prf` | MeshTree.cellAddress IS the spine PRF: equal, stable across repeat calls, moving across spaces | validated - REFUSED |
+| `mesh-authority-canonical-winner` | same payload in different key order under one fixed clock hashes to ONE root; winner-or-recorded-loser regression holds | validated - REFUSED |
+| `mesh-persistence-inmemory-default` | a dir-less MeshTree reports battery-off truth (enabled false, dir null, recovery null) and still answers register/alive | validated - REFUSED |
+| `store-tree-tier-laws` | toTree/fromTree roundtrip carries STATE KEYS ONLY; metadata excluded; fresh trees agree on one root across key orders | validated - REFUSED |
+| `store-persist-mirror-event` | persist({tree}) mirrors into the caller tree; the disk view reads back PRESENT with the SAME root; state:saved carries it | validated - REFUSED |
+| `store-treefor-typed-absence` | treeFor answers typed ABSENT (no hash, no fake empty tree) for a never-written file | validated - REFUSED |
+| `store-hydrate-law` | hydrate({tree}) populates the CALLER tree, returns the 64-hex root, and fromTree reads the payload back | validated - REFUSED |
+| `store-anchor-chain-event-laws` | the chain is an event history: first root anchors once (state:anchored rides it), unchanged root dedupes, changed root anchors, fresh mirror stays deduped | validated - REFUSED |
+| `store-anchor-tamper-detector` | verifyStateRoot answers clean-against-anchor, then catches the out-of-band disk write with diverged-since-anchor | validated - REFUSED |
+| `store-anchor-no-tree-never-bless-law` | no tree → no anchor (typed not-yet-anchored) and hydrate never appends to the ledger even carrying a tree | validated - REFUSED |
+| `store-anchor-merged-cause-law` | persistMerged anchors the merged tree root with a cause that names the merge path; state verifies clean | validated - REFUSED |
+
 Slice 1 verdict: the five pins measure REFUSED on the real seams with
 `test/state-wiring.test.js` drove the way (read before write, per the campaign's law) and the suite's run stayed green through every conversion — then the retirement step (see the retirement note in the carriers section below) trimmed it to the families the pack rows don't measure: 20 pins remain (seeds, authority, tree tier, anchor, mesh in-memory default, mesh-status JSON roundtrip); the 31 converted pins retired to the pack rows 2026-10-26
 reverse-verification law — the suite never retires until the whole family
 closes.
+
+**Retirement step (final, 2026-10-28 wave-2): the LAST 20 native pins
+closed on the pack rows and `test/state-wiring.test.js` retired whole**
+(the carriers precedent). The wave-2 tranche drove the six remaining
+families onto two arms: `wiring-mesh` grew the seeds/authority ops
+(`seed`, `envseed`, `celladdr`, `authpair`, `inmemdefault`) and a new
+`wiring-store` arm carried the bare tree-tier + StateAnchor laws — 12
+new rows, `vant-state-wiring 44/44 REFUSED x2` deterministic across
+cycles, zero EXPLOITED. Two honest repairs landed same-pass: the
+tamper op first corrupted the loader's identity field (kind) — the
+out-of-band write now hits a PAYLOAD key — and the pass-184
+treeHot disk-read cache had to ride the tamper leg's fresh-reader
+posture (the ride-local cache drops before the detector's verify
+round). The seeds rows ride per-run salted throwaway state tokens
+(deltas, not absolutes — the anchor ledger is append-only by design).
+The native suite's whole file is gone; its families live on the rows.
 
 **Slice 2 (same day): the merge-path consumers — REGISTRY → TREE (step ② §
 and CONSENSUS + MARKET → TREE (step ③).** The arm grew a second route
@@ -996,7 +1029,7 @@ today's clean B0 run: **48 REFUSED / 0 EXPLOITED / 1 skipped**.
 | 0 — wire-surface door pins (`test/crashtest-server.js`, 9 pins) | smallest lift, biggest overlap | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native suite 9/9 each run); the suite stays in CI under the law |
 | wire-surface re-pins — r/2 edge face (`web/relay/functions/api/r/relay.ts`) | ~15% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 5/5 REFUSED + native lanes green each run: relay, relay-parity, memory, escrow, escrow-kernel, forum-msg-escrow, governance, workspace-memory via the sweep filter); the native lanes stay in CI under the law. Cycle 2's catch: the origin row's drive called hopFrame twice (sign + body) and each call re-evaluated ts — a ms-grain boundary left the signature covering different bytes than the body, and the edge (correctly) 401'd; one eval per shape since, signature === body bytes |
 | in-process module discipline (row-by-row) | ~40% (first slice) | **S-COUNTER ADVANCED** — cycles 1-3 all green on both sides (pack rows 6/6 REFUSED + native suites memory / escrow / governance green each run via the same sweep filter); the native blocks stay in CI under the law |
-| drill-down: remaining native suites (migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-6 landed (2026-10-25/26)**: state-wiring fully converted (30/30 REFUSED x2), the carriers battery converted in full (31/31 REFUSED x2: lane laws, pointer/wire-hook, route/certified-letter, plates, assembly/template), AND the migrations battery's fixture + legacy-main import + CLI-banner/MCP-door/edge families landed (21/21 REFUSED x2 on `migration-fixture`) — with the REAL FINDING armed+fixed same-pass (the dropfile migration ate live protocol state / crashed EISDIR on the state-store's .wal dir; native suite 25/28 → 28/28 GREEN) and a deterministic-ride fixture shape caught in slice 3 (a private-vant dropfile kept the loader non-empty after the public wipe — the sabotage-shape rows now seed the native shape); the carriers battery finished the same day (slices 3-5 above), AND the retirement step ran the same pass: test/carriers.test.js retired whole to the pack rows, test/migrations.test.js trimmed to its 4 uncovered pins (4/4 green), test/state-wiring.test.js trimmed to its 20 uncovered pins (20/20 green) — the converted families' coverage lives in the pack rows now. Restamped 2026-10-27 (two full cycles on the post-retirement tree): every slice-4/trim claim re-verified with migrations retired whole and the spine/leisure/brain/guest native trims in CI — 209 pack rows REFUSED / 0 EXPLOITED / 0 BOUNDED x2 deterministic (6 honest skips), library rows 48/0/1 each run, contract 310/0, gate GREEN. Re-restamped same-day-end (after batches 2-4 of the dashboard surface landed): harness x2 now reads 218 pack rows REFUSED / 0 EXPLOITED / 0 BOUNDED x2 deterministic (6 honest skips), contract 319/0, gate GREEN, and the FULL native floor swept in six --from/--to chunks: 222/222 suites green with two honest repairs landed mid-sweep. Remaining native-suite buckets: none named in this drill-down — the S-counters hold their claims per bucket as converted |
+| drill-down: remaining native suites (migration, carriers, ...) | remaining ~35% | **CONVERTED — slices 1-6 landed (2026-10-25/26)**: state-wiring fully converted (30/30 REFUSED x2), the carriers battery converted in full (31/31 REFUSED x2: lane laws, pointer/wire-hook, route/certified-letter, plates, assembly/template), AND the migrations battery's fixture + legacy-main import + CLI-banner/MCP-door/edge families landed (21/21 REFUSED x2 on `migration-fixture`) — with the REAL FINDING armed+fixed same-pass (the dropfile migration ate live protocol state / crashed EISDIR on the state-store's .wal dir; native suite 25/28 → 28/28 GREEN) and a deterministic-ride fixture shape caught in slice 3 (a private-vant dropfile kept the loader non-empty after the public wipe — the sabotage-shape rows now seed the native shape); the carriers battery finished the same day (slices 3-5 above), AND the retirement step ran the same pass: test/carriers.test.js retired whole to the pack rows, test/migrations.test.js trimmed to its 4 uncovered pins (4/4 green), test/state-wiring.test.js trimmed to its 20 uncovered pins (20/20 green) — the converted families' coverage lives in the pack rows now. Restamped 2026-10-27 (two full cycles on the post-retirement tree): every slice-4/trim claim re-verified with migrations retired whole and the spine/leisure/brain/guest native trims in CI — 209 pack rows REFUSED / 0 EXPLOITED / 0 BOUNDED x2 deterministic (6 honest skips), library rows 48/0/1 each run, contract 310/0, gate GREEN. Re-restamped same-day-end (after batches 2-4 of the dashboard surface landed): harness x2 now reads 218 pack rows REFUSED / 0 EXPLOITED / 0 BOUNDED x2 deterministic (6 honest skips), contract 319/0, gate GREEN, and the FULL native floor swept in six --from/--to chunks: 222/222 suites green with two honest repairs landed mid-sweep. Remaining native-suite buckets: none named in this drill-down — the S-counters hold their claims per bucket as converted. Wave-2 (2026-10-28): the state-wiring suite's last 20 native families (seeds, canonical authority, bare tree tier, StateAnchor chain incl. tamper/never-bless, mesh in-memory default) converted to 12 pack rows (vant-state-wiring 44/44 REFUSED x2) and test/state-wiring.test.js retired WHOLE — the drill-down bucket's native-suite inventory is empty |
 
 **Bucket 0 S-counter ledger:** cycle 1 (2026-10-25, conversion day) →
 cycle 2 → cycle 3, all sides green each run — the quarter-period
@@ -2092,6 +2125,61 @@ compare has no early exit.
 
 7/7 rows `REFUSED` x2 deterministic (25/25 laws held both cycles);
 contract 360/0 with the row graded live in-suite; lint flat.
+
+## Wave 2 (2026-10-28) — the state-wiring suite retires whole
+
+The conversion law ran its last lap on the drill-down bucket: the
+retiring native suite's final 20 pins (its seeds, canonical-authority,
+tree-tier, StateAnchor-chain, and mesh in-memory-default families) went
+onto pack rows FIRST (read before write — the native file stayed green
+and its pins are enumerated in its header), the rows ran 44/44 REFUSED
+x2 deterministic with zero EXPLOITED, and THEN the file retired whole
+(`git rm`), the carriers precedent. Two real instrumentation findings
+came out of the wave itself and were fixed same-pass: (1) the store's
+out-of-band tamper write initially hit the loader's identity field
+('kind'), which silenced treeFor's PRESENT verdict before the
+divergence detector could run — the arm now corrupts a payload key;
+(2) the pass-184 treeHot disk-read cache served the pre-tamper root
+inside the long-lived runner process — the tamper op now drops the
+ride-local cache to model the fresh reader a restart produces. The
+seeds rows salt their state-file tokens per run (deltas, never
+absolutes: the anchor ledger is append-only). packstruct lint green
+(21 packs, 288+ ids); the contract table and the strict ci-gate ride
+the same stamp below.
+
+## Restamp 8 (2026-10-28) — the wave-2 full floor
+
+The wave-2 tranche (the state-wiring suite retiring whole) pre-dated
+its own stamp, so the whole tree re-stamped on the post-retirement
+count, two full cycles:
+
+- **Full packs x2 green**: **261 pack rows REFUSED across all 21 packs**
+  (6 honest skips unchanged), **0 EXPLOITED, 0 BOUNDED, deterministic
+  pass-for-pass**; library rows 48/0/1 each cycle. The wave-2 rows ride
+  both cycles (vant-state-wiring 44/44 REFUSED each).
+- **Contract: 372/0, exit 0** on the final tree. The first post-wave-2
+  fire was RED by design catching the work: the 12 new rows were absent
+  from the contract's EXPECTED table. Honest entries added — typed
+  `skip` rows (the run-root-only wiring-mesh/wiring-store arm; strict
+  earned verification rides the run root, the market-scope precedent).
+- **Native floor swept on the post-retirement tree**: **220 suites**
+  (the state-wiring retirement settled the floor 221 -> 220), driven in
+  three chunks — head 97, middle 82, trailer 41 — 0 timeouts. Two
+  honest repairs landed mid-sweep, both re-run green standalone after
+  the fix (contract 372/0 full-length; mcp.test.js 34/0): the contract
+  EXPECTED-table mismatch above, and the cloud runner restart wiping
+  installed dependencies mid-chunk (the missing `qrcode-generator`
+  dropped mcp.test.js's three carrier/traveler stamp checks —
+  `npm ci` from the lockfile restored them; no code change).
+- **The S-counters hold**: every Phase A bucket's claims are now
+  stamped on the tree that carries them; the wave-2 retirement closes
+  the drill-down bucket's native-suite inventory at empty.
+- **Strict ci-gate: GREEN, exit 0, whitelist empty** (A: contract table
+  PASS + B: real harness PASS/final clean) on the settled tree. One
+  earlier background fire went RED during the concurrent floor sweep
+  (every one of the 372 checks logged ✓ but the gate's contract child
+  exited 1 mid-fire) - the settled re-run is the stamped verdict.
+
 
 ## Restamp 7 (2026-10-28) — the post-CI-repair full floor
 

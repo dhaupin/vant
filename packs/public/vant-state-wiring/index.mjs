@@ -112,6 +112,48 @@ function rowErr(detail, ops, evidence) {
 // slice 1/2's `skip` — kind, verdict packing, and detail prefix identical)
 const rowSkip = skip;
 
+import { randomBytes } from 'node:crypto';
+
+/**
+ * Per-run ride-local salt for state-file tokens (2026-10-28 wave-2).
+ * Deliberately NEVER wall clock (the house law: no wall clock in any fixed
+ * id) - the anchor ledger is append-only and shared, so each RUN rides its
+ * own fresh carrier files; chain laws count DELTAS inside one ride, never
+ * absolutes across runs.
+ */
+const salt = () => 'r' + randomBytes(4).toString('hex');
+
+/**
+ * The store-arm probe (wave-2): POST ops over the wiring-store arm, the
+ * same shape probeWiring rides. Returns null when the route is not armed.
+ */
+async function probeStore(harness, ops) {
+  let raw;
+  try {
+    const r = await harness.run('wiring-store', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ ops }),
+    });
+    if (typeof r.body === 'string') raw = r.body;
+    else if (typeof r.text === 'function') { try { raw = await r.text(); } catch { raw = ''; } }
+    else if (r.response && typeof r.response.text === 'function') {
+      try { raw = await r.response.text(); } catch { raw = ''; } }
+    else raw = '';
+  } catch (e) {
+    if (/no route registered as/i.test(String(e?.message))) return null;
+    throw e;
+  }
+  if (!raw) return null;
+  const j = parseJson(raw);
+  if (!j || j.error) return null;
+  const arr = Array.isArray(j.results) ? j.results : [];
+  return { rows: arr, get: (n) => arr.filter((x) => x && x.op === n).pop(), all: (n) => arr.filter((x) => x && x.op === n),
+           saved: Array.isArray(j.saved) ? j.saved : [], anchored: Array.isArray(j.anchored) ? j.anchored : [],
+           savedCount: j.savedCount || 0, anchoredCount: j.anchoredCount || 0 };
+}
+
+
 export default {
   name: 'vant-state-wiring',
   description: 'state-spine wiring discipline via its consumer families: the ledger mirrors under /trust/ with the score and history in the tree, every mutation re-mirrors and re-hashes, the disk view equals the live mirror in one string, the state:saved event carries that same hash, and clearState leaves no hash for state that no longer exists (slice 3 adds the mesh WAL/event/recovery families and the geometry/brain-verify/mesh-status surfaces)',
@@ -1027,6 +1069,283 @@ export default {
           return rowErr('the gate re-off answered ' + JSON.stringify(j.skOffAgain) + ' - the flag flips honestly both ways (never a stuck-ON prototype)', [], {});
         }
         return { verdict: 'REFUSED', detail: 'the OFF gate inerts all six ops typed (and re-offers the gate off again after the flip), the ON gate refuses the launch kind with the declared why, the role walls hold (buyer cannot deliver, seller delivers a 64-hex payload), the settle discipline is typed and identity-anchored (bad decision, no identity, buyer-only confirm with the trust feed), and the sweep answers - the gate cluster is measured', tookRequests: 10 };
+      },
+    },
+    // ============ (wave-2 conversion, 2026-10-28) the SEEDS + AUTHORITY
+    // + tree-tier + ANCHOR + in-memory families ======================
+    // The last uncovered pins off the retiring native suite
+    // (test/state-wiring.test.js): the seeds family (universe-scoped,
+    // deterministic, env-sharded, boundary-typed), the canonical
+    // authority (one encoder, winner-or-loser), the bare store tier
+    // (roundtrip / persist-event / disk tier / typed absence / hydrate),
+    // the StateAnchor chain (append / dedupe / tamper / never-bless /
+    // merged + the anchor event), and the in-memory default. On green
+    // x2 across cycles, the native file retires whole.
+
+    {
+      name: 'mesh-seeds-family',
+      description: 'region seed scopes are universe-scoped and deterministic (two fresh trees, one seed), universes shard, VANT_UNIVERSE_SEED moves the default-constructor seed, and the boundary refuses invalid/empty regions typed',
+      async run(harness) {
+        const ride = await probeMesh(harness, [
+          { op: 'seed', universe: 'wire-test', region: 'r1' },
+          { op: 'seed', universe: 'wire-test', region: 'r1' },
+          { op: 'seed', universe: 'u-alpha', region: 'r1' },
+          { op: 'seed', universe: 'u-beta', universe2: 'u-alpha', region: 'r1' },
+          { op: 'seed', regions: ['../evil', ''] },
+          { op: 'envseed' },
+        ]);
+        if (!ride) return skip('wiring-mesh not armed');
+        const seedOps = ride.all('seed');
+        if (seedOps.length !== 5) return rowErr('the seeds ops did not all answer: ' + JSON.stringify(seedOps.map((x) => x && x.op)), []);
+        const [sameA, sameB, uniSha, uniShb, rideInvalid] = seedOps;
+        for (const [nm, opRow] of [['sameA', sameA], ['sameB', sameB], ['uniSha', uniSha], ['uniShb', uniShb], ['invalid', rideInvalid]]) {
+          if (!opRow || opRow.fault) return rowErr(`the ${nm} seed op faulted: ${JSON.stringify(opRow)}`, seedOps);
+        }
+        const scopeOf = (opRow) => (opRow.scopes || [])[0] || { fault: 'missing scope 0' };
+        const s1 = scopeOf(sameA);
+        const s1b = scopeOf(sameB);
+        const su = scopeOf(uniSha);
+        const ub = scopeOf(uniShb);
+        const scopes = [s1, s1b, su, ub];
+        if (!scopes.every((s) => s.ok && /^[0-9a-f]{64}$/.test(String(s.seedHex)))) return rowErr('the valid regions did not all answer a 64-hex seed: ' + JSON.stringify(scopes), seedOps);
+        if (String(s1.scopePath) !== 'mesh:r1') return rowErr(`the normalized scope path is ${String(s1.scopePath)} - the seed scope rides the 'mesh:' spine prefix`, seedOps);
+        if (String(s1.seedHex) !== String(s1b.seedHex)) return rowErr('two fresh trees over the SAME universe derived DIFFERENT seeds - the seed chain must be deterministic', seedOps);
+        if (String(su.seedHex) === String(ub.seedHex)) return rowErr('universes u-alpha and u-beta derived the SAME seed - the universe must shard mesh addressing', seedOps);
+        const bad = (rideInvalid && rideInvalid.scopes) || [];
+        if (bad.length !== 2 || !bad.every((b) => b.ok === false && /invalid region/i.test(String(b.fault)))) return rowErr('the invalid/empty regions were not both refused typed: ' + JSON.stringify(bad), seedOps);
+        if (uniShb.sharded !== true) return rowErr(`the same region under u-beta vs u-alpha answered sharded=${String(uniShb.sharded)} - the universe must shard mesh addressing`, seedOps);
+        const env = ride.get('envseed');
+        if (!env || env.fault || env.envMoved !== true) return rowErr('the VANT_UNIVERSE_SEED env override did not answer envMoved:true: ' + JSON.stringify(env), []);
+        return { verdict: 'REFUSED', detail: 'seeds are one deterministic universe-scoped chain (two fresh trees, one seed; universes shard; the env shard flows through the default constructor) and the seed boundary refuses invalid/empty regions typed - the seeds family is wired', tookRequests: 6 };
+      },
+    },
+
+    {
+      name: 'mesh-celladdr-one-prf',
+      description: 'MeshTree.cellAddress IS the spine PRF for the same region+space (no adapters): equal over the same universe, stable across repeat calls, moving across spaces',
+      async run(harness) {
+        const ride = await probeMesh(harness, [
+          { op: 'celladdr', universe: 'parity-universe', region: 'r1', space: 7, other: 8 },
+        ]);
+        if (!ride) return skip('wiring-mesh not armed');
+        const ca = ride.get('celladdr');
+        if (!ca || ca.fault) return rowErr('the cell-address probe faulted: ' + JSON.stringify(ca), []);
+        if (ca.equal !== true) return rowErr(`the MeshTree address (${String(ca.viaMesh).slice(0, 10)}...) and the spine address (${String(ca.viaSpine).slice(0, 10)}...) differ - the ONE chain must have no adapters`, []);
+        if (ca.stable !== true) return rowErr('the same region+space answered a different address on the repeat call - the PRF must be stable', []);
+        if (ca.moved !== true) return rowErr('different spaces under the same region answered the same address - the space must move the address', []);
+        return { verdict: 'REFUSED', detail: 'MeshTree.cellAddress collides exactly with the spine PRF (equal, stable, per-space moving) - one chain, no adapters', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'mesh-authority-canonical-winner',
+      description: 'the same payload written in different key order under one fixed clock hashes to ONE root (the canonical encoder), and the same-tree regression still keeps winner-or-recorded-loser (never more than one loser)',
+      async run(harness) {
+        const ride = await probeMesh(harness, [
+          { op: 'authpair', universe: 'auth-universe' },
+        ]);
+        if (!ride) return skip('wiring-mesh not armed');
+        const auth = ride.get('authpair');
+        if (!auth || auth.fault) return rowErr('the authority probe faulted: ' + JSON.stringify(auth), []);
+        if (auth.keyOrderEqual !== true) return rowErr(`the two key orders diverged (${String(auth.rootA).slice(0, 10)}... vs ${String(auth.rootB).slice(0, 10)}...) - the canonical encoder must be key-order independent`, []);
+        if (auth.either !== true || auth.loserSmall !== true) return rowErr('the winner-or-loser law failed: ' + JSON.stringify({ either: auth.either, loserSmall: auth.loserSmall }), []);
+        return { verdict: 'REFUSED', detail: 'one fixed clock, two key orders, one root hash; the same-tree regression keeps the winner-or-recorded-loser law - the canonical encoder is the only authority', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'mesh-persistence-inmemory-default',
+      description: 'a MeshTree without { dir } stays in-memory honestly (persistenceInfo: enabled false, dir null, recovery null) and the behavior contract still answers',
+      async run(harness) {
+        const ride = await probeMesh(harness, [
+          { op: 'inmemdefault', universe: 'mem-default-u' },
+        ]);
+        if (!ride) return skip('wiring-mesh not armed');
+        const md = ride.get('inmemdefault');
+        if (!md || md.fault) return rowErr('the in-memory probe faulted: ' + JSON.stringify(md), []);
+        if (md.disabled !== true || md.dirNull !== true || md.recoveryNull !== true) return rowErr('the default persistenceInfo is not the honest battery-off shape: ' + JSON.stringify(md), []);
+        if (md.stillAlive !== true) return rowErr('the no-dir tree stopped answering the behavior contract (register + alive)', []);
+        return { verdict: 'REFUSED', detail: 'a dir-less MeshTree reports the battery-off truth (enabled false, dir null, recovery null) while register/alive keep answering - the in-memory default is wired', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'store-tree-tier-laws',
+      description: 'the bare tree tier: toTree/fromTree roundtrip carries STATE KEYS ONLY (metadata excluded, paths under /<module>/), and the same payload in fresh trees hashes to one root regardless of key order',
+      async run(harness) {
+        const ride = await probeStore(harness, [
+          { op: 'roundtrip', module: 'pin-ct' },
+        ]);
+        if (!ride) return skip('wiring-store not armed');
+        const rt = ride.get('roundtrip');
+        if (!rt || rt.fault) return rowErr('the roundtrip probe faulted - answers, not throws', []);
+        const got = (rt.paths || []).join(',');
+        if (got !== '/pin-ct/config,/pin-ct/peers') return rowErr(`the tree paths are [${got}] - state keys must be the ONLY content (metadata riding?)`, []);
+        if (rt.backOnlyStateKeys !== true) return rowErr('the fromTree roundtrip leaked savedAt/kind/module into the state payload - metadata must not ride the tree', []);
+        if (rt.rootSame !== true) return rowErr('the same payload in fresh trees diverged on key order - the root hash must be canonical, not insertion-ordered', []);
+        return { verdict: 'REFUSED', detail: 'toTree/fromTree carries exactly the state keys (roundtrip exact, metadata excluded) and fresh trees agree on one root hash across key orders - the bare tier is wired', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'store-persist-mirror-event',
+      description: 'persist({tree}) mirrors the state into the caller tree, the disk tier reads back PRESENT with the SAME root hash, and state:saved fires carrying that root',
+      async run(harness) {
+        const f = 'state/pin-ct-mirror-' + salt() + '.json';
+        const ride = await probeStore(harness, [
+          { op: 'persisttree', module: 'pin-ct', file: f, data: { hits: 3 } },
+          { op: 'diskfor', file: f },
+        ]);
+        if (!ride) return skip('wiring-store not armed');
+        const pt = ride.get('persisttree');
+        if (!pt || pt.fault || pt.accepted !== true) return rowErr('the reflected persist did not answer accepted:true', []);
+        if ((pt.treePaths || []).some((p) => p === '/pin-ct/hits') !== true) return rowErr(`the caller tree paths are [${(pt.treePaths || []).join(',')}] - the persist must mirror the payload into the tree`, []);
+        if (!/^[0-9a-f]{64}$/.test(String(pt.rootHash))) return rowErr('the mirror root hash is not a sha256 hex - mirroring must hash, not placeholder', []);
+        const d = ride.get('diskfor');
+        if (!d || d.fault || d.state !== 'PRESENT') return rowErr('the disk view did not answer PRESENT for the persisted file - the disk tier did not ride', []);
+        if (String(d.rootHash) !== String(pt.rootHash)) return rowErr(`the disk root (${String(d.rootHash).slice(0, 10)}...) differs from the mirror root (${String(pt.rootHash).slice(0, 10)}...) - cross-process same-state is one string`, []);
+        const ev = (ride.saved || []).find((s) => s.stateFile === String(f) && String(s.rootHash) === String(pt.rootHash));
+        if (!ev) return rowErr('state:saved did not fire with the mirror root hash for this file - the event must carry the snapshot', []);
+        return { verdict: 'REFUSED', detail: 'persist({tree}) mirrors into the caller tree, the disk view reads back PRESENT with the matching root, and state:saved carries that root - one hash end to end', tookRequests: 2 };
+      },
+    },
+
+    {
+      name: 'store-treefor-typed-absence',
+      description: 'treeFor answers a typed ABSENT (no hash, no fake empty tree) for a file the store never wrote',
+      async run(harness) {
+        const ride = await probeStore(harness, [
+          { op: 'diskfor', file: 'state/pin-ct-never-' + salt() + '.json' },
+        ]);
+        if (!ride) return skip('wiring-store not armed');
+        const d = ride.get('diskfor');
+        if (!d || d.fault) return rowErr('the absence probe faulted - answers, not throws', []);
+        if (d.state !== 'ABSENT') return rowErr(`treeFor answered ${String(d.state)} for a never-written file - the presence must be typed, not guessed`, []);
+        if (d.rootHash != null) return rowErr('a never-written file carried a root hash - absence must not bless a hash', []);
+        return { verdict: 'REFUSED', detail: 'a never-written state file answers the typed ABSENT (no hash, no fake empty tree) - the disk presence tier is honest about absence', tookRequests: 1 };
+      },
+    },
+
+    {
+      name: 'store-hydrate-law',
+      description: 'hydrate({tree}) populates the CALLER tree and returns the root hash; fromTree reads the payload back',
+      async run(harness) {
+        const f = 'state/pin-ct-hydr-' + salt() + '.json';
+        const ride = await probeStore(harness, [
+          { op: 'drypersist', module: 'pin-ct', file: f, data: { n: 11 } },
+          { op: 'hydratetree', module: 'pin-ct', file: f },
+        ]);
+        if (!ride) return skip('wiring-store not armed');
+        const d0 = ride.get('drypersist');
+        if (!d0 || d0.fault || d0.ok !== true) return rowErr('the hydrate stage did not persist anything onto disk', []);
+        const h = ride.get('hydratetree');
+        if (!h || h.fault || h.applied !== true) return rowErr('hydrate did not answer applied:true - the hydrate side did not ride', []);
+        if (!/^[0-9a-f]{64}$/.test(String(h.rootHash))) return rowErr('the hydrate root hash is not a sha256 hex - hydrate must return the tree root, not a placeholder', []);
+        if (!h.back || Number(h.back && h.back.n) !== 11) return rowErr('fromTree over the hydrated tree did not read the payload back: ' + JSON.stringify(h.back), []);
+        if ((h.treePaths || []).some((p) => p === '/pin-ct/n') !== true) return rowErr(`the hydrated tree paths are [${(h.treePaths || []).join(',')}] - hydrate must populate the CALLER tree`, []);
+        return { verdict: 'REFUSED', detail: 'hydrate populates the caller tree, returns the 64-hex root, and fromTree reads the payload back - the hydrate law is wired', tookRequests: 2 };
+      },
+    },
+
+    {
+      name: 'store-anchor-chain-event-laws',
+      description: 'the StateAnchor chain is an event history, NOT a heartbeat log: first root anchors once (state:anchored fires with it), an unchanged root dedupes, a changed root anchors, a fresh mirror over the same content stays deduped, and the per-carrier tail carries root + carrier',
+      async run(harness) {
+        const f = 'state/pin-ct-anch-' + salt() + '.json';
+        const ride = await probeStore(harness, [
+          { op: 'anchorcount', file: f },
+          { op: 'persisttree', module: 'pin-ct', file: f, data: { n: 1 } },
+          { op: 'anchorcount', file: f },
+          { op: 'persisttree', module: 'pin-ct', file: f, data: { n: 1 } },
+          { op: 'anchorcount', file: f },
+          { op: 'persisttree', module: 'pin-ct', file: f, data: { n: 3 } },
+          { op: 'persisttree', module: 'pin-ct', file: f, data: { n: 3 } },
+          { op: 'anchorcount', file: f },
+          { op: 'anchorlast', file: f },
+        ]);
+        if (!ride) return skip('wiring-store not armed');
+        const counts = ride.all('anchorcount');
+        if (counts.length !== 4 || counts.some((c) => c.count < 0)) return rowErr('the chain counter never answered: ' + JSON.stringify(counts), counts);
+        if (counts[0].count !== 0) return rowErr(`the fresh-state file already rode ${counts[0].count} chain entries - the ride salt must be fresh per run`, counts);
+        if (counts[1].count !== 1) return rowErr(`the first anchor produced ${counts[1].count - counts[0].count} entries (want exactly +1) - first root anchored once`, counts);
+        if (counts[2].count !== 1) return rowErr(`the identical root persisted twice added ${counts[2].count - counts[1].count} entries (want +0) - the unchanged root must dedupe`, counts);
+        if (counts[3].count !== 2) return rowErr(`the changed root + fresh mirror ended at ${counts[3].count} (want exactly 2) - the changed root anchors and the fresh mirror over the same content stays deduped`, counts);
+        const last = ride.get('anchorlast');
+        if (!last || last.state !== 'PRESENT' || !last.entry) return rowErr('the anchor tail never answered PRESENT', [last]);
+        if (!/^[0-9a-f]{64}$/.test(String(last.entry.rootHash))) return rowErr('the anchor tail root is not a sha256 hex', [last]);
+        if (String(last.entry.carrier) !== String(f)) return rowErr(`the anchor tail carries ${last.entry.carrier} - the ledger is per-state-file (carrier)`, [last]);
+        const ev = (ride.anchored || []).find((a) => a.stateFile === String(f) && /^[0-9a-f]{64}$/.test(String(a.rootHash)));
+        if (!ev) return rowErr('state:anchored did not fire with the root for this file - the event must ride the anchor', []);
+        return { verdict: 'REFUSED', detail: 'the anchor chain is an event history: first root anchored once with the root on state:anchored, identical root dedupes, changed root anchors, fresh mirror stays deduped, per-carrier tail carries root + carrier - the anchor laws are wired', tookRequests: 9 };
+      },
+    },
+
+    {
+      name: 'store-anchor-tamper-detector',
+      description: 'verifyStateRoot verifies clean state against the anchor, then detects the out-of-band disk write (tampering that bypassed the store choke point) with a divergence that names the anchor',
+      async run(harness) {
+        const f = 'state/pin-ct-tamper-' + salt() + '.json';
+        const ride = await probeStore(harness, [
+          { op: 'persisttree', module: 'pin-ct', file: f, data: { secret: 'good' } },
+          { op: 'verifyroot', file: f },
+          { op: 'tamper', file: f },
+          { op: 'verifyroot', file: f },
+        ]);
+        if (!ride) return skip('wiring-store not armed');
+        const pri = ride.all('verifyroot');
+        if (pri.length !== 2) return rowErr('the verify stages did not both answer: ' + JSON.stringify(pri), pri);
+        const [clean, dirty] = pri;
+        if (clean.fault || clean.verifyOk !== true) return rowErr('clean state did not verify against its last anchor: ' + JSON.stringify(clean), pri);
+        if (clean.anchored !== true) return rowErr('the clean verify did not answer anchored:true - the chain must hold the baseline', pri);
+        const tamp = ride.get('tamper');
+        if (!tamp || tamp.fault || tamp.wrote !== true) return rowErr('the out-of-band write never landed: ' + JSON.stringify(tamp), []);
+        if (dirty.fault || dirty.verifyOk !== false) return rowErr('tampered state still verified ok:true - the divergence detector must catch the writes that bypassed the store', pri);
+        if (!dirty.firstDivergence || !/diverged since anchor/i.test(String(dirty.firstDivergence))) return rowErr(`the divergence text is ${String(dirty.firstDivergence)} - it must name the anchor`, pri);
+        return { verdict: 'REFUSED', detail: 'verifyStateRoot answers clean-against-anchor on the untouched tree and catches the out-of-band disk write with a diverged-since-anchor verdict - the tamper leg is wired', tookRequests: 4 };
+      },
+    },
+
+    {
+      name: 'store-anchor-no-tree-never-bless-law',
+      description: 'no tree tier → no anchor (typed not-yet-anchored verdict), and hydrate never appends to the anchor ledger even with a tree in hand - a restart must not re-bless whatever happens to be on disk',
+      async run(harness) {
+        const f = 'state/pin-ct-fresh-' + salt() + '.json';
+        const ride = await probeStore(harness, [
+          { op: 'persistplain', module: 'pin-ct', file: f, data: { n: 5 } },
+          { op: 'hydratetree', module: 'pin-ct', file: f },
+          { op: 'hydratekill', module: 'pin-ct', file: f },
+        ]);
+        if (!ride) return skip('wiring-store not armed');
+        const pp = ride.get('persistplain');
+        if (!pp || pp.fault || pp.accepted !== true) return rowErr('the no-tree persist did not land: ' + JSON.stringify(pp), []);
+        if (pp.anchorState !== 'ABSENT') return rowErr(`a no-tree persist still carried an anchor entry (${String(pp.anchorState)}) - no tree means nothing to anchor`, []);
+        if (pp.noAnchorTyped !== true || pp.verifyOk !== false) return rowErr('verifyStateRoot did not answer the typed not-yet-anchored verdict: ' + JSON.stringify(pp), []);
+        const kill = ride.get('hydratekill');
+        if (!kill || kill.fault) return rowErr('the hydrate ledger probe faulted - answers, not throws', []);
+        if (kill.before == null || kill.after == null || kill.before !== kill.after) return rowErr(`hydrate changed the anchor chain (${String(kill.before)} -> ${String(kill.after)}) - a restart must not re-bless disk`, []);
+        return { verdict: 'REFUSED', detail: 'a no-tree persist leaves the chain empty (typed not-yet-anchored) and hydrate - even carrying a tree - never appends to the anchor ledger - the never-bless law holds', tookRequests: 3 };
+      },
+    },
+
+    {
+      name: 'store-anchor-merged-cause-law',
+      description: 'persistMerged rides the SAME anchor contract as persist: the merged root anchors once and the cause string names the merge path',
+      async run(harness) {
+        const f = 'state/pin-ct-merged-' + salt() + '.json';
+        const ride = await probeStore(harness, [
+          { op: 'persistmerged', module: 'pin-ct', file: f, data: { n: 6 } },
+          { op: 'anchorlast', file: f },
+          { op: 'verifyroot', file: f },
+        ]);
+        if (!ride) return skip('wiring-store not armed');
+        const pm = ride.get('persistmerged');
+        if (!pm || pm.fault || pm.accepted !== true) return rowErr('the merged persist did not land: ' + JSON.stringify(pm), []);
+        if (pm.anchorState !== 'PRESENT') return rowErr('the merged root never anchored - the lock-path write must ride the same contract', []);
+        if (String(pm.rootHash) !== String(pm.treeRoot)) return rowErr(`the anchored root (${String(pm.rootHash).slice(0, 10)}...) differs from the merged tree root (${String(pm.treeRoot).slice(0, 10)}...)`, []);
+        if (!pm.cause || !/persistMerged/.test(String(pm.cause))) return rowErr(`the anchor cause is ${String(pm.cause)} - it must name the merge path`, []);
+        const v = ride.get('verifyroot');
+        if (!v || v.fault || v.verifyOk !== true) return rowErr('the merged state did not verify against its anchor: ' + JSON.stringify(v), []);
+        return { verdict: 'REFUSED', detail: 'persistMerged anchors the merged tree root with a cause that names the merge path and the state verifies clean - the lock-path write rides the same contract', tookRequests: 3 };
       },
     },
   ],

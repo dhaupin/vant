@@ -3740,7 +3740,11 @@ const LIFECYCLE_CHILD = `${CHILD_STDOUT_GUARD}
                         continue;
                     }
                     const inst = (o.id !== undefined && String(o.id) !== '' ? instances.get(String(o.id)) : current) || null;
-                    if (!inst && o.op !== 'watch' && o.op !== 'report' && o.op !== 'unwatch') { out.push({ op: String(o.op), fault: 'no instance: ' + String(o.id) }); continue; }
+                    // (2026-10-28 wave-2) the seeds/authority/in-memory ops run
+                    // instance-less (fresh trees per op) — same exemption lane
+                    // as the bus watchers below.
+                    const sendless = ['watch', 'report', 'unwatch', 'seed', 'envseed', 'celladdr', 'authpair', 'inmemdefault'];
+                    if (!inst && !sendless.includes(o.op)) { out.push({ op: String(o.op), fault: 'no instance: ' + String(o.id) }); continue; }
                     if (o.op === 'register') { inst.mt.register(String(o.r), String(o.n), Object.assign({}, o.meta || {})); out.push({ op: 'register', ok: true }); continue; }
                     if (o.op === 'heartbeat') { inst.mt.heartbeat(String(o.r), String(o.n)); out.push({ op: 'heartbeat', ok: true }); continue; }
                     if (o.op === 'subscribe') { const res = inst.mt.subscribe(String(o.r), String(o.n), String(o.scope || '/mesh/' + o.r + '/' + o.n)); out.push({ op: 'subscribe', ok: true, ack: res }); continue; }
@@ -3775,6 +3779,110 @@ const LIFECYCLE_CHILD = `${CHILD_STDOUT_GUARD}
                         out.push({ op: 'unwatch', ok: true });
                         continue;
                     }
+                    if (o.op === 'seed') {
+                        // (2026-10-28 wave-2 conversion) the SEEDS family off
+                        // the retiring test/state-wiring.test.js: seedScope
+                        // over a throwaway in-memory MeshTree (no dir, no
+                        // side effects) — scopePath + 64-hex seed; invalid
+                        // regions answer the boundary's real typed refusal.
+                        const reqs = Array.isArray(o.regions) ? o.regions.map(String)
+                            : [(o.region == null ? 'r1' : String(o.region))];
+                        const uniA = o.universe == null ? 'wiring-seed-u' : String(o.universe);
+                        const uniB = o.universe2 == null ? uniA : String(o.universe2);
+                        const scopes = reqs.map((region) => {
+                            try {
+                                const s = new MeshTree({ universe: uniA }).seedScope(region);
+                                return { region, ok: true, scopePath: String(s.scopePath), seedHex: String(s.seedHex) };
+                            } catch (er) {
+                                return { region, ok: false, fault: 'refused: ' + String(er && er.message || er).slice(0, 100) };
+                            }
+                        });
+                        let sharded = null;
+                        try {
+                            const sa = new MeshTree({ universe: uniA }).seedScope('r1').seedHex;
+                            const sb2 = new MeshTree({ universe: uniB }).seedScope('r1').seedHex;
+                            sharded = String(sa) !== String(sb2);
+                        } catch (er2) { sharded = null; }
+                        out.push({ op: 'seed', ok: true, scopes, sharded });
+                        continue;
+                    }
+                    if (o.op === 'envseed') {
+                        // the env law: VANT_UNIVERSE_SEED moves the derived
+                        // seed through the DEFAULT constructor (env override
+                        // must change the seed; env always restored)
+                        const prev = process.env.VANT_UNIVERSE_SEED;
+                        try {
+                            const base = new MeshTree().seedScope('r1').seedHex;
+                            process.env.VANT_UNIVERSE_SEED = String(o.env || 'wiring-pack-env-shard');
+                            const envd = new MeshTree().seedScope('r1').seedHex;
+                            out.push({ op: 'envseed', ok: true, envMoved: String(base) !== String(envd) });
+                        } finally {
+                            if (prev === undefined) delete process.env.VANT_UNIVERSE_SEED;
+                            else process.env.VANT_UNIVERSE_SEED = prev;
+                        }
+                        continue;
+                    }
+                    if (o.op === 'celladdr') {
+                        // the ONE-PRF law: MeshTree.cellAddress === the spine's
+                        // PRF for the same region+space (no adapters), stable
+                        // across repeat calls, moving across spaces.
+                        const AddressingSpine = require(path.join(sb, 'lib', 'state', 'spine')).AddressingSpine;
+                        const uniC = o.universe == null ? 'parity-universe' : String(o.universe);
+                        const region = String(o.region == null ? 'r1' : o.region);
+                        const space = Number(o.space == null ? 7 : o.space);
+                        const other = Number(o.other == null ? 8 : o.other);
+                        const mt3 = new MeshTree({ universe: uniC });
+                        const sp2 = new AddressingSpine({ universe: uniC });
+                        const viaMesh = mt3.cellAddress(region, space);
+                        const viaSpine = sp2.cellAddress('/mesh/' + region, space);
+                        out.push({
+                            op: 'celladdr', ok: true, viaMesh: String(viaMesh), viaSpine: String(viaSpine),
+                            equal: String(viaMesh) === String(viaSpine),
+                            stable: String(viaMesh) === String(mt3.cellAddress(region, space)),
+                            moved: String(mt3.cellAddress(region, space)) !== String(mt3.cellAddress(region, other)),
+                        });
+                        continue;
+                    }
+                    if (o.op === 'authpair') {
+                        // the CANONICAL AUTHORITY family: the same payload in
+                        // DIFFERENT key order under one fixed clock → one root
+                        // hash; the deterministic-winner law stays a same-tree
+                        // regression (loser recorded, winner kept, <=1 loser).
+                        const uniD = o.universe == null ? 'auth-universe' : String(o.universe);
+                        const t1 = new MeshTree({ universe: uniD, now: () => 1000 });
+                        const t2 = new MeshTree({ universe: uniD, now: () => 1000 });
+                        t1.write('r', 'n', '/mesh/r/n/state', o.valueB || { beta: 2, alpha: 1 });
+                        t2.write('r', 'n', '/mesh/r/n/state', o.valueA || { alpha: 1, beta: 2 });
+                        const w3 = new MeshTree({ universe: uniD, now: () => 1000 });
+                        w3.write('r', 'a', '/mesh/r/n/x', { v: 1 });
+                        const wres = w3.write('r', 'b', '/mesh/r/n/x', { v: 2 });
+                        const rej = w3.rejectedWrites();
+                        out.push({
+                            op: 'authpair', ok: true,
+                            rootA: String(t1.tree.rootHash()), rootB: String(t2.tree.rootHash()),
+                            keyOrderEqual: String(t1.tree.rootHash()) === String(t2.tree.rootHash()),
+                            either: !!(wres.accepted) || rej.length === 1,
+                            loserSmall: rej.length <= 1,
+                        });
+                        continue;
+                    }
+                    if (o.op === 'inmemdefault') {
+                        // the battery-off law: no dir → persistenceInfo says
+                        // so honestly (enabled false, dir null, no recovery
+                        // state) and the behavior contract still answers.
+                        const mt4 = new MeshTree({ universe: String(o.universe || 'mem-default-u') });
+                        const info = mt4.persistenceInfo();
+                        mt4.register('r', 'n', { a: 1 });
+                        const alive = mt4.isAlive('r', 'n', mt4._now() + 1);
+                        out.push({
+                            op: 'inmemdefault', ok: true,
+                            disabled: (info && info.enabled) === false,
+                            dirNull: !!(info && info.dir === null),
+                            recoveryNull: !!(info && info.recovery === null),
+                            stillAlive: !!(alive && alive.alive),
+                        });
+                        continue;
+                    }
                     out.push({ op: String(o.op), fault: 'unknown op' });
                 } catch (e2) {
                     out.push({ op: String((o && o.op) || '?'), ok: false, fault: String(e2 && e2.name || 'Error') + ': ' + String(e2 && e2.message || e2).slice(0, 140) });
@@ -3787,6 +3895,164 @@ const LIFECYCLE_CHILD = `${CHILD_STDOUT_GUARD}
         void jsonResInner;
         return jsonRes({ results: out }, 200);
     });
+    // wiring-store: POST { ops: [{ op, ... }] } — the BARE-STORE arm
+    // (2026-10-28 wave-2 conversion, #249): the tree-tier + StateAnchor
+    // ledger laws off test/state-wiring.test.js's state-store families,
+    // driven on the REAL lib/state-store seams in-process (deterministic
+    // roots, treeFor typed presence, the hydrate law, and the append-only
+    // anchor chain ride the actual store instance — no fixtures, no
+    // answer sheets). Ride-local state files under state/pin-ct-*; cleared
+    // at ride end; the anchor LEDGER itself is append-only by design, so
+    // rows count DELTAS, never absolutes.
+    harness.registerRoute('wiring-store', async (ctx) => {
+        const stateStore = sandboxLib('state-store');
+        const bus = sandboxLib('event');
+        const { StateAnchor } = require(path.join(sb, 'lib', 'state', 'anchor.js'));
+        let j = null;
+        try { j = await ctx.request.json(); } catch { j = null; }
+        const ops = (j && Array.isArray(j.ops) && j.ops.length) ? j.ops.slice(0, 40) : null;
+        if (!ops) return jsonRes({ error: 'ops array required' }, 400);
+        const ledgerPath = path.join('models', 'private', String(stateStore.currentBrain()), '.state-anchor.jsonl');
+        // (ride-local reader) a fresh read-only StateAnchor over the SAME
+        // ledger path — chain() re-reads the file per call, so counts are
+        // honest mid-ride facts, never a stale cache.
+        const countFor = (file) => {
+            try { return new StateAnchor(ledgerPath).chain().filter((e) => e.carrier === file).length; }
+            catch { return -1; }
+        };
+        const out = [];
+        const touched = new Set();
+        const saved = [], anchored = [];
+        const onSaved = (d) => { saved.push({ stateFile: d && d.stateFile != null ? String(d.stateFile) : null, rootHash: d && d.rootHash != null ? String(d.rootHash) : null }); };
+        const onAnchored = (d) => { anchored.push({ stateFile: d && d.stateFile != null ? String(d.stateFile) : null, rootHash: d && d.rootHash != null ? String(d.rootHash) : null }); };
+        bus.on('state:saved', onSaved);
+        bus.on('state:anchored', onAnchored);
+        try {
+            for (const op of ops) {
+                const o = op || {};
+                try {
+                    if (o.op === 'roundtrip') {
+                        // the TREE TIER laws: toTree/fromTree roundtrip with
+                        // metadata excluded, paths under /<module>/, and the
+                        // key-order-independence of the root hash
+                        const mod = String(o.module || 'pin-ct');
+                        const data = o.data == null ? { peers: { a: 1 }, config: { x: 'y' }, kind: 'vant-protocol-state', module: mod, savedAt: 42 } : o.data;
+                        const tree = stateStore.toTree(mod, data);
+                        const back = stateStore.fromTree(mod, tree);
+                        const shuffled = stateStore.toTree(mod, o.shuffled == null ? { config: { x: 'y' }, savedAt: 42, module: mod, peers: { a: 1 }, kind: 'vant-protocol-state' } : o.shuffled);
+                        out.push({ op: 'roundtrip', ok: true, paths: tree.paths().map(String), back: back || null, backOnlyStateKeys: back && !('savedAt' in back) && !('kind' in back) && !('module' in back), rootHash: String(tree.rootHash()), rootSame: String(tree.rootHash()) === String(shuffled.rootHash()) });
+                        continue;
+                    }
+                    if (o.op === 'persisttree') {
+                        // persist({tree}) mirrors state into the CALLER tree
+                        const f = String(o.file);
+                        const tree = new stateStore.StateTree();
+                        const res = stateStore.persist({ moduleName: String(o.module || 'pin-ct'), stateFile: f, data: o.data == null ? { hits: 3 } : o.data, tree });
+                        touched.add(f);
+                        out.push({ op: 'persisttree', ok: true, accepted: res === true, rootHash: String(tree.rootHash()), treePaths: tree.paths().map(String) });
+                        continue;
+                    }
+                    if (o.op === 'drypersist') { stateStore.persist({ moduleName: String(o.module || 'pin-ct'), stateFile: String(o.file), data: o.data == null ? { n: 11 } : o.data }); touched.add(String(o.file)); out.push({ op: 'drypersist', ok: true }); continue; }
+                    if (o.op === 'diskfor') {
+                        const d = stateStore.treeFor(String(o.file));
+                        out.push({ op: 'diskfor', ok: true, state: d.state, rootHash: d.rootHash != null ? String(d.rootHash) : null, treePaths: d.tree ? d.tree.paths().map(String) : null });
+                        continue;
+                    }
+                    if (o.op === 'hydratetree') {
+                        // hydrate populates the CALLER tree and returns the
+                        // root hash (native law: res.applied + res.rootHash)
+                        const f = String(o.file);
+                        const tree = new stateStore.StateTree();
+                        const res = await stateStore.hydrate({ moduleName: String(o.module || 'pin-ct'), stateFile: f, apply: () => {}, tree });
+                        const back = stateStore.fromTree(String(o.module || 'pin-ct'), tree);
+                        out.push({ op: 'hydratetree', ok: true, applied: !!(res && res.applied), rootHash: res && res.rootHash != null ? String(res.rootHash) : null, treePaths: tree.paths().map(String), back: back || null });
+                        continue;
+                    }
+                    if (o.op === 'anchorlast') {
+                        const last = stateStore.lastAnchorFor(String(o.file));
+                        out.push({ op: 'anchorlast', ok: true, state: last.state, entry: last.entry ? { rootHash: String(last.entry.root_hash), carrier: String(last.entry.carrier), cause: String(last.entry.cause || '') } : null });
+                        continue;
+                    }
+                    if (o.op === 'anchorcount') { out.push({ op: 'anchorcount', ok: true, file: String(o.file), count: countFor(String(o.file)) }); continue; }
+                    if (o.op === 'persistplain') {
+                        // no tree → no anchor; and verifyStateRoot answers a
+                        // typed not-yet-anchored verdict (native law)
+                        const f = String(o.file);
+                        const res = stateStore.persist({ moduleName: String(o.module || 'pin-ct'), stateFile: f, data: o.data == null ? { n: 5 } : o.data });
+                        touched.add(f);
+                        const last = stateStore.lastAnchorFor(f);
+                        const v = stateStore.verifyStateRoot(f);
+                        out.push({ op: 'persistplain', ok: true, accepted: res === true, anchorState: last.state, noAnchorTyped: v.anchored === false, verifyOk: !!v.ok });
+                        continue;
+                    }
+                    if (o.op === 'persistmerged') {
+                        const f = String(o.file);
+                        const tree = new stateStore.StateTree();
+                        const res = await stateStore.persistMerged({ moduleName: String(o.module || 'pin-ct'), stateFile: f, merge: () => {}, serialize: () => (o.data == null ? { n: 6 } : o.data), tree });
+                        touched.add(f);
+                        const last = stateStore.lastAnchorFor(f);
+                        out.push({ op: 'persistmerged', ok: true, accepted: res === true, anchorState: last.entry ? 'PRESENT' : 'ABSENT', rootHash: last.entry ? String(last.entry.root_hash) : null, cause: last.entry ? String(last.entry.cause || '') : null, treeRoot: String(tree.rootHash()) });
+                        continue;
+                    }
+                    if (o.op === 'hydratekill') {
+                        // (the never-bless law) hydrate must NOT append to the
+                        // anchor ledger, even with a tree in hand — a restart
+                        // must not re-bless whatever happens to be on disk
+                        const f = String(o.file);
+                        const before = countFor(f);
+                        const tree = new stateStore.StateTree();
+                        await stateStore.hydrate({ moduleName: String(o.module || 'pin-ct'), stateFile: f, apply: () => {}, tree });
+                        const after = countFor(f);
+                        out.push({ op: 'hydratekill', ok: true, before, after, neverAnchored: before === after });
+                        continue;
+                    }
+                    if (o.op === 'tamper') {
+                        // the OUTSIDE-the-store write (the exact threat the
+                        // anchor exists to catch) — raw disk mutation
+                        const f = String(o.file);
+                        const disk = path.join(process.cwd(), 'models', 'private', String(stateStore.currentBrain()), f);
+                        try {
+                            const raw = JSON.parse(fs.readFileSync(disk, 'utf8'));
+                            // (2026-10-28 wave-2 fix) the state file lays the
+                            // payload keys at the TOP LEVEL next to the metadata
+                            // (kind/module/savedAt) — the honest out-of-band write
+                            // must hit a PAYLOAD key, never the loader's identity
+                            // fields: corrupting 'kind' stops treeFor from even
+                            // answering PRESENT and the divergence detector (the
+                            // seam under test) never runs.
+                            const META = ['kind', 'module', 'savedAt', 'name', 'version', 'createdAt'];
+                            const keys = Object.keys(raw);
+                            const target = keys.find((k) => !META.includes(k)) || keys[0];
+                            raw[target] = 'TAMPERED';
+                            fs.writeFileSync(disk, JSON.stringify(raw, null, 2));
+                            // (2026-10-28 wave-2 fix 2) the pass-184 _treeDiskHot
+                            // cache legitimately serves repeat reads inside one
+                            // process — but the tamper leg simulates the FRESH
+                            // reader a restart produces, so the ride-local cache
+                            // must be dropped before the detector's verify round
+                            try { stateStore.treeHot.clear(); } catch (eh) { /* best effort */ }
+                            out.push({ op: 'tamper', ok: true, wrote: true });
+                        } catch (er) { out.push({ op: 'tamper', ok: false, fault: String(er && er.message || er).slice(0, 100) }); }
+                        continue;
+                    }
+                    if (o.op === 'verifyroot') {
+                        const v = stateStore.verifyStateRoot(String(o.file));
+                        out.push({ op: 'verifyroot', ok: true, verifyOk: !!v.ok, anchored: v.anchored !== false, state: v.state || null, current: v.current != null ? String(v.current) : null, lastAnchored: v.lastAnchored && v.lastAnchored.root_hash != null ? String(v.lastAnchored.root_hash) : null, firstDivergence: v.firstDivergence != null ? String(v.firstDivergence) : null });
+                        continue;
+                    }
+                    out.push({ op: String(o.op), fault: 'unknown op' });
+                } catch (e2) {
+                    out.push({ op: String((o && o.op) || '?'), ok: false, fault: String(e2 && e2.name || 'Error') + ': ' + String(e2 && e2.message || e2).slice(0, 140) });
+                }
+            }
+        } finally {
+            for (const f of touched) { try { stateStore.clear(f); } catch (er3) {} }
+            bus.off('state:saved', onSaved);
+            bus.off('state:anchored', onAnchored);
+        }
+        return jsonRes({ results: out, saved: saved.slice(-6), anchored: anchored.slice(-6), anchoredCount: anchored.length, savedCount: saved.length }, 200);
+    });
+
     // migration-fixture: POST { ops: [{ op }] } — the MIGRATION arm
     // (migrations battery slice 1, per-bucket conversion): seeds a
     // throwaway fixture install (throwaway tmpdir: lib copy + package.json
