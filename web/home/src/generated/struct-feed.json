@@ -1,0 +1,26 @@
+{
+  "source": "crashtest",
+  "ok": true,
+  "version": "crashledger/1",
+  "generatedAt": "2026-10-28",
+  "counts": {
+    "packs": 21,
+    "rows": 269,
+    "refused": 97,
+    "skipped": 172,
+    "exploited": 0
+  },
+  "findings": [
+    {
+      "id": "contract-table",
+      "level": "info",
+      "message": "Contract table held: 21 packs, 269 rows — 97 REFUSED, 172 honest skips, 0 EXPLOITED. Measured live by test/crashtest-packs.test.js (two-cycle deterministic)."
+    }
+  ],
+  "sourceHref": "https://www.npmjs.com/package/crashtest",
+  "_stamp": {
+    "by": "scripts/struct-feed-stamp.js",
+    "from": "test/crashtest-packs.test.js",
+    "legend": "values derive from the measured verdict ledger run this stamp's date; restamp with npm run struct:stamp after a campaign wave"
+  }
+}

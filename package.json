@@ -34,6 +34,8 @@
   "scripts": {
     "test": "node bin/build-test.js",
     "test:crashtest": "node test/ci-crashtest-gate.js",
+    "struct:stamp": "node scripts/struct-feed-stamp.js",
+    "struct:check": "node scripts/struct-feed-stamp.js --check",
     "test:eyes": "eyestruct gate",
     "packs:lint": "packstruct lint packs/ --deep",
     "packs:audit": "node scripts/audit-packs-gate.js",

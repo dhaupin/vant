@@ -14,16 +14,18 @@
  *   poststruct  — the render audit's findings (PRD-staged, pre-npm)
  *
  * EPOCH LAW (honest by construction): every card that is inline data
- * carries the MOCK SKELETON badge next to its verdict; the ABSENT card
+ * carries the MOCK SKELETON badge next to its verdict; the crashtest
+ * card is LIVE (issue #264 step b — the stamped verdict ledger,
+ * src/generated/struct-feed.json, no badge) and the ABSENT card
  * (poststruct, pre-npm) states its absence and grades nothing. When
- * the real feeds land (issue steps b-d) the cards flip with the data
- * and the badges leave; the shape stays fixed (kit head:
+ * the remaining feeds land (issue steps c-d) their cards flip the
+ * same way; the shape stays fixed (kit head:
  * web/kit/components/struct-audit.tsx — the single shape source the
  * dashboard flavor already consumes vendored + hash-pinned).
  */
 
 import React from 'react'
-import { STRUCT_FEEDS_MOCK, STRUCT_LABELS, verdictOf, evidenceSlice } from '../struct-feeds.mjs'
+import { STRUCT_FEEDS, STRUCT_LABELS, verdictOf, evidenceSlice } from '../struct-feeds.mjs'
 
 const VERDICT_CLASS = {
     PASS: 'verdict-pass',
@@ -49,14 +51,15 @@ export default function StructAudit() {
                     The four STRUCT families' findings, combined on one page:
                     the pack conformance gate, the crashtest packs floor, the
                     eyestruct vision battery, and the poststruct render audit.
-                    Skeleton epoch: these cards are inline mock data shaped
-                    exactly as the real feeds will land (issues #264 steps
-                    b–d) — nothing is fetched, nothing is graded, and the
-                    mock badge rides every card until then.
+                    The crashtest card rides the live stamped verdict ledger
+                    (issue #264 step b); the rest are inline mock data shaped
+                    exactly as the real feeds will land (steps c–d) — nothing
+                    is fetched, nothing is graded, and the mock badge rides an
+                    unlanded card until then.
                 </p>
 
                 <div className="struct-grid">
-                    {STRUCT_FEEDS_MOCK.map((feed) => (
+                    {STRUCT_FEEDS.map((feed) => (
                         <div className="card struct-card" key={feed.source}>
                             <div className="struct-head">
                                 <VerdictChip verdict={verdictOf(feed)} mock={feed.mock} />

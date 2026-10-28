@@ -16,13 +16,17 @@
  *   findings: [{ id, page?, level: 'fail'|'warn'|'info', message }]
  *   verdict derivation: verdictOf — PASS | FINDINGS | ABSENT
  *
- * EPOCH LAW: every row here is a mock and the page says so per card
- * (the MOCK SKELETON chip). The three npm-live feeds (packstruct /
- * crashtest / eyestruct) wire in at issue steps (b)-(d); the fourth,
- * poststruct, is PRD-staged until its npm lands. There are four and
- * only four sources — the kit's own typed refusal law, mirrored here:
- * E_STRUCT_SOURCE on anything else.
+ * EPOCH LAW: every row that is inline data carries its MOCK SKELETON
+ * badge. The crashtest row is LIVE (issue #264 step b): it rides the
+ * stamped verdict ledger (src/generated/struct-feed.json, written by
+ * scripts/struct-feed-stamp.js, pin sidecar beside it) and carries NO
+ * mock flag. The three npm-live feeds (packstruct / eyestruct) wire
+ * in at issue steps (c)-(d); poststruct is PRD-staged until its npm
+ * lands. There are four and only four sources — the kit's own typed
+ * refusal law, mirrored here: E_STRUCT_SOURCE on anything else.
  */
+
+import liveCrashFeed from './generated/struct-feed.json'
 
 export const STRUCT_SOURCES = ['packstruct', 'crashtest', 'eyestruct', 'poststruct']
 
@@ -50,12 +54,13 @@ export function evidenceSlice(feed, n) {
 }
 
 /**
- * The skeleton epoch's inline mocks — one row per family, each shaped
- * exactly as the landing feed will arrive (poststruct's row already
- * follows the PRD contract's post-parse shape; the others mirror the
- * tools' stamped README surfaces as of 2026-10-28).
+ * The skeleton epoch's feed rows — one per family, each shaped exactly
+ * as the landing feed will arrive. The crashtest row is LIVE (stamped
+ * verdict ledger); the other three are inline mocks until their feeds
+ * land (poststruct's row already follows the PRD contract's post-parse
+ * shape).
  */
-export const STRUCT_FEEDS_MOCK = [
+export const STRUCT_FEEDS = [
     {
         source: 'packstruct',
         ok: true,
@@ -73,19 +78,10 @@ export const STRUCT_FEEDS_MOCK = [
         sourceHref: 'https://www.npmjs.com/package/packstruct',
     },
     {
-        source: 'crashtest',
-        ok: true,
-        mock: true,
-        generatedAt: '2026-10-28',
-        counts: { packRows: 261, refused: 261, exploited: 0, skips: 6, contract: 372, nativeSuites: 220 },
-        findings: [
-            {
-                id: 'restamp-8',
-                level: 'info',
-                message: 'Full packs 261 rows REFUSED x2 deterministic, 0 EXPLOITED/BOUNDED; contract 372/0; native floor 220 suites green. The live emit replaces this card at step (b).',
-            },
-        ],
-        sourceHref: 'https://www.npmjs.com/package/crashtest',
+        // (step b, LIVE) the crashtest row rides the stamped verdict
+        // ledger (src/generated/struct-feed.json); no mock flag, the
+        // badge stays off, and the counts statement is the ledger's own.
+        ...liveCrashFeed,
     },
     {
         source: 'eyestruct',

@@ -2421,3 +2421,27 @@ manifest gains a new key; the placeholder never existed in any tree
 2026-10-24) and the delivered spec confirms none was owed. Verified, not
 skipped: the gate above now enforces the field set every future manifest
 must carry.
+
+## Wave 3a (2026-10-28) — the STRUCT audit page, step (b): the crashtest feed goes live (vant #264)
+
+Both struct-audit flavors (web/home /audit, web/dashboard /struct-audit)
+now render the crashtest card from a STAMPED verdict ledger instead of a
+mock: `scripts/struct-feed-stamp.js` runs the contract suite with
+`CRASHTEST_PACKS_JSON=1` (the CI gate's phase-A body), parses the
+sentinel dump, and writes one feed row byte-identically into
+`web/home/src/generated/struct-feed.json` and
+`web/dashboard/src/generated/struct-feed.json`, each with its own
+`.sha256` pin (`npm run struct:stamp` to restamp, `struct:check` for CI
+drift). The kit contract file (web/kit/components/struct-audit.tsx) grew
+the step-b epoch note and re-vendored with its pin following.
+
+The stamp this wave (as of 2026-10-28, suite exit 0, 374 signals green):
+**21 packs, 269 rows — 97 REFUSED, 172 honest skips, 0 EXPLOITED.**
+Layer note, honestly stated: this counts what the CONTRACT SUITE's
+ledger measures (the EXPECTED-table rows and their verdicts in this
+sandbox); the run-root full-pack sweeps' "261 REFUSED x2" readings in
+the wave-2 stamps measure the ARMED harness over real routes and are a
+different, deeper layer. The feed derives strictly from the ledger it
+names — no cross-layer number laundering, and the mock badge leaves the
+crashtest card accordingly. The other three cards (packstruct, eyestruct,
+poststruct) stay mock/ABSENT pending issue steps (c)-(d).

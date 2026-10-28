@@ -11,12 +11,16 @@ import * as React from "react";
  *   eyestruct   — the vision battery's findings npm feed
  *   poststruct  — the render/docs audit's findings feed (PRD-staged)
  *
- * EPOCH LAW (honest by construction): the page is in its mock-feed
- * skeleton epoch (issue #264 step a). Every feed here carries
+ * EPOCH LAW (honest by construction): every inline feed here carries
  * `mock: true` and renders a MOCK identity chip; nothing reads a
- * network, nothing fabricates a green. LIVE feeds land in the same
- * Shape (b: crashtest run-root emits, c: packstruct gate, d: the
- * eyestruct + poststruct npm feeds) and the chips flip with the data.
+ * network, nothing fabricates a green. LIVE feeds replace their mock
+ * twins in the SAME shape — (b, landed) the crashtest verdict-ledger
+ * stamp consumed from the flavors' generated struct-feed.json copies
+ * (written by scripts/struct-feed-stamp.js, .sha256-pinned); (c) the
+ * packstruct gate; (d) the eyestruct + poststruct npm feeds — and the
+ * chips flip with the data. These edges are consumed by both flavors:
+ * web/dashboard via the vendored pinned frame copy, web/home via its
+ * pure-data struct-feeds.mjs over the generated stamp.
  *
  * The one pre-staged adapter: parsePoststructFeed below, built against
  * the PRD contract -- poststruct graduated from its gistory staging
