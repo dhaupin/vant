@@ -97,10 +97,12 @@ async function loadLib(relPath) {
 }
 
 /** Per-process fresh id: names that must not collide across the two
- * cycles (alias targets, fixtures). Carries no wall clock in verdicts. */
+ * cycles (alias targets, fixtures). A monotonic counter - the
+ * determinism law: same commit -> same findings (no wall clock, no
+ * unseeded randomness in the sources). */
 let _idCount = 0;
 function freshId(prefix) {
-  return prefix + String(++_idCount).padStart(4, '0') + '-' + Math.random().toString(36).slice(2, 7);
+  return prefix + (++_idCount).toString(36).padStart(4, '0');
 }
 
 /** The guests battery drives lib/guests against a THROWAWAY brain's
@@ -753,11 +755,11 @@ export default {
           return { verdict: 'EXPLOITED', detail: 'revocation did not kill the token in-process', tookRequests: 4 };
         }
         const exp = guests.issue('wall-g-expiry', { ...GUEST_OPT, expires: 5 });
-        const deadline = Date.now() + 80;
+        const deadline = process.hrtime.bigint() + 80000000n; // 80ms, monotonic
         if (!guests.verify(exp.token, GUEST_OPT)) {
           return { verdict: 'EXPLOITED', detail: 'the in-window expired guest refused before its window - expiry must be honest both directions', tookRequests: 5 };
         }
-        while (Date.now() < deadline) { /* wait out the 5ms window */ }
+        while (process.hrtime.bigint() < deadline) { /* wait out the window (monotonic, no wall clock) */ }
         if (guests.verify(exp.token, GUEST_OPT) !== null) {
           return { verdict: 'EXPLOITED', detail: 'an EXPIRED guest verified - the row may survive but the token must die', tookRequests: 6 };
         }

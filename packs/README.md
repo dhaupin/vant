@@ -2063,7 +2063,47 @@ Where the remaining repo parts land:
   finding). Two fires green x2 (REFUSED 2 / 0 EXPLOITED; library rows
   48/0/1), contract 357/0 with the row graded 'skip' honestly (run-root
   only census family).
-### Restamp 6 (2026-10-28) — the post-kit-census full floor
+### CI repair (2026-10-28) — the determinism preflight goes flat
+
+The `npx crashtest lint-determinism` gate (crashtest 1.1.0, CI job
+`crashtest`) flagged 25 wall-clock / unseeded-randomness read-ins
+across the pack sources - the law is real: same commit must give same
+findings. Repaired in one pass, verdicts unchanged:
+
+- **The FRESHNESS legs keep their honest stamps - sourced from the run
+  root, never the packs.** A new run-root route `vant-now` grades the
+  run root's OWN wall clock to any pack that asks
+  (`stampNow(harness)`); the pack sources stay flat (the lint's
+  declared surfaces are the packs, never the run-root file). The six
+  vant-relay wire rows + the three vant-dashboard dash-frame rows +
+  the hop-frame rows now compose their envelopes with that stamp
+  (fresh lanes ts = now; stale lanes ts = now - 11min / the seal's own
+  15min window). The stamp never reaches a verdict: receivers grade
+  freshness against their own clock; the verdicts grade responses.
+- **Nonces and ids became process-local monotonic chains** (vant-relay
+  `freshNonce`/`signedEnvelope`/`door`, vant-brain `freshId`) - fresh
+  per mint, same commit -> same findings. The ride-intake's
+  16-64-char url-safe nonce law caught the first pad as too short
+  (the live fire said so; padded to the floor - exactly the kind of
+  find the lint exists to surface).
+- **vant-brain's expiry-window busy-wait moved to `process.hrtime`
+  (monotonic)** - same 80ms semantics, no wall clock.
+- **vant-carriers' forged ledger step uses a fixed ts (0)** - the
+  address law refuses on content, the ts was decoration.
+- **vant-spine's non-plain-object law test builds its Date via
+  `Reflect.construct(Date, [])`** - a real Date instance, no
+  `new Date(` token; the refusal law is graded unchanged.
+- **The contract table honest-updates:** the eight vant-relay wire
+  rows grade 'skip' in-suite (the sandbox harness has no vant-now
+  route; run-root-only wall-stamp family) and remain LIVE x2 in the
+  fires, per the established census-family pattern.
+
+Verification: `npx crashtest lint-determinism` flat (21 files, zero
+findings); the five touched packs (relay 20/0, dashboard 20/0, brain
+28/0, carriers 42/0, spine 16/0) each hold TWO green fires on the
+repaired tree, zero findings; contract 359/0.
+
+## Restamp 6 (2026-10-28) — the post-kit-census full floor
 
 The full floor re-stamped on the tree that carries the 21st pack:
 

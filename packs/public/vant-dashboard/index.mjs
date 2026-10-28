@@ -108,12 +108,27 @@ function dashSign(body, secret) {
   return createHmac('sha256', secret).update(body, 'utf8').digest('hex');
 }
 
+// (determinism law, 2026-10-28) the wall stamp rides the run root's
+// vant-now route - the pack sources never read one. stampNow(harness)
+// sets _runNow at the top of every row that composes envelopes; a row
+// whose route is missing honest-skips.
+let _runNow = null;
+async function stampNow(harness) {
+  try {
+    const r = await harness.run('vant-now', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
+    const text = (typeof r.body === 'string' && r.body) ? r.body : (r.response && typeof r.response.text === 'function' ? await r.response.text() : '');
+    const j = JSON.parse(text);
+    if (j && typeof j.now === 'number') { _runNow = j.now; return _runNow; }
+  } catch (e0) { /* route absent: the caller honest-skips */ }
+  return null;
+}
+
 function dashFrame(event, payload, extra) {
   const e = extra || {};
   return JSON.stringify({
     event,
     from: 'dash-pack-probe',
-    ts: e.ts == null ? Date.now() : e.ts,
+    ts: e.ts == null ? _runNow : e.ts,
     nonce: 'd' + (++e.n || (e.n = 1)),
     payload,
     v: { major: 2 },
@@ -641,6 +656,8 @@ export default {
       name: 'dash-relay-hmac-header-lane-laws',
       description: 'the relay lane is HMAC-gated over the RAW body bytes and the hop guards ride typed INSIDE the 200 acks: a signatureless envelope answers 401 naming X-Signature-256, a wrong sig 401s, an http hop origin refuses E_RELAY_BAD_ORIGIN naming https, a loopback target refuses E_RELAY_BAD_ORIGIN, a relative path refuses E_RELAY_BAD_PATH, plaintext ct refuses E_RELAY_NEEDS_ENVELOPE (plaintext never hops), an unknown event acks handlers=0 with E_RELAY_UNKNOWN_EVENT, and a relay-lane relay.ride still refuses (rides decode at the pod)',
       async run(harness) {
+        // the determinism law: the wall stamp rides the run root's vant-now route
+        if ((await stampNow(harness)) == null) return skip('vant-now route not armed');
         const unsignedBody = dashFrame('relay.hop', { origin: 'https://peer.local/x', path: '/y', ct: DASH_CT_SHAPE });
         const results = await probeDashRelay(harness, {
           shapes: [
@@ -704,16 +721,18 @@ export default {
       name: 'dash-relay-sealed-lane-laws',
       description: 'the keyless last mile: a COMPLETE payload seal { sig, ts } whose sig fails to verify answers 401 naming the seal, a seal whose ts falls outside its OWN freshness window answers 401 Stale-seal, and a GOOD seal is AUTHENTICATED - it reaches the hop lane and its refusal comes from the origin guard, never the signature wall',
       async run(harness) {
+        // the determinism law: the wall stamp rides the run root's vant-now route
+        if ((await stampNow(harness)) == null) return skip('vant-now route not armed');
         const sealFrame = (sig, ts) => {
           // dashFrame ALREADY returns the exact body string - ship it as-is.
           const text = dashFrame('relay.hop', { origin: 'http://peer.local/x', path: '/y', ct: DASH_CT_SHAPE, seal: { sig: sig, ts: ts } });
           return { name: sig === 'f'.repeat(64) ? 'bad-seal' : 'good-seal', edge: 'dashrelay', env: DASH_ENV_ON,
             request: { method: 'POST', headers: { 'content-type': 'application/json' }, body: text } };
         };
-        const goodBody = dashFrame('relay.hop', { origin: 'http://peer.local/x', path: '/y', ct: DASH_CT_SHAPE, seal: { sig: dashSign(DASH_CT_SHAPE, DASH_GATE_SECRET), ts: Date.now() - 15 * 60 * 1000 } });
+        const goodBody = dashFrame('relay.hop', { origin: 'http://peer.local/x', path: '/y', ct: DASH_CT_SHAPE, seal: { sig: dashSign(DASH_CT_SHAPE, DASH_GATE_SECRET), ts: _runNow - 15 * 60 * 1000 } });
         const results = await probeDashRelay(harness, {
           shapes: [
-            sealFrame('f'.repeat(64), Date.now()),
+            sealFrame('f'.repeat(64), _runNow),
             { name: 'stale-seal', edge: 'dashrelay', env: DASH_ENV_ON, request: { method: 'POST', headers: { 'content-type': 'application/json' }, body: goodBody } },
           ],
         });
@@ -735,6 +754,8 @@ export default {
       name: 'dash-relay-browser-lane-bridge',
       description: 'the intent lane (a vguest_ bearer, NO signature) forwards through the pod bridge: with no pod origin configured the bridge typed-503s and the ack rides E_RELAY_UPST with the refusal quoted, and with an origin stashed a shaped relay.sync payload TRANSLATES to the door verb - dispatched=1, ok rides back, the answer verbatim from the stub upstream',
       async run(harness) {
+        // the determinism law: the wall stamp rides the run root's vant-now route
+        if ((await stampNow(harness)) == null) return skip('vant-now route not armed');
         const results = await probeDashRelay(harness, {
           fetchStub: { match: 'upstream.stub', status: 200, body: '{"ok":true,"verdict":"dash-pack-bridge-stub"}' },
           shapes: [

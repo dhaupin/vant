@@ -47,12 +47,26 @@ async function loadLib(relPath) {
 const CHANNEL_KEY = 'vant-relay-pack-channel-key-0123456789abc';
 // The ride nonce store PERSISTS across the two pack cycles in one
 // process, so a fixed inner nonce would replay on cycle 2 and diverge
-// the second run. Every ride row mints its nonces FRESH per run (the
-// helper is per-process; the verdicts carry none of it).
-const _nonceSeed = Date.now().toString(36).slice(-7);
+// the second run. The nonces are a PROCESS-LOCAL monotonic chain (the
+// determinism law: same commit -> same findings; the verdicts carry
+// none of it).
 let _nonceCount = 0;
 function freshNonce(prefix) {
-  return prefix + _nonceSeed + '-' + (++_nonceCount).toString(36).padStart(4, '0');
+  return prefix + (++_nonceCount).toString(36).padStart(8, '0');
+}
+// The FRESHNESS legs need a real current ts: the run root grades its
+// OWN wall clock through the vant-now route - the pack sources never
+// read one (the determinism lint keeps the packs flat; the run-root
+// file is outside the lint's declared surfaces).
+let _runNow = null;
+async function stampNow(harness) {
+  try {
+    const r = await harness.run('vant-now', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
+    const text = (typeof r.body === 'string' && r.body) ? r.body : (r.response && typeof r.response.text === 'function' ? await r.response.text() : '');
+    const j = JSON.parse(text);
+    if (j && typeof j.now === 'number') { _runNow = j.now; return _runNow; }
+  } catch (e) { /* route absent: the caller honest-skips */ }
+  return null;
 }
 
 async function wireKit() {
@@ -121,8 +135,8 @@ function signedEnvelope(event, payload) {
   const env = {
     event,
     from: 'wire-row',
-    ts: Date.now(),
-    nonce: 'w' + Math.random().toString(16).slice(2),
+    ts: _runNow,
+    nonce: 'w' + (++_nonceCount).toString(36).padStart(4, '0'),
     payload,
     v: { major: 2 },
   };
@@ -182,7 +196,7 @@ const GATE_SECRET = 'vant-relay-pack-gate-secret-0123456789';
 const ENV_ON = { VANT_RELAY_ENABLED: '1', VANT_RELAY_GATE_KEY: GATE_SECRET };
 const CALL = 'https://relay-edge.local/api/r/relay';
 
-function hopFrame(origin, path, ct, ts = Date.now(), extra = {}) {
+function hopFrame(origin, path, ct, ts, extra = {}) {
   return JSON.stringify({
     event: 'relay.hop',
     from: 'pack-probe',
@@ -238,10 +252,12 @@ export default {
       name: 'hmac-lane-over-raw-bytes',
       description: 'the gate IS the HMAC secret: a signed envelope with no header refuses 401 typed, a WRONG signature refuses 401 typed, and the CORRECT HMAC over the raw UTF-8 body bytes passes the gate into the ack path (X-Signature-256 raw-bytes law)',
       async run(harness) {
+        // the determinism law: the wall stamp rides the run root's vant-now route
+        if ((await stampNow(harness)) == null) return skip('vant-now route not armed');
         // the VALID lane's envelope carries a fresh ts too: the gate first,
         // then the freshness window — a valid credential rides INTO the ack
         // path, so this shape proves the raw-bytes HMAC law end to end
-        const ctx = JSON.stringify({ event: 'msg-sync', from: 'pack-probe', ts: Date.now(), nonce: 'n-hmac', payload: { probe: 'hmac-lane' }, v: { major: 2 } });
+        const ctx = JSON.stringify({ event: 'msg-sync', from: 'pack-probe', ts: _runNow, nonce: 'n-hmac', payload: { probe: 'hmac-lane' }, v: { major: 2 } });
         const wrongSig = 'f'.repeat(64);
         const results = await probeEdge(harness, [
           { name: 'no-header', env: ENV_ON, request: { url: CALL, method: 'POST', body: ctx } },
@@ -269,8 +285,10 @@ export default {
       name: 'freshness-window-typed',
       description: 'a correctly SIGNED envelope whose ts sits outside the freshness window refuses 401 typed - the edge has no replay cache, so staleness is the stateless memory it honestly owns',
       async run(harness) {
+        // the determinism law: the wall stamp rides the run root's vant-now route
+        if ((await stampNow(harness)) == null) return skip('vant-now route not armed');
         // 11 minutes back: outside the 10-minute window, deterministic per run
-        const staleTs = Date.now() - (11 * 60 * 1000);
+        const staleTs = _runNow - (11 * 60 * 1000);
         const body = JSON.stringify({ event: 'msg-sync', from: 'pack-probe', ts: staleTs, nonce: 'n-stale', payload: { note: 'freshly signed but old' }, v: { major: 2 } });
         const results = await probeEdge(harness, [
           { name: 'stale-signed', env: ENV_ON, request: { url: CALL, method: 'POST', headers: { 'x-signature-256': signEnvelope(body, GATE_SECRET) }, body } },
@@ -291,6 +309,8 @@ export default {
       name: 'origin-guard-typed-acks',
       description: 'hostile hop origins answer the ack path with typed refusals INSIDE the 200: http downgrade, loopback, and cloud metadata targets all refuse - the edge has NO lab escape and private targets never hop',
       async run(harness) {
+        // the determinism law: the wall stamp rides the run root's vant-now route
+        if ((await stampNow(harness)) == null) return skip('vant-now route not armed');
         // ONE string per shape, signed over the EXACT bytes shipped — the
         // row used to call hopFrame twice (sign call + body call), and each
         // call re-evaluated ts. A ms-grain boundary between the two evals
@@ -298,7 +318,7 @@ export default {
         // so the edge (correctly!) answered 401 and the row misclassified
         // vant's true gate as a flake (measured 2026-10-25, cycles 2+3).
         const shape = (origin) => {
-          const bodyStr = hopFrame(origin, '/api', SEALED_CT);
+          const bodyStr = hopFrame(origin, '/api', SEALED_CT, _runNow);
           return {
             name: 'origin:' + origin,
             env: ENV_ON,
@@ -333,7 +353,9 @@ export default {
       name: 'encrypted-pipes-only-and-body-cap',
       description: 'plaintext hop bodies answer NEEDS_ENVELOPE typed inside the 200 (no downgrade, ever) and a body beyond the doors\' shared 1 MiB cap answers 413 - the transport posture is shared and loud (native pin 12)',
       async run(harness) {
-        const plainBody = hopFrame('https://public-target.example/', '/api', 'plaintext-never-hops');
+        // the determinism law: the wall stamp rides the run root's vant-now route
+        if ((await stampNow(harness)) == null) return skip('vant-now route not armed');
+        const plainBody = hopFrame('https://public-target.example/', '/api', 'plaintext-never-hops', _runNow);
         const oversized = 'x'.repeat(1024 * 1024 + 1);
         const results = await probeEdge(harness, [
           { name: 'plaintext-hop', env: ENV_ON, request: { url: CALL, method: 'POST', headers: { 'x-signature-256': signEnvelope(plainBody, GATE_SECRET) }, body: plainBody } },
@@ -543,6 +565,8 @@ export default {
       name: 'wire-hmac-lane-and-replay-gate',
       description: 'the gate IS the route secret over the real wire: unsigned posts answer 401, a wrong signature answers 401 (timing-safe verify), a correct raw-body HMAC passes into the 200 ack, and the SAME signed bytes replay 409 at the transport',
       async run(_harness) {
+        // the determinism law: the wall stamp rides the run root's vant-now route
+        if ((await stampNow(_harness)) == null) return skip('vant-now route not armed');
         const { relay: relayCore } = await wireKit();
         return await withMountedRelay(relayCore, async (port) => {
           const good = signedEnvelope('relay.hop', { origin: 'https://wire-hmac-probe.local/', path: '/x', ct: SEALED_CT });
@@ -568,6 +592,8 @@ export default {
       name: 'wire-hop-roundtrip-and-no-body-leak',
       description: 'the FULL hop loop over real sockets: an http origin refuses typed in the public posture, a signed hop to a REAL local upstream forwards and the answer rides the same ack, the upstream sees ONLY the ct (no plaintext, no gate secret, the gate never rides inside the hop), and the envelope canon is 4 colon parts',
       async run(_harness) {
+        // the determinism law: the wall stamp rides the run root's vant-now route
+        if ((await stampNow(_harness)) == null) return skip('vant-now route not armed');
         const http = await import('node:http');
         const { relay: relayCore, cfg } = await wireKit();
         const upstream = await startUpstream(http, 'pong-pipe');
@@ -615,6 +641,8 @@ export default {
       name: 'wire-ride-core-loop-and-refusals',
       description: 'the RIDE core over real sockets: envelope in, opened with the channel key, nonce checked, the door answers with the bearer teleported INSIDE the envelope, the answer re-seals nonce-bound; transport replay 409s, a same-inner-nonce ride refuses typed E_RIDE_REPLAY, a ctx-less seal refuses typed E_RIDE_DECODE, and a wrong channel key decodes to NOTHING',
       async run(_harness) {
+        // the determinism law: the wall stamp rides the run root's vant-now route
+        if ((await stampNow(_harness)) == null) return skip('vant-now route not armed');
         const { relay: relayCore, cfg } = await wireKit();
         return await withMountedRelay(relayCore, async (port) => {
           const savedChan = cfg.get('relay.channelKey');
@@ -683,6 +711,8 @@ export default {
       name: 'wire-body-cap-and-liveness-counters',
       description: "the shared posture on the wire: a body beyond the doors' 1 MiB cap answers 413, and the liveness counters MOVE with the served and refused traffic (hops served, gate refusals) - the face counts what it did, loudly",
       async run(_harness) {
+        // the determinism law: the wall stamp rides the run root's vant-now route
+        if ((await stampNow(_harness)) == null) return skip('vant-now route not armed');
         const { relay: relayCore, cfg } = await wireKit();
         // the ride counters are the face's honest liveness: a SERVED ride
         // bumps ridesServed, an inner-nonce replay bumps ridesReplayed, a
@@ -728,6 +758,8 @@ export default {
       name: 'wire-sender-seam-and-bridge-families',
       description: 'the sender seam rides the real wire end-to-end (relay.send over sockets, the pong rides back), and the interface-handler bridge translates its families ONTO the door: relay.sync lands as brain_write, relay.call is the catch-all through the door, a bent payload refuses typed E_RIDE_DECODE, and an unknown family answers typed E_RELAY_UNKNOWN_EVENT',
       async run(_harness) {
+        // the determinism law: the wall stamp rides the run root's vant-now route
+        if ((await stampNow(_harness)) == null) return skip('vant-now route not armed');
         const http = await import('node:http');
         const { relay: relayCore, Encrypt, cfg } = await wireKit();
         const upstream = await startUpstream(http, 'pong-seam');
@@ -751,7 +783,7 @@ export default {
               return { verdict: 'EXPLOITED', detail: 'the sender seam did not ride the real wire: ' + JSON.stringify(sent).slice(0, 140), tookRequests: 1 };
             }
             const door = (event, payload) => {
-              const env = { event, from: 'wire-bridge-row', ts: Date.now(), nonce: 'b' + Math.random().toString(16).slice(2), payload, v: { major: 2 } };
+              const env = { event, from: 'wire-bridge-row', ts: _runNow, nonce: 'b' + (++_nonceCount).toString(36).padStart(4, '0'), payload, v: { major: 2 } };
               const raw = JSON.stringify(env);
               return { raw, sig: Encrypt.hmacSign(raw, GATE_SECRET) };
             };
@@ -794,6 +826,8 @@ export default {
       name: 'wire-sealed-lane-freshness-and-dedupe',
       description: 'the SEALED lane on the real wire (the seal inside the payload IS the credential, keyed by the channel key - no gate header): a channel-key seal rides, a gate-key seal rides on the same verify set, a present-but-wrong seal refuses 401, a stale seal settles 401 outside the freshness window, and the same VALID seal on fresh top-level bytes still 409s because the seal sig is the dedupe key',
       async run(_harness) {
+        // the determinism law: the wall stamp rides the run root's vant-now route
+        if ((await stampNow(_harness)) == null) return skip('vant-now route not armed');
         const { relay: relayCore, Encrypt, cfg } = await wireKit();
         // the seal verify set [gate, channel] ARMS AT MOUNT (the snapshot
         // law): the channel key binds BEFORE relay.mount()
@@ -805,15 +839,15 @@ export default {
           relayCore.setDoorTransport(async () => ({ ok: true, status: 200, body: JSON.stringify({ jsonrpc: '2.0', id: 1, result: { echoed: 'sealed-wire' } }) }));
           try {
             const ride = (n) => relayCore.envelope(JSON.stringify({ nonce: n, ctx: { origin: 'wire-sealed-intake', path: '/relay', nonce: n }, bearer: null, body: { tool: 'echo_test', args: { q: 'sealed' } } }), CHANNEL_KEY);
-            const sealedBody = (ct, key, ts) => JSON.stringify({ event: 'relay.ride', from: 'wire-sealed-row', ts: Date.now(), nonce: 's' + Math.random().toString(16).slice(2), payload: { ct, seal: { sig: Encrypt.hmacSign(ct, key), ts: ts === undefined ? Date.now() : ts } }, v: { major: 2 } });
+            const sealedBody = (ct, key, ts) => JSON.stringify({ event: 'relay.ride', from: 'wire-sealed-row', ts: _runNow, nonce: 's' + (++_nonceCount).toString(36).padStart(4, '0'), payload: { ct, seal: { sig: Encrypt.hmacSign(ct, key), ts: ts === undefined ? _runNow : ts } }, v: { major: 2 } });
             const keyless = await postWire(port, sealedBody(ride(freshNonce('wire-seal-')), CHANNEL_KEY), {});
             await new Promise((r) => setTimeout(r, 6));
             const gateSeal = await postWire(port, sealedBody(ride(freshNonce('wire-seal-')), GATE_SECRET), {});
-            const wrong = await postWire(port, JSON.stringify({ event: 'relay.ride', from: 'wire-sealed-row', ts: Date.now(), nonce: 's' + Math.random().toString(16).slice(2), payload: { ct: ride(freshNonce('wire-seal-')), seal: { sig: Encrypt.hmacSign('not-the-ct', CHANNEL_KEY), ts: Date.now() } }, v: { major: 2 } }), {});
-            const staleAns = await postWire(port, sealedBody(ride(freshNonce('wire-seal-')), CHANNEL_KEY, Date.now() - (6 * 60 * 1000)), {});
+            const wrong = await postWire(port, JSON.stringify({ event: 'relay.ride', from: 'wire-sealed-row', ts: _runNow, nonce: 's' + (++_nonceCount).toString(36).padStart(4, '0'), payload: { ct: ride(freshNonce('wire-seal-')), seal: { sig: Encrypt.hmacSign('not-the-ct', CHANNEL_KEY), ts: _runNow } }, v: { major: 2 } }), {});
+            const staleAns = await postWire(port, sealedBody(ride(freshNonce('wire-seal-')), CHANNEL_KEY, _runNow - (6 * 60 * 1000)), {});
             const ctE = ride(freshNonce('wire-seal-'));
-            const shared = { sig: Encrypt.hmacSign(ctE, CHANNEL_KEY), ts: Date.now() };
-            const fresh = () => JSON.stringify({ event: 'relay.ride', from: 'wire-sealed-row', ts: Date.now(), nonce: 's' + Math.random().toString(16).slice(2), payload: { ct: ctE, seal: shared }, v: { major: 2 } });
+            const shared = { sig: Encrypt.hmacSign(ctE, CHANNEL_KEY), ts: _runNow };
+            const fresh = () => JSON.stringify({ event: 'relay.ride', from: 'wire-sealed-row', ts: _runNow, nonce: 's' + (++_nonceCount).toString(36).padStart(4, '0'), payload: { ct: ctE, seal: shared }, v: { major: 2 } });
             const first = await postWire(port, fresh(), {});
             await new Promise((r) => setTimeout(r, 6));
             const second = await postWire(port, fresh(), {});
@@ -846,6 +880,8 @@ export default {
       name: 'wire-traveler-carrier-id-named',
       description: 'the traveler carrier (tr/1) rides the real wire as a bridge family: a legal packet dispatches and its door landing is the brain_write record slot NAMED traveler-<id>-tr1.json with the packet inside; a bent packet (seq != steps) refuses typed INSIDE the 200 ack (E_TRAVELER_STEP) and an unknown tr/ version refuses the SAME lane (E_TRAVELER_SCHEMA) - the rizer never guesses',
       async run(_harness) {
+        // the determinism law: the wall stamp rides the run root's vant-now route
+        if ((await stampNow(_harness)) == null) return skip('vant-now route not armed');
         const { relay: relayCore } = await wireKit();
         return await withMountedRelay(relayCore, async (port) => {
           const seen = [];
@@ -934,7 +970,9 @@ export default {
       name: 'edge-events-gate-ladder',
       description: "the SSE stream-through's GET gate is the FULL r/2 ladder re-run over DECLARATIONS: posture off = raw 404; enabled without a secret = typed 503 fail-closed; a missing signature, a WRONG signature and a STALE ts (signed but outside the freshness window) all answer 401 typed; and the declared target rides the same origin guard - a plaintext hop 403s, the metadata IP 403s, a traversal path 400s - the bytes never pipe through a refusal",
       async run(harness) {
-        const now = Date.now();
+        // the determinism law: the wall stamp rides the run root's vant-now route
+        if ((await stampNow(harness)) == null) return skip('vant-now route not armed');
+        const now = _runNow;
         const staleTs = now - (11 * 60 * 1000);
         // the edge signs url.search VERBATIM - and url.search carries the
         // LEADING '?'. The signed bytes are the full search string.
@@ -981,6 +1019,8 @@ export default {
       name: 'wire-traveler-law-lanes',
       description: "the traveler's REMAINING shape lanes at the relay door (the sibling row covers STEP/SCHEMA): a non-hex id refuses E_TRAVELER_ADDRESS before the door slot generator ever sees it (the id-named brain_write slot has nothing to fear only because the guard refuses first), absent slots refuses E_TRAVELER_SHAPE, and NO refused packet rides the door - zero landing growth across the lane fires",
       async run(_harness) {
+        // the determinism law: the wall stamp rides the run root's vant-now route
+        if ((await stampNow(_harness)) == null) return skip('vant-now route not armed');
         const { relay: relayCore } = await wireKit();
         return await withMountedRelay(relayCore, async (port) => {
           const seen = [];

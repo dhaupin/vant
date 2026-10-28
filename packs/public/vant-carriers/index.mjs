@@ -839,7 +839,7 @@ export default {
             return { verdict: 'EXPLOITED', detail: 'a tampered packet verified or refused without its typed name: ' + JSON.stringify(vt).slice(0, 120), tookRequests: 4 };
           }
           const forged = JSON.parse(JSON.stringify(t2));
-          forged.steps.push({ seq: 3, op: 'forge', by: 'typosquat', ts: Date.now() });
+          forged.steps.push({ seq: 3, op: 'forge', by: 'typosquat', ts: 0 });
           if (T.verify(forged).ok !== false) {
             return { verdict: 'EXPLOITED', detail: 'a forged step injection verified - the ledger is the content', tookRequests: 5 };
           }

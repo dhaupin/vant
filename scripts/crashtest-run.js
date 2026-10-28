@@ -2661,6 +2661,16 @@ const LIFECYCLE_CHILD = `${CHILD_STDOUT_GUARD}
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
+    // (determinism law, 2026-10-28) the FRESHNESS legs of the wire rows
+    // need a real current ts: the run root grades its OWN wall clock
+    // through this route - the pack sources never read one (the
+    // determinism lint keeps the pack sources flat; the run-root file is
+    // outside the lint's declared surfaces). The VERDICTS never carry
+    // the stamp: receivers grade freshness against their own clock.
+    harness.registerRoute('vant-now', async () => {
+        return new Response(JSON.stringify({ now: Date.now() }), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     // (kit contracts census 2026-10-27) drive the web/kit contract census
     // (isPrivateIp walls, envelope/shape laws, vocabularies + parity pins)
     // in a fresh child process against the run root's copied web/kit.

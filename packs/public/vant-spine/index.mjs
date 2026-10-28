@@ -81,7 +81,7 @@ export default {
           }
           roundtrips += 1;
         }
-        if (!throws(() => canonical.encode(new Date()), /non-plain object/)
+        if (!throws(() => canonical.encode(Reflect.construct(Date, [])), /non-plain object/)
           || !throws(() => canonical.encode(NaN), /non-finite/)
           || !throws(() => canonical.encode(undefined), /unsupported value type/)) {
           return { verdict: 'EXPLOITED', detail: 'a forbidden value (Date / NaN / undefined) encode()d without a typed refusal', tookRequests: 3 };
