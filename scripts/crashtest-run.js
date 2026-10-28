@@ -4466,6 +4466,8 @@ ${o.task === 'banner' ? '' : `    const out2 = await run();
         const { spawnSync } = require('child_process');
         const carriersPath = JSON.stringify(path.join(ROOT, 'lib', 'carriers.js'));
         const travelerPath = JSON.stringify(path.join(ROOT, 'lib', 'traveler.js'));
+        const brainJsPath = JSON.stringify(path.join(ROOT, 'lib', 'brain.js'));
+        const configJsPath = JSON.stringify(path.join(ROOT, 'lib', 'config.js'));
         let j = null;
         try { j = await ctx.request.json(); } catch { j = null; }
         const ops = (j && Array.isArray(j.ops) && j.ops.length) ? j.ops.slice(0, 20) : null;
@@ -4480,10 +4482,12 @@ ${o.task === 'banner' ? '' : `    const out2 = await run();
                 const header = `(async () => {\nconst carriers = require(${carriersPath});\nconst traveler = require(${travelerPath});\nprocess.chdir(${JSON.stringify(scratch)});\nconst fs = require('fs');\nconst path = require('path');`;
                 const seal = `\n})().catch(e => { console.error('PROBE-ERR:', e.message); process.exit(1); });`;
                 const mk = (core) => header + core + seal;
+                const diagnos = `(function (brainJs, cfgJs) { const b = require(brainJs); console.log('CWD:' + process.cwd()); try { console.log('BRAINPATH:' + b.getBrainPath()); } catch (e) { console.log('BRAINPATH:ERR:' + e.name + ':' + e.message); } try { const c = require(cfgJs); console.log('CFG:' + (c && c.get && c.get('storage.path'))); } catch (e) { console.log('CFG:ERR:' + e.name); } const walk = (d, depth) => { try { return fs.readdirSync(d, { withFileTypes: true }).flatMap((en) => { const p = d + '/' + en.name; return en.isDirectory() && depth < 5 ? walk(p, depth + 1) : (p.includes('carrier-plates') ? [p] : []); }); } catch (e) { return []; } }; console.log('WALK:' + walk(process.cwd(), 0).join('|')); })(${brainJsPath}, ${configJsPath});`;
                 const mintPacket = `const t = traveler.mint({ from: 'floor-1', slots: { title: 'wheel' }, now: 5000 });`;
                 if (o.case === 'persist') {
                     return mk(`carriers.plateDefine({ id: 'mfg-tag', carries: 'full-object', frame: { prefix: 'MTG/', suffix: '/END' }, family: 'tag', note: 'the plant floor tag lane' });
                     const store = 'models/private/vant/state/carrier-plates.json';
+${diagnos}
 ${mintPacket}
                     console.log('STORE:' + fs.existsSync(store));
                     console.log('SIDECAR:' + fs.existsSync(store + '.sha256'));
@@ -4565,6 +4569,7 @@ console.log('GRAMMAR:' + imposter + ',' + imposterCode);`);
                     let packetReturn = false; let packetCode = 'NONE';
                     try { custom2.decode({}); } catch (e) { packetReturn = true; packetCode = e && e.code; }
                     console.log('PACKET:' + packetReturn + ',' + packetCode);
+                    ${diagnos}
                     const storeTxt = fs.readFileSync('models/private/vant/state/carrier-plates.json', 'utf8');
                     console.log('EPHEMERAL:' + !storeTxt.includes('edi-lane'));`);
                 }
@@ -4578,12 +4583,12 @@ console.log('GRAMMAR:' + imposter + ',' + imposterCode);`);
             const fault = p.error ? String(p.error.message || p.error).slice(0, 120)
                 : (p.stderr || '').includes('PROBE-ERR') ? (p.stderr || '').split('\n').filter(l => l.includes('PROBE-ERR')).join(' | ').slice(0, 160) : null;
             out.push(Object.assign({ op: 'plate', case: String(o.case), fault }, (() => {
-                if (o.case === 'persist') return { store: kv('STORE'), sidecar: kv('SIDECAR'), roster: kv('ROSTER') };
+                if (o.case === 'persist') return { store: kv('STORE'), sidecar: kv('SIDECAR'), roster: kv('ROSTER'), cwd: kv('CWD'), brainpath: kv('BRAINPATH'), cfg: kv('CFG'), walk: kv('WALK') };
                 if (o.case === 'framed') return { marker: kv('FRAMED_MARKER'), roundtrip: kv('ROUNDTRIP'), seal: kv('SEAL'), foreign: kv('FOREIGN') };
                 if (o.case === 'pointer') return { pinShape: kv('PIN_SHAPE'), roughSame: kv('ROUGH_SAME'), roughFrame: kv('COIN_FRAME') };
                 if (o.case === 'gates') return { reserved: kv('RESERVED'), malformed: kv('MALFORMED'), grammar: kv('GRAMMAR') };
                 if (o.case === 'hydrate') return { registry: kv('REGISTRY'), stable: kv('STABLE') };
-                if (o.case === 'code') return { tamper: kv('TAMPER'), packet: kv('PACKET'), ephemeral: kv('EPHEMERAL') };
+                if (o.case === 'code') return { tamper: kv('TAMPER'), packet: kv('PACKET'), ephemeral: kv('EPHEMERAL'), cwd: kv('CWD'), brainpath: kv('BRAINPATH'), cfg: kv('CFG'), walk: kv('WALK') };
                 return {};
             })()));
         }
