@@ -930,6 +930,51 @@ export default {
       },
     },
 
+    // (batch 5, 2026-10-28) the knee rung the second batch owed: the
+    // DISABLED kill at the BRIDGE (podTokenFor), not just at the admin
+    // gate - a bound token that turns fail-closed the moment its
+    // account dies.
+    {
+      name: 'disabled-account-knee-fail-closed',
+      description: 'the knee rung the second batch owed: a viewer session bound to a pod token reads through the bridge (present, vguest) BEFORE the disable, and the same bind answers fail-closed (present:false) through podTokenFor after the account dies - the disabled account dies at EVERY gate, the forwarded-token knee included',
+      async run(harness) {
+        const adminEmail = 'knee-admin@vant-dash.local';
+        const viewerEmail = 'knee-viewer@vant-dash.local';
+        const viewerHash = emailHashOf(viewerEmail, UD_SALT);
+        const results = await probeDoors(harness, [
+          call('capture-mint', { env: { sink: true, VANT_EMAIL_SALT: UD_SALT }, endpoint: 'request-otp', body: { email: adminEmail } }),
+          call('ok-admin', { env: { VANT_EMAIL_SALT: UD_SALT }, endpoint: 'verify-otp', body: { email: adminEmail, code: '__CODE__' } }),
+          { name: 'capture-mint-2', env: { bolete: true, sink: true, VANT_EMAIL_SALT: UD_SALT }, request: { endpoint: 'request-otp', method: 'POST', body: JSON.stringify({ email: viewerEmail }) } },
+          { name: 'ok-viewer', env: { bolete: true, VANT_EMAIL_SALT: UD_SALT }, request: { endpoint: 'verify-otp', method: 'POST', body: JSON.stringify({ email: viewerEmail, code: '__CODE__' }) } },
+          { name: 'bind-victim-token', env: { bolete: true, VANT_EMAIL_SALT: UD_SALT }, request: { endpoint: 'bridge-establish', method: 'POST', useCookie: 'ok-viewer', property: 'pod-alpha-dis', body: JSON.stringify({ token: TOKEN_B }) } },
+          { name: 'knee-bound-pre', env: { bolete: true, VANT_EMAIL_SALT: UD_SALT }, request: { endpoint: 'bridge-pod-token', method: 'POST', useCookie: 'ok-viewer', property: 'pod-alpha-dis', headers: {} } },
+          { name: 'users-disable-viewer', env: { bolete: true, VANT_EMAIL_SALT: UD_SALT }, request: { endpoint: 'users', method: 'POST', useCookie: 'ok-admin', headers: { 'content-type': 'application/json' }, url: USERS_URL + '/set-status', body: JSON.stringify({ emailHash: viewerHash, status: 'disabled' }) } },
+          { name: 'knee-bound-post', env: { bolete: true, VANT_EMAIL_SALT: UD_SALT }, request: { endpoint: 'bridge-pod-token', method: 'POST', useCookie: 'ok-viewer', property: 'pod-alpha-dis', headers: {} } },
+        ]);
+        if (!results) return skip('dash-auth not armed with the small doors');
+        const bind = shapeResults(results, 'bind-victim-token');
+        const pre = shapeResults(results, 'knee-bound-pre');
+        const disable = shapeResults(results, 'users-disable-viewer');
+        const post = shapeResults(results, 'knee-bound-post');
+        if (!bind || !pre || !disable || !post) {
+          return { verdict: 'EXPLOITED', detail: 'probe threw on the knee ladder - every rung must answer', tookRequests: 8 };
+        }
+        if (!bind.body || bind.body.ok !== true || bind.body.bound !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the viewer token bind answered ' + JSON.stringify(bind.body).slice(0, 90) + ' - the binding leg must land ok:true bound:true', tookRequests: 8 };
+        }
+        if (!pre.body || pre.body.present !== true || pre.body.isVguest !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the bound token answered ' + JSON.stringify(pre.body).slice(0, 90) + ' - the live viewer reads through as vguest before the disable', tookRequests: 8 };
+        }
+        if (!disable.body || disable.body.ok !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the disable answered ' + JSON.stringify(disable.body).slice(0, 90) + ' - the admin may disable accounts that are not its own', tookRequests: 8 };
+        }
+        if (!post.body || post.body.present !== false) {
+          return { verdict: 'EXPLOITED', detail: 'the disabled-account knee answered ' + JSON.stringify(post.body).slice(0, 90) + ' - podTokenFor must fail CLOSED (null) once accountActive is false, even with a valid bound token', tookRequests: 8, evidence: { body: post.body } };
+        }
+        return { verdict: 'REFUSED', detail: 'the bind lands (ok true, bound true), the live viewer reads through the knee as vguest, the disable lands ok:true, and the VERY SAME bind answers fail-closed (present:false) through podTokenFor after the account dies - the disabled account dies at EVERY gate, the forwarded-token knee included', tookRequests: 8 };
+      },
+    },
+
     {
       name: 'small-doors-mcp-trio-typed-forward',
       description: 'the MCP forward trio (exec POST, tools GET, events GET) all cross ONE forward: with no pod origin configured each answers the typed 503 naming VANT_PROPERTY_LOCAL_ORIGIN and hinting at the fix (Pages settings) - a translate-to-door family that refuses honestly at every verb, never a fake success and never a crash',

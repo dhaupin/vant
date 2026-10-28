@@ -1476,6 +1476,8 @@ const EXPECTED = {
         'small-doors-audit-ladder-and-cap': 'skip',
         'small-doors-users-roster-lockout-and-gate-done': 'skip',
         'small-doors-mcp-trio-typed-forward': 'skip',
+        // (batch 5, 2026-10-28) the DISABLED kill at the bridge (podTokenFor)
+        'disabled-account-knee-fail-closed': 'skip',
     },
     // ARMED 2026-10-25 (drill-down slice 1, Phase A of the S0→S1 campaign,
     // #249): the trust→tree consumer family converted from the native
