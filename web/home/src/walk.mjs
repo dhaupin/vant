@@ -39,6 +39,10 @@ export const WALK = [
     { label: 'Security', href: '/security' },
     { label: 'Showcase', href: '/showcase' },
     { label: 'Status', href: '/status' },
+    // the combined STRUCT audit (issue #264): statically honest by design
+    // (mock-labelled cards prerender; nothing to wire before it answers),
+    // so unlike Status this stop rides UNGATED in the walk.
+    { label: 'Struct audit', href: '/audit' },
     { label: 'Releases', href: 'https://github.com/dhaupin/vant/releases' },
     { label: 'GitHub', href: 'https://github.com/dhaupin/vant' },
     { label: 'Docs', href: 'https://docs.creadev.org/vant/' },
@@ -58,6 +62,7 @@ export const LEARN = [
     { label: 'CLI reference', href: 'https://docs.creadev.org/vant/reference/cli' },
     { label: 'Security', href: 'https://docs.creadev.org/vant/security/' },
     { label: 'Operations', href: 'https://docs.creadev.org/vant/operations/' },
+    { label: 'MCP tools', href: 'https://docs.creadev.org/vant/reference/mcp-tools' },
 ]
 
 export const STATUS_LIVE = gates.STATUS_LIVE

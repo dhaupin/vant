@@ -35,10 +35,10 @@ describe('src/walk.mjs - the walk contract (one list, four surfaces)', () => {
         }
     })
 
-    it('reads the tour in the owner order (Status rides right after Showcase)', () => {
+    it('reads the tour in the owner order (issue #264 adds Struct audit)', () => {
         expect(WALK.map((s) => s.label)).toEqual([
             'Home', 'Install', 'Brain', 'Security', 'Showcase',
-            'Status', 'Releases', 'GitHub', 'Docs', 'Contact',
+            'Status', 'Struct audit', 'Releases', 'GitHub', 'Docs', 'Contact',
         ])
     })
 
@@ -65,17 +65,20 @@ describe('src/walk.mjs - the footer Learn contract (nine docs doors)', () => {
 describe('hopChain - the menu-derived prev/next contract (externals ride along)', () => {
     const ix = (href) => WALK.findIndex((s) => s.href === href)
 
-    it('walks internal stops directly (Showcase: Security <-> Status)', () => {
+    it('walks internal stops directly (Showcase: Security <-> Status, Status -> Struct audit next)', () => {
         const back = hopChain(WALK, ix('/showcase'), -1)
         const fwd = hopChain(WALK, ix('/showcase'), 1)
         expect(back.externals).toEqual([])
         expect(back.internal.label).toBe('Security')
         expect(fwd.externals).toEqual([])
         expect(fwd.internal.label).toBe('Status')
+        const fromStatus = hopChain(WALK, ix('/status'), 1)
+        expect(fromStatus.externals).toEqual([])
+        expect(fromStatus.internal.href).toBe('/audit')
     })
 
-    it('renders the externals, then the tour hop that skips them (Status next)', () => {
-        const fwd = hopChain(WALK, ix('/status'), 1)
+    it('renders the externals, then the tour hop that skips them (Struct audit next)', () => {
+        const fwd = hopChain(WALK, ix('/audit'), 1)
         expect(fwd.externals.map((s) => s.label)).toEqual(['Releases', 'GitHub', 'Docs'])
         expect(fwd.internal.href).toBe('/contact')
     })
@@ -83,7 +86,7 @@ describe('hopChain - the menu-derived prev/next contract (externals ride along)'
     it('collects the externals behind a prev hop too (Contact prev)', () => {
         const back = hopChain(WALK, ix('/contact'), -1)
         expect(back.externals.map((s) => s.label)).toEqual(['Docs', 'GitHub', 'Releases'])
-        expect(back.internal.href).toBe('/status')
+        expect(back.internal.href).toBe('/audit')
     })
 
     it('wraps the tour back to Home after the last stop (Contact next)', () => {
@@ -100,7 +103,7 @@ describe('hopChain - the menu-derived prev/next contract (externals ride along)'
         // full tour; WALK_LIVE is the same tour minus the unwired stop.
         expect(STATUS_LIVE).toBe(false)
         expect(WALK_LIVE).toEqual(WALK.filter((s) => s.href !== '/status'))
-        expect(WALK_LIVE.length).toBe(9)
+        expect(WALK_LIVE.length).toBe(10)
     })
 
     it('resolves gates by name the same VITE_<NAME>_LIVE way (future surfaces)', () => {
