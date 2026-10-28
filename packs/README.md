@@ -1990,6 +1990,15 @@ Where the remaining repo parts land:
   second batch; the session seals (`src/lib/seal.ts`) live on the UI's own
   native tests per the surfaces rule. The UI modules keep their own native
   tests — packs attack the WIRE, not React mounts.
+  [CLOSED 2026-10-28] the knee + auth_guard second batch landed as the
+  batch-2 rows (token-source-order / bound-token-property-scoped /
+  token-intake-binding-law / raw-cookie-fallback-hygiene /
+  admin-gate-typed-ladder); batch 5 closed the rung that batch left open:
+  `disabled-account-knee-fail-closed` — the disabled account kills at the
+  BRIDGE (podTokenFor answers present:false through the very same bind it
+  answered present:true with while the account lived), not just at the
+  admin gate. 21 rows REFUSED x2 golden, contract 359/0, the row 'skip'
+  honestly in-suite (run-root-only dash-auth family).
 - **`web/kit` contracts → `vant-kit`, the 21st pack (2026-10-28).** The
   survey's note below is STAMPED OVER: the vendored contract layer now
   HAS its own census (`vant-kit/kit-contracts-census`, armed run-root
