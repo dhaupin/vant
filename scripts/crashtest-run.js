@@ -2447,6 +2447,88 @@ function buildRoutes(sb, Harness) {
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
+    // (legacy-orphan-laws census 2026-10-28, wave 6 slice 2) the
+    // legacy-runner graveyard's REAL-behavior leftovers: of the 31
+    // sweep-invisible test/test-*.js files, most duplicate laws that MODERN
+    // suites now cover (escrow.test.js, habitat-rls*, security-hardening
+    // P0-9/P1-15, islands.test.js, vaf's audit-C1 regression). What stayed
+    // ORPHANED - graded by NO modern suite and NO pack row - are these: the
+    // brain T11b nuclear-alias removals (loadBrain/brainList must be GONE),
+    // legal's dormant gate chain (canUse's DORMANT answer, the
+    // always-pass-while-dormant checkGate, the activate/deactivate
+    // round-trips), sandbox's RLS binding trio (initRLS true,
+    // generateCaps/createAllowed objects), security's op-gate shapes
+    // (Security class, isOperationAllowed/getStatus), and islands'
+    // class/hydrated/available trio. The child grades exactly the orphaned
+    // set; everything already covered retires as duplicates.
+    const LEGACY_ORPHAN_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const out = { family: 'legacy-orphan-laws', ok: true, bail: null };
+    try {
+        // ---- lib/brain: the T11b nuclear-alias removals + the mode law
+        const brain = require('./lib/brain.js');
+        out.brainT11bAliasesGone = brain.loadBrain === undefined && brain.brainList === undefined;
+        const modeWas = brain.getMode();
+        brain.setMode('public');
+        out.brainModeRoundTrip = brain.getMode() === 'public';
+        brain.setMode(modeWas === 'private' ? 'private' : 'dual');
+        out.brainPathsNonEmpty = String(brain.getBrainPath()).length > 0 && String(brain.getPublicPath()).length > 0;
+        const corpus = await brain.loadCorpus({ sync: true });
+        out.brainCorpusArray = Array.isArray(corpus) && corpus.length >= 0;
+        // ---- lib/legal: the dormant gate chain
+        const legal = require('./lib/legal.js');
+        const useShape = legal.canUse();
+        out.legalCanUseDormant = !!(useShape && useShape.allowed === true && useShape.level === 'passive');
+        out.legalDormantGatePass = legal.checkGate('use', {}) === true;
+        out.legalUnknownGatePass = legal.checkGate('not-a-real-gate', {}) === true;
+        const act = legal.activate('warn');
+        out.legalActivateTyped = !!(act && act.activated === true && act.level === 'warn');
+        const off = legal.deactivate();
+        out.legalDeactivateTyped = !!(off && off.deactivated === true && off.status === 'DORMANT');
+        // ---- lib/sandbox: the RLS binding trio
+        const sandboxMod = require('./lib/sandbox.js');
+        const Habitat = require('./lib/habitat.js');
+        const hab = new Habitat();
+        hab.createWorkspace('census-ws');
+        out.sbInitRLSWithHabitat = sandboxMod.initRLS(hab) === true;
+        out.sbGenerateCapsObject = typeof sandboxMod.generateCaps({}) === 'object';
+        out.sbCreateAllowedObject = typeof sandboxMod.createAllowed() === 'object';
+        // ---- lib/security: the op-gate shapes
+        const sec = require('./lib/security.js');
+        out.secClassInstantiates = typeof sec.Security === 'function' && !!(new sec.Security());
+        const secInst = new sec.Security();
+        out.secInstEncryptDecryptFns = typeof secInst.encrypt === 'function' && typeof secInst.decrypt === 'function';
+        out.secIsOperationAllowedObject = typeof sec.isOperationAllowed('test', {}) === 'object';
+        out.secGetStatusObject = typeof sec.getStatus() === 'object';
+        // ---- lib/islands: the class/hydrated/available trio
+        const isl = require('./lib/islands.js');
+        out.islGetHydratedArray = Array.isArray(isl.getHydrated());
+        out.islGetAvailableArray = Array.isArray(isl.getAvailable());
+        const IslClass = isl.Islands;
+        let statusOk = false;
+        if (typeof IslClass === 'function') {
+            const inst = new IslClass();
+            statusOk = typeof inst.getStatus() === 'object';
+        }
+        out.islClassStatusObject = statusOk === true;
+    } catch (e) {
+        out.ok = false;
+        out.bail = (e && e.message) ? e.message : String(e);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ ok: false, bail: String(e) }) + '>>END'); });
+`;
+
+    harness.registerRoute('legacy-orphan-laws', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', LEGACY_ORPHAN_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `legacy-orphan-laws probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     harness.registerRoute('mcp-exec', async (ctx) => {
         const j = await ctx.request.json().catch(() => ({}));
         let outText;

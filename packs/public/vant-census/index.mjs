@@ -203,6 +203,34 @@ export default {
         return { verdict: 'REFUSED', detail: "21 first-doors laws hold across the four naked modules: citations' merge-under-lock chain (round trip, verify both sides, the [Source: prefix, id increment, honest clear), telegram's token wall typed with the validation door answering before it, webhooks' register round-trip + SECRET-FREE ack projection + the secretless bind refusal + HMAC law (genuine/tampered/absent) + replay defense (first fresh, second refused 409, no-signature skip), and theme's sanitize law + applyToMCP mapping - the graveyard's naked modules are now graded behaviorally", tookRequests: 1 };
       },
     },
+    {
+      name: 'legacy-orphan-laws',
+      description: "the graveyard slice 2: the REAL-behavior leftovers the modern suites never claimed - the brain T11b nuclear-alias removals (loadBrain/brainList GONE), the mode/path/corpus laws, legal's dormant gate chain (canUse's passive DORMANT answer, the always-pass-while-dormant checkGate incl. unknown gates, the activate warn / deactivate DORMANT round-trips), sandbox's RLS binding trio (initRLS true with a habitat, generateCaps/createAllowed objects), security's op-gate shapes (Security class, instance encrypt/decrypt, isOperationAllowed/getStatus), and islands' class/hydrated/available trio - everything else in the graveyard duplicates MODERN coverage (escrow.test.js, habitat-rls*, security-hardening P0-9/P1-15, islands.test.js, the audit-C1 vaf regression) and retires as duplicates",
+      async run(harness) {
+        const r = await tryRun(harness, 'legacy-orphan-laws', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: '{}',
+        });
+        if (r._absent) return skip('no legacy-orphan-laws route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `legacy-orphan-laws threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return skip('legacy-orphan-laws probe unavailable: ' + (j && j.error || 'no payload'));
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the orphan-laws child faulted mid-census: ' + (j.bail || 'unknown'), tookRequests: 1 };
+        const laws = [
+          ['brain T11b removals + mode law', j.brainT11bAliasesGone && j.brainModeRoundTrip && j.brainPathsNonEmpty && j.brainCorpusArray],
+          ['legal dormant chain', j.legalCanUseDormant && j.legalDormantGatePass && j.legalUnknownGatePass && j.legalActivateTyped && j.legalDeactivateTyped],
+          ['sandbox RLS trio', j.sbInitRLSWithHabitat && j.sbGenerateCapsObject && j.sbCreateAllowedObject],
+          ['security op-gate shapes', j.secClassInstantiates && j.secInstEncryptDecryptFns && j.secIsOperationAllowedObject && j.secGetStatusObject],
+          ['islands class trio', j.islGetHydratedArray && j.islGetAvailableArray && j.islClassStatusObject],
+        ];
+        const broken = laws.filter(([, ok]) => !ok);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: 'the orphaned laws broke at: ' + broken.map(([n]) => n).join(', '), tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: "17 orphaned laws hold: the brain T11b aliases are gone with the mode/path/corpus laws intact, legal's dormant gate chain answers honestly (passive canUse, always-pass checkGate incl. unknown gates, typed activate/deactivate), sandbox's RLS binding trio wires, security's op-gate shapes hold, and islands' class/hydrated/available trio is honest - the graveyard's orphaned behaviors are now pack-graded and the rest of the legacy files retire as duplicates", tookRequests: 1 };
+      },
+    },
   ],
 };
 

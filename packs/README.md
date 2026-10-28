@@ -52,7 +52,7 @@ that rides real OS processes or its own module plane stays native):
 |---|---|---|---|
 | `vant-brain` | 28 | `test/brain.test.js` (trim) + `test/brain-circuit.test.js` (retired whole 2026-10-27) |
 | `vant-carriers` | 42 | `test/carriers.test.js` (retired whole 2026-10-27) + `test/traveler-lib.test.js` (trimmed to the REAL-PROCESS CLI family) |
-| `vant-census` | 5 | config-armed censuses + the naked-lib first-doors row (run-root ctx; no native suite) |
+| `vant-census` | 6 | config-armed censuses + naked-lib first-doors + legacy-orphan-laws rows (run-root ctx; no native suite) |
 | `vant-crew` | 4 | crew quota trio (lib surface; the doors census rides run roots) |
 | `vant-dashboard` | 22 | the dashboard webs faces (dash-auth arm; native Stayed for the module plane) |
 | `vant-discipline` | 6 | memory/governance/escrow faces (their suites keep the kernel-plane pins) |
@@ -2618,3 +2618,49 @@ coverage anywhere: `lib/citations.js`, `lib/telegram.js`,
   sibling precedent). `packs:lint` 21 packs / 293 ids; `packs:audit`
   clean with the one ALLOWED-pinned known finding; determinism lint
   flat (21 files). The full-table fires ride the next restamp.
+
+
+### Wave 6 slice 2 (2026-10-28) - the graveyard's real-behavior census: duplicates retire, orphans convert
+
+Reading the eight "real-behavior" legacy suites exposed the deepest
+ surprise yet: **the modern suites already exist and cover MORE than
+ the legacy files ever did** - `test/escrow.test.js` (337 lines:
+ canSpend/recordSpend/beforeExecute), `test/habitat-rls*.test.js`
+ (the role/policy chain), `test/security-hardening.test.js` P0-9 (the
+ DEFAULT_CAPABILITIES deny-by-default law) and P1-15 (traversal laws:
+ single/mixed/double-encoded, Unicode-normalized, malformed - far
+ deeper than the legacy vaf smoke), `test/islands.test.js` (manifest +
+ static/lazy islands), `test/legal.test.js`, and the audit-C1 vaf
+ regression. So the real sweep claim of slice 1's wave-6 entry
+ (vaf/sandbox/etc. "naked elsewhere") corrects itself here: only
+ FIVE law groups were genuinely orphaned - graded by NO modern suite
+ and NO pack row - and they convert to `legacy-orphan-laws` (vant-
+ census row 6) over the run-root probe child: the brain T11b nuclear-
+ alias removals (loadBrain/brainList GONE) with the mode/path/corpus
+ laws, legal's dormant gate chain (canUse's passive DORMANT answer,
+ the always-pass-while-dormant checkGate incl. unknown gates, the
+ activate-warn/deactivate-DORMANT round-trips), sandbox's RLS
+ binding trio (initRLS true with a habitat, generateCaps/
+ createAllowed objects), security's op-gate shapes (Security class,
+ instance encrypt/decrypt functions, isOperationAllowed/getStatus
+ objects), and islands' class/hydrated/available trio.
+
+- **Retirement (convert first, then retire):** the eight real-behavior
+  legacy files deleted whole - `test-brain.js`, `test-escrow.js`,
+  `test-habitat.js`, `test-islands.js`, `test-legal.js`,
+  `test-sandbox.js`, `test-security.js`, `test-vaf.js`. Their claims
+  live in the pack rows (the orphaned set) and the modern suites
+  (the duplicated set, where modern coverage is strictly deeper).
+  The graveyard now stands at 18 files: the pure shape-smokes
+  (api/audit/boot/compute/cron/error/event/integrations/mcp/metrics/
+  msg/qos/stego/storage/stream/telegram/tmp/utilities/vant/webhooks),
+  each of whose "has X function" claims rides the module census rows
+  or a successor slice's conversion.
+
+- Stamps: `--pack=vant-census` x2 verdict-identical - REFUSED 2 /
+  0 EXPLOITED / 4 honest not-armed skips. Contract **378/0, exit 0**
+  with both census rows graded honestly `skip` in-suite
+  (run-root-only arm, the sibling precedent). `packs:lint` 21/294;
+  `packs:audit` clean with the pinned known finding; determinism
+  lint flat. The full-table fires + native floor sweep ride the
+  next restamp (the wave-6 IOU).

@@ -1138,6 +1138,15 @@ const EXPECTED = {
         // the README ledger pins the verdicts (the first fire's own find:
         // the register ack is a SECRET-FREE projection).
         'naked-lib-first-doors': 'skip',
+        // (legacy-orphan-laws, ARMED 2026-10-28, wave 6 slice 2) the
+        // graveyard's REAL-behavior leftovers the modern suites never
+        // claimed - brain T11b nuclear-alias removals, legal's dormant gate
+        // chain, sandbox's RLS binding trio, security's op-gate shapes,
+        // islands' class trio - graded over the run-root probe child
+        // (run-root-only arm, the sibling precedent; the run fires grade
+        // it live x2 and the README ledger pins the verdicts). The rest
+        // of the legacy graveyard retired as MODERN-COVERAGE DUPLICATES.
+        'legacy-orphan-laws': 'skip',
     },
     'vant-brain': {
         'private-first-fallback': 'REFUSED',
