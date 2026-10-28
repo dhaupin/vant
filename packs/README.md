@@ -2126,6 +2126,35 @@ compare has no early exit.
 7/7 rows `REFUSED` x2 deterministic (25/25 laws held both cycles);
 contract 360/0 with the row graded live in-suite; lint flat.
 
+## Wave 3 (2026-10-28) — the plate slice: the two unrowed dashboard doors
+
+The fresh wire-survey read re-inventoried every live route under
+`web/*/functions` and found ONE real gap: `api/health.ts` (the one-line
+`forward()` plate) and `api/session.ts`'s DELETE face (`clearSession`)
+grew no rows — the survey's batch-5 slice landed the same reading:
+two new rows on the dash-auth arm, and the arm itself grew the
+instrumentation that makes the knee OBSERVABLE instead of inferred: a
+`bridge-forward` library endpoint drives the REAL `forward()` with an
+intercepted upstream fetch (the hop facts — Bearer-vs-cookie, the POST
+Content-Type law, the SSE Accept — ride the row), plus the health
+plate import so even the wrapper is measured, and `bridge-clear` drives
+the real clear law. The rows:
+
+- `bridge-forward-plate-laws`: the unconfigured origin answers typed 503
+  BEFORE any fetch (naming `VANT_PROPERTY_LOCAL_ORIGIN` + the fix hint),
+  the configured hop carries the knee law (bound/raw session answers
+  ride as a Bearer Authorization; the cookie NEVER crosses), status
+  mirrors the upstream, and the POST law sets `application/json` on the
+  hop (the pod door types other MIME 415 by its own gate).
+- `bridge-clear-law`: both resets answer typed `ok` and touch ONLY their
+  own property-scoped cookie (`vg_session_pod-alpha` vs `-beta`) with
+  the full hygiene law (Max-Age=0, HttpOnly, Secure, SameSite=Strict) —
+  scoping lives in the cookie NAME, never a global wipe.
+
+`vant-dashboard 22/22 REFUSED x2` deterministic, zero EXPLOITED;
+contract 374/0 with the two rows graded as honest typed skips
+(run-root-only arm); lint flat; library rows 48/0/1 per fire.
+
 ## Wave 2 (2026-10-28) — the state-wiring suite retires whole
 
 The conversion law ran its last lap on the drill-down bucket: the

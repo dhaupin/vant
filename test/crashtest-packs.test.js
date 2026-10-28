@@ -1525,6 +1525,13 @@ const EXPECTED = {
         'small-doors-mcp-trio-typed-forward': 'skip',
         // (batch 5, 2026-10-28) the DISABLED kill at the bridge (podTokenFor)
         'disabled-account-knee-fail-closed': 'skip',
+        // (batch 5, ARMED 2026-10-28) the PLATE slice: the two doors that
+        // grew no rows - health.ts (the one-line forward plate) and the
+        // session DELETE face (clearSession), both graded through dash-auth
+        // over a REAL intercepted upstream (hop facts observable). Strict
+        // earned verification rides the run root.
+        'bridge-forward-plate-laws': 'skip',
+        'bridge-clear-law': 'skip',
     },
     // ARMED 2026-10-25 (drill-down slice 1, Phase A of the S0→S1 campaign,
     // #249): the trust→tree consumer family converted from the native

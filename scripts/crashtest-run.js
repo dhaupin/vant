@@ -965,6 +965,10 @@ const DASH_CHILD = `
         let mMcpExec = null; try { mMcpExec = await import(url(libDir, 'api/mcp/exec.ts')); } catch (eMe) { mMcpExec = null; }
         let mMcpTools = null; try { mMcpTools = await import(url(libDir, 'api/mcp/tools.ts')); } catch (eMt) { mMcpTools = null; }
         let mMcpEvents = null; try { mMcpEvents = await import(url(libDir, 'api/mcp/events.ts')); } catch (eEv) { mMcpEvents = null; }
+        // (batch 5, the plate slice 2026-10-28) health.ts IS a one-line
+        // wrapper over libBridge.forward; importing THE PLATE means the
+        // row measures the wrapper too, not just the bridge face.
+        let mHealth = null; try { mHealth = await import(url(libDir, 'api/health.ts')); } catch (eHp) { mHealth = null; }
         handlers = {
             'request-otp': ({ method }) => (method === 'GET' ? mReq.onRequestGet : mReq.onRequestPost),
             'verify-otp': ({ method }) => (method === 'GET' ? mVer.onRequestGet : mVer.onRequestPost),
@@ -976,6 +980,7 @@ const DASH_CHILD = `
             'mcp-exec': () => (mMcpExec && mMcpExec.onRequestPost),
             'mcp-tools': () => (mMcpTools && mMcpTools.onRequestGet),
             'mcp-events': () => (mMcpEvents && mMcpEvents.onRequestGet),
+            'health': () => (mHealth && mHealth.onRequestGet),
         };
     } catch (e0) {
         process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ error: 'dashboard handler import failed: ' + e0.name + ': ' + e0.message }) + '>>END');
@@ -1034,7 +1039,7 @@ const DASH_CHILD = `
             // functions, not Pages handlers: they run with an explicit
             // ctx/request the pack composes, and serialize neutral facts
             // (present/hash prefix, never the token itself).
-            if (endpoint === 'bridge-pod-token' || endpoint === 'bridge-establish' || endpoint === 'auth-gate') {
+            if (endpoint === 'bridge-pod-token' || endpoint === 'bridge-establish' || endpoint === 'auth-gate' || endpoint === 'bridge-forward' || endpoint === 'bridge-clear') {
                 const buildCtx = (req) => ({ request: req, env, params: {}, data: {}, next: async () => new Response('no next route', { status: 404 }), waitUntil: () => {} });
                 if (endpoint === 'bridge-pod-token') {
                     if (typeof libBridge.podTokenFor !== 'function') { row.status = 'THREW'; row.bodyText = 'podTokenFor missing'; results.push(row); continue; }
@@ -1066,6 +1071,68 @@ const DASH_CHILD = `
                     results.push(row);
                     continue;
                 }
+                if (endpoint === 'bridge-clear') {
+                    // (batch 5) the session plate's DELETE face: the clear
+                    // law is the typed ok + the property-scoped cookie
+                    // reset (Max-Age=0, HttpOnly, Secure, SameSite=Strict)
+                    // - never a global session wipe.
+                    if (typeof libBridge.clearSession !== 'function') { row.status = 'THREW'; row.bodyText = 'clearSession missing'; results.push(row); continue; }
+                    const res = libBridge.clearSession(String(meta.property || 'pod-alpha'));
+                    row.status = res.status;
+                    const setc = res.headers.get('set-cookie');
+                    if (setc) row.headers['set-cookie'] = String(setc).slice(0, 400);
+                    row.bodyText = String(await res.text()).slice(0, 200);
+                    results.push(row);
+                    continue;
+                }
+                if (endpoint === 'bridge-forward') {
+                    // (batch 5, the plate slice) drive the REAL forward
+                    // the way health.ts does: one round trip through
+                    // bridgeOptions + the walls, with the upstream fetch
+                    // intercepted so the hop facts (the token knee's
+                    // Bearer, the POST Content-Type law, the SSE Accept,
+                    // no cookie trip) are observable alongside the
+                    // resolved behavior (typed 503/429/502 walls, the
+                    // breaker honesty, status mirroring).
+                    if (typeof libBridge.forward !== 'function') { row.status = 'THREW'; row.bodyText = 'forward missing'; results.push(row); continue; }
+                    const up = meta.upstream || null;
+                    let hop = null;
+                    const realFetch2 = globalThis.fetch;
+                    if (up) {
+                        globalThis.fetch = async (u, i) => {
+                            const hh = (i && i.headers) || {};
+                            const hget = (nm) => (hh.get ? hh.get(nm) : hh[nm] || null);
+                            hop = {
+                                url: String(u).slice(0, 300),
+                                method: String((i && i.method) || 'GET').toUpperCase(),
+                                bearer: !!hget('Authorization'),
+                                contentType: hget('Content-Type'),
+                                accept: hget('Accept'),
+                                cookieTrip: !!hget('Cookie'),
+                            };
+                            if (up.throw === true) throw new TypeError('upstream unreachable (canned)');
+                            return new Response(String(up.body == null ? '{"ok":true}' : up.body), { status: Number(up.status || 200), headers: { 'content-type': String(up.contentType || 'application/json') } });
+                        };
+                    }
+                    const target = 'https://dash-run-root.pages.dev/api' + String(meta.path || '/health') + (String(meta.p || '').length ? ('?p=' + String(meta.p)) : '');
+                    const fInit = { method: String(meta.method || 'GET').toUpperCase(), headers };
+                    if (fInit.method === 'POST' && typeof meta.body === 'string') fInit.body = meta.body;
+                    const ctx2 = { request: new Request(target, fInit), env, params: {}, data: {}, next: async () => new Response('no next route', { status: 404 }), waitUntil: () => {} };
+                    try {
+                        const res = await libBridge.forward(ctx2, ctx2.request);
+                        row.hop = hop;
+                        row.status = res.status;
+                        const setc2 = res.headers.get('set-cookie');
+                        if (setc2) row.headers['set-cookie'] = String(setc2).slice(0, 300);
+                        const ct2 = res.headers.get('content-type');
+                        if (ct2) row.headers['content-type'] = String(ct2);
+                        row.bodyText = String(await res.text()).slice(0, 400);
+                    } finally {
+                        globalThis.fetch = realFetch2;
+                    }
+                    results.push(row);
+                    continue;
+                }
                 // auth-gate
                 if (typeof libGuard.ensureAdmin !== 'function') { row.status = 'THREW'; row.bodyText = 'ensureAdmin missing'; results.push(row); continue; }
                 const req = new Request('https://dash-run-root.pages.dev/api/users/list', { method: 'GET', headers });
@@ -1093,19 +1160,38 @@ const DASH_CHILD = `
             const url = (typeof meta.url === 'string' && meta.url) ? meta.url : 'https://dash-run-root.pages.dev/api/auth/' + endpoint;
             const h = handler;
             const realFetch = globalThis.fetch;
-            if (wantSink) {
+            let hop = null;
+            const up = meta.upstream || null;
+            if (wantSink || up) {
                 globalThis.fetch = async (u, i) => {
-                    try {
-                        const txt = String((i && i.body) || '');
-                        const m = txt.match(/\\b\\d{6}\\b/);
-                        if (m) captured = m[0];
-                    } catch (e2) {}
+                    if (wantSink) {
+                        try {
+                            const txt = String((i && i.body) || '');
+                            const m = txt.match(/\\b\\d{6}\\b/);
+                            if (m) captured = m[0];
+                        } catch (e2) {}
+                    }
+                    const hh = (i && i.headers) || {};
+                    const hget2 = (nm) => (hh.get ? hh.get(nm) : hh[nm] || null);
+                    hop = {
+                        url: String(u).slice(0, 300),
+                        method: String((i && i.method) || 'GET').toUpperCase(),
+                        bearer: !!hget2('Authorization'),
+                        contentType: hget2('Content-Type'),
+                        accept: hget2('Accept'),
+                        cookieTrip: !!hget2('Cookie'),
+                    };
+                    if (up) {
+                        if (up.throw === true) throw new TypeError('upstream unreachable (canned)');
+                        return new Response(String(up.body == null ? '{"ok":true}' : up.body), { status: Number(up.status || 200), headers: { 'content-type': String(up.contentType || 'application/json') } });
+                    }
                     return new Response(JSON.stringify({ id: 'captured' }), { status: 200, headers: { 'content-type': 'application/json' } });
                 };
             }
             const context = { request: new Request(url, init), env, params: {}, data: {}, next: async () => new Response('no next route', { status: 404 }), waitUntil: () => {} };
             try {
                 const res = await h(context);
+                row.hop = hop;
                 row.status = res.status;
                 const setc = res.headers.get('set-cookie');
                 if (setc) {

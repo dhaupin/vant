@@ -57,7 +57,7 @@ function shapeResults(results, name) {
   const arr = (results && Array.isArray(results.results)) ? results.results : (Array.isArray(results) ? results : []);
   const hit = arr.find((r) => r && r.name === name);
   if (!hit || hit.status === 'THREW') return null;
-  return { status: hit.status, body: parseJson(hit.bodyText), raw: hit.bodyText, headers: hit.headers || {} };
+  return { status: hit.status, body: parseJson(hit.bodyText), raw: hit.bodyText, headers: hit.headers || {}, hop: hit.hop || null };
 }
 
 function capturedCode(results) {
@@ -1016,6 +1016,72 @@ export default {
           }
         }
         return { verdict: 'REFUSED', detail: 'exec/tools/events all 503 typed on the missing origin naming VANT_PROPERTY_LOCAL_ORIGIN with the fix hint - the forward trio is honest at every verb', tookRequests: 3 };
+      },
+    },
+
+    // --- (batch 5, 2026-10-28) the PLATE slice: the two doors that grew no
+    // --- rows - health.ts (the one-line forward plate) and session.ts's
+    // --- DELETE face (clearSession). The bridge concede is now measured
+    // --- over a REAL upstream fetch (intercepted one-hop lane), so the
+    // --- knee's hop facts are observable, not inferred.
+    {
+      name: 'bridge-forward-plate-laws',
+      description: 'the health plate and the forward concede over a REAL intercepted upstream: the unconfigured origin answers typed 503 naming VANT_PROPERTY_LOCAL_ORIGIN with the fix hint (the hop never fired), the configured origin forwards the hop with the knee law held (the bound-session token rides as a Bearer Authorization header, the raw cookie NEVER trips to the pod), status mirrors the upstream, and the POST law sets Content-Type application/json on the hop (the pod door refuses text/plain POSTs by its own gate)',
+      async run(harness) {
+        const results = await probeDoors(harness, [
+          { name: 'fwd-unconfigured', env: { bolete: false }, request: { endpoint: 'health', method: 'GET', url: 'https://dash-run-root.pages.dev/api/health?p=local' } },
+          { name: 'fwd-configured', env: { bolete: true, sink: false, VANT_PROPERTY_LOCAL_ORIGIN: 'https://pod-alpha.example' }, request: { endpoint: 'health', method: 'GET', url: 'https://dash-run-root.pages.dev/api/health?p=local', headers: { cookie: 'vg_session_local=vg_pack_raw_1' }, upstream: { status: 200, body: '{"ok":true,"pod":"alpha"}' } } },
+          { name: 'fwd-post-ct', env: { bolete: true, sink: false, VANT_PROPERTY_LOCAL_ORIGIN: 'https://pod-alpha.example' }, request: { endpoint: 'health', method: 'POST', url: 'https://dash-run-root.pages.dev/api/mcp/exec?p=local', body: JSON.stringify({ tool: 'brain_read', args: {} }), headers: { cookie: 'vg_session_local=vg_pack_raw_2' }, upstream: { status: 200 } } },
+        ]);
+        if (!results) return skip('dash-auth not armed with the plate slice');
+        const un = shapeResults(results, 'fwd-unconfigured');
+        if (!un || un.status !== 503 || !un.body || String(un.body.error || '').indexOf('VANT_PROPERTY_LOCAL_ORIGIN') === -1) {
+          return { verdict: 'EXPLOITED', detail: 'the unconfigured forward answered ' + (un && un.status) + ' - the plate must 503 typed NAMING the missing setting, never fake a hop', tookRequests: 3 };
+        }
+        if (un.hop) {
+          return { verdict: 'EXPLOITED', detail: 'the unconfigured forward fired a hop anyway - the origin refusal must stand BEFORE the fetch', tookRequests: 3 };
+        }
+        const cfg = shapeResults(results, 'fwd-configured');
+        if (!cfg || cfg.status !== 200) {
+          return { verdict: 'EXPLOITED', detail: 'the configured forward answered ' + (cfg && cfg.status) + ' - the happy path must mirror the upstream', tookRequests: 3 };
+        }
+        if (!cfg.hop || cfg.hop.bearer !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the configured hop rode ' + JSON.stringify(cfg.hop) + ' - the bound session token must ride as a Bearer Authorization header (the knee law)', tookRequests: 3 };
+        }
+        if (cfg.hop.cookieTrip === true) {
+          return { verdict: 'EXPLOITED', detail: 'the hop carried the session COOKIE upstream - the knee translates session state to a Bearer; the secret-at-rest cookie never crosses', tookRequests: 3 };
+        }
+        const ct = shapeResults(results, 'fwd-post-ct');
+        if (!ct || !ct.hop || ct.hop.contentType !== 'application/json') {
+          return { verdict: 'EXPLOITED', detail: 'the POST hop rode Content-Type ' + (ct && ct.hop && ct.hop.contentType) + ' - the bridge must set application/json on POST hops or the pod door types every exec 415', tookRequests: 3 };
+        }
+        return { verdict: 'REFUSED', detail: 'the forward plate holds: unconfigured origin 503s typed BEFORE any fetch, the configured hop carries the bound token as a Bearer (server-side binding, never the raw cookie), status mirrors the upstream, and the POST law sets application/json on the hop - the plate laws are wired', tookRequests: 3 };
+      },
+    },
+
+    {
+      name: 'bridge-clear-law',
+      description: 'the session plate-ls DELETE face: clearSession answers typed ok and resets ONLY the named property-ls session cookie (the property-scoped name, Max-Age=0, HttpOnly, Secure, SameSite=Strict) - never a global wipe, never a mint',
+      async run(harness) {
+        const results = await probeDoors(harness, [
+          { name: 'clear-pod', env: { bolete: false }, request: { endpoint: 'bridge-clear', method: 'DELETE', property: 'pod-alpha' } },
+          { name: 'clear-other', env: { bolete: false }, request: { endpoint: 'bridge-clear', method: 'DELETE', property: 'pod-beta' } },
+        ]);
+        if (!results) return skip('dash-auth not armed with the plate slice');
+        for (const [n, prop] of [['clear-pod', 'pod-alpha'], ['clear-other', 'pod-beta']]) {
+          const row = shapeResults(results, n);
+          if (!row || row.status !== 200 || !row.body || row.body.ok !== true) {
+            return { verdict: 'EXPLOITED', detail: n + ' answered ' + (row && row.status) + ' ' + JSON.stringify(row && row.body) + ' - the clear must answer typed ok', tookRequests: 2 };
+          }
+          const sc = String(row.headers['set-cookie'] || '');
+          if (!sc.startsWith('vg_session_' + prop + '=')) {
+            return { verdict: 'EXPLOITED', detail: n + ' reset cookie ' + sc.slice(0, 60) + ' - the clear must be PROPERTY-SCOPED (vg_session_' + prop + '), never a global wipe', tookRequests: 2 };
+          }
+          if (!/Max-Age=0/.test(sc) || !/HttpOnly/.test(sc) || !/Secure/.test(sc) || !/SameSite=Strict/.test(sc)) {
+            return { verdict: 'EXPLOITED', detail: n + ' reset cookie ' + sc.slice(0, 90) + ' - the cookie reset must keep the full hygiene law (Max-Age=0, HttpOnly, Secure, SameSite=Strict)', tookRequests: 2 };
+          }
+        }
+        return { verdict: 'REFUSED', detail: 'both clears answer typed ok and reset ONLY their own property-scoped cookie (vg_session_pod-alpha / vg_session_pod-beta) with the full hygiene law (Max-Age=0, HttpOnly, Secure, SameSite=Strict) - scoping is the cookie NAME, not the value', tookRequests: 2 };
       },
     },
   ],
