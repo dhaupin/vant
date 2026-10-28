@@ -1129,6 +1129,15 @@ const EXPECTED = {
         'whale-function-cap': 'skip',
         'late-key-canary': 'skip',
         'guard-throw-probe': 'skip',
+        // (naked-lib-first-doors, ARMED 2026-10-28) the legacy-runner
+        // graveyard's naked modules (citations/telegram/webhooks/theme -
+        // whose ONLY tests were sweep-invisible shape-smokes) grade their
+        // first doors over the run-root probe child (fresh modules,
+        // gate grants per-process). Run-root-only arm, the sibling
+        // teams-governance precedent; the run fires grade it live x2 and
+        // the README ledger pins the verdicts (the first fire's own find:
+        // the register ack is a SECRET-FREE projection).
+        'naked-lib-first-doors': 'skip',
     },
     'vant-brain': {
         'private-first-fallback': 'REFUSED',

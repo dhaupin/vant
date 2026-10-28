@@ -2360,6 +2360,93 @@ function buildRoutes(sb, Harness) {
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
+    const LIB_FIRST_DOORS_CHILD = `${CHILD_STDOUT_GUARD}
+// (lib-first-doors census 2026-10-28) the legacy-runner graveyard pass: 31
+// sweep-invisible test/test-*.js legacy suites cover ALIVE lib modules and
+// run in NO suite wall - four of their modules (citations, telegram,
+// webhooks, theme) have ZERO pack coverage anywhere. This child is their
+// first doors: the real doors, not the "has X function" shape-smokes the
+// legacy runner graded.
+(async () => {
+    const out = { family: 'lib-first-doors', ok: true, bail: null };
+    try {
+        require('./lib/sandbox').defaultSandbox.setCapabilities({ canRead: true, canWrite: true });
+        const isFrag = (v, frag) => !!(v && v.message && String(v.message).toLowerCase().indexOf(frag) !== -1);
+        // ---- lib/citations: the git-backed grounding chain (the
+        // merge-under-lock append the old unlocked read-push-save window
+        // could drop rows from, the verify/set-prefix laws, the honest clear)
+        const cit = require('./lib/citations.js');
+        try { cit.clear(); } catch (e2) { }
+        const src1 = cit.addSource('abc1234def5678', 'census-grounding');
+        out.citAddSourceRoundTrip = !!(src1 && src1.id === 1 && src1.commit === 'abc1234def5678');
+        out.citVerifyKnown = cit.verify('abc1234def5678') === true;
+        out.citVerifyUnknown = cit.verify('dead00beef00') === false;
+        out.citFormatPrefix = String(cit.formatCitation({ commit: 'abc1234def5678', context: 'census' })).indexOf('[Source: ') === 0;
+        const src2 = cit.addSource('priv1ateaa', 'census-2');
+        out.citIdIncrement = !!(src2 && src2.id > src1.id);
+        out.citClearHonest = (() => { cit.clear(); return cit.getAll().length === 0; })();
+        // ---- lib/telegram: the token wall typed, AND the validation door
+        // that answers BEFORE the token wall (a bogus method name must not
+        // leak which credential is missing)
+        const taj = require('./lib/telegram.js');
+        const tokErr = await taj.api('sendMessage', {}).catch((e) => e);
+        out.tajTokenWallTyped = isFrag(tokErr, 'telegram_bot_token');
+        const valErr = await taj.api('bogus-method!', {}).catch((e) => e);
+        out.tajValidationDoorFirst = !!valErr && !isFrag(valErr, 'telegram_bot_token');
+        // ---- lib/webhooks: the register round-trip (name + secret bind),
+        // the HMAC signature law (genuine accepted, tampered + absent
+        // refused), and the replay defense's second-come-refusal with the
+        // no-signature skip exemption
+        const wh = require('./lib/webhooks.js');
+        const Encrypt = require('./lib/encrypt.js');
+        const hook = wh.register({ name: 'census-hook', source: 'census', secret: 'shh-census-secret' });
+        out.whRegisterRoundTrip = !!(hook && hook.id === 'census-hook' && hook.source === 'census' && hook.enabled === true);
+        // (the find the first fire graded) the register ack is a
+        // SECRET-FREE projection - the route object with its secret lives
+        // in the registry Map, and the ack over that POST never echoes it
+        out.whRegisterAckSecretFree = !('secret' in hook);
+        // ...and the route WITHOUT a secret refuses to bind typed (the
+        // fail-closed register law: a secretless route can never
+        // authenticate, so it never serves)
+        let bareErr = null;
+        try { wh.register({ name: 'census-bare', source: 'census' }); } catch (e3) { bareErr = e3; }
+        out.whSecretlessBindRefused = isFrag(bareErr, 'secret');
+        const goodSig = Encrypt.hmacSign('census-payload', 'shh-census-secret');
+        out.whSigAcceptsGenuine = wh.verifySignature('census-payload', goodSig, 'shh-census-secret') === true;
+        out.whSigRefusesTampered = wh.verifySignature('census-payload', String(goodSig).replace(/a/, 'b'), 'shh-census-secret') === false;
+        out.whSigRefusesAbsent = wh.verifySignature('census-payload', '', 'shh-census-secret') === false;
+        const rep1 = wh._replayCheck('census-replay-route', { ts: Date.now() }, 'aa11');
+        const rep2 = wh._replayCheck('census-replay-route', { ts: Date.now() }, 'aa11');
+        out.whReplayFirstFresh = rep1.ok === true;
+        out.whReplaySecondRefused = rep2.ok === false && rep2.code === 409;
+        out.whReplayNoSigSkips = (wh._replayCheck('census-replay-route', { ts: Date.now() }, '') || {}).ok === true;
+        // ---- lib/theme: the sanitize law (control-char strip + the 10k
+        // cap) and the MCP result mapping (status/icon/format ride the
+        // result, defaults honest)
+        const th = require('./lib/theme.js');
+        out.thSanitizeStripsControl = th.sanitize(String.fromCharCode(1) + 'ok') === 'ok';
+        out.thSanitizeCapsLength = th.sanitize('x'.padEnd(10050, 'y')).length === 10000;
+        const themed = th.applyToMCP({ x: 1 }, { status: 'success' });
+        out.thApplyToMCPMaps = !!(themed && themed._theme && themed._theme.status === 'success' && themed._theme.icon === '\u2713');
+        out.thApplyToMCPDefault = th.applyToMCP({ x: 1 }, {})._theme.format === 'text';
+    } catch (e) {
+        out.ok = false;
+        out.bail = (e && e.message) ? e.message : String(e);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ ok: false, bail: String(e) }) + '>>END'); });
+`;
+
+    harness.registerRoute('lib-first-doors', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', LIB_FIRST_DOORS_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `lib-first-doors probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     harness.registerRoute('mcp-exec', async (ctx) => {
         const j = await ctx.request.json().catch(() => ({}));
         let outText;

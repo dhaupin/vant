@@ -52,7 +52,7 @@ that rides real OS processes or its own module plane stays native):
 |---|---|---|---|
 | `vant-brain` | 28 | `test/brain.test.js` (trim) + `test/brain-circuit.test.js` (retired whole 2026-10-27) |
 | `vant-carriers` | 42 | `test/carriers.test.js` (retired whole 2026-10-27) + `test/traveler-lib.test.js` (trimmed to the REAL-PROCESS CLI family) |
-| `vant-census` | 4 | config-armed censuses (run-root ctx; no native suite) |
+| `vant-census` | 5 | config-armed censuses + the naked-lib first-doors row (run-root ctx; no native suite) |
 | `vant-crew` | 4 | crew quota trio (lib surface; the doors census rides run roots) |
 | `vant-dashboard` | 22 | the dashboard webs faces (dash-auth arm; native Stayed for the module plane) |
 | `vant-discipline` | 6 | memory/governance/escrow faces (their suites keep the kernel-plane pins) |
@@ -70,7 +70,7 @@ that rides real OS processes or its own module plane stays native):
 | `vant-spine` | 16 | `test/engine-parity-spine.test.js` (retired whole) |
 | `vant-state-wiring` | 44 | `test/state-wiring.test.js` (retired whole 2026-10-28, wave 2) |
 | `vant-stones` | 3 | boot stone seal/restore (shared stone tamper arm) |
-| `vant-teams` | 1 | teams orgchart census (run-root arm) |
+| `vant-teams` | 2 | teams orgchart census + governance depth (run-root arm) |
 
 Retired WHOLE to pack rows this campaign: `test/carriers.test.js`,
 `test/migrations.test.js`, `test/state-wiring.test.js`,
@@ -138,7 +138,7 @@ rows flipped earlier the same day. Both CI whitelists
 (`ALLOWED_FINDINGS` / `KNOWN_FINDINGS`) are now EMPTY — any future finding
 is a regression the gate fails loudly, not whitelistable silently.
 
-### `public/vant-census` — structural oracles (4 oracles; config-armed)
+### `public/vant-census` — structural oracles (4 oracles; config-armed) + the naked-lib first-doors row
 
 **What it does.** Attacks vant's SHAPE, not a route: the require graph, the
 function-size census, the object-literal duplicate-key census, and guard
@@ -2559,3 +2559,62 @@ Three named candidates from the ledger, run as one tranche:
   `teams-governance-depth` graded honestly `skip` in-suite
   (run-root-only arm, the sibling precedent). `packs:lint` 21/292;
   `packs:audit` clean with its pinned finding; determinism lint flat.
+
+## Wave 6 (2026-10-28) - the legacy-runner graveyard census, the naked-lib first-doors row, and three smoke retirements
+
+The census question that named this wave: **are there suites the floor
+sweep never sees?** Yes - 31 legacy `test/test-*.js` files from the
+pre-v0.8.6 runner era carry no `.test.js` suffix, so `run-all.js` skips
+them and CI never fires them. The census ran every one: all 31 still
+pass (exit 0), but their depth classification exposed the real shape -
+about half are pure "has X function" shape-smokes, one (`test-rls.js`)
+asserts literally nothing (0 passed / 0 failed / 2 skipped), and
+`test/active-brain.js` is a helper module, not a suite (it exports
+`resolveActiveBrain` and stays). Four of their modules have NO pack
+coverage anywhere: `lib/citations.js`, `lib/telegram.js`,
+`lib/webhooks.js`, `lib/theme.js`.
+
+- **The naked-lib first-doors row (vant-census row 5), landed.**
+  `naked-lib-first-doors` over the run-root `lib-first-doors` probe
+  child (fresh modules, per-process gate grants; hermetic, socketless):
+  citations' merge-under-lock grounding chain (the source round trip (
+  id 1, commit verbatim), verify answering true known / false unknown,
+  the `[Source: ` prefix law, the lock path's id increment, the honest
+  clear), telegram's token wall answering typed (`TELEGRAM_BOT_TOKEN`)
+  AND its validation door ordering (a bogus method name answers the
+  vaf refusal BEFORE the token wall, so the probe cannot learn which
+  credential is missing), webhooks' register round-trip with its
+  SECRET-FREE ack projection, the secretless route refusing to bind
+  typed, the HMAC law (genuine accepted, tampered and absent refused -
+  the pass-42 fail-closed belt), and the replay defense (first come
+  fresh, second identical signature refused 409, the no-signature
+  exemption honest), and theme's sanitize law (control-char strip +
+  the 10k cap) with the applyToMCP status/icon/format mapping and its
+  honest defaults. **The row's own first fire caught a find - in the
+  row:** the initial law expected `register` to echo the secret; the
+  module's behavior is BETTER than the law - the ack is a secret-free
+  projection (the route object with its secret lives in the registry
+  Map; the ack over that POST never carries it), so the law was
+  repaired to demand exactly that. The module kept its fail-closed
+  secrets; the row now grades the stronger law.
+
+- **Three smoke retirements (convert FIRST, then retire):**
+  `test/test-citations.js`, `test/test-telegram.js`,
+  `test/test-webhooks.js` deleted whole - their shape-only claims
+  ("has addSource", "has send", "has register") are strictly subsumed
+  by the row's behavior laws over the same exports. `test-integrations
+  .js` STAYS (its cache/canvas/embed/network/schema/theme families are
+  not all covered yet - the theme half of its claim is, the rest is
+  wave-6-slice-2 material alongside the real-behavior legacy suites:
+  brain 13/0, escrow 8/0, habitat 12/0, islands 11/0, legal 11/0,
+  sandbox 14/0, security 12/1, vaf 12/0). `test/test-rls.js` asserted
+  nothing and was retired as the dead-weight it measured (its module
+  `lib/rls.js` rides the habitat/sandbox families' next pass).
+
+- Stamps: `--pack=vant-census` ×2 verdict-identical - REFUSED 1 /
+  0 EXPLOITED / 4 honest not-armed skips (the config-armed oracles).
+  Contract **377/0, exit 0 ×1** with `naked-lib-first-doors` graded
+  honestly `skip` in-suite (run-root-only arm, the teams-governance
+  sibling precedent). `packs:lint` 21 packs / 293 ids; `packs:audit`
+  clean with the one ALLOWED-pinned known finding; determinism lint
+  flat (21 files). The full-table fires ride the next restamp.

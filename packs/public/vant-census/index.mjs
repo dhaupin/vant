@@ -21,6 +21,32 @@
 // armed data; nothing reads the clock, the network, or the filesystem except
 // the guard-throw probe, which requires ONLY host-declared module paths the
 // run root already serves to node's loader.
+const ROUTE_ABSENT = /no route registered as/i;
+
+const skip = (why) => ({ verdict: 'REFUSED', skipped: true, detail: `not armed: ${why}` });
+
+async function bodyText(r) {
+  if (r == null) return '';
+  if (typeof r.body === 'string') return r.body;
+  if (typeof r.text === 'function') return await r.text();
+  if (r.response && typeof r.response.text === 'function') {
+    try { return await r.response.text(); } catch { return ''; }
+  }
+  return '';
+}
+
+function parseJson(text) {
+  try { return JSON.parse(text); } catch { return null; }
+}
+
+async function tryRun(harness, route, reqInit) {
+  try { return await harness.run(route, reqInit); }
+  catch (e) {
+    if (ROUTE_ABSENT.test(String(e?.message))) return { _absent: true };
+    throw e;
+  }
+}
+
 export default {
   name: 'vant-census',
   description: 'Structural-oracle attacks for vant pods: require-SCC ceiling, whale-function cap, late-key canary, guard-throw probe',
@@ -145,6 +171,36 @@ export default {
           };
         }
         return { verdict: 'REFUSED', detail: `guard probes held: ${probes.length} probe(s) returned typed refusals or clean results`, tookRequests: 0, evidence: { probes: probes.length } };
+      },
+    },
+    {
+      name: 'naked-lib-first-doors',
+      description: "the legacy-runner graveyard's naked modules open their first doors: lib/citations (the merge-under-lock grounding chain: source round trip, verify known/unknown, the [Source: prefix, id increment, the honest clear), lib/telegram (the token wall typed AND the validation door answering BEFORE it), lib/webhooks (the register round-trip with its SECRET-FREE ack projection - the route object with its secret lives in the registry, the ack over that POST never echoes it - the secretless route refusing to bind typed, the HMAC law - genuine accepted, tampered and absent refused - and the replay defense refusing the second come with its no-signature skip), and lib/theme (the sanitize control-char strip + 10k cap, the applyToMCP status/icon mapping with honest defaults) - modules whose ONLY tests were shape-smokes invisible to the sweep, now graded behaviorally (the first fire's own find: the ack rounds trip WITHOUT echoing the register secret)",
+      async run(harness) {
+        const r = await tryRun(harness, 'lib-first-doors', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: '{}',
+        });
+        if (r._absent) return skip('no lib-first-doors route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `lib-first-doors threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return skip('lib-first-doors probe unavailable: ' + (j && j.error || 'no payload'));
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the first-doors child faulted mid-census: ' + (j.bail || 'unknown'), tookRequests: 1 };
+        const citLaws = ['citAddSourceRoundTrip', 'citVerifyKnown', 'citVerifyUnknown', 'citFormatPrefix', 'citIdIncrement', 'citClearHonest'];
+        const tajLaws = ['tajTokenWallTyped', 'tajValidationDoorFirst'];
+        const whLaws = ['whRegisterRoundTrip', 'whRegisterAckSecretFree', 'whSecretlessBindRefused', 'whSigAcceptsGenuine', 'whSigRefusesTampered', 'whSigRefusesAbsent', 'whReplayFirstFresh', 'whReplaySecondRefused', 'whReplayNoSigSkips'];
+        const thLaws = ['thSanitizeStripsControl', 'thSanitizeCapsLength', 'thApplyToMCPMaps', 'thApplyToMCPDefault'];
+        const broken = [];
+        for (const group of [['citations', citLaws], ['telegram', tajLaws], ['webhooks', whLaws], ['theme', thLaws]]) {
+          const [mod, laws] = group;
+          const missing = laws.filter((k) => j[k] !== true);
+          if (missing.length) broken.push(`${mod}: ${missing.join(', ')}`);
+        }
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: 'the naked modules broke at: ' + broken.join('; '), tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: "21 first-doors laws hold across the four naked modules: citations' merge-under-lock chain (round trip, verify both sides, the [Source: prefix, id increment, honest clear), telegram's token wall typed with the validation door answering before it, webhooks' register round-trip + SECRET-FREE ack projection + the secretless bind refusal + HMAC law (genuine/tampered/absent) + replay defense (first fresh, second refused 409, no-signature skip), and theme's sanitize law + applyToMCP mapping - the graveyard's naked modules are now graded behaviorally", tookRequests: 1 };
       },
     },
   ],
