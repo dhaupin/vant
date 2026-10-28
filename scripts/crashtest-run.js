@@ -4477,9 +4477,19 @@ ${o.task === 'banner' ? '' : `    const out2 = await run();
         for (const op of ops) {
             const o = op || {};
             const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-ct-plates-'));
+            // (privacy default, CI fork 2026-10-28) the CLEAN checkout has no
+            // models/state.json (gitignored) - an unseeded child resolves
+            // getBrainPath() onto the PUBLIC root (fresh-install guard has
+            // no private dir to flip on) and plateDefine writes the plate
+            // store to models/PUBLIC - the native suite's laws are
+            // state-pinned PRIVATE, so the arm seeds exactly that pin in
+            // the scratch before any op child runs (same makeSandbox law
+            // this run root already applies to its own fixture brain).
+            fs.mkdirSync(path.join(scratch, 'models', 'private', 'vant'), { recursive: true });
+            fs.writeFileSync(path.join(scratch, 'models', 'state.json'), JSON.stringify({ stack: ['vant'], currentBrain: 'vant' }));
             scratches.push(scratch);
             const bodyFor = () => {
-                const header = `(async () => {\nconst carriers = require(${carriersPath});\nconst traveler = require(${travelerPath});\nprocess.chdir(${JSON.stringify(scratch)});\nconst fs = require('fs');\nconst path = require('path');`;
+                const header = `(async () => {\nprocess.chdir(${JSON.stringify(scratch)});\nconst carriers = require(${carriersPath});\nconst traveler = require(${travelerPath});\nconst fs = require('fs');\nconst path = require('path');`;
                 const seal = `\n})().catch(e => { console.error('PROBE-ERR:', e.message); process.exit(1); });`;
                 const mk = (core) => header + core + seal;
                 const diagnos = `(function (brainJs, cfgJs) { const b = require(brainJs); console.log('CWD:' + process.cwd()); try { console.log('BRAINPATH:' + b.getBrainPath()); } catch (e) { console.log('BRAINPATH:ERR:' + e.name + ':' + e.message); } try { const c = require(cfgJs); console.log('CFG:' + (c && c.get && c.get('storage.path'))); } catch (e) { console.log('CFG:ERR:' + e.name); } const walk = (d, depth) => { try { return fs.readdirSync(d, { withFileTypes: true }).flatMap((en) => { const p = d + '/' + en.name; return en.isDirectory() && depth < 5 ? walk(p, depth + 1) : (p.includes('carrier-plates') ? [p] : []); }); } catch (e) { return []; } }; const repoRoot = brainJs.slice(0, brainJs.lastIndexOf('/lib/'));

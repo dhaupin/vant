@@ -508,9 +508,12 @@ lesson as slice 2, org side).
 **Slice 4 (same day): the carrier plates family (M1-M16; 6 rows,
 23/23 REFUSED x2).** The arm grew a `carriers-plates` route with
 SUBPROCESS case probes chdir'ing into a scratch cwd (plate stores must
-never pollute the repo tree) — requires the REAL repo lib by absolute
-path FIRST (the store path resolves through the ACTIVE brain, decided at
-module load; the chdir lands after, exactly the native suite's shape):
+never pollute the repo tree) — the CHILD CHDIRS FIRST, then requires the
+REAL repo lib by absolute path (the store path resolves through the
+ACTIVE brain, and an un-pinned cwd may not decide it), and the arm
+SEEDS the native state law in the scratch before any op runs
+(models/state.json pin + models/private/vant, the same makeSandbox law
+this run root applies to its own fixture brain):
 persist (store + .sha256 sidecar + roster ride), the FRAMED artifact
 (definer owns the marker, lib owns the crypto — round-trips BOTH walls,
 seal damage refuses on the SEAL, foreign marker refuses the frame law),
@@ -529,13 +532,16 @@ and out; code never persists).
 | `carriers-plate-hydrate-restart` | plate hydrates from the store and decodes identically after the restart | validated - REFUSED |
 | `carriers-plate-code-carrier` | customer code is gated in and out, and never becomes data | validated - REFUSED |
 
-Slice-4 arm finding (armed, read, fixed in-ride): the scratch children
-must require the lib BEFORE chdir so the brain's active-private check
-reads the repo state at load — otherwise a fresh scratch resolves the
-plate store to the PUBLIC root and the pinned private path model truth
-is missed; the arm now mirrors the native exact order and each case
-sweeps its scratch. The pointer shape check uses plain arithmetic (no
-regex escapes riding template layers).
+Slice-4 arm finding (armed, read, fixed in-ride, CI-fork closed
+2026-10-28): the require-BEFORE-chdir order relied on a .gitignored
+dev-local models/state.json — a CLEAN checkout (CI's) resolved every
+plate store to the PUBLIC root (models/public/vant/state/, walk-verified
+through the child's own diagnostics) and faithfully refused the private
+law rows in-ride. The fixed arm (state-pinned scratch + chdir-first) was
+verified against a git-archive checkout WITH the local state file absent
+— the exact CI shape — green. Each case still sweeps its scratch. The
+pointer shape check uses plain arithmetic (no regex escapes riding
+template layers).
 
 **Slice 5 (same day): assembly + template (pass 260; A1-A6 B1-B7 C3 and
 the C4 compose; 8 rows, 31/31 REFUSED x2).** The `carriers-lane` arm grew
