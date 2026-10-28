@@ -2069,6 +2069,30 @@ Where the remaining repo parts land:
   finding). Two fires green x2 (REFUSED 2 / 0 EXPLOITED; library rows
   48/0/1), contract 357/0 with the row graded 'skip' honestly (run-root
   only census family).
+### The home math plate census (2026-10-28) — vant-home row 7
+
+The fresh wire survey read every live route under `web/*/functions` and
+found every door family armed EXCEPT one facet: the home status
+monitor's own pure math plate, `web/home/functions/_lib/status-math.js`
+(the "stat truth" law rode only a CI script, never pack rows). The new
+row drives the SAME arm shape the home rows use: a `home-status-math`
+route (run root + contract suite, identical body) imports the REAL web
+module into the probe (no lib->web import - the one-way boundary holds)
+and grades **25 laws under a FIXED date pin** (determinism stays flat):
+hollow days stay honest no-data (`pct: null`, never a fabricated
+outage), duplicate daily rows merge (4/5 into an integer 80), rendered
+slots are exactly the trailing window with today last, an id-less or
+out-of-window row contributes nothing, `trailingDays` refuses NaN dates
+empty, uptime is `null` with no data + integer-rounded + sliced to the
+EXACT last-N window, worst state wins with `unknown`s never dragging
+the headline, the alert picker takes worst-then-newest over active rows
+only and answers `null` over garbage, the admin spec gates (https-only,
+name cap, kind whitelist, object options) refuse typed, and the key
+compare has no early exit.
+
+7/7 rows `REFUSED` x2 deterministic (25/25 laws held both cycles);
+contract 360/0 with the row graded live in-suite; lint flat.
+
 ### CI repair (2026-10-28) — the determinism preflight goes flat
 
 The `npx crashtest lint-determinism` gate (crashtest 1.1.0, CI job

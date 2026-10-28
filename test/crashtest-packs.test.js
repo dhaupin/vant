@@ -1075,6 +1075,45 @@ function buildRoutes(sb) {
         return new Response(JSON.stringify(facts), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
     });
 
+    // (2026-10-28 first-doors census) home-status-math: same shape as the
+    // run root's route - the status board's PURE math plate graded under a
+    // FIXED date pin, neutral booleans on the wire only.
+    routes.registerRoute('home-status-math', async () => {
+        const mod = (await import(String(require('url').pathToFileURL(path.join(ROOT, 'web', 'home', 'functions', '_lib', 'status-math.js')))));
+        const fact = {};
+        const TODAY = '2026-01-15';
+        const t = (k, fn) => { try { fact[k] = fn() === true; } catch (e) { fact[k] = null; fact.faults = String(fact.faults || '') + k + ':' + (e && e.name || 'Error') + ';'; } };
+        t('slotLen', () => { const m = mod.dayBuckets([{ endpoint_id: 'a', day: '2026-01-13', up_count: 2, check_count: 2 }], 5, TODAY); const arr = m.get('a'); return Array.isArray(arr) && arr.length === 5 && arr[4].day === TODAY && arr[2].pct === 100 && arr[4].pct === null && arr[0].pct === null && arr[0].up === 0 && arr[0].total === 0; });
+        t('mergedPct', () => { const m = mod.dayBuckets([{ endpoint_id: 'b', day: TODAY, up_count: 3, check_count: 4 }, { endpoint_id: 'b', day: TODAY, up_count: 1, check_count: 1 }], 2, TODAY); const arr = m.get('b'); return arr.length === 2 && arr[1].up === 4 && arr[1].total === 5 && arr[1].pct === 80; });
+        t('idlessIgnored', () => mod.dayBuckets([{ day: TODAY, up_count: 5, check_count: 5 }], 1, TODAY).size === 0);
+        t('outsideDropped', () => { const m = mod.dayBuckets([{ endpoint_id: 'c', day: '2020-01-01', up_count: 9, check_count: 9 }], 1, TODAY); const arr = m.get('c'); return arr.length === 1 && arr[0].pct === null; });
+        t('nanTrailing', () => mod.trailingDays(3, 'not-a-date').length === 0);
+        t('uptimeNull', () => mod.uptimePct([]) === null && mod.uptimePct([{ up: 0, total: 0 }]) === null);
+        t('uptime70', () => mod.uptimePct([{ up: 3, total: 4 }, { up: 4, total: 6 }]) === 70);
+        t('windowSlice', () => { const many = [{ up: 0, total: 1 }]; for (let i = 1; i <= 34; i++) many.push({ up: 1, total: 1 }); return mod.uptimePct(many, 30) === 100 && mod.uptimePct(many, 35) === 97 && mod.uptimePct(many, 100) === 97; });
+        t('worstWins', () => mod.overallStatus([{ state: 'up' }, { state: 'degraded' }, { state: 'down' }]) === 'down');
+        t('unknownNeverDrags', () => mod.overallStatus([{ state: 'up' }, { state: 'unknown' }]) === 'up');
+        t('allUnknown', () => mod.overallStatus([]) === 'unknown' && mod.overallStatus([{ state: 'unknown' }]) === 'unknown');
+        t('alertWorst', () => { const a = mod.pickAlert([{ id: 1, level: 'warn', active: 1 }, { id: 7, level: 'critical', active: 1 }]); return !!a && a.level === 'critical' && a.id === 7; });
+        t('alertTieNewest', () => { const a = mod.pickAlert([{ id: 3, level: 'warn', active: 1 }, { id: 9, level: 'warn', active: 1 }]); return !!a && a.id === 9; });
+        t('alertInactive', () => { const a = mod.pickAlert([{ id: 7, level: 'critical', active: 0 }, { id: 2, level: 'warn', active: 1 }]); return !!a && a.level === 'warn'; });
+        t('alertGarbage', () => mod.pickAlert([null, undefined, {}]) === null);
+        t('specHttpsGate', () => mod.validEndpointSpec({ name: 'x', url: 'http://a.b/c' }).ok === false);
+        t('specNameGate', () => mod.validEndpointSpec({ name: 'x'.repeat(81), url: 'https://a.b' }).ok === false);
+        t('specKindGate', () => mod.validEndpointSpec({ name: 'x', url: 'https://a.b', kind: 'ping' }).ok === false);
+        t('specOptionsGate', () => mod.validEndpointSpec({ name: 'x', url: 'https://a.b', options: [] }).ok === false);
+        t('specGood', () => { const r = mod.validEndpointSpec({ name: '  x  ', url: 'https://a.b/c', kind: 'json-ok', options: { q: 1 } }); return r.ok === true && r.name === 'x'; });
+        t('keyEqual', () => mod.adminKeyMatch('k'.repeat(24), 'k'.repeat(24)) === true);
+        t('keyFullCompare', () => mod.adminKeyMatch('k'.repeat(23) + 'j', 'k'.repeat(23) + 'k') === false);
+        t('keyLength', () => mod.adminKeyMatch('abc', 'abcd') === false);
+        t('keyEmpty', () => mod.adminKeyMatch('', 'x') === false);
+        t('keyNonString', () => mod.adminKeyMatch(null, 'x') === false && mod.adminKeyMatch(42, 'x') === false);
+        const keys = Object.keys(fact).filter((k) => k !== 'faults');
+        fact.checked = keys.length;
+        fact.allHeld = keys.every((k) => fact[k] === true);
+        return new Response(JSON.stringify(fact), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
+    });
+
     return routes;
 }
 
@@ -1358,6 +1397,9 @@ const EXPECTED = {
         // cron row (silent no-op without the DB, cron-only wire, sweep
         // engine over the fake D1).
         'scheduled-sweep-door': 'REFUSED',
+        // (2026-10-28 first-doors census) the math plate row: same arm in
+        // this suite (fixed-date pin) - graded live.
+        'home-status-math-first-doors': 'REFUSED',
     },
     // ARMED 2026-10-25 (Phase A of the S0→S1 conversion campaign, #249) —
     // three packs whose run-root arms live in scripts/crashtest-run.js

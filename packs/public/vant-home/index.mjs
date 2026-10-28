@@ -225,5 +225,26 @@ export default {
             return refused('the cron door is honest on every seat: silent without the binding, cron-only 404 typed on the wire, and the bounded sweep engine runs over the real store', { tookRequests: 3 });
         },
     },
+
+    // (2026-10-28 first-doors census) the status board owns ONE math plate:
+    // _lib/status-math.js (pure). its laws are graded under a FIXED date
+    // pin; the wire carries neutral booleans only.
+    {
+        name: 'home-status-math-first-doors',
+        description: 'the status board OWN pure math plate (_lib/status-math.js) holds under a fixed-date pin: hollow days stay honest no-data (pct null, never a fabricated outage), duplicate daily rows merge (4/5 into an integer 80), an id-less or out-of-window row contributes NOTHING, uptime is null with no data + integer-rounded + sliced to the EXACT last-N window, worst state wins with unknowns never dragging the headline, the alert picker takes worst-then-newest over active rows only and answers null over garbage, the admin spec gates (https-only, name cap, kind whitelist, object options) refuse typed with a trimmed acceptance, and the key compare has no early exit (a last-char difference still walks the full compare)',
+        async run(harness) {
+            const f = await spoke(harness, 'home-status-math', {});
+            if (f.absent) return skip('home-status-math unregistered');
+            if (f.fault) return exploited('status-math plate route faulted: ' + f.fault);
+            const j = f.parsed;
+            if (!j || typeof j !== 'object') return exploited('the math plate answered non-JSON: ' + f.text.slice(0, 80));
+            if (j.faults) return exploited('the math plate faulted inside: ' + j.faults.slice(0, 120));
+            if (j.allHeld !== true) {
+                const failed = Object.keys(j).filter((k) => j[k] !== true && k !== 'faults' && k !== 'checked').join(',');
+                return exploited('the math plate dropped its own laws (' + j.checked + ' checked): [' + failed.slice(0, 160) + '] - the board must hold its math, not approximate it');
+            }
+            return refused('the pure core holds all ' + j.checked + ' laws (buckets + uptime + aggregation + spec gates + key compare) under the fixed-date pin', { tookRequests: 1 });
+        },
+    },
   ],
 };
