@@ -38,6 +38,53 @@ WordPress lane and the `crashtest-site` pack with crashtest's own site).
 
 ## The packs
 
+### The run close-out census (2026-10-28, live counts; the older "reaches N rows" lines below are their slice-time claims)
+
+**269 rows across 21 packs** (strict + honest typed skips graded live each
+fire). The close-out proof run on the final tree: **two consecutive full
+harness cycles, 263 strict rows REFUSED / 0 EXPLOITED / 0 BOUNDED / 6
+honest skips per cycle (269 graded rows), pass-for-pass deterministic**;
+library rows 48/0/1 each cycle. Native-suite disposition, per the
+campaign's reverse-verification law (convert FIRST, then retire; a family
+that rides real OS processes or its own module plane stays native):
+
+| pack | rows | attacks | native counterpart |
+|---|---|---|---|
+| `vant-brain` | 28 | `test/brain.test.js` (trim) + `test/brain-circuit.test.js` (retired whole 2026-10-27) |
+| `vant-carriers` | 42 | `test/carriers.test.js` (retired whole 2026-10-27) + `test/traveler-lib.test.js` (trimmed to the REAL-PROCESS CLI family) |
+| `vant-census` | 4 | config-armed censuses (run-root ctx; no native suite) |
+| `vant-crew` | 4 | crew quota trio (lib surface; the doors census rides run roots) |
+| `vant-dashboard` | 22 | the dashboard webs faces (dash-auth arm; native Stayed for the module plane) |
+| `vant-discipline` | 6 | memory/governance/escrow faces (their suites keep the kernel-plane pins) |
+| `vant-home` | 7 | web/home favorites (the status-math plate row over the first-doors arm) |
+| `vant-kernel` | 10 | the kernel/escrow plane itself (gate-side pins; `test/kernel.test.js` is the plane, kept) |
+| `vant-kit` | 3 | web/kit contracts + the vendoring ring + the CarrierShare plate census |
+| `vant-leisure` | 6 | `test/leisure.test.js` (retired whole) |
+| `vant-mcp` | 4 | MCP tool census (run-root arm) |
+| `vant-migrations` | 24 | `test/migrations.test.js` (retired whole 2026-10-27) |
+| `vant-pass-ledger` | 4 | pass-ledger doc surfaces (`test/pass-ledger.test.js` keeps the ledger plane) |
+| `vant-recursion-wall` | 3 | trace/recursion walls (lib-level) |
+| `vant-relay` | 20 | the r/2 relay face (`test/relay.test.js` REBUILT FRESH per owner ruling — the face plane stays) |
+| `vant-rest` | 13 | lib/server REST doors + the api-object census |
+| `vant-server-wall` | 5 | mcp-server walls (run-root wiring) |
+| `vant-spine` | 16 | `test/engine-parity-spine.test.js` (retired whole) |
+| `vant-state-wiring` | 44 | `test/state-wiring.test.js` (retired whole 2026-10-28, wave 2) |
+| `vant-stones` | 3 | boot stone seal/restore (shared stone tamper arm) |
+| `vant-teams` | 1 | teams orgchart census (run-root arm) |
+
+Retired WHOLE to pack rows this campaign: `test/carriers.test.js`,
+`test/migrations.test.js`, `test/state-wiring.test.js`,
+`test/engine-parity-spine.test.js`, `test/leisure.test.js`,
+`test/brain-circuit.test.js`. Trimmed to their uncovered/real-process
+pins (kept by the reverse-verification law): `test/traveler-lib.test.js`
+(CLI), `test/brain.test.js` (unit pins), `test/guests.test.js` (H1 #185
+lifecycle). Kept as their own module plane: `test/relay.test.js`,
+`test/kernel.test.js`, `test/escrow-kernel.test.js`,
+`test/governance.test.js`, `test/pass-ledger.test.js`,
+`test/memory.test.js`, `test/relay-parity.test.js` (vendored ring),
+`test/crashtest-packs.test.js` (the contract).
+
+
 ### `public/vant-brain` — brain-file layer discipline (9 oracles; all armed 2026-10-22; the listing family landed 2026-10-27)
 
 **Listing slice (2026-10-27, `brain-listing-dirs-family`):** the native
