@@ -80,6 +80,7 @@ The full agent loop, written to be executed without a human, is [Agent Onboardin
 | **Carrier lanes** | Route the packet through stations (`vant carrier list|plates|plate|encode|decode`): the stone envelope, the NSC-9 doorway, the pointer-QR (`VANT:1:`) with mesh local-store or cross-node resolve, and operator-defined PLATE lanes — framed lane data, zero crypto written by the definer |
 | **Webhook relay (r/2)** | One HMAC-gated webhook route for the mesh: `relay.ride` turns a pod into a sealed message-call endpoint for its MCP door, `relay.hop` turns it into a blind ciphertext forwarder; plain http is refused by the origin policy, and a LAN-scope posture (`relay.intranetOrigins`) admits loopback/RFC1918 hops while clouds metadata stays refused in every posture |
 | **Crash safety** | Write-ahead journal plus atomic writes: a crash never leaves torn memory |
+| **Eyes (eyestruct)** | Deterministic look / look-diff with a committed visual memory under `labs/.eyes/` (manifest pin + route matrix + append-only ledger): `npm run test:eyes` gates unexplained appearance drift in CI — browserless by design; the capture verbs (`look/diff/walk`) are LAN-local against the pinned chrome (dev-dep eyestruct@0.9, npm) |
 
 ## Headless Mode
 

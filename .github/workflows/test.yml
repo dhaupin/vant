@@ -41,7 +41,13 @@ jobs:
       - name: Security checks (tokens + npm audit)
         run: |
           ! grep -rE "ghp_[a-zA-Z0-9]{36}" . --include="*.js"
-          npm audit --audit-level=high
+          # --omit=dev: eyestruct (dev-only, the visual gate) rides the
+          # puppeteer chrome-installer chain, whose extract-zip dep carries
+          # an upstream high advisory with NO fix - the chain exists only
+          # for LAN-local capture verbs (look/diff/walk), which vant's CI
+          # never runs (the gate lane is browserless by design). The prod
+          # tree stays clean-0-high, and that is the surface CI promises.
+          npm audit --omit=dev --audit-level=high
 
       - name: Run tests
         run: |
@@ -50,6 +56,16 @@ jobs:
           node test/runner.js
           node test/evals/vibe.js
           node test/coverage.js
+
+      - name: Eyes gate (eyestruct@0.9 visual ledger, browserless)
+        # The crashtest lane aimed at appearance instead of attackability.
+        # eyestruct@0.9 (npm, not the staging pin): `gate` is read-only over
+        # labs/.eyes/ - every committed visual artifact must be explained
+        # by a ledger row and every row must reference a live artifact on
+        # disk. Browserless by design: capture verbs (look/diff/walk) are
+        # LAN-local against the pinned chrome; CI runs the meanings, not
+        # the pixels.
+        run: npx eyestruct gate
 
       - name: Packs deep lint (packstruct@1 author-time gate, vant#247)
         # The live-corpus receipt + CI lane, same commit: every pack

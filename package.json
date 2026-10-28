@@ -34,6 +34,7 @@
   "scripts": {
     "test": "node bin/build-test.js",
     "test:crashtest": "node test/ci-crashtest-gate.js",
+    "test:eyes": "eyestruct gate",
     "packs:lint": "packstruct lint packs/ --deep",
     "packs:audit": "node scripts/audit-packs-gate.js",
     "ledger:snapshot": "node -e \"const l=require('./lib/pass-ledger.js'),fs=require('fs');const vis=l.ledgersReadable();if(!vis.tasks||!vis.mem){console.error('ledger docs unreadable at run root - refusing to stamp a snapshot from invisible bytes');process.exit(1)}const items=l.openItems();const s={schema:1,note:'Machine-visible open-item baseline for labs/TASKS.md + labs/MEM.md (pass-ledger lib/pass-ledger.js). ANY change to the census must update this file in the SAME commit as the ledger edit - a conscious act, never silent drift. Regenerate: npm run ledger:snapshot',stamped:new Date().toISOString().slice(0,10),count:items.length,items:items.map((i)=>({id:i.id,marker:i.marker,source:i.source,at:i.at}))};fs.writeFileSync('labs/open-items.snapshot.json',JSON.stringify(s,null,2)+'\\n');console.log('snapshot stamped:',s.count,'open items')\"",
@@ -70,6 +71,7 @@
     "crashtest": "^1.1.0",
     "eslint": "^8.57.1",
     "eslint-plugin-react-hooks": "4.6.2",
+    "eyestruct": "^0.9.0",
     "packstruct": "^1.0.0",
     "typescript": "5.8.3"
   },
