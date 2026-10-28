@@ -1,26 +1,26 @@
 /**
  * src/pages/StructAudit.jsx (vant-home)
  * =====================================
- * The combined STRUCT audit page (vant issue #264, step a — the
+ * The combined STRUCT audit page (vant issue #264, step a - the
  * mock-feed static skeleton). Like /showcase, this page is static by
  * design: the cards prerender at build time from src/struct-feeds.mjs
  * (the pure-data law), so crawlers and no-JS visitors read the whole
  * board and no network call ships to the browser.
  *
  * The four STRUCT families, combined:
- *   packstruct  — pack conformance gate
- *   crashtest   — the packs floor (rows, contract, native suites)
- *   eyestruct   — the vision battery's findings (npm-live)
- *   poststruct  — the render audit's findings (PRD-staged, pre-npm)
+ *   packstruct  - pack conformance gate
+ *   crashtest   - the packs floor (rows, contract, native suites)
+ *   eyestruct   - the vision battery's findings (npm-live)
+ *   poststruct  - the render audit's findings (PRD-staged, pre-npm)
  *
  * EPOCH LAW (honest by construction): every card that is inline data
  * carries the MOCK SKELETON badge next to its verdict; the crashtest
- * card is LIVE (issue #264 step b — the stamped verdict ledger,
+ * card is LIVE (issue #264 step b - the stamped verdict ledger,
  * src/generated/struct-feed.json, no badge) and the ABSENT card
  * (poststruct, pre-npm) states its absence and grades nothing. When
  * the remaining feeds land (issue steps c-d) their cards flip the
  * same way; the shape stays fixed (kit head:
- * web/kit/components/struct-audit.tsx — the single shape source the
+ * web/kit/components/struct-audit.tsx - the single shape source the
  * dashboard flavor already consumes vendored + hash-pinned).
  */
 
@@ -53,7 +53,7 @@ export default function StructAudit() {
                     eyestruct vision battery, and the poststruct render audit.
                     The crashtest card rides the live stamped verdict ledger
                     (issue #264 step b); the rest are inline mock data shaped
-                    exactly as the real feeds will land (steps c–d) — nothing
+                    exactly as the real feeds will land (steps c - d) - nothing
                     is fetched, nothing is graded, and the mock badge rides an
                     unlanded card until then.
                 </p>

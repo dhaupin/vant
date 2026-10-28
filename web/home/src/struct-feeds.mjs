@@ -2,11 +2,11 @@
  * src/struct-feeds.mjs (vant-home)
  * ================================
  * The pure-data underbelly of the combined STRUCT audit page (vant issue
- * #264, step a — the mock-feed static skeleton). Shrugs at the same law
+ * #264, step a - the mock-feed static skeleton). Shrugs at the same law
  * walk.mjs/showcase.mjs hold: no React, no network, prerender-safe,
  * importable in plain vitest.
  *
- * SHAPE SOURCE: web/kit/components/struct-audit.tsx (kit head) —
+ * SHAPE SOURCE: web/kit/components/struct-audit.tsx (kit head)  -
  * consumed by the dashboard flavor through the vendored, hash-pinned
  * copy web/dashboard/src/frame/StructAudit.tsx. THIS module is the home
  * flavor's own data palm (JSX-free pure data the prerender can read);
@@ -14,7 +14,7 @@
  *
  *   { source, ok, version?, generatedAt?, counts?, findings?, mock?, error?, sourceHref? }
  *   findings: [{ id, page?, level: 'fail'|'warn'|'info', message }]
- *   verdict derivation: verdictOf — PASS | FINDINGS | ABSENT
+ *   verdict derivation: verdictOf - PASS | FINDINGS | ABSENT
  *
  * EPOCH LAW: every row that is inline data carries its MOCK SKELETON
  * badge. The crashtest row is LIVE (issue #264 step b): it rides the
@@ -22,7 +22,7 @@
  * scripts/struct-feed-stamp.js, pin sidecar beside it) and carries NO
  * mock flag. The three npm-live feeds (packstruct / eyestruct) wire
  * in at issue steps (c)-(d); poststruct is PRD-staged until its npm
- * lands. There are four and only four sources — the kit's own typed
+ * lands. There are four and only four sources - the kit's own typed
  * refusal law, mirrored here: E_STRUCT_SOURCE on anything else.
  */
 
@@ -31,10 +31,10 @@ import liveCrashFeed from './generated/struct-feed.json'
 export const STRUCT_SOURCES = ['packstruct', 'crashtest', 'eyestruct', 'poststruct']
 
 export const STRUCT_LABELS = {
-    packstruct: 'packstruct — pack conformance',
-    crashtest: 'crashtest — the packs floor',
-    eyestruct: 'eyestruct — the vision battery',
-    poststruct: 'poststruct — the render audit',
+    packstruct: 'packstruct - pack conformance',
+    crashtest: 'crashtest - the packs floor',
+    eyestruct: 'eyestruct - the vision battery',
+    poststruct: 'poststruct - the render audit',
 }
 
 /** Pure verdict family, pinned to the kit's verdictOf. */
@@ -54,7 +54,7 @@ export function evidenceSlice(feed, n) {
 }
 
 /**
- * The skeleton epoch's feed rows — one per family, each shaped exactly
+ * The skeleton epoch's feed rows - one per family, each shaped exactly
  * as the landing feed will arrive. The crashtest row is LIVE (stamped
  * verdict ledger); the other three are inline mocks until their feeds
  * land (poststruct's row already follows the PRD contract's post-parse

@@ -4,8 +4,8 @@
   "memorySystems": 3,
   "cli": 130,
   "mcp": 347,
-  "libModules": 182,
-  "docPages": 126,
-  "testSuites": 218,
+  "libModules": 189,
+  "docPages": 127,
+  "testSuites": 220,
   "version": "0.8.6"
 }

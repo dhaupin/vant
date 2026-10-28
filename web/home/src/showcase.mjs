@@ -36,7 +36,8 @@ export const SHOWCASE = [
         blurb:
             'Adversarial QA for agent-built software: seeded in-process attacks on ' +
             'your real handlers, a hardening ledger, and CI that fails on regressions ' +
-            '- no sockets, no bans, no invoice.',
+            '- no sockets, no bans, no invoice. Live on npm as crashtest@1.1.0: ' +
+            'install it, arm it, let the gate keep the line.',
         desc:
             'Crashtest wasn\'t built in one session, it was built by a continuity. ' +
             'Its builder, Rook, is a persistent coding agent that works the Vant ' +
@@ -61,19 +62,26 @@ export const SHOWCASE = [
             'also travels as a vant horcrux ' +
             '(horcrux/crashtest-p_quillstone-9fold.svg), verifiably restorable on a ' +
             'virgin clone, so any fresh session wakes up owning the project rather ' +
-            'than reading up on it.',
+            'than reading up on it.\n\n' +
+            'The consumption story is public, too: this project\'s own CI lane runs ' +
+            'the npm-installed crashtest - no clone, no special tooling - behind a ' +
+            'determinism preflight and a strict conformance gate. Any finding ' +
+            'outside the whitelisted pins fails the pull request, and a fix that ' +
+            'flips a row to REFUSED deletes its own whitelist line. Adversarial ' +
+            'grading as a CI contract, not a dev-only ritual.',
     },
     {
         id: 'gistory-creadev',
         title: 'Gistory',
         industry: ['Privacy', 'AI'],
         url: 'https://gistory.creadev.org',
-        img: '/showcase-gistory-og.png',
-        imgAlt: 'Gistory product tile: the privacy-first prompt keeper for AI workflows',
+        img: '/showcase-gistory-logo.jpg',
+        imgAlt: 'Gistory logo: an open book with the text cursor between the pages and code braces on the right page, on a black rounded tile',
         blurb:
             'A prompt keeper that trusts you with the keys: end-to-end encrypted ' +
             'prompt history for AI workflows, synced across your own machines, ' +
-            'with the sync engine shipped as an npm package you can reuse.',
+            'with the whole sync engine written as reusable code you can lift ' +
+            'into your own app.',
         desc:
             'Gistory keeps AI prompt history the way a vault should: encrypted on ' +
             'your devices, verified by the family gates, and synced end-to-end. ' +
@@ -86,9 +94,9 @@ export const SHOWCASE = [
             'a deterministic deviceId tiebreaker, tombstones for safe deletes, ' +
             'and a QoS scheduler that debounces, coalesces, backs off on the ' +
             'relay\'s own Retry-After, and never silently drops a failed push. ' +
-            'That exact engine ships as gistory-sync on npm (v1.0.0): the storage ' +
-            'seam reads IndexedDB or localStorage at call time, so the same ' +
-            'bundle runs in a browser, a web worker, or plain Node.\n\n' +
+            'The sync engine itself is written to be lifted out: the storage seam ' +
+            'reads IndexedDB or localStorage at call time, so the same bundle ' +
+            'runs in a browser, a web worker, or plain Node.\n\n' +
             'Gistory is a family member of the struct fleet, built the Vant way: ' +
             'a markdown brain lives under models/ in the repo itself, every ' +
             'session reads on wake and closes by committing what it learned, and ' +
@@ -113,8 +121,9 @@ export const SHOWCASE = [
             'Every working session it wakes, inherits what previous agents wrote, does ' +
             'real work (docs QC, fiction sweeps, install audits, status-board wiring), ' +
             'then commits lessons to its own agent branch and pushes. The pass ledger ' +
-            'that produced this very site is public on the changelog page: three ' +
-            'hundred fifty numbered passes and counting, each one a reviewed commit.\n\n' +
+            'that produced this very site is public on the changelog page: ' +
+            'numbered passes in the hundreds and counting, each one a reviewed ' +
+            'commit.\n\n' +
             'Creadev.org runs a fleet of Vant agents around it: the core Axolotl (' +
             'Buffy) brain, and colleague Vant agents Rook, Cairn, and Prime. ' +
             'Together with the Creadev.org maintainers, they orchestrate all ' +

@@ -40,7 +40,7 @@ describe('struct-feeds (the /audit skeleton laws)', () => {
             for (const key of REQUIRED) expect(feed, feed.source).toHaveProperty(key)
             expect(feed.mock, feed.source).toBe(true)
         }
-        // the live row (step b) carries NO mock flag — the badge stays off
+        // the live row (step b) carries NO mock flag - the badge stays off
         expect(mocks.map(f => f.source)).toEqual(['packstruct', 'eyestruct', 'poststruct'])
     })
 
