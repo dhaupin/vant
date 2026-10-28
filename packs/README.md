@@ -2013,6 +2013,26 @@ Where the remaining repo parts land:
   template-literal escape law (the outer template ate `\s`, so the
   rendered child split the sha pin at the wrong place - the live fire
   caught it as nine unpinned pairs, fixed with the escaped `\\s`).
+- **`vant-kit` third row — the CARRIER-SHARE PLATE census (2026-10-28).**
+  `kit-plate-census` (this route): the kit's first COMPONENT member
+  measured at its source — the pure-renderer law (no fetch/state/
+  runtime-API calls; btoa stays, it is a standards global), the typed
+  unknown-lane refusal (`E_CARRIER_SHAPE` + the caller-names-the-carrier
+  sentence), `decodeSentence` PINNED WORD-FOR-WORD **evaluated live**
+  (typescript transpile + vm stubbed-require — no React runtime needed,
+  JSX never executes at module scope) across the five lanes plus the
+  honest custom-plate default, the pointer derivation law
+  (`VANT:1:` stripped to the 64-hex address), the always-rendered
+  hash-verified sentence, the no-auto-download law (a user-picked link,
+  said so), and the plate target of the vendoring ring (the vendored
+  `CarrierShare.tsx` byte-identical). Two fires green x2 (REFUSED 3 /
+  0 EXPLOITED), contract 358/0 with the row graded 'skip' honestly
+  (run-root-only census family). The census's own repair: the sandbox
+  now also carries the plate's vendored target under `web/dashboard`
+  (the first fires ENOENT'd on it — caught by the fire, fixed in
+  makeSandbox), and two probe pins tightened (a purity ban list that
+  matched the kit's own "no asserts" law comment; a lowercase-'the'
+  pin vs the source's sentence case).
 - **`vant-kit` second row — the VENDORING-RING census (2026-10-28).**
   `kit-vendor-ring-census` (run-root route `kit-vendor-ring`): the
   ring leg. The vendor script's own `--check` must answer exit 0 with

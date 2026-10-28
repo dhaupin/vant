@@ -55,6 +55,39 @@ export default {
   description: 'web/kit contract discipline: frozen vocabularies refuse canary writes, the two-tier private-IP wall answers (hard metadata + 0.0.0.0 refuse in every posture), the envelope shape law holds at its 32/24-32/32/2+ hex shape, the traveler bank (shape/ledger/rizer) closes, and the schema-rizer never guesses forward',
   attacks: [
     {
+      name: 'kit-plate-census',
+      description: "the CarrierShare plate's own laws, graded from the kit source in a fresh child (typescript transpile + vm decodeSentence evaluation, no React runtime): the pure-renderer law (no fetch/state/asserts/runtime-API calls; btoa stays, it is a standards global), the typed refusal (E_CARRIER_SHAPE: unknown lane + the never-guess/caller-names-the-carrier sentence), decodeSentence word-for-word evaluated live for all five lanes plus the honest custom-plate default, the pointer derivation law (VANT:1: stripped to the 64-hex address), the always-rendered hash-verified sentence, the no-auto-download law (a user-picked link, never auto), and the plate target of the vendoring ring (the vendored CarrierShare.tsx copy byte-identical to kit head)",
+      async run(harness) {
+        const r = await tryRun(harness, 'kit-plate-census', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: '{}',
+        });
+        if (r._absent) return skip('no kit-plate-census route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `kit-plate-census threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return skip('kit-plate-census not armed');
+        if (j.ok === false) {
+          return { verdict: 'EXPLOITED', detail: 'the carrier-share plate broke a law mid-census: ' + (j.bail || 'unknown'), tookRequests: 1, evidence: { census: j } };
+        }
+        const laws = {
+          'pure renderer': j.pureRenderer,
+          'typed refusal': j.refusalLaw,
+          'decode sentences pinned': j.decodeSentencePinned,
+          'unknown lane honest default': j.decodeUnknownCustomPlate,
+          'pointer derivation': j.pointerLaw,
+          'hash-verified always rendered': j.hashVerifiedAlways,
+          'no auto-download': j.noAutoDownload,
+          'vendored byte-identical': j.vendoredByteIdentical,
+        };
+        const broken = Object.entries(laws).filter(([, ok2]) => !ok2);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: 'the carrier-share plate broke at: ' + broken.map(([n]) => n).join(', '), tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: "the CarrierShare plate holds end to end: the kit source is a pure renderer (no doors, no state, no runtime APIs), the unknown-lane refusal is typed (E_CARRIER_SHAPE + the caller-names-the-carrier sentence), decodeSentence is pinned word-for-word across the five lanes plus the honest custom-plate default (evaluated live via the transpiled module), the pointer derivation law holds (VANT:1: strips to the 64-hex address), the hash-verified sentence renders whenever an address is present, nothing auto-downloads (a user-picked link, said so), and the vendored copy is byte-identical to kit head - the kit's first component member is measured at its source", tookRequests: 1, evidence: { census: j } };
+      },
+    },
+    {
       name: 'kit-vendor-ring-census',
       description: "the vendoring parity ring: the vendor script's --check answers exit 0 with one [ok] per pin (9 sidecar pins: relay relay x4, traveler x4, CarrierShare plate x1), AND an independent census child re-derives the ring WITHOUT the script's bookkeeping - each pin must equal BOTH the vendored copy's bytes and its kit source's head (a stale or swapped copy fails either leg), every target stays inside web/ (the one-way boundary), and a negative-control leg (one mutated byte changes the digest) keeps sha() discriminating",
       async run(harness) {

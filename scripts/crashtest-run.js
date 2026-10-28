@@ -266,6 +266,12 @@ function makeSandbox() {
     // (web/ never required by lib - the one-way boundary holds; this is the
     // ARM copying kit into the probe fixture, not a lib->web import).
     try { fs.cpSync(path.join(ROOT, 'web', 'kit'), path.join(sb, 'web', 'kit'), { recursive: true, dereference: true }); } catch (ek) {}
+    // (plate census 2026-10-28) the plate TARGET rides too: the carrier-share
+    // vendored copy the ring/plate rows grade byte-identity against.
+    try {
+        fs.mkdirSync(path.join(sb, 'web', 'dashboard', 'src', 'frame'), { recursive: true });
+        fs.copyFileSync(path.join(ROOT, 'web', 'dashboard', 'src', 'frame', 'CarrierShare.tsx'), path.join(sb, 'web', 'dashboard', 'src', 'frame', 'CarrierShare.tsx'));
+    } catch (ek) {}
     fs.mkdirSync(path.join(sb, 'models', 'private', 'vant'), { recursive: true });
     fs.mkdirSync(path.join(sb, 'models', 'public', 'vant'), { recursive: true });
     fs.writeFileSync(path.join(sb, 'models', 'private', 'vant', 'identity.md'), 'PRIVATE-CANARY');
@@ -511,6 +517,76 @@ const VENDOR_RING_CHILD = `${CHILD_STDOUT_GUARD}
     } catch (e1) {
         out.ok = false;
         out.bail = String((e1 && e1.name) || '?') + ': ' + String((e1 && e1.message) || '').slice(0, 140);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
+// (kit plate census 2026-10-28) the CARRIER-SHARE PLATE census: the kit's
+// first COMPONENT member — the pure renderer whose laws predate the doors.
+// transpiles the .tsx kit source (typescript is in node_modules; no React
+// runtime needed — JSX bodies never execute at module scope), then grades:
+// the pure-renderer law (no fetch/state/asserts/runtime APIs — btoa stays,
+// it is a standards global), the typed refusal (E_CARRIER_SHAPE + the
+// never-guess sentence), decodeSentence WORD-FOR-WORD evaluated for all
+// five lanes + the honest default, the pointer derivation law
+// (VANT:1: stripped to the 64-hex address), the always-rendered
+// hash-verified sentence, the no-auto-download law (link not auto),
+// and the plate target of the vendoring ring (byte-identical copy).
+const PLATE_CENSUS_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const out = { family: 'kit-plate-census', ok: true, bail: null };
+    try {
+        const fs = require('fs');
+        const ts = require('typescript');
+        const vm = require('vm');
+        const src = fs.readFileSync('./web/kit/components/carrier-share.tsx', 'utf8');
+        // ---- 1. the pure-renderer law (no doors, no state, no runtime)
+        const banned = ['fetch(', 'useState(', 'useEffect(', 'console.assert(', 'crypto.', 'document.', 'window.'];
+        const hits = banned.filter((b) => src.includes(b));
+        out.pureRenderer = hits.length === 0;
+        // ---- 2. the typed refusal law (unknown lane is refused, never guessed)
+        out.refusalLaw = src.includes('E_CARRIER_SHAPE: unknown lane')
+            && src.includes('The caller names the carrier; the component decides nothing')
+            && src.includes('is not on that roster is');
+        // ---- 3. decodeSentence word-for-word, evaluated live via the vm
+        const tr = ts.transpileModule(src, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.React, target: ts.ScriptTarget.ES2020 } });
+        const mod = { exports: {} };
+        const stubRequire = (name) => { if (name === 'react') return {}; throw new Error('plate child required beyond react: ' + name); };
+        vm.runInNewContext(tr.outputText, { module: mod, exports: mod.exports, require: stubRequire, __filename: 'carrier-share.tsx', __dirname: '.' }, { timeout: 3000 });
+        const ds = mod.exports.decodeSentence;
+        const pins = {
+            qr: 'a camera',
+            svg: 'carriers.decode on the svg lane',
+            nsc9: 'the doorway digits into the NSC-9 window',
+            json: 'carriers.decode on the json lane',
+            stone: 'carriers.decode on the stone lane',
+        };
+        let dsOk = typeof ds === 'function';
+        if (dsOk) {
+            for (const k of Object.keys(pins)) {
+                const r = ds(k);
+                if (typeof r !== 'string' || r.indexOf(pins[k]) === -1) { dsOk = false; break; }
+            }
+        }
+        out.decodeSentencePinned = dsOk;
+        out.decodeUnknownCustomPlate = !!(dsOk && ds('vault-custom-x' + Date.now()).indexOf('custom plate lane') !== -1);
+        // ---- 4. the pointer derivation + the always-rendered hash sentence
+        out.pointerLaw = src.includes('replace(/^VANT:1:/');
+        out.hashVerifiedAlways = src.includes('hash-verified: ')
+            && src.includes('the address derives from the packet');
+        // ---- 5. the no-auto-download law (a user-picked link, honest words)
+        out.noAutoDownload = src.includes('never auto-downloaded')
+            && !src.includes('autoDownload') && !src.includes('.click()');
+        // ---- 6. the plate target of the ring: the vendored copy is the bytes
+        const vendored = fs.readFileSync('./web/dashboard/src/frame/CarrierShare.tsx');
+        out.vendoredByteIdentical = Buffer.compare(Buffer.from(src), vendored) === 0;
+        out.ok = out.pureRenderer && out.refusalLaw && out.decodeSentencePinned
+            && out.decodeUnknownCustomPlate && out.pointerLaw && out.hashVerifiedAlways
+            && out.noAutoDownload && out.vendoredByteIdentical;
+    } catch (e1) {
+        out.ok = false;
+        out.bail = String((e1 && e1.name) || '?') + ': ' + String((e1 && e1.message) || '').slice(0, 160);
     }
     process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
@@ -2606,6 +2682,19 @@ const LIFECYCLE_CHILD = `${CHILD_STDOUT_GUARD}
         }
         const okLines = String(checkOut).split('\n').filter((l) => l.startsWith('[ok]')).length;
         return new Response(JSON.stringify({ script: { exit: 0, okLines }, census: JSON.parse(extractCtJson(censusOut)) }), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
+    // (kit plate census 2026-10-28) the carrier-share plate's own first
+    // laws, graded from the kit source in a fresh child (typescript
+    // transpile + vm decodeSentence evaluation - no React runtime needed).
+    harness.registerRoute('kit-plate-census', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', PLATE_CENSUS_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `plate census child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
     harness.registerRoute('kit-contracts', async () => {

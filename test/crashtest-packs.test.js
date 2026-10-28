@@ -1239,6 +1239,10 @@ const EXPECTED = {
         // all 9 sidecar pins, web/ containment, negative control,
         // two-lens agreement), and the README ledger pins the verdicts.
         'kit-vendor-ring-census': 'skip',
+        // (plate census, ARMED 2026-10-28) the carrier-share plate's laws
+        // via the typescript transpile + vm ladder - another run-root-only
+        // census child, honest skip in-suite, live x2 in the fires.
+        'kit-plate-census': 'skip',
     },
     'vant-mcp': {
                 'tools-registry-census': 'skip',
