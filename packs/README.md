@@ -1517,8 +1517,15 @@ Honest growth candidates, as they name themselves:
 - the Edge chains' shared QoS budget behaviors over REAL multi-cycle
   conversations (the 429-skip law already lives; deeper W1/W2 windows if
   any new door uses its own budget);
-- whichever provider-facing surface the campaign wires next (the two
-  spine slices #164–#166 stay the standing drill-down pair).
+- [CLOSED 2026-10-28] the spine slices #164–#166 standing drill-down
+  pair: all three named facet groups carry in the slice-2 rows (mesh
+  AOI/stale-purity/write-winners in `mesh-aoi-staleness-and-write-winners`,
+  PRF addressing in `geometry-prf-one-chain` + `spine-addressing-one-module`,
+  brain verify + horcrux in `brain-verify-and-horcrux`), the native
+  `engine-parity-spine` suite retired whole, and the spine pack still
+  answers 16/16 REFUSED x2 on the post-census tree - the pair is
+  measured; deeper drilling from here is whatever NEW surface the
+  campaign wires, not the old facets.
 
 ### Restamp 5 (2026-10-27) — the full floor re-swept after the five-tranche run
 
