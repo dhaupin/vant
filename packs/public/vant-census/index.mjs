@@ -231,6 +231,37 @@ export default {
         return { verdict: 'REFUSED', detail: "17 orphaned laws hold: the brain T11b aliases are gone with the mode/path/corpus laws intact, legal's dormant gate chain answers honestly (passive canUse, always-pass checkGate incl. unknown gates, typed activate/deactivate), sandbox's RLS binding trio wires, security's op-gate shapes hold, and islands' class/hydrated/available trio is honest - the graveyard's orphaned behaviors are now pack-graded and the rest of the legacy files retire as duplicates", tookRequests: 1 };
       },
     },
+    {
+      name: 'facade-surfaces',
+      description: "the drift-off pass: the umbrella facade (lib/vant.js) and the never-twin'd utility/integration modules keep their export-surface laws sweep-visible - the facade's 16 function doors (startFull/startHeadless/remember/learn/executeTool/getTools/shutdown/system/lock/connector/citations/encrypt/habitat/sandbox/stego/islands) plus the 6 namespaced module objects (audit/event/mcp/msg/storage namespaces) plus agents/cron/network/qos/event presence plus the version string, compute's run/python executors, auth's Auth class with health's surface, msg's publish/subscribe pair, cron's once/JobWorker pair, audit's batch, boot's lifecycle trio, the cache class, and the embed/network/schema/canvas presence shapes - the laws the last 18 legacy shape-smokes distant-graded, now graded over a real child so those files retire",
+      async run(harness) {
+        const r = await tryRun(harness, 'facade-surfaces', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: '{}',
+        });
+        if (r._absent) return skip('no facade-surfaces route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `facade-surfaces threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return skip('facade-surfaces probe unavailable: ' + (j && j.error || 'no payload'));
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the facade-surfaces child faulted mid-census: ' + (j.bail || 'unknown'), tookRequests: 1 };
+        const laws = [
+          ['vant facade doors', j.vanFnDoors && j.vanObjDoors && j.vanFnObjNamespaces && j.vanVersionString],
+          ['compute executors', j.computeRunPython],
+          ['auth + health', j.authClassDoor && j.healthSurface],
+          ['msg pub/sub pair', j.msgPublishSubscribe],
+          ['cron pair', j.cronOnceJobWorker],
+          ['audit batch', j.auditBatch],
+          ['boot lifecycle', j.bootLifecycle],
+          ['cache/embed/network/schema/canvas', j.cacheClass && j.embedSurface && j.networkSurface && j.schemaSurface && j.canvasPaintSpiral],
+        ];
+        const broken = laws.filter(([, ok]) => !ok);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: 'the facade surfaces broke at: ' + broken.map(([n]) => n).join(', '), tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: "15 facade-surface laws hold: the vant umbrella announces its 15 function doors + 6 namespaced objects (islands rides the object list - the fn/obj split is load-bearing) + namespace presence + version, compute's run/python executors exist, auth/health/msg/cron/audit/boot keep their never-twin'd surfaces, and the cache class + embed/network/schema/canvas presence shapes hold - the last 18 legacy shape-smokes' claims are now sweep-visible and the files retire", tookRequests: 1 };
+      },
+    },
   ],
 };
 

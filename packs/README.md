@@ -52,7 +52,7 @@ that rides real OS processes or its own module plane stays native):
 |---|---|---|---|
 | `vant-brain` | 28 | `test/brain.test.js` (trim) + `test/brain-circuit.test.js` (retired whole 2026-10-27) |
 | `vant-carriers` | 42 | `test/carriers.test.js` (retired whole 2026-10-27) + `test/traveler-lib.test.js` (trimmed to the REAL-PROCESS CLI family) |
-| `vant-census` | 6 | config-armed censuses + naked-lib first-doors + legacy-orphan-laws rows (run-root ctx; no native suite) |
+| `vant-census` | 7 | config-armed censuses + naked-lib first-doors + legacy-orphan-laws + facade-surfaces rows (run-root ctx; no native suite) |
 | `vant-crew` | 4 | crew quota trio (lib surface; the doors census rides run roots) |
 | `vant-dashboard` | 22 | the dashboard webs faces (dash-auth arm; native Stayed for the module plane) |
 | `vant-discipline` | 6 | memory/governance/escrow faces (their suites keep the kernel-plane pins) |
@@ -2664,3 +2664,51 @@ Reading the eight "real-behavior" legacy suites exposed the deepest
   `packs:audit` clean with the pinned known finding; determinism
   lint flat. The full-table fires + native floor sweep ride the
   next restamp (the wave-6 IOU).
+
+
+## Wave 7 (2026-10-28) - the LAST 18 smoke retirements, the graveyard closes EMPTY, and the wave-6 IOU paid
+
+The drift-off pass. The remaining 18 legacy shape-smokes were triaged
+ against their MODERN twins (17 of 18 have one) and the three new
+ census rows, then retired whole:
+
+- **facade-surfaces (vant-census row 7) landed** - the export-surface
+  laws that never had a modern twin: the umbrella facade lib/vant.js
+  (16 function doors incl. startFull/startHeadless/remember/learn/
+  executeTool/getTools + the 6 namespaced module objects audit/event/
+  islands/mcp/msg/storage + agents/cron/network/qos/event presence +
+  the version string), compute's run/python executors, auth's Auth
+  class with health's surface, msg's publish/subscribe pair, cron's
+  once/JobWorker pair, audit's batch, boot's lifecycle trio, the
+  cache class, and the embed/network/schema/canvas presence shapes.
+  The row's first fire caught a FIND in the row itself: `islands` was
+  listed in BOTH the function-door list and the namespaced-object
+  list - the fn/obj split is load-bearing and the law was repaired to
+  grade it exactly once (the object list). The run-root child exits
+  hard (compute.js holds connector handles alive).
+- **The retirement batch (convert FIRST, then retire):** all 31
+  legacy `test/test-*.js` files are now GONE - the 18 remaining after
+  wave 6 deleted: api/audit/boot/compute/cron/error/event/integrations/
+  mcp/metrics/msg/qos/stego/stream/telegram/tmp/utilities/vant/webhooks
+  and the last survivor storage. Every claim was verified against its
+  modern twin (api 138 lines, audit 248, boot 151, compute 92, cron
+  103, error 204, event 109, mcp 586, metrics 163, msg 338, qos 100,
+  stego 91, storage 365, stream 212, tmp 203, vant 61, webhooks 153)
+  plus the three census rows; the two never-twin'd files
+  (test-integrations, test-utilities) convert through facade-surfaces
+  first. The sweep-invisible graveyard ran from 31 files to ZERO.
+- **The wave-6 IOU: paid on the final tree.** Full-table fires x2
+  verdict-table-identical - **268 pack rows REFUSED, 0 EXPLOITED,
+  0 BOUNDED, 6 honest skips across 21 packs**; library rows 48/0/1
+  per fire. The native floor swept in three chunks (dash-governance
+  74, guests-remote-storage 74, remote-transport-zen 71):
+  **219/219 suites green, 0 failures, 0 timeouts** - the floor count
+  holds exactly as enumerated, because the retired smokes were
+  never part of it.
+- Stamps: `--pack=vant-census` x2 (REFUSED 3 / 0 EXPLOITED / 4 not-
+  armed skips); contract **379/0, exit 0 x2** with facade-surfaces
+  graded honestly `skip` in-suite; `packs:lint` 21 packs / 295 ids;
+  `packs:audit` clean with the pinned known finding; determinism
+  lint flat (21 files). The graveyard is closed; the legacy-runner
+  era is over in both directions (deleted files AND real coverage
+  now riding pack rows + modern suites).

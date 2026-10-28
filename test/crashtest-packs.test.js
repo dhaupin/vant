@@ -1147,6 +1147,15 @@ const EXPECTED = {
         // it live x2 and the README ledger pins the verdicts). The rest
         // of the legacy graveyard retired as MODERN-COVERAGE DUPLICATES.
         'legacy-orphan-laws': 'skip',
+        // (facade-surfaces, ARMED 2026-10-28) the drift-off pass - the
+        // umbrella facade (lib/vant.js) and the never-twin'd utility/
+        // integration surfaces (auth/health/compute/msg/cron/audit/boot/
+        // cache/embed/network/schema/canvas) grade their export-surface
+        // laws over the run-root probe child (run-root-only arm, the
+        // sibling precedent; the run fires grade it live x2 and the
+        // README ledger pins the verdicts). THE LAST 18 legacy
+        // shape-smokes' claims now ride this row and those files retire.
+        'facade-surfaces': 'skip',
     },
     'vant-brain': {
         'private-first-fallback': 'REFUSED',

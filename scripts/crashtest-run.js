@@ -2529,6 +2529,72 @@ function buildRoutes(sb, Harness) {
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
+    // (facade-surfaces census 2026-10-28) the drift-off pass: the LAST
+    // legacy shape-smokes graded the export SURFACE of the umbrella facade
+    // (lib/vant.js) and the never-twin'd utility modules (auth/health) and
+    // integrations (cache/canvas/embed/network/schema). Those surface laws
+    // never had a modern twin (test-vant.js's twin is 61 lines; integrations
+    // has none at all). This child makes them sweep-visible: the facade's
+    // 16 function doors + 6 namespaced module objects + version string,
+    // compute's run/python executors, auth's Auth class + health's surface,
+    // msg's publish/subscribe pair, cron's once/JobWorker pair, audit's
+    // batch, boot's lifecycle trio, the cache class, and the
+    // embed/network/schema/canvas presence shapes. Computedmetic: the child
+    // exits hard (compute.js holds connector handles alive).
+    const FACADE_SURFACES_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const out = { family: 'facade-surfaces', ok: true, bail: null };
+    try {
+        const van = require('./lib/vant.js');
+        // islands rides the OBJECT namespace list below (the first fire's own find: the fn/obj split is load-bearing)
+        const vanFns = ['startFull', 'startHeadless', 'remember', 'learn', 'executeTool', 'getTools', 'shutdown', 'system', 'lock', 'connector', 'citations', 'encrypt', 'habitat', 'sandbox', 'stego'];
+        out.vanFnDoors = vanFns.every((k) => typeof van[k] === 'function');
+        out.vanObjDoors = ['audit', 'event', 'islands', 'mcp', 'msg', 'storage'].every((k) => typeof van[k] === 'object' && van[k] !== null);
+        out.vanFnObjNamespaces = ['agents', 'cron', 'network', 'qos', 'event'].every((k) => van[k] !== undefined);
+        out.vanVersionString = typeof van.version === 'string' && van.version.length > 0;
+        const cmp = require('./lib/compute.js');
+        out.computeRunPython = typeof cmp.run === 'function' && typeof cmp.python === 'function';
+        const aus = require('./lib/auth.js');
+        out.authClassDoor = typeof aus.Auth === 'function';
+        const hl = require('./lib/health.js');
+        out.healthSurface = Object.keys(hl).length > 0;
+        const msgr = require('./lib/msg.js');
+        out.msgPublishSubscribe = typeof msgr.publish === 'function' && typeof msgr.subscribe === 'function';
+        const cronMod = require('./lib/cron.js');
+        out.cronOnceJobWorker = typeof cronMod.once === 'function' && typeof cronMod.JobWorker === 'function';
+        const aud = require('./lib/audit.js');
+        out.auditBatch = typeof aud.batch === 'function';
+        const bootMod = require('./lib/boot.js');
+        out.bootLifecycle = typeof bootMod.getStatus === 'function' && typeof bootMod.isInitialized === 'function' && typeof bootMod.reset === 'function';
+        const cach = require('./lib/cache.js');
+        out.cacheClass = typeof cach.Cache === 'function';
+        const emb = require('./lib/embed.js');
+        out.embedSurface = Object.keys(emb).length > 0;
+        const net = require('./lib/network.js');
+        out.networkSurface = Object.keys(net).length > 0;
+        const sch = require('./lib/schema.js');
+        out.schemaSurface = Object.keys(sch).length > 0;
+        const cv = require('./lib/canvas.js');
+        out.canvasPaintSpiral = typeof cv.paintSpiral === 'function';
+    } catch (e) {
+        out.ok = false;
+        out.bail = (e && e.message) ? e.message : String(e);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+    process.exit(0);
+})().catch((e) => { process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ ok: false, bail: String(e) }) + '>>END'); process.exit(0); });
+`;
+
+    harness.registerRoute('facade-surfaces', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', FACADE_SURFACES_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `facade-surfaces probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     harness.registerRoute('mcp-exec', async (ctx) => {
         const j = await ctx.request.json().catch(() => ({}));
         let outText;
