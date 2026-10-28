@@ -2093,6 +2093,33 @@ compare has no early exit.
 7/7 rows `REFUSED` x2 deterministic (25/25 laws held both cycles);
 contract 360/0 with the row graded live in-suite; lint flat.
 
+## Restamp 7 (2026-10-28) — the post-CI-repair full floor
+
+The whole floor re-swept on the tree that carries the plate-arm CI-fork
+fix + the home math plate row (two tranches since restamp 6):
+
+- **Full packs x2 green**: two consecutive cycles, **249 pack rows
+  REFUSED** across all 21 packs (6 honest skips unchanged: vant-census
+  config-skips + pass-ledger session-skips), **0 EXPLOITED, zero
+  findings, pass-for-pass verdict-identical** - the only line-level
+  diffs between the cycles are run-local timing text (a 2ms/1ms walk
+  detail) and the throwaway sandbox path inside the kit-census gate
+  lines; verdict tables, totals and the library rows (48/0/1 each
+  cycle) are byte-stable.
+- **Native floor swept clean x2**: **221/221 suites green across two
+  full harness cycles** (the floor grew 203 -> 221 across the recent
+  tranches; strict harness, zero failures, zero timeouts) - the
+  relay-parity suite rode the sweep both cycles.
+- **Vendor parity verdict: KEEP** (the parity pins pass x2 in the
+  harness; the vendoring ring census unchanged).
+- **Strict ci-gate**: the run root fired WITHOUT whitelist exceptions
+  both cycles; the known-finding whitelist remains EMPTY.
+
+The x2 was repaired-required only once in the run (a full-harness cycle
+cut twice by the cloud runner restart at the same alphabetical seam;
+each resume reran the harness from its own slate restore, and the
+completed cycles are the stamped ones).
+
 ### CI repair (2026-10-28) — the determinism preflight goes flat
 
 The `npx crashtest lint-determinism` gate (crashtest 1.1.0, CI job
