@@ -1183,6 +1183,15 @@ const EXPECTED = {
         // the leaks wedged the bulkhead shut with a starved queue) and
         // the Debouncer's cancel leaving a stale timer entry forever.
         'throttle-debounce-bulkhead': 'skip',
+        // (jobworker-pool, ARMED 2026-10-28, wave 11) the pattern sweep+
+        // convert move after the two wave-10 lib repairs: the other
+        // clearTimeout/dispatch families swept CLEAN, so the never-graded
+        // JobWorker pool laws (concurrency under racing adds, counter
+        // parity, the typed non-wedging failure path, batch drains,
+        // honest stats) graded over the run-root probe child
+        // (run-root-only arm, the sibling precedent; the run fires grade
+        // it live x2 and the README ledger pins the verdicts).
+        'jobworker-pool': 'skip',
     },
     'vant-brain': {
         'private-first-fallback': 'REFUSED',

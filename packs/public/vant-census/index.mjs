@@ -345,6 +345,33 @@ export default {
         return { verdict: 'REFUSED', detail: "14 deep window laws hold: the throttler spills SILENTLY at the per-key cap (countered, not thrown) and reopens over the real clock, the debouncer collapses rapid calls to ONE trailing fire with the last args and cancel kills a pending fire before it lands, the bulkhead saturates honestly, queues the overflow, drains it FIFO with the QUEUED caller receiving the queued task's failure as its own rejection, and returns its counters to drained, and the unified QoS facade refuses the second client typed at the shared chain - the QoS trio is now graded behaviorally end to end", tookRequests: 1 };
       },
     },
+    {
+      name: 'jobworker-pool',
+      description: "the pattern sweep's convert move: the wave-10 bug shapes (the Wedge, the Stale Timer) swept the whole lib tree CLEAN (boot's unregister/stopAll both delete, tempo's controller._timer nulls, the sandbox/shell/sidecar one-shot locals, agora-sync's paired _pending deletes), so the never-graded pool laws convert instead - the JobWorker (lib/cron.js): concurrency honored when racing adds park separate _process loops on the shared counter, the counter pairing back to 0 at the drain, the typed failure path (handler throws -> status failed + the job:failed event + THE POOL CONTINUES serving the next jobs), batch adds draining fully under a small concurrency, and stats honest mid-flight and at parity",
+      async run(harness) {
+        const r = await tryRun(harness, 'jobworker-pool', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: '{}',
+        });
+        if (r._absent) return skip('no jobworker-pool route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `jobworker-pool threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return skip('jobworker-pool probe unavailable: ' + (j && j.error || 'no payload'));
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the jobworker-pool child faulted mid-census: ' + (j.bail || 'unknown'), tookRequests: 1 };
+        const laws = [
+          ['racing adds honor concurrency', j.jwConcurrencyHonored && j.jwCounterParity],
+          ['failure path typed + non-wedging', j.jwFailStatusTyped && j.jwFailEventFired && j.jwPoolSurvivesFailure],
+          ['batch drains under a small cap', j.jwBatchDrains],
+          ['stats honest mid-flight + parity', j.jwMidFlightShape && j.jwMidFlightParity],
+        ];
+        const broken = laws.filter(([, ok]) => !ok);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: 'the job worker pool broke at: ' + broken.map(([n]) => n).join(', '), tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: '7 pool laws hold: racing adds reach the declared concurrency with the shared counter pairing back to 0, a throwing handler marks its job failed typed with the job:failed event AND the pool keeps serving the jobs behind it (the error cannot wedge the pool), a batch of adds under a one-slot cap drains fully, and the stats are honest mid-flight and at parity - the JobWorker pool is graded behaviorally, riding the wave-11 pattern sweep that cleared the other clearTimeout families', tookRequests: 1 };
+      },
+    },
   ],
 };
 

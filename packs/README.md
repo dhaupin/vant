@@ -70,7 +70,7 @@ that rides real OS processes or its own module plane stays native):
 |---|---|---|---|
 | `vant-brain` | 28 | `test/brain.test.js` (trim) + `test/brain-circuit.test.js` (retired whole 2026-10-27) |
 | `vant-carriers` | 42 | `test/carriers.test.js` (retired whole 2026-10-27) + `test/traveler-lib.test.js` (trimmed to the REAL-PROCESS CLI family) |
-| `vant-census` | 10 | config-armed censuses + naked-lib first-doors + legacy-orphan-laws + facade-surfaces + qos-window-laws + circuit-full-mode + throttle-debounce-bulkhead rows (run-root ctx; no native suite) |
+| `vant-census` | 11 | config-armed censuses + naked-lib first-doors + legacy-orphan-laws + facade-surfaces + qos-window-laws + circuit-full-mode + throttle-debounce-bulkhead + jobworker-pool rows (run-root ctx; no native suite) |
 | `vant-crew` | 4 | crew quota trio (lib surface; the doors census rides run roots) |
 | `vant-dashboard` | 22 | the dashboard webs faces (dash-auth arm; native Stayed for the module plane) |
 | `vant-discipline` | 6 | memory/governance/escrow faces (their suites keep the kernel-plane pins) |
@@ -2873,3 +2873,44 @@ The drift-off pass. The remaining 18 legacy shape-smokes were triaged
   flat. The QoS machinery (all five classes + the facade, both
   breaker modes) is graded BEHAVIORALLY end to end with two real
   repairs riding the wave.
+
+
+## Wave 11 (2026-10-28) - the pattern sweep: the two wave-10 bug shapes swept CLEAN, and the JobWorker pool converts
+
+The pattern sweep the wave-10 finds owed: every clearTimeout /
+ clearInterval family member and every shared-dispatch counter in
+ lib/ was checked against the shapes that produced the Wedge
+ (increment-without-decrement on a rare dispatch path) and the
+ Stale Timer (cleanup that clears but never deletes):
+
+- **The sweep verdict: CLEAN everywhere else.** boot's
+  unregisterTimer deletes its entry AND stopAllTimers clears the
+  whole map; tempo's controller._timer nulls itself after every
+  clear; sandbox/shell/sidecar/mcp/notices run one-shot local
+  timers with no registry behind them; agora-sync's _pending pairs
+  every set with a delete (timeout, send-fail, and reply legs all
+  clean); backup/cron/sync/zen - no stored-timer registries at
+  all. The two wave-10 bugs were the ONLY instances of their
+  shapes in the pod's lib tree.
+- **The honest probe:** a suspicion that lib/cron.js JobWorker's
+  while-loop `await` serialized its declared concurrency was
+  probed and REFUTED - racing `add()` calls park separate
+  _process loops on the shared counter, so the declared
+  concurrency is honored and the counter pairs to 0 (peak
+  inFlight reached the cap; stats running: 0, completed: 3). No
+  repair needed; the pool is right.
+- **The convert move (since the pool was never behaviorally
+  graded): `jobworker-pool` (vant-census row 11).** 7 laws green
+  x2 over the run-root probe child: racing adds reach the
+  declared concurrency with the counter pairing back to 0; a
+  throwing handler marks its job `failed` typed with the
+  job:failed event AND the pool keeps serving the jobs behind it
+  (the error cannot wedge the pool); a batch of four adds under a
+  one-slot cap drains fully; and stats are honest mid-flight
+  (running: 2, pending: 0, total: 2) and at parity.
+
+- Stamps: `--pack=vant-census` x2 verdict-identical (REFUSED 7 /
+  0 EXPLOITED / 4 not-armed skips); contract **383/0, exit 0**
+  with jobworker-pool graded honestly `skip` in-suite;
+  `packs:lint` 21 packs / 299 ids; determinism lint flat; the
+  cron twin (test/cron.test.js 14/0) green beside the new row.

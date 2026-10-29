@@ -2836,6 +2836,88 @@ function buildRoutes(sb, Harness) {
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
+    // (jobworker-pool-laws census 2026-10-28, wave 11) the pattern sweep
+    // that checked the two wave-10 QoS finds (the Wedge, the Stale Timer)
+    // across the whole lib tree graded every other clearTimeout family
+    // member CLEAN (boot's unregister+stopAll both delete, tempo's
+    // controller._timer nulls, sandbox/shell/sidecar one-shot locals,
+    // agora-sync's _pending paired deletes) - so the sweep's convert move
+    // is the JobWorker pool (lib/cron.js), whose pool LAWS no twin or pack
+    // row graded (the cron twin is a shape smoke; vant-home's cron row
+    // grades the home scheduling door, not this pool): concurrency
+    // honored when parallel adds race separate _process loops onto the
+    // shared counter, the counter pairing back to 0 at the drain, the
+    // typed failure path (handler throws -> status failed + the
+    // job:failed event + THE POOL CONTINUES serving the next jobs - the
+    // error cannot wedge the pool), batch adds draining fully under a
+    // small concurrency, and stats honest at every stage.
+    const JOBWORKER_POOL_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const out = { family: 'jobworker-pool', ok: true, bail: null };
+    try {
+        const { JobWorker } = require('./lib/cron.js');
+        const eventMod = require('./lib/event.js');
+        // ---- concurrency honored by racing adds + counter parity
+        const jw = new JobWorker({ concurrency: 3 });
+        let inFlight = 0; let peak = 0;
+        for (let i = 0; i < 3; i++) {
+            jw.add('pool-job' + i, async () => {
+                inFlight++; peak = Math.max(peak, inFlight);
+                await new Promise((res) => setTimeout(res, 40));
+                inFlight--;
+            });
+        }
+        await new Promise((res) => setTimeout(res, 120));
+        out.jwConcurrencyHonored = peak === 3;
+        out.jwCounterParity = jw.stats().running === 0 && jw.stats().completed === 3;
+        // ---- the typed failure path: failed status + event + pool survives
+        let failEvents = 0;
+        const onFail = () => { failEvents++; };
+        eventMod.on('job:failed', onFail);
+        let afterFailRan = false;
+        jw.add('wedge-attempt', async () => { throw new Error('census-pool-fail'); });
+        jw.add('after-wedge', async () => { afterFailRan = true; });
+        await new Promise((res) => setTimeout(res, 80));
+        eventMod.off('job:failed', onFail);
+        const wedgeJob = jw._jobs.find((j) => j.name === 'wedge-attempt');
+        out.jwFailStatusTyped = !!(wedgeJob && wedgeJob.status === 'failed' && wedgeJob.error === 'census-pool-fail');
+        out.jwFailEventFired = failEvents === 1;
+        out.jwPoolSurvivesFailure = afterFailRan === true && jw.stats().failed === 1;
+        // ---- batch adds under concurrency 1 drain fully in order-relevant stats
+        const jw2 = new JobWorker({ concurrency: 1 });
+        let done2 = 0;
+        for (let i = 0; i < 4; i++) {
+            jw2.add('batch' + i, async () => { done2++; await new Promise((res) => setTimeout(res, 10)); });
+        }
+        await new Promise((res) => setTimeout(res, 120));
+        out.jwBatchDrains = done2 === 4 && jw2.stats().completed === 4 && jw2.stats().running === 0;
+        // ---- stats honest mid-flight (bounded and paired)
+        const jw3 = new JobWorker({ concurrency: 2 });
+        jw3.add('mid-a', async () => { await new Promise((res) => setTimeout(res, 30)); });
+        jw3.add('mid-b', async () => { await new Promise((res) => setTimeout(res, 30)); });
+        await new Promise((res) => setTimeout(res, 10));
+        const midStats = jw3.stats();
+        out.jwMidFlightShape = midStats.running === 2 && midStats.pending === 0 && midStats.total === 2;
+        await new Promise((res) => setTimeout(res, 60));
+        out.jwMidFlightParity = jw3.stats().running === 0 && jw3.stats().completed === 2;
+    } catch (e) {
+        out.ok = false;
+        out.bail = (e && e.message) ? e.message : String(e);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ ok: false, bail: String(e) }) + '>>END'); });
+`;
+
+    harness.registerRoute('jobworker-pool', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', JOBWORKER_POOL_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `jobworker-pool probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     harness.registerRoute('mcp-exec', async (ctx) => {
         const j = await ctx.request.json().catch(() => ({}));
         let outText;
