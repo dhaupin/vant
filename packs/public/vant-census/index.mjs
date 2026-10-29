@@ -318,6 +318,33 @@ export default {
         return { verdict: 'REFUSED', detail: '11 full-mode laws hold: per-provider isolation, the backoff ladder doubling with every below-threshold failure and persisting, the trip at threshold flipping isClosed for the failed provider only, the outage surviving a fresh construction from the state file, the backoff window then answering the retry half-open with the provider zeroed, recordSuccess restoring honestly, a corrupt state file degrading to an EMPTY provider map (never a crash, never an inherited trip), and the default mode keeping its shape - the breaker machine is graded end to end', tookRequests: 1 };
       },
     },
+    {
+      name: 'throttle-debounce-bulkhead',
+      description: "the third tranche of the QoS machinery - the Throttler/Debouncer/Bulkhead DEEP window laws convert where wave 8 graded only one-shot shapes: Throttler's per-KEY windows (two named functions never share a window) with the SILENT refusal (the cap spills and the wrapper drops the call without invoking fn - the invocation counter stays pinned), the window sliding open again, the clear() reset, and stats counting distinct keys; Debouncer's trailing-edge collapse (rapid calls fire ONCE with the LAST args - last-writes-win), cancel() killing a pending fire for good, per-function-reference independence, and stats().timers honest at zero after fire and one while pending; Bulkhead UNDER LOAD (saturation flips isFull with the (N+1)th runner queued behind the honest queue counter, the queued task draining FIFO with its error PROPAGATED to the queued caller when it fails, and the running counter returning to 0 after drain); and the unified QoS facade riding the same chain typed (admission, then the typed rate-limit refusal)",
+      async run(harness) {
+        const r = await tryRun(harness, 'throttle-debounce-bulkhead', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: '{}',
+        });
+        if (r._absent) return skip('no throttle-debounce-bulkhead route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `throttle-debounce-bulkhead threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return skip('throttle-debounce-bulkhead probe unavailable: ' + (j && j.error || 'no payload'));
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the throttle-debounce-bulkhead child faulted mid-census: ' + (j.bail || 'unknown'), tookRequests: 1 };
+        const laws = [
+          ['throttler per-key + silent', j.thPerKeyWindows && j.thSaturationWasSilent && j.thStatsKeys && j.thWindowSlidesOpen && j.thClearResetsWindows],
+          ['debouncer trailing edge', j.dbTrailingEdgeOnly && j.dbLastWritesWin && j.dbTimersStatZero && j.dbPendingTimerCounted && j.dbCancelKillsPending],
+          ['bulkhead under load', j.bhSaturated && j.bhQueuedHonest && j.bhDrainsFifoTypedError && j.bhRecoversAfterDrain && j.bhCountersReturnToZero],
+          ['unified QoS chain typed', j.qosCheckAdmitsFirst && j.qosRateLimitTyped],
+        ];
+        const broken = laws.filter(([, ok]) => !ok);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: 'the throttle/debounce/bulkhead family broke at: ' + broken.map(([n]) => n).join(', '), tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: "14 deep window laws hold: the throttler spills SILENTLY at the per-key cap (countered, not thrown) and reopens over the real clock, the debouncer collapses rapid calls to ONE trailing fire with the last args and cancel kills a pending fire before it lands, the bulkhead saturates honestly, queues the overflow, drains it FIFO with the QUEUED caller receiving the queued task's failure as its own rejection, and returns its counters to drained, and the unified QoS facade refuses the second client typed at the shared chain - the QoS trio is now graded behaviorally end to end", tookRequests: 1 };
+      },
+    },
   ],
 };
 

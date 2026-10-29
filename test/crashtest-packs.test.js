@@ -1172,6 +1172,17 @@ const EXPECTED = {
         // arm, the sibling precedent; the run fires grade it live x2 and
         // the README ledger pins the verdicts).
         'circuit-full-mode': 'skip',
+        // (throttle-debounce-bulkhead, ARMED 2026-10-28) the third QoS
+        // tranche's deep window laws - throttler's per-key silent spill,
+        // debouncer's trailing-edge collapse + complete cancel, bulkhead's
+        // saturation/queue/drain FIFO with typed error propagation, the
+        // unified QoS chain - graded over the run-root probe child
+        // (run-root-only arm, the sibling precedent). THE ROW'S FIRST FIRE
+        // FOUND AND FIXED TWO REAL LIB BUGS: the Bulkhead's slot leak (a
+        // drained task's slot never released - under sustained queueing
+        // the leaks wedged the bulkhead shut with a starved queue) and
+        // the Debouncer's cancel leaving a stale timer entry forever.
+        'throttle-debounce-bulkhead': 'skip',
     },
     'vant-brain': {
         'private-first-fallback': 'REFUSED',

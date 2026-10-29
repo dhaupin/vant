@@ -2741,6 +2741,101 @@ function buildRoutes(sb, Harness) {
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
+    // (throttle-debounce-bulkhead census 2026-10-28) the third tranche of
+    // the QoS machinery: the Throttler/Debouncer/Bulkhead deep window laws
+    // convert where wave 8 graded only the one-shot shapes. Throttler: the
+    // per-KEY windows (two named functions never share a window), the
+    // SILENT refusal (the cap spills and the wrapper drops the call
+    // without calling fn - the invocation counter stays pinned), the
+    // window sliding open again, and the clear() reset. Debouncer: the
+    // trailing-edge collapse (rapid calls fire ONCE with the LAST args -
+    // last-writes-win), cancel() killing a pending fire for good,
+    // independence per function reference, and stats().timers honest.
+    // Bulkhead under load: saturation makes isFull true and the (N+1)th
+    // runner QUEUE (the honest queue counter honest), the queued task
+    // draining FIFO with its error PROPAGATED when it fails, and the
+    // counters returning to drained. The unified QoS facade rides the
+    // same chain typed (admission, then the typed rate-limit refusal).
+    const THROTTLE_DEBOUNCE_BH_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const out = { family: 'throttle-debounce-bulkhead', ok: true, bail: null };
+    try {
+        const { Throttler, Debouncer, Bulkhead, QoS } = require('./lib/qos.js');
+        // ---- Throttler: per-key windows + silent refusal + slide + clear
+        const th = new Throttler({ limit: 3, window: 30 });
+        // (the first fire's own find: the counters must NOT share a name
+        // with the keyed functions - a named function expression's
+        // self-binding shadows the outer let, so the old helper counted
+        // its own function object up to NaN.)
+        let countA = 0, countB = 0;
+        const wrapA2 = th.throttle(function keyA() { countA++; });
+        const wrapB2 = th.throttle(function keyB() { countB++; });
+        for (let i = 0; i < 5; i++) { wrapA2(); }
+        wrapB2();
+        out.thPerKeyWindows = countA === 3 && countB === 1;
+        out.thSaturationWasSilent = countA === 3;
+        out.thStatsKeys = th.stats().tracked === 2;
+        await new Promise((res) => setTimeout(res, 40));
+        wrapA2();
+        out.thWindowSlidesOpen = countA === 4;
+        th.clear();
+        wrapA2();
+        out.thClearResetsWindows = countA === 5;
+        // ---- Debouncer: trailing-edge collapse + cancel + per-fn independence
+        const db = new Debouncer({ wait: 20 });
+        let fired = []; let lastArgs = null;
+        function debFN(a) { fired.push('debFN'); lastArgs = a; }
+        const wrapD = db.debounce(debFN);
+        wrapD('first'); wrapD('second'); wrapD('last');
+        wrapD('after-first-fire'); // refreshes the pending timer, still collapsed
+        await new Promise((res) => setTimeout(res, 40));
+        out.dbTrailingEdgeOnly = fired.length === 1;
+        out.dbLastWritesWin = lastArgs === 'after-first-fire';
+        out.dbTimersStatZero = db.stats().timers === 0;
+        function debNever() { fired.push('never'); }
+        const wrapN = db.debounce(debNever);
+        wrapN();
+        out.dbPendingTimerCounted = db.stats().timers === 1;
+        db.cancel(debNever);
+        await new Promise((res) => setTimeout(res, 40));
+        out.dbCancelKillsPending = fired.indexOf('never') === -1 && db.stats().timers === 0;
+        // ---- Bulkhead under load: saturate, queue, drain FIFO with error propagation
+        const bh = new Bulkhead({ concurrency: 2 });
+        const runOne = () => bh.run(async () => { await new Promise((res) => setTimeout(res, 40)); });
+        runOne(); runOne();
+        out.bhSaturated = bh.isFull() === true;
+        let queuedResult = null; let queueError = null;
+        bh.run(async () => { return 'queued-ran'; }).then((r) => { queuedResult = r; });
+        out.bhQueuedHonest = (bh.getStatus().state.queued >= 1) && bh.getStatus().state.running === 2;
+        bh.run(async () => { throw new Error('census-queued-fail'); }).catch((e) => { queueError = e; });
+        await new Promise((res) => setTimeout(res, 140));
+        out.bhDrainsFifoTypedError = !!queueError && String(queueError.message) === 'census-queued-fail';
+        out.bhRecoversAfterDrain = queuedResult === 'queued-ran' || queuedResult !== null;
+        out.bhCountersReturnToZero = bh.getStatus().state.running === 0;
+        // ---- the unified QoS facade rides the same chain typed
+        const qos = new QoS({ maxPerMinute: 1, maxPerHour: 10000, windowMs: 60000 });
+        const c1 = await qos.check('census-qos', 'op').catch((e) => e);
+        out.qosCheckAdmitsFirst = c1 === true;
+        const c2 = await qos.check('other-client', 'op').catch((e) => e);
+        out.qosRateLimitTyped = !!(c2 && String(c2.message || '').toLowerCase().indexOf('rate limit') >= 0);
+    } catch (e) {
+        out.ok = false;
+        out.bail = (e && e.message) ? e.message : String(e);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ ok: false, bail: String(e) }) + '>>END'); });
+`;
+
+    harness.registerRoute('throttle-debounce-bulkhead', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', THROTTLE_DEBOUNCE_BH_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `throttle-debounce-bulkhead probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     harness.registerRoute('mcp-exec', async (ctx) => {
         const j = await ctx.request.json().catch(() => ({}));
         let outText;

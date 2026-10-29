@@ -70,7 +70,7 @@ that rides real OS processes or its own module plane stays native):
 |---|---|---|---|
 | `vant-brain` | 28 | `test/brain.test.js` (trim) + `test/brain-circuit.test.js` (retired whole 2026-10-27) |
 | `vant-carriers` | 42 | `test/carriers.test.js` (retired whole 2026-10-27) + `test/traveler-lib.test.js` (trimmed to the REAL-PROCESS CLI family) |
-| `vant-census` | 9 | config-armed censuses + naked-lib first-doors + legacy-orphan-laws + facade-surfaces + qos-window-laws + circuit-full-mode rows (run-root ctx; no native suite) |
+| `vant-census` | 10 | config-armed censuses + naked-lib first-doors + legacy-orphan-laws + facade-surfaces + qos-window-laws + circuit-full-mode + throttle-debounce-bulkhead rows (run-root ctx; no native suite) |
 | `vant-crew` | 4 | crew quota trio (lib surface; the doors census rides run roots) |
 | `vant-dashboard` | 22 | the dashboard webs faces (dash-auth arm; native Stayed for the module plane) |
 | `vant-discipline` | 6 | memory/governance/escrow faces (their suites keep the kernel-plane pins) |
@@ -2816,3 +2816,60 @@ The drift-off pass. The remaining 18 legacy shape-smokes were triaged
   finding; determinism lint flat. The med-family observation for
   the next census pair: Throttler/Debouncer's deep window laws and
   Bulkhead's rejection shape under load remain partial.
+
+
+## Wave 10 (2026-10-28) - TWO real QoS finds (the Wedge and the Stale Timer), the trio's deep windows convert
+
+`throttle-debounce-bulkhead` (vant-census row 10) landed - the third
+ tranche of lib/qos machinery: Throttler/Debouncer/Bulkhead deep
+ window laws plus the unified QoS facade. 14 laws green x2 over the
+ run-root probe child AFTER the row's first fire found and fixed two
+ REAL bugs:
+
+- **THE WEDGE (Bulkhead slot leak, fixed same-pass).** The old
+  `run()` dispatched a queued task INLINE inside the completing
+  runner's `finally`: it incremented `_running` for the shifted task
+  and NEVER decremented it. One leaked slot per drained task -
+  probe-verified accumulation: under sustained queueing the leaks
+  grew until `isFull()` stayed true permanently while `queued`
+  climbed 4 -> 8 -> 12 across waves with NOTHING running: the
+  bulkhead wedged itself shut and starved its own queue under
+  sustained load. The repair makes the dispatch a proper slot
+  (`_execute` increments, runs, decrements in its own finally,
+  then `_drain()` redrains while slots are free); the sustained-
+  load probe now reads `running=0 queued=0 isFull=false` every
+  wave - and queued callers still receive their drained task's
+  failure as their own typed rejection (FIFO, error propagated).
+
+- **The Stale Timer (Debouncer cancel, fixed same-pass).** `cancel()`
+  cleared the timeout but never deleted the `_timers` entry, so
+  `stats().timers` stayed inflated forever after a cancel. The kill
+  is now complete (clearTimeout + delete); `timers` reads 0 after a
+  cancel and 1 while pending.
+
+- **One find in the row itself:** the throttler's helper counters
+  must NOT share a name with the keyed functions - a named function
+  expression's self-binding shadows the outer `let`, so the first
+  draft counted its own function object up to NaN. The module
+  behaved correctly; the law was repaired.
+
+- The converted laws: Throttler's per-KEY windows (two named
+  functions never share a window) with the SILENT spill (the cap
+  drops the call, never invokes fn), the window sliding open over
+  the real clock, clear() reset, distinct-key stats; Debouncer's
+  trailing-edge collapse (rapid calls fire ONCE with the LAST
+  args), pending-timer counting, and cancel-forever; Bulkhead's
+  saturation (isFull true), honest queue counter, FIFO drain with
+  the queued caller receiving the idle-drained task's failure as
+  its own rejection, and counters returning to drained; and the
+  unified QoS facade refusing the second client typed at the shared
+  chain (admit, then the typed rate-limit refusal).
+
+- Stamps: with qos.test.js (10/0) + market-skills (23/0) + forum-msg-
+  escrow green against both repairs, `--pack=vant-census` x2
+  verdict-identical (REFUSED 6 / 0 EXPLOITED / 4 not-armed skips);
+  contract **382/0, exit 0** with the two new rows graded honestly
+  `skip` in-suite; `packs:lint` 21 packs / 298 ids; determinism lint
+  flat. The QoS machinery (all five classes + the facade, both
+  breaker modes) is graded BEHAVIORALLY end to end with two real
+  repairs riding the wave.
