@@ -2914,3 +2914,30 @@ The pattern sweep the wave-10 finds owed: every clearTimeout /
   with jobworker-pool graded honestly `skip` in-suite;
   `packs:lint` 21 packs / 299 ids; determinism lint flat; the
   cron twin (test/cron.test.js 14/0) green beside the new row.
+
+
+## Wave 12 (2026-10-28) - the waves-8-11 restamp: the post-repair tree holds x2
+
+The stamp the waves-8-11 tranche owed (four new census rows, two real
+ lib repairs in lib/qos.js, the STRUCT toolchain table, and the
+ eyestruct@1.0.0 bump), driven fresh on the final tree:
+
+- **Full-table fires x2, VERDICT-TABLE-IDENTICAL**: **272 pack rows
+  REFUSED / 0 EXPLOITED / 0 BOUNDED / 6 honest skips across 21
+  packs** per fire (the five new census rows all grade live:
+  naked-lib-first-doors, legacy-orphan-laws, facade-surfaces,
+  qos-window-laws, circuit-full-mode, throttle-debounce-bulkhead,
+  jobworker-pool - the QoS machinery rides BOTH the repaired lib/qos
+  the whole way), library rows 48/0/1 per fire.
+- **The native floor swept green post-repair in three chunks**
+  (dash-governance 74, guests-remote-storage 74,
+  remote-transport-zen 71): **219/219 suites green, 0 failures,
+  0 timeouts** - including all five QoS-dependent suites and the
+  pruned test dir (the 31 legacy tail is gone from the count too).
+- S-counters hold: the waves-8-11 claims are stamped on the tree
+  they now live on; the next tranche of rows re-stamps from here.
+
+- Stamps: contract **383/0 x2** (stamped wave 11 on this same tree,
+  no pack or lib byte changed since), lint 21/299, audit +
+  determinism flat. The STRUCT toolchain section and the README
+  waves 8-11 ride this same commit hash as landed.
