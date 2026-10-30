@@ -2,7 +2,11 @@ name: Deploy Docs
 
 on:
   push:
-    branches: [main]
+    # CI coverage rides BOTH integration lanes (the staging rule,
+    # vant#272 point 2): staging builds run the docs battery but the
+    # deploy job below gates itself to main - a Pages publish may never
+    # ride a trigger list, only a branch check (point 3).
+    branches: [main, staging]
   workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
@@ -85,6 +89,9 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    # Production gate (vant#272 point 3): visibility in a trigger list
+    # never keeps content out of production - the branch check does.
+    if: github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

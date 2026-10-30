@@ -6,12 +6,18 @@ name: VANT CI
 on:
   workflow_dispatch:
   push:
-    # axolotl is the working batch branch: batch passes land there BEFORE
-    # any PR opens (post-merge, no PR event exists) - so push-trigger CI
-    # must cover it or batch passes ship ungated.
-    branches: [main, develop, 'agent-*', axolotl]
+    # The staging rule (poststruct#32's canon; eyestruct#21 was the reuse,
+    # adopted vant-wide in wave 16, vant#272): staging is the PERMANENT
+    # integration branch - work PRs target it, promotion to main is the
+    # only way out. axolotl is the free-bird dev branch: batch passes still
+    # land there BEFORE any PR opens (post-merge, no PR event exists), so
+    # push CI must cover it too or batch passes ship ungated. `develop` no
+    # longer rides the list: it has not existed in the branch slate for a
+    # while (checked on adoption day) and a trigger for a missing branch
+    # is drift by another name.
+    branches: [main, staging, 'agent-*', axolotl]
   pull_request:
-    branches: [main, develop]
+    branches: [main, staging]
   schedule:
     - cron: '0 0 * * 0'  # Weekly (default branch only, single job = cheap)
 
